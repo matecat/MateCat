@@ -42,4 +42,4 @@ const AppDispatcher = {
   },
 }
 
-module.exports = AppDispatcher
+export default AppDispatcher

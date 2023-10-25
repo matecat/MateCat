@@ -1,5 +1,7 @@
-import React from 'react'
-import _ from 'lodash'
+import React, {useRef} from 'react'
+import {isUndefined, size} from 'lodash'
+import {each, map} from 'lodash/collection'
+import {pick} from 'lodash/object'
 
 import OutsourceContainer from '../outsource/OutsourceContainer'
 import ModalsActions from '../../actions/ModalsActions'
@@ -18,7 +20,6 @@ class AnalyzeChunksResume extends React.Component {
     }
 
     this.jobLinkRef = {}
-    this.outsourceButton = React.createRef()
   }
 
   showDetails = (idJob) => (evt) => {
@@ -57,7 +58,7 @@ class AnalyzeChunksResume extends React.Component {
     let outsourceChunk = this.props.project.get('jobs').find((item) => {
       return !!item.get('outsource') && item.get('id') === idJob
     })
-    return !_.isUndefined(outsourceChunk)
+    return !isUndefined(outsourceChunk)
   }
 
   getTranslateUrl = (job, index) => {
@@ -137,43 +138,12 @@ class AnalyzeChunksResume extends React.Component {
   }
 
   getOutsourceButton = (chunk, index) => {
-    const {openOutsourceModal} = this
-    return !chunk.outsource_available &&
-      chunk.outsource_info.custom_payable_rate ? (
-      <div
-        className={'outsource-translation outsource-translation-disabled'}
-        id="open-quote-request"
-      >
-        <Tooltip
-          content={
-            <div>
-              Jobs created with custom billing models cannot be outsourced to
-              Translated.
-              <br />
-              In order to outsource this job to Translated, please recreate it
-              using Matecat's standard billing model
-            </div>
-          }
-        >
-          <div ref={this.outsourceButton}>
-            <a>Buy Translation</a>
-            <span>
-              from <TranslatedIcon />
-            </span>
-          </div>
-        </Tooltip>
-      </div>
-    ) : (
-      <div
-        className={'outsource-translation'}
-        onClick={openOutsourceModal(index, chunk)}
-        id="open-quote-request"
-      >
-        <a>Buy Translation</a>
-        <span>
-          from <TranslatedIcon />
-        </span>
-      </div>
+    return (
+      <OutsourceButton
+        chunk={chunk}
+        index={index}
+        openOutsourceModal={this.openOutsourceModal}
+      />
     )
   }
 
@@ -204,11 +174,11 @@ class AnalyzeChunksResume extends React.Component {
     let buttonsClass =
       status !== 'DONE' || thereIsChunkOutsourced() ? 'disabled' : ''
     if (!jobsAnalysis.isEmpty()) {
-      return _.map(jobsInfo, (item, indexJob) => {
+      return map(jobsInfo, (item, indexJob) => {
         let tmpJobAnalysis = jobsAnalysis.get(indexJob)
 
-        if (item.splitted !== '' && _.size(item.chunks) > 1) {
-          let chunksHtml = _.map(item.chunks, (chunkConfig, index) => {
+        if (item.splitted !== '' && size(item.chunks) > 1) {
+          let chunksHtml = map(item.chunks, (chunkConfig, index) => {
             let indexChunk = chunkConfig.jpassword
             let chunkAnalysis = tmpJobAnalysis.get('totals').get(indexChunk)
             let chunk = chunkConfig
@@ -537,11 +507,11 @@ class AnalyzeChunksResume extends React.Component {
   }
 
   componentDidUpdate() {
-    let changedData = _.pick(this.payableValuesChenged, (item) => {
+    let changedData = pick(this.payableValuesChenged, (item) => {
       return item === true
     })
-    if (_.size(changedData) > 0) {
-      _.each(changedData, (item, i) => {
+    if (size(changedData) > 0) {
+      each(changedData, (item, i) => {
         this.containers[i].classList.add('updated-count')
         setTimeout(() => {
           this.containers[i].classList.remove('updated-count')
@@ -552,7 +522,7 @@ class AnalyzeChunksResume extends React.Component {
 
   componentDidMount() {
     if (this.props.status === 'DONE') {
-      _.each(self.containers, (item, i) => {
+      each(self.containers, (item, i) => {
         this.classList.add('updated-count')
         setTimeout(() => {
           this.containers[i].classList.remove('updated-count')
@@ -616,6 +586,47 @@ class AnalyzeChunksResume extends React.Component {
       </div>
     )
   }
+}
+
+const OutsourceButton = ({chunk, index, openOutsourceModal}) => {
+  const outsourceButton = useRef()
+  return !chunk.outsource_available &&
+    chunk.outsource_info.custom_payable_rate ? (
+    <div
+      className={'outsource-translation outsource-translation-disabled'}
+      id="open-quote-request"
+    >
+      <Tooltip
+        content={
+          <div>
+            Jobs created with custom billing models cannot be outsourced to
+            Translated.
+            <br />
+            In order to outsource this job to Translated, please recreate it
+            using Matecat's standard billing model
+          </div>
+        }
+      >
+        <div ref={outsourceButton}>
+          <a>Buy Translation</a>
+          <span>
+            from <TranslatedIcon />
+          </span>
+        </div>
+      </Tooltip>
+    </div>
+  ) : (
+    <div
+      className={'outsource-translation'}
+      onClick={openOutsourceModal(index, chunk)}
+      id="open-quote-request"
+    >
+      <a>Buy Translation</a>
+      <span>
+        from <TranslatedIcon />
+      </span>
+    </div>
+  )
 }
 
 export default AnalyzeChunksResume

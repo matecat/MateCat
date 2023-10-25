@@ -1,6 +1,6 @@
 import React from 'react'
-import _ from 'lodash'
 import moment from 'moment'
+import {isUndefined} from 'lodash'
 
 class SegmentQRIssue extends React.Component {
   generateHtmlCommentLines(issue) {
@@ -88,7 +88,7 @@ class SegmentQRIssue extends React.Component {
         <div className="qr-severity" key={'severity-qr' + index}>
           <b key={'sev' + index}>[{issue.get('issue_severity')}]</b>
         </div>
-        {(!_.isUndefined(issue.get('comments')) &&
+        {(!isUndefined(issue.get('comments')) &&
           issue.get('comments').size > 0) ||
         issue.get('target_text') ? (
           <React.Fragment>

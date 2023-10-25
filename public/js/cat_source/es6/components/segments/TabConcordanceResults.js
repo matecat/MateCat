@@ -10,7 +10,7 @@ import SegmentStore from '../../stores/SegmentStore'
 import SegmentConstants from '../../constants/SegmentConstants'
 import CommonUtils from '../../utils/commonUtils'
 import Cookies from 'js-cookie'
-
+import TagUtils from '../../utils/tagUtils'
 export const TabConcordanceResults = forwardRef(({segment, isActive}, ref) => {
   const [results, setResults] = useState(undefined)
   const [isExtended, setIsExtended] = useState(

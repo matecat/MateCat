@@ -77,7 +77,21 @@ class Utils {
         return 0;
     }
 
+    /**
+     * @return array
+     */
     static public function getBrowser() {
+
+        // handle Undefined index: HTTP_USER_AGENT
+        if(!isset($_SERVER[ 'HTTP_USER_AGENT' ])){
+            return [
+                'userAgent' => null,
+                'name'      => null,
+                'version'   => null,
+                'platform'  => null
+            ];
+        }
+
         $u_agent = $_SERVER[ 'HTTP_USER_AGENT' ];
 
         //First get the platform?
@@ -896,7 +910,7 @@ class Utils {
 
         return $shortedLanguage[0];
     }
-    
+
     /**
      * This escape is need by
      * javascript JSON.parse() function

@@ -164,4 +164,4 @@ AppDispatcher.register(function (action) {
       CommentsStore.emitChange(action.actionType, action.data)
   }
 })
-module.exports = CommentsStore
+export default CommentsStore

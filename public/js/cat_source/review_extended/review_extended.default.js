@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import {each} from 'lodash'
 
 import SegmentActions from '../es6/actions/SegmentActions'
 import {getSegmentsIssues} from '../es6/api/getSegmentsIssues'
@@ -15,7 +15,7 @@ window.ReviewExtended = {
   getSegmentsIssues: function () {
     getSegmentsIssues().then((data) => {
       let versionsIssues = {}
-      _.each(data.issues, (issue) => {
+      each(data.issues, (issue) => {
         if (!versionsIssues[issue.id_segment]) {
           versionsIssues[issue.id_segment] = []
         }

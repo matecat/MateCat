@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import {isUndefined} from 'lodash'
 import CommonUtils from './es6/utils/commonUtils'
 import OfflineUtils from './es6/utils/offlineUtils'
 import TagUtils from './es6/utils/tagUtils'
@@ -31,7 +31,7 @@ import {setCurrentSegment} from './es6/api/setCurrentSegment'
           //SegmentActions.autoFillTagsInTarget(sid);
         })
         .catch((errors) => {
-          if (errors && (errors.length > 0 || !_.isUndefined(errors.code))) {
+          if (errors && (errors.length > 0 || !isUndefined(errors.code))) {
             UI.processErrors(errors, 'getTagProjection')
             SegmentActions.disableTPOnSegment()
             // Set as Tagged and restore source with taggedText

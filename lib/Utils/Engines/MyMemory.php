@@ -939,7 +939,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 
         $parameters                 = [];
         $parameters[ 's' ]          = $source_string;
-        $parameters[ 't' ]          = substr($target_string, $l_index, $r_index - $l_index);
+        $parameters[ 't' ]          = mb_substr($target_string, $l_index, $r_index - $l_index);
         $parameters[ 'hint' ]       = $config[ 'suggestion' ];
 
         $this->_setAdditionalCurlParams( [

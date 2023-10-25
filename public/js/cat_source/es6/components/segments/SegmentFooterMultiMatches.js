@@ -1,6 +1,6 @@
 import React from 'react'
 import Immutable from 'immutable'
-import _ from 'lodash'
+import {isUndefined} from 'lodash'
 
 import TagUtils from '../../utils/tagUtils'
 import TextUtils from '../../utils/textUtils'
@@ -35,9 +35,9 @@ class SegmentFooterMultiMatches extends React.Component {
     var self = this
     var matchesProcessed = []
     // SegmentActions.createFooter(this.props.segment.sid);
-    $.each(matches, function (match) {
+    $.each(matches, function () {
       if (
-        _.isUndefined(this.segment) ||
+        isUndefined(this.segment) ||
         this.segment === '' ||
         this.translation === ''
       )
@@ -145,7 +145,7 @@ class SegmentFooterMultiMatches extends React.Component {
           ),
         )
       }
-      if (!_.isUndefined(this.tm_properties)) {
+      if (!isUndefined(this.tm_properties)) {
         item.tm_properties = this.tm_properties
       }
 
@@ -202,10 +202,10 @@ class SegmentFooterMultiMatches extends React.Component {
 
   shouldComponentUpdate(nextProps) {
     return (
-      ((!_.isUndefined(nextProps.segment.cl_contributions) ||
-        !_.isUndefined(this.props.segment.cl_contributions)) &&
-        ((!_.isUndefined(nextProps.segment.cl_contributions) &&
-          _.isUndefined(this.props.segment.cl_contributions)) ||
+      ((!isUndefined(nextProps.segment.cl_contributions) ||
+        !isUndefined(this.props.segment.cl_contributions)) &&
+        ((!isUndefined(nextProps.segment.cl_contributions) &&
+          isUndefined(this.props.segment.cl_contributions)) ||
           !Immutable.fromJS(this.props.segment.cl_contributions).equals(
             Immutable.fromJS(nextProps.segment.cl_contributions),
           ))) ||
@@ -297,7 +297,7 @@ class SegmentFooterMultiMatches extends React.Component {
       >
         {clientConnected ? (
           <div className="overflow">
-            {!_.isUndefined(matches) && matches.length > 0 ? (
+            {!isUndefined(matches) && matches.length > 0 ? (
               matches
             ) : (
               <span className="loader loader_on" />

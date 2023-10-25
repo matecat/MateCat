@@ -174,7 +174,14 @@ class reviseSummaryController extends viewController {
 
         $this->template->reviseClass = $this->reviseClass;
 
+        $projectMetaDataDao = new Projects_MetadataDao();
+        $projectMetaData = null;
 
+        if($this->getProject() !== null){
+            $projectMetaData = $projectMetaDataDao->get($this->getProject()->id, Projects_MetadataDao::FEATURES_KEY);
+        }
+
+        $this->template->project_plugins = (!empty($projectMetaData)) ?  $this->featureSet->filter('appendInitialTemplateVars', explode(",", $projectMetaData->value)) : [];
 
         foreach( $this->qa_data as $k => $value ){
             $this->qa_data[ $k ][ 'text_content' ] = $this->error_info[ $value[ 'type' ] ];

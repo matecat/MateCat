@@ -1,5 +1,5 @@
 import React, {Component} from 'react'
-import _ from 'lodash'
+import {find} from 'lodash'
 
 import LexiqaTooltipInfo from '../TooltipInfo/LexiqaTooltipInfo.component'
 import LexiqaUtils from '../../../utils/lxq.main'
@@ -53,7 +53,7 @@ class LexiqaHighlight extends Component {
   getWarning = () => {
     let {blockKey, start, end, warnings, isSource, sid} = this.props
     // Every block starts from offset 0, so we have to check warnings's blockKey
-    let warning = _.find(
+    let warning = find(
       warnings,
       (warn) =>
         warn.start === start && warn.end === end && warn.blockKey === blockKey,

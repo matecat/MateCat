@@ -1,5 +1,6 @@
-import React from 'react'
-import _ from 'lodash'
+import React, {useRef} from 'react'
+import {round} from 'lodash/math'
+
 import JobMenu from './JobMenu'
 import OutsourceContainer from '../outsource/OutsourceContainer'
 import CommonUtils from '../../utils/commonUtils'
@@ -22,7 +23,7 @@ class JobContainer extends React.Component {
       showTranslatorBox: false,
       extendedView: true,
     }
-    this.ousorceButton = React.createRef()
+
     this.getTranslateUrl = this.getTranslateUrl.bind(this)
     this.getAnalysisUrl = this.getAnalysisUrl.bind(this)
     this.changePassword = this.changePassword.bind(this)
@@ -657,7 +658,7 @@ class JobContainer extends React.Component {
     return icon
   }
 
-  openOutsourceModal(showTranslatorBox, extendedView) {
+  openOutsourceModal = (showTranslatorBox, extendedView) => {
     if (showTranslatorBox && !this.props.job.get('outsource_available')) {
       this.setState({
         showTranslatorBox: showTranslatorBox,
@@ -686,64 +687,12 @@ class JobContainer extends React.Component {
   }
 
   getOutsourceButton() {
-    if (!config.enable_outsource) {
-      return null
-    }
-    const outsourceInfo = this.props.job.get('outsource_info')
-      ? this.props.job.get('outsource_info').toJS()
-      : undefined
-    let label =
-      !this.props.job.get('outsource_available') &&
-      outsourceInfo?.custom_payable_rate ? (
-        <div
-          className="open-outsource open-outsource-disabled buy-translation ui button"
-          id="open-quote-request"
-          data-testid="buy-translation-button"
-        >
-          <Tooltip
-            content={
-              <div>
-                Jobs created with custom billing models cannot be outsourced to
-                Translated.
-                <br />
-                In order to outsource this job to Translated, please recreate it
-                using Matecat's standard billing model
-              </div>
-            }
-          >
-            <div ref={this.ousorceButton} className={'buy-translation-button'}>
-              <span className="buy-translation-span">Buy Translation</span>
-              <span>from</span>
-              <TranslatedIconSmall size={20} />
-            </div>
-          </Tooltip>
-        </div>
-      ) : (
-        <a
-          className="open-outsource buy-translation ui button"
-          id="open-quote-request"
-          onClick={this.openOutsourceModal.bind(this, false, true)}
-          data-testid="buy-translation-button"
-        >
-          <span className="buy-translation-span">Buy Translation</span>
-          <span>from</span>
-          <TranslatedIconSmall size={20} />
-        </a>
-      )
-    if (this.props.job.get('outsource')) {
-      if (this.props.job.get('outsource').get('id_vendor') == '1') {
-        label = (
-          <a
-            className="open-outsourced ui button "
-            id="open-quote-request"
-            onClick={this.openOutsourceModal.bind(this, false, true)}
-          >
-            View status
-          </a>
-        )
-      }
-    }
-    return label
+    return (
+      <OutsourceButton
+        job={this.props.job}
+        openOutsourceModal={this.openOutsourceModal}
+      />
+    )
   }
 
   getOutsourceJobSent() {
@@ -1023,7 +972,7 @@ class JobContainer extends React.Component {
         ? (approved.get('advancement_wc') * 100) /
           this.props.job.get('stats').get('TOTAL')
         : approvedPerc
-      approvedPercFormatted = _.round(approvedPerc, 1)
+      approvedPercFormatted = round(approvedPerc, 1)
       let approved2ndPass = this.props.job
         .get('stats')
         .get('revises')
@@ -1034,7 +983,7 @@ class JobContainer extends React.Component {
         ? (approved2ndPass.get('advancement_wc') * 100) /
           this.props.job.get('stats').get('TOTAL')
         : approved2ndPass
-      approvedPercFormatted2ndPass = _.round(approvedPerc2ndPass, 1)
+      approvedPercFormatted2ndPass = round(approvedPerc2ndPass, 1)
     }
 
     return (
@@ -1219,5 +1168,66 @@ class JobContainer extends React.Component {
       </div>
     )
   }
+}
+
+const OutsourceButton = ({job, openOutsourceModal}) => {
+  const outsourceButton = useRef()
+  if (!config.enable_outsource) {
+    return null
+  }
+  const outsourceInfo = job.get('outsource_info')
+    ? job.get('outsource_info').toJS()
+    : undefined
+  let label =
+    !job.get('outsource_available') && outsourceInfo?.custom_payable_rate ? (
+      <div
+        className="open-outsource open-outsource-disabled buy-translation ui button"
+        id="open-quote-request"
+        data-testid="buy-translation-button"
+      >
+        <Tooltip
+          content={
+            <div>
+              Jobs created with custom billing models cannot be outsourced to
+              Translated.
+              <br />
+              In order to outsource this job to Translated, please recreate it
+              using Matecat's standard billing model
+            </div>
+          }
+        >
+          <div ref={outsourceButton} className={'buy-translation-button'}>
+            <span className="buy-translation-span">Buy Translation</span>
+            <span>from</span>
+            <TranslatedIconSmall size={20} />
+          </div>
+        </Tooltip>
+      </div>
+    ) : (
+      <a
+        className="open-outsource buy-translation ui button"
+        id="open-quote-request"
+        onClick={openOutsourceModal.bind(this, false, true)}
+        data-testid="buy-translation-button"
+      >
+        <span className="buy-translation-span">Buy Translation</span>
+        <span>from</span>
+        <TranslatedIconSmall size={20} />
+      </a>
+    )
+  if (job.get('outsource')) {
+    if (job.get('outsource').get('id_vendor') == '1') {
+      label = (
+        <a
+          className="open-outsourced ui button "
+          id="open-quote-request"
+          onClick={openOutsourceModal.bind(this, false, true)}
+        >
+          View status
+        </a>
+      )
+    }
+  }
+  return label
 }
 export default JobContainer
