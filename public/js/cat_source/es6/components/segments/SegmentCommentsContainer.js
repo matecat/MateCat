@@ -87,7 +87,7 @@ class SegmentCommentsContainer extends React.Component {
   }
 
   getComments() {
-    let htmlComments, htmlInsert, resolveButton
+    let htmlComments, htmlInsert, resolveButton, deleteButton
     const nl2br = function (str, is_xhtml) {
       var breakTag =
         is_xhtml || typeof is_xhtml === 'undefined' ? '<br />' : '<br>'
@@ -210,11 +210,20 @@ class SegmentCommentsContainer extends React.Component {
             Resolve
           </a>
         )
-      }
-      if (thread_wrap.length > 0) {
         const isAuthorOfLastComment =
           comments[comments.length - 1].email === config.userMail
-
+        deleteButton = isAuthorOfLastComment ? (
+          <a
+            className="ui button mbc-comment-label mbc-comment-btn mbc-comment-resolve-btn mbc-comment-delete-btn pull-right"
+            onClick={this.deleteComment}
+          >
+            Delete
+          </a>
+        ) : (
+          ''
+        )
+      }
+      if (thread_wrap.length > 0) {
         commentsHtml.push(
           <div
             key={'thread-' + 900}
@@ -223,14 +232,7 @@ class SegmentCommentsContainer extends React.Component {
           >
             {thread_wrap}
             {resolveButton}
-            {isAuthorOfLastComment && (
-              <a
-                className="ui button mbc-comment-label mbc-comment-btn mbc-comment-resolve-btn mbc-comment-delete-btn pull-right"
-                onClick={this.deleteComment}
-              >
-                Delete
-              </a>
-            )}
+            {deleteButton}
           </div>,
         )
       }
