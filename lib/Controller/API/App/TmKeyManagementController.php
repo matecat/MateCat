@@ -4,11 +4,77 @@ namespace API\App;
 
 use API\V2\Validators\LoginValidator;
 use CatUtils;
+use Engines_MyMemory;
+use EnginesModel_EngineStruct;
 use TmKeyManagement\UserKeysModel;
 use TmKeyManagement_ClientTmKeyStruct;
 use TmKeyManagement_Filter;
+use TmKeyManagement_MemoryKeyDao;
+use TmKeyManagement_MemoryKeyStruct;
 
 class TmKeyManagementController extends AbstractStatefulKleinController {
+
+    /**
+     * @throws \Exception
+     */
+    public function getByUser()
+    {
+        if(!$this->userIsLogged()){
+            $this->response->json( [
+                'tm_keys' => []
+            ] );
+            exit();
+        }
+
+        $_keyDao = new TmKeyManagement_MemoryKeyDao( \Database::obtain() );
+        $dh      = new TmKeyManagement_MemoryKeyStruct( ['uid' => $this->user->uid] );
+        $keyList = $_keyDao->read( $dh );
+
+        $keys = [];
+        $keyIds = [];
+
+        foreach ($keyList as $key){
+            $keyIds[] = $key->tm_key->key;
+            $keys[] = [
+                'id' =>  $key->tm_key->key,
+                'name' =>  $key->tm_key->name,
+                'has_glossary' => false,
+            ];
+        }
+
+        $myMemoryClient = $this->getMyMemoryClient();
+        $hasGlossaryMap = $myMemoryClient->glossaryKeys(null ,null, $keyIds);
+
+        // update `has_glossary` in $keys
+        foreach ($keys as $index => $key) {
+            if(isset($hasGlossaryMap->entries[$key['id']])){
+                $keys[$index]['has_glossary'] = $hasGlossaryMap->entries[$key['id']];
+            }
+        }
+
+        $this->response->json( $keys );
+        exit();
+    }
+
+    /**
+     * @return Engines_MyMemory
+     * @throws \Exception
+     */
+    private function getMyMemoryClient()
+    {
+        $engineDAO        = new \EnginesModel_EngineDAO( \Database::obtain() );
+        $engineStruct     = \EnginesModel_EngineStruct::getStruct();
+        $engineStruct->id = 1;
+
+        $eng = $engineDAO->setCacheTTL( 60 * 5 )->read( $engineStruct );
+
+        /**
+         * @var $engineRecord EnginesModel_EngineStruct
+         */
+        $engineRecord = @$eng[ 0 ];
+
+        return new Engines_MyMemory( $engineRecord );
+    }
 
     /**
      * Return all the keys of the job

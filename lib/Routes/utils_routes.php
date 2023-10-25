@@ -93,6 +93,7 @@ route( '/api/app/jobs/[:id_job]/[:password]/quality-framework',         'GET',  
 // TM Keys
 $klein->with( '/api/app/tm-keys', function () {
     route( '/[:id_job]/[:password]', 'GET', '\API\App\TmKeyManagementController', 'getByJob' );
+    route( '/user', 'GET', '\API\App\TmKeyManagementController', 'getByUser' );
 } );
 
 // Glossary
