@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import {isNull} from 'lodash'
 
 import CommonUtils from './commonUtils'
 import TagUtils from './tagUtils'
@@ -122,7 +122,7 @@ const SegmentUtils = {
     return segment.ice_locked === '1'
   },
   isUnlockedSegment: function (segment) {
-    return !_.isNull(CommonUtils.getFromStorage('unlocked-' + segment.sid))
+    return !isNull(CommonUtils.getFromStorage('unlocked-' + segment.sid))
   },
 
   /**
@@ -192,7 +192,7 @@ const SegmentUtils = {
   segmentHasNote: (segment) => {
     return segment.notes ||
       segment.context_groups?.context_json ||
-      segment.metadata?.lenght > 0
+      segment.metadata?.length > 0
       ? true
       : false
   },

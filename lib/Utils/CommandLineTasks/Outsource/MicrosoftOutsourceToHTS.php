@@ -83,7 +83,7 @@ class MicrosoftOutsourceToHTS extends AbstractOutsource {
             $hts_pass = 'microsoftdemo';
         }
 
-        return "http://www.translated.net/hts/index.php?" . http_build_query( [
+        return "https://www.translated.net/hts/index.php?" . http_build_query( [
                         'f'             => 'quote',
                         'cid'           => $hts_user,
                         'p'             => $hts_pass,
@@ -123,7 +123,7 @@ class MicrosoftOutsourceToHTS extends AbstractOutsource {
             $hts_pass = 'microsoftdemo';
         }
 
-        return "http://www.translated.net/hts/index.php?" . http_build_query( [
+        return "https://www.translated.net/hts/index.php?" . http_build_query( [
                         'f'             => 'confirm',
                         'cid'           => $hts_user,
                         'p'             => $hts_pass,

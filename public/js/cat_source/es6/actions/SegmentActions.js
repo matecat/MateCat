@@ -1,5 +1,6 @@
 import Cookies from 'js-cookie'
-import _ from 'lodash'
+import {isUndefined} from 'lodash'
+import {debounce} from 'lodash/function'
 
 import AppDispatcher from '../stores/AppDispatcher'
 import SegmentConstants from '../constants/SegmentConstants'
@@ -368,7 +369,7 @@ const SegmentActions = {
       type: type,
     })
   },
-  selectNextSegmentDebounced: _.debounce(() => {
+  selectNextSegmentDebounced: debounce(() => {
     SegmentActions.selectNextSegment()
   }, 100),
 
@@ -379,7 +380,7 @@ const SegmentActions = {
       direction: 'next',
     })
   },
-  selectPrevSegmentDebounced: _.debounce(() => {
+  selectPrevSegmentDebounced: debounce(() => {
     SegmentActions.selectPrevSegment()
   }, 100),
   selectPrevSegment: function (sid) {
@@ -569,7 +570,7 @@ const SegmentActions = {
     })
   },
   copyTagProjectionInCurrentSegment(sid, translation) {
-    if (!_.isUndefined(translation) && translation.length > 0) {
+    if (!isUndefined(translation) && translation.length > 0) {
       SegmentActions.replaceEditAreaTextContent(sid, translation)
     }
   },
@@ -1360,6 +1361,8 @@ const SegmentActions = {
           target: trg_content,
           source: src_content,
           keys: jobTmKeys.map(({key}) => key),
+        }).catch((error) => {
+          console.log('Glossary check failed', error)
         })
       }
     })

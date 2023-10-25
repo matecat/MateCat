@@ -1,5 +1,7 @@
 import React from 'react'
-import _ from 'lodash'
+
+import {isUndefined, orderBy} from 'lodash'
+import {isEqual} from 'lodash/lang'
 
 class QualitySummaryTable extends React.Component {
   constructor(props) {
@@ -23,7 +25,7 @@ class QualitySummaryTable extends React.Component {
         let currentSeverities = cat.get('severities')
         let groupFound = false
         categoriesGroups.map((group) => {
-          if (_.isEqual(group[0].get('severities'), currentSeverities)) {
+          if (isEqual(group[0].get('severities'), currentSeverities)) {
             group.push(cat)
             groupFound = true
           }
@@ -70,7 +72,7 @@ class QualitySummaryTable extends React.Component {
       if (category.subcategories.length > 0) {
         category.subcategories.forEach((sub) => {
           if (
-            !_.isUndefined(
+            !isUndefined(
               this.props.qualitySummary.get('revise_issues').get(sub.id),
             ) &&
             this.props.qualitySummary
@@ -189,7 +191,7 @@ class QualitySummaryTable extends React.Component {
           })
           if (
             severityFound.size > 0 &&
-            !_.isUndefined(totalIssues) &&
+            !isUndefined(totalIssues) &&
             totalIssues.get('founds').get(currentSev.label)
           ) {
             const issues = totalIssues.get('founds').get(currentSev.label)

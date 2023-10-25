@@ -1649,17 +1649,19 @@ class QA {
      */
     public function performTagPositionCheck($source, $target, $performIdCheck = true, $performTagPositionsCheck = true)
     {
+        $new = '/(<[a-zA-Z0-9\-\"\/ =:\_]+>|<\/([a-zA-Z]+)>)/';
+
         // extract tag from source
-        preg_match_all( '/(<([^\/>]+)[\/]{0,1}>|<\/([a-zA-Z]+)>)/', $source, $matches );
-        $complete_malformedSrcStruct   = array_filter($matches[ 1 ], function ($item) { return str_replace( " ", "", $item ); });
-        $open_malformedXmlSrcStruct    = $matches[ 2 ];
-        $closing_malformedXmlSrcStruct = $matches[ 3 ];
+        preg_match_all( $new, $source, $matches );
+       // $complete_malformedSrcStruct   = array_filter($matches[ 0 ], function ($item) { return str_replace( " ", "", $item ); });
+        $open_malformedXmlSrcStruct    = $matches[ 1 ];
+        $closing_malformedXmlSrcStruct = $matches[ 2 ];
 
         // extract tag from target
-        preg_match_all( '/(<([^\/>]+)[\/]{0,1}>|<\/([a-zA-Z]+)>)/', $target, $matches );
-        $complete_malformedTrgStruct   = array_filter($matches[ 1 ], function ($item) { return str_replace( " ", "", $item ); });
-        $open_malformedXmlTrgStruct    = $matches[ 2 ];
-        $closing_malformedXmlTrgStruct = $matches[ 3 ];
+        preg_match_all( $new, $target, $matches );
+        $complete_malformedTrgStruct   = array_filter($matches[ 0 ], function ($item) { return str_replace( " ", "", $item ); });
+        $open_malformedXmlTrgStruct    = $matches[ 1 ];
+        $closing_malformedXmlTrgStruct = $matches[ 2 ];
 
         // extract self closing tags from source and target
         preg_match_all( '#(<[^>]+/>)#', $source, $selfClosingTags_src );
@@ -2089,8 +2091,10 @@ class QA {
 
             } else {
 
-                $srcNode        = $srcNodeList->item( $srcTagReference[ 'node_idx' ] );
-                $srcNodeContent = $srcNode->textContent;
+                $srcNode = $srcNodeList->item( $srcTagReference[ 'node_idx' ] );
+                if($srcNode !== null){
+                    $srcNodeContent = $srcNode->textContent;
+                }
 
                 foreach ( $this->trgDomMap[ 'DOMElement' ] as $k => $elements ) {
                     if ( $elements[ 'id' ] == $srcTagReference[ 'id' ] ) {
@@ -2100,8 +2104,9 @@ class QA {
 
                 $trgTagPos      = $trgTagReference[ 'node_idx' ];
                 $trgNode        = $trgNodeList->item( $trgTagPos );
-                $trgNodeContent = $trgNode->textContent;
-
+                if($trgNode !== null){
+                    $trgNodeContent = $trgNode->textContent;
+                }
             }
 
             /**
@@ -2129,17 +2134,19 @@ class QA {
              *
              */
             $domSrcNodeString = $srcNode->ownerDocument->saveXML( $srcNode );
-            if ( !preg_match( '/^<g[^>]+></', $domSrcNodeString ) ) {
-                $this->_checkHeadWhiteSpaces( $srcNodeContent, $trgNodeContent, $trgTagReference );
+
+            if(isset($trgNodeContent) and isset($srcNodeContent)){
+                if ( !preg_match( '/^<g[^>]+></', $domSrcNodeString ) ) {
+                    $this->_checkHeadWhiteSpaces( $srcNodeContent, $trgNodeContent, $trgTagReference );
+                }
+
+                $this->_checkTailWhiteSpaces( $srcNodeContent, $trgNodeContent );
+                $this->_checkHeadTabs( $srcNodeContent, $trgNodeContent );
+                $this->_checkTailTabs( $srcNodeContent, $trgNodeContent );
+                $this->_checkHeadCRNL( $srcNodeContent, $trgNodeContent );
+                $this->_checkTailCRNL( $srcNodeContent, $trgNodeContent );
             }
-
-            $this->_checkTailWhiteSpaces( $srcNodeContent, $trgNodeContent, $trgTagReference );
-            $this->_checkHeadTabs( $srcNodeContent, $trgNodeContent );
-            $this->_checkTailTabs( $srcNodeContent, $trgNodeContent );
-            $this->_checkHeadCRNL( $srcNodeContent, $trgNodeContent );
-            $this->_checkTailCRNL( $srcNodeContent, $trgNodeContent );
         }
-
     }
 
     /**

@@ -69,7 +69,7 @@ class TmKeyManagement_TmKeyManagement {
 
         $filter = new TmKeyManagement_Filter( $uid );
         $filter->setGrants( $grant_level )
-                ->setTmType( $type );
+            ->setTmType( $type );
 
         switch ( $user_role ) {
             case TmKeyManagement_Filter::ROLE_TRANSLATOR:
@@ -140,7 +140,7 @@ class TmKeyManagement_TmKeyManagement {
 
             $filter = new TmKeyManagement_Filter();
             $filter->setGrants( $grant_level )
-                    ->setTmType( $type );
+                ->setTmType( $type );
             $tmKey  = array_filter( $tmKey, array( $filter, 'byOwner' ) );
 
             $result_arr[ ] = $tmKey;
@@ -411,11 +411,19 @@ class TmKeyManagement_TmKeyManagement {
 
                 }
 
-                //remove the uid property
+                // remove the uid property
                 if ( $userRole == TmKeyManagement_Filter::ROLE_TRANSLATOR ) {
-                    $_job_Key->uid_transl = null;
-                } elseif ( $userRole == TmKeyManagement_Filter::ROLE_REVISOR ) {
                     $_job_Key->uid_rev = null;
+                    $_job_Key->r_rev = null;
+                    $_job_Key->w_rev = null;
+                    $_job_Key->r_transl = true;
+                    $_job_Key->w_transl = true;
+                } elseif ( $userRole == TmKeyManagement_Filter::ROLE_REVISOR ) {
+                    $_job_Key->uid_transl = null;
+                    $_job_Key->r_transl = null;
+                    $_job_Key->w_transl = null;
+                    $_job_Key->r_rev = true;
+                    $_job_Key->w_rev = true;
                 }
 
                 //if the key is no more linked to someone, don't add to the resultset, else reorder if it is not an owner key.
@@ -434,7 +442,7 @@ class TmKeyManagement_TmKeyManagement {
                             $server_reorder_position[ -1000000 + $i ] = $_job_Key;
                         } else {
                             // Remove the key!!!
-                            //only the owner can remove it's keys
+                            //only the owner can remove its keys
                         }
 
                     }
@@ -503,10 +511,10 @@ class TmKeyManagement_TmKeyManagement {
                          */
                         $_keyDao = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
                         $dh      = new TmKeyManagement_MemoryKeyStruct( array(
-                                'uid'    => $uid,
-                                'tm_key' => new TmKeyManagement_TmKeyStruct( array(
-                                        'key' => $justCreatedKey->key
-                                ) )
+                            'uid'    => $uid,
+                            'tm_key' => new TmKeyManagement_TmKeyStruct( array(
+                                'key' => $justCreatedKey->key
+                            ) )
                         ) );
 
                         $keyList = $_keyDao->read( $dh );
@@ -586,8 +594,8 @@ class TmKeyManagement_TmKeyManagement {
 
                 //if the key is still linked to someone, add it to the result.
                 if ( $curr_tm_key->owner ||
-                        !is_null( $curr_tm_key->uid_transl ) ||
-                        !is_null( $curr_tm_key->uid_rev )
+                    !is_null( $curr_tm_key->uid_transl ) ||
+                    !is_null( $curr_tm_key->uid_rev )
                 ) {
                     $result[ ] = $curr_tm_key;
                 }

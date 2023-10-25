@@ -29,9 +29,9 @@ APP.getFilenameFromUploadedFiles = function () {
   return files.substr(7)
 }
 
-UI.UPLOAD_PAGE = {}
+let UPLOAD_PAGE = {}
 
-$.extend(UI.UPLOAD_PAGE, {
+$.extend(UPLOAD_PAGE, {
   init: function () {
     this.addEvents()
   },
@@ -64,7 +64,7 @@ $.extend(UI.UPLOAD_PAGE, {
 })
 
 APP.restartConversion = function () {
-  UI.UPLOAD_PAGE.restartConversions()
+  UPLOAD_PAGE.restartConversions()
 }
 
 APP.checkGDriveEvents = function () {
@@ -238,36 +238,43 @@ APP.postProjectCreation = function (d) {
 }
 
 $(document).ready(function () {
-  UI.UPLOAD_PAGE.init()
+  UPLOAD_PAGE.init()
   //TODO: REMOVE
   let currentTargetLangs = localStorage.getItem('currentTargetLang')
   let currentSourceLangs = localStorage.getItem('currentSourceLang')
   if (!currentSourceLangs) {
-    currentSourceLangs = config.currentSourceLang
+    currentSourceLangs = 'en-US'
   }
   if (!currentTargetLangs) {
-    currentTargetLangs = config.currentTargetLang
+    currentTargetLangs = 'fr-FR'
   }
-  const newProjectPage = document.getElementsByClassName('new_project__page')[0]
-  const rootNewProjectPage = createRoot(newProjectPage)
-  rootNewProjectPage.render(
-    <NewProject
-      isLoggedIn={!!config.isLoggedIn}
-      languages={config.languages_array.map((lang) => {
-        return {...lang, id: lang.code}
-      })}
-      sourceLanguageSelected={currentSourceLangs}
-      targetLanguagesSelected={currentTargetLangs}
-      subjectsArray={config.subject_array.map((item) => {
-        return {...item, id: item.key, name: item.display}
-      })}
-      conversionEnabled={!!config.conversionEnabled}
-      formatsNumber={config.formats_number}
-      googleDriveEnabled={!!config.googleDriveEnabled}
-    />,
-  )
+  const domMountPoint = document.getElementsByClassName('new_project__page')[0]
+  if (domMountPoint) {
+    const newProjectPage =
+      document.getElementsByClassName('new_project__page')[0]
+    const rootNewProjectPage = createRoot(newProjectPage)
+    rootNewProjectPage.render(
+      <NewProject
+        isLoggedIn={!!config.isLoggedIn}
+        languages={config.languages_array.map((lang) => {
+          return {...lang, id: lang.code}
+        })}
+        sourceLanguageSelected={currentSourceLangs}
+        targetLanguagesSelected={currentTargetLangs}
+        subjectsArray={config.subject_array.map((item) => {
+          return {...item, id: item.key, name: item.display}
+        })}
+        conversionEnabled={!!config.conversionEnabled}
+        formatsNumber={config.formats_number}
+        googleDriveEnabled={!!config.googleDriveEnabled}
+        restartConversions={UPLOAD_PAGE.restartConversions}
+      />,
+    )
 
-  const mountPoint = document.getElementsByClassName('notifications-wrapper')[0]
-  const root = createRoot(mountPoint)
-  root.render(<NotificationBox />)
+    const mountPoint = document.getElementsByClassName(
+      'notifications-wrapper',
+    )[0]
+    const root = createRoot(mountPoint)
+    root.render(<NotificationBox />)
+  }
 })
