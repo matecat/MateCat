@@ -222,7 +222,7 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
             // NOTE: the vendor returns an error in case words = 0 -> make sure $words is at least 1
             $words = max( (int)$volAnalysis[ 'data' ][ 'jobs' ][ $job[ 'jid' ] ][ 'totals' ][ $job[ 'jpassword' ] ][ 'TOTAL_PAYABLE' ][ 0 ], 1 );
 
-            $url = "http://www.translated.net/hts/matecat-endpoint.php?" . http_build_query( [
+            $url = "https://www.translated.net/hts/matecat-endpoint.php?" . http_build_query( [
                     'f'             => 'outsourced',
                     'cid'           => 'htsdemo',
                     'p'             => 'htsdemo5',
@@ -331,7 +331,7 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
             // and provide a MySQL -like date format. E.g. "1989-10-15 18:24:00"
             $fixedDeliveryDateForQuote = ( $this->fixedDelivery > 0 ) ? date( "Y-m-d H:i:s", $this->fixedDelivery / 1000 ) : "0";
 
-            $url = "http://www.translated.net/hts/matecat-endpoint.php?" . http_build_query( [
+            $url = "https://www.translated.net/hts/matecat-endpoint.php?" . http_build_query( [
                     'f'             => 'quote',
                     'cid'           => 'htsdemo',
                     'p'             => 'htsdemo5',

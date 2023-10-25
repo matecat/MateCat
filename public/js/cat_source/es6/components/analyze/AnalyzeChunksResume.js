@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useRef} from 'react'
 import {isUndefined, size} from 'lodash'
 import {each, map} from 'lodash/collection'
 import {pick} from 'lodash/object'
@@ -20,7 +20,6 @@ class AnalyzeChunksResume extends React.Component {
     }
 
     this.jobLinkRef = {}
-    this.outsourceButton = React.createRef()
   }
 
   showDetails = (idJob) => (evt) => {
@@ -139,43 +138,12 @@ class AnalyzeChunksResume extends React.Component {
   }
 
   getOutsourceButton = (chunk, index) => {
-    const {openOutsourceModal} = this
-    return !chunk.outsource_available &&
-      chunk.outsource_info.custom_payable_rate ? (
-      <div
-        className={'outsource-translation outsource-translation-disabled'}
-        id="open-quote-request"
-      >
-        <Tooltip
-          content={
-            <div>
-              Jobs created with custom billing models cannot be outsourced to
-              Translated.
-              <br />
-              In order to outsource this job to Translated, please recreate it
-              using Matecat's standard billing model
-            </div>
-          }
-        >
-          <div ref={this.outsourceButton}>
-            <a>Buy Translation</a>
-            <span>
-              from <TranslatedIcon />
-            </span>
-          </div>
-        </Tooltip>
-      </div>
-    ) : (
-      <div
-        className={'outsource-translation'}
-        onClick={openOutsourceModal(index, chunk)}
-        id="open-quote-request"
-      >
-        <a>Buy Translation</a>
-        <span>
-          from <TranslatedIcon />
-        </span>
-      </div>
+    return (
+      <OutsourceButton
+        chunk={chunk}
+        index={index}
+        openOutsourceModal={this.openOutsourceModal}
+      />
     )
   }
 
@@ -618,6 +586,47 @@ class AnalyzeChunksResume extends React.Component {
       </div>
     )
   }
+}
+
+const OutsourceButton = ({chunk, index, openOutsourceModal}) => {
+  const outsourceButton = useRef()
+  return !chunk.outsource_available &&
+    chunk.outsource_info.custom_payable_rate ? (
+    <div
+      className={'outsource-translation outsource-translation-disabled'}
+      id="open-quote-request"
+    >
+      <Tooltip
+        content={
+          <div>
+            Jobs created with custom billing models cannot be outsourced to
+            Translated.
+            <br />
+            In order to outsource this job to Translated, please recreate it
+            using Matecat's standard billing model
+          </div>
+        }
+      >
+        <div ref={outsourceButton}>
+          <a>Buy Translation</a>
+          <span>
+            from <TranslatedIcon />
+          </span>
+        </div>
+      </Tooltip>
+    </div>
+  ) : (
+    <div
+      className={'outsource-translation'}
+      onClick={openOutsourceModal(index, chunk)}
+      id="open-quote-request"
+    >
+      <a>Buy Translation</a>
+      <span>
+        from <TranslatedIcon />
+      </span>
+    </div>
+  )
 }
 
 export default AnalyzeChunksResume
