@@ -6,9 +6,11 @@ use FilesStorage\FilesStorageFactory;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use ProjectQueue\Queue;
 use Matecat\XliffParser\Utils\Files as XliffFiles;
+use Validator\MMTGlossaryValidator;
 
 class createProjectController extends ajaxController {
 
+    private $mmt_glossaries;
     private $file_name;
     private $project_name;
     private $source_lang;
@@ -58,6 +60,8 @@ class createProjectController extends ajaxController {
                 'private_tm_key'    => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
                 'pretranslate_100'  => [ 'filter' => FILTER_VALIDATE_INT ],
                 'id_team'           => [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR ],
+
+                'mmt_glossaries'     => [ 'filter' => FILTER_SANITIZE_STRING ],
 
                 'project_completion' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ], // features customization
                 'get_public_matches' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ], // disable public TM matches
@@ -110,6 +114,19 @@ class createProjectController extends ajaxController {
         }
 
         $__postPrivateTmKey = array_filter( $private_keyList, [ "self", "sanitizeTmKeyArr" ] );
+
+        // add MMT Glossaries only for logged users
+        if ( !empty( $this->postInput[ 'mmt_glossaries' ] ) and $this->isLoggedIn() ) {
+
+            try {
+                $mmtGlossaries = html_entity_decode($this->postInput[ 'mmt_glossaries' ]);
+                MMTGlossaryValidator::validate($mmtGlossaries, $this->user->uid);
+
+                $this->mmt_glossaries = $mmtGlossaries;
+            } catch (Exception $exception){
+                $this->result[ 'errors' ][] = [ "code" => -6, "message" => $exception->getMessage() ];
+            }
+        }
 
         // NOTE: This is for debug purpose only,
         // NOTE: Global $_POST Overriding from CLI
@@ -287,6 +304,10 @@ class createProjectController extends ajaxController {
         $projectStructure[ 'target_language_mt_engine_id' ] = $this->postInput[ 'target_language_mt_engine_id' ];
         $projectStructure[ 'user_ip' ]                      = Utils::getRealIpAddr();
         $projectStructure[ 'HTTP_HOST' ]                    = INIT::$HTTPHOST;
+
+        if($this->mmt_glossaries !== null){
+            $projectStructure[ 'mmt_glossaries' ] = $this->mmt_glossaries;
+        }
 
         //TODO enable from CONFIG
         $projectStructure[ 'metadata' ] = $this->metadata;

@@ -14,6 +14,7 @@ use ProjectQueue\Queue;
 use QAModelTemplate\QAModelTemplateStruct;
 use Teams\MembershipDao;
 use TMS\TMSService;
+use Validator\MMTGlossaryValidator;
 
 //limit execution time to 300 seconds
 set_time_limit( 300 );
@@ -1154,29 +1155,7 @@ class NewController extends ajaxController {
         if ( !empty( $this->postInput[ 'mmt_glossaries' ] ) ) {
 
             $mmtGlossaries = html_entity_decode($this->postInput[ 'mmt_glossaries' ]);
-            $mmtGlossariesArray = json_decode($mmtGlossaries, true);
-
-            if(!is_array($mmtGlossariesArray)){
-                throw new Exception("mmt_glossaries is not a valid JSON");
-            }
-
-            foreach ($mmtGlossariesArray as $mmtGlossary){
-                if(!isset($mmtGlossary['ignore_glossary_case'])){
-                    throw new Exception("`ignore_glossary_case` key not found in `mmt_glossaries` JSON");
-                }
-
-                if(!isset($mmtGlossary['id_mmt_glossary'])){
-                    throw new Exception("`id_mmt_glossary` key not found in `mmt_glossaries` JSON");
-                }
-
-                if(!is_bool($mmtGlossary['ignore_glossary_case'])){
-                    throw new Exception("`ignore_glossary_case` is not boolean in `mmt_glossaries` JSON");
-                }
-
-                if(!is_int($mmtGlossary['id_mmt_glossary'])){
-                    throw new Exception("`id_mmt_glossary` is not integer in `mmt_glossaries` JSON");
-                }
-            }
+            MMTGlossaryValidator::validate($mmtGlossaries, $this->user->uid);
 
             $this->mmtGlossaries = $mmtGlossaries;
         }
