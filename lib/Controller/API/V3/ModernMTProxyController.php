@@ -28,7 +28,7 @@ class ModernMTProxyController extends BaseChunkController
         try {
             $engineId = $this->request->engineId;
             $params = $this->request->params();
-            $MMTClient = $this->getMyMemoryClient($engineId);
+            $MMTClient = $this->getModernMTClient($engineId);
             $memories = $MMTClient->getAllMemories();
             $results = [];
 
@@ -56,28 +56,16 @@ class ModernMTProxyController extends BaseChunkController
      * @return Engines_MMT
      * @throws \Exception
      */
-    private function getMyMemoryClient($id)
+    private function getModernMTClient($id)
     {
-        $engineDAO        = new \EnginesModel_EngineDAO( \Database::obtain() );
-        $engineStruct     = \EnginesModel_EngineStruct::getStruct();
-        $engineStruct->id = $id;
-
-        $eng = $engineDAO->setCacheTTL( 60 * 5 )->read( $engineStruct );
-
-        if(empty($eng)){
-            throw new \Exception("Engine not found");
-        }
-
-        /**
-         * @var $engineRecord EnginesModel_EngineStruct
-         */
-        $engineRecord = @$eng[ 0 ];
+        $engine = \Engine::getInstance($id);
+        $engineRecord = $engine->getEngineRecord();
 
         if($engineRecord->uid !== $this->user->uid){
             throw new \Exception("Engine doesn't belong to the logged user");
         }
 
-        return new Engines_MMT( $engineRecord );
+        return $engineRecord;
     }
 
     /**
@@ -93,7 +81,6 @@ class ModernMTProxyController extends BaseChunkController
             }
         }
 
-        // has_glossary
         if(isset($params['has_glossary'])){
             if($memory['has_glossary'] != $params['has_glossary']){
                 return false;
