@@ -66,6 +66,10 @@ class ModernMTProxyController extends BaseChunkController
             throw new Exception("Engine doesn't belong to the logged user");
         }
 
+        if(!$engine instanceof Engines_MMT){
+            throw new Exception("Engine is not instance of Engines_MMT class");
+        }
+
         return $engine;
     }
 
