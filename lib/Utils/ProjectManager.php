@@ -186,7 +186,8 @@ class ProjectManager {
                     'due_date'                     => null,
                     'qa_model'                     => null,
                     'target_language_mt_engine_id' => [],
-                    'standard_word_count'         => 0
+                    'standard_word_count'          => 0,
+                    'mmt_glossaries'               => null
                 ] );
 
         }
@@ -369,6 +370,15 @@ class ProjectManager {
                 $this->projectStructure[ 'id_project' ],
                 $key,
                 $value
+            );
+        }
+
+        // add MMT Glossaries here
+        if( $this->projectStructure[ 'mmt_glossaries' ] and !empty( $this->projectStructure[ 'mmt_glossaries' ] ) ){
+            $dao->set(
+                $this->projectStructure[ 'id_project' ],
+                'mmt_glossaries',
+                $this->projectStructure[ 'mmt_glossaries' ]
             );
         }
     }

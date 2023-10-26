@@ -101,6 +101,11 @@ class NewController extends ajaxController {
 
     protected $httpHeader = "HTTP/1.0 200 OK";
 
+    /**
+     * @var array
+     */
+    private $mmtGlossaries;
+
     private function setBadRequestHeader() {
         $this->httpHeader = 'HTTP/1.0 400 Bad Request';
     }
@@ -176,7 +181,8 @@ class NewController extends ajaxController {
                         'filter' => FILTER_SANITIZE_STRING,
                         'flags'  => FILTER_REQUIRE_ARRAY,
                 ],
-                'project_info'       => [ 'filter' => FILTER_SANITIZE_STRING ]
+                'project_info'       => [ 'filter' => FILTER_SANITIZE_STRING ],
+                'mmt_glossaries'     => [ 'filter' => FILTER_SANITIZE_STRING ]
         ];
 
         $filterArgs = $this->featureSet->filter( 'filterNewProjectInputFilters', $filterArgs, $this->userIsLogged );
@@ -222,6 +228,7 @@ class NewController extends ajaxController {
             $this->__validateQaModelTemplate();
             $this->__validatePayableRateTemplate();
             $this->__validateQaModel();
+            $this->__validateMMTGlossaries();
             $this->__appendFeaturesToProject();
             $this->__generateTargetEngineAssociation();
         } catch ( Exception $ex ) {
@@ -617,6 +624,11 @@ class NewController extends ajaxController {
             $projectStructure[ 'uid' ]          = $this->user->getUid();
             $projectStructure[ 'id_customer' ]  = $this->user->getEmail();
             $this->projectManager->setTeam( $this->team );
+        }
+
+        // mmtGlossaries
+        if( $this->mmtGlossaries ){
+            $projectStructure[ 'mmt_glossaries' ] = $this->mmtGlossaries;
         }
 
         // with the qa template id
@@ -1131,6 +1143,42 @@ class NewController extends ajaxController {
             }
 
             $this->qaModel = $qaModel;
+        }
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function __validateMMTGlossaries(){
+
+        if ( !empty( $this->postInput[ 'mmt_glossaries' ] ) ) {
+
+            $mmtGlossaries = html_entity_decode($this->postInput[ 'mmt_glossaries' ]);
+            $mmtGlossariesArray = json_decode($mmtGlossaries, true);
+
+            if(!is_array($mmtGlossariesArray)){
+                throw new Exception("mmt_glossaries is not a valid JSON");
+            }
+
+            foreach ($mmtGlossariesArray as $mmtGlossary){
+                if(!isset($mmtGlossary['ignore_glossary_case'])){
+                    throw new Exception("`ignore_glossary_case` key not found in `mmt_glossaries` JSON");
+                }
+
+                if(!isset($mmtGlossary['id_mmt_glossary'])){
+                    throw new Exception("`id_mmt_glossary` key not found in `mmt_glossaries` JSON");
+                }
+
+                if(!is_bool($mmtGlossary['ignore_glossary_case'])){
+                    throw new Exception("`ignore_glossary_case` is not boolean in `mmt_glossaries` JSON");
+                }
+
+                if(!is_int($mmtGlossary['id_mmt_glossary'])){
+                    throw new Exception("`id_mmt_glossary` is not integer in `mmt_glossaries` JSON");
+                }
+            }
+
+            $this->mmtGlossaries = $mmtGlossaries;
         }
     }
 
