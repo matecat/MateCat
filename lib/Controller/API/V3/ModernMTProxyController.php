@@ -108,7 +108,7 @@ class ModernMTProxyController extends BaseChunkController
         return [
             'id' => $memory['id'],
             'name' => $memory['name'],
-            'has_glossary' => (isset($memory['has_glossary']) ? $memory['has_glossary'] : null),
+            'has_glossary' => (isset($memory['has_glossary']) ? $memory['has_glossary'] : false),
         ];
     }
 }

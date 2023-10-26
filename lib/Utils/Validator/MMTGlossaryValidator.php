@@ -13,7 +13,7 @@ class MMTGlossaryValidator
      * @param $uid
      * @throws Exception
      */
-    public static function validate($mmtGlossaries, $uid)
+    public static function validate($mmtGlossaries)
     {
         $mmtGlossariesArray = json_decode($mmtGlossaries, true);
 
@@ -36,17 +36,6 @@ class MMTGlossaryValidator
 
             if(!is_int($mmtGlossary['id_mmt_glossary'])){
                 throw new Exception("`id_mmt_glossary` is not integer in `mmt_glossaries` JSON");
-            }
-
-            $engine = Engine::getInstance($mmtGlossary['id_mmt_glossary']);
-
-            if(!$engine instanceof Engines_MMT){
-                throw new Exception("id_mmt_glossary is not valid");
-            }
-
-            $engineRecord = $engine->getEngineRecord();
-            if($engineRecord->uid !== $uid){
-                throw new Exception("Engine doesn't belong to the logged user");
             }
         }
     }

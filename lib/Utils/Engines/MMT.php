@@ -113,10 +113,12 @@ class Engines_MMT extends Engines_AbstractEngine {
                     $_config[ 'target' ],
                     $_config[ 'segment' ],
                     @$_config[ 'mt_context' ],
-                    $_keys, @$_config[ 'job_id' ],
+                    $_keys,
+                    @$_config[ 'job_id' ],
                     static::GET_REQUEST_TIMEOUT,
                     @$_config[ 'priority' ],
-                    $_config[ 'session' ]
+                    $_config[ 'session' ],
+                    $_config[ 'glossaries' ]
             );
 
             return ( new Engines_Results_MyMemory_Matches(

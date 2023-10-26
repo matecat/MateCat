@@ -120,7 +120,7 @@ class createProjectController extends ajaxController {
 
             try {
                 $mmtGlossaries = html_entity_decode($this->postInput[ 'mmt_glossaries' ]);
-                MMTGlossaryValidator::validate($mmtGlossaries, $this->user->uid);
+                MMTGlossaryValidator::validate($mmtGlossaries);
 
                 $this->mmt_glossaries = $mmtGlossaries;
             } catch (Exception $exception){
@@ -305,7 +305,11 @@ class createProjectController extends ajaxController {
         $projectStructure[ 'user_ip' ]                      = Utils::getRealIpAddr();
         $projectStructure[ 'HTTP_HOST' ]                    = INIT::$HTTPHOST;
 
-        if($this->mmt_glossaries !== null){
+
+        // MMT Glossaries
+        // (if $engine is not an MMT instance, ignore 'mmt_glossaries')
+        $engine = Engine::getInstance( $this->mt_engine );
+        if($engine instanceof Engines_MMT and $this->mmt_glossaries !== null){
             $projectStructure[ 'mmt_glossaries' ] = $this->mmt_glossaries;
         }
 

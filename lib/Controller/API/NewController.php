@@ -1152,10 +1152,12 @@ class NewController extends ajaxController {
      */
     private function __validateMMTGlossaries(){
 
-        if ( !empty( $this->postInput[ 'mmt_glossaries' ] ) ) {
-
+        // MMT Glossaries
+        // (if $engine is not an MMT instance, ignore 'mmt_glossaries')
+        $engine = Engine::getInstance( $this->postInput[ 'mt_engine' ] );
+        if($engine instanceof Engines_MMT and !empty( $this->postInput[ 'mmt_glossaries' ] )){
             $mmtGlossaries = html_entity_decode($this->postInput[ 'mmt_glossaries' ]);
-            MMTGlossaryValidator::validate($mmtGlossaries, $this->user->uid);
+            MMTGlossaryValidator::validate($mmtGlossaries);
 
             $this->mmtGlossaries = $mmtGlossaries;
         }

@@ -321,10 +321,11 @@ class MMTServiceApi {
      * @param null $timeout
      * @param null $priority
      * @param null $session
+     * @param null $glossaries
      * @return mixed
      * @throws MMTServiceApiException
      */
-    public function translate( $source, $target, $text, $contextVector = null, $hints = null, $projectId = null, $timeout = null, $priority = null, $session = null ) {
+    public function translate( $source, $target, $text, $contextVector = null, $hints = null, $projectId = null, $timeout = null, $priority = null, $session = null, $glossaries = null ) {
 
         return $this->send( 'GET', "$this->baseUrl/translate", [
             'source'  => $source,
@@ -336,6 +337,7 @@ class MMTServiceApi {
             'timeout' => ( $timeout ? ( $timeout * 1000 ) : null ),
             'priority' => ( $priority ?: 'normal' ),
             'session' => ($session ? $session : null),
+            'glossaries' => ($glossaries ? $glossaries : null),
         ], false, $timeout );
     }
 
