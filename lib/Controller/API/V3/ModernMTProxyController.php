@@ -74,7 +74,7 @@ class ModernMTProxyController extends BaseChunkController
         $engineRecord = @$eng[ 0 ];
 
         if($engineRecord->uid !== $this->user->uid){
-            throw new \Exception("Engine not belongs to the logged user");
+            throw new \Exception("Engine doesn't belong to the logged user");
         }
 
         return new Engines_MMT( $engineRecord );
