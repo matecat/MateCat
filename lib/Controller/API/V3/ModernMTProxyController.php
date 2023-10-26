@@ -1,12 +1,22 @@
 <?php
 
-namespace API\App;
+namespace API\V3;
 
+use API\V2\Validators\LoginValidator;
 use Engines_MMT;
 use EnginesModel_EngineStruct;
+use API\V2\BaseChunkController;
 
-class ModernMTProxyController extends AbstractStatefulKleinController
+class ModernMTProxyController extends BaseChunkController
 {
+    protected function afterConstruct() {
+        parent::afterConstruct();
+        $this->appendValidator( new LoginValidator( $this ) );
+    }
+
+    /**
+     * Get all the customer's memories
+     */
     public function get()
     {
         if(!$this->userIsLogged()){
@@ -17,20 +27,15 @@ class ModernMTProxyController extends AbstractStatefulKleinController
 
         try {
             $engineId = $this->request->engineId;
+            $params = $this->request->params();
             $MMTClient = $this->getMyMemoryClient($engineId);
             $memories = $MMTClient->getAllMemories();
             $results = [];
 
             foreach ($memories as $memory){
-
-                // if($memory['has_glossary'] == true){
-                // }
-
-                $results[] = [
-                    'id' => $memory['id'],
-                    'name' => $memory['name'],
-                    'has_glossary' => true
-                ];
+                if($this->filterResult($params, $memory)){
+                    $results[] = $this->buildResult($memory);
+                }
             }
 
             $this->response->status()->setCode( 200 );
@@ -73,5 +78,41 @@ class ModernMTProxyController extends AbstractStatefulKleinController
         }
 
         return new Engines_MMT( $engineRecord );
+    }
+
+    /**
+     * @param $params
+     * @param $memory
+     * @return bool
+     */
+    private function filterResult($params, $memory)
+    {
+        if(isset($params['q'])){
+            if(false === strpos($memory['name'], $params['q'])){
+                return false;
+            }
+        }
+
+        // has_glossary
+        if(isset($params['has_glossary'])){
+            if($memory['has_glossary'] != $params['has_glossary']){
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * @param $memory
+     * @return array
+     */
+    private function buildResult($memory)
+    {
+        return [
+            'id' => $memory['id'],
+            'name' => $memory['name'],
+            'has_glossary' => true
+        ];
     }
 }

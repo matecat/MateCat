@@ -71,3 +71,8 @@ $klein->with( '/api/v3/payable_rate', function () {
 $klein->with( '/api/v3/tm-keys', function () {
     route( '/list', 'GET', '\API\V3\TmKeyManagementController', 'getByUser' );
 } );
+
+// MMT
+$klein->with( '/api/v3/mmt/keys', function () {
+    route( '/[:engineId]', 'GET', '\API\V3\ModernMTProxyController', 'get' );
+} );

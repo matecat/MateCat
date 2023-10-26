@@ -107,10 +107,5 @@ $klein->with( '/api/app/glossary', function () {
     route( '/_update', 'POST', '\API\App\GlossaryController', 'update' );
 } );
 
-// MMT
-$klein->with( '/api/app/mmt/keys', function () {
-    route( '/[:engineId]', 'GET', '\API\App\ModernMTProxyController', 'get' );
-} );
-
 // AI Assistant
 route( '/api/app/ai-assistant', 'POST',  'API\App\AIAssistantController', 'index' );
