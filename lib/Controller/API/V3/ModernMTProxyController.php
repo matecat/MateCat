@@ -4,7 +4,8 @@ namespace API\V3;
 
 use API\V2\Validators\LoginValidator;
 use Engines_MMT;
-use EnginesModel_EngineStruct;
+use Exception;
+use Engine;
 use API\V2\BaseChunkController;
 
 class ModernMTProxyController extends BaseChunkController
@@ -42,7 +43,7 @@ class ModernMTProxyController extends BaseChunkController
             $this->response->json($results);
             exit();
 
-        } catch (\Exception $exception){
+        } catch (Exception $exception){
             $this->response->status()->setCode( 500 );
             $this->response->json([
                 'error' => $exception->getMessage()
@@ -54,15 +55,15 @@ class ModernMTProxyController extends BaseChunkController
     /**
      * @param $id
      * @return Engines_MMT
-     * @throws \Exception
+     * @throws Exception
      */
     private function getModernMTClient($id)
     {
-        $engine = \Engine::getInstance($id);
+        $engine = Engine::getInstance($id);
         $engineRecord = $engine->getEngineRecord();
 
         if($engineRecord->uid !== $this->user->uid){
-            throw new \Exception("Engine doesn't belong to the logged user");
+            throw new Exception("Engine doesn't belong to the logged user");
         }
 
         return $engineRecord;
