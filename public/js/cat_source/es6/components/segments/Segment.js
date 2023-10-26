@@ -139,7 +139,7 @@ class Segment extends React.Component {
         cancelText: 'Close',
         successCallback: () => SegmentActions.gotoNextTranslatedSegment(sid),
         successText: 'Open next translated segment',
-        text: UI.alertNotTranslatedMessage,
+        text: ReviewExtended.alertNotTranslatedMessage,
       }),
     )
   }
