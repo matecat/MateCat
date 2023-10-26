@@ -66,7 +66,7 @@ class ModernMTProxyController extends BaseChunkController
             throw new Exception("Engine doesn't belong to the logged user");
         }
 
-        return $engineRecord;
+        return $engine;
     }
 
     /**
@@ -77,13 +77,17 @@ class ModernMTProxyController extends BaseChunkController
     private function filterResult($params, $memory)
     {
         if(isset($params['q'])){
-            if(false === strpos($memory['name'], $params['q'])){
+            $q = filter_var($params['q'], FILTER_SANITIZE_STRING);
+
+            if(false === strpos($memory['name'], $q)){
                 return false;
             }
         }
 
         if(isset($params['has_glossary'])){
-            if($memory['has_glossary'] != $params['has_glossary']){
+            $hasGlossary = filter_var($params['has_glossary'], FILTER_VALIDATE_BOOLEAN);
+
+            if($memory['has_glossary'] != $hasGlossary){
                 return false;
             }
         }
@@ -100,7 +104,7 @@ class ModernMTProxyController extends BaseChunkController
         return [
             'id' => $memory['id'],
             'name' => $memory['name'],
-            'has_glossary' => true
+            'has_glossary' => (isset($memory['has_glossary']) ? $memory['has_glossary'] : null),
         ];
     }
 }
