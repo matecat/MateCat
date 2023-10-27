@@ -492,10 +492,11 @@ class GetContributionWorker extends AbstractWorker {
                     $metadata = $metadataDao->get($contributionStruct->getProjectStruct()->id, 'mmt_glossaries');
 
                     if($metadata !== null){
-                        $metadata = html_entity_decode($metadata);
+
+                        $metadata = html_entity_decode($metadata->value);
                         $mmtGlossariesArray = json_decode($metadata, true);
 
-                        $config[ 'glossaries' ] = implode(",",$mmtGlossariesArray['glossaries']);
+                        $config[ 'glossaries' ] = implode(",", $mmtGlossariesArray['glossaries']);
                         $config[ 'ignore_glossary_case' ] = $mmtGlossariesArray['ignore_glossary_case'];
                     }
                 }
