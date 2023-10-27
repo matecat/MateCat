@@ -2,13 +2,14 @@
 
 namespace Validator;
 
-use Engine;
-use Engines_MMT;
 use Exception;
 
 class MMTGlossaryValidator
 {
     /**
+     * Example:
+     * {"glossaries": [1, 2, 3, 4], "ignore_glossary_case": true }
+     *
      * @param $mmtGlossaries
      * @param $uid
      * @throws Exception
@@ -21,21 +22,21 @@ class MMTGlossaryValidator
             throw new Exception("mmt_glossaries is not a valid JSON");
         }
 
-        foreach ($mmtGlossariesArray as $mmtGlossary){
-            if(!isset($mmtGlossary['ignore_glossary_case'])){
-                throw new Exception("`ignore_glossary_case` key not found in `mmt_glossaries` JSON");
-            }
+        if(!isset($mmtGlossariesArray['ignore_glossary_case'])){
+            throw new Exception("`ignore_glossary_case` key not found in `mmt_glossaries` JSON");
+        }
 
-            if(!isset($mmtGlossary['id_mmt_glossary'])){
-                throw new Exception("`id_mmt_glossary` key not found in `mmt_glossaries` JSON");
-            }
+        if(!is_bool($mmtGlossariesArray['ignore_glossary_case'])){
+            throw new Exception("`ignore_glossary_case` is not boolean in `mmt_glossaries` JSON");
+        }
 
-            if(!is_bool($mmtGlossary['ignore_glossary_case'])){
-                throw new Exception("`ignore_glossary_case` is not boolean in `mmt_glossaries` JSON");
-            }
+        if(!is_array($mmtGlossariesArray['glossaries'])){
+            throw new Exception("`glossaries` is not an array in `mmt_glossaries` JSON");
+        }
 
-            if(!is_int($mmtGlossary['id_mmt_glossary'])){
-                throw new Exception("`id_mmt_glossary` is not integer in `mmt_glossaries` JSON");
+        foreach ($mmtGlossariesArray['glossaries'] as $glossaryId){
+            if(!is_int($glossaryId)){
+                throw new Exception("`glossaries` array contains a non integer value in `mmt_glossaries` JSON");
             }
         }
     }

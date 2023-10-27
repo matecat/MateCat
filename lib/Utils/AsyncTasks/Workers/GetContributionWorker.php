@@ -490,7 +490,11 @@ class GetContributionWorker extends AbstractWorker {
                 if($mt_engine instanceof Engines_MMT){
                     $metadataDao = new Projects_MetadataDao();
                     $metadata = $metadataDao->get($contributionStruct->getProjectStruct()->id, 'mmt_glossaries');
-                    $config[ 'glossaries' ] = ($metadata !== null) ? $metadata->value : '';
+
+                    if($metadata !== null){
+                        $config[ 'glossaries' ] = implode(",",$metadata['glossaries']);
+                        $config[ 'ignore_glossary_case' ] = $metadata['ignore_glossary_case'];
+                    }
                 }
 
                 $mt_result = $mt_engine->get( $config );

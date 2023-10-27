@@ -322,10 +322,11 @@ class MMTServiceApi {
      * @param null $priority
      * @param null $session
      * @param null $glossaries
+     * @param null $ignoreGlossaryCase
      * @return mixed
      * @throws MMTServiceApiException
      */
-    public function translate( $source, $target, $text, $contextVector = null, $hints = null, $projectId = null, $timeout = null, $priority = null, $session = null, $glossaries = null ) {
+    public function translate( $source, $target, $text, $contextVector = null, $hints = null, $projectId = null, $timeout = null, $priority = null, $session = null, $glossaries = null, $ignoreGlossaryCase = null ) {
 
         return $this->send( 'GET', "$this->baseUrl/translate", [
             'source'  => $source,
@@ -338,6 +339,7 @@ class MMTServiceApi {
             'priority' => ( $priority ?: 'normal' ),
             'session' => ($session ? $session : null),
             'glossaries' => ($glossaries ? $glossaries : null),
+            'ignore_glossary_case' => ($ignoreGlossaryCase ? $ignoreGlossaryCase : null),
         ], false, $timeout );
     }
 

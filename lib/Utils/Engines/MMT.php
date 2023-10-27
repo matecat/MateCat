@@ -96,6 +96,10 @@ class Engines_MMT extends Engines_AbstractEngine {
         return $client->getAvailableLanguages();
     }
 
+    /**
+     * @param $_config
+     * @return array|Engines_Results_AbstractResponse
+     */
     public function get( $_config ) {
 
         //This is not really needed because by default in analysis the Engine_MMT is accepted by MyMemory
@@ -109,16 +113,17 @@ class Engines_MMT extends Engines_AbstractEngine {
 
         try {
             $translation = $client->translate(
-                    $_config[ 'source' ],
-                    $_config[ 'target' ],
-                    $_config[ 'segment' ],
-                    @$_config[ 'mt_context' ],
-                    $_keys,
-                    @$_config[ 'job_id' ],
-                    static::GET_REQUEST_TIMEOUT,
-                    @$_config[ 'priority' ],
-                    $_config[ 'session' ],
-                    $_config[ 'glossaries' ]
+                $_config[ 'source' ],
+                $_config[ 'target' ],
+                $_config[ 'segment' ],
+                @$_config[ 'mt_context' ],
+                $_keys,
+                @$_config[ 'job_id' ],
+                static::GET_REQUEST_TIMEOUT,
+                @$_config[ 'priority' ],
+                $_config[ 'session' ],
+                @$_config[ 'glossaries' ],
+                @$_config[ 'ignore_glossary_case' ]
             );
 
             return ( new Engines_Results_MyMemory_Matches(
