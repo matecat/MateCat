@@ -60,14 +60,15 @@ class ModernMTProxyController extends BaseChunkController
     private function getModernMTClient($id)
     {
         $engine = Engine::getInstance($id);
+
+        if(!$engine instanceof Engines_MMT){
+            throw new Exception("Engine is not instance of Engines_MMT class");
+        }
+
         $engineRecord = $engine->getEngineRecord();
 
         if($engineRecord->uid !== $this->user->uid){
             throw new Exception("Engine doesn't belong to the logged user");
-        }
-
-        if(!$engine instanceof Engines_MMT){
-            throw new Exception("Engine is not instance of Engines_MMT class");
         }
 
         return $engine;
