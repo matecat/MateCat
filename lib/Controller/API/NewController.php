@@ -1155,7 +1155,14 @@ class NewController extends ajaxController {
         // MMT Glossaries
         // (if $engine is not an MMT instance, ignore 'mmt_glossaries')
         $engine = Engine::getInstance( $this->postInput[ 'mt_engine' ] );
+        $engineRecord = $engine->getEngineRecord();
+
         if($engine instanceof Engines_MMT and !empty( $this->postInput[ 'mmt_glossaries' ] )){
+
+            if($engineRecord->uid !== $this->user->uid){
+                throw new Exception("Engine doesn't belong to the logged user");
+            }
+
             $mmtGlossaries = html_entity_decode($this->postInput[ 'mmt_glossaries' ]);
             MMTGlossaryValidator::validate($mmtGlossaries);
 
