@@ -115,19 +115,6 @@ class createProjectController extends ajaxController {
 
         $__postPrivateTmKey = array_filter( $private_keyList, [ "self", "sanitizeTmKeyArr" ] );
 
-        // add MMT Glossaries only for logged users
-        if ( !empty( $this->postInput[ 'mmt_glossaries' ] ) and $this->isLoggedIn() ) {
-
-            try {
-                $mmtGlossaries = html_entity_decode($this->postInput[ 'mmt_glossaries' ]);
-                MMTGlossaryValidator::validate($mmtGlossaries);
-
-                $this->mmt_glossaries = $mmtGlossaries;
-            } catch (Exception $exception){
-                $this->result[ 'errors' ][] = [ "code" => -6, "message" => $exception->getMessage() ];
-            }
-        }
-
         // NOTE: This is for debug purpose only,
         // NOTE: Global $_POST Overriding from CLI
         // $this->__postInput = filter_var_array( $_POST, $filterArgs );
@@ -144,6 +131,30 @@ class createProjectController extends ajaxController {
         $this->pretranslate_100        = $this->postInput[ 'pretranslate_100' ];
         $this->only_private            = ( is_null( $this->postInput[ 'get_public_matches' ] ) ? false : !$this->postInput[ 'get_public_matches' ] );
         $this->due_date                = ( empty( $this->postInput[ 'due_date' ] ) ? null : Utils::mysqlTimestamp( $this->postInput[ 'due_date' ] ) );
+
+        // add MMT Glossaries only for logged users
+        if ( !empty( $this->postInput[ 'mmt_glossaries' ] ) and $this->isLoggedIn() ) {
+
+            try {
+                $engine = Engine::getInstance( $this->mt_engine );
+                $engineRecord = $engine->getEngineRecord();
+
+                if($engine instanceof Engines_MMT and !empty( $this->postInput[ 'mmt_glossaries' ] )){
+
+                    if($engineRecord->uid !== $this->user->uid){
+                        throw new Exception("Engine doesn't belong to the logged user");
+                    }
+
+                    $mmtGlossaries = html_entity_decode($this->postInput[ 'mmt_glossaries' ]);
+                    MMTGlossaryValidator::validate($mmtGlossaries);
+
+                    $this->mmt_glossaries = $mmtGlossaries;
+                }
+
+            } catch (Exception $exception){
+                $this->result[ 'errors' ][] = [ "code" => -6, "message" => $exception->getMessage() ];
+            }
+        }
 
         $this->__setMetadataFromPostInput();
 
