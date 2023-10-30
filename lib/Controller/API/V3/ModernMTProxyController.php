@@ -7,6 +7,8 @@ use Engines_MMT;
 use Exception;
 use Engine;
 use API\V2\BaseChunkController;
+use Validator\EngineValidator;
+use Validator\MMTValidator;
 
 class ModernMTProxyController extends BaseChunkController
 {
@@ -53,25 +55,13 @@ class ModernMTProxyController extends BaseChunkController
     }
 
     /**
-     * @param $id
-     * @return Engines_MMT
+     * @param $engineId
+     * @return \Engines_AbstractEngine
      * @throws Exception
      */
-    private function getModernMTClient($id)
+    private function getModernMTClient($engineId)
     {
-        $engine = Engine::getInstance($id);
-
-        if(!$engine instanceof Engines_MMT){
-            throw new Exception("Engine is not instance of Engines_MMT class");
-        }
-
-        $engineRecord = $engine->getEngineRecord();
-
-        if($engineRecord->uid !== $this->user->uid){
-            throw new Exception("Engine doesn't belong to the logged user");
-        }
-
-        return $engine;
+        return EngineValidator::engineBelongsToUser($engineId, $this->user->uid, Engines_MMT::class);
     }
 
     /**
@@ -82,8 +72,7 @@ class ModernMTProxyController extends BaseChunkController
     private function filterResult($params, $memory)
     {
         if(isset($params['q'])){
-            $q = filter_var($params['q'], FILTER_SANITIZE_STRING);
-
+            $q = filter_var($params['q'], [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW  ] );
             if(false === strpos($memory['name'], $q)){
                 return false;
             }

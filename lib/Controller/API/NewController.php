@@ -14,7 +14,8 @@ use ProjectQueue\Queue;
 use QAModelTemplate\QAModelTemplateStruct;
 use Teams\MembershipDao;
 use TMS\TMSService;
-use Validator\MMTGlossaryValidator;
+use Validator\EngineValidator;
+use Validator\MMTValidator;
 
 //limit execution time to 300 seconds
 set_time_limit( 300 );
@@ -229,6 +230,7 @@ class NewController extends ajaxController {
             $this->__validateQaModelTemplate();
             $this->__validatePayableRateTemplate();
             $this->__validateQaModel();
+            $this->__validateEngineRecord();
             $this->__validateMMTGlossaries();
             $this->__appendFeaturesToProject();
             $this->__generateTargetEngineAssociation();
@@ -1150,21 +1152,22 @@ class NewController extends ajaxController {
     /**
      * @throws Exception
      */
+    private function __validateEngineRecord(){
+
+        if($this->postInput[ 'mt_engine' ] > 0){
+            EngineValidator::engineBelongsToUser($this->postInput[ 'mt_engine' ], $this->user->uid,  Engines_MMT::class);
+        }
+    }
+
+    /**
+     * @throws Exception
+     */
     private function __validateMMTGlossaries(){
 
-        // MMT Glossaries
-        // (if $engine is not an MMT instance, ignore 'mmt_glossaries')
-        $engine = Engine::getInstance( $this->postInput[ 'mt_engine' ] );
-        $engineRecord = $engine->getEngineRecord();
-
-        if($engine instanceof Engines_MMT and !empty( $this->postInput[ 'mmt_glossaries' ] )){
-
-            if($engineRecord->uid !== $this->user->uid){
-                throw new Exception("Engine doesn't belong to the logged user");
-            }
+        if(!empty( $this->postInput[ 'mmt_glossaries' ] )){
 
             $mmtGlossaries = html_entity_decode($this->postInput[ 'mmt_glossaries' ]);
-            MMTGlossaryValidator::validate($mmtGlossaries);
+            MMTValidator::validateGlossary($mmtGlossaries);
 
             $this->mmtGlossaries = $mmtGlossaries;
         }

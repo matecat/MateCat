@@ -4,7 +4,7 @@ namespace Validator;
 
 use Exception;
 
-class MMTGlossaryValidator
+class MMTValidator
 {
     /**
      * Example:
@@ -14,7 +14,7 @@ class MMTGlossaryValidator
      * @param $uid
      * @throws Exception
      */
-    public static function validate($mmtGlossaries)
+    public static function validateGlossary($mmtGlossaries)
     {
         $mmtGlossariesArray = json_decode($mmtGlossaries, true);
 
