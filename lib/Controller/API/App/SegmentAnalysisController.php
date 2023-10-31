@@ -301,6 +301,7 @@ class SegmentAnalysisController extends KleinController {
             $issuesAggregate[$issuesRecord->id_job][$issuesRecord->id_segment][] = [
                 'source_page'         => $this->humanReadableSourcePage($issuesRecord->source_page),
                 'id_category'         => (int)$issuesRecord->id_category,
+                'category'            => $issuesRecord->cat_label,
                 'severity'            => $issuesRecord->severity,
                 'translation_version' => (int)$issuesRecord->translation_version,
                 'penalty_points'      => floatval($issuesRecord->penalty_points),
