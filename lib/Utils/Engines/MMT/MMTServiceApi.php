@@ -339,7 +339,7 @@ class MMTServiceApi {
             'priority' => ( $priority ?: 'normal' ),
             'session' => ($session ? $session : null),
             'glossaries' => ($glossaries ? $glossaries : null),
-            'ignore_glossary_case' => ($ignoreGlossaryCase ? $ignoreGlossaryCase : null),
+            'ignore_glossary_case' => ($ignoreGlossaryCase ? $ignoreGlossaryCase == 1 : null),
         ], false, $timeout );
     }
 

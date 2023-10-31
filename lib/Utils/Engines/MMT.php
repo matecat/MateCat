@@ -100,7 +100,6 @@ class Engines_MMT extends Engines_AbstractEngine {
         }
 
         $client = $this->_getClient();
-
         $_keys = $this->_reMapKeyList( @$_config[ 'keys' ] );
 
         try {
