@@ -230,7 +230,7 @@ class NewController extends ajaxController {
             $this->__validateQaModelTemplate();
             $this->__validatePayableRateTemplate();
             $this->__validateQaModel();
-            $this->__validateEngineRecord();
+            $this->__validateUserMTEngine();
             $this->__validateMMTGlossaries();
             $this->__appendFeaturesToProject();
             $this->__generateTargetEngineAssociation();
@@ -1152,7 +1152,7 @@ class NewController extends ajaxController {
     /**
      * @throws Exception
      */
-    private function __validateEngineRecord(){
+    private function __validateUserMTEngine(){
 
         // any other engine than MyMemory
         if($this->postInput[ 'mt_engine' ] and $this->postInput[ 'mt_engine' ] > 1){

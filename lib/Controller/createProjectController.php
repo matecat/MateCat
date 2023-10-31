@@ -133,28 +133,6 @@ class createProjectController extends ajaxController {
         $this->only_private            = ( is_null( $this->postInput[ 'get_public_matches' ] ) ? false : !$this->postInput[ 'get_public_matches' ] );
         $this->due_date                = ( empty( $this->postInput[ 'due_date' ] ) ? null : Utils::mysqlTimestamp( $this->postInput[ 'due_date' ] ) );
 
-        // check if MT engine belongs to user
-        if($this->mt_engine > 0 and $this->isLoggedIn()){
-            try {
-                EngineValidator::engineBelongsToUser($this->mt_engine, $this->user->uid);
-            } catch (Exception $exception){
-                $this->result[ 'errors' ][] = [ "code" => -6, "message" => $exception->getMessage() ];
-            }
-        }
-
-        // validate mmt_glossaries string
-        if ( !empty( $this->postInput[ 'mmt_glossaries' ] ) and $this->isLoggedIn() ) {
-            try {
-                $mmtGlossaries = html_entity_decode($this->postInput[ 'mmt_glossaries' ]);
-                MMTValidator::validateGlossary($mmtGlossaries);
-
-                $this->mmt_glossaries = $mmtGlossaries;
-
-            } catch (Exception $exception){
-                $this->result[ 'errors' ][] = [ "code" => -6, "message" => $exception->getMessage() ];
-            }
-        }
-
         $this->__setMetadataFromPostInput();
 
         if ( $this->disable_tms_engine_flag ) {
@@ -177,6 +155,7 @@ class createProjectController extends ajaxController {
         $this->__validateSourceLang( Langs_Languages::getInstance() );
         $this->__validateTargetLangs( Langs_Languages::getInstance() );
         $this->__validateUserMTEngine();
+        $this->__validateMMTGlossaries();
         $this->__appendFeaturesToProject();
         $this->__generateTargetEngineAssociation();
         if ( $this->userIsLogged ) {
@@ -545,28 +524,36 @@ class createProjectController extends ajaxController {
         }
     }
 
+    /**
+     * Check if MT engine (except MyMemory) belongs to user
+     */
     private function __validateUserMTEngine() {
 
-        if ( array_search( $this->mt_engine, [ 0, 1 ] ) === false ) {
-
-            if ( !$this->userIsLogged ) {
-                $this->result[ 'errors' ][] = [ "code" => -2, "message" => "Invalid MT Engine." ];
-
-                return;
+        if($this->mt_engine > 1 and $this->isLoggedIn()){
+            try {
+                EngineValidator::engineBelongsToUser($this->mt_engine, $this->user->uid);
+            } catch (Exception $exception){
+                $this->result[ 'errors' ][] = [ "code" => -2, "message" => $exception->getMessage() ];
             }
-
-            $engineQuery      = new EnginesModel_EngineStruct();
-            $engineQuery->id  = $this->mt_engine;
-            $engineQuery->uid = $this->user->uid;
-            $enginesDao       = new EnginesModel_EngineDAO();
-            $engine           = $enginesDao->setCacheTTL( 60 * 5 )->read( $engineQuery );
-
-            if ( empty( $engine ) ) {
-                $this->result[ 'errors' ][] = [ "code" => -2, "message" => "Invalid MT Engine." ];
-            }
-
         }
+    }
 
+    /**
+     * Validate `mmt_glossaries` string
+     */
+    private function __validateMMTGlossaries() {
+
+        if ( !empty( $this->postInput[ 'mmt_glossaries' ] ) and $this->isLoggedIn() ) {
+            try {
+                $mmtGlossaries = html_entity_decode($this->postInput[ 'mmt_glossaries' ]);
+                MMTValidator::validateGlossary($mmtGlossaries);
+
+                $this->mmt_glossaries = $mmtGlossaries;
+
+            } catch (Exception $exception){
+                $this->result[ 'errors' ][] = [ "code" => -6, "message" => $exception->getMessage() ];
+            }
+        }
     }
 
     /**
