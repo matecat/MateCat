@@ -24,7 +24,7 @@ class EngineValidator
         }
 
         if($engineClass !== null and !$engine instanceof $engineClass ){
-            throw new Exception($engineId . "is not a valid MMT engine");
+            throw new Exception($engineId . "is not the expected $engineClass engine instance");
         }
 
         return $engine;
