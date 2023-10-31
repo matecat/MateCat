@@ -180,6 +180,56 @@ export const isCaretInsideEntity = () => {
   return false
 }
 
+export const getEntitiesSelected = (editorState) => {
+  const selection = editorState.getSelection()
+  const isBackward = selection.isBackward
+
+  const anchorKey = !isBackward
+    ? selection.getAnchorKey()
+    : selection.getFocusKey()
+  const focusKey = !isBackward
+    ? selection.getFocusKey()
+    : selection.getAnchorKey()
+
+  const start = !isBackward
+    ? selection.getAnchorOffset()
+    : selection.getFocusOffset()
+  const end = !isBackward
+    ? selection.getFocusOffset()
+    : selection.getAnchorOffset()
+
+  if (start === end) return []
+
+  const blocks = editorState.getCurrentContent().getBlockMap()
+  const blocksLength = []
+  blocks.forEach((block) =>
+    blocksLength.push({key: block.key, start: 0, end: block.getLength()}),
+  )
+  const selectedBlocksOffset = blocksLength.reduce((acc, cur) => {
+    if (cur.key === focusKey) {
+      const curUpdate = {...cur, end, ...(cur.key === anchorKey && {start})}
+      return [acc.items ? [...acc.items, curUpdate] : [curUpdate]].flat()
+    }
+
+    if (cur.key === anchorKey)
+      return {canAddItem: true, items: [{...cur, start}]}
+
+    if (acc.canAddItem) return {...acc, items: [...acc.items, cur]}
+
+    return acc
+  }, {})
+
+  const entities = getEntities(editorState)
+  const entitiesMatched = entities.filter((entity) => {
+    const offset = selectedBlocksOffset.find(({key}) => key === entity.blockKey)
+    return typeof offset === 'object'
+      ? entity.start > offset.start && entity.end < offset.end
+      : false
+  })
+
+  return entitiesMatched
+}
+
 export const adjustCaretPosition = ({direction, isShiftPressed}) => {
   const selection = window.getSelection()
   if (!selection) return

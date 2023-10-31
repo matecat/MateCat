@@ -38,6 +38,7 @@ import {
   isCaretInsideEntity,
   checkCaretIsNearZwsp,
   isSelectedEntity,
+  getEntitiesSelected,
 } from './utils/DraftMatecatUtils/manageCaretPositionNearEntity'
 
 const {hasCommandModifier, isOptionKeyCommand, isCtrlKeyCommand} =
@@ -540,9 +541,27 @@ class Editarea extends React.Component {
 
     // Adjust caret position
     if (prevState.editorState !== this.state.editorState) {
-      const currentFocusOffset = this.state.editorState
-        .getSelection()
-        .getFocusOffset()
+      const {editorState} = this.state
+      ////////////////////////////////////////////////////////////////////////////
+      const entitiesSelected = getEntitiesSelected(editorState)
+      if (entitiesSelected.length) {
+        SegmentActions.focusTags(entitiesSelected)
+      } else {
+        SegmentActions.focusTags()
+      }
+      // if (highlightEntities.length) {
+      //   highlightEntities.forEach(({entityKey}) => {
+      //     const {
+      //       data: {id: entityId, placeholder: entityPlaceholder},
+      //     } = editorState.getCurrentContent().getEntity(entityKey)
+      //     setTimeout(() => {
+      //       SegmentActions.highlightTags(entityId, entityPlaceholder, entityKey)
+      //     })
+      //   })
+      // }
+      ////////////////////////////////////////////////////////////////////////////
+
+      const currentFocusOffset = editorState.getSelection().getFocusOffset()
       const prevFocusOffset = prevState.editorState
         .getSelection()
         .getFocusOffset()
