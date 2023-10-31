@@ -1154,8 +1154,9 @@ class NewController extends ajaxController {
      */
     private function __validateEngineRecord(){
 
-        if($this->postInput[ 'mt_engine' ] > 0){
-            EngineValidator::engineBelongsToUser($this->postInput[ 'mt_engine' ], $this->user->uid,  Engines_MMT::class);
+        // any other engine than MyMemory
+        if($this->postInput[ 'mt_engine' ] and $this->postInput[ 'mt_engine' ] > 1){
+            EngineValidator::engineBelongsToUser($this->postInput[ 'mt_engine' ], $this->user->uid);
         }
     }
 
