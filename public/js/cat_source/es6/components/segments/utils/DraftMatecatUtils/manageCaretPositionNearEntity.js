@@ -221,9 +221,11 @@ export const getEntitiesSelected = (editorState) => {
 
   const entities = getEntities(editorState)
   const entitiesMatched = entities.filter((entity) => {
-    const offset = selectedBlocksOffset.find(({key}) => key === entity.blockKey)
+    const offset = Array.isArray(selectedBlocksOffset)
+      ? selectedBlocksOffset.find(({key}) => key === entity.blockKey)
+      : undefined
     return typeof offset === 'object'
-      ? entity.start > offset.start && entity.end < offset.end
+      ? entity.start >= offset.start && entity.end <= offset.end
       : false
   })
 

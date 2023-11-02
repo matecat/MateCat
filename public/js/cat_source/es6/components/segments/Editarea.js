@@ -539,27 +539,12 @@ class Editarea extends React.Component {
       this.setNewTranslation(this.props.segment.sid, this.props.translation)
     }
 
-    // Adjust caret position
+    // Adjust caret position and set focus to entity
     if (prevState.editorState !== this.state.editorState) {
       const {editorState} = this.state
-      ////////////////////////////////////////////////////////////////////////////
+
       const entitiesSelected = getEntitiesSelected(editorState)
-      if (entitiesSelected.length) {
-        SegmentActions.focusTags(entitiesSelected)
-      } else {
-        SegmentActions.focusTags()
-      }
-      // if (highlightEntities.length) {
-      //   highlightEntities.forEach(({entityKey}) => {
-      //     const {
-      //       data: {id: entityId, placeholder: entityPlaceholder},
-      //     } = editorState.getCurrentContent().getEntity(entityKey)
-      //     setTimeout(() => {
-      //       SegmentActions.highlightTags(entityId, entityPlaceholder, entityKey)
-      //     })
-      //   })
-      // }
-      ////////////////////////////////////////////////////////////////////////////
+      SegmentActions.focusTags(entitiesSelected)
 
       const currentFocusOffset = editorState.getSelection().getFocusOffset()
       const prevFocusOffset = prevState.editorState
