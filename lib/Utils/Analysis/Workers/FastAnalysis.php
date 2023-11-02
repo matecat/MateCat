@@ -500,7 +500,6 @@ class FastAnalysis extends AbstractDaemon {
                     $this->segments[ $k ][ 'date_insert' ]   = date_create()->format( 'Y-m-d H:i:s' );
                     $this->segments[ $k ][ 'eq_word_count' ] = ( (float)$eq_word > $segment->raw_word_count ) ? $segment->raw_word_count : (float)$eq_word;;
                     $this->segments[ $k ][ 'standard_word_count' ] = ( (float)$standard_words > $segment->raw_word_count ) ? $segment->raw_word_count : (float)$standard_words;
-                    $this->segments[ $k ][ 'match_type' ]         = $match_type;
 
                 } elseif ( $perform_Tms_Analysis ) {
 

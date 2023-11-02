@@ -439,6 +439,14 @@ class TMAnalysisWorker extends AbstractWorker {
             return $tm_match_fuzzy_band;
         }
 
+        if(
+            $fast_match_type == '75%-84%' ||
+            $fast_match_type == '85%-94%' ||
+            $fast_match_type == '95-99%'
+        ){
+            return 'INTERNAL';
+        }
+
         return $fast_match_type;
     }
 
