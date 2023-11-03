@@ -1835,15 +1835,16 @@ class QA {
 //        preg_match_all('#[\s\t\x{a0}\r\n]+<(?:x[^>]+|[^/>]+)>#u', rtrim($this->target_seg), $target_tags);
         $source_tags = $source_tags[ 0 ];
         $target_tags = $target_tags[ 0 ];
-        if ( count( $source_tags ) != count( $target_tags ) ) {
-            $num = abs( count( $source_tags ) - count( $target_tags ) );
-//            Log::doJsonLog($source_tags);
-//            Log::doJsonLog($target_tags);
-//            Log::hexDump($this->source_seg);
-//            Log::hexDump($this->target_seg);
-            for ( $i = 0; $i < $num; $i++ ) {
-                $this->addError( self::ERR_SPACE_MISMATCH_BEFORE_TAG );
-            }
+
+        $diffS = array_diff($target_tags, $source_tags);
+        $diffT = array_diff($source_tags, $target_tags);
+
+        for ( $i = 0; $i < count($diffS); $i++ ) {
+            $this->addError( self::ERR_SPACE_MISMATCH_AFTER_TAG );
+        }
+
+        for ( $i = 0; $i < count($diffT); $i++ ) {
+            $this->addError( self::ERR_SPACE_MISMATCH_BEFORE_TAG );
         }
 
         //get all special chars ( and spaces ) after a tag x or ph
@@ -1853,12 +1854,16 @@ class QA {
         preg_match_all( '#<(?:(?:x|ph)[^>]+|[^/>]+)>+[\s\t\x{a0}\r\n\,\.\;\!\?]#u', $this->target_seg, $target_tags );
         $source_tags = $source_tags[ 0 ];
         $target_tags = $target_tags[ 0 ];
-        if ( ( count( $source_tags ) != count( $target_tags ) ) ) {
-            $num = abs( count( $source_tags ) - count( $target_tags ) );
 
-            for ( $i = 0; $i < $num; $i++ ) {
-                $this->addError( self::ERR_SPACE_MISMATCH_AFTER_TAG );
-            }
+        $diffS = array_diff($target_tags, $source_tags);
+        $diffT = array_diff($source_tags, $target_tags);
+
+        for ( $i = 0; $i < count($diffS); $i++ ) {
+            $this->addError( self::ERR_SPACE_MISMATCH_AFTER_TAG );
+        }
+
+        for ( $i = 0; $i < count($diffT); $i++ ) {
+            $this->addError( self::ERR_SPACE_MISMATCH_BEFORE_TAG );
         }
 
         //get All special chars between G TAGS before first char occurrence
