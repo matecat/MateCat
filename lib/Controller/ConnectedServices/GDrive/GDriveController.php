@@ -237,11 +237,11 @@ class GDriveController extends KleinController {
     private function formatErrorMessage($message){
 
         if($message == "This file is too large to be exported."){
-            return "Upload failed: you are trying to upload a file bigger than 10 mb. Google Drive does not allow exports of files bigger than 10 mb. Please download the file and upload it from your computer.";
+            return "you are trying to upload a file bigger than 10 mb. Google Drive does not allow exports of files bigger than 10 mb. Please download the file and upload it from your computer.";
         }
 
         if($message == "Export only supports Docs Editors files."){
-            return "Upload failed: Google Drive does not allow exports of files in this format. Please open the file in Google Drive and save it as a Google Drive file.";
+            return "Google Drive does not allow exports of files in this format. Please open the file in Google Drive and save it as a Google Drive file.";
         }
 
         return $message;
