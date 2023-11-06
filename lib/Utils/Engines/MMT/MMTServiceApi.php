@@ -170,6 +170,16 @@ class MMTServiceApi {
     }
 
     /**
+     * @param $jobId
+     * @return mixed
+     * @throws MMTServiceApiException
+     */
+    public function importJobStatus($jobId)
+    {
+        return $this->send( 'GET', "$this->baseUrl/import-jobs/$jobId" );
+    }
+
+    /**
      * @param $id
      *
      * @return mixed

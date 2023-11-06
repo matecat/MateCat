@@ -64,43 +64,7 @@ class ModernMTController extends BaseChunkController
     public function importGlossary()
     {
         try {
-            // validate params
-            if(!isset($_FILES['glossary'])){
-                $this->response->status()->setCode( 500 );
-                $this->response->json([
-                    'error' => 'Missing `glossary` files'
-                ]);
-                exit();
-            }
-
-            if(!isset($_POST['glossaryId'])){
-                $this->response->status()->setCode( 500 );
-                $this->response->json([
-                    'error' => 'Missing `glossaryId` param'
-                ]);
-                exit();
-            }
-
-            if(!isset($_POST['type']) ){
-                $this->response->status()->setCode( 500 );
-                $this->response->json([
-                    'error' => 'Missing `type` param.'
-                ]);
-                exit();
-            }
-
-            $allowedTypes = [
-                'unidirectional',
-                'equivalent',
-            ];
-
-            if(!in_array($_POST['type'], $allowedTypes)){
-                $this->response->status()->setCode( 500 );
-                $this->response->json([
-                    'error' => 'Wrong `type` param. Allowed values: [unidirectional, equivalent]'
-                ]);
-                exit();
-            }
+            $this->validateImportGlossaryParams();
 
             $glossaryId = filter_var( $_POST['glossaryId' ], FILTER_SANITIZE_NUMBER_INT );
             $type = filter_var( $_POST['type' ], FILTER_SANITIZE_STRING );
@@ -126,6 +90,34 @@ class ModernMTController extends BaseChunkController
                 'error' => $exception->getMessage()
             ]);
             exit();
+        }
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function validateImportGlossaryParams()
+    {
+        // validate params
+        if(!isset($_FILES['glossary'])){
+            throw new Exception('Missing `glossary` files');
+        }
+
+        if(!isset($_POST['glossaryId'])){
+            throw new Exception('Missing `glossaryId` param');
+        }
+
+        if(!isset($_POST['type']) ){
+            throw new Exception('Missing `type` param');
+        }
+
+        $allowedTypes = [
+            'unidirectional',
+            'equivalent',
+        ];
+
+        if(!in_array($_POST['type'], $allowedTypes)){
+            throw new Exception('Wrong `type` param. Allowed values: [unidirectional, equivalent]');
         }
     }
 
