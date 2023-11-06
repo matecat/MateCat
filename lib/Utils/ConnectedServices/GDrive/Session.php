@@ -130,17 +130,17 @@ class Session {
                         // copy orig and cache\INIT::$UPLOAD_REPOSITORY folder
                         $s3Client = S3FilesStorage::getStaticS3Client();
                         $copyOrig = $s3Client->copyFolder( [
-                                'source_bucket' => \INIT::$AWS_STORAGE_BASE_BUCKET,
-                                'source_folder' => $originalCacheFileDir . '/orig',
-                                'target_folder' => $newCacheFileDir . '/orig',
-                                'delete_source' => false,
+                            'source_bucket' => \INIT::$AWS_STORAGE_BASE_BUCKET,
+                            'source_folder' => $originalCacheFileDir . '/orig',
+                            'target_folder' => $newCacheFileDir . '/orig',
+                            'delete_source' => false,
                         ] );
 
                         $copyWork = $s3Client->copyFolder( [
-                                'source_bucket' => \INIT::$AWS_STORAGE_BASE_BUCKET,
-                                'source_folder' => $originalCacheFileDir . '/work',
-                                'target_folder' => $newCacheFileDir . '/work',
-                                'delete_source' => false,
+                            'source_bucket' => \INIT::$AWS_STORAGE_BASE_BUCKET,
+                            'source_folder' => $originalCacheFileDir . '/work',
+                            'target_folder' => $newCacheFileDir . '/work',
+                            'delete_source' => false,
                         ] );
 
                         if ( $copyOrig and $copyWork ) {
@@ -186,9 +186,9 @@ class Session {
 
         /** @var DirectoryIterator $item */
         foreach (
-                $iterator = new \RecursiveIteratorIterator(
-                        new \RecursiveDirectoryIterator( $uploadDir, \RecursiveDirectoryIterator::SKIP_DOTS ),
-                        \RecursiveIteratorIterator::SELF_FIRST ) as $item
+            $iterator = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator( $uploadDir, \RecursiveDirectoryIterator::SKIP_DOTS ),
+                \RecursiveIteratorIterator::SELF_FIRST ) as $item
         ) {
             $originalSourceLangMarker = '|' . $originalSourceLang;
             $newSourceLangMarker      = '|' . $newSourceLang;
@@ -215,17 +215,17 @@ class Session {
                 $path     = $this->getGDriveFilePathForS3( $file );
                 $s3Client = S3FilesStorage::getStaticS3Client();
                 $s3       = $s3Client->getItem( [
-                                'bucket' => S3FilesStorage::getFilesStorageBucket(),
-                                'key'    => $path
-                        ]
+                        'bucket' => S3FilesStorage::getFilesStorageBucket(),
+                        'key'    => $path
+                    ]
                 );
 
                 $mime                  = include __DIR__ . '/../../../Utils/Mime2Extension.php';
                 $response[ 'files' ][] = [
-                        'fileId'        => $fileId,
-                        'fileName'      => $fileName,
-                        'fileSize'      => $s3[ 'ContentLength' ],
-                        'fileExtension' => $mime[ $s3[ 'ContentType' ] ][ 0 ]
+                    'fileId'        => $fileId,
+                    'fileName'      => $fileName,
+                    'fileSize'      => $s3[ 'ContentLength' ],
+                    'fileExtension' => $mime[ $s3[ 'ContentType' ] ][ 0 ]
                 ];
 
             } else {
@@ -236,10 +236,10 @@ class Session {
                     $fileExtension = pathinfo( $fileName, PATHINFO_EXTENSION );
 
                     $response[ 'files' ][] = [
-                            'fileId'        => $fileId,
-                            'fileName'      => $fileName,
-                            'fileSize'      => $fileSize,
-                            'fileExtension' => $fileExtension
+                        'fileId'        => $fileId,
+                        'fileName'      => $fileName,
+                        'fileSize'      => $fileSize,
+                        'fileExtension' => $fileExtension
                     ];
                 } else {
                     unset( $this->session[ self::FILE_LIST ][ $fileId ] );
@@ -311,15 +311,15 @@ class Session {
     public function addFiles( $fileId, $fileName, $fileHash ) {
 
         if ( !isset( $this->session[ self::FILE_LIST ] )
-                || !is_array( $this->session[ self::FILE_LIST ] ) ) {
+            || !is_array( $this->session[ self::FILE_LIST ] ) ) {
 
             $this->session[ self::FILE_LIST ] = [];
         }
 
         $this->session[ self::FILE_LIST ][ $fileId ] = [
-                self::FILE_NAME             => $fileName,
-                self::FILE_HASH             => $fileHash,
-                self::CONNNECTED_SERVICE_ID => $this->serviceStruct->id,
+            self::FILE_NAME             => $fileName,
+            self::FILE_HASH             => $fileHash,
+            self::CONNNECTED_SERVICE_ID => $this->serviceStruct->id,
         ];
     }
 
@@ -342,7 +342,7 @@ class Session {
      */
     public static function sessionHasFiles( $session ) {
         if ( isset( $session[ self::FILE_LIST ] )
-                && !empty( $session[ self::FILE_LIST ] ) ) {
+            && !empty( $session[ self::FILE_LIST ] ) ) {
             return true;
         }
 
@@ -424,9 +424,9 @@ class Session {
             if ( S3FilesStorage::isOnS3() ) {
                 $s3Client = S3FilesStorage::getStaticS3Client();
                 $s3Client->deleteFolder( [
-                                'bucket' => S3FilesStorage::getFilesStorageBucket(),
-                                'key'    => $pathCache
-                        ]
+                        'bucket' => S3FilesStorage::getFilesStorageBucket(),
+                        'key'    => $pathCache
+                    ]
                 );
             } else {
                 $this->deleteDirectory( $pathCache );
@@ -579,12 +579,17 @@ class Session {
      * @throws Exception
      */
     public function createRemoteCopiesWhereToSaveTranslation( $id_file, $id_job ) {
-        $this->getService();
+
+        $service = $this->getService();
+
+        if(!$service){
+            throw new Exception( 'Cannot instantiate service' );
+        }
 
         $listRemoteFiles = \RemoteFiles_RemoteFileDao::getByFileId( $id_file, 1 );
         $remoteFile      = $listRemoteFiles[ 0 ];
 
-        $gdriveFile = $this->service->files->get( $remoteFile->remote_id );
+        $gdriveFile = $service->files->get( $remoteFile->remote_id );
         $fileTitle = $gdriveFile->getName();
 
         $job                 = \Jobs_JobDao::getById( $id_job )[ 0 ];
@@ -615,7 +620,13 @@ class Session {
         //$urlPermission->setEmailAddress( $this->__getUser()->getEmail() );
         //$urlPermission->setWithLink( true ); setWithLink() was removed
 
-        return $this->getService()->permissions->create( $fileId, $urlPermission );
+        $service = $this->getService();
+
+        if(!$service){
+            throw new Exception( 'Cannot instantiate service' );
+        }
+
+        return $service->permissions->create( $fileId, $urlPermission );
     }
 
     /**
@@ -632,6 +643,10 @@ class Session {
 
         $service = $this->getService();
 
+        if(!$service){
+            throw new Exception( 'Cannot instantiate service' );
+        }
+
         // get meta and mimetype
         $meta = $service->files->get( $fileId );
         $mime = RemoteFileService::officeMimeFromGoogle( $meta->mimeType );
@@ -647,7 +662,7 @@ class Session {
 
         // export the file
         $optParams = [
-                'alt' => 'media'
+            'alt' => 'media'
         ];
         /** @var Response $file */
         $file = $service->files->export( $fileId, $mime, $optParams );
@@ -697,12 +712,12 @@ class Session {
         $uploadDir = $this->guid;
 
         $intDir = INIT::$UPLOAD_REPOSITORY .
-                DIRECTORY_SEPARATOR . $uploadDir;
+            DIRECTORY_SEPARATOR . $uploadDir;
 
         $errDir = INIT::$STORAGE_DIR .
-                DIRECTORY_SEPARATOR .
-                'conversion_errors' .
-                DIRECTORY_SEPARATOR . $uploadDir;
+            DIRECTORY_SEPARATOR .
+            'conversion_errors' .
+            DIRECTORY_SEPARATOR . $uploadDir;
 
         $conversionHandler = new ConversionHandler();
         $conversionHandler->setFileName( $file_name );

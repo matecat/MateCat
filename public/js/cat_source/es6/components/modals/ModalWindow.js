@@ -125,6 +125,9 @@ export class ModalWindow extends React.Component {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  const mountPoint = createRoot(document.getElementById('modal'))
-  mountPoint.render(React.createElement(ModalWindow, {}))
+  const dom = document.getElementById('modal')
+  if (dom) {
+    const mountPoint = createRoot(document.getElementById('modal'))
+    mountPoint.render(React.createElement(ModalWindow, {}))
+  }
 })

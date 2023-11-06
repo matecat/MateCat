@@ -1,6 +1,7 @@
 import React, {useState} from 'react'
 import Switch from '../../../common/Switch'
 import SegmentUtils from '../../../../utils/segmentUtils'
+import CommonUtils from '../../../../utils/commonUtils'
 
 export const AiAssistant = () => {
   const [active, setActive] = useState(SegmentUtils.isAiAssistantAuto())

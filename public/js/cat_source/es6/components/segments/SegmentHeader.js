@@ -148,7 +148,7 @@ class SegmentHeader extends React.PureComponent {
       <div className="header toggle" id={'segment-' + sid + '-header'}>
         {autopropagated ? autopropagatedHtml : percentageHtml}
         {/* Characters counter */}
-        {!autopropagated && !saving && shouldDisplayCharactersCounter && (
+        {!saving && shouldDisplayCharactersCounter && (
           <div
             className={`segment-counter ${
               charactersCounter.counter > charactersCounter.limit

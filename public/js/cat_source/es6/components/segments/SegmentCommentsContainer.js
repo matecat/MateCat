@@ -3,7 +3,7 @@
 
  */
 import React from 'react'
-import _ from 'lodash'
+import {isUndefined, find} from 'lodash'
 
 import CommentsStore from '../../stores/CommentsStore'
 import CommentsActions from '../../actions/CommentsActions'
@@ -71,7 +71,7 @@ class SegmentCommentsContainer extends React.Component {
   }
 
   updateComments(sid) {
-    if (_.isUndefined(sid) || sid === this.context.segment.original_sid) {
+    if (isUndefined(sid) || sid === this.context.segment.original_sid) {
       const comments = CommentsStore.getCommentsBySegment(
         this.context.segment.original_sid,
       )
@@ -101,7 +101,7 @@ class SegmentCommentsContainer extends React.Component {
     }
 
     var findUser = (id) => {
-      return _.find(this.state.teamUsers, function (item) {
+      return find(this.state.teamUsers, function (item) {
         return item.uid === id
       })
     }
@@ -202,7 +202,7 @@ class SegmentCommentsContainer extends React.Component {
       })
       // Thread is not resolved
       if (
-        !_.isUndefined(comments.length - 1) &&
+        !isUndefined(comments.length - 1) &&
         !comments[comments.length - 1].thread_id
       ) {
         resolveButton = (

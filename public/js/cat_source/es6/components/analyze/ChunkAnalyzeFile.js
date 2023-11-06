@@ -1,5 +1,7 @@
 import React from 'react'
-import _ from 'lodash'
+import {size} from 'lodash'
+import {pick} from 'lodash/object'
+import {each} from 'lodash/collection'
 
 class ChunkAnalyzeFile extends React.Component {
   constructor(props) {
@@ -52,11 +54,11 @@ class ChunkAnalyzeFile extends React.Component {
 
   componentDidUpdate() {
     let self = this
-    let changedData = _.pick(this.dataChange, function (item) {
+    let changedData = pick(this.dataChange, function (item) {
       return item === true
     })
-    if (_.size(changedData) > 0) {
-      _.each(changedData, function (item, i) {
+    if (size(changedData) > 0) {
+      each(changedData, function (item, i) {
         self.containers[i].classList.add('updated-count')
         setTimeout(function () {
           self.containers[i].classList.remove('updated-count')

@@ -1,3 +1,5 @@
+import React from 'react'
+import classnames from 'classnames'
 class ReviewExtendedCategorySelector extends React.Component {
   constructor(props) {
     super(props)
