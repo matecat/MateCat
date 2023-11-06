@@ -562,6 +562,10 @@ const CommonUtils = {
     const event = new CustomEvent('track-event', {detail: {name, message}})
     document.dispatchEvent(event)
   },
+  dispatchAnalyticsEvents: (data) => {
+    const event = new CustomEvent('dataLayer-event', {detail: data})
+    document.dispatchEvent(event)
+  },
 }
 
 const ParsedHash = function (hash) {
