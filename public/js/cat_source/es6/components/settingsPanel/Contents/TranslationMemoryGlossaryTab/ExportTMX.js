@@ -29,16 +29,8 @@ export const ExportTMX = ({row, onClose}) => {
         >
           <div>
             <span>
-              We will send a link to download the exported TM to this email:
+              We will send a link to download the exported TM to your email.
             </span>
-            <input
-              type="email"
-              className="translation-memory-glossary-tab-input-text"
-              required
-              value={email}
-              onChange={onChange}
-              disabled={isFormDisabled}
-            />
           </div>
           <div className="translation-memory-glossary-tab-buttons-group align-center">
             <button
