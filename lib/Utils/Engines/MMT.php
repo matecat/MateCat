@@ -448,4 +448,17 @@ class Engines_MMT extends Engines_AbstractEngine {
 
         return $client->getMemory($id);
     }
+
+    /**
+     * @param $id
+     * @param $data
+     * @return mixed
+     * @throws \Engines\MMT\MMTServiceApiException
+     */
+    public function importGlossary($id, $data)
+    {
+        $client = $this->_getClient();
+
+        return $client->importGlossary($id, $data);
+    }
 }

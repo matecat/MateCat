@@ -73,6 +73,7 @@ $klein->with( '/api/v3/tm-keys', function () {
 } );
 
 // MMT
-$klein->with( '/api/v3/mmt/keys', function () {
-    route( '/[:engineId]', 'GET', '\API\V3\ModernMTProxyController', 'get' );
+$klein->with( '/api/v3/mmt/[:engineId]', function () {
+    route( '/keys', 'GET', '\API\V3\ModernMTController', 'get' );
+    route( '/import-glossary', 'POST', '\API\V3\ModernMTController', 'importGlossary' );
 } );

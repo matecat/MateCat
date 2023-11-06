@@ -160,6 +160,17 @@ class MMTServiceApi {
 
     /**
      * @param $id
+     * @param $data
+     * @return mixed
+     * @throws MMTServiceApiException
+     */
+    public function importGlossary($id, $data)
+    {
+        return $this->send( 'POST', "$this->baseUrl/memories/$id/glossary", $data, true );
+    }
+
+    /**
+     * @param $id
      *
      * @return mixed
      * @throws MMTServiceApiException
