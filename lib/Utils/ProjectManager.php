@@ -2600,25 +2600,6 @@ class ProjectManager {
                 $position          = ( isset( $translation_row[ 6 ] ) ) ? $translation_row[ 6 ] : null;
                 $segment           = ( new Segments_SegmentDao() )->getById( $translation_row [ 0 ] );
                 $ice_payable_rates = ( isset( $this->projectStructure[ 'array_jobs' ][ 'payable_rates' ][ $jid ][ 'ICE' ] ) ) ? $this->projectStructure[ 'array_jobs' ][ 'payable_rates' ][ $jid ][ 'ICE' ] : null;
-                $originalState     = @$translation_row[ 4 ][ 'seg-target' ][ $position ][ 'attr' ][ 'state' ];
-
-                // create a R2 for the job is state is 'final'
-//                if($originalState !== null and $originalState === XliffTranslationStatus::FINAL_STATE){
-//                    $createSecondPassReview = true;
-//
-//                    $translationEventStruct = new TranslationEventStruct();
-//                    $translationEventStruct->uid = isset($projectStructure['uid']) ? $projectStructure['uid'] : 0;
-//                    $translationEventStruct->id_job = $job->id;
-//                    $translationEventStruct->id_segment = $segment->id;
-//                    $translationEventStruct->version_number = 0;
-//                    $translationEventStruct->status = Constants_TranslationStatus::STATUS_APPROVED;
-//                    $translationEventStruct->source_page = 3;
-//                    $translationEventStruct->final_revision = 1;
-//                    $translationEventStruct->create_date = new \DateTime();
-//                    $translationEventStruct->time_to_edit = 0;
-//
-//                    $r2SegmentEvents[] = $translationEventStruct;
-//                }
 
                 $iceLockArray = $this->features->filter( 'setSegmentTranslationFromXliffValues',
                         [
@@ -2701,22 +2682,6 @@ class ProjectManager {
             ProjectManagerModel::insertPreTranslations( $query_translations_values );
         }
 
-        // We do not create Chunk reviews since this is a task for postProjectCreate
-        // First, create a R2 for the job is state is 'final',
-        // then, save an event of each segment with state 'final'
-//        if($createSecondPassReview){
-//
-//            $projectStructure['create_2_pass_review'] = true;
-//
-//            $translationEventDao = new TranslationEventDao();
-//            // bulk update, max 100 inserts
-//            $r2SegmentEventsChunks = array_chunk($r2SegmentEvents, 100);
-//            foreach ($r2SegmentEventsChunks as $r2SegmentEventsChunk){
-//                $translationEventDao->bulkInsert($r2SegmentEventsChunk);
-//            }
-//
-//        }
-
         //clean translations and queries
         unset( $query_translations_values );
     }
@@ -2752,6 +2717,11 @@ class ProjectManager {
             if ( XliffTranslationStatus::isRevision( $state ) ) {
                 return Constants_TranslationStatus::STATUS_APPROVED;
             }
+
+            if( XliffTranslationStatus::isFinalState( $state ) ){
+                return Constants_TranslationStatus::STATUS_APPROVED2;
+            }
+
         }
 
         // retro-compatibility

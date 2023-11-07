@@ -67,7 +67,7 @@ class XliffTranslationStatus {
      * @return bool
      */
     public static function isRevision( $status ) {
-        return self::isR1($status) or self::isR2($status);
+        return self::isR1($status);
     }
 
     /**
@@ -85,7 +85,7 @@ class XliffTranslationStatus {
      * @param $status
      * @return bool
      */
-    public static function isR2( $status ) {
+    public static function isFinalState( $status ) {
         return $status === self::FINAL_STATE;
     }
 }
