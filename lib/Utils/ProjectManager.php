@@ -2577,9 +2577,7 @@ class ProjectManager {
      */
     protected function _insertPreTranslations( Jobs_JobStruct $job, ArrayObject $projectStructure ) {
 
-        $jid                    = $job->id;
-        $createSecondPassReview = false;
-        $r2SegmentEvents        = [];
+        $jid = $job->id;
         $this->_cleanSegmentsMetadata();
 
         $status = $this->features->filter( 'filter_status_for_pretranslated_segments',
