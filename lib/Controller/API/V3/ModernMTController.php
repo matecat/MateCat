@@ -66,7 +66,7 @@ class ModernMTController extends BaseChunkController
         try {
             $this->validateImportGlossaryParams();
 
-            $glossaryId = filter_var( $_POST['glossaryId' ], FILTER_SANITIZE_NUMBER_INT );
+            $memoryId = filter_var( $_POST['memoryId' ], FILTER_SANITIZE_NUMBER_INT );
             $type = filter_var( $_POST['type' ], FILTER_SANITIZE_STRING );
 
             $uploadManager = new Upload();
@@ -78,7 +78,7 @@ class ModernMTController extends BaseChunkController
             $MMTClient = $this->getModernMTClient($engineId);
 
             $this->response->status()->setCode( 200 );
-            $this->response->json($MMTClient->importGlossary($glossaryId, [
+            $this->response->json($MMTClient->importGlossary($memoryId, [
                 'csv' => new CURLFile($glossary, 'text/csv'),
                 'type' => $type
             ]));
@@ -101,7 +101,7 @@ class ModernMTController extends BaseChunkController
         try {
             $this->validateModifyGlossaryParams();
 
-            $glossaryId = filter_var( $this->params['glossaryId' ], FILTER_SANITIZE_NUMBER_INT );
+            $memoryId = filter_var( $this->params['memoryId' ], FILTER_SANITIZE_NUMBER_INT );
             $tuid = (isset($this->params['tuid'])) ? filter_var( $this->params['tuid' ], FILTER_SANITIZE_STRING ) : null;
             $terms = $this->params['terms'];
             $type = filter_var( $this->params['type' ], FILTER_SANITIZE_STRING );
@@ -119,7 +119,7 @@ class ModernMTController extends BaseChunkController
             }
 
             $this->response->status()->setCode( 200 );
-            $this->response->json($MMTClient->updateGlossary($glossaryId, $payload));
+            $this->response->json($MMTClient->updateGlossary($memoryId, $payload));
             exit();
 
         } catch (Exception $exception){
@@ -163,8 +163,8 @@ class ModernMTController extends BaseChunkController
             throw new Exception('Missing `glossary` files');
         }
 
-        if(!isset($_POST['glossaryId'])){
-            throw new Exception('Missing `glossaryId` param');
+        if(!isset($_POST['memoryId'])){
+            throw new Exception('Missing `memoryId` param');
         }
 
         if(!isset($_POST['type']) ){
@@ -186,8 +186,8 @@ class ModernMTController extends BaseChunkController
      */
     private function validateModifyGlossaryParams()
     {
-        if(!isset($this->params['glossaryId'])){
-            throw new Exception('Missing `glossaryId` param');
+        if(!isset($this->params['memoryId'])){
+            throw new Exception('Missing `memoryId` param');
         }
 
         if(!isset($this->params['type']) ){
@@ -282,7 +282,7 @@ class ModernMTController extends BaseChunkController
     private function filterResult($params, $memory)
     {
         if(isset($params['q'])){
-            $q = filter_var($params['q'], [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW  ] );
+            $q = filter_var($params['q'], FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW );
             if(false === strpos($memory['name'], $q)){
                 return false;
             }
