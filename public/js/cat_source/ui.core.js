@@ -626,12 +626,6 @@ window.UI = {
         if (config.alternativesEnabled) {
           UI.getTranslationMismatches(id_segment)
         }
-        const event = {
-          event: 'translate_click',
-          userStatus: APP.USER.isUserLogged ? 'loggedUser' : 'notLoggedUser',
-          userId: APP.USER.isUserLogged ? APP.USER.STORE.user.uid : null,
-        }
-        CommonUtils.dispatchAnalyticsEvents(event)
       })
       .catch(({errors}) => {
         const idSegment = options.id_segment

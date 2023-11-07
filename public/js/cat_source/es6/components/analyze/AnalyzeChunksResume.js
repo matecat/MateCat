@@ -7,6 +7,7 @@ import OutsourceContainer from '../outsource/OutsourceContainer'
 import ModalsActions from '../../actions/ModalsActions'
 import TranslatedIcon from '../../../../../img/icons/TranslatedIcon'
 import Tooltip from '../common/Tooltip'
+import CommonUtils from '../../utils/commonUtils'
 
 class AnalyzeChunksResume extends React.Component {
   constructor(props) {
@@ -118,6 +119,18 @@ class AnalyzeChunksResume extends React.Component {
   goToTranslate = (chunk, index, e) => {
     e.preventDefault()
     e.stopPropagation()
+    const key = 'first_translate_click' + config.id_project
+    if (!sessionStorage.getItem(key)) {
+      //Track Translate click
+      const event = {
+        event: 'open_job',
+        userStatus: APP.USER.isUserLogged ? 'loggedUser' : 'notLoggedUser',
+        userId: APP.USER.isUserLogged ? APP.USER.STORE.user.uid : null,
+        idProject: parseInt(config.id_project),
+      }
+      CommonUtils.dispatchAnalyticsEvents(event)
+      sessionStorage.setItem(key, 'true')
+    }
     window.open(this.getTranslateUrl(chunk, index), '_blank')
   }
 
