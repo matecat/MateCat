@@ -50,7 +50,8 @@ class ModernMTController extends BaseChunkController
             exit();
 
         } catch (Exception $exception){
-            $this->response->status()->setCode( 500 );
+            $code = ($exception->getCode() > 0) ? $exception->getCode() : 500;
+            $this->response->status()->setCode( $code );
             $this->response->json([
                 'error' => $exception->getMessage()
             ]);
@@ -85,7 +86,8 @@ class ModernMTController extends BaseChunkController
             exit();
 
         } catch (Exception $exception){
-            $this->response->status()->setCode( 500 );
+            $code = ($exception->getCode() > 0) ? $exception->getCode() : 500;
+            $this->response->status()->setCode( $code );
             $this->response->json([
                 'error' => $exception->getMessage()
             ]);
@@ -123,7 +125,8 @@ class ModernMTController extends BaseChunkController
             exit();
 
         } catch (Exception $exception){
-            $this->response->status()->setCode( 500 );
+            $code = ($exception->getCode() > 0) ? $exception->getCode() : 500;
+            $this->response->status()->setCode( $code );
             $this->response->json([
                 'error' => $exception->getMessage()
             ]);
@@ -138,7 +141,7 @@ class ModernMTController extends BaseChunkController
     {
         try {
             if(!isset($_POST['name'])){
-                throw new Exception('Missing `name` param');
+                throw new Exception('Missing `name` param', 400);
             }
 
             $name =  filter_var( $_POST['name'], FILTER_SANITIZE_STRING, FILTER_FLAG_ENCODE_LOW );
@@ -153,7 +156,8 @@ class ModernMTController extends BaseChunkController
             exit();
 
         } catch (Exception $exception){
-            $this->response->status()->setCode( 500 );
+            $code = ($exception->getCode() > 0) ? $exception->getCode() : 500;
+            $this->response->status()->setCode( $code );
             $this->response->json([
                 'error' => $exception->getMessage()
             ]);
@@ -168,7 +172,7 @@ class ModernMTController extends BaseChunkController
     {
         try {
             if(!isset($_POST['name'])){
-                throw new Exception('Missing `name` param');
+                throw new Exception('Missing `name` param', 400);
             }
 
             $name =  filter_var( $_POST['name'], FILTER_SANITIZE_STRING, FILTER_FLAG_ENCODE_LOW );
@@ -182,7 +186,8 @@ class ModernMTController extends BaseChunkController
 
 
         } catch (Exception $exception){
-            $this->response->status()->setCode( 500 );
+            $code = ($exception->getCode() > 0) ? $exception->getCode() : 500;
+            $this->response->status()->setCode( $code );
             $this->response->json([
                 'error' => $exception->getMessage()
             ]);
@@ -205,7 +210,8 @@ class ModernMTController extends BaseChunkController
             exit();
 
         } catch (Exception $exception){
-            $this->response->status()->setCode( 500 );
+            $code = ($exception->getCode() > 0) ? $exception->getCode() : 500;
+            $this->response->status()->setCode( $code );
             $this->response->json([
                 'error' => $exception->getMessage()
             ]);
@@ -219,15 +225,15 @@ class ModernMTController extends BaseChunkController
     private function validateImportGlossaryParams()
     {
         if(!isset($_FILES['glossary'])){
-            throw new Exception('Missing `glossary` files');
+            throw new Exception('Missing `glossary` files', 400);
         }
 
         if(!isset($_POST['memoryId'])){
-            throw new Exception('Missing `memoryId` param');
+            throw new Exception('Missing `memoryId` param', 400);
         }
 
         if(!isset($_POST['type']) ){
-            throw new Exception('Missing `type` param');
+            throw new Exception('Missing `type` param', 400);
         }
 
         $allowedTypes = [
@@ -236,7 +242,7 @@ class ModernMTController extends BaseChunkController
         ];
 
         if(!in_array($_POST['type'], $allowedTypes)){
-            throw new Exception('Wrong `type` param. Allowed values: [unidirectional, equivalent]');
+            throw new Exception('Wrong `type` param. Allowed values: [unidirectional, equivalent]', 400);
         }
     }
 
@@ -246,11 +252,11 @@ class ModernMTController extends BaseChunkController
     private function validateModifyGlossaryParams()
     {
         if(!isset($this->params['memoryId'])){
-            throw new Exception('Missing `memoryId` param');
+            throw new Exception('Missing `memoryId` param', 400);
         }
 
         if(!isset($this->params['type']) ){
-            throw new Exception('Missing `type` param');
+            throw new Exception('Missing `type` param', 400);
         }
 
         $allowedTypes = [
@@ -259,27 +265,27 @@ class ModernMTController extends BaseChunkController
         ];
 
         if(!in_array($this->params['type'], $allowedTypes)){
-            throw new Exception('Wrong `type` param. Allowed values: [unidirectional, equivalent]');
+            throw new Exception('Wrong `type` param. Allowed values: [unidirectional, equivalent]', 400);
         }
 
         if($this->params['type'] === 'equivalent' and !isset($this->params['tuid'])){
-            throw new Exception('Missing `tuid` param');
+            throw new Exception('Missing `tuid` param', 400);
         }
 
         if(!isset($this->params['terms'])){
-            throw new Exception('Missing `terms` param');
+            throw new Exception('Missing `terms` param', 400);
         }
 
         // validate terms
         $terms = $this->params['terms'];
 
         if(!is_array($terms)){
-            throw new Exception('`terms` is not an array');
+            throw new Exception('`terms` is not an array', 400);
         }
 
         foreach ($terms as $term){
             if(!isset($term['term']) or !isset($term['language'])){
-                throw new Exception('`terms` array is malformed.');
+                throw new Exception('`terms` array is malformed.', 400);
             }
         }
     }
@@ -309,15 +315,15 @@ class ModernMTController extends BaseChunkController
         $csv = CSVParser::parse($tmpFileName);
 
         if(empty($csv)){
-            throw new Exception("Glossary is empty");
+            throw new Exception("Glossary is empty", 400);
         }
 
         if(count($csv[0]) == 2 and $type !== 'unidirectional'){
-            throw new Exception("Wrong type: the file type MUST be `unidirectional`");
+            throw new Exception("Wrong type: the file type MUST be `unidirectional`", 400);
         }
 
         if(count($csv[0]) > 2 and $type !== 'equivalent'){
-            throw new Exception("Wrong type: the file type MUST be `equivalent`");
+            throw new Exception("Wrong type: the file type MUST be `equivalent`", 400);
         }
 
         return $glossary->file_path;
