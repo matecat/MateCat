@@ -451,6 +451,19 @@ class Engines_MMT extends Engines_AbstractEngine {
 
     /**
      * @param $id
+     * @param $name
+     * @return mixed
+     * @throws \Engines\MMT\MMTServiceApiException
+     */
+    public function updateMemory($id, $name)
+    {
+        $client = $this->_getClient();
+
+        return $client->updateMemory($id, $name);
+    }
+
+    /**
+     * @param $id
      * @param $data
      * @return mixed
      * @throws \Engines\MMT\MMTServiceApiException
