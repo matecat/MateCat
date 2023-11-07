@@ -19,6 +19,7 @@ import {SegmentContext} from './SegmentContext'
 import Assistant from '../icons/Assistant'
 import Education from '../icons/Education'
 import {TERM_FORM_FIELDS} from './SegmentFooterTabGlossary/SegmentFooterTabGlossary'
+import {getEntitiesSelected} from './utils/DraftMatecatUtils/manageCaretPositionNearEntity'
 
 class SegmentSource extends React.Component {
   static contextType = SegmentContext
@@ -406,7 +407,7 @@ class SegmentSource extends React.Component {
     this.$source.on('keydown', this.openConcordance)
   }
 
-  componentDidUpdate(prevProps) {
+  componentDidUpdate(prevProps, prevState) {
     this.checkDecorators(prevProps)
     // Check if splitMode
     if (!prevProps.segment.openSplit && this.props.segment.openSplit) {
@@ -443,6 +444,13 @@ class SegmentSource extends React.Component {
         // update current editorState
         this.setState({editorState: editorStateSplitGroup})
       }
+    }
+
+    if (prevState.editorState !== this.state.editorState) {
+      const {editorState} = this.state
+
+      const entitiesSelected = getEntitiesSelected(editorState)
+      SegmentActions.focusTags(entitiesSelected)
     }
   }
 
@@ -767,6 +775,7 @@ class SegmentSource extends React.Component {
   onBlurEvent = () => {
     setTimeout(() => {
       SegmentActions.highlightTags()
+      SegmentActions.focusTags([])
     })
 
     this.setState({

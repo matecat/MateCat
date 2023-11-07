@@ -245,6 +245,8 @@ class Editarea extends React.Component {
         newContentState,
         'insert-fragment',
       )
+      newEditorState = EditorState.moveSelectionToEnd(newEditorState)
+
       const cleanTagsTranslation = TagUtils.decodePlaceholdersToPlainText(
         DraftMatecatUtils.cleanSegmentString(translation),
       )
@@ -544,7 +546,7 @@ class Editarea extends React.Component {
       const {editorState} = this.state
 
       const entitiesSelected = getEntitiesSelected(editorState)
-      SegmentActions.focusTags(entitiesSelected)
+      SegmentActions.focusTags(editorSync.editorFocused ? entitiesSelected : [])
 
       const currentFocusOffset = editorState.getSelection().getFocusOffset()
       const prevFocusOffset = prevState.editorState
@@ -1032,6 +1034,7 @@ class Editarea extends React.Component {
 
   onChange = (editorState) => {
     //console.log('onChange')
+    console.log(editorState.getSelection())
     const {
       displayPopover,
       editorState: prevEditorState,

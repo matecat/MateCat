@@ -1,4 +1,4 @@
-import React, {Component} from 'react'
+import React, {Component, createRef} from 'react'
 import {debounce, find} from 'lodash'
 
 import TooltipInfo from '../TooltipInfo/TooltipInfo.component'
@@ -34,6 +34,9 @@ class TagEntity extends Component {
       this.updateTagWarningStyle,
       500,
     )
+
+    this.focusedState = createRef({})
+    this.focusedState.current = {}
   }
 
   tooltipToggle = (show = false) => {
@@ -259,6 +262,9 @@ class TagEntity extends Component {
                   entityKey,
                 )
               })
+            this.focusedState.current = {
+              skipTmOut: true,
+            }
           }}
         >
           {tooltipAvailable && showTooltip && (
@@ -364,6 +370,10 @@ class TagEntity extends Component {
   }
 
   focusTag = ({tagsSelected}) => {
+    const {skipTmOut, tmOut} = this.focusedState.current
+    if (tmOut) clearTimeout(tmOut)
+    this.focusedState.current = {}
+
     if (!tagsSelected?.length) {
       // reset
       this.setState({
@@ -372,11 +382,19 @@ class TagEntity extends Component {
       return
     }
 
-    this.setState({
-      focused: tagsSelected.some(
-        ({entityKey}) => entityKey === this.props.entityKey,
-      ),
-    })
+    const updateState = () => {
+      this.setState({
+        focused: tagsSelected.some(
+          ({entityKey}) => entityKey === this.props.entityKey,
+        ),
+      })
+    }
+
+    if (!skipTmOut) {
+      this.focusedState.current.tmOut = setTimeout(() => updateState(), 100)
+    } else {
+      updateState()
+    }
   }
 
   highlightOnWarnings = () => {
