@@ -134,6 +134,36 @@ class ModernMTController extends BaseChunkController
     /**
      * Update a MMT memory
      */
+    public function createMemory()
+    {
+        try {
+            if(!isset($_POST['name'])){
+                throw new Exception('Missing `name` param');
+            }
+
+            $name =  filter_var( $_POST['name'], FILTER_SANITIZE_STRING, FILTER_FLAG_ENCODE_LOW );
+            $description =  isset($_POST['description']) ? filter_var( $_POST['description'], FILTER_SANITIZE_STRING, FILTER_FLAG_ENCODE_LOW ) : null;
+            $externalId =  isset($_POST['external_id']) ? filter_var( $_POST['external_id'], FILTER_SANITIZE_STRING, FILTER_FLAG_ENCODE_LOW ) : null;
+
+            $engineId = filter_var( $this->request->engineId, FILTER_SANITIZE_NUMBER_INT );
+            $MMTClient = $this->getModernMTClient($engineId);
+
+            $this->response->status()->setCode( 200 );
+            $this->response->json($MMTClient->createMemory($name, $description, $externalId));
+            exit();
+
+        } catch (Exception $exception){
+            $this->response->status()->setCode( 500 );
+            $this->response->json([
+                'error' => $exception->getMessage()
+            ]);
+            exit();
+        }
+    }
+
+    /**
+     * Update a MMT memory
+     */
     public function updateMemory()
     {
         try {

@@ -404,6 +404,20 @@ class Engines_MMT extends Engines_AbstractEngine {
     }
 
     /**
+     * @param $name
+     * @param null $description
+     * @param null $externalId
+     * @return mixed
+     * @throws \Engines\MMT\MMTServiceApiException
+     */
+    public function createMemory($name, $description = null, $externalId = null)
+    {
+        $client = $this->_getClient();
+
+        return $client->createMemory($name, $description, $externalId);
+    }
+
+    /**
      * Delete a memory associated to an MMT account
      * (id can be an external account)
      *
