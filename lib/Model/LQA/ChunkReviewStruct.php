@@ -2,6 +2,7 @@
 
 namespace LQA ;
 
+use Chunks_ChunkDao;
 use Utils;
 
 class ChunkReviewStruct extends \DataAccess_AbstractDaoSilentStruct implements \DataAccess_IDaoStruct {
@@ -18,7 +19,6 @@ class ChunkReviewStruct extends \DataAccess_AbstractDaoSilentStruct implements \
     public $reviewed_words_count = 0;
     public $undo_data ;
     public $advancement_wc = 0;
-    public $advancement_raw_wc = 0;
     public $total_tte = 0;
     public $avg_pee = 0;
 
@@ -36,7 +36,7 @@ class ChunkReviewStruct extends \DataAccess_AbstractDaoSilentStruct implements \
     public function getChunk() {
         $review = clone $this;
         return $this->cachable(__FUNCTION__, $review , function($review) {
-            return \Chunks_ChunkDao::getByIdAndPassword($review->id_job, $review->password);
+            return Chunks_ChunkDao::getByIdAndPassword($review->id_job, $review->password);
         });
     }
 
@@ -44,8 +44,9 @@ class ChunkReviewStruct extends \DataAccess_AbstractDaoSilentStruct implements \
      * @return int
      */
     public function getReviewedPercentage() {
+        $count = $this->getChunk()->totalWordsCount();
         return round( ($this->reviewed_words_count /
-                ( empty( $this->getChunk()->totalWordsCount() ) ? 1 : $this->getChunk()->totalWordsCount() ) *
+                ( empty( $count ) ? 1 : $count ) *
         100), 2 );
     }
 

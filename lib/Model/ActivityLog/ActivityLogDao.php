@@ -68,8 +68,6 @@ class ActivityLogDao extends DataAccess_AbstractDao {
      *
      * Use when counters of the job value are not important but only the metadata are needed
      *
-     * XXX: Be careful, used by the ActivityLogStruct
-     *
      * @see      \AsyncTasks\Workers\ActivityLogWorker
      * @see      \ActivityLog\ActivityLogStruct
      *

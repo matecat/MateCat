@@ -2,6 +2,7 @@
 
 use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
+use WordCount\WordCountStruct;
 
 /**
  * Description of catController
@@ -41,26 +42,20 @@ class reviseSummaryController extends viewController {
 	public function doAction() {
 
         //pay a little query to avoid to fetch 5000 rows
-        $this->data = $jobData = Jobs_JobDao::getByIdAndPassword( $this->jid, $this->password );
+        $this->data = $jobStruct = Jobs_JobDao::getByIdAndPassword( $this->jid, $this->password );
 
-        $wStruct = new WordCount_Struct();
-        $wStruct->setIdJob( $this->jid );
-        $wStruct->setJobPassword( $this->password );
-        $wStruct->setNewWords( $jobData[ 'new_words' ] );
-        $wStruct->setDraftWords( $jobData[ 'draft_words' ] );
-        $wStruct->setTranslatedWords( $jobData[ 'translated_words' ] );
-        $wStruct->setApprovedWords( $jobData[ 'approved_words' ] );
-        $wStruct->setRejectedWords( $jobData[ 'rejected_words' ] );
+        $wStruct = WordCountStruct::loadFromJob( $jobStruct );
 
-        if( $jobData['status'] == Constants_JobStatus::STATUS_ARCHIVED || $jobData['status'] == Constants_JobStatus::STATUS_CANCELLED ){
+        if( $jobStruct['status'] == Constants_JobStatus::STATUS_ARCHIVED || $jobStruct['status'] == Constants_JobStatus::STATUS_CANCELLED ){
             //this job has been archived
             $this->job_archived = true;
-            $this->job_owner_email = $jobData['job_owner'];
+            $this->job_owner_email = $jobStruct['job_owner'];
         }
 
-		$this->job_stats = CatUtils::getFastStatsForJob($wStruct);
-
         $projectStruct = $this->data->getProject();
+        // YYY [Remove] backward compatibility for current projects
+        $this->job_stats = CatUtils::getFastStatsForJob( $wStruct, false, $jobStruct->getProject(60 * 60 )->getWordCountType() );
+
         $this->project_status = $projectStruct;
 
         $this->_saveActivity();
@@ -94,16 +89,14 @@ class reviseSummaryController extends viewController {
 
         $this->template->creation_date = $this->data['create_date'];
 
-        $this->job_stats['STATUS_BAR_NO_DISPLAY'] = ( $this->project_status['status_analysis'] == Constants_ProjectStatus::STATUS_DONE ? '' : 'display:none;' );
-        $this->job_stats['ANALYSIS_COMPLETE']     = ( $this->project_status['status_analysis'] == Constants_ProjectStatus::STATUS_DONE ? true : false );
-        $this->template->job_stats                = $this->job_stats;
+        $this->template->word_count_type        = $this->data->getProject()->getWordCountType();
+        $this->job_stats[ 'analysis_complete' ] = ( $this->project_status[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE ? true : false );
+        $this->template->job_stats              = $this->job_stats;
 
 
         $this->template->build_number  = INIT::$BUILD_NUMBER;
         $this->template->extended_user = ($this->isLoggedIn() !== false ) ? trim( $this->user->fullName() ) : "";
         $this->template->logged_user   = ($this->isLoggedIn() !== false ) ? $this->user->shortName() : "";
-
-        $this->template->reviseClass = $this->reviseClass;
 
         $projectMetaDataDao = new Projects_MetadataDao();
         $projectMetaData = null;

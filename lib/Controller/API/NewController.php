@@ -852,6 +852,9 @@ class NewController extends ajaxController {
             Log::doJsonLog( "Passed parameter metadata as json string." );
         }
 
+        // new raw counter model
+        $this->metadata[ Projects_MetadataDao::WORD_COUNT_TYPE_KEY ] = Projects_MetadataDao::WORD_COUNT_RAW;
+
         // project_info
         if ( !empty( $this->postInput[ 'project_info' ] ) ) {
             $this->metadata[ 'project_info' ] = $this->postInput[ 'project_info' ];
@@ -963,7 +966,6 @@ class NewController extends ajaxController {
 
                     $newUser = $APIKeySrv->createMyMemoryKey();
 
-                    //TODO: i need to store an array of these
                     $this->private_tm_user = $newUser->id;
                     $this->private_tm_pass = $newUser->pass;
 

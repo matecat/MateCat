@@ -465,7 +465,9 @@ class createProjectController extends ajaxController {
      *
      */
     private function __setMetadataFromPostInput() {
-        $options = [];
+
+        // new raw counter model
+        $options = [ Projects_MetadataDao::WORD_COUNT_TYPE_KEY => Projects_MetadataDao::WORD_COUNT_RAW ];
 
         if ( isset( $this->postInput[ 'lexiqa' ] ) ) {
             $options[ 'lexiqa' ] = $this->postInput[ 'lexiqa' ];

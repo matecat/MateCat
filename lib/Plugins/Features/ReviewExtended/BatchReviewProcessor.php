@@ -21,8 +21,10 @@ use PDOException;
 use ReflectionException;
 use RevisionFactory;
 use TransactionableTrait;
-use WordCount_CounterModel;
-use WordCount_Struct;
+use WordCount\CounterModel;
+use WordCount\WordCountStruct;
+
+;
 
 class BatchReviewProcessor {
 
@@ -39,7 +41,7 @@ class BatchReviewProcessor {
     protected $_translationEventsHandler;
 
     /**
-     * @var WordCount_CounterModel
+     * @var CounterModel
      */
     private $jobWordCounter;
 
@@ -51,17 +53,8 @@ class BatchReviewProcessor {
         $this->_translationEventsHandler = $eventCreator;
 
         $chunk = $this->_translationEventsHandler->getChunk();
-
-        $old_wStruct = new WordCount_Struct();
-        $old_wStruct->setIdJob( $chunk->id );
-        $old_wStruct->setJobPassword( $chunk->password );
-        $old_wStruct->setNewWords( $chunk->new_words );
-        $old_wStruct->setDraftWords( $chunk->draft_words );
-        $old_wStruct->setTranslatedWords( $chunk->translated_words );
-        $old_wStruct->setApprovedWords( $chunk->approved_words );
-        $old_wStruct->setRejectedWords( $chunk->rejected_words );
-
-        $this->jobWordCounter = new WordCount_CounterModel( $old_wStruct );
+        $old_wStruct = WordCountStruct::loadFromJob( $chunk );
+        $this->jobWordCounter = new CounterModel( $old_wStruct );
 
     }
 
@@ -152,13 +145,22 @@ class BatchReviewProcessor {
 
             // if empty, no segment status changes are present
             if ( !empty( $this->jobWordCounter->getValues() ) ) {
-                $newCount                 = $this->jobWordCounter->updateDB( $this->jobWordCounter->getValues() );
-                $chunk                    = $this->_translationEventsHandler->getChunk();
-                $chunk->draft_words_words = $newCount->getDraftWords();
-                $chunk->new_words         = $newCount->getNewWords();
-                $chunk->translated_words  = $newCount->getTranslatedWords();
-                $chunk->approved_words    = $newCount->getApprovedWords();
-                $chunk->rejected_words    = $newCount->getRejectedWords();
+                $newCount                = $this->jobWordCounter->updateDB( $this->jobWordCounter->getValues() );
+                $chunk                   = $this->_translationEventsHandler->getChunk();
+                $chunk->draft_words      = $newCount->getDraftWords();
+                $chunk->new_words        = $newCount->getNewWords();
+                $chunk->translated_words = $newCount->getTranslatedWords();
+                $chunk->approved_words   = $newCount->getApprovedWords();
+                $chunk->approved2_words  = $newCount->getApproved2Words();
+                $chunk->rejected_words   = $newCount->getRejectedWords();
+
+                $chunk->draft_raw_words      = $newCount->getDraftRawWords();
+                $chunk->new_raw_words        = $newCount->getNewRawWords();
+                $chunk->translated_raw_words = $newCount->getTranslatedRawWords();
+                $chunk->approved_raw_words   = $newCount->getApprovedRawWords();
+                $chunk->approved2_raw_words  = $newCount->getApproved2RawWords();
+                $chunk->rejected_raw_words   = $newCount->getRejectedRawWords();
+
                 // updateTodoValues for the JOB
             }
 

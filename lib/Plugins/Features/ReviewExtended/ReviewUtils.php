@@ -12,6 +12,7 @@ use Chunks_ChunkStruct;
 use LQA\ChunkReviewDao;
 use LQA\ChunkReviewStruct;
 use LQA\ModelStruct;
+use Projects_MetadataDao;
 
 class ReviewUtils {
 
@@ -23,6 +24,7 @@ class ReviewUtils {
      * @throws \Exception
      */
     public static function formatStats( $statsArray, $chunkReviews ) {
+
         $statsArray [ 'revises' ] = [];
 
         /** @var ChunkReviewStruct $chunkReview */

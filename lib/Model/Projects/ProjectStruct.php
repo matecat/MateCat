@@ -206,7 +206,7 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
      * @return mixed|string
      */
     public function getWordCountType() {
-        return $this->cachable(__METHOD__, $this->getMetadataValue('word_count_type'), function($type) {
+        return $this->cachable(__METHOD__, $this->getMetadataValue( Projects_MetadataDao::WORD_COUNT_TYPE_KEY ), function($type) {
             if ( $type == null ) {
                 return Projects_MetadataDao::WORD_COUNT_EQUIVALENT;
             } else {

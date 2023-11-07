@@ -2,11 +2,11 @@
 
 use Contribution\ContributionSetStruct;
 use Contribution\Set;
+use EditLog\EditLogSegmentClientStruct;
 use Exceptions\ControllerReturnException;
 use Exceptions\NotFoundException;
 use Features\ReviewExtended\ReviewUtils;
 use Features\TranslationVersions;
-use Features\TranslationVersions\TranslationVersionsHandler;
 use Files\FilesPartsDao;
 use LQA\QA;
 use Matecat\SubFiltering\Commons\Pipeline;
@@ -14,6 +14,7 @@ use Matecat\SubFiltering\Filters\FromViewNBSPToSpaces;
 use Matecat\SubFiltering\Filters\PhCounter;
 use Matecat\SubFiltering\Filters\SprintfToPH;
 use Matecat\SubFiltering\MateCatFilter;
+use WordCount\WordCountStruct;
 
 class setTranslationController extends ajaxController {
 
@@ -156,7 +157,6 @@ class setTranslationController extends ajaxController {
      * @return bool
      */
     private function isSplittedSegment() {
-        //strtoupper transforms null to "" so check for the first element to be an empty string
         return !empty( $this->split_statuses[ 0 ] ) && !empty( $this->split_num );
     }
 
@@ -199,7 +199,7 @@ class setTranslationController extends ajaxController {
             $featureSet = $this->getFeatureSet();
             $featureSet->loadForProject( $this->project );
 
-            /** @var MateCatFilter filter */
+            /** @var MateCatFilter $filter */
             $this->filter = MateCatFilter::getInstance( $featureSet, $this->chunk->source, $this->chunk->target, Segments_SegmentOriginalDataDao::getSegmentDataRefMap( $this->id_segment ) );
         }
 
@@ -245,6 +245,7 @@ class setTranslationController extends ajaxController {
         switch ( $status ) {
             case Constants_TranslationStatus::STATUS_TRANSLATED:
             case Constants_TranslationStatus::STATUS_APPROVED:
+            case Constants_TranslationStatus::STATUS_APPROVED2:
             case Constants_TranslationStatus::STATUS_REJECTED:
             case Constants_TranslationStatus::STATUS_DRAFT:
             case Constants_TranslationStatus::STATUS_NEW:
@@ -393,6 +394,8 @@ class setTranslationController extends ajaxController {
         $this->_validateSegmentTranslationChange( $new_translation, $old_translation );
 
         /**
+         * Update Time to Edit and
+         *
          * Evaluate new Avg post-editing effort for the job:
          * - get old translation
          * - get suggestion
@@ -481,27 +484,7 @@ class setTranslationController extends ajaxController {
             }
         }
 
-        //update total time to edit
-        try {
-            if ( !self::isRevision() ) {
-
-                $tte = 0;
-                if ( false === Utils::stringsAreEqual( $new_translation->translation, $old_translation->translation ) ) {
-                    $tte = $this->time_to_edit;
-                }
-
-                Jobs_JobDao::updateTotalTimeToEdit( $this->chunk, $tte );
-            }
-        } catch ( Exception $e ) {
-            $this->result[ 'errors' ][] = [ "code" => -101, "message" => "database errors" ];
-            Log::doJsonLog( "Lock: Transaction Aborted. " . $e->getMessage() );
-            $db->rollback();
-
-            return $e->getCode();
-        }
-
-        //strtoupper transforms null to "" so check for the first element to be an empty string
-        if ( !empty( $this->split_statuses[ 0 ] ) && !empty( $this->split_num ) ) {
+        if ( $this->isSplittedSegment() ) {
 
             /* put the split inside the transaction if they are present */
             $translationStruct             = TranslationsSplit_SplitStruct::getStruct();
@@ -549,10 +532,11 @@ class setTranslationController extends ajaxController {
             return $e->getCode();
         }
 
-        $newTotals = $this->recountJobTotals( $this->status );
+        $newTotals = WordCountStruct::loadFromJob( $this->chunk );
 
-        $job_stats                        = CatUtils::getFastStatsForJob( $newTotals );
-        $job_stats[ 'ANALYSIS_COMPLETE' ] = (
+        // YYY [Remove] backward compatibility for current projects
+        $job_stats = CatUtils::getFastStatsForJob( $newTotals, true, $this->project->getWordCountType() );
+        $job_stats[ 'analysis_complete' ] = (
                 $this->project[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE ||
                 $this->project[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE
         );
@@ -608,10 +592,20 @@ class setTranslationController extends ajaxController {
 
         //EVERY time an user changes a row in his job when the job is completed,
         // a query to do the update is executed...
-        // Avoid this by setting a key on redis with an reasonable TTL
+        // Avoid this by setting a key on redis with a reasonable TTL
         $redisHandler = new RedisHandler();
         $job_status   = $redisHandler->getConnection()->get( 'job_completeness:' . $this->id_job );
-        if ( $job_stats[ 'TRANSLATED_PERC' ] == '100' && empty( $job_status ) ) {
+        if (
+                (
+                    // YYY [Remove] this condition 'TRANSLATED_PERC' is for backward compatibility
+                        @$job_stats[ 'TRANSLATED_PERC' ] == '100' ||
+                        (
+                                @$job_stats[ Projects_MetadataDao::WORD_COUNT_RAW ][ 'draft' ] +
+                                @$job_stats[ Projects_MetadataDao::WORD_COUNT_RAW ][ 'new' ] == 0
+                        )
+                        && empty( $job_status )
+                )
+        ) {
             $redisHandler->getConnection()->setex( 'job_completeness:' . $this->id_job, 60 * 60 * 24 * 15, true ); //15 days
 
             try {
@@ -629,7 +623,12 @@ class setTranslationController extends ajaxController {
         }
 
         $this->result[ 'propagation' ] = $propagationTotal;
-        $this->result[ 'stats' ]       = $this->featureSet->filter( 'filterStatsResponse', $this->result[ 'stats' ], [ 'chunk' => $this->chunk, 'segmentId' => $this->id_segment ] );
+        $this->result[ 'stats' ]       = $this->featureSet->filter(
+                'filterStatsResponse',
+                $this->result[ 'stats' ],
+                [ 'chunk' => $this->chunk, 'segmentId' => $this->id_segment ],
+                $this->project->getWordCountType()
+        );
 
         $this->evalSetContribution( $new_translation, $old_translation );
     }
@@ -701,25 +700,19 @@ class setTranslationController extends ajaxController {
      * @param $saved_translation
      *
      * @return array
-     * @throws \API\V2\Exceptions\AuthenticationError
-     * @throws \Exceptions\NotFoundException
-     * @throws \Exceptions\ValidationError
-     * @throws \TaskRunner\Exceptions\EndQueueException
-     * @throws \TaskRunner\Exceptions\ReQueueException
+     * @throws Exception
      */
     private function getTranslationObject( $saved_translation ) {
-        $translation = [
+        return [
                 'version_number' => @$saved_translation[ 'version_number' ],
                 'sid'            => $saved_translation[ 'id_segment' ],
                 'translation'    => $this->filter->fromLayer0ToLayer2( $saved_translation[ 'translation' ] ),
                 'status'         => $saved_translation[ 'status' ]
         ];
-
-        return $translation;
     }
 
     private function recountJobTotals( $old_status ) {
-        $old_wStruct = new WordCount_Struct();
+        $old_wStruct = new WordCountStruct();
         $old_wStruct->setIdJob( $this->id_job );
         $old_wStruct->setJobPassword( $this->password );
         $old_wStruct->setNewWords( $this->chunk[ 'new_words' ] );
@@ -730,18 +723,26 @@ class setTranslationController extends ajaxController {
 
         $old_wStruct->setIdSegment( $this->id_segment );
 
-        //redundant, this is made into WordCount_CounterModel::updateDB
+        //redundant, this is made into CounterModel::updateDB
         $old_wStruct->setOldStatus( $old_status );
         $old_wStruct->setNewStatus( $this->status );
 
         return $old_wStruct;
     }
 
-    //TODO: put this method into Job model and use Segnent object
+    //TODO: put this method into Job model and use Segment object
     private function updateJobPEE( array $old_translation, array $new_translation ) {
 
-        $segmentRawWordCount = $this->segment->raw_word_count;
-        $segment             = new EditLog_EditLogSegmentClientStruct(
+        //update total time to edit
+        $tte = $old_translation[ 'time_to_edit' ];
+        if ( !self::isRevision() ) {
+            if ( false === Utils::stringsAreEqual( $new_translation[ 'translation' ], $old_translation[ 'translation' ] ) ) {
+                $tte += $new_translation[ 'time_to_edit' ];
+            }
+        }
+
+        $segmentRawWordCount  = $this->segment->raw_word_count;
+        $editLogSegmentStruct = new EditLogSegmentClientStruct(
                 [
                         'suggestion'     => $old_translation[ 'suggestion' ],
                         'translation'    => $old_translation[ 'translation' ],
@@ -750,21 +751,21 @@ class setTranslationController extends ajaxController {
                 ]
         );
 
-        $oldSegment               = clone $segment;
-        $oldSegment->time_to_edit = $old_translation[ 'time_to_edit' ];
+        $oldSegmentStatus               = clone $editLogSegmentStruct;
+        $oldSegmentStatus->time_to_edit = $old_translation[ 'time_to_edit' ];
 
-        $oldPEE          = $segment->getPEE();
+        $oldPEE          = $editLogSegmentStruct->getPEE();
         $oldPee_weighted = $oldPEE * $segmentRawWordCount;
 
-        $segment->translation    = $new_translation[ 'translation' ];
-        $segment->pe_effort_perc = null;
+        $editLogSegmentStruct->translation    = $new_translation[ 'translation' ];
+        $editLogSegmentStruct->pe_effort_perc = null;
 
-        $newPEE          = $segment->getPEE();
+        $newPEE          = $editLogSegmentStruct->getPEE();
         $newPee_weighted = $newPEE * $segmentRawWordCount;
 
-        if ( $segment->isValidForEditLog() ) {
-            //if the segment was not valid for editlog and now it is, then just add the weighted pee
-            if ( !$oldSegment->isValidForEditLog() ) {
+        if ( $editLogSegmentStruct->isValidForEditLog() ) {
+            //if the segment was not valid for editlog, and now it is, then just add the weighted pee
+            if ( !$oldSegmentStatus->isValidForEditLog() ) {
                 $newTotalJobPee = ( $this->chunk[ 'avg_post_editing_effort' ] + $newPee_weighted );
             } //otherwise, evaluate it normally
             else {
@@ -772,25 +773,31 @@ class setTranslationController extends ajaxController {
             }
 
             Jobs_JobDao::updateFields(
-                    [ 'avg_post_editing_effort' => $newTotalJobPee, ],
+                    [ 'avg_post_editing_effort' => $newTotalJobPee, 'total_time_to_edit' => $tte ],
                     [
                             'id'       => $this->id_job,
                             'password' => $this->password
                     ] );
 
-        } //segment was valid but now it is no more
-        else {
-            if ( $oldSegment->isValidForEditLog() ) {
-                $newTotalJobPee = ( $this->chunk[ 'avg_post_editing_effort' ] - $oldPee_weighted );
+        } //segment was valid but now it is no more valid
+        elseif ( $oldSegmentStatus->isValidForEditLog() ) {
+            $newTotalJobPee = ( $this->chunk[ 'avg_post_editing_effort' ] - $oldPee_weighted );
 
-                Jobs_JobDao::updateFields(
-                        [ 'avg_post_editing_effort' => $newTotalJobPee, ],
-                        [
-                                'id'       => $this->id_job,
-                                'password' => $this->password
-                        ] );
-            }
+            Jobs_JobDao::updateFields(
+                    [ 'avg_post_editing_effort' => $newTotalJobPee, 'total_time_to_edit' => $tte ],
+                    [
+                            'id'       => $this->id_job,
+                            'password' => $this->password
+                    ] );
+        } else {
+            Jobs_JobDao::updateFields(
+                    [ 'total_time_to_edit' => $tte ],
+                    [
+                            'id'       => $this->id_job,
+                            'password' => $this->password
+                    ] );
         }
+
     }
 
     /**
@@ -849,23 +856,6 @@ class setTranslationController extends ajaxController {
         } else {
             return $old_translation[ 'status' ];
         }
-    }
-
-
-    /**
-     * Returns the old_count to pass to WordCounter, based on project
-     * configuration, picking from either eq_word_count or raw_word_count
-     *
-     * @param $segment
-     * @param $old_translation
-     *
-     * @return mixed
-     */
-    private function getOldCount( $segment, $old_translation ) {
-
-        return $old_translation[ 'match_type' ] === 'ICE' ? $segment[ 'raw_word_count' ] : $old_translation[ 'eq_word_count' ];
-//        $word_count_type = $this->project->getWordCountType();
-//        return ( $word_count_type == Projects_MetadataDao::WORD_COUNT_RAW  ) ? $segment[ 'raw_word_count' ] : $old_translation[ 'eq_word_count' ];
     }
 
     /**

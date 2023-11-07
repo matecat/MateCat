@@ -1,6 +1,5 @@
 <?php
 
-// TODO: files should remain on disk, and not copied and transformed in memory several times
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 

@@ -8,6 +8,7 @@ use Outsource\TranslatedConfirmationStruct;
 use Translations\WarningDao;
 use Translators\JobsTranslatorsDao;
 use Translators\JobsTranslatorsStruct;
+use WordCount\WordCountStruct;
 
 class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct, \ArrayAccess {
 
@@ -44,7 +45,7 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
 
     /**
      * Column 'completed' cannot be null, moreover it is BIT(1) and
-     * PDO does not works well in this case without explicitly
+     * PDO does not work well in this case without explicitly
      * tell him that this is an INT.
      * So, we can't set 0 because it will be treated as string, set it to false, it works.
      * @see https://bugs.php.net/bug.php?id=50757
@@ -63,6 +64,7 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
     public $translated_raw_words;
     public $approved_raw_words;
     public $approved2_raw_words;
+    public $rejected_raw_words;
 
     public $subject;
     public $payable_rates;
@@ -275,11 +277,7 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
      * @return float
      */
     public function totalWordsCount() {
-        return $this->new_words +
-        $this->draft_words +
-        $this->translated_words +
-        $this->approved_words +
-        $this->rejected_words;
+        return WordCountStruct::loadFromJob( $this )->getRawTotal();
     }
 
     /**

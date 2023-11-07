@@ -139,8 +139,6 @@ class Project {
 
         }
 
-        // @TODO if $jobJSONs is empty ( == no jobs) throw an exception????
-
         $metadataDao = new \Projects_MetadataDao();
         $projectInfo = $metadataDao->get((int)$project->id,'project_info');
 

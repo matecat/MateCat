@@ -23,7 +23,9 @@ use LQA\EntryWithCategoryStruct;
 use Routes;
 use TransactionableTrait;
 use Users_UserDao;
-use WordCount_CounterModel;
+use WordCount\CounterModel;
+
+;
 
 class SegmentTranslationModel implements ISegmentTranslationModel {
 
@@ -38,8 +40,6 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
      * @var Chunks_ChunkStruct
      */
     protected $_chunk;
-
-    protected $affectedChunkReviews = [];
 
     /**
      * @var \Projects_ProjectStruct
@@ -66,11 +66,11 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
      */
     private $_finalRevisions;
     /**
-     * @var WordCount_CounterModel
+     * @var CounterModel
      */
     private $_jobWordCounter;
 
-    public function __construct( TranslationEvent $model, WordCount_CounterModel $jobWordCounter, array $chunkReviews ) {
+    public function __construct( TranslationEvent $model, CounterModel $jobWordCounter, array $chunkReviews ) {
         $this->_event          = $model;
         $this->_chunkReviews   = $chunkReviews;
         $this->_chunk          = $model->getChunk();
@@ -188,12 +188,9 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
         $_currentEventSourcePage  = $this->_event->getCurrentEventSourcePage();
 
         if ( $this->_event->isChangingStatus() ) {
-
             $this->_jobWordCounter->setOldStatus( $this->_event->getOldTranslation()->status );
             $this->_jobWordCounter->setNewStatus( $this->_event->getWantedTranslation()->status );
-
-            $this->_jobWordCounter->setUpdatedValues( $this->getDeltaWordCount() );
-
+            $this->_jobWordCounter->setUpdatedValues( $this->getDeltaWordCount(), $this->_event->getSegmentStruct()->raw_word_count );
         }
 
         $segmentReviewTransitionModel = new ChunkReviewTranslationEventTransition( $this->_event );
@@ -302,8 +299,7 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
             ) {
                 $this->increaseAllCounters( $chunkReview );
                 $chunkReviews[] = $chunkReview;
-            }
-            else { // Upper transition
+            } else { // Upper transition
 
                 /*
                  * HERE we are handling the UPWARD Revision

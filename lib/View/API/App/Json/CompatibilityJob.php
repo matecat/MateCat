@@ -7,10 +7,12 @@
  *
  */
 
-namespace API\V2\Json;
+namespace API\App\Json;
 
 
-use API\App\Json\OutsourceConfirmation;
+use API\V2\Json\Job;
+use API\V2\Json\JobTranslator;
+use API\V2\Json\ProjectUrls;
 use CatUtils;
 use Chunks_ChunkStruct;
 use DataAccess\ShapelessConcreteStruct;
@@ -21,84 +23,22 @@ use Langs_Languages;
 use LQA\ChunkReviewDao;
 use ManageUtils;
 use OutsourceTo_OutsourceAvailable;
+use Projects_MetadataDao;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
-use TmKeyManagement_ClientTmKeyStruct;
-use Users_UserStruct;
 use Utils;
 use WordCount\WordCountStruct;
 
-class Job {
-
-    /**
-     * @var string
-     */
-    protected $status;
-
-    /**
-     * @var Users_UserStruct
-     */
-    protected $user;
-
-    /**
-     * @var bool
-     */
-    protected $called_from_api = false;
-
-    /**
-     * @var TmKeyManagement_ClientTmKeyStruct[]
-     */
-    protected $keyList = [];
-
-    /**
-     * @param mixed $status
-     */
-    public function setStatus( $status ) {
-        $this->status = $status;
-    }
-
-    /**
-     * @param Users_UserStruct $user
-     *
-     * @return $this
-     */
-    public function setUser( Users_UserStruct $user = null ) {
-        $this->user = $user;
-
-        return $this;
-    }
-
-    /**
-     * @param bool $called_from_api
-     *
-     * @return $this
-     */
-    public function setCalledFromApi( $called_from_api ) {
-        $this->called_from_api = (bool)$called_from_api;
-
-        return $this;
-    }
-
-    /**
-     * @param Chunks_ChunkStruct $jStruct
-     *
-     * @return array
-     */
-    protected function getKeyList( Chunks_ChunkStruct $jStruct ) {
-
-        if ( empty( $this->user ) ) {
-            return [];
-        }
-
-        if ( !$this->called_from_api ) {
-            $out = $jStruct->getClientKeys( $this->user, \TmKeyManagement_Filter::OWNER )[ 'job_keys' ];
-        } else {
-            $out = $jStruct->getClientKeys( $this->user, \TmKeyManagement_Filter::ROLE_TRANSLATOR )[ 'job_keys' ];
-        }
-
-        return ( new JobClientKeys( $out ) )->render();
-
-    }
+/**
+ * ( 2023/11/06 )
+ *
+ * This class is meant to allow back compatibility with running projects
+ * after the advancement word-count switch from weighted to raw
+ *
+ * YYY [Remove] backward compatibility for current projects
+ * YYY Remove after a reasonable amount of time
+ */
+class CompatibilityJob extends Job {
 
     /**
      * @param                         $chunk Chunks_ChunkStruct
@@ -173,7 +113,11 @@ class Job {
                 'private_tm_key'        => $this->getKeyList( $chunk ),
                 'warnings_count'        => $warningsCount->warnings_count,
                 'warning_segments'      => ( isset( $warningsCount->warning_segments ) ? $warningsCount->warning_segments : [] ),
-                'stats'                 => $jobStats,
+                'word_count_type'       => $chunk->getProject()->getWordCountType(),
+                'stats'                 => ( $chunk->getProject()->getWordCountType() == Projects_MetadataDao::WORD_COUNT_RAW ?
+                        $jobStats :
+                        ReviewUtils::formatStats( CatUtils::getFastStatsForJob( $jobStats, false, $chunk->getProject()->getWordCountType() ), $chunkReviews )
+                ),
                 'outsource'             => $outsource,
                 'outsource_available'   => $outsourceAvailable,
                 'outsource_info'        => $outsourceAvailableInfo,

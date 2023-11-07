@@ -6,13 +6,14 @@
  * Time: 16:16
  */
 
-namespace API\V3\Json;
+namespace API\App\Json;
 
-use API\App\Json\OutsourceConfirmation;
 use API\V2\Json\JobTranslator;
 use API\V2\Json\ProjectUrls;
+use API\V3\Json\Chunk;
+use API\V3\Json\QualitySummary;
+use CatUtils;
 use Chunks_ChunkStruct;
-use Constants;
 use DataAccess\ShapelessConcreteStruct;
 use Features\QaCheckBlacklist\Utils\BlacklistUtils;
 use Features\ReviewExtended\ReviewUtils;
@@ -20,37 +21,24 @@ use FeatureSet;
 use Glossary\Blacklist\BlacklistDao;
 use Langs_LanguageDomains;
 use Langs_Languages;
-use LQA\ChunkReviewDao;
-use LQA\ChunkReviewStruct;
+use Projects_MetadataDao;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
 use RedisHandler;
 use Utils;
 use WordCount\WordCountStruct;
 
-class Chunk extends \API\V2\Json\Chunk {
+/**
+ * ( 2023/11/06 )
+ *
+ * This class is meant to allow back compatibility with running projects
+ * after the advancement word-count switch from weighted to raw
+ *
+ * YYY [Remove] backward compatibility for current projects
+ * YYY Remove after a reasonable amount of time
+ */
+class CompatibilityChunk extends Chunk {
 
-    protected $chunk_reviews;
-    protected $chunk;
-
-    /**
-     * @param \Chunks_ChunkStruct $chunk
-     *
-     * @return array
-     * @throws \Exception
-     * @throws \Exceptions\NotFoundException
-     */
-    public function renderOne( Chunks_ChunkStruct $chunk ) {
-        $project    = $chunk->getProject();
-        $featureSet = $project->getFeaturesSet();
-
-        return [
-                'job' => [
-                        'id'     => (int)$chunk->id,
-                        'chunks' => [ $this->renderItem( $chunk, $project, $featureSet ) ]
-                ]
-        ];
-    }
 
     /**
      * @param                         $chunk Chunks_ChunkStruct
@@ -119,7 +107,7 @@ class Chunk extends \API\V2\Json\Chunk {
                 'private_tm_key'          => $this->getKeyList( $chunk ),
                 'warnings_count'          => $warningsCount->warnings_count,
                 'warning_segments'        => ( isset( $warningsCount->warning_segments ) ? $warningsCount->warning_segments : [] ),
-                'stats'                   => $jobStats,
+                'stats'                   => ( $chunk->getProject()->getWordCountType() == Projects_MetadataDao::WORD_COUNT_RAW ? $jobStats : $this->_getStats( $jobStats ) ),
                 'outsource'               => $outsource,
                 'translator'              => $translator,
                 'total_raw_wc'            => (int)$chunk->total_raw_wc,
@@ -157,61 +145,12 @@ class Chunk extends \API\V2\Json\Chunk {
         return $result;
     }
 
-    protected function getChunkReviews() {
-        if ( is_null( $this->chunk_reviews ) ) {
-            $this->chunk_reviews = ( new ChunkReviewDao() )->findChunkReviews( $this->chunk );
-        }
+    protected function _getStats( $jobStats ) {
+        $stats = CatUtils::getPlainStatsForJobs( $jobStats );
+        unset( $stats [ 'id' ] );
+        $stats = array_change_key_case( $stats, CASE_LOWER );
 
-        return $this->chunk_reviews;
-    }
-
-    /**
-     * @param $chunk_id
-     *
-     * @return array
-     */
-    protected function getTimeToEditArray( $chunk_id ) {
-
-        $jobDao   = new \Jobs_JobDao();
-        $tteT     = (int)$jobDao->getTimeToEdit( $chunk_id, 1 )[ 'tte' ];
-        $tteR1    = (int)$jobDao->getTimeToEdit( $chunk_id, 2 )[ 'tte' ];
-        $tteR2    = (int)$jobDao->getTimeToEdit( $chunk_id, 3 )[ 'tte' ];
-        $tteTotal = $tteT + $tteR1 + $tteR2;
-
-        return [
-                'total' => $tteTotal,
-                't'     => $tteT,
-                'r1'    => $tteR1,
-                'r2'    => $tteR2,
-        ];
-    }
-
-    /**
-     * @param ChunkReviewStruct $chunk_review
-     * @param                   $result
-     *
-     * @return mixed
-     */
-    protected static function populateRevisePasswords( ChunkReviewStruct $chunk_review, $result ) {
-
-        if ( !isset( $result[ 'revise_passwords' ] ) ) {
-            $result[ 'revise_passwords' ] = [];
-        }
-
-        if ( $chunk_review->source_page <= Constants::SOURCE_PAGE_REVISION ) {
-            $result[ 'revise_passwords' ][] = [
-                    'revision_number' => 1,
-                    'password'        => $chunk_review->review_password
-            ];
-        } else {
-            $result[ 'revise_passwords' ][] = [
-                    'revision_number' => ReviewUtils::sourcePageToRevisionNumber( $chunk_review->source_page ),
-                    'password'        => $chunk_review->review_password
-            ];
-        }
-
-        return $result;
-
+        return ReviewUtils::formatStats( $stats, $this->getChunkReviews() );
     }
 
 }

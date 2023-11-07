@@ -21,6 +21,7 @@ use Features\TranslationVersions\Model\TranslationEventDao;
 use Klein\Klein;
 use LQA\ChunkReviewDao;
 use LQA\ChunkReviewStruct;
+use Projects_MetadataDao;
 use Projects_ProjectDao;
 
 class SecondPassReview extends BaseFeature {
@@ -70,13 +71,22 @@ class SecondPassReview extends BaseFeature {
     }
 
     /**
+     * YYY this is the only place where we maintain the double counter systems
+     *     to allow current projects to be consistent
+     * YYY [Remove] backward compatibility for current projects
+     *
      * @param $inputStats
      * @param $options
      *
      * @return array
      * @throws \Exception
      */
-    public function filterStatsResponse( $inputStats, $options ) {
+    public function filterStatsResponse( $inputStats, $options, $word_count_type = Projects_MetadataDao::WORD_COUNT_EQUIVALENT ) {
+
+        if( $word_count_type == Projects_MetadataDao::WORD_COUNT_RAW ){
+            return $inputStats;
+        }
+
         /** @var Chunks_ChunkStruct $chunk */
         $chunk        = $options[ 'chunk' ];
         $chunkReviews = ( new ChunkReviewDao() )->findChunkReviews( $chunk, 0 );

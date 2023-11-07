@@ -1,6 +1,7 @@
 <?php
 namespace AsyncTasks\Workers;
 
+use EditLog\EditLogSegmentStruct;
 use Jobs_JobDao;
 use Jobs_JobStruct;
 use TaskRunner\Commons\AbstractElement;
@@ -64,9 +65,6 @@ class JobsWorker extends AbstractWorker {
 
         $jDao = new Jobs_JobDao();
 
-        /**
-         * @var $segments \EditLog_EditLogSegmentStruct[]
-         */
         $segments = $jDao->getAllModifiedSegmentsForPee( $jobStruct );
 
         $Pee_weighted = 0;

@@ -132,7 +132,6 @@ class Routes {
     public static function downloadXliff( $id_job, $password, $options = [] ) {
         $host = self::httpHost( $options );
 
-        // TODO: pass in a filename here as last param?
         return "$host/SDLXLIFF/$id_job/$password/$id_job.zip";
     }
 

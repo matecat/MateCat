@@ -8,22 +8,21 @@
  *
  */
 
-use WordCount\WordCounterDao;
+namespace WordCount;
 
-class WordCount_CounterModel {
+use BadMethodCallException;
+use Constants_TranslationStatus;
+use Exception;
+use LogicException;
+use Projects_ProjectStruct;
+use ReflectionClass;
+
+class CounterModel {
 
     /**
-     * @var WordCount_Struct
+     * @var WordCountStruct
      */
     protected $oldWCount;
-
-    /**
-     * @var WordCount_Struct
-     */
-    protected $newWCount;
-
-    protected $newStatusCall;
-    protected $oldStatusCall;
     protected $newStatus;
     protected $oldStatus;
 
@@ -32,25 +31,24 @@ class WordCount_CounterModel {
      */
     private $project;
 
-    protected static $constCache = array();
+    protected static $constCache = [];
     /**
-     * @var WordCount_Struct[]
+     * @var WordCountStruct[]
      */
     private $values;
 
     /**
-     * @return WordCount_Struct[]
+     * @return WordCountStruct[]
      */
     public function getValues() {
         return $this->values;
     }
 
     /**
-     * @param WordCount_Struct $oldWCount
+     * @param WordCountStruct $oldWCount
      *
-     * @throws ReflectionException
      */
-    public function __construct( WordCount_Struct $oldWCount = null ) {
+    public function __construct( WordCountStruct $oldWCount = null ) {
 
         $reflect          = new ReflectionClass( 'Constants_TranslationStatus' );
         self::$constCache = array_flip( $reflect->getConstants() );
@@ -72,46 +70,44 @@ class WordCount_CounterModel {
         }
     }
 
-    public function setOldWordCount( WordCount_Struct $oldWCount ) {
+    public function setOldWordCount( WordCountStruct $oldWCount ) {
         $this->oldWCount = $oldWCount;
     }
 
     /**
      * @param Projects_ProjectStruct $project
      */
-    public function setProject(Projects_ProjectStruct $project ) {
+    public function setProject( Projects_ProjectStruct $project ) {
         $this->project = $project;
     }
 
     public function setNewStatus( $new_status ) {
         $this->_verifyStatus( $new_status );
-        $this->newStatusCall = $this->methodNameForStatusCall($new_status) ;
         $this->newStatus     = $new_status;
     }
 
     public function setOldStatus( $old_status ) {
         $this->_verifyStatus( $old_status );
-        $this->oldStatusCall = $this->methodNameForStatusCall( $old_status );
         $this->oldStatus     = $old_status;
     }
 
-    public function setUpdatedValues( $words_amount ) {
-        $this->values[] = $this->getUpdatedValues( $words_amount );
+    public function setUpdatedValues( $weighted_words_amount, $raw_words_amount ) {
+        $this->values[] = $this->getUpdatedValues( $weighted_words_amount, $raw_words_amount );
     }
 
     /**
-     * @param $words_amount int the new status
+     * @param $weighted_words_amount int the new status
      *
-     * @return WordCount_Struct
+     * @return WordCountStruct
      * @throws LogicException
      */
-    public function getUpdatedValues( $words_amount ) {
+    public function getUpdatedValues( $weighted_words_amount, $raw_words_amount ) {
 
         if ( $this->oldWCount === null ) {
             throw new LogicException( __METHOD__ . " Error: old word count is not defined." );
         }
 
-        $newWCount = new WordCount_Struct();
+        $newWCount = new WordCountStruct();
         $newWCount->setIdJob( $this->oldWCount->getIdJob() );
         $newWCount->setJobPassword( $this->oldWCount->getJobPassword() );
 
@@ -119,22 +115,32 @@ class WordCount_CounterModel {
         $newWCount->setOldStatus( $this->oldStatus );
         $newWCount->setNewStatus( $this->newStatus );
 
-        if (!$this->equivalentStatuses() ) {
+        if ( !$this->equivalentStatuses() ) {
+
             $callSetNew = 'set' . $this->methodNameForStatusCall( $this->newStatus );
             $callSetOld = 'set' . $this->methodNameForStatusCall( $this->oldStatus );
 
-            $newWCount->$callSetOld( -$words_amount );
-            $newWCount->$callSetNew( +$words_amount );
+            $newWCount->$callSetOld( -$weighted_words_amount );
+            $newWCount->$callSetNew( +$weighted_words_amount );
+
+            if ( !empty( $raw_words_amount ) ) {
+                $callSetNew = 'set' . $this->methodNameForStatusCall( $this->newStatus, true );
+                $callSetOld = 'set' . $this->methodNameForStatusCall( $this->oldStatus, true );
+                $newWCount->$callSetOld( -$raw_words_amount );
+                $newWCount->$callSetNew( +$raw_words_amount );
+            }
+
         }
+
 
         return $newWCount;
 
     }
 
     /**
-     * @param WordCount_Struct[] $_wordCount_Struct_Array
+     * @param WordCountStruct[] $_wordCount_Struct_Array
      *
-     * @return WordCount_Struct
+     * @return WordCountStruct
      * @throws Exception
      */
     public function updateDB( array $_wordCount_Struct_Array ) {
@@ -147,12 +153,21 @@ class WordCount_CounterModel {
             throw new Exception( "Failed to update counter", $res );
         }
 
-        $newTotalWCount = new WordCount_Struct();
+        $newTotalWCount = new WordCountStruct();
         $newTotalWCount->setNewWords( $this->oldWCount->getNewWords() + $differentialCountStruct->getNewWords() );
+        $newTotalWCount->setDraftWords( $this->oldWCount->getDraftWords() + $differentialCountStruct->getDraftWords() );
         $newTotalWCount->setTranslatedWords( $this->oldWCount->getTranslatedWords() + $differentialCountStruct->getTranslatedWords() );
         $newTotalWCount->setApprovedWords( $this->oldWCount->getApprovedWords() + $differentialCountStruct->getApprovedWords() );
+        $newTotalWCount->setApproved2Words( $this->oldWCount->getApproved2Words() + $differentialCountStruct->getApproved2Words() );
         $newTotalWCount->setRejectedWords( $this->oldWCount->getRejectedWords() + $differentialCountStruct->getRejectedWords() );
-        $newTotalWCount->setDraftWords( $this->oldWCount->getDraftWords() + $differentialCountStruct->getDraftWords() );
+
+        $newTotalWCount->setNewRawWords( $this->oldWCount->getNewRawWords() + $differentialCountStruct->getNewRawWords() );
+        $newTotalWCount->setDraftRawWords( $this->oldWCount->getDraftRawWords() + $differentialCountStruct->getDraftRawWords() );
+        $newTotalWCount->setTranslatedRawWords( $this->oldWCount->getTranslatedRawWords() + $differentialCountStruct->getTranslatedRawWords() );
+        $newTotalWCount->setApprovedRawWords( $this->oldWCount->getApprovedRawWords() + $differentialCountStruct->getApprovedRawWords() );
+        $newTotalWCount->setApproved2RawWords( $this->oldWCount->getApproved2RawWords() + $differentialCountStruct->getApproved2RawWords() );
+        $newTotalWCount->setRejectedRawWords( $this->oldWCount->getRejectedRawWords() + $differentialCountStruct->getRejectedRawWords() );
+
         $newTotalWCount->setIdSegment( $this->oldWCount->getIdSegment() );
         $newTotalWCount->setOldStatus( $this->oldStatus );
         $newTotalWCount->setNewStatus( $this->newStatus );
@@ -164,27 +179,34 @@ class WordCount_CounterModel {
     }
 
     /**
-     * @param WordCount_Struct[] $wordCount_Struct
+     * @param WordCountStruct[] $wordCount_Struct
      *
-     * @return WordCount_Struct
+     * @return WordCountStruct
      */
     public function sumDifferentials( $wordCount_Struct ) {
 
-        $newWCount = new WordCount_Struct();
+        $newWCount = new WordCountStruct();
         $newWCount->setIdSegment( $this->oldWCount->getIdSegment() );
         $newWCount->setOldStatus( $this->oldStatus );
         $newWCount->setNewStatus( $this->newStatus );
         $newWCount->setIdJob( $this->oldWCount->getIdJob() );
         $newWCount->setJobPassword( $this->oldWCount->getJobPassword() );
-        /**
-         * @var WordCount_Struct $count
-         */
+
         foreach ( $wordCount_Struct as $count ) {
             $newWCount->setNewWords( $newWCount->getNewWords() + $count->getNewWords() );
             $newWCount->setTranslatedWords( $newWCount->getTranslatedWords() + $count->getTranslatedWords() );
-            $newWCount->setApprovedWords( $newWCount->getApprovedWords() + $count->getApprovedWords() );
-            $newWCount->setRejectedWords( $newWCount->getRejectedWords() + $count->getRejectedWords() );
             $newWCount->setDraftWords( $newWCount->getDraftWords() + $count->getDraftWords() );
+            $newWCount->setApprovedWords( $newWCount->getApprovedWords() + $count->getApprovedWords() );
+            $newWCount->setApproved2Words( $newWCount->getApproved2Words() + $count->getApproved2Words() );
+            $newWCount->setRejectedWords( $newWCount->getRejectedWords() + $count->getRejectedWords() );
+
+            $newWCount->setNewRawWords( $newWCount->getNewRawWords() + $count->getNewRawWords() );
+            $newWCount->setDraftRawWords( $newWCount->getDraftRawWords() + $count->getDraftRawWords() );
+            $newWCount->setTranslatedRawWords( $newWCount->getTranslatedRawWords() + $count->getTranslatedRawWords() );
+            $newWCount->setApprovedRawWords( $newWCount->getApprovedRawWords() + $count->getApprovedRawWords() );
+            $newWCount->setApproved2RawWords( $newWCount->getApproved2RawWords() + $count->getApproved2RawWords() );
+            $newWCount->setRejectedRawWords( $newWCount->getRejectedRawWords() + $count->getRejectedRawWords() );
+
         }
 
         return $newWCount;
@@ -194,18 +216,43 @@ class WordCount_CounterModel {
     public function initializeJobWordCount( $id_job, $jPassword ) {
 
         $_details = WordCounterDao::getStatsForJob( $id_job, null, $jPassword );
-        //Log::doJsonLog( "--- trying to Iitialize/reset job total word count." );
+        //Log::doJsonLog( "--- trying to Initialize/reset job total word count." );
 
-        $job_details = array_pop( $_details ); //get the row
+        $_job_details = array_pop( $_details ); //get the row
 
-        $wStruct = new WordCount_Struct();
+        $job_details = [
+                'weighted' => 0,
+                'raw'      => 0
+        ];
+
+        foreach ( $_job_details as $key => $value ) {
+            $k = explode( "_", $key ); // EX: split TOTAL_RAW
+            if ( !empty( $k[ 1 ] ) ) {
+                $job_details[ $k[ 0 ] ][ 'raw' ] = $value;
+            } elseif ( $k[ 0 ] != 'id' ) {
+                $job_details[ $k[ 0 ] ][ 'weighted' ] = $value;
+            } else {
+                $job_details[ $key ] = $value;
+            }
+        }
+
+        $wStruct = new WordCountStruct();
         $wStruct->setIdJob( $job_details[ 'id' ] );
         $wStruct->setJobPassword( $jPassword );
-        $wStruct->setNewWords( $job_details[ Constants_TranslationStatus::STATUS_NEW ] );
-        $wStruct->setDraftWords( $job_details[ Constants_TranslationStatus::STATUS_DRAFT ] - $job_details[ Constants_TranslationStatus::STATUS_NEW ] );
-        $wStruct->setTranslatedWords( $job_details[ Constants_TranslationStatus::STATUS_TRANSLATED ] );
-        $wStruct->setApprovedWords( $job_details[ Constants_TranslationStatus::STATUS_APPROVED ] );
-        $wStruct->setRejectedWords( $job_details[ Constants_TranslationStatus::STATUS_REJECTED ] );
+        $wStruct->setNewWords( $job_details[ Constants_TranslationStatus::STATUS_NEW ][ 'weighted' ] );
+        $wStruct->setDraftWords( $job_details[ Constants_TranslationStatus::STATUS_DRAFT ][ 'weighted' ] );
+        $wStruct->setTranslatedWords( $job_details[ Constants_TranslationStatus::STATUS_TRANSLATED ][ 'weighted' ] );
+        $wStruct->setApprovedWords( $job_details[ Constants_TranslationStatus::STATUS_APPROVED ][ 'weighted' ] );
+        $wStruct->setApproved2Words( $job_details[ Constants_TranslationStatus::STATUS_APPROVED2 ][ 'weighted' ] );
+        $wStruct->setRejectedWords( $job_details[ Constants_TranslationStatus::STATUS_REJECTED ][ 'weighted' ] );
+
+        $wStruct->setNewRawWords( $job_details[ Constants_TranslationStatus::STATUS_NEW ][ 'raw' ] );
+        $wStruct->setDraftRawWords( $job_details[ Constants_TranslationStatus::STATUS_DRAFT ][ 'raw' ] );
+        $wStruct->setTranslatedRawWords( $job_details[ Constants_TranslationStatus::STATUS_TRANSLATED ][ 'raw' ] );
+        $wStruct->setApprovedRawWords( $job_details[ Constants_TranslationStatus::STATUS_APPROVED ][ 'raw' ] );
+        $wStruct->setApproved2RawWords( $job_details[ Constants_TranslationStatus::STATUS_APPROVED2 ][ 'raw' ] );
+        $wStruct->setRejectedRawWords( $job_details[ Constants_TranslationStatus::STATUS_REJECTED ][ 'raw' ] );
+
         WordCounterDao::initializeWordCount( $wStruct );
 
         //Log::doJsonLog( $wStruct );
@@ -222,11 +269,12 @@ class WordCount_CounterModel {
      *
      * @return string
      */
-    private function methodNameForStatusCall( $name ) {
-        if ( in_array( strtoupper($name), Constants_TranslationStatus::$POST_REVISION_STATUSES  ) ) {
-            return 'TranslatedWords' ;
+    private function methodNameForStatusCall( $name, $raw_count = false ) {
+        if ( in_array( strtoupper( $name ), Constants_TranslationStatus::$POST_REVISION_STATUSES ) ) {
+            return 'TranslatedWords';
         }
-        return ucfirst( strtolower( $name ) ) . 'Words';
+
+        return ucfirst( strtolower( $name ) ) . ( $raw_count ? "Raw" : "" ) . 'Words';
 
     }
 

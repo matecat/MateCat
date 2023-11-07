@@ -277,14 +277,14 @@ export const CattolFooter = ({
             {!!stats?.WORDS_PER_HOUR && (
               <div id="stat-wph" title="Based on last 10 segments performance">
                 Speed:
-                <strong>{stats.WORDS_PER_HOUR}</strong> Words/h
+                <strong>{stats.words_per_hour}</strong> Words/h
               </div>
             )}
 
             {!!stats?.ESTIMATED_COMPLETION && (
               <div id="stat-completion">
                 Completed in:
-                <strong>{stats.ESTIMATED_COMPLETION}</strong>
+                <strong>{stats.estimated_completion}</strong>
               </div>
             )}
           </div>

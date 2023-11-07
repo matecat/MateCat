@@ -786,7 +786,6 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
      * @param $id_job
      *
      * @return array|null
-     * @throws Exception
      */
     public static function getLast10TranslatedSegmentIDs( $id_job ) {
 
@@ -799,7 +798,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
 		SELECT id_segment
             FROM segment_translations FORCE INDEX (id_job) 
             WHERE id_job = :id_job
-            AND `status` IN ( 'TRANSLATED', 'APPROVED' )
+            AND `status` IN ( 'TRANSLATED', 'APPROVED', 'APPROVED2' )
             AND `translation_date` <= :now AND `translation_date` >= :limit
             ORDER BY translation_date DESC LIMIT 10
 		";
@@ -843,8 +842,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
          */
         $query = "
             SELECT 
-                   Round(SUM(IF(Ifnull(st.eq_word_count, 0) = 0, s.raw_word_count,
-                         st.eq_word_count)) /
+                   Round( s.raw_word_count /
                                ( Unix_timestamp(Max(translation_date)) -
                                  Unix_timestamp(Min(translation_date)) ) * 3600) AS words_per_hour
          

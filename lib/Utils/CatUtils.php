@@ -6,6 +6,8 @@ use LQA\ChunkReviewStruct;
 use Matecat\SubFiltering\Enum\CTypeEnum;
 use Matecat\SubFiltering\MateCatFilter;
 use Validator\IsJobRevisionValidatorObject;
+use WordCount\CounterModel;
+use WordCount\WordCountStruct;
 
 define( "LTPLACEHOLDER", "##LESSTHAN##" );
 define( "GTPLACEHOLDER", "##GREATERTHAN##" );
@@ -225,7 +227,6 @@ class CatUtils {
      * @param array $job_stats
      *
      * @return array
-     * @throws Exception
      */
     protected static function _performanceEstimationTime( array $job_stats ) {
 
@@ -236,12 +237,12 @@ class CatUtils {
             // Calculating words per hour and estimated completion
             $estimation_temp = Translations_SegmentTranslationDao::getEQWLastHour( $job_stats[ 'id' ], $last_10_worked_ids );
 
-            $job_stats[ 'WORDS_PER_HOUR' ] = number_format( $estimation_temp[ 0 ][ 'words_per_hour' ], 0, '.', ',' );
+            $job_stats[ 'words_per_hour' ] = number_format( $estimation_temp[ 0 ][ 'words_per_hour' ], 0, '.', ',' );
             // 7.2 hours
             // $job_stats['ESTIMATED_COMPLETION'] = number_format( ($job_stats['DRAFT']+$job_stats['REJECTED'])/$estimation_temp[0]['words_per_hour'],1);
             // 1 h 32 m
             // $job_stats['ESTIMATED_COMPLETION'] = date("G",($job_stats['DRAFT']+$job_stats['REJECTED'])/$estimation_temp[0]['words_per_hour']*3600) . "h " . date("i",($job_stats['DRAFT']+$job_stats['REJECTED'])/$estimation_temp[0]['words_per_hour']*3600) . "m";
-            $job_stats[ 'ESTIMATED_COMPLETION' ] = date( "z\d G\h i\m", ( $job_stats[ 'DRAFT' ] + $job_stats[ 'REJECTED' ] ) * 3600 / ( !empty( $estimation_temp[ 0 ][ 'words_per_hour' ] ) ? $estimation_temp[ 0 ][ 'words_per_hour' ] : 1 ) - 3600 );
+            $job_stats[ 'estimated_completion' ] = date( "z\d G\h i\m", ( $job_stats[ 'DRAFT' ] + $job_stats[ 'REJECTED' ] ) * 3600 / ( !empty( $estimation_temp[ 0 ][ 'words_per_hour' ] ) ? $estimation_temp[ 0 ][ 'words_per_hour' ] : 1 ) - 3600 );
         }
 
         return $job_stats;
@@ -379,22 +380,31 @@ class CatUtils {
     }
 
     /**
-     * @param WordCount_Struct $wCount
      *
-     * @param bool             $performanceEstimation
+     * // YYY [Remove] backward compatibility for current projects
+     *
+     * This function expose stats supporting new and old version counter
+     *
+     * @param WordCountStruct $wCount
+     * @param bool            $performanceEstimation
      *
      * @return array
-     * @deprecated because if the use of pre-formatted values
      */
-    public static function getFastStatsForJob( WordCount_Struct $wCount, $performanceEstimation = true ) {
-        $job_stats = self::getPlainStatsForJobs( $wCount );
-        $job_stats = self::_getStatsForJob( $job_stats ); //true set estimation check if present
+    public static function getFastStatsForJob( WordCountStruct $wCount, $performanceEstimation = true, $wordCountType = Projects_MetadataDao::WORD_COUNT_RAW ) {
+
+        if ( $wordCountType == Projects_MetadataDao::WORD_COUNT_RAW ) {
+            $job_stats = $wCount->jsonSerialize();
+        } else {
+            $job_stats = self::getPlainStatsForJobs( $wCount );
+            $job_stats = self::_getStatsForJob( $job_stats ); //true set estimation check if present
+        }
 
         if ( !$performanceEstimation ) {
             return $job_stats;
         }
 
         return self::_performanceEstimationTime( $job_stats );
+
     }
 
     /**
@@ -707,24 +717,16 @@ class CatUtils {
      *
      * @param Projects_ProjectStruct $projectStruct
      *
-     * @return WordCount_Struct
+     * @return WordCountStruct
      * @throws Exception
      */
     public static function getWStructFromJobArray( Jobs_JobStruct $job, Projects_ProjectStruct $projectStruct ) {
 
-        $wStruct = new WordCount_Struct();
-
-        $wStruct->setIdJob( $job[ 'id' ] );
-        $wStruct->setJobPassword( $job[ 'password' ] );
-        $wStruct->setNewWords( $job[ 'new_words' ] );
-        $wStruct->setDraftWords( $job[ 'draft_words' ] );
-        $wStruct->setTranslatedWords( $job[ 'translated_words' ] );
-        $wStruct->setApprovedWords( $job[ 'approved_words' ] );
-        $wStruct->setRejectedWords( $job[ 'rejected_words' ] );
+        $wStruct = WordCountStruct::loadFromJob( $job );
 
         // For projects created with No tm analysis enabled
         if ( $wStruct->getTotal() == 0 && ( $projectStruct[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE || $projectStruct[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE ) ) {
-            $wCounter = new WordCount_CounterModel();
+            $wCounter = new CounterModel();
             $wStruct  = $wCounter->initializeJobWordCount( $job[ 'id' ], $job[ 'password' ] );
             Log::doJsonLog( "BackWard compatibility set Counter." );
 
@@ -772,11 +774,11 @@ class CatUtils {
     }
 
     /**
-     * @param WordCount_Struct $wCount
+     * @param WordCountStruct $wCount
      *
      * @return array
      */
-    public static function getPlainStatsForJobs( WordCount_Struct $wCount ) {
+    public static function getPlainStatsForJobs( WordCountStruct $wCount ) {
         $job_stats                 = [];
         $job_stats[ 'id' ]         = $wCount->getIdJob();
         $job_stats[ 'DRAFT' ]      = self::normalizeNumber( $wCount->getNewWords() ) + self::normalizeNumber( $wCount->getDraftWords() );

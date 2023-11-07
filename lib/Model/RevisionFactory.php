@@ -10,6 +10,7 @@ use Features\SecondPassReview\TranslationIssueModel;
 use Features\TranslationVersions\Model\TranslationEvent;
 use Klein\Request;
 use LQA\ChunkReviewStruct;
+use WordCount\CounterModel;
 
 /**
  * Class RevisionFactory
@@ -64,7 +65,7 @@ class RevisionFactory {
      *
      * @return ISegmentTranslationModel
      */
-    public function getSegmentTranslationModel( TranslationEvent $translationEvent, array $chunkReviews, WordCount_CounterModel $jobWordCounter ) {
+    public function getSegmentTranslationModel( TranslationEvent $translationEvent, array $chunkReviews, CounterModel $jobWordCounter ) {
         return $this->revision->getSegmentTranslationModel( $translationEvent, $jobWordCounter, $chunkReviews );
     }
 

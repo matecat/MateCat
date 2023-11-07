@@ -554,7 +554,6 @@ class FsFilesStorage extends AbstractFilesStorage
      */
 
     public function transferFiles($source, $destination){
-        // @TODO to implement
     }
 }
 

@@ -5,7 +5,6 @@ namespace Features;
 use API\V2\Exceptions\ValidationError;
 use BasicFeatureStruct;
 use Chunks_ChunkCompletionEventStruct;
-use Chunks_ChunkDao;
 use Chunks_ChunkStruct;
 use Constants;
 use Database;
@@ -13,10 +12,9 @@ use Exception;
 use Exceptions\NotFoundException;
 use Features;
 use Features\ProjectCompletion\CompletionEventStruct;
+use Features\ReviewExtended\BatchReviewProcessor;
 use Features\ReviewExtended\IChunkReviewModel;
 use Features\ReviewExtended\ISegmentTranslationModel;
-use Features\ReviewExtended\Model\ArchivedQualityReportModel;
-use Features\ReviewExtended\BatchReviewProcessor;
 use Features\ReviewExtended\Model\QualityReportModel;
 use Features\TranslationVersions\Handlers\TranslationEventsHandler;
 use Features\TranslationVersions\Model\TranslationEvent;
@@ -34,8 +32,10 @@ use Projects_ProjectStruct;
 use Revise\FeedbackDAO;
 use RevisionFactory;
 use Utils;
-use WordCount_CounterModel;
+use WordCount\CounterModel;
 use ZipArchive;
+
+;
 
 abstract class AbstractRevisionFeature extends BaseFeature {
 
@@ -325,13 +325,8 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      * @param                       $completion_event_id
      */
     public function project_completion_event_saved( Chunks_ChunkStruct $chunk, CompletionEventStruct $event, $completion_event_id ) {
-        if ( $event->is_review ) {
-            $model = new ArchivedQualityReportModel( $chunk );
-            $model->saveWithUID( $event->uid );
-        } else {
             $model = new QualityReportModel( $chunk );
             $model->resetScore( $completion_event_id );
-        }
     }
 
     /**
@@ -538,7 +533,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      *
      * @return ISegmentTranslationModel
      */
-    public function getSegmentTranslationModel( TranslationEvent $translation, WordCount_CounterModel $jobWordCounter, array $chunkReviews = [] ) {
+    public function getSegmentTranslationModel( TranslationEvent $translation, CounterModel $jobWordCounter, array $chunkReviews = [] ) {
         $class_name = get_class( $this ) . '\SegmentTranslationModel';
 
         return new $class_name( $translation, $jobWordCounter, $chunkReviews );

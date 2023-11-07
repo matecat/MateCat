@@ -5,7 +5,9 @@ namespace API\V1;
 
 use API\V2\KleinController;
 use API\V2\Validators\ChunkPasswordValidator;
+use CatUtils;
 use Chunks_ChunkStruct;
+use WordCount\WordCountStruct;
 
 class StatsController extends KleinController {
 
@@ -19,36 +21,12 @@ class StatsController extends KleinController {
     }
 
     /**
-     * @throws \API\V2\Exceptions\AuthenticationError
-     * @throws \Exceptions\NotFoundException
-     * @throws \Exceptions\ValidationError
-     * @throws \TaskRunner\Exceptions\EndQueueException
-     * @throws \TaskRunner\Exceptions\ReQueueException
+     * @return void
      */
     public function stats() {
-
-        $wStruct = new \WordCount_Struct();
-
-        $wStruct->setIdJob( $this->chunk->id );
-        $wStruct->setJobPassword( $this->chunk->password );
-        $wStruct->setNewWords( $this->chunk->new_words );
-        $wStruct->setDraftWords( $this->chunk->draft_words );
-        $wStruct->setTranslatedWords( $this->chunk->translated_words );
-        $wStruct->setApprovedWords( $this->chunk->approved_words );
-        $wStruct->setRejectedWords( $this->chunk->rejected_words );
-
-        $job_stats = \CatUtils::getFastStatsForJob( $wStruct );
-
-        $job_stats['ANALYSIS_COMPLETE'] = $this->chunk->getProject()->analysisComplete() ;
-
-
-        $response = array( 'stats' => $job_stats );
-
-        $this->featureSet = new \FeatureSet();
-        $this->featureSet->loadForProject( $this->chunk->getProject( 60 * 60 ) )  ;
-        $response = $this->featureSet->filter('filterStatsControllerResponse', $response, [ 'chunk' => $this->chunk ] );
-
-        $this->response->json( $response ) ;
+        $wStruct = WordCountStruct::loadFromJob( $this->chunk );
+        $wStruct['analysis_complete'] = $this->chunk->getProject()->analysisComplete() ;
+        $this->response->json( $wStruct ) ;
     }
 
     protected function afterConstruct() {

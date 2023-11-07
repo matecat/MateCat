@@ -38,6 +38,7 @@ use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\NotSupportedMTException;
 use TaskRunner\Exceptions\ReQueueException;
 use Translations_SegmentTranslationDao;
+use WordCount\CounterModel;
 
 /**
  * Class TMAnalysisWorker
@@ -898,7 +899,7 @@ class TMAnalysisWorker extends AbstractWorker {
 
             $database = Database::obtain();
             foreach ( $_analyzed_report as $job_info ) {
-                $counter = new \WordCount_CounterModel();
+                $counter = new CounterModel();
                 $database->begin();
                 $wordCountStructs[] = $counter->initializeJobWordCount( $job_info[ 'id_job' ], $job_info[ 'password' ] );
                 $database->commit();

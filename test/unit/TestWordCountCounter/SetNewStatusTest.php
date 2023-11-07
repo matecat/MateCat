@@ -2,7 +2,7 @@
 
 /**
  * @group regression
- * @covers WordCount_CounterModel::setNewStatus
+ * @covers CounterModel::setNewStatus
  * User: dinies
  * Date: 13/06/16
  * Time: 12.25
@@ -11,7 +11,7 @@ class SetNewStatusTest extends AbstractTest
 {
 
     /**
-     * @var WordCount_CounterModel
+     * @var CounterModel
      */
     protected $word_counter;
     protected $mirror_word_counter;
@@ -21,7 +21,7 @@ class SetNewStatusTest extends AbstractTest
 
     public function setUp()
     {
-        $this->word_counter = new WordCount_CounterModel();
+        $this->word_counter = new CounterModel();
         $this->mirror_word_counter = new ReflectionClass($this->word_counter);
         $this->new_status = $this->mirror_word_counter->getProperty('newStatus');
         $this->new_status->setAccessible(true);
@@ -33,7 +33,7 @@ class SetNewStatusTest extends AbstractTest
 
     /**
      * @group regression
-     * @covers WordCount_CounterModel::setNewStatus
+     * @covers CounterModel::setNewStatus
      *
      * @param "NEW"
      */
@@ -46,7 +46,7 @@ class SetNewStatusTest extends AbstractTest
 
     /**
      * @group regression
-     * @covers WordCount_CounterModel::setNewStatus
+     * @covers CounterModel::setNewStatus
      *
      * @param "DRAFT"
      */
@@ -59,7 +59,7 @@ class SetNewStatusTest extends AbstractTest
 
     /**
      * @group regression
-     * @covers WordCount_CounterModel::setNewStatus
+     * @covers CounterModel::setNewStatus
      *
      * @param "TRANSLATED"
      */
@@ -72,7 +72,7 @@ class SetNewStatusTest extends AbstractTest
 
     /**
      * @group regression
-     * @covers WordCount_CounterModel::setNewStatus
+     * @covers CounterModel::setNewStatus
      *
      * @param "APPROVED"
      */
@@ -84,7 +84,7 @@ class SetNewStatusTest extends AbstractTest
     }
     /**
      * @group  regression
-     * @covers WordCount_CounterModel::setNewStatus
+     * @covers CounterModel::setNewStatus
      *
      * @param "REJECTED"
      */
@@ -97,7 +97,7 @@ class SetNewStatusTest extends AbstractTest
 
     /**
      * @group  regression
-     * @covers WordCount_CounterModel::setNewStatus
+     * @covers CounterModel::setNewStatus
      *
      * @param "FIXED"
      */
@@ -110,7 +110,7 @@ class SetNewStatusTest extends AbstractTest
 
     /**
      * @group  regression
-     * @covers WordCount_CounterModel::setNewStatus
+     * @covers CounterModel::setNewStatus
      *
      * @param "REBUTTED"
      */
@@ -123,7 +123,7 @@ class SetNewStatusTest extends AbstractTest
 
     /**
      * @group  regression
-     * @covers WordCount_CounterModel::setNewStatus
+     * @covers CounterModel::setNewStatus
      *
      * @param "BARANDFOO"
      */
