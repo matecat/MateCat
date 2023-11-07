@@ -170,6 +170,17 @@ class MMTServiceApi {
     }
 
     /**
+     * @param $id
+     * @param $data
+     * @return mixed
+     * @throws MMTServiceApiException
+     */
+    public function updateGlossary($id, $data)
+    {
+        return $this->send( 'PUT', "$this->baseUrl/memories/$id/glossary", $data );
+    }
+
+    /**
      * @param $jobId
      * @return mixed
      * @throws MMTServiceApiException
@@ -416,9 +427,10 @@ class MMTServiceApi {
         if ( $multipart ) {
             $headers[] = 'Content-Type: multipart/form-data';
         } else {
-            $headers[] = 'Content-Type: application/x-www-form-urlencoded; charset=utf-8';
+            $headers[] = 'Content-Type: application/json';
             if ( $params ) {
-                $params = http_build_query( $params );
+                $params = json_encode( $params );
+                $headers[] = strlen( $params ) ;
             }
         }
 

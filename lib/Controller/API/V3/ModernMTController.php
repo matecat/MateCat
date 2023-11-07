@@ -33,7 +33,7 @@ class ModernMTController extends BaseChunkController
         }
 
         try {
-            $engineId = $this->request->engineId;
+            $engineId = filter_var( $this->request->engineId, FILTER_SANITIZE_NUMBER_INT );
             $params = $this->request->params();
             $MMTClient = $this->getModernMTClient($engineId);
             $memories = $MMTClient->getAllMemories();
@@ -74,7 +74,7 @@ class ModernMTController extends BaseChunkController
 
             $glossary = $this->extractCSVAndValidate($uploadedFiles->glossary, $type);
 
-            $engineId = $this->request->engineId;
+            $engineId = filter_var( $this->request->engineId, FILTER_SANITIZE_NUMBER_INT );
             $MMTClient = $this->getModernMTClient($engineId);
 
             $this->response->status()->setCode( 200 );
@@ -94,11 +94,71 @@ class ModernMTController extends BaseChunkController
     }
 
     /**
+     * Update a MMT glossary (tuid is needed)
+     */
+    public function modifyGlossary()
+    {
+        try {
+            $this->validateModifyGlossaryParams();
+
+            $glossaryId = filter_var( $this->params['glossaryId' ], FILTER_SANITIZE_NUMBER_INT );
+            $tuid = (isset($this->params['tuid'])) ? filter_var( $this->params['tuid' ], FILTER_SANITIZE_STRING ) : null;
+            $terms = $this->params['terms'];
+            $type = filter_var( $this->params['type' ], FILTER_SANITIZE_STRING );
+
+            $engineId = filter_var( $this->request->engineId, FILTER_SANITIZE_NUMBER_INT );
+            $MMTClient = $this->getModernMTClient($engineId);
+
+            $payload = [
+                'type'  => $type,
+                'terms' => $terms
+            ];
+
+            if($tuid){
+                $payload['tuid'] = $tuid;
+            }
+
+            $this->response->status()->setCode( 200 );
+            $this->response->json($MMTClient->updateGlossary($glossaryId, $payload));
+            exit();
+
+        } catch (Exception $exception){
+            $this->response->status()->setCode( 500 );
+            $this->response->json([
+                'error' => $exception->getMessage()
+            ]);
+            exit();
+        }
+    }
+
+    /**
+     * Delete a MMT memory
+     */
+    public function deleteMemory()
+    {
+        try {
+            $memoryId = filter_var( $this->request->memoryId, FILTER_SANITIZE_NUMBER_INT );
+            $engineId = filter_var( $this->request->engineId, FILTER_SANITIZE_NUMBER_INT );
+            $MMTClient = $this->getModernMTClient($engineId);
+
+            $this->response->status()->setCode( 200 );
+            $this->response->json($MMTClient->deleteMemory($memoryId));
+            exit();
+
+        } catch (Exception $exception){
+            $this->response->status()->setCode( 500 );
+            $this->response->json([
+                'error' => $exception->getMessage()
+            ]);
+            exit();
+        }
+    }
+
+    /**
      * @throws Exception
      */
     private function validateImportGlossaryParams()
     {
-        // validate params
         if(!isset($_FILES['glossary'])){
             throw new Exception('Missing `glossary` files');
         }
@@ -118,6 +178,50 @@ class ModernMTController extends BaseChunkController
 
         if(!in_array($_POST['type'], $allowedTypes)){
             throw new Exception('Wrong `type` param. Allowed values: [unidirectional, equivalent]');
+        }
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function validateModifyGlossaryParams()
+    {
+        if(!isset($this->params['glossaryId'])){
+            throw new Exception('Missing `glossaryId` param');
+        }
+
+        if(!isset($this->params['type']) ){
+            throw new Exception('Missing `type` param');
+        }
+
+        $allowedTypes = [
+            'unidirectional',
+            'equivalent',
+        ];
+
+        if(!in_array($this->params['type'], $allowedTypes)){
+            throw new Exception('Wrong `type` param. Allowed values: [unidirectional, equivalent]');
+        }
+
+        if($this->params['type'] === 'equivalent' and !isset($this->params['tuid'])){
+            throw new Exception('Missing `tuid` param');
+        }
+
+        if(!isset($this->params['terms'])){
+            throw new Exception('Missing `terms` param');
+        }
+
+        // validate terms
+        $terms = $this->params['terms'];
+
+        if(!is_array($terms)){
+            throw new Exception('`terms` is not an array');
+        }
+
+        foreach ($terms as $term){
+            if(!isset($term['term']) or !isset($term['language'])){
+                throw new Exception('`terms` array is malformed.');
+            }
         }
     }
 

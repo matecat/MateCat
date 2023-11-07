@@ -76,4 +76,6 @@ $klein->with( '/api/v3/tm-keys', function () {
 $klein->with( '/api/v3/mmt/[:engineId]', function () {
     route( '/keys', 'GET', '\API\V3\ModernMTController', 'get' );
     route( '/import-glossary', 'POST', '\API\V3\ModernMTController', 'importGlossary' );
+    route( '/modify-glossary', 'POST', '\API\V3\ModernMTController', 'modifyGlossary' );
+    route( '/delete-memory/[:memoryId]', 'POST', '\API\V3\ModernMTController', 'deleteMemory' );
 } );
