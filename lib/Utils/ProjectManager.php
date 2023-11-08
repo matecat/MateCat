@@ -36,6 +36,7 @@ use Teams\TeamStruct;
 use TMS\TMSFile;
 use TMS\TMSService;
 use Translators\TranslatorsModel;
+use WordCount\CounterModel;
 
 class ProjectManager {
 
