@@ -9,6 +9,8 @@
 namespace Features\SegmentFilter\Model;
 
 
+use Constants_TranslationStatus;
+
 class FilterDefinition {
 
     /**
@@ -31,7 +33,7 @@ class FilterDefinition {
     }
 
     public function revisionNumber() {
-        if ( in_array( $this->getSegmentStatus(), \Constants_TranslationStatus::$REVISION_STATUSES ) ) {
+        if ( in_array( $this->getSegmentStatus(), Constants_TranslationStatus::$REVISION_STATUSES ) ) {
             if ( empty( $this->filter_data['revision_number']) ) {
                 $this->filter_data['revision_number'] = 1 ;
             }
