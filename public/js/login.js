@@ -121,8 +121,8 @@ $.extend(APP, {
           //After confirm email or google register
           const data = {
             event: APP.USER.isGoogleUser()
-              ? 'google_register'
-              : 'email_register',
+              ? 'new_signup_google'
+              : 'new_signup_email',
             userId: APP.USER.isUserLogged() ? APP.USER.STORE.user.uid : null,
           }
           CommonUtils.dispatchAnalyticsEvents(data)

@@ -52,7 +52,7 @@ class RegisterModal extends React.Component {
     }
     this.setState({requestRunning: true})
     const data = {
-      event: 'email_open_register',
+      event: 'open_register_email',
     }
     CommonUtils.dispatchAnalyticsEvents(data)
     this.checkRedeemProject().then(
@@ -89,7 +89,7 @@ class RegisterModal extends React.Component {
 
   googole_popup() {
     const data = {
-      event: 'google_open_register',
+      event: 'open_register_google',
     }
     CommonUtils.dispatchAnalyticsEvents(data)
     var url = this.props.googleUrl
