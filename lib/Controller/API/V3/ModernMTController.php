@@ -72,12 +72,20 @@ class ModernMTController extends BaseChunkController
             }
 
             $memoryId = filter_var( $_POST['memoryId' ], FILTER_SANITIZE_NUMBER_INT );
-            $type = filter_var( $_POST['type' ], FILTER_SANITIZE_STRING );
 
             $uploadManager = new Upload();
             $uploadedFiles = $uploadManager->uploadFiles( $_FILES );
 
-            $glossary = $this->extractCSVAndValidate($uploadedFiles->glossary, $type);
+            $glossary = $this->extractCSV($uploadedFiles->glossary);
+
+            // validate
+            $csv = CSVParser::parse($glossary);
+
+            if(empty($csv)){
+                throw new Exception("Glossary is empty", 400);
+            }
+
+            $type = (count($csv[0]) == 2) ? 'unidirectional' : 'equivalent';
 
             $engineId = filter_var( $this->request->engineId, FILTER_SANITIZE_NUMBER_INT );
             $MMTClient = $this->getModernMTClient($engineId);
@@ -193,12 +201,19 @@ class ModernMTController extends BaseChunkController
             $memoryId = $memory['id'];
 
             // upload glossary
-            $type = filter_var( $_POST['type' ], FILTER_SANITIZE_STRING );
-
             $uploadManager = new Upload();
             $uploadedFiles = $uploadManager->uploadFiles( $_FILES );
 
-            $glossary = $this->extractCSVAndValidate($uploadedFiles->glossary, $type);
+            $glossary = $this->extractCSV($uploadedFiles->glossary);
+
+            // validate
+            $csv = CSVParser::parse($glossary);
+
+            if(empty($csv)){
+                throw new Exception("Glossary is empty", 400);
+            }
+
+            $type = (count($csv[0]) == 2) ? 'unidirectional' : 'equivalent';
 
             $this->response->status()->setCode( 200 );
             $this->response->json($MMTClient->importGlossary($memoryId, [
@@ -279,23 +294,6 @@ class ModernMTController extends BaseChunkController
         if(!isset($_FILES['glossary'])){
             throw new Exception('Missing `glossary` files', 400);
         }
-
-        if(!isset($_POST['memoryId'])){
-            throw new Exception('Missing `memoryId` param', 400);
-        }
-
-        if(!isset($_POST['type']) ){
-            throw new Exception('Missing `type` param', 400);
-        }
-
-        $allowedTypes = [
-            'unidirectional',
-            'equivalent',
-        ];
-
-        if(!in_array($_POST['type'], $allowedTypes)){
-            throw new Exception('Wrong `type` param. Allowed values: [unidirectional, equivalent]', 400);
-        }
     }
 
     /**
@@ -348,7 +346,7 @@ class ModernMTController extends BaseChunkController
      * @return false|string
      * @throws \PhpOffice\PhpSpreadsheet\Reader\Exception
      */
-    private function extractCSVAndValidate($glossary, $type)
+    private function extractCSV($glossary)
     {
         $tmpFileName = tempnam( "/tmp", "MMT_EXCEL_GLOSS_" );
 
@@ -362,21 +360,6 @@ class ModernMTController extends BaseChunkController
         $glossary->file_path = $tmpFileName;
 
         unlink( $oldPath );
-
-        // validate
-        $csv = CSVParser::parse($tmpFileName);
-
-        if(empty($csv)){
-            throw new Exception("Glossary is empty", 400);
-        }
-
-        if(count($csv[0]) == 2 and $type !== 'unidirectional'){
-            throw new Exception("Wrong type: the file type MUST be `unidirectional`", 400);
-        }
-
-        if(count($csv[0]) > 2 and $type !== 'equivalent'){
-            throw new Exception("Wrong type: the file type MUST be `equivalent`", 400);
-        }
 
         return $glossary->file_path;
     }
