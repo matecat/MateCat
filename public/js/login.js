@@ -120,8 +120,10 @@ $.extend(APP, {
           modal$.trigger('openpreferences')
           //After confirm email or google register
           const data = {
-            event: APP.USER.isGoogleUser ? 'google_register' : 'email_register',
-            userId: APP.USER.isUserLogged ? APP.USER.STORE.user.uid : null,
+            event: APP.USER.isGoogleUser()
+              ? 'google_register'
+              : 'email_register',
+            userId: APP.USER.isUserLogged() ? APP.USER.STORE.user.uid : null,
           }
           CommonUtils.dispatchAnalyticsEvents(data)
         })

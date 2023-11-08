@@ -124,8 +124,8 @@ class AnalyzeChunksResume extends React.Component {
       //Track Translate click
       const event = {
         event: 'open_job',
-        userStatus: APP.USER.isUserLogged ? 'loggedUser' : 'notLoggedUser',
-        userId: APP.USER.isUserLogged ? APP.USER.STORE.user.uid : null,
+        userStatus: APP.USER.isUserLogged() ? 'loggedUser' : 'notLoggedUser',
+        userId: APP.USER.isUserLogged() ? APP.USER.STORE.user.uid : null,
         idProject: parseInt(config.id_project),
       }
       CommonUtils.dispatchAnalyticsEvents(event)
