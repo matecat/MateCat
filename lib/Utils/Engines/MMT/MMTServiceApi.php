@@ -260,6 +260,15 @@ class MMTServiceApi {
     }
 
     /**
+     * @param $uuid
+     * @throws MMTServiceApiException
+     */
+    public function jobStatus($uuid)
+    {
+        $this->send( 'GET', "$this->baseUrl/import-jobs/$uuid/content", [] );
+    }
+
+    /**
      * @param $tuid
      * @param $memory_keys
      * @param $source

@@ -67,6 +67,10 @@ class ModernMTController extends BaseChunkController
         try {
             $this->validateImportGlossaryParams();
 
+            if(!isset($_POST['memoryId'])){
+                throw new Exception('Missing `memoryId` param', 400);
+            }
+
             $memoryId = filter_var( $_POST['memoryId' ], FILTER_SANITIZE_NUMBER_INT );
             $type = filter_var( $_POST['type' ], FILTER_SANITIZE_STRING );
 
@@ -153,6 +157,54 @@ class ModernMTController extends BaseChunkController
 
             $this->response->status()->setCode( 200 );
             $this->response->json($MMTClient->createMemory($name, $description, $externalId));
+            exit();
+
+        } catch (Exception $exception){
+            $code = ($exception->getCode() > 0) ? $exception->getCode() : 500;
+            $this->response->status()->setCode( $code );
+            $this->response->json([
+                'error' => $exception->getMessage()
+            ]);
+            exit();
+        }
+    }
+
+    /**
+     * Creates a memory, wait to be completed and then import glossary
+     */
+    public function createMemoryAndImportGlossary()
+    {
+        try {
+            $this->validateImportGlossaryParams();
+
+            if(!isset($_POST['name'])){
+                throw new Exception('Missing `name` param', 400);
+            }
+
+            $name =  filter_var( $_POST['name'], FILTER_SANITIZE_STRING, FILTER_FLAG_ENCODE_LOW );
+
+            $engineId = filter_var( $this->request->engineId, FILTER_SANITIZE_NUMBER_INT );
+            $MMTClient = $this->getModernMTClient($engineId);
+
+            // create a new memory
+            $memory = $MMTClient->createMemory($name);
+
+            // wait to be completed
+            $memoryId = $memory['id'];
+
+            // upload glossary
+            $type = filter_var( $_POST['type' ], FILTER_SANITIZE_STRING );
+
+            $uploadManager = new Upload();
+            $uploadedFiles = $uploadManager->uploadFiles( $_FILES );
+
+            $glossary = $this->extractCSVAndValidate($uploadedFiles->glossary, $type);
+
+            $this->response->status()->setCode( 200 );
+            $this->response->json($MMTClient->importGlossary($memoryId, [
+                'csv' => new CURLFile($glossary, 'text/csv'),
+                'type' => $type
+            ]));
             exit();
 
         } catch (Exception $exception){
