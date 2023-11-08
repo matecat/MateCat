@@ -42,7 +42,6 @@ class SegmentFilterModel {
      * @throws Exception
      */
     public function getSegmentList() {
-        $result = null;
 
         if ( $this->filter->isSampled() ) {
             $result = SegmentFilterDao::findSegmentIdsForSample( $this->chunk, $this->filter );
