@@ -6,6 +6,7 @@ import * as RuleRunner from '../common/ruleRunner'
 import * as FormRules from '../common/formRules'
 import {checkRedeemProject as checkRedeemProjectApi} from '../../api/checkRedeemProject'
 import {registerUser} from '../../api/registerUser'
+import CommonUtils from '../../utils/commonUtils'
 
 const PASSWORD_MIN_LENGTH = 12
 
@@ -50,6 +51,10 @@ class RegisterModal extends React.Component {
       return false
     }
     this.setState({requestRunning: true})
+    const data = {
+      event: 'email_open_register',
+    }
+    CommonUtils.dispatchAnalyticsEvents(data)
     this.checkRedeemProject().then(
       this.sendRegisterData()
         .then(() => {
@@ -83,6 +88,10 @@ class RegisterModal extends React.Component {
   }
 
   googole_popup() {
+    const data = {
+      event: 'google_open_register',
+    }
+    CommonUtils.dispatchAnalyticsEvents(data)
     var url = this.props.googleUrl
     this.checkRedeemProject()
     var newWindow = window.open(url, 'name', 'height=600,width=900')
