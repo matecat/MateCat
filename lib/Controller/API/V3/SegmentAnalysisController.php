@@ -1,6 +1,6 @@
 <?php
 
-namespace API\App;
+namespace API\V3;
 
 use API\V2\KleinController;
 use API\V2\Validators\LoginValidator;
