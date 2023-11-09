@@ -161,7 +161,7 @@ class TMSService {
             case "400" :
                 throw new Exception( "Error uploading TMX file. Please, try again in 5 minutes.", -15 );
             case "403" :
-                throw new Exception( "Invalid key provided", -15 );
+                throw new Exception( "Error: ". $this->formatErrorMessage($importStatus->responseDetails), -15 );
             default:
         }
 
@@ -279,7 +279,7 @@ class TMSService {
         if ( $allMemories->responseStatus >= 400 || $allMemories->responseData[ 'status' ] == 2 ) {
             Log::doJsonLog( "Error response from TMX status check: " . $allMemories->responseData[ 'log' ] );
             //what the hell? No memories although I've just loaded some? Eject!
-            throw new Exception( "Error response from TMX status check", -15 );
+            throw new Exception( 'Error: '. $this->formatErrorMessage($allMemories->responseData[ 'log' ]), -15 );
         }
 
         switch ( $allMemories->responseData[ 'status' ] ) {
@@ -303,6 +303,19 @@ class TMSService {
 
         return $result;
 
+    }
+
+    /**
+     * @param $message
+     * @return mixed
+     */
+    private function formatErrorMessage($message)
+    {
+        if($message === "THE CHARACTER SET PROVIDED IS INVALID."){
+            return "The encoding of the TMX file uploaded is not valid, please open it in a text editor, convert its encoding to UTF-8 (character corruption might happen) and retry upload";
+        }
+
+        return $message;
     }
 
     /**
