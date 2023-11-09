@@ -220,11 +220,6 @@ class CounterModel {
 
         $_job_details = array_pop( $_details ); //get the row
 
-        $job_details = [
-                'weighted' => 0,
-                'raw'      => 0
-        ];
-
         foreach ( $_job_details as $key => $value ) {
             $k = explode( "_", $key ); // EX: split TOTAL_RAW
             if ( !empty( $k[ 1 ] ) ) {

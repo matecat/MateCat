@@ -253,7 +253,7 @@ class WordCountStruct implements JsonSerializable {
      * @return $this
      */
     public function setApproved2Words( $approved2_words ) {
-        $this->approved2_words = $approved2_words;
+        $this->approved2_words = (float)$approved2_words;
 
         return $this;
     }
@@ -271,7 +271,7 @@ class WordCountStruct implements JsonSerializable {
      * @return $this
      */
     public function setNewRawWords( $new_raw_words ) {
-        $this->new_raw_words = $new_raw_words;
+        $this->new_raw_words = (float)$new_raw_words;
 
         return $this;
     }
@@ -289,7 +289,7 @@ class WordCountStruct implements JsonSerializable {
      * @return $this
      */
     public function setDraftRawWords( $draft_raw_words ) {
-        $this->draft_raw_words = $draft_raw_words;
+        $this->draft_raw_words = (float)$draft_raw_words;
 
         return $this;
     }
@@ -307,7 +307,7 @@ class WordCountStruct implements JsonSerializable {
      * @return $this
      */
     public function setTranslatedRawWords( $translated_raw_words ) {
-        $this->translated_raw_words = $translated_raw_words;
+        $this->translated_raw_words = (float)$translated_raw_words;
 
         return $this;
     }
@@ -325,7 +325,7 @@ class WordCountStruct implements JsonSerializable {
      * @return $this
      */
     public function setApprovedRawWords( $approved_raw_words ) {
-        $this->approved_raw_words = $approved_raw_words;
+        $this->approved_raw_words = (float)$approved_raw_words;
 
         return $this;
     }
@@ -343,7 +343,7 @@ class WordCountStruct implements JsonSerializable {
      * @return $this
      */
     public function setApproved2RawWords( $approved2_raw_words ) {
-        $this->approved2_raw_words = $approved2_raw_words;
+        $this->approved2_raw_words = (float)$approved2_raw_words;
 
         return $this;
     }
@@ -361,7 +361,7 @@ class WordCountStruct implements JsonSerializable {
      * @return $this
      */
     public function setRejectedRawWords( $rejected_raw_words ) {
-        $this->rejected_raw_words = $rejected_raw_words;
+        $this->rejected_raw_words = (float)$rejected_raw_words;
 
         return $this;
     }
