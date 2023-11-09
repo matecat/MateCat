@@ -224,8 +224,11 @@ class OutsourceVendor extends React.Component {
       .attr('value', JSON.stringify(this.quoteResponse))
     $(this.outsourceForm).submit()
     $(this.outsourceForm).find('input[name=quoteData]').attr('value', '')
-    $(document).trigger('outsource-clicked', {quote_data: this.quoteResponse})
-
+    const data = {
+      event: 'outsource_clicked',
+      quote_data: this.quoteResponse,
+    }
+    CommonUtils.dispatchAnalyticsEvents(data)
     // this.setState({
     //     jobOutsourced: true
     // });
