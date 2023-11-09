@@ -82,6 +82,10 @@ class AnalyzeChunksResume extends React.Component {
   openOutsourceModal = (idJob, chunk) => (e) => {
     e.stopPropagation()
     e.preventDefault()
+    const data = {
+      event: 'outsource_request',
+    }
+    CommonUtils.dispatchAnalyticsEvents(data)
     if (chunk.outsource_available) {
       this.setState({
         openOutsource: true,
