@@ -128,9 +128,6 @@ class SegmentAnalysisController extends KleinController {
      */
     private function getSegmentsFromIdJobAndPassword($idJob, $password, $page, $perPage)
     {
-        // https://dev.matecat.com/api/app/projects/9/64a02abbb1b6/segment-analysis
-        // https://dev.matecat.com/api/app/jobs/3/2fa321f18a18/segment-analysis
-
         $segments = [];
         $limit = $perPage;
         $offset = ($page-1)*$perPage;
