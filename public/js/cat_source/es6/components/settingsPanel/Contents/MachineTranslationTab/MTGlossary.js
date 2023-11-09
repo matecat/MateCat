@@ -1,8 +1,10 @@
-import React, {Fragment, useEffect} from 'react'
+import React, {useEffect} from 'react'
 import PropTypes from 'prop-types'
 import {useState} from 'react'
 import {SettingsPanelTable} from '../../SettingsPanelTable'
 import {MTGlossaryRow} from './MTGlossaryRow'
+import Upload from '../../../../../../../img/icons/Upload'
+import {MTGlossaryCreateRow} from './MTGlossaryCreateRow'
 
 const COLUMNS_TABLE = [
   {name: 'Activate'},
@@ -11,7 +13,7 @@ const COLUMNS_TABLE = [
   {name: ''},
 ]
 
-const CREATE_ROW_ID = 'createRow'
+export const MT_GLOSSARY_CREATE_ROW_ID = 'createRow'
 
 const fakeApi = {
   getMMTKeys: ({engineId}) =>
@@ -36,11 +38,16 @@ const fakeApi = {
         ])
       }, 500)
     }),
+  updateMMTMemory: ({id, name}) =>
+    new Promise((resolve) => {
+      resolve()
+    }),
 }
 
 export const MTGlossary = ({id, name}) => {
   const [isShowingRows, setIsShowingRows] = useState(false)
   const [rows, setRows] = useState([])
+  const [isGlossaryCaseSensitive, setIsGlossaryCaseSensitive] = useState(false)
 
   useEffect(() => {
     let wasCleanup = false
@@ -57,7 +64,7 @@ export const MTGlossary = ({id, name}) => {
 
             return {
               ...row,
-              node: <MTGlossaryRow key={row.id} {...{row}} />,
+              node: <MTGlossaryRow key={row.id} {...{row, setRows}} />,
             }
           }),
         )
@@ -67,6 +74,22 @@ export const MTGlossary = ({id, name}) => {
     return () => (wasCleanup = true)
   }, [id])
 
+  const addGlossary = () => {
+    const row = {
+      id: MT_GLOSSARY_CREATE_ROW_ID,
+      isActive: true,
+      className: 'row-content-create-glossary',
+    }
+
+    setRows((prevState) => [
+      ...prevState.filter(({id}) => id !== MT_GLOSSARY_CREATE_ROW_ID),
+      {...row, node: <MTGlossaryCreateRow {...{row, setRows}} />},
+    ])
+  }
+
+  const onChangeCaseSensitive = (e) =>
+    setIsGlossaryCaseSensitive(e.currentTarget.checked)
+
   return (
     <div className="mt-glossary">
       <div className="expand-button">
@@ -75,7 +98,24 @@ export const MTGlossary = ({id, name}) => {
         </button>
       </div>
       {isShowingRows && (
-        <SettingsPanelTable columns={COLUMNS_TABLE} rows={rows} />
+        <>
+          <SettingsPanelTable columns={COLUMNS_TABLE} rows={rows} />
+          <div className="bottom-buttons">
+            <button className="grey-button" onClick={addGlossary}>
+              <Upload size={14} />
+              Add glossary
+            </button>
+            <div className="mt-glossary-case-sensitive">
+              <input
+                checked={isGlossaryCaseSensitive}
+                onChange={onChangeCaseSensitive}
+                type="checkbox"
+                title=""
+              />
+              <label>Make glossary case sensitive</label>
+            </div>
+          </div>
+        </>
       )}
     </div>
   )
