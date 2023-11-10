@@ -149,7 +149,7 @@ class CounterModel {
 
         $res = WordCounterDao::updateWordCount( $differentialCountStruct );
 
-        if ( $res < 0 ) {
+        if ( $res <= 0 ) {
             throw new Exception( "Failed to update counter", $res );
         }
 

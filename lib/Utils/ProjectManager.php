@@ -9,7 +9,6 @@
 
 use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
-use Analysis\AnalysisDao;
 use ConnectedServices\GDrive as GDrive;
 use ConnectedServices\GDrive\Session;
 use Constants\XliffTranslationStatus;
@@ -30,6 +29,7 @@ use Matecat\SubFiltering\MateCatFilter;
 use Matecat\XliffParser\XliffParser;
 use Matecat\XliffParser\XliffUtils\DataRefReplacer;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
+use Model\Analysis\AnalysisDao;
 use PayableRates\CustomPayableRateDao;
 use ProjectManager\ProjectManagerModel;
 use Teams\TeamStruct;

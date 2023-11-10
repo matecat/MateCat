@@ -1,4 +1,5 @@
 <?php
+namespace Model\Analysis;
 
 /**
  * Created by PhpStorm.
@@ -7,7 +8,7 @@
  * Time: 13.37
  *
  */
-class Analysis_XTRFStatus extends Analysis_APIStatus {
+class XTRFStatus extends APIStatus {
 
     public function getResult(){
 

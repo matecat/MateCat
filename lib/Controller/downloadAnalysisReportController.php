@@ -2,6 +2,7 @@
 
 use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
+use Model\Analysis\XTRFStatus;
 
 /**
  * User: gremorian
@@ -68,7 +69,7 @@ class downloadAnalysisReportController extends downloadController {
 
         $this->featureSet->loadForProject( Projects_ProjectDao::findById( $this->id_project, 60 * 60 * 24 ) );
 
-        $analysisStatus = new Analysis_XTRFStatus( $_project_data, $this->featureSet );
+        $analysisStatus = new XTRFStatus( $_project_data, $this->featureSet );
         $outputContent = $analysisStatus->fetchData()->getResult();
 
         $this->outputContent = $this->composeZip( $_project_data[0][ 'pname' ], $outputContent );

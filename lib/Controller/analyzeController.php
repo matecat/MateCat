@@ -2,6 +2,7 @@
 
 use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
+use Model\Analysis\AnalysisModel;
 
 class analyzeController extends viewController {
 
@@ -28,7 +29,7 @@ class analyzeController extends viewController {
     private $jpassword;
 
     /**
-     * @var Analysis_AnalysisModel
+     * @var AnalysisModel
      */
     public $model;
 
@@ -124,7 +125,7 @@ class analyzeController extends viewController {
                 'project' => $this->project, 'page_type' => $this->page_type
         ] );
 
-        $this->model = new Analysis_AnalysisModel( $this->project, $this->chunk );
+        $this->model = new AnalysisModel( $this->project, $this->chunk );
         $this->model->loadData();
 
         $activity             = new ActivityLogStruct();

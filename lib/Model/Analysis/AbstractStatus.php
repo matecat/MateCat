@@ -1,6 +1,12 @@
 <?php
-
-use Analysis\AnalysisDao;
+namespace Model\Analysis;
+use Constants_ProjectStatus;
+use FeatureSet;
+use INIT;
+use OutsourceTo_OutsourceAvailable;
+use Projects_MetadataDao;
+use Projects_ProjectDao;
+use Exception;
 
 /**
  * Created by PhpStorm.
@@ -8,8 +14,10 @@ use Analysis\AnalysisDao;
  * Date: 04/05/15
  * Time: 13.37
  *
+ * YYY [Refactor] Change the analysis structure and rewrite all the subclasses
+ *
  */
-abstract class Analysis_AbstractStatus {
+abstract class AbstractStatus {
 
     protected $_data_struct = array();
 
@@ -88,9 +96,149 @@ abstract class Analysis_AbstractStatus {
      *
      * @return $this
      */
-    public function fetchData() {
+    public function fetchData( $word_count_type = Projects_MetadataDao::WORD_COUNT_EQUIVALENT ) {
 
         $this->_fetchProjectData();
+
+        return $this->_oldFormatData();
+//        if( $word_count_type == Projects_MetadataDao::WORD_COUNT_EQUIVALENT ){
+//        }
+//
+//        return $this->_formatData();
+
+    }
+
+    protected function _formatData(){
+        //TODO
+        $this->result = [];
+
+        $_total_segments_analyzed         = 0;
+        $_total_wc_fast_analysis          = 0;
+        $_total_wc_standard_fast_analysis = 0;
+        $target                           = null;
+        $outsourceAvailable               = false;
+
+        $read_jobs = [];
+        $read_chunks = [];
+
+        foreach ( $this->_resultSet as $segInfo ) {
+
+            if ( $segInfo[ 'st_status_analysis' ] == 'DONE' ) {
+                $_total_segments_analyzed += 1;
+            }
+
+            if ( $_total_wc_fast_analysis == 0 and $segInfo[ 'fast_analysis_wc' ] > 0 ) {
+                $_total_wc_fast_analysis = $segInfo[ 'fast_analysis_wc' ];
+            }
+
+            if ( $_total_wc_standard_fast_analysis == 0 and $segInfo[ 'fast_analysis_wc' ] > 0 ) {
+                $_total_wc_standard_fast_analysis = $segInfo[ 'fast_analysis_wc' ];
+            }
+
+            $jid           = $segInfo[ 'jid' ];
+            $jpassword     = $segInfo[ 'jpassword' ];
+            $words         = $segInfo[ 'raw_word_count' ];
+            $eq_words      = $segInfo[ 'eq_word_count' ];
+            $st_word_count = $segInfo[ 'standard_word_count' ];
+
+            $_total_raw_wc += $segInfo[ 'raw_word_count' ];
+            $_total_wc_tm_analysis += $eq_words;
+            $_total_wc_standard_analysis += $st_word_count;
+
+            // is outsource available?
+            if ( $target === null or $segInfo[ 'target' ] !== $target ) {
+                $outsourceAvailableInfo = $this->featureSet->filter( 'outsourceAvailableInfo', $segInfo[ 'target' ], $segInfo[ 'id_customer' ], $jid );
+
+                // if the hook is not triggered by any plugin
+                if ( !is_array( $outsourceAvailableInfo ) or empty( $outsourceAvailableInfo ) ) {
+                    $outsourceAvailableInfo = [
+                            'disabled_email'         => false,
+                            'custom_payable_rate'    => false,
+                            'language_not_supported' => false,
+                    ];
+                }
+
+                $outsourceAvailable = OutsourceTo_OutsourceAvailable::isOutsourceAvailable( $outsourceAvailableInfo );
+                $target             = $segInfo[ 'target' ];
+            }
+
+            if ( !array_key_exists( $jid, $read_jobs ) ) {
+                $this->result[ 'jobs' ]             = [];
+                $this->result[ 'jobs' ][ 'chunks' ] = [];
+                $read_jobs[ $jid ]                  = true;
+//                $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'outsource_available' ] = $outsourceAvailable;
+//                $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'totals' ]              = [];
+//                $total_word_counters[ $jid ]                                       = [];
+
+/*
+{
+        'jobs': {
+            'id': 123,
+            'chunks': [
+                'password': 'aaa',
+                'files': {
+                    'id': 1234,
+                    'name': 'filename.abc'
+
+                }
+            ]
+        }
+}
+*/
+
+            }
+
+            if ( $segInfo[ 'match_type' ] == "INTERNAL" ) {
+                $keyValue = 'internal';
+            } elseif ( $segInfo[ 'match_type' ] == "MT" ) {
+                $keyValue = 'MT';
+            } elseif ( $segInfo[ 'match_type' ] == "100%" ) {
+                $keyValue = '100';
+            } elseif ( $segInfo[ 'match_type' ] == "100%_PUBLIC" ) {
+                $keyValue = '100_public';
+            } elseif ( $segInfo[ 'match_type' ] == "75%-99%" ) {
+                $keyValue = '75_99';
+            } elseif ( $segInfo[ 'match_type' ] == "75%-84%" ) {
+                $keyValue = '75_84';
+            } elseif ( $segInfo[ 'match_type' ] == "85%-94%" ) {
+                $keyValue = '85_94';
+            } elseif ( $segInfo[ 'match_type' ] == "95%-99%" ) {
+                $keyValue = '95_99';
+            } elseif ( $segInfo[ 'match_type' ] == "50%-74%" ) {
+                $keyValue = '50_74';
+            } elseif ( $segInfo[ 'match_type' ] == "NO_MATCH" or $segInfo[ 'match_type' ] == "NEW" ) {
+                $keyValue = 'new';
+            } elseif ( $segInfo[ 'match_type' ] == "ICE" ) {
+                $keyValue = "ice";
+            } elseif ( $segInfo[ 'match_type' ] == "REPETITIONS" ) {
+                $keyValue = 'repetitions';
+            } else {
+                $keyValue = 'numbers_only';
+            }
+
+            /*
+            {
+                    'jobs': {
+                        'id': 123,
+                        'chunks': [
+                            'password': 'aaa',
+                            'files': {
+                                'id': 1234,
+                                'name': 'filename.abc'
+
+                            }
+                        ]
+                    }
+            }
+            */
+
+
+        }
+
+        return $this;
+    }
+
+    protected function _oldFormatData(){
 
         $this->result[ 'data' ] = $this->_data_struct;
 
@@ -140,9 +288,9 @@ abstract class Analysis_AbstractStatus {
                 // if the hook is not triggered by any plugin
                 if(!is_array($outsourceAvailableInfo) or empty($outsourceAvailableInfo)){
                     $outsourceAvailableInfo = [
-                        'disabled_email' => false,
-                        'custom_payable_rate' => false,
-                        'language_not_supported' => false,
+                            'disabled_email' => false,
+                            'custom_payable_rate' => false,
+                            'language_not_supported' => false,
                     ];
                 }
 

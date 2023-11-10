@@ -1,6 +1,13 @@
 <?php
-
+namespace Model\Analysis;
+use CatUtils;
+use Chunks_ChunkStruct;
 use DataAccess\ShapelessConcreteStruct;
+use INIT;
+use Langs_Languages;
+use Projects_ProjectStruct;
+use ZipArchive;
+use ZipArchiveExtended;
 
 /**
  * Created by PhpStorm.
@@ -8,7 +15,7 @@ use DataAccess\ShapelessConcreteStruct;
  * Date: 3/18/16
  * Time: 3:24 PM
  */
-class Analysis_AnalysisModel {
+class AnalysisModel {
 
     public $pid;
     public $pname                      = "";

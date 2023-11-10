@@ -7,7 +7,7 @@
  *
  */
 
-namespace Analysis;
+namespace Model\Analysis;
 
 
 use DataAccess\ShapelessConcreteStruct;

@@ -1,4 +1,5 @@
 <?php
+namespace Model\Analysis;
 
 /**
  * Created by PhpStorm.
@@ -7,7 +8,7 @@
  * Time: 13.37
  *
  */
-class Analysis_WEBStatus extends Analysis_AbstractStatus {
+class WEBStatus extends AbstractStatus {
 
     protected $_data_struct = array(
         'jobs'    => array(),

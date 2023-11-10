@@ -9,7 +9,6 @@
 
 namespace Analysis\Workers;
 
-use Analysis\AnalysisDao;
 use Analysis\Queue\RedisKeys;
 use Constants\Ices;
 use Constants_TranslationStatus;
@@ -25,6 +24,7 @@ use Exception;
 use FeatureSet;
 use Jobs_JobDao;
 use LQA\QA;
+use Model\Analysis\AnalysisDao;
 use PDOException;
 use PostProcess;
 use Predis\Connection\ConnectionException;

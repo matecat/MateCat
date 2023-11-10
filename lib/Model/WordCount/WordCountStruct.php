@@ -44,6 +44,8 @@ class WordCountStruct implements JsonSerializable {
      */
     public static function loadFromJob( Jobs_JobStruct $jobOrChunk ) {
         $wordCountStruct                       = new WordCountStruct();
+        $wordCountStruct->id_job               = (int)$jobOrChunk->id;
+        $wordCountStruct->job_password         = $jobOrChunk->password;
         $wordCountStruct->new_words            = (float)$jobOrChunk->new_words;
         $wordCountStruct->draft_words          = (float)$jobOrChunk->draft_words;
         $wordCountStruct->translated_words     = (float)$jobOrChunk->translated_words;
@@ -56,6 +58,7 @@ class WordCountStruct implements JsonSerializable {
         $wordCountStruct->approved_raw_words   = (float)$jobOrChunk->approved_raw_words;
         $wordCountStruct->approved2_raw_words  = (float)$jobOrChunk->approved2_raw_words;
         $wordCountStruct->rejected_raw_words   = (float)$jobOrChunk->rejected_raw_words;
+
         return $wordCountStruct;
     }
 

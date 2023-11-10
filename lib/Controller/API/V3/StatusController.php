@@ -3,7 +3,6 @@
 namespace API\V3;
 
 use AMQHandler;
-use Analysis\AnalysisDao;
 use API\V2\Exceptions\NotFoundException;
 use API\V2\KleinController;
 use API\V2\Validators\LoginValidator;
@@ -11,6 +10,7 @@ use API\V2\Validators\ProjectPasswordValidator;
 use Chunks_ChunkStruct;
 use Constants_JobStatus;
 use Constants_ProjectStatus;
+use Model\Analysis\AnalysisDao;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
 use Routes;
@@ -349,7 +349,6 @@ class StatusController extends KleinController {
         $chunkMetadata           = new \stdClass();
         $chunkMetadata->id       = $chunk->id;
         $chunkMetadata->password = $chunk->password;
-        $chunkMetadata->source   = $chunk->source;
         $chunkMetadata->source   = $chunk->source;
         $chunkMetadata->target   = $chunk->target;
         $chunkMetadata->details  = $this->getChunkDetails( $chunk->id, $chunk->password );
