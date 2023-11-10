@@ -15,6 +15,7 @@ use Contribution\ContributionRequestStruct;
 use Engines_MMT;
 use FeatureSet;
 use INIT;
+use Matecat\SubFiltering\AbstractFilter;
 use PostProcess;
 use Projects_MetadataDao;
 use Stomp;
@@ -54,6 +55,24 @@ class GetContributionWorker extends AbstractWorker {
     }
 
     /**
+     * @param $matches
+     * @param AbstractFilter $filter
+     * @return mixed
+     * @throws \Exception
+     */
+    private function normalizeMatchesToLayer0($matches, AbstractFilter $filter)
+    {
+        foreach ( $matches as $k => $m ) {
+            $matches[ $k ][ 'raw_segment' ] = $filter->fromLayer1ToLayer0( $matches[ $k ][ 'raw_segment' ] );
+            $matches[ $k ][ 'segment' ] = $filter->fromLayer1ToLayer0( html_entity_decode($matches[ $k ][ 'segment' ]) );
+            $matches[ $k ][ 'translation' ] = $filter->fromLayer1ToLayer0( html_entity_decode($matches[ $k ][ 'translation' ]) );
+            $matches[ $k ][ 'raw_translation' ] = $filter->fromLayer1ToLayer0( $matches[ $k ][ 'raw_translation' ] );
+        }
+
+        return $matches;
+    }
+
+    /**
      * @param ContributionRequestStruct $contributionStruct
      *
      * @throws ReQueueException
@@ -68,15 +87,9 @@ class GetContributionWorker extends AbstractWorker {
 
         list( $mt_result, $matches ) = $this->_getMatches( $contributionStruct, $jobStruct, $jobStruct->target, $featureSet );
 
-        $filter     = MateCatFilter::getInstance( $featureSet, $contributionStruct->params->source, $queueElement->params->target, [] );
+        $filter     = MateCatFilter::getInstance( $featureSet, $jobStruct->source, $jobStruct->target, [] );
         $matches = $this->_sortMatches( $mt_result, $matches );
 
-        foreach ( $matches as $k => $m ) {
-            $matches[ $k ][ 'raw_segment' ] = $filter->fromLayer1ToLayer0( $matches[ $k ][ 'raw_segment' ] );
-            $matches[ $k ][ 'segment' ] = $filter->fromLayer1ToLayer0( html_entity_decode($matches[ $k ][ 'segment' ]) );
-            $matches[ $k ][ 'translation' ] = $filter->fromLayer1ToLayer0( html_entity_decode($matches[ $k ][ 'translation' ]) );
-            $matches[ $k ][ 'raw_translation' ] = $filter->fromLayer1ToLayer0( $matches[ $k ][ 'raw_translation' ] );
-        }
 
         if ( !$contributionStruct->concordanceSearch ) {
             //execute these lines only in segment contribution search,
@@ -86,7 +99,7 @@ class GetContributionWorker extends AbstractWorker {
 
         $matches = array_slice( $matches, 0, $contributionStruct->resultNum );
         $this->normalizeTMMatches( $matches, $contributionStruct, $featureSet, $jobStruct->target );
-        $this->_updateSuggestionArray($contributionStruct->segmentId, $matches);
+        $this->_updateSuggestionArray($contributionStruct->segmentId, $this->normalizeMatchesToLayer0($matches, $filter));
 
         $this->_publishPayload( $matches, $contributionStruct );
 
@@ -117,7 +130,7 @@ class GetContributionWorker extends AbstractWorker {
             if(false === $contributionStruct->concordanceSearch){
 
                 if(!empty($crossLangMatches)){
-                    $this->_updateSuggestionArray($contributionStruct->segmentId, $crossLangMatches);
+                    $this->_updateSuggestionArray($contributionStruct->segmentId, $this->normalizeMatchesToLayer0($crossLangMatches, $filter));
                 }
 
                 $this->_publishPayload( $crossLangMatches, $contributionStruct, true );
