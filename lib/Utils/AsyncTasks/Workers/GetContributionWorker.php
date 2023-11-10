@@ -12,9 +12,11 @@ namespace AsyncTasks\Workers;
 use Constants\Ices;
 use Constants_TranslationStatus;
 use Contribution\ContributionRequestStruct;
+use Engines_MMT;
 use FeatureSet;
 use INIT;
 use PostProcess;
+use Projects_MetadataDao;
 use Stomp;
 use Matecat\SubFiltering\MateCatFilter;
 use TaskRunner\Commons\AbstractElement;
@@ -23,6 +25,7 @@ use TaskRunner\Commons\QueueElement;
 use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\ReQueueException;
 use TmKeyManagement_TmKeyManagement;
+use Translations_SegmentTranslationDao;
 use Utils;
 
 class GetContributionWorker extends AbstractWorker {
@@ -65,7 +68,15 @@ class GetContributionWorker extends AbstractWorker {
 
         list( $mt_result, $matches ) = $this->_getMatches( $contributionStruct, $jobStruct, $jobStruct->target, $featureSet );
 
+        $filter     = MateCatFilter::getInstance( $featureSet, $contributionStruct->params->source, $queueElement->params->target, [] );
         $matches = $this->_sortMatches( $mt_result, $matches );
+
+        foreach ( $matches as $k => $m ) {
+            $matches[ $k ][ 'raw_segment' ] = $filter->fromLayer1ToLayer0( $matches[ $k ][ 'raw_segment' ] );
+            $matches[ $k ][ 'segment' ] = $filter->fromLayer1ToLayer0( html_entity_decode($matches[ $k ][ 'segment' ]) );
+            $matches[ $k ][ 'translation' ] = $filter->fromLayer1ToLayer0( html_entity_decode($matches[ $k ][ 'translation' ]) );
+            $matches[ $k ][ 'raw_translation' ] = $filter->fromLayer1ToLayer0( $matches[ $k ][ 'raw_translation' ] );
+        }
 
         if ( !$contributionStruct->concordanceSearch ) {
             //execute these lines only in segment contribution search,
@@ -75,6 +86,7 @@ class GetContributionWorker extends AbstractWorker {
 
         $matches = array_slice( $matches, 0, $contributionStruct->resultNum );
         $this->normalizeTMMatches( $matches, $contributionStruct, $featureSet, $jobStruct->target );
+        $this->_updateSuggestionArray($contributionStruct->segmentId, $matches);
 
         $this->_publishPayload( $matches, $contributionStruct );
 
@@ -103,9 +115,24 @@ class GetContributionWorker extends AbstractWorker {
             }
 
             if(false === $contributionStruct->concordanceSearch){
+
+                if(!empty($crossLangMatches)){
+                    $this->_updateSuggestionArray($contributionStruct->segmentId, $crossLangMatches);
+                }
+
                 $this->_publishPayload( $crossLangMatches, $contributionStruct, true );
             }
         }
+    }
+
+    /**
+     * Suggestion array must be updated every time we receive the matches
+     *
+     * @param $id_segment
+     * @param $matches
+     */
+    protected function _updateSuggestionArray($id_segment, $matches) {
+        Translations_SegmentTranslationDao::updateSuggestionsArray( $id_segment, $matches );
     }
 
     /**
@@ -382,6 +409,7 @@ class GetContributionWorker extends AbstractWorker {
         $_config[ 'segment' ]    = $contributionStruct->getContexts()->segment;
         $_config[ 'source' ]     = $jobStruct->source;
         $_config[ 'target' ]     = $targetLang;
+        $_config[ 'uid' ]        = ($contributionStruct->user !== null ? $contributionStruct->user->uid : 0);
 
         $_config[ 'email' ] = INIT::$MYMEMORY_API_KEY;
 
@@ -483,6 +511,21 @@ class GetContributionWorker extends AbstractWorker {
                 $config[ 'job_id' ]       = $jobStruct->id;
                 $config[ 'job_password' ] = $jobStruct->password;
                 $config[ 'session' ]      = $contributionStruct->getSessionId();
+
+                // glossaries (only for MMT)
+                if($mt_engine instanceof Engines_MMT){
+                    $metadataDao = new Projects_MetadataDao();
+                    $metadata = $metadataDao->get($contributionStruct->getProjectStruct()->id, 'mmt_glossaries', 86400);
+
+                    if($metadata !== null){
+
+                        $metadata = html_entity_decode($metadata->value);
+                        $mmtGlossariesArray = json_decode($metadata, true);
+
+                        $config[ 'glossaries' ] = implode(",", $mmtGlossariesArray['glossaries']);
+                        $config[ 'ignore_glossary_case' ] = $mmtGlossariesArray['ignore_glossary_case'];
+                    }
+                }
 
                 $mt_result = $mt_engine->get( $config );
             }
