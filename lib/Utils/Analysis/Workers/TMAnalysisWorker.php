@@ -156,18 +156,17 @@ class TMAnalysisWorker extends AbstractWorker {
         $suggestion = $this->_matches[ 0 ][ 'raw_translation' ]; //No layering needed
 
         $suggestion_match  = $this->_matches[ 0 ][ 'match' ];
-        $suggestion_json   = json_encode( $this->_matches );
         $suggestion_source = $this->_matches[ 0 ][ 'created_by' ];
 
         $equivalentWordMapping = json_decode( $queueElement->params->payable_rates, true );
 
         $new_match_type = $this->_getNewMatchType(
-                ( stripos( $this->_matches[ 0 ][ 'created_by' ], "MT" ) !== false ? "MT" : $suggestion_match ),
-                $queueElement->params->match_type,
-                $equivalentWordMapping,
-                /* is Public TM */
-                empty( $this->_matches[ 0 ][ 'memory_key' ] ),
-                isset( $this->_matches[ 0 ][ 'ICE' ] ) && $this->_matches[ 0 ][ 'ICE' ]
+            ( stripos( $this->_matches[ 0 ][ 'created_by' ], "MT" ) !== false ? "MT" : $suggestion_match ),
+            $queueElement->params->match_type,
+            $equivalentWordMapping,
+            /* is Public TM */
+            empty( $this->_matches[ 0 ][ 'memory_key' ] ),
+            isset( $this->_matches[ 0 ][ 'ICE' ] ) && $this->_matches[ 0 ][ 'ICE' ]
         );
 
         $eqWordMapping = (isset($equivalentWordMapping[ $new_match_type ])) ? $equivalentWordMapping[ $new_match_type ] : null;
@@ -205,8 +204,8 @@ class TMAnalysisWorker extends AbstractWorker {
         }
 
         ( !empty( $this->_matches[ 0 ][ 'sentence_confidence' ] ) ?
-                $mt_qe = floatval( $this->_matches[ 0 ][ 'sentence_confidence' ] ) :
-                $mt_qe = null
+            $mt_qe = floatval( $this->_matches[ 0 ][ 'sentence_confidence' ] ) :
+            $mt_qe = null
         );
 
         // perform a consistency check as setTranslation does
@@ -219,6 +218,15 @@ class TMAnalysisWorker extends AbstractWorker {
         $suggestion = $filter->fromLayer1ToLayer0( $suggestion );
 
         $segment = ( new \Segments_SegmentDao() )->getById( $queueElement->params->id_segment );
+
+        foreach ( $this->_matches as $k => $m ) {
+            $this->_matches[ $k ][ 'raw_segment' ] = $filter->fromLayer1ToLayer0( $this->_matches[ $k ][ 'raw_segment' ] );
+            $this->_matches[ $k ][ 'segment' ] = $filter->fromLayer1ToLayer0( html_entity_decode($this->_matches[ $k ][ 'segment' ]) );
+            $this->_matches[ $k ][ 'translation' ] = $filter->fromLayer1ToLayer0( html_entity_decode($this->_matches[ $k ][ 'translation' ]) );
+            $this->_matches[ $k ][ 'raw_translation' ] = $filter->fromLayer1ToLayer0( $this->_matches[ $k ][ 'raw_translation' ] );
+        }
+
+        $suggestion_json   = json_encode( $this->_matches );
 
         $tm_data                             = [];
         $tm_data[ 'id_job' ]                 = $queueElement->params->id_job;
@@ -264,8 +272,8 @@ class TMAnalysisWorker extends AbstractWorker {
 
 
         $this->featureSet->run( 'postTMSegmentAnalyzed', [
-                'tm_data'       => $tm_data,
-                'queue_element' => $queueElement
+            'tm_data'       => $tm_data,
+            'queue_element' => $queueElement
         ] );
 
     }
@@ -333,7 +341,7 @@ class TMAnalysisWorker extends AbstractWorker {
                 $tm_data = $this->featureSet->filter( 'checkIceLocked', $tm_data, $queueElementParams );
 
             } elseif ( $queueElementParams->pretranslate_100 ) {
-                $tm_data[ 'status' ] = Constants_TranslationStatus::STATUS_TRANSLATED;
+                $tm_data[ 'status' ] = Constants_TranslationStatus::STATUS_APPROVED;
                 $tm_data[ 'locked' ] = false;
             }
 
@@ -435,7 +443,7 @@ class TMAnalysisWorker extends AbstractWorker {
          * Apply the TM discount rate and/or force the value obtained from TM for
          * matches between 50%-74% because is never returned in Fast Analysis; it's rate is set default as equals to NO_MATCH
          */
-        if ( $tm_rate_paid < $fast_rate_paid || $fast_match_type == "NO_MATCH" ) {
+        if( in_array( $fast_match_type, ['INTERNAL','REPETITION'] ) && $tm_rate_paid <= $fast_rate_paid || $fast_match_type == "NO_MATCH" ){
             return $tm_match_fuzzy_band;
         }
 
@@ -868,12 +876,12 @@ class TMAnalysisWorker extends AbstractWorker {
             $this->_doLog( "--- (Worker $this->_workerPid) : analysis project $_project_id finished : change status to DONE" );
 
             Projects_ProjectDao::updateFields(
-                    [
-                            'status_analysis'      => \Constants_ProjectStatus::STATUS_DONE,
-                            'tm_analysis_wc'       => $project_totals[ 'eq_wc' ],
-                            'standard_analysis_wc' => $project_totals[ 'st_wc' ]
-                    ],
-                    [ 'id' => $_project_id ]
+                [
+                    'status_analysis'      => \Constants_ProjectStatus::STATUS_DONE,
+                    'tm_analysis_wc'       => $project_totals[ 'eq_wc' ],
+                    'standard_analysis_wc' => $project_totals[ 'st_wc' ]
+                ],
+                [ 'id' => $_project_id ]
             );
 
             // update chunks' standard_analysis_wc
@@ -882,9 +890,9 @@ class TMAnalysisWorker extends AbstractWorker {
 
             foreach ( $jobs as $job ) {
                 Jobs_JobDao::updateFields( [
-                        'standard_analysis_wc' => round( $project_totals[ 'st_wc' ] / $numberOfJobs )
+                    'standard_analysis_wc' => round( $project_totals[ 'st_wc' ] / $numberOfJobs )
                 ], [
-                        'id' => $job->id
+                    'id' => $job->id
                 ] );
             }
 
@@ -933,8 +941,8 @@ class TMAnalysisWorker extends AbstractWorker {
 
         $data[ 'tm_analysis_status' ] = "DONE"; // DONE . I don't want it remains in an inconsistent state
         $where                        = [
-                "id_segment" => $elementQueue->params->id_segment,
-                "id_job"     => $elementQueue->params->id_job
+            "id_segment" => $elementQueue->params->id_segment,
+            "id_job"     => $elementQueue->params->id_job
         ];
 
         $db = Database::obtain();
