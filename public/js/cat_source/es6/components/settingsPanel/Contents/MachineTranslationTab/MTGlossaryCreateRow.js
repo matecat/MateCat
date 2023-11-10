@@ -29,9 +29,7 @@ export const MTGlossaryCreateRow = ({row, setRows}) => {
   }
 
   const onChangeFile = (e) => {
-    if (e.target.files) {
-      setFile(Array.from(e.target.files)[0])
-    }
+    if (e.target.files) setFile(Array.from(e.target.files)[0])
     setSubmitCheckErrors(undefined)
   }
 

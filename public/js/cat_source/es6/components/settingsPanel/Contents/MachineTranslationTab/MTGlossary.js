@@ -44,7 +44,7 @@ const fakeApi = {
     }),
 }
 
-export const MTGlossary = ({id, name}) => {
+export const MTGlossary = ({id}) => {
   const [isShowingRows, setIsShowingRows] = useState(false)
   const [rows, setRows] = useState([])
   const [isGlossaryCaseSensitive, setIsGlossaryCaseSensitive] = useState(false)
@@ -123,5 +123,4 @@ export const MTGlossary = ({id, name}) => {
 
 MTGlossary.propTypes = {
   id: PropTypes.number.isRequired,
-  name: PropTypes.string.isRequired,
 }

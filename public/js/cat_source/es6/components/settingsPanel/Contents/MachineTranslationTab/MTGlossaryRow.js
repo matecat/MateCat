@@ -6,6 +6,7 @@ import Trash from '../../../../../../../img/icons/Trash'
 export const MTGlossaryRow = ({row, setRows}) => {
   const [isActive, setIsActive] = useState(row.isActive)
   const [name, setName] = useState(row.name)
+  const [file, setFile] = useState()
 
   const onChangeIsActive = (e) => setIsActive(e.currentTarget.checked)
 
@@ -22,6 +23,10 @@ export const MTGlossaryRow = ({row, setRows}) => {
 
   const updateKeyName = () => {
     // call api to update name
+  }
+
+  const onChangeFile = (e) => {
+    if (e.target.files) setFile(Array.from(e.target.files)[0])
   }
 
   return (
@@ -43,10 +48,17 @@ export const MTGlossaryRow = ({row, setRows}) => {
         />
       </div>
       <div className="glossary-row-import-button">
-        <button className="grey-button">
+        <input
+          type="file"
+          id={`file-import${row.id}`}
+          onChange={onChangeFile}
+          name="import_file"
+          accept=".xls, .xlsx"
+        />
+        <label htmlFor={`file-import${row.id}`} className="grey-button">
           <Upload size={14} />
           Import from glossary
-        </button>
+        </label>
       </div>
       <div className="glossary-row-delete">
         <button className="grey-button">
