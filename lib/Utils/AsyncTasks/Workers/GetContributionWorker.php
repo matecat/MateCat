@@ -551,6 +551,10 @@ class GetContributionWorker extends AbstractWorker {
 
                 foreach ( $matches as $k => $m ) {
 
+                    // normalize data for saving `suggestions_array`
+                    $matches[ $k ][ 'raw_segment' ] = $Filter->fromLayer1ToLayer0( $matches[ $k ][ 'raw_segment' ] );
+                    $matches[ $k ][ 'segment' ] = $Filter->fromLayer1ToLayer0( html_entity_decode($matches[ $k ][ 'segment' ]) );
+                    $matches[ $k ][ 'translation' ] = $Filter->fromLayer1ToLayer0( html_entity_decode($matches[ $k ][ 'translation' ]) );
                     $matches[ $k ][ 'raw_translation' ] = $Filter->fromLayer1ToLayer0( $matches[ $k ][ 'raw_translation' ] );
 
                     if ( $matches[ $k ][ 'created_by' ] == 'MT!' ) {
