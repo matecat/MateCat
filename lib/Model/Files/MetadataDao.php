@@ -10,6 +10,7 @@ namespace Files;
 
 use DataAccess_IDaoStruct;
 use Database;
+use Utils;
 
 class MetadataDao extends \DataAccess_AbstractDao {
 
@@ -92,7 +93,7 @@ class MetadataDao extends \DataAccess_AbstractDao {
                 'id_file'        => $id_file,
                 'files_parts_id' => $filePartsId,
                 'key'            => $key,
-                'value'          => $value
+                'value'          => Utils::stripTagsPreservingHrefs($value)
         ] );
 
         return $this->get( $id_project, $id_file, $key, $filePartsId );
@@ -118,7 +119,7 @@ class MetadataDao extends \DataAccess_AbstractDao {
                 'id_file'        => $id_file,
                 'files_parts_id' => $filePartsId,
                 'key'            => $key,
-                'value'          => $value
+                'value'          => Utils::stripTagsPreservingHrefs($value)
         ] );
 
         return $this->get( $id_project, $id_file, $key, $filePartsId );
@@ -152,7 +153,7 @@ class MetadataDao extends \DataAccess_AbstractDao {
                 $bind_values[] = $id_project;
                 $bind_values[] = $id_file;
                 $bind_values[] = $key;
-                $bind_values[] = $value;
+                $bind_values[] = Utils::stripTagsPreservingHrefs($value);
                 $bind_values[] = $filePartsId;
             }
             $index++;

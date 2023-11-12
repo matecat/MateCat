@@ -6,6 +6,7 @@ use API\V2\Exceptions\NotFoundException;
 use API\V3\Json\FilesInfo;
 use Files\MetadataDao as Files_MetadataDao;
 use Jobs_JobStruct;
+use Utils;
 
 class FilesInfoUtility {
 
@@ -141,9 +142,9 @@ class FilesInfoUtility {
         if(\Files_FileDao::isFileInProject($id_file, $this->project->id)){
             $metadataDao = new Files_MetadataDao;
             if($metadataDao->get( $this->project->id, $id_file, 'instructions', 60 * 5 )){
-                $metadataDao->update( $this->project->id, $id_file, 'instructions', $instructions );
+                $metadataDao->update( $this->project->id, $id_file, 'instructions', Utils::stripTagsPreservingHrefs($instructions) );
             } else {
-                $metadataDao->insert( $this->project->id, $id_file, 'instructions', $instructions );
+                $metadataDao->insert( $this->project->id, $id_file, 'instructions', Utils::stripTagsPreservingHrefs($instructions) );
             }
 
             return true;
