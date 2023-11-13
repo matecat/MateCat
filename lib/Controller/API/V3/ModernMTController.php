@@ -408,7 +408,7 @@ class ModernMTController extends BaseChunkController
         return [
             'id' => $memory['id'],
             'name' => $memory['name'],
-            'has_glossary' => (isset($memory['has_glossary']) ? $memory['has_glossary'] : false),
+            'has_glossary' => ($memory['hasGlossary'] == 1),
         ];
     }
 }
