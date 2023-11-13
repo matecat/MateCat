@@ -6,6 +6,7 @@ import {MTGlossaryRow} from './MTGlossaryRow'
 import Upload from '../../../../../../../img/icons/Upload'
 import {MTGlossaryCreateRow} from './MTGlossaryCreateRow'
 import {getMMTKeys} from '../../../../api/getMMTKeys/getMMTKeys'
+import {getStatusMemoryGlossaryImport} from '../../../../api/getStatusMemoryGlossaryImport/getStatusMemoryGlossaryImport'
 
 const COLUMNS_TABLE = [
   {name: 'Activate'},
@@ -21,7 +22,7 @@ export class MTGlossaryStatus {
     this.wasAborted = false
   }
 
-  get(promise, props) {
+  get(props, promise = getStatusMemoryGlossaryImport) {
     this.wasAborted = false
     return new Promise((resolve, reject) => {
       this.executeApi({promise, props, resolve, reject})
@@ -108,7 +109,11 @@ export const MTGlossary = ({id}) => {
       </div>
       {isShowingRows && (
         <>
-          <SettingsPanelTable columns={COLUMNS_TABLE} rows={rows} />
+          <SettingsPanelTable
+            columns={COLUMNS_TABLE}
+            rows={rows}
+            className="mt-glossary-table"
+          />
           <div className="bottom-buttons">
             <button className="grey-button" onClick={addGlossary}>
               <Upload size={14} />

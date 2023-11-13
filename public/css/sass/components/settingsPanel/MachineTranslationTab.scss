@@ -159,6 +159,7 @@
     .settings-panel-row-extra-content {
       transition: none;
       min-height: unset;
+      max-height: none;
     }
   }
 }
@@ -305,4 +306,11 @@
   width: 26px;
   height: 26px;
   margin-left: 10px;
+}
+
+.mt-glossary-table {
+  .settings-panel-table-rows-container {
+    max-height: 400px;
+    overflow-y: auto;
+  }
 }

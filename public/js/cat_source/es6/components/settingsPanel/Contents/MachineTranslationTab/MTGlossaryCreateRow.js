@@ -6,7 +6,6 @@ import Close from '../../../../../../../img/icons/Close'
 import {MTGlossaryStatus, MT_GLOSSARY_CREATE_ROW_ID} from './MTGlossary'
 import {MachineTranslationTabContext} from './'
 import {createMemoryAndImportGlossary} from '../../../../api/createMemoryAndImportGlossary/createMemoryAndImportGlossary'
-import {getStatusMemoryGlossaryImport} from '../../../../api/getStatusMemoryGlossaryImport/getStatusMemoryGlossaryImport'
 
 export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
   const {setNotification} = useContext(MachineTranslationTabContext)
@@ -17,10 +16,12 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
   const [submitCheckErrors, setSubmitCheckErrors] = useState()
   const [isWaitingResult, setIsWaitingResult] = useState(false)
 
+  const ref = useRef()
   const statusPolling = useRef()
 
   useEffect(() => {
     statusPolling.current = new MTGlossaryStatus()
+    ref.current.scrollIntoView({behavior: 'smooth', block: 'nearest'})
 
     return () => statusPolling.current.cancel()
   }, [])
@@ -56,7 +57,7 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
         } else {
           //   start polling to get status
           statusPolling.current
-            .get(getStatusMemoryGlossaryImport, {engineId, uuid: data.id})
+            .get({engineId, uuid: data.id})
             .then(() => dispatchSuccessfullNotification())
             .catch(() => dispatchErrorNotification())
             .finally(() => setIsWaitingResult(false))
@@ -117,6 +118,7 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
 
   return (
     <form
+      ref={ref}
       className={`settings-panel-row-content${
         isWaitingResult ? ' row-content-create-glossary-waiting' : ''
       }`}
