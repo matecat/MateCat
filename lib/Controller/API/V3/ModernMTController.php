@@ -391,7 +391,7 @@ class ModernMTController extends BaseChunkController
         if(isset($params['has_glossary'])){
             $hasGlossary = filter_var($params['has_glossary'], FILTER_VALIDATE_BOOLEAN);
 
-            if($memory['has_glossary'] != $hasGlossary){
+            if($memory['hasGlossary'] != $hasGlossary){
                 return false;
             }
         }
