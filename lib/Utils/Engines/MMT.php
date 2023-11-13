@@ -501,4 +501,16 @@ class Engines_MMT extends Engines_AbstractEngine {
 
         return $client->updateGlossary($id, $data);
     }
+
+    /**
+     * @param $uuid
+     * @return mixed
+     * @throws \Engines\MMT\MMTServiceApiException
+     */
+    public function importJobStatus($uuid)
+    {
+        $client = $this->_getClient();
+
+        return $client->importJobStatus($uuid);
+    }
 }

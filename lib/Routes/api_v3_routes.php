@@ -74,7 +74,8 @@ $klein->with( '/api/v3/tm-keys', function () {
 
 // MMT
 $klein->with( '/api/v3/mmt/[:engineId]', function () {
-    route( '/keys', 'GET', '\API\V3\ModernMTController', 'get' );
+    route( '/keys', 'GET', '\API\V3\ModernMTController', 'keys' );
+    route( '/job-status/[:uuid]', 'GET', '\API\V3\ModernMTController', 'jobStatus' );
     route( '/create-memory-and-import-glossary', 'POST', '\API\V3\ModernMTController', 'createMemoryAndImportGlossary' );
     route( '/import-glossary', 'POST', '\API\V3\ModernMTController', 'importGlossary' );
     route( '/modify-glossary', 'POST', '\API\V3\ModernMTController', 'modifyGlossary' );

@@ -24,7 +24,7 @@ class ModernMTController extends BaseChunkController
     /**
      * Get all the customer's MMT memories
      */
-    public function get()
+    public function keys()
     {
         if(!$this->userIsLogged()){
             $this->response->status()->setCode( 401 );
@@ -47,6 +47,30 @@ class ModernMTController extends BaseChunkController
 
             $this->response->status()->setCode( 200 );
             $this->response->json($results);
+            exit();
+
+        } catch (Exception $exception){
+            $code = ($exception->getCode() > 0) ? $exception->getCode() : 500;
+            $this->response->status()->setCode( $code );
+            $this->response->json([
+                'error' => $exception->getMessage()
+            ]);
+            exit();
+        }
+    }
+
+    /**
+     * Import job status
+     */
+    public function jobStatus()
+    {
+        try {
+            $uuid = filter_var( $this->request->uuid, FILTER_SANITIZE_STRING, FILTER_FLAG_ENCODE_LOW|FILTER_FLAG_STRIP_HIGH );
+            $engineId = filter_var( $this->request->engineId, FILTER_SANITIZE_NUMBER_INT );
+            $MMTClient = $this->getModernMTClient($engineId);
+
+            $this->response->status()->setCode( 200 );
+            $this->response->json($MMTClient->importJobStatus($uuid));
             exit();
 
         } catch (Exception $exception){
