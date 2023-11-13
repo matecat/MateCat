@@ -205,6 +205,9 @@
           padding: 0 !important;
         }
       }
+      .row-content-create-glossary-waiting {
+        opacity: 0.6;
+      }
     }
     .settings-panel-row-active {
       background-color: unset;
@@ -293,4 +296,13 @@
 .mt-glossary-case-sensitive {
   display: flex;
   gap: 6px;
+}
+
+.spinner {
+  position: absolute;
+  background: url(../../img/loading.gif) 48% top no-repeat !important;
+  background-size: 26px 26px !important;
+  width: 26px;
+  height: 26px;
+  margin-left: 10px;
 }
