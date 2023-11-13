@@ -154,4 +154,143 @@
       margin-top: 1px;
     }
   }
+
+  .settings-panel-table {
+    .settings-panel-row-extra-content {
+      transition: none;
+      min-height: unset;
+    }
+  }
+}
+
+.mt-glossary {
+  display: flex;
+  flex-direction: column;
+  background-color: #f3f3f3;
+
+  .expand-button {
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #eaebee;
+
+    > button {
+      background: unset;
+      border: none;
+      cursor: pointer;
+    }
+  }
+
+  .settings-panel-table {
+    .settings-panel-table-rowHeading {
+      font-size: 12px;
+      background-color: unset;
+      color: black;
+
+      & > :first-child {
+        text-align: center;
+      }
+    }
+    .settings-panel-row-content {
+      grid-template-columns: 15% minmax(0, 1fr) 30% 5%;
+    }
+    .settings-panel-row {
+      border: none;
+
+      .row-content-create-glossary {
+        grid-template-columns: 100%;
+
+        > form {
+          padding: 0 !important;
+        }
+      }
+    }
+    .settings-panel-row-active {
+      background-color: unset;
+    }
+  }
+
+  .bottom-buttons {
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.glossary-row-name-input {
+  width: 100%;
+  padding: 4px;
+  background-color: unset;
+  border: 1px solid $grey8;
+  border-radius: 3px;
+
+  &:focus,
+  &:hover {
+    background-color: white;
+  }
+
+  &.error {
+    border: solid 1px $redDefault;
+  }
+}
+
+.glossary-row-import-button {
+  display: flex;
+  justify-content: end;
+  gap: 10px;
+
+  input[type='file'] {
+    display: none;
+  }
+
+  .grey-button {
+    &.error {
+      border: solid 1px $redDefault;
+    }
+  }
+}
+
+.glossary-row-delete {
+  padding: 0 !important;
+
+  button {
+    width: 40px;
+    height: 29px;
+    display: flex;
+    justify-content: center;
+  }
+}
+
+.grey-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 2px;
+  font-size: 16px;
+  color: #000;
+  background: #eaebee;
+  padding: 4px 8px;
+  text-align: center;
+  border: 1px solid #9e9e9e;
+  cursor: pointer;
+
+  &:hover {
+    background-color: $grey5;
+  }
+}
+
+.small-row-button {
+  height: 29px;
+  margin: 0 !important;
+
+  &:last-child {
+    padding: 0 8px;
+  }
+}
+
+.mt-glossary-case-sensitive {
+  display: flex;
+  gap: 6px;
 }

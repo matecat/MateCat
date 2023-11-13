@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useState} from 'react'
+import React, {useCallback, useContext, useEffect, useState} from 'react'
 import {Select} from '../../../common/Select'
 import {ModernMt} from './MtEngines/ModernMt'
 import {AltLang} from './MtEngines/AltLang'
@@ -15,6 +15,7 @@ import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {deleteMTEngine} from '../../../../api/deleteMTEngine'
 import {MessageNotification} from '../MessageNotification'
 import {DEFAULT_ENGINE_MEMORY} from '../../SettingsPanel'
+import {MTGlossary} from './MTGlossary'
 
 import Close from '../../../../../../../img/icons/Close'
 import AddWide from '../../../../../../../img/icons/AddWide'
@@ -215,6 +216,10 @@ export const MachineTranslationTab = () => {
                     ),
                     isDraggable: false,
                     isActive: true,
+                    ...(activeMTEngine.type === 'MT' && {
+                      isExpanded: true,
+                      extraNode: <MTGlossary {...activeMTEngine} />,
+                    }),
                   },
                 ]
               : []
