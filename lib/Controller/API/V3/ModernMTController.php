@@ -418,6 +418,12 @@ class ModernMTController extends BaseChunkController
             }
         }
 
+        if(isset($params['has_glossary']) and $params['has_glossary'] == 0){
+            if($memory['hasGlossary'] != false){
+                return false;
+            }
+        }
+
         return true;
     }
 
