@@ -38,6 +38,7 @@ import {
   isCaretInsideEntity,
   checkCaretIsNearZwsp,
   isSelectedEntity,
+  getEntitiesSelected,
 } from './utils/DraftMatecatUtils/manageCaretPositionNearEntity'
 
 const {hasCommandModifier, isOptionKeyCommand, isCtrlKeyCommand} =
@@ -244,6 +245,8 @@ class Editarea extends React.Component {
         newContentState,
         'insert-fragment',
       )
+      newEditorState = EditorState.moveSelectionToEnd(newEditorState)
+
       const cleanTagsTranslation = TagUtils.decodePlaceholdersToPlainText(
         DraftMatecatUtils.cleanSegmentString(translation),
       )
@@ -538,11 +541,14 @@ class Editarea extends React.Component {
       this.setNewTranslation(this.props.segment.sid, this.props.translation)
     }
 
-    // Adjust caret position
+    // Adjust caret position and set focus to entity
     if (prevState.editorState !== this.state.editorState) {
-      const currentFocusOffset = this.state.editorState
-        .getSelection()
-        .getFocusOffset()
+      const {editorState} = this.state
+
+      const entitiesSelected = getEntitiesSelected(editorState)
+      SegmentActions.focusTags(editorSync.editorFocused ? entitiesSelected : [])
+
+      const currentFocusOffset = editorState.getSelection().getFocusOffset()
       const prevFocusOffset = prevState.editorState
         .getSelection()
         .getFocusOffset()
@@ -1047,6 +1053,7 @@ class Editarea extends React.Component {
 
   onChange = (editorState) => {
     //console.log('onChange')
+    console.log(editorState.getSelection())
     const {
       displayPopover,
       editorState: prevEditorState,

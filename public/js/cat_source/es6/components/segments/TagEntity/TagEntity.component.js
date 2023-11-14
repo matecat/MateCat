@@ -1,4 +1,4 @@
-import React, {Component} from 'react'
+import React, {Component, createRef} from 'react'
 import {debounce, find} from 'lodash'
 
 import TooltipInfo from '../TooltipInfo/TooltipInfo.component'
@@ -34,6 +34,9 @@ class TagEntity extends Component {
       this.updateTagWarningStyle,
       500,
     )
+
+    this.focusedState = createRef({})
+    this.focusedState.current = {}
   }
 
   tooltipToggle = (show = false) => {
@@ -147,6 +150,8 @@ class TagEntity extends Component {
       SegmentConstants.REMOVE_SEARCH_RESULTS,
       this.removeSearchParams,
     )
+    SegmentStore.addListener(SegmentConstants.FOCUS_TAGS, this.focusTag)
+
     const textSpanDisplayed =
       this.tagRef && this.tagRef.querySelector('span[data-text="true"]')
     const shouldTooltipOnHover =
@@ -197,6 +202,7 @@ class TagEntity extends Component {
       SegmentConstants.REMOVE_SEARCH_RESULTS,
       this.removeSearchParams,
     )
+    SegmentStore.removeListener(SegmentConstants.FOCUS_TAGS, this.focusTag)
   }
 
   getChildrenContent(index) {
@@ -218,6 +224,7 @@ class TagEntity extends Component {
       showTooltip,
       shouldTooltipOnHover,
       searchParams,
+      focused,
     } = this.state
     const {tooltipToggle, markSearch} = this
     const style =
@@ -225,7 +232,6 @@ class TagEntity extends Component {
         ? tagStyle
         : this.selectCorrectStyle()
     const {openSplit} = getUpdatedSegmentInfo()
-
     const {
       data: {id: entityId, placeholder: entityPlaceholder, index},
     } = contentState.getEntity(entityKey)
@@ -237,7 +243,9 @@ class TagEntity extends Component {
       <div className={'tag-container'}>
         <span
           ref={(ref) => (this.tagRef = ref)}
-          className={`tag ${style} ${tagWarningStyle}`}
+          className={`tag ${style}${
+            focused ? ' tag-focused' : ''
+          } ${tagWarningStyle}`}
           data-offset-key={this.props.offsetkey}
           unselectable="on"
           suppressContentEditableWarning={true}
@@ -254,6 +262,9 @@ class TagEntity extends Component {
                   entityKey,
                 )
               })
+            this.focusedState.current = {
+              skipTmOut: true,
+            }
           }}
         >
           {tooltipAvailable && showTooltip && (
@@ -288,14 +299,12 @@ class TagEntity extends Component {
       this.setState({
         tagStyle: this.selectCorrectStyle(),
         clicked: false,
-        focused: false,
         entityKey,
       })
     } else if (entityKey === triggerEntityKey) {
       this.setState({
         tagStyle: this.selectCorrectStyle(tagId, tagPlaceholder, true),
         clicked: true,
-        focused: true,
         entityKey,
       })
     } else if (
@@ -306,7 +315,6 @@ class TagEntity extends Component {
       this.setState({
         tagStyle: this.selectCorrectStyle(tagId, tagPlaceholder),
         clicked: true,
-        focused: false,
         entityKey,
       })
     }
@@ -332,11 +340,7 @@ class TagEntity extends Component {
     }
   }
 
-  selectCorrectStyle = (
-    clickedTagId = null,
-    clickedTagText = null,
-    focused = false,
-  ) => {
+  selectCorrectStyle = (clickedTagId = null, clickedTagText = null) => {
     const {entityKey, contentState, getUpdatedSegmentInfo, isRTL} = this.props
     const {segmentOpened} = getUpdatedSegmentInfo()
     const {
@@ -362,8 +366,35 @@ class TagEntity extends Component {
         ? 'tag-clicked'
         : '' // green
 
-    const tagFocused = focused ? 'tag-focused' : '' // blue with shadow
-    return `${baseStyle} ${tagInactive} ${tagClicked} ${tagFocused}`.trim()
+    return `${baseStyle} ${tagInactive} ${tagClicked}`.trim()
+  }
+
+  focusTag = ({tagsSelected}) => {
+    const {skipTmOut, tmOut} = this.focusedState.current
+    if (tmOut) clearTimeout(tmOut)
+    this.focusedState.current = {}
+
+    if (!tagsSelected?.length) {
+      // reset
+      this.setState({
+        focused: false,
+      })
+      return
+    }
+
+    const updateState = () => {
+      this.setState({
+        focused: tagsSelected.some(
+          ({entityKey}) => entityKey === this.props.entityKey,
+        ),
+      })
+    }
+
+    if (!skipTmOut) {
+      this.focusedState.current.tmOut = setTimeout(() => updateState(), 100)
+    } else {
+      updateState()
+    }
   }
 
   highlightOnWarnings = () => {

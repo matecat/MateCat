@@ -1474,6 +1474,12 @@ const SegmentActions = {
       ...filledFields,
     })
   },
+  focusTags: function (tagsSelected) {
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.FOCUS_TAGS,
+      tagsSelected,
+    })
+  },
 }
 
 export default SegmentActions
