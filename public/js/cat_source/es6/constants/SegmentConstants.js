@@ -114,5 +114,6 @@ const SegmentConstants = keyMirror({
   AI_SUGGESTION: null,
   SET_IS_CURRENT_SEARCH_OCCURRENCE_TAG: null,
   OPEN_GLOSSARY_FORM_PREFILL: null,
+  FOCUS_TAGS: null,
 })
 export default SegmentConstants

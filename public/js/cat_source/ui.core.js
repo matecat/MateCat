@@ -837,8 +837,7 @@ window.UI = {
 
     var afterTranslateFn = function () {
       if (!goToNextUntranslated) {
-        UI.gotoNextSegment() //Others functionality override this function
-        // SegmentActions.openSegment(UI.nextSegmentId);
+        SegmentActions.gotoNextSegment() //Others functionality override this function
       } else {
         SegmentActions.gotoNextUntranslatedSegment()
       }
@@ -917,10 +916,6 @@ window.UI = {
       'If you must edit it, click on the padlock icon to the left of the segment. ' +
       'The owner of the project will be notified of any edits.'
     )
-  },
-
-  closeAllMenus: function () {
-    CatToolActions.closeSubHeader()
   },
 }
 

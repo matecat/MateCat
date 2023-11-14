@@ -4,7 +4,6 @@ import {isUndefined} from 'lodash'
 import CommentsStore from '../../stores/CommentsStore'
 import SegmentActions from '../../actions/SegmentActions'
 import CommentsConstants from '../../constants/CommentsConstants'
-import MBC from '../../utils/mbc.main'
 import Shortcuts from '../../utils/shortcuts'
 import {SegmentContext} from './SegmentContext'
 
@@ -37,7 +36,6 @@ class SegmentsCommentsIcon extends React.Component {
     SegmentActions.openSegmentComment(this.context.segment.sid)
     if (!UI.isReadonlySegment(this.context.segment))
       SegmentActions.openSegment(this.context.segment.sid)
-    localStorage.setItem(MBC.localStorageCommentsClosed, false)
   }
 
   componentDidMount() {
@@ -72,7 +70,10 @@ class SegmentsCommentsIcon extends React.Component {
     ) {
       let html
       let rootClasses = ['mbc-comment-icon-button', 'txt']
-      if (this.state.comments.total === 0) {
+      if (
+        this.state.comments.total === 0 ||
+        (this.state.comments.total > 0 && this.state.comments.active === 0)
+      ) {
         html = (
           <span className="mbc-comment-notification mbc-comment-highlight-segment mbc-comment-highlight-invite">
             +
@@ -100,7 +101,7 @@ class SegmentsCommentsIcon extends React.Component {
           onClick={(e) => this.openComments(e)}
         >
           <span className="mbc-comment-icon icon-bubble2" />
-          {html}
+          <div className="mbc-comment-notifications-container">{html}</div>
         </div>
       )
     } else {

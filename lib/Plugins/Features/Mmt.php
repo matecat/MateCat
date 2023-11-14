@@ -101,27 +101,16 @@ class Mmt extends BaseFeature {
             return $newCreatedDbRowStruct;
         }
 
-        $engineMmt = new Engines_MMT( $newCreatedDbRowStruct );
+        /** @var Engines_MMT $newTestCreatedMT */
+        $newTestCreatedMT = Engine::getInstance( $newCreatedDbRowStruct->id );
 
-        // Check account
         try {
-            $engineMmt->checkAccount();
-        } catch ( Exception $e ){
-            ( new EnginesModel_EngineDAO( Database::obtain() ) )->delete( $newCreatedDbRowStruct );
-
-            throw new Exception("MMT license not valid.", $e->getCode());
-        }
-
-        // Connect keys
-        try {
-            $extraParams = $newCreatedDbRowStruct->getExtraParamsAsArray();
-            $preImport   = $extraParams[ 'MMT-preimport' ];
 
             // if the MMT-preimport flag is enabled,
             // then all the user's MyMemory keys must be sent to MMT
             // when the engine is created
-            if ( $preImport === true ) {
-                $engineMmt->connectKeys( self::_getKeyringOwnerKeysByUid( $userStruct->uid ) );
+            if ( !empty( $newTestCreatedMT->extra_parameters[ 'MMT-preimport' ] ) ) {
+                $newTestCreatedMT->connectKeys( self::_getKeyringOwnerKeysByUid( $userStruct->uid ) );
             }
 
         } catch ( Exception $e ) {
@@ -134,14 +123,6 @@ class Mmt extends BaseFeature {
 
         return $newCreatedDbRowStruct;
 
-    }
-
-    /**
-     * @param EnginesModel_MMTStruct $newCreatedDbRowStruct
-     */
-    private function rollback(EnginesModel_MMTStruct $newCreatedDbRowStruct)
-    {
-        ( new EnginesModel_EngineDAO( Database::obtain() ) )->delete( $newCreatedDbRowStruct );
     }
 
     /**
