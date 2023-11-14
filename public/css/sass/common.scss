@@ -2972,6 +2972,7 @@ section.currSearchSegment mark.searchMarker {
 
 .offline {
   padding: 0;
+  padding-top: 80px;
 }
 
 .offline .claim {
@@ -2994,7 +2995,10 @@ section.currSearchSegment mark.searchMarker {
 }
 
 .offline h1 {
-  font-size: 40px;
+  font-size: 35px;
+}
+.offline h2 {
+  font-size: 30px;
 }
 
 .offline h2 {
