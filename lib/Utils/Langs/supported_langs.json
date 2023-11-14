@@ -600,6 +600,17 @@
         {
             "localized": [
                 {
+                    "en": "Chuj"
+                }
+            ],
+            "isocode": "cac",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "cac-GT"
+        },
+        {
+            "localized": [
+                {
                     "en": "Classical Greek"
                 }
             ],
@@ -1491,6 +1502,17 @@
         {
             "localized": [
                 {
+                    "en": "Kanjobal"
+                }
+            ],
+            "isocode": "kjb",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "kjb-GT"
+        },
+        {
+            "localized": [
+                {
                     "en": "Kannada"
                 }
             ],
@@ -1971,6 +1993,17 @@
             "enabled": true,
             "rtl": false,
             "rfc3066code": "mt-MT"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Mam"
+                }
+            ],
+            "isocode": "mam",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "mam-GT"
         },
         {
             "localized": [
