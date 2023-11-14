@@ -1252,6 +1252,8 @@ class Editarea extends React.Component {
       const plainText = internalClipboard
         .map((block) => block.getText())
         .join('\n')
+        .replace(new RegExp(String.fromCharCode(parseInt('200B', 16)), 'g'), '')
+
       const entitiesMap = DraftMatecatUtils.getEntitiesInFragment(
         internalClipboard,
         editorState,
