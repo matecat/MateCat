@@ -781,6 +781,23 @@ class Editarea extends React.Component {
       ((e.ctrlKey && e.altKey) || (CommonUtils.isMacOS() && e.shiftKey))
     ) {
       return 'insert-word-joiner-tag'
+    } else if (e.code === 'BracketLeft' || e.code === 'BracketRight') {
+      if (e.code === 'BracketLeft' && (isOptionKeyCommand(e) || e.altKey)) {
+        if (e.shiftKey) {
+          this.typeTextInEditor('“')
+        } else {
+          this.typeTextInEditor('‘')
+        }
+        return 'quote-shortcut'
+      }
+      if (e.code === 'BracketRight' && (isOptionKeyCommand(e) || e.altKey)) {
+        if (e.shiftKey) {
+          this.typeTextInEditor('”')
+        } else {
+          this.typeTextInEditor('’')
+        }
+        return 'quote-shortcut'
+      }
     } else if (e.altKey && !e.shiftKey && !e.ctrlKey) {
       const {get, reset} = typingWordJoiner
       if (e.key !== 'Alt') {
@@ -886,6 +903,8 @@ class Editarea extends React.Component {
         return 'not-handled'
       case 'next-translate':
         return 'not-handled'
+      case 'quote-shortcut':
+        return 'handled'
       default:
         return 'not-handled'
     }
