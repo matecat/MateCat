@@ -30,7 +30,6 @@ import getSelectedText from './getSelectedText'
 import addTagEntityToEditor from './addTagEntityToEditor'
 import canDecorateRange from './canDecorateRange'
 import getEntityStrategy from './getEntityStrategy'
-import moveCursorJumpEntity from './moveCursorJumpEntity'
 import selectionIsEntity from './selectionIsEntity'
 import insertEntityAtSelection from './insertEntityAtSelection'
 import structFromName from './tagFromTagType'
@@ -45,6 +44,7 @@ import activateQaCheckBlacklist from './activateQaCheckBlacklist'
 import prepareTextForLexiqa from './prepareTextForLexiqa'
 import getSelectedTextWithoutEntities from './getSelectedTextWithoutEntities'
 import replaceMultipleText from './replaceMultipleText'
+import * as manageCaretPositionNearEntity from './manageCaretPositionNearEntity'
 
 const DraftMatecatUtils = {
   // Text utils
@@ -72,7 +72,7 @@ const DraftMatecatUtils = {
   addTagEntityToEditor,
   canDecorateRange,
   selectionIsEntity,
-  moveCursorJumpEntity,
+  manageCaretPositionNearEntity,
   insertEntityAtSelection,
   // Fragment Utils
   insertFragment,
