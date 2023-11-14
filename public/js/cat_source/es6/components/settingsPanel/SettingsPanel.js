@@ -73,11 +73,9 @@ export const SettingsPanel = ({
   const [tabs, setTabs] = useState(() => {
     const initialState = DEFAULT_CONTENTS.map((tab) => ({
       ...tab,
-      isOpened: config.is_cattool
-        ? tab.id === SETTINGS_PANEL_TABS.advancedOptions
-        : Object.values(SETTINGS_PANEL_TABS).some(
-            (value) => value === tabOpenFromQueryString,
-          )
+      isOpened: Object.values(SETTINGS_PANEL_TABS).some(
+        (value) => value === tabOpenFromQueryString,
+      )
         ? tabOpenFromQueryString === tab.id
         : tabOpen === tab.id,
     }))

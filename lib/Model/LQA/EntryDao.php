@@ -22,11 +22,27 @@ class EntryDao extends DataAccess_AbstractDao {
      */
     public static function getBySegmentIds(array $ids = [])
     {
-        $sql = "SELECT * FROM qa_entries WHERE qa_entries.deleted_at IS NULL AND id_segment IN ( " . implode(', ' , $ids ) . " ) ";
+        $sql = "SELECT 
+            q.id_job,
+            q.id_segment,
+            q.source_page,
+            q.id_category,
+            q.severity,
+            q.translation_version,
+            q.penalty_points,
+            q.create_date,
+            cat.label as cat_label
+        FROM
+            qa_entries q
+                LEFT JOIN
+            qa_categories cat ON q.id_category = cat.id
+        WHERE
+            q.deleted_at IS NULL
+                AND q.id_segment IN ( " . implode(', ' , $ids ) . " ) ";
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->execute();
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'LQA\EntryStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, ShapelessConcreteStruct::class );
 
         return $stmt->fetchAll();
     }
