@@ -7,14 +7,19 @@ APP.USER.STORE = {}
    *
    * @returns {*|{type}|nothing}
    */
-  var loadUserData = () => {
+  const loadUserData = () => {
     return getUserData().then(function (data) {
       APP.USER.STORE = data
       $(document).trigger('userDataLoaded', data)
       return data
     })
   }
-
+  const isUserLogged = () => {
+    return !!config.isLoggedIn
+  }
+  const isGoogleUser = () => {
+    return !APP.USER.STORE.user.has_password
+  }
   function getDefaultConnectedService() {
     if (APP.USER.STORE.connected_services.length) {
       var selectable = $(APP.USER.STORE.connected_services).filter(function () {
@@ -43,5 +48,7 @@ APP.USER.STORE = {}
     loadUserData: loadUserData,
     getDefaultConnectedService: getDefaultConnectedService,
     upsertConnectedService: upsertConnectedService,
+    isUserLogged: isUserLogged,
+    isGoogleUser: isGoogleUser,
   })
 })(APP, jQuery)

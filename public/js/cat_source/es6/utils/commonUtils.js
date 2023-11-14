@@ -553,6 +553,10 @@ const CommonUtils = {
     const event = new CustomEvent('track-event', {detail: {name, message}})
     document.dispatchEvent(event)
   },
+  dispatchAnalyticsEvents: (data) => {
+    const event = new CustomEvent('dataLayer-event', {detail: data})
+    document.dispatchEvent(event)
+  },
   parseCommentHtmlBeforeSend: (text) => {
     var elem = $('<div></div>').html(text)
     elem.find('.atwho-inserted').each(function () {

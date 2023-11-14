@@ -8,8 +8,8 @@ import {projectCreationStatus} from './cat_source/es6/api/projectCreationStatus'
 import AlertModal from './cat_source/es6/components/modals/AlertModal'
 import NotificationBox from './cat_source/es6/components/notificationsComponent/NotificationBox'
 import NewProject from './cat_source/es6/pages/NewProject'
-import CreateProjectStore from './cat_source/es6/stores/CreateProjectStore'
 import CreateProjectActions from './cat_source/es6/actions/CreateProjectActions'
+import CommonUtils from './cat_source/es6/utils/commonUtils'
 
 /**
  * ajax call to clear the uploaded files when an user refresh the home page
@@ -145,94 +145,28 @@ APP.postProjectCreation = function (d) {
     //reset the clearNotCompletedUploads event that should be called in main.js onbeforeunload
     //--> we don't want to delete the files on the upload directory
     clearNotCompletedUploads = function () {}
-
-    if (config.analysisEnabled) {
-      //this should not be.
-      //A project now are never EMPTY, it is not created anymore
-      if (d.status == 'EMPTY') {
-        console.log('EMPTY')
-        $('body').removeClass('creating')
-        ModalsActions.showModalComponent(
-          AlertModal,
-          {
-            text: 'No text to translate in the file(s).<br />Perhaps it is a scanned file or an image?',
-            buttonText: 'Continue',
-          },
-          'No text to translate',
-        )
-      } else {
-        location.href = d.analyze_url
-      }
+    //this should not be.
+    //A project now are never EMPTY, it is not created anymore
+    if (d.status == 'EMPTY') {
+      console.log('EMPTY')
+      $('body').removeClass('creating')
+      ModalsActions.showModalComponent(
+        AlertModal,
+        {
+          text: 'No text to translate in the file(s).<br />Perhaps it is a scanned file or an image?',
+          buttonText: 'Continue',
+        },
+        'No text to translate',
+      )
     } else {
-      if (Object.keys(d.target_language).length > 1) {
-        //if multiple language selected show a job list
-        d.files = []
-        d.trgLangHumanReadable =
-          CreateProjectStore.getTargetLangsNames.split(',')
-        d.srcLangHumanReadable = CreateProjectStore.getSourceLangName()
-
-        $.each(d.target_language, function (idx, val) {
-          d.files.push({
-            href:
-              config.hostpath +
-              config.basepath +
-              'translate/' +
-              d.project_name +
-              '/' +
-              d.source_language.substring(0, 2) +
-              '-' +
-              val.substring(0, 2) +
-              '/' +
-              d.id_job[idx] +
-              '-' +
-              d.password[idx],
-          })
-        })
-
-        $('.uploadbtn-box').fadeOut('slow', function () {
-          $('.uploadbtn-box').replaceWith(tmpl('job-links-list', d))
-
-          var btnContainer = $('.btncontinue')
-          var btnNew = $('#add-files').clone()
-          btnContainer
-            .fadeOut('slow', function () {
-              btnContainer.html('').addClass('newProject')
-              btnNew.children('span').text('New Project')
-              btnNew.children('i').remove()
-              btnNew.children('input').remove()
-              btnNew
-                .attr({id: 'new-project'})
-                .on('click', function () {
-                  location.href = config.hostpath + config.basepath
-                })
-                .css({margin: 'auto 0'})
-              btnNew.appendTo(btnContainer)
-            })
-            .css({height: '50px'})
-            .fadeIn(1000)
-
-          $('.translate-box input, .translate-box select').attr({
-            disabled: 'disabled',
-          })
-          $('td.delete').empty()
-          $('#info-login').fadeIn(1000)
-          $('#project-' + d.id_project).fadeIn(1000)
-        })
-      } else {
-        location.href =
-          config.hostpath +
-          config.basepath +
-          'translate/' +
-          d.project_name +
-          '/' +
-          d.source_language.substring(0, 2) +
-          '-' +
-          d.target_language[0].substring(0, 2) +
-          '/' +
-          d.id_job[0] +
-          '-' +
-          d.password[0]
+      const data = {
+        event: 'analyze_click',
+        userStatus: APP.USER.isUserLogged() ? 'loggedUser' : 'notLoggedUser',
+        userId: APP.USER.isUserLogged() ? APP.USER.STORE.user.uid : null,
+        idProject: d.id_project,
       }
+      CommonUtils.dispatchAnalyticsEvents(data)
+      location.href = d.analyze_url
     }
   }
 }
