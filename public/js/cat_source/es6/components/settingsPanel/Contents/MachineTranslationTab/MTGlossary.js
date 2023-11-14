@@ -57,7 +57,7 @@ export class MTGlossaryStatus {
 export const MTGlossary = ({id}) => {
   const [isShowingRows, setIsShowingRows] = useState(false)
   const [rows, setRows] = useState([])
-  const [isGlossaryCaseSensitive, setIsGlossaryCaseSensitive] = useState(false)
+  const [isGlossaryCaseSensitive, setIsGlossaryCaseSensitive] = useState(true)
 
   useEffect(() => {
     let wasCleanup = false
@@ -74,7 +74,9 @@ export const MTGlossary = ({id}) => {
 
             return {
               ...row,
-              node: <MTGlossaryRow key={row.id} {...{row, setRows}} />,
+              node: (
+                <MTGlossaryRow key={row.id} {...{engineId: id, row, setRows}} />
+              ),
             }
           }),
         )

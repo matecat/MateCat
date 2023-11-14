@@ -6,6 +6,7 @@ import Close from '../../../../../../../img/icons/Close'
 import {MTGlossaryStatus, MT_GLOSSARY_CREATE_ROW_ID} from './MTGlossary'
 import {MachineTranslationTabContext} from './'
 import {createMemoryAndImportGlossary} from '../../../../api/createMemoryAndImportGlossary/createMemoryAndImportGlossary'
+import {MTGlossaryRow} from './MTGlossaryRow'
 
 export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
   const {setNotification} = useContext(MachineTranslationTabContext)
@@ -17,13 +18,13 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
   const [isWaitingResult, setIsWaitingResult] = useState(false)
 
   const ref = useRef()
-  const statusPolling = useRef()
+  const statusEntry = useRef()
 
   useEffect(() => {
-    statusPolling.current = new MTGlossaryStatus()
+    statusEntry.current = new MTGlossaryStatus()
     ref.current.scrollIntoView({behavior: 'smooth', block: 'nearest'})
 
-    return () => statusPolling.current.cancel()
+    return () => statusEntry.current.cancel()
   }, [])
 
   const onChangeIsActive = (e) => {
@@ -52,13 +53,37 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
     console.log(name, file)
     createMemoryAndImportGlossary({engineId, glossary: file, name})
       .then(({data}) => {
+        const addNewEntry = (prevState) =>
+          prevState.map((row) =>
+            row.id === MT_GLOSSARY_CREATE_ROW_ID
+              ? {
+                  id: data.memory,
+                  isActive,
+                  name: row.name,
+                  node: (
+                    <MTGlossaryRow
+                      key={data.memory}
+                      {...{
+                        row: {id: data.memory, isActive, name: row.name},
+                        setRows,
+                      }}
+                    />
+                  ),
+                }
+              : row,
+          )
+
         if (data.progress === 1) {
           dispatchSuccessfullNotification()
+          setRows(addNewEntry)
         } else {
           //   start polling to get status
-          statusPolling.current
+          statusEntry.current
             .get({engineId, uuid: data.id})
-            .then(() => dispatchSuccessfullNotification())
+            .then(() => {
+              dispatchSuccessfullNotification()
+              setRows(addNewEntry)
+            })
             .catch(() => dispatchErrorNotification())
             .finally(() => setIsWaitingResult(false))
         }
