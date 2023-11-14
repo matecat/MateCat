@@ -1,3 +1,4 @@
+@import 'commons/colors';
 /*
  ******
  ******
@@ -407,7 +408,7 @@ a.ui.button.mbc-comment-delete-btn {
  ******
  ******
  */
-a.mbc-comment-link-btn:link,
+a.mbc-comment-link-btn,
 a.mbc-comment-link-btn:visited {
   color: #7f7f7f;
   display: inline-block;
@@ -682,6 +683,29 @@ article .mbc-comment-balloon-outer {
 #mbc-history:hover {
   /* #filterSwitch:hover line 86 style.css */
   color: #ccc;
+}
+
+.mbc-badge-container {
+  position: absolute;
+  top: -3px;
+  right: -4px;
+  display: flex;
+  .mbc-badge,
+  .mbc-badge-resolved {
+    padding: 1px 6px;
+    background: #0bbeec;
+    color: #fff;
+    font-size: 10px;
+    text-align: center;
+    border-radius: 25px;
+    vertical-align: middle;
+    line-height: 16px;
+    height: 17px;
+    display: block;
+  }
+  .mbc-badge-resolved {
+    background-color: $greenDefaultTransparent;
+  }
 }
 
 /*

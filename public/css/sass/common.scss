@@ -2972,6 +2972,7 @@ section.currSearchSegment mark.searchMarker {
 
 .offline {
   padding: 0;
+  padding-top: 80px;
 }
 
 .offline .claim {
@@ -2994,7 +2995,10 @@ section.currSearchSegment mark.searchMarker {
 }
 
 .offline h1 {
-  font-size: 40px;
+  font-size: 35px;
+}
+.offline h2 {
+  font-size: 30px;
 }
 
 .offline h2 {
@@ -4348,7 +4352,7 @@ body.side-popup {
 
 @media (max-width: 768px) {
   body.upload-page {
-    min-width: unset;
+    //min-width: unset;
     background-color: #f5f6f7;
     .started header,
     .wrapper-upload,
@@ -4356,7 +4360,8 @@ body.side-popup {
     #template-upload,
     #template-download,
     .wrapper-claim,
-    .wrapper-bottom {
+    .wrapper-bottom,
+    .upload-page-header {
       display: none !important;
     }
   }

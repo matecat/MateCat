@@ -120,6 +120,18 @@ let CommentsStore = assign({}, EventEmitter.prototype, {
       }
       return count
     },
+    getResolvedThreadCount: function () {
+      var count = 0
+
+      for (var segmentID in CommentsStore.db.segments) {
+        const el =
+          CommentsStore.db.segments[segmentID][
+            CommentsStore.db.segments[segmentID].length - 1
+          ]
+        if (el && el.message_type && parseInt(el.message_type) === 2) count++
+      }
+      return count
+    },
   },
   getCommentsBySegment: function (sid) {
     return CommentsStore.db.getCommentsBySegment(sid)
