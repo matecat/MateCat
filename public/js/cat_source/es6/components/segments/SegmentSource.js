@@ -781,10 +781,21 @@ class SegmentSource extends React.Component {
     try {
       // Get latest selection
       let newSelection = this.editor._latestEditorState.getSelection()
+
+      const currentBlockText = this.editor._latestEditorState
+        .getCurrentContent()
+        .getBlockForKey(newSelection.getFocusKey())
+        .getText()
+      const zwsp = String.fromCharCode(parseInt('200B', 16))
+      const selectedTextAfter = currentBlockText.slice(end, end + 1)
+      const selectedTextBefore = currentBlockText.slice(start - 1, start)
+      const addZwspExtraStepBefore = zwsp === selectedTextBefore ? 1 : 0
+      const addZwspExtraStepAfter = zwsp === selectedTextAfter ? 1 : 0
+
       // force selection on entity
       newSelection = newSelection.merge({
-        anchorOffset: start - 1, // -1 is to catch the zero-width space char placed before every entity
-        focusOffset: end,
+        anchorOffset: start - addZwspExtraStepBefore,
+        focusOffset: end + addZwspExtraStepAfter,
       })
       let newEditorState = EditorState.forceSelection(editorState, newSelection)
       const contentState = newEditorState.getCurrentContent()
