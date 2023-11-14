@@ -407,15 +407,13 @@ class ModernMTController extends BaseChunkController
     {
         if(isset($params['q'])){
             $q = filter_var($params['q'], FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW );
-            if(false === strpos($memory['name'], $q)){
+            if(false === strpos(strtolower($memory['name']), strtolower($q))){
                 return false;
             }
         }
 
-        if(isset($params['has_glossary'])){
-            $hasGlossary = filter_var($params['has_glossary'], FILTER_VALIDATE_BOOLEAN);
-
-            if($memory['hasGlossary'] != $hasGlossary){
+        if(isset($params['has_glossary']) and $params['has_glossary'] == 1){
+            if($memory['hasGlossary'] != true){
                 return false;
             }
         }
