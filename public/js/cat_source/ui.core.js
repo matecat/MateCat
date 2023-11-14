@@ -731,7 +731,6 @@ window.UI = {
 
     if (response.data == 'OK') {
       SegmentActions.setStatus(id_segment, null, status)
-      this.setDownloadStatus(response.stats)
       CatToolActions.setProgress(response.stats)
       SegmentActions.removeClassToSegment(id_segment, 'setTranslationPending')
 

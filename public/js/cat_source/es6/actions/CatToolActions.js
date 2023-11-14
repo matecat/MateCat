@@ -18,6 +18,7 @@ import SegmentUtils from '../utils/segmentUtils'
 import {getTmKeysJob} from '../api/getTmKeysJob'
 import {getDomainsList} from '../api/getDomainsList'
 import {checkJobKeysHaveGlossary} from '../api/checkJobKeysHaveGlossary'
+import {JOB_WORD_CONT_TYPE} from '../constants/Constants'
 
 let CatToolActions = {
   popupInfoUserMenu: () => 'infoUserMenu-' + config.userMail,
@@ -167,9 +168,12 @@ let CatToolActions = {
   },
   updateFooterStatistics: function () {
     getJobStatistics(config.id_job, config.password).then(function (data) {
-      if (data.stats) {
-        CatToolActions.setProgress(data.stats)
-        UI.setDownloadStatus(data.stats)
+      if (data) {
+        const stats = CommonUtils.parseOldStats(
+          data.stats ? data.stats : data,
+          config.word_count_type,
+        )
+        CatToolActions.setProgress(stats)
       }
     })
   },
@@ -179,6 +183,7 @@ let CatToolActions = {
       stats: stats,
     })
     //TODO move it
+    this.setDownloadStatus(stats)
     UI.projectStats = stats
     this.checkQualityReport(stats)
   },
