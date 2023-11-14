@@ -274,6 +274,37 @@ let SegmentFilterUtils = {
       SegmentActions.openSegment(nextItem)
     })
   },
+  gotoPreviousSegment: () => {
+    var list = SegmentFilterUtils.getLastFilterData()['segment_ids']
+    var index = list.indexOf('' + SegmentStore.getCurrentSegmentId())
+    var nextFiltered = index !== 0 ? list[index - 1] : list[list.length - 1]
+
+    if (!nextFiltered) {
+      return
+    }
+
+    SegmentActions.openSegment(nextFiltered)
+  },
+  gotoNextTranslatedSegment: (sid) => {
+    var list = SegmentFilterUtils.getLastFilterData()['segment_ids']
+    var index = list.indexOf('' + sid)
+    var nextFiltered = index !== list.length - 1 ? list[index + 1] : list[0]
+    let segment = SegmentStore.getSegmentByIdToJS(nextFiltered)
+    if (segment && segment.status !== 'DRAFT' && segment.status !== 'NEW') {
+      SegmentActions.openSegment(nextFiltered)
+    } else if (segment) {
+      SegmentFilterUtils.gotoNextTranslatedSegment(nextFiltered)
+    }
+  },
+  gotoNextSegment: (sid) => {
+    var list = SegmentFilterUtils.getLastFilterData()['segment_ids']
+    var index = list.indexOf('' + sid)
+    var nextFiltered = index !== list.length - 1 ? list[index + 1] : list[0]
+    if (!nextFiltered) {
+      return
+    }
+    SegmentActions.openSegment(nextFiltered)
+  },
 }
 
 export default SegmentFilterUtils

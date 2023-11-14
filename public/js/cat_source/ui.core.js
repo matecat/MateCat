@@ -837,8 +837,7 @@ window.UI = {
 
     var afterTranslateFn = function () {
       if (!goToNextUntranslated) {
-        UI.gotoNextSegment() //Others functionality override this function
-        // SegmentActions.openSegment(UI.nextSegmentId);
+        SegmentActions.gotoNextSegment() //Others functionality override this function
       } else {
         SegmentActions.gotoNextUntranslatedSegment()
       }
