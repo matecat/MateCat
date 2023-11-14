@@ -1,9 +1,12 @@
-import React, {Fragment, useContext, useEffect, useState} from 'react'
+import React, {Fragment, useContext, useEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import Upload from '../../../../../../../img/icons/Upload'
 import Trash from '../../../../../../../img/icons/Trash'
 import {deleteMemoryGlossary} from '../../../../api/deleteMemoryGlossary/deleteMemoryGlossary'
 import {MachineTranslationTabContext} from './MachineTranslationTab'
+import {MTGlossaryStatus} from './MTGlossary'
+import {importMemoryGlossary} from '../../../../api/importMemoryGlossary/importMemoryGlossary'
+import {updateMemoryGlossary} from '../../../../api/updateMemoryGlossary/updateMemoryGlossary'
 
 export const MTGlossaryRow = ({engineId, row, setRows}) => {
   const {setNotification} = useContext(MachineTranslationTabContext)
@@ -13,11 +16,48 @@ export const MTGlossaryRow = ({engineId, row, setRows}) => {
   const [file, setFile] = useState()
   const [isWaitingResult, setIsWaitingResult] = useState(false)
 
+  const statusImport = useRef()
+
   // user import new one glossary
   useEffect(() => {
     if (!file) return
-    console.log('call import api')
-  }, [file])
+
+    const dispatchSuccessfullImportNotification = () => {
+      setNotification({
+        type: 'success',
+        message: 'Glossary import successfull',
+      })
+      setIsWaitingResult(false)
+    }
+    const dispatchErrorImportNotification = () => {
+      setNotification({
+        type: 'error',
+        message: 'Glossary import error',
+      })
+      setIsWaitingResult(false)
+    }
+
+    statusImport.current = new MTGlossaryStatus()
+
+    setIsWaitingResult(true)
+    importMemoryGlossary({engineId, glossary: file, memoryId: row.id})
+      .then((data) => {
+        if (data.progress === 1) {
+          dispatchSuccessfullImportNotification()
+        } else {
+          //   start polling to get status
+          statusImport.current
+            .get({engineId, uuid: data.id})
+            .then(() => {
+              dispatchSuccessfullImportNotification()
+            })
+            .catch(() => dispatchErrorImportNotification())
+        }
+      })
+      .catch(() => dispatchErrorImportNotification())
+
+    return () => statusImport.current.cancel()
+  }, [file, row.id, engineId, setNotification])
 
   const onChangeIsActive = (e) => {
     setNotification()
@@ -37,9 +77,8 @@ export const MTGlossaryRow = ({engineId, row, setRows}) => {
       )
   }
 
-  const updateKeyName = () => {
-    // call api to update name
-  }
+  const updateKeyName = () => false
+  // updateMemoryGlossary({engineId, memoryId: row.id, name})
 
   const onChangeFile = (e) => {
     setNotification()
@@ -51,7 +90,7 @@ export const MTGlossaryRow = ({engineId, row, setRows}) => {
 
     setIsWaitingResult(true)
     deleteMemoryGlossary({engineId, memoryId: row.id})
-      .then(({data}) => {
+      .then((data) => {
         if (data.id === row.id)
           setRows((prevState) => prevState.filter(({id}) => id !== row.id))
       })

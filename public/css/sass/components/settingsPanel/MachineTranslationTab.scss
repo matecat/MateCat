@@ -247,6 +247,11 @@
 
   input[type='file'] {
     display: none;
+
+    &:disabled + label {
+      opacity: 0.5;
+      cursor: default;
+    }
   }
 
   .grey-button {
@@ -282,6 +287,11 @@
 
   &:hover {
     background-color: $grey5;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: default;
   }
 }
 

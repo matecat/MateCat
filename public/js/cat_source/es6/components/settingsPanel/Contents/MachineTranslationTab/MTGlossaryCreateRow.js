@@ -52,7 +52,7 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
   const createNewGlossary = () => {
     console.log(name, file)
     createMemoryAndImportGlossary({engineId, glossary: file, name})
-      .then(({data}) => {
+      .then((data) => {
         const addNewEntry = (prevState) =>
           prevState.map((row) =>
             row.id === MT_GLOSSARY_CREATE_ROW_ID
@@ -85,13 +85,9 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
               setRows(addNewEntry)
             })
             .catch(() => dispatchErrorNotification())
-            .finally(() => setIsWaitingResult(false))
         }
       })
-      .catch(() => {
-        dispatchErrorNotification()
-        setIsWaitingResult(false)
-      })
+      .catch(() => dispatchErrorNotification())
   }
 
   const onSubmit = (e) => {
@@ -122,16 +118,20 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
     setNotification()
   }
 
-  const dispatchSuccessfullNotification = () =>
+  const dispatchSuccessfullNotification = () => {
     setNotification({
       type: 'success',
       message: 'Glossary create successfull',
     })
-  const dispatchErrorNotification = () =>
+    setIsWaitingResult(false)
+  }
+  const dispatchErrorNotification = () => {
     setNotification({
       type: 'error',
       message: 'Glossary create error',
     })
+    setIsWaitingResult(false)
+  }
 
   const inputNameClasses = `glossary-row-name-input ${
     typeof submitCheckErrors === 'symbol' && !name ? ' error' : ''
@@ -142,14 +142,12 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
   }`
 
   return (
-    <form
-      ref={ref}
-      className={`settings-panel-row-content${
-        isWaitingResult ? ' row-content-create-glossary-waiting' : ''
-      }`}
-      onSubmit={onSubmit}
-    >
-      <div className="align-center">
+    <form ref={ref} className="settings-panel-row-content" onSubmit={onSubmit}>
+      <div
+        className={`align-center${
+          isWaitingResult ? ' row-content-create-glossary-waiting' : ''
+        }`}
+      >
         <input
           checked={isActive}
           onChange={onChangeIsActive}
@@ -158,7 +156,11 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
           disabled={isWaitingResult}
         />
       </div>
-      <div>
+      <div
+        className={`${
+          isWaitingResult ? ' row-content-create-glossary-waiting' : ''
+        }`}
+      >
         <input
           className={inputNameClasses}
           placeholder="Please insert a name for the glossary"
@@ -167,7 +169,11 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
           disabled={isWaitingResult}
         />
       </div>
-      <div className="glossary-row-import-button">
+      <div
+        className={`glossary-row-import-button${
+          isWaitingResult ? ' row-content-create-glossary-waiting' : ''
+        }`}
+      >
         <input
           type="file"
           id="file-import"

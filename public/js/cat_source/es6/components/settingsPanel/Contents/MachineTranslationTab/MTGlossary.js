@@ -65,9 +65,9 @@ export const MTGlossary = ({id}) => {
     getMMTKeys({engineId: id}).then((data) => {
       if (!wasCleanup) {
         setRows(
-          data.map(({name, id}) => {
+          data.map(({name, id: idRow}) => {
             const row = {
-              id,
+              id: idRow,
               name,
               isActive: false,
             }

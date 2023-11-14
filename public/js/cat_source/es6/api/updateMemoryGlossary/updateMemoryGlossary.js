@@ -1,19 +1,20 @@
 import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
 
-export const deleteMemoryGlossary = async ({engineId, memoryId}) => {
+export const updateMemoryGlossary = async ({engineId, memoryId, name}) => {
   const formData = new FormData()
 
   const params = {
-    memoryId,
+    name,
   }
   Object.keys(params).forEach((key) => {
     formData.append(key, params[key])
   })
   const response = await fetch(
-    `${getMatecatApiDomain()}api/v3/mmt/${engineId}/delete-memory/${memoryId}`,
+    `${getMatecatApiDomain()}api/v3/mmt/${engineId}/update-memory/${memoryId}`,
     {
-      method: 'GET',
+      method: 'POST',
       credentials: 'include',
+      body: formData,
     },
   )
 
