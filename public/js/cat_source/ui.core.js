@@ -918,10 +918,6 @@ window.UI = {
       'The owner of the project will be notified of any edits.'
     )
   },
-
-  closeAllMenus: function () {
-    CatToolActions.closeSubHeader()
-  },
 }
 
 $(document).ready(function () {

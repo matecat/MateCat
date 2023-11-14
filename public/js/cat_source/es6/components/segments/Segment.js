@@ -18,11 +18,11 @@ import Speech2Text from '../../utils/speech2text'
 import ConfirmMessageModal from '../modals/ConfirmMessageModal'
 import SegmentBody from './SegmentBody'
 import TranslationIssuesSideButton from '../review/TranslationIssuesSideButton'
-import MBC from '../../utils/mbc.main'
 import ModalsActions from '../../actions/ModalsActions'
 import {SegmentContext} from '../segments/SegmentContext'
 import CatToolConstants from '../../constants/CatToolConstants'
 import CatToolStore from '../../stores/CatToolStore'
+import CommentsStore from '../../stores/CommentsStore'
 
 class Segment extends React.Component {
   constructor(props) {
@@ -72,6 +72,24 @@ class Segment extends React.Component {
     this.timeoutScroll
   }
 
+  checkOpenSegmentComment() {
+    if (
+      CommentsStore.db.getCommentsCountBySegment &&
+      UI.currentSegmentId === this.props.segment.sid
+    ) {
+      const comments_obj = CommentsStore.db.getCommentsCountBySegment(
+        this.props.segment.sid,
+      )
+      const panelClosed =
+        localStorage.getItem(SegmentActions.localStorageCommentsClosed) ===
+        'true'
+      if (comments_obj.active > 0 && !panelClosed) {
+        SegmentActions.openSegmentComment(this.props.segment.sid)
+        SegmentActions.scrollToSegment(this.props.segment.sid)
+      }
+    }
+  }
+
   openSegment(wasOriginatedFromBrowserHistory) {
     if (!this.$section.length) return
     if (!this.checkIfCanOpenSegment()) {
@@ -106,6 +124,7 @@ class Segment extends React.Component {
           segmentId: this.props.segment.original_sid,
         }),
       )
+      this.checkOpenSegmentComment()
 
       /************/
       UI.editStart = new Date()
@@ -501,7 +520,6 @@ class Segment extends React.Component {
         }
       } else if (this.props.segment.openComments) {
         SegmentActions.closeSegmentComment()
-        localStorage.setItem(MBC.localStorageCommentsClosed, true)
       } else if (this.props.segment.openIssues) {
         SegmentActions.closeIssuesPanel()
       }

@@ -34,6 +34,9 @@ import CatToolStore from '../stores/CatToolStore'
 import {toggleTagProjectionJob} from '../api/toggleTagProjectionJob'
 
 const SegmentActions = {
+  localStorageCommentsClosed:
+    'commentsPanelClosed-' + config.id_job + config.password,
+
   /********* SEGMENTS *********/
   renderSegments: function (segments, idToOpen) {
     AppDispatcher.dispatch({
@@ -125,7 +128,6 @@ const SegmentActions = {
 
   openSegment: function (sid, wasOriginatedFromBrowserHistory = false) {
     const segment = SegmentStore.getSegmentByIdToJS(sid)
-
     if (segment) {
       //Check first if the segment is in the view
       if (UI.isReadonlySegment(segment) && !SearchUtils.searchEnabled) {
@@ -176,7 +178,7 @@ const SegmentActions = {
     if (SegmentStore.getCurrentSegment())
       this.scrollToSegment(SegmentStore.getCurrentSegment().sid)
   },
-  scrollToSegment: function (sid, callback) {
+  scrollToSegment: function (sid, callback = null) {
     const segment = SegmentStore.getSegmentByIdToJS(sid)
     if (segment) {
       AppDispatcher.dispatch({
@@ -1201,12 +1203,14 @@ const SegmentActions = {
       actionType: SegmentConstants.OPEN_COMMENTS,
       sid: sid,
     })
+    localStorage.setItem(this.localStorageCommentsClosed, false)
   },
   closeSegmentComment(sid) {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.CLOSE_COMMENTS,
       sid: sid,
     })
+    localStorage.setItem(this.localStorageCommentsClosed, true)
   },
   gotoNextSegment() {
     let next = SegmentStore.getNextSegment()
