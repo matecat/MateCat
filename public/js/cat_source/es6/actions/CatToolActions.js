@@ -77,8 +77,6 @@ let CatToolActions = {
     })
   },
   closeSubHeader: function () {
-    $('.mbc-history-balloon-outer').removeClass('mbc-visible')
-    $('#mbc-history').removeClass('open')
     AppDispatcher.dispatch({
       actionType: CattolConstants.CLOSE_SUBHEADER,
     })

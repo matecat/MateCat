@@ -18,6 +18,9 @@
                 <tal:block tal:condition="php: in_array('edge', enabledBrowsers)">
                     <li><a href="https://www.microsoft.com/en-us/edge"><img src="/public/img/edge.jpg" /><span>Edge</span></a></li>
                 </tal:block>
+                <tal:block tal:condition="php: in_array('firefox', enabledBrowsers)">
+                    <li><a href="https://www.mozilla.org/it/firefox/new/"><img src="/public/img/firefox.jpg" /><span>Firefox</span></a></li>
+                </tal:block>
             </ul>
             <h3 class="link-more">Learn more about <a href="https://site.matecat.com/benefits/">Matecat</a></h3>
         </div>
@@ -42,6 +45,9 @@
                 </tal:block>
                 <tal:block tal:condition="php: in_array('edge', enabledBrowsers)">
                     <li><a href="https://www.microsoft.com/en-us/edge"><img src="/public/img/edge.jpg" /><span>Edge</span></a></li>
+                </tal:block>
+                <tal:block tal:condition="php: in_array('firefox', enabledBrowsers)">
+                    <li><a href="https://www.mozilla.org/it/firefox/new/"><img src="/public/img/firefox.jpg" /><span>Firefox</span></a></li>
                 </tal:block>
             </ul>
             <h3 class="link-more">Learn more about <a href="https://site.matecat.com/benefits/">Matecat</a></h3>

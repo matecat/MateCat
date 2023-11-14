@@ -2,7 +2,6 @@ import {round} from 'lodash'
 import Cookies from 'js-cookie'
 import Platform from 'platform'
 import OfflineUtils from './offlineUtils'
-import MBC from './mbc.main'
 import SegmentActions from '../actions/SegmentActions'
 import SegmentStore from '../stores/SegmentStore'
 import AlertModal from '../components/modals/AlertModal'
@@ -161,15 +160,7 @@ const CommonUtils = {
     }
 
     window.onpopstate = () => {
-      if (this.parsedHash.onlyActionRemoved(window.location.hash)) {
-        return
-      }
-
       this.parsedHash = new ParsedHash(window.location.hash)
-
-      if (this.parsedHash.hashCleanupRequired()) {
-        this.parsedHash.cleanupHash()
-      }
 
       updateAppByPopState()
     }
@@ -179,7 +170,7 @@ const CommonUtils = {
     })
 
     this.parsedHash = new ParsedHash(window.location.hash)
-    this.parsedHash.hashCleanupRequired() && this.parsedHash.cleanupHash()
+    this.parsedHash.cleanupHash()
   },
 
   goodbye(e) {
@@ -566,6 +557,15 @@ const CommonUtils = {
     const event = new CustomEvent('dataLayer-event', {detail: data})
     document.dispatchEvent(event)
   },
+  parseCommentHtmlBeforeSend: (text) => {
+    var elem = $('<div></div>').html(text)
+    elem.find('.atwho-inserted').each(function () {
+      var id = $(this).find('.tagging-item').data('id')
+      $(this).html('{@' + id + '@}')
+    })
+    elem.find('.tagging-item').remove()
+    return elem.text()
+  },
 }
 
 const ParsedHash = function (hash) {
@@ -611,10 +611,6 @@ const ParsedHash = function (hash) {
   this.splittedSegmentId = _obj.splittedSegmentId
   this.chunkId = _obj.chunkId
 
-  this.isComment = function () {
-    return _obj.action == MBC.const.commentAction
-  }
-
   this.toString = function () {
     var hash = ''
     if (_obj.splittedSegmentId) {
@@ -628,23 +624,8 @@ const ParsedHash = function (hash) {
     return hash
   }
 
-  this.onlyActionRemoved = function (hash) {
-    var current = new ParsedHash(hash)
-    var diff = this.toString().split(current.toString())
-    return MBC.enabled() && diff[1] == actionSep + MBC.const.commentAction
-  }
-
-  this.hashCleanupRequired = function () {
-    return MBC.enabled() && this.isComment()
-  }
-
   this.cleanupHash = function () {
-    notifyModules()
     window.location.hash = CommonUtils.parsedHash.segmentId
-  }
-
-  var notifyModules = function () {
-    MBC.enabled() && that.isComment() && MBC.setLastCommentHash(that)
   }
 }
 
