@@ -5,6 +5,8 @@ import {SettingsPanelTable} from '../../SettingsPanelTable'
 import {MTGlossaryRow} from './MTGlossaryRow'
 import Upload from '../../../../../../../img/icons/Upload'
 import {MTGlossaryCreateRow} from './MTGlossaryCreateRow'
+import {getMMTKeys} from '../../../../api/getMMTKeys/getMMTKeys'
+import {getStatusMemoryGlossaryImport} from '../../../../api/getStatusMemoryGlossaryImport/getStatusMemoryGlossaryImport'
 
 const COLUMNS_TABLE = [
   {name: 'Activate'},
@@ -15,33 +17,41 @@ const COLUMNS_TABLE = [
 
 export const MT_GLOSSARY_CREATE_ROW_ID = 'createRow'
 
-const fakeApi = {
-  getMMTKeys: ({engineId}) =>
-    new Promise((resolve) => {
-      setTimeout(() => {
-        resolve([
-          {
-            id: 197983,
-            name: 'TM esame',
-            has_glossary: true,
-          },
-          {
-            id: 197996,
-            name: 'TM corso',
-            has_glossary: true,
-          },
-          {
-            id: 198430,
-            name: 'MyMemory eb90b0a88870372f2599',
-            has_glossary: true,
-          },
-        ])
-      }, 500)
-    }),
-  updateMMTMemory: ({id, name}) =>
-    new Promise((resolve) => {
-      resolve()
-    }),
+export class MTGlossaryStatus {
+  constructor() {
+    this.wasAborted = false
+  }
+
+  get(props, promise = getStatusMemoryGlossaryImport) {
+    this.wasAborted = false
+    return new Promise((resolve, reject) => {
+      this.executeApi({promise, props, resolve, reject})
+    })
+  }
+
+  cancel() {
+    this.wasAborted = true
+  }
+
+  executeApi({promise, props, resolve, reject}) {
+    const DELAY = 1000
+
+    promise(props).then((data) => {
+      if (typeof data?.progress === 'undefined') {
+        reject()
+        return
+      }
+      console.log('polling result', data)
+      if (data.progress === 0) {
+        setTimeout(() => {
+          if (!this.wasAborted)
+            this.executeApi({promise, props, resolve, reject})
+        }, DELAY)
+      } else {
+        resolve(data)
+      }
+    })
+  }
 }
 
 export const MTGlossary = ({id}) => {
@@ -52,14 +62,14 @@ export const MTGlossary = ({id}) => {
   useEffect(() => {
     let wasCleanup = false
 
-    fakeApi.getMMTKeys({engineId: id}).then((data) => {
+    getMMTKeys({engineId: id}).then((data) => {
       if (!wasCleanup) {
         setRows(
           data.map(({name, id}) => {
             const row = {
               id,
               name,
-              isActive: true,
+              isActive: false,
             }
 
             return {
@@ -77,13 +87,13 @@ export const MTGlossary = ({id}) => {
   const addGlossary = () => {
     const row = {
       id: MT_GLOSSARY_CREATE_ROW_ID,
-      isActive: true,
+      isActive: false,
       className: 'row-content-create-glossary',
     }
 
     setRows((prevState) => [
       ...prevState.filter(({id}) => id !== MT_GLOSSARY_CREATE_ROW_ID),
-      {...row, node: <MTGlossaryCreateRow {...{row, setRows}} />},
+      {...row, node: <MTGlossaryCreateRow {...{engineId: id, row, setRows}} />},
     ])
   }
 
@@ -99,7 +109,11 @@ export const MTGlossary = ({id}) => {
       </div>
       {isShowingRows && (
         <>
-          <SettingsPanelTable columns={COLUMNS_TABLE} rows={rows} />
+          <SettingsPanelTable
+            columns={COLUMNS_TABLE}
+            rows={rows}
+            className="mt-glossary-table"
+          />
           <div className="bottom-buttons">
             <button className="grey-button" onClick={addGlossary}>
               <Upload size={14} />

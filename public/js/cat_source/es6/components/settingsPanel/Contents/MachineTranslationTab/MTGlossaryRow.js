@@ -1,4 +1,4 @@
-import React, {Fragment, useState} from 'react'
+import React, {Fragment, useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
 import Upload from '../../../../../../../img/icons/Upload'
 import Trash from '../../../../../../../img/icons/Trash'
@@ -7,6 +7,12 @@ export const MTGlossaryRow = ({row, setRows}) => {
   const [isActive, setIsActive] = useState(row.isActive)
   const [name, setName] = useState(row.name)
   const [file, setFile] = useState()
+
+  // user import new one glossary
+  useEffect(() => {
+    if (!file) return
+    console.log('call import api')
+  }, [file])
 
   const onChangeIsActive = (e) => setIsActive(e.currentTarget.checked)
 
