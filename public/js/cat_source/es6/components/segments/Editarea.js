@@ -1053,7 +1053,6 @@ class Editarea extends React.Component {
 
   onChange = (editorState) => {
     //console.log('onChange')
-    console.log(editorState.getSelection())
     const {
       displayPopover,
       editorState: prevEditorState,
