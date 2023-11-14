@@ -68,9 +68,24 @@ APP.restartConversion = function () {
 }
 
 APP.checkGDriveEvents = function () {
-  var cookie = Cookies.get('gdrive_files_to_be_listed')
+  const cookieFilesGdrive = 'gdrive_files_to_be_listed'
+  const cookieGdriveResponse = 'gdrive_files_outcome'
+  const cookie = Cookies.get(cookieGdriveResponse)
   if (cookie) {
-    APP.tryListGDriveFiles()
+    const gdriveResponse = JSON.parse(Cookies.get(cookieGdriveResponse))
+    if (gdriveResponse.success) {
+      APP.tryListGDriveFiles()
+    } else if (gdriveResponse.error_msg) {
+      CreateProjectActions.showError(gdriveResponse.error_msg)
+    }
+    Cookies.remove(cookieFilesGdrive, {
+      path: '',
+      domain: '.' + location.hostname,
+    })
+    Cookies.remove(cookieGdriveResponse, {
+      path: '',
+      domain: '.' + location.hostname,
+    })
   }
 }
 APP.handleCreationStatus = function (id_project, password) {
