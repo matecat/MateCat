@@ -194,7 +194,7 @@ abstract class AbstractStatus {
             // is outsource available?
             if ( $target === null or $segInfo[ 'target' ] !== $target ) {
                 $job->setOutsource(
-                        $this->isOutsourceEnabled( $segInfo[ 'target' ], $segInfo[ 'id_customer' ], $jid )
+                        $this->isOutsourceEnabled( $segInfo[ 'target' ], $segInfo[ 'id_customer' ], $segInfo[ 'jid' ] )
                 );
                 $target = $segInfo[ 'target' ];
             }
