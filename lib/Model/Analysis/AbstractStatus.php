@@ -1,12 +1,21 @@
 <?php
+
 namespace Model\Analysis;
+
+use API\App\Json\Analysis\AnalysisChunk;
+use API\App\Json\Analysis\AnalysisFile;
+use API\App\Json\Analysis\AnalysisJob;
+use API\App\Json\Analysis\AnalysisProject;
+use API\App\Json\Analysis\AnalysisProjectSummary;
+use API\App\Json\Analysis\MatchConstants;
+use API\App\Json\Analysis\Matches\AnalysisMatchType;
 use Constants_ProjectStatus;
+use Exception;
 use FeatureSet;
 use INIT;
 use OutsourceTo_OutsourceAvailable;
 use Projects_MetadataDao;
 use Projects_ProjectDao;
-use Exception;
 
 /**
  * Created by PhpStorm.
@@ -19,38 +28,38 @@ use Exception;
  */
 abstract class AbstractStatus {
 
-    protected $_data_struct = array();
+    protected $_data_struct = [];
 
     /**
      * Carry the result from Executed Controller Action and returned in json format to the Client
      *
      * @var array
      */
-    protected $result = array( "errors" => array(), "data" => array() );
+    protected $result = [ "errors" => [], "data" => [] ];
 
-    protected $_globals = array();
+    protected $_globals = [];
 
-    protected $total_segments = 0;
-    protected $_resultSet = array();
+    protected $total_segments   = 0;
+    protected $_resultSet       = [];
     protected $_others_in_queue = 0;
-    protected $_project_data = array();
-    protected $status_project = "";
+    protected $_project_data    = [];
+    protected $status_project   = "";
 
-    protected $_total_init_struct = array(
-            "TOTAL_PAYABLE" => array( 0, "0" ), "REPETITIONS" => array( 0, "0" ), "MT" => array( 0, "0" ),
-            "NEW"           => array( 0, "0" ), "TM_100" => array( 0, "0" ), "TM_100_PUBLIC" => array( 0, "0" ),
-            "TM_75_99"      => array( 0, "0" ),
-            "TM_75_84"      => array( 0, "0" ), "TM_85_94" => array( 0, "0" ), "TM_95_99" => array( 0, "0" ),
-            "TM_50_74"      => array( 0, "0" ), "INTERNAL_MATCHES" => array( 0, "0" ), "ICE" => array( 0, "0" ),
-            "NUMBERS_ONLY"  => array( 0, "0" )
-    );
+    protected $_total_init_struct = [
+            "TOTAL_PAYABLE" => [ 0, "0" ], "REPETITIONS" => [ 0, "0" ], "MT" => [ 0, "0" ],
+            "NEW"           => [ 0, "0" ], "TM_100" => [ 0, "0" ], "TM_100_PUBLIC" => [ 0, "0" ],
+            "TM_75_99"      => [ 0, "0" ],
+            "TM_75_84"      => [ 0, "0" ], "TM_85_94" => [ 0, "0" ], "TM_95_99" => [ 0, "0" ],
+            "TM_50_74"      => [ 0, "0" ], "INTERNAL_MATCHES" => [ 0, "0" ], "ICE" => [ 0, "0" ],
+            "NUMBERS_ONLY"  => [ 0, "0" ]
+    ];
 
-    protected   $featureSet;
+    protected $featureSet;
 
-    public function __construct( $_project_data , FeatureSet $features) {
-        $this->id_project = $_project_data[0]['pid'];
+    public function __construct( $_project_data, FeatureSet $features ) {
+        $this->id_project    = $_project_data[ 0 ][ 'pid' ];
         $this->_project_data = $_project_data;
-        $this->featureSet = $features;
+        $this->featureSet    = $features;
     }
 
     /**
@@ -82,7 +91,7 @@ abstract class AbstractStatus {
             $segmentsBeforeMine = null;
         }
 
-        $this->_others_in_queue = ( $segmentsBeforeMine >= 0 ? $segmentsBeforeMine : 0 );
+        $this->_others_in_queue = ( $segmentsBeforeMine > 0 ? $segmentsBeforeMine : 0 );
 
         $this->total_segments = count( $this->_resultSet );
 
@@ -100,150 +109,184 @@ abstract class AbstractStatus {
 
         $this->_fetchProjectData();
 
-        return $this->_oldFormatData();
-//        if( $word_count_type == Projects_MetadataDao::WORD_COUNT_EQUIVALENT ){
-//        }
-//
-//        return $this->_formatData();
+        if ( $word_count_type == Projects_MetadataDao::WORD_COUNT_EQUIVALENT ) {
+            return $this->_oldFormatData();
+
+        }
+
+        return $this->_formatData();
 
     }
 
-    protected function _formatData(){
-        //TODO
-        $this->result = [];
+    /**
+     * @return bool
+     * @throws Exception
+     */
+    protected function isOutsourceEnabled( $targetLang, $id_customer, $idJob ) {
 
-        $_total_segments_analyzed         = 0;
-        $_total_wc_fast_analysis          = 0;
-        $_total_wc_standard_fast_analysis = 0;
-        $target                           = null;
-        $outsourceAvailable               = false;
+        $outsourceAvailableInfo = $this->featureSet->filter( 'outsourceAvailableInfo', $targetLang, $id_customer, $idJob );
 
-        $read_jobs = [];
-        $read_chunks = [];
+        // if the hook is not triggered by any plugin
+        if ( !is_array( $outsourceAvailableInfo ) or empty( $outsourceAvailableInfo ) ) {
+            $outsourceAvailableInfo = [
+                    'disabled_email'         => false,
+                    'custom_payable_rate'    => false,
+                    'language_not_supported' => false,
+            ];
+        }
+
+        return OutsourceTo_OutsourceAvailable::isOutsourceAvailable( $outsourceAvailableInfo );
+
+    }
+
+    protected function _formatData() {
+
+        $target  = null;
+        $this->result = $project = new AnalysisProject(
+                $this->_project_data[ 0 ][ 'pname' ],
+                new AnalysisProjectSummary(
+                        $this->_others_in_queue,
+                        $this->total_segments,
+                        $this->status_project
+                )
+        );
+
+        if ( $project->getSummary()->getSegmentsAnalyzed() == 0 && $this->status_project == Constants_ProjectStatus::STATUS_NEW ) {
+
+            //Related to an issue in the outsource
+            //Here, the Fast analysis was not performed, return the number of raw word count
+            //Needed because the "getProjectStatsVolumeAnalysis" query based on segment_translations always returns null
+            //( there are no segment_translations )
+            $project_data_fallback = Projects_ProjectDao::getProjectAndJobData( $this->id_project );
+
+            foreach ( $project_data_fallback as $i => $_job_fallback ) {
+
+                $job = new AnalysisJob( $_job_fallback[ 'jid' ] );
+                $project->setJob( $job );
+                $job->incrementIndustry( round( $_job_fallback[ 'standard_analysis_wc' ] ) );
+                $job->incrementEquivalent( round( $_job_fallback[ 'standard_analysis_wc' ] ) );
+                $job->incrementRaw( round( $_job_fallback[ 'standard_analysis_wc' ] ) );
+
+            }
+
+            $project->getSummary()->incrementRaw( $project_data_fallback[ 0 ][ 'standard_analysis_wc' ] );
+            $project->getSummary()->incrementIndustry( $project_data_fallback[ 0 ][ 'standard_analysis_wc' ] );
+            $project->getSummary()->incrementEquivalent( $project_data_fallback[ 0 ][ 'standard_analysis_wc' ] );
+
+            return $this;
+
+        }
 
         foreach ( $this->_resultSet as $segInfo ) {
 
-            if ( $segInfo[ 'st_status_analysis' ] == 'DONE' ) {
-                $_total_segments_analyzed += 1;
-            }
-
-            if ( $_total_wc_fast_analysis == 0 and $segInfo[ 'fast_analysis_wc' ] > 0 ) {
-                $_total_wc_fast_analysis = $segInfo[ 'fast_analysis_wc' ];
-            }
-
-            if ( $_total_wc_standard_fast_analysis == 0 and $segInfo[ 'fast_analysis_wc' ] > 0 ) {
-                $_total_wc_standard_fast_analysis = $segInfo[ 'fast_analysis_wc' ];
-            }
-
-            $jid           = $segInfo[ 'jid' ];
-            $jpassword     = $segInfo[ 'jpassword' ];
-            $words         = $segInfo[ 'raw_word_count' ];
-            $eq_words      = $segInfo[ 'eq_word_count' ];
-            $st_word_count = $segInfo[ 'standard_word_count' ];
-
-            $_total_raw_wc += $segInfo[ 'raw_word_count' ];
-            $_total_wc_tm_analysis += $eq_words;
-            $_total_wc_standard_analysis += $st_word_count;
-
-            // is outsource available?
-            if ( $target === null or $segInfo[ 'target' ] !== $target ) {
-                $outsourceAvailableInfo = $this->featureSet->filter( 'outsourceAvailableInfo', $segInfo[ 'target' ], $segInfo[ 'id_customer' ], $jid );
-
-                // if the hook is not triggered by any plugin
-                if ( !is_array( $outsourceAvailableInfo ) or empty( $outsourceAvailableInfo ) ) {
-                    $outsourceAvailableInfo = [
-                            'disabled_email'         => false,
-                            'custom_payable_rate'    => false,
-                            'language_not_supported' => false,
-                    ];
-                }
-
-                $outsourceAvailable = OutsourceTo_OutsourceAvailable::isOutsourceAvailable( $outsourceAvailableInfo );
-                $target             = $segInfo[ 'target' ];
-            }
-
-            if ( !array_key_exists( $jid, $read_jobs ) ) {
-                $this->result[ 'jobs' ]             = [];
-                $this->result[ 'jobs' ][ 'chunks' ] = [];
-                $read_jobs[ $jid ]                  = true;
-//                $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'outsource_available' ] = $outsourceAvailable;
-//                $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'totals' ]              = [];
-//                $total_word_counters[ $jid ]                                       = [];
-
-/*
-{
-        'jobs': {
-            'id': 123,
-            'chunks': [
-                'password': 'aaa',
-                'files': {
-                    'id': 1234,
-                    'name': 'filename.abc'
-
-                }
-            ]
-        }
-}
-*/
-
-            }
-
-            if ( $segInfo[ 'match_type' ] == "INTERNAL" ) {
-                $keyValue = 'internal';
-            } elseif ( $segInfo[ 'match_type' ] == "MT" ) {
-                $keyValue = 'MT';
-            } elseif ( $segInfo[ 'match_type' ] == "100%" ) {
-                $keyValue = '100';
-            } elseif ( $segInfo[ 'match_type' ] == "100%_PUBLIC" ) {
-                $keyValue = '100_public';
-            } elseif ( $segInfo[ 'match_type' ] == "75%-99%" ) {
-                $keyValue = '75_99';
-            } elseif ( $segInfo[ 'match_type' ] == "75%-84%" ) {
-                $keyValue = '75_84';
-            } elseif ( $segInfo[ 'match_type' ] == "85%-94%" ) {
-                $keyValue = '85_94';
-            } elseif ( $segInfo[ 'match_type' ] == "95%-99%" ) {
-                $keyValue = '95_99';
-            } elseif ( $segInfo[ 'match_type' ] == "50%-74%" ) {
-                $keyValue = '50_74';
-            } elseif ( $segInfo[ 'match_type' ] == "NO_MATCH" or $segInfo[ 'match_type' ] == "NEW" ) {
-                $keyValue = 'new';
-            } elseif ( $segInfo[ 'match_type' ] == "ICE" ) {
-                $keyValue = "ice";
-            } elseif ( $segInfo[ 'match_type' ] == "REPETITIONS" ) {
-                $keyValue = 'repetitions';
-            } else {
-                $keyValue = 'numbers_only';
+            if ( $project->getSummary()->getTotalFastAnalysis() == 0 and $segInfo[ 'fast_analysis_wc' ] > 0 ) {
+                $project->getSummary()->setTotalFastAnalysis( $segInfo[ 'fast_analysis_wc' ] );
             }
 
             /*
-            {
-                    'jobs': {
-                        'id': 123,
-                        'chunks': [
-                            'password': 'aaa',
-                            'files': {
-                                'id': 1234,
-                                'name': 'filename.abc'
-
-                            }
-                        ]
-                    }
+             *  Create & Set objects while iterating
+             */
+            if ( !isset( $job ) || $job->getId() != $segInfo[ 'jid' ] ) {
+                $job = new AnalysisJob( $segInfo[ 'jid' ] );
+                $project->setJob( $job );
             }
-            */
 
+            // is outsource available?
+            if ( $target === null or $segInfo[ 'target' ] !== $target ) {
+                $job->setOutsource(
+                        $this->isOutsourceEnabled( $segInfo[ 'target' ], $segInfo[ 'id_customer' ], $jid )
+                );
+                $target = $segInfo[ 'target' ];
+            }
+
+            if ( !isset( $chunk ) || $chunk->getPassword() != $segInfo[ 'jpassword' ] ) {
+                $chunk = new AnalysisChunk( $segInfo[ 'jpassword' ] );
+                $job->setChunk( $chunk );
+            }
+
+            if ( !isset( $file ) || $file->getId() != $segInfo[ 'id_file' ] || !$chunk->hasFile( $segInfo[ 'id_file' ] ) ) {
+                $file = new AnalysisFile( $segInfo[ 'id_file' ], $segInfo[ 'filename' ] );
+                $chunk->setFile( $file );
+            }
+            // Runtime Initialization Completed
+
+            if ( $segInfo[ 'match_type' ] == "INTERNAL" ) {
+                $matchType = MatchConstants::_INTERNAL;
+            } elseif ( $segInfo[ 'match_type' ] == "MT" ) {
+                $matchType = MatchConstants::_MT;
+            } elseif ( $segInfo[ 'match_type' ] == "100%" ) {
+                $matchType = MatchConstants::_100;
+            } elseif ( $segInfo[ 'match_type' ] == "100%_PUBLIC" ) {
+                $matchType = MatchConstants::_100_PUBLIC;
+            } elseif ( $segInfo[ 'match_type' ] == "75%-84%" ) {
+                $matchType = MatchConstants::_75_84;
+            } elseif ( $segInfo[ 'match_type' ] == "85%-94%" ) {
+                $matchType = MatchConstants::_85_94;
+            } elseif ( $segInfo[ 'match_type' ] == "95%-99%" ) {
+                $matchType = MatchConstants::_95_99;
+            } elseif ( $segInfo[ 'match_type' ] == "50%-74%" ) {
+                $matchType = MatchConstants::_50_74;
+            } elseif ( $segInfo[ 'match_type' ] == "NO_MATCH" or $segInfo[ 'match_type' ] == "NEW" ) {
+                $matchType = MatchConstants::_NEW;
+            } elseif ( $segInfo[ 'match_type' ] == "ICE" ) {
+                $matchType = MatchConstants::_ICE;
+            } elseif ( $segInfo[ 'match_type' ] == "REPETITIONS" ) {
+                $matchType = MatchConstants::_REPETITIONS;
+            } else {
+                $matchType = MatchConstants::_NUMBERS_ONLY;
+            }
+
+            $match = $file->getMatch( $matchType );
+            $match->incrementRaw( $segInfo[ 'raw_word_count' ] );
+            $match->incrementEquivalent( $segInfo[ 'eq_word_count' ] );
+
+            //increment job summary for the current match type
+            $jobMatchTotal = $job->getSummary()->getMatch( $matchType );
+            $jobMatchTotal->incrementRaw( $segInfo[ 'raw_word_count' ] );
+            $jobMatchTotal->incrementEquivalent( $segInfo[ 'eq_word_count' ] );
+
+            // increment job totals
+            $job->incrementRaw( $segInfo[ 'raw_word_count' ] );
+            $job->incrementEquivalent( $segInfo[ 'eq_word_count' ] );
+            $job->incrementIndustry( $segInfo[ 'standard_word_count' ] );
+
+            // increment project summary
+            if ( $segInfo[ 'st_status_analysis' ] == 'DONE' ) {
+                $project->getSummary()->incrementAnalyzed();
+            }
+            $project->getSummary()->incrementRaw( $segInfo[ 'raw_word_count' ] );
+            $project->getSummary()->incrementEquivalent( $segInfo[ 'eq_word_count' ] );
+            $project->getSummary()->incrementIndustry( $segInfo[ 'standard_word_count' ] );
+
+        }
+
+        /**
+         * Those code blocks are for the intermediate status 'FAST_OK'
+         */
+        if ( $project->getSummary()->getTotalIndustry() == 0 && $this->status_project == Constants_ProjectStatus::STATUS_FAST_OK ) {
+
+            // Here we have no TM (volume) analysis
+            // set the values of the Fast
+            $project->getSummary()->incrementIndustry( $project->getSummary()->getTotalFastAnalysis() );
+
+            // if fast quote has been done and tm analysis has not produced any result yet
+            if ( $project->getSummary()->getTotalEquivalent() == 0
+                    and $project->getSummary()->getTotalFastAnalysis() > 0
+            ) {
+                $project->getSummary()->incrementEquivalent( $project->getSummary()->getTotalFastAnalysis() );
+            }
 
         }
 
         return $this;
     }
 
-    protected function _oldFormatData(){
+    protected function _oldFormatData() {
 
         $this->result[ 'data' ] = $this->_data_struct;
 
         //array of totals per job-files
-        $total_word_counters                    = array();
+        $total_word_counters              = [];
         $_total_segments_analyzed         = 0;
         $_total_wc_fast_analysis          = 0;
         $_total_wc_standard_fast_analysis = 0;
@@ -253,7 +296,7 @@ abstract class AbstractStatus {
         $_matecat_price_per_word          = 0.03; //(dollari) se indipendente dalla combinazione metterlo nel config
         $_standard_price_per_word         = 0.10; //(dollari) se indipendente dalla combinazione metterlo nel config
 
-        $target = null;
+        $target             = null;
         $outsourceAvailable = false;
 
         //VERY Expensive cycle ± 0.7 s for 27650 segments ( 150k words )
@@ -277,39 +320,39 @@ abstract class AbstractStatus {
             $eq_words      = $segInfo[ 'eq_word_count' ];
             $st_word_count = $segInfo[ 'standard_word_count' ];
 
-            $_total_raw_wc += $segInfo[ 'raw_word_count' ];
-            $_total_wc_tm_analysis += $eq_words;
+            $_total_raw_wc               += $segInfo[ 'raw_word_count' ];
+            $_total_wc_tm_analysis       += $eq_words;
             $_total_wc_standard_analysis += $st_word_count;
 
             // is outsource available?
-            if($target === null or $segInfo['target'] !== $target){
-                $outsourceAvailableInfo = $this->featureSet->filter( 'outsourceAvailableInfo', $segInfo['target'], $segInfo['id_customer'], $jid );
+            if ( $target === null or $segInfo[ 'target' ] !== $target ) {
+                $outsourceAvailableInfo = $this->featureSet->filter( 'outsourceAvailableInfo', $segInfo[ 'target' ], $segInfo[ 'id_customer' ], $jid );
 
                 // if the hook is not triggered by any plugin
-                if(!is_array($outsourceAvailableInfo) or empty($outsourceAvailableInfo)){
+                if ( !is_array( $outsourceAvailableInfo ) or empty( $outsourceAvailableInfo ) ) {
                     $outsourceAvailableInfo = [
-                            'disabled_email' => false,
-                            'custom_payable_rate' => false,
+                            'disabled_email'         => false,
+                            'custom_payable_rate'    => false,
                             'language_not_supported' => false,
                     ];
                 }
 
-                $outsourceAvailable = OutsourceTo_OutsourceAvailable::isOutsourceAvailable($outsourceAvailableInfo);
-                $target = $segInfo['target'];
+                $outsourceAvailable = OutsourceTo_OutsourceAvailable::isOutsourceAvailable( $outsourceAvailableInfo );
+                $target             = $segInfo[ 'target' ];
             }
 
             //init indexes to avoid notices
             if ( !array_key_exists( $jid, $this->result[ 'data' ][ 'jobs' ] ) ) {
-                $this->result[ 'data' ][ 'jobs' ][ $jid ]             = array();
-                $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'chunks' ] = array();
+                $this->result[ 'data' ][ 'jobs' ][ $jid ]                          = [];
+                $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'chunks' ]              = [];
                 $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'outsource_available' ] = $outsourceAvailable;
-                $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'totals' ] = array();
-                $total_word_counters[ $jid ]                                = array();
+                $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'totals' ]              = [];
+                $total_word_counters[ $jid ]                                       = [];
             }
 
             if ( !array_key_exists( $jpassword, $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'chunks' ] ) ) {
-                $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ] = array();
-                $total_word_counters[ $jid ][ $jpassword ]                                = array();
+                $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ] = [];
+                $total_word_counters[ $jid ][ $jpassword ]                          = [];
             }
 
             if ( !array_key_exists( $jpassword, $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'totals' ] ) ) {
@@ -353,31 +396,31 @@ abstract class AbstractStatus {
             $w           = $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $segInfo[ 'id_file' ] ][ $keyValue ][ 0 ] + $words;
             $words_print = number_format( $w, 0, ".", "," );
 
-            $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $segInfo[ 'id_file' ] ][ $keyValue ] = array(
+            $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $segInfo[ 'id_file' ] ][ $keyValue ] = [
                     $w, $words_print
-            );
+            ];
 
-            $tmp_tot = $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'totals' ][ $jpassword ][ $keyValue ][ 0 ];
-            $tmp_tot += $words;
+            $tmp_tot                                                                         = $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'totals' ][ $jpassword ][ $keyValue ][ 0 ];
+            $tmp_tot                                                                         += $words;
             $words_print                                                                     = number_format( $tmp_tot, 0, ".", "," );
-            $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'totals' ][ $jpassword ][ $keyValue ] = array(
+            $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'totals' ][ $jpassword ][ $keyValue ] = [
                     $tmp_tot, $words_print
-            );
+            ];
 
             //SUM WITH PREVIOUS ( Accumulator )
             //take note of payable words for job/file combination
-            $total_word_counters[ $jid ][ $jpassword ][ 'eq_word_count' ] = isset( $total_word_counters[ $jid ][ $jpassword ][ 'eq_word_count' ] ) ? ($total_word_counters[ $jid ][ $jpassword ][ 'eq_word_count' ] + $segInfo[ 'eq_word_count' ]) : $segInfo[ 'eq_word_count' ];
-            $total_word_counters[ $jid ][ $jpassword ][ 'standard_word_count' ] = isset( $total_word_counters[ $jid ][ $jpassword ][ 'standard_word_count' ] ) ? ($total_word_counters[ $jid ][ $jpassword ][ 'standard_word_count' ] + $segInfo[ 'standard_word_count' ]) : $segInfo[ 'standard_word_count' ];
-            $total_word_counters[ $jid ][ $jpassword ][ 'raw_word_count' ] = isset( $total_word_counters[ $jid ][ $jpassword ][ 'raw_word_count' ] ) ? ($total_word_counters[ $jid ][ $jpassword ][ 'raw_word_count' ] + $segInfo[ 'raw_word_count' ]) : $segInfo[ 'raw_word_count' ];
+            $total_word_counters[ $jid ][ $jpassword ][ 'eq_word_count' ]       = isset( $total_word_counters[ $jid ][ $jpassword ][ 'eq_word_count' ] ) ? ( $total_word_counters[ $jid ][ $jpassword ][ 'eq_word_count' ] + $segInfo[ 'eq_word_count' ] ) : $segInfo[ 'eq_word_count' ];
+            $total_word_counters[ $jid ][ $jpassword ][ 'standard_word_count' ] = isset( $total_word_counters[ $jid ][ $jpassword ][ 'standard_word_count' ] ) ? ( $total_word_counters[ $jid ][ $jpassword ][ 'standard_word_count' ] + $segInfo[ 'standard_word_count' ] ) : $segInfo[ 'standard_word_count' ];
+            $total_word_counters[ $jid ][ $jpassword ][ 'raw_word_count' ]      = isset( $total_word_counters[ $jid ][ $jpassword ][ 'raw_word_count' ] ) ? ( $total_word_counters[ $jid ][ $jpassword ][ 'raw_word_count' ] + $segInfo[ 'raw_word_count' ] ) : $segInfo[ 'raw_word_count' ];
 
             $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $segInfo[ 'id_file' ] ][ 'FILENAME' ] = $segInfo[ 'filename' ];
 
-            $total_file_payable = $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $segInfo[ 'id_file' ] ][ 'TOTAL_PAYABLE' ][ 0 ] += $segInfo[ 'eq_word_count' ];
-            $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $segInfo[ 'id_file' ] ][ 'TOTAL_PAYABLE' ][ 1 ]                       = number_format( $total_file_payable, 0, ".", "," );
+            $total_file_payable                                                                                                  = $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $segInfo[ 'id_file' ] ][ 'TOTAL_PAYABLE' ][ 0 ] += $segInfo[ 'eq_word_count' ];
+            $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $segInfo[ 'id_file' ] ][ 'TOTAL_PAYABLE' ][ 1 ] = number_format( $total_file_payable, 0, ".", "," );
 
         }
 
-        $this->_resultSet = array(); //free memory
+        $this->_resultSet = []; //free memory
 
         //sum all totals for each job
         //N^2 but there are a little number of rows max 30
@@ -395,7 +438,7 @@ abstract class AbstractStatus {
             }
         }
 
-        if ( $_total_wc_standard_analysis == 0 AND $this->status_project == Constants_ProjectStatus::STATUS_FAST_OK ) {
+        if ( $_total_wc_standard_analysis == 0 and $this->status_project == Constants_ProjectStatus::STATUS_FAST_OK ) {
 
             $_total_wc_standard_analysis = $_total_wc_standard_fast_analysis;
 
@@ -423,8 +466,8 @@ abstract class AbstractStatus {
 
         // if fast quote has been done and tm analysis has not produced any result yet
         if ( $_total_wc_tm_analysis == 0
-                AND $this->status_project == Constants_ProjectStatus::STATUS_FAST_OK
-                AND $_total_wc_fast_analysis > 0
+                and $this->status_project == Constants_ProjectStatus::STATUS_FAST_OK
+                and $_total_wc_fast_analysis > 0
         ) {
             $_total_wc_tm_analysis = $_total_wc_fast_analysis;
         }
@@ -520,7 +563,7 @@ abstract class AbstractStatus {
         $this->result[ 'data' ][ 'summary' ][ 'DISCOUNT_WC' ]      = number_format( $discount_wc, 0, ".", "," );
 
 
-        $this->_globals = array(
+        $this->_globals = [
                 'STATUS_PROJECT'    => $this->status_project,
                 'IN_QUEUE_BEFORE'   => $this->_others_in_queue,
                 'TOTAL_SEGMENTS'    => $this->total_segments,
@@ -530,7 +573,7 @@ abstract class AbstractStatus {
                 'TOTAL_TM_WC'       => $_total_wc_tm_analysis + 0.00000001,
                 'TOTAL_RAW_WC'      => $_total_raw_wc,
                 'TOTAL_PAYABLE'     => $_total_wc_tm_analysis + 0.00000001,
-        );
+        ];
 
         return $this;
 
