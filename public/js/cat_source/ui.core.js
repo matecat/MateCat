@@ -710,7 +710,7 @@ window.UI = {
         OfflineUtils.startOfflineMode()
       }
 
-      if (codeInt <= -2000 && !isUndefined(this.message)) {
+      if (codeInt === -2000 && !isUndefined(this.message)) {
         ModalsActions.showModalComponent(
           AlertModal,
           {
