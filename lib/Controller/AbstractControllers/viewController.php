@@ -10,12 +10,6 @@ abstract class viewController extends controller {
     protected $template = null;
 
     /**
-     * The os platform
-     *
-     * @var string
-     */
-    protected $platform;
-    /**
      * @var Google_Client
      */
     protected $client;
@@ -27,16 +21,6 @@ abstract class viewController extends controller {
 
     protected $login_required = false;
 
-    protected $supportedBrowser;
-
-    /**
-     * Try to identify the browser of users
-     *
-     * @return array
-     */
-    private function getBrowser() {
-        return Utils::getBrowser();
-    }
 
     /**
      * Class constructor
@@ -53,8 +37,6 @@ abstract class viewController extends controller {
             $controllerInstance->doAction();
             die(); // do not complete klein response, set 404 header in render404 instead of 200
         }
-
-        $this->setBrowserSupport();
 
         //SESSION ENABLED
         $this->readLoginInfo( false );
@@ -189,17 +171,6 @@ abstract class viewController extends controller {
         $this->collectFlashMessages();
 
         $this->template->googleDriveEnabled = Bootstrap::areOauthKeysPresent() && Bootstrap::isGDriveConfigured();
-    }
-
-    /**
-     *
-     * Set the variables for the browser support
-     *
-     */
-    protected function setBrowserSupport() {
-        $browser_info           = Utils::getBrowser();
-        $this->supportedBrowser = Utils::isSupportedWebBrowser( $browser_info );
-        $this->platform         = strtolower( $browser_info[ 'platform' ] );
     }
 
     /**

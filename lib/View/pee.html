@@ -14,13 +14,7 @@
 
 </head>
 
-<body tal:condition="not:supportedBrowser">
-<div metal:use-macro="unsupported_browser.html/unsupported"/>
-</body>
-<body tal:condition="php:supportedBrowser EQ -2">
-<div metal:use-macro="unsupported_browser.html/unsupported"/>
-</body>
-<body tal:condition="php:supportedBrowser EQ 1" class="started pee-page">
+<body class="started pee-page">
 <header>
     <div class="wrapper">
         <a href="${basepath}" class="logo"></a>
