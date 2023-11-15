@@ -121,11 +121,11 @@ window.UI = {
     var statusNotConfirmationNeeded = ['new', 'draft']
     if (propagation) {
       if (config.isReview) {
-        return segmentModified || !_.isUndefined(segment.alternatives)
+        return segmentModified || !isUndefined(segment.alternatives)
       } else {
         return (
           statusNotConfirmationNeeded.indexOf(segmentStatus) === -1 &&
-          (segmentModified || !_.isUndefined(segment.alternatives))
+          (segmentModified || !isUndefined(segment.alternatives))
         )
       }
     }
