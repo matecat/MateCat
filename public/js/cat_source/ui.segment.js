@@ -59,7 +59,7 @@ import {setCurrentSegment} from './es6/api/setCurrentSegment'
       var currentContribution = SegmentStore.getSegmentChoosenContribution(sid)
       // Send the suggestion to Tag Projection only if is > 89% and is not MT
       if (
-        !_.isUndefined(currentContribution) &&
+        !isUndefined(currentContribution) &&
         currentContribution.match !== 'MT' &&
         parseInt(currentContribution.match) > 89
       ) {

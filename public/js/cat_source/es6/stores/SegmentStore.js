@@ -602,7 +602,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
   setAlternatives: function (sid, alternatives) {
     const index = this.getSegmentIndex(sid)
     if (index === -1) return
-    if (_.isUndefined(alternatives)) {
+    if (isUndefined(alternatives)) {
       this._segments = this._segments.deleteIn([index, 'alternatives'])
     } else {
       this._segments = this._segments.setIn(
