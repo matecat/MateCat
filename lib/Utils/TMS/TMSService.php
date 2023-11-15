@@ -334,18 +334,21 @@ class TMSService {
      * @param $userMail
      * @param $userName
      * @param $userSurname
+     * @param $tm_key
+     * @param bool $strip_tags
      *
      * @return Engines_Results_MyMemory_ExportResponse
      * @throws Exception
      */
-    public function requestTMXEmailDownload( $userMail, $userName, $userSurname, $tm_key ) {
+    public function requestTMXEmailDownload( $userMail, $userName, $userSurname, $tm_key, $strip_tags = false ) {
 
         return $this->mymemory_engine->emailExport(
                 $tm_key,
                 $this->name,
                 $userMail,
                 $userName,
-                $userSurname
+                $userSurname,
+                $strip_tags
         );
     }
 
