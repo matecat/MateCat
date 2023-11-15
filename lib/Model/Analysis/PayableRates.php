@@ -24,6 +24,23 @@ class Analysis_PayableRates {
     ];
 
     protected static $langPair2MTpayableRates = [
+            "de" => [
+                [
+                    'tr' => [
+                        'NO_MATCH'    => 100,
+                        '50%-74%'     => 100,
+                        //'75%-99%'     => 60,
+                        '75%-84%'     => 60,
+                        '85%-94%'     => 60,
+                        '95%-99%'     => 60,
+                        '100%'        => 30,
+                        '100%_PUBLIC' => 30,
+                        'REPETITIONS' => 30,
+                        'INTERNAL'    => 60,
+                        'MT'          => 77
+                    ]
+                ]
+            ],
             "tr" => [
                 [
                     'de' => [
@@ -54,6 +71,21 @@ class Analysis_PayableRates {
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
                             'MT'          => 67
+                    ],
+                    [
+                        'tr' => [
+                            'NO_MATCH'    => 100,
+                            '50%-74%'     => 100,
+                            //'75%-99%'     => 60,
+                            '75%-84%'     => 60,
+                            '85%-94%'     => 60,
+                            '95%-99%'     => 60,
+                            '100%'        => 30,
+                            '100%_PUBLIC' => 30,
+                            'REPETITIONS' => 30,
+                            'INTERNAL'    => 60,
+                            'MT'          => 77
+                        ]
                     ],
                     "fr" => [
                             'NO_MATCH'    => 100,
