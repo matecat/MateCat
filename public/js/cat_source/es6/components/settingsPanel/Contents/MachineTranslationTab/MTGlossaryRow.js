@@ -1,4 +1,11 @@
-import React, {Fragment, useContext, useEffect, useRef, useState} from 'react'
+import React, {
+  Fragment,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react'
 import PropTypes from 'prop-types'
 import Upload from '../../../../../../../img/icons/Upload'
 import Trash from '../../../../../../../img/icons/Trash'
@@ -7,16 +14,21 @@ import {MachineTranslationTabContext} from './MachineTranslationTab'
 import {MTGlossaryStatus} from './MTGlossary'
 import {importMemoryGlossary} from '../../../../api/importMemoryGlossary/importMemoryGlossary'
 import {updateMemoryGlossary} from '../../../../api/updateMemoryGlossary/updateMemoryGlossary'
+import IconEdit from '../../../icons/IconEdit'
+import Checkmark from '../../../../../../../img/icons/Checkmark'
+import Close from '../../../../../../../img/icons/Close'
 
 export const MTGlossaryRow = ({engineId, row, setRows}) => {
   const {setNotification} = useContext(MachineTranslationTabContext)
 
   const [isActive, setIsActive] = useState(row.isActive)
+  const [isEditingName, setIsEditingName] = useState(false)
   const [name, setName] = useState(row.name)
   const [file, setFile] = useState()
   const [isWaitingResult, setIsWaitingResult] = useState(false)
 
   const statusImport = useRef()
+  const inputNameRef = useRef()
 
   // user import new one glossary
   useEffect(() => {
@@ -59,9 +71,19 @@ export const MTGlossaryRow = ({engineId, row, setRows}) => {
     return () => statusImport.current.cancel()
   }, [file, row.id, engineId, setNotification])
 
+  useLayoutEffect(() => {
+    inputNameRef.current.focus()
+  }, [isEditingName])
+
   const onChangeIsActive = (e) => {
     setNotification()
-    setIsActive(e.currentTarget.checked)
+    const isActive = e.currentTarget.checked
+    setIsActive(isActive)
+    setRows((prevState) =>
+      prevState.map((glossary) =>
+        glossary.id === row.id ? {...glossary, isActive} : glossary,
+      ),
+    )
   }
 
   const onChangeName = (e) => {
@@ -69,16 +91,27 @@ export const MTGlossaryRow = ({engineId, row, setRows}) => {
 
     const {value} = e.currentTarget ?? {}
     setName(value)
-    if (value)
-      setRows((prevState) =>
-        prevState.map((glossary) =>
-          glossary.id === row.id ? {...glossary, name: value} : glossary,
-        ),
-      )
   }
 
-  const updateKeyName = () => false
-  // updateMemoryGlossary({engineId, memoryId: row.id, name})
+  const updateKeyName = () => {
+    updateMemoryGlossary({engineId, memoryId: row.id, name})
+      .then((data) => {
+        setRows((prevState) =>
+          prevState.map((glossary) =>
+            glossary.id === row.id
+              ? {
+                  ...glossary,
+                  name: data.name,
+                }
+              : glossary,
+          ),
+        )
+        setIsEditingName(false)
+      })
+      .catch(() => {
+        setName(row.name)
+      })
+  }
 
   const onChangeFile = (e) => {
     setNotification()
@@ -103,6 +136,31 @@ export const MTGlossaryRow = ({engineId, row, setRows}) => {
       .finally(() => setIsWaitingResult(false))
   }
 
+  const editingNameButtons = !isEditingName ? (
+    <button className="grey-button" onClick={() => setIsEditingName(true)}>
+      <IconEdit size={15} />
+    </button>
+  ) : (
+    <div className="editing-buttons">
+      <button
+        className="ui primary button settings-panel-button-icon small-row-button"
+        onClick={updateKeyName}
+      >
+        <Checkmark size={14} />
+        Confirm
+      </button>
+      <button
+        className="ui button orange small-row-button"
+        onClick={() => {
+          setIsEditingName(false)
+          setName(row.name)
+        }}
+      >
+        <Close size={20} />
+      </button>
+    </div>
+  )
+
   return (
     <Fragment>
       <div className="align-center">
@@ -113,14 +171,15 @@ export const MTGlossaryRow = ({engineId, row, setRows}) => {
           disabled={isWaitingResult}
         />
       </div>
-      <div>
+      <div className="glossary-row-name">
         <input
-          className="glossary-row-name-input"
+          ref={inputNameRef}
+          className={`glossary-row-name-input${isEditingName ? ' active' : ''}`}
           value={name}
           onChange={onChangeName}
-          onBlur={updateKeyName}
-          disabled={isWaitingResult}
+          disabled={!isEditingName}
         />
+        {editingNameButtons}
       </div>
       <div className="glossary-row-import-button">
         <input

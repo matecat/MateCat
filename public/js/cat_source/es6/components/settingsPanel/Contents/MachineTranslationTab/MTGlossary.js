@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react'
+import React, {useCallback, useContext, useEffect} from 'react'
 import PropTypes from 'prop-types'
 import {useState} from 'react'
 import {SettingsPanelTable} from '../../SettingsPanelTable'
@@ -7,6 +7,7 @@ import Upload from '../../../../../../../img/icons/Upload'
 import {MTGlossaryCreateRow} from './MTGlossaryCreateRow'
 import {getMMTKeys} from '../../../../api/getMMTKeys/getMMTKeys'
 import {getStatusMemoryGlossaryImport} from '../../../../api/getStatusMemoryGlossaryImport/getStatusMemoryGlossaryImport'
+import {SettingsPanelContext} from '../../SettingsPanelContext'
 
 const COLUMNS_TABLE = [
   {name: 'Activate'},
@@ -41,7 +42,6 @@ export class MTGlossaryStatus {
         reject()
         return
       }
-      console.log('polling result', data)
       if (data.progress === 0) {
         setTimeout(() => {
           if (!this.wasAborted)
@@ -54,37 +54,68 @@ export class MTGlossaryStatus {
   }
 }
 
-export const MTGlossary = ({id}) => {
+export const MTGlossary = ({id, isCattoolPage = false}) => {
+  const {activeMTEngine, setActiveMTEngine} = useContext(SettingsPanelContext)
+
   const [isShowingRows, setIsShowingRows] = useState(false)
   const [rows, setRows] = useState([])
-  const [isGlossaryCaseSensitive, setIsGlossaryCaseSensitive] = useState(true)
+  const [isGlossaryCaseSensitive, setIsGlossaryCaseSensitive] = useState(
+    activeMTEngine.isGlossaryCaseSensitive ?? true,
+  )
+
+  const updateRowsState = useCallback(
+    (value) => {
+      setRows((prevState) => {
+        const newValue = typeof value === 'function' ? value(prevState) : value
+
+        return newValue.map((row) => ({
+          ...row,
+          node: (
+            <MTGlossaryRow
+              key={row.id}
+              {...{engineId: id, row, setRows: updateRowsState}}
+            />
+          ),
+        }))
+      })
+    },
+    [id],
+  )
 
   useEffect(() => {
     let wasCleanup = false
 
     getMMTKeys({engineId: id}).then((data) => {
       if (!wasCleanup) {
-        setRows(
-          data.map(({name, id: idRow}) => {
-            const row = {
-              id: idRow,
-              name,
-              isActive: false,
-            }
+        if (!isCattoolPage) {
+          updateRowsState(
+            data.map(({name, id: idRow}) => {
+              const isActive = Array.isArray(activeMTEngine.glossaries)
+                ? activeMTEngine.glossaries.some((value) => value === idRow)
+                : false
 
-            return {
-              ...row,
-              node: (
-                <MTGlossaryRow key={row.id} {...{engineId: id, row, setRows}} />
-              ),
-            }
-          }),
-        )
+              return {
+                id: idRow,
+                name,
+                isActive,
+              }
+            }),
+          )
+        } /* else {
+        } */
       }
     })
 
     return () => (wasCleanup = true)
-  }, [id])
+  }, [id, isCattoolPage, updateRowsState])
+
+  useEffect(() => {
+    setActiveMTEngine((prevState) => ({
+      ...prevState,
+      glossaries: rows.filter(({isActive}) => isActive).map(({id}) => id),
+      isGlossaryCaseSensitive,
+    }))
+  }, [rows, isGlossaryCaseSensitive, setActiveMTEngine])
 
   const addGlossary = () => {
     const row = {
@@ -95,7 +126,14 @@ export const MTGlossary = ({id}) => {
 
     setRows((prevState) => [
       ...prevState.filter(({id}) => id !== MT_GLOSSARY_CREATE_ROW_ID),
-      {...row, node: <MTGlossaryCreateRow {...{engineId: id, row, setRows}} />},
+      {
+        ...row,
+        node: (
+          <MTGlossaryCreateRow
+            {...{engineId: id, row, setRows: updateRowsState}}
+          />
+        ),
+      },
     ])
   }
 
@@ -139,4 +177,5 @@ export const MTGlossary = ({id}) => {
 
 MTGlossary.propTypes = {
   id: PropTypes.number.isRequired,
+  isCattoolPage: PropTypes.bool,
 }

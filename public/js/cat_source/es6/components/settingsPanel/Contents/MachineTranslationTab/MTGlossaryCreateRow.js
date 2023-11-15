@@ -35,12 +35,6 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
   const onChangeName = (e) => {
     const {value} = e.currentTarget ?? {}
     setName(value)
-    if (value)
-      setRows((prevState) =>
-        prevState.map((glossary) =>
-          glossary.id === row.id ? {...glossary, name: value} : glossary,
-        ),
-      )
     resetErrors()
   }
 
@@ -50,7 +44,6 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
   }
 
   const createNewGlossary = () => {
-    console.log(name, file)
     createMemoryAndImportGlossary({engineId, glossary: file, name})
       .then((data) => {
         const addNewEntry = (prevState) =>
@@ -59,16 +52,7 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
               ? {
                   id: data.memory,
                   isActive,
-                  name: row.name,
-                  node: (
-                    <MTGlossaryRow
-                      key={data.memory}
-                      {...{
-                        row: {id: data.memory, isActive, name: row.name},
-                        setRows,
-                      }}
-                    />
-                  ),
+                  name,
                 }
               : row,
           )
@@ -133,7 +117,7 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
     setIsWaitingResult(false)
   }
 
-  const inputNameClasses = `glossary-row-name-input ${
+  const inputNameClasses = `glossary-row-name-input glossary-row-name-input-create ${
     typeof submitCheckErrors === 'symbol' && !name ? ' error' : ''
   }`
 
@@ -142,7 +126,11 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
   }`
 
   return (
-    <form ref={ref} className="settings-panel-row-content" onSubmit={onSubmit}>
+    <form
+      ref={ref}
+      className="settings-panel-row-content row-content-create"
+      onSubmit={onSubmit}
+    >
       <div
         className={`align-center${
           isWaitingResult ? ' row-content-create-glossary-waiting' : ''
