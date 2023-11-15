@@ -169,21 +169,21 @@ let CatToolActions = {
   updateFooterStatistics: function () {
     getJobStatistics(config.id_job, config.password).then(function (data) {
       if (data) {
-        const stats = CommonUtils.parseOldStats(
-          data.stats ? data.stats : data,
-          config.word_count_type,
-        )
-        CatToolActions.setProgress(stats)
+        CatToolActions.setProgress(data)
       }
     })
   },
-  setProgress: function (stats) {
+  setProgress: function (data) {
+    const stats = CommonUtils.parseOldStats(
+      data.stats ? data.stats : data,
+      config.word_count_type,
+    )
     AppDispatcher.dispatch({
       actionType: CattolConstants.SET_PROGRESS,
       stats: stats,
     })
     //TODO move it
-    this.setDownloadStatus(stats)
+    //this.setDownloadStatus(stats)
     UI.projectStats = stats
     this.checkQualityReport(stats)
   },

@@ -173,18 +173,11 @@ export const CattolFooter = ({
           </p>
         </div>
         <div onMouseLeave={removeTooltip}>
-          {config.word_count_type === JOB_WORD_CONT_TYPE.EQUIVALENT ? (
-            <ProgressBarEquivalent
-              stats={stats}
-              onClickFn={(e) => onClickTodo(e, 'progressBar')}
-            />
-          ) : (
-            <JobProgressBar
-              stats={stats?.raw}
-              showPercent={true}
-              analysisComplete={stats?.analysis_complete}
-            />
-          )}
+          <JobProgressBar
+            stats={stats}
+            showPercent={true}
+            analysisComplete={stats?.analysis_complete}
+          />
           {getTooltip('progressBar')}
         </div>
 
@@ -217,7 +210,7 @@ export const CattolFooter = ({
               :
               <strong id="total-payable">
                 {' '}
-                {stats?.TOTAL_FORMATTED || '-'}
+                {stats ? Math.round(stats.equivalent.total) : '-'}
               </strong>
             </div>
           </div>
@@ -242,16 +235,16 @@ export const CattolFooter = ({
           {getTooltip('todo')}
         </div>
 
-        {!!stats && stats?.ANALYSIS_COMPLETE && (
+        {stats && stats.analysis_complete && (
           <div className="statistics-details">
-            {!!stats?.WORDS_PER_HOUR && (
+            {stats?.words_per_hour && (
               <div id="stat-wph" title="Based on last 10 segments performance">
                 Speed:
                 <strong>{stats.words_per_hour}</strong> Words/h
               </div>
             )}
 
-            {!!stats?.ESTIMATED_COMPLETION && (
+            {stats?.estimated_completion && (
               <div id="stat-completion">
                 Completed in:
                 <strong>{stats.estimated_completion}</strong>
@@ -260,7 +253,7 @@ export const CattolFooter = ({
           </div>
         )}
 
-        {!stats?.ANALYSIS_COMPLETE && (
+        {!stats?.analysis_complete && (
           <div id="analyzing">
             <p className="progress">Calculating word count...</p>
           </div>
@@ -268,55 +261,5 @@ export const CattolFooter = ({
       </div>
       <CookieConsent />
     </footer>
-  )
-}
-
-const ProgressBarEquivalent = ({stats, onClickFn = () => {}}) => {
-  return (
-    <div className="progress-bar" data-testid="progress-bar">
-      <div
-        className="meter"
-        onClick={onClickFn}
-        style={{width: '100%', position: 'relative'}}
-      >
-        {stats == null ? (
-          <div className="bg-loader" />
-        ) : !stats?.analysis_complete ? null : (
-          <>
-            <a
-              className="approved-bar-2nd-pass"
-              style={{width: stats.a_perc_2nd + '%'}}
-              title={'2nd Approved ' + stats.a_perc_2nd_formatted}
-            />
-            <a
-              className="approved-bar"
-              style={{width: stats.a_perc + '%'}}
-              title={'Approved ' + stats.a_perc_formatted}
-            />
-            <a
-              className="translated-bar"
-              style={{width: stats.t_perc + '%'}}
-              title={'Translated ' + stats.t_perc_formatted}
-            />
-            <a
-              className="rejected-bar"
-              style={{width: stats.r_perc + '%'}}
-              title={'Rejected ' + stats.r_perc_formatted}
-            />
-            <a
-              className="draft-bar"
-              style={{width: stats.d_perc + '%'}}
-              title={'Draft ' + stats.d_perc_formatted}
-            />
-          </>
-        )}
-      </div>
-      <div className="percent">
-        <span id="stat-progress" data-testid="progress-bar-amount">
-          {stats?.PROGRESS_PERC_FORMATTED || '-'}
-        </span>
-        %
-      </div>
-    </div>
   )
 }

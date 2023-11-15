@@ -979,15 +979,7 @@ class JobContainer extends React.Component {
                   {this.props.job.get('targetTxt')}
                 </div>
               </div>
-              {/*{this.props.job.get('word_count_type') ===
-              JOB_WORD_CONT_TYPE.EQUIVALENT ? (
-                <ProgressBarEquivalent
-                  job={this.props.job}
-                  project={this.props.project}
-                />
-              ) : (*/}
               <JobProgressBar stats={stats} />
-              {/*)}*/}
               <div className="job-payable">
                 <a href={analysisUrl} target="_blank" rel="noreferrer">
                   <span id="words">{Math.round(stats.raw.total)}</span> words

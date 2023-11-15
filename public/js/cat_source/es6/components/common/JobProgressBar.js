@@ -13,11 +13,12 @@ const JobProgressBar = ({
   const translatedTooltip = useRef()
   const draftTooltip = useRef()
   const {raw} = stats
-  const {total, translated, approved, approved2, draft} = raw
+  const newWords = raw ? raw.new : undefined
+  const {total, translated, approved, approved2, draft} = raw || {}
   const translatedPerc = (translated * 100) / total
   const approvedPerc = (approved * 100) / total
   const approved2Perc = (approved2 * 100) / total
-  const draftPerc = ((draft + stats.new) * 100) / total
+  const draftPerc = ((draft + newWords) * 100) / total
   const totalPerc = ((translated + approved + approved2 + draft) * 100) / total
   const analysisComplete = !isUndefined(stats.analysis_complete)
     ? stats.analysis_complete
@@ -86,7 +87,7 @@ const JobProgressBar = ({
         {showPercent && (
           <div className="percent">
             <span id="stat-progress" data-testid="progress-bar-amount">
-              {totalPerc ? totalPerc.toFixed(1) : '-'}
+              {totalPerc ? Math.round(totalPerc) : '-'}
             </span>
             %
           </div>
