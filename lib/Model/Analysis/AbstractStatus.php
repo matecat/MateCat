@@ -260,25 +260,8 @@ abstract class AbstractStatus {
 
         }
 
-        /**
-         * Those code blocks are for the intermediate status 'FAST_OK'
-         */
-        if ( $project->getSummary()->getTotalIndustry() == 0 && $this->status_project == Constants_ProjectStatus::STATUS_FAST_OK ) {
-
-            // Here we have no TM (volume) analysis
-            // set the values of the Fast
-            $project->getSummary()->incrementIndustry( $project->getSummary()->getTotalFastAnalysis() );
-
-            // if fast quote has been done and tm analysis has not produced any result yet
-            if ( $project->getSummary()->getTotalEquivalent() == 0
-                    and $project->getSummary()->getTotalFastAnalysis() > 0
-            ) {
-                $project->getSummary()->incrementEquivalent( $project->getSummary()->getTotalFastAnalysis() );
-            }
-
-        }
-
         return $this;
+
     }
 
     protected function _oldFormatData() {
