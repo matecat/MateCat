@@ -114,7 +114,7 @@ export const Header = ({
           <SearchButton />
 
           {/*Comments*/}
-          <CommentsButton />
+          <CommentsButton teams={user ? user.teams : []} />
 
           {/*Segments filter*/}
           <SegmentsFilterButton />

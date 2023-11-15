@@ -15,6 +15,7 @@ use Utils;
 class GDriveController extends KleinController {
 
     const GDRIVE_LIST_COOKIE_NAME = 'gdrive_files_to_be_listed';
+    const GDRIVE_OUTCOME_COOKIE_NAME = 'gdrive_files_outcome';
 
     private $source_lang           = Constants::DEFAULT_SOURCE_LANG;
     private $target_lang           = Constants::DEFAULT_TARGET_LANG;
@@ -184,6 +185,26 @@ class GDriveController extends KleinController {
     }
 
     private function doRedirect() {
+
+        // set a cookie for callback outcome to allow the frontend to show errors
+        $outcome = [
+            "success" => $this->isImportingSuccessful,
+            "error_msg" => isset($this->error['msg']) ? $this->formatErrorMessage($this->error['msg']) : null,
+            "error_class" => isset($this->error['class']) ? $this->error['class'] : null,
+            "error_code" => isset($this->error['code']) ? $this->error['code'] : null,
+        ];
+
+        CookieManager::setCookie( self::GDRIVE_OUTCOME_COOKIE_NAME, json_encode($outcome),
+            [
+                'expires'  => time() + 86400,
+                'path'     => '/',
+                'domain'   => INIT::$COOKIE_DOMAIN,
+                'secure'   => true,
+                'httponly' => false,
+                'samesite' => 'None',
+            ]
+        );
+
         // set a cookie to allow the frontend to call list endpoint
         CookieManager::setCookie( self::GDRIVE_LIST_COOKIE_NAME, $_SESSION[ "upload_session" ],
             [
@@ -195,6 +216,7 @@ class GDriveController extends KleinController {
                 'samesite' => 'None',
             ]
         );
+
         header( "Location: /", true, 302 );
         exit;
     }
@@ -202,10 +224,27 @@ class GDriveController extends KleinController {
     private function doResponse() {
         $this->response->json( [
             "success" => $this->isImportingSuccessful,
-            "error_msg" => isset($this->error['msg']) ? $this->error['msg'] : null,
+            "error_msg" => isset($this->error['msg']) ? $this->formatErrorMessage($this->error['msg']) : null,
             "error_class" => isset($this->error['class']) ? $this->error['class'] : null,
             "error_code" => isset($this->error['code']) ? $this->error['code'] : null,
         ] );
+    }
+
+    /**
+     * @param $message
+     * @return string
+     */
+    private function formatErrorMessage($message){
+
+        if($message == "This file is too large to be exported."){
+            return "you are trying to upload a file bigger than 10 mb. Google Drive does not allow exports of files bigger than 10 mb. Please download the file and upload it from your computer.";
+        }
+
+        if($message == "Export only supports Docs Editors files."){
+            return "Google Drive does not allow exports of files in this format. Please open the file in Google Drive and save it as a Google Drive file.";
+        }
+
+        return $message;
     }
 
     /**

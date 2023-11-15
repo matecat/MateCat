@@ -3,13 +3,11 @@
 
  */
 import React from 'react'
-import {isUndefined, find} from 'lodash'
-
+import {isUndefined} from 'lodash'
 import CommentsStore from '../../stores/CommentsStore'
 import CommentsActions from '../../actions/CommentsActions'
 import CommentsConstants from '../../constants/CommentsConstants'
 import SegmentActions from '../../actions/SegmentActions'
-import MBC from '../../utils/mbc.main'
 import {SegmentContext} from './SegmentContext'
 
 class SegmentCommentsContainer extends React.Component {
@@ -36,7 +34,6 @@ class SegmentCommentsContainer extends React.Component {
     e.preventDefault()
     e.stopPropagation()
     SegmentActions.closeSegmentComment(this.context.segment.sid)
-    localStorage.setItem(MBC.localStorageCommentsClosed, true)
   }
 
   sendComment() {
@@ -90,7 +87,7 @@ class SegmentCommentsContainer extends React.Component {
   }
 
   getComments() {
-    let htmlComments, htmlInsert, resolveButton
+    let htmlComments, htmlInsert, resolveButton, deleteButton
     const nl2br = function (str, is_xhtml) {
       var breakTag =
         is_xhtml || typeof is_xhtml === 'undefined' ? '<br />' : '<br>'
@@ -100,8 +97,8 @@ class SegmentCommentsContainer extends React.Component {
       )
     }
 
-    var findUser = (id) => {
-      return find(this.state.teamUsers, function (item) {
+    const findUser = (id) => {
+      return this.state.teamUsers.find((item) => {
         return item.uid === id
       })
     }
@@ -213,11 +210,20 @@ class SegmentCommentsContainer extends React.Component {
             Resolve
           </a>
         )
-      }
-      if (thread_wrap.length > 0) {
         const isAuthorOfLastComment =
           comments[comments.length - 1].email === config.userMail
-
+        deleteButton = isAuthorOfLastComment ? (
+          <a
+            className="ui button mbc-comment-label mbc-comment-btn mbc-comment-resolve-btn mbc-comment-delete-btn pull-right"
+            onClick={this.deleteComment}
+          >
+            Delete
+          </a>
+        ) : (
+          ''
+        )
+      }
+      if (thread_wrap.length > 0) {
         commentsHtml.push(
           <div
             key={'thread-' + 900}
@@ -226,14 +232,7 @@ class SegmentCommentsContainer extends React.Component {
           >
             {thread_wrap}
             {resolveButton}
-            {isAuthorOfLastComment && (
-              <a
-                className="ui button mbc-comment-label mbc-comment-btn mbc-comment-resolve-btn mbc-comment-delete-btn pull-right"
-                onClick={this.deleteComment}
-              >
-                Delete
-              </a>
-            )}
+            {deleteButton}
           </div>,
         )
       }
@@ -247,10 +246,6 @@ class SegmentCommentsContainer extends React.Component {
         className="mbc-thread-wrap mbc-post-comment-wrap mbc-clearfix mbc-first-input"
         ref={(container) => (this.container = container)}
       >
-        {/*<div className="mbc-new-message-notification">*/}
-        {/*<span className="mbc-new-message-icon mbc-new-message-arrowdown">&#8595;</span>*/}
-        {/*<a className="mbc-new-message-link"/>*/}
-        {/*</div>*/}
         <div className="mbc-post-comment">
           <span className="mbc-comment-label mbc-comment-username mbc-comment-username-label mbc-truncate mbc-comment-anonymous-label">
             {this.state.user ? this.state.user.full_name : 'Anonymous'}

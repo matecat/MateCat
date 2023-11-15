@@ -6,6 +6,7 @@ const CommentsConstants = keyMirror({
   SET_FOCUS: null,
   SET_TEAM_USERS: null,
   DELETE_COMMENT: null,
+  OPEN_MENU: null,
 })
 
 export default CommentsConstants

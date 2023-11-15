@@ -19,6 +19,7 @@ import {getMTEngines as getMtEnginesApi} from '../api/getMTEngines'
 import {
   DEFAULT_ENGINE_MEMORY,
   MMT_NAME,
+  SETTINGS_PANEL_TABS,
   SettingsPanel,
 } from '../components/settingsPanel'
 import Speech2TextFeature from '../utils/speech2text'
@@ -64,7 +65,8 @@ function CatTool() {
     })
 
   const closeSettings = useCallback(() => setOpenSettings({isOpen: false}), [])
-  const openTmPanel = () => setOpenSettings({isOpen: true})
+  const openTmPanel = () =>
+    setOpenSettings({isOpen: true, tab: SETTINGS_PANEL_TABS.advancedOptions})
 
   const getTmKeys = () => {
     const promises = [
@@ -136,6 +138,7 @@ function CatTool() {
     }
     const openSettingsPanel = ({value}) =>
       setOpenSettings({isOpen: true, tab: value})
+
     CatToolStore.addListener(CatToolConstants.ON_RENDER, onRenderHandler)
     CatToolStore.addListener(
       CatToolConstants.OPEN_SETTINGS_PANEL,

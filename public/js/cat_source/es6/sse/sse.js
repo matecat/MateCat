@@ -2,6 +2,7 @@ import CatToolActions from '../actions/CatToolActions'
 import SegmentActions from '../actions/SegmentActions'
 import SegmentStore from '../stores/SegmentStore'
 import CommonUtils from '../utils/commonUtils'
+import CommentsActions from '../actions/CommentsActions'
 
 let SSE = {
   init: function () {
@@ -154,6 +155,9 @@ let SSE = {
     })
     $(document).on('sse:glossary_keys', function (ev, message) {
       CatToolActions.setHaveKeysGlossary(message.data.has_glossary)
+    })
+    $(document).on('sse:comment', function (ev, message) {
+      CommentsActions.updateCommentsFromSse(message.data)
     })
     if (config.translation_matches_enabled) {
       $(document).on('sse:contribution', function (ev, message) {

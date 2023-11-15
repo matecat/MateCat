@@ -10,8 +10,8 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  * @returns {Promise<object>}
  */
 export const getComments = async ({
-  firstSegment,
-  lastSegment,
+  firstSegment = null,
+  lastSegment = null,
   idJob = config.id_job,
   password = config.password,
 }) => {
