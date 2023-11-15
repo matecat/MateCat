@@ -26,9 +26,13 @@ class EntryStruct extends \DataAccess_AbstractDaoSilentStruct implements \DataAc
     public $source_page;
     public $deleted_at;
 
-    protected              $_comments;
-    protected              $_diff;
-    private EntryValidator $validator;
+    protected $_comments;
+    protected $_diff;
+
+    /**
+     * @var EntryValidator
+     */
+    private $validator;
 
     public function __construct( array $array_params = [] ) {
         parent::__construct( $array_params );
