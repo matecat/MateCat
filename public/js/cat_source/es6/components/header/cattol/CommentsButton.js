@@ -7,6 +7,7 @@ import CatToolActions from '../../../actions/CatToolActions'
 import CatToolStore from '../../../stores/CatToolStore'
 import CattolConstants from '../../../constants/CatToolConstants'
 import SegmentActions from '../../../actions/SegmentActions'
+import {getTeamUsers} from '../../../api/getTeamUsers'
 
 const commentsTypes = {sticky: 3, resolve: 2, comment: 1}
 export const CommentsButton = ({teams}) => {
@@ -137,7 +138,10 @@ export const CommentsButton = ({teams}) => {
         teamTemp,
       ])
     } else {
-      setTeamUsers()
+      getTeamUsers({teamId: config.id_team}).then((data) => {
+        setTeamUsers(data)
+        CommentsActions.updateTeamUsers(data)
+      })
     }
   }, [teams])
   useEffect(() => {
