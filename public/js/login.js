@@ -7,6 +7,7 @@ import RegisterModal from './cat_source/es6/components/modals/RegisterModal'
 import LoginModal from './cat_source/es6/components/modals/LoginModal'
 import ModalsActions from './cat_source/es6/actions/ModalsActions'
 import {onModalWindowMounted} from './cat_source/es6/components/modals/ModalWindow'
+import CommonUtils from './cat_source/es6/utils/commonUtils'
 
 $.extend(APP, {
   setLoginEvents: function () {
@@ -117,7 +118,16 @@ $.extend(APP, {
         // TODO: optimized this, establish a list of events to happen after user data is loaded
         APP.USER.loadUserData().then(function () {
           modal$.trigger('openpreferences')
+          //After confirm email or google register
+          const data = {
+            event: APP.USER.isGoogleUser()
+              ? 'new_signup_google'
+              : 'new_signup_email',
+            userId: APP.USER.isUserLogged() ? APP.USER.STORE.user.uid : null,
+          }
+          CommonUtils.dispatchAnalyticsEvents(data)
         })
+
         break
       case 'login':
         APP.openLoginModal()
@@ -132,14 +142,6 @@ $.extend(APP, {
           }
         }
         break
-    }
-  },
-
-  openManagePage: function (e) {
-    if (!config.isLoggedIn) {
-      e.preventDefault()
-      e.stopPropagation()
-      APP.openLoginModal({goToManage: true})
     }
   },
 

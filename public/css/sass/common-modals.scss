@@ -1707,6 +1707,12 @@ a.login-button.btn-confirm-medium.sing-in.disabled:hover {
                 &.space:after {
                   content: 'Space';
                 }
+                &.bracketLeft:after {
+                  content: ']';
+                }
+                &.bracketRight:after {
+                  content: '[';
+                }
               }
             }
           }

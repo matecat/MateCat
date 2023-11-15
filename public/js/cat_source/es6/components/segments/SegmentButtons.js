@@ -6,6 +6,7 @@ import CatToolStore from '../../stores/CatToolStore'
 import SegmentFilter from '../header/cattol/segment_filter/segment_filter'
 import SegmentUtils from '../../utils/segmentUtils'
 import CattoolConstants from '../../constants/CatToolConstants'
+import CommonUtils from '../../utils/commonUtils'
 
 class SegmentButton extends React.Component {
   constructor(props) {
@@ -22,7 +23,24 @@ class SegmentButton extends React.Component {
     })
   }
 
+  trackTranslatedClick() {
+    //Track first translate event in the session
+    const idProject = config.id_project
+    const key = 'first_segment_confirm' + idProject
+    if (!sessionStorage.getItem(key)) {
+      const event = {
+        event: 'first_segment_confirm',
+        userStatus: APP.USER.isUserLogged() ? 'loggedUser' : 'notLoggedUser',
+        userId: APP.USER.isUserLogged() ? APP.USER.STORE.user.uid : null,
+        idProject: parseInt(idProject),
+      }
+      CommonUtils.dispatchAnalyticsEvents(event)
+      sessionStorage.setItem(key, 'true')
+    }
+  }
+
   clickOnTranslatedButton(event, gotoUntranslated) {
+    this.trackTranslatedClick()
     setTimeout(() =>
       UI.clickOnTranslatedButton(this.props.segment, gotoUntranslated),
     )

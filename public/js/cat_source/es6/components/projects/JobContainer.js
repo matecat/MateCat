@@ -666,7 +666,10 @@ class JobContainer extends React.Component {
       })
     } else if (this.props.job.get('outsource_available')) {
       if (!this.state.openOutsource) {
-        $(document).trigger('outsource-request')
+        const data = {
+          event: 'outsource_request',
+        }
+        CommonUtils.dispatchAnalyticsEvents(data)
       }
       this.setState({
         openOutsource: true,

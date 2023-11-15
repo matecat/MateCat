@@ -2022,6 +2022,11 @@ AppDispatcher.register(function (action) {
         ...action,
       })
       break
+    case SegmentConstants.FOCUS_TAGS:
+      SegmentStore.emitChange(SegmentConstants.FOCUS_TAGS, {
+        ...action,
+      })
+      break
     default:
       SegmentStore.emitChange(action.actionType, action.sid, action.data)
   }
