@@ -18,7 +18,7 @@ import IconEdit from '../../../icons/IconEdit'
 import Checkmark from '../../../../../../../img/icons/Checkmark'
 import Close from '../../../../../../../img/icons/Close'
 
-export const MTGlossaryRow = ({engineId, row, setRows}) => {
+export const MTGlossaryRow = ({engineId, row, setRows, isReadOnly}) => {
   const {setNotification} = useContext(MachineTranslationTabContext)
 
   const [isActive, setIsActive] = useState(row.isActive)
@@ -168,7 +168,7 @@ export const MTGlossaryRow = ({engineId, row, setRows}) => {
           checked={isActive}
           onChange={onChangeIsActive}
           type="checkbox"
-          disabled={isWaitingResult}
+          disabled={isWaitingResult || isReadOnly}
         />
       </div>
       <div className="glossary-row-name">
@@ -177,34 +177,38 @@ export const MTGlossaryRow = ({engineId, row, setRows}) => {
           className={`glossary-row-name-input${isEditingName ? ' active' : ''}`}
           value={name}
           onChange={onChangeName}
-          disabled={!isEditingName}
+          disabled={!isEditingName || isReadOnly}
         />
-        {editingNameButtons}
+        {!isReadOnly && editingNameButtons}
       </div>
-      <div className="glossary-row-import-button">
-        <input
-          type="file"
-          id={`file-import${row.id}`}
-          onChange={onChangeFile}
-          name="import_file"
-          accept=".xls, .xlsx"
-          disabled={isWaitingResult}
-        />
-        <label htmlFor={`file-import${row.id}`} className="grey-button">
-          <Upload size={14} />
-          Import from glossary
-        </label>
-      </div>
-      <div className="glossary-row-delete">
-        <button
-          className="grey-button"
-          disabled={isWaitingResult}
-          onClick={deleteGlossary}
-        >
-          <Trash size={14} />
-        </button>
-      </div>
-      {isWaitingResult && <div className="spinner"></div>}
+      {!isReadOnly && (
+        <>
+          <div className="glossary-row-import-button">
+            <input
+              type="file"
+              id={`file-import${row.id}`}
+              onChange={onChangeFile}
+              name="import_file"
+              accept=".xls, .xlsx"
+              disabled={isWaitingResult}
+            />
+            <label htmlFor={`file-import${row.id}`} className="grey-button">
+              <Upload size={14} />
+              Import from glossary
+            </label>
+          </div>
+          <div className="glossary-row-delete">
+            <button
+              className="grey-button"
+              disabled={isWaitingResult}
+              onClick={deleteGlossary}
+            >
+              <Trash size={14} />
+            </button>
+          </div>
+          {isWaitingResult && <div className="spinner"></div>}
+        </>
+      )}
     </Fragment>
   )
 }
@@ -213,4 +217,5 @@ MTGlossaryRow.propTypes = {
   engineId: PropTypes.number,
   row: PropTypes.object,
   setRows: PropTypes.func,
+  isReadOnly: PropTypes.bool,
 }

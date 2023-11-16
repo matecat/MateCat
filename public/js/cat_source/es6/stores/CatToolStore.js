@@ -23,6 +23,7 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
   tmKeys: null,
   keysDomains: null,
   haveKeysGlossary: undefined,
+  jobMetadata: undefined,
   storeFilesInfo: function (files) {
     this.files = files
   },
@@ -228,6 +229,11 @@ AppDispatcher.register(function (action) {
       break
     case CatToolConstants.OPEN_SETTINGS_PANEL:
       CatToolStore.emitChange(CatToolConstants.OPEN_SETTINGS_PANEL, {
+        ...action,
+      })
+      break
+    case CatToolConstants.GET_JOB_METADATA:
+      CatToolStore.emitChange(CatToolConstants.GET_JOB_METADATA, {
         ...action,
       })
       break

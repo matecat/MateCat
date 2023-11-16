@@ -6,7 +6,6 @@ import Close from '../../../../../../../img/icons/Close'
 import {MTGlossaryStatus, MT_GLOSSARY_CREATE_ROW_ID} from './MTGlossary'
 import {MachineTranslationTabContext} from './'
 import {createMemoryAndImportGlossary} from '../../../../api/createMemoryAndImportGlossary/createMemoryAndImportGlossary'
-import {MTGlossaryRow} from './MTGlossaryRow'
 
 export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
   const {setNotification} = useContext(MachineTranslationTabContext)
