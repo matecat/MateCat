@@ -34,7 +34,9 @@ export const CommentsButton = ({teams}) => {
     if (regExp.test(text)) {
       text = text.replace(regExp, (match, id) => {
         id = id === 'team' ? id : parseInt(id)
-        const user = teamUsers.find((user) => user.uid === id)
+        const user = teamUsers
+          ? teamUsers.find((user) => user.uid === id)
+          : undefined
         if (user) {
           return (
             '<span class="tagging-item">' +
