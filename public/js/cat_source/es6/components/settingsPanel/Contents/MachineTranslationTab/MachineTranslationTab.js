@@ -124,7 +124,7 @@ export const MachineTranslationTab = () => {
   useEffect(() => {
     setMTRows(
       mtEngines
-        .filter((row) => !activeMTEngine || row.id !== activeMTEngine.id)
+        .filter((row) => !activeMTEngine?.id || row.id !== activeMTEngine?.id)
         .map((row, index) => {
           return {
             node: (
@@ -140,7 +140,7 @@ export const MachineTranslationTab = () => {
         }),
     )
     setDeleteMTRequest()
-  }, [activeMTEngine, mtEngines])
+  }, [activeMTEngine?.id, mtEngines])
 
   const resetNotification = () => setNotification({})
 
@@ -239,7 +239,14 @@ export const MachineTranslationTab = () => {
                       isActive: true,
                       ...(activeMTEngine.type === 'MT' && {
                         isExpanded: true,
-                        extraNode: <MTGlossary {...activeMTEngine} />,
+                        extraNode: (
+                          <MTGlossary
+                            {...{
+                              ...activeMTEngine,
+                              isCattoolPage: config.is_cattool,
+                            }}
+                          />
+                        ),
                       }),
                     },
                   ]

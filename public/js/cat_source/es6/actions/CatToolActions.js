@@ -18,6 +18,7 @@ import SegmentUtils from '../utils/segmentUtils'
 import {getTmKeysJob} from '../api/getTmKeysJob'
 import {getDomainsList} from '../api/getDomainsList'
 import {checkJobKeysHaveGlossary} from '../api/checkJobKeysHaveGlossary'
+import {getJobMetadata} from '../api/getJobMetadata'
 
 let CatToolActions = {
   popupInfoUserMenu: () => 'infoUserMenu-' + config.userMail,
@@ -368,6 +369,22 @@ let CatToolActions = {
       actionType: CattolConstants.OPEN_SETTINGS_PANEL,
       value,
     })
+  },
+  getJobMetadata: ({idJob, password}) => {
+    if (!CatToolStore.jobMetadata) {
+      getJobMetadata(idJob, password).then((jobMetadata) => {
+        AppDispatcher.dispatch({
+          actionType: CattolConstants.GET_JOB_METADATA,
+          jobMetadata,
+        })
+        CatToolStore.jobMetadata = jobMetadata
+      })
+    } else {
+      AppDispatcher.dispatch({
+        actionType: CattolConstants.GET_JOB_METADATA,
+        jobMetadata: CatToolStore.jobMetadata,
+      })
+    }
   },
 }
 

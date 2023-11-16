@@ -180,6 +180,18 @@
       background: unset;
       border: none;
       cursor: pointer;
+      display: flex;
+      align-items: center;
+
+      &:hover {
+        text-decoration: underline;
+      }
+
+      &.rotate {
+        > svg {
+          transform: rotate(180deg);
+        }
+      }
     }
   }
 
@@ -194,6 +206,9 @@
       }
     }
     .settings-panel-row-content {
+      grid-template-columns: 15% minmax(0, 1fr) 20% 5%;
+    }
+    .row-content-create {
       grid-template-columns: 15% minmax(0, 1fr) 30% 5%;
     }
     .settings-panel-row {
@@ -223,13 +238,35 @@
   }
 }
 
+.glossary-row-name {
+  display: flex;
+  gap: 10px;
+
+  .editing-buttons {
+    display: flex;
+    gap: 4px;
+
+    > :first-child {
+      font-size: 14px;
+      min-width: unset;
+      padding: 8px;
+      gap: 4px !important;
+    }
+
+    > :last-child {
+      padding: 4px;
+    }
+  }
+}
+
 .glossary-row-name-input {
-  width: 100%;
+  width: 70%;
   padding: 4px;
   background-color: unset;
   border: 1px solid $grey8;
   border-radius: 3px;
 
+  &.active,
   &:focus,
   &:hover {
     background-color: white;
@@ -238,6 +275,10 @@
   &.error {
     border: solid 1px $redDefault;
   }
+}
+
+.glossary-row-name-input-create {
+  width: 94%;
 }
 
 .glossary-row-import-button {
