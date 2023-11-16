@@ -138,10 +138,12 @@ export const CommentsButton = ({teams}) => {
         teamTemp,
       ])
     } else {
-      getTeamUsers({teamId: config.id_team}).then((data) => {
-        setTeamUsers(data)
-        CommentsActions.updateTeamUsers(data)
-      })
+      if (config.id_team) {
+        getTeamUsers({teamId: config.id_team}).then((data) => {
+          setTeamUsers(data)
+          CommentsActions.updateTeamUsers(data)
+        })
+      }
     }
   }, [teams])
   useEffect(() => {

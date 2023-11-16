@@ -21,7 +21,8 @@ export const MenuButton = ({
 
   useEffect(() => {
     const handler = (e) => {
-      if (!ref.current.children[1].contains(e.target)) setItemsCoords(undefined)
+      if (!ref.current?.children[1].contains(e.target))
+        setItemsCoords(undefined)
     }
     document.addEventListener('mousedown', handler)
 
