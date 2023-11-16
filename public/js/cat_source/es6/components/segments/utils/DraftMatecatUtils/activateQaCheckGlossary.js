@@ -21,10 +21,9 @@ const activateQaCheckGlossary = (missingTerms, text, sid) => {
 
   const createGlossaryRegex = (glossaryArray) => {
     // const matches = _.map(glossaryArray, (elem) => elem.matching_words[0])
-    const matches = glossaryArray.reduce(
-      (acc, {matching_words}) => [...acc, ...matching_words],
-      [],
-    )
+    const matches = glossaryArray
+      .reduce((acc, {matching_words}) => [...acc, ...matching_words], [])
+      .sort((a, b) => (a.toLowerCase() < b.toLowerCase() ? 1 : -1)) // Order words alphabetically descending to prioritize composite terms ex. ['Guest favorite', 'guest']
     if (!matches.length) return ''
     return TextUtils.getGlossaryMatchRegex(matches)
   }

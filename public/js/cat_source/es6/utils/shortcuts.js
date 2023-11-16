@@ -19,6 +19,38 @@ const Shortcuts = {
           mac: 'shift+space',
         },
       },
+      singleQuoteOpen: {
+        label: 'Opening single curly quote',
+        equivalent: '',
+        keystrokes: {
+          standard: 'alt+bracketLeft',
+          mac: 'option+bracketLeft',
+        },
+      },
+      singleQuoteClose: {
+        label: 'Closing single curly quote (apostrophe)',
+        equivalent: '',
+        keystrokes: {
+          standard: 'alt+bracketRight',
+          mac: 'option+bracketRight',
+        },
+      },
+      doubleQuoteOpen: {
+        label: 'Opening double curly quotes',
+        equivalent: '',
+        keystrokes: {
+          standard: 'alt+shift+bracketLeft',
+          mac: 'option+shift+bracketLeft',
+        },
+      },
+      doubleQuoteClose: {
+        label: 'Closing double curly quotes',
+        equivalent: '',
+        keystrokes: {
+          standard: 'alt+shift+bracketRight',
+          mac: 'option+shift+bracketRight',
+        },
+      },
     },
   },
   cattol: {
