@@ -98,9 +98,12 @@ class SegmentCommentsContainer extends React.Component {
     }
 
     const findUser = (id) => {
-      return this.state.teamUsers.find((item) => {
-        return item.uid === id
-      })
+      if (this.state.teamUsers) {
+        return this.state.teamUsers.find((item) => {
+          return item.uid === id
+        })
+      }
+      return undefined
     }
 
     const parseCommentHtml = function (text) {

@@ -61,13 +61,13 @@ class Dashboard extends React.Component {
             ManageActions.storeSelectedTeam(selectedTeam)
           })
           .catch((err) => {
-            if (err[0].code == 401) {
+            if (err && err.length && err[0].code == 401) {
               // Not Logged or not in the team
               window.location.reload()
               return
             }
 
-            if (err[0].code == 404) {
+            if (err && err.length && err[0].code == 404) {
               this.selectPersonalTeam()
               return
             }
