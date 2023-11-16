@@ -1035,11 +1035,13 @@ const SegmentActions = {
     deleteSegmentIssueApi({
       idSegment: sid,
       idIssue: issue.id,
-    }).then(() => {
-      SegmentActions.confirmDeletedIssue(sid, issue.id)
-      ReviewExtended.getSegmentVersionsIssues(sid)
-      CatToolActions.reloadQualityReport()
     })
+      .then(() => {
+        SegmentActions.confirmDeletedIssue(sid, issue.id)
+        ReviewExtended.getSegmentVersionsIssues(sid)
+        CatToolActions.reloadQualityReport()
+      })
+      .catch(() => {})
   },
 
   confirmDeletedIssue: function (sid, issue_id) {
