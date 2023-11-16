@@ -37,7 +37,7 @@ export const MTGlossaryRow = ({engineId, row, setRows, isReadOnly}) => {
     const dispatchSuccessfullImportNotification = () => {
       setNotification({
         type: 'success',
-        message: 'Glossary import successfull',
+        message: 'Glossary import successfully',
       })
       setIsWaitingResult(false)
     }

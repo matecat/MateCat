@@ -104,7 +104,7 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
   const dispatchSuccessfullNotification = () => {
     setNotification({
       type: 'success',
-      message: 'Glossary create successfull',
+      message: 'Glossary create successfully',
     })
     setIsWaitingResult(false)
   }
