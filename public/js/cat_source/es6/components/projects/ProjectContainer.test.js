@@ -15,7 +15,6 @@ const mountPoint = createRoot(modalElement)
 afterAll(() => mountPoint.unmount())
 
 require('../../../../common')
-require('../../../../login')
 window.config = {
   enable_outsource: 1,
   basepath: '/',

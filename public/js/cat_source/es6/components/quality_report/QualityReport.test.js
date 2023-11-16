@@ -1293,7 +1293,6 @@ test('renders properly', async () => {
   }
 
   require('../../../../common')
-  require('../../../../login')
 
   const header = document.createElement('header')
 

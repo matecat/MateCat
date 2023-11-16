@@ -215,7 +215,7 @@ class SegmentsFilter extends React.Component {
 
   moveUp() {
     if (this.state.filtering && this.state.filteredCount > 1) {
-      SegmentsFilter.gotoPreviousSegment()
+      SegmentFilterUtils.gotoPreviousSegment()
     }
   }
 
