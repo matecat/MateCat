@@ -223,12 +223,13 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
         $conn         = Database::obtain()->getConnection();
         $and_ste      = '';
 
-        if ( $status == Constants_TranslationStatus::STATUS_APPROVED ) {
+        if ( $status == Constants_TranslationStatus::STATUS_APPROVED || Constants_TranslationStatus::STATUS_APPROVED2 ) {
             /**
              * if source_page is null, we keep the default behaviour and only allow TRANSLATED and APPROVED segments.
              */
             $where_values[] = Constants_TranslationStatus::STATUS_TRANSLATED;
             $where_values[] = Constants_TranslationStatus::STATUS_APPROVED;
+            $where_values[] = Constants_TranslationStatus::STATUS_APPROVED2;
         } elseif ( $status == Constants_TranslationStatus::STATUS_TRANSLATED ) {
             /**
              * When status is TRANSLATED we can change APPROVED DRAFT and NEW statuses
@@ -237,6 +238,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
             $where_values[] = Constants_TranslationStatus::STATUS_NEW;
             $where_values[] = Constants_TranslationStatus::STATUS_TRANSLATED;
             $where_values[] = Constants_TranslationStatus::STATUS_APPROVED;
+            $where_values[] = Constants_TranslationStatus::STATUS_APPROVED2;
         } else {
             throw new Exception( 'not allowed to change status to ' . $status );
         }
@@ -257,7 +259,8 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
                           AND ste.final_revision = 1 ";
 
             $where_values = array_merge( [
-                    $chunk->id, Constants_TranslationStatus::STATUS_APPROVED
+                    $chunk->id, Constants_TranslationStatus::STATUS_APPROVED,
+                    $chunk->id, Constants_TranslationStatus::STATUS_APPROVED2
             ], $where_values );
         } else {
             $join_ste = '';

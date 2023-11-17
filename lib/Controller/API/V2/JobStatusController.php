@@ -55,7 +55,7 @@ class JobStatusController extends BaseChunkController {
         }
 
         if ( in_array( $status, [
-                Constants_TranslationStatus::STATUS_TRANSLATED, Constants_TranslationStatus::STATUS_APPROVED
+                Constants_TranslationStatus::STATUS_TRANSLATED, Constants_TranslationStatus::STATUS_APPROVED, Constants_TranslationStatus::STATUS_APPROVED2
         ] ) ) {
             $unchangeble_segments = Translations_SegmentTranslationDao::getUnchangebleStatus(
                     $this->chunk, $segments_id, $status, $source_page
