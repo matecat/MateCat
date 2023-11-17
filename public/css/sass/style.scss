@@ -2860,6 +2860,10 @@ section.status-approved .status {
   background-color: $approvedGreen !important;
 }
 
+section.status-approved2 .status {
+  background-color: $approved2Green !important;
+}
+
 /* section.status-draft .status{background-color:#dddedf !important;} */
 section.status-rejected .status {
   background-color: $rebuttedRed !important;

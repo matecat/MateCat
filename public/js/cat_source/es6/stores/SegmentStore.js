@@ -40,6 +40,11 @@ import TagUtils from '../utils/tagUtils'
 import SegmentUtils from '../utils/segmentUtils'
 import EditAreaConstants from '../constants/EditAreaConstants'
 import DraftMatecatUtils from './../components/segments/utils/DraftMatecatUtils'
+import {
+  JOB_WORD_CONT_TYPE,
+  REVISE_STEP_NUMBER,
+  SEGMENTS_STATUS,
+} from '../constants/Constants'
 
 EventEmitter.prototype.setMaxListeners(0)
 
@@ -169,7 +174,12 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
             sid: segment.sid + '-' + (i + 1),
             split_group: splitGroup,
             split_points_source: [],
-            status: status,
+            status:
+              config.word_count_type === JOB_WORD_CONT_TYPE.RAW &&
+              segment.revision_number === REVISE_STEP_NUMBER.REVISE2 &&
+              status.toUpperCase() === SEGMENTS_STATUS.APPROVED
+                ? SEGMENTS_STATUS.APPROVED2
+                : status,
             time_to_edit: '0',
             originalDecodedTranslation: translation
               ? DraftMatecatUtils.unescapeHTML(
@@ -209,6 +219,12 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         })
       } else {
         segment.saving = false
+        segment.status =
+          config.word_count_type === JOB_WORD_CONT_TYPE.EQUIVALENT &&
+          segment.revision_number === REVISE_STEP_NUMBER.REVISE2 &&
+          segment.status.toUpperCase() === SEGMENTS_STATUS.APPROVED
+            ? SEGMENTS_STATUS.APPROVED2
+            : segment.status
         segment.splitted = false
         segment.original_translation = segment.translation
         segment.unlocked = SegmentUtils.isUnlockedSegment(segment)

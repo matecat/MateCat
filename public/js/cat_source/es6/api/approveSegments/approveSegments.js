@@ -1,5 +1,6 @@
 import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
 import {flattenObject} from '../../utils/queryString'
+import {REVISE_STEP_NUMBER, SEGMENTS_STATUS} from '../../constants/Constants'
 
 /**
  * Mark approved filtered segments
@@ -19,7 +20,10 @@ export const approveSegments = async (
 ) => {
   const dataParams = flattenObject({
     segments_id: segments,
-    status: 'approved',
+    status:
+      revisionNumber === REVISE_STEP_NUMBER.REVISE1
+        ? SEGMENTS_STATUS.APPROVED
+        : SEGMENTS_STATUS.APPROVED2,
     client_id: config.id_client,
     revision_number: revisionNumber,
   })

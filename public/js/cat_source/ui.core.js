@@ -14,6 +14,7 @@ import {getGlobalWarnings} from './es6/api/getGlobalWarnings'
 import {setTranslation} from './es6/api/setTranslation'
 import AlertModal from './es6/components/modals/AlertModal'
 import ModalsActions from './es6/actions/ModalsActions'
+import {SEGMENTS_STATUS} from './es6/constants/Constants'
 
 window.UI = {
   cacheObjects: function (editarea_or_segment) {
@@ -44,18 +45,14 @@ window.UI = {
    * @returns {boolean}
    */
   shouldSegmentAutoPropagate: function (segment, status) {
-    var segmentStatus = segment.status.toLowerCase()
+    var segmentStatus = segment.status
     var statusAcceptedNotModified = ['new', 'draft']
     var segmentModified = segment.modified
     return (
       segmentModified ||
       statusAcceptedNotModified.indexOf(segmentStatus) !== -1 ||
-      (!segmentModified && status.toLowerCase() !== segmentStatus) ||
-      (!segmentModified &&
-        status.toLowerCase() === segmentStatus &&
-        segmentStatus === 'approved' &&
-        config.revisionNumber !== segment.revision_number)
-    ) // from R1 to R2 and reverse
+      (!segmentModified && status !== segmentStatus)
+    )
   },
 
   /**
@@ -469,11 +466,11 @@ window.UI = {
   },
 
   setTranslation: function (options, callback) {
-    var id_segment = options.id_segment
-    var status = options.status
-    var propagate = options.propagate || false
+    const id_segment = options.id_segment
+    const status = options.status
+    const propagate = options.propagate || false
 
-    var segment = SegmentStore.getSegmentByIdToJS(id_segment)
+    const segment = SegmentStore.getSegmentByIdToJS(id_segment)
 
     if (!segment) {
       return
@@ -481,14 +478,14 @@ window.UI = {
 
     //REMOVED Check for to save
     //Send ALL to the queue
-    var item = {
+    const item = {
       id_segment: id_segment,
       status: status,
       propagate: propagate,
       autoPropagation: options.autoPropagation,
     }
     //Check if the traslation is not already in the tail
-    var saveTranslation = this.translationIsToSave(segment)
+    const saveTranslation = this.translationIsToSave(segment)
     // If not i save it or update
     if (saveTranslation) {
       this.addToSetTranslationTail(item)
@@ -516,7 +513,7 @@ window.UI = {
     }
   },
   alreadyInSetTranslationTail: function (sid) {
-    var alreadySet = false
+    let alreadySet = false
     $.each(UI.setTranslationTail, function () {
       if (this.id_segment == sid) alreadySet = true
     })
@@ -731,7 +728,7 @@ window.UI = {
 
     if (response.data == 'OK') {
       SegmentActions.setStatus(id_segment, null, status)
-      //CatToolActions.setProgress(response)
+      CatToolActions.setProgress(response)
       SegmentActions.removeClassToSegment(id_segment, 'setTranslationPending')
 
       this.checkWarnings(false)
@@ -842,7 +839,7 @@ window.UI = {
       }
     }
 
-    UI.changeStatus(segment, 'translated', afterTranslateFn)
+    UI.changeStatus(segment, SEGMENTS_STATUS.TRANSLATED, afterTranslateFn)
   },
 
   // Project completion override this method

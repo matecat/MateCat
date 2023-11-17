@@ -35,7 +35,17 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
       stats.raw.translated === 0 && stats.translationCompleted
     stats.revision1Completed = stats.raw.approved === stats.raw.total
     stats.revision2Completed = stats.raw.approved2 === stats.raw.total
-
+    stats.translate_todo = Math.round(
+      stats.equivalent.draft + stats.equivalent.new,
+    )
+    stats.revise_todo = Math.round(
+      stats.translate_todo + stats.equivalent.translated,
+    )
+    stats.revise2_todo = Math.round(
+      stats.translate_todo +
+        stats.equivalent.translated +
+        stats.equivalent.approved,
+    )
     this._projectProgess = stats
   },
   updateQR: function (qr) {
