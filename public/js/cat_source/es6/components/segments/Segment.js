@@ -23,17 +23,11 @@ import {SegmentContext} from '../segments/SegmentContext'
 import CatToolConstants from '../../constants/CatToolConstants'
 import CatToolStore from '../../stores/CatToolStore'
 import CommentsStore from '../../stores/CommentsStore'
+import {SEGMENTS_STATUS} from '../../constants/Constants'
 
 class Segment extends React.Component {
   constructor(props) {
     super(props)
-    this.segmentStatus = {
-      approved: 'APPROVED',
-      translated: 'TRANSLATED',
-      draft: 'DRAFT',
-      new: 'NEW',
-      rejected: 'REJECTED',
-    }
 
     this.createSegmentClasses = this.createSegmentClasses.bind(this)
     this.hightlightEditarea = this.hightlightEditarea.bind(this)
@@ -51,7 +45,7 @@ class Segment extends React.Component {
 
     let readonly = UI.isReadonlySegment(this.props.segment)
     this.secondPassLocked =
-      this.props.segment.status.toUpperCase() === this.segmentStatus.approved &&
+      this.props.segment.status.toUpperCase() === SEGMENTS_STATUS.APPROVED2 &&
       this.props.segment.revision_number === 2 &&
       config.revisionNumber !== 2
     this.state = {
@@ -93,7 +87,8 @@ class Segment extends React.Component {
   openSegment(wasOriginatedFromBrowserHistory) {
     if (!this.$section.length) return
     if (!this.checkIfCanOpenSegment()) {
-      if (UI.projectStats && UI.projectStats.TRANSLATED_PERC_FORMATTED === 0) {
+      const progress = CatToolStore.getProgress()
+      if (progress && progress.raw.translated === 0) {
         this.alertNoTranslatedSegments()
       } else {
         this.alertNotTranslatedYet(this.props.segment.sid)
@@ -235,12 +230,6 @@ class Segment extends React.Component {
     }
     if (this.props.segment.muted) {
       classes.push('muted')
-    }
-    if (
-      this.props.segment.status.toUpperCase() === this.segmentStatus.approved &&
-      this.props.segment.revision_number
-    ) {
-      classes.push('approved-step-' + this.props.segment.revision_number)
     }
     if (this.props.segment.opened && this.checkIfCanOpenSegment()) {
       classes.push('editor')

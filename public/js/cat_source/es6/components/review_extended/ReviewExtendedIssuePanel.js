@@ -5,6 +5,7 @@ import SegmentActions from '../../actions/SegmentActions'
 import {setTranslation} from '../../api/setTranslation'
 import {orderBy} from 'lodash'
 import {SegmentContext} from '../segments/SegmentContext'
+import {REVISE_STEP_NUMBER, SEGMENTS_STATUS} from '../../constants/Constants'
 
 class ReviewExtendedIssuePanel extends React.Component {
   static contextType = SegmentContext
@@ -74,10 +75,15 @@ class ReviewExtendedIssuePanel extends React.Component {
 
     const segment = this.context.segment
     if (
-      segment.status.toLowerCase() !== 'approved' ||
-      segment.revision_number !== ReviewExtended.number
+      segment.revision_number !== config.revisionNumber ||
+      ![SEGMENTS_STATUS.APPROVED, SEGMENTS_STATUS.APPROVED2].includes(
+        segment.status.toUpperCase(),
+      )
     ) {
-      segment.status = 'approved'
+      segment.status =
+        config.revisionNumber === REVISE_STEP_NUMBER.REVISE1
+          ? SEGMENTS_STATUS.APPROVED
+          : SEGMENTS_STATUS.APPROVED2
       setTranslation({segment})
         .then((response) => {
           issue.version = response.translation.version_number

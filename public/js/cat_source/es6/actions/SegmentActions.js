@@ -35,6 +35,7 @@ import {toggleTagProjectionJob} from '../api/toggleTagProjectionJob'
 import {deleteSegmentIssue as deleteSegmentIssueApi} from '../api/deleteSegmentIssue'
 import SegmentsFilterUtil from '../components/header/cattol/segment_filter/segment_filter'
 import SegmentFilter from '../components/header/cattol/segment_filter/segment_filter'
+import {SEGMENTS_STATUS} from '../constants/Constants'
 
 const SegmentActions = {
   localStorageCommentsClosed:
@@ -1077,32 +1078,40 @@ const SegmentActions = {
     ModalsActions.showModalComponent(ConfirmMessageModal, props, 'Warning')
   },
   approveFilteredSegments: function (segmentsArray) {
-    if (segmentsArray.length >= 500) {
-      var subArray = segmentsArray.slice(0, 499)
-      var todoArray = segmentsArray.slice(500, segmentsArray.length - 1)
+    if (segmentsArray.length >= 100) {
+      var subArray = segmentsArray.slice(0, 99)
+      var todoArray = segmentsArray.slice(99, segmentsArray.length - 1)
       return this.approveFilteredSegments(subArray).then(() => {
         return this.approveFilteredSegments(todoArray)
       })
     } else {
       const promise = approveSegments(segmentsArray)
       promise.then((response) => {
-        this.checkUnchangebleSegments(response, segmentsArray, 'APPROVED')
+        this.checkUnchangebleSegments(
+          response,
+          segmentsArray,
+          SEGMENTS_STATUS.APPROVED,
+        )
         setTimeout(CatToolActions.updateFooterStatistics(), 2000)
       })
       return promise
     }
   },
   translateFilteredSegments: function (segmentsArray) {
-    if (segmentsArray.length >= 500) {
-      var subArray = segmentsArray.slice(0, 499)
-      var todoArray = segmentsArray.slice(499, segmentsArray.length)
+    if (segmentsArray.length >= 100) {
+      var subArray = segmentsArray.slice(0, 99)
+      var todoArray = segmentsArray.slice(99, segmentsArray.length)
       return this.translateFilteredSegments(subArray).then(() => {
         return this.translateFilteredSegments(todoArray)
       })
     } else {
       const promise = translateSegments(segmentsArray)
       promise.then((response) => {
-        this.checkUnchangebleSegments(response, segmentsArray, 'TRANSLATED')
+        this.checkUnchangebleSegments(
+          response,
+          segmentsArray,
+          SEGMENTS_STATUS.TRANSLATED,
+        )
         setTimeout(CatToolActions.updateFooterStatistics(), 2000)
       })
       return promise

@@ -30,17 +30,22 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
     return this.files
   },
   setProgress: function (stats) {
-    stats.translationCompleted = stats.TODO === 0
-    stats.revisionCompleted = stats.TRANSLATED === 0
-    stats.revision1Completed =
-      stats.revises &&
-      stats.revises.length > 0 &&
-      round(stats.revises[0].advancement_wc) === stats.TOTAL
-    stats.revision2Completed =
-      stats.revises &&
-      stats.revises.length > 1 &&
-      round(stats.revises[1].advancement_wc) === stats.TOTAL
-
+    stats.translationCompleted = stats.raw.draft === 0 && stats.raw.new === 0
+    stats.revisionCompleted =
+      stats.raw.translated === 0 && stats.translationCompleted
+    stats.revision1Completed = stats.raw.approved === stats.raw.total
+    stats.revision2Completed = stats.raw.approved2 === stats.raw.total
+    stats.translate_todo = Math.round(
+      stats.equivalent.draft + stats.equivalent.new,
+    )
+    stats.revise_todo = Math.round(
+      stats.translate_todo + stats.equivalent.translated,
+    )
+    stats.revise2_todo = Math.round(
+      stats.translate_todo +
+        stats.equivalent.translated +
+        stats.equivalent.approved,
+    )
     this._projectProgess = stats
   },
   updateQR: function (qr) {
@@ -88,6 +93,9 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
   },
   getHaveKeysGlossary: function () {
     return this.haveKeysGlossary
+  },
+  getProgress: () => {
+    return this._projectProgess
   },
   setHaveKeysGlossary: function (value) {
     this.haveKeysGlossary = value

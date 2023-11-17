@@ -74,62 +74,6 @@ class SegmentBody extends React.Component {
       (targetTags && !isEqual(sourceTags.sort(), targetTags.sort()))
     )
   }
-
-  getStatusMenu() {
-    if (this.state.showStatusMenu && !this.isReviewExtended) {
-      return (
-        <ul className="statusmenu" ref={(menu) => (this.statusMenuRef = menu)}>
-          <li className="arrow">
-            <span className="arrow-mcolor" />
-          </li>
-
-          <li>
-            <a
-              className="draftStatusMenu"
-              data-sid={'segment-' + this.context.segment.sid}
-              title="set draft as status"
-              onClick={this.changeStatus.bind(this, 'draft')}
-            >
-              DRAFT
-            </a>
-          </li>
-          <li>
-            <a
-              className="translatedStatusMenu"
-              data-sid={'segment-' + this.context.segment.sid}
-              title="set translated as status"
-              onClick={this.changeStatus.bind(this, 'translated')}
-            >
-              TRANSLATED
-            </a>
-          </li>
-          <li>
-            <a
-              className="approvedStatusMenu"
-              data-sid={'segment-' + this.context.segment.sid}
-              title="set approved as status"
-              onClick={this.changeStatus.bind(this, 'approved')}
-            >
-              APPROVED
-            </a>
-          </li>
-
-          <li>
-            <a
-              className="rejectedStatusMenu"
-              data-sid={'segment-' + this.context.segment.sid}
-              title="set rejected as status"
-              onClick={this.changeStatus.bind(this, 'rejected')}
-            >
-              REJECTED
-            </a>
-          </li>
-        </ul>
-      )
-    } else {
-      return ''
-    }
-  }
   copySource(e) {
     e.preventDefault()
     SegmentActions.copySourceToTarget(this.context.segment.sid)
@@ -194,8 +138,6 @@ class SegmentBody extends React.Component {
             />
           )}
         </div>
-
-        {this.getStatusMenu()}
       </div>
     )
   }

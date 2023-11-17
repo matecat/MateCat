@@ -14,6 +14,7 @@ import {getGlobalWarnings} from './es6/api/getGlobalWarnings'
 import {setTranslation} from './es6/api/setTranslation'
 import AlertModal from './es6/components/modals/AlertModal'
 import ModalsActions from './es6/actions/ModalsActions'
+import {SEGMENTS_STATUS} from './es6/constants/Constants'
 
 window.UI = {
   cacheObjects: function (editarea_or_segment) {
@@ -44,18 +45,14 @@ window.UI = {
    * @returns {boolean}
    */
   shouldSegmentAutoPropagate: function (segment, status) {
-    var segmentStatus = segment.status.toLowerCase()
+    var segmentStatus = segment.status
     var statusAcceptedNotModified = ['new', 'draft']
     var segmentModified = segment.modified
     return (
       segmentModified ||
       statusAcceptedNotModified.indexOf(segmentStatus) !== -1 ||
-      (!segmentModified && status.toLowerCase() !== segmentStatus) ||
-      (!segmentModified &&
-        status.toLowerCase() === segmentStatus &&
-        segmentStatus === 'approved' &&
-        config.revisionNumber !== segment.revision_number)
-    ) // from R1 to R2 and reverse
+      (!segmentModified && status !== segmentStatus)
+    )
   },
 
   /**
@@ -237,107 +234,6 @@ window.UI = {
     }
     tte.data('raw-time-to-edit', this.totalTime)
   },
-  goToFirstError: function () {
-    CatToolActions.toggleQaIssues()
-    setTimeout(function () {
-      $('.button.qa-issue').first().click()
-    }, 300)
-  },
-  setDownloadStatus: function (stats) {
-    var t = CommonUtils.getTranslationStatus(stats)
-
-    var downloadable = t === 'translated' || t.indexOf('approved') > -1
-
-    var isGDriveFile = false
-
-    if (config.isGDriveProject && config.isGDriveProject !== 'false') {
-      isGDriveFile = true
-    }
-
-    var label = ''
-
-    if (downloadable) {
-      if (isGDriveFile) {
-        label = 'Open in Google Drive'
-      } else {
-        label = 'Download Translation'
-      }
-      $('#action-download').addClass('job-completed')
-    } else {
-      if (isGDriveFile) {
-        label = 'Preview in Google Drive'
-      } else {
-        label = 'Draft'
-      }
-      $('#action-download').removeClass('job-completed')
-    }
-
-    $('#action-download .downloadTranslation a').text(label)
-    $('#action-download .previewLink a').text(label)
-  },
-  disableDownloadButtonForDownloadStart: function () {
-    $('#action-download').addClass('disabled')
-  },
-
-  reEnableDownloadButton: function () {
-    $('#action-download').removeClass('disabled')
-  },
-
-  continueDownloadWithGoogleDrive: function (openOriginalFiles) {
-    if ($('#downloadProject').hasClass('disabled')) {
-      return
-    }
-    UI.disableDownloadButtonForDownloadStart(openOriginalFiles)
-
-    APP.downloadGDriveFile(
-      openOriginalFiles,
-      config.id_job,
-      config.password,
-      UI.reEnableDownloadButton,
-    )
-  },
-
-  continueDownload: function () {
-    if ($('#downloadProject').hasClass('disabled')) {
-      return
-    }
-
-    //UI.showDownloadCornerTip();
-
-    UI.disableDownloadButtonForDownloadStart()
-
-    APP.downloadFile(
-      config.id_job,
-      config.password,
-      UI.reEnableDownloadButton.bind(this),
-    )
-  },
-
-  runDownload: function () {
-    const globalWarnings = SegmentStore.getGlobalWarnings()
-    var continueDownloadFunction
-
-    if ($('#downloadProject').hasClass('disabled')) return false
-
-    if (config.isGDriveProject) {
-      continueDownloadFunction = UI.continueDownloadWithGoogleDrive
-    } else {
-      continueDownloadFunction = UI.continueDownload
-    }
-
-    //the translation mismatches are not a severe Error, but only a warn, so don't display Error Popup
-    if (
-      globalWarnings.matecat.ERROR &&
-      globalWarnings.matecat.ERROR.total > 0
-    ) {
-      ModalsActions.showDownloadWarningsModal(
-        continueDownloadFunction,
-        UI.goToFirstError,
-      )
-    } else {
-      continueDownloadFunction()
-    }
-  },
   startWarning: function () {
     clearTimeout(UI.startWarningTimeout)
     UI.startWarningTimeout = setTimeout(function () {
@@ -469,11 +365,11 @@ window.UI = {
   },
 
   setTranslation: function (options, callback) {
-    var id_segment = options.id_segment
-    var status = options.status
-    var propagate = options.propagate || false
+    const id_segment = options.id_segment
+    const status = options.status
+    const propagate = options.propagate || false
 
-    var segment = SegmentStore.getSegmentByIdToJS(id_segment)
+    const segment = SegmentStore.getSegmentByIdToJS(id_segment)
 
     if (!segment) {
       return
@@ -481,14 +377,14 @@ window.UI = {
 
     //REMOVED Check for to save
     //Send ALL to the queue
-    var item = {
+    const item = {
       id_segment: id_segment,
       status: status,
       propagate: propagate,
       autoPropagation: options.autoPropagation,
     }
     //Check if the traslation is not already in the tail
-    var saveTranslation = this.translationIsToSave(segment)
+    const saveTranslation = this.translationIsToSave(segment)
     // If not i save it or update
     if (saveTranslation) {
       this.addToSetTranslationTail(item)
@@ -516,7 +412,7 @@ window.UI = {
     }
   },
   alreadyInSetTranslationTail: function (sid) {
-    var alreadySet = false
+    let alreadySet = false
     $.each(UI.setTranslationTail, function () {
       if (this.id_segment == sid) alreadySet = true
     })
@@ -731,8 +627,7 @@ window.UI = {
 
     if (response.data == 'OK') {
       SegmentActions.setStatus(id_segment, null, status)
-      this.setDownloadStatus(response.stats)
-      CatToolActions.setProgress(response.stats)
+      CatToolActions.setProgress(response)
       SegmentActions.removeClassToSegment(id_segment, 'setTranslationPending')
 
       this.checkWarnings(false)
@@ -843,7 +738,7 @@ window.UI = {
       }
     }
 
-    UI.changeStatus(segment, 'translated', afterTranslateFn)
+    UI.changeStatus(segment, SEGMENTS_STATUS.TRANSLATED, afterTranslateFn)
   },
 
   // Project completion override this method

@@ -7,6 +7,7 @@ import SegmentFilter from '../header/cattol/segment_filter/segment_filter'
 import SegmentUtils from '../../utils/segmentUtils'
 import CattoolConstants from '../../constants/CatToolConstants'
 import CommonUtils from '../../utils/commonUtils'
+import {SEGMENTS_STATUS} from '../../constants/Constants'
 
 class SegmentButton extends React.Component {
   constructor(props) {
@@ -104,7 +105,9 @@ class SegmentButton extends React.Component {
     let enableGoToNext =
       !isUndefined(nextSegment) &&
       !revisionCompleted &&
-      ((nextSegment.status.toLowerCase() === 'approved' &&
+      (([SEGMENTS_STATUS.APPROVED2, SEGMENTS_STATUS.APPROVED].includes(
+        nextSegment.status,
+      ) &&
         nextSegment.autopropagated_from == 0) || //Approved and propagation confirmed
         (SegmentUtils.isIceSegment(nextSegment) && !nextSegment.unlocked) || //Ice
         nextSegment.status === 'NEW' ||
@@ -114,15 +117,15 @@ class SegmentButton extends React.Component {
     const className = ReviewExtended.enabled()
       ? 'revise-button-' + ReviewExtended.number
       : ''
-    enableGoToNext = ReviewExtended.enabled()
-      ? enableGoToNext &&
-        (isNull(nextSegment.revision_number) ||
-          (!isNull(nextSegment.revision_number) &&
-            (nextSegment.revision_number === config.revisionNumber ||
-              (nextSegment.revision_number === 2 &&
-                config.revisionNumber === 1))) || //Not Same Rev
-          (SegmentUtils.isIceSegment(nextSegment) && !nextSegment.unlocked)) // Ice Locked
-      : enableGoToNext && nextSegment.status.toLowerCase() === 'approved' // Review Simple
+    enableGoToNext =
+      enableGoToNext &&
+      (isNull(nextSegment.revision_number) ||
+        (!isNull(nextSegment.revision_number) &&
+          (nextSegment.revision_number === config.revisionNumber ||
+            (nextSegment.revision_number === 2 &&
+              config.revisionNumber === 1))) || //Not Same Rev
+        (SegmentUtils.isIceSegment(nextSegment) && !nextSegment.unlocked)) // Ice Locked
+
     nextButton = enableGoToNext ? (
       <li>
         <a
@@ -161,7 +164,7 @@ class SegmentButton extends React.Component {
                 data-segmentid={'segment-' + this.props.segment.sid}
                 title="Revise and go to next repetition"
               >
-                REP >
+                REP &lt;
               </a>
             </li>
             <li>
@@ -176,7 +179,7 @@ class SegmentButton extends React.Component {
                 data-segmentid={'segment-' + this.props.segment.sid}
                 title="Revise and go to next repetition group"
               >
-                REP >>
+                REP &lt;&lt;
               </a>
             </li>
           </React.Fragment>

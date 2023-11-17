@@ -8,6 +8,7 @@ import {sendSegmentVersionIssueComment} from './es6/api/sendSegmentVersionIssueC
 import SegmentStore from './es6/stores/SegmentStore'
 import {getSegmentVersionsIssues} from './es6/api/getSegmentVersionsIssues'
 import CommonUtils from './es6/utils/commonUtils'
+import {REVISE_STEP_NUMBER, SEGMENTS_STATUS} from './es6/constants/Constants'
 
 window.Review = {
   enabled: function () {
@@ -185,7 +186,11 @@ if (Review.enabled()) {
       }
 
       UI.setTimeToEdit(sid)
-      UI.changeStatus(segment, 'approved', afterApproveFn) // this does < setTranslation
+      const status =
+        segment.revision_number === REVISE_STEP_NUMBER.REVISE1
+          ? SEGMENTS_STATUS.APPROVED
+          : SEGMENTS_STATUS.APPROVED2
+      UI.changeStatus(segment, status, afterApproveFn) // this does < setTranslation
 
       // Lock the segment if it's approved in a second pass but was previously approved in first revision
       if (ReviewExtended.number > 1) {
