@@ -335,7 +335,7 @@ class JobContainer extends React.Component {
 
   getDownloadLabel() {
     const stats = this.props.job.get('stats').toJS()
-    let jobTranslated = stats.raw.draft !== 0 && stats.raw.new !== 0
+    let jobTranslated = stats.raw.draft === 0 && stats.raw.new === 0
     let remoteService = this.props.project.get('remote_file_service')
     let label = (
       <a

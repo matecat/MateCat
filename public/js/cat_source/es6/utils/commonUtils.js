@@ -1,4 +1,3 @@
-import {round} from 'lodash'
 import Cookies from 'js-cookie'
 import Platform from 'platform'
 import OfflineUtils from './offlineUtils'
@@ -17,41 +16,8 @@ const CommonUtils = {
   /**
    * Returns the translation status evaluating the job stats
    */
-  getTranslationStatus(stats) {
-    var t = 'approved'
-    var app = parseFloat(stats.APPROVED)
-    var tra = parseFloat(stats.TRANSLATED)
-    var dra = parseFloat(stats.DRAFT)
-    var rej = parseFloat(stats.REJECTED)
-    var todo = parseFloat(stats.TODO)
-
-    // If second pass enabled
-    if (config.secondRevisionsCount && stats.reviews) {
-      var revWords1 = stats.reviews.find(function (value) {
-        return value.revision_number === 1
-      })
-
-      var revWords2 = stats.reviews.find(function (value) {
-        return value.revision_number === 2
-      })
-
-      if (revWords1 && round(parseFloat(revWords1.advancement_wc)) > 0) {
-        app = parseFloat(revWords1.advancement_wc)
-      } else if (revWords2 && round(parseFloat(revWords2.advancement_wc)) > 0) {
-        app = parseFloat(revWords2.advancement_wc)
-        t = 'approved-2ndpass'
-      }
-    }
-
-    if (tra) t = 'translated'
-    if (dra) t = 'draft'
-    if (rej) t = 'draft'
-
-    if (!tra && !dra && !rej && !app && todo > 0) {
-      t = 'draft'
-    }
-
-    return t
+  isJobCompleted(stats) {
+    return stats.raw.draft === 0 && stats.raw.new === 0
   },
   levenshteinDistance(s1, s2) {
     //       discuss at: http://phpjs.org/functions/levenshtein/
@@ -193,7 +159,7 @@ const CommonUtils = {
       }
     }
     if (
-      $('#downloadProject').hasClass('disabled') ||
+      $('#action-download').hasClass('disabled') ||
       $('tr td a.downloading').length ||
       $('.popup-tm td.uploadfile.uploading').length
     ) {

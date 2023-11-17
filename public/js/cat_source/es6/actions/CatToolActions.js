@@ -183,7 +183,6 @@ let CatToolActions = {
       stats: stats,
     })
     //TODO move it
-    //this.setDownloadStatus(stats)
     UI.projectStats = stats
     this.checkQualityReport(stats)
   },
