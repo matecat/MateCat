@@ -94,6 +94,9 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
   getHaveKeysGlossary: function () {
     return this.haveKeysGlossary
   },
+  getProgress: () => {
+    return this._projectProgess
+  },
   setHaveKeysGlossary: function (value) {
     this.haveKeysGlossary = value
   },

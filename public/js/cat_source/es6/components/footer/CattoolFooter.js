@@ -50,16 +50,16 @@ export const CattolFooter = ({
 
   const onClickTodo = (e, targetName) => {
     e.preventDefault()
-    if (!UI.projectStats) return
+    if (!stats) return
     // show tooltip
     if (
-      (!config.isReview && UI.projectStats.translationCompleted) ||
+      (!config.isReview && stats.translationCompleted) ||
       (config.isReview &&
         config.revisionNumber === 1 &&
-        UI.projectStats.revisionCompleted) ||
+        stats.revisionCompleted) ||
       (config.isReview &&
         config.revisionNumber === 2 &&
-        UI.projectStats.revises[1]?.advancement_wc === UI.projectStats.TOTAL)
+        stats.revision2Completed)
     ) {
       setIsShowingTooltip({progressBar: false, todo: false, [targetName]: true})
       return

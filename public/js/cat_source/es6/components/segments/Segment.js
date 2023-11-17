@@ -87,7 +87,8 @@ class Segment extends React.Component {
   openSegment(wasOriginatedFromBrowserHistory) {
     if (!this.$section.length) return
     if (!this.checkIfCanOpenSegment()) {
-      if (UI.projectStats && UI.projectStats.TRANSLATED_PERC_FORMATTED === 0) {
+      const progress = CatToolStore.getProgress()
+      if (progress && progress.raw.translated === 0) {
         this.alertNoTranslatedSegments()
       } else {
         this.alertNotTranslatedYet(this.props.segment.sid)
