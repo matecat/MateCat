@@ -5,6 +5,7 @@ use Exceptions\NotFoundException;
 use Outsource\ConfirmationDao;
 use Outsource\ConfirmationStruct;
 use Outsource\TranslatedConfirmationStruct;
+use TmKeyManagement\UserKeysModel;
 use Translations\WarningDao;
 use Translators\JobsTranslatorsDao;
 use Translators\JobsTranslatorsStruct;
@@ -228,15 +229,6 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
     }
 
     /**
-     * @return Translations_SegmentTranslationStruct
-     */
-    public function findLatestTranslation() {
-        $dao = new Translations_SegmentTranslationDao( Database::obtain() );
-
-        return $dao->lastTranslationByJobOrChunk( $this );
-    }
-
-    /**
      * @return Chunks_ChunkStruct[]
      */
     public function getChunks() {
@@ -260,8 +252,8 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
      * @return array
      */
     public function getClientKeys( Users_UserStruct $user, $role ){
-        $uKModel = new \TmKeyManagement\UserKeysModel( $user, $role );
-        return $uKModel->getKeys( $this->tm_keys );
+        $uKModel = new UserKeysModel( $user, $role );
+        return $uKModel->getKeys( $this->tm_keys, 60 * 10 );
     }
 
     public function getPeeForTranslatedSegments(){

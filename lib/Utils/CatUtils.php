@@ -237,12 +237,20 @@ class CatUtils {
             // Calculating words per hour and estimated completion
             $estimation_temp = Translations_SegmentTranslationDao::getEQWLastHour( $job_stats[ 'id' ], $last_10_worked_ids );
 
-            $job_stats[ 'words_per_hour' ] = number_format( $estimation_temp[ 0 ][ 'words_per_hour' ], 0, '.', ',' );
+            $job_stats[ 'words_per_hour' ] = number_format( $estimation_temp[ 0 ][ 'words_per_hour' ] );
+
             // 7.2 hours
             // $job_stats['ESTIMATED_COMPLETION'] = number_format( ($job_stats['DRAFT']+$job_stats['REJECTED'])/$estimation_temp[0]['words_per_hour'],1);
             // 1 h 32 m
             // $job_stats['ESTIMATED_COMPLETION'] = date("G",($job_stats['DRAFT']+$job_stats['REJECTED'])/$estimation_temp[0]['words_per_hour']*3600) . "h " . date("i",($job_stats['DRAFT']+$job_stats['REJECTED'])/$estimation_temp[0]['words_per_hour']*3600) . "m";
-            $job_stats[ 'estimated_completion' ] = date( "z\d G\h i\m", ( $job_stats[ 'DRAFT' ] + $job_stats[ 'REJECTED' ] ) * 3600 / ( !empty( $estimation_temp[ 0 ][ 'words_per_hour' ] ) ? $estimation_temp[ 0 ][ 'words_per_hour' ] : 1 ) - 3600 );
+
+            //YYY [Remove] Backward compatibility
+            if ( isset( $job_stats[ 'DRAFT' ] ) ) {
+                $job_stats[ 'estimated_completion' ] = date( "z\d G\h i\m", ( $job_stats[ 'DRAFT' ] + $job_stats[ 'REJECTED' ] ) * 3600 / ( !empty( $estimation_temp[ 0 ][ 'words_per_hour' ] ) ? $estimation_temp[ 0 ][ 'words_per_hour' ] : 1 ) - 3600 );
+            } else {
+                $job_stats[ 'estimated_completion' ] = date( "z\d G\h i\m", ( $job_stats[ 'equivalent' ][ 'draft' ] + $job_stats[ 'equivalent' ][ 'rejected' ] ) * 3600 / ( !empty( $estimation_temp[ 0 ][ 'words_per_hour' ] ) ? $estimation_temp[ 0 ][ 'words_per_hour' ] : 1 ) - 3600 );
+            }
+
         }
 
         return $job_stats;

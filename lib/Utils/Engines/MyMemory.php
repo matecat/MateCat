@@ -933,7 +933,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         preg_match("/" . $re .'$/', $target_string, $r_matches,PREG_OFFSET_CAPTURE, 0);
         preg_match("/^" . $re . '/', $target_string, $l_matches,PREG_OFFSET_CAPTURE, 0);
         $r_index = (isset($r_matches[0][1])) ? $r_matches[0][1] : mb_strlen($target_string);
-        $l_index = (isset($l_matches[0][1])) ? $l_matches[0][1] + mb_strlen($l_matches[0][0]) : 0;
+        $l_index = (isset($l_matches[0][1])) ? (int)$l_matches[0][1] + mb_strlen($l_matches[0][0]) : 0;
         $r_matches =    (isset($r_matches[0][0])) ? $r_matches[0][0] : '';
         $l_matches =    (isset($l_matches[0][0])) ? $l_matches[0][0] :  '';
 

@@ -8,7 +8,7 @@ namespace Model\Analysis;
  * Time: 13.37
  *
  */
-class XTRFStatus extends APIStatus {
+class XTRFStatus extends AbstractStatus {
 
     public function getResult(){
 

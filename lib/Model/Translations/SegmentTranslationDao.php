@@ -848,7 +848,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
          
             FROM   segment_translations st
             JOIN   segments s ON id = st.id_segment
-            WHERE  status IN ( 'TRANSLATED', 'APPROVED' )
+            WHERE  status IN ( 'TRANSLATED', 'APPROVED', 'APPROVED2' )
                    AND id_job = ?
                    AND id_segment IN ( " . implode( ",", array_fill( 0, count( $estimation_seg_ids ), '?' ) ) . " )
     ";

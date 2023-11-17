@@ -2,13 +2,14 @@
 
 namespace Model\Analysis;
 
+use AMQHandler;
 use API\App\Json\Analysis\AnalysisChunk;
 use API\App\Json\Analysis\AnalysisFile;
 use API\App\Json\Analysis\AnalysisJob;
 use API\App\Json\Analysis\AnalysisProject;
 use API\App\Json\Analysis\AnalysisProjectSummary;
 use API\App\Json\Analysis\MatchConstants;
-use API\App\Json\Analysis\Matches\AnalysisMatchType;
+use Chunks_ChunkDao;
 use Constants_ProjectStatus;
 use Exception;
 use FeatureSet;
@@ -16,6 +17,9 @@ use INIT;
 use OutsourceTo_OutsourceAvailable;
 use Projects_MetadataDao;
 use Projects_ProjectDao;
+use Projects_ProjectStruct;
+use Routes;
+use Users_UserStruct;
 
 /**
  * Created by PhpStorm.
@@ -23,7 +27,6 @@ use Projects_ProjectDao;
  * Date: 04/05/15
  * Time: 13.37
  *
- * YYY [Refactor] Change the analysis structure and rewrite all the subclasses
  *
  */
 abstract class AbstractStatus {
@@ -55,9 +58,22 @@ abstract class AbstractStatus {
     ];
 
     protected $featureSet;
+    /**
+     * @var Projects_ProjectStruct
+     */
+    protected $project;
+    /**
+     * @var Users_UserStruct|null
+     */
+    protected $user;
 
-    public function __construct( $_project_data, FeatureSet $features ) {
-        $this->id_project    = $_project_data[ 0 ][ 'pid' ];
+    public function __construct( $_project_data, FeatureSet $features, Users_UserStruct $user = null ) {
+        if ( is_null( $user ) ) { // avoid null pointer exception when calling methods on class property user
+            $user = new Users_UserStruct();
+            $user->uid = -1;
+        }
+        $this->user          = $user;
+        $this->project       = Projects_ProjectDao::findById( $_project_data[ 0 ][ 'pid' ], 60 * 60 );
         $this->_project_data = $_project_data;
         $this->featureSet    = $features;
     }
@@ -82,11 +98,11 @@ abstract class AbstractStatus {
      */
     protected function _fetchProjectData() {
 
-        $this->_resultSet = AnalysisDao::getProjectStatsVolumeAnalysis( $this->id_project );
+        $this->_resultSet = AnalysisDao::getProjectStatsVolumeAnalysis( $this->project->id );
 
         try {
-            $amqHandler         = new \AMQHandler();
-            $segmentsBeforeMine = $amqHandler->getActualForQID( $this->id_project );
+            $amqHandler         = new AMQHandler();
+            $segmentsBeforeMine = $amqHandler->getActualForQID( $this->project->id );
         } catch ( Exception $e ) {
             $segmentsBeforeMine = null;
         }
@@ -109,6 +125,9 @@ abstract class AbstractStatus {
 
         $this->_fetchProjectData();
 
+        //YYY [Remove] backward API compatibility
+        //  XTRFStatus::class to download txt report
+        //  old deprecated API curl -X GET "https://dev.matecat.com/api/status?id_project=95&project_pass=c58749b32943" -H "accept: application/json"
         if ( $word_count_type == Projects_MetadataDao::WORD_COUNT_EQUIVALENT ) {
             return $this->_oldFormatData();
 
@@ -141,7 +160,7 @@ abstract class AbstractStatus {
 
     protected function _formatData() {
 
-        $target  = null;
+        $target       = null;
         $this->result = $project = new AnalysisProject(
                 $this->_project_data[ 0 ][ 'pname' ],
                 new AnalysisProjectSummary(
@@ -151,17 +170,20 @@ abstract class AbstractStatus {
                 )
         );
 
+        $project->setAnalyze( $this->getAnalyzeLink() );
+
         if ( $project->getSummary()->getSegmentsAnalyzed() == 0 && $this->status_project == Constants_ProjectStatus::STATUS_NEW ) {
 
             //Related to an issue in the outsource
             //Here, the Fast analysis was not performed, return the number of raw word count
             //Needed because the "getProjectStatsVolumeAnalysis" query based on segment_translations always returns null
             //( there are no segment_translations )
-            $project_data_fallback = Projects_ProjectDao::getProjectAndJobData( $this->id_project );
 
-            foreach ( $project_data_fallback as $i => $_job_fallback ) {
+            foreach ( $this->_project_data as $_job_fallback ) {
 
-                $job = new AnalysisJob( $_job_fallback[ 'jid' ] );
+                $lang_pair = explode( "|", $_job_fallback[ 'langpair' ] );
+                $job       = new AnalysisJob( $_job_fallback[ 'jid' ], $lang_pair[ 0 ], $lang_pair[ 1 ] );
+
                 $project->setJob( $job );
                 $job->incrementIndustry( round( $_job_fallback[ 'standard_analysis_wc' ] ) );
                 $job->incrementEquivalent( round( $_job_fallback[ 'standard_analysis_wc' ] ) );
@@ -169,9 +191,9 @@ abstract class AbstractStatus {
 
             }
 
-            $project->getSummary()->incrementRaw( $project_data_fallback[ 0 ][ 'standard_analysis_wc' ] );
-            $project->getSummary()->incrementIndustry( $project_data_fallback[ 0 ][ 'standard_analysis_wc' ] );
-            $project->getSummary()->incrementEquivalent( $project_data_fallback[ 0 ][ 'standard_analysis_wc' ] );
+            $project->getSummary()->incrementRaw( $this->_project_data[ 0 ][ 'standard_analysis_wc' ] );
+            $project->getSummary()->incrementIndustry( $this->_project_data[ 0 ][ 'standard_analysis_wc' ] );
+            $project->getSummary()->incrementEquivalent( $this->_project_data[ 0 ][ 'standard_analysis_wc' ] );
 
             return $this;
 
@@ -187,7 +209,7 @@ abstract class AbstractStatus {
              *  Create & Set objects while iterating
              */
             if ( !isset( $job ) || $job->getId() != $segInfo[ 'jid' ] ) {
-                $job = new AnalysisJob( $segInfo[ 'jid' ] );
+                $job = new AnalysisJob( $segInfo[ 'jid' ], $segInfo[ 'source' ], $segInfo[ 'target' ] );
                 $project->setJob( $job );
             }
 
@@ -200,12 +222,15 @@ abstract class AbstractStatus {
             }
 
             if ( !isset( $chunk ) || $chunk->getPassword() != $segInfo[ 'jpassword' ] ) {
-                $chunk = new AnalysisChunk( $segInfo[ 'jpassword' ] );
+                $chunkStruct = Chunks_ChunkDao::getByIdAndPassword( $segInfo[ 'jid' ], $segInfo[ 'jpassword' ], 60 * 10 );
+                $chunk       = new AnalysisChunk( $chunkStruct, $this->_project_data[ 0 ][ 'pname' ], $this->user );
                 $job->setChunk( $chunk );
             }
 
             if ( !isset( $file ) || $file->getId() != $segInfo[ 'id_file' ] || !$chunk->hasFile( $segInfo[ 'id_file' ] ) ) {
-                $file = new AnalysisFile( $segInfo[ 'id_file' ], $segInfo[ 'filename' ] );
+                $originalFile = ( !empty( $segInfo[ 'tag_key' ] ) and $segInfo[ 'tag_key' ] === 'original' ) ? $segInfo[ 'tag_value' ] : $segInfo[ 'filename' ];
+                $id_file_part = ( !empty( $segInfo[ 'id_file_part' ] ) ) ? (int)$segInfo[ 'id_file_part' ] : null;
+                $file         = new AnalysisFile( $segInfo[ 'id_file' ], $id_file_part, $segInfo[ 'filename' ], $originalFile );
                 $chunk->setFile( $file );
             }
             // Runtime Initialization Completed
@@ -262,6 +287,18 @@ abstract class AbstractStatus {
 
         return $this;
 
+    }
+
+    /**
+     * @return string
+     * @throws \Exception
+     */
+    private function getAnalyzeLink() {
+        return Routes::analyze( [
+                'project_name' => $this->project->name,
+                'id_project'   => $this->project->id,
+                'password'     => $this->project->password,
+        ] );
     }
 
     protected function _oldFormatData() {

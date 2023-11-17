@@ -17,7 +17,10 @@ class AnalysisFile implements JsonSerializable {
      * @var int
      */
     protected $id = null;
-
+    /**
+     * @var int
+     */
+    protected $file_part_id;
     /**
      * @var string
      */
@@ -27,10 +30,20 @@ class AnalysisFile implements JsonSerializable {
      * @var AnalysisMatch[]
      */
     protected $matches = [];
+    /**
+     * @var string
+     */
+    protected $original_name;
+    /**
+     * @var string|null
+     */
+    protected $id_file_part;
 
-    public function __construct( $id, $name ) {
-        $this->id   = $id;
-        $this->name = $name;
+    public function __construct( $id, $id_file_part, $name, $original_name ) {
+        $this->id            = $id;
+        $this->id_file_part  = $id_file_part;
+        $this->name          = $name;
+        $this->original_name = $original_name;
         foreach ( MatchConstants::$forValue as $matchType ) {
             $this->matches[ $matchType ] = AnalysisMatch::forName( $matchType );
         }
@@ -38,9 +51,11 @@ class AnalysisFile implements JsonSerializable {
 
     public function jsonSerialize() {
         return [
-                'id'      => $this->id,
-                'name'    => $this->name,
-                'matches' => array_values( $this->matches )
+                'id'            => $this->id,
+                'id_file_part'  => $this->id_file_part,
+                'name'          => $this->name,
+                'original_name' => $this->original_name,
+                'matches'       => array_values( $this->matches )
         ];
     }
 

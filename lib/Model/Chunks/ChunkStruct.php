@@ -30,6 +30,7 @@ class Chunks_ChunkStruct extends Jobs_JobStruct {
 
     /**
      * @return Jobs_JobStruct
+     * @throws ReflectionException
      */
     public function getJob() {
         // I'm doing this to keep the concepts of Chunk and Job as

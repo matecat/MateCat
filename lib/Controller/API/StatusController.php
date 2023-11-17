@@ -8,6 +8,8 @@ use Model\Analysis\APIStatus;
  * Date: 04/05/15
  * Time: 13.37
  *
+ * @deprecated old api controller
+ * @deprecated curl -X GET "https://dev.matecat.com/api/status?id_project=95&project_pass=c58749b32943" -H "accept: application/json"
  */
 class StatusController extends ajaxController {
 

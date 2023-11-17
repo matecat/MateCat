@@ -43,21 +43,37 @@ class AnalysisJob implements JsonSerializable {
      * @var bool
      */
     protected $outsource = true;
+    /**
+     * @var string
+     */
+    protected $projectName;
+    /**
+     * @var string
+     */
+    protected $source;
+    /**
+     * @var string
+     */
+    protected $target;
 
     public function jsonSerialize() {
         return [
                 'id'               => $this->id,
+                'source'           => $this->source,
+                'target'           => $this->target,
                 'chunks'           => array_values( $this->chunks ),
                 'summary'          => $this->summary,
                 'total_raw'        => $this->total_raw,
                 'total_equivalent' => $this->total_equivalent,
                 'total_industry'   => $this->total_industry,
-                'outsource'        => $this->outsource
+                'outsource'        => $this->outsource,
         ];
     }
 
-    public function __construct( $id ) {
+    public function __construct( $id, $source, $target ) {
         $this->id      = $id;
+        $this->source  = $source;
+        $this->target  = $target;
         $this->summary = new AnalysisJobSummary();
     }
 
@@ -70,6 +86,13 @@ class AnalysisJob implements JsonSerializable {
         $this->chunks [ $chunk->getPassword() ] = $chunk;
 
         return $this;
+    }
+
+    /**
+     * @return AnalysisChunk[]
+     */
+    public function getChunks() {
+        return $this->chunks;
     }
 
     /**
@@ -129,6 +152,7 @@ class AnalysisJob implements JsonSerializable {
      */
     public function setOutsource( $outsource ) {
         $this->outsource = $outsource;
+
         return $this;
     }
 

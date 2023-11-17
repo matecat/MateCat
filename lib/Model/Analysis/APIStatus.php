@@ -1,11 +1,16 @@
 <?php
 namespace Model\Analysis;
 
+use Routes;
+
 /**
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
  * Date: 04/05/15
  * Time: 13.37
+ *
+ * @deprecated old api model
+ * @deprecated curl -X GET "https://dev.matecat.com/api/status?id_project=95&project_pass=c58749b32943" -H "accept: application/json"
  *
  */
 class APIStatus extends AbstractStatus {

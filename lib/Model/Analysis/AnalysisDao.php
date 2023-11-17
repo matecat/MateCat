@@ -14,8 +14,6 @@ use DataAccess\ShapelessConcreteStruct;
 use DataAccess_AbstractDao;
 use Database;
 use Log;
-use PDO;
-use PDOException;
 
 class AnalysisDao extends DataAccess_AbstractDao {
 
@@ -24,6 +22,7 @@ class AnalysisDao extends DataAccess_AbstractDao {
         SELECT
                 st.id_job AS jid,
                 j.password as jpassword,
+                j.source as source,
                 j.target as target,
                 st.id_segment AS sid,
                 s.id_file,

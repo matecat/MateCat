@@ -9,7 +9,7 @@ namespace Model\Analysis;
  * Time: 13.37
  *
  */
-class WEBStatus extends AbstractStatus {
+class Status extends AbstractStatus {
 
 
 }

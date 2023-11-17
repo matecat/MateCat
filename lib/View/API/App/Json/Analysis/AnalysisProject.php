@@ -26,6 +26,10 @@ class AnalysisProject implements JsonSerializable {
      * @var AnalysisProjectSummary
      */
     protected $summary = null;
+    /**
+     * @var string
+     */
+    private   $analyze;
 
     public function __construct( $name, AnalysisProjectSummary $summary ) {
         $this->name    = $name;
@@ -39,8 +43,20 @@ class AnalysisProject implements JsonSerializable {
         return [
                 'name'    => $this->name,
                 'jobs'    => array_values( $this->jobs ),
-                'summary' => $this->summary
+                'summary' => $this->summary,
+                'analyze' => $this->analyze
         ];
+    }
+
+    /**
+     * @param string $analyze
+     *
+     * @return $this
+     */
+    public function setAnalyze( $analyze ) {
+        $this->analyze = $analyze;
+
+        return $this;
     }
 
     /**
@@ -68,6 +84,13 @@ class AnalysisProject implements JsonSerializable {
      */
     public function getJob( $id ) {
         return $this->jobs[ $id ];
+    }
+
+    /**
+     * @return AnalysisJob[]
+     */
+    public function getJobs() {
+        return $this->jobs;
     }
 
     /**

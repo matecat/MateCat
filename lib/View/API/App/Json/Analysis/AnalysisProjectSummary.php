@@ -72,8 +72,7 @@ class AnalysisProjectSummary implements JsonSerializable {
                 'total_raw'           => $this->total_raw,
                 'total_industry'      => round( $this->total_industry ),
                 'total_equivalent'    => round( $this->total_equivalent ),
-                'discount'            => $this->getDiscount(),
-                'estimated_work_time' => $this->getEstimatedWorkTime()
+                'discount'            => $this->getDiscount()
         ];
     }
 
@@ -169,6 +168,13 @@ class AnalysisProjectSummary implements JsonSerializable {
      */
     public function getTotalEquivalent() {
         return $this->total_equivalent;
+    }
+
+    /**
+     * @return int
+     */
+    public function getTotalSegments() {
+        return $this->total_segments;
     }
 
 }
