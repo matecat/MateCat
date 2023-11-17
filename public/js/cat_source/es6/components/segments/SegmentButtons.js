@@ -31,7 +31,10 @@ class SegmentButton extends React.Component {
       const event = {
         event: 'first_segment_confirm',
         userStatus: APP.USER.isUserLogged() ? 'loggedUser' : 'notLoggedUser',
-        userId: APP.USER.isUserLogged() ? APP.USER.STORE.user.uid : null,
+        userId:
+          APP.USER.isUserLogged() && APP.USER.STORE.user
+            ? APP.USER.STORE.user.uid
+            : null,
         idProject: parseInt(idProject),
       }
       CommonUtils.dispatchAnalyticsEvents(event)
