@@ -18,11 +18,6 @@ class downloadAnalysisReportController extends downloadController {
      */
     protected $id_project;
 
-    /**
-     * @var string
-     */
-    protected $download_type;  // switch flag, for now not important
-
     public function __construct() {
 
         $filterArgs = array(
@@ -39,7 +34,6 @@ class downloadAnalysisReportController extends downloadController {
 
         $this->id_project    = $__postInput[ 'id_project' ];
         $this->password      = $__postInput[ 'password' ];
-        $this->download_type = $__postInput[ 'download_type' ]; // switch flag, for now not important
 
         $this->featureSet = new FeatureSet();
 
@@ -91,6 +85,12 @@ class downloadAnalysisReportController extends downloadController {
 
     }
 
+    /**
+     * @param string $projectName
+     * @param string[] $outputContent
+     *
+     * @return false|string
+     */
     protected static function composeZip( $projectName , $outputContent ) {
 
         $fileName = tempnam( "/tmp", "zipmat" );

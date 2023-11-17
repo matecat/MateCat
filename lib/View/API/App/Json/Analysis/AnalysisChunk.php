@@ -89,6 +89,13 @@ class AnalysisChunk implements JsonSerializable {
     }
 
     /**
+     * @return AnalysisFile[]|null
+     */
+    public function getFiles() {
+        return $this->files;
+    }
+
+    /**
      * @throws Exception
      */
     private function getEngines() {

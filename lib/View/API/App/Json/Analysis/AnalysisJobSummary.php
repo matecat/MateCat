@@ -11,7 +11,7 @@ namespace API\App\Json\Analysis;
 
 use JsonSerializable;
 
-class AnalysisJobSummary implements JsonSerializable {
+class AnalysisJobSummary implements MatchContainerInterface, JsonSerializable {
 
     /**
      * @var AnalysisMatch[]

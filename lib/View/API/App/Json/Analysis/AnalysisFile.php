@@ -11,7 +11,7 @@ namespace API\App\Json\Analysis;
 
 use JsonSerializable;
 
-class AnalysisFile implements JsonSerializable {
+class AnalysisFile implements MatchContainerInterface, JsonSerializable {
 
     /**
      * @var int
@@ -73,5 +73,11 @@ class AnalysisFile implements JsonSerializable {
         return $this->matches[ $matchName ];
     }
 
+    /**
+     * @return string
+     */
+    public function getName() {
+        return $this->name;
+    }
 
 }

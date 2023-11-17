@@ -156,4 +156,18 @@ class AnalysisJob implements JsonSerializable {
         return $this;
     }
 
+    /**
+     * @return string
+     */
+    public function getSource() {
+        return $this->source;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTarget() {
+        return $this->target;
+    }
+
 }

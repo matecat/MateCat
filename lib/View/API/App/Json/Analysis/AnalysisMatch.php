@@ -93,4 +93,18 @@ class AnalysisMatch implements JsonSerializable {
         $this->equivalent += round( $equivalent );
     }
 
+    /**
+     * @return int
+     */
+    public function getRaw() {
+        return $this->raw;
+    }
+
+    /**
+     * @return int
+     */
+    public function getEquivalent() {
+        return $this->equivalent;
+    }
+
 }
