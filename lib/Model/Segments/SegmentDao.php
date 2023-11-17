@@ -102,7 +102,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
      *
      * @return \Segments_SegmentStruct|\DataAccess_IDaoStruct
      */
-    function getByChunkIdAndSegmentId( $id_job, $password, $id_segment, $ttl = 86400  ) {
+    function getByChunkIdAndSegmentId( $id_job, $password, $id_segment, $ttl = 86400 ) {
 
         $query = " SELECT segments.* FROM segments " .
                 " INNER JOIN files_job fj USING (id_file) " .
@@ -122,7 +122,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                 'id_segment' => $id_segment
         ] );
 
-        return isset($fetched[0]) ? $fetched[0] : null;
+        return isset( $fetched[ 0 ] ) ? $fetched[ 0 ] : null;
     }
 
     /**
@@ -260,51 +260,32 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                     $options[ 'filter' ][ 'issue_category' ] != self::ISSUE_CATEGORY_ALL
             ) {
 
-                if ( in_array( $options[ 'filter' ][ 'issue_category' ], Constants_Revise::$categoriesDbNames ) ) {
-                    // Case for legacy review  ^^
-                    $options_conditions_query .= " AND (sr." . $options[ 'filter' ][ 'issue_category' ] .
-                            " != '' AND sr." . $options[ 'filter' ][ 'issue_category' ] . " != 'none')";
-                } else {
-                    // Case for AbstractRevisionFeature
-                    if ( is_array( $options[ 'filter' ][ 'issue_category' ] ) ) {
-                        $placeholders = implode( ', ', array_map( function ( $id ) {
-                            return ':issue_category_' . $id;
-                        }, $options[ 'filter' ][ 'issue_category' ] ) );
+                // Case for AbstractRevisionFeature
+                if ( is_array( $options[ 'filter' ][ 'issue_category' ] ) ) {
+                    $placeholders = implode( ', ', array_map( function ( $id ) {
+                        return ':issue_category_' . $id;
+                    }, $options[ 'filter' ][ 'issue_category' ] ) );
 
-                        $options_conditions_query .= " AND e.id_category IN ( $placeholders ) ";
+                    $options_conditions_query .= " AND e.id_category IN ( $placeholders ) ";
 
-                        foreach ( $options[ 'filter' ][ 'issue_category' ] as $id_category ) {
-                            $options_conditions_values[ 'issue_category_' . $id_category ] = $id_category;
-                        }
-                    } else {
-                        $options_conditions_query                   .= " AND e.id_category = :id_category ";
-                        $options_conditions_values[ 'id_category' ] = $options[ 'filter' ][ 'issue_category' ];
+                    foreach ( $options[ 'filter' ][ 'issue_category' ] as $id_category ) {
+                        $options_conditions_values[ 'issue_category_' . $id_category ] = $id_category;
                     }
+                } else {
+                    $options_conditions_query                   .= " AND e.id_category = :id_category ";
+                    $options_conditions_values[ 'id_category' ] = $options[ 'filter' ][ 'issue_category' ];
                 }
+
             } elseif (
                     isset( $options[ 'filter' ][ 'issue_category' ] ) &&
                     $options[ 'filter' ][ 'issue_category' ] == self::ISSUE_CATEGORY_ALL
             ) {
-                if ( $chunk->getProject()->getFeaturesSet()->hasRevisionFeature() ) {
-                    $options_conditions_query .= " AND e.id_category IS NOT NULL ";
-                } else {
-                    $options_conditions_query .= " AND ( " .
-                            implode( ' OR ', array_map( function ( $name ) {
-                                return " ( sr.$name != 'none' AND sr.$name != '') ";
-                            }, Constants_Revise::$categoriesDbNames ) ) . " ) ";
-                }
+                $options_conditions_query .= " AND e.id_category IS NOT NULL ";
             }
 
 
             if ( isset( $options[ 'filter' ][ 'severity' ] ) && $options[ 'filter' ][ 'severity' ] != '' ) {
-                $options_conditions_query                .= " AND (
-                    e.severity = :severity OR (
-                        sr.err_typing = :severity OR
-                        sr.err_translation = :severity OR
-                        sr.err_terminology = :severity OR
-                        sr.err_language = :severity OR
-                        sr.err_style = :severity)
-                        ) ";
+                $options_conditions_query                .= " AND e.severity = :severity ";
                 $options_conditions_values[ 'severity' ] = $options[ 'filter' ][ 'severity' ];
             }
         }
@@ -716,7 +697,8 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
 
     /**
      * @param Jobs_JobStruct $jStruct
-     * @param $id_file
+     * @param                $id_file
+     *
      * @return array
      */
     public function getSegmentsDownload( Jobs_JobStruct $jStruct, $id_file ) {
@@ -1001,16 +983,15 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param $idJob
-     * @param $password
-     * @param $limit
-     * @param $offset
+     * @param     $idJob
+     * @param     $password
+     * @param     $limit
+     * @param     $offset
      * @param int $ttl
      *
      * @return DataAccess_IDaoStruct[]
      */
-    public static function getSegmentsForAnalysisFromIdJobAndPassword($idJob, $password, $limit, $offset, $ttl = 0)
-    {
+    public static function getSegmentsForAnalysisFromIdJobAndPassword( $idJob, $password, $limit, $offset, $ttl = 0 ) {
         $thisDao = new self();
         $conn    = Database::obtain()->getConnection();
         $query   = "
@@ -1076,22 +1057,22 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                             j.id = :id_job 
                         AND
                             j.password = :password
-                        AND id_segment BETWEEN j.job_first_segment AND ( j.job_first_segment + ".$offset." )
+                        AND id_segment BETWEEN j.job_first_segment AND ( j.job_first_segment + " . $offset . " )
                             GROUP BY id_segment
-                            LIMIT ".$limit."
+                            LIMIT " . $limit . "
                         ) AS X ON _m_id = segment_translation_events.id
                 ) ste ON ste.ste_id_segment = st.id_segment
             WHERE
                 j.id = :id_job
             AND 
                 j.password = :password
-            LIMIT ".$limit." offset " .$offset;
+            LIMIT " . $limit . " offset " . $offset;
 
-        $stmt = $conn->prepare($query);
+        $stmt = $conn->prepare( $query );
 
         return @$thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
-            'id_job'   => $idJob,
-            'password' => $password,
+                'id_job'   => $idJob,
+                'password' => $password,
         ] );
     }
 
@@ -1104,8 +1085,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
      *
      * @return DataAccess_IDaoStruct[]
      */
-    public static function getSegmentsForAnalysisFromIdProjectAndPassword($idProject, $password, $limit, $offset, $ttl = 0)
-    {
+    public static function getSegmentsForAnalysisFromIdProjectAndPassword( $idProject, $password, $limit, $offset, $ttl = 0 ) {
         $thisDao = new self();
         $conn    = Database::obtain()->getConnection();
         $query   = "
@@ -1176,13 +1156,13 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                 p.id = :id_project
             AND 
                 p.password = :password
-            LIMIT ".$limit." offset " .$offset;
+            LIMIT " . $limit . " offset " . $offset;
 
-        $stmt = $conn->prepare($query);
+        $stmt = $conn->prepare( $query );
 
         return @$thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
-                'id_project'   => $idProject,
-                'password' => $password,
+                'id_project' => $idProject,
+                'password'   => $password,
         ] );
     }
 }

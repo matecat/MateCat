@@ -58,8 +58,7 @@ class QualityReportController extends BaseChunkController {
 
     public function segments() {
         $this->return404IfTheJobWasDeleted();
-
-        return $this->renderSegments();
+        $this->renderSegments();
     }
 
     /**
@@ -194,7 +193,6 @@ class QualityReportController extends BaseChunkController {
             $seg[ 'pee_translation_revise' ]     = $segment->pee_translation_revise;
             $seg[ 'pee_translation_suggestion' ] = $segment->pee_translation_suggestion;
             $seg[ 'raw_word_count' ]             = $segment->raw_word_count;
-            $seg[ 'secs_per_word' ]              = $segment->secs_per_word;
             $seg[ 'segment' ]                    = $segment->segment;
             $seg[ 'segment_hash' ]               = $segment->segment_hash;
             $seg[ 'id' ]                         = (int)$segment->sid;
@@ -300,24 +298,6 @@ class QualityReportController extends BaseChunkController {
                 'project' => $project,
                 'job'     => $this->chunk,
         ] );
-    }
-
-    public function versions() {
-        $dao      = new ArchivedQualityReportDao();
-        $versions = $dao->getAllByChunk( $this->chunk );
-        $response = [];
-
-        foreach ( $versions as $version ) {
-            $response[] = [
-                    'id'             => (int)$version->id,
-                    'version_number' => (int)$version->version,
-                    'created_at'     => \Utils::api_timestamp( $version->create_date ),
-                    'quality-report' => json_decode( $version->quality_report )
-            ];
-        }
-
-        $this->response->json( [ 'versions' => $response ] );
-
     }
 
     protected function afterConstruct() {

@@ -41,8 +41,6 @@ $klein->with('/api/v2/jobs/[:id_job]/[:password]', function() {
 
     route( '/quality-report/general',          'GET', 'Features\ReviewExtended\Controller\API\QualityReportController', 'general' );
 
-    route( '/quality-report/versions', 'GET', 'Features\ReviewExtended\Controller\API\QualityReportController', 'versions' );
-
     route( '/translator', 'GET',  '\API\V2\JobsTranslatorsController', 'get' ) ;
     route( '/translator', 'POST',  '\API\V2\JobsTranslatorsController', 'add' ) ;
 
@@ -60,7 +58,7 @@ $klein->with('/api/v2/jobs/[:id_job]/[:password]', function() {
     route( '/segments/[:id_segment]/translation-issues/[:id_issue]/comments', 'POST', 'API\V2\SegmentTranslationIssueController', 'createComment' );
     route( '/segments/[:id_segment]/translation-issues/[:id_issue]/comments', 'GET', 'API\V2\SegmentTranslationIssueController', 'getComments' );
 
-    route( '/segments/status', 'POST', '\API\V2\JobStatusController', 'changeSegmentsStatus'  );
+    route( '/segments/status', 'POST', '\API\V2\JobStatusController', 'changeSegmentsStatus'  ); // mark as translated bulk
 
     route( '/segments-filter', 'GET', 'Features\SegmentFilter\Controller\API\FilterController', 'index' );
 

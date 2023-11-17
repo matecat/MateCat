@@ -57,19 +57,6 @@ class QualityReportModel {
         $this->chunk = $chunk;
     }
 
-    /**
-     * @param $version
-     *
-     * @deprecated no need for a setter, pass in constructor, no need for mutation here.
-     */
-    public function setVersionNumber( $version ) {
-        $this->version = $version;
-    }
-
-    public function getVersionNumber() {
-        return $this->version;
-    }
-
     public function getChunk() {
         return $this->chunk;
     }
@@ -79,11 +66,9 @@ class QualityReportModel {
     }
 
     public function getStructure() {
-        if ( $this->version ) {
-            return $this->__getArchviedStructure();
-        }
+        $records = QualityReportDao::getSegmentsForQualityReport( $this->chunk );
 
-        return $this->__getCurrentStructure();
+        return $this->buildQualityReportStructure( $records );
     }
 
     public function getChunkReview() {
@@ -341,31 +326,6 @@ class QualityReportModel {
         }
 
         return $out;
-    }
-
-    private function __getCurrentStructure() {
-        $records = QualityReportDao::getSegmentsForQualityReport( $this->chunk );
-
-        return $this->buildQualityReportStructure( $records );
-    }
-
-    /**
-     * TODO: this method/feature does not belong here. It should be moved to ReviewImproved since archived quality report
-     * structure is not a core matecat feature.
-     *
-     * @return RecursiveArrayObject
-     */
-    private function __getArchviedStructure() {
-        $archivedRecord = ( new ArchivedQualityReportDao() )->getByChunkAndVersionNumber( $this->chunk, $this->version );
-        $decoded        = new RecursiveArrayObject( json_decode( $archivedRecord->quality_report, true ) );
-
-        foreach ( $decoded[ 'chunk' ][ 'files' ] as $file ) {
-            foreach ( $file[ 'segments' ] as $segment ) {
-                $this->all_segments[] = new ArrayObject( $segment );
-            }
-        }
-
-        return $decoded;
     }
 
 }
