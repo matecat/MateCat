@@ -17,7 +17,7 @@ window.Review = {
 }
 window.ReviewExtended = {
   enabled: function () {
-    return Review.type === 'extended'
+    return Review.enabled()
   },
   alertNotTranslatedMessage:
     'This segment is not translated yet.<br /> Only translated segments can be revised.',
@@ -90,17 +90,19 @@ window.ReviewExtended = {
   getSegmentVersionsIssues: function (segmentId) {
     const segment = SegmentStore.getSegmentByIdToJS(segmentId)
     if (segment) {
-      getSegmentVersionsIssues(segmentId).then((response) => {
-        SegmentActions.addTranslationIssuesToSegment(
-          segmentId,
-          response.versions,
-        )
-      })
+      getSegmentVersionsIssues(segmentId)
+        .then((response) => {
+          SegmentActions.addTranslationIssuesToSegment(
+            segmentId,
+            response.versions,
+          )
+        })
+        .catch(() => {})
     }
   },
 }
 
-if (ReviewExtended.enabled()) {
+if (Review.enabled()) {
   $(document).on('files:appended', function () {
     ReviewExtended.getSegmentsIssues()
   })
@@ -128,7 +130,7 @@ if (ReviewExtended.enabled()) {
   })
 }
 
-if (ReviewExtended.enabled()) {
+if (Review.enabled()) {
   $.extend(UI, {
     getSegmentRevisionIssues(segment, revisionNumber) {
       let issues = []

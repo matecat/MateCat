@@ -364,10 +364,11 @@ window.UI = {
             fname: data.result[0].name,
             filesize: data.result[0].size,
             filerow: data.context,
-            extension:
-              data.result[0].name.split('.')[
-                data.result[0].name.split('.').length - 1
-              ],
+            extension: data.result[0].name
+              ? data.result[0].name.split('.')[
+                  data.result[0].name.split('.').length - 1
+                ]
+              : '',
             error:
               typeof data.result[0].error !== 'undefined'
                 ? data.result[0].error

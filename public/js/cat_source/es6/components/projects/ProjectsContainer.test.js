@@ -13,7 +13,6 @@ modalElement.id = 'modal'
 document.body.appendChild(modalElement)
 
 require('../../../../common')
-require('../../../../login')
 window.config = {
   enable_outsource: 1,
   basepath: '/',
