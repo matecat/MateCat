@@ -164,7 +164,6 @@ export const isSelectedEntity = (editorState) => {
       ? start === entity.start && end === entity.end
       : false,
   )
-  console.log('@', entityMatched)
   return typeof entityMatched !== 'undefined'
 }
 
@@ -260,8 +259,12 @@ export const adjustCaretPosition = ({direction, isShiftPressed}) => {
       const {anchorOffset, anchorNode} = selection
 
       if (isShiftPressed || selection.type === 'Range') {
-        console.log('textNode', textNode, offset)
-        selection.setBaseAndExtent(anchorNode, anchorOffset, textNode, offset)
+        selection.setBaseAndExtent(
+          anchorNode,
+          anchorOffset,
+          textNode,
+          textNode.textContent[offset] === ZWSP ? offset + 1 : offset,
+        )
       } else {
         const charAtOffset =
           direction === 'left'
