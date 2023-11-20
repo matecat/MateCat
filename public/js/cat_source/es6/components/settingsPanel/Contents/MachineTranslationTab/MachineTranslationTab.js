@@ -241,7 +241,7 @@ export const MachineTranslationTab = () => {
                       ),
                       isDraggable: false,
                       isActive: true,
-                      ...(activeMTEngine.type === 'MT' && {
+                      ...(activeMTEngine.name === 'ModernMT' && {
                         isExpanded: true,
                         extraNode: (
                           <MTGlossary
