@@ -233,9 +233,9 @@ class QualitySummary {
             $total_issues_weight,
             $total_reviewed_words_count,
             $categories,
-            $model->hash,
-            $model->id,
-            $model->label
+            ($model ? $model->hash : null),
+            ($model ? $model->id : null),
+            ($model ? $model->label : null)
         ];
     }
 
