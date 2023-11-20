@@ -1,6 +1,6 @@
 import assign from 'object-assign'
 import {EventEmitter} from 'events'
-import {round, filter} from 'lodash'
+import {filter} from 'lodash'
 
 import AppDispatcher from './AppDispatcher'
 import CatToolConstants from '../constants/CatToolConstants'
@@ -23,6 +23,7 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
   tmKeys: null,
   keysDomains: null,
   haveKeysGlossary: undefined,
+  _projectProgress: undefined,
   storeFilesInfo: function (files) {
     this.files = files
   },
@@ -95,7 +96,7 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
     return this.haveKeysGlossary
   },
   getProgress: () => {
-    return this._projectProgess
+    return CatToolStore._projectProgess
   },
   setHaveKeysGlossary: function (value) {
     this.haveKeysGlossary = value

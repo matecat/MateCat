@@ -228,14 +228,14 @@ class CatUtils {
      *
      * @return array
      */
-    protected static function _performanceEstimationTime( array $job_stats ) {
+    protected static function _performanceEstimationTime( array $job_stats, $id_job ) {
 
-        $last_10_worked_ids = Translations_SegmentTranslationDao::getLast10TranslatedSegmentIDs( $job_stats[ 'id' ] );
+        $last_10_worked_ids = Translations_SegmentTranslationDao::getLast10TranslatedSegmentIDs( $id_job );
         if ( !empty( $last_10_worked_ids ) and count( $last_10_worked_ids ) === 10 ) {
 
             //perform check on performance if single segment are set to check or globally Forced
             // Calculating words per hour and estimated completion
-            $estimation_temp = Translations_SegmentTranslationDao::getEQWLastHour( $job_stats[ 'id' ], $last_10_worked_ids );
+            $estimation_temp = Translations_SegmentTranslationDao::getEQWLastHour( $id_job, $last_10_worked_ids );
 
             $job_stats[ 'words_per_hour' ] = number_format( $estimation_temp[ 0 ][ 'words_per_hour' ] );
 
@@ -411,7 +411,7 @@ class CatUtils {
             return $job_stats;
         }
 
-        return self::_performanceEstimationTime( $job_stats );
+        return self::_performanceEstimationTime( $job_stats, $wCount->getIdJob() );
 
     }
 
