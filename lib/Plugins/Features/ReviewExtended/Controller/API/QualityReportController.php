@@ -8,12 +8,9 @@
 
 namespace Features\ReviewExtended\Controller\API;
 
-use API\V2\KleinController;
-use API\V2\Validators\ChunkPasswordValidator;
 use API\V2\BaseChunkController;
+use API\V2\Validators\ChunkPasswordValidator;
 use Chunks_ChunkStruct;
-use Constants_JobStatus;
-use Features\ReviewExtended\Model\ArchivedQualityReportDao;
 use Features\ReviewExtended\Model\QualityReportModel;
 use Features\ReviewExtended\ReviewUtils;
 use Features\TranslationVersions\Model\TranslationEventDao;
@@ -25,7 +22,7 @@ use QualityReport\QualityReportSegmentModel;
 class QualityReportController extends BaseChunkController {
 
     const DEFAULT_PER_PAGE = 20;
-    const MAX_PER_PAGE = 200;
+    const MAX_PER_PAGE     = 200;
 
     /**
      * @var Projects_ProjectStruct
@@ -56,9 +53,9 @@ class QualityReportController extends BaseChunkController {
         ] );
     }
 
-    public function segments() {
+    public function segments( $isForUI = false ) {
         $this->return404IfTheJobWasDeleted();
-        $this->renderSegments();
+        $this->renderSegments( $isForUI );
     }
 
     /**
@@ -87,7 +84,7 @@ class QualityReportController extends BaseChunkController {
             $step = self::DEFAULT_PER_PAGE;
         }
 
-        if( $step > self::MAX_PER_PAGE ) {
+        if ( $step > self::MAX_PER_PAGE ) {
             $step = self::MAX_PER_PAGE;
         }
 
@@ -102,7 +99,7 @@ class QualityReportController extends BaseChunkController {
             $segments                   = $qrSegmentModel->getSegmentsForQR( $segments_ids, $isForUI );
 
             $filesInfoUtility = new FilesInfoUtility( $this->chunk );
-            $filesInfo        = $filesInfoUtility->getInfo(false);
+            $filesInfo        = $filesInfoUtility->getInfo( false );
 
             $segments = $this->_formatSegments( $segments, $ttlArray, $filesInfo );
 

@@ -19,7 +19,7 @@ $klein->with('/api/v3/projects/[:id_project]/[:password]', function() {
 
 $klein->with( '/api/v3/jobs/[:id_job]/[:password]', function () {
     route( '', 'GET', '\API\V3\ChunkController', 'show' ); //this do not show some info like teams and translators
-    route( '/quality-report/segments', 'GET', 'Features\ReviewExtended\Controller\API\QualityReportController', 'segments' );
+    route( '/quality-report/segments', 'GET', 'Features\SecondPassReview\Controller\API\QualityReportController', 'segments' );
     route( '/files', 'GET', '\API\V3\FileInfoController', 'getInfo' );
     route( '/file/[:id_file]/instructions', 'GET', '\API\V3\FileInfoController', 'getInstructions' );
     route( '/file/[:id_file]/[:id_file_parts]/instructions', 'GET', '\API\V3\FileInfoController', 'getInstructionsByFilePartsId' );

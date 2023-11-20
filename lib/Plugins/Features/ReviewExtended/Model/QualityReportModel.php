@@ -12,9 +12,11 @@ use ArrayObject;
 use Chunks_ChunkCompletionEventDao;
 use Chunks_ChunkStruct;
 use Database;
+use Exception;
 use Features\ReviewExtended\IChunkReviewModel;
+use Features\ReviewExtended\ReviewUtils;
 use LQA\ChunkReviewDao;
-use RecursiveArrayObject;
+use Revise\FeedbackDAO;
 use RevisionFactory;
 use Users_UserDao;
 
@@ -159,15 +161,29 @@ class QualityReportModel {
     }
 
     /**
-     *
+     * @return void
+     * @throws Exception
      */
     protected function _attachReviewsData() {
-        $this->quality_report_structure[ 'chunk' ][ 'review' ] = [
-                'percentage'    => $this->getChunkReview()->getReviewedPercentage(),
-                'is_pass'       => !!$this->getChunkReview()->is_pass,
-                'score'         => $this->getScore(),
-                'reviewer_name' => $this->getReviewerName()
-        ];
+        $chunk_reviews = ( new \Features\ReviewExtended\Model\ChunkReviewDao() )->findChunkReviews( $this->chunk );
+
+        $this->quality_report_structure[ 'chunk' ][ 'reviews' ] = [];
+        foreach ( $chunk_reviews as $chunk_review ) {
+
+            // try to load Revision Extended but should not load the Improved ( deprecated )
+            $chunkReviewModel = RevisionFactory::initFromProject( $this->getProject() )->getChunkReviewModel( $chunk_review );
+
+            $revisionNumber = ReviewUtils::sourcePageToRevisionNumber( $chunk_review->source_page );
+            $feedback       = ( new FeedbackDAO() )->getFeedback( $this->chunk->id, $chunk_review->review_password, $revisionNumber );
+
+            $this->quality_report_structure[ 'chunk' ][ 'reviews' ][] = [
+                    'revision_number' => $revisionNumber,
+                    'feedback'        => ( $feedback and isset( $feedback[ 'feedback' ] ) ) ? $feedback[ 'feedback' ] : null,
+                    'is_pass'         => !!$chunk_review->is_pass,
+                    'score'           => $chunkReviewModel->getScore(),
+                    'reviewer_name'   => $this->getReviewerName()
+            ];
+        }
     }
 
     /**
