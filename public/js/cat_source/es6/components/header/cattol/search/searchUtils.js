@@ -12,6 +12,10 @@ import AlertModal from '../../../modals/AlertModal'
 import ModalsActions from '../../../../actions/ModalsActions'
 import {tagSignatures} from '../../../segments/utils/DraftMatecatUtils/tagModel'
 import TagUtils from '../../../../utils/tagUtils'
+import {
+  REVISE_STEP_NUMBER,
+  SEGMENTS_STATUS,
+} from '../../../../constants/Constants'
 
 let SearchUtils = {
   searchEnabled: true,
@@ -48,6 +52,11 @@ let SearchUtils = {
 
     let selectStatus = params.selectStatus
     if (selectStatus !== '') {
+      selectStatus =
+        selectStatus.toUpperCase() === SEGMENTS_STATUS.APPROVED &&
+        params.revisionNumber === REVISE_STEP_NUMBER.REVISE2
+          ? SEGMENTS_STATUS.APPROVED2
+          : selectStatus
       this.searchParams.status = selectStatus
       this.searchParams.status = this.searchParams.status.toLowerCase()
     } else {
@@ -104,6 +113,7 @@ let SearchUtils = {
         matchcase: this.searchParams['match-case'],
         exactmatch: this.searchParams['exact-match'],
         strictMode: this.searchParams['strict_mode'],
+        revisionNumber: params.revisionNumber,
         replace,
       }).then((data) => {
         SearchUtils.execFind_success(data)

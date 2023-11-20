@@ -350,7 +350,13 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
   },
 
   setStatus(sid, fid, status) {
-    var index = this.getSegmentIndex(sid)
+    const index = this.getSegmentIndex(sid)
+    //YYY
+    status =
+      config.revisionNumber === REVISE_STEP_NUMBER.REVISE2 &&
+      status === SEGMENTS_STATUS.APPROVED
+        ? SEGMENTS_STATUS.APPROVED2
+        : status
     if (index === -1) return
     this._segments = this._segments.setIn([index, 'status'], status)
     this._segments = this._segments.setIn(
