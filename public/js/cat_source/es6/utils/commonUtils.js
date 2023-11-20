@@ -548,6 +548,8 @@ const CommonUtils = {
         total: stats.TOTAL,
       }
       stats = {
+        estimated_completion: stats.estimated_completion,
+        words_per_hour: stats.words_per_hour,
         analysis_complete: stats.analysis_complete,
         raw: rawCopy,
         equivalent: rawCopy,
