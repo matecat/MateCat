@@ -223,7 +223,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
         $conn         = Database::obtain()->getConnection();
         $and_ste      = '';
 
-        if ( $status == Constants_TranslationStatus::STATUS_APPROVED || Constants_TranslationStatus::STATUS_APPROVED2 ) {
+        if ( $status == Constants_TranslationStatus::STATUS_APPROVED || $status == Constants_TranslationStatus::STATUS_APPROVED2 ) {
             /**
              * if source_page is null, we keep the default behaviour and only allow TRANSLATED and APPROVED segments.
              */
