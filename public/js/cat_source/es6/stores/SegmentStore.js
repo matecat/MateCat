@@ -220,7 +220,6 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
       } else {
         segment.saving = false
         segment.status =
-          config.word_count_type === JOB_WORD_CONT_TYPE.EQUIVALENT &&
           segment.revision_number === REVISE_STEP_NUMBER.REVISE2 &&
           segment.status.toUpperCase() === SEGMENTS_STATUS.APPROVED
             ? SEGMENTS_STATUS.APPROVED2
