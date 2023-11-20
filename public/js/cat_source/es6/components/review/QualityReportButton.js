@@ -99,7 +99,7 @@ export const QualityReportButton = ({
 
   return (
     <div
-      className="action-submenu ui floating ${header_quality_report_item_class}"
+      className={'action-submenu ui floating'}
       id="quality-report-button"
       title="Quality Report"
     >
