@@ -29,10 +29,18 @@ class SignupModel {
     public function __construct( $params ) {
         $this->params = filter_var_array( $params, [
                 'email'                 => FILTER_SANITIZE_EMAIL,
-                'password'              => FILTER_SANITIZE_STRING,
+                'password'              => [ 'filter' => FILTER_SANITIZE_STRING, 'options' => FILTER_FLAG_STRIP_LOW ],
                 'password_confirmation' => FILTER_SANITIZE_STRING,
-                'first_name'            => FILTER_SANITIZE_STRING,
-                'last_name'             => FILTER_SANITIZE_STRING,
+                'first_name'            => [
+                        'filter' => FILTER_CALLBACK, 'options' => function ( $username ) {
+                            return substr( preg_replace( '/(?:https?|s?ftp)?\P{L}+/', '', $username ), 0, 50 );
+                        }
+                ],
+                'last_name'             => [
+                        'filter' => FILTER_CALLBACK, 'options' => function ( $username ) {
+                            return substr( preg_replace( '/(?:https?|s?ftp)?\P{L}+/', '', $username ), 0 , 50 );
+                        }
+                ],
                 'wanted_url'            => FILTER_SANITIZE_URL
         ] );
 
