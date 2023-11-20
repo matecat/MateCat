@@ -255,12 +255,13 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
             $join_ste = "LEFT JOIN segment_translation_events ste
                       ON ste.id_segment = st.id_segment
                           AND ste.id_job = ?
-                          AND ste.status = ?
+                          AND ste.status IN ( ?, ? )
                           AND ste.final_revision = 1 ";
 
             $where_values = array_merge( [
-                    $chunk->id, Constants_TranslationStatus::STATUS_APPROVED,
-                    $chunk->id, Constants_TranslationStatus::STATUS_APPROVED2
+                    $chunk->id,
+                    Constants_TranslationStatus::STATUS_APPROVED,
+                    Constants_TranslationStatus::STATUS_APPROVED2
             ], $where_values );
         } else {
             $join_ste = '';
