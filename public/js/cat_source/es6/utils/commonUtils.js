@@ -545,6 +545,7 @@ const CommonUtils = {
         draft: stats.DRAFT,
         new: 0,
         translated: stats.TRANSLATED,
+        rejected: stats.REJECTED,
         total: stats.TOTAL,
       }
       stats = {

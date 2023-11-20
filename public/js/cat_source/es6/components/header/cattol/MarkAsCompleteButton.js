@@ -154,7 +154,7 @@ export const MarkAsCompleteButton = ({featureEnabled, isReview}) => {
          */
         return (
           jobCompletionCurrentPhase.current == 'revise' &&
-          stats.APPROVED + stats.REJECTED + stats.TRANSLATED > 0
+          stats.raw.approved + stats.raw.translated > 0
         )
       } else {
         /**
@@ -166,7 +166,7 @@ export const MarkAsCompleteButton = ({featureEnabled, isReview}) => {
          */
         return (
           jobCompletionCurrentPhase.current == 'translate' &&
-          parseInt(stats.REJECTED) == 0
+          (!stats.raw.rejected || parseInt(stats.raw.rejected) == 0)
         )
       }
     }
