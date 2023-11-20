@@ -70,8 +70,19 @@ class QualitySummary {
      */
     protected function renderItem( ChunkReviewStruct $chunkReview ) {
 
-        list( $passFail, $reviseIssues, $quality_overall, $is_pass, $score, $total_issues_weight, $total_reviewed_words_count, $categories, $model_version ) =
-                self::revisionQualityVars( $this->chunk, $this->project, $chunkReview );
+        list(
+            $passFail,
+            $reviseIssues,
+            $quality_overall,
+            $is_pass,
+            $score,
+            $total_issues_weight,
+            $total_reviewed_words_count,
+            $categories,
+            $model_version,
+            $model_id,
+            $model_label
+            ) = self::revisionQualityVars( $this->chunk, $this->project, $chunkReview );
 
         return self::populateQualitySummarySection(
                 $chunkReview->source_page,
@@ -86,6 +97,8 @@ class QualitySummary {
                 $chunkReview->total_tte,
                 $is_pass,
                 $model_version,
+                $model_id,
+                $model_label,
                 $chunkReview->review_password
         );
     }
@@ -106,6 +119,8 @@ class QualitySummary {
      * @param                $is_pass
      *
      * @param                $model_version
+     * @param                $model_id
+     * @param                $model_label
      *
      * @return mixed
      */
@@ -122,6 +137,8 @@ class QualitySummary {
             $total_tte,
             $is_pass,
             $model_version,
+            $model_id = null,
+            $model_label = null,
             $chunkReviewPassword = null
     ) {
 
@@ -136,6 +153,8 @@ class QualitySummary {
             'revision_number'            => $revisionNumber,
             'feedback'                   => ( $feedback and isset( $feedback[ 'feedback' ] ) ) ? $feedback[ 'feedback' ] : null,
             'model_version'              => ( $model_version ? (int)$model_version : null ),
+            'model_id'                   => ( $model_id ? (int)$model_id : null ),
+            'model_label'                => ( $model_label ? $model_label : null ),
             'equivalent_class'           => $jStruct->getQualityInfo(),
             'is_pass'                    => $is_pass,
             'quality_overall'            => $quality_overall,
@@ -206,8 +225,17 @@ class QualitySummary {
         $passFail   = [ 'type' => $model->pass_type, 'options' => [ 'limit' => $chunkReviewModel->getQALimit( $model ) ] ];
 
         return [
-                $passFail,
-                $reviseIssues, $quality_overall, $is_pass, $score, $total_issues_weight, $total_reviewed_words_count, $categories, $model->hash
+            $passFail,
+            $reviseIssues,
+            $quality_overall,
+            $is_pass,
+            $score,
+            $total_issues_weight,
+            $total_reviewed_words_count,
+            $categories,
+            $model->hash,
+            $model->id,
+            $model->label
         ];
     }
 
