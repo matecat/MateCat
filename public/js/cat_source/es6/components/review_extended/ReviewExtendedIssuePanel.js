@@ -5,7 +5,11 @@ import SegmentActions from '../../actions/SegmentActions'
 import {setTranslation} from '../../api/setTranslation'
 import {orderBy} from 'lodash'
 import {SegmentContext} from '../segments/SegmentContext'
-import {REVISE_STEP_NUMBER, SEGMENTS_STATUS} from '../../constants/Constants'
+import {
+  JOB_WORD_CONT_TYPE,
+  REVISE_STEP_NUMBER,
+  SEGMENTS_STATUS,
+} from '../../constants/Constants'
 
 class ReviewExtendedIssuePanel extends React.Component {
   static contextType = SegmentContext
@@ -82,6 +86,8 @@ class ReviewExtendedIssuePanel extends React.Component {
     ) {
       segment.status =
         config.revisionNumber === REVISE_STEP_NUMBER.REVISE1
+          ? SEGMENTS_STATUS.APPROVED
+          : config.word_count_type === JOB_WORD_CONT_TYPE.EQUIVALENT
           ? SEGMENTS_STATUS.APPROVED
           : SEGMENTS_STATUS.APPROVED2
       setTranslation({segment})

@@ -8,7 +8,11 @@ import {sendSegmentVersionIssueComment} from './es6/api/sendSegmentVersionIssueC
 import SegmentStore from './es6/stores/SegmentStore'
 import {getSegmentVersionsIssues} from './es6/api/getSegmentVersionsIssues'
 import CommonUtils from './es6/utils/commonUtils'
-import {REVISE_STEP_NUMBER, SEGMENTS_STATUS} from './es6/constants/Constants'
+import {
+  JOB_WORD_CONT_TYPE,
+  REVISE_STEP_NUMBER,
+  SEGMENTS_STATUS,
+} from './es6/constants/Constants'
 
 window.Review = {
   enabled: function () {
@@ -188,6 +192,8 @@ if (Review.enabled()) {
       UI.setTimeToEdit(sid)
       const status =
         segment.revision_number === REVISE_STEP_NUMBER.REVISE1
+          ? SEGMENTS_STATUS.APPROVED
+          : config.word_count_type === JOB_WORD_CONT_TYPE.EQUIVALENT
           ? SEGMENTS_STATUS.APPROVED
           : SEGMENTS_STATUS.APPROVED2
       UI.changeStatus(segment, status, afterApproveFn) // this does < setTranslation
