@@ -33,26 +33,25 @@ class XTRFStatus extends AbstractStatus {
 
                 foreach ( $j->getChunks() as $chunk ) {
 
+                    $vector = [
+                            'name'        => $this->result->getName(),
+                            'create_date' => $this->result->getCreateDate(),
+                            'source'      => $j->getSource(),
+                            'target'      => $j->getTarget()
+                    ];
+
                     $outputContent[ $j->getId() . "-" . $chunk->getPassword() ] = null;
 
                     foreach ( $chunk->getFiles() as $file ) {
 
-                        $vector                = [];
                         $vector[ 'firstLine' ] = str_pad( "File: ", 23 ) . $file->getId() . "_" . $file->getName();
-                        $vector[ 'source' ]    = $j->getSource();
-                        $vector[ 'target' ]    = $j->getTarget();
-
                         $outputContent[ $j->getId() . "-" . $chunk->getPassword() ] .= $this->formatFile( $file, $vector );
 
                     }
 
                     $outputContent[ $j->getId() . "-" . $chunk->getPassword() ] .= str_repeat( "-", 80 ) . PHP_EOL . PHP_EOL;
 
-                    $vector                = [];
                     $vector[ 'firstLine' ] = str_pad( "Total: ", 23 ) . count( $chunk->getFiles() ) . " files";
-                    $vector[ 'source' ]    = $j->getSource();
-                    $vector[ 'target' ]    = $j->getTarget();
-
                     $outputContent[ $j->getId() . "-" . $chunk->getPassword() ] .= $this->formatFile( $chunk->getSummary(), $vector );
 
                 }
@@ -100,8 +99,8 @@ class XTRFStatus extends AbstractStatus {
         );
 
         $fileContent = $vector[ 'firstLine' ] . PHP_EOL;
-        $fileContent .= str_pad( "Date: ", 23 ) . date_create( $this->_project_data[ 0 ][ 'create_date' ] )->format( DATE_RFC822 ) . PHP_EOL;
-        $fileContent .= str_pad( "Project: ", 23 ) . $this->_project_data[ 0 ][ 'pname' ] . PHP_EOL;
+        $fileContent .= str_pad( "Date: ", 23 ) . date_create( $vector[ 'create_date' ] )->format( DATE_RFC822 ) . PHP_EOL;
+        $fileContent .= str_pad( "Project: ", 23 ) . $vector[ 'name' ] . PHP_EOL;
         $fileContent .= str_pad( "Language direction: ", 23 ) . $vector[ 'source' ] . " > " . $vector[ 'target' ] . PHP_EOL;
         $fileContent .= PHP_EOL;
 

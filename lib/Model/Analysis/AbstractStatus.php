@@ -163,6 +163,7 @@ abstract class AbstractStatus {
         $target       = null;
         $this->result = $project = new AnalysisProject(
                 $this->_project_data[ 0 ][ 'pname' ],
+                $this->_project_data[ 0 ][ 'create_date' ],
                 new AnalysisProjectSummary(
                         $this->_others_in_queue,
                         $this->total_segments,
@@ -170,7 +171,7 @@ abstract class AbstractStatus {
                 )
         );
 
-        $project->setAnalyze( $this->getAnalyzeLink() );
+        $project->setAnalyzeLink( $this->getAnalyzeLink() );
 
         if ( $project->getSummary()->getSegmentsAnalyzed() == 0 && $this->status_project == Constants_ProjectStatus::STATUS_NEW ) {
 
