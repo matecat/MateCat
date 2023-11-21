@@ -225,9 +225,9 @@ class QualityReportSegmentModel {
             if ( null === $seg->last_translation and $seg->status === \Constants_TranslationStatus::STATUS_APPROVED ) {
 
                 $first_version = ( new TranslationVersionDao() )->getVersionNumberForTranslation( $this->chunk->id, $seg->sid, 0 );
-                $translation = ($first_version) ? $first_version->translation : $seg->translation;
+                $translation   = ( $first_version ) ? $first_version->translation : $seg->translation;
 
-                if($isForUI){
+                if ( $isForUI ) {
                     $seg->last_translation = $Filter->fromLayer0ToLayer2( $translation );
                 }
 
@@ -238,7 +238,7 @@ class QualityReportSegmentModel {
                     }
                 }
 
-                if(null === $seg->last_translation){
+                if ( null === $seg->last_translation ) {
                     $seg->last_translation = $seg->suggestion;
                 }
 
@@ -315,7 +315,11 @@ class QualityReportSegmentModel {
         // last revision version object
         $last_segment_revisions = $this->_findLastRevision( $seg, $Filter, $last_revisions, $isForUI );
 
-        if ( $seg->status == Constants_TranslationStatus::STATUS_TRANSLATED or $seg->status == Constants_TranslationStatus::STATUS_APPROVED ) {
+        if (
+                $seg->status == Constants_TranslationStatus::STATUS_TRANSLATED ||
+                $seg->status == Constants_TranslationStatus::STATUS_APPROVED ||
+                $seg->status == Constants_TranslationStatus::STATUS_APPROVED2
+        ) {
             if ( !empty( $last_translation ) ) {
                 $seg->last_translation = $last_translation->translation;
             }
@@ -347,10 +351,11 @@ class QualityReportSegmentModel {
     }
 
     /**
-     * @param $seg
+     * @param               $seg
      * @param MateCatFilter $Filter
-     * @param $last_translations
-     * @param bool $isForUI
+     * @param               $last_translations
+     * @param bool          $isForUI
+     *
      * @return mixed|null
      * @throws \Exception
      */
@@ -359,7 +364,7 @@ class QualityReportSegmentModel {
         if ( isset( $last_translations ) && !empty( $last_translations ) ) {
             foreach ( $last_translations as $last_translation ) {
                 if ( $last_translation->id_segment == $seg->sid ) {
-                    $translation = ($isForUI) ? $Filter->fromLayer0ToLayer2( $last_translation->translation ) : $last_translation->translation;
+                    $translation                   = ( $isForUI ) ? $Filter->fromLayer0ToLayer2( $last_translation->translation ) : $last_translation->translation;
                     $last_translation->translation = $translation;
                     $find_last_translation_version = $last_translation;
                     break;
@@ -386,7 +391,7 @@ class QualityReportSegmentModel {
             foreach ( $last_revisions as $source_page => $source_page_revisions ) {
                 foreach ( $source_page_revisions as $last_revision ) {
                     if ( $last_revision->id_segment == $seg->sid ) {
-                        $last_translation = ($isForUI) ? $Filter->fromLayer0ToLayer2( $last_revision->translation ) : $last_revision->translation;
+                        $last_translation                       = ( $isForUI ) ? $Filter->fromLayer0ToLayer2( $last_revision->translation ) : $last_revision->translation;
                         $last_revision->translation             = $last_translation;
                         $segment_last_revisions[ $source_page ] = $last_revision;
                         break;
