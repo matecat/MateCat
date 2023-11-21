@@ -67,10 +67,7 @@ class CompatibilityChunk extends Chunk {
         $lang_handler = Langs_Languages::getInstance();
 
         $subject_handler = Langs_LanguageDomains::getInstance();
-        $subjects        = $subject_handler->getEnabledDomains();
-
-        $subjects_keys = Utils::array_column( $subjects, "key" );
-        $subject_key   = array_search( $chunk->subject, $subjects_keys );
+        $subjectsHashMap = $subject_handler->getEnabledHashMap();
 
         $warningsCount = $chunk->getWarningsCount();
 
@@ -96,7 +93,7 @@ class CompatibilityChunk extends Chunk {
                 'targetTxt'               => $lang_handler->getLocalizedName( $chunk->target ),
                 'status'                  => $chunk->status_owner,
                 'subject'                 => $chunk->subject,
-                'subject_printable'       => $subjects[ $subject_key ][ 'display' ],
+                'subject_printable'       => $subjectsHashMap[ $chunk->subject ],
                 'owner'                   => $chunk->owner,
                 'time_to_edit'            => $this->getTimeToEditArray( $chunk->id ),
                 'total_time_to_edit'      => (int)$chunk->total_time_to_edit,

@@ -34,10 +34,15 @@ class AnalysisProject implements JsonSerializable {
      * @var string
      */
     private $createDate;
+    /**
+     * @var mixed
+     */
+    protected $subject;
 
-    public function __construct( $name, $create_date, AnalysisProjectSummary $summary ) {
+    public function __construct( $name, $create_date, $subject, AnalysisProjectSummary $summary ) {
         $this->name       = $name;
         $this->summary    = $summary;
+        $this->subject    = $subject;
         $this->createDate = $create_date;
     }
 
@@ -48,6 +53,7 @@ class AnalysisProject implements JsonSerializable {
         return [
                 'name'        => $this->name,
                 'create_date' => $this->createDate,
+                'subject'     => $this->subject,
                 'jobs'        => array_values( $this->jobs ),
                 'summary'     => $this->summary,
                 'analyze_url' => $this->analyzeLink

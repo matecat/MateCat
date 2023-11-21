@@ -16,6 +16,7 @@ use Constants_ProjectStatus;
 use Exception;
 use FeatureSet;
 use INIT;
+use Langs_LanguageDomains;
 use OutsourceTo_OutsourceAvailable;
 use Projects_MetadataDao;
 use Projects_ProjectDao;
@@ -68,6 +69,10 @@ abstract class AbstractStatus {
      * @var Users_UserStruct|null
      */
     protected $user;
+    /**
+     * @var mixed
+     */
+    protected $subject;
 
     public function __construct( $_project_data, FeatureSet $features, Users_UserStruct $user = null ) {
         if ( is_null( $user ) ) { // avoid null pointer exception when calling methods on class property user
@@ -115,6 +120,10 @@ abstract class AbstractStatus {
 
         //get status of project
         $this->status_project = $this->_project_data[ 0 ][ 'status_analysis' ];
+
+        $subject_handler = Langs_LanguageDomains::getInstance();
+        $subjects        = $subject_handler->getEnabledHashMap();
+        $this->subject   = $subjects[ $this->_project_data[ 0 ][ 'subject' ] ];
 
     }
 
@@ -166,6 +175,7 @@ abstract class AbstractStatus {
         $this->result = $project = new AnalysisProject(
                 $this->_project_data[ 0 ][ 'pname' ],
                 $this->_project_data[ 0 ][ 'create_date' ],
+                $this->subject,
                 new AnalysisProjectSummary(
                         $this->_others_in_queue,
                         $this->total_segments,

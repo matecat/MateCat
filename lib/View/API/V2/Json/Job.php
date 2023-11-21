@@ -126,12 +126,8 @@ class Job {
         $lang_handler = Langs_Languages::getInstance();
 
         $subject_handler = Langs_LanguageDomains::getInstance();
-        $subjects        = $subject_handler->getEnabledDomains();
-
-        $subjects_keys = Utils::array_column( $subjects, "key" );
-        $subject_key   = array_search( $chunk->subject, $subjects_keys );
-
-        $warningsCount = $chunk->getWarningsCount();
+        $subjectsHashMap = $subject_handler->getEnabledHashMap();
+        $warningsCount   = $chunk->getWarningsCount();
 
         // Added 5 minutes cache here
         $chunkReviews = ( new ChunkReviewDao() )->findChunkReviews( $chunk, 60 * 5 );
@@ -160,7 +156,7 @@ class Job {
                 'job_first_segment'     => $chunk->job_first_segment,
                 'status'                => $chunk->status_owner,
                 'subject'               => $chunk->subject,
-                'subject_printable'     => $subjects[ $subject_key ][ 'display' ],
+                'subject_printable'     => $subjectsHashMap[ $chunk->subject ],
                 'owner'                 => $chunk->owner,
                 'open_threads_count'    => (int)$chunk->getOpenThreadsCount(),
                 'create_timestamp'      => strtotime( $chunk->create_date ),

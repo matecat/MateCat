@@ -8,6 +8,7 @@ class Langs_LanguageDomains {
 
     private static $instance; //singleton instance
     private static $subjectMap;
+    private static $subjectHashMap = [];
 
     //access singleton
     public static function getInstance() {
@@ -33,11 +34,23 @@ class Langs_LanguageDomains {
         Utils::raiseJsonExceptionError();
 
         self::$subjectMap = $subjects;
+
+        array_walk( self::$subjectMap, function ( $element ) {
+            self::$subjectHashMap[ $element[ 'key' ] ] = $element[ 'display' ];
+        } );
+
     }
 
     //get list of languages, as RFC3066
     public static function getEnabledDomains() {
         return self::$subjectMap;
+    }
+
+    /**
+     * @return array
+     */
+    public static function getEnabledHashMap(){
+        return self::$subjectHashMap;
     }
 
     public static function getDisplayDomain( $domainID ) {
