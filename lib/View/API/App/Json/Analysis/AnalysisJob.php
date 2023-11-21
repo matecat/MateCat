@@ -59,10 +59,15 @@ class AnalysisJob implements JsonSerializable {
         ];
     }
 
+    /**
+     * @param int $id
+     * @param string $source
+     * @param string $target
+     */
     public function __construct( $id, $source, $target ) {
-        $this->id      = $id;
-        $this->source  = $source;
-        $this->target  = $target;
+        $this->id     = (int)$id;
+        $this->source = $source;
+        $this->target = $target;
     }
 
     /**
