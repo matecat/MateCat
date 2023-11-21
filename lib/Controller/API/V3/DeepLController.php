@@ -4,7 +4,7 @@ namespace API\V3;
 
 use API\V2\KleinController;
 use API\V2\Validators\LoginValidator;
-use Engines\DeepL;
+use Engines_DeepL;
 use Exception;
 use Validator\EngineValidator;
 
@@ -48,7 +48,7 @@ class DeepLController extends KleinController
      */
     private function getDeepLClient($engineId)
     {
-        $engine = EngineValidator::engineBelongsToUser($engineId, $this->user->uid, DeepL::class);
+        $engine = EngineValidator::engineBelongsToUser($engineId, $this->user->uid, Engines_DeepL::class);
         $extraParams = $engine->getEngineRecord()->extra_parameters;
 
         if(!isset($extraParams['DeepL-Auth-Key'])){

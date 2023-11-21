@@ -40,7 +40,7 @@ class DeepLApiClient
      */
     public function translate($text, $sourceLang, $targetLang)
     {
-        return $this->send('POST', 'translate', [
+        return $this->send('POST', '/translate', [
             'text' => [
                 $text
             ],
@@ -55,7 +55,7 @@ class DeepLApiClient
      */
     public function allGlossaries()
     {
-        return $this->send("GET", "/v2/glossaries");
+        return $this->send("GET", "/glossaries");
     }
 
     /**
@@ -65,7 +65,7 @@ class DeepLApiClient
      */
     public function createGlossary($data)
     {
-        return $this->send("POST", "/v2/glossaries", $data);
+        return $this->send("POST", "/glossaries", $data);
     }
 
     /**
@@ -75,7 +75,7 @@ class DeepLApiClient
      */
     public function deleteGlossary($id)
     {
-        return $this->send("DELETE", "/v2/glossaries/$id");
+        return $this->send("DELETE", "/glossaries/$id");
     }
 
     /**
@@ -85,7 +85,7 @@ class DeepLApiClient
      */
     public function getGlossary($id)
     {
-        return $this->send("GET", "/v2/glossaries/$id");
+        return $this->send("GET", "/glossaries/$id");
     }
 
     /**
@@ -95,7 +95,7 @@ class DeepLApiClient
      */
     public function getGlossaryEntries($id)
     {
-        return $this->send("GET", "/v2/glossaries/$id/entries");
+        return $this->send("GET", "/glossaries/$id/entries");
     }
 
     /**
@@ -155,7 +155,7 @@ class DeepLApiClient
             $options[ CURLOPT_TIMEOUT ] = $timeout;
         }
 
-        $resourceHashId = $handler->createResource( $url, $options );
+        $resourceHashId = $handler->createResource( self::DEFAULT_BASE_URL . $url, $options );
         $handler->multiExec();
         $handler->multiCurlCloseAll();
 
@@ -192,11 +192,6 @@ class DeepLApiClient
             throw new DeepLApiException( "ConnectionException", 500, "Unable to decode server response: '$body'" );
         }
 
-        $status = $json[ "status" ];
-        if ( !( 200 <= $status and $status < 300 ) ) {
-            throw DeepLApiException::fromJSONResponse( $json );
-        }
-
-        return isset( $json[ 'data' ] ) ? $json[ 'data' ] : null;
+        return $json;
     }
 }

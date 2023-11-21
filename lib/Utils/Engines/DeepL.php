@@ -1,12 +1,8 @@
 <?php
 
-namespace Engines;
-
 use Engines\DeepL\DeepLApiClient;
-use Engines_AbstractEngine;
-use Exception;
 
-class DeepL extends Engines_AbstractEngine
+class Engines_DeepL extends Engines_AbstractEngine
 {
     private $apiKey;
 
@@ -30,7 +26,8 @@ class DeepL extends Engines_AbstractEngine
 
     /**
      * @return mixed
-     * @throws DeepL\DeepLApiException
+     * @throws \Engines\DeepL\DeepLApiException
+     * @throws Exception
      */
     public function glossaries()
     {
