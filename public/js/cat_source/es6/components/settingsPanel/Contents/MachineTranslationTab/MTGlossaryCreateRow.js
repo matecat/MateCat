@@ -84,7 +84,14 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
 
   const validateForm = () => {
     setSubmitCheckErrors(Symbol())
-    if (!name || !file) return false
+
+    if (!name || !file) {
+      setNotification({
+        type: 'error',
+        message: !name ? 'Name mandatory' : 'File mandatory',
+      })
+      return false
+    }
 
     return true
   }
@@ -104,7 +111,7 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
   const dispatchSuccessfullNotification = () => {
     setNotification({
       type: 'success',
-      message: 'Glossary create successfully',
+      message: 'Glossary created succesfully',
     })
     setIsWaitingResult(false)
   }
@@ -140,7 +147,7 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
           onChange={onChangeIsActive}
           type="checkbox"
           title=""
-          disabled={isWaitingResult}
+          disabled
         />
       </div>
       <div
@@ -169,10 +176,14 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
           accept=".xls, .xlsx"
           disabled={isWaitingResult}
         />
-        <label htmlFor="file-import" className={fileNameClasses}>
-          <Upload size={14} />
-          Import .xls
-        </label>
+        {!file ? (
+          <label htmlFor="file-import" className={fileNameClasses}>
+            <Upload size={14} />
+            Import .xls
+          </label>
+        ) : (
+          <label className="filename">{file.name}</label>
+        )}
 
         <button
           className="ui primary button settings-panel-button-icon small-row-button"

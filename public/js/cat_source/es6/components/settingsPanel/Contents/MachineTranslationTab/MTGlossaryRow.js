@@ -37,14 +37,14 @@ export const MTGlossaryRow = ({engineId, row, setRows, isReadOnly}) => {
     const dispatchSuccessfullImportNotification = () => {
       setNotification({
         type: 'success',
-        message: 'Glossary import successfully',
+        message: `Glossary file ${file.name} imported successfully`,
       })
       setIsWaitingResult(false)
     }
     const dispatchErrorImportNotification = () => {
       setNotification({
         type: 'error',
-        message: 'Glossary import error',
+        message: `Glossary file ${file.name} import error`,
       })
       setIsWaitingResult(false)
     }
@@ -194,7 +194,7 @@ export const MTGlossaryRow = ({engineId, row, setRows, isReadOnly}) => {
             />
             <label htmlFor={`file-import${row.id}`} className="grey-button">
               <Upload size={14} />
-              Import from glossary
+              Import glossary
             </label>
           </div>
           <div className="glossary-row-delete">

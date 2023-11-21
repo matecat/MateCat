@@ -300,6 +300,12 @@
       border: solid 1px $redDefault;
     }
   }
+
+  .filename {
+    display: flex;
+    align-items: center;
+    padding: 5px;
+  }
 }
 
 .glossary-row-delete {
@@ -364,4 +370,25 @@
     max-height: 400px;
     overflow-y: auto;
   }
+}
+
+.empty-list-mode {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 20px 0;
+
+  > p {
+    font-size: 19px;
+    color: $grey6;
+    margin: 0 0 10px 0;
+  }
+}
+
+.loading-list-mode {
+  padding: 10px;
+}
+
+.create-glossary-button {
+  gap: unset;
 }

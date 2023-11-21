@@ -3,7 +3,6 @@ import PropTypes from 'prop-types'
 import {useState} from 'react'
 import {SettingsPanelTable} from '../../SettingsPanelTable'
 import {MTGlossaryRow} from './MTGlossaryRow'
-import Upload from '../../../../../../../img/icons/Upload'
 import {MTGlossaryCreateRow} from './MTGlossaryCreateRow'
 import {getMMTKeys} from '../../../../api/getMMTKeys/getMMTKeys'
 import {getStatusMemoryGlossaryImport} from '../../../../api/getStatusMemoryGlossaryImport/getStatusMemoryGlossaryImport'
@@ -12,6 +11,7 @@ import CatToolActions from '../../../../actions/CatToolActions'
 import CatToolConstants from '../../../../constants/CatToolConstants'
 import CatToolStore from '../../../../stores/CatToolStore'
 import ArrowDown from '../../../../../../../img/icons/ArrowDown'
+import IconAdd from '../../../icons/IconAdd'
 
 const COLUMNS_TABLE = [
   {name: 'Activate'},
@@ -61,14 +61,16 @@ export class MTGlossaryStatus {
 export const MTGlossary = ({id, isCattoolPage = false}) => {
   const {activeMTEngine, setActiveMTEngine} = useContext(SettingsPanelContext)
 
-  const [isShowingRows, setIsShowingRows] = useState(false)
-  const [rows, setRows] = useState([])
-  const [isGlossaryCaseSensitive, setIsGlossaryCaseSensitive] = useState(
-    activeMTEngine.isGlossaryCaseSensitive ?? true,
+  const [isShowingRows, setIsShowingRows] = useState(
+    activeMTEngine.mtGlossaryProps?.isOpened ?? false,
+  )
+  const [rows, setRows] = useState()
+  const [isGlossaryCaseInsensitive, setIsGlossaryCaseInsensitive] = useState(
+    activeMTEngine.mtGlossaryProps?.isGlossaryCaseInsensitive ?? false,
   )
 
   const activeGlossariesRef = useRef()
-  activeGlossariesRef.current = activeMTEngine.glossaries
+  activeGlossariesRef.current = activeMTEngine.mtGlossaryProps?.glossaries
 
   const updateRowsState = useCallback(
     (value) => {
@@ -77,17 +79,22 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
 
         return newValue.map((row) => ({
           ...row,
-          node: (
-            <MTGlossaryRow
-              key={row.id}
-              {...{
-                engineId: id,
-                row,
-                setRows: updateRowsState,
-                isReadOnly: isCattoolPage,
-              }}
-            />
-          ),
+          node:
+            row.id === MT_GLOSSARY_CREATE_ROW_ID ? (
+              <MTGlossaryCreateRow
+                {...{engineId: id, row, setRows: updateRowsState}}
+              />
+            ) : (
+              <MTGlossaryRow
+                key={row.id}
+                {...{
+                  engineId: id,
+                  row,
+                  setRows: updateRowsState,
+                  isReadOnly: isCattoolPage,
+                }}
+              />
+            ),
         }))
       })
     },
@@ -146,12 +153,17 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
   }, [id, isCattoolPage, updateRowsState])
 
   useEffect(() => {
+    if (isCattoolPage || !rows) return
+
     setActiveMTEngine((prevState) => ({
       ...prevState,
-      glossaries: rows.filter(({isActive}) => isActive).map(({id}) => id),
-      isGlossaryCaseSensitive,
+      mtGlossaryProps: {
+        ...prevState.mtGlossaryProps,
+        glossaries: rows.filter(({isActive}) => isActive).map(({id}) => id),
+        isGlossaryCaseInsensitive,
+      },
     }))
-  }, [rows, isGlossaryCaseSensitive, setActiveMTEngine])
+  }, [rows, isGlossaryCaseInsensitive, isCattoolPage, setActiveMTEngine])
 
   const addGlossary = () => {
     const row = {
@@ -160,57 +172,90 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
       className: 'row-content-create-glossary',
     }
 
-    setRows((prevState) => [
-      ...prevState.filter(({id}) => id !== MT_GLOSSARY_CREATE_ROW_ID),
-      {
-        ...row,
-        node: (
-          <MTGlossaryCreateRow
-            {...{engineId: id, row, setRows: updateRowsState}}
-          />
-        ),
-      },
+    updateRowsState((prevState) => [
+      ...prevState,
+      ...(!prevState.some(({id}) => id === MT_GLOSSARY_CREATE_ROW_ID)
+        ? [row]
+        : []),
     ])
   }
 
+  const onShowingRows = () => {
+    setIsShowingRows((prevState) => !prevState)
+    if (!isCattoolPage) {
+      setActiveMTEngine((prevState) => ({
+        ...prevState,
+        mtGlossaryProps: {
+          ...prevState.mtGlossaryProps,
+          isOpened: !isShowingRows,
+        },
+      }))
+    }
+  }
+
   const onChangeCaseSensitive = (e) =>
-    setIsGlossaryCaseSensitive(e.currentTarget.checked)
+    setIsGlossaryCaseInsensitive(e.currentTarget.checked)
+
+  const haveRecords = rows?.length > 0
 
   return (
     <div className="mt-glossary">
       <div className="expand-button">
         <button
           className={`${isShowingRows ? 'rotate' : ''}`}
-          onClick={() => setIsShowingRows((prevState) => !prevState)}
+          onClick={onShowingRows}
         >
           <ArrowDown />
-          ModernMT glossary
+          Glossary options
         </button>
       </div>
       {isShowingRows && (
         <>
-          <SettingsPanelTable
-            columns={COLUMNS_TABLE}
-            rows={rows}
-            className="mt-glossary-table"
-          />
-          {!isCattoolPage && (
-            <div className="bottom-buttons">
-              <button className="grey-button" onClick={addGlossary}>
-                <Upload size={14} />
-                Add glossary
-              </button>
-              <div className="mt-glossary-case-sensitive">
-                <input
-                  checked={isGlossaryCaseSensitive}
-                  onChange={onChangeCaseSensitive}
-                  type="checkbox"
-                  title=""
-                />
-                <label>Make glossary case sensitive</label>
-              </div>
-            </div>
+          {haveRecords && (
+            <SettingsPanelTable
+              columns={COLUMNS_TABLE}
+              rows={rows}
+              className="mt-glossary-table"
+            />
           )}
+
+          {!isCattoolPage &&
+            (haveRecords ? (
+              <div className="bottom-buttons">
+                <button
+                  className="grey-button create-glossary-button"
+                  onClick={addGlossary}
+                >
+                  <IconAdd size={14} />
+                  Create new glossary
+                </button>
+                <div className="mt-glossary-case-sensitive">
+                  <input
+                    checked={isGlossaryCaseInsensitive}
+                    onChange={onChangeCaseSensitive}
+                    type="checkbox"
+                    title=""
+                  />
+                  <label>Make glossary case insensitive</label>
+                </div>
+              </div>
+            ) : Array.isArray(rows) ? (
+              <div className="empty-list-mode">
+                <p>
+                  Create a glossary to start using ModernMT&apos;s glossary
+                  feature
+                </p>
+                <button
+                  className="grey-button create-glossary-button"
+                  onClick={addGlossary}
+                >
+                  <IconAdd size={14} />
+                  Create glossary
+                </button>
+              </div>
+            ) : (
+              <p className="loading-list-mode">Loading...</p>
+            ))}
         </>
       )}
     </div>
