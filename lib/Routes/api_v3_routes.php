@@ -89,5 +89,9 @@ $klein->with( '/api/v3/mmt/[:engineId]', function () {
 
 // DEEPL
 $klein->with( '/api/v3/deepl/[:engineId]', function () {
-    route( '/glossaries', 'GET', '\API\V3\DeepLController', 'glossaries' );
+    route( '/glossaries', 'GET', '\API\V3\DeepLGlossaryController', 'all' );
+    route( '/glossaries', 'POST', '\API\V3\DeepLGlossaryController', 'create' );
+    route( '/glossaries/[:id]', 'DELETE', '\API\V3\DeepLGlossaryController', 'delete' );
+    route( '/glossaries/[:id]', 'GET', '\API\V3\DeepLGlossaryController', 'get' );
+    route( '/glossaries/[:id]/entries', 'GET', '\API\V3\DeepLGlossaryController', 'getEntries' );
 } );

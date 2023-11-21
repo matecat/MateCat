@@ -189,6 +189,14 @@ class DeepLApiClient
         $json = json_decode( $body, true );
 
         if ( json_last_error() != JSON_ERROR_NONE ) {
+
+            // is a TSV?
+            $tsvAsArray = preg_split("/\t+/", $body);
+
+            if(is_array($tsvAsArray)){
+                return $tsvAsArray;
+            }
+
             throw new DeepLApiException( "ConnectionException", 500, "Unable to decode server response: '$body'" );
         }
 

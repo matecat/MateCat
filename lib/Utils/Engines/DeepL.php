@@ -34,6 +34,54 @@ class Engines_DeepL extends Engines_AbstractEngine
         return $this->_getClient()->allGlossaries();
     }
 
+    /**
+     * @param $id
+     * @return mixed
+     * @throws \Engines\DeepL\DeepLApiException
+     * @throws Exception
+     */
+    public function getGlossary($id)
+    {
+        return $this->_getClient()->getGlossary($id);
+    }
+
+    /**
+     * @param $id
+     * @return mixed
+     * @throws \Engines\DeepL\DeepLApiException
+     * @throws Exception
+     */
+    public function deleteGlossary($id)
+    {
+        return $this->_getClient()->deleteGlossary($id);
+    }
+
+    /**
+     * @param $data
+     * @return mixed
+     * @throws \Engines\DeepL\DeepLApiException
+     * @throws Exception
+     */
+    public function createGlossary($data)
+    {
+        return $this->_getClient()->createGlossary($data);
+    }
+
+    /**
+     * @param $id
+     * @return mixed
+     * @throws \Engines\DeepL\DeepLApiException
+     * @throws Exception
+     */
+    public function getGlossaryEntries($id)
+    {
+        return $this->_getClient()->getGlossaryEntries($id);
+    }
+
+
+
+
+
     protected function _decode($rawValue)
     {
         // TODO: Implement _decode() method.
