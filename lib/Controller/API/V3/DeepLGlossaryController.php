@@ -43,7 +43,26 @@ class DeepLGlossaryController extends KleinController
 
     public function create()
     {
+        try {
+            $data = json_decode($this->request->body());
+            $engineId = filter_var( $this->request->engineId, FILTER_SANITIZE_NUMBER_INT );
+            $deepLClient = $this->getDeepLClient($engineId);
 
+            $deepLApiKey = $deepLClient->getEngineRecord()->extra_parameters['DeepL-Auth-Key'];
+            $deepLClient->setApiKey($deepLApiKey);
+
+            $this->response->status()->setCode( 200 );
+            $this->response->json($deepLClient->createGlossary($data));
+            exit();
+
+        } catch (Exception $exception){
+            $code = ($exception->getCode() > 0) ? $exception->getCode() : 500;
+            $this->response->status()->setCode( $code );
+            $this->response->json([
+                'error' => $exception->getMessage()
+            ]);
+            exit();
+        }
     }
 
     /**
@@ -60,7 +79,10 @@ class DeepLGlossaryController extends KleinController
             $deepLClient->setApiKey($deepLApiKey);
 
             $this->response->status()->setCode( 200 );
-            $this->response->json($deepLClient->delete($id));
+            $deepLClient->deleteGlossary($id);
+            $this->response->json([
+                'id' => $id
+            ]);
             exit();
 
         } catch (Exception $exception){

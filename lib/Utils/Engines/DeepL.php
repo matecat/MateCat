@@ -60,7 +60,6 @@ class Engines_DeepL extends Engines_AbstractEngine
      * @param $data
      * @return mixed
      * @throws \Engines\DeepL\DeepLApiException
-     * @throws Exception
      */
     public function createGlossary($data)
     {
@@ -71,7 +70,6 @@ class Engines_DeepL extends Engines_AbstractEngine
      * @param $id
      * @return mixed
      * @throws \Engines\DeepL\DeepLApiException
-     * @throws Exception
      */
     public function getGlossaryEntries($id)
     {

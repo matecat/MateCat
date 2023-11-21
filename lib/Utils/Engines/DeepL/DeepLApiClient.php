@@ -148,7 +148,7 @@ class DeepLApiClient
         }
 
         if ( $params ) {
-            $options[ CURLOPT_POSTFIELDS ] = $params;
+            $options[ CURLOPT_POSTFIELDS ] = json_encode($params);
         }
 
         if ( $timeout !== null ) {
@@ -161,11 +161,11 @@ class DeepLApiClient
 
         if ( $handler->hasError( $resourceHashId ) ) {
             if ( $handler->getError( $resourceHashId )[ 'errno' ] == 28 ) {
-                throw new DeepLApiException( "TimeoutException", 500, "Unable to contact upstream server ({$handler->getError( $resourceHashId )[ 'errno' ]})" );
+                throw new DeepLApiException( "Unable to contact upstream server ({$handler->getError( $resourceHashId )[ 'errno' ]})", 500  );
             } elseif ( $handler->getError( $resourceHashId )[ 'http_code' ] ) {
-                throw new DeepLApiException( "ServiceException", $handler->getError( $resourceHashId )[ 'http_code' ], "Request denied ({$handler->getError( $resourceHashId )[ 'http_code' ]})" );
+                throw new DeepLApiException( "Request denied ({$handler->getError( $resourceHashId )[ 'http_code' ]})", $handler->getError( $resourceHashId )[ 'http_code' ] );
             } else {
-                throw new DeepLApiException( "ConnectionException", 500, "Unable to contact upstream server ({$handler->getError( $resourceHashId )[ 'errno' ]})" );
+                throw new DeepLApiException( "Unable to contact upstream server ({$handler->getError( $resourceHashId )[ 'errno' ]})", 500 );
             }
         }
 
