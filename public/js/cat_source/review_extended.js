@@ -205,17 +205,17 @@ if (Review.enabled()) {
     },
     openNextApproved: function (sid) {
       sid = sid || UI.currentSegmentId
-      var nextApprovedSegment = SegmentStore.getNextSegment(
+      const nextApprovedSegment = SegmentStore.getNextSegment(
         sid,
         null,
-        9,
+        SEGMENTS_STATUS.UNAPPROVED,
         1,
         true,
       )
-      var nextApprovedSegmentInPrevious = SegmentStore.getNextSegment(
+      const nextApprovedSegmentInPrevious = SegmentStore.getNextSegment(
         -1,
         null,
-        9,
+        SEGMENTS_STATUS.UNAPPROVED,
         1,
         true,
       )

@@ -716,7 +716,11 @@ const SegmentActions = {
         fid: nextSegment.fid,
         text: nextSegment.segment,
       })
-      let nextSegmentUntranslated = SegmentStore.getNextSegment(sid, fid, 8)
+      let nextSegmentUntranslated = SegmentStore.getNextSegment(
+        sid,
+        fid,
+        SEGMENTS_STATUS.UNTRANSLATED,
+      )
       if (
         nextSegmentUntranslated &&
         requestes[1].sid != nextSegmentUntranslated.sid
@@ -1263,14 +1267,14 @@ const SegmentActions = {
       const nextTranslatedSegment = SegmentStore.getNextSegment(
         sid,
         null,
-        7,
+        SEGMENTS_STATUS.TRANSLATED,
         null,
         true,
       )
       const nextTranslatedSegmentInPrevious = SegmentStore.getNextSegment(
         -1,
         null,
-        7,
+        SEGMENTS_STATUS.TRANSLATED,
         null,
         true,
       )

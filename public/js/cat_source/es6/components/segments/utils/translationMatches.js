@@ -10,6 +10,7 @@ import SegmentStore from '../../../stores/SegmentStore'
 import {getContributions} from '../../../api/getContributions'
 import {deleteContribution} from '../../../api/deleteContribution'
 import TagUtils from '../../../utils/tagUtils'
+import {SEGMENTS_STATUS} from '../../../constants/Constants'
 
 let TranslationMatches = {
   copySuggestionInEditarea: function (segment, index, translation) {
@@ -118,7 +119,11 @@ let TranslationMatches = {
         ? segment
         : next == 1
         ? SegmentStore.getNextSegment(segmentSid)
-        : SegmentStore.getNextSegment(segmentSid, null, 8)
+        : SegmentStore.getNextSegment(
+            segmentSid,
+            null,
+            SEGMENTS_STATUS.UNTRANSLATED,
+          )
 
     if (!currentSegment) return
 
