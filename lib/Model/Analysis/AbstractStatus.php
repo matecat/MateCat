@@ -214,18 +214,18 @@ abstract class AbstractStatus {
                 $project->setJob( $job );
             }
 
-            // is outsource available?
-            if ( $target === null or $segInfo[ 'target' ] !== $target ) {
-                $job->setOutsource(
-                        $this->isOutsourceEnabled( $segInfo[ 'target' ], $segInfo[ 'id_customer' ], $segInfo[ 'jid' ] )
-                );
-                $target = $segInfo[ 'target' ];
-            }
-
             if ( !isset( $chunk ) || $chunk->getPassword() != $segInfo[ 'jpassword' ] ) {
                 $chunkStruct = Chunks_ChunkDao::getByIdAndPassword( $segInfo[ 'jid' ], $segInfo[ 'jpassword' ], 60 * 10 );
                 $chunk       = new AnalysisChunk( $chunkStruct, $this->_project_data[ 0 ][ 'pname' ], $this->user );
                 $job->setChunk( $chunk );
+            }
+
+            // is outsource available?
+            if ( $target === null or $segInfo[ 'target' ] . $segInfo[ 'jpassword' ] !== $target ) {
+                $chunk->setOutsource(
+                        $this->isOutsourceEnabled( $segInfo[ 'target' ], $segInfo[ 'id_customer' ], $segInfo[ 'jid' ] )
+                );
+                $target = $segInfo[ 'target' ] . $segInfo[ 'jpassword' ];
             }
 
             if ( !isset( $file ) || $file->getId() != $segInfo[ 'id_file' ] || !$chunk->hasFile( $segInfo[ 'id_file' ] ) ) {

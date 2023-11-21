@@ -35,10 +35,6 @@ class AnalysisJob implements JsonSerializable {
      */
     protected $total_industry = 0;
     /**
-     * @var bool
-     */
-    protected $outsource = true;
-    /**
      * @var string
      */
     protected $projectName;
@@ -60,7 +56,6 @@ class AnalysisJob implements JsonSerializable {
                 'total_raw'        => $this->total_raw,
                 'total_equivalent' => $this->total_equivalent,
                 'total_industry'   => $this->total_industry,
-                'outsource'        => $this->outsource,
         ];
     }
 
@@ -129,17 +124,6 @@ class AnalysisJob implements JsonSerializable {
      */
     public function incrementIndustry( $industry ) {
         $this->total_industry += round( $industry );
-    }
-
-    /**
-     * @param bool $outsource
-     *
-     * @return $this
-     */
-    public function setOutsource( $outsource ) {
-        $this->outsource = $outsource;
-
-        return $this;
     }
 
     /**

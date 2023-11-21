@@ -61,6 +61,11 @@ class AnalysisChunk implements JsonSerializable {
      */
     protected $total_industry = 0;
 
+    /**
+     * @var bool
+     */
+    protected $outsource = true;
+
     public function __construct( Jobs_JobStruct $chunkStruct, $projectName, Users_UserStruct $user ) {
         $this->chunkStruct = $chunkStruct;
         $this->projectName = $projectName;
@@ -94,6 +99,7 @@ class AnalysisChunk implements JsonSerializable {
                 'total_raw'        => $this->total_raw,
                 'total_equivalent' => $this->total_equivalent,
                 'total_industry'   => $this->total_industry,
+                'outsource'        => $this->outsource,
         ];
     }
 
@@ -181,6 +187,17 @@ class AnalysisChunk implements JsonSerializable {
      */
     public function incrementIndustry( $industry ) {
         $this->total_industry += round( $industry );
+    }
+
+    /**
+     * @param bool $outsource
+     *
+     * @return $this
+     */
+    public function setOutsource( $outsource ) {
+        $this->outsource = $outsource;
+
+        return $this;
     }
 
 }
