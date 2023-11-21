@@ -30,15 +30,15 @@ class SignupModel {
         $this->params = filter_var_array( $params, [
                 'email'                 => FILTER_SANITIZE_EMAIL,
                 'password'              => [ 'filter' => FILTER_SANITIZE_STRING, 'options' => FILTER_FLAG_STRIP_LOW ],
-                'password_confirmation' => FILTER_SANITIZE_STRING,
+                'password_confirmation' => [ 'filter' => FILTER_SANITIZE_STRING, 'options' => FILTER_FLAG_STRIP_LOW ],
                 'first_name'            => [
                         'filter' => FILTER_CALLBACK, 'options' => function ( $username ) {
-                            return substr( preg_replace( '/(?:https?|s?ftp)?\P{L}+/', '', $username ), 0, 50 );
+                            return mb_substr( preg_replace( '/(?:https?|s?ftp)?\P{L}+/', '', $username ), 0, 50 );
                         }
                 ],
                 'last_name'             => [
                         'filter' => FILTER_CALLBACK, 'options' => function ( $username ) {
-                            return substr( preg_replace( '/(?:https?|s?ftp)?\P{L}+/', '', $username ), 0 , 50 );
+                            return mb_substr( preg_replace( '/(?:https?|s?ftp)?\P{L}+/', '', $username ), 0, 50 );
                         }
                 ],
                 'wanted_url'            => FILTER_SANITIZE_URL
@@ -131,6 +131,14 @@ class SignupModel {
      * @return bool
      */
     private function __userAlreadyExists() {
+
+        $dao       = new Users_UserDao();
+        $persisted = $dao->getByEmail( $this->user->email );
+
+        if ( $persisted ) {
+            $this->user = $persisted;
+        }
+
         return isset( $this->user->uid );
     }
 
@@ -148,12 +156,6 @@ class SignupModel {
      * @throws ValidationError
      */
     private function __doValidation() {
-        $dao       = new Users_UserDao();
-        $persisted = $dao->getByEmail( $this->user->email );
-
-        if ( $persisted ) {
-            $this->user = $persisted;
-        }
 
         UserPasswordValidator::validatePassword( $this->params[ 'password' ], $this->params[ 'password_confirmation' ] );
 
