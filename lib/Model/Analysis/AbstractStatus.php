@@ -9,6 +9,8 @@ use API\App\Json\Analysis\AnalysisJob;
 use API\App\Json\Analysis\AnalysisProject;
 use API\App\Json\Analysis\AnalysisProjectSummary;
 use API\App\Json\Analysis\MatchConstants;
+use API\App\Json\OutsourceConfirmation;
+use API\V2\Json\JobTranslator;
 use Chunks_ChunkDao;
 use Constants_ProjectStatus;
 use Exception;
@@ -69,7 +71,7 @@ abstract class AbstractStatus {
 
     public function __construct( $_project_data, FeatureSet $features, Users_UserStruct $user = null ) {
         if ( is_null( $user ) ) { // avoid null pointer exception when calling methods on class property user
-            $user = new Users_UserStruct();
+            $user      = new Users_UserStruct();
             $user->uid = -1;
         }
         $this->user          = $user;
@@ -216,16 +218,38 @@ abstract class AbstractStatus {
 
             if ( !isset( $chunk ) || $chunk->getPassword() != $segInfo[ 'jpassword' ] ) {
                 $chunkStruct = Chunks_ChunkDao::getByIdAndPassword( $segInfo[ 'jid' ], $segInfo[ 'jpassword' ], 60 * 10 );
-                $chunk       = new AnalysisChunk( $chunkStruct, $this->_project_data[ 0 ][ 'pname' ], $this->user );
+
+                // chunk already outsourced
+                $outsourceInfo = $chunkStruct->getOutsource();
+                $tStruct       = $chunkStruct->getTranslator();
+                $outsource     = null;
+                $translator    = null;
+                if ( !empty( $outsourceInfo ) ) {
+                    $outsource = new OutsourceConfirmation( $outsourceInfo );
+                } elseif ( !empty( $tStruct ) ) {
+                    $translator = new JobTranslator( $tStruct );
+                }
+                $chunk = new AnalysisChunk( $chunkStruct, $this->_project_data[ 0 ][ 'pname' ], $this->user );
+                $chunk->setOutsource( $outsource );
+                $chunk->setTranslator( $translator );
+
                 $job->setChunk( $chunk );
             }
 
-            // is outsource available?
+            // chunk already outsourced
             if ( $target === null or $segInfo[ 'target' ] . $segInfo[ 'jpassword' ] !== $target ) {
-                $chunk->setOutsource(
+                $job->setOutsourceAvailable(
                         $this->isOutsourceEnabled( $segInfo[ 'target' ], $segInfo[ 'id_customer' ], $segInfo[ 'jid' ] )
                 );
                 $target = $segInfo[ 'target' ] . $segInfo[ 'jpassword' ];
+            }
+
+            // is outsource available?
+            if ( $target === null or $segInfo[ 'target' ] !== $target ) {
+                $job->setOutsourceAvailable(
+                        $this->isOutsourceEnabled( $segInfo[ 'target' ], $segInfo[ 'id_customer' ], $segInfo[ 'jid' ] )
+                );
+                $target = $segInfo[ 'target' ];
             }
 
             if ( !isset( $file ) || $file->getId() != $segInfo[ 'id_file' ] || !$chunk->hasFile( $segInfo[ 'id_file' ] ) ) {
