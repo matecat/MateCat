@@ -74,3 +74,8 @@ $klein->with( '/api/v3/tm-keys', function () {
 
 route( '/api/v3/projects/[:id_project]/[:password]/segment-analysis',  'GET',  'API\V3\SegmentAnalysisController', 'project' );
 route( '/api/v3/jobs/[:id_job]/[:password]/segment-analysis',          'GET',  'API\V3\SegmentAnalysisController', 'job' );
+
+// DEEPL
+$klein->with( '/api/v3/deepl/[:engineId]', function () {
+    route( '/glossaries', 'GET', '\API\V3\DeepLController', 'glossaries' );
+} );
