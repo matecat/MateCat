@@ -36,8 +36,8 @@ class AnalysisProject implements JsonSerializable {
     private $createDate;
 
     public function __construct( $name, $create_date, AnalysisProjectSummary $summary ) {
-        $this->name    = $name;
-        $this->summary = $summary;
+        $this->name       = $name;
+        $this->summary    = $summary;
         $this->createDate = $create_date;
     }
 
@@ -46,10 +46,11 @@ class AnalysisProject implements JsonSerializable {
      */
     public function jsonSerialize() {
         return [
-                'name'    => $this->name,
-                'jobs'    => array_values( $this->jobs ),
-                'summary' => $this->summary,
-                'analyze' => $this->analyzeLink
+                'name'        => $this->name,
+                'create_date' => $this->createDate,
+                'jobs'        => array_values( $this->jobs ),
+                'summary'     => $this->summary,
+                'analyze'     => $this->analyzeLink
         ];
     }
 
