@@ -12,9 +12,11 @@ namespace AsyncTasks\Workers;
 use Constants\Ices;
 use Constants_TranslationStatus;
 use Contribution\ContributionRequestStruct;
+use Engines_MMT;
 use FeatureSet;
 use INIT;
 use PostProcess;
+use Projects_MetadataDao;
 use Stomp;
 use Matecat\SubFiltering\MateCatFilter;
 use TaskRunner\Commons\AbstractElement;
@@ -483,6 +485,21 @@ class GetContributionWorker extends AbstractWorker {
                 $config[ 'job_id' ]       = $jobStruct->id;
                 $config[ 'job_password' ] = $jobStruct->password;
                 $config[ 'session' ]      = $contributionStruct->getSessionId();
+
+                // glossaries (only for MMT)
+                if($mt_engine instanceof Engines_MMT){
+                    $metadataDao = new Projects_MetadataDao();
+                    $metadata = $metadataDao->get($contributionStruct->getProjectStruct()->id, 'mmt_glossaries', 86400);
+
+                    if($metadata !== null){
+
+                        $metadata = html_entity_decode($metadata->value);
+                        $mmtGlossariesArray = json_decode($metadata, true);
+
+                        $config[ 'glossaries' ] = implode(",", $mmtGlossariesArray['glossaries']);
+                        $config[ 'ignore_glossary_case' ] = $mmtGlossariesArray['ignore_glossary_case'];
+                    }
+                }
 
                 $mt_result = $mt_engine->get( $config );
             }

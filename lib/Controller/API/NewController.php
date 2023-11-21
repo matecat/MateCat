@@ -14,6 +14,8 @@ use ProjectQueue\Queue;
 use QAModelTemplate\QAModelTemplateStruct;
 use Teams\MembershipDao;
 use TMS\TMSService;
+use Validator\EngineValidator;
+use Validator\MMTValidator;
 
 //limit execution time to 300 seconds
 set_time_limit( 300 );
@@ -101,6 +103,11 @@ class NewController extends ajaxController {
 
     protected $httpHeader = "HTTP/1.0 200 OK";
 
+    /**
+     * @var array
+     */
+    private $mmtGlossaries;
+
     private function setBadRequestHeader() {
         $this->httpHeader = 'HTTP/1.0 400 Bad Request';
     }
@@ -176,7 +183,8 @@ class NewController extends ajaxController {
                         'filter' => FILTER_SANITIZE_STRING,
                         'flags'  => FILTER_REQUIRE_ARRAY,
                 ],
-                'project_info'       => [ 'filter' => FILTER_SANITIZE_STRING ]
+                'project_info'       => [ 'filter' => FILTER_SANITIZE_STRING ],
+                'mmt_glossaries'     => [ 'filter' => FILTER_SANITIZE_STRING ]
         ];
 
         $filterArgs = $this->featureSet->filter( 'filterNewProjectInputFilters', $filterArgs, $this->userIsLogged );
@@ -222,6 +230,8 @@ class NewController extends ajaxController {
             $this->__validateQaModelTemplate();
             $this->__validatePayableRateTemplate();
             $this->__validateQaModel();
+            $this->__validateUserMTEngine();
+            $this->__validateMMTGlossaries();
             $this->__appendFeaturesToProject();
             $this->__generateTargetEngineAssociation();
         } catch ( Exception $ex ) {
@@ -617,6 +627,11 @@ class NewController extends ajaxController {
             $projectStructure[ 'uid' ]          = $this->user->getUid();
             $projectStructure[ 'id_customer' ]  = $this->user->getEmail();
             $this->projectManager->setTeam( $this->team );
+        }
+
+        // mmtGlossaries
+        if( $this->mmtGlossaries ){
+            $projectStructure[ 'mmt_glossaries' ] = $this->mmtGlossaries;
         }
 
         // with the qa template id
@@ -1131,6 +1146,31 @@ class NewController extends ajaxController {
             }
 
             $this->qaModel = $qaModel;
+        }
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function __validateUserMTEngine(){
+
+        // any other engine than MyMemory
+        if($this->postInput[ 'mt_engine' ] and $this->postInput[ 'mt_engine' ] > 1){
+            EngineValidator::engineBelongsToUser($this->postInput[ 'mt_engine' ], $this->user->uid);
+        }
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function __validateMMTGlossaries(){
+
+        if(!empty( $this->postInput[ 'mmt_glossaries' ] )){
+
+            $mmtGlossaries = html_entity_decode($this->postInput[ 'mmt_glossaries' ]);
+            MMTValidator::validateGlossary($mmtGlossaries);
+
+            $this->mmtGlossaries = $mmtGlossaries;
         }
     }
 

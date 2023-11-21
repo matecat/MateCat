@@ -2,11 +2,27 @@
 
 namespace Engines;
 
+use Engines\DeepL\DeepLApiClient;
 use Engines_AbstractEngine;
-use Engines_Results_AbstractResponse;
 
 class DeepL extends Engines_AbstractEngine
 {
+    /**
+     * @return DeepLApiClient
+     */
+    protected function _getClient()
+    {
+        return DeepLApiClient::newInstance();
+    }
+
+    /**
+     * @return mixed
+     * @throws DeepL\DeepLApiException
+     */
+    public function glossaries()
+    {
+        return $this->_getClient()->allGlossaries();
+    }
 
     protected function _decode($rawValue)
     {

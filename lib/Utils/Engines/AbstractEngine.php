@@ -97,6 +97,14 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
     }
 
     /**
+     * @return EnginesModel_EngineStruct
+     */
+    public function getEngineRecord()
+    {
+        return $this->engineRecord;
+    }
+
+    /**
      * @param $key
      *
      * @return null

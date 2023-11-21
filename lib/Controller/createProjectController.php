@@ -6,9 +6,12 @@ use FilesStorage\FilesStorageFactory;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use ProjectQueue\Queue;
 use Matecat\XliffParser\Utils\Files as XliffFiles;
+use Validator\EngineValidator;
+use Validator\MMTValidator;
 
 class createProjectController extends ajaxController {
 
+    private $mmt_glossaries;
     private $file_name;
     private $project_name;
     private $source_lang;
@@ -58,6 +61,8 @@ class createProjectController extends ajaxController {
                 'private_tm_key'    => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
                 'pretranslate_100'  => [ 'filter' => FILTER_VALIDATE_INT ],
                 'id_team'           => [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR ],
+
+                'mmt_glossaries'     => [ 'filter' => FILTER_SANITIZE_STRING ],
 
                 'project_completion' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ], // features customization
                 'get_public_matches' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ], // disable public TM matches
@@ -150,6 +155,7 @@ class createProjectController extends ajaxController {
         $this->__validateSourceLang( Langs_Languages::getInstance() );
         $this->__validateTargetLangs( Langs_Languages::getInstance() );
         $this->__validateUserMTEngine();
+        $this->__validateMMTGlossaries();
         $this->__appendFeaturesToProject();
         $this->__generateTargetEngineAssociation();
         if ( $this->userIsLogged ) {
@@ -287,6 +293,14 @@ class createProjectController extends ajaxController {
         $projectStructure[ 'target_language_mt_engine_id' ] = $this->postInput[ 'target_language_mt_engine_id' ];
         $projectStructure[ 'user_ip' ]                      = Utils::getRealIpAddr();
         $projectStructure[ 'HTTP_HOST' ]                    = INIT::$HTTPHOST;
+
+
+        // MMT Glossaries
+        // (if $engine is not an MMT instance, ignore 'mmt_glossaries')
+        $engine = Engine::getInstance( $this->mt_engine );
+        if($engine instanceof Engines_MMT and $this->mmt_glossaries !== null){
+            $projectStructure[ 'mmt_glossaries' ] = $this->mmt_glossaries;
+        }
 
         //TODO enable from CONFIG
         $projectStructure[ 'metadata' ] = $this->metadata;
@@ -510,28 +524,36 @@ class createProjectController extends ajaxController {
         }
     }
 
+    /**
+     * Check if MT engine (except MyMemory) belongs to user
+     */
     private function __validateUserMTEngine() {
 
-        if ( array_search( $this->mt_engine, [ 0, 1 ] ) === false ) {
-
-            if ( !$this->userIsLogged ) {
-                $this->result[ 'errors' ][] = [ "code" => -2, "message" => "Invalid MT Engine." ];
-
-                return;
+        if($this->mt_engine > 1 and $this->isLoggedIn()){
+            try {
+                EngineValidator::engineBelongsToUser($this->mt_engine, $this->user->uid);
+            } catch (Exception $exception){
+                $this->result[ 'errors' ][] = [ "code" => -2, "message" => $exception->getMessage() ];
             }
-
-            $engineQuery      = new EnginesModel_EngineStruct();
-            $engineQuery->id  = $this->mt_engine;
-            $engineQuery->uid = $this->user->uid;
-            $enginesDao       = new EnginesModel_EngineDAO();
-            $engine           = $enginesDao->setCacheTTL( 60 * 5 )->read( $engineQuery );
-
-            if ( empty( $engine ) ) {
-                $this->result[ 'errors' ][] = [ "code" => -2, "message" => "Invalid MT Engine." ];
-            }
-
         }
+    }
 
+    /**
+     * Validate `mmt_glossaries` string
+     */
+    private function __validateMMTGlossaries() {
+
+        if ( !empty( $this->postInput[ 'mmt_glossaries' ] ) and $this->isLoggedIn() ) {
+            try {
+                $mmtGlossaries = html_entity_decode($this->postInput[ 'mmt_glossaries' ]);
+                MMTValidator::validateGlossary($mmtGlossaries);
+
+                $this->mmt_glossaries = $mmtGlossaries;
+
+            } catch (Exception $exception){
+                $this->result[ 'errors' ][] = [ "code" => -6, "message" => $exception->getMessage() ];
+            }
+        }
     }
 
     /**
