@@ -50,7 +50,7 @@ class AnalysisProject implements JsonSerializable {
                 'create_date' => $this->createDate,
                 'jobs'        => array_values( $this->jobs ),
                 'summary'     => $this->summary,
-                'analyze'     => $this->analyzeLink
+                'analyze_url' => $this->analyzeLink
         ];
     }
 
