@@ -70,8 +70,6 @@ DQF_ENCRYPTION_IV = encryption-iv
 DQF_GENERIC_USERNAME = "matecatGeneric@taus.net"
 DQF_GENERIC_PASSWORD = "generic-user-password"
 
-DEEPL_API_KEY = "xxxxxxxxxxxxxxxxxxxxxxxx"
-
 ; Segments partition rule, leave unset to write to `segments` table.
 ; Format of configuration string is: "{id_project}:{table_name};...".
 ; Project ids must be sorted in ascecnding order. Match on `id_project` is "less than" ( < ).

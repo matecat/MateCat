@@ -24,6 +24,9 @@ class DeepLController extends KleinController
             $engineId = filter_var( $this->request->engineId, FILTER_SANITIZE_NUMBER_INT );
             $deepLClient = $this->getDeepLClient($engineId);
 
+            $deepLApiKey = $deepLClient->getEngineRecord()->extra_parameters['DeepL-Auth-Key'];
+            $deepLClient->setApiKey($deepLApiKey);
+
             $this->response->status()->setCode( 200 );
             $this->response->json($deepLClient->glossaries());
             exit();
@@ -45,6 +48,13 @@ class DeepLController extends KleinController
      */
     private function getDeepLClient($engineId)
     {
-        return EngineValidator::engineBelongsToUser($engineId, $this->user->uid, DeepL::class);
+        $engine = EngineValidator::engineBelongsToUser($engineId, $this->user->uid, DeepL::class);
+        $extraParams = $engine->getEngineRecord()->extra_parameters;
+
+        if(!isset($extraParams['DeepL-Auth-Key'])){
+            throw new Exception('`DeepL-Auth-Key` is not set');
+        }
+
+        return $engine;
     }
 }

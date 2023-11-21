@@ -4,15 +4,28 @@ namespace Engines;
 
 use Engines\DeepL\DeepLApiClient;
 use Engines_AbstractEngine;
+use Exception;
 
 class DeepL extends Engines_AbstractEngine
 {
+    private $apiKey;
+
+    public function setApiKey($apiKey)
+    {
+        $this->apiKey = $apiKey;
+    }
+
     /**
      * @return DeepLApiClient
+     * @throws Exception
      */
     protected function _getClient()
     {
-        return DeepLApiClient::newInstance();
+        if($this->apiKey === null){
+            throw new Exception("API ket not set");
+        }
+
+        return DeepLApiClient::newInstance($this->apiKey);
     }
 
     /**

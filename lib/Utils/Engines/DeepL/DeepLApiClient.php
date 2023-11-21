@@ -14,11 +14,12 @@ class DeepLApiClient
     private $apiKey;
 
     /**
+     * @param $apiKey
      * @return static
      */
-    public static function newInstance()
+    public static function newInstance($apiKey)
     {
-        return new static( INIT::$DEEPL_API_KEY );
+        return new static($apiKey );
     }
 
     /**

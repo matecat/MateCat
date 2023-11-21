@@ -124,8 +124,6 @@ class INIT {
     public static $OPEN_AI_MAX_TOKENS;
     public static $OPEN_AI_MAX_REQUEST_TOKENS;
 
-    public static $DEEPL_API_KEY;
-
     /**
      * DQF configuration
      *

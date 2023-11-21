@@ -19,7 +19,7 @@ class DeepLStruct
     /**
      * @var string
      */
-    public $base_url = "https://api.deepl.com/v1/";
+    public $base_url = "https://deepl.com";
 
     /**
      * @var string
@@ -27,23 +27,17 @@ class DeepLStruct
     public $translate_relative_url = "translate";
 
     /**
-     * @var string
+     * @var array
      */
-    public $contribute_relative_url = "memories/content";
-
-    /**
-     * @var string
-     */
-    public $update_relative_url = "memories/content";
+    public $others = [
+        "relative_glossaries_url" => "glossaries",
+    ];
 
     /**
      * @var array
      */
-    public $others = [
-        "tmx_import_relative_url" => "memories/content",
-        "api_key_check_auth_url" => "users/me",
-        "user_update_activate" => "memories/connect",
-        "context_get" => "context-vector",
+    public $extra_parameters = [
+        'DeepL-Auth-Key' => "",
     ];
 
     /**
