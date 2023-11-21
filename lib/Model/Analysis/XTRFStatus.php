@@ -53,7 +53,7 @@ class XTRFStatus extends AbstractStatus {
                     $vector[ 'source' ]    = $j->getSource();
                     $vector[ 'target' ]    = $j->getTarget();
 
-                    $outputContent[ $j->getId() . "-" . $chunk->getPassword() ] .= $this->formatFile( $j->getSummary(), $vector );
+                    $outputContent[ $j->getId() . "-" . $chunk->getPassword() ] .= $this->formatFile( $chunk->getSummary(), $vector );
 
                 }
 

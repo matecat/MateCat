@@ -2,6 +2,7 @@
 
 use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
+use Analysis\Health;
 use API\App\Json\Analysis\AnalysisProject;
 use Model\Analysis\Status;
 
@@ -176,7 +177,7 @@ class analyzeController extends viewController {
         $this->template->num_segments_analyzed = $this->model->getSummary()->getSegmentsAnalyzed();
 
         //perform check on running daemons and send a mail randomly
-        $misconfiguration = \Analysis\Status::thereIsAMisconfiguration();
+        $misconfiguration = Health::thereIsAMisconfiguration();
         if ( $misconfiguration && mt_rand( 1, 3 ) == 1 ) {
             $msg = "<strong>The analysis daemons seem not to be running despite server configuration.</strong><br />Change the application configuration or start analysis daemons.";
             Utils::sendErrMailReport( $msg, "Matecat Misconfiguration" );

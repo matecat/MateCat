@@ -23,11 +23,6 @@ class AnalysisJob implements JsonSerializable {
     protected $chunks = [];
 
     /**
-     * @var AnalysisJobSummary
-     */
-    protected $summary = null;
-
-    /**
      * @var int
      */
     protected $total_raw = 0;
@@ -62,7 +57,6 @@ class AnalysisJob implements JsonSerializable {
                 'source'           => $this->source,
                 'target'           => $this->target,
                 'chunks'           => array_values( $this->chunks ),
-                'summary'          => $this->summary,
                 'total_raw'        => $this->total_raw,
                 'total_equivalent' => $this->total_equivalent,
                 'total_industry'   => $this->total_industry,
@@ -74,7 +68,6 @@ class AnalysisJob implements JsonSerializable {
         $this->id      = $id;
         $this->source  = $source;
         $this->target  = $target;
-        $this->summary = new AnalysisJobSummary();
     }
 
     /**
@@ -109,13 +102,6 @@ class AnalysisJob implements JsonSerializable {
      */
     public function getId() {
         return $this->id;
-    }
-
-    /**
-     * @return AnalysisJobSummary
-     */
-    public function getSummary() {
-        return $this->summary;
     }
 
     /**

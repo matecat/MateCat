@@ -21,7 +21,7 @@ use RedisHandler;
  * Should be the final class when daemons will refactored
  *
  */
-class Status {
+class Health {
 
     public static function fastAnalysisIsRunning( $redisHandler ) {
 

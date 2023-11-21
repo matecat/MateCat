@@ -265,15 +265,20 @@ abstract class AbstractStatus {
             $match->incrementRaw( $segInfo[ 'raw_word_count' ] );
             $match->incrementEquivalent( $segInfo[ 'eq_word_count' ] );
 
-            //increment job summary for the current match type
-            $jobMatchTotal = $job->getSummary()->getMatch( $matchType );
-            $jobMatchTotal->incrementRaw( $segInfo[ 'raw_word_count' ] );
-            $jobMatchTotal->incrementEquivalent( $segInfo[ 'eq_word_count' ] );
+            //increment chunk summary for the current match type
+            $chunkMatchTotal = $chunk->getSummary()->getMatch( $matchType );
+            $chunkMatchTotal->incrementRaw( $segInfo[ 'raw_word_count' ] );
+            $chunkMatchTotal->incrementEquivalent( $segInfo[ 'eq_word_count' ] );
 
             // increment job totals
             $job->incrementRaw( $segInfo[ 'raw_word_count' ] );
             $job->incrementEquivalent( $segInfo[ 'eq_word_count' ] );
             $job->incrementIndustry( $segInfo[ 'standard_word_count' ] );
+
+            // increment chunk totals
+            $chunk->incrementRaw( $segInfo[ 'raw_word_count' ] );
+            $chunk->incrementEquivalent( $segInfo[ 'eq_word_count' ] );
+            $chunk->incrementIndustry( $segInfo[ 'standard_word_count' ] );
 
             // increment project summary
             if ( $segInfo[ 'st_status_analysis' ] == 'DONE' ) {

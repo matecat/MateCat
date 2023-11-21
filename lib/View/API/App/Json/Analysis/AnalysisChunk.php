@@ -9,7 +9,6 @@
 
 namespace API\App\Json\Analysis;
 
-use Chunks_ChunkStruct;
 use Engine;
 use Exception;
 use Jobs_JobStruct;
@@ -19,6 +18,11 @@ use Url\JobUrlBuilder;
 use Users_UserStruct;
 
 class AnalysisChunk implements JsonSerializable {
+
+    /**
+     * @var AnalysisJobSummary
+     */
+    protected $summary = null;
 
     /**
      * @var AnalysisFile[]
@@ -37,10 +41,31 @@ class AnalysisChunk implements JsonSerializable {
      */
     protected $user;
 
+    /**
+     * @return AnalysisJobSummary
+     */
+    public function getSummary() {
+        return $this->summary;
+    }
+
+    /**
+     * @var int
+     */
+    protected $total_raw = 0;
+    /**
+     * @var int
+     */
+    protected $total_equivalent = 0;
+    /**
+     * @var int
+     */
+    protected $total_industry = 0;
+
     public function __construct( Jobs_JobStruct $chunkStruct, $projectName, Users_UserStruct $user ) {
         $this->chunkStruct = $chunkStruct;
         $this->projectName = $projectName;
         $this->user        = $user;
+        $this->summary     = new AnalysisJobSummary();
     }
 
     /**
@@ -54,14 +79,21 @@ class AnalysisChunk implements JsonSerializable {
         return $this;
     }
 
+    /**
+     * @throws Exception
+     */
     public function jsonSerialize() {
         return [
-                'password'    => $this->chunkStruct->password,
-                'status'      => $this->chunkStruct->status,
-                'engines'     => $this->getEngines(),
-                'memory_keys' => $this->getMemoryKeys(),
-                'urls'        => JobUrlBuilder::createFromJobStructAndProjectName( $this->chunkStruct, $this->projectName )->getUrls(),
-                'files'       => array_values( $this->files )
+                'password'         => $this->chunkStruct->password,
+                'status'           => $this->chunkStruct->status,
+                'engines'          => $this->getEngines(),
+                'memory_keys'      => $this->getMemoryKeys(),
+                'urls'             => JobUrlBuilder::createFromJobStructAndProjectName( $this->chunkStruct, $this->projectName )->getUrls(),
+                'files'            => array_values( $this->files ),
+                'summary'          => $this->summary,
+                'total_raw'        => $this->total_raw,
+                'total_equivalent' => $this->total_equivalent,
+                'total_industry'   => $this->total_industry,
         ];
     }
 
@@ -71,7 +103,7 @@ class AnalysisChunk implements JsonSerializable {
     public function getChunkStruct() {
         return $this->chunkStruct;
     }
-    
+
     /**
      * @return string
      */
@@ -121,6 +153,34 @@ class AnalysisChunk implements JsonSerializable {
         }
 
         return $tmKeys;
+    }
+
+
+    /**
+     * @param $raw
+     *
+     * @return void
+     */
+    public function incrementRaw( $raw ) {
+        $this->total_raw += (int)$raw;
+    }
+
+    /**
+     * @param $equivalent
+     *
+     * @return void
+     */
+    public function incrementEquivalent( $equivalent ) {
+        $this->total_equivalent += round( $equivalent );
+    }
+
+    /**
+     * @param $industry
+     *
+     * @return void
+     */
+    public function incrementIndustry( $industry ) {
+        $this->total_industry += round( $industry );
     }
 
 }
