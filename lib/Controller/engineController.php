@@ -1,5 +1,7 @@
 <?php
 
+use EnginesModel\DeepLStruct;
+
 /**
  * Created by PhpStorm.
  * User: roberto
@@ -115,6 +117,18 @@ class engineController extends ajaxController {
         $validEngine     = true;
 
         switch ( strtolower( $this->provider ) ) {
+
+            case strtolower( Constants_Engines::DEEPL ):
+
+                $newEngineStruct = DeepLStruct::getStruct();
+
+                $newEngineStruct->name                                 = $this->name;
+                $newEngineStruct->uid                                  = $this->user->uid;
+                $newEngineStruct->type                                 = Constants_Engines::MT;
+                $newEngineStruct->extra_parameters[ 'DeepL-Auth-Key' ] = $this->engineData[ 'client_id' ];
+                break;
+
+
             case strtolower( Constants_Engines::MICROSOFT_HUB ):
 
                 /**

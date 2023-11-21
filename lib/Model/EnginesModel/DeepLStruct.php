@@ -3,8 +3,9 @@
 namespace EnginesModel;
 
 use Constants_Engines;
+use EnginesModel_EngineStruct;
 
-class DeepLStruct
+class DeepLStruct extends EnginesModel_EngineStruct
 {
     /**
      * @var string
@@ -19,7 +20,7 @@ class DeepLStruct
     /**
      * @var string
      */
-    public $base_url = "https://deepl.com";
+    public $base_url = "https://api.deepl.com";
 
     /**
      * @var string
@@ -49,4 +50,8 @@ class DeepLStruct
      * @var int
      */
     public $penalty = 14;
+
+    public static function getStruct() {
+        return new DeepLStruct();
+    }
 }
