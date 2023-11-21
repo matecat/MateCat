@@ -41,6 +41,20 @@ class DeepLGlossaryController extends KleinController
         }
     }
 
+    /**
+     * Create a new glossary.
+     *
+     * Payload example:
+     *
+     * {
+     *   "name": "My Glossary",
+     *   "source_lang": "en",
+     *   "target_lang": "de",
+     *   "entries": "Hello\tGuten Tag",
+     *   "entries_format": "tsv"
+     * }
+     *
+     */
     public function create()
     {
         try {
