@@ -9,7 +9,9 @@
 
 namespace API\App\Json\Analysis;
 
+use Exception;
 use JsonSerializable;
+use Langs_Languages;
 
 class AnalysisJob implements JsonSerializable {
 
@@ -46,12 +48,22 @@ class AnalysisJob implements JsonSerializable {
      * @var string
      */
     protected $target;
+    /**
+     * @var string
+     */
+    protected $sourceName;
+    /**
+     * @var string
+     */
+    protected $targetName;
 
     public function jsonSerialize() {
         return [
                 'id'               => $this->id,
                 'source'           => $this->source,
+                'source_name'      => $this->sourceName,
                 'target'           => $this->target,
+                'target_name'      => $this->targetName,
                 'chunks'           => array_values( $this->chunks ),
                 'total_raw'        => $this->total_raw,
                 'total_equivalent' => $this->total_equivalent,
@@ -60,14 +72,19 @@ class AnalysisJob implements JsonSerializable {
     }
 
     /**
-     * @param int $id
+     * @param int    $id
      * @param string $source
      * @param string $target
+     *
+     * @throws Exception
      */
     public function __construct( $id, $source, $target ) {
-        $this->id     = (int)$id;
-        $this->source = $source;
-        $this->target = $target;
+        $this->id         = (int)$id;
+        $this->source     = $source;
+        $this->target     = $target;
+        $lang_handler     = Langs_Languages::getInstance();
+        $this->sourceName = $lang_handler->getLocalizedName( $source );
+        $this->targetName = $lang_handler->getLocalizedName( $target );
     }
 
     /**
