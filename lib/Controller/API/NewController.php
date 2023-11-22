@@ -108,6 +108,10 @@ class NewController extends ajaxController {
      */
     private $mmtGlossaries;
 
+    private $deepl_formality;
+
+    private $deepl_id_glossary;
+
     private function setBadRequestHeader() {
         $this->httpHeader = 'HTTP/1.0 400 Bad Request';
     }
@@ -184,7 +188,10 @@ class NewController extends ajaxController {
                         'flags'  => FILTER_REQUIRE_ARRAY,
                 ],
                 'project_info'       => [ 'filter' => FILTER_SANITIZE_STRING ],
-                'mmt_glossaries'     => [ 'filter' => FILTER_SANITIZE_STRING ]
+                'mmt_glossaries'     => [ 'filter' => FILTER_SANITIZE_STRING ],
+
+                'deepl_formality'    => [ 'filter' => FILTER_SANITIZE_STRING ],
+                'deepl_id_glossary'  => [ 'filter' => FILTER_SANITIZE_STRING ],
         ];
 
         $filterArgs = $this->featureSet->filter( 'filterNewProjectInputFilters', $filterArgs, $this->userIsLogged );
@@ -232,6 +239,7 @@ class NewController extends ajaxController {
             $this->__validateQaModel();
             $this->__validateUserMTEngine();
             $this->__validateMMTGlossaries();
+            $this->__validateDeepLGlossaryParams();
             $this->__appendFeaturesToProject();
             $this->__generateTargetEngineAssociation();
         } catch ( Exception $ex ) {
@@ -632,6 +640,15 @@ class NewController extends ajaxController {
         // mmtGlossaries
         if( $this->mmtGlossaries ){
             $projectStructure[ 'mmt_glossaries' ] = $this->mmtGlossaries;
+        }
+
+        // DeepL
+        if($this->deepl_formality !== null){
+            $projectStructure['deepl_formality'] = $this->deepl_formality;
+        }
+
+        if($this->deepl_id_glossary !== null){
+            $projectStructure['deepl_id_glossary'] = $this->deepl_id_glossary;
         }
 
         // with the qa template id
@@ -1171,6 +1188,29 @@ class NewController extends ajaxController {
             MMTValidator::validateGlossary($mmtGlossaries);
 
             $this->mmtGlossaries = $mmtGlossaries;
+        }
+    }
+
+    /**
+     * Validate DeepL params
+     */
+    private function __validateDeepLGlossaryParams() {
+
+        if ( !empty( $this->postInput[ 'deepl_formality' ] ) ) {
+
+            $allowedFormalities = [
+                'default',
+                'prefer_less',
+                'prefer_more'
+            ];
+
+            if(in_array($this->postInput[ 'deepl_formality' ], $allowedFormalities)){
+                $this->deepl_formality = $this->postInput[ 'deepl_formality' ];
+            }
+        }
+
+        if ( !empty( $this->postInput[ 'deepl_id_glossary' ] ) ) {
+            $this->deepl_id_glossary = $this->postInput[ 'deepl_id_glossary' ];
         }
     }
 

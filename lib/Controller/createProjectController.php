@@ -11,6 +11,8 @@ use Validator\MMTValidator;
 
 class createProjectController extends ajaxController {
 
+    private $deepl_id_glossary;
+    private $deepl_formality;
     private $mmt_glossaries;
     private $file_name;
     private $project_name;
@@ -62,7 +64,10 @@ class createProjectController extends ajaxController {
                 'pretranslate_100'  => [ 'filter' => FILTER_VALIDATE_INT ],
                 'id_team'           => [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR ],
 
-                'mmt_glossaries'     => [ 'filter' => FILTER_SANITIZE_STRING ],
+                'mmt_glossaries'     => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+
+                'deepl_id_glossary'  => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'deepl_formality'     => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
 
                 'project_completion' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ], // features customization
                 'get_public_matches' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ], // disable public TM matches
@@ -156,6 +161,7 @@ class createProjectController extends ajaxController {
         $this->__validateTargetLangs( Langs_Languages::getInstance() );
         $this->__validateUserMTEngine();
         $this->__validateMMTGlossaries();
+        $this->__validateDeepLGlossaryParams();
         $this->__appendFeaturesToProject();
         $this->__generateTargetEngineAssociation();
         if ( $this->userIsLogged ) {
@@ -294,12 +300,20 @@ class createProjectController extends ajaxController {
         $projectStructure[ 'user_ip' ]                      = Utils::getRealIpAddr();
         $projectStructure[ 'HTTP_HOST' ]                    = INIT::$HTTPHOST;
 
-
         // MMT Glossaries
         // (if $engine is not an MMT instance, ignore 'mmt_glossaries')
         $engine = Engine::getInstance( $this->mt_engine );
         if($engine instanceof Engines_MMT and $this->mmt_glossaries !== null){
             $projectStructure[ 'mmt_glossaries' ] = $this->mmt_glossaries;
+        }
+
+        // DeepL
+        if($this->deepl_formality !== null){
+            $projectStructure['deepl_formality'] = $this->deepl_formality;
+        }
+
+        if($this->deepl_id_glossary !== null){
+            $projectStructure['deepl_id_glossary'] = $this->deepl_id_glossary;
         }
 
         //TODO enable from CONFIG
@@ -555,6 +569,34 @@ class createProjectController extends ajaxController {
             }
         }
     }
+
+    /**
+     * Validate DeepL params
+     */
+    private function __validateDeepLGlossaryParams() {
+
+        if ( $this->isLoggedIn() ) {
+
+            if ( !empty( $this->postInput[ 'deepl_formality' ] ) ) {
+
+                $allowedFormalities = [
+                    'default',
+                    'prefer_less',
+                    'prefer_more'
+                ];
+
+                if(in_array($this->postInput[ 'deepl_formality' ], $allowedFormalities)){
+                    $this->deepl_formality = $this->postInput[ 'deepl_formality' ];
+                }
+            }
+
+            if ( !empty( $this->postInput[ 'deepl_id_glossary' ] ) ) {
+                $this->deepl_id_glossary = $this->postInput[ 'deepl_id_glossary' ];
+            }
+        }
+    }
+
+
 
     /**
      * This could be already set by MMT engine if enabled ( so check key existence and do not override )

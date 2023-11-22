@@ -187,7 +187,9 @@ class ProjectManager {
                     'qa_model'                     => null,
                     'target_language_mt_engine_id' => [],
                     'standard_word_count'          => 0,
-                    'mmt_glossaries'               => null
+                    'mmt_glossaries'               => null,
+                    'deepl_formality'              => null,
+                    'deepl_id_glossary'            => null,
                 ] );
 
         }
@@ -381,6 +383,24 @@ class ProjectManager {
                 $this->projectStructure[ 'mmt_glossaries' ]
             );
         }
+
+        // add DeepL params here
+        if( $this->projectStructure[ 'deepl_formality' ] and !empty( $this->projectStructure[ 'deepl_formality' ] ) ){
+            $dao->set(
+                $this->projectStructure[ 'id_project' ],
+                'deepl_formality',
+                $this->projectStructure[ 'deepl_formality' ]
+            );
+        }
+
+        if( $this->projectStructure[ 'deepl_id_glossary' ] and !empty( $this->projectStructure[ 'deepl_id_glossary' ] ) ){
+            $dao->set(
+                $this->projectStructure[ 'id_project' ],
+                'deepl_id_glossary',
+                $this->projectStructure[ 'deepl_id_glossary' ]
+            );
+        }
+
     }
 
     private function sanitizeProjectOptions( $options ) {
