@@ -61,6 +61,11 @@ class AnalysisJob implements JsonSerializable {
      */
     protected $outsourceAvailable = true;
 
+    /**
+     * @var array
+     */
+    protected $payable_rates = [];
+
     public function jsonSerialize() {
         return [
                 'id'                  => $this->id,
@@ -73,6 +78,7 @@ class AnalysisJob implements JsonSerializable {
                 'total_equivalent'    => $this->total_equivalent,
                 'total_industry'      => $this->total_industry,
                 'outsource_available' => $this->outsourceAvailable,
+                'payable_rates'       => $this->payable_rates
         ];
     }
 
@@ -174,6 +180,17 @@ class AnalysisJob implements JsonSerializable {
      */
     public function setOutsourceAvailable( $outsourceAvailable ) {
         $this->outsourceAvailable = $outsourceAvailable;
+
+        return $this;
+    }
+
+    /**
+     * @param array $payable_rates
+     *
+     * @return $this
+     */
+    public function setPayableRates( $payable_rates ) {
+        $this->payable_rates = $payable_rates;
 
         return $this;
     }

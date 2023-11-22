@@ -229,6 +229,7 @@ abstract class AbstractStatus {
             if ( !isset( $chunk ) || $chunk->getPassword() != $segInfo[ 'jpassword' ] ) {
                 $chunkStruct = Chunks_ChunkDao::getByIdAndPassword( $segInfo[ 'jid' ], $segInfo[ 'jpassword' ], 60 * 10 );
                 $chunk = new AnalysisChunk( $chunkStruct, $this->_project_data[ 0 ][ 'pname' ], $this->user );
+                $job->setPayableRates( json_decode( $chunkStruct->payable_rates ) );
                 $job->setChunk( $chunk );
             }
 
