@@ -40,7 +40,7 @@ class AnalysisFile implements MatchContainerInterface, JsonSerializable {
     protected $id_file_part;
 
     public function __construct( $id, $id_file_part, $name, $original_name ) {
-        $this->id            = $id;
+        $this->id            = (int)$id;
         $this->id_file_part  = $id_file_part;
         $this->name          = $name;
         $this->original_name = $original_name;
