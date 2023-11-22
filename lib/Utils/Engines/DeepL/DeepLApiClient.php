@@ -35,18 +35,31 @@ class DeepLApiClient
      * @param $text
      * @param $sourceLang
      * @param $targetLang
+     * @param null $formality
+     * @param null $idGlossary
+     *
      * @return mixed
      * @throws DeepLApiException
      */
-    public function translate($text, $sourceLang, $targetLang)
+    public function translate($text, $sourceLang, $targetLang, $formality = null, $idGlossary = null)
     {
-        return $this->send('POST', '/translate', [
+        $args = [
             'text' => [
                 $text
             ],
             'source_lang' => $sourceLang,
             'target_lang' => $targetLang,
-        ]);
+        ];
+
+        if($formality){
+            $args['formality'] = $formality;
+        }
+
+        if($idGlossary){
+            $args['glossary_id'] = $idGlossary;
+        }
+
+        return $this->send('POST', '/translate', $args);
     }
 
     /**

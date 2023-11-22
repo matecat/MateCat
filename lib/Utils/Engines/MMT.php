@@ -125,30 +125,8 @@ class Engines_MMT extends Engines_AbstractEngine {
                     date( "Y-m-d" )
             ) )->getMatches(2, [], $_config[ 'source' ], $_config[ 'target' ]);
         } catch ( Exception $e ) {
-            return $this->fallback( $_config );
+            return $this->GoogleTranslateFallback( $_config );
         }
-
-    }
-
-    protected function fallback( $_config ) {
-
-        /**
-         * Create a record of type GoogleTranslate
-         */
-        $newEngineStruct = EnginesModel_GoogleTranslateStruct::getStruct();
-
-        $newEngineStruct->name                                = "Generic";
-        $newEngineStruct->uid                                 = 0;
-        $newEngineStruct->type                                = Constants_Engines::MT;
-        $newEngineStruct->extra_parameters[ 'client_secret' ] = $_config[ 'secret_key' ];
-        $newEngineStruct->others                              = [];
-
-        $gtEngine = Engine::createTempInstance( $newEngineStruct );
-
-        /**
-         * @var $gtEngine Engines_GoogleTranslate
-         */
-        return $gtEngine->get( $_config );
 
     }
 

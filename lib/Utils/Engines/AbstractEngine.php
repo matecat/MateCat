@@ -300,4 +300,30 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
 
         return "@" . realpath( $file );
     }
+
+    /**
+     * @param $_config
+     * @return array|Engines_Results_AbstractResponse
+     */
+    protected function GoogleTranslateFallback( $_config ) {
+
+        /**
+         * Create a record of type GoogleTranslate
+         */
+        $newEngineStruct = EnginesModel_GoogleTranslateStruct::getStruct();
+
+        $newEngineStruct->name                                = "Generic";
+        $newEngineStruct->uid                                 = 0;
+        $newEngineStruct->type                                = Constants_Engines::MT;
+        $newEngineStruct->extra_parameters[ 'client_secret' ] = $_config[ 'secret_key' ];
+        $newEngineStruct->others                              = [];
+
+        $gtEngine = Engine::createTempInstance( $newEngineStruct );
+
+        /**
+         * @var $gtEngine Engines_GoogleTranslate
+         */
+        return $gtEngine->get( $_config );
+
+    }
 }
