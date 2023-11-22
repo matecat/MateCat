@@ -9,8 +9,6 @@
 
 namespace API\App\Json\Analysis;
 
-use API\App\Json\OutsourceConfirmation;
-use API\V2\Json\JobTranslator;
 use Engine;
 use Exception;
 use Jobs_JobStruct;
@@ -56,16 +54,6 @@ class AnalysisChunk implements JsonSerializable {
      */
     protected $total_industry = 0;
 
-    /**
-     * @var OutsourceConfirmation
-     */
-    protected $outsource = null;
-
-    /**
-     * @var JobTranslator
-     */
-    protected $translator = null;
-
     public function __construct( Jobs_JobStruct $chunkStruct, $projectName, Users_UserStruct $user ) {
         $this->chunkStruct = $chunkStruct;
         $this->projectName = $projectName;
@@ -99,8 +87,6 @@ class AnalysisChunk implements JsonSerializable {
                 'total_raw'        => $this->total_raw,
                 'total_equivalent' => $this->total_equivalent,
                 'total_industry'   => $this->total_industry,
-                'outsource'        => !empty( $this->outsource ) ? $this->outsource->render() : null,
-                'translator'       => !empty( $this->translator ) ? $this->translator->renderItem() : null
         ];
     }
 
@@ -194,28 +180,6 @@ class AnalysisChunk implements JsonSerializable {
      */
     public function incrementIndustry( $industry ) {
         $this->total_industry += round( $industry );
-    }
-
-    /**
-     * @param OutsourceConfirmation|null $outsource
-     *
-     * @return $this
-     */
-    public function setOutsource( OutsourceConfirmation $outsource = null ) {
-        $this->outsource = $outsource;
-
-        return $this;
-    }
-
-    /**
-     * @param JobTranslator|null $translator
-     *
-     * @return $this
-     */
-    public function setTranslator( JobTranslator $translator = null ) {
-        $this->translator = $translator;
-
-        return $this;
     }
 
 }

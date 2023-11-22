@@ -228,30 +228,8 @@ abstract class AbstractStatus {
 
             if ( !isset( $chunk ) || $chunk->getPassword() != $segInfo[ 'jpassword' ] ) {
                 $chunkStruct = Chunks_ChunkDao::getByIdAndPassword( $segInfo[ 'jid' ], $segInfo[ 'jpassword' ], 60 * 10 );
-
-                // chunk already outsourced
-                $outsourceInfo = $chunkStruct->getOutsource();
-                $tStruct       = $chunkStruct->getTranslator();
-                $outsource     = null;
-                $translator    = null;
-                if ( !empty( $outsourceInfo ) ) {
-                    $outsource = new OutsourceConfirmation( $outsourceInfo );
-                } elseif ( !empty( $tStruct ) ) {
-                    $translator = new JobTranslator( $tStruct );
-                }
                 $chunk = new AnalysisChunk( $chunkStruct, $this->_project_data[ 0 ][ 'pname' ], $this->user );
-                $chunk->setOutsource( $outsource );
-                $chunk->setTranslator( $translator );
-
                 $job->setChunk( $chunk );
-            }
-
-            // chunk already outsourced
-            if ( $target === null or $segInfo[ 'target' ] . $segInfo[ 'jpassword' ] !== $target ) {
-                $job->setOutsourceAvailable(
-                        $this->isOutsourceEnabled( $segInfo[ 'target' ], $segInfo[ 'id_customer' ], $segInfo[ 'jid' ] )
-                );
-                $target = $segInfo[ 'target' ] . $segInfo[ 'jpassword' ];
             }
 
             // is outsource available?
