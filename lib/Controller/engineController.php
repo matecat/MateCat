@@ -1,6 +1,7 @@
 <?php
 
 use EnginesModel\DeepLStruct;
+use Validator\DeepLValidator;
 
 /**
  * Created by PhpStorm.
@@ -126,6 +127,15 @@ class engineController extends ajaxController {
                 $newEngineStruct->uid                                  = $this->user->uid;
                 $newEngineStruct->type                                 = Constants_Engines::MT;
                 $newEngineStruct->extra_parameters[ 'DeepL-Auth-Key' ] = $this->engineData[ 'client_id' ];
+
+                try {
+                    DeepLValidator::validate($newEngineStruct);
+                } catch ( Exception $e ) {
+                    $this->result[ 'errors' ][] = [ 'code' => $e->getCode(), 'message' => $e->getMessage() ];
+
+                    return;
+                }
+
                 break;
 
 
