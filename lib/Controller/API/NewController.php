@@ -47,6 +47,11 @@ class NewController extends ajaxController {
     protected $new_keys = [];
 
     /**
+     * @var Engines_AbstractEngine
+     */
+    private $mt_engine;
+
+    /**
      * @var BasicFeatureStruct[]
      */
     private $projectFeatures = [];
@@ -638,16 +643,16 @@ class NewController extends ajaxController {
         }
 
         // mmtGlossaries
-        if( $this->mmtGlossaries ){
+        if( $this->mt_engine instanceof Engines_MMT and $this->mmtGlossaries ){
             $projectStructure[ 'mmt_glossaries' ] = $this->mmtGlossaries;
         }
 
         // DeepL
-        if($this->deepl_formality !== null){
+        if( $this->mt_engine instanceof Engines_DeepL and $this->deepl_formality !== null ){
             $projectStructure['deepl_formality'] = $this->deepl_formality;
         }
 
-        if($this->deepl_id_glossary !== null){
+        if( $this->mt_engine instanceof Engines_DeepL and $this->deepl_id_glossary !== null ){
             $projectStructure['deepl_id_glossary'] = $this->deepl_id_glossary;
         }
 
@@ -1173,7 +1178,7 @@ class NewController extends ajaxController {
 
         // any other engine than MyMemory
         if($this->postInput[ 'mt_engine' ] and $this->postInput[ 'mt_engine' ] > 1){
-            EngineValidator::engineBelongsToUser($this->postInput[ 'mt_engine' ], $this->user->uid);
+            $this->mt_engine = EngineValidator::engineBelongsToUser($this->postInput[ 'mt_engine' ], $this->user->uid);
         }
     }
 

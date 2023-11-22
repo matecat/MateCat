@@ -308,11 +308,11 @@ class createProjectController extends ajaxController {
         }
 
         // DeepL
-        if($this->deepl_formality !== null){
+        if($engine instanceof Engines_DeepL and $this->deepl_formality !== null){
             $projectStructure['deepl_formality'] = $this->deepl_formality;
         }
 
-        if($this->deepl_id_glossary !== null){
+        if($engine instanceof Engines_DeepL and $this->deepl_id_glossary !== null){
             $projectStructure['deepl_id_glossary'] = $this->deepl_id_glossary;
         }
 
