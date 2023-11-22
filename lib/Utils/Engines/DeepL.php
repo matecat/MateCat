@@ -26,7 +26,7 @@ class Engines_DeepL extends Engines_AbstractEngine
 
     protected function _decode($rawValue)
     {
-        // TODO: Implement _decode() method.
+        throw new DomainException( "Method " . __FUNCTION__ . " not implemented." );
     }
 
     /**
@@ -66,7 +66,7 @@ class Engines_DeepL extends Engines_AbstractEngine
 
         foreach ($result['translations'] as $translation){
             $matches[] = [
-                'id' => 21,
+                'id'               => 0,
                 'create_date'      => '0000-00-00',
                 'segment'          => $_config['segment'],
                 'raw_segment'      => $_config['segment'],

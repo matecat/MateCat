@@ -12,6 +12,7 @@ namespace AsyncTasks\Workers;
 use Constants\Ices;
 use Constants_TranslationStatus;
 use Contribution\ContributionRequestStruct;
+use Engines_DeepL;
 use Engines_MMT;
 use FeatureSet;
 use INIT;
@@ -498,6 +499,21 @@ class GetContributionWorker extends AbstractWorker {
 
                         $config[ 'glossaries' ] = implode(",", $mmtGlossariesArray['glossaries']);
                         $config[ 'ignore_glossary_case' ] = $mmtGlossariesArray['ignore_glossary_case'];
+                    }
+                }
+
+                // glossaries (only for DeepL)
+                if($mt_engine instanceof Engines_DeepL){
+                    $metadataDao = new Projects_MetadataDao();
+                    $deepLFormality = $metadataDao->get($contributionStruct->getProjectStruct()->id, 'deepl_formality', 86400);
+                    $deepLIdGlossary = $metadataDao->get($contributionStruct->getProjectStruct()->id, 'deepl_id_glossary', 86400);
+
+                    if($deepLFormality !== null){
+                        $config[ 'formality' ] = $deepLFormality->value;
+                    }
+
+                    if($deepLIdGlossary !== null){
+                        $config[ 'idGlossary' ] = $deepLIdGlossary->value;
                     }
                 }
 
