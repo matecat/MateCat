@@ -124,9 +124,17 @@ class GlossaryCSVValidator extends AbstractValidator {
         }
 
         foreach ( $languages as $language ) {
+
+            if( empty($language) ){
+                $error          = 'The file contains and empty column header, you can find the correct column headers <a href="https://guides.matecat.com/glossary-file-format" target="_blank">here</a>.';
+                $this->errors[] = $error;
+
+                return false;
+            }
+
             if ( !in_array( $language, $allowedLanguages ) ) {
 
-                $error          = ( strpos( $language, '_' ) !== false ) ? 'The column header ' . $language . ' contains an underscore, please replace it with a dash for the file to be valid for import. Ex: it_IT -> it-iT' : $language . ' is not a valid column header, you can find the correct column headers <a href="https://guides.matecat.com/glossary-file-format" target="_blank">here</a>.';
+                $error          = ( strpos( $language, '_' ) !== false ) ? 'The column header <b>' . $language . '</b> contains an underscore, please replace it with a dash for the file to be valid for import. Ex: it_IT -> it-iT' : '<b>' . $language . '</b> is not a valid column header, you can find the correct column headers <a href="https://guides.matecat.com/glossary-file-format" target="_blank">here</a>.';
                 $this->errors[] = $error;
 
                 return false;

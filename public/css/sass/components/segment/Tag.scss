@@ -241,22 +241,23 @@
     &:after {
       border-right-color: #2fb177;
     }
+  }
 
-    &.tag-focused {
-      cursor: grab;
-      opacity: 1;
-      background-color: #0099cc;
-      &:before {
-        border-left-color: #0099cc;
-      }
-      &:after {
-        border-right-color: #0099cc;
-      }
-      &:active {
-        cursor: grabbing;
-      }
+  &.tag-focused {
+    cursor: grab;
+    opacity: 1;
+    background-color: #0099cc;
+    &:before {
+      border-left-color: #0099cc;
+    }
+    &:after {
+      border-right-color: #0099cc;
+    }
+    &:active {
+      cursor: grabbing;
     }
   }
+
   &.tag-selected {
     cursor: grab;
     opacity: 1;

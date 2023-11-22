@@ -2,8 +2,7 @@ var spec = {
   swagger: '2.0',
   info: {
     title: 'Matecat API',
-    description:
-      `<p>We developed a set of Rest API to let you integrate Matecat in your translation management system or in any other application. Use our API to create projects and check their status.</p>
+    description: `<p>We developed a set of Rest API to let you integrate Matecat in your translation management system or in any other application. Use our API to create projects and check their status.</p>
       <h2>How to authenticate</h2>
       <div class="opblock opblock-get">
         <div class="opblock-summary opblock-summary-get">
@@ -57,8 +56,7 @@ var spec = {
       post: {
         tags: ['Project'],
         summary: 'Create new Project on Matecat in detached mode',
-        description:
-          `Create new Project on Matecat With HTTP POST ( multipart/form-data ) protocol.
+        description: `Create new Project on Matecat With HTTP POST ( multipart/form-data ) protocol.
           new has a maximum file size limit of 200 MB per file and a max number of files of 600. 
           This API will process the project creation in background. Client can poll the v1 project creation status API to be notified when the project is actually created.
           `,
@@ -3400,14 +3398,14 @@ var spec = {
   },
   securityDefinitions: {
     ApiKeyAuth: {
-      type: "apiKey",
-      in: "header",
-      name: "x-matecat-key"
+      type: 'apiKey',
+      in: 'header',
+      name: 'x-matecat-key',
     },
   },
   security: [
     {
-      ApiKeyAuth: []
-    }
+      ApiKeyAuth: [],
+    },
   ],
 }

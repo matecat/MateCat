@@ -10,6 +10,12 @@ class SegmentFooterTabMessages extends React.Component {
     this.excludeMatchingNotesRegExp
   }
 
+  getFilteredMetadataKeys() {
+    return this.props.metadata.filter(
+      ({meta_key}) => meta_key !== 'sizeRestriction',
+    )
+  }
+
   getNotes() {
     let notesHtml = []
     let self = this
@@ -96,16 +102,26 @@ class SegmentFooterTabMessages extends React.Component {
     }
 
     // metadata notes
-    if (this.props.metadata?.length > 0) {
+    const metadata =
+      typeof this.getFilteredMetadataKeys === 'function'
+        ? this.getFilteredMetadataKeys()
+        : this.props.metadata
+    if (metadata?.length > 0) {
       notesHtml.push(this.getMetadataNoteTemplate())
     }
     return notesHtml
   }
 
   getMetadataNoteTemplate() {
+    const metadata =
+      typeof this.getFilteredMetadataKeys === 'function'
+        ? this.getFilteredMetadataKeys()
+        : this.props.metadata
     let metadataNotes = []
-    for (const [index, item] of this.props.metadata.entries()) {
-      const {meta_key: label, meta_value: body} = item
+    for (const [index, item] of metadata.entries()) {
+      const {meta_key, meta_value: body} = item
+      const label = meta_key
+
       metadataNotes.push(
         <div className="note" key={`meta-${index}`}>
           <span className="note-label">{label}: </span>

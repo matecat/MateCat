@@ -743,9 +743,10 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
 
             array_pop( $arrayOfSegmentTranslationToPropagate );
 
-            $propagationAnalyser = new PropagationAnalyser();
-            $propagationTotal    = $propagationAnalyser->analyse( $segmentTranslationStruct, $arrayOfSegmentTranslationToPropagate );
-            $propagationTotal->setTotals( [
+            if($lastRow !== null and is_array($lastRow)){
+                $propagationAnalyser = new PropagationAnalyser();
+                $propagationTotal    = $propagationAnalyser->analyse( $segmentTranslationStruct, $arrayOfSegmentTranslationToPropagate );
+                $propagationTotal->setTotals( [
                     'propagated_ice_total'     => $propagationAnalyser->getPropagatedIceCount(),
                     'not_propagated_total'     => $propagationAnalyser->getNotPropagatedCount(),
                     'propagated_total'         => $propagationAnalyser->getPropagatedCount(),
@@ -753,7 +754,9 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
                     'total'                    => $lastRow[ 0 ],
                     'countSeg'                 => $lastRow[ 1 ],
                     'status'                   => $lastRow[ 2 ],
-            ] );
+                ] );
+            }
+
 
         } catch ( PDOException $e ) {
             throw new Exception( "Error in counting total words for propagation: " . $e->getCode() . ": " . $e->getMessage()
@@ -761,7 +764,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
                     -$e->getCode() );
         }
 
-        if ( !empty( $propagationTotal->getTotals() ) ) {
+        if ( isset($propagationTotal) and $propagationTotal !== null and !empty( $propagationTotal->getTotals() ) ) {
 
             if ( true === $execute_update and !empty( $propagationTotal->getSegmentsForPropagation() ) ) {
 
@@ -837,6 +840,10 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
                             -$e->getCode() );
                 }
             }
+        }
+
+        if(!isset($propagationTotal)){
+            $propagationTotal = new Propagation_PropagationTotalStruct();
         }
 
         return ( new PropagationApi( $propagationTotal ) )->render();

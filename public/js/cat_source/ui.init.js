@@ -3,6 +3,8 @@ import React from 'react'
 import CatToolActions from './es6/actions/CatToolActions'
 import CatTool from './es6/pages/CatTool'
 import CommonUtils from './es6/utils/commonUtils'
+import commentsActions from './es6/actions/CommentsActions'
+import CommentsActions from './es6/actions/CommentsActions'
 
 $.extend(window.UI, {
   start: function () {
@@ -60,19 +62,13 @@ $.extend(window.UI, {
           CommonUtils.removeParam('action')
           break
         case 'openComments':
-          if (MBC.enabled()) {
-            interval = setInterval(function () {
-              if ($('.mbc-history-balloon-outer')) {
-                $('.mbc-history-balloon-outer').addClass('mbc-visible')
-                $('#mbc-history').addClass('open')
-                clearInterval(interval)
-              }
-            }, 500)
-          }
+          interval = setTimeout(function () {
+            CommentsActions.openCommentsMenu()
+          }, 500)
           CommonUtils.removeParam('action')
           break
         case 'warnings':
-          interval = setInterval(function () {
+          interval = setTimeout(function () {
             if ($('#notifbox.warningbox')) {
               CatToolActions.toggleQaIssues()
               clearInterval(interval)

@@ -61,13 +61,13 @@ class Dashboard extends React.Component {
             ManageActions.storeSelectedTeam(selectedTeam)
           })
           .catch((err) => {
-            if (err[0].code == 401) {
+            if (err && err.length && err[0].code == 401) {
               // Not Logged or not in the team
               window.location.reload()
               return
             }
 
-            if (err[0].code == 404) {
+            if (err && err.length && err[0].code == 404) {
               this.selectPersonalTeam()
               return
             }
@@ -181,13 +181,13 @@ class Dashboard extends React.Component {
           }
         })
         .catch((err) => {
-          if (err[0].code == 401) {
+          if (err && err[0]?.code == 401) {
             //Not Logged or not in the team
             window.location.reload()
             return
           }
 
-          if (err[0].code == 404) {
+          if (err[0]?.code == 404) {
             this.selectPersonalTeam()
             return
           }
@@ -215,10 +215,14 @@ class Dashboard extends React.Component {
         ManageActions.updateProjects(total_projects)
       })
     }
-    getUserData().then((data) => {
-      this.setState({teams: data.teams})
-      TeamsActions.updateTeams(data.teams)
-    })
+    getUserData()
+      .then((data) => {
+        this.setState({teams: data.teams})
+        TeamsActions.updateTeams(data.teams)
+      })
+      .catch(() => {
+        console.log('User not logged')
+      })
   }
 
   selectPersonalTeam = () => {

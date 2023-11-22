@@ -1114,6 +1114,8 @@ class ProjectManager {
      */
     protected function _loopForTMXLoadStatus( $memoryFiles ) {
 
+        $time = strtotime( '+30 minutes' );
+
         //TMX Management
         /****************/
         //loop again through files to check for TMX loading
@@ -1127,10 +1129,11 @@ class ProjectManager {
 
                     $result = $this->tmxServiceWrapper->tmxUploadStatus( $file->getUuid() );
 
-                    if ( $result[ 'completed' ] ) {
+                    if ( $result[ 'completed' ] || strtotime( 'now' ) > $time ) {
 
                         //"$fileName" has been loaded into MyMemory"
-                        //exit the loop
+                        // OR the indexer is down or stopped for maintenance
+                        // exit the loop, the import will be executed in a later time
                         break;
 
                     }
@@ -1141,7 +1144,7 @@ class ProjectManager {
                 } catch ( Exception $e ) {
 
                     $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                        "code" => $e->getCode(), "message" => $e->getMessage()
+                            "code" => $e->getCode(), "message" => $e->getMessage()
                     ];
 
                     $this->_log( $e->getMessage() . "\n" . $e->getTraceAsString() );
