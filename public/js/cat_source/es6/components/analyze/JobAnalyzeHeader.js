@@ -10,12 +10,10 @@ class JobAnalyzeHeader extends React.Component {
     this.total = 0
     this.payable = 0
     let self = this
-    this.props.totals.forEach(function (chunk) {
-      self.payable = self.payable + chunk.get('TOTAL_PAYABLE').get(0)
-    })
 
     each(this.props.jobInfo.chunks, function (chunk) {
-      self.total = self.total + chunk.total_raw_word_count
+      self.payable = self.payable + chunk.total_equivalent
+      self.total = self.total + chunk.total_raw
     })
   }
 
@@ -28,11 +26,11 @@ class JobAnalyzeHeader extends React.Component {
     return (
       <div className="head-chunk sixteen wide column pad-right-10 shadow-1">
         <div className="source-target">
-          <div className="source-box">{this.props.jobInfo.source}</div>
+          <div className="source-box">{this.props.jobInfo.source_name}</div>
           <div className="in-to">
             <i className="icon-chevron-right icon" />
           </div>
-          <div className="target-box">{this.props.jobInfo.target}</div>
+          <div className="target-box">{this.props.jobInfo.target_name}</div>
         </div>
         {/*<div className="job-not-payable">*/}
         {/*<span id="raw-words">{parseInt(this.total)}</span> Total words*/}

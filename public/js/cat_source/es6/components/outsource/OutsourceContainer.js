@@ -12,7 +12,6 @@ class OutsourceContainer extends React.Component {
     this.handleDocumentClick = this.handleDocumentClick.bind(this)
     this._handleEscKey = this._handleEscKey.bind(this)
     this.checkTimezone()
-    // this.retrieveTranslators();
   }
 
   allowHTML(string) {
@@ -25,24 +24,6 @@ class OutsourceContainer extends React.Component {
       timezoneToShow = -1 * (new Date().getTimezoneOffset() / 60)
       Cookies.set('matecat_timezone', timezoneToShow, {secure: true})
     }
-  }
-
-  retrieveTranslators() {
-    if (config.enable_outsource) {
-      let self = this
-      self.translatorsNumber = null
-    }
-  }
-
-  getProjectAnalyzeUrl() {
-    return (
-      '/analyze/' +
-      this.props.project.get('project_slug') +
-      '/' +
-      this.props.project.get('id') +
-      '-' +
-      this.props.project.get('password')
-    )
   }
 
   handleDocumentClick(evt) {
@@ -146,15 +127,12 @@ class OutsourceContainer extends React.Component {
                 </div>
                 <div className="job-payable">
                   <div>
-                    <span id="words">
-                      {this.props.job.get('stats').get('TOTAL_FORMATTED')}
-                    </span>{' '}
-                    words
+                    <span id="words">{this.props.standardWC}</span> words
                   </div>
                 </div>
-                <div className="project-subject">
-                  <b>Subject</b>: {this.props.job.get('subject_printable')}
-                </div>
+                {/*<div className="project-subject">*/}
+                {/*  <b>Subject</b>: {this.props.job.get('subject_printable')}*/}
+                {/*</div>*/}
               </div>
               <div className="sixteen wide column">
                 <div

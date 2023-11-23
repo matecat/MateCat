@@ -12,8 +12,6 @@ const AnalyzeMain = ({volumeAnalysis, project, parentRef}) => {
   const [scrollTop, setScrollTop] = useState()
   const [jobToScroll, setJobToScroll] = useState()
 
-  const jobsInfo = config.jobs
-
   const spinnerContainer = {
     position: 'absolute',
     height: '100%',
@@ -72,10 +70,9 @@ const AnalyzeMain = ({volumeAnalysis, project, parentRef}) => {
             </div>
 
             <AnalyzeChunksResume
-              jobsAnalysis={volumeAnalysis.get('jobs')}
-              jobsInfo={jobsInfo}
+              jobsAnalysis={volumeAnalysis.get('jobs').toJS()}
               project={project}
-              status={volumeAnalysis.get('summary').get('STATUS')}
+              status={volumeAnalysis.get('summary').get('status')}
               showAnalysis={showAnalysis}
               openAnalysisReport={openAnalysisReport}
             />
@@ -91,8 +88,7 @@ const AnalyzeMain = ({volumeAnalysis, project, parentRef}) => {
                     <ProjectAnalyze
                       volumeAnalysis={volumeAnalysis.get('jobs')}
                       project={project}
-                      jobsInfo={jobsInfo}
-                      status={volumeAnalysis.get('summary').get('STATUS')}
+                      status={volumeAnalysis.get('summary').get('status')}
                       jobToScroll={jobToScroll}
                       showAnalysis={showAnalysis}
                     />

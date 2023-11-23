@@ -11,28 +11,42 @@ class JobAnalyze extends React.Component {
     super(props)
     this.showDetails = this.showDetails.bind(this)
     setTimeout(() => this.showDetails())
+    this.rates = {
+      NO_MATCH: 100,
+      '50%-74%': 100,
+      '75%-84%': 60,
+      '85%-94%': 60,
+      '95%-99%': 60,
+      '100%': 30,
+      '100%_PUBLIC': 30,
+      REPETITIONS: 30,
+      INTERNAL: 60,
+      MT: 77,
+    }
   }
 
   getChunks() {
     let self = this
     if (this.props.chunks) {
       return map(this.props.jobInfo.chunks, function (item, index) {
-        let files = self.props.chunks.get(item.jpassword)
+        let chunk = self.props.chunks.find(
+          (c) => c.get('password') === item.password,
+        )
         index++
         let job = self.props.project.get('jobs').find(function (jobElem) {
-          return jobElem.get('password') === item.jpassword
+          return jobElem.get('password') === item.password
         })
 
         return (
           <ChunkAnalyze
-            key={item.jpassword}
-            files={files}
+            key={item.password}
+            files={chunk.get('files').toJS()}
             job={job}
             project={self.props.project}
-            total={self.props.total.get(item.jpassword)}
+            total={item.summary}
             index={index}
             chunkInfo={item}
-            chunksSize={size(self.props.jobInfo.chunks)}
+            chunksSize={self.props.jobInfo.chunks.length}
           />
         )
       })
@@ -89,12 +103,11 @@ class JobAnalyze extends React.Component {
                 ref={(container) => (this.container = container)}
               >
                 <JobAnalyzeHeader
-                  totals={this.props.total}
                   project={this.props.project}
                   jobInfo={this.props.jobInfo}
                   status={this.props.status}
                 />
-                <JobTableHeader rates={this.props.jobInfo.rates} />
+                <JobTableHeader rates={this.rates} />
                 {this.getChunks()}
               </div>
             </div>

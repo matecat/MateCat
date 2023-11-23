@@ -8,6 +8,7 @@ import ModalsActions from '../../actions/ModalsActions'
 import TranslatedIcon from '../../../../../img/icons/TranslatedIcon'
 import Tooltip from '../common/Tooltip'
 import CommonUtils from '../../utils/commonUtils'
+import {ANALYSIS_STATUS} from '../../constants/Constants'
 
 class AnalyzeChunksResume extends React.Component {
   constructor(props) {
@@ -35,7 +36,7 @@ class AnalyzeChunksResume extends React.Component {
     e.preventDefault()
     const {project} = this.props
     let job = project.get('jobs').find((item) => {
-      return item.get('id') == id
+      return item.get('id') === id
     })
     ModalsActions.openSplitJobModal(job, project, () =>
       window.location.reload(),
@@ -47,7 +48,7 @@ class AnalyzeChunksResume extends React.Component {
     e.preventDefault()
     const {project} = this.props
     let job = this.props.project.get('jobs').find((item) => {
-      return item.get('id') == id
+      return item.get('id') === id
     })
     ModalsActions.openMergeModal(project.toJS(), job.toJS(), () =>
       window.location.reload(),
@@ -135,7 +136,7 @@ class AnalyzeChunksResume extends React.Component {
       CommonUtils.dispatchAnalyticsEvents(event)
       sessionStorage.setItem(key, 'true')
     }
-    window.open(this.getTranslateUrl(chunk, index), '_blank')
+    window.open(chunk.urls.t, '_blank')
   }
 
   getDirectOpenButton = (chunk, index) => {
@@ -143,7 +144,7 @@ class AnalyzeChunksResume extends React.Component {
     return (
       <div
         className={`open-translate ui primary button open ${
-          status === 'NEW' ? 'disabled' : ''
+          status === ANALYSIS_STATUS.NEW ? 'disabled' : ''
         }`}
         onClick={(e) => {
           this.goToTranslate(chunk, index, e)
@@ -164,66 +165,44 @@ class AnalyzeChunksResume extends React.Component {
     )
   }
 
-  getUrl = (job, index) => {
-    let chunk_id = index ? job.get('id') + '-' + index : job.get('id')
-    return (
-      window.location.protocol +
-      '//' +
-      window.location.host +
-      '/translate/' +
-      this.props.project.get('project_slug') +
-      '/' +
-      job.get('source') +
-      '-' +
-      job.get('target') +
-      '/' +
-      chunk_id +
-      '-' +
-      job.get('password') +
-      (index ? '#' + job.get('job_first_segment') : '')
-    )
-  }
-
   getResumeJobs = () => {
     const {copyJobLinkToClipboard, thereIsChunkOutsourced} = this
-    const {status, jobsAnalysis, jobsInfo} = this.props
+    const {status, jobsAnalysis} = this.props
 
     let buttonsClass =
       status !== 'DONE' || thereIsChunkOutsourced() ? 'disabled' : ''
-    if (!jobsAnalysis.isEmpty()) {
-      return map(jobsInfo, (item, indexJob) => {
-        let tmpJobAnalysis = jobsAnalysis.get(indexJob)
-
-        if (item.splitted !== '' && size(item.chunks) > 1) {
-          let chunksHtml = map(item.chunks, (chunkConfig, index) => {
-            let indexChunk = chunkConfig.jpassword
-            let chunkAnalysis = tmpJobAnalysis.get('totals').get(indexChunk)
-            let chunk = chunkConfig
-            let chunkJob = this.props.project.get('jobs').find((job) => {
-              return (
-                job.get('id') == chunk.jid &&
-                job.get('password') === chunk.jpassword
-              )
-            })
+    if (jobsAnalysis) {
+      return jobsAnalysis.map((job, indexJob) => {
+        if (job.chunks.length > 1) {
+          let chunksHtml = map(job.chunks, (chunkAnalysis, index) => {
+            chunkAnalysis.id = job.id
+            chunkAnalysis.outsource_available = job.outsource_available
+            chunkAnalysis.target_name = job.target_name
+            chunkAnalysis.source_name = job.source_name
             index++
 
             let openOutsource =
               this.state.openOutsource &&
-              this.state.outsourceJobId === chunk.jid + '-' + index
-
+              this.state.outsourceJobId === job.id + '-' + index
+            let chunkJob = this.props.project.get('jobs').find((item) => {
+              return (
+                item.get('id') === chunkAnalysis.id &&
+                item.get('password') === chunkAnalysis.password
+              )
+            })
             this.checkPayableChanged(
-              chunk.jid + index,
-              chunkAnalysis.get('TOTAL_PAYABLE').get(1),
+              job.id + index,
+              chunkAnalysis.total_equivalent,
             )
 
             let openOutsourceClass = openOutsource ? 'openOutsource' : ''
-            const jidChunk = `${chunk.jid}-${index}`
+            const jidChunk = `${chunkAnalysis.id}-${index}`
 
             return (
               <div
-                key={indexChunk}
+                key={index}
                 className={'chunk ui grid shadow-1 ' + openOutsourceClass}
-                onClick={this.showDetails(chunk.jid)}
+                onClick={this.showDetails(chunkAnalysis.id)}
               >
                 <div className="title-job splitted">
                   <div className="job-id">{'Chunk ' + index}</div>
@@ -232,7 +211,7 @@ class AnalyzeChunksResume extends React.Component {
                       ref={(el) => (this.jobLinkRef[jidChunk] = el)}
                       type="text"
                       readOnly
-                      value={this.getUrl(chunkJob, index)}
+                      value={chunkAnalysis.urls.t}
                       onClick={(e) => e.stopPropagation()}
                     />
                     <button
@@ -247,44 +226,44 @@ class AnalyzeChunksResume extends React.Component {
                 </div>
                 <div className="titles-compare">
                   <div className="title-total-words ttw">
-                    <div>{chunk.total_raw_word_count_print}</div>
+                    <div>{chunkAnalysis.total_raw}</div>
                   </div>
                   <div className="title-standard-words tsw">
-                    <div>{chunkAnalysis.get('standard_word_count').get(1)}</div>
+                    <div>{chunkAnalysis.total_industry}</div>
                   </div>
                   <div
                     className="title-matecat-words tmw"
                     ref={(container) =>
-                      (this.containers[chunk.jid + index] = container)
+                      (this.containers[chunkAnalysis.id + index] = container)
                     }
                   >
-                    <div>{chunkAnalysis.get('TOTAL_PAYABLE').get(1)}</div>
+                    <div>{chunkAnalysis.total_equivalent}</div>
                   </div>
                 </div>
                 <div className="activity-icons">
                   <div className={'activity-button splitted'}>
-                    {/*{self.getOpenButton(chunkJob.toJS(), chunk.jid + '-' + index)}*/}
+                    {/*{self.getOpenButton(job.toJS(), job.id + '-' + index)}*/}
                     {this.getDirectOpenButton(
-                      chunkJob,
-                      chunk.jid + '-' + index,
+                      chunkAnalysis,
+                      job.id + '-' + index,
                     )}
                   </div>
                   {this.getOutsourceButton(
-                    chunkJob.toJS(),
-                    chunk.jid + '-' + index,
+                    chunkAnalysis,
+                    chunkAnalysis.id + '-' + index,
                   )}
                 </div>
                 <OutsourceContainer
                   project={this.props.project}
                   job={chunkJob}
-                  standardWC={chunkAnalysis.get('standard_word_count').get(1)}
-                  url={this.getTranslateUrl(chunkJob, index)}
+                  url={chunkAnalysis.urls.t}
                   showTranslatorBox={false}
                   extendedView={true}
                   onClickOutside={this.closeOutsourceModal}
                   openOutsource={openOutsource}
-                  idJobLabel={chunk.jid + '-' + index}
+                  idJobLabel={job.id + '-' + index}
                   outsourceJobId={this.state.outsourceJobId}
+                  standardWC={chunkAnalysis.total_equivalent}
                 />
               </div>
             )
@@ -295,22 +274,22 @@ class AnalyzeChunksResume extends React.Component {
               <div className="chunks sixteen wide column">
                 <div
                   className="chunk ui grid shadow-1"
-                  onClick={this.showDetails(this.props.jobsInfo[indexJob].jid)}
+                  onClick={this.showDetails(jobsAnalysis[indexJob].id)}
                 >
                   <div className="title-job heading splitted">
                     <div className="job-info">
                       <div className="job-id">
-                        ID: {this.props.jobsInfo[indexJob].jid}
+                        ID: {jobsAnalysis[indexJob].id}
                       </div>
                       <div className="source-target">
                         <div className="source-box">
-                          {this.props.jobsInfo[indexJob].source}
+                          {jobsAnalysis[indexJob].source_name}
                         </div>
                         <div className="in-to">
                           <i className="icon-chevron-right icon" />
                         </div>
                         <div className="target-box">
-                          {this.props.jobsInfo[indexJob].target}
+                          {jobsAnalysis[indexJob].target_name}
                         </div>
                       </div>
                     </div>
@@ -319,9 +298,7 @@ class AnalyzeChunksResume extends React.Component {
                   <div className="activity-icons splitted">
                     <div
                       className="merge ui blue basic button"
-                      onClick={this.openMergeModal(
-                        this.props.jobsInfo[indexJob].jid,
-                      )}
+                      onClick={this.openMergeModal(jobsAnalysis[indexJob].id)}
                     >
                       <i className="icon-compress icon" />
                       Merge
@@ -333,34 +310,30 @@ class AnalyzeChunksResume extends React.Component {
             </div>
           )
         } else {
-          let obj = this.props.jobsInfo[indexJob].chunks[0]
-          let password = obj.jpassword
-          let total_raw = obj.total_raw_word_count_print
-          let standardWordCount = tmpJobAnalysis
-            .get('totals')
-            .get(password)
-            .get('standard_word_count')
-          let total_standard = standardWordCount ? standardWordCount.get(1) : 0
-
-          let chunkJob = this.props.project.get('jobs').find((job) => {
+          let chunkAnalysis = jobsAnalysis[indexJob].chunks[0]
+          chunkAnalysis.id = job.id
+          chunkAnalysis.outsource_available = job.outsource_available
+          chunkAnalysis.outsource = job.outsource
+          chunkAnalysis.target_name = job.target_name
+          chunkAnalysis.source_name = job.source_name
+          let total_raw = chunkAnalysis.total_raw
+          let standardWordCount = chunkAnalysis.total_equivalent
+          let chunkJob = this.props.project.get('jobs').find((item) => {
             return (
-              job.get('id') == this.props.jobsInfo[indexJob].jid &&
-              job.get('password') === password
+              item.get('id') === chunkAnalysis.id &&
+              item.get('password') === chunkAnalysis.password
             )
           })
+          let total_standard = standardWordCount ? standardWordCount : 0
 
           let openOutsource =
             this.state.openOutsource &&
-            this.state.outsourceJobId === this.props.jobsInfo[indexJob].jid
+            this.state.outsourceJobId === jobsAnalysis[indexJob].id
           let openOutsourceClass = openOutsource ? 'openOutsource' : ''
 
           this.checkPayableChanged(
-            this.props.jobsInfo[indexJob].jid,
-            tmpJobAnalysis
-              .get('totals')
-              .get(password)
-              .get('TOTAL_PAYABLE')
-              .get(1),
+            jobsAnalysis[indexJob].id,
+            chunkAnalysis.total_equivalent,
           )
 
           return (
@@ -368,22 +341,22 @@ class AnalyzeChunksResume extends React.Component {
               <div className="chunks sixteen wide column">
                 <div
                   className={'chunk ui grid shadow-1 ' + openOutsourceClass}
-                  onClick={this.showDetails(this.props.jobsInfo[indexJob].jid)}
+                  onClick={this.showDetails(jobsAnalysis[indexJob].id)}
                 >
                   <div className="title-job">
                     <div className="job-info">
                       <div className="job-id">
-                        ID: {this.props.jobsInfo[indexJob].jid}
+                        ID: {jobsAnalysis[indexJob].id}
                       </div>
                       <div className="source-target">
                         <div className="source-box no-split">
-                          {this.props.jobsInfo[indexJob].source}
+                          {jobsAnalysis[indexJob].source_name}
                         </div>
                         <div className="in-to">
                           <i className="icon-chevron-right icon" />
                         </div>
                         <div className="target-box no-split">
-                          {this.props.jobsInfo[indexJob].target}
+                          {jobsAnalysis[indexJob].target_name}
                         </div>
                       </div>
                     </div>
@@ -391,16 +364,15 @@ class AnalyzeChunksResume extends React.Component {
                       <input
                         type="text"
                         readOnly
-                        value={this.getUrl(chunkJob)}
+                        value={chunkAnalysis.urls.t}
                         ref={(el) =>
-                          (this.jobLinkRef[this.props.jobsInfo[indexJob].jid] =
-                            el)
+                          (this.jobLinkRef[jobsAnalysis[indexJob].id] = el)
                         }
                         onClick={(e) => e.stopPropagation()}
                       />
                       <button
                         onClick={copyJobLinkToClipboard(
-                          this.props.jobsInfo[indexJob].jid,
+                          jobsAnalysis[indexJob].id,
                         )}
                         className={'ui icon button copy'}
                         data-content="Copied to Clipboard!"
@@ -422,18 +394,13 @@ class AnalyzeChunksResume extends React.Component {
                     <div
                       className="title-matecat-words tmw"
                       ref={(container) =>
-                        (this.containers[this.props.jobsInfo[indexJob].jid] =
-                          container)
+                        (this.containers[jobsAnalysis[indexJob].id] = container)
                       }
                     >
                       {/*<div className="cell-label" >Weighted words:</div>*/}
                       <div>
                         {/*<i className="icon-chart4 icon"/>*/}
-                        {tmpJobAnalysis
-                          .get('totals')
-                          .get(password)
-                          .get('TOTAL_PAYABLE')
-                          .get(1)}
+                        {chunkAnalysis.total_equivalent}
                       </div>
                     </div>
                   </div>
@@ -445,32 +412,29 @@ class AnalyzeChunksResume extends React.Component {
                             'split ui blue basic button ' + buttonsClass + ' '
                           }
                           onClick={this.openSplitModal(
-                            this.props.jobsInfo[indexJob].jid,
+                            jobsAnalysis[indexJob].id,
                           )}
                         >
                           <i className="icon-expand icon" />
                           Split
                         </div>
                       ) : null}
-                      {/*{this.getOpenButton(chunkJob.toJS(), this.props.jobsInfo[indexJob].jid)}*/}
-                      {this.getDirectOpenButton(chunkJob)}
+                      {/*{this.getOpenButton(job.toJS(), jobsAnalysis[indexJob].id)}*/}
+                      {this.getDirectOpenButton(chunkAnalysis)}
                     </div>
-                    {this.getOutsourceButton(
-                      chunkJob.toJS(),
-                      this.props.jobsInfo[indexJob].jid,
-                    )}
+                    {this.getOutsourceButton(chunkAnalysis, chunkAnalysis.id)}
                   </div>
                 </div>
                 <OutsourceContainer
                   project={this.props.project}
                   job={chunkJob}
-                  url={this.getTranslateUrl(chunkJob)}
+                  url={chunkAnalysis.urls.t}
                   standardWC={total_standard}
                   showTranslatorBox={false}
                   extendedView={true}
                   onClickOutside={this.closeOutsourceModal}
                   openOutsource={openOutsource}
-                  idJobLabel={this.props.jobsInfo[indexJob].jid}
+                  idJobLabel={jobsAnalysis[indexJob].id}
                   outsourceJobId={this.state.outsourceJobId}
                 />
               </div>
@@ -590,7 +554,7 @@ class AnalyzeChunksResume extends React.Component {
           </div>
         </div>
         <div className="compare-table jobs sixteen wide column">{html}</div>
-        {!this.props.jobsAnalysis.isEmpty() ? (
+        {this.props.jobsAnalysis ? (
           <div className="analyze-report" onClick={this.openAnalysisReport}>
             <div>
               <h3>{showHideText}</h3>
@@ -608,7 +572,7 @@ class AnalyzeChunksResume extends React.Component {
 const OutsourceButton = ({chunk, index, openOutsourceModal}) => {
   const outsourceButton = useRef()
   return !chunk.outsource_available &&
-    chunk.outsource_info.custom_payable_rate ? (
+    chunk.outsource_info?.custom_payable_rate ? (
     <div
       className={'outsource-translation outsource-translation-disabled'}
       id="open-quote-request"
@@ -620,7 +584,7 @@ const OutsourceButton = ({chunk, index, openOutsourceModal}) => {
             Translated.
             <br />
             In order to outsource this job to Translated, please recreate it
-            using Matecat's standard billing model
+            using Matecat&apos;s standard billing model
           </div>
         }
       >
