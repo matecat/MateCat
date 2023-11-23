@@ -1,5 +1,4 @@
 import React from 'react'
-import {size} from 'lodash'
 import {map} from 'lodash/collection'
 
 import JobAnalyzeHeader from './JobAnalyzeHeader'
@@ -11,18 +10,6 @@ class JobAnalyze extends React.Component {
     super(props)
     this.showDetails = this.showDetails.bind(this)
     setTimeout(() => this.showDetails())
-    this.rates = {
-      NO_MATCH: 100,
-      '50%-74%': 100,
-      '75%-84%': 60,
-      '85%-94%': 60,
-      '95%-99%': 60,
-      '100%': 30,
-      '100%_PUBLIC': 30,
-      REPETITIONS: 30,
-      INTERNAL: 60,
-      MT: 77,
-    }
   }
 
   getChunks() {
@@ -107,7 +94,7 @@ class JobAnalyze extends React.Component {
                   jobInfo={this.props.jobInfo}
                   status={this.props.status}
                 />
-                <JobTableHeader rates={this.rates} />
+                <JobTableHeader rates={this.props.jobInfo.payable_rates} />
                 {this.getChunks()}
               </div>
             </div>
