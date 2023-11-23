@@ -2583,11 +2583,7 @@ class ProjectManager {
 
         $jid = $job->id;
         $this->_cleanSegmentsMetadata();
-
-        $status = $this->features->filter( 'filter_status_for_pretranslated_segments',
-                Constants_TranslationStatus::STATUS_APPROVED,
-                $this->projectStructure
-        );
+        $createSecondPassReview = false;
 
         $query_translations_values = [];
         foreach ( $this->projectStructure[ 'translations' ] as $trans_unit_reference => $struct ) {
@@ -2602,6 +2598,7 @@ class ProjectManager {
                 $position          = ( isset( $translation_row[ 6 ] ) ) ? $translation_row[ 6 ] : null;
                 $segment           = ( new Segments_SegmentDao() )->getById( $translation_row [ 0 ] );
                 $ice_payable_rates = ( isset( $this->projectStructure[ 'array_jobs' ][ 'payable_rates' ][ $jid ][ 'ICE' ] ) ) ? $this->projectStructure[ 'array_jobs' ][ 'payable_rates' ][ $jid ][ 'ICE' ] : null;
+                $originalState     = @$translation_row[ 4 ][ 'seg-target' ][ $position ][ 'attr' ][ 'state' ];
 
                 $iceLockArray = $this->features->filter( 'setSegmentTranslationFromXliffValues',
                         [
@@ -2620,6 +2617,10 @@ class ProjectManager {
                         $this->projectStructure,
                         $this->filter
                 );
+
+                if ( XliffTranslationStatus::isFinalState( $originalState ) ) {
+                    $createSecondPassReview = true;
+                }
 
                 // Use QA to get target segment
                 $chunk  = \Chunks_ChunkDao::getByJobID( $jid )[ 0 ];
@@ -2682,6 +2683,12 @@ class ProjectManager {
         // Executing the Query
         if ( !empty( $query_translations_values ) ) {
             ProjectManagerModel::insertPreTranslations( $query_translations_values );
+        }
+
+        // We do not create Chunk reviews since this is a task for postProjectCreate
+        // Create a R2 for the job is state is 'final',
+        if ( $createSecondPassReview ) {
+            $projectStructure[ 'create_2_pass_review' ] = true;
         }
 
         //clean translations and queries
