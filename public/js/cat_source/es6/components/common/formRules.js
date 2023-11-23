@@ -20,6 +20,12 @@ export const minLength = (length) => {
   }
 }
 
+export const maxLength = (length) => {
+  return (text) => {
+    return text.length > length ? ErrorMessages.maxLength(length) : null
+  }
+}
+
 export const atLeastOneSpecialChar = (length) => {
   return (text) => {
     return text.search(/[ !"#$%&'()*+,-.\/:;<=>?@\[\]^_`{|}~]/) !== -1
