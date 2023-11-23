@@ -100,10 +100,10 @@ class ModernMTController extends BaseChunkController
             $uploadManager = new Upload();
             $uploadedFiles = $uploadManager->uploadFiles( $_FILES );
 
-            $glossary = $this->extractCSV($uploadedFiles->glossary);
+            $glossary = CSVParser::extract($uploadedFiles->glossary, "MMT_EXCEL_GLOSS_");
 
             // validate
-            $csv = CSVParser::parse($glossary);
+            $csv = CSVParser::parseToArray($glossary);
 
             if(empty($csv)){
                 throw new Exception("Glossary is empty", 400);
@@ -228,10 +228,10 @@ class ModernMTController extends BaseChunkController
             $uploadManager = new Upload();
             $uploadedFiles = $uploadManager->uploadFiles( $_FILES );
 
-            $glossary = $this->extractCSV($uploadedFiles->glossary);
+            $glossary = CSVParser::extract($uploadedFiles->glossary, "MMT_EXCEL_GLOSS_");
 
             // validate
-            $csv = CSVParser::parse($glossary);
+            $csv = CSVParser::parseToArray($glossary);
 
             if(empty($csv)){
                 throw new Exception("Glossary is empty", 400);
@@ -362,30 +362,6 @@ class ModernMTController extends BaseChunkController
                 throw new Exception('`terms` array is malformed.', 400);
             }
         }
-    }
-
-    /**
-     * @param $glossary
-     * @param $type
-     * @return false|string
-     * @throws \PhpOffice\PhpSpreadsheet\Reader\Exception
-     */
-    private function extractCSV($glossary)
-    {
-        $tmpFileName = tempnam( "/tmp", "MMT_EXCEL_GLOSS_" );
-
-        $objReader = IOFactory::createReaderForFile( $glossary->file_path );
-
-        $objPHPExcel = $objReader->load( $glossary->file_path );
-        $objWriter   = new Csv( $objPHPExcel );
-        $objWriter->save( $tmpFileName );
-
-        $oldPath             = $glossary->file_path;
-        $glossary->file_path = $tmpFileName;
-
-        unlink( $oldPath );
-
-        return $glossary->file_path;
     }
 
     /**

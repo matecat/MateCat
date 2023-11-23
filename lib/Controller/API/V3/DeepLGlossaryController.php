@@ -6,6 +6,10 @@ use API\V2\KleinController;
 use API\V2\Validators\LoginValidator;
 use Engines_DeepL;
 use Exception;
+use Files\CSV as CSVParser;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Writer\Csv;
+use Upload;
 use Validator\EngineValidator;
 
 class DeepLGlossaryController extends KleinController
@@ -58,7 +62,32 @@ class DeepLGlossaryController extends KleinController
     public function create()
     {
         try {
-            $data = json_decode($this->request->body());
+            $this->validateCreateGlossaryPayload();
+
+            $name = filter_var( $_POST['name'], FILTER_SANITIZE_STRING, FILTER_FLAG_ENCODE_LOW|FILTER_FLAG_STRIP_HIGH );
+            $source = filter_var( $_POST['source'], FILTER_SANITIZE_STRING, FILTER_FLAG_ENCODE_LOW|FILTER_FLAG_STRIP_HIGH );
+            $target = filter_var( $_POST['target'], FILTER_SANITIZE_STRING, FILTER_FLAG_ENCODE_LOW|FILTER_FLAG_STRIP_HIGH );
+
+            $uploadManager = new Upload();
+            $uploadedFiles = $uploadManager->uploadFiles( $_FILES );
+
+            $glossary = CSVParser::extract($uploadedFiles->glossary, "DEEPL_EXCEL_GLOSS_");
+
+            // validate
+            $csv = CSVParser::withoutHeaders($glossary);
+
+            if(empty($csv)){
+                throw new Exception("Glossary is empty", 400);
+            }
+
+            $data = [
+                "name" => $name,
+                "source_lang" => $source,
+                "target_lang" => $target,
+                "entries" => $csv,
+                "entries_format" => "csv",
+            ];
+
             $engineId = filter_var( $this->request->engineId, FILTER_SANITIZE_NUMBER_INT );
             $deepLClient = $this->getDeepLClient($engineId);
 
@@ -76,6 +105,28 @@ class DeepLGlossaryController extends KleinController
                 'error' => $exception->getMessage()
             ]);
             exit();
+        }
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function validateCreateGlossaryPayload()
+    {
+        if(!isset($_FILES['glossary'])){
+            throw new Exception('Missing `glossary`', 400);
+        }
+
+        if(!isset($_POST['name'])){
+            throw new Exception('Missing `name`', 400);
+        }
+
+        if(!isset($_POST['source'])){
+            throw new Exception('Missing `source`', 400);
+        }
+
+        if(!isset($_POST['target'])){
+            throw new Exception('Missing `target`', 400);
         }
     }
 
@@ -161,6 +212,30 @@ class DeepLGlossaryController extends KleinController
             ]);
             exit();
         }
+    }
+
+    /**
+     * @param $glossary
+     * @param $type
+     * @return false|string
+     * @throws \PhpOffice\PhpSpreadsheet\Reader\Exception
+     */
+    private function extractCSV($glossary)
+    {
+        $tmpFileName = tempnam( "/tmp", "DEEPL_EXCEL_GLOSS_" );
+
+        $objReader = IOFactory::createReaderForFile( $glossary->file_path );
+
+        $objPHPExcel = $objReader->load( $glossary->file_path );
+        $objWriter   = new Csv( $objPHPExcel );
+        $objWriter->save( $tmpFileName );
+
+        $oldPath             = $glossary->file_path;
+        $glossary->file_path = $tmpFileName;
+
+        unlink( $oldPath );
+
+        return $glossary->file_path;
     }
 
     /**
