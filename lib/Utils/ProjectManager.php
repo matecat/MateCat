@@ -2587,8 +2587,6 @@ class ProjectManager {
     protected function _insertPreTranslations( Jobs_JobStruct $job, ArrayObject $projectStructure ) {
 
         $jid = $job->id;
-        $createSecondPassReview = false;
-        $r2SegmentEvents = [];
         $this->_cleanSegmentsMetadata();
 
         $status = $this->features->filter( 'filter_status_for_pretranslated_segments',
@@ -2609,25 +2607,6 @@ class ProjectManager {
                 $position          = (isset($translation_row[ 6 ])) ? $translation_row[ 6 ] : null;
                 $segment           = ( new Segments_SegmentDao() )->getById( $translation_row [ 0 ] );
                 $ice_payable_rates = ( isset( $this->projectStructure[ 'array_jobs' ][ 'payable_rates' ][ $jid ][ 'ICE' ] ) ) ? $this->projectStructure[ 'array_jobs' ][ 'payable_rates' ][ $jid ][ 'ICE' ] : null;
-                $originalState     = @$translation_row[ 4 ]['seg-target'][$position]['attr']['state'];
-
-                // create a R2 for the job is state is 'final'
-                if($originalState !== null and $originalState === Constants_XliffTranslationStatus::FINAL_STATE){
-                    $createSecondPassReview = true;
-
-                    $translationEventStruct = new TranslationEventStruct();
-                    $translationEventStruct->uid = isset($projectStructure['uid']) ? $projectStructure['uid'] : 0;
-                    $translationEventStruct->id_job = $job->id;
-                    $translationEventStruct->id_segment = $segment->id;
-                    $translationEventStruct->version_number = 0;
-                    $translationEventStruct->status = Constants_TranslationStatus::STATUS_APPROVED;
-                    $translationEventStruct->source_page = 3;
-                    $translationEventStruct->final_revision = 1;
-                    $translationEventStruct->create_date = new \DateTime();
-                    $translationEventStruct->time_to_edit = 0;
-
-                    $r2SegmentEvents[] = $translationEventStruct;
-                }
 
                 $iceLockArray = $this->features->filter( 'setSegmentTranslationFromXliffValues',
                     [
@@ -2702,27 +2681,14 @@ class ProjectManager {
                 ];
 
                 $query_translations_values[] = $sql_values;
+
             }
+
         }
 
         // Executing the Query
         if ( !empty( $query_translations_values ) ) {
             ProjectManagerModel::insertPreTranslations( $query_translations_values );
-        }
-
-        //  $this->createReview($job, 2);
-
-        // First, create a R2 for the job is state is 'final',
-        // then, save an event of each segment with state 'final'
-        if($createSecondPassReview){
-            $this->createSecondPassReview($job);
-            $translationEventDao = new TranslationEventDao();
-
-            // bulk update, max 100 inserts
-            $r2SegmentEventsChunks = array_chunk($r2SegmentEvents, 100);
-            foreach ($r2SegmentEventsChunks as $r2SegmentEventsChunk){
-                $translationEventDao->bulkInsert($r2SegmentEventsChunk);
-            }
         }
 
         //clean translations and queries
@@ -3386,7 +3352,7 @@ class ProjectManager {
         if ( $source != $target ) {
 
             // evaluate if different source and target should be considered translated
-            $differentSourceAndTargetIsTranslated = ( empty( $target ) ) ? false : true;
+            $differentSourceAndTargetIsTranslated = !empty( $target );
             $differentSourceAndTargetIsTranslated = $this->features->filter(
                 'filterDifferentSourceAndTargetIsTranslated',
                 $differentSourceAndTargetIsTranslated, $this->projectStructure, $xliff_trans_unit

@@ -2,24 +2,25 @@
 
 class Constants_XliffTranslationStatus {
 
-    const FUZZY_MATCH = 'fuzzy-match';
-    const MT_SUGGESTION = 'mt-suggestion';
-
-    const NEW_STATE = 'new';
-    const INITIAL = 'initial';
-    const NEEDS_TRANSLATION = 'needs-translation';
-    const NEEDS_L10N = 'needs-l10n';
-    const NEEDS_ADAPTATION = 'needs-adaptation';
-
-    const TRANSLATED = 'translated';
-    const NEEDS_REVIEW_ADAPTATION = 'needs-review-adaptation';
-    const NEEDS_REVIEW_L10N = 'needs-review-l10n';
+    // xliff 1.2
+    const FUZZY_MATCH              = 'fuzzy-match';
+    const MT_SUGGESTION            = 'mt-suggestion';
+    const NEEDS_TRANSLATION        = 'needs-translation';
+    const NEEDS_L10N               = 'needs-l10n';
+    const NEEDS_ADAPTATION         = 'needs-adaptation';
+    const NEEDS_REVIEW_ADAPTATION  = 'needs-review-adaptation';
+    const NEEDS_REVIEW_L10N        = 'needs-review-l10n';
     const NEEDS_REVIEW_TRANSLATION = 'needs-review-translation';
+    const SIGNED_OFF               = 'signed-off';
 
-    const REVIEWED = 'reviewed';
-    const SIGNED_OFF = 'signed-off';
-
+    // xliff 2.0 AND 1.2
+    const NEW_STATE   = 'new';
+    const TRANSLATED  = 'translated';
     const FINAL_STATE = 'final';
+
+    // xliff 2.0
+    const INITIAL  = 'initial';
+    const REVIEWED = 'reviewed';
 
     /**
      * @param $status
