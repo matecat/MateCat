@@ -21,10 +21,8 @@ use FilesStorage\FilesStorageFactory;
 use FilesStorage\S3FilesStorage;
 use Jobs\SplitQueue;
 use LQA\QA;
-use Matecat\SubFiltering\Commons\Pipeline;
 use Matecat\SubFiltering\Filters\FromViewNBSPToSpaces;
 use Matecat\SubFiltering\Filters\PhCounter;
-use Matecat\SubFiltering\Filters\SprintfToPH;
 use Matecat\SubFiltering\MateCatFilter;
 use Matecat\XliffParser\XliffParser;
 use Matecat\XliffParser\XliffUtils\DataRefReplacer;
@@ -1110,6 +1108,8 @@ class ProjectManager {
      */
     protected function _loopForTMXLoadStatus( $memoryFiles ) {
 
+        $time = strtotime( '+30 minutes' );
+
         //TMX Management
         /****************/
         //loop again through files to check for TMX loading
@@ -1123,10 +1123,11 @@ class ProjectManager {
 
                     $result = $this->tmxServiceWrapper->tmxUploadStatus( $file->getUuid() );
 
-                    if ( $result[ 'completed' ] ) {
+                    if ( $result[ 'completed' ] || strtotime( 'now' ) > $time ) {
 
                         //"$fileName" has been loaded into MyMemory"
-                        //exit the loop
+                        // OR the indexer is down or stopped for maintenance
+                        // exit the loop, the import will be executed in a later time
                         break;
 
                     }
@@ -1137,7 +1138,7 @@ class ProjectManager {
                 } catch ( Exception $e ) {
 
                     $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                        "code" => $e->getCode(), "message" => $e->getMessage()
+                            "code" => $e->getCode(), "message" => $e->getMessage()
                     ];
 
                     $this->_log( $e->getMessage() . "\n" . $e->getTraceAsString() );
@@ -2623,26 +2624,12 @@ class ProjectManager {
                 $source = $segment->segment;
                 $target = $translation_row [ 2 ];
 
-                //
-                // NOTE 2021-12-20
-                // ------------------------------------------------------
-                // In order to perform an integrity check
-                // we need to transform source and target to layer1
-                // This piece of code mimics setTranslationController (from line 322 to 341)
-
-                /** @var MateCatFilter filter */
+                /** @var $filter MateCatFilter filter */
                 $filter = MateCatFilter::getInstance( $this->features, $chunk->source, $chunk->target, Segments_SegmentOriginalDataDao::getSegmentDataRefMap( $translation_row [ 0 ] ) );
                 $source = $filter->fromLayer0ToLayer1( $source );
                 $target = $filter->fromLayer0ToLayer1( $target );
 
-                $pipeline = new Pipeline( $chunk->source, $chunk->target );
-
-                $pipeline->addLast( new SprintfToPH() );
-
-                $src = $pipeline->transform( $source );
-                $trg = $pipeline->transform( $target );
-
-                $check = new QA( $src, $trg );
+                $check = new QA( $source, $target );
                 $check->setFeatureSet( $this->features );
                 $check->setSourceSegLang( $chunk->source );
                 $check->setTargetSegLang( $chunk->target );

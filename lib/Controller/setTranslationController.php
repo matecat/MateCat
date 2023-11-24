@@ -6,13 +6,9 @@ use Exceptions\ControllerReturnException;
 use Exceptions\NotFoundException;
 use Features\ReviewExtended\ReviewUtils;
 use Features\TranslationVersions;
-use Features\TranslationVersions\Handlers\DummyTranslationVersionHandler;
-use Features\TranslationVersions\Handlers\TranslationVersionsHandler;
 use Files\FilesPartsDao;
 use LQA\QA;
-use Matecat\SubFiltering\Commons\Pipeline;
 use Matecat\SubFiltering\MateCatFilter;
-use Matecat\SubFiltering\Filters\SprintfToPH;
 
 class setTranslationController extends ajaxController {
 
@@ -76,7 +72,7 @@ class setTranslationController extends ajaxController {
     protected $filter;
 
     /**
-     * @var DummyTranslationVersionHandler|TranslationVersionsHandler
+     * @var TranslationVersions\Handlers\TranslationVersionsHandler|TranslationVersions\Handlers\DummyTranslationVersionHandler
      */
     private $VersionsHandler;
     private $revisionNumber;
@@ -307,21 +303,15 @@ class setTranslationController extends ajaxController {
         $dao           = new \Segments_SegmentDao( \Database::obtain() );
         $this->segment = $dao->getById( $this->id_segment );
 
-        $pipeline = new Pipeline($this->chunk->source, $this->chunk->target);
-        $pipeline->addLast( new SprintfToPH() );
-
-        $src = $pipeline->transform( $this->__postInput[ 'segment' ] );
-        $trg = $pipeline->transform( $this->__postInput[ 'translation' ] );
-
-        $check = new QA( $src, $trg );
-        $check->setChunk($this->chunk);
+        $check = new QA( $this->__postInput[ 'segment' ], $this->__postInput[ 'translation' ] );
+        $check->setChunk( $this->chunk );
         $check->setFeatureSet( $this->featureSet );
         $check->setSourceSegLang( $this->chunk->source );
         $check->setTargetSegLang( $this->chunk->target );
         $check->setIdSegment( $this->id_segment );
 
-        if(isset($this->__postInput[ 'characters_counter' ] )){
-            $check->setCharactersCount($this->__postInput[ 'characters_counter' ]);
+        if ( isset( $this->__postInput[ 'characters_counter' ] ) ) {
+            $check->setCharactersCount( $this->__postInput[ 'characters_counter' ] );
         }
 
         $check->performConsistencyCheck();
