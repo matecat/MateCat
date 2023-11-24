@@ -607,4 +607,81 @@ class TmKeyManagement_TmKeyManagement {
         return $result;
     }
 
+    /**
+     * @param array $emailList
+     * @param TmKeyManagement_MemoryKeyStruct $memoryKeyToUpdate
+     * @param Users_UserStruct $user
+     * @throws Exception
+     */
+    public function shareKey( Array $emailList, TmKeyManagement_MemoryKeyStruct $memoryKeyToUpdate, Users_UserStruct $user ) {
+
+        $mkDao = new TmKeyManagement_MemoryKeyDao();
+        $userDao = new Users_UserDao();
+
+        foreach ( $emailList as $pos => $email ) {
+
+            $userQuery                  = Users_UserStruct::getStruct();
+            $userQuery->email           = $email;
+            $alreadyRegisteredRecipient = $userDao->setCacheTTL( 60 * 10 )->read( $userQuery );
+
+            if ( !empty( $alreadyRegisteredRecipient ) ) {
+
+                // do not send the email to myself
+                if ( $memoryKeyToUpdate->uid == $alreadyRegisteredRecipient[ 0 ]->uid ) {
+                    continue;
+                }
+
+                $memoryKeyToUpdate->uid = $alreadyRegisteredRecipient[ 0 ]->uid;
+                $this->_addToUserKeyRing( $memoryKeyToUpdate, $mkDao );
+
+                /**
+                 * @var Users_UserStruct[] $alreadyRegisteredRecipient
+                 */
+                $email = new TmKeyManagement_ShareKeyEmail(
+                    $user,
+                    [
+                        $alreadyRegisteredRecipient[ 0 ]->email,
+                        $alreadyRegisteredRecipient[ 0 ]->fullName()
+                    ],
+                    $memoryKeyToUpdate
+                );
+                $email->send();
+
+            } else {
+
+                $email = new TmKeyManagement_ShareKeyEmail( $user, [ $email, "" ], $memoryKeyToUpdate );
+                $email->send();
+
+            }
+
+        }
+
+    }
+
+    /**
+     * @param TmKeyManagement_MemoryKeyStruct $memoryKeyToUpdate
+     * @param TmKeyManagement_MemoryKeyDao $mkDao
+     * @return DataAccess_IDaoStruct|TmKeyManagement_MemoryKeyStruct|null
+     * @throws Exception
+     */
+    protected function _addToUserKeyRing( TmKeyManagement_MemoryKeyStruct $memoryKeyToUpdate, TmKeyManagement_MemoryKeyDao $mkDao ){
+
+        try {
+            $userMemoryKeys = $mkDao->create( $memoryKeyToUpdate );
+        } catch ( PDOException $e ) {
+            //if a constraint violation is raised, it's fine, the key is already in the user keyring
+            //else raise an exception
+            //SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry '1-xxxxxxxxxxx' for key 'PRIMARY'
+            if ( $e->getCode() == 23000 ) {
+                //Ensure the key is enabled on the client KeyRing
+                $userMemoryKeys = $mkDao->enable( $memoryKeyToUpdate );
+            } else {
+                throw $e;
+            }
+
+        }
+
+        return $userMemoryKeys;
+
+    }
 }
