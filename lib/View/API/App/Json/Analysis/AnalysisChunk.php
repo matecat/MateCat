@@ -124,6 +124,12 @@ class AnalysisChunk implements JsonSerializable {
      * @throws Exception
      */
     private function getEngines() {
+
+        // this can happen even when fast analysis is not completed
+        if ( !is_numeric( $this->chunkStruct->id_tms ) || !is_numeric( $this->chunkStruct->id_mt_engine ) ) {
+            return [];
+        }
+
         $tmEngine = Engine::getInstance( $this->chunkStruct->id_tms );
         $mtEngine = Engine::getInstance( $this->chunkStruct->id_mt_engine );
 
@@ -138,7 +144,13 @@ class AnalysisChunk implements JsonSerializable {
      * @throws Exception
      */
     private function getMemoryKeys() {
-        $tmKeys  = [];
+        $tmKeys = [];
+
+        // this can happen even when fast analysis is not completed
+        if ( empty( $this->chunkStruct->tm_keys ) ) {
+            return $tmKeys;
+        }
+
         $jobKeys = $this->chunkStruct->getClientKeys( $this->user, TmKeyManagement_Filter::OWNER )[ 'job_keys' ];
 
         foreach ( $jobKeys as $tmKey ) {

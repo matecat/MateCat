@@ -9,9 +9,8 @@ use API\App\Json\Analysis\AnalysisJob;
 use API\App\Json\Analysis\AnalysisProject;
 use API\App\Json\Analysis\AnalysisProjectSummary;
 use API\App\Json\Analysis\MatchConstants;
-use API\App\Json\OutsourceConfirmation;
-use API\V2\Json\JobTranslator;
 use Chunks_ChunkDao;
+use Chunks_ChunkStruct;
 use Constants_ProjectStatus;
 use Exception;
 use FeatureSet;
@@ -201,7 +200,7 @@ abstract class AbstractStatus {
 
             if ( !isset( $chunk ) || $chunk->getPassword() != $segInfo[ 'jpassword' ] ) {
                 $chunkStruct = Chunks_ChunkDao::getByIdAndPassword( $segInfo[ 'jid' ], $segInfo[ 'jpassword' ], 60 * 10 );
-                $chunk = new AnalysisChunk( $chunkStruct, $this->_project_data[ 0 ][ 'pname' ], $this->user );
+                $chunk       = new AnalysisChunk( $chunkStruct, $this->_project_data[ 0 ][ 'pname' ], $this->user );
                 $job->setPayableRates( json_decode( $chunkStruct->payable_rates ) );
                 $job->setChunk( $chunk );
             }
@@ -282,7 +281,12 @@ abstract class AbstractStatus {
 
         }
 
-        if ( $project->getSummary()->getSegmentsAnalyzed() == 0 && $this->status_project == Constants_ProjectStatus::STATUS_NEW ) {
+        if ( $project->getSummary()->getSegmentsAnalyzed() == 0 && in_array( $this->status_project,
+                        [
+                                Constants_ProjectStatus::STATUS_NEW,
+                                Constants_ProjectStatus::STATUS_BUSY
+                        ]
+                ) ) {
 
             //Related to an issue in the outsource
             //Here, the Fast analysis was not performed, return the number of raw word count
@@ -298,6 +302,17 @@ abstract class AbstractStatus {
                 $job->incrementIndustry( round( $_job_fallback[ 'standard_analysis_wc' ] ) );
                 $job->incrementEquivalent( round( $_job_fallback[ 'standard_analysis_wc' ] ) );
                 $job->incrementRaw( round( $_job_fallback[ 'standard_analysis_wc' ] ) );
+
+                $chunkStruct                = new Chunks_ChunkStruct();
+                $chunkStruct->id            = $_job_fallback[ 'jid' ];
+                $chunkStruct->password      = $_job_fallback[ 'jpassword' ];
+                $chunkStruct->source        = $lang_pair[ 0 ];
+                $chunkStruct->target        = $lang_pair[ 1 ];
+                $chunkStruct->payable_rates = $_job_fallback[ 'payable_rates' ];
+                
+                $chunk = new AnalysisChunk( $chunkStruct, $this->_project_data[ 0 ][ 'pname' ], $this->user );
+                $job->setPayableRates( json_decode( $chunkStruct->payable_rates ) );
+                $job->setChunk( $chunk );
 
             }
 
