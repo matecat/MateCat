@@ -65,14 +65,14 @@ class AnalysisProjectSummary implements JsonSerializable {
 
     public function jsonSerialize() {
         return [
-                'in_queue_before'     => $this->in_queue_before,
-                'total_segments'      => $this->total_segments,
-                'segments_analyzed'   => $this->segments_analyzed,
-                'status'              => $this->analysis_status,
-                'total_raw'           => $this->total_raw,
-                'total_industry'      => round( $this->total_industry ),
-                'total_equivalent'    => round( $this->total_equivalent ),
-                'discount'            => $this->getDiscount()
+                'in_queue_before'   => $this->in_queue_before,
+                'total_segments'    => $this->total_segments,
+                'segments_analyzed' => $this->segments_analyzed,
+                'status'            => $this->analysis_status,
+                'total_raw'         => $this->total_raw,
+                'total_industry'    => round( $this->total_industry ),
+                'total_equivalent'  => round( $this->total_equivalent ),
+                'discount'          => $this->getDiscount()
         ];
     }
 
@@ -100,6 +100,9 @@ class AnalysisProjectSummary implements JsonSerializable {
     }
 
     public function getDiscount() {
+        if ( empty( $this->total_raw ) ) {
+            return 0;
+        }
         return round( ( ( $this->total_raw - round( $this->total_equivalent ) ) / $this->total_raw ) * 100 );
     }
 

@@ -166,11 +166,6 @@ class analyzeController extends viewController {
         $projectMetaData                 = $projectMetaDataDao->get( $this->pid, Projects_MetadataDao::FEATURES_KEY );
         $this->template->project_plugins = ( !empty( $projectMetaData ) ) ? $this->featureSet->filter( 'appendInitialTemplateVars', explode( ",", $projectMetaData->value ) ) : [];
 
-        $this->template->isCJK = false;
-        if ( array_key_exists( explode( "-", array_values( $this->model->getJobs() )[ 0 ]->jsonSerialize()[ 'source' ] ), CatUtils::$cjk ) ) {
-            $this->template->isCJK = true;
-        }
-
         $this->template->pid                   = $this->project->id;
         $this->template->project_status        = $this->project->status_analysis;
         $this->template->num_segments          = $this->model->getSummary()->getTotalSegments();

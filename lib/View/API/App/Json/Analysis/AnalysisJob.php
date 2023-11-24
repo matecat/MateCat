@@ -9,6 +9,7 @@
 
 namespace API\App\Json\Analysis;
 
+use CatUtils;
 use Exception;
 use JsonSerializable;
 use Langs_Languages;
@@ -78,7 +79,8 @@ class AnalysisJob implements JsonSerializable {
                 'total_equivalent'    => $this->total_equivalent,
                 'total_industry'      => $this->total_industry,
                 'outsource_available' => $this->outsourceAvailable,
-                'payable_rates'       => $this->payable_rates
+                'payable_rates'       => $this->payable_rates,
+                'count_unit'          => $this->getCountUnit( $this->source ),
         ];
     }
 
@@ -193,6 +195,10 @@ class AnalysisJob implements JsonSerializable {
         $this->payable_rates = $payable_rates;
 
         return $this;
+    }
+
+    private function getCountUnit( $languageCode ) {
+        return array_key_exists( explode( "-", $languageCode )[ 0 ], CatUtils::$cjk ) ? 'characters' : 'words';
     }
 
 }

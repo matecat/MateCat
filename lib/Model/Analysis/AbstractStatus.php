@@ -144,7 +144,7 @@ abstract class AbstractStatus {
 
         }
 
-        return $this->_formatData();
+        return $this->loadObjects();
 
     }
 
@@ -169,7 +169,7 @@ abstract class AbstractStatus {
 
     }
 
-    protected function _formatData() {
+    protected function loadObjects() {
 
         $target       = null;
         $this->result = $project = new AnalysisProject(
@@ -184,33 +184,6 @@ abstract class AbstractStatus {
         );
 
         $project->setAnalyzeLink( $this->getAnalyzeLink() );
-
-        if ( $project->getSummary()->getSegmentsAnalyzed() == 0 && $this->status_project == Constants_ProjectStatus::STATUS_NEW ) {
-
-            //Related to an issue in the outsource
-            //Here, the Fast analysis was not performed, return the number of raw word count
-            //Needed because the "getProjectStatsVolumeAnalysis" query based on segment_translations always returns null
-            //( there are no segment_translations )
-
-            foreach ( $this->_project_data as $_job_fallback ) {
-
-                $lang_pair = explode( "|", $_job_fallback[ 'langpair' ] );
-                $job       = new AnalysisJob( $_job_fallback[ 'jid' ], $lang_pair[ 0 ], $lang_pair[ 1 ] );
-
-                $project->setJob( $job );
-                $job->incrementIndustry( round( $_job_fallback[ 'standard_analysis_wc' ] ) );
-                $job->incrementEquivalent( round( $_job_fallback[ 'standard_analysis_wc' ] ) );
-                $job->incrementRaw( round( $_job_fallback[ 'standard_analysis_wc' ] ) );
-
-            }
-
-            $project->getSummary()->incrementRaw( $this->_project_data[ 0 ][ 'standard_analysis_wc' ] );
-            $project->getSummary()->incrementIndustry( $this->_project_data[ 0 ][ 'standard_analysis_wc' ] );
-            $project->getSummary()->incrementEquivalent( $this->_project_data[ 0 ][ 'standard_analysis_wc' ] );
-
-            return $this;
-
-        }
 
         foreach ( $this->_resultSet as $segInfo ) {
 
@@ -275,6 +248,11 @@ abstract class AbstractStatus {
                 $matchType = MatchConstants::_NUMBERS_ONLY;
             }
 
+            // increment file totals
+            $file->incrementRaw( $segInfo[ 'raw_word_count' ] );
+            $file->incrementEquivalent( $segInfo[ 'eq_word_count' ] );
+
+            // increment single file match
             $match = $file->getMatch( $matchType );
             $match->incrementRaw( $segInfo[ 'raw_word_count' ] );
             $match->incrementEquivalent( $segInfo[ 'eq_word_count' ] );
@@ -301,6 +279,33 @@ abstract class AbstractStatus {
             $project->getSummary()->incrementRaw( $segInfo[ 'raw_word_count' ] );
             $project->getSummary()->incrementEquivalent( $segInfo[ 'eq_word_count' ] );
             $project->getSummary()->incrementIndustry( $segInfo[ 'standard_word_count' ] );
+
+        }
+
+        if ( $project->getSummary()->getSegmentsAnalyzed() == 0 && $this->status_project == Constants_ProjectStatus::STATUS_NEW ) {
+
+            //Related to an issue in the outsource
+            //Here, the Fast analysis was not performed, return the number of raw word count
+            //Needed because the "getProjectStatsVolumeAnalysis" query based on segment_translations always returns null
+            //( there are no segment_translations )
+
+            foreach ( $this->_project_data as $_job_fallback ) {
+
+                $lang_pair = explode( "|", $_job_fallback[ 'lang_pair' ] );
+                $job       = new AnalysisJob( $_job_fallback[ 'jid' ], $lang_pair[ 0 ], $lang_pair[ 1 ] );
+
+                $project->setJob( $job );
+                $job->incrementIndustry( round( $_job_fallback[ 'standard_analysis_wc' ] ) );
+                $job->incrementEquivalent( round( $_job_fallback[ 'standard_analysis_wc' ] ) );
+                $job->incrementRaw( round( $_job_fallback[ 'standard_analysis_wc' ] ) );
+
+            }
+
+            $project->getSummary()->incrementRaw( $this->_project_data[ 0 ][ 'standard_analysis_wc' ] );
+            $project->getSummary()->incrementIndustry( $this->_project_data[ 0 ][ 'standard_analysis_wc' ] );
+            $project->getSummary()->incrementEquivalent( $this->_project_data[ 0 ][ 'standard_analysis_wc' ] );
+
+            return $this;
 
         }
 

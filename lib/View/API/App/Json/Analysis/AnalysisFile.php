@@ -39,6 +39,15 @@ class AnalysisFile implements MatchContainerInterface, JsonSerializable {
      */
     protected $id_file_part;
 
+    /**
+     * @var int
+     */
+    protected $total_raw = 0;
+    /**
+     * @var int
+     */
+    protected $total_equivalent = 0;
+
     public function __construct( $id, $id_file_part, $name, $original_name ) {
         $this->id            = (int)$id;
         $this->id_file_part  = $id_file_part;
@@ -51,11 +60,13 @@ class AnalysisFile implements MatchContainerInterface, JsonSerializable {
 
     public function jsonSerialize() {
         return [
-                'id'            => $this->id,
-                'id_file_part'  => $this->id_file_part,
-                'name'          => $this->name,
-                'original_name' => $this->original_name,
-                'matches'       => array_values( $this->matches )
+                'id'               => $this->id,
+                'id_file_part'     => $this->id_file_part,
+                'name'             => $this->name,
+                'original_name'    => $this->original_name,
+                'total_raw'        => $this->total_raw,
+                'total_equivalent' => $this->total_equivalent,
+                'matches'          => array_values( $this->matches )
         ];
     }
 
@@ -78,6 +89,24 @@ class AnalysisFile implements MatchContainerInterface, JsonSerializable {
      */
     public function getName() {
         return $this->name;
+    }
+
+    /**
+     * @param $raw
+     *
+     * @return void
+     */
+    public function incrementRaw( $raw ) {
+        $this->total_raw += (int)$raw;
+    }
+
+    /**
+     * @param $equivalent
+     *
+     * @return void
+     */
+    public function incrementEquivalent( $equivalent ) {
+        $this->total_equivalent += round( $equivalent );
     }
 
 }
