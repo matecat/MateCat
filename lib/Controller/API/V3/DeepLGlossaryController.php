@@ -65,8 +65,6 @@ class DeepLGlossaryController extends KleinController
             $this->validateCreateGlossaryPayload();
 
             $name = filter_var( $_POST['name'], FILTER_SANITIZE_STRING, FILTER_FLAG_ENCODE_LOW|FILTER_FLAG_STRIP_HIGH );
-            $source = filter_var( $_POST['source'], FILTER_SANITIZE_STRING, FILTER_FLAG_ENCODE_LOW|FILTER_FLAG_STRIP_HIGH );
-            $target = filter_var( $_POST['target'], FILTER_SANITIZE_STRING, FILTER_FLAG_ENCODE_LOW|FILTER_FLAG_STRIP_HIGH );
 
             $uploadManager = new Upload();
             $uploadedFiles = $uploadManager->uploadFiles( $_FILES );
@@ -74,7 +72,12 @@ class DeepLGlossaryController extends KleinController
             $glossary = CSVParser::extract($uploadedFiles->glossary, "DEEPL_EXCEL_GLOSS_");
 
             // validate
+            $csvHeaders = CSVParser::parseToArray($glossary)[0];
             $csv = CSVParser::withoutHeaders($glossary);
+
+            if(count($csvHeaders) !== 2){
+                throw new Exception("Glossary has more or less than 2 columns. Only bilingual files are supported", 400);
+            }
 
             if(empty($csv)){
                 throw new Exception("Glossary is empty", 400);
@@ -82,8 +85,8 @@ class DeepLGlossaryController extends KleinController
 
             $data = [
                 "name" => $name,
-                "source_lang" => $source,
-                "target_lang" => $target,
+                "source_lang" => $csvHeaders[0],
+                "target_lang" => $csvHeaders[1],
                 "entries" => $csv,
                 "entries_format" => "csv",
             ];
@@ -119,14 +122,6 @@ class DeepLGlossaryController extends KleinController
 
         if(!isset($_POST['name'])){
             throw new Exception('Missing `name`', 400);
-        }
-
-        if(!isset($_POST['source'])){
-            throw new Exception('Missing `source`', 400);
-        }
-
-        if(!isset($_POST['target'])){
-            throw new Exception('Missing `target`', 400);
         }
     }
 
