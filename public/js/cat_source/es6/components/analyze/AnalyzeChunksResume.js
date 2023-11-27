@@ -8,7 +8,7 @@ import ModalsActions from '../../actions/ModalsActions'
 import TranslatedIcon from '../../../../../img/icons/TranslatedIcon'
 import Tooltip from '../common/Tooltip'
 import CommonUtils from '../../utils/commonUtils'
-import {ANALYSIS_STATUS} from '../../constants/Constants'
+import {ANALYSIS_STATUS, UNIT_COUNT} from '../../constants/Constants'
 
 class AnalyzeChunksResume extends React.Component {
   constructor(props) {
@@ -530,7 +530,7 @@ class AnalyzeChunksResume extends React.Component {
               <p />
             </div>
             <div className="titles-compare">
-              {!config.isCJK ? (
+              {this.props.jobsAnalysis[0].count_unit === UNIT_COUNT.WORDS ? (
                 <div className="title-total-words">
                   <h5>Total word count</h5>
                 </div>

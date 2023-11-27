@@ -1,5 +1,6 @@
 import React from 'react'
 import {each} from 'lodash/collection'
+import {UNIT_COUNT} from '../../constants/Constants'
 
 class JobAnalyzeHeader extends React.Component {
   constructor(props) {
@@ -37,7 +38,7 @@ class JobAnalyzeHeader extends React.Component {
         {/*</div>*/}
         <div className="job-payable">
           <span id="words">{parseInt(this.payable)}</span>
-          {!config.isCJK
+          {this.props.jobInfo.count_unit === UNIT_COUNT.WORDS
             ? ' Matecat Weighted words'
             : ' Matecat weighted characters'}
         </div>

@@ -25,3 +25,8 @@ export const ANALYSIS_STATUS = {
   DONE: 'DONE',
   NOT_TO_ANALYZE: 'NOT_TO_ANALYZE',
 }
+
+export const UNIT_COUNT = {
+  WORDS: 'words',
+  CHARACTERS: 'characters',
+}
