@@ -45,50 +45,6 @@ const SegmentUtils = {
     })
     return arrayIntersection.length > 0 && !!config.defaults.tag_projection
   },
-  pippo: () => {
-    const acceptedLanguages = config.tag_projection_languages
-    const sourceLanguageCode = source.code
-    const sourceLanguageText = source.name
-    let languageCombinations = []
-    let notSupportedCouples = []
-
-    targets.forEach(function (target) {
-      var elem = {}
-      elem.targetCode = target.code
-      elem.sourceCode = sourceLanguageCode
-      elem.targetName = target.name
-      elem.sourceName = sourceLanguageText
-      languageCombinations.push(elem)
-    })
-    //Intersection between the combination of choosen languages and the supported
-    const arrayIntersection = languageCombinations.filter(function (n) {
-      const elemST =
-        n.sourceCode.split('-')[0] + '-' + n.targetCode.split('-')[0]
-      const elemTS =
-        n.targetCode.split('-')[0] + '-' + n.sourceCode.split('-')[0]
-      if (
-        typeof acceptedLanguages[elemST] == 'undefined' &&
-        typeof acceptedLanguages[elemTS] == 'undefined'
-      ) {
-        notSupportedCouples.push(n.sourceName + ' - ' + n.targetName)
-      }
-      return (
-        typeof acceptedLanguages[elemST] !== 'undefined' ||
-        typeof acceptedLanguages[elemTS] !== 'undefined'
-      )
-    })
-
-    const disableTP = !(
-      arrayIntersection.length > 0 && config.defaults.tag_projection
-    )
-    if (notSupportedCouples.length > 0) {
-      //Not supported languages
-    }
-    //disable Tag Projection
-    if (arrayIntersection.length == 0) {
-      //Disable GT
-    }
-  },
   /**
    * Tag Projection: check if is enable the Tag Projection
    */

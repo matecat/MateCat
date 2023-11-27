@@ -28,7 +28,6 @@ window.config = {
 }
 
 require('../../../../common')
-require('../../../../login')
 require('../../../../user_store')
 const fakeTeamsData = {
   threeTeams: {

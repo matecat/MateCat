@@ -31,8 +31,13 @@ import SearchUtils from '../components/header/cattol/search/searchUtils'
 import CatToolStore from '../stores/CatToolStore'
 import {toggleTagProjectionJob} from '../api/toggleTagProjectionJob'
 import DraftMatecatUtils from '../components/segments/utils/DraftMatecatUtils'
+import {deleteSegmentIssue as deleteSegmentIssueApi} from '../api/deleteSegmentIssue'
+import SegmentsFilterUtil from '../components/header/cattol/segment_filter/segment_filter'
 
 const SegmentActions = {
+  localStorageCommentsClosed:
+    'commentsPanelClosed-' + config.id_job + config.password,
+
   /********* SEGMENTS *********/
   renderSegments: function (segments, idToOpen) {
     AppDispatcher.dispatch({
@@ -124,7 +129,6 @@ const SegmentActions = {
 
   openSegment: function (sid, wasOriginatedFromBrowserHistory = false) {
     const segment = SegmentStore.getSegmentByIdToJS(sid)
-
     if (segment) {
       //Check first if the segment is in the view
       if (UI.isReadonlySegment(segment) && !SearchUtils.searchEnabled) {
@@ -175,7 +179,7 @@ const SegmentActions = {
     if (SegmentStore.getCurrentSegment())
       this.scrollToSegment(SegmentStore.getCurrentSegment().sid)
   },
-  scrollToSegment: function (sid, callback) {
+  scrollToSegment: function (sid, callback = null) {
     const segment = SegmentStore.getSegmentByIdToJS(sid)
     if (segment) {
       AppDispatcher.dispatch({
@@ -954,7 +958,7 @@ const SegmentActions = {
   },
 
   openIssuesPanel: function (data, openSegment) {
-    if (UI.openIssuesPanel(data, openSegment)) {
+    if (ReviewExtended.openIssuesPanel(data, openSegment)) {
       AppDispatcher.dispatch({
         actionType: SegmentConstants.OPEN_ISSUES_PANEL,
         data: data,
@@ -990,7 +994,7 @@ const SegmentActions = {
   },
 
   submitIssue: function (sid, data) {
-    return UI.submitIssues(sid, data)
+    return ReviewExtended.submitIssue(sid, data)
   },
 
   issueAdded: function (sid, issueId) {
@@ -1024,8 +1028,17 @@ const SegmentActions = {
     })
   },
 
-  deleteIssue: function (issue, sid, dontShowMessage) {
-    UI.deleteIssue(issue, sid, dontShowMessage)
+  deleteIssue: function (issue, sid) {
+    deleteSegmentIssueApi({
+      idSegment: sid,
+      idIssue: issue.id,
+    })
+      .then(() => {
+        SegmentActions.confirmDeletedIssue(sid, issue.id)
+        ReviewExtended.getSegmentVersionsIssues(sid)
+        CatToolActions.reloadQualityReport()
+      })
+      .catch(() => {})
   },
 
   confirmDeletedIssue: function (sid, issue_id) {
@@ -1036,8 +1049,8 @@ const SegmentActions = {
     })
   },
 
-  submitComment: function (sid, idIssue, data) {
-    return UI.submitComment(sid, idIssue, data)
+  submitIssueComment: function (sid, idIssue, data) {
+    return ReviewExtended.submitIssueComment(sid, idIssue, data)
   },
 
   showApproveAllModalWarnirng: function () {
@@ -1199,19 +1212,69 @@ const SegmentActions = {
       actionType: SegmentConstants.OPEN_COMMENTS,
       sid: sid,
     })
+    localStorage.setItem(this.localStorageCommentsClosed, false)
   },
   closeSegmentComment(sid) {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.CLOSE_COMMENTS,
       sid: sid,
     })
+    localStorage.setItem(this.localStorageCommentsClosed, true)
   },
   gotoNextSegment() {
-    let next = SegmentStore.getNextSegment()
-    if (next) {
-      SegmentActions.openSegment(next.sid)
+    if (SegmentsFilterUtil.enabled() && SegmentsFilterUtil.filtering()) {
+      SegmentsFilterUtil.gotoNextSegment(SegmentStore.getCurrentSegmentId())
     } else {
-      this.closeSegment()
+      let next = SegmentStore.getNextSegment()
+      if (next) {
+        SegmentActions.openSegment(next.sid)
+      } else {
+        this.closeSegment()
+      }
+    }
+  },
+  /**
+   * Search for the next translated segment to propose for revision.
+   * This function searches in the current UI first, then falls back
+   * to invoke the server and eventually reload the page to the new
+   * URL.
+   *
+   */
+  gotoNextTranslatedSegment(sid) {
+    sid = sid || SegmentStore.getCurrentSegmentId()
+    // this is expected behaviour in review
+    // change this if we are filtering, go to the next
+    // segment, assuming the sample is what we want to revise.
+    if (SegmentsFilterUtil.enabled() && SegmentsFilterUtil.filtering()) {
+      SegmentsFilterUtil.gotoNextTranslatedSegment(sid)
+    } else {
+      const nextTranslatedSegment = SegmentStore.getNextSegment(
+        sid,
+        null,
+        7,
+        null,
+        true,
+      )
+      const nextTranslatedSegmentInPrevious = SegmentStore.getNextSegment(
+        -1,
+        null,
+        7,
+        null,
+        true,
+      )
+      // find in next segments
+      if (nextTranslatedSegment) {
+        SegmentActions.openSegment(nextTranslatedSegment.sid)
+      } else if (
+        UI.nextUntranslatedSegmentIdByServer ||
+        nextTranslatedSegmentInPrevious
+      ) {
+        SegmentActions.openSegment(
+          UI.nextUntranslatedSegmentIdByServer
+            ? UI.nextUntranslatedSegmentIdByServer
+            : nextTranslatedSegmentInPrevious.sid,
+        )
+      }
     }
   },
   gotoNextUntranslatedSegment() {
@@ -1405,6 +1468,12 @@ const SegmentActions = {
       actionType: SegmentConstants.OPEN_GLOSSARY_FORM_PREFILL,
       sid,
       ...filledFields,
+    })
+  },
+  focusTags: function (tagsSelected) {
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.FOCUS_TAGS,
+      tagsSelected,
     })
   },
 }

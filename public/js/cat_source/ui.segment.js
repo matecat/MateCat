@@ -55,7 +55,7 @@ import {setCurrentSegment} from './es6/api/setCurrentSegment'
       let currentContribution = SegmentStore.getSegmentChoosenContribution(sid)
       // Send the suggestion to Tag Projection only if is > 89% and is not MT
       if (
-        !_.isUndefined(currentContribution) &&
+        !isUndefined(currentContribution) &&
         currentContribution.match !== 'MT' &&
         parseInt(currentContribution.match) > 89
       ) {
@@ -101,55 +101,6 @@ import {setCurrentSegment} from './es6/api/setCurrentSegment'
         : null
       this.nextSegmentId = next ? next.sid : null
     },
-    //Override by  plugin
-    gotoNextSegment: function () {
-      SegmentActions.gotoNextSegment()
-    },
-    //Overridden by  plugin
-    gotoPreviousSegment: function () {
-      var prevSeg = SegmentStore.getPrevSegment()
-      if (prevSeg) {
-        SegmentActions.openSegment(prevSeg.sid)
-      }
-    },
-    /**
-     * Search for the next translated segment to propose for revision.
-     * This function searches in the current UI first, then falls back
-     * to invoke the server and eventually reload the page to the new
-     * URL.
-     *
-     * Overridden by  plugin
-     */
-    openNextTranslated: function (sid) {
-      sid = sid || UI.currentSegmentId
-      var nextTranslatedSegment = SegmentStore.getNextSegment(
-        sid,
-        null,
-        7,
-        null,
-        true,
-      )
-      var nextTranslatedSegmentInPrevious = SegmentStore.getNextSegment(
-        -1,
-        null,
-        7,
-        null,
-        true,
-      )
-      // find in next segments
-      if (nextTranslatedSegment) {
-        SegmentActions.openSegment(nextTranslatedSegment.sid)
-      } else if (
-        UI.nextUntranslatedSegmentIdByServer ||
-        nextTranslatedSegmentInPrevious
-      ) {
-        SegmentActions.openSegment(
-          UI.nextUntranslatedSegmentIdByServer
-            ? UI.nextUntranslatedSegmentIdByServer
-            : nextTranslatedSegmentInPrevious.sid,
-        )
-      }
-    },
     //Overridden by  plugin
     isReadonlySegment: function (segment) {
       const projectCompletionCheck =
@@ -161,27 +112,6 @@ import {setCurrentSegment} from './es6/api/setCurrentSegment'
         segment.readonly == 'true' ||
         UI.body.hasClass('archived')
       )
-    },
-    //Overridden by  plugin
-    getStatusForAutoSave: function (segment) {
-      var status
-      if (segment.hasClass('status-translated')) {
-        status = 'translated'
-      } else if (segment.hasClass('status-approved')) {
-        status = 'approved'
-      } else if (segment.hasClass('status-rejected')) {
-        status = 'rejected'
-      } else if (segment.hasClass('status-new')) {
-        status = 'new'
-      } else {
-        status = 'draft'
-      }
-
-      if (status == 'new') {
-        status = 'draft'
-      }
-      console.debug('status', status)
-      return status
     },
     setCurrentSegment: function () {
       var id_segment = this.currentSegmentId
@@ -196,29 +126,24 @@ import {setCurrentSegment} from './es6/api/setCurrentSegment'
       }
       setCurrentSegment(requestData)
         .then((data) => {
-          UI.setCurrentSegment_success(id_segment, data)
+          this.nextUntranslatedSegmentIdByServer = data.nextSegmentId
+          SegmentActions.setNextUntranslatedSegmentFromServer(
+            data.nextSegmentId,
+          )
+
+          var segment = SegmentStore.getSegmentByIdToJS(id_segment)
+          if (!segment) return
+          if (config.alternativesEnabled && !segment.alternatives) {
+            this.getTranslationMismatches(id_segment)
+          }
         })
         .catch(() => {
           OfflineUtils.failedConnection(requestData, 'setCurrentSegment')
         })
     },
-    setCurrentSegment_success: function (id_segment, d) {
-      this.nextUntranslatedSegmentIdByServer = d.nextSegmentId
-      SegmentActions.setNextUntranslatedSegmentFromServer(d.nextSegmentId)
-
-      var segment = SegmentStore.getSegmentByIdToJS(id_segment)
-      if (!segment) return
-      if (config.alternativesEnabled && !segment.alternatives) {
-        this.getTranslationMismatches(id_segment)
-      }
-      $('html').trigger('setCurrentSegment_success', [d, id_segment])
-    },
 
     getSegmentById: function (id) {
       return $('#segment-' + id)
-    },
-    getEditAreaBySegmentId: function (id) {
-      return $('#segment-' + id + ' .targetarea')
     },
 
     segmentIsLoaded: function (segmentId) {

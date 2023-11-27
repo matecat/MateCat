@@ -21,7 +21,6 @@ import getSelectedText from './getSelectedText'
 import addTagEntityToEditor from './addTagEntityToEditor'
 import canDecorateRange from './canDecorateRange'
 import getEntityStrategy from './getEntityStrategy'
-import moveCursorJumpEntity from './moveCursorJumpEntity'
 import selectionIsEntity from './selectionIsEntity'
 import insertEntityAtSelection from './insertEntityAtSelection'
 import structFromName from './tagFromTagType'
@@ -47,6 +46,7 @@ import {
   hasDataOriginalTags,
   checkXliffTagsInText,
 } from './tagUtils'
+import * as manageCaretPositionNearEntity from './manageCaretPositionNearEntity'
 
 const DraftMatecatUtils = {
   // Tag utils
@@ -72,7 +72,7 @@ const DraftMatecatUtils = {
   addTagEntityToEditor,
   canDecorateRange,
   selectionIsEntity,
-  moveCursorJumpEntity,
+  manageCaretPositionNearEntity,
   insertEntityAtSelection,
   // Fragment Utils
   insertFragment,
