@@ -816,7 +816,8 @@ class Editarea extends React.Component {
       }
     } else if (
       (e.key === 'Backspace' || e.key === 'Delete') &&
-      !isSelectedEntity(this.state.editorState)
+      !isSelectedEntity(this.state.editorState) &&
+      window.getSelection().type === 'Caret'
     ) {
       const direction = e.key === 'Backspace' ? 'left' : 'right'
 
