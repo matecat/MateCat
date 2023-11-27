@@ -23,8 +23,8 @@ const Shortcuts = {
         label: 'Opening single curly quote',
         equivalent: '',
         keystrokes: {
-          standard: 'alt+bracketLeft',
-          mac: 'option+bracketLeft',
+          standard: 'ctrl+bracketLeft',
+          mac: 'meta+bracketLeft',
         },
       },
       singleQuoteClose: {
