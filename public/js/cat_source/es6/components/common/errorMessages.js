@@ -8,6 +8,10 @@ export const minLength = (length) => {
   return (fieldName) => `${fieldName} must be at least ${length} characters`
 }
 
+export const maxLength = (length) => {
+  return (fieldName) => `${fieldName} must be at maximum ${length} characters`
+}
+
 export const atLeastOneSpecialChar = () => {
   return (fieldName) =>
     `${fieldName} must contain at least one special character: ` +
