@@ -1,6 +1,6 @@
 <?php
 
-namespace API\App;
+namespace API\V3;
 
 use API\V2\KleinController;
 use API\V2\Validators\LoginValidator;
@@ -128,9 +128,6 @@ class SegmentAnalysisController extends KleinController {
      */
     private function getSegmentsFromIdJobAndPassword($idJob, $password, $page, $perPage)
     {
-        // https://dev.matecat.com/api/app/projects/9/64a02abbb1b6/segment-analysis
-        // https://dev.matecat.com/api/app/jobs/3/2fa321f18a18/segment-analysis
-
         $segments = [];
         $limit = $perPage;
         $offset = ($page-1)*$perPage;
@@ -301,6 +298,7 @@ class SegmentAnalysisController extends KleinController {
             $issuesAggregate[$issuesRecord->id_job][$issuesRecord->id_segment][] = [
                 'source_page'         => $this->humanReadableSourcePage($issuesRecord->source_page),
                 'id_category'         => (int)$issuesRecord->id_category,
+                'category'            => $issuesRecord->cat_label,
                 'severity'            => $issuesRecord->severity,
                 'translation_version' => (int)$issuesRecord->translation_version,
                 'penalty_points'      => floatval($issuesRecord->penalty_points),

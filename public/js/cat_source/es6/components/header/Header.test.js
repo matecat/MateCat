@@ -21,7 +21,6 @@ window.config = {
   hostpath: 'https://dev.matecat.com',
 }
 require('../../../../common')
-require('../../../../login')
 require('../../../../user_store')
 
 const props = {
