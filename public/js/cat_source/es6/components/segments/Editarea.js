@@ -788,7 +788,7 @@ class Editarea extends React.Component {
     ) {
       return 'insert-word-joiner-tag'
     } else if (e.code === 'BracketLeft' || e.code === 'BracketRight') {
-      if (e.code === 'BracketLeft' && (isOptionKeyCommand(e) || e.altKey)) {
+      if (e.code === 'BracketLeft' && isCtrlKeyCommand(e)) {
         if (e.shiftKey) {
           this.typeTextInEditor('“')
         } else {
@@ -796,7 +796,7 @@ class Editarea extends React.Component {
         }
         return 'quote-shortcut'
       }
-      if (e.code === 'BracketRight' && (isOptionKeyCommand(e) || e.altKey)) {
+      if (e.code === 'BracketRight' && isCtrlKeyCommand(e)) {
         if (e.shiftKey) {
           this.typeTextInEditor('”')
         } else {
