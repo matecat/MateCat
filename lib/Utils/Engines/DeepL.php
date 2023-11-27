@@ -17,7 +17,7 @@ class Engines_DeepL extends Engines_AbstractEngine
      */
     protected function _getClient()
     {
-        if($this->apiKey === null){
+        if ($this->apiKey === null) {
             throw new Exception("API ket not set");
         }
 
@@ -26,7 +26,7 @@ class Engines_DeepL extends Engines_AbstractEngine
 
     protected function _decode($rawValue)
     {
-        throw new DomainException( "Method " . __FUNCTION__ . " not implemented." );
+        throw new DomainException("Method " . __FUNCTION__ . " not implemented.");
     }
 
     /**
@@ -35,19 +35,22 @@ class Engines_DeepL extends Engines_AbstractEngine
     public function get($_config)
     {
         try {
+            $source = explode("-", $_config['source']);
+            $target = explode("-", $_config['target']);
+
             $client = $this->_getClient();
             $result = $client->translate(
                 $_config['segment'],
-                $_config['source'],
-                $_config['target'],
+                $source[0],
+                $target[0],
                 $_config['formality'] ? $_config['formality'] : null,
                 $_config['idGlossary'] ? $_config['idGlossary'] : null
             );
 
             return $this->formatMatches($_config, $result);
 
-        } catch ( Exception $e ) {
-            return $this->GoogleTranslateFallback( $_config );
+        } catch (Exception $e) {
+            return $this->GoogleTranslateFallback($_config);
         }
     }
 
@@ -60,37 +63,35 @@ class Engines_DeepL extends Engines_AbstractEngine
     {
         $matches = [];
 
-        if(!isset($result['translations'])){
+        if (!isset($result['translations'])) {
             return $matches;
         }
 
-        foreach ($result['translations'] as $translation){
-            $matches[] = [
-                'id'               => 0,
-                'create_date'      => '0000-00-00',
-                'segment'          => $_config['segment'],
-                'raw_segment'      => $_config['segment'],
-                'translation'      => $translation['text'],
-                'source_note'      => '',
-                'target_note'      => '',
-                'raw_translation'  => $translation['text'],
-                'quality'          => 0,
-                'reference'        => '',
-                'usage_count'      => 0,
-                'subject'          => '',
-                'created_by'       => '',
-                'last_updated_by'  => '',
-                'last_update_date' => '0000-00-00',
-                'match'            => 0,
-                'memory_key'       => '',
-                'ICE'              => false,
-                'tm_properties'    => [],
-                'target'           => $_config['target'],
-                'source'           => $_config['source'],
-            ];
-        }
+        $translation = $result['translations'][0]['text'];
 
-        return $matches;
+        return [
+            'id' => 0,
+            'create_date' => '0000-00-00',
+            'segment' => $_config['segment'],
+            'raw_segment' => $_config['segment'],
+            'translation' => $translation,
+            'source_note' => '',
+            'target_note' => '',
+            'raw_translation' => $translation,
+            'quality' => 0,
+            'reference' => '',
+            'usage_count' => 0,
+            'subject' => '',
+            'created_by' => '',
+            'last_updated_by' => '',
+            'last_update_date' => '0000-00-00',
+            'match' => 0,
+            'memory_key' => '',
+            'ICE' => false,
+            'tm_properties' => [],
+            'target' => $_config['target'],
+            'source' => $_config['source'],
+        ];
     }
 
     /**
@@ -98,7 +99,7 @@ class Engines_DeepL extends Engines_AbstractEngine
      */
     public function set($_config)
     {
-        throw new DomainException( "Method " . __FUNCTION__ . " not implemented." );
+        throw new DomainException("Method " . __FUNCTION__ . " not implemented.");
     }
 
     /**
@@ -106,7 +107,7 @@ class Engines_DeepL extends Engines_AbstractEngine
      */
     public function update($_config)
     {
-        throw new DomainException( "Method " . __FUNCTION__ . " not implemented." );
+        throw new DomainException("Method " . __FUNCTION__ . " not implemented.");
     }
 
     /**
@@ -114,7 +115,7 @@ class Engines_DeepL extends Engines_AbstractEngine
      */
     public function delete($_config)
     {
-        throw new DomainException( "Method " . __FUNCTION__ . " not implemented." );
+        throw new DomainException("Method " . __FUNCTION__ . " not implemented.");
     }
 
     /**
@@ -169,3 +170,4 @@ class Engines_DeepL extends Engines_AbstractEngine
         return $this->_getClient()->getGlossaryEntries($id);
     }
 }
+    
