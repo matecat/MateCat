@@ -530,7 +530,8 @@ class AnalyzeChunksResume extends React.Component {
               <p />
             </div>
             <div className="titles-compare">
-              {this.props.jobsAnalysis[0].count_unit === UNIT_COUNT.WORDS ? (
+              {this.props.jobsAnalysis.length &&
+              this.props.jobsAnalysis[0].count_unit === UNIT_COUNT.WORDS ? (
                 <div className="title-total-words">
                   <h5>Total word count</h5>
                 </div>
