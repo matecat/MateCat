@@ -2202,8 +2202,391 @@ var spec = {
         },
       },
     },
+    'api/v2/payable_rate': {
+      get: {
+        tags: ['Payable rate'],
+        summary: 'Shows the user\'s payable rate models',
+        description: 'Shows the user\'s payable rate models.',
+        responses: {
+          200: {
+            description: 'An array of JSON representation models.',
+            schema: {
+              type: "array",
+              items: {
+                $ref: '#/definitions/PayableRateSchema',
+              }
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+      post: {
+        tags: ['Payable rate'],
+        summary: 'Creates a new payable rate',
+        description: 'Creates a new payable rate.',
+        parameters: [
+          {
+            in: "body",
+            schema: {
+              $ref: '#/definitions/PayableRateSchema',
+            },
+          }
+        ],
+        responses: {
+          200: {
+            description: 'create',
+            examples: {
+              "application/json": {
+                id: 4,
+                version: 1
+              }
+            }
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        }
+      },
+    },
+    'api/v2/payable_rate/{id}': {
+      get: {
+        tags: ['Payable rate'],
+        summary: 'Shows a particular payable rate',
+        description: 'Shows a particular payable rate.',
+        parameters: [
+          {
+            name: 'id',
+            in: 'path',
+            description: 'The model ID',
+            required: true,
+            type: 'integer',
+          }
+        ],
+        responses: {
+          200: {
+            description: 'The model JSON representation.',
+            schema: {
+              $ref: '#/definitions/PayableRateSchema',
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+      delete: {
+        tags: ['Payable rate'],
+        summary: 'Deletes a particular payable rate',
+        description: 'Deletes the payable rate schema.',
+        parameters: [
+          {
+            name: 'id',
+            in: 'path',
+            description: 'The model ID',
+            required: true,
+            type: 'integer',
+          }
+        ],
+        responses: {
+          200: {
+            description: 'delete',
+            examples: {
+              "application/json": {
+                id: 3,
+              }
+            }
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+      put: {
+        tags: ['Payable rate'],
+        summary: 'Updates a particular payable rate',
+        description: 'Updates a particular payable rate.',
+        parameters: [
+          {
+            in: "body",
+            schema: {
+              $ref: '#/definitions/PayableRateSchema',
+            },
+          },
+          {
+            name: 'id',
+            in: 'path',
+            description: 'The model ID',
+            required: true,
+            type: 'integer',
+          }
+        ],
+        responses: {
+          200: {
+            description: 'update',
+            examples: {
+              "application/json": {
+                id: 4,
+                version: 1
+              }
+            }
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        }
+
+
+      },
+    },
+    'api/v2/payable_rate/validate': {
+      post: {
+        tags: ['Payable rate'],
+        summary: 'Validate a payable rate schema',
+        description: 'Validate a payable rate schema.',
+        parameters: [
+          {
+            in: "body",
+            schema: {
+              $ref: '#/definitions/PayableRateSchema',
+            },
+          }
+        ],
+        responses: {
+          200: {
+            description: 'validate',
+            examples: {
+              "application/json": {
+                errors: [],
+              }
+            }
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        }
+      }
+    },
+    'api/v2/payable_rate/schema': {
+      get: {
+        tags: ['Payable rate'],
+        summary: 'Shows the payable rate schema',
+        description: 'Shows the payable rate schema.',
+        parameters:[],
+        responses: {
+          200: {
+            description: 'schema',
+            schema: {
+              $ref: '#/definitions/PayableRateSchema',
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        }
+      }
+    },
   },
   definitions: {
+
+    PayableRateSchema: {
+      type: 'object',
+      properties: {
+        payable_rate_template_name: {
+          type: 'string',
+        },
+        version: {
+          type: "integer",
+          description: 'The model version. It\'s incremented on every model update.',
+          example: 1,
+        },
+        breakdowns: {
+          type: "object",
+          $ref: "#/definitions/PayableRateBreakdowns"
+        }
+      }
+    },
+
+    PayableRateBreakdowns: {
+      type: "object",
+      properties: {
+        "default": {
+          "type": "object",
+          "properties": {
+            "NO_MATCH": {
+              "type": "integer",
+              "maximum":100,
+              "minimum":0
+            },
+            "50%-74%": {
+              "type": "integer",
+              "maximum":100,
+              "minimum":0
+            },
+            "75%-84%": {
+              "type": "integer",
+              "maximum":100,
+              "minimum":0
+            },
+            "85%-94%": {
+              "type": "integer",
+              "maximum":100,
+              "minimum":0
+            },
+            "95%-99%": {
+              "type": "integer",
+              "maximum":100,
+              "minimum":0
+            },
+            "100%": {
+              "type": "integer",
+              "maximum":100,
+              "minimum":0
+            },
+            "100%_PUBLIC": {
+              "type": "integer",
+              "maximum":100,
+              "minimum":0
+            },
+            "REPETITIONS": {
+              "type": "integer",
+              "maximum":100,
+              "minimum":0
+            },
+            "INTERNAL": {
+              "type": "integer",
+              "maximum":100,
+              "minimum":0
+            },
+            "MT": {
+              "type": "integer",
+              "maximum":100,
+              "minimum":0
+            },
+            "ICE": {
+              "type": "integer",
+              "maximum":100,
+              "minimum":0
+            },
+            "ICE_MT": {
+              "type": "integer",
+              "maximum":100,
+              "minimum":0
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "NO_MATCH",
+            "50%-74%",
+            "75%-84%",
+            "85%-94%",
+            "95%-99%",
+            "100%",
+            "100%_PUBLIC",
+            "REPETITIONS",
+            "INTERNAL",
+            "MT",
+            "ICE",
+            "ICE_MT"
+          ]
+        }
+      },
+      patternProperties: {
+        "(^[a-z]{2,3}$)|(^[a-z]{2,3}-[A-Z0-9]{2,3}$)|(^[a-z]{2}-[A-Za-z]{2,4}-[A-Z]{2}$)": {
+          "type": "object",
+          "patternProperties": {
+            "(^[a-z]{2,3}$)|(^[a-z]{2,3}-[A-Z0-9]{2,3}$)|(^[a-z]{2}-[A-Za-z]{2,4}-[A-Z]{2}$)": {
+              "type": "object",
+              "properties": {
+                "NO_MATCH": {
+                  "type": "integer",
+                  "maximum":100,
+                  "minimum":0
+                },
+                "50%-74%": {
+                  "type": "integer",
+                  "maximum":100,
+                  "minimum":0
+                },
+                "75%-84%": {
+                  "type": "integer",
+                  "maximum":100,
+                  "minimum":0
+                },
+                "85%-94%": {
+                  "type": "integer",
+                  "maximum":100,
+                  "minimum":0
+                },
+                "95%-99%": {
+                  "type": "integer",
+                  "maximum":100,
+                  "minimum":0
+                },
+                "100%": {
+                  "type": "integer",
+                  "maximum":100,
+                  "minimum":0
+                },
+                "100%_PUBLIC": {
+                  "type": "integer",
+                  "maximum":100,
+                  "minimum":0
+                },
+                "REPETITIONS": {
+                  "type": "integer",
+                  "maximum":100,
+                  "minimum":0
+                },
+                "INTERNAL": {
+                  "type": "integer",
+                  "maximum":100,
+                  "minimum":0
+                },
+                "MT": {
+                  "type": "integer",
+                  "maximum":100,
+                  "minimum":0
+                },
+                "ICE": {
+                  "type": "integer",
+                  "maximum":100,
+                  "minimum":0
+                },
+                "ICE_MT": {
+                  "type": "integer",
+                  "maximum":100,
+                  "minimum":0
+                }
+              },
+              "additionalProperties": false,
+              "required": [
+                "NO_MATCH",
+                "50%-74%",
+                "75%-84%",
+                "85%-94%",
+                "95%-99%",
+                "100%",
+                "100%_PUBLIC",
+                "REPETITIONS",
+                "INTERNAL",
+                "MT",
+                "ICE",
+                "ICE_MT"
+              ]
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      additionalProperties: false,
+      required: [
+        "default"
+      ]
+
+    },
+
     NewProject: {
       type: 'object',
       properties: {

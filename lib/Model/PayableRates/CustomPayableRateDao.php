@@ -106,7 +106,7 @@ class CustomPayableRateDao extends DataAccess_AbstractDao
 
     /**
      * @param CustomPayableRateStruct $customPayableRateStruct
-     * @return int
+     * @return CustomPayableRateStruct
      * @throws \Exception
      */
     public static function save( CustomPayableRateStruct $customPayableRateStruct ) {
@@ -126,12 +126,12 @@ class CustomPayableRateDao extends DataAccess_AbstractDao
             'now'        => (new DateTime())->format('Y-m-d H:i:s'),
         ] );
 
-        return $conn->lastInsertId();
+        return self::getById($conn->lastInsertId());
     }
 
     /**
      * @param CustomPayableRateStruct $customPayableRateStruct
-     * @return int
+     * @return CustomPayableRateStruct
      * @throws \Exception
      */
     public static function update( CustomPayableRateStruct $customPayableRateStruct ) {
@@ -152,7 +152,7 @@ class CustomPayableRateDao extends DataAccess_AbstractDao
         self::destroyQueryByIdCache($conn, $customPayableRateStruct->id);
         self::destroyQueryByUidAndNameCache($conn, $customPayableRateStruct->uid, $customPayableRateStruct->name);
 
-        return $customPayableRateStruct->id;
+        return $customPayableRateStruct;
 
     }
 
@@ -174,10 +174,9 @@ class CustomPayableRateDao extends DataAccess_AbstractDao
      * validate a json against schema and then
      * create a Payable Rate model template from it
      *
-     * @param      $json
+     * @param $json
      * @param null $uid
-     *
-     * @return int
+     * @return CustomPayableRateStruct
      * @throws \Swaggest\JsonSchema\InvalidValue
      * @throws \Exception
      */
@@ -215,11 +214,9 @@ class CustomPayableRateDao extends DataAccess_AbstractDao
 
     /**
      * @param CustomPayableRateStruct $customPayableRateStruct
-     * @param                       $json
-     *
-     * @return mixed
+     * @param $json
+     * @return CustomPayableRateStruct
      * @throws \Swaggest\JsonSchema\InvalidValue
-     * @throws \Exception
      */
     public static function editFromJSON(CustomPayableRateStruct $customPayableRateStruct, $json)
     {
