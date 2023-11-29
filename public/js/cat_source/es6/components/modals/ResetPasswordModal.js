@@ -171,6 +171,7 @@ const fieldValidations = [
     'Password',
     FormRules.requiredRule,
     FormRules.minLength(12),
+    FormRules.maxLength(50),
     FormRules.atLeastOneSpecialChar(),
   ),
   RuleRunner.ruleRunner(

@@ -788,7 +788,7 @@ class Editarea extends React.Component {
     ) {
       return 'insert-word-joiner-tag'
     } else if (e.code === 'BracketLeft' || e.code === 'BracketRight') {
-      if (e.code === 'BracketLeft' && (isOptionKeyCommand(e) || e.altKey)) {
+      if (e.code === 'BracketLeft' && isCtrlKeyCommand(e)) {
         if (e.shiftKey) {
           this.typeTextInEditor('“')
         } else {
@@ -796,7 +796,7 @@ class Editarea extends React.Component {
         }
         return 'quote-shortcut'
       }
-      if (e.code === 'BracketRight' && (isOptionKeyCommand(e) || e.altKey)) {
+      if (e.code === 'BracketRight' && isCtrlKeyCommand(e)) {
         if (e.shiftKey) {
           this.typeTextInEditor('”')
         } else {
@@ -816,7 +816,8 @@ class Editarea extends React.Component {
       }
     } else if (
       (e.key === 'Backspace' || e.key === 'Delete') &&
-      !isSelectedEntity(this.state.editorState)
+      !isSelectedEntity(this.state.editorState) &&
+      window.getSelection().type === 'Caret'
     ) {
       const direction = e.key === 'Backspace' ? 'left' : 'right'
 
@@ -1053,7 +1054,6 @@ class Editarea extends React.Component {
 
   onChange = (editorState) => {
     //console.log('onChange')
-    console.log(editorState.getSelection())
     const {
       displayPopover,
       editorState: prevEditorState,
