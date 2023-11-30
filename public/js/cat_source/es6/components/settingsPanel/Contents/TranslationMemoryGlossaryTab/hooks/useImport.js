@@ -66,9 +66,13 @@ function useImport({type, row, onClose}) {
           .catch((error) => {
             // TODO implementare errori upload files multipli
             setStatus(uuids.map((item) => ({...item, errors: error.errors})))
+            const message =
+              error.errors && error.errors.length > 0
+                ? error.errors[0].message
+                : 'Error while importing your file'
             setNotification({
               type: 'error',
-              message: error.errors[0].message,
+              message: message,
               rowKey: key,
             })
           })
