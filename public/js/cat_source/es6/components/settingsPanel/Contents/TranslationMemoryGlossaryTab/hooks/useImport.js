@@ -84,7 +84,7 @@ function useImport({type, row, onClose}) {
     setStatus([])
     setNotification({})
 
-    if (e.target.files) {
+    if (e.target.files && e.target.files.length > 0) {
       if (
         e.target.files[0].size > config.maxTMXFileSize &&
         type === IMPORT_TYPE.tmx
