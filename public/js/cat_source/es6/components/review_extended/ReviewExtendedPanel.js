@@ -11,6 +11,7 @@ import SegmentActions from '../../actions/SegmentActions'
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentUtils from '../../utils/segmentUtils'
 import {SegmentContext} from '../segments/SegmentContext'
+import ModalsActions from '../../actions/ModalsActions'
 
 class ReviewExtendedPanel extends React.Component {
   static contextType = SegmentContext
