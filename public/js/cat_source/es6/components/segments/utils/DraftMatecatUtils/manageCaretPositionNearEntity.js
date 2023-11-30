@@ -231,7 +231,11 @@ export const getEntitiesSelected = (editorState) => {
   return entitiesMatched
 }
 
-export const adjustCaretPosition = ({direction, isShiftPressed}) => {
+export const adjustCaretPosition = ({
+  direction,
+  isShiftPressed,
+  shouldMoveCursorPreviousElementTag = false,
+}) => {
   const selection = window.getSelection()
   if (!selection) return
 
@@ -257,6 +261,18 @@ export const adjustCaretPosition = ({direction, isShiftPressed}) => {
       const textNode = getTextNode(focusOnElement)
       const offset = direction === 'left' ? textNode.length : 0
       const {anchorOffset, anchorNode} = selection
+
+      if (shouldMoveCursorPreviousElementTag && selection.type === 'Range') {
+        const prevTextNode = getTextNode(entityContainer.previousElementSibling)
+
+        selection.setBaseAndExtent(
+          anchorNode,
+          anchorOffset,
+          prevTextNode,
+          prevTextNode.length - 1,
+        )
+        return
+      }
 
       if (isShiftPressed || selection.type === 'Range') {
         selection.setBaseAndExtent(
