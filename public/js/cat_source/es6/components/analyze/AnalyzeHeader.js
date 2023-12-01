@@ -377,7 +377,8 @@ class AnalyzeHeader extends React.Component {
     let status = this.props.data.get('status')
     if (status === ANALYSIS_STATUS.DONE) {
       setTimeout(function () {
-        self.containerAnalysisComplete.classList.remove('hide')
+        self.containerAnalysisComplete &&
+          self.containerAnalysisComplete.classList.remove('hide')
       }, 600)
     }
   }

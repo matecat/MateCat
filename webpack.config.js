@@ -124,6 +124,11 @@ const matecatConfig = async ({env}, {mode}) => {
       rules: [
         {
           test: /\.(js|jsx)$/,
+          include: [
+            path.resolve(__dirname, 'public/js'),
+            path.resolve(__dirname, 'public/img/icons'),
+            path.resolve(__dirname, 'plugins'),
+          ],
           exclude: '/node_modules/',
           use: {
             loader: 'babel-loader',
@@ -134,6 +139,7 @@ const matecatConfig = async ({env}, {mode}) => {
         },
         {
           test: /\.css$/i,
+          include: path.resolve(__dirname, 'public/css'),
           use: [
             {
               loader: MiniCssExtractPlugin.loader,
@@ -146,6 +152,10 @@ const matecatConfig = async ({env}, {mode}) => {
         },
         {
           test: /\.s[ac]ss$/i,
+          include: [
+            path.resolve(__dirname, 'public/css/sass'),
+            path.resolve(__dirname, 'plugins'),
+          ],
           use: [
             {
               loader: MiniCssExtractPlugin.loader,
@@ -159,6 +169,7 @@ const matecatConfig = async ({env}, {mode}) => {
         },
         {
           test: /\.(png|jpe?g|gif|mp4|svg|ico)$/i,
+          include: [path.resolve(__dirname, 'public/img')],
           type: 'asset/resource',
           generator: {
             filename: 'images/[name][ext]',
@@ -166,6 +177,7 @@ const matecatConfig = async ({env}, {mode}) => {
         },
         {
           test: /\.(woff(2)?|ttf|eot|otf)(\?v=\d+\.\d+\.\d+)?$/,
+          include: [path.resolve(__dirname, 'public/css/fonts')],
           type: 'asset/resource',
           generator: {
             filename: 'fonts/[name][ext]',

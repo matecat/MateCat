@@ -534,7 +534,6 @@ class SegmentSource extends React.Component {
       copyFragment,
       onBlurEvent,
       dragFragment,
-      onDragEndEvent,
       addSplitTag,
       splitSegmentNew,
       preventEdit,
@@ -550,7 +549,6 @@ class SegmentSource extends React.Component {
           onCopy: copyFragment,
           onBlur: onBlurEvent,
           onDragStart: dragFragment,
-          onDragEnd: onDragEndEvent,
           onMouseUp: () => {
             this.setState({
               isShowingOptionsToolbar: !this.editor._latestEditorState
@@ -886,10 +884,6 @@ class SegmentSource extends React.Component {
       e.dataTransfer.setData('text/plain', fragment)
       e.dataTransfer.setData('text/html', fragment)
     }
-  }
-
-  onDragEndEvent = (e) => {
-    e.dataTransfer.clearData()
   }
 
   getUpdatedSegmentInfo = () => {

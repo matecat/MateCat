@@ -64,7 +64,7 @@ class OutsourceContainer extends React.Component {
       setTimeout(function () {
         window.addEventListener('click', self.handleDocumentClick)
         window.addEventListener('keydown', self._handleEscKey)
-        self.container.scrollIntoView({block: 'center'})
+        self.container && self.container.scrollIntoView({block: 'center'})
       }, 500)
     } else {
       window.removeEventListener('click', self.handleDocumentClick)

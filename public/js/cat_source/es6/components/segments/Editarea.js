@@ -104,6 +104,7 @@ class Editarea extends React.Component {
     const {editorState, tagRange} = contentEncoded
 
     this.isShiftPressedOnNavigation = createRef()
+    this.wasTripleClickTriggered = createRef()
     this.compositionEventChecks = createRef()
 
     this.state = {
@@ -473,6 +474,11 @@ class Editarea extends React.Component {
     const {editor: editorElement} = this.editor
     editorElement.addEventListener('compositionstart', this.onCompositionStart)
     editorElement.addEventListener('compositionend', this.onCompositionEnd)
+
+    new CommonUtils.DetectTripleClick(
+      this.editAreaRef,
+      () => (this.wasTripleClickTriggered.current = true),
+    )
   }
 
   copyGlossaryToEditArea = (segment, glossaryTranslation) => {
@@ -569,12 +575,17 @@ class Editarea extends React.Component {
           selection.focusOffset < selection.focusNode.length / 2
             ? 'left'
             : 'right'
+
         adjustCaretPosition({
           direction,
           isShiftPressed: this.isShiftPressedOnNavigation.current,
+          shouldMoveCursorPreviousElementTag:
+            this.wasTripleClickTriggered.current,
         })
       }
     }
+
+    this.wasTripleClickTriggered.current = false
   }
 
   onCompositionStart = () => {
@@ -788,7 +799,7 @@ class Editarea extends React.Component {
     ) {
       return 'insert-word-joiner-tag'
     } else if (e.code === 'BracketLeft' || e.code === 'BracketRight') {
-      if (e.code === 'BracketLeft' && (isOptionKeyCommand(e) || e.altKey)) {
+      if (e.code === 'BracketLeft' && isCtrlKeyCommand(e)) {
         if (e.shiftKey) {
           this.typeTextInEditor('“')
         } else {
@@ -796,7 +807,7 @@ class Editarea extends React.Component {
         }
         return 'quote-shortcut'
       }
-      if (e.code === 'BracketRight' && (isOptionKeyCommand(e) || e.altKey)) {
+      if (e.code === 'BracketRight' && isCtrlKeyCommand(e)) {
         if (e.shiftKey) {
           this.typeTextInEditor('”')
         } else {
@@ -816,7 +827,8 @@ class Editarea extends React.Component {
       }
     } else if (
       (e.key === 'Backspace' || e.key === 'Delete') &&
-      !isSelectedEntity(this.state.editorState)
+      !isSelectedEntity(this.state.editorState) &&
+      window.getSelection().type === 'Caret'
     ) {
       const direction = e.key === 'Backspace' ? 'left' : 'right'
 
