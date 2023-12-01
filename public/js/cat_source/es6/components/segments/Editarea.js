@@ -104,6 +104,7 @@ class Editarea extends React.Component {
     const {editorState, tagRange} = contentEncoded
 
     this.isShiftPressedOnNavigation = createRef()
+    this.wasTripleClickTriggered = createRef()
     this.compositionEventChecks = createRef()
 
     this.state = {
@@ -473,6 +474,11 @@ class Editarea extends React.Component {
     const {editor: editorElement} = this.editor
     editorElement.addEventListener('compositionstart', this.onCompositionStart)
     editorElement.addEventListener('compositionend', this.onCompositionEnd)
+
+    new CommonUtils.DetectTripleClick(
+      this.editAreaRef,
+      () => (this.wasTripleClickTriggered.current = true),
+    )
   }
 
   copyGlossaryToEditArea = (segment, glossaryTranslation) => {
@@ -569,12 +575,17 @@ class Editarea extends React.Component {
           selection.focusOffset < selection.focusNode.length / 2
             ? 'left'
             : 'right'
+
         adjustCaretPosition({
           direction,
           isShiftPressed: this.isShiftPressedOnNavigation.current,
+          shouldMoveCursorPreviousElementTag:
+            this.wasTripleClickTriggered.current,
         })
       }
     }
+
+    this.wasTripleClickTriggered.current = false
   }
 
   onCompositionStart = () => {
