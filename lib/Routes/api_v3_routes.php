@@ -74,5 +74,3 @@ $klein->with( '/api/v3/tm-keys', function () {
 
 route( '/api/v3/projects/[:id_project]/[:password]/segment-analysis',  'GET',  'API\V3\SegmentAnalysisController', 'project' );
 route( '/api/v3/jobs/[:id_job]/[:password]/segment-analysis',          'GET',  'API\V3\SegmentAnalysisController', 'job' );
-
-route( '/api/v3/projects-stats','GET','API\V3\ProjectStatsController', 'index' );
