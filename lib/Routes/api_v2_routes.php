@@ -107,7 +107,9 @@ $klein->with('/api/v2/teams', function() {
 }) ;
 
 $klein->with('/api/v2/languages', function() {
-
     route( '', 'GET', '\API\V2\SupportedLanguagesController', 'index' );
+});
 
+$klein->with('/api/v2/files', function() {
+    route( '', 'GET', '\API\V2\SupportedFilesController', 'index' );
 });
