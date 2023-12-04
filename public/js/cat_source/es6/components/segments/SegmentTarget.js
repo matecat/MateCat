@@ -121,7 +121,7 @@ class SegmentTarget extends React.Component {
             />
           </div>
           <div className="toolbar">
-            {config.isReview && ReviewExtended.enabled() ? (
+            {config.isReview ? (
               <a
                 href="#"
                 className="revise-lock-editArea active"
@@ -197,7 +197,7 @@ class SegmentTarget extends React.Component {
           />
           {s2tMicro}
           <div className="toolbar">
-            {config.isReview && ReviewExtended.enabled() ? (
+            {config.isReview ? (
               <a
                 href="#"
                 className="revise-lock-editArea"
@@ -205,8 +205,7 @@ class SegmentTarget extends React.Component {
                 title="Highlight text and assign an issue to the selected text."
               />
             ) : null}
-            {ReviewExtended.enabled() &&
-            (issues.length > 0 || config.isReview) ? (
+            {issues.length > 0 || config.isReview ? (
               <a
                 className="revise-qr-link"
                 title="Segment Quality Report."

@@ -159,7 +159,6 @@ let CatToolActions = {
         password: config.password,
         source: config.source_rfc,
         target: config.target_rfc,
-        isReview: config.isReview,
         isCJK: config.isCJK,
         languagesArray: config.languages_array,
       }),
