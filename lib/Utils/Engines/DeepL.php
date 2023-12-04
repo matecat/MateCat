@@ -82,7 +82,7 @@ class Engines_DeepL extends Engines_AbstractEngine
             'reference' => '',
             'usage_count' => 0,
             'subject' => '',
-            'created_by' => '',
+            'created_by' => 'DeepL',
             'last_updated_by' => '',
             'last_update_date' => '0000-00-00',
             'match' => 0,
