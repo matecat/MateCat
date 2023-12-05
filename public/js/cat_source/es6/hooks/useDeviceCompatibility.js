@@ -12,7 +12,7 @@ function useDeviceCompatibility() {
   // const isCoarsePointerAvailable = useMediaQuery('(any-pointer:coarse)');
   // const isHoverAvailable = useMediaQuery('(any-hover:hover)');
 
-  const isNotMobileOrTablet = useMediaQuery('(min-device-width:768px)')
+  const isNotMobileOrTablet = useMediaQuery('(min-device-width:1024px)')
 
   // console.log('DEBUG --> isCoarsePointerAvailable:', isCoarsePointerAvailable);
   // console.log('DEBUG --> isHoverAvailable:', isHoverAvailable);
