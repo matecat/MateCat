@@ -691,7 +691,7 @@ const SegmentActions = {
     if (shouldRefresh) {
       getGlossaryForSegment({
         idSegment: sid,
-        source: text,
+        source: DraftMatecatUtils.removeTagsFromText(text),
       }).catch(() => {
         OfflineUtils.failedConnection(sid, 'getGlossaryForSegment')
       })
@@ -735,7 +735,7 @@ const SegmentActions = {
         //Response inside SSE Channel
         getGlossaryForSegment({
           idSegment: request.sid,
-          source: request.text,
+          source: DraftMatecatUtils.removeTagsFromText(request.text),
         }).catch(() => {
           OfflineUtils.failedConnection(request.sid, 'getGlossaryForSegment')
         })
