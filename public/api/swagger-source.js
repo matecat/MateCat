@@ -2202,11 +2202,11 @@ var spec = {
         },
       },
     },
-    'api/v2/payable_rate': {
+    '/api/v2/payable_rate': {
       get: {
-        tags: ['Payable rate'],
-        summary: 'Shows the user\'s payable rate models',
-        description: 'Shows the user\'s payable rate models.',
+        tags: ['Billing models'],
+        summary: 'Shows the list of billing models available for the currents user',
+        description: 'Shows the list of billing models available for the currents user',
         responses: {
           200: {
             description: 'An array of JSON representation models.',
@@ -2223,9 +2223,9 @@ var spec = {
         },
       },
       post: {
-        tags: ['Payable rate'],
-        summary: 'Creates a new payable rate',
-        description: 'Creates a new payable rate.',
+        tags: ['Billing models'],
+        summary: 'Creates a new billing model',
+        description: 'Creates a new billing model',
         parameters: [
           {
             in: "body",
@@ -2250,11 +2250,11 @@ var spec = {
         }
       },
     },
-    'api/v2/payable_rate/{id}': {
+    '/api/v2/payable_rate/{id}': {
       get: {
-        tags: ['Payable rate'],
-        summary: 'Shows a particular payable rate',
-        description: 'Shows a particular payable rate.',
+        tags: ['Billing models'],
+        summary: 'Shows a particular billing model',
+        description: 'Shows a particular billing model',
         parameters: [
           {
             name: 'id',
@@ -2277,9 +2277,9 @@ var spec = {
         },
       },
       delete: {
-        tags: ['Payable rate'],
-        summary: 'Deletes a particular payable rate',
-        description: 'Deletes the payable rate schema.',
+        tags: ['Billing models'],
+        summary: 'Deletes a particular billing model',
+        description: 'Deletes a particular billing model',
         parameters: [
           {
             name: 'id',
@@ -2304,9 +2304,9 @@ var spec = {
         },
       },
       put: {
-        tags: ['Payable rate'],
-        summary: 'Updates a particular payable rate',
-        description: 'Updates a particular payable rate.',
+        tags: ['Billing models'],
+        summary: 'Updates a particular billing model',
+        description: 'Updates a particular billing model',
         parameters: [
           {
             in: "body",
@@ -2340,11 +2340,11 @@ var spec = {
 
       },
     },
-    'api/v2/payable_rate/validate': {
+    '/api/v2/payable_rate/validate': {
       post: {
-        tags: ['Payable rate'],
-        summary: 'Validate a payable rate schema',
-        description: 'Validate a payable rate schema.',
+        tags: ['Billing models'],
+        summary: 'Validates a billing model before creation',
+        description: 'Validates a billing model before creation',
         parameters: [
           {
             in: "body",
@@ -2368,11 +2368,11 @@ var spec = {
         }
       }
     },
-    'api/v2/payable_rate/schema': {
+    '/api/v2/payable_rate/schema': {
       get: {
-        tags: ['Payable rate'],
-        summary: 'Shows the payable rate schema',
-        description: 'Shows the payable rate schema.',
+        tags: ['Billing models'],
+        summary: 'Shows the billing model creation schema',
+        description: 'Shows the billing model creation schema',
         parameters:[],
         responses: {
           200: {
