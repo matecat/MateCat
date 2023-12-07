@@ -141,6 +141,11 @@ class TranslationVersionsHandler implements VersionHandlerInterface {
         $new_version->old_status = Constants_TranslationStatus::$DB_STATUSES_MAP[ $old_translation->status ];
         $new_version->new_status = Constants_TranslationStatus::$DB_STATUSES_MAP[ $new_translation->status ];
 
+        // avoid version_number null error
+        if($new_translation->version_number === null){
+            $new_translation->version_number = 0;
+        }
+
         /**
          * In some cases, version 0 may already be there among saved_versions, because
          * an issue for ReviewExtended has been saved on version 0.

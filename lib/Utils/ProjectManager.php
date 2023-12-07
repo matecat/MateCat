@@ -2673,6 +2673,7 @@ class ProjectManager {
                     'warning'                => ( $check->thereAreErrors() ) ? 1 : 0,
                     'suggestion_match'       => $iceLockArray[ 'suggestion_match' ],
                     'standard_word_count'    => $iceLockArray[ 'standard_word_count' ],
+                    'version_number'         => (isset($iceLockArray[ 'version_number' ])) ? $iceLockArray[ 'version_number' ] : 0,
                 ];
 
                 $query_translations_values[] = $sql_values;
