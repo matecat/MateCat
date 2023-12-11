@@ -116,6 +116,8 @@ class CustomPayableRateDao extends DataAccess_AbstractDao
             " VALUES " .
             " ( :uid, :version, :name, :breakdowns, :now, :now ); ";
 
+        $now = (new DateTime())->format('Y-m-d H:i:s');
+
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->execute( [
@@ -123,13 +125,13 @@ class CustomPayableRateDao extends DataAccess_AbstractDao
             'version'    => 1,
             'name'       => $customPayableRateStruct->name,
             'breakdowns' => $customPayableRateStruct->breakdownsToJson(),
-            'now'        => (new DateTime())->format('Y-m-d H:i:s'),
+            'now'        => $now,
         ] );
 
         $customPayableRateStruct->id = $conn->lastInsertId();
         $customPayableRateStruct->version = 1;
-        $customPayableRateStruct->created_at = (new DateTime())->format('Y-m-d H:i:s');
-        $customPayableRateStruct->modified_at = (new DateTime())->format('Y-m-d H:i:s');
+        $customPayableRateStruct->created_at = $now;
+        $customPayableRateStruct->modified_at = $now;
 
         return $customPayableRateStruct;
     }
