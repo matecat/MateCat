@@ -126,7 +126,12 @@ class CustomPayableRateDao extends DataAccess_AbstractDao
             'now'        => (new DateTime())->format('Y-m-d H:i:s'),
         ] );
 
-        return self::getById($conn->lastInsertId());
+        $customPayableRateStruct->id = $conn->lastInsertId();
+        $customPayableRateStruct->version = 1;
+        $customPayableRateStruct->created_at = (new DateTime())->format('Y-m-d H:i:s');
+        $customPayableRateStruct->modified_at = (new DateTime())->format('Y-m-d H:i:s');
+
+        return $customPayableRateStruct;
     }
 
     /**
