@@ -67,7 +67,7 @@ const NEW_RESOURCE = {
 
 export const isOwnerOfKey = (key) => !/[*]/g.test(key)
 
-export const getTmDataStructureToSendServer = ({tmKeys, keysOrdered}) => {
+export const getTmDataStructureToSendServer = ({tmKeys = [], keysOrdered}) => {
   const mine = tmKeys
     .filter(({key, isActive}) => isOwnerOfKey(key) && isActive)
     .map(({tm, glos, key, name, r, w}) => ({tm, glos, key, name, r, w}))
