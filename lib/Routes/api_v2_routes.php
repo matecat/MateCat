@@ -111,3 +111,13 @@ $klein->with('/api/v2/languages', function() {
     route( '', 'GET', '\API\V2\SupportedLanguagesController', 'index' );
 
 });
+
+$klein->with( '/api/v2/payable_rate', function () {
+    route( '/schema', 'GET', '\API\V2\PayableRateController', 'schema' );
+    route( '/validate', 'POST', '\API\V2\PayableRateController', 'validate' );
+    route( '', 'GET', '\API\V2\PayableRateController', 'index' );
+    route( '', 'POST', '\API\V2\PayableRateController', 'create' );
+    route( '/[:id]', 'GET', '\API\V2\PayableRateController', 'view' );
+    route( '/[:id]', 'DELETE', '\API\V2\PayableRateController', 'delete' );
+    route( '/[:id]', 'PUT', '\API\V2\PayableRateController', 'edit' );
+} );
