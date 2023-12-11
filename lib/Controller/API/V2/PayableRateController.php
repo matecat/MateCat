@@ -1,8 +1,7 @@
 <?php
 
-namespace API\V3;
+namespace API\V2;
 
-use API\V2\KleinController;
 use API\V2\Validators\LoginValidator;
 use PayableRates\CustomPayableRateDao;
 use PayableRates\CustomPayableRateStruct;
@@ -41,19 +40,22 @@ class PayableRateController extends KleinController
         // try to create the template
         try {
             $json = $this->request->body();
-            $id = CustomPayableRateDao::createFromJSON($json, $this->getUser()->uid);
+            $struct = CustomPayableRateDao::createFromJSON($json, $this->getUser()->uid);
 
             $this->response->code(201);
 
             return $this->response->json([
-                'id' => (int)$id
+                'id'      => (int)$struct->id,
+                'version' => (int)$struct->version,
             ]);
         } catch (JSONValidatorError $exception){
-            $this->response->code(500);
+            $errorCode = $exception->getCode() >= 400 ? $exception->getCode()  : 500;
+            $this->response->code($errorCode);
 
             return $this->response->json($exception);
         } catch (\Exception $exception){
-            $this->response->code(500);
+            $errorCode = $exception->getCode() >= 400 ? $exception->getCode()  : 500;
+            $this->response->code($errorCode);
 
             return $this->response->json([
                 'error' => $exception->getMessage()
@@ -92,7 +94,8 @@ class PayableRateController extends KleinController
                 'id' => (int)$id
             ]);
         } catch (\Exception $exception){
-            $this->response->code(500);
+            $errorCode = $exception->getCode() >= 400 ? $exception->getCode()  : 500;
+            $this->response->code($errorCode);
 
             return $this->response->json([
                 'error' => $exception->getMessage()
@@ -126,18 +129,21 @@ class PayableRateController extends KleinController
 
         try {
             $json = $this->request->body();
-            $id = CustomPayableRateDao::editFromJSON($model, $json);
+            $struct = CustomPayableRateDao::editFromJSON($model, $json);
 
             $this->response->code(200);
             return $this->response->json([
-                'id' => (int)$id
+                'id'      => (int)$struct->id,
+                'version' => (int)$struct->version,
             ]);
         } catch (JSONValidatorError $exception){
-            $this->response->code(500);
+            $errorCode = $exception->getCode() >= 400 ? $exception->getCode()  : 500;
+            $this->response->code($errorCode);
 
             return $this->response->json($exception);
         } catch (\Exception $exception){
-            $this->response->code(500);
+            $errorCode = $exception->getCode() >= 400 ? $exception->getCode()  : 500;
+            $this->response->code($errorCode);
 
             return $this->response->json([
                 'error' => $exception->getMessage()
@@ -212,7 +218,8 @@ class PayableRateController extends KleinController
                 'errors' => $errors
             ]);
         } catch (\Exception $exception){
-            $this->response->code(500);
+            $errorCode = $exception->getCode() >= 400 ? $exception->getCode()  : 500;
+            $this->response->code($errorCode);
 
             return $this->response->json([
                 'error' => $exception->getMessage()
