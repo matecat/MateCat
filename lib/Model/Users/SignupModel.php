@@ -44,7 +44,7 @@ class SignupModel {
                 'wanted_url'            => FILTER_SANITIZE_URL
         ] );
 
-        $this->user = new Users_UserStruct( $params );
+        $this->user = new Users_UserStruct( $this->params );
     }
 
 

@@ -60,7 +60,7 @@ class JobAnalyze extends React.Component {
 
       // ReactDOM.findDOMNode(itemComponent).scrollIntoView({block: 'end'});
       setTimeout(function () {
-        self.container.classList.remove('show-details')
+        self.container && self.container.classList.remove('show-details')
       }, 1000)
     } else {
       setTimeout(function () {
