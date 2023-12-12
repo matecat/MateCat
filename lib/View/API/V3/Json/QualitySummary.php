@@ -160,7 +160,7 @@ class QualitySummary {
             'model_version'              => ( $model_version ? (int)$model_version : null ),
             'model_id'                   => ( $model_id ? (int)$model_id : null ),
             'model_label'                => ( $model_label ? $model_label : null ),
-            'model_template_id'          => ( $model_template_id ? $model_template_id : null ),
+            'model_template_id'          => ( $model_template_id ? (int)$model_template_id : null ),
             'equivalent_class'           => $jStruct->getQualityInfo(),
             'is_pass'                    => $is_pass,
             'quality_overall'            => $quality_overall,
