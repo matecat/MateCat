@@ -163,14 +163,14 @@ var spec = {
           {
             name: 'payable_rate_template_id',
             in: 'formData',
-            description: 'The billing model id you want to use in this project',
+            description: 'The id of the billing model you want to use in the project you are creating (if you want to use a custom billing model in a project, both relevant parameters must be included in the API call)',
             required: false,
             type: 'integer',
           },
           {
             name: 'payable_rate_template_name',
             in: 'formData',
-            description: 'The billing model name you want to use in this project',
+            description: 'The name of the billing model you want to use in the project you are creating (if you want to use a custom billing model in a project, both relevant parameters must be included in the API call)',
             required: false,
             type: 'string',
           },
