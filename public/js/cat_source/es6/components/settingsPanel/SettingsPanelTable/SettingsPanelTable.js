@@ -77,9 +77,8 @@ export const SettingsPanelTable = ({
         dragOverIndex >= 0 &&
         dragStartInfoRef.current?.index !== dragOverIndex
 
-      const {index: startIndex, halfPoint} = dragStartInfoRef.current
-
       if (isValidRange) {
+        const {index: startIndex, halfPoint} = dragStartInfoRef.current
         const indexToMove =
           halfPoint === 'bottom' ? dragOverIndex + 1 : dragOverIndex
 

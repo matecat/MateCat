@@ -46,13 +46,21 @@ const activateSearch = (
     callback,
   ) => {
     const text = contentBlock.getText()
+    const key = contentBlock.getKey()
     let matchArr, start, end
     let index = 0
     while ((matchArr = regex.exec(text)) !== null) {
       start = matchArr.index
       end = start + matchArr[0].length
       if (occurrences[index]) {
-        occurrences[index].start = start
+        if (!occurrences[index].start || occurrences[index].key === key) {
+          occurrences[index].start = start
+          occurrences[index].key = key
+        } else if (occurrences[index + 1]) {
+          occurrences[index + 1].start = start
+          occurrences[index + 1].key = key
+          // index++
+        }
       }
       //!isTag(start, tagRange) && callback(start, end)
       handleTagInside(start, end, contentBlock, callback)

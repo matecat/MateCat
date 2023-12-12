@@ -113,7 +113,7 @@ class ReviewExtendedIssue extends React.Component {
 
     if (!this.state.commentView) {
       setTimeout(() => {
-        $(this.el).find('.re-comment-input')[0].focus()
+        this.el && $(this.el).find('.re-comment-input')[0].focus()
       }, 100)
     }
     this.setState({

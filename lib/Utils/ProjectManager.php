@@ -340,6 +340,11 @@ class ProjectManager {
     private function saveMetadata() {
         $options = $this->projectStructure[ 'metadata' ];
 
+        // "From API" flag
+        if(isset($this->projectStructure['from_api']) and $this->projectStructure['from_api'] == true){
+            $options['from_api'] = 1;
+        }
+
         /**
          * Here we have the opportunity to add other features as dependencies of the ones
          * which are already explicitly set.
