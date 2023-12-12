@@ -161,6 +161,20 @@ var spec = {
             type: 'string',
           },
           {
+            name: 'payable_rate_template_id',
+            in: 'formData',
+            description: 'The billing model id you want to use in this project',
+            required: false,
+            type: 'integer',
+          },
+          {
+            name: 'payable_rate_template_name',
+            in: 'formData',
+            description: 'The billing model name you want to use in this project',
+            required: false,
+            type: 'string',
+          },
+          {
             name: 'lexiqa',
             in: 'formData',
             description:
