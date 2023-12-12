@@ -242,7 +242,7 @@ class QualitySummary {
             ($model ? $model->hash : null),
             ($model ? $model->id : null),
             ($model ? $model->label : null),
-            ($model ? $model->qa_model_template_id : null)
+            ($model ? $model->qa_model_template_id : null),
             ($model ? $model->label : null)
         ];
     }
