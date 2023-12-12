@@ -1416,8 +1416,8 @@ const SegmentActions = {
         const jobTmKeys = CatToolStore.getJobTmKeys()
         getGlossaryCheck({
           idSegment: segment.sid,
-          target: translation,
-          source: updatedSource,
+          target: DraftMatecatUtils.removeTagsFromText(translation),
+          source: DraftMatecatUtils.removeTagsFromText(updatedSource),
           keys: jobTmKeys.map(({key}) => key),
         }).catch((error) => {
           console.log('Glossary check failed', error)
