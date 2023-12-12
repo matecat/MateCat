@@ -64,6 +64,9 @@ class ManageUtils {
             $data [ 'id_assignee' ] = $assignee->uid;
         }
 
+        $conditions[]           = " p.status_analysis != :not_to_analyze ";
+        $data [ 'not_to_analyze' ] = Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE;
+
         $where_query = implode( " AND ", $conditions );
 
         $projectsQuery =

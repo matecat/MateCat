@@ -136,13 +136,11 @@ class Project {
                     }
                 }
             }
-
         }
-
-        // @TODO if $jobJSONs is empty ( == no jobs) throw an exception????
 
         $metadataDao = new \Projects_MetadataDao();
         $projectInfo = $metadataDao->get((int)$project->id,'project_info');
+        $fromApi = $metadataDao->get((int)$project->id,'from_api');
 
         return [
                 'id'                   => (int)$project->id,
@@ -150,6 +148,7 @@ class Project {
                 'name'                 => $project->name,
                 'id_team'              => (int)$project->id_team,
                 'id_assignee'          => (int)$project->id_assignee,
+                'from_api'             => ($fromApi !== null && $fromApi->value == 1 ? true : false),
                 'create_date'          => $project->create_date,
                 'fast_analysis_wc'     => (int)$project->fast_analysis_wc,
                 'standard_analysis_wc' => (int)$project->standard_analysis_wc,

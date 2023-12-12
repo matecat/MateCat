@@ -19,14 +19,14 @@ class deleteContributionController extends ajaxController {
         parent::__construct();
 
         $filterArgs = [
-                'source_lang'      => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
-                'target_lang'      => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
-                'seg'              => [ 'filter' => FILTER_UNSAFE_RAW ],
-                'tra'              => [ 'filter' => FILTER_UNSAFE_RAW ],
-                'id_match'         => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
-                'password'         => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
-                'current_password' => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
-                'id_job'           => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+            'source_lang'      => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+            'target_lang'      => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+            'seg'              => [ 'filter' => FILTER_UNSAFE_RAW ],
+            'tra'              => [ 'filter' => FILTER_UNSAFE_RAW ],
+            'id_match'         => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+            'password'         => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+            'current_password' => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+            'id_job'           => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
         ];
 
         $__postInput = filter_input_array( INPUT_POST, $filterArgs );
@@ -87,19 +87,11 @@ class deleteContributionController extends ajaxController {
 
             if ( self::isRevision() ) {
                 $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
-            } elseif ( $this->user->email == $jobStruct[ 'owner' ] ) {
-                $tm_keys = TmKeyManagement_TmKeyManagement::getOwnerKeys( [ $tm_keys ], 'r', 'tm' );
-                $tm_keys = json_encode( $tm_keys );
             }
 
             //get TM keys with read grants
-            $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $tm_keys, 'r', 'tm', $this->user->uid, $this->userRole );
-
-            if ( is_array( $tm_keys ) && !empty( $tm_keys ) ) {
-                foreach ( $tm_keys as $tm_key ) {
-                    $config[ 'id_user' ][] = $tm_key->key;
-                }
-            }
+            $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $tm_keys, 'w', 'tm', $this->user->uid, $this->userRole );
+            $tm_keys = TmKeyManagement_TmKeyManagement::filterOutByOwnership( $tm_keys, $this->user->email, $jobStruct[ 'owner' ] );
 
         } catch ( Exception $e ) {
             $this->result[ 'errors' ][] = [ "code" => -11, "message" => "Cannot retrieve TM keys info." ];
