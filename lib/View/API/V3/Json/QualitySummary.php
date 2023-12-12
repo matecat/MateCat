@@ -243,7 +243,6 @@ class QualitySummary {
             ($model ? $model->id : null),
             ($model ? $model->label : null),
             ($model ? $model->qa_model_template_id : null)
-            ($model ? $model->label : null)
         ];
     }
 
