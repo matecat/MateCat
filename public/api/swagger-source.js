@@ -161,6 +161,20 @@ var spec = {
             type: 'string',
           },
           {
+            name: 'payable_rate_template_id',
+            in: 'formData',
+            description: 'The id of the billing model you want to use in the project you are creating (if you want to use a custom billing model in a project, both relevant parameters must be included in the API call)',
+            required: false,
+            type: 'integer',
+          },
+          {
+            name: 'payable_rate_template_name',
+            in: 'formData',
+            description: 'The name of the billing model you want to use in the project you are creating (if you want to use a custom billing model in a project, both relevant parameters must be included in the API call)',
+            required: false,
+            type: 'string',
+          },
+          {
             name: 'lexiqa',
             in: 'formData',
             description:
