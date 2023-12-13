@@ -13,6 +13,7 @@ import CatToolStore from '../../stores/CatToolStore'
 import CatToolConstants from '../../constants/CatToolConstants'
 import {SegmentContext} from './SegmentContext'
 import {SegmentFooterTabError} from './SegmentFooterTabError'
+import ApplicationStore from '../../stores/ApplicationStore'
 
 class SegmentFooterTabMatches extends React.Component {
   static contextType = SegmentContext
@@ -175,7 +176,7 @@ class SegmentFooterTabMatches extends React.Component {
         <li>{match.suggestion_info}</li>
         <li className={'graydesc'}>
           <span className={'bold'} style={{fontSize: '14px'}}>
-            {CommonUtils.getLanguageNameFromLocale(match.target)}
+            {ApplicationStore.getLanguageNameFromLocale(match.target)}
           </span>
         </li>
         <li className="graydesc graydesc-sourcekey">

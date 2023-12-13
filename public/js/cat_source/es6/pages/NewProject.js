@@ -31,6 +31,10 @@ import {getMTEngines as getMtEnginesApi} from '../api/getMTEngines'
 import SegmentUtils from '../utils/segmentUtils'
 import {tmCreateRandUser} from '../api/tmCreateRandUser'
 import {getTmDataStructureToSendServer} from '../components/settingsPanel/Contents/TranslationMemoryGlossaryTab'
+import {getSupportedFiles} from '../api/getSupportedFiles'
+import {getSupportedLanguages} from '../api/getSupportedLanguages'
+import ApplicationStore from '../stores/ApplicationStore'
+import ApplicationActions from '../actions/ApplicationActions'
 
 const SELECT_HEIGHT = 324
 
@@ -45,7 +49,6 @@ const tmKeyFromQueryString = urlParams.get('private_tm_key')
 
 const NewProject = ({
   isLoggedIn = false,
-  languages,
   sourceLanguageSelected,
   targetLanguagesSelected,
   subjectsArray,
@@ -60,18 +63,8 @@ const NewProject = ({
   const [mtEngines, setMtEngines] = useState([DEFAULT_ENGINE_MEMORY])
   const [activeMTEngine, setActiveMTEngine] = useState(DEFAULT_ENGINE_MEMORY)
   const [selectedTeam, setSelectedTeam] = useState()
-  const [sourceLang, setSourceLang] = useState(
-    sourceLanguageSelected
-      ? languages.find((lang) => lang.id === sourceLanguageSelected)
-      : languages[0],
-  )
-  const [targetLangs, setTargetLangs] = useState(
-    targetLanguagesSelected
-      ? languages.filter(
-          (lang) => targetLanguagesSelected.indexOf(lang.id) > -1,
-        )
-      : [languages[0]],
-  )
+  const [sourceLang, setSourceLang] = useState({})
+  const [targetLangs, setTargetLangs] = useState([])
   const [subject, setSubject] = useState(subjectsArray[0])
   const [projectSent, setProjectSent] = useState(false)
   const [errors, setErrors] = useState()
@@ -101,6 +94,8 @@ const NewProject = ({
   )
   const [isImportTMXInProgress, setIsImportTMXInProgress] = useState(false)
   const [isFormReadyToSubmit, setIsFormReadyToSubmit] = useState(false)
+  const [supportedFiles, setSupportedFiles] = useState()
+  const [supportedLanguages, setSupportedLanguages] = useState()
 
   const projectNameRef = useRef()
   const prevSourceLang = useRef(sourceLang)
@@ -242,6 +237,31 @@ const NewProject = ({
         })
     }
   }
+  const retrieveSupportedLanguages = () => {
+    getSupportedLanguages()
+      .then((data) => {
+        const languages = data.map((lang) => {
+          return {...lang, id: lang.code}
+        })
+        setSupportedLanguages(languages)
+        setSourceLang(
+          sourceLanguageSelected
+            ? languages.find((lang) => lang.id === sourceLanguageSelected)
+            : languages[0],
+        )
+        setTargetLangs(
+          targetLanguagesSelected
+            ? languages.filter(
+                (lang) => targetLanguagesSelected.indexOf(lang.id) > -1,
+              )
+            : [languages[0]],
+        )
+        ApplicationActions.setLanguages(data)
+      })
+      .catch((error) =>
+        console.log('Error retrieving supported languages', error),
+      )
+  }
 
   //TODO: Move it
   useEffect(() => {
@@ -251,6 +271,13 @@ const NewProject = ({
   }, [selectedTeam])
 
   useEffect(() => {
+    retrieveSupportedLanguages()
+    getSupportedFiles()
+      .then((data) => {
+        setSupportedFiles(data)
+      })
+      .catch((error) => console.log('Error retrieving supported files', error))
+
     UI.addEvents()
     setGuessTagActive(
       SegmentUtils.checkGuessTagCanActivate(sourceLang, targetLangs),
@@ -389,17 +416,19 @@ const NewProject = ({
         localStorage.setItem('currentTargetLang', lang)
       }
     }
-    setGuessTagActive(
-      SegmentUtils.checkGuessTagCanActivate(sourceLang, targetLangs),
-    )
-    CreateProjectActions.updateProjectParams({
-      sourceLang,
-      targetLangs,
-      selectedTeam,
-    })
-    if (prevSourceLang.current.id !== sourceLang.id) {
-      prevSourceLang.current = sourceLang
-      restartConversions()
+    if (sourceLang && targetLangs) {
+      setGuessTagActive(
+        SegmentUtils.checkGuessTagCanActivate(sourceLang, targetLangs),
+      )
+      CreateProjectActions.updateProjectParams({
+        sourceLang,
+        targetLangs,
+        selectedTeam,
+      })
+      if (prevSourceLang.current.id !== sourceLang.id) {
+        prevSourceLang.current = sourceLang
+        restartConversions()
+      }
     }
   }, [sourceLang, targetLangs, selectedTeam])
 
@@ -415,7 +444,7 @@ const NewProject = ({
         SELECT_HEIGHT,
         tmKeys,
         setTmKeys,
-        languages,
+        supportedLanguages,
         targetLangs,
         setTargetLangs,
         setIsOpenMultiselectLanguages,
@@ -560,7 +589,7 @@ const NewProject = ({
               onClick={() => {
                 ModalsActions.showModalComponent(
                   SupportedFilesModal,
-                  {},
+                  {supportedFiles: supportedFiles},
                   'Supported file formats',
                   {minWidth: '80%', height: '80%'},
                 )
@@ -611,7 +640,7 @@ const NewProject = ({
           selectedLanguagesFromDropdown={
             targetLangs.length > 1 ? targetLangs.map(({code}) => code) : []
           }
-          languagesList={config.languages_array}
+          languagesList={supportedLanguages}
           fromLanguage={CreateProjectStore.getSourceLang()}
           onClose={() => setIsOpenMultiselectLanguages(false)}
           onConfirm={(data) => {
@@ -654,7 +683,6 @@ const NewProject = ({
 }
 NewProject.propTypes = {
   isLoggedIn: PropTypes.bool,
-  languages: PropTypes.array,
   sourceLanguageSelected: PropTypes.string,
   targetLanguagesSelected: PropTypes.string,
   subjectsArray: PropTypes.array,
