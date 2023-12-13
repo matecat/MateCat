@@ -25,6 +25,19 @@
   .not-logged-user {
     padding: 100px;
   }
+
+  .confirm-button {
+    font-size: 14px !important;
+    min-width: unset;
+    gap: 5px !important;
+  }
+
+  .close-button {
+    width: 35px;
+    height: 29px;
+    display: flex;
+    justify-content: center;
+  }
 }
 .add-mt-button {
   display: flex;
@@ -209,7 +222,7 @@
       grid-template-columns: 15% minmax(0, 1fr) 22% 5%;
     }
     .row-content-create {
-      grid-template-columns: 15% minmax(0, 1fr) 30% 5%;
+      grid-template-columns: 15% minmax(0, 1fr) 22% 5%;
     }
     .settings-panel-row {
       border: none;
@@ -230,8 +243,11 @@
     }
   }
 
-  .bottom-buttons {
-    padding: 10px;
+  .main-buttons-container {
+    position: absolute;
+    width: 100%;
+    padding: 0 10px 0 220px;
+    margin-top: 50px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -277,10 +293,6 @@
   }
 }
 
-.glossary-row-name-input-create {
-  width: 94%;
-}
-
 .glossary-row-import-button {
   display: flex;
   justify-content: end;
@@ -308,15 +320,13 @@
   }
 }
 
+.glossary-row-confirm-button {
+  display: flex;
+  justify-content: end;
+}
+
 .glossary-row-delete {
   padding: 0 !important;
-
-  button {
-    width: 40px;
-    height: 29px;
-    display: flex;
-    justify-content: center;
-  }
 }
 
 .grey-button {
@@ -324,7 +334,7 @@
   align-items: center;
   gap: 8px;
   border-radius: 2px;
-  font-size: 16px;
+  font-size: 14px;
   color: #000;
   background: #eaebee;
   padding: 4px 8px;
@@ -366,6 +376,8 @@
 }
 
 .mt-glossary-table {
+  margin-top: 15px;
+
   .settings-panel-table-rows-container {
     max-height: 400px;
     overflow-y: auto;
@@ -391,4 +403,6 @@
 
 .create-glossary-button {
   gap: unset;
+  font-size: 14px;
+  padding: 2px 8px 2px 4px;
 }

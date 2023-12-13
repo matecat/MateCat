@@ -149,7 +149,7 @@ export const ShareResource = ({row, onClose}) => {
         <div className="translation-memory-glossary-tab-buttons-group align-center">
           <button
             type="submit"
-            className="ui primary button settings-panel-button-icon tm-key-small-row-button"
+            className="ui primary button settings-panel-button-icon confirm-button"
             disabled={isFormDisabled || isErrorExport}
           >
             Share
@@ -157,10 +157,10 @@ export const ShareResource = ({row, onClose}) => {
 
           <button
             type="reset"
-            className="ui button orange tm-key-small-row-button"
+            className="ui button orange close-button"
             disabled={isFormDisabled}
           >
-            <Close />
+            <Close size={18} />
           </button>
         </div>
       </form>

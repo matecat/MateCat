@@ -13,7 +13,6 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
   const [isActive, setIsActive] = useState(row.isActive)
   const [name, setName] = useState(row.name ?? '')
   const [file, setFile] = useState()
-  const [submitCheckErrors, setSubmitCheckErrors] = useState()
   const [isWaitingResult, setIsWaitingResult] = useState(false)
 
   const ref = useRef()
@@ -83,8 +82,6 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
   }
 
   const validateForm = () => {
-    setSubmitCheckErrors(Symbol())
-
     if (!name || !file) {
       setNotification({
         type: 'error',
@@ -103,10 +100,7 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
     setNotification()
   }
 
-  const resetErrors = () => {
-    setSubmitCheckErrors(undefined)
-    setNotification()
-  }
+  const resetErrors = () => setNotification()
 
   const dispatchSuccessfullNotification = () => {
     setNotification({
@@ -123,13 +117,10 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
     setIsWaitingResult(false)
   }
 
-  const inputNameClasses = `glossary-row-name-input glossary-row-name-input-create ${
-    typeof submitCheckErrors === 'symbol' && !name ? ' error' : ''
-  }`
+  const inputNameClasses = `glossary-row-name-input`
+  const fileNameClasses = `grey-button`
 
-  const fileNameClasses = `grey-button ${
-    typeof submitCheckErrors === 'symbol' && !file ? ' error' : ''
-  }`
+  const isFormFilled = file && name
 
   return (
     <form
@@ -152,7 +143,9 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
       </div>
       <div
         className={`${
-          isWaitingResult ? ' row-content-create-glossary-waiting' : ''
+          isWaitingResult
+            ? ' row-content-create-glossary-waiting'
+            : 'glossary-row-name'
         }`}
       >
         <input
@@ -162,46 +155,47 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
           onChange={onChangeName}
           disabled={isWaitingResult}
         />
+        <div className="glossary-row-import-button">
+          <input
+            type="file"
+            id="file-import"
+            onChange={onChangeFile}
+            name="import_file"
+            accept=".xls, .xlsx"
+            disabled={isWaitingResult}
+          />
+          {!file ? (
+            <label htmlFor="file-import" className={fileNameClasses}>
+              <Upload size={14} />
+              Choose file
+            </label>
+          ) : (
+            <label className="filename">{file.name}</label>
+          )}
+        </div>
       </div>
       <div
-        className={`glossary-row-import-button${
+        className={`glossary-row-confirm-button${
           isWaitingResult ? ' row-content-create-glossary-waiting' : ''
         }`}
       >
-        <input
-          type="file"
-          id="file-import"
-          onChange={onChangeFile}
-          name="import_file"
-          accept=".xls, .xlsx"
-          disabled={isWaitingResult}
-        />
-        {!file ? (
-          <label htmlFor="file-import" className={fileNameClasses}>
-            <Upload size={14} />
-            Import .xls
-          </label>
-        ) : (
-          <label className="filename">{file.name}</label>
-        )}
-
         <button
-          className="ui primary button settings-panel-button-icon small-row-button"
+          className="ui primary button settings-panel-button-icon small-row-button confirm-button"
           type="submit"
-          disabled={isWaitingResult}
+          disabled={isWaitingResult || !isFormFilled}
         >
-          <Checkmark size={16} />
+          <Checkmark size={12} />
           Confirm
         </button>
       </div>
       <div className="glossary-row-delete">
         <button
-          className="ui button orange small-row-button"
+          className="ui button orange small-row-button close-button"
           onClick={onReset}
           type="reset"
           disabled={isWaitingResult}
         >
-          <Close />
+          <Close size={18} />
         </button>
       </div>
       {isWaitingResult && <div className="spinner"></div>}

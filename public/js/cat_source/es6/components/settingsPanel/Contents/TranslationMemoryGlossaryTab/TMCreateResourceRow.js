@@ -293,18 +293,18 @@ export const TMCreateResourceRow = ({row}) => {
       <div />
       <div className="translation-memory-glossary-tab-buttons-group">
         <button
-          className="ui primary button settings-panel-button-icon tm-key-small-row-button"
+          className="ui primary button settings-panel-button-icon confirm-button"
           type="submit"
         >
-          <Checkmark size={16} />
+          <Checkmark size={12} />
           Confirm
         </button>
         <button
-          className="ui button orange tm-key-small-row-button"
+          className="ui button orange close-button"
           onClick={onReset}
           type="reset"
         >
-          <Close />
+          <Close size={18} />
         </button>
       </div>
     </form>

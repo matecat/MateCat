@@ -50,18 +50,18 @@ export const DeleteResource = ({row, onClose}) => {
         </div>
         <div className="translation-memory-glossary-tab-buttons-group align-center">
           <button
-            className="ui primary button settings-panel-button-icon tm-key-small-row-button"
+            className="ui primary button settings-panel-button-icon confirm-button"
             onClick={onClickConfirm}
           >
-            <Checkmark size={16} />
+            <Checkmark size={12} />
             Confirm
           </button>
 
           <button
-            className="ui button orange tm-key-small-row-button"
+            className="ui button orange close-button"
             onClick={onClickClose}
           >
-            <Close />
+            <Close size={18} />
           </button>
         </div>
       </div>

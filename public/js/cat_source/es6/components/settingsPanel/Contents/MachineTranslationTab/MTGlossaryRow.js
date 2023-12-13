@@ -143,20 +143,20 @@ export const MTGlossaryRow = ({engineId, row, setRows, isReadOnly}) => {
   ) : (
     <div className="editing-buttons">
       <button
-        className="ui primary button settings-panel-button-icon small-row-button"
+        className="ui primary button settings-panel-button-icon small-row-button confirm-button"
         onClick={updateKeyName}
       >
-        <Checkmark size={14} />
+        <Checkmark size={12} />
         Confirm
       </button>
       <button
-        className="ui button orange small-row-button"
+        className="ui button orange small-row-button close-button"
         onClick={() => {
           setIsEditingName(false)
           setName(row.name)
         }}
       >
-        <Close size={20} />
+        <Close size={18} />
       </button>
     </div>
   )
@@ -194,7 +194,7 @@ export const MTGlossaryRow = ({engineId, row, setRows, isReadOnly}) => {
             />
             <label htmlFor={`file-import${row.id}`} className="grey-button">
               <Upload size={14} />
-              Import glossary
+              Update
             </label>
           </div>
           <div className="glossary-row-delete">

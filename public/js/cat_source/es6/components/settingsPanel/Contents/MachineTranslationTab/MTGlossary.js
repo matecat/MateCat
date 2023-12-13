@@ -15,7 +15,7 @@ import IconAdd from '../../../icons/IconAdd'
 
 const COLUMNS_TABLE = [
   {name: 'Activate'},
-  {name: 'Name'},
+  {name: 'Glossary'},
   {name: ''},
   {name: ''},
 ]
@@ -173,10 +173,8 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
     }
 
     updateRowsState((prevState) => [
-      ...prevState,
-      ...(!prevState.some(({id}) => id === MT_GLOSSARY_CREATE_ROW_ID)
-        ? [row]
-        : []),
+      row,
+      ...prevState.filter(({id}) => id !== MT_GLOSSARY_CREATE_ROW_ID),
     ])
   }
 
@@ -221,13 +219,13 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
 
           {!isCattoolPage &&
             (haveRecords ? (
-              <div className="bottom-buttons">
+              <div className="main-buttons-container">
                 <button
                   className="grey-button create-glossary-button"
                   onClick={addGlossary}
                 >
-                  <IconAdd size={14} />
-                  Create new glossary
+                  <IconAdd size={18} />
+                  New
                 </button>
                 <div className="mt-glossary-case-sensitive">
                   <input
@@ -236,7 +234,7 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
                     type="checkbox"
                     title=""
                   />
-                  <label>Make glossary case insensitive</label>
+                  <label>Enable case-sensitive matching</label>
                 </div>
               </div>
             ) : Array.isArray(rows) ? (
