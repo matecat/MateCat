@@ -41,9 +41,6 @@ class peeViewController extends viewController {
     public function setTemplateVars() {
         $this->template->dataLangStats = json_encode( $this->dataLangStats );
 
-        $this->template->languages_array = $this->lang_handler->getEnabledLanguages( 'en' )  ;
-        $this->template->languages_json = json_encode(  $this->lang_handler->getEnabledLanguages( 'en' ) ) ;
-
         $this->template->snapshots = $this->snapshots;
         $this->template->lastMonth = end( $this->snapshots )[ 'date' ];
     }

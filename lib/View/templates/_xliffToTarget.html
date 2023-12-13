@@ -23,7 +23,6 @@
             basepath: '${basepath | string:/}',
             hostpath: '${hostpath | string:/}',
             unsupportedFileTypes: '${unsupported_file_types}',
-            allowedFileTypes: /(\.|\/)(${allowed_file_types})$/i,
             conversionEnabled: true,
             analysisEnabled: ${volume_analysis_enabled},
             isAnInternalUser: ${php: var_export( !empty( isAnInternalUser ), true )},
@@ -467,26 +466,6 @@
 <script src="js/cors/jquery.xdr-transport.js"></script><![endif]-->
 
 
-
-<div class="modal supported-formats" data-type="view">
-    <div class="popup-outer closeClickingOutside"></div>
-    <div class="popup">
-        <a href="#" class="x-popup"></a>
-
-        <h1>Supported file formats</h1>
-
-        <div class="popup-box fileformat">
-            <div tal:define="supported php:array()" tal:repeat="supported supported_file_types_array" class="format-box">
-                <h3 tal:content="repeat/supported/key"></h3>
-                <ul tal:repeat="ext supported">
-                    <li tal:repeat="item ext">
-                        <span tal:content="item/ext" tal:attributes="class item/class"></span>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </div>
-</div>
 <div class="notifications-wrapper"></div>
 <footer class="normal-foo">
     <div class="footer-body">
