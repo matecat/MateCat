@@ -444,7 +444,7 @@ const NewProject = ({
         SELECT_HEIGHT,
         tmKeys,
         setTmKeys,
-        supportedLanguages,
+        languages: supportedLanguages,
         targetLangs,
         setTargetLangs,
         setIsOpenMultiselectLanguages,
