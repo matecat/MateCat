@@ -239,16 +239,13 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
               </div>
             ) : Array.isArray(rows) ? (
               <div className="empty-list-mode">
-                <p>
-                  Create a glossary to start using ModernMT&apos;s glossary
-                  feature
-                </p>
+                <p>Start using ModernMT’s glossary feature</p>
                 <button
                   className="grey-button create-glossary-button"
                   onClick={addGlossary}
                 >
                   <IconAdd size={14} />
-                  Create glossary
+                  New glossary
                 </button>
               </div>
             ) : (

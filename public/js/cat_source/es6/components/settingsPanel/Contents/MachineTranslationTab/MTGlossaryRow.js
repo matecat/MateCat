@@ -143,14 +143,14 @@ export const MTGlossaryRow = ({engineId, row, setRows, isReadOnly}) => {
   ) : (
     <div className="editing-buttons">
       <button
-        className="ui primary button settings-panel-button-icon small-row-button confirm-button"
+        className="ui primary button settings-panel-button-icon confirm-button"
         onClick={updateKeyName}
       >
         <Checkmark size={12} />
         Confirm
       </button>
       <button
-        className="ui button orange small-row-button close-button"
+        className="ui button orange close-button"
         onClick={() => {
           setIsEditingName(false)
           setName(row.name)
@@ -193,7 +193,7 @@ export const MTGlossaryRow = ({engineId, row, setRows, isReadOnly}) => {
               disabled={isWaitingResult}
             />
             <label htmlFor={`file-import${row.id}`} className="grey-button">
-              <Upload size={14} />
+              <Upload size={12} />
               Update
             </label>
           </div>
@@ -203,7 +203,7 @@ export const MTGlossaryRow = ({engineId, row, setRows, isReadOnly}) => {
               disabled={isWaitingResult}
               onClick={deleteGlossary}
             >
-              <Trash size={14} />
+              <Trash size={12} />
             </button>
           </div>
           {isWaitingResult && <div className="spinner"></div>}

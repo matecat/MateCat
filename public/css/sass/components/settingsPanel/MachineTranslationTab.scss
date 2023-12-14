@@ -27,16 +27,21 @@
   }
 
   .confirm-button {
+    height: 26px;
     font-size: 14px !important;
     min-width: unset;
     gap: 5px !important;
+    border-radius: unset;
+    padding: 0 8px;
   }
 
   .close-button {
-    width: 35px;
-    height: 29px;
+    width: 30px;
+    height: 26px;
     display: flex;
     justify-content: center;
+    border-radius: unset;
+    padding: 0;
   }
 }
 .add-mt-button {
@@ -139,6 +144,7 @@
 .machine-translation-tab {
   .settings-panel-table-rowHeading,
   .settings-panel-row-content {
+    min-height: 40px;
     grid-template-columns: 15% minmax(0, 1fr) 15% 15%;
   }
   .settings-panel-table-rowHeading-column:nth-child(3),
@@ -247,7 +253,7 @@
     position: absolute;
     width: 100%;
     padding: 0 10px 0 220px;
-    margin-top: 50px;
+    margin-top: 54px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -260,18 +266,7 @@
 
   .editing-buttons {
     display: flex;
-    gap: 4px;
-
-    > :first-child {
-      font-size: 14px;
-      min-width: unset;
-      padding: 8px;
-      gap: 4px !important;
-    }
-
-    > :last-child {
-      padding: 4px;
-    }
+    gap: 10px;
   }
 }
 
@@ -316,7 +311,6 @@
   .filename {
     display: flex;
     align-items: center;
-    padding: 5px;
   }
 }
 
@@ -332,12 +326,13 @@
 .grey-button {
   display: flex;
   align-items: center;
+  height: 26px;
   gap: 8px;
   border-radius: 2px;
-  font-size: 14px;
+  font-size: 16px;
   color: #000;
   background: #eaebee;
-  padding: 4px 8px;
+  padding: 0 8px;
   text-align: center;
   border: 1px solid #9e9e9e;
   cursor: pointer;
@@ -349,15 +344,6 @@
   &:disabled {
     opacity: 0.5;
     cursor: default;
-  }
-}
-
-.small-row-button {
-  height: 29px;
-  margin: 0 !important;
-
-  &:last-child {
-    padding: 0 8px;
   }
 }
 
@@ -403,6 +389,5 @@
 
 .create-glossary-button {
   gap: unset;
-  font-size: 14px;
   padding: 2px 8px 2px 4px;
 }

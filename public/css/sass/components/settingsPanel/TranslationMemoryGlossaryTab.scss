@@ -5,24 +5,26 @@
   flex-direction: column;
 
   .confirm-button {
+    height: 26px;
     font-size: 14px !important;
     min-width: unset;
     gap: 5px !important;
-    height: 29px;
     margin: 0 !important;
     padding: 0 8px;
-
-    &:last-child {
-      padding: 0 8px;
-    }
+    border-radius: unset;
   }
 
   .close-button {
-    width: 35px;
-    height: 29px;
+    width: 30px;
+    height: 26px !important;
     padding: 0 !important;
     display: flex !important;
     justify-content: center !important;
+    border-radius: unset;
+  }
+
+  button {
+    line-height: 1;
   }
 }
 

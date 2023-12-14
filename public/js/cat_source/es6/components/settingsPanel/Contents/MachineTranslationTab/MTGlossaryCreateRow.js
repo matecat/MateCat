@@ -117,8 +117,8 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
     setIsWaitingResult(false)
   }
 
-  const inputNameClasses = `glossary-row-name-input`
-  const fileNameClasses = `grey-button`
+  const inputNameClasses = 'glossary-row-name-input'
+  const fileNameClasses = 'grey-button'
 
   const isFormFilled = file && name
 
@@ -180,7 +180,7 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
         }`}
       >
         <button
-          className="ui primary button settings-panel-button-icon small-row-button confirm-button"
+          className="ui primary button settings-panel-button-icon confirm-button"
           type="submit"
           disabled={isWaitingResult || !isFormFilled}
         >
@@ -190,7 +190,7 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
       </div>
       <div className="glossary-row-delete">
         <button
-          className="ui button orange small-row-button close-button"
+          className="ui button orange close-button"
           onClick={onReset}
           type="reset"
           disabled={isWaitingResult}
