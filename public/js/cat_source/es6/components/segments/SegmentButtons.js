@@ -7,8 +7,6 @@ import SegmentFilter from '../header/cattol/segment_filter/segment_filter'
 import SegmentUtils from '../../utils/segmentUtils'
 import CattoolConstants from '../../constants/CatToolConstants'
 import CommonUtils from '../../utils/commonUtils'
-import segment from './Segment'
-import DraftMatecatUtils from './utils/DraftMatecatUtils'
 import {
   decodePlaceholdersToPlainText,
   removeTagsFromText,
@@ -79,12 +77,9 @@ class SegmentButton extends React.Component {
       : undefined
     if (contribution && contribution.match === 'MT') {
       const currentTranslation = segment.decodedTranslation
-      const contributionText = DraftMatecatUtils.removeTagsFromText(
-        DraftMatecatUtils.decodePlaceholdersToPlainText(
-          contribution.translation,
-        ),
+      const contributionText = removeTagsFromText(
+        decodePlaceholdersToPlainText(contribution.translation),
       )
-      console.log('###############', currentTranslation, contributionText)
       if (currentTranslation === contributionText)
         SegmentActions.replaceEditAreaTextContent(
           segment.sid,
