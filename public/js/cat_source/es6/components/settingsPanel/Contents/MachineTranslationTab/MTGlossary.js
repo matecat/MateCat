@@ -244,7 +244,7 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
                   className="grey-button create-glossary-button"
                   onClick={addGlossary}
                 >
-                  <IconAdd size={14} />
+                  <IconAdd size={18} />
                   New glossary
                 </button>
               </div>
