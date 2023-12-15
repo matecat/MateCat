@@ -323,16 +323,16 @@ class AnalyzeHeader extends React.Component {
     var ppassword = config.password
 
     var form =
-        '			<form id="downloadAnalysisReportForm" action="/" method="post">' +
-        '				<input type=hidden name="action" value="downloadAnalysisReport">' +
-        '				<input type=hidden name="id_project" value="' +
-        pid +
-        '">' +
-        '				<input type=hidden name="password" value="' +
-        ppassword +
-        '">' +
-        '				<input type=hidden name="download_type" value="XTRF">' +
-        '			</form>'
+      '			<form id="downloadAnalysisReportForm" action="/" method="post">' +
+      '				<input type=hidden name="action" value="downloadAnalysisReport">' +
+      '				<input type=hidden name="id_project" value="' +
+      pid +
+      '">' +
+      '				<input type=hidden name="password" value="' +
+      ppassword +
+      '">' +
+      '				<input type=hidden name="download_type" value="XTRF">' +
+      '			</form>'
     $('body').append(form)
     $('#downloadAnalysisReportForm').submit()
   }
@@ -357,7 +357,8 @@ class AnalyzeHeader extends React.Component {
     let status = this.props.data.get('STATUS')
     if (status === 'DONE') {
       setTimeout(function () {
-        self.containerAnalysisComplete.classList.remove('hide')
+        self.containerAnalysisComplete &&
+          self.containerAnalysisComplete.classList.remove('hide')
       }, 600)
     }
   }

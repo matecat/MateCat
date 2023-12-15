@@ -341,6 +341,11 @@ class ProjectManager {
     private function saveMetadata() {
         $options = $this->projectStructure[ 'metadata' ];
 
+        // "From API" flag
+        if(isset($this->projectStructure['from_api']) and $this->projectStructure['from_api'] == true){
+            $options['from_api'] = 1;
+        }
+
         /**
          * Here we have the opportunity to add other features as dependencies of the ones
          * which are already explicitly set.
@@ -1120,6 +1125,8 @@ class ProjectManager {
      */
     protected function _loopForTMXLoadStatus( $memoryFiles ) {
 
+        $time = strtotime( '+30 minutes' );
+
         //TMX Management
         /****************/
         //loop again through files to check for TMX loading
@@ -1133,10 +1140,11 @@ class ProjectManager {
 
                     $result = $this->tmxServiceWrapper->tmxUploadStatus( $file->getUuid() );
 
-                    if ( $result[ 'completed' ] ) {
+                    if ( $result[ 'completed' ] || strtotime( 'now' ) > $time ) {
 
                         //"$fileName" has been loaded into MyMemory"
-                        //exit the loop
+                        // OR the indexer is down or stopped for maintenance
+                        // exit the loop, the import will be executed in a later time
                         break;
 
                     }
@@ -1147,7 +1155,7 @@ class ProjectManager {
                 } catch ( Exception $e ) {
 
                     $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                        "code" => $e->getCode(), "message" => $e->getMessage()
+                            "code" => $e->getCode(), "message" => $e->getMessage()
                     ];
 
                     $this->_log( $e->getMessage() . "\n" . $e->getTraceAsString() );

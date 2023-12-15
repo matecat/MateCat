@@ -667,6 +667,9 @@ class NewController extends ajaxController {
 
         $projectStructure = $this->featureSet->filter( 'addNewProjectStructureAttributes', $projectStructure, $this->postInput );
 
+        // flag to mark the project "from API"
+        $projectStructure[ 'from_api' ] = true;
+
         $this->projectStructure = $projectStructure;
 
         Queue::sendProject( $projectStructure );

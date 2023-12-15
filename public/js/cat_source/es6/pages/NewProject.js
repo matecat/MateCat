@@ -259,7 +259,6 @@ const NewProject = ({
   }, [selectedTeam])
 
   useEffect(() => {
-    APP.checkGDriveEvents()
     UI.addEvents()
     setGuessTagActive(
       SegmentUtils.checkGuessTagCanActivate(sourceLang, targetLangs),
@@ -300,7 +299,7 @@ const NewProject = ({
       CommonUtils.getParameterByName('project_name')
     if (projectNameFromQuerystring)
       projectNameRef.current.value = projectNameFromQuerystring
-
+    APP.checkGDriveEvents()
     return () => {
       TeamsStore.removeListener(TeamConstants.UPDATE_USER, updateUser)
       CreateProjectStore.removeListener(

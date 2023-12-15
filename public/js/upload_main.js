@@ -364,10 +364,11 @@ window.UI = {
             fname: data.result[0].name,
             filesize: data.result[0].size,
             filerow: data.context,
-            extension:
-              data.result[0].name.split('.')[
-                data.result[0].name.split('.').length - 1
-              ],
+            extension: data.result[0].name
+              ? data.result[0].name.split('.')[
+                  data.result[0].name.split('.').length - 1
+                ]
+              : '',
             error:
               typeof data.result[0].error !== 'undefined'
                 ? data.result[0].error
@@ -909,32 +910,10 @@ var getIconClass = function (ext) {
 }
 
 window.onbeforeunload = function (e) {
-  var leave_message = null
-  if ($('.popup-tm .notify').length) {
-    var dont_confirm_leave = 0 //set dont_confirm_leave to 1 when you want the user to be able to leave withou confirmation
-    leave_message =
-      'You have a pending operation. Are you sure you want to quit?'
-    if (dont_confirm_leave !== 1) {
-      if (!e) e = window.event
-      //e.cancelBubble is supported by IE - this will kill the bubbling process.
-      e.cancelBubble = true
-      e.returnValue = leave_message
-      //e.stopPropagation works in Firefox.
-      if (e.stopPropagation) {
-        e.stopPropagation()
-        e.preventDefault()
-      }
-    }
-  }
-
   //return works for Chrome and Safari
   //function in new-project.js this function does an ajax call to clean uploaded files when an user
   // refresh a page without click the analyze method
   clearNotCompletedUploads()
-
-  if (leave_message != null) {
-    return leave_message
-  }
 }
 
 document.addEventListener('DOMContentLoaded', function (event) {

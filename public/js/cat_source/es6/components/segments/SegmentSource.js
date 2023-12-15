@@ -19,6 +19,7 @@ import {SegmentContext} from './SegmentContext'
 import Assistant from '../icons/Assistant'
 import Education from '../icons/Education'
 import {TERM_FORM_FIELDS} from './SegmentFooterTabGlossary/SegmentFooterTabGlossary'
+import {getEntitiesSelected} from './utils/DraftMatecatUtils/manageCaretPositionNearEntity'
 
 class SegmentSource extends React.Component {
   static contextType = SegmentContext
@@ -257,24 +258,6 @@ class SegmentSource extends React.Component {
       //Glossary
       const {glossary} = this.props.segment
       const prevGlossary = prevProps ? prevProps.segment.glossary : undefined
-      if (
-        glossary &&
-        size(glossary) > 0 &&
-        (isUndefined(prevGlossary) ||
-          !Immutable.fromJS(prevGlossary).equals(Immutable.fromJS(glossary)) ||
-          !prevActiveDecorators[DraftMatecatConstants.GLOSSARY_DECORATOR])
-      ) {
-        activeDecorators[DraftMatecatConstants.GLOSSARY_DECORATOR] = true
-        changedDecorator = true
-        this.addGlossaryDecorator()
-      } else if (
-        size(prevGlossary) > 0 &&
-        (!glossary || size(glossary) === 0)
-      ) {
-        activeDecorators[DraftMatecatConstants.GLOSSARY_DECORATOR] = false
-        changedDecorator = true
-        this.removeDecorator(DraftMatecatConstants.GLOSSARY_DECORATOR)
-      }
 
       //Qa Check Glossary
       const missingGlossaryItems =
@@ -302,6 +285,24 @@ class SegmentSource extends React.Component {
         activeDecorators[DraftMatecatConstants.QA_GLOSSARY_DECORATOR] = false
       }
 
+      if (
+        glossary &&
+        size(glossary) > 0 &&
+        (isUndefined(prevGlossary) ||
+          !Immutable.fromJS(prevGlossary).equals(Immutable.fromJS(glossary)) ||
+          !prevActiveDecorators[DraftMatecatConstants.GLOSSARY_DECORATOR])
+      ) {
+        activeDecorators[DraftMatecatConstants.GLOSSARY_DECORATOR] = true
+        changedDecorator = true
+        this.addGlossaryDecorator()
+      } else if (
+        size(prevGlossary) > 0 &&
+        (!glossary || size(glossary) === 0)
+      ) {
+        activeDecorators[DraftMatecatConstants.GLOSSARY_DECORATOR] = false
+        changedDecorator = true
+        this.removeDecorator(DraftMatecatConstants.GLOSSARY_DECORATOR)
+      }
       //Lexiqa
       const {lexiqa} = this.props.segment
       const prevLexiqa = prevProps ? prevProps.segment.lexiqa : undefined
@@ -406,7 +407,7 @@ class SegmentSource extends React.Component {
     this.$source.on('keydown', this.openConcordance)
   }
 
-  componentDidUpdate(prevProps) {
+  componentDidUpdate(prevProps, prevState) {
     this.checkDecorators(prevProps)
     // Check if splitMode
     if (!prevProps.segment.openSplit && this.props.segment.openSplit) {
@@ -443,6 +444,13 @@ class SegmentSource extends React.Component {
         // update current editorState
         this.setState({editorState: editorStateSplitGroup})
       }
+    }
+
+    if (prevState.editorState !== this.state.editorState) {
+      const {editorState} = this.state
+
+      const entitiesSelected = getEntitiesSelected(editorState)
+      SegmentActions.focusTags(entitiesSelected)
     }
   }
 
@@ -526,7 +534,6 @@ class SegmentSource extends React.Component {
       copyFragment,
       onBlurEvent,
       dragFragment,
-      onDragEndEvent,
       addSplitTag,
       splitSegmentNew,
       preventEdit,
@@ -542,7 +549,6 @@ class SegmentSource extends React.Component {
           onCopy: copyFragment,
           onBlur: onBlurEvent,
           onDragStart: dragFragment,
-          onDragEnd: onDragEndEvent,
           onMouseUp: () => {
             this.setState({
               isShowingOptionsToolbar: !this.editor._latestEditorState
@@ -767,6 +773,7 @@ class SegmentSource extends React.Component {
   onBlurEvent = () => {
     setTimeout(() => {
       SegmentActions.highlightTags()
+      SegmentActions.focusTags([])
     })
 
     this.setState({
@@ -781,10 +788,21 @@ class SegmentSource extends React.Component {
     try {
       // Get latest selection
       let newSelection = this.editor._latestEditorState.getSelection()
+
+      const currentBlockText = this.editor._latestEditorState
+        .getCurrentContent()
+        .getBlockForKey(newSelection.getFocusKey())
+        .getText()
+      const zwsp = String.fromCharCode(parseInt('200B', 16))
+      const selectedTextAfter = currentBlockText.slice(end, end + 1)
+      const selectedTextBefore = currentBlockText.slice(start - 1, start)
+      const addZwspExtraStepBefore = zwsp === selectedTextBefore ? 1 : 0
+      const addZwspExtraStepAfter = zwsp === selectedTextAfter ? 1 : 0
+
       // force selection on entity
       newSelection = newSelection.merge({
-        anchorOffset: start - 1, // -1 is to catch the zero-width space char placed before every entity
-        focusOffset: end,
+        anchorOffset: start - addZwspExtraStepBefore,
+        focusOffset: end + addZwspExtraStepAfter,
       })
       let newEditorState = EditorState.forceSelection(editorState, newSelection)
       const contentState = newEditorState.getCurrentContent()
@@ -835,6 +853,8 @@ class SegmentSource extends React.Component {
       const plainText = internalClipboard
         .map((block) => block.getText())
         .join('\n')
+        .replace(new RegExp(String.fromCharCode(parseInt('200B', 16)), 'g'), '')
+
       const entitiesMap = DraftMatecatUtils.getEntitiesInFragment(
         internalClipboard,
         editorState,
@@ -864,10 +884,6 @@ class SegmentSource extends React.Component {
       e.dataTransfer.setData('text/plain', fragment)
       e.dataTransfer.setData('text/html', fragment)
     }
-  }
-
-  onDragEndEvent = (e) => {
-    e.dataTransfer.clearData()
   }
 
   getUpdatedSegmentInfo = () => {

@@ -58,13 +58,13 @@ $klein->with( '/api/v3/qa_model_template', function () {
 } );
 
 $klein->with( '/api/v3/payable_rate', function () {
-    route( '/schema', 'GET', '\API\V3\PayableRateController', 'schema' );
-    route( '/validate', 'POST', '\API\V3\PayableRateController', 'validate' );
-    route( '', 'GET', '\API\V3\PayableRateController', 'index' );
-    route( '', 'POST', '\API\V3\PayableRateController', 'create' );
-    route( '/[:id]', 'GET', '\API\V3\PayableRateController', 'view' );
-    route( '/[:id]', 'DELETE', '\API\V3\PayableRateController', 'delete' );
-    route( '/[:id]', 'PUT', '\API\V3\PayableRateController', 'edit' );
+    route( '/schema', 'GET', '\API\V2\PayableRateController', 'schema' );
+    route( '/validate', 'POST', '\API\V2\PayableRateController', 'validate' );
+    route( '', 'GET', '\API\V2\PayableRateController', 'index' );
+    route( '', 'POST', '\API\V2\PayableRateController', 'create' );
+    route( '/[:id]', 'GET', '\API\V2\PayableRateController', 'view' );
+    route( '/[:id]', 'DELETE', '\API\V2\PayableRateController', 'delete' );
+    route( '/[:id]', 'PUT', '\API\V2\PayableRateController', 'edit' );
 } );
 
 // TM Keys
@@ -83,3 +83,7 @@ $klein->with( '/api/v3/mmt/[:engineId]', function () {
     route( '/update-memory/[:memoryId]', 'POST', '\API\V3\ModernMTController', 'updateMemory' );
     route( '/delete-memory/[:memoryId]', 'GET', '\API\V3\ModernMTController', 'deleteMemory' );
 } );
+
+route( '/api/v3/projects/[:id_project]/[:password]/segment-analysis',  'GET',  'API\V3\SegmentAnalysisController', 'project' );
+route( '/api/v3/jobs/[:id_job]/[:password]/segment-analysis',          'GET',  'API\V3\SegmentAnalysisController', 'job' );
+

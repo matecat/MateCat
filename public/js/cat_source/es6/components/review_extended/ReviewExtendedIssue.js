@@ -111,10 +111,9 @@ class ReviewExtendedIssue extends React.Component {
     event.preventDefault()
     event.stopPropagation()
 
-    let self = this
     if (!this.state.commentView) {
-      setTimeout(function () {
-        $(self.el).find('.re-comment-input')[0].focus()
+      setTimeout(() => {
+        this.el && $(this.el).find('.re-comment-input')[0].focus()
       }, 100)
     }
     this.setState({
@@ -149,7 +148,7 @@ class ReviewExtendedIssue extends React.Component {
 
     this.setState({sendDisabled: true})
 
-    SegmentActions.submitComment(this.props.sid, this.props.issue.id, data)
+    SegmentActions.submitIssueComment(this.props.sid, this.props.issue.id, data)
       .then(function () {
         self.setState({
           comment_text: '',
@@ -299,7 +298,7 @@ class ReviewExtendedIssue extends React.Component {
                 {category.label}
               </span>
               <b>
-                <span title="Type of severity" title={severity.label}>
+                <span title={severity.label}>
                   [
                   {severity.code
                     ? severity.code

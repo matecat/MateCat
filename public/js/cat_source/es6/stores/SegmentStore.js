@@ -602,7 +602,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
   setAlternatives: function (sid, alternatives) {
     const index = this.getSegmentIndex(sid)
     if (index === -1) return
-    if (_.isUndefined(alternatives)) {
+    if (isUndefined(alternatives)) {
       this._segments = this._segments.deleteIn([index, 'alternatives'])
     } else {
       this._segments = this._segments.setIn(
@@ -2019,6 +2019,11 @@ AppDispatcher.register(function (action) {
       break
     case SegmentConstants.OPEN_GLOSSARY_FORM_PREFILL:
       SegmentStore.emitChange(SegmentConstants.OPEN_GLOSSARY_FORM_PREFILL, {
+        ...action,
+      })
+      break
+    case SegmentConstants.FOCUS_TAGS:
+      SegmentStore.emitChange(SegmentConstants.FOCUS_TAGS, {
         ...action,
       })
       break

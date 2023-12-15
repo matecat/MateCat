@@ -124,6 +124,11 @@ const matecatConfig = async ({env}, {mode}) => {
       rules: [
         {
           test: /\.(js|jsx)$/,
+          include: [
+            path.resolve(__dirname, 'public/js'),
+            path.resolve(__dirname, 'public/img/icons'),
+            path.resolve(__dirname, 'plugins'),
+          ],
           exclude: '/node_modules/',
           use: {
             loader: 'babel-loader',
@@ -134,6 +139,7 @@ const matecatConfig = async ({env}, {mode}) => {
         },
         {
           test: /\.css$/i,
+          include: path.resolve(__dirname, 'public/css'),
           use: [
             {
               loader: MiniCssExtractPlugin.loader,
@@ -146,6 +152,10 @@ const matecatConfig = async ({env}, {mode}) => {
         },
         {
           test: /\.s[ac]ss$/i,
+          include: [
+            path.resolve(__dirname, 'public/css/sass'),
+            path.resolve(__dirname, 'plugins'),
+          ],
           use: [
             {
               loader: MiniCssExtractPlugin.loader,
@@ -159,6 +169,7 @@ const matecatConfig = async ({env}, {mode}) => {
         },
         {
           test: /\.(png|jpe?g|gif|mp4|svg|ico)$/i,
+          include: [path.resolve(__dirname, 'public/img')],
           type: 'asset/resource',
           generator: {
             filename: 'images/[name][ext]',
@@ -166,6 +177,7 @@ const matecatConfig = async ({env}, {mode}) => {
         },
         {
           test: /\.(woff(2)?|ttf|eot|otf)(\?v=\d+\.\d+\.\d+)?$/,
+          include: [path.resolve(__dirname, 'public/css/fonts')],
           type: 'asset/resource',
           generator: {
             filename: 'fonts/[name][ext]',
@@ -177,7 +189,6 @@ const matecatConfig = async ({env}, {mode}) => {
       'qa-report': [
         path.resolve(__dirname, 'public/js/common.js'),
         path.resolve(__dirname, 'public/js/user_store.js'),
-        path.resolve(__dirname, 'public/js/login.js'),
         path.resolve(
           __dirname,
           'public/js/cat_source/es6/components/quality_report/QualityReport.js',
@@ -188,7 +199,6 @@ const matecatConfig = async ({env}, {mode}) => {
         path.resolve(__dirname, 'public/js/upload_main.js'),
         path.resolve(__dirname, 'public/js/common.js'),
         path.resolve(__dirname, 'public/js/user_store.js'),
-        path.resolve(__dirname, 'public/js/login.js'),
         path.resolve(__dirname, 'public/js/gdrive.upload.js'),
         path.resolve(__dirname, 'public/js/gdrive.picker.js'),
         path.resolve(__dirname, 'public/js/new-project.js'),
@@ -199,25 +209,12 @@ const matecatConfig = async ({env}, {mode}) => {
         path.resolve(__dirname, 'public/build/lxqlicense.js'),
         path.resolve(__dirname, 'public/js/common.js'),
         path.resolve(__dirname, 'public/js/user_store.js'),
-        path.resolve(__dirname, 'public/js/login.js'),
         path.resolve(__dirname, 'public/js/cat_source/ui.core.js'),
         path.resolve(__dirname, 'public/js/cat_source/ui.init.js'),
         path.resolve(__dirname, 'public/js/cat_source/ui.segment.js'),
         path.resolve(__dirname, 'public/js/cat_source/ui.events.js'),
         path.resolve(__dirname, 'public/js/cat_source/ui.headerTooltips.js'),
-        path.resolve(__dirname, 'public/js/cat_source/ui.review.js'),
-        path.resolve(
-          __dirname,
-          'public/js/cat_source/review_extended/review_extended.default.js',
-        ),
-        path.resolve(
-          __dirname,
-          'public/js/cat_source/review_extended/review_extended.ui_extension.js',
-        ),
-        path.resolve(
-          __dirname,
-          'public/js/cat_source/review_extended/review_extended.common_events.js',
-        ),
+        path.resolve(__dirname, 'public/js/cat_source/review_extended.js'),
         path.resolve(
           __dirname,
           'public/js/cat_source/segment_filter.common_extension.js',
@@ -227,7 +224,6 @@ const matecatConfig = async ({env}, {mode}) => {
       dashboard: [
         path.resolve(__dirname, 'public/js/common.js'),
         path.resolve(__dirname, 'public/js/user_store.js'),
-        path.resolve(__dirname, 'public/js/login.js'),
         path.resolve(
           __dirname,
           'public/js/cat_source/es6/components/projects/Dashboard.js',
@@ -237,7 +233,6 @@ const matecatConfig = async ({env}, {mode}) => {
       analyze: [
         path.resolve(__dirname, 'public/js/common.js'),
         path.resolve(__dirname, 'public/js/user_store.js'),
-        path.resolve(__dirname, 'public/js/login.js'),
         path.resolve(
           __dirname,
           'public/js/cat_source/es6/pages/AnalyzePage.js',
@@ -248,7 +243,6 @@ const matecatConfig = async ({env}, {mode}) => {
         path.resolve(__dirname, 'public/js/upload_main.js'),
         path.resolve(__dirname, 'public/js/common.js'),
         path.resolve(__dirname, 'public/js/user_store.js'),
-        path.resolve(__dirname, 'public/js/login.js'),
         path.resolve(__dirname, 'public/js/xliffToTarget.js'),
         path.resolve(__dirname, 'public/css/sass/upload-main.scss'),
         path.resolve(__dirname, 'public/css/sass/main.scss'),
