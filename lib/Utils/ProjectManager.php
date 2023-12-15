@@ -1864,7 +1864,8 @@ class ProjectManager {
                             //mrk in the list will not be too!!!
                             $show_in_cattool = 1;
 
-                            $wordCount = CatUtils::segment_raw_word_count( $seg_source[ 'raw-content' ], $this->projectStructure[ 'source_language' ], $this->filter, true );
+                            $wordCount = CatUtils::segment_raw_word_count( $seg_source[ 'raw-content' ], $this->projectStructure[ 'source_language' ], $this->filter );
+                            $wordCount = $this->features->filter( 'wordCount', $wordCount );
 
                             //init tags
                             $seg_source[ 'mrk-ext-prec-tags' ] = '';
