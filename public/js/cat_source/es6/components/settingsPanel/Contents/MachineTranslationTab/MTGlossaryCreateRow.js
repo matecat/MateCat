@@ -142,10 +142,8 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
         />
       </div>
       <div
-        className={`${
-          isWaitingResult
-            ? ' row-content-create-glossary-waiting'
-            : 'glossary-row-name'
+        className={`glossary-row-name ${
+          isWaitingResult ? ' row-content-create-glossary-waiting' : ''
         }`}
       >
         <input
@@ -170,7 +168,9 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
               Choose file
             </label>
           ) : (
-            <label className="filename">{file.name}</label>
+            <div className="filename">
+              <label>{file.name}</label>
+            </div>
           )}
         </div>
       </div>

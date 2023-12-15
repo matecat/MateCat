@@ -94,23 +94,27 @@ export const MTGlossaryRow = ({engineId, row, setRows, isReadOnly}) => {
   }
 
   const updateKeyName = () => {
-    updateMemoryGlossary({engineId, memoryId: row.id, name})
-      .then((data) => {
-        setRows((prevState) =>
-          prevState.map((glossary) =>
-            glossary.id === row.id
-              ? {
-                  ...glossary,
-                  name: data.name,
-                }
-              : glossary,
-          ),
-        )
-        setIsEditingName(false)
-      })
-      .catch(() => {
-        setName(row.name)
-      })
+    if (name) {
+      updateMemoryGlossary({engineId, memoryId: row.id, name})
+        .then((data) => {
+          setRows((prevState) =>
+            prevState.map((glossary) =>
+              glossary.id === row.id
+                ? {
+                    ...glossary,
+                    name: data.name,
+                  }
+                : glossary,
+            ),
+          )
+          setIsEditingName(false)
+        })
+        .catch(() => {
+          setName(row.name)
+        })
+    } else {
+      setName(row.name)
+    }
   }
 
   const onChangeFile = (e) => {

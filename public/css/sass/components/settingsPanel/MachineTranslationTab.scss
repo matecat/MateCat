@@ -271,7 +271,7 @@
 }
 
 .glossary-row-name-input {
-  width: 70%;
+  min-width: 70%;
   padding: 4px;
   background-color: unset;
   border: 1px solid $grey8;
@@ -311,6 +311,13 @@
   .filename {
     display: flex;
     align-items: center;
+
+    > label {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      max-width: 220px;
+    }
   }
 }
 
