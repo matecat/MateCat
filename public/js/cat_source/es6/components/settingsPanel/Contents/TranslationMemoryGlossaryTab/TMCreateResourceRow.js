@@ -254,7 +254,8 @@ export const TMCreateResourceRow = ({row}) => {
   const inputNameClasses = 'tm-key-create-resource-row-input'
   const inputKeyCodeClasses = 'tm-key-create-resource-row-input'
 
-  const isFormFilled = keyCode && name
+  const isFormFilled =
+    row.id === SPECIAL_ROWS_ID.addSharedResource ? keyCode && name : name
 
   return (
     <form className="settings-panel-row-content" onSubmit={onSubmit}>
