@@ -45,39 +45,6 @@ class Utils {
     }
 
     /**
-     * Check for browser support
-     *
-     * @return bool
-     */
-    public static function isSupportedWebBrowser( $browser_info ) {
-        $browser_name     = strtolower( $browser_info[ 'name' ] );
-        $browser_platform = strtolower( $browser_info[ 'platform' ] );
-
-        foreach ( INIT::$ENABLED_BROWSERS as $enabled_browser ) {
-            if ( stripos( $browser_name, $enabled_browser ) !== false ) {
-                // Safari supported only on Mac
-                if ( stripos( "apple safari", $browser_name ) === false ||
-                        ( stripos( "apple safari", $browser_name ) !== false && stripos( "mac", $browser_platform ) !== false ) ) {
-                    return 1;
-                }
-            }
-        }
-
-        foreach ( INIT::$UNTESTED_BROWSERS as $untested_browser ) {
-            if ( stripos( $browser_name, $untested_browser ) !== false ) {
-                return -1;
-            }
-        }
-
-        // unsupported browsers: hack for home page
-        if ( $_SERVER[ 'REQUEST_URI' ] == "/" ) {
-            return -2;
-        }
-
-        return 0;
-    }
-
-    /**
      * @return array
      */
     static public function getBrowser() {
