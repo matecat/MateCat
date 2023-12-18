@@ -27,13 +27,14 @@ class SegmentFooterTabConflicts extends React.Component {
     )
     $.each(alternatives.editable, function (index) {
       // Execute diff
-      const segmentTranslation = segment.decodedTranslation
-      const conflictTranslation = DraftMatecatUtils.transformTagsToText(
-        this.translation,
+      const segmentTranslation = segment.translation
+      const conflictTranslation = this.translation
+      let translation = TextUtils.getDiffHtml(
+        segmentTranslation,
+        conflictTranslation,
       )
-      let diff_obj = TextUtils.execDiff(segmentTranslation, conflictTranslation)
-      let translation = TextUtils.diffMatchPatch.diff_prettyHtml(diff_obj)
-
+      // let translation = TextUtils.diffMatchPatch.diff_prettyHtml(diff_obj)
+      translation = DraftMatecatUtils.transformTagsToHtml(translation)
       // No diff executed on source
       html.push(
         <ul
