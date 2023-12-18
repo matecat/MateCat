@@ -34,7 +34,10 @@ class SegmentFooterTabConflicts extends React.Component {
         conflictTranslation,
       )
       // let translation = TextUtils.diffMatchPatch.diff_prettyHtml(diff_obj)
-      translation = DraftMatecatUtils.transformTagsToHtml(translation)
+      translation = DraftMatecatUtils.transformTagsToHtml(
+        translation,
+        config.isTargetRTL,
+      )
       // No diff executed on source
       html.push(
         <ul
