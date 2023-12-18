@@ -31,6 +31,7 @@ import {getMTEngines as getMtEnginesApi} from '../api/getMTEngines'
 import SegmentUtils from '../utils/segmentUtils'
 import {tmCreateRandUser} from '../api/tmCreateRandUser'
 import {getTmDataStructureToSendServer} from '../components/settingsPanel/Contents/TranslationMemoryGlossaryTab'
+import useDeviceCompatibility from '../hooks/useDeviceCompatibility'
 
 const SELECT_HEIGHT = 324
 
@@ -101,6 +102,8 @@ const NewProject = ({
   )
   const [isImportTMXInProgress, setIsImportTMXInProgress] = useState(false)
   const [isFormReadyToSubmit, setIsFormReadyToSubmit] = useState(false)
+
+  const isDeviceCompatible = useDeviceCompatibility()
 
   const projectNameRef = useRef()
   const prevSourceLang = useRef(sourceLang)
@@ -409,7 +412,7 @@ const NewProject = ({
     restartConversions()
   }, [segmentationRule])
 
-  return (
+  return isDeviceCompatible ? (
     <CreateProjectContext.Provider
       value={{
         SELECT_HEIGHT,
@@ -650,6 +653,10 @@ const NewProject = ({
       />
       <Footer />
     </CreateProjectContext.Provider>
+  ) : (
+    <div>
+      <h1>Device not supported</h1>
+    </div>
   )
 }
 NewProject.propTypes = {
