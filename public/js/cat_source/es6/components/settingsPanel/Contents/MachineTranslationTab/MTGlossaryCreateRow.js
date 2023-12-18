@@ -117,7 +117,8 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
     setIsWaitingResult(false)
   }
 
-  const inputNameClasses = 'glossary-row-name-input'
+  const inputNameClasses =
+    'glossary-row-name-input glossary-row-name-create-input'
   const fileNameClasses = 'grey-button'
 
   const isFormFilled = file && name

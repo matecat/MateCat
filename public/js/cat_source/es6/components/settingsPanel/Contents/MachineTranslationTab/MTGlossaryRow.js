@@ -17,6 +17,7 @@ import {updateMemoryGlossary} from '../../../../api/updateMemoryGlossary/updateM
 import IconEdit from '../../../icons/IconEdit'
 import Checkmark from '../../../../../../../img/icons/Checkmark'
 import Close from '../../../../../../../img/icons/Close'
+import LabelWithTooltip from '../../../common/LabelWithTooltip'
 
 export const MTGlossaryRow = ({engineId, row, setRows, isReadOnly}) => {
   const {setNotification} = useContext(MachineTranslationTabContext)
@@ -148,6 +149,7 @@ export const MTGlossaryRow = ({engineId, row, setRows, isReadOnly}) => {
     <div className="editing-buttons">
       <button
         className="ui primary button settings-panel-button-icon confirm-button"
+        disabled={!name}
         onClick={updateKeyName}
       >
         <Checkmark size={12} />
@@ -165,6 +167,15 @@ export const MTGlossaryRow = ({engineId, row, setRows, isReadOnly}) => {
     </div>
   )
 
+  const setInputNameContainer = (children) =>
+    !isEditingName ? (
+      <LabelWithTooltip className="tooltip-input-name">
+        {children}
+      </LabelWithTooltip>
+    ) : (
+      <div className="tooltip-input-name">{children}</div>
+    )
+
   return (
     <Fragment>
       <div className="align-center">
@@ -176,13 +187,17 @@ export const MTGlossaryRow = ({engineId, row, setRows, isReadOnly}) => {
         />
       </div>
       <div className="glossary-row-name">
-        <input
-          ref={inputNameRef}
-          className={`glossary-row-name-input${isEditingName ? ' active' : ''}`}
-          value={name}
-          onChange={onChangeName}
-          disabled={!isEditingName || isReadOnly}
-        />
+        {setInputNameContainer(
+          <input
+            ref={inputNameRef}
+            className={`glossary-row-name-input${
+              isEditingName ? ' active' : ''
+            }`}
+            value={name}
+            onChange={onChangeName}
+            disabled={!isEditingName || isReadOnly}
+          />,
+        )}
         {!isReadOnly && editingNameButtons}
       </div>
       {!isReadOnly && (

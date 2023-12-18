@@ -16,8 +16,15 @@ const LabelWithTooltip = ({children, className, tooltipTarget}) => {
     let textContent = children
     while (typeof textContent !== 'string' && textContent) {
       const next = textContent?.props?.children
+
       if (typeof next === 'string') {
         return next
+      }
+      if (textContent.type === 'input') {
+        return textContent.props.value
+      }
+      if (next?.type === 'input') {
+        return next.props.value
       }
       textContent = next
     }

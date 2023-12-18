@@ -216,7 +216,6 @@
 
   .settings-panel-table {
     .settings-panel-table-rowHeading {
-      font-size: 12px;
       background-color: unset;
       color: black;
 
@@ -252,7 +251,7 @@
   .main-buttons-container {
     position: absolute;
     width: 100%;
-    padding: 0 10px 0 220px;
+    padding: 0 10px 0 230px;
     margin-top: 54px;
     display: flex;
     align-items: center;
@@ -268,14 +267,21 @@
     display: flex;
     gap: 10px;
   }
+
+  .tooltip-input-name {
+    min-width: 70%;
+  }
 }
 
 .glossary-row-name-input {
-  min-width: 70%;
+  width: 100%;
   padding: 4px;
   background-color: unset;
   border: 1px solid $grey8;
   border-radius: 3px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
 
   &.active,
   &:focus,
@@ -319,6 +325,11 @@
       max-width: 220px;
     }
   }
+}
+
+.glossary-row-name-create-input {
+  width: auto;
+  min-width: 70%;
 }
 
 .glossary-row-confirm-button {
