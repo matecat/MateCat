@@ -80,13 +80,14 @@ class SegmentButton extends React.Component {
       const contributionText = removeTagsFromText(
         decodePlaceholdersToPlainText(contribution.translation),
       )
-      if (currentTranslation === contributionText)
+      if (currentTranslation === contributionText) {
         SegmentActions.replaceEditAreaTextContent(
           segment.sid,
           contribution.translation,
         )
-      SegmentActions.setSegmentAsTagged(segment.sid)
-      return
+        SegmentActions.setSegmentAsTagged(segment.sid)
+        return
+      }
     }
     e.preventDefault()
     $(e.target).addClass('disabled')
