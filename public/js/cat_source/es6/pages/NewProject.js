@@ -189,6 +189,8 @@ const NewProject = ({
   }
 
   createProject.current = () => {
+    const {mtGlossaryProps} = activeMTEngine
+
     const getParams = () => ({
       action: 'createProject',
       file_name: APP.getFilenameFromUploadedFiles(),
@@ -206,6 +208,12 @@ const NewProject = ({
       segmentation_rule: segmentationRule.id === '1' ? '' : segmentationRule.id,
       id_team: selectedTeam ? selectedTeam.id : undefined,
       get_public_matches: getPublicMatches,
+      ...(mtGlossaryProps?.glossaries.length && {
+        mmt_glossaries: JSON.stringify({
+          glossaries: mtGlossaryProps.glossaries,
+          ignore_glossary_case: mtGlossaryProps.isGlossaryCaseInsensitive,
+        }),
+      }),
     })
 
     if (!projectSent) {

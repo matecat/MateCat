@@ -21,10 +21,8 @@ use FilesStorage\FilesStorageFactory;
 use FilesStorage\S3FilesStorage;
 use Jobs\SplitQueue;
 use LQA\QA;
-use Matecat\SubFiltering\Commons\Pipeline;
 use Matecat\SubFiltering\Filters\FromViewNBSPToSpaces;
 use Matecat\SubFiltering\Filters\PhCounter;
-use Matecat\SubFiltering\Filters\SprintfToPH;
 use Matecat\SubFiltering\MateCatFilter;
 use Matecat\XliffParser\XliffParser;
 use Matecat\XliffParser\XliffUtils\DataRefReplacer;
@@ -186,7 +184,10 @@ class ProjectManager {
                     'due_date'                     => null,
                     'qa_model'                     => null,
                     'target_language_mt_engine_id' => [],
-                    'standard_word_count'         => 0
+                    'standard_word_count'          => 0,
+                    'mmt_glossaries'               => null,
+                    'deepl_formality'              => null,
+                    'deepl_id_glossary'            => null,
                 ] );
 
         }
@@ -376,6 +377,33 @@ class ProjectManager {
                 $value
             );
         }
+
+        // add MMT Glossaries here
+        if( $this->projectStructure[ 'mmt_glossaries' ] and !empty( $this->projectStructure[ 'mmt_glossaries' ] ) ){
+            $dao->set(
+                $this->projectStructure[ 'id_project' ],
+                'mmt_glossaries',
+                $this->projectStructure[ 'mmt_glossaries' ]
+            );
+        }
+
+        // add DeepL params here
+        if( $this->projectStructure[ 'deepl_formality' ] and !empty( $this->projectStructure[ 'deepl_formality' ] ) ){
+            $dao->set(
+                $this->projectStructure[ 'id_project' ],
+                'deepl_formality',
+                $this->projectStructure[ 'deepl_formality' ]
+            );
+        }
+
+        if( $this->projectStructure[ 'deepl_id_glossary' ] and !empty( $this->projectStructure[ 'deepl_id_glossary' ] ) ){
+            $dao->set(
+                $this->projectStructure[ 'id_project' ],
+                'deepl_id_glossary',
+                $this->projectStructure[ 'deepl_id_glossary' ]
+            );
+        }
+
     }
 
     private function sanitizeProjectOptions( $options ) {
@@ -1864,7 +1892,8 @@ class ProjectManager {
                             //mrk in the list will not be too!!!
                             $show_in_cattool = 1;
 
-                            $wordCount = CatUtils::segment_raw_word_count( $seg_source[ 'raw-content' ], $this->projectStructure[ 'source_language' ], $this->filter, true );
+                            $wordCount = CatUtils::segment_raw_word_count( $seg_source[ 'raw-content' ], $this->projectStructure[ 'source_language' ], $this->filter );
+                            $wordCount = $this->features->filter( 'wordCount', $wordCount );
 
                             //init tags
                             $seg_source[ 'mrk-ext-prec-tags' ] = '';
@@ -2631,33 +2660,12 @@ class ProjectManager {
                 $source = $segment->segment;
                 $target = $translation_row [ 2 ];
 
-                //
-                // NOTE 2021-12-20
-                // ------------------------------------------------------
-                // In order to perform an integrity check
-                // we need to transform source and target to layer1
-                // This piece of code mimics setTranslationController (from line 322 to 341)
-
-                /** @var MateCatFilter filter */
+                /** @var $filter MateCatFilter filter */
                 $filter = MateCatFilter::getInstance( $this->features, $chunk->source, $chunk->target, Segments_SegmentOriginalDataDao::getSegmentDataRefMap( $translation_row [ 0 ] ) );
                 $source = $filter->fromLayer0ToLayer1( $source );
                 $target = $filter->fromLayer0ToLayer1( $target );
 
-                $pipeline = new Pipeline( $chunk->source, $chunk->target );
-                $counter  = new PhCounter();
-                $counter->transform( $target );
-
-                for ( $i = 0; $i < $counter->getCount(); $i++ ) {
-                    $pipeline->getNextId();
-                }
-
-                $pipeline->addLast( new FromViewNBSPToSpaces() );
-                $pipeline->addLast( new SprintfToPH() );
-
-                $src = $pipeline->transform( $source );
-                $trg = $pipeline->transform( $target );
-
-                $check = new QA( $src, $trg );
+                $check = new QA( $source, $target );
                 $check->setFeatureSet( $this->features );
                 $check->setSourceSegLang( $chunk->source );
                 $check->setTargetSegLang( $chunk->target );

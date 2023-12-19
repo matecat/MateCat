@@ -3,6 +3,29 @@
 .translation-memory-glossary-tab {
   display: flex;
   flex-direction: column;
+
+  .confirm-button {
+    height: 26px;
+    font-size: 14px !important;
+    min-width: unset;
+    gap: 5px !important;
+    margin: 0 !important;
+    padding: 0 8px;
+    border-radius: unset;
+  }
+
+  .close-button {
+    width: 30px;
+    height: 26px !important;
+    padding: 0 !important;
+    display: flex !important;
+    justify-content: center !important;
+    border-radius: unset;
+  }
+
+  button {
+    line-height: 1;
+  }
 }
 
 .translation-memory-glossary-tab-pre-translate {
@@ -155,15 +178,6 @@
     > form {
       padding: 0 !important;
     }
-  }
-}
-
-.tm-key-small-row-button {
-  height: 32px;
-  margin: 0 !important;
-
-  &:last-child {
-    padding: 0 8px;
   }
 }
 

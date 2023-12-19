@@ -9,7 +9,6 @@ import SegmentActions from '../../../actions/SegmentActions'
 import SegmentStore from '../../../stores/SegmentStore'
 import {getContributions} from '../../../api/getContributions'
 import {deleteContribution} from '../../../api/deleteContribution'
-import TagUtils from '../../../utils/tagUtils'
 
 let TranslationMatches = {
   copySuggestionInEditarea: function (segment, index, translation) {
@@ -19,10 +18,7 @@ let TranslationMatches = {
     translation = translation ? translation : matchToUse.translation
     var percentageClass = this.getPercentuageClass(matchToUse.match)
     if ($.trim(translation) !== '') {
-      SegmentActions.replaceEditAreaTextContent(
-        segment.sid,
-        TagUtils.transformTextFromBe(translation),
-      )
+      SegmentActions.replaceEditAreaTextContent(segment.sid, translation)
       SegmentActions.setHeaderPercentage(
         segment.sid,
         segment.id_file,
@@ -80,7 +76,7 @@ let TranslationMatches = {
         translation = currentContribution.translation
         if (SegmentUtils.checkCurrentSegmentTPEnabled(segmentObj)) {
           if (parseInt(match) !== 100) {
-            translation = DraftMatecatUtils.cleanSegmentString(translation)
+            translation = DraftMatecatUtils.removeTagsFromText(translation)
           } else {
             SegmentActions.disableTPOnSegment(segmentObj)
           }

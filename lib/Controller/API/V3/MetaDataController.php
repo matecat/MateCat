@@ -47,7 +47,7 @@ class MetaDataController extends BaseChunkController {
 
         foreach ( $project->getMetadata() as $metadatum ) {
             $key = $metadatum->key;
-            $metadata->$key = $metadatum->value;
+            $metadata->$key = $metadatum->getValue();
         }
 
         return $metadata;
