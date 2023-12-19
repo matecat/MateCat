@@ -1,5 +1,7 @@
 import React, {useContext} from 'react'
+import PropTypes from 'prop-types'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
+import Trash from '../../../../../../../img/icons/Trash'
 
 export const MTRow = ({row, deleteMT, onCheckboxClick}) => {
   const {activeMTEngine} = useContext(SettingsPanelContext)
@@ -46,7 +48,8 @@ export const MTRow = ({row, deleteMT, onCheckboxClick}) => {
       )}
       {!row.default && !config.is_cattool && (
         <div className="settings-panel-cell-center">
-          <button className="settings-panel-button" onClick={deleteMT}>
+          <button className="grey-button" onClick={deleteMT}>
+            <Trash size={12} />
             Delete
           </button>
         </div>
@@ -59,4 +62,10 @@ export const MTRow = ({row, deleteMT, onCheckboxClick}) => {
       )}
     </>
   )
+}
+
+MTRow.propTypes = {
+  row: PropTypes.object.isRequired,
+  deleteMT: PropTypes.func,
+  onCheckboxClick: PropTypes.func,
 }
