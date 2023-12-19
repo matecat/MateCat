@@ -4,7 +4,7 @@
  * @author domenico domenico@translated.net / ostico@gmail.com
  * Date: 09/10/14
  * Time: 12.43
- * 
+ *
  */
 
 /**
@@ -57,9 +57,9 @@ class TmKeyManagement_Filter {
      * @var array
      */
     public static $GRANTS_MAP = array(
-            self::ROLE_TRANSLATOR => array( "r" => 'r_transl', "w" => 'w_transl' ),
-            self::ROLE_REVISOR    => array( "r" => 'r_rev', "w" => 'w_rev' ),
-            self::OWNER           => array( 'r' => 'r', 'w' => 'w' )
+        self::ROLE_TRANSLATOR => array( "r" => 'r_transl', "w" => 'w_transl' ),
+        self::ROLE_REVISOR    => array( "r" => 'r_rev', "w" => 'w_rev' ),
+        self::OWNER           => array( 'r' => 'r', 'w' => 'w' )
     );
 
     /**
@@ -97,21 +97,19 @@ class TmKeyManagement_Filter {
          *      WARNING: Undefined index: uid_transl
          */
         $i_can_see_the_key = false;
-        if( array_key_exists( 'uid_transl', $tm_key ) ){ // this is a new key type
 
-//            if( is_null( $tm_key[ 'uid_transl' ] ) && is_null( $tm_key[ 'uid_rev' ] ) ){
-//                //this is an owner key or anonymous one, so i can use it
-//                $i_can_see_the_key = true;
-//            } else {
-                //it's mine???
-                $i_can_see_the_key = $this->__uid == $tm_key[ 'uid_transl' ];
-//            }
-
+        //it's mine???
+        // - if you're not anonymous
+        // - o se la chiave è owner E SEI l'owner
+        // - oppure se la chiave appartiene all'utente
+        //
+        if( !empty( $this->__uid ) && ( !empty($tm_key[ 'uid_transl' ]) ) ){
+            $i_can_see_the_key = $this->__uid == $tm_key[ 'uid_transl' ];
         }
 
         return ( $is_an_owner_key || $i_can_see_the_key )
-                && $this->_hasRightGrants( $tm_key, $role )
-                && $this->_isTheRightType( $tm_key );
+            && $this->_hasRightGrants( $tm_key, $role )
+            && $this->_isTheRightType( $tm_key );
     }
 
     /**
@@ -147,8 +145,8 @@ class TmKeyManagement_Filter {
         }
 
         return ( $is_an_owner_key || $i_can_see_the_key )
-                && $this->_hasRightGrants( $tm_key, $role )
-                && $this->_isTheRightType( $tm_key );
+            && $this->_hasRightGrants( $tm_key, $role )
+            && $this->_isTheRightType( $tm_key );
     }
 
     /**
@@ -160,8 +158,8 @@ class TmKeyManagement_Filter {
      */
     public function byOwner( $tm_key ){
         return ( $tm_key[ self::OWNER ] == true )
-                && $this->_hasRightGrants( $tm_key, self::OWNER )
-                && $this->_isTheRightType( $tm_key );
+            && $this->_hasRightGrants( $tm_key, self::OWNER )
+            && $this->_isTheRightType( $tm_key );
     }
 
     /**
@@ -273,4 +271,4 @@ class TmKeyManagement_Filter {
 
     }
 
-} 
+}

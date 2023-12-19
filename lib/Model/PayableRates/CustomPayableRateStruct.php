@@ -11,6 +11,8 @@ use Utils;
 
 class CustomPayableRateStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct, \JsonSerializable
 {
+    const MAX_BREAKDOWN_SIZE = 65535;
+
     public $id;
     public $uid;
     public $version;
@@ -82,7 +84,7 @@ class CustomPayableRateStruct extends DataAccess_AbstractDaoSilentStruct impleme
             !isset($json['payable_rate_template_name']) and
             !isset($json['breakdowns'])
         ){
-            throw new \Exception("Cannot instantiate a new CustomPayableRateStruct. Invalid JSON provided.");
+            throw new \Exception("Cannot instantiate a new CustomPayableRateStruct. Invalid JSON provided.", 403);
         }
 
         $this->validateBreakdowns($json['breakdowns']);
@@ -99,11 +101,18 @@ class CustomPayableRateStruct extends DataAccess_AbstractDaoSilentStruct impleme
 
     /**
      * @param $breakdowns
+     * @throws \Exception
      */
     private function validateBreakdowns($breakdowns)
     {
+        $size = mb_strlen(json_encode($breakdowns, JSON_NUMERIC_CHECK), '8bit');
+
+        if($size > self::MAX_BREAKDOWN_SIZE){
+            throw new \Exception('`breakdowns` string is too large. Max size: 64kb');
+        }
+
         if(!isset($breakdowns['default'])){
-            throw new \DomainException('`default` node is MANDATORY in the breakdowns array.');
+            throw new \DomainException('`default` node is MANDATORY in the breakdowns array.', 403);
         }
 
         unset($breakdowns['default']);
@@ -127,7 +136,7 @@ class CustomPayableRateStruct extends DataAccess_AbstractDaoSilentStruct impleme
         $format = (strlen($lang) > 3) ? 'rfc3066code' : 'isocode';
 
         if(!Utils::isValidLanguage($lang, $format)){
-            throw new \DomainException($lang . ' is not a supported language');
+            throw new \DomainException($lang . ' is not a supported language', 403);
         }
     }
 

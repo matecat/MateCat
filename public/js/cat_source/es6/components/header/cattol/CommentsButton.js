@@ -10,7 +10,7 @@ import SegmentActions from '../../../actions/SegmentActions'
 import {getTeamUsers} from '../../../api/getTeamUsers'
 
 const commentsTypes = {sticky: 3, resolve: 2, comment: 1}
-export const CommentsButton = ({teams}) => {
+export const CommentsButton = ({}) => {
   const [teamUsers, setTeamUsers] = useState([])
   const [comments, setComments] = useState([])
   const [counterOpenComments, setCounterOpenComments] = useState(0)
@@ -105,12 +105,17 @@ export const CommentsButton = ({teams}) => {
     })
   }
   useEffect(() => {
+    getTeamUsers({teamId: config.id_team}).then((data) => {
+      CommentsActions.updateTeamUsers(data)
+    })
     const close = () => setShowComments(false)
     const openMenu = () => setShowComments(true)
+    const setUsers = (users) => setTeamUsers(users)
     loadCommentData()
     CommentsStore.addListener(CommentsConstants.DELETE_COMMENT, updateComments)
     CommentsStore.addListener(CommentsConstants.ADD_COMMENT, updateComments)
     CommentsStore.addListener(CommentsConstants.OPEN_MENU, openMenu)
+    CommentsStore.addListener(CommentsConstants.SET_TEAM_USERS, setUsers)
     CatToolStore.addListener(CattolConstants.CLOSE_SUBHEADER, close)
     return () => {
       CommentsStore.removeListener(
@@ -123,31 +128,10 @@ export const CommentsButton = ({teams}) => {
       )
       CatToolStore.removeListener(CattolConstants.CLOSE_SUBHEADER, close)
       CatToolStore.removeListener(CattolConstants.OPEN_MENU, openMenu)
+      CommentsStore.removeListener(CommentsConstants.SET_TEAM_USERS, setUsers)
     }
   }, [])
-  useEffect(() => {
-    const team = teams.find((t) => t.id === config.id_team)
-    if (team) {
-      const members = team.members.map((m) => m.user)
-      const teamTemp = {
-        uid: 'team',
-        first_name: 'Team',
-        last_name: '',
-      }
-      setTeamUsers([...members, teamTemp])
-      CommentsActions.updateTeamUsers([
-        ...team.members.map((m) => m.user),
-        teamTemp,
-      ])
-    } else {
-      if (config.id_team) {
-        getTeamUsers({teamId: config.id_team}).then((data) => {
-          setTeamUsers(data)
-          CommentsActions.updateTeamUsers(data)
-        })
-      }
-    }
-  }, [teams])
+
   useEffect(() => {
     setCounterOpenComments(CommentsStore.db.getOpenedThreadCount())
     setCounterResolvedComments(CommentsStore.db.getResolvedThreadCount())

@@ -545,66 +545,26 @@ class TmKeyManagement_TmKeyManagement {
     }
 
     /**
-     * Removes a tm key from an array of tm keys for a specific user type. <br/>
-     * If the tm key is still linked to some other user, the result will be the same input array,
-     * except for the tm key wo be removed, whose attributes are properly changed according to the user that wanted to
-     * remove it.<br/>
-     * If user type is wrong, this function will return the input array.
-     *
-     * @param array                       $tmKey_arr
-     * @param TmKeyManagement_TmKeyStruct $newTmKey
-     * @param string                      $user_role
-     *
-     * @return array
+     * @param TmKeyManagement_TmKeyStruct[] $tm_keys
+     * @param $userEmail
+     * @param $jobOwnerEmail
+     * @return TmKeyManagement_TmKeyStruct[]
      */
-    public static function deleteTmKey( Array $tmKey_arr, TmKeyManagement_TmKeyStruct $newTmKey, $user_role = TmKeyManagement_Filter::OWNER ) {
-        $result = array();
+    public static function filterOutByOwnership(Array $tm_keys, $userEmail, $jobOwnerEmail)
+    {
 
-        foreach ( $tmKey_arr as $i => $curr_tm_key ) {
-            /**
-             * @var $curr_tm_key TmKeyManagement_TmKeyStruct
-             */
-            if ( $curr_tm_key->key == $newTmKey->key ) {
-                switch ( $user_role ) {
+        foreach ($tm_keys as $k => $tm_key) {
 
-                    case TmKeyManagement_Filter::ROLE_TRANSLATOR:
-                        $curr_tm_key->uid_transl = null;
-                        $curr_tm_key->r_transl   = null;
-                        $curr_tm_key->w_transl   = null;
-                        break;
-
-                    case TmKeyManagement_Filter::ROLE_REVISOR:
-                        $curr_tm_key->uid_rev = null;
-                        $curr_tm_key->r_rev   = null;
-                        $curr_tm_key->w_rev   = null;
-                        break;
-
-                    case TmKeyManagement_Filter::OWNER:
-                        $curr_tm_key->owner = false;
-                        $curr_tm_key->r     = null;
-                        $curr_tm_key->w     = null;
-                        break;
-
-                    case null:
-                        break;
-
-                    default:
-                        break;
-                }
-
-                //if the key is still linked to someone, add it to the result.
-                if ( $curr_tm_key->owner ||
-                    !is_null( $curr_tm_key->uid_transl ) ||
-                    !is_null( $curr_tm_key->uid_rev )
-                ) {
-                    $result[ ] = $curr_tm_key;
-                }
-            } else {
-                $result[ ] = $curr_tm_key;
+            if ($userEmail != $jobOwnerEmail && $tm_key->owner) {
+                unset($tm_keys[$k]);
+            } elseif ($userEmail == $jobOwnerEmail && !$tm_key->owner) {
+                unset($tm_keys[$k]);
             }
+
         }
 
-        return $result;
+        return $tm_keys;
+
     }
 
     /**

@@ -634,4 +634,33 @@ String.prototype.splice = function (idx, rem, s) {
   return this.slice(0, idx) + s + this.slice(idx + Math.abs(rem))
 }
 
+class DetectTripleClick {
+  constructor(target, callback) {
+    this.tmOut
+    this.count = 0
+    this.callback = callback
+    target.addEventListener('mousedown', this.handler)
+  }
+
+  handler = () => {
+    this.count++
+
+    if (this.count == 3) {
+      this.callback()
+      this.reset()
+      return
+    }
+
+    clearTimeout(this.tmOut)
+    this.tmOut = setTimeout(() => this.reset(), 500)
+  }
+
+  reset() {
+    clearTimeout(this.tmOut)
+    this.count = 0
+  }
+}
+
+CommonUtils.DetectTripleClick = DetectTripleClick
+
 export default CommonUtils
