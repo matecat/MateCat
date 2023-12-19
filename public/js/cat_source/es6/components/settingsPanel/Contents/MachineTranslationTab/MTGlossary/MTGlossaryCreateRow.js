@@ -1,11 +1,11 @@
 import React, {useContext, useEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
-import Upload from '../../../../../../../img/icons/Upload'
-import Checkmark from '../../../../../../../img/icons/Checkmark'
-import Close from '../../../../../../../img/icons/Close'
+import Upload from '../../../../../../../../img/icons/Upload'
+import Checkmark from '../../../../../../../../img/icons/Checkmark'
+import Close from '../../../../../../../../img/icons/Close'
 import {MTGlossaryStatus, MT_GLOSSARY_CREATE_ROW_ID} from './MTGlossary'
-import {MachineTranslationTabContext} from './'
-import {createMemoryAndImportGlossary} from '../../../../api/createMemoryAndImportGlossary/createMemoryAndImportGlossary'
+import {MachineTranslationTabContext} from '..'
+import {createMemoryAndImportGlossary} from '../../../../../api/createMemoryAndImportGlossary/createMemoryAndImportGlossary'
 
 export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
   const {setNotification} = useContext(MachineTranslationTabContext)

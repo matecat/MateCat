@@ -7,17 +7,17 @@ import React, {
   useState,
 } from 'react'
 import PropTypes from 'prop-types'
-import Upload from '../../../../../../../img/icons/Upload'
-import Trash from '../../../../../../../img/icons/Trash'
-import {deleteMemoryGlossary} from '../../../../api/deleteMemoryGlossary/deleteMemoryGlossary'
-import {MachineTranslationTabContext} from './MachineTranslationTab'
+import Upload from '../../../../../../../../img/icons/Upload'
+import Trash from '../../../../../../../../img/icons/Trash'
+import {deleteMemoryGlossary} from '../../../../../api/deleteMemoryGlossary/deleteMemoryGlossary'
+import {MachineTranslationTabContext} from '../MachineTranslationTab'
 import {MTGlossaryStatus} from './MTGlossary'
-import {importMemoryGlossary} from '../../../../api/importMemoryGlossary/importMemoryGlossary'
-import {updateMemoryGlossary} from '../../../../api/updateMemoryGlossary/updateMemoryGlossary'
-import IconEdit from '../../../icons/IconEdit'
-import Checkmark from '../../../../../../../img/icons/Checkmark'
-import Close from '../../../../../../../img/icons/Close'
-import LabelWithTooltip from '../../../common/LabelWithTooltip'
+import {importMemoryGlossary} from '../../../../../api/importMemoryGlossary/importMemoryGlossary'
+import {updateMemoryGlossary} from '../../../../../api/updateMemoryGlossary/updateMemoryGlossary'
+import IconEdit from '../../../../icons/IconEdit'
+import Checkmark from '../../../../../../../../img/icons/Checkmark'
+import Close from '../../../../../../../../img/icons/Close'
+import LabelWithTooltip from '../../../../common/LabelWithTooltip'
 
 export const MTGlossaryRow = ({engineId, row, setRows, isReadOnly}) => {
   const {setNotification} = useContext(MachineTranslationTabContext)
