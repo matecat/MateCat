@@ -406,13 +406,13 @@ const NewProject = ({
   useEffect(() => {
     if (sourceLang) {
       const lang = sourceLang.id
-      if (localStorage.getItem('currentSourceLang') != lang) {
+      if (lang && localStorage.getItem('currentSourceLang') !== lang) {
         localStorage.setItem('currentSourceLang', lang)
       }
     }
     if (targetLangs) {
       const lang = targetLangs.map((lang) => lang.id).join()
-      if (localStorage.getItem('currentTargetLang') != lang) {
+      if (lang && localStorage.getItem('currentTargetLang') !== lang) {
         localStorage.setItem('currentTargetLang', lang)
       }
     }
