@@ -643,7 +643,7 @@ class NewController extends ajaxController {
         }
 
         // mmtGlossaries
-        if( $this->mt_engine instanceof Engines_MMT and $this->mmtGlossaries ){
+        if( $this->mmtGlossaries ){
             $projectStructure[ 'mmt_glossaries' ] = $this->mmtGlossaries;
         }
 
@@ -1181,7 +1181,7 @@ class NewController extends ajaxController {
 
         // any other engine than MyMemory
         if($this->postInput[ 'mt_engine' ] and $this->postInput[ 'mt_engine' ] > 1){
-            $this->mt_engine = EngineValidator::engineBelongsToUser($this->postInput[ 'mt_engine' ], $this->user->uid);
+            EngineValidator::engineBelongsToUser($this->postInput[ 'mt_engine' ], $this->user->uid);
         }
     }
 

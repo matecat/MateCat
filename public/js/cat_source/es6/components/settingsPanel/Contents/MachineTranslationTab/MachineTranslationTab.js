@@ -77,11 +77,15 @@ export const MachineTranslationTab = () => {
         const {data} = response
         setAddMTVisible(false)
         setError()
+
         if (data.id) {
           const newMT = {
             name: data.name,
-            id: parseInt(response.data.id),
-            description: activeAddEngine.name,
+            id: parseInt(data.id),
+            type: data.type,
+            description: data.description
+              ? data.description
+              : activeAddEngine.name,
           }
           setMtEngines((prevStateMT) => {
             return [newMT, ...prevStateMT]
@@ -237,7 +241,7 @@ export const MachineTranslationTab = () => {
                       ),
                       isDraggable: false,
                       isActive: true,
-                      ...(activeMTEngine.type === 'MT' && {
+                      ...(activeMTEngine.name === 'ModernMT' && {
                         isExpanded: true,
                         extraNode: (
                           <MTGlossary

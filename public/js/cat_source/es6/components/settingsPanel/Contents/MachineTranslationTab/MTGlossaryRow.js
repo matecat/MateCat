@@ -17,6 +17,7 @@ import {updateMemoryGlossary} from '../../../../api/updateMemoryGlossary/updateM
 import IconEdit from '../../../icons/IconEdit'
 import Checkmark from '../../../../../../../img/icons/Checkmark'
 import Close from '../../../../../../../img/icons/Close'
+import LabelWithTooltip from '../../../common/LabelWithTooltip'
 
 export const MTGlossaryRow = ({engineId, row, setRows, isReadOnly}) => {
   const {setNotification} = useContext(MachineTranslationTabContext)
@@ -37,14 +38,14 @@ export const MTGlossaryRow = ({engineId, row, setRows, isReadOnly}) => {
     const dispatchSuccessfullImportNotification = () => {
       setNotification({
         type: 'success',
-        message: 'Glossary import successfully',
+        message: `Glossary file ${file.name} imported successfully`,
       })
       setIsWaitingResult(false)
     }
     const dispatchErrorImportNotification = () => {
       setNotification({
         type: 'error',
-        message: 'Glossary import error',
+        message: `Glossary file ${file.name} import error`,
       })
       setIsWaitingResult(false)
     }
@@ -94,23 +95,27 @@ export const MTGlossaryRow = ({engineId, row, setRows, isReadOnly}) => {
   }
 
   const updateKeyName = () => {
-    updateMemoryGlossary({engineId, memoryId: row.id, name})
-      .then((data) => {
-        setRows((prevState) =>
-          prevState.map((glossary) =>
-            glossary.id === row.id
-              ? {
-                  ...glossary,
-                  name: data.name,
-                }
-              : glossary,
-          ),
-        )
-        setIsEditingName(false)
-      })
-      .catch(() => {
-        setName(row.name)
-      })
+    if (name) {
+      updateMemoryGlossary({engineId, memoryId: row.id, name})
+        .then((data) => {
+          setRows((prevState) =>
+            prevState.map((glossary) =>
+              glossary.id === row.id
+                ? {
+                    ...glossary,
+                    name: data.name,
+                  }
+                : glossary,
+            ),
+          )
+          setIsEditingName(false)
+        })
+        .catch(() => {
+          setName(row.name)
+        })
+    } else {
+      setName(row.name)
+    }
   }
 
   const onChangeFile = (e) => {
@@ -143,23 +148,33 @@ export const MTGlossaryRow = ({engineId, row, setRows, isReadOnly}) => {
   ) : (
     <div className="editing-buttons">
       <button
-        className="ui primary button settings-panel-button-icon small-row-button"
+        className="ui primary button settings-panel-button-icon confirm-button"
+        disabled={!name}
         onClick={updateKeyName}
       >
-        <Checkmark size={14} />
+        <Checkmark size={12} />
         Confirm
       </button>
       <button
-        className="ui button orange small-row-button"
+        className="ui button orange close-button"
         onClick={() => {
           setIsEditingName(false)
           setName(row.name)
         }}
       >
-        <Close size={20} />
+        <Close size={18} />
       </button>
     </div>
   )
+
+  const setInputNameContainer = (children) =>
+    !isEditingName ? (
+      <LabelWithTooltip className="tooltip-input-name">
+        {children}
+      </LabelWithTooltip>
+    ) : (
+      <div className="tooltip-input-name">{children}</div>
+    )
 
   return (
     <Fragment>
@@ -172,13 +187,17 @@ export const MTGlossaryRow = ({engineId, row, setRows, isReadOnly}) => {
         />
       </div>
       <div className="glossary-row-name">
-        <input
-          ref={inputNameRef}
-          className={`glossary-row-name-input${isEditingName ? ' active' : ''}`}
-          value={name}
-          onChange={onChangeName}
-          disabled={!isEditingName || isReadOnly}
-        />
+        {setInputNameContainer(
+          <input
+            ref={inputNameRef}
+            className={`glossary-row-name-input${
+              isEditingName ? ' active' : ''
+            }`}
+            value={name}
+            onChange={onChangeName}
+            disabled={!isEditingName || isReadOnly}
+          />,
+        )}
         {!isReadOnly && editingNameButtons}
       </div>
       {!isReadOnly && (
@@ -193,8 +212,8 @@ export const MTGlossaryRow = ({engineId, row, setRows, isReadOnly}) => {
               disabled={isWaitingResult}
             />
             <label htmlFor={`file-import${row.id}`} className="grey-button">
-              <Upload size={14} />
-              Import from glossary
+              <Upload size={12} />
+              Update
             </label>
           </div>
           <div className="glossary-row-delete">
@@ -203,7 +222,7 @@ export const MTGlossaryRow = ({engineId, row, setRows, isReadOnly}) => {
               disabled={isWaitingResult}
               onClick={deleteGlossary}
             >
-              <Trash size={14} />
+              <Trash size={12} />
             </button>
           </div>
           {isWaitingResult && <div className="spinner"></div>}

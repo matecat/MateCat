@@ -83,20 +83,20 @@ export const ImportGlossary = ({row, onClose}) => {
           {files.length > 0 && (
             <button
               type="submit"
-              className="ui primary button settings-panel-button-icon tm-key-small-row-button"
+              className="ui primary button settings-panel-button-icon confirm-button"
               disabled={isFormDisabled || isErrorUpload}
             >
-              <Checkmark size={16} />
+              <Checkmark size={12} />
               Confirm
             </button>
           )}
 
           <button
             type="reset"
-            className="ui button orange tm-key-small-row-button"
+            className="ui button orange close-button"
             disabled={isFormDisabled}
           >
-            <Close />
+            <Close size={18} />
           </button>
         </div>
       </form>

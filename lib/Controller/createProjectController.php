@@ -11,9 +11,9 @@ use Validator\MMTValidator;
 
 class createProjectController extends ajaxController {
 
+    private $mmt_glossaries;
     private $deepl_id_glossary;
     private $deepl_formality;
-    private $mmt_glossaries;
     private $file_name;
     private $project_name;
     private $source_lang;
