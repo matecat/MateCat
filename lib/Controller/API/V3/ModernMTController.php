@@ -103,7 +103,7 @@ class ModernMTController extends BaseChunkController
             $glossary = $this->extractCSV($uploadedFiles->glossary);
 
             // validate
-            $csv = CSVParser::parse($glossary);
+            $csv = CSVParser::parseToArray($glossary);
 
             if(empty($csv)){
                 throw new Exception("Glossary is empty", 400);
@@ -231,7 +231,7 @@ class ModernMTController extends BaseChunkController
             $glossary = $this->extractCSV($uploadedFiles->glossary);
 
             // validate
-            $csv = CSVParser::parse($glossary);
+            $csv = CSVParser::parseToArray($glossary);
 
             if(empty($csv)){
                 throw new Exception("Glossary is empty", 400);

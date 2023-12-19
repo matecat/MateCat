@@ -65,8 +65,8 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
     activeMTEngine.mtGlossaryProps?.isOpened ?? false,
   )
   const [rows, setRows] = useState()
-  const [isGlossaryCaseInsensitive, setIsGlossaryCaseInsensitive] = useState(
-    activeMTEngine.mtGlossaryProps?.isGlossaryCaseInsensitive ?? false,
+  const [isGlossaryCaseSensitive, setIsGlossaryCaseSensitive] = useState(
+    activeMTEngine.mtGlossaryProps?.isGlossaryCaseSensitive ?? false,
   )
 
   const activeGlossariesRef = useRef()
@@ -160,10 +160,10 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
       mtGlossaryProps: {
         ...prevState.mtGlossaryProps,
         glossaries: rows.filter(({isActive}) => isActive).map(({id}) => id),
-        isGlossaryCaseInsensitive,
+        isGlossaryCaseSensitive,
       },
     }))
-  }, [rows, isGlossaryCaseInsensitive, isCattoolPage, setActiveMTEngine])
+  }, [rows, isGlossaryCaseSensitive, isCattoolPage, setActiveMTEngine])
 
   const addGlossary = () => {
     const row = {
@@ -192,7 +192,7 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
   }
 
   const onChangeCaseSensitive = (e) =>
-    setIsGlossaryCaseInsensitive(e.currentTarget.checked)
+    setIsGlossaryCaseSensitive(e.currentTarget.checked)
 
   const haveRecords = rows?.length > 0
 
@@ -229,7 +229,7 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
                 </button>
                 <div className="mt-glossary-case-sensitive">
                   <input
-                    checked={isGlossaryCaseInsensitive}
+                    checked={isGlossaryCaseSensitive}
                     onChange={onChangeCaseSensitive}
                     type="checkbox"
                     title=""
