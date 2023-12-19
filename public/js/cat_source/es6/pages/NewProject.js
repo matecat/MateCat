@@ -211,7 +211,7 @@ const NewProject = ({
       ...(mtGlossaryProps?.glossaries.length && {
         mmt_glossaries: JSON.stringify({
           glossaries: mtGlossaryProps.glossaries,
-          ignore_glossary_case: mtGlossaryProps.isGlossaryCaseInsensitive,
+          ignore_glossary_case: !mtGlossaryProps.isGlossaryCaseSensitive,
         }),
       }),
     })
