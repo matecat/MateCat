@@ -13,15 +13,45 @@
  */
 
 const tagSignatures = {
+  // ph1: {
+  //   type: 'ph',
+  //   regex: /&lt;ph.*?id="((?:(?!dataRef|equiv-text|subType|type|&gt).)+?)"\s(dataRef=")*((?:(?!equiv-text|&gt;).)+?)"\sequiv-text="base64:((?:(?!&gt;).)+?)"\/&gt;/gi,
+  //   selfClosing: true,
+  //   isClosure: false,
+  //   placeholder: null,
+  //   placeholderRegex: /&lt;ph.*?id="(?:(?:(?!dataRef|equiv-text|subType|type|&gt).)+?)"\s(?:(?:(?!equiv-text|&gt;).)+?)"\sequiv-text="base64:((?:(?!&gt;).)+?)"\/&gt;/,
+  //   decodeNeeded: true,
+  //   errorCheckAvailable: true,
+  //   lexiqaAvailable: false,
+  //   glossaryAvailable: false,
+  //   style: 'tag-selfclosed tag-ph',
+  //   showTooltip: true,
+  //   replaceForLexiqa: false,
+  // },
+  // ph2: {
+  //   type: 'ph',
+  //   regex: /&lt;ph\sid="((?:(?!&gt;|equiv-text|dataRef).)+?)"\sdataRef="((?:(?!&gt;|equiv-text).)+?)"\/&gt;/gi,
+  //   selfClosing: true,
+  //   isClosure: false,
+  //   placeholder: null,
+  //   placeholderRegex: /&lt;ph\sid="(?:(?:(?!dataRef|equiv-text|&gt;).)+?)"\sdataRef="((?:(?!&gt;|equiv-text).)+?)"\/&gt;/,
+  //   decodeNeeded: false,
+  //   errorCheckAvailable: true,
+  //   lexiqaAvailable: false,
+  //   glossaryAvailable: false,
+  //   style: 'tag-selfclosed tag-ph',
+  //   showTooltip: true,
+  //   replaceForLexiqa: false,
+  // },
   ph: {
     type: 'ph',
     regex:
-      /<ph(?:(?:(?!id).)*?)id="(?:[^"].*?)"(?:(?:(?!equiv-text).)*?)equiv-text="base64:((?:(?!>).)*?)"\/>/g,
+      /&lt;ph(?:(?:(?!id).)*?)id="(?:[^"].*?)"(?:(?:(?!equiv-text).)*?)equiv-text="base64:((?:(?!&gt;).)*?)"\/&gt;/g,
     selfClosing: true,
     isClosure: false,
     placeholder: null,
     placeholderRegex:
-      /<ph(?:(?:(?!id).)*?)id="(?:[^"].*?)"(?:(?:(?!equiv-text).)*?)equiv-text="base64:((?:(?!>).)*?)"\/>/,
+      /&lt;ph(?:(?:(?!id).)*?)id="(?:[^"].*?)"(?:(?:(?!equiv-text).)*?)equiv-text="base64:((?:(?!&gt;).)*?)"\/&gt;/,
     decodeNeeded: true,
     errorCheckAvailable: true,
     lexiqaAvailable: false,
@@ -32,12 +62,11 @@ const tagSignatures = {
   },
   g: {
     type: 'g',
-    regex: /<g .*?\bid="(.*?)".*?>/g,
-    // regex: /<g[^>]+?id="([^"]+)".*?>/g,
+    regex: /&lt;g[^&]*id="(.*?)".*?&gt;/g,
     selfClosing: false,
     isClosure: false,
     placeholder: null,
-    placeholderRegex: /<g .*?\bid="(.*?)".*?>/,
+    placeholderRegex: /&lt;g .*?\bid="(.*?)".*?&gt;/,
     decodeNeeded: false,
     errorCheckAvailable: true,
     lexiqaAvailable: false,
@@ -49,7 +78,7 @@ const tagSignatures = {
   },
   gCl: {
     type: 'g',
-    regex: /<(\/g)>/g,
+    regex: /&lt;(\/g)&gt;/g,
     selfClosing: false,
     isClosure: true,
     placeholder: '</g>',
@@ -65,11 +94,11 @@ const tagSignatures = {
   },
   bx: {
     type: 'bx',
-    regex: /<bx .*?id="(.*?)".*?\/>/g,
+    regex: /&lt;bx[^&]*id="(.*?)".*?\/&gt;/g,
     selfClosing: true,
     isClosure: false,
     placeholder: null,
-    placeholderRegex: /<bx .*?id="(.*?)".*?\/>/,
+    placeholderRegex: /&lt;bx .*?id="(.*?)".*?\/&gt;/,
     decodeNeeded: false,
     errorCheckAvailable: true,
     lexiqaAvailable: false,
@@ -80,11 +109,11 @@ const tagSignatures = {
   },
   ex: {
     type: 'ex',
-    regex: /<ex .*?id="(.*?)".*?\/>/g,
+    regex: /&lt;ex[^&]*id="(.*?)".*?\/&gt;/g,
     selfClosing: true,
     isClosure: false,
     placeholder: null,
-    placeholderRegex: /<ex .*?id="(.*?)".*?\/>/,
+    placeholderRegex: /&lt;ex .*?id="(.*?)".*?\/&gt;/,
     decodeNeeded: false,
     errorCheckAvailable: true,
     lexiqaAvailable: false,
@@ -95,11 +124,11 @@ const tagSignatures = {
   },
   x: {
     type: 'x',
-    regex: /<x .*?id="(.*?)".*?\/>/gi,
+    regex: /&lt;x[^&]*id="(.*?)".*?&gt;/gi,
     selfClosing: true,
     isClosure: false,
     placeholder: null,
-    placeholderRegex: /<x .*?id="(.*?)".*?\/>/,
+    placeholderRegex: /&lt;x .*?id="(.*?)".*?\/&gt;/,
     decodeNeeded: false,
     errorCheckAvailable: true,
     lexiqaAvailable: false,
@@ -139,8 +168,7 @@ const tagSignatures = {
     glossaryAvailable: false,
     style: 'tag-selfclosed tag-tab',
     showTooltip: false,
-    replaceForLexiqa: true,
-    lexiqaText: ' ',
+    replaceForLexiqa: false,
   },
   carriageReturn: {
     type: 'carriageReturn',
@@ -156,8 +184,7 @@ const tagSignatures = {
     glossaryAvailable: false,
     style: 'tag-selfclosed tag-cr',
     showTooltip: false,
-    replaceForLexiqa: true,
-    lexiqaText: '\n',
+    replaceForLexiqa: false,
   },
   lineFeed: {
     type: 'lineFeed',
@@ -173,8 +200,7 @@ const tagSignatures = {
     glossaryAvailable: false,
     style: 'tag-selfclosed tag-lf',
     showTooltip: false,
-    replaceForLexiqa: true,
-    lexiqaText: '\n',
+    replaceForLexiqa: false,
   },
   splitPoint: {
     type: 'splitpoint',
@@ -272,14 +298,10 @@ const getTooltipTag = () => {
   )
 }
 
-const getStyleForName = (tagName, isRtl) => {
+const getStyleForName = (tagName) => {
   return Object.keys(tagSignatures)
     .filter((tagKey) => tagKey === tagName)
-    .map((tagKey) =>
-      isRtl && tagSignatures[tagKey].styleRTL
-        ? tagSignatures[tagKey].styleRTL
-        : tagSignatures[tagKey].style,
-    )
+    .map((tagKey) => tagSignatures[tagKey].style)
 }
 
 const getCorrectClosureTag = (tagType) => {
@@ -310,7 +332,7 @@ const isToReplaceForLexiqa = (tagType, isClosure = false) => {
 }
 
 const getXliffRegExpression = () => {
-  return /(<\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*((?!&lt;|<).)*?>)/gim
+  return /(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*((?!&lt;|<).)*?&gt;)/gim
 }
 
 const getTagSignature = (tagType) => {

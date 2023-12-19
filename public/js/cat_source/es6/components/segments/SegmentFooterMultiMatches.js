@@ -2,12 +2,12 @@ import React from 'react'
 import Immutable from 'immutable'
 import {isUndefined} from 'lodash'
 
-import TagUtils from '../../utils/tagUtils'
 import TextUtils from '../../utils/textUtils'
 import TranslationMatches from './utils/translationMatches'
 import SegmentActions from '../../actions/SegmentActions'
 import {SegmentContext} from './SegmentContext'
 import {SegmentFooterTabError} from './SegmentFooterTabError'
+import DraftMatecatUtils from './utils/DraftMatecatUtils'
 
 class SegmentFooterMultiMatches extends React.Component {
   static contextType = SegmentContext
@@ -70,17 +70,15 @@ class SegmentFooterMultiMatches extends React.Component {
       // Attention Bug: We are mixing the view mode and the raw data mode.
       // before doing a enhanced  view you will need to add a data-original tag
       //
-      item.suggestionDecodedHtml = TagUtils.matchTag(
-        TagUtils.decodeHtmlInTag(
-          TagUtils.decodePlaceholdersToTextSimple(this.segment),
-        ),
+      item.suggestionDecodedHtml = DraftMatecatUtils.transformTagsToHtml(
+        this.segment,
+        config.isTargetRTL,
       )
-      item.translationDecodedHtml = TagUtils.matchTag(
-        TagUtils.decodeHtmlInTag(
-          TagUtils.decodePlaceholdersToTextSimple(this.translation),
-        ),
+      item.translationDecodedHtml = DraftMatecatUtils.transformTagsToHtml(
+        this.translation,
+        config.isTargetRTL,
       )
-      item.translation = TagUtils.transformTextFromBe(this.translation)
+      item.translation = this.translation
       item.sourceDiff = item.suggestionDecodedHtml
 
       if (
@@ -88,61 +86,14 @@ class SegmentFooterMultiMatches extends React.Component {
         parseInt(this.match) > 74 &&
         parseInt(this.match) < 100
       ) {
-        // Clean text without tag and create tagsMap to replace tag after exec_diff
-        const {text: matchDecoded, tagsMap: matchTagsMap} =
-          TagUtils.cleanTextFromTag(this.segment)
-        const {text: sourceDecoded} = TagUtils.cleanTextFromTag(
+        item.sourceDiff = TextUtils.getDiffHtml(
+          this.segment,
           self.props.segment.segment,
         )
-        let diff_obj = TextUtils.execDiff(matchDecoded, sourceDecoded)
 
-        let totalLength = 0
-        // --- Replace all mapped tags back inside the string
-        diff_obj.forEach((diffItem) => {
-          if (diffItem[0] <= 0) {
-            let includedTags = []
-            let newTotalLength = totalLength + diffItem[1].length
-            let firstLoopTotalLength = newTotalLength
-            // sort tags by offset because next check is executed consecutively
-            matchTagsMap.sort((a, b) => {
-              return a.offset - b.offset
-            })
-            // get every tag included inside the original string slice
-            matchTagsMap.forEach((tag) => {
-              // offset+1 is for prepended Unicode Character 'ZERO WIDTH SPACE'
-              if (
-                tag.offset + 1 <= firstLoopTotalLength &&
-                tag.offset + 1 >= firstLoopTotalLength - diffItem[1].length
-              ) {
-                // add tag reference to work array
-                includedTags.push(tag)
-                // add tag's length (tag.offset is computed on the dirty string with all tags)
-                firstLoopTotalLength += tag.match.length
-              }
-            })
-            includedTags.forEach((includedTag) => {
-              const relativeTagOffset =
-                diffItem[1].length - (newTotalLength - (includedTag.offset + 1))
-              const strBefore = diffItem[1].slice(0, relativeTagOffset)
-              const strAfter = diffItem[1].slice(relativeTagOffset)
-              // insert tag
-              const newString = strBefore + includedTag.match + strAfter
-              // update total parsed length of the temp string
-              newTotalLength += includedTag.match.length
-              // update item inside diff_obj
-              diffItem[1] = newString
-            })
-            // update total parsed length of the complete string
-            totalLength += diffItem[1].length
-          }
-        })
-
-        item.sourceDiff = TextUtils.diffMatchPatch.diff_prettyHtml(diff_obj)
-        item.sourceDiff = item.sourceDiff.replace(/&amp;/g, '&')
-        item.sourceDiff = TagUtils.matchTag(
-          TagUtils.decodeHtmlInTag(
-            TagUtils.decodePlaceholdersToTextSimple(item.sourceDiff),
-          ),
+        item.sourceDiff = DraftMatecatUtils.transformTagsToHtml(
+          item.sourceDiff,
+          config.isSourceRTL,
         )
       }
       if (!isUndefined(this.tm_properties)) {

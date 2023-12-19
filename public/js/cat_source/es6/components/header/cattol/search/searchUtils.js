@@ -11,7 +11,6 @@ import {replaceAllIntoSegments} from '../../../../api/replaceAllIntoSegments'
 import AlertModal from '../../../modals/AlertModal'
 import ModalsActions from '../../../../actions/ModalsActions'
 import {tagSignatures} from '../../../segments/utils/DraftMatecatUtils/tagModel'
-import TagUtils from '../../../../utils/tagUtils'
 
 let SearchUtils = {
   searchEnabled: true,
@@ -98,8 +97,8 @@ let SearchUtils = {
 
       searchTermIntoSegments({
         token: dd.getTime(),
-        source: TagUtils.prepareTextToSend(source),
-        target: TagUtils.prepareTextToSend(target),
+        source: source,
+        target: target,
         status: this.searchParams.status,
         matchcase: this.searchParams['match-case'],
         exactmatch: this.searchParams['exact-match'],

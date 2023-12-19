@@ -106,7 +106,7 @@ class CustomPayableRateDao extends DataAccess_AbstractDao
 
     /**
      * @param CustomPayableRateStruct $customPayableRateStruct
-     * @return int
+     * @return CustomPayableRateStruct
      * @throws \Exception
      */
     public static function save( CustomPayableRateStruct $customPayableRateStruct ) {
@@ -116,6 +116,8 @@ class CustomPayableRateDao extends DataAccess_AbstractDao
             " VALUES " .
             " ( :uid, :version, :name, :breakdowns, :now, :now ); ";
 
+        $now = (new DateTime())->format('Y-m-d H:i:s');
+
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->execute( [
@@ -123,15 +125,20 @@ class CustomPayableRateDao extends DataAccess_AbstractDao
             'version'    => 1,
             'name'       => $customPayableRateStruct->name,
             'breakdowns' => $customPayableRateStruct->breakdownsToJson(),
-            'now'        => (new DateTime())->format('Y-m-d H:i:s'),
+            'now'        => $now,
         ] );
 
-        return $conn->lastInsertId();
+        $customPayableRateStruct->id = $conn->lastInsertId();
+        $customPayableRateStruct->version = 1;
+        $customPayableRateStruct->created_at = $now;
+        $customPayableRateStruct->modified_at = $now;
+
+        return $customPayableRateStruct;
     }
 
     /**
      * @param CustomPayableRateStruct $customPayableRateStruct
-     * @return int
+     * @return CustomPayableRateStruct
      * @throws \Exception
      */
     public static function update( CustomPayableRateStruct $customPayableRateStruct ) {
@@ -152,7 +159,7 @@ class CustomPayableRateDao extends DataAccess_AbstractDao
         self::destroyQueryByIdCache($conn, $customPayableRateStruct->id);
         self::destroyQueryByUidAndNameCache($conn, $customPayableRateStruct->uid, $customPayableRateStruct->name);
 
-        return $customPayableRateStruct->id;
+        return $customPayableRateStruct;
 
     }
 
@@ -174,10 +181,9 @@ class CustomPayableRateDao extends DataAccess_AbstractDao
      * validate a json against schema and then
      * create a Payable Rate model template from it
      *
-     * @param      $json
+     * @param $json
      * @param null $uid
-     *
-     * @return int
+     * @return CustomPayableRateStruct
      * @throws \Swaggest\JsonSchema\InvalidValue
      * @throws \Exception
      */
@@ -215,11 +221,9 @@ class CustomPayableRateDao extends DataAccess_AbstractDao
 
     /**
      * @param CustomPayableRateStruct $customPayableRateStruct
-     * @param                       $json
-     *
-     * @return mixed
+     * @param $json
+     * @return CustomPayableRateStruct
      * @throws \Swaggest\JsonSchema\InvalidValue
-     * @throws \Exception
      */
     public static function editFromJSON(CustomPayableRateStruct $customPayableRateStruct, $json)
     {

@@ -9,6 +9,7 @@ import {registerUser} from '../../api/registerUser'
 import CommonUtils from '../../utils/commonUtils'
 
 const PASSWORD_MIN_LENGTH = 12
+const PASSWORD_MAX_LENGTH = 50
 
 class RegisterModal extends React.Component {
   constructor(props) {
@@ -334,6 +335,7 @@ const fieldValidations = [
     'Password',
     FormRules.requiredRule,
     FormRules.minLength(PASSWORD_MIN_LENGTH),
+    FormRules.maxLength(PASSWORD_MAX_LENGTH),
     FormRules.atLeastOneSpecialChar(),
   ),
   RuleRunner.ruleRunner(
