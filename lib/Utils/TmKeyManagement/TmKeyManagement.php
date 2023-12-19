@@ -412,19 +412,39 @@ class TmKeyManagement_TmKeyManagement {
 
                 }
 
+//
+//                // remove the uid property
+//                if ( $userRole == TmKeyManagement_Filter::ROLE_TRANSLATOR ) {
+//                    $_job_Key->uid_rev = null;
+//                    $_job_Key->r = null;
+//                    $_job_Key->w = null;
+//                    $_job_Key->r_rev = null;
+//                    $_job_Key->w_rev = null;
+//                    $_job_Key->r_transl = null;
+//                    $_job_Key->w_transl = null;
+//                } elseif ( $userRole == TmKeyManagement_Filter::ROLE_REVISOR ) {
+//                    $_job_Key->uid_transl = null;
+//                    $_job_Key->r = null;
+//                    $_job_Key->w = null;
+//                    $_job_Key->r_transl = null;
+//                    $_job_Key->w_transl = null;
+//                    $_job_Key->r_rev = null;
+//                    $_job_Key->w_rev = null;
+//                }
+
                 // remove the uid property
                 if ( $userRole == TmKeyManagement_Filter::ROLE_TRANSLATOR ) {
                     $_job_Key->uid_rev = null;
                     $_job_Key->r_rev = null;
                     $_job_Key->w_rev = null;
-                    $_job_Key->r_transl = true;
-                    $_job_Key->w_transl = true;
+                    $_job_Key->r_transl = null;
+                    $_job_Key->w_transl = null;
                 } elseif ( $userRole == TmKeyManagement_Filter::ROLE_REVISOR ) {
                     $_job_Key->uid_transl = null;
                     $_job_Key->r_transl = null;
                     $_job_Key->w_transl = null;
-                    $_job_Key->r_rev = true;
-                    $_job_Key->w_rev = true;
+                    $_job_Key->r_rev = null;
+                    $_job_Key->w_rev = null;
                 }
 
                 //if the key is no more linked to someone, don't add to the resultset, else reorder if it is not an owner key.
