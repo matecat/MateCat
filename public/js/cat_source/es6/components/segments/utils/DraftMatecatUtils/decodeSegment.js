@@ -1,4 +1,6 @@
 import getEntities from './getEntities'
+import TextUtils from '../../../../utils/textUtils'
+import {encodeHtmlEntities} from './tagUtils'
 /**
  *
  * @param editorState
@@ -8,7 +10,6 @@ const decodeSegment = (editorState) => {
   let contentState = editorState.getCurrentContent()
   if (!contentState.hasText())
     return {entities: [], decodedSegment: contentState.getPlainText()}
-
   const entities = getEntities(editorState) // already consecutive
   // Adapt offset from block to absolute
   const blocks = contentState.getBlockMap()
@@ -37,7 +38,9 @@ const decodeSegment = (editorState) => {
   let decodedSegmentPlain = plainEditorText
     .replace(/\n/gi, config.lfPlaceholder)
     .replace(new RegExp(String.fromCharCode(parseInt('200B', 16)), 'gi'), '')
-
+  let {tags, text} = TextUtils.replaceTempTags(decodedSegmentPlain)
+  decodedSegmentPlain = encodeHtmlEntities(text)
+  decodedSegmentPlain = TextUtils.restoreTempTags(tags, decodedSegmentPlain)
   return {entitiesRange: entities, decodedSegment: decodedSegmentPlain}
 }
 

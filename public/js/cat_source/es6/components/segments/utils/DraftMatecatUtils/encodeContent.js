@@ -3,6 +3,7 @@ import {EditorState} from 'draft-js'
 import splitOnTagPlaceholder from './splitOnTagPlaceHolder'
 import removeNewLineInContentState from './removeNewLineInContentState'
 import {getErrorCheckTag, getSplitBlockTag} from './tagModel'
+import {decodeHtmlEntities} from './tagUtils'
 
 /**
  *
@@ -19,9 +20,10 @@ const encodeContent = (originalEditorState, plainText = '', sourceTagMap) => {
   // sometimes there is no text between  <g id="n"> and </g> and backend merges them in <g id="n"/>
   // We have to split g tag selfclosed in g tag open and g tag closed
   plainText = plainText.replace(
-    /&lt;g\sid="((?:(?!&gt;).)+?)"\s?\/&gt;/gi,
-    '&lt;g id="$1"&gt;&lt;/g&gt;',
+    /<g\sid="((?:(?!>).)+?)"\s?\/>/gi,
+    '<g id="$1"></g>',
   )
+  plainText = decodeHtmlEntities(plainText)
   // Create entities
   const entitiesFromMap = createNewEntitiesFromMap(
     originalEditorState,

@@ -4,7 +4,8 @@ import {SegmentContext} from './SegmentContext'
 import SegmentSource from './SegmentSource'
 import SegmentTarget from './SegmentTarget'
 import SimpleEditor from './SimpleEditor'
-import TagUtils from '../../utils/tagUtils'
+import SegmentUtils from '../../utils/segmentUtils'
+import SearchUtils from '../header/cattol/search/searchUtils'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
 
 class SegmentWrapper extends React.Component {
@@ -25,11 +26,32 @@ class SegmentWrapper extends React.Component {
         <SegmentSource segment={segment} />
       )
     }
+
     let textToDisplay = isTarget ? segment.translation : segment.segment
-    textToDisplay = TagUtils.transformTextForEditor(
-      DraftMatecatUtils.unescapeHTML(textToDisplay),
+    textToDisplay = SegmentUtils.checkCurrentSegmentTPEnabled(segment)
+      ? DraftMatecatUtils.removeTagsFromText(textToDisplay)
+      : textToDisplay
+
+    if (segment.inSearch) {
+      textToDisplay = SearchUtils.markText(
+        textToDisplay,
+        !isTarget,
+        segment.sid,
+      )
+    }
+    return (
+      <div
+        className={`${isTarget ? `target` : `source`} item`}
+        id={`segment-${segment.sid}-${isTarget ? 'target' : 'source'}`}
+      >
+        <SimpleEditor
+          className={isTarget ? `targetarea editarea` : ``}
+          text={textToDisplay}
+          isTarget={isTarget}
+          isRtl={isTarget ? config.isTargetRTL : config.isSourceRTL}
+        />
+      </div>
     )
-    return <SimpleEditor text={textToDisplay} isTarget={isTarget} />
   }
 }
 

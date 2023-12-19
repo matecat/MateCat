@@ -6,14 +6,9 @@ use Exceptions\ControllerReturnException;
 use Exceptions\NotFoundException;
 use Features\ReviewExtended\ReviewUtils;
 use Features\TranslationVersions;
-use Features\TranslationVersions\TranslationVersionsHandler;
 use Files\FilesPartsDao;
 use LQA\QA;
-use Matecat\SubFiltering\Commons\Pipeline;
 use Matecat\SubFiltering\MateCatFilter;
-use Matecat\SubFiltering\Filters\FromViewNBSPToSpaces;
-use Matecat\SubFiltering\Filters\PhCounter;
-use Matecat\SubFiltering\Filters\SprintfToPH;
 
 class setTranslationController extends ajaxController {
 
@@ -308,42 +303,15 @@ class setTranslationController extends ajaxController {
         $dao           = new \Segments_SegmentDao( \Database::obtain() );
         $this->segment = $dao->getById( $this->id_segment );
 
-        // compare segment-translation and get results
-        // QA here stands for Quality Assurance
-        //
-        // NOTE 2020-01-21
-        // ------------------------------------------------------
-        // In order to allow users to insert raw text we need a custom pipeline.
-        //
-        // After counting PH tags in source segment we initialize a Pipeline and update its Id count.
-        //
-        // Then the Pipeline can be used to transform the raw translation. Example:
-        //
-        // <ph id="mtc_1" equiv-text="base64:JTEkZA=="/> 根據當地稅率低，每次預訂的節省價值都不能執行預訂總額的10% <ph id="mtc_2" equiv-text="base64:JSU="/> dddscfc --------> <ph id="mtc_1" equiv-text="base64:JTEkZA=="/> 根據當地稅率低，每次預訂的節省價值都不能執行預訂總額的10% <ph id="mtc_2" equiv-text="base64:JSU="/> dddscfc
-        //
-        $counter = new PhCounter();
-        $counter->transform( $this->__postInput[ 'translation' ] );
-
-        $pipeline = new Pipeline($this->chunk->source, $this->chunk->target);
-        for ( $i = 0; $i < $counter->getCount(); $i++ ) {
-            $pipeline->getNextId();
-        }
-
-        $pipeline->addLast( new FromViewNBSPToSpaces() ); //nbsp are not valid xml entities we have to remove them before the QA check ( Invalid DOM )
-        $pipeline->addLast( new SprintfToPH() );
-
-        $src = $pipeline->transform( $this->__postInput[ 'segment' ] );
-        $trg = $pipeline->transform( $this->__postInput[ 'translation' ] );
-
-        $check = new QA( $src, $trg );
-        $check->setChunk($this->chunk);
+        $check = new QA( $this->__postInput[ 'segment' ], $this->__postInput[ 'translation' ] );
+        $check->setChunk( $this->chunk );
         $check->setFeatureSet( $this->featureSet );
         $check->setSourceSegLang( $this->chunk->source );
         $check->setTargetSegLang( $this->chunk->target );
         $check->setIdSegment( $this->id_segment );
 
-        if(isset($this->__postInput[ 'characters_counter' ] )){
-            $check->setCharactersCount($this->__postInput[ 'characters_counter' ]);
+        if ( isset( $this->__postInput[ 'characters_counter' ] ) ) {
+            $check->setCharactersCount( $this->__postInput[ 'characters_counter' ] );
         }
 
         $check->performConsistencyCheck();
