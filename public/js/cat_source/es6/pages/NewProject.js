@@ -189,7 +189,7 @@ const NewProject = ({
   }
 
   createProject.current = () => {
-    const {mtGlossaryProps} = activeMTEngine
+    const {mtGlossaryProps} = activeMTEngine ?? {}
 
     const getParams = () => ({
       action: 'createProject',
