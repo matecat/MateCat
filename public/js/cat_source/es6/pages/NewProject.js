@@ -206,6 +206,13 @@ const NewProject = ({
       segmentation_rule: segmentationRule.id === '1' ? '' : segmentationRule.id,
       id_team: selectedTeam ? selectedTeam.id : undefined,
       get_public_matches: getPublicMatches,
+      ...(activeMTEngine.type === 'MT' &&
+        activeMTEngine.glossaries?.length && {
+          mmt_glossaries: JSON.stringify({
+            glossaries: activeMTEngine.glossaries,
+            ignore_glossary_case: activeMTEngine.isGlossaryCaseSensitive,
+          }),
+        }),
     })
 
     if (!projectSent) {

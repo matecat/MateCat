@@ -1,4 +1,5 @@
 import React, {useContext} from 'react'
+import PropTypes from 'prop-types'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 
 export const MTRow = ({row, deleteMT, onCheckboxClick}) => {
@@ -59,4 +60,10 @@ export const MTRow = ({row, deleteMT, onCheckboxClick}) => {
       )}
     </>
   )
+}
+
+MTRow.propTypes = {
+  row: PropTypes.object.isRequired,
+  deleteMT: PropTypes.func,
+  onCheckboxClick: PropTypes.func,
 }

@@ -74,3 +74,24 @@ $klein->with( '/api/v3/tm-keys', function () {
 
 route( '/api/v3/projects/[:id_project]/[:password]/segment-analysis',  'GET',  'API\V3\SegmentAnalysisController', 'project' );
 route( '/api/v3/jobs/[:id_job]/[:password]/segment-analysis',          'GET',  'API\V3\SegmentAnalysisController', 'job' );
+
+// MMT
+$klein->with( '/api/v3/mmt/[:engineId]', function () {
+    route( '/keys', 'GET', '\API\V3\ModernMTController', 'keys' );
+    route( '/job-status/[:uuid]', 'GET', '\API\V3\ModernMTController', 'jobStatus' );
+    route( '/create-memory-and-import-glossary', 'POST', '\API\V3\ModernMTController', 'createMemoryAndImportGlossary' );
+    route( '/import-glossary', 'POST', '\API\V3\ModernMTController', 'importGlossary' );
+    route( '/modify-glossary', 'POST', '\API\V3\ModernMTController', 'modifyGlossary' );
+    route( '/create-memory', 'POST', '\API\V3\ModernMTController', 'createMemory' );
+    route( '/update-memory/[:memoryId]', 'POST', '\API\V3\ModernMTController', 'updateMemory' );
+    route( '/delete-memory/[:memoryId]', 'GET', '\API\V3\ModernMTController', 'deleteMemory' );
+} );
+
+// DEEPL
+$klein->with( '/api/v3/deepl/[:engineId]', function () {
+    route( '/glossaries', 'GET', '\API\V3\DeepLGlossaryController', 'all' );
+    route( '/glossaries', 'POST', '\API\V3\DeepLGlossaryController', 'create' );
+    route( '/glossaries/[:id]', 'DELETE', '\API\V3\DeepLGlossaryController', 'delete' );
+    route( '/glossaries/[:id]', 'GET', '\API\V3\DeepLGlossaryController', 'get' );
+    route( '/glossaries/[:id]/entries', 'GET', '\API\V3\DeepLGlossaryController', 'getEntries' );
+} );
