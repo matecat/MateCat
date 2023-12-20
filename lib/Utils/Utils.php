@@ -957,4 +957,40 @@ class Utils {
 
         return $strippedHtml;
     }
+
+    /**
+     * @param $email
+     * @throws \Exception
+     */
+    public static function validateEmailAddress($email)
+    {
+        $clean_email = filter_var($email,FILTER_SANITIZE_EMAIL);
+
+        if( $email !== $clean_email or !filter_var($email,FILTER_VALIDATE_EMAIL) ){
+            throw new \Exception($email . " is not a valid email address");
+        }
+    }
+
+    /**
+     * @param $list
+     * @return array
+     */
+    public static function validateEmailList($list){
+
+        $aValid = [];
+        foreach ( explode( ',', $list ) AS $sEmailAddress ) {
+            $sEmailAddress = trim( $sEmailAddress );
+            if( empty( $sEmailAddress ) ) continue;
+            $aValid[ $sEmailAddress ] = filter_var( $sEmailAddress, FILTER_VALIDATE_EMAIL );
+        }
+
+        $invalidEmails = array_keys( $aValid, false );
+
+        if( !empty( $invalidEmails ) ){
+            throw new InvalidArgumentException( "Not valid e-mail provided: " . implode( ", ", $invalidEmails ), -6 );
+        }
+
+        return array_keys( $aValid );
+
+    }
 }

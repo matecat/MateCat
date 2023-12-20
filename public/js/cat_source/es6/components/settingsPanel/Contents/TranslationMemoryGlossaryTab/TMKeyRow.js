@@ -118,21 +118,25 @@ export const TMKeyRow = ({row, onExpandRow}) => {
 
   const updateKeyName = () => {
     if (valueChange.current) {
-      updateTmKey({
-        key: row.key,
-        description: name,
-      }).catch((errors) => {
-        setNotification({
-          type: 'error',
-          message: errors[0].message,
+      if (name) {
+        updateTmKey({
+          key: row.key,
+          description: name,
+        }).catch((errors) => {
+          setNotification({
+            type: 'error',
+            message: errors[0].message,
+          })
         })
-      })
 
-      if (config.is_cattool) {
-        updateJobKeys({
-          getPublicMatches,
-          dataTm: getTmDataStructureToSendServer({tmKeys}),
-        }).then(() => CatToolActions.onTMKeysChangeStatus())
+        if (config.is_cattool) {
+          updateJobKeys({
+            getPublicMatches,
+            dataTm: getTmDataStructureToSendServer({tmKeys}),
+          }).then(() => CatToolActions.onTMKeysChangeStatus())
+        }
+      } else {
+        setName(row.name)
       }
 
       valueChange.current = false

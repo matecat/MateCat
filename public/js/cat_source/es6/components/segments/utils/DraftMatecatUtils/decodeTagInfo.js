@@ -1,5 +1,5 @@
 import {tagSignatures} from './tagModel'
-import {getIdAttributeRegEx, unescapeHTMLRecursive} from './textUtils'
+import {getIdAttributeRegEx, unescapeHTMLRecursive} from './tagUtils'
 import {Base64} from 'js-base64'
 
 /**

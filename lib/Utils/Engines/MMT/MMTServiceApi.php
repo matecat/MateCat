@@ -160,6 +160,38 @@ class MMTServiceApi {
 
     /**
      * @param $id
+     * @param $data
+     * @return mixed
+     * @throws MMTServiceApiException
+     */
+    public function importGlossary($id, $data)
+    {
+        return $this->send( 'POST', "$this->baseUrl/memories/$id/glossary", $data, true );
+    }
+
+    /**
+     * @param $id
+     * @param $data
+     * @return mixed
+     * @throws MMTServiceApiException
+     */
+    public function updateGlossary($id, $data)
+    {
+        return $this->send( 'PUT', "$this->baseUrl/memories/$id/glossary", $data );
+    }
+
+    /**
+     * @param $uuid
+     * @return mixed
+     * @throws MMTServiceApiException
+     */
+    public function importJobStatus($uuid)
+    {
+        return $this->send( 'GET', "$this->baseUrl/import-jobs/$uuid" );
+    }
+
+    /**
+     * @param $id
      *
      * @return mixed
      * @throws MMTServiceApiException
@@ -225,6 +257,15 @@ class MMTServiceApi {
             'translation' => $translation,
             'session' => $session,
         ] );
+    }
+
+    /**
+     * @param $uuid
+     * @throws MMTServiceApiException
+     */
+    public function jobStatus($uuid)
+    {
+        $this->send( 'GET', "$this->baseUrl/import-jobs/$uuid/content", [] );
     }
 
     /**
@@ -321,12 +362,14 @@ class MMTServiceApi {
      * @param null $timeout
      * @param null $priority
      * @param null $session
+     * @param null $glossaries
+     * @param null $ignoreGlossaryCase
      * @return mixed
      * @throws MMTServiceApiException
      */
-    public function translate( $source, $target, $text, $contextVector = null, $hints = null, $projectId = null, $timeout = null, $priority = null, $session = null ) {
+    public function translate( $source, $target, $text, $contextVector = null, $hints = null, $projectId = null, $timeout = null, $priority = null, $session = null, $glossaries = null, $ignoreGlossaryCase = null ) {
 
-        return $this->send( 'GET', "$this->baseUrl/translate", [
+        $params = [
             'source'  => $source,
             'target' => $target,
             'q' => $text,
@@ -335,8 +378,21 @@ class MMTServiceApi {
             'project_id' => $projectId,
             'timeout' => ( $timeout ? ( $timeout * 1000 ) : null ),
             'priority' => ( $priority ?: 'normal' ),
-            'session' => ($session ? $session : null),
-        ], false, $timeout );
+        ];
+
+        if($session){
+            $params['session'] = $session;
+        }
+
+        if($glossaries){
+            $params['glossaries'] = $glossaries;
+        }
+
+        if($ignoreGlossaryCase){
+            $params['ignore_glossary_case'] = ($ignoreGlossaryCase  == 1) ? 'true' : 'false';
+        }
+
+        return $this->send( 'GET', "$this->baseUrl/translate", $params, false, $timeout );
     }
 
     /* - Low level utils -------------------------------------------------------------------------------------------- */
@@ -380,9 +436,10 @@ class MMTServiceApi {
         if ( $multipart ) {
             $headers[] = 'Content-Type: multipart/form-data';
         } else {
-            $headers[] = 'Content-Type: application/x-www-form-urlencoded; charset=utf-8';
+            $headers[] = 'Content-Type: application/json';
             if ( $params ) {
-                $params = http_build_query( $params );
+                $params = json_encode( $params );
+                $headers[] = strlen( $params ) ;
             }
         }
 
