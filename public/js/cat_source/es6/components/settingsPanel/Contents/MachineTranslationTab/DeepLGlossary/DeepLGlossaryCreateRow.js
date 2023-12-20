@@ -1,14 +1,14 @@
-import React, {useContext, useEffect, useRef, useState} from 'react'
+import React, {useContext, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import Upload from '../../../../../../../../img/icons/Upload'
 import Checkmark from '../../../../../../../../img/icons/Checkmark'
 import Close from '../../../../../../../../img/icons/Close'
-import {MTGlossaryStatus, MT_GLOSSARY_CREATE_ROW_ID} from './MTGlossary'
 import {MachineTranslationTabContext} from '..'
-import {createMemoryAndImportGlossary} from '../../../../../api/createMemoryAndImportGlossary/createMemoryAndImportGlossary'
+import {DEEPL_GLOSSARY_CREATE_ROW_ID} from './DeepLGlossary'
+import {createAndImportDeepLGlossary} from '../../../../../api/createAndImportDeepLGlossary'
 import LabelWithTooltip from '../../../../common/LabelWithTooltip'
 
-export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
+export const DeepLGlossaryCreateRow = ({engineId, row, setRows}) => {
   const {setNotification} = useContext(MachineTranslationTabContext)
 
   const [isActive, setIsActive] = useState(row.isActive)
@@ -17,14 +17,6 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
   const [isWaitingResult, setIsWaitingResult] = useState(false)
 
   const ref = useRef()
-  const statusEntry = useRef()
-
-  useEffect(() => {
-    statusEntry.current = new MTGlossaryStatus()
-    ref.current.scrollIntoView({behavior: 'smooth', block: 'nearest'})
-
-    return () => statusEntry.current.cancel()
-  }, [])
 
   const onChangeIsActive = (e) => {
     setIsActive(e.currentTarget.checked)
@@ -43,32 +35,21 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
   }
 
   const createNewGlossary = () => {
-    createMemoryAndImportGlossary({engineId, glossary: file, name})
+    createAndImportDeepLGlossary({engineId, glossary: file, name})
       .then((data) => {
         const addNewEntry = (prevState) =>
           prevState.map((row) =>
-            row.id === MT_GLOSSARY_CREATE_ROW_ID
+            row.id === DEEPL_GLOSSARY_CREATE_ROW_ID
               ? {
-                  id: data.memory,
+                  id: data.glossary_id,
                   isActive,
                   name,
                 }
               : row,
           )
 
-        if (data.progress === 1) {
-          dispatchSuccessfullNotification()
-          setRows(addNewEntry)
-        } else {
-          //   start polling to get status
-          statusEntry.current
-            .get({engineId, uuid: data.id})
-            .then(() => {
-              dispatchSuccessfullNotification()
-              setRows(addNewEntry)
-            })
-            .catch(() => dispatchErrorNotification())
-        }
+        dispatchSuccessfullNotification()
+        setRows(addNewEntry)
       })
       .catch(() => dispatchErrorNotification())
   }
@@ -96,7 +77,7 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
 
   const onReset = () => {
     setRows((prevState) =>
-      prevState.filter(({id}) => id !== MT_GLOSSARY_CREATE_ROW_ID),
+      prevState.filter(({id}) => id !== DEEPL_GLOSSARY_CREATE_ROW_ID),
     )
     setNotification()
   }
@@ -138,7 +119,7 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
         <input
           checked={isActive}
           onChange={onChangeIsActive}
-          type="checkbox"
+          type="radio"
           title=""
           disabled
         />
@@ -207,7 +188,7 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
   )
 }
 
-MTGlossaryCreateRow.propTypes = {
+DeepLGlossaryCreateRow.propTypes = {
   engineId: PropTypes.number,
   row: PropTypes.object,
   setRows: PropTypes.func,

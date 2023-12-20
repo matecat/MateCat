@@ -189,7 +189,7 @@ const NewProject = ({
   }
 
   createProject.current = () => {
-    const {mtGlossaryProps} = activeMTEngine ?? {}
+    const {mtGlossaryProps, deeplGlossaryProps} = activeMTEngine ?? {}
 
     const getParams = () => ({
       action: 'createProject',
@@ -213,6 +213,11 @@ const NewProject = ({
           glossaries: mtGlossaryProps.glossaries,
           ignore_glossary_case: !mtGlossaryProps.isGlossaryCaseSensitive,
         }),
+      }),
+      ...(typeof deeplGlossaryProps === 'object' && {
+        ...Object.entries(deeplGlossaryProps)
+          .filter(([, value]) => value)
+          .reduce((acc, [key, value]) => ({...acc, [key]: value}), {}),
       }),
     })
 

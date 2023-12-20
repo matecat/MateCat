@@ -114,10 +114,11 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
     }
 
     getMMTKeys({engineId: id}).then((data) => {
+      const items = [...data].reverse()
       if (!wasCleanup) {
         if (!isCattoolPage) {
           updateRowsState(
-            data.map(({name, id: idRow}) => {
+            items.map(({name, id: idRow}) => {
               const isActive = Array.isArray(glossaries)
                 ? glossaries.some((value) => value === idRow)
                 : false
@@ -130,7 +131,7 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
             }),
           )
         } else {
-          memories = data
+          memories = items
           CatToolStore.addListener(
             CatToolConstants.GET_JOB_METADATA,
             getJobMetadata,

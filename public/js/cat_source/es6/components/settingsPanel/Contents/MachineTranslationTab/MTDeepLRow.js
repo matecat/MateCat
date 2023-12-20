@@ -1,16 +1,60 @@
-import React, {useContext, useState} from 'react'
+import React, {useContext, useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import Trash from '../../../../../../../img/icons/Trash'
 import {Select} from '../../../common/Select'
+import CatToolStore from '../../../../stores/CatToolStore'
+import CatToolConstants from '../../../../constants/CatToolConstants'
+import CatToolActions from '../../../../actions/CatToolActions'
 
 export const MTDeepLRow = ({row, deleteMT, onCheckboxClick}) => {
-  const {activeMTEngine} = useContext(SettingsPanelContext)
-  const [formalityOptions, setFormalityOptions] = useState([
-    {name: 'Default', id: 'default', isActive: true},
-    {name: 'prefer_less', id: 'prefer_less'},
-    {name: 'prefer_more', id: 'prefer_more'},
-  ])
+  const {activeMTEngine, setActiveMTEngine} = useContext(SettingsPanelContext)
+
+  const formalityAlreadySelected =
+    activeMTEngine?.deeplGlossaryProps?.deepl_formality
+
+  const [formalityOptions, setFormalityOptions] = useState(() =>
+    [
+      {name: 'Default', id: 'default'},
+      {name: 'Informal', id: 'prefer_less'},
+      {name: 'Formal', id: 'prefer_more'},
+    ].map((item, index) => ({
+      ...item,
+      isActive:
+        typeof formalityAlreadySelected !== 'undefined'
+          ? formalityAlreadySelected === item.id
+          : index === 0,
+    })),
+  )
+
+  useEffect(() => {
+    const getJobMetadata = ({jobMetadata: {project} = {}}) => {
+      setFormalityOptions((prevState) =>
+        prevState.map((option) => ({
+          ...option,
+          isActive: option.id === project.deepl_formality,
+        })),
+      )
+    }
+
+    if (config.is_cattool) {
+      CatToolStore.addListener(
+        CatToolConstants.GET_JOB_METADATA,
+        getJobMetadata,
+      )
+      CatToolActions.getJobMetadata({
+        idJob: config.id_job,
+        password: config.password,
+      })
+    }
+
+    return () => {
+      CatToolStore.removeListener(
+        CatToolConstants.GET_JOB_METADATA,
+        getJobMetadata,
+      )
+    }
+  }, [])
 
   const formalitySelect = (
     <Select
@@ -18,10 +62,19 @@ export const MTDeepLRow = ({row, deleteMT, onCheckboxClick}) => {
       options={formalityOptions}
       activeOption={formalityOptions.find(({isActive}) => isActive)}
       onSelect={(option) =>
-        setFormalityOptions((prevState) =>
-          prevState.map((optionItem) => ({
-            ...optionItem,
-            isActive: optionItem.id === option.id,
+        setFormalityOptions(
+          (prevState) =>
+            prevState.map((optionItem) => ({
+              ...optionItem,
+              isActive: optionItem.id === option.id,
+            })),
+
+          setActiveMTEngine((prevState) => ({
+            ...prevState,
+            deeplGlossaryProps: {
+              ...prevState.deeplGlossaryProps,
+              deepl_formality: option.id,
+            },
           })),
         )
       }
@@ -38,9 +91,11 @@ export const MTDeepLRow = ({row, deleteMT, onCheckboxClick}) => {
         )
       </div>
       <div>{row.description}</div>
-      {!config.is_cattool && (
-        <div className="settings-panel-cell-center">{formalitySelect}</div>
-      )}
+      <div className="settings-panel-cell-center">
+        {!config.is_cattool
+          ? formalitySelect
+          : formalityOptions.find(({isActive}) => isActive)?.name}
+      </div>
       {!config.is_cattool && (
         <div className="settings-panel-cell-center">
           <input

@@ -2,11 +2,15 @@ import React, {useCallback, useContext, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import {SettingsPanelContext} from '../../../SettingsPanelContext'
 import {useEffect} from 'react'
-import {MTGlossaryCreateRow} from '../MTGlossary/MTGlossaryCreateRow'
-import {MTGlossaryRow} from '../MTGlossary/MTGlossaryRow'
 import ArrowDown from '../../../../../../../../img/icons/ArrowDown'
 import {SettingsPanelTable} from '../../../SettingsPanelTable'
 import IconAdd from '../../../../icons/IconAdd'
+import {getDeepLGlosssaries} from '../../../../../api/getDeepLGlosssaries/getDeepLGlosssaries'
+import {DeepLGlossaryRow} from './DeepLGlossaryRow'
+import {DeepLGlossaryCreateRow} from './DeepLGlossaryCreateRow'
+import CatToolStore from '../../../../../stores/CatToolStore'
+import CatToolConstants from '../../../../../constants/CatToolConstants'
+import CatToolActions from '../../../../../actions/CatToolActions'
 
 const COLUMNS_TABLE = [
   {name: 'Activate'},
@@ -38,11 +42,11 @@ export const DeepLGlossary = ({id, isCattoolPage = false}) => {
           ...row,
           node:
             row.id === DEEPL_GLOSSARY_CREATE_ROW_ID ? (
-              <MTGlossaryCreateRow
+              <DeepLGlossaryCreateRow
                 {...{engineId: id, row, setRows: updateRowsState}}
               />
             ) : (
-              <MTGlossaryRow
+              <DeepLGlossaryRow
                 key={row.id}
                 {...{
                   engineId: id,
@@ -62,51 +66,56 @@ export const DeepLGlossary = ({id, isCattoolPage = false}) => {
     let wasCleanup = false
 
     const glossaryId = activeGlossaryRef.current
-    // let memories = []
-    // const getJobMetadata = ({jobMetadata: {project} = {}}) => {
-    //   const rows = memories.filter(({id}) =>
-    //     project.mmt_glossaries.glossaries.some((value) => value === id),
-    //   )
-    //   updateRowsState(rows.map(({id, name}) => ({id, name, isActive: true})))
-    // }
+    let glossariesFromJobMetadata = []
+    const getJobMetadata = ({jobMetadata: {project} = {}}) => {
+      const rows = glossariesFromJobMetadata.filter(
+        ({glossary_id}) => project.deepl_id_glossary === glossary_id,
+      )
 
-    // getMMTKeys({engineId: id}).then((data) => {
-    //   if (!wasCleanup) {
-    //     if (!isCattoolPage) {
-    //       updateRowsState(
-    //         data.map(({name, id: idRow}) => {
-    //           const isActive = Array.isArray(glossaries)
-    //             ? glossaries.some((value) => value === idRow)
-    //             : false
+      updateRowsState(
+        rows.map(({glossary_id: id, name}) => ({id, name, isActive: true})),
+      )
+    }
 
-    //           return {
-    //             id: idRow,
-    //             name,
-    //             isActive,
-    //           }
-    //         }),
-    //       )
-    //     } else {
-    //       memories = data
-    //       CatToolStore.addListener(
-    //         CatToolConstants.GET_JOB_METADATA,
-    //         getJobMetadata,
-    //       )
-    //       CatToolActions.getJobMetadata({
-    //         idJob: config.id_job,
-    //         password: config.password,
-    //       })
-    //     }
-    //   }
-    // })
+    getDeepLGlosssaries({engineId: id}).then(({glossaries}) => {
+      const items = [...glossaries].reverse()
+      if (!wasCleanup) {
+        if (!isCattoolPage) {
+          updateRowsState(
+            items.map(({name, glossary_id: idRow}, index) => {
+              const isActive =
+                typeof glossaryId !== 'undefined'
+                  ? idRow === glossaryId
+                  : index === 0
 
-    // return () => {
-    //   wasCleanup = true
-    //   CatToolStore.removeListener(
-    //     CatToolConstants.GET_JOB_METADATA,
-    //     getJobMetadata,
-    //   )
-    // }
+              return {
+                id: idRow,
+                name,
+                isActive,
+              }
+            }),
+          )
+        } else {
+          glossariesFromJobMetadata = items
+          CatToolStore.addListener(
+            CatToolConstants.GET_JOB_METADATA,
+            getJobMetadata,
+          )
+          CatToolActions.getJobMetadata({
+            idJob: config.id_job,
+            password: config.password,
+          })
+        }
+      }
+    })
+
+    return () => {
+      wasCleanup = true
+      CatToolStore.removeListener(
+        CatToolConstants.GET_JOB_METADATA,
+        getJobMetadata,
+      )
+    }
   }, [id, isCattoolPage, updateRowsState])
 
   useEffect(() => {
@@ -117,7 +126,6 @@ export const DeepLGlossary = ({id, isCattoolPage = false}) => {
       deeplGlossaryProps: {
         ...prevState.deeplGlossaryProps,
         deepl_id_glossary: rows.find(({isActive}) => isActive)?.id,
-        deepl_formality: '',
       },
     }))
   }, [rows, isCattoolPage, setActiveMTEngine])
@@ -184,7 +192,7 @@ export const DeepLGlossary = ({id, isCattoolPage = false}) => {
               </div>
             ) : Array.isArray(rows) ? (
               <div className="empty-list-mode">
-                <p>Start using DeepL glossary feature</p>
+                <p>Start using DeepL's glossary feature</p>
                 <button
                   className="grey-button create-glossary-button"
                   onClick={addGlossary}
