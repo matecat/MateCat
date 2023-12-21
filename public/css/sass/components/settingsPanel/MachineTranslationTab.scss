@@ -181,6 +181,11 @@
       min-height: unset;
       max-height: none;
     }
+
+    .select {
+      padding: 2px 8px;
+      height: 24px;
+    }
   }
 
   .active-table-DeepL {
@@ -201,11 +206,6 @@
   .dropdown__option--is-active-option,
   .dropdown__option.dropdown__option--is-active-option:hover {
     color: black;
-  }
-
-  .select {
-    padding: 2px 8px;
-    height: 24px;
   }
 }
 
