@@ -22,7 +22,7 @@
     "immutable": "^4.0.0-rc.12",
     "jquery": "^3.4.1",
     "js-base64": "^3.6.1",
-    "js-cookie": "^2.2.1",
+    "js-cookie": "^3.0.0",
     "keymirror": "^0.1.1",
     "lodash": "^4.17.21",
     "moment": "^2.29.4",
