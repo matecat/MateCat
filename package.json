@@ -76,8 +76,5 @@
     "webpack-concat-files-plugin": "^0.5.2",
     "whatwg-fetch": "^3.6.2"
   },
-  "resolutions": {
-    "wrap-ansi": "^9.0.0"
-  },
   "version": "2.20.147"
 }
