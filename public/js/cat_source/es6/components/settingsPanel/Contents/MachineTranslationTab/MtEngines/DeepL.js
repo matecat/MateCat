@@ -1,7 +1,7 @@
 import React from 'react'
 import {useForm} from 'react-hook-form'
 
-export const DeepL = ({addMTEngine, error}) => {
+export const DeepL = ({addMTEngine, error, isRequestInProgress}) => {
   const {
     register,
     handleSubmit,
@@ -32,6 +32,7 @@ export const DeepL = ({addMTEngine, error}) => {
           <div className="provider-field">
             {error && <span className={'mt-error'}>{error.message}</span>}
             <button
+              disabled={isRequestInProgress}
               className="ui primary button"
               onClick={handleSubmit(onSubmit)}
             >

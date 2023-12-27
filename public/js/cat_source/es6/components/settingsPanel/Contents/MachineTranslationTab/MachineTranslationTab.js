@@ -36,6 +36,8 @@ export const MachineTranslationTab = () => {
 
   const [addMTVisible, setAddMTVisible] = useState(false)
   const [activeAddEngine, setActiveAddEngine] = useState()
+  const [isAddMTEngineRequestInProgress, setIsAddMTEngineRequestInProgress] =
+    useState(false)
   const [error, setError] = useState()
   const [MTRows, setMTRows] = useState([])
   const [deleteMTRequest, setDeleteMTRequest] = useState()
@@ -84,6 +86,7 @@ export const MachineTranslationTab = () => {
   }
 
   const addMTEngineRequest = (data) => {
+    setIsAddMTEngineRequestInProgress(true)
     addMTEngine({
       name: data.name,
       provider: activeAddEngine.id,
@@ -111,6 +114,7 @@ export const MachineTranslationTab = () => {
       .catch((error) => {
         if (error && error.length) setError(error[0])
       })
+      .finally(() => setIsAddMTEngineRequestInProgress(false))
   }
 
   const deleteMTConfirm = (mt) => {
@@ -242,6 +246,7 @@ export const MachineTranslationTab = () => {
                 <activeAddEngine.component
                   addMTEngine={addMTEngineRequest}
                   error={error}
+                  isRequestInProgress={isAddMTEngineRequestInProgress}
                 />
               ) : null}
             </div>
