@@ -27,7 +27,7 @@ export const transformTagsToHtml = (text, isRtl = 0) => {
         )
         text = text.replace(globalRegex, (match, text) => {
           let tagText = decodeNeeded
-            ? Base64.decode(text)
+            ? encodeHtmlEntities(Base64.decode(text))
             : selfClosing
             ? text
             : match
