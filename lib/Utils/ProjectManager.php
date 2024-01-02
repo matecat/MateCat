@@ -13,8 +13,6 @@ use Analysis\AnalysisDao;
 use ConnectedServices\GDrive as GDrive;
 use ConnectedServices\GDrive\Session;
 use Exceptions\NotFoundException;
-use Features\TranslationVersions\Model\TranslationEventDao;
-use Features\TranslationVersions\Model\TranslationEventStruct;
 use Files\FilesPartsDao;
 use Files\FilesPartsStruct;
 use Files\MetadataDao;
@@ -24,10 +22,6 @@ use FilesStorage\S3FilesStorage;
 use Jobs\SplitQueue;
 use LQA\ChunkReviewDao;
 use LQA\QA;
-use Matecat\SubFiltering\Commons\Pipeline;
-use Matecat\SubFiltering\Filters\FromViewNBSPToSpaces;
-use Matecat\SubFiltering\Filters\PhCounter;
-use Matecat\SubFiltering\Filters\SprintfToPH;
 use Matecat\SubFiltering\MateCatFilter;
 use Matecat\XliffParser\XliffParser;
 use Matecat\XliffParser\XliffUtils\DataRefReplacer;
@@ -2631,33 +2625,12 @@ class ProjectManager {
                 $source = $segment->segment;
                 $target = $translation_row [ 2 ];
 
-                //
-                // NOTE 2021-12-20
-                // ------------------------------------------------------
-                // In order to perform an integrity check
-                // we need to transform source and target to layer1
-                // This piece of code mimics setTranslationController (from line 322 to 341)
-
-                /** @var MateCatFilter filter */
+                /** @var $filter MateCatFilter filter */
                 $filter = MateCatFilter::getInstance( $this->features, $chunk->source, $chunk->target, Segments_SegmentOriginalDataDao::getSegmentDataRefMap( $translation_row [ 0 ] ) );
                 $source = $filter->fromLayer0ToLayer1( $source );
                 $target = $filter->fromLayer0ToLayer1( $target );
 
-                $pipeline = new Pipeline( $chunk->source, $chunk->target );
-                $counter  = new PhCounter();
-                $counter->transform( $target );
-
-                for ( $i = 0; $i < $counter->getCount(); $i++ ) {
-                    $pipeline->getNextId();
-                }
-
-                $pipeline->addLast( new FromViewNBSPToSpaces() );
-                $pipeline->addLast( new SprintfToPH() );
-
-                $src = $pipeline->transform( $source );
-                $trg = $pipeline->transform( $target );
-
-                $check = new QA( $src, $trg );
+                $check = new QA( $source, $target );
                 $check->setFeatureSet( $this->features );
                 $check->setSourceSegLang( $chunk->source );
                 $check->setTargetSegLang( $chunk->target );
@@ -2681,9 +2654,7 @@ class ProjectManager {
                 ];
 
                 $query_translations_values[] = $sql_values;
-
             }
-
         }
 
         // Executing the Query
@@ -2693,29 +2664,6 @@ class ProjectManager {
 
         //clean translations and queries
         unset( $query_translations_values );
-    }
-
-    /**
-     * @param Jobs_JobStruct $job
-     * @param $source_page
-     * @throws \Exception
-     */
-    private function createSecondPassReview(Jobs_JobStruct $job)
-    {
-        $records = RevisionFactory::initFromProject( $this->project )->getRevisionFeature()->createQaChunkReviewRecords(
-            [ $job ],
-            $this->project,
-            [
-                'source_page' => 3
-            ]
-        );
-
-        // destroy project data cache
-        ( new \Projects_ProjectDao() )->destroyCacheForProjectData( $this->project->id, $this->project->password );
-
-        // destroy the 5 minutes chunk review cache
-        $chunk = (new \Chunks_ChunkDao())->getByIdAndPassword($records[ 0 ]->id_job, $records[ 0 ]->password);
-        ( new ChunkReviewDao() )->destroyCacheForFindChunkReviews($chunk, 60 * 5 );
     }
 
     /**
