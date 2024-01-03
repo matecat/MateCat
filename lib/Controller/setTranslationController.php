@@ -341,6 +341,9 @@ class setTranslationController extends ajaxController {
 
         $old_translation = $this->_getOldTranslation();
 
+        $old_suggestion_array = json_decode($old_translation->suggestions_array);
+        $old_suggestion = @$old_suggestion_array[$this->chosen_suggestion_index-1];
+
         $new_translation                         = new Translations_SegmentTranslationStruct();
         $new_translation->id_segment             = $this->id_segment;
         $new_translation->id_job                 = $this->id_job;
@@ -351,6 +354,12 @@ class setTranslationController extends ajaxController {
         $new_translation->suggestion_position    = $this->chosen_suggestion_index;
         $new_translation->warning                = $check->thereAreWarnings();
         $new_translation->translation_date       = date( "Y-m-d H:i:s" );
+
+        // update suggestion
+        $updatedSuggestion = $this->updatedSuggestion($new_translation, $old_translation, $old_suggestion);
+        if($updatedSuggestion !== null){
+            $new_translation->suggestion = $updatedSuggestion;
+        }
 
         // time_to_edit should be increased only if the translation was changed
         $new_translation->time_to_edit = 0;
@@ -677,6 +686,51 @@ class setTranslationController extends ajaxController {
         $this->result[ 'stats' ]       = $this->featureSet->filter( 'filterStatsResponse', $this->result[ 'stats' ], [ 'chunk' => $this->chunk, 'segmentId' => $this->id_segment ] );
 
         $this->evalSetContribution( $new_translation, $old_translation );
+    }
+
+    /**
+     * Update suggestion only if:
+     *
+     * 1) the new state is one of these:
+     *      - NEW
+     *      - DRAFT
+     *      - TRANSLATED
+     *
+     * 2) the old state is one of these:
+     *      - NEW
+     *      - DRAFT
+     *
+     * @param Translations_SegmentTranslationStruct $new_translation
+     * @param Translations_SegmentTranslationStruct $old_translation
+     * @param null $old_suggestion
+     * @return string|null
+     */
+    private function updatedSuggestion(Translations_SegmentTranslationStruct $new_translation, Translations_SegmentTranslationStruct $old_translation, $old_suggestion = null)
+    {
+        $allowedNewTranslationStatus = [
+            Constants_TranslationStatus::STATUS_NEW,
+            Constants_TranslationStatus::STATUS_DRAFT,
+            Constants_TranslationStatus::STATUS_TRANSLATED,
+        ];
+
+        $allowedOldTranslationStatus = [
+            Constants_TranslationStatus::STATUS_NEW,
+            Constants_TranslationStatus::STATUS_DRAFT,
+        ];
+
+        if(!in_array($new_translation->status, $allowedNewTranslationStatus)){
+            return null;
+        }
+
+        if(!in_array($old_translation->status, $allowedOldTranslationStatus)){
+            return null;
+        }
+
+        if(!empty($old_suggestion) && isset($old_suggestion->translation)){
+            return $old_suggestion->translation;
+        }
+
+        return null;
     }
 
     /**
