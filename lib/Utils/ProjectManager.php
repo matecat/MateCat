@@ -1899,8 +1899,13 @@ class ProjectManager {
                                         $src = CatUtils::trimAndStripFromAnHtmlEntityDecoded( $extract_external[ 'seg' ] );
                                         $trg = CatUtils::trimAndStripFromAnHtmlEntityDecoded( $target_extract_external[ 'seg' ] );
 
-                                        if ( !Constants_XliffTranslationStatus::isNew($state) && $this->__isTranslated( $src, $trg, $xliff_trans_unit, $state, $stateQualifier ) && !is_numeric( $src ) && !empty( $trg ) ) { //treat 0,1,2.. as translated content!
-
+                                        if (
+                                            !Constants_XliffTranslationStatus::isNew($state) &&
+                                            $this->__isTranslated( $src, $trg, $xliff_trans_unit, $state, $stateQualifier ) &&
+                                            !is_numeric( $src ) &&
+                                            !empty( $trg )
+                                        ) {
+                                            //treat 0,1,2.. as translated content!
                                             $target = $this->filter->fromRawXliffToLayer0( $target_extract_external[ 'seg' ] );
 
                                             //add an empty string to avoid casting to int: 0001 -> 1
@@ -2028,13 +2033,15 @@ class ProjectManager {
 
                             if ( isset( $xliff_trans_unit[ 'target' ][ 'raw-content' ] ) ) {
 
-
                                 // could not have attributes, suppress warning
-                                $state = @$xliff_trans_unit['target']['attr']['state'];
-                                $stateQualifier = @$xliff_trans_unit['target']['attr'][ 'state-qualifier' ];
+                                $state = (isset($xliff_trans_unit['target']['attr']['state'])) ? $xliff_trans_unit['target']['attr']['state'] : null;
+                                $stateQualifier = (isset($xliff_trans_unit['target']['attr'][ 'state-qualifier' ])) ? $xliff_trans_unit['target']['attr'][ 'state-qualifier' ] : null;
                                 $target_extract_external = $this->_strip_external( $xliff_trans_unit[ 'target' ][ 'raw-content' ], $xliffInfo );
 
-                                if ( !Constants_XliffTranslationStatus::isNew($state) && $this->__isTranslated( $xliff_trans_unit[ 'source' ][ 'raw-content' ], $target_extract_external[ 'seg' ], $xliff_trans_unit, $state, $stateQualifier ) ) {
+                                if (
+                                    !Constants_XliffTranslationStatus::isNew($state) &&
+                                    $this->__isTranslated( $xliff_trans_unit[ 'source' ][ 'raw-content' ], $target_extract_external[ 'seg' ], $xliff_trans_unit, $state, $stateQualifier )
+                                ) {
 
                                     $target = $this->filter->fromRawXliffToLayer0( $target_extract_external[ 'seg' ] );
 
@@ -2669,17 +2676,31 @@ class ProjectManager {
     /**
      * @param $trans_unit
      * @param null $position
+     *
      * @return string
      */
     private function preTranslationStatus($trans_unit, $position = null){
 
         // state handling
         $state = null;
+        $stateQualifier = null;
 
         if(isset($trans_unit['seg-target'][$position]['attr']) and isset($trans_unit['seg-target'][$position]['attr']['state'])){
             $state = $trans_unit['seg-target'][$position]['attr']['state'];
         } elseif(isset($trans_unit['target']['attr']) and isset($trans_unit['target']['attr']['state'])){
             $state = $trans_unit['target']['attr']['state'];
+        }
+
+        if(isset($trans_unit['seg-target'][$position]['attr']) and isset($trans_unit['seg-target'][$position]['attr']['state-qualifier'])){
+            $stateQualifier = $trans_unit['seg-target'][$position]['attr']['state-qualifier'];
+        } elseif(isset($trans_unit['target']['attr']) and isset($trans_unit['target']['attr']['state-qualifier'])){
+            $stateQualifier = $trans_unit['target']['attr']['state-qualifier'];
+        }
+
+        if($stateQualifier !== null){
+            if(Constants_XliffTranslationStatus::isFuzzyMatch($stateQualifier)){
+                return Constants_TranslationStatus::STATUS_NEW;
+            }
         }
 
         if($state !== null){
@@ -3289,7 +3310,7 @@ class ProjectManager {
         // ignore translations for fuzzy matches (xliff 1.2)
         if($stateQualifier !== null){
             if(Constants_XliffTranslationStatus::isFuzzyMatch($stateQualifier)){
-                return false;
+                return true;
             }
         }
 
