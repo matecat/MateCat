@@ -2699,7 +2699,7 @@ class ProjectManager {
 
         if($stateQualifier !== null){
             if(Constants_XliffTranslationStatus::isFuzzyMatch($stateQualifier)){
-                return Constants_TranslationStatus::STATUS_NEW;
+                return Constants_TranslationStatus::STATUS_DRAFT;
             }
         }
 
