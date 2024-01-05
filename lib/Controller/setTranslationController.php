@@ -707,22 +707,17 @@ class setTranslationController extends ajaxController {
      */
     private function updatedSuggestion(Translations_SegmentTranslationStruct $new_translation, Translations_SegmentTranslationStruct $old_translation, $old_suggestion = null)
     {
-        $allowedNewTranslationStatus = [
+        $allowedStatuses = [
             Constants_TranslationStatus::STATUS_NEW,
             Constants_TranslationStatus::STATUS_DRAFT,
             Constants_TranslationStatus::STATUS_TRANSLATED,
         ];
 
-        $allowedOldTranslationStatus = [
-            Constants_TranslationStatus::STATUS_NEW,
-            Constants_TranslationStatus::STATUS_DRAFT,
-        ];
-
-        if(!in_array($new_translation->status, $allowedNewTranslationStatus)){
+        if(!in_array($new_translation->status, $allowedStatuses)){
             return null;
         }
 
-        if(!in_array($old_translation->status, $allowedOldTranslationStatus)){
+        if(!in_array($old_translation->status, $allowedStatuses)){
             return null;
         }
 
