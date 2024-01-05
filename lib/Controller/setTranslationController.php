@@ -356,9 +356,19 @@ class setTranslationController extends ajaxController {
         $new_translation->translation_date       = date( "Y-m-d H:i:s" );
 
         // update suggestion
-        $updatedSuggestion = $this->updatedSuggestion($new_translation, $old_translation, $old_suggestion);
-        if($updatedSuggestion !== null){
-            $new_translation->suggestion = $updatedSuggestion;
+        if( $this->canUpdateSuggestion($new_translation, $old_translation, $old_suggestion) ){
+            $new_translation->suggestion = $old_suggestion->translation;
+            $new_translation->suggestion_match = $old_suggestion->match;
+
+            if ( ($old_suggestion->match == "85%" ) || ( $old_suggestion->match == "86%" ) ) {
+                $new_translation->suggestion_source = 'Machine Translation';
+            } elseif( $old_suggestion->match == 'NO_MATCH' ) {
+                $new_translation->suggestion_source = 'NO_MATCH';
+            } elseif( $old_suggestion->ICE == true ) {
+                $new_translation->suggestion_match = "101%";
+            } else {
+                $new_translation->suggestion_source = 'TM';
+            }
         }
 
         // time_to_edit should be increased only if the translation was changed
@@ -703,9 +713,9 @@ class setTranslationController extends ajaxController {
      * @param Translations_SegmentTranslationStruct $new_translation
      * @param Translations_SegmentTranslationStruct $old_translation
      * @param null $old_suggestion
-     * @return string|null
+     * @return bool
      */
-    private function updatedSuggestion(Translations_SegmentTranslationStruct $new_translation, Translations_SegmentTranslationStruct $old_translation, $old_suggestion = null)
+    private function canUpdateSuggestion(Translations_SegmentTranslationStruct $new_translation, Translations_SegmentTranslationStruct $old_translation, $old_suggestion = null)
     {
         $allowedStatuses = [
             Constants_TranslationStatus::STATUS_NEW,
@@ -714,18 +724,23 @@ class setTranslationController extends ajaxController {
         ];
 
         if(!in_array($new_translation->status, $allowedStatuses)){
-            return null;
+            return false;
         }
 
         if(!in_array($old_translation->status, $allowedStatuses)){
-            return null;
+            return false;
         }
 
-        if(!empty($old_suggestion) && isset($old_suggestion->translation)){
-            return $old_suggestion->translation;
+        if(
+            !empty($old_suggestion) and
+            isset($old_suggestion->translation) and
+            isset($old_suggestion->match) and
+            isset($old_suggestion->created_by)
+        ){
+            return true;
         }
 
-        return null;
+        return false;
     }
 
     /**

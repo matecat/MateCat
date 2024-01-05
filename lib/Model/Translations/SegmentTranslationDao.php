@@ -376,7 +376,10 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
                 'status',
                 'translation',
                 'serialized_errors_list',
+                'suggestion',
                 'suggestion_position',
+                'suggestion_source',
+                'suggestion_match',
                 'warning',
                 'translation_date',
                 'version_number',
@@ -414,7 +417,10 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
                 VALUES (" . implode( ", ", $bind_keys ) . ")
 				ON DUPLICATE KEY UPDATE
 				status = :status,
+                suggestion = :suggestion,
                 suggestion_position = :suggestion_position,
+                suggestion_source = :suggestion_source,
+                suggestion_match = :suggestion_match,
                 serialized_errors_list = :serialized_errors_list,
                 time_to_edit = time_to_edit + VALUES( time_to_edit ),
                 translation = :translation,
