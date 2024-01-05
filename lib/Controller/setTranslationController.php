@@ -354,6 +354,9 @@ class setTranslationController extends ajaxController {
         $new_translation->suggestion_position    = $this->chosen_suggestion_index;
         $new_translation->warning                = $check->thereAreWarnings();
         $new_translation->translation_date       = date( "Y-m-d H:i:s" );
+        $new_translation->suggestion             = $old_translation->suggestion;
+        $new_translation->suggestion_source      = $old_translation->suggestion_source;
+        $new_translation->suggestion_match       = $old_translation->suggestion_match;
 
         // update suggestion
         if( $this->canUpdateSuggestion($new_translation, $old_translation, $old_suggestion) ){
@@ -365,7 +368,7 @@ class setTranslationController extends ajaxController {
             } elseif( $old_suggestion->match == 'NO_MATCH' ) {
                 $new_translation->suggestion_source = 'NO_MATCH';
             } elseif( $old_suggestion->ICE == true ) {
-                $new_translation->suggestion_match = "101%";
+                $new_translation->suggestion_source = $old_suggestion->match;
             } else {
                 $new_translation->suggestion_source = 'TM';
             }
