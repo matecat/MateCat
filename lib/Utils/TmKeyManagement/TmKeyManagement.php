@@ -361,26 +361,27 @@ class TmKeyManagement_TmKeyManagement {
                 }
 
                 //override the static values
-                $_job_Key->tm   = filter_var( $reverse_lookup_client_json[ 'elements' ][ $_index_position ]->tm, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
-                $_job_Key->glos = filter_var( $reverse_lookup_client_json[ 'elements' ][ $_index_position ]->glos, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
+                $_job_ket_element = $reverse_lookup_client_json[ 'elements' ][ $_index_position ];
+                $_job_Key->tm   = filter_var( $_job_ket_element->tm, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
+                $_job_Key->glos = filter_var( $_job_ket_element->glos, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
 
                 if ( $userRole == TmKeyManagement_Filter::OWNER ) {
 
                     //override grants
-                    $_job_Key->r = filter_var( $reverse_lookup_client_json[ 'elements' ][ $_index_position ]->r, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
-                    $_job_Key->w = filter_var( $reverse_lookup_client_json[ 'elements' ][ $_index_position ]->w, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
+                    $_job_Key->r = filter_var( $_job_ket_element->r, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
+                    $_job_Key->w = filter_var( $_job_ket_element->w, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
 
                 } elseif ( $userRole == TmKeyManagement_Filter::ROLE_REVISOR || $userRole == TmKeyManagement_Filter::ROLE_TRANSLATOR ) {
 
                     //override role specific grants
-                    $_job_Key->{TmKeyManagement_Filter::$GRANTS_MAP[ $userRole ][ 'r' ]} = filter_var( $reverse_lookup_client_json[ 'elements' ][ $_index_position ]->r, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
-                    $_job_Key->{TmKeyManagement_Filter::$GRANTS_MAP[ $userRole ][ 'w' ]} = filter_var( $reverse_lookup_client_json[ 'elements' ][ $_index_position ]->w, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
+                    $_job_Key->{TmKeyManagement_Filter::$GRANTS_MAP[ $userRole ][ 'r' ]} = filter_var( $_job_ket_element->r, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
+                    $_job_Key->{TmKeyManagement_Filter::$GRANTS_MAP[ $userRole ][ 'w' ]} = filter_var( $_job_ket_element->w, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
 
                 }
 
                 //change name if modified
-                if ( $_job_Key->name != $reverse_lookup_client_json[ 'elements' ][ $_index_position ]->name ) {
-                    $_job_Key->name = $reverse_lookup_client_json[ 'elements' ][ $_index_position ]->name;
+                if ( $_job_Key->name != $_job_ket_element->name ) {
+                    $_job_Key->name = $_job_ket_element->name;
                 }
 
                 //set as owner if it is but should be already set
@@ -403,27 +404,11 @@ class TmKeyManagement_TmKeyManagement {
                     $_job_Key->w = null;
                     $_job_Key->owner = false;
 
-                } elseif ( $userRole == TmKeyManagement_Filter::ROLE_REVISOR || $userRole == TmKeyManagement_Filter::ROLE_TRANSLATOR ) {
+                } elseif ( ($uid !== null and ($uid == $_job_Key->uid_rev or $uid == $_job_Key->uid_transl)) and ($userRole == TmKeyManagement_Filter::ROLE_REVISOR || $userRole == TmKeyManagement_Filter::ROLE_TRANSLATOR) ) {
 
                     //override role specific grants
                     $_job_Key->{TmKeyManagement_Filter::$GRANTS_MAP[ $userRole ][ 'r' ]} = null;
                     $_job_Key->{TmKeyManagement_Filter::$GRANTS_MAP[ $userRole ][ 'w' ]} = null;
-
-                }
-
-                // remove the uid property
-                if ( $userRole == TmKeyManagement_Filter::ROLE_TRANSLATOR ) {
-                    $_job_Key->uid_rev = null;
-                    $_job_Key->r_rev = null;
-                    $_job_Key->w_rev = null;
-                    $_job_Key->r_transl = true;
-                    $_job_Key->w_transl = true;
-                } elseif ( $userRole == TmKeyManagement_Filter::ROLE_REVISOR ) {
-                    $_job_Key->uid_transl = null;
-                    $_job_Key->r_transl = null;
-                    $_job_Key->w_transl = null;
-                    $_job_Key->r_rev = true;
-                    $_job_Key->w_rev = true;
                 }
 
                 //if the key is no more linked to someone, don't add to the resultset, else reorder if it is not an owner key.
@@ -540,8 +525,49 @@ class TmKeyManagement_TmKeyManagement {
         }
 
         ksort( $server_reorder_position, SORT_NUMERIC );
-        return array_values( $server_reorder_position );
 
+        $merged_tm_keys = [];
+
+        foreach (array_values( $server_reorder_position ) as $tm_key){
+            if(!self::excludeJobKeyFromMerge($tm_key, $uid)){
+                $merged_tm_keys[] = $tm_key;
+            }
+        }
+
+        return $merged_tm_keys;
+    }
+
+    /**
+     * Exclude keys if r/w are null (which will be deleted)
+     *
+     * @param TmKeyManagement_TmKeyStruct $_job_Key
+     * @param $uid
+     * @return bool
+     */
+    private static function excludeJobKeyFromMerge(TmKeyManagement_TmKeyStruct $_job_Key, $uid = null)
+    {
+        if($uid === null){
+            return false;
+        }
+
+        if($_job_Key->owner){
+            return false;
+        }
+
+        if( $_job_Key->uid_transl == $uid ){
+            if( $_job_Key->w_transl === null and $_job_Key->r_transl === null ){
+                return true;
+            }
+
+        }
+
+        if( $_job_Key->uid_rev == $uid ) {
+            if( $_job_Key->w_rev === null and $_job_Key->r_rev === null ){
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
