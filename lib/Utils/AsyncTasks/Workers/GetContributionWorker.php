@@ -12,9 +12,12 @@ namespace AsyncTasks\Workers;
 use Constants\Ices;
 use Constants_TranslationStatus;
 use Contribution\ContributionRequestStruct;
+use Engines_DeepL;
+use Engines_MMT;
 use FeatureSet;
 use INIT;
 use PostProcess;
+use Projects_MetadataDao;
 use Stomp;
 use Matecat\SubFiltering\MateCatFilter;
 use TaskRunner\Commons\AbstractElement;
@@ -483,6 +486,45 @@ class GetContributionWorker extends AbstractWorker {
                 $config[ 'job_id' ]       = $jobStruct->id;
                 $config[ 'job_password' ] = $jobStruct->password;
                 $config[ 'session' ]      = $contributionStruct->getSessionId();
+
+                // glossaries (only for MMT)
+                if($mt_engine instanceof Engines_MMT){
+                    $metadataDao = new Projects_MetadataDao();
+                    $metadata = $metadataDao->get($contributionStruct->getProjectStruct()->id, 'mmt_glossaries', 86400);
+
+                    if($metadata !== null){
+
+                        $metadata = html_entity_decode($metadata->value);
+                        $mmtGlossariesArray = json_decode($metadata, true);
+
+                        $config[ 'glossaries' ] = implode(",", $mmtGlossariesArray['glossaries']);
+                        $config[ 'ignore_glossary_case' ] = $mmtGlossariesArray['ignore_glossary_case'];
+                    }
+                }
+
+                // glossaries (only for DeepL)
+                if($mt_engine instanceof Engines_DeepL){
+
+                    $extraParams = $mt_engine->getEngineRecord()->extra_parameters;
+
+                    if(!isset($extraParams['DeepL-Auth-Key'])){
+                        throw new \Exception("DeepL API key not set");
+                    }
+
+                    $metadataDao = new Projects_MetadataDao();
+                    $deepLFormality = $metadataDao->get($contributionStruct->getProjectStruct()->id, 'deepl_formality', 86400);
+                    $deepLIdGlossary = $metadataDao->get($contributionStruct->getProjectStruct()->id, 'deepl_id_glossary', 86400);
+
+                    if($deepLFormality !== null){
+                        $config[ 'formality' ] = $deepLFormality->value;
+                    }
+
+                    if($deepLIdGlossary !== null){
+                        $config[ 'idGlossary' ] = $deepLIdGlossary->value;
+                    }
+
+                    $mt_engine->setApiKey($extraParams['DeepL-Auth-Key']);
+                }
 
                 $mt_result = $mt_engine->get( $config );
             }

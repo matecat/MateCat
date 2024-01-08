@@ -8,12 +8,10 @@ import EditAreaConstants from '../constants/EditAreaConstants'
 import CatToolConstants from '../constants/CatToolConstants'
 import SegmentStore from '../stores/SegmentStore'
 import TranslationMatches from '../components/segments/utils/translationMatches'
-import TagUtils from '../utils/tagUtils'
 import OfflineUtils from '../utils/offlineUtils'
 import CommonUtils from '../utils/commonUtils'
 import SegmentUtils from '../utils/segmentUtils'
 import CopySourceModal from '../components/modals/CopySourceModal'
-import {unescapeHTMLLeaveTags} from '../components/segments/utils/DraftMatecatUtils/textUtils'
 import CatToolActions from './CatToolActions'
 import ConfirmMessageModal from '../components/modals/ConfirmMessageModal'
 import {getGlossaryForSegment} from '../api/getGlossaryForSegment'
@@ -32,6 +30,7 @@ import {getGlossaryCheck} from '../api/getGlossaryCheck'
 import SearchUtils from '../components/header/cattol/search/searchUtils'
 import CatToolStore from '../stores/CatToolStore'
 import {toggleTagProjectionJob} from '../api/toggleTagProjectionJob'
+import DraftMatecatUtils from '../components/segments/utils/DraftMatecatUtils'
 import {deleteSegmentIssue as deleteSegmentIssueApi} from '../api/deleteSegmentIssue'
 import SegmentsFilterUtil from '../components/header/cattol/segment_filter/segment_filter'
 import {getSegmentsIssues} from '../api/getSegmentsIssues'
@@ -426,7 +425,7 @@ const SegmentActions = {
     if (!currentSegment) return
 
     var tagProjectionEnabled =
-      TagUtils.hasDataOriginalTags(currentSegment.segment) &&
+      DraftMatecatUtils.hasDataOriginalTags(currentSegment.segment) &&
       !currentSegment.tagged
     if (SegmentUtils.checkTPEnabled() && tagProjectionEnabled) {
       SegmentActions.setSegmentAsTagged(
@@ -522,7 +521,6 @@ const SegmentActions = {
       let source = currentSegment.segment
       let sid = currentSegment.sid
       // Escape html
-      source = unescapeHTMLLeaveTags(source)
       SegmentActions.replaceEditAreaTextContent(sid, source)
       SegmentActions.modifiedTranslation(sid, true)
       SegmentActions.getSegmentsQa(currentSegment)
@@ -808,7 +806,7 @@ const SegmentActions = {
     if (shouldRefresh) {
       getGlossaryForSegment({
         idSegment: sid,
-        source: text,
+        source: DraftMatecatUtils.removeTagsFromText(text),
       }).catch(() => {
         OfflineUtils.failedConnection(sid, 'getGlossaryForSegment')
       })
@@ -852,7 +850,7 @@ const SegmentActions = {
         //Response inside SSE Channel
         getGlossaryForSegment({
           idSegment: request.sid,
-          source: request.text,
+          source: DraftMatecatUtils.removeTagsFromText(request.text),
         }).catch(() => {
           OfflineUtils.failedConnection(request.sid, 'getGlossaryForSegment')
         })
@@ -1517,18 +1515,15 @@ const SegmentActions = {
   getSegmentsQa: (segment) => {
     if (!segment) return
 
-    var segment_status = segment.status
-
-    const src_content = TagUtils.prepareTextToSend(segment.updatedSource)
-    const trg_content = TagUtils.prepareTextToSend(segment.translation)
+    const {status, translation, updatedSource} = segment
 
     getLocalWarnings({
       id: segment.sid,
       id_job: config.id_job,
       password: config.password,
-      src_content: src_content,
-      trg_content: trg_content,
-      segment_status: segment_status,
+      src_content: updatedSource,
+      trg_content: translation,
+      segment_status: status,
       characters_counter: segment.charactersCounter ?? 0,
     })
       .then((data) => {
@@ -1586,12 +1581,12 @@ const SegmentActions = {
         resolve()
       }
     }).then(() => {
-      if (CatToolStore.getHaveKeysGlossary() && trg_content) {
+      if (CatToolStore.getHaveKeysGlossary() && translation) {
         const jobTmKeys = CatToolStore.getJobTmKeys()
         getGlossaryCheck({
           idSegment: segment.sid,
-          target: trg_content,
-          source: src_content,
+          target: DraftMatecatUtils.removeTagsFromText(translation),
+          source: DraftMatecatUtils.removeTagsFromText(updatedSource),
           keys: jobTmKeys.map(({key}) => key),
         }).catch((error) => {
           console.log('Glossary check failed', error)

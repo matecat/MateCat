@@ -20,9 +20,9 @@ import CatToolStore from '../../stores/CatToolStore'
 import Speech2Text from '../../utils/speech2text'
 import SegmentActions from '../../actions/SegmentActions'
 import {isUndefined} from 'lodash'
-import TagUtils from '../../utils/tagUtils'
 import SegmentUtils from '../../utils/segmentUtils'
 import CommentsStore from '../../stores/CommentsStore'
+import DraftMatecatUtils from './utils/DraftMatecatUtils'
 
 const ROW_HEIGHT = 90
 const OVERSCAN = 5
@@ -739,22 +739,12 @@ const getSegmentStructure = (segment, sideOpen) => {
   let source = segment.segment
   let target = segment.translation
   if (SegmentUtils.checkCurrentSegmentTPEnabled(segment)) {
-    source = TagUtils.removeAllTags(source)
-    target = TagUtils.removeAllTags(target)
+    source = DraftMatecatUtils.removeTagsFromText(source)
+    target = DraftMatecatUtils.removeTagsFromText(target)
   }
 
-  source = TagUtils.matchTag(
-    TagUtils.decodeHtmlInTag(
-      TagUtils.decodePlaceholdersToTextSimple(source),
-      config.isSourceRTL,
-    ),
-  )
-  target = TagUtils.matchTag(
-    TagUtils.decodeHtmlInTag(
-      TagUtils.decodePlaceholdersToTextSimple(target),
-      config.isSourceRTL,
-    ),
-  )
+  source = DraftMatecatUtils.transformTagsToHtml(source, config.isSourceRTL)
+  target = DraftMatecatUtils.transformTagsToHtml(target, config.isTargetRTL)
 
   return (
     <section
