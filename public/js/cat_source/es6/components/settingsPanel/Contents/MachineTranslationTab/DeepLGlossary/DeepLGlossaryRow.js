@@ -50,7 +50,7 @@ export const DeepLGlossaryRow = ({engineId, row, setRows, isReadOnly}) => {
           name="active"
           checked={isActive}
           onChange={onChangeIsActive}
-          type="radio"
+          type="checkbox"
           disabled={isWaitingResult || isReadOnly}
         />
       </div>

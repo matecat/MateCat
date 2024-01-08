@@ -119,7 +119,7 @@ export const DeepLGlossaryCreateRow = ({engineId, row, setRows}) => {
         <input
           checked={isActive}
           onChange={onChangeIsActive}
-          type="radio"
+          type="checkbox"
           title=""
           disabled
         />
