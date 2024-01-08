@@ -617,9 +617,13 @@ window.UI = {
         }
         UI.execSetTranslationTail()
         UI.setTranslation_success(data, options)
+        //Review
         SegmentActions.setSegmentSaving(id_segment, false)
+        if (config.isReview) {
+          SegmentActions.getSegmentVersionsIssues(idSegment)
+          CatToolActions.reloadQualityReport()
+        }
         data.translation.segment = segment
-        $(document).trigger('translation:change', data.translation)
         data.segment = segment
         $(document).trigger('setTranslation:success', data)
         if (config.alternativesEnabled) {
@@ -820,27 +824,6 @@ window.UI = {
     this.recoverUnsavedSegmentsTimer = setTimeout(function () {
       UI.recoverUnsavedSetTranslations()
     }, 1000)
-  },
-
-  /**
-   * After User click on Translated or T+>> Button
-   * @param segment
-   * @param goToNextUntranslated
-   */
-  clickOnTranslatedButton: function (segment, goToNextUntranslated) {
-    SegmentActions.removeClassToSegment(segment.sid, 'modified')
-
-    UI.setTimeToEdit(segment.sid)
-
-    var afterTranslateFn = function () {
-      if (!goToNextUntranslated) {
-        SegmentActions.gotoNextSegment() //Others functionality override this function
-      } else {
-        SegmentActions.gotoNextUntranslatedSegment()
-      }
-    }
-
-    UI.changeStatus(segment, 'translated', afterTranslateFn)
   },
 
   // Project completion override this method
