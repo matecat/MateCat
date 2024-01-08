@@ -192,14 +192,10 @@
 
     </head>
 
-    <body class="cattool ${review_class} ${job_archived}${source_rtl}${target_rtl}" tal:condition="php: supportedBrowser NE 0 && !job_not_found && !job_cancelled && !job_archived">
+    <body class="cattool ${review_class} ${job_archived}${source_rtl}${target_rtl}" tal:condition="php: !job_not_found && !job_cancelled && !job_archived">
         <div class="page-content"></div>
         <tal:block metal:use-macro="common.html/footer_includes" />
         <tal:block metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/track_codes_translate"/>
-    </body>
-
-    <body tal:condition="php:supportedBrowser EQ 0">
-        <div metal:use-macro="unsupported_browser.html/unsupported"/>
     </body>
 
 <script tal:condition="exists:dqf_user_status">
