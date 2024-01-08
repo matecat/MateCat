@@ -272,7 +272,9 @@ function CatTool() {
       // TODO: da verificare se serve: $(window).trigger('segmentsAdded', {resp: data.files})
       $(window).trigger('segmentsAdded', {resp: data.files})
     }
-    $(document).trigger('files:appended')
+    if (config.isReview) {
+      SegmentActions.addPreloadedIssuesToSegment()
+    }
   }, [segmentsResult, options?.openCurrentSegmentAfter])
 
   // execute callback option from onRender action
@@ -339,9 +341,7 @@ function CatTool() {
           <article id="file" className="loading mbc-commenting-closed">
             <div className="article-segments-container">
               <SegmentsContainer
-                isReview={Review.enabled()}
-                isReviewExtended={ReviewExtended.enabled()}
-                reviewType={Review.type}
+                isReview={config.isReview}
                 enableTagProjection={UI.enableTagProjection}
                 startSegmentId={UI.startSegmentId?.toString()}
                 firstJobSegment={config.first_job_segment}
