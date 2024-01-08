@@ -13,6 +13,8 @@ use Analysis\AnalysisDao;
 use ConnectedServices\GDrive as GDrive;
 use ConnectedServices\GDrive\Session;
 use Exceptions\NotFoundException;
+use Features\TranslationVersions\Model\TranslationEventDao;
+use Features\TranslationVersions\Model\TranslationEventStruct;
 use Files\FilesPartsDao;
 use Files\FilesPartsStruct;
 use Files\MetadataDao;
@@ -20,6 +22,7 @@ use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use FilesStorage\S3FilesStorage;
 use Jobs\SplitQueue;
+use LQA\ChunkReviewDao;
 use LQA\QA;
 use Matecat\SubFiltering\Filters\FromViewNBSPToSpaces;
 use Matecat\SubFiltering\Filters\PhCounter;
@@ -905,7 +908,8 @@ class ProjectManager {
             foreach ( $array_files as $index => $filename ) {
                 if ( $file_info[ 'original_filename' ] === $filename ) {
                     if ( isset( $this->projectStructure[ 'instructions' ][ $index ] ) && !empty( $this->projectStructure[ 'instructions' ][ $index ] ) ) {
-                        $this->_insertInstructions( $fid, $this->projectStructure[ 'instructions' ][ $index ] );
+                        $instructions = Utils::stripTagsPreservingHrefs($this->projectStructure[ 'instructions' ][ $index ]);
+                        $this->_insertInstructions( $fid, $instructions );
                     }
 
                 }
@@ -1306,7 +1310,7 @@ class ProjectManager {
 
                 //prepare pre-translated segments queries
                 if ( !empty( $projectStructure[ 'translations' ] ) ) {
-                    $this->_insertPreTranslations( $newJob->id );
+                    $this->_insertPreTranslations( $newJob, $projectStructure );
                 }
             } catch ( Exception $e ) {
                 $msg = "\n\n Error, pre-translations lost, project should be re-created. \n\n " . var_export( $e->getMessage(), true );
@@ -1914,6 +1918,7 @@ class ProjectManager {
 
                                         // could not have attributes, suppress warning
                                         $state = @$xliff_trans_unit[ 'seg-target' ][ $position ][ 'attr' ][ 'state' ];
+                                        $stateQualifier = @$xliff_trans_unit[ 'seg-target' ][ $position ][ 'attr' ][ 'state-qualifier' ];
                                         $target_extract_external = $this->_strip_external( $xliff_trans_unit[ 'seg-target' ][ $position ][ 'raw-content' ], $xliffInfo );
 
                                         //
@@ -1934,13 +1939,7 @@ class ProjectManager {
                                         $src = CatUtils::trimAndStripFromAnHtmlEntityDecoded( $extract_external[ 'seg' ] );
                                         $trg = CatUtils::trimAndStripFromAnHtmlEntityDecoded( $target_extract_external[ 'seg' ] );
 
-                                        $initialTranslationStates = [
-                                            'new',
-                                            'initial',
-                                            'needs-translation',
-                                        ];
-
-                                        if ( !in_array($state, $initialTranslationStates) && $this->__isTranslated( $src, $trg, $xliff_trans_unit ) && !is_numeric( $src ) && !empty( $trg ) ) { //treat 0,1,2.. as translated content!
+                                        if ( !Constants_XliffTranslationStatus::isNew($state) && $this->__isTranslated( $src, $trg, $xliff_trans_unit, $state, $stateQualifier ) && !is_numeric( $src ) && !empty( $trg ) ) { //treat 0,1,2.. as translated content!
 
                                             $target = $this->filter->fromRawXliffToLayer0( $target_extract_external[ 'seg' ] );
 
@@ -2069,9 +2068,13 @@ class ProjectManager {
 
                             if ( isset( $xliff_trans_unit[ 'target' ][ 'raw-content' ] ) ) {
 
+
+                                // could not have attributes, suppress warning
+                                $state = @$xliff_trans_unit['target']['attr']['state'];
+                                $stateQualifier = @$xliff_trans_unit['target']['attr'][ 'state-qualifier' ];
                                 $target_extract_external = $this->_strip_external( $xliff_trans_unit[ 'target' ][ 'raw-content' ], $xliffInfo );
 
-                                if ( $this->__isTranslated( $xliff_trans_unit[ 'source' ][ 'raw-content' ], $target_extract_external[ 'seg' ], $xliff_trans_unit ) ) {
+                                if ( !Constants_XliffTranslationStatus::isNew($state) && $this->__isTranslated( $xliff_trans_unit[ 'source' ][ 'raw-content' ], $target_extract_external[ 'seg' ], $xliff_trans_unit, $state, $stateQualifier ) ) {
 
                                     $target = $this->filter->fromRawXliffToLayer0( $target_extract_external[ 'seg' ] );
 
@@ -2607,15 +2610,17 @@ class ProjectManager {
     }
 
     /**
-     * @param $jid
+     * @param Jobs_JobStruct $job
+     * @param ArrayObject $projectStructure
      * @throws NotFoundException
      * @throws \API\V2\Exceptions\AuthenticationError
      * @throws \Exceptions\ValidationError
      * @throws \TaskRunner\Exceptions\EndQueueException
      * @throws \TaskRunner\Exceptions\ReQueueException
      */
-    protected function _insertPreTranslations( $jid ) {
+    protected function _insertPreTranslations( Jobs_JobStruct $job, ArrayObject $projectStructure ) {
 
+        $jid = $job->id;
         $this->_cleanSegmentsMetadata();
 
         $status = $this->features->filter( 'filter_status_for_pretranslated_segments',
@@ -2630,7 +2635,7 @@ class ProjectManager {
                 continue;
             }
 
-            //array of segmented translations
+            // array of segmented translations
             foreach ( $struct as $pos => $translation_row ) {
 
                 $position          = (isset($translation_row[ 6 ])) ? $translation_row[ 6 ] : null;
@@ -2701,7 +2706,29 @@ class ProjectManager {
 
         //clean translations and queries
         unset( $query_translations_values );
+    }
 
+    /**
+     * @param Jobs_JobStruct $job
+     * @param $source_page
+     * @throws \Exception
+     */
+    private function createSecondPassReview(Jobs_JobStruct $job)
+    {
+        $records = RevisionFactory::initFromProject( $this->project )->getRevisionFeature()->createQaChunkReviewRecords(
+            [ $job ],
+            $this->project,
+            [
+                'source_page' => 3
+            ]
+        );
+
+        // destroy project data cache
+        ( new \Projects_ProjectDao() )->destroyCacheForProjectData( $this->project->id, $this->project->password );
+
+        // destroy the 5 minutes chunk review cache
+        $chunk = (new \Chunks_ChunkDao())->getByIdAndPassword($records[ 0 ]->id_job, $records[ 0 ]->password);
+        ( new ChunkReviewDao() )->destroyCacheForFindChunkReviews($chunk, 60 * 5 );
     }
 
     /**
@@ -2712,23 +2739,26 @@ class ProjectManager {
     private function preTranslationStatus($trans_unit, $position = null){
 
         // state handling
+        $state = null;
+
         if(isset($trans_unit['seg-target'][$position]['attr']) and isset($trans_unit['seg-target'][$position]['attr']['state'])){
             $state = $trans_unit['seg-target'][$position]['attr']['state'];
+        } elseif(isset($trans_unit['target']['attr']) and isset($trans_unit['target']['attr']['state'])){
+            $state = $trans_unit['target']['attr']['state'];
+        }
 
-            switch ($state){
+        if($state !== null){
 
-                case 'new':
-                case 'needs-translation':
-                case 'initial':
-                    return Constants_TranslationStatus::STATUS_NEW;
+            if(Constants_XliffTranslationStatus::isNew($state)){
+                return Constants_TranslationStatus::STATUS_NEW;
+            }
 
-                case 'translated':
-                    return Constants_TranslationStatus::STATUS_TRANSLATED;
+            if(Constants_XliffTranslationStatus::isTranslated($state)){
+                return Constants_TranslationStatus::STATUS_TRANSLATED;
+            }
 
-                default:
-                case 'reviewed':
-                case 'final':
-                    return Constants_TranslationStatus::STATUS_APPROVED;
+            if(Constants_XliffTranslationStatus::isRevision($state)){
+                return Constants_TranslationStatus::STATUS_APPROVED;
             }
         }
 
@@ -3308,8 +3338,9 @@ class ProjectManager {
      *
      * @param $source
      * @param $target
-     *
      * @param $xliff_trans_unit
+     * @param $state
+     * @param $stateQualifier
      *
      * @return bool|mixed
      * @throws NotFoundException
@@ -3318,11 +3349,23 @@ class ProjectManager {
      * @throws \TaskRunner\Exceptions\EndQueueException
      * @throws \TaskRunner\Exceptions\ReQueueException
      */
-    private function __isTranslated( $source, $target, $xliff_trans_unit ) {
+    private function __isTranslated( $source, $target, $xliff_trans_unit, $state = null, $stateQualifier = null ) {
+
+        // ignore translations for fuzzy matches (xliff 1.2)
+        if($stateQualifier !== null){
+            if(Constants_XliffTranslationStatus::isFuzzyMatch($stateQualifier)){
+                return false;
+            }
+        }
+
+        if($state !== null){
+            return !Constants_XliffTranslationStatus::isNew($state);
+        }
+
         if ( $source != $target ) {
 
             // evaluate if different source and target should be considered translated
-            $differentSourceAndTargetIsTranslated = ( empty( $target ) ) ? false : true;
+            $differentSourceAndTargetIsTranslated = !empty( $target );
             $differentSourceAndTargetIsTranslated = $this->features->filter(
                 'filterDifferentSourceAndTargetIsTranslated',
                 $differentSourceAndTargetIsTranslated, $this->projectStructure, $xliff_trans_unit

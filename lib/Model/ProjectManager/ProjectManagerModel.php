@@ -89,6 +89,9 @@ class ProjectManagerModel {
 
     }
 
+    /**
+     * @param $query_translations_values
+     */
     public static function insertPreTranslations( &$query_translations_values ) {
 
         $dbHandler = Database::obtain();
