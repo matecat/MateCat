@@ -28,7 +28,7 @@ class Translations_SegmentTranslationStruct extends DataAccess_AbstractDaoSilent
     public $locked;
     public $warning;
     public $serialized_errors_list;
-    public $version_number;
+    public $version_number = 0; // this value should be not null
 
 
     public function isReviewedStatus() {

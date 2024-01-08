@@ -5,15 +5,14 @@ import Immutable from 'immutable'
 import SegmentConstants from '../../constants/SegmentConstants'
 import SegmentStore from '../../stores/SegmentStore'
 import TranslationMatches from './utils/translationMatches'
-import TagUtils from '../../utils/tagUtils'
 import TextUtils from '../../utils/textUtils'
 import SegmentActions from '../../actions/SegmentActions'
-import CommonUtils from '../../utils/commonUtils'
 import CatToolStore from '../../stores/CatToolStore'
 import CatToolConstants from '../../constants/CatToolConstants'
 import {SegmentContext} from './SegmentContext'
 import {SegmentFooterTabError} from './SegmentFooterTabError'
 import ApplicationStore from '../../stores/ApplicationStore'
+import DraftMatecatUtils from './utils/DraftMatecatUtils'
 
 class SegmentFooterTabMatches extends React.Component {
   static contextType = SegmentContext
@@ -71,19 +70,16 @@ class SegmentFooterTabMatches extends React.Component {
       // Attention Bug: We are mixing the view mode and the raw data mode.
       // before doing a enhanced  view you will need to add a data-original tag
       //
-      item.suggestionDecodedHtml = TagUtils.matchTag(
-        TagUtils.decodeHtmlInTag(
-          TagUtils.decodePlaceholdersToTextSimple(this.segment),
-          config.isSourceRTL,
-        ),
+      item.suggestionDecodedHtml = DraftMatecatUtils.transformTagsToHtml(
+        this.segment,
+        config.isSourceRTL,
       )
-      item.translationDecodedHtml = TagUtils.matchTag(
-        TagUtils.decodeHtmlInTag(
-          TagUtils.decodePlaceholdersToTextSimple(this.translation),
-          config.isTargetRTL,
-        ),
+
+      item.translationDecodedHtml = DraftMatecatUtils.transformTagsToHtml(
+        this.translation,
+        config.isTargetRTL,
       )
-      item.translation = TagUtils.transformTextFromBe(this.translation)
+      item.translation = this.translation
 
       item.sourceDiff = item.suggestionDecodedHtml
       item.memoryKey = this.memory_key
@@ -96,11 +92,10 @@ class SegmentFooterTabMatches extends React.Component {
           this.segment,
           self.props.segment.segment,
         )
-        item.sourceDiff = item.sourceDiff.replace(/&amp;/g, '&')
-        item.sourceDiff = TagUtils.matchTag(
-          TagUtils.decodeHtmlInTag(
-            TagUtils.decodePlaceholdersToTextSimple(item.sourceDiff),
-          ),
+
+        item.sourceDiff = DraftMatecatUtils.transformTagsToHtml(
+          item.sourceDiff,
+          config.isSourceRTL,
         )
       }
 
@@ -157,10 +152,9 @@ class SegmentFooterTabMatches extends React.Component {
   }
 
   deleteSuggestion(match) {
-    var source = TextUtils.htmlDecode(match.segment)
-    var target = TextUtils.htmlDecode(match.translation)
-    target = TagUtils.prepareTextToSend(target)
-    source = TagUtils.prepareTextToSend(source)
+    var source = match.segment
+    var target = match.translation
+
     SegmentActions.deleteContribution(
       source,
       target,

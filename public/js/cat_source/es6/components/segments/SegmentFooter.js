@@ -148,9 +148,7 @@ function SegmentFooter() {
     }
     const notes =
       SegmentFooterTabMessages.prototype.getNotes.call(tabMessagesContext)
-    return (
-      (Array.isArray(notes) && notes.length > 0) || segment.metadata.length > 0
-    )
+    return Array.isArray(notes) && notes.length > 0
   }, [segment])
 
   const nextTab = useMemo(() => {

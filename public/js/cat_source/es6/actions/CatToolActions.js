@@ -15,6 +15,7 @@ import {Header} from '../components/header/cattol/Header'
 import {getTmKeysJob} from '../api/getTmKeysJob'
 import {getDomainsList} from '../api/getDomainsList'
 import {checkJobKeysHaveGlossary} from '../api/checkJobKeysHaveGlossary'
+import {getJobMetadata} from '../api/getJobMetadata'
 import CatToolConstants from '../constants/CatToolConstants'
 
 let CatToolActions = {
@@ -349,6 +350,22 @@ let CatToolActions = {
       actionType: CatToolConstants.OPEN_SETTINGS_PANEL,
       value,
     })
+  },
+  getJobMetadata: ({idJob, password}) => {
+    if (!CatToolStore.jobMetadata) {
+      getJobMetadata(idJob, password).then((jobMetadata) => {
+        AppDispatcher.dispatch({
+          actionType: CattolConstants.GET_JOB_METADATA,
+          jobMetadata,
+        })
+        CatToolStore.jobMetadata = jobMetadata
+      })
+    } else {
+      AppDispatcher.dispatch({
+        actionType: CattolConstants.GET_JOB_METADATA,
+        jobMetadata: CatToolStore.jobMetadata,
+      })
+    }
   },
 }
 

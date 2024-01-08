@@ -2,7 +2,38 @@
 
 namespace Files;
 
-class CSV {
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use stdClass;
+
+class CSV
+{
+    /**
+     * @param stdClass $file
+     * @param string $prefix
+     * @return false|string
+     * @throws \PhpOffice\PhpSpreadsheet\Reader\Exception
+     */
+    public static function extract($file, $prefix = '')
+    {
+        if(!isset($file->file_path)){
+            return false;
+        }
+
+        $tmpFileName = tempnam( "/tmp", $prefix );
+
+        $objReader = IOFactory::createReaderForFile( $file->file_path );
+
+        $objPHPExcel = $objReader->load( $file->file_path );
+        $objWriter   = new \PhpOffice\PhpSpreadsheet\Writer\Csv( $objPHPExcel );
+        $objWriter->save( $tmpFileName );
+
+        $oldPath             = $file->file_path;
+        $file->file_path     = $tmpFileName;
+
+        unlink( $oldPath );
+
+        return $file->file_path;
+    }
 
     /**
      * @param $filepath
@@ -22,7 +53,7 @@ class CSV {
      *
      * @return array
      */
-    public static function parse( $filepath, $delimiter = ',' ) {
+    public static function parseToArray($filepath, $delimiter = ',' ) {
 
         $output = [];
 
@@ -34,6 +65,30 @@ class CSV {
         }
 
         return $output;
+    }
+
+    /**
+     * @param $filepath
+     * @param string $delimiter
+     * @return string|null
+     */
+    public static function withoutHeaders($filepath, $delimiter = ',')
+    {
+        $csv = self::parseToArray($filepath);
+
+        if(!is_array($csv)){
+            return null;
+        }
+
+        unset($csv[0]);
+
+        $out = "";
+
+        foreach($csv as $arr) {
+            $out .= implode($delimiter, $arr) . PHP_EOL;
+        }
+
+        return $out;
     }
 
     /**

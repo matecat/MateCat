@@ -105,7 +105,9 @@ class SegmentFooterTabMessages extends React.Component {
     const metadata =
       typeof this.getFilteredMetadataKeys === 'function'
         ? this.getFilteredMetadataKeys()
-        : this.props.metadata
+        : this.props.metadata.filter(
+            (item) => item.meta_key !== 'sizeRestriction',
+          )
     if (metadata?.length > 0) {
       notesHtml.push(this.getMetadataNoteTemplate())
     }

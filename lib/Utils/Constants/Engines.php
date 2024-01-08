@@ -19,6 +19,7 @@ class Constants_Engines {
     const SMART_MATE       = 'SmartMATE';
     const YANDEX_TRANSLATE = 'YandexTranslate';
     const MMT              = 'MMT';
+    const DEEPL            = 'DeepL';
     const GOOGLE_TRANSLATE = 'GoogleTranslate';
     const INTENTO          = 'Intento';
 
@@ -32,6 +33,7 @@ class Constants_Engines {
             self::GOOGLE_TRANSLATE => self::GOOGLE_TRANSLATE,
             self::INTENTO          => self::INTENTO,
             self::MMT              => self::MMT,
+            self::DEEPL            => self::DEEPL,
     ];
 
     /**

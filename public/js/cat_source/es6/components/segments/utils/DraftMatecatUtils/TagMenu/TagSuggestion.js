@@ -1,8 +1,11 @@
-import React, {Component} from 'react'
+import React from 'react'
 import {getStyleForName} from '../tagModel'
 
 const TagSuggestion = React.forwardRef((props, ref) => {
-  const tagStyle = getStyleForName(props.suggestion.data.name).join(' ')
+  const tagStyle = getStyleForName(
+    props.suggestion.data.name,
+    config.isTargetRTL,
+  ).join(' ')
   const {index} = props.suggestion.data
   return (
     <div
