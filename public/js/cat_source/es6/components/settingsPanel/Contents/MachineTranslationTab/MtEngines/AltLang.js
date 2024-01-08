@@ -1,7 +1,7 @@
 import React from 'react'
 import {useForm} from 'react-hook-form'
 
-export const AltLang = ({addMTEngine, error}) => {
+export const AltLang = ({addMTEngine, error, isRequestInProgress}) => {
   const {
     register,
     handleSubmit,
@@ -42,6 +42,7 @@ export const AltLang = ({addMTEngine, error}) => {
           <div className="provider-field">
             {error && <span className={'mt-error'}>{error.message}</span>}
             <button
+              disabled={isRequestInProgress}
               className="ui primary button"
               onClick={handleSubmit(onSubmit)}
             >
