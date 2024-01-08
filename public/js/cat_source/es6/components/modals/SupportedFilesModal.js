@@ -1,7 +1,6 @@
 import React from 'react'
 
-const SupportedFilesModal = () => {
-  const supportedFiles = config.supported_file_types_array
+const SupportedFilesModal = ({supportedFiles}) => {
   const keys = Object.keys(supportedFiles)
 
   return (

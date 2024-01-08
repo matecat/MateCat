@@ -25,6 +25,8 @@ import {
 import Speech2TextFeature from '../utils/speech2text'
 import SegmentUtils from '../utils/segmentUtils'
 import {getTmKeysJob} from '../api/getTmKeysJob'
+import {getSupportedLanguages} from '../api/getSupportedLanguages'
+import ApplicationStore from '../stores/ApplicationStore'
 
 const urlParams = new URLSearchParams(window.location.search)
 const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
@@ -52,6 +54,7 @@ function CatTool() {
   const [getPublicMatches, setGetPublicMatches] = useState(
     Boolean(config.get_public_matches),
   )
+  const [supportedLanguages, setSupportedLanguages] = useState([])
 
   const startSegmentIdRef = useRef(UI.startSegmentId)
   const callbackAfterSegmentsResponseRef = useRef()
@@ -185,6 +188,14 @@ function CatTool() {
 
   // on mount dispatch some actions
   useEffect(() => {
+    getSupportedLanguages()
+      .then((data) => {
+        ApplicationStore.setLanguages(data)
+        setSupportedLanguages(data)
+      })
+      .catch((error) =>
+        console.log('Error retrieving supported languages', error),
+      )
     CatToolActions.onRender()
     $('html').trigger('start')
     if (LXQ.enabled()) LXQ.initPopup()
@@ -337,6 +348,7 @@ function CatTool() {
                 guessTagActive={guessTagActive}
                 speechToTextActive={speechToTextActive}
                 multiMatchLangs={multiMatchLangs}
+                languages={supportedLanguages}
               />
             </div>
           </article>
@@ -364,12 +376,16 @@ function CatTool() {
             setGuessTagActive,
             setSpeechToTextActive,
             sourceLang: {
-              name: CommonUtils.getLanguageNameFromLocale(config.source_rfc),
+              name: ApplicationStore.getLanguageNameFromLocale(
+                config.source_rfc,
+              ),
               code: config.source_rfc,
             },
             targetLangs: [
               {
-                name: CommonUtils.getLanguageNameFromLocale(config.target_rfc),
+                name: ApplicationStore.getLanguageNameFromLocale(
+                  config.target_rfc,
+                ),
                 code: config.target_rfc,
               },
             ],
@@ -390,7 +406,7 @@ function CatTool() {
         target={config.target_rfc}
         isReview={config.isReview}
         isCJK={config.isCJK}
-        languagesArray={config.languages_array}
+        languagesArray={supportedLanguages}
       />
     </>
   )

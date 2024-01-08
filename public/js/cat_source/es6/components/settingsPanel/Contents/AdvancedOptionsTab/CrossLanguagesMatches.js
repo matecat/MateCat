@@ -1,12 +1,13 @@
 import React, {useEffect, useState} from 'react'
 import {Select} from '../../../common/Select'
 import SegmentActions from '../../../../actions/SegmentActions'
+import ApplicationStore from '../../../../stores/ApplicationStore'
 
 export const CrossLanguagesMatches = ({
   multiMatchLangs,
   setMultiMatchLangs,
 }) => {
-  const languages = config.languages_array.map((lang) => {
+  const languages = ApplicationStore.getLanguages().map((lang) => {
     return {name: lang.name, id: lang.code}
   })
   const [activeLang1, setActiveLang1] = useState(

@@ -2218,6 +2218,25 @@ var spec = {
         },
       },
     },
+    '/api/v2/files': {
+      get: {
+        tags: ['Files'],
+        summary: 'Supported file types list.',
+        description: 'List of supported file types.',
+        parameters: [],
+        responses: {
+          200: {
+            description: 'File types List',
+            schema: {
+              $ref: '#/definitions/Files',
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
     '/api/v2/payable_rate': {
       get: {
         tags: ['Billing models'],
@@ -3288,6 +3307,78 @@ var spec = {
         },
       },
     },
+    Files: {
+      type: 'object',
+      properties: {
+        Office: {
+          type: 'array',
+          items: {
+            type: 'array',
+            items: {
+              $ref: '#/definitions/File',
+            },
+          },
+        },
+        Web: {
+          type: 'array',
+          items: {
+            type: 'array',
+            items: {
+              $ref: '#/definitions/File',
+            },
+          },
+        },
+        'Scanned Files': {
+          type: 'array',
+          items: {
+            type: 'array',
+            items: {
+              $ref: '#/definitions/File',
+            },
+          },
+        },
+        'Interchange Formats': {
+          type: 'array',
+          items: {
+            type: 'array',
+            items: {
+              $ref: '#/definitions/File',
+            },
+          },
+        },
+        'Desktop Publishing': {
+          type: 'array',
+          items: {
+            type: 'array',
+            items: {
+              $ref: '#/definitions/File',
+            },
+          },
+        },
+        Localization: {
+          type: 'array',
+          items: {
+            type: 'array',
+            items: {
+              $ref: '#/definitions/File',
+            },
+          },
+        },
+      },
+    },
+
+    File: {
+      type: 'object',
+      properties: {
+        ext: {
+          type: 'string',
+        },
+        class: {
+          type: 'string',
+        },
+      },
+    },
+
     PendingInvitation: {
       type: 'array',
       items: {

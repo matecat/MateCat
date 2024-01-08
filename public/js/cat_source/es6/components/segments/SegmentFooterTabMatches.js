@@ -7,11 +7,11 @@ import SegmentStore from '../../stores/SegmentStore'
 import TranslationMatches from './utils/translationMatches'
 import TextUtils from '../../utils/textUtils'
 import SegmentActions from '../../actions/SegmentActions'
-import CommonUtils from '../../utils/commonUtils'
 import CatToolStore from '../../stores/CatToolStore'
 import CatToolConstants from '../../constants/CatToolConstants'
 import {SegmentContext} from './SegmentContext'
 import {SegmentFooterTabError} from './SegmentFooterTabError'
+import ApplicationStore from '../../stores/ApplicationStore'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
 
 class SegmentFooterTabMatches extends React.Component {
@@ -170,7 +170,7 @@ class SegmentFooterTabMatches extends React.Component {
         <li>{match.suggestion_info}</li>
         <li className={'graydesc'}>
           <span className={'bold'} style={{fontSize: '14px'}}>
-            {CommonUtils.getLanguageNameFromLocale(match.target)}
+            {ApplicationStore.getLanguageNameFromLocale(match.target)}
           </span>
         </li>
         <li className="graydesc graydesc-sourcekey">
