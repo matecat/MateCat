@@ -830,7 +830,15 @@ class Editarea extends React.Component {
       !isSelectedEntity(this.state.editorState) &&
       window.getSelection().type === 'Caret'
     ) {
-      const direction = e.key === 'Backspace' ? 'left' : 'right'
+      const isRTL = Boolean(config.isTargetRTL)
+      const direction =
+        e.key === 'Backspace'
+          ? !isRTL
+            ? 'left'
+            : 'right'
+          : !isRTL
+          ? 'right'
+          : 'left'
 
       const updatedStateNearZwsp = checkCaretIsNearZwsp({
         editorState: this.state.editorState,
