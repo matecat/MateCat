@@ -1,7 +1,8 @@
 <?php
 
-namespace API\App;
+namespace API\V2;
 
+use API\App\AbstractStatefulKleinController;
 use AuthCookie;
 use Bootstrap;
 use CookieManager;

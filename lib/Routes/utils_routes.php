@@ -109,8 +109,3 @@ $klein->with( '/api/app/glossary', function () {
 
 // AI Assistant
 route( '/api/app/ai-assistant', 'POST',  'API\App\AIAssistantController', 'index' );
-
-// Download files
-route( '/api/app/translation/[:id_job]/[:password]', 'GET',  'API\App\DownloadFileController', 'index' );
-route( '/api/app/SDLXLIFF/[:id_job]/[:password]/[:filename]', 'GET',  'API\App\DownloadFileController', 'forceXliff' );
-route( '/api/app/TMX/[:id_job]/[:password]', 'GET',  'API\App\ExportTMXController', 'index' );

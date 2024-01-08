@@ -1,6 +1,6 @@
 <?php
 
-namespace API\App;
+namespace API\V2;
 
 use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
