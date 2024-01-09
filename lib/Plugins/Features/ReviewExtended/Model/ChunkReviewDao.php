@@ -41,9 +41,9 @@ class ChunkReviewDao extends \LQA\ChunkReviewDao {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->execute( [
-                'id_job'      => $chunk->id,
-                'password'    => $chunk->password,
-                'source_page' => $source_page
+            'id_job'      => $chunk->id,
+            'password'    => $chunk->password,
+            'source_page' => $source_page
         ] );
 
         $count = $stmt->fetch();
@@ -70,9 +70,9 @@ class ChunkReviewDao extends \LQA\ChunkReviewDao {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->execute( [
-                'id_job'      => $chunk->id,
-                'password'    => $chunk->password,
-                'source_page' => $source_page
+            'id_job'      => $chunk->id,
+            'password'    => $chunk->password,
+            'source_page' => $source_page
         ] );
 
         $count = $stmt->fetch();
@@ -99,9 +99,9 @@ class ChunkReviewDao extends \LQA\ChunkReviewDao {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->execute( [
-                'id_job'      => $chunk->id,
-                'password'    => $chunk->password,
-                'source_page' => $source_page,
+            'id_job'      => $chunk->id,
+            'password'    => $chunk->password,
+            'source_page' => $source_page,
         ] );
 
         $result = $stmt->fetch();
@@ -112,7 +112,8 @@ class ChunkReviewDao extends \LQA\ChunkReviewDao {
     public function recountAdvancementWords( Chunks_ChunkStruct $chunk, $source_page ) {
 
         $sql = "
-            SELECT SUM( eq_word_count ) FROM segment_translations st
+            SELECT (SUM( eq_word_count ) + SUM(s.raw_word_count)) FROM segment_translations st
+				join segments s ON s.id = st.id_segment
                 JOIN jobs j on j.id = st.id_job
                 AND st.id_segment <= j.job_last_segment
                 AND st.id_segment >= j.job_first_segment
@@ -141,11 +142,11 @@ class ChunkReviewDao extends \LQA\ChunkReviewDao {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->execute( [
-                'id_job'            => $chunk->id,
-                'password'          => $chunk->password,
-                'source_page'       => $source_page,
-                'job_first_segment' => $chunk->job_first_segment,
-                'job_last_segment'  => $chunk->job_last_segment
+            'id_job'            => $chunk->id,
+            'password'          => $chunk->password,
+            'source_page'       => $source_page,
+            'job_first_segment' => $chunk->job_first_segment,
+            'job_last_segment'  => $chunk->job_last_segment
         ] );
 
         $result = $stmt->fetch();
@@ -198,13 +199,13 @@ class ChunkReviewDao extends \LQA\ChunkReviewDao {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->execute( [
-                'id'                   => $chunkReviewID,
-                'id_job'               => $chunkReview_partial->id_job,
-                'password'             => $chunkReview_partial->password,
-                'penalty_points'       => empty( $data[ 'penalty_points' ] ) ? 0 : $data[ 'penalty_points' ],
-                'reviewed_words_count' => $data[ 'reviewed_words_count' ],
-                'advancement_wc'       => $data[ 'advancement_wc' ],
-                'total_tte'            => $data[ 'total_tte' ],
+            'id'                   => $chunkReviewID,
+            'id_job'               => $chunkReview_partial->id_job,
+            'password'             => $chunkReview_partial->password,
+            'penalty_points'       => empty( $data[ 'penalty_points' ] ) ? 0 : $data[ 'penalty_points' ],
+            'reviewed_words_count' => $data[ 'reviewed_words_count' ],
+            'advancement_wc'       => $data[ 'advancement_wc' ],
+            'total_tte'            => $data[ 'total_tte' ],
         ] );
 
         return ChunkReviewDao::findById( $chunkReviewID );

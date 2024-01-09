@@ -38,7 +38,6 @@
         basepath: '${basepath | string:/}',
         hostpath: '${hostpath | string:/}',
         unsupportedFileTypes: '${unsupported_file_types}',
-        allowedFileTypes: /(\.|\/)(${allowed_file_types})$/i,
         isOpenAiEnabled: ${isOpenAiEnabled},
         conversionEnabled: ${conversion_enabled},
         analysisEnabled: ${volume_analysis_enabled},
@@ -55,7 +54,6 @@
         lxq_license: '${lxq_license | string:}',
         lexiqa_languages: ${lexiqa_languages| string:[]},
         tag_projection_languages: ${tag_projection_languages},
-        languages_array : ${languages_array},
         user_plugins: JSON.parse( '${ php: json_encode(user_plugins)}'),
         private_keys: ${user_keys_obj | string: []},
         currentTargetLang: '${currentTargetLang | string: []}',
@@ -65,7 +63,6 @@
         subject_array: ${subjects | string:[]]},
         formats_number: ${formats_number},
         isAnInternalUser: ${php: var_export( !empty( isAnInternalUser ), true )},
-        supported_file_types_array: JSON.parse( '${ php: json_encode(supported_file_types_array)}'),
         not_empty_default_tm_key: ${not_empty_default_tm_key|string:false},
         intento_providers: JSON.parse('${translation_engines_intento_prov_json}'),
         show_tag_projection: ${show_tag_projection | string: false},
@@ -76,17 +73,11 @@
     <script type="text/javascript" src="${basepath}public/build/lib_upload.min.js?build=${build_number}"></script>
 
 </head>
-<body tal:condition="not:supportedBrowser">
-<div metal:use-macro="unsupported_browser.html/unsupported"/>
-</body>
 
-<body tal:condition="php:supportedBrowser EQ -2">
-<div metal:use-macro="unsupported_browser.html/unsupported"/>
-</body>
 
-<div metal:use-macro="unsupported_browser.html/devices"/>
 
-<body tal:condition="php:supportedBrowser EQ 1" class="upload-page started">
+
+<body class="upload-page started">
 <div class="reloading-upload-page" style="position: absolute;height: 85%;width: 100%;background-color: rgba(76, 69, 69, 0.3);top: 170px;left: 0;z-index: 3;display: none;">
     <div class="ui active inverted dimmer">
         <div class="ui massive text loader">Reloading</div>

@@ -318,11 +318,11 @@ class setTranslationController extends ajaxController {
 
         if ( $check->thereAreWarnings() ) {
             $err_json    = $check->getWarningsJSON();
-            $translation = $this->filter->fromLayer1ToLayer0( $this->__postInput[ 'translation' ] );
+            $translation = $this->filter->fromLayer2ToLayer0( $this->__postInput[ 'translation' ] );
         } else {
             $err_json         = '';
             $targetNormalized = $check->getTrgNormalized();
-            $translation      = $this->filter->fromLayer1ToLayer0( $targetNormalized );
+            $translation      = $this->filter->fromLayer2ToLayer0( $targetNormalized );
         }
 
         //PATCH TO FIX BOM INSERTIONS

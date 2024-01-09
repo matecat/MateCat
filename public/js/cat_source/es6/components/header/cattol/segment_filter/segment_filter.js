@@ -66,12 +66,6 @@ let SegmentFilterUtils = {
         }
       })
 
-      $(window).on('segmentOpened', function (event, data) {
-        if (SegmentFilterUtils.filtering()) {
-          SegmentFilterUtils.setStoredState({lastSegmentId: data.segmentId})
-        }
-      })
-
       $(document).on('click', 'header .filter', function (e) {
         e.preventDefault()
         if (!SegmentFilterUtils.open) {

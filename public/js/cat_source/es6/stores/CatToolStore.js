@@ -12,6 +12,7 @@ EventEmitter.prototype.setMaxListeners(0)
 let CatToolStore = assign({}, EventEmitter.prototype, {
   files: null,
   qr: null,
+  languages: [],
   searchResults: {
     searchResults: [], // Array
     occurrencesList: [],
@@ -92,6 +93,12 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
   },
   setHaveKeysGlossary: function (value) {
     this.haveKeysGlossary = value
+  },
+  setLanguages: function (languages) {
+    this.languages = languages
+  },
+  getLanguages: function () {
+    return this.languages
   },
   emitChange: function () {
     this.emit.apply(this, arguments)

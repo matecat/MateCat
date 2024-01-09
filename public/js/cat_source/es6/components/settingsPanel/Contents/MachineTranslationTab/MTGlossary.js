@@ -65,8 +65,8 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
     activeMTEngine.mtGlossaryProps?.isOpened ?? false,
   )
   const [rows, setRows] = useState()
-  const [isGlossaryCaseInsensitive, setIsGlossaryCaseInsensitive] = useState(
-    activeMTEngine.mtGlossaryProps?.isGlossaryCaseInsensitive ?? false,
+  const [isGlossaryCaseSensitive, setIsGlossaryCaseSensitive] = useState(
+    activeMTEngine.mtGlossaryProps?.isGlossaryCaseSensitive ?? false,
   )
 
   const activeGlossariesRef = useRef()
@@ -160,10 +160,10 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
       mtGlossaryProps: {
         ...prevState.mtGlossaryProps,
         glossaries: rows.filter(({isActive}) => isActive).map(({id}) => id),
-        isGlossaryCaseInsensitive,
+        isGlossaryCaseSensitive,
       },
     }))
-  }, [rows, isGlossaryCaseInsensitive, isCattoolPage, setActiveMTEngine])
+  }, [rows, isGlossaryCaseSensitive, isCattoolPage, setActiveMTEngine])
 
   const addGlossary = () => {
     const row = {
@@ -192,7 +192,7 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
   }
 
   const onChangeCaseSensitive = (e) =>
-    setIsGlossaryCaseInsensitive(e.currentTarget.checked)
+    setIsGlossaryCaseSensitive(e.currentTarget.checked)
 
   const haveRecords = rows?.length > 0
 
@@ -227,12 +227,14 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
                   <IconAdd size={18} />
                   New
                 </button>
-                <div className="mt-glossary-case-sensitive">
+                <div
+                  className="mt-glossary-case-sensitive"
+                  title='Activating this option makes glossary matching case-sensitive: if your glossary includes a translation for "Cat", it will only be applied when "Cat" is found with an initial capital letter'
+                >
                   <input
-                    checked={isGlossaryCaseInsensitive}
+                    checked={isGlossaryCaseSensitive}
                     onChange={onChangeCaseSensitive}
                     type="checkbox"
-                    title=""
                   />
                   <label>Enable case-sensitive matching</label>
                 </div>
