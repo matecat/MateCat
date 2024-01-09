@@ -34,35 +34,35 @@ $klein->onError( function ( Klein $klein, $err_msg, $err_type, Exception $except
         throw $exception;
     }  catch( InvalidArgumentException $e ){
         $klein->response()->code( 400 );
-        $klein->response()->json( ( new Error( [ $e ] ) )->render() );
+        $klein->response()->json( ( new Error( $e ) )->render() );
     } catch ( AuthenticationError $e ) {
         $klein->response()->code( 401 );
-        $klein->response()->json( ( new Error( [ $e ] ) )->render() );
+        $klein->response()->json( ( new Error( $e ) )->render() );
     } catch ( Model_ValidationError $e ) {
         $klein->response()->code( 400 );
-        $klein->response()->json( ( new Error( [ $e ] ) )->render() );
+        $klein->response()->json( ( new Error( $e ) )->render() );
     } catch ( ValidationError $e ) {
         $klein->response()->code( 400 );
-        $klein->response()->json( ( new Error( [ $e ] ) )->render() );
+        $klein->response()->json( ( new Error( $e ) )->render() );
     } catch ( AuthorizationError $e ) {
         $klein->response()->code( 403 );
-        $klein->response()->json( ( new Error( [ $e ] ) )->render() );
+        $klein->response()->json( ( new Error( $e ) )->render() );
     } catch ( DomainException $e ) {
         $klein->response()->code( 403 );
-        $klein->response()->json( ( new Error( [ $e ] ) )->render() );
+        $klein->response()->json( ( new Error( $e ) )->render() );
     } catch ( NotFoundException $e ) {
         Log::doJsonLog( 'Record Not found error for URI: ' . $_SERVER[ 'REQUEST_URI' ] );
         $klein->response()->code( 404 );
-        $klein->response()->json( ( new Error( [ $e ] ) )->render() );
+        $klein->response()->json( ( new Error( $e ) )->render() );
     } catch( UnprocessableException $e ){
         $klein->response()->code( 422 );
-        $klein->response()->json( ( new Error( [ $e ] ) )->render() );
+        $klein->response()->json( ( new Error( $e ) )->render() );
     } catch ( ExternalServiceException $e ) {
         $klein->response()->code( 503 );
-        $klein->response()->json( ( new Error( [ $e ] ) )->render() );
+        $klein->response()->json( ( new Error( $e ) )->render() );
     } catch ( PDOException $e ) {
         $klein->response()->code( 503 );
-//        $klein->response()->json( ( new Error( [ $e ] ) )->render() );
+//        $klein->response()->json( ( new Error( $e ) )->render() );
         Utils::sendErrMailReport( $exception->getMessage() . "" . $exception->getTraceAsString(), 'Generic error' );
         Log::doJsonLog( [ "error" => $exception->getMessage(), "trace" => $exception->getTrace() ] );
     } catch ( Exception $e ){
