@@ -12,6 +12,12 @@ body {
   font-family: calibri, Arial, Helvetica, sans-serif;
   -webkit-transition: all 100ms ease-in;
   -moz-transition: all 100ms ease-in;
+  &.no-min-width {
+    min-width: auto;
+  }
+  header {
+    min-width: auto;
+  }
 }
 
 input,

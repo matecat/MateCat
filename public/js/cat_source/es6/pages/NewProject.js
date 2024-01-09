@@ -448,6 +448,13 @@ const NewProject = ({
     restartConversions()
   }, [segmentationRule])
 
+  useEffect(() => {
+    if (!isDeviceCompatible) {
+      const body = document.querySelector('body')
+      if (body) body.classList.add('no-min-width')
+    }
+  }, [isDeviceCompatible])
+
   return isDeviceCompatible ? (
     <CreateProjectContext.Provider
       value={{
@@ -691,7 +698,26 @@ const NewProject = ({
     </CreateProjectContext.Provider>
   ) : (
     <div>
-      <h1>Device not supported</h1>
+      <HeaderPortal>
+        <Header
+          showModals={false}
+          showLinks={false}
+          loggedUser={false}
+          showUserMenu={false}
+        />
+      </HeaderPortal>
+      <div className="not-supported-container">
+        <h1>Use Matecat from your desktop</h1>
+        <p>
+          Matecat is not available for mobile devices, you can use it on your
+          desktop with the browser of your choice.
+        </p>
+        <div className="buttons">
+          <a href="https://site.matecat.com/" className="ui primary button">
+            Find out more about Matecat
+          </a>
+        </div>
+      </div>
     </div>
   )
 }

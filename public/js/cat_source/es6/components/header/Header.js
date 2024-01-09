@@ -19,6 +19,7 @@ class Header extends React.Component {
       user: this.props.user,
       loggedUser: this.props.loggedUser,
       jobUrls: undefined,
+      showUserMenu: true,
     }
     this.renderTeams = this.renderTeams.bind(this)
     this.updateTeams = this.updateTeams.bind(this)
@@ -123,6 +124,7 @@ class Header extends React.Component {
       showTeams,
       changeTeam,
       isQualityReport,
+      showUserMenu,
     } = this.props
     const {teams, selectedTeamId, loggedUser, jobUrls} = this.state
 
@@ -182,7 +184,9 @@ class Header extends React.Component {
               {!!isQualityReport && jobUrls && (
                 <ActionMenu jobUrls={this.state.jobUrls.toJS()} />
               )}
-              <UserMenu user={this.state.user} userLogged={loggedUser} />
+              {showUserMenu && (
+                <UserMenu user={this.state.user} userLogged={loggedUser} />
+              )}
             </div>
           </div>
         </nav>
@@ -199,6 +203,7 @@ Header.defaultProps = {
   showTeams: true,
   changeTeam: true,
   isQualityReport: false,
+  showUserMenu: true,
 }
 
 export default Header

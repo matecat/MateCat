@@ -2982,3 +2982,14 @@ a.pull-right.confirmDelete {
     opacity: 1;
   }
 }
+
+.not-supported-container {
+  display: grid;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  color: #002b5a;
+  div.buttons {
+    padding-top: 20px;
+  }
+}
