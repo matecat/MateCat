@@ -8,9 +8,9 @@ import React, {
 import PropTypes from 'prop-types'
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentConstants from '../../constants/SegmentConstants'
-import CommonUtils from '../../utils/commonUtils'
 import Cookies from 'js-cookie'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
+import ApplicationStore from '../../stores/ApplicationStore'
 export const TabConcordanceResults = forwardRef(({segment, isActive}, ref) => {
   const [results, setResults] = useState(undefined)
   const [isExtended, setIsExtended] = useState(
@@ -143,7 +143,7 @@ export const TabConcordanceResults = forwardRef(({segment, isActive}, ref) => {
           <li>{item.last_update_date}</li>
           <li className="graydesc">
             <span className="bold">
-              {CommonUtils.getLanguageNameFromLocale(item.target)}
+              {ApplicationStore.getLanguageNameFromLocale(item.target)}
             </span>
           </li>
           <li className="graydesc">

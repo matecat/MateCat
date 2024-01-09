@@ -20,6 +20,9 @@ class LoginController extends AbstractStatefulKleinController  {
         $this->response->code(200);
     }
 
+    /**
+     * @throws \ReflectionException
+     */
     public function login() {
         $params = filter_var_array( $this->request->params(), [
                 'email'    => FILTER_SANITIZE_EMAIL,
@@ -31,6 +34,12 @@ class LoginController extends AbstractStatefulKleinController  {
 
         if ( $user && ( !is_null( $user->email_confirmed_at ) || !is_null( $user->oauth_access_token ) ) && $user->passwordMatch( $params[ 'password' ] ) ) {
             AuthCookie::setCredentials( $user->email, $user->uid );
+
+            $user->confirmation_token = null;
+            $user->oauth_access_token = null;
+
+            $dao->updateUser($user);
+            $dao->destroyCacheByUid($user->uid);
 
             $project = new RedeemableProject( $user, $_SESSION );
             $project->tryToRedeem();

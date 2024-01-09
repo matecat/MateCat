@@ -714,6 +714,11 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
 
     }
 
+    /**
+     * @param Jobs_JobStruct $jStruct
+     * @param $id_file
+     * @return array
+     */
     public function getSegmentsDownload( Jobs_JobStruct $jStruct, $id_file ) {
 
         $query = "SELECT
@@ -730,12 +735,19 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
             st.serialized_errors_list AS error,
             st.eq_word_count,
             s.raw_word_count,
+            ste.source_page,
+            IF( LOCATE( '3', ste.source_page ) > 0, 1, null ) AS r2,
             od.map as data_ref_map
         FROM files 
         JOIN segments s ON s.id_file = files.id
         LEFT JOIN segment_translations st ON s.id = st.id_segment AND st.id_job = :id_job
         LEFT JOIN segment_original_data od ON s.id = od.id_segment
-        WHERE files.id = :id_file
+        LEFT JOIN segment_translation_events ste ON s.id = ste.id_segment 
+				AND ste.id_job = st.id_job
+				AND ste.source_page = 3
+				AND ste.version_number = st.version_number
+				AND ste.final_revision = 1
+        WHERE files.id = :id_file group by sid
 ";
 
         $bind_keys = [

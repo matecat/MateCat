@@ -19,7 +19,6 @@ class CustomPage extends viewController {
 
         //SESSION ENABLED
         parent::sessionStart();
-        $this->setBrowserSupport();
         $this->_setUserFromAuthCookie();
         $this->setUserCredentials();
 

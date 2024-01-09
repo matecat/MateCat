@@ -228,12 +228,14 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
                   <IconAdd size={18} />
                   New
                 </button>
-                <div className="mt-glossary-case-sensitive">
+                <div
+                  className="mt-glossary-case-sensitive"
+                  title='Activating this option makes glossary matching case-sensitive: if your glossary includes a translation for "Cat", it will only be applied when "Cat" is found with an initial capital letter'
+                >
                   <input
                     checked={isGlossaryCaseSensitive}
                     onChange={onChangeCaseSensitive}
                     type="checkbox"
-                    title=""
                   />
                   <label>Enable case-sensitive matching</label>
                 </div>
