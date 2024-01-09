@@ -944,6 +944,7 @@ class setTranslationController extends ajaxController {
         }
 
         $filesParts = (new FilesPartsDao())->getBySegmentId($this->id_segment);
+        $ownerUid   = Jobs_JobDao::getOwnerUid($this->id_job, $this->password);
 
         /**
          * Set the new contribution in queue
@@ -957,7 +958,7 @@ class setTranslationController extends ajaxController {
         $contributionStruct->segment              = $this->filter->fromLayer0ToLayer1( $this->segment[ 'segment' ] );
         $contributionStruct->translation          = $this->filter->fromLayer0ToLayer1( $_Translation[ 'translation' ] );
         $contributionStruct->api_key              = \INIT::$MYMEMORY_API_KEY;
-        $contributionStruct->uid                  = Jobs_JobDao::getOwnerUid($this->id_job, $this->password);
+        $contributionStruct->uid                  = ($ownerUid !== null) ? $ownerUid : 0;
         $contributionStruct->oldTranslationStatus = $old_translation[ 'status' ];
         $contributionStruct->oldSegment           = $this->filter->fromLayer0ToLayer1( $this->segment[ 'segment' ] ); //
         $contributionStruct->oldTranslation       = $this->filter->fromLayer0ToLayer1( $old_translation[ 'translation' ] );
