@@ -363,8 +363,8 @@ class setTranslationController extends ajaxController {
             $new_translation->suggestion = $old_suggestion->translation;
             $new_translation->suggestion_match = $old_suggestion->match;
 
-            if ( ($old_suggestion->match == "85%" ) || ( $old_suggestion->match == "86%" ) ) {
-                $new_translation->suggestion_source = 'Machine Translation';
+            if ( $old_suggestion->match == "85%" || $old_suggestion->match == "86%" || $old_suggestion->created_by == 'MT'  ) {
+                $new_translation->suggestion_source = 'MT';
             } elseif( $old_suggestion->match == 'NO_MATCH' ) {
                 $new_translation->suggestion_source = 'NO_MATCH';
             } elseif( $old_suggestion->ICE == true ) {
