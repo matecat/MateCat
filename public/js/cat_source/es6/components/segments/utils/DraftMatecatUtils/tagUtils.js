@@ -240,7 +240,7 @@ export const removeTagsFromText = (segmentString) => {
  * @param escapedHTML
  * @returns {string}
  */
-const unescapeHTMLinTags = (escapedHTML) => {
+export const unescapeHTMLinTags = (escapedHTML) => {
   try {
     return escapedHTML
       .replace(/&lt;/g, '<')
