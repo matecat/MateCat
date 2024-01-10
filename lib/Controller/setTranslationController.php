@@ -367,8 +367,6 @@ class setTranslationController extends ajaxController {
                 $new_translation->suggestion_source = 'MT';
             } elseif( $old_suggestion->match == 'NO_MATCH' ) {
                 $new_translation->suggestion_source = 'NO_MATCH';
-            } elseif( $old_suggestion->ICE == true ) {
-                $new_translation->suggestion_source = $old_suggestion->match;
             } else {
                 $new_translation->suggestion_source = 'TM';
             }
