@@ -205,9 +205,6 @@ $(document).ready(function () {
     rootNewProjectPage.render(
       <NewProject
         isLoggedIn={!!config.isLoggedIn}
-        languages={config.languages_array.map((lang) => {
-          return {...lang, id: lang.code}
-        })}
         sourceLanguageSelected={currentSourceLangs}
         targetLanguagesSelected={currentTargetLangs}
         subjectsArray={config.subject_array.map((item) => {

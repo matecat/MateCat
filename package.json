@@ -22,7 +22,7 @@
     "immutable": "^4.0.0-rc.12",
     "jquery": "^3.4.1",
     "js-base64": "^3.6.1",
-    "js-cookie": "^2.2.1",
+    "js-cookie": "^3.0.0",
     "keymirror": "^0.1.1",
     "lodash": "^4.17.21",
     "moment": "^2.29.4",
@@ -35,7 +35,7 @@
     "react-tagsinput": "^3.19.0",
     "react-transition-group": "^4.2.2",
     "react-virtual": "^2.10.4",
-    "showdown": "^1.9.1",
+    "showdown": "^2.0.0",
     "sprintf-js": "^1.1.2"
   },
   "devDependencies": {
@@ -71,7 +71,7 @@
     "sass": "^1.66.0",
     "sass-loader": "13.3.2",
     "style-loader": "3.3.3",
-    "webpack": "5.88.2",
+    "webpack": "5.89.0",
     "webpack-cli": "5.1.4",
     "webpack-concat-files-plugin": "^0.5.2",
     "whatwg-fetch": "^3.6.2"

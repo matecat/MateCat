@@ -214,7 +214,6 @@ const matecatConfig = async ({env}, {mode}) => {
         path.resolve(__dirname, 'public/js/cat_source/ui.segment.js'),
         path.resolve(__dirname, 'public/js/cat_source/ui.events.js'),
         path.resolve(__dirname, 'public/js/cat_source/ui.headerTooltips.js'),
-        path.resolve(__dirname, 'public/js/cat_source/review_extended.js'),
         path.resolve(__dirname, 'public/css/sass/main.scss'),
       ],
       dashboard: [

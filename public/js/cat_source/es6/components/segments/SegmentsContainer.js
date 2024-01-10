@@ -37,8 +37,6 @@ const listRef = createRef()
 
 function SegmentsContainer({
   isReview,
-  isReviewExtended,
-  reviewType,
   enableTagProjection,
   startSegmentId,
   firstJobSegment,
@@ -661,8 +659,6 @@ function SegmentsContainer({
       segImmutable,
       timeToEdit: config.time_to_edit_enabled,
       isReview,
-      isReviewExtended: !!isReviewExtended,
-      reviewType,
       enableTagProjection,
       speech2textEnabledFn: Speech2Text.enabled,
       setLastSelectedSegment: (sid) => setLastSelectedSegment({sid}),
@@ -731,8 +727,6 @@ function SegmentsContainer({
 
 SegmentsContainer.propTypes = {
   isReview: PropTypes.bool,
-  isReviewExtended: PropTypes.bool,
-  reviewType: PropTypes.string,
   enableTagProjection: PropTypes.any,
   startSegmentId: PropTypes.string,
   firstJobSegment: PropTypes.string,
