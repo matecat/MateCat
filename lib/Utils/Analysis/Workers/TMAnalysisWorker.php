@@ -154,7 +154,6 @@ class TMAnalysisWorker extends AbstractWorker {
         $suggestion = $this->_matches[ 0 ][ 'raw_translation' ]; //No layering needed
 
         $suggestion_match  = $this->_matches[ 0 ][ 'match' ];
-        $suggestion_json   = json_encode( $this->_matches );
         $suggestion_source = $this->_matches[ 0 ][ 'created_by' ];
 
         $equivalentWordMapping = json_decode( $queueElement->params->payable_rates, true );
@@ -217,6 +216,15 @@ class TMAnalysisWorker extends AbstractWorker {
         $suggestion = $filter->fromLayer1ToLayer0( $suggestion );
 
         $segment = ( new \Segments_SegmentDao() )->getById( $queueElement->params->id_segment );
+
+        foreach ( $this->_matches as $k => $m ) {
+            $this->_matches[ $k ][ 'raw_segment' ] = $filter->fromLayer1ToLayer0( $this->_matches[ $k ][ 'raw_segment' ] );
+            $this->_matches[ $k ][ 'segment' ] = $filter->fromLayer1ToLayer0( html_entity_decode($this->_matches[ $k ][ 'segment' ]) );
+            $this->_matches[ $k ][ 'translation' ] = $filter->fromLayer1ToLayer0( html_entity_decode($this->_matches[ $k ][ 'translation' ]) );
+            $this->_matches[ $k ][ 'raw_translation' ] = $filter->fromLayer1ToLayer0( $this->_matches[ $k ][ 'raw_translation' ] );
+        }
+
+        $suggestion_json   = json_encode( $this->_matches );
 
         $tm_data                             = [];
         $tm_data[ 'id_job' ]                 = $queueElement->params->id_job;
