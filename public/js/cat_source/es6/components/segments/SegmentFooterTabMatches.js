@@ -34,12 +34,6 @@ class SegmentFooterTabMatches extends React.Component {
     var matchesProcessed = []
     // SegmentActions.createFooter(this.props.segment.sid);
     $.each(matches, function () {
-      if (
-        isUndefined(this.segment) ||
-        this.segment === '' ||
-        this.translation === ''
-      )
-        return true
       var item = {}
       item.id = this.id
       item.disabled = this.id == '0' ? true : false
