@@ -361,7 +361,10 @@ class setTranslationController extends ajaxController {
         // update suggestion
         if( $this->canUpdateSuggestion($new_translation, $old_translation, $old_suggestion) ){
             $new_translation->suggestion = $old_suggestion->translation;
-            $new_translation->suggestion_match = $old_suggestion->match;
+
+            if($old_suggestion->match !== "MT"){
+                $new_translation->suggestion_match = $old_suggestion->match;
+            }
 
             if ( $old_suggestion->match == "85%" || $old_suggestion->match == "86%" || $old_suggestion->created_by == 'MT'  ) {
                 $new_translation->suggestion_source = 'MT';
