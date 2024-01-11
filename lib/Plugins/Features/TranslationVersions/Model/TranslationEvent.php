@@ -302,7 +302,7 @@ class TranslationEvent {
         $this->current_event->id_segment     = $this->wanted_translation[ 'id_segment' ];
         $this->current_event->uid            = ( $this->user->uid != null ? $this->user->uid : 0 );
         $this->current_event->status         = $this->wanted_translation[ 'status' ];
-        $this->current_event->version_number = $this->wanted_translation[ 'version_number' ];
+        $this->current_event->version_number = ( $this->wanted_translation[ 'version_number' ] != null ? $this->wanted_translation[ 'version_number' ] : 0 );
         $this->current_event->source_page    = $this->source_page;
 
         if ( $this->isPropagationSource() ) {

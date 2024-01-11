@@ -16,8 +16,8 @@
             basepath: '${basepath | string:/}',
             id_job: '${jid}',
             password: '${password}',
-            source_rtl: ${source_rtl | string:false},
-            target_rtl: ${target_rtl | string:false},
+            isSourceRTL: ${source_rtl | string:false},
+            isTargetRTL: ${target_rtl | string:false},
             searchable_statuses : JSON.parse( '${ php: json_encode(searchable_statuses)}'),
             enableMultiDomainApi: ${enableMultiDomainApi | string:false},
             ajaxDomainsNumber: ${ajaxDomainsNumber | string:false},
@@ -63,12 +63,7 @@
 
 </head>
 
-<body class="reviselog" tal:condition="not:supportedBrowser">
-<div metal:use-macro="unsupported_browser.html/unsupported"/>
-</body>
-
-
-<body class="reviselog" tal:condition="php: supportedBrowser NE 0 ">
+<body class="reviselog">
 
 <header>
 

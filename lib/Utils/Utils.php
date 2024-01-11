@@ -45,39 +45,6 @@ class Utils {
     }
 
     /**
-     * Check for browser support
-     *
-     * @return bool
-     */
-    public static function isSupportedWebBrowser( $browser_info ) {
-        $browser_name     = strtolower( $browser_info[ 'name' ] );
-        $browser_platform = strtolower( $browser_info[ 'platform' ] );
-
-        foreach ( INIT::$ENABLED_BROWSERS as $enabled_browser ) {
-            if ( stripos( $browser_name, $enabled_browser ) !== false ) {
-                // Safari supported only on Mac
-                if ( stripos( "apple safari", $browser_name ) === false ||
-                        ( stripos( "apple safari", $browser_name ) !== false && stripos( "mac", $browser_platform ) !== false ) ) {
-                    return 1;
-                }
-            }
-        }
-
-        foreach ( INIT::$UNTESTED_BROWSERS as $untested_browser ) {
-            if ( stripos( $browser_name, $untested_browser ) !== false ) {
-                return -1;
-            }
-        }
-
-        // unsupported browsers: hack for home page
-        if ( $_SERVER[ 'REQUEST_URI' ] == "/" ) {
-            return -2;
-        }
-
-        return 0;
-    }
-
-    /**
      * @return array
      */
     static public function getBrowser() {
@@ -927,5 +894,41 @@ class Utils {
         $strippedHtml = rtrim($strippedHtml);
 
         return $strippedHtml;
+    }
+
+    /**
+     * @param $email
+     * @throws \Exception
+     */
+    public static function validateEmailAddress($email)
+    {
+        $clean_email = filter_var($email,FILTER_SANITIZE_EMAIL);
+
+        if( $email !== $clean_email or !filter_var($email,FILTER_VALIDATE_EMAIL) ){
+            throw new \Exception($email . " is not a valid email address");
+        }
+    }
+
+    /**
+     * @param $list
+     * @return array
+     */
+    public static function validateEmailList($list){
+
+        $aValid = [];
+        foreach ( explode( ',', $list ) AS $sEmailAddress ) {
+            $sEmailAddress = trim( $sEmailAddress );
+            if( empty( $sEmailAddress ) ) continue;
+            $aValid[ $sEmailAddress ] = filter_var( $sEmailAddress, FILTER_VALIDATE_EMAIL );
+        }
+
+        $invalidEmails = array_keys( $aValid, false );
+
+        if( !empty( $invalidEmails ) ){
+            throw new InvalidArgumentException( "Not valid e-mail provided: " . implode( ", ", $invalidEmails ), -6 );
+        }
+
+        return array_keys( $aValid );
+
     }
 }

@@ -1,8 +1,6 @@
 import React from 'react'
-import {isEqual} from 'lodash'
 
 import Shortcuts from '../../utils/shortcuts'
-import {getXliffRegExpression} from './utils/DraftMatecatUtils/tagModel'
 import SegmentWrapper from './SegmentWrapper'
 import SegmentActions from '../../actions/SegmentActions'
 import {SegmentContext} from './SegmentContext'
@@ -10,92 +8,21 @@ import {SegmentContext} from './SegmentContext'
 class SegmentBody extends React.Component {
   static contextType = SegmentContext
 
-  constructor(props, context) {
+  constructor(props) {
     super(props)
-    this.openStatusSegmentMenu = this.openStatusSegmentMenu.bind(this)
-    this.handleClickOutside = this.handleClickOutside.bind(this)
     this.state = {
-      showStatusMenu: false,
       clickedTagId: null,
       clickedTagText: null,
       tagClickedInSource: false,
     }
-    this.isReviewExtended = context.reviewType === 'extended'
   }
 
-  statusHandleTitleAttr(status) {
-    status = status.toUpperCase()
-    return (
-      status.charAt(0) + status.slice(1).toLowerCase() + ', click to change it'
-    )
-  }
-
-  openStatusSegmentMenu(e) {
-    e.preventDefault()
-    this.setState({
-      showStatusMenu: !this.state.showStatusMenu,
-    })
-  }
-
-  changeStatus(status) {
-    UI.changeStatus(this.context.segment, status)
-    this.setState({
-      showStatusMenu: false,
-    })
-  }
-
-  /**
-   * Alert if clicked on outside of element
-   */
-  handleClickOutside(event) {
-    if (this.statusMenuRef && !this.statusMenuRef.contains(event.target)) {
-      this.setState({
-        showStatusMenu: false,
-      })
-    }
-  }
-
-  hasSourceOrTargetTags() {
-    var regExp = getXliffRegExpression()
-    var sourceTags = this.context.segment.segment.match(regExp)
-    return sourceTags && sourceTags.length > 0
-  }
-
-  hasMissingTargetTags() {
-    var regExp = getXliffRegExpression()
-    var sourceTags = this.context.segment.segment.match(regExp)
-    if (!sourceTags || sourceTags.length === 0) {
-      return false
-    }
-    var targetTags = this.context.segment.translation.match(regExp)
-
-    return (
-      (targetTags && sourceTags.length > targetTags.length) ||
-      (targetTags && !isEqual(sourceTags.sort(), targetTags.sort()))
-    )
-  }
   copySource(e) {
     e.preventDefault()
     SegmentActions.copySourceToTarget(this.context.segment.sid)
   }
 
-  componentDidMount() {
-    document.addEventListener('mousedown', this.handleClickOutside)
-  }
-
-  componentWillUnmount() {
-    document.removeEventListener('mousedown', this.handleClickOutside)
-  }
-
   render() {
-    var status_change_title
-    if (this.context.segment.status) {
-      status_change_title = this.statusHandleTitleAttr(
-        this.context.segment.status,
-      )
-    } else {
-      status_change_title = 'Change segment status'
-    }
     let copySourceShortcuts = UI.isMac
       ? Shortcuts.cattol.events.copySource.keystrokes.mac
       : Shortcuts.cattol.events.copySource.keystrokes.standard
@@ -122,21 +49,7 @@ class SegmentBody extends React.Component {
           </div>
         </div>
         <div className="status-container">
-          {this.isReviewExtended ? (
-            <a
-              href="#"
-              className="status no-hover"
-              onClick={this.openStatusSegmentMenu}
-            />
-          ) : (
-            <a
-              href="#"
-              title={status_change_title}
-              className="status"
-              id={'segment-' + this.context.segment.sid + '-changestatus'}
-              onClick={this.openStatusSegmentMenu}
-            />
-          )}
+          <a href="#" className="status no-hover" />
         </div>
       </div>
     )

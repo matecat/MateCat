@@ -197,9 +197,9 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
     private function getVersionNumber() {
         if ( null !== $this->request->param( 'version_number' ) ) {
             return $this->request->param( 'version_number' );
-        } else {
-            return $this->validator->translation->version_number;
         }
+
+        return $this->validator->translation->version_number;
     }
 
     /**

@@ -4283,12 +4283,14 @@ body.tagmode-default-extended .textarea-container .tagMode li.extended,
   box-shadow: inset 0 0 1px 1px #888;
 }
 
+.alternatives .deleted,
 .suggestion_source .deleted,
 .suggestion_source del {
   background: #ffc7ca;
   text-decoration: line-through;
 }
 
+.alternatives .added,
 .suggestion_source .added,
 .suggestion_source ins {
   background: #b0ffb3;

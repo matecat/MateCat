@@ -48,11 +48,12 @@ class Projects_MetadataDao extends DataAccess_AbstractDao {
     /**
      * @param $id_project
      * @param $key
+     * @param int $ttl
      *
-     * @return Projects_MetadataStruct
+     * @return Projects_MetadataStruct|null
      */
-  public function get( $id_project, $key ) {
-      $stmt = $this->_getStatementForCache(
+  public function get( $id_project, $key, $ttl = 0 ) {
+      $stmt = $this->setCacheTTL( $ttl )->_getStatementForCache(
               "SELECT * FROM project_metadata WHERE " .
               " id_project = :id_project " .
               " AND `key` = :key "

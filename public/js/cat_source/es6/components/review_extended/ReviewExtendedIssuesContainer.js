@@ -28,7 +28,7 @@ class ReviewExtendedIssuesContainer extends React.Component {
     ).categories
     this.is2ndPassReviewEnabled =
       config.secondRevisionsCount && config.secondRevisionsCount > 0
-    this.reviewType = ReviewExtended.number
+    this.reviewType = config.revisionNumber
   }
 
   parseIssues() {

@@ -305,6 +305,11 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
      */
     public static function addTranslation( Translations_SegmentTranslationStruct $translation_struct, $is_revision ) {
 
+        // avoid version_number null error
+        if($translation_struct->version_number === null){
+            $translation_struct->version_number = 0;
+        }
+
         $keys_to_insert = [
                 'id_segment',
                 'id_job',

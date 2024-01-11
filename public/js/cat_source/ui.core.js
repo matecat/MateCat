@@ -4,7 +4,6 @@ import Cookies from 'js-cookie'
 import CatToolActions from './es6/actions/CatToolActions'
 import CommonUtils from './es6/utils/commonUtils'
 import ConfirmMessageModal from './es6/components/modals/ConfirmMessageModal'
-import TagUtils from './es6/utils/tagUtils'
 import TextUtils from './es6/utils/textUtils'
 import OfflineUtils from './es6/utils/offlineUtils'
 import SegmentActions from './es6/actions/SegmentActions'
@@ -455,8 +454,8 @@ window.UI = {
 
     try {
       // Attention, to be modified when we will lock tags
-      translation = TagUtils.prepareTextToSend(segment.translation)
-      sourceSegment = TagUtils.prepareTextToSend(segment.updatedSource)
+      translation = segment.translation
+      sourceSegment = segment.updatedSource
     } catch (e) {
       var indexSegment = UI.executingSetTranslation.indexOf(id_segment)
       if (indexSegment > -1) {
@@ -514,9 +513,13 @@ window.UI = {
         }
         UI.execSetTranslationTail()
         UI.setTranslation_success(data, options)
+        //Review
         SegmentActions.setSegmentSaving(id_segment, false)
+        if (config.isReview) {
+          SegmentActions.getSegmentVersionsIssues(idSegment)
+          CatToolActions.reloadQualityReport()
+        }
         data.translation.segment = segment
-        $(document).trigger('translation:change', data.translation)
         data.segment = segment
         $(document).trigger('setTranslation:success', data)
         if (config.alternativesEnabled) {
@@ -566,9 +569,7 @@ window.UI = {
     $.each(segments, function (index) {
       var segment = this
       totalTranslation +=
-        selector === '.source'
-          ? segment.segment
-          : TagUtils.prepareTextToSend(segment.translation)
+        selector === '.source' ? segment.segment : segment.translation
       if (index < segments.length - 1)
         totalTranslation += UI.splittedTranslationPlaceholder
     })
@@ -718,27 +719,6 @@ window.UI = {
     this.recoverUnsavedSegmentsTimer = setTimeout(function () {
       UI.recoverUnsavedSetTranslations()
     }, 1000)
-  },
-
-  /**
-   * After User click on Translated or T+>> Button
-   * @param segment
-   * @param goToNextUntranslated
-   */
-  clickOnTranslatedButton: function (segment, goToNextUntranslated) {
-    SegmentActions.removeClassToSegment(segment.sid, 'modified')
-
-    UI.setTimeToEdit(segment.sid)
-
-    var afterTranslateFn = function () {
-      if (!goToNextUntranslated) {
-        SegmentActions.gotoNextSegment() //Others functionality override this function
-      } else {
-        SegmentActions.gotoNextUntranslatedSegment()
-      }
-    }
-
-    UI.changeStatus(segment, SEGMENTS_STATUS.TRANSLATED, afterTranslateFn)
   },
 
   // Project completion override this method

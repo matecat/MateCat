@@ -115,9 +115,7 @@ class TMAnalysisWorker extends AbstractWorker {
          */
         $this->_matches = $this->_getMatches( $queueElement );
 
-
         $this->_doLog( "--- (Worker " . $this->_workerPid . ") : Segment {$queueElement->params->id_segment} - Job {$queueElement->params->id_job} matches retrieved." );
-        $this->_tryRealignTagID( $queueElement );
 
         /**
          * @throws ReQueueException
@@ -582,13 +580,15 @@ class TMAnalysisWorker extends AbstractWorker {
     }
 
     /**
-     * @param Engines_AbstractEngine  $tmsEngine
-     * @param                         $_config
-     *
-     * @return Engines_Results_MyMemory_Matches[]|null
+     * @param Engines_AbstractEngine $tmsEngine
+     * @param $_config
+     * @return array|Engines_Results_MyMemory_TMS|null
      * @throws EndQueueException
      * @throws NotSupportedMTException
      * @throws ReQueueException
+     * @throws \API\V2\Exceptions\AuthenticationError
+     * @throws \Exceptions\NotFoundException
+     * @throws \Exceptions\ValidationError
      */
     protected function _getTM( Engines_AbstractEngine $tmsEngine, $_config ) {
 
@@ -631,60 +631,6 @@ class TMAnalysisWorker extends AbstractWorker {
         }
 
         return $tms_match;
-
-    }
-
-    /**
-     *  Only if this is not a MT and if it is a ( 90 =< MATCH < 100 ) try to realign tag IDs
-     *
-     * @param QueueElement $queueElement
-     *
-     * @throws DOMException
-     */
-    protected function _tryRealignTagID( QueueElement $queueElement ) {
-
-        //use the first match record
-        // ---> $this->_matches[ 0 ];
-
-        ( isset( $this->_matches[ 0 ][ 'match' ] ) ? $firstMatchVal = floatval( $this->_matches[ 0 ][ 'match' ] ) : null );
-        if ( isset( $firstMatchVal ) && $firstMatchVal >= 90 && $firstMatchVal < 100 ) {
-
-            $srcSearch    = strip_tags( $queueElement->params->segment );
-            $segmentFound = strip_tags( $this->_matches[ 0 ][ 'raw_segment' ] );
-            $srcSearch    = mb_strtolower( preg_replace( '#[\x{20}]{2,}#u', chr( 0x20 ), $srcSearch ) );
-            $segmentFound = mb_strtolower( preg_replace( '#[\x{20}]{2,}#u', chr( 0x20 ), $segmentFound ) );
-
-            $fuzzy = @levenshtein( $srcSearch, $segmentFound ) / log10( mb_strlen( $srcSearch . $segmentFound ) + 1 );
-
-            //levenshtein handle max 255 chars per string and returns -1, so fuzzy var can be less than 0 !!
-            if ( $srcSearch == $segmentFound || ( $fuzzy < 2.5 && $fuzzy > 0 ) ) {
-
-
-                //TODO check fo BUG in html encoding html_entity_decode
-                $qaRealign = new QA( $queueElement->params->segment, html_entity_decode( $this->_matches[ 0 ][ 'raw_translation' ] ) );
-                $qaRealign->setFeatureSet( $this->featureSet );
-                $qaRealign->tryRealignTagID();
-
-                $log_prepend = uniqid( '', true ) . " - SERVER REALIGN IDS PROCEDURE | ";
-                if ( !$qaRealign->thereAreErrors() ) {
-
-                    /*
-                        $this->_doLog( $log_prepend . " - Requested Segment: " . var_export( $queueElement, true ) );
-                        $this->_doLog( $log_prepend . "Fuzzy: " . $fuzzy . " - Try to Execute Tag ID Realignment." );
-                        $this->_doLog( $log_prepend . "TMS RAW RESULT:" );
-                        $this->_doLog( $log_prepend . var_export( $this->_matches[ 0 ]e, true ) );
-                        $this->_doLog( $log_prepend . "Realignment Success:" );
-                    */
-                    $this->_matches[ 0 ][ 'raw_translation' ] = $qaRealign->getTrgNormalized();
-                    $this->_matches[ 0 ][ 'match' ]           = ( $fuzzy == 0 ? '100%' : '99%' );
-
-                } else {
-                    $this->_doLog( $log_prepend . 'Realignment Failed. Skip. Segment: ' . $queueElement->params->id_segment );
-                }
-
-            }
-
-        }
 
     }
 
@@ -822,13 +768,10 @@ class TMAnalysisWorker extends AbstractWorker {
     }
 
     /**
-     * Every time one element of the project is taken from the queue, the worker try to finalize the project.
-     * Only the last worker can finalize the project by setting a lock on Redis.
-     *
      * @param $_params
-     *
-     * @throws ReQueueException
      * @throws ConnectionException
+     * @throws ReQueueException
+     * @throws \ReflectionException
      */
     protected function _tryToCloseProject( $_params ) {
 

@@ -100,3 +100,11 @@ $klein->with( '/api/app/glossary', function () {
 
 // AI Assistant
 route( '/api/app/ai-assistant', 'POST',  'API\App\AIAssistantController', 'index' );
+
+$klein->with('/api/app/languages', function() {
+    route( '', 'GET', '\API\App\SupportedLanguagesController', 'index' );
+});
+
+$klein->with('/api/app/files', function() {
+    route( '', 'GET', '\API\App\SupportedFilesController', 'index' );
+});

@@ -12,6 +12,7 @@ EventEmitter.prototype.setMaxListeners(0)
 let CatToolStore = assign({}, EventEmitter.prototype, {
   files: null,
   qr: null,
+  languages: [],
   searchResults: {
     searchResults: [], // Array
     occurrencesList: [],
@@ -23,6 +24,7 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
   tmKeys: null,
   keysDomains: null,
   haveKeysGlossary: undefined,
+  jobMetadata: undefined,
   _projectProgress: undefined,
   storeFilesInfo: function (files) {
     this.files = files
@@ -47,7 +49,7 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
         stats.equivalent.translated +
         stats.equivalent.approved,
     )
-    this._projectProgess = stats
+    this._projectProgress = stats
   },
   updateQR: function (qr) {
     this.qr = qr
@@ -96,10 +98,16 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
     return this.haveKeysGlossary
   },
   getProgress: () => {
-    return CatToolStore._projectProgess
+    return CatToolStore._projectProgress
   },
   setHaveKeysGlossary: function (value) {
     this.haveKeysGlossary = value
+  },
+  setLanguages: function (languages) {
+    this.languages = languages
+  },
+  getLanguages: function () {
+    return this.languages
   },
   emitChange: function () {
     this.emit.apply(this, arguments)
@@ -145,7 +153,7 @@ AppDispatcher.register(function (action) {
       CatToolStore.setProgress(action.stats)
       CatToolStore.emitChange(
         CatToolConstants.SET_PROGRESS,
-        CatToolStore._projectProgess,
+        CatToolStore._projectProgress,
       )
       break
     case CatToolConstants.STORE_SEARCH_RESULT:
@@ -237,6 +245,11 @@ AppDispatcher.register(function (action) {
       break
     case CatToolConstants.OPEN_SETTINGS_PANEL:
       CatToolStore.emitChange(CatToolConstants.OPEN_SETTINGS_PANEL, {
+        ...action,
+      })
+      break
+    case CatToolConstants.GET_JOB_METADATA:
+      CatToolStore.emitChange(CatToolConstants.GET_JOB_METADATA, {
         ...action,
       })
       break

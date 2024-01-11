@@ -36,7 +36,6 @@ import assign from 'object-assign'
 
 import AppDispatcher from './AppDispatcher'
 import SegmentConstants from '../constants/SegmentConstants'
-import TagUtils from '../utils/tagUtils'
 import SegmentUtils from '../utils/segmentUtils'
 import EditAreaConstants from '../constants/EditAreaConstants'
 import DraftMatecatUtils from './../components/segments/utils/DraftMatecatUtils'
@@ -165,9 +164,9 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
             has_reference: 'false',
             parsed_time_to_edit: ['00', '00', '00', '00'],
             readonly: 'false',
-            segment: TagUtils.transformTextFromBe(splittedSourceAr[i]),
-            decodedSource: DraftMatecatUtils.unescapeHTML(
-              DraftMatecatUtils.decodeTagsToPlainText(segment.segment),
+            segment: splittedSourceAr[i],
+            decodedSource: DraftMatecatUtils.transformTagsToText(
+              segment.segment,
             ),
             segment_hash: segment.segment_hash,
             original_sid: segment.sid,
@@ -181,17 +180,10 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
                 ? SEGMENTS_STATUS.APPROVED2
                 : status,
             time_to_edit: '0',
-            originalDecodedTranslation: translation
-              ? DraftMatecatUtils.unescapeHTML(
-                  TagUtils.transformTextFromBe(translation),
-                )
-              : '',
-            translation: translation
-              ? TagUtils.transformTextFromBe(translation)
-              : '',
-            decodedTranslation: DraftMatecatUtils.unescapeHTML(
-              DraftMatecatUtils.decodeTagsToPlainText(translation),
-            ),
+            originalDecodedTranslation: translation ? translation : '',
+            translation: translation ? translation : '',
+            decodedTranslation:
+              DraftMatecatUtils.transformTagsToText(translation),
             warning: '0',
             warnings: {},
             tagged: !this.hasSegmentTagProjectionEnabled(segment),
@@ -239,18 +231,18 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         segment.currentInSearch = currentInSearch
         segment.occurrencesInSearch = occurrencesInSearch
         segment.searchParams = this.searchParams
-        segment.segment = TagUtils.transformTextFromBe(segment.segment)
-        segment.translation = TagUtils.transformTextFromBe(segment.translation)
-        segment.originalDecodedTranslation = DraftMatecatUtils.unescapeHTML(
+        segment.originalDecodedTranslation = segment.translation
+        segment.decodedTranslation = DraftMatecatUtils.transformTagsToText(
           segment.translation,
         )
-        segment.decodedTranslation = DraftMatecatUtils.unescapeHTML(
-          DraftMatecatUtils.decodeTagsToPlainText(segment.translation),
+        segment.decodedSource = DraftMatecatUtils.transformTagsToText(
+          segment.segment,
         )
-        segment.decodedSource = DraftMatecatUtils.unescapeHTML(
-          DraftMatecatUtils.decodeTagsToPlainText(segment.segment),
+        segment.updatedSource = SegmentUtils.checkCurrentSegmentTPEnabled(
+          segment,
         )
-        segment.updatedSource = segment.segment
+          ? DraftMatecatUtils.removeTagsFromText(segment.segment)
+          : segment.segment
         segment.openComments = false
         segment.openSplit = false
         newSegments.push(segment)
@@ -394,7 +386,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
   updateOriginalTranslation(sid, translation) {
     const index = this.getSegmentIndex(sid)
     if (index === -1) return
-    const newTrans = DraftMatecatUtils.decodeTagsToPlainText(translation)
+    const newTrans = DraftMatecatUtils.transformTagsToText(translation)
 
     this._segments = this._segments.setIn(
       [index, 'originalDecodedTranslation'],
@@ -1044,8 +1036,8 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     if (SegmentUtils.checkTPEnabled()) {
       if (
         (segment.status === 'NEW' || segment.status === 'DRAFT') &&
-        TagUtils.checkXliffTagsInText(segment.segment) &&
-        !TagUtils.checkXliffTagsInText(segment.translation)
+        DraftMatecatUtils.checkXliffTagsInText(segment.segment) &&
+        !DraftMatecatUtils.checkXliffTagsInText(segment.translation)
       ) {
         return true
       }

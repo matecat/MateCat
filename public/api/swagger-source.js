@@ -161,6 +161,22 @@ var spec = {
             type: 'string',
           },
           {
+            name: 'payable_rate_template_id',
+            in: 'formData',
+            description:
+              'The id of the billing model you want to use in the project you are creating (if you want to use a custom billing model in a project, both relevant parameters must be included in the API call)',
+            required: false,
+            type: 'integer',
+          },
+          {
+            name: 'payable_rate_template_name',
+            in: 'formData',
+            description:
+              'The name of the billing model you want to use in the project you are creating (if you want to use a custom billing model in a project, both relevant parameters must be included in the API call)',
+            required: false,
+            type: 'string',
+          },
+          {
             name: 'lexiqa',
             in: 'formData',
             description:
@@ -2202,8 +2218,409 @@ var spec = {
         },
       },
     },
+    '/api/v2/files': {
+      get: {
+        tags: ['Files'],
+        summary: 'Supported file types list.',
+        description: 'List of supported file types.',
+        parameters: [],
+        responses: {
+          200: {
+            description: 'File types List',
+            schema: {
+              $ref: '#/definitions/Files',
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v2/payable_rate': {
+      get: {
+        tags: ['Billing models'],
+        summary:
+          'Shows the list of billing models available for the currents user',
+        description:
+          'Shows the list of billing models available for the currents user',
+        responses: {
+          200: {
+            description: 'An array of JSON representation models.',
+            schema: {
+              type: 'array',
+              items: {
+                $ref: '#/definitions/PayableRateSchema',
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+      post: {
+        tags: ['Billing models'],
+        summary: 'Creates a new billing model',
+        description: 'Creates a new billing model',
+        parameters: [
+          {
+            in: 'body',
+            schema: {
+              $ref: '#/definitions/PayableRateSchema',
+            },
+          },
+        ],
+        responses: {
+          200: {
+            description: 'create',
+            examples: {
+              'application/json': {
+                id: 4,
+                version: 1,
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v2/payable_rate/{id}': {
+      get: {
+        tags: ['Billing models'],
+        summary: 'Shows a particular billing model',
+        description: 'Shows a particular billing model',
+        parameters: [
+          {
+            name: 'id',
+            in: 'path',
+            description: 'The model ID',
+            required: true,
+            type: 'integer',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'The model JSON representation.',
+            schema: {
+              $ref: '#/definitions/PayableRateSchema',
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+      delete: {
+        tags: ['Billing models'],
+        summary: 'Deletes a particular billing model',
+        description: 'Deletes a particular billing model',
+        parameters: [
+          {
+            name: 'id',
+            in: 'path',
+            description: 'The model ID',
+            required: true,
+            type: 'integer',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'delete',
+            examples: {
+              'application/json': {
+                id: 3,
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+      put: {
+        tags: ['Billing models'],
+        summary: 'Updates a particular billing model',
+        description: 'Updates a particular billing model',
+        parameters: [
+          {
+            in: 'body',
+            schema: {
+              $ref: '#/definitions/PayableRateSchema',
+            },
+          },
+          {
+            name: 'id',
+            in: 'path',
+            description: 'The model ID',
+            required: true,
+            type: 'integer',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'update',
+            examples: {
+              'application/json': {
+                id: 4,
+                version: 1,
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v2/payable_rate/validate': {
+      post: {
+        tags: ['Billing models'],
+        summary: 'Validates a billing model before creation',
+        description: 'Validates a billing model before creation',
+        parameters: [
+          {
+            in: 'body',
+            schema: {
+              $ref: '#/definitions/PayableRateSchema',
+            },
+          },
+        ],
+        responses: {
+          200: {
+            description: 'validate',
+            examples: {
+              'application/json': {
+                errors: [],
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v2/payable_rate/schema': {
+      get: {
+        tags: ['Billing models'],
+        summary: 'Shows the billing model creation schema',
+        description: 'Shows the billing model creation schema',
+        parameters: [],
+        responses: {
+          200: {
+            description: 'schema',
+            schema: {
+              $ref: '#/definitions/PayableRateSchema',
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
   },
   definitions: {
+    PayableRateSchema: {
+      type: 'object',
+      properties: {
+        payable_rate_template_name: {
+          type: 'string',
+        },
+        version: {
+          type: 'integer',
+          description:
+            "The model version. It's incremented on every model update.",
+          example: 1,
+        },
+        breakdowns: {
+          type: 'object',
+          $ref: '#/definitions/PayableRateBreakdowns',
+        },
+      },
+    },
+
+    PayableRateBreakdowns: {
+      type: 'object',
+      properties: {
+        default: {
+          type: 'object',
+          properties: {
+            NO_MATCH: {
+              type: 'integer',
+              maximum: 100,
+              minimum: 0,
+            },
+            '50%-74%': {
+              type: 'integer',
+              maximum: 100,
+              minimum: 0,
+            },
+            '75%-84%': {
+              type: 'integer',
+              maximum: 100,
+              minimum: 0,
+            },
+            '85%-94%': {
+              type: 'integer',
+              maximum: 100,
+              minimum: 0,
+            },
+            '95%-99%': {
+              type: 'integer',
+              maximum: 100,
+              minimum: 0,
+            },
+            '100%': {
+              type: 'integer',
+              maximum: 100,
+              minimum: 0,
+            },
+            '100%_PUBLIC': {
+              type: 'integer',
+              maximum: 100,
+              minimum: 0,
+            },
+            REPETITIONS: {
+              type: 'integer',
+              maximum: 100,
+              minimum: 0,
+            },
+            INTERNAL: {
+              type: 'integer',
+              maximum: 100,
+              minimum: 0,
+            },
+            MT: {
+              type: 'integer',
+              maximum: 100,
+              minimum: 0,
+            },
+            ICE: {
+              type: 'integer',
+              maximum: 100,
+              minimum: 0,
+            },
+            ICE_MT: {
+              type: 'integer',
+              maximum: 100,
+              minimum: 0,
+            },
+          },
+          additionalProperties: false,
+          required: [
+            'NO_MATCH',
+            '50%-74%',
+            '75%-84%',
+            '85%-94%',
+            '95%-99%',
+            '100%',
+            '100%_PUBLIC',
+            'REPETITIONS',
+            'INTERNAL',
+            'MT',
+            'ICE',
+            'ICE_MT',
+          ],
+        },
+      },
+      patternProperties: {
+        '(^[a-z]{2,3}$)|(^[a-z]{2,3}-[A-Z0-9]{2,3}$)|(^[a-z]{2}-[A-Za-z]{2,4}-[A-Z]{2}$)':
+          {
+            type: 'object',
+            patternProperties: {
+              '(^[a-z]{2,3}$)|(^[a-z]{2,3}-[A-Z0-9]{2,3}$)|(^[a-z]{2}-[A-Za-z]{2,4}-[A-Z]{2}$)':
+                {
+                  type: 'object',
+                  properties: {
+                    NO_MATCH: {
+                      type: 'integer',
+                      maximum: 100,
+                      minimum: 0,
+                    },
+                    '50%-74%': {
+                      type: 'integer',
+                      maximum: 100,
+                      minimum: 0,
+                    },
+                    '75%-84%': {
+                      type: 'integer',
+                      maximum: 100,
+                      minimum: 0,
+                    },
+                    '85%-94%': {
+                      type: 'integer',
+                      maximum: 100,
+                      minimum: 0,
+                    },
+                    '95%-99%': {
+                      type: 'integer',
+                      maximum: 100,
+                      minimum: 0,
+                    },
+                    '100%': {
+                      type: 'integer',
+                      maximum: 100,
+                      minimum: 0,
+                    },
+                    '100%_PUBLIC': {
+                      type: 'integer',
+                      maximum: 100,
+                      minimum: 0,
+                    },
+                    REPETITIONS: {
+                      type: 'integer',
+                      maximum: 100,
+                      minimum: 0,
+                    },
+                    INTERNAL: {
+                      type: 'integer',
+                      maximum: 100,
+                      minimum: 0,
+                    },
+                    MT: {
+                      type: 'integer',
+                      maximum: 100,
+                      minimum: 0,
+                    },
+                    ICE: {
+                      type: 'integer',
+                      maximum: 100,
+                      minimum: 0,
+                    },
+                    ICE_MT: {
+                      type: 'integer',
+                      maximum: 100,
+                      minimum: 0,
+                    },
+                  },
+                  additionalProperties: false,
+                  required: [
+                    'NO_MATCH',
+                    '50%-74%',
+                    '75%-84%',
+                    '85%-94%',
+                    '95%-99%',
+                    '100%',
+                    '100%_PUBLIC',
+                    'REPETITIONS',
+                    'INTERNAL',
+                    'MT',
+                    'ICE',
+                    'ICE_MT',
+                  ],
+                },
+            },
+            additionalProperties: false,
+          },
+      },
+      additionalProperties: false,
+      required: ['default'],
+    },
+
     NewProject: {
       type: 'object',
       properties: {
@@ -2890,6 +3307,78 @@ var spec = {
         },
       },
     },
+    Files: {
+      type: 'object',
+      properties: {
+        Office: {
+          type: 'array',
+          items: {
+            type: 'array',
+            items: {
+              $ref: '#/definitions/File',
+            },
+          },
+        },
+        Web: {
+          type: 'array',
+          items: {
+            type: 'array',
+            items: {
+              $ref: '#/definitions/File',
+            },
+          },
+        },
+        'Scanned Files': {
+          type: 'array',
+          items: {
+            type: 'array',
+            items: {
+              $ref: '#/definitions/File',
+            },
+          },
+        },
+        'Interchange Formats': {
+          type: 'array',
+          items: {
+            type: 'array',
+            items: {
+              $ref: '#/definitions/File',
+            },
+          },
+        },
+        'Desktop Publishing': {
+          type: 'array',
+          items: {
+            type: 'array',
+            items: {
+              $ref: '#/definitions/File',
+            },
+          },
+        },
+        Localization: {
+          type: 'array',
+          items: {
+            type: 'array',
+            items: {
+              $ref: '#/definitions/File',
+            },
+          },
+        },
+      },
+    },
+
+    File: {
+      type: 'object',
+      properties: {
+        ext: {
+          type: 'string',
+        },
+        class: {
+          type: 'string',
+        },
+      },
+    },
+
     PendingInvitation: {
       type: 'array',
       items: {

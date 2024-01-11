@@ -386,6 +386,19 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
         }
     }
 
+    public function validateForUser( EnginesModel_EngineStruct $obj )
+    {
+        $query = "SELECT * FROM " . self::TABLE . " WHERE `name` = :engine_name and uid = :uid";
 
+        $stmt = $this->database->getConnection()->prepare( $query );
+        $stmt->execute( [
+            'engine_name'  => $obj->name,
+            'uid' => $obj->uid
+        ] );
+
+        if ( $stmt->rowCount() > 0 ) {
+            throw new Exception("A user can have only one $obj->name engine");
+        }
+    }
 }
 

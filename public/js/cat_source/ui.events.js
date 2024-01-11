@@ -127,32 +127,24 @@ $.extend(window.UI, {
             return
           }
           if (config.isReview) {
-            if ($('.editor .next-unapproved:not(.disabled)').length > 0) {
-              setTimeout(function () {
-                UI.clickOnApprovedButton(segment, true)
-              })
-            } else {
-              setTimeout(function () {
-                UI.clickOnApprovedButton(segment, false)
-              })
-            }
+            setTimeout(function () {
+              const nextApprovedEnabled =
+                $('.editor .next-unapproved:not(.disabled)').length > 0
+              SegmentActions.clickOnApprovedButton(segment, nextApprovedEnabled)
+            })
           } else {
-            var nextUntranslatedSegmentId =
+            const nextUntranslatedSegmentId =
               SegmentStore.getNextUntranslatedSegmentId()
             if (!segment.tagged) {
               setTimeout(function () {
                 UI.startSegmentTagProjection(segment.sid)
               })
-            } else if (
-              nextUntranslatedSegmentId &&
-              segment.translation.trim() !== ''
-            ) {
-              setTimeout(function () {
-                UI.clickOnTranslatedButton(segment, true)
-              })
             } else if (segment.translation.trim() !== '') {
               setTimeout(function () {
-                UI.clickOnTranslatedButton(segment, false)
+                SegmentActions.clickOnTranslatedButton(
+                  segment,
+                  !!nextUntranslatedSegmentId,
+                )
               })
             }
           }
@@ -177,7 +169,7 @@ $.extend(window.UI, {
         function (e) {
           e.preventDefault()
           var segment = SegmentStore.getCurrentSegment()
-          if (segment && Review.enabled()) {
+          if (segment && config.isReview) {
             SegmentActions.openIssuesPanel({sid: segment.sid})
             SegmentActions.scrollToSegment(segment.sid)
           }

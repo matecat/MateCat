@@ -104,6 +104,15 @@ class Mmt extends BaseFeature {
         /** @var Engines_MMT $newTestCreatedMT */
         $newTestCreatedMT = Engine::getInstance( $newCreatedDbRowStruct->id );
 
+        // Check account
+        try {
+            $newTestCreatedMT->checkAccount();
+        } catch ( Exception $e ){
+            ( new EnginesModel_EngineDAO( Database::obtain() ) )->delete( $newCreatedDbRowStruct );
+
+            throw new Exception("MMT license not valid.", $e->getCode());
+        }
+
         try {
 
             // if the MMT-preimport flag is enabled,

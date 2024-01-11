@@ -60,14 +60,14 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      * If found, override the input password with job password.
      *
      * @param string $review_password
-     * @param int $id_job
-     * @param int $source_page
+     * @param int    $id_job
+     * @param int    $source_page
      *
      * @return ChunkReviewStruct
      * @throws NotFoundException
      */
     public function filter_review_password_to_job_password( ChunkReviewStruct $chunkReviewStruct, $source_page ) {
-        $chunk_review = (new \LQA\ChunkReviewDao())->findByJobIdReviewPasswordAndSourcePage( $chunkReviewStruct->id_job, $chunkReviewStruct->review_password, $source_page );
+        $chunk_review = ( new \LQA\ChunkReviewDao() )->findByJobIdReviewPasswordAndSourcePage( $chunkReviewStruct->id_job, $chunkReviewStruct->review_password, $source_page );
 
         if ( !$chunk_review ) {
             throw new NotFoundException( 'Review record was not found' );
@@ -128,7 +128,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      * @return array
      * @throws Exception
      */
-    public function createQaChunkReviewRecords( Array $chunksArray, Projects_ProjectStruct $project, $options = [] ) {
+    public function createQaChunkReviewRecords( array $chunksArray, Projects_ProjectStruct $project, $options = [] ) {
 
         $createdRecords = [];
 
@@ -139,10 +139,10 @@ abstract class AbstractRevisionFeature extends BaseFeature {
 
         foreach ( $chunksArray as $k => $chunk ) {
             $data = [
-                    'id_project'     => $project->id,
-                    'id_job'         => $chunk->id,
-                    'password'       => $chunk->password,
-                    'source_page'    => $options[ 'source_page' ]
+                    'id_project'  => $project->id,
+                    'id_job'      => $chunk->id,
+                    'password'    => $chunk->password,
+                    'source_page' => $options[ 'source_page' ]
             ];
 
             if ( $k == 0 && array_key_exists( 'first_record_password', $options ) != null ) {
@@ -212,10 +212,10 @@ abstract class AbstractRevisionFeature extends BaseFeature {
 
         ChunkReviewDao::deleteByJobId( $id_job );
 
+        /**
+         * @var $chunksStructArray Chunks_ChunkStruct[]
+         */
         $chunksStructArray = Jobs_JobDao::getById( $id_job, 0, new Chunks_ChunkStruct() );
-
-
-
 
 
         $reviews = [];
@@ -224,13 +224,13 @@ abstract class AbstractRevisionFeature extends BaseFeature {
             // check if $review belongs to a deleted job
             $chunk = Jobs_JobDao::getByIdAndPassword( $review->id_job, $review->password );
 
-            if(!$chunk->wasDeleted()){
+            if ( !$chunk->wasDeleted() ) {
                 $reviews = array_merge( $reviews, $this->createQaChunkReviewRecords( $chunksStructArray, $project,
                         [
                                 'first_record_password' => $review->review_password,
                                 'source_page'           => $review->source_page
                         ]
-                    )
+                )
                 );
             }
         }
@@ -446,14 +446,12 @@ abstract class AbstractRevisionFeature extends BaseFeature {
     public static function loadAndValidateModelFromJsonFile( &$projectStructure, $jsonPath = null ) {
 
         // CASE 1 there is an injected QA template id
-        if(isset($projectStructure['qa_model_template']) and null !== $projectStructure['qa_model_template']){
-            $decoded_model = $projectStructure['qa_model_template'];
-        }
-        // CASE 2 there a is an injected qa_model
-        elseif(isset($projectStructure['qa_model']) and null !== $projectStructure['qa_model'] ){
-            $decoded_model = $projectStructure['qa_model'];
-        }
-        // CASE3 otherwise
+        if ( isset( $projectStructure[ 'qa_model_template' ] ) and null !== $projectStructure[ 'qa_model_template' ] ) {
+            $decoded_model = $projectStructure[ 'qa_model_template' ];
+        } // CASE 2 there a is an injected qa_model
+        elseif ( isset( $projectStructure[ 'qa_model' ] ) and null !== $projectStructure[ 'qa_model' ] ) {
+            $decoded_model = $projectStructure[ 'qa_model' ];
+        } // CASE3 otherwise
         else {
             // detect if the project created was a zip file, in which case try to detect
             // id_qa_model from json file.
@@ -470,7 +468,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
                 $zip->open( $zip_file );
                 $qa_model = $zip->getFromName( '__meta/qa_model.json' );
 
-                if ( AbstractFilesStorage::isOnS3() ){
+                if ( AbstractFilesStorage::isOnS3() ) {
                     unlink( $zip_file );
                 }
 

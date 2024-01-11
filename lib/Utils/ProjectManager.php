@@ -21,10 +21,6 @@ use FilesStorage\FilesStorageFactory;
 use FilesStorage\S3FilesStorage;
 use Jobs\SplitQueue;
 use LQA\QA;
-use Matecat\SubFiltering\Commons\Pipeline;
-use Matecat\SubFiltering\Filters\FromViewNBSPToSpaces;
-use Matecat\SubFiltering\Filters\PhCounter;
-use Matecat\SubFiltering\Filters\SprintfToPH;
 use Matecat\SubFiltering\MateCatFilter;
 use Matecat\XliffParser\XliffParser;
 use Matecat\XliffParser\XliffUtils\DataRefReplacer;
@@ -125,71 +121,74 @@ class ProjectManager {
 
         if ( $projectStructure == null ) {
             $projectStructure = new RecursiveArrayObject(
-                    [
-                            'HTTP_HOST'                               => null,
-                            'id_project'                              => null,
-                            'create_date'                             => date( "Y-m-d H:i:s" ),
-                            'id_customer'                             => self::TRANSLATED_USER,
-                            'project_features'                        => [],
-                            'user_ip'                                 => null,
-                            'project_name'                            => null,
-                            'result'                                  => [ "errors" => [], "data" => [] ],
-                            'private_tm_key'                          => 0,
-                            'uploadToken'                             => null,
-                            'array_files'                             => [], //list of file names
-                            'array_files_meta'                        => [], //list of file meta data
-                            'file_id_list'                            => [],
-                            'source_language'                         => null,
-                            'target_language'                         => null,
-                            'job_subject'                             => 'general',
-                            'mt_engine'                               => null,
-                            'tms_engine'                              => null,
-                            'ppassword'                               => null,
-                            'array_jobs'                              => [
-                                    'job_list'      => [],
-                                    'job_pass'      => [],
-                                    'job_segments'  => [],
-                                    'job_languages' => [],
-                                    'payable_rates' => [],
-                            ],
-                            'job_segments'                            => [], //array of job_id => [  min_seg, max_seg  ]
-                            'segments'                                => [], //array of files_id => segments[  ]
-                            'segments-original-data'                  => [], //array of files_id => segments-original-data[  ]
-                            'segments_metadata'                       => [], //array of segments_metadata
-                            'segments-meta-data'                      => [], //array of files_id => segments-meta-data[  ]
-                            'file-part-id'                            => [], //array of files_id => segments-meta-data[  ]
-                            'file-metadata'                           => [], //array of files metadata
-                            'translations'                            => [],
-                            'notes'                                   => [],
-                            'context-group'                           => [],
-                        //one translation for every file because translations are files related
-                            'status'                                  => Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS,
-                            'job_to_split'                            => null,
-                            'job_to_split_pass'                       => null,
-                            'split_result'                            => null,
-                            'job_to_merge'                            => null,
-                            'lang_detect_files'                       => [],
-                            'tm_keys'                                 => [],
-                            'userIsLogged'                            => false,
-                            'uid'                                     => null,
-                            'skip_lang_validation'                    => false,
-                            'pretranslate_100'                        => 0,
-                            'only_private'                            => 0,
-                            'owner'                                   => '',
-                            Projects_MetadataDao::WORD_COUNT_TYPE_KEY => Projects_MetadataDao::WORD_COUNT_RAW,
-                            'metadata'                                => [],
-                            'id_assignee'                             => null,
-                            'session'                                 => ( isset( $_SESSION ) ? $_SESSION : false ),
-                            'instance_id'                             => ( !is_null( INIT::$INSTANCE_ID ) ? (int)INIT::$INSTANCE_ID : 0 ),
-                            'id_team'                                 => null,
-                            'team'                                    => null,
-                            'sanitize_project_options'                => true,
-                            'file_segments_count'                     => [],
-                            'due_date'                                => null,
-                            'qa_model'                                => null,
-                            'target_language_mt_engine_id'            => [],
-                            'standard_word_count'                     => 0
-                    ] );
+                [
+                    'HTTP_HOST'                    => null,
+                    'id_project'                   => null,
+                    'create_date'                  => date( "Y-m-d H:i:s" ),
+                    'id_customer'                  => self::TRANSLATED_USER,
+                    'project_features'             => [],
+                    'user_ip'                      => null,
+                    'project_name'                 => null,
+                    'result'                       => [ "errors" => [], "data" => [] ],
+                    'private_tm_key'               => 0,
+                    'uploadToken'                  => null,
+                    'array_files'                  => [], //list of file names
+                    'array_files_meta'             => [], //list of file meta data
+                    'file_id_list'                 => [],
+                    'source_language'              => null,
+                    'target_language'              => null,
+                    'job_subject'                  => 'general',
+                    'mt_engine'                    => null,
+                    'tms_engine'                   => null,
+                    'ppassword'                    => null,
+                    'array_jobs'                   => [
+                        'job_list'      => [],
+                        'job_pass'      => [],
+                        'job_segments'  => [],
+                        'job_languages' => [],
+                        'payable_rates' => [],
+                    ],
+                    'job_segments'                 => [], //array of job_id => [  min_seg, max_seg  ]
+                    'segments'                     => [], //array of files_id => segments[  ]
+                    'segments-original-data'       => [], //array of files_id => segments-original-data[  ]
+                    'segments_metadata'            => [], //array of segments_metadata
+                    'segments-meta-data'           => [], //array of files_id => segments-meta-data[  ]
+                    'file-part-id'                 => [], //array of files_id => segments-meta-data[  ]
+                    'file-metadata'                => [], //array of files metadata
+                    'translations'                 => [],
+                    'notes'                        => [],
+                    'context-group'                => [],
+                    //one translation for every file because translations are files related
+                    'status'                       => Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS,
+                    'job_to_split'                 => null,
+                    'job_to_split_pass'            => null,
+                    'split_result'                 => null,
+                    'job_to_merge'                 => null,
+                    'lang_detect_files'            => [],
+                    'tm_keys'                      => [],
+                    'userIsLogged'                 => false,
+                    'uid'                          => null,
+                    'skip_lang_validation'         => false,
+                    'pretranslate_100'             => 0,
+                    'only_private'                 => 0,
+                    'owner'                        => '',
+                    Projects_MetadataDao::WORD_COUNT_TYPE_KEY => Projects_MetadataDao::WORD_COUNT_RAW,
+                    'metadata'                     => [],
+                    'id_assignee'                  => null,
+                    'session'                      => ( isset( $_SESSION ) ? $_SESSION : false ),
+                    'instance_id'                  => ( !is_null( INIT::$INSTANCE_ID ) ? (int)INIT::$INSTANCE_ID : 0 ),
+                    'id_team'                      => null,
+                    'team'                         => null,
+                    'sanitize_project_options'     => true,
+                    'file_segments_count'          => [],
+                    'due_date'                     => null,
+                    'qa_model'                     => null,
+                    'target_language_mt_engine_id' => [],
+                    'standard_word_count'          => 0,
+                    'mmt_glossaries'               => null,
+                    'deepl_formality'              => null,
+                    'deepl_id_glossary'            => null,
+                ] );
 
         }
 
@@ -342,6 +341,11 @@ class ProjectManager {
     private function saveMetadata() {
         $options = $this->projectStructure[ 'metadata' ];
 
+        // "From API" flag
+        if(isset($this->projectStructure['from_api']) and $this->projectStructure['from_api'] == true){
+            $options['from_api'] = 1;
+        }
+
         /**
          * Here we have the opportunity to add other features as dependencies of the ones
          * which are already explicitly set.
@@ -373,6 +377,33 @@ class ProjectManager {
                     $value
             );
         }
+
+        // add MMT Glossaries here
+        if( $this->projectStructure[ 'mmt_glossaries' ] and !empty( $this->projectStructure[ 'mmt_glossaries' ] ) ){
+            $dao->set(
+                $this->projectStructure[ 'id_project' ],
+                'mmt_glossaries',
+                $this->projectStructure[ 'mmt_glossaries' ]
+            );
+        }
+
+        // add DeepL params here
+        if( $this->projectStructure[ 'deepl_formality' ] and !empty( $this->projectStructure[ 'deepl_formality' ] ) ){
+            $dao->set(
+                $this->projectStructure[ 'id_project' ],
+                'deepl_formality',
+                $this->projectStructure[ 'deepl_formality' ]
+            );
+        }
+
+        if( $this->projectStructure[ 'deepl_id_glossary' ] and !empty( $this->projectStructure[ 'deepl_id_glossary' ] ) ){
+            $dao->set(
+                $this->projectStructure[ 'id_project' ],
+                'deepl_id_glossary',
+                $this->projectStructure[ 'deepl_id_glossary' ]
+            );
+        }
+
     }
 
     private function sanitizeProjectOptions( $options ) {
@@ -1858,7 +1889,8 @@ class ProjectManager {
                             //mrk in the list will not be too!!!
                             $show_in_cattool = 1;
 
-                            $wordCount = CatUtils::segment_raw_word_count( $seg_source[ 'raw-content' ], $this->projectStructure[ 'source_language' ], $this->filter, true );
+                            $wordCount = CatUtils::segment_raw_word_count( $seg_source[ 'raw-content' ], $this->projectStructure[ 'source_language' ], $this->filter );
+                            $wordCount = $this->features->filter( 'wordCount', $wordCount );
 
                             //init tags
                             $seg_source[ 'mrk-ext-prec-tags' ] = '';
@@ -2029,10 +2061,9 @@ class ProjectManager {
 
                             if ( isset( $xliff_trans_unit[ 'target' ][ 'raw-content' ] ) ) {
 
-
                                 // could not have attributes, suppress warning
-                                $state                   = @$xliff_trans_unit[ 'target' ][ 'attr' ][ 'state' ];
-                                $stateQualifier          = @$xliff_trans_unit[ 'target' ][ 'attr' ][ 'state-qualifier' ];
+                                $state = (isset($xliff_trans_unit['target']['attr']['state'])) ? $xliff_trans_unit['target']['attr']['state'] : null;
+                                $stateQualifier = (isset($xliff_trans_unit['target']['attr'][ 'state-qualifier' ])) ? $xliff_trans_unit['target']['attr'][ 'state-qualifier' ] : null;
                                 $target_extract_external = $this->_strip_external( $xliff_trans_unit[ 'target' ][ 'raw-content' ], $xliffInfo );
 
                                 if ( $this->__isTranslated( $xliff_trans_unit[ 'source' ][ 'raw-content' ], $target_extract_external[ 'seg' ], $xliff_trans_unit, $state, $stateQualifier ) && !is_numeric( $xliff_trans_unit[ 'source' ][ 'raw-content' ] ) && !empty( $target_extract_external[ 'seg' ] ) ) {
@@ -2627,33 +2658,12 @@ class ProjectManager {
                 $source = $segment->segment;
                 $target = $translation_row [ 2 ];
 
-                //
-                // NOTE 2021-12-20
-                // ------------------------------------------------------
-                // In order to perform an integrity check
-                // we need to transform source and target to layer1
-                // This piece of code mimics setTranslationController (from line 322 to 341)
-
-                /** @var MateCatFilter filter */
+                /** @var $filter MateCatFilter filter */
                 $filter = MateCatFilter::getInstance( $this->features, $chunk->source, $chunk->target, Segments_SegmentOriginalDataDao::getSegmentDataRefMap( $translation_row [ 0 ] ) );
                 $source = $filter->fromLayer0ToLayer1( $source );
                 $target = $filter->fromLayer0ToLayer1( $target );
 
-                $pipeline = new Pipeline( $chunk->source, $chunk->target );
-                $counter  = new PhCounter();
-                $counter->transform( $target );
-
-                for ( $i = 0; $i < $counter->getCount(); $i++ ) {
-                    $pipeline->getNextId();
-                }
-
-                $pipeline->addLast( new FromViewNBSPToSpaces() );
-                $pipeline->addLast( new SprintfToPH() );
-
-                $src = $pipeline->transform( $source );
-                $trg = $pipeline->transform( $target );
-
-                $check = new QA( $src, $trg );
+                $check = new QA( $source, $target );
                 $check->setFeatureSet( $this->features );
                 $check->setSourceSegLang( $chunk->source );
                 $check->setTargetSegLang( $chunk->target );
@@ -2662,18 +2672,19 @@ class ProjectManager {
 
                 /* WARNING do not change the order of the keys */
                 $sql_values = [
-                        'id_segment'             => $translation_row [ 0 ],
-                        'id_job'                 => $jid,
-                        'segment_hash'           => $translation_row [ 3 ],
-                        'status'                 => $iceLockArray[ 'status' ],
-                        'translation'            => $filter->fromLayer1ToLayer0( $check->getTargetSeg() ),
-                        'locked'                 => 0, // not allowed to change locked status for pre-translations
-                        'match_type'             => $iceLockArray[ 'match_type' ],
-                        'eq_word_count'          => $iceLockArray[ 'eq_word_count' ],
-                        'serialized_errors_list' => ( $check->thereAreErrors() ) ? $check->getErrorsJSON() : '',
-                        'warning'                => ( $check->thereAreErrors() ) ? 1 : 0,
-                        'suggestion_match'       => $iceLockArray[ 'suggestion_match' ],
-                        'standard_word_count'    => $iceLockArray[ 'standard_word_count' ],
+                    'id_segment'             => $translation_row [ 0 ],
+                    'id_job'                 => $jid,
+                    'segment_hash'           => $translation_row [ 3 ],
+                    'status'                 => $iceLockArray[ 'status' ],
+                    'translation'            => $filter->fromLayer1ToLayer0( $check->getTargetSeg() ),
+                    'locked'                 => 0, // not allowed to change locked status for pre-translations
+                    'match_type'             => $iceLockArray[ 'match_type' ],
+                    'eq_word_count'          => $iceLockArray[ 'eq_word_count' ],
+                    'serialized_errors_list' => ( $check->thereAreErrors() ) ? $check->getErrorsJSON() : '',
+                    'warning'                => ( $check->thereAreErrors() ) ? 1 : 0,
+                    'suggestion_match'       => $iceLockArray[ 'suggestion_match' ],
+                    'standard_word_count'    => $iceLockArray[ 'standard_word_count' ],
+                    'version_number'         => (isset($iceLockArray[ 'version_number' ])) ? $iceLockArray[ 'version_number' ] : 0,
                 ];
 
                 $query_translations_values[] = $sql_values;

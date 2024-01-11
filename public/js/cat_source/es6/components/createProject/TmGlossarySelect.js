@@ -11,6 +11,8 @@ export const TmGlossarySelect = () => {
     ? tmKeys.filter(({isActive}) => isActive)
     : []
 
+  const hasNoPrivateKeys = Array.isArray(tmKeys) && !tmKeys.length
+
   return (
     <Select
       label={
@@ -28,6 +30,7 @@ export const TmGlossarySelect = () => {
       }
       id="tmx-select"
       name={'tmx-select'}
+      className={`${hasNoPrivateKeys ? 'select-without-private-keys' : ''}`}
       maxHeightDroplist={SELECT_HEIGHT}
       showSearchBar={true}
       isDisabled={!tmKeys}
@@ -59,16 +62,23 @@ export const TmGlossarySelect = () => {
       {({index, onClose, name, key, showActiveOptionIcon}) => ({
         ...(index === 0 && {
           beforeRow: (
-            <button
-              className="button-top-of-list"
-              onClick={() => {
-                setOpenSettings({isOpen: true})
-                onClose()
-              }}
-            >
-              CREATE RESOURCE
-              <span className="icon-plus3 icon"></span>
-            </button>
+            <>
+              {hasNoPrivateKeys && (
+                <span className="no-private-keys-message">
+                  You have no private resources
+                </span>
+              )}
+              <button
+                className="button-top-of-list"
+                onClick={() => {
+                  setOpenSettings({isOpen: true})
+                  onClose()
+                }}
+              >
+                CREATE RESOURCE
+                <span className="icon-plus3 icon"></span>
+              </button>
+            </>
           ),
         }),
         row: (

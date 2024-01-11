@@ -3,10 +3,10 @@ import React, {useEffect, useState} from 'react'
 import JobMetadataModal from '../../modals/JobMetadataModal'
 import SegmentStore from '../../../stores/SegmentStore'
 import ModalsActions from '../../../actions/ModalsActions'
-import {getJobMetadata} from '../../../api/getJobMetadata'
 import TeamsStore from '../../../stores/TeamsStore'
 import CatToolStore from '../../../stores/CatToolStore'
 import CattolConstants from '../../../constants/CatToolConstants'
+import CatToolActions from '../../../actions/CatToolActions'
 
 export const JobMetadata = ({idJob, password}) => {
   const [files, setFiles] = useState()
@@ -39,7 +39,7 @@ export const JobMetadata = ({idJob, password}) => {
   }
 
   useEffect(() => {
-    getJobMetadata(idJob, password).then((jobMetadata) => {
+    const getJobMetadata = ({jobMetadata}) => {
       const projectInfo =
         jobMetadata.project && jobMetadata.project.project_info
           ? jobMetadata.project.project_info
@@ -48,7 +48,16 @@ export const JobMetadata = ({idJob, password}) => {
         setProjectInfo(projectInfo)
         setShowButton(true)
       }
-    })
+    }
+
+    CatToolStore.addListener(CattolConstants.GET_JOB_METADATA, getJobMetadata)
+    CatToolActions.getJobMetadata({idJob, password})
+
+    return () =>
+      CatToolStore.removeListener(
+        CattolConstants.GET_JOB_METADATA,
+        getJobMetadata,
+      )
   }, [])
 
   useEffect(() => {

@@ -80,7 +80,8 @@ class QualitySummary {
             $categories,
             $model_version,
             $model_id,
-            $model_label
+            $model_label,
+            $model_template_id
             ) = self::revisionQualityVars( $this->chunk, $this->project, $chunkReview );
 
         return self::populateQualitySummarySection(
@@ -98,6 +99,7 @@ class QualitySummary {
                 $model_version,
                 $model_id,
                 $model_label,
+                $model_template_id,
                 $chunkReview->review_password
         );
     }
@@ -120,6 +122,7 @@ class QualitySummary {
      * @param                $model_version
      * @param                $model_id
      * @param                $model_label
+     * @param                $model_template_id
      *
      * @return mixed
      */
@@ -138,6 +141,7 @@ class QualitySummary {
             $model_version,
             $model_id = null,
             $model_label = null,
+            $model_template_id = null,
             $chunkReviewPassword = null
     ) {
 
@@ -154,6 +158,7 @@ class QualitySummary {
             'model_version'              => ( $model_version ? (int)$model_version : null ),
             'model_id'                   => ( !empty( $model_id ) ? (int)$model_id : null ),
             'model_label'                => ( !empty( $model_label ) ? $model_label : null ),
+            'model_template_id'          => ( $model_template_id ? (int)$model_template_id : null ),
             'is_pass'                    => $is_pass,
             'quality_overall'            => $quality_overall,
             'errors_count'               => (int)$jStruct->getErrorsCount(),
@@ -231,13 +236,15 @@ class QualitySummary {
                 $passFail,
                 $reviseIssues,
                 $quality_overall,
-                $is_pass, $score,
+                $is_pass,
+                $score,
                 $total_issues_weight,
                 $total_reviewed_words_count,
                 $categories,
                 ($model ? $model->hash : null),
                 ($model ? $model->id : null),
-                ($model ? $model->label : null)
+                ($model ? $model->label : null),
+                ($model ? $model->qa_model_template_id : null)
         ];
     }
 

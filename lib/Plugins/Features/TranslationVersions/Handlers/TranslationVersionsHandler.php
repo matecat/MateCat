@@ -132,6 +132,16 @@ class TranslationVersionsHandler implements VersionHandlerInterface {
             return false;
         }
 
+        // avoid version_number null error
+        if($new_translation->version_number === null){
+            $new_translation->version_number = 0;
+        }
+
+        // avoid version_number null error
+        if($old_translation->version_number === null){
+            $old_translation->version_number = 0;
+        }
+
         // From now on, translations are treated as arrays and get attributes attached
         // just to be passed to version save. Create two arrays for the purpose.
         $new_version = new TranslationVersionStruct( $old_translation->toArray() );
