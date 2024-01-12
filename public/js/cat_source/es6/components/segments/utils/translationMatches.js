@@ -186,7 +186,10 @@ let TranslationMatches = {
   processContributions: function (data, sid) {
     if (config.translation_matches_enabled && data) {
       if (!data) return true
-      this.renderContributions(data, sid)
+      const validMatches = data.matches.filter(
+        ({segment, translation}) => segment && translation,
+      )
+      this.renderContributions({...data, matches: validMatches}, sid)
     }
   },
 
