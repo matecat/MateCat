@@ -16,8 +16,12 @@ class Error {
 
     private $data;
 
-    public function __construct( $data = [] ) {
-        $this->data = $data;
+    /**
+     * Error constructor.
+     * @param Exception[] $exceptions
+     */
+    public function __construct($exceptions = [] ) {
+        $this->data = $exceptions;
     }
 
     public function render( $data = null ) {
