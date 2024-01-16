@@ -30,6 +30,62 @@ class ProjectTemplateDao extends DataAccess_AbstractDao
     }
 
     /**
+     * @param $json
+     * @param null $uid
+     * @return ProjectTemplateStruct
+     * @throws \Swaggest\JsonSchema\InvalidValue
+     * @throws \Exception
+     */
+    public static function createFromJSON($json, $uid)
+    {
+        self::validateJSON($json);
+
+        $projectTemplateStruct = new ProjectTemplateStruct();
+        $projectTemplateStruct->hydrateFromJSON($json);
+
+        if($uid){
+            $projectTemplateStruct->uid = $uid;
+        }
+
+        return self::save($projectTemplateStruct);
+    }
+
+    /**
+     * @param ProjectTemplateStruct $projectTemplateStruct
+     * @param $json
+     * @param $uid
+     * @return ProjectTemplateStruct
+     * @throws \Swaggest\JsonSchema\InvalidValue
+     * @throws \Exception
+     */
+    public static function editFromJSON(ProjectTemplateStruct $projectTemplateStruct, $json, $uid)
+    {
+        self::validateJSON($json);
+        $projectTemplateStruct->hydrateFromJSON($json);
+        $projectTemplateStruct->uid = $uid;
+
+        return self::update($projectTemplateStruct);
+    }
+
+    /**
+     * @param $json
+     * @throws \Swaggest\JsonSchema\InvalidValue
+     * @throws \Exception
+     */
+    private static function validateJSON($json)
+    {
+        $validatorObject = new \Validator\JSONValidatorObject();
+        $validatorObject->json = $json;
+        $jsonSchema = file_get_contents( __DIR__ . '/../../../inc/validation/schema/project_template.json.json' );
+        $validator = new \Validator\JSONValidator($jsonSchema);
+        $validator->validate($validatorObject);
+
+        if(!$validator->isValid()){
+            throw $validator->getErrors()[0]->error;
+        }
+    }
+
+    /**
      * @param $uid
      * @param int $current
      * @param int $pagination

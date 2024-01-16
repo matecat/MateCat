@@ -31,6 +31,37 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
     public $modified_at ;
 
     /**
+     * @param $json
+     * @return $this
+     * @throws \Exception
+     */
+    public function hydrateFromJSON($json)
+    {
+        $json = json_decode($json);
+
+        if(!isset($json->model)){
+            throw new \Exception("Cannot instantiate a new ProjectTemplateStruct. Invalid JSON provided.");
+        }
+
+        $this->id = $json->id;
+        $this->name = $json->name;
+        $this->is_default = $json->is_default;
+        $this->uid = $json->uid;
+        $this->id_team = $json->id_team;
+        $this->speech2text = $json->speech2text;
+        $this->lexica = $json->lexica;
+        $this->tag_projection = $json->tag_projection;
+        $this->cross_language_matches = $json->cross_language_matches;
+        $this->segmentation_rule = $json->segmentation_rule;
+        $this->mt = $json->mt;
+        $this->tm = $json->tm;
+        $this->payable_rate_template_id = $json->payable_rate_template_id;
+        $this->qa_model_template_id = $json->qa_model_template_id;
+
+        return $this;
+    }
+
+    /**
      * @return string
      */
     public function tmToJson()
