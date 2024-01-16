@@ -67,6 +67,10 @@
 }
 .settings-panel-contentwrapper {
   height: 100%;
+
+  > ul {
+    padding: 15px 25px;
+  }
 }
 
 .settings-panel-header-logo {
@@ -78,17 +82,18 @@
 }
 
 .settings-panel-tab {
-  padding: 6px 20px;
+  padding: 10px 20px;
   cursor: pointer;
-  border-radius: 4px 4px 0 0;
-  background-color: #cdd4de;
-  color: $grey6;
+  border-radius: 20px;
+  color: $white;
   font-weight: bold;
   font-size: 16px;
+  opacity: 0.6;
 }
 
 .settings-panel-tab-active {
-  background-color: white;
+  background-color: rgba($grey3, 0.24);
+  opacity: 1;
 }
 
 .settings-panel-contentwrapper {
@@ -122,9 +127,51 @@
   }
 }
 
+.settings-panel-contentwrapper-active-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  padding: 20px;
+
+  h3 {
+    font-size: 20px;
+    margin-bottom: 4px;
+  }
+
+  span {
+    font-size: 16px;
+    color: $grey6;
+  }
+}
+
 .settings-panel-button-icon {
   min-width: 120px;
   display: flex !important;
   gap: 10px !important;
   margin: 0 !important;
+}
+
+.settings-panel-project-template {
+  padding: 16px 24px;
+  background-color: $darkBlue;
+
+  .select-with-label__wrapper {
+    width: 240px;
+  }
+  .select-with-label__wrapper label {
+    color: $white;
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+  .select-with-label__wrapper .select {
+    font-size: 16px;
+    padding: 9px 46px 9px 12px;
+  }
+}
+
+.settings-panel-contentwrapper-tab-background {
+  background-color: $grey5;
+  padding: 20px;
+  border-radius: 16px;
 }

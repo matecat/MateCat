@@ -5,6 +5,7 @@ import {ContentWrapper} from './ContentWrapper'
 import {MachineTranslationTab} from './Contents/MachineTranslationTab'
 import {AdvancedOptionsTab} from './Contents/AdvancedOptionsTab'
 import {TranslationMemoryGlossaryTab} from './Contents/TranslationMemoryGlossaryTab'
+import {ProjectTemplate} from './ProjectTemplate'
 
 let tabOpenFromQueryString = new URLSearchParams(window.location.search).get(
   'openTab',
@@ -20,16 +21,22 @@ const DEFAULT_CONTENTS = [
   {
     id: SETTINGS_PANEL_TABS.translationMemoryGlossary,
     label: 'Translation Memory and Glossary',
+    description:
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vulputate libero et velit interdum, ac aliquet odio mattis.',
     component: <TranslationMemoryGlossaryTab />,
   },
   {
     id: SETTINGS_PANEL_TABS.machineTranslation,
     label: 'Machine Translation',
+    description:
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vulputate libero et velit interdum, ac aliquet odio mattis.',
     component: <MachineTranslationTab />,
   },
   {
     id: SETTINGS_PANEL_TABS.advancedOptions,
     label: 'Advanced Options',
+    description:
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vulputate libero et velit interdum, ac aliquet odio mattis.',
     component: <AdvancedOptionsTab />,
   },
 ]
@@ -167,6 +174,7 @@ export const SettingsPanel = ({
             <span>Settings</span>
             <div onClick={close} className="close-matecat-modal x-popup" />
           </div>
+          <ProjectTemplate />
           <ContentWrapper />
         </div>
       </div>

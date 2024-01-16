@@ -320,7 +320,10 @@ export const TranslationMemoryGlossaryTab = () => {
     <TranslationMemoryGlossaryTabContext.Provider
       value={{ref, setSpecialRows, setNotification}}
     >
-      <div ref={ref} className="translation-memory-glossary-tab">
+      <div
+        ref={ref}
+        className="translation-memory-glossary-tab settings-panel-contentwrapper-tab-background"
+      >
         {typeof isPretranslate100Active === 'boolean' && (
           <div className="translation-memory-glossary-tab-pre-translate">
             <input
