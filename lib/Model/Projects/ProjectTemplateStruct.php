@@ -39,10 +39,6 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
     {
         $json = json_decode($json);
 
-        if(!isset($json->model)){
-            throw new \Exception("Cannot instantiate a new ProjectTemplateStruct. Invalid JSON provided.");
-        }
-
         $this->id = $json->id;
         $this->name = $json->name;
         $this->is_default = $json->is_default;
@@ -66,7 +62,7 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
      */
     public function tmToJson()
     {
-        return json_encode($this->tm);
+        return (!empty($this->tm)) ? json_encode($this->tm) : null;
     }
 
     /**
@@ -74,7 +70,7 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
      */
     public function mtToJson()
     {
-        return json_encode($this->mt);
+        return (!empty($this->mt)) ? json_encode($this->mt) : null;
     }
 
     /**
@@ -129,22 +125,22 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
     public function jsonSerialize()
     {
         return [
-            'id' => $this->id,
+            'id' => (int)$this->id,
             'name' => $this->name,
-            'is_default' => $this->is_default,
-            'uid' => $this->uid,
-            'id_team' => $this->id_team,
-            'speech2text' => $this->speech2text,
-            'lexica' => $this->lexica,
-            'tag_projection' => $this->tag_projection,
+            'is_default' => (bool)$this->is_default,
+            'uid' => (int)$this->uid,
+            'id_team' => (int)$this->id_team,
+            'speech2text' => (bool)$this->speech2text,
+            'lexica' => (bool)$this->lexica,
+            'tag_projection' => (bool)$this->tag_projection,
             'cross_language_matches' => $this->cross_language_matches,
             'segmentation_rule' => $this->segmentation_rule,
-            'mt' => $this->mt,
-            'tm' => $this->tm,
-            'payable_rate_template_id' => $this->payable_rate_template_id,
-            'qa_model_template_id' => $this->qa_model_template_id,
-            'create_date' => date_create( $this->create_date )->format( DATE_RFC822 ),
-            'update_date' => date_create( $this->update_date )->format( DATE_RFC822 ),
+            'mt' => json_decode($this->mt),
+            'tm' => json_decode($this->tm),
+            'payable_rate_template_id' => $this->payable_rate_template_id ? (int)$this->payable_rate_template_id : null,
+            'qa_model_template_id' => $this->qa_model_template_id ? (int)$this->qa_model_template_id : null,
+            'created_at' => date_create( $this->created_at )->format( DATE_RFC822 ),
+            'modified_at' => date_create( $this->modified_at )->format( DATE_RFC822 ),
         ];
     }
 }

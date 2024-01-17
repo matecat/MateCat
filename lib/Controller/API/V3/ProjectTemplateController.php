@@ -47,8 +47,18 @@ class ProjectTemplateController extends KleinController
         $id = filter_var( $this->request->id, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_HIGH|FILTER_FLAG_ENCODE_LOW );
 
         try {
+            $model = ProjectTemplateDao::getById($id);
+
+            if(empty($model)){
+                $this->response->code(404);
+
+                return $this->response->json([
+                    'error' => 'Model not found'
+                ]);
+            }
+
             $this->response->status()->setCode( 200 );
-            $this->response->json(ProjectTemplateDao::getById($id));
+            $this->response->json($model);
             exit();
 
         } catch (Exception $exception){
@@ -143,8 +153,7 @@ class ProjectTemplateController extends KleinController
 
             $this->response->code(200);
             return $this->response->json([
-                'id'      => (int)$struct->id,
-                'version' => (int)$struct->version,
+                'id' => (int)$struct->id,
             ]);
         } catch (JSONValidatorError $exception){
             $errorCode = $exception->getCode() >= 400 ? $exception->getCode()  : 500;
@@ -169,6 +178,16 @@ class ProjectTemplateController extends KleinController
         $id = filter_var( $this->request->id, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_HIGH|FILTER_FLAG_ENCODE_LOW );
 
         try {
+            $model = ProjectTemplateDao::getById($id);
+
+            if(empty($model)){
+                $this->response->code(404);
+
+                return $this->response->json([
+                    'error' => 'Model not found'
+                ]);
+            }
+
             ProjectTemplateDao::remove($id);
 
             $this->response->json([

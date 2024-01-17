@@ -2,6 +2,7 @@
 
 namespace Projects;
 
+use CatUtils;
 use DataAccess_AbstractDao;
 use Database;
 use DateTime;
@@ -12,6 +13,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao
     const TABLE = 'project_templates';
 
     const query_by_id = "SELECT * FROM " . self::TABLE . " WHERE id = :id";
+    const query_by_uid_name = "SELECT * FROM " . self::TABLE . " WHERE uid = :uid AND name = :name";
 
     /**
      * @var null
@@ -43,9 +45,11 @@ class ProjectTemplateDao extends DataAccess_AbstractDao
         $projectTemplateStruct = new ProjectTemplateStruct();
         $projectTemplateStruct->hydrateFromJSON($json);
 
-        if($uid){
-            $projectTemplateStruct->uid = $uid;
-        }
+        // check name
+        $jsonDecoded = json_decode($json);
+        $projectTemplateStruct = self::findUniqueName($projectTemplateStruct, $jsonDecoded->name, $uid);
+
+        $projectTemplateStruct->uid = $uid;
 
         return self::save($projectTemplateStruct);
     }
@@ -61,10 +65,38 @@ class ProjectTemplateDao extends DataAccess_AbstractDao
     public static function editFromJSON(ProjectTemplateStruct $projectTemplateStruct, $json, $uid)
     {
         self::validateJSON($json);
+        $id = $projectTemplateStruct->id;
         $projectTemplateStruct->hydrateFromJSON($json);
         $projectTemplateStruct->uid = $uid;
+        $projectTemplateStruct->id = $id;
+
+        $saved = self::getById($id);
+
+        if($saved->name !== $projectTemplateStruct->name){
+            $projectTemplateStruct = self::findUniqueName($projectTemplateStruct, $projectTemplateStruct->name, $uid);
+        }
 
         return self::update($projectTemplateStruct);
+    }
+
+    /**
+     * @param ProjectTemplateStruct $projectTemplateStruct
+     * @param $name
+     * @param $uid
+     * @return ProjectTemplateStruct
+     */
+    private static function findUniqueName(ProjectTemplateStruct $projectTemplateStruct, $name, $uid)
+    {
+        $check = ProjectTemplateDao::getByUidAndName($uid, $name, 0);
+
+        if($check === null){
+            return $projectTemplateStruct;
+        }
+
+        $newName = CatUtils::getUniqueName($projectTemplateStruct->name);
+        $projectTemplateStruct->name = CatUtils::getUniqueName($projectTemplateStruct->name);
+
+        return self::findUniqueName($projectTemplateStruct, $newName, $uid);
     }
 
     /**
@@ -76,7 +108,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao
     {
         $validatorObject = new \Validator\JSONValidatorObject();
         $validatorObject->json = $json;
-        $jsonSchema = file_get_contents( __DIR__ . '/../../../inc/validation/schema/project_template.json.json' );
+        $jsonSchema = file_get_contents( __DIR__ . '/../../../inc/validation/schema/project_template.json' );
         $validator = new \Validator\JSONValidator($jsonSchema);
         $validator->validate($validatorObject);
 
@@ -143,6 +175,23 @@ class ProjectTemplateDao extends DataAccess_AbstractDao
     }
 
     /**
+     * @param $uid
+     * @param $name
+     * @param int $ttl
+     * @return ProjectTemplateStruct
+     */
+    public static function getByUidAndName( $uid, $name, $ttl = 60 )
+    {
+        $stmt = self::getInstance()->_getStatementForCache(self::query_by_uid_name);
+        $result = self::getInstance()->setCacheTTL( $ttl )->_fetchObject( $stmt, new ProjectTemplateStruct(), [
+            'uid' => $uid,
+            'name' => $name,
+        ] );
+
+        return @$result[0];
+    }
+
+    /**
      * @param ProjectTemplateStruct $projectTemplateStruct
      * @return ProjectTemplateStruct
      * @throws \Exception
@@ -172,6 +221,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao
             "tm" => $projectTemplateStruct->tmToJson(),
             "payable_rate_template_id" => $projectTemplateStruct->payable_rate_template_id,
             "qa_model_template_id" => $projectTemplateStruct->qa_model_template_id,
+            'now' => (new DateTime())->format('Y-m-d H:i:s'),
         ] );
 
         $projectTemplateStruct->id = $conn->lastInsertId();
@@ -188,11 +238,28 @@ class ProjectTemplateDao extends DataAccess_AbstractDao
      */
     public static function update(ProjectTemplateStruct $projectTemplateStruct )
     {
-        $sql = "UPDATE " . self::TABLE . " SET `name` = :name, `is_default` = :is_default, `uid` = :uid, `id_team` = :id_team, `speech2text` = :speech2text, `lexica` = :lexica, `tag_projection` = :tag_projection, `cross_language_matches` = :cross_language_matches, `segmentation_rule` = :segmentation_rule, `tm` = :tm, `mt` = :mt, `payable_rate_template_id` = :payable_rate_template_id, `qa_model_template_id` = :qa_model_template_id, `modified_at` = :now WHERE id = :id ";
+        $sql = "UPDATE " . self::TABLE . " SET 
+            `name` = :name, 
+            `is_default` = :is_default, 
+            `uid` = :uid, 
+            `id_team` = :id_team, 
+            `speech2text` = :speech2text,
+             `lexica` = :lexica, 
+             `tag_projection` = :tag_projection, 
+             `cross_language_matches` = :cross_language_matches, 
+             `segmentation_rule` = :segmentation_rule, 
+             `tm` = :tm, 
+             `mt` = :mt, 
+             `payable_rate_template_id` = :payable_rate_template_id, 
+             `qa_model_template_id` = :qa_model_template_id, 
+             `modified_at` = :now 
+             WHERE id = :id
+         ;";
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->execute( [
+            "id" => $projectTemplateStruct->id,
             "name" => $projectTemplateStruct->name,
             "is_default" => $projectTemplateStruct->is_default,
             "uid" => $projectTemplateStruct->uid,
@@ -206,10 +273,11 @@ class ProjectTemplateDao extends DataAccess_AbstractDao
             "tm" => $projectTemplateStruct->tmToJson(),
             "payable_rate_template_id" => $projectTemplateStruct->payable_rate_template_id,
             "qa_model_template_id" => $projectTemplateStruct->qa_model_template_id,
-            'now'        => (new DateTime())->format('Y-m-d H:i:s'),
+            'now' => (new DateTime())->format('Y-m-d H:i:s'),
         ] );
 
         self::destroyQueryByIdCache($conn, $projectTemplateStruct->id);
+        self::destroyQueryByUidAndNameCache($conn, $projectTemplateStruct->uid, $projectTemplateStruct->name);
 
         return $projectTemplateStruct;
     }
@@ -227,6 +295,17 @@ class ProjectTemplateDao extends DataAccess_AbstractDao
         self::destroyQueryByIdCache($conn, $id);
 
         return $stmt->rowCount();
+    }
+
+    /**
+     * @param PDO $conn
+     * @param string $uid
+     * @param string $name
+     */
+    private static function destroyQueryByUidAndNameCache(PDO $conn, $uid, $name)
+    {
+        $stmt = $conn->prepare( self::query_by_uid_name );
+        self::getInstance()->_destroyObjectCache( $stmt, [ 'uid' => $uid, 'name' => $name,  ] );
     }
 
     /**
