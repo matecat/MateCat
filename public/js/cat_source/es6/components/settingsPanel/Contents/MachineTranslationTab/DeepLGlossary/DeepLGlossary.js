@@ -82,11 +82,9 @@ export const DeepLGlossary = ({id, isCattoolPage = false}) => {
       if (!wasCleanup) {
         if (!isCattoolPage) {
           updateRowsState(
-            items.map(({name, glossary_id: idRow}, index) => {
+            items.map(({name, glossary_id: idRow}) => {
               const isActive =
-                typeof glossaryId !== 'undefined'
-                  ? idRow === glossaryId
-                  : index === 0
+                typeof glossaryId !== 'undefined' ? idRow === glossaryId : false
 
               return {
                 id: idRow,
