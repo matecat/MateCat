@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event'
 import React from 'react'
 import JobMenu from './JobMenu'
 import Immutable from 'immutable'
-import {rest} from 'msw'
+import {http, HttpResponse} from 'msw'
 import {mswServer} from '../../../../../mocks/mswServer'
 import ProjectsStore from '../../stores/ProjectsStore'
 import ManageActions from '../../actions/ManageActions'
@@ -243,19 +243,16 @@ test('Cancelled job: check Resume job item', () => {
 test('Generate revise 2: onClick flow', async () => {
   mswServer.use(
     ...[
-      rest.post(
+      http.post(
         '/plugins/second_pass_review/project/:id/:password/reviews',
-        (req, res, ctx) => {
-          return res(
-            ctx.status(200),
-            ctx.json({
-              chunk_review: {
-                id: 164,
-                id_job: 98,
-                review_password: '6688b6b321de',
-              },
-            }),
-          )
+        () => {
+          return HttpResponse.json({
+            chunk_review: {
+              id: 164,
+              id_job: 98,
+              review_password: '6688b6b321de',
+            },
+          })
         },
       ),
     ],

@@ -66,7 +66,7 @@
     "jest": "^27.0.5",
     "lint-staged": ">=10",
     "mini-css-extract-plugin": "^2.7.6",
-    "msw": "^2.0.0",
+    "msw": "^2.1.1",
     "prettier": "^2.2.1",
     "sass": "^1.66.0",
     "sass-loader": "13.3.2",
@@ -74,7 +74,8 @@
     "webpack": "5.89.0",
     "webpack-cli": "5.1.4",
     "webpack-concat-files-plugin": "^0.5.2",
-    "whatwg-fetch": "^3.6.2"
+    "whatwg-fetch": "^3.6.20",
+    "undici": "^6.3.0"
   },
   "resolutions": {
     "wrap-ansi": "^7.0.0"

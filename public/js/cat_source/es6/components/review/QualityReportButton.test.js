@@ -1,5 +1,5 @@
 import {render, screen} from '@testing-library/react'
-import {rest} from 'msw'
+import {http, HttpResponse} from 'msw'
 import React from 'react'
 import {mswServer} from '../../../../../mocks/mswServer'
 
@@ -14,8 +14,8 @@ window.config = {
 const executeMswServer = () => {
   mswServer.use(
     ...[
-      rest.get('/api/app/jobs/1/1/quality-report', (req, res, ctx) => {
-        return res(ctx.status(200), ctx.json({}))
+      http.get('/api/app/jobs/1/1/quality-report', () => {
+        return HttpResponse.json({})
       }),
     ],
   )

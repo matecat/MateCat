@@ -1,4 +1,4 @@
-import {rest} from 'msw'
+import {http, HttpResponse} from 'msw'
 
 import {getProjects} from '.'
 import {mswServer} from '../../../../../mocks/mswServer'
@@ -7,8 +7,8 @@ test('works properly with empty filter', async () => {
   const payload = {errors: [], data: {fake: 'data'}}
 
   mswServer.use(
-    rest.post('*.ajax.localhost', (req, res, ctx) => {
-      return res(ctx.status(200), ctx.json(payload))
+    http.post('*.ajax.localhost', () => {
+      return HttpResponse.json(payload)
     }),
   )
 
@@ -26,8 +26,8 @@ test('works properly with full filter', async () => {
   const payload = {errors: [], data: {fake: 'data'}}
 
   mswServer.use(
-    rest.post('*.ajax.localhost', (req, res, ctx) => {
-      return res(ctx.status(200), ctx.json(payload))
+    http.post('*.ajax.localhost', () => {
+      return HttpResponse.json(payload)
     }),
   )
 
@@ -49,8 +49,8 @@ test('throws on non empty errors', async () => {
   const payload = {errors: [500, 'VERY_BAD_ERROR'], data: {fake: 'data'}}
 
   mswServer.use(
-    rest.post('*.ajax.localhost', (req, res, ctx) => {
-      return res(ctx.status(200), ctx.json(payload))
+    http.post('*.ajax.localhost', () => {
+      return HttpResponse.json(payload)
     }),
   )
 

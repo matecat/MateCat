@@ -1,9 +1,10 @@
-import {rest} from 'msw'
+import {http, HttpResponse} from 'msw'
 import {mswServer} from '../../../../../mocks/mswServer'
 import {getProject} from '.'
 
 global.config = {
-  basepath: '/',
+  basepath: 'http://localhost:8080/',
+  enableMultiDomainApi: false,
 }
 
 const fakeData = {
@@ -20,27 +21,26 @@ const fakeData = {
 test('Works fine with correct project id and password', async () => {
   mswServer.use(
     ...[
-      rest.get('/api/v2/projects/:id/:password', (req, res, ctx) => {
-        return res(ctx.status(200), ctx.json(fakeData.successfull))
+      http.get(config.basepath + 'api/v2/projects/:id/:password', () => {
+        return HttpResponse.json(fakeData.successfull)
       }),
     ],
   )
-
-  const result = await getProject(19, 'df7d197122d8')
-  expect(result).toEqual(fakeData.successfull)
+  const response = await getProject(19, 'df7d197122d8')
+  expect(response).toEqual(fakeData.successfull)
 })
 
 test('Error with wrong project id or password', async () => {
   mswServer.use(
     ...[
-      rest.get('/api/v2/projects/:id/:password', (req, res, ctx) => {
-        return res(ctx.status(200), ctx.json(fakeData.wrong))
+      http.get('/api/v2/projects/:id/:password', () => {
+        console.log('@@@@@@@@@@@@@@@@@@')
+        return HttpResponse.json(fakeData.wrong)
       }),
     ],
   )
 
-  const result = await getProject(19, 'df7d197a122d8').catch(
-    ({response, errors}) => errors,
-  )
+  const result = await getProject(19, 'df7d197a122d8')
+
   expect(result).toEqual(fakeData.wrong.errors)
 })

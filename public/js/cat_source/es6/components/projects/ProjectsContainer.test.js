@@ -1,7 +1,7 @@
 import {render, screen, waitFor, act} from '@testing-library/react'
 import React from 'react'
 import Immutable from 'immutable'
-import {rest} from 'msw'
+import {http, HttpResponse} from 'msw'
 
 import ProjectsContainer from './ProjectsContainer'
 import ManageActions from '../../actions/ManageActions'
@@ -145,13 +145,10 @@ const apiActivityMockResponse = {
 const executeMswServer = () => {
   mswServer.use(
     ...[
-      rest.get(
-        '/api/v2/activity/project/:id/:password/last',
-        (req, res, ctx) => {
-          const {id} = req.params
-          return res(ctx.status(200), ctx.json(apiActivityMockResponse[id]))
-        },
-      ),
+      http.get('/api/v2/activity/project/:id/:password/last', ({params}) => {
+        const {id} = params
+        return HttpResponse.json(apiActivityMockResponse[id])
+      }),
     ],
   )
 }
