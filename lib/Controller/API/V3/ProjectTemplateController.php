@@ -57,6 +57,14 @@ class ProjectTemplateController extends KleinController
                 ]);
             }
 
+            if($model->uid !== $this->getUser()->uid){
+                $this->response->code(403);
+
+                return $this->response->json([
+                    'error' => 'You are not authorized to see this model'
+                ]);
+            }
+
             $this->response->status()->setCode( 200 );
             $this->response->json($model);
             exit();
