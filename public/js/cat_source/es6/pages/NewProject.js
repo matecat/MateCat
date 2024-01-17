@@ -35,6 +35,7 @@ import {getSupportedFiles} from '../api/getSupportedFiles'
 import {getSupportedLanguages} from '../api/getSupportedLanguages'
 import ApplicationActions from '../actions/ApplicationActions'
 import useDeviceCompatibility from '../hooks/useDeviceCompatibility'
+import useProjectTemplates from '../hooks/useProjectTemplates'
 
 const SELECT_HEIGHT = 324
 
@@ -97,7 +98,8 @@ const NewProject = ({
   const [supportedFiles, setSupportedFiles] = useState()
   const [supportedLanguages, setSupportedLanguages] = useState()
 
-  const [projectTemplates, setProjectTemplates] = useState([])
+  const {projectTemplates, currentProjectTemplate, setProjectTemplates} =
+    useProjectTemplates()
 
   const isDeviceCompatible = useDeviceCompatibility()
 
@@ -347,6 +349,7 @@ const NewProject = ({
       )
     }
   }, [])
+
   useEffect(() => {
     const createKeyFromTMXFile = ({extension, filename}) => {
       const haveNoActiveKeys = tmKeys.every(({isActive}) => !isActive)
@@ -456,6 +459,20 @@ const NewProject = ({
       if (body) body.classList.add('no-min-width')
     }
   }, [isDeviceCompatible])
+
+  // Sync tmKeys state with current project template
+  // useEffect(() => {
+  //   if (!currentProjectTemplate) return
+  //   console.log(currentProjectTemplate)
+
+  //   const {tm} = currentProjectTemplate
+  //   setTmKeys((prevState) =>
+  //     prevState.map((tmItem) => {
+  //       const tmFromTemplate = tm.find(({key}) => key === tmItem.key)
+  //       return {...tmItem, ...(tmFromTemplate && {...tmFromTemplate})}
+  //     }),
+  //   )
+  // }, [currentProjectTemplate])
 
   return isDeviceCompatible ? (
     <CreateProjectContext.Provider
