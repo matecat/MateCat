@@ -7,13 +7,39 @@ use DataAccess_AbstractDao;
 use Database;
 use DateTime;
 use PDO;
+use Teams\TeamDao;
 
 class ProjectTemplateDao extends DataAccess_AbstractDao
 {
     const TABLE = 'project_templates';
 
     const query_by_id = "SELECT * FROM " . self::TABLE . " WHERE id = :id";
+    const query_default = "SELECT * FROM " . self::TABLE . " WHERE is_default = :is_default AND uid = :uid";
     const query_by_uid_name = "SELECT * FROM " . self::TABLE . " WHERE uid = :uid AND name = :name";
+
+    /**
+     * @param $uid
+     * @return ProjectTemplateStruct
+     */
+    public static function getDefaultTemplate($uid)
+    {
+        $defaultProject = self::getTheDefaultProject($uid);
+        $team = (new TeamDao())->getPersonalByUid($uid);
+
+        $default = new ProjectTemplateStruct();
+        $default->id = 0;
+        $default->name = "Standard";
+        $default->speech2text = true;
+        $default->is_default = empty($defaultProject);
+        $default->id_team = $team->id;
+        $default->lexica = true;
+        $default->tag_projection = true;
+        $default->uid = $uid;
+        $default->created_at = date("Y-m-d H:i:s");
+        $default->modified_at = date("Y-m-d H:i:s");
+
+        return $default;
+    }
 
     /**
      * @var null
@@ -133,30 +159,49 @@ class ProjectTemplateDao extends DataAccess_AbstractDao
         ]);
 
         $count = $stmt->fetch(\PDO::FETCH_ASSOC);
-        $pages = ceil($count['count'] / $pagination);
+        $count = $count['count'];
+        $count = $count + 1;
+        $pages = ceil($count / $pagination);
         $prev = ($current !== 1) ? "/api/v3/project-template?page=".($current-1) : null;
         $next = ($current < $pages) ? "/api/v3/project-template?page=".($current+1) : null;
         $offset = ($current - 1) * $pagination;
 
         $models = [];
+        $models[] = self::getDefaultTemplate($uid);
 
-        $stmt = $conn->prepare( "SELECT id FROM ".self::TABLE." WHERE uid = :uid LIMIT $pagination OFFSET $offset ");
+        $stmt = $conn->prepare( "SELECT * FROM ".self::TABLE." WHERE uid = :uid ORDER BY id ASC LIMIT $pagination OFFSET $offset ");
+        $stmt->setFetchMode(PDO::FETCH_CLASS, ProjectTemplateStruct::class);
         $stmt->execute([
             'uid' => $uid
         ]);
 
-        foreach ($stmt->fetchAll(\PDO::FETCH_ASSOC) as $model){
-            $models[] = self::getById($model['id']);
-        }
+        $models = array_merge($models, $stmt->fetchAll());
 
         return [
             'current_page' => $current,
             'per_page' => $pagination,
             'last_page' => $pages,
+            'total_count' => (int)$count,
             'prev' => $prev,
             'next' => $next,
             'items' => $models,
         ];
+    }
+
+    /**
+     * @param $uid
+     * @param int $ttl
+     * @return \DataAccess_IDaoStruct
+     */
+    public static function getTheDefaultProject($uid, $ttl = 0)
+    {
+        $stmt = self::getInstance()->_getStatementForCache(self::query_default);
+        $result = self::getInstance()->setCacheTTL( $ttl )->_fetchObject( $stmt, new ProjectTemplateStruct(), [
+            'uid' => $uid,
+            'is_default' => 1,
+        ] );
+
+        return @$result[0];
     }
 
     /**
@@ -228,6 +273,10 @@ class ProjectTemplateDao extends DataAccess_AbstractDao
         $projectTemplateStruct->created_at = $now;
         $projectTemplateStruct->modified_at = $now;
 
+        if($projectTemplateStruct->is_default === true){
+            self::markAsNotDefault($projectTemplateStruct->uid, $projectTemplateStruct->id);
+        }
+
         return $projectTemplateStruct;
     }
 
@@ -279,7 +328,42 @@ class ProjectTemplateDao extends DataAccess_AbstractDao
         self::destroyQueryByIdCache($conn, $projectTemplateStruct->id);
         self::destroyQueryByUidAndNameCache($conn, $projectTemplateStruct->uid, $projectTemplateStruct->name);
 
+        if($projectTemplateStruct->is_default === true){
+            self::markAsNotDefault($projectTemplateStruct->uid, $projectTemplateStruct->id);
+        }
+
         return $projectTemplateStruct;
+    }
+
+    /**
+     * @param $uid
+     * @param $excludeId
+     */
+    public static function markAsNotDefault($uid, $excludeId)
+    {
+        $sql = "UPDATE " . self::TABLE . " SET 
+            `is_default` = :is_default
+             WHERE uid= :uid 
+             AND id != :id
+         ;";
+
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        $stmt->execute( [
+            "uid" => $uid,
+            "id" => $excludeId,
+            "is_default" => false,
+        ] );
+
+        // destroy cache
+        $stmt = $conn->prepare( "SELECT id FROM ".self::TABLE." WHERE uid = :uid ");
+        $stmt->execute([
+            'uid' => $uid
+        ]);
+
+        foreach ($stmt->fetchAll() as $project){
+            self::destroyQueryByIdCache($conn, $project['id']);
+        }
     }
 
     /**

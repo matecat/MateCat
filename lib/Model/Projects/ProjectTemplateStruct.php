@@ -58,6 +58,30 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
     }
 
     /**
+     * @return mixed
+     */
+    public function getMt()
+    {
+        if(is_string($this->mt)){
+            return json_decode($this->mt, true);
+        }
+
+        return $this->mt;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getTm()
+    {
+        if(is_string($this->tm)){
+            return json_decode($this->tm, true);
+        }
+
+        return $this->tm;
+    }
+
+    /**
      * @return string
      */
     public function tmToJson()
@@ -135,8 +159,8 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
             'tag_projection' => (bool)$this->tag_projection,
             'cross_language_matches' => $this->cross_language_matches,
             'segmentation_rule' => $this->segmentation_rule,
-            'mt' => json_decode($this->mt),
-            'tm' => json_decode($this->tm),
+            'mt' => $this->getMt(),
+            'tm' => $this->getTm(),
             'payable_rate_template_id' => $this->payable_rate_template_id ? (int)$this->payable_rate_template_id : null,
             'qa_model_template_id' => $this->qa_model_template_id ? (int)$this->qa_model_template_id : null,
             'created_at' => date_create( $this->created_at )->format( DATE_RFC822 ),

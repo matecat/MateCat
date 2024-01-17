@@ -94,10 +94,7 @@ class ProjectTemplateController extends KleinController
 
             $this->response->code(201);
 
-            return $this->response->json([
-                'id' => (int)$struct->id,
-
-            ]);
+            return $this->response->json($struct);
 
         } catch (JSONValidatorError $exception){
             $this->response->code(500);
@@ -129,6 +126,17 @@ class ProjectTemplateController extends KleinController
         }
 
         $id = $this->request->param( 'id' );
+        $uid = $this->getUser()->uid;
+
+        // mark all templates as not default
+        if($id == 0){
+            ProjectTemplateDao::markAsNotDefault($uid, 0);
+
+            $this->response->code(404);
+
+            return $this->response->json(ProjectTemplateDao::getDefaultTemplate($uid));
+        }
+
         $model = ProjectTemplateDao::getById($id);
 
         if(empty($model)){
@@ -149,12 +157,10 @@ class ProjectTemplateController extends KleinController
 
         try {
             $json = $this->request->body();
-            $struct = ProjectTemplateDao::editFromJSON($model, $json, $this->getUser()->uid);
+            $struct = ProjectTemplateDao::editFromJSON($model, $json, $uid);
 
             $this->response->code(200);
-            return $this->response->json([
-                'id' => (int)$struct->id,
-            ]);
+            return $this->response->json($struct);
         } catch (JSONValidatorError $exception){
             $errorCode = $exception->getCode() >= 400 ? $exception->getCode()  : 500;
             $this->response->code($errorCode);
@@ -203,5 +209,23 @@ class ProjectTemplateController extends KleinController
             ]);
             exit();
         }
+    }
+
+    /**
+     * This is the Payable Rate Model JSON schema
+     *
+     * @return \Klein\Response
+     */
+    public function schema()
+    {
+        return $this->response->json(json_decode($this->getProjectTemplateModelSchema()));
+    }
+
+    /**
+     * @return false|string
+     */
+    private function getProjectTemplateModelSchema()
+    {
+        return file_get_contents( \INIT::$ROOT . '/inc/validation/schema/project_template.json' );
     }
 }
