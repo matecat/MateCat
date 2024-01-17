@@ -179,52 +179,52 @@ export const MachineTranslationTab = () => {
 
   return (
     <MachineTranslationTabContext.Provider value={{setNotification}}>
-      <div className="machine-translation-tab">
+      <div className="machine-translation-tab settings-panel-contentwrapper-tab-background">
         {notificationsNode}
 
-        {!config.is_cattool && config.isLoggedIn ? (
-          !addMTVisible ? (
-            <div className="add-mt-button">
+        {!config.is_cattool && config.isLoggedIn && addMTVisible && (
+          <div className="add-mt-container">
+            <h2>Add MT Engine</h2>
+            <div className="add-mt-provider">
+              <Select
+                placeholder="Choose provider"
+                id="mt-engine"
+                maxHeightDroplist={100}
+                options={enginesList}
+                activeOption={activeAddEngine}
+                onSelect={(option) => {
+                  setActiveAddEngine(option)
+                  setError()
+                }}
+              />
+              <button
+                className="ui button orange"
+                onClick={() => setAddMTVisible(false)}
+              >
+                <Close />
+              </button>
+            </div>
+            {activeAddEngine ? (
+              <activeAddEngine.component
+                addMTEngine={addMTEngineRequest}
+                error={error}
+              />
+            ) : null}
+          </div>
+        )}
+        <div>
+          <div className="machine-translation-tab-table-title">
+            <h2>Active MT</h2>
+            {!config.is_cattool && config.isLoggedIn && !addMTVisible && (
               <button
                 className="ui primary button settings-panel-button-icon"
                 onClick={() => setAddMTVisible(true)}
               >
                 <AddWide size={18} /> Add MT engine
               </button>
-            </div>
-          ) : (
-            <div className="add-mt-container">
-              <h2>Add MT Engine</h2>
-              <div className="add-mt-provider">
-                <Select
-                  placeholder="Choose provider"
-                  id="mt-engine"
-                  maxHeightDroplist={100}
-                  options={enginesList}
-                  activeOption={activeAddEngine}
-                  onSelect={(option) => {
-                    setActiveAddEngine(option)
-                    setError()
-                  }}
-                />
-                <button
-                  className="ui button orange"
-                  onClick={() => setAddMTVisible(false)}
-                >
-                  <Close />
-                </button>
-              </div>
-              {activeAddEngine ? (
-                <activeAddEngine.component
-                  addMTEngine={addMTEngineRequest}
-                  error={error}
-                />
-              ) : null}
-            </div>
-          )
-        ) : null}
-        <div>
-          <h2>Active MT</h2>
+            )}
+          </div>
+
           <SettingsPanelTable
             columns={COLUMNS_TABLE}
             rows={

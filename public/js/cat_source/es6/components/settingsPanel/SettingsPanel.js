@@ -34,7 +34,7 @@ const DEFAULT_CONTENTS = [
   },
   {
     id: SETTINGS_PANEL_TABS.advancedOptions,
-    label: 'Advanced Options',
+    label: 'Advanced settings',
     description:
       'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vulputate libero et velit interdum, ac aliquet odio mattis.',
     component: <AdvancedOptionsTab />,
@@ -75,6 +75,8 @@ export const SettingsPanel = ({
   getPublicMatches,
   setGetPublicMatches,
   setKeysOrdered,
+  projectTemplates,
+  setProjectTemplates,
 }) => {
   const [isVisible, setIsVisible] = useState(false)
   const [tabs, setTabs] = useState(() => {
@@ -146,6 +148,8 @@ export const SettingsPanel = ({
         getPublicMatches,
         setGetPublicMatches,
         setKeysOrdered,
+        projectTemplates,
+        setProjectTemplates,
       }}
     >
       <div
@@ -199,4 +203,6 @@ SettingsPanel.propTypes = {
   getPublicMatches: PropTypes.bool,
   setGetPublicMatches: PropTypes.func,
   setKeysOrdered: PropTypes.func,
+  projectTemplates: PropTypes.array,
+  setProjectTemplates: PropTypes.func,
 }

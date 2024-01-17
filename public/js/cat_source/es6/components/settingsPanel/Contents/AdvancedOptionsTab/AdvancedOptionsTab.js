@@ -26,9 +26,7 @@ export const AdvancedOptionsTab = () => {
     setSegmentationRule,
   } = useContext(SettingsPanelContext)
   return (
-    <div className="advanced-options-box">
-      {/*<h2>Advanced Options</h2>*/}
-
+    <div className="advanced-options-box settings-panel-contentwrapper-tab-background">
       <SpeechToText
         setSpeechToTextActive={setSpeechToTextActive}
         speechToTextActive={speechToTextActive}

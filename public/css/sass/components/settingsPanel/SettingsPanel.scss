@@ -108,7 +108,7 @@
   font-size: 14px;
   padding: 20px;
   overflow-y: auto;
-  max-height: calc(100vh - 100px);
+  max-height: calc(100vh - 340px);
   height: 100%;
   position: relative;
   h2 {
@@ -167,6 +167,10 @@
   .select-with-label__wrapper .select {
     font-size: 16px;
     padding: 9px 46px 9px 12px;
+  }
+  .dropdown__option {
+    font-size: 16px;
+    padding: 8px;
   }
 }
 

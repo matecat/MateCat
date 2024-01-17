@@ -97,6 +97,8 @@ const NewProject = ({
   const [supportedFiles, setSupportedFiles] = useState()
   const [supportedLanguages, setSupportedLanguages] = useState()
 
+  const [projectTemplates, setProjectTemplates] = useState([])
+
   const isDeviceCompatible = useDeviceCompatibility()
 
   const projectNameRef = useRef()
@@ -692,6 +694,8 @@ const NewProject = ({
           setSegmentationRule,
           setGetPublicMatches,
           setKeysOrdered,
+          projectTemplates,
+          setProjectTemplates,
         }}
       />
       <Footer />
