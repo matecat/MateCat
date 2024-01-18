@@ -1,6 +1,4 @@
-import showdown from 'showdown'
 import React from 'react'
-
 import CommonUtils from '../../utils/commonUtils'
 import TextUtils from '../../utils/textUtils'
 
@@ -8,13 +6,6 @@ class JobMetadataModal extends React.Component {
   constructor(props) {
     super(props)
     this.state = {}
-    this.converter = new showdown.Converter()
-    this.converter.setOption('literalMidWordUnderscores', true)
-    // this.instructions =
-    //     '**Client:** Product - Rider  \n' +
-    //     '**Domain:** UI  \n' +
-    //     '**Note:** Link to file a query: http://t.uber.com/riderq Rider  \n' +
-    //     '            Screen Search: https://docs.google.com/document/d/19Dk92t9NXdN.';
   }
   createFileList() {
     const {currentFile, currentFilePart} = this.props
@@ -89,7 +80,7 @@ class JobMetadataModal extends React.Component {
   }
 
   getHtml(text) {
-    return TextUtils.replaceUrl(text.replace(/[ ]*\n/g, '<br>\n'))
+    return text
   }
 
   componentDidMount() {
