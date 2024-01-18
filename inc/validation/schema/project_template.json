@@ -20,6 +20,12 @@
     "tag_projection": {
       "type": "boolean"
     },
+    "pretranslate_100": {
+      "type": "boolean"
+    },
+    "get_public_matches": {
+      "type": "boolean"
+    },
     "cross_language_matches": {
       "type": "array"
     },
@@ -50,7 +56,9 @@
     "id_team",
     "speech2text",
     "lexica",
-    "tag_projection"
+    "tag_projection",
+    "pretranslate_100",
+    "get_public_matches"
   ],
   "definitions": {
     "tm": {

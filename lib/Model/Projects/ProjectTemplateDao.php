@@ -244,9 +244,9 @@ class ProjectTemplateDao extends DataAccess_AbstractDao
     public static function save(ProjectTemplateStruct $projectTemplateStruct )
     {
         $sql = "INSERT INTO " . self::TABLE .
-            " ( `name`, `is_default`, `uid`, `id_team`, `speech2text`, `lexica`, `tag_projection`, `cross_language_matches`, `segmentation_rule`, `tm`, `mt`, `payable_rate_template_id`,`qa_model_template_id`, `created_at`, `modified_at` ) " .
+            " ( `name`, `is_default`, `uid`, `id_team`, `speech2text`, `lexica`, `tag_projection`, `cross_language_matches`, `segmentation_rule`, `tm`, `mt`, `payable_rate_template_id`,`qa_model_template_id`, `pretranslate_100`, `get_public_matches`, `created_at`, `modified_at` ) " .
             " VALUES " .
-            " ( :name, :is_default, :uid, :id_team, :speech2text, :lexica, :tag_projection, :cross_language_matches, :segmentation_rule, :tm, :mt, :payable_rate_template_id, :qa_model_template_id, :now, :now ); ";
+            " ( :name, :is_default, :uid, :id_team, :speech2text, :lexica, :tag_projection, :cross_language_matches, :segmentation_rule, :tm, :mt, :payable_rate_template_id, :qa_model_template_id, :pretranslate_100, :get_public_matches, :now, :now ); ";
 
         $now = (new DateTime())->format('Y-m-d H:i:s');
 
@@ -264,6 +264,8 @@ class ProjectTemplateDao extends DataAccess_AbstractDao
             "segmentation_rule" => $projectTemplateStruct->segmentation_rule,
             "mt" => $projectTemplateStruct->mtToJson(),
             "tm" => $projectTemplateStruct->tmToJson(),
+            "pretranslate_100" => $projectTemplateStruct->pretranslate_100,
+            "get_public_matches" => $projectTemplateStruct->get_public_matches,
             "payable_rate_template_id" => $projectTemplateStruct->payable_rate_template_id,
             "qa_model_template_id" => $projectTemplateStruct->qa_model_template_id,
             'now' => (new DateTime())->format('Y-m-d H:i:s'),
@@ -293,17 +295,18 @@ class ProjectTemplateDao extends DataAccess_AbstractDao
             `uid` = :uid, 
             `id_team` = :id_team, 
             `speech2text` = :speech2text,
-             `lexica` = :lexica, 
-             `tag_projection` = :tag_projection, 
-             `cross_language_matches` = :cross_language_matches, 
-             `segmentation_rule` = :segmentation_rule, 
-             `tm` = :tm, 
-             `mt` = :mt, 
-             `payable_rate_template_id` = :payable_rate_template_id, 
-             `qa_model_template_id` = :qa_model_template_id, 
-             `modified_at` = :now 
-             WHERE id = :id
-         ;";
+            `lexica` = :lexica, 
+            `tag_projection` = :tag_projection, 
+            `cross_language_matches` = :cross_language_matches, 
+            `segmentation_rule` = :segmentation_rule, 
+            `tm` = :tm, 
+            `mt` = :mt, 
+            `pretranslate_100` = :pretranslate_100,
+            `get_public_matches` = :get_public_matches,
+            `payable_rate_template_id` = :payable_rate_template_id, 
+            `qa_model_template_id` = :qa_model_template_id, 
+            `modified_at` = :now 
+         WHERE id = :id;";
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
@@ -320,6 +323,8 @@ class ProjectTemplateDao extends DataAccess_AbstractDao
             "segmentation_rule" => $projectTemplateStruct->segmentation_rule,
             "mt" => $projectTemplateStruct->mtToJson(),
             "tm" => $projectTemplateStruct->tmToJson(),
+            "pretranslate_100" => $projectTemplateStruct->pretranslate_100,
+            "get_public_matches" => $projectTemplateStruct->get_public_matches,
             "payable_rate_template_id" => $projectTemplateStruct->payable_rate_template_id,
             "qa_model_template_id" => $projectTemplateStruct->qa_model_template_id,
             'now' => (new DateTime())->format('Y-m-d H:i:s'),
