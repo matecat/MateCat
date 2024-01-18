@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef, useCallback} from 'react'
+import React, {useState, useEffect, useRef} from 'react'
 import PropTypes from 'prop-types'
 import {SettingsPanelContext} from './SettingsPanelContext'
 import {ContentWrapper} from './ContentWrapper'
@@ -72,11 +72,11 @@ export const SettingsPanel = ({
   setMultiMatchLangs,
   segmentationRule,
   setSegmentationRule,
-  getPublicMatches,
-  setGetPublicMatches,
   setKeysOrdered,
   projectTemplates,
   setProjectTemplates,
+  modifyingCurrentTemplate,
+  currentProjectTemplate,
 }) => {
   const [isVisible, setIsVisible] = useState(false)
   const [tabs, setTabs] = useState(() => {
@@ -145,11 +145,11 @@ export const SettingsPanel = ({
         setMultiMatchLangs,
         segmentationRule,
         setSegmentationRule,
-        getPublicMatches,
-        setGetPublicMatches,
         setKeysOrdered,
         projectTemplates,
         setProjectTemplates,
+        modifyingCurrentTemplate,
+        currentProjectTemplate,
       }}
     >
       <div
@@ -179,7 +179,7 @@ export const SettingsPanel = ({
             <div onClick={close} className="close-matecat-modal x-popup" />
           </div>
           <ProjectTemplate />
-          <ContentWrapper />
+          {currentProjectTemplate && <ContentWrapper />}
         </div>
       </div>
     </SettingsPanelContext.Provider>
@@ -200,9 +200,9 @@ SettingsPanel.propTypes = {
   setGuessTagActive: PropTypes.func,
   sourceLang: PropTypes.object,
   targetLangs: PropTypes.array,
-  getPublicMatches: PropTypes.bool,
-  setGetPublicMatches: PropTypes.func,
   setKeysOrdered: PropTypes.func,
   projectTemplates: PropTypes.array,
   setProjectTemplates: PropTypes.func,
+  modifyingCurrentTemplate: PropTypes.func,
+  currentProjectTemplate: PropTypes.object,
 }

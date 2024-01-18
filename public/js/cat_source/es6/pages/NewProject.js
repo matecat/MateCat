@@ -89,17 +89,17 @@ const NewProject = ({
     name: 'General',
     id: 'standard',
   })
-  const [isPretranslate100Active, setIsPretranslate100Active] = useState(false)
-  const [getPublicMatches, setGetPublicMatches] = useState(
-    Boolean(config.get_public_matches),
-  )
   const [isImportTMXInProgress, setIsImportTMXInProgress] = useState(false)
   const [isFormReadyToSubmit, setIsFormReadyToSubmit] = useState(false)
   const [supportedFiles, setSupportedFiles] = useState()
   const [supportedLanguages, setSupportedLanguages] = useState()
 
-  const {projectTemplates, currentProjectTemplate, setProjectTemplates} =
-    useProjectTemplates()
+  const {
+    projectTemplates,
+    currentProjectTemplate,
+    setProjectTemplates,
+    modifyingCurrentTemplate,
+  } = useProjectTemplates({tmKeys: tmKeys ?? [], setTmKeys})
 
   const isDeviceCompatible = useDeviceCompatibility()
 
@@ -202,13 +202,13 @@ const NewProject = ({
       mt_engine: activeMTEngine ? activeMTEngine.id : undefined,
       private_keys_list: getTmDataStructureToSendServer({tmKeys, keysOrdered}),
       lang_detect_files: '',
-      pretranslate_100: isPretranslate100Active ? 1 : 0,
+      // pretranslate_100: isPretranslate100Active ? 1 : 0,
       lexiqa: lexiqaActive,
       speech2text: speechToTextActive,
       tag_projection: guessTagActive,
       segmentation_rule: segmentationRule.id === '1' ? '' : segmentationRule.id,
       id_team: selectedTeam ? selectedTeam.id : undefined,
-      get_public_matches: getPublicMatches,
+      // get_public_matches: getPublicMatches,
       ...(mtGlossaryProps?.glossaries.length && {
         mmt_glossaries: JSON.stringify({
           glossaries: mtGlossaryProps.glossaries,
@@ -460,20 +460,6 @@ const NewProject = ({
     }
   }, [isDeviceCompatible])
 
-  // Sync tmKeys state with current project template
-  // useEffect(() => {
-  //   if (!currentProjectTemplate) return
-  //   console.log(currentProjectTemplate)
-
-  //   const {tm} = currentProjectTemplate
-  //   setTmKeys((prevState) =>
-  //     prevState.map((tmItem) => {
-  //       const tmFromTemplate = tm.find(({key}) => key === tmItem.key)
-  //       return {...tmItem, ...(tmFromTemplate && {...tmFromTemplate})}
-  //     }),
-  //   )
-  // }, [currentProjectTemplate])
-
   return isDeviceCompatible ? (
     <CreateProjectContext.Provider
       value={{
@@ -489,8 +475,6 @@ const NewProject = ({
         setOpenSettings,
         isImportTMXInProgress,
         setIsImportTMXInProgress,
-        isPretranslate100Active,
-        setIsPretranslate100Active,
       }}
     >
       <HeaderPortal>
@@ -709,10 +693,11 @@ const NewProject = ({
           setMultiMatchLangs,
           segmentationRule,
           setSegmentationRule,
-          setGetPublicMatches,
           setKeysOrdered,
           projectTemplates,
           setProjectTemplates,
+          modifyingCurrentTemplate,
+          currentProjectTemplate,
         }}
       />
       <Footer />

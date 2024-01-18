@@ -1,4 +1,6 @@
 import {useCallback, useEffect, useRef, useState} from 'react'
+import PropTypes from 'prop-types'
+import {isEqual} from 'lodash'
 
 const getProjectTemplates = async () =>
   new Promise((resolve) => {
@@ -18,6 +20,8 @@ const getProjectTemplates = async () =>
         segmentation_rule: 'General',
         mt: {},
         tm: [],
+        get_public_matches: true,
+        pretranslate_100: false,
       },
       {
         id: 3,
@@ -48,56 +52,78 @@ const getProjectTemplates = async () =>
             r: true,
             w: false,
           },
+          {
+            glos: true,
+            is_shared: false,
+            key: '21df10c8cce1b31f2d0d',
+            name: 'myKey',
+            owner: true,
+            tm: true,
+            r: true,
+            w: true,
+          },
         ],
+        get_public_matches: false,
+        pretranslate_100: true,
       },
     ])
   })
 
-function useProjectTemplates() {
+function useProjectTemplates({tmKeys, setTmKeys}) {
+  const canRetrieveTemplates = !!tmKeys?.length
+
   const [projectTemplates, setProjectTemplates] = useState([])
   const [currentProjectTemplate, setCurrentProjectTemplate] = useState()
 
+  const projectTemplatesRef = useRef()
+  projectTemplatesRef.current = projectTemplates
   const prevCurrentProjectTemplateId = useRef()
 
-  const modifyingCurrentTemplate = useCallback(
-    (callback) => {
-      if (typeof callback !== 'function')
-        throw new Error('"callback" argument is not function.')
+  const modifyingCurrentTemplate = useCallback((callback) => {
+    if (typeof callback !== 'function')
+      throw new Error('"callback" argument is not function.')
 
-      const selectedTemplate = projectTemplates.find(
-        ({isSelected}) => isSelected,
-      )
-      const temporaryTemplate = projectTemplates.find(
-        ({id, isTemporary}) => id === selectedTemplate.id && isTemporary,
-      )
+    const originalTemplate = projectTemplatesRef.current.find(
+      ({isSelected, isTemporary}) => isSelected && !isTemporary,
+    )
+    const temporaryTemplate = projectTemplatesRef.current.find(
+      ({id, isTemporary}) => id === originalTemplate.id && isTemporary,
+    )
 
-      const modifiedTemplate = callback(
-        temporaryTemplate ? temporaryTemplate : selectedTemplate,
-      )
+    const modifiedTemplate = callback(
+      temporaryTemplate ? temporaryTemplate : originalTemplate,
+    )
+    const {isTemporary, ...comparableModifiedTemplate} = modifiedTemplate
 
-      if (!temporaryTemplate) {
-        // create temporary template
-        setProjectTemplates((prevState) => [
-          ...prevState,
+    // If modified template is equal to original template clean up temporary template
+    if (isEqual(comparableModifiedTemplate, originalTemplate)) {
+      setProjectTemplates(
+        projectTemplatesRef.current.filter(({isTemporary}) => !isTemporary),
+      )
+      setCurrentProjectTemplate(originalTemplate)
+      return
+    }
+
+    const modifiedProjectTemplates = !temporaryTemplate
+      ? [
+          ...projectTemplatesRef.current,
           {
             ...modifiedTemplate,
             isTemporary: true,
           },
-        ])
-      } else {
-        // modify temporary template
-        setProjectTemplates((prevState) =>
-          prevState.map((template) =>
-            template.isTemporary ? modifiedTemplate : template,
-          ),
+        ]
+      : projectTemplatesRef.current.map((template) =>
+          template.isTemporary ? modifiedTemplate : template,
         )
-      }
-    },
-    [projectTemplates],
-  )
+
+    setProjectTemplates(modifiedProjectTemplates)
+    setCurrentProjectTemplate(modifiedTemplate)
+  }, [])
 
   // retrieve templates
   useEffect(() => {
+    if (!canRetrieveTemplates) return
+
     let cleanup = false
 
     getProjectTemplates().then((items) => {
@@ -112,29 +138,43 @@ function useProjectTemplates() {
     })
 
     return () => (cleanup = true)
-  }, [])
+  }, [canRetrieveTemplates])
 
-  const getCurrentTemplate = () => {
-    const currentTemplate = projectTemplates.find(({isSelected}) => isSelected)
-    const temporaryCurrentTemplate =
-      projectTemplates.find(
-        ({id, isTemporary}) => id === currentTemplate.id && isTemporary,
-      ) ?? {}
-    return {...currentTemplate, ...temporaryCurrentTemplate}
+  const onChangeCurrentProjectTemplate = (current) => {
+    setProjectTemplates((prevState) =>
+      prevState.filter(({isTemporary}) => !isTemporary),
+    )
+    setCurrentProjectTemplate(current)
+
+    // Sync dependencies state with current project template
+    const {tm} = current
+
+    setTmKeys((prevState) =>
+      prevState.map((tmItem) => {
+        const tmFromTemplate = tm.find(({key}) => key === tmItem.key)
+        return {
+          ...tmItem,
+          r: false,
+          w: false,
+          isActive: false,
+          ...(tmFromTemplate && {...tmFromTemplate, isActive: true}),
+        }
+      }),
+    )
   }
 
   const currentProjectTemplateId = projectTemplates.find(
     ({isSelected}) => isSelected,
   )?.id
-
   // set current project template
   if (
     typeof currentProjectTemplateId === 'number' &&
     currentProjectTemplateId !== prevCurrentProjectTemplateId.current
   ) {
-    setCurrentProjectTemplate(getCurrentTemplate())
+    onChangeCurrentProjectTemplate(
+      projectTemplates.find(({isSelected}) => isSelected),
+    )
   }
-
   prevCurrentProjectTemplateId.current = currentProjectTemplateId
 
   return {
@@ -143,6 +183,11 @@ function useProjectTemplates() {
     setProjectTemplates,
     modifyingCurrentTemplate,
   }
+}
+
+useProjectTemplates.propTypes = {
+  tmKeys: PropTypes.array.isRequired,
+  setTmKeys: PropTypes.func.isRequired,
 }
 
 export default useProjectTemplates

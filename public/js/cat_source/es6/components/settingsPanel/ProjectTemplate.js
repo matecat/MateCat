@@ -1,4 +1,4 @@
-import React, {useContext, useEffect} from 'react'
+import React, {useContext} from 'react'
 import {Select} from '../common/Select'
 import {SettingsPanelContext} from './SettingsPanelContext'
 

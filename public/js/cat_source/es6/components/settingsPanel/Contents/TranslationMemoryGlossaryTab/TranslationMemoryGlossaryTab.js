@@ -67,11 +67,7 @@ const NEW_RESOURCE = {
 
 export const isOwnerOfKey = (key) => !/[*]/g.test(key)
 
-export const getTmDataStructureToSendServer = ({tmKeys = [], keysOrdered}) => {
-  const mine = tmKeys
-    .filter(({key, isActive}) => isOwnerOfKey(key) && isActive)
-    .map(({tm, glos, key, name, r, w}) => ({tm, glos, key, name, r, w}))
-
+const orderTmKeys = (tmKeys, keysOrdered) => {
   const order = (acc, cur) => {
     const copyAcc = [...acc]
     const index = keysOrdered.findIndex((key) => key === cur.key)
@@ -85,12 +81,19 @@ export const getTmDataStructureToSendServer = ({tmKeys = [], keysOrdered}) => {
     }
     return copyAcc
   }
+  return Array.isArray(keysOrdered)
+    ? tmKeys.reduce(order, []).filter((row) => row)
+    : tmKeys
+}
+
+export const getTmDataStructureToSendServer = ({tmKeys = [], keysOrdered}) => {
+  const mine = tmKeys
+    .filter(({key, isActive}) => isOwnerOfKey(key) && isActive)
+    .map(({tm, glos, key, name, r, w}) => ({tm, glos, key, name, r, w}))
 
   return JSON.stringify({
     ownergroup: [],
-    mine: Array.isArray(keysOrdered)
-      ? mine.reduce(order, []).filter((row) => row)
-      : mine,
+    mine: orderTmKeys(mine, keysOrdered),
     anonymous: [],
   })
 }
@@ -102,16 +105,27 @@ const memoData = {
 export const TranslationMemoryGlossaryTabContext = createContext({})
 
 export const TranslationMemoryGlossaryTab = () => {
-  const {isPretranslate100Active, setIsPretranslate100Active} =
-    useContext(CreateProjectContext)
-  const {tmKeys, openLoginModal, getPublicMatches, setKeysOrdered} =
-    useContext(SettingsPanelContext)
+  const {
+    tmKeys,
+    openLoginModal,
+    setKeysOrdered,
+    modifyingCurrentTemplate,
+    currentProjectTemplate,
+  } = useContext(SettingsPanelContext)
+
+  const getPublicMatches = currentProjectTemplate.get_public_matches
+  const isPretranslate100Active = currentProjectTemplate.pretranslate_100
+  const setIsPretranslate100Active = (value) =>
+    modifyingCurrentTemplate((prevTemplate) => ({
+      ...prevTemplate,
+      pretranslate_100: value,
+    }))
 
   const [specialRows, setSpecialRows] = useState([
     {
       ...memoData.DEFAULT_TRANSLATION_MEMORY,
       ...(typeof memoData.DEFAULT_TRANSLATION_MEMORY.r === 'undefined' && {
-        r: Boolean(config.get_public_matches),
+        r: getPublicMatches,
       }),
     },
   ])
@@ -146,6 +160,13 @@ export const TranslationMemoryGlossaryTab = () => {
 
     if (setKeysOrdered) setKeysOrdered(keysOrdered)
 
+    modifyingCurrentTemplate((prevTemplate) => ({
+      ...prevTemplate,
+      tm: orderTmKeys(tmKeys, keysOrdered)
+        .filter(({isActive}) => isActive)
+        .map(({id, isActive, ...rest}) => rest),
+    }))
+
     // Cattol page updateJobKeys
     if (config.is_cattool) {
       updateJobKeys({
@@ -154,6 +175,18 @@ export const TranslationMemoryGlossaryTab = () => {
       }).then(() => CatToolActions.onTMKeysChangeStatus())
     }
   }
+
+  useEffect(() => {
+    setSpecialRows((prevState) =>
+      prevState.map((row) => ({
+        ...row,
+        r:
+          row.id === SPECIAL_ROWS_ID.defaultTranslationMemory
+            ? getPublicMatches
+            : row.r,
+      })),
+    )
+  }, [getPublicMatches])
 
   useEffect(() => {
     // update memoized default translation memory checks
@@ -324,18 +357,16 @@ export const TranslationMemoryGlossaryTab = () => {
         ref={ref}
         className="translation-memory-glossary-tab settings-panel-contentwrapper-tab-background"
       >
-        {typeof isPretranslate100Active === 'boolean' && (
-          <div className="translation-memory-glossary-tab-pre-translate">
-            <input
-              value={isPretranslate100Active}
-              onChange={(e) =>
-                setIsPretranslate100Active(e.currentTarget.checked)
-              }
-              type="checkbox"
-            />
-            Pre-translate 100% matches from TM
-          </div>
-        )}
+        <div className="translation-memory-glossary-tab-pre-translate">
+          <input
+            checked={isPretranslate100Active}
+            onChange={(e) =>
+              setIsPretranslate100Active(e.currentTarget.checked)
+            }
+            type="checkbox"
+          />
+          Pre-translate 100% matches from TM
+        </div>
 
         <div className="translation-memory-glossary-tab-active-resources">
           {activeResourcersNotification}
