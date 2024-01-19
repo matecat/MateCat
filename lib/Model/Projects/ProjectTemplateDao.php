@@ -132,15 +132,21 @@ class ProjectTemplateDao extends DataAccess_AbstractDao
     private static function checkValues(ProjectTemplateStruct $projectTemplateStruct)
     {
         // check id_team
-        $team = (new TeamDao())->findById($projectTemplateStruct->id_team);
+        $teamDao = new TeamDao();
+        $personalTeam =  $teamDao->getPersonalByUid($projectTemplateStruct->uid);
 
-        if($team === null){
-            throw new Exception("User group not found.");
+        if($personalTeam === null){
+            $team = $teamDao->findById($projectTemplateStruct->id_team);
+
+            if($team === null){
+                throw new Exception("User group not found.");
+            }
+
+            if(!$team->hasUser($projectTemplateStruct->uid)){
+                throw new Exception("This user does not belong to this group.");
+            }
         }
 
-        if(!$team->hasUser($projectTemplateStruct->uid)){
-            throw new Exception("This user does not belong to this group.");
-        }
 
         // check qa_id
         if($projectTemplateStruct->qa_model_template_id !== null){
@@ -165,17 +171,22 @@ class ProjectTemplateDao extends DataAccess_AbstractDao
         // check mt
         if($projectTemplateStruct->mt !== null){
             $mt = $projectTemplateStruct->getMt();
-            $engine = Engine::getInstance($mt['id']);
 
-            if(empty($engine)){
-                throw new Exception("Not existing engine.");
+            if(isset($mt->id)){
+                $engine = Engine::getInstance($mt->id);
+
+                if(empty($engine)){
+                    throw new Exception("Not existing engine.");
+                }
+
+                $engineRecord = $engine->getEngineRecord();
+
+                if($engineRecord->uid !== $projectTemplateStruct->uid){
+                    throw new Exception("Engine doesn't belong to the user.");
+                }
             }
 
-            $engineRecord = $engine->getEngineRecord();
 
-            if($engineRecord->uid !== $projectTemplateStruct->uid){
-                throw new Exception("Engine doesn't belong to the user.");
-            }
         }
 
         // check tm
