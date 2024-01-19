@@ -97,6 +97,7 @@ const NewProject = ({
   const {
     projectTemplates,
     currentProjectTemplate,
+    availableTemplateProps,
     setProjectTemplates,
     modifyingCurrentTemplate,
   } = useProjectTemplates({tmKeys: tmKeys ?? [], setTmKeys})
@@ -698,6 +699,7 @@ const NewProject = ({
           setProjectTemplates,
           modifyingCurrentTemplate,
           currentProjectTemplate,
+          availableTemplateProps,
         }}
       />
       <Footer />

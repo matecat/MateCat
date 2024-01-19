@@ -74,6 +74,7 @@ function useProjectTemplates({tmKeys, setTmKeys}) {
 
   const [projectTemplates, setProjectTemplates] = useState([])
   const [currentProjectTemplate, setCurrentProjectTemplate] = useState()
+  const [availableTemplateProps, setAvailableTemplateProps] = useState({})
 
   const projectTemplatesRef = useRef()
   projectTemplatesRef.current = projectTemplates
@@ -94,6 +95,16 @@ function useProjectTemplates({tmKeys, setTmKeys}) {
       temporaryTemplate ? temporaryTemplate : originalTemplate,
     )
     const {isTemporary, ...comparableModifiedTemplate} = modifiedTemplate
+
+    const originalTemplateKeys = Object.keys(originalTemplate).filter(
+      (value) => value !== 'isSelected',
+    )
+    const modifiedTemplateKeys = Object.keys(comparableModifiedTemplate).filter(
+      (value) => value !== 'isSelected',
+    )
+
+    if (!isEqual(modifiedTemplateKeys, originalTemplateKeys))
+      throw new Error('Error template schema not valid.')
 
     // If modified template is equal to original template clean up temporary template
     if (isEqual(comparableModifiedTemplate, originalTemplate)) {
@@ -126,6 +137,9 @@ function useProjectTemplates({tmKeys, setTmKeys}) {
 
     let cleanup = false
 
+    const stripUnderscore = (value) =>
+      value.replace(/_[^_]/g, (match) => match[1].toUpperCase())
+
     getProjectTemplates().then((items) => {
       if (!cleanup) {
         setProjectTemplates(
@@ -133,6 +147,16 @@ function useProjectTemplates({tmKeys, setTmKeys}) {
             ...template,
             isSelected: template.is_default,
           })),
+        )
+
+        const propKeys = Object.keys(
+          items.find(({is_default}) => is_default),
+        ).filter((value) => value !== 'id' && value !== 'name')
+        setAvailableTemplateProps(
+          propKeys.reduce(
+            (acc, cur) => ({...acc, [stripUnderscore(cur)]: cur}),
+            {},
+          ),
         )
       }
     })
@@ -180,6 +204,7 @@ function useProjectTemplates({tmKeys, setTmKeys}) {
   return {
     projectTemplates,
     currentProjectTemplate,
+    availableTemplateProps,
     setProjectTemplates,
     modifyingCurrentTemplate,
   }

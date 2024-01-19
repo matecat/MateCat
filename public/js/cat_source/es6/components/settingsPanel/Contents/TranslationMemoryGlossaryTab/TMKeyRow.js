@@ -33,8 +33,13 @@ import CatToolActions from '../../../../actions/CatToolActions'
 
 export const TMKeyRow = ({row, onExpandRow}) => {
   const {isImportTMXInProgress} = useContext(CreateProjectContext)
-  const {tmKeys, setTmKeys, modifyingCurrentTemplate, currentProjectTemplate} =
-    useContext(SettingsPanelContext)
+  const {
+    tmKeys,
+    setTmKeys,
+    modifyingCurrentTemplate,
+    currentProjectTemplate,
+    availableTemplateProps,
+  } = useContext(SettingsPanelContext)
   const {setSpecialRows, setNotification} = useContext(
     TranslationMemoryGlossaryTabContext,
   )
@@ -65,7 +70,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
       if (isMMSharedKey) {
         modifyingCurrentTemplate((prevTemplate) => ({
           ...prevTemplate,
-          get_public_matches: isLookup,
+          [availableTemplateProps.getPublicMatches]: isLookup,
         }))
       }
     }
@@ -103,7 +108,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
       setTmKeys(updatedKeys)
       modifyingCurrentTemplate((prevTemplate) => ({
         ...prevTemplate,
-        tm: updatedKeys
+        [availableTemplateProps.tm]: updatedKeys
           .filter(({isActive}) => isActive)
           .map(({id, isActive, ...rest}) => rest),
       }))

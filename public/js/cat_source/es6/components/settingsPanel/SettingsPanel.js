@@ -77,6 +77,7 @@ export const SettingsPanel = ({
   setProjectTemplates,
   modifyingCurrentTemplate,
   currentProjectTemplate,
+  availableTemplateProps,
 }) => {
   const [isVisible, setIsVisible] = useState(false)
   const [tabs, setTabs] = useState(() => {
@@ -150,6 +151,7 @@ export const SettingsPanel = ({
         setProjectTemplates,
         modifyingCurrentTemplate,
         currentProjectTemplate,
+        availableTemplateProps,
       }}
     >
       <div
@@ -205,4 +207,5 @@ SettingsPanel.propTypes = {
   setProjectTemplates: PropTypes.func,
   modifyingCurrentTemplate: PropTypes.func,
   currentProjectTemplate: PropTypes.object,
+  availableTemplateProps: PropTypes.object,
 }

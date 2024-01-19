@@ -111,6 +111,7 @@ export const TranslationMemoryGlossaryTab = () => {
     setKeysOrdered,
     modifyingCurrentTemplate,
     currentProjectTemplate,
+    availableTemplateProps,
   } = useContext(SettingsPanelContext)
 
   const getPublicMatches = currentProjectTemplate.get_public_matches
@@ -118,7 +119,7 @@ export const TranslationMemoryGlossaryTab = () => {
   const setIsPretranslate100Active = (value) =>
     modifyingCurrentTemplate((prevTemplate) => ({
       ...prevTemplate,
-      pretranslate_100: value,
+      [availableTemplateProps.pretranslate100]: value,
     }))
 
   const [specialRows, setSpecialRows] = useState([
@@ -162,7 +163,7 @@ export const TranslationMemoryGlossaryTab = () => {
 
     modifyingCurrentTemplate((prevTemplate) => ({
       ...prevTemplate,
-      tm: orderTmKeys(tmKeys, keysOrdered)
+      [availableTemplateProps.tm]: orderTmKeys(tmKeys, keysOrdered)
         .filter(({isActive}) => isActive)
         .map(({id, isActive, ...rest}) => rest),
     }))
