@@ -10,7 +10,6 @@ import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {TMKeyRow} from './TMKeyRow'
 import {TMCreateResourceRow} from './TMCreateResourceRow'
 import {MessageNotification} from '../MessageNotification'
-import {CreateProjectContext} from '../../../createProject/CreateProjectContext'
 import {updateJobKeys} from '../../../../api/updateJobKeys'
 
 import Users from '../../../../../../../img/icons/Users'
@@ -98,10 +97,6 @@ export const getTmDataStructureToSendServer = ({tmKeys = [], keysOrdered}) => {
   })
 }
 
-const memoData = {
-  DEFAULT_TRANSLATION_MEMORY,
-}
-
 export const TranslationMemoryGlossaryTabContext = createContext({})
 
 export const TranslationMemoryGlossaryTab = () => {
@@ -124,10 +119,8 @@ export const TranslationMemoryGlossaryTab = () => {
 
   const [specialRows, setSpecialRows] = useState([
     {
-      ...memoData.DEFAULT_TRANSLATION_MEMORY,
-      ...(typeof memoData.DEFAULT_TRANSLATION_MEMORY.r === 'undefined' && {
-        r: getPublicMatches,
-      }),
+      ...DEFAULT_TRANSLATION_MEMORY,
+      r: getPublicMatches,
     },
   ])
   const [keyRows, setKeyRows] = useState([])
@@ -190,11 +183,6 @@ export const TranslationMemoryGlossaryTab = () => {
   }, [getPublicMatches])
 
   useEffect(() => {
-    // update memoized default translation memory checks
-    memoData.DEFAULT_TRANSLATION_MEMORY = specialRows.find(
-      ({id}) => id === SPECIAL_ROWS_ID.defaultTranslationMemory,
-    )
-
     const onExpandRow = ({row, shouldExpand, content}) =>
       setKeyRows((prevState) =>
         prevState.map((item) =>
@@ -317,9 +305,15 @@ export const TranslationMemoryGlossaryTab = () => {
   }, [tmKeys, getPublicMatches])
 
   const onAddSharedResource = () =>
-    setSpecialRows([DEFAULT_TRANSLATION_MEMORY, ADD_SHARED_RESOURCE])
+    setSpecialRows([
+      {...DEFAULT_TRANSLATION_MEMORY, r: getPublicMatches},
+      ADD_SHARED_RESOURCE,
+    ])
   const onNewResource = () =>
-    setSpecialRows([DEFAULT_TRANSLATION_MEMORY, NEW_RESOURCE])
+    setSpecialRows([
+      {...DEFAULT_TRANSLATION_MEMORY, r: getPublicMatches},
+      NEW_RESOURCE,
+    ])
 
   const inactiveKeys = keyRows.filter(
     ({isActive, name}) =>

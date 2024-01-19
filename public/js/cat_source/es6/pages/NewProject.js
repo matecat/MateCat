@@ -100,6 +100,7 @@ const NewProject = ({
     availableTemplateProps,
     setProjectTemplates,
     modifyingCurrentTemplate,
+    checkOneOfPropsAreModified,
   } = useProjectTemplates({tmKeys: tmKeys ?? [], setTmKeys})
 
   const isDeviceCompatible = useDeviceCompatibility()
@@ -700,6 +701,7 @@ const NewProject = ({
           modifyingCurrentTemplate,
           currentProjectTemplate,
           availableTemplateProps,
+          checkOneOfPropsAreModified,
         }}
       />
       <Footer />

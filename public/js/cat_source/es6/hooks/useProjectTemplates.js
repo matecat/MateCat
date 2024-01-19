@@ -131,6 +131,28 @@ function useProjectTemplates({tmKeys, setTmKeys}) {
     setCurrentProjectTemplate(modifiedTemplate)
   }, [])
 
+  const checkOneOfPropsAreModified = useCallback((props) => {
+    if (!Array.isArray(props)) throw new Error('Argument props is not array.')
+
+    const getOnlyPropsInvolved = (template) =>
+      Object.entries(template)
+        .filter(([key]) => props.includes(key))
+        .reduce((acc, cur) => ({...acc, [cur[0]]: cur[1]}), {})
+
+    const originalTemplate = projectTemplatesRef.current.find(
+      ({isSelected, isTemporary}) => isSelected && !isTemporary,
+    )
+    const temporaryTemplate = projectTemplatesRef.current.find(
+      ({id, isTemporary}) => id === originalTemplate.id && isTemporary,
+    )
+
+    if (!temporaryTemplate) return false
+    return !isEqual(
+      getOnlyPropsInvolved(originalTemplate),
+      getOnlyPropsInvolved(temporaryTemplate),
+    )
+  }, [])
+
   // retrieve templates
   useEffect(() => {
     if (!canRetrieveTemplates) return
@@ -207,6 +229,7 @@ function useProjectTemplates({tmKeys, setTmKeys}) {
     availableTemplateProps,
     setProjectTemplates,
     modifyingCurrentTemplate,
+    checkOneOfPropsAreModified,
   }
 }
 

@@ -17,6 +17,14 @@ export const SETTINGS_PANEL_TABS = {
   advancedOptions: 'options',
 }
 
+export const TEMPLATE_PROPS_BY_TAB = {
+  [SETTINGS_PANEL_TABS.translationMemoryGlossary]: [
+    'tm',
+    'get_public_matches',
+    'pretranslate_100',
+  ],
+}
+
 const DEFAULT_CONTENTS = [
   {
     id: SETTINGS_PANEL_TABS.translationMemoryGlossary,
@@ -74,10 +82,11 @@ export const SettingsPanel = ({
   setSegmentationRule,
   setKeysOrdered,
   projectTemplates,
-  setProjectTemplates,
-  modifyingCurrentTemplate,
   currentProjectTemplate,
   availableTemplateProps,
+  setProjectTemplates,
+  modifyingCurrentTemplate,
+  checkOneOfPropsAreModified,
 }) => {
   const [isVisible, setIsVisible] = useState(false)
   const [tabs, setTabs] = useState(() => {
@@ -148,10 +157,11 @@ export const SettingsPanel = ({
         setSegmentationRule,
         setKeysOrdered,
         projectTemplates,
-        setProjectTemplates,
-        modifyingCurrentTemplate,
         currentProjectTemplate,
         availableTemplateProps,
+        setProjectTemplates,
+        modifyingCurrentTemplate,
+        checkOneOfPropsAreModified,
       }}
     >
       <div
@@ -204,8 +214,9 @@ SettingsPanel.propTypes = {
   targetLangs: PropTypes.array,
   setKeysOrdered: PropTypes.func,
   projectTemplates: PropTypes.array,
-  setProjectTemplates: PropTypes.func,
-  modifyingCurrentTemplate: PropTypes.func,
   currentProjectTemplate: PropTypes.object,
   availableTemplateProps: PropTypes.object,
+  setProjectTemplates: PropTypes.func,
+  modifyingCurrentTemplate: PropTypes.func,
+  checkOneOfPropsAreModified: PropTypes.func,
 }
