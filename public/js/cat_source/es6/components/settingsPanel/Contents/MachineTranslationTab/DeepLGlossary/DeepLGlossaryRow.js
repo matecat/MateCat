@@ -56,7 +56,9 @@ export const DeepLGlossaryRow = ({engineId, row, setRows, isReadOnly}) => {
       </div>
       <div className="glossary-row-name">
         <div className="tooltip-input-name">
-          <div className="glossary-row-name-input">{row.name}</div>
+          <div className="glossary-row-name-input glossary-deepl-row-name-input">
+            {row.name}
+          </div>
         </div>
       </div>
       {!isReadOnly && (
