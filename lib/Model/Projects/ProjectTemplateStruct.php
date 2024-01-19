@@ -74,7 +74,7 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
     }
 
     /**
-     * @return mixed
+     * @return array
      */
     public function getTm()
     {

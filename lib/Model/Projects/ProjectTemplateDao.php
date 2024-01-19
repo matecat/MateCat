@@ -6,8 +6,15 @@ use CatUtils;
 use DataAccess_AbstractDao;
 use Database;
 use DateTime;
+use Engine;
+use Exception;
+use PayableRates\CustomPayableRateDao;
 use PDO;
+use QAModelTemplate\QAModelTemplateDao;
 use Teams\TeamDao;
+use TmKeyManagement_MemoryKeyDao;
+use TmKeyManagement_MemoryKeyStruct;
+use TmKeyManagement_TmKeyStruct;
 
 class ProjectTemplateDao extends DataAccess_AbstractDao
 {
@@ -74,8 +81,9 @@ class ProjectTemplateDao extends DataAccess_AbstractDao
         // check name
         $jsonDecoded = json_decode($json);
         $projectTemplateStruct = self::findUniqueName($projectTemplateStruct, $jsonDecoded->name, $uid);
-
         $projectTemplateStruct->uid = $uid;
+
+        self::checkValues($projectTemplateStruct);
 
         return self::save($projectTemplateStruct);
     }
@@ -102,7 +110,92 @@ class ProjectTemplateDao extends DataAccess_AbstractDao
             $projectTemplateStruct = self::findUniqueName($projectTemplateStruct, $projectTemplateStruct->name, $uid);
         }
 
+        self::checkValues($projectTemplateStruct);
+
         return self::update($projectTemplateStruct);
+    }
+
+    /**
+     * Check if the template values are valid.
+     *
+     * The checks includes:
+     *
+     * - id_team
+     * - qa_model_template_id
+     * - payable_rate_template_id
+     * - mt
+     * - tm
+     *
+     * @param ProjectTemplateStruct $projectTemplateStruct
+     * @throws Exception
+     */
+    private static function checkValues(ProjectTemplateStruct $projectTemplateStruct)
+    {
+        // check id_team
+        $team = (new TeamDao())->findById($projectTemplateStruct->id_team);
+
+        if($team === null){
+            throw new Exception("User group not found");
+        }
+
+        if(!$team->hasUser($projectTemplateStruct->uid)){
+            throw new Exception("This user does not belong to this group");
+        }
+
+        // check qa_id
+        if($projectTemplateStruct->qa_model_template_id !== null){
+            $qaModel = QAModelTemplateDao::get([
+                'id' => $projectTemplateStruct->qa_model_template_id
+            ]);
+
+            if(empty($qaModel)){
+                throw new Exception("Not existing QA template");
+            }
+        }
+
+        // check pr_id
+        if($projectTemplateStruct->payable_rate_template_id !== null){
+            $payableRateModel = CustomPayableRateDao::getById($projectTemplateStruct->payable_rate_template_id);
+
+            if(empty($payableRateModel)){
+                throw new Exception("Not existing payable rate template");
+            }
+        }
+
+        // check mt
+        if($projectTemplateStruct->mt !== null){
+            $engine = Engine::getInstance($projectTemplateStruct->mt);
+
+            if(empty($engine)){
+                throw new Exception("Not existing engine");
+            }
+
+            $engineRecord = $engine->getEngineRecord();
+
+            if($engineRecord->uid !== $projectTemplateStruct->uid){
+                throw new Exception("Engine doesn't belong to the user");
+            }
+        }
+
+        // check tm
+        if($projectTemplateStruct->tm !== null){
+            $tmKeys = $projectTemplateStruct->getTm();
+            $mkDao = new TmKeyManagement_MemoryKeyDao();
+
+            foreach ($tmKeys as $tmKey){
+                $keyRing = $mkDao->read(
+                    ( new TmKeyManagement_MemoryKeyStruct( [
+                        'uid'    => $projectTemplateStruct->uid,
+                        'tm_key' => new TmKeyManagement_TmKeyStruct( $tmKey['key'] )
+                    ] )
+                    )
+                );
+
+                if ( empty($keyRing) ) {
+                    throw new Exception("TM key doesn't belong to the user");
+                }
+            }
+        }
     }
 
     /**
