@@ -172,6 +172,11 @@
     font-size: 16px;
     padding: 8px;
   }
+  .select-unsaved {
+    .select {
+      color: $translatedBlue;
+    }
+  }
 }
 
 .settings-panel-contentwrapper-tab-background {

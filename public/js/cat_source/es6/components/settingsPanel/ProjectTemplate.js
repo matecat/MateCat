@@ -35,6 +35,7 @@ export const ProjectTemplate = () => {
       {options.length > 0 && (
         <Select
           placeholder="Select template"
+          className={`${isModifyingTemplate ? 'select-unsaved' : ''}`}
           label="Project template"
           id="project-template"
           maxHeightDroplist={100}

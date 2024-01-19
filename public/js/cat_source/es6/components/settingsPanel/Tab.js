@@ -11,7 +11,7 @@ export const Tab = ({id, label}) => {
     )
 
   const isActive = tabs.find((tab) => tab.id === id)?.isOpened ?? false
-
+  //●
   return (
     <li
       className={`settings-panel-tab${
