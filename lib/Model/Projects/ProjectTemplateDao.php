@@ -135,11 +135,11 @@ class ProjectTemplateDao extends DataAccess_AbstractDao
         $team = (new TeamDao())->findById($projectTemplateStruct->id_team);
 
         if($team === null){
-            throw new Exception("User group not found");
+            throw new Exception("User group not found.");
         }
 
         if(!$team->hasUser($projectTemplateStruct->uid)){
-            throw new Exception("This user does not belong to this group");
+            throw new Exception("This user does not belong to this group.");
         }
 
         // check qa_id
@@ -149,7 +149,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao
             ]);
 
             if(empty($qaModel)){
-                throw new Exception("Not existing QA template");
+                throw new Exception("Not existing QA template.");
             }
         }
 
@@ -158,22 +158,23 @@ class ProjectTemplateDao extends DataAccess_AbstractDao
             $payableRateModel = CustomPayableRateDao::getById($projectTemplateStruct->payable_rate_template_id);
 
             if(empty($payableRateModel)){
-                throw new Exception("Not existing payable rate template");
+                throw new Exception("Not existing payable rate template.");
             }
         }
 
         // check mt
         if($projectTemplateStruct->mt !== null){
-            $engine = Engine::getInstance($projectTemplateStruct->mt);
+            $mt = $projectTemplateStruct->getMt();
+            $engine = Engine::getInstance($mt['id']);
 
             if(empty($engine)){
-                throw new Exception("Not existing engine");
+                throw new Exception("Not existing engine.");
             }
 
             $engineRecord = $engine->getEngineRecord();
 
             if($engineRecord->uid !== $projectTemplateStruct->uid){
-                throw new Exception("Engine doesn't belong to the user");
+                throw new Exception("Engine doesn't belong to the user.");
             }
         }
 
@@ -192,7 +193,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao
                 );
 
                 if ( empty($keyRing) ) {
-                    throw new Exception("TM key doesn't belong to the user");
+                    throw new Exception("TM key doesn't belong to the user.");
                 }
             }
         }
