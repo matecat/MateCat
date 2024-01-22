@@ -157,6 +157,10 @@ class ProjectTemplateDao extends DataAccess_AbstractDao
             if(empty($qaModel)){
                 throw new Exception("Not existing QA template.");
             }
+
+            if($qaModel->uid !== $projectTemplateStruct->uid){
+                throw new Exception("QA model doesn't belong to the user.");
+            }
         }
 
         // check pr_id
@@ -165,6 +169,10 @@ class ProjectTemplateDao extends DataAccess_AbstractDao
 
             if(empty($payableRateModel)){
                 throw new Exception("Not existing payable rate template.");
+            }
+
+            if($payableRateModel->uid !== $projectTemplateStruct->uid){
+                throw new Exception("Billing model doesn't belong to the user.");
             }
         }
 
