@@ -186,7 +186,10 @@ let TranslationMatches = {
   processContributions: function (data, sid) {
     if (config.translation_matches_enabled && data) {
       if (!data) return true
-      this.renderContributions(data, sid)
+      const validMatches = data.matches.filter(
+        ({segment, translation}) => segment && translation,
+      )
+      this.renderContributions({...data, matches: validMatches}, sid)
     }
   },
 
@@ -198,11 +201,12 @@ let TranslationMatches = {
     SegmentActions.setSegmentContributions(UI.getSegmentId(segment), [], errors)
   },
 
-  setDeleteSuggestion: function (source, target, id) {
+  setDeleteSuggestion: function (source, target, id, sid) {
     return deleteContribution({
       source,
       target,
       id,
+      sid,
     }).catch(() => {
       OfflineUtils.failedConnection(0, 'deleteContribution')
     })

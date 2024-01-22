@@ -1,7 +1,7 @@
 import React from 'react'
 import {useForm} from 'react-hook-form'
 
-export const MicrosoftHub = ({addMTEngine, error}) => {
+export const MicrosoftHub = ({addMTEngine, error, isRequestInProgress}) => {
   const {
     register,
     handleSubmit,
@@ -52,6 +52,7 @@ export const MicrosoftHub = ({addMTEngine, error}) => {
             )}
             <button
               className="ui primary button"
+              disabled={isRequestInProgress}
               onClick={handleSubmit(onSubmit)}
             >
               Confirm
