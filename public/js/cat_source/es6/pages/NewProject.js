@@ -62,7 +62,6 @@ const NewProject = ({
   const [tmKeys, setTmKeys] = useState()
   const [keysOrdered, setKeysOrdered] = useState()
   const [mtEngines, setMtEngines] = useState([DEFAULT_ENGINE_MEMORY])
-  const [activeMTEngine, setActiveMTEngine] = useState(DEFAULT_ENGINE_MEMORY)
   const [selectedTeam, setSelectedTeam] = useState()
   const [sourceLang, setSourceLang] = useState({})
   const [targetLangs, setTargetLangs] = useState([])
@@ -181,18 +180,12 @@ const NewProject = ({
       getMtEnginesApi().then((mtEngines) => {
         mtEngines.push(DEFAULT_ENGINE_MEMORY)
         setMtEngines(mtEngines)
-        if (config.isAnInternalUser) {
-          const mmt = mtEngines.find((mt) => mt.name === MMT_NAME)
-          if (mmt) {
-            setActiveMTEngine(mmt)
-          }
-        }
       })
     }
   }
 
   createProject.current = () => {
-    const {mtGlossaryProps} = activeMTEngine ?? {}
+    // const {mtGlossaryProps} = activeMTEngine ?? {}
 
     const getParams = () => ({
       action: 'createProject',
@@ -201,7 +194,7 @@ const NewProject = ({
       source_lang: sourceLang.id,
       target_lang: targetLangs.map((lang) => lang.id).join(),
       job_subject: subject.id,
-      mt_engine: activeMTEngine ? activeMTEngine.id : undefined,
+      // mt_engine: activeMTEngine ? activeMTEngine.id : undefined,
       private_keys_list: getTmDataStructureToSendServer({tmKeys, keysOrdered}),
       lang_detect_files: '',
       // pretranslate_100: isPretranslate100Active ? 1 : 0,
@@ -211,12 +204,12 @@ const NewProject = ({
       segmentation_rule: segmentationRule.id === '1' ? '' : segmentationRule.id,
       id_team: selectedTeam ? selectedTeam.id : undefined,
       // get_public_matches: getPublicMatches,
-      ...(mtGlossaryProps?.glossaries.length && {
-        mmt_glossaries: JSON.stringify({
-          glossaries: mtGlossaryProps.glossaries,
-          ignore_glossary_case: !mtGlossaryProps.isGlossaryCaseSensitive,
-        }),
-      }),
+      // ...(mtGlossaryProps?.glossaries.length && {
+      //   mmt_glossaries: JSON.stringify({
+      //     glossaries: mtGlossaryProps.glossaries,
+      //     ignore_glossary_case: !mtGlossaryProps.isGlossaryCaseSensitive,
+      //   }),
+      // }),
     })
 
     if (!projectSent) {
@@ -681,8 +674,6 @@ const NewProject = ({
           setTmKeys,
           mtEngines,
           setMtEngines,
-          activeMTEngine,
-          setActiveMTEngine,
           speechToTextActive,
           setSpeechToTextActive,
           guessTagActive,

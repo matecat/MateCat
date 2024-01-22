@@ -18,7 +18,10 @@ const getProjectTemplates = async () =>
         tag_projection: true,
         cross_language_matches: ['it-IT', 'fr-FR'],
         segmentation_rule: 'General',
-        mt: {},
+        mt: {
+          id: 9,
+          extra: {},
+        },
         tm: [],
         get_public_matches: true,
         pretranslate_100: false,
@@ -94,7 +97,7 @@ function useProjectTemplates({tmKeys, setTmKeys}) {
     const modifiedTemplate = callback(
       temporaryTemplate ? temporaryTemplate : originalTemplate,
     )
-    const {isTemporary, ...comparableModifiedTemplate} = modifiedTemplate
+    const {isTemporary, ...comparableModifiedTemplate} = modifiedTemplate // eslint-disable-line
 
     const originalTemplateKeys = Object.keys(originalTemplate).filter(
       (value) => value !== 'isSelected',

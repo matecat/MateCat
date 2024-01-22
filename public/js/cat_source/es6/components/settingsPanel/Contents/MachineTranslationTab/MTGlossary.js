@@ -59,18 +59,21 @@ export class MTGlossaryStatus {
 }
 
 export const MTGlossary = ({id, isCattoolPage = false}) => {
-  const {activeMTEngine, setActiveMTEngine} = useContext(SettingsPanelContext)
+  const {
+    currentProjectTemplate,
+    modifyingCurrentTemplate,
+    availableTemplateProps,
+  } = useContext(SettingsPanelContext)
+  const {mt: {extra: mtGlossaryProps} = {}} = currentProjectTemplate ?? {}
 
-  const [isShowingRows, setIsShowingRows] = useState(
-    activeMTEngine.mtGlossaryProps?.isOpened ?? false,
-  )
+  const [isShowingRows, setIsShowingRows] = useState(false)
   const [rows, setRows] = useState()
   const [isGlossaryCaseSensitive, setIsGlossaryCaseSensitive] = useState(
-    activeMTEngine.mtGlossaryProps?.isGlossaryCaseSensitive ?? false,
+    mtGlossaryProps?.isGlossaryCaseSensitive ?? false,
   )
 
   const activeGlossariesRef = useRef()
-  activeGlossariesRef.current = activeMTEngine.mtGlossaryProps?.glossaries
+  activeGlossariesRef.current = mtGlossaryProps?.glossaries
 
   const updateRowsState = useCallback(
     (value) => {
@@ -153,17 +156,37 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
   }, [id, isCattoolPage, updateRowsState])
 
   useEffect(() => {
-    if (isCattoolPage || !rows) return
+    if (
+      isCattoolPage ||
+      !rows ||
+      (rows.length === 1 &&
+        rows.some(({id}) => id === MT_GLOSSARY_CREATE_ROW_ID))
+    )
+      return
 
-    setActiveMTEngine((prevState) => ({
-      ...prevState,
-      mtGlossaryProps: {
-        ...prevState.mtGlossaryProps,
-        glossaries: rows.filter(({isActive}) => isActive).map(({id}) => id),
-        isGlossaryCaseSensitive,
+    const rowsActive = rows.filter(({isActive}) => isActive).map(({id}) => id)
+
+    modifyingCurrentTemplate((prevTemplate) => ({
+      ...prevTemplate,
+      [availableTemplateProps.mt]: {
+        ...prevTemplate[availableTemplateProps.mt],
+        extra: {
+          ...(rowsActive.length
+            ? {
+                glossaries: rowsActive,
+                isGlossaryCaseSensitive,
+              }
+            : {}),
+        },
       },
     }))
-  }, [rows, isGlossaryCaseSensitive, isCattoolPage, setActiveMTEngine])
+  }, [
+    rows,
+    isGlossaryCaseSensitive,
+    isCattoolPage,
+    modifyingCurrentTemplate,
+    availableTemplateProps,
+  ])
 
   const addGlossary = () => {
     const row = {
@@ -181,13 +204,16 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
   const onShowingRows = () => {
     setIsShowingRows((prevState) => !prevState)
     if (!isCattoolPage) {
-      setActiveMTEngine((prevState) => ({
-        ...prevState,
-        mtGlossaryProps: {
-          ...prevState.mtGlossaryProps,
-          isOpened: !isShowingRows,
-        },
-      }))
+      // modifyingCurrentTemplate((prevTemplate) => ({
+      //   ...prevTemplate,
+      //   [availableTemplateProps.mt]: {
+      //     ...prevTemplate[availableTemplateProps.mt],
+      //     extra: {
+      //       ...(prevTemplate[availableTemplateProps.mt]?.extra ?? {}),
+      //       isOpened: !isShowingRows,
+      //     },
+      //   },
+      // }))
     }
   }
 

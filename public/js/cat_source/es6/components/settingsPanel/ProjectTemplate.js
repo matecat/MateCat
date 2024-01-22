@@ -10,6 +10,7 @@ export const ProjectTemplate = () => {
   const isModifyingTemplate = projectTemplates.some(
     ({isTemporary}) => isTemporary,
   )
+  const isDefaultTemplate = currentTemplate?.is_default
 
   const options = projectTemplates
     .filter(({isTemporary}) => !isTemporary)
@@ -43,6 +44,19 @@ export const ProjectTemplate = () => {
           activeOption={activeOption}
           onSelect={onSelect}
         />
+      )}
+      {isModifyingTemplate && !isDefaultTemplate && (
+        <button className="settings-panel-project-template-button settings-panel-project-template-button-save-changes">
+          Save changes
+        </button>
+      )}
+      {isModifyingTemplate && (
+        <button className="settings-panel-project-template-button">
+          Save as new
+        </button>
+      )}
+      {!isDefaultTemplate && (
+        <button className="settings-panel-project-template-button">...</button>
       )}
     </div>
   )

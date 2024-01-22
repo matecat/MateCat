@@ -23,6 +23,7 @@ export const TEMPLATE_PROPS_BY_TAB = {
     'get_public_matches',
     'pretranslate_100',
   ],
+  [SETTINGS_PANEL_TABS.machineTranslation]: ['mt'],
 }
 
 const DEFAULT_CONTENTS = [
@@ -66,8 +67,6 @@ export const SettingsPanel = ({
   setTmKeys,
   mtEngines,
   setMtEngines,
-  activeMTEngine,
-  setActiveMTEngine,
   speechToTextActive,
   setSpeechToTextActive,
   guessTagActive,
@@ -139,8 +138,6 @@ export const SettingsPanel = ({
         setTmKeys,
         mtEngines,
         setMtEngines,
-        activeMTEngine,
-        setActiveMTEngine,
         openLoginModal,
         wrapperRef,
         speechToTextActive,
@@ -206,8 +203,6 @@ SettingsPanel.propTypes = {
   setTmKeys: PropTypes.func,
   mtEngines: PropTypes.array,
   setMtEngines: PropTypes.func,
-  activeMTEngine: PropTypes.object,
-  setActiveMTEngine: PropTypes.func,
   guessTagActive: PropTypes.bool,
   setGuessTagActive: PropTypes.func,
   sourceLang: PropTypes.object,

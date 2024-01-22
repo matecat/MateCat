@@ -26,10 +26,20 @@ export const MachineTranslationTab = () => {
   const {
     mtEngines,
     setMtEngines,
-    activeMTEngine,
     openLoginModal,
-    setActiveMTEngine,
+    modifyingCurrentTemplate,
+    currentProjectTemplate,
+    availableTemplateProps,
   } = useContext(SettingsPanelContext)
+  console.log('currentProjectTemplate', currentProjectTemplate)
+  const activeMTEngine = currentProjectTemplate.mt?.id
+  const setActiveMTEngine = ({id} = {}) =>
+    modifyingCurrentTemplate((prevTemplate) => ({
+      ...prevTemplate,
+      [availableTemplateProps.mt]: {
+        id,
+      },
+    }))
 
   const [addMTVisible, setAddMTVisible] = useState(false)
   const [activeAddEngine, setActiveAddEngine] = useState()
@@ -102,13 +112,13 @@ export const MachineTranslationTab = () => {
     setDeleteMTRequest(mt)
   }
   const deleteMT = () => {
-    deleteMTEngine({id: deleteMTRequest.id})
+    deleteMTEngine({id: deleteMTRequest})
       .then(() => {
         setMtEngines((prevStateMT) => {
-          return prevStateMT.filter((MT) => MT.id !== deleteMTRequest.id)
+          return prevStateMT.filter((MT) => MT.id !== deleteMTRequest)
         })
         setDeleteMTRequest()
-        if (activeMTEngine.id === deleteMTRequest.id) {
+        if (activeMTEngine === deleteMTRequest) {
           setActiveMTEngine(DEFAULT_ENGINE_MEMORY)
         }
       })
@@ -128,7 +138,7 @@ export const MachineTranslationTab = () => {
   useEffect(() => {
     setMTRows(
       mtEngines
-        .filter((row) => !activeMTEngine?.id || row.id !== activeMTEngine?.id)
+        .filter((row) => !activeMTEngine || row.id !== activeMTEngine)
         .map((row, index) => {
           return {
             node: (
@@ -144,13 +154,13 @@ export const MachineTranslationTab = () => {
         }),
     )
     setDeleteMTRequest()
-  }, [activeMTEngine?.id, mtEngines])
+  }, [activeMTEngine, mtEngines])
 
   const resetNotification = () => setNotification({})
 
   const notificationsNode = (
     <>
-      {deleteMTRequest && (
+      {typeof deleteMTRequest === 'number' && (
         <MessageNotification
           type={'warning'}
           message={`Do you really want to delete the MT: <b>${deleteMTRequest.name}</b>?`}
@@ -176,6 +186,8 @@ export const MachineTranslationTab = () => {
       )}
     </>
   )
+
+  const activeMTEngineData = mtEngines.find(({id}) => id === activeMTEngine)
 
   return (
     <MachineTranslationTabContext.Provider value={{setNotification}}>
@@ -228,25 +240,25 @@ export const MachineTranslationTab = () => {
           <SettingsPanelTable
             columns={COLUMNS_TABLE}
             rows={
-              activeMTEngine
+              typeof activeMTEngine === 'number'
                 ? [
                     {
                       node: (
                         <MTRow
                           key={'active'}
-                          row={{...activeMTEngine}}
+                          row={activeMTEngineData}
                           deleteMT={() => deleteMTConfirm(activeMTEngine)}
                           onCheckboxClick={disableMT}
                         />
                       ),
                       isDraggable: false,
                       isActive: true,
-                      ...(activeMTEngine.name === 'ModernMT' && {
+                      ...(activeMTEngineData.name === 'ModernMT' && {
                         isExpanded: true,
                         extraNode: (
                           <MTGlossary
                             {...{
-                              ...activeMTEngine,
+                              ...activeMTEngineData,
                               isCattoolPage: config.is_cattool,
                             }}
                           />

@@ -157,6 +157,10 @@
 }
 
 .settings-panel-project-template {
+  display: flex;
+  align-items: end;
+  gap: 8px;
+
   padding: 16px 24px;
   background-color: $darkBlue;
 
@@ -182,6 +186,25 @@
       color: $translatedBlue;
     }
   }
+}
+
+.settings-panel-project-template-button {
+  height: 40px;
+  background-color: unset;
+  border: 1px solid $grey4;
+  color: white;
+  font-size: 16px;
+  padding: 0 12px;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+.settings-panel-project-template-button-save-changes {
+  background-color: $grey4;
+  color: black;
 }
 
 .settings-panel-contentwrapper-tab-background {
