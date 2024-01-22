@@ -1022,7 +1022,7 @@ class setTranslationController extends ajaxController {
         $contributionStruct->segment              = $this->filter->fromLayer0ToLayer1( $this->segment[ 'segment' ] );
         $contributionStruct->translation          = $this->filter->fromLayer0ToLayer1( $_Translation[ 'translation' ] );
         $contributionStruct->api_key              = \INIT::$MYMEMORY_API_KEY;
-        $contributionStruct->uid                  = ($ownerUid !== null) ? $ownerUid : 0;
+        $contributionStruct->uid                  = Jobs_JobDao::getOwnerUid($this->id_job, $this->password);
         $contributionStruct->oldTranslationStatus = $old_translation[ 'status' ];
         $contributionStruct->oldSegment           = $this->filter->fromLayer0ToLayer1( $this->segment[ 'segment' ] ); //
         $contributionStruct->oldTranslation       = $this->filter->fromLayer0ToLayer1( $old_translation[ 'translation' ] );
