@@ -1,7 +1,7 @@
 import React from 'react'
 import {useForm} from 'react-hook-form'
 
-export const SmartMate = ({addMTEngine, error}) => {
+export const SmartMate = ({addMTEngine, error, isRequestInProgress}) => {
   const {
     register,
     handleSubmit,
@@ -57,6 +57,7 @@ export const SmartMate = ({addMTEngine, error}) => {
             {error && <span className={'mt-error'}>{error.message}</span>}
             <button
               className="ui primary button"
+              disabled={isRequestInProgress}
               onClick={handleSubmit(onSubmit)}
             >
               Confirm
