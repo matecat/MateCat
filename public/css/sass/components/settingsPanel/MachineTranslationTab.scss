@@ -320,6 +320,12 @@
   }
 }
 
+.glossary-deepl-row-name-input {
+  &:hover {
+    background-color: unset;
+  }
+}
+
 .glossary-row-import-button {
   display: flex;
   justify-content: end;
