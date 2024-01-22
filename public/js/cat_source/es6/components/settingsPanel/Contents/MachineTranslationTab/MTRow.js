@@ -34,6 +34,16 @@ export const MTRow = ({row, deleteMT, onCheckboxClick}) => {
             )
           </>
         )}
+        {row.name === 'DeepL' && (
+          <>
+            {' '}
+            (
+            <a href="https://guides.matecat.com/my" target="_blank">
+              Details
+            </a>
+            )
+          </>
+        )}
       </div>
       <div>{row.description}</div>
       {!config.is_cattool && (

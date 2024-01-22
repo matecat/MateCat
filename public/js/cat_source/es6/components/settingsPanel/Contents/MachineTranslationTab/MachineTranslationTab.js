@@ -19,6 +19,9 @@ import {MTGlossary} from './MTGlossary'
 
 import Close from '../../../../../../../img/icons/Close'
 import AddWide from '../../../../../../../img/icons/AddWide'
+import {DeepL} from './MtEngines/DeepL'
+import {DeepLGlossary} from './DeepLGlossary/DeepLGlossary'
+import {MTDeepLRow} from './MTDeepLRow'
 
 export const MachineTranslationTabContext = createContext({})
 
@@ -43,6 +46,8 @@ export const MachineTranslationTab = () => {
 
   const [addMTVisible, setAddMTVisible] = useState(false)
   const [activeAddEngine, setActiveAddEngine] = useState()
+  const [isAddMTEngineRequestInProgress, setIsAddMTEngineRequestInProgress] =
+    useState(false)
   const [error, setError] = useState()
   const [MTRows, setMTRows] = useState([])
   const [deleteMTRequest, setDeleteMTRequest] = useState()
@@ -53,6 +58,7 @@ export const MachineTranslationTab = () => {
     {name: 'ModernMT', id: 'mmt', component: ModernMt},
     {name: 'AltLang', id: 'altlang', component: AltLang},
     {name: 'Apertium', id: 'apertium', component: Apertium},
+    {name: 'DeepL', id: 'deepl', component: DeepL},
     {
       name: 'Google Translate',
       id: 'googletranslate',
@@ -77,7 +83,20 @@ export const MachineTranslationTab = () => {
         {name: 'Action'},
       ]
 
+  const CUSTOM_ACTIVE_COLUMNS_TABLE_BY_ENGINE = {
+    [enginesList.find(({name}) => name === 'DeepL').name]: config.is_cattool
+      ? [{name: 'Engine Name'}, {name: 'Description'}, {name: 'Formality'}]
+      : [
+          {name: 'Engine Name'},
+          {name: 'Description'},
+          {name: 'Formality'},
+          {name: 'Use in this project'},
+          {name: 'Action'},
+        ],
+  }
+
   const addMTEngineRequest = (data) => {
+    setIsAddMTEngineRequestInProgress(true)
     addMTEngine({
       name: data.name,
       provider: activeAddEngine.id,
@@ -105,6 +124,7 @@ export const MachineTranslationTab = () => {
       .catch((error) => {
         if (error && error.length) setError(error[0])
       })
+      .finally(() => setIsAddMTEngineRequestInProgress(false))
   }
 
   const deleteMTConfirm = (mt) => {
@@ -188,6 +208,13 @@ export const MachineTranslationTab = () => {
   )
 
   const activeMTEngineData = mtEngines.find(({id}) => id === activeMTEngine)
+  const activeColumns = CUSTOM_ACTIVE_COLUMNS_TABLE_BY_ENGINE[
+    activeMTEngineData?.name
+  ]
+    ? CUSTOM_ACTIVE_COLUMNS_TABLE_BY_ENGINE[activeMTEngineData.name]
+    : COLUMNS_TABLE
+
+  const ActiveMTRow = activeMTEngineData?.name === 'DeepL' ? MTDeepLRow : MTRow
 
   return (
     <MachineTranslationTabContext.Provider value={{setNotification}}>
@@ -220,6 +247,7 @@ export const MachineTranslationTab = () => {
               <activeAddEngine.component
                 addMTEngine={addMTEngineRequest}
                 error={error}
+                isRequestInProgress={isAddMTEngineRequestInProgress}
               />
             ) : null}
           </div>
@@ -238,13 +266,14 @@ export const MachineTranslationTab = () => {
           </div>
 
           <SettingsPanelTable
-            columns={COLUMNS_TABLE}
+            columns={activeColumns}
+            className={`active-table-${activeMTEngine?.name}`}
             rows={
               typeof activeMTEngine === 'number'
                 ? [
                     {
                       node: (
-                        <MTRow
+                        <ActiveMTRow
                           key={'active'}
                           row={activeMTEngineData}
                           deleteMT={() => deleteMTConfirm(activeMTEngine)}
@@ -259,6 +288,17 @@ export const MachineTranslationTab = () => {
                           <MTGlossary
                             {...{
                               ...activeMTEngineData,
+                              isCattoolPage: config.is_cattool,
+                            }}
+                          />
+                        ),
+                      }),
+                      ...(activeMTEngine.name === 'DeepL' && {
+                        isExpanded: true,
+                        extraNode: (
+                          <DeepLGlossary
+                            {...{
+                              ...activeMTEngine,
                               isCattoolPage: config.is_cattool,
                             }}
                           />
