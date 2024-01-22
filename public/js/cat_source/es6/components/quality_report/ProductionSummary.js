@@ -228,7 +228,7 @@ class ProductionSummary extends React.Component {
         <div className="qr-effort pee">
           <div className="qr-label">PEE</div>
           <div className="qr-info">
-            <b>{jobInfo.get('pee') ? parseInt(jobInfo.get('pee')) : 0}%</b>{' '}
+            <b>{jobInfo.get('pee') ? Math.round(jobInfo.get('pee')) : 0}%</b>{' '}
           </div>
         </div>
 

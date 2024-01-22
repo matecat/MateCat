@@ -4,9 +4,7 @@ import $ from 'jquery'
 import {filter} from 'lodash'
 
 import AppDispatcher from '../stores/AppDispatcher'
-import CattolConstants from '../constants/CatToolConstants'
 import Notifications from '../sse/sse'
-import {CattolFooter} from '../components/footer/CattoolFooter'
 import RevisionFeedbackModal from '../components/modals/RevisionFeedbackModal'
 import CommonUtils from '../utils/commonUtils'
 import CatToolStore from '../stores/CatToolStore'
@@ -14,77 +12,77 @@ import {getJobStatistics} from '../api/getJobStatistics'
 import {sendRevisionFeedback} from '../api/sendRevisionFeedback'
 import ModalsActions from './ModalsActions'
 import {Header} from '../components/header/cattol/Header'
-import SegmentUtils from '../utils/segmentUtils'
 import {getTmKeysJob} from '../api/getTmKeysJob'
 import {getDomainsList} from '../api/getDomainsList'
 import {checkJobKeysHaveGlossary} from '../api/checkJobKeysHaveGlossary'
 import {getJobMetadata} from '../api/getJobMetadata'
+import CatToolConstants from '../constants/CatToolConstants'
 
 let CatToolActions = {
   popupInfoUserMenu: () => 'infoUserMenu-' + config.userMail,
 
   openQaIssues: function () {
     AppDispatcher.dispatch({
-      actionType: CattolConstants.SHOW_CONTAINER,
+      actionType: CatToolConstants.SHOW_CONTAINER,
       container: 'qaComponent',
     })
   },
   openSearch: function () {
     AppDispatcher.dispatch({
-      actionType: CattolConstants.SHOW_CONTAINER,
+      actionType: CatToolConstants.SHOW_CONTAINER,
       container: 'search',
     })
   },
   openSegmentFilter: function () {
     AppDispatcher.dispatch({
-      actionType: CattolConstants.SHOW_CONTAINER,
+      actionType: CatToolConstants.SHOW_CONTAINER,
       container: 'segmentFilter',
     })
   },
   setSegmentFilter: function (segments, state) {
     AppDispatcher.dispatch({
-      actionType: CattolConstants.SET_SEGMENT_FILTER,
+      actionType: CatToolConstants.SET_SEGMENT_FILTER,
       data: segments,
       state: state,
     })
   },
   reloadSegmentFilter: function () {
     AppDispatcher.dispatch({
-      actionType: CattolConstants.RELOAD_SEGMENT_FILTER,
+      actionType: CatToolConstants.RELOAD_SEGMENT_FILTER,
     })
   },
   toggleQaIssues: function () {
     AppDispatcher.dispatch({
-      actionType: CattolConstants.TOGGLE_CONTAINER,
+      actionType: CatToolConstants.TOGGLE_CONTAINER,
       container: 'qaComponent',
     })
   },
   toggleSearch: function () {
     AppDispatcher.dispatch({
-      actionType: CattolConstants.TOGGLE_CONTAINER,
+      actionType: CatToolConstants.TOGGLE_CONTAINER,
       container: 'search',
     })
   },
   storeSearchResults: function (data) {
     AppDispatcher.dispatch({
-      actionType: CattolConstants.STORE_SEARCH_RESULT,
+      actionType: CatToolConstants.STORE_SEARCH_RESULT,
       data: data,
     })
   },
   toggleSegmentFilter: function () {
     AppDispatcher.dispatch({
-      actionType: CattolConstants.TOGGLE_CONTAINER,
+      actionType: CatToolConstants.TOGGLE_CONTAINER,
       container: 'segmentFilter',
     })
   },
   closeSubHeader: function () {
     AppDispatcher.dispatch({
-      actionType: CattolConstants.CLOSE_SUBHEADER,
+      actionType: CatToolConstants.CLOSE_SUBHEADER,
     })
   },
   closeSearch: function () {
     AppDispatcher.dispatch({
-      actionType: CattolConstants.CLOSE_SEARCH,
+      actionType: CatToolConstants.CLOSE_SEARCH,
     })
     setTimeout(() => window.dispatchEvent(new Event('resize')))
   },
@@ -93,13 +91,13 @@ let CatToolActions = {
   },
   clientConnected: function (clientId) {
     AppDispatcher.dispatch({
-      actionType: CattolConstants.CLIENT_CONNECT,
+      actionType: CatToolConstants.CLIENT_CONNECT,
       clientId,
     })
   },
   clientReconnect: () => {
     AppDispatcher.dispatch({
-      actionType: CattolConstants.CLIENT_RECONNECTION,
+      actionType: CatToolConstants.CLIENT_RECONNECTION,
     })
   },
 
@@ -110,7 +108,7 @@ let CatToolActions = {
       UI.showProfilePopUp(!closedPopup)
     } else if (!closedPopup) {
       AppDispatcher.dispatch({
-        actionType: CattolConstants.SHOW_PROFILE_MESSAGE_TOOLTIP,
+        actionType: CatToolConstants.SHOW_PROFILE_MESSAGE_TOOLTIP,
       })
     }
   },
@@ -119,7 +117,7 @@ let CatToolActions = {
   },
   storeFilesInfo: function (files, firstSegment, lastSegment) {
     AppDispatcher.dispatch({
-      actionType: CattolConstants.STORE_FILES_INFO,
+      actionType: CatToolConstants.STORE_FILES_INFO,
       files: files,
     })
 
@@ -151,21 +149,6 @@ let CatToolActions = {
       }),
     )
   },
-  renderFooter: function () {
-    var mountPoint = createRoot($('footer.stats-foo')[0])
-    mountPoint.render(
-      React.createElement(CattolFooter, {
-        idProject: config.id_project,
-        idJob: config.job_id,
-        password: config.password,
-        source: config.source_rfc,
-        target: config.target_rfc,
-        isReview: config.isReview,
-        isCJK: config.isCJK,
-        languagesArray: config.languages_array,
-      }),
-    )
-  },
   updateFooterStatistics: function () {
     getJobStatistics(config.id_job, config.password).then(function (data) {
       if (data.stats) {
@@ -176,7 +159,7 @@ let CatToolActions = {
   },
   setProgress: function (stats) {
     AppDispatcher.dispatch({
-      actionType: CattolConstants.SET_PROGRESS,
+      actionType: CatToolConstants.SET_PROGRESS,
       stats: stats,
     })
     //TODO move it
@@ -237,12 +220,12 @@ let CatToolActions = {
   },
   reloadQualityReport: function () {
     AppDispatcher.dispatch({
-      actionType: CattolConstants.RELOAD_QR,
+      actionType: CatToolConstants.RELOAD_QR,
     })
   },
   updateQualityReport: function (qr) {
     AppDispatcher.dispatch({
-      actionType: CattolConstants.UPDATE_QR,
+      actionType: CatToolConstants.UPDATE_QR,
       qr: qr,
     })
   },
@@ -259,7 +242,7 @@ let CatToolActions = {
         })
         const keys = filteredKeys.map((item) => ({...item, id: item.key}))
         AppDispatcher.dispatch({
-          actionType: CattolConstants.UPDATE_TM_KEYS,
+          actionType: CatToolConstants.UPDATE_TM_KEYS,
           keys,
         })
       })
@@ -268,19 +251,19 @@ let CatToolActions = {
       checkJobKeysHaveGlossary()
     } else {
       AppDispatcher.dispatch({
-        actionType: CattolConstants.UPDATE_TM_KEYS,
+        actionType: CatToolConstants.UPDATE_TM_KEYS,
         keys: jobKeys,
       })
       //From sse channel
       if (domains) {
         AppDispatcher.dispatch({
-          actionType: CattolConstants.UPDATE_DOMAINS,
+          actionType: CatToolConstants.UPDATE_DOMAINS,
           entries: domains,
         })
       }
       if (haveKeysGlossary !== undefined) {
         AppDispatcher.dispatch({
-          actionType: CattolConstants.HAVE_KEYS_GLOSSARY,
+          actionType: CatToolConstants.HAVE_KEYS_GLOSSARY,
           value: haveKeysGlossary,
           wasAlreadyVerified: true,
         })
@@ -289,7 +272,7 @@ let CatToolActions = {
   },
   setDomains: ({entries, sid}) => {
     AppDispatcher.dispatch({
-      actionType: CattolConstants.UPDATE_DOMAINS,
+      actionType: CatToolConstants.UPDATE_DOMAINS,
       sid,
       entries,
     })
@@ -311,20 +294,20 @@ let CatToolActions = {
    */
   addNotification: function (notification) {
     return AppDispatcher.dispatch({
-      actionType: CattolConstants.ADD_NOTIFICATION,
+      actionType: CatToolConstants.ADD_NOTIFICATION,
       notification,
     })
   },
   removeNotification: function (notification) {
     AppDispatcher.dispatch({
-      actionType: CattolConstants.REMOVE_NOTIFICATION,
+      actionType: CatToolConstants.REMOVE_NOTIFICATION,
       notification,
     })
   },
 
   removeAllNotifications: function () {
     AppDispatcher.dispatch({
-      actionType: CattolConstants.REMOVE_ALL_NOTIFICATION,
+      actionType: CatToolConstants.REMOVE_ALL_NOTIFICATION,
     })
   },
   onRender: (props = {}) => {
@@ -345,7 +328,7 @@ let CatToolActions = {
     }
 
     AppDispatcher.dispatch({
-      actionType: CattolConstants.ON_RENDER,
+      actionType: CatToolConstants.ON_RENDER,
       ...props,
       ...(UI.startSegmentId && {startSegmentId: UI.startSegmentId}),
       where: props.where ? props.where : 'center',
@@ -353,18 +336,18 @@ let CatToolActions = {
   },
   onTMKeysChangeStatus: () => {
     AppDispatcher.dispatch({
-      actionType: CattolConstants.ON_TM_KEYS_CHANGE_STATUS,
+      actionType: CatToolConstants.ON_TM_KEYS_CHANGE_STATUS,
     })
   },
   setHaveKeysGlossary: (value) => {
     AppDispatcher.dispatch({
-      actionType: CattolConstants.HAVE_KEYS_GLOSSARY,
+      actionType: CatToolConstants.HAVE_KEYS_GLOSSARY,
       value,
     })
   },
   openSettingsPanel: (value) => {
     AppDispatcher.dispatch({
-      actionType: CattolConstants.OPEN_SETTINGS_PANEL,
+      actionType: CatToolConstants.OPEN_SETTINGS_PANEL,
       value,
     })
   },
@@ -372,14 +355,14 @@ let CatToolActions = {
     if (!CatToolStore.jobMetadata) {
       getJobMetadata(idJob, password).then((jobMetadata) => {
         AppDispatcher.dispatch({
-          actionType: CattolConstants.GET_JOB_METADATA,
+          actionType: CatToolConstants.GET_JOB_METADATA,
           jobMetadata,
         })
         CatToolStore.jobMetadata = jobMetadata
       })
     } else {
       AppDispatcher.dispatch({
-        actionType: CattolConstants.GET_JOB_METADATA,
+        actionType: CatToolConstants.GET_JOB_METADATA,
         jobMetadata: CatToolStore.jobMetadata,
       })
     }

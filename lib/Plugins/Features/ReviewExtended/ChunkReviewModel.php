@@ -109,7 +109,11 @@ class ChunkReviewModel implements IChunkReviewModel {
      */
     public function _updatePassFailResult( Projects_ProjectStruct $project ) {
 
-        $this->chunk_review->is_pass = ( $this->getScore() <= $this->getQALimit( $project->getLqaModel() ) );
+        if($project->getLqaModel()){
+            $this->chunk_review->is_pass = ( $this->getScore() <= $this->getQALimit( $project->getLqaModel() ) );
+        } else {
+            $this->chunk_review->is_pass = true;
+        }
 
         $update_result = ChunkReviewDao::updateStruct( $this->chunk_review, [
                         'fields' => [
