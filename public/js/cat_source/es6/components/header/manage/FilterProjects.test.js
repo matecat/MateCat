@@ -14,7 +14,7 @@ import {mswServer} from '../../../../../../mocks/mswServer'
 window.config = {
   enableMultiDomainApi: false,
   ajaxDomainsNumber: 3,
-  basepath: '/',
+  basepath: 'http://localhost/',
 }
 
 const fakeFilterData = {
@@ -1159,7 +1159,7 @@ const apiGetProjects = {
 const executeMswServer = (response) => {
   mswServer.use(
     ...[
-      http.post('/', () => {
+      http.post(config.basepath, () => {
         return HttpResponse.json(response)
       }),
     ],

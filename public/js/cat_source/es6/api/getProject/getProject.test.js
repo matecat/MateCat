@@ -3,7 +3,7 @@ import {mswServer} from '../../../../../mocks/mswServer'
 import {getProject} from '.'
 
 global.config = {
-  basepath: 'http://localhost:8080/',
+  basepath: 'http://localhost/',
   enableMultiDomainApi: false,
 }
 
@@ -33,14 +33,13 @@ test('Works fine with correct project id and password', async () => {
 test('Error with wrong project id or password', async () => {
   mswServer.use(
     ...[
-      http.get('/api/v2/projects/:id/:password', () => {
-        console.log('@@@@@@@@@@@@@@@@@@')
+      http.get(config.basepath + 'api/v2/projects/:id/:password', () => {
         return HttpResponse.json(fakeData.wrong)
       }),
     ],
   )
 
-  const result = await getProject(19, 'df7d197a122d8')
+  const result = await getProject(19, 'df7d197a122d8').catch((error) => error)
 
-  expect(result).toEqual(fakeData.wrong.errors)
+  expect(result.errors).toEqual(fakeData.wrong.errors)
 })

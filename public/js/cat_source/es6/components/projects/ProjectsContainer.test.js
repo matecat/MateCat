@@ -15,7 +15,7 @@ document.body.appendChild(modalElement)
 require('../../../../common')
 window.config = {
   enable_outsource: 1,
-  basepath: '/',
+  basepath: 'http://localhost/',
 }
 
 const fakeProjectsData = {
@@ -145,10 +145,13 @@ const apiActivityMockResponse = {
 const executeMswServer = () => {
   mswServer.use(
     ...[
-      http.get('/api/v2/activity/project/:id/:password/last', ({params}) => {
-        const {id} = params
-        return HttpResponse.json(apiActivityMockResponse[id])
-      }),
+      http.get(
+        config.basepath + 'api/v2/activity/project/:id/:password/last',
+        ({params}) => {
+          const {id} = params
+          return HttpResponse.json(apiActivityMockResponse[id])
+        },
+      ),
     ],
   )
 }

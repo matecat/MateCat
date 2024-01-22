@@ -2,20 +2,19 @@ import {http, HttpResponse} from 'msw'
 
 import {getProjects} from '.'
 import {mswServer} from '../../../../../mocks/mswServer'
-
+global.config = {
+  basepath: 'http://localhost/',
+  enableMultiDomainApi: false,
+  ajaxDomainsNumber: 20,
+}
 test('works properly with empty filter', async () => {
   const payload = {errors: [], data: {fake: 'data'}}
 
   mswServer.use(
-    http.post('*.ajax.localhost', () => {
+    http.post(config.basepath, () => {
       return HttpResponse.json(payload)
     }),
   )
-
-  global.config = {
-    enableMultiDomainApi: true,
-    ajaxDomainsNumber: 20,
-  }
 
   const data = await getProjects({searchFilter: {}, team: {}})
 
@@ -26,15 +25,10 @@ test('works properly with full filter', async () => {
   const payload = {errors: [], data: {fake: 'data'}}
 
   mswServer.use(
-    http.post('*.ajax.localhost', () => {
+    http.post(config.basepath, () => {
       return HttpResponse.json(payload)
     }),
   )
-
-  global.config = {
-    enableMultiDomainApi: true,
-    ajaxDomainsNumber: 20,
-  }
 
   const data = await getProjects({
     searchFilter: {filter: {foo: 'bar'}},
@@ -49,15 +43,10 @@ test('throws on non empty errors', async () => {
   const payload = {errors: [500, 'VERY_BAD_ERROR'], data: {fake: 'data'}}
 
   mswServer.use(
-    http.post('*.ajax.localhost', () => {
+    http.post(config.basepath, () => {
       return HttpResponse.json(payload)
     }),
   )
-
-  global.config = {
-    enableMultiDomainApi: true,
-    ajaxDomainsNumber: 20,
-  }
 
   await expect(getProjects({searchFilter: {}, team: {}})).rejects.toEqual(
     payload.errors,

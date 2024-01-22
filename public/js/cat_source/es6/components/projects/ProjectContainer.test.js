@@ -15,9 +15,10 @@ const mountPoint = createRoot(modalElement)
 afterAll(() => mountPoint.unmount())
 
 require('../../../../common')
-window.config = {
+global.config = {
   enable_outsource: 1,
-  basepath: '/',
+  basepath: 'http://localhost/',
+  enableMultiDomainApi: false,
   id_job: 2,
 }
 
@@ -91,9 +92,12 @@ const apiActivityMockResponse = {
 const executeMswServer = () => {
   mswServer.use(
     ...[
-      http.get('/api/v2/activity/project/:id/:password/last', () => {
-        return HttpResponse.json(apiActivityMockResponse)
-      }),
+      http.get(
+        config.basepath + 'api/v2/activity/project/:id/:password/last',
+        () => {
+          return HttpResponse.json(apiActivityMockResponse)
+        },
+      ),
     ],
   )
 }

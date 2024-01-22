@@ -9,9 +9,10 @@ import ProjectsStore from '../../stores/ProjectsStore'
 import ManageActions from '../../actions/ManageActions'
 import ManageConstants from '../../constants/ManageConstants'
 
-window.config = {
+global.config = {
   splitEnabled: 1,
-  hostpath: 'https://dev.matecat.com',
+  basepath: 'http://localhost/',
+  enableMultiDomainApi: false,
 }
 
 const fakeProjectsData = {
@@ -147,9 +148,7 @@ const getRevise2Url = (project, job) => {
   const target = job.get('target')
   const id = job.get('id')
   const revisePasswords = job.get('revise_passwords')
-  return `${
-    window.config.hostpath
-  }/revise2/${name}/${source}-${target}/${id}-${revisePasswords
+  return `/revise2/${name}/${source}-${target}/${id}-${revisePasswords
     .get(1)
     .get('password')}`
 }
@@ -244,7 +243,8 @@ test('Generate revise 2: onClick flow', async () => {
   mswServer.use(
     ...[
       http.post(
-        '/plugins/second_pass_review/project/:id/:password/reviews',
+        config.basepath +
+          'plugins/second_pass_review/project/:id/:password/reviews',
         () => {
           return HttpResponse.json({
             chunk_review: {
