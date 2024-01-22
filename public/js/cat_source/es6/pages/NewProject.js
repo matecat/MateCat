@@ -22,11 +22,7 @@ import {TargetLanguagesSelect} from '../components/createProject/TargetLanguages
 import {TmGlossarySelect} from '../components/createProject/TmGlossarySelect'
 import {SourceLanguageSelect} from '../components/createProject/SourceLanguageSelect'
 import CommonUtils from '../utils/commonUtils'
-import {
-  DEFAULT_ENGINE_MEMORY,
-  MMT_NAME,
-  SettingsPanel,
-} from '../components/settingsPanel'
+import {DEFAULT_ENGINE_MEMORY, SettingsPanel} from '../components/settingsPanel'
 import {getMTEngines as getMtEnginesApi} from '../api/getMTEngines'
 import SegmentUtils from '../utils/segmentUtils'
 import {tmCreateRandUser} from '../api/tmCreateRandUser'
@@ -60,7 +56,6 @@ const NewProject = ({
 }) => {
   const [user, setUser] = useState()
   const [tmKeys, setTmKeys] = useState()
-  const [keysOrdered, setKeysOrdered] = useState()
   const [mtEngines, setMtEngines] = useState([DEFAULT_ENGINE_MEMORY])
   const [selectedTeam, setSelectedTeam] = useState()
   const [sourceLang, setSourceLang] = useState({})
@@ -99,7 +94,7 @@ const NewProject = ({
     availableTemplateProps,
     setProjectTemplates,
     modifyingCurrentTemplate,
-    checkOneOfPropsAreModified,
+    checkSpecificTemplatePropsAreModified,
   } = useProjectTemplates({tmKeys: tmKeys ?? [], setTmKeys})
 
   const isDeviceCompatible = useDeviceCompatibility()
@@ -195,7 +190,7 @@ const NewProject = ({
       target_lang: targetLangs.map((lang) => lang.id).join(),
       job_subject: subject.id,
       // mt_engine: activeMTEngine ? activeMTEngine.id : undefined,
-      private_keys_list: getTmDataStructureToSendServer({tmKeys, keysOrdered}),
+      // private_keys_list: getTmDataStructureToSendServer({tmKeys, keysOrdered}),
       lang_detect_files: '',
       // pretranslate_100: isPretranslate100Active ? 1 : 0,
       lexiqa: lexiqaActive,
@@ -691,13 +686,12 @@ const NewProject = ({
           setMultiMatchLangs,
           segmentationRule,
           setSegmentationRule,
-          setKeysOrdered,
           projectTemplates,
           setProjectTemplates,
           modifyingCurrentTemplate,
           currentProjectTemplate,
           availableTemplateProps,
-          checkOneOfPropsAreModified,
+          checkSpecificTemplatePropsAreModified,
         }}
       />
       <Footer />

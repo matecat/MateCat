@@ -103,7 +103,6 @@ export const TranslationMemoryGlossaryTab = () => {
   const {
     tmKeys,
     openLoginModal,
-    setKeysOrdered,
     modifyingCurrentTemplate,
     currentProjectTemplate,
     availableTemplateProps,
@@ -151,8 +150,6 @@ export const TranslationMemoryGlossaryTab = () => {
 
     setKeyRows([...keyRows.filter(({isActive}) => !isActive), ...orderedRows])
     const keysOrdered = orderedRows.map(({key}) => key).filter((key) => key)
-
-    if (setKeysOrdered) setKeysOrdered(keysOrdered)
 
     modifyingCurrentTemplate((prevTemplate) => ({
       ...prevTemplate,

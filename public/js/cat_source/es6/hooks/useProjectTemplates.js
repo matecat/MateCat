@@ -28,7 +28,7 @@ const getProjectTemplates = async () =>
       },
       {
         id: 3,
-        name: 'template name',
+        name: 'Testing template',
         id_team: 45,
         qa_template_id: 4456,
         payable_rate_template_id: 434,
@@ -133,7 +133,7 @@ function useProjectTemplates({tmKeys, setTmKeys}) {
     setCurrentProjectTemplate(modifiedTemplate)
   }, [])
 
-  const checkOneOfPropsAreModified = useCallback((props) => {
+  const checkSpecificTemplatePropsAreModified = useCallback((props) => {
     if (!Array.isArray(props)) throw new Error('Argument props is not array.')
 
     const getOnlyPropsInvolved = (template) =>
@@ -231,7 +231,7 @@ function useProjectTemplates({tmKeys, setTmKeys}) {
     availableTemplateProps,
     setProjectTemplates,
     modifyingCurrentTemplate,
-    checkOneOfPropsAreModified,
+    checkSpecificTemplatePropsAreModified,
   }
 }
 

@@ -79,13 +79,12 @@ export const SettingsPanel = ({
   setMultiMatchLangs,
   segmentationRule,
   setSegmentationRule,
-  setKeysOrdered,
   projectTemplates,
   currentProjectTemplate,
   availableTemplateProps,
   setProjectTemplates,
   modifyingCurrentTemplate,
-  checkOneOfPropsAreModified,
+  checkSpecificTemplatePropsAreModified,
 }) => {
   const [isVisible, setIsVisible] = useState(false)
   const [tabs, setTabs] = useState(() => {
@@ -152,13 +151,12 @@ export const SettingsPanel = ({
         setMultiMatchLangs,
         segmentationRule,
         setSegmentationRule,
-        setKeysOrdered,
         projectTemplates,
         currentProjectTemplate,
         availableTemplateProps,
         setProjectTemplates,
         modifyingCurrentTemplate,
-        checkOneOfPropsAreModified,
+        checkSpecificTemplatePropsAreModified,
       }}
     >
       <div
@@ -207,11 +205,10 @@ SettingsPanel.propTypes = {
   setGuessTagActive: PropTypes.func,
   sourceLang: PropTypes.object,
   targetLangs: PropTypes.array,
-  setKeysOrdered: PropTypes.func,
   projectTemplates: PropTypes.array,
   currentProjectTemplate: PropTypes.object,
   availableTemplateProps: PropTypes.object,
   setProjectTemplates: PropTypes.func,
   modifyingCurrentTemplate: PropTypes.func,
-  checkOneOfPropsAreModified: PropTypes.func,
+  checkSpecificTemplatePropsAreModified: PropTypes.func,
 }
