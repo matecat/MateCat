@@ -64,6 +64,7 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
     modifyingCurrentTemplate,
     availableTemplateProps,
   } = useContext(SettingsPanelContext)
+
   const {mt: {extra: mtGlossaryProps} = {}} = currentProjectTemplate ?? {}
 
   const [isShowingRows, setIsShowingRows] = useState(false)

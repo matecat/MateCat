@@ -38,10 +38,9 @@ const getProjectTemplates = async () =>
         cross_language_matches: [],
         segmentation_rule: 'General',
         mt: {
-          id: 123,
+          id: 10,
           extra: {
-            glossaries: [1, 2, 4],
-            formality: 'low',
+            deepl_formality: 'prefer_less',
           },
         },
         tm: [

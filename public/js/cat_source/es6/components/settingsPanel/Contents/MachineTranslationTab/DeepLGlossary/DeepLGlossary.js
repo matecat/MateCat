@@ -22,16 +22,19 @@ const COLUMNS_TABLE = [
 export const DEEPL_GLOSSARY_CREATE_ROW_ID = 'createRow'
 
 export const DeepLGlossary = ({id, isCattoolPage = false}) => {
-  const {activeMTEngine, setActiveMTEngine} = useContext(SettingsPanelContext)
+  const {
+    currentProjectTemplate,
+    modifyingCurrentTemplate,
+    availableTemplateProps,
+  } = useContext(SettingsPanelContext)
 
-  const [isShowingRows, setIsShowingRows] = useState(
-    activeMTEngine.mtGlossaryProps?.isOpened ?? false,
-  )
+  const {mt: {extra: deeplGlossaryProps} = {}} = currentProjectTemplate ?? {}
+
+  const [isShowingRows, setIsShowingRows] = useState(false)
   const [rows, setRows] = useState()
 
   const activeGlossaryRef = useRef()
-  activeGlossaryRef.current =
-    activeMTEngine.deeplGlossaryProps?.deepl_id_glossary
+  activeGlossaryRef.current = deeplGlossaryProps?.deepl_id_glossary
 
   const updateRowsState = useCallback(
     (value) => {
@@ -117,16 +120,35 @@ export const DeepLGlossary = ({id, isCattoolPage = false}) => {
   }, [id, isCattoolPage, updateRowsState])
 
   useEffect(() => {
-    if (isCattoolPage || !rows) return
+    if (
+      isCattoolPage ||
+      !rows ||
+      (rows.length === 1 &&
+        rows.some(({id}) => id === DEEPL_GLOSSARY_CREATE_ROW_ID))
+    )
+      return
 
-    setActiveMTEngine((prevState) => ({
-      ...prevState,
-      deeplGlossaryProps: {
-        ...prevState.deeplGlossaryProps,
-        deepl_id_glossary: rows.find(({isActive}) => isActive)?.id,
-      },
-    }))
-  }, [rows, isCattoolPage, setActiveMTEngine])
+    const activeRow = rows.find(({isActive}) => isActive)
+
+    modifyingCurrentTemplate((prevTemplate) => {
+      const prevMt = prevTemplate[availableTemplateProps.mt]
+      const prevMTExtra = prevMt?.extra ?? {}
+      const {deepl_id_glossary, ...deepLExtra} = prevMTExtra
+
+      return {
+        ...prevTemplate,
+        [availableTemplateProps.mt]: {
+          ...prevMt,
+          extra: {
+            ...deepLExtra,
+            ...(activeRow && {
+              deepl_id_glossary: activeRow.id,
+            }),
+          },
+        },
+      }
+    })
+  }, [rows, isCattoolPage, modifyingCurrentTemplate, availableTemplateProps])
 
   const addGlossary = () => {
     const row = {
@@ -144,13 +166,13 @@ export const DeepLGlossary = ({id, isCattoolPage = false}) => {
   const onShowingRows = () => {
     setIsShowingRows((prevState) => !prevState)
     if (!isCattoolPage) {
-      setActiveMTEngine((prevState) => ({
-        ...prevState,
-        deeplGlossaryProps: {
-          ...prevState.deeplGlossaryProps,
-          isOpened: !isShowingRows,
-        },
-      }))
+      // setActiveMTEngine((prevState) => ({
+      //   ...prevState,
+      //   deeplGlossaryProps: {
+      //     ...prevState.deeplGlossaryProps,
+      //     isOpened: !isShowingRows,
+      //   },
+      // }))
     }
   }
 

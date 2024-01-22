@@ -7,25 +7,56 @@ import CatToolStore from '../../../../stores/CatToolStore'
 import CatToolConstants from '../../../../constants/CatToolConstants'
 import CatToolActions from '../../../../actions/CatToolActions'
 
+const FORMALITIES = [
+  {name: 'Default', id: 'default'},
+  {name: 'Informal', id: 'prefer_less'},
+  {name: 'Formal', id: 'prefer_more'},
+]
+
 export const MTDeepLRow = ({row, deleteMT, onCheckboxClick}) => {
-  const {activeMTEngine, setActiveMTEngine} = useContext(SettingsPanelContext)
+  const {
+    currentProjectTemplate,
+    modifyingCurrentTemplate,
+    availableTemplateProps,
+  } = useContext(SettingsPanelContext)
 
-  const formalityAlreadySelected =
-    activeMTEngine?.deeplGlossaryProps?.deepl_formality
+  const activeMTEngine = currentProjectTemplate.mt?.id
+  const {mt: {extra: deeplGlossaryProps} = {}} = currentProjectTemplate ?? {}
 
-  const [formalityOptions, setFormalityOptions] = useState(() =>
-    [
-      {name: 'Default', id: 'default'},
-      {name: 'Informal', id: 'prefer_less'},
-      {name: 'Formal', id: 'prefer_more'},
-    ].map((item, index) => ({
-      ...item,
-      isActive:
-        typeof formalityAlreadySelected !== 'undefined'
-          ? formalityAlreadySelected === item.id
-          : index === 0,
-    })),
-  )
+  const formalityAlreadySelected = deeplGlossaryProps?.deepl_formality
+
+  const [formalityOptions, setFormalityOptions] = useState(FORMALITIES)
+
+  useEffect(() => {
+    if (typeof formalityAlreadySelected === 'undefined') {
+      modifyingCurrentTemplate((prevTemplate) => {
+        const prevMt = prevTemplate[availableTemplateProps.mt]
+        const prevMTExtra = prevMt?.extra ?? {}
+
+        return {
+          ...prevTemplate,
+          [availableTemplateProps.mt]: {
+            ...prevMt,
+            extra: {
+              ...prevMTExtra,
+              deepl_formality: FORMALITIES[0].id,
+            },
+          },
+        }
+      })
+    } else {
+      setFormalityOptions((prevState) =>
+        prevState.map((option) => ({
+          ...option,
+          isActive: option.id === formalityAlreadySelected,
+        })),
+      )
+    }
+  }, [
+    formalityAlreadySelected,
+    modifyingCurrentTemplate,
+    availableTemplateProps,
+  ])
 
   useEffect(() => {
     const getJobMetadata = ({jobMetadata: {project} = {}}) => {
@@ -61,23 +92,30 @@ export const MTDeepLRow = ({row, deleteMT, onCheckboxClick}) => {
       name="formality"
       options={formalityOptions}
       activeOption={formalityOptions.find(({isActive}) => isActive)}
-      onSelect={(option) =>
-        setFormalityOptions(
-          (prevState) =>
-            prevState.map((optionItem) => ({
-              ...optionItem,
-              isActive: optionItem.id === option.id,
-            })),
-
-          setActiveMTEngine((prevState) => ({
-            ...prevState,
-            deeplGlossaryProps: {
-              ...prevState.deeplGlossaryProps,
-              deepl_formality: option.id,
-            },
+      onSelect={(option) => {
+        setFormalityOptions((prevState) =>
+          prevState.map((optionItem) => ({
+            ...optionItem,
+            isActive: optionItem.id === option.id,
           })),
         )
-      }
+
+        modifyingCurrentTemplate((prevTemplate) => {
+          const prevMt = prevTemplate[availableTemplateProps.mt]
+          const prevMTExtra = prevMt?.extra ?? {}
+
+          return {
+            ...prevTemplate,
+            [availableTemplateProps.mt]: {
+              ...prevMt,
+              extra: {
+                ...prevMTExtra,
+                deepl_formality: option.id,
+              },
+            },
+          }
+        })
+      }}
     />
   )
 
@@ -100,9 +138,7 @@ export const MTDeepLRow = ({row, deleteMT, onCheckboxClick}) => {
         <div className="settings-panel-cell-center">
           <input
             type="checkbox"
-            checked={
-              activeMTEngine && row.id === activeMTEngine.id ? true : false
-            }
+            checked={row.id === activeMTEngine ? true : false}
             onChange={() => onCheckboxClick(row)}
           ></input>
         </div>
@@ -115,7 +151,7 @@ export const MTDeepLRow = ({row, deleteMT, onCheckboxClick}) => {
           </button>
         </div>
       )}
-      {config.is_cattool && activeMTEngine && row.id === activeMTEngine.id && (
+      {config.is_cattool && row.id === activeMTEngine && (
         <>
           <div></div>
           <div className="settings-panel-cell-center">Enabled</div>

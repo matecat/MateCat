@@ -267,7 +267,7 @@ export const MachineTranslationTab = () => {
 
           <SettingsPanelTable
             columns={activeColumns}
-            className={`active-table-${activeMTEngine?.name}`}
+            className={`active-table-${activeMTEngineData?.name}`}
             rows={
               typeof activeMTEngine === 'number'
                 ? [
@@ -293,12 +293,12 @@ export const MachineTranslationTab = () => {
                           />
                         ),
                       }),
-                      ...(activeMTEngine.name === 'DeepL' && {
+                      ...(activeMTEngineData.name === 'DeepL' && {
                         isExpanded: true,
                         extraNode: (
                           <DeepLGlossary
                             {...{
-                              ...activeMTEngine,
+                              ...activeMTEngineData,
                               isCattoolPage: config.is_cattool,
                             }}
                           />
