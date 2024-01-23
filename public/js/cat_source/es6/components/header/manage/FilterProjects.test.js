@@ -2,7 +2,7 @@ import {render, screen, act} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import React from 'react'
 import Immutable from 'immutable'
-import {rest} from 'msw'
+import {http, HttpResponse} from 'msw'
 
 import FilterProjects from './FilterProjects'
 import ProjectsStore from '../../../stores/ProjectsStore'
@@ -14,7 +14,7 @@ import {mswServer} from '../../../../../../mocks/mswServer'
 window.config = {
   enableMultiDomainApi: false,
   ajaxDomainsNumber: 3,
-  basepath: '/',
+  basepath: 'http://localhost/',
 }
 
 const fakeFilterData = {
@@ -1159,8 +1159,8 @@ const apiGetProjects = {
 const executeMswServer = (response) => {
   mswServer.use(
     ...[
-      rest.post('/', (req, res, ctx) => {
-        return res(ctx.status(200), ctx.json(response))
+      http.post(config.basepath, () => {
+        return HttpResponse.json(response)
       }),
     ],
   )
