@@ -1,4 +1,4 @@
-import React, {Fragment, useContext, useRef, useState} from 'react'
+import React, {Fragment, useContext, useEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {
@@ -33,8 +33,13 @@ import CatToolActions from '../../../../actions/CatToolActions'
 
 export const TMKeyRow = ({row, onExpandRow}) => {
   const {isImportTMXInProgress} = useContext(CreateProjectContext)
-  const {tmKeys, setTmKeys, getPublicMatches, setGetPublicMatches} =
-    useContext(SettingsPanelContext)
+  const {
+    tmKeys,
+    setTmKeys,
+    modifyingCurrentTemplate,
+    currentProjectTemplate,
+    availableTemplateProps,
+  } = useContext(SettingsPanelContext)
   const {setSpecialRows, setNotification} = useContext(
     TranslationMemoryGlossaryTabContext,
   )
@@ -47,6 +52,12 @@ export const TMKeyRow = ({row, onExpandRow}) => {
 
   const isMMSharedKey = row.id === SPECIAL_ROWS_ID.defaultTranslationMemory
   const isOwner = isOwnerOfKey(row.key)
+  const getPublicMatches = currentProjectTemplate.get_public_matches
+
+  useEffect(() => {
+    setIsLookup(row.r ?? false)
+    setIsUpdating(row.w ?? false)
+  }, [row.r, row.w])
 
   const onChangeIsLookup = (e) => {
     const isLookup = e.currentTarget.checked
@@ -56,7 +67,12 @@ export const TMKeyRow = ({row, onExpandRow}) => {
       showModalLostPrivateTmKeyNotLoggedIn(setIsLookup)
     } else {
       updateRow({isLookup, isUpdating})
-      if (isMMSharedKey) setGetPublicMatches(isLookup)
+      if (isMMSharedKey) {
+        modifyingCurrentTemplate((prevTemplate) => ({
+          ...prevTemplate,
+          [availableTemplateProps.getPublicMatches]: isLookup,
+        }))
+      }
     }
     setIsLookup(isLookup)
   }
@@ -75,22 +91,27 @@ export const TMKeyRow = ({row, onExpandRow}) => {
 
   const updateRow = ({isLookup, isUpdating}) => {
     if (!isMMSharedKey) {
-      setTmKeys((prevState) =>
-        prevState.map((tm) =>
-          tm.id === row.id
-            ? {
-                ...tm,
-                isActive: isLookup
-                  ? isLookup
-                  : !isLookup && !isUpdating
-                  ? false
-                  : true,
-                r: isLookup,
-                w: !tm.isActive ? isLookup : isUpdating,
-              }
-            : tm,
-        ),
+      const updatedKeys = tmKeys.map((tm) =>
+        tm.id === row.id
+          ? {
+              ...tm,
+              isActive: isLookup
+                ? isLookup
+                : !isLookup && !isUpdating
+                ? false
+                : true,
+              r: isLookup,
+              w: !tm.isActive ? isLookup : isUpdating,
+            }
+          : tm,
       )
+      setTmKeys(updatedKeys)
+      modifyingCurrentTemplate((prevTemplate) => ({
+        ...prevTemplate,
+        [availableTemplateProps.tm]: updatedKeys
+          .filter(({isActive}) => isActive)
+          .map(({id, isActive, ...rest}) => rest),
+      }))
     } else {
       setSpecialRows((prevState) =>
         prevState.map((specialRow) =>

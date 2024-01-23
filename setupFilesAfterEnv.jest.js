@@ -1,5 +1,4 @@
 import '@testing-library/jest-dom'
-
 import {mswServer} from './public/mocks/mswServer'
 
 beforeAll(() => {

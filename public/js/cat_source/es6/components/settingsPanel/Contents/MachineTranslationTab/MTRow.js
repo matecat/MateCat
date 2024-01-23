@@ -4,7 +4,8 @@ import {SettingsPanelContext} from '../../SettingsPanelContext'
 import Trash from '../../../../../../../img/icons/Trash'
 
 export const MTRow = ({row, deleteMT, onCheckboxClick}) => {
-  const {activeMTEngine} = useContext(SettingsPanelContext)
+  const {currentProjectTemplate} = useContext(SettingsPanelContext)
+  const activeMTEngine = currentProjectTemplate.mt?.id
 
   return (
     <>
@@ -33,15 +34,23 @@ export const MTRow = ({row, deleteMT, onCheckboxClick}) => {
             )
           </>
         )}
+        {row.name === 'DeepL' && (
+          <>
+            {' '}
+            (
+            <a href="https://guides.matecat.com/my" target="_blank">
+              Details
+            </a>
+            )
+          </>
+        )}
       </div>
       <div>{row.description}</div>
       {!config.is_cattool && (
         <div className="settings-panel-cell-center">
           <input
             type="checkbox"
-            checked={
-              activeMTEngine && row.id === activeMTEngine.id ? true : false
-            }
+            checked={row.id === activeMTEngine ? true : false}
             onChange={() => onCheckboxClick(row)}
           ></input>
         </div>
@@ -54,7 +63,7 @@ export const MTRow = ({row, deleteMT, onCheckboxClick}) => {
           </button>
         </div>
       )}
-      {config.is_cattool && activeMTEngine && row.id === activeMTEngine.id && (
+      {config.is_cattool && row.id === activeMTEngine && (
         <>
           <div></div>
           <div className="settings-panel-cell-center">Enabled</div>

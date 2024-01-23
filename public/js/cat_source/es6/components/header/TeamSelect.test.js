@@ -2,7 +2,7 @@ import {render, screen} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import React from 'react'
 import Immutable from 'immutable'
-import {rest} from 'msw'
+import {http, HttpResponse} from 'msw'
 
 import TeamsSelect from './TeamsSelect'
 import TeamsActions from '../../actions/TeamsActions'
@@ -178,11 +178,11 @@ const apiTeamsMembersMockResponse = {
 const executeMswServer = () => {
   mswServer.use(
     ...[
-      rest.get('/api/app/user', (req, res, ctx) => {
-        return res(ctx.status(200), ctx.json(apiUserMockResponse))
+      http.get('/api/app/user', () => {
+        return HttpResponse.json(apiUserMockResponse)
       }),
-      rest.get('/api/v2/teams/2/members', (req, res, ctx) => {
-        return res(ctx.status(200), ctx.json(apiTeamsMembersMockResponse))
+      http.get('/api/v2/teams/2/members', () => {
+        return HttpResponse.json(apiTeamsMembersMockResponse)
       }),
     ],
   )

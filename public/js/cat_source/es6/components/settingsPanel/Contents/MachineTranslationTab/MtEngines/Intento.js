@@ -2,7 +2,7 @@ import React from 'react'
 import {Select} from '../../../../common/Select'
 import {Controller, useForm} from 'react-hook-form'
 
-export const Intento = ({addMTEngine, error}) => {
+export const Intento = ({addMTEngine, error, isRequestInProgress}) => {
   const {
     register,
     handleSubmit,
@@ -96,6 +96,7 @@ export const Intento = ({addMTEngine, error}) => {
             {error && <span className={'mt-error'}>{error.message}</span>}
             <button
               className="ui primary button"
+              disabled={isRequestInProgress}
               onClick={handleSubmit(onSubmit)}
             >
               Confirm

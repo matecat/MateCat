@@ -41,14 +41,14 @@ class MyMemoryController extends KleinController
             $name = filter_var( $json['name'], FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH );
 
             if($key !== null){
-                $this->checkTheKeyAndAssignToUser($key, $name);
+                $newKey = $this->checkTheKeyAndAssignToUser($key, $name);
             } else {
-                $this->createANewKeyAndAssignToUser($name);
+                $newKey = $this->createANewKeyAndAssignToUser($name);
             }
 
             $this->response->status()->setCode( 200 );
             $this->response->json( [
-                'success' => true
+                'key' => $newKey
             ] );
             exit();
 
@@ -65,7 +65,8 @@ class MyMemoryController extends KleinController
     }
 
     /**
-     * @param string $name
+     * @param $name
+     * @return mixed
      * @throws \Exception
      */
     private function createANewKeyAndAssignToUser($name)
@@ -74,11 +75,14 @@ class MyMemoryController extends KleinController
         $newKey = $tms->createMyMemoryKey();
 
         $this->saveMemoryKey($newKey->key, $name);
+
+        return $newKey->key;
     }
 
     /**
-     * @param string $key
-     * @param string $name
+     * @param $key
+     * @param $name
+     * @return mixed
      * @throws \Exception
      */
     private function checkTheKeyAndAssignToUser($key, $name)
@@ -91,6 +95,8 @@ class MyMemoryController extends KleinController
         }
 
         $this->saveMemoryKey($key, $name);
+
+        return $key;
     }
 
     /**
