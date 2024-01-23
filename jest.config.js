@@ -1,6 +1,9 @@
 module.exports = {
   testEnvironment: 'jsdom',
-  setupFiles: ['<rootDir>/setupFiles.jest.js'],
+  testEnvironmentOptions: {
+    customExportConditions: [''],
+  },
+  setupFiles: ['<rootDir>/setupFiles.jest.js', '<rootDir>/jest.polyfills.js'],
   setupFilesAfterEnv: ['<rootDir>/setupFilesAfterEnv.jest.js'],
   collectCoverageFrom: [
     '<rootDir>/public/**/*.js',
@@ -8,4 +11,5 @@ module.exports = {
     '!<rootDir>/public/api/**',
     '!<rootDir>/public/**/*.min.js',
   ],
+  transformIgnorePatterns: ['node_modules/(?!@bundled-es-modules)/'],
 }

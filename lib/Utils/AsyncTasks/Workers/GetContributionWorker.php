@@ -130,7 +130,7 @@ class GetContributionWorker extends AbstractWorker {
             if(false === $contributionStruct->concordanceSearch){
 
                 if(!empty($crossLangMatches)){
-                    $this->_updateSuggestionArray($contributionStruct->segmentId, $crossLangMatches);
+                    $this->_updateSuggestionArray($contributionStruct->segmentId, $this->normalizeMatchesToLayer0($crossLangMatches, $filter));
                 }
 
                 $this->_publishPayload( $crossLangMatches, $contributionStruct, true );
@@ -526,7 +526,7 @@ class GetContributionWorker extends AbstractWorker {
 
                 if($mt_engine instanceof Engines_MMT){
                     $metadataDao = new Projects_MetadataDao();
-                    $metadata = $metadataDao->get($contributionStruct->getProjectStruct()->id, 'mmt_glossaries', 86400);
+                    $metadata = $metadataDao->setCacheTTL( 86400 )->get($contributionStruct->getProjectStruct()->id, 'mmt_glossaries');
 
                     if($metadata !== null){
                         $metadata = html_entity_decode($metadata->value);
