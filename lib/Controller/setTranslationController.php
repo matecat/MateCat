@@ -341,6 +341,9 @@ class setTranslationController extends ajaxController {
 
         $old_translation = $this->_getOldTranslation();
 
+        $old_suggestion_array = json_decode($old_translation->suggestions_array);
+        $old_suggestion = @$old_suggestion_array[$this->chosen_suggestion_index-1];
+
         $new_translation                         = new Translations_SegmentTranslationStruct();
         $new_translation->id_segment             = $this->id_segment;
         $new_translation->id_job                 = $this->id_job;
@@ -351,6 +354,26 @@ class setTranslationController extends ajaxController {
         $new_translation->suggestion_position    = $this->chosen_suggestion_index;
         $new_translation->warning                = $check->thereAreWarnings();
         $new_translation->translation_date       = date( "Y-m-d H:i:s" );
+        $new_translation->suggestion             = ((!empty($old_suggestion)) ? $old_suggestion->translation : null);
+        $new_translation->suggestion_source      = $old_translation->suggestion_source;
+        $new_translation->suggestion_match       = $old_translation->suggestion_match;
+
+        // update suggestion
+        if( $this->canUpdateSuggestion($new_translation, $old_translation, $old_suggestion) ){
+            $new_translation->suggestion = $old_suggestion->translation;
+
+            if($old_suggestion->match !== "MT"){
+                $new_translation->suggestion_match = $old_suggestion->match;
+            }
+
+            if ( $old_suggestion->match == "85%" || $old_suggestion->match == "86%" || $old_suggestion->created_by == 'MT'  ) {
+                $new_translation->suggestion_source = 'MT';
+            } elseif( $old_suggestion->match == 'NO_MATCH' ) {
+                $new_translation->suggestion_source = 'NO_MATCH';
+            } else {
+                $new_translation->suggestion_source = 'TM';
+            }
+        }
 
         // time_to_edit should be increased only if the translation was changed
         $new_translation->time_to_edit = 0;
@@ -677,6 +700,51 @@ class setTranslationController extends ajaxController {
         $this->result[ 'stats' ]       = $this->featureSet->filter( 'filterStatsResponse', $this->result[ 'stats' ], [ 'chunk' => $this->chunk, 'segmentId' => $this->id_segment ] );
 
         $this->evalSetContribution( $new_translation, $old_translation );
+    }
+
+    /**
+     * Update suggestion only if:
+     *
+     * 1) the new state is one of these:
+     *      - NEW
+     *      - DRAFT
+     *      - TRANSLATED
+     *
+     * 2) the old state is one of these:
+     *      - NEW
+     *      - DRAFT
+     *
+     * @param Translations_SegmentTranslationStruct $new_translation
+     * @param Translations_SegmentTranslationStruct $old_translation
+     * @param null $old_suggestion
+     * @return bool
+     */
+    private function canUpdateSuggestion(Translations_SegmentTranslationStruct $new_translation, Translations_SegmentTranslationStruct $old_translation, $old_suggestion = null)
+    {
+        $allowedStatuses = [
+            Constants_TranslationStatus::STATUS_NEW,
+            Constants_TranslationStatus::STATUS_DRAFT,
+            Constants_TranslationStatus::STATUS_TRANSLATED,
+        ];
+
+        if(!in_array($new_translation->status, $allowedStatuses)){
+            return false;
+        }
+
+        if(!in_array($old_translation->status, $allowedStatuses)){
+            return false;
+        }
+
+        if(
+            !empty($old_suggestion) and
+            isset($old_suggestion->translation) and
+            isset($old_suggestion->match) and
+            isset($old_suggestion->created_by)
+        ){
+            return true;
+        }
+
+        return false;
     }
 
     /**

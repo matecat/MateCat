@@ -3,7 +3,7 @@ import {useForm} from 'react-hook-form'
 import Tooltip from '../../../../common/Tooltip'
 import InfoIcon from '../../../../../../../../img/icons/InfoIcon'
 
-export const ModernMt = ({addMTEngine, error}) => {
+export const ModernMt = ({addMTEngine, error, isRequestInProgress}) => {
   const infoIcon1 = useRef()
   const infoIcon2 = useRef()
   const infoIcon3 = useRef()
@@ -161,6 +161,7 @@ export const ModernMt = ({addMTEngine, error}) => {
             {error && <span className={'mt-error'}>{error.message}</span>}
             <button
               className="ui primary button"
+              disabled={isRequestInProgress}
               onClick={handleSubmit(onSubmit)}
             >
               Confirm
