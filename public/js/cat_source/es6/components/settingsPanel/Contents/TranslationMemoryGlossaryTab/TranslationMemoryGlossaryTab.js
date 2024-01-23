@@ -102,6 +102,7 @@ export const TranslationMemoryGlossaryTabContext = createContext({})
 export const TranslationMemoryGlossaryTab = () => {
   const {
     tmKeys,
+    setTmKeys,
     openLoginModal,
     modifyingCurrentTemplate,
     currentProjectTemplate,
@@ -128,9 +129,32 @@ export const TranslationMemoryGlossaryTab = () => {
 
   const ref = useRef()
   const previousStatesRef = useRef({
+    currentProjectTemplate: undefined,
     tmKeys: undefined,
     getPublicMatches: undefined,
   })
+
+  previousStatesRef.current.currentProjectTemplate = currentProjectTemplate
+
+  // Sync tmKeys state when current project template changed
+  useEffect(() => {
+    if (typeof currentProjectTemplate?.id === 'number') {
+      const tm = previousStatesRef.current.currentProjectTemplate?.tm ?? []
+
+      setTmKeys((prevState) =>
+        prevState.map((tmItem) => {
+          const tmFromTemplate = tm.find(({key}) => key === tmItem.key)
+          return {
+            ...tmItem,
+            r: false,
+            w: false,
+            isActive: false,
+            ...(tmFromTemplate && {...tmFromTemplate, isActive: true}),
+          }
+        }),
+      )
+    }
+  }, [currentProjectTemplate?.id, setTmKeys])
 
   const onOrderActiveRows = ({index, indexToMove}) => {
     const activeRows = keyRows.filter(({isActive}) => isActive)

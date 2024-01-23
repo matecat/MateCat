@@ -39,9 +39,12 @@ export const MachineTranslationTab = () => {
   const setActiveMTEngine = ({id} = {}) =>
     modifyingCurrentTemplate((prevTemplate) => ({
       ...prevTemplate,
-      [availableTemplateProps.mt]: {
-        id,
-      },
+      [availableTemplateProps.mt]:
+        typeof id === 'number'
+          ? {
+              id,
+            }
+          : null,
     }))
 
   const [addMTVisible, setAddMTVisible] = useState(false)

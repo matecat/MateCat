@@ -602,6 +602,8 @@ const TEXT_UTILS = {
     ],
   },
   removeHiddenCharacters: (value) => value.replace(/\u2060/g, ''),
+  stripUnderscore: (value) =>
+    value.replace(/_[^_]/g, (match) => match[1].toUpperCase()),
 }
 
 export default TEXT_UTILS

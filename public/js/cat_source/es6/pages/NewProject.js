@@ -95,7 +95,7 @@ const NewProject = ({
     setProjectTemplates,
     modifyingCurrentTemplate,
     checkSpecificTemplatePropsAreModified,
-  } = useProjectTemplates({tmKeys: tmKeys ?? [], setTmKeys})
+  } = useProjectTemplates(!!tmKeys?.length)
 
   const isDeviceCompatible = useDeviceCompatibility()
 

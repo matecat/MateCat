@@ -55,8 +55,8 @@ export const TMKeyRow = ({row, onExpandRow}) => {
   const getPublicMatches = currentProjectTemplate.get_public_matches
 
   useEffect(() => {
-    setIsLookup(row.r)
-    setIsUpdating(row.w)
+    setIsLookup(row.r ?? false)
+    setIsUpdating(row.w ?? false)
   }, [row.r, row.w])
 
   const onChangeIsLookup = (e) => {

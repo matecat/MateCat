@@ -1,79 +1,10 @@
 import {useCallback, useEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import {isEqual} from 'lodash'
+import {getProjectTemplates} from '../api/getProjectTemplates/getProjectTemplates'
+import TEXT_UTILS from '../utils/textUtils'
 
-const getProjectTemplates = async () =>
-  new Promise((resolve) => {
-    resolve([
-      {
-        id: 34,
-        name: 'default template',
-        uid: 54,
-        is_default: true,
-        id_team: 45,
-        qa_template_id: 4456,
-        payable_rate_template_id: 434,
-        speech2text: true,
-        lexica: true,
-        tag_projection: true,
-        cross_language_matches: ['it-IT', 'fr-FR'],
-        segmentation_rule: 'General',
-        mt: {
-          id: 9,
-          extra: {},
-        },
-        tm: [],
-        get_public_matches: true,
-        pretranslate_100: false,
-      },
-      {
-        id: 3,
-        name: 'Testing template',
-        id_team: 45,
-        qa_template_id: 4456,
-        payable_rate_template_id: 434,
-        speech2text: true,
-        lexica: true,
-        tag_projection: true,
-        cross_language_matches: [],
-        segmentation_rule: 'General',
-        mt: {
-          id: 10,
-          extra: {
-            deepl_formality: 'prefer_less',
-          },
-        },
-        tm: [
-          {
-            glos: true,
-            is_shared: false,
-            key: '74b6c82408a028b6f020',
-            name: 'abc',
-            owner: true,
-            tm: true,
-            r: true,
-            w: false,
-          },
-          {
-            glos: true,
-            is_shared: false,
-            key: '21df10c8cce1b31f2d0d',
-            name: 'myKey',
-            owner: true,
-            tm: true,
-            r: true,
-            w: true,
-          },
-        ],
-        get_public_matches: false,
-        pretranslate_100: true,
-      },
-    ])
-  })
-
-function useProjectTemplates({tmKeys, setTmKeys}) {
-  const canRetrieveTemplates = !!tmKeys?.length
-
+function useProjectTemplates(canRetrieveTemplates) {
   const [projectTemplates, setProjectTemplates] = useState([])
   const [currentProjectTemplate, setCurrentProjectTemplate] = useState()
   const [availableTemplateProps, setAvailableTemplateProps] = useState({})
@@ -94,7 +25,9 @@ function useProjectTemplates({tmKeys, setTmKeys}) {
     )
 
     const modifiedTemplate = callback(
-      temporaryTemplate ? temporaryTemplate : originalTemplate,
+      temporaryTemplate
+        ? temporaryTemplate
+        : {...originalTemplate, isTemporary: true},
     )
     const {isTemporary, ...comparableModifiedTemplate} = modifiedTemplate // eslint-disable-line
 
@@ -161,10 +94,7 @@ function useProjectTemplates({tmKeys, setTmKeys}) {
 
     let cleanup = false
 
-    const stripUnderscore = (value) =>
-      value.replace(/_[^_]/g, (match) => match[1].toUpperCase())
-
-    getProjectTemplates().then((items) => {
+    getProjectTemplates().then(({items}) => {
       if (!cleanup) {
         setProjectTemplates(
           items.map((template) => ({
@@ -178,7 +108,7 @@ function useProjectTemplates({tmKeys, setTmKeys}) {
         ).filter((value) => value !== 'id' && value !== 'name')
         setAvailableTemplateProps(
           propKeys.reduce(
-            (acc, cur) => ({...acc, [stripUnderscore(cur)]: cur}),
+            (acc, cur) => ({...acc, [TEXT_UTILS.stripUnderscore(cur)]: cur}),
             {},
           ),
         )
@@ -193,22 +123,6 @@ function useProjectTemplates({tmKeys, setTmKeys}) {
       prevState.filter(({isTemporary}) => !isTemporary),
     )
     setCurrentProjectTemplate(current)
-
-    // Sync dependencies state with current project template
-    const {tm} = current
-
-    setTmKeys((prevState) =>
-      prevState.map((tmItem) => {
-        const tmFromTemplate = tm.find(({key}) => key === tmItem.key)
-        return {
-          ...tmItem,
-          r: false,
-          w: false,
-          isActive: false,
-          ...(tmFromTemplate && {...tmFromTemplate, isActive: true}),
-        }
-      }),
-    )
   }
 
   const currentProjectTemplateId = projectTemplates.find(
@@ -236,8 +150,7 @@ function useProjectTemplates({tmKeys, setTmKeys}) {
 }
 
 useProjectTemplates.propTypes = {
-  tmKeys: PropTypes.array.isRequired,
-  setTmKeys: PropTypes.func.isRequired,
+  canRetrieveTemplates: PropTypes.bool,
 }
 
 export default useProjectTemplates
