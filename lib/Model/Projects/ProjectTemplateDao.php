@@ -7,6 +7,8 @@ use DataAccess_AbstractDao;
 use Database;
 use DateTime;
 use Engine;
+use EnginesModel_EngineDAO;
+use EnginesModel_EngineStruct;
 use Exception;
 use PayableRates\CustomPayableRateDao;
 use PDO;
@@ -42,10 +44,79 @@ class ProjectTemplateDao extends DataAccess_AbstractDao
         $default->lexica = true;
         $default->tag_projection = true;
         $default->uid = $uid;
+        $default->pretranslate_100 = true;
+        $default->get_public_matches = true;
+
+        // MT
+        $engineDAO        = new EnginesModel_EngineDAO( Database::obtain() );
+        $engineStruct     = EnginesModel_EngineStruct::getStruct();
+        $engineStruct->uid = $uid;
+        $engineStruct->active = true;
+
+        $engineList = $engineDAO->setCacheTTL( 60 * 5 )->read( $engineStruct );
+        $default->mt = self::cacaca($engineList);
+
+        // TM
+        $_keyDao = new TmKeyManagement_MemoryKeyDao( \Database::obtain() );
+        $dh      = new TmKeyManagement_MemoryKeyStruct( array( 'uid' => $uid ) );
+        $keyList = $_keyDao->read( $dh );
+
+        $tm = [];
+
+        foreach ($keyList as $key){
+            $tm[] = [
+                "glos" => $key->tm_key->glos,
+                "is_shared" => $key->tm_key->is_shared,
+                "key" => $key->tm_key->key,
+                "name" => $key->tm_key->name,
+                "owner" => $key->tm_key->owner,
+                "tm" => $key->tm_key->tm,
+                "r" => $key->tm_key->r,
+                "w" => $key->tm_key->w  ,
+            ];
+        }
+
+        $default->tm = $tm;
+
         $default->created_at = date("Y-m-d H:i:s");
         $default->modified_at = date("Y-m-d H:i:s");
 
         return $default;
+    }
+
+    /**
+     * @param EnginesModel_EngineStruct[] $engineList
+     * @return array
+     */
+    private static function cacaca($engineList = [])
+    {
+        if(empty($engineList)){
+           return [
+               'id' => 1,
+               'extra' => []
+           ];
+        }
+
+        foreach ($engineList as $engine){
+            if($engine->name === "ModernMT"){
+                return [
+                    'id' => $engine->id,
+                    'extra' => []
+                ];
+            }
+
+            if($engine->name === "DeepL"){
+                return [
+                    'id' => $engine->id,
+                    'extra' => []
+                ];
+            }
+        }
+
+        return [
+            'id' => 1,
+            'extra' => []
+        ];
     }
 
     /**

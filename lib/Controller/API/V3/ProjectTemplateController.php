@@ -140,8 +140,6 @@ class ProjectTemplateController extends KleinController
         if($id == 0){
             ProjectTemplateDao::markAsNotDefault($uid, 0);
 
-            $this->response->code(404);
-
             return $this->response->json(ProjectTemplateDao::getDefaultTemplate($uid));
         }
 
