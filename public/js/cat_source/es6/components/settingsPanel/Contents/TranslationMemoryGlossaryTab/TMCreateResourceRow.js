@@ -14,7 +14,8 @@ import Checkmark from '../../../../../../../img/icons/Checkmark'
 import Close from '../../../../../../../img/icons/Close'
 
 export const TMCreateResourceRow = ({row}) => {
-  const {tmKeys, setTmKeys} = useContext(SettingsPanelContext)
+  const {tmKeys, setTmKeys, modifyingCurrentTemplate, availableTemplateProps} =
+    useContext(SettingsPanelContext)
   const {setSpecialRows, setNotification} = useContext(
     TranslationMemoryGlossaryTabContext,
   )
@@ -104,6 +105,14 @@ export const TMCreateResourceRow = ({row}) => {
     return true
   }
 
+  const executeModifyCurrentTemplate = (updatedKeys) =>
+    modifyingCurrentTemplate((prevTemplate) => ({
+      ...prevTemplate,
+      [availableTemplateProps.tm]: updatedKeys
+        .filter(({isActive}) => isActive)
+        .map(({id, isActive, ...rest}) => rest),
+    }))
+
   const getNewItem = (key) => ({
     r: isLookup,
     w: isUpdating,
@@ -127,7 +136,9 @@ export const TMCreateResourceRow = ({row}) => {
           description: name,
         })
           .then(() => {
-            setTmKeys((prevState) => [getNewItem(key), ...prevState])
+            const updatedKeys = [getNewItem(key), ...tmKeys]
+            setTmKeys(updatedKeys)
+            executeModifyCurrentTemplate(updatedKeys)
             onReset()
           })
           .catch((errors) => {
@@ -155,7 +166,9 @@ export const TMCreateResourceRow = ({row}) => {
         description: name,
       })
         .then(() => {
-          setTmKeys((prevState) => [getNewItem(key), ...prevState])
+          const updatedKeys = [getNewItem(key), ...tmKeys]
+          setTmKeys(updatedKeys)
+          executeModifyCurrentTemplate(updatedKeys)
           onReset()
           getInfoTmKeyCallback()
         })
@@ -200,18 +213,18 @@ export const TMCreateResourceRow = ({row}) => {
   const activateInactiveSharedKey = ({event, rowAlreadyAssigned}) => {
     onReset()
 
-    setTmKeys((prevState) =>
-      prevState.map((tm) =>
-        tm.id === rowAlreadyAssigned.id
-          ? {
-              ...tm,
-              isActive: true,
-              r: true,
-              w: true,
-            }
-          : tm,
-      ),
+    const updatedKeys = tmKeys.map((tm) =>
+      tm.id === rowAlreadyAssigned.id
+        ? {
+            ...tm,
+            isActive: true,
+            r: true,
+            w: true,
+          }
+        : tm,
     )
+    setTmKeys(updatedKeys)
+    executeModifyCurrentTemplate(updatedKeys)
 
     event.preventDefault()
   }

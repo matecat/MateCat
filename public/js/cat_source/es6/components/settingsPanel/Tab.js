@@ -1,9 +1,11 @@
 import React, {useContext} from 'react'
 import PropTypes from 'prop-types'
 import {SettingsPanelContext} from './SettingsPanelContext'
+import {TEMPLATE_PROPS_BY_TAB} from './SettingsPanel'
 
 export const Tab = ({id, label}) => {
-  const {tabs, setTabs} = useContext(SettingsPanelContext)
+  const {tabs, setTabs, checkSpecificTemplatePropsAreModified} =
+    useContext(SettingsPanelContext)
 
   const clickHandler = () =>
     setTabs((prevState) =>
@@ -11,6 +13,9 @@ export const Tab = ({id, label}) => {
     )
 
   const isActive = tabs.find((tab) => tab.id === id)?.isOpened ?? false
+  const isModifyng = checkSpecificTemplatePropsAreModified(
+    TEMPLATE_PROPS_BY_TAB[id] ?? [],
+  )
 
   return (
     <li
@@ -19,6 +24,9 @@ export const Tab = ({id, label}) => {
       }`}
       onClick={clickHandler}
     >
+      {isModifyng && (
+        <span className="settings-panel-tab-modifyng-icon">●</span>
+      )}
       {label}
     </li>
   )

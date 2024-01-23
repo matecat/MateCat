@@ -5,7 +5,8 @@ import {Tab} from './Tab'
 export const ContentWrapper = () => {
   const {tabs} = useContext(SettingsPanelContext)
 
-  const activeContent = tabs.find(({isOpened}) => isOpened)?.component
+  const activeTab = tabs.find(({isOpened}) => isOpened)
+  const activeContent = activeTab?.component
 
   return (
     <div className="settings-panel-contentwrapper">
@@ -14,6 +15,10 @@ export const ContentWrapper = () => {
           <Tab key={index} {...{...tab}} />
         ))}
       </ul>
+      <div className="settings-panel-contentwrapper-active-tab">
+        <h3>{activeTab.label}</h3>
+        <span>{activeTab.description}</span>
+      </div>
       <div className="settings-panel-contentwrapper-container">
         {activeContent}
       </div>

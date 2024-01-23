@@ -355,14 +355,14 @@ let CatToolActions = {
     if (!CatToolStore.jobMetadata) {
       getJobMetadata(idJob, password).then((jobMetadata) => {
         AppDispatcher.dispatch({
-          actionType: CattolConstants.GET_JOB_METADATA,
+          actionType: CatToolConstants.GET_JOB_METADATA,
           jobMetadata,
         })
         CatToolStore.jobMetadata = jobMetadata
       })
     } else {
       AppDispatcher.dispatch({
-        actionType: CattolConstants.GET_JOB_METADATA,
+        actionType: CatToolConstants.GET_JOB_METADATA,
         jobMetadata: CatToolStore.jobMetadata,
       })
     }

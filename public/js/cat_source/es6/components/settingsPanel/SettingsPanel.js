@@ -5,6 +5,7 @@ import {ContentWrapper} from './ContentWrapper'
 import {MachineTranslationTab} from './Contents/MachineTranslationTab'
 import {AdvancedOptionsTab} from './Contents/AdvancedOptionsTab'
 import {TranslationMemoryGlossaryTab} from './Contents/TranslationMemoryGlossaryTab'
+import {ProjectTemplate} from './ProjectTemplate'
 
 let tabOpenFromQueryString = new URLSearchParams(window.location.search).get(
   'openTab',
@@ -16,20 +17,35 @@ export const SETTINGS_PANEL_TABS = {
   advancedOptions: 'options',
 }
 
+export const TEMPLATE_PROPS_BY_TAB = {
+  [SETTINGS_PANEL_TABS.translationMemoryGlossary]: [
+    'tm',
+    'get_public_matches',
+    'pretranslate_100',
+  ],
+  [SETTINGS_PANEL_TABS.machineTranslation]: ['mt'],
+}
+
 const DEFAULT_CONTENTS = [
   {
     id: SETTINGS_PANEL_TABS.translationMemoryGlossary,
     label: 'Translation Memory and Glossary',
+    description:
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vulputate libero et velit interdum, ac aliquet odio mattis.',
     component: <TranslationMemoryGlossaryTab />,
   },
   {
     id: SETTINGS_PANEL_TABS.machineTranslation,
     label: 'Machine Translation',
+    description:
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vulputate libero et velit interdum, ac aliquet odio mattis.',
     component: <MachineTranslationTab />,
   },
   {
     id: SETTINGS_PANEL_TABS.advancedOptions,
-    label: 'Advanced Options',
+    label: 'Advanced settings',
+    description:
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vulputate libero et velit interdum, ac aliquet odio mattis.',
     component: <AdvancedOptionsTab />,
   },
 ]
@@ -51,8 +67,6 @@ export const SettingsPanel = ({
   setTmKeys,
   mtEngines,
   setMtEngines,
-  activeMTEngine,
-  setActiveMTEngine,
   speechToTextActive,
   setSpeechToTextActive,
   guessTagActive,
@@ -65,9 +79,12 @@ export const SettingsPanel = ({
   setMultiMatchLangs,
   segmentationRule,
   setSegmentationRule,
-  getPublicMatches,
-  setGetPublicMatches,
-  setKeysOrdered,
+  projectTemplates,
+  currentProjectTemplate,
+  availableTemplateProps,
+  setProjectTemplates,
+  modifyingCurrentTemplate,
+  checkSpecificTemplatePropsAreModified,
 }) => {
   const [isVisible, setIsVisible] = useState(false)
   const [tabs, setTabs] = useState(() => {
@@ -120,8 +137,6 @@ export const SettingsPanel = ({
         setTmKeys,
         mtEngines,
         setMtEngines,
-        activeMTEngine,
-        setActiveMTEngine,
         openLoginModal,
         wrapperRef,
         speechToTextActive,
@@ -136,9 +151,12 @@ export const SettingsPanel = ({
         setMultiMatchLangs,
         segmentationRule,
         setSegmentationRule,
-        getPublicMatches,
-        setGetPublicMatches,
-        setKeysOrdered,
+        projectTemplates,
+        currentProjectTemplate,
+        availableTemplateProps,
+        setProjectTemplates,
+        modifyingCurrentTemplate,
+        checkSpecificTemplatePropsAreModified,
       }}
     >
       <div
@@ -167,7 +185,8 @@ export const SettingsPanel = ({
             <span>Settings</span>
             <div onClick={close} className="close-matecat-modal x-popup" />
           </div>
-          <ContentWrapper />
+          <ProjectTemplate />
+          {currentProjectTemplate && <ContentWrapper />}
         </div>
       </div>
     </SettingsPanelContext.Provider>
@@ -182,13 +201,14 @@ SettingsPanel.propTypes = {
   setTmKeys: PropTypes.func,
   mtEngines: PropTypes.array,
   setMtEngines: PropTypes.func,
-  activeMTEngine: PropTypes.object,
-  setActiveMTEngine: PropTypes.func,
   guessTagActive: PropTypes.bool,
   setGuessTagActive: PropTypes.func,
   sourceLang: PropTypes.object,
   targetLangs: PropTypes.array,
-  getPublicMatches: PropTypes.bool,
-  setGetPublicMatches: PropTypes.func,
-  setKeysOrdered: PropTypes.func,
+  projectTemplates: PropTypes.array,
+  currentProjectTemplate: PropTypes.object,
+  availableTemplateProps: PropTypes.object,
+  setProjectTemplates: PropTypes.func,
+  modifyingCurrentTemplate: PropTypes.func,
+  checkSpecificTemplatePropsAreModified: PropTypes.func,
 }

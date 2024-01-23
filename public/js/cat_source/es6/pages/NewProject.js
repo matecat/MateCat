@@ -22,11 +22,7 @@ import {TargetLanguagesSelect} from '../components/createProject/TargetLanguages
 import {TmGlossarySelect} from '../components/createProject/TmGlossarySelect'
 import {SourceLanguageSelect} from '../components/createProject/SourceLanguageSelect'
 import CommonUtils from '../utils/commonUtils'
-import {
-  DEFAULT_ENGINE_MEMORY,
-  MMT_NAME,
-  SettingsPanel,
-} from '../components/settingsPanel'
+import {DEFAULT_ENGINE_MEMORY, SettingsPanel} from '../components/settingsPanel'
 import {getMTEngines as getMtEnginesApi} from '../api/getMTEngines'
 import SegmentUtils from '../utils/segmentUtils'
 import {tmCreateRandUser} from '../api/tmCreateRandUser'
@@ -35,6 +31,7 @@ import {getSupportedFiles} from '../api/getSupportedFiles'
 import {getSupportedLanguages} from '../api/getSupportedLanguages'
 import ApplicationActions from '../actions/ApplicationActions'
 import useDeviceCompatibility from '../hooks/useDeviceCompatibility'
+import useProjectTemplates from '../hooks/useProjectTemplates'
 
 const SELECT_HEIGHT = 324
 
@@ -59,9 +56,7 @@ const NewProject = ({
 }) => {
   const [user, setUser] = useState()
   const [tmKeys, setTmKeys] = useState()
-  const [keysOrdered, setKeysOrdered] = useState()
   const [mtEngines, setMtEngines] = useState([DEFAULT_ENGINE_MEMORY])
-  const [activeMTEngine, setActiveMTEngine] = useState(DEFAULT_ENGINE_MEMORY)
   const [selectedTeam, setSelectedTeam] = useState()
   const [sourceLang, setSourceLang] = useState({})
   const [targetLangs, setTargetLangs] = useState([])
@@ -88,14 +83,19 @@ const NewProject = ({
     name: 'General',
     id: 'standard',
   })
-  const [isPretranslate100Active, setIsPretranslate100Active] = useState(false)
-  const [getPublicMatches, setGetPublicMatches] = useState(
-    Boolean(config.get_public_matches),
-  )
   const [isImportTMXInProgress, setIsImportTMXInProgress] = useState(false)
   const [isFormReadyToSubmit, setIsFormReadyToSubmit] = useState(false)
   const [supportedFiles, setSupportedFiles] = useState()
   const [supportedLanguages, setSupportedLanguages] = useState()
+
+  const {
+    projectTemplates,
+    currentProjectTemplate,
+    availableTemplateProps,
+    setProjectTemplates,
+    modifyingCurrentTemplate,
+    checkSpecificTemplatePropsAreModified,
+  } = useProjectTemplates({tmKeys: tmKeys ?? [], setTmKeys})
 
   const isDeviceCompatible = useDeviceCompatibility()
 
@@ -175,18 +175,12 @@ const NewProject = ({
       getMtEnginesApi().then((mtEngines) => {
         mtEngines.push(DEFAULT_ENGINE_MEMORY)
         setMtEngines(mtEngines)
-        if (config.isAnInternalUser) {
-          const mmt = mtEngines.find((mt) => mt.name === MMT_NAME)
-          if (mmt) {
-            setActiveMTEngine(mmt)
-          }
-        }
       })
     }
   }
 
   createProject.current = () => {
-    const {mtGlossaryProps} = activeMTEngine ?? {}
+    // const {mtGlossaryProps, deeplGlossaryProps} = activeMTEngine ?? {}
 
     const getParams = () => ({
       action: 'createProject',
@@ -195,22 +189,27 @@ const NewProject = ({
       source_lang: sourceLang.id,
       target_lang: targetLangs.map((lang) => lang.id).join(),
       job_subject: subject.id,
-      mt_engine: activeMTEngine ? activeMTEngine.id : undefined,
-      private_keys_list: getTmDataStructureToSendServer({tmKeys, keysOrdered}),
+      // mt_engine: activeMTEngine ? activeMTEngine.id : undefined,
+      // private_keys_list: getTmDataStructureToSendServer({tmKeys, keysOrdered}),
       lang_detect_files: '',
-      pretranslate_100: isPretranslate100Active ? 1 : 0,
+      // pretranslate_100: isPretranslate100Active ? 1 : 0,
       lexiqa: lexiqaActive,
       speech2text: speechToTextActive,
       tag_projection: guessTagActive,
       segmentation_rule: segmentationRule.id === '1' ? '' : segmentationRule.id,
       id_team: selectedTeam ? selectedTeam.id : undefined,
-      get_public_matches: getPublicMatches,
-      ...(mtGlossaryProps?.glossaries.length && {
-        mmt_glossaries: JSON.stringify({
-          glossaries: mtGlossaryProps.glossaries,
-          ignore_glossary_case: !mtGlossaryProps.isGlossaryCaseSensitive,
-        }),
-      }),
+      // get_public_matches: getPublicMatches,
+      // ...(mtGlossaryProps?.glossaries.length && {
+      //   mmt_glossaries: JSON.stringify({
+      //     glossaries: mtGlossaryProps.glossaries,
+      //     ignore_glossary_case: !mtGlossaryProps.isGlossaryCaseSensitive,
+      //   }),
+      // }),
+      // ...(typeof deeplGlossaryProps === 'object' && {
+      //   ...Object.entries(deeplGlossaryProps)
+      //     .filter(([, value]) => value)
+      //     .reduce((acc, [key, value]) => ({...acc, [key]: value}), {}),
+      // }),
     })
 
     if (!projectSent) {
@@ -345,6 +344,7 @@ const NewProject = ({
       )
     }
   }, [])
+
   useEffect(() => {
     const createKeyFromTMXFile = ({extension, filename}) => {
       const haveNoActiveKeys = tmKeys.every(({isActive}) => !isActive)
@@ -470,8 +470,6 @@ const NewProject = ({
         setOpenSettings,
         isImportTMXInProgress,
         setIsImportTMXInProgress,
-        isPretranslate100Active,
-        setIsPretranslate100Active,
       }}
     >
       <HeaderPortal>
@@ -676,8 +674,6 @@ const NewProject = ({
           setTmKeys,
           mtEngines,
           setMtEngines,
-          activeMTEngine,
-          setActiveMTEngine,
           speechToTextActive,
           setSpeechToTextActive,
           guessTagActive,
@@ -690,8 +686,12 @@ const NewProject = ({
           setMultiMatchLangs,
           segmentationRule,
           setSegmentationRule,
-          setGetPublicMatches,
-          setKeysOrdered,
+          projectTemplates,
+          setProjectTemplates,
+          modifyingCurrentTemplate,
+          currentProjectTemplate,
+          availableTemplateProps,
+          checkSpecificTemplatePropsAreModified,
         }}
       />
       <Footer />

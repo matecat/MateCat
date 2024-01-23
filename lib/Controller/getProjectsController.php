@@ -123,8 +123,7 @@ class getProjectsController extends ajaxController {
     public function doAction() {
 
         if ( !$this->userIsLogged ) {
-            $this->result = ( new Error( [ new Exception( 'User not Logged', 401 ) ] ) )->render();
-            return;
+            throw new Exception( 'User not Logged', 401 );
         }
 
         $this->featureSet->loadFromUserEmail( $this->user->email ) ;
@@ -132,8 +131,7 @@ class getProjectsController extends ajaxController {
         try {
             $team = $this->filterTeam();
         } catch( NotFoundException $e ){
-            $this->result = ( new Error( [ $e ] ) )->render();
-            return;
+            throw new $e;
         }
 
         if( $team->type == Constants_Teams::PERSONAL ){
