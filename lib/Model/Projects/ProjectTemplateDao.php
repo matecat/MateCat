@@ -55,7 +55,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao
         $engineStruct->active = true;
 
         $engineList = $engineDAO->setCacheTTL( 60 * 5 )->read( $engineStruct );
-        $default->mt = self::cacaca($engineList);
+        $default->mt = self::getUserDefaultMt($engineList);
 
         $default->tm = [];
         $default->created_at = date("Y-m-d H:i:s");
@@ -68,7 +68,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao
      * @param EnginesModel_EngineStruct[] $engineList
      * @return array
      */
-    private static function cacaca($engineList = [])
+    private static function getUserDefaultMt($engineList = [])
     {
         if(empty($engineList)){
            return [
