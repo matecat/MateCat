@@ -257,7 +257,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao
                 $keyRing = $mkDao->read(
                     ( new TmKeyManagement_MemoryKeyStruct( [
                         'uid'    => $projectTemplateStruct->uid,
-                        'tm_key' => new TmKeyManagement_TmKeyStruct( $tmKey['key'] )
+                        'tm_key' => new TmKeyManagement_TmKeyStruct( $tmKey->key )
                     ] )
                     )
                 );

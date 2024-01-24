@@ -15,7 +15,7 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
 {
     public $id;
     public $name;
-    public $is_default;
+    public $is_default = false;
     public $uid;
     public $id_team;
     public $speech2text;
@@ -43,7 +43,7 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
 
         $this->id = $json->id;
         $this->name = $json->name;
-        $this->is_default = $json->is_default;
+        $this->is_default = (isset($json->is_default)) ? $json->is_default : false;
         $this->uid = $json->uid;
         $this->id_team = $json->id_team;
         $this->speech2text = $json->speech2text;
