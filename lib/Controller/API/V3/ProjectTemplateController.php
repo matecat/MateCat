@@ -203,7 +203,7 @@ class ProjectTemplateController extends KleinController
             ProjectTemplateDao::remove($id);
 
             $this->response->json([
-                'id' => $id
+                'id' => (int)$id
             ]);
             exit();
 
