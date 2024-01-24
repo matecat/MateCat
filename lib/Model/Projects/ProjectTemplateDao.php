@@ -29,6 +29,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao
     /**
      * @param $uid
      * @return ProjectTemplateStruct
+     * @throws Exception
      */
     public static function getDefaultTemplate($uid)
     {
@@ -56,28 +57,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao
         $engineList = $engineDAO->setCacheTTL( 60 * 5 )->read( $engineStruct );
         $default->mt = self::cacaca($engineList);
 
-        // TM
-        $_keyDao = new TmKeyManagement_MemoryKeyDao( \Database::obtain() );
-        $dh      = new TmKeyManagement_MemoryKeyStruct( array( 'uid' => $uid ) );
-        $keyList = $_keyDao->read( $dh );
-
-        $tm = [];
-
-        foreach ($keyList as $key){
-            $tm[] = [
-                "glos" => $key->tm_key->glos,
-                "is_shared" => $key->tm_key->is_shared,
-                "key" => $key->tm_key->key,
-                "name" => $key->tm_key->name,
-                "owner" => $key->tm_key->owner,
-                "tm" => $key->tm_key->tm,
-                "r" => $key->tm_key->r,
-                "w" => $key->tm_key->w  ,
-            ];
-        }
-
-        $default->tm = $tm;
-
+        $default->tm = [];
         $default->created_at = date("Y-m-d H:i:s");
         $default->modified_at = date("Y-m-d H:i:s");
 
