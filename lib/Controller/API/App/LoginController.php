@@ -14,6 +14,8 @@ use Users_UserDao;
 
 class LoginController extends AbstractStatefulKleinController  {
 
+    use RateLimiterTrait;
+
     public function logout() {
         unset( $_SESSION[ 'cid' ] );
         AuthCookie::destroyAuthentication();
@@ -24,10 +26,13 @@ class LoginController extends AbstractStatefulKleinController  {
      * @throws \ReflectionException
      */
     public function login() {
+
         $params = filter_var_array( $this->request->params(), [
                 'email'    => FILTER_SANITIZE_EMAIL,
                 'password' => FILTER_SANITIZE_STRING
         ] );
+
+        $this->checkRateLimit($this->response, $params[ 'email' ], '/api/app/user/login');
 
         $dao  = new Users_UserDao();
         $user = $dao->getByEmail( $params[ 'email' ] );
@@ -45,6 +50,7 @@ class LoginController extends AbstractStatefulKleinController  {
             $project->tryToRedeem();
             $this->response->code( 200 );
         } else {
+            $this->incrementRateLimitCounter($params[ 'email' ], '/api/app/user/login');
             $this->response->code( 404 );
         }
 
