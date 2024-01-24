@@ -63,7 +63,15 @@ export const ProjectTemplate = () => {
     } = {...currentProjectTemplate, name: templateName}
     /* eslint-enable no-unused-vars */
     createProjectTemplate(newTemplate)
-      .then((data) => console.log(data))
+      .then((template) => {
+        // setProjectTemplates((prevState) => [
+        //   ...prevState
+        //     .filter(({isTemporary}) => !isTemporary)
+        //     .map((templateItem) => ({...templateItem, isSelected: false})),
+        //   {...template, isSelected: true},
+        // ])
+        console.log(template)
+      })
       .catch((error) => console.log(error))
   }
 
