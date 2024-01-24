@@ -52,7 +52,6 @@
   },
   "required": [
     "name",
-    "is_default",
     "id_team",
     "speech2text",
     "lexica",
