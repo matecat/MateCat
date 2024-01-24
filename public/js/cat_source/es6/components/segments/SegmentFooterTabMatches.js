@@ -7,11 +7,11 @@ import SegmentStore from '../../stores/SegmentStore'
 import TranslationMatches from './utils/translationMatches'
 import TextUtils from '../../utils/textUtils'
 import SegmentActions from '../../actions/SegmentActions'
-import CommonUtils from '../../utils/commonUtils'
 import CatToolStore from '../../stores/CatToolStore'
 import CatToolConstants from '../../constants/CatToolConstants'
 import {SegmentContext} from './SegmentContext'
 import {SegmentFooterTabError} from './SegmentFooterTabError'
+import ApplicationStore from '../../stores/ApplicationStore'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
 
 class SegmentFooterTabMatches extends React.Component {
@@ -34,12 +34,6 @@ class SegmentFooterTabMatches extends React.Component {
     var matchesProcessed = []
     // SegmentActions.createFooter(this.props.segment.sid);
     $.each(matches, function () {
-      if (
-        isUndefined(this.segment) ||
-        this.segment === '' ||
-        this.translation === ''
-      )
-        return true
       var item = {}
       item.id = this.id
       item.disabled = this.id == '0' ? true : false
@@ -170,7 +164,7 @@ class SegmentFooterTabMatches extends React.Component {
         <li>{match.suggestion_info}</li>
         <li className={'graydesc'}>
           <span className={'bold'} style={{fontSize: '14px'}}>
-            {CommonUtils.getLanguageNameFromLocale(match.target)}
+            {ApplicationStore.getLanguageNameFromLocale(match.target)}
           </span>
         </li>
         <li className="graydesc graydesc-sourcekey">

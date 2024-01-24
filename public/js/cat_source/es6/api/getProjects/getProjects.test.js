@@ -1,21 +1,20 @@
-import {rest} from 'msw'
+import {http, HttpResponse} from 'msw'
 
 import {getProjects} from '.'
 import {mswServer} from '../../../../../mocks/mswServer'
-
+global.config = {
+  basepath: 'http://localhost/',
+  enableMultiDomainApi: false,
+  ajaxDomainsNumber: 20,
+}
 test('works properly with empty filter', async () => {
   const payload = {errors: [], data: {fake: 'data'}}
 
   mswServer.use(
-    rest.post('*.ajax.localhost', (req, res, ctx) => {
-      return res(ctx.status(200), ctx.json(payload))
+    http.post(config.basepath, () => {
+      return HttpResponse.json(payload)
     }),
   )
-
-  global.config = {
-    enableMultiDomainApi: true,
-    ajaxDomainsNumber: 20,
-  }
 
   const data = await getProjects({searchFilter: {}, team: {}})
 
@@ -26,15 +25,10 @@ test('works properly with full filter', async () => {
   const payload = {errors: [], data: {fake: 'data'}}
 
   mswServer.use(
-    rest.post('*.ajax.localhost', (req, res, ctx) => {
-      return res(ctx.status(200), ctx.json(payload))
+    http.post(config.basepath, () => {
+      return HttpResponse.json(payload)
     }),
   )
-
-  global.config = {
-    enableMultiDomainApi: true,
-    ajaxDomainsNumber: 20,
-  }
 
   const data = await getProjects({
     searchFilter: {filter: {foo: 'bar'}},
@@ -49,15 +43,10 @@ test('throws on non empty errors', async () => {
   const payload = {errors: [500, 'VERY_BAD_ERROR'], data: {fake: 'data'}}
 
   mswServer.use(
-    rest.post('*.ajax.localhost', (req, res, ctx) => {
-      return res(ctx.status(200), ctx.json(payload))
+    http.post(config.basepath, () => {
+      return HttpResponse.json(payload)
     }),
   )
-
-  global.config = {
-    enableMultiDomainApi: true,
-    ajaxDomainsNumber: 20,
-  }
 
   await expect(getProjects({searchFilter: {}, team: {}})).rejects.toEqual(
     payload.errors,

@@ -53,7 +53,6 @@ class JobMenu extends React.Component {
         this.props.job.get('revise_passwords').size > 1
       ) {
         let url =
-          config.hostpath +
           '/revise2/' +
           this.props.project.get('name') +
           '/' +

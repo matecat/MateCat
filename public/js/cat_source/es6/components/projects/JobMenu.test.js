@@ -3,15 +3,16 @@ import userEvent from '@testing-library/user-event'
 import React from 'react'
 import JobMenu from './JobMenu'
 import Immutable from 'immutable'
-import {rest} from 'msw'
+import {http, HttpResponse} from 'msw'
 import {mswServer} from '../../../../../mocks/mswServer'
 import ProjectsStore from '../../stores/ProjectsStore'
 import ManageActions from '../../actions/ManageActions'
 import ManageConstants from '../../constants/ManageConstants'
 
-window.config = {
+global.config = {
   splitEnabled: 1,
-  hostpath: 'https://dev.matecat.com',
+  basepath: 'http://localhost/',
+  enableMultiDomainApi: false,
 }
 
 const fakeProjectsData = {
@@ -147,9 +148,7 @@ const getRevise2Url = (project, job) => {
   const target = job.get('target')
   const id = job.get('id')
   const revisePasswords = job.get('revise_passwords')
-  return `${
-    window.config.hostpath
-  }/revise2/${name}/${source}-${target}/${id}-${revisePasswords
+  return `/revise2/${name}/${source}-${target}/${id}-${revisePasswords
     .get(1)
     .get('password')}`
 }
@@ -243,19 +242,17 @@ test('Cancelled job: check Resume job item', () => {
 test('Generate revise 2: onClick flow', async () => {
   mswServer.use(
     ...[
-      rest.post(
-        '/plugins/second_pass_review/project/:id/:password/reviews',
-        (req, res, ctx) => {
-          return res(
-            ctx.status(200),
-            ctx.json({
-              chunk_review: {
-                id: 164,
-                id_job: 98,
-                review_password: '6688b6b321de',
-              },
-            }),
-          )
+      http.post(
+        config.basepath +
+          'plugins/second_pass_review/project/:id/:password/reviews',
+        () => {
+          return HttpResponse.json({
+            chunk_review: {
+              id: 164,
+              id_job: 98,
+              review_password: '6688b6b321de',
+            },
+          })
         },
       ),
     ],

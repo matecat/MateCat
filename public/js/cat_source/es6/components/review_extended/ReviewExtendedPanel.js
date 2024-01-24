@@ -61,12 +61,10 @@ class ReviewExtendedPanel extends React.Component {
   showIssuesMessage(sid, type) {
     switch (type) {
       case this.addIssueToApproveMessageType:
-        if (this.props.issueRequiredOnSegmentChange) {
-          this.setState({
-            showAddIssueMessage: true,
-            showAddIssueToSelectedTextMessage: false,
-          })
-        }
+        this.setState({
+          showAddIssueMessage: true,
+          showAddIssueToSelectedTextMessage: false,
+        })
         break
       case this.addIssueToSelectedTextMessageType:
         this.setState({
@@ -182,9 +180,6 @@ class ReviewExtendedPanel extends React.Component {
       </div>
     )
   }
-}
-ReviewExtendedPanel.defaultProps = {
-  issueRequiredOnSegmentChange: true,
 }
 
 export default ReviewExtendedPanel

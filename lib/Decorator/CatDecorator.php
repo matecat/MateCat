@@ -88,9 +88,6 @@ class CatDecorator extends \AbstractDecorator {
         $this->template->support_mail = INIT::$SUPPORT_MAIL ;
         $this->template->showReplaceOptionsInSearch = true ;
 
-        $this->template->languages_array = json_encode(  $this->lang_handler->getEnabledLanguages( 'en' ) ) ;
-        //languages for tm panel
-        $this->template->languages_array_obj = $this->lang_handler->getEnabledLanguages( 'en' ) ;
         $this->decorateForCJK();
 
         $this->assignOptions();

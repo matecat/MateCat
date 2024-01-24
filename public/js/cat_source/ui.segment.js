@@ -231,7 +231,7 @@ import {setCurrentSegment} from './es6/api/setCurrentSegment'
       }
       if (config.isReview) {
         setTimeout(function () {
-          UI.clickOnApprovedButton(segment, false)
+          SegmentActions.clickOnApprovedButton(segment, false)
         })
       } else {
         if (!segment.tagged) {
@@ -240,7 +240,7 @@ import {setCurrentSegment} from './es6/api/setCurrentSegment'
           })
         } else if (segment.translation.trim() !== '') {
           setTimeout(function () {
-            UI.clickOnTranslatedButton(segment, false)
+            SegmentActions.clickOnTranslatedButton(segment, false)
           })
         }
       }

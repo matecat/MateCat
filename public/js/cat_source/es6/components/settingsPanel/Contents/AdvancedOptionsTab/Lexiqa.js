@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react'
 import Switch from '../../../common/Switch'
 import CommonUtils from '../../../../utils/commonUtils'
 import LXQ from '../../../../utils/lxq.main'
+import ApplicationStore from '../../../../stores/ApplicationStore'
 
 export const Lexiqa = ({
   lexiqaActive,
@@ -32,7 +33,7 @@ export const Lexiqa = ({
       targetLanguages.filter(function (n) {
         if (acceptedLanguages.indexOf(n.code) === -1) {
           notAcceptedLanguages.push(
-            CommonUtils.getLanguageNameFromLocale(n.code),
+            ApplicationStore.getLanguageNameFromLocale(n.code),
           )
         }
         return acceptedLanguages.indexOf(n.code) != -1

@@ -1,17 +1,17 @@
 import React, {useCallback, useContext, useEffect, useRef} from 'react'
 import PropTypes from 'prop-types'
 import {useState} from 'react'
-import {SettingsPanelTable} from '../../SettingsPanelTable'
+import {SettingsPanelTable} from '../../../SettingsPanelTable'
 import {MTGlossaryRow} from './MTGlossaryRow'
 import {MTGlossaryCreateRow} from './MTGlossaryCreateRow'
-import {getMMTKeys} from '../../../../api/getMMTKeys/getMMTKeys'
-import {getStatusMemoryGlossaryImport} from '../../../../api/getStatusMemoryGlossaryImport/getStatusMemoryGlossaryImport'
-import {SettingsPanelContext} from '../../SettingsPanelContext'
-import CatToolActions from '../../../../actions/CatToolActions'
-import CatToolConstants from '../../../../constants/CatToolConstants'
-import CatToolStore from '../../../../stores/CatToolStore'
-import ArrowDown from '../../../../../../../img/icons/ArrowDown'
-import IconAdd from '../../../icons/IconAdd'
+import {getMMTKeys} from '../../../../../api/getMMTKeys/getMMTKeys'
+import {getStatusMemoryGlossaryImport} from '../../../../../api/getStatusMemoryGlossaryImport/getStatusMemoryGlossaryImport'
+import {SettingsPanelContext} from '../../../SettingsPanelContext'
+import CatToolActions from '../../../../../actions/CatToolActions'
+import CatToolConstants from '../../../../../constants/CatToolConstants'
+import CatToolStore from '../../../../../stores/CatToolStore'
+import ArrowDown from '../../../../../../../../img/icons/ArrowDown'
+import IconAdd from '../../../../icons/IconAdd'
 
 const COLUMNS_TABLE = [
   {name: 'Activate'},
@@ -114,10 +114,11 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
     }
 
     getMMTKeys({engineId: id}).then((data) => {
+      const items = [...data].reverse()
       if (!wasCleanup) {
         if (!isCattoolPage) {
           updateRowsState(
-            data.map(({name, id: idRow}) => {
+            items.map(({name, id: idRow}) => {
               const isActive = Array.isArray(glossaries)
                 ? glossaries.some((value) => value === idRow)
                 : false
@@ -130,7 +131,7 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
             }),
           )
         } else {
-          memories = data
+          memories = items
           CatToolStore.addListener(
             CatToolConstants.GET_JOB_METADATA,
             getJobMetadata,
@@ -227,12 +228,14 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
                   <IconAdd size={18} />
                   New
                 </button>
-                <div className="mt-glossary-case-sensitive">
+                <div
+                  className="mt-glossary-case-sensitive"
+                  title='Activating this option makes glossary matching case-sensitive: if your glossary includes a translation for "Cat", it will only be applied when "Cat" is found with an initial capital letter'
+                >
                   <input
                     checked={isGlossaryCaseSensitive}
                     onChange={onChangeCaseSensitive}
                     type="checkbox"
-                    title=""
                   />
                   <label>Enable case-sensitive matching</label>
                 </div>

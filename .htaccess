@@ -60,15 +60,13 @@ RewriteRule ^gdrive/(.*)$ router.php [QSA,L]
 
 RewriteRule ^utils/pee$ router.php [L]
 
-
-
 RewriteRule ^TMX/([^/]*)/([^/]*)[/]?$ index.php?action=exportTMX&jid=$1&jpass=$2 [L]
 RewriteRule ^SDLXLIFF/([^/]*)/([^/]*)/([^/]*)[/]?$ index.php?action=downloadFile&id_job=$1&password=$2&filename=$3&forceXliff=1 [L]
 RewriteRule ^translation/([^/]*)/([^/]*)[/]?$ index.php?action=downloadFile&id_job=$1&password=$2 [L]
 
-RedirectMatch 404 /\.git
-RedirectMatch 404 /vendor
-RedirectMatch 404 /storage
+RedirectMatch 404 ^/\.git
+RedirectMatch 404 ^/vendor
+RedirectMatch 404 ^/storage
 
 </IfModule>
 

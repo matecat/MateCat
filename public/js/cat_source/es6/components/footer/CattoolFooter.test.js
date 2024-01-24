@@ -25,7 +25,6 @@ test('render properly', async () => {
       idProject={projectId}
       idJob={jobId}
       isCJK={false}
-      isReview={false}
       password="fake-password"
     />,
   )

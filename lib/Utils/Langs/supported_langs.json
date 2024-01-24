@@ -213,13 +213,13 @@
         {
             "localized": [
                 {
-                    "en": "Balkan Gipsy"
+                    "en": "Balkan Romani"
                 }
             ],
-            "isocode": "rm",
+            "isocode": "rmn",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "rm-RO"
+            "rfc3066code": "rmn-BG"
         },
         {
             "localized": [
@@ -1282,6 +1282,17 @@
         {
             "localized": [
                 {
+                    "en": "Ho"
+                }
+            ],
+            "isocode": "hoc",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "hoc-IN"
+        },
+        {
+            "localized": [
+                {
                     "en": "Hungarian"
                 }
             ],
@@ -2218,18 +2229,6 @@
         {
             "localized": [
                 {
-                    "en": "Ndebele"
-                }
-            ],
-            "isocode": "nr",
-            "enabled": true,
-            "rtl": false,
-            "rfc3066code": "nr-ZA",
-            "languageRegionCode": "nso-ZA"
-        },
-        {
-            "localized": [
-                {
                     "en": "Nepali"
                 }
             ],
@@ -2281,6 +2280,18 @@
             "enabled": true,
             "rtl": false,
             "rfc3066code": "kmr-TR"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Northern Ndebele"
+                }
+            ],
+            "isocode": "nd",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "nd-ZW",
+            "languageRegionCode": "nde-ZW"
         },
         {
             "localized": [
@@ -2922,6 +2933,18 @@
             "enabled": true,
             "rtl": true,
             "rfc3066code": "pbt-PK"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Southern Ndebele"
+                }
+            ],
+            "isocode": "nr",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "nr-ZA",
+            "languageRegionCode": "nso-ZA"
         },
         {
             "localized": [
