@@ -9,31 +9,35 @@ trait RateLimiterTrait
 {
     /**
      * @param Response $response
-     * @param $email
+     * @param $identifier
      * @param $route
+     * @return Response
      * @throws \Exception
      */
-    public function checkRateLimit(Response $response, $email, $route)
+    public function checkRateLimitResponse(Response $response, $identifier, $route)
     {
         $maxRetries = 10;
-        $key = $this->getKey($email, $route);
+        $key = $this->getKey($identifier, $route);
         $redis = $this->getRedis();
 
         if($redis->get($key) and $redis->get($key) > $maxRetries){
             $response->code(429);
-            $response->header("Retry-After", $this->getTtl());
-            exit();
+            $response->header("Retry-After", $redis->ttl($key));
+
+            return $response;
         }
+
+        return null;
     }
 
     /**
-     * @param $email
+     * @param $identifier
      * @param $route
      * @throws \Exception
      */
-    public function incrementRateLimitCounter($email, $route)
+    public function incrementRateLimitCounter($identifier, $route)
     {
-        $key = $this->getKey($email, $route);
+        $key = $this->getKey($identifier, $route);
         $redis = $this->getRedis();
 
         if(!$redis->get($key)){
@@ -46,8 +50,8 @@ trait RateLimiterTrait
 
     /**
      * @return \Predis\Client
-     * @throws \Predis\Connection\ConnectionException
-     * @throws \ReflectionException
+     *
+     * @throws \Exception
      */
     private function getRedis()
     {
@@ -57,13 +61,13 @@ trait RateLimiterTrait
     }
 
     /**
-     * @param string $email
+     * @param string $identifier
      * @param string $route
      * @return string
      */
-    private function getKey($email, $route)
+    private function getKey($identifier, $route)
     {
-        return md5($email.$route);
+        return md5($identifier.$route);
     }
 
     /**

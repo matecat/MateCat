@@ -9,6 +9,7 @@
 namespace API\App;
 
 use AuthCookie;
+use Klein\Response;
 use Users\RedeemableProject;
 use Users_UserDao;
 
@@ -23,16 +24,21 @@ class LoginController extends AbstractStatefulKleinController  {
     }
 
     /**
-     * @throws \ReflectionException
+     * @throws \Exception
      */
     public function login() {
 
         $params = filter_var_array( $this->request->params(), [
-                'email'    => FILTER_SANITIZE_EMAIL,
-                'password' => FILTER_SANITIZE_STRING
+            'email'    => FILTER_SANITIZE_EMAIL,
+            'password' => FILTER_SANITIZE_STRING
         ] );
 
-        $this->checkRateLimit($this->response, $params[ 'email' ], '/api/app/user/login');
+        $checkRateLimitResponse = $this->checkRateLimitResponse($this->response, $params[ 'email' ], '/api/app/user/login');
+        if($checkRateLimitResponse instanceof Response){
+            $this->response = $checkRateLimitResponse;
+
+            return;
+        }
 
         $dao  = new Users_UserDao();
         $user = $dao->getByEmail( $params[ 'email' ] );
