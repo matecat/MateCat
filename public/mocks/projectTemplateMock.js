@@ -1,8 +1,8 @@
 export default {
   items: [
     {
-      id: 34,
-      name: 'default template',
+      id: 0,
+      name: 'Standard',
       uid: 54,
       is_default: true,
       id_team: 45,
