@@ -1,3 +1,5 @@
+import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
+
 /**
  * Description
  *
@@ -23,9 +25,8 @@ export const getSecondPassReview = async (
   Object.keys(dataParams).forEach((key) => {
     formData.append(key, dataParams[key])
   })
-
   const response = await fetch(
-    `/plugins/second_pass_review/project/${idProject}/${passwordProject}/reviews`,
+    `${getMatecatApiDomain()}plugins/second_pass_review/project/${idProject}/${passwordProject}/reviews`,
     {
       method: 'POST',
       credentials: 'include',
