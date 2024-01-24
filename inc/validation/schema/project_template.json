@@ -33,14 +33,14 @@
       "type": ["null", "string"]
     },
     "tm": {
-      "type": "array",
+      "type": ["null", "array"],
       "items": {
         "type": "object",
         "$ref": "#/definitions/tm"
       }
     },
     "mt": {
-      "type": "object",
+      "type": ["null", "object"],
       "$ref": "#/definitions/mt"
     },
     "payable_rate_template_id": {
