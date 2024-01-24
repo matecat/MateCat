@@ -2,33 +2,28 @@ import React, {useContext, useEffect, useState} from 'react'
 import {Select} from '../common/Select'
 import {SettingsPanelContext} from './SettingsPanelContext'
 import IconClose from '../icons/IconClose'
-import {useRef} from 'react'
-import {useLayoutEffect} from 'react'
 import {createProjectTemplate} from '../../api/createProjectTemplate'
+import {deleteProjectTemplate} from '../../api/deleteProjectTemplate'
+import {isStandardTemplate} from '../../hooks/useProjectTemplates'
 
 export const ProjectTemplate = () => {
   const {projectTemplates, setProjectTemplates, currentProjectTemplate} =
     useContext(SettingsPanelContext)
 
   const [isSavingNewTemplate, setIsSavingNewTemplate] = useState(false)
-  const [templateName, setTemplateName] = useState()
-
-  const templateNameRef = useRef()
+  const [templateName, setTemplateName] = useState('')
+  const [isRequestInProgress, setIsRequestInProgress] = useState(false)
 
   const currentTemplate = projectTemplates.find(({isSelected}) => isSelected)
   const isModifyingTemplate = projectTemplates.some(
     ({isTemporary}) => isTemporary,
   )
-  const isDefaultTemplate = currentTemplate?.is_default
+  const isStandardTemplateBool = isStandardTemplate(currentTemplate)
 
   useEffect(() => {
     setIsSavingNewTemplate(false)
-    setTemplateName()
+    setTemplateName('')
   }, [currentProjectTemplate])
-
-  useLayoutEffect(() => {
-    if (isSavingNewTemplate) templateNameRef.current.focus()
-  }, [isSavingNewTemplate])
 
   const options = projectTemplates
     .filter(({isTemporary}) => !isTemporary)
@@ -52,7 +47,6 @@ export const ProjectTemplate = () => {
   const createTemplate = () => {
     /* eslint-disable no-unused-vars */
     const {
-      is_default,
       created_at,
       id,
       uid,
@@ -62,24 +56,51 @@ export const ProjectTemplate = () => {
       ...newTemplate
     } = {...currentProjectTemplate, name: templateName}
     /* eslint-enable no-unused-vars */
+    setIsRequestInProgress(true)
     createProjectTemplate(newTemplate)
       .then((template) => {
-        // setProjectTemplates((prevState) => [
-        //   ...prevState
-        //     .filter(({isTemporary}) => !isTemporary)
-        //     .map((templateItem) => ({...templateItem, isSelected: false})),
-        //   {...template, isSelected: true},
-        // ])
-        console.log(template)
+        setProjectTemplates((prevState) => [
+          ...prevState
+            .filter(({isTemporary}) => !isTemporary)
+            .map((templateItem) => ({...templateItem, isSelected: false})),
+          {...template, isSelected: true},
+        ])
       })
       .catch((error) => console.log(error))
+      .finally(() => setIsRequestInProgress(false))
   }
 
   const onChangeTemplateName = (e) => setTemplateName(e.currentTarget.value)
 
   const cancelSavingNewTemplate = () => {
     setIsSavingNewTemplate(false)
-    setTemplateName()
+    setTemplateName('')
+  }
+
+  const deleteTemplate = () => {
+    setIsRequestInProgress(true)
+    deleteProjectTemplate(currentProjectTemplate.id)
+      .then((data) =>
+        setProjectTemplates((prevState) => {
+          const id = parseInt(data.id)
+          const indexDelete = prevState.findIndex(
+            (template) => template.id === id && !template.isTemporary,
+          )
+          const previousIdToSelect = prevState.find(
+            (template, index) =>
+              index === (indexDelete - 1 > 0 ? indexDelete - 1 : 0),
+          )?.id
+
+          return prevState
+            .filter((template) => template.id !== id)
+            .map((template) => ({
+              ...template,
+              isSelected: template.id === previousIdToSelect,
+            }))
+        }),
+      )
+      .catch((error) => console.log(error))
+      .finally(() => setIsRequestInProgress(false))
   }
 
   return (
@@ -99,36 +120,56 @@ export const ProjectTemplate = () => {
         )}
         {isSavingNewTemplate && (
           <input
-            ref={templateNameRef}
             className="template-name"
+            data-testid="template-name-input"
             value={templateName}
             onChange={onChangeTemplateName}
+            autoFocus
           ></input>
         )}
       </div>
       <div className="settings-panel-project-template-container-buttons">
         {!isSavingNewTemplate ? (
           <>
-            {isModifyingTemplate && !isDefaultTemplate && (
-              <button className="template-button button-save-changes">
+            {isModifyingTemplate && !isStandardTemplateBool && (
+              <button
+                className="template-button button-save-changes"
+                disabled={isRequestInProgress}
+              >
                 Save changes
               </button>
             )}
             {isModifyingTemplate && (
               <button
                 className="template-button"
+                data-testid="save-as-new-template"
+                disabled={isRequestInProgress}
                 onClick={() => setIsSavingNewTemplate(true)}
               >
                 Save as new
               </button>
             )}
-            {!isDefaultTemplate && (
-              <button className="template-button">...</button>
+            {!isStandardTemplateBool && (
+              <>
+                <button
+                  className="template-button"
+                  data-testid="delete-template"
+                  disabled={isRequestInProgress}
+                  onClick={deleteTemplate}
+                >
+                  Delete
+                </button>
+                <button className="template-button">...</button>
+              </>
             )}
           </>
         ) : (
           <>
-            <button className="template-button" onClick={createTemplate}>
+            <button
+              className="template-button"
+              data-testid="create-template"
+              onClick={createTemplate}
+            >
               Confirm
             </button>
             <button

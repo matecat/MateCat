@@ -4,6 +4,8 @@ import {isEqual} from 'lodash'
 import {getProjectTemplates} from '../api/getProjectTemplates/getProjectTemplates'
 import TEXT_UTILS from '../utils/textUtils'
 
+export const isStandardTemplate = ({id} = {}) => id === 0
+
 function useProjectTemplates(canRetrieveTemplates) {
   const [projectTemplates, setProjectTemplates] = useState([])
   const [currentProjectTemplate, setCurrentProjectTemplate] = useState()
@@ -99,12 +101,12 @@ function useProjectTemplates(canRetrieveTemplates) {
         setProjectTemplates(
           items.map((template) => ({
             ...template,
-            isSelected: template.is_default,
+            isSelected: isStandardTemplate(template),
           })),
         )
 
         const propKeys = Object.keys(
-          items.find(({is_default}) => is_default),
+          items.find((template) => isStandardTemplate(template)),
         ).filter((value) => value !== 'id' && value !== 'name')
         setAvailableTemplateProps(
           propKeys.reduce(
