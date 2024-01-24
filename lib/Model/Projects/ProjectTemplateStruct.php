@@ -167,8 +167,8 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
             'tm' => $this->getTm(),
             'payable_rate_template_id' => $this->payable_rate_template_id ? (int)$this->payable_rate_template_id : null,
             'qa_model_template_id' => $this->qa_model_template_id ? (int)$this->qa_model_template_id : null,
-            'get_public_matches' => $this->get_public_matches,
-            'pretranslate_100' => $this->pretranslate_100,
+            'get_public_matches' => (bool)$this->get_public_matches,
+            'pretranslate_100' => (bool)$this->pretranslate_100,
             'created_at' => date_create( $this->created_at )->format( DATE_RFC822 ),
             'modified_at' => date_create( $this->modified_at )->format( DATE_RFC822 ),
         ];

@@ -240,7 +240,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao
 
                 $engineRecord = $engine->getEngineRecord();
 
-                if($engineRecord->uid !== $projectTemplateStruct->uid){
+                if($engineRecord->id > 1 and $engineRecord->uid !== $projectTemplateStruct->uid){
                     throw new Exception("Engine doesn't belong to the user.");
                 }
             }
