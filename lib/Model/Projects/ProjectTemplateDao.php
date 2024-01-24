@@ -73,7 +73,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao
         if(empty($engineList)){
            return [
                'id' => 1,
-               'extra' => []
+               'extra' => new \stdClass()
            ];
         }
 
@@ -81,21 +81,21 @@ class ProjectTemplateDao extends DataAccess_AbstractDao
             if($engine->name === "ModernMT"){
                 return [
                     'id' => $engine->id,
-                    'extra' => []
+                    'extra' => new \stdClass()
                 ];
             }
 
             if($engine->name === "DeepL"){
                 return [
                     'id' => $engine->id,
-                    'extra' => []
+                    'extra' => new \stdClass()
                 ];
             }
         }
 
         return [
             'id' => 1,
-            'extra' => []
+            'extra' => new \stdClass()
         ];
     }
 

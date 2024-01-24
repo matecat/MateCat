@@ -67,7 +67,7 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
     public function getMt()
     {
         if(is_string($this->mt)){
-            return json_decode($this->mt, true);
+            return json_decode($this->mt);
         }
 
         return $this->mt;
@@ -79,7 +79,7 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
     public function getTm()
     {
         if(is_string($this->tm)){
-            return json_decode($this->tm, true);
+            return json_decode($this->tm);
         }
 
         return $this->tm;
