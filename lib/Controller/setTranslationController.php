@@ -342,7 +342,7 @@ class setTranslationController extends ajaxController {
         $old_translation = $this->_getOldTranslation();
 
         $old_suggestion_array = json_decode($old_translation->suggestions_array);
-        $old_suggestion = @$old_suggestion_array[$this->chosen_suggestion_index-1];
+        $old_suggestion = ($this->chosen_suggestion_index !== null ? @$old_suggestion_array[$this->chosen_suggestion_index-1] : null);
 
         $new_translation                         = new Translations_SegmentTranslationStruct();
         $new_translation->id_segment             = $this->id_segment;
@@ -351,7 +351,7 @@ class setTranslationController extends ajaxController {
         $new_translation->segment_hash           = $this->segment->segment_hash;
         $new_translation->translation            = $translation;
         $new_translation->serialized_errors_list = $err_json;
-        $new_translation->suggestion_position    = $this->chosen_suggestion_index;
+        $new_translation->suggestion_position    = ($this->chosen_suggestion_index !== null ? $this->chosen_suggestion_index : $old_translation->suggestion_position);
         $new_translation->warning                = $check->thereAreWarnings();
         $new_translation->translation_date       = date( "Y-m-d H:i:s" );
         $new_translation->suggestion             = ((!empty($old_suggestion)) ? $old_suggestion->translation : null);
@@ -721,6 +721,10 @@ class setTranslationController extends ajaxController {
      */
     private function canUpdateSuggestion(Translations_SegmentTranslationStruct $new_translation, Translations_SegmentTranslationStruct $old_translation, $old_suggestion = null)
     {
+        if($old_suggestion === null){
+            return false;
+        }
+
         $allowedStatuses = [
             Constants_TranslationStatus::STATUS_NEW,
             Constants_TranslationStatus::STATUS_DRAFT,
