@@ -24,6 +24,9 @@ trait RateLimiterTrait
             $response->code(429);
             $response->header("Retry-After", $redis->ttl($key));
 
+            // PENALTY: reset ttl
+            $redis->expire($key, $this->getTtl());
+
             return $response;
         }
 
