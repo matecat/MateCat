@@ -159,12 +159,14 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
   }, [id, isCattoolPage, updateRowsState])
 
   useEffect(() => {
-    if (!isCattoolPage)
+    if (!isCattoolPage) {
+      const glossaries = activeGlossariesRef.current
+
       updateRowsState((prevState) =>
         Array.isArray(prevState)
           ? prevState.map(({name, id: idRow}) => {
-              const isActive = Array.isArray(mtGlossaryProps.glossaries)
-                ? mtGlossaryProps.glossaries.some((value) => value === idRow)
+              const isActive = Array.isArray(glossaries)
+                ? glossaries.some((value) => value === idRow)
                 : false
 
               return {
@@ -175,7 +177,8 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
             })
           : prevState,
       )
-  }, [mtGlossaryProps?.glossaries, isCattoolPage, updateRowsState])
+    }
+  }, [currentProjectTemplate.id, isCattoolPage, updateRowsState])
 
   useEffect(() => {
     if (

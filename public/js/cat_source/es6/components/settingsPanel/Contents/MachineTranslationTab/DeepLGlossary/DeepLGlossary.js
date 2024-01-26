@@ -121,13 +121,15 @@ export const DeepLGlossary = ({id, isCattoolPage = false}) => {
   }, [id, isCattoolPage, updateRowsState])
 
   useEffect(() => {
-    if (!isCattoolPage)
+    if (!isCattoolPage) {
+      const deeplIdGlossary = activeGlossaryRef.current
+
       updateRowsState((prevState) =>
         Array.isArray(prevState)
           ? prevState.map(({name, id: idRow}) => {
               const isActive =
-                typeof deeplGlossaryProps?.deepl_id_glossary !== 'undefined'
-                  ? idRow === deeplGlossaryProps?.deepl_id_glossary
+                typeof deeplIdGlossary !== 'undefined'
+                  ? idRow === deeplIdGlossary
                   : false
 
               return {
@@ -138,7 +140,8 @@ export const DeepLGlossary = ({id, isCattoolPage = false}) => {
             })
           : prevState,
       )
-  }, [deeplGlossaryProps?.deepl_id_glossary, isCattoolPage, updateRowsState])
+    }
+  }, [currentProjectTemplate.id, isCattoolPage, updateRowsState])
 
   useEffect(() => {
     if (

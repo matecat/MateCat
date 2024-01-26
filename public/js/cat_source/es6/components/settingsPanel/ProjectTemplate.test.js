@@ -23,11 +23,9 @@ const WrapperComponent = (contextProps) => {
   }, [])
 
   return (
-    <SettingsPanelContext.Provider
-      value={{...contextProps, wrapperRef: {current: wrapperElement}}}
-    >
+    <SettingsPanelContext.Provider value={contextProps}>
       <div ref={ref}>
-        <ProjectTemplate />
+        <ProjectTemplate portalTarget={wrapperElement} />
       </div>
     </SettingsPanelContext.Provider>
   )

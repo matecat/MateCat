@@ -1,4 +1,5 @@
 import React, {useContext, useEffect, useState} from 'react'
+import PropTypes from 'prop-types'
 import {Select} from '../common/Select'
 import {SettingsPanelContext} from './SettingsPanelContext'
 import IconClose from '../icons/IconClose'
@@ -15,13 +16,9 @@ const TEMPLATE_NAME_MANAGE_MODE = {
   EDITING: 'editing',
 }
 
-export const ProjectTemplate = () => {
-  const {
-    projectTemplates,
-    setProjectTemplates,
-    currentProjectTemplate,
-    wrapperRef,
-  } = useContext(SettingsPanelContext)
+export const ProjectTemplate = ({portalTarget}) => {
+  const {projectTemplates, setProjectTemplates, currentProjectTemplate} =
+    useContext(SettingsPanelContext)
 
   const [templateNameManageMode, setTemplateNameManageMode] = useState()
   const [templateName, setTemplateName] = useState('')
@@ -150,7 +147,7 @@ export const ProjectTemplate = () => {
       onClick={() => false}
       icon={<DotsHorizontal size={18} />}
       isVisibleRectArrow={false}
-      itemsTarget={wrapperRef.current}
+      itemsTarget={portalTarget ? portalTarget : document.body}
     >
       <MenuButtonItem
         disabled={isRequestInProgress}
@@ -244,4 +241,11 @@ export const ProjectTemplate = () => {
       </div>
     </div>
   )
+}
+
+ProjectTemplate.propTypes = {
+  portalTarget: PropTypes.oneOfType([
+    PropTypes.instanceOf(Element),
+    PropTypes.node,
+  ]),
 }
