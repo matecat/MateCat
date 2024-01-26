@@ -196,14 +196,15 @@
 
   .template-name {
     width: 200px;
-    height: 40px;
+    height: 38px;
     font-size: 16px;
-    padding: 10px;
+    padding: 9px 0 9px 12px;
     border: none;
     position: absolute;
-    margin-top: 36px;
-    border: 1px solid #aebdcd;
-    border-right: unset;
+    margin-top: 37px;
+    margin-left: 1px;
+    outline: none;
+    line-height: 4;
   }
 }
 
@@ -222,9 +223,24 @@
     font-size: 16px;
     padding: 0 12px;
     cursor: pointer;
+    line-height: 1;
 
     &:hover {
       opacity: 0.8;
+    }
+  }
+
+  .button-more-items {
+    padding: 0;
+
+    .menu-button-wrapper .icon {
+      justify-content: center;
+      background-color: unset;
+      color: $white;
+      border: none;
+      transform: rotate(90deg);
+      width: 40px;
+      height: 40px;
     }
   }
 
@@ -238,4 +254,8 @@
   background-color: $grey5;
   padding: 20px;
   border-radius: 16px;
+}
+
+.settings-panel-project-template-button-more {
+  min-width: 240px;
 }

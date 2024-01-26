@@ -5,12 +5,25 @@ import IconClose from '../icons/IconClose'
 import {createProjectTemplate} from '../../api/createProjectTemplate'
 import {deleteProjectTemplate} from '../../api/deleteProjectTemplate'
 import {isStandardTemplate} from '../../hooks/useProjectTemplates'
+import {updateProjectTemplate} from '../../api/updateProjectTemplate'
+import {MenuButton} from '../common/MenuButton/MenuButton'
+import {MenuButtonItem} from '../common/MenuButton/MenuButtonItem'
+import DotsHorizontal from '../../../../../img/icons/DotsHorizontal'
+
+const TEMPLATE_NAME_MANAGE_MODE = {
+  NEW_ONE: 'newOne',
+  EDITING: 'editing',
+}
 
 export const ProjectTemplate = () => {
-  const {projectTemplates, setProjectTemplates, currentProjectTemplate} =
-    useContext(SettingsPanelContext)
+  const {
+    projectTemplates,
+    setProjectTemplates,
+    currentProjectTemplate,
+    wrapperRef,
+  } = useContext(SettingsPanelContext)
 
-  const [isSavingNewTemplate, setIsSavingNewTemplate] = useState(false)
+  const [templateNameManageMode, setTemplateNameManageMode] = useState()
   const [templateName, setTemplateName] = useState('')
   const [isRequestInProgress, setIsRequestInProgress] = useState(false)
 
@@ -21,7 +34,7 @@ export const ProjectTemplate = () => {
   const isStandardTemplateBool = isStandardTemplate(currentTemplate)
 
   useEffect(() => {
-    setIsSavingNewTemplate(false)
+    setTemplateNameManageMode()
     setTemplateName('')
   }, [currentProjectTemplate])
 
@@ -57,6 +70,7 @@ export const ProjectTemplate = () => {
     } = {...currentProjectTemplate, name: templateName}
     /* eslint-enable no-unused-vars */
     setIsRequestInProgress(true)
+
     createProjectTemplate(newTemplate)
       .then((template) => {
         setProjectTemplates((prevState) => [
@@ -70,38 +84,94 @@ export const ProjectTemplate = () => {
       .finally(() => setIsRequestInProgress(false))
   }
 
-  const onChangeTemplateName = (e) => setTemplateName(e.currentTarget.value)
+  const updateTemplate = () => {
+    /* eslint-disable no-unused-vars */
+    const {
+      created_at,
+      id,
+      uid,
+      modified_at,
+      isTemporary,
+      isSelected,
+      ...modifiedTemplate
+    } = {
+      ...currentProjectTemplate,
+      name: templateName ? templateName : currentProjectTemplate.name,
+    }
+    /* eslint-enable no-unused-vars */
+    setIsRequestInProgress(true)
 
-  const cancelSavingNewTemplate = () => {
-    setIsSavingNewTemplate(false)
-    setTemplateName('')
+    updateProjectTemplate({
+      id: currentProjectTemplate.id,
+      template: modifiedTemplate,
+    })
+      .then((template) => {
+        setProjectTemplates((prevState) =>
+          prevState
+            .filter(({isTemporary}) => !isTemporary)
+            .map((templateItem) =>
+              templateItem.id === template.id
+                ? {...template, isSelected: true}
+                : templateItem,
+            ),
+        )
+      })
+      .catch((error) => console.log(error))
+      .finally(() => setIsRequestInProgress(false))
   }
 
   const deleteTemplate = () => {
     setIsRequestInProgress(true)
     deleteProjectTemplate(currentProjectTemplate.id)
-      .then((data) =>
-        setProjectTemplates((prevState) => {
-          const id = parseInt(data.id)
-          const indexDelete = prevState.findIndex(
-            (template) => template.id === id && !template.isTemporary,
-          )
-          const previousIdToSelect = prevState.find(
-            (template, index) =>
-              index === (indexDelete - 1 > 0 ? indexDelete - 1 : 0),
-          )?.id
-
-          return prevState
+      .then(({id}) =>
+        setProjectTemplates((prevState) =>
+          prevState
             .filter((template) => template.id !== id)
             .map((template) => ({
               ...template,
-              isSelected: template.id === previousIdToSelect,
-            }))
-        }),
+              isSelected: isStandardTemplate(template),
+            })),
+        ),
       )
       .catch((error) => console.log(error))
       .finally(() => setIsRequestInProgress(false))
   }
+
+  const onChangeTemplateName = (e) => setTemplateName(e.currentTarget.value)
+
+  const cancelSavingNewTemplate = () => {
+    setTemplateNameManageMode()
+    setTemplateName('')
+  }
+
+  const moreButton = (
+    <MenuButton
+      className="template-button button-more-items"
+      onClick={() => false}
+      icon={<DotsHorizontal size={18} />}
+      isVisibleRectArrow={false}
+      itemsTarget={wrapperRef.current}
+    >
+      <MenuButtonItem
+        disabled={isRequestInProgress}
+        className="settings-panel-project-template-button-more"
+        onMouseDown={() => {
+          setTemplateNameManageMode(TEMPLATE_NAME_MANAGE_MODE.EDITING)
+          setTemplateName(currentProjectTemplate.name)
+        }}
+      >
+        Rename
+      </MenuButtonItem>
+      <MenuButtonItem
+        data-testid="delete-template"
+        className="settings-panel-project-template-button-more"
+        disabled={isRequestInProgress}
+        onMouseDown={deleteTemplate}
+      >
+        Delete
+      </MenuButtonItem>
+    </MenuButton>
+  )
 
   return (
     <div className="settings-panel-project-template">
@@ -118,7 +188,7 @@ export const ProjectTemplate = () => {
             onSelect={onSelect}
           />
         )}
-        {isSavingNewTemplate && (
+        {templateNameManageMode && (
           <input
             className="template-name"
             data-testid="template-name-input"
@@ -129,12 +199,13 @@ export const ProjectTemplate = () => {
         )}
       </div>
       <div className="settings-panel-project-template-container-buttons">
-        {!isSavingNewTemplate ? (
+        {!templateNameManageMode ? (
           <>
             {isModifyingTemplate && !isStandardTemplateBool && (
               <button
                 className="template-button button-save-changes"
                 disabled={isRequestInProgress}
+                onClick={updateTemplate}
               >
                 Save changes
               </button>
@@ -144,24 +215,14 @@ export const ProjectTemplate = () => {
                 className="template-button"
                 data-testid="save-as-new-template"
                 disabled={isRequestInProgress}
-                onClick={() => setIsSavingNewTemplate(true)}
+                onClick={() =>
+                  setTemplateNameManageMode(TEMPLATE_NAME_MANAGE_MODE.NEW_ONE)
+                }
               >
                 Save as new
               </button>
             )}
-            {!isStandardTemplateBool && (
-              <>
-                <button
-                  className="template-button"
-                  data-testid="delete-template"
-                  disabled={isRequestInProgress}
-                  onClick={deleteTemplate}
-                >
-                  Delete
-                </button>
-                <button className="template-button">...</button>
-              </>
-            )}
+            {!isStandardTemplateBool && moreButton}
           </>
         ) : (
           <>

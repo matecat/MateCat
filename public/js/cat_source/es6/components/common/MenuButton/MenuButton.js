@@ -6,12 +6,13 @@ import ArrowDown from '../../../../../../img/icons/ArrowDown'
 
 export const MenuButton = ({
   label,
-  onClick,
   icon = <ArrowDown />,
+  onClick,
   className = '',
   itemsTarget,
   children,
   disabled,
+  isVisibleRectArrow = true,
 }) => {
   const ItemsPortal = usePortal(itemsTarget ? itemsTarget : document.body)
   const [itemsCoords, setItemsCoords] = useState()
@@ -21,8 +22,10 @@ export const MenuButton = ({
 
   useEffect(() => {
     const handler = (e) => {
-      if (!ref.current?.children[1].contains(e.target))
-        setItemsCoords(undefined)
+      const target = ref.current?.children[1]
+        ? ref.current?.children[1]
+        : ref.current?.children[0]
+      if (!target.contains(e.target)) setItemsCoords(undefined)
     }
     document.addEventListener('mousedown', handler)
 
@@ -32,7 +35,7 @@ export const MenuButton = ({
   const onShowingItems = (e) => {
     const rect = ref.current.getBoundingClientRect()
     const difference = itemsTarget
-      ? itemsTarget.getBoundingClientRect().left - itemsTarget.offsetLeft
+      ? itemsTarget.getBoundingClientRect().left /* - itemsTarget.offsetLeft */
       : 0
     const bottom = rect.y + rect.height + window.scrollY
     const availableHeightDelta = Math.max(
@@ -60,19 +63,26 @@ export const MenuButton = ({
   return (
     <div className={`menu-button ${className}`}>
       <div ref={ref} className="menu-button-wrapper">
-        <button disabled={disabled} onClick={onClick}>
-          {label}
-        </button>
-        <button disabled={disabled} onMouseUp={onShowingItems}>
+        {label && (
+          <button className="label" disabled={disabled} onClick={onClick}>
+            {label}
+          </button>
+        )}
+        <button
+          className="icon"
+          data-testid="menu-button-show-items"
+          disabled={disabled}
+          onMouseUp={onShowingItems}
+        >
           {icon}
         </button>
       </div>
       {itemsCoords && (
         <ItemsPortal>
           <div
-            className={`menu-button-items ${
-              isReversed ? 'menu-button-items-reversed' : ''
-            }`}
+            className={`menu-button-items${
+              isVisibleRectArrow ? ' menu-button-items-rect-arrow' : ''
+            } ${isReversed ? 'menu-button-items-reversed' : ''}`}
             style={{
               left: itemsCoords.left,
               top: itemsCoords.top,
@@ -92,11 +102,12 @@ const MenuButtonItemType = PropTypes.shape({
 })
 
 MenuButton.propTypes = {
-  label: PropTypes.string.isRequired,
-  onClick: PropTypes.func.isRequired,
+  label: PropTypes.string,
   icon: PropTypes.node,
+  onClick: PropTypes.func,
   className: PropTypes.string,
   itemsTarget: PropTypes.object,
   children: PropTypes.arrayOf(MenuButtonItemType),
   disabled: PropTypes.bool,
+  isVisibleRectArrow: PropTypes.bool,
 }

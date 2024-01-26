@@ -14,7 +14,7 @@
     cursor: pointer;
   }
 
-  > * {
+  > button {
     color: $black;
     background: $grey4;
     padding: 4px 8px;
@@ -22,7 +22,7 @@
     border: 1px solid $grey7;
   }
 
-  > :first-child {
+  .label {
     border-radius: 2px 0 0 2px;
 
     &:hover {
@@ -30,7 +30,7 @@
     }
   }
 
-  :last-child {
+  .icon {
     display: flex;
     align-items: center;
     border-radius: 0 2px 2px 0;
@@ -57,7 +57,9 @@
   > :not(:last-child) {
     border-bottom: solid 1px $grey4;
   }
+}
 
+.menu-button-items-rect-arrow {
   &::before {
     content: '';
     border-left: 8px solid transparent;

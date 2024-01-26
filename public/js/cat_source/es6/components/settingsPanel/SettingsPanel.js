@@ -180,13 +180,17 @@ export const SettingsPanel = ({
               : ' settings-panel-wrapper-hide'
           }`}
         >
-          <div className="settings-panel-header">
-            <div className="settings-panel-header-logo" />
-            <span>Settings</span>
-            <div onClick={close} className="close-matecat-modal x-popup" />
-          </div>
-          <ProjectTemplate />
-          {currentProjectTemplate && <ContentWrapper />}
+          {isOpened && (
+            <>
+              <div className="settings-panel-header">
+                <div className="settings-panel-header-logo" />
+                <span>Settings</span>
+                <div onClick={close} className="close-matecat-modal x-popup" />
+              </div>
+              <ProjectTemplate />
+              {currentProjectTemplate && <ContentWrapper />}
+            </>
+          )}
         </div>
       </div>
     </SettingsPanelContext.Provider>

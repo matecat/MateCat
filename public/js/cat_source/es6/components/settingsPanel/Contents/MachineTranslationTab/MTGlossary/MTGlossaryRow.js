@@ -31,6 +31,10 @@ export const MTGlossaryRow = ({engineId, row, setRows, isReadOnly}) => {
   const statusImport = useRef()
   const inputNameRef = useRef()
 
+  useEffect(() => {
+    setIsActive(row.isActive)
+  }, [row.isActive])
+
   // user import new one glossary
   useEffect(() => {
     if (!file) return

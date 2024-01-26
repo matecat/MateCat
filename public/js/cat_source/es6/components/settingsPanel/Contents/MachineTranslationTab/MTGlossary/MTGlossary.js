@@ -80,6 +80,7 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
     (value) => {
       setRows((prevState) => {
         const newValue = typeof value === 'function' ? value(prevState) : value
+        if (!Array.isArray(newValue)) return prevState
 
         return newValue.map((row) => ({
           ...row,
@@ -156,6 +157,25 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
       )
     }
   }, [id, isCattoolPage, updateRowsState])
+
+  useEffect(() => {
+    if (!isCattoolPage)
+      updateRowsState((prevState) =>
+        Array.isArray(prevState)
+          ? prevState.map(({name, id: idRow}) => {
+              const isActive = Array.isArray(mtGlossaryProps.glossaries)
+                ? mtGlossaryProps.glossaries.some((value) => value === idRow)
+                : false
+
+              return {
+                id: idRow,
+                name,
+                isActive,
+              }
+            })
+          : prevState,
+      )
+  }, [mtGlossaryProps?.glossaries, isCattoolPage, updateRowsState])
 
   useEffect(() => {
     if (

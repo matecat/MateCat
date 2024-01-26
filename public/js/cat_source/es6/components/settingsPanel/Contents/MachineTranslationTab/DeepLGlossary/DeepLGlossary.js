@@ -40,6 +40,7 @@ export const DeepLGlossary = ({id, isCattoolPage = false}) => {
     (value) => {
       setRows((prevState) => {
         const newValue = typeof value === 'function' ? value(prevState) : value
+        if (!Array.isArray(newValue)) return prevState
 
         return newValue.map((row) => ({
           ...row,
@@ -120,6 +121,26 @@ export const DeepLGlossary = ({id, isCattoolPage = false}) => {
   }, [id, isCattoolPage, updateRowsState])
 
   useEffect(() => {
+    if (!isCattoolPage)
+      updateRowsState((prevState) =>
+        Array.isArray(prevState)
+          ? prevState.map(({name, id: idRow}) => {
+              const isActive =
+                typeof deeplGlossaryProps?.deepl_id_glossary !== 'undefined'
+                  ? idRow === deeplGlossaryProps?.deepl_id_glossary
+                  : false
+
+              return {
+                id: idRow,
+                name,
+                isActive,
+              }
+            })
+          : prevState,
+      )
+  }, [deeplGlossaryProps?.deepl_id_glossary, isCattoolPage, updateRowsState])
+
+  useEffect(() => {
     if (
       isCattoolPage ||
       !rows ||
@@ -133,7 +154,7 @@ export const DeepLGlossary = ({id, isCattoolPage = false}) => {
     modifyingCurrentTemplate((prevTemplate) => {
       const prevMt = prevTemplate[availableTemplateProps.mt]
       const prevMTExtra = prevMt?.extra ?? {}
-      const {deepl_id_glossary, ...deepLExtra} = prevMTExtra
+      const {deepl_id_glossary, ...deepLExtra} = prevMTExtra //eslint-disable-line
 
       return {
         ...prevTemplate,
