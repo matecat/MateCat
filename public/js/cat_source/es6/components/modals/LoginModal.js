@@ -8,6 +8,8 @@ import * as RuleRunner from '../common/ruleRunner'
 import * as FormRules from '../common/formRules'
 import {checkRedeemProject as checkRedeemProjectApi} from '../../api/checkRedeemProject'
 import {loginUser} from '../../api/loginUser'
+import ModalsActions from '../../actions/ModalsActions'
+import ForgotPasswordModal from './ForgotPasswordModal'
 
 class LoginModal extends React.Component {
   constructor(props) {
@@ -129,11 +131,23 @@ class LoginModal extends React.Component {
   }
 
   openRegisterModal() {
-    $('#modal').trigger('openregister')
+    APP.openRegisterModal()
   }
 
   openForgotPassword() {
-    $('#modal').trigger('openforgotpassword')
+    let props = {}
+    if (config.showModalBoxLogin == 1) {
+      props.redeemMessage = true
+    }
+    const style = {
+      width: '577px',
+    }
+    ModalsActions.showModalComponent(
+      ForgotPasswordModal,
+      props,
+      'Forgot Password',
+      style,
+    )
   }
 
   googleLoginButton() {

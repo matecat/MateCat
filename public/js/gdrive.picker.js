@@ -1,4 +1,3 @@
-import {sprintf} from 'sprintf-js'
 import {getUserConnectedService} from './cat_source/es6/api/getUserConnectedService'
 
 var GDrive = function () {
@@ -80,7 +79,7 @@ var gdrive = new GDrive()
   }
 
   function showPreferencesWithMessage() {
-    $('#modal').trigger('openpreferences', [{showGDriveMessage: true}])
+    APP.openPreferencesModal({showGDriveMessage: true})
   }
 
   function openGoogleDrivePickerIntent() {
