@@ -402,41 +402,44 @@ class Utils {
 
     }
 
-    public static function createToken( $namespace = '' ) {
+    /**
+     * Alias of uuid4
+     * @see Utils::uuid4()
+     *
+     * @return string|null
+     * @throws Exception
+     */
+    public static function createToken() {
+        return self::uuid4();
+    }
 
-        static $guid = '';
-        $uid  = uniqid( "", true );
-        $data = $namespace;
-        $data .= $_SERVER[ 'REQUEST_TIME' ];
-        $data .= @$_SERVER[ 'HTTP_USER_AGENT' ];
+    /**
+     * Generate a valid UUID Version 4
+     *
+     * @see https://digitalbunker.dev/understanding-how-uuids-are-generated/
+     * @see https://www.rfc-editor.org/rfc/rfc4122.html
+     *
+     * @return string|void
+     * @throws Exception
+     */
+    public static function uuid4() {
 
-        if ( isset( $_SERVER[ 'LOCAL_ADDR' ] ) ) {
-            $data .= $_SERVER[ 'LOCAL_ADDR' ]; // Windows only
+        // Generate 16 bytes (128 bits) of random data or use the data passed into the function.
+        if ( PHP_MAJOR_VERSION >= 7 ) {
+            $data = random_bytes( 16 );
+        } else {
+            $data = openssl_random_pseudo_bytes( 16 );
         }
 
-        if ( isset( $_SERVER[ 'LOCAL_PORT' ] ) ) {
-            $data .= $_SERVER[ 'LOCAL_PORT' ]; // Windows only
-        }
+        assert( strlen( $data ) == 16 );
 
-        $data .= $_SERVER[ 'REMOTE_ADDR' ];
-        $data .= $_SERVER[ 'REMOTE_PORT' ];
-        $hash = strtoupper( hash( 'ripemd128', $uid . $guid . md5( $data ) ) );
+        // Set version to 0100
+        $data[ 6 ] = chr( ord( $data[ 6 ] ) & 0x0f | 0x40 );
+        // Set bits 6-7 to 10
+        $data[ 8 ] = chr( ord( $data[ 8 ] ) & 0x3f | 0x80 );
 
-        $guid = '{' .
-                substr( $hash, 0, 8 ) .
-                '-' .
-                substr( $hash, 8, 4 ) .
-                '-' .
-                substr( $hash, 12, 4 ) .
-                '-' .
-                substr( $hash, 16, 4 ) .
-                '-' .
-                substr( $hash, 20, 12 ) .
-                '}';
-
-        \Log::doJsonLog( $guid );
-
-        return $guid;
+        // Output the 36 character UUID.
+        return vsprintf( '%s%s-%s-%s-%s-%s%s%s', str_split( bin2hex( $data ), 4 ) );
     }
 
     /**
