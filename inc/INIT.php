@@ -49,7 +49,7 @@ class INIT {
     public static $USE_COMPILED_ASSETS     = false;
     public static $ENABLE_MULTI_DOMAIN_API = false;
     public static $BLACKLIST_FILE_SIZE_MAX = 2097152;
-    public static $XSRF_TOKEN = 'XSRF-Token';
+    public static $XSRF_TOKEN = 'xsrf-token';
 
     /**
      * Use or not the js tracking codes macro import ( Ex: google analytics code injection )

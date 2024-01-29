@@ -30,7 +30,7 @@ class LoginController extends AbstractStatefulKleinController  {
     public function login() {
 
         // XSRF-Token
-        $xsrfToken = $this->request->headers()->get('XSRF-Token');
+        $xsrfToken = $this->request->headers()->get(INIT::$XSRF_TOKEN );
 
         if($xsrfToken === null){
             $this->response->code( 403 );
@@ -87,7 +87,7 @@ class LoginController extends AbstractStatefulKleinController  {
         $jwt = new SimpleJWT( [ "csrf" => Utils::createToken() ] );
         $jwt->setTimeToLive( 60 );
 
-        CookieManager::setCookie( INIT::$XSRF_TOKEN, $jwt->sign()['signature'],
+        CookieManager::setCookie( INIT::$XSRF_TOKEN, $jwt->jsonSerialize(),
             [
                 'expires'  => time() + 60, /* now + 60 seconds */
                 'path'     => '/',

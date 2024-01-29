@@ -17,7 +17,7 @@ export const loginUser = async (email, password) => {
   const tokenResponse = await fetch('/api/app/user/login/token')
 
   if (tokenResponse.ok) {
-    const token = Cookies.get('Xsrf-Token')
+    const token = Cookies.get('xsrf-token')
 
     Object.keys(paramsData).forEach((key) => {
       formData.append(key, paramsData[key])
@@ -27,7 +27,7 @@ export const loginUser = async (email, password) => {
       body: formData,
       credentials: 'include',
       headers: {
-        'Xsrf-Token': token,
+        'xsrf-token': token,
       },
     })
 
