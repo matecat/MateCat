@@ -437,6 +437,11 @@ class TMAnalysisWorker extends AbstractWorker {
             }
         }
 
+        // if MM says is ICE, return ICE
+        if($isICE){
+            return $tm_match_fuzzy_band;
+        }
+
         /**
          * Apply the TM discount rate and/or force the value obtained from TM for
          * matches between 50%-74% because is never returned in Fast Analysis; it's rate is set default as equals to NO_MATCH
