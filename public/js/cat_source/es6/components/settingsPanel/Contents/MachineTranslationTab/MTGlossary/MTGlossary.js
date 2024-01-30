@@ -107,6 +107,12 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
   )
 
   useEffect(() => {
+    setIsGlossaryCaseSensitive(
+      mtGlossaryProps?.isGlossaryCaseSensitive ?? false,
+    )
+  }, [mtGlossaryProps?.isGlossaryCaseSensitive])
+
+  useEffect(() => {
     let wasCleanup = false
 
     const glossaries = activeGlossariesRef.current
@@ -196,12 +202,12 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
       [availableTemplateProps.mt]: {
         ...prevTemplate[availableTemplateProps.mt],
         extra: {
-          ...(rowsActive.length
-            ? {
-                glossaries: rowsActive,
-                isGlossaryCaseSensitive,
-              }
-            : {}),
+          ...(rowsActive.length && {
+            glossaries: rowsActive,
+          }),
+          ...(isGlossaryCaseSensitive && {
+            ignore_glossary_case: isGlossaryCaseSensitive,
+          }),
         },
       },
     }))

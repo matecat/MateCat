@@ -114,7 +114,7 @@ export const TMCreateResourceRow = ({row}) => {
       [availableTemplateProps.tm]: [
         ...updatedKeys.filter(({isActive, id}) => isActive && id !== row.id),
         ...(currentKey ? [currentKey] : []),
-      ].map(({id, isActive, ...rest}) => rest),
+      ].map(({id, isActive, ...rest}) => rest), //eslint-disable-line
     }))
   }
 

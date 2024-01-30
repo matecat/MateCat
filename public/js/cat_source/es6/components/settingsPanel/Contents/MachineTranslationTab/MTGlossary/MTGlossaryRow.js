@@ -18,9 +18,13 @@ import IconEdit from '../../../../icons/IconEdit'
 import Checkmark from '../../../../../../../../img/icons/Checkmark'
 import Close from '../../../../../../../../img/icons/Close'
 import LabelWithTooltip from '../../../../common/LabelWithTooltip'
+import CreateProjectActions from '../../../../../actions/CreateProjectActions'
+import {SettingsPanelContext} from '../../../SettingsPanelContext'
 
 export const MTGlossaryRow = ({engineId, row, setRows, isReadOnly}) => {
   const {setNotification} = useContext(MachineTranslationTabContext)
+  const {projectTemplates, availableTemplateProps} =
+    useContext(SettingsPanelContext)
 
   const [isActive, setIsActive] = useState(row.isActive)
   const [isEditingName, setIsEditingName] = useState(false)
@@ -133,8 +137,47 @@ export const MTGlossaryRow = ({engineId, row, setRows, isReadOnly}) => {
     setIsWaitingResult(true)
     deleteMemoryGlossary({engineId, memoryId: row.id})
       .then((data) => {
-        if (data.id === row.id)
+        if (data.id === row.id) {
           setRows((prevState) => prevState.filter(({id}) => id !== row.id))
+
+          const mtProp = availableTemplateProps.mt
+
+          const templatesInvolved = projectTemplates
+            .filter((template) =>
+              template[mtProp].extra.glossaries?.some(
+                (value) => value === row.id,
+              ),
+            )
+            .map((template) => {
+              const mtObject = template[mtProp]
+              const {glossaries, ...extra} = mtObject.extra // eslint-disable-line
+              const glossariesFiltered = mtObject.extra.glossaries.filter(
+                (value) => value !== row.id,
+              )
+
+              return {
+                ...template,
+                [mtProp]: {
+                  ...mtObject,
+                  extra: {
+                    ...extra,
+                    ...(glossariesFiltered.length && {
+                      glossaries: glossariesFiltered,
+                    }),
+                  },
+                },
+              }
+            })
+
+          CreateProjectActions.updateProjectTemplates({
+            templates: templatesInvolved,
+            modifiedPropsCurrentProjectTemplate: {
+              [mtProp]: templatesInvolved.find(
+                ({isTemporary}) => isTemporary,
+              )?.[mtProp],
+            },
+          })
+        }
       })
       .catch(() => {
         setNotification({
