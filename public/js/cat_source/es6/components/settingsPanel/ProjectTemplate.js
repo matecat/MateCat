@@ -25,7 +25,6 @@ export const ProjectTemplate = ({portalTarget}) => {
     setProjectTemplates,
     currentProjectTemplate,
     modifyingCurrentTemplate,
-    availableTemplateProps,
   } = useContext(SettingsPanelContext)
 
   const [templateNameManageMode, setTemplateNameManageMode] = useState()

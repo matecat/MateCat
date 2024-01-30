@@ -3,9 +3,13 @@ import PropTypes from 'prop-types'
 import Trash from '../../../../../../../../img/icons/Trash'
 import {MachineTranslationTabContext} from '../MachineTranslationTab'
 import {deleteDeepLGlossary} from '../../../../../api/deleteDeepLGlossary'
+import {SettingsPanelContext} from '../../../SettingsPanelContext'
+import CreateProjectActions from '../../../../../actions/CreateProjectActions'
 
 export const DeepLGlossaryRow = ({engineId, row, setRows, isReadOnly}) => {
   const {setNotification} = useContext(MachineTranslationTabContext)
+  const {projectTemplates, availableTemplateProps} =
+    useContext(SettingsPanelContext)
 
   const [isActive, setIsActive] = useState(false)
   const [isWaitingResult, setIsWaitingResult] = useState(false)
@@ -26,13 +30,46 @@ export const DeepLGlossaryRow = ({engineId, row, setRows, isReadOnly}) => {
   }
 
   const deleteGlossary = () => {
+    const mtProp = availableTemplateProps.mt
+
+    const templatesInvolved = projectTemplates
+      .filter((template) => template[mtProp].extra.deepl_id_glossary === row.id)
+      .map((template) => {
+        const mtObject = template[mtProp]
+        const {deepl_id_glossary, ...extra} = mtObject.extra // eslint-disable-line
+
+        return {
+          ...template,
+          [mtProp]: {
+            ...mtObject,
+            extra: {
+              ...extra,
+              ...(deepl_id_glossary !== row.id && {
+                deepl_id_glossary,
+              }),
+            },
+          },
+        }
+      })
+
+    CreateProjectActions.updateProjectTemplates({
+      templates: templatesInvolved,
+      modifiedPropsCurrentProjectTemplate: {
+        [mtProp]: templatesInvolved.find(({isTemporary}) => isTemporary)?.[
+          mtProp
+        ],
+      },
+    })
+
+    return
     setNotification()
 
     setIsWaitingResult(true)
     deleteDeepLGlossary({engineId, id: row.id})
       .then((data) => {
-        if (data.id === row.id)
+        if (data.id === row.id) {
           setRows((prevState) => prevState.filter(({id}) => id !== row.id))
+        }
       })
       .catch(() => {
         setNotification({
