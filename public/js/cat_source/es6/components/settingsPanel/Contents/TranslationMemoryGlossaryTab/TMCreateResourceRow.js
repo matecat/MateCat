@@ -105,13 +105,18 @@ export const TMCreateResourceRow = ({row}) => {
     return true
   }
 
-  const executeModifyCurrentTemplate = (updatedKeys) =>
+  const executeModifyCurrentTemplate = (updatedKeys) => {
+    const currentKey = updatedKeys.find(
+      ({id, isActive}) => id === row.id && isActive,
+    )
     modifyingCurrentTemplate((prevTemplate) => ({
       ...prevTemplate,
-      [availableTemplateProps.tm]: updatedKeys
-        .filter(({isActive}) => isActive)
-        .map(({id, isActive, ...rest}) => rest),
+      [availableTemplateProps.tm]: [
+        ...updatedKeys.filter(({isActive, id}) => isActive && id !== row.id),
+        ...(currentKey ? [currentKey] : []),
+      ].map(({id, isActive, ...rest}) => rest),
     }))
+  }
 
   const getNewItem = (key) => ({
     r: isLookup,
@@ -123,7 +128,7 @@ export const TMCreateResourceRow = ({row}) => {
     key,
     is_shared: false,
     id: key,
-    isActive: true,
+    isActive: isLookup ? isLookup : !isLookup && !isUpdating ? false : true,
   })
 
   const createNewResource = () => {

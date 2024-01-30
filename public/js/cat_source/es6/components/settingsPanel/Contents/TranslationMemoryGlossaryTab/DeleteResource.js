@@ -7,9 +7,11 @@ import CatToolActions from '../../../../actions/CatToolActions'
 import Checkmark from '../../../../../../../img/icons/Checkmark'
 import Close from '../../../../../../../img/icons/Close'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
+import CreateProjectActions from '../../../../actions/CreateProjectActions'
 
 export const DeleteResource = ({row, onClose}) => {
-  const {setTmKeys} = useContext(SettingsPanelContext)
+  const {setTmKeys, projectTemplates, availableTemplateProps} =
+    useContext(SettingsPanelContext)
   const {setNotification} = useContext(TranslationMemoryGlossaryTabContext)
 
   const tmOutOnCloseRef = useRef()
@@ -22,7 +24,29 @@ export const DeleteResource = ({row, onClose}) => {
     deleteTmKey({key: row.key})
       .then(() => {
         setTmKeys((prevState) => prevState.filter(({key}) => key !== row.key))
-        if (APP.isCattool) CatToolActions.onTMKeysChangeStatus()
+        if (APP.isCattool) {
+          CatToolActions.onTMKeysChangeStatus()
+        } else {
+          const tmProp = availableTemplateProps.tm
+
+          const templatesInvolved = projectTemplates
+            .filter((template) =>
+              template[tmProp].some(({key}) => key === row.key),
+            )
+            .map((template) => ({
+              ...template,
+              [tmProp]: template[tmProp].filter(({key}) => key !== row.key),
+            }))
+
+          CreateProjectActions.updateProjectTemplates({
+            templates: templatesInvolved,
+            modifiedPropsCurrentProjectTemplate: {
+              [tmProp]: templatesInvolved.find(
+                ({isTemporary}) => isTemporary,
+              )?.[tmProp],
+            },
+          })
+        }
         tmOutOnCloseRef.current = setTimeout(onClose, 2000)
       })
       .catch(() => {

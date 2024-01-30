@@ -106,11 +106,15 @@ export const TMKeyRow = ({row, onExpandRow}) => {
           : tm,
       )
       setTmKeys(updatedKeys)
+      const currentKey = updatedKeys.find(
+        ({id, isActive}) => id === row.id && isActive,
+      )
       modifyingCurrentTemplate((prevTemplate) => ({
         ...prevTemplate,
-        [availableTemplateProps.tm]: updatedKeys
-          .filter(({isActive}) => isActive)
-          .map(({id, isActive, ...rest}) => rest),
+        [availableTemplateProps.tm]: [
+          ...updatedKeys.filter(({isActive, id}) => isActive && id !== row.id),
+          ...(currentKey ? [currentKey] : []),
+        ].map(({id, isActive, ...rest}) => rest), //eslint-disable-line
       }))
     } else {
       setSpecialRows((prevState) =>

@@ -127,9 +127,9 @@ function useProjectTemplates(canRetrieveTemplates) {
     setCurrentProjectTemplate(current)
   }
 
-  const currentProjectTemplateId = projectTemplates.find(
-    ({isSelected}) => isSelected,
-  )?.id
+  const {id: currentProjectTemplateId} =
+    projectTemplates.find(({isSelected}) => isSelected) ?? {}
+
   // set current project template
   if (
     typeof currentProjectTemplateId === 'number' &&

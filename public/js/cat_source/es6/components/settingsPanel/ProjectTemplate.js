@@ -10,6 +10,9 @@ import {updateProjectTemplate} from '../../api/updateProjectTemplate'
 import {MenuButton} from '../common/MenuButton/MenuButton'
 import {MenuButtonItem} from '../common/MenuButton/MenuButtonItem'
 import DotsHorizontal from '../../../../../img/icons/DotsHorizontal'
+import CreateProjectStore from '../../stores/CreateProjectStore'
+import NewProjectConstants from '../../constants/NewProjectConstants'
+import {flushSync} from 'react-dom'
 
 const TEMPLATE_NAME_MANAGE_MODE = {
   NEW_ONE: 'newOne',
@@ -17,8 +20,13 @@ const TEMPLATE_NAME_MANAGE_MODE = {
 }
 
 export const ProjectTemplate = ({portalTarget}) => {
-  const {projectTemplates, setProjectTemplates, currentProjectTemplate} =
-    useContext(SettingsPanelContext)
+  const {
+    projectTemplates,
+    setProjectTemplates,
+    currentProjectTemplate,
+    modifyingCurrentTemplate,
+    availableTemplateProps,
+  } = useContext(SettingsPanelContext)
 
   const [templateNameManageMode, setTemplateNameManageMode] = useState()
   const [templateName, setTemplateName] = useState('')
@@ -29,6 +37,82 @@ export const ProjectTemplate = ({portalTarget}) => {
     ({isTemporary}) => isTemporary,
   )
   const isStandardTemplateBool = isStandardTemplate(currentTemplate)
+
+  useEffect(() => {
+    const updateProjectTemplatesAction = ({
+      templates,
+      modifiedPropsCurrentProjectTemplate,
+    }) => {
+      const promiseTemplates = templates
+        .filter(({isTemporary, id}) => !isTemporary && !isStandardTemplate(id))
+        .map(
+          (template) =>
+            new Promise((resolve, reject) => {
+              /* eslint-disable no-unused-vars */
+              const {
+                created_at,
+                id,
+                uid,
+                modified_at,
+                isTemporary,
+                isSelected,
+                ...modifiedTemplate
+              } = template
+              //     /* eslint-enable no-unused-vars */
+
+              updateProjectTemplate({
+                id: template.id,
+                template: modifiedTemplate,
+              })
+                .then((template) => resolve(template))
+                .catch((error) => reject())
+            }),
+        )
+
+      Promise.all(promiseTemplates).then((values) => {
+        flushSync(() =>
+          setProjectTemplates((prevState) =>
+            prevState.map((template) => {
+              const update = values.find(
+                ({id} = {}) => id === template.id && !template.isTemporary,
+              )
+              return {...template, ...(update && {...update})}
+            }),
+          ),
+        )
+
+        const currentOriginalTemplate = values.find(
+          ({id, isTemporary}) =>
+            id === currentProjectTemplate.id && !isTemporary,
+        )
+
+        modifyingCurrentTemplate((prevTemplate) => ({
+          ...prevTemplate,
+          ...(templates.find(
+            ({isTemporary, id}) => isTemporary && !isStandardTemplate(id),
+          )
+            ? {
+                ...modifiedPropsCurrentProjectTemplate,
+                ...(currentOriginalTemplate && {
+                  modified_at: currentOriginalTemplate.modified_at,
+                }),
+              }
+            : currentOriginalTemplate),
+        }))
+      })
+    }
+
+    CreateProjectStore.addListener(
+      NewProjectConstants.UPDATE_PROJECT_TEMPLATES,
+      updateProjectTemplatesAction,
+    )
+
+    return () =>
+      CreateProjectStore.removeListener(
+        NewProjectConstants.UPDATE_PROJECT_TEMPLATES,
+        updateProjectTemplatesAction,
+      )
+  }, [currentProjectTemplate.id, setProjectTemplates, modifyingCurrentTemplate])
 
   useEffect(() => {
     setTemplateNameManageMode()
@@ -226,7 +310,11 @@ export const ProjectTemplate = ({portalTarget}) => {
             <button
               className="template-button"
               data-testid="create-template"
-              onClick={createTemplate}
+              onClick={
+                templateNameManageMode === TEMPLATE_NAME_MANAGE_MODE.NEW_ONE
+                  ? createTemplate
+                  : updateTemplate
+              }
             >
               Confirm
             </button>
