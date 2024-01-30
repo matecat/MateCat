@@ -78,8 +78,5 @@
     "whatwg-fetch": "^3.6.20",
     "undici": "^5.28.2"
   },
-  "resolutions": {
-    "wrap-ansi": "^7.0.0"
-  },
   "version": "2.20.150"
 }
