@@ -88,6 +88,13 @@ const CommentsActions = {
       actionType: CommentsConstants.OPEN_MENU,
     })
   },
+  saveDraftComment: (sid, comment) => {
+    AppDispatcher.dispatch({
+      actionType: CommentsConstants.SAVE_DRAFT,
+      sid,
+      comment,
+    })
+  },
 }
 
 export default CommentsActions
