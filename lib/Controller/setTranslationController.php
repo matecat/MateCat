@@ -6,14 +6,9 @@ use Exceptions\ControllerReturnException;
 use Exceptions\NotFoundException;
 use Features\ReviewExtended\ReviewUtils;
 use Features\TranslationVersions;
-use Features\TranslationVersions\TranslationVersionsHandler;
 use Files\FilesPartsDao;
 use LQA\QA;
-use Matecat\SubFiltering\Commons\Pipeline;
 use Matecat\SubFiltering\MateCatFilter;
-use Matecat\SubFiltering\Filters\FromViewNBSPToSpaces;
-use Matecat\SubFiltering\Filters\PhCounter;
-use Matecat\SubFiltering\Filters\SprintfToPH;
 
 class setTranslationController extends ajaxController {
 
@@ -308,53 +303,26 @@ class setTranslationController extends ajaxController {
         $dao           = new \Segments_SegmentDao( \Database::obtain() );
         $this->segment = $dao->getById( $this->id_segment );
 
-        // compare segment-translation and get results
-        // QA here stands for Quality Assurance
-        //
-        // NOTE 2020-01-21
-        // ------------------------------------------------------
-        // In order to allow users to insert raw text we need a custom pipeline.
-        //
-        // After counting PH tags in source segment we initialize a Pipeline and update its Id count.
-        //
-        // Then the Pipeline can be used to transform the raw translation. Example:
-        //
-        // <ph id="mtc_1" equiv-text="base64:JTEkZA=="/> 根據當地稅率低，每次預訂的節省價值都不能執行預訂總額的10% <ph id="mtc_2" equiv-text="base64:JSU="/> dddscfc --------> <ph id="mtc_1" equiv-text="base64:JTEkZA=="/> 根據當地稅率低，每次預訂的節省價值都不能執行預訂總額的10% <ph id="mtc_2" equiv-text="base64:JSU="/> dddscfc
-        //
-        $counter = new PhCounter();
-        $counter->transform( $this->__postInput[ 'translation' ] );
-
-        $pipeline = new Pipeline($this->chunk->source, $this->chunk->target);
-        for ( $i = 0; $i < $counter->getCount(); $i++ ) {
-            $pipeline->getNextId();
-        }
-
-        $pipeline->addLast( new FromViewNBSPToSpaces() ); //nbsp are not valid xml entities we have to remove them before the QA check ( Invalid DOM )
-        $pipeline->addLast( new SprintfToPH() );
-
-        $src = $pipeline->transform( $this->__postInput[ 'segment' ] );
-        $trg = $pipeline->transform( $this->__postInput[ 'translation' ] );
-
-        $check = new QA( $src, $trg );
-        $check->setChunk($this->chunk);
+        $check = new QA( $this->__postInput[ 'segment' ], $this->__postInput[ 'translation' ] );
+        $check->setChunk( $this->chunk );
         $check->setFeatureSet( $this->featureSet );
         $check->setSourceSegLang( $this->chunk->source );
         $check->setTargetSegLang( $this->chunk->target );
         $check->setIdSegment( $this->id_segment );
 
-        if(isset($this->__postInput[ 'characters_counter' ] )){
-            $check->setCharactersCount($this->__postInput[ 'characters_counter' ]);
+        if ( isset( $this->__postInput[ 'characters_counter' ] ) ) {
+            $check->setCharactersCount( $this->__postInput[ 'characters_counter' ] );
         }
 
         $check->performConsistencyCheck();
 
         if ( $check->thereAreWarnings() ) {
             $err_json    = $check->getWarningsJSON();
-            $translation = $this->filter->fromLayer1ToLayer0( $this->__postInput[ 'translation' ] );
+            $translation = $this->filter->fromLayer2ToLayer0( $this->__postInput[ 'translation' ] );
         } else {
             $err_json         = '';
             $targetNormalized = $check->getTrgNormalized();
-            $translation      = $this->filter->fromLayer1ToLayer0( $targetNormalized );
+            $translation      = $this->filter->fromLayer2ToLayer0( $targetNormalized );
         }
 
         //PATCH TO FIX BOM INSERTIONS
@@ -373,6 +341,9 @@ class setTranslationController extends ajaxController {
 
         $old_translation = $this->_getOldTranslation();
 
+        $old_suggestion_array = json_decode($old_translation->suggestions_array);
+        $old_suggestion = ($this->chosen_suggestion_index !== null ? @$old_suggestion_array[$this->chosen_suggestion_index-1] : null);
+
         $new_translation                         = new Translations_SegmentTranslationStruct();
         $new_translation->id_segment             = $this->id_segment;
         $new_translation->id_job                 = $this->id_job;
@@ -380,9 +351,29 @@ class setTranslationController extends ajaxController {
         $new_translation->segment_hash           = $this->segment->segment_hash;
         $new_translation->translation            = $translation;
         $new_translation->serialized_errors_list = $err_json;
-        $new_translation->suggestion_position    = $this->chosen_suggestion_index;
+        $new_translation->suggestion_position    = ($this->chosen_suggestion_index !== null ? $this->chosen_suggestion_index : $old_translation->suggestion_position);
         $new_translation->warning                = $check->thereAreWarnings();
         $new_translation->translation_date       = date( "Y-m-d H:i:s" );
+        $new_translation->suggestion             = ((!empty($old_suggestion)) ? $old_suggestion->translation : null);
+        $new_translation->suggestion_source      = $old_translation->suggestion_source;
+        $new_translation->suggestion_match       = $old_translation->suggestion_match;
+
+        // update suggestion
+        if( $this->canUpdateSuggestion($new_translation, $old_translation, $old_suggestion) ){
+            $new_translation->suggestion = $old_suggestion->translation;
+
+            if($old_suggestion->match !== "MT"){
+                $new_translation->suggestion_match = $old_suggestion->match;
+            }
+
+            if ( $old_suggestion->match == "85%" || $old_suggestion->match == "86%" || $old_suggestion->created_by == 'MT'  ) {
+                $new_translation->suggestion_source = 'MT';
+            } elseif( $old_suggestion->match == 'NO_MATCH' ) {
+                $new_translation->suggestion_source = 'NO_MATCH';
+            } else {
+                $new_translation->suggestion_source = 'TM';
+            }
+        }
 
         // time_to_edit should be increased only if the translation was changed
         $new_translation->time_to_edit = 0;
@@ -709,6 +700,55 @@ class setTranslationController extends ajaxController {
         $this->result[ 'stats' ]       = $this->featureSet->filter( 'filterStatsResponse', $this->result[ 'stats' ], [ 'chunk' => $this->chunk, 'segmentId' => $this->id_segment ] );
 
         $this->evalSetContribution( $new_translation, $old_translation );
+    }
+
+    /**
+     * Update suggestion only if:
+     *
+     * 1) the new state is one of these:
+     *      - NEW
+     *      - DRAFT
+     *      - TRANSLATED
+     *
+     * 2) the old state is one of these:
+     *      - NEW
+     *      - DRAFT
+     *
+     * @param Translations_SegmentTranslationStruct $new_translation
+     * @param Translations_SegmentTranslationStruct $old_translation
+     * @param null $old_suggestion
+     * @return bool
+     */
+    private function canUpdateSuggestion(Translations_SegmentTranslationStruct $new_translation, Translations_SegmentTranslationStruct $old_translation, $old_suggestion = null)
+    {
+        if($old_suggestion === null){
+            return false;
+        }
+
+        $allowedStatuses = [
+            Constants_TranslationStatus::STATUS_NEW,
+            Constants_TranslationStatus::STATUS_DRAFT,
+            Constants_TranslationStatus::STATUS_TRANSLATED,
+        ];
+
+        if(!in_array($new_translation->status, $allowedStatuses)){
+            return false;
+        }
+
+        if(!in_array($old_translation->status, $allowedStatuses)){
+            return false;
+        }
+
+        if(
+            !empty($old_suggestion) and
+            isset($old_suggestion->translation) and
+            isset($old_suggestion->match) and
+            isset($old_suggestion->created_by)
+        ){
+            return true;
+        }
+
+        return false;
     }
 
     /**

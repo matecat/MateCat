@@ -243,9 +243,6 @@ SRC;
         $this->setExpectedException( 'LogicException' );
         $normalized = $check->getTrgNormalized();
 
-        $check->tryRealignTagID();
-        $normalized = $check->getTrgNormalized();
-
         $this->assertFalse( $check->thereAreErrors() );
 
         $check->realignMTSpaces();

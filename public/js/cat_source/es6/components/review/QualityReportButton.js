@@ -42,21 +42,23 @@ export const QualityReportButton = ({
   }
 
   const updateQr = (qr) => {
-    const revNumber = revisionNumber ? revisionNumber : 1
-    const review = qr.chunk.reviews.find(function (value) {
-      return value.revision_number === revNumber
-    })
-    let newVote = ''
-    if (review) {
-      if (review.is_pass != null && isReview) {
-        newVote = review.is_pass ? 'excellent' : 'fail'
+    if (qr) {
+      const revNumber = revisionNumber ? revisionNumber : 1
+      const review = qr.chunk.reviews.find(function (value) {
+        return value.revision_number === revNumber
+      })
+      let newVote = ''
+      if (review) {
+        if (review.is_pass != null && isReview) {
+          newVote = review.is_pass ? 'excellent' : 'fail'
+        }
+        setIsPass(review.is_pass)
+        setVote(newVote)
+        // setScore(review.score)
+        setFeedback(review.feedback)
       }
-      setIsPass(review.is_pass)
-      setVote(newVote)
-      // setScore(review.score)
-      setFeedback(review.feedback)
+      CatToolActions.updateQualityReport(qr)
     }
-    CatToolActions.updateQualityReport(qr)
   }
 
   const reloadQualityReportFn = () => {

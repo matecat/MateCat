@@ -7,6 +7,11 @@ import SegmentFilter from '../header/cattol/segment_filter/segment_filter'
 import SegmentUtils from '../../utils/segmentUtils'
 import CattoolConstants from '../../constants/CatToolConstants'
 import CommonUtils from '../../utils/commonUtils'
+import {
+  decodePlaceholdersToPlainText,
+  removeTagsFromText,
+} from './utils/DraftMatecatUtils/tagUtils'
+import SegmentActions from '../../actions/SegmentActions'
 
 class SegmentButton extends React.Component {
   constructor(props) {
@@ -45,13 +50,19 @@ class SegmentButton extends React.Component {
   clickOnTranslatedButton(event, gotoUntranslated) {
     this.trackTranslatedClick()
     setTimeout(() =>
-      UI.clickOnTranslatedButton(this.props.segment, gotoUntranslated),
+      SegmentActions.clickOnTranslatedButton(
+        this.props.segment,
+        gotoUntranslated,
+      ),
     )
   }
 
   clickOnApprovedButton(event, gotoNexUnapproved) {
     setTimeout(() =>
-      UI.clickOnApprovedButton(this.props.segment, gotoNexUnapproved),
+      SegmentActions.clickOnApprovedButton(
+        this.props.segment,
+        gotoNexUnapproved,
+      ),
     )
   }
 
@@ -66,6 +77,24 @@ class SegmentButton extends React.Component {
   }
 
   clickOnGuessTags(e) {
+    const {segment} = this.props
+    const contribution = segment.contributions?.matches
+      ? this.props.segment.contributions.matches[0]
+      : undefined
+    if (contribution && contribution.match === 'MT') {
+      const currentTranslation = segment.decodedTranslation
+      const contributionText = removeTagsFromText(
+        decodePlaceholdersToPlainText(contribution.translation),
+      )
+      if (currentTranslation === contributionText) {
+        SegmentActions.replaceEditAreaTextContent(
+          segment.sid,
+          contribution.translation,
+        )
+        SegmentActions.setSegmentAsTagged(segment.sid)
+        return
+      }
+    }
     e.preventDefault()
     $(e.target).addClass('disabled')
     setTimeout(() => UI.startSegmentTagProjection(this.props.segment.sid))
@@ -93,7 +122,7 @@ class SegmentButton extends React.Component {
     )
 
     let revisionCompleted = false
-    if (ReviewExtended.enabled() && this.state.progress) {
+    if (config.isReview && this.state.progress) {
       revisionCompleted =
         config.revisionNumber === 1
           ? this.state.progress.revision1Completed
@@ -111,18 +140,18 @@ class SegmentButton extends React.Component {
         nextSegment.status === 'DRAFT')
     const filtering =
       SegmentFilter.enabled() && SegmentFilter.filtering() && SegmentFilter.open
-    const className = ReviewExtended.enabled()
-      ? 'revise-button-' + ReviewExtended.number
+    const className = config.isReview
+      ? 'revise-button-' + config.revisionNumber
       : ''
-    enableGoToNext = ReviewExtended.enabled()
-      ? enableGoToNext &&
-        (isNull(nextSegment.revision_number) ||
-          (!isNull(nextSegment.revision_number) &&
-            (nextSegment.revision_number === config.revisionNumber ||
-              (nextSegment.revision_number === 2 &&
-                config.revisionNumber === 1))) || //Not Same Rev
-          (SegmentUtils.isIceSegment(nextSegment) && !nextSegment.unlocked)) // Ice Locked
-      : enableGoToNext && nextSegment.status.toLowerCase() === 'approved' // Review Simple
+    enableGoToNext =
+      enableGoToNext &&
+      (isNull(nextSegment.revision_number) ||
+        (!isNull(nextSegment.revision_number) &&
+          (nextSegment.revision_number === config.revisionNumber ||
+            (nextSegment.revision_number === 2 &&
+              config.revisionNumber === 1))) || //Not Same Rev
+        (SegmentUtils.isIceSegment(nextSegment) && !nextSegment.unlocked)) // Ice Locked
+
     nextButton = enableGoToNext ? (
       <li>
         <a
@@ -325,8 +354,8 @@ class SegmentButton extends React.Component {
 
   getReviewButton() {
     const classDisable = this.props.disabled ? 'disabled' : ''
-    const className = ReviewExtended.enabled()
-      ? 'revise-button-' + ReviewExtended.number
+    const className = config.isReview
+      ? 'revise-button-' + config.revisionNumber
       : ''
 
     return (

@@ -12,6 +12,7 @@ EventEmitter.prototype.setMaxListeners(0)
 let CatToolStore = assign({}, EventEmitter.prototype, {
   files: null,
   qr: null,
+  languages: [],
   searchResults: {
     searchResults: [], // Array
     occurrencesList: [],
@@ -23,6 +24,7 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
   tmKeys: null,
   keysDomains: null,
   haveKeysGlossary: undefined,
+  jobMetadata: undefined,
   storeFilesInfo: function (files) {
     this.files = files
   },
@@ -91,6 +93,12 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
   },
   setHaveKeysGlossary: function (value) {
     this.haveKeysGlossary = value
+  },
+  setLanguages: function (languages) {
+    this.languages = languages
+  },
+  getLanguages: function () {
+    return this.languages
   },
   emitChange: function () {
     this.emit.apply(this, arguments)
@@ -228,6 +236,11 @@ AppDispatcher.register(function (action) {
       break
     case CatToolConstants.OPEN_SETTINGS_PANEL:
       CatToolStore.emitChange(CatToolConstants.OPEN_SETTINGS_PANEL, {
+        ...action,
+      })
+      break
+    case CatToolConstants.GET_JOB_METADATA:
+      CatToolStore.emitChange(CatToolConstants.GET_JOB_METADATA, {
         ...action,
       })
       break

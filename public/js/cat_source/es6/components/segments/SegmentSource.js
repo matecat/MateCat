@@ -48,15 +48,13 @@ class SegmentSource extends React.Component {
     const decorator = new CompositeDecorator(this.decoratorsStructure)
     // Initialise EditorState
     const plainEditorState = EditorState.createEmpty(decorator)
-    // Escape html
-    const translation = DraftMatecatUtils.unescapeHTMLLeaveTags(
-      this.props.segment.segment,
-    )
+    const translation = this.props.segment.segment
+
     // If GuessTag enabled, clean string from tag
     const cleanSource = SegmentUtils.checkCurrentSegmentTPEnabled(
       this.props.segment,
     )
-      ? DraftMatecatUtils.cleanSegmentString(translation)
+      ? DraftMatecatUtils.removeTagsFromText(translation)
       : translation
     // New EditorState with translation
     const contentEncoded = DraftMatecatUtils.encodeContent(
@@ -116,13 +114,11 @@ class SegmentSource extends React.Component {
     if (sid === this.props.segment.sid) {
       // Escape html
 
-      const translation = DraftMatecatUtils.unescapeHTMLLeaveTags(
-        this.props.segment.segment,
-      )
+      const translation = this.props.segment.segment
 
       // If GuessTag enabled, clean string from tag
       const cleanSource = SegmentUtils.checkCurrentSegmentTPEnabled()
-        ? DraftMatecatUtils.cleanSegmentString(translation)
+        ? DraftMatecatUtils.removeTagsFromText(translation)
         : translation
       // TODO: get taggedSource from store
       const contentEncoded = DraftMatecatUtils.encodeContent(
@@ -234,9 +230,9 @@ class SegmentSource extends React.Component {
       const {editorState, tagRange} = this.state
       let contentState = editorState.getCurrentContent()
       let plainText = contentState.getPlainText()
-      const lxqDecodedSource =
-        DraftMatecatUtils.prepareTextForLexiqa(editorState)
       const {decodedSegment} = DraftMatecatUtils.decodeSegment(editorState)
+      const lxqDecodedSource =
+        DraftMatecatUtils.prepareTextForLexiqa(decodedSegment)
       SegmentActions.updateSource(
         this.props.segment.sid,
         decodedSegment,
@@ -534,7 +530,6 @@ class SegmentSource extends React.Component {
       copyFragment,
       onBlurEvent,
       dragFragment,
-      onDragEndEvent,
       addSplitTag,
       splitSegmentNew,
       preventEdit,
@@ -550,7 +545,6 @@ class SegmentSource extends React.Component {
           onCopy: copyFragment,
           onBlur: onBlurEvent,
           onDragStart: dragFragment,
-          onDragEnd: onDragEndEvent,
           onMouseUp: () => {
             this.setState({
               isShowingOptionsToolbar: !this.editor._latestEditorState
@@ -588,26 +582,27 @@ class SegmentSource extends React.Component {
 
     const optionsToolbar = this.state.isShowingOptionsToolbar && (
       <ul className="optionsToolbar">
-        {Boolean(config.isOpenAiEnabled) && !SegmentUtils.isAiAssistantAuto() && (
-          <li
-            title={
-              isEnabledAiAssistantButton
-                ? 'See the meaning of the highlighted text in this context'
-                : "Your selection is over the AI assistant's limit of 3 words, 6 Chinese characters or 10 Japanese characters, please reduce it."
-            }
-            className={!isEnabledAiAssistantButton ? 'disabled' : ''}
-            onMouseDown={() => {
-              if (isEnabledAiAssistantButton) {
-                SegmentActions.helpAiAssistant({
-                  sid: segment.sid,
-                  value: getSelectedWords(),
-                })
+        {Boolean(config.isOpenAiEnabled) &&
+          !SegmentUtils.isAiAssistantAuto() && (
+            <li
+              title={
+                isEnabledAiAssistantButton
+                  ? 'See the meaning of the highlighted text in this context'
+                  : "Your selection is over the AI assistant's limit of 3 words, 6 Chinese characters or 10 Japanese characters, please reduce it."
               }
-            }}
-          >
-            <Assistant />
-          </li>
-        )}
+              className={!isEnabledAiAssistantButton ? 'disabled' : ''}
+              onMouseDown={() => {
+                if (isEnabledAiAssistantButton) {
+                  SegmentActions.helpAiAssistant({
+                    sid: segment.sid,
+                    value: getSelectedWords(),
+                  })
+                }
+              }}
+            >
+              <Assistant />
+            </li>
+          )}
         <li
           title="Click to add the highlighted text to the glossary"
           onMouseDown={() => {
@@ -886,10 +881,6 @@ class SegmentSource extends React.Component {
       e.dataTransfer.setData('text/plain', fragment)
       e.dataTransfer.setData('text/html', fragment)
     }
-  }
-
-  onDragEndEvent = (e) => {
-    e.dataTransfer.clearData()
   }
 
   getUpdatedSegmentInfo = () => {

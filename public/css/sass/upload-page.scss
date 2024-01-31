@@ -1587,6 +1587,17 @@ button.ui-button::-moz-focus-inner {
   }
 }
 
+.select-without-private-keys {
+  .dropdown__option--is-no-results-found {
+    display: none;
+  }
+
+  .no-private-keys-message {
+    padding: 10px 15px;
+    display: block;
+  }
+}
+
 .translate-box.settings {
   display: flex;
   align-items: center;
@@ -2969,5 +2980,16 @@ a.pull-right.confirmDelete {
   opacity: 0.8;
   &:hover {
     opacity: 1;
+  }
+}
+
+.not-supported-container {
+  display: grid;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  color: #002b5a;
+  div.buttons {
+    padding-top: 20px;
   }
 }

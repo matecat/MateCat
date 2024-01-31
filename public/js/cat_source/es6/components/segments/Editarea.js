@@ -28,7 +28,6 @@ import updateLexiqaWarnings from './utils/DraftMatecatUtils/updateLexiqaWarnings
 import {tagSignatures} from './utils/DraftMatecatUtils/tagModel'
 import SegmentActions from '../../actions/SegmentActions'
 import getFragmentFromSelection from './utils/DraftMatecatUtils/DraftSource/src/component/handlers/edit/getFragmentFromSelection'
-import TagUtils from '../../utils/tagUtils'
 import matchTypingSequence from '../../utils/matchTypingSequence/matchTypingSequence'
 import {SegmentContext} from './SegmentContext'
 import CatToolStore from '../../stores/CatToolStore'
@@ -86,14 +85,13 @@ class Editarea extends React.Component {
     const decorator = new CompositeDecorator(this.decoratorsStructure)
     //const decorator = new CompoundDecorator(this.decoratorsStructure);
     // Escape html
-    const translation = DraftMatecatUtils.unescapeHTMLLeaveTags(
-      this.props.translation,
-    )
+    const translation = this.props.translation
+
     // If GuessTag is Enabled, clean translation from tags
     const cleanTranslation = SegmentUtils.checkCurrentSegmentTPEnabled(
       this.props.segment,
     )
-      ? DraftMatecatUtils.cleanSegmentString(translation)
+      ? DraftMatecatUtils.removeTagsFromText(translation)
       : translation
     // Inizializza Editor State con solo testo
     const plainEditorState = EditorState.createEmpty(decorator)
@@ -104,6 +102,7 @@ class Editarea extends React.Component {
     const {editorState, tagRange} = contentEncoded
 
     this.isShiftPressedOnNavigation = createRef()
+    this.wasTripleClickTriggered = createRef()
     this.compositionEventChecks = createRef()
 
     this.state = {
@@ -125,9 +124,10 @@ class Editarea extends React.Component {
       },
       previousSourceTagMap: null,
     }
-    const cleanTagsTranslation = TagUtils.decodePlaceholdersToPlainText(
-      DraftMatecatUtils.cleanSegmentString(translation),
-    )
+    const cleanTagsTranslation =
+      DraftMatecatUtils.decodePlaceholdersToPlainText(
+        DraftMatecatUtils.removeTagsFromText(translation),
+      )
     this.props.updateCounter(
       DraftMatecatUtils.getCharactersCounter(cleanTagsTranslation),
     )
@@ -234,7 +234,7 @@ class Editarea extends React.Component {
       const {editorState} = this.state
       const contentEncoded = DraftMatecatUtils.encodeContent(
         editorState,
-        DraftMatecatUtils.unescapeHTMLLeaveTags(translation),
+        translation,
         this.props.segment.sourceTagMap,
       )
       // this must be done to make the Undo action possible, otherwise encodeContent will delete all editor history
@@ -247,9 +247,10 @@ class Editarea extends React.Component {
       )
       newEditorState = EditorState.moveSelectionToEnd(newEditorState)
 
-      const cleanTagsTranslation = TagUtils.decodePlaceholdersToPlainText(
-        DraftMatecatUtils.cleanSegmentString(translation),
-      )
+      const cleanTagsTranslation =
+        DraftMatecatUtils.decodePlaceholdersToPlainText(
+          DraftMatecatUtils.removeTagsFromText(translation),
+        )
       this.props.updateCounter(
         DraftMatecatUtils.getCharactersCounter(cleanTagsTranslation),
       )
@@ -317,7 +318,7 @@ class Editarea extends React.Component {
       // Add missing tag to store for highlight warnings on tags
       const {missingTags} = checkForMissingTags(sourceTagMap, currentTagRange)
       const lxqDecodedTranslation =
-        DraftMatecatUtils.prepareTextForLexiqa(editorState)
+        DraftMatecatUtils.prepareTextForLexiqa(decodedSegment)
       //const currentTagRange = matchTag(decodedSegment); //deactivate if updateTagsInEditor is active
       SegmentActions.updateTranslation(
         segment.sid,
@@ -327,8 +328,8 @@ class Editarea extends React.Component {
         missingTags,
         lxqDecodedTranslation,
       )
-      const cleanTranslation = TagUtils.decodePlaceholdersToPlainText(
-        DraftMatecatUtils.cleanSegmentString(decodedSegment),
+      const cleanTranslation = DraftMatecatUtils.decodePlaceholdersToPlainText(
+        DraftMatecatUtils.removeTagsFromText(decodedSegment),
       )
       this.props.updateCounter(
         DraftMatecatUtils.getCharactersCounter(cleanTranslation),
@@ -473,6 +474,11 @@ class Editarea extends React.Component {
     const {editor: editorElement} = this.editor
     editorElement.addEventListener('compositionstart', this.onCompositionStart)
     editorElement.addEventListener('compositionend', this.onCompositionEnd)
+
+    new CommonUtils.DetectTripleClick(
+      this.editAreaRef,
+      () => (this.wasTripleClickTriggered.current = true),
+    )
   }
 
   copyGlossaryToEditArea = (segment, glossaryTranslation) => {
@@ -569,12 +575,17 @@ class Editarea extends React.Component {
           selection.focusOffset < selection.focusNode.length / 2
             ? 'left'
             : 'right'
+
         adjustCaretPosition({
           direction,
           isShiftPressed: this.isShiftPressedOnNavigation.current,
+          shouldMoveCursorPreviousElementTag:
+            this.wasTripleClickTriggered.current,
         })
       }
     }
+
+    this.wasTripleClickTriggered.current = false
   }
 
   onCompositionStart = () => {
@@ -819,7 +830,15 @@ class Editarea extends React.Component {
       !isSelectedEntity(this.state.editorState) &&
       window.getSelection().type === 'Caret'
     ) {
-      const direction = e.key === 'Backspace' ? 'left' : 'right'
+      const isRTL = Boolean(config.isTargetRTL)
+      const direction =
+        e.key === 'Backspace'
+          ? !isRTL
+            ? 'left'
+            : 'right'
+          : !isRTL
+          ? 'right'
+          : 'left'
 
       const updatedStateNearZwsp = checkCaretIsNearZwsp({
         editorState: this.state.editorState,
@@ -1351,9 +1370,7 @@ class Editarea extends React.Component {
     } else if (text) {
       // we're handling an external copy, special chars must be striped from text
       // and we have to add tag for external entities like nbsp or tab
-      let cleanText = DraftMatecatUtils.cleanSegmentString(
-        DraftMatecatUtils.unescapeHTML(text),
-      )
+      let cleanText = DraftMatecatUtils.removeTagsFromText(text)
       // Replace with placeholder
       const nbspSign = tagSignatures['nbsp'].encodedPlaceholder
       const tabSign = tagSignatures['tab'].encodedPlaceholder

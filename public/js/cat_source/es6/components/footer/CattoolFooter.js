@@ -84,7 +84,6 @@ export const CattolFooter = ({
   source,
   target,
   isCJK,
-  isReview,
 }) => {
   const [stats, setStats] = React.useState()
   const [isShowingTooltip, setIsShowingTooltip] = useState({
@@ -259,7 +258,7 @@ export const CattolFooter = ({
           onClick={(e) => onClickTodo(e, 'todo')}
           onMouseLeave={removeTooltip}
         >
-          {isReview ? (
+          {config.isReview ? (
             <div id="stat-todo">
               <span>To-do</span> :{' '}
               <strong>{stats?.revise_todo_formatted || '-'}</strong>

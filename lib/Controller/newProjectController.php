@@ -149,7 +149,7 @@ class newProjectController extends viewController {
                 Utils::deleteDir( INIT::$UPLOAD_REPOSITORY . '/' . $_COOKIE[ 'upload_session' ] . '/' );
             }
 
-            $this->guid = Utils::createToken();
+            $this->guid = Utils::uuid4();
             CookieManager::setCookie( "upload_session", $this->guid,
                 [
                     'expires'  => time() + 86400,
@@ -217,33 +217,10 @@ class newProjectController extends viewController {
         return $count;
     }
 
-    private function getCategories( $output = "array" ) {
-        $ret = [];
-        foreach ( INIT::$SUPPORTED_FILE_TYPES as $key => $value ) {
-            $val = [];
-            foreach ( $value as $ext => $info ) {
-                $val[] = [
-                    'ext'   => $ext,
-                    'class' => $info[ 2 ]
-                ];
-            }
-            $val = array_chunk( $val, 1 );
-
-            $ret[ $key ] = $val;
-        }
-        if ( $output == "json" ) {
-            return json_encode( $ret );
-        }
-
-        return $ret;
-    }
-
     public function setTemplateVars() {
         $source_languages = $this->lang_handler->getEnabledLanguages( 'en' );
         $target_languages = $this->lang_handler->getEnabledLanguages( 'en' );
 
-        $this->template->languages_array     = json_encode( $this->lang_handler->getEnabledLanguages( 'en' ) );
-        $this->template->languages_array_obj = $this->lang_handler->getEnabledLanguages( 'en' );
         $this->template->subject_array       = $this->subjectArray;
 
         $this->template->project_name = $this->project_name;
@@ -258,13 +235,9 @@ class newProjectController extends viewController {
 
         $this->template->isUploadTMXAllowed = false;
         if ( !empty( INIT::$FILTERS_ADDRESS ) ) {
-            $this->template->allowed_file_types = $this->getExtensions( "" );
             $this->template->isUploadTMXAllowed = $this->isUploadTMXAllowed();
-        } else {
-            $this->template->allowed_file_types = $this->getExtensions( "default" );
         }
 
-        $this->template->supported_file_types_array            = $this->getCategories();
         $this->template->unsupported_file_types                = $this->getExtensionsUnsupported();
         $this->template->formats_number                        = $this->countExtensions();
         $this->template->volume_analysis_enabled               = INIT::$VOLUME_ANALYSIS_ENABLED;

@@ -95,6 +95,11 @@ class Users_UserDao extends DataAccess_AbstractDao {
         return $stmt->fetch();
     }
 
+    /**
+     * @param Users_UserStruct $obj
+     * @return Users_UserStruct
+     * @throws ReflectionException
+     */
     public function createUser( Users_UserStruct $obj ) {
         $conn = $this->database->getConnection();
         \Database::obtain()->begin();
@@ -119,6 +124,48 @@ class Users_UserDao extends DataAccess_AbstractDao {
         );
 
         $record = $this->getByUid( $conn->lastInsertId() );
+        $conn->commit();
+
+        return $record;
+    }
+
+    /**
+     * @param Users_UserStruct $obj
+     * @return Users_UserStruct
+     * @throws ReflectionException
+     */
+    public function updateUser( Users_UserStruct $obj ) {
+        $conn = $this->database->getConnection();
+        \Database::obtain()->begin();
+
+        $stmt = $conn->prepare( "UPDATE users
+            SET 
+                uid = :uid, 
+                email = :email, 
+                salt = :salt, 
+                pass = :pass, 
+                create_date = :create_date, 
+                first_name = :first_name, 
+                last_name = :last_name, 
+                confirmation_token = :confirmation_token, 
+                oauth_access_token = :oauth_access_token 
+            WHERE uid = :uid 
+        ");
+
+        $stmt->execute( $obj->toArray([
+            'uid',
+            'email',
+            'salt',
+            'pass',
+            'create_date',
+            'first_name',
+            'last_name',
+            'confirmation_token',
+            'oauth_access_token'
+            ])
+        );
+
+        $record = $this->getByUid( $obj->uid );
         $conn->commit();
 
         return $record;

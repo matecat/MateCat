@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useState} from 'react'
+import React, {createContext, useContext, useEffect, useState} from 'react'
 import {Select} from '../../../common/Select'
 import {ModernMt} from './MtEngines/ModernMt'
 import {AltLang} from './MtEngines/AltLang'
@@ -15,9 +15,15 @@ import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {deleteMTEngine} from '../../../../api/deleteMTEngine'
 import {MessageNotification} from '../MessageNotification'
 import {DEFAULT_ENGINE_MEMORY} from '../../SettingsPanel'
+import {MTGlossary} from './MTGlossary'
 
 import Close from '../../../../../../../img/icons/Close'
 import AddWide from '../../../../../../../img/icons/AddWide'
+import {DeepL} from './MtEngines/DeepL'
+import {DeepLGlossary} from './DeepLGlossary/DeepLGlossary'
+import {MTDeepLRow} from './MTDeepLRow'
+
+export const MachineTranslationTabContext = createContext({})
 
 export const MachineTranslationTab = () => {
   const {
@@ -30,15 +36,19 @@ export const MachineTranslationTab = () => {
 
   const [addMTVisible, setAddMTVisible] = useState(false)
   const [activeAddEngine, setActiveAddEngine] = useState()
+  const [isAddMTEngineRequestInProgress, setIsAddMTEngineRequestInProgress] =
+    useState(false)
   const [error, setError] = useState()
   const [MTRows, setMTRows] = useState([])
   const [deleteMTRequest, setDeleteMTRequest] = useState()
   const [errorDeletingMT, setErrorDeletingMT] = useState(false)
+  const [notification, setNotification] = useState({})
 
   const enginesList = [
     {name: 'ModernMT', id: 'mmt', component: ModernMt},
     {name: 'AltLang', id: 'altlang', component: AltLang},
     {name: 'Apertium', id: 'apertium', component: Apertium},
+    {name: 'DeepL', id: 'deepl', component: DeepL},
     {
       name: 'Google Translate',
       id: 'googletranslate',
@@ -63,7 +73,20 @@ export const MachineTranslationTab = () => {
         {name: 'Action'},
       ]
 
+  const CUSTOM_ACTIVE_COLUMNS_TABLE_BY_ENGINE = {
+    [enginesList.find(({name}) => name === 'DeepL').name]: config.is_cattool
+      ? [{name: 'Engine Name'}, {name: 'Description'}, {name: 'Formality'}]
+      : [
+          {name: 'Engine Name'},
+          {name: 'Description'},
+          {name: 'Formality'},
+          {name: 'Use in this project'},
+          {name: 'Action'},
+        ],
+  }
+
   const addMTEngineRequest = (data) => {
+    setIsAddMTEngineRequestInProgress(true)
     addMTEngine({
       name: data.name,
       provider: activeAddEngine.id,
@@ -73,11 +96,15 @@ export const MachineTranslationTab = () => {
         const {data} = response
         setAddMTVisible(false)
         setError()
+
         if (data.id) {
           const newMT = {
             name: data.name,
-            id: parseInt(response.data.id),
-            description: activeAddEngine.name,
+            id: parseInt(data.id),
+            type: data.type,
+            description: data.description
+              ? data.description
+              : activeAddEngine.name,
           }
           setMtEngines((prevStateMT) => {
             return [newMT, ...prevStateMT]
@@ -87,6 +114,7 @@ export const MachineTranslationTab = () => {
       .catch((error) => {
         if (error && error.length) setError(error[0])
       })
+      .finally(() => setIsAddMTEngineRequestInProgress(false))
   }
 
   const deleteMTConfirm = (mt) => {
@@ -120,7 +148,7 @@ export const MachineTranslationTab = () => {
   useEffect(() => {
     setMTRows(
       mtEngines
-        .filter((row) => !activeMTEngine || row.id !== activeMTEngine.id)
+        .filter((row) => !activeMTEngine?.id || row.id !== activeMTEngine?.id)
         .map((row, index) => {
           return {
             node: (
@@ -136,10 +164,12 @@ export const MachineTranslationTab = () => {
         }),
     )
     setDeleteMTRequest()
-  }, [activeMTEngine, mtEngines])
+  }, [activeMTEngine?.id, mtEngines])
 
-  return (
-    <div className="machine-translation-tab">
+  const resetNotification = () => setNotification({})
+
+  const notificationsNode = (
+    <>
       {deleteMTRequest && (
         <MessageNotification
           type={'warning'}
@@ -155,85 +185,134 @@ export const MachineTranslationTab = () => {
           closeCallback={() => setErrorDeletingMT(false)}
         />
       )}
+      {notification?.message && (
+        <MessageNotification
+          {...{
+            type: notification.type,
+            message: notification.message,
+            closeCallback: resetNotification,
+          }}
+        />
+      )}
+    </>
+  )
 
-      {!config.is_cattool && config.isLoggedIn ? (
-        !addMTVisible ? (
-          <div className="add-mt-button">
-            <button
-              className="ui primary button settings-panel-button-icon"
-              onClick={() => setAddMTVisible(true)}
-            >
-              <AddWide size={18} /> Add MT engine
-            </button>
-          </div>
-        ) : (
-          <div className="add-mt-container">
-            <h2>Add MT Engine</h2>
-            <div className="add-mt-provider">
-              <Select
-                placeholder="Choose provider"
-                id="mt-engine"
-                maxHeightDroplist={100}
-                options={enginesList}
-                activeOption={activeAddEngine}
-                onSelect={(option) => {
-                  setActiveAddEngine(option)
-                  setError()
-                }}
-              />
+  const activeColumns = CUSTOM_ACTIVE_COLUMNS_TABLE_BY_ENGINE[
+    activeMTEngine?.name
+  ]
+    ? CUSTOM_ACTIVE_COLUMNS_TABLE_BY_ENGINE[activeMTEngine.name]
+    : COLUMNS_TABLE
+
+  const ActiveMTRow = activeMTEngine?.name === 'DeepL' ? MTDeepLRow : MTRow
+
+  return (
+    <MachineTranslationTabContext.Provider value={{setNotification}}>
+      <div className="machine-translation-tab">
+        {notificationsNode}
+
+        {!config.is_cattool && config.isLoggedIn ? (
+          !addMTVisible ? (
+            <div className="add-mt-button">
               <button
-                className="ui button orange"
-                onClick={() => setAddMTVisible(false)}
+                className="ui primary button settings-panel-button-icon"
+                onClick={() => setAddMTVisible(true)}
               >
-                <Close />
+                <AddWide size={18} /> Add MT engine
               </button>
             </div>
-            {activeAddEngine ? (
-              <activeAddEngine.component
-                addMTEngine={addMTEngineRequest}
-                error={error}
-              />
-            ) : null}
+          ) : (
+            <div className="add-mt-container">
+              <h2>Add MT Engine</h2>
+              <div className="add-mt-provider">
+                <Select
+                  placeholder="Choose provider"
+                  id="mt-engine"
+                  maxHeightDroplist={100}
+                  options={enginesList}
+                  activeOption={activeAddEngine}
+                  onSelect={(option) => {
+                    setActiveAddEngine(option)
+                    setError()
+                  }}
+                />
+                <button
+                  className="ui button orange"
+                  onClick={() => setAddMTVisible(false)}
+                >
+                  <Close />
+                </button>
+              </div>
+              {activeAddEngine ? (
+                <activeAddEngine.component
+                  addMTEngine={addMTEngineRequest}
+                  error={error}
+                  isRequestInProgress={isAddMTEngineRequestInProgress}
+                />
+              ) : null}
+            </div>
+          )
+        ) : null}
+        <div>
+          <h2>Active MT</h2>
+          <SettingsPanelTable
+            columns={activeColumns}
+            className={`active-table-${activeMTEngine?.name}`}
+            rows={
+              activeMTEngine
+                ? [
+                    {
+                      node: (
+                        <ActiveMTRow
+                          key={'active'}
+                          row={{...activeMTEngine}}
+                          deleteMT={() => deleteMTConfirm(activeMTEngine)}
+                          onCheckboxClick={disableMT}
+                        />
+                      ),
+                      isDraggable: false,
+                      isActive: true,
+                      ...(activeMTEngine.name === 'ModernMT' && {
+                        isExpanded: true,
+                        extraNode: (
+                          <MTGlossary
+                            {...{
+                              ...activeMTEngine,
+                              isCattoolPage: config.is_cattool,
+                            }}
+                          />
+                        ),
+                      }),
+                      ...(activeMTEngine.name === 'DeepL' && {
+                        isExpanded: true,
+                        extraNode: (
+                          <DeepLGlossary
+                            {...{
+                              ...activeMTEngine,
+                              isCattoolPage: config.is_cattool,
+                            }}
+                          />
+                        ),
+                      }),
+                    },
+                  ]
+                : []
+            }
+          />
+        </div>
+        {config.isLoggedIn ? (
+          <div className="inactive-mt">
+            <h2>Inactive MT</h2>
+            <SettingsPanelTable columns={COLUMNS_TABLE} rows={MTRows} />
           </div>
-        )
-      ) : null}
-      <div>
-        <h2>Active MT</h2>
-        <SettingsPanelTable
-          columns={COLUMNS_TABLE}
-          rows={
-            activeMTEngine
-              ? [
-                  {
-                    node: (
-                      <MTRow
-                        key={'active'}
-                        row={{...activeMTEngine}}
-                        deleteMT={() => deleteMTConfirm(activeMTEngine)}
-                        onCheckboxClick={disableMT}
-                      />
-                    ),
-                    isDraggable: false,
-                    isActive: true,
-                  },
-                ]
-              : []
-          }
-        />
+        ) : (
+          <div className="not-logged-user">
+            <button className="ui primary button" onClick={openLoginModal}>
+              Login to see your custom MT engines
+            </button>
+          </div>
+        )}
       </div>
-      {config.isLoggedIn ? (
-        <div className="inactive-mt">
-          <h2>Inactive MT</h2>
-          <SettingsPanelTable columns={COLUMNS_TABLE} rows={MTRows} />
-        </div>
-      ) : (
-        <div className="not-logged-user">
-          <button className="ui primary button" onClick={openLoginModal}>
-            Login to see your custom MT engines
-          </button>
-        </div>
-      )}
-    </div>
+    </MachineTranslationTabContext.Provider>
   )
 }
 MachineTranslationTab.propTypes = {}

@@ -40,7 +40,7 @@ class Upload {
     public function __construct( $uploadToken = null ) {
 
         if ( empty( $uploadToken ) ) {
-            $this->uploadToken = Utils::createToken( 'API' );
+            $this->uploadToken = Utils::uuid4();
         } else {
             $this->uploadToken = $uploadToken;
         }

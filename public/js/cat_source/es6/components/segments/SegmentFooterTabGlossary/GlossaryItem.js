@@ -37,6 +37,7 @@ export const GlossaryItem = ({
 
     const checkContentLength = () => {
       const placeholderTag = noteDescriptionPlaceholderRef.current
+      if (!placeholderTag) return
       placeholderTag.style.display = 'block'
 
       const lineHeight = Math.round(
