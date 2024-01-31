@@ -165,7 +165,7 @@ export const ProjectTemplate = ({portalTarget}) => {
       .finally(() => setIsRequestInProgress(false))
   }
 
-  const updateTemplate = () => {
+  const updateTemplate = (updatedTemplate = currentProjectTemplate) => {
     /* eslint-disable no-unused-vars */
     const {
       created_at,
@@ -176,14 +176,14 @@ export const ProjectTemplate = ({portalTarget}) => {
       isSelected,
       ...modifiedTemplate
     } = {
-      ...currentProjectTemplate,
-      name: templateName ? templateName : currentProjectTemplate.name,
+      ...updatedTemplate,
+      name: templateName ? templateName : updatedTemplate.name,
     }
     /* eslint-enable no-unused-vars */
     setIsRequestInProgress(true)
 
     updateProjectTemplate({
-      id: currentProjectTemplate.id,
+      id: updatedTemplate.id,
       template: modifiedTemplate,
     })
       .then((template) => {
@@ -218,6 +218,8 @@ export const ProjectTemplate = ({portalTarget}) => {
       .finally(() => setIsRequestInProgress(false))
   }
 
+  const onClickUpdateTemplate = () => updateTemplate()
+
   const onChangeTemplateName = (e) => setTemplateName(e.currentTarget.value)
 
   const cancelSavingNewTemplate = () => {
@@ -241,7 +243,10 @@ export const ProjectTemplate = ({portalTarget}) => {
       [availableTemplateProps.isDefault]: true,
     }))
 
-    // updateTemplate()
+    updateTemplate({
+      ...currentProjectTemplate,
+      [availableTemplateProps.isDefault]: true,
+    })
   }
 
   const moreButton = (
@@ -305,6 +310,7 @@ export const ProjectTemplate = ({portalTarget}) => {
               !isModifyingTemplate && (
                 <button
                   className="template-button"
+                  data-testid="set-as-default-template"
                   disabled={isRequestInProgress}
                   onClick={setCurrentProjectTemplateAsDefault}
                 >
@@ -315,7 +321,7 @@ export const ProjectTemplate = ({portalTarget}) => {
               <button
                 className="template-button button-save-changes"
                 disabled={isRequestInProgress}
-                onClick={updateTemplate}
+                onClick={onClickUpdateTemplate}
               >
                 Save changes
               </button>
@@ -342,7 +348,7 @@ export const ProjectTemplate = ({portalTarget}) => {
               onClick={
                 templateNameManageMode === TEMPLATE_NAME_MANAGE_MODE.NEW_ONE
                   ? createTemplate
-                  : updateTemplate
+                  : onClickUpdateTemplate
               }
             >
               Confirm

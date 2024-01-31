@@ -189,3 +189,56 @@ test('Create and delete template', async () => {
 
   expect(screen.getByText('Standard')).toBeInTheDocument()
 })
+
+test('Set template as default', async () => {
+  const user = userEvent.setup()
+
+  const {result} = renderHook(() => useProjectTemplates(true))
+  const {modifyingCurrentTemplate} = result.current
+
+  await waitFor(() => {
+    expect(result.current.projectTemplates?.length).toBe(2)
+  })
+
+  mswServer.use(
+    http.put(`${config.basepath}api/v3/project-template/id:`, () => {
+      return HttpResponse.json({
+        ...projectTemplatesMock.items.find(({is_default}) => !is_default),
+        is_default: true,
+      })
+    }),
+  )
+
+  let {projectTemplates, setProjectTemplates, currentProjectTemplate} =
+    result.current
+
+  const {rerender} = render(
+    <WrapperComponent
+      {...{projectTemplates, setProjectTemplates, currentProjectTemplate}}
+    />,
+  )
+
+  const selectLabel = screen.getByText('Standard')
+  expect(selectLabel).toBeInTheDocument()
+
+  await act(async () => user.click(selectLabel))
+
+  const itemTestingTemplate = screen.getByText('Testing template')
+  expect(itemTestingTemplate).toBeInTheDocument()
+
+  const setAsDefaultButton = screen.getByTestId('set-as-default-template')
+  expect(setAsDefaultButton).toBeInTheDocument()
+
+  await act(async () => user.click(setAsDefaultButton))
+
+  projectTemplates = result.current.projectTemplates
+  currentProjectTemplate = result.current.currentProjectTemplate
+  rerender(
+    <WrapperComponent
+      {...{projectTemplates, setProjectTemplates, currentProjectTemplate}}
+    />,
+  )
+
+  expect(currentProjectTemplate.is_default).toBeTruthy()
+  expect(screen.getByTestId('set-as-default-template')).not.toBeInTheDocument()
+})
