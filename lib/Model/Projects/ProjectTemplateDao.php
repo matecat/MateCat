@@ -154,6 +154,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao
         $projectTemplateStruct->hydrateFromJSON($json);
         $projectTemplateStruct->uid = $uid;
         $projectTemplateStruct->id = $id;
+        $projectTemplateStruct->modified_at = (new DateTime())->format('Y-m-d H:i:s');
 
         $saved = self::getById($id);
 
@@ -312,6 +313,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao
      * @param int $current
      * @param int $pagination
      * @return array
+     * @throws Exception
      */
     public static function getAllPaginated($uid, $current = 1, $pagination = 20)
     {

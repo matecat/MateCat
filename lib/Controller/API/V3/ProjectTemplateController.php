@@ -121,6 +121,7 @@ class ProjectTemplateController extends KleinController
      * Update an entry
      *
      * @return \Klein\Response
+     * @throws Exception
      */
     public function update()
     {
