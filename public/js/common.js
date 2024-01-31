@@ -340,15 +340,8 @@ window.APP = {
     var iFrameForm = $(
       '<form id="fileDownload" action="' +
         config.basepath +
-        '" method="post">' +
-        '<input type="hidden" name="action" value="downloadFile" />' +
-        '<input type="hidden" name="id_job" value="' +
-        idJob +
-        '" />' +
-        '<input type="hidden" name="id_file" value="" />' +
-        '<input type="hidden" name="password" value="' +
-        pass +
-        '"/>' +
+        `api/v2/translation/${idJob}/${pass}` +
+        '" method="GET">' +
         '<input type="hidden" name="download_type" value="all" />' +
         '<input type="hidden" name="downloadToken" value="' +
         downloadToken +
