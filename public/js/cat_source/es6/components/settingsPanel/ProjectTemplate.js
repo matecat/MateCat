@@ -25,6 +25,7 @@ export const ProjectTemplate = ({portalTarget}) => {
     setProjectTemplates,
     currentProjectTemplate,
     modifyingCurrentTemplate,
+    availableTemplateProps,
   } = useContext(SettingsPanelContext)
 
   const [templateNameManageMode, setTemplateNameManageMode] = useState()
@@ -224,6 +225,25 @@ export const ProjectTemplate = ({portalTarget}) => {
     setTemplateName('')
   }
 
+  const setCurrentProjectTemplateAsDefault = () => {
+    flushSync(() =>
+      setProjectTemplates((prevState) =>
+        prevState.map((template) => ({
+          ...template,
+          [availableTemplateProps.isDefault]:
+            template.id === currentProjectTemplate.id,
+        })),
+      ),
+    )
+
+    modifyingCurrentTemplate((prevTemplate) => ({
+      ...prevTemplate,
+      [availableTemplateProps.isDefault]: true,
+    }))
+
+    // updateTemplate()
+  }
+
   const moreButton = (
     <MenuButton
       className="template-button button-more-items"
@@ -252,7 +272,7 @@ export const ProjectTemplate = ({portalTarget}) => {
       </MenuButtonItem>
     </MenuButton>
   )
-
+  console.log('------>', projectTemplates)
   return (
     <div className="settings-panel-project-template">
       <div className="settings-panel-project-template-container-select">
@@ -281,6 +301,16 @@ export const ProjectTemplate = ({portalTarget}) => {
       <div className="settings-panel-project-template-container-buttons">
         {!templateNameManageMode ? (
           <>
+            {!currentProjectTemplate[availableTemplateProps.isDefault] &&
+              !isModifyingTemplate && (
+                <button
+                  className="template-button"
+                  disabled={isRequestInProgress}
+                  onClick={setCurrentProjectTemplateAsDefault}
+                >
+                  Set as default
+                </button>
+              )}
             {isModifyingTemplate && !isStandardTemplateBool && (
               <button
                 className="template-button button-save-changes"

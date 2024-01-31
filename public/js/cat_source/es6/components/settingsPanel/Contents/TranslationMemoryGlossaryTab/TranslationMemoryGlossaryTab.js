@@ -66,7 +66,7 @@ const NEW_RESOURCE = {
 
 export const isOwnerOfKey = (key) => !/[*]/g.test(key)
 
-const orderTmKeys = (tmKeys, keysOrdered) => {
+export const orderTmKeys = (tmKeys, keysOrdered) => {
   const order = (acc, cur) => {
     const copyAcc = [...acc]
     const index = keysOrdered.findIndex((key) => key === cur.key)

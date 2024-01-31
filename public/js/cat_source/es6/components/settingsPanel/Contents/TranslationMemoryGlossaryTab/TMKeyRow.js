@@ -6,6 +6,7 @@ import {
   TranslationMemoryGlossaryTabContext,
   getTmDataStructureToSendServer,
   isOwnerOfKey,
+  orderTmKeys,
 } from '../TranslationMemoryGlossaryTab/TranslationMemoryGlossaryTab'
 import {MenuButton} from '../../../common/MenuButton/MenuButton'
 import {MenuButtonItem} from '../../../common/MenuButton/MenuButtonItem'
@@ -106,15 +107,13 @@ export const TMKeyRow = ({row, onExpandRow}) => {
           : tm,
       )
       setTmKeys(updatedKeys)
-      const currentKey = updatedKeys.find(
-        ({id, isActive}) => id === row.id && isActive,
-      )
+
       modifyingCurrentTemplate((prevTemplate) => ({
         ...prevTemplate,
-        [availableTemplateProps.tm]: [
-          ...updatedKeys.filter(({isActive, id}) => isActive && id !== row.id),
-          ...(currentKey ? [currentKey] : []),
-        ].map(({id, isActive, ...rest}) => rest), //eslint-disable-line
+        [availableTemplateProps.tm]: orderTmKeys(
+          updatedKeys.filter(({isActive}) => isActive),
+          prevTemplate[availableTemplateProps.tm].map(({key}) => key),
+        ).map(({id, isActive, ...rest}) => rest), //eslint-disable-line
       }))
     } else {
       setSpecialRows((prevState) =>

@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import {
   SPECIAL_ROWS_ID,
   TranslationMemoryGlossaryTabContext,
+  orderTmKeys,
 } from './TranslationMemoryGlossaryTab'
 import {tmCreateRandUser} from '../../../../api/tmCreateRandUser'
 import {createNewTmKey} from '../../../../api/createNewTmKey'
@@ -106,15 +107,12 @@ export const TMCreateResourceRow = ({row}) => {
   }
 
   const executeModifyCurrentTemplate = (updatedKeys) => {
-    const currentKey = updatedKeys.find(
-      ({id, isActive}) => id === row.id && isActive,
-    )
     modifyingCurrentTemplate((prevTemplate) => ({
       ...prevTemplate,
-      [availableTemplateProps.tm]: [
-        ...updatedKeys.filter(({isActive, id}) => isActive && id !== row.id),
-        ...(currentKey ? [currentKey] : []),
-      ].map(({id, isActive, ...rest}) => rest), //eslint-disable-line
+      [availableTemplateProps.tm]: orderTmKeys(
+        updatedKeys.filter(({isActive}) => isActive),
+        prevTemplate[availableTemplateProps.tm].map(({key}) => key),
+      ).map(({id, isActive, ...rest}) => rest), //eslint-disable-line
     }))
   }
 

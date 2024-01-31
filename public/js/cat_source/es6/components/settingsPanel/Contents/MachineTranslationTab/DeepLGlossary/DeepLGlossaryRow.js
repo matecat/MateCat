@@ -30,38 +30,6 @@ export const DeepLGlossaryRow = ({engineId, row, setRows, isReadOnly}) => {
   }
 
   const deleteGlossary = () => {
-    const mtProp = availableTemplateProps.mt
-
-    const templatesInvolved = projectTemplates
-      .filter((template) => template[mtProp].extra.deepl_id_glossary === row.id)
-      .map((template) => {
-        const mtObject = template[mtProp]
-        const {deepl_id_glossary, ...extra} = mtObject.extra // eslint-disable-line
-
-        return {
-          ...template,
-          [mtProp]: {
-            ...mtObject,
-            extra: {
-              ...extra,
-              ...(deepl_id_glossary !== row.id && {
-                deepl_id_glossary,
-              }),
-            },
-          },
-        }
-      })
-
-    CreateProjectActions.updateProjectTemplates({
-      templates: templatesInvolved,
-      modifiedPropsCurrentProjectTemplate: {
-        [mtProp]: templatesInvolved.find(({isTemporary}) => isTemporary)?.[
-          mtProp
-        ],
-      },
-    })
-
-    return
     setNotification()
 
     setIsWaitingResult(true)
@@ -69,6 +37,39 @@ export const DeepLGlossaryRow = ({engineId, row, setRows, isReadOnly}) => {
       .then((data) => {
         if (data.id === row.id) {
           setRows((prevState) => prevState.filter(({id}) => id !== row.id))
+
+          const mtProp = availableTemplateProps.mt
+
+          const templatesInvolved = projectTemplates
+            .filter(
+              (template) => template[mtProp].extra.deepl_id_glossary === row.id,
+            )
+            .map((template) => {
+              const mtObject = template[mtProp]
+              const {deepl_id_glossary, ...extra} = mtObject.extra // eslint-disable-line
+
+              return {
+                ...template,
+                [mtProp]: {
+                  ...mtObject,
+                  extra: {
+                    ...extra,
+                    ...(deepl_id_glossary !== row.id && {
+                      deepl_id_glossary,
+                    }),
+                  },
+                },
+              }
+            })
+
+          CreateProjectActions.updateProjectTemplates({
+            templates: templatesInvolved,
+            modifiedPropsCurrentProjectTemplate: {
+              [mtProp]: templatesInvolved.find(
+                ({isTemporary}) => isTemporary,
+              )?.[mtProp],
+            },
+          })
         }
       })
       .catch(() => {

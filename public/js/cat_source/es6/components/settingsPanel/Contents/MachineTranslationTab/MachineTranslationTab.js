@@ -22,6 +22,7 @@ import AddWide from '../../../../../../../img/icons/AddWide'
 import {DeepL} from './MtEngines/DeepL'
 import {DeepLGlossary} from './DeepLGlossary/DeepLGlossary'
 import {MTDeepLRow} from './MTDeepLRow'
+import CreateProjectActions from '../../../../actions/CreateProjectActions'
 
 export const MachineTranslationTabContext = createContext({})
 
@@ -33,6 +34,7 @@ export const MachineTranslationTab = () => {
     modifyingCurrentTemplate,
     currentProjectTemplate,
     availableTemplateProps,
+    projectTemplates,
   } = useContext(SettingsPanelContext)
   console.log('currentProjectTemplate', currentProjectTemplate)
   const activeMTEngine = currentProjectTemplate.mt?.id
@@ -44,7 +46,7 @@ export const MachineTranslationTab = () => {
           ? {
               id,
             }
-          : null,
+          : {},
     }))
 
   const [addMTVisible, setAddMTVisible] = useState(false)
@@ -144,6 +146,24 @@ export const MachineTranslationTab = () => {
         if (activeMTEngine === deleteMTRequest) {
           setActiveMTEngine(DEFAULT_ENGINE_MEMORY)
         }
+
+        const mtProp = availableTemplateProps.mt
+
+        const templatesInvolved = projectTemplates
+          .filter((template) => template[mtProp].id === deleteMTRequest)
+          .map((template) => ({
+            ...template,
+            [mtProp]: {},
+          }))
+
+        CreateProjectActions.updateProjectTemplates({
+          templates: templatesInvolved,
+          modifiedPropsCurrentProjectTemplate: {
+            [mtProp]: templatesInvolved.find(({isTemporary}) => isTemporary)?.[
+              mtProp
+            ],
+          },
+        })
       })
       .catch(() => {
         setErrorDeletingMT(true)
@@ -181,12 +201,14 @@ export const MachineTranslationTab = () => {
 
   const resetNotification = () => setNotification({})
 
+  const activeMTEngineData = mtEngines.find(({id}) => id === activeMTEngine)
+
   const notificationsNode = (
     <>
       {typeof deleteMTRequest === 'number' && (
         <MessageNotification
           type={'warning'}
-          message={`Do you really want to delete the MT: <b>${deleteMTRequest.name}</b>?`}
+          message={`Do you really want to delete the MT: <b>${activeMTEngineData.name}</b>?`}
           confirmCallback={deleteMT}
           closeCallback={() => setDeleteMTRequest()}
         />
@@ -210,7 +232,6 @@ export const MachineTranslationTab = () => {
     </>
   )
 
-  const activeMTEngineData = mtEngines.find(({id}) => id === activeMTEngine)
   const activeColumns = CUSTOM_ACTIVE_COLUMNS_TABLE_BY_ENGINE[
     activeMTEngineData?.name
   ]
