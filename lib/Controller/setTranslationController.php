@@ -354,7 +354,7 @@ class setTranslationController extends ajaxController {
         $new_translation->suggestion_position    = ($this->chosen_suggestion_index !== null ? $this->chosen_suggestion_index : $old_translation->suggestion_position);
         $new_translation->warning                = $check->thereAreWarnings();
         $new_translation->translation_date       = date( "Y-m-d H:i:s" );
-        $new_translation->suggestion             = ((!empty($old_suggestion)) ? $old_suggestion->translation : null);
+        $new_translation->suggestion             = ((!empty($old_suggestion)) ? $old_suggestion->translation : $old_translation->translation);
         $new_translation->suggestion_source      = $old_translation->suggestion_source;
         $new_translation->suggestion_match       = $old_translation->suggestion_match;
 
@@ -362,15 +362,27 @@ class setTranslationController extends ajaxController {
         if( $this->canUpdateSuggestion($new_translation, $old_translation, $old_suggestion) ){
             $new_translation->suggestion = $old_suggestion->translation;
 
-            if($old_suggestion->match !== "MT"){
+            // update suggestion match
+            if($old_suggestion->match == "MT"){
+                $new_translation->suggestion_match = 85;
+            } else {
                 $new_translation->suggestion_match = $old_suggestion->match;
             }
 
-            if ( $old_suggestion->match == "85%" || $old_suggestion->match == "86%" || $old_suggestion->created_by == 'MT'  ) {
+            // update suggestion_source
+            if (
+                $old_suggestion->match == "85%" or
+                $old_suggestion->match == "86%" or
+                $old_suggestion->created_by == 'MT' or
+                strpos($old_suggestion->created_by, 'MT') !== false
+            ) {
+                // case 1. is MT
                 $new_translation->suggestion_source = 'MT';
             } elseif( $old_suggestion->match == 'NO_MATCH' ) {
+                // case 2. no match
                 $new_translation->suggestion_source = 'NO_MATCH';
             } else {
+                // case 3. otherwise is TM
                 $new_translation->suggestion_source = 'TM';
             }
         }
