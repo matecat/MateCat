@@ -13,7 +13,7 @@
         "matecat/whole-text-finder": "^1.0",
         "matecat/xliff-parser": "^v2.0",
         "matecat/subfiltering": "^2.0",
-        "monolog/monolog": "1.17.*",
+        "monolog/monolog": "3.5.*",
         "phpmailer/phpmailer": "~6.1",
         "phpoffice/phpspreadsheet": "~1.29",
         "symfony/console": "^2.8",
