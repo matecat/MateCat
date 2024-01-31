@@ -11,6 +11,7 @@ EventEmitter.prototype.setMaxListeners(0)
 
 let CommentsStore = assign({}, EventEmitter.prototype, {
   users: undefined,
+  draftComments: {},
   db: {
     types: {sticky: 3, resolve: 2, comment: 1},
     segments: {},
@@ -78,6 +79,7 @@ let CommentsStore = assign({}, EventEmitter.prototype, {
         })
       }
       CommentsStore.db.refreshHistory()
+      CommentsStore.saveDraftComment(data.id_segment, '')
     },
     deleteSegment: function (idComment, idSegment) {
       const segmentComments = CommentsStore.db.segments[idSegment]
@@ -133,6 +135,12 @@ let CommentsStore = assign({}, EventEmitter.prototype, {
       return count
     },
   },
+  saveDraftComment: (sid, comment) => {
+    CommentsStore.draftComments[sid] = comment
+  },
+  getDraftComment: (sid) => {
+    return CommentsStore.draftComments[sid]
+  },
   setUsers: (users) => {
     const teamTemp = {
       uid: 'team',
@@ -179,6 +187,9 @@ AppDispatcher.register(function (action) {
     case CommentsConstants.DELETE_COMMENT:
       CommentsStore.db.deleteSegment(action.idComment, action.sid)
       CommentsStore.emitChange(action.actionType, action.sid)
+      break
+    case CommentsConstants.SAVE_DRAFT:
+      CommentsStore.saveDraftComment(action.sid, action.comment)
       break
     default:
       CommentsStore.emitChange(action.actionType, action.data)
