@@ -35,7 +35,7 @@
         "ext-mbstring": "*",
         "ext-zlib": "*",
         "ext-gd": "*",
-        "orhanerday/open-ai": "^4.7",
+        "orhanerday/open-ai": "^5.0",
         "ext-openssl": "*"
     }
 }
