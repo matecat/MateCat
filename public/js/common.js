@@ -58,7 +58,10 @@ window.APP = {
             event: APP.USER.isGoogleUser()
               ? 'new_signup_google'
               : 'new_signup_email',
-            userId: APP.USER.isUserLogged() ? APP.USER.STORE.user.uid : null,
+            userId:
+              APP.USER.isUserLogged() && APP.USER.STORE.user
+                ? APP.USER.STORE.user.uid
+                : null,
           }
           CommonUtils.dispatchAnalyticsEvents(data)
         })
