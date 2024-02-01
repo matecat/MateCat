@@ -129,7 +129,10 @@ class AnalyzeChunksResume extends React.Component {
       const event = {
         event: 'open_job',
         userStatus: APP.USER.isUserLogged() ? 'loggedUser' : 'notLoggedUser',
-        userId: APP.USER.isUserLogged() ? APP.USER.STORE.user.uid : null,
+        userId:
+          APP.USER.isUserLogged() && APP.USER.STORE.user
+            ? APP.USER.STORE.user.uid
+            : null,
         idProject: parseInt(config.id_project),
       }
       CommonUtils.dispatchAnalyticsEvents(event)
