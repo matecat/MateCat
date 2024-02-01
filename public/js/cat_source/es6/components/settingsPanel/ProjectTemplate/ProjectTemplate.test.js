@@ -1,12 +1,12 @@
 import React, {useEffect, useRef} from 'react'
 import {render, renderHook, waitFor, screen, act} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import useProjectTemplates from '../../hooks/useProjectTemplates'
+import useProjectTemplates from '../../../hooks/useProjectTemplates'
 import {ProjectTemplate} from './ProjectTemplate'
-import {SettingsPanelContext} from './SettingsPanelContext'
-import {mswServer} from '../../../../../mocks/mswServer'
+import {SettingsPanelContext} from '../SettingsPanelContext'
+import {mswServer} from '../../../../../../mocks/mswServer'
 import {HttpResponse, http} from 'msw'
-import projectTemplatesMock from '../../../../../mocks/projectTemplateMock'
+import projectTemplatesMock from '../../../../../../mocks/projectTemplateMock'
 
 global.config = {
   basepath: 'http://localhost/',
@@ -48,12 +48,21 @@ test('Render properly', async () => {
     expect(result.current.projectTemplates?.length).toBe(2)
   })
 
-  let {projectTemplates, setProjectTemplates, currentProjectTemplate} =
-    result.current
+  let {
+    projectTemplates,
+    setProjectTemplates,
+    currentProjectTemplate,
+    availableTemplateProps,
+  } = result.current
 
   const {rerender} = render(
     <WrapperComponent
-      {...{projectTemplates, setProjectTemplates, currentProjectTemplate}}
+      {...{
+        projectTemplates,
+        setProjectTemplates,
+        currentProjectTemplate,
+        availableTemplateProps,
+      }}
     />,
   )
 
@@ -71,7 +80,12 @@ test('Render properly', async () => {
   currentProjectTemplate = result.current.currentProjectTemplate
   rerender(
     <WrapperComponent
-      {...{projectTemplates, setProjectTemplates, currentProjectTemplate}}
+      {...{
+        projectTemplates,
+        setProjectTemplates,
+        currentProjectTemplate,
+        availableTemplateProps,
+      }}
     />,
   )
 
@@ -122,12 +136,21 @@ test('Create and delete template', async () => {
     ],
   )
 
-  let {projectTemplates, setProjectTemplates, currentProjectTemplate} =
-    result.current
+  let {
+    projectTemplates,
+    setProjectTemplates,
+    currentProjectTemplate,
+    availableTemplateProps,
+  } = result.current
 
   const {rerender} = render(
     <WrapperComponent
-      {...{projectTemplates, setProjectTemplates, currentProjectTemplate}}
+      {...{
+        projectTemplates,
+        setProjectTemplates,
+        currentProjectTemplate,
+        availableTemplateProps,
+      }}
     />,
   )
 
@@ -143,7 +166,12 @@ test('Create and delete template', async () => {
   projectTemplates = result.current.projectTemplates
   rerender(
     <WrapperComponent
-      {...{projectTemplates, setProjectTemplates, currentProjectTemplate}}
+      {...{
+        projectTemplates,
+        setProjectTemplates,
+        currentProjectTemplate,
+        availableTemplateProps,
+      }}
     />,
   )
 
@@ -156,7 +184,9 @@ test('Create and delete template', async () => {
   expect(input).toHaveFocus()
 
   await act(async () => user.type(input, 'my template'))
-  await act(async () => user.click(screen.getByTestId('create-template')))
+  await waitFor(async () =>
+    user.click(screen.getByTestId('create-update-template')),
+  )
 
   expect(result.current.currentProjectTemplate.id).toBe(4)
 
@@ -164,7 +194,12 @@ test('Create and delete template', async () => {
   currentProjectTemplate = result.current.currentProjectTemplate
   rerender(
     <WrapperComponent
-      {...{projectTemplates, setProjectTemplates, currentProjectTemplate}}
+      {...{
+        projectTemplates,
+        setProjectTemplates,
+        currentProjectTemplate,
+        availableTemplateProps,
+      }}
     />,
   )
 
@@ -175,7 +210,7 @@ test('Create and delete template', async () => {
     user.click(screen.getByTestId('menu-button-show-items')),
   )
 
-  await act(async () => user.click(screen.getByTestId('delete-template')))
+  await waitFor(async () => user.click(screen.getByTestId('delete-template')))
 
   expect(result.current.currentProjectTemplate.id).toBe(0)
 
@@ -183,9 +218,100 @@ test('Create and delete template', async () => {
   currentProjectTemplate = result.current.currentProjectTemplate
   rerender(
     <WrapperComponent
-      {...{projectTemplates, setProjectTemplates, currentProjectTemplate}}
+      {...{
+        projectTemplates,
+        setProjectTemplates,
+        currentProjectTemplate,
+        availableTemplateProps,
+      }}
     />,
   )
 
   expect(screen.getByText('Standard')).toBeInTheDocument()
+})
+
+test('Set template as default', async () => {
+  const user = userEvent.setup()
+
+  const {result} = renderHook(() => useProjectTemplates(true))
+
+  await waitFor(() => {
+    expect(result.current.projectTemplates?.length).toBe(2)
+  })
+
+  mswServer.use(
+    http.put(`${config.basepath}api/v3/project-template/:id`, () => {
+      return HttpResponse.json({
+        ...projectTemplatesMock.items.find(({is_default}) => !is_default),
+        is_default: true,
+      })
+    }),
+  )
+
+  let {
+    projectTemplates,
+    setProjectTemplates,
+    currentProjectTemplate,
+    availableTemplateProps,
+    modifyingCurrentTemplate,
+  } = result.current
+
+  const {rerender} = render(
+    <WrapperComponent
+      {...{
+        projectTemplates,
+        setProjectTemplates,
+        currentProjectTemplate,
+        availableTemplateProps,
+      }}
+    />,
+  )
+
+  const selectLabel = screen.getByText('Standard')
+  expect(selectLabel).toBeInTheDocument()
+
+  await act(async () => user.click(selectLabel))
+
+  const itemTestingTemplate = screen.getByText('Testing template')
+  expect(itemTestingTemplate).toBeInTheDocument()
+
+  await act(async () => user.click(itemTestingTemplate))
+
+  projectTemplates = result.current.projectTemplates
+  currentProjectTemplate = result.current.currentProjectTemplate
+  rerender(
+    <WrapperComponent
+      {...{
+        projectTemplates,
+        setProjectTemplates,
+        currentProjectTemplate,
+        availableTemplateProps,
+        modifyingCurrentTemplate,
+      }}
+    />,
+  )
+
+  const setAsDefaultButton = screen.getByTestId('set-as-default-template')
+  expect(setAsDefaultButton).toBeInTheDocument()
+
+  await waitFor(async () => user.click(setAsDefaultButton))
+
+  projectTemplates = result.current.projectTemplates
+  currentProjectTemplate = result.current.currentProjectTemplate
+  rerender(
+    <WrapperComponent
+      {...{
+        projectTemplates,
+        setProjectTemplates,
+        currentProjectTemplate,
+        availableTemplateProps,
+        modifyingCurrentTemplate,
+      }}
+    />,
+  )
+
+  expect(currentProjectTemplate.is_default).toBeTruthy()
+  expect(
+    screen.queryByTestId('set-as-default-template'),
+  ).not.toBeInTheDocument()
 })

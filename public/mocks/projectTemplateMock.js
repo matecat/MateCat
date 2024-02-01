@@ -25,6 +25,7 @@ export default {
       id: 3,
       name: 'Testing template',
       id_team: 45,
+      is_default: false,
       qa_template_id: 4456,
       payable_rate_template_id: 434,
       speech2text: true,

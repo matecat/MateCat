@@ -5,7 +5,7 @@ import {ContentWrapper} from './ContentWrapper'
 import {MachineTranslationTab} from './Contents/MachineTranslationTab'
 import {AdvancedOptionsTab} from './Contents/AdvancedOptionsTab'
 import {TranslationMemoryGlossaryTab} from './Contents/TranslationMemoryGlossaryTab'
-import {ProjectTemplate} from './ProjectTemplate'
+import {ProjectTemplate} from './ProjectTemplate/ProjectTemplate'
 
 let tabOpenFromQueryString = new URLSearchParams(window.location.search).get(
   'openTab',

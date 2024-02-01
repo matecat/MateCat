@@ -101,7 +101,7 @@ function useProjectTemplates(canRetrieveTemplates) {
         setProjectTemplates(
           items.map((template) => ({
             ...template,
-            isSelected: isStandardTemplate(template),
+            isSelected: template.is_default,
           })),
         )
 

@@ -117,3 +117,4 @@ $klein->with('/api/app/languages', function() {
 $klein->with('/api/app/files', function() {
     route( '', 'GET', '\API\App\SupportedFilesController', 'index' );
 });
+
