@@ -114,7 +114,7 @@ class JobMetadataModal extends React.Component {
               {this.props.files &&
                 this.props.files.find((file) => file.metadata.instructions) && (
                   <div>
-                    <h2>Files instructions</h2>
+                    <h2>File instructions</h2>
                     <div
                       className="ui styled fluid accordion"
                       ref={(acc) => {
