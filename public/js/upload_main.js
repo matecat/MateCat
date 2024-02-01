@@ -13,6 +13,7 @@
 /*global $, window, document */
 import {initFileUpload} from './cat_source/es6/api/initFileUpload'
 import {convertFileRequest} from './cat_source/es6/api/convertFileRequest'
+import {clearNotCompletedUploads} from './cat_source/es6/api/clearNotCompletedUploads'
 import CreateProjectStore from './cat_source/es6/stores/CreateProjectStore'
 import CreateProjectActions from './cat_source/es6/actions/CreateProjectActions'
 
@@ -775,9 +776,12 @@ var testProgress = function (filerow, filesize, session, progress) {
     return
   }
 
-  setTimeout(function () {
-    testProgress(filerow, filesize, session, progress)
-  }, Math.round(stepWait * 1000))
+  setTimeout(
+    function () {
+      testProgress(filerow, filesize, session, progress)
+    },
+    Math.round(stepWait * 1000),
+  )
 }
 
 var checkInit = function () {
