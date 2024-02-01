@@ -77,23 +77,29 @@ class ProjectTemplateDao extends DataAccess_AbstractDao
            ];
         }
 
-        foreach ($engineList as $engine){
-            if($engine->name === "ModernMT"){
-                return [
-                    'id' => $engine->id,
-                    'extra' => new \stdClass()
-                ];
-            }
+        $mmt = array_filter($engineList, function($el){
+            return $el->name === 'ModernMT';
+        });
 
-            if($engine->name === "DeepL"){
+        $deepL = array_filter($engineList, function($el){
+            return $el->name === 'DeepL';
+        });
 
-                // $engine->extra_parameters
+        if(!empty($mmt)){
+            return [
+                'id' => array_values($mmt)[0]->id,
+                'extra' => new \stdClass()
+            ];
+        }
 
-                return [
-                    'id' => $engine->id,
-                    'extra' => new \stdClass()
-                ];
-            }
+        if(!empty($deepL)){
+            $extra = new \stdClass();
+            $extra->deepl_formality = 'default';
+
+            return [
+                'id' => array_values($deepL)[0]->id,
+                'extra' => $extra
+            ];
         }
 
         return [
