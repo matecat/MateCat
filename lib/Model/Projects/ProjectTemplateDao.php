@@ -86,6 +86,9 @@ class ProjectTemplateDao extends DataAccess_AbstractDao
             }
 
             if($engine->name === "DeepL"){
+
+                // $engine->extra_parameters
+
                 return [
                     'id' => $engine->id,
                     'extra' => new \stdClass()
@@ -278,7 +281,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao
      */
     private static function findUniqueName(ProjectTemplateStruct $projectTemplateStruct, $name, $uid)
     {
-        $check = ProjectTemplateDao::getByUidAndName($uid, $name, 0);
+        $check = ProjectTemplateDao::getByUidAndName($uid, $name, 0); // potrebbe essere più veloce fare una query con LIKE name%
 
         if($check === null){
             return $projectTemplateStruct;
