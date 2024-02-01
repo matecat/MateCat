@@ -106,15 +106,14 @@ export const TranslationMemoryGlossaryTab = () => {
     openLoginModal,
     modifyingCurrentTemplate,
     currentProjectTemplate,
-    availableTemplateProps,
   } = useContext(SettingsPanelContext)
 
-  const getPublicMatches = currentProjectTemplate.get_public_matches
-  const isPretranslate100Active = currentProjectTemplate.pretranslate_100
+  const getPublicMatches = currentProjectTemplate.getPublicMatches
+  const isPretranslate100Active = currentProjectTemplate.pretranslate100
   const setIsPretranslate100Active = (value) =>
     modifyingCurrentTemplate((prevTemplate) => ({
       ...prevTemplate,
-      [availableTemplateProps.pretranslate100]: value,
+      pretranslate100: value,
     }))
 
   const [specialRows, setSpecialRows] = useState([
@@ -133,10 +132,6 @@ export const TranslationMemoryGlossaryTab = () => {
     getPublicMatches: undefined,
     currentProjectTemplate: undefined,
   })
-
-  const wasSwitchedCurrentProjectTemplate =
-    currentProjectTemplate?.id !==
-    previousStatesRef.current.currentProjectTemplate?.id
 
   previousStatesRef.current.currentProjectTemplate = currentProjectTemplate
 
@@ -168,10 +163,10 @@ export const TranslationMemoryGlossaryTab = () => {
       indexRow === indexToMove
         ? [rowSelected, row]
         : indexRow === index
-        ? []
-        : indexRow === activeRows.length - 1 && isLastIndexToMove
-        ? [row, rowSelected]
-        : row,
+          ? []
+          : indexRow === activeRows.length - 1 && isLastIndexToMove
+            ? [row, rowSelected]
+            : row,
     )
 
     setKeyRows([...keyRows.filter(({isActive}) => !isActive), ...orderedRows])
@@ -179,7 +174,7 @@ export const TranslationMemoryGlossaryTab = () => {
 
     modifyingCurrentTemplate((prevTemplate) => ({
       ...prevTemplate,
-      [availableTemplateProps.tm]: orderTmKeys(tmKeys, keysOrdered)
+      tm: orderTmKeys(tmKeys, keysOrdered)
         .filter(({isActive}) => isActive)
         .map(({id, isActive, ...rest}) => rest),
     }))
@@ -206,10 +201,11 @@ export const TranslationMemoryGlossaryTab = () => {
   }, [getPublicMatches])
 
   useEffect(() => {
-    const getTmKeysOrderedByTemplate = () => {
-      const tmCurrentTemplate =
-        previousStatesRef.current.currentProjectTemplate.tm
+    const tmCurrentProjectTemplate =
+      previousStatesRef.current.currentProjectTemplate.tm
 
+    const getTmKeysOrderedByTemplate = () => {
+      const tmCurrentTemplate = tmCurrentProjectTemplate
       return Array.isArray(tmCurrentTemplate)
         ? orderTmKeys(
             tmKeys,
@@ -248,26 +244,24 @@ export const TranslationMemoryGlossaryTab = () => {
       ]
 
       // preserve rows order
-      const rowsActive = !wasSwitchedCurrentProjectTemplate
-        ? allRows
+      const rowsActive = allRows
+        .filter(({isActive}) => isActive)
+        .reduce((acc, cur) => {
+          const copyAcc = [...acc]
+          const index = tmCurrentProjectTemplate
             .filter(({isActive}) => isActive)
-            .reduce((acc, cur) => {
-              const copyAcc = [...acc]
-              const index = prevState
-                .filter(({isActive}) => isActive)
-                .findIndex(({id}) => id === cur.id)
+            .findIndex(({id}) => id === cur.id)
 
-              if (index >= 0) {
-                const previousItem = copyAcc[index]
-                copyAcc[index] = cur
-                if (previousItem) copyAcc.push(previousItem)
-              } else {
-                copyAcc.push(cur)
-              }
-              return copyAcc
-            }, [])
-            .filter((row) => row)
-        : allRows.filter(({isActive}) => isActive)
+          if (index >= 0) {
+            const previousItem = copyAcc[index]
+            copyAcc[index] = cur
+            if (previousItem) copyAcc.push(previousItem)
+          } else {
+            copyAcc.push(cur)
+          }
+          return copyAcc
+        }, [])
+        .filter((row) => row)
 
       const rowsNotActive = allRows.filter(({isActive}) => !isActive)
 
@@ -296,9 +290,9 @@ export const TranslationMemoryGlossaryTab = () => {
             id === SPECIAL_ROWS_ID.defaultTranslationMemory
               ? 'row-content-default-memory'
               : id === SPECIAL_ROWS_ID.addSharedResource ||
-                id === SPECIAL_ROWS_ID.newResource
-              ? 'row-content-create-resource'
-              : '',
+                  id === SPECIAL_ROWS_ID.newResource
+                ? 'row-content-create-resource'
+                : '',
           node: !isCreateResourceRow ? (
             <TMKeyRow key={row.id} {...{row, onExpandRow}} />
           ) : (
@@ -308,7 +302,7 @@ export const TranslationMemoryGlossaryTab = () => {
         }
       })
     })
-  }, [tmKeys, wasSwitchedCurrentProjectTemplate, specialRows])
+  }, [tmKeys, specialRows])
 
   // Update job keys
   useEffect(() => {

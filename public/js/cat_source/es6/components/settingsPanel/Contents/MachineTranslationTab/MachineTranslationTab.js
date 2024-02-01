@@ -33,7 +33,6 @@ export const MachineTranslationTab = () => {
     openLoginModal,
     modifyingCurrentTemplate,
     currentProjectTemplate,
-    availableTemplateProps,
     projectTemplates,
   } = useContext(SettingsPanelContext)
   console.log('currentProjectTemplate', currentProjectTemplate)
@@ -41,7 +40,7 @@ export const MachineTranslationTab = () => {
   const setActiveMTEngine = ({id} = {}) =>
     modifyingCurrentTemplate((prevTemplate) => ({
       ...prevTemplate,
-      [availableTemplateProps.mt]:
+      mt:
         typeof id === 'number'
           ? {
               id,
@@ -147,21 +146,17 @@ export const MachineTranslationTab = () => {
           setActiveMTEngine(DEFAULT_ENGINE_MEMORY)
         }
 
-        const mtProp = availableTemplateProps.mt
-
         const templatesInvolved = projectTemplates
-          .filter((template) => template[mtProp].id === deleteMTRequest)
+          .filter((template) => template.mt.id === deleteMTRequest)
           .map((template) => ({
             ...template,
-            [mtProp]: {},
+            mt: {},
           }))
 
         CreateProjectActions.updateProjectTemplates({
           templates: templatesInvolved,
           modifiedPropsCurrentProjectTemplate: {
-            [mtProp]: templatesInvolved.find(({isTemporary}) => isTemporary)?.[
-              mtProp
-            ],
+            mt: templatesInvolved.find(({isTemporary}) => isTemporary)?.mt,
           },
         })
       })

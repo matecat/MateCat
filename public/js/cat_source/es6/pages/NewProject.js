@@ -91,7 +91,6 @@ const NewProject = ({
   const {
     projectTemplates,
     currentProjectTemplate,
-    availableTemplateProps,
     setProjectTemplates,
     modifyingCurrentTemplate,
     checkSpecificTemplatePropsAreModified,
@@ -690,7 +689,6 @@ const NewProject = ({
           setProjectTemplates,
           modifyingCurrentTemplate,
           currentProjectTemplate,
-          availableTemplateProps,
           checkSpecificTemplatePropsAreModified,
         }}
       />

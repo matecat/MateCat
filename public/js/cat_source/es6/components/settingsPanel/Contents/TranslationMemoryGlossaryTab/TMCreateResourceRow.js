@@ -15,7 +15,7 @@ import Checkmark from '../../../../../../../img/icons/Checkmark'
 import Close from '../../../../../../../img/icons/Close'
 
 export const TMCreateResourceRow = ({row}) => {
-  const {tmKeys, setTmKeys, modifyingCurrentTemplate, availableTemplateProps} =
+  const {tmKeys, setTmKeys, modifyingCurrentTemplate} =
     useContext(SettingsPanelContext)
   const {setSpecialRows, setNotification} = useContext(
     TranslationMemoryGlossaryTabContext,
@@ -109,9 +109,9 @@ export const TMCreateResourceRow = ({row}) => {
   const executeModifyCurrentTemplate = (updatedKeys) => {
     modifyingCurrentTemplate((prevTemplate) => ({
       ...prevTemplate,
-      [availableTemplateProps.tm]: orderTmKeys(
+      tm: orderTmKeys(
         updatedKeys.filter(({isActive}) => isActive),
-        prevTemplate[availableTemplateProps.tm].map(({key}) => key),
+        prevTemplate.tm.map(({key}) => key),
       ).map(({id, isActive, ...rest}) => rest), //eslint-disable-line
     }))
   }

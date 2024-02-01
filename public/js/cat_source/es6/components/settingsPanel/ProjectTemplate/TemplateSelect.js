@@ -2,7 +2,7 @@ import React, {useContext} from 'react'
 import {Select} from '../../common/Select'
 import {ProjectTemplateContext} from './ProjectTemplateContext'
 
-export const ProjectTemplateSelect = () => {
+export const TemplateSelect = () => {
   const {projectTemplates, setProjectTemplates, currentProjectTemplate} =
     useContext(ProjectTemplateContext)
 

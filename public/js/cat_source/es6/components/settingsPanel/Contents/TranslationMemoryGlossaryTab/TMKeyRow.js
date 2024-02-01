@@ -34,13 +34,8 @@ import CatToolActions from '../../../../actions/CatToolActions'
 
 export const TMKeyRow = ({row, onExpandRow}) => {
   const {isImportTMXInProgress} = useContext(CreateProjectContext)
-  const {
-    tmKeys,
-    setTmKeys,
-    modifyingCurrentTemplate,
-    currentProjectTemplate,
-    availableTemplateProps,
-  } = useContext(SettingsPanelContext)
+  const {tmKeys, setTmKeys, modifyingCurrentTemplate, currentProjectTemplate} =
+    useContext(SettingsPanelContext)
   const {setSpecialRows, setNotification} = useContext(
     TranslationMemoryGlossaryTabContext,
   )
@@ -71,7 +66,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
       if (isMMSharedKey) {
         modifyingCurrentTemplate((prevTemplate) => ({
           ...prevTemplate,
-          [availableTemplateProps.getPublicMatches]: isLookup,
+          getPublicMatches: isLookup,
         }))
       }
     }
@@ -99,8 +94,8 @@ export const TMKeyRow = ({row, onExpandRow}) => {
               isActive: isLookup
                 ? isLookup
                 : !isLookup && !isUpdating
-                ? false
-                : true,
+                  ? false
+                  : true,
               r: isLookup,
               w: !tm.isActive ? isLookup : isUpdating,
             }
@@ -110,9 +105,9 @@ export const TMKeyRow = ({row, onExpandRow}) => {
 
       modifyingCurrentTemplate((prevTemplate) => ({
         ...prevTemplate,
-        [availableTemplateProps.tm]: orderTmKeys(
+        tm: orderTmKeys(
           updatedKeys.filter(({isActive}) => isActive),
-          prevTemplate[availableTemplateProps.tm].map(({key}) => key),
+          prevTemplate.tm.map(({key}) => key),
         ).map(({id, isActive, ...rest}) => rest), //eslint-disable-line
       }))
     } else {
@@ -204,16 +199,16 @@ export const TMKeyRow = ({row, onExpandRow}) => {
         icon: <Earth size={16} />,
       }
     : !row.is_shared
-    ? {
-        title: 'Private resource. \n' + 'Share it from the dropdown menu',
-        icon: <Lock size={16} />,
-      }
-    : {
-        title:
-          'Shared resource.\n' +
-          'Select Share resource from the dropdown menu to see owners',
-        icon: <Users size={16} />,
-      }
+      ? {
+          title: 'Private resource. \n' + 'Share it from the dropdown menu',
+          icon: <Lock size={16} />,
+        }
+      : {
+          title:
+            'Shared resource.\n' +
+            'Select Share resource from the dropdown menu to see owners',
+          icon: <Users size={16} />,
+        }
 
   return (
     <Fragment>
