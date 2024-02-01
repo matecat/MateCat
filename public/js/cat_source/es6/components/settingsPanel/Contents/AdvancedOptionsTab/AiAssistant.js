@@ -9,7 +9,10 @@ export const AiAssistant = () => {
     setActive(selected)
     //Track Event
     const message = {
-      user: config.isLoggedIn ? APP.USER.STORE.user.uid : undefined,
+      user:
+        config.isLoggedIn && APP.USER.STORE.user
+          ? APP.USER.STORE.user.uid
+          : undefined,
       page: location.href,
       onHighlight: selected,
     }
