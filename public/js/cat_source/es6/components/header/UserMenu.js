@@ -18,7 +18,7 @@ export const UserMenu = ({user, userLogged}) => {
   }
 
   const openPreferencesModal = () => {
-    $('#modal').trigger('openpreferences')
+    APP.openPreferencesModal()
   }
 
   const logoutUserFn = () => {

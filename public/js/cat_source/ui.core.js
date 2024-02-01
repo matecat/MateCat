@@ -608,6 +608,7 @@ window.UI = {
     setTranslation(requestArgs)
       .then((data) => {
         const idSegment = options.id_segment
+        SegmentActions.setChoosenSuggestion(idSegment, null)
         const index = UI.executingSetTranslation.indexOf(idSegment)
         if (index > -1) {
           UI.executingSetTranslation.splice(index, 1)

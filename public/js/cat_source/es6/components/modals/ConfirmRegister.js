@@ -1,5 +1,6 @@
 import React from 'react'
 import {resendEmailConfirmation} from '../../api/resendEmailConfirmation'
+import ModalsActions from '../../actions/ModalsActions'
 
 class ConfirmRegister extends React.Component {
   constructor(props) {
@@ -19,7 +20,7 @@ class ConfirmRegister extends React.Component {
   }
 
   closeModal() {
-    $('#modal').trigger('closemodal')
+    ModalsActions.onCloseModal()
   }
 
   render() {

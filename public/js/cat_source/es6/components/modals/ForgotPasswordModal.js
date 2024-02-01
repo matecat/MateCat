@@ -49,15 +49,13 @@ class ForgotPasswordModal extends React.Component {
     this.checkRedeemProject().then(
       this.sendForgotPassword()
         .then(() => {
-          $('#modal').trigger('opensuccess', [
-            {
-              title: 'Forgot Password',
-              text:
-                'We sent an email to ' +
-                self.state.emailAddress +
-                '. Follow the instructions to create a new password.',
-            },
-          ])
+          APP.openSuccessModal({
+            title: 'Forgot Password',
+            text:
+              'We sent an email to ' +
+              self.state.emailAddress +
+              '. Follow the instructions to create a new password.',
+          })
         })
         .catch(({errors}) => {
           const error = errors?.[0]

@@ -1,3 +1,5 @@
+import Cookies from 'js-cookie'
+
 /**
  * Login user
  *
@@ -12,16 +14,27 @@ export const loginUser = async (email, password) => {
   }
   const formData = new FormData()
 
-  Object.keys(paramsData).forEach((key) => {
-    formData.append(key, paramsData[key])
-  })
-  const response = await fetch(`/api/app/user/login`, {
-    method: 'POST',
-    body: formData,
-    credentials: 'include',
-  })
+  const tokenResponse = await fetch('/api/app/user/login/token')
 
-  if (!response.ok) return Promise.reject(response)
+  if (tokenResponse.ok) {
+    const token = Cookies.get('xsrf-token')
 
-  return response
+    Object.keys(paramsData).forEach((key) => {
+      formData.append(key, paramsData[key])
+    })
+    const response = await fetch(`/api/app/user/login`, {
+      method: 'POST',
+      body: formData,
+      credentials: 'include',
+      headers: {
+        'xsrf-token': token,
+      },
+    })
+
+    if (!response.ok) return Promise.reject(response)
+
+    return response
+  } else {
+    return Promise.reject(tokenResponse)
+  }
 }

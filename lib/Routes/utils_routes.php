@@ -33,8 +33,10 @@ route( '/api/app/teams/[i:id_team]/members/public',                             
 route( '/api/app/user',                                                             'GET',  'API\App\UserController', 'show' );
 route( '/api/app/user/password/change',                                             'POST', 'API\App\UserController', 'changePasswordAsLoggedUser' );
 
+
 route( '/api/app/user/login',                                                       'POST', 'API\App\LoginController', 'login' );
 route( '/api/app/user/logout',                                                      'POST', 'API\App\LoginController', 'logout' );
+route( '/api/app/user/login/token',                                                 'GET',  'API\App\LoginController', 'token' );
 
 route( '/api/app/user',                                                             'POST', 'API\App\SignupController', 'create' );
 route( '/api/app/user/metadata',                                                    'POST', 'API\App\UserMetadataController', 'update' );
