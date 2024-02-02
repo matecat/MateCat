@@ -62,6 +62,18 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
     }
 
     /**
+     * @return mixed
+     */
+    public function getCrossLanguageMatches()
+    {
+        if(is_string($this->cross_language_matches)){
+            return json_decode($this->cross_language_matches);
+        }
+
+        return $this->cross_language_matches;
+    }
+
+    /**
      * @return array
      */
     public function getSegmentationRule()
@@ -95,6 +107,14 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
         }
 
         return $this->tm;
+    }
+
+    /**
+     * @return string
+     */
+    public function crossLanguageMatchesToJson()
+    {
+        return (!empty($this->cross_language_matches)) ? json_encode($this->cross_language_matches) : null;
     }
 
     /**
@@ -181,7 +201,7 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
             'speech2text' => (bool)$this->speech2text,
             'lexica' => (bool)$this->lexica,
             'tag_projection' => (bool)$this->tag_projection,
-            'cross_language_matches' => $this->cross_language_matches,
+            'cross_language_matches' => $this->getCrossLanguageMatches(),
             'segmentation_rule' => $this->getSegmentationRule(),
             'mt' => $this->getMt(),
             'tm' => $this->getTm(),

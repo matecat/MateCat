@@ -27,7 +27,8 @@
       "type": "boolean"
     },
     "cross_language_matches": {
-      "type": ["null", "array"]
+      "type": ["null", "object"],
+      "$ref": "#/definitions/cross_language_matches"
     },
     "segmentation_rule": {
       "type": ["null", "object"]
@@ -60,6 +61,17 @@
     "get_public_matches"
   ],
   "definitions": {
+    "cross_language_matches": {
+      "type": "object",
+      "properties": {
+        "primary": {
+          "type": ["null", "string"]
+        },
+        "secondary": {
+          "type": ["null", "string"]
+        }
+      }
+    },
     "tm": {
       "type": "object",
       "properties": {
