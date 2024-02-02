@@ -70,7 +70,7 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
             return json_decode($this->segmentation_rule);
         }
 
-        return $this->tm;
+        return $this->segmentation_rule;
     }
 
     /**
