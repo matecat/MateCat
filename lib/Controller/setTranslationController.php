@@ -303,7 +303,10 @@ class setTranslationController extends ajaxController {
         $dao           = new \Segments_SegmentDao( \Database::obtain() );
         $this->segment = $dao->getById( $this->id_segment );
 
-        $check = new QA( $this->__postInput[ 'segment' ], $this->__postInput[ 'translation' ] );
+        $segment = $this->filter->fromLayer0ToLayer2($this->__postInput[ 'segment' ]);
+        $translation = $this->filter->fromLayer0ToLayer2($this->__postInput[ 'translation' ]);
+
+        $check = new QA( $segment, $translation );
         $check->setChunk( $this->chunk );
         $check->setFeatureSet( $this->featureSet );
         $check->setSourceSegLang( $this->chunk->source );
