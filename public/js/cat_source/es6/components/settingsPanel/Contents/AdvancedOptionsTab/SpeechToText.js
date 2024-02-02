@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import Switch from '../../../common/Switch'
 import ModalsActions from '../../../../actions/ModalsActions'
 import Speech2TextFeature from '../../../../utils/speech2text'
@@ -21,6 +21,16 @@ export const SpeechToText = ({
   })
   // const disabled = !('webkitSpeechRecognition' in window)
   const disabled = !('webkitSpeechRecognition' in window)
+
+  useEffect(() => {
+    setDictationOption(() => {
+      if (isCattool) {
+        return Speech2TextFeature.enabled()
+      } else {
+        return speechToTextActive
+      }
+    })
+  }, [speechToTextActive, isCattool])
 
   const clickOnDisabled = () => {
     if (disabled) {

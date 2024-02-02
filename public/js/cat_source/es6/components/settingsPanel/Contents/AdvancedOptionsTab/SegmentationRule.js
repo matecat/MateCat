@@ -3,14 +3,15 @@ import {Select} from '../../../common/Select'
 import AlertModal from '../../../modals/AlertModal'
 import ModalsActions from '../../../../actions/ModalsActions'
 
+const options = [
+  {name: 'General', id: 'standard'},
+  {name: 'Patent', id: 'patent'},
+  {name: 'Paragraph', id: 'paragraph'},
+]
+
 export const SegmentationRule = ({segmentationRule, setSegmentationRule}) => {
   const [active, setActive] = useState(segmentationRule)
 
-  const options = [
-    {name: 'General', id: 'standard'},
-    {name: 'Patent', id: 'patent'},
-    {name: 'Paragraph', id: 'paragraph'},
-  ]
   const onClick = () => {
     if (!!config.is_cattool) {
       ModalsActions.showModalComponent(
@@ -23,6 +24,11 @@ export const SegmentationRule = ({segmentationRule, setSegmentationRule}) => {
       )
     }
   }
+
+  useEffect(() => {
+    setActive(segmentationRule)
+  }, [segmentationRule])
+
   useEffect(() => {
     if (config.is_cattool) {
       let activeRule
@@ -40,7 +46,7 @@ export const SegmentationRule = ({segmentationRule, setSegmentationRule}) => {
     if (!config.is_cattool) {
       setSegmentationRule(active)
     }
-  }, [active])
+  }, [active, setSegmentationRule])
   return (
     <div className="options-box seg_rule" onClick={onClick}>
       <h3>Segmentation Rules</h3>

@@ -35,7 +35,7 @@ export const MachineTranslationTab = () => {
     currentProjectTemplate,
     projectTemplates,
   } = useContext(SettingsPanelContext)
-  console.log('currentProjectTemplate', currentProjectTemplate)
+
   const activeMTEngine = currentProjectTemplate.mt?.id
   const setActiveMTEngine = ({id} = {}) =>
     modifyingCurrentTemplate((prevTemplate) => ({

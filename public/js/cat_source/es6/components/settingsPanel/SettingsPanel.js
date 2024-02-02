@@ -25,6 +25,11 @@ export const TEMPLATE_PROPS_BY_TAB = {
     SCHEMA_KEYS.pretranslate100,
   ],
   [SETTINGS_PANEL_TABS.machineTranslation]: [SCHEMA_KEYS.mt],
+  [SETTINGS_PANEL_TABS.advancedOptions]: [
+    SCHEMA_KEYS.speech2text,
+    SCHEMA_KEYS.tagProjection,
+    SCHEMA_KEYS.lexica,
+  ],
 }
 
 const DEFAULT_CONTENTS = [

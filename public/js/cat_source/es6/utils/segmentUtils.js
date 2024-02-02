@@ -159,7 +159,8 @@ const SegmentUtils = {
    */
   checkCrossLanguageSettings: function () {
     const settings = localStorage.getItem('multiMatchLangs')
-    if (settings) return JSON.parse(settings)
+    if (settings && Object.keys(JSON.parse(settings)).length)
+      return JSON.parse(settings)
     return undefined
   },
   /**

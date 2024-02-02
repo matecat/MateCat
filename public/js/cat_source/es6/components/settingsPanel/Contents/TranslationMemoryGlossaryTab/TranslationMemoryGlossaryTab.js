@@ -176,7 +176,7 @@ export const TranslationMemoryGlossaryTab = () => {
       ...prevTemplate,
       tm: orderTmKeys(tmKeys, keysOrdered)
         .filter(({isActive}) => isActive)
-        .map(({id, isActive, ...rest}) => rest),
+        .map(({id, isActive, ...rest}) => rest), // eslint-disable-line
     }))
 
     // Cattol page updateJobKeys

@@ -3,6 +3,7 @@ import {ProjectTemplateContext} from './ProjectTemplateContext'
 import {TEMPLATE_MODIFIERS} from './ProjectTemplate'
 import IconClose from '../../icons/IconClose'
 import {createProjectTemplate} from '../../../api/createProjectTemplate'
+import {SCHEMA_KEYS} from '../../../hooks/useProjectTemplates'
 
 export const CreateUpdateControl = () => {
   const {
@@ -26,7 +27,11 @@ export const CreateUpdateControl = () => {
       isTemporary,
       isSelected,
       ...newTemplate
-    } = {...currentProjectTemplate, name: templateName, is_default: false}
+    } = {
+      ...currentProjectTemplate,
+      name: templateName,
+      [SCHEMA_KEYS.isDefault]: false,
+    }
     /* eslint-enable no-unused-vars */
     setIsRequestInProgress(true)
 

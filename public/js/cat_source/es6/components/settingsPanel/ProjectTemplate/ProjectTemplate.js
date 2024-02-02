@@ -1,7 +1,10 @@
 import React, {useCallback, useContext, useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
 import {SettingsPanelContext} from '../SettingsPanelContext'
-import {isStandardTemplate} from '../../../hooks/useProjectTemplates'
+import {
+  SCHEMA_KEYS,
+  isStandardTemplate,
+} from '../../../hooks/useProjectTemplates'
 import {updateProjectTemplate} from '../../../api/updateProjectTemplate'
 import CreateProjectStore from '../../../stores/CreateProjectStore'
 import NewProjectConstants from '../../../constants/NewProjectConstants'
@@ -134,7 +137,7 @@ export const ProjectTemplate = ({portalTarget}) => {
             ? {
                 ...modifiedPropsCurrentProjectTemplate,
                 ...(currentOriginalTemplate && {
-                  modified_at: currentOriginalTemplate.modified_at,
+                  modifiedAt: currentOriginalTemplate.modified_at,
                 }),
               }
             : currentOriginalTemplate),
@@ -176,7 +179,7 @@ export const ProjectTemplate = ({portalTarget}) => {
 
     updateTemplate({
       ...currentProjectTemplate,
-      isDefault: true,
+      [SCHEMA_KEYS.isDefault]: true,
     })
   }
 

@@ -192,9 +192,17 @@ const NewProject = ({
       // private_keys_list: getTmDataStructureToSendServer({tmKeys, keysOrdered}),
       lang_detect_files: '',
       // pretranslate_100: isPretranslate100Active ? 1 : 0,
+
+      // IMPORTANTE con l'integrazione dei template chiamare prima la funzione checkLexiqaIsEnabled per vedere se è abilitato
       lexiqa: lexiqaActive,
+      //IMPORTANTE
+
       speech2text: speechToTextActive,
+
+      // IMPORTANTE con l'integrazione dei template chiamare prima la funzione checkGuessTagIsEnabled per vedere se è abilitato per la lingua selezionata
       tag_projection: guessTagActive,
+      //IMPORTANTE
+
       segmentation_rule: segmentationRule.id === '1' ? '' : segmentationRule.id,
       id_team: selectedTeam ? selectedTeam.id : undefined,
       // get_public_matches: getPublicMatches,

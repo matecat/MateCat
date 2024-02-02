@@ -11,22 +11,35 @@ export const CrossLanguagesMatches = ({
     return {name: lang.name, id: lang.code}
   })
   const [activeLang1, setActiveLang1] = useState(
-    multiMatchLangs
-      ? languages.find((lang) => lang.id === multiMatchLangs.primary)
-      : undefined,
+    languages.find((lang) => lang.id === multiMatchLangs?.primary),
   )
   const [activeLang2, setActiveLang2] = useState(
-    multiMatchLangs
-      ? languages.find((lang) => lang.id === multiMatchLangs.secondary)
-      : undefined,
+    languages.find((lang) => lang.id === multiMatchLangs?.secondary),
   )
+
+  useEffect(() => {
+    const languages = ApplicationStore.getLanguages().map((lang) => {
+      return {name: lang.name, id: lang.code}
+    })
+
+    setActiveLang1(
+      languages.find((lang) => lang.id === multiMatchLangs?.primary),
+    )
+
+    setActiveLang2(
+      languages.find((lang) => lang.id === multiMatchLangs?.secondary),
+    )
+  }, [multiMatchLangs?.primary, multiMatchLangs?.secondary])
 
   useEffect(() => {
     const settings = {
       primary: activeLang1?.id,
       secondary: activeLang2?.id,
     }
-    setMultiMatchLangs(settings)
+
+    setMultiMatchLangs(
+      typeof activeLang1?.id !== 'undefined' ? settings : undefined,
+    )
     localStorage.setItem('multiMatchLangs', JSON.stringify(settings))
     if (SegmentActions.getContribution && config.is_cattool) {
       if (settings.primary) {
@@ -38,7 +51,7 @@ export const CrossLanguagesMatches = ({
         SegmentActions.updateAllSegments()
       }
     }
-  }, [activeLang1, activeLang2])
+  }, [activeLang1, activeLang2, setMultiMatchLangs])
 
   useEffect(() => {
     if (!activeLang1) {
