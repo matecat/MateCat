@@ -62,7 +62,7 @@
   ],
   "definitions": {
     "cross_language_matches": {
-      "type": "object",
+      "type": ["null", "object"],
       "properties": {
         "primary": {
           "type": ["null", "string"]
