@@ -114,7 +114,15 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
      */
     public function crossLanguageMatchesToJson()
     {
-        return (!empty($this->cross_language_matches)) ? json_encode($this->cross_language_matches) : null;
+        if(empty($this->cross_language_matches)){
+            return null;
+        }
+
+        if(!is_string($this->cross_language_matches)){
+            return json_encode($this->cross_language_matches);
+        }
+
+        return $this->cross_language_matches;
     }
 
     /**
@@ -122,7 +130,15 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
      */
     public function segmentationRuleToJson()
     {
-        return (!empty($this->segmentation_rule)) ? json_encode($this->segmentation_rule) : null;
+        if(empty($this->segmentation_rule)){
+            return null;
+        }
+
+        if(!is_string($this->segmentation_rule)){
+            return json_encode($this->segmentation_rule);
+        }
+
+        return $this->segmentation_rule;
     }
 
     /**
@@ -130,7 +146,15 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
      */
     public function tmToJson()
     {
-        return (!empty($this->tm)) ? json_encode($this->tm) : null;
+        if(empty($this->tm)){
+            return null;
+        }
+
+        if(!is_string($this->tm)){
+            return json_encode($this->tm);
+        }
+
+        return $this->tm;
     }
 
     /**
@@ -138,7 +162,15 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
      */
     public function mtToJson()
     {
-        return (!empty($this->mt)) ? json_encode($this->mt) : null;
+        if(empty($this->mt)){
+            return null;
+        }
+
+        if(!is_string($this->mt)){
+            return json_encode($this->mt);
+        }
+
+        return $this->mt;
     }
 
     /**
