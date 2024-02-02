@@ -47,6 +47,10 @@ class ProjectTemplateDao extends DataAccess_AbstractDao
         $default->uid = $uid;
         $default->pretranslate_100 = true;
         $default->get_public_matches = true;
+        $default->segmentation_rule = [
+            "name" => "General",
+            "id" => "standard"
+        ];
 
         // MT
         $engineDAO        = new EnginesModel_EngineDAO( Database::obtain() );
