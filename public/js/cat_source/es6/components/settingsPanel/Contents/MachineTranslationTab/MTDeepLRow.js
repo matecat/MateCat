@@ -14,11 +14,8 @@ const FORMALITIES = [
 ]
 
 export const MTDeepLRow = ({row, deleteMT, onCheckboxClick}) => {
-  const {
-    currentProjectTemplate,
-    modifyingCurrentTemplate,
-    availableTemplateProps,
-  } = useContext(SettingsPanelContext)
+  const {currentProjectTemplate, modifyingCurrentTemplate} =
+    useContext(SettingsPanelContext)
 
   const activeMTEngine = currentProjectTemplate.mt?.id
   const {mt: {extra: deeplGlossaryProps} = {}} = currentProjectTemplate ?? {}
@@ -30,12 +27,12 @@ export const MTDeepLRow = ({row, deleteMT, onCheckboxClick}) => {
   useEffect(() => {
     if (typeof formalityAlreadySelected === 'undefined') {
       modifyingCurrentTemplate((prevTemplate) => {
-        const prevMt = prevTemplate[availableTemplateProps.mt]
+        const prevMt = prevTemplate.mt
         const prevMTExtra = prevMt?.extra ?? {}
 
         return {
           ...prevTemplate,
-          [availableTemplateProps.mt]: {
+          mt: {
             ...prevMt,
             extra: {
               ...prevMTExtra,
@@ -52,11 +49,7 @@ export const MTDeepLRow = ({row, deleteMT, onCheckboxClick}) => {
         })),
       )
     }
-  }, [
-    formalityAlreadySelected,
-    modifyingCurrentTemplate,
-    availableTemplateProps,
-  ])
+  }, [formalityAlreadySelected, modifyingCurrentTemplate])
 
   useEffect(() => {
     const getJobMetadata = ({jobMetadata: {project} = {}}) => {
@@ -101,12 +94,12 @@ export const MTDeepLRow = ({row, deleteMT, onCheckboxClick}) => {
         )
 
         modifyingCurrentTemplate((prevTemplate) => {
-          const prevMt = prevTemplate[availableTemplateProps.mt]
+          const prevMt = prevTemplate.mt
           const prevMTExtra = prevMt?.extra ?? {}
 
           return {
             ...prevTemplate,
-            [availableTemplateProps.mt]: {
+            mt: {
               ...prevMt,
               extra: {
                 ...prevMTExtra,

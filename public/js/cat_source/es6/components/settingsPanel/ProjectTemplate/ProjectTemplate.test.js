@@ -48,12 +48,8 @@ test('Render properly', async () => {
     expect(result.current.projectTemplates?.length).toBe(2)
   })
 
-  let {
-    projectTemplates,
-    setProjectTemplates,
-    currentProjectTemplate,
-    availableTemplateProps,
-  } = result.current
+  let {projectTemplates, setProjectTemplates, currentProjectTemplate} =
+    result.current
 
   const {rerender} = render(
     <WrapperComponent
@@ -61,7 +57,6 @@ test('Render properly', async () => {
         projectTemplates,
         setProjectTemplates,
         currentProjectTemplate,
-        availableTemplateProps,
       }}
     />,
   )
@@ -84,7 +79,6 @@ test('Render properly', async () => {
         projectTemplates,
         setProjectTemplates,
         currentProjectTemplate,
-        availableTemplateProps,
       }}
     />,
   )
@@ -112,7 +106,7 @@ test('Create and delete template', async () => {
           uid: 54,
           is_default: true,
           id_team: 45,
-          qa_template_id: 4456,
+          qa_model_template_id: 4456,
           payable_rate_template_id: 434,
           speech2text: true,
           lexica: true,
@@ -136,12 +130,8 @@ test('Create and delete template', async () => {
     ],
   )
 
-  let {
-    projectTemplates,
-    setProjectTemplates,
-    currentProjectTemplate,
-    availableTemplateProps,
-  } = result.current
+  let {projectTemplates, setProjectTemplates, currentProjectTemplate} =
+    result.current
 
   const {rerender} = render(
     <WrapperComponent
@@ -149,7 +139,6 @@ test('Create and delete template', async () => {
         projectTemplates,
         setProjectTemplates,
         currentProjectTemplate,
-        availableTemplateProps,
       }}
     />,
   )
@@ -159,7 +148,7 @@ test('Create and delete template', async () => {
   act(() => {
     modifyingCurrentTemplate((prevTemplate) => ({
       ...prevTemplate,
-      [result.current.availableTemplateProps.pretranslate100]: true,
+      pretranslate100: true,
     }))
   })
 
@@ -170,7 +159,6 @@ test('Create and delete template', async () => {
         projectTemplates,
         setProjectTemplates,
         currentProjectTemplate,
-        availableTemplateProps,
       }}
     />,
   )
@@ -198,7 +186,6 @@ test('Create and delete template', async () => {
         projectTemplates,
         setProjectTemplates,
         currentProjectTemplate,
-        availableTemplateProps,
       }}
     />,
   )
@@ -222,7 +209,6 @@ test('Create and delete template', async () => {
         projectTemplates,
         setProjectTemplates,
         currentProjectTemplate,
-        availableTemplateProps,
       }}
     />,
   )
@@ -252,7 +238,6 @@ test('Set template as default', async () => {
     projectTemplates,
     setProjectTemplates,
     currentProjectTemplate,
-    availableTemplateProps,
     modifyingCurrentTemplate,
   } = result.current
 
@@ -262,7 +247,6 @@ test('Set template as default', async () => {
         projectTemplates,
         setProjectTemplates,
         currentProjectTemplate,
-        availableTemplateProps,
       }}
     />,
   )
@@ -285,7 +269,6 @@ test('Set template as default', async () => {
         projectTemplates,
         setProjectTemplates,
         currentProjectTemplate,
-        availableTemplateProps,
         modifyingCurrentTemplate,
       }}
     />,
@@ -304,7 +287,6 @@ test('Set template as default', async () => {
         projectTemplates,
         setProjectTemplates,
         currentProjectTemplate,
-        availableTemplateProps,
         modifyingCurrentTemplate,
       }}
     />,

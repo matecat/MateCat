@@ -1,6 +1,4 @@
-import React, {useContext, useState} from 'react'
-import PropTypes from 'prop-types'
-import Switch from '../../../common/Switch'
+import React, {useContext} from 'react'
 import {SpeechToText} from './SpeechToText'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {GuessTag} from './GuessTag'
@@ -12,6 +10,9 @@ import {SegmentationRule} from './SegmentationRule'
 
 export const AdvancedOptionsTab = () => {
   const {
+    modifyingCurrentTemplate,
+    currentProjectTemplate,
+    //
     speechToTextActive,
     setSpeechToTextActive,
     guessTagActive,
@@ -25,6 +26,9 @@ export const AdvancedOptionsTab = () => {
     segmentationRule,
     setSegmentationRule,
   } = useContext(SettingsPanelContext)
+
+  // const speechToTextActive =
+
   return (
     <div className="advanced-options-box settings-panel-contentwrapper-tab-background">
       <SpeechToText

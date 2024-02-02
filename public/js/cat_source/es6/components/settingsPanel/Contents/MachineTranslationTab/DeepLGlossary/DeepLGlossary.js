@@ -22,11 +22,8 @@ const COLUMNS_TABLE = [
 export const DEEPL_GLOSSARY_CREATE_ROW_ID = 'createRow'
 
 export const DeepLGlossary = ({id, isCattoolPage = false}) => {
-  const {
-    currentProjectTemplate,
-    modifyingCurrentTemplate,
-    availableTemplateProps,
-  } = useContext(SettingsPanelContext)
+  const {currentProjectTemplate, modifyingCurrentTemplate} =
+    useContext(SettingsPanelContext)
 
   const {mt: {extra: deeplGlossaryProps} = {}} = currentProjectTemplate ?? {}
 
@@ -155,13 +152,13 @@ export const DeepLGlossary = ({id, isCattoolPage = false}) => {
     const activeRow = rows.find(({isActive}) => isActive)
 
     modifyingCurrentTemplate((prevTemplate) => {
-      const prevMt = prevTemplate[availableTemplateProps.mt]
+      const prevMt = prevTemplate.mt
       const prevMTExtra = prevMt?.extra ?? {}
       const {deepl_id_glossary, ...deepLExtra} = prevMTExtra //eslint-disable-line
 
       return {
         ...prevTemplate,
-        [availableTemplateProps.mt]: {
+        mt: {
           ...prevMt,
           extra: {
             ...deepLExtra,
@@ -172,7 +169,7 @@ export const DeepLGlossary = ({id, isCattoolPage = false}) => {
         },
       }
     })
-  }, [rows, isCattoolPage, modifyingCurrentTemplate, availableTemplateProps])
+  }, [rows, isCattoolPage, modifyingCurrentTemplate])
 
   const addGlossary = () => {
     const row = {

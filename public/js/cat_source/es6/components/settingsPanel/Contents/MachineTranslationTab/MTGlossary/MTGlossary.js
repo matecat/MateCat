@@ -59,11 +59,8 @@ export class MTGlossaryStatus {
 }
 
 export const MTGlossary = ({id, isCattoolPage = false}) => {
-  const {
-    currentProjectTemplate,
-    modifyingCurrentTemplate,
-    availableTemplateProps,
-  } = useContext(SettingsPanelContext)
+  const {currentProjectTemplate, modifyingCurrentTemplate} =
+    useContext(SettingsPanelContext)
 
   const {mt: {extra: mtGlossaryProps} = {}} = currentProjectTemplate ?? {}
 
@@ -199,8 +196,8 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
 
     modifyingCurrentTemplate((prevTemplate) => ({
       ...prevTemplate,
-      [availableTemplateProps.mt]: {
-        ...prevTemplate[availableTemplateProps.mt],
+      mt: {
+        ...prevTemplate.mt,
         extra: {
           ...(rowsActive.length && {
             glossaries: rowsActive,
@@ -211,13 +208,7 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
         },
       },
     }))
-  }, [
-    rows,
-    isGlossaryCaseSensitive,
-    isCattoolPage,
-    modifyingCurrentTemplate,
-    availableTemplateProps,
-  ])
+  }, [rows, isGlossaryCaseSensitive, isCattoolPage, modifyingCurrentTemplate])
 
   const addGlossary = () => {
     const row = {
@@ -237,10 +228,10 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
     if (!isCattoolPage) {
       // modifyingCurrentTemplate((prevTemplate) => ({
       //   ...prevTemplate,
-      //   [availableTemplateProps.mt]: {
-      //     ...prevTemplate[availableTemplateProps.mt],
+      //   mt: {
+      //     ...prevTemplate.mt,
       //     extra: {
-      //       ...(prevTemplate[availableTemplateProps.mt]?.extra ?? {}),
+      //       ...(prevTemplate.mt?.extra ?? {}),
       //       isOpened: !isShowingRows,
       //     },
       //   },

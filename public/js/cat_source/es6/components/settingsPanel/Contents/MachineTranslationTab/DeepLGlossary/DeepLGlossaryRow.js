@@ -8,8 +8,7 @@ import CreateProjectActions from '../../../../../actions/CreateProjectActions'
 
 export const DeepLGlossaryRow = ({engineId, row, setRows, isReadOnly}) => {
   const {setNotification} = useContext(MachineTranslationTabContext)
-  const {projectTemplates, availableTemplateProps} =
-    useContext(SettingsPanelContext)
+  const {projectTemplates} = useContext(SettingsPanelContext)
 
   const [isActive, setIsActive] = useState(false)
   const [isWaitingResult, setIsWaitingResult] = useState(false)
@@ -38,19 +37,17 @@ export const DeepLGlossaryRow = ({engineId, row, setRows, isReadOnly}) => {
         if (data.id === row.id) {
           setRows((prevState) => prevState.filter(({id}) => id !== row.id))
 
-          const mtProp = availableTemplateProps.mt
-
           const templatesInvolved = projectTemplates
             .filter(
-              (template) => template[mtProp].extra.deepl_id_glossary === row.id,
+              (template) => template.mt.extra.deepl_id_glossary === row.id,
             )
             .map((template) => {
-              const mtObject = template[mtProp]
+              const mtObject = template.mt
               const {deepl_id_glossary, ...extra} = mtObject.extra // eslint-disable-line
 
               return {
                 ...template,
-                [mtProp]: {
+                mt: {
                   ...mtObject,
                   extra: {
                     ...extra,

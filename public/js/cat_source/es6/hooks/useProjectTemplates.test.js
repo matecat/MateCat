@@ -60,24 +60,24 @@ test('Modyfing current template', async () => {
   act(() => {
     modifyingCurrentTemplate((prevTemplate) => ({
       ...prevTemplate,
-      get_public_matches: false,
+      getPublicMatches: false,
     }))
   })
 
   let {currentProjectTemplate} = result.current
   expect(currentProjectTemplate.isTemporary).toBeTruthy()
-  expect(currentProjectTemplate.get_public_matches).toBeFalsy()
+  expect(currentProjectTemplate.getPublicMatches).toBeFalsy()
 
   act(() =>
     modifyingCurrentTemplate((prevTemplate) => ({
       ...prevTemplate,
-      get_public_matches: true,
+      getPublicMatches: true,
     })),
   )
 
   currentProjectTemplate = result.current.currentProjectTemplate
   expect(currentProjectTemplate.isTemporary).toBeFalsy()
-  expect(currentProjectTemplate.get_public_matches).toBeTruthy()
+  expect(currentProjectTemplate.getPublicMatches).toBeTruthy()
 })
 
 test('Modifyng current template with wrong prop', async () => {
@@ -108,7 +108,7 @@ test('Check is modified specific property', async () => {
   act(() =>
     modifyingCurrentTemplate((prevTemplate) => ({
       ...prevTemplate,
-      pretranslate_100: true,
+      pretranslate100: true,
     })),
   )
 

@@ -4,16 +4,16 @@ import {TEMPLATE_MODIFIERS} from './ProjectTemplate'
 import IconClose from '../../icons/IconClose'
 import {createProjectTemplate} from '../../../api/createProjectTemplate'
 
-export const SaveOrUpdateControl = () => {
+export const CreateUpdateControl = () => {
   const {
     currentProjectTemplate,
     setProjectTemplates,
+    modifyingCurrentTemplate,
     templateName,
     templateModifier,
     setTemplateModifier,
     setTemplateName,
     setIsRequestInProgress,
-    updateTemplate,
   } = useContext(ProjectTemplateContext)
 
   const createTemplate = () => {
@@ -46,7 +46,12 @@ export const SaveOrUpdateControl = () => {
       .finally(() => setIsRequestInProgress(false))
   }
 
-  const update = () => updateTemplate()
+  const updateName = () => {
+    modifyingCurrentTemplate((prevTemplate) => ({
+      ...prevTemplate,
+      name: templateName,
+    }))
+  }
 
   const cancel = () => {
     setTemplateModifier()
@@ -61,7 +66,7 @@ export const SaveOrUpdateControl = () => {
         onClick={
           templateModifier === TEMPLATE_MODIFIERS.CREATE
             ? createTemplate
-            : update
+            : updateName
         }
       >
         Confirm

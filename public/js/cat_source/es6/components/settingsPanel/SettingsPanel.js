@@ -6,6 +6,7 @@ import {MachineTranslationTab} from './Contents/MachineTranslationTab'
 import {AdvancedOptionsTab} from './Contents/AdvancedOptionsTab'
 import {TranslationMemoryGlossaryTab} from './Contents/TranslationMemoryGlossaryTab'
 import {ProjectTemplate} from './ProjectTemplate/ProjectTemplate'
+import {SCHEMA_KEYS} from '../../hooks/useProjectTemplates'
 
 let tabOpenFromQueryString = new URLSearchParams(window.location.search).get(
   'openTab',
@@ -19,11 +20,11 @@ export const SETTINGS_PANEL_TABS = {
 
 export const TEMPLATE_PROPS_BY_TAB = {
   [SETTINGS_PANEL_TABS.translationMemoryGlossary]: [
-    'tm',
-    'get_public_matches',
-    'pretranslate_100',
+    SCHEMA_KEYS.tm,
+    SCHEMA_KEYS.getPublicMatches,
+    SCHEMA_KEYS.pretranslate100,
   ],
-  [SETTINGS_PANEL_TABS.machineTranslation]: ['mt'],
+  [SETTINGS_PANEL_TABS.machineTranslation]: [SCHEMA_KEYS.mt],
 }
 
 const DEFAULT_CONTENTS = [
@@ -81,7 +82,6 @@ export const SettingsPanel = ({
   setSegmentationRule,
   projectTemplates,
   currentProjectTemplate,
-  availableTemplateProps,
   setProjectTemplates,
   modifyingCurrentTemplate,
   checkSpecificTemplatePropsAreModified,
@@ -153,7 +153,6 @@ export const SettingsPanel = ({
         setSegmentationRule,
         projectTemplates,
         currentProjectTemplate,
-        availableTemplateProps,
         setProjectTemplates,
         modifyingCurrentTemplate,
         checkSpecificTemplatePropsAreModified,
@@ -210,8 +209,7 @@ SettingsPanel.propTypes = {
   sourceLang: PropTypes.object,
   targetLangs: PropTypes.array,
   projectTemplates: PropTypes.array,
-  currentProjectTemplate: PropTypes.object,
-  availableTemplateProps: PropTypes.object,
+  currentProjectTemplate: PropTypes.any,
   setProjectTemplates: PropTypes.func,
   modifyingCurrentTemplate: PropTypes.func,
   checkSpecificTemplatePropsAreModified: PropTypes.func,

@@ -1,23 +1,16 @@
 import React, {useCallback, useContext, useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
-import {Select} from '../../common/Select'
 import {SettingsPanelContext} from '../SettingsPanelContext'
-import IconClose from '../../icons/IconClose'
-import {createProjectTemplate} from '../../../api/createProjectTemplate'
-import {deleteProjectTemplate} from '../../../api/deleteProjectTemplate'
 import {isStandardTemplate} from '../../../hooks/useProjectTemplates'
 import {updateProjectTemplate} from '../../../api/updateProjectTemplate'
-import {MenuButton} from '../../common/MenuButton/MenuButton'
-import {MenuButtonItem} from '../../common/MenuButton/MenuButtonItem'
-import DotsHorizontal from '../../../../../../img/icons/DotsHorizontal'
 import CreateProjectStore from '../../../stores/CreateProjectStore'
 import NewProjectConstants from '../../../constants/NewProjectConstants'
 import {flushSync} from 'react-dom'
 import {ProjectTemplateContext} from './ProjectTemplateContext'
 import {TemplateNameInput} from './TemplateNameInput'
 import {MoreMenu} from './MoreMenu'
-import {SaveOrUpdateControl} from './SaveOrUpdateControl'
-import {ProjectTemplateSelect} from './ProjectTemplateSelect'
+import {CreateUpdateControl} from './CreateUpdateControl'
+import {TemplateSelect} from './TemplateSelect'
 
 export const TEMPLATE_MODIFIERS = {
   CREATE: 'create',
@@ -30,7 +23,6 @@ export const ProjectTemplate = ({portalTarget}) => {
     setProjectTemplates,
     currentProjectTemplate,
     modifyingCurrentTemplate,
-    availableTemplateProps,
   } = useContext(SettingsPanelContext)
 
   const [templateModifier, setTemplateModifier] = useState()
@@ -56,7 +48,7 @@ export const ProjectTemplate = ({portalTarget}) => {
         ...modifiedTemplate
       } = {
         ...updatedTemplate,
-        name: templateName ? templateName : updatedTemplate.name,
+        name: updatedTemplate.name,
       }
       /* eslint-enable no-unused-vars */
       setIsRequestInProgress(true)
@@ -82,9 +74,10 @@ export const ProjectTemplate = ({portalTarget}) => {
           setTemplateModifier()
         })
     },
-    [currentProjectTemplate, setProjectTemplates, templateName],
+    [currentProjectTemplate, setProjectTemplates],
   )
 
+  // Notify to server when user deleted a tmKey, MT or MT glossary from templates and sync project templates state
   useEffect(() => {
     const updateProjectTemplatesAction = ({
       templates,
@@ -171,26 +164,24 @@ export const ProjectTemplate = ({portalTarget}) => {
       setProjectTemplates((prevState) =>
         prevState.map((template) => ({
           ...template,
-          [availableTemplateProps.isDefault]:
-            template.id === currentProjectTemplate.id,
+          isDefault: template.id === currentProjectTemplate.id,
         })),
       ),
     )
 
     modifyingCurrentTemplate((prevTemplate) => ({
       ...prevTemplate,
-      [availableTemplateProps.isDefault]: true,
+      isDefault: true,
     }))
 
     updateTemplate({
       ...currentProjectTemplate,
-      [availableTemplateProps.isDefault]: true,
+      isDefault: true,
     })
   }
 
   const isActiveSetAsDefault =
-    !currentProjectTemplate[availableTemplateProps.isDefault] &&
-    !isModifyingTemplate
+    !currentProjectTemplate.isDefault && !isModifyingTemplate
 
   return (
     <ProjectTemplateContext.Provider
@@ -198,19 +189,20 @@ export const ProjectTemplate = ({portalTarget}) => {
         currentProjectTemplate,
         projectTemplates,
         setProjectTemplates,
+        modifyingCurrentTemplate,
+        updateTemplate,
         templateName,
         setTemplateName,
         isRequestInProgress,
         setIsRequestInProgress,
         templateModifier,
         setTemplateModifier,
-        updateTemplate,
       }}
     >
       <div className="settings-panel-project-template">
         <div className="settings-panel-project-template-container-select">
           <h3>Project template</h3>
-          <ProjectTemplateSelect />
+          <TemplateSelect />
           {templateModifier && <TemplateNameInput />}
         </div>
         <div className="settings-panel-project-template-container-buttons">
@@ -248,7 +240,7 @@ export const ProjectTemplate = ({portalTarget}) => {
               {!isStandardTemplateBool && <MoreMenu {...{portalTarget}} />}
             </>
           ) : (
-            <SaveOrUpdateControl />
+            <CreateUpdateControl />
           )}
         </div>
       </div>

@@ -27,9 +27,9 @@ export const MenuButton = ({
         : ref.current?.children[0]
       if (!target.contains(e.target)) setItemsCoords(undefined)
     }
-    document.addEventListener('mousedown', handler)
+    document.addEventListener('mouseup', handler)
 
-    return () => document.removeEventListener('mousedown', handler)
+    return () => document.removeEventListener('mouseup', handler)
   }, [])
 
   const onShowingItems = (e) => {
