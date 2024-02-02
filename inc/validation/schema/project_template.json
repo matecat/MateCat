@@ -30,7 +30,7 @@
       "type": ["null", "array"]
     },
     "segmentation_rule": {
-      "type": ["null", "string"]
+      "type": ["null", "object"]
     },
     "tm": {
       "type": ["null", "array"],

@@ -62,6 +62,18 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
     }
 
     /**
+     * @return array
+     */
+    public function getSegmentationRule()
+    {
+        if(is_string($this->segmentation_rule)){
+            return json_decode($this->segmentation_rule);
+        }
+
+        return $this->tm;
+    }
+
+    /**
      * @return mixed
      */
     public function getMt()
@@ -83,6 +95,14 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
         }
 
         return $this->tm;
+    }
+
+    /**
+     * @return string
+     */
+    public function segmentationRuleToJson()
+    {
+        return (!empty($this->segmentation_rule)) ? json_encode($this->segmentation_rule) : null;
     }
 
     /**
@@ -162,7 +182,7 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
             'lexica' => (bool)$this->lexica,
             'tag_projection' => (bool)$this->tag_projection,
             'cross_language_matches' => $this->cross_language_matches,
-            'segmentation_rule' => $this->segmentation_rule,
+            'segmentation_rule' => $this->getSegmentationRule(),
             'mt' => $this->getMt(),
             'tm' => $this->getTm(),
             'payable_rate_template_id' => $this->payable_rate_template_id ? (int)$this->payable_rate_template_id : null,

@@ -499,7 +499,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao
             "lexica" => $projectTemplateStruct->lexica,
             "tag_projection" => $projectTemplateStruct->tag_projection,
             "cross_language_matches" => $projectTemplateStruct->cross_language_matches,
-            "segmentation_rule" => $projectTemplateStruct->segmentation_rule,
+            "segmentation_rule" => $projectTemplateStruct->segmentationRuleToJson(),
             "mt" => $projectTemplateStruct->mtToJson(),
             "tm" => $projectTemplateStruct->tmToJson(),
             "pretranslate_100" => $projectTemplateStruct->pretranslate_100,
