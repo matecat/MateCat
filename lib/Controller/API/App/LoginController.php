@@ -58,8 +58,8 @@ class LoginController extends AbstractStatefulKleinController  {
         );
 
         $params = filter_var_array( $this->request->params(), [
-                'email'    => FILTER_SANITIZE_EMAIL,
-                'password' => FILTER_SANITIZE_STRING
+            'email'    => FILTER_SANITIZE_EMAIL,
+            'password' => FILTER_SANITIZE_STRING
         ] );
 
         $checkRateLimitResponse = $this->checkRateLimitResponse($this->response, $params[ 'email' ], '/api/app/user/login');
