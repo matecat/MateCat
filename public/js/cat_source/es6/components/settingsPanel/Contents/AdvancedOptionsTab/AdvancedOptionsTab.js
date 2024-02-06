@@ -1,4 +1,4 @@
-import React, {useCallback, useContext, useState} from 'react'
+import React, {useCallback, useContext, useMemo} from 'react'
 import {SpeechToText} from './SpeechToText'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {GuessTag, checkGuessTagIsEnabled} from './GuessTag'
@@ -8,7 +8,6 @@ import {CharacterCounter} from './CharacterCounter'
 import {AiAssistant} from './AiAssistant'
 import {SegmentationRule} from './SegmentationRule'
 import {config} from 'react-transition-group'
-import {Select} from '../../../common/Select'
 import {Team} from './Team'
 
 export const AdvancedOptionsTab = () => {
@@ -82,7 +81,20 @@ export const AdvancedOptionsTab = () => {
     [modifyingCurrentTemplate],
   )
 
-  const [selectedTeam, setSelectedTeam] = useState()
+  const selectedTeam = useMemo(() => {
+    const team =
+      user?.teams.find(({id}) => id === currentProjectTemplate?.idTeam) ?? {}
+
+    return {...team, id: team.id?.toString()}
+  }, [user?.teams, currentProjectTemplate?.idTeam])
+  const setSelectedTeam = useCallback(
+    ({id}) =>
+      modifyingCurrentTemplate((prevTemplate) => ({
+        ...prevTemplate,
+        idTeam: parseInt(id),
+      })),
+    [modifyingCurrentTemplate],
+  )
 
   return (
     <div className="advanced-options-box settings-panel-contentwrapper-tab-background">
