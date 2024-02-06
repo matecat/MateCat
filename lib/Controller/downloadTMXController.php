@@ -22,6 +22,11 @@ class downloadTMXController extends ajaxController {
     protected $password;
 
     /**
+     * @var bool
+     */
+    protected $strip_tags;
+
+    /**
      * Tell to MyMemory to send the download link to this email.
      *
      * @var string
@@ -94,6 +99,9 @@ class downloadTMXController extends ajaxController {
                 'email'         => array(
                         'filter' => FILTER_VALIDATE_EMAIL
                 ),
+                'strip_tags'         => array(
+                        'filter' => FILTER_VALIDATE_BOOLEAN
+                ),
                 'source'        => array(
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ),
@@ -116,6 +124,7 @@ class downloadTMXController extends ajaxController {
         $this->download_to_email = $__postInput[ 'email' ];
         $this->id_job            = $__postInput[ 'id_job' ];
         $this->password          = $__postInput[ 'password' ];
+        $this->strip_tags        = $__postInput[ 'strip_tags' ];
 
         if ( !$this->userIsLogged ) {
 
@@ -159,7 +168,8 @@ class downloadTMXController extends ajaxController {
                     ( $this->download_to_email != false ? $this->download_to_email : $this->user->email ),
                     $this->user->first_name,
                     $this->user->last_name,
-                    $this->tm_key
+                    $this->tm_key,
+                    $this->strip_tags
             );
 
             // TODO: Not used at moment, will be enabled when will be built the Log Activity Keys

@@ -24,9 +24,9 @@ function useExport({type, row, onClose}) {
     if (e.currentTarget.value) setEmail(e.currentTarget.value)
   }
 
-  const onSubmit = (event) => {
+  const onSubmit = (event, stripTags = undefined) => {
     const promise = type === EXPORT_TYPE.tmx ? downloadTMX : downloadGlossary
-    promise({key: row.key, name: row.name})
+    promise({key: row.key, name: row.name, stripTags})
       .then(() => {
         setStatus({successfull: true})
         tmOutOnCloseRef.current = setTimeout(onClose, 2000)

@@ -209,7 +209,9 @@
     justify-content: space-between;
     align-items: center;
     width: 100%;
-
+    .translation-memory-glossary-tab-label {
+      gap: 220px !important;
+    }
     > :first-child {
       display: flex;
       gap: 10px;
@@ -217,6 +219,10 @@
     }
   }
 
+  .translation-memory-glossary-tab-checkbox {
+    display: flex;
+    gap: 10px;
+  }
   .action-form-error {
     input {
       color: $redDefault;
