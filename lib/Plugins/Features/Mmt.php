@@ -68,6 +68,7 @@ class Mmt extends BaseFeature {
      * @param Users_UserStruct $userStruct
      *
      * @return mixed
+     * @throws Exception
      * @see engineController::add()
      *
      * Only one MMT engine per user can be registered
@@ -79,7 +80,13 @@ class Mmt extends BaseFeature {
         $engineEnabled   = $UserMetadataDao->get( $userStruct->uid, self::FEATURE_CODE );
 
         if ( !empty( $engineEnabled ) ) {
-            unset( $enginesList[ Constants_Engines::MMT ] ); // remove the engine from the list of available engines like it was disabled, so it will not be created
+
+            $engine = Engine::getInstance($engineEnabled->value);
+            $engineRecord = $engine->getEngineRecord();
+
+            if($engineRecord->active == 1){
+                unset( $enginesList[ Constants_Engines::MMT ] ); // remove the engine from the list of available engines like it was disabled, so it will not be created
+            }
         }
 
         return $enginesList;
