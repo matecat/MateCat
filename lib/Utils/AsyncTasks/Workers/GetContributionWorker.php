@@ -128,11 +128,6 @@ class GetContributionWorker extends AbstractWorker {
             }
 
             if(false === $contributionStruct->concordanceSearch){
-
-                if(!empty($crossLangMatches)){
-                    $this->_updateSuggestionArray($contributionStruct->segmentId, $this->normalizeMatchesToLayer0($crossLangMatches, $filter));
-                }
-
                 $this->_publishPayload( $crossLangMatches, $contributionStruct, true );
             }
         }

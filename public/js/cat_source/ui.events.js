@@ -287,34 +287,6 @@ $.extend(window.UI, {
         e.preventDefault()
         UI.runDownload()
       })
-      .on('click', '#previewDropdown a.tmx', function (e) {
-        e.preventDefault()
-        window.open($(this).attr('href'))
-      })
-      .on('click', '#downloadProject', function (e) {
-        e.preventDefault()
-        UI.runDownload()
-      })
-      .on('mousedown', '.originalDownload, .sdlxliff', function (e) {
-        if (e.which == 1) {
-          // left click
-          e.preventDefault()
-          e.stopPropagation()
-          var iFrameDownload = $(document.createElement('iframe'))
-            .hide()
-            .prop({
-              id:
-                'iframeDownload_' +
-                new Date().getTime() +
-                '_' +
-                parseInt(Math.random(0, 1) * 10000000),
-              src: $(e.currentTarget).attr('data-href'),
-            })
-          $('body').append(iFrameDownload)
-
-          //console.log( $( e.currentTarget ).attr( 'href' ) );
-        }
-      })
       .on('click', '#previewDropdown .originalsGDrive', function () {
         UI.continueDownloadWithGoogleDrive(1)
       })
