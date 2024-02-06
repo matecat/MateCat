@@ -1,11 +1,19 @@
-import React, {useContext} from 'react'
+import React, {useContext, useEffect} from 'react'
 import PropTypes from 'prop-types'
 import {Select} from '../../../common/Select'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 
 export const Team = ({selectedTeam, setSelectedTeam}) => {
-  const {user} = useContext(SettingsPanelContext)
-  console.log(user.teams)
+  const {user, modifyingCurrentTemplate} = useContext(SettingsPanelContext)
+
+  useEffect(() => {
+    setSelectedTeam(
+      APP.getLastTeamSelected(
+        user.teams.map((team) => ({...team, id: team.id.toString()})),
+      ),
+    )
+  }, [user?.teams, setSelectedTeam])
+
   return (
     <div className="options-box">
       <div className="option-description">
@@ -27,7 +35,13 @@ export const Team = ({selectedTeam, setSelectedTeam}) => {
           activeOption={selectedTeam}
           checkSpaceToReverse={false}
           isDisabled={!user || user.teams.length === 1}
-          onSelect={(option) => setSelectedTeam(option)}
+          onSelect={(option) => {
+            setSelectedTeam(option)
+            modifyingCurrentTemplate((prevTemplate) => ({
+              ...prevTemplate,
+              idTeam: option.id,
+            }))
+          }}
         />
       </div>
     </div>

@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState, useCallback} from 'react'
+import React, {useEffect, useRef, useState, useCallback, useMemo} from 'react'
 import PropTypes from 'prop-types'
 import usePortal from '../hooks/usePortal'
 import Header from '../components/header/Header'
@@ -57,7 +57,7 @@ const NewProject = ({
   const [user, setUser] = useState()
   const [tmKeys, setTmKeys] = useState()
   const [mtEngines, setMtEngines] = useState([DEFAULT_ENGINE_MEMORY])
-  const [selectedTeam, setSelectedTeam] = useState()
+  // const [selectedTeam, setSelectedTeam] = useState()
   const [sourceLang, setSourceLang] = useState({})
   const [targetLangs, setTargetLangs] = useState([])
   const [subject, setSubject] = useState(subjectsArray[0])
@@ -68,20 +68,6 @@ const NewProject = ({
     useState(false)
   const [openSettings, setOpenSettings] = useState({
     isOpen: initialStateIsOpenSettings,
-  })
-  const [speechToTextActive, setSpeechToTextActive] = useState(
-    config.defaults.speech2text,
-  )
-  const [guessTagActive, setGuessTagActive] = useState(
-    !!config.defaults.tag_projection,
-  )
-  const [lexiqaActive, setLexiqaActive] = useState(!!config.defaults.lexiqa)
-  const [multiMatchLangs, setMultiMatchLangs] = useState(
-    SegmentUtils.checkCrossLanguageSettings(),
-  )
-  const [segmentationRule, setSegmentationRule] = useState({
-    name: 'General',
-    id: 'standard',
   })
   const [isImportTMXInProgress, setIsImportTMXInProgress] = useState(false)
   const [isFormReadyToSubmit, setIsFormReadyToSubmit] = useState(false)
@@ -103,6 +89,18 @@ const NewProject = ({
   const createProject = useRef()
 
   const closeSettings = useCallback(() => setOpenSettings({isOpen: false}), [])
+
+  const selectedTeam = useMemo(() => {
+    const team =
+      user?.teams.find(({id}) => id === currentProjectTemplate?.idTeam) ?? {}
+
+    return {...team, id: team.id?.toString()}
+  }, [user?.teams, currentProjectTemplate?.idTeam])
+  const setSelectedTeam = ({id}) =>
+    modifyingCurrentTemplate((prevTemplate) => ({
+      ...prevTemplate,
+      idTeam: id,
+    }))
 
   const headerMountPoint = document.querySelector('header.upload-page-header')
   const HeaderPortal = usePortal(headerMountPoint)
@@ -295,16 +293,11 @@ const NewProject = ({
       .catch((error) => console.log('Error retrieving supported files', error))
 
     UI.addEvents()
-    setGuessTagActive(
-      SegmentUtils.checkGuessTagCanActivate(sourceLang, targetLangs),
-    )
+    // setGuessTagActive(
+    //   SegmentUtils.checkGuessTagCanActivate(sourceLang, targetLangs),
+    // )
     const updateUser = (user) => {
       setUser(user)
-      setSelectedTeam(
-        APP.getLastTeamSelected(
-          user.teams.map((team) => ({...team, id: team.id.toString()})),
-        ),
-      )
     }
     const hideAllErrors = () => {
       setErrors()
@@ -434,9 +427,9 @@ const NewProject = ({
       }
     }
     if (sourceLang && targetLangs) {
-      setGuessTagActive(
-        SegmentUtils.checkGuessTagCanActivate(sourceLang, targetLangs),
-      )
+      // setGuessTagActive(
+      //   SegmentUtils.checkGuessTagCanActivate(sourceLang, targetLangs),
+      // )
       CreateProjectActions.updateProjectParams({
         sourceLang,
         targetLangs,
@@ -449,11 +442,11 @@ const NewProject = ({
     }
   }, [sourceLang, targetLangs, selectedTeam])
 
-  useEffect(() => {
-    //TODO: used in main.js, remove
-    UI.segmentationRule = segmentationRule.id
-    restartConversions()
-  }, [segmentationRule])
+  // useEffect(() => {
+  //   //TODO: used in main.js, remove
+  //   UI.segmentationRule = segmentationRule.id
+  //   restartConversions()
+  // }, [segmentationRule])
 
   useEffect(() => {
     if (!isDeviceCompatible) {
@@ -703,18 +696,8 @@ const NewProject = ({
           setTmKeys,
           mtEngines,
           setMtEngines,
-          speechToTextActive,
-          setSpeechToTextActive,
-          guessTagActive,
-          setGuessTagActive,
           sourceLang,
           targetLangs,
-          lexiqaActive,
-          setLexiqaActive,
-          multiMatchLangs,
-          setMultiMatchLangs,
-          segmentationRule,
-          setSegmentationRule,
           projectTemplates,
           setProjectTemplates,
           modifyingCurrentTemplate,

@@ -5,13 +5,8 @@ import {CreateProjectContext} from './CreateProjectContext'
 import {orderTmKeys} from '../settingsPanel/Contents/TranslationMemoryGlossaryTab'
 
 export const TmGlossarySelect = () => {
-  const {
-    SELECT_HEIGHT,
-    tmKeys,
-    setTmKeys,
-    setOpenSettings,
-    modifyingCurrentTemplate,
-  } = useContext(CreateProjectContext)
+  const {SELECT_HEIGHT, tmKeys, setOpenSettings, modifyingCurrentTemplate} =
+    useContext(CreateProjectContext)
 
   const tmKeyActive = Array.isArray(tmKeys)
     ? tmKeys.filter(({isActive}) => isActive)
