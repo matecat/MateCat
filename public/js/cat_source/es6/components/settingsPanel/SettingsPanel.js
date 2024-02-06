@@ -69,6 +69,7 @@ export const SettingsPanel = ({
   onClose,
   isOpened,
   tabOpen = SETTINGS_PANEL_TABS.translationMemoryGlossary,
+  user,
   tmKeys,
   setTmKeys,
   mtEngines,
@@ -133,11 +134,15 @@ export const SettingsPanel = ({
     APP.openLoginModal()
   }
 
+  const isEnabledProjectTemplateComponent =
+    config.isLoggedIn === 1 && !config.is_cattool
+
   return (
     <SettingsPanelContext.Provider
       value={{
         tabs,
         setTabs,
+        user,
         tmKeys,
         setTmKeys,
         mtEngines,
@@ -161,6 +166,7 @@ export const SettingsPanel = ({
         setProjectTemplates,
         modifyingCurrentTemplate,
         checkSpecificTemplatePropsAreModified,
+        isEnabledProjectTemplateComponent,
       }}
     >
       <div
@@ -191,7 +197,7 @@ export const SettingsPanel = ({
                 <span>Settings</span>
                 <div onClick={close} className="close-matecat-modal x-popup" />
               </div>
-              <ProjectTemplate />
+              {isEnabledProjectTemplateComponent && <ProjectTemplate />}
               {currentProjectTemplate && <ContentWrapper />}
             </>
           )}
@@ -205,6 +211,7 @@ SettingsPanel.propTypes = {
   onClose: PropTypes.func.isRequired,
   isOpened: PropTypes.bool,
   tabOpen: PropTypes.oneOf(Object.values(SETTINGS_PANEL_TABS)),
+  user: PropTypes.object,
   tmKeys: PropTypes.array,
   setTmKeys: PropTypes.func,
   mtEngines: PropTypes.array,

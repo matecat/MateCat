@@ -4,8 +4,12 @@ import {SettingsPanelContext} from './SettingsPanelContext'
 import {TEMPLATE_PROPS_BY_TAB} from './SettingsPanel'
 
 export const Tab = ({id, label}) => {
-  const {tabs, setTabs, checkSpecificTemplatePropsAreModified} =
-    useContext(SettingsPanelContext)
+  const {
+    tabs,
+    setTabs,
+    checkSpecificTemplatePropsAreModified,
+    isEnabledProjectTemplateComponent,
+  } = useContext(SettingsPanelContext)
 
   const clickHandler = () =>
     setTabs((prevState) =>
@@ -13,9 +17,9 @@ export const Tab = ({id, label}) => {
     )
 
   const isActive = tabs.find((tab) => tab.id === id)?.isOpened ?? false
-  const isModifyng = checkSpecificTemplatePropsAreModified(
-    TEMPLATE_PROPS_BY_TAB[id] ?? [],
-  )
+  const isModifyng =
+    isEnabledProjectTemplateComponent &&
+    checkSpecificTemplatePropsAreModified(TEMPLATE_PROPS_BY_TAB[id] ?? [])
 
   return (
     <li

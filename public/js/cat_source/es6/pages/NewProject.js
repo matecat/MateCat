@@ -462,6 +462,26 @@ const NewProject = ({
     }
   }, [isDeviceCompatible])
 
+  // Sync tmKeys state when current project template changed
+  useEffect(() => {
+    const tm = currentProjectTemplate?.tm ?? []
+
+    setTmKeys((prevState) =>
+      Array.isArray(prevState)
+        ? prevState.map((tmItem) => {
+            const tmFromTemplate = tm.find(({key}) => key === tmItem.key)
+            return {
+              ...tmItem,
+              r: false,
+              w: false,
+              isActive: false,
+              ...(tmFromTemplate && {...tmFromTemplate, isActive: true}),
+            }
+          })
+        : prevState,
+    )
+  }, [currentProjectTemplate?.tm])
+
   return isDeviceCompatible ? (
     <CreateProjectContext.Provider
       value={{
@@ -477,6 +497,7 @@ const NewProject = ({
         setOpenSettings,
         isImportTMXInProgress,
         setIsImportTMXInProgress,
+        modifyingCurrentTemplate,
       }}
     >
       <HeaderPortal>
@@ -677,6 +698,7 @@ const NewProject = ({
           onClose: closeSettings,
           isOpened: openSettings.isOpen,
           tabOpen: openSettings.tab,
+          user,
           tmKeys,
           setTmKeys,
           mtEngines,

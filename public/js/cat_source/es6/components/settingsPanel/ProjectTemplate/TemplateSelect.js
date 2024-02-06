@@ -1,11 +1,12 @@
-import React, {useContext} from 'react'
+import React from 'react'
+import PropTypes from 'prop-types'
 import {Select} from '../../common/Select'
-import {ProjectTemplateContext} from './ProjectTemplateContext'
 
-export const TemplateSelect = () => {
-  const {projectTemplates, setProjectTemplates, currentProjectTemplate} =
-    useContext(ProjectTemplateContext)
-
+export const TemplateSelect = ({
+  projectTemplates,
+  setProjectTemplates,
+  currentProjectTemplate,
+}) => {
   const isModifyingTemplate = projectTemplates.some(
     ({isTemporary}) => isTemporary,
   )
@@ -44,4 +45,10 @@ export const TemplateSelect = () => {
       )}
     </>
   )
+}
+
+TemplateSelect.propTypes = {
+  projectTemplates: PropTypes.array,
+  setProjectTemplates: PropTypes.func,
+  currentProjectTemplate: PropTypes.any,
 }

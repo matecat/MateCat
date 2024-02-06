@@ -1,4 +1,4 @@
-import React, {useCallback, useContext} from 'react'
+import React, {useCallback, useContext, useState} from 'react'
 import {SpeechToText} from './SpeechToText'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {GuessTag, checkGuessTagIsEnabled} from './GuessTag'
@@ -7,9 +7,13 @@ import {CrossLanguagesMatches} from './CrossLanguagesMatches'
 import {CharacterCounter} from './CharacterCounter'
 import {AiAssistant} from './AiAssistant'
 import {SegmentationRule} from './SegmentationRule'
+import {config} from 'react-transition-group'
+import {Select} from '../../../common/Select'
+import {Team} from './Team'
 
 export const AdvancedOptionsTab = () => {
   const {
+    user,
     modifyingCurrentTemplate,
     currentProjectTemplate,
     sourceLang,
@@ -78,6 +82,8 @@ export const AdvancedOptionsTab = () => {
     [modifyingCurrentTemplate],
   )
 
+  const [selectedTeam, setSelectedTeam] = useState()
+
   return (
     <div className="advanced-options-box settings-panel-contentwrapper-tab-background">
       <SpeechToText
@@ -114,6 +120,7 @@ export const AdvancedOptionsTab = () => {
         segmentationRule={segmentationRule}
         setSegmentationRule={setSegmentationRule}
       />
+      <Team {...{selectedTeam, setSelectedTeam}} />
     </div>
   )
 }

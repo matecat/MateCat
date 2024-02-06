@@ -71,10 +71,10 @@ export const Lexiqa = ({
       {/*  Lexiqa
     TODO: check lexiqa licence active
   */}
-      <h3>
-        QA by <img src="/public/img/lexiqa-new-2.png" />
-      </h3>
       <div className="option-description">
+        <h3>
+          QA by <img src="/public/img/lexiqa-new-2.png" />
+        </h3>
         <p>
           {!lexiqaLicense && (
             <span className="option-qa-box-languages">

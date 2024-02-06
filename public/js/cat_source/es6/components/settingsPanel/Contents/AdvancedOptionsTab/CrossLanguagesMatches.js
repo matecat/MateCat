@@ -60,8 +60,8 @@ export const CrossLanguagesMatches = ({
   }, [activeLang1])
   return (
     <div className="options-box multi-match">
-      <h3>Cross-language Matches</h3>
       <div className="option-description">
+        <h3>Cross-language Matches</h3>
         <p>
           Get translation suggestions in other target languages you know as
           reference.

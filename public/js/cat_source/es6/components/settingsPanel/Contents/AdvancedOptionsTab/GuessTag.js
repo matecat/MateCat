@@ -73,8 +73,8 @@ export const GuessTag = ({
   return (
     <div className="options-box tagp">
       {/*TODO Check tag porojection active, check tm.html show_tag_projection*/}
-      <h3>Guess tag position</h3>
       <div className="option-description">
+        <h3>Guess tag position</h3>
         <p>
           {notSupportedLangs.length > 0 && (
             <span className="option-tagp-languages">

@@ -189,10 +189,6 @@ export const ProjectTemplate = ({portalTarget}) => {
   return (
     <ProjectTemplateContext.Provider
       value={{
-        currentProjectTemplate,
-        projectTemplates,
-        setProjectTemplates,
-        modifyingCurrentTemplate,
         updateTemplate,
         templateName,
         setTemplateName,
@@ -205,7 +201,9 @@ export const ProjectTemplate = ({portalTarget}) => {
       <div className="settings-panel-project-template">
         <div className="settings-panel-project-template-container-select">
           <h3>Project template</h3>
-          <TemplateSelect />
+          <TemplateSelect
+            {...{projectTemplates, setProjectTemplates, currentProjectTemplate}}
+          />
           {templateModifier && <TemplateNameInput />}
         </div>
         <div className="settings-panel-project-template-container-buttons">

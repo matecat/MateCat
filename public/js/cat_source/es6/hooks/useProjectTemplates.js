@@ -4,6 +4,34 @@ import {isEqual} from 'lodash'
 import {getProjectTemplates} from '../api/getProjectTemplates/getProjectTemplates'
 
 export const isStandardTemplate = ({id} = {}) => id === 0
+
+const STANDARD_TEMPLATE = {
+  id: 0,
+  name: 'Standard',
+  is_default: true,
+  uid: 1,
+  id_team: 1,
+  speech2text: true,
+  lexica: true,
+  tag_projection: true,
+  cross_language_matches: null,
+  segmentation_rule: {
+    name: 'General',
+    id: 'standard',
+  },
+  mt: {
+    id: 1,
+    extra: {},
+  },
+  tm: [],
+  payable_rate_template_id: null,
+  qa_model_template_id: null,
+  get_public_matches: true,
+  pretranslate_100: true,
+  created_at: 'Fri, 02 Feb 24 16:48:34 +0100',
+  modified_at: 'Fri, 02 Feb 24 16:48:34 +0100',
+}
+
 export const SCHEMA_KEYS = {
   id: 'id',
   uid: 'uid',
@@ -164,16 +192,20 @@ function useProjectTemplates(canRetrieveTemplates) {
 
     let cleanup = false
 
-    getProjectTemplates().then(({items}) => {
-      if (!cleanup) {
-        setProjectTemplates(
-          items.map((template) => ({
-            ...template,
-            isSelected: template.is_default,
-          })),
-        )
-      }
-    })
+    if (config.isLoggedIn === 1) {
+      getProjectTemplates().then(({items}) => {
+        if (!cleanup) {
+          setProjectTemplates(
+            items.map((template) => ({
+              ...template,
+              isSelected: template.is_default,
+            })),
+          )
+        }
+      })
+    } else {
+      setProjectTemplates([{...STANDARD_TEMPLATE, isSelected: true}])
+    }
 
     return () => (cleanup = true)
   }, [canRetrieveTemplates, setProjectTemplates])

@@ -70,8 +70,8 @@ export const SpeechToText = ({
   }
   return (
     <div className="options-box s2t-box">
-      <h3>Dictation</h3>
       <div className="option-description">
+        <h3>Dictation</h3>
         <p>
           <span className="option-s2t-box-chrome-label">
             Available on Chrome.{' '}
