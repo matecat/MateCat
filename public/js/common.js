@@ -7,10 +7,8 @@ import ModalsActions from './cat_source/es6/actions/ModalsActions'
 import CommonUtils from './cat_source/es6/utils/commonUtils'
 import CatToolActions from './cat_source/es6/actions/CatToolActions'
 import SuccessModal from './cat_source/es6/components/modals/SuccessModal'
-import ConfirmRegister from './cat_source/es6/components/modals/ConfirmRegister'
 import PreferencesModal from './cat_source/es6/components/modals/PreferencesModal'
 import ResetPasswordModal from './cat_source/es6/components/modals/ResetPasswordModal'
-import ForgotPasswordModal from './cat_source/es6/components/modals/ForgotPasswordModal'
 import RegisterModal from './cat_source/es6/components/modals/RegisterModal'
 import {onModalWindowMounted} from './cat_source/es6/components/modals/ModalWindow'
 import LoginModal from './cat_source/es6/components/modals/LoginModal'
@@ -34,119 +32,36 @@ window.APP = {
   },
   /*************************************************************************************************************/
   setLoginEvents: function () {
-    $('#modal').on('closemodal', function () {
-      ModalsActions.onCloseModal()
-    })
-
-    $('#modal').on('opensuccess', function (e, param) {
-      ModalsActions.showModalComponent(SuccessModal, param, param.title)
-    })
-
-    $('#modal').on('confirmregister', function (e, param) {
-      var style = {
-        width: '25%',
-        maxWidth: '450px',
-      }
-      ModalsActions.showModalComponent(
-        ConfirmRegister,
-        param,
-        'Confirm Registration',
-        style,
-      )
-    })
-
-    $('#modal').on('openpreferences', function (e, param) {
-      e.preventDefault()
-      e.stopPropagation()
-      var props = {
-        user: APP.USER.STORE.user,
-        metadata: APP.USER.STORE.metadata ? APP.USER.STORE.metadata : {},
-      }
-      if (
-        APP.USER.STORE.connected_services &&
-        APP.USER.STORE.connected_services.length
-      ) {
-        props.service = APP.USER.getDefaultConnectedService()
-      }
-      if (param) {
-        $.extend(props, param)
-      }
-      var style = {
-        width: '700px',
-        maxWidth: '700px',
-      }
-      ModalsActions.showModalComponent(
-        PreferencesModal,
-        props,
-        'Profile',
-        style,
-      )
-    })
-    $('#modal').on('openresetpassword', function () {
-      let props = {closeOnOutsideClick: false, showOldPassword: true}
-      if (APP.lookupFlashServiceParam('popup')) {
-        props.showOldPassword = false
-      }
-      ModalsActions.showModalComponent(
-        ResetPasswordModal,
-        props,
-        'Reset Password',
-      )
-    })
-    $('#modal').on('openforgotpassword', function () {
-      var props = {}
-      if (config.showModalBoxLogin == 1) {
-        props.redeemMessage = true
-      }
-      var style = {
-        width: '577px',
-      }
-      ModalsActions.showModalComponent(
-        ForgotPasswordModal,
-        props,
-        'Forgot Password',
-        style,
-      )
-    })
-    $('#modal').on('openregister', function (e, param) {
-      var props = {
-        googleUrl: config.authURL,
-      }
-      if (config.showModalBoxLogin == 1) {
-        props.redeemMessage = true
-      }
-      if (param) {
-        $.extend(props, param)
-      }
-      ModalsActions.showModalComponent(RegisterModal, props, 'Register Now')
-    })
-
     if (config.showModalBoxLogin == 1) {
       APP.openLoginModal()
     }
-
     onModalWindowMounted().then(() => this.checkForPopupToOpen())
   },
 
   checkForPopupToOpen: function () {
     var openFromFlash = APP.lookupFlashServiceParam('popup')
     if (!openFromFlash) return
-    var modal$ = $('#modal')
 
     switch (openFromFlash[0].value) {
       case 'passwordReset':
-        modal$.trigger('openresetpassword')
+        APP.openResetPassword()
         break
       case 'profile':
         // TODO: optimized this, establish a list of events to happen after user data is loaded
         APP.USER.loadUserData().then(function () {
-          modal$.trigger('openpreferences')
+          APP.openSuccessModal({
+            title: 'Registration complete',
+            text: 'You are now logged in and ready to use Matecat.',
+          })
           //After confirm email or google register
           const data = {
             event: APP.USER.isGoogleUser()
               ? 'new_signup_google'
               : 'new_signup_email',
-            userId: APP.USER.isUserLogged() ? APP.USER.STORE.user.uid : null,
+            userId:
+              APP.USER.isUserLogged() && APP.USER.STORE.user
+                ? APP.USER.STORE.user.uid
+                : null,
           }
           CommonUtils.dispatchAnalyticsEvents(data)
         })
@@ -159,9 +74,9 @@ window.APP = {
         if (!config.isLoggedIn) {
           if (APP.lookupFlashServiceParam('signup_email')) {
             var userMail = APP.lookupFlashServiceParam('signup_email')[0].value
-            modal$.trigger('openregister', [{userMail: userMail}])
+            APP.openRegisterModal({userMail: userMail})
           } else {
-            modal$.trigger('openregister')
+            APP.openRegisterModal()
           }
         }
         break
@@ -186,6 +101,58 @@ window.APP = {
     }
 
     ModalsActions.showModalComponent(LoginModal, props, title, style)
+  },
+  openRegisterModal: (params) => {
+    let props = {
+      googleUrl: config.authURL,
+    }
+    if (config.showModalBoxLogin == 1) {
+      props.redeemMessage = true
+    }
+    if (params) {
+      props = {
+        ...props,
+        ...params,
+      }
+    }
+    ModalsActions.showModalComponent(RegisterModal, props, 'Register Now')
+  },
+  openPreferencesModal: (params) => {
+    let props = {
+      user: APP.USER.STORE.user,
+      metadata: APP.USER.STORE.metadata ? APP.USER.STORE.metadata : {},
+    }
+    if (
+      APP.USER.STORE.connected_services &&
+      APP.USER.STORE.connected_services.length
+    ) {
+      props.service = APP.USER.getDefaultConnectedService()
+    }
+    if (params) {
+      props = {
+        ...props,
+        ...params,
+      }
+    }
+    const style = {
+      width: '700px',
+      maxWidth: '700px',
+    }
+    ModalsActions.showModalComponent(PreferencesModal, props, 'Profile', style)
+  },
+  openSuccessModal: (props) => {
+    ModalsActions.showModalComponent(SuccessModal, props, props.title)
+  },
+  openResetPassword: () => {
+    let props = {closeOnOutsideClick: false, showOldPassword: true}
+    if (APP.lookupFlashServiceParam('popup')) {
+      props.showOldPassword = false
+    }
+    ModalsActions.showModalComponent(
+      ResetPasswordModal,
+      props,
+      'Reset Password',
+    )
   },
   lookupFlashServiceParam: function (name) {
     if (config.flash_messages && config.flash_messages.service) {

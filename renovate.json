@@ -4,7 +4,8 @@
   "packageRules": [
     {
       "updateTypes": ["minor", "patch"],
-      "automerge": false
+      "automerge": false,
+      "minimumReleaseAge": "15 days"
     }
   ],
   "branchConcurrentLimit": 3,
