@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "bef295c4a809aea589e15ad89f3c29e3",
+    "content-hash": "987745c94df00f0e66118c87f9c97120",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -1174,16 +1174,16 @@
         },
         {
             "name": "matecat/subfiltering",
-            "version": "v2.0.4",
+            "version": "v2.0.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/subfiltering.git",
-                "reference": "d5bee59fc8124f108d7277fbab16f28088d00ce6"
+                "reference": "c8cce4fdbd0752577f31dec9419cbe35ca46041b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/subfiltering/zipball/d5bee59fc8124f108d7277fbab16f28088d00ce6",
-                "reference": "d5bee59fc8124f108d7277fbab16f28088d00ce6",
+                "url": "https://api.github.com/repos/matecat/subfiltering/zipball/c8cce4fdbd0752577f31dec9419cbe35ca46041b",
+                "reference": "c8cce4fdbd0752577f31dec9419cbe35ca46041b",
                 "shasum": ""
             },
             "require": {
@@ -1224,9 +1224,9 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/subfiltering/issues",
-                "source": "https://github.com/matecat/subfiltering/tree/v2.0.4"
+                "source": "https://github.com/matecat/subfiltering/tree/v2.0.5"
             },
-            "time": "2023-12-21T12:47:10+00:00"
+            "time": "2023-12-21T13:26:20+00:00"
         },
         {
             "name": "matecat/whole-text-finder",
@@ -4463,7 +4463,8 @@
         "ext-fileinfo": "*",
         "ext-mbstring": "*",
         "ext-zlib": "*",
-        "ext-gd": "*"
+        "ext-gd": "*",
+        "ext-openssl": "*"
     },
     "platform-dev": [],
     "plugin-api-version": "2.6.0"
