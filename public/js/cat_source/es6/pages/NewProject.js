@@ -57,7 +57,6 @@ const NewProject = ({
   const [user, setUser] = useState()
   const [tmKeys, setTmKeys] = useState()
   const [mtEngines, setMtEngines] = useState([DEFAULT_ENGINE_MEMORY])
-  // const [selectedTeam, setSelectedTeam] = useState()
   const [sourceLang, setSourceLang] = useState({})
   const [targetLangs, setTargetLangs] = useState([])
   const [subject, setSubject] = useState(subjectsArray[0])
@@ -99,7 +98,7 @@ const NewProject = ({
   const setSelectedTeam = ({id}) =>
     modifyingCurrentTemplate((prevTemplate) => ({
       ...prevTemplate,
-      idTeam: id,
+      idTeam: parseInt(id),
     }))
 
   const headerMountPoint = document.querySelector('header.upload-page-header')
@@ -279,7 +278,7 @@ const NewProject = ({
 
   //TODO: Move it
   useEffect(() => {
-    if (selectedTeam) {
+    if (typeof selectedTeam?.id === 'number') {
       APP.setTeamInStorage(selectedTeam.id)
     }
   }, [selectedTeam])
