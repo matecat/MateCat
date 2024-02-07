@@ -32,6 +32,7 @@ import {getSupportedLanguages} from '../api/getSupportedLanguages'
 import ApplicationActions from '../actions/ApplicationActions'
 import useDeviceCompatibility from '../hooks/useDeviceCompatibility'
 import useProjectTemplates from '../hooks/useProjectTemplates'
+import {TemplateSelect} from '../components/settingsPanel/ProjectTemplate/TemplateSelect'
 
 const SELECT_HEIGHT = 324
 
@@ -575,7 +576,7 @@ const NewProject = ({
               />
             </div>
             {/*Project Subject*/}
-            <div className="translate-box project-subject">
+            {/* <div className="translate-box project-subject">
               <Select
                 label="Select subject"
                 id="project-subject"
@@ -587,11 +588,25 @@ const NewProject = ({
                 checkSpaceToReverse={false}
                 onSelect={(option) => setSubject(option)}
               />
-            </div>
+            </div> */}
             {/*TM and glossary*/}
             <div className="translate-box tmx-select">
               <TmGlossarySelect />
             </div>
+            {isLoggedIn && (
+              <div className="translate-box">
+                <TemplateSelect
+                  {...{
+                    label: 'Project template',
+                    maxHeightDroplist: SELECT_HEIGHT,
+                    projectTemplates,
+                    setProjectTemplates,
+                    currentProjectTemplate,
+                  }}
+                />
+              </div>
+            )}
+
             <div className="translate-box settings" onClick={openTmPanel}>
               <More size={24} />
               <span className="text">More settings</span>
