@@ -7,13 +7,14 @@ import {ProjectTemplateContext} from './ProjectTemplateContext'
 import {deleteProjectTemplate} from '../../../api/deleteProjectTemplate'
 import {isStandardTemplate} from '../../../hooks/useProjectTemplates'
 import {TEMPLATE_MODIFIERS} from './ProjectTemplate'
+import {SettingsPanelContext} from '../SettingsPanelContext'
 
 export const MoreMenu = ({portalTarget}) => {
+  const {setProjectTemplates, currentProjectTemplate} =
+    useContext(SettingsPanelContext)
   const {
-    setProjectTemplates,
     isRequestInProgress,
     setIsRequestInProgress,
-    currentProjectTemplate,
     setTemplateModifier,
     setTemplateName,
   } = useContext(ProjectTemplateContext)

@@ -27,6 +27,7 @@ import SegmentUtils from '../utils/segmentUtils'
 import {getTmKeysJob} from '../api/getTmKeysJob'
 import {getSupportedLanguages} from '../api/getSupportedLanguages'
 import ApplicationStore from '../stores/ApplicationStore'
+import useProjectTemplates from '../hooks/useProjectTemplates'
 
 const urlParams = new URLSearchParams(window.location.search)
 const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
@@ -67,6 +68,9 @@ function CatTool() {
       where: options?.where,
     })
 
+  const {currentProjectTemplate, modifyingCurrentTemplate} =
+    useProjectTemplates(Array.isArray(tmKeys))
+
   const closeSettings = useCallback(() => setOpenSettings({isOpen: false}), [])
   const openTmPanel = () =>
     setOpenSettings({isOpen: true, tab: SETTINGS_PANEL_TABS.advancedOptions})
@@ -84,16 +88,16 @@ function CatTool() {
             !acc.some(({key}) => key === cur.key) ? [...acc, cur] : acc,
           [],
         )
-      setTmKeys(
-        uniqueKeys.map((key) => {
-          return {
-            ...key,
-            id: key.key,
-            isActive: Boolean(key.r || key.w),
-            isLocked: !key.owner,
-          }
-        }),
-      )
+      const updatedTmKeys = uniqueKeys.map((key) => {
+        return {
+          ...key,
+          id: key.key,
+          isActive: Boolean(key.r || key.w),
+          isLocked: !key.owner,
+        }
+      })
+      setTmKeys(updatedTmKeys)
+      console.log('set tm keys')
     })
   }
 
@@ -155,8 +159,8 @@ function CatTool() {
         where === 'after'
           ? SegmentStore.getLastSegmentId()
           : where === 'before'
-          ? SegmentStore.getFirstSegmentId()
-          : ''
+            ? SegmentStore.getFirstSegmentId()
+            : ''
 
       setOptions((prevState) => ({...prevState, segmentId, where}))
     }
@@ -333,8 +337,8 @@ function CatTool() {
               ? options?.where === 'before'
                 ? 'loadingBefore'
                 : options?.where === 'after'
-                ? 'loadingAfter'
-                : 'loading'
+                  ? 'loadingAfter'
+                  : 'loading'
               : ''
           }
         >
@@ -365,6 +369,7 @@ function CatTool() {
         <SettingsPanel
           {...{
             onClose: closeSettings,
+            isOpened: openSettings.isOpen,
             tabOpen: openSettings.tab,
             tmKeys,
             setTmKeys,
@@ -395,6 +400,8 @@ function CatTool() {
             setMultiMatchLangs,
             getPublicMatches,
             setGetPublicMatches,
+            currentProjectTemplate,
+            modifyingCurrentTemplate,
           }}
         />
       )}

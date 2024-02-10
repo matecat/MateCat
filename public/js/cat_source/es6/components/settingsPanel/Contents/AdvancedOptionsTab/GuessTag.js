@@ -37,7 +37,12 @@ export const checkGuessTagIsEnabled = ({
     )
   })
 
-  return {arrayIntersection, notSupportedCouples}
+  return {
+    isEnabled:
+      arrayIntersection.length > 0 && config.defaults?.tag_projection === 1,
+    arrayIntersection,
+    notSupportedCouples,
+  }
 }
 
 export const GuessTag = ({
@@ -64,6 +69,7 @@ export const GuessTag = ({
     if (notSupportedCouples.length > 0) {
       setNotSupportedLangs(notSupportedCouples)
     }
+
     //disable Tag Projection
     if (arrayIntersection.length == 0) {
       setGuessTagActive(false)

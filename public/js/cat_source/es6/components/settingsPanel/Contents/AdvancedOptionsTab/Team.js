@@ -7,11 +7,13 @@ export const Team = ({selectedTeam, setSelectedTeam}) => {
   const {user, modifyingCurrentTemplate} = useContext(SettingsPanelContext)
 
   useEffect(() => {
-    setSelectedTeam(
-      APP.getLastTeamSelected(
-        user.teams.map((team) => ({...team, id: team.id.toString()})),
-      ),
-    )
+    if (Array.isArray(user?.teams)) {
+      setSelectedTeam(
+        APP.getLastTeamSelected(
+          user.teams.map((team) => ({...team, id: team.id.toString()})),
+        ),
+      )
+    }
   }, [user?.teams, setSelectedTeam])
 
   return (
@@ -39,7 +41,7 @@ export const Team = ({selectedTeam, setSelectedTeam}) => {
             setSelectedTeam(option)
             modifyingCurrentTemplate((prevTemplate) => ({
               ...prevTemplate,
-              idTeam: option.id,
+              idTeam: parseInt(option.id),
             }))
           }}
         />

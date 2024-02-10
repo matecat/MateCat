@@ -133,6 +133,10 @@
   }
 }
 
+.settings-panel-contentwrapper-container-without-project-teamplate-control {
+  max-height: calc(100vh - 220px);
+}
+
 .settings-panel-contentwrapper-active-tab {
   display: flex;
   flex-direction: column;

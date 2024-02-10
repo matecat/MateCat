@@ -60,7 +60,7 @@ const NewProject = ({
   const [mtEngines, setMtEngines] = useState([DEFAULT_ENGINE_MEMORY])
   const [sourceLang, setSourceLang] = useState({})
   const [targetLangs, setTargetLangs] = useState([])
-  const [subject, setSubject] = useState(subjectsArray[0])
+  // const [subject, setSubject] = useState(subjectsArray[0])
   const [projectSent, setProjectSent] = useState(false)
   const [errors, setErrors] = useState()
   const [warnings, setWarnings] = useState()
@@ -279,7 +279,7 @@ const NewProject = ({
 
   //TODO: Move it
   useEffect(() => {
-    if (typeof selectedTeam?.id === 'number') {
+    if (typeof selectedTeam?.id !== 'undefined') {
       APP.setTeamInStorage(selectedTeam.id)
     }
   }, [selectedTeam])
@@ -293,9 +293,7 @@ const NewProject = ({
       .catch((error) => console.log('Error retrieving supported files', error))
 
     UI.addEvents()
-    // setGuessTagActive(
-    //   SegmentUtils.checkGuessTagCanActivate(sourceLang, targetLangs),
-    // )
+
     const updateUser = (user) => {
       setUser(user)
     }
@@ -427,9 +425,6 @@ const NewProject = ({
       }
     }
     if (sourceLang && targetLangs) {
-      // setGuessTagActive(
-      //   SegmentUtils.checkGuessTagCanActivate(sourceLang, targetLangs),
-      // )
       CreateProjectActions.updateProjectParams({
         sourceLang,
         targetLangs,

@@ -192,7 +192,7 @@ function useProjectTemplates(canRetrieveTemplates) {
 
     let cleanup = false
 
-    if (config.isLoggedIn === 1) {
+    if (config.isLoggedIn === 1 && !config.is_cattool) {
       getProjectTemplates().then(({items}) => {
         if (!cleanup) {
           setProjectTemplates(

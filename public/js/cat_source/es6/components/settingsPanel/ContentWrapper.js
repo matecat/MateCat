@@ -3,7 +3,8 @@ import {SettingsPanelContext} from './SettingsPanelContext'
 import {Tab} from './Tab'
 
 export const ContentWrapper = () => {
-  const {tabs} = useContext(SettingsPanelContext)
+  const {tabs, isEnabledProjectTemplateComponent} =
+    useContext(SettingsPanelContext)
 
   const activeTab = tabs.find(({isOpened}) => isOpened)
   const activeContent = activeTab?.component
@@ -19,7 +20,9 @@ export const ContentWrapper = () => {
         <h3>{activeTab.label}</h3>
         <span>{activeTab.description}</span>
       </div>
-      <div className="settings-panel-contentwrapper-container">
+      <div
+        className={`settings-panel-contentwrapper-container${!isEnabledProjectTemplateComponent ? ' settings-panel-contentwrapper-container-without-project-teamplate-control' : ''}`}
+      >
         {activeContent}
       </div>
     </div>

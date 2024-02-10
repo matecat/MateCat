@@ -7,7 +7,6 @@ import {CrossLanguagesMatches} from './CrossLanguagesMatches'
 import {CharacterCounter} from './CharacterCounter'
 import {AiAssistant} from './AiAssistant'
 import {SegmentationRule} from './SegmentationRule'
-import {config} from 'react-transition-group'
 import {Team} from './Team'
 
 export const AdvancedOptionsTab = () => {
@@ -132,7 +131,9 @@ export const AdvancedOptionsTab = () => {
         segmentationRule={segmentationRule}
         setSegmentationRule={setSegmentationRule}
       />
-      <Team {...{selectedTeam, setSelectedTeam}} />
+      {config.isLoggedIn === 1 && !config.is_cattool && (
+        <Team {...{selectedTeam, setSelectedTeam}} />
+      )}
     </div>
   )
 }
