@@ -4,12 +4,15 @@ import {TEMPLATE_MODIFIERS} from './ProjectTemplate'
 import IconClose from '../../icons/IconClose'
 import {createProjectTemplate} from '../../../api/createProjectTemplate'
 import {SCHEMA_KEYS} from '../../../hooks/useProjectTemplates'
+import {SettingsPanelContext} from '../SettingsPanelContext'
 
 export const CreateUpdateControl = () => {
   const {
     currentProjectTemplate,
     setProjectTemplates,
     modifyingCurrentTemplate,
+  } = useContext(SettingsPanelContext)
+  const {
     templateName,
     templateModifier,
     setTemplateModifier,
