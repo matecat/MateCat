@@ -248,9 +248,10 @@ export const TranslationMemoryGlossaryTab = () => {
         .filter(({isActive}) => isActive)
         .reduce((acc, cur) => {
           const copyAcc = [...acc]
-          const index = tmCurrentProjectTemplate
-            .filter(({isActive}) => isActive)
-            .findIndex(({id}) => id === cur.id)
+          const index = [
+            defaultTranslationMemoryRow,
+            ...tmCurrentProjectTemplate,
+          ].findIndex(({id}) => id === cur.id)
 
           if (index >= 0) {
             const previousItem = copyAcc[index]
@@ -383,17 +384,18 @@ export const TranslationMemoryGlossaryTab = () => {
         ref={ref}
         className="translation-memory-glossary-tab settings-panel-contentwrapper-tab-background"
       >
-        <div className="translation-memory-glossary-tab-pre-translate">
-          <input
-            checked={isPretranslate100Active}
-            onChange={(e) =>
-              setIsPretranslate100Active(e.currentTarget.checked)
-            }
-            type="checkbox"
-          />
-          Pre-translate 100% matches from TM
-        </div>
-
+        {!config.is_cattool && (
+          <div className="translation-memory-glossary-tab-pre-translate">
+            <input
+              checked={isPretranslate100Active}
+              onChange={(e) =>
+                setIsPretranslate100Active(e.currentTarget.checked)
+              }
+              type="checkbox"
+            />
+            Pre-translate 100% matches from TM
+          </div>
+        )}
         <div className="translation-memory-glossary-tab-active-resources">
           {activeResourcersNotification}
           <div className="translation-memory-glossary-tab-table-title">

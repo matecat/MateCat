@@ -24,7 +24,6 @@ import {SourceLanguageSelect} from '../components/createProject/SourceLanguageSe
 import CommonUtils from '../utils/commonUtils'
 import {DEFAULT_ENGINE_MEMORY, SettingsPanel} from '../components/settingsPanel'
 import {getMTEngines as getMtEnginesApi} from '../api/getMTEngines'
-import SegmentUtils from '../utils/segmentUtils'
 import {tmCreateRandUser} from '../api/tmCreateRandUser'
 import {getTmDataStructureToSendServer} from '../components/settingsPanel/Contents/TranslationMemoryGlossaryTab'
 import {getSupportedFiles} from '../api/getSupportedFiles'
@@ -33,6 +32,8 @@ import ApplicationActions from '../actions/ApplicationActions'
 import useDeviceCompatibility from '../hooks/useDeviceCompatibility'
 import useProjectTemplates from '../hooks/useProjectTemplates'
 import {TemplateSelect} from '../components/settingsPanel/ProjectTemplate/TemplateSelect'
+import {checkLexiqaIsEnabled} from '../components/settingsPanel/Contents/AdvancedOptionsTab/Lexiqa'
+import {checkGuessTagIsEnabled} from '../components/settingsPanel/Contents/AdvancedOptionsTab/GuessTag'
 
 const SELECT_HEIGHT = 324
 
@@ -60,7 +61,7 @@ const NewProject = ({
   const [mtEngines, setMtEngines] = useState([DEFAULT_ENGINE_MEMORY])
   const [sourceLang, setSourceLang] = useState({})
   const [targetLangs, setTargetLangs] = useState([])
-  // const [subject, setSubject] = useState(subjectsArray[0])
+  const [subject, setSubject] = useState(subjectsArray[0])
   const [projectSent, setProjectSent] = useState(false)
   const [errors, setErrors] = useState()
   const [warnings, setWarnings] = useState()
@@ -179,6 +180,24 @@ const NewProject = ({
   createProject.current = () => {
     // const {mtGlossaryProps, deeplGlossaryProps} = activeMTEngine ?? {}
 
+    const {
+      mt,
+      tm,
+      lexica,
+      speech2text,
+      tagProjection,
+      pretranslate100,
+      segmentationRule,
+      idTeam,
+      getPublicMatches,
+    } = currentProjectTemplate
+
+    const isLexiqaEnabled = !checkLexiqaIsEnabled({sourceLang, targetLangs})
+      .disableLexiQA
+    const isGuessTagEnabled =
+      checkGuessTagIsEnabled({sourceLang, targetLangs}).arrayIntersection
+        .length > 0
+
     const getParams = () => ({
       action: 'createProject',
       file_name: APP.getFilenameFromUploadedFiles(),
@@ -186,35 +205,32 @@ const NewProject = ({
       source_lang: sourceLang.id,
       target_lang: targetLangs.map((lang) => lang.id).join(),
       job_subject: subject.id,
-      // mt_engine: activeMTEngine ? activeMTEngine.id : undefined,
-      // private_keys_list: getTmDataStructureToSendServer({tmKeys, keysOrdered}),
+      mt_engine: mt.id,
+      private_keys_list: JSON.stringify({
+        ownergroup: [],
+        mine: tm,
+        anonymous: [],
+      }),
       lang_detect_files: '',
-      // pretranslate_100: isPretranslate100Active ? 1 : 0,
-
-      // IMPORTANTE con l'integrazione dei template chiamare prima la funzione checkLexiqaIsEnabled per vedere se è abilitato
-      lexiqa: lexiqaActive,
-      //IMPORTANTE
-
-      speech2text: speechToTextActive,
-
-      // IMPORTANTE con l'integrazione dei template chiamare prima la funzione checkGuessTagIsEnabled per vedere se è abilitato per la lingua selezionata
-      tag_projection: guessTagActive,
-      //IMPORTANTE
-
+      pretranslate_100: pretranslate100 ? 1 : 0,
+      lexiqa: isLexiqaEnabled && lexica,
+      speech2text: speech2text,
+      tag_projection: isGuessTagEnabled && tagProjection,
       segmentation_rule: segmentationRule.id === '1' ? '' : segmentationRule.id,
-      id_team: selectedTeam ? selectedTeam.id : undefined,
-      // get_public_matches: getPublicMatches,
-      // ...(mtGlossaryProps?.glossaries.length && {
-      //   mmt_glossaries: JSON.stringify({
-      //     glossaries: mtGlossaryProps.glossaries,
-      //     ignore_glossary_case: !mtGlossaryProps.isGlossaryCaseSensitive,
-      //   }),
-      // }),
-      // ...(typeof deeplGlossaryProps === 'object' && {
-      //   ...Object.entries(deeplGlossaryProps)
-      //     .filter(([, value]) => value)
-      //     .reduce((acc, [key, value]) => ({...acc, [key]: value}), {}),
-      // }),
+      id_team: idTeam,
+      get_public_matches: getPublicMatches,
+      ...(mt.extra?.glossaries?.length && {
+        mmt_glossaries: JSON.stringify({
+          glossaries: mt.extra.glossaries,
+          ignore_glossary_case: !mt.extra.ignore_glossary_case,
+        }),
+      }),
+      ...(mt.extra?.deepl_id_glossary && {
+        deepl_id_glossary: mt.extra.deepl_id_glossary,
+      }),
+      ...(mt.extra?.deepl_formality && {
+        deepl_formality: mt.extra.deepl_formality,
+      }),
     })
 
     if (!projectSent) {
@@ -571,7 +587,7 @@ const NewProject = ({
               />
             </div>
             {/*Project Subject*/}
-            {/* <div className="translate-box project-subject">
+            <div className="translate-box project-subject">
               <Select
                 label="Select subject"
                 id="project-subject"
@@ -583,7 +599,7 @@ const NewProject = ({
                 checkSpaceToReverse={false}
                 onSelect={(option) => setSubject(option)}
               />
-            </div> */}
+            </div>
             {/*TM and glossary*/}
             <div className="translate-box tmx-select">
               <TmGlossarySelect />

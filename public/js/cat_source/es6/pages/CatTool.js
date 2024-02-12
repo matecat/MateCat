@@ -41,20 +41,7 @@ function CatTool() {
   })
   const [tmKeys, setTmKeys] = useState()
   const [mtEngines, setMtEngines] = useState([DEFAULT_ENGINE_MEMORY])
-  const [activeMTEngine, setActiveMTEngine] = useState()
-  const [guessTagActive, setGuessTagActive] = useState(
-    SegmentUtils.checkTPEnabled(),
-  )
-  const [lexiqaActive, setLexiqaActive] = useState(!!config.lxq_enabled)
-  const [speechToTextActive, setSpeechToTextActive] = useState(
-    Speech2TextFeature.enabled(),
-  )
-  const [multiMatchLangs, setMultiMatchLangs] = useState(
-    SegmentUtils.checkCrossLanguageSettings(),
-  )
-  const [getPublicMatches, setGetPublicMatches] = useState(
-    Boolean(config.get_public_matches),
-  )
+
   const [supportedLanguages, setSupportedLanguages] = useState([])
 
   const startSegmentIdRef = useRef(UI.startSegmentId)
@@ -69,7 +56,7 @@ function CatTool() {
     })
 
   const {currentProjectTemplate, modifyingCurrentTemplate} =
-    useProjectTemplates(Array.isArray(tmKeys))
+    useProjectTemplates(true)
 
   const closeSettings = useCallback(() => setOpenSettings({isOpen: false}), [])
   const openTmPanel = () =>
@@ -97,7 +84,11 @@ function CatTool() {
         }
       })
       setTmKeys(updatedTmKeys)
-      console.log('set tm keys')
+      modifyingCurrentTemplate((prevTemplate) => ({
+        ...prevTemplate,
+        tm: updatedTmKeys.filter(({isActive}) => isActive),
+        getPublicMatches: config.get_public_matches === 1,
+      }))
     })
   }
 
@@ -109,16 +100,40 @@ function CatTool() {
         if (config.isAnInternalUser && config.active_engine.length > 0) {
           const mmt = mtEngines.find((mt) => mt.name === MMT_NAME)
           if (mmt) {
-            setActiveMTEngine(mmt)
+            modifyingCurrentTemplate((prevTemplate) => ({
+              ...prevTemplate,
+              mt: {...prevTemplate.mt, id: mmt.id},
+            }))
           }
         }
         if (config.active_engine && config.active_engine.id) {
           const activeMT = config.active_engine
-          activeMT && setActiveMTEngine(activeMT)
+          if (activeMT) {
+            modifyingCurrentTemplate((prevTemplate) => ({
+              ...prevTemplate,
+              mt: {
+                ...prevTemplate.mt,
+                id: activeMT.id,
+              },
+            }))
+          }
         }
       })
     }
   }
+
+  // parse advanced settings options
+  useEffect(() => {
+    if (typeof currentProjectTemplate?.id === 'undefined') return
+
+    modifyingCurrentTemplate((prevTemplate) => ({
+      ...prevTemplate,
+      speech2text: Speech2TextFeature.enabled(),
+      tagProjection: SegmentUtils.checkTPEnabled(),
+      lexica: config.lxq_enabled === 1,
+      crossLanguageMatches: SegmentUtils.checkCrossLanguageSettings(),
+    }))
+  }, [currentProjectTemplate?.id, modifyingCurrentTemplate])
 
   // actions listener
   useEffect(() => {
@@ -304,6 +319,12 @@ function CatTool() {
     UI.registerFooterTabs()
   }, [wasInitSegments])
 
+  const {
+    tagProjection: guessTagActive,
+    speech2text: speechToTextActive,
+    crossLanguageMatches: multiMatchLangs,
+  } = currentProjectTemplate ?? {}
+
   return (
     <>
       <Header
@@ -375,11 +396,6 @@ function CatTool() {
             setTmKeys,
             mtEngines,
             setMtEngines,
-            activeMTEngine,
-            setActiveMTEngine,
-            guessTagActive,
-            setGuessTagActive,
-            setSpeechToTextActive,
             sourceLang: {
               name: ApplicationStore.getLanguageNameFromLocale(
                 config.source_rfc,
@@ -394,12 +410,6 @@ function CatTool() {
                 code: config.target_rfc,
               },
             ],
-            lexiqaActive,
-            setLexiqaActive,
-            multiMatchLangs,
-            setMultiMatchLangs,
-            getPublicMatches,
-            setGetPublicMatches,
             currentProjectTemplate,
             modifyingCurrentTemplate,
           }}

@@ -67,7 +67,7 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
   const [isShowingRows, setIsShowingRows] = useState(false)
   const [rows, setRows] = useState()
   const [isGlossaryCaseSensitive, setIsGlossaryCaseSensitive] = useState(
-    mtGlossaryProps?.isGlossaryCaseSensitive ?? false,
+    mtGlossaryProps?.ignore_glossary_case ?? false,
   )
 
   const activeGlossariesRef = useRef()
@@ -104,10 +104,8 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
   )
 
   useEffect(() => {
-    setIsGlossaryCaseSensitive(
-      mtGlossaryProps?.isGlossaryCaseSensitive ?? false,
-    )
-  }, [mtGlossaryProps?.isGlossaryCaseSensitive])
+    setIsGlossaryCaseSensitive(mtGlossaryProps?.ignore_glossary_case ?? false)
+  }, [mtGlossaryProps?.ignore_glossary_case])
 
   useEffect(() => {
     let wasCleanup = false

@@ -11,8 +11,8 @@ export const CharacterCounter = () => {
   }
   return (
     <div className="options-box charscounter">
-      <h3>Character counter</h3>
       <div className="option-description">
+        <h3>Character counter</h3>
         <p>
           Enabling this option makes a counter appear that counts the number of
           characters in the target section of each segment.

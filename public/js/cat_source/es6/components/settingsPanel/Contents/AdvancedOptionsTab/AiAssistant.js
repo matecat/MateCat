@@ -19,8 +19,8 @@ export const AiAssistant = () => {
   }
   return (
     <div className="options-box ai-assistant">
-      <h3>Automatic AI assistant</h3>
       <div className="option-description">
+        <h3>Automatic AI assistant</h3>
         <p>
           By default, a button to activate the AI assistant appears under the
           source segment when you highlight a word. If you set this option to
