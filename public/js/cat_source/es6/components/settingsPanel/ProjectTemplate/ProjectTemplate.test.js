@@ -12,6 +12,7 @@ global.config = {
   basepath: 'http://localhost/',
   enableMultiDomainApi: false,
   ajaxDomainsNumber: 20,
+  isLoggedIn: 1,
 }
 
 const wrapperElement = document.createElement('div')
