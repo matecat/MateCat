@@ -9,7 +9,6 @@ import {SettingsPanelTable} from '../../SettingsPanelTable/SettingsPanelTable'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {TMKeyRow} from './TMKeyRow'
 import {TMCreateResourceRow} from './TMCreateResourceRow'
-import {MessageNotification} from '../MessageNotification'
 import {updateJobKeys} from '../../../../api/updateJobKeys'
 
 import Users from '../../../../../../../img/icons/Users'
@@ -124,7 +123,6 @@ export const TranslationMemoryGlossaryTab = () => {
   ])
   const [keyRows, setKeyRows] = useState([])
   const [filterInactiveKeys, setFilterInactiveKeys] = useState('')
-  const [notification, setNotification] = useState({})
 
   const ref = useRef()
   const previousStatesRef = useRef({
@@ -355,31 +353,8 @@ export const TranslationMemoryGlossaryTab = () => {
         : true),
   )
 
-  const resetNotification = () => setNotification({})
-
-  const {type, message, rowKey} = notification
-
-  const isActiveResourceNotification = keyRows.some(
-    (row) => row.key === rowKey && row.isActive,
-  )
-
-  const activeResourcersNotification = message &&
-    isActiveResourceNotification && (
-      <MessageNotification
-        {...{type, message, closeCallback: resetNotification}}
-      />
-    )
-  const inactiveResourcersNotification = message &&
-    !isActiveResourceNotification && (
-      <MessageNotification
-        {...{type, message, closeCallback: resetNotification}}
-      />
-    )
-
   return (
-    <TranslationMemoryGlossaryTabContext.Provider
-      value={{ref, setSpecialRows, setNotification}}
-    >
+    <TranslationMemoryGlossaryTabContext.Provider value={{ref, setSpecialRows}}>
       <div
         ref={ref}
         className="translation-memory-glossary-tab settings-panel-contentwrapper-tab-background"
@@ -397,7 +372,6 @@ export const TranslationMemoryGlossaryTab = () => {
           </div>
         )}
         <div className="translation-memory-glossary-tab-active-resources">
-          {activeResourcersNotification}
           <div className="translation-memory-glossary-tab-table-title">
             <h2>Active Resources</h2>
             <div className="translation-memory-glossary-tab-buttons-group">
@@ -425,7 +399,6 @@ export const TranslationMemoryGlossaryTab = () => {
           />
         </div>
         <div className="translation-memory-glossary-tab-inactive-resources">
-          {inactiveResourcersNotification}
           <div className="translation-memory-glossary-tab-table-title">
             <h2>Inactive Resources</h2>
             <input

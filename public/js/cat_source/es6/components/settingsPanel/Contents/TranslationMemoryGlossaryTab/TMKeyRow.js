@@ -142,9 +142,13 @@ export const TMKeyRow = ({row, onExpandRow}) => {
           key: row.key,
           description: name,
         }).catch((errors) => {
-          setNotification({
+          CatToolActions.addNotification({
+            title: 'Error updating key',
             type: 'error',
-            message: errors[0].message,
+            text: `errors[0].message`,
+            position: 'br',
+            allowHtml: true,
+            timer: 5000,
           })
         })
 

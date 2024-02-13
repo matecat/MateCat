@@ -20,9 +20,11 @@ import {MTGlossary} from './MTGlossary'
 import Close from '../../../../../../../img/icons/Close'
 import AddWide from '../../../../../../../img/icons/AddWide'
 import {DeepL} from './MtEngines/DeepL'
-import {DeepLGlossary} from './DeepLGlossary/DeepLGlossary'
+import {DeepLGlossary} from './DeepLGlossary'
 import {MTDeepLRow} from './MTDeepLRow'
 import CreateProjectActions from '../../../../actions/CreateProjectActions'
+import CatToolActions from '../../../../actions/CatToolActions'
+import {DeleteResource} from './DeleteResource'
 
 export const MachineTranslationTabContext = createContext({})
 
@@ -55,7 +57,6 @@ export const MachineTranslationTab = () => {
   const [error, setError] = useState()
   const [MTRows, setMTRows] = useState([])
   const [deleteMTRequest, setDeleteMTRequest] = useState()
-  const [errorDeletingMT, setErrorDeletingMT] = useState(false)
   const [notification, setNotification] = useState({})
 
   const enginesList = [
@@ -132,12 +133,12 @@ export const MachineTranslationTab = () => {
   }
 
   const deleteMTConfirm = (mt) => {
-    setErrorDeletingMT(false)
     setDeleteMTRequest(mt)
   }
   const deleteMT = () => {
     deleteMTEngine({id: deleteMTRequest})
       .then(() => {
+        const mtToDelete = mtEngines.find((mt) => mt.id === deleteMTRequest)
         setMtEngines((prevStateMT) => {
           return prevStateMT.filter((MT) => MT.id !== deleteMTRequest)
         })
@@ -159,9 +160,23 @@ export const MachineTranslationTab = () => {
             mt: templatesInvolved.find(({isTemporary}) => isTemporary)?.mt,
           },
         })
+        CatToolActions.addNotification({
+          title: 'MT deleted',
+          type: 'success',
+          text: `The MT (<b>${mtToDelete.name}</b>) has been successfully deleted`,
+          position: 'br',
+          allowHtml: true,
+          timer: 5000,
+        })
       })
       .catch(() => {
-        setErrorDeletingMT(true)
+        CatToolActions.addNotification({
+          title: 'Error deleting MT',
+          type: 'error',
+          text: 'There was an error saving your data. Please retry!',
+          position: 'br',
+          timer: 5000,
+        })
       })
   }
 
@@ -183,16 +198,26 @@ export const MachineTranslationTab = () => {
               <MTRow
                 key={index}
                 {...{row}}
-                deleteMT={() => deleteMTConfirm(row)}
+                deleteMT={() => deleteMTConfirm(row.id)}
                 onCheckboxClick={activateMT}
               />
             ),
             isDraggable: false,
+            ...(deleteMTRequest &&
+              row.id === deleteMTRequest && {
+                isExpanded: true,
+                extraNode: (
+                  <DeleteResource
+                    row={row}
+                    onClose={() => setDeleteMTRequest()}
+                    onConfirm={deleteMT}
+                  />
+                ),
+              }),
           }
         }),
     )
-    setDeleteMTRequest()
-  }, [activeMTEngine, mtEngines])
+  }, [activeMTEngine, mtEngines, deleteMTRequest])
 
   const resetNotification = () => setNotification({})
 
@@ -200,21 +225,14 @@ export const MachineTranslationTab = () => {
 
   const notificationsNode = (
     <>
-      {typeof deleteMTRequest === 'number' && (
+      {/* {typeof deleteMTRequest === 'number' && (
         <MessageNotification
           type={'warning'}
           message={`Do you really want to delete the MT: <b>${activeMTEngineData.name}</b>?`}
           confirmCallback={deleteMT}
           closeCallback={() => setDeleteMTRequest()}
         />
-      )}
-      {errorDeletingMT && (
-        <MessageNotification
-          type={'error'}
-          message={'There was an error saving your data. Please retry!'}
-          closeCallback={() => setErrorDeletingMT(false)}
-        />
-      )}
+      )}*/}
       {notification?.message && (
         <MessageNotification
           {...{
@@ -299,6 +317,17 @@ export const MachineTranslationTab = () => {
                           onCheckboxClick={disableMT}
                         />
                       ),
+                      ...(deleteMTRequest &&
+                        activeMTEngineData.id === deleteMTRequest && {
+                          isExpanded: true,
+                          extraNode: (
+                            <DeleteResource
+                              row={activeMTEngineData}
+                              onClose={() => setDeleteMTRequest()}
+                              onConfirm={deleteMT}
+                            />
+                          ),
+                        }),
                       isDraggable: false,
                       isActive: true,
                       ...(activeMTEngineData.name === 'ModernMT' && {

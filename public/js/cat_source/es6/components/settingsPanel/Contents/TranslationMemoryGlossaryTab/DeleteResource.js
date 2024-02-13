@@ -1,7 +1,6 @@
 import React, {useContext, useEffect, useRef} from 'react'
 import PropTypes from 'prop-types'
 import {deleteTmKey} from '../../../../api/deleteTmKey'
-import {TranslationMemoryGlossaryTabContext} from './TranslationMemoryGlossaryTab'
 import CatToolActions from '../../../../actions/CatToolActions'
 
 import Checkmark from '../../../../../../../img/icons/Checkmark'
@@ -11,7 +10,6 @@ import CreateProjectActions from '../../../../actions/CreateProjectActions'
 
 export const DeleteResource = ({row, onClose}) => {
   const {setTmKeys, projectTemplates} = useContext(SettingsPanelContext)
-  const {setNotification} = useContext(TranslationMemoryGlossaryTabContext)
 
   const tmOutOnCloseRef = useRef()
 
@@ -40,20 +38,31 @@ export const DeleteResource = ({row, onClose}) => {
             },
           })
         }
+        const notification = {
+          title: 'Resource deleted',
+          text: `The resource (<b>${row.name}</b>) has been successfully deleted`,
+          type: 'success',
+          position: 'br',
+          allowHtml: true,
+          timer: 5000,
+        }
+        CatToolActions.addNotification(notification)
         tmOutOnCloseRef.current = setTimeout(onClose, 2000)
       })
       .catch(() => {
-        setNotification({
+        CatToolActions.addNotification({
+          title: 'Error deleting resource',
           type: 'error',
-          message: 'There was an error saving your data. Please retry!',
-          rowKey: row.key,
+          text: 'There was an error saving your data. Please retry!',
+          position: 'br',
+          allowHtml: true,
+          timer: 5000,
         })
         onClose()
       })
   }
 
   const onClickClose = () => {
-    setNotification({})
     onClose()
   }
 
@@ -62,7 +71,7 @@ export const DeleteResource = ({row, onClose}) => {
       <div className="action-form">
         <div>
           <span>
-            Do you really want to delete this resource (<b>{row.key}</b>)
+            Do you really want to delete this resource (<b>{row.name}</b>)
           </span>
         </div>
         <div className="translation-memory-glossary-tab-buttons-group align-center">

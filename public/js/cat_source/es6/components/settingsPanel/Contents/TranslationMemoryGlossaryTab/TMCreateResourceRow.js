@@ -13,13 +13,12 @@ import {getInfoTmKey} from '../../../../api/getInfoTmKey'
 
 import Checkmark from '../../../../../../../img/icons/Checkmark'
 import Close from '../../../../../../../img/icons/Close'
+import CatToolActions from '../../../../actions/CatToolActions'
 
 export const TMCreateResourceRow = ({row}) => {
   const {tmKeys, setTmKeys, modifyingCurrentTemplate} =
     useContext(SettingsPanelContext)
-  const {setSpecialRows, setNotification} = useContext(
-    TranslationMemoryGlossaryTabContext,
-  )
+  const {setSpecialRows} = useContext(TranslationMemoryGlossaryTabContext)
 
   const [isLookup, setIsLookup] = useState(row.r ?? false)
   const [isUpdating, setIsUpdating] = useState(row.w ?? false)
@@ -52,7 +51,6 @@ export const TMCreateResourceRow = ({row}) => {
 
   const onChangeKeyCode = (e) => {
     setKeyCode(e.currentTarget.value)
-    setNotification({})
   }
 
   const updateRow = ({isLookup, isUpdating, name, keyCode}) => {
@@ -79,8 +77,6 @@ export const TMCreateResourceRow = ({row}) => {
           id !== SPECIAL_ROWS_ID.newResource,
       ),
     )
-
-    setNotification({})
   }
 
   const onSubmit = (e) => {
@@ -143,14 +139,25 @@ export const TMCreateResourceRow = ({row}) => {
             setTmKeys(updatedKeys)
             executeModifyCurrentTemplate(updatedKeys)
             onReset()
+            CatToolActions.addNotification({
+              title: 'Resource created ',
+              type: 'success',
+              text: `Resource <b>${name}</b> created successfully`,
+              position: 'br',
+              allowHtml: true,
+              timer: 5000,
+            })
           })
           .catch((errors) => {
-            setNotification({
+            CatToolActions.addNotification({
+              title: 'Invalid key',
               type: 'error',
-              message:
+              text:
                 errors[0].code === '23000'
                   ? 'The key you entered is invalid.'
                   : errors[0].message,
+              position: 'br',
+              timer: 5000,
             })
           })
       } else {
@@ -176,12 +183,15 @@ export const TMCreateResourceRow = ({row}) => {
           getInfoTmKeyCallback()
         })
         .catch((errors) => {
-          setNotification({
+          CatToolActions.addNotification({
+            title: 'Invalid key',
             type: 'error',
-            message:
+            text:
               errors[0].code === '23000'
                 ? 'The key you entered is invalid.'
                 : errors[0].message,
+            position: 'br',
+            timer: 5000,
           })
         })
 
@@ -206,9 +216,12 @@ export const TMCreateResourceRow = ({row}) => {
         if (data.success === true) createNewTmKeyCallback()
       })
       .catch(() => {
-        setNotification({
+        CatToolActions.addNotification({
+          title: 'Invalid key',
           type: 'error',
-          message: 'The key you entered is invalid.',
+          text: 'The key you entered is invalid.',
+          position: 'br',
+          timer: 5000,
         })
       })
   }
@@ -256,9 +269,12 @@ export const TMCreateResourceRow = ({row}) => {
       )
 
       if (dispathNotification) {
-        setNotification({
+        CatToolActions.addNotification({
+          title: 'Invalid key',
           type: 'error',
-          message,
+          text: message,
+          position: 'br',
+          timer: 5000,
         })
       }
 
