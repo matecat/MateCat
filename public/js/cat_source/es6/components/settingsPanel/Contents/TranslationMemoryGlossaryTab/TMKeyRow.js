@@ -36,9 +36,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
   const {isImportTMXInProgress} = useContext(CreateProjectContext)
   const {tmKeys, setTmKeys, modifyingCurrentTemplate, currentProjectTemplate} =
     useContext(SettingsPanelContext)
-  const {setSpecialRows, setNotification} = useContext(
-    TranslationMemoryGlossaryTabContext,
-  )
+  const {setSpecialRows} = useContext(TranslationMemoryGlossaryTabContext)
 
   const [isLookup, setIsLookup] = useState(row.r ?? false)
   const [isUpdating, setIsUpdating] = useState(row.w ?? false)
@@ -141,7 +139,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
         updateTmKey({
           key: row.key,
           description: name,
-        }).catch((errors) => {
+        }).catch(() => {
           CatToolActions.addNotification({
             title: 'Error updating key',
             type: 'error',

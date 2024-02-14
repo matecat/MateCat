@@ -180,10 +180,6 @@ export const MachineTranslationTab = () => {
       })
   }
 
-  const activateMT = (row) => {
-    setActiveMTEngine(row)
-  }
-
   const disableMT = () => {
     setActiveMTEngine()
   }
@@ -199,7 +195,7 @@ export const MachineTranslationTab = () => {
                 key={index}
                 {...{row}}
                 deleteMT={() => deleteMTConfirm(row.id)}
-                onCheckboxClick={activateMT}
+                onCheckboxClick={(row) => setActiveMTEngine(row)}
               />
             ),
             isDraggable: false,
@@ -225,14 +221,6 @@ export const MachineTranslationTab = () => {
 
   const notificationsNode = (
     <>
-      {/* {typeof deleteMTRequest === 'number' && (
-        <MessageNotification
-          type={'warning'}
-          message={`Do you really want to delete the MT: <b>${activeMTEngineData.name}</b>?`}
-          confirmCallback={deleteMT}
-          closeCallback={() => setDeleteMTRequest()}
-        />
-      )}*/}
       {notification?.message && (
         <MessageNotification
           {...{

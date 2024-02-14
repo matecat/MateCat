@@ -12,6 +12,9 @@ import CatToolConstants from '../../../../../constants/CatToolConstants'
 import CatToolStore from '../../../../../stores/CatToolStore'
 import ArrowDown from '../../../../../../../../img/icons/ArrowDown'
 import IconAdd from '../../../../icons/IconAdd'
+import {DeleteResource} from '../DeleteResource'
+import {deleteMemoryGlossary} from '../../../../../api/deleteMemoryGlossary'
+import CreateProjectActions from '../../../../../actions/CreateProjectActions'
 
 const COLUMNS_TABLE = [
   {name: 'Activate'},
@@ -59,7 +62,7 @@ export class MTGlossaryStatus {
 }
 
 export const MTGlossary = ({id, isCattoolPage = false}) => {
-  const {currentProjectTemplate, modifyingCurrentTemplate} =
+  const {currentProjectTemplate, modifyingCurrentTemplate, projectTemplates} =
     useContext(SettingsPanelContext)
 
   const {mt: {extra: mtGlossaryProps} = {}} = currentProjectTemplate ?? {}
@@ -69,9 +72,73 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
   const [isGlossaryCaseSensitive, setIsGlossaryCaseSensitive] = useState(
     mtGlossaryProps?.ignore_glossary_case ?? false,
   )
+  const [deleteGlossaryRequest, setDeleteGlossaryRequest] = useState()
 
   const activeGlossariesRef = useRef()
   activeGlossariesRef.current = mtGlossaryProps?.glossaries
+
+  const deleteGlossary = () => {
+    deleteMemoryGlossary({engineId: id, memoryId: deleteGlossaryRequest.id})
+      .then((data) => {
+        if (data.id === deleteGlossaryRequest.id) {
+          setRows((prevState) =>
+            prevState.filter(({id}) => id !== deleteGlossaryRequest.id),
+          )
+
+          const templatesInvolved = projectTemplates
+            .filter((template) =>
+              template.mt.extra.glossaries?.some(
+                (value) => value === deleteGlossaryRequest.id,
+              ),
+            )
+            .map((template) => {
+              const mtObject = template.mt
+              const {glossaries, ...extra} = mtObject.extra // eslint-disable-line
+              const glossariesFiltered = mtObject.extra.glossaries.filter(
+                (value) => value !== deleteGlossaryRequest.id,
+              )
+
+              return {
+                ...template,
+                mt: {
+                  ...mtObject,
+                  extra: {
+                    ...extra,
+                    ...(glossariesFiltered.length && {
+                      glossaries: glossariesFiltered,
+                    }),
+                  },
+                },
+              }
+            })
+          CatToolActions.addNotification({
+            title: 'Glossary deleted',
+            type: 'success',
+            text: `The glossary (<b>${deleteGlossaryRequest.name}</b>) has been successfully deleted`,
+            position: 'br',
+            allowHtml: true,
+            timer: 5000,
+          })
+          CreateProjectActions.updateProjectTemplates({
+            templates: templatesInvolved,
+            modifiedPropsCurrentProjectTemplate: {
+              mt: templatesInvolved.find(({isTemporary}) => isTemporary)?.mt,
+            },
+          })
+        }
+      })
+      .catch(() => {
+        CatToolActions.addNotification({
+          title: 'Glossary delete error',
+          type: 'error',
+          text: 'Error deleting glossary',
+          position: 'br',
+          allowHtml: true,
+          timer: 5000,
+        })
+      })
+      .finally(() => setDeleteGlossaryRequest())
+  }
 
   const updateRowsState = useCallback(
     (value) => {
@@ -95,12 +162,27 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
                   setRows: updateRowsState,
                   isReadOnly: isCattoolPage,
                 }}
+                deleteGlossaryConfirm={(glossary) =>
+                  setDeleteGlossaryRequest(glossary)
+                }
               />
             ),
+          ...(deleteGlossaryRequest &&
+            deleteGlossaryRequest.id === row.id && {
+              isExpanded: true,
+              extraNode: (
+                <DeleteResource
+                  row={deleteGlossaryRequest}
+                  onClose={() => setDeleteGlossaryRequest()}
+                  onConfirm={deleteGlossary}
+                  type={'glossary'}
+                />
+              ),
+            }),
         }))
       })
     },
-    [id, isCattoolPage],
+    [id, isCattoolPage, deleteGlossaryRequest],
   )
 
   useEffect(() => {

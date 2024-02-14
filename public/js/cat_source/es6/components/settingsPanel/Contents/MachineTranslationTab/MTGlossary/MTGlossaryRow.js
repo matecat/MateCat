@@ -9,8 +9,6 @@ import React, {
 import PropTypes from 'prop-types'
 import Upload from '../../../../../../../../img/icons/Upload'
 import Trash from '../../../../../../../../img/icons/Trash'
-import {deleteMemoryGlossary} from '../../../../../api/deleteMemoryGlossary/deleteMemoryGlossary'
-import {MachineTranslationTabContext} from '../MachineTranslationTab'
 import {MTGlossaryStatus} from './MTGlossary'
 import {importMemoryGlossary} from '../../../../../api/importMemoryGlossary/importMemoryGlossary'
 import {updateMemoryGlossary} from '../../../../../api/updateMemoryGlossary/updateMemoryGlossary'
@@ -18,13 +16,15 @@ import IconEdit from '../../../../icons/IconEdit'
 import Checkmark from '../../../../../../../../img/icons/Checkmark'
 import Close from '../../../../../../../../img/icons/Close'
 import LabelWithTooltip from '../../../../common/LabelWithTooltip'
-import CreateProjectActions from '../../../../../actions/CreateProjectActions'
-import {SettingsPanelContext} from '../../../SettingsPanelContext'
+import CatToolActions from '../../../../../actions/CatToolActions'
 
-export const MTGlossaryRow = ({engineId, row, setRows, isReadOnly}) => {
-  const {setNotification} = useContext(MachineTranslationTabContext)
-  const {projectTemplates} = useContext(SettingsPanelContext)
-
+export const MTGlossaryRow = ({
+  engineId,
+  row,
+  setRows,
+  isReadOnly,
+  deleteGlossaryConfirm,
+}) => {
   const [isActive, setIsActive] = useState(row.isActive)
   const [isEditingName, setIsEditingName] = useState(false)
   const [name, setName] = useState(row.name)
@@ -43,16 +43,24 @@ export const MTGlossaryRow = ({engineId, row, setRows, isReadOnly}) => {
     if (!file) return
 
     const dispatchSuccessfullImportNotification = () => {
-      setNotification({
+      CatToolActions.addNotification({
+        title: 'Glossary imported',
         type: 'success',
-        message: `Glossary file ${file.name} imported successfully`,
+        text: `Glossary file ${file.name} imported successfully`,
+        position: 'br',
+        allowHtml: true,
+        timer: 5000,
       })
       setIsWaitingResult(false)
     }
     const dispatchErrorImportNotification = () => {
-      setNotification({
+      CatToolActions.addNotification({
+        title: 'Glossary import error',
         type: 'error',
-        message: `Glossary file ${file.name} import error`,
+        text: `Glossary file ${file.name} import error`,
+        position: 'br',
+        allowHtml: true,
+        timer: 5000,
       })
       setIsWaitingResult(false)
     }
@@ -77,14 +85,13 @@ export const MTGlossaryRow = ({engineId, row, setRows, isReadOnly}) => {
       .catch(() => dispatchErrorImportNotification())
 
     return () => statusImport.current.cancel()
-  }, [file, row.id, engineId, setNotification])
+  }, [file, row.id, engineId])
 
   useLayoutEffect(() => {
     inputNameRef.current.focus()
   }, [isEditingName])
 
   const onChangeIsActive = (e) => {
-    setNotification()
     const isActive = e.currentTarget.checked
     setIsActive(isActive)
     setRows((prevState) =>
@@ -95,8 +102,6 @@ export const MTGlossaryRow = ({engineId, row, setRows, isReadOnly}) => {
   }
 
   const onChangeName = (e) => {
-    setNotification()
-
     const {value} = e.currentTarget ?? {}
     setName(value)
   }
@@ -126,59 +131,7 @@ export const MTGlossaryRow = ({engineId, row, setRows, isReadOnly}) => {
   }
 
   const onChangeFile = (e) => {
-    setNotification()
     if (e.target.files) setFile(Array.from(e.target.files)[0])
-  }
-
-  const deleteGlossary = () => {
-    setNotification()
-
-    setIsWaitingResult(true)
-    deleteMemoryGlossary({engineId, memoryId: row.id})
-      .then((data) => {
-        if (data.id === row.id) {
-          setRows((prevState) => prevState.filter(({id}) => id !== row.id))
-
-          const templatesInvolved = projectTemplates
-            .filter((template) =>
-              template.mt.extra.glossaries?.some((value) => value === row.id),
-            )
-            .map((template) => {
-              const mtObject = template.mt
-              const {glossaries, ...extra} = mtObject.extra // eslint-disable-line
-              const glossariesFiltered = mtObject.extra.glossaries.filter(
-                (value) => value !== row.id,
-              )
-
-              return {
-                ...template,
-                mt: {
-                  ...mtObject,
-                  extra: {
-                    ...extra,
-                    ...(glossariesFiltered.length && {
-                      glossaries: glossariesFiltered,
-                    }),
-                  },
-                },
-              }
-            })
-
-          CreateProjectActions.updateProjectTemplates({
-            templates: templatesInvolved,
-            modifiedPropsCurrentProjectTemplate: {
-              mt: templatesInvolved.find(({isTemporary}) => isTemporary)?.mt,
-            },
-          })
-        }
-      })
-      .catch(() => {
-        setNotification({
-          type: 'error',
-          message: 'Glossary delete error',
-        })
-      })
-      .finally(() => setIsWaitingResult(false))
   }
 
   const editingNameButtons = !isEditingName ? (
@@ -260,7 +213,7 @@ export const MTGlossaryRow = ({engineId, row, setRows, isReadOnly}) => {
             <button
               className="grey-button"
               disabled={isWaitingResult}
-              onClick={deleteGlossary}
+              onClick={() => deleteGlossaryConfirm(row)}
             >
               <Trash size={12} />
             </button>

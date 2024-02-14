@@ -6,10 +6,13 @@ import {deleteDeepLGlossary} from '../../../../../api/deleteDeepLGlossary'
 import {SettingsPanelContext} from '../../../SettingsPanelContext'
 import CreateProjectActions from '../../../../../actions/CreateProjectActions'
 
-export const DeepLGlossaryRow = ({engineId, row, setRows, isReadOnly}) => {
-  const {setNotification} = useContext(MachineTranslationTabContext)
-  const {projectTemplates} = useContext(SettingsPanelContext)
-
+export const DeepLGlossaryRow = ({
+  engineId,
+  row,
+  setRows,
+  isReadOnly,
+  deleteGlossaryConfirm,
+}) => {
   const [isActive, setIsActive] = useState(false)
   const [isWaitingResult, setIsWaitingResult] = useState(false)
 
@@ -18,7 +21,6 @@ export const DeepLGlossaryRow = ({engineId, row, setRows, isReadOnly}) => {
   }, [row.isActive])
 
   const onChangeIsActive = (e) => {
-    setNotification()
     const isActive = e.currentTarget.checked
     setRows((prevState) =>
       prevState.map((glossary) => ({
@@ -26,56 +28,6 @@ export const DeepLGlossaryRow = ({engineId, row, setRows, isReadOnly}) => {
         isActive: isActive && glossary.id === row.id,
       })),
     )
-  }
-
-  const deleteGlossary = () => {
-    setNotification()
-
-    setIsWaitingResult(true)
-    deleteDeepLGlossary({engineId, id: row.id})
-      .then((data) => {
-        if (data.id === row.id) {
-          setRows((prevState) => prevState.filter(({id}) => id !== row.id))
-
-          const templatesInvolved = projectTemplates
-            .filter(
-              (template) => template.mt.extra.deepl_id_glossary === row.id,
-            )
-            .map((template) => {
-              const mtObject = template.mt
-              const {deepl_id_glossary, ...extra} = mtObject.extra // eslint-disable-line
-
-              return {
-                ...template,
-                mt: {
-                  ...mtObject,
-                  extra: {
-                    ...extra,
-                    ...(deepl_id_glossary !== row.id && {
-                      deepl_id_glossary,
-                    }),
-                  },
-                },
-              }
-            })
-
-          CreateProjectActions.updateProjectTemplates({
-            templates: templatesInvolved,
-            modifiedPropsCurrentProjectTemplate: {
-              [mtProp]: templatesInvolved.find(
-                ({isTemporary}) => isTemporary,
-              )?.[mtProp],
-            },
-          })
-        }
-      })
-      .catch(() => {
-        setNotification({
-          type: 'error',
-          message: 'Glossary delete error',
-        })
-      })
-      .finally(() => setIsWaitingResult(false))
   }
 
   return (
@@ -103,7 +55,7 @@ export const DeepLGlossaryRow = ({engineId, row, setRows, isReadOnly}) => {
             <button
               className="grey-button"
               disabled={isWaitingResult}
-              onClick={deleteGlossary}
+              onClick={() => deleteGlossaryConfirm(row)}
             >
               <Trash size={12} />
             </button>

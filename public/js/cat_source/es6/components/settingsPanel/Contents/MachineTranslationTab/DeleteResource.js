@@ -4,7 +4,7 @@ import PropTypes from 'prop-types'
 import Checkmark from '../../../../../../../img/icons/Checkmark'
 import Close from '../../../../../../../img/icons/Close'
 
-export const DeleteResource = ({row, onClose, onConfirm}) => {
+export const DeleteResource = ({row, onClose, onConfirm, type = 'mt'}) => {
   const onClickConfirm = () => {
     onConfirm()
   }
@@ -18,7 +18,8 @@ export const DeleteResource = ({row, onClose, onConfirm}) => {
       <div className="action-form">
         <div>
           <span>
-            Do you really want to delete the MT: (<b>{row.name}</b>)
+            Do you really want to delete the
+            {type === 'mt' ? ' MT' : ' Glossary'}: (<b>{row.name}</b>)
           </span>
         </div>
         <div className="translation-memory-glossary-tab-buttons-group align-center">
@@ -45,4 +46,5 @@ export const DeleteResource = ({row, onClose, onConfirm}) => {
 DeleteResource.propTypes = {
   row: PropTypes.object.isRequired,
   onClose: PropTypes.func,
+  type: PropTypes.oneOf(['mt', 'glossary']),
 }
