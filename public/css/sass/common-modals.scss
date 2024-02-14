@@ -98,7 +98,9 @@ a.ui.primary.right.floated.button.tiny.register-ok {
   box-shadow: 0px 0px 16px 0px rgba(0, 0, 0, 0.4);
   visibility: hidden;
   transform: translateY(1em);
-  transition: all 0.3s ease-in-out 0s, visibility 0s linear 0.3s,
+  transition:
+    all 0.3s ease-in-out 0s,
+    visibility 0s linear 0.3s,
     z-index 0s linear 0.01s;
   z-index: -1;
   opacity: 0;
@@ -391,7 +393,9 @@ a.ui.primary.right.floated.button.tiny.register-ok {
 
     &:hover {
       background-color: #08b3de;
-      box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12),
+      box-shadow:
+        0 0 0 #e0e0e0,
+        0 0 2px rgba(0, 0, 0, 0.12),
         0 2px 4px rgba(0, 0, 0, 0.24) !important;
     }
   }
@@ -819,7 +823,9 @@ a.ui.primary.right.floated.button.tiny.register-ok {
   .matecat-modal-content {
     width: 320px;
     min-width: unset;
-    box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12),
+    box-shadow:
+      0 0 0 #e0e0e0,
+      0 0 2px rgba(0, 0, 0, 0.12),
       0 2px 4px rgba(0, 0, 0, 0.24) !important;
   }
 
@@ -922,7 +928,9 @@ a.ui.primary.right.floated.button.tiny.register-ok {
 .matecat-modal-content .btn-confirm-medium:hover,
 .matecat-modal-content .btn-confirm-small:hover {
   cursor: pointer;
-  box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12),
+  box-shadow:
+    0 0 0 #e0e0e0,
+    0 0 2px rgba(0, 0, 0, 0.12),
     0 2px 4px rgba(0, 0, 0, 0.24) !important;
   color: #ffffff;
 }
@@ -1130,7 +1138,9 @@ a.ui.primary.right.floated.button.tiny.register-ok {
             white-space: nowrap;
 
             &:hover {
-              box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12),
+              box-shadow:
+                0 0 0 #e0e0e0,
+                0 0 2px rgba(0, 0, 0, 0.12),
                 0 2px 4px rgba(0, 0, 0, 0.24) !important;
             }
 
@@ -1814,5 +1824,13 @@ a.login-button.btn-confirm-medium.sing-in.disabled:hover {
     p {
       line-height: 25px;
     }
+  }
+}
+
+.confirm-delete-resource-project-templates {
+  ul {
+    list-style: disc;
+    padding: 10px 20px;
+    font-weight: bold;
   }
 }

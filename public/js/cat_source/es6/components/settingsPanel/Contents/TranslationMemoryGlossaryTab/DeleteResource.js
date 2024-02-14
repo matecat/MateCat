@@ -1,65 +1,12 @@
-import React, {useContext, useEffect, useRef} from 'react'
+import React from 'react'
 import PropTypes from 'prop-types'
-import {deleteTmKey} from '../../../../api/deleteTmKey'
-import CatToolActions from '../../../../actions/CatToolActions'
 
 import Checkmark from '../../../../../../../img/icons/Checkmark'
 import Close from '../../../../../../../img/icons/Close'
-import {SettingsPanelContext} from '../../SettingsPanelContext'
-import CreateProjectActions from '../../../../actions/CreateProjectActions'
 
-export const DeleteResource = ({row, onClose}) => {
-  const {setTmKeys, projectTemplates} = useContext(SettingsPanelContext)
-
-  const tmOutOnCloseRef = useRef()
-
-  useEffect(() => {
-    return () => clearTimeout(tmOutOnCloseRef.current)
-  }, [])
-
+export const DeleteResource = ({row, onClose, onConfirm}) => {
   const onClickConfirm = () => {
-    deleteTmKey({key: row.key})
-      .then(() => {
-        setTmKeys((prevState) => prevState.filter(({key}) => key !== row.key))
-        if (APP.isCattool) {
-          CatToolActions.onTMKeysChangeStatus()
-        } else {
-          const templatesInvolved = projectTemplates
-            .filter((template) => template.tm.some(({key}) => key === row.key))
-            .map((template) => ({
-              ...template,
-              tm: template.tm.filter(({key}) => key !== row.key),
-            }))
-
-          CreateProjectActions.updateProjectTemplates({
-            templates: templatesInvolved,
-            modifiedPropsCurrentProjectTemplate: {
-              tm: templatesInvolved.find(({isTemporary}) => isTemporary)?.tm,
-            },
-          })
-        }
-        const notification = {
-          title: 'Resource deleted',
-          text: `The resource (<b>${row.name}</b>) has been successfully deleted`,
-          type: 'success',
-          position: 'br',
-          allowHtml: true,
-          timer: 5000,
-        }
-        CatToolActions.addNotification(notification)
-        tmOutOnCloseRef.current = setTimeout(onClose, 2000)
-      })
-      .catch(() => {
-        CatToolActions.addNotification({
-          title: 'Error deleting resource',
-          type: 'error',
-          text: 'There was an error saving your data. Please retry!',
-          position: 'br',
-          allowHtml: true,
-          timer: 5000,
-        })
-        onClose()
-      })
+    onConfirm()
   }
 
   const onClickClose = () => {
@@ -98,4 +45,5 @@ export const DeleteResource = ({row, onClose}) => {
 DeleteResource.propTypes = {
   row: PropTypes.object.isRequired,
   onClose: PropTypes.func,
+  onConfirm: PropTypes.func,
 }

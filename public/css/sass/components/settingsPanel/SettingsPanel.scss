@@ -263,3 +263,14 @@
 .settings-panel-project-template-button-more {
   min-width: 240px;
 }
+
+.settings-panel-project-template {
+  .custom-dropdown {
+    padding: 10px;
+
+    .dropdown__option--is-active-option {
+      color: $white;
+      background-color: $darkBlue;
+    }
+  }
+}

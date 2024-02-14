@@ -31,11 +31,19 @@ import Trash from '../../../../../../../img/icons/Trash'
 import DotsHorizontal from '../../../../../../../img/icons/DotsHorizontal'
 import {updateJobKeys} from '../../../../api/updateJobKeys'
 import CatToolActions from '../../../../actions/CatToolActions'
+import {ConfirmDeleteResourceProjectTemplates} from '../../../modals/ConfirmDeleteResourceProjectTemplates'
+import CreateProjectActions from '../../../../actions/CreateProjectActions'
+import {deleteTmKey} from '../../../../api/deleteTmKey'
 
 export const TMKeyRow = ({row, onExpandRow}) => {
   const {isImportTMXInProgress} = useContext(CreateProjectContext)
-  const {tmKeys, setTmKeys, modifyingCurrentTemplate, currentProjectTemplate} =
-    useContext(SettingsPanelContext)
+  const {
+    tmKeys,
+    setTmKeys,
+    modifyingCurrentTemplate,
+    currentProjectTemplate,
+    projectTemplates,
+  } = useContext(SettingsPanelContext)
   const {setSpecialRows} = useContext(TranslationMemoryGlossaryTabContext)
 
   const [isLookup, setIsLookup] = useState(row.r ?? false)
@@ -184,11 +192,12 @@ export const TMKeyRow = ({row, onExpandRow}) => {
 
   const handleExpandeRow = (Component) => {
     const onClose = () => onExpandRow({row, shouldExpand: false})
+    const onConfirm = onConfirmDeleteTmKey
 
     onExpandRow({
       row,
       shouldExpand: true,
-      content: <Component {...{row, onClose}} />,
+      content: <Component {...{row, onClose, onConfirm}} />,
     })
   }
 
@@ -211,6 +220,70 @@ export const TMKeyRow = ({row, onExpandRow}) => {
             'Select Share resource from the dropdown menu to see owners',
           icon: <Users size={16} />,
         }
+
+  const onConfirmDeleteTmKey = () => {
+    deleteTmKey({key: row.key})
+      .then(() => {
+        setTmKeys((prevState) => prevState.filter(({key}) => key !== row.key))
+        if (APP.isCattool) {
+          CatToolActions.onTMKeysChangeStatus()
+        } else {
+          const templatesInvolved = projectTemplates
+            .filter((template) => template.tm.some(({key}) => key === row.key))
+            .map((template) => ({
+              ...template,
+              tm: template.tm.filter(({key}) => key !== row.key),
+            }))
+
+          CreateProjectActions.updateProjectTemplates({
+            templates: templatesInvolved,
+            modifiedPropsCurrentProjectTemplate: {
+              tm: templatesInvolved.find(({isTemporary}) => isTemporary)?.tm,
+            },
+          })
+        }
+        const notification = {
+          title: 'Resource deleted',
+          text: `The resource (<b>${row.name}</b>) has been successfully deleted`,
+          type: 'success',
+          position: 'br',
+          allowHtml: true,
+          timer: 5000,
+        }
+        CatToolActions.addNotification(notification)
+      })
+      .catch(() => {
+        CatToolActions.addNotification({
+          title: 'Error deleting resource',
+          type: 'error',
+          text: 'There was an error saving your data. Please retry!',
+          position: 'br',
+          allowHtml: true,
+          timer: 5000,
+        })
+        onExpandRow({row, shouldExpand: false})
+      })
+  }
+
+  const showConfirmDelete = () => {
+    const templatesInvolved = projectTemplates
+      .filter(({isSelected}) => !isSelected)
+      .filter((template) => template.tm.some(({key}) => key === row.key))
+
+    if (templatesInvolved.length) {
+      ModalsActions.showModalComponent(
+        ConfirmDeleteResourceProjectTemplates,
+        {
+          projectTemplatesInvolved: templatesInvolved,
+          successCallback: onConfirmDeleteTmKey,
+          content: `The memory key you are about to delete is used in the following project creation template(s)`,
+        },
+        'Confirm deletion',
+      )
+    } else {
+      handleExpandeRow(DeleteResource)
+    }
+  }
 
   return (
     <Fragment>
@@ -296,7 +369,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
             </MenuButtonItem>
             <MenuButtonItem
               className="tm-key-row-button-item"
-              onMouseDown={() => handleExpandeRow(DeleteResource)}
+              onMouseDown={showConfirmDelete}
             >
               <div>
                 <Trash size={20} /> Delete resource

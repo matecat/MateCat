@@ -121,3 +121,17 @@ test('Check is modified specific property', async () => {
     checkSpecificTemplatePropsAreModified(['pretranslate_100']),
   ).toBeTruthy()
 })
+
+test('Cattool page', async () => {
+  global.config.is_cattool = true
+
+  const {result} = renderHook(() => useProjectTemplates(true))
+
+  await waitFor(() => {
+    expect(result.current.projectTemplates?.length).toBe(1)
+  })
+
+  const {currentProjectTemplate} = result.current
+
+  expect(currentProjectTemplate.id).toBe(0)
+})
