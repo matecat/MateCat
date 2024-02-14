@@ -79,9 +79,7 @@ export const DeepLGlossary = ({id, isCattoolPage = false}) => {
           CreateProjectActions.updateProjectTemplates({
             templates: templatesInvolved,
             modifiedPropsCurrentProjectTemplate: {
-              [mtProp]: templatesInvolved.find(
-                ({isTemporary}) => isTemporary,
-              )?.[mtProp],
+              mt: templatesInvolved.find(({isTemporary}) => isTemporary)?.mt,
             },
           })
         }
