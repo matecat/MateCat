@@ -363,7 +363,12 @@ export const MachineTranslationTab = () => {
         </div>
       ) : (
         <div className="not-logged-user">
-          <button className="ui primary button" onClick={openLoginModal}>
+          <button
+            className="ui primary button"
+            onClick={openLoginModal}
+            title="Login to see your custom MT engines"
+            data-testid="login-button"
+          >
             Login to see your custom MT engines
           </button>
         </div>

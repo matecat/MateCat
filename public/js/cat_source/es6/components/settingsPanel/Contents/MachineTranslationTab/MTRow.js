@@ -12,14 +12,14 @@ export const MTRow = ({row, deleteMT, onCheckboxClick}) => {
       <div>
         {row.name}
         {row.name === 'MyMemory' && (
-          <>
+          <span>
             {' '}
             (
             <a href="https://guides.matecat.com/my" target="_blank">
               Details
             </a>
             )
-          </>
+          </span>
         )}
         {row.name === 'ModernMT' && (
           <>
@@ -50,6 +50,7 @@ export const MTRow = ({row, deleteMT, onCheckboxClick}) => {
         <div className="settings-panel-cell-center">
           <input
             type="checkbox"
+            data-testid="checkbox-mt-active"
             checked={row.id === activeMTEngine ? true : false}
             onChange={() => onCheckboxClick(row)}
           ></input>
