@@ -1,10 +1,6 @@
-import React, {Fragment, useContext, useEffect, useState} from 'react'
+import React, {Fragment, useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
 import Trash from '../../../../../../../../img/icons/Trash'
-import {MachineTranslationTabContext} from '../MachineTranslationTab'
-import {deleteDeepLGlossary} from '../../../../../api/deleteDeepLGlossary'
-import {SettingsPanelContext} from '../../../SettingsPanelContext'
-import CreateProjectActions from '../../../../../actions/CreateProjectActions'
 
 export const DeepLGlossaryRow = ({
   engineId,
