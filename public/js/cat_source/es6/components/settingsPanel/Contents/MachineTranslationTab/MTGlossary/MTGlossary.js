@@ -15,6 +15,8 @@ import IconAdd from '../../../../icons/IconAdd'
 import {DeleteResource} from '../DeleteResource'
 import {deleteMemoryGlossary} from '../../../../../api/deleteMemoryGlossary'
 import CreateProjectActions from '../../../../../actions/CreateProjectActions'
+import ModalsActions from '../../../../../actions/ModalsActions'
+import {ConfirmDeleteResourceProjectTemplates} from '../../../../modals/ConfirmDeleteResourceProjectTemplates'
 
 const COLUMNS_TABLE = [
   {name: 'Activate'},
@@ -77,25 +79,24 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
   const activeGlossariesRef = useRef()
   activeGlossariesRef.current = mtGlossaryProps?.glossaries
 
-  const deleteGlossary = () => {
-    deleteMemoryGlossary({engineId: id, memoryId: deleteGlossaryRequest.id})
+  const deleteGlossary = useRef()
+  deleteGlossary.current = (glossary = deleteGlossaryRequest) => {
+    deleteMemoryGlossary({engineId: id, memoryId: glossary.id})
       .then((data) => {
-        if (data.id === deleteGlossaryRequest.id) {
-          setRows((prevState) =>
-            prevState.filter(({id}) => id !== deleteGlossaryRequest.id),
-          )
+        if (data.id === glossary.id) {
+          setRows((prevState) => prevState.filter(({id}) => id !== glossary.id))
 
           const templatesInvolved = projectTemplates
             .filter((template) =>
               template.mt.extra.glossaries?.some(
-                (value) => value === deleteGlossaryRequest.id,
+                (value) => value === glossary.id,
               ),
             )
             .map((template) => {
               const mtObject = template.mt
               const {glossaries, ...extra} = mtObject.extra // eslint-disable-line
               const glossariesFiltered = mtObject.extra.glossaries.filter(
-                (value) => value !== deleteGlossaryRequest.id,
+                (value) => value !== glossary.id,
               )
 
               return {
@@ -114,7 +115,7 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
           CatToolActions.addNotification({
             title: 'Glossary deleted',
             type: 'success',
-            text: `The glossary (<b>${deleteGlossaryRequest.name}</b>) has been successfully deleted`,
+            text: `The glossary (<b>${glossary.name}</b>) has been successfully deleted`,
             position: 'br',
             allowHtml: true,
             timer: 5000,
@@ -140,6 +141,29 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
       .finally(() => setDeleteGlossaryRequest())
   }
 
+  const showConfirmDelete = useRef()
+  showConfirmDelete.current = (glossary) => {
+    const templatesInvolved = projectTemplates
+      .filter(({isSelected}) => !isSelected)
+      .filter((template) =>
+        template.mt.extra.glossaries?.some((value) => value === glossary.id),
+      )
+
+    if (templatesInvolved.length) {
+      ModalsActions.showModalComponent(
+        ConfirmDeleteResourceProjectTemplates,
+        {
+          projectTemplatesInvolved: templatesInvolved,
+          successCallback: () => deleteGlossary.current(glossary),
+          content: `The MT glossary you are about to delete is used in the following project creation template(s)`,
+        },
+        'Confirm deletion',
+      )
+    } else {
+      setDeleteGlossaryRequest(glossary)
+    }
+  }
+
   const updateRowsState = useCallback(
     (value) => {
       setRows((prevState) => {
@@ -162,9 +186,7 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
                   setRows: updateRowsState,
                   isReadOnly: isCattoolPage,
                 }}
-                deleteGlossaryConfirm={(glossary) =>
-                  setDeleteGlossaryRequest(glossary)
-                }
+                deleteGlossaryConfirm={showConfirmDelete.current}
               />
             ),
           ...(deleteGlossaryRequest &&
@@ -174,7 +196,7 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
                 <DeleteResource
                   row={deleteGlossaryRequest}
                   onClose={() => setDeleteGlossaryRequest()}
-                  onConfirm={deleteGlossary}
+                  onConfirm={deleteGlossary.current}
                   type={'glossary'}
                 />
               ),

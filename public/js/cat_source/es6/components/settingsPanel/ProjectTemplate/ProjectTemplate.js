@@ -101,14 +101,14 @@ export const ProjectTemplate = ({portalTarget}) => {
                 isSelected,
                 ...modifiedTemplate
               } = template
-              //     /* eslint-enable no-unused-vars */
+              /* eslint-enable no-unused-vars */
 
               updateProjectTemplate({
                 id: template.id,
                 template: modifiedTemplate,
               })
                 .then((template) => resolve(template))
-                .catch((error) => reject())
+                .catch(() => reject())
             }),
         )
 

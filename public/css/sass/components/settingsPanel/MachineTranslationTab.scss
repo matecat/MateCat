@@ -214,15 +214,18 @@
   }
 
   .settings-panel-table {
+    .select {
+      padding: 2px 8px;
+      height: 24px;
+    }
+  }
+
+  .active-table-ModernMT,
+  .active-table-DeepL {
     .settings-panel-row-extra-content {
       transition: none;
       min-height: unset;
       max-height: none;
-    }
-
-    .select {
-      padding: 2px 8px;
-      height: 24px;
     }
   }
 

@@ -14,6 +14,8 @@ import CatToolActions from '../../../../../actions/CatToolActions'
 import {DeleteResource} from '../DeleteResource'
 import {deleteDeepLGlossary} from '../../../../../api/deleteDeepLGlossary'
 import CreateProjectActions from '../../../../../actions/CreateProjectActions'
+import ModalsActions from '../../../../../actions/ModalsActions'
+import {ConfirmDeleteResourceProjectTemplates} from '../../../../modals/ConfirmDeleteResourceProjectTemplates'
 
 const COLUMNS_TABLE = [
   {name: 'Activate'},
@@ -37,19 +39,16 @@ export const DeepLGlossary = ({id, isCattoolPage = false}) => {
   const activeGlossaryRef = useRef()
   activeGlossaryRef.current = deeplGlossaryProps?.deepl_id_glossary
 
-  const deleteGlossary = () => {
-    deleteDeepLGlossary({engineId: id, id: deleteGlossaryRequest.id})
+  const deleteGlossary = useRef()
+  deleteGlossary.current = (glossary = deleteGlossaryRequest) => {
+    deleteDeepLGlossary({engineId: id, id: glossary.id})
       .then((data) => {
-        if (data.id === deleteGlossaryRequest.id) {
-          setRows((prevState) =>
-            prevState.filter(({id}) => id !== deleteGlossaryRequest.id),
-          )
+        if (data.id === glossary.id) {
+          setRows((prevState) => prevState.filter(({id}) => id !== glossary.id))
 
           const templatesInvolved = projectTemplates
             .filter(
-              (template) =>
-                template.mt.extra.deepl_id_glossary ===
-                deleteGlossaryRequest.id,
+              (template) => template.mt.extra.deepl_id_glossary === glossary.id,
             )
             .map((template) => {
               const mtObject = template.mt
@@ -61,7 +60,7 @@ export const DeepLGlossary = ({id, isCattoolPage = false}) => {
                   ...mtObject,
                   extra: {
                     ...extra,
-                    ...(deepl_id_glossary !== deleteGlossaryRequest.id && {
+                    ...(deepl_id_glossary !== glossary.id && {
                       deepl_id_glossary,
                     }),
                   },
@@ -71,7 +70,7 @@ export const DeepLGlossary = ({id, isCattoolPage = false}) => {
           CatToolActions.addNotification({
             title: 'Glossary deleted',
             type: 'success',
-            text: `The glossary (<b>${deleteGlossaryRequest.name}</b>) has been successfully deleted`,
+            text: `The glossary (<b>${glossary.name}</b>) has been successfully deleted`,
             position: 'br',
             allowHtml: true,
             timer: 5000,
@@ -97,6 +96,27 @@ export const DeepLGlossary = ({id, isCattoolPage = false}) => {
       .finally(() => setDeleteGlossaryRequest())
   }
 
+  const showConfirmDelete = useRef()
+  showConfirmDelete.current = (glossary) => {
+    const templatesInvolved = projectTemplates
+      .filter(({isSelected}) => !isSelected)
+      .filter((template) => template.mt.extra.deepl_id_glossary === glossary.id)
+
+    if (templatesInvolved.length) {
+      ModalsActions.showModalComponent(
+        ConfirmDeleteResourceProjectTemplates,
+        {
+          projectTemplatesInvolved: templatesInvolved,
+          successCallback: () => deleteGlossary.current(glossary),
+          content: `The DeepL glossary you are about to delete is used in the following project creation template(s)`,
+        },
+        'Confirm deletion',
+      )
+    } else {
+      setDeleteGlossaryRequest(glossary)
+    }
+  }
+
   const updateRowsState = useCallback(
     (value) => {
       setRows((prevState) => {
@@ -119,9 +139,7 @@ export const DeepLGlossary = ({id, isCattoolPage = false}) => {
                   setRows: updateRowsState,
                   isReadOnly: isCattoolPage,
                 }}
-                deleteGlossaryConfirm={(glossary) =>
-                  setDeleteGlossaryRequest(glossary)
-                }
+                deleteGlossaryConfirm={showConfirmDelete.current}
               />
             ),
           ...(deleteGlossaryRequest &&
@@ -131,7 +149,7 @@ export const DeepLGlossary = ({id, isCattoolPage = false}) => {
                 <DeleteResource
                   row={deleteGlossaryRequest}
                   onClose={() => setDeleteGlossaryRequest()}
-                  onConfirm={deleteGlossary}
+                  onConfirm={deleteGlossary.current}
                   type={'glossary'}
                 />
               ),

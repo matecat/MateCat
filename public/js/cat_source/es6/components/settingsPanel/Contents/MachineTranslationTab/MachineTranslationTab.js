@@ -1,4 +1,10 @@
-import React, {createContext, useContext, useEffect, useState} from 'react'
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 import {Select} from '../../../common/Select'
 import {ModernMt} from './MtEngines/ModernMt'
 import {AltLang} from './MtEngines/AltLang'
@@ -24,6 +30,8 @@ import {MTDeepLRow} from './MTDeepLRow'
 import CreateProjectActions from '../../../../actions/CreateProjectActions'
 import CatToolActions from '../../../../actions/CatToolActions'
 import {DeleteResource} from './DeleteResource'
+import ModalsActions from '../../../../actions/ModalsActions'
+import {ConfirmDeleteResourceProjectTemplates} from '../../../modals/ConfirmDeleteResourceProjectTemplates'
 
 export const MachineTranslationTab = () => {
   const {
@@ -128,23 +136,23 @@ export const MachineTranslationTab = () => {
       .finally(() => setIsAddMTEngineRequestInProgress(false))
   }
 
-  const deleteMTConfirm = (mt) => {
-    setDeleteMTRequest(mt)
-  }
-  const deleteMT = () => {
-    deleteMTEngine({id: deleteMTRequest})
+  const deleteMT = useRef()
+  deleteMT.current = (id) => {
+    const deleteId = typeof id === 'number' ? id : deleteMTRequest
+
+    deleteMTEngine({id: deleteId})
       .then(() => {
-        const mtToDelete = mtEngines.find((mt) => mt.id === deleteMTRequest)
+        const mtToDelete = mtEngines.find((mt) => mt.id === deleteId)
         setMtEngines((prevStateMT) => {
-          return prevStateMT.filter((MT) => MT.id !== deleteMTRequest)
+          return prevStateMT.filter((MT) => MT.id !== deleteId)
         })
         setDeleteMTRequest()
-        if (activeMTEngine === deleteMTRequest) {
+        if (activeMTEngine === deleteId) {
           setActiveMTEngine(DEFAULT_ENGINE_MEMORY)
         }
 
         const templatesInvolved = projectTemplates
-          .filter((template) => template.mt.id === deleteMTRequest)
+          .filter((template) => template.mt.id === deleteId)
           .map((template) => ({
             ...template,
             mt: {},
@@ -176,8 +184,25 @@ export const MachineTranslationTab = () => {
       })
   }
 
-  const disableMT = () => {
-    setActiveMTEngine()
+  const showConfirmDelete = useRef()
+  showConfirmDelete.current = (id) => {
+    const templatesInvolved = projectTemplates
+      .filter(({isSelected}) => !isSelected)
+      .filter((template) => template.mt.id === id)
+
+    if (templatesInvolved.length) {
+      ModalsActions.showModalComponent(
+        ConfirmDeleteResourceProjectTemplates,
+        {
+          projectTemplatesInvolved: templatesInvolved,
+          successCallback: () => deleteMT.current(id),
+          content: `The MT engine you are about to delete is used in the following project creation template(s)`,
+        },
+        'Confirm deletion',
+      )
+    } else {
+      setDeleteMTRequest(id)
+    }
   }
 
   useEffect(() => {
@@ -190,7 +215,7 @@ export const MachineTranslationTab = () => {
               <MTRow
                 key={index}
                 {...{row}}
-                deleteMT={() => deleteMTConfirm(row.id)}
+                deleteMT={() => showConfirmDelete.current(row.id)}
                 onCheckboxClick={(row) => setActiveMTEngine(row)}
               />
             ),
@@ -202,7 +227,7 @@ export const MachineTranslationTab = () => {
                   <DeleteResource
                     row={row}
                     onClose={() => setDeleteMTRequest()}
-                    onConfirm={deleteMT}
+                    onConfirm={deleteMT.current}
                   />
                 ),
               }),
@@ -210,6 +235,8 @@ export const MachineTranslationTab = () => {
         }),
     )
   }, [activeMTEngine, mtEngines, deleteMTRequest])
+
+  const disableMT = () => setActiveMTEngine()
 
   const activeMTEngineData = mtEngines.find(({id}) => id === activeMTEngine)
 
@@ -220,6 +247,42 @@ export const MachineTranslationTab = () => {
     : COLUMNS_TABLE
 
   const ActiveMTRow = activeMTEngineData?.name === 'DeepL' ? MTDeepLRow : MTRow
+
+  const getExtraNodeActiveRow = () => {
+    const shouldShowDeleteConfirmation =
+      deleteMTRequest && activeMTEngineData.id === deleteMTRequest
+    const GlossaryComponent =
+      activeMTEngineData.name === 'ModernMT'
+        ? MTGlossary
+        : activeMTEngineData.name === 'DeepL'
+          ? DeepLGlossary
+          : undefined
+
+    return {
+      ...((shouldShowDeleteConfirmation || GlossaryComponent) && {
+        isExpanded: true,
+        extraNode: (
+          <>
+            {deleteMTRequest && activeMTEngineData.id === deleteMTRequest && (
+              <DeleteResource
+                row={activeMTEngineData}
+                onClose={() => setDeleteMTRequest()}
+                onConfirm={deleteMT.current}
+              />
+            )}
+            {GlossaryComponent && (
+              <GlossaryComponent
+                {...{
+                  ...activeMTEngineData,
+                  isCattoolPage: config.is_cattool,
+                }}
+              />
+            )}
+          </>
+        ),
+      }),
+    }
+  }
 
   return (
     <div className="machine-translation-tab settings-panel-contentwrapper-tab-background">
@@ -278,45 +341,15 @@ export const MachineTranslationTab = () => {
                       <ActiveMTRow
                         key={'active'}
                         row={activeMTEngineData}
-                        deleteMT={() => deleteMTConfirm(activeMTEngine)}
+                        deleteMT={() =>
+                          showConfirmDelete.current(activeMTEngine)
+                        }
                         onCheckboxClick={disableMT}
                       />
                     ),
-                    ...(deleteMTRequest &&
-                      activeMTEngineData.id === deleteMTRequest && {
-                        isExpanded: true,
-                        extraNode: (
-                          <DeleteResource
-                            row={activeMTEngineData}
-                            onClose={() => setDeleteMTRequest()}
-                            onConfirm={deleteMT}
-                          />
-                        ),
-                      }),
                     isDraggable: false,
                     isActive: true,
-                    ...(activeMTEngineData.name === 'ModernMT' && {
-                      isExpanded: true,
-                      extraNode: (
-                        <MTGlossary
-                          {...{
-                            ...activeMTEngineData,
-                            isCattoolPage: config.is_cattool,
-                          }}
-                        />
-                      ),
-                    }),
-                    ...(activeMTEngineData.name === 'DeepL' && {
-                      isExpanded: true,
-                      extraNode: (
-                        <DeepLGlossary
-                          {...{
-                            ...activeMTEngineData,
-                            isCattoolPage: config.is_cattool,
-                          }}
-                        />
-                      ),
-                    }),
+                    ...getExtraNodeActiveRow(),
                   },
                 ]
               : []
