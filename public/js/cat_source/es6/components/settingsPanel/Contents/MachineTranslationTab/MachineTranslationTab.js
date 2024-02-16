@@ -1,10 +1,4 @@
-import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from 'react'
+import React, {useContext, useEffect, useRef, useState} from 'react'
 import {Select} from '../../../common/Select'
 import {ModernMt} from './MtEngines/ModernMt'
 import {AltLang} from './MtEngines/AltLang'
@@ -289,7 +283,7 @@ export const MachineTranslationTab = () => {
       {!config.is_cattool && config.isLoggedIn && addMTVisible && (
         <div className="add-mt-container">
           <h2>Add MT Engine</h2>
-          <div className="add-mt-provider">
+          <div className="add-mt-provider" data-testid="add-mt-provider">
             <Select
               placeholder="Choose provider"
               id="mt-engine"
@@ -317,13 +311,14 @@ export const MachineTranslationTab = () => {
           ) : null}
         </div>
       )}
-      <div>
+      <div data-testid="active-mt">
         <div className="machine-translation-tab-table-title">
           <h2>Active MT</h2>
           {!config.is_cattool && config.isLoggedIn && !addMTVisible && (
             <button
               className="ui primary button settings-panel-button-icon"
               onClick={() => setAddMTVisible(true)}
+              title="Add MT engine"
             >
               <AddWide size={18} /> Add MT engine
             </button>
@@ -357,7 +352,7 @@ export const MachineTranslationTab = () => {
         />
       </div>
       {config.isLoggedIn ? (
-        <div className="inactive-mt">
+        <div className="inactive-mt" data-testid="inactive-mt">
           <h2>Inactive MT</h2>
           <SettingsPanelTable columns={COLUMNS_TABLE} rows={MTRows} />
         </div>

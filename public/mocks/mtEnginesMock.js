@@ -7,7 +7,7 @@ export const mtEnginesMock = [
   },
   {
     id: 6,
-    name: 'Federico',
+    name: 'Test MT',
     type: 'MT',
     description: 'AltLang Engine',
   },
@@ -122,4 +122,22 @@ export const mmtKeysMock = [
     name: 'test cicciopasticcio',
     has_glossary: true,
   },
+]
+
+export const engineListMock = [
+  {name: 'ModernMT', id: 'mmt'},
+  {name: 'AltLang', id: 'altlang'},
+  {name: 'Apertium', id: 'apertium'},
+  {name: 'DeepL', id: 'deepl'},
+  {
+    name: 'Google Translate',
+    id: 'googletranslate',
+  },
+  {name: 'Intento', id: 'intento'},
+  {
+    name: 'Microsoft Translator Hub',
+    id: 'microsofthub',
+  },
+  {name: 'SmartMATE', id: 'smartmate'},
+  {name: 'Yandex.Translate', id: 'yandextranslate'},
 ]

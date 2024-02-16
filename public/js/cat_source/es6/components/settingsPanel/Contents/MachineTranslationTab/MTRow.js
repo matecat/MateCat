@@ -23,25 +23,29 @@ export const MTRow = ({row, deleteMT, onCheckboxClick}) => {
         )}
         {row.name === 'ModernMT' && (
           <>
-            {' '}
-            (
-            <a
-              href="https://guides.matecat.com/modernmt-mmt-plug-in"
-              target="_blank"
-            >
-              Details
-            </a>
-            )
+            <span>
+              {' '}
+              (
+              <a
+                href="https://guides.matecat.com/modernmt-mmt-plug-in"
+                target="_blank"
+              >
+                Details
+              </a>
+              )
+            </span>
           </>
         )}
         {row.name === 'DeepL' && (
           <>
-            {' '}
-            (
-            <a href="https://guides.matecat.com/my" target="_blank">
-              Details
-            </a>
-            )
+            <span>
+              {' '}
+              (
+              <a href="https://guides.matecat.com/my" target="_blank">
+                Details
+              </a>
+              )
+            </span>
           </>
         )}
       </div>
@@ -50,7 +54,8 @@ export const MTRow = ({row, deleteMT, onCheckboxClick}) => {
         <div className="settings-panel-cell-center">
           <input
             type="checkbox"
-            data-testid="checkbox-mt-active"
+            title="Use in this project"
+            data-testid={`checkbox-mt-active-${row.name}`}
             checked={row.id === activeMTEngine ? true : false}
             onChange={() => onCheckboxClick(row)}
           ></input>
@@ -58,7 +63,11 @@ export const MTRow = ({row, deleteMT, onCheckboxClick}) => {
       )}
       {!row.default && !config.is_cattool && (
         <div className="settings-panel-cell-center">
-          <button className="grey-button" onClick={deleteMT}>
+          <button
+            className="grey-button"
+            data-testid="delete-mt"
+            onClick={deleteMT}
+          >
             <Trash size={12} />
             Delete
           </button>
