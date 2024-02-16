@@ -1,6 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import {Select} from '../../common/Select'
+import IconPin from '../../icons/IconPin'
 
 export const TemplateSelect = ({
   projectTemplates,
@@ -15,9 +16,18 @@ export const TemplateSelect = ({
 
   const options = projectTemplates
     .filter(({isTemporary}) => !isTemporary)
-    .map(({id, name}) => ({
+    .map(({id, name, isDefault, isSelected}) => ({
       id: id.toString(),
-      name,
+      name: isDefault ? (
+        <span
+          className={`select-item-default${isSelected ? ' select-item-default-active' : ''}`}
+        >
+          {name}
+          <IconPin />
+        </span>
+      ) : (
+        name
+      ),
     }))
   const activeOption = currentProjectTemplate && {
     id: currentProjectTemplate.id.toString(),
@@ -38,7 +48,7 @@ export const TemplateSelect = ({
         <Select
           label={label}
           placeholder="Select template"
-          className={`${isModifyingTemplate ? 'select-unsaved' : ''}`}
+          className={`project-template-select${isModifyingTemplate ? ' project-template-select-unsaved' : ''}`}
           id="project-template"
           checkSpaceToReverse={false}
           maxHeightDroplist={maxHeightDroplist ?? 100}

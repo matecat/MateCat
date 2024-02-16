@@ -55,7 +55,7 @@ function CatTool() {
       where: options?.where,
     })
 
-  const {currentProjectTemplate, modifyingCurrentTemplate} =
+  const {projectTemplates, currentProjectTemplate, modifyingCurrentTemplate} =
     useProjectTemplates(true)
 
   const closeSettings = useCallback(() => setOpenSettings({isOpen: false}), [])
@@ -410,6 +410,7 @@ function CatTool() {
                 code: config.target_rfc,
               },
             ],
+            projectTemplates,
             currentProjectTemplate,
             modifyingCurrentTemplate,
           }}

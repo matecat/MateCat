@@ -179,9 +179,10 @@
     font-size: 16px;
     padding: 8px;
   }
-  .select-unsaved {
-    .select {
-      color: $translatedBlue;
+
+  .project-template-select {
+    .select-item-default-active {
+      color: $white;
     }
   }
 }
@@ -231,6 +232,16 @@
 
     &:hover {
       opacity: 0.8;
+    }
+  }
+
+  .control-button {
+    border: unset;
+    gap: 6px;
+    padding: 0 16px;
+
+    &:hover {
+      opacity: 0.9;
     }
   }
 

@@ -251,22 +251,9 @@ export const TMCreateResourceRow = ({row}) => {
       .find(({key}) => key === keyCode)
 
     if (rowAlreadyAssigned) {
-      const message = rowAlreadyAssigned.isActive ? (
-        <p>The key is already assigned to one of your Active TMs.</p>
-      ) : (
-        <p>
-          The key is already assigned to one of your Inactive TMs.{' '}
-          <a
-            className="active-tm-key-link activate-key"
-            href="/"
-            onClick={(event) =>
-              activateInactiveSharedKey({event, rowAlreadyAssigned})
-            }
-          >
-            Click here to activate it
-          </a>
-        </p>
-      )
+      const message = rowAlreadyAssigned.isActive
+        ? 'The key is already assigned to one of your Active TMs.'
+        : 'The key is already assigned to one of your Inactive TMs.'
 
       if (dispathNotification) {
         CatToolActions.addNotification({

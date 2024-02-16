@@ -222,47 +222,53 @@ export const TMKeyRow = ({row, onExpandRow}) => {
         }
 
   const onConfirmDeleteTmKey = () => {
-    deleteTmKey({key: row.key})
-      .then(() => {
-        setTmKeys((prevState) => prevState.filter(({key}) => key !== row.key))
-        if (APP.isCattool) {
-          CatToolActions.onTMKeysChangeStatus()
-        } else {
-          const templatesInvolved = projectTemplates
-            .filter((template) => template.tm.some(({key}) => key === row.key))
-            .map((template) => ({
-              ...template,
-              tm: template.tm.filter(({key}) => key !== row.key),
-            }))
+    if (config.isLoggedIn === 1) {
+      deleteTmKey({key: row.key})
+        .then(() => {
+          setTmKeys((prevState) => prevState.filter(({key}) => key !== row.key))
+          if (APP.isCattool) {
+            CatToolActions.onTMKeysChangeStatus()
+          } else {
+            const templatesInvolved = projectTemplates
+              .filter((template) =>
+                template.tm.some(({key}) => key === row.key),
+              )
+              .map((template) => ({
+                ...template,
+                tm: template.tm.filter(({key}) => key !== row.key),
+              }))
 
-          CreateProjectActions.updateProjectTemplates({
-            templates: templatesInvolved,
-            modifiedPropsCurrentProjectTemplate: {
-              tm: templatesInvolved.find(({isTemporary}) => isTemporary)?.tm,
-            },
-          })
-        }
-        const notification = {
-          title: 'Resource deleted',
-          text: `The resource (<b>${row.name}</b>) has been successfully deleted`,
-          type: 'success',
-          position: 'br',
-          allowHtml: true,
-          timer: 5000,
-        }
-        CatToolActions.addNotification(notification)
-      })
-      .catch(() => {
-        CatToolActions.addNotification({
-          title: 'Error deleting resource',
-          type: 'error',
-          text: 'There was an error saving your data. Please retry!',
-          position: 'br',
-          allowHtml: true,
-          timer: 5000,
+            CreateProjectActions.updateProjectTemplates({
+              templates: templatesInvolved,
+              modifiedPropsCurrentProjectTemplate: {
+                tm: templatesInvolved.find(({isTemporary}) => isTemporary)?.tm,
+              },
+            })
+          }
+          const notification = {
+            title: 'Resource deleted',
+            text: `The resource (<b>${row.name}</b>) has been successfully deleted`,
+            type: 'success',
+            position: 'br',
+            allowHtml: true,
+            timer: 5000,
+          }
+          CatToolActions.addNotification(notification)
         })
-        onExpandRow({row, shouldExpand: false})
-      })
+        .catch(() => {
+          CatToolActions.addNotification({
+            title: 'Error deleting resource',
+            type: 'error',
+            text: 'There was an error saving your data. Please retry!',
+            position: 'br',
+            allowHtml: true,
+            timer: 5000,
+          })
+          onExpandRow({row, shouldExpand: false})
+        })
+    } else {
+      setTmKeys((prevState) => prevState.filter(({key}) => key !== row.key))
+    }
   }
 
   const showConfirmDelete = () => {

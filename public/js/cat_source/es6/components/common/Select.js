@@ -302,17 +302,17 @@ Select.propTypes = {
   options: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.string,
-      name: PropTypes.string,
+      name: PropTypes.node,
     }),
   ),
   activeOption: PropTypes.shape({
     id: PropTypes.string,
-    name: PropTypes.string,
+    name: PropTypes.node,
   }),
   activeOptions: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.string,
-      name: PropTypes.string,
+      name: PropTypes.node,
     }),
   ),
   isValid: PropTypes.bool,
