@@ -29,6 +29,8 @@ export const TEMPLATE_PROPS_BY_TAB = {
     SCHEMA_KEYS.speech2text,
     SCHEMA_KEYS.tagProjection,
     SCHEMA_KEYS.lexica,
+    SCHEMA_KEYS.crossLanguageMatches,
+    SCHEMA_KEYS.segmentationRule,
     SCHEMA_KEYS.idTeam,
   ],
 }
