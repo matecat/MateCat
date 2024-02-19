@@ -43,6 +43,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
     modifyingCurrentTemplate,
     currentProjectTemplate,
     projectTemplates,
+    portalTarget,
   } = useContext(SettingsPanelContext)
   const {setSpecialRows} = useContext(TranslationMemoryGlossaryTabContext)
 
@@ -301,6 +302,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
             (!isOwner && !isMMSharedKey) || (isMMSharedKey && !config.ownerIsMe)
           }
           type="checkbox"
+          data-testid={`tmkey-lookup-${row.id}`}
         />
       </div>
       <div className="tm-key-update align-center">
@@ -314,6 +316,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
               isMMSharedUpdateChecked && {
                 title: 'Add a private resource to disable updating',
               })}
+            data-testid={`tmkey-update-${row.id}`}
           />
         )}
       </div>
@@ -326,6 +329,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
           onChange={onChangeName}
           disabled={isMMSharedKey || !isOwner}
           onBlur={updateKeyName}
+          data-testid={`tmkey-row-name-${row.id}`}
         ></input>
       </div>
       <div className="tm-key-row-key">{row.key}</div>
@@ -340,6 +344,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
             icon={<DotsHorizontal />}
             className="tm-key-row-menu-button"
             disabled={isImportTMXInProgress}
+            itemsTarget={portalTarget ? portalTarget : document.body}
           >
             <MenuButtonItem
               className="tm-key-row-button-item"

@@ -133,8 +133,10 @@ export const TranslationMemoryGlossaryTab = () => {
 
   previousStatesRef.current.currentProjectTemplate = currentProjectTemplate
 
-  // Sync tmKeys state when current project template changed
+  // Sync tmKeys state when current project template changed in homepage
   useEffect(() => {
+    if (config.is_cattool) return
+
     const tm = currentProjectTemplate?.tm ?? []
 
     setTmKeys((prevState) =>
