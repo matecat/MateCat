@@ -106,6 +106,10 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
             return json_decode($this->tm);
         }
 
+        if(empty($this->tm)){
+            return [];
+        }
+
         return $this->tm;
     }
 
