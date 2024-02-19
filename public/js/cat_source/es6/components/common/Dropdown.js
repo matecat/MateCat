@@ -82,9 +82,11 @@ export const Dropdown = forwardRef(
 
     const getFilteredOptions = useCallback(
       (filter = null) => {
-        const filteredOptions = options.filter((option) => {
-          return !!option.id
-        })
+        const filteredOptions = options
+          ? options.filter((option) => {
+              return !!option.id
+            })
+          : []
         const currentFilter = filter || queryFilterRef.current
 
         if (currentFilter) {
@@ -111,9 +113,9 @@ export const Dropdown = forwardRef(
                 queryPositionInOptionBNormalized
                 ? 1
                 : queryPositionInOptionANormalized <
-                  queryPositionInOptionBNormalized
-                ? -1
-                : 0
+                    queryPositionInOptionBNormalized
+                  ? -1
+                  : 0
             })
         } else {
           const standardOptions = []

@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event'
 import React from 'react'
 import {SegmentContext} from './SegmentContext'
 import SegmentFooter from './SegmentFooter'
-import {rest} from 'msw'
+import {http, HttpResponse} from 'msw'
 import {mswServer} from '../../../../../mocks/mswServer'
 window.React = React
 
@@ -310,36 +310,33 @@ const props = {
 const executeMswServer = () => {
   mswServer.use(
     ...[
-      rest.get('/api/app/tm-keys/6/74ac64e1f60e', (req, res, ctx) => {
-        return res(
-          ctx.status(200),
-          ctx.json({
-            tm_keys: [
-              {
-                tm: true,
-                glos: true,
-                owner: true,
-                uid_transl: null,
-                uid_rev: null,
-                name: 'Test',
-                key: 'c52da4a03d6aea33f242',
-                r: true,
-                w: true,
-                r_transl: null,
-                w_transl: null,
-                r_rev: null,
-                w_rev: null,
-                is_shared: false,
-              },
-            ],
-          }),
-        )
+      http.get('/api/app/tm-keys/6/74ac64e1f60e', () => {
+        return HttpResponse.json({
+          tm_keys: [
+            {
+              tm: true,
+              glos: true,
+              owner: true,
+              uid_transl: null,
+              uid_rev: null,
+              name: 'Test',
+              key: 'c52da4a03d6aea33f242',
+              r: true,
+              w: true,
+              r_transl: null,
+              w_transl: null,
+              r_rev: null,
+              w_rev: null,
+              is_shared: false,
+            },
+          ],
+        })
       }),
-      rest.post('/api/app/glossary/_keys', (req, res, ctx) => {
-        return res(ctx.status(200), ctx.json({}))
+      http.post('/api/app/glossary/_keys', () => {
+        return HttpResponse.json({})
       }),
-      rest.post('/api/app/glossary/_domains', (req, res, ctx) => {
-        return res(ctx.status(200), ctx.json({}))
+      http.post('/api/app/glossary/_domains', () => {
+        return HttpResponse.json({})
       }),
     ],
   )

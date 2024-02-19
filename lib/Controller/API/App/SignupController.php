@@ -5,6 +5,7 @@ namespace API\App;
 use Exception;
 use Exceptions\ValidationError;
 use FlashMessage;
+use Klein\Response;
 use Log;
 use Routes;
 use Teams\InvitedUser;
@@ -14,19 +15,36 @@ use Users\SignupModel;
 
 class SignupController extends AbstractStatefulKleinController {
 
+    use RateLimiterTrait;
+
+    /**
+     * @throws Exception
+     */
     public function create() {
 
-        $signup = new SignupModel( $this->request->param( 'user' ) );
+        $user = $this->request->param( 'user' );
+
+        $checkRateLimit = $this->checkRateLimitResponse($this->response, $user[ 'email' ], '/api/app/user');
+        if($checkRateLimit instanceof Response){
+            $this->response = $checkRateLimit;
+
+            return;
+        }
+
+        $signup = new SignupModel( $user );
+
+        //email
 
         if ( $signup->valid() ) {
             $signup->process();
             $this->response->code( 200 );
         } else {
+            $this->incrementRateLimitCounter($user[ 'email' ], '/api/app/user');
             $this->response->code( 400 );
             $this->response->json( [
-                    'error' => [
-                            'message' => $signup->getError()
-                    ]
+                'error' => [
+                    'message' => $signup->getError()
+                ]
             ] );
         }
     }
@@ -61,8 +79,17 @@ class SignupController extends AbstractStatefulKleinController {
         $this->response->code( 200 );
     }
 
+    /**
+     * @throws Exception
+     */
     public function authForPasswordReset() {
         try {
+            $checkRateLimit = $this->checkRateLimitResponse($this->response, $this->request->param( 'token' ), '/api/app/user/password_reset');
+            if($checkRateLimit instanceof Response){
+                $this->response = $checkRateLimit;
+
+                return;
+            }
 
             $reset = new PasswordResetModel( $this->request->param( 'token' ), $_SESSION );
             $reset->validateUser();
@@ -72,6 +99,7 @@ class SignupController extends AbstractStatefulKleinController {
 
         } catch ( ValidationError $e ) {
 
+            $this->incrementRateLimitCounter($this->request->param( 'token' ), '/api/app/user/password_reset');
             FlashMessage::set( 'passwordReset', $e->getMessage(), FlashMessage::ERROR );
             $this->response->redirect( Routes::appRoot() );
 
@@ -83,15 +111,29 @@ class SignupController extends AbstractStatefulKleinController {
         $this->response->code( 200 );
     }
 
+    /**
+     * @throws Exception
+     */
     public function forgotPassword() {
+
+        $checkRateLimit = $this->checkRateLimitResponse($this->response, $this->request->param( 'email' ), '/api/app/user/forgot_password');
+        if($checkRateLimit instanceof Response){
+            $this->response = $checkRateLimit;
+
+            return;
+        }
 
         $doForgotPassword = $this->doForgotPassword();
 
+        if(!empty( $doForgotPassword )){
+            $this->incrementRateLimitCounter($this->request->param( 'email' ), '/api/app/user/forgot_password');
+        }
+
         $this->response->code( empty( $doForgotPassword ) ? 200 : 500 );
         $this->response->json( [
-                'email'      => $this->request->param( 'email' ),
-                'wanted_url' => $this->request->param( 'wanted_url' ),
-                'errors'     => $doForgotPassword,
+            'email'      => $this->request->param( 'email' ),
+            'wanted_url' => $this->request->param( 'wanted_url' ),
+            'errors'     => $doForgotPassword,
         ] );
     }
 

@@ -183,8 +183,8 @@ class getWarningController extends ajaxController {
         $featureSet = $this->getFeatureSet();
         $Filter     = MateCatFilter::getInstance( $featureSet, $this->chunk->source, $this->chunk->target, [] );
 
-        $this->__postInput->src_content = $Filter->fromLayer2ToLayer1( $this->__postInput->src_content );
-        $this->__postInput->trg_content = $Filter->fromLayer2ToLayer1( $this->__postInput->trg_content );
+        $this->__postInput->src_content = $Filter->fromLayer2ToLayer0( $this->__postInput->src_content );
+        $this->__postInput->trg_content = $Filter->fromLayer2ToLayer0( $this->__postInput->trg_content );
 
         $QA = new QA( $this->__postInput->src_content, $this->__postInput->trg_content );
         $QA->setFeatureSet( $featureSet );

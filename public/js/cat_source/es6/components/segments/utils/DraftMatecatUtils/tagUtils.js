@@ -27,7 +27,7 @@ export const transformTagsToHtml = (text, isRtl = 0) => {
         )
         text = text.replace(globalRegex, (match, text) => {
           let tagText = decodeNeeded
-            ? Base64.decode(text)
+            ? Base64.decode(text).replace(/</g, '&lt').replace(/>/g, '&gt') // Forza conversione angolari in &lt o &gt [XLIFF 2.0] Tag senza dataref
             : selfClosing
             ? text
             : match
@@ -240,7 +240,7 @@ export const removeTagsFromText = (segmentString) => {
  * @param escapedHTML
  * @returns {string}
  */
-const unescapeHTMLinTags = (escapedHTML) => {
+export const unescapeHTMLinTags = (escapedHTML) => {
   try {
     return escapedHTML
       .replace(/&lt;/g, '<')
