@@ -294,8 +294,11 @@ class TMAnalysisWorker extends AbstractWorker {
     private function getFirstAvailableNotMTMatch()
     {
         foreach($this->_matches as $match){
-            // return if not MT
-            if(stripos( $match[ 'created_by' ], "MT" ) === false ){
+            // return $match if not MT and quality >= 75
+            if(
+                stripos( $match[ 'created_by' ], "MT" ) === false and
+                (int)$match[ 'match' ] >= 75
+            ){
                 return $match;
             }
         }
