@@ -169,7 +169,6 @@ export const TMCreateResourceRow = ({row}) => {
 
   const addSharedResource = () => {
     const key = keyCode
-
     const createNewTmKeyCallback = () =>
       createNewTmKey({
         key,
@@ -305,6 +304,7 @@ export const TMCreateResourceRow = ({row}) => {
             className={inputKeyCodeClasses}
             value={keyCode}
             onChange={onChangeKeyCode}
+            data-testid={`input-${row.id}`}
           ></input>
         )}
       </div>
@@ -314,6 +314,7 @@ export const TMCreateResourceRow = ({row}) => {
           className="ui primary button settings-panel-button-icon confirm-button"
           type="submit"
           disabled={!isFormFilled}
+          data-testid="create-tmkey-confirm"
         >
           <Checkmark size={12} />
           Confirm

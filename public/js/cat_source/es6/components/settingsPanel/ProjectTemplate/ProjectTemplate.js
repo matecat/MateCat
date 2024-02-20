@@ -14,6 +14,7 @@ import {TemplateNameInput} from './TemplateNameInput'
 import {MoreMenu} from './MoreMenu'
 import {CreateUpdateControl} from './CreateUpdateControl'
 import {TemplateSelect} from './TemplateSelect'
+import IconPin from '../../icons/IconPin'
 
 export const TEMPLATE_MODIFIERS = {
   CREATE: 'create',
@@ -216,6 +217,7 @@ export const ProjectTemplate = ({portalTarget}) => {
                   disabled={isRequestInProgress}
                   onClick={setCurrentProjectTemplateAsDefault}
                 >
+                  <IconPin />
                   Set as default
                 </button>
               )}

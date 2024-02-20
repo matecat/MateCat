@@ -1,5 +1,5 @@
 import React, {useEffect, useRef} from 'react'
-import {act, render, screen} from '@testing-library/react'
+import {act, render, screen, waitFor} from '@testing-library/react'
 import projectTemplatesMock from '../../../../../../../mocks/projectTemplateMock'
 import tmKeysMock from '../../../../../../../mocks/tmKeysMock'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
@@ -9,6 +9,8 @@ import {
 } from './TranslationMemoryGlossaryTab'
 import {SCHEMA_KEYS} from '../../../../hooks/useProjectTemplates'
 import userEvent from '@testing-library/user-event'
+import {mswServer} from '../../../../../../../mocks/mswServer'
+import {HttpResponse, http} from 'msw'
 
 global.config = {
   basepath: 'http://localhost/',
@@ -18,15 +20,17 @@ global.config = {
   ownerIsMe: true,
 }
 
-const contextMockValues = () => {
-  let _tmKeys = tmKeysMock.tm_keys.map((key) => ({
-    ...key,
-    id: key.key,
-    r: false,
-    w: false,
-    isActive: false,
-    isLocked: !key.owner,
-  }))
+const contextMockValues = (noTmKeys = false) => {
+  let _tmKeys = !noTmKeys
+    ? tmKeysMock.tm_keys.map((key) => ({
+        ...key,
+        id: key.key,
+        r: false,
+        w: false,
+        isActive: false,
+        isLocked: !key.owner,
+      }))
+    : []
   const setTmKeys = (value) =>
     (_tmKeys = typeof value === 'function' ? value(_tmKeys) : value)
 
@@ -176,11 +180,36 @@ test('Enabled/disable key', async () => {
   ).not.toBeInTheDocument()
 })
 
-test('Create new resource', async () => {
-  const user = userEvent.setup()
-  const contextValues = contextMockValues()
+test('Create and delete new resource', async () => {
+  mswServer.use(
+    http.post(config.basepath, ({request}) => {
+      const url = new URL(request.url)
+      const action = url.searchParams.get('action')
+      const response =
+        action === 'createRandUser'
+          ? {
+              errors: [],
+              data: {
+                key: '6f03df0307c7a161afa9',
+                id: 'MyMemory_5007d86025f58b50f29c',
+                pass: 'f22815f87d',
+                mtLangSupported: true,
+                error: {
+                  code: 0,
+                  message: '',
+                },
+              },
+            }
+          : {errors: [], data: []}
 
-  render(<WrapperComponent {...contextValues} />)
+      return HttpResponse.json(response)
+    }),
+  )
+
+  const user = userEvent.setup()
+  const contextValues = contextMockValues(true)
+
+  const {rerender} = render(<WrapperComponent {...contextValues} />)
 
   const button = screen.getByText('New resource')
   expect(button).toBeInTheDocument()
@@ -190,4 +219,187 @@ test('Create new resource', async () => {
   const rowName = screen.getByTestId(SPECIAL_ROWS_ID.newResource)
 
   expect(rowName).toBeInTheDocument()
+  expect(rowName).toHaveFocus()
+
+  const buttonConfirm = screen.getByTestId('create-tmkey-confirm')
+  expect(buttonConfirm).toBeDisabled()
+
+  await act(async () => user.type(rowName, 'my test key'))
+
+  await waitFor(async () => user.click(buttonConfirm))
+
+  rerender(<WrapperComponent {...contextValues} />)
+
+  const rowNewEntry = {
+    lookup: getRowElementById({
+      column: ROW_COLUMNS_TESTID.LOOKUP,
+      id: '6f03df0307c7a161afa9',
+    }),
+    update: getRowElementById({
+      column: ROW_COLUMNS_TESTID.UPDATE,
+      id: '6f03df0307c7a161afa9',
+    }),
+  }
+
+  expect(rowNewEntry.lookup).toBeChecked()
+  expect(rowNewEntry.update).toBeChecked()
+
+  // delete
+  const menuButton = screen.getByTestId('menu-button-show-items')
+
+  await act(async () => user.click(menuButton))
+
+  const deleteButton = screen.getByTestId('delete-resource')
+  await act(async () => user.click(deleteButton))
+
+  const deleteConfirm = screen.queryByText('Confirm')
+  expect(deleteConfirm).toBeInTheDocument()
+
+  await waitFor(async () => user.click(deleteConfirm))
+
+  rerender(<WrapperComponent {...contextValues} />)
+
+  const rowDeleted = getRowElementById({
+    column: ROW_COLUMNS_TESTID.LOOKUP,
+    id: '6f03df0307c7a161afa9',
+  })
+
+  expect(rowDeleted).not.toBeInTheDocument()
+})
+
+test('Create shared resource', async () => {
+  mswServer.use(
+    http.post(config.basepath, ({request}) => {
+      const url = new URL(request.url)
+      const action = url.searchParams.get('action')
+      const response =
+        action === 'ajaxUtils'
+          ? {errors: [], data: [], success: true}
+          : {errors: [], data: []}
+
+      return HttpResponse.json(response)
+    }),
+  )
+
+  const user = userEvent.setup()
+  const contextValues = contextMockValues(true)
+
+  const {rerender} = render(<WrapperComponent {...contextValues} />)
+
+  const button = screen.getByText('Add shared resource')
+  expect(button).toBeInTheDocument()
+
+  await act(async () => user.click(button))
+
+  const rowName = screen.getByTestId(SPECIAL_ROWS_ID.addSharedResource)
+
+  expect(rowName).toBeInTheDocument()
+  expect(rowName).toHaveFocus()
+
+  const buttonConfirm = screen.getByTestId('create-tmkey-confirm')
+  expect(buttonConfirm).toBeDisabled()
+
+  await act(async () => user.type(rowName, 'my test key'))
+
+  expect(buttonConfirm).toBeDisabled()
+
+  await act(async () => user.type(rowName, 'my test key'))
+
+  const rowSharedKey = screen.getByTestId(
+    `input-${SPECIAL_ROWS_ID.addSharedResource}`,
+  )
+  await act(async () => user.type(rowSharedKey, '6a820ef8f06d922ca0a0'))
+
+  expect(buttonConfirm).toBeEnabled()
+  await waitFor(async () => user.click(buttonConfirm))
+
+  rerender(<WrapperComponent {...contextValues} />)
+
+  const rowNewEntry = {
+    lookup: getRowElementById({
+      column: ROW_COLUMNS_TESTID.LOOKUP,
+      id: '6a820ef8f06d922ca0a0',
+    }),
+    update: getRowElementById({
+      column: ROW_COLUMNS_TESTID.UPDATE,
+      id: '6a820ef8f06d922ca0a0',
+    }),
+  }
+
+  expect(rowNewEntry.lookup).toBeChecked()
+  expect(rowNewEntry.update).toBeChecked()
+})
+
+test('Row Menu items', async () => {
+  mswServer.use(
+    http.post(config.basepath, ({request}) => {
+      const url = new URL(request.url)
+      const action = url.searchParams.get('action')
+      const response =
+        action === 'createRandUser'
+          ? {
+              errors: [],
+              data: {
+                key: '6f03df0307c7a161afa9',
+                id: 'MyMemory_5007d86025f58b50f29c',
+                pass: 'f22815f87d',
+                mtLangSupported: true,
+                error: {
+                  code: 0,
+                  message: '',
+                },
+              },
+            }
+          : {errors: [], data: []}
+
+      return HttpResponse.json(response)
+    }),
+  )
+
+  const user = userEvent.setup()
+  const contextValues = contextMockValues(true)
+
+  const {rerender} = render(<WrapperComponent {...contextValues} />)
+
+  const button = screen.getByText('New resource')
+  await act(async () => user.click(button))
+
+  const rowName = screen.getByTestId(SPECIAL_ROWS_ID.newResource)
+  const buttonConfirm = screen.getByTestId('create-tmkey-confirm')
+
+  await act(async () => user.type(rowName, 'my test key'))
+  await waitFor(async () => user.click(buttonConfirm))
+
+  rerender(<WrapperComponent {...contextValues} />)
+
+  const menuButton = screen.getByTestId('menu-button-show-items')
+
+  await act(async () => user.click(screen.getByTestId('menu-button')))
+  expect(screen.getByText('Select a tmx file to import')).toBeInTheDocument()
+
+  await act(async () => user.click(menuButton))
+  await act(async () => user.click(screen.getByTestId('import-glossary')))
+  expect(
+    screen.getByText('Select glossary in XLSX, XLS or ODS format'),
+  ).toBeInTheDocument()
+
+  await act(async () => user.click(menuButton))
+  await act(async () => user.click(screen.getByTestId('export-tmx')))
+  expect(
+    screen.getByText(
+      'We will send a link to download the exported TM to your email.',
+    ),
+  ).toBeInTheDocument()
+
+  await act(async () => user.click(menuButton))
+  await act(async () => user.click(screen.getByTestId('export-glossary')))
+  expect(
+    screen.getByText(
+      'We will send a link to download the exported Glossary to your email.',
+    ),
+  ).toBeInTheDocument()
+
+  await act(async () => user.click(menuButton))
+  await act(async () => user.click(screen.getByTestId('share-resource')))
+  expect(screen.getByText('Share')).toBeEnabled()
 })

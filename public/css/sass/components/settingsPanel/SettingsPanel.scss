@@ -221,6 +221,7 @@
   .template-button {
     display: flex;
     align-items: center;
+    gap: 5px;
     height: 40px;
     background-color: unset;
     border: 1px solid $grey4;
