@@ -806,8 +806,13 @@ const SegmentActions = {
     if (shouldRefresh) {
       getGlossaryForSegment({
         idSegment: sid,
+<<<<<<< Updated upstream
         source: DraftMatecatUtils.removePlaceholdersForGlossary(
           DraftMatecatUtils.removeTagsFromText(text),
+=======
+        source: DraftMatecatUtils.removeTagsFromText(
+          DraftMatecatUtils.unescapeHTMLinTags(text),
+>>>>>>> Stashed changes
         ),
       }).catch(() => {
         OfflineUtils.failedConnection(sid, 'getGlossaryForSegment')
@@ -852,8 +857,13 @@ const SegmentActions = {
         //Response inside SSE Channel
         getGlossaryForSegment({
           idSegment: request.sid,
+<<<<<<< Updated upstream
           source: DraftMatecatUtils.removePlaceholdersForGlossary(
             DraftMatecatUtils.removeTagsFromText(request.text),
+=======
+          source: DraftMatecatUtils.removeTagsFromText(
+            DraftMatecatUtils.unescapeHTMLinTags(request.text),
+>>>>>>> Stashed changes
           ),
         }).catch(() => {
           OfflineUtils.failedConnection(request.sid, 'getGlossaryForSegment')
@@ -1589,8 +1599,12 @@ const SegmentActions = {
         const jobTmKeys = CatToolStore.getJobTmKeys()
         getGlossaryCheck({
           idSegment: segment.sid,
-          target: DraftMatecatUtils.removeTagsFromText(translation),
-          source: DraftMatecatUtils.removeTagsFromText(updatedSource),
+          target: DraftMatecatUtils.removeTagsFromText(
+            DraftMatecatUtils.unescapeHTMLinTags(translation),
+          ),
+          source: DraftMatecatUtils.removeTagsFromText(
+            DraftMatecatUtils.unescapeHTMLinTags(updatedSource),
+          ),
           keys: jobTmKeys.map(({key}) => key),
         }).catch((error) => {
           console.log('Glossary check failed', error)
