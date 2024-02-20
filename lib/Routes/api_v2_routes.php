@@ -120,4 +120,10 @@ $klein->with( '/api/v2/payable_rate', function () {
     route( '/[:id]', 'GET', '\API\V2\PayableRateController', 'view' );
     route( '/[:id]', 'DELETE', '\API\V2\PayableRateController', 'delete' );
     route( '/[:id]', 'PUT', '\API\V2\PayableRateController', 'edit' );
-});
+
+// Download files
+route( '/api/v2/original/[:id_job]/[:password]', 'GET',  'API\V2\DownloadOriginalController', 'index' );
+route( '/api/v2/translation/[:id_job]/[:password]', 'GET',  'API\V2\DownloadFileController', 'index' );
+route( '/api/v2/SDLXLIFF/[:id_job]/[:password]/[:filename]', 'GET',  'API\V2\DownloadFileController', 'forceXliff' );
+route( '/api/v2/TMX/[:id_job]/[:password]', 'GET',  'API\V2\ExportTMXController', 'index' );
+

@@ -134,8 +134,8 @@ export const TMCreateResourceRow = ({row}) => {
             setNotification({
               type: 'error',
               message:
-                errors[0].code === '23000'
-                  ? 'The key you entered is invalid.'
+                !errors || errors[0].code === '23000'
+                  ? 'Invalid key.'
                   : errors[0].message,
             })
           })

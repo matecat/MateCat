@@ -4,6 +4,7 @@ use Matecat\SubFiltering\MateCatFilter;
 
 class deleteContributionController extends ajaxController {
 
+    protected $id_segment;
     protected $id_job;
     protected $password;
     private   $id_match;
@@ -19,18 +20,20 @@ class deleteContributionController extends ajaxController {
         parent::__construct();
 
         $filterArgs = [
-            'source_lang'      => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
-            'target_lang'      => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
-            'seg'              => [ 'filter' => FILTER_UNSAFE_RAW ],
-            'tra'              => [ 'filter' => FILTER_UNSAFE_RAW ],
-            'id_match'         => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
-            'password'         => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
-            'current_password' => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
-            'id_job'           => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'id_segment'       => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'source_lang'      => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'target_lang'      => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'seg'              => [ 'filter' => FILTER_UNSAFE_RAW ],
+                'tra'              => [ 'filter' => FILTER_UNSAFE_RAW ],
+                'id_match'         => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'password'         => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'current_password' => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'id_job'           => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
         ];
 
         $__postInput = filter_input_array( INPUT_POST, $filterArgs );
 
+        $this->id_segment        = $__postInput[ 'id_segment' ];
         $this->source_lang       = $__postInput[ 'source_lang' ];
         $this->target_lang       = $__postInput[ 'target_lang' ];
         $this->source            = trim( $__postInput[ 'seg' ] );
@@ -110,6 +113,11 @@ class deleteContributionController extends ajaxController {
         if ( empty( $tm_keys ) ) {
             //try deleting anyway, it may be a public segment and it may work
             $TMS_RESULT = $tms->delete( $config );
+
+            if($TMS_RESULT){
+                $this->updateSuggestionsArray();
+            }
+
             $set_code[] = $TMS_RESULT;
         } else {
             //loop over the list of keys
@@ -117,6 +125,11 @@ class deleteContributionController extends ajaxController {
                 //issue a separate call for each key
                 $config[ 'id_user' ] = $tm_key->key;
                 $TMS_RESULT          = $tms->delete( $config );
+
+                if($TMS_RESULT){
+                    $this->updateSuggestionsArray();
+                }
+
                 $set_code[]          = $TMS_RESULT;
             }
         }
@@ -132,5 +145,25 @@ class deleteContributionController extends ajaxController {
 
     }
 
+    /**
+     * update suggestions array
+     */
+    private function updateSuggestionsArray() {
+
+        $segmentTranslation = Translations_SegmentTranslationDao::findBySegmentAndJob($this->id_segment, $this->id_job);
+        $oldSuggestionsArray = json_decode($segmentTranslation->suggestions_array);
+
+        if(!empty($oldSuggestionsArray)){
+
+            $newSuggestionsArray = [];
+            foreach ($oldSuggestionsArray as $suggestion){
+                if($suggestion->id != $this->id_match){
+                    $newSuggestionsArray[] = $suggestion;
+                }
+            }
+
+            Translations_SegmentTranslationDao::updateSuggestionsArray($this->id_segment, $newSuggestionsArray);
+        }
+    }
 
 }

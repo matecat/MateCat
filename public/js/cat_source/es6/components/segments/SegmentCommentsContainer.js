@@ -4,6 +4,7 @@
  */
 import React from 'react'
 import {isUndefined} from 'lodash'
+import {debounce} from 'lodash/function'
 import CommentsStore from '../../stores/CommentsStore'
 import CommentsActions from '../../actions/CommentsActions'
 import CommentsConstants from '../../constants/CommentsConstants'
@@ -28,6 +29,12 @@ class SegmentCommentsContainer extends React.Component {
     this.updateComments = this.updateComments.bind(this)
     this.setFocusOnInput = this.setFocusOnInput.bind(this)
     this.setTeamUsers = this.setTeamUsers.bind(this)
+    this.saveDraft = debounce(() => {
+      CommentsActions.saveDraftComment(
+        this.context.segment.original_sid,
+        this.commentInput.textContent,
+      )
+    }, 500)
   }
 
   closeComments(e) {
@@ -346,6 +353,8 @@ class SegmentCommentsContainer extends React.Component {
     if (e.key === 'Enter' && !e.shiftKey && !this.state.showTagging) {
       e.preventDefault()
       this.sendComment()
+    } else {
+      this.saveDraft()
     }
   }
 
@@ -355,6 +364,8 @@ class SegmentCommentsContainer extends React.Component {
   }
 
   componentDidMount() {
+    const draftText = CommentsStore.getDraftComment(this.context.segment.sid)
+    this.commentInput.textContent = draftText ? draftText : ''
     this.updateComments(this.context.segment.sid)
     this.addTagging()
     CommentsStore.addListener(

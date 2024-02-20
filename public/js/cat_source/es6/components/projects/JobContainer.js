@@ -201,59 +201,59 @@ class JobContainer extends React.Component {
   removeTranslator() {
     let self = this
     this.oldPassword = this.props.job.get('password')
-    changeJobPassword(this.props.job.toJS(), this.oldPassword).then(function (
-      data,
-    ) {
-      const notification = {
-        uid: 'remove-translator',
-        title: 'Job unassigned',
-        text: 'The translator has been removed and the password changed. <a class="undo-password">Undo</a>',
-        type: 'warning',
-        position: 'bl',
-        allowHtml: true,
-        timer: 10000,
-      }
-      CatToolActions.addNotification(notification)
-      let translator = self.props.job.get('translator')
-      ManageActions.changeJobPassword(
-        self.props.project,
-        self.props.job,
-        data.password,
-        data.undo,
-        null,
-      )
-      setTimeout(function () {
-        $('.undo-password').off('click')
-        $('.undo-password').on('click', function () {
-          CatToolActions.removeNotification(notification)
-          changeJobPassword(
-            self.props.job.toJS(),
-            data.password,
-            null,
-            1,
-            self.oldPassword,
-          ).then(function (data) {
-            const passwordNotification = {
-              uid: 'change-password',
-              title: 'Change job password',
-              text: 'The previous password has been restored.',
-              type: 'warning',
-              position: 'bl',
-              timer: 7000,
-            }
-            CatToolActions.addNotification(passwordNotification)
-            ManageActions.changeJobPassword(
-              self.props.project,
-              self.props.job,
+    changeJobPassword(this.props.job.toJS(), this.oldPassword).then(
+      function (data) {
+        const notification = {
+          uid: 'remove-translator',
+          title: 'Job unassigned',
+          text: 'The translator has been removed and the password changed. <a class="undo-password">Undo</a>',
+          type: 'warning',
+          position: 'bl',
+          allowHtml: true,
+          timer: 10000,
+        }
+        CatToolActions.addNotification(notification)
+        let translator = self.props.job.get('translator')
+        ManageActions.changeJobPassword(
+          self.props.project,
+          self.props.job,
+          data.password,
+          data.undo,
+          null,
+        )
+        setTimeout(function () {
+          $('.undo-password').off('click')
+          $('.undo-password').on('click', function () {
+            CatToolActions.removeNotification(notification)
+            changeJobPassword(
+              self.props.job.toJS(),
               data.password,
-              data.undo,
               null,
-              translator,
-            )
+              1,
+              self.oldPassword,
+            ).then(function (data) {
+              const passwordNotification = {
+                uid: 'change-password',
+                title: 'Change job password',
+                text: 'The previous password has been restored.',
+                type: 'warning',
+                position: 'bl',
+                timer: 7000,
+              }
+              CatToolActions.addNotification(passwordNotification)
+              ManageActions.changeJobPassword(
+                self.props.project,
+                self.props.job,
+                data.password,
+                data.undo,
+                null,
+                translator,
+              )
+            })
           })
-        })
-      }, 500)
-    })
+        }, 500)
+      },
+    )
   }
 
   archiveJob() {
@@ -382,9 +382,12 @@ class JobContainer extends React.Component {
 
   getJobMenu() {
     let jobTMXUrl =
-      '/TMX/' + this.props.job.get('id') + '/' + this.props.job.get('password')
+      '/api/v2/TMX/' +
+      this.props.job.get('id') +
+      '/' +
+      this.props.job.get('password')
     let exportXliffUrl =
-      '/SDLXLIFF/' +
+      '/api/v2/SDLXLIFF/' +
       this.props.job.get('id') +
       '/' +
       this.props.job.get('password') +
@@ -392,12 +395,7 @@ class JobContainer extends React.Component {
       this.props.project.get('project_slug') +
       '.zip'
 
-    let originalUrl =
-      '/?action=downloadOriginal&id_job=' +
-      this.props.job.get('id') +
-      ' &password=' +
-      this.props.job.get('password') +
-      '&download_type=all'
+    let originalUrl = `/api/v2/original/${this.props.job.get('id')}/${this.props.job.get('password')}`
     return (
       <JobMenu
         jobId={this.props.job.get('id')}

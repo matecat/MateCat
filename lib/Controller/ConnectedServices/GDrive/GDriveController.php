@@ -103,7 +103,7 @@ class GDriveController extends KleinController {
         if ( $this->isAsyncReq && $this->gdriveUserSession->hasFiles() ) {
             $this->guid = $_SESSION[ "upload_session" ];
         } else {
-            $this->guid = Utils::createToken();
+            $this->guid = Utils::uuid4();
             CookieManager::setCookie( "upload_session", $this->guid,
                 [
                     'expires'  => time() + 86400,
