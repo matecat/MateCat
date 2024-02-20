@@ -1,12 +1,14 @@
-import React, {Fragment, useContext, useEffect, useState} from 'react'
+import React, {Fragment, useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
 import Trash from '../../../../../../../../img/icons/Trash'
-import {MachineTranslationTabContext} from '../MachineTranslationTab'
-import {deleteDeepLGlossary} from '../../../../../api/deleteDeepLGlossary'
 
-export const DeepLGlossaryRow = ({engineId, row, setRows, isReadOnly}) => {
-  const {setNotification} = useContext(MachineTranslationTabContext)
-
+export const DeepLGlossaryRow = ({
+  engineId,
+  row,
+  setRows,
+  isReadOnly,
+  deleteGlossaryConfirm,
+}) => {
   const [isActive, setIsActive] = useState(false)
   const [isWaitingResult, setIsWaitingResult] = useState(false)
 
@@ -15,7 +17,6 @@ export const DeepLGlossaryRow = ({engineId, row, setRows, isReadOnly}) => {
   }, [row.isActive])
 
   const onChangeIsActive = (e) => {
-    setNotification()
     const isActive = e.currentTarget.checked
     setRows((prevState) =>
       prevState.map((glossary) => ({
@@ -23,24 +24,6 @@ export const DeepLGlossaryRow = ({engineId, row, setRows, isReadOnly}) => {
         isActive: isActive && glossary.id === row.id,
       })),
     )
-  }
-
-  const deleteGlossary = () => {
-    setNotification()
-
-    setIsWaitingResult(true)
-    deleteDeepLGlossary({engineId, id: row.id})
-      .then((data) => {
-        if (data.id === row.id)
-          setRows((prevState) => prevState.filter(({id}) => id !== row.id))
-      })
-      .catch(() => {
-        setNotification({
-          type: 'error',
-          message: 'Glossary delete error',
-        })
-      })
-      .finally(() => setIsWaitingResult(false))
   }
 
   return (
@@ -68,7 +51,7 @@ export const DeepLGlossaryRow = ({engineId, row, setRows, isReadOnly}) => {
             <button
               className="grey-button"
               disabled={isWaitingResult}
-              onClick={deleteGlossary}
+              onClick={() => deleteGlossaryConfirm(row)}
             >
               <Trash size={12} />
             </button>

@@ -443,23 +443,23 @@ Dropdown.propTypes = {
   options: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.string,
-      name: PropTypes.string,
+      name: PropTypes.node,
     }),
   ).isRequired,
   activeOption: PropTypes.shape({
     id: PropTypes.string,
-    name: PropTypes.string,
+    name: PropTypes.node,
   }),
   activeOptions: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.string,
-      name: PropTypes.string,
+      name: PropTypes.node,
     }),
   ),
   mostPopularOptions: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.string,
-      name: PropTypes.string,
+      name: PropTypes.node,
     }),
   ),
   showSearchBar: PropTypes.bool,

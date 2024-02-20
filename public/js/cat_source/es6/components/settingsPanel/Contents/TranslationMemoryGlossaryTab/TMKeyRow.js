@@ -1,4 +1,4 @@
-import React, {Fragment, useContext, useRef, useState} from 'react'
+import React, {Fragment, useContext, useEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {
@@ -6,6 +6,7 @@ import {
   TranslationMemoryGlossaryTabContext,
   getTmDataStructureToSendServer,
   isOwnerOfKey,
+  orderTmKeys,
 } from '../TranslationMemoryGlossaryTab/TranslationMemoryGlossaryTab'
 import {MenuButton} from '../../../common/MenuButton/MenuButton'
 import {MenuButtonItem} from '../../../common/MenuButton/MenuButtonItem'
@@ -30,14 +31,21 @@ import Trash from '../../../../../../../img/icons/Trash'
 import DotsHorizontal from '../../../../../../../img/icons/DotsHorizontal'
 import {updateJobKeys} from '../../../../api/updateJobKeys'
 import CatToolActions from '../../../../actions/CatToolActions'
+import {ConfirmDeleteResourceProjectTemplates} from '../../../modals/ConfirmDeleteResourceProjectTemplates'
+import CreateProjectActions from '../../../../actions/CreateProjectActions'
+import {deleteTmKey} from '../../../../api/deleteTmKey'
 
 export const TMKeyRow = ({row, onExpandRow}) => {
   const {isImportTMXInProgress} = useContext(CreateProjectContext)
-  const {tmKeys, setTmKeys, getPublicMatches, setGetPublicMatches} =
-    useContext(SettingsPanelContext)
-  const {setSpecialRows, setNotification} = useContext(
-    TranslationMemoryGlossaryTabContext,
-  )
+  const {
+    tmKeys,
+    setTmKeys,
+    modifyingCurrentTemplate,
+    currentProjectTemplate,
+    projectTemplates,
+    portalTarget,
+  } = useContext(SettingsPanelContext)
+  const {setSpecialRows} = useContext(TranslationMemoryGlossaryTabContext)
 
   const [isLookup, setIsLookup] = useState(row.r ?? false)
   const [isUpdating, setIsUpdating] = useState(row.w ?? false)
@@ -47,6 +55,12 @@ export const TMKeyRow = ({row, onExpandRow}) => {
 
   const isMMSharedKey = row.id === SPECIAL_ROWS_ID.defaultTranslationMemory
   const isOwner = isOwnerOfKey(row.key)
+  const getPublicMatches = currentProjectTemplate.get_public_matches
+
+  useEffect(() => {
+    setIsLookup(row.r ?? false)
+    setIsUpdating(row.w ?? false)
+  }, [row.r, row.w])
 
   const onChangeIsLookup = (e) => {
     const isLookup = e.currentTarget.checked
@@ -56,7 +70,12 @@ export const TMKeyRow = ({row, onExpandRow}) => {
       showModalLostPrivateTmKeyNotLoggedIn(setIsLookup)
     } else {
       updateRow({isLookup, isUpdating})
-      if (isMMSharedKey) setGetPublicMatches(isLookup)
+      if (isMMSharedKey) {
+        modifyingCurrentTemplate((prevTemplate) => ({
+          ...prevTemplate,
+          getPublicMatches: isLookup,
+        }))
+      }
     }
     setIsLookup(isLookup)
   }
@@ -75,22 +94,29 @@ export const TMKeyRow = ({row, onExpandRow}) => {
 
   const updateRow = ({isLookup, isUpdating}) => {
     if (!isMMSharedKey) {
-      setTmKeys((prevState) =>
-        prevState.map((tm) =>
-          tm.id === row.id
-            ? {
-                ...tm,
-                isActive: isLookup
-                  ? isLookup
-                  : !isLookup && !isUpdating
+      const updatedKeys = tmKeys.map((tm) =>
+        tm.id === row.id
+          ? {
+              ...tm,
+              isActive: isLookup
+                ? isLookup
+                : !isLookup && !isUpdating
                   ? false
                   : true,
-                r: isLookup,
-                w: !tm.isActive ? isLookup : isUpdating,
-              }
-            : tm,
-        ),
+              r: isLookup,
+              w: !tm.isActive ? isLookup : isUpdating,
+            }
+          : tm,
       )
+      setTmKeys(updatedKeys)
+
+      modifyingCurrentTemplate((prevTemplate) => ({
+        ...prevTemplate,
+        tm: orderTmKeys(
+          updatedKeys.filter(({isActive}) => isActive),
+          prevTemplate.tm.map(({key}) => key),
+        ).map(({id, isActive, ...rest}) => rest), //eslint-disable-line
+      }))
     } else {
       setSpecialRows((prevState) =>
         prevState.map((specialRow) =>
@@ -122,10 +148,14 @@ export const TMKeyRow = ({row, onExpandRow}) => {
         updateTmKey({
           key: row.key,
           description: name,
-        }).catch((errors) => {
-          setNotification({
+        }).catch(() => {
+          CatToolActions.addNotification({
+            title: 'Error updating key',
             type: 'error',
-            message: errors[0].message,
+            text: `errors[0].message`,
+            position: 'br',
+            allowHtml: true,
+            timer: 5000,
           })
         })
 
@@ -163,11 +193,12 @@ export const TMKeyRow = ({row, onExpandRow}) => {
 
   const handleExpandeRow = (Component) => {
     const onClose = () => onExpandRow({row, shouldExpand: false})
+    const onConfirm = onConfirmDeleteTmKey
 
     onExpandRow({
       row,
       shouldExpand: true,
-      content: <Component {...{row, onClose}} />,
+      content: <Component {...{row, onClose, onConfirm}} />,
     })
   }
 
@@ -180,16 +211,86 @@ export const TMKeyRow = ({row, onExpandRow}) => {
         icon: <Earth size={16} />,
       }
     : !row.is_shared
-    ? {
-        title: 'Private resource. \n' + 'Share it from the dropdown menu',
-        icon: <Lock size={16} />,
-      }
-    : {
-        title:
-          'Shared resource.\n' +
-          'Select Share resource from the dropdown menu to see owners',
-        icon: <Users size={16} />,
-      }
+      ? {
+          title: 'Private resource. \n' + 'Share it from the dropdown menu',
+          icon: <Lock size={16} />,
+        }
+      : {
+          title:
+            'Shared resource.\n' +
+            'Select Share resource from the dropdown menu to see owners',
+          icon: <Users size={16} />,
+        }
+
+  const onConfirmDeleteTmKey = () => {
+    if (config.isLoggedIn === 1) {
+      deleteTmKey({key: row.key})
+        .then(() => {
+          setTmKeys((prevState) => prevState.filter(({key}) => key !== row.key))
+          if (APP.isCattool) {
+            CatToolActions.onTMKeysChangeStatus()
+          } else {
+            const templatesInvolved = projectTemplates
+              .filter((template) =>
+                template.tm.some(({key}) => key === row.key),
+              )
+              .map((template) => ({
+                ...template,
+                tm: template.tm.filter(({key}) => key !== row.key),
+              }))
+
+            CreateProjectActions.updateProjectTemplates({
+              templates: templatesInvolved,
+              modifiedPropsCurrentProjectTemplate: {
+                tm: templatesInvolved.find(({isTemporary}) => isTemporary)?.tm,
+              },
+            })
+          }
+          const notification = {
+            title: 'Resource deleted',
+            text: `The resource (<b>${row.name}</b>) has been successfully deleted`,
+            type: 'success',
+            position: 'br',
+            allowHtml: true,
+            timer: 5000,
+          }
+          CatToolActions.addNotification(notification)
+        })
+        .catch(() => {
+          CatToolActions.addNotification({
+            title: 'Error deleting resource',
+            type: 'error',
+            text: 'There was an error saving your data. Please retry!',
+            position: 'br',
+            allowHtml: true,
+            timer: 5000,
+          })
+          onExpandRow({row, shouldExpand: false})
+        })
+    } else {
+      setTmKeys((prevState) => prevState.filter(({key}) => key !== row.key))
+    }
+  }
+
+  const showConfirmDelete = () => {
+    const templatesInvolved = projectTemplates
+      .filter(({isSelected}) => !isSelected)
+      .filter((template) => template.tm.some(({key}) => key === row.key))
+
+    if (templatesInvolved.length) {
+      ModalsActions.showModalComponent(
+        ConfirmDeleteResourceProjectTemplates,
+        {
+          projectTemplatesInvolved: templatesInvolved,
+          successCallback: onConfirmDeleteTmKey,
+          content: `The memory key you are about to delete is used in the following project creation template(s)`,
+        },
+        'Confirm deletion',
+      )
+    } else {
+      handleExpandeRow(DeleteResource)
+    }
+  }
 
   return (
     <Fragment>
@@ -201,6 +302,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
             (!isOwner && !isMMSharedKey) || (isMMSharedKey && !config.ownerIsMe)
           }
           type="checkbox"
+          data-testid={`tmkey-lookup-${row.id}`}
         />
       </div>
       <div className="tm-key-update align-center">
@@ -214,6 +316,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
               isMMSharedUpdateChecked && {
                 title: 'Add a private resource to disable updating',
               })}
+            data-testid={`tmkey-update-${row.id}`}
           />
         )}
       </div>
@@ -226,6 +329,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
           onChange={onChangeName}
           disabled={isMMSharedKey || !isOwner}
           onBlur={updateKeyName}
+          data-testid={`tmkey-row-name-${row.id}`}
         ></input>
       </div>
       <div className="tm-key-row-key">{row.key}</div>
@@ -240,6 +344,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
             icon={<DotsHorizontal />}
             className="tm-key-row-menu-button"
             disabled={isImportTMXInProgress}
+            itemsTarget={portalTarget ? portalTarget : document.body}
           >
             <MenuButtonItem
               className="tm-key-row-button-item"
@@ -275,7 +380,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
             </MenuButtonItem>
             <MenuButtonItem
               className="tm-key-row-button-item"
-              onMouseDown={() => handleExpandeRow(DeleteResource)}
+              onMouseDown={showConfirmDelete}
             >
               <div>
                 <Trash size={20} /> Delete resource

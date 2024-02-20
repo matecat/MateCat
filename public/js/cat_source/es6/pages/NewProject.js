@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState, useCallback} from 'react'
+import React, {useEffect, useRef, useState, useCallback, useMemo} from 'react'
 import PropTypes from 'prop-types'
 import usePortal from '../hooks/usePortal'
 import Header from '../components/header/Header'
@@ -22,19 +22,18 @@ import {TargetLanguagesSelect} from '../components/createProject/TargetLanguages
 import {TmGlossarySelect} from '../components/createProject/TmGlossarySelect'
 import {SourceLanguageSelect} from '../components/createProject/SourceLanguageSelect'
 import CommonUtils from '../utils/commonUtils'
-import {
-  DEFAULT_ENGINE_MEMORY,
-  MMT_NAME,
-  SettingsPanel,
-} from '../components/settingsPanel'
+import {DEFAULT_ENGINE_MEMORY, SettingsPanel} from '../components/settingsPanel'
 import {getMTEngines as getMtEnginesApi} from '../api/getMTEngines'
-import SegmentUtils from '../utils/segmentUtils'
 import {tmCreateRandUser} from '../api/tmCreateRandUser'
 import {getTmDataStructureToSendServer} from '../components/settingsPanel/Contents/TranslationMemoryGlossaryTab'
 import {getSupportedFiles} from '../api/getSupportedFiles'
 import {getSupportedLanguages} from '../api/getSupportedLanguages'
 import ApplicationActions from '../actions/ApplicationActions'
 import useDeviceCompatibility from '../hooks/useDeviceCompatibility'
+import useProjectTemplates from '../hooks/useProjectTemplates'
+import {TemplateSelect} from '../components/settingsPanel/ProjectTemplate/TemplateSelect'
+import {checkLexiqaIsEnabled} from '../components/settingsPanel/Contents/AdvancedOptionsTab/Lexiqa'
+import {checkGuessTagIsEnabled} from '../components/settingsPanel/Contents/AdvancedOptionsTab/GuessTag'
 
 const SELECT_HEIGHT = 324
 
@@ -59,10 +58,7 @@ const NewProject = ({
 }) => {
   const [user, setUser] = useState()
   const [tmKeys, setTmKeys] = useState()
-  const [keysOrdered, setKeysOrdered] = useState()
   const [mtEngines, setMtEngines] = useState([DEFAULT_ENGINE_MEMORY])
-  const [activeMTEngine, setActiveMTEngine] = useState(DEFAULT_ENGINE_MEMORY)
-  const [selectedTeam, setSelectedTeam] = useState()
   const [sourceLang, setSourceLang] = useState({})
   const [targetLangs, setTargetLangs] = useState([])
   const [subject, setSubject] = useState(subjectsArray[0])
@@ -74,28 +70,18 @@ const NewProject = ({
   const [openSettings, setOpenSettings] = useState({
     isOpen: initialStateIsOpenSettings,
   })
-  const [speechToTextActive, setSpeechToTextActive] = useState(
-    config.defaults.speech2text,
-  )
-  const [guessTagActive, setGuessTagActive] = useState(
-    !!config.defaults.tag_projection,
-  )
-  const [lexiqaActive, setLexiqaActive] = useState(!!config.defaults.lexiqa)
-  const [multiMatchLangs, setMultiMatchLangs] = useState(
-    SegmentUtils.checkCrossLanguageSettings(),
-  )
-  const [segmentationRule, setSegmentationRule] = useState({
-    name: 'General',
-    id: 'standard',
-  })
-  const [isPretranslate100Active, setIsPretranslate100Active] = useState(false)
-  const [getPublicMatches, setGetPublicMatches] = useState(
-    Boolean(config.get_public_matches),
-  )
   const [isImportTMXInProgress, setIsImportTMXInProgress] = useState(false)
   const [isFormReadyToSubmit, setIsFormReadyToSubmit] = useState(false)
   const [supportedFiles, setSupportedFiles] = useState()
   const [supportedLanguages, setSupportedLanguages] = useState()
+
+  const {
+    projectTemplates,
+    currentProjectTemplate,
+    setProjectTemplates,
+    modifyingCurrentTemplate,
+    checkSpecificTemplatePropsAreModified,
+  } = useProjectTemplates(Array.isArray(tmKeys))
 
   const isDeviceCompatible = useDeviceCompatibility()
 
@@ -104,6 +90,18 @@ const NewProject = ({
   const createProject = useRef()
 
   const closeSettings = useCallback(() => setOpenSettings({isOpen: false}), [])
+
+  const selectedTeam = useMemo(() => {
+    const team =
+      user?.teams.find(({id}) => id === currentProjectTemplate?.idTeam) ?? {}
+
+    return {...team, id: team.id?.toString()}
+  }, [user?.teams, currentProjectTemplate?.idTeam])
+  const setSelectedTeam = ({id}) =>
+    modifyingCurrentTemplate((prevTemplate) => ({
+      ...prevTemplate,
+      idTeam: parseInt(id),
+    }))
 
   const headerMountPoint = document.querySelector('header.upload-page-header')
   const HeaderPortal = usePortal(headerMountPoint)
@@ -175,18 +173,30 @@ const NewProject = ({
       getMtEnginesApi().then((mtEngines) => {
         mtEngines.push(DEFAULT_ENGINE_MEMORY)
         setMtEngines(mtEngines)
-        if (config.isAnInternalUser) {
-          const mmt = mtEngines.find((mt) => mt.name === MMT_NAME)
-          if (mmt) {
-            setActiveMTEngine(mmt)
-          }
-        }
       })
     }
   }
 
   createProject.current = () => {
-    const {mtGlossaryProps, deeplGlossaryProps} = activeMTEngine ?? {}
+    // const {mtGlossaryProps, deeplGlossaryProps} = activeMTEngine ?? {}
+
+    const {
+      mt,
+      tm,
+      lexica,
+      speech2text,
+      tagProjection,
+      pretranslate100,
+      segmentationRule,
+      idTeam,
+      getPublicMatches,
+    } = currentProjectTemplate
+
+    const isLexiqaEnabled = !checkLexiqaIsEnabled({sourceLang, targetLangs})
+      .disableLexiQA
+    const isGuessTagEnabled =
+      checkGuessTagIsEnabled({sourceLang, targetLangs}).arrayIntersection
+        .length > 0
 
     const getParams = () => ({
       action: 'createProject',
@@ -195,26 +205,31 @@ const NewProject = ({
       source_lang: sourceLang.id,
       target_lang: targetLangs.map((lang) => lang.id).join(),
       job_subject: subject.id,
-      mt_engine: activeMTEngine ? activeMTEngine.id : undefined,
-      private_keys_list: getTmDataStructureToSendServer({tmKeys, keysOrdered}),
+      mt_engine: mt.id,
+      private_keys_list: JSON.stringify({
+        ownergroup: [],
+        mine: tm,
+        anonymous: [],
+      }),
       lang_detect_files: '',
-      pretranslate_100: isPretranslate100Active ? 1 : 0,
-      lexiqa: lexiqaActive,
-      speech2text: speechToTextActive,
-      tag_projection: guessTagActive,
+      pretranslate_100: pretranslate100 ? 1 : 0,
+      lexiqa: isLexiqaEnabled && lexica,
+      speech2text: speech2text,
+      tag_projection: isGuessTagEnabled && tagProjection,
       segmentation_rule: segmentationRule.id === '1' ? '' : segmentationRule.id,
-      id_team: selectedTeam ? selectedTeam.id : undefined,
+      id_team: idTeam,
       get_public_matches: getPublicMatches,
-      ...(mtGlossaryProps?.glossaries.length && {
+      ...(mt.extra?.glossaries?.length && {
         mmt_glossaries: JSON.stringify({
-          glossaries: mtGlossaryProps.glossaries,
-          ignore_glossary_case: !mtGlossaryProps.isGlossaryCaseSensitive,
+          glossaries: mt.extra.glossaries,
+          ignore_glossary_case: !mt.extra.ignore_glossary_case,
         }),
       }),
-      ...(typeof deeplGlossaryProps === 'object' && {
-        ...Object.entries(deeplGlossaryProps)
-          .filter(([, value]) => value)
-          .reduce((acc, [key, value]) => ({...acc, [key]: value}), {}),
+      ...(mt.extra?.deepl_id_glossary && {
+        deepl_id_glossary: mt.extra.deepl_id_glossary,
+      }),
+      ...(mt.extra?.deepl_formality && {
+        deepl_formality: mt.extra.deepl_formality,
       }),
     })
 
@@ -280,7 +295,7 @@ const NewProject = ({
 
   //TODO: Move it
   useEffect(() => {
-    if (selectedTeam) {
+    if (typeof selectedTeam?.id !== 'undefined') {
       APP.setTeamInStorage(selectedTeam.id)
     }
   }, [selectedTeam])
@@ -294,16 +309,9 @@ const NewProject = ({
       .catch((error) => console.log('Error retrieving supported files', error))
 
     UI.addEvents()
-    setGuessTagActive(
-      SegmentUtils.checkGuessTagCanActivate(sourceLang, targetLangs),
-    )
+
     const updateUser = (user) => {
       setUser(user)
-      setSelectedTeam(
-        APP.getLastTeamSelected(
-          user.teams.map((team) => ({...team, id: team.id.toString()})),
-        ),
-      )
     }
     const hideAllErrors = () => {
       setErrors()
@@ -350,6 +358,7 @@ const NewProject = ({
       )
     }
   }, [])
+
   useEffect(() => {
     const createKeyFromTMXFile = ({extension, filename}) => {
       const haveNoActiveKeys = tmKeys.every(({isActive}) => !isActive)
@@ -432,9 +441,6 @@ const NewProject = ({
       }
     }
     if (sourceLang && targetLangs) {
-      setGuessTagActive(
-        SegmentUtils.checkGuessTagCanActivate(sourceLang, targetLangs),
-      )
       CreateProjectActions.updateProjectParams({
         sourceLang,
         targetLangs,
@@ -447,11 +453,11 @@ const NewProject = ({
     }
   }, [sourceLang, targetLangs, selectedTeam])
 
-  useEffect(() => {
-    //TODO: used in main.js, remove
-    UI.segmentationRule = segmentationRule.id
-    restartConversions()
-  }, [segmentationRule])
+  // useEffect(() => {
+  //   //TODO: used in main.js, remove
+  //   UI.segmentationRule = segmentationRule.id
+  //   restartConversions()
+  // }, [segmentationRule])
 
   useEffect(() => {
     if (!isDeviceCompatible) {
@@ -459,6 +465,26 @@ const NewProject = ({
       if (body) body.classList.add('no-min-width')
     }
   }, [isDeviceCompatible])
+
+  // Sync tmKeys state when current project template changed
+  useEffect(() => {
+    const tm = currentProjectTemplate?.tm ?? []
+
+    setTmKeys((prevState) =>
+      Array.isArray(prevState)
+        ? prevState.map((tmItem) => {
+            const tmFromTemplate = tm.find(({key}) => key === tmItem.key)
+            return {
+              ...tmItem,
+              r: false,
+              w: false,
+              isActive: false,
+              ...(tmFromTemplate && {...tmFromTemplate, isActive: true}),
+            }
+          })
+        : prevState,
+    )
+  }, [currentProjectTemplate?.tm])
 
   return isDeviceCompatible ? (
     <CreateProjectContext.Provider
@@ -475,8 +501,7 @@ const NewProject = ({
         setOpenSettings,
         isImportTMXInProgress,
         setIsImportTMXInProgress,
-        isPretranslate100Active,
-        setIsPretranslate100Active,
+        modifyingCurrentTemplate,
       }}
     >
       <HeaderPortal>
@@ -579,6 +604,20 @@ const NewProject = ({
             <div className="translate-box tmx-select">
               <TmGlossarySelect />
             </div>
+            {isLoggedIn && (
+              <div className="translate-box">
+                <TemplateSelect
+                  {...{
+                    label: 'Project template',
+                    maxHeightDroplist: SELECT_HEIGHT,
+                    projectTemplates,
+                    setProjectTemplates,
+                    currentProjectTemplate,
+                  }}
+                />
+              </div>
+            )}
+
             <div className="translate-box settings" onClick={openTmPanel}>
               <More size={24} />
               <span className="text">More settings</span>
@@ -677,26 +716,18 @@ const NewProject = ({
           onClose: closeSettings,
           isOpened: openSettings.isOpen,
           tabOpen: openSettings.tab,
+          user,
           tmKeys,
           setTmKeys,
           mtEngines,
           setMtEngines,
-          activeMTEngine,
-          setActiveMTEngine,
-          speechToTextActive,
-          setSpeechToTextActive,
-          guessTagActive,
-          setGuessTagActive,
           sourceLang,
           targetLangs,
-          lexiqaActive,
-          setLexiqaActive,
-          multiMatchLangs,
-          setMultiMatchLangs,
-          segmentationRule,
-          setSegmentationRule,
-          setGetPublicMatches,
-          setKeysOrdered,
+          projectTemplates,
+          setProjectTemplates,
+          modifyingCurrentTemplate,
+          currentProjectTemplate,
+          checkSpecificTemplatePropsAreModified,
         }}
       />
       <Footer />

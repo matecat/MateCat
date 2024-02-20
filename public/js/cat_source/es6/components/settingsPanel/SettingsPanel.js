@@ -5,6 +5,8 @@ import {ContentWrapper} from './ContentWrapper'
 import {MachineTranslationTab} from './Contents/MachineTranslationTab'
 import {AdvancedOptionsTab} from './Contents/AdvancedOptionsTab'
 import {TranslationMemoryGlossaryTab} from './Contents/TranslationMemoryGlossaryTab'
+import {ProjectTemplate} from './ProjectTemplate/ProjectTemplate'
+import {SCHEMA_KEYS} from '../../hooks/useProjectTemplates'
 
 let tabOpenFromQueryString = new URLSearchParams(window.location.search).get(
   'openTab',
@@ -16,20 +18,43 @@ export const SETTINGS_PANEL_TABS = {
   advancedOptions: 'options',
 }
 
+export const TEMPLATE_PROPS_BY_TAB = {
+  [SETTINGS_PANEL_TABS.translationMemoryGlossary]: [
+    SCHEMA_KEYS.tm,
+    SCHEMA_KEYS.getPublicMatches,
+    SCHEMA_KEYS.pretranslate100,
+  ],
+  [SETTINGS_PANEL_TABS.machineTranslation]: [SCHEMA_KEYS.mt],
+  [SETTINGS_PANEL_TABS.advancedOptions]: [
+    SCHEMA_KEYS.speech2text,
+    SCHEMA_KEYS.tagProjection,
+    SCHEMA_KEYS.lexica,
+    SCHEMA_KEYS.crossLanguageMatches,
+    SCHEMA_KEYS.segmentationRule,
+    SCHEMA_KEYS.idTeam,
+  ],
+}
+
 const DEFAULT_CONTENTS = [
   {
     id: SETTINGS_PANEL_TABS.translationMemoryGlossary,
     label: 'Translation Memory and Glossary',
+    description:
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vulputate libero et velit interdum, ac aliquet odio mattis.',
     component: <TranslationMemoryGlossaryTab />,
   },
   {
     id: SETTINGS_PANEL_TABS.machineTranslation,
     label: 'Machine Translation',
+    description:
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vulputate libero et velit interdum, ac aliquet odio mattis.',
     component: <MachineTranslationTab />,
   },
   {
     id: SETTINGS_PANEL_TABS.advancedOptions,
-    label: 'Advanced Options',
+    label: 'Advanced settings',
+    description:
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vulputate libero et velit interdum, ac aliquet odio mattis.',
     component: <AdvancedOptionsTab />,
   },
 ]
@@ -47,27 +72,18 @@ export const SettingsPanel = ({
   onClose,
   isOpened,
   tabOpen = SETTINGS_PANEL_TABS.translationMemoryGlossary,
+  user,
   tmKeys,
   setTmKeys,
   mtEngines,
   setMtEngines,
-  activeMTEngine,
-  setActiveMTEngine,
-  speechToTextActive,
-  setSpeechToTextActive,
-  guessTagActive,
-  setGuessTagActive,
   sourceLang,
   targetLangs,
-  lexiqaActive,
-  setLexiqaActive,
-  multiMatchLangs,
-  setMultiMatchLangs,
-  segmentationRule,
-  setSegmentationRule,
-  getPublicMatches,
-  setGetPublicMatches,
-  setKeysOrdered,
+  projectTemplates,
+  currentProjectTemplate,
+  setProjectTemplates,
+  modifyingCurrentTemplate,
+  checkSpecificTemplatePropsAreModified,
 }) => {
   const [isVisible, setIsVisible] = useState(false)
   const [tabs, setTabs] = useState(() => {
@@ -111,34 +127,29 @@ export const SettingsPanel = ({
     APP.openLoginModal()
   }
 
+  const isEnabledProjectTemplateComponent =
+    config.isLoggedIn === 1 && !config.is_cattool
+
   return (
     <SettingsPanelContext.Provider
       value={{
         tabs,
         setTabs,
+        user,
         tmKeys,
         setTmKeys,
         mtEngines,
         setMtEngines,
-        activeMTEngine,
-        setActiveMTEngine,
         openLoginModal,
         wrapperRef,
-        speechToTextActive,
-        setSpeechToTextActive,
-        guessTagActive,
-        setGuessTagActive,
         sourceLang,
         targetLangs,
-        lexiqaActive,
-        setLexiqaActive,
-        multiMatchLangs,
-        setMultiMatchLangs,
-        segmentationRule,
-        setSegmentationRule,
-        getPublicMatches,
-        setGetPublicMatches,
-        setKeysOrdered,
+        projectTemplates,
+        currentProjectTemplate,
+        setProjectTemplates,
+        modifyingCurrentTemplate,
+        checkSpecificTemplatePropsAreModified,
+        isEnabledProjectTemplateComponent,
       }}
     >
       <div
@@ -162,12 +173,17 @@ export const SettingsPanel = ({
               : ' settings-panel-wrapper-hide'
           }`}
         >
-          <div className="settings-panel-header">
-            <div className="settings-panel-header-logo" />
-            <span>Settings</span>
-            <div onClick={close} className="close-matecat-modal x-popup" />
-          </div>
-          <ContentWrapper />
+          {isOpened && (
+            <>
+              <div className="settings-panel-header">
+                <div className="settings-panel-header-logo" />
+                <span>Settings</span>
+                <div onClick={close} className="close-matecat-modal x-popup" />
+              </div>
+              {isEnabledProjectTemplateComponent && <ProjectTemplate />}
+              {currentProjectTemplate && <ContentWrapper />}
+            </>
+          )}
         </div>
       </div>
     </SettingsPanelContext.Provider>
@@ -178,17 +194,16 @@ SettingsPanel.propTypes = {
   onClose: PropTypes.func.isRequired,
   isOpened: PropTypes.bool,
   tabOpen: PropTypes.oneOf(Object.values(SETTINGS_PANEL_TABS)),
+  user: PropTypes.object,
   tmKeys: PropTypes.array,
   setTmKeys: PropTypes.func,
   mtEngines: PropTypes.array,
   setMtEngines: PropTypes.func,
-  activeMTEngine: PropTypes.object,
-  setActiveMTEngine: PropTypes.func,
-  guessTagActive: PropTypes.bool,
-  setGuessTagActive: PropTypes.func,
   sourceLang: PropTypes.object,
   targetLangs: PropTypes.array,
-  getPublicMatches: PropTypes.bool,
-  setGetPublicMatches: PropTypes.func,
-  setKeysOrdered: PropTypes.func,
+  projectTemplates: PropTypes.array,
+  currentProjectTemplate: PropTypes.any,
+  setProjectTemplates: PropTypes.func,
+  modifyingCurrentTemplate: PropTypes.func,
+  checkSpecificTemplatePropsAreModified: PropTypes.func,
 }

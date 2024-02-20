@@ -2,9 +2,10 @@ import React, {useContext} from 'react'
 import Check from '../../../../../img/icons/Check'
 import {Select} from '../common/Select'
 import {CreateProjectContext} from './CreateProjectContext'
+import {orderTmKeys} from '../settingsPanel/Contents/TranslationMemoryGlossaryTab'
 
 export const TmGlossarySelect = () => {
-  const {SELECT_HEIGHT, tmKeys, setTmKeys, setOpenSettings} =
+  const {SELECT_HEIGHT, tmKeys, setOpenSettings, modifyingCurrentTemplate} =
     useContext(CreateProjectContext)
 
   const tmKeyActive = Array.isArray(tmKeys)
@@ -40,23 +41,26 @@ export const TmGlossarySelect = () => {
       placeholder={'MyMemory Collaborative TM'}
       checkSpaceToReverse={false}
       onToggleOption={(option) => {
-        if (tmKeyActive?.some((item) => item.id === option.id)) {
-          setTmKeys((prevState) =>
-            prevState.map((tm) =>
-              tm.id === option.id
-                ? {...tm, isActive: false, r: false, w: false}
-                : tm,
-            ),
-          )
-        } else {
-          setTmKeys((prevState) =>
-            prevState.map((tm) =>
-              tm.id === option.id
-                ? {...tm, isActive: true, r: true, w: true}
-                : tm,
-            ),
-          )
-        }
+        const isKeyAlreadyActive = tmKeyActive?.some(
+          (item) => item.id === option.id,
+        )
+        const updatedKeys = tmKeys.map((tm) =>
+          tm.id === option.id
+            ? {
+                ...tm,
+                isActive: !isKeyAlreadyActive,
+                r: !isKeyAlreadyActive,
+                w: !isKeyAlreadyActive,
+              }
+            : tm,
+        )
+        modifyingCurrentTemplate((prevTemplate) => ({
+          ...prevTemplate,
+          tm: orderTmKeys(
+            updatedKeys.filter(({isActive}) => isActive),
+            prevTemplate.tm.map(({key}) => key),
+          ).map(({id, isActive, ...rest}) => rest), //eslint-disable-line
+        }))
       }}
     >
       {({index, onClose, name, key, showActiveOptionIcon}) => ({

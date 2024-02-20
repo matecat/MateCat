@@ -12,6 +12,11 @@ import CatToolConstants from '../../../../../constants/CatToolConstants'
 import CatToolStore from '../../../../../stores/CatToolStore'
 import ArrowDown from '../../../../../../../../img/icons/ArrowDown'
 import IconAdd from '../../../../icons/IconAdd'
+import {DeleteResource} from '../DeleteResource'
+import {deleteMemoryGlossary} from '../../../../../api/deleteMemoryGlossary'
+import CreateProjectActions from '../../../../../actions/CreateProjectActions'
+import ModalsActions from '../../../../../actions/ModalsActions'
+import {ConfirmDeleteResourceProjectTemplates} from '../../../../modals/ConfirmDeleteResourceProjectTemplates'
 
 const COLUMNS_TABLE = [
   {name: 'Activate'},
@@ -59,23 +64,111 @@ export class MTGlossaryStatus {
 }
 
 export const MTGlossary = ({id, isCattoolPage = false}) => {
-  const {activeMTEngine, setActiveMTEngine} = useContext(SettingsPanelContext)
+  const {currentProjectTemplate, modifyingCurrentTemplate, projectTemplates} =
+    useContext(SettingsPanelContext)
 
-  const [isShowingRows, setIsShowingRows] = useState(
-    activeMTEngine.mtGlossaryProps?.isOpened ?? false,
-  )
+  const {mt: {extra: mtGlossaryProps} = {}} = currentProjectTemplate ?? {}
+
+  const [isShowingRows, setIsShowingRows] = useState(false)
   const [rows, setRows] = useState()
   const [isGlossaryCaseSensitive, setIsGlossaryCaseSensitive] = useState(
-    activeMTEngine.mtGlossaryProps?.isGlossaryCaseSensitive ?? false,
+    mtGlossaryProps?.ignore_glossary_case ?? false,
   )
+  const [deleteGlossaryRequest, setDeleteGlossaryRequest] = useState()
 
   const activeGlossariesRef = useRef()
-  activeGlossariesRef.current = activeMTEngine.mtGlossaryProps?.glossaries
+  activeGlossariesRef.current = mtGlossaryProps?.glossaries
+
+  const deleteGlossary = useRef()
+  deleteGlossary.current = (glossary = deleteGlossaryRequest) => {
+    deleteMemoryGlossary({engineId: id, memoryId: glossary.id})
+      .then((data) => {
+        if (data.id === glossary.id) {
+          setRows((prevState) => prevState.filter(({id}) => id !== glossary.id))
+
+          const templatesInvolved = projectTemplates
+            .filter((template) =>
+              template.mt.extra.glossaries?.some(
+                (value) => value === glossary.id,
+              ),
+            )
+            .map((template) => {
+              const mtObject = template.mt
+              const {glossaries, ...extra} = mtObject.extra // eslint-disable-line
+              const glossariesFiltered = mtObject.extra.glossaries.filter(
+                (value) => value !== glossary.id,
+              )
+
+              return {
+                ...template,
+                mt: {
+                  ...mtObject,
+                  extra: {
+                    ...extra,
+                    ...(glossariesFiltered.length && {
+                      glossaries: glossariesFiltered,
+                    }),
+                  },
+                },
+              }
+            })
+          CatToolActions.addNotification({
+            title: 'Glossary deleted',
+            type: 'success',
+            text: `The glossary (<b>${glossary.name}</b>) has been successfully deleted`,
+            position: 'br',
+            allowHtml: true,
+            timer: 5000,
+          })
+          CreateProjectActions.updateProjectTemplates({
+            templates: templatesInvolved,
+            modifiedPropsCurrentProjectTemplate: {
+              mt: templatesInvolved.find(({isTemporary}) => isTemporary)?.mt,
+            },
+          })
+        }
+      })
+      .catch(() => {
+        CatToolActions.addNotification({
+          title: 'Glossary delete error',
+          type: 'error',
+          text: 'Error deleting glossary',
+          position: 'br',
+          allowHtml: true,
+          timer: 5000,
+        })
+      })
+      .finally(() => setDeleteGlossaryRequest())
+  }
+
+  const showConfirmDelete = useRef()
+  showConfirmDelete.current = (glossary) => {
+    const templatesInvolved = projectTemplates
+      .filter(({isSelected}) => !isSelected)
+      .filter((template) =>
+        template.mt.extra.glossaries?.some((value) => value === glossary.id),
+      )
+
+    if (templatesInvolved.length) {
+      ModalsActions.showModalComponent(
+        ConfirmDeleteResourceProjectTemplates,
+        {
+          projectTemplatesInvolved: templatesInvolved,
+          successCallback: () => deleteGlossary.current(glossary),
+          content: `The MT glossary you are about to delete is used in the following project creation template(s)`,
+        },
+        'Confirm deletion',
+      )
+    } else {
+      setDeleteGlossaryRequest(glossary)
+    }
+  }
 
   const updateRowsState = useCallback(
     (value) => {
       setRows((prevState) => {
         const newValue = typeof value === 'function' ? value(prevState) : value
+        if (!Array.isArray(newValue)) return prevState
 
         return newValue.map((row) => ({
           ...row,
@@ -93,13 +186,30 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
                   setRows: updateRowsState,
                   isReadOnly: isCattoolPage,
                 }}
+                deleteGlossaryConfirm={showConfirmDelete.current}
               />
             ),
+          ...(deleteGlossaryRequest &&
+            deleteGlossaryRequest.id === row.id && {
+              isExpanded: true,
+              extraNode: (
+                <DeleteResource
+                  row={deleteGlossaryRequest}
+                  onClose={() => setDeleteGlossaryRequest()}
+                  onConfirm={deleteGlossary.current}
+                  type={'glossary'}
+                />
+              ),
+            }),
         }))
       })
     },
-    [id, isCattoolPage],
+    [id, isCattoolPage, deleteGlossaryRequest],
   )
+
+  useEffect(() => {
+    setIsGlossaryCaseSensitive(mtGlossaryProps?.ignore_glossary_case ?? false)
+  }, [mtGlossaryProps?.ignore_glossary_case])
 
   useEffect(() => {
     let wasCleanup = false
@@ -154,17 +264,53 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
   }, [id, isCattoolPage, updateRowsState])
 
   useEffect(() => {
-    if (isCattoolPage || !rows) return
+    if (!isCattoolPage) {
+      const glossaries = activeGlossariesRef.current
 
-    setActiveMTEngine((prevState) => ({
-      ...prevState,
-      mtGlossaryProps: {
-        ...prevState.mtGlossaryProps,
-        glossaries: rows.filter(({isActive}) => isActive).map(({id}) => id),
-        isGlossaryCaseSensitive,
+      updateRowsState((prevState) =>
+        Array.isArray(prevState)
+          ? prevState.map(({name, id: idRow}) => {
+              const isActive = Array.isArray(glossaries)
+                ? glossaries.some((value) => value === idRow)
+                : false
+
+              return {
+                id: idRow,
+                name,
+                isActive,
+              }
+            })
+          : prevState,
+      )
+    }
+  }, [currentProjectTemplate.id, isCattoolPage, updateRowsState])
+
+  useEffect(() => {
+    if (
+      isCattoolPage ||
+      !rows ||
+      (rows.length === 1 &&
+        rows.some(({id}) => id === MT_GLOSSARY_CREATE_ROW_ID))
+    )
+      return
+
+    const rowsActive = rows.filter(({isActive}) => isActive).map(({id}) => id)
+
+    modifyingCurrentTemplate((prevTemplate) => ({
+      ...prevTemplate,
+      mt: {
+        ...prevTemplate.mt,
+        extra: {
+          ...(rowsActive.length && {
+            glossaries: rowsActive,
+          }),
+          ...(isGlossaryCaseSensitive && {
+            ignore_glossary_case: isGlossaryCaseSensitive,
+          }),
+        },
       },
     }))
-  }, [rows, isGlossaryCaseSensitive, isCattoolPage, setActiveMTEngine])
+  }, [rows, isGlossaryCaseSensitive, isCattoolPage, modifyingCurrentTemplate])
 
   const addGlossary = () => {
     const row = {
@@ -182,13 +328,16 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
   const onShowingRows = () => {
     setIsShowingRows((prevState) => !prevState)
     if (!isCattoolPage) {
-      setActiveMTEngine((prevState) => ({
-        ...prevState,
-        mtGlossaryProps: {
-          ...prevState.mtGlossaryProps,
-          isOpened: !isShowingRows,
-        },
-      }))
+      // modifyingCurrentTemplate((prevTemplate) => ({
+      //   ...prevTemplate,
+      //   mt: {
+      //     ...prevTemplate.mt,
+      //     extra: {
+      //       ...(prevTemplate.mt?.extra ?? {}),
+      //       isOpened: !isShowingRows,
+      //     },
+      //   },
+      // }))
     }
   }
 
