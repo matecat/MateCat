@@ -35,7 +35,6 @@
     "react-tagsinput": "^3.19.0",
     "react-transition-group": "^4.2.2",
     "react-virtual": "^2.10.4",
-    "showdown": "^2.0.0",
     "sprintf-js": "^1.1.2"
   },
   "devDependencies": {
@@ -45,7 +44,7 @@
     "@babel/plugin-transform-runtime": "^7.23.7",
     "@babel/preset-env": "^7.23.8",
     "@babel/preset-react": "^7.23.3",
-    "@sentry/webpack-plugin": "2.10.3",
+    "@sentry/webpack-plugin": "2.13.0",
     "@testing-library/jest-dom": "^6.2.0",
     "@testing-library/react": "^14.1.2",
     "@testing-library/user-event": "^14.5.2",
@@ -72,11 +71,11 @@
     "sass": "^1.66.0",
     "sass-loader": "14.1.0",
     "style-loader": "3.3.4",
-    "undici": "^5.28.2",
-    "webpack": "5.90.0",
+    "webpack": "5.90.1",
     "webpack-cli": "5.1.4",
     "webpack-concat-files-plugin": "^0.5.2",
-    "whatwg-fetch": "^3.6.20"
+    "whatwg-fetch": "^3.6.20",
+    "undici": "^5.28.2"
   },
   "resolutions": {
     "wrap-ansi": "^7.0.0"

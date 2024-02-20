@@ -145,6 +145,7 @@ function SegmentFooter() {
       getMetadataNoteTemplate: () =>
         segment.metadata?.length > 0 ? segment.metadata : null,
       allowHTML: () => '',
+      getNoteContentStructure: (note) => note,
     }
     const notes =
       SegmentFooterTabMessages.prototype.getNotes.call(tabMessagesContext)

@@ -66,6 +66,8 @@ div.segment-notes ul.graysmall li span.note-label {
   font-size: 16px;
   word-break: break-word;
   white-space: pre-wrap;
+  display: flex;
+  align-content: center;
 }
 .segments-notes-container .metadata-notes {
   display: flex;
@@ -73,9 +75,12 @@ div.segment-notes ul.graysmall li span.note-label {
   flex-direction: row;
 }
 
-.segments-notes-container div.note p {
-  margin: 0;
-  line-height: 25px;
+.segments-notes-container div.note {
+  p,
+  span {
+    margin: 0;
+    line-height: 20px;
+  }
 }
 
 .segments-notes-container div.note p a {
