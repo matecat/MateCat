@@ -1,4 +1,14 @@
+<<<<<<< Updated upstream
 import React, {useContext, useEffect, useRef, useState} from 'react'
+=======
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
+>>>>>>> Stashed changes
 import {Select} from '../../../common/Select'
 import {ModernMt} from './MtEngines/ModernMt'
 import {AltLang} from './MtEngines/AltLang'
@@ -26,6 +36,8 @@ import CatToolActions from '../../../../actions/CatToolActions'
 import {DeleteResource} from './DeleteResource'
 import ModalsActions from '../../../../actions/ModalsActions'
 import {ConfirmDeleteResourceProjectTemplates} from '../../../modals/ConfirmDeleteResourceProjectTemplates'
+
+export const MachineTranslationTabContext = createContext({})
 
 export const MachineTranslationTab = () => {
   const {
@@ -231,6 +243,11 @@ export const MachineTranslationTab = () => {
   }, [activeMTEngine, mtEngines, deleteMTRequest])
 
   const disableMT = () => setActiveMTEngine()
+<<<<<<< Updated upstream
+=======
+
+  const resetNotification = () => setNotification({})
+>>>>>>> Stashed changes
 
   const activeMTEngineData = mtEngines.find(({id}) => id === activeMTEngine)
 
@@ -251,6 +268,8 @@ export const MachineTranslationTab = () => {
         : activeMTEngineData.name === 'DeepL'
           ? DeepLGlossary
           : undefined
+<<<<<<< Updated upstream
+=======
 
     return {
       ...((shouldShowDeleteConfirmation || GlossaryComponent) && {
@@ -279,6 +298,39 @@ export const MachineTranslationTab = () => {
   }
 
   return (
+    <MachineTranslationTabContext.Provider value={{setNotification}}>
+      <div className="machine-translation-tab settings-panel-contentwrapper-tab-background">
+        {notificationsNode}
+>>>>>>> Stashed changes
+
+    return {
+      ...((shouldShowDeleteConfirmation || GlossaryComponent) && {
+        isExpanded: true,
+        extraNode: (
+          <>
+            {deleteMTRequest && activeMTEngineData.id === deleteMTRequest && (
+              <DeleteResource
+                row={activeMTEngineData}
+                onClose={() => setDeleteMTRequest()}
+                onConfirm={deleteMT.current}
+              />
+            )}
+            {GlossaryComponent && (
+              <GlossaryComponent
+                {...{
+                  ...activeMTEngineData,
+                  isCattoolPage: config.is_cattool,
+                }}
+              />
+            )}
+          </>
+        ),
+      }),
+    }
+  }
+
+<<<<<<< Updated upstream
+  return (
     <div className="machine-translation-tab settings-panel-contentwrapper-tab-background">
       {!config.is_cattool && config.isLoggedIn && addMTVisible && (
         <div className="add-mt-container">
@@ -300,6 +352,43 @@ export const MachineTranslationTab = () => {
               onClick={() => setAddMTVisible(false)}
             >
               <Close />
+=======
+          <SettingsPanelTable
+            columns={activeColumns}
+            className={`active-table-${activeMTEngineData?.name}`}
+            rows={
+              typeof activeMTEngine === 'number'
+                ? [
+                    {
+                      node: (
+                        <ActiveMTRow
+                          key={'active'}
+                          row={activeMTEngineData}
+                          deleteMT={() =>
+                            showConfirmDelete.current(activeMTEngine)
+                          }
+                          onCheckboxClick={disableMT}
+                        />
+                      ),
+                      isDraggable: false,
+                      isActive: true,
+                      ...getExtraNodeActiveRow(),
+                    },
+                  ]
+                : []
+            }
+          />
+        </div>
+        {config.isLoggedIn ? (
+          <div className="inactive-mt">
+            <h2>Inactive MT</h2>
+            <SettingsPanelTable columns={COLUMNS_TABLE} rows={MTRows} />
+          </div>
+        ) : (
+          <div className="not-logged-user">
+            <button className="ui primary button" onClick={openLoginModal}>
+              Login to see your custom MT engines
+>>>>>>> Stashed changes
             </button>
           </div>
           {activeAddEngine ? (
