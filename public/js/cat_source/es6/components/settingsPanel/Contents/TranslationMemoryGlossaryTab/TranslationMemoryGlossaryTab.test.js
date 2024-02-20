@@ -77,7 +77,7 @@ const ROW_COLUMNS_TESTID = {
 const getRowElementById = ({id, column}) =>
   screen.queryByTestId(`${column}-${id}`)
 
-test('Operation on MyMemory row', async () => {
+test('Operation about MyMemory row', async () => {
   const user = userEvent.setup()
   const contextValues = contextMockValues()
 
@@ -174,4 +174,20 @@ test('Enabled/disable key', async () => {
       id: 'e32699c0a360e08948fe',
     })),
   ).not.toBeInTheDocument()
+})
+
+test('Create new resource', async () => {
+  const user = userEvent.setup()
+  const contextValues = contextMockValues()
+
+  render(<WrapperComponent {...contextValues} />)
+
+  const button = screen.getByText('New resource')
+  expect(button).toBeInTheDocument()
+
+  await act(async () => user.click(button))
+
+  const rowName = screen.getByTestId(SPECIAL_ROWS_ID.newResource)
+
+  expect(rowName).toBeInTheDocument()
 })

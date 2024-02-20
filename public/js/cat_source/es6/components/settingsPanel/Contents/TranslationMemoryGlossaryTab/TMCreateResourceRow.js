@@ -295,7 +295,8 @@ export const TMCreateResourceRow = ({row}) => {
           className={inputNameClasses}
           value={name}
           onChange={onChangeName}
-        ></input>
+          data-testid={row.id}
+        />
       </div>
       <div>
         {row.id === SPECIAL_ROWS_ID.addSharedResource && (
