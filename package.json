@@ -35,7 +35,6 @@
     "react-tagsinput": "^3.19.0",
     "react-transition-group": "^4.2.2",
     "react-virtual": "^2.10.4",
-    "showdown": "^2.0.0",
     "sprintf-js": "^1.1.2"
   },
   "devDependencies": {
