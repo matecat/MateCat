@@ -15,31 +15,28 @@ class SegmentFooterTabMessages extends React.Component {
       ({meta_key}) => meta_key !== 'sizeRestriction',
     )
   }
-
+  getNoteContentStructure(note) {
+    return TEXT_UTILS.getContentWithAllowedLinkRedirect(note).length > 1
+      ? TEXT_UTILS.getContentWithAllowedLinkRedirect(note).map(
+          (content, index) =>
+            typeof content === 'object' && content.isLink ? (
+              <a key={index} href={content.link} target="_blank">
+                {content.link}
+              </a>
+            ) : (
+              content
+            ),
+        )
+      : note
+  }
   getNotes() {
     let notesHtml = []
-    let self = this
-
-    const getNoteContentStructure = (note) =>
-      TEXT_UTILS.getContentWithAllowedLinkRedirect(note).length > 1
-        ? TEXT_UTILS.getContentWithAllowedLinkRedirect(note).map(
-            (content, index) =>
-              typeof content === 'object' && content.isLink ? (
-                <a key={index} href={content.link} target="_blank">
-                  {content.link}
-                </a>
-              ) : (
-                content
-              ),
-          )
-        : note
-
     if (this.props.notes) {
-      this.props.notes.forEach(function (item, index) {
+      this.props.notes.forEach((item, index) => {
         if (item.note && item.note !== '') {
           if (
-            self.excludeMatchingNotesRegExp &&
-            self.excludeMatchingNotesRegExp.test(item.note)
+            this.excludeMatchingNotesRegExp &&
+            this.excludeMatchingNotesRegExp.test(item.note)
           ) {
             return
           }
@@ -47,7 +44,11 @@ class SegmentFooterTabMessages extends React.Component {
           let html = (
             <div className="note" key={'note-' + index}>
               <span className="note-label">Note: </span>
-              <span>{getNoteContentStructure(note)}</span>
+              <span
+                dangerouslySetInnerHTML={{
+                  __html: this.getNoteContentStructure(note),
+                }}
+              />
             </div>
           )
           notesHtml.push(html)
