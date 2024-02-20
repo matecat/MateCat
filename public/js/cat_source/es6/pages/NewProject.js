@@ -519,7 +519,6 @@ const NewProject = ({
       </div>
 
       <div className="wrapper-upload">
-        <div id="matecat-cat" />
         <div id="languageSelector" />
         <div className="translation-row">
           <div className="translation-options">
