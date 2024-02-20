@@ -50,6 +50,11 @@ export const DeepL = ({addMTEngine, error, isRequestInProgress}) => {
           for the target language and uploading a glossary to make sure that the
           MT output reflects your preferred terminology.
         </p>
+        <p>
+          <strong>Note: </strong>as per DeepL's policy, Matecat's integration
+          with DeepL is only available for subscribers of DeepL's "Advanced" and
+          "Ultimate" plans.
+        </p>
         <a
           href="https://www.deepl.com/pro/change-plan?cta=header-pro#single"
           rel="noreferrer"
