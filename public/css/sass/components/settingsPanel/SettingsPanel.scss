@@ -274,6 +274,11 @@
 
 .settings-panel-project-template-button-more {
   min-width: 240px;
+  border: unset !important;
+
+  &:hover {
+    color: unset !important;
+  }
 }
 
 .settings-panel-project-template {

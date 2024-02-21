@@ -8,6 +8,8 @@ import {deleteProjectTemplate} from '../../../api/deleteProjectTemplate'
 import {isStandardTemplate} from '../../../hooks/useProjectTemplates'
 import {TEMPLATE_MODIFIERS} from './ProjectTemplate'
 import {SettingsPanelContext} from '../SettingsPanelContext'
+import IconEdit from '../../icons/IconEdit'
+import Trash from '../../../../../../img/icons/Trash'
 
 export const MoreMenu = ({portalTarget}) => {
   const {setProjectTemplates, currentProjectTemplate} =
@@ -52,6 +54,7 @@ export const MoreMenu = ({portalTarget}) => {
           setTemplateName(currentProjectTemplate.name)
         }}
       >
+        <IconEdit />
         Rename
       </MenuButtonItem>
       <MenuButtonItem
@@ -60,6 +63,7 @@ export const MoreMenu = ({portalTarget}) => {
         disabled={isRequestInProgress}
         onMouseUp={deleteTemplate}
       >
+        <Trash size={16} />
         Delete
       </MenuButtonItem>
     </MenuButton>

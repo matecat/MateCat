@@ -14,7 +14,9 @@ import {TemplateNameInput} from './TemplateNameInput'
 import {MoreMenu} from './MoreMenu'
 import {CreateUpdateControl} from './CreateUpdateControl'
 import {TemplateSelect} from './TemplateSelect'
-import IconPin from '../../icons/IconPin'
+import {IconPin} from '../../icons/IconPin'
+import {IconSave} from '../../icons/IconSave'
+import {IconSaveChanges} from '../../icons/IconSaveChanges'
 
 export const TEMPLATE_MODIFIERS = {
   CREATE: 'create',
@@ -227,6 +229,7 @@ export const ProjectTemplate = ({portalTarget}) => {
                   disabled={isRequestInProgress}
                   onClick={() => updateTemplate()}
                 >
+                  <IconSaveChanges />
                   Save changes
                 </button>
               )}
@@ -237,6 +240,7 @@ export const ProjectTemplate = ({portalTarget}) => {
                   disabled={isRequestInProgress}
                   onClick={() => setTemplateModifier(TEMPLATE_MODIFIERS.CREATE)}
                 >
+                  <IconSave />
                   Save as new
                 </button>
               )}
