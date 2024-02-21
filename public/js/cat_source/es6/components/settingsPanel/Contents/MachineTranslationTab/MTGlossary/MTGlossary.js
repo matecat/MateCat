@@ -326,6 +326,7 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
   }
 
   const onShowingRows = () => {
+    console.log('###############################################')
     setIsShowingRows((prevState) => !prevState)
     if (!isCattoolPage) {
       // modifyingCurrentTemplate((prevTemplate) => ({
@@ -352,6 +353,7 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
         <button
           className={`${isShowingRows ? 'rotate' : ''}`}
           onClick={onShowingRows}
+          title="Glossary options"
         >
           <ArrowDown />
           Glossary options
@@ -373,6 +375,7 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
                 <button
                   className="grey-button create-glossary-button"
                   onClick={addGlossary}
+                  title="Add glossary"
                 >
                   <IconAdd size={18} />
                   New
