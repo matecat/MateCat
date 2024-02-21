@@ -44,7 +44,7 @@ export const MoreMenu = ({portalTarget}) => {
       onClick={() => false}
       icon={<DotsHorizontal size={18} />}
       isVisibleRectArrow={false}
-      itemsTarget={portalTarget ? portalTarget : document.body}
+      itemsTarget={portalTarget}
     >
       <MenuButtonItem
         disabled={isRequestInProgress}

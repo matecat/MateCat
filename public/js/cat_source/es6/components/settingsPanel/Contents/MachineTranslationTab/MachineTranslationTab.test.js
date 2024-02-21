@@ -33,6 +33,25 @@ beforeEach(() => {
   )
 })
 
+const wrapperElement = document.createElement('div')
+const WrapperComponent = (contextProps) => {
+  const ref = useRef()
+
+  useEffect(() => {
+    ref.current.appendChild(wrapperElement)
+  }, [])
+
+  return (
+    <SettingsPanelContext.Provider
+      value={{...contextProps, portalTarget: wrapperElement}}
+    >
+      <div ref={ref}>
+        <MachineTranslationTab />
+      </div>
+    </SettingsPanelContext.Provider>
+  )
+}
+
 test('Render Machine translation tab - not logged', async () => {
   global.config.isLoggedIn = false
   const values = {
@@ -206,24 +225,6 @@ test('Delete MT Confirm', async () => {
 })
 
 test('Modern MT', async () => {
-  const wrapperElement = document.createElement('div')
-  const WrapperComponent = (contextProps) => {
-    const ref = useRef()
-
-    useEffect(() => {
-      ref.current.appendChild(wrapperElement)
-    }, [])
-
-    return (
-      <SettingsPanelContext.Provider
-        value={{...contextProps, portalTarget: wrapperElement}}
-      >
-        <div ref={ref}>
-          <MachineTranslationTab />
-        </div>
-      </SettingsPanelContext.Provider>
-    )
-  }
   const user = userEvent.setup()
   global.config.isLoggedIn = true
   config.is_cattool = false
@@ -243,7 +244,7 @@ test('Modern MT', async () => {
   const glossaryButton = screen.getByTitle('Glossary options')
   expect(glossaryButton).toBeInTheDocument()
 
-  // await user.click(glossaryButton)
-  // const addGlossary = screen.getByText('New glossary')
-  // expect(addGlossary).toBeInTheDocument()
+  await user.click(glossaryButton)
+  const addGlossary = screen.getByText('New glossary') // l'empty state non lo trova perchè ci sono dei glossari ritornati in mock dall'api - api/v3/mmt/:engineId/keysgi
+  expect(addGlossary).toBeInTheDocument()
 })

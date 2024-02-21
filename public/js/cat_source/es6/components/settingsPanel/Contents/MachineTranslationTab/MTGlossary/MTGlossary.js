@@ -326,7 +326,6 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
   }
 
   const onShowingRows = () => {
-    console.log('###############################################')
     setIsShowingRows((prevState) => !prevState)
     if (!isCattoolPage) {
       // modifyingCurrentTemplate((prevTemplate) => ({

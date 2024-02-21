@@ -17,6 +17,7 @@ import Checkmark from '../../../../../../../../img/icons/Checkmark'
 import Close from '../../../../../../../../img/icons/Close'
 import LabelWithTooltip from '../../../../common/LabelWithTooltip'
 import CatToolActions from '../../../../../actions/CatToolActions'
+import {SettingsPanelContext} from '../../../SettingsPanelContext'
 
 export const MTGlossaryRow = ({
   engineId,
@@ -25,6 +26,8 @@ export const MTGlossaryRow = ({
   isReadOnly,
   deleteGlossaryConfirm,
 }) => {
+  const {portalTarget} = useContext(SettingsPanelContext)
+
   const [isActive, setIsActive] = useState(row.isActive)
   const [isEditingName, setIsEditingName] = useState(false)
   const [name, setName] = useState(row.name)
@@ -162,7 +165,10 @@ export const MTGlossaryRow = ({
 
   const setInputNameContainer = (children) =>
     !isEditingName ? (
-      <LabelWithTooltip className="tooltip-input-name">
+      <LabelWithTooltip
+        className="tooltip-input-name"
+        tooltipTarget={portalTarget}
+      >
         {children}
       </LabelWithTooltip>
     ) : (

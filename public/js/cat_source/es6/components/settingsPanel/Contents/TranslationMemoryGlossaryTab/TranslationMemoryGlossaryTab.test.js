@@ -1,5 +1,5 @@
 import React, {useEffect, useRef} from 'react'
-import {act, render, screen, waitFor} from '@testing-library/react'
+import {act, fireEvent, render, screen, waitFor} from '@testing-library/react'
 import projectTemplatesMock from '../../../../../../../mocks/projectTemplateMock'
 import tmKeysMock from '../../../../../../../mocks/tmKeysMock'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
@@ -20,7 +20,7 @@ global.config = {
   ownerIsMe: true,
 }
 
-const contextMockValues = (noTmKeys = false) => {
+const contextMockValues = ({noTmKeys = false} = {}) => {
   let _tmKeys = !noTmKeys
     ? tmKeysMock.tm_keys.map((key) => ({
         ...key,
@@ -207,11 +207,11 @@ test('Create and delete new resource', async () => {
   )
 
   const user = userEvent.setup()
-  const contextValues = contextMockValues(true)
+  const contextValues = contextMockValues({noTmKeys: true})
 
   const {rerender} = render(<WrapperComponent {...contextValues} />)
 
-  const button = screen.getByText('New resource')
+  const button = screen.getByTestId('new-resource-tm')
   expect(button).toBeInTheDocument()
 
   await act(async () => user.click(button))
@@ -282,11 +282,11 @@ test('Create shared resource', async () => {
   )
 
   const user = userEvent.setup()
-  const contextValues = contextMockValues(true)
+  const contextValues = contextMockValues({noTmKeys: true})
 
   const {rerender} = render(<WrapperComponent {...contextValues} />)
 
-  const button = screen.getByText('Add shared resource')
+  const button = screen.getByTestId('add-shared-resource-tm')
   expect(button).toBeInTheDocument()
 
   await act(async () => user.click(button))
@@ -357,11 +357,11 @@ test('Row Menu items', async () => {
   )
 
   const user = userEvent.setup()
-  const contextValues = contextMockValues(true)
+  const contextValues = contextMockValues({noTmKeys: true})
 
   const {rerender} = render(<WrapperComponent {...contextValues} />)
 
-  const button = screen.getByText('New resource')
+  const button = screen.getByTestId('new-resource-tm')
   await act(async () => user.click(button))
 
   const rowName = screen.getByTestId(SPECIAL_ROWS_ID.newResource)
@@ -403,3 +403,71 @@ test('Row Menu items', async () => {
   await act(async () => user.click(screen.getByTestId('share-resource')))
   expect(screen.getByText('Share')).toBeEnabled()
 })
+
+test('Pretranslate truthy', async () => {
+  const {currentProjectTemplate, ...rest} = contextMockValues()
+  const contextValues = {
+    ...rest,
+    currentProjectTemplate: {
+      ...currentProjectTemplate,
+      pretranslate100: true,
+    },
+  }
+
+  render(<WrapperComponent {...contextValues} />)
+
+  expect(screen.getByTestId('pretranslate-checkbox')).toBeChecked()
+})
+
+test('Get public matches falsy', async () => {
+  const {currentProjectTemplate, ...rest} = contextMockValues()
+  const contextValues = {
+    ...rest,
+    currentProjectTemplate: {
+      ...currentProjectTemplate,
+      getPublicMatches: false,
+    },
+  }
+
+  render(<WrapperComponent {...contextValues} />)
+
+  const rowLookup = getRowElementById({
+    column: ROW_COLUMNS_TESTID.LOOKUP,
+    id: SPECIAL_ROWS_ID.defaultTranslationMemory,
+  })
+
+  expect(rowLookup).not.toBeChecked()
+})
+
+// test('Rows drag and drop order', async () => {
+//   const {currentProjectTemplate, ...rest} = contextMockValues()
+//   const contextValues = {
+//     ...rest,
+//     currentProjectTemplate: {
+//       ...currentProjectTemplate,
+//       tm: tmKeysMock.tm_keys.map((key) => ({
+//         ...key,
+//         id: key.key,
+//         r: true,
+//         w: true,
+//         isActive: true,
+//       })),
+//     },
+//   }
+
+//   const {rerender} = render(<WrapperComponent {...contextValues} />)
+
+//   const dragElement = screen.getByTestId(
+//     'settings-panel-table-row-21df10c8cce1b31f2d0d',
+//   )
+//   const dropElement = screen.getByTestId(
+//     'settings-panel-table-row-e32699c0a360e08948fe',
+//   )
+//   fireEvent.dragStart(dragElement)
+//   fireEvent.dragEnter(dropElement)
+//   fireEvent.dragOver(dropElement)
+//   fireEvent.drop(dropElement)
+//   fireEvent.dragEnd(dragElement)
+
+//   //   console.log(contextValues.currentProjectTemplate.tm)
+// })

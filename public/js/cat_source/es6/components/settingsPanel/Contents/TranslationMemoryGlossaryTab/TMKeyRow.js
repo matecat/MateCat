@@ -344,7 +344,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
             icon={<DotsHorizontal />}
             className="tm-key-row-menu-button"
             disabled={isImportTMXInProgress}
-            itemsTarget={portalTarget ? portalTarget : document.body}
+            itemsTarget={portalTarget}
           >
             <MenuButtonItem
               className="tm-key-row-button-item"
