@@ -64,7 +64,12 @@ export const MenuButton = ({
     <div className={`menu-button ${className}`}>
       <div ref={ref} className="menu-button-wrapper">
         {label && (
-          <button className="label" disabled={disabled} onClick={onClick}>
+          <button
+            className="label"
+            disabled={disabled}
+            onClick={onClick}
+            data-testid="menu-button"
+          >
             {label}
           </button>
         )}

@@ -349,6 +349,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
             <MenuButtonItem
               className="tm-key-row-button-item"
               onMouseDown={() => handleExpandeRow(ImportGlossary)}
+              data-testid="import-glossary"
             >
               <div>
                 <Upload size={20} /> Import Glossary
@@ -357,6 +358,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
             <MenuButtonItem
               className="tm-key-row-button-item"
               onMouseDown={() => handleExpandeRow(ExportTMX)}
+              data-testid="export-tmx"
             >
               <div>
                 <Download size={20} /> Export TMX
@@ -365,6 +367,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
             <MenuButtonItem
               className="tm-key-row-button-item"
               onMouseDown={() => handleExpandeRow(ExportGlossary)}
+              data-testid="export-glossary"
             >
               <div>
                 <Download size={20} /> Export Glossary
@@ -373,6 +376,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
             <MenuButtonItem
               className="tm-key-row-button-item"
               onMouseDown={() => handleExpandeRow(ShareResource)}
+              data-testid="share-resource"
             >
               <div>
                 <Share size={20} /> Share resource
@@ -381,6 +385,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
             <MenuButtonItem
               className="tm-key-row-button-item"
               onMouseDown={showConfirmDelete}
+              data-testid="delete-resource"
             >
               <div>
                 <Trash size={20} /> Delete resource
