@@ -221,6 +221,7 @@
   .template-button {
     display: flex;
     align-items: center;
+    gap: 5px;
     height: 40px;
     background-color: unset;
     border: 1px solid $grey4;
@@ -273,6 +274,11 @@
 
 .settings-panel-project-template-button-more {
   min-width: 240px;
+  border: unset !important;
+
+  &:hover {
+    color: unset !important;
+  }
 }
 
 .settings-panel-project-template {

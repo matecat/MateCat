@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import {Select} from '../../common/Select'
-import IconPin from '../../icons/IconPin'
+import {IconPin} from '../../icons/IconPin'
 
 export const TemplateSelect = ({
   projectTemplates,
