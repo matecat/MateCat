@@ -183,6 +183,7 @@ class NewController extends ajaxController {
                 'id_qa_model_template'       => [ 'filter' => FILTER_VALIDATE_INT ],
                 'payable_rate_template_id'   => [ 'filter' => FILTER_VALIDATE_INT ],
                 'payable_rate_template_name' => [ 'filter' => FILTER_SANITIZE_STRING ],
+                'dialect_strict'             => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
                 'lexiqa'                     => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
                 'speech2text'                => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
                 'tag_projection'             => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
@@ -895,6 +896,10 @@ class NewController extends ajaxController {
         // project_info
         if ( !empty( $this->postInput[ 'project_info' ] ) ) {
             $this->metadata[ 'project_info' ] = $this->postInput[ 'project_info' ];
+        }
+
+        if ( !empty( $this->postInput[ 'dialect_strict' ] ) ) {
+            $this->metadata[ 'dialect_strict' ] = $this->postInput[ 'dialect_strict' ];
         }
 
         //override metadata with explicitly declared keys ( we maintain metadata for backward compatibility )
