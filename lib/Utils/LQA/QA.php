@@ -1810,11 +1810,15 @@ class QA {
     private function checkContentAndAddTagMismatchError(array $src, array $trg, $error, array $originalTargetValues) {
 
         foreach ($trg as $pos => $value){
-            if(!in_array($value, $src)){
+            $index = array_search($value, $src);
+
+            if($index === false){
                 $this->addError( $error );
                 $this->tagPositionError[] = ( new LtGtEncode() )->transform( $originalTargetValues[$pos] );
 
                 return;
+            } else {
+                unset($src[$index]);
             }
         }
     }
