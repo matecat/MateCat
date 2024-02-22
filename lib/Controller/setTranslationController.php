@@ -359,7 +359,7 @@ class setTranslationController extends ajaxController {
         $new_translation->suggestion_position    = ($this->chosen_suggestion_index !== null ? $this->chosen_suggestion_index : $old_translation->suggestion_position);
         $new_translation->warning                = $check->thereAreWarnings();
         $new_translation->translation_date       = date( "Y-m-d H:i:s" );
-        $new_translation->suggestion             = ((!empty($old_suggestion)) ? $old_suggestion->translation : $old_translation->translation);
+        $new_translation->suggestion             = ((!empty($old_suggestion)) ? $old_suggestion->translation : $old_translation->suggestion);
         $new_translation->suggestion_source      = $old_translation->suggestion_source;
         $new_translation->suggestion_match       = $old_translation->suggestion_match;
 
