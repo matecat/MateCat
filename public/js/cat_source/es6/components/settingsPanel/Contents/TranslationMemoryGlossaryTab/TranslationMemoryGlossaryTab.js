@@ -410,6 +410,7 @@ export const TranslationMemoryGlossaryTab = () => {
               placeholder="Search resources"
               value={filterInactiveKeys}
               onChange={(e) => setFilterInactiveKeys(e.currentTarget.value)}
+              data-testid="search-inactive-tmkeys"
             />
           </div>
           {config.isLoggedIn ? (

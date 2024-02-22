@@ -1,5 +1,12 @@
 import React, {useEffect, useRef} from 'react'
-import {act, fireEvent, render, screen, waitFor} from '@testing-library/react'
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  spyOn,
+} from '@testing-library/react'
 import projectTemplatesMock from '../../../../../../../mocks/projectTemplateMock'
 import tmKeysMock from '../../../../../../../mocks/tmKeysMock'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
@@ -439,35 +446,30 @@ test('Get public matches falsy', async () => {
   expect(rowLookup).not.toBeChecked()
 })
 
-// test('Rows drag and drop order', async () => {
-//   const {currentProjectTemplate, ...rest} = contextMockValues()
-//   const contextValues = {
-//     ...rest,
-//     currentProjectTemplate: {
-//       ...currentProjectTemplate,
-//       tm: tmKeysMock.tm_keys.map((key) => ({
-//         ...key,
-//         id: key.key,
-//         r: true,
-//         w: true,
-//         isActive: true,
-//       })),
-//     },
-//   }
+test('Search resources inactive keys', async () => {
+  const user = userEvent.setup()
+  const contextValues = contextMockValues()
 
-//   const {rerender} = render(<WrapperComponent {...contextValues} />)
+  render(<WrapperComponent {...contextValues} />)
 
-//   const dragElement = screen.getByTestId(
-//     'settings-panel-table-row-21df10c8cce1b31f2d0d',
-//   )
-//   const dropElement = screen.getByTestId(
-//     'settings-panel-table-row-e32699c0a360e08948fe',
-//   )
-//   fireEvent.dragStart(dragElement)
-//   fireEvent.dragEnter(dropElement)
-//   fireEvent.dragOver(dropElement)
-//   fireEvent.drop(dropElement)
-//   fireEvent.dragEnd(dragElement)
+  const searchInput = screen.getByTestId('search-inactive-tmkeys')
 
-//   //   console.log(contextValues.currentProjectTemplate.tm)
-// })
+  await act(async () => user.click(searchInput))
+  await act(async () => user.type(searchInput, 'myKey'))
+
+  const row1 = getRowElementById({
+    column: ROW_COLUMNS_TESTID.LOOKUP,
+    id: 'e32699c0a360e08948fe',
+  })
+  const row2 = getRowElementById({
+    column: ROW_COLUMNS_TESTID.LOOKUP,
+    id: '74b6c82408a028b6f020',
+  })
+  const row3 = getRowElementById({
+    column: ROW_COLUMNS_TESTID.LOOKUP,
+    id: '21df10c8cce1b31f2d0d',
+  })
+  expect(row1).not.toBeInTheDocument()
+  expect(row2).not.toBeInTheDocument()
+  expect(row3).toBeInTheDocument()
+})
