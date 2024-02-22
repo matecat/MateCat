@@ -224,16 +224,18 @@ class TMAnalysisWorker extends AbstractWorker {
         $suggestion = $check->getTargetSeg();
         $err_json2  = ( $check->thereAreErrors() ) ? $check->getErrorsJSON() : '';
 
-        $suggestion = $filter->fromLayer1ToLayer0( $suggestion );
+        $suggestion = $filter->fromLayer2ToLayer0( $suggestion );
 
         $segment = ( new \Segments_SegmentDao() )->getById( $queueElement->params->id_segment );
 
         foreach ( $this->_matches as $k => $m ) {
-            $this->_matches[ $k ][ 'raw_segment' ] = $filter->fromLayer1ToLayer0( $this->_matches[ $k ][ 'raw_segment' ] );
-            $this->_matches[ $k ][ 'segment' ] = $filter->fromLayer1ToLayer0( html_entity_decode($this->_matches[ $k ][ 'segment' ]) );
-            $this->_matches[ $k ][ 'translation' ] = $filter->fromLayer1ToLayer0( html_entity_decode($this->_matches[ $k ][ 'translation' ]) );
-            $this->_matches[ $k ][ 'raw_translation' ] = $filter->fromLayer1ToLayer0( $this->_matches[ $k ][ 'raw_translation' ] );
+            $this->_matches[ $k ][ 'raw_segment' ] = $filter->fromLayer2ToLayer0( $this->_matches[ $k ][ 'raw_segment' ] );
+            $this->_matches[ $k ][ 'segment' ] = $filter->fromLayer2ToLayer0( html_entity_decode($this->_matches[ $k ][ 'segment' ]) );
+            $this->_matches[ $k ][ 'translation' ] = $filter->fromLayer2ToLayer0( html_entity_decode($this->_matches[ $k ][ 'translation' ]) );
+            $this->_matches[ $k ][ 'raw_translation' ] = $filter->fromLayer2ToLayer0( $this->_matches[ $k ][ 'raw_translation' ] );
         }
+
+        \Log::doJsonLog("PIPPO . " . json_encode($this->_matches));
 
         $suggestion_json   = json_encode( $this->_matches );
 
