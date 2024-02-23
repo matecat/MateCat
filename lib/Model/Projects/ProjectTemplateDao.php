@@ -39,13 +39,13 @@ class ProjectTemplateDao extends DataAccess_AbstractDao
         $default = new ProjectTemplateStruct();
         $default->id = 0;
         $default->name = "Standard";
-        $default->speech2text = true;
+        $default->speech2text = false;
         $default->is_default = empty($defaultProject);
         $default->id_team = $team->id;
         $default->lexica = true;
         $default->tag_projection = true;
         $default->uid = $uid;
-        $default->pretranslate_100 = true;
+        $default->pretranslate_100 = false;
         $default->get_public_matches = true;
         $default->segmentation_rule = [
             "name" => "General",
