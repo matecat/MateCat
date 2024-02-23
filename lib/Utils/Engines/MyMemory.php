@@ -678,13 +678,13 @@ class Engines_MyMemory extends Engines_AbstractEngine {
      * @param $userEmail
      * @param $userName
      * @param $userSurname
-     *
+     * @param $strip_tags
      *
      * @return Engines_Results_MyMemory_ExportResponse
      * @throws Exception
      *
      */
-    public function emailExport( $key, $name, $userEmail, $userName, $userSurname ) {
+    public function emailExport( $key, $name, $userEmail, $userName, $userSurname, $strip_tags = false ) {
         $parameters = [];
 
         $parameters[ 'key' ]        = trim( $key );
@@ -692,6 +692,10 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         $parameters[ 'user_name' ]  = trim( $userName ) . " " . trim( $userSurname );
         ( !empty( $name ) ? $parameters[ 'zip_name' ] = $name : $parameters[ 'zip_name' ] = $key );
         $parameters[ 'zip_name' ] = $parameters[ 'zip_name' ] . ".zip";
+
+        if($strip_tags and $strip_tags == true){
+            $parameters['strip_tags'] = 1;
+        }
 
         $this->call( 'tmx_export_email_url', $parameters );
 

@@ -18,8 +18,6 @@ export const AdvancedOptionsTab = () => {
     targetLangs,
   } = useContext(SettingsPanelContext)
 
-  console.log('currentProjectTemplate', currentProjectTemplate)
-
   // Speech to text
   const speechToTextActive = currentProjectTemplate.speech2text
   const setSpeechToTextActive = (value) =>

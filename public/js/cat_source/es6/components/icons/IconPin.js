@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-const IconPin = ({size = 16}) => {
+export const IconPin = ({size = 16}) => {
   return (
     <svg width={size} height={size} viewBox="0 0 16 16">
       <path
@@ -17,5 +17,3 @@ const IconPin = ({size = 16}) => {
 IconPin.propTypes = {
   size: PropTypes.number,
 }
-
-export default IconPin

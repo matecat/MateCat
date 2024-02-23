@@ -38,7 +38,7 @@ const LabelWithTooltip = ({children, className, tooltipTarget}) => {
       window.getComputedStyle(element)?.textOverflow !== 'ellipsis'
     ) {
       const next = element.firstChild
-      if (window.getComputedStyle(next)?.textOverflow === 'ellipsis') {
+      if (next && window.getComputedStyle(next)?.textOverflow === 'ellipsis') {
         return next
       }
       element = next
@@ -46,9 +46,9 @@ const LabelWithTooltip = ({children, className, tooltipTarget}) => {
     return element
   }
 
-  const shouldShowTooltip = TEXT_UTILS.isContentTextEllipsis(
-    getOverflowChildren(),
-  )
+  const overflowChildren = getOverflowChildren()
+  const shouldShowTooltip =
+    overflowChildren && TEXT_UTILS.isContentTextEllipsis(overflowChildren)
 
   const mouseEnter = () => {
     const rect = ref.current.getBoundingClientRect()
@@ -91,7 +91,7 @@ const LabelWithTooltip = ({children, className, tooltipTarget}) => {
 LabelWithTooltip.propTypes = {
   children: PropTypes.node.isRequired,
   className: PropTypes.string,
-  tooltipTarget: PropTypes.node,
+  tooltipTarget: PropTypes.object,
 }
 
 export default LabelWithTooltip

@@ -1,5 +1,5 @@
-import React from 'react'
-import {render, screen, within} from '@testing-library/react'
+import React, {useEffect, useRef} from 'react'
+import {act, render, screen, within} from '@testing-library/react'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {MachineTranslationTab} from './MachineTranslationTab'
 import {mswServer} from '../../../../../../../mocks/mswServer'
@@ -11,6 +11,7 @@ import {
   mtEnginesMock,
 } from '../../../../../../../mocks/mtEnginesMock'
 import userEvent from '@testing-library/user-event'
+import {TranslationMemoryGlossaryTab} from '../TranslationMemoryGlossaryTab'
 
 beforeEach(() => {
   global.config = {
@@ -31,6 +32,25 @@ beforeEach(() => {
     }),
   )
 })
+
+const wrapperElement = document.createElement('div')
+const WrapperComponent = (contextProps) => {
+  const ref = useRef()
+
+  useEffect(() => {
+    ref.current.appendChild(wrapperElement)
+  }, [])
+
+  return (
+    <SettingsPanelContext.Provider
+      value={{...contextProps, portalTarget: wrapperElement}}
+    >
+      <div ref={ref}>
+        <MachineTranslationTab />
+      </div>
+    </SettingsPanelContext.Provider>
+  )
+}
 
 test('Render Machine translation tab - not logged', async () => {
   global.config.isLoggedIn = false
@@ -144,7 +164,7 @@ test('Activate MT', async () => {
   const user = userEvent.setup()
   global.config.isLoggedIn = true
 
-  const values = {
+  let values = {
     mtEngines: mtEnginesMock,
     setMtEngines: () => {},
     openLoginModal: jest.fn(),
@@ -152,13 +172,12 @@ test('Activate MT', async () => {
     currentProjectTemplate: projectTemplatesMock.items[0],
     projectTemplates: projectTemplatesMock.items,
   }
-  render(
+  const {rerender} = render(
     <SettingsPanelContext.Provider value={values}>
       <MachineTranslationTab />
     </SettingsPanelContext.Provider>,
   )
-
-  const activeMTContainert = screen.getByTestId('active-mt')
+  let activeMTContainert = screen.getByTestId('active-mt')
   let mtName = within(activeMTContainert).getByText('MyMemory')
   expect(mtName).toBeInTheDocument()
   const checkboxMtActive = screen.getByTestId(
@@ -166,6 +185,15 @@ test('Activate MT', async () => {
   )
   await user.click(checkboxMtActive)
   expect(values.modifyingCurrentTemplate.call.length).toBe(1)
+  values.currentProjectTemplate.mt.id = mtEnginesMock[1].id
+  rerender(
+    <SettingsPanelContext.Provider value={values}>
+      <MachineTranslationTab />
+    </SettingsPanelContext.Provider>,
+  )
+  activeMTContainert = screen.getByTestId('active-mt')
+  mtName = within(activeMTContainert).getByText(mtEnginesMock[1].name)
+  expect(mtName).toBeInTheDocument()
 })
 
 test('Delete MT Confirm', async () => {
@@ -194,4 +222,29 @@ test('Delete MT Confirm', async () => {
   expect(confirmButton).toBeInTheDocument()
   await user.click(confirmButton)
   expect(values.modifyingCurrentTemplate.call.length).toBe(1)
+})
+
+test('Modern MT', async () => {
+  const user = userEvent.setup()
+  global.config.isLoggedIn = true
+  config.is_cattool = false
+  const projectTemplate = {...projectTemplatesMock[0], mt: {id: 5}}
+  const values = {
+    mtEngines: mtEnginesMock,
+    setMtEngines: () => {},
+    openLoginModal: jest.fn(),
+    modifyingCurrentTemplate: jest.fn(),
+    currentProjectTemplate: projectTemplate,
+    projectTemplates: projectTemplatesMock.items,
+  }
+  render(<WrapperComponent {...values} />)
+  let activeMTContainert = screen.getByTestId('active-mt')
+  let mtName = within(activeMTContainert).getByText('ModernMT')
+  expect(mtName).toBeInTheDocument()
+  const glossaryButton = screen.getByTitle('Glossary options')
+  expect(glossaryButton).toBeInTheDocument()
+
+  await user.click(glossaryButton)
+  const addGlossary = screen.getByText('New glossary') // l'empty state non lo trova perchè ci sono dei glossari ritornati in mock dall'api - api/v3/mmt/:engineId/keysgi
+  expect(addGlossary).toBeInTheDocument()
 })

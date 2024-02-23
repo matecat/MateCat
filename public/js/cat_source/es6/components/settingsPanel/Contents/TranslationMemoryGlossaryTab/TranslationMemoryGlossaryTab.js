@@ -114,7 +114,6 @@ export const TranslationMemoryGlossaryTab = () => {
       ...prevTemplate,
       pretranslate100: value,
     }))
-
   const [specialRows, setSpecialRows] = useState([
     {
       ...DEFAULT_TRANSLATION_MEMORY,
@@ -133,8 +132,10 @@ export const TranslationMemoryGlossaryTab = () => {
 
   previousStatesRef.current.currentProjectTemplate = currentProjectTemplate
 
-  // Sync tmKeys state when current project template changed
+  // Sync tmKeys state when current project template changed in homepage
   useEffect(() => {
+    if (config.is_cattool) return
+
     const tm = currentProjectTemplate?.tm ?? []
 
     setTmKeys((prevState) =>
@@ -367,6 +368,7 @@ export const TranslationMemoryGlossaryTab = () => {
                 setIsPretranslate100Active(e.currentTarget.checked)
               }
               type="checkbox"
+              data-testid="pretranslate-checkbox"
             />
             Pre-translate 100% matches from TM
           </div>
@@ -379,6 +381,7 @@ export const TranslationMemoryGlossaryTab = () => {
                 <button
                   className="ui primary button settings-panel-button-icon"
                   onClick={onAddSharedResource}
+                  data-testid="add-shared-resource-tm"
                 >
                   <Users size={18} /> Add shared resource
                 </button>
@@ -387,6 +390,7 @@ export const TranslationMemoryGlossaryTab = () => {
               <button
                 className="ui primary button settings-panel-button-icon"
                 onClick={onNewResource}
+                data-testid="new-resource-tm"
               >
                 <AddWide size={18} /> New resource
               </button>
@@ -406,6 +410,7 @@ export const TranslationMemoryGlossaryTab = () => {
               placeholder="Search resources"
               value={filterInactiveKeys}
               onChange={(e) => setFilterInactiveKeys(e.currentTarget.value)}
+              data-testid="search-inactive-tmkeys"
             />
           </div>
           {config.isLoggedIn ? (

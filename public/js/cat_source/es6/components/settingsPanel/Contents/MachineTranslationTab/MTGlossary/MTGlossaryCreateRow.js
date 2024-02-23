@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react'
+import React, {useContext, useEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import Upload from '../../../../../../../../img/icons/Upload'
 import Checkmark from '../../../../../../../../img/icons/Checkmark'
@@ -7,8 +7,11 @@ import {MTGlossaryStatus, MT_GLOSSARY_CREATE_ROW_ID} from './MTGlossary'
 import {createMemoryAndImportGlossary} from '../../../../../api/createMemoryAndImportGlossary/createMemoryAndImportGlossary'
 import LabelWithTooltip from '../../../../common/LabelWithTooltip'
 import CatToolActions from '../../../../../actions/CatToolActions'
+import {SettingsPanelContext} from '../../../SettingsPanelContext'
 
 export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
+  const {portalTarget} = useContext(SettingsPanelContext)
+
   const [isActive, setIsActive] = useState(row.isActive)
   const [name, setName] = useState(row.name ?? '')
   const [file, setFile] = useState()
@@ -174,7 +177,7 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
               Choose file
             </label>
           ) : (
-            <LabelWithTooltip>
+            <LabelWithTooltip tooltipTarget={portalTarget}>
               <div className="filename">
                 <label>{file.name}</label>
               </div>

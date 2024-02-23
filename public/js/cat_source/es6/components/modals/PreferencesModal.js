@@ -39,7 +39,7 @@ class PreferencesModal extends React.Component {
   }
 
   openResetPassword() {
-    $('#modal').trigger('openresetpassword')
+    APP.openResetPassword()
   }
 
   checkboxChange(selected) {

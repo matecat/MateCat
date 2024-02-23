@@ -43,6 +43,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
     modifyingCurrentTemplate,
     currentProjectTemplate,
     projectTemplates,
+    portalTarget,
   } = useContext(SettingsPanelContext)
   const {setSpecialRows} = useContext(TranslationMemoryGlossaryTabContext)
 
@@ -301,6 +302,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
             (!isOwner && !isMMSharedKey) || (isMMSharedKey && !config.ownerIsMe)
           }
           type="checkbox"
+          data-testid={`tmkey-lookup-${row.id}`}
         />
       </div>
       <div className="tm-key-update align-center">
@@ -314,6 +316,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
               isMMSharedUpdateChecked && {
                 title: 'Add a private resource to disable updating',
               })}
+            data-testid={`tmkey-update-${row.id}`}
           />
         )}
       </div>
@@ -326,6 +329,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
           onChange={onChangeName}
           disabled={isMMSharedKey || !isOwner}
           onBlur={updateKeyName}
+          data-testid={`tmkey-row-name-${row.id}`}
         ></input>
       </div>
       <div className="tm-key-row-key">{row.key}</div>
@@ -340,10 +344,12 @@ export const TMKeyRow = ({row, onExpandRow}) => {
             icon={<DotsHorizontal />}
             className="tm-key-row-menu-button"
             disabled={isImportTMXInProgress}
+            itemsTarget={portalTarget}
           >
             <MenuButtonItem
               className="tm-key-row-button-item"
               onMouseDown={() => handleExpandeRow(ImportGlossary)}
+              data-testid="import-glossary"
             >
               <div>
                 <Upload size={20} /> Import Glossary
@@ -352,6 +358,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
             <MenuButtonItem
               className="tm-key-row-button-item"
               onMouseDown={() => handleExpandeRow(ExportTMX)}
+              data-testid="export-tmx"
             >
               <div>
                 <Download size={20} /> Export TMX
@@ -360,6 +367,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
             <MenuButtonItem
               className="tm-key-row-button-item"
               onMouseDown={() => handleExpandeRow(ExportGlossary)}
+              data-testid="export-glossary"
             >
               <div>
                 <Download size={20} /> Export Glossary
@@ -368,6 +376,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
             <MenuButtonItem
               className="tm-key-row-button-item"
               onMouseDown={() => handleExpandeRow(ShareResource)}
+              data-testid="share-resource"
             >
               <div>
                 <Share size={20} /> Share resource
@@ -376,6 +385,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
             <MenuButtonItem
               className="tm-key-row-button-item"
               onMouseDown={showConfirmDelete}
+              data-testid="delete-resource"
             >
               <div>
                 <Trash size={20} /> Delete resource
