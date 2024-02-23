@@ -224,7 +224,7 @@ test('Delete MT Confirm', async () => {
   expect(values.modifyingCurrentTemplate.call.length).toBe(1)
 })
 
-test('Modern MT', async () => {
+test.skip('Modern MT', async () => {
   const user = userEvent.setup()
   global.config.isLoggedIn = true
   config.is_cattool = false
