@@ -12,6 +12,7 @@ import {
 } from '../../../../../../../mocks/mtEnginesMock'
 import userEvent from '@testing-library/user-event'
 import {TranslationMemoryGlossaryTab} from '../TranslationMemoryGlossaryTab'
+import ModalsActions from '../../../../actions/ModalsActions'
 
 beforeEach(() => {
   global.config = {
@@ -224,18 +225,36 @@ test('Delete MT Confirm', async () => {
   expect(values.modifyingCurrentTemplate.call.length).toBe(1)
 })
 
-test.skip('Modern MT', async () => {
+test('Modern MT and glossary', async () => {
   const user = userEvent.setup()
+
   global.config.isLoggedIn = true
   config.is_cattool = false
-  const projectTemplate = {...projectTemplatesMock[0], mt: {id: 5}}
+
+  const projectTemplates = [
+    ...projectTemplatesMock.items,
+    {
+      ...projectTemplatesMock.items[1],
+      id: 4,
+      mt: {id: 5, extra: {glossaries: [374333]}},
+    },
+  ]
+  const currentProjectTemplate = {
+    ...projectTemplates[1],
+    mt: {id: 5, extra: {}},
+  }
+
+  let modifiedTemplate = currentProjectTemplate
+  const modifyingCurrentTemplateFn = (value) =>
+    (modifiedTemplate = value(currentProjectTemplate))
+
   const values = {
     mtEngines: mtEnginesMock,
     setMtEngines: () => {},
     openLoginModal: jest.fn(),
-    modifyingCurrentTemplate: jest.fn(),
-    currentProjectTemplate: projectTemplate,
-    projectTemplates: projectTemplatesMock.items,
+    modifyingCurrentTemplate: modifyingCurrentTemplateFn,
+    currentProjectTemplate,
+    projectTemplates,
   }
   render(<WrapperComponent {...values} />)
   let activeMTContainert = screen.getByTestId('active-mt')
@@ -245,6 +264,29 @@ test.skip('Modern MT', async () => {
   expect(glossaryButton).toBeInTheDocument()
 
   await user.click(glossaryButton)
-  const addGlossary = screen.getByText('New glossary') // l'empty state non lo trova perchè ci sono dei glossari ritornati in mock dall'api - api/v3/mmt/:engineId/keysgi
-  expect(addGlossary).toBeInTheDocument()
+
+  const rowGlossary1 = screen.getByTestId('mtglossary-active-374333')
+  const rowGlossary2 = screen.getByTestId('mtglossary-active-374533')
+  expect(rowGlossary1).toBeInTheDocument()
+  expect(rowGlossary2).toBeInTheDocument()
+
+  await user.click(rowGlossary1)
+
+  expect(modifiedTemplate).toEqual({
+    ...currentProjectTemplate,
+    mt: {id: 5, extra: {glossaries: [374333]}},
+  })
+
+  await user.click(screen.getByTestId('delete-mtglossary-374533'))
+
+  expect(await screen.findByText('Confirm')).toBeInTheDocument()
+
+  const spyShowModal = jest.spyOn(ModalsActions, 'showModalComponent')
+
+  await user.click(screen.getByTestId('delete-mtglossary-374333'))
+
+  const modalContent = spyShowModal.mock.calls[0][1].content
+  expect(modalContent).toBe(
+    'The MT glossary you are about to delete is used in the following project creation template(s)',
+  )
 })

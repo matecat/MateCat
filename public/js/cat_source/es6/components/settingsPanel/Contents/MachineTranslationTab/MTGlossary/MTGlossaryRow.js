@@ -183,6 +183,7 @@ export const MTGlossaryRow = ({
           onChange={onChangeIsActive}
           type="checkbox"
           disabled={isWaitingResult || isReadOnly}
+          data-testid={`mtglossary-active-${row.id}`}
         />
       </div>
       <div className="glossary-row-name">
@@ -220,6 +221,7 @@ export const MTGlossaryRow = ({
               className="grey-button"
               disabled={isWaitingResult}
               onClick={() => deleteGlossaryConfirm(row)}
+              data-testid={`delete-mtglossary-${row.id}`}
             >
               <Trash size={12} />
             </button>

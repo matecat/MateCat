@@ -18,6 +18,7 @@ import {SCHEMA_KEYS} from '../../../../hooks/useProjectTemplates'
 import userEvent from '@testing-library/user-event'
 import {mswServer} from '../../../../../../../mocks/mswServer'
 import {HttpResponse, http} from 'msw'
+import ModalsActions from '../../../../actions/ModalsActions'
 
 global.config = {
   basepath: 'http://localhost/',
@@ -27,9 +28,12 @@ global.config = {
   ownerIsMe: true,
 }
 
-const contextMockValues = ({noTmKeys = false} = {}) => {
+const contextMockValues = ({
+  noTmKeys = false,
+  tmKeysMockArray = tmKeysMock.tm_keys,
+} = {}) => {
   let _tmKeys = !noTmKeys
-    ? tmKeysMock.tm_keys.map((key) => ({
+    ? tmKeysMockArray.map((key) => ({
         ...key,
         id: key.key,
         r: false,
@@ -472,4 +476,39 @@ test('Search resources inactive keys', async () => {
   expect(row1).not.toBeInTheDocument()
   expect(row2).not.toBeInTheDocument()
   expect(row3).toBeInTheDocument()
+})
+
+test('Modal delete tmkeys used in other templates', async () => {
+  const spyShowModal = jest.spyOn(ModalsActions, 'showModalComponent')
+
+  const user = userEvent.setup()
+  const {projectTemplates, ...rest} = contextMockValues({
+    tmKeysMockArray: tmKeysMock.tm_keys.filter(
+      ({key}) => key === '74b6c82408a028b6f020',
+    ),
+  })
+  const template = {
+    ...projectTemplates[1],
+    id: 5,
+    tm: [projectTemplates[1].tm[0]],
+  }
+  const contextValues = {
+    ...rest,
+    projectTemplates: [...projectTemplates, template],
+    currentProjectTemplate: template,
+  }
+
+  render(<WrapperComponent {...contextValues} />)
+
+  const menuButton = screen.getByTestId('menu-button-show-items')
+
+  await act(async () => user.click(menuButton))
+
+  const deleteButton = screen.getByTestId('delete-resource')
+  await act(async () => user.click(deleteButton))
+
+  const modalContent = spyShowModal.mock.calls[0][1].content
+  expect(modalContent).toBe(
+    'The memory key you are about to delete is used in the following project creation template(s)',
+  )
 })
