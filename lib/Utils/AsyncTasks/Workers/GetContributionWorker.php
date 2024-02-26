@@ -19,7 +19,6 @@ use INIT;
 use Jobs_JobStruct;
 use Matecat\SubFiltering\AbstractFilter;
 use PostProcess;
-use Projects_MetadataDao;
 use Stomp;
 use Matecat\SubFiltering\MateCatFilter;
 use TaskRunner\Commons\AbstractElement;
@@ -427,10 +426,11 @@ class GetContributionWorker extends AbstractWorker {
         $_config[ 'num_result' ]     = $contributionStruct->resultNum;
         $_config[ 'isConcordance' ]  = $contributionStruct->concordanceSearch;
 
-        $dialect_strict = Projects_MetadataDao::get($jobStruct->id_project, 'dialect_strict');
+        $jobsMetadataDao = new \Jobs\MetadataDao();
+        $dialect_strict = $jobsMetadataDao->get($jobStruct->id, $jobStruct->password, 'dialect_strict');
 
         if($dialect_strict !== null){
-            $_config['dialect_strict'] = $dialect_strict->getValue() == 1;
+            $_config['dialect_strict'] = $dialect_strict->value == 1;
         }
 
         if ( $contributionStruct->concordanceSearch && $contributionStruct->fromTarget ) {
