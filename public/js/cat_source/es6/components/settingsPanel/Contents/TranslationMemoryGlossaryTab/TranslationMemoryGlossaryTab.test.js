@@ -1,12 +1,5 @@
 import React, {useEffect, useRef} from 'react'
-import {
-  act,
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-  spyOn,
-} from '@testing-library/react'
+import {act, render, screen, waitFor} from '@testing-library/react'
 import projectTemplatesMock from '../../../../../../../mocks/projectTemplateMock'
 import tmKeysMock from '../../../../../../../mocks/tmKeysMock'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
@@ -26,6 +19,9 @@ global.config = {
   ajaxDomainsNumber: 20,
   isLoggedIn: 1,
   ownerIsMe: true,
+  defaults: {
+    tag_projection: 1,
+  },
 }
 
 const contextMockValues = ({

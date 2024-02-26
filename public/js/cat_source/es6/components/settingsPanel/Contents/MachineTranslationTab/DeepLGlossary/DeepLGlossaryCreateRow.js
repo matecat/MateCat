@@ -142,6 +142,7 @@ export const DeepLGlossaryCreateRow = ({engineId, row, setRows}) => {
           value={name}
           onChange={onChangeName}
           disabled={isWaitingResult}
+          data-testid="deeplglossary-create-name"
         />
         <div className="glossary-row-import-button">
           <input
@@ -175,6 +176,7 @@ export const DeepLGlossaryCreateRow = ({engineId, row, setRows}) => {
           className="ui primary button settings-panel-button-icon confirm-button"
           type="submit"
           disabled={isWaitingResult || !isFormFilled}
+          data-testid="deeplglossary-create-confirm"
         >
           <Checkmark size={12} />
           Confirm

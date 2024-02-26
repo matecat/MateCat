@@ -22,7 +22,7 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
 
   useEffect(() => {
     statusEntry.current = new MTGlossaryStatus()
-    ref.current.scrollIntoView({behavior: 'smooth', block: 'nearest'})
+    ref.current.scrollIntoView?.({behavior: 'smooth', block: 'nearest'})
 
     return () => statusEntry.current.cancel()
   }, [])
@@ -161,6 +161,7 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
           value={name}
           onChange={onChangeName}
           disabled={isWaitingResult}
+          data-testid="mtglossary-create-name"
         />
         <div className="glossary-row-import-button">
           <input
@@ -194,6 +195,7 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
           className="ui primary button settings-panel-button-icon confirm-button"
           type="submit"
           disabled={isWaitingResult || !isFormFilled}
+          data-testid="mtglossary-create-confirm"
         >
           <Checkmark size={12} />
           Confirm

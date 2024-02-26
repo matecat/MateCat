@@ -47,6 +47,7 @@ export const SegmentationRule = ({segmentationRule, setSegmentationRule}) => {
       setSegmentationRule(active)
     }
   }, [active, setSegmentationRule])
+
   return (
     <div className="options-box seg_rule" onClick={onClick}>
       <div className="option-description">
@@ -71,7 +72,10 @@ export const SegmentationRule = ({segmentationRule, setSegmentationRule}) => {
           </p>
         </div>
       </div>
-      <div className="options-select-container">
+      <div
+        className="options-select-container"
+        data-testid="container-segmentationrule"
+      >
         <Select
           options={options}
           activeOption={active}
