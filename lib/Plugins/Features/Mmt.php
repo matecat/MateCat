@@ -106,7 +106,18 @@ class Mmt extends BaseFeature {
 
         // Check account
         try {
-            $newTestCreatedMT->checkAccount();
+            $checkAccount = $newTestCreatedMT->checkAccount();
+
+            if(!isset($checkAccount['billingPeriod']['planForCatTool'])){
+                throw new Exception("MMT license not valid");
+            }
+
+            $planForCatTool = $checkAccount['billingPeriod']['planForCatTool'];
+
+            if($planForCatTool === false){
+                throw new Exception("The ModernMT license you entered cannot be used inside CAT tools. Please subscribe to a suitable license to start using the ModernMT plugin.");
+            }
+
         } catch ( Exception $e ){
             ( new EnginesModel_EngineDAO( Database::obtain() ) )->delete( $newCreatedDbRowStruct );
 
