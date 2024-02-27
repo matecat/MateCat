@@ -163,9 +163,16 @@ jest.mock('../../../../stores/ApplicationStore', () => ({
   getLanguageNameFromLocale: () => '',
 }))
 
+const originalUI = global.UI
+global.UI = {
+  currentSegmentId: '',
+}
+
 beforeEach(() => {
   config.show_tag_projection = 1
 })
+
+afterAll(() => (global.UI = originalUI))
 
 const projectTemplatesMockProxy = projectTemplatesMock.items.map(
   (template) =>
@@ -294,4 +301,23 @@ test('Lexiqa not available for... (target lang)', () => {
   )
 
   expect(screen.getByTestId('switch-lexiqa')).not.toBeChecked()
+})
+
+test('Cattool page', () => {
+  config.is_cattool = true
+  config.isOpenAiEnabled = true
+
+  render(
+    <SettingsPanelContext.Provider
+      value={{
+        ...contextValues,
+      }}
+    >
+      <AdvancedOptionsTab />
+    </SettingsPanelContext.Provider>,
+  )
+
+  expect(screen.getByTestId('switch-chars-counter')).toBeInTheDocument()
+  expect(screen.getByTestId('switch-ai-assistant')).toBeInTheDocument()
+  expect(screen.queryByTestId('container-team')).not.toBeInTheDocument()
 })

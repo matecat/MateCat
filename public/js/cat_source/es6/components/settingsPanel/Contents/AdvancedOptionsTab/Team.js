@@ -21,7 +21,7 @@ export const Team = ({selectedTeam, setSelectedTeam}) => {
       <div className="option-description">
         <h3>Team</h3>Description
       </div>
-      <div className="options-select-container">
+      <div className="options-select-container" data-testid="container-team">
         <Select
           id="project-team"
           name={'project-team'}
