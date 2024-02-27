@@ -109,6 +109,8 @@ class ModernMTController extends BaseChunkController
                 throw new Exception("Glossary is empty", 400);
             }
 
+            $this->validateCSVContent($csv);
+
             $type = (count($csv[0]) == 2) ? 'unidirectional' : 'equivalent';
 
             $engineId = filter_var( $this->request->engineId, FILTER_SANITIZE_NUMBER_INT );
@@ -236,6 +238,8 @@ class ModernMTController extends BaseChunkController
             if(empty($csv)){
                 throw new Exception("Glossary is empty", 400);
             }
+
+            $this->validateCSVContent($csv);
 
             $type = (count($csv[0]) == 2) ? 'unidirectional' : 'equivalent';
 
@@ -386,6 +390,21 @@ class ModernMTController extends BaseChunkController
         unlink( $oldPath );
 
         return $glossary->file_path;
+    }
+
+    /**
+     * @param $csvContent
+     * @throws Exception
+     */
+    private function validateCSVContent($csvContent)
+    {
+        foreach ($csvContent as $csvRowIndex => $csvRow){
+            for($i = 0; $i < count($csvRow); $i++){
+                if(empty($csvRow[$i])){
+                    throw new Exception("Row ".($csvRowIndex+1)." malformed, please amend it and upload the file again.");
+                }
+            }
+        }
     }
 
     /**
