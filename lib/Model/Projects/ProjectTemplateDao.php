@@ -47,6 +47,8 @@ class ProjectTemplateDao extends DataAccess_AbstractDao
         $default->uid = $uid;
         $default->pretranslate_100 = false;
         $default->get_public_matches = true;
+        $default->payable_rate_template_id = 0;
+        $default->qa_model_template_id = 0;
         $default->segmentation_rule = [
             "name" => "General",
             "id" => "standard"

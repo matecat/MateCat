@@ -150,7 +150,7 @@ class CustomPayableRateStruct extends DataAccess_AbstractDaoSilentStruct impleme
             'id' => (int)$this->id,
             'uid' => (int)$this->uid,
             'version' => (int)$this->version,
-            'name' => $this->name,
+            'payable_rate_template_name' => $this->name,
             'breakdowns' => $this->getBreakdownsArray(),
             'createdAt' => DateTimeUtil::formatIsoDate($this->created_at),
             'modifiedAt' => DateTimeUtil::formatIsoDate($this->modified_at),
