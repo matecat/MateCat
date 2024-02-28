@@ -23,7 +23,12 @@ class QAModelTemplateController extends KleinController {
     public function index()
     {
         $currentPage = (isset($_GET['page'])) ? $_GET['page'] : 1;
-        $pagination = 20;
+        $pagination = (isset($_GET['perPage'])) ? $_GET['perPage'] : 20;
+
+        if($pagination > 200){
+            $pagination = 200;
+        }
+
         $uid = $this->getUser()->uid;
 
         return $this->response->json(QAModelTemplateDao::getAllPaginated($uid, $currentPage, $pagination));

@@ -130,6 +130,18 @@ class QAModelTemplateDao extends DataAccess_AbstractDao
     }
 
     /**
+     * @param $uid
+     * @return array
+     */
+    private static function getDefaultTemplate($uid)
+    {
+        return [
+            'id' => 0,
+            'uid' => $uid
+        ];
+    }
+
+    /**
      * @param int $uid
      * @param int $current
      * @param int $pagination
@@ -152,6 +164,7 @@ class QAModelTemplateDao extends DataAccess_AbstractDao
         $offset = ($current - 1) * $pagination;
 
         $models = [];
+        $models[] = self::getDefaultTemplate($uid);
 
         $stmt = $conn->prepare( "SELECT id FROM qa_model_templates WHERE uid = :uid LIMIT $pagination OFFSET $offset ");
         $stmt->execute([
@@ -166,9 +179,9 @@ class QAModelTemplateDao extends DataAccess_AbstractDao
         }
 
         return [
-            'current_page' => $current,
-            'per_page' => $pagination,
-            'last_page' => $pages,
+            'current_page' => (int)$current,
+            'per_page' => (int)$pagination,
+            'last_page' => (int)$pages,
             'prev' => $prev,
             'next' => $next,
             'items' => $models,

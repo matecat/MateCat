@@ -2,6 +2,7 @@
 
 namespace PayableRates;
 
+use Analysis_PayableRates;
 use DataAccess_AbstractDao;
 use Database;
 use DateTime;
@@ -33,6 +34,25 @@ class CustomPayableRateDao extends DataAccess_AbstractDao
 
     /**
      * @param $uid
+     * @return array
+     */
+    private static function getDefaultTemplate($uid)
+    {
+        return [
+            'id' => 0,
+            'uid' => (int)$uid,
+            'name' => 'Default',
+            'version' => 1,
+            'breakdowns' => [
+                'default' => Analysis_PayableRates::$DEFAULT_PAYABLE_RATES
+            ],
+            'createdAt' => date("Y-m-d H:i:s"),
+            'modifiedAt' => date("Y-m-d H:i:s"),
+        ];
+    }
+
+    /**
+     * @param $uid
      * @param int $current
      * @param int $pagination
      *
@@ -54,6 +74,7 @@ class CustomPayableRateDao extends DataAccess_AbstractDao
         $offset = ($current - 1) * $pagination;
 
         $models = [];
+        $models[] = self::getDefaultTemplate($uid);
 
         $stmt = $conn->prepare( "SELECT id FROM ".self::TABLE." WHERE uid = :uid LIMIT $pagination OFFSET $offset ");
         $stmt->execute([
@@ -65,9 +86,9 @@ class CustomPayableRateDao extends DataAccess_AbstractDao
         }
 
         return [
-            'current_page' => $current,
-            'per_page' => $pagination,
-            'last_page' => $pages,
+            'current_page' => (int)$current,
+            'per_page' => (int)$pagination,
+            'last_page' => (int)$pages,
             'prev' => $prev,
             'next' => $next,
             'items' => $models,
