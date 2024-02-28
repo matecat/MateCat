@@ -19,13 +19,14 @@ const createTemplateProxy = ({template, schema}) =>
     get(target, prop) {
       const isSpecialProp = prop === 'isSelected' || prop === 'isTemporary'
       const key = isSpecialProp || !schema[prop] ? prop : schema[prop]
-
       if (
         !isSpecialProp &&
         !schema[prop] &&
-        !Object.values(schema).some((item) => item === prop)
-      )
+        !Object.values(schema).some((item) => item === prop) &&
+        Reflect.getOwnPropertyDescriptor(target, key)
+      ) {
         throw new Error(`Invalid prop ${prop}.`)
+      }
 
       return target[key]
     },

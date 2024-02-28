@@ -8,6 +8,7 @@ import {TranslationMemoryGlossaryTab} from './Contents/TranslationMemoryGlossary
 import {ProjectTemplate} from './ProjectTemplate/ProjectTemplate'
 import {SCHEMA_KEYS} from '../../hooks/useProjectTemplates'
 import {AnalysisTab} from './Contents/AnalysisTab'
+import {QualityFrameworkTab} from './Contents/QualityFrameworkTab'
 
 let tabOpenFromQueryString = new URLSearchParams(window.location.search).get(
   'openTab',
@@ -61,7 +62,7 @@ const DEFAULT_CONTENTS = (isCattool = config.is_cattool) => {
             label: 'Quality framework',
             description:
               'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vulputate libero et velit interdum, ac aliquet odio mattis.',
-            component: <AnalysisTab />,
+            component: <QualityFrameworkTab />,
           },
           {
             id: SETTINGS_PANEL_TABS.analysis,
