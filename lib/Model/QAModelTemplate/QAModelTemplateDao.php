@@ -135,10 +135,59 @@ class QAModelTemplateDao extends DataAccess_AbstractDao
      */
     private static function getDefaultTemplate($uid)
     {
+        $defaultTemplate = file_get_contents( __DIR__ . '/../../../inc/qa_model.json' );
+        $defaultTemplateModel = json_decode($defaultTemplate, true);
+
+        $categories = [];
+
+        foreach ($defaultTemplateModel['model']['categories'] as $cindex => $category){
+
+            $severities = [];
+            $category['id'] = 0;
+
+            foreach ($defaultTemplateModel['model']['severities'] as $sindex => $severity){
+                $severity['id'] = 0;
+                $severity['penalty'] = floatval($severity['penalty']);
+                $severity['sort'] = $sindex + 1;
+                $severities[] = $severity;
+            }
+
+            $category['severities'] = $severities;
+            $category['sort'] = $cindex + 1;
+
+            $categories[] = $category;
+        }
+
+        $passfail = $defaultTemplateModel['model']['passfail'];
+        $passfail['id'] = 0;
+        $passfail['id_template'] = 0;
+
+        $passfail['thresholds'] = [
+            [
+                "id" => 0,
+                "id_passfail" => 0,
+                "label" => "T",
+                "value" => $passfail['options']['limit'][0],
+            ],
+            [
+                "id" => 0,
+                "id_passfail" => 0,
+                "label" => "R1",
+                "value" => $passfail['options']['limit'][1],
+            ]
+        ];
+
+        unset($passfail['options']);
+
         return [
             'id' => 0,
-            'uid' => $uid
+            'uid' => (int)$uid,
+            'label' => 'Default',
+            'version' => 1,
+            'categories' => $categories,
+            'passfail' => $passfail,
         ];
+
     }
 
     /**
