@@ -201,15 +201,15 @@ export const ProjectTemplate = ({portalTarget}) => {
         setTemplateModifier,
       }}
     >
-      <div className="settings-panel-project-template">
-        <div className="settings-panel-project-template-container-select">
+      <div className="settings-panel-templates">
+        <div className="settings-panel-templates-container-select">
           <h3>Project template</h3>
           <TemplateSelect
             {...{projectTemplates, setProjectTemplates, currentProjectTemplate}}
           />
           {templateModifier && <TemplateNameInput />}
         </div>
-        <div className="settings-panel-project-template-container-buttons">
+        <div className="settings-panel-templates-container-buttons">
           {!templateModifier ? (
             <>
               {isActiveSetAsDefault && (

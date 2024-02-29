@@ -48,7 +48,7 @@ export const MoreMenu = ({portalTarget}) => {
     >
       <MenuButtonItem
         disabled={isRequestInProgress}
-        className="settings-panel-project-template-button-more"
+        className="settings-panel-templates-button-more"
         onMouseUp={() => {
           setTemplateModifier(TEMPLATE_MODIFIERS.UPDATE)
           setTemplateName(currentProjectTemplate.name)
@@ -59,7 +59,7 @@ export const MoreMenu = ({portalTarget}) => {
       </MenuButtonItem>
       <MenuButtonItem
         data-testid="delete-template"
-        className="settings-panel-project-template-button-more"
+        className="settings-panel-templates-button-more"
         disabled={isRequestInProgress}
         onMouseUp={deleteTemplate}
       >
