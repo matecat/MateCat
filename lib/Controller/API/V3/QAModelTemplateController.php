@@ -57,7 +57,7 @@ class QAModelTemplateController extends KleinController {
 
             $this->response->code(201);
             return $this->response->json([
-                'id' => $id
+                'id' => (int)$id
             ]);
         } catch (JSONValidatorError $exception){
             $this->response->code(500);
@@ -97,7 +97,7 @@ class QAModelTemplateController extends KleinController {
             QAModelTemplateDao::remove($id);
 
             return $this->response->json([
-                'id' => $id
+                'id' => (int)$id
             ]);
         } catch (\Exception $exception){
             $this->response->code(500);
@@ -135,7 +135,7 @@ class QAModelTemplateController extends KleinController {
 
             $this->response->code(200);
             return $this->response->json([
-                'id' => $id
+                'id' => (int)$id
             ]);
         } catch (JSONValidatorError $exception){
             $this->response->code(500);
