@@ -35,6 +35,7 @@ export const DeepLGlossaryRow = ({
           onChange={onChangeIsActive}
           type="checkbox"
           disabled={isWaitingResult || isReadOnly}
+          data-testid={`deeplglossary-active-${row.id}`}
         />
       </div>
       <div className="glossary-row-name">
@@ -52,6 +53,7 @@ export const DeepLGlossaryRow = ({
               className="grey-button"
               disabled={isWaitingResult}
               onClick={() => deleteGlossaryConfirm(row)}
+              data-testid={`delete-deeplglossary-${row.id}`}
             >
               <Trash size={12} />
             </button>

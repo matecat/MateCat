@@ -19,7 +19,11 @@ export const CharacterCounter = () => {
         </p>
       </div>
       <div className="options-box-value">
-        <Switch active={active} onChange={onChange} />
+        <Switch
+          active={active}
+          onChange={onChange}
+          testId="switch-chars-counter"
+        />
       </div>
     </div>
   )

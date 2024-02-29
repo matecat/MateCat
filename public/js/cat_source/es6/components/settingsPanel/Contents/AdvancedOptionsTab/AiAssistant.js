@@ -33,7 +33,11 @@ export const AiAssistant = () => {
         </p>
       </div>
       <div className="options-box-value">
-        <Switch onChange={onChange} active={active} />
+        <Switch
+          onChange={onChange}
+          active={active}
+          testId="switch-ai-assistant"
+        />
       </div>
     </div>
   )

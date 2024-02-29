@@ -37,7 +37,10 @@ export default {
       lexica: true,
       tag_projection: true,
       cross_language_matches: [],
-      segmentation_rule: 'General',
+      segmentation_rule: {
+        name: 'General',
+        id: 'standard',
+      },
       mt: {
         id: 10,
         extra: {

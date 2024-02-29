@@ -105,7 +105,12 @@ export const Lexiqa = ({
         </p>
       </div>
       <div className="options-box-value">
-        <Switch active={lexiqaActive} onChange={onChange} disabled={disabled} />
+        <Switch
+          active={lexiqaActive}
+          onChange={onChange}
+          disabled={disabled}
+          testId="switch-lexiqa"
+        />
       </div>
     </div>
   )

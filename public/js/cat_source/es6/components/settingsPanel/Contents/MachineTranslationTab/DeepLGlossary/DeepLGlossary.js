@@ -302,6 +302,7 @@ export const DeepLGlossary = ({id, isCattoolPage = false}) => {
         <button
           className={`${isShowingRows ? 'rotate' : ''}`}
           onClick={onShowingRows}
+          title="Glossary options"
         >
           <ArrowDown />
           Glossary options

@@ -11,7 +11,7 @@ import {
   mtEnginesMock,
 } from '../../../../../../../mocks/mtEnginesMock'
 import userEvent from '@testing-library/user-event'
-import {TranslationMemoryGlossaryTab} from '../TranslationMemoryGlossaryTab'
+import ModalsActions from '../../../../actions/ModalsActions'
 
 beforeEach(() => {
   global.config = {
@@ -32,6 +32,7 @@ beforeEach(() => {
     }),
   )
 })
+afterEach(() => jest.clearAllMocks())
 
 const wrapperElement = document.createElement('div')
 const WrapperComponent = (contextProps) => {
@@ -224,18 +225,36 @@ test('Delete MT Confirm', async () => {
   expect(values.modifyingCurrentTemplate.call.length).toBe(1)
 })
 
-test('Modern MT', async () => {
+test('Modern MT and glossary', async () => {
   const user = userEvent.setup()
+
   global.config.isLoggedIn = true
   config.is_cattool = false
-  const projectTemplate = {...projectTemplatesMock[0], mt: {id: 5}}
+
+  const projectTemplates = [
+    ...projectTemplatesMock.items,
+    {
+      ...projectTemplatesMock.items[1],
+      id: 4,
+      mt: {id: 5, extra: {glossaries: [374333]}},
+    },
+  ]
+  const currentProjectTemplate = {
+    ...projectTemplates[1],
+    mt: {id: 5, extra: {}},
+  }
+
+  let modifiedTemplate = currentProjectTemplate
+  const modifyingCurrentTemplateFn = (value) =>
+    (modifiedTemplate = value(currentProjectTemplate))
+
   const values = {
     mtEngines: mtEnginesMock,
     setMtEngines: () => {},
     openLoginModal: jest.fn(),
-    modifyingCurrentTemplate: jest.fn(),
-    currentProjectTemplate: projectTemplate,
-    projectTemplates: projectTemplatesMock.items,
+    modifyingCurrentTemplate: modifyingCurrentTemplateFn,
+    currentProjectTemplate,
+    projectTemplates,
   }
   render(<WrapperComponent {...values} />)
   let activeMTContainert = screen.getByTestId('active-mt')
@@ -245,6 +264,193 @@ test('Modern MT', async () => {
   expect(glossaryButton).toBeInTheDocument()
 
   await user.click(glossaryButton)
-  const addGlossary = screen.getByText('New glossary') // l'empty state non lo trova perchè ci sono dei glossari ritornati in mock dall'api - api/v3/mmt/:engineId/keysgi
-  expect(addGlossary).toBeInTheDocument()
+
+  const rowGlossary1 = screen.getByTestId('mtglossary-active-374333')
+  const rowGlossary2 = screen.getByTestId('mtglossary-active-374533')
+  expect(rowGlossary1).toBeInTheDocument()
+  expect(rowGlossary2).toBeInTheDocument()
+
+  await user.click(rowGlossary1)
+
+  expect(modifiedTemplate).toEqual({
+    ...currentProjectTemplate,
+    mt: {id: 5, extra: {glossaries: [374333]}},
+  })
+
+  await user.click(screen.getByTestId('delete-mtglossary-374533'))
+
+  expect(await screen.findByText('Confirm')).toBeInTheDocument()
+
+  const spyShowModal = jest.spyOn(ModalsActions, 'showModalComponent')
+
+  await user.click(screen.getByTestId('delete-mtglossary-374333'))
+
+  const modalContent = spyShowModal.mock.calls[0][1].content
+  expect(modalContent).toBe(
+    'The MT glossary you are about to delete is used in the following project creation template(s)',
+  )
+
+  const newButton = screen.getByText('New')
+  expect(newButton).toBeInTheDocument()
+
+  await user.click(newButton)
+
+  const inputName = screen.getByTestId('mtglossary-create-name')
+  expect(inputName).toBeInTheDocument()
+
+  const confirm = screen.getByTestId('mtglossary-create-confirm')
+  expect(confirm).toBeDisabled()
+})
+
+test('DeepL and glossary', async () => {
+  mswServer.use(
+    http.get(`${config.basepath}api/v3/deepl/:engineId/glossaries`, () => {
+      return HttpResponse.json({
+        glossaries: [
+          {
+            glossary_id: '316e350e-81d1-4781-900c-2ab69aa4e6f4',
+            name: 'Test',
+            ready: true,
+            source_lang: 'it',
+            target_lang: 'en',
+            creation_time: '2024-02-14T16:39:14.56105Z',
+            entry_count: 2,
+          },
+          {
+            glossary_id: '316e350e-81d1-4781-900c-3abc',
+            name: 'Test2',
+            ready: true,
+            source_lang: 'it',
+            target_lang: 'en',
+            creation_time: '2024-02-14T16:39:14.56105Z',
+            entry_count: 2,
+          },
+        ],
+      })
+    }),
+  )
+
+  const user = userEvent.setup()
+
+  global.config.isLoggedIn = true
+  config.is_cattool = false
+
+  const projectTemplates = [
+    ...projectTemplatesMock.items,
+    {
+      ...projectTemplatesMock.items[1],
+      id: 4,
+      mt: {
+        id: 7,
+        extra: {
+          deepl_formality: 'default',
+          deepl_id_glossary: '316e350e-81d1-4781-900c-2ab69aa4e6f4',
+        },
+      },
+    },
+  ]
+  const currentProjectTemplate = {
+    ...projectTemplates[1],
+    mt: {id: 7, extra: {deepl_formality: 'default'}},
+  }
+
+  let modifiedTemplate = currentProjectTemplate
+  const modifyingCurrentTemplateFn = (value) =>
+    (modifiedTemplate = value(currentProjectTemplate))
+
+  const values = {
+    mtEngines: mtEnginesMock,
+    setMtEngines: () => {},
+    openLoginModal: jest.fn(),
+    modifyingCurrentTemplate: modifyingCurrentTemplateFn,
+    currentProjectTemplate,
+    projectTemplates,
+  }
+  render(<WrapperComponent {...values} />)
+  let activeMTContainert = screen.getByTestId('active-mt')
+  let mtName = within(activeMTContainert).getByText(
+    'DeepL - Accurate translations for individuals and Teams.',
+  )
+  expect(mtName).toBeInTheDocument()
+  const glossaryButton = screen.getByTitle('Glossary options')
+  expect(glossaryButton).toBeInTheDocument()
+
+  await user.click(glossaryButton)
+
+  const rowGlossary1 = screen.getByTestId(
+    'deeplglossary-active-316e350e-81d1-4781-900c-2ab69aa4e6f4',
+  )
+  const rowGlossary2 = screen.getByTestId(
+    'deeplglossary-active-316e350e-81d1-4781-900c-3abc',
+  )
+  expect(rowGlossary1).toBeInTheDocument()
+  expect(rowGlossary2).toBeInTheDocument()
+
+  await user.click(rowGlossary2)
+  expect(rowGlossary2).toBeChecked()
+
+  await user.click(rowGlossary1)
+  expect(rowGlossary1).toBeChecked()
+  expect(rowGlossary2).not.toBeChecked()
+
+  expect(modifiedTemplate).toEqual({
+    ...currentProjectTemplate,
+    mt: {
+      id: 7,
+      extra: {
+        deepl_formality: 'default',
+        deepl_id_glossary: '316e350e-81d1-4781-900c-2ab69aa4e6f4',
+      },
+    },
+  })
+
+  await user.click(
+    screen.getByTestId('delete-deeplglossary-316e350e-81d1-4781-900c-3abc'),
+  )
+
+  expect(await screen.findByText('Confirm')).toBeInTheDocument()
+
+  const spyShowModal = jest.spyOn(ModalsActions, 'showModalComponent')
+
+  await user.click(
+    screen.getByTestId(
+      'delete-deeplglossary-316e350e-81d1-4781-900c-2ab69aa4e6f4',
+    ),
+  )
+
+  const modalContent = spyShowModal.mock.calls[0][1].content
+  expect(modalContent).toBe(
+    'The DeepL glossary you are about to delete is used in the following project creation template(s)',
+  )
+
+  const newButton = screen.getByText('New')
+  expect(newButton).toBeInTheDocument()
+
+  await user.click(newButton)
+
+  const inputName = screen.getByTestId('deeplglossary-create-name')
+  expect(inputName).toBeInTheDocument()
+
+  const confirm = screen.getByTestId('deeplglossary-create-confirm')
+  expect(confirm).toBeDisabled()
+
+  const formalitySelect = screen.getByText('Default')
+  expect(formalitySelect).toBeInTheDocument()
+
+  await user.click(formalitySelect)
+
+  expect(screen.getByText('Informal')).toBeInTheDocument()
+  expect(screen.getByText('Formal')).toBeInTheDocument()
+
+  await user.click(screen.getByText('Formal'))
+
+  expect(modifiedTemplate).toEqual({
+    ...currentProjectTemplate,
+    mt: {
+      id: 7,
+      extra: {
+        deepl_formality: 'prefer_more',
+      },
+    },
+  })
 })

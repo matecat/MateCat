@@ -114,6 +114,7 @@ export const GuessTag = ({
           onChange={onChange}
           active={guessTagActive}
           disabled={disabled}
+          testId="switch-guesstag"
         />
       </div>
     </div>

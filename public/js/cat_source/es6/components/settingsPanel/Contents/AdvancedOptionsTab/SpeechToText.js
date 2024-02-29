@@ -86,6 +86,7 @@ export const SpeechToText = ({
           onChange={onChange}
           disabled={disabled}
           onClick={clickOnDisabled}
+          testId={'switch-speechtotext'}
         />
       </div>
     </div>

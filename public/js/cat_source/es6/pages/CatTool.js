@@ -97,27 +97,6 @@ function CatTool() {
       getMtEnginesApi().then((mtEngines) => {
         mtEngines.push(DEFAULT_ENGINE_MEMORY)
         setMtEngines(mtEngines)
-        if (config.isAnInternalUser && config.active_engine.length > 0) {
-          const mmt = mtEngines.find((mt) => mt.name === MMT_NAME)
-          if (mmt) {
-            modifyingCurrentTemplate((prevTemplate) => ({
-              ...prevTemplate,
-              mt: {...prevTemplate.mt, id: mmt.id},
-            }))
-          }
-        }
-        if (config.active_engine && config.active_engine.id) {
-          const activeMT = config.active_engine
-          if (activeMT) {
-            modifyingCurrentTemplate((prevTemplate) => ({
-              ...prevTemplate,
-              mt: {
-                ...prevTemplate.mt,
-                id: activeMT.id,
-              },
-            }))
-          }
-        }
       })
     }
   }

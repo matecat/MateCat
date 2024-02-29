@@ -67,7 +67,10 @@ export const CrossLanguagesMatches = ({
           reference.
         </p>
       </div>
-      <div className="options-select-container">
+      <div
+        className="options-select-container"
+        data-testid="container-crosslanguagesmatches"
+      >
         <Select
           name="multi-match-1"
           id="multi-match-1"
