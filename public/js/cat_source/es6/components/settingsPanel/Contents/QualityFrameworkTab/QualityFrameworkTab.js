@@ -1,9 +1,12 @@
-import React, {useEffect, useRef} from 'react'
+import React, {useEffect, useRef, useContext, createContext} from 'react'
 import useTemplates from '../../../../hooks/useTemplates'
 import {SubTemplates} from '../SubTemplates'
-import {useContext} from 'react'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {getQualityFrameworkTemplates} from '../../../../api/getQualityFrameworkTemplates/getQualityFrameworkTemplates'
+import {EptThreshold} from './EptThreshold'
+import {createQualityFrameworkTemplate} from '../../../../api/createQualityFrameworkTemplate/createQualityFrameworkTemplate'
+import {updateQualityFrameworkTemplate} from '../../../../api/updateQualityFrameworkTemplate/updateQualityFrameworkTemplate'
+import {deleteQualityFrameworkTemplate} from '../../../../api/deleteQualityFrameworkTemplate/deleteQualityFrameworkTemplate'
 
 const QF_SCHEMA_KEYS = {
   id: 'id',
@@ -14,47 +17,13 @@ const QF_SCHEMA_KEYS = {
   passfail: 'passfail',
 }
 
+export const QualityFrameworkTabContext = createContext({})
+
 export const QualityFrameworkTab = () => {
   const {currentProjectTemplate} = useContext(SettingsPanelContext)
 
   const {templates, setTemplates, currentTemplate, modifyingCurrentTemplate} =
     useTemplates(QF_SCHEMA_KEYS)
-
-  const thresholdR1 = currentTemplate?.passfail.thresholds.find(
-    ({label}) => label === 'T',
-  ).value
-  const setThresholdR1 = (value) =>
-    modifyingCurrentTemplate((prevTemplate) => {
-      const {thresholds} = prevTemplate.passfail
-
-      return {
-        ...prevTemplate,
-        passfail: {
-          ...prevTemplate.passfail,
-          thresholds: thresholds.map((item) =>
-            item.label === 'T' ? {...item, value} : item,
-          ),
-        },
-      }
-    })
-
-  const thresholdR2 = currentTemplate?.passfail.thresholds.find(
-    ({label}) => label === 'R1',
-  ).value
-  const setThresholdR2 = (value) =>
-    modifyingCurrentTemplate((prevTemplate) => {
-      const {thresholds} = prevTemplate.passfail
-
-      return {
-        ...prevTemplate,
-        passfail: {
-          ...prevTemplate.passfail,
-          thresholds: thresholds.map((item) =>
-            item.label === 'R1' ? {...item, value} : item,
-          ),
-        },
-      }
-    })
 
   const currentProjectTemplateQaId =
     currentProjectTemplate.qaModelTemplateId ?? 0
@@ -91,34 +60,26 @@ export const QualityFrameworkTab = () => {
   }, [setTemplates])
 
   return (
-    <div className="quality-framework-box">
-      <SubTemplates
-        {...{
-          templates,
-          setTemplates,
-          currentTemplate,
-          modifyingCurrentTemplate,
-        }}
-      />
-      <div className="settings-panel-contentwrapper-tab-background">
-        <h2>EPT Threshold</h2>
-        <div className="quality-framework-box-ept-threshold">
-          <div>
-            <label>R1</label>
-            <input
-              value={thresholdR1}
-              onChange={(e) => setThresholdR1(parseInt(e.currentTarget.value))}
-            />
-          </div>
-          <div>
-            <label>R2</label>
-            <input
-              value={thresholdR2}
-              onChange={(e) => setThresholdR2(parseInt(e.currentTarget.value))}
-            />
-          </div>
+    <QualityFrameworkTabContext.Provider
+      value={{currentTemplate, modifyingCurrentTemplate}}
+    >
+      <div className="quality-framework-box">
+        <SubTemplates
+          {...{
+            templates,
+            setTemplates,
+            currentTemplate,
+            modifyingCurrentTemplate,
+            schema: QF_SCHEMA_KEYS,
+            createApi: createQualityFrameworkTemplate,
+            updateApi: updateQualityFrameworkTemplate,
+            deleteApi: deleteQualityFrameworkTemplate,
+          }}
+        />
+        <div className="settings-panel-contentwrapper-tab-background">
+          <EptThreshold />
         </div>
       </div>
-    </div>
+    </QualityFrameworkTabContext.Provider>
   )
 }

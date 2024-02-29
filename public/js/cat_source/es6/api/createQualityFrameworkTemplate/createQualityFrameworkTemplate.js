@@ -8,7 +8,7 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  */
 export const createQualityFrameworkTemplate = async (template) => {
   const response = await fetch(
-    `${getMatecatApiDomain()}/api/v3/qa_model_template`,
+    `${getMatecatApiDomain()}api/v3/qa_model_template`,
     {
       method: 'POST',
       credentials: 'include',

@@ -13,31 +13,33 @@ export const SubTemplateCreateUpdateControl = () => {
     setTemplateModifier,
     setTemplateName,
     setIsRequestInProgress,
+    schema,
+    createApi,
   } = useContext(SubTemplatesContext)
 
   const createTemplate = () => {
     /* eslint-disable no-unused-vars */
     const {id, uid, isTemporary, isSelected, ...newTemplate} = {
       ...currentTemplate,
-      name: templateName,
+      [schema.name]: templateName,
     }
     /* eslint-enable no-unused-vars */
     setIsRequestInProgress(true)
 
-    //   createProjectTemplate(newTemplate)
-    //     .then((template) => {
-    //       setTemplates((prevState) => [
-    //         ...prevState
-    //           .filter(({isTemporary}) => !isTemporary)
-    //           .map((templateItem) => ({...templateItem, isSelected: false})),
-    //         {
-    //           ...template,
-    //           isSelected: true,
-    //         },
-    //       ])
-    //     })
-    //     .catch((error) => console.log(error))
-    //     .finally(() => setIsRequestInProgress(false))
+    createApi(newTemplate)
+      .then((template) => {
+        setTemplates((prevState) => [
+          ...prevState
+            .filter(({isTemporary}) => !isTemporary)
+            .map((templateItem) => ({...templateItem, isSelected: false})),
+          {
+            ...template,
+            isSelected: true,
+          },
+        ])
+      })
+      .catch((error) => console.log(error))
+      .finally(() => setIsRequestInProgress(false))
   }
 
   const updateName = () => {

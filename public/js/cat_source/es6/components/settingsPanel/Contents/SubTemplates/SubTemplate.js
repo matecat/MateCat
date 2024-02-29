@@ -21,6 +21,10 @@ export const SubTemplates = ({
   setTemplates,
   currentTemplate,
   modifyingCurrentTemplate,
+  schema,
+  createApi,
+  updateApi,
+  deleteApi,
   portalTarget,
 }) => {
   const [templateModifier, setTemplateModifier] = useState()
@@ -49,6 +53,10 @@ export const SubTemplates = ({
         setIsRequestInProgress,
         templateModifier,
         setTemplateModifier,
+        schema,
+        createApi,
+        updateApi,
+        deleteApi,
       }}
     >
       <div className="settings-panel-templates settings-panel-subtemplates">
@@ -96,9 +104,13 @@ export const SubTemplates = ({
 }
 
 SubTemplates.propTypes = {
-  templates: PropTypes.array,
-  setTemplates: PropTypes.func,
+  templates: PropTypes.array.isRequired,
+  setTemplates: PropTypes.func.isRequired,
   currentTemplate: PropTypes.object,
-  modifyingCurrentTemplate: PropTypes.func,
+  modifyingCurrentTemplate: PropTypes.func.isRequired,
+  schema: PropTypes.object.isRequired,
+  createApi: PropTypes.func.isRequired,
+  updateApi: PropTypes.func.isRequired,
+  deleteApi: PropTypes.func.isRequired,
   portalTarget: PropTypes.any,
 }
