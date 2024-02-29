@@ -1,4 +1,4 @@
-import React, {useCallback, useContext, useEffect, useState} from 'react'
+import React, {useContext, useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
 import {SettingsPanelContext} from '../SettingsPanelContext'
 import {
@@ -41,47 +41,44 @@ export const ProjectTemplate = ({portalTarget}) => {
     ({isTemporary}) => isTemporary,
   )
 
-  const updateTemplate = useCallback(
-    (updatedTemplate = currentProjectTemplate) => {
-      /* eslint-disable no-unused-vars */
-      const {
-        created_at,
-        id,
-        uid,
-        modified_at,
-        isTemporary,
-        isSelected,
-        ...modifiedTemplate
-      } = {
-        ...updatedTemplate,
-        name: updatedTemplate.name,
-      }
-      /* eslint-enable no-unused-vars */
-      setIsRequestInProgress(true)
+  const updateTemplate = (updatedTemplate = currentProjectTemplate) => {
+    /* eslint-disable no-unused-vars */
+    const {
+      created_at,
+      id,
+      uid,
+      modified_at,
+      isTemporary,
+      isSelected,
+      ...modifiedTemplate
+    } = {
+      ...updatedTemplate,
+      name: updatedTemplate.name,
+    }
+    /* eslint-enable no-unused-vars */
+    setIsRequestInProgress(true)
 
-      updateProjectTemplate({
-        id: updatedTemplate.id,
-        template: modifiedTemplate,
+    updateProjectTemplate({
+      id: updatedTemplate.id,
+      template: modifiedTemplate,
+    })
+      .then((template) => {
+        setProjectTemplates((prevState) =>
+          prevState
+            .filter(({isTemporary}) => !isTemporary)
+            .map((templateItem) =>
+              templateItem.id === template.id
+                ? {...template, isSelected: true}
+                : templateItem,
+            ),
+        )
       })
-        .then((template) => {
-          setProjectTemplates((prevState) =>
-            prevState
-              .filter(({isTemporary}) => !isTemporary)
-              .map((templateItem) =>
-                templateItem.id === template.id
-                  ? {...template, isSelected: true}
-                  : templateItem,
-              ),
-          )
-        })
-        .catch((error) => console.log(error))
-        .finally(() => {
-          setIsRequestInProgress(false)
-          setTemplateModifier()
-        })
-    },
-    [currentProjectTemplate, setProjectTemplates],
-  )
+      .catch((error) => console.log(error))
+      .finally(() => {
+        setIsRequestInProgress(false)
+        setTemplateModifier()
+      })
+  }
 
   // Notify to server when user deleted a tmKey, MT or MT glossary from templates and sync project templates state
   useEffect(() => {
@@ -192,7 +189,6 @@ export const ProjectTemplate = ({portalTarget}) => {
   return (
     <ProjectTemplateContext.Provider
       value={{
-        updateTemplate,
         templateName,
         setTemplateName,
         isRequestInProgress,

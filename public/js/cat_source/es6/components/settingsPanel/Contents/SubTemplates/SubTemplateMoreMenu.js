@@ -1,6 +1,10 @@
 import React, {useContext} from 'react'
 import PropTypes from 'prop-types'
-import {SUBTEMPLATE_MODIFIERS, SubTemplatesContext} from './SubTemplate'
+import {
+  SUBTEMPLATE_MODIFIERS,
+  SubTemplatesContext,
+  isStandardSubTemplate,
+} from './SubTemplate'
 import {MenuButton} from '../../../common/MenuButton/MenuButton'
 import {MenuButtonItem} from '../../../common/MenuButton/MenuButtonItem'
 import IconEdit from '../../../icons/IconEdit'
@@ -15,23 +19,24 @@ export const SubTemplateMoreMenu = ({portalTarget}) => {
     setIsRequestInProgress,
     setTemplateModifier,
     setTemplateName,
+    deleteApi,
   } = useContext(SubTemplatesContext)
 
   const deleteTemplate = () => {
     setIsRequestInProgress(true)
-    // deleteProjectTemplate(currentTemplate.id)
-    //   .then(({id}) =>
-    //     setTemplates((prevState) =>
-    //       prevState
-    //         .filter((template) => template.id !== id)
-    //         .map((template) => ({
-    //           ...template,
-    //           isSelected: isStandardTemplate(template),
-    //         })),
-    //     ),
-    //   )
-    //   .catch((error) => console.log(error))
-    //   .finally(() => setIsRequestInProgress(false))
+    deleteApi(currentTemplate.id)
+      .then(({id}) =>
+        setTemplates((prevState) =>
+          prevState
+            .filter((template) => template.id !== id)
+            .map((template) => ({
+              ...template,
+              isSelected: isStandardSubTemplate(template),
+            })),
+        ),
+      )
+      .catch((error) => console.log(error))
+      .finally(() => setIsRequestInProgress(false))
   }
 
   return (

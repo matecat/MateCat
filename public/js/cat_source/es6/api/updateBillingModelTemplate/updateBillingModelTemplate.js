@@ -9,7 +9,7 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  */
 export const updateBillingModelTemplate = async ({id, template}) => {
   const response = await fetch(
-    `${getMatecatApiDomain()}/api/v2/payable_rate/${id}`,
+    `${getMatecatApiDomain()}api/v2/payable_rate/${id}`,
     {
       method: 'PUT',
       credentials: 'include',

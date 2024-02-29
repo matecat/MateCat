@@ -14,16 +14,15 @@ export const SubTemplateCreateUpdateControl = () => {
     setTemplateName,
     setIsRequestInProgress,
     schema,
+    getFilteredSchemaCreateUpdate,
     createApi,
   } = useContext(SubTemplatesContext)
 
   const createTemplate = () => {
-    /* eslint-disable no-unused-vars */
-    const {id, uid, isTemporary, isSelected, ...newTemplate} = {
-      ...currentTemplate,
+    const newTemplate = {
+      ...getFilteredSchemaCreateUpdate(currentTemplate),
       [schema.name]: templateName,
     }
-    /* eslint-enable no-unused-vars */
     setIsRequestInProgress(true)
 
     createApi(newTemplate)
@@ -33,6 +32,7 @@ export const SubTemplateCreateUpdateControl = () => {
             .filter(({isTemporary}) => !isTemporary)
             .map((templateItem) => ({...templateItem, isSelected: false})),
           {
+            ...newTemplate,
             ...template,
             isSelected: true,
           },

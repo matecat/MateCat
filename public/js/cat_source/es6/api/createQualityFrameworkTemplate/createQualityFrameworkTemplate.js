@@ -15,7 +15,7 @@ export const createQualityFrameworkTemplate = async (template) => {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(template),
+      body: JSON.stringify({model: template}),
     },
   )
 

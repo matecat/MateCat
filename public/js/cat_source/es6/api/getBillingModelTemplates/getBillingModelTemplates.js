@@ -6,7 +6,7 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  * @returns {Promise<object>}
  */
 export const getBillingModelTemplates = async () => {
-  const response = await fetch(`${getMatecatApiDomain()}/api/v2/payable_rate`, {
+  const response = await fetch(`${getMatecatApiDomain()}api/v2/payable_rate`, {
     method: 'GET',
     credentials: 'include',
   })

@@ -12,7 +12,7 @@ export const SUBTEMPLATE_MODIFIERS = {
   UPDATE: 'update',
 }
 
-const isStandardSubTemplate = ({id} = {}) => id === 0
+export const isStandardSubTemplate = ({id} = {}) => id === 0
 
 export const SubTemplatesContext = createContext({})
 
@@ -22,6 +22,7 @@ export const SubTemplates = ({
   currentTemplate,
   modifyingCurrentTemplate,
   schema,
+  getFilteredSchemaCreateUpdate,
   createApi,
   updateApi,
   deleteApi,
@@ -30,6 +31,35 @@ export const SubTemplates = ({
   const [templateModifier, setTemplateModifier] = useState()
   const [templateName, setTemplateName] = useState('')
   const [isRequestInProgress, setIsRequestInProgress] = useState(false)
+
+  const updateTemplate = (updatedTemplate = currentTemplate) => {
+    const modifiedTemplate = {
+      ...getFilteredSchemaCreateUpdate(updatedTemplate),
+      [schema.name]: updatedTemplate.name,
+    }
+    setIsRequestInProgress(true)
+
+    updateApi({
+      id: updatedTemplate.id,
+      template: modifiedTemplate,
+    })
+      .then((template) => {
+        setTemplates((prevState) =>
+          prevState
+            .filter(({isTemporary}) => !isTemporary)
+            .map((templateItem) =>
+              templateItem.id === template.id
+                ? {...modifiedTemplate, ...template, isSelected: true}
+                : templateItem,
+            ),
+        )
+      })
+      .catch((error) => console.log(error))
+      .finally(() => {
+        setIsRequestInProgress(false)
+        setTemplateModifier()
+      })
+  }
 
   const isStandardTemplateBool = isStandardSubTemplate(currentTemplate)
 
@@ -54,8 +84,8 @@ export const SubTemplates = ({
         templateModifier,
         setTemplateModifier,
         schema,
+        getFilteredSchemaCreateUpdate,
         createApi,
-        updateApi,
         deleteApi,
       }}
     >
@@ -71,7 +101,7 @@ export const SubTemplates = ({
                 <button
                   className="template-button button-save-changes"
                   disabled={isRequestInProgress}
-                  //   onClick={() => updateTemplate()}
+                  onClick={() => updateTemplate()}
                 >
                   <IconSaveChanges />
                   Save changes
@@ -109,6 +139,7 @@ SubTemplates.propTypes = {
   currentTemplate: PropTypes.object,
   modifyingCurrentTemplate: PropTypes.func.isRequired,
   schema: PropTypes.object.isRequired,
+  getFilteredSchemaCreateUpdate: PropTypes.func.isRequired,
   createApi: PropTypes.func.isRequired,
   updateApi: PropTypes.func.isRequired,
   deleteApi: PropTypes.func.isRequired,
