@@ -215,7 +215,8 @@ $(document).ready(function () {
         })}
         conversionEnabled={!!config.conversionEnabled}
         formatsNumber={config.formats_number}
-        googleDriveEnabled={!!config.googleDriveEnabled}
+        googleDriveEnabled={false}
+        //{!!config.googleDriveEnabled}
         restartConversions={UPLOAD_PAGE.restartConversions}
       />,
     )
