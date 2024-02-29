@@ -24,7 +24,7 @@ const JobProgressBar = ({
     ? stats.analysis_complete
     : true
   return (
-    <div className="progress-bar">
+    <div className="progress-bar" data-testid="progress-bar">
       <div className="progr">
         <div className="meter" onClick={onClickFn}>
           {!stats || !analysisComplete ? (
