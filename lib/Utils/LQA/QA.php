@@ -1671,6 +1671,19 @@ class QA {
 
         //
         // ===========================================
+        // Check the count mismatch
+        // ===========================================
+        //
+        if(
+            count($open_malformedXmlSrcStruct) !== count($open_malformedXmlTrgStruct) or
+            count($closing_malformedXmlSrcStruct) !== count($closing_malformedXmlTrgStruct) or
+            count($selfClosingTags_src) !== count($selfClosingTags_trg)
+        ){
+            $this->addError( self::ERR_COUNT );
+        }
+
+        //
+        // ===========================================
         // Compare the tag id(s) and equiv-text content
         // ===========================================
         //
@@ -1797,11 +1810,15 @@ class QA {
     private function checkContentAndAddTagMismatchError(array $src, array $trg, $error, array $originalTargetValues) {
 
         foreach ($trg as $pos => $value){
-            if(!in_array($value, $src)){
+            $index = array_search($value, $src);
+
+            if($index === false){
                 $this->addError( $error );
                 $this->tagPositionError[] = ( new LtGtEncode() )->transform( $originalTargetValues[$pos] );
 
                 return;
+            } else {
+                unset($src[$index]);
             }
         }
     }
