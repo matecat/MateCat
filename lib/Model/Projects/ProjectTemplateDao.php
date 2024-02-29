@@ -53,13 +53,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao
         ];
 
         // MT
-        $engineDAO        = new EnginesModel_EngineDAO( Database::obtain() );
-        $engineStruct     = EnginesModel_EngineStruct::getStruct();
-        $engineStruct->uid = $uid;
-        $engineStruct->active = true;
-
-        $engineList = $engineDAO->setCacheTTL( 60 * 5 )->read( $engineStruct );
-        $default->mt = self::getUserDefaultMt($engineList);
+        $default->mt = self::getUserDefaultMt();
 
         $default->tm = [];
         $default->created_at = date("Y-m-d H:i:s");
@@ -69,43 +63,10 @@ class ProjectTemplateDao extends DataAccess_AbstractDao
     }
 
     /**
-     * @param EnginesModel_EngineStruct[] $engineList
      * @return array
      */
-    private static function getUserDefaultMt($engineList = [])
+    private static function getUserDefaultMt()
     {
-        if(empty($engineList)){
-           return [
-               'id' => 1,
-               'extra' => new \stdClass()
-           ];
-        }
-
-        $mmt = array_filter($engineList, function($el){
-            return $el->name === 'ModernMT';
-        });
-
-        $deepL = array_filter($engineList, function($el){
-            return $el->name === 'DeepL';
-        });
-
-        if(!empty($mmt)){
-            return [
-                'id' => array_values($mmt)[0]->id,
-                'extra' => new \stdClass()
-            ];
-        }
-
-        if(!empty($deepL)){
-            $extra = new \stdClass();
-            $extra->deepl_formality = 'default';
-
-            return [
-                'id' => array_values($deepL)[0]->id,
-                'extra' => $extra
-            ];
-        }
-
         return [
             'id' => 1,
             'extra' => new \stdClass()
