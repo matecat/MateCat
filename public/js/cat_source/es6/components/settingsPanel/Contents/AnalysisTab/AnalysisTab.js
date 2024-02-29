@@ -1,20 +1,21 @@
-import React, {createContext, useContext, useEffect, useRef} from 'react'
-import {SubTemplates} from '../SubTemplates'
-import {SettingsPanelContext} from '../../SettingsPanelContext'
+import React, {createContext, useContext, useEffect, useRef, useState} from 'react'
+import Switch from '../../../common/Switch'
+import {getBillingModelTemplates} from '../../../../api/getBillingModelTemplates'
 import useTemplates from '../../../../hooks/useTemplates'
-import {getBillingModelTemplates} from '../../../../api/getBillingModelTemplates/getBillingModelTemplates'
-import {createBillingModelTemplate} from '../../../../api/createBillingModelTemplate/createBillingModelTemplate'
-import {updateBillingModelTemplate} from '../../../../api/updateBillingModelTemplate/updateBillingModelTemplate'
-import {deleteBillingModelTemplate} from '../../../../api/deleteBillingModelTemplate/deleteBillingModelTemplate'
+import {SettingsPanelContext} from '../../SettingsPanelContext'
+import {createBillingModelTemplate} from '../../../../api/createBillingModelTemplate'
+import {updateBillingModelTemplate} from '../../../../api/updateBillingModelTemplate'
+import {deleteBillingModelTemplate} from '../../../../api/deleteBillingModelTemplate'
+import {SubTemplates} from '../SubTemplates'
 
-const BILLING_SCHEMA_KEYS = {
+const ANALYSIS_SCHEMA_KEYS = {
   id: 'id',
   uid: 'uid',
   name: 'payable_rate_template_name',
-  version: 'version',
   breakdowns: 'breakdowns',
   createdAt: 'createdAt',
   modifiedAt: 'modifiedAt',
+  version: 'version',
 }
 
 const getFilteredSchemaCreateUpdate = (template) => {
@@ -42,29 +43,35 @@ export const AnalysisTab = () => {
   } = useContext(SettingsPanelContext)
 
   const {templates, setTemplates, currentTemplate, modifyingCurrentTemplate} =
-    useTemplates(BILLING_SCHEMA_KEYS)
+    useTemplates(ANALYSIS_SCHEMA_KEYS)
+
+  const [matches100InScope, setMatches100InScope] = useState(true)
+  const [matches101InScope, setMatches101InScope] = useState(true)
+  const [newValue, setNewValue] = useState('100')
+  const [repetitions, setRepetitions] = useState('100')
 
   const currentTemplateId = currentTemplate?.id
   const currentProjectTemplateBillingId =
-    currentProjectTemplate.payableRateTemplateId
+      currentProjectTemplate.payableRateTemplateId
   const prevCurrentProjectTemplateBillingId = useRef()
 
   // select billing model template when curren project template change
   if (
-    prevCurrentProjectTemplateBillingId.current !==
+      prevCurrentProjectTemplateBillingId.current !==
       currentProjectTemplateBillingId &&
-    currentTemplateId !== currentProjectTemplateBillingId &&
-    templates.length
+      currentTemplateId !== currentProjectTemplateBillingId &&
+      templates.length
   ) {
     setTemplates((prevState) =>
-      prevState.map((template) => ({
-        ...template,
-        isSelected: template.id === currentProjectTemplateBillingId,
-      })),
+        prevState.map((template) => ({
+          ...template,
+          isSelected: template.id === currentProjectTemplateBillingId,
+        })),
     )
   }
 
   prevCurrentProjectTemplateBillingId.current = currentProjectTemplateBillingId
+
 
   // retrieve billing model templates
   useEffect(() => {
@@ -74,11 +81,11 @@ export const AnalysisTab = () => {
       getBillingModelTemplates().then(({items}) => {
         if (!cleanup) {
           setTemplates(
-            items.map((template) => ({
-              ...template,
-              isSelected:
-                template.id === prevCurrentProjectTemplateBillingId.current,
-            })),
+              items.map((template) => ({
+                ...template,
+                isSelected:
+                    template.id === prevCurrentProjectTemplateBillingId.current,
+              })),
           )
         }
       })
@@ -89,37 +96,99 @@ export const AnalysisTab = () => {
     return () => (cleanup = true)
   }, [setTemplates])
 
-  // Modify current project template billing model template id when qf template id change
-  useEffect(() => {
-    if (
-      typeof currentTemplateId === 'number' &&
-      currentTemplateId !== prevCurrentProjectTemplateBillingId.current
-    )
-      modifyingCurrentProjectTemplate((prevTemplate) => ({
-        ...prevTemplate,
-        payableRateTemplateId: currentTemplateId,
-      }))
-  }, [currentTemplateId, modifyingCurrentProjectTemplate])
-
   return (
-    <AnalysisTabContext.Provider
-      value={{currentTemplate, modifyingCurrentTemplate}}
-    >
-      <div className="analysis-box">
-        <SubTemplates
-          {...{
-            templates,
-            setTemplates,
-            currentTemplate,
-            modifyingCurrentTemplate,
-            schema: BILLING_SCHEMA_KEYS,
-            getFilteredSchemaCreateUpdate,
-            createApi: createBillingModelTemplate,
-            updateApi: updateBillingModelTemplate,
-            deleteApi: deleteBillingModelTemplate,
-          }}
-        />
+    <div>
+      <SubTemplates
+        {...{
+          templates,
+          setTemplates,
+          currentTemplate,
+          modifyingCurrentTemplate,
+          schema: ANALYSIS_SCHEMA_KEYS,
+          getFilteredSchemaCreateUpdate,
+          createApi: createBillingModelTemplate,
+          updateApi: updateBillingModelTemplate,
+          deleteApi: deleteBillingModelTemplate,
+        }}
+      />
+      <div className="settings-panel-contentwrapper-tab-background">
+        <div>
+          <h2>Pre-translate settings</h2>
+          <span>
+            Select whether 100%/101% matches are in-scope for the job. If they
+            are out of scope, their payable rate will be set to 0% and they will
+            be preapproved and locked in the editor window
+          </span>
+        </div>
+        <div>
+          <div>
+            <h3>100% matches</h3>
+            <Switch
+              onChange={(value) => {
+                setMatches100InScope(value)
+              }}
+              active={matches100InScope}
+              activeText={'In scope'}
+              inactiveText={'Not in scope'}
+            />
+          </div>
+          <div>
+            <h3>101% matches</h3>
+            <Switch
+              onChange={(value) => {
+                setMatches101InScope(value)
+              }}
+              active={matches101InScope}
+              activeText={'In scope'}
+              inactiveText={'Not in scope'}
+            />
+          </div>
+        </div>
+        <div>
+          <table>
+            <thead>
+              <tr>
+                <th>New</th>
+                <th>Repetitions</th>
+                <th>Internal matches 75-99%</th>
+                <th>TM Partial 50-74%</th>
+                <th>TM Partial 75-84%</th>
+                <th>TM Partial 85-94%</th>
+                <th>TM Partial 95-99%</th>
+                <th>TM 100%</th>
+                <th>Public TM 100%</th>
+                <th>TM 100% in context</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <InputPercentage value={newValue} setFn={setNewValue} />
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
-    </AnalysisTabContext.Provider>
+    </div>
+  )
+}
+const InputPercentage = ({value, setFn}) => {
+  const inputRef = useRef()
+  const onPercentInput = (e) => {
+    let int = e.target.value.split('%')[0]
+    int = parseInt(int)
+    int = isNaN(int) ? 0 : int
+    if (int > 100) {
+      int = 100
+    }
+    setFn(int)
+  }
+  return (
+    <input
+      ref={inputRef}
+      value={value + '%'}
+      onInput={(e) => onPercentInput(e)}
+    />
   )
 }

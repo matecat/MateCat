@@ -18,7 +18,7 @@ export const ContentWrapper = () => {
       </ul>
       <div className="settings-panel-contentwrapper-active-tab">
         <h3>{activeTab.label}</h3>
-        <span>{activeTab.description}</span>
+        <span dangerouslySetInnerHTML={{__html: activeTab.description}} />
       </div>
       <div
         className={`settings-panel-contentwrapper-container${!isEnabledProjectTemplateComponent ? ' settings-panel-contentwrapper-container-without-project-teamplate-control' : ''}`}

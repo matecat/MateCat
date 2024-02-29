@@ -68,7 +68,7 @@ const DEFAULT_CONTENTS = (isCattool = config.is_cattool) => {
             id: SETTINGS_PANEL_TABS.analysis,
             label: 'Analysis',
             description:
-              'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vulputate libero et velit interdum, ac aliquet odio mattis.',
+              'Determines what discount percentage is applied to each match category. More details <a href="#">here</a>.',
             component: <AnalysisTab />,
           },
         ]
@@ -95,7 +95,7 @@ export const MMT_NAME = 'ModernMT'
 export const SettingsPanel = ({
   onClose,
   isOpened,
-  tabOpen = SETTINGS_PANEL_TABS.translationMemoryGlossary,
+  tabOpen = SETTINGS_PANEL_TABS.analysis,
   user,
   tmKeys,
   setTmKeys,
@@ -109,7 +109,7 @@ export const SettingsPanel = ({
   modifyingCurrentTemplate,
   checkSpecificTemplatePropsAreModified,
 }) => {
-  const [isVisible, setIsVisible] = useState(false)
+  const [isVisible, setIsVisible] = useState(true)
   const [tabs, setTabs] = useState(() => {
     const initialState = DEFAULT_CONTENTS().map((tab) => ({
       ...tab,
