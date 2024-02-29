@@ -148,7 +148,7 @@ class DownloadFileController extends AbstractDownloadController
 
         $this->featureSet = new FeatureSet();
         $this->processDownload();
-        $this->finalize();
+        $this->finalize($forceXliff);
     }
 
     /**

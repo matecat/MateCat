@@ -1671,19 +1671,6 @@ class QA {
 
         //
         // ===========================================
-        // Check the count mismatch
-        // ===========================================
-        //
-        if(
-            count($open_malformedXmlSrcStruct) !== count($open_malformedXmlTrgStruct) or
-            count($closing_malformedXmlSrcStruct) !== count($closing_malformedXmlTrgStruct) or
-            count($selfClosingTags_src) !== count($selfClosingTags_trg)
-        ){
-            $this->addError( self::ERR_COUNT );
-        }
-
-        //
-        // ===========================================
         // Compare the tag id(s) and equiv-text content
         // ===========================================
         //
