@@ -211,7 +211,7 @@ export const AnalysisTab = () => {
         }}
       />
       <div className="analysis-tab settings-panel-contentwrapper-tab-background">
-        <div>
+        <div className="analysis-tab-head">
           <h2>Pre-translate settings</h2>
           <span>
             Select whether 100%/101% matches are in-scope for the job. If they
@@ -243,7 +243,7 @@ export const AnalysisTab = () => {
             />
           </div>
         </div>
-        <div>
+        <div className="analysis-tab-head">
           <h2>Lorem ipsum</h2>
           <span>
             Lorem ipsum dolor sit amet consectetur. Vestibulum mauris gravida
@@ -252,7 +252,7 @@ export const AnalysisTab = () => {
             odio eleifend porta malesuada.
           </span>
         </div>
-        <div>
+        <div className="analysis-tab-tableContainer">
           <table>
             <thead>
               <tr>
