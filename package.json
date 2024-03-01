@@ -71,14 +71,14 @@
     "sass": "^1.66.0",
     "sass-loader": "14.1.0",
     "style-loader": "3.3.4",
+    "undici": "^5.28.2",
     "webpack": "5.90.1",
     "webpack-cli": "5.1.4",
     "webpack-concat-files-plugin": "^0.5.2",
-    "whatwg-fetch": "^3.6.20",
-    "undici": "^5.28.2"
+    "whatwg-fetch": "^3.6.20"
   },
   "resolutions": {
     "wrap-ansi": "^7.0.0"
   },
-  "version": "2.20.150"
+  "version": "2.20.163"
 }
