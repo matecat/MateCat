@@ -59,6 +59,11 @@ export const EptThreshold = () => {
   return (
     <div>
       <h2>EPT Threshold</h2>
+      <p>
+        Select whether 100%/101% matches are in-scope for the job. If they are
+        out of scope, their payable rate will be set to 0% and they will be
+        preapproved and locked in the editor window
+      </p>
       <div className="quality-framework-box-ept-threshold">
         <div>
           <label>R1</label>

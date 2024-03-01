@@ -24,6 +24,23 @@ const getFilteredSchemaCreateUpdate = (template) => {
 
 export const QualityFrameworkTabContext = createContext({})
 
+const getMemoTemplates = (() => {
+  let _templates = []
+
+  return () =>
+    new Promise((resolve) => {
+      if (!_templates.length) {
+        // fetch templates
+        getQualityFrameworkTemplates().then(({items}) => {
+          _templates = items
+          resolve(items)
+        })
+      } else {
+        resolve(_templates)
+      }
+    })
+})()
+
 export const QualityFrameworkTab = () => {
   const {
     currentProjectTemplate,
@@ -58,10 +75,10 @@ export const QualityFrameworkTab = () => {
     let cleanup = false
 
     if (config.isLoggedIn === 1 && !config.is_cattool) {
-      getQualityFrameworkTemplates().then(({items}) => {
+      getMemoTemplates().then((templates) => {
         if (!cleanup) {
           setTemplates(
-            items.map((template) => ({
+            templates.map((template) => ({
               ...template,
               isSelected:
                 template.id === prevCurrentProjectTemplateQaId.current,
@@ -92,24 +109,26 @@ export const QualityFrameworkTab = () => {
     <QualityFrameworkTabContext.Provider
       value={{currentTemplate, modifyingCurrentTemplate}}
     >
-      <div className="quality-framework-box">
-        <SubTemplates
-          {...{
-            templates,
-            setTemplates,
-            currentTemplate,
-            modifyingCurrentTemplate,
-            schema: QF_SCHEMA_KEYS,
-            getFilteredSchemaCreateUpdate,
-            createApi: createQualityFrameworkTemplate,
-            updateApi: updateQualityFrameworkTemplate,
-            deleteApi: deleteQualityFrameworkTemplate,
-          }}
-        />
-        <div className="settings-panel-contentwrapper-tab-background">
-          <EptThreshold />
+      {templates.length > 0 && (
+        <div className="quality-framework-box">
+          <SubTemplates
+            {...{
+              templates,
+              setTemplates,
+              currentTemplate,
+              modifyingCurrentTemplate,
+              schema: QF_SCHEMA_KEYS,
+              getFilteredSchemaCreateUpdate,
+              createApi: createQualityFrameworkTemplate,
+              updateApi: updateQualityFrameworkTemplate,
+              deleteApi: deleteQualityFrameworkTemplate,
+            }}
+          />
+          <div className="settings-panel-contentwrapper-tab-background">
+            <EptThreshold />
+          </div>
         </div>
-      </div>
+      )}
     </QualityFrameworkTabContext.Provider>
   )
 }
