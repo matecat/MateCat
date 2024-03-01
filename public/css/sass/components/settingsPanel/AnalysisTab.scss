@@ -1,7 +1,9 @@
-.analysis-box {
+@import '../../commons/colors';
+
+.analysis-tab {
   display: flex;
   flex-direction: column;
-  gap: 25px;
+  gap: 15px;
   float: left;
   width: 100%;
   padding: 20px;
@@ -9,4 +11,24 @@
   .settings-panel-contentwrapper-tab-background {
     text-align: left;
   }
+  h2 {
+    padding-left: 0;
+    padding-bottom: 8px;
+  }
+  span {
+    display: block;
+    text-align: left;
+    color: $grey6;
+  }
+
+  .analysis-tab-switchContainer {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 10px 0px;
+    h3 {
+      margin-bottom: 0;
+    }
+  }
+
 }

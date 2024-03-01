@@ -95,7 +95,7 @@ export const MMT_NAME = 'ModernMT'
 export const SettingsPanel = ({
   onClose,
   isOpened,
-  tabOpen = SETTINGS_PANEL_TABS.analysis,
+  tabOpen = SETTINGS_PANEL_TABS.translationMemoryGlossary,
   user,
   tmKeys,
   setTmKeys,
@@ -109,7 +109,7 @@ export const SettingsPanel = ({
   modifyingCurrentTemplate,
   checkSpecificTemplatePropsAreModified,
 }) => {
-  const [isVisible, setIsVisible] = useState(true)
+  const [isVisible, setIsVisible] = useState(false)
   const [tabs, setTabs] = useState(() => {
     const initialState = DEFAULT_CONTENTS().map((tab) => ({
       ...tab,
