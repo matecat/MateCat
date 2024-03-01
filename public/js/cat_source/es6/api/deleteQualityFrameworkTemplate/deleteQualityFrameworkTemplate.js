@@ -8,7 +8,7 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  */
 export const deleteQualityFrameworkTemplate = async (id) => {
   const response = await fetch(
-    `${getMatecatApiDomain()}/api/v3/qa_model_template/${id}`,
+    `${getMatecatApiDomain()}api/v3/qa_model_template/${id}`,
     {
       method: 'DELETE',
       credentials: 'include',

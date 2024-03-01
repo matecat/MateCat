@@ -9,14 +9,14 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  */
 export const updateQualityFrameworkTemplate = async ({id, template}) => {
   const response = await fetch(
-    `${getMatecatApiDomain()}/api/v3/qa_model_template/${id}`,
+    `${getMatecatApiDomain()}api/v3/qa_model_template/${id}`,
     {
       method: 'PUT',
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(template),
+      body: JSON.stringify({model: template}),
     },
   )
 

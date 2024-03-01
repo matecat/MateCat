@@ -8,7 +8,7 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  */
 export const deleteBillingModelTemplate = async (id) => {
   const response = await fetch(
-    `${getMatecatApiDomain()}/api/v2/payable_rate/${id}`,
+    `${getMatecatApiDomain()}api/v2/payable_rate/${id}`,
     {
       method: 'DELETE',
       credentials: 'include',

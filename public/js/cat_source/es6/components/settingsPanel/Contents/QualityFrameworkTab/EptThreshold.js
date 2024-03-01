@@ -1,4 +1,4 @@
-import React, {useContext} from 'react'
+import React, {useContext, useRef} from 'react'
 import {QualityFrameworkTabContext} from './QualityFrameworkTab'
 
 export const EptThreshold = () => {
@@ -6,15 +6,16 @@ export const EptThreshold = () => {
     QualityFrameworkTabContext,
   )
 
+  const previousThresholds = useRef({R1: undefined, R2: undefined})
+
   const getThreshold = (type) => {
-    const value = currentTemplate?.passfail.thresholds.find(
+    return currentTemplate?.passfail.thresholds.find(
       ({label}) => label === type,
     ).value
-    return typeof value === 'number' ? value.toFixed(2) : value
   }
   const setThreshold = (type, value) =>
     modifyingCurrentTemplate((prevTemplate) => {
-      const isValidInput = !/[^+0-9.]/g.test(value)
+      const isValidInput = typeof value === 'number' || !/[^+0-9]/g.test(value)
       const {thresholds} = prevTemplate.passfail
 
       return {
@@ -26,10 +27,10 @@ export const EptThreshold = () => {
               ? {
                   ...item,
                   value: isValidInput
-                    ? value
-                    : !isValidInput && value.length === 0
-                      ? ''
-                      : item.value,
+                    ? value.length > 0 || typeof value === 'number'
+                      ? parseInt(value)
+                      : ''
+                    : item.value,
                 }
               : item,
           ),
@@ -37,23 +38,23 @@ export const EptThreshold = () => {
       }
     })
 
-  const thresholdR1 = getThreshold('T')
-  const setThresholdR1 = ({currentTarget: {value}}) => setThreshold('T', value)
+  const thresholdR1 = getThreshold('R1')
+  const setThresholdR1 = ({currentTarget: {value}}) => setThreshold('R1', value)
 
-  const thresholdR2 = getThreshold('R1')
-  const setThresholdR2 = ({currentTarget: {value}}) => setThreshold('R1', value)
+  const thresholdR2 = getThreshold('R2')
+  const setThresholdR2 = ({currentTarget: {value}}) => setThreshold('R2', value)
 
-  const setThresholdToNumber = () =>
-    modifyingCurrentTemplate((prevTemplate) => ({
-      ...prevTemplate,
-      passfail: {
-        ...prevTemplate.passfail,
-        thresholds: prevTemplate.passfail.thresholds.map((item) => ({
-          ...item,
-          value: parseFloat(item.value ? item.value : 0),
-        })),
-      },
-    }))
+  const checkInput = () => {
+    if (typeof thresholdR1 !== 'number')
+      setThreshold('R1', previousThresholds.current.R1)
+    if (typeof thresholdR2 !== 'number')
+      setThreshold('R2', previousThresholds.current.R2)
+  }
+
+  if (typeof thresholdR1 === 'number')
+    previousThresholds.current.R1 = thresholdR1
+  if (typeof thresholdR2 === 'number')
+    previousThresholds.current.R2 = thresholdR2
 
   return (
     <div>
@@ -64,7 +65,7 @@ export const EptThreshold = () => {
           <input
             value={thresholdR1}
             onChange={setThresholdR1}
-            onBlur={setThresholdToNumber}
+            onBlur={checkInput}
           />
         </div>
         <div>
@@ -72,7 +73,7 @@ export const EptThreshold = () => {
           <input
             value={thresholdR2}
             onChange={setThresholdR2}
-            onBlur={setThresholdToNumber}
+            onBlur={checkInput}
           />
         </div>
       </div>

@@ -17,27 +17,43 @@ const QF_SCHEMA_KEYS = {
   passfail: 'passfail',
 }
 
+const getFilteredSchemaCreateUpdate = (template) => {
+  const {id, uid, isTemporary, isSelected, ...filtered} = template // eslint-disable-line
+  return filtered
+}
+
 export const QualityFrameworkTabContext = createContext({})
 
 export const QualityFrameworkTab = () => {
-  const {currentProjectTemplate} = useContext(SettingsPanelContext)
+  const {
+    currentProjectTemplate,
+    modifyingCurrentTemplate: modifyingCurrentProjectTemplate,
+  } = useContext(SettingsPanelContext)
 
   const {templates, setTemplates, currentTemplate, modifyingCurrentTemplate} =
     useTemplates(QF_SCHEMA_KEYS)
 
-  const currentProjectTemplateQaId =
-    currentProjectTemplate.qaModelTemplateId ?? 0
-  const qaModelTemplateId = useRef()
+  const currentTemplateId = currentTemplate?.id
+  const currentProjectTemplateQaId = currentProjectTemplate.qaModelTemplateId
+  const prevCurrentProjectTemplateQaId = useRef()
 
+  // select QF template when curren project template change
   if (
-    qaModelTemplateId.current !== currentProjectTemplateQaId &&
+    prevCurrentProjectTemplateQaId.current !== currentProjectTemplateQaId &&
+    currentTemplateId !== currentProjectTemplateQaId &&
     templates.length
   ) {
-    // select right QF template when curren project template change
+    setTemplates((prevState) =>
+      prevState.map((template) => ({
+        ...template,
+        isSelected: template.id === currentProjectTemplateQaId,
+      })),
+    )
   }
 
-  qaModelTemplateId.current = currentProjectTemplateQaId
+  prevCurrentProjectTemplateQaId.current = currentProjectTemplateQaId
 
+  // retrieve QF templates
   useEffect(() => {
     let cleanup = false
 
@@ -47,7 +63,8 @@ export const QualityFrameworkTab = () => {
           setTemplates(
             items.map((template) => ({
               ...template,
-              isSelected: template.id === qaModelTemplateId.current,
+              isSelected:
+                template.id === prevCurrentProjectTemplateQaId.current,
             })),
           )
         }
@@ -58,6 +75,18 @@ export const QualityFrameworkTab = () => {
 
     return () => (cleanup = true)
   }, [setTemplates])
+
+  // Modify current project template qa model template id when qf template id change
+  useEffect(() => {
+    if (
+      typeof currentTemplateId === 'number' &&
+      currentTemplateId !== prevCurrentProjectTemplateQaId.current
+    )
+      modifyingCurrentProjectTemplate((prevTemplate) => ({
+        ...prevTemplate,
+        qaModelTemplateId: currentTemplateId,
+      }))
+  }, [currentTemplateId, modifyingCurrentProjectTemplate])
 
   return (
     <QualityFrameworkTabContext.Provider
@@ -71,6 +100,7 @@ export const QualityFrameworkTab = () => {
             currentTemplate,
             modifyingCurrentTemplate,
             schema: QF_SCHEMA_KEYS,
+            getFilteredSchemaCreateUpdate,
             createApi: createQualityFrameworkTemplate,
             updateApi: updateQualityFrameworkTemplate,
             deleteApi: deleteQualityFrameworkTemplate,
