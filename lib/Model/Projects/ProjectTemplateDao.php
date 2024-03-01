@@ -216,7 +216,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao
 
 
         // check qa_id
-        if($projectTemplateStruct->qa_model_template_id !== null){
+        if($projectTemplateStruct->qa_model_template_id > 0){
             $qaModel = QAModelTemplateDao::get([
                 'id' => $projectTemplateStruct->qa_model_template_id
             ]);
@@ -231,7 +231,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao
         }
 
         // check pr_id
-        if($projectTemplateStruct->payable_rate_template_id !== null){
+        if($projectTemplateStruct->payable_rate_template_id > 0){
             $payableRateModel = CustomPayableRateDao::getById($projectTemplateStruct->payable_rate_template_id);
 
             if(empty($payableRateModel)){

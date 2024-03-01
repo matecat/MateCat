@@ -41,7 +41,7 @@ class CustomPayableRateDao extends DataAccess_AbstractDao
         return [
             'id' => 0,
             'uid' => (int)$uid,
-            'name' => 'Default',
+            'payable_rate_template_name' => 'Default',
             'version' => 1,
             'breakdowns' => [
                 'default' => Analysis_PayableRates::$DEFAULT_PAYABLE_RATES
