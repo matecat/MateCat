@@ -64,9 +64,6 @@ export const AnalysisTab = () => {
   const {templates, setTemplates, currentTemplate, modifyingCurrentTemplate} =
     analysisTemplates
 
-  const [matches100InScope, setMatches100InScope] = useState(true)
-  const [matches101InScope, setMatches101InScope] = useState(false)
-
   const newWords =
     currentTemplate?.breakdowns.default[ANALYSIS_BREAKDOWNS.newWords]
   const setNewWords = (value) =>
@@ -198,38 +195,6 @@ export const AnalysisTab = () => {
           }}
         />
         <div className="analysis-tab settings-panel-contentwrapper-tab-background">
-          <div className="analysis-tab-head">
-            <h2>Pre-translate settings</h2>
-            <span>
-              Select whether 100%/101% matches are in-scope for the job. If they
-              are out of scope, their payable rate will be set to 0% and they
-              will be preapproved and locked in the editor window
-            </span>
-          </div>
-          <div>
-            <div className="analysis-tab-switchContainer">
-              <h3>100% matches</h3>
-              <Switch
-                onChange={(value) => {
-                  setMatches100InScope(value)
-                }}
-                active={matches100InScope}
-                activeText={'In scope'}
-                inactiveText={'Out of scope'}
-              />
-            </div>
-            <div className="analysis-tab-switchContainer">
-              <h3>101% matches</h3>
-              <Switch
-                onChange={(value) => {
-                  setMatches101InScope(value)
-                }}
-                active={matches101InScope}
-                activeText={'In scope'}
-                inactiveText={'Out of scope'}
-              />
-            </div>
-          </div>
           <div className="analysis-tab-head">
             <h2>Lorem ipsum</h2>
             <span>

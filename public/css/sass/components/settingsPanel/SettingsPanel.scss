@@ -112,7 +112,7 @@
 
 .settings-panel-contentwrapper-container {
   font-size: 14px;
-  padding: 20px;
+  padding: 0 20px 20px 20px;
   overflow-y: auto;
   max-height: calc(100vh - 340px);
   height: 100%;
@@ -352,7 +352,6 @@
   gap: 25px;
   float: left;
   width: 100%;
-  padding: 20px;
 
   h2 {
     padding: 10px 0 10px 0;
