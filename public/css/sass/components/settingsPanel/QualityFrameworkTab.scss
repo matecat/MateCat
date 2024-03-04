@@ -1,20 +1,79 @@
-.quality-framework-box {
-  display: flex;
-  flex-direction: column;
-  gap: 25px;
-  float: left;
-  width: 100%;
-  padding: 20px;
-
-  h2 {
-    padding: 10px 0 10px 0;
-  }
-
-  .settings-panel-contentwrapper-tab-background {
-    text-align: left;
-  }
-}
+@import '../../commons/colors';
 
 .quality-framework-box-ept-threshold {
   display: flex;
+}
+
+.quality-framework-categories-table {
+  display: flex;
+  flex-direction: row;
+  margin-top: 20px;
+
+  .categories {
+    display: flex;
+    flex-direction: column;
+    min-width: 280px;
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 64px;
+      background-color: $grey3;
+      font-weight: bold;
+    }
+
+    .row {
+      background-color: $white;
+      border: 1px solid $grey3;
+      border-left-width: 2px;
+
+      &:last-child {
+        border-bottom-width: 2px;
+      }
+    }
+  }
+
+  .severities {
+    display: flex;
+    flex-direction: column;
+
+    .header {
+      display: flex;
+      justify-content: center;
+      min-height: 64px;
+      background-color: $grey3;
+      padding: 10px 0;
+      font-weight: bold;
+    }
+
+    .row {
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: 124px;
+      background-color: $white;
+
+      .cell {
+        display: flex;
+        justify-content: center;
+        border: 1px solid $grey3;
+
+        &:last-child {
+          border-right-width: 2px;
+        }
+      }
+
+      &:last-child {
+        .cell {
+          border-bottom-width: 2px;
+        }
+      }
+    }
+
+    .row-columns {
+      position: absolute;
+      margin-top: 42px;
+      font-weight: bold;
+    }
+  }
 }
