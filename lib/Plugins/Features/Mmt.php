@@ -121,7 +121,7 @@ class Mmt extends BaseFeature {
         } catch ( Exception $e ){
             ( new EnginesModel_EngineDAO( Database::obtain() ) )->delete( $newCreatedDbRowStruct );
 
-            throw new Exception("MMT license not valid.", $e->getCode());
+            throw new Exception($e->getMessage(), $e->getCode());
         }
 
         try {
