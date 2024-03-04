@@ -94,7 +94,7 @@ test('Modifyng current template with wrong prop', async () => {
       ...prevTemplate,
       customProp: false,
     }))
-  }).toThrow('Error template schema not valid.')
+  }).toThrow('Invalid prop customProp.')
 })
 
 test('Check is modified specific property', async () => {
