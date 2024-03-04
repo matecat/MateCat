@@ -72,7 +72,7 @@
     "sass-loader": "14.1.0",
     "style-loader": "3.3.4",
     "undici": "^5.28.2",
-    "webpack": "5.90.1",
+    "webpack": "5.90.2",
     "webpack-cli": "5.1.4",
     "webpack-concat-files-plugin": "^0.5.2",
     "whatwg-fetch": "^3.6.20"
