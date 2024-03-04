@@ -5,13 +5,14 @@ import React, {
   useRef,
   useState,
 } from 'react'
-import Switch from '../../../common/Switch'
 import {getBillingModelTemplates} from '../../../../api/getBillingModelTemplates'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {createBillingModelTemplate} from '../../../../api/createBillingModelTemplate'
 import {updateBillingModelTemplate} from '../../../../api/updateBillingModelTemplate'
 import {deleteBillingModelTemplate} from '../../../../api/deleteBillingModelTemplate'
 import {SubTemplates} from '../SubTemplates'
+import {Select} from '../../../common/Select'
+import {CreateProjectContext} from '../../../createProject/CreateProjectContext'
 
 export const ANALYSIS_SCHEMA_KEYS = {
   id: 'id',
@@ -60,6 +61,7 @@ export const AnalysisTab = () => {
     modifyingCurrentTemplate: modifyingCurrentProjectTemplate,
     analysisTemplates,
   } = useContext(SettingsPanelContext)
+  const {languages} = useContext(CreateProjectContext)
 
   const {templates, setTemplates, currentTemplate, modifyingCurrentTemplate} =
     analysisTemplates
@@ -102,6 +104,8 @@ export const AnalysisTab = () => {
     currentTemplate?.breakdowns.default[ANALYSIS_BREAKDOWNS.tm100InContext]
   const setTm100InContext = (value) =>
     setWordsValue(ANALYSIS_BREAKDOWNS.tm100InContext, value)
+  const mt = currentTemplate?.breakdowns.default[ANALYSIS_BREAKDOWNS.mt]
+  const setMt = (value) => setWordsValue(ANALYSIS_BREAKDOWNS.mt, value)
 
   const setWordsValue = (name, value) => {
     modifyingCurrentTemplate((prevTemplate) => {
@@ -265,6 +269,31 @@ export const AnalysisTab = () => {
               </tbody>
             </table>
           </div>
+          <div className="analysis-tab-exceptionsContainer">
+            <div className="analysis-tab-subhead">
+              <h3>Machine translation</h3>
+              <span>
+                Lorem ipsum dolor sit amet consectetur. Vestibulum mauris
+                gravida volutpat libero vulputate faucibus ultrices convallis.
+                Non sagittis in condimentum lectus dapibus. Vestibulum volutpat
+                tempus sed sed odio eleifend porta malesuada.
+              </span>
+              <InputPercentage value={mt} setFn={setMt} />
+            </div>
+            <div className="analysis-tab-exceptions">
+              <h3>Exceptions</h3>
+              <div>
+                <div>
+                  <Select
+                    name={'lang'}
+                    showSearchBar={true}
+                    options={languages}
+                    onSelect={(option) => {}}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     )
@@ -293,6 +322,7 @@ const InputPercentage = ({value = '', setFn}) => {
   }, [value])
   return (
     <input
+      className="input-percentage"
       ref={inputRef}
       value={inputValue + '%'}
       onInput={(e) => onPercentInput(e)}
