@@ -14,7 +14,7 @@ class QAModelTemplateDao extends DataAccess_AbstractDao
      * @param      $json
      * @param null $uid
      *
-     * @return int
+     * @return QAModelTemplateStruct
      * @throws \Swaggest\JsonSchema\InvalidValue
      * @throws \Exception
      */
@@ -54,7 +54,7 @@ class QAModelTemplateDao extends DataAccess_AbstractDao
      * @param QAModelTemplateStruct $QAModelTemplateStruct
      * @param                       $json
      *
-     * @return mixed
+     * @return QAModelTemplateStruct
      * @throws \Swaggest\JsonSchema\InvalidValue
      * @throws \Exception
      */
@@ -325,7 +325,7 @@ class QAModelTemplateDao extends DataAccess_AbstractDao
     /**
      * @param QAModelTemplateStruct $modelTemplateStruct
      *
-     * @return string
+     * @return QAModelTemplateStruct
      * @throws \Exception
      */
     public static function save(QAModelTemplateStruct $modelTemplateStruct)
@@ -351,6 +351,7 @@ class QAModelTemplateDao extends DataAccess_AbstractDao
             ]);
 
             $QAModelTemplatePassfailId = $conn->lastInsertId();
+            $modelTemplateStruct->passfail->id = $QAModelTemplatePassfailId;
 
             foreach ($modelTemplateStruct->passfail->thresholds as $thresholdStruct){
                 $thresholdStruct->id_passfail = $QAModelTemplatePassfailId;
@@ -360,6 +361,8 @@ class QAModelTemplateDao extends DataAccess_AbstractDao
                     'passfail_label' => $thresholdStruct->passfail_label,
                     'passfail_value' => $thresholdStruct->passfail_value
                 ]);
+
+                $thresholdStruct->id = $conn->lastInsertId();
             }
 
             foreach ($modelTemplateStruct->categories as $csort => $categoryStruct){
@@ -375,6 +378,7 @@ class QAModelTemplateDao extends DataAccess_AbstractDao
                 ]);
 
                 $QAModelTemplateCategoryId = $conn->lastInsertId();
+                $categoryStruct->id = $QAModelTemplateCategoryId;
 
                 foreach ($categoryStruct->severities as $ssort => $severityStruct){
                     $severityStruct->id_category = $QAModelTemplateCategoryId;
@@ -387,12 +391,16 @@ class QAModelTemplateDao extends DataAccess_AbstractDao
                             'severity_code' => $severityStruct->severity_code,
                             'sort' => (int)($severityStruct->sort) ? $severityStruct->sort : (int)($ssort+1),
                     ]);
+
+                    $severityStruct->id = $conn->lastInsertId();
                 }
             }
 
             $conn->commit();
 
-            return (int)$QAModelTemplateId;
+            $modelTemplateStruct->id = $QAModelTemplateId;
+
+            return $modelTemplateStruct;
         } catch (\Exception $exception){
             $conn->rollBack();
 
@@ -438,6 +446,7 @@ class QAModelTemplateDao extends DataAccess_AbstractDao
             ]);
 
             $idPassfail = $conn->lastInsertId();
+            $modelTemplateStruct->passfail->id = $idPassfail;
 
             foreach ($modelTemplateStruct->passfail->thresholds as $thresholdStruct){
                 $stmt = $conn->prepare( "INSERT INTO qa_model_template_passfail_options (id_passfail,passfail_label,passfail_value) 
@@ -447,6 +456,9 @@ class QAModelTemplateDao extends DataAccess_AbstractDao
                     'passfail_label' => $thresholdStruct->passfail_label,
                     'passfail_value' => $thresholdStruct->passfail_value,
                 ]);
+
+                $thresholdStruct->id = $conn->lastInsertId();
+                $thresholdStruct->id_passfail = $idPassfail;
             }
 
             foreach ($modelTemplateStruct->categories as $csort => $categoryStruct){
@@ -461,6 +473,7 @@ class QAModelTemplateDao extends DataAccess_AbstractDao
                 ]);
 
                 $idCategory = $conn->lastInsertId();
+                $categoryStruct->id = $idCategory;
 
                 foreach ($categoryStruct->severities as $ssort => $severityStruct){
                     $stmt = $conn->prepare( "INSERT INTO qa_model_template_severities (id_category,severity_label,severity_code, penalty, sort)
@@ -472,12 +485,15 @@ class QAModelTemplateDao extends DataAccess_AbstractDao
                         'penalty' => $severityStruct->penalty,
                         'sort' => ($severityStruct->sort) ? (int)$severityStruct->sort : (int)($ssort+1),
                     ]);
+
+                    $severityStruct->id = $conn->lastInsertId();
+                    $severityStruct->id_category = $idCategory;
                 }
             }
 
             $conn->commit();
 
-            return (int)$modelTemplateStruct->id;
+            return $modelTemplateStruct;
         } catch (\Exception $exception){
             $conn->rollBack();
 

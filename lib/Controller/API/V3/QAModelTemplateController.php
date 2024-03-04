@@ -53,12 +53,10 @@ class QAModelTemplateController extends KleinController {
         // try to create the template
         try {
             $json = $this->request->body();
-            $id = QAModelTemplateDao::createFromJSON($json, $this->getUser()->uid);
+            $model = QAModelTemplateDao::createFromJSON($json, $this->getUser()->uid);
 
             $this->response->code(201);
-            return $this->response->json([
-                'id' => (int)$id
-            ]);
+            return $this->response->json($model);
         } catch (JSONValidatorError $exception){
             $this->response->code(500);
 
@@ -131,12 +129,10 @@ class QAModelTemplateController extends KleinController {
 
         try {
             $json = $this->request->body();
-            $id = QAModelTemplateDao::editFromJSON($model, $json);
+            $model = QAModelTemplateDao::editFromJSON($model, $json);
 
             $this->response->code(200);
-            return $this->response->json([
-                'id' => (int)$id
-            ]);
+            return $this->response->json($model);
         } catch (JSONValidatorError $exception){
             $this->response->code(500);
 

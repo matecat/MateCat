@@ -49,10 +49,7 @@ class PayableRateController extends KleinController
 
             $this->response->code(201);
 
-            return $this->response->json([
-                'id'      => (int)$struct->id,
-                'version' => (int)$struct->version,
-            ]);
+            return $this->response->json($struct);
         } catch (JSONValidatorError $exception){
             $errorCode = $exception->getCode() >= 400 ? $exception->getCode()  : 500;
             $this->response->code($errorCode);
@@ -137,10 +134,7 @@ class PayableRateController extends KleinController
             $struct = CustomPayableRateDao::editFromJSON($model, $json);
 
             $this->response->code(200);
-            return $this->response->json([
-                'id'      => (int)$struct->id,
-                'version' => (int)$struct->version,
-            ]);
+            return $this->response->json($struct);
         } catch (JSONValidatorError $exception){
             $errorCode = $exception->getCode() >= 400 ? $exception->getCode()  : 500;
             $this->response->code($errorCode);
