@@ -28,6 +28,7 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
     public $payable_rate_template_id;
     public $qa_model_template_id;
     public $pretranslate_100;
+    public $pretranslate_101;
     public $get_public_matches;
     public $created_at ;
     public $modified_at ;
@@ -52,6 +53,7 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
         $this->cross_language_matches = $json->cross_language_matches;
         $this->segmentation_rule = $json->segmentation_rule;
         $this->pretranslate_100 = $json->pretranslate_100;
+        $this->pretranslate_101 = $json->pretranslate_101;
         $this->get_public_matches = $json->get_public_matches;
         $this->mt = $json->mt;
         $this->tm = $json->tm;
@@ -245,6 +247,7 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
             'qa_model_template_id' => $this->qa_model_template_id ? (int)$this->qa_model_template_id : null,
             'get_public_matches' => (bool)$this->get_public_matches,
             'pretranslate_100' => (bool)$this->pretranslate_100,
+            'pretranslate_101' => (bool)$this->pretranslate_101,
             'created_at' => date_create( $this->created_at )->format( DATE_RFC822 ),
             'modified_at' => date_create( $this->modified_at )->format( DATE_RFC822 ),
         ];

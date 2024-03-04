@@ -23,6 +23,9 @@
     "pretranslate_100": {
       "type": "boolean"
     },
+    "pretranslate_101": {
+      "type": "boolean"
+    },
     "get_public_matches": {
       "type": "boolean"
     },

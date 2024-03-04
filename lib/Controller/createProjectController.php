@@ -25,6 +25,7 @@ class createProjectController extends ajaxController {
     private $lang_detect_files;
     private $disable_tms_engine_flag;
     private $pretranslate_100;
+    private $pretranslate_101;
     private $only_private;
     private $due_date;
     private $metadata;
@@ -62,6 +63,7 @@ class createProjectController extends ajaxController {
                 ],
                 'private_tm_key'    => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
                 'pretranslate_100'  => [ 'filter' => FILTER_VALIDATE_INT ],
+                'pretranslate_101'  => [ 'filter' => FILTER_VALIDATE_INT ],
                 'id_team'           => [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR ],
 
                 'mmt_glossaries'     => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
@@ -135,6 +137,7 @@ class createProjectController extends ajaxController {
         $this->private_tm_key          = $__postPrivateTmKey;
         $this->lang_detect_files       = $this->postInput[ 'lang_detect_files' ];
         $this->pretranslate_100        = $this->postInput[ 'pretranslate_100' ];
+        $this->pretranslate_101        = $this->postInput[ 'pretranslate_101' ];
         $this->only_private            = ( is_null( $this->postInput[ 'get_public_matches' ] ) ? false : !$this->postInput[ 'get_public_matches' ] );
         $this->due_date                = ( empty( $this->postInput[ 'due_date' ] ) ? null : Utils::mysqlTimestamp( $this->postInput[ 'due_date' ] ) );
 
@@ -154,6 +157,10 @@ class createProjectController extends ajaxController {
 
         if ( $this->pretranslate_100 !== 1 && $this->pretranslate_100 !== 0 ) {
             $this->result[ 'errors' ][] = [ "code" => -6, "message" => "invalid pretranslate_100 value" ];
+        }
+
+        if ( $this->pretranslate_101 !== 1 && $this->pretranslate_101 !== 0 ) {
+            $this->result[ 'errors' ][] = [ "code" => -6, "message" => "invalid pretranslate_101 value" ];
         }
 
 
@@ -294,6 +301,7 @@ class createProjectController extends ajaxController {
         $projectStructure[ 'lang_detect_files' ]            = $this->lang_detect_files;
         $projectStructure[ 'skip_lang_validation' ]         = true;
         $projectStructure[ 'pretranslate_100' ]             = $this->pretranslate_100;
+        $projectStructure[ 'pretranslate_101' ]             = $this->pretranslate_101;
         $projectStructure[ 'only_private' ]                 = $this->only_private;
         $projectStructure[ 'due_date' ]                     = $this->due_date;
         $projectStructure[ 'target_language_mt_engine_id' ] = $this->postInput[ 'target_language_mt_engine_id' ];
