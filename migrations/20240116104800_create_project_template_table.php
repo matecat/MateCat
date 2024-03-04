@@ -13,6 +13,7 @@ class CreateProjectTemplateTable extends AbstractMatecatMigration {
             `lexica` TINYINT(1) NOT NULL DEFAULT  0,
             `tag_projection` TINYINT(1) NOT NULL DEFAULT  0,
             `pretranslate_100` TINYINT(1) NOT NULL DEFAULT  0,
+            `pretranslate_101` TINYINT(1) NOT NULL DEFAULT  1,
             `get_public_matches` TINYINT(1) NOT NULL DEFAULT  0,
             `segmentation_rule` VARCHAR(255) DEFAULT NULL,
             `cross_language_matches` TEXT DEFAULT NULL,
