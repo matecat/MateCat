@@ -2,6 +2,14 @@
 
 .quality-framework-box-ept-threshold {
   display: flex;
+  gap: 15px;
+
+  > div {
+    display: flex;
+    align-items: center;
+    width: 120px;
+    gap: 15px;
+  }
 }
 
 .quality-framework-categories-table {
@@ -24,9 +32,28 @@
     }
 
     .row {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      max-width: 280px;
+      height: 64px;
       background-color: $white;
       border: 1px solid $grey3;
       border-left-width: 2px;
+      padding: 0 10px;
+
+      > :first-child {
+        font-weight: bold;
+      }
+
+      .details {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        max-height: 50px;
+      }
 
       &:last-child {
         border-bottom-width: 2px;
@@ -43,7 +70,7 @@
       justify-content: center;
       min-height: 64px;
       background-color: $grey3;
-      padding: 10px 0;
+      padding: 8px 0;
       font-weight: bold;
     }
 
@@ -53,10 +80,19 @@
       grid-auto-columns: 124px;
       background-color: $white;
 
+      .column {
+        display: flex;
+        justify-content: center;
+        border: 1px solid $grey3;
+        padding: 5px 0;
+      }
+
       .cell {
         display: flex;
         justify-content: center;
         border: 1px solid $grey3;
+        padding: 10px;
+        height: 64px;
 
         &:last-child {
           border-right-width: 2px;
@@ -72,8 +108,20 @@
 
     .row-columns {
       position: absolute;
-      margin-top: 42px;
+      margin-top: 32px;
       font-weight: bold;
     }
   }
+}
+
+.quality-framework-input {
+  height: 40px;
+  width: 100%;
+  border: 1px solid $grey4;
+  padding: 8px 12px 8px 12px;
+  box-shadow: 2px 2px 4px 0px #00000014 inset;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+  text-align: center;
 }

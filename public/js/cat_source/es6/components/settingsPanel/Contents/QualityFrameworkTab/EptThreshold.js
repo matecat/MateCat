@@ -6,6 +6,8 @@ export const EptThreshold = () => {
     QualityFrameworkTabContext,
   )
 
+  const refR1 = useRef()
+  const refR2 = useRef()
   const previousThresholds = useRef({R1: undefined, R2: undefined})
 
   const getThreshold = (type) => {
@@ -56,6 +58,8 @@ export const EptThreshold = () => {
   if (typeof thresholdR2 === 'number')
     previousThresholds.current.R2 = thresholdR2
 
+  const selectAll = ({current}) => current.select()
+
   return (
     <div>
       <h2>EPT Threshold</h2>
@@ -68,16 +72,24 @@ export const EptThreshold = () => {
         <div>
           <label>R1</label>
           <input
+            ref={refR1}
+            className="quality-framework-input"
+            type="text"
             value={thresholdR1}
             onChange={setThresholdR1}
+            onFocus={() => selectAll(refR1)}
             onBlur={checkInput}
           />
         </div>
         <div>
           <label>R2</label>
           <input
+            ref={refR2}
+            className="quality-framework-input"
+            type="text"
             value={thresholdR2}
             onChange={setThresholdR2}
+            onFocus={() => selectAll(refR2)}
             onBlur={checkInput}
           />
         </div>
