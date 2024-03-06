@@ -101,6 +101,11 @@ a.button-component-container {
   }
 
   // Size modifiers
+  &.small {
+    height: 28px;
+    padding: 0 10px;
+    font-size: 12px;
+  }
   &.standard {
     height: 40px;
     padding: 0 16px;
@@ -118,7 +123,7 @@ a.button-component-container {
     height: 48px;
     padding: 0 24px;
     line-height: 48px;
-    font-size: 16px;
+    font-size: 18px;
     font-weight: bold;
   }
   &.iconSmall {

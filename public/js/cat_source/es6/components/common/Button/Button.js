@@ -32,6 +32,7 @@ export const BUTTON_MODE = {
   GHOST: 'ghost',
 }
 export const BUTTON_SIZE = {
+  SMALL: 'small',
   STANDARD: 'standard',
   MEDIUM: 'medium',
   BIG: 'big',

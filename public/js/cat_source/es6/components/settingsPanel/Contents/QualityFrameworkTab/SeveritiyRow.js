@@ -3,7 +3,9 @@ import PropTypes from 'prop-types'
 import {QualityFrameworkTabContext} from './QualityFrameworkTab'
 
 export const SeveritiyRow = ({severity}) => {
-  const {modifyingCurrentTemplate} = useContext(QualityFrameworkTabContext)
+  const {modifyingCurrentTemplate, templates, currentTemplate} = useContext(
+    QualityFrameworkTabContext,
+  )
 
   const ref = useRef()
 
@@ -51,8 +53,22 @@ export const SeveritiyRow = ({severity}) => {
     if (penalty === '') setPenalty(severity.penalty)
   }
 
+  const checkIsNotSaved = () => {
+    if (!templates?.some(({isTemporary}) => isTemporary)) return false
+
+    const originalCurrentTemplate = templates?.find(
+      ({id, isTemporary}) => id === currentTemplate.id && !isTemporary,
+    )
+
+    return !originalCurrentTemplate.categories.some(({severities}) =>
+      severities.some(({id}) => id === severity.id),
+    )
+  }
+
+  const isNotSaved = checkIsNotSaved()
+
   return (
-    <div className="cell">
+    <div className={`cell${isNotSaved ? ' cell-not-saved' : ''}`}>
       <input
         ref={ref}
         className="quality-framework-input"

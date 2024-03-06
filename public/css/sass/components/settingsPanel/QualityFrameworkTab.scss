@@ -17,13 +17,6 @@
   }
 }
 
-.quality-framework-categories-severities {
-  .add-new-category {
-    margin-top: 20px;
-    gap: 2px;
-  }
-}
-
 .quality-framework-categories-table {
   display: flex;
   flex-direction: row;
@@ -71,19 +64,29 @@
         border-bottom-width: 2px;
       }
     }
+
+    .row-not-saved {
+      color: $translatedBlue;
+    }
   }
 
   .severities {
     display: flex;
     flex-direction: column;
+    background-color: $white;
 
     .header {
-      display: flex;
-      justify-content: center;
-      min-height: 64px;
+      padding: 6px;
       background-color: $grey3;
-      padding: 8px 0;
       font-weight: bold;
+      text-align: center;
+    }
+
+    .scroll-area {
+      max-width: 620px;
+      overflow-x: auto;
+      overscroll-behavior: none;
+      scrollbar-width: thin;
     }
 
     .row {
@@ -98,6 +101,9 @@
         border: 1px solid $grey3;
         padding: 5px 0;
       }
+      .column-not-saved {
+        color: $translatedBlue;
+      }
 
       .cell {
         display: flex;
@@ -110,6 +116,11 @@
           border-right-width: 2px;
         }
       }
+      .cell-not-saved {
+        input {
+          color: $translatedBlue;
+        }
+      }
 
       &:last-child {
         .cell {
@@ -119,8 +130,6 @@
     }
 
     .row-columns {
-      position: absolute;
-      margin-top: 32px;
       font-weight: bold;
     }
   }
@@ -140,4 +149,40 @@
   line-height: 24px;
   font-weight: 400;
   text-align: center;
+}
+
+.quality-framework-add-category,
+.quality-framework-add-severity {
+  width: 520px;
+  margin-top: 20px;
+
+  .add-popover-content {
+    width: 320px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: start;
+  }
+
+  .input {
+    text-align: left;
+  }
+}
+
+.quality-framework-add-category {
+  .popover-component-top {
+    bottom: 0;
+    margin-bottom: 0;
+  }
+  button.add-description {
+    gap: 0;
+    font-weight: bold;
+    height: auto;
+  }
+}
+
+.quality-framework-add-severity {
+  width: auto;
+  margin-top: 40px;
+  margin-left: 10px;
 }

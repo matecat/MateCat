@@ -93,7 +93,7 @@ export const QualityFrameworkTab = () => {
 
   return (
     <QualityFrameworkTabContext.Provider
-      value={{currentTemplate, modifyingCurrentTemplate}}
+      value={{templates, currentTemplate, modifyingCurrentTemplate}}
     >
       {templates.length > 0 && (
         <div className="settings-panel-box">
