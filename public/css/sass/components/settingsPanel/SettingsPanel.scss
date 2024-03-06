@@ -197,6 +197,7 @@
 
   .select {
     color: $black;
+    border-color: $grey8;
   }
 }
 
@@ -213,7 +214,7 @@
   }
 
   .template-name {
-    width: 200px;
+    width: 236px;
     height: 38px;
     font-size: 16px;
     padding: 9px 0 9px 12px;
@@ -231,20 +232,22 @@
   gap: 8px;
   margin-left: 8px;
 
-  .template-button {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    height: 40px;
-    background-color: unset;
-    border: 1px solid $grey4;
-    color: white;
-    font-size: 16px;
-    padding: 0 12px;
-    cursor: pointer;
-    line-height: 1;
+  button.template-button {
+    border-radius: unset;
+    font-weight: normal;
+    color: black !important;
+    box-shadow: inset 0 0 0 1px $grey8;
+  }
+
+  button.template-button-white {
+    border-radius: unset;
+    font-weight: normal;
+    color: white !important;
+    box-shadow: inset 0 0 0 1px $white;
 
     &:hover {
+      background-color: unset !important;
+      box-shadow: inset 0 0 0 1px $white !important;
       opacity: 0.8;
     }
   }
@@ -260,7 +263,15 @@
   }
 
   .button-more-items {
+    border-radius: unset;
+    font-weight: normal;
+    color: black;
+    box-shadow: inset 0 0 0 1px $grey8;
     padding: 0;
+
+    &:hover {
+      box-shadow: inset 0 0 0 1px $black;
+    }
 
     .menu-button-wrapper .icon {
       justify-content: center;
@@ -273,9 +284,23 @@
     }
   }
 
-  .button-save-changes {
+  .button-more-items-project-templates {
+    box-shadow: inset 0 0 0 1px $white;
+
+    &:hover {
+      box-shadow: inset 0 0 0 1px $white;
+      opacity: 0.8;
+    }
+  }
+
+  button.button-save-changes {
     background-color: $grey4;
-    color: black;
+    color: black !important;
+
+    &:hover {
+      background-color: $grey4 !important;
+      opacity: 0.8;
+    }
   }
 }
 
@@ -319,11 +344,6 @@
 .settings-panel-subtemplates {
   background-color: unset;
   padding: unset;
-
-  .template-button {
-    border-color: $grey2;
-    color: $black;
-  }
 
   .settings-panel-templates-container-buttons {
     .button-more-items {

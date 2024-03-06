@@ -17,6 +17,7 @@ import {TemplateSelect} from './TemplateSelect'
 import {IconPin} from '../../icons/IconPin'
 import {IconSave} from '../../icons/IconSave'
 import {IconSaveChanges} from '../../icons/IconSaveChanges'
+import {BUTTON_MODE, BUTTON_SIZE, Button} from '../../common/Button/Button'
 
 export const TEMPLATE_MODIFIERS = {
   CREATE: 'create',
@@ -209,36 +210,42 @@ export const ProjectTemplate = ({portalTarget}) => {
           {!templateModifier ? (
             <>
               {isActiveSetAsDefault && (
-                <button
-                  className="template-button"
-                  data-testid="set-as-default-template"
+                <Button
+                  className="template-button-white"
+                  size={BUTTON_SIZE.MEDIUM}
+                  mode={BUTTON_MODE.OUTLINE}
+                  testId="set-as-default-template"
                   disabled={isRequestInProgress}
                   onClick={setCurrentProjectTemplateAsDefault}
                 >
                   <IconPin />
                   Set as default
-                </button>
+                </Button>
               )}
               {isModifyingTemplate && !isStandardTemplateBool && (
-                <button
-                  className="template-button button-save-changes"
+                <Button
+                  className="template-button-white button-save-changes"
+                  size={BUTTON_SIZE.MEDIUM}
+                  mode={BUTTON_MODE.OUTLINE}
                   disabled={isRequestInProgress}
                   onClick={() => updateTemplate()}
                 >
                   <IconSaveChanges />
                   Save changes
-                </button>
+                </Button>
               )}
               {isModifyingTemplate && (
-                <button
-                  className="template-button"
-                  data-testid="save-as-new-template"
+                <Button
+                  testId="save-as-new-template"
+                  className="template-button-white"
+                  size={BUTTON_SIZE.MEDIUM}
+                  mode={BUTTON_MODE.OUTLINE}
                   disabled={isRequestInProgress}
                   onClick={() => setTemplateModifier(TEMPLATE_MODIFIERS.CREATE)}
                 >
                   <IconSave />
                   Save as new
-                </button>
+                </Button>
               )}
               {!isStandardTemplateBool && <MoreMenu {...{portalTarget}} />}
             </>

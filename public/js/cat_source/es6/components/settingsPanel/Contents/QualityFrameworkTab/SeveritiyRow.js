@@ -37,7 +37,8 @@ export const SeveritiyRow = ({severity}) => {
             if (idCategory === category.id && id === severityItem.id) {
               return {
                 ...severityItem,
-                penalty: parseFloat(penalty),
+                penalty:
+                  penalty !== '' ? parseFloat(penalty) : severityItem.penalty,
               }
             } else {
               return severityItem
@@ -46,6 +47,8 @@ export const SeveritiyRow = ({severity}) => {
         })),
       }
     })
+
+    if (penalty === '') setPenalty(severity.penalty)
   }
 
   return (

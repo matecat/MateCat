@@ -40,7 +40,7 @@ export const MoreMenu = ({portalTarget}) => {
 
   return (
     <MenuButton
-      className="template-button button-more-items"
+      className="template-button-white button-more-items button-more-items-project-templates"
       onClick={() => false}
       icon={<DotsHorizontal size={18} />}
       isVisibleRectArrow={false}

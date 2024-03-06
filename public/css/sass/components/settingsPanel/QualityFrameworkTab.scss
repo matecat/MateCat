@@ -9,6 +9,18 @@
     align-items: center;
     width: 120px;
     gap: 15px;
+
+    > label {
+      font-weight: bold;
+      font-size: 16px;
+    }
+  }
+}
+
+.quality-framework-categories-severities {
+  .add-new-category {
+    margin-top: 20px;
+    gap: 2px;
   }
 }
 
@@ -111,6 +123,10 @@
       margin-top: 32px;
       font-weight: bold;
     }
+  }
+
+  .add-new-severity {
+    padding: 16px;
   }
 }
 

@@ -6,6 +6,12 @@ import {SubTemplateMoreMenu} from './SubTemplateMoreMenu'
 import {SubTemplateCreateUpdateControl} from './SubTemplateCreateUpdateControl'
 import {IconSaveChanges} from '../../../icons/IconSaveChanges'
 import {IconSave} from '../../../icons/IconSave'
+import {
+  BUTTON_MODE,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+  Button,
+} from '../../../common/Button/Button'
 
 export const SUBTEMPLATE_MODIFIERS = {
   CREATE: 'create',
@@ -98,19 +104,23 @@ export const SubTemplates = ({
           {!templateModifier ? (
             <>
               {isModifyingTemplate && !isStandardTemplateBool && (
-                <button
+                <Button
                   className="template-button button-save-changes"
+                  mode={BUTTON_MODE.OUTLINE}
+                  size={BUTTON_SIZE.MEDIUM}
                   disabled={isRequestInProgress}
                   onClick={() => updateTemplate()}
                 >
                   <IconSaveChanges />
                   Save changes
-                </button>
+                </Button>
               )}
               {isModifyingTemplate && (
-                <button
+                <Button
                   className="template-button"
-                  data-testid="save-as-new-template"
+                  testId="save-as-new-template"
+                  mode={BUTTON_MODE.OUTLINE}
+                  size={BUTTON_SIZE.MEDIUM}
                   disabled={isRequestInProgress}
                   onClick={() =>
                     setTemplateModifier(SUBTEMPLATE_MODIFIERS.CREATE)
@@ -118,7 +128,7 @@ export const SubTemplates = ({
                 >
                   <IconSave />
                   Save as new
-                </button>
+                </Button>
               )}
               {!isStandardTemplateBool && (
                 <SubTemplateMoreMenu {...{portalTarget}} />

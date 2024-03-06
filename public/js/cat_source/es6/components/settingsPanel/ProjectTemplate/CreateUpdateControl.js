@@ -6,6 +6,7 @@ import {createProjectTemplate} from '../../../api/createProjectTemplate'
 import {SCHEMA_KEYS} from '../../../hooks/useProjectTemplates'
 import {SettingsPanelContext} from '../SettingsPanelContext'
 import Checkmark from '../../../../../../img/icons/Checkmark'
+import {BUTTON_SIZE, BUTTON_TYPE, Button} from '../../common/Button/Button'
 
 export const CreateUpdateControl = () => {
   const {
@@ -69,9 +70,10 @@ export const CreateUpdateControl = () => {
 
   return (
     <>
-      <button
-        className="ui primary button template-button control-button"
-        data-testid="create-update-template"
+      <Button
+        testId="create-update-template"
+        type={BUTTON_TYPE.PRIMARY}
+        size={BUTTON_SIZE.MEDIUM}
         onClick={
           templateModifier === TEMPLATE_MODIFIERS.CREATE
             ? createTemplate
@@ -80,13 +82,11 @@ export const CreateUpdateControl = () => {
       >
         <Checkmark size={14} />
         Confirm
-      </button>
-      <button
-        className="ui button orange template-button control-button"
-        onClick={cancel}
-      >
+      </Button>
+
+      <Button type={BUTTON_TYPE.WARNING} onClick={cancel}>
         <IconClose size={11} />
-      </button>
+      </Button>
     </>
   )
 }

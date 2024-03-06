@@ -41,7 +41,7 @@ export const SubTemplateMoreMenu = ({portalTarget}) => {
 
   return (
     <MenuButton
-      className="template-button button-more-items"
+      className="button-menu-button button-more-items"
       onClick={() => false}
       icon={<DotsHorizontal size={18} />}
       isVisibleRectArrow={false}
