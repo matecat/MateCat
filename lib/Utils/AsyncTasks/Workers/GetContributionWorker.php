@@ -19,6 +19,7 @@ use INIT;
 use Jobs_JobStruct;
 use Matecat\SubFiltering\AbstractFilter;
 use PostProcess;
+use Projects_MetadataDao;
 use Stomp;
 use Matecat\SubFiltering\MateCatFilter;
 use TaskRunner\Commons\AbstractElement;
