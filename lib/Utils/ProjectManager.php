@@ -169,6 +169,7 @@ class ProjectManager {
                     'uid'                          => null,
                     'skip_lang_validation'         => false,
                     'pretranslate_100'             => 0,
+                    'pretranslate_101'             => 1,
                     'only_private'                 => 0,
                     'owner'                        => '',
                     'word_count_type'              => '',
@@ -345,6 +346,10 @@ class ProjectManager {
             $options['from_api'] = 1;
         }
 
+        // pretranslate_101
+        if(isset($this->projectStructure['pretranslate_101'])){
+            $options['pretranslate_101'] = $this->projectStructure['pretranslate_101'];
+        }
         /**
          * Here we have the opportunity to add other features as dependencies of the ones
          * which are already explicitly set.

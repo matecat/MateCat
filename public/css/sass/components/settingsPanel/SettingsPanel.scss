@@ -112,7 +112,7 @@
 
 .settings-panel-contentwrapper-container {
   font-size: 14px;
-  padding: 20px;
+  padding: 0 20px 20px 20px;
   overflow-y: auto;
   max-height: calc(100vh - 340px);
   height: 100%;
@@ -343,5 +343,21 @@
 .settings-panel-subtemplates-select-unsaved {
   .select {
     color: $translatedBlue !important;
+  }
+}
+
+.settings-panel-box {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  float: left;
+  width: 100%;
+
+  h2 {
+    padding: 10px 0 10px 0;
+  }
+
+  .settings-panel-contentwrapper-tab-background {
+    text-align: left;
   }
 }

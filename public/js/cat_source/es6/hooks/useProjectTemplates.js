@@ -51,6 +51,7 @@ export const SCHEMA_KEYS = {
   qaModelTemplateId: 'qa_model_template_id',
   getPublicMatches: 'get_public_matches',
   pretranslate100: 'pretranslate_100',
+  pretranslate101: 'pretranslate_101',
 }
 
 function useProjectTemplates(canRetrieveTemplates) {

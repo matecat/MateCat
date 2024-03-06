@@ -7,8 +7,12 @@ import {AdvancedOptionsTab} from './Contents/AdvancedOptionsTab'
 import {TranslationMemoryGlossaryTab} from './Contents/TranslationMemoryGlossaryTab'
 import {ProjectTemplate} from './ProjectTemplate/ProjectTemplate'
 import {SCHEMA_KEYS} from '../../hooks/useProjectTemplates'
-import {AnalysisTab} from './Contents/AnalysisTab'
-import {QualityFrameworkTab} from './Contents/QualityFrameworkTab'
+import {ANALYSIS_SCHEMA_KEYS, AnalysisTab} from './Contents/AnalysisTab'
+import {
+  QF_SCHEMA_KEYS,
+  QualityFrameworkTab,
+} from './Contents/QualityFrameworkTab'
+import useTemplates from '../../hooks/useTemplates'
 
 let tabOpenFromQueryString = new URLSearchParams(window.location.search).get(
   'openTab',
@@ -29,6 +33,8 @@ export const TEMPLATE_PROPS_BY_TAB = {
     SCHEMA_KEYS.pretranslate100,
   ],
   [SETTINGS_PANEL_TABS.machineTranslation]: [SCHEMA_KEYS.mt],
+  [SETTINGS_PANEL_TABS.qualityFramework]: [SCHEMA_KEYS.qaModelTemplateId],
+  [SETTINGS_PANEL_TABS.analysis]: [SCHEMA_KEYS.payableRateTemplateId],
   [SETTINGS_PANEL_TABS.advancedOptions]: [
     SCHEMA_KEYS.speech2text,
     SCHEMA_KEYS.tagProjection,
@@ -124,6 +130,10 @@ export const SettingsPanel = ({
     return initialState
   })
 
+  // templates quality framework
+  const qualityFrameworkTemplates = useTemplates(QF_SCHEMA_KEYS)
+  const analysisTemplates = useTemplates(ANALYSIS_SCHEMA_KEYS)
+
   const wrapperRef = useRef()
 
   useEffect(() => {
@@ -174,6 +184,8 @@ export const SettingsPanel = ({
         modifyingCurrentTemplate,
         checkSpecificTemplatePropsAreModified,
         isEnabledProjectTemplateComponent,
+        qualityFrameworkTemplates,
+        analysisTemplates,
       }}
     >
       <div

@@ -14,23 +14,44 @@ const normalizeKeys = ({template, schema}) =>
     }
   }, {})
 
-const createTemplateProxy = ({template, schema}) =>
-  new Proxy(normalizeKeys({template, schema}), {
-    get(target, prop) {
-      const isSpecialProp = prop === 'isSelected' || prop === 'isTemporary'
-      const key = isSpecialProp || !schema[prop] ? prop : schema[prop]
-      if (
-        !isSpecialProp &&
-        !schema[prop] &&
-        !Object.values(schema).some((item) => item === prop) &&
-        Reflect.getOwnPropertyDescriptor(target, key)
-      ) {
-        throw new Error(`Invalid prop ${prop}.`)
-      }
+const isSpecialProp = (prop) => prop === 'isSelected' || prop === 'isTemporary'
 
-      return target[key]
-    },
-  })
+const isValidProp = ({target, prop, schema}) => {
+  const key = isSpecialProp(prop) || !schema[prop] ? prop : schema[prop]
+  if (
+    !isSpecialProp(prop) &&
+    !schema[prop] &&
+    !Object.values(schema).some((item) => item === prop) &&
+    Reflect.getOwnPropertyDescriptor(target, key)
+  ) {
+    return false
+  }
+  return true
+}
+
+const createTemplateProxy = ({template, schema}) => {
+  const isCorrespondingToSchema = Object.keys(template).every((prop) =>
+    isValidProp({target: template, prop, schema}),
+  )
+
+  if (isCorrespondingToSchema) {
+    return new Proxy(normalizeKeys({template, schema}), {
+      get(target, prop) {
+        if (isValidProp({target, prop, schema})) {
+          const key = isSpecialProp(prop) || !schema[prop] ? prop : schema[prop]
+          return target[key]
+        } else {
+          throw new Error(`Invalid prop ${prop}.`)
+        }
+      },
+    })
+  } else {
+    const prop = Object.keys(template).find(
+      (prop) => !isValidProp({target: template, prop, schema}),
+    )
+    throw new Error(`Invalid prop ${prop}.`)
+  }
+}
 
 function useTemplates(schema) {
   const [templates, setTemplatesState] = useState([])
@@ -81,15 +102,15 @@ function useTemplates(schema) {
 
       const {isTemporary, ...comparableModifiedTemplate} = modifiedTemplate // eslint-disable-line
 
-      const originalTemplateKeys = Object.keys(originalTemplate).filter(
-        (value) => value !== 'isSelected',
-      )
-      const modifiedTemplateKeys = Object.keys(
-        comparableModifiedTemplate,
-      ).filter((value) => value !== 'isSelected')
+      // const originalTemplateKeys = Object.keys(originalTemplate).filter(
+      //   (value) => value !== 'isSelected',
+      // )
+      // const modifiedTemplateKeys = Object.keys(
+      //   comparableModifiedTemplate,
+      // ).filter((value) => value !== 'isSelected')
 
-      if (!isEqual(modifiedTemplateKeys, originalTemplateKeys))
-        throw new Error('Error template schema not valid.')
+      // if (!isEqual(modifiedTemplateKeys, originalTemplateKeys))
+      //   throw new Error('Error template schema not valid.')
 
       // If modified template is equal to original template clean up temporary template
       if (isEqual(comparableModifiedTemplate, originalTemplate)) {

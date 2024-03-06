@@ -46,6 +46,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao
         $default->tag_projection = true;
         $default->uid = $uid;
         $default->pretranslate_100 = false;
+        $default->pretranslate_101 = true;
         $default->get_public_matches = true;
         $default->payable_rate_template_id = 0;
         $default->qa_model_template_id = 0;
@@ -55,13 +56,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao
         ];
 
         // MT
-        $engineDAO        = new EnginesModel_EngineDAO( Database::obtain() );
-        $engineStruct     = EnginesModel_EngineStruct::getStruct();
-        $engineStruct->uid = $uid;
-        $engineStruct->active = true;
-
-        $engineList = $engineDAO->setCacheTTL( 60 * 5 )->read( $engineStruct );
-        $default->mt = self::getUserDefaultMt($engineList);
+        $default->mt = self::getUserDefaultMt();
 
         $default->tm = [];
         $default->created_at = date("Y-m-d H:i:s");
@@ -71,43 +66,10 @@ class ProjectTemplateDao extends DataAccess_AbstractDao
     }
 
     /**
-     * @param EnginesModel_EngineStruct[] $engineList
      * @return array
      */
-    private static function getUserDefaultMt($engineList = [])
+    private static function getUserDefaultMt()
     {
-        if(empty($engineList)){
-           return [
-               'id' => 1,
-               'extra' => new \stdClass()
-           ];
-        }
-
-        $mmt = array_filter($engineList, function($el){
-            return $el->name === 'ModernMT';
-        });
-
-        $deepL = array_filter($engineList, function($el){
-            return $el->name === 'DeepL';
-        });
-
-        if(!empty($mmt)){
-            return [
-                'id' => array_values($mmt)[0]->id,
-                'extra' => new \stdClass()
-            ];
-        }
-
-        if(!empty($deepL)){
-            $extra = new \stdClass();
-            $extra->deepl_formality = 'default';
-
-            return [
-                'id' => array_values($deepL)[0]->id,
-                'extra' => $extra
-            ];
-        }
-
         return [
             'id' => 1,
             'extra' => new \stdClass()
@@ -425,9 +387,9 @@ class ProjectTemplateDao extends DataAccess_AbstractDao
     public static function save(ProjectTemplateStruct $projectTemplateStruct )
     {
         $sql = "INSERT INTO " . self::TABLE .
-            " ( `name`, `is_default`, `uid`, `id_team`, `speech2text`, `lexica`, `tag_projection`, `cross_language_matches`, `segmentation_rule`, `tm`, `mt`, `payable_rate_template_id`,`qa_model_template_id`, `pretranslate_100`, `get_public_matches`, `created_at`, `modified_at` ) " .
+            " ( `name`, `is_default`, `uid`, `id_team`, `speech2text`, `lexica`, `tag_projection`, `cross_language_matches`, `segmentation_rule`, `tm`, `mt`, `payable_rate_template_id`,`qa_model_template_id`, `pretranslate_100`, `pretranslate_101`,  `get_public_matches`, `created_at`, `modified_at` ) " .
             " VALUES " .
-            " ( :name, :is_default, :uid, :id_team, :speech2text, :lexica, :tag_projection, :cross_language_matches, :segmentation_rule, :tm, :mt, :payable_rate_template_id, :qa_model_template_id, :pretranslate_100, :get_public_matches, :now, :now ); ";
+            " ( :name, :is_default, :uid, :id_team, :speech2text, :lexica, :tag_projection, :cross_language_matches, :segmentation_rule, :tm, :mt, :payable_rate_template_id, :qa_model_template_id, :pretranslate_100, :pretranslate_101, :get_public_matches, :now, :now ); ";
 
         $now = (new DateTime())->format('Y-m-d H:i:s');
 
@@ -446,6 +408,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao
             "mt" => $projectTemplateStruct->mtToJson(),
             "tm" => $projectTemplateStruct->tmToJson(),
             "pretranslate_100" => $projectTemplateStruct->pretranslate_100,
+            "pretranslate_101" => $projectTemplateStruct->pretranslate_101,
             "get_public_matches" => $projectTemplateStruct->get_public_matches,
             "payable_rate_template_id" => $projectTemplateStruct->payable_rate_template_id,
             "qa_model_template_id" => $projectTemplateStruct->qa_model_template_id,
@@ -483,6 +446,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao
             `tm` = :tm, 
             `mt` = :mt, 
             `pretranslate_100` = :pretranslate_100,
+            `pretranslate_101` = :pretranslate_101,
             `get_public_matches` = :get_public_matches,
             `payable_rate_template_id` = :payable_rate_template_id, 
             `qa_model_template_id` = :qa_model_template_id, 
@@ -505,6 +469,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao
             "mt" => $projectTemplateStruct->mtToJson(),
             "tm" => $projectTemplateStruct->tmToJson(),
             "pretranslate_100" => $projectTemplateStruct->pretranslate_100,
+            "pretranslate_101" => $projectTemplateStruct->pretranslate_101,
             "get_public_matches" => $projectTemplateStruct->get_public_matches,
             "payable_rate_template_id" => $projectTemplateStruct->payable_rate_template_id,
             "qa_model_template_id" => $projectTemplateStruct->qa_model_template_id,
