@@ -139,16 +139,21 @@ class QAModelTemplateDao extends DataAccess_AbstractDao
         $defaultTemplateModel = json_decode($defaultTemplate, true);
 
         $categories = [];
+        $idSeverityIndex = 0;
 
         foreach ($defaultTemplateModel['model']['categories'] as $cindex => $category){
 
             $severities = [];
             unset($category['dqf_id']);
-            $category['id'] = 0;
+            $category['id'] = ($cindex+1);
 
             foreach ($defaultTemplateModel['model']['severities'] as $sindex => $severity){
+
+                $idSeverityIndex++;
+
                 unset($severity['dqf_id']);
-                $severity['id'] = 0;
+                $severity['id'] = $idSeverityIndex;
+                $severity['id_category'] = ($cindex+1);
                 $severity['code'] = strtoupper(substr($severity['label'], 0, 3));
                 $severity['penalty'] = floatval($severity['penalty']);
                 $severities[] = $severity;
