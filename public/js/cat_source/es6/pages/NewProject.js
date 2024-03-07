@@ -214,7 +214,7 @@ const NewProject = ({
       }),
       lang_detect_files: '',
       pretranslate_100: pretranslate100 ? 1 : 0,
-      pretranslate_101: pretranslate101,
+      pretranslate_101: pretranslate101 ? 1 : 0,
       lexiqa: isLexiqaEnabled && lexica,
       speech2text: speech2text,
       tag_projection: isGuessTagEnabled && tagProjection,
