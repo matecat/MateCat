@@ -73,7 +73,7 @@ class LoginController extends AbstractStatefulKleinController  {
         $user = $dao->getByEmail( $params[ 'email' ] );
 
         if ( $user && ( !is_null( $user->email_confirmed_at ) || !is_null( $user->oauth_access_token ) ) && $user->passwordMatch( $params[ 'password' ] ) ) {
-            AuthCookie::setCredentials( $user->email, $user->uid );
+            AuthCookie::setCredentials( $user );
 
             $user->confirmation_token = null;
             $user->oauth_access_token = null;

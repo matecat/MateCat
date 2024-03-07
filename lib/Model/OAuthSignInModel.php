@@ -100,7 +100,7 @@ class OAuthSignInModel {
     }
 
     protected function _authenticateUser() {
-        AuthCookie::setCredentials($this->user->email, $this->user->uid );
+        AuthCookie::setCredentials($this->user );
         $_SESSION[ 'cid' ]  = $this->user->email ;
         $_SESSION[ 'uid' ]  = $this->user->uid ;
     }
