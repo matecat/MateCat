@@ -96,7 +96,10 @@
       background-color: $grey3;
 
       :first-child {
+        position: sticky;
+        left: 0;
         display: block;
+        max-width: 620px;
         font-weight: bold;
         text-align: center;
         padding: 6px;
