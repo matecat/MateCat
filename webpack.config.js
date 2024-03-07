@@ -352,6 +352,13 @@ const matecatConfig = async ({env}, {mode}) => {
         xhtml: true,
       }),
       new HtmlWebPackPlugin({
+        filename: path.resolve(__dirname, './lib/View/signin.html'),
+        template: path.resolve(__dirname, './lib/View/templates/_signin.html'),
+        chunks: ['signin', 'allPagesPlugins'],
+        publicPath: '/public/build/',
+        xhtml: true,
+      }),
+      new HtmlWebPackPlugin({
         filename: path.resolve(__dirname, './lib/View/jobAnalysis.html'),
         template: path.resolve(
           __dirname,

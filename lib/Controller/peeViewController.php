@@ -28,6 +28,7 @@ class peeViewController extends viewController {
 
     public function doAction() {
 
+        $this->checkLoginRequiredAndRedirect();
         ( new WhitelistAccessValidator( $this ) )->validate();
 
         $languageStats = ( new LanguageStats_LanguageStatsDAO() )->getLanguageStats( null );

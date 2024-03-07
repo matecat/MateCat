@@ -19,8 +19,10 @@ abstract class viewController extends controller {
      */
     protected $authURL;
 
-    protected $login_required = false;
-
+    /**
+     * @var bool
+     */
+    protected $login_required = true;
 
     /**
      * Class constructor
@@ -49,6 +51,7 @@ abstract class viewController extends controller {
      * Perform Authentication Requests and set incoming url
      */
     public function checkLoginRequiredAndRedirect() {
+
         if ( !$this->login_required ) {
             return true;
         }
@@ -58,15 +61,23 @@ abstract class viewController extends controller {
 
         //if no login set and login is required
         if ( !$this->isLoggedIn() ) {
-            //take note of url we wanted to go after
-            $_SESSION[ 'wanted_url' ] = $_SERVER[ 'REQUEST_URI' ];
-            $mustRedirectToLogin      = true;
+
+            CookieManager::setCookie( 'matecat_login_v6_requested_url', $_SERVER[ 'REQUEST_URI' ],
+                [
+                    'expires'  => time() + ( 3600 ), // 1 hour
+                    'path'     => '/',
+                    'domain'   => INIT::$COOKIE_DOMAIN,
+                    'secure'   => true,
+                    'httponly' => false,
+                    'samesite' => 'None',
+                ]
+            );
+
+            $mustRedirectToLogin = true;
         }
 
         if ( $mustRedirectToLogin ) {
-            FlashMessage::set( 'popup', 'login', FlashMessage::SERVICE );
-
-            header( 'Location: ' . Routes::appRoot() );
+            header( "Location: " . INIT::$HTTPHOST . INIT::$BASEURL . "signin", true  );
             exit;
         }
 
