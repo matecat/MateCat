@@ -13,6 +13,9 @@ import {deleteBillingModelTemplate} from '../../../../api/deleteBillingModelTemp
 import {SubTemplates} from '../SubTemplates'
 import {Select} from '../../../common/Select'
 import {CreateProjectContext} from '../../../createProject/CreateProjectContext'
+import Checkmark from '../../../../../../../img/icons/Checkmark'
+import Close from '../../../../../../../img/icons/Close'
+import AddWide from '../../../../../../../img/icons/AddWide'
 
 export const ANALYSIS_SCHEMA_KEYS = {
   id: 'id',
@@ -61,7 +64,6 @@ export const AnalysisTab = () => {
     modifyingCurrentTemplate: modifyingCurrentProjectTemplate,
     analysisTemplates,
   } = useContext(SettingsPanelContext)
-  const {languages} = useContext(CreateProjectContext)
 
   const {templates, setTemplates, currentTemplate, modifyingCurrentTemplate} =
     analysisTemplates
@@ -282,16 +284,11 @@ export const AnalysisTab = () => {
             </div>
             <div className="analysis-tab-exceptions">
               <h3>Exceptions</h3>
-              <div>
-                <div>
-                  <Select
-                    name={'lang'}
-                    showSearchBar={true}
-                    options={languages}
-                    onSelect={(option) => {}}
-                  />
-                </div>
-              </div>
+              <LanguagesExceptions object={currentTemplate.breakdowns} />
+              <button className="ui primary button add-button">
+                <AddWide size={12} />
+                Add exception
+              </button>
             </div>
           </div>
         </div>
@@ -328,5 +325,50 @@ const InputPercentage = ({value = '', setFn}) => {
       onInput={(e) => onPercentInput(e)}
       onBlur={onBlur}
     />
+  )
+}
+
+const LanguagesExceptions = ({object}) => {
+  const {languages} = useContext(CreateProjectContext)
+
+  let exceptions = []
+
+  for (const [key, value] of Object.entries(object)) {
+    console.log(`${key}: ${value}`)
+    if (key !== 'default' && key.indexOf('-') > -1) {
+      exceptions.push(key)
+      console.log('', exceptions.toString())
+    }
+  }
+  return (
+    <div className="analysis-tab-exceptionsRow">
+      <div className="analysis-tab-languages">
+        <Select
+          name={'lang'}
+          showSearchBar={true}
+          options={languages}
+          onSelect={(option) => {}}
+          placeholder={'Please select language'}
+        />
+        <div id="swaplang" title="Swap languages" onClick={() => {}} />
+        <Select
+          name={'lang'}
+          showSearchBar={true}
+          options={languages}
+          onSelect={(option) => {}}
+          placeholder={'Please select language'}
+        />
+      </div>
+      <InputPercentage value={0} setFn={() => {}} />
+      <div className="analysis-tab-buttons">
+        <button className="ui primary button confirm-button">
+          <Checkmark size={12} />
+          Confirm
+        </button>
+        <button className="ui button orange close-button">
+          <Close size={16} />
+        </button>
+      </div>
+    </div>
   )
 }
