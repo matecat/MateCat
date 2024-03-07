@@ -24,8 +24,8 @@
 
   .scroll-area {
     display: flex;
-    max-width: 900px;
-    max-height: 400px;
+    max-width: 910px;
+    max-height: calc(100vh - 680px);
     overflow-x: auto;
     overscroll-behavior: none;
     scrollbar-width: thin;
@@ -95,7 +95,7 @@
       top: 0;
       background-color: $grey3;
 
-      :first-child {
+      > :first-child {
         position: sticky;
         left: 0;
         display: block;
@@ -117,6 +117,7 @@
         justify-content: center;
         border: 1px solid $grey3;
         padding: 5px 0;
+        gap: 5px;
       }
       .column-not-saved {
         color: $translatedBlue;
@@ -153,6 +154,13 @@
 
   .add-new-severity {
     padding: 16px;
+  }
+
+  .button-menu-button {
+    .icon {
+      background-color: unset;
+      border: unset;
+    }
   }
 }
 

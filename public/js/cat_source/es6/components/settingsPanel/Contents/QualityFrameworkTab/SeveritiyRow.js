@@ -60,12 +60,20 @@ export const SeveritiyRow = ({severity}) => {
       ({id, isTemporary}) => id === currentTemplate.id && !isTemporary,
     )
 
-    return !originalCurrentTemplate.categories.some(({severities}) =>
+    const isMatched = originalCurrentTemplate.categories.some(({severities}) =>
       severities.some(({id}) => id === severity.id),
     )
+    const isModified = originalCurrentTemplate.categories.some(({severities}) =>
+      severities.some(
+        ({id, penalty}) => id === severity.id && penalty !== severity.penalty,
+      ),
+    )
+
+    return !isMatched || isModified
   }
 
   const isNotSaved = checkIsNotSaved()
+  console.log('isNotSaved', isNotSaved)
 
   return (
     <div className={`cell${isNotSaved ? ' cell-not-saved' : ''}`}>
