@@ -22,12 +22,26 @@
   flex-direction: row;
   margin-top: 20px;
 
+  .scroll-area {
+    display: flex;
+    max-width: 900px;
+    max-height: 400px;
+    overflow-x: auto;
+    overscroll-behavior: none;
+    scrollbar-width: thin;
+  }
+
   .categories {
     display: flex;
+    position: sticky;
+    left: 0;
+    z-index: 2;
     flex-direction: column;
     min-width: 280px;
 
     .header {
+      position: sticky;
+      top: 0;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -41,7 +55,8 @@
       flex-direction: column;
       justify-content: center;
       max-width: 280px;
-      height: 64px;
+      /* height: 64px; */
+      min-height: 64px;
       background-color: $white;
       border: 1px solid $grey3;
       border-left-width: 2px;
@@ -76,17 +91,16 @@
     background-color: $white;
 
     .header {
-      padding: 6px;
+      position: sticky;
+      top: 0;
       background-color: $grey3;
-      font-weight: bold;
-      text-align: center;
-    }
 
-    .scroll-area {
-      max-width: 620px;
-      overflow-x: auto;
-      overscroll-behavior: none;
-      scrollbar-width: thin;
+      :first-child {
+        display: block;
+        font-weight: bold;
+        text-align: center;
+        padding: 6px;
+      }
     }
 
     .row {

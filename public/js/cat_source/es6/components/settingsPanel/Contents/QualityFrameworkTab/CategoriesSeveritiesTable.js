@@ -15,19 +15,21 @@ export const CategoriesSeveritiesTable = () => {
   return (
     <div className="quality-framework-categories-severities">
       <div className="quality-framework-categories-table">
-        <div className="categories">
-          <span className="header">Categories</span>
-          {categories.map((category, index) => (
-            <CategoryRow key={index} {...{category}} />
-          ))}
-        </div>
-        <div className="severities">
-          <span className="header">Severities</span>
-          <div className="scroll-area">
-            <div className="row row-columns">
-              {categories[0]?.severities.map(({label}, index) => (
-                <SeverityColumn key={index} {...{label}} />
-              ))}
+        <div className="scroll-area">
+          <div className="categories">
+            <span className="header">Categories</span>
+            {categories.map((category, index) => (
+              <CategoryRow key={index} {...{category}} />
+            ))}
+          </div>
+          <div className="severities">
+            <div className="header">
+              <span>Severities</span>
+              <div className="row row-columns">
+                {categories[0]?.severities.map(({label}, index) => (
+                  <SeverityColumn key={index} {...{label}} />
+                ))}
+              </div>
             </div>
             {categories.map(({severities}, index) => (
               <div key={index} className="row">
