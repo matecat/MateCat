@@ -88,7 +88,7 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
 
           const templatesInvolved = projectTemplates
             .filter((template) =>
-              template.mt.extra.glossaries?.some(
+              template.mt?.extra?.glossaries?.some(
                 (value) => value === glossary.id,
               ),
             )
@@ -146,7 +146,7 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
     const templatesInvolved = projectTemplates
       .filter(({isSelected}) => !isSelected)
       .filter((template) =>
-        template.mt.extra.glossaries?.some((value) => value === glossary.id),
+        template.mt?.extra?.glossaries?.some((value) => value === glossary.id),
       )
 
     if (templatesInvolved.length) {

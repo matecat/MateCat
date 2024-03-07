@@ -28,6 +28,7 @@ const STANDARD_TEMPLATE = {
   qa_model_template_id: null,
   get_public_matches: true,
   pretranslate_100: true,
+  pretranslate_101: true,
   created_at: 'Fri, 02 Feb 24 16:48:34 +0100',
   modified_at: 'Fri, 02 Feb 24 16:48:34 +0100',
 }

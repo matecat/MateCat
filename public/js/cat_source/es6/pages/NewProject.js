@@ -186,6 +186,7 @@ const NewProject = ({
       speech2text,
       tagProjection,
       pretranslate100,
+      pretranslate101,
       segmentationRule,
       idTeam,
       getPublicMatches,
@@ -212,22 +213,23 @@ const NewProject = ({
       }),
       lang_detect_files: '',
       pretranslate_100: pretranslate100 ? 1 : 0,
+      pretranslate_101: pretranslate101,
       lexiqa: isLexiqaEnabled && lexica,
       speech2text: speech2text,
       tag_projection: isGuessTagEnabled && tagProjection,
       segmentation_rule: segmentationRule.id === '1' ? '' : segmentationRule.id,
       id_team: idTeam,
       get_public_matches: getPublicMatches,
-      ...(mt.extra?.glossaries?.length && {
+      ...(mt?.extra?.glossaries?.length && {
         mmt_glossaries: JSON.stringify({
           glossaries: mt.extra.glossaries,
           ignore_glossary_case: !mt.extra.ignore_glossary_case,
         }),
       }),
-      ...(mt.extra?.deepl_id_glossary && {
+      ...(mt?.extra?.deepl_id_glossary && {
         deepl_id_glossary: mt.extra.deepl_id_glossary,
       }),
-      ...(mt.extra?.deepl_formality && {
+      ...(mt?.extra?.deepl_formality && {
         deepl_formality: mt.extra.deepl_formality,
       }),
     })
