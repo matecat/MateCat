@@ -200,7 +200,7 @@ abstract class KleinController implements IController {
             // Credentials from AuthCookie
             $user_credentials = AuthCookie::getCredentials();
 
-            if( !empty( $user_credentials ) and isset( $userCredentials['user'] ) and !empty( $user_credentials['user'][ 'uid' ] ) ){
+            if( !empty( $user_credentials ) and isset( $user_credentials['user'] ) and !empty( $user_credentials['user'][ 'uid' ] ) ){
                 $dao = new Users_UserDao();
                 $dao->setCacheTTL( 3600 );
                 $this->user = $dao->getByUid( $user_credentials['user'][ 'uid' ] ) ;
