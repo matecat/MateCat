@@ -1,6 +1,7 @@
 import React, {useContext, useEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import {QualityFrameworkTabContext} from './QualityFrameworkTab'
+import {isEqual} from 'lodash'
 
 export const SeveritiyRow = ({severity}) => {
   const {modifyingCurrentTemplate, templates, currentTemplate} = useContext(
@@ -63,17 +64,30 @@ export const SeveritiyRow = ({severity}) => {
     const isMatched = originalCurrentTemplate.categories.some(({severities}) =>
       severities.some(({id}) => id === severity.id),
     )
-    const isModified = originalCurrentTemplate.categories.some(({severities}) =>
-      severities.some(
-        ({id, penalty}) => id === severity.id && penalty !== severity.penalty,
-      ),
+
+    if (!isMatched) return true
+
+    const categoryIndex = originalCurrentTemplate.categories.findIndex(
+      ({id}) => id === severity.id_category,
+    )
+    const severityIndex = originalCurrentTemplate.categories[
+      categoryIndex
+    ].severities.findIndex(
+      ({id, id_category}) =>
+        id_category === severity.id_category && id === severity.id,
     )
 
-    return !isMatched || isModified
+    const isModified = !isEqual(
+      originalCurrentTemplate.categories[categoryIndex].severities[
+        severityIndex
+      ],
+      currentTemplate.categories[categoryIndex].severities[severityIndex],
+    )
+
+    return isModified
   }
 
   const isNotSaved = checkIsNotSaved()
-  console.log('isNotSaved', isNotSaved)
 
   return (
     <div className={`cell${isNotSaved ? ' cell-not-saved' : ''}`}>

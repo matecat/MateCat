@@ -19,7 +19,7 @@ export const CategoriesSeveritiesTable = () => {
           <div className="categories">
             <span className="header">Categories</span>
             {categories.map((category, index) => (
-              <CategoryRow key={index} {...{category}} />
+              <CategoryRow key={index} {...{category, index}} />
             ))}
           </div>
           <div className="severities">
@@ -27,7 +27,7 @@ export const CategoriesSeveritiesTable = () => {
               <span>Severities</span>
               <div className="row row-columns">
                 {categories[0]?.severities.map(({label}, index) => (
-                  <SeverityColumn key={index} {...{label}} />
+                  <SeverityColumn key={index} {...{label, index}} />
                 ))}
               </div>
             </div>

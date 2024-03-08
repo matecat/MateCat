@@ -102,7 +102,7 @@
   background-color: unset;
   cursor: pointer;
 
-  &:hover {
+  &:not(:disabled):hover {
     background-color: $grey9;
     color: $translatedBlue;
   }

@@ -52,8 +52,7 @@
 
     .row {
       display: flex;
-      flex-direction: column;
-      justify-content: center;
+      justify-content: space-between;
       max-width: 280px;
       /* height: 64px; */
       min-height: 64px;
@@ -62,8 +61,18 @@
       border-left-width: 2px;
       padding: 0 10px;
 
-      > :first-child {
-        font-weight: bold;
+      .label {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        max-width: 230px;
+
+        > :first-child {
+          font-weight: bold;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
       }
 
       .details {
@@ -77,6 +86,11 @@
 
       &:last-child {
         border-bottom-width: 2px;
+      }
+
+      .menu {
+        display: flex;
+        align-items: center;
       }
     }
 
@@ -113,11 +127,19 @@
       background-color: $white;
 
       .column {
-        display: flex;
-        justify-content: center;
+        display: grid;
+        grid-template-columns: 1fr 10%;
+        height: 32px;
         border: 1px solid $grey3;
-        padding: 5px 0;
-        gap: 5px;
+        padding: 5px 10px;
+
+        .label {
+          text-align: center;
+          padding-left: 5px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
       }
       .column-not-saved {
         color: $translatedBlue;
@@ -154,13 +176,6 @@
 
   .add-new-severity {
     padding: 16px;
-  }
-
-  .button-menu-button {
-    .icon {
-      background-color: unset;
-      border: unset;
-    }
   }
 }
 
@@ -210,4 +225,21 @@
   width: auto;
   margin-top: 40px;
   margin-left: 10px;
+}
+
+.quality-framework-columns-menu-button {
+  .icon {
+    background-color: unset;
+    border: unset;
+    padding: 4px 5px;
+  }
+  .icon.active {
+    background-color: $grey4;
+    border-radius: 3px;
+  }
+}
+
+.quality-framework-columns-menu-item {
+  min-width: 150px;
+  border: unset !important;
 }
