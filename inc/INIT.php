@@ -110,8 +110,8 @@ class INIT {
     public static $REQUESTED_URL_COOKIENAME     = 'matecat_login_v6_requested_url';
     public static $SUPPORT_MAIL                 = 'the owner of this MateCat instance.';//default string is 'the owner of this Matecat instance'
     public static $ANALYSIS_WORDS_PER_DAYS      = 3000;
-    public static $AUTHCOOKIEDURATION           = 5184000;            // 86400 * 60;         // seconds
-    public static $MAX_UPLOAD_FILE_SIZE         = 62914560;         // 60 * 1024 * 1024;  // bytes
+    public static $AUTHCOOKIEDURATION           = 86400;        // 24 hours
+    public static $MAX_UPLOAD_FILE_SIZE         = 62914560;     // 60 * 1024 * 1024;  // bytes
     public static $MAX_UPLOAD_TMX_FILE_SIZE     = 314572800;    // 300 * 1024 * 1024; // bytes
     public static $MAX_NUM_FILES                = 100;
     public static $MAX_SOURCE_WORDS             = 250000;
