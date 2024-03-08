@@ -55,6 +55,18 @@ export const SeverityColumn = ({label, index}) => {
     }
   }
 
+  const deleteSeverity = () => {
+    modifyingCurrentTemplate((prevTemplate) => ({
+      ...prevTemplate,
+      categories: prevTemplate.categories.map((category) => ({
+        ...category,
+        severities: category.severities.filter(
+          (severity, indexSeverity) => indexSeverity !== index,
+        ),
+      })),
+    }))
+  }
+
   const isMoveLeftDisabled = index === 0
   const isMoveRightDisabled =
     index === currentTemplate.categories[0].severities.length - 1
@@ -88,7 +100,10 @@ export const SeverityColumn = ({label, index}) => {
       >
         Move right
       </MenuButtonItem>
-      <MenuButtonItem className="quality-framework-columns-menu-item">
+      <MenuButtonItem
+        className="quality-framework-columns-menu-item"
+        onMouseUp={deleteSeverity}
+      >
         <Trash size={16} />
         Delete severity
       </MenuButtonItem>

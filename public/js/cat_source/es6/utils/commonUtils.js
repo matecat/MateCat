@@ -658,7 +658,7 @@ CommonUtils.DetectTripleClick = DetectTripleClick
 export default CommonUtils
 
 /**
- * Move position of an item inside array
+ * Switch position of an item inside array
  *
  * @param {Array} arr
  * @param {number} targetIndex - index of item to move

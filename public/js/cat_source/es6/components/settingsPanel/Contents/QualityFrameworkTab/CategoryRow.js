@@ -54,6 +54,15 @@ export const CategoryRow = ({category, index}) => {
     }
   }
 
+  const deleteCategory = () => {
+    modifyingCurrentTemplate((prevTemplate) => ({
+      ...prevTemplate,
+      categories: prevTemplate.categories.filter(
+        (category, indexCategory) => indexCategory !== index,
+      ),
+    }))
+  }
+
   const isMoveUpDisabled = index === 0
   const isMoveDownDisabled = index === currentTemplate.categories.length - 1
 
@@ -86,7 +95,10 @@ export const CategoryRow = ({category, index}) => {
       >
         Move down
       </MenuButtonItem>
-      <MenuButtonItem className="quality-framework-columns-menu-item">
+      <MenuButtonItem
+        className="quality-framework-columns-menu-item"
+        onMouseUp={deleteCategory}
+      >
         <Trash size={16} />
         Delete category
       </MenuButtonItem>

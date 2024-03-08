@@ -81,7 +81,7 @@ export const SeveritiyRow = ({severity}) => {
       originalCurrentTemplate.categories[categoryIndex].severities[
         severityIndex
       ],
-      currentTemplate.categories[categoryIndex].severities[severityIndex],
+      currentTemplate.categories[categoryIndex]?.severities[severityIndex],
     )
 
     return isModified
