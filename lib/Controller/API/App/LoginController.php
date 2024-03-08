@@ -84,6 +84,20 @@ class LoginController extends AbstractStatefulKleinController  {
             $project = new RedeemableProject( $user, $_SESSION );
             $project->tryToRedeem();
             $this->response->code( 200 );
+
+            // redirect if there is the request url cookie
+            if(isset($_COOKIE[ INIT::$REQUESTED_URL_COOKIENAME ])){
+                $this->response->redirect($_COOKIE[ INIT::$REQUESTED_URL_COOKIENAME ]);
+
+                CookieManager::setCookie( INIT::$REQUESTED_URL_COOKIENAME, '',
+                    [
+                        'expires' => 0,
+                        'path'    => '/',
+                        'domain'  => INIT::$COOKIE_DOMAIN
+                    ]
+                );
+            }
+
         } else {
             $this->incrementRateLimitCounter($params[ 'email' ], '/api/app/user/login');
             $this->response->code( 404 );

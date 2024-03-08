@@ -40,8 +40,33 @@ class newProjectController extends viewController {
 
     }
 
+    /**
+     * Redirect to requested url after login
+     *
+     * If user is logged in and the cookie $REQUESTED_URL_COOKIENAME is set,
+     * then redirect to requested url
+     */
+    private function redirectToRequestUrlAfterLogin()
+    {
+        if($this->isLoggedIn() and isset($_COOKIE[ INIT::$REQUESTED_URL_COOKIENAME ])){
+
+            header( "Location: " . INIT::$HTTPHOST . INIT::$BASEURL . $_COOKIE[ INIT::$REQUESTED_URL_COOKIENAME ], true  );
+
+            CookieManager::setCookie( INIT::$REQUESTED_URL_COOKIENAME, '',
+                [
+                    'expires' => 0,
+                    'path'    => '/',
+                    'domain'  => INIT::$COOKIE_DOMAIN
+                ]
+            );
+
+            exit;
+        }
+    }
+
     public function doAction() {
 
+        $this->redirectToRequestUrlAfterLogin();
         $this->setOrGetGuid();
 
         try {

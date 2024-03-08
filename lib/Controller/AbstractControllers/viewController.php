@@ -62,7 +62,7 @@ abstract class viewController extends controller {
         //if no login set and login is required
         if ( !$this->isLoggedIn() ) {
 
-            CookieManager::setCookie( 'matecat_login_v6_requested_url', $_SERVER[ 'REQUEST_URI' ],
+            CookieManager::setCookie( INIT::$REQUESTED_URL_COOKIENAME, $_SERVER[ 'REQUEST_URI' ],
                 [
                     'expires'  => time() + ( 3600 ), // 1 hour
                     'path'     => '/',
