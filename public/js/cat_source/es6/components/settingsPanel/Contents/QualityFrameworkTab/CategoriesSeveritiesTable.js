@@ -14,6 +14,13 @@ export const CategoriesSeveritiesTable = () => {
   console.log(currentTemplate)
   return (
     <div className="quality-framework-categories-severities">
+      <h2>Lorem ipsum</h2>
+      <p>
+        Lorem ipsum dolor sit amet consectetur. Vestibulum mauris gravida
+        volutpat libero vulputate faucibus ultrices convallis. Non sagittis in
+        condimentum lectus dapibus. Vestibulum volutpat tempus sed sed odio
+        eleifend porta malesuada.
+      </p>
       <div className="quality-framework-categories-table">
         <div className="scroll-area">
           <div className="categories">

@@ -17,6 +17,10 @@
   }
 }
 
+.quality-framework-categories-severities {
+  margin-top: 20px;
+}
+
 .quality-framework-categories-table {
   display: flex;
   flex-direction: row;
@@ -25,7 +29,7 @@
   .scroll-area {
     display: flex;
     max-width: 910px;
-    max-height: calc(100vh - 680px);
+    max-height: calc(100vh - 760px);
     overflow-x: auto;
     overscroll-behavior: none;
     scrollbar-width: thin;
@@ -93,10 +97,6 @@
         align-items: center;
       }
     }
-
-    .row-not-saved {
-      color: $translatedBlue;
-    }
   }
 
   .severities {
@@ -135,14 +135,11 @@
 
         .label {
           text-align: center;
-          padding-left: 5px;
+          padding: 0 5px;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
         }
-      }
-      .column-not-saved {
-        color: $translatedBlue;
       }
 
       .cell {
@@ -242,4 +239,8 @@
 .quality-framework-columns-menu-item {
   min-width: 150px;
   border: unset !important;
+}
+
+.quality-framework-not-saved {
+  color: $translatedBlue;
 }

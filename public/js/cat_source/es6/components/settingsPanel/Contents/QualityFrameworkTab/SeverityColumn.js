@@ -8,6 +8,7 @@ import IconEdit from '../../../icons/IconEdit'
 import Trash from '../../../../../../../img/icons/Trash'
 import IconDown from '../../../icons/IconDown'
 import {switchArrayIndex} from '../../../../utils/commonUtils'
+import {isEqual} from 'lodash'
 
 export const SeverityColumn = ({label, index}) => {
   const {portalTarget} = useContext(SettingsPanelContext)
@@ -22,9 +23,22 @@ export const SeverityColumn = ({label, index}) => {
       ({id, isTemporary}) => id === currentTemplate.id && !isTemporary,
     )
 
-    return !originalCurrentTemplate.categories.some(({severities}) =>
+    const isMatched = originalCurrentTemplate.categories.some(({severities}) =>
       severities.some((severity) => severity.label === label),
     )
+
+    if (!isMatched) return true
+
+    const originalColumnSeverity = originalCurrentTemplate.categories.map(
+      ({severities}) => severities[index],
+    )
+    const columnsSeverity = currentTemplate.categories.map(
+      ({severities}) => severities[index],
+    )
+
+    const isModified = !isEqual(originalColumnSeverity, columnsSeverity)
+
+    return isModified
   }
 
   const isNotSaved = checkIsNotSaved()
@@ -111,7 +125,9 @@ export const SeverityColumn = ({label, index}) => {
   )
 
   return (
-    <div className={`column${isNotSaved ? ' column-not-saved' : ''}`}>
+    <div
+      className={`column${isNotSaved ? ' quality-framework-not-saved' : ''}`}
+    >
       <span className="label">{label}</span>
       {menu}
     </div>

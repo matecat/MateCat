@@ -8,6 +8,7 @@ import IconEdit from '../../../icons/IconEdit'
 import Trash from '../../../../../../../img/icons/Trash'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {switchArrayIndex} from '../../../../utils/commonUtils'
+import {isEqual} from 'lodash'
 
 export const CategoryRow = ({category, index}) => {
   const {portalTarget} = useContext(SettingsPanelContext)
@@ -27,9 +28,17 @@ export const CategoryRow = ({category, index}) => {
       ({id, isTemporary}) => id === currentTemplate.id && !isTemporary,
     )
 
-    return !originalCurrentTemplate.categories.some(
+    const isMatched = originalCurrentTemplate.categories.some(
       ({id}) => id === category.id,
     )
+
+    if (!isMatched) return true
+
+    const isModified =
+      originalCurrentTemplate.categories[index].id !==
+      currentTemplate.categories[index].id
+
+    return isModified
   }
 
   const isNotSaved = checkIsNotSaved()
@@ -106,7 +115,7 @@ export const CategoryRow = ({category, index}) => {
   )
 
   return (
-    <div className={`row${isNotSaved ? ' row-not-saved' : ''}`}>
+    <div className={`row${isNotSaved ? ' quality-framework-not-saved' : ''}`}>
       <div className="label">
         <span>{line1}</span>
         <div className="details">{line2 && `(${line2}`}</div>

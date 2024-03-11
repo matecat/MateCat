@@ -2,7 +2,7 @@ import React, {useContext, useRef} from 'react'
 import {QualityFrameworkTabContext} from './QualityFrameworkTab'
 
 export const EptThreshold = () => {
-  const {currentTemplate, modifyingCurrentTemplate} = useContext(
+  const {currentTemplate, templates, modifyingCurrentTemplate} = useContext(
     QualityFrameworkTabContext,
   )
 
@@ -60,6 +60,18 @@ export const EptThreshold = () => {
 
   const selectAll = ({current}) => current.select()
 
+  const originalCurrentTemplate = templates?.find(
+    ({id, isTemporary}) => id === currentTemplate.id && !isTemporary,
+  )
+  const isR1NotSaved =
+    originalCurrentTemplate.passfail.thresholds.find(
+      ({label}) => label === 'R1',
+    ).value !== thresholdR1
+  const isR2NotSaved =
+    originalCurrentTemplate.passfail.thresholds.find(
+      ({label}) => label === 'R2',
+    ).value !== thresholdR2
+
   return (
     <div>
       <h2>EPT Threshold</h2>
@@ -73,7 +85,7 @@ export const EptThreshold = () => {
           <label>R1</label>
           <input
             ref={refR1}
-            className="quality-framework-input"
+            className={`quality-framework-input${isR1NotSaved ? ' quality-framework-not-saved' : ''}`}
             type="text"
             value={thresholdR1}
             onChange={setThresholdR1}
@@ -85,7 +97,7 @@ export const EptThreshold = () => {
           <label>R2</label>
           <input
             ref={refR2}
-            className="quality-framework-input"
+            className={`quality-framework-input${isR2NotSaved ? ' quality-framework-not-saved' : ''}`}
             type="text"
             value={thresholdR2}
             onChange={setThresholdR2}
