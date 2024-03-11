@@ -10,6 +10,7 @@ namespace API\V2;
 
 use AMQHandler;
 use API\V2\Validators\ChunkPasswordValidator;
+use API\V2\Validators\LoginValidator;
 use Constants_TranslationStatus;
 use Features\ReviewExtended\ReviewUtils;
 use Features\SecondPassReview;
@@ -34,6 +35,7 @@ class JobStatusController extends BaseChunkController {
         } );
 
         $this->appendValidator( $chunkValidator );
+        $this->appendValidator( new LoginValidator( $this ) );
     }
 
     public function changeSegmentsStatus() {

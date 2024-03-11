@@ -4,6 +4,7 @@ namespace API\App;
 
 use API\V2\KleinController;
 use API\V2\Validators\ChunkPasswordValidator;
+use API\V2\Validators\LoginValidator;
 use CatUtils;
 use Chunks_ChunkStruct;
 use Features\SecondPassReview;
@@ -72,6 +73,7 @@ class StatsController extends KleinController {
         } );
 
         $this->appendValidator( $Validator );
+        $this->appendValidator( new LoginValidator( $this ) );
     }
 
 }

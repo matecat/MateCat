@@ -6,6 +6,7 @@ use API\V2\BaseChunkController;
 use API\V2\Exceptions\NotFoundException;
 use API\V2\KleinController;
 use API\V2\Validators\ChunkPasswordValidator;
+use API\V2\Validators\LoginValidator;
 use Chunks_ChunkStruct;
 use Revise_FeedbackDAO;
 use Revise_FeedbackStruct;
@@ -63,6 +64,7 @@ class RevisionFeedbackController extends BaseChunkController {
         } );
 
         $this->appendValidator( $validator );
+        $this->appendValidator( new LoginValidator( $this ) );
     }
 }
 

@@ -10,6 +10,7 @@ namespace API\V2;
 
 use API\V2\Json\SegmentTranslationIssue as JsonFormatter;
 use API\V2\Validators\ChunkPasswordValidator;
+use API\V2\Validators\LoginValidator;
 use Chunks_ChunkStruct;
 
 class ChunkTranslationIssueController extends BaseChunkController {
@@ -49,6 +50,7 @@ class ChunkTranslationIssueController extends BaseChunkController {
             $Controller->setChunk( $Validator->getChunk() );
         } );
         $this->appendValidator( $Validator );
+        $this->appendValidator( new LoginValidator( $this ) );
     }
 
 }

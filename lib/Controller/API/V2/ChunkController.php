@@ -10,6 +10,7 @@ namespace API\V2;
 
 use API\V2\Json\Chunk;
 use API\V2\Validators\ChunkPasswordValidator;
+use API\V2\Validators\LoginValidator;
 use Chunks_ChunkStruct;
 use Jobs_JobDao;
 use Translations_SegmentTranslationDao;
@@ -89,6 +90,7 @@ class ChunkController extends BaseChunkController {
             $Controller->setChunk( $Validator->getChunk() );
         } );
         $this->appendValidator( $Validator );
+        $this->appendValidator( new LoginValidator( $this ) );
     }
 
 }
