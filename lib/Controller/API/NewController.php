@@ -882,13 +882,20 @@ class NewController extends ajaxController {
     private function __validateMetadataParam() {
 
         if ( !empty( $this->postInput[ 'metadata' ] ) ) {
+
             if ( strlen( $this->postInput[ 'metadata' ] ) > 2048 ) {
                 throw new Exception( 'metadata string is too long' );
             }
+
             $depth                         = 2; // only converts key value structures
             $assoc                         = true;
             $this->postInput[ 'metadata' ] = html_entity_decode( $this->postInput[ 'metadata' ] );
-            $this->metadata                = json_decode( $this->postInput[ 'metadata' ], $assoc, $depth );
+            $parsedMetadata                = json_decode( $this->postInput[ 'metadata' ], $assoc, $depth );
+
+            if(is_array($parsedMetadata)){
+                $this->metadata = $parsedMetadata;
+            }
+
             Log::doJsonLog( "Passed parameter metadata as json string." );
         }
 

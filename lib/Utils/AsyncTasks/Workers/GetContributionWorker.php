@@ -64,10 +64,10 @@ class GetContributionWorker extends AbstractWorker {
     private function normalizeMatchesToLayer0($matches, AbstractFilter $filter)
     {
         foreach ( $matches as $k => $m ) {
-            $matches[ $k ][ 'raw_segment' ] = $filter->fromLayer1ToLayer0( $matches[ $k ][ 'raw_segment' ] );
-            $matches[ $k ][ 'segment' ] = $filter->fromLayer1ToLayer0( html_entity_decode($matches[ $k ][ 'segment' ]) );
-            $matches[ $k ][ 'translation' ] = $filter->fromLayer1ToLayer0( html_entity_decode($matches[ $k ][ 'translation' ]) );
-            $matches[ $k ][ 'raw_translation' ] = $filter->fromLayer1ToLayer0( $matches[ $k ][ 'raw_translation' ] );
+            $matches[ $k ][ 'raw_segment' ] = $filter->fromLayer2ToLayer0( $matches[ $k ][ 'raw_segment' ] );
+            $matches[ $k ][ 'segment' ] = $filter->fromLayer2ToLayer0( html_entity_decode($matches[ $k ][ 'segment' ]) );
+            $matches[ $k ][ 'translation' ] = $filter->fromLayer2ToLayer0( html_entity_decode($matches[ $k ][ 'translation' ]) );
+            $matches[ $k ][ 'raw_translation' ] = $filter->fromLayer2ToLayer0( $matches[ $k ][ 'raw_translation' ] );
         }
 
         return $matches;
