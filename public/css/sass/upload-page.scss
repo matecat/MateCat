@@ -1393,9 +1393,6 @@ button.ui-button::-moz-focus-inner {
   .gdrive-upload-file {
     margin: 6px 71px !important;
   }
-  #matecat-cat {
-    display: none;
-  }
 }
 
 @media (max-width: 480px) {
@@ -1657,16 +1654,6 @@ button.ui-button::-moz-focus-inner {
   padding: 24px;
   background: $grey5;
   padding-top: 0px;
-
-  #matecat-cat {
-    background-image: url(../../img/home-page-cat.svg);
-    background-size: cover;
-    width: 90px;
-    top: -104px;
-    position: absolute;
-    height: 130px;
-    left: 4px;
-  }
 }
 
 .wrapper-upload h1 {
