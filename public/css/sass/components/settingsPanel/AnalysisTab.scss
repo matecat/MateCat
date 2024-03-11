@@ -101,10 +101,13 @@
       padding: 0;
     }
     h3 {
-      margin-bottom: 4px;
+      margin-bottom: 8px;
     }
     .analysis-tab-exceptions {
       padding-top: 24px;
+      gap: 16px;
+      display: flex;
+      flex-direction: column;
       input.input-percentage {
         width: 80px;
       }
@@ -166,9 +169,14 @@
           }
         }
       }
+      .analysis-tab-buttons {
+        gap: 8px;
+        button {
+          height: 32px;
+        }
+      }
       button.add-button {
-        margin: 16px 0;
-        font-size: 16px;
+        width: 148px;
       }
     }
 

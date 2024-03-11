@@ -1,5 +1,6 @@
 import React, {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useRef,
@@ -14,8 +15,14 @@ import {SubTemplates} from '../SubTemplates'
 import {Select} from '../../../common/Select'
 import {CreateProjectContext} from '../../../createProject/CreateProjectContext'
 import Checkmark from '../../../../../../../img/icons/Checkmark'
-import Close from '../../../../../../../img/icons/Close'
 import AddWide from '../../../../../../../img/icons/AddWide'
+import {
+  Button,
+  BUTTON_MODE,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+} from '../../../common/Button/Button'
+import IconClose from '../../../icons/IconClose'
 
 export const ANALYSIS_SCHEMA_KEYS = {
   id: 'id',
@@ -129,6 +136,16 @@ export const AnalysisTab = () => {
     currentProjectTemplate.payableRateTemplateId
   const prevCurrentProjectTemplateBillingId = useRef()
 
+  const addException = (newBreakdowns) => {
+    modifyingCurrentTemplate((prevTemplate) => {
+      return {
+        ...prevTemplate,
+        breakdowns: {
+          ...newBreakdowns,
+        },
+      }
+    })
+  }
   // retrieve billing model templates
   useEffect(() => {
     if (templates.length) return
@@ -282,14 +299,11 @@ export const AnalysisTab = () => {
               </span>
               <InputPercentage value={mt} setFn={setMt} />
             </div>
-            <div className="analysis-tab-exceptions">
-              <h3>Exceptions</h3>
-              <LanguagesExceptions object={currentTemplate.breakdowns} />
-              <button className="ui primary button add-button">
-                <AddWide size={12} />
-                Add exception
-              </button>
-            </div>
+
+            <LanguagesExceptions
+              object={currentTemplate.breakdowns}
+              updateExceptions={addException}
+            />
           </div>
         </div>
       </div>
@@ -328,18 +342,111 @@ const InputPercentage = ({value = '', setFn}) => {
   )
 }
 
-const LanguagesExceptions = ({object}) => {
-  const {languages} = useContext(CreateProjectContext)
+const LanguagesExceptions = ({object, updateExceptions}) => {
+  const [exceptions, setExceptions] = useState([])
 
-  let exceptions = []
+  const [addExceptionCounter, setAddExceptionCounter] = useState(0)
 
-  for (const [key, value] of Object.entries(object)) {
-    console.log(`${key}: ${value}`)
-    if (key !== 'default' && key.indexOf('-') > -1) {
-      exceptions.push(key)
-      console.log('', exceptions.toString())
+  const evaluateExceptions = useCallback(() => {
+    let exceptions = []
+    for (const [source, value] of Object.entries(object)) {
+      if (source !== 'default' && source.indexOf('-') > -1) {
+        for (const [target, data] of Object.entries(value)) {
+          exceptions.push({
+            source: source,
+            target: target,
+            data: data,
+          })
+        }
+      }
     }
+    setExceptions(exceptions)
+    setAddExceptionCounter(exceptions.length ? 0 : 1)
+  }, [object])
+
+  useEffect(() => {
+    evaluateExceptions()
+  }, [evaluateExceptions, object])
+
+  const addException = ({source, target, value}) => {
+    const newException = {
+      [source.code]: {
+        ...object[source.code],
+        [target.code]: {
+          ...object.default,
+          MT: value,
+        },
+      },
+    }
+    updateExceptions({
+      ...object,
+      ...newException,
+    })
   }
+  const removeException = (exception) => {
+    let newObject = {...object}
+    delete newObject[exception.source][exception.target]
+    if (Object.keys(newObject[exception.source]).length === 0) {
+      delete newObject[exception.source]
+    }
+    updateExceptions({
+      ...newObject,
+    })
+  }
+  const modifyException = (oldException, newException) => {
+    removeException(oldException)
+    addException(newException)
+  }
+  return (
+    <div className="analysis-tab-exceptions">
+      <h3>Exceptions</h3>
+      {exceptions.map((item) => {
+        return (
+          <LanguageException
+            exception={item}
+            addException={(newException) => modifyException(item, newException)}
+            removeException={() => removeException(item)}
+            key={item.source + '-' + item.target}
+            confirmed={true}
+          />
+        )
+      })}
+      {[...Array(addExceptionCounter)].map((e, i) => (
+        <LanguageException
+          addException={addException}
+          key={'newExc' + i}
+          removeException={() => {
+            setAddExceptionCounter((prevState) => prevState - 1)
+          }}
+        />
+      ))}
+      <Button
+        className="add-button"
+        type={BUTTON_TYPE.PRIMARY}
+        size={BUTTON_SIZE.MEDIUM}
+        onClick={() => setAddExceptionCounter((prevState) => prevState + 1)}
+      >
+        <AddWide size={12} />
+        Add exception
+      </Button>
+    </div>
+  )
+}
+const LanguageException = ({
+  exception,
+  confirmed = false,
+  addException,
+  removeException,
+}) => {
+  const {languages} = useContext(CreateProjectContext)
+  const [source, setSource] = useState(
+    exception ? languages.find((l) => exception.source === l.id) : undefined,
+  )
+  const [target, setTarget] = useState(
+    exception ? languages.find((l) => exception.target === l.id) : undefined,
+  )
+  const [value, setValue] = useState(exception ? exception.data.MT : undefined)
+  const [modified, setModified] = useState(false)
   return (
     <div className="analysis-tab-exceptionsRow">
       <div className="analysis-tab-languages">
@@ -347,28 +454,71 @@ const LanguagesExceptions = ({object}) => {
           name={'lang'}
           showSearchBar={true}
           options={languages}
-          onSelect={(option) => {}}
+          onSelect={(option) => {
+            setSource(option)
+            setModified(true)
+          }}
           placeholder={'Please select language'}
+          activeOption={source}
         />
+        {/*TODO swap lingue*/}
         <div id="swaplang" title="Swap languages" onClick={() => {}} />
         <Select
           name={'lang'}
           showSearchBar={true}
           options={languages}
-          onSelect={(option) => {}}
+          onSelect={(option) => {
+            setTarget(option)
+            setModified(true)
+          }}
           placeholder={'Please select language'}
+          activeOption={target}
         />
       </div>
-      <InputPercentage value={0} setFn={() => {}} />
-      <div className="analysis-tab-buttons">
-        <button className="ui primary button confirm-button">
-          <Checkmark size={12} />
-          Confirm
-        </button>
-        <button className="ui button orange close-button">
-          <Close size={16} />
-        </button>
-      </div>
+      <InputPercentage
+        value={value}
+        setFn={(value) => {
+          setValue(value)
+          setModified(true)
+        }}
+      />
+      {/*TODO check form*/}
+
+      {confirmed && !modified ? (
+        <div className="analysis-tab-buttons">
+          <Button
+            size={BUTTON_SIZE.SMALL}
+            mode={BUTTON_MODE.GHOST}
+            onClick={removeException}
+          >
+            <IconClose />
+          </Button>
+        </div>
+      ) : (
+        <div className="analysis-tab-buttons">
+          <Button
+            type={BUTTON_TYPE.PRIMARY}
+            size={BUTTON_SIZE.MEDIUM}
+            disabled={source && target && value ? false : true}
+            className={'confirm-button'}
+            onClick={() => {
+              addException({source, target, value})
+              setModified(false)
+            }}
+          >
+            <Checkmark size={12} />
+            Confirm
+          </Button>
+          <Button
+            type={BUTTON_TYPE.WARNING}
+            size={BUTTON_SIZE.MEDIUM}
+            className="close-button"
+            onClick={removeException}
+          >
+            <IconClose />
+          </Button>
+        </div>
+      )}
     </div>
   )
 }
