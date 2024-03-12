@@ -504,6 +504,13 @@ class TMAnalysisWorker extends AbstractWorker {
         $_config[ 'context_after' ]     = $queueElement->params->context_after;
         $_config[ 'additional_params' ] = @$queueElement->params->additional_params;
 
+        $jobsMetadataDao = new \Jobs\MetadataDao();
+        $dialect_strict = $jobsMetadataDao->get($queueElement->params->id_job, $queueElement->params->password, 'dialect_strict');
+
+        if($dialect_strict !== null){
+            $_config['dialect_strict'] = $dialect_strict->value == 1;
+        }
+
         $tm_keys = \TmKeyManagement_TmKeyManagement::getJobTmKeys( $queueElement->params->tm_keys, 'r', 'tm' );
         if ( is_array( $tm_keys ) && !empty( $tm_keys ) ) {
             foreach ( $tm_keys as $tm_key ) {

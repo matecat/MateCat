@@ -1246,20 +1246,21 @@ class NewController extends ajaxController {
     {
         if ( !empty( $this->postInput[ 'dialect_strict' ] ) ) {
 
-            $targets = explode( ',', $this->postInput[ 'target_lang' ] );
-            $dialectStrictObj = json_decode(html_entity_decode($this->postInput[ 'dialect_strict' ]), true);
+            $dialect_strict = trim(html_entity_decode($this->postInput[ 'dialect_strict' ]));
+            $targets = explode( ',', trim($this->postInput[ 'target_lang' ]) );
+            $dialectStrictObj = json_decode($dialect_strict, true);
 
             foreach($targets as $target){
-                if(!isset($dialectStrictObj[$target])){
+                if(!isset($dialectStrictObj[trim($target)])){
                     throw new \Exception('Wrong `dialect_strict` object, missing value for ' . $target);
                 }
 
-                if(!is_bool($dialectStrictObj[$target])){
+                if(!is_bool($dialectStrictObj[trim($target)])){
                     throw new \Exception('Wrong `dialect_strict` object, not boolean declared value for ' . $target);
                 }
             }
 
-            $this->dialect_strict = html_entity_decode($this->postInput[ 'dialect_strict' ]);
+            $this->dialect_strict = html_entity_decode($dialect_strict);
         }
     }
 

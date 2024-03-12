@@ -1300,7 +1300,7 @@ class ProjectManager {
                 $dialectStrictObj = json_decode($projectStructure['dialect_strict'], true);
 
                 foreach ($dialectStrictObj as $lang => $value){
-                    if($lang === $newJob->target){
+                    if(trim($lang) === trim($newJob->target)){
                         $jobsMetadataDao->set($newJob->id, $newJob->password, 'dialect_strict', $value);
                     }
                 }
