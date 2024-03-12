@@ -1,4 +1,4 @@
-import React, {useContext} from 'react'
+import React, {useContext, useEffect, useRef} from 'react'
 import PropTypes from 'prop-types'
 import {QualityFrameworkTabContext} from './QualityFrameworkTab'
 import {MenuButton} from '../../../common/MenuButton/MenuButton'
@@ -10,11 +10,18 @@ import IconDown from '../../../icons/IconDown'
 import {switchArrayIndex} from '../../../../utils/commonUtils'
 import {isEqual} from 'lodash'
 
-export const SeverityColumn = ({label, index}) => {
+export const SeverityColumn = ({label, index, shouldScrollIntoView}) => {
   const {portalTarget} = useContext(SettingsPanelContext)
   const {templates, currentTemplate, modifyingCurrentTemplate} = useContext(
     QualityFrameworkTabContext,
   )
+
+  const ref = useRef()
+
+  useEffect(() => {
+    if (shouldScrollIntoView)
+      ref.current.scrollIntoView?.({behavior: 'smooth', block: 'nearest'})
+  }, [shouldScrollIntoView])
 
   const checkIsNotSaved = () => {
     if (!templates?.some(({isTemporary}) => isTemporary)) return false
@@ -126,6 +133,7 @@ export const SeverityColumn = ({label, index}) => {
 
   return (
     <div
+      ref={ref}
       className={`column${isNotSaved ? ' quality-framework-not-saved' : ''}`}
     >
       <span className="label">{label}</span>
@@ -137,4 +145,5 @@ export const SeverityColumn = ({label, index}) => {
 SeverityColumn.propTypes = {
   label: PropTypes.string.isRequired,
   index: PropTypes.number.isRequired,
+  shouldScrollIntoView: PropTypes.bool,
 }

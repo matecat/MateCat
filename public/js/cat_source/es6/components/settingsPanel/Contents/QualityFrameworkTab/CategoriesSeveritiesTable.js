@@ -1,4 +1,4 @@
-import React, {useContext} from 'react'
+import React, {useContext, useRef} from 'react'
 import {QualityFrameworkTabContext} from './QualityFrameworkTab'
 import {CategoryRow} from './CategoryRow'
 import {SeveritiyRow} from './SeveritiyRow'
@@ -10,6 +10,20 @@ export const CategoriesSeveritiesTable = () => {
   const {currentTemplate} = useContext(QualityFrameworkTabContext)
 
   const {categories = []} = currentTemplate ?? {}
+
+  const prevCategories = useRef()
+  const prevSeverities = useRef()
+
+  const wasAddedCategory =
+    Array.isArray(prevCategories.current) &&
+    categories.length > prevCategories.current.length
+
+  const wasAddedSeverity =
+    Array.isArray(prevSeverities.current) &&
+    categories[0].severities.length > prevSeverities.current.length
+
+  prevCategories.current = categories
+  prevSeverities.current = categories[0].severities
 
   console.log(currentTemplate)
   return (
@@ -26,7 +40,17 @@ export const CategoriesSeveritiesTable = () => {
           <div className="categories">
             <span className="header">Categories</span>
             {categories.map((category, index) => (
-              <CategoryRow key={index} {...{category, index}} />
+              <CategoryRow
+                key={index}
+                {...{
+                  category,
+                  index,
+                  ...(wasAddedCategory &&
+                    index === categories.length - 1 && {
+                      shouldScrollIntoView: true,
+                    }),
+                }}
+              />
             ))}
           </div>
           <div className="severities">
@@ -34,7 +58,17 @@ export const CategoriesSeveritiesTable = () => {
               <span>Severities</span>
               <div className="row row-columns">
                 {categories[0]?.severities.map(({label}, index) => (
-                  <SeverityColumn key={index} {...{label, index}} />
+                  <SeverityColumn
+                    key={index}
+                    {...{
+                      label,
+                      index,
+                      ...(wasAddedSeverity &&
+                        index === categories[0].severities.length - 1 && {
+                          shouldScrollIntoView: true,
+                        }),
+                    }}
+                  />
                 ))}
               </div>
             </div>

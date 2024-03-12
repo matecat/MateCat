@@ -1,4 +1,4 @@
-import React, {useContext} from 'react'
+import React, {useContext, useEffect, useRef} from 'react'
 import PropTypes from 'prop-types'
 import {QualityFrameworkTabContext} from './QualityFrameworkTab'
 import {MenuButton} from '../../../common/MenuButton/MenuButton'
@@ -8,14 +8,21 @@ import IconEdit from '../../../icons/IconEdit'
 import Trash from '../../../../../../../img/icons/Trash'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {switchArrayIndex} from '../../../../utils/commonUtils'
-import {isEqual} from 'lodash'
+import LabelWithTooltip from '../../../common/LabelWithTooltip'
 
-export const CategoryRow = ({category, index}) => {
+export const CategoryRow = ({category, index, shouldScrollIntoView}) => {
   const {portalTarget} = useContext(SettingsPanelContext)
 
   const {templates, currentTemplate, modifyingCurrentTemplate} = useContext(
     QualityFrameworkTabContext,
   )
+
+  const ref = useRef()
+
+  useEffect(() => {
+    if (shouldScrollIntoView)
+      ref.current.scrollIntoView?.({behavior: 'smooth', block: 'nearest'})
+  }, [shouldScrollIntoView])
 
   const {label} = category
 
@@ -35,7 +42,7 @@ export const CategoryRow = ({category, index}) => {
     if (!isMatched) return true
 
     const isModified =
-      originalCurrentTemplate.categories[index].id !==
+      originalCurrentTemplate.categories[index]?.id !==
       currentTemplate.categories[index].id
 
     return isModified
@@ -115,10 +122,17 @@ export const CategoryRow = ({category, index}) => {
   )
 
   return (
-    <div className={`row${isNotSaved ? ' quality-framework-not-saved' : ''}`}>
+    <div
+      ref={ref}
+      className={`row${isNotSaved ? ' quality-framework-not-saved' : ''}`}
+    >
       <div className="label">
-        <span>{line1}</span>
-        <div className="details">{line2 && `(${line2}`}</div>
+        <LabelWithTooltip>
+          <span>{line1}</span>
+        </LabelWithTooltip>
+        <LabelWithTooltip>
+          <span className="details">{line2 && `(${line2}`}</span>
+        </LabelWithTooltip>
       </div>
       <div className="menu">{menu}</div>
     </div>
@@ -128,4 +142,5 @@ export const CategoryRow = ({category, index}) => {
 CategoryRow.propTypes = {
   category: PropTypes.object.isRequired,
   index: PropTypes.number.isRequired,
+  shouldScrollIntoView: PropTypes.bool,
 }
