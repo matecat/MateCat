@@ -6,24 +6,42 @@ import {SeverityColumn} from './SeverityColumn'
 import {AddCategory} from './AddCategory'
 import {AddSeverity} from './AddSeverity'
 
+export const getCategoryLabelAndDescription = (category) => {
+  const [line1, line2] = category.label.split('(')
+  const label =
+    line1.slice(-1) === ' ' ? line1.substring(0, line1.length - 1) : line1
+  const description = line2 && line2.replace(/[()]/g, '')
+
+  return {label, description}
+}
+export const formatCategoryDescription = (description) =>
+  `${description[0] !== '(' ? '(' : ''}${description}${description[description.length - 1] !== ')' ? ')' : ''}`
+export const getCodeFromLabel = (label) => label.substring(0, 3).toUpperCase()
+
 export const CategoriesSeveritiesTable = () => {
   const {currentTemplate} = useContext(QualityFrameworkTabContext)
 
   const {categories = []} = currentTemplate ?? {}
 
-  const prevCategories = useRef()
-  const prevSeverities = useRef()
+  const previousState = useRef({
+    currentTemplateId: undefined,
+    categories: undefined,
+    severities: undefined,
+  })
 
   const wasAddedCategory =
-    Array.isArray(prevCategories.current) &&
-    categories.length > prevCategories.current.length
+    currentTemplate.id === previousState.current.currentTemplateId &&
+    Array.isArray(previousState.current.categories) &&
+    categories.length > previousState.current.categories.length
 
   const wasAddedSeverity =
-    Array.isArray(prevSeverities.current) &&
-    categories[0].severities.length > prevSeverities.current.length
+    currentTemplate.id === previousState.current.currentTemplateId &&
+    Array.isArray(previousState.current.severities) &&
+    categories[0].severities.length > previousState.current.severities.length
 
-  prevCategories.current = categories
-  prevSeverities.current = categories[0].severities
+  previousState.current.currentTemplateId = currentTemplate.id
+  previousState.current.categories = categories
+  previousState.current.severities = categories[0].severities
 
   console.log(currentTemplate)
   return (

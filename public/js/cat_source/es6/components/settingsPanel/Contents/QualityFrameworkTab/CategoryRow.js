@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useRef} from 'react'
+import React, {useContext, useEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import {QualityFrameworkTabContext} from './QualityFrameworkTab'
 import {MenuButton} from '../../../common/MenuButton/MenuButton'
@@ -9,6 +9,8 @@ import Trash from '../../../../../../../img/icons/Trash'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {switchArrayIndex} from '../../../../utils/commonUtils'
 import LabelWithTooltip from '../../../common/LabelWithTooltip'
+import {ModifyCategory} from './ModifyCategory'
+import {getCategoryLabelAndDescription} from './CategoriesSeveritiesTable'
 
 export const CategoryRow = ({category, index, shouldScrollIntoView}) => {
   const {portalTarget} = useContext(SettingsPanelContext)
@@ -17,6 +19,8 @@ export const CategoryRow = ({category, index, shouldScrollIntoView}) => {
     QualityFrameworkTabContext,
   )
 
+  const [isEditingName, setIsEditingName] = useState(false)
+
   const ref = useRef()
 
   useEffect(() => {
@@ -24,9 +28,7 @@ export const CategoryRow = ({category, index, shouldScrollIntoView}) => {
       ref.current.scrollIntoView?.({behavior: 'smooth', block: 'nearest'})
   }, [shouldScrollIntoView])
 
-  const {label} = category
-
-  const [line1, line2] = label.split('(')
+  const {label, description} = getCategoryLabelAndDescription(category)
 
   const checkIsNotSaved = () => {
     if (!templates?.some(({isTemporary}) => isTemporary)) return false
@@ -41,9 +43,12 @@ export const CategoryRow = ({category, index, shouldScrollIntoView}) => {
 
     if (!isMatched) return true
 
+    const originalCategory = originalCurrentTemplate.categories[index]
+    const currentCategory = currentTemplate.categories[index]
+
     const isModified =
-      originalCurrentTemplate.categories[index]?.id !==
-      currentTemplate.categories[index].id
+      originalCategory?.id !== currentCategory.id ||
+      originalCategory?.label !== currentCategory.label
 
     return isModified
   }
@@ -92,7 +97,7 @@ export const CategoryRow = ({category, index, shouldScrollIntoView}) => {
     >
       <MenuButtonItem
         className="quality-framework-columns-menu-item"
-        onMouseUp={() => {}}
+        onMouseUp={() => setIsEditingName(true)}
       >
         <IconEdit />
         Rename
@@ -128,13 +133,22 @@ export const CategoryRow = ({category, index, shouldScrollIntoView}) => {
     >
       <div className="label">
         <LabelWithTooltip>
-          <span>{line1}</span>
+          <span>{label}</span>
         </LabelWithTooltip>
         <LabelWithTooltip>
-          <span className="details">{line2 && `(${line2}`}</span>
+          <span className="details">{description && `(${description})`}</span>
         </LabelWithTooltip>
       </div>
       <div className="menu">{menu}</div>
+      {isEditingName && (
+        <ModifyCategory
+          {...{
+            target: ref.current,
+            category,
+            setIsEditingName,
+          }}
+        />
+      )}
     </div>
   )
 }

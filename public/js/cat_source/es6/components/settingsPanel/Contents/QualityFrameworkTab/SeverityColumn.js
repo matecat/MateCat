@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useRef} from 'react'
+import React, {useContext, useEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import {QualityFrameworkTabContext} from './QualityFrameworkTab'
 import {MenuButton} from '../../../common/MenuButton/MenuButton'
@@ -9,12 +9,16 @@ import Trash from '../../../../../../../img/icons/Trash'
 import IconDown from '../../../icons/IconDown'
 import {switchArrayIndex} from '../../../../utils/commonUtils'
 import {isEqual} from 'lodash'
+import LabelWithTooltip from '../../../common/LabelWithTooltip'
+import {getCodeFromLabel} from './CategoriesSeveritiesTable'
 
 export const SeverityColumn = ({label, index, shouldScrollIntoView}) => {
   const {portalTarget} = useContext(SettingsPanelContext)
   const {templates, currentTemplate, modifyingCurrentTemplate} = useContext(
     QualityFrameworkTabContext,
   )
+
+  const [isEditingName, setIsEditingName] = useState(false)
 
   const ref = useRef()
 
@@ -88,6 +92,21 @@ export const SeverityColumn = ({label, index, shouldScrollIntoView}) => {
     }))
   }
 
+  const onChangeName = ({currentTarget: {value}}) => {
+    modifyingCurrentTemplate((prevTemplate) => ({
+      ...prevTemplate,
+      categories: prevTemplate.categories.map((category) => ({
+        ...category,
+        severities: category.severities.map((severity, indexSeverity) => ({
+          ...severity,
+          ...(indexSeverity === index && {
+            label: value,
+          }),
+        })),
+      })),
+    }))
+  }
+
   const isMoveLeftDisabled = index === 0
   const isMoveRightDisabled =
     index === currentTemplate.categories[0].severities.length - 1
@@ -102,7 +121,7 @@ export const SeverityColumn = ({label, index, shouldScrollIntoView}) => {
     >
       <MenuButtonItem
         className="quality-framework-columns-menu-item"
-        onMouseUp={() => {}}
+        onMouseUp={() => setIsEditingName(true)}
       >
         <IconEdit />
         Rename
@@ -136,7 +155,18 @@ export const SeverityColumn = ({label, index, shouldScrollIntoView}) => {
       ref={ref}
       className={`column${isNotSaved ? ' quality-framework-not-saved' : ''}`}
     >
-      <span className="label">{label}</span>
+      <LabelWithTooltip className="label">
+        {isEditingName ? (
+          <input
+            autoFocus
+            value={label}
+            onChange={onChangeName}
+            onBlur={() => setIsEditingName(false)}
+          />
+        ) : (
+          <span>{label}</span>
+        )}
+      </LabelWithTooltip>
       {menu}
     </div>
   )

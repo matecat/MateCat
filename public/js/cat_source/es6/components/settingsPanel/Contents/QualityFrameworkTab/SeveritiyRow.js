@@ -77,12 +77,21 @@ export const SeveritiyRow = ({severity}) => {
         id_category === severity.id_category && id === severity.id,
     )
 
-    const isModified = !isEqual(
+    const {
+      label, // eslint-disable-line
+      code, // eslint-disable-line
+      ...originalSeverity
+    } =
       originalCurrentTemplate.categories[categoryIndex].severities[
         severityIndex
-      ],
-      currentTemplate.categories[categoryIndex]?.severities[severityIndex],
-    )
+      ]
+    const {
+      label: labelCurrent, // eslint-disable-line
+      code: codeCurrent, // eslint-disable-line
+      ...currentSeverity
+    } = currentTemplate.categories[categoryIndex]?.severities[severityIndex] ??
+    {}
+    const isModified = !isEqual(originalSeverity, currentSeverity)
 
     return isModified
   }

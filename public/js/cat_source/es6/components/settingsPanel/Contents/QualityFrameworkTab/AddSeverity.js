@@ -12,8 +12,7 @@ import {
 import {QualityFrameworkTabContext} from './QualityFrameworkTab'
 import IconAdd from '../../../icons/IconAdd'
 import Checkmark from '../../../../../../../img/icons/Checkmark'
-
-const getSeverityCode = (label) => label.substring(0, 3).toUpperCase()
+import {getCodeFromLabel} from './CategoriesSeveritiesTable'
 
 export const AddSeverity = () => {
   const {modifyingCurrentTemplate, currentTemplate} = useContext(
@@ -33,7 +32,7 @@ export const AddSeverity = () => {
           ...cur.severities.slice(-1)[0],
           id: ++lastId,
           label: name,
-          code: getSeverityCode(name),
+          code: getCodeFromLabel(name),
           penalty: 0,
         },
       ],

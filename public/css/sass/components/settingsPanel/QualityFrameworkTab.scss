@@ -29,7 +29,7 @@
   .scroll-area {
     display: flex;
     max-width: 910px;
-    max-height: calc(100vh - 760px);
+    max-height: calc(100vh - 770px);
     overflow-x: auto;
     overscroll-behavior: none;
     scrollbar-width: thin;
@@ -71,7 +71,7 @@
         justify-content: center;
         max-width: 230px;
 
-        > :first-child {
+        > :first-child:not(textarea) {
           font-weight: bold;
           white-space: nowrap;
           overflow: hidden;
@@ -132,11 +132,20 @@
         padding: 5px 10px;
 
         .label {
-          text-align: center;
+          display: inherit;
           padding: 0 5px;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
+
+          > :first-child {
+            display: block;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-weight: bold;
+            border: none;
+            padding: 0;
+            line-height: 1.5;
+          }
         }
       }
 
@@ -241,4 +250,22 @@
 
 .quality-framework-not-saved {
   color: $translatedBlue;
+}
+
+.quality-framework-modify-category {
+  z-index: 12;
+  top: 0;
+  transform: translateY(-30%) translateX(80%);
+
+  .add-popover-content {
+    width: 310px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: start;
+  }
+
+  .input {
+    text-align: left;
+  }
 }

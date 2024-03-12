@@ -20,39 +20,9 @@ export const MenuButton = ({
 
   const ref = useRef()
   const portalRef = useRef()
-
-  useEffect(() => {
-    const handler = (e) => {
-      const target = ref.current?.children[1]
-        ? ref.current?.children[1]
-        : ref.current?.children[0]
-
-      if (!target.contains(e.target)) setItemsCoords(undefined)
-    }
-    document.addEventListener('mouseup', handler)
-
-    return () => document.removeEventListener('mouseup', handler)
-  }, [])
-
-  useLayoutEffect(() => {
-    if (portalRef.current) {
-      const {x, width} = portalRef.current.getBoundingClientRect()
-
-      if (x + width > document.body.clientWidth) {
-        setItemsCoords((prevState) => ({
-          ...prevState,
-          left: document.body.clientWidth - 10 - width,
-        }))
-      }
-    }
-  }, [itemsCoords])
-
-  const onShowingItems = (e) => {
-    const documentMouseUpEvent = new Event('mouseup', {
-      bubbles: true,
-      cancelable: false,
-    })
-    if (!itemsCoords) document.dispatchEvent(documentMouseUpEvent)
+  const setPortalPosition = useRef()
+  setPortalPosition.current = (shouldUpdate) => {
+    if (shouldUpdate && !itemsCoords) return
 
     const rect = ref.current.getBoundingClientRect()
     const difference = itemsTarget
@@ -79,7 +49,50 @@ export const MenuButton = ({
       result.top = bottom
     }
 
-    setItemsCoords((prevState) => (!prevState ? result : undefined))
+    if (shouldUpdate) setItemsCoords(result)
+    else setItemsCoords((prevState) => (!prevState ? result : undefined))
+  }
+
+  useEffect(() => {
+    const handler = (e) => {
+      const target = ref.current?.children[1]
+        ? ref.current?.children[1]
+        : ref.current?.children[0]
+
+      if (!target.contains(e.target)) setItemsCoords(undefined)
+    }
+    const handlerResize = () => setPortalPosition.current(true)
+
+    document.addEventListener('mouseup', handler)
+    window.addEventListener('resize', handlerResize)
+
+    return () => {
+      document.removeEventListener('mouseup', handler)
+      window.removeEventListener('resize', handlerResize)
+    }
+  }, [])
+
+  useLayoutEffect(() => {
+    if (portalRef.current) {
+      const {x, width} = portalRef.current.getBoundingClientRect()
+
+      if (x + width > document.body.clientWidth) {
+        setItemsCoords((prevState) => ({
+          ...prevState,
+          left: document.body.clientWidth - 10 - width,
+        }))
+      }
+    }
+  }, [itemsCoords])
+
+  const onShowingItems = (e) => {
+    const documentMouseUpEvent = new Event('mouseup', {
+      bubbles: true,
+      cancelable: false,
+    })
+    if (!itemsCoords) document.dispatchEvent(documentMouseUpEvent)
+
+    setPortalPosition.current()
     e.stopPropagation()
   }
 

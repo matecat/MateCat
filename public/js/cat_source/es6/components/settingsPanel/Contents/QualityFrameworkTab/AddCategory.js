@@ -13,8 +13,10 @@ import {
 import {QualityFrameworkTabContext} from './QualityFrameworkTab'
 import IconAdd from '../../../icons/IconAdd'
 import Checkmark from '../../../../../../../img/icons/Checkmark'
-
-const getCategoryCode = (label) => label.substring(0, 3).toUpperCase()
+import {
+  getCodeFromLabel,
+  formatCategoryDescription,
+} from './CategoriesSeveritiesTable'
 
 export const AddCategory = () => {
   const {modifyingCurrentTemplate, currentTemplate} = useContext(
@@ -47,8 +49,8 @@ export const AddCategory = () => {
         {
           ...lastCategory,
           id: newCategoryId,
-          label: `${name}${description ? '(' + description + ')' : ''}`,
-          code: getCategoryCode(name),
+          label: `${name}${description ? formatCategoryDescription(description) : ''}`,
+          code: getCodeFromLabel(name),
           severities: lastCategorySeverities.map((severity) => ({
             ...severity,
             id: ++lastSeverityId,
