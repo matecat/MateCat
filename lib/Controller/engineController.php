@@ -264,6 +264,8 @@ class engineController extends ajaxController {
         $newTestCreatedMT      = null;
 
         if ( array_search( $newEngineStruct->class_load, $engineList ) ) {
+
+            $newEngineStruct->active = true;
             $newCreatedDbRowStruct = $engineDAO->create( $newEngineStruct );
 
             $engineStruct     = EnginesModel_EngineStruct::getStruct();
