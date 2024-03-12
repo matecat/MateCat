@@ -161,6 +161,7 @@ export const UploadFile = ({}) => {
             </span>
             <span
               id="clear-all-gdrive"
+              onClick={() => APP.deleteGDriveFile('all')}
               className="btn fileinput-button cancel-btn clear-gdrive"
             >
               <span>Clear all</span>
