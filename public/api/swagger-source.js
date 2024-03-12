@@ -415,7 +415,7 @@ var spec = {
         },
       },
     },
-    '/translation/{id_job}/{password}': {
+    '/api/v2/translation/{id_job}/{password}': {
       get: {
         tags: ['Job'],
         summary: 'Download Translation',
@@ -2034,8 +2034,8 @@ var spec = {
         },
       },
     },
-    '/TMX/id_job/password': {
-      post: {
+    '/api/v2/TMX/{id_job}/{password}': {
+      get: {
         tags: ['Job'],
         summary: 'Download Job TMX',
         description: 'Download the Job TMX ',
@@ -2064,6 +2064,44 @@ var spec = {
           },
         },
       },
+    },
+    '/api/v2/glossaries/check/': {
+      post: {
+        tags: ['Glossary'],
+        summary: 'Check Glossary',
+        description: 'Check if a glossary file (.xlsx) is valid or not',
+        parameters: [
+          {
+            name: 'files',
+            in: 'formData',
+            description: 'The file(s) to be uploaded',
+            required: true,
+            type: 'file',
+          },
+          {
+            name: 'name',
+            in: 'formData',
+            description: 'The file name.',
+            type: 'string',
+            required: false,
+          },
+          {
+            name: 'tm_key',
+            in: 'formData',
+            description: 'The tm key.',
+            required: false,
+            type: 'string',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'Check Glossary',
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      }
     },
     '/api/v2/glossaries/import/': {
       post: {
@@ -2136,15 +2174,15 @@ var spec = {
         },
       },
     },
-    '/api/v2/glossaries/export/{tm_key}': {
-      get: {
+    '/api/v2/glossaries/export/': {
+      post: {
         tags: ['Glossary'],
         summary: 'Download Glossary',
         description: 'download Glossary',
         parameters: [
           {
             name: 'tm_key',
-            in: 'path',
+            in: 'body',
             description: 'The tm key.',
             required: true,
             type: 'string',
