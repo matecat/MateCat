@@ -6,12 +6,7 @@ import {SubTemplateMoreMenu} from './SubTemplateMoreMenu'
 import {SubTemplateCreateUpdateControl} from './SubTemplateCreateUpdateControl'
 import {IconSaveChanges} from '../../../icons/IconSaveChanges'
 import {IconSave} from '../../../icons/IconSave'
-import {
-  BUTTON_MODE,
-  BUTTON_SIZE,
-  BUTTON_TYPE,
-  Button,
-} from '../../../common/Button/Button'
+import {BUTTON_MODE, BUTTON_SIZE, Button} from '../../../common/Button/Button'
 import {flushSync} from 'react-dom'
 
 export const SUBTEMPLATE_MODIFIERS = {

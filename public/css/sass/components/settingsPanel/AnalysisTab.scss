@@ -8,6 +8,13 @@
   width: 100%;
   padding: 20px;
 
+  .analysis-value-not-saved,
+  .analysis-value-not-saved span,
+  .analysis-value-not-saved input,
+  {
+    color: $translatedBlue;
+  }
+
   .settings-panel-contentwrapper-tab-background {
     text-align: left;
   }
@@ -153,6 +160,7 @@
         }
         #swaplang {
           margin: 0 10px;
+          cursor: pointer;
         }
         > div {
           display: flex;
