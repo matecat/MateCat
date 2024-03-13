@@ -117,18 +117,16 @@ class SignupController extends AbstractStatefulKleinController {
      */
     public function forgotPassword() {
 
-        $checkRateLimitEmail = $this->checkRateLimitResponse( $this->response, $this->request->param( 'email' ), '/api/app/user/forgot_password' );
-        $checkRateLimitIp    = $this->checkRateLimitResponse( $this->response, Utils::getRealIpAddr(), '/api/app/user/forgot_password' );
+        $checkRateLimitEmail = $this->checkRateLimitResponse( $this->response, $this->request->param( 'email' ), '/api/app/user/forgot_password', 5 );
+        $checkRateLimitIp    = $this->checkRateLimitResponse( $this->response, Utils::getRealIpAddr(), '/api/app/user/forgot_password', 5 );
         
         if ( $checkRateLimitIp instanceof Response ) {
             $this->response = $checkRateLimitIp;
-
             return;
         }
 
         if ( $checkRateLimitEmail instanceof Response ) {
             $this->response = $checkRateLimitEmail;
-
             return;
         }
 
