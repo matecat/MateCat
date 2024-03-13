@@ -15,10 +15,15 @@ export const GOOGLE_LOGIN_NOTIFICATION = {
 
 export const GOOGLE_LOGIN_LOCAL_STORAGE = 'google_login_notification'
 
-export const useGoogleLoginNotification = () => {
-  const shouldShowNotification =
+export const shouldShowNotificationGoogleLogin = () => {
+  return (
     localStorage.getItem(GOOGLE_LOGIN_LOCAL_STORAGE) === 'true' &&
     !config.isLoggedIn
+  )
+}
+
+export const useGoogleLoginNotification = () => {
+  const shouldShowNotification = shouldShowNotificationGoogleLogin()
 
   useEffect(() => {
     let tmOut
