@@ -24,8 +24,8 @@ class SignupController extends AbstractStatefulKleinController {
 
         $user = $this->request->param( 'user' );
 
-        $checkRateLimit = $this->checkRateLimitResponse($this->response, $user[ 'email' ], '/api/app/user');
-        if($checkRateLimit instanceof Response){
+        $checkRateLimit = $this->checkRateLimitResponse( $this->response, $user[ 'email' ], '/api/app/user' );
+        if ( $checkRateLimit instanceof Response ) {
             $this->response = $checkRateLimit;
 
             return;
@@ -39,12 +39,12 @@ class SignupController extends AbstractStatefulKleinController {
             $signup->process();
             $this->response->code( 200 );
         } else {
-            $this->incrementRateLimitCounter($user[ 'email' ], '/api/app/user');
+            $this->incrementRateLimitCounter( $user[ 'email' ], '/api/app/user' );
             $this->response->code( 400 );
             $this->response->json( [
-                'error' => [
-                    'message' => $signup->getError()
-                ]
+                    'error' => [
+                            'message' => $signup->getError()
+                    ]
             ] );
         }
     }
@@ -84,8 +84,8 @@ class SignupController extends AbstractStatefulKleinController {
      */
     public function authForPasswordReset() {
         try {
-            $checkRateLimit = $this->checkRateLimitResponse($this->response, $this->request->param( 'token' ), '/api/app/user/password_reset');
-            if($checkRateLimit instanceof Response){
+            $checkRateLimit = $this->checkRateLimitResponse( $this->response, $this->request->param( 'token' ), '/api/app/user/password_reset' );
+            if ( $checkRateLimit instanceof Response ) {
                 $this->response = $checkRateLimit;
 
                 return;
@@ -99,7 +99,7 @@ class SignupController extends AbstractStatefulKleinController {
 
         } catch ( ValidationError $e ) {
 
-            $this->incrementRateLimitCounter($this->request->param( 'token' ), '/api/app/user/password_reset');
+            $this->incrementRateLimitCounter( $this->request->param( 'token' ), '/api/app/user/password_reset' );
             FlashMessage::set( 'passwordReset', $e->getMessage(), FlashMessage::ERROR );
             $this->response->redirect( Routes::appRoot() );
 
@@ -116,8 +116,8 @@ class SignupController extends AbstractStatefulKleinController {
      */
     public function forgotPassword() {
 
-        $checkRateLimit = $this->checkRateLimitResponse($this->response, $this->request->param( 'email' ), '/api/app/user/forgot_password');
-        if($checkRateLimit instanceof Response){
+        $checkRateLimit = $this->checkRateLimitResponse( $this->response, $this->request->param( 'email' ), '/api/app/user/forgot_password' );
+        if ( $checkRateLimit instanceof Response ) {
             $this->response = $checkRateLimit;
 
             return;
@@ -125,15 +125,13 @@ class SignupController extends AbstractStatefulKleinController {
 
         $doForgotPassword = $this->doForgotPassword();
 
-        if(!empty( $doForgotPassword )){
-            $this->incrementRateLimitCounter($this->request->param( 'email' ), '/api/app/user/forgot_password');
-        }
+        $this->incrementRateLimitCounter( $this->request->param( 'email' ), '/api/app/user/forgot_password' );
 
         $this->response->code( empty( $doForgotPassword ) ? 200 : 500 );
         $this->response->json( [
-            'email'      => $this->request->param( 'email' ),
-            'wanted_url' => $this->request->param( 'wanted_url' ),
-            'errors'     => $doForgotPassword,
+                'email'      => $this->request->param( 'email' ),
+                'wanted_url' => $this->request->param( 'wanted_url' ),
+                'errors'     => $doForgotPassword,
         ] );
     }
 
