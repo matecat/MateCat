@@ -47,10 +47,13 @@ export const QualityFrameworkTab = () => {
     if (config.isLoggedIn === 1 && !config.is_cattool) {
       getQualityFrameworkTemplates().then(({items}) => {
         if (!cleanup) {
+          const selectedTemplateId =
+            items.find(({id}) => id === currentProjectTemplateQaId)?.id ?? 0
+
           setTemplates(
             items.map((template) => ({
               ...template,
-              isSelected: template.id === currentProjectTemplateQaId,
+              isSelected: template.id === selectedTemplateId,
             })),
           )
         }

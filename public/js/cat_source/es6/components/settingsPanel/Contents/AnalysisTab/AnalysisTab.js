@@ -108,10 +108,14 @@ export const AnalysisTab = () => {
     if (config.isLoggedIn === 1 && !config.is_cattool) {
       getBillingModelTemplates().then(({items}) => {
         if (!cleanup) {
+          const selectedTemplateId =
+            items.find(({id}) => id === currentProjectTemplateBillingId)?.id ??
+            0
+
           setTemplates(
             items.map((template) => ({
               ...template,
-              isSelected: template.id === currentProjectTemplateBillingId,
+              isSelected: template.id === selectedTemplateId,
             })),
           )
         }
