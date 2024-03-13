@@ -35,6 +35,7 @@ import {getSupportedFiles} from '../api/getSupportedFiles'
 import {getSupportedLanguages} from '../api/getSupportedLanguages'
 import ApplicationActions from '../actions/ApplicationActions'
 import useDeviceCompatibility from '../hooks/useDeviceCompatibility'
+import {useGoogleLoginNotification} from '../hooks/useGoogleLoginNotification'
 
 const SELECT_HEIGHT = 324
 
@@ -98,6 +99,9 @@ const NewProject = ({
   const [supportedLanguages, setSupportedLanguages] = useState()
 
   const isDeviceCompatible = useDeviceCompatibility()
+
+  // TODO: Remove temp notification warning login google (search in files this todo)
+  useGoogleLoginNotification()
 
   const projectNameRef = useRef()
   const prevSourceLang = useRef(sourceLang)
@@ -588,14 +592,18 @@ const NewProject = ({
         {warnings && (
           <div className="warning-message">
             <i className="icon-warning2 icon"> </i>
-            <p>{warnings}</p>
+            <p dangerouslySetInnerHTML={{
+              __html: warnings
+            }} />
           </div>
         )}
 
         {errors && (
           <div className="error-message">
             <i className="icon-error_outline icon"> </i>
-            <p>{errors}</p>
+            <p dangerouslySetInnerHTML={{
+              __html: errors
+            }} />
           </div>
         )}
 

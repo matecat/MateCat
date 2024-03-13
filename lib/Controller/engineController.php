@@ -324,6 +324,8 @@ class engineController extends ajaxController {
                 $this->featureSet->run( 'postEngineCreation', $newCreatedDbRowStruct, $this->user );
             } catch ( Exception $e ) {
                 $this->result[ 'errors' ][] = [ 'code' => $e->getCode(), 'message' => $e->getMessage() ];
+                $engineDAO->delete( $newCreatedDbRowStruct );
+                $this->destroyUserEnginesCache();
 
                 return;
             }
