@@ -3,9 +3,14 @@ import PropTypes from 'prop-types'
 
 export const InputPercentage = ({value = '', setFn, className}) => {
   const inputRef = useRef()
-  const [inputValue, setInputValue] = useState(value)
+  const [inputValue, setInputValue] = useState(value + '%')
   const onPercentInput = (e) => {
-    let int = e.target.value.split('%')[0]
+    let int
+    if (e.target.value.indexOf('%') > -1) {
+      int = e.target.value.split('%')[0]
+    } else {
+      int = e.target.value
+    }
     int = parseInt(int)
     int = isNaN(int) ? '' : int
     if (int > 100) {
@@ -16,19 +21,22 @@ export const InputPercentage = ({value = '', setFn, className}) => {
   const onBlur = () => {
     let int = inputValue
     int = int === '' ? 0 : int
-    setInputValue(int)
+    setInputValue(int + '%')
     setFn(int)
   }
+  const selectAll = () => inputRef.current.select()
+
   useEffect(() => {
-    setInputValue(value)
+    setInputValue(value + '%')
   }, [value])
   return (
     <input
       className={'input-percentage ' + className}
       ref={inputRef}
-      value={inputValue + '%'}
+      value={inputValue}
       onInput={(e) => onPercentInput(e)}
       onBlur={onBlur}
+      onFocus={() => selectAll()}
     />
   )
 }
