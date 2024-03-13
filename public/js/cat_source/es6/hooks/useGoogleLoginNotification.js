@@ -37,7 +37,7 @@ export const useGoogleLoginNotification = () => {
         () => CatToolActions.addNotification(GOOGLE_LOGIN_NOTIFICATION),
         100,
       )
-    } else {
+    } else if (config.isLoggedIn) {
       localStorage.setItem(GOOGLE_LOGIN_LOCAL_STORAGE, false)
     }
 
