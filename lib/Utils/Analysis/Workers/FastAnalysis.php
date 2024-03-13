@@ -501,7 +501,6 @@ class FastAnalysis extends AbstractDaemon {
                     $this->segments[$k]['eq_word_count'] = ((float)$eq_word > $segment->raw_word_count) ? $segment->raw_word_count : (float)$eq_word;;
                     $this->segments[$k]['standard_word_count'] = ((float)$standard_words > $segment->raw_word_count) ? $segment->raw_word_count : (float)$standard_words;
                     $this->segments[$k]['match_type'] = $match_type;
-                    $this->segments[$k]['password'] = $job_pass;
 
                 } elseif ( $perform_Tms_Analysis ) {
 
@@ -614,6 +613,7 @@ class FastAnalysis extends AbstractDaemon {
              * Reset the indexes of the list to get the context easily
              */
             $this->segments = array_values( $this->segments );
+
             foreach ( $this->segments as $k => $queue_element ) {
 
                 $queue_element[ 'id_segment' ]       = $queue_element[ 'id' ];
@@ -625,6 +625,9 @@ class FastAnalysis extends AbstractDaemon {
                 $queue_element[ 'only_private' ]     = $this->actual_project_row[ 'only_private_tm' ];
                 $queue_element[ 'context_before' ]   = @$this->segments[ $k - 1 ][ 'segment' ];
                 $queue_element[ 'context_after' ]    = @$this->segments[ $k + 1 ][ 'segment' ];
+
+                $jsid = explode("-", $queue_element[ 'jsid' ]); // 749-49:7acfb82b8168,50:47c70434fe78,51:f3f5551e9c4f
+                $passwordMap = explode(",", $jsid[1]);
 
                 /**
                  * remove some unuseful fields
@@ -640,10 +643,12 @@ class FastAnalysis extends AbstractDaemon {
                     $languages_job = explode( ",", $queue_element[ 'target' ] );  //now target holds more than one language ex: ( 80415:fr-FR,80416:it-IT )
                     //in memory replacement avoid duplication of the segment list
                     //send in queue every element * number of languages
-                    foreach ( $languages_job as $_language ) {
+                    foreach ( $languages_job as $index => $_language ) {
 
                         list( $id_job, $language ) = explode( ":", $_language );
+                        list( $jid, $password ) = explode( ":", $passwordMap[$index] );
 
+                        $queue_element[ 'password' ]      = $password;
                         $queue_element[ 'target' ]        = $language;
                         $queue_element[ 'id_job' ]        = $id_job;
                         $queue_element[ 'payable_rates' ] = $jobs_payable_rates[ $id_job ]; // assign the right payable rate for the current job
