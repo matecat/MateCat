@@ -195,9 +195,3 @@ APP.hideGDLink = function () {
 APP.showGDLink = function () {
   $('.gdrive-addlink-container').show()
 }
-
-$(document).ready(function () {
-  $('#clear-all-gdrive').click(function () {
-    APP.deleteGDriveFile('all')
-  })
-})
