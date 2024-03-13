@@ -35,6 +35,7 @@ import {getSupportedFiles} from '../api/getSupportedFiles'
 import {getSupportedLanguages} from '../api/getSupportedLanguages'
 import ApplicationActions from '../actions/ApplicationActions'
 import useDeviceCompatibility from '../hooks/useDeviceCompatibility'
+import {useGoogleLoginNotification} from '../hooks/useGoogleLoginNotification'
 
 const SELECT_HEIGHT = 324
 
@@ -98,6 +99,9 @@ const NewProject = ({
   const [supportedLanguages, setSupportedLanguages] = useState()
 
   const isDeviceCompatible = useDeviceCompatibility()
+
+  // TODO: Remove temp notification warning login google (search in files this todo)
+  useGoogleLoginNotification()
 
   const projectNameRef = useRef()
   const prevSourceLang = useRef(sourceLang)
