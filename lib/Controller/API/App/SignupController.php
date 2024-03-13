@@ -12,6 +12,7 @@ use Teams\InvitedUser;
 use Users\PasswordResetModel;
 use Users\RedeemableProject;
 use Users\SignupModel;
+use Utils;
 
 class SignupController extends AbstractStatefulKleinController {
 
@@ -116,9 +117,17 @@ class SignupController extends AbstractStatefulKleinController {
      */
     public function forgotPassword() {
 
-        $checkRateLimit = $this->checkRateLimitResponse( $this->response, $this->request->param( 'email' ), '/api/app/user/forgot_password' );
-        if ( $checkRateLimit instanceof Response ) {
-            $this->response = $checkRateLimit;
+        $checkRateLimitEmail = $this->checkRateLimitResponse( $this->response, $this->request->param( 'email' ), '/api/app/user/forgot_password' );
+        $checkRateLimitIp    = $this->checkRateLimitResponse( $this->response, Utils::getRealIpAddr(), '/api/app/user/forgot_password' );
+        
+        if ( $checkRateLimitIp instanceof Response ) {
+            $this->response = $checkRateLimitIp;
+
+            return;
+        }
+
+        if ( $checkRateLimitEmail instanceof Response ) {
+            $this->response = $checkRateLimitEmail;
 
             return;
         }
