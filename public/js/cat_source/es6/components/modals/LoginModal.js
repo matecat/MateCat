@@ -278,8 +278,11 @@ class LoginModal extends React.Component {
   }
 
   showNotificationGoogleLogin() {
-    localStorage.setItem(GOOGLE_LOGIN_LOCAL_STORAGE, 'true')
-    CatToolActions.addNotification(GOOGLE_LOGIN_NOTIFICATION)
+    const googleNotification = localStorage.getItem(GOOGLE_LOGIN_LOCAL_STORAGE)
+    if (!googleNotification) {
+      localStorage.setItem(GOOGLE_LOGIN_LOCAL_STORAGE, 'true')
+      CatToolActions.addNotification(GOOGLE_LOGIN_NOTIFICATION)
+    }
   }
 
   render() {

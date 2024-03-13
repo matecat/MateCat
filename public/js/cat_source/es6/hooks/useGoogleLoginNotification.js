@@ -37,6 +37,8 @@ export const useGoogleLoginNotification = () => {
         () => CatToolActions.addNotification(GOOGLE_LOGIN_NOTIFICATION),
         100,
       )
+    } else {
+      localStorage.setItem(GOOGLE_LOGIN_LOCAL_STORAGE, false)
     }
 
     return () => clearTimeout(tmOut)
