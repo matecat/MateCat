@@ -3,7 +3,11 @@ import CatToolActions from '../actions/CatToolActions'
 
 export const GOOGLE_LOGIN_NOTIFICATION = {
   title: 'Google login warning',
-  text: 'Content...',
+  text:
+    'Hi There! We are experiencing some problems with our Google integration. ' +
+    'If you are having issues signing in or uploading Drive files from the homepage, ' +
+    'please <a href="https://guides.matecat.com/" title="Guide">read this guide</a> to find out how to solve them. ' +
+    'If the issues persist, please contact our support.',
   type: 'warning',
   autoDismiss: false,
   position: 'bl',
