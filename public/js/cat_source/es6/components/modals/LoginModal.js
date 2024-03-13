@@ -10,6 +10,11 @@ import {checkRedeemProject as checkRedeemProjectApi} from '../../api/checkRedeem
 import {loginUser} from '../../api/loginUser'
 import ModalsActions from '../../actions/ModalsActions'
 import ForgotPasswordModal from './ForgotPasswordModal'
+import CatToolActions from '../../actions/CatToolActions'
+import {
+  GOOGLE_LOGIN_LOCAL_STORAGE,
+  GOOGLE_LOGIN_NOTIFICATION,
+} from '../../hooks/useGoogleLoginNotification'
 
 class LoginModal extends React.Component {
   constructor(props) {
@@ -54,6 +59,9 @@ class LoginModal extends React.Component {
   }
 
   googole_popup() {
+    // TODO: Remove temp notification warning login google (search in files this todo)
+    this.showNotificationGoogleLogin()
+
     let url = this.props.googleUrl
     let self = this
     this.checkRedeemProject()
@@ -267,6 +275,11 @@ class LoginModal extends React.Component {
         </div>
       )
     }
+  }
+
+  showNotificationGoogleLogin() {
+    localStorage.setItem(GOOGLE_LOGIN_LOCAL_STORAGE, 'true')
+    CatToolActions.addNotification(GOOGLE_LOGIN_NOTIFICATION)
   }
 
   render() {
