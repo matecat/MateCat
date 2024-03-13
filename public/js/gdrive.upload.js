@@ -152,6 +152,11 @@ APP.addGDriveFile = function (exportIds) {
           'There was an error retrieving the file from Google Drive: ' +
           response.error_msg
       }
+
+      if(response.error_code === 404){
+        message = 'File retrieval error. To find out how to translate the desired file, please <a href="https://guides.matecat.com/google-drive-files-upload-issues" target="_blank">read this guide</a>.';
+      }
+
       CreateProjectActions.showError(message)
 
       console.error(
