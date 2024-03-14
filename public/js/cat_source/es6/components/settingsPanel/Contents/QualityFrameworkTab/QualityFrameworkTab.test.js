@@ -43,7 +43,7 @@ beforeEach(() => {
   )
 })
 
-test('Render properly', async () => {
+test('Render properly and change ept thresholds', async () => {
   const user = userEvent.setup()
 
   const {result} = renderHook(() => useTemplates(QF_SCHEMA_KEYS))
@@ -79,10 +79,7 @@ test('Render properly', async () => {
   await act(async () => user.keyboard('1'))
   refresh()
 
-  const saveAsNewButton = screen.getByTestId('save-as-new-template')
-  expect(saveAsNewButton).toBeInTheDocument()
-
-  await user.click(saveAsNewButton)
+  expect(screen.getByTestId('save-as-new-template')).toBeInTheDocument()
 
   refresh()
 
@@ -121,6 +118,34 @@ test('Change template', async () => {
   await user.click(templateDropDownItem)
   refresh()
 
-  expect(screen.getByTestId('threshold-R1').value).toBe('28')
+  const R1Input = screen.getByTestId('threshold-R1')
+
+  expect(R1Input.value).toBe('28')
   expect(screen.getByTestId('threshold-R2').value).toBe('2')
+
+  await user.click(R1Input)
+
+  await act(async () => user.keyboard('1'))
+  refresh()
+  await act(async () => user.keyboard('2'))
+  refresh()
+
+  expect(R1Input.value).toBe('12')
+  expect(R1Input).toHaveClass('quality-framework-not-saved')
+
+  const saveAsChanges = screen.getByTestId('save-as-changes')
+  expect(saveAsChanges).toBeInTheDocument()
+  expect(screen.getByTestId('save-as-new-template')).toBeInTheDocument()
+
+  mswServer.use(
+    http.put(`${config.basepath}api/v3/qa_model_template/:id`, () => {
+      const {isTemporary, ...data} = result.current.currentTemplate //eslint-disable-line
+      return HttpResponse.json(data)
+    }),
+  )
+
+  await user.click(saveAsChanges)
+  refresh()
+
+  expect(R1Input).not.toHaveClass('quality-framework-not-saved')
 })

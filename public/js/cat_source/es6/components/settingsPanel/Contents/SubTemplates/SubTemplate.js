@@ -110,6 +110,7 @@ export const SubTemplates = ({
               {isModifyingTemplate && !isStandardTemplateBool && (
                 <Button
                   className="template-button button-save-changes"
+                  testId="save-as-changes"
                   mode={BUTTON_MODE.OUTLINE}
                   size={BUTTON_SIZE.MEDIUM}
                   disabled={isRequestInProgress}
