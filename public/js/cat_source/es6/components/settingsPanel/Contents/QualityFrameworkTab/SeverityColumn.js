@@ -155,7 +155,7 @@ export const SeverityColumn = ({label, index, shouldScrollIntoView}) => {
       ref={ref}
       className={`column${isNotSaved ? ' quality-framework-not-saved' : ''}`}
     >
-      <LabelWithTooltip className="label">
+      <LabelWithTooltip className="label" tooltipTarget={portalTarget}>
         {isEditingName ? (
           <input
             autoFocus

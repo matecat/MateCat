@@ -30,6 +30,7 @@
     display: flex;
     max-width: 910px;
     max-height: calc(100vh - 770px);
+    min-height: 385px;
     overflow-x: auto;
     overscroll-behavior: none;
     scrollbar-width: thin;

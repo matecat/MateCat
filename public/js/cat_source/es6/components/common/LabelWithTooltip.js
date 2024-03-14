@@ -35,10 +35,15 @@ const LabelWithTooltip = ({children, className, tooltipTarget}) => {
     let element = ref?.current
     while (
       element &&
+      element.nodeName !== '#text' &&
       window.getComputedStyle(element)?.textOverflow !== 'ellipsis'
     ) {
       const next = element.firstChild
-      if (next && window.getComputedStyle(next)?.textOverflow === 'ellipsis') {
+      if (
+        next &&
+        next.nodeName !== '#text' &&
+        window.getComputedStyle(next)?.textOverflow === 'ellipsis'
+      ) {
         return next
       }
       element = next

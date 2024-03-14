@@ -29,6 +29,7 @@ export const QualityFrameworkTab = () => {
     currentProjectTemplate,
     modifyingCurrentTemplate: modifyingCurrentProjectTemplate,
     qualityFrameworkTemplates,
+    portalTarget,
   } = useContext(SettingsPanelContext)
 
   const {templates, setTemplates, currentTemplate, modifyingCurrentTemplate} =
@@ -106,6 +107,7 @@ export const QualityFrameworkTab = () => {
               setTemplates,
               currentTemplate,
               modifyingCurrentTemplate,
+              portalTarget,
               schema: QF_SCHEMA_KEYS,
               getFilteredSchemaCreateUpdate,
               createApi: createQualityFrameworkTemplate,

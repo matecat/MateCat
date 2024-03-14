@@ -43,7 +43,6 @@ export const CategoriesSeveritiesTable = () => {
   previousState.current.categories = categories
   previousState.current.severities = categories[0].severities
 
-  console.log(currentTemplate)
   return (
     <div className="quality-framework-categories-severities">
       <h2>Lorem ipsum</h2>

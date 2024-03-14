@@ -132,10 +132,10 @@ export const CategoryRow = ({category, index, shouldScrollIntoView}) => {
       className={`row${isNotSaved ? ' quality-framework-not-saved' : ''}`}
     >
       <div className="label">
-        <LabelWithTooltip>
+        <LabelWithTooltip tooltipTarget={portalTarget}>
           <span>{label}</span>
         </LabelWithTooltip>
-        <LabelWithTooltip>
+        <LabelWithTooltip tooltipTarget={portalTarget}>
           <span className="details">{description && `(${description})`}</span>
         </LabelWithTooltip>
       </div>

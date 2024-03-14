@@ -91,6 +91,7 @@ export const EptThreshold = () => {
             onChange={setThresholdR1}
             onFocus={() => selectAll(refR1)}
             onBlur={checkInput}
+            data-testid="threshold-R1"
           />
         </div>
         <div>
@@ -103,6 +104,7 @@ export const EptThreshold = () => {
             onChange={setThresholdR2}
             onFocus={() => selectAll(refR2)}
             onBlur={checkInput}
+            data-testid="threshold-R2"
           />
         </div>
       </div>
