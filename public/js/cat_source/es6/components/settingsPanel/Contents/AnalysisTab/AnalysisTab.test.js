@@ -96,6 +96,7 @@ test('Render Analysis Tab', async () => {
   expect(
     contextProps.analysisTemplates.modifyingCurrentTemplate,
   ).toBeCalledTimes(1)
+  expect(mtValue).not.toHaveClass('analysis-value-not-saved')
 })
 
 test('Modify template breakdowns', async () => {
