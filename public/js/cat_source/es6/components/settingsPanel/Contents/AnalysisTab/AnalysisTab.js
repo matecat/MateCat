@@ -125,7 +125,7 @@ export const AnalysisTab = () => {
     }
 
     return () => (cleanup = true)
-  }, [setTemplates, templates, currentProjectTemplateBillingId])
+  }, [setTemplates, templates.length, currentProjectTemplateBillingId])
 
   // Select billing model template when curren project template change
   useEffect(() => {

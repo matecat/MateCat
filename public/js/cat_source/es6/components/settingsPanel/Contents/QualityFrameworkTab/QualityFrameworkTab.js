@@ -63,7 +63,7 @@ export const QualityFrameworkTab = () => {
     }
 
     return () => (cleanup = true)
-  }, [setTemplates, templates, currentProjectTemplateQaId])
+  }, [setTemplates, templates.length, currentProjectTemplateQaId])
 
   // Select QF template when curren project template change
   useEffect(() => {
