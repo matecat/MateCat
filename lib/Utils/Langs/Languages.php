@@ -279,7 +279,7 @@ class Langs_Languages {
     {
         foreach ( self::$languages_definition as $lang ) {
             if($lang['rfc3066code'] === $rfc3066code){
-                return @$lang['localized'][0]['en'];
+                return @$lang['localized']['en'];
             }
         }
 
