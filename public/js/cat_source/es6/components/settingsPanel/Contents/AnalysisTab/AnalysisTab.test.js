@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useEffect, useRef} from 'react'
 import {
   fireEvent,
   render,
@@ -20,6 +20,30 @@ import useTemplates from '../../../../hooks/useTemplates'
 import languagesMock from '../../../../../../../mocks/languagesMock'
 import {CreateProjectContext} from '../../../createProject/CreateProjectContext'
 
+const wrapperElement = document.createElement('div')
+const projectContext = {
+  languages: languagesMock,
+}
+const WrapperComponent = (contextProps) => {
+  const ref = useRef()
+
+  useEffect(() => {
+    ref.current.appendChild(wrapperElement)
+  }, [])
+
+  return (
+    <CreateProjectContext.Provider value={projectContext}>
+      <SettingsPanelContext.Provider
+        value={{...contextProps, portalTarget: wrapperElement}}
+      >
+        <div ref={ref}>
+          <AnalysisTab />
+        </div>
+      </SettingsPanelContext.Provider>
+    </CreateProjectContext.Provider>
+  )
+}
+
 beforeEach(() => {
   global.config = {
     basepath: 'http://localhost/',
@@ -38,26 +62,19 @@ beforeEach(() => {
 
 test('Render Analysis Tab', async () => {
   const {result} = renderHook(() => useTemplates(ANALYSIS_SCHEMA_KEYS))
-  let values = {
+  let contextProps = {
     openLoginModal: jest.fn(),
     modifyingCurrentTemplate: jest.fn(),
     currentProjectTemplate: projectTemplatesMock.items[0],
     projectTemplates: projectTemplatesMock.items,
     analysisTemplates: result.current,
+    portalTarget: wrapperElement,
   }
-  const {rerender} = render(
-    <SettingsPanelContext.Provider value={values}>
-      <AnalysisTab />
-    </SettingsPanelContext.Provider>,
-  )
+  const {rerender} = render(<WrapperComponent {...{...contextProps}} />)
   await waitFor(() => expect(result.current.templates.length).not.toBe(0))
-  values.analysisTemplates = result.current
-  values.analysisTemplates.modifyingCurrentTemplate = jest.fn()
-  rerender(
-    <SettingsPanelContext.Provider value={values}>
-      <AnalysisTab />
-    </SettingsPanelContext.Provider>,
-  )
+  contextProps.analysisTemplates = result.current
+  contextProps.analysisTemplates.modifyingCurrentTemplate = jest.fn()
+  rerender(<WrapperComponent {...{...contextProps}} />)
   const currentAnalysisTemplate = result.current.templates?.find(
     ({id, isTemporary}) =>
       id === result.current.currentTemplate.id && !isTemporary,
@@ -76,83 +93,68 @@ test('Render Analysis Tab', async () => {
   fireEvent.change(mtValue, {target: {value: 100}})
   expect(screen.queryByTestId(ANALYSIS_BREAKDOWNS.mt).value).toBe('100')
   fireEvent.blur(mtValue)
-  expect(values.analysisTemplates.modifyingCurrentTemplate).toBeCalledTimes(1)
+  expect(
+    contextProps.analysisTemplates.modifyingCurrentTemplate,
+  ).toBeCalledTimes(1)
 })
 
 test('Modify template breakdowns', async () => {
   const {result} = renderHook(() => useTemplates(ANALYSIS_SCHEMA_KEYS))
-  let values = {
+  let contextProps = {
     openLoginModal: jest.fn(),
     modifyingCurrentTemplate: jest.fn(),
     currentProjectTemplate: projectTemplatesMock.items[0],
     projectTemplates: projectTemplatesMock.items,
     analysisTemplates: result.current,
   }
-  const {rerender} = render(
-    <SettingsPanelContext.Provider value={values}>
-      <AnalysisTab />
-    </SettingsPanelContext.Provider>,
-  )
+  const {rerender} = render(<WrapperComponent {...{...contextProps}} />)
   await waitFor(() => expect(result.current.templates.length).not.toBe(0))
-  values.analysisTemplates = result.current
-  values.analysisTemplates.modifyingCurrentTemplate = jest.fn()
-  rerender(
-    <SettingsPanelContext.Provider value={values}>
-      <AnalysisTab />
-    </SettingsPanelContext.Provider>,
-  )
+  contextProps.analysisTemplates = result.current
+  contextProps.analysisTemplates.modifyingCurrentTemplate = jest.fn()
+
+  rerender(<WrapperComponent {...{...contextProps}} />)
   const mtValue = screen.getByTestId(ANALYSIS_BREAKDOWNS.mt)
   fireEvent.change(mtValue, {target: {value: 100}})
   expect(screen.queryByTestId(ANALYSIS_BREAKDOWNS.mt).value).toBe('100')
   fireEvent.blur(mtValue)
-  expect(values.analysisTemplates.modifyingCurrentTemplate).toBeCalledTimes(1)
+  expect(
+    contextProps.analysisTemplates.modifyingCurrentTemplate,
+  ).toBeCalledTimes(1)
 })
 
 test('Change template', async () => {
   const {result} = renderHook(() => useTemplates(ANALYSIS_SCHEMA_KEYS))
-  let values = {
+  let contextProps = {
     openLoginModal: jest.fn(),
     modifyingCurrentTemplate: jest.fn(),
     currentProjectTemplate: projectTemplatesMock.items[0],
     projectTemplates: projectTemplatesMock.items,
     analysisTemplates: result.current,
+    portalTarget: wrapperElement,
   }
-  const projectContext = {
-    languages: languagesMock,
-  }
-  const {rerender} = render(
-    <SettingsPanelContext.Provider value={values}>
-      <AnalysisTab />
-    </SettingsPanelContext.Provider>,
-  )
+
+  const {rerender} = render(<WrapperComponent {...{...contextProps}} />)
   await waitFor(() => expect(result.current.templates.length).not.toBe(0))
-  values.analysisTemplates.modifyingCurrentTemplate = jest.fn()
-  values.analysisTemplates = result.current
-  rerender(
-    <SettingsPanelContext.Provider value={values}>
-      <AnalysisTab />
-    </SettingsPanelContext.Provider>,
-  )
+  contextProps.analysisTemplates.modifyingCurrentTemplate = jest.fn()
+  contextProps.analysisTemplates = result.current
+  rerender(<WrapperComponent {...{...contextProps}} />)
   const select = screen.getByText('Default')
   fireEvent.click(select)
   const templateDropdown = screen.getByText(
-    values.analysisTemplates.templates[1].payable_rate_template_name,
+    contextProps.analysisTemplates.templates[1].payable_rate_template_name,
   )
   expect(templateDropdown).toBeInTheDocument()
   fireEvent.click(templateDropdown)
 
-  values.analysisTemplates = result.current
+  contextProps.analysisTemplates = result.current
 
-  rerender(
-    <CreateProjectContext.Provider value={projectContext}>
-      <SettingsPanelContext.Provider value={values}>
-        <AnalysisTab />
-      </SettingsPanelContext.Provider>
-    </CreateProjectContext.Provider>,
-  )
+  rerender(<WrapperComponent {...{...contextProps}} />)
   const currentAnalysisTemplate = result.current.templates?.find(
     ({id, isTemporary}) =>
       id === result.current.currentTemplate.id && !isTemporary,
+  )
+  expect(currentAnalysisTemplate.payable_rate_template_name).toBe(
+    contextProps.analysisTemplates.templates[1].payable_rate_template_name,
   )
   for (const [key, value] of Object.entries(ANALYSIS_BREAKDOWNS)) {
     if (value !== '100%_PUBLIC' && value !== 'ICE') {

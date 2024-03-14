@@ -53,6 +53,7 @@ export const AnalysisTab = () => {
     currentProjectTemplate,
     modifyingCurrentTemplate: modifyingCurrentProjectTemplate,
     analysisTemplates,
+    portalTarget,
   } = useContext(SettingsPanelContext)
 
   const {templates, setTemplates, currentTemplate, modifyingCurrentTemplate} =
@@ -165,6 +166,7 @@ export const AnalysisTab = () => {
             setTemplates,
             currentTemplate,
             modifyingCurrentTemplate,
+            portalTarget,
             schema: ANALYSIS_SCHEMA_KEYS,
             getFilteredSchemaCreateUpdate,
             createApi: createBillingModelTemplate,
