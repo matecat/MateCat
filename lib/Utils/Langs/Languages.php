@@ -91,6 +91,25 @@ class Langs_Languages {
     }
 
     /**
+     * A indexed array of allowed languages
+     *
+     * @param string $format
+     * @return array
+     */
+    public static function allowedLanguages($format = 'rfc3066code')
+    {
+        $allowedLanguages = [];
+
+        foreach ( self::$languages_definition as $lang ) {
+            if(isset($lang[ $format ])){
+                $allowedLanguages[] = $lang[ $format ];
+            }
+        }
+
+        return $allowedLanguages;
+    }
+
+    /**
      * Check if a language is RTL
      *
      * @param $code
@@ -239,5 +258,52 @@ class Langs_Languages {
         if( !$this->isEnabled( $code ) ) throw new Lang_InvalidLanguageException( 'Language not enabled: ' . $code );
     }
 
+    /**
+     * @param string $language
+     * @param string $format
+     * @return bool
+     */
+    public static function isValidLanguage($language, $format = 'rfc3066code')
+    {
+        $allowedLanguages = self::allowedLanguages($format);
+
+        return in_array($language, $allowedLanguages);
+    }
+
+    /**
+     * @param $rfc3066code
+     * @return |null
+     */
+    public static function getLocalizedLanguage($rfc3066code)
+    {
+        foreach ( self::$languages_definition as $lang ) {
+            if($lang['rfc3066code'] === $rfc3066code){
+                return @$lang['localized'][0]['en'];
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Examples:
+     *
+     * it-IT  ---> it
+     * es-419 ---> es
+     * to-TO ----> ton
+     *
+     * @param $rfc3066code
+     * @return string|null
+     */
+    public static function convertLanguageToIsoCode($rfc3066code)
+    {
+        foreach ( self::$languages_definition as $lang ) {
+            if($rfc3066code === $lang['rfc3066code']){
+                return $lang['isocode'];
+            }
+        }
+
+        return null;
+    }
 }
 

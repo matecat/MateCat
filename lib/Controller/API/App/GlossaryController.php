@@ -3,6 +3,7 @@
 namespace API\App;
 
 use API\V2\KleinController;
+use Langs_Languages;
 use Matecat\SubFiltering\MateCatFilter;
 use TmKeyManagement\UserKeysModel;
 use TmKeyManagement_Filter;
@@ -389,7 +390,9 @@ class GlossaryController extends KleinController {
      */
     private function validateLanguage($language){
 
-        if(!in_array($language, Utils::allowedLanguages())){
+        $languages = Langs_Languages::getInstance();
+
+        if(!in_array($language, $languages->allowedLanguages())){
             $this->response->code(500);
             $this->response->json([
                     'error' => $language . ' is not an allowed language'
