@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 
-export const InputPercentage = ({value = '', setFn, className}) => {
+export const InputPercentage = ({value = '', setFn, className, dataTestid}) => {
   const inputRef = useRef()
   const [inputValue, setInputValue] = useState(value + '%')
   const onPercentInput = () => {
@@ -45,9 +45,10 @@ export const InputPercentage = ({value = '', setFn, className}) => {
       className={'input-percentage ' + className}
       ref={inputRef}
       value={inputValue}
-      onInput={(e) => onPercentInput(e)}
+      onChange={(e) => onPercentInput(e)}
       onBlur={onBlur}
       onFocus={() => selectAll()}
+      data-testid={dataTestid}
     />
   )
 }

@@ -70,6 +70,7 @@ export const BreakdownsTable = ({saveValue}) => {
               <InputPercentage
                 value={newWords}
                 setFn={setNewWords}
+                dataTestid={ANALYSIS_BREAKDOWNS.newWords}
                 className={
                   !isValueSaved(ANALYSIS_BREAKDOWNS.newWords, newWords)
                     ? 'analysis-value-not-saved'
@@ -81,6 +82,7 @@ export const BreakdownsTable = ({saveValue}) => {
               <InputPercentage
                 value={repetitions}
                 setFn={setRepetitions}
+                dataTestid={ANALYSIS_BREAKDOWNS.repetitions}
                 className={
                   !isValueSaved(ANALYSIS_BREAKDOWNS.repetitions, repetitions)
                     ? 'analysis-value-not-saved'
@@ -92,6 +94,7 @@ export const BreakdownsTable = ({saveValue}) => {
               <InputPercentage
                 value={internal75_99}
                 setFn={setInternal75_99}
+                dataTestid={ANALYSIS_BREAKDOWNS.internal75_99}
                 className={
                   !isValueSaved(
                     ANALYSIS_BREAKDOWNS.internal75_99,
@@ -106,6 +109,7 @@ export const BreakdownsTable = ({saveValue}) => {
               <InputPercentage
                 value={tm50_74}
                 setFn={setTm50_74}
+                dataTestid={ANALYSIS_BREAKDOWNS.tm50_74}
                 className={
                   !isValueSaved(ANALYSIS_BREAKDOWNS.tm50_74, tm50_74)
                     ? 'analysis-value-not-saved'
@@ -117,6 +121,7 @@ export const BreakdownsTable = ({saveValue}) => {
               <InputPercentage
                 value={tm75_84}
                 setFn={setTm75_84}
+                dataTestid={ANALYSIS_BREAKDOWNS.tm75_84}
                 className={
                   !isValueSaved(ANALYSIS_BREAKDOWNS.tm75_84, tm75_84)
                     ? 'analysis-value-not-saved'
@@ -128,6 +133,7 @@ export const BreakdownsTable = ({saveValue}) => {
               <InputPercentage
                 value={tm85_94}
                 setFn={setTm85_94}
+                dataTestid={ANALYSIS_BREAKDOWNS.tm85_94}
                 className={
                   !isValueSaved(ANALYSIS_BREAKDOWNS.tm85_94, tm85_94)
                     ? 'analysis-value-not-saved'
@@ -139,6 +145,7 @@ export const BreakdownsTable = ({saveValue}) => {
               <InputPercentage
                 value={tm95_99}
                 setFn={setTm95_99}
+                dataTestid={ANALYSIS_BREAKDOWNS.tm95_99}
                 className={
                   !isValueSaved(ANALYSIS_BREAKDOWNS.tm95_99, tm95_99)
                     ? 'analysis-value-not-saved'
@@ -150,6 +157,7 @@ export const BreakdownsTable = ({saveValue}) => {
               <InputPercentage
                 value={tm100}
                 setFn={setTm100}
+                dataTestid={ANALYSIS_BREAKDOWNS.tm100}
                 className={
                   !isValueSaved(ANALYSIS_BREAKDOWNS.tm100, tm100)
                     ? 'analysis-value-not-saved'
@@ -161,6 +169,7 @@ export const BreakdownsTable = ({saveValue}) => {
               <InputPercentage
                 value={public100}
                 setFn={setPublic100}
+                dataTestid={ANALYSIS_BREAKDOWNS.public100}
                 className={
                   !isValueSaved(ANALYSIS_BREAKDOWNS.public100, public100)
                     ? 'analysis-value-not-saved'
@@ -172,6 +181,7 @@ export const BreakdownsTable = ({saveValue}) => {
               <InputPercentage
                 value={tm100InContext}
                 setFn={setTm100InContext}
+                dataTestid={ANALYSIS_BREAKDOWNS.tm100InContext}
                 className={
                   !isValueSaved(
                     ANALYSIS_BREAKDOWNS.tm100InContext,
