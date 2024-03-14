@@ -91,25 +91,6 @@ class Langs_Languages {
     }
 
     /**
-     * A indexed array of allowed languages
-     *
-     * @param string $format
-     * @return array
-     */
-    public static function allowedLanguages($format = 'rfc3066code')
-    {
-        $allowedLanguages = [];
-
-        foreach ( self::$languages_definition as $lang ) {
-            if(isset($lang[ $format ])){
-                $allowedLanguages[] = $lang[ $format ];
-            }
-        }
-
-        return $allowedLanguages;
-    }
-
-    /**
      * Check if a language is RTL
      *
      * @param $code
@@ -259,12 +240,32 @@ class Langs_Languages {
     }
 
     /**
+     * A indexed array of allowed languages
+     *
+     * @param string $format
+     * @return array
+     */
+    public static function allowedLanguages($format = 'rfc3066code')
+    {
+        $allowedLanguages = [];
+
+        foreach ( self::$languages_definition as $lang ) {
+            if(isset($lang[ $format ])){
+                $allowedLanguages[] = Utils::trimAndLowerCase($lang[ $format ]);
+            }
+        }
+
+        return $allowedLanguages;
+    }
+
+    /**
      * @param string $language
      * @param string $format
      * @return bool
      */
     public static function isValidLanguage($language, $format = 'rfc3066code')
     {
+        $language = Utils::trimAndLowerCase($language);
         $allowedLanguages = self::allowedLanguages($format);
 
         return in_array($language, $allowedLanguages);
@@ -272,7 +273,7 @@ class Langs_Languages {
 
     /**
      * @param $rfc3066code
-     * @return |null
+     * @return string|null
      */
     public static function getLocalizedLanguage($rfc3066code)
     {

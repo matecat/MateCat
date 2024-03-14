@@ -390,6 +390,7 @@ class GlossaryController extends KleinController {
      */
     private function validateLanguage($language){
 
+        $language = Utils::trimAndLowerCase($language);
         $languages = Langs_Languages::getInstance();
 
         if(!in_array($language, $languages->allowedLanguages())){
