@@ -97,6 +97,7 @@ export const LanguagesExceptions = ({breakdowns, updateExceptions}) => {
       ...newException,
     })
   }
+
   return (
     <div className="analysis-tab-exceptions">
       <h3>Exceptions</h3>

@@ -22,7 +22,9 @@ import {CreateProjectContext} from '../../../createProject/CreateProjectContext'
 
 const wrapperElement = document.createElement('div')
 const projectContext = {
-  languages: languagesMock,
+  languages: languagesMock.map((lang) => {
+    return {...lang, id: lang.code}
+  }),
 }
 const WrapperComponent = (contextProps) => {
   const ref = useRef()
@@ -165,4 +167,8 @@ test('Change template', async () => {
       )
     }
   }
+  expect(screen.getByText('French')).toBeInTheDocument()
+  expect(screen.getByText('Italian')).toBeInTheDocument()
+  expect(screen.getByText('Azerbaijani')).toBeInTheDocument()
+  expect(screen.getByText('Austrian German')).toBeInTheDocument()
 })
