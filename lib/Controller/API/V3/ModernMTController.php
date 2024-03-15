@@ -418,7 +418,7 @@ class ModernMTController extends BaseChunkController
             }
 
             // cells has only one term (for equivalent)
-            if($type === 'equivalent' and ($emptyCells >= (count($csvRow)-1))){
+            if($type === 'equivalent' and ($emptyCells >= (count($csvRow)-2))){
                 throw new Exception("Row ".($csvRowIndex+1)." invalid, please provide terms for at least two languages.");
             }
         }
