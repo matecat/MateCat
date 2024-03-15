@@ -10,8 +10,10 @@ namespace API\V2;
 
 use API\V2\Json\Chunk;
 use API\V2\Validators\ChunkPasswordValidator;
+use API\V2\Validators\ProjectAccessValidator;
 use Chunks_ChunkStruct;
 use Jobs_JobDao;
+use Projects_ProjectStruct;
 use Translations_SegmentTranslationDao;
 use Utils;
 
@@ -23,12 +25,18 @@ class ChunkController extends BaseChunkController {
     protected $chunk;
 
     /**
+     * @var Projects_ProjectStruct
+     */
+    private $project;
+
+    /**
      * @param Chunks_ChunkStruct $chunk
      *
      * @return $this
      */
     public function setChunk( $chunk ) {
-        $this->chunk = $chunk;
+        $this->chunk   = $chunk;
+        $this->project = $chunk->getProject( 60 * 10 );
 
         return $this;
     }
@@ -45,7 +53,7 @@ class ChunkController extends BaseChunkController {
 
         $this->return404IfTheJobWasDeleted();
 
-        $this->response->json( $format->renderOne($this->chunk) );
+        $this->response->json( $format->renderOne( $this->chunk ) );
 
     }
 
@@ -83,12 +91,13 @@ class ChunkController extends BaseChunkController {
     }
 
     protected function afterConstruct() {
-        $Validator = new ChunkPasswordValidator( $this ) ;
+        $Validator  = new ChunkPasswordValidator( $this );
         $Controller = $this;
         $Validator->onSuccess( function () use ( $Validator, $Controller ) {
             $Controller->setChunk( $Validator->getChunk() );
         } );
         $this->appendValidator( $Validator );
+        $this->appendValidator( ( new ProjectAccessValidator( $this ) )->setProject( $this->project ) );
     }
 
 }

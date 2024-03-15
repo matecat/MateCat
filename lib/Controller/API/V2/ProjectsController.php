@@ -4,6 +4,7 @@ namespace API\V2;
 
 use API\V2\Json\Project;
 use API\V2\Json\ProjectAnonymous;
+use API\V2\Validators\ProjectAccessValidator;
 use API\V2\Validators\ProjectPasswordValidator;
 use Jobs_JobDao;
 use Translations_SegmentTranslationDao;
@@ -124,6 +125,7 @@ class ProjectsController extends KleinController {
         } );
 
         $this->appendValidator( $projectValidator );
+        $this->appendValidator( ( new ProjectAccessValidator( $this ) )->setProject( $this->project ) );
     }
 
 }
