@@ -31,7 +31,8 @@ class AIAssistantController extends KleinController {
             die();
         }
 
-        $localizedLanguage = Utils::getLocalizedLanguage($json['target']);
+        $languages = \Langs_Languages::getInstance();
+        $localizedLanguage = $languages->getLocalizedLanguage($json['target']);
 
         if(empty($localizedLanguage)){
             $this->response->code(500);

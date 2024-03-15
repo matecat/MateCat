@@ -5,6 +5,7 @@ namespace Validator;
 use Exception;
 use Files\CSV;
 use INIT;
+use Langs_Languages;
 use Utils;
 use Validator\Contracts\AbstractValidator;
 use Validator\Contracts\ValidatorObject;
@@ -21,7 +22,8 @@ class GlossaryCSVValidator extends AbstractValidator {
         }
 
         $headers          = $this->getHeaders( $object->csv );
-        $allowedLanguages = $this->allowedLanguages();
+        $languages        = Langs_Languages::getInstance();
+        $allowedLanguages = $languages->allowedLanguages();
 
         // 1. Validate languages
         if ( $this->validateLanguages( $headers, $allowedLanguages ) === false ) {
@@ -77,25 +79,6 @@ class GlossaryCSVValidator extends AbstractValidator {
         }
 
         return count($languages);
-    }
-
-    /**
-     * @return array
-     */
-    private function allowedLanguages() {
-        $allowedLanguages = [];
-
-        $file   = INIT::$UTILS_ROOT . '/Langs/supported_langs.json';
-        $string = file_get_contents( $file );
-        $langs  = json_decode( $string, true );
-
-        foreach ( $langs[ 'langs' ] as $lang ) {
-            $rfc3066code = Utils::trimAndLowerCase( $lang[ 'rfc3066code' ] );
-
-            $allowedLanguages[] = $rfc3066code;
-        }
-
-        return $allowedLanguages;
     }
 
     /**
