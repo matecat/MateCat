@@ -398,11 +398,33 @@ class ModernMTController extends BaseChunkController
      */
     private function validateCSVContent($csvContent)
     {
+        if(count($csvContent[0]) === 1){
+            throw new Exception("Glossary invalid: unidirectional glossaries should have exactly two columns");
+        }
+
+        // determine if unidirectional or equivalent
+        $unidirectional = count($csvContent[0]) === 2;
+
+        if(!$unidirectional and !in_array('tuid', $csvContent[0])){
+            throw new Exception("Glossary invalid: tuid column is expected for glossaries of equivalent terms");
+        }
+
         foreach ($csvContent as $csvRowIndex => $csvRow){
+
+            $emptyCells = 0;
+
             for($i = 0; $i < count($csvRow); $i++){
                 if(empty($csvRow[$i])){
-                    throw new Exception("Row ".($csvRowIndex+1)." malformed, please amend it and upload the file again.");
+                    $emptyCells++;
+                    if($unidirectional){
+                        throw new Exception("Row ".($csvRowIndex+1)." invalid, please add terms for both languages.");
+                    }
                 }
+            }
+
+            // throw error if cells has only one term
+            if(!$unidirectional and ($emptyCells >= (count($csvRow)-1))){
+                throw new Exception("Row ".($csvRowIndex+1)." invalid, please provide terms for at least two languages.");
             }
         }
     }
