@@ -99,7 +99,10 @@ export const SeveritiyRow = ({severity}) => {
   const isNotSaved = checkIsNotSaved()
 
   return (
-    <div className={`cell${isNotSaved ? ' cell-not-saved' : ''}`}>
+    <div
+      className={`cell${isNotSaved ? ' cell-not-saved' : ''}`}
+      data-testid={`qf-severity-cell-${severity.id_category}-${severity.id}`}
+    >
       <input
         ref={ref}
         className="quality-framework-input"

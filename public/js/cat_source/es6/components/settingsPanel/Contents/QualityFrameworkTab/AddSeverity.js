@@ -19,7 +19,7 @@ export const AddSeverity = () => {
     QualityFrameworkTabContext,
   )
 
-  const [name, setName] = useState()
+  const [name, setName] = useState('')
 
   const addSeverity = () => {
     const {categories = []} = currentTemplate ?? {}
@@ -54,13 +54,17 @@ export const AddSeverity = () => {
   const onClose = () => setName()
 
   return (
-    <div className="quality-framework-add-severity">
+    <div
+      className="quality-framework-add-severity"
+      data-testid="qf-add-severity"
+    >
       <Popover
         title="Add Severity"
         toggleButtonProps={{
           type: BUTTON_TYPE.PRIMARY,
           mode: BUTTON_MODE.BASIC,
           size: BUTTON_SIZE.ICON_SMALL,
+          testId: 'add-severity-button',
           children: (
             <>
               <IconAdd size={22} />

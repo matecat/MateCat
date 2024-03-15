@@ -98,6 +98,7 @@ export const CategoryRow = ({category, index, shouldScrollIntoView}) => {
       <MenuButtonItem
         className="quality-framework-columns-menu-item"
         onMouseUp={() => setIsEditingName(true)}
+        data-testid="menu-button-rename"
       >
         <IconEdit />
         Rename
@@ -106,6 +107,7 @@ export const CategoryRow = ({category, index, shouldScrollIntoView}) => {
         className="quality-framework-columns-menu-item"
         onMouseUp={moveUp}
         disabled={isMoveUpDisabled}
+        data-testid="menu-button-moveup"
       >
         Move up
       </MenuButtonItem>
@@ -113,12 +115,14 @@ export const CategoryRow = ({category, index, shouldScrollIntoView}) => {
         className="quality-framework-columns-menu-item"
         onMouseUp={moveDown}
         disabled={isMoveDownDisabled}
+        data-testid="menu-button-movedown"
       >
         Move down
       </MenuButtonItem>
       <MenuButtonItem
         className="quality-framework-columns-menu-item"
         onMouseUp={deleteCategory}
+        data-testid="menu-button-delete"
       >
         <Trash size={16} />
         Delete category
@@ -130,6 +134,7 @@ export const CategoryRow = ({category, index, shouldScrollIntoView}) => {
     <div
       ref={ref}
       className={`row${isNotSaved ? ' quality-framework-not-saved' : ''}`}
+      data-testid={`qf-category-row-${category.id}`}
     >
       <div className="label">
         <LabelWithTooltip tooltipTarget={portalTarget}>

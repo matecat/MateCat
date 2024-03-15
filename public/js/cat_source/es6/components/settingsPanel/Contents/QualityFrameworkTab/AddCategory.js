@@ -25,13 +25,13 @@ export const AddCategory = () => {
 
   const [isVisibleDescriptionInput, setIsVisibleDescriptionInput] =
     useState(false)
-  const [params, setParams] = useState({name: '', description: ''})
+  const [fields, setFields] = useState({name: '', description: ''})
 
-  const {name, description} = params
+  const {name, description} = fields
   const setName = ({currentTarget: {value}}) =>
-    setParams((prevState) => ({...prevState, name: value}))
+    setFields((prevState) => ({...prevState, name: value}))
   const setDescription = ({currentTarget: {value}}) =>
-    setParams((prevState) => ({...prevState, description: value}))
+    setFields((prevState) => ({...prevState, description: value}))
 
   const addCategory = () => {
     const {categories = []} = currentTemplate ?? {}
@@ -64,11 +64,14 @@ export const AddCategory = () => {
 
   const onClose = () => {
     setIsVisibleDescriptionInput(false)
-    setParams({name: '', description: ''})
+    setFields({name: '', description: ''})
   }
 
   return (
-    <div className="quality-framework-add-category">
+    <div
+      className="quality-framework-add-category"
+      data-testid="qf-add-category"
+    >
       <Popover
         title="Add category"
         toggleButtonProps={{

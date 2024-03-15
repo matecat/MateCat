@@ -10,7 +10,6 @@ import IconDown from '../../../icons/IconDown'
 import {switchArrayIndex} from '../../../../utils/commonUtils'
 import {isEqual} from 'lodash'
 import LabelWithTooltip from '../../../common/LabelWithTooltip'
-import {getCodeFromLabel} from './CategoriesSeveritiesTable'
 
 export const SeverityColumn = ({label, index, shouldScrollIntoView}) => {
   const {portalTarget} = useContext(SettingsPanelContext)
@@ -122,6 +121,7 @@ export const SeverityColumn = ({label, index, shouldScrollIntoView}) => {
       <MenuButtonItem
         className="quality-framework-columns-menu-item"
         onMouseUp={() => setIsEditingName(true)}
+        data-testid="menu-button-rename"
       >
         <IconEdit />
         Rename
@@ -130,6 +130,7 @@ export const SeverityColumn = ({label, index, shouldScrollIntoView}) => {
         className="quality-framework-columns-menu-item"
         onMouseUp={moveLeft}
         disabled={isMoveLeftDisabled}
+        data-testid="menu-button-moveleft"
       >
         Move left
       </MenuButtonItem>
@@ -137,12 +138,14 @@ export const SeverityColumn = ({label, index, shouldScrollIntoView}) => {
         className="quality-framework-columns-menu-item"
         onMouseUp={moveRight}
         disabled={isMoveRightDisabled}
+        data-testid="menu-button-moveright"
       >
         Move right
       </MenuButtonItem>
       <MenuButtonItem
         className="quality-framework-columns-menu-item"
         onMouseUp={deleteSeverity}
+        data-testid="menu-button-delete"
       >
         <Trash size={16} />
         Delete severity
@@ -154,6 +157,7 @@ export const SeverityColumn = ({label, index, shouldScrollIntoView}) => {
     <div
       ref={ref}
       className={`column${isNotSaved ? ' quality-framework-not-saved' : ''}`}
+      data-testid={`qf-severity-column-${index}`}
     >
       <LabelWithTooltip className="label" tooltipTarget={portalTarget}>
         {isEditingName ? (

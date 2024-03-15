@@ -11,7 +11,6 @@ import {SettingsPanelContext} from '../../SettingsPanelContext'
 import usePortal from '../../../../hooks/usePortal'
 import {QualityFrameworkTabContext} from './QualityFrameworkTab'
 import {
-  getCodeFromLabel,
   formatCategoryDescription,
   getCategoryLabelAndDescription,
 } from './CategoriesSeveritiesTable'
@@ -95,6 +94,7 @@ export const ModifyCategory = ({target, category, setIsEditingName}) => {
         ref={ref}
         className="popover-component-popover quality-framework-modify-category"
         style={{top: `${rect.top}px`, left: `${rect.left}px`}}
+        data-testid="qf-modify-category"
       >
         <div className="popover-component-header">
           <span className="popover-component-title">Modify category</span>

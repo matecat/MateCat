@@ -5,9 +5,17 @@ import {mswServer} from '../../../../../../../mocks/mswServer'
 import {HttpResponse, http} from 'msw'
 import qaModelTemplateMocks from '../../../../../../../mocks/qaModelTemplateMocks'
 import projectTemplateMock from '../../../../../../../mocks/projectTemplateMock'
-import {act, render, renderHook, screen, waitFor} from '@testing-library/react'
+import {
+  act,
+  render,
+  renderHook,
+  screen,
+  waitFor,
+  within,
+} from '@testing-library/react'
 import useTemplates from '../../../../hooks/useTemplates'
 import userEvent from '@testing-library/user-event'
+import {getCategoryLabelAndDescription} from './CategoriesSeveritiesTable'
 
 global.config = {
   basepath: 'http://localhost/',
@@ -148,4 +156,491 @@ test('Change template', async () => {
   refresh()
 
   expect(R1Input).not.toHaveClass('quality-framework-not-saved')
+})
+
+test('QF template id not exits and select Standard template', async () => {
+  const {result} = renderHook(() => useTemplates(QF_SCHEMA_KEYS))
+
+  let currentProjectTemplate = {
+    ...projectTemplateMock.items[1],
+    qa_model_template_id: 99,
+  }
+
+  const contextProps = {
+    currentProjectTemplate,
+    modifyingCurrentTemplate: (value) => {
+      currentProjectTemplate = value(currentProjectTemplate)
+    },
+    qualityFrameworkTemplates: result.current,
+  }
+
+  const {rerender} = render(<WrapperComponent {...{...contextProps}} />)
+  const refresh = () => {
+    contextProps.qualityFrameworkTemplates = result.current
+    rerender(<WrapperComponent {...{...contextProps}} />)
+  }
+  await waitFor(() => expect(result.current.templates).not.toBe(0))
+  refresh()
+
+  expect(screen.getByText('Default')).toBeInTheDocument()
+})
+
+test('Add category', async () => {
+  const user = userEvent.setup()
+
+  const {result} = renderHook(() => useTemplates(QF_SCHEMA_KEYS))
+
+  let currentProjectTemplate = projectTemplateMock.items[0]
+
+  const contextProps = {
+    currentProjectTemplate,
+    modifyingCurrentTemplate: (value) => {
+      currentProjectTemplate = value(currentProjectTemplate)
+    },
+    qualityFrameworkTemplates: result.current,
+  }
+
+  const {rerender} = render(<WrapperComponent {...{...contextProps}} />)
+  const refresh = () => {
+    contextProps.qualityFrameworkTemplates = result.current
+    rerender(<WrapperComponent {...{...contextProps}} />)
+  }
+  await waitFor(() => expect(result.current.templates).not.toBe(0))
+  refresh()
+
+  const addCategory = screen.getByTestId('qf-add-category')
+  const addCategoryContainer = within(addCategory)
+
+  await user.click(addCategoryContainer.getByText('Add category'))
+
+  expect(addCategoryContainer.getByTestId('popover')).toBeInTheDocument()
+
+  const nameInput = addCategoryContainer.getByPlaceholderText('Name')
+  const descriptionButton = addCategoryContainer.getByText('Add description')
+
+  await user.click(descriptionButton)
+
+  const descriptionInput =
+    addCategoryContainer.getByPlaceholderText('Description')
+
+  await user.type(nameInput, 'New category')
+  await user.type(descriptionInput, 'Test description')
+
+  await user.click(addCategoryContainer.getByText('Confirm'))
+  refresh()
+
+  const categoryRow = within(screen.getByTestId('qf-category-row-6'))
+
+  expect(categoryRow.getByText('New category')).toBeInTheDocument()
+  expect(categoryRow.getByText('(Test description)')).toBeInTheDocument()
+  expect(screen.getByTestId('qf-category-row-6')).toHaveClass(
+    'quality-framework-not-saved',
+  )
+})
+
+test('Category rename', async () => {
+  const user = userEvent.setup()
+
+  const {result} = renderHook(() => useTemplates(QF_SCHEMA_KEYS))
+
+  let currentProjectTemplate = projectTemplateMock.items[0]
+
+  const contextProps = {
+    currentProjectTemplate,
+    modifyingCurrentTemplate: (value) => {
+      currentProjectTemplate = value(currentProjectTemplate)
+    },
+    qualityFrameworkTemplates: result.current,
+  }
+
+  const {rerender} = render(<WrapperComponent {...{...contextProps}} />)
+  const refresh = () => {
+    contextProps.qualityFrameworkTemplates = result.current
+    rerender(<WrapperComponent {...{...contextProps}} />)
+  }
+  await waitFor(() => expect(result.current.templates).not.toBe(0))
+  refresh()
+
+  const categoryRow = within(screen.getByTestId('qf-category-row-2'))
+  const menuButtonShowItems = categoryRow.getByTestId('menu-button-show-items')
+  expect(menuButtonShowItems).toBeInTheDocument()
+
+  await user.click(menuButtonShowItems)
+
+  const renameButton = screen.getByTestId('menu-button-rename')
+
+  await user.click(renameButton)
+
+  const modifyCategory = within(screen.getByTestId('qf-modify-category'))
+  const nameInput = modifyCategory.getByPlaceholderText('Name')
+  const descriptionInput = modifyCategory.getByPlaceholderText('Description')
+
+  const {label, description} = getCategoryLabelAndDescription(
+    result.current.currentTemplate.categories[1],
+  )
+
+  expect(nameInput.value).toBe(label)
+  expect(descriptionInput.value).toBe(description)
+
+  await user.click(nameInput)
+
+  await user.type(nameInput, ' Mod')
+
+  await user.click(modifyCategory.getByText('Confirm'))
+  refresh()
+
+  expect(categoryRow.getByText(`${label} Mod`)).toBeInTheDocument()
+  expect(screen.getByTestId('qf-category-row-2')).toHaveClass(
+    'quality-framework-not-saved',
+  )
+})
+
+test('Category moveup and movedown', async () => {
+  const user = userEvent.setup()
+
+  const {result} = renderHook(() => useTemplates(QF_SCHEMA_KEYS))
+
+  let currentProjectTemplate = projectTemplateMock.items[0]
+
+  const contextProps = {
+    currentProjectTemplate,
+    modifyingCurrentTemplate: (value) => {
+      currentProjectTemplate = value(currentProjectTemplate)
+    },
+    qualityFrameworkTemplates: result.current,
+  }
+
+  const {rerender} = render(<WrapperComponent {...{...contextProps}} />)
+  const refresh = () => {
+    contextProps.qualityFrameworkTemplates = result.current
+    rerender(<WrapperComponent {...{...contextProps}} />)
+  }
+  await waitFor(() => expect(result.current.templates).not.toBe(0))
+  refresh()
+
+  let categoryRow = within(screen.getByTestId('qf-category-row-2'))
+  let menuButtonShowItems = categoryRow.getByTestId('menu-button-show-items')
+  expect(menuButtonShowItems).toBeInTheDocument()
+
+  await user.click(menuButtonShowItems)
+
+  const moveUpButton = screen.getByTestId('menu-button-moveup')
+
+  // moveup
+  await user.click(moveUpButton)
+  refresh()
+
+  expect(screen.getByTestId('qf-category-row-2')).toHaveClass(
+    'quality-framework-not-saved',
+  )
+  expect(screen.getByTestId('qf-category-row-1')).toHaveClass(
+    'quality-framework-not-saved',
+  )
+
+  categoryRow = within(screen.getByTestId('qf-category-row-2'))
+  menuButtonShowItems = categoryRow.getByTestId('menu-button-show-items')
+
+  // movedown
+  await user.click(menuButtonShowItems)
+
+  expect(screen.getByTestId('menu-button-moveup')).toBeDisabled()
+
+  const moveDownButton = screen.getByTestId('menu-button-movedown')
+  await user.click(moveDownButton)
+  refresh()
+
+  expect(screen.getByTestId('qf-category-row-2')).not.toHaveClass(
+    'quality-framework-not-saved',
+  )
+  expect(screen.getByTestId('qf-category-row-1')).not.toHaveClass(
+    'quality-framework-not-saved',
+  )
+})
+
+test('Category delete', async () => {
+  const user = userEvent.setup()
+
+  const {result} = renderHook(() => useTemplates(QF_SCHEMA_KEYS))
+
+  let currentProjectTemplate = projectTemplateMock.items[0]
+
+  const contextProps = {
+    currentProjectTemplate,
+    modifyingCurrentTemplate: (value) => {
+      currentProjectTemplate = value(currentProjectTemplate)
+    },
+    qualityFrameworkTemplates: result.current,
+  }
+
+  const {rerender} = render(<WrapperComponent {...{...contextProps}} />)
+  const refresh = () => {
+    contextProps.qualityFrameworkTemplates = result.current
+    rerender(<WrapperComponent {...{...contextProps}} />)
+  }
+  await waitFor(() => expect(result.current.templates).not.toBe(0))
+  refresh()
+
+  const categoryRow = within(screen.getByTestId('qf-category-row-2'))
+  const menuButtonShowItems = categoryRow.getByTestId('menu-button-show-items')
+  expect(menuButtonShowItems).toBeInTheDocument()
+
+  await user.click(menuButtonShowItems)
+
+  const deleteButton = screen.getByTestId('menu-button-delete')
+
+  await user.click(deleteButton)
+  refresh()
+
+  expect(screen.queryByTestId('qf-category-row-2')).not.toBeInTheDocument()
+})
+
+test('Add severity', async () => {
+  const user = userEvent.setup()
+
+  const {result} = renderHook(() => useTemplates(QF_SCHEMA_KEYS))
+
+  let currentProjectTemplate = projectTemplateMock.items[0]
+
+  const contextProps = {
+    currentProjectTemplate,
+    modifyingCurrentTemplate: (value) => {
+      currentProjectTemplate = value(currentProjectTemplate)
+    },
+    qualityFrameworkTemplates: result.current,
+  }
+
+  const {rerender} = render(<WrapperComponent {...{...contextProps}} />)
+  const refresh = () => {
+    contextProps.qualityFrameworkTemplates = result.current
+    rerender(<WrapperComponent {...{...contextProps}} />)
+  }
+  await waitFor(() => expect(result.current.templates).not.toBe(0))
+  refresh()
+
+  const addSeverity = screen.getByTestId('qf-add-severity')
+  const addSeverityContainer = within(addSeverity)
+
+  await user.click(addSeverityContainer.getByTestId('add-severity-button'))
+
+  expect(addSeverityContainer.getByTestId('popover')).toBeInTheDocument()
+
+  const nameInput = addSeverityContainer.getByPlaceholderText('Name')
+
+  await user.type(nameInput, 'New severity')
+
+  await user.click(addSeverityContainer.getByText('Confirm'))
+  refresh()
+
+  const severityColumn = within(screen.getByTestId('qf-severity-column-3'))
+
+  expect(severityColumn.getByText('New severity')).toBeInTheDocument()
+  expect(screen.getByTestId('qf-severity-column-3')).toHaveClass(
+    'quality-framework-not-saved',
+  )
+})
+
+test('Edit severity', async () => {
+  const user = userEvent.setup()
+
+  const {result} = renderHook(() => useTemplates(QF_SCHEMA_KEYS))
+
+  let currentProjectTemplate = projectTemplateMock.items[0]
+
+  const contextProps = {
+    currentProjectTemplate,
+    modifyingCurrentTemplate: (value) => {
+      currentProjectTemplate = value(currentProjectTemplate)
+    },
+    qualityFrameworkTemplates: result.current,
+  }
+
+  const {rerender} = render(<WrapperComponent {...{...contextProps}} />)
+  const refresh = () => {
+    contextProps.qualityFrameworkTemplates = result.current
+    rerender(<WrapperComponent {...{...contextProps}} />)
+  }
+  await waitFor(() => expect(result.current.templates).not.toBe(0))
+  refresh()
+
+  const severityCurrentValue =
+    result.current.currentTemplate.categories[1].severities[1].penalty.toString()
+  const severityCell = within(screen.getByTestId('qf-severity-cell-2-5'))
+  const severityInput = severityCell.getByDisplayValue(severityCurrentValue)
+
+  await user.click(severityInput)
+  await act(async () => user.keyboard('3'))
+
+  await user.click(screen.getByTestId('qf-category-row-2'))
+  refresh()
+
+  expect(screen.getByTestId('qf-severity-cell-2-5')).toHaveClass(
+    'cell-not-saved',
+  )
+
+  expect(screen.getByTestId('qf-severity-column-1')).toHaveClass(
+    'quality-framework-not-saved',
+  )
+})
+
+test('Severity column rename', async () => {
+  const user = userEvent.setup()
+
+  const {result} = renderHook(() => useTemplates(QF_SCHEMA_KEYS))
+
+  let currentProjectTemplate = projectTemplateMock.items[0]
+
+  const contextProps = {
+    currentProjectTemplate,
+    modifyingCurrentTemplate: (value) => {
+      currentProjectTemplate = value(currentProjectTemplate)
+    },
+    qualityFrameworkTemplates: result.current,
+  }
+
+  const {rerender} = render(<WrapperComponent {...{...contextProps}} />)
+  const refresh = () => {
+    contextProps.qualityFrameworkTemplates = result.current
+    rerender(<WrapperComponent {...{...contextProps}} />)
+  }
+  await waitFor(() => expect(result.current.templates).not.toBe(0))
+  refresh()
+
+  const severityColumn = within(screen.getByTestId('qf-severity-column-1'))
+
+  const menuButtonShowItems = severityColumn.getByTestId(
+    'menu-button-show-items',
+  )
+  expect(menuButtonShowItems).toBeInTheDocument()
+
+  await user.click(menuButtonShowItems)
+
+  const renameButton = screen.getByTestId('menu-button-rename')
+
+  await user.click(renameButton)
+
+  await user.keyboard(' ')
+  refresh()
+  await user.keyboard('c')
+  refresh()
+  await user.keyboard('o')
+  refresh()
+  await user.keyboard('p')
+  refresh()
+  await user.keyboard('y')
+  refresh()
+
+  expect(result.current.currentTemplate.categories[0].severities[1].label).toBe(
+    'Minor copy',
+  )
+
+  expect(screen.getByTestId('qf-severity-column-1')).toHaveClass(
+    'quality-framework-not-saved',
+  )
+})
+
+test('Severity column move left and right', async () => {
+  const user = userEvent.setup()
+
+  const {result} = renderHook(() => useTemplates(QF_SCHEMA_KEYS))
+
+  let currentProjectTemplate = projectTemplateMock.items[0]
+
+  const contextProps = {
+    currentProjectTemplate,
+    modifyingCurrentTemplate: (value) => {
+      currentProjectTemplate = value(currentProjectTemplate)
+    },
+    qualityFrameworkTemplates: result.current,
+  }
+
+  const {rerender} = render(<WrapperComponent {...{...contextProps}} />)
+  const refresh = () => {
+    contextProps.qualityFrameworkTemplates = result.current
+    rerender(<WrapperComponent {...{...contextProps}} />)
+  }
+  await waitFor(() => expect(result.current.templates).not.toBe(0))
+  refresh()
+
+  let severityColumn = within(screen.getByTestId('qf-severity-column-1'))
+  let menuButtonShowItems = severityColumn.getByTestId('menu-button-show-items')
+  expect(menuButtonShowItems).toBeInTheDocument()
+
+  await user.click(menuButtonShowItems)
+
+  const moveLeftButton = screen.getByTestId('menu-button-moveleft')
+
+  await user.click(moveLeftButton)
+  refresh()
+
+  expect(screen.getByTestId('qf-severity-column-1')).toHaveClass(
+    'quality-framework-not-saved',
+  )
+  expect(screen.getByTestId('qf-severity-column-0')).toHaveClass(
+    'quality-framework-not-saved',
+  )
+  expect(screen.getByTestId('qf-severity-column-2')).not.toHaveClass(
+    'quality-framework-not-saved',
+  )
+
+  severityColumn = within(screen.getByTestId('qf-severity-column-0'))
+  menuButtonShowItems = severityColumn.getByTestId('menu-button-show-items')
+  await user.click(menuButtonShowItems)
+
+  expect(screen.getByTestId('menu-button-moveleft')).toBeDisabled()
+
+  const moveRightButton = screen.getByTestId('menu-button-moveright')
+
+  await user.click(moveRightButton)
+  refresh()
+
+  expect(screen.getByTestId('qf-severity-column-1')).not.toHaveClass(
+    'quality-framework-not-saved',
+  )
+  expect(screen.getByTestId('qf-severity-column-0')).not.toHaveClass(
+    'quality-framework-not-saved',
+  )
+})
+
+test('Severity delete', async () => {
+  const user = userEvent.setup()
+
+  const {result} = renderHook(() => useTemplates(QF_SCHEMA_KEYS))
+
+  let currentProjectTemplate = projectTemplateMock.items[0]
+
+  const contextProps = {
+    currentProjectTemplate,
+    modifyingCurrentTemplate: (value) => {
+      currentProjectTemplate = value(currentProjectTemplate)
+    },
+    qualityFrameworkTemplates: result.current,
+  }
+
+  const {rerender} = render(<WrapperComponent {...{...contextProps}} />)
+  const refresh = () => {
+    contextProps.qualityFrameworkTemplates = result.current
+    rerender(<WrapperComponent {...{...contextProps}} />)
+  }
+  await waitFor(() => expect(result.current.templates).not.toBe(0))
+  refresh()
+
+  const severityColumn = within(screen.getByTestId('qf-severity-column-1'))
+  const menuButtonShowItems = severityColumn.getByTestId(
+    'menu-button-show-items',
+  )
+  expect(menuButtonShowItems).toBeInTheDocument()
+
+  await user.click(menuButtonShowItems)
+
+  const deleteButton = screen.getByTestId('menu-button-delete')
+
+  await user.click(deleteButton)
+  refresh()
+
+  expect(screen.getByTestId('qf-severity-column-1')).toHaveClass(
+    'quality-framework-not-saved',
+  )
+
+  const column1 = within(screen.queryByTestId('qf-severity-column-1'))
+  expect(column1.queryByText('Minor')).not.toBeInTheDocument()
 })
