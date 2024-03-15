@@ -111,15 +111,13 @@ class ModernMTController extends BaseChunkController
 
             $this->validateCSVContent($csv);
 
-            $type = (count($csv[0]) == 2) ? 'unidirectional' : 'equivalent';
-
             $engineId = filter_var( $this->request->engineId, FILTER_SANITIZE_NUMBER_INT );
             $MMTClient = $this->getModernMTClient($engineId);
 
             $this->response->status()->setCode( 200 );
             $this->response->json($MMTClient->importGlossary($memoryId, [
                 'csv' => new CURLFile($glossary, 'text/csv'),
-                'type' => $type
+                'type' => $this->getCsvType($csv)
             ]));
             exit();
 
@@ -241,12 +239,10 @@ class ModernMTController extends BaseChunkController
 
             $this->validateCSVContent($csv);
 
-            $type = (count($csv[0]) == 2) ? 'unidirectional' : 'equivalent';
-
             $this->response->status()->setCode( 200 );
             $this->response->json($MMTClient->importGlossary($memoryId, [
                 'csv' => new CURLFile($glossary, 'text/csv'),
-                'type' => $type
+                'type' => $this->getCsvType($csv)
             ]));
             exit();
 
@@ -398,32 +394,31 @@ class ModernMTController extends BaseChunkController
      */
     private function validateCSVContent($csvContent)
     {
-        if(count($csvContent[0]) === 1){
-            throw new Exception("Glossary invalid: unidirectional glossaries should have exactly two columns");
-        }
-
-        // determine if unidirectional or equivalent
-        $unidirectional = count($csvContent[0]) === 2;
-
-        if(!$unidirectional and !in_array('tuid', $csvContent[0])){
-            throw new Exception("Glossary invalid: tuid column is expected for glossaries of equivalent terms");
-        }
+        $type = $this->getCsvType($csvContent);
 
         foreach ($csvContent as $csvRowIndex => $csvRow){
+
+            // missing tuid (for equivalent)
+            if($type === 'equivalent' and empty($csvRow[0])){
+                throw new Exception("Row ".($csvRowIndex+1)." invalid, please provide a tuid for the row.");
+            }
 
             $emptyCells = 0;
 
             for($i = 0; $i < count($csvRow); $i++){
+
+                // empty cells
                 if(empty($csvRow[$i])){
                     $emptyCells++;
-                    if($unidirectional){
+                    if($type === 'unidirectional'){
+                        // empty cell (for unidirectional)
                         throw new Exception("Row ".($csvRowIndex+1)." invalid, please add terms for both languages.");
                     }
                 }
             }
 
-            // throw error if cells has only one term
-            if(!$unidirectional and ($emptyCells >= (count($csvRow)-1))){
+            // cells has only one term (for equivalent)
+            if($type === 'equivalent' and ($emptyCells >= (count($csvRow)-1))){
                 throw new Exception("Row ".($csvRowIndex+1)." invalid, please provide terms for at least two languages.");
             }
         }
@@ -479,5 +474,37 @@ class ModernMTController extends BaseChunkController
             'name' => $memory['name'],
             'has_glossary' => ($memory['hasGlossary'] == 1),
         ];
+    }
+
+    /**
+     * @param array $csv
+     * @return string
+     * @throws Exception
+     */
+    private function getCsvType(array $csv)
+    {
+        $firstCell = $csv[0][0];
+        $numberOfRows = count($csv[0]);
+
+        if($numberOfRows === 1){
+            throw new Exception("Glossary invalid: unidirectional glossaries should have exactly two columns");
+        }
+
+        // tuid and 2 columns
+        if($firstCell == 'tuid' and $numberOfRows <= 2){
+            throw new Exception("Glossary invalid: at least two language columns are expected for glossaries of equivalent terms");
+        }
+
+        // tuid and more than 2 columns
+        if($firstCell == 'tuid' and $numberOfRows > 2){
+            return 'equivalent';
+        }
+
+        // if is not equivalent and there are more than 2 columns, is not valid
+        if($numberOfRows > 2){
+            throw new Exception("Glossary invalid: tuid column is expected for glossaries of equivalent terms");
+        }
+
+        return 'unidirectional';
     }
 }
