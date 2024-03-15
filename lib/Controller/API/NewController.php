@@ -1250,13 +1250,13 @@ class NewController extends ajaxController {
             $targets = explode( ',', trim($this->postInput[ 'target_lang' ]) );
             $dialectStrictObj = json_decode($dialect_strict, true);
 
-            foreach($targets as $target){
-                if(!isset($dialectStrictObj[trim($target)])){
-                    throw new \Exception('Wrong `dialect_strict` object, missing value for ' . $target);
+            foreach ($dialectStrictObj as $lang => $value){
+                if(!in_array($lang, $targets)){
+                    throw new \Exception('Wrong `dialect_strict` object, language, ' . $lang . ' is not one of the project target languages');
                 }
 
-                if(!is_bool($dialectStrictObj[trim($target)])){
-                    throw new \Exception('Wrong `dialect_strict` object, not boolean declared value for ' . $target);
+                if(!is_bool($value)){
+                    throw new \Exception('Wrong `dialect_strict` object, not boolean declared value for ' . $lang);
                 }
             }
 
