@@ -87,7 +87,7 @@ class createProjectController extends ajaxController {
                 'project_completion' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ], // features customization
                 'get_public_matches' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ], // disable public TM matches
 
-                'id_qa_model_template'       => [ 'filter' => FILTER_VALIDATE_INT ],
+                'qa_model_template_id'       => [ 'filter' => FILTER_VALIDATE_INT ],
                 'payable_rate_template_id'   => [ 'filter' => FILTER_VALIDATE_INT ],
         ];
 
@@ -635,9 +635,9 @@ class createProjectController extends ajaxController {
      */
     private function __validateQaModelTemplate()
     {
-        if ( !empty( $this->postInput[ 'id_qa_model_template' ] ) ) {
+        if ( !empty( $this->postInput[ 'qa_model_template_id' ] ) and $this->postInput[ 'qa_model_template_id' ] > 0 ) {
             $qaModelTemplate = \QAModelTemplate\QAModelTemplateDao::get([
-                'id' => $this->postInput[ 'id_qa_model_template' ],
+                'id' => $this->postInput[ 'qa_model_template_id' ],
                 'uid' => $this->getUser()->uid
             ]);
 
@@ -657,7 +657,7 @@ class createProjectController extends ajaxController {
     {
         $payableRateModelTemplate = null;
 
-        if( !empty($this->postInput[ 'payable_rate_template_id' ] ) ){
+        if( !empty($this->postInput[ 'payable_rate_template_id' ] ) and $this->postInput[ 'payable_rate_template_id' ] > 0 ){
 
             $payableRateTemplateId = $this->postInput[ 'payable_rate_template_id' ];
             $userId = $this->getUser()->uid;
