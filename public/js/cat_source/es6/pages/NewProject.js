@@ -190,6 +190,8 @@ const NewProject = ({
       segmentationRule,
       idTeam,
       getPublicMatches,
+      qaModelTemplateId,
+      payableRateTemplateId,
     } = currentProjectTemplate
 
     const isLexiqaEnabled = !checkLexiqaIsEnabled({sourceLang, targetLangs})
@@ -219,6 +221,8 @@ const NewProject = ({
       tag_projection: isGuessTagEnabled && tagProjection,
       segmentation_rule: segmentationRule.id === '1' ? '' : segmentationRule.id,
       id_team: idTeam,
+      qa_model_template_id: qaModelTemplateId,
+      payable_rate_template_id: payableRateTemplateId,
       get_public_matches: getPublicMatches,
       ...(mt?.extra?.glossaries?.length && {
         mmt_glossaries: JSON.stringify({
