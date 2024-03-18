@@ -29,6 +29,7 @@ export const QualityFrameworkTab = () => {
     currentProjectTemplate,
     modifyingCurrentTemplate: modifyingCurrentProjectTemplate,
     qualityFrameworkTemplates,
+    portalTarget,
   } = useContext(SettingsPanelContext)
 
   const {templates, setTemplates, currentTemplate, modifyingCurrentTemplate} =
@@ -47,10 +48,13 @@ export const QualityFrameworkTab = () => {
     if (config.isLoggedIn === 1 && !config.is_cattool) {
       getQualityFrameworkTemplates().then(({items}) => {
         if (!cleanup) {
+          const selectedTemplateId =
+            items.find(({id}) => id === currentProjectTemplateQaId)?.id ?? 0
+
           setTemplates(
             items.map((template) => ({
               ...template,
-              isSelected: template.id === currentProjectTemplateQaId,
+              isSelected: template.id === selectedTemplateId,
             })),
           )
         }
@@ -60,7 +64,7 @@ export const QualityFrameworkTab = () => {
     }
 
     return () => (cleanup = true)
-  }, [setTemplates, templates, currentProjectTemplateQaId])
+  }, [setTemplates, templates.length, currentProjectTemplateQaId])
 
   // Select QF template when curren project template change
   useEffect(() => {
@@ -103,6 +107,7 @@ export const QualityFrameworkTab = () => {
               setTemplates,
               currentTemplate,
               modifyingCurrentTemplate,
+              portalTarget,
               schema: QF_SCHEMA_KEYS,
               getFilteredSchemaCreateUpdate,
               createApi: createQualityFrameworkTemplate,

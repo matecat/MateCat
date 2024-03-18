@@ -48,7 +48,8 @@ export const DeepLGlossary = ({id, isCattoolPage = false}) => {
 
           const templatesInvolved = projectTemplates
             .filter(
-              (template) => template.mt.extra.deepl_id_glossary === glossary.id,
+              (template) =>
+                template.mt?.extra?.deepl_id_glossary === glossary.id,
             )
             .map((template) => {
               const mtObject = template.mt
@@ -100,7 +101,9 @@ export const DeepLGlossary = ({id, isCattoolPage = false}) => {
   showConfirmDelete.current = (glossary) => {
     const templatesInvolved = projectTemplates
       .filter(({isSelected}) => !isSelected)
-      .filter((template) => template.mt.extra.deepl_id_glossary === glossary.id)
+      .filter(
+        (template) => template.mt?.extra?.deepl_id_glossary === glossary.id,
+      )
 
     if (templatesInvolved.length) {
       ModalsActions.showModalComponent(

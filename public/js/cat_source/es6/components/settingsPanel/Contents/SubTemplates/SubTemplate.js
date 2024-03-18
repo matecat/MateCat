@@ -6,12 +6,8 @@ import {SubTemplateMoreMenu} from './SubTemplateMoreMenu'
 import {SubTemplateCreateUpdateControl} from './SubTemplateCreateUpdateControl'
 import {IconSaveChanges} from '../../../icons/IconSaveChanges'
 import {IconSave} from '../../../icons/IconSave'
-import {
-  BUTTON_MODE,
-  BUTTON_SIZE,
-  BUTTON_TYPE,
-  Button,
-} from '../../../common/Button/Button'
+import {BUTTON_MODE, BUTTON_SIZE, Button} from '../../../common/Button/Button'
+import {flushSync} from 'react-dom'
 
 export const SUBTEMPLATE_MODIFIERS = {
   CREATE: 'create',
@@ -50,15 +46,23 @@ export const SubTemplates = ({
       template: modifiedTemplate,
     })
       .then((template) => {
-        setTemplates((prevState) =>
-          prevState
-            .filter(({isTemporary}) => !isTemporary)
-            .map((templateItem) =>
-              templateItem.id === template.id
-                ? {...modifiedTemplate, ...template, isSelected: true}
-                : templateItem,
-            ),
+        flushSync(() =>
+          setTemplates((prevState) =>
+            prevState
+              .filter(({isTemporary}) => !isTemporary)
+              .map((templateItem) =>
+                templateItem.id === template.id
+                  ? {...modifiedTemplate, ...template, isSelected: true}
+                  : templateItem,
+              ),
+          ),
         )
+
+        // update current template with new id's received
+        modifyingCurrentTemplate((prevTemplate) => ({
+          ...prevTemplate,
+          ...template,
+        }))
       })
       .catch((error) => console.log(error))
       .finally(() => {
@@ -106,6 +110,7 @@ export const SubTemplates = ({
               {isModifyingTemplate && !isStandardTemplateBool && (
                 <Button
                   className="template-button button-save-changes"
+                  testId="save-as-changes"
                   mode={BUTTON_MODE.OUTLINE}
                   size={BUTTON_SIZE.MEDIUM}
                   disabled={isRequestInProgress}

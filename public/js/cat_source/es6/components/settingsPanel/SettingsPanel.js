@@ -61,7 +61,7 @@ const DEFAULT_CONTENTS = (isCattool = config.is_cattool) => {
         'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vulputate libero et velit interdum, ac aliquet odio mattis.',
       component: <MachineTranslationTab />,
     },
-    ...(!isCattool
+    ...(!isCattool && config.isLoggedIn
       ? [
           {
             id: SETTINGS_PANEL_TABS.qualityFramework,

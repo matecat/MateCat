@@ -1,6 +1,7 @@
 import React, {useContext, useEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import {QualityFrameworkTabContext} from './QualityFrameworkTab'
+import {isEqual} from 'lodash'
 
 export const SeveritiyRow = ({severity}) => {
   const {modifyingCurrentTemplate, templates, currentTemplate} = useContext(
@@ -60,15 +61,48 @@ export const SeveritiyRow = ({severity}) => {
       ({id, isTemporary}) => id === currentTemplate.id && !isTemporary,
     )
 
-    return !originalCurrentTemplate.categories.some(({severities}) =>
+    const isMatched = originalCurrentTemplate.categories.some(({severities}) =>
       severities.some(({id}) => id === severity.id),
     )
+
+    if (!isMatched) return true
+
+    const categoryIndex = originalCurrentTemplate.categories.findIndex(
+      ({id}) => id === severity.id_category,
+    )
+    const severityIndex = originalCurrentTemplate.categories[
+      categoryIndex
+    ].severities.findIndex(
+      ({id, id_category}) =>
+        id_category === severity.id_category && id === severity.id,
+    )
+
+    const {
+      label, // eslint-disable-line
+      code, // eslint-disable-line
+      ...originalSeverity
+    } =
+      originalCurrentTemplate.categories[categoryIndex].severities[
+        severityIndex
+      ]
+    const {
+      label: labelCurrent, // eslint-disable-line
+      code: codeCurrent, // eslint-disable-line
+      ...currentSeverity
+    } = currentTemplate.categories[categoryIndex]?.severities[severityIndex] ??
+    {}
+    const isModified = !isEqual(originalSeverity, currentSeverity)
+
+    return isModified
   }
 
   const isNotSaved = checkIsNotSaved()
 
   return (
-    <div className={`cell${isNotSaved ? ' cell-not-saved' : ''}`}>
+    <div
+      className={`cell${isNotSaved ? ' cell-not-saved' : ''}`}
+      data-testid={`qf-severity-cell-${severity.id_category}-${severity.id}`}
+    >
       <input
         ref={ref}
         className="quality-framework-input"

@@ -328,9 +328,24 @@ class ProjectManager {
         return $this->projectStructure;
     }
 
+    /**
+     * Save features in project metadata
+     */
+    private function saveFeaturesInMetadata(){
+
+        $dao = new Projects_MetadataDao();
+
+        $featureCodes = $this->features->getCodes();
+        if ( !empty( $featureCodes ) ) {
+            $dao->set( $this->projectStructure[ 'id_project' ],
+                Projects_MetadataDao::FEATURES_KEY,
+                implode( ',', $featureCodes )
+            );
+        }
+    }
 
     /**
-     *  saveMetadata
+     *  Save custom project metadata
      *
      * This is where, among other things, we put project options.
      *
@@ -339,7 +354,9 @@ class ProjectManager {
      *
      */
     private function saveMetadata() {
+
         $options = $this->projectStructure[ 'metadata' ];
+        $dao = new Projects_MetadataDao();
 
         // "From API" flag
         if(isset($this->projectStructure['from_api']) and $this->projectStructure['from_api'] == true){
@@ -360,26 +377,14 @@ class ProjectManager {
             $options = $this->sanitizeProjectOptions( $options );
         }
 
-        if ( empty( $options ) ) {
-            return;
-        }
-
-        $dao = new Projects_MetadataDao();
-
-        $featureCodes = $this->features->getCodes();
-        if ( !empty( $featureCodes ) ) {
-            $dao->set( $this->projectStructure[ 'id_project' ],
-                Projects_MetadataDao::FEATURES_KEY,
-                implode( ',', $featureCodes )
-            );
-        }
-
-        foreach ( $options as $key => $value ) {
-            $dao->set(
-                $this->projectStructure[ 'id_project' ],
-                $key,
-                $value
-            );
+        if(!empty($options)){
+            foreach ( $options as $key => $value ) {
+                $dao->set(
+                    $this->projectStructure[ 'id_project' ],
+                    $key,
+                    $value
+                );
+            }
         }
 
         // add MMT Glossaries here
@@ -513,6 +518,7 @@ class ProjectManager {
         }
 
         $this->__createProjectRecord();
+        $this->saveFeaturesInMetadata();
         $this->saveMetadata();
 
         //sort files in order to process TMX first

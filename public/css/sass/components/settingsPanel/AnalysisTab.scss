@@ -8,6 +8,13 @@
   width: 100%;
   padding: 20px;
 
+  .analysis-value-not-saved,
+  .analysis-value-not-saved span,
+  .analysis-value-not-saved input,
+  {
+    color: $translatedBlue;
+  }
+
   .settings-panel-contentwrapper-tab-background {
     text-align: left;
   }
@@ -89,7 +96,7 @@
     border-radius: 4px;
     display: flex;
     flex-direction: column;
-    .input-percentage {
+    .analysis-tab-subhead .input-percentage {
       font-size: 16px;
       line-height: 24px;
       width: 128px;
@@ -101,10 +108,84 @@
       padding: 0;
     }
     h3 {
-      margin-bottom: 4px;
+      margin-bottom: 8px;
     }
     .analysis-tab-exceptions {
       padding-top: 24px;
+      gap: 16px;
+      display: flex;
+      flex-direction: column;
+      input.input-percentage {
+        width: 80px;
+      }
+      .analysis-tab-exceptionsRows {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+      .analysis-tab-exceptionsRow {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        .select-with-label__wrapper {
+          height: 40px;
+          width: 275px;
+          .custom-dropdown {
+            margin-top: 0;
+            padding-top: 12px;
+            border-radius: unset;
+            background-color: white;
+          }
+          .select {
+            font-size: 16px;
+            padding: 9px 46px 9px 12px;
+            border-radius: 2px;
+            border: 1px solid rgba(34, 36, 38, 0.15);
+            box-shadow: inset 0 1px 3px #ddd;
+          }
+          .dropdown__search-bar {
+            height: 34px;
+            margin: 0 12px 12px;
+            border-radius: 4px;
+            border: 1px solid rgba(34, 36, 38, .15);
+            background-color: #fff;
+            outline: none;
+            .dropdown__search-bar-input {
+              width: 100%;
+              padding: 8px 8px;
+              background-color: unset;
+              outline: none;
+            }
+          }
+        }
+        #swaplang {
+          margin: 0 10px;
+          cursor: pointer;
+        }
+        > div {
+          display: flex;
+          align-items: center;
+          .button {
+            height: 32px;
+            width: 106px;
+            font-size: 16px;
+            padding: 0px;
+            &.close-button {
+              width: 32px;
+              margin-left: 8px;
+            }
+          }
+        }
+      }
+      .analysis-tab-buttons {
+        gap: 8px;
+        button {
+          height: 32px;
+        }
+      }
+      button.add-button {
+        width: 148px;
+      }
     }
 
   }

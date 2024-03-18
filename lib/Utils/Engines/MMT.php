@@ -305,12 +305,17 @@ class Engines_MMT extends Engines_AbstractEngine {
      * Call to check the license key validity
      * @return Engines_Results_MMT_ExceptionError
      * @throws \Engines\MMT\MMTServiceApiException
+     * @throws Exception
      */
     public function checkAccount() {
-        $client       = $this->_getClient();
-        $this->result = $client->me();
+        try {
+            $client       = $this->_getClient();
+            $this->result = $client->me();
 
-        return $this->result;
+            return $this->result;
+        } catch (\Exception $exception){
+            throw new Exception("MMT license not valid");
+        }
     }
 
     /**

@@ -224,6 +224,7 @@ export const ProjectTemplate = ({portalTarget}) => {
               )}
               {isModifyingTemplate && !isStandardTemplateBool && (
                 <Button
+                  testId="save-as-changes"
                   className="template-button-white button-save-changes"
                   size={BUTTON_SIZE.MEDIUM}
                   mode={BUTTON_MODE.OUTLINE}

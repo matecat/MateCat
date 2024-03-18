@@ -102,16 +102,6 @@ function useTemplates(schema) {
 
       const {isTemporary, ...comparableModifiedTemplate} = modifiedTemplate // eslint-disable-line
 
-      // const originalTemplateKeys = Object.keys(originalTemplate).filter(
-      //   (value) => value !== 'isSelected',
-      // )
-      // const modifiedTemplateKeys = Object.keys(
-      //   comparableModifiedTemplate,
-      // ).filter((value) => value !== 'isSelected')
-
-      // if (!isEqual(modifiedTemplateKeys, originalTemplateKeys))
-      //   throw new Error('Error template schema not valid.')
-
       // If modified template is equal to original template clean up temporary template
       if (isEqual(comparableModifiedTemplate, originalTemplate)) {
         setTemplates(

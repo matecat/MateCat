@@ -88,7 +88,7 @@ test('Render properly', async () => {
   expect(result.current.currentProjectTemplate.id).toBe(3)
 })
 
-test('Create and delete template', async () => {
+test('Create, update and delete template', async () => {
   const user = userEvent.setup()
 
   const {result} = renderHook(() => useProjectTemplates(true))
@@ -121,6 +121,29 @@ test('Create and delete template', async () => {
           tm: [],
           get_public_matches: true,
           pretranslate_100: true,
+        })
+      }),
+      http.put(`${config.basepath}api/v3/project-template/:id`, () => {
+        return HttpResponse.json({
+          id: 4,
+          name: 'my template',
+          uid: 54,
+          is_default: true,
+          id_team: 45,
+          qa_model_template_id: 4456,
+          payable_rate_template_id: 434,
+          speech2text: true,
+          lexica: true,
+          tag_projection: true,
+          cross_language_matches: ['it-IT', 'fr-FR'],
+          segmentation_rule: 'General',
+          mt: {
+            id: 9,
+            extra: {},
+          },
+          tm: [],
+          get_public_matches: true,
+          pretranslate_100: false,
         })
       }),
       http.delete(`${config.basepath}api/v3/project-template/:id`, () => {
@@ -191,6 +214,43 @@ test('Create and delete template', async () => {
     />,
   )
 
+  expect(screen.getByText('my template')).toBeInTheDocument()
+
+  // update
+  act(() => {
+    modifyingCurrentTemplate((prevTemplate) => ({
+      ...prevTemplate,
+      pretranslate100: false,
+    }))
+  })
+
+  projectTemplates = result.current.projectTemplates
+  rerender(
+    <WrapperComponent
+      {...{
+        projectTemplates,
+        setProjectTemplates,
+        currentProjectTemplate,
+      }}
+    />,
+  )
+  expect(screen.getByText('my template *')).toBeInTheDocument()
+  const saveAsChanges = screen.getByTestId('save-as-changes')
+  expect(saveAsChanges).toBeInTheDocument()
+
+  await user.click(saveAsChanges)
+
+  projectTemplates = result.current.projectTemplates
+  currentProjectTemplate = result.current.currentProjectTemplate
+  rerender(
+    <WrapperComponent
+      {...{
+        projectTemplates,
+        setProjectTemplates,
+        currentProjectTemplate,
+      }}
+    />,
+  )
   expect(screen.getByText('my template')).toBeInTheDocument()
 
   // delete
