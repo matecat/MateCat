@@ -5,6 +5,7 @@ namespace API\V2\Validators;
 use API\V2\Exceptions\AuthorizationError;
 use API\V2\KleinController;
 use Exception;
+use Projects_ProjectStruct;
 use Teams\MembershipDao;
 use Teams\TeamStruct;
 
@@ -16,7 +17,7 @@ class ProjectAccessValidator extends Base {
     private $team;
 
     /**
-     * @var \Projects_ProjectStruct
+     * @var Projects_ProjectStruct
      */
     private $project;
 
@@ -30,20 +31,10 @@ class ProjectAccessValidator extends Base {
      *
      * @param KleinController $controller
      */
-    public function __construct( KleinController $controller ) {
+    public function __construct( KleinController $controller, Projects_ProjectStruct $project ) {
         $this->controller = $controller;
+        $this->project    = $project;
         parent::__construct( $controller->getRequest() );
-    }
-
-    /**
-     * @param \Projects_ProjectStruct $project
-     *
-     * @return $this
-     */
-    public function setProject( \Projects_ProjectStruct $project ) {
-        $this->project = $project;
-
-        return $this;
     }
 
     /**
@@ -59,7 +50,7 @@ class ProjectAccessValidator extends Base {
             throw new AuthorizationError( "Not Authorized, the user does not belong to team " . $this->project->id_team, 401 );
         }
 
-        if ( method_exists($this->controller, 'setTeam') ) {
+        if ( method_exists( $this->controller, 'setTeam' ) ) {
             $this->controller->setTeam( $this->team );
         }
     }

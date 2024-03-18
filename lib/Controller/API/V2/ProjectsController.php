@@ -6,7 +6,10 @@ use API\V2\Json\Project;
 use API\V2\Json\ProjectAnonymous;
 use API\V2\Validators\ProjectAccessValidator;
 use API\V2\Validators\ProjectPasswordValidator;
+use Constants_JobStatus;
 use Jobs_JobDao;
+use Projects_ProjectDao;
+use Projects_ProjectStruct;
 use Translations_SegmentTranslationDao;
 use Utils;
 
@@ -19,7 +22,7 @@ use Utils;
 class ProjectsController extends KleinController {
 
     /**
-     * @var \Projects_ProjectStruct
+     * @var Projects_ProjectStruct
      */
     private $project;
 
@@ -60,7 +63,7 @@ class ProjectsController extends KleinController {
         ) {
 
             $due_date    = \Utils::mysqlTimestamp( $this->params[ 'due_date' ] );
-            $project_dao = new \Projects_ProjectDao;
+            $project_dao = new Projects_ProjectDao;
             $project_dao->updateField( $this->project, "due_date", $due_date );
         }
         if ( empty( $this->user ) ) {
@@ -74,7 +77,7 @@ class ProjectsController extends KleinController {
     }
 
     public function deleteDueDate() {
-        $project_dao = new \Projects_ProjectDao;
+        $project_dao = new Projects_ProjectDao;
         $project_dao->updateField( $this->project, "due_date", null );
 
         if ( empty( $this->user ) ) {
@@ -86,26 +89,26 @@ class ProjectsController extends KleinController {
     }
 
     public function cancel() {
-        return $this->changeStatus(\Constants_JobStatus::STATUS_CANCELLED );
+        return $this->changeStatus( Constants_JobStatus::STATUS_CANCELLED );
     }
 
     public function archive() {
-        return $this->changeStatus(\Constants_JobStatus::STATUS_ARCHIVED );
+        return $this->changeStatus( Constants_JobStatus::STATUS_ARCHIVED );
     }
 
     public function active() {
-        return $this->changeStatus(\Constants_JobStatus::STATUS_ACTIVE );
+        return $this->changeStatus( Constants_JobStatus::STATUS_ACTIVE );
     }
 
-    protected function changeStatus($status){
+    protected function changeStatus( $status ) {
 
         $chunks = $this->project->getJobs();
 
-        foreach( $chunks as $chunk ){
+        foreach ( $chunks as $chunk ) {
 
             // update a job only if it is NOT deleted
-            if(!$chunk->wasDeleted()){
-                Jobs_JobDao::updateJobStatus($chunk, $status);
+            if ( !$chunk->wasDeleted() ) {
+                Jobs_JobDao::updateJobStatus( $chunk, $status );
 
                 $lastSegmentsList = Translations_SegmentTranslationDao::getMaxSegmentIdsFromJob( $chunk );
                 Translations_SegmentTranslationDao::updateLastTranslationDateByIdList( $lastSegmentsList, Utils::mysqlTimestamp( time() ) );
@@ -122,10 +125,12 @@ class ProjectsController extends KleinController {
 
         $projectValidator->onSuccess( function () use ( $projectValidator ) {
             $this->project = $projectValidator->getProject();
+        } )->onSuccess( function () {
+            ( new ProjectAccessValidator( $this, $this->project ) )->validate();
         } );
 
         $this->appendValidator( $projectValidator );
-        $this->appendValidator( ( new ProjectAccessValidator( $this ) )->setProject( $this->project ) );
+
     }
 
 }

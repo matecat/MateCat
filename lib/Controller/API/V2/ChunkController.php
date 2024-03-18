@@ -12,6 +12,9 @@ use API\V2\Json\Chunk;
 use API\V2\Validators\ChunkPasswordValidator;
 use API\V2\Validators\ProjectAccessValidator;
 use Chunks_ChunkStruct;
+use Constants_JobStatus;
+use Exception;
+use Exceptions\NotFoundException;
 use Jobs_JobDao;
 use Projects_ProjectStruct;
 use Translations_SegmentTranslationDao;
@@ -30,20 +33,26 @@ class ChunkController extends BaseChunkController {
     private $project;
 
     /**
+     * @return Projects_ProjectStruct
+     */
+    public function getProject() {
+        return $this->project;
+    }
+
+    /**
      * @param Chunks_ChunkStruct $chunk
      *
      * @return $this
      */
     public function setChunk( $chunk ) {
-        $this->chunk   = $chunk;
-        $this->project = $chunk->getProject( 60 * 10 );
+        $this->chunk = $chunk;
 
         return $this;
     }
 
     /**
-     * @throws \Exception
-     * @throws \Exceptions\NotFoundException
+     * @throws Exception
+     * @throws NotFoundException
      */
     public function show() {
 
@@ -60,25 +69,25 @@ class ChunkController extends BaseChunkController {
     public function delete() {
         $this->return404IfTheJobWasDeleted();
 
-        return $this->changeStatus( \Constants_JobStatus::STATUS_DELETED );
+        return $this->changeStatus( Constants_JobStatus::STATUS_DELETED );
     }
 
     public function cancel() {
         $this->return404IfTheJobWasDeleted();
 
-        return $this->changeStatus( \Constants_JobStatus::STATUS_CANCELLED );
+        return $this->changeStatus( Constants_JobStatus::STATUS_CANCELLED );
     }
 
     public function archive() {
         $this->return404IfTheJobWasDeleted();
 
-        return $this->changeStatus( \Constants_JobStatus::STATUS_ARCHIVED );
+        return $this->changeStatus( Constants_JobStatus::STATUS_ARCHIVED );
     }
 
     public function active() {
         $this->return404IfTheJobWasDeleted();
 
-        return $this->changeStatus( \Constants_JobStatus::STATUS_ACTIVE );
+        return $this->changeStatus( Constants_JobStatus::STATUS_ACTIVE );
     }
 
     protected function changeStatus( $status ) {
@@ -91,13 +100,14 @@ class ChunkController extends BaseChunkController {
     }
 
     protected function afterConstruct() {
-        $Validator  = new ChunkPasswordValidator( $this );
-        $Controller = $this;
-        $Validator->onSuccess( function () use ( $Validator, $Controller ) {
-            $Controller->setChunk( $Validator->getChunk() );
+        $Validator = new ChunkPasswordValidator( $this );
+        $Validator->onSuccess( function () use ( $Validator ) {
+            $this->chunk   = $Validator->getChunk();
+            $this->project = $Validator->getChunk()->getProject( 60 * 10 );
+        } )->onSuccess( function () {
+            ( new ProjectAccessValidator( $this, $this->project ) )->validate();
         } );
         $this->appendValidator( $Validator );
-        $this->appendValidator( ( new ProjectAccessValidator( $this ) )->setProject( $this->project ) );
     }
 
 }

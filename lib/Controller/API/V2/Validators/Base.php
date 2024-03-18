@@ -39,8 +39,9 @@ abstract class Base {
      * @param callable|null $callable
      */
     public function onSuccess( callable $callable = null ){
-        if ( !is_callable( $callable ) ) return;
+        if ( !is_callable( $callable ) ) return null;
         $this->_validationCallbacks[] = $callable;
+        return $this;
     }
 
     /**
