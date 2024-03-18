@@ -42,6 +42,11 @@ class ProjectAccessValidator extends Base {
      * @throws Exception
      */
     protected function _validate() {
+
+        if( empty( $this->controller->getUser() ) ){
+            throw new AuthorizationError( "Not Authorized. You must be logged in.", 401 );
+        }
+
         $this->team = ( new MembershipDao() )->setCacheTTL( 60 * 10 )->findTeamByIdAndUser(
                 $this->project->id_team, $this->controller->getUser()
         );
