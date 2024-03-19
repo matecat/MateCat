@@ -85,10 +85,12 @@ class UserController extends AbstractStatefulKleinController {
         $new_password              = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_STRING );
         $new_password_confirmation = filter_var( $this->request->param( 'password_confirmation' ), FILTER_SANITIZE_STRING );
 
-        $cpModel = new ChangePasswordModel( $this->user );
-        $cpModel->changePassword( $old_password, $new_password, $new_password_confirmation );
-
-        $this->incrementRateLimitCounter( $this->user->email, '/api/app/user/password/change' );
+        try {
+            $cpModel = new ChangePasswordModel( $this->user );
+            $cpModel->changePassword( $old_password, $new_password, $new_password_confirmation );
+        } finally {
+            $this->incrementRateLimitCounter( $this->user->email, '/api/app/user/password/change' );
+        }
 
         $this->response->code( 200 );
 
