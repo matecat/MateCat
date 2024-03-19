@@ -2,17 +2,24 @@
 
 namespace API\App;
 
+use DateTime;
+use Exception;
 use Klein\Response;
+use Predis\Client;
+use Predis\PredisException;
 use RedisHandler;
 
 trait RateLimiterTrait
 {
     /**
      * @param Response $response
-     * @param $identifier
-     * @param $route
+     * @param          $identifier
+     * @param          $route
+     * @param int      $maxRetries
+     *
      * @return Response
-     * @throws \Exception
+     * @throws PredisException
+     * @throws Exception
      */
     public function checkRateLimitResponse(Response $response, $identifier, $route, $maxRetries = 10)
     {
@@ -36,7 +43,7 @@ trait RateLimiterTrait
     /**
      * @param $identifier
      * @param $route
-     * @throws \Exception
+     * @throws Exception
      */
     public function incrementRateLimitCounter($identifier, $route)
     {
@@ -52,9 +59,9 @@ trait RateLimiterTrait
     }
 
     /**
-     * @return \Predis\Client
+     * @return Client
      *
-     * @throws \Exception
+     * @throws Exception
      */
     private function getRedis()
     {
@@ -81,14 +88,12 @@ trait RateLimiterTrait
      * 12:30:46 ---> returns 14 + 60
      *
      * @return int|string
-     * @throws \Exception
      */
     private function getTtl()
     {
-        $date = new \DateTime();
+        $date = new DateTime();
         $ttl = 60 - $date->format("s");
-        $ttl = 60 + $ttl;
 
-        return $ttl;
+        return 60 + $ttl;
     }
 }

@@ -69,25 +69,25 @@ class ChunkController extends BaseChunkController {
     public function delete() {
         $this->return404IfTheJobWasDeleted();
 
-        return $this->changeStatus( Constants_JobStatus::STATUS_DELETED );
+        $this->changeStatus( Constants_JobStatus::STATUS_DELETED );
     }
 
     public function cancel() {
         $this->return404IfTheJobWasDeleted();
 
-        return $this->changeStatus( Constants_JobStatus::STATUS_CANCELLED );
+        $this->changeStatus( Constants_JobStatus::STATUS_CANCELLED );
     }
 
     public function archive() {
         $this->return404IfTheJobWasDeleted();
 
-        return $this->changeStatus( Constants_JobStatus::STATUS_ARCHIVED );
+        $this->changeStatus( Constants_JobStatus::STATUS_ARCHIVED );
     }
 
     public function active() {
         $this->return404IfTheJobWasDeleted();
 
-        return $this->changeStatus( Constants_JobStatus::STATUS_ACTIVE );
+        $this->changeStatus( Constants_JobStatus::STATUS_ACTIVE );
     }
 
     protected function changeStatus( $status ) {
@@ -99,6 +99,13 @@ class ChunkController extends BaseChunkController {
 
     }
 
+    /**
+     * Perform actions after constructing an instance of the class.
+     * This method sets up the necessary validators and performs further actions.
+     *
+     * @throws Exception If an error occurs during the validation process.
+     * @throws NotFoundException If the chunk or project could not be found.
+     */
     protected function afterConstruct() {
         $Validator = new ChunkPasswordValidator( $this );
         $Validator->onSuccess( function () use ( $Validator ) {

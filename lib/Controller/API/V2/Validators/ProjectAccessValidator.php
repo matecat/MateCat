@@ -4,7 +4,6 @@ namespace API\V2\Validators;
 
 use API\V2\Exceptions\AuthorizationError;
 use API\V2\KleinController;
-use Exception;
 use Projects_ProjectStruct;
 use Teams\MembershipDao;
 use Teams\TeamStruct;
@@ -27,9 +26,10 @@ class ProjectAccessValidator extends Base {
     protected $controller;
 
     /**
-     * ProjectAccessValidator constructor.
+     * Class constructor.
      *
-     * @param KleinController $controller
+     * @param KleinController        $controller The KleinController object.
+     * @param Projects_ProjectStruct $project    The Projects_ProjectStruct object.
      */
     public function __construct( KleinController $controller, Projects_ProjectStruct $project ) {
         $this->controller = $controller;
@@ -37,9 +37,18 @@ class ProjectAccessValidator extends Base {
         parent::__construct( $controller->getRequest() );
     }
 
+
     /**
-     * @return mixed
-     * @throws Exception
+     * Validates the user's access to the project.
+     *
+     * This function performs a sequence of steps to verify the user's access:
+     * - It checks if the user is logged-in. If not, an AuthorizationError is thrown.
+     * - It tries to find the team associated with the project and the current user.
+     *   If no such team exists, an AuthorizationError is thrown.
+     * - If a 'setTeam' method exists on the controller, the found team is set on the controller.
+     *
+     * @throws AuthorizationError If a user is not logged-in or if the user does not belong to the team.
+     * @return void
      */
     protected function _validate() {
 

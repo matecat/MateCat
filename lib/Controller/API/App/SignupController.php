@@ -7,6 +7,7 @@ use Exceptions\ValidationError;
 use FlashMessage;
 use Klein\Response;
 use Log;
+use Predis\PredisException;
 use Routes;
 use Teams\InvitedUser;
 use Users\PasswordResetModel;
@@ -81,6 +82,14 @@ class SignupController extends AbstractStatefulKleinController {
     }
 
     /**
+     * Authenticates a user for a password reset.
+     *
+     * This method checks the rate limit, validates the user
+     * and redirects the user to the desired URL if successful.
+     * If an error occurs during the process, it increments the rate limit counter
+     * and redirects the user to the application root.
+     *
+     * @throws ValidationError If a validation error occurs.
      * @throws Exception
      */
     public function authForPasswordReset() {
@@ -113,20 +122,27 @@ class SignupController extends AbstractStatefulKleinController {
     }
 
     /**
+     * Sends a password reset email to the provided email address.
+     *
+     * @return void
+     * @throws ValidationError If the request fails the rate limit check or an error occurred during the password reset process.
+     * @throws PredisException
      * @throws Exception
      */
     public function forgotPassword() {
 
         $checkRateLimitEmail = $this->checkRateLimitResponse( $this->response, $this->request->param( 'email' ), '/api/app/user/forgot_password', 5 );
         $checkRateLimitIp    = $this->checkRateLimitResponse( $this->response, Utils::getRealIpAddr(), '/api/app/user/forgot_password', 5 );
-        
+
         if ( $checkRateLimitIp instanceof Response ) {
             $this->response = $checkRateLimitIp;
+
             return;
         }
 
         if ( $checkRateLimitEmail instanceof Response ) {
             $this->response = $checkRateLimitEmail;
+
             return;
         }
 
