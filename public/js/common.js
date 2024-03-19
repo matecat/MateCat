@@ -27,7 +27,6 @@ window.APP = {
         self.setUserImage()
       })
     }
-    this.isCattool = $('body').hasClass('cattool')
     setTimeout(() => this.checkGlobalMassages(), 1000)
   },
   /*************************************************************************************************************/

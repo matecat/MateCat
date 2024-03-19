@@ -100,10 +100,11 @@ class LanguageSelectorList extends React.Component {
 
   getFilteredLanguages = () => {
     const {languagesList, querySearch} = this.props
-    const langs = languagesList
+    const langs =
+      languagesList && languagesList.length
         ? languagesList.filter(
             (e) => e.name.toLowerCase().indexOf(querySearch.toLowerCase()) >= 0,
-        )
+          )
         : []
     const sortInputFirst = (input, data) => {
       let first = []
