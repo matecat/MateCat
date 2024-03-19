@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
 import {Select} from '../../common/Select'
 import {IconPin} from '../../icons/IconPin'
@@ -10,6 +10,8 @@ export const TemplateSelect = ({
   label,
   maxHeightDroplist,
 }) => {
+  const [isLoadingTemplates, setIsLoadingTemplates] = useState(false)
+
   const isModifyingTemplate = projectTemplates.some(
     ({isTemporary}) => isTemporary,
   )
@@ -42,20 +44,38 @@ export const TemplateSelect = ({
       })),
     )
 
+  useEffect(() => {
+    let tmOut
+    if (!projectTemplates.length) {
+      tmOut = setTimeout(() => setIsLoadingTemplates(true), 200)
+    } else {
+      clearTimeout(tmOut)
+      setIsLoadingTemplates(false)
+    }
+
+    return () => clearTimeout(tmOut)
+  }, [projectTemplates.length])
+
+  // const isLoadingTemplates = !projectTemplates.length
+
   return (
     <>
-      {options.length > 0 && (
-        <Select
-          label={label}
-          placeholder="Select template"
-          className={`project-template-select${isModifyingTemplate ? ' project-template-select-unsaved' : ''}`}
-          id="project-template"
-          checkSpaceToReverse={false}
-          maxHeightDroplist={maxHeightDroplist ?? 100}
-          options={options}
-          activeOption={activeOption}
-          onSelect={onSelect}
-        />
+      <Select
+        label={label}
+        placeholder="Select template"
+        className={`project-template-select${isModifyingTemplate ? ' project-template-select-unsaved' : ''}`}
+        id="project-template"
+        checkSpaceToReverse={false}
+        maxHeightDroplist={maxHeightDroplist ?? 100}
+        options={options}
+        activeOption={activeOption}
+        onSelect={onSelect}
+        isDisabled={isLoadingTemplates}
+      />
+      {isLoadingTemplates && !config.is_cattool && (
+        <div className="project-template-select-loading">
+          <div className="project-template-select-loading-icon"></div>
+        </div>
       )}
     </>
   )

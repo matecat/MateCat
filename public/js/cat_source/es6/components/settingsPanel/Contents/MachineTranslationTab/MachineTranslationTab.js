@@ -190,7 +190,7 @@ export const MachineTranslationTab = () => {
         {
           projectTemplatesInvolved: templatesInvolved,
           successCallback: () => deleteMT.current(id),
-          content: `The MT engine you are about to delete is used in the following project creation template(s)`,
+          content: `The MT engine you are about to delete is used in the following project creation template(s):`,
         },
         'Confirm deletion',
       )

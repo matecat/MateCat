@@ -283,7 +283,8 @@ export const TMKeyRow = ({row, onExpandRow}) => {
         {
           projectTemplatesInvolved: templatesInvolved,
           successCallback: onConfirmDeleteTmKey,
-          content: `The memory key you are about to delete is used in the following project creation template(s)`,
+          content:
+            'The memory key you are about to delete is used in the following project creation template(s):',
         },
         'Confirm deletion',
       )

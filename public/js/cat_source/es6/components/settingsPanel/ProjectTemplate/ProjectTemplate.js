@@ -6,8 +6,6 @@ import {
   isStandardTemplate,
 } from '../../../hooks/useProjectTemplates'
 import {updateProjectTemplate} from '../../../api/updateProjectTemplate'
-import CreateProjectStore from '../../../stores/CreateProjectStore'
-import NewProjectConstants from '../../../constants/NewProjectConstants'
 import {flushSync} from 'react-dom'
 import {ProjectTemplateContext} from './ProjectTemplateContext'
 import {TemplateNameInput} from './TemplateNameInput'
@@ -80,83 +78,6 @@ export const ProjectTemplate = ({portalTarget}) => {
         setTemplateModifier()
       })
   }
-
-  // Notify to server when user deleted a tmKey, MT or MT glossary from templates and sync project templates state
-  useEffect(() => {
-    const updateProjectTemplatesAction = ({
-      templates,
-      modifiedPropsCurrentProjectTemplate,
-    }) => {
-      const promiseTemplates = templates
-        .filter(({isTemporary, id}) => !isTemporary && !isStandardTemplate(id))
-        .map(
-          (template) =>
-            new Promise((resolve, reject) => {
-              /* eslint-disable no-unused-vars */
-              const {
-                created_at,
-                id,
-                uid,
-                modified_at,
-                isTemporary,
-                isSelected,
-                ...modifiedTemplate
-              } = template
-              /* eslint-enable no-unused-vars */
-
-              updateProjectTemplate({
-                id: template.id,
-                template: modifiedTemplate,
-              })
-                .then((template) => resolve(template))
-                .catch(() => reject())
-            }),
-        )
-
-      Promise.all(promiseTemplates).then((values) => {
-        flushSync(() =>
-          setProjectTemplates((prevState) =>
-            prevState.map((template) => {
-              const update = values.find(
-                ({id} = {}) => id === template.id && !template.isTemporary,
-              )
-              return {...template, ...(update && {...update})}
-            }),
-          ),
-        )
-
-        const currentOriginalTemplate = values.find(
-          ({id, isTemporary}) =>
-            id === currentProjectTemplate.id && !isTemporary,
-        )
-
-        modifyingCurrentTemplate((prevTemplate) => ({
-          ...prevTemplate,
-          ...(templates.find(
-            ({isTemporary, id}) => isTemporary && !isStandardTemplate(id),
-          )
-            ? {
-                ...modifiedPropsCurrentProjectTemplate,
-                ...(currentOriginalTemplate && {
-                  modifiedAt: currentOriginalTemplate.modified_at,
-                }),
-              }
-            : currentOriginalTemplate),
-        }))
-      })
-    }
-
-    CreateProjectStore.addListener(
-      NewProjectConstants.UPDATE_PROJECT_TEMPLATES,
-      updateProjectTemplatesAction,
-    )
-
-    return () =>
-      CreateProjectStore.removeListener(
-        NewProjectConstants.UPDATE_PROJECT_TEMPLATES,
-        updateProjectTemplatesAction,
-      )
-  }, [currentProjectTemplate.id, setProjectTemplates, modifyingCurrentTemplate])
 
   useEffect(() => {
     setTemplateModifier()

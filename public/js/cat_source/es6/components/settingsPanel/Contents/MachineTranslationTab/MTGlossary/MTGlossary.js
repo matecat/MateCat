@@ -155,12 +155,24 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
         {
           projectTemplatesInvolved: templatesInvolved,
           successCallback: () => deleteGlossary.current(glossary),
-          content: `The MT glossary you are about to delete is used in the following project creation template(s)`,
+          content:
+            'The glossary you are about to delete is linked to an MT license and used in the following project creation template(s):',
+          footerContent:
+            'If you confirm, it will be removed from the template(s) and deleted permanently for you and any other user of the same license.',
         },
         'Confirm deletion',
       )
     } else {
-      setDeleteGlossaryRequest(glossary)
+      ModalsActions.showModalComponent(
+        ConfirmDeleteResourceProjectTemplates,
+        {
+          projectTemplatesInvolved: templatesInvolved,
+          successCallback: () => deleteGlossary.current(glossary),
+          content:
+            'You are about to delete a resource linked to an MT license. If you confirm, it will be deleted permanently for you and any other user of the same license.',
+        },
+        'Confirm deletion',
+      )
     }
   }
 

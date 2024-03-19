@@ -6,13 +6,17 @@ import {MachineTranslationTab} from './Contents/MachineTranslationTab'
 import {AdvancedOptionsTab} from './Contents/AdvancedOptionsTab'
 import {TranslationMemoryGlossaryTab} from './Contents/TranslationMemoryGlossaryTab'
 import {ProjectTemplate} from './ProjectTemplate/ProjectTemplate'
-import {SCHEMA_KEYS} from '../../hooks/useProjectTemplates'
+import {SCHEMA_KEYS, isStandardTemplate} from '../../hooks/useProjectTemplates'
 import {ANALYSIS_SCHEMA_KEYS, AnalysisTab} from './Contents/AnalysisTab'
 import {
   QF_SCHEMA_KEYS,
   QualityFrameworkTab,
 } from './Contents/QualityFrameworkTab'
 import useTemplates from '../../hooks/useTemplates'
+import {updateProjectTemplate} from '../../api/updateProjectTemplate'
+import {flushSync} from 'react-dom'
+import CreateProjectStore from '../../stores/CreateProjectStore'
+import NewProjectConstants from '../../constants/NewProjectConstants'
 
 let tabOpenFromQueryString = new URLSearchParams(window.location.search).get(
   'openTab',
@@ -153,6 +157,87 @@ export const SettingsPanel = ({
 
     return () => current.removeEventListener('transitionend', onTransitionEnd)
   }, [isVisible, onClose])
+
+  // Notify to server when user deleted a tmKey, MT or MT glossary from templates and sync project templates state
+  useEffect(() => {
+    const updateProjectTemplatesAction = ({
+      templates,
+      modifiedPropsCurrentProjectTemplate,
+    }) => {
+      const promiseTemplates = templates
+        .filter(({isTemporary, id}) => !isTemporary && !isStandardTemplate(id))
+        .map(
+          (template) =>
+            new Promise((resolve, reject) => {
+              /* eslint-disable no-unused-vars */
+              const {
+                created_at,
+                id,
+                uid,
+                modified_at,
+                isTemporary,
+                isSelected,
+                ...modifiedTemplate
+              } = template
+              /* eslint-enable no-unused-vars */
+
+              updateProjectTemplate({
+                id: template.id,
+                template: modifiedTemplate,
+              })
+                .then((template) => resolve(template))
+                .catch(() => reject())
+            }),
+        )
+
+      Promise.all(promiseTemplates).then((values) => {
+        flushSync(() =>
+          setProjectTemplates((prevState) =>
+            prevState.map((template) => {
+              const update = values.find(
+                ({id} = {}) => id === template.id && !template.isTemporary,
+              )
+              return {...template, ...(update && {...update})}
+            }),
+          ),
+        )
+
+        const currentOriginalTemplate = values.find(
+          ({id, isTemporary}) =>
+            id === currentProjectTemplate.id && !isTemporary,
+        )
+
+        modifyingCurrentTemplate((prevTemplate) => ({
+          ...prevTemplate,
+          ...(templates.find(
+            ({isTemporary, id}) => isTemporary && !isStandardTemplate(id),
+          )
+            ? {
+                ...modifiedPropsCurrentProjectTemplate,
+                ...(currentOriginalTemplate && {
+                  modifiedAt: currentOriginalTemplate.modified_at,
+                }),
+              }
+            : currentOriginalTemplate),
+        }))
+      })
+    }
+
+    CreateProjectStore.addListener(
+      NewProjectConstants.UPDATE_PROJECT_TEMPLATES,
+      updateProjectTemplatesAction,
+    )
+
+    return () =>
+      CreateProjectStore.removeListener(
+        NewProjectConstants.UPDATE_PROJECT_TEMPLATES,
+        updateProjectTemplatesAction,
+      )
+  }, [
+    currentProjectTemplate?.id,
+    setProjectTemplates,
+    modifyingCurrentTemplate,
+  ])
 
   const close = () => setIsVisible(false)
 

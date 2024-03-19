@@ -22,7 +22,11 @@ import {TargetLanguagesSelect} from '../components/createProject/TargetLanguages
 import {TmGlossarySelect} from '../components/createProject/TmGlossarySelect'
 import {SourceLanguageSelect} from '../components/createProject/SourceLanguageSelect'
 import CommonUtils from '../utils/commonUtils'
-import {DEFAULT_ENGINE_MEMORY, SettingsPanel} from '../components/settingsPanel'
+import {
+  DEFAULT_ENGINE_MEMORY,
+  MMT_NAME,
+  SettingsPanel,
+} from '../components/settingsPanel'
 import {getMTEngines as getMtEnginesApi} from '../api/getMTEngines'
 import {tmCreateRandUser} from '../api/tmCreateRandUser'
 import {getSupportedFiles} from '../api/getSupportedFiles'
@@ -33,6 +37,8 @@ import useProjectTemplates from '../hooks/useProjectTemplates'
 import {TemplateSelect} from '../components/settingsPanel/ProjectTemplate/TemplateSelect'
 import {checkLexiqaIsEnabled} from '../components/settingsPanel/Contents/AdvancedOptionsTab/Lexiqa'
 import {checkGuessTagIsEnabled} from '../components/settingsPanel/Contents/AdvancedOptionsTab/GuessTag'
+import {getMMTKeys} from '../api/getMMTKeys/getMMTKeys'
+import {updateProjectTemplate} from '../api/updateProjectTemplate'
 
 const SELECT_HEIGHT = 324
 
@@ -87,6 +93,98 @@ const NewProject = ({
   const projectNameRef = useRef()
   const prevSourceLang = useRef(sourceLang)
   const createProject = useRef()
+
+  const checkMMTGlossariesWasCancelledIntoTemplates = useRef(
+    (() => {
+      let wasChecked = false
+
+      return ({engineId, projectTemplates}) => {
+        if (
+          !wasChecked &&
+          typeof engineId === 'number' &&
+          projectTemplates.length
+        ) {
+          getMMTKeys({engineId}).then((data) => {
+            const projectTemplatesInvolved = projectTemplates.filter(
+              ({mt}) =>
+                mt.id === engineId &&
+                Array.isArray(mt.extra?.glossaries) &&
+                mt.extra.glossaries.some(
+                  (glossaryId) => !data.find(({id}) => glossaryId === id),
+                ),
+            )
+
+            if (projectTemplatesInvolved.length) {
+              const projectTemplatesUpdated = projectTemplatesInvolved.map(
+                (template) => ({
+                  ...template,
+                  mt: {
+                    ...template.mt,
+                    extra: {
+                      ...template.mt.extra,
+                      glossaries: template.mt.extra.glossaries.filter(
+                        (glossaryId) => data.find(({id}) => id === glossaryId),
+                      ),
+                    },
+                  },
+                }),
+              )
+
+              // Notify template to server without glossaries delete
+              CreateProjectActions.updateProjectTemplates({
+                templates: projectTemplatesUpdated,
+                modifiedPropsCurrentProjectTemplate: {
+                  tm: projectTemplatesUpdated.find(
+                    ({isTemporary}) => isTemporary,
+                  )?.tm,
+                },
+              })
+
+              // Promise.all(
+              //   projectTemplatesUpdated.map((template) => {
+              //     /* eslint-disable no-unused-vars */
+              //     const {
+              //       created_at,
+              //       id,
+              //       uid,
+              //       modified_at,
+              //       isTemporary,
+              //       isSelected,
+              //       ...modifiedTemplate
+              //     } = {
+              //       ...template,
+              //     }
+              //     /* eslint-enable no-unused-vars */
+
+              //     return updateProjectTemplate({
+              //       id: template.id,
+              //       template: modifiedTemplate,
+              //     })
+              //   }),
+              // ).then((templates) =>
+              //   setProjectTemplates((prevState) =>
+              //     prevState.map((templateItem) => ({
+              //       ...templateItem,
+              //       ...(templates.find(({id}) => id === templateItem.id) ?? {}),
+              //     })),
+              //   ),
+              // )
+
+              ModalsActions.showModalComponent(
+                AlertModal,
+                {
+                  text: `One of the MT glossaries used in the template${projectTemplatesInvolved.length > 1 ? 's' : ''} ${projectTemplatesUpdated.map(({name}) => `"${name}"`).join(', ')} has been deleted by another user and removed from the template${projectTemplatesInvolved.length > 1 ? 's' : ''}.`,
+                },
+                'MT glossary deletion',
+              )
+            }
+          })
+
+          wasChecked = true
+        }
+      }
+    })(),
+  )
 
   const closeSettings = useCallback(() => setOpenSettings({isOpen: false}), [])
 
@@ -491,6 +589,14 @@ const NewProject = ({
     )
   }, [currentProjectTemplate?.tm])
 
+  const isLoadingTemplates = !projectTemplates.length
+
+  // ---->
+  checkMMTGlossariesWasCancelledIntoTemplates.current({
+    engineId: mtEngines.find(({name}) => name === MMT_NAME)?.id,
+    projectTemplates,
+  })
+
   return isDeviceCompatible ? (
     <CreateProjectContext.Provider
       value={{
@@ -622,7 +728,10 @@ const NewProject = ({
               </div>
             )}
 
-            <div className="translate-box settings" onClick={openTmPanel}>
+            <div
+              className={`translate-box settings${isLoadingTemplates ? ' settings-disabled' : ''}`}
+              {...(!isLoadingTemplates && {onClick: openTmPanel})}
+            >
               <More size={24} />
               <span className="text">More settings</span>
             </div>
