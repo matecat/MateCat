@@ -3,6 +3,8 @@
 namespace QAModelTemplate;
 
 use DataAccess_AbstractDao;
+use Date\DateTimeUtil;
+use DateTime;
 
 class QAModelTemplateDao extends DataAccess_AbstractDao
 {
@@ -125,10 +127,11 @@ class QAModelTemplateDao extends DataAccess_AbstractDao
                     'id_template' => $id
             ]);
 
-            $stmt = $conn->prepare( "UPDATE project_templates SET qa_model_template_id = 0 WHERE uid = :uid and payable_rate_template_id = :id " );
+            $stmt = $conn->prepare( "UPDATE project_templates SET qa_model_template_id = :zero WHERE uid = :uid and qa_model_template_id = :id " );
             $stmt->execute( [
-                'id'  => $id,
-                'uid' => $uid,
+                'zero' => 0,
+                'id'   => $id,
+                'uid'  => $uid,
             ] );
 
             $conn->commit();
@@ -142,6 +145,7 @@ class QAModelTemplateDao extends DataAccess_AbstractDao
     /**
      * @param $uid
      * @return array
+     * @throws \Exception
      */
     private static function getDefaultTemplate($uid)
     {
@@ -194,6 +198,8 @@ class QAModelTemplateDao extends DataAccess_AbstractDao
 
         unset($passfail['options']);
 
+        $now = (new DateTime())->format('Y-m-d H:i:s');
+
         return [
             'id' => 0,
             'uid' => (int)$uid,
@@ -201,6 +207,9 @@ class QAModelTemplateDao extends DataAccess_AbstractDao
             'version' => 1,
             'categories' => $categories,
             'passfail' => $passfail,
+            'createdAt' => DateTimeUtil::formatIsoDate($now),
+            'modifiedAt' => DateTimeUtil::formatIsoDate($now),
+            'deletedAt' => null,
         ];
 
     }

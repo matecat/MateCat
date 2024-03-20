@@ -5,6 +5,7 @@ namespace PayableRates;
 use Analysis_PayableRates;
 use DataAccess_AbstractDao;
 use Database;
+use Date\DateTimeUtil;
 use DateTime;
 use PDO;
 
@@ -35,6 +36,7 @@ class CustomPayableRateDao extends DataAccess_AbstractDao
     /**
      * @param $uid
      * @return array
+     * @throws \Exception
      */
     private static function getDefaultTemplate($uid)
     {
@@ -46,8 +48,9 @@ class CustomPayableRateDao extends DataAccess_AbstractDao
             'breakdowns' => [
                 'default' => Analysis_PayableRates::$DEFAULT_PAYABLE_RATES
             ],
-            'createdAt' => date("Y-m-d H:i:s"),
-            'modifiedAt' => date("Y-m-d H:i:s"),
+            'createdAt' => DateTimeUtil::formatIsoDate(date("Y-m-d H:i:s")),
+            'modifiedAt' => DateTimeUtil::formatIsoDate(date("Y-m-d H:i:s")),
+            'deletedAt' => null,
         ];
     }
 
@@ -55,8 +58,8 @@ class CustomPayableRateDao extends DataAccess_AbstractDao
      * @param $uid
      * @param int $current
      * @param int $pagination
-     *
      * @return array
+     * @throws \Exception
      */
     public static function getAllPaginated($uid, $current = 1, $pagination = 20)
     {
@@ -205,10 +208,11 @@ class CustomPayableRateDao extends DataAccess_AbstractDao
 
         $queryAffected = $stmt->rowCount();
 
-        $stmt = $conn->prepare( "UPDATE project_templates SET payable_rate_template_id = 0 WHERE uid = :uid and payable_rate_template_id = :id " );
+        $stmt = $conn->prepare( "UPDATE project_templates SET payable_rate_template_id = :zero WHERE uid = :uid AND payable_rate_template_id = :id " );
         $stmt->execute( [
-            'id'  => $id,
-            'uid' => $uid,
+            'zero' => 0,
+            'id'   => $id,
+            'uid'  => $uid,
         ] );
 
         return $queryAffected;
