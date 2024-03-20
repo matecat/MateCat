@@ -73,8 +73,12 @@ class QAModelTemplateDao extends DataAccess_AbstractDao
      */
     public static function remove($id)
     {
-        $conn = \Database::obtain()->getConnection();
+        $qaTemplateModel = self::get([
+            'id' => $id
+        ]);
+        $uid = $qaTemplateModel->uid;
 
+        $conn = \Database::obtain()->getConnection();
         $conn->beginTransaction();
 
         try {
@@ -120,6 +124,12 @@ class QAModelTemplateDao extends DataAccess_AbstractDao
             $stmt->execute([
                     'id_template' => $id
             ]);
+
+            $stmt = $conn->prepare( "UPDATE project_templates SET qa_model_template_id = 0 WHERE uid = :uid and payable_rate_template_id = :id " );
+            $stmt->execute( [
+                'id'  => $id,
+                'uid' => $uid,
+            ] );
 
             $conn->commit();
         } catch (\Exception $exception){
@@ -206,7 +216,7 @@ class QAModelTemplateDao extends DataAccess_AbstractDao
     {
         $conn = \Database::obtain()->getConnection();
 
-        $stmt = $conn->prepare( "SELECT count(id) as count FROM qa_model_templates WHERE uid = :uid");
+        $stmt = $conn->prepare( "SELECT count(id) as count FROM qa_model_templates WHERE deleted_at IS NULL AND uid = :uid");
         $stmt->execute([
             'uid' => $uid
         ]);
@@ -220,7 +230,7 @@ class QAModelTemplateDao extends DataAccess_AbstractDao
         $models = [];
         $models[] = self::getDefaultTemplate($uid);
 
-        $stmt = $conn->prepare( "SELECT id FROM qa_model_templates WHERE uid = :uid LIMIT $pagination OFFSET $offset ");
+        $stmt = $conn->prepare( "SELECT id FROM qa_model_templates WHERE deleted_at IS NULL AND uid = :uid LIMIT $pagination OFFSET $offset ");
         $stmt->execute([
             'uid' => $uid
         ]);
@@ -262,7 +272,7 @@ class QAModelTemplateDao extends DataAccess_AbstractDao
     public static function get(array $meta = [])
     {
         $conn = \Database::obtain()->getConnection();
-        $query = "SELECT * FROM qa_model_templates WHERE 1=1 ";
+        $query = "SELECT * FROM qa_model_templates WHERE deleted_at IS NULL ";
         $params = [];
 
         if(isset($meta['id']) and '' !== $meta['id'] ){
