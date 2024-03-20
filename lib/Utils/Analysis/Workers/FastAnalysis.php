@@ -573,7 +573,7 @@ class FastAnalysis extends AbstractDaemon {
 
         //_TimeStampMsg( "Done." );
 
-        $data2 = [ 'eanalysis_wc' => $total_eq_wc ];
+        $data2 = [ 'fast_analysis_wc' => $total_eq_wc ];
         $where = [ "id" => $pid ];
 
 
