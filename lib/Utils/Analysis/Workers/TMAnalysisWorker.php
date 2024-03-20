@@ -493,11 +493,7 @@ class TMAnalysisWorker extends AbstractWorker {
 
         // if Fast match type > TM match type, return it
         // otherwise return the TM match type
-        if(
-            $fast_exact_match_type === '75%-84%' or
-            $fast_exact_match_type === '85%-94%' or
-            $fast_exact_match_type === '95%-99%'
-        ){
+        if( $fast_match_type === 'INTERNAL' ){
             $ind_fast = intval( $fast_exact_match_type );
 
             if($ind_fast > $ind){
