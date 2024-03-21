@@ -27,6 +27,7 @@ import SegmentUtils from '../utils/segmentUtils'
 import {getTmKeysJob} from '../api/getTmKeysJob'
 import {getSupportedLanguages} from '../api/getSupportedLanguages'
 import ApplicationStore from '../stores/ApplicationStore'
+import {useGoogleLoginNotification} from '../hooks/useGoogleLoginNotification'
 
 const urlParams = new URLSearchParams(window.location.search)
 const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
@@ -55,6 +56,9 @@ function CatTool() {
     Boolean(config.get_public_matches),
   )
   const [supportedLanguages, setSupportedLanguages] = useState([])
+
+  // TODO: Remove temp notification warning login google (search in files this todo)
+  useGoogleLoginNotification()
 
   const startSegmentIdRef = useRef(UI.startSegmentId)
   const callbackAfterSegmentsResponseRef = useRef()
@@ -155,8 +159,8 @@ function CatTool() {
         where === 'after'
           ? SegmentStore.getLastSegmentId()
           : where === 'before'
-          ? SegmentStore.getFirstSegmentId()
-          : ''
+            ? SegmentStore.getFirstSegmentId()
+            : ''
 
       setOptions((prevState) => ({...prevState, segmentId, where}))
     }
@@ -333,8 +337,8 @@ function CatTool() {
               ? options?.where === 'before'
                 ? 'loadingBefore'
                 : options?.where === 'after'
-                ? 'loadingAfter'
-                : 'loading'
+                  ? 'loadingAfter'
+                  : 'loading'
               : ''
           }
         >

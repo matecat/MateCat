@@ -25,7 +25,7 @@ export const uploadTm = async ({
     name: keyName,
     r: '1',
     w: '1',
-    ...(APP.isCattool && {job_id: idJob, job_pass: password}),
+    ...(config.is_cattool && {job_id: idJob, job_pass: password}),
   }
   const formData = new FormData()
 

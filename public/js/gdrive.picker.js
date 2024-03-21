@@ -3,7 +3,7 @@ import {getUserConnectedService} from './cat_source/es6/api/getUserConnectedServ
 var GDrive = function () {
   'use strict'
 
-  var scope = ['https://www.googleapis.com/auth/drive.readonly']
+  var scope = ['https://www.googleapis.com/auth/drive.file']
 
   this.pickerApiLoaded = false
   this.authApiLoaded = false

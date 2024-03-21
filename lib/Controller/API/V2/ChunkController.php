@@ -11,8 +11,13 @@ namespace API\V2;
 use API\V2\Json\Chunk;
 use API\V2\Validators\ChunkPasswordValidator;
 use API\V2\Validators\LoginValidator;
+use API\V2\Validators\ProjectAccessValidator;
 use Chunks_ChunkStruct;
+use Constants_JobStatus;
+use Exception;
+use Exceptions\NotFoundException;
 use Jobs_JobDao;
+use Projects_ProjectStruct;
 use Translations_SegmentTranslationDao;
 use Utils;
 
@@ -22,6 +27,18 @@ class ChunkController extends BaseChunkController {
      * @var Chunks_ChunkStruct
      */
     protected $chunk;
+
+    /**
+     * @var Projects_ProjectStruct
+     */
+    private $project;
+
+    /**
+     * @return Projects_ProjectStruct
+     */
+    public function getProject() {
+        return $this->project;
+    }
 
     /**
      * @param Chunks_ChunkStruct $chunk
@@ -35,8 +52,8 @@ class ChunkController extends BaseChunkController {
     }
 
     /**
-     * @throws \Exception
-     * @throws \Exceptions\NotFoundException
+     * @throws Exception
+     * @throws NotFoundException
      */
     public function show() {
 
@@ -46,32 +63,32 @@ class ChunkController extends BaseChunkController {
 
         $this->return404IfTheJobWasDeleted();
 
-        $this->response->json( $format->renderOne($this->chunk) );
+        $this->response->json( $format->renderOne( $this->chunk ) );
 
     }
 
     public function delete() {
         $this->return404IfTheJobWasDeleted();
 
-        return $this->changeStatus( \Constants_JobStatus::STATUS_DELETED );
+        $this->changeStatus( Constants_JobStatus::STATUS_DELETED );
     }
 
     public function cancel() {
         $this->return404IfTheJobWasDeleted();
 
-        return $this->changeStatus( \Constants_JobStatus::STATUS_CANCELLED );
+        $this->changeStatus( Constants_JobStatus::STATUS_CANCELLED );
     }
 
     public function archive() {
         $this->return404IfTheJobWasDeleted();
 
-        return $this->changeStatus( \Constants_JobStatus::STATUS_ARCHIVED );
+        $this->changeStatus( Constants_JobStatus::STATUS_ARCHIVED );
     }
 
     public function active() {
         $this->return404IfTheJobWasDeleted();
 
-        return $this->changeStatus( \Constants_JobStatus::STATUS_ACTIVE );
+        $this->changeStatus( Constants_JobStatus::STATUS_ACTIVE );
     }
 
     protected function changeStatus( $status ) {
@@ -83,11 +100,20 @@ class ChunkController extends BaseChunkController {
 
     }
 
+    /**
+     * Perform actions after constructing an instance of the class.
+     * This method sets up the necessary validators and performs further actions.
+     *
+     * @throws Exception If an error occurs during the validation process.
+     * @throws NotFoundException If the chunk or project could not be found.
+     */
     protected function afterConstruct() {
-        $Validator = new ChunkPasswordValidator( $this ) ;
-        $Controller = $this;
-        $Validator->onSuccess( function () use ( $Validator, $Controller ) {
-            $Controller->setChunk( $Validator->getChunk() );
+        $Validator = new ChunkPasswordValidator( $this );
+        $Validator->onSuccess( function () use ( $Validator ) {
+            $this->chunk   = $Validator->getChunk();
+            $this->project = $Validator->getChunk()->getProject( 60 * 10 );
+        } )->onSuccess( function () {
+            ( new ProjectAccessValidator( $this, $this->project ) )->validate();
         } );
         $this->appendValidator( $Validator );
         $this->appendValidator( new LoginValidator( $this ) );

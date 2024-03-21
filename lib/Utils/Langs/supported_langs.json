@@ -3591,17 +3591,6 @@
         {
             "localized": [
                 {
-                    "en": "Western Persian"
-                }
-            ],
-            "isocode": "pes",
-            "enabled": true,
-            "rtl": true,
-            "rfc3066code": "pes-IR"
-        },
-        {
-            "localized": [
-                {
                     "en": "Wolof"
                 }
             ],

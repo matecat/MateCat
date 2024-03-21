@@ -24,17 +24,11 @@ import CatToolConstants from '../../constants/CatToolConstants'
 import CatToolStore from '../../stores/CatToolStore'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
 import CommentsStore from '../../stores/CommentsStore'
+import {SEGMENTS_STATUS} from '../../constants/Constants'
 
 class Segment extends React.Component {
   constructor(props) {
     super(props)
-    this.segmentStatus = {
-      approved: 'APPROVED',
-      translated: 'TRANSLATED',
-      draft: 'DRAFT',
-      new: 'NEW',
-      rejected: 'REJECTED',
-    }
 
     this.createSegmentClasses = this.createSegmentClasses.bind(this)
     this.hightlightEditarea = this.hightlightEditarea.bind(this)
@@ -52,7 +46,7 @@ class Segment extends React.Component {
 
     let readonly = UI.isReadonlySegment(this.props.segment)
     this.secondPassLocked =
-      this.props.segment.status.toUpperCase() === this.segmentStatus.approved &&
+      this.props.segment.status.toUpperCase() === SEGMENTS_STATUS.APPROVED &&
       this.props.segment.revision_number === 2 &&
       config.revisionNumber !== 2
     this.state = {
@@ -255,7 +249,7 @@ class Segment extends React.Component {
       classes.push('muted')
     }
     if (
-      this.props.segment.status.toUpperCase() === this.segmentStatus.approved &&
+      this.props.segment.status.toUpperCase() === SEGMENTS_STATUS.APPROVED &&
       this.props.segment.revision_number
     ) {
       classes.push('approved-step-' + this.props.segment.revision_number)
