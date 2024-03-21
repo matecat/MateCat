@@ -30,7 +30,7 @@ class Team {
         ];
 
         $members = $team->getMembers();
-        $invitations = ( new PendingInvitations( ( new \RedisHandler() )->getConnection(), [] ) )->get( (int)$team->id );
+        $invitations = ( new PendingInvitations( ( new \RedisHandler() )->getConnection(), [] ) )->hasPengingInvitation( (int)$team->id );
 
         if ( !empty( $members ) ) {
             $memberShipFormatter = new Membership( $members );

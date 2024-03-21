@@ -30,10 +30,11 @@ class SegmentCommentsContainer extends React.Component {
     this.setFocusOnInput = this.setFocusOnInput.bind(this)
     this.setTeamUsers = this.setTeamUsers.bind(this)
     this.saveDraft = debounce(() => {
-      CommentsActions.saveDraftComment(
-        this.context.segment.original_sid,
-        this.commentInput.textContent,
-      )
+      this.commentInput &&
+        CommentsActions.saveDraftComment(
+          this.context.segment.original_sid,
+          this.commentInput.textContent,
+        )
     }, 500)
   }
 

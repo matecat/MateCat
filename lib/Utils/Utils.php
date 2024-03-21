@@ -868,17 +868,27 @@ class Utils {
 
     /**
      * Examples:
+     *
      * it-IT  ---> it
      * es-419 ---> es
+     * to-TO ----> ton
      *
      * @param $rfc3066code
      * @return string|null
      */
     public static function convertLanguageToIsoCode($rfc3066code)
     {
-        $shortedLanguage = explode('-', $rfc3066code);
+        $file = \INIT::$UTILS_ROOT . '/Langs/supported_langs.json';
+        $string = file_get_contents( $file );
+        $langs = json_decode( $string, true );
 
-        return $shortedLanguage[0];
+        foreach ($langs['langs'] as $lang){
+            if($rfc3066code === $lang['rfc3066code']){
+                return $lang['isocode'];
+            }
+        }
+
+        return null;
     }
 
     /**

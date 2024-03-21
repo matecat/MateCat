@@ -18,7 +18,6 @@ import {getTmKeysUser} from '../api/getTmKeysUser'
 import {getMTEngines as getMtEnginesApi} from '../api/getMTEngines'
 import {
   DEFAULT_ENGINE_MEMORY,
-  MMT_NAME,
   SETTINGS_PANEL_TABS,
   SettingsPanel,
 } from '../components/settingsPanel'
@@ -28,6 +27,7 @@ import {getTmKeysJob} from '../api/getTmKeysJob'
 import {getSupportedLanguages} from '../api/getSupportedLanguages'
 import ApplicationStore from '../stores/ApplicationStore'
 import useProjectTemplates from '../hooks/useProjectTemplates'
+import {useGoogleLoginNotification} from '../hooks/useGoogleLoginNotification'
 
 const urlParams = new URLSearchParams(window.location.search)
 const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
@@ -43,6 +43,9 @@ function CatTool() {
   const [mtEngines, setMtEngines] = useState([DEFAULT_ENGINE_MEMORY])
 
   const [supportedLanguages, setSupportedLanguages] = useState([])
+
+  // TODO: Remove temp notification warning login google (search in files this todo)
+  useGoogleLoginNotification()
 
   const startSegmentIdRef = useRef(UI.startSegmentId)
   const callbackAfterSegmentsResponseRef = useRef()

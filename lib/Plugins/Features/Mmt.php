@@ -109,7 +109,11 @@ class Mmt extends BaseFeature {
         }
 
         /** @var Engines_MMT $newTestCreatedMT */
-        $newTestCreatedMT = Engine::getInstance( $newCreatedDbRowStruct->id );
+        try {
+            $newTestCreatedMT = Engine::getInstance( $newCreatedDbRowStruct->id );
+        } catch (Exception $exception){
+            throw new Exception("MMT license not valid");
+        }
 
         // Check account
         try {

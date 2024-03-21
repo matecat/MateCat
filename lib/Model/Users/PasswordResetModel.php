@@ -11,6 +11,7 @@ namespace Users;
 use Exception;
 use Exceptions\ValidationError;
 use Users_UserDao;
+use Users_UserStruct;
 use Utils;
 
 
@@ -32,6 +33,13 @@ class PasswordResetModel {
     }
 
 
+    /**
+     * Retrieves the user associated with the reset token.
+     *
+     * @return Users_UserStruct The user associated with the reset token, or null if not found.
+     * @throws Exception If an error occurs while retrieving the user.
+     *
+     */
     protected function getUserFromResetToken() {
         if ( !isset( $this->user ) ) {
             $dao        = new Users_UserDao();
@@ -42,7 +50,10 @@ class PasswordResetModel {
     }
 
     /**
-     * @throws ValidationError
+     * Validates the user based on the reset token
+     *
+     * @throws ValidationError if confirmation token not found or auth token expired
+     * @throws Exception if an error occurs
      */
     public function validateUser() {
 
