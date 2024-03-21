@@ -234,36 +234,38 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
       updateRowsState(rows.map(({id, name}) => ({id, name, isActive: true})))
     }
 
-    getMMTKeys({engineId: id}).then((data) => {
-      const items = [...data].reverse()
-      if (!wasCleanup) {
-        if (!isCattoolPage) {
-          updateRowsState(
-            items.map(({name, id: idRow}) => {
-              const isActive = Array.isArray(glossaries)
-                ? glossaries.some((value) => value === idRow)
-                : false
+    if (config.ownerIsMe) {
+      getMMTKeys({engineId: id}).then((data) => {
+        const items = [...data].reverse()
+        if (!wasCleanup) {
+          if (!isCattoolPage) {
+            updateRowsState(
+              items.map(({name, id: idRow}) => {
+                const isActive = Array.isArray(glossaries)
+                  ? glossaries.some((value) => value === idRow)
+                  : false
 
-              return {
-                id: idRow,
-                name,
-                isActive,
-              }
-            }),
-          )
-        } else {
-          memories = items
-          CatToolStore.addListener(
-            CatToolConstants.GET_JOB_METADATA,
-            getJobMetadata,
-          )
-          CatToolActions.getJobMetadata({
-            idJob: config.id_job,
-            password: config.password,
-          })
+                return {
+                  id: idRow,
+                  name,
+                  isActive,
+                }
+              }),
+            )
+          } else {
+            memories = items
+            CatToolStore.addListener(
+              CatToolConstants.GET_JOB_METADATA,
+              getJobMetadata,
+            )
+            CatToolActions.getJobMetadata({
+              idJob: config.id_job,
+              password: config.password,
+            })
+          }
         }
-      }
-    })
+      })
+    }
 
     return () => {
       wasCleanup = true
@@ -359,16 +361,19 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
 
   return (
     <div className="mt-glossary">
-      <div className="expand-button">
-        <button
-          className={`${isShowingRows ? 'rotate' : ''}`}
-          onClick={onShowingRows}
-          title="Glossary options"
-        >
-          <ArrowDown />
-          Glossary options
-        </button>
-      </div>
+      {rows?.length > 0 && (
+        <div className="expand-button">
+          <button
+            className={`${isShowingRows ? 'rotate' : ''}`}
+            onClick={onShowingRows}
+            title="Glossary options"
+          >
+            <ArrowDown />
+            Glossary options
+          </button>
+        </div>
+      )}
+
       {isShowingRows && (
         <>
           {haveRecords && (

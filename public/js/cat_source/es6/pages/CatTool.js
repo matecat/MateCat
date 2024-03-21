@@ -96,24 +96,28 @@ function CatTool() {
   }
 
   const getMTEngines = () => {
-    if (config.isLoggedIn) {
-      getMtEnginesApi().then((mtEngines) => {
-        mtEngines.push(DEFAULT_ENGINE_MEMORY)
-        setMtEngines(mtEngines)
-
-        if (config.active_engine && config.active_engine.id) {
-          const activeMT = config.active_engine
-          if (activeMT) {
-            modifyingCurrentTemplate((prevTemplate) => ({
-              ...prevTemplate,
-              mt: {
-                ...prevTemplate.mt,
-                id: activeMT.id,
-              },
-            }))
-          }
+    const setMTCurrentFakeTemplate = () => {
+      if (config.active_engine && config.active_engine.id) {
+        const activeMT = config.active_engine
+        if (activeMT) {
+          modifyingCurrentTemplate((prevTemplate) => ({
+            ...prevTemplate,
+            mt: {
+              ...prevTemplate.mt,
+              id: activeMT.id,
+            },
+          }))
         }
+      }
+    }
+
+    if (config.isLoggedIn && config.ownerIsMe) {
+      getMtEnginesApi().then((mtEngines) => {
+        setMtEngines([DEFAULT_ENGINE_MEMORY, ...mtEngines])
+        setMTCurrentFakeTemplate()
       })
+    } else {
+      setMTCurrentFakeTemplate()
     }
   }
 
