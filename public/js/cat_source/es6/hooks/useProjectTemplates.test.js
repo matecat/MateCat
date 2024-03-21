@@ -90,10 +90,12 @@ test('Modifyng current template with wrong prop', async () => {
   })
 
   expect(() => {
-    modifyingCurrentTemplate((prevTemplate) => ({
-      ...prevTemplate,
-      customProp: false,
-    }))
+    act(() =>
+      modifyingCurrentTemplate((prevTemplate) => ({
+        ...prevTemplate,
+        customProp: false,
+      })),
+    )
   }).toThrow('Invalid prop customProp.')
 })
 

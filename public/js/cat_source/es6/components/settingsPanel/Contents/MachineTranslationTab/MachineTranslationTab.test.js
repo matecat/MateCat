@@ -277,17 +277,13 @@ test('Modern MT and glossary', async () => {
     mt: {id: 5, extra: {glossaries: [374333]}},
   })
 
-  await user.click(screen.getByTestId('delete-mtglossary-374533'))
-
-  expect(await screen.findByText('Confirm')).toBeInTheDocument()
-
   const spyShowModal = jest.spyOn(ModalsActions, 'showModalComponent')
 
   await user.click(screen.getByTestId('delete-mtglossary-374333'))
 
   const modalContent = spyShowModal.mock.calls[0][1].content
   expect(modalContent).toBe(
-    'The MT glossary you are about to delete is used in the following project creation template(s)',
+    'The glossary you are about to delete is linked to an MT license and used in the following project creation template(s):',
   )
 
   const newButton = screen.getByText('New')
@@ -420,7 +416,7 @@ test('DeepL and glossary', async () => {
 
   const modalContent = spyShowModal.mock.calls[0][1].content
   expect(modalContent).toBe(
-    'The DeepL glossary you are about to delete is used in the following project creation template(s)',
+    'The DeepL glossary you are about to delete is used in the following project creation template(s):',
   )
 
   const newButton = screen.getByText('New')

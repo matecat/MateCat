@@ -38,7 +38,6 @@ import {TemplateSelect} from '../components/settingsPanel/ProjectTemplate/Templa
 import {checkLexiqaIsEnabled} from '../components/settingsPanel/Contents/AdvancedOptionsTab/Lexiqa'
 import {checkGuessTagIsEnabled} from '../components/settingsPanel/Contents/AdvancedOptionsTab/GuessTag'
 import {getMMTKeys} from '../api/getMMTKeys/getMMTKeys'
-import {updateProjectTemplate} from '../api/updateProjectTemplate'
 
 const SELECT_HEIGHT = 324
 

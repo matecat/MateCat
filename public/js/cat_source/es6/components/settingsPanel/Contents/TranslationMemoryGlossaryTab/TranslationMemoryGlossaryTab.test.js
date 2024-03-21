@@ -505,6 +505,6 @@ test('Modal delete tmkeys used in other templates', async () => {
 
   const modalContent = spyShowModal.mock.calls[0][1].content
   expect(modalContent).toBe(
-    'The memory key you are about to delete is used in the following project creation template(s)',
+    'The memory key you are about to delete is used in the following project creation template(s):',
   )
 })
