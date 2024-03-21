@@ -228,7 +228,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
       deleteTmKey({key: row.key})
         .then(() => {
           setTmKeys((prevState) => prevState.filter(({key}) => key !== row.key))
-          if (APP.isCattool) {
+          if (config.is_cattool) {
             CatToolActions.onTMKeysChangeStatus()
           } else {
             const templatesInvolved = projectTemplates
