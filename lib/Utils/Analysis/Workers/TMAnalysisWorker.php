@@ -497,7 +497,7 @@ class TMAnalysisWorker extends AbstractWorker {
             $ind_fast = intval( $fast_exact_match_type );
 
             if($ind_fast > $ind){
-                return $tm_match_fuzzy_band;
+                return $fast_match_type;
             }
 
             return $tm_match_fuzzy_band;
