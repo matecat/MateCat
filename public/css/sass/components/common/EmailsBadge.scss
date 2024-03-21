@@ -1,0 +1,108 @@
+@import '../../commons/colors';
+
+.email-badge {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  width: 100%;
+
+  label {
+    cursor: pointer;
+  }
+}
+
+.email-badge-fakeInput {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 8px;
+  border-radius: 4px;
+  min-width: 0;
+  width: 100%;
+  min-height: 90px;
+  max-height: 320px;
+  padding: 12px;
+  outline: none;
+  background-color: $grey8;
+  cursor: text;
+  overflow-y: auto;
+}
+
+.email-badge-wrapper {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  width: auto;
+
+  input {
+    border: none;
+    width: 100%;
+    padding: 0;
+    outline: none;
+    background: transparent;
+    color: $white;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  span {
+    visibility: hidden;
+    height: 0;
+  }
+}
+
+.email-badge-placeholder {
+  position: absolute;
+  inset: 12px;
+  color: $grey9;
+}
+
+.email-badge-item {
+  display: inline-flex;
+  cursor: pointer;
+}
+
+.email-badge-error {
+  color: $redDefault;
+}
+
+.email-badge-tag {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 4px;
+  padding: 2px 4px;
+  cursor: default;
+
+  &.default {
+    background-color: $grey8;
+    color: $white;
+  }
+  &.selected {
+    background-color: $white;
+    color: $grey9;
+  }
+  &.invalid {
+    background-color: $redDefault;
+    color: $white;
+  }
+}
+
+.email-badge-tag-remove {
+  flex-shrink: 0;
+  margin: -2px -4px -2px 0 !important;
+
+  &:hover {
+    background-color: transparent !important;
+    color: $grey8 !important;
+  }
+
+  .selected & {
+    color: $grey9 !important;
+
+    &:hover {
+      color: $grey8 !important;
+    }
+  }
+}

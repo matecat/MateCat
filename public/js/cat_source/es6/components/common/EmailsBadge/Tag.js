@@ -20,7 +20,7 @@ export const Tag = ({
   }
 
   return (
-    <span className={`email-badge-tag email-badge-tag-${[status]}`}>
+    <span className={`email-badge-tag ${[status]}`}>
       {children}
       <div onClick={handleCLick}>
         <IconClose />

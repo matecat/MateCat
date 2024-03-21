@@ -485,10 +485,10 @@ class ModifyTeam extends React.Component {
                   onKeyUp={this.handleKeyPressUserInput.bind(this)}
                   ref={(inputNewUSer) => (this.inputNewUSer = inputNewUSer)}
                 >
-                  <input name="tags" type="hidden" />
+                  {/* <input name="tags" type="hidden" />
                   <div className="default text">
                     Add new people (separate email addresses with a comma)
-                  </div>
+                  </div> */}
                 </div>
                 {this.state.inputUserError ? (
                   <div className="validation-error">

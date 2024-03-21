@@ -164,7 +164,7 @@ export const EmailsBadge = ({name, onChange, value = [], error}) => {
     return (
       <span
         key={index}
-        className={styles.item}
+        className="email-badge-item"
         onClick={(e) => handleClickOnChip(e, index)}
       >
         <Tag
@@ -183,29 +183,28 @@ export const EmailsBadge = ({name, onChange, value = [], error}) => {
     )
   }
   return (
-    <div className={styles.container}>
+    <div className="email-badge">
       <label htmlFor={name}>Email addresses</label>
       <div
         ref={areaRef}
-        className={styles.fakeInput}
+        className="email-badge-fakeInput"
         onClick={setFocus}
         onKeyDown={handleAreaKeyDown}
         tabIndex="0"
         data-testid="email-area"
       >
         {emails.length === 0 && inputValue === '' ? (
-          <span className={styles.placeholder}>
+          <span className="email-badge-placeholder">
             john@email.com, federico@email.com, sara@email.com
           </span>
         ) : (
           emails.map(renderChip)
         )}
-        <span className={styles.wrapper}>
+        <span className="email-badge-wrapper">
           <input
             ref={inputRef}
             name={name}
             data-testid="email-input"
-            className={styles.input}
             value={inputValue}
             autoComplete="off"
             onPaste={handlePaste}
@@ -216,7 +215,7 @@ export const EmailsBadge = ({name, onChange, value = [], error}) => {
         </span>
       </div>
       {error && error.message && (
-        <span className={styles.error}>{error.message}</span>
+        <span className="email-badge-error">{error.message}</span>
       )}
     </div>
   )
