@@ -100,6 +100,19 @@ function CatTool() {
       getMtEnginesApi().then((mtEngines) => {
         mtEngines.push(DEFAULT_ENGINE_MEMORY)
         setMtEngines(mtEngines)
+
+        if (config.active_engine && config.active_engine.id) {
+          const activeMT = config.active_engine
+          if (activeMT) {
+            modifyingCurrentTemplate((prevTemplate) => ({
+              ...prevTemplate,
+              mt: {
+                ...prevTemplate.mt,
+                id: activeMT.id,
+              },
+            }))
+          }
+        }
       })
     }
   }
