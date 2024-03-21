@@ -34,6 +34,7 @@ import CatToolActions from '../../../../actions/CatToolActions'
 import {ConfirmDeleteResourceProjectTemplates} from '../../../modals/ConfirmDeleteResourceProjectTemplates'
 import CreateProjectActions from '../../../../actions/CreateProjectActions'
 import {deleteTmKey} from '../../../../api/deleteTmKey'
+import {SCHEMA_KEYS} from '../../../../hooks/useProjectTemplates'
 
 export const TMKeyRow = ({row, onExpandRow}) => {
   const {isImportTMXInProgress} = useContext(CreateProjectContext)
@@ -236,7 +237,9 @@ export const TMKeyRow = ({row, onExpandRow}) => {
               )
               .map((template) => ({
                 ...template,
-                tm: template.tm.filter(({key}) => key !== row.key),
+                [SCHEMA_KEYS.tm]: template.tm.filter(
+                  ({key}) => key !== row.key,
+                ),
               }))
 
             CreateProjectActions.updateProjectTemplates({
@@ -273,9 +276,9 @@ export const TMKeyRow = ({row, onExpandRow}) => {
   }
 
   const showConfirmDelete = () => {
-    const templatesInvolved = projectTemplates
-      .filter(({isSelected}) => !isSelected)
-      .filter((template) => template.tm.some(({key}) => key === row.key))
+    const templatesInvolved = projectTemplates.filter((template) =>
+      template.tm.some(({key}) => key === row.key),
+    )
 
     if (templatesInvolved.length) {
       ModalsActions.showModalComponent(

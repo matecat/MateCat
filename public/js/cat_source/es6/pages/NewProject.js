@@ -33,7 +33,7 @@ import {getSupportedFiles} from '../api/getSupportedFiles'
 import {getSupportedLanguages} from '../api/getSupportedLanguages'
 import ApplicationActions from '../actions/ApplicationActions'
 import useDeviceCompatibility from '../hooks/useDeviceCompatibility'
-import useProjectTemplates from '../hooks/useProjectTemplates'
+import useProjectTemplates, {SCHEMA_KEYS} from '../hooks/useProjectTemplates'
 import {TemplateSelect} from '../components/settingsPanel/ProjectTemplate/TemplateSelect'
 import {checkLexiqaIsEnabled} from '../components/settingsPanel/Contents/AdvancedOptionsTab/Lexiqa'
 import {checkGuessTagIsEnabled} from '../components/settingsPanel/Contents/AdvancedOptionsTab/GuessTag'
@@ -118,7 +118,7 @@ const NewProject = ({
               const projectTemplatesUpdated = projectTemplatesInvolved.map(
                 (template) => ({
                   ...template,
-                  mt: {
+                  [SCHEMA_KEYS.mt]: {
                     ...template.mt,
                     extra: {
                       ...template.mt.extra,
@@ -139,36 +139,6 @@ const NewProject = ({
                   )?.tm,
                 },
               })
-
-              // Promise.all(
-              //   projectTemplatesUpdated.map((template) => {
-              //     /* eslint-disable no-unused-vars */
-              //     const {
-              //       created_at,
-              //       id,
-              //       uid,
-              //       modified_at,
-              //       isTemporary,
-              //       isSelected,
-              //       ...modifiedTemplate
-              //     } = {
-              //       ...template,
-              //     }
-              //     /* eslint-enable no-unused-vars */
-
-              //     return updateProjectTemplate({
-              //       id: template.id,
-              //       template: modifiedTemplate,
-              //     })
-              //   }),
-              // ).then((templates) =>
-              //   setProjectTemplates((prevState) =>
-              //     prevState.map((templateItem) => ({
-              //       ...templateItem,
-              //       ...(templates.find(({id}) => id === templateItem.id) ?? {}),
-              //     })),
-              //   ),
-              // )
 
               ModalsActions.showModalComponent(
                 AlertModal,

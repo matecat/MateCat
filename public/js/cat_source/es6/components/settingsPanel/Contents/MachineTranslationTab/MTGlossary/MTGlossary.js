@@ -17,6 +17,7 @@ import {deleteMemoryGlossary} from '../../../../../api/deleteMemoryGlossary'
 import CreateProjectActions from '../../../../../actions/CreateProjectActions'
 import ModalsActions from '../../../../../actions/ModalsActions'
 import {ConfirmDeleteResourceProjectTemplates} from '../../../../modals/ConfirmDeleteResourceProjectTemplates'
+import {SCHEMA_KEYS} from '../../../../../hooks/useProjectTemplates'
 
 const COLUMNS_TABLE = [
   {name: 'Activate'},
@@ -101,7 +102,7 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
 
               return {
                 ...template,
-                mt: {
+                [SCHEMA_KEYS.mt]: {
                   ...mtObject,
                   extra: {
                     ...extra,
@@ -143,11 +144,9 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
 
   const showConfirmDelete = useRef()
   showConfirmDelete.current = (glossary) => {
-    const templatesInvolved = projectTemplates
-      .filter(({isSelected}) => !isSelected)
-      .filter((template) =>
-        template.mt?.extra?.glossaries?.some((value) => value === glossary.id),
-      )
+    const templatesInvolved = projectTemplates.filter((template) =>
+      template.mt?.extra?.glossaries?.some((value) => value === glossary.id),
+    )
 
     if (templatesInvolved.length) {
       ModalsActions.showModalComponent(

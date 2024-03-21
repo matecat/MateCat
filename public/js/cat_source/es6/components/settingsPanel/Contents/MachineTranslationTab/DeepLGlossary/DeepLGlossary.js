@@ -16,6 +16,7 @@ import {deleteDeepLGlossary} from '../../../../../api/deleteDeepLGlossary'
 import CreateProjectActions from '../../../../../actions/CreateProjectActions'
 import ModalsActions from '../../../../../actions/ModalsActions'
 import {ConfirmDeleteResourceProjectTemplates} from '../../../../modals/ConfirmDeleteResourceProjectTemplates'
+import {SCHEMA_KEYS} from '../../../../../hooks/useProjectTemplates'
 
 const COLUMNS_TABLE = [
   {name: 'Activate'},
@@ -57,7 +58,7 @@ export const DeepLGlossary = ({id, isCattoolPage = false}) => {
 
               return {
                 ...template,
-                mt: {
+                [SCHEMA_KEYS.mt]: {
                   ...mtObject,
                   extra: {
                     ...extra,
@@ -99,11 +100,9 @@ export const DeepLGlossary = ({id, isCattoolPage = false}) => {
 
   const showConfirmDelete = useRef()
   showConfirmDelete.current = (glossary) => {
-    const templatesInvolved = projectTemplates
-      .filter(({isSelected}) => !isSelected)
-      .filter(
-        (template) => template.mt?.extra?.deepl_id_glossary === glossary.id,
-      )
+    const templatesInvolved = projectTemplates.filter(
+      (template) => template.mt?.extra?.deepl_id_glossary === glossary.id,
+    )
 
     if (templatesInvolved.length) {
       ModalsActions.showModalComponent(

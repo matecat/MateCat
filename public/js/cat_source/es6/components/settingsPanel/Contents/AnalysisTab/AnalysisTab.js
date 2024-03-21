@@ -1,4 +1,4 @@
-import React, {createContext, useContext, useEffect, useRef} from 'react'
+import React, {useContext, useEffect, useRef} from 'react'
 import {getBillingModelTemplates} from '../../../../api/getBillingModelTemplates'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {createBillingModelTemplate} from '../../../../api/createBillingModelTemplate'
@@ -8,6 +8,7 @@ import {SubTemplates} from '../SubTemplates'
 import {InputPercentage} from './InputPercentage'
 import {LanguagesExceptions} from './LanguagesExceptions'
 import {BreakdownsTable} from './BreakdownsTable'
+import {SCHEMA_KEYS} from '../../../../hooks/useProjectTemplates'
 
 export const ANALYSIS_SCHEMA_KEYS = {
   id: 'id',
@@ -16,6 +17,7 @@ export const ANALYSIS_SCHEMA_KEYS = {
   breakdowns: 'breakdowns',
   createdAt: 'createdAt',
   modifiedAt: 'modifiedAt',
+  deletedAt: 'deletedAt',
   version: 'version',
 }
 export const ANALYSIS_BREAKDOWNS = {
@@ -136,7 +138,7 @@ export const AnalysisTab = () => {
     )
   }, [currentProjectTemplateBillingId, setTemplates])
 
-  // Modify current project template qa model template id when qf template id change
+  // Modify current project template billing model id when analysis template id change
   useEffect(() => {
     if (
       typeof currentTemplateId === 'number' &&
@@ -168,6 +170,7 @@ export const AnalysisTab = () => {
             modifyingCurrentTemplate,
             portalTarget,
             schema: ANALYSIS_SCHEMA_KEYS,
+            propConnectProjectTemplate: SCHEMA_KEYS.payableRateTemplateId,
             getFilteredSchemaCreateUpdate,
             createApi: createBillingModelTemplate,
             updateApi: updateBillingModelTemplate,

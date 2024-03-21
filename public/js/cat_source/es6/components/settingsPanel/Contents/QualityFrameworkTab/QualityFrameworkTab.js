@@ -7,6 +7,7 @@ import {createQualityFrameworkTemplate} from '../../../../api/createQualityFrame
 import {updateQualityFrameworkTemplate} from '../../../../api/updateQualityFrameworkTemplate/updateQualityFrameworkTemplate'
 import {deleteQualityFrameworkTemplate} from '../../../../api/deleteQualityFrameworkTemplate/deleteQualityFrameworkTemplate'
 import {CategoriesSeveritiesTable} from './CategoriesSeveritiesTable'
+import {SCHEMA_KEYS} from '../../../../hooks/useProjectTemplates'
 
 export const QF_SCHEMA_KEYS = {
   id: 'id',
@@ -15,6 +16,9 @@ export const QF_SCHEMA_KEYS = {
   version: 'version',
   categories: 'categories',
   passfail: 'passfail',
+  createdAt: 'createdAt',
+  deletedAt: 'deletedAt',
+  modifiedAt: 'modifiedAt',
 }
 
 const getFilteredSchemaCreateUpdate = (template) => {
@@ -109,6 +113,7 @@ export const QualityFrameworkTab = () => {
               modifyingCurrentTemplate,
               portalTarget,
               schema: QF_SCHEMA_KEYS,
+              propConnectProjectTemplate: SCHEMA_KEYS.qaModelTemplateId,
               getFilteredSchemaCreateUpdate,
               createApi: createQualityFrameworkTemplate,
               updateApi: updateQualityFrameworkTemplate,

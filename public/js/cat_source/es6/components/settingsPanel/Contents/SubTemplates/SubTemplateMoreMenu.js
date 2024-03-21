@@ -10,8 +10,19 @@ import {MenuButtonItem} from '../../../common/MenuButton/MenuButtonItem'
 import IconEdit from '../../../icons/IconEdit'
 import Trash from '../../../../../../../img/icons/Trash'
 import DotsHorizontal from '../../../../../../../img/icons/DotsHorizontal'
+import ModalsActions from '../../../../actions/ModalsActions'
+import {ConfirmDeleteResourceProjectTemplates} from '../../../modals/ConfirmDeleteResourceProjectTemplates'
+import {SettingsPanelContext} from '../../SettingsPanelContext'
+import {flushSync} from 'react-dom'
+import {SCHEMA_KEYS} from '../../../../hooks/useProjectTemplates'
 
 export const SubTemplateMoreMenu = ({portalTarget}) => {
+  const {
+    projectTemplates,
+    setProjectTemplates,
+    modifyingCurrentTemplate: modifyingCurrentProjectTemplate,
+  } = useContext(SettingsPanelContext)
+
   const {
     setTemplates,
     currentTemplate,
@@ -19,13 +30,36 @@ export const SubTemplateMoreMenu = ({portalTarget}) => {
     setIsRequestInProgress,
     setTemplateModifier,
     setTemplateName,
+    propConnectProjectTemplate,
     deleteApi,
   } = useContext(SubTemplatesContext)
+
+  const deleteTemplateConfirmation = () => {
+    const templatesInvolved = projectTemplates.filter(
+      (template) =>
+        !template.isTemporary &&
+        template[propConnectProjectTemplate] === currentTemplate.id,
+    )
+
+    if (templatesInvolved.length) {
+      ModalsActions.showModalComponent(
+        ConfirmDeleteResourceProjectTemplates,
+        {
+          projectTemplatesInvolved: templatesInvolved,
+          successCallback: deleteTemplate,
+          content: `The ${propConnectProjectTemplate === SCHEMA_KEYS.qaModelTemplateId ? 'quality framework' : 'analysis'} template you are about to delete is used in the following project creation template(s):`,
+        },
+        'Confirm deletion',
+      )
+    } else {
+      deleteTemplate()
+    }
+  }
 
   const deleteTemplate = () => {
     setIsRequestInProgress(true)
     deleteApi(currentTemplate.id)
-      .then(({id}) =>
+      .then(({id}) => {
         setTemplates((prevState) =>
           prevState
             .filter((template) => template.id !== id)
@@ -33,10 +67,46 @@ export const SubTemplateMoreMenu = ({portalTarget}) => {
               ...template,
               isSelected: isStandardSubTemplate(template),
             })),
-        ),
-      )
+        )
+
+        cleanProjectTemplateAfterDelete(id)
+      })
       .catch((error) => console.log(error))
       .finally(() => setIsRequestInProgress(false))
+  }
+
+  const cleanProjectTemplateAfterDelete = (id) => {
+    if (
+      id !==
+      projectTemplates.find(({isSelected}) => isSelected).qaModelTemplateId
+    )
+      return
+
+    const projectTemplatesUpdated = projectTemplates
+      .filter(({qaModelTemplateId}) => qaModelTemplateId === id)
+      .map((template) => ({...template, [propConnectProjectTemplate]: 0}))
+
+    if (projectTemplatesUpdated.length) {
+      flushSync(() =>
+        setProjectTemplates((prevState) =>
+          prevState.map((template) => {
+            const update = projectTemplatesUpdated.find(
+              ({id} = {}) => id === template.id && !template.isTemporary,
+            )
+            return {...template, ...(update && {...update})}
+          }),
+        ),
+      )
+
+      const currentOriginalTemplate = projectTemplatesUpdated.find(
+        ({isSelected, isTemporary}) => isSelected && !isTemporary,
+      )
+
+      modifyingCurrentProjectTemplate((prevTemplate) => ({
+        ...prevTemplate,
+        ...currentOriginalTemplate,
+      }))
+    }
   }
 
   return (
@@ -62,7 +132,7 @@ export const SubTemplateMoreMenu = ({portalTarget}) => {
         data-testid="delete-template"
         className="settings-panel-templates-button-more"
         disabled={isRequestInProgress}
-        onMouseUp={deleteTemplate}
+        onMouseUp={deleteTemplateConfirmation}
       >
         <Trash size={16} />
         Delete

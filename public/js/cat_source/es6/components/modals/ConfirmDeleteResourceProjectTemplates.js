@@ -14,11 +14,14 @@ export const ConfirmDeleteResourceProjectTemplates = ({
     text: (
       <div className="confirm-delete-resource-project-templates">
         {content}
-        <ul>
-          {projectTemplatesInvolved.map(({name}, index) => (
-            <li key={index}>{name}</li>
-          ))}
-        </ul>
+        {projectTemplatesInvolved.length > 0 && (
+          <ul>
+            {projectTemplatesInvolved.map(({name}, index) => (
+              <li key={index}>{name}</li>
+            ))}
+          </ul>
+        )}
+
         {typeof footerContent === 'string'
           ? footerContent
           : 'If you confirm, it will be removed from the template(s).'}

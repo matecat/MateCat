@@ -26,6 +26,7 @@ import CatToolActions from '../../../../actions/CatToolActions'
 import {DeleteResource} from './DeleteResource'
 import ModalsActions from '../../../../actions/ModalsActions'
 import {ConfirmDeleteResourceProjectTemplates} from '../../../modals/ConfirmDeleteResourceProjectTemplates'
+import {SCHEMA_KEYS} from '../../../../hooks/useProjectTemplates'
 
 export const MachineTranslationTab = () => {
   const {
@@ -149,7 +150,7 @@ export const MachineTranslationTab = () => {
           .filter((template) => template.mt.id === deleteId)
           .map((template) => ({
             ...template,
-            mt: {},
+            [SCHEMA_KEYS.mt]: {},
           }))
 
         CreateProjectActions.updateProjectTemplates({
@@ -180,9 +181,9 @@ export const MachineTranslationTab = () => {
 
   const showConfirmDelete = useRef()
   showConfirmDelete.current = (id) => {
-    const templatesInvolved = projectTemplates
-      .filter(({isSelected}) => !isSelected)
-      .filter((template) => template.mt.id === id)
+    const templatesInvolved = projectTemplates.filter(
+      (template) => template.mt.id === id,
+    )
 
     if (templatesInvolved.length) {
       ModalsActions.showModalComponent(
