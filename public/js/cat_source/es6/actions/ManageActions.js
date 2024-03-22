@@ -1,7 +1,7 @@
 import AppDispatcher from '../stores/AppDispatcher'
 import ManageConstants from '../constants/ManageConstants'
-import TeamConstants from '../constants/TeamConstants'
-import TeamsStore from '../stores/TeamsStore'
+import TeamConstants from '../constants/UserConstants'
+import UserStore from '../stores/UserStore'
 import {changeProjectName} from '../api/changeProjectName'
 import {changeProjectAssignee} from '../api/changeProjectAssignee'
 import {changeProjectTeam} from '../api/changeProjectTeam'
@@ -227,11 +227,11 @@ let ManageActions = {
   changeProjectTeam: function (teamId, project) {
     changeProjectTeam(teamId, project.toJS())
       .then(() => {
-        var team = TeamsStore.teams.find(function (team) {
+        var team = UserStore.teams.find(function (team) {
           return team.get('id') == teamId
         })
         team = team.toJS()
-        const selectedTeam = TeamsStore.getSelectedTeam()
+        const selectedTeam = UserStore.getSelectedTeam()
         if (selectedTeam.type == 'personal' && team.type !== 'personal') {
           getTeamMembers(teamId).then(function (data) {
             team.members = data.members
@@ -455,7 +455,7 @@ let ManageActions = {
     var userId = user.get('uid')
     removeTeamUser(team.toJS(), userId).then(function (data) {
       if (userId === APP.USER.STORE.user.uid) {
-        const selectedTeam = TeamsStore.getSelectedTeam()
+        const selectedTeam = UserStore.getSelectedTeam()
 
         if (selectedTeam.id === team.get('id')) {
           getUserData().then(function (data) {

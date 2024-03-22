@@ -207,7 +207,6 @@ $(document).ready(function () {
     const rootNewProjectPage = createRoot(newProjectPage)
     rootNewProjectPage.render(
       <NewProject
-        isLoggedIn={!!config.isLoggedIn}
         sourceLanguageSelected={currentSourceLangs}
         targetLanguagesSelected={currentTargetLangs}
         subjectsArray={config.subject_array.map((item) => {

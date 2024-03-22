@@ -13,8 +13,8 @@ import {CommentsButton} from './CommentsButton'
 import {SegmentsFilterButton} from './SegmentsFilterButton'
 import {SettingsButton} from './SettingsButton'
 import {ActionMenu} from '../ActionMenu'
-import TeamsStore from '../../../stores/TeamsStore'
-import TeamConstants from '../../../constants/TeamConstants'
+import UserStore from '../../../stores/UserStore'
+import TeamConstants from '../../../constants/UserConstants'
 import {UserMenu} from '../UserMenu'
 
 export const Header = ({
@@ -51,9 +51,9 @@ export const Header = ({
   useEffect(() => {
     const updateUser = (user) => setUser(user)
 
-    TeamsStore.addListener(TeamConstants.UPDATE_USER, updateUser)
+    UserStore.addListener(TeamConstants.UPDATE_USER, updateUser)
     return () => {
-      TeamsStore.removeListener(TeamConstants.UPDATE_USER, updateUser)
+      UserStore.removeListener(TeamConstants.UPDATE_USER, updateUser)
     }
   }, [])
   return (
