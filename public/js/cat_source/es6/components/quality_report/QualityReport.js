@@ -9,6 +9,12 @@ import QRConstants from '../../constants/QualityReportConstants'
 import Header from '../header/Header'
 import {getUserData} from '../../api/getUserData'
 import {CookieConsent} from '../common/CookieConsent'
+import {
+  GOOGLE_LOGIN_NOTIFICATION,
+  shouldShowNotificationGoogleLogin,
+} from '../../hooks/useGoogleLoginNotification'
+import CatToolActions from '../../actions/CatToolActions'
+import NotificationBox from '../notificationsComponent/NotificationBox'
 
 class QualityReport extends React.Component {
   constructor(props) {
@@ -27,6 +33,15 @@ class QualityReport extends React.Component {
     this.noMoreSegments = this.noMoreSegments.bind(this)
 
     QRActions.loadInitialAjaxData({id_segment: this.state.idSegment})
+
+    // TODO: Remove temp notification warning login google (search in files this todo)
+    const shouldShowNotification = shouldShowNotificationGoogleLogin()
+    if (shouldShowNotification) {
+      setTimeout(
+        () => CatToolActions.addNotification(GOOGLE_LOGIN_NOTIFICATION),
+        100,
+      )
+    }
   }
   getReviseUrlParameter() {
     let url = new URL(window.location.href)
@@ -249,6 +264,9 @@ class QualityReport extends React.Component {
               </div>
             )}
           </div>
+        </div>
+        <div className="notifications-wrapper">
+          <NotificationBox />
         </div>
       </div>
     )

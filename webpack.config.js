@@ -10,6 +10,8 @@ const https = require('https')
 const fs = require('fs')
 const ini = require('ini')
 
+const buildPath = './public/build/'
+
 const downloadFile = async (url, dest, cb) => {
   const file = fs.createWriteStream(dest)
   return new Promise((resolve, reject) => {
@@ -37,15 +39,18 @@ const matecatConfig = async ({env}, {mode}) => {
   const lxqLicence = config[config.ENV]?.LXQ_LICENSE
   if (lxqLicence) {
     const lxqServer = config[config.ENV].LXQ_SERVER
-    if (!fs.existsSync('./public/build')) {
-      fs.mkdirSync('./public/build')
+    if (!fs.existsSync(buildPath)) {
+      fs.mkdirSync(buildPath)
     }
     await downloadFile(
       lxqServer + '/js/lxqlicense.js',
-      './public/build/lxqlicense.js',
+      buildPath + 'lxqlicense.js',
     )
   } else {
-    fs.closeSync(fs.openSync('./public/build/lxqlicense.js', 'w'))
+    if (!fs.existsSync(buildPath)) {
+      fs.mkdirSync(buildPath)
+    }
+    fs.closeSync(fs.openSync(buildPath + 'lxqlicense.js', 'w'))
   }
   let pluginsCattoolFiles = []
   let pluginsUploadFiles = []
