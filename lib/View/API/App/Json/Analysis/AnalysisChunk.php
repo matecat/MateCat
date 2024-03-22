@@ -27,7 +27,7 @@ class AnalysisChunk implements JsonSerializable {
     /**
      * @var AnalysisFile[]
      */
-    protected $files = null;
+    protected $files = [];
     /**
      * @var Jobs_JobStruct
      */

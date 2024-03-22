@@ -757,8 +757,8 @@ class CatUtils {
     public static function getQualityOverallFromJobStruct( Jobs_JobStruct $job,  array $chunkReviews = [] ) {
         $values = self::getChunkReviewStructFromJobStruct( $job, $chunkReviews );
 
-        if ( @$values->is_pass == null ) {
-            $result = $values->is_pass;
+        if ( !isset( $values ) ) {
+            $result = null;
         } elseif ( !empty( $values->is_pass ) ) {
             $result = 'excellent';
         } else {
@@ -777,8 +777,7 @@ class CatUtils {
      * @internal   param Projects_ProjectStruct $project
      */
     public static function getChunkReviewStructFromJobStruct( Jobs_JobStruct $job, array $chunkReviews = [] ) {
-        $result = ( $chunkReviews ) ? $chunkReviews[ 0 ] : ( new ChunkReviewDao() )->findChunkReviews( new Chunks_ChunkStruct( $job->toArray() ) )[ 0 ];
-        return $result;
+        return ( !empty( $chunkReviews ) ) ? $chunkReviews[ 0 ] : ( new ChunkReviewDao() )->findChunkReviews( new Chunks_ChunkStruct( $job->toArray() ) )[ 0 ];
     }
 
     /**
