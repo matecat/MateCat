@@ -115,7 +115,7 @@ export const Select = ({
       const wrapperTopPosition = wrapperNode.offsetTop
       const offsetParentElement = offsetParent
         ? offsetParent
-        : wrapperNode.offsetParent
+        : wrapperNode.offsetParent ?? document.body
       //console.log('Select offsetParent:', offsetParentElement);
       const parentHeight = offsetParentElement.getBoundingClientRect().height
       const parentScrollTop =
@@ -302,17 +302,17 @@ Select.propTypes = {
   options: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.string,
-      name: PropTypes.string,
+      name: PropTypes.node,
     }),
   ),
   activeOption: PropTypes.shape({
     id: PropTypes.string,
-    name: PropTypes.string,
+    name: PropTypes.node,
   }),
   activeOptions: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.string,
-      name: PropTypes.string,
+      name: PropTypes.node,
     }),
   ),
   isValid: PropTypes.bool,

@@ -94,6 +94,7 @@ export const SettingsPanelRow = forwardRef(
         onDragStart={onDragStartCallback}
         onDragOver={onDragOverCallback}
         onDragEnd={onDragEndCallback}
+        data-testid={`settings-panel-table-row-${row.id}`}
       >
         <>
           {isDraggable && (

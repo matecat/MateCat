@@ -42,4 +42,18 @@ class TeamStruct extends DataAccess_AbstractDaoSilentStruct implements DataAcces
         return $this->members ;
     }
 
+    /**
+     * @param $uid
+     * @return bool
+     */
+    public function hasUser($uid) {
+        foreach ($this->getMembers() as $member){
+            if($member->uid === $uid){
+                return true;
+            }
+        }
+
+        return false;
+    }
+
 }

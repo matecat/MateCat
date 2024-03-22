@@ -1,6 +1,5 @@
-import React, {useRef, useState, useContext, useEffect} from 'react'
+import React, {useRef, useState, useEffect} from 'react'
 import PropTypes from 'prop-types'
-import {TranslationMemoryGlossaryTabContext} from './TranslationMemoryGlossaryTab'
 import {shareTmKey} from '../../../../api/shareTmKey'
 import CommonUtils from '../../../../utils/commonUtils'
 
@@ -8,10 +7,9 @@ import Close from '../../../../../../../img/icons/Close'
 import {getInfoTmKey} from '../../../../api/getInfoTmKey'
 import ModalsActions from '../../../../actions/ModalsActions'
 import ShareTmModal from '../../../modals/ShareTmModal'
+import CatToolActions from '../../../../actions/CatToolActions'
 
 export const ShareResource = ({row, onClose}) => {
-  const {setNotification} = useContext(TranslationMemoryGlossaryTabContext)
-
   const [emails, setEmails] = useState('')
   const [status, setStatus] = useState()
   const [sharedUsers, setSharedUsers] = useState()
@@ -20,7 +18,6 @@ export const ShareResource = ({row, onClose}) => {
 
   const onChange = (e) => {
     setStatus(undefined)
-    setNotification({})
     if (e.currentTarget.value) setEmails(e.currentTarget.value)
   }
 
@@ -31,11 +28,13 @@ export const ShareResource = ({row, onClose}) => {
       const errorsObject = {
         message: `The email ${emails} is not valid.`,
       }
-
-      setNotification({
+      CatToolActions.addNotification({
+        title: 'Error sharing resource',
         type: 'error',
-        message: errorsObject.message,
-        rowKey: row.key,
+        text: errorsObject.message,
+        position: 'br',
+        allowHtml: true,
+        timer: 5000,
       })
       setStatus({errors: errorsObject})
     } else {
@@ -45,13 +44,15 @@ export const ShareResource = ({row, onClose}) => {
       })
         .then(() => {
           onClose()
-          setNotification({
+          CatToolActions.addNotification({
+            title: 'Resource shared',
             type: 'success',
-            message: `The resource <b>${row.key}</b> has been shared.`,
-            rowKey: row.key,
+            text: `The resource <b>${row.name}</b> has been shared.`,
+            position: 'br',
+            allowHtml: true,
+            timer: 5000,
           })
           setStatus({successfull: true})
-          setTimeout(() => setNotification({}), 3000)
         })
         .catch((errors) => {
           const errorsObject = errors?.[0]
@@ -60,11 +61,12 @@ export const ShareResource = ({row, onClose}) => {
                 message:
                   'There was a problem sharing the key, try again or contact the support.',
               }
-
-          setNotification({
+          CatToolActions.addNotification({
+            title: 'Error sharing resource',
             type: 'error',
-            message: errorsObject.message,
-            rowKey: row.key,
+            text: errorsObject.message,
+            position: 'br',
+            timer: 5000,
           })
           setStatus({errors: errorsObject})
         })
@@ -76,8 +78,6 @@ export const ShareResource = ({row, onClose}) => {
   const onReset = () => {
     setEmails(config.userMail)
     setStatus(undefined)
-    setNotification({})
-
     onClose()
   }
 

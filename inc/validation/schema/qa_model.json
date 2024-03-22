@@ -19,7 +19,7 @@
         },
         "categories": {
           "type": "array",
-          "maxItems": 9,
+          "maxItems": 50,
           "items": {
             "$ref": "#/definitions/category"
           }
@@ -47,7 +47,7 @@
         },
         "severities": {
           "type": "array",
-          "maxItems": 8,
+          "maxItems": 50,
           "items": {
             "$ref": "#/definitions/severity"
           }

@@ -4,6 +4,7 @@ namespace QAModelTemplate;
 
 use DataAccess_AbstractDaoSilentStruct;
 use DataAccess_IDaoStruct;
+use Date\DateTimeUtil;
 use LQA\QAModelInterface;
 
 class QAModelTemplateStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct, \JsonSerializable, QAModelInterface
@@ -12,6 +13,9 @@ class QAModelTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
     public $uid;
     public $label;
     public $version;
+    public $created_at;
+    public $modified_at;
+    public $deleted_at;
 
     /**
      * @var QAModelTemplatePassfailStruct
@@ -77,7 +81,6 @@ class QAModelTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
                 $severityModel->severity_label = $severity->label;
                 $severityModel->severity_code  = $severity->code;
                 $severityModel->penalty  = $severity->penalty;
-                $severityModel->dqf_id  = (isset($severity->dqf_id)) ? $severity->dqf_id : null;
 
                 $QAModelTemplateCategoryStruct->severities[$index2] = $severityModel;
             }
@@ -148,16 +151,20 @@ class QAModelTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
 
     /**
      * @return array|mixed
+     * @throws \Exception
      */
     public function jsonSerialize()
     {
         return [
-                'id' => (int)$this->id,
-                'uid' => (int)$this->uid,
-                'label' => $this->label,
-                'version' => (int)$this->version,
-                'categories' => $this->categories,
-                'passfail' => $this->passfail,
+            'id' => (int)$this->id,
+            'uid' => (int)$this->uid,
+            'label' => $this->label,
+            'version' => (int)$this->version,
+            'categories' => $this->categories,
+            'passfail' => $this->passfail,
+            'createdAt' => DateTimeUtil::formatIsoDate($this->created_at),
+            'modifiedAt' => DateTimeUtil::formatIsoDate($this->modified_at),
+            'deletedAt' => DateTimeUtil::formatIsoDate($this->deleted_at),
         ];
     }
 }

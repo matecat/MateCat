@@ -1,8 +1,8 @@
-import {useContext, useRef, useState, useEffect} from 'react'
+import {useRef, useState, useEffect} from 'react'
 import PropTypes from 'prop-types'
-import {TranslationMemoryGlossaryTabContext} from '../TranslationMemoryGlossaryTab'
 import {downloadTMX} from '../../../../../api/downloadTMX'
 import {downloadGlossary} from '../../../../../api/downloadGlossary'
+import CatToolActions from '../../../../../actions/CatToolActions'
 
 export const EXPORT_TYPE = {
   tmx: 'tmx',
@@ -10,8 +10,6 @@ export const EXPORT_TYPE = {
 }
 
 function useExport({type, row, onClose}) {
-  const {setNotification} = useContext(TranslationMemoryGlossaryTabContext)
-
   const [email, setEmail] = useState(config.userMail)
   const [status, setStatus] = useState()
 
@@ -23,7 +21,6 @@ function useExport({type, row, onClose}) {
 
   const onChange = (e) => {
     setStatus(undefined)
-    setNotification({})
     if (e.currentTarget.value) setEmail(e.currentTarget.value)
   }
 
@@ -38,11 +35,13 @@ function useExport({type, row, onClose}) {
         const errorsObject = errors?.[0]
           ? errors[0]
           : {message: 'We got an error, please contact support'}
-
-        setNotification({
+        CatToolActions.addNotification({
+          title: 'Error export',
           type: 'error',
-          message: errorsObject.message,
-          rowKey: row.key,
+          text: errorsObject.message,
+          position: 'br',
+          allowHtml: true,
+          timer: 5000,
         })
         setStatus({errors: errorsObject})
       })
@@ -53,7 +52,6 @@ function useExport({type, row, onClose}) {
   const onReset = () => {
     setEmail(config.userMail)
     setStatus(undefined)
-    setNotification({})
 
     onClose()
   }

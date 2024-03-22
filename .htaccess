@@ -119,6 +119,7 @@ SetEnvIfNoCase Origin "https?://.*?$" CORS=$0
 Header set Access-Control-Allow-Origin %{CORS}e env=CORS
 Header set Access-Control-Allow-Credentials "true"
 Header set Access-Control-Allow-Methods "POST,PUT,OPTIONS,DELETE"
+Header set Access-Control-Allow-Headers "Content-Type"
 Header append Vary User-Agent env=!dont-vary
 Header always append X-Frame-Options SAMEORIGIN
 Header always append X-Content-Type-Options nosniff

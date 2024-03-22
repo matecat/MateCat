@@ -18,7 +18,6 @@ import {getTmKeysUser} from '../api/getTmKeysUser'
 import {getMTEngines as getMtEnginesApi} from '../api/getMTEngines'
 import {
   DEFAULT_ENGINE_MEMORY,
-  MMT_NAME,
   SETTINGS_PANEL_TABS,
   SettingsPanel,
 } from '../components/settingsPanel'
@@ -27,6 +26,7 @@ import SegmentUtils from '../utils/segmentUtils'
 import {getTmKeysJob} from '../api/getTmKeysJob'
 import {getSupportedLanguages} from '../api/getSupportedLanguages'
 import ApplicationStore from '../stores/ApplicationStore'
+import useProjectTemplates from '../hooks/useProjectTemplates'
 import {useGoogleLoginNotification} from '../hooks/useGoogleLoginNotification'
 
 const urlParams = new URLSearchParams(window.location.search)
@@ -41,20 +41,7 @@ function CatTool() {
   })
   const [tmKeys, setTmKeys] = useState()
   const [mtEngines, setMtEngines] = useState([DEFAULT_ENGINE_MEMORY])
-  const [activeMTEngine, setActiveMTEngine] = useState()
-  const [guessTagActive, setGuessTagActive] = useState(
-    SegmentUtils.checkTPEnabled(),
-  )
-  const [lexiqaActive, setLexiqaActive] = useState(!!config.lxq_enabled)
-  const [speechToTextActive, setSpeechToTextActive] = useState(
-    Speech2TextFeature.enabled(),
-  )
-  const [multiMatchLangs, setMultiMatchLangs] = useState(
-    SegmentUtils.checkCrossLanguageSettings(),
-  )
-  const [getPublicMatches, setGetPublicMatches] = useState(
-    Boolean(config.get_public_matches),
-  )
+
   const [supportedLanguages, setSupportedLanguages] = useState([])
 
   // TODO: Remove temp notification warning login google (search in files this todo)
@@ -70,6 +57,9 @@ function CatTool() {
         : startSegmentIdRef.current,
       where: options?.where,
     })
+
+  const {projectTemplates, currentProjectTemplate, modifyingCurrentTemplate} =
+    useProjectTemplates(true)
 
   const closeSettings = useCallback(() => setOpenSettings({isOpen: false}), [])
   const openTmPanel = () =>
@@ -88,37 +78,61 @@ function CatTool() {
             !acc.some(({key}) => key === cur.key) ? [...acc, cur] : acc,
           [],
         )
-      setTmKeys(
-        uniqueKeys.map((key) => {
-          return {
-            ...key,
-            id: key.key,
-            isActive: Boolean(key.r || key.w),
-            isLocked: !key.owner,
-          }
-        }),
-      )
+      const updatedTmKeys = uniqueKeys.map((key) => {
+        return {
+          ...key,
+          id: key.key,
+          isActive: Boolean(key.r || key.w),
+          isLocked: !key.owner,
+        }
+      })
+      setTmKeys(updatedTmKeys)
+      modifyingCurrentTemplate((prevTemplate) => ({
+        ...prevTemplate,
+        tm: updatedTmKeys.filter(({isActive}) => isActive),
+        getPublicMatches: config.get_public_matches === 1,
+      }))
     })
   }
 
   const getMTEngines = () => {
-    if (config.isLoggedIn) {
+    const setMTCurrentFakeTemplate = () => {
+      if (config.active_engine && config.active_engine.id) {
+        const activeMT = config.active_engine
+        if (activeMT) {
+          modifyingCurrentTemplate((prevTemplate) => ({
+            ...prevTemplate,
+            mt: {
+              ...prevTemplate.mt,
+              id: activeMT.id,
+            },
+          }))
+        }
+      }
+    }
+
+    if (config.isLoggedIn && config.ownerIsMe) {
       getMtEnginesApi().then((mtEngines) => {
-        mtEngines.push(DEFAULT_ENGINE_MEMORY)
-        setMtEngines(mtEngines)
-        if (config.isAnInternalUser && config.active_engine.length > 0) {
-          const mmt = mtEngines.find((mt) => mt.name === MMT_NAME)
-          if (mmt) {
-            setActiveMTEngine(mmt)
-          }
-        }
-        if (config.active_engine && config.active_engine.id) {
-          const activeMT = config.active_engine
-          activeMT && setActiveMTEngine(activeMT)
-        }
+        setMtEngines([DEFAULT_ENGINE_MEMORY, ...mtEngines])
+        setMTCurrentFakeTemplate()
       })
+    } else {
+      setMTCurrentFakeTemplate()
     }
   }
+
+  // parse advanced settings options
+  useEffect(() => {
+    if (typeof currentProjectTemplate?.id === 'undefined') return
+
+    modifyingCurrentTemplate((prevTemplate) => ({
+      ...prevTemplate,
+      speech2text: Speech2TextFeature.enabled(),
+      tagProjection: SegmentUtils.checkTPEnabled(),
+      lexica: config.lxq_enabled === 1,
+      crossLanguageMatches: SegmentUtils.checkCrossLanguageSettings(),
+    }))
+  }, [currentProjectTemplate?.id, modifyingCurrentTemplate])
 
   // actions listener
   useEffect(() => {
@@ -304,6 +318,12 @@ function CatTool() {
     UI.registerFooterTabs()
   }, [wasInitSegments])
 
+  const {
+    tagProjection: guessTagActive,
+    speech2text: speechToTextActive,
+    crossLanguageMatches: multiMatchLangs,
+  } = currentProjectTemplate ?? {}
+
   return (
     <>
       <Header
@@ -369,16 +389,12 @@ function CatTool() {
         <SettingsPanel
           {...{
             onClose: closeSettings,
+            isOpened: openSettings.isOpen,
             tabOpen: openSettings.tab,
             tmKeys,
             setTmKeys,
             mtEngines,
             setMtEngines,
-            activeMTEngine,
-            setActiveMTEngine,
-            guessTagActive,
-            setGuessTagActive,
-            setSpeechToTextActive,
             sourceLang: {
               name: ApplicationStore.getLanguageNameFromLocale(
                 config.source_rfc,
@@ -393,12 +409,9 @@ function CatTool() {
                 code: config.target_rfc,
               },
             ],
-            lexiqaActive,
-            setLexiqaActive,
-            multiMatchLangs,
-            setMultiMatchLangs,
-            getPublicMatches,
-            setGetPublicMatches,
+            projectTemplates,
+            currentProjectTemplate,
+            modifyingCurrentTemplate,
           }}
         />
       )}

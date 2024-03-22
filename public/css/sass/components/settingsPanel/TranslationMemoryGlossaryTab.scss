@@ -36,7 +36,7 @@
   border: 1px dashed $grey8;
   padding: 10px;
   margin-bottom: 20px;
-  background: $grey9;
+  background: $white;
 }
 
 .translation-memory-glossary-tab-table-title {
@@ -45,6 +45,7 @@
   font-size: 24px;
   font-weight: bold;
   justify-content: space-between;
+  margin-bottom: 10px;
 
   > span:first-of-type {
     flex-grow: 1;
@@ -62,6 +63,33 @@
   .settings-panel-table-rowHeading,
   .settings-panel-row-content {
     grid-template-columns: 8% 5% minmax(0, 1fr) 20% 5% 22%;
+  }
+
+  .settings-panel-row {
+    border-top: unset;
+
+    .row-content-default-memory {
+      grid-template-columns: 8% 5% minmax(0, 1fr) 0 5% 22%;
+    }
+    .row-content-create-resource {
+      grid-template-columns: 100%;
+
+      > form {
+        padding: 0 !important;
+      }
+    }
+  }
+
+  .settings-panel-row-extra-content {
+    border: none;
+  }
+
+  .settings-panel-row-content {
+    background-color: $white;
+  }
+
+  .settings-panel-row-active {
+    background-color: $transparentBlue;
   }
 
   .settings-panel-table-rowHeading-column {
@@ -165,19 +193,6 @@
 
   &.error {
     border: solid 1px $redDefault;
-  }
-}
-
-.settings-panel-row {
-  .row-content-default-memory {
-    grid-template-columns: 8% 5% minmax(0, 1fr) 0 5% 22%;
-  }
-  .row-content-create-resource {
-    grid-template-columns: 100%;
-
-    > form {
-      padding: 0 !important;
-    }
   }
 }
 

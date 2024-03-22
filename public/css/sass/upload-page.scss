@@ -1601,6 +1601,9 @@ button.ui-button::-moz-focus-inner {
   margin: 44px 0 0 0;
   cursor: pointer;
 }
+.translate-box.settings-disabled {
+  opacity: 0.5;
+}
 
 .translate-box.qa-box {
   margin: 32px 0 0 !important;
@@ -1746,7 +1749,9 @@ h2.payoff {
 .uploadbtn:hover {
   background: $translatedBlueHover;
   color: #ffffff;
-  box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12),
+  box-shadow:
+    0 0 0 #e0e0e0,
+    0 0 2px rgba(0, 0, 0, 0.12),
     0 2px 4px rgba(0, 0, 0, 0.24) !important;
 }
 
@@ -1904,7 +1909,9 @@ h2.payoff {
 
 .fileinput-button:hover {
   background-color: $translatedBlueHover;
-  box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12),
+  box-shadow:
+    0 0 0 #e0e0e0,
+    0 0 2px rgba(0, 0, 0, 0.12),
     0 2px 4px rgba(0, 0, 0, 0.24) !important;
 }
 
@@ -2981,5 +2988,48 @@ a.pull-right.confirmDelete {
   color: #002b5a;
   div.buttons {
     padding-top: 20px;
+  }
+}
+
+.project-template-select {
+  .select-item-default {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: $black;
+    & > svg {
+      opacity: 1;
+    }
+  }
+  .select-item-default-active {
+    margin-right: 4px;
+  }
+
+  .dropdown__option {
+    > :first-child {
+      flex-grow: 1;
+      text-align: left;
+    }
+  }
+}
+
+.project-template-select-unsaved {
+  .select {
+    color: $translatedBlue !important;
+  }
+}
+
+.project-template-select-loading {
+  position: absolute;
+  z-index: 2;
+  width: 100%;
+  height: 36px;
+  top: 24px;
+  background-color: rgba(255, 255, 255, 0.9);
+
+  .project-template-select-loading-icon {
+    background: url(../../img/loading.gif) 47% 6px no-repeat !important;
+    background-size: 24px !important;
+    height: 100%;
   }
 }

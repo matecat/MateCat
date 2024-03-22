@@ -97,3 +97,13 @@ $klein->with( '/api/v3/deepl/[:engineId]', function () {
     route( '/glossaries/[:id]', 'GET', '\API\V3\DeepLGlossaryController', 'get' );
     route( '/glossaries/[:id]/entries', 'GET', '\API\V3\DeepLGlossaryController', 'getEntries' );
 } );
+
+// PROJECT TEMPLATE
+$klein->with( '/api/v3/project-template', function () {
+    route( '/schema', 'GET', '\API\V3\ProjectTemplateController', 'schema' );
+    route( '/', 'GET', '\API\V3\ProjectTemplateController', 'all' );
+    route( '/', 'POST', '\API\V3\ProjectTemplateController', 'create' );
+    route( '/[:id]', 'DELETE', '\API\V3\ProjectTemplateController', 'delete' );
+    route( '/[:id]', 'PUT', '\API\V3\ProjectTemplateController', 'update' );
+    route( '/[:id]', 'GET', '\API\V3\ProjectTemplateController', 'get' );
+} );

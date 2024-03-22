@@ -1,7 +1,7 @@
 import * as React from 'react'
 
-const IconClose = ({width = 12, height = 12}) => (
-  <svg width={width} height={height}>
+const IconClose = ({size = 12}) => (
+  <svg width={size} height={size} viewBox="0 0 12 12">
     <path
       d="M11 1L1 11M1 1L11 11"
       stroke="currentColor"
