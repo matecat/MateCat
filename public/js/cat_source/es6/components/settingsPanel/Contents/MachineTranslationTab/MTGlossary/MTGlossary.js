@@ -169,6 +169,7 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
           successCallback: () => deleteGlossary.current(glossary),
           content:
             'You are about to delete a resource linked to an MT license. If you confirm, it will be deleted permanently for you and any other user of the same license.',
+          footerContent: '',
         },
         'Confirm deletion',
       )
@@ -358,10 +359,12 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
     setIsGlossaryCaseSensitive(e.currentTarget.checked)
 
   const haveRecords = rows?.length > 0
+  const isVisibleGlossaryOptions =
+    !isCattoolPage || (isCattoolPage && haveRecords)
 
   return (
     <div className="mt-glossary">
-      {rows?.length > 0 && (
+      {isVisibleGlossaryOptions && (
         <div className="expand-button">
           <button
             className={`${isShowingRows ? 'rotate' : ''}`}

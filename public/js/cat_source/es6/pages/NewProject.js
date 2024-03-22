@@ -39,6 +39,7 @@ import {checkLexiqaIsEnabled} from '../components/settingsPanel/Contents/Advance
 import {checkGuessTagIsEnabled} from '../components/settingsPanel/Contents/AdvancedOptionsTab/GuessTag'
 import {getMMTKeys} from '../api/getMMTKeys/getMMTKeys'
 import {useGoogleLoginNotification} from '../hooks/useGoogleLoginNotification'
+import {AlertDeleteResourceProjectTemplates} from '../components/modals/AlertDeleteResourceProjectTemplates'
 
 const SELECT_HEIGHT = 324
 
@@ -119,18 +120,26 @@ const NewProject = ({
 
             if (projectTemplatesInvolved.length) {
               const projectTemplatesUpdated = projectTemplatesInvolved.map(
-                (template) => ({
-                  ...template,
-                  [SCHEMA_KEYS.mt]: {
-                    ...template.mt,
-                    extra: {
-                      ...template.mt.extra,
-                      glossaries: template.mt.extra.glossaries.filter(
-                        (glossaryId) => data.find(({id}) => id === glossaryId),
-                      ),
+                (template) => {
+                  const filteredGlossaries =
+                    template.mt.extra.glossaries.filter((glossaryId) =>
+                      data.find(({id}) => id === glossaryId),
+                    )
+                  const {glossaries, ...prevExtra} = template.mt.extra // eslint-disable-line
+
+                  return {
+                    ...template,
+                    [SCHEMA_KEYS.mt]: {
+                      ...template.mt,
+                      extra: {
+                        ...prevExtra,
+                        ...(filteredGlossaries.length && {
+                          glossaries: filteredGlossaries,
+                        }),
+                      },
                     },
-                  },
-                }),
+                  }
+                },
               )
 
               // Notify template to server without glossaries delete
@@ -144,9 +153,11 @@ const NewProject = ({
               })
 
               ModalsActions.showModalComponent(
-                AlertModal,
+                AlertDeleteResourceProjectTemplates,
                 {
-                  text: `One of the MT glossaries used in the template${projectTemplatesInvolved.length > 1 ? 's' : ''} ${projectTemplatesUpdated.map(({name}) => `"${name}"`).join(', ')} has been deleted by another user and removed from the template${projectTemplatesInvolved.length > 1 ? 's' : ''}.`,
+                  projectTemplatesInvolved,
+                  content:
+                    'A different user has deleted one or more of the MT glossaries used in the following project creation template(s):',
                 },
                 'MT glossary deletion',
               )
@@ -564,7 +575,6 @@ const NewProject = ({
 
   const isLoadingTemplates = !projectTemplates.length
 
-  // ---->
   checkMMTGlossariesWasCancelledIntoTemplates.current({
     engineId: mtEngines.find(({name}) => name === MMT_NAME)?.id,
     projectTemplates,
@@ -714,18 +724,22 @@ const NewProject = ({
         {warnings && (
           <div className="warning-message">
             <i className="icon-warning2 icon"> </i>
-            <p dangerouslySetInnerHTML={{
-              __html: warnings
-            }} />
+            <p
+              dangerouslySetInnerHTML={{
+                __html: warnings,
+              }}
+            />
           </div>
         )}
 
         {errors && (
           <div className="error-message">
             <i className="icon-error_outline icon"> </i>
-            <p dangerouslySetInnerHTML={{
-              __html: errors
-            }} />
+            <p
+              dangerouslySetInnerHTML={{
+                __html: errors,
+              }}
+            />
           </div>
         )}
 

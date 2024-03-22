@@ -70,29 +70,31 @@ function CatTool() {
       getTmKeysJob(),
       ...(config.isLoggedIn ? [getTmKeysUser()] : []),
     ]
-    Promise.all(promises).then((values) => {
-      const uniqueKeys = values
-        .flatMap((item) => [...item.tm_keys])
-        .reduce(
-          (acc, cur) =>
-            !acc.some(({key}) => key === cur.key) ? [...acc, cur] : acc,
-          [],
-        )
-      const updatedTmKeys = uniqueKeys.map((key) => {
-        return {
-          ...key,
-          id: key.key,
-          isActive: Boolean(key.r || key.w),
-          isLocked: !key.owner,
-        }
+    Promise.all(promises)
+      .then((values) => {
+        const uniqueKeys = values
+          .flatMap((item) => [...item.tm_keys])
+          .reduce(
+            (acc, cur) =>
+              !acc.some(({key}) => key === cur.key) ? [...acc, cur] : acc,
+            [],
+          )
+        const updatedTmKeys = uniqueKeys.map((key) => {
+          return {
+            ...key,
+            id: key.key,
+            isActive: Boolean(key.r || key.w),
+            isLocked: !key.owner,
+          }
+        })
+        setTmKeys(updatedTmKeys)
+        modifyingCurrentTemplate((prevTemplate) => ({
+          ...prevTemplate,
+          tm: updatedTmKeys.filter(({isActive}) => isActive),
+          getPublicMatches: config.get_public_matches === 1,
+        }))
       })
-      setTmKeys(updatedTmKeys)
-      modifyingCurrentTemplate((prevTemplate) => ({
-        ...prevTemplate,
-        tm: updatedTmKeys.filter(({isActive}) => isActive),
-        getPublicMatches: config.get_public_matches === 1,
-      }))
-    })
+      .finally(() => getMTEngines())
   }
 
   const getMTEngines = () => {
@@ -138,7 +140,6 @@ function CatTool() {
   useEffect(() => {
     // CatTool onRender action
     getTmKeys()
-    getMTEngines()
     const onRenderHandler = (options) => {
       const {
         actionType, // eslint-disable-line
