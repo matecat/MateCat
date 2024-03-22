@@ -455,14 +455,15 @@ class Utils {
         return true;
     }
 
+
     /**
+     * Fixes the file name by sanitizing the given string and ensuring uniqueness in the specified directory.
      *
-     * Remove Un-Wanted Chars from string nameexit
+     * @param string      $stringName The original file name to fix.
+     * @param string|null $directory  Optional. The directory where the file is located. Default is null.
+     * @param bool        $upCount    Optional. Whether to increment the count number if the file name already exists. Default is true.
      *
-     * @param (string) $string
-     *
-     * @return string
-     * @throws Exception
+     * @return string The fixed file name.
      */
     public static function fixFileName( $stringName, $directory = null, $upCount = true ) {
         $string = filter_var( $stringName, FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES ] );
@@ -472,19 +473,41 @@ class Utils {
         return $string;
     }
 
+    /**
+     * Callback function used to update the count name in the given name by replacing it with the incremented count number.
+     *
+     * @param array $matches The matches array containing the count number and extension.
+     *                       The count number is stored in index 1 and the extension is stored in index 2.
+     *
+     * @return string The updated name with the incremented count number.
+     */
     protected function upCountNameCallback( $matches ) {
         $index = isset( $matches[ 1 ] ) ? intval( $matches[ 1 ] ) + 1 : 1;
         $ext   = isset( $matches[ 2 ] ) ? $matches[ 2 ] : '';
         return '_(' . $index . ')' . $ext;
     }
 
+    /**
+     * Updates the count name in the given name by replacing it with the incremented count number.
+     *
+     * @param string $name The name to update the count in.
+     *
+     * @return string The updated name with the incremented count number.
+     */
     protected static function upCountName( $name ) {
         return preg_replace_callback(
-            '/(?:(?:_\(([\d]+)\))?(\.[^.]+))?$/', [ '\Utils', 'upCountNameCallback' ], $name, 1
+            '/(?:(?:_\((\d+)\))?(\.[^.]+))?$/', [ '\Utils', 'upCountNameCallback' ], $name, 1
         );
     }
 
 
+    /**
+     * Check if a file name is valid to prevent directory traversal attacks.
+     *
+     * @param string $fileUpName The file name to check.
+     *
+     * @return bool Returns true if the file name is valid, false otherwise.
+     */
     public static function isValidFileName( $fileUpName ) {
 
         if (
@@ -503,15 +526,6 @@ class Utils {
 
         return true;
 
-    }
-
-    /**
-     * @param $arr
-     *
-     * @return mixed
-     */
-    public static function filterLangDetectArray( $arr ) {
-        return filter_var( $arr, FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
     }
 
     /**
