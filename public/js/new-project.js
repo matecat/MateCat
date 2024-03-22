@@ -177,7 +177,10 @@ APP.postProjectCreation = function (d) {
       const data = {
         event: 'analyze_click',
         userStatus: APP.USER.isUserLogged() ? 'loggedUser' : 'notLoggedUser',
-        userId: APP.USER.isUserLogged() ? APP.USER.STORE.user.uid : null,
+        userId:
+          APP.USER.isUserLogged() && APP.USER.STORE.user
+            ? APP.USER.STORE.user.uid
+            : null,
         idProject: d.id_project,
       }
       CommonUtils.dispatchAnalyticsEvents(data)

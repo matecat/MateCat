@@ -7,6 +7,8 @@ import * as FormRules from '../common/formRules'
 import {checkRedeemProject as checkRedeemProjectApi} from '../../api/checkRedeemProject'
 import {registerUser} from '../../api/registerUser'
 import CommonUtils from '../../utils/commonUtils'
+import ModalsActions from '../../actions/ModalsActions'
+import ConfirmRegister from './ConfirmRegister'
 
 const PASSWORD_MIN_LENGTH = 12
 const PASSWORD_MAX_LENGTH = 50
@@ -59,9 +61,16 @@ class RegisterModal extends React.Component {
     this.checkRedeemProject().then(
       this.sendRegisterData()
         .then(() => {
-          $('#modal').trigger('confirmregister', [
+          const style = {
+            width: '25%',
+            maxWidth: '450px',
+          }
+          ModalsActions.showModalComponent(
+            ConfirmRegister,
             {emailAddress: self.state.emailAddress},
-          ])
+            'Confirm Registration',
+            style,
+          )
         })
         .catch((response) => {
           var generalErrorText

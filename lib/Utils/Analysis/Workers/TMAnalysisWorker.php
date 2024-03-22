@@ -150,23 +150,23 @@ class TMAnalysisWorker extends AbstractWorker {
      */
     protected function _updateRecord( QueueElement $queueElement ) {
 
+        $firstAvailableNotMTMatch = $this->getFirstAvailableNotMTMatch();
         $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new \FeatureSet();
         $filter     = MateCatFilter::getInstance( $featureSet, $queueElement->params->source, $queueElement->params->target, [] );
-        $suggestion = $this->_matches[ 0 ][ 'raw_translation' ]; //No layering needed
+        $suggestion = $firstAvailableNotMTMatch[ 'raw_translation' ]; //No layering needed
 
-        $suggestion_match  = $this->_matches[ 0 ][ 'match' ];
-        $suggestion_json   = json_encode( $this->_matches );
-        $suggestion_source = $this->_matches[ 0 ][ 'created_by' ];
+        $suggestion_match  = $firstAvailableNotMTMatch[ 'match' ];
+        $suggestion_source = $firstAvailableNotMTMatch[ 'created_by' ];
 
         $equivalentWordMapping = json_decode( $queueElement->params->payable_rates, true );
 
         $new_match_type = $this->_getNewMatchType(
-            ( stripos( $this->_matches[ 0 ][ 'created_by' ], "MT" ) !== false ? "MT" : $suggestion_match ),
+            ( stripos( $firstAvailableNotMTMatch[ 'created_by' ], "MT" ) !== false ? "MT" : $suggestion_match ),
             $queueElement->params->match_type,
             $equivalentWordMapping,
             /* is Public TM */
-            empty( $this->_matches[ 0 ][ 'memory_key' ] ),
-            isset( $this->_matches[ 0 ][ 'ICE' ] ) && $this->_matches[ 0 ][ 'ICE' ]
+            empty( $firstAvailableNotMTMatch[ 'memory_key' ] ),
+            isset( $firstAvailableNotMTMatch[ 'ICE' ] ) && $firstAvailableNotMTMatch[ 'ICE' ]
         );
 
         $eqWordMapping = (isset($equivalentWordMapping[ $new_match_type ])) ? $equivalentWordMapping[ $new_match_type ] : null;
@@ -184,7 +184,12 @@ class TMAnalysisWorker extends AbstractWorker {
             $standard_words = $equivalentWordMapping[ "NO_MATCH" ] * $queueElement->params->raw_word_count / 100;
 
             // realign MT Spaces
-            $check = $this->initPostProcess( $this->_matches[ 0 ][ 'raw_segment' ], $suggestion, $queueElement->params->source, $queueElement->params->target );
+            $check = $this->initPostProcess(
+                $firstAvailableNotMTMatch[ 'raw_segment' ],
+                $suggestion,
+                $queueElement->params->source,
+                $queueElement->params->target
+            );
             $check->realignMTSpaces();
 
             //this should every time be ok because MT preserve tags, but we use the check on the errors
@@ -203,14 +208,19 @@ class TMAnalysisWorker extends AbstractWorker {
 
         }
 
-        ( !empty( $this->_matches[ 0 ][ 'sentence_confidence' ] ) ?
-            $mt_qe = floatval( $this->_matches[ 0 ][ 'sentence_confidence' ] ) :
+        ( !empty( $firstAvailableNotMTMatch[ 'sentence_confidence' ] ) ?
+            $mt_qe = floatval( $firstAvailableNotMTMatch[ 'sentence_confidence' ] ) :
             $mt_qe = null
         );
 
         // perform a consistency check as setTranslation does
         // in order to add spaces to translation if needed
-        $check = $this->initPostProcess( $queueElement->params->segment, $suggestion, $queueElement->params->source, $queueElement->params->target );
+        $check = $this->initPostProcess(
+            $queueElement->params->segment,
+            $suggestion,
+            $queueElement->params->source,
+            $queueElement->params->target
+        );
         $check->performConsistencyCheck();
         $suggestion = $check->getTargetSeg();
         $err_json2  = ( $check->thereAreErrors() ) ? $check->getErrorsJSON() : '';
@@ -218,6 +228,15 @@ class TMAnalysisWorker extends AbstractWorker {
         $suggestion = $filter->fromLayer1ToLayer0( $suggestion );
 
         $segment = ( new \Segments_SegmentDao() )->getById( $queueElement->params->id_segment );
+
+        foreach ( $this->_matches as $k => $m ) {
+            $this->_matches[ $k ][ 'raw_segment' ] = $filter->fromLayer1ToLayer0( $this->_matches[ $k ][ 'raw_segment' ] );
+            $this->_matches[ $k ][ 'segment' ] = $filter->fromLayer1ToLayer0( html_entity_decode($this->_matches[ $k ][ 'segment' ]) );
+            $this->_matches[ $k ][ 'translation' ] = $filter->fromLayer1ToLayer0( html_entity_decode($this->_matches[ $k ][ 'translation' ]) );
+            $this->_matches[ $k ][ 'raw_translation' ] = $filter->fromLayer1ToLayer0( $this->_matches[ $k ][ 'raw_translation' ] );
+        }
+
+        $suggestion_json   = json_encode( $this->_matches );
 
         $tm_data                             = [];
         $tm_data[ 'id_job' ]                 = $queueElement->params->id_job;
@@ -267,6 +286,26 @@ class TMAnalysisWorker extends AbstractWorker {
             'queue_element' => $queueElement
         ] );
 
+    }
+
+    /**
+     * Get the first available not MT match
+     * @return mixed
+     */
+    private function getFirstAvailableNotMTMatch()
+    {
+        foreach($this->_matches as $match){
+            // return $match if not MT and quality >= 75
+            if(
+                stripos( $match[ 'created_by' ], "MT" ) === false and
+                (int)$match[ 'match' ] >= 75
+            ){
+                return $match;
+            }
+        }
+
+        // return the first match available
+        return $this->_matches[0];
     }
 
     /**
@@ -428,6 +467,11 @@ class TMAnalysisWorker extends AbstractWorker {
                 $tm_match_fuzzy_band = "75%-99%";
                 $tm_rate_paid        = $equivalentWordMapping[ "75%-99%" ];
             }
+        }
+
+        // if MM says is ICE, return ICE
+        if($isICE){
+            return $tm_match_fuzzy_band;
         }
 
         /**

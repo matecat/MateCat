@@ -388,12 +388,13 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
 
     public function validateForUser( EnginesModel_EngineStruct $obj )
     {
-        $query = "SELECT * FROM " . self::TABLE . " WHERE `name` = :engine_name and uid = :uid";
+        $query = "SELECT * FROM " . self::TABLE . " WHERE `name` = :engine_name and uid = :uid and active = :active";
 
         $stmt = $this->database->getConnection()->prepare( $query );
         $stmt->execute( [
             'engine_name'  => $obj->name,
-            'uid' => $obj->uid
+            'uid' => $obj->uid,
+            'active' => 1
         ] );
 
         if ( $stmt->rowCount() > 0 ) {

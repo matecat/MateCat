@@ -1,10 +1,9 @@
-import {sprintf} from 'sprintf-js'
 import {getUserConnectedService} from './cat_source/es6/api/getUserConnectedService'
 
 var GDrive = function () {
   'use strict'
 
-  var scope = ['https://www.googleapis.com/auth/drive.readonly']
+  var scope = ['https://www.googleapis.com/auth/drive.file']
 
   this.pickerApiLoaded = false
   this.authApiLoaded = false
@@ -80,7 +79,7 @@ var gdrive = new GDrive()
   }
 
   function showPreferencesWithMessage() {
-    $('#modal').trigger('openpreferences', [{showGDriveMessage: true}])
+    APP.openPreferencesModal({showGDriveMessage: true})
   }
 
   function openGoogleDrivePickerIntent() {

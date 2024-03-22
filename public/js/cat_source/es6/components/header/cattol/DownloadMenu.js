@@ -134,7 +134,7 @@ export const DownloadMenu = ({password, jid, isGDriveProject}) => {
               className="originalDownload"
               title="Original"
               alt="Original"
-              data-href={`/?action=downloadOriginal&id_job=${jid}&password=${password}&download_type=all`}
+              href={`/api/v2/original/${jid}/${password}`}
               target="_blank"
             >
               Original
@@ -160,7 +160,7 @@ export const DownloadMenu = ({password, jid, isGDriveProject}) => {
             className="sdlxliff"
             title="Export XLIFF"
             alt="Export XLIFF"
-            href={`/SDLXLIFF/${jid}/${password}/${jid}.zip`}
+            href={`/api/v2/SDLXLIFF/${jid}/${password}/${jid}.zip`}
             target="_blank"
           >
             Export XLIFF
@@ -173,6 +173,7 @@ export const DownloadMenu = ({password, jid, isGDriveProject}) => {
             className="tmx"
             title="Export job TMX for QA"
             alt="Export job TMX for QA"
+            href={`/api/v2/TMX/${jid}/${password}`}
             target="_blank"
             href={`/TMX/${jid}/${password}`}
           >

@@ -149,7 +149,7 @@ class newProjectController extends viewController {
                 Utils::deleteDir( INIT::$UPLOAD_REPOSITORY . '/' . $_COOKIE[ 'upload_session' ] . '/' );
             }
 
-            $this->guid = Utils::createToken();
+            $this->guid = Utils::uuid4();
             CookieManager::setCookie( "upload_session", $this->guid,
                 [
                     'expires'  => time() + 86400,
