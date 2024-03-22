@@ -1247,7 +1247,8 @@ class NewController extends ajaxController {
         if ( !empty( $this->postInput[ 'dialect_strict' ] ) ) {
 
             $dialect_strict = trim(html_entity_decode($this->postInput[ 'dialect_strict' ]));
-            $targets = explode( ',', trim($this->postInput[ 'target_lang' ]) );
+            $target_languages = preg_replace('/\s+/', '', $this->postInput[ 'target_lang' ]);
+            $targets = explode( ',', trim($target_languages) );
             $dialectStrictObj = json_decode($dialect_strict, true);
 
             foreach ($dialectStrictObj as $lang => $value){
