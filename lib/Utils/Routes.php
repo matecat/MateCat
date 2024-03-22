@@ -272,7 +272,7 @@ class Routes {
     public static function appRoot( $options = [] ) {
         $query = isset( $options[ 'query' ] ) ? $options[ 'query' ] : null;
 
-        $url = self::httpHost( $options ) . \INIT::$BASEURL;
+        $url = self::httpHost( $options ) . INIT::$BASEURL;
 
         if ( $query ) {
             $url .= '?' . http_build_query( $query );

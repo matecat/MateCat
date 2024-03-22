@@ -1084,7 +1084,7 @@ const SegmentActions = {
   openIssuesPanel: function (data, openSegment) {
     const segment = SegmentStore.getSegmentByIdToJS(data.sid)
     const canOpenSegment =
-      segment.status !== 'NEW' && segment.status !== 'DRAFT'
+      segment && segment.status !== 'NEW' && segment.status !== 'DRAFT'
     if (segment && !canOpenSegment) {
       return false
     }
