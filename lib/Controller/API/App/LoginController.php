@@ -87,8 +87,13 @@ class LoginController extends AbstractStatefulKleinController  {
 
             // redirect if there is the request url cookie
             if(isset($_COOKIE[ INIT::$REQUESTED_URL_COOKIENAME ])){
-                $this->response->redirect($_COOKIE[ INIT::$REQUESTED_URL_COOKIENAME ]);
 
+                // if not home redirect
+                if($_SERVER['HTTP_REFERER'] !== INIT::$CLI_HTTP_HOST . INIT::$BASEURL){
+                    $this->response->redirect($_COOKIE[ INIT::$REQUESTED_URL_COOKIENAME ]);
+                }
+
+                // clear the cookie
                 CookieManager::setCookie( INIT::$REQUESTED_URL_COOKIENAME, '',
                     [
                         'expires' => 0,

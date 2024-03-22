@@ -50,7 +50,10 @@ class newProjectController extends viewController {
     {
         if($this->isLoggedIn() and isset($_COOKIE[ INIT::$REQUESTED_URL_COOKIENAME ])){
 
-            header( "Location: " . INIT::$HTTPHOST . INIT::$BASEURL . $_COOKIE[ INIT::$REQUESTED_URL_COOKIENAME ], true  );
+            // if not home redirect
+            if($_SERVER['HTTP_REFERER'] !== INIT::$CLI_HTTP_HOST . INIT::$BASEURL){
+                header( "Location: " . INIT::$HTTPHOST . INIT::$BASEURL . $_COOKIE[ INIT::$REQUESTED_URL_COOKIENAME ], true  );
+            }
 
             CookieManager::setCookie( INIT::$REQUESTED_URL_COOKIENAME, '',
                 [
