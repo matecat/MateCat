@@ -19,7 +19,14 @@ export const importMemoryGlossary = async ({engineId, glossary, memoryId}) => {
     },
   )
 
-  if (!response.ok) return Promise.reject(response)
+  if (!response.ok) {
+    if (response.headers.get('Content-Length') !== '0') {
+      const data = await response.json()
+      return Promise.reject({response, errors: data.error ?? data})
+    } else {
+      return Promise.reject({response})
+    }
+  }
 
   const data = await response.json()
   if (typeof data?.id === 'undefined') return Promise.reject(data)

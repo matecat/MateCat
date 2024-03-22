@@ -70,7 +70,7 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
             .catch(() => dispatchErrorNotification())
         }
       })
-      .catch(() => dispatchErrorNotification())
+      .catch(({errors}) => dispatchErrorNotification(errors))
   }
 
   const onSubmit = (e) => {
@@ -110,10 +110,10 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
     })
     setIsWaitingResult(false)
   }
-  const dispatchErrorNotification = () => {
+  const dispatchErrorNotification = (message) => {
     setNotification({
       type: 'error',
-      message: 'Glossary create error',
+      message: message ?? 'Glossary create error',
     })
     setIsWaitingResult(false)
   }
