@@ -142,6 +142,7 @@ test('Add MT', async () => {
 
 test('In cattool', async () => {
   global.config.isLoggedIn = true
+  global.config.ownerIsMe = 1
   config.is_cattool = true
   const values = {
     mtEngines: mtEnginesMock,
@@ -260,7 +261,7 @@ test('Modern MT and glossary', async () => {
   let activeMTContainert = screen.getByTestId('active-mt')
   let mtName = within(activeMTContainert).getByText('ModernMT')
   expect(mtName).toBeInTheDocument()
-  const glossaryButton = screen.getByTitle('Glossary options')
+  const glossaryButton = await screen.findByTitle('Glossary options')
   expect(glossaryButton).toBeInTheDocument()
 
   await user.click(glossaryButton)

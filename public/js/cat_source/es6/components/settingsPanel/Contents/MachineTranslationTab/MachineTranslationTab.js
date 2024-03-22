@@ -233,9 +233,10 @@ export const MachineTranslationTab = () => {
 
   const disableMT = () => setActiveMTEngine()
 
-  const activeMTEngineData = !config.is_cattool
-    ? mtEngines.find(({id}) => id === activeMTEngine)
-    : config.active_engine
+  const activeMTEngineData =
+    !config.is_cattool || (config.is_cattool && config.ownerIsMe)
+      ? mtEngines.find(({id}) => id === activeMTEngine)
+      : config.active_engine
 
   const activeColumns = CUSTOM_ACTIVE_COLUMNS_TABLE_BY_ENGINE[
     activeMTEngineData?.name

@@ -234,7 +234,7 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
       updateRowsState(rows.map(({id, name}) => ({id, name, isActive: true})))
     }
 
-    if (config.ownerIsMe) {
+    if (config.ownerIsMe || !isCattoolPage) {
       getMMTKeys({engineId: id}).then((data) => {
         const items = [...data].reverse()
         if (!wasCleanup) {
