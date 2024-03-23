@@ -271,28 +271,32 @@ export const MachineTranslationTab = () => {
                       ),
                       isDraggable: false,
                       isActive: true,
-                      ...(activeMTEngine.name === 'ModernMT' && {
-                        isExpanded: true,
-                        extraNode: (
-                          <MTGlossary
-                            {...{
-                              ...activeMTEngine,
-                              isCattoolPage: config.is_cattool,
-                            }}
-                          />
-                        ),
-                      }),
-                      ...(activeMTEngine.name === 'DeepL' && {
-                        isExpanded: true,
-                        extraNode: (
-                          <DeepLGlossary
-                            {...{
-                              ...activeMTEngine,
-                              isCattoolPage: config.is_cattool,
-                            }}
-                          />
-                        ),
-                      }),
+                      ...(activeMTEngine.name === 'ModernMT' &&
+                        ((config.is_cattool && config.ownerIsMe === 1) ||
+                          !config.is_cattool) && {
+                          isExpanded: true,
+                          extraNode: (
+                            <MTGlossary
+                              {...{
+                                ...activeMTEngine,
+                                isCattoolPage: config.is_cattool,
+                              }}
+                            />
+                          ),
+                        }),
+                      ...(activeMTEngine.name === 'DeepL' &&
+                        ((config.is_cattool && config.ownerIsMe === 1) ||
+                          !config.is_cattool) && {
+                          isExpanded: true,
+                          extraNode: (
+                            <DeepLGlossary
+                              {...{
+                                ...activeMTEngine,
+                                isCattoolPage: config.is_cattool,
+                              }}
+                            />
+                          ),
+                        }),
                     },
                   ]
                 : []
