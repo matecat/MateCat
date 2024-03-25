@@ -3,9 +3,9 @@
 use ConnectedServices\GDrive as GDrive;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
+use Matecat\XliffParser\Utils\Files as XliffFiles;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use ProjectQueue\Queue;
-use Matecat\XliffParser\Utils\Files as XliffFiles;
 use Validator\EngineValidator;
 use Validator\MMTValidator;
 
@@ -50,24 +50,21 @@ class createProjectController extends ajaxController {
         $filterArgs = [
                 'file_name'          => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
                 'project_name'       => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
-                'source_lang'    => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
-                'target_lang'    => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'source_lang'        => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'target_lang'        => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
                 'job_subject'        => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
                 'due_date'           => [ 'filter' => FILTER_VALIDATE_INT ],
                 'mt_engine'          => [ 'filter' => FILTER_VALIDATE_INT ],
                 'disable_tms_engine' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
-                'lang_detect_files' => [
-                        'filter'  => FILTER_CALLBACK,
-                        'options' => "Utils::filterLangDetectArray"
-                ],
-                'private_tm_key'    => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
-                'pretranslate_100'  => [ 'filter' => FILTER_VALIDATE_INT ],
-                'id_team'           => [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR ],
+                'lang_detect_files'  => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'private_tm_key'     => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'pretranslate_100'   => [ 'filter' => FILTER_VALIDATE_INT ],
+                'id_team'            => [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR ],
 
-                'mmt_glossaries'     => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'mmt_glossaries' => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
 
-                'deepl_id_glossary'  => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
-                'deepl_formality'     => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'deepl_id_glossary' => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'deepl_formality'   => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
 
                 'project_completion' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ], // features customization
                 'get_public_matches' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ], // disable public TM matches
@@ -239,7 +236,7 @@ class createProjectController extends ajaxController {
 
         $uploadDir  = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $_COOKIE[ 'upload_session' ];
         $newArFiles = [];
-        $fs = FilesStorageFactory::create();
+        $fs         = FilesStorageFactory::create();
 
         foreach ( $arFiles as $__fName ) {
             if ( 'zip' == AbstractFilesStorage::pathinfo_fix( $__fName, PATHINFO_EXTENSION ) ) {
@@ -272,8 +269,8 @@ class createProjectController extends ajaxController {
         $arMeta  = [];
 
         // create array_files_meta
-        foreach ($arFiles as $arFile){
-            $arMeta[] = $this->getFileMetadata($uploadDir .DIRECTORY_SEPARATOR . $arFile);
+        foreach ( $arFiles as $arFile ) {
+            $arMeta[] = $this->getFileMetadata( $uploadDir . DIRECTORY_SEPARATOR . $arFile );
         }
 
         $projectManager = new ProjectManager();
@@ -303,17 +300,17 @@ class createProjectController extends ajaxController {
         // MMT Glossaries
         // (if $engine is not an MMT instance, ignore 'mmt_glossaries')
         $engine = Engine::getInstance( $this->mt_engine );
-        if($engine instanceof Engines_MMT and $this->mmt_glossaries !== null){
+        if ( $engine instanceof Engines_MMT and $this->mmt_glossaries !== null ) {
             $projectStructure[ 'mmt_glossaries' ] = $this->mmt_glossaries;
         }
 
         // DeepL
-        if($engine instanceof Engines_DeepL and $this->deepl_formality !== null){
-            $projectStructure['deepl_formality'] = $this->deepl_formality;
+        if ( $engine instanceof Engines_DeepL and $this->deepl_formality !== null ) {
+            $projectStructure[ 'deepl_formality' ] = $this->deepl_formality;
         }
 
-        if($engine instanceof Engines_DeepL and $this->deepl_id_glossary !== null){
-            $projectStructure['deepl_id_glossary'] = $this->deepl_id_glossary;
+        if ( $engine instanceof Engines_DeepL and $this->deepl_id_glossary !== null ) {
+            $projectStructure[ 'deepl_id_glossary' ] = $this->deepl_id_glossary;
         }
 
         //TODO enable from CONFIG
@@ -336,9 +333,9 @@ class createProjectController extends ajaxController {
 
         try {
             $projectManager->sanitizeProjectStructure();
-        } catch ( Exception $e ){
+        } catch ( Exception $e ) {
             $this->result[ 'errors' ][] = [
-                    "code" => $e->getCode(),
+                    "code"    => $e->getCode(),
                     "message" => $e->getMessage()
             ];
 
@@ -347,9 +344,9 @@ class createProjectController extends ajaxController {
 
         try {
             $fs::moveFileFromUploadSessionToQueuePath( $_COOKIE[ 'upload_session' ] );
-        } catch ( Exception $e ){
+        } catch ( Exception $e ) {
             $this->result[ 'errors' ][] = [
-                    "code" => -235, // Error during moving file from upload session folder to queue path
+                    "code"    => -235, // Error during moving file from upload session folder to queue path
                     "message" => $e->getMessage()
             ];
 
@@ -378,14 +375,14 @@ class createProjectController extends ajaxController {
      * @throws \TaskRunner\Exceptions\EndQueueException
      * @throws \TaskRunner\Exceptions\ReQueueException
      */
-    private function getFileMetadata($filename) {
+    private function getFileMetadata( $filename ) {
         $info          = XliffProprietaryDetect::getInfo( $filename );
         $isXliff       = XliffFiles::isXliff( $filename );
         $isGlossary    = XliffFiles::isGlossaryFile( $filename );
         $isTMX         = XliffFiles::isTMXFile( $filename );
         $getMemoryType = XliffFiles::getMemoryFileType( $filename );
 
-        $forceXliff = $this->getFeatureSet()->filter(
+        $forceXliff      = $this->getFeatureSet()->filter(
                 'forceXLIFFConversion',
                 INIT::$FORCE_XLIFF_CONVERSION,
                 $this->userIsLogged,
@@ -404,9 +401,9 @@ class createProjectController extends ajaxController {
         $metadata[ 'isGlossary' ]      = $isGlossary;
         $metadata[ 'isTMX' ]           = $isTMX;
         $metadata[ 'proprietary' ]     = [
-             'proprietary'             => $info[ 'proprietary' ],
-             'proprietary_name'        => $info[ 'proprietary_name' ],
-             'proprietary_short_name'  => $info[ 'proprietary_short_name' ],
+                'proprietary'            => $info[ 'proprietary' ],
+                'proprietary_name'       => $info[ 'proprietary_name' ],
+                'proprietary_short_name' => $info[ 'proprietary_short_name' ],
         ];
 
         return $metadata;
@@ -480,9 +477,9 @@ class createProjectController extends ajaxController {
 
     private static function sanitizeTmKeyArr( $elem ) {
 
-        $element = new TmKeyManagement_TmKeyStruct( $elem );
+        $element                  = new TmKeyManagement_TmKeyStruct( $elem );
         $element->complete_format = true;
-        $elem = TmKeyManagement_TmKeyManagement::sanitize( $element );
+        $elem                     = TmKeyManagement_TmKeyManagement::sanitize( $element );
 
         return $elem->toArray();
 
@@ -543,10 +540,10 @@ class createProjectController extends ajaxController {
      */
     private function __validateUserMTEngine() {
 
-        if($this->mt_engine > 1 and $this->isLoggedIn()){
+        if ( $this->mt_engine > 1 and $this->isLoggedIn() ) {
             try {
-                EngineValidator::engineBelongsToUser($this->mt_engine, $this->user->uid);
-            } catch (Exception $exception){
+                EngineValidator::engineBelongsToUser( $this->mt_engine, $this->user->uid );
+            } catch ( Exception $exception ) {
                 $this->result[ 'errors' ][] = [ "code" => -2, "message" => $exception->getMessage() ];
             }
         }
@@ -559,12 +556,12 @@ class createProjectController extends ajaxController {
 
         if ( !empty( $this->postInput[ 'mmt_glossaries' ] ) and $this->isLoggedIn() ) {
             try {
-                $mmtGlossaries = html_entity_decode($this->postInput[ 'mmt_glossaries' ]);
-                MMTValidator::validateGlossary($mmtGlossaries);
+                $mmtGlossaries = html_entity_decode( $this->postInput[ 'mmt_glossaries' ] );
+                MMTValidator::validateGlossary( $mmtGlossaries );
 
                 $this->mmt_glossaries = $mmtGlossaries;
 
-            } catch (Exception $exception){
+            } catch ( Exception $exception ) {
                 $this->result[ 'errors' ][] = [ "code" => -6, "message" => $exception->getMessage() ];
             }
         }
@@ -580,12 +577,12 @@ class createProjectController extends ajaxController {
             if ( !empty( $this->postInput[ 'deepl_formality' ] ) ) {
 
                 $allowedFormalities = [
-                    'default',
-                    'prefer_less',
-                    'prefer_more'
+                        'default',
+                        'prefer_less',
+                        'prefer_more'
                 ];
 
-                if(in_array($this->postInput[ 'deepl_formality' ], $allowedFormalities)){
+                if ( in_array( $this->postInput[ 'deepl_formality' ], $allowedFormalities ) ) {
                     $this->deepl_formality = $this->postInput[ 'deepl_formality' ];
                 }
             }
@@ -597,16 +594,15 @@ class createProjectController extends ajaxController {
     }
 
 
-
     /**
      * This could be already set by MMT engine if enabled ( so check key existence and do not override )
      *
      * @see filterCreateProjectFeatures callback
      * @see createProjectController::__appendFeaturesToProject()
      */
-    private function __generateTargetEngineAssociation(){
-        if( !isset( $this->postInput[ 'target_language_mt_engine_id' ] ) ){ // this could be already set by MMT engine if enabled ( so check and do not override )
-            foreach( explode( ",", $this->target_lang ) as $_matecatTarget ){
+    private function __generateTargetEngineAssociation() {
+        if ( !isset( $this->postInput[ 'target_language_mt_engine_id' ] ) ) { // this could be already set by MMT engine if enabled ( so check and do not override )
+            foreach ( explode( ",", $this->target_lang ) as $_matecatTarget ) {
                 $this->postInput[ 'target_language_mt_engine_id' ][ $_matecatTarget ] = $this->mt_engine;
             }
         }

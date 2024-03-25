@@ -41,7 +41,7 @@ class PendingInvitations {
 
     }
 
-    public function get( $id_team ){
+    public function hasPengingInvitation( $id_team ){
 
         return $this->redisClient->smembers( sprintf( self::REDIS_INVITATIONS_SET, $id_team ) );
 

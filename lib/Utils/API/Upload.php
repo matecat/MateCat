@@ -107,11 +107,12 @@ class Upload {
      */
     protected function _uploadFile( $fileUp ) {
 
-        $mod_name = null;
-
         if ( empty ( $fileUp ) ) {
             throw new Exception ( __METHOD__ . " -> File Not Found In Registry Instance." );
         }
+
+        // fix possibly XSS on the file name
+        $fileUp[ 'name' ] = $this->fixFileName( $fileUp[ 'name' ] );
 
         $fileName    = $fileUp[ 'name' ];
         $fileTmpName = $fileUp[ 'tmp_name' ];
@@ -201,8 +202,8 @@ class Upload {
             // NOTE FOR ZIP FILES
             //This exception is already raised by ZipArchiveExtended when file is unzipped.
 
-            $filePathInfo = pathinfo($fileName);
-            $fileMaxSize = ($filePathInfo['extension'] === 'tmx') ? INIT::$MAX_UPLOAD_TMX_FILE_SIZE : INIT::$MAX_UPLOAD_FILE_SIZE;
+            $filePathInfo = pathinfo( $out_filename );
+            $fileMaxSize  = ( $filePathInfo[ 'extension' ] === 'tmx' ) ? INIT::$MAX_UPLOAD_TMX_FILE_SIZE : INIT::$MAX_UPLOAD_FILE_SIZE;
 
             if ( $fileSize >= $fileMaxSize ) {
                 $this->setObjectErrorOrThrowException(
@@ -211,12 +212,10 @@ class Upload {
                 );
             }
 
-            $mod_name = $this->fixFileName( $fileUp->name );
-
-            if ( !Utils::isValidFileName( $mod_name ) ) {
+            if ( !Utils::isValidFileName( $fileUp->name ) ) {
                 $this->setObjectErrorOrThrowException(
                         $fileUp,
-                        new Exception ( __METHOD__ . " -> Invalid File Name '" . ZipArchiveExtended::getFileName( $fileUp->name ) . "'" )
+                        new Exception ( __METHOD__ . " -> Invalid File Name '" . $out_filename . "'" )
                 );
             }
 
@@ -228,7 +227,7 @@ class Upload {
             }
 
             //All Right!!! GO!!!
-            if ( !copy( $fileTmpName, $this->dirUpload . DIRECTORY_SEPARATOR . $mod_name ) ) {
+            if ( !copy( $fileTmpName, $this->dirUpload . DIRECTORY_SEPARATOR . $fileUp->name ) ) {
                 $this->setObjectErrorOrThrowException(
                         $fileUp,
                         new Exception ( __METHOD__ . " -> Failed To Store File '$out_filename' On Server." )
@@ -240,7 +239,7 @@ class Upload {
             @unlink( $fileTmpName );
 
             // octal; changing mode
-            if ( !chmod( $this->dirUpload . DIRECTORY_SEPARATOR . $mod_name, 0664 ) ) {
+            if ( !chmod( $this->dirUpload . DIRECTORY_SEPARATOR . $fileUp->name, 0664 ) ) {
                 $this->setObjectErrorOrThrowException(
                         $fileUp,
                         new Exception ( __METHOD__ . " -> Failed To Set Permissions On File. '$out_filename'" )
@@ -249,8 +248,7 @@ class Upload {
 
         }
 
-        $fileUp->name      = $mod_name;
-        $fileUp->file_path = $this->dirUpload . DIRECTORY_SEPARATOR . $mod_name;
+        $fileUp->file_path = $this->dirUpload . DIRECTORY_SEPARATOR . $fileUp->name;
         unset( $fileUp->tmp_name );
 
         return $fileUp;
@@ -258,18 +256,25 @@ class Upload {
     }
 
     /**
+     * Fixes the file name by appending a unique suffix and adjusting the path.
      *
-     * Remove Un-Wanted Chars from string name
+     * @param string $stringName The original file name.
+     * @param bool   $upCount    Optional. Whether to include a counter in the file name suffix. Defaults to true.
      *
-     * @param (string) $string
-     *
-     * @return string
-     * @throws Exception
+     * @return string The fixed file name with the adjusted path.
      */
     public function fixFileName( $stringName, $upCount = true ) {
         return Utils::fixFileName( $stringName, $this->dirUpload, $upCount );
     }
 
+    /**
+     * Checks if the number of files exceeds the maximum limit.
+     *
+     * @param array $filesToUpload The array of files to upload.
+     *
+     * @return bool Returns true if the number of files exceeds the maximum limit,
+     * false otherwise.
+     */
     protected function _filesAreTooMuch( $filesToUpload ) {
 
         $count = 0;
@@ -305,6 +310,13 @@ class Upload {
 
     }
 
+    /**
+     * Checks if the file extension is allowed.
+     *
+     * @param object $fileUp The uploaded file object.
+     *
+     * @return bool Returns true if the file extension is allowed, false otherwise.
+     */
     protected function _isRightExtension( $fileUp ) {
 
         $acceptedExtensions = [];
@@ -315,7 +327,7 @@ class Upload {
         $fileNameChunks = explode( ".", $fileUp->name );
 
         //first Check the extension
-        if ( array_search( strtolower( $fileNameChunks[ count( $fileNameChunks ) - 1 ] ), $acceptedExtensions ) !== false ) {
+        if ( in_array( strtolower( $fileNameChunks[ count( $fileNameChunks ) - 1 ] ), $acceptedExtensions ) ) {
             return true;
         }
 
