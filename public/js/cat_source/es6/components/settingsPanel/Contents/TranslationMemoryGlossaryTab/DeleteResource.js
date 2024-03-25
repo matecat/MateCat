@@ -22,7 +22,7 @@ export const DeleteResource = ({row, onClose}) => {
     deleteTmKey({key: row.key})
       .then(() => {
         setTmKeys((prevState) => prevState.filter(({key}) => key !== row.key))
-        if (APP.isCattool) CatToolActions.onTMKeysChangeStatus()
+        if (config.is_cattool) CatToolActions.onTMKeysChangeStatus()
         tmOutOnCloseRef.current = setTimeout(onClose, 2000)
       })
       .catch(() => {

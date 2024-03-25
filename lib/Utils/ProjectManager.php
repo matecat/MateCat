@@ -327,37 +327,10 @@ class ProjectManager {
         return $this->projectStructure;
     }
 
-
     /**
-     *  saveMetadata
-     *
-     * This is where, among other things, we put project options.
-     *
-     * Project options may need to be sanitized so that we can silently ignore impossible combinations,
-     * and we can apply defaults when those are missing.
-     *
+     * Save features in project metadata
      */
-    private function saveMetadata() {
-        $options = $this->projectStructure[ 'metadata' ];
-
-        // "From API" flag
-        if(isset($this->projectStructure['from_api']) and $this->projectStructure['from_api'] == true){
-            $options['from_api'] = 1;
-        }
-
-        /**
-         * Here we have the opportunity to add other features as dependencies of the ones
-         * which are already explicitly set.
-         */
-        $this->features->loadProjectDependenciesFromProjectMetadata( $options );
-
-        if ( $this->projectStructure[ 'sanitize_project_options' ] ) {
-            $options = $this->sanitizeProjectOptions( $options );
-        }
-
-        if ( empty( $options ) ) {
-            return;
-        }
+    private function saveFeaturesInMetadata(){
 
         $dao = new Projects_MetadataDao();
 
@@ -368,13 +341,39 @@ class ProjectManager {
                 implode( ',', $featureCodes )
             );
         }
+    }
 
-        foreach ( $options as $key => $value ) {
-            $dao->set(
-                $this->projectStructure[ 'id_project' ],
-                $key,
-                $value
-            );
+    /**
+     *  Save custom project metadata
+     *
+     * This is where, among other things, we put project options.
+     *
+     * Project options may need to be sanitized so that we can silently ignore impossible combinations,
+     * and we can apply defaults when those are missing.
+     *
+     */
+    private function saveMetadata() {
+
+        $options = $this->projectStructure[ 'metadata' ];
+        $dao = new Projects_MetadataDao();
+
+        // "From API" flag
+        if(isset($this->projectStructure['from_api']) and $this->projectStructure['from_api'] == true){
+            $options['from_api'] = 1;
+        }
+
+        if ( $this->projectStructure[ 'sanitize_project_options' ] ) {
+            $options = $this->sanitizeProjectOptions( $options );
+        }
+
+        if(!empty($options)){
+            foreach ( $options as $key => $value ) {
+                $dao->set(
+                    $this->projectStructure[ 'id_project' ],
+                    $key,
+                    $value
+                );
+            }
         }
 
         // add MMT Glossaries here
@@ -508,6 +507,7 @@ class ProjectManager {
         }
 
         $this->__createProjectRecord();
+        $this->saveFeaturesInMetadata();
         $this->saveMetadata();
 
         //sort files in order to process TMX first

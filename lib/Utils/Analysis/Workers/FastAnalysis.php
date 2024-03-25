@@ -501,6 +501,7 @@ class FastAnalysis extends AbstractDaemon {
                     $this->segments[$k]['eq_word_count'] = ((float)$eq_word > $segment->raw_word_count) ? $segment->raw_word_count : (float)$eq_word;;
                     $this->segments[$k]['standard_word_count'] = ((float)$standard_words > $segment->raw_word_count) ? $segment->raw_word_count : (float)$standard_words;
                     $this->segments[$k]['match_type'] = $match_type;
+                    $this->segments[$k]['fast_exact_match_type'] = $v[ 'match_type' ];
 
                 } elseif ( $perform_Tms_Analysis ) {
 

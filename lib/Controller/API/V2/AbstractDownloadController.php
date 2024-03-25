@@ -216,8 +216,9 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
 
     /**
      * Download the file
+     * @param bool $forceXliff
      */
-    public function finalize() {
+    public function finalize($forceXliff = false) {
         try {
             $this->unlockToken();
 
@@ -231,9 +232,7 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
 
             $isGDriveProject = \Projects_ProjectDao::isGDriveProject( $this->project->id );
 
-            $forceXliff = intval( filter_input( INPUT_GET, 'forceXliff' ) );
-
-            if ( !$isGDriveProject || $forceXliff === 1 ) {
+            if ( !$isGDriveProject || $forceXliff === true ) {
                 $buffer = ob_get_contents();
                 ob_get_clean();
                 ob_start( "ob_gzhandler" );  // compress page before sending
