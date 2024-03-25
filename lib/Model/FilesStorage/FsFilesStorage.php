@@ -3,8 +3,15 @@
 namespace FilesStorage;
 
 use FilesStorage\Exceptions\FileSystemException;
-use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
+use FilesystemIterator;
+use INIT;
+use Log;
 use Matecat\XliffParser\Utils\Files as XliffFiles;
+use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
+use UnexpectedValueException;
+use Utils;
 
 /**
  * Class FsFilesStorage
@@ -20,8 +27,7 @@ use Matecat\XliffParser\Utils\Files as XliffFiles;
  *
  * @package FilesStorage
  */
-class FsFilesStorage extends AbstractFilesStorage
-{
+class FsFilesStorage extends AbstractFilesStorage {
     /**
      **********************************************************************************************
      * 1. CACHE PACKAGE
@@ -34,7 +40,7 @@ class FsFilesStorage extends AbstractFilesStorage
      * @param bool $originalPath
      * @param      $xliffPath
      *
-     * @return bool|mixed
+     * @return bool
      * @throws FileSystemException
      */
     public function makeCachePackage( $hash, $lang, $originalPath, $xliffPath ) {
@@ -42,31 +48,32 @@ class FsFilesStorage extends AbstractFilesStorage
         $cacheTree = implode( DIRECTORY_SEPARATOR, static::composeCachePath( $hash ) );
 
         //don't save in cache when a specified filter version is forced
-        if ( \INIT::$FILTERS_SOURCE_TO_XLIFF_FORCE_VERSION !== false && is_dir( $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang ) ) {
+        if ( INIT::$FILTERS_SOURCE_TO_XLIFF_FORCE_VERSION !== false && is_dir( $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang ) ) {
             return true;
         }
 
         //create cache dir structure
-        @mkdir( $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang, 0755, true );
+        mkdir( $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang, 0755, true );
         $cacheDir = $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang . DIRECTORY_SEPARATOR . "package";
-        @mkdir( $cacheDir, 0755, true );
-        @mkdir( $cacheDir . DIRECTORY_SEPARATOR . "orig" );
-        @mkdir( $cacheDir . DIRECTORY_SEPARATOR . "work" );
+        mkdir( $cacheDir, 0755, true );
+        mkdir( $cacheDir . DIRECTORY_SEPARATOR . "orig" );
+        mkdir( $cacheDir . DIRECTORY_SEPARATOR . "work" );
 
-        //if it's not an xliff as original
+        //if it's not a xliff as original
         if ( !$originalPath ) {
 
             //if there is not an original path this is an unconverted file,
-            // the original does not exists
+            // the original does not exist
             // detect which type of xliff
             //check also for the extension, if already present do not force
+            $force_extension = "";
             $fileType = XliffProprietaryDetect::getInfo( $xliffPath );
             if ( !$fileType[ 'proprietary' ] && $fileType[ 'info' ][ 'extension' ] != 'sdlxliff' ) {
                 $force_extension = '.sdlxliff';
             }
 
             //use original xliff
-            $xliffDestination = $cacheDir . DIRECTORY_SEPARATOR . "work" . DIRECTORY_SEPARATOR . static::basename_fix( $xliffPath ) . @$force_extension;
+            $xliffDestination = $cacheDir . DIRECTORY_SEPARATOR . "work" . DIRECTORY_SEPARATOR . static::basename_fix( $xliffPath ) . $force_extension;
         } else {
 
             //move original
@@ -82,13 +89,13 @@ class FsFilesStorage extends AbstractFilesStorage
                 $cacheDirToDelete = $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang;
 
                 // check if cache dir exists
-                if(!file_exists($cacheDirToDelete)){
-                    throw new FileSystemException($cacheDirToDelete . ' directory does not exists. Maybe there is a problem with folder permissions.');
+                if ( !file_exists( $cacheDirToDelete ) ) {
+                    throw new FileSystemException( $cacheDirToDelete . ' directory does not exists. Maybe there is a problem with folder permissions.' );
                 }
 
-                \Utils::deleteDir( $cacheDirToDelete );
+                Utils::deleteDir( $cacheDirToDelete );
 
-                return $outcome1;
+                return false;
             }
 
             $file_extension = '.sdlxliff';
@@ -109,13 +116,13 @@ class FsFilesStorage extends AbstractFilesStorage
             $cacheDirToDelete = $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang;
 
             // check if cache dir exists
-            if(!file_exists($cacheDirToDelete)){
-                throw new FileSystemException($cacheDirToDelete . ' directory does not exists. Maybe there is a problem with folder permissions.');
+            if ( !file_exists( $cacheDirToDelete ) ) {
+                throw new FileSystemException( $cacheDirToDelete . ' directory does not exists. Maybe there is a problem with folder permissions.' );
             }
 
-            \Utils::deleteDir( $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang );
+            Utils::deleteDir( $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang );
 
-            return $outcome2;
+            return false;
         }
 
         unlink( $xliffPath );
@@ -153,7 +160,7 @@ class FsFilesStorage extends AbstractFilesStorage
      * @param $hash
      * @param $lang
      *
-     * @return bool|mixed|string
+     * @return bool|string
      */
     public function getXliffFromCache( $hash, $lang ) {
 
@@ -178,7 +185,7 @@ class FsFilesStorage extends AbstractFilesStorage
      * @param      $idFile
      * @param null $newFileName
      *
-     * @return mixed|void
+     * @return bool
      */
     public function moveFromCacheToFileDir( $dateHashPath, $lang, $idFile, $newFileName = null ) {
 
@@ -189,11 +196,11 @@ class FsFilesStorage extends AbstractFilesStorage
         $fileDir  = $this->filesDir . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $idFile;
         $cacheDir = $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang . DIRECTORY_SEPARATOR . "package";
 
-        \Log::doJsonLog( $fileDir );
-        \Log::doJsonLog( $cacheDir );
+        Log::doJsonLog( $fileDir );
+        Log::doJsonLog( $cacheDir );
 
         $res = true;
-        //check if doesn't exist
+        //check if it doesn't exist
         if ( !is_dir( $fileDir ) ) {
             //make files' directory structure
             $res &= mkdir( $fileDir, 0755, true );
@@ -208,7 +215,7 @@ class FsFilesStorage extends AbstractFilesStorage
         //BUG: this stuff may not work if FILES and CACHES are on different filesystems
         //orig, suppress error because of xliff files have not original one
         $origDir = $cacheDir . DIRECTORY_SEPARATOR . "orig";
-        \Log::doJsonLog( $origDir );
+        Log::doJsonLog( $origDir );
 
         $origFilePath    = $this->getSingleFileInPath( $origDir );
         $tmpOrigFileName = $origFilePath;
@@ -229,10 +236,10 @@ class FsFilesStorage extends AbstractFilesStorage
          * Force the new filename if it is provided
          */
         $d = $cacheDir . DIRECTORY_SEPARATOR . "work";
-        \Log::doJsonLog( $d );
+        Log::doJsonLog( $d );
         $convertedFilePath = $this->getSingleFileInPath( $d );
 
-        \Log::doJsonLog( $convertedFilePath );
+        Log::doJsonLog( $convertedFilePath );
 
         $tmpConvertedFilePath = $convertedFilePath;
         if ( !empty( $newFileName ) ) {
@@ -242,16 +249,16 @@ class FsFilesStorage extends AbstractFilesStorage
             }
         }
 
-        \Log::doJsonLog( $convertedFilePath );  // <--------- TODO: this is empty!
+        Log::doJsonLog( $convertedFilePath );  // <--------- TODO: this is empty!
 
         $dest = $fileDir . DIRECTORY_SEPARATOR . "xliff" . DIRECTORY_SEPARATOR . static::basename_fix( $tmpConvertedFilePath );
 
-        \Log::doJsonLog( $dest );
+        Log::doJsonLog( $dest );
 
         $res &= $this->link( $convertedFilePath, $dest );
 
         if ( !$res ) {
-            throw new \UnexpectedValueException( 'Internal Error: Failed to create/copy the file on disk from cache.', -13 );
+            throw new UnexpectedValueException( 'Internal Error: Failed to create/copy the file on disk from cache.', -13 );
         }
 
         return (bool)$res;
@@ -262,12 +269,13 @@ class FsFilesStorage extends AbstractFilesStorage
      * Rebuild the filename that will be taken from disk in files directory
      *
      * @param $id
+     * @param $dateHashPath
      *
      * @return bool|string
      */
     public function getOriginalFromFileDir( $id, $dateHashPath ) {
 
-        list( $datePath, $hash ) = explode( DIRECTORY_SEPARATOR, $dateHashPath );
+        list( $datePath, ) = explode( DIRECTORY_SEPARATOR, $dateHashPath );
 
         //compose path
         $path = $this->filesDir . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $id . DIRECTORY_SEPARATOR . "orig";
@@ -287,11 +295,11 @@ class FsFilesStorage extends AbstractFilesStorage
      * @param $id
      * @param $dateHashPath
      *
-     * @return bool|mixed|string
+     * @return bool|string
      */
     public function getXliffFromFileDir( $id, $dateHashPath ) {
 
-        list( $datePath, $hash ) = explode( DIRECTORY_SEPARATOR, $dateHashPath );
+        list( $datePath, ) = explode( DIRECTORY_SEPARATOR, $dateHashPath );
 
         //compose path
         $path = $this->filesDir . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $id . DIRECTORY_SEPARATOR . "xliff";
@@ -320,9 +328,9 @@ class FsFilesStorage extends AbstractFilesStorage
             } elseif ( strpos( $linkFile, '.' ) !== false or strpos( $linkFile, '|' ) === false ) {
                 unset( $linkFiles[ $k ] );
             } else {
-                $filesHashInfo[ 'sha' ][]                        = $linkFiles[ $k ];
-                $filesHashInfo[ 'fileName' ][ $linkFiles[ $k ] ] = file(
-                        $dirToScan . DIRECTORY_SEPARATOR . $linkFiles[ $k ],
+                $filesHashInfo[ 'sha' ][]                 = $linkFile;
+                $filesHashInfo[ 'fileName' ][ $linkFile ] = file(
+                        $dirToScan . DIRECTORY_SEPARATOR . $linkFile,
                         FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES
                 );
             }
@@ -345,16 +353,16 @@ class FsFilesStorage extends AbstractFilesStorage
     /**
      * @param $uploadSession
      *
-     * @return mixed|void
+     * @return void
      */
     public static function moveFileFromUploadSessionToQueuePath( $uploadSession ) {
 
-        $destination = \INIT::$QUEUE_PROJECT_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession;
+        $destination = INIT::$QUEUE_PROJECT_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession;
         mkdir( $destination, 0755 );
         foreach (
-                $iterator = new \RecursiveIteratorIterator(
-                        new \RecursiveDirectoryIterator( \INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession, \RecursiveDirectoryIterator::SKIP_DOTS ),
-                        \RecursiveIteratorIterator::SELF_FIRST ) as $item
+                $iterator = new RecursiveIteratorIterator(
+                        new RecursiveDirectoryIterator( INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession, FilesystemIterator::SKIP_DOTS ),
+                        RecursiveIteratorIterator::SELF_FIRST ) as $item
         ) {
             if ( $item->isDir() ) {
                 mkdir( $destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName() );
@@ -363,7 +371,7 @@ class FsFilesStorage extends AbstractFilesStorage
             }
         }
 
-        \Utils::deleteDir( \INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession );
+        Utils::deleteDir( INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession );
 
     }
 
@@ -374,15 +382,15 @@ class FsFilesStorage extends AbstractFilesStorage
      */
 
     /**
+     * @param       $id_project
      * @param array $segments_metadata
      *
-     * @throws \UnexpectedValueException
      */
-    public static function storeFastAnalysisFile( $id_project, Array $segments_metadata = [] ) {
+    public static function storeFastAnalysisFile( $id_project, array $segments_metadata = [] ) {
 
-        $storedBytes = file_put_contents( \INIT::$ANALYSIS_FILES_REPOSITORY . DIRECTORY_SEPARATOR . "waiting_analysis_{$id_project}.ser", serialize( $segments_metadata ) );
+        $storedBytes = file_put_contents( INIT::$ANALYSIS_FILES_REPOSITORY . DIRECTORY_SEPARATOR . "waiting_analysis_$id_project.ser", serialize( $segments_metadata ) );
         if ( $storedBytes === false ) {
-            throw new \UnexpectedValueException( 'Internal Error: Failed to store segments for fast analysis on disk.', -14 );
+            throw new UnexpectedValueException( 'Internal Error: Failed to store segments for fast analysis on disk.', -14 );
         }
 
     }
@@ -391,14 +399,14 @@ class FsFilesStorage extends AbstractFilesStorage
      * @param $id_project
      *
      * @return array
-     * @throws \UnexpectedValueException
+     * @throws UnexpectedValueException
      *
      */
     public static function getFastAnalysisData( $id_project ) {
 
-        $analysisData = unserialize( file_get_contents( \INIT::$ANALYSIS_FILES_REPOSITORY . DIRECTORY_SEPARATOR . "waiting_analysis_{$id_project}.ser" ) );
+        $analysisData = unserialize( file_get_contents( INIT::$ANALYSIS_FILES_REPOSITORY . DIRECTORY_SEPARATOR . "waiting_analysis_$id_project.ser" ) );
         if ( $analysisData === false ) {
-            throw new \UnexpectedValueException( 'Internal Error: Failed to retrieve analysis information from disk.', -15 );
+            throw new UnexpectedValueException( 'Internal Error: Failed to retrieve analysis information from disk.', -15 );
         }
 
         return $analysisData;
@@ -411,7 +419,7 @@ class FsFilesStorage extends AbstractFilesStorage
      * @return bool
      */
     public static function deleteFastAnalysisFile( $id_project ) {
-        return unlink( \INIT::$ANALYSIS_FILES_REPOSITORY . DIRECTORY_SEPARATOR . "waiting_analysis_{$id_project}.ser" );
+        return unlink( INIT::$ANALYSIS_FILES_REPOSITORY . DIRECTORY_SEPARATOR . "waiting_analysis_$id_project.ser" );
     }
 
     /**
@@ -434,14 +442,14 @@ class FsFilesStorage extends AbstractFilesStorage
 
         //ensure old stuff is overwritten
         if ( is_dir( $thisZipDir ) ) {
-            \Utils::deleteDir( $thisZipDir );
+            Utils::deleteDir( $thisZipDir );
         }
 
         //create cache dir structure
         $created = mkdir( $thisZipDir, 0755, true );
 
         if ( !$created ) {
-            return $created;
+            return false;
         }
 
         //move original
@@ -450,9 +458,9 @@ class FsFilesStorage extends AbstractFilesStorage
         if ( !$outcome1 ) {
             //Original directory deleted!!!
             //CLEAR ALL CACHE
-            \Utils::deleteDir( $this->zipDir . DIRECTORY_SEPARATOR . $hash . self::ORIGINAL_ZIP_PLACEHOLDER );
+            Utils::deleteDir( $this->zipDir . DIRECTORY_SEPARATOR . $hash . self::ORIGINAL_ZIP_PLACEHOLDER );
 
-            return $outcome1;
+            return false;
         }
 
         unlink( $zipPath );
@@ -473,14 +481,14 @@ class FsFilesStorage extends AbstractFilesStorage
      */
     public function linkZipToProject( $create_date, $zipHash, $projectID ) {
 
-        $datePath = $this->getDatePath($create_date);
+        $datePath = $this->getDatePath( $create_date );
 
         $fileName = static::basename_fix( $this->getSingleFileInPath( $this->zipDir . DIRECTORY_SEPARATOR . $zipHash ) );
 
         //destination dir
         $newZipDir = $this->zipDir . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $projectID;
 
-        //check if doesn't exist
+        //check if it doesn't exist
         if ( !is_dir( $newZipDir ) ) {
             //make files' directory structure
             if ( !mkdir( $newZipDir, 0755, true ) ) {
@@ -496,7 +504,7 @@ class FsFilesStorage extends AbstractFilesStorage
             return $outcome1;
         }
 
-        \Utils::deleteDir( $this->zipDir . DIRECTORY_SEPARATOR . $zipHash );
+        Utils::deleteDir( $this->zipDir . DIRECTORY_SEPARATOR . $zipHash );
 
         return true;
 
@@ -512,9 +520,8 @@ class FsFilesStorage extends AbstractFilesStorage
     public function getOriginalZipPath( $projectDate, $projectID, $zipName ) {
 
         $datePath = date_create( $projectDate )->format( 'Ymd' );
-        $zipDir   = $this->zipDir . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $projectID . DIRECTORY_SEPARATOR . $zipName;
 
-        return $zipDir;
+        return $this->zipDir . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $projectID . DIRECTORY_SEPARATOR . $zipName;
 
     }
 
@@ -527,20 +534,9 @@ class FsFilesStorage extends AbstractFilesStorage
     public function getOriginalZipDir( $projectDate, $projectID ) {
 
         $datePath = date_create( $projectDate )->format( 'Ymd' );
-        $zipDir   = $this->zipDir . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $projectID;
 
-        return $zipDir;
+        return $this->zipDir . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $projectID;
 
-    }
-
-    /**
-     **********************************************************************************************
-     * 6. GENERAL METHODS
-     **********************************************************************************************
-     */
-
-    public function getZipDir() {
-        return $this->zipDir;
     }
 
     private function link( $source, $destination ) {
@@ -553,7 +549,7 @@ class FsFilesStorage extends AbstractFilesStorage
      **********************************************************************************************
      */
 
-    public function transferFiles($source, $destination){
+    public function transferFiles( $source, $destination ) {
     }
 }
 

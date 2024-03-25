@@ -11,56 +11,56 @@ namespace API\V2;
 use AMQHandler;
 use API\V2\Validators\ChunkPasswordValidator;
 use Constants_TranslationStatus;
+use Exception;
 use Features\ReviewExtended\ReviewUtils;
-use Features\SecondPassReview;
-use Projects_ProjectStruct;
 use Translations_SegmentTranslationDao;
 use WorkerClient;
 
 
 class JobStatusController extends BaseChunkController {
 
-    /**
-     * @var Projects_ProjectStruct
-     */
-    private $project;
-
     protected function afterConstruct() {
 
         $chunkValidator = new ChunkPasswordValidator( $this );
         $chunkValidator->onSuccess( function () use ( $chunkValidator ) {
-            $this->chunk   = $chunkValidator->getChunk();
-            $this->project = $this->chunk->getProject();
+            $this->chunk = $chunkValidator->getChunk();
         } );
 
         $this->appendValidator( $chunkValidator );
     }
 
+    /**
+     * Change the status of segments based on the provided parameters.
+     * @see api_v2_routes.php
+     * @return void
+     * @throws Exception
+     */
     public function changeSegmentsStatus() {
 
         $this->return404IfTheJobWasDeleted();
 
         $segments_id = $this->sanitizeSegmentIDs( $this->request->segments_id );
         $status      = strtoupper( $this->request->status );
-        $source_page = null ;
+        $source_page = null;
 
         if ( $this->request->revision_number ) {
-            $validRevisions = ReviewUtils::validRevisionNumbers( $this->chunk ) ;
+            $validRevisions = ReviewUtils::validRevisionNumbers( $this->chunk );
             if ( !in_array( $this->request->revision_number, $validRevisions ) ) {
-                $this->response->code( 400 ) ;
+                $this->response->code( 400 );
                 $this->response->json( [ 'error' => 'Invalid revision number' ] );
+
                 return;
             }
-            $source_page = ReviewUtils::revisionNumberToSourcePage( $this->request->revision_number ) ;
+            $source_page = ReviewUtils::revisionNumberToSourcePage( $this->request->revision_number );
         }
 
         if ( in_array( $status, [
                 Constants_TranslationStatus::STATUS_TRANSLATED, Constants_TranslationStatus::STATUS_APPROVED, Constants_TranslationStatus::STATUS_APPROVED2
         ] ) ) {
-            $unchangeble_segments = Translations_SegmentTranslationDao::getUnchangebleStatus(
+            $unchangeable_segments = Translations_SegmentTranslationDao::getUnchangebleStatus(
                     $this->chunk, $segments_id, $status, $source_page
             );
-            $segments_id          = array_diff( $segments_id, $unchangeble_segments );
+            $segments_id          = array_diff( $segments_id, $unchangeable_segments );
 
             if ( !empty( $segments_id ) ) {
 
@@ -77,14 +77,14 @@ class JobStatusController extends BaseChunkController {
                                     'revision_number'    => $this->request->revision_number
                             ], [ 'persistent' => true ]
                     );
-                } catch ( \Exception $e ) {
+                } catch ( Exception $e ) {
                     $this->response->json( [ 'error_message' => $e->getMessage(), 'data' => true, 'unchangeble_segments' => $segments_id ] );
 
                     return;
                 }
             }
 
-            $this->response->json( [ 'data' => true, 'unchangeble_segments' => $unchangeble_segments ] );
+            $this->response->json( [ 'data' => true, 'unchangeble_segments' => $unchangeable_segments ] );
         }
     }
 

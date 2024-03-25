@@ -1,24 +1,27 @@
 <?php
 namespace AsyncTasks\Workers;
 
-use EditLog\EditLogSegmentStruct;
 use Jobs_JobDao;
 use Jobs_JobStruct;
 use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\AbstractWorker;
 use TaskRunner\Commons\QueueElement;
 use TaskRunner\Exceptions\EndQueueException;
+use Utils;
 
 //include_once INIT::$UTILS_ROOT . "/MyMemory.copyrighted.php";
 
 /**
  * Created by PhpStorm.
- * User: Hashashiyyin
+ * User: Ostico
  * Date: 13/06/16
  * Time: 11:49
  */
 class JobsWorker extends AbstractWorker {
 
+    /**
+     * @throws EndQueueException
+     */
     public function process( AbstractElement $queueElement ) {
 
         /**
@@ -28,7 +31,7 @@ class JobsWorker extends AbstractWorker {
 
         $jobStruct = new Jobs_JobStruct( $queueElement->params->toArray() );
 
-        //re initialize DB if socked is closed
+        //re-initialize DB if socked is closed
         $this->_checkDatabaseConnection();
 
         $this->_recountAvgPee( $jobStruct );
@@ -51,7 +54,7 @@ class JobsWorker extends AbstractWorker {
         if ( isset( $queueElement->reQueueNum ) && $queueElement->reQueueNum >= 100 ) {
 
             $msg = "\n\n Error Set Contribution  \n\n " . var_export( $queueElement, true );
-            \Utils::sendErrMailReport( $msg );
+            Utils::sendErrMailReport( $msg );
             $this->_doLog( "--- (Worker " . $this->_workerPid . ") :  Frame Re-queue max value reached, acknowledge and skip." );
             throw new EndQueueException( "--- (Worker " . $this->_workerPid . ") :  Frame Re-queue max value reached, acknowledge and skip.", self::ERR_REQUEUE_END );
 

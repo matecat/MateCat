@@ -2,9 +2,7 @@
 
 namespace Validator;
 
-use Engine;
 use Engines\DeepL\DeepLApiClient;
-use Engines\DeepL\DeepLApiException;
 use EnginesModel\DeepLStruct;
 use EnginesModel_EngineDAO;
 use Exception;

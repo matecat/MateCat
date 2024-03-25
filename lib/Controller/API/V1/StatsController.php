@@ -5,7 +5,6 @@ namespace API\V1;
 
 use API\V2\KleinController;
 use API\V2\Validators\ChunkPasswordValidator;
-use CatUtils;
 use Chunks_ChunkStruct;
 use WordCount\WordCountStruct;
 

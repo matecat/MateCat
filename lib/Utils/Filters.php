@@ -1,7 +1,6 @@
 <?php
 
 use FilesStorage\AbstractFilesStorage;
-use FilesStorage\FilesStorageFactory;
 
 class Filters {
 
@@ -166,7 +165,7 @@ class Filters {
 
 
             $tmpFiles[ $id ] = $tmpXliffFile;
-            $x               = file_put_contents( $tmpXliffFile, $xliffData[ 'document_content' ] );
+            file_put_contents( $tmpXliffFile, $xliffData[ 'document_content' ] );
 
             $dataGroups[ $id ] = [ 'xliffContent' => Utils::curlFile( $tmpXliffFile ) ];
         }

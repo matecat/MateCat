@@ -2,6 +2,8 @@
 
 namespace Features\QaCheckBlacklist\Utils;
 
+use Chunks_ChunkDao;
+use Chunks_ChunkStruct;
 use Exception;
 use Features\QaCheckBlacklist\AbstractBlacklist;
 use Features\QaCheckBlacklist\BlacklistFromTextFile;
@@ -11,10 +13,13 @@ use FilesStorage\FilesStorageFactory;
 use FilesStorage\S3FilesStorage;
 use Glossary\Blacklist\BlacklistDao;
 use INIT;
+use Jobs_JobDao;
 use Jobs_JobStruct;
 use Log;
+use Predis\Client;
+use Predis\Connection\ConnectionException;
+use ReflectionException;
 use Translations\WarningDao;
-use Translations\WarningModel;
 
 class BlacklistUtils
 {
@@ -26,7 +31,7 @@ class BlacklistUtils
      */
     private $redis;
 
-    public function __construct(\Predis\Client $redis) {
+    public function __construct( Client $redis) {
         $this->redis = $redis;
     }
 
@@ -49,7 +54,7 @@ class BlacklistUtils
         $this->clearCached($this->getJobCacheRedisKey($model->id_job, $model->password));
 
         // delete all translation_warnings associated to this job
-        $chunk = \Chunks_ChunkDao::getByIdAndPassword($model->id_job, $model->password);
+        $chunk = Chunks_ChunkDao::getByIdAndPassword($model->id_job, $model->password);
         $warnings = WarningDao::findByChunkAndScope($chunk, 'blacklist');
 
         foreach ($warnings as $warning){
@@ -71,7 +76,7 @@ class BlacklistUtils
         // Set a cache on jobdao requests here because
         // we need only id and password here and they do not changes,
         // btw even if they changes, a new redis value is set.
-        $job = \Jobs_JobDao::getByIdAndPassword($model->id_job, $model->password, 5 * 60);
+        $job = Jobs_JobDao::getByIdAndPassword($model->id_job, $model->password, 5 * 60);
         $blacklist = $this->getAbstractBlacklist($job);
 
         return $blacklist->getWords();
@@ -79,15 +84,15 @@ class BlacklistUtils
 
     /**
      * @param                     $filePath
-     * @param \Chunks_ChunkStruct $chunkStruct
+     * @param Chunks_ChunkStruct $chunkStruct
      * @param null                $uid
      *
      * @return mixed
-     * @throws \Predis\Connection\ConnectionException
-     * @throws \ReflectionException
+     * @throws ConnectionException
+     * @throws ReflectionException
      * @throws Exception
      */
-    public function save($filePath, \Chunks_ChunkStruct $chunkStruct, $uid = null)
+    public function save($filePath, Chunks_ChunkStruct $chunkStruct, $uid = null)
     {
         if(false === $this->checkIfExists($chunkStruct->id, $chunkStruct->password)) {
             $fs = FilesStorageFactory::create();
@@ -241,6 +246,6 @@ class BlacklistUtils
      */
     private function getJobCacheRedisKey($jid, $password)
     {
-        return md5("blacklist:id_job:{$jid}:password:{$password}");
+        return md5("blacklist:id_job:$jid:password:$password");
     }
 }

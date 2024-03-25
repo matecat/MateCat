@@ -9,10 +9,9 @@
 namespace Features;
 
 use BasicFeatureStruct;
-use catController;
 use Chunks_ChunkStruct;
-use Constants;
-use Exceptions\NotFoundException;
+use createProjectController;
+use Exception;
 use Features;
 use Features\ReviewExtended\Controller\API\Json\ProjectUrls;
 use Features\ReviewExtended\ReviewUtils as ReviewUtils;
@@ -21,8 +20,10 @@ use Features\TranslationVersions\Model\TranslationEventDao;
 use Klein\Klein;
 use LQA\ChunkReviewDao;
 use LQA\ChunkReviewStruct;
+use NewController;
 use Projects_MetadataDao;
 use Projects_ProjectDao;
+use Projects_ProjectStruct;
 
 class SecondPassReview extends BaseFeature {
     const FEATURE_CODE = 'second_pass_review';
@@ -32,9 +33,7 @@ class SecondPassReview extends BaseFeature {
     ];
 
     public static function projectUrls( $formatted ) {
-        $projectUrlsDecorator = new ProjectUrls( $formatted->getData() );
-
-        return $projectUrlsDecorator;
+        return new ProjectUrls( $formatted->getData() );
     }
 
     public static function loadRoutes( Klein $klein ) {
@@ -44,11 +43,11 @@ class SecondPassReview extends BaseFeature {
 
     /**
      * @param ChunkReviewStruct       $chunkReview
-     * @param \Projects_ProjectStruct $projectStruct
+     * @param Projects_ProjectStruct $projectStruct
      *
-     * @throws \Exception
+     * @throws Exception
      */
-    public function chunkReviewRecordCreated( ChunkReviewStruct $chunkReview, \Projects_ProjectStruct $projectStruct ) {
+    public function chunkReviewRecordCreated( ChunkReviewStruct $chunkReview, Projects_ProjectStruct $projectStruct ) {
         // This is needed to properly populate advancement wc for ICE matches
         ( new ChunkReviewModel( $chunkReview ) )->recountAndUpdatePassFailResult( $projectStruct );
     }
@@ -59,7 +58,7 @@ class SecondPassReview extends BaseFeature {
      * @param $project_id
      * @param $_analyzed_report
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function afterTMAnalysisCloseProject( $project_id, $_analyzed_report ) {
         $project      = Projects_ProjectDao::findById( $project_id, 300 );
@@ -75,11 +74,12 @@ class SecondPassReview extends BaseFeature {
      *     to allow current projects to be consistent
      * YYY [Remove] backward compatibility for current projects
      *
-     * @param $inputStats
-     * @param $options
+     * @param        $inputStats
+     * @param        $options
+     * @param string $word_count_type
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     public function filterStatsResponse( $inputStats, $options, $word_count_type = Projects_MetadataDao::WORD_COUNT_EQUIVALENT ) {
 
@@ -137,16 +137,15 @@ class SecondPassReview extends BaseFeature {
 
     /**
      * @param $projectFeatures
-     * @param $controller \NewController|\createProjectController
+     * @param $controller NewController|createProjectController
      *
      * @return mixed
-     * @throws \Exception
+     * @throws Exception
      */
     public function filterCreateProjectFeatures( $projectFeatures, $controller ) {
         $projectFeatures[ self::FEATURE_CODE ] = new BasicFeatureStruct( [ 'feature_code' => self::FEATURE_CODE ] );
-        $projectFeatures                       = $controller->getFeatureSet()->filter( 'filterOverrideReviewExtended', $projectFeatures, $controller );
 
-        return $projectFeatures;
+        return $controller->getFeatureSet()->filter( 'filterOverrideReviewExtended', $projectFeatures, $controller );
     }
 
 }

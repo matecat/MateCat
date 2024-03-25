@@ -7,7 +7,6 @@
  * Time: 10:17
  */
 
-use Klein\Klein;
 global $klein;
 
 $klein->respond( '/utils/pee', function () {

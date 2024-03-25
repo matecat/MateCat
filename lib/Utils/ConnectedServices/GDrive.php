@@ -3,20 +3,19 @@
 
 namespace ConnectedServices;
 
-use Exception;
-use INIT;
 use ConnectedServices\GDrive\GoogleClientFactory;
+use Exception;
 
 class GDrive {
 
     /**
      * Generate OAuth URL with GDrive Scopes added
+     * @throws Exception
      */
     public static function generateGDriveAuthUrl() {
         $oauthClient = GoogleClientFactory::create();
-        $authURL     = $oauthClient->createAuthUrl();
 
-        return $authURL;
+        return $oauthClient->createAuthUrl();
     }
 
     /**
@@ -25,8 +24,8 @@ class GDrive {
      *
      * @param $raw_token
      *
-     * @return mixed
-     * @throws \Exception
+     * @return false|string
+     * @throws Exception
      */
     public static function getsNewToken( $raw_token ) {
         $client = GoogleClientFactory::create();

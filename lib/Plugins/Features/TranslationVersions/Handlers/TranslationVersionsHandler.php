@@ -6,8 +6,6 @@ use Chunks_ChunkStruct;
 use Constants_TranslationStatus;
 use Exception;
 use Exceptions\ControllerReturnException;
-use Exceptions\ValidationError;
-use Features;
 use Features\TranslationVersions\Model\TranslationEvent;
 use Features\TranslationVersions\Model\TranslationVersionDao;
 use Features\TranslationVersions\Model\TranslationVersionStruct;
@@ -19,6 +17,7 @@ use Projects_ProjectStruct;
 use ReflectionException;
 use Translations_SegmentTranslationStruct;
 use Users_UserStruct;
+use Utils;
 
 /**
  * Class TranslationVersionsHandler
@@ -127,7 +126,7 @@ class TranslationVersionsHandler implements VersionHandlerInterface {
 
         if (
                 empty( $old_translation ) ||
-                \Utils::stringsAreEqual( $new_translation->translation, $old_translation->translation )
+                Utils::stringsAreEqual( $new_translation->translation, $old_translation->translation )
         ) {
             return false;
         }

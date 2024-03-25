@@ -10,6 +10,8 @@ namespace API\App;
 
 use API\App\Json\CompatibilityChunk;
 use API\V3\ChunkController;
+use Exception;
+use Exceptions\NotFoundException;
 
 /**
  * ( 2023/11/06 )
@@ -23,8 +25,8 @@ use API\V3\ChunkController;
 class CompatibilityChunkController extends ChunkController {
 
     /**
-     * @throws \Exception
-     * @throws \Exceptions\NotFoundException
+     * @throws Exception
+     * @throws NotFoundException
      */
     public function show() {
 

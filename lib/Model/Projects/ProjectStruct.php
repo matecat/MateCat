@@ -3,10 +3,10 @@
 use DataAccess\ArrayAccessTrait;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
-use FilesStorage\S3FilesStorage;
 use LQA\ModelDao;
 use LQA\ModelStruct;
 use Teams\TeamDao;
+use Teams\TeamStruct;
 
 class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct, ArrayAccess {
 
@@ -101,6 +101,7 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
         if ( array_key_exists($key, $meta) ) {
             return $meta[$key];
         }
+        return null;
     }
 
     /**
@@ -146,7 +147,7 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
     }
 
     /**
-     * @return null|\Teams\TeamStruct
+     * @return null|TeamStruct
      */
     public function getTeam() {
         if ( is_null( $this->id_team ) ) {
@@ -252,7 +253,7 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
         $originalZipPath = $fs->getOriginalZipPath( $this->create_date, $this->id, $zipName );
 
         if( AbstractFilesStorage::isOnS3() ){
-            $params[ 'bucket' ]  = \INIT::$AWS_STORAGE_BASE_BUCKET;
+            $params[ 'bucket' ]  = INIT::$AWS_STORAGE_BASE_BUCKET;
             $params[ 'key' ]     = $originalZipPath;
             $params[ 'save_as' ] = "/tmp/" . AbstractFilesStorage::pathinfo_fix( $originalZipPath, PATHINFO_BASENAME );
             $client              = $fs::getStaticS3Client();
