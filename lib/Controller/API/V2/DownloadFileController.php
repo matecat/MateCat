@@ -470,6 +470,7 @@ class DownloadFileController extends AbstractDownloadController
                         $oContent = array_pop( $output_content );
 
                         $filename = $this->generateFilename($oContent->output_filename);
+                        $pathinfo = pathinfo($filename);
 
                         if ( $pathinfo[ 'extension' ] == 'zip' ) {
                             $this->setFilename( $filename );
