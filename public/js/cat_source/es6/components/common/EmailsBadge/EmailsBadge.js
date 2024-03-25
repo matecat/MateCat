@@ -27,7 +27,13 @@ const stringIncludesSeparator = (text) => {
   return EMAIL_SEPARATORS.some((separator) => lastChar === separator)
 }
 
-export const EmailsBadge = ({name, onChange, value = [], error}) => {
+export const EmailsBadge = ({
+  name,
+  onChange,
+  value = [],
+  placeholder,
+  error,
+}) => {
   const areaRef = useRef()
   const inputRef = useRef()
   const highlightedEmailIndexRef = useRef(-1)
@@ -184,7 +190,6 @@ export const EmailsBadge = ({name, onChange, value = [], error}) => {
   }
   return (
     <div className="email-badge">
-      <label htmlFor={name}>Email addresses</label>
       <div
         ref={areaRef}
         className="email-badge-fakeInput"
@@ -195,7 +200,9 @@ export const EmailsBadge = ({name, onChange, value = [], error}) => {
       >
         {emails.length === 0 && inputValue === '' ? (
           <span className="email-badge-placeholder">
-            john@email.com, federico@email.com, sara@email.com
+            {placeholder
+              ? placeholder
+              : 'john@email.com, federico@email.com, sara@email.com'}
           </span>
         ) : (
           emails.map(renderChip)
@@ -225,5 +232,6 @@ EmailsBadge.propTypes = {
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
   value: PropTypes.arrayOf(PropTypes.string),
+  placeholder: PropTypes.string,
   error: PropTypes.object,
 }

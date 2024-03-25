@@ -7,6 +7,7 @@ import IconSearch from '../icons/IconSearch'
 import IconClose from '../icons/IconClose'
 import TEXT_UTILS from '../../utils/textUtils'
 import ModalsActions from '../../actions/ModalsActions'
+import {EmailsBadge} from '../common/EmailsBadge/EmailsBadge'
 class ModifyTeam extends React.Component {
   constructor(props) {
     super(props)
@@ -18,6 +19,7 @@ class ModifyTeam extends React.Component {
       readyToSend: false,
       resendInviteArray: [],
       searchMember: '',
+      inviteEmails: [],
     }
     this.updateTeam = this.updateTeam.bind(this)
     this.onLabelCreate = this.onLabelCreate.bind(this)
@@ -114,26 +116,6 @@ class ModifyTeam extends React.Component {
     this.setState({
       resendInviteArray: resendInviteArray,
     })
-  }
-
-  handleKeyPressUserInput(e) {
-    let mail = $(this.inputNewUSer).find('input.search').val()
-    if (e.key == 'Enter') {
-      if (mail == '') {
-        this.addUsers()
-      }
-      return
-    }
-    if (e.key === ' ') {
-      e.stopPropagation()
-      e.preventDefault()
-      this.createLabel(mail)
-    } else {
-      this.setState({
-        inputUserError: false,
-      })
-    }
-    return false
   }
 
   addUsers() {
@@ -415,6 +397,10 @@ class ModifyTeam extends React.Component {
     this.setState({searchMember: event.target.value})
   }
 
+  onChangeInviteEmails = (emails) => {
+    console.log(emails) //inviteEmails
+  }
+
   render() {
     let usersError = this.state.inputUserError ? 'error' : ''
     let orgNameError = this.state.inputNameError ? 'error' : ''
@@ -470,26 +456,12 @@ class ModifyTeam extends React.Component {
             <div className="ui grid left aligned">
               <div className="sixteen wide column">
                 <h2>Manage Members</h2>
-                {/* <div className={"ui fluid icon input " + usersError }>
-                                    <input type="text" placeholder="insert email and press enter"
-                                           onKeyUp={this.handleKeyPressUserInput.bind(this)}
-                                           ref={(inputNewUSer) => this.inputNewUSer = inputNewUSer}/>
-                                </div>
-                                {this.state.inputUserError ? (
-                                        <div className="validation-error"><span className="text" style={{color: 'red', fontSize: '14px'}}>A valid email is required</span></div>
-                                    ): ''}*/}
-                <div
-                  className={
-                    'ui multiple search selection dropdown ' + usersError
-                  }
-                  onKeyUp={this.handleKeyPressUserInput.bind(this)}
-                  ref={(inputNewUSer) => (this.inputNewUSer = inputNewUSer)}
-                >
-                  {/* <input name="tags" type="hidden" />
-                  <div className="default text">
-                    Add new people (separate email addresses with a comma)
-                  </div> */}
-                </div>
+                <EmailsBadge
+                  name="team"
+                  value={this.state.inviteEmails}
+                  onChange={this.onChangeInviteEmails}
+                  placeholder="Add new people (separate email addresses with a comma)"
+                />
                 {this.state.inputUserError ? (
                   <div className="validation-error">
                     <span

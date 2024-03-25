@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import IconClose from '../../icons/IconClose'
+import Close from '../../../../../../img/icons/Close'
 
 export const TAG_STATUS = {
   DEFAULT: 'default',
@@ -22,8 +22,8 @@ export const Tag = ({
   return (
     <span className={`email-badge-tag ${[status]}`}>
       {children}
-      <div onClick={handleCLick}>
-        <IconClose />
+      <div className="email-badge-tag-button-close" onClick={handleCLick}>
+        <Close size={18} />
       </div>
     </span>
   )

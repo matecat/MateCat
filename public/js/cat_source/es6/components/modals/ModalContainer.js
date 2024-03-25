@@ -1,5 +1,4 @@
-import React, {useEffect, useRef} from 'react'
-import $ from 'jquery'
+import React, {useRef} from 'react'
 
 export const ModalContainer = ({
   title,
@@ -10,7 +9,7 @@ export const ModalContainer = ({
 }) => {
   const ref = useRef(null)
 
-  const handleClose = (event) => {
+  const handleClose = () => {
     onClose()
   }
 
@@ -18,25 +17,19 @@ export const ModalContainer = ({
     document.activeElement.blur()
   }, [])
 
-  // prevent propagation keydown events
-  useEffect(() => {
-    if (!ref.current) return
-    const refTag = ref.current
-    const stopPropagation = (event) => event.stopPropagation()
-    const preventDefault = (event) =>
-      event.key === 'Tab' && event.preventDefault()
-    refTag.addEventListener('keydown', stopPropagation)
-    refTag.addEventListener('keydown', preventDefault)
-    refTag.focus()
-
-    return () => {
-      refTag.removeEventListener('keydown', stopPropagation)
-      refTag.removeEventListener('keydown', preventDefault)
-    }
-  }, [ref])
+  const onKeyDownHandler = (event) => {
+    event.stopPropagation()
+    if (event.key === 'Tab') event.preventDefault()
+  }
 
   return (
-    <div ref={ref} tabIndex="0" id="matecat-modal" className="matecat-modal">
+    <div
+      ref={ref}
+      tabIndex="0"
+      id="matecat-modal"
+      className="matecat-modal"
+      onKeyDown={onKeyDownHandler}
+    >
       <div
         className="matecat-modal-background"
         onClick={() => {

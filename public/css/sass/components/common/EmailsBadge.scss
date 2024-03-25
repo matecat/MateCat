@@ -22,12 +22,14 @@
   min-width: 0;
   width: 100%;
   min-height: 90px;
-  max-height: 320px;
+  max-height: 200px;
   padding: 12px;
   outline: none;
-  background-color: $grey8;
   cursor: text;
   overflow-y: auto;
+  box-shadow: inset 0 1px 3px #ddd;
+  border: 1px solid rgba(34, 36, 38, 0.15);
+  background-color: white;
 }
 
 .email-badge-wrapper {
@@ -42,21 +44,23 @@
     padding: 0;
     outline: none;
     background: transparent;
-    color: $white;
+    color: black;
     overflow: hidden;
     text-overflow: ellipsis;
+    line-height: 1.5;
   }
 
   span {
     visibility: hidden;
     height: 0;
+    line-height: 0;
   }
 }
 
 .email-badge-placeholder {
   position: absolute;
   inset: 12px;
-  color: $grey9;
+  color: $grey7;
 }
 
 .email-badge-item {
@@ -76,12 +80,12 @@
   cursor: default;
 
   &.default {
-    background-color: $grey8;
-    color: $white;
+    background-color: $grey4;
+    color: $grey6;
   }
   &.selected {
-    background-color: $white;
-    color: $grey9;
+    background-color: $translatedBlue;
+    color: $white;
   }
   &.invalid {
     background-color: $redDefault;
@@ -105,4 +109,9 @@
       color: $grey8 !important;
     }
   }
+}
+
+.email-badge-tag-button-close {
+  display: flex;
+  cursor: pointer;
 }
