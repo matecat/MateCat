@@ -168,6 +168,7 @@ class TMAnalysisWorker extends AbstractWorker {
         $new_match_type = $this->_getNewMatchType(
             ( stripos( $firstAvailableNotMTMatch[ 'created_by' ], "MT" ) !== false ? "MT" : $suggestion_match ),
             $queueElement->params->match_type,
+            $queueElement->params->fast_exact_match_type,
             $equivalentWordMapping,
             /* is Public TM */
             empty( $firstAvailableNotMTMatch[ 'memory_key' ] ),
@@ -240,8 +241,6 @@ class TMAnalysisWorker extends AbstractWorker {
             $this->_matches[ $k ][ 'translation' ] = $filter->fromLayer2ToLayer0( html_entity_decode($this->_matches[ $k ][ 'translation' ]) );
             $this->_matches[ $k ][ 'raw_translation' ] = $filter->fromLayer2ToLayer0( $this->_matches[ $k ][ 'raw_translation' ] );
         }
-
-        Log::doJsonLog("PIPPO . " . json_encode($this->_matches));
 
         $suggestion_json   = json_encode( $this->_matches );
 
@@ -407,6 +406,7 @@ class TMAnalysisWorker extends AbstractWorker {
      *
      * @param string $tm_match_type
      * @param string $fast_match_type
+     * @param string $fast_exact_match_type
      * @param array  $equivalentWordMapping
      * @param bool   $publicTM
      * @param bool   $isICE
@@ -414,8 +414,14 @@ class TMAnalysisWorker extends AbstractWorker {
      * @return string
      * @throws Exception
      */
-    protected function _getNewMatchType( $tm_match_type, $fast_match_type, $equivalentWordMapping, $publicTM = false, $isICE = false ) {
-
+    protected function _getNewMatchType(
+        $tm_match_type,
+        $fast_match_type,
+        $fast_exact_match_type,
+        &$equivalentWordMapping,
+        $publicTM = false,
+        $isICE = false
+    ) {
         $fast_match_type = strtoupper( $fast_match_type );
         $fast_rate_paid  = $equivalentWordMapping[ $fast_match_type ];
 
@@ -491,6 +497,23 @@ class TMAnalysisWorker extends AbstractWorker {
 
         // if there is a repetition with a 100% match type, return 100%
         if ( $ind == 100 && $fast_match_type == 'REPETITIONS' ) {
+            return $tm_match_fuzzy_band;
+        }
+
+        // if there is a repetition from Fast, keep it in REPETITIONS bucket
+        if ( $fast_match_type == 'REPETITIONS' ) {
+            return $fast_match_type;
+        }
+
+        // if Fast match type > TM match type, return it
+        // otherwise return the TM match type
+        if( $fast_match_type === 'INTERNAL' ){
+            $ind_fast = intval( $fast_exact_match_type );
+
+            if($ind_fast > $ind){
+                return $fast_match_type;
+            }
+
             return $tm_match_fuzzy_band;
         }
 
