@@ -10,6 +10,8 @@ import CommentsConstants from '../constants/CommentsConstants'
 EventEmitter.prototype.setMaxListeners(0)
 
 let CommentsStore = assign({}, EventEmitter.prototype, {
+  users: undefined,
+  draftComments: {},
   db: {
     types: {sticky: 3, resolve: 2, comment: 1},
     segments: {},
@@ -77,6 +79,7 @@ let CommentsStore = assign({}, EventEmitter.prototype, {
         })
       }
       CommentsStore.db.refreshHistory()
+      CommentsStore.saveDraftComment(data.id_segment, '')
     },
     deleteSegment: function (idComment, idSegment) {
       const segmentComments = CommentsStore.db.segments[idSegment]
@@ -85,7 +88,6 @@ let CommentsStore = assign({}, EventEmitter.prototype, {
       )
       CommentsStore.db.refreshHistory()
     },
-
     getCommentsBySegment: function (s) {
       var s = Number(s)
 
@@ -120,6 +122,32 @@ let CommentsStore = assign({}, EventEmitter.prototype, {
       }
       return count
     },
+    getResolvedThreadCount: function () {
+      var count = 0
+
+      for (var segmentID in CommentsStore.db.segments) {
+        const el =
+          CommentsStore.db.segments[segmentID][
+            CommentsStore.db.segments[segmentID].length - 1
+          ]
+        if (el && el.message_type && parseInt(el.message_type) === 2) count++
+      }
+      return count
+    },
+  },
+  saveDraftComment: (sid, comment) => {
+    CommentsStore.draftComments[sid] = comment
+  },
+  getDraftComment: (sid) => {
+    return CommentsStore.draftComments[sid]
+  },
+  setUsers: (users) => {
+    const teamTemp = {
+      uid: 'team',
+      first_name: 'Team',
+      last_name: '',
+    }
+    CommentsStore.users = [teamTemp, ...users]
   },
   getCommentsBySegment: function (sid) {
     return CommentsStore.db.getCommentsBySegment(sid)
@@ -153,15 +181,18 @@ AppDispatcher.register(function (action) {
       CommentsStore.emitChange(action.actionType, action.sid)
       break
     case CommentsConstants.SET_TEAM_USERS:
-      CommentsStore.users = action.users
-      CommentsStore.emitChange(action.actionType, action.users)
+      CommentsStore.setUsers(action.users)
+      CommentsStore.emitChange(action.actionType, CommentsStore.users)
       break
     case CommentsConstants.DELETE_COMMENT:
       CommentsStore.db.deleteSegment(action.idComment, action.sid)
       CommentsStore.emitChange(action.actionType, action.sid)
       break
+    case CommentsConstants.SAVE_DRAFT:
+      CommentsStore.saveDraftComment(action.sid, action.comment)
+      break
     default:
       CommentsStore.emitChange(action.actionType, action.data)
   }
 })
-module.exports = CommentsStore
+export default CommentsStore

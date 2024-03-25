@@ -11,7 +11,7 @@ import Immutable from 'immutable'
 
 EventEmitter.prototype.setMaxListeners(0)
 
-let TeamsStore = assign({}, EventEmitter.prototype, {
+const TeamsStore = assign({}, EventEmitter.prototype, {
   teams: Immutable.fromJS([]),
   selectedTeam: {},
   user: null,
@@ -72,6 +72,11 @@ let TeamsStore = assign({}, EventEmitter.prototype, {
 
   getUser: function () {
     return this.user
+  },
+  getUserName: function () {
+    return this.user
+      ? `${this.user.user.first_name} ${this.user.user.last_name}`
+      : 'Anonymous'
   },
 
   emitChange: function () {
@@ -148,4 +153,4 @@ AppDispatcher.register(function (action) {
       TeamsStore.selectedTeam = action.selectedTeam
   }
 })
-module.exports = TeamsStore
+export default TeamsStore

@@ -145,12 +145,11 @@ function SegmentFooter() {
       getMetadataNoteTemplate: () =>
         segment.metadata?.length > 0 ? segment.metadata : null,
       allowHTML: () => '',
+      getNoteContentStructure: (note) => note,
     }
     const notes =
       SegmentFooterTabMessages.prototype.getNotes.call(tabMessagesContext)
-    return (
-      (Array.isArray(notes) && notes.length > 0) || segment.metadata.length > 0
-    )
+    return Array.isArray(notes) && notes.length > 0
   }, [segment])
 
   const nextTab = useMemo(() => {
@@ -368,7 +367,7 @@ function SegmentFooter() {
         return tabItems.find(({code}) => code === 'gl')?.isLoading
       case 'cc':
         if (!clientConnected) return true
-        return tabItems.find(({code}) => code === 'gl')?.isLoading
+        return tabItems.find(({code}) => code === 'cc')?.isLoading
       default:
         return false
     }

@@ -1,4 +1,4 @@
-import {rest} from 'msw'
+import {http, HttpResponse} from 'msw'
 import React from 'react'
 import {screen, waitFor, render} from '@testing-library/react'
 
@@ -8,77 +8,71 @@ import Dashboard from './Dashboard'
 xtest('renders properly', async () => {
   mswServer.use(
     ...[
-      rest.get('*api/app/user', (req, res, ctx) => {
-        return res(
-          ctx.status(200),
-          ctx.json({
-            user: {
-              uid: 123,
-              first_name: 'Bruce',
-              last_name: 'Wayne',
-              email: 'bruce.wayne@translated.net',
-              has_password: false,
-            },
-            connected_services: [],
-            metadata: {
-              gplus_picture: 'https://fake-picture.jpg',
-            },
-            teams: [
-              {
-                id: 116065,
-                name: 'Personal',
-                type: 'personal',
-                created_at: '2021-04-15T14:19:25+02:00',
-                created_by: 96386,
-                members: [
-                  {
-                    id: 121346,
-                    id_team: 116065,
-                    user: {
-                      uid: 96386,
-                      first_name: 'Bruce',
-                      last_name: 'Wayne',
-                      email: 'bruce.wayne@translated.net',
-                      has_password: false,
-                    },
-                    user_metadata: {
-                      gplus_picture: 'https://fake-picture.jpg',
-                    },
-                    projects: 0,
+      http.get('*api/app/user', () => {
+        return HttpResponse.json({
+          user: {
+            uid: 123,
+            first_name: 'Bruce',
+            last_name: 'Wayne',
+            email: 'bruce.wayne@translated.net',
+            has_password: false,
+          },
+          connected_services: [],
+          metadata: {
+            gplus_picture: 'https://fake-picture.jpg',
+          },
+          teams: [
+            {
+              id: 116065,
+              name: 'Personal',
+              type: 'personal',
+              created_at: '2021-04-15T14:19:25+02:00',
+              created_by: 96386,
+              members: [
+                {
+                  id: 121346,
+                  id_team: 116065,
+                  user: {
+                    uid: 96386,
+                    first_name: 'Bruce',
+                    last_name: 'Wayne',
+                    email: 'bruce.wayne@translated.net',
+                    has_password: false,
                   },
-                ],
-                pending_invitations: [],
-              },
-            ],
-          }),
-        )
-      }),
-      rest.get('*api/v2/teams/:id/members', (req, res, ctx) => {
-        return res(
-          ctx.status(200),
-          ctx.json({
-            members: [
-              {
-                id: 123,
-                id_team: 123,
-                user: {
-                  uid: 123,
-                  first_name: 'Bruce',
-                  last_name: 'Wayne',
-                  email: 'bruce.wayne@translated.net',
-                  has_password: false,
+                  user_metadata: {
+                    gplus_picture: 'https://fake-picture.jpg',
+                  },
+                  projects: 0,
                 },
-                user_metadata: {
-                  gplus_picture: 'https://fake-picture.jpg',
-                },
-                projects: 0,
-              },
-            ],
-            pending_invitations: [],
-          }),
-        )
+              ],
+              pending_invitations: [],
+            },
+          ],
+        })
       }),
-      rest.post('*', (req, res, ctx) => {
+      http.get('*api/v2/teams/:id/members', () => {
+        return HttpResponse.json({
+          members: [
+            {
+              id: 123,
+              id_team: 123,
+              user: {
+                uid: 123,
+                first_name: 'Bruce',
+                last_name: 'Wayne',
+                email: 'bruce.wayne@translated.net',
+                has_password: false,
+              },
+              user_metadata: {
+                gplus_picture: 'https://fake-picture.jpg',
+              },
+              projects: 0,
+            },
+          ],
+          pending_invitations: [],
+        })
+      }),
+      http.post('*', () => {
         const queryParams = req.url.searchParams
         const action = queryParams.get('action')
 
@@ -86,16 +80,13 @@ xtest('renders properly', async () => {
           throw new Error('msw :: branch not mocked, yet.')
         }
 
-        return res(
-          ctx.status(200),
-          ctx.json({
-            errors: [],
-            data: [],
-            page: 1,
-            pnumber: '0',
-            pageStep: 10,
-          }),
-        )
+        return HttpResponse.json({
+          errors: [],
+          data: [],
+          page: 1,
+          pnumber: '0',
+          pageStep: 10,
+        })
       }),
     ],
   )
@@ -106,7 +97,6 @@ xtest('renders properly', async () => {
 
   require('../../../../common')
   require('../../../../user_store')
-  require('../../../../login')
 
   {
     const elHeader = document.createElement('header')

@@ -97,7 +97,6 @@ $.extend(window.UI, {
           e.preventDefault()
           e.stopPropagation()
           SegmentActions.selectPrevSegmentDebounced()
-          // UI.gotoPreviousSegment();
         },
       )
       .on(
@@ -108,7 +107,6 @@ $.extend(window.UI, {
           e.preventDefault()
           e.stopPropagation()
           SegmentActions.selectNextSegmentDebounced()
-          // UI.gotoNextSegment();
         },
       )
       //For shortcut arrows + ctrl in windows to move between segments
@@ -129,32 +127,24 @@ $.extend(window.UI, {
             return
           }
           if (config.isReview) {
-            if ($('.editor .next-unapproved:not(.disabled)').length > 0) {
-              setTimeout(function () {
-                UI.clickOnApprovedButton(segment, true)
-              })
-            } else {
-              setTimeout(function () {
-                UI.clickOnApprovedButton(segment, false)
-              })
-            }
+            setTimeout(function () {
+              const nextApprovedEnabled =
+                $('.editor .next-unapproved:not(.disabled)').length > 0
+              SegmentActions.clickOnApprovedButton(segment, nextApprovedEnabled)
+            })
           } else {
-            var nextUntranslatedSegmentId =
+            const nextUntranslatedSegmentId =
               SegmentStore.getNextUntranslatedSegmentId()
             if (!segment.tagged) {
               setTimeout(function () {
                 UI.startSegmentTagProjection(segment.sid)
               })
-            } else if (
-              nextUntranslatedSegmentId &&
-              segment.translation.trim() !== ''
-            ) {
-              setTimeout(function () {
-                UI.clickOnTranslatedButton(segment, true)
-              })
             } else if (segment.translation.trim() !== '') {
               setTimeout(function () {
-                UI.clickOnTranslatedButton(segment, false)
+                SegmentActions.clickOnTranslatedButton(
+                  segment,
+                  !!nextUntranslatedSegmentId,
+                )
               })
             }
           }
@@ -179,7 +169,7 @@ $.extend(window.UI, {
         function (e) {
           e.preventDefault()
           var segment = SegmentStore.getCurrentSegment()
-          if (segment && Review.enabled()) {
+          if (segment && config.isReview) {
             SegmentActions.openIssuesPanel({sid: segment.sid})
             SegmentActions.scrollToSegment(segment.sid)
           }
@@ -297,34 +287,6 @@ $.extend(window.UI, {
         e.preventDefault()
         UI.runDownload()
       })
-      .on('click', '#previewDropdown a.tmx', function (e) {
-        e.preventDefault()
-        window.open($(this).attr('href'))
-      })
-      .on('click', '#downloadProject', function (e) {
-        e.preventDefault()
-        UI.runDownload()
-      })
-      .on('mousedown', '.originalDownload, .sdlxliff', function (e) {
-        if (e.which == 1) {
-          // left click
-          e.preventDefault()
-          e.stopPropagation()
-          var iFrameDownload = $(document.createElement('iframe'))
-            .hide()
-            .prop({
-              id:
-                'iframeDownload_' +
-                new Date().getTime() +
-                '_' +
-                parseInt(Math.random(0, 1) * 10000000),
-              src: $(e.currentTarget).attr('data-href'),
-            })
-          $('body').append(iFrameDownload)
-
-          //console.log( $( e.currentTarget ).attr( 'href' ) );
-        }
-      })
       .on('click', '#previewDropdown .originalsGDrive', function () {
         UI.continueDownloadWithGoogleDrive(1)
       })
@@ -335,7 +297,7 @@ $.extend(window.UI, {
       .on('click', '#statistics .meter a', function (e) {
         e.preventDefault()
         if (config.isReview) {
-          UI.openNextTranslated()
+          SegmentActions.gotoNextTranslatedSegment()
         } else {
           SegmentActions.gotoNextUntranslatedSegment()
         }

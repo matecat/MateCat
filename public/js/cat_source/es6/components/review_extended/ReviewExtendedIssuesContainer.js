@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import React from 'react'
 import ReviewExtendedIssue from './ReviewExtendedIssue'
 import WrapperLoader from '../common/WrapperLoader'
@@ -8,6 +7,11 @@ import SegmentStore from '../../stores/SegmentStore'
 import SegmentUtils from '../../utils/segmentUtils'
 import {SegmentContext} from '../segments/SegmentContext'
 import CatToolActions from '../../actions/CatToolActions'
+import {forEach, filter, isUndefined} from 'lodash'
+import {isNull} from 'lodash/lang'
+import {each} from 'lodash/collection'
+import {findIndex} from 'lodash/array'
+import classnames from 'classnames'
 
 class ReviewExtendedIssuesContainer extends React.Component {
   static contextType = SegmentContext
@@ -24,7 +28,7 @@ class ReviewExtendedIssuesContainer extends React.Component {
     ).categories
     this.is2ndPassReviewEnabled =
       config.secondRevisionsCount && config.secondRevisionsCount > 0
-    this.reviewType = ReviewExtended.number
+    this.reviewType = config.revisionNumber
   }
 
   parseIssues() {
@@ -48,7 +52,7 @@ class ReviewExtendedIssuesContainer extends React.Component {
   }
 
   isSubCategory(category) {
-    return !_.isNull(category.id_parent)
+    return !isNull(category.id_parent)
   }
 
   thereAreSubcategories() {
@@ -62,7 +66,7 @@ class ReviewExtendedIssuesContainer extends React.Component {
     let parsedIssues = this.parseIssues()
     let htmlR1 = [],
       htmlR2 = []
-    _.each(parsedIssues, (issuesList, id) => {
+    each(parsedIssues, (issuesList, id) => {
       let cat = this.findCategory(id)
       let issues = this.getIssuesSortedComponentList(issuesList)
       if (issues.r1.length > 0) {
@@ -255,7 +259,7 @@ class ReviewExtendedIssuesContainer extends React.Component {
       return a > b ? -1 : a < b ? 1 : 0
     })
 
-    _.forEach(sorted_issues, (item) => {
+    forEach(sorted_issues, (item) => {
       if (item.revision_number === 2) {
         issuesR2.push(
           <ReviewExtendedIssue
@@ -298,13 +302,13 @@ class ReviewExtendedIssuesContainer extends React.Component {
 
   changeVisibility(id, visible) {
     let issues = this.props.issues.slice()
-    let index = _.findIndex(issues, function (item) {
+    let index = findIndex(issues, function (item) {
       return item.id == id
     })
     issues[index].visible = visible
 
-    let visibleIssues = _.filter(this.props.issues, function (item) {
-      return _.isUndefined(item.visible) || item.visible
+    let visibleIssues = filter(this.props.issues, function (item) {
+      return isUndefined(item.visible) || item.visible
     })
     if (visibleIssues.length === 0) {
       this.setState({

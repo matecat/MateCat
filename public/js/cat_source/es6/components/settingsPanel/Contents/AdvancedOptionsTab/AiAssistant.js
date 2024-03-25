@@ -1,6 +1,7 @@
 import React, {useState} from 'react'
 import Switch from '../../../common/Switch'
 import SegmentUtils from '../../../../utils/segmentUtils'
+import CommonUtils from '../../../../utils/commonUtils'
 
 export const AiAssistant = () => {
   const [active, setActive] = useState(SegmentUtils.isAiAssistantAuto())
@@ -8,7 +9,10 @@ export const AiAssistant = () => {
     setActive(selected)
     //Track Event
     const message = {
-      user: APP.USER.STORE.user.uid,
+      user:
+        config.isLoggedIn && APP.USER.STORE.user
+          ? APP.USER.STORE.user.uid
+          : undefined,
       page: location.href,
       onHighlight: selected,
     }

@@ -3,7 +3,7 @@ import React from 'react'
 import {createRoot} from 'react-dom/client'
 import ProjectContainer from './ProjectContainer'
 import Immutable from 'immutable'
-import {rest} from 'msw'
+import {http, HttpResponse} from 'msw'
 
 import {mswServer} from '../../../../../mocks/mswServer'
 
@@ -15,10 +15,10 @@ const mountPoint = createRoot(modalElement)
 afterAll(() => mountPoint.unmount())
 
 require('../../../../common')
-require('../../../../login')
-window.config = {
+global.config = {
   enable_outsource: 1,
-  basepath: '/',
+  basepath: 'http://localhost/',
+  enableMultiDomainApi: false,
   id_job: 2,
 }
 
@@ -92,10 +92,10 @@ const apiActivityMockResponse = {
 const executeMswServer = () => {
   mswServer.use(
     ...[
-      rest.get(
-        '/api/v2/activity/project/:id/:password/last',
-        (req, res, ctx) => {
-          return res(ctx.status(200), ctx.json(apiActivityMockResponse))
+      http.get(
+        config.basepath + 'api/v2/activity/project/:id/:password/last',
+        () => {
+          return HttpResponse.json(apiActivityMockResponse)
         },
       ),
     ],

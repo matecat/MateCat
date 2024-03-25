@@ -1,18 +1,18 @@
 import React from 'react'
-import _ from 'lodash'
+import {isUndefined} from 'lodash'
 import Immutable from 'immutable'
 
 import SegmentConstants from '../../constants/SegmentConstants'
 import SegmentStore from '../../stores/SegmentStore'
 import TranslationMatches from './utils/translationMatches'
-import TagUtils from '../../utils/tagUtils'
 import TextUtils from '../../utils/textUtils'
 import SegmentActions from '../../actions/SegmentActions'
-import CommonUtils from '../../utils/commonUtils'
 import CatToolStore from '../../stores/CatToolStore'
 import CatToolConstants from '../../constants/CatToolConstants'
 import {SegmentContext} from './SegmentContext'
 import {SegmentFooterTabError} from './SegmentFooterTabError'
+import ApplicationStore from '../../stores/ApplicationStore'
+import DraftMatecatUtils from './utils/DraftMatecatUtils'
 
 class SegmentFooterTabMatches extends React.Component {
   static contextType = SegmentContext
@@ -34,12 +34,6 @@ class SegmentFooterTabMatches extends React.Component {
     var matchesProcessed = []
     // SegmentActions.createFooter(this.props.segment.sid);
     $.each(matches, function () {
-      if (
-        _.isUndefined(this.segment) ||
-        this.segment === '' ||
-        this.translation === ''
-      )
-        return true
       var item = {}
       item.id = this.id
       item.disabled = this.id == '0' ? true : false
@@ -70,19 +64,16 @@ class SegmentFooterTabMatches extends React.Component {
       // Attention Bug: We are mixing the view mode and the raw data mode.
       // before doing a enhanced  view you will need to add a data-original tag
       //
-      item.suggestionDecodedHtml = TagUtils.matchTag(
-        TagUtils.decodeHtmlInTag(
-          TagUtils.decodePlaceholdersToTextSimple(this.segment),
-          config.isSourceRTL,
-        ),
+      item.suggestionDecodedHtml = DraftMatecatUtils.transformTagsToHtml(
+        this.segment,
+        config.isSourceRTL,
       )
-      item.translationDecodedHtml = TagUtils.matchTag(
-        TagUtils.decodeHtmlInTag(
-          TagUtils.decodePlaceholdersToTextSimple(this.translation),
-          config.isTargetRTL,
-        ),
+
+      item.translationDecodedHtml = DraftMatecatUtils.transformTagsToHtml(
+        this.translation,
+        config.isTargetRTL,
       )
-      item.translation = TagUtils.transformTextFromBe(this.translation)
+      item.translation = this.translation
 
       item.sourceDiff = item.suggestionDecodedHtml
       item.memoryKey = this.memory_key
@@ -95,15 +86,14 @@ class SegmentFooterTabMatches extends React.Component {
           this.segment,
           self.props.segment.segment,
         )
-        item.sourceDiff = item.sourceDiff.replace(/&amp;/g, '&')
-        item.sourceDiff = TagUtils.matchTag(
-          TagUtils.decodeHtmlInTag(
-            TagUtils.decodePlaceholdersToTextSimple(item.sourceDiff),
-          ),
+
+        item.sourceDiff = DraftMatecatUtils.transformTagsToHtml(
+          item.sourceDiff,
+          config.isSourceRTL,
         )
       }
 
-      if (!_.isUndefined(this.tm_properties)) {
+      if (!isUndefined(this.tm_properties)) {
         item.tm_properties = this.tm_properties
       }
       let matchToInsert = self.processMatchCallback(item)
@@ -156,10 +146,9 @@ class SegmentFooterTabMatches extends React.Component {
   }
 
   deleteSuggestion(match) {
-    var source = TextUtils.htmlDecode(match.segment)
-    var target = TextUtils.htmlDecode(match.translation)
-    target = TagUtils.prepareTextToSend(target)
-    source = TagUtils.prepareTextToSend(source)
+    var source = match.segment
+    var target = match.translation
+
     SegmentActions.deleteContribution(
       source,
       target,
@@ -175,7 +164,7 @@ class SegmentFooterTabMatches extends React.Component {
         <li>{match.suggestion_info}</li>
         <li className={'graydesc'}>
           <span className={'bold'} style={{fontSize: '14px'}}>
-            {CommonUtils.getLanguageNameFromLocale(match.target)}
+            {ApplicationStore.getLanguageNameFromLocale(match.target)}
           </span>
         </li>
         <li className="graydesc graydesc-sourcekey">
@@ -236,10 +225,10 @@ class SegmentFooterTabMatches extends React.Component {
 
   shouldComponentUpdate(nextProps, nextState) {
     return (
-      ((!_.isUndefined(nextProps.segment.contributions) ||
-        !_.isUndefined(this.props.segment.contributions)) &&
-        ((!_.isUndefined(nextProps.segment.contributions) &&
-          _.isUndefined(this.props.segment.contributions)) ||
+      ((!isUndefined(nextProps.segment.contributions) ||
+        !isUndefined(this.props.segment.contributions)) &&
+        ((!isUndefined(nextProps.segment.contributions) &&
+          isUndefined(this.props.segment.contributions)) ||
           !Immutable.fromJS(this.props.segment.contributions).equals(
             Immutable.fromJS(nextProps.segment.contributions),
           ))) ||
@@ -398,7 +387,7 @@ class SegmentFooterTabMatches extends React.Component {
         {clientConnected ? (
           <>
             <div className="overflow">
-              {!_.isUndefined(matchesHtml) && matchesHtml.length > 0 ? (
+              {!isUndefined(matchesHtml) && matchesHtml.length > 0 ? (
                 matchesHtml
               ) : (
                 <span className="loader loader_on" />

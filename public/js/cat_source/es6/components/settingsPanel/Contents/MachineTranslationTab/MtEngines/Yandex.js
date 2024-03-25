@@ -1,7 +1,7 @@
 import React from 'react'
 import {useForm} from 'react-hook-form'
 
-export const Yandex = ({addMTEngine, error}) => {
+export const Yandex = ({addMTEngine, error, isRequestInProgress}) => {
   const {
     register,
     handleSubmit,
@@ -44,6 +44,7 @@ export const Yandex = ({addMTEngine, error}) => {
             {error && <span className={'mt-error'}>{error.message}</span>}
             <button
               className="ui primary button"
+              disabled={isRequestInProgress}
               onClick={handleSubmit(onSubmit)}
             >
               Confirm

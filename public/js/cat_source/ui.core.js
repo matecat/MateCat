@@ -1,10 +1,9 @@
-import _ from 'lodash'
+import {isUndefined} from 'lodash'
 import Cookies from 'js-cookie'
 
 import CatToolActions from './es6/actions/CatToolActions'
 import CommonUtils from './es6/utils/commonUtils'
 import ConfirmMessageModal from './es6/components/modals/ConfirmMessageModal'
-import TagUtils from './es6/utils/tagUtils'
 import TextUtils from './es6/utils/textUtils'
 import OfflineUtils from './es6/utils/offlineUtils'
 import SegmentActions from './es6/actions/SegmentActions'
@@ -78,7 +77,7 @@ window.UI = {
     // for this segment
 
     if (this.autopropagateConfirmNeeded(segment, opts.propagation)) {
-      var text = !_.isUndefined(segment.alternatives)
+      var text = !isUndefined(segment.alternatives)
         ? 'The translation you are confirming for this segment is different from the versions confirmed for other identical segments</b>. <br><br>Would you like ' +
           'to propagate this translation to all other identical segments and replace the other versions or keep it only for this segment?'
         : 'The translation you are confirming for this segment is different from the version confirmed for other identical segments. <br><br>Would you ' +
@@ -121,11 +120,11 @@ window.UI = {
     var statusNotConfirmationNeeded = ['new', 'draft']
     if (propagation) {
       if (config.isReview) {
-        return segmentModified || !_.isUndefined(segment.alternatives)
+        return segmentModified || !isUndefined(segment.alternatives)
       } else {
         return (
           statusNotConfirmationNeeded.indexOf(segmentStatus) === -1 &&
-          (segmentModified || !_.isUndefined(segment.alternatives))
+          (segmentModified || !isUndefined(segment.alternatives))
         )
       }
     }
@@ -426,19 +425,19 @@ window.UI = {
       }
     })
   },
-  checkVersion: function () {
-    if (this.version != config.build_number) {
-      var notification = {
-        uid: 'checkVersion',
-        title: 'New version of Matecat',
-        text: 'A new version of Matecat has been released. Please <a href="#" class="reloadPage">click here</a> or press CTRL+F5 (or CMD+R on Mac) to update.',
-        type: 'warning',
-        allowHtml: true,
-        position: 'bl',
-      }
-      CatToolActions.addNotification(notification)
-    }
-  },
+  // checkVersion: function () {
+  //   if (this.version != config.build_number) {
+  //     var notification = {
+  //       uid: 'checkVersion',
+  //       title: 'New version of Matecat',
+  //       text: 'A new version of Matecat has been released. Please <a href="#" class="reloadPage">click here</a> or press CTRL+F5 (or CMD+R on Mac) to update.',
+  //       type: 'warning',
+  //       allowHtml: true,
+  //       position: 'bl',
+  //     }
+  //     CatToolActions.addNotification(notification)
+  //   }
+  // },
   registerQACheck: function () {
     clearTimeout(UI.pendingQACheck)
     UI.pendingQACheck = setTimeout(function () {
@@ -559,8 +558,8 @@ window.UI = {
 
     try {
       // Attention, to be modified when we will lock tags
-      translation = TagUtils.prepareTextToSend(segment.translation)
-      sourceSegment = TagUtils.prepareTextToSend(segment.updatedSource)
+      translation = segment.translation
+      sourceSegment = segment.updatedSource
     } catch (e) {
       var indexSegment = UI.executingSetTranslation.indexOf(id_segment)
       if (indexSegment > -1) {
@@ -609,6 +608,7 @@ window.UI = {
     setTranslation(requestArgs)
       .then((data) => {
         const idSegment = options.id_segment
+        SegmentActions.setChoosenSuggestion(idSegment, null)
         const index = UI.executingSetTranslation.indexOf(idSegment)
         if (index > -1) {
           UI.executingSetTranslation.splice(index, 1)
@@ -618,9 +618,13 @@ window.UI = {
         }
         UI.execSetTranslationTail()
         UI.setTranslation_success(data, options)
+        //Review
         SegmentActions.setSegmentSaving(id_segment, false)
+        if (config.isReview) {
+          SegmentActions.getSegmentVersionsIssues(idSegment)
+          CatToolActions.reloadQualityReport()
+        }
         data.translation.segment = segment
-        $(document).trigger('translation:change', data.translation)
         data.segment = segment
         $(document).trigger('setTranslation:success', data)
         if (config.alternativesEnabled) {
@@ -670,9 +674,7 @@ window.UI = {
     $.each(segments, function (index) {
       var segment = this
       totalTranslation +=
-        selector === '.source'
-          ? segment.segment
-          : TagUtils.prepareTextToSend(segment.translation)
+        selector === '.source' ? segment.segment : segment.translation
       if (index < segments.length - 1)
         totalTranslation += UI.splittedTranslationPlaceholder
     })
@@ -710,7 +712,7 @@ window.UI = {
         OfflineUtils.startOfflineMode()
       }
 
-      if (codeInt <= -2000 && !_.isUndefined(this.message)) {
+      if (codeInt === -2000 && !isUndefined(this.message)) {
         ModalsActions.showModalComponent(
           AlertModal,
           {
@@ -825,28 +827,6 @@ window.UI = {
     }, 1000)
   },
 
-  /**
-   * After User click on Translated or T+>> Button
-   * @param segment
-   * @param goToNextUntranslated
-   */
-  clickOnTranslatedButton: function (segment, goToNextUntranslated) {
-    SegmentActions.removeClassToSegment(segment.sid, 'modified')
-
-    UI.setTimeToEdit(segment.sid)
-
-    var afterTranslateFn = function () {
-      if (!goToNextUntranslated) {
-        UI.gotoNextSegment() //Others functionality override this function
-        // SegmentActions.openSegment(UI.nextSegmentId);
-      } else {
-        SegmentActions.gotoNextUntranslatedSegment()
-      }
-    }
-
-    UI.changeStatus(segment, 'translated', afterTranslateFn)
-  },
-
   // Project completion override this method
   handleClickOnReadOnly: function (section) {
     console.log(section)
@@ -917,14 +897,6 @@ window.UI = {
       'If you must edit it, click on the padlock icon to the left of the segment. ' +
       'The owner of the project will be notified of any edits.'
     )
-  },
-
-  closeAllMenus: function () {
-    CatToolActions.closeSubHeader()
-  },
-  // overridden by plugin
-  inputEditAreaEventHandler: function () {
-    UI.currentSegment.trigger('modified')
   },
 }
 

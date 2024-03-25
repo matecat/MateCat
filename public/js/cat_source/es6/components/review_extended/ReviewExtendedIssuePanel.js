@@ -1,3 +1,4 @@
+import React from 'react'
 import ReviewExtendedCategorySelector from './ReviewExtendedCategorySelector'
 import CommonUtils from '../../utils/commonUtils'
 import SegmentActions from '../../actions/SegmentActions'
@@ -74,7 +75,7 @@ class ReviewExtendedIssuePanel extends React.Component {
     const segment = this.context.segment
     if (
       segment.status.toLowerCase() !== 'approved' ||
-      segment.revision_number !== ReviewExtended.number
+      segment.revision_number !== config.revisionNumber
     ) {
       segment.status = 'approved'
       setTranslation({segment})

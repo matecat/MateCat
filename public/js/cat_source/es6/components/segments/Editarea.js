@@ -1,5 +1,4 @@
-import React from 'react'
-import _ from 'lodash'
+import React, {createRef} from 'react'
 import Immutable from 'immutable'
 import {
   Modifier,
@@ -9,6 +8,8 @@ import {
   KeyBindingUtil,
   CompositeDecorator,
 } from 'draft-js'
+import {remove, cloneDeep, findIndex, size, isEqual} from 'lodash'
+import {debounce} from 'lodash/function'
 
 import SegmentConstants from '../../constants/SegmentConstants'
 import EditAreaConstants from '../../constants/EditAreaConstants'
@@ -24,14 +25,20 @@ import checkForMissingTags from './utils/DraftMatecatUtils/TagMenu/checkForMissi
 import updateEntityData from './utils/DraftMatecatUtils/updateEntityData'
 import LexiqaUtils from '../../utils/lxq.main'
 import updateLexiqaWarnings from './utils/DraftMatecatUtils/updateLexiqaWarnings'
-import insertText from './utils/DraftMatecatUtils/insertText'
 import {tagSignatures} from './utils/DraftMatecatUtils/tagModel'
 import SegmentActions from '../../actions/SegmentActions'
 import getFragmentFromSelection from './utils/DraftMatecatUtils/DraftSource/src/component/handlers/edit/getFragmentFromSelection'
-import TagUtils from '../../utils/tagUtils'
 import matchTypingSequence from '../../utils/matchTypingSequence/matchTypingSequence'
 import {SegmentContext} from './SegmentContext'
 import CatToolStore from '../../stores/CatToolStore'
+import {
+  checkCaretIsNearEntity,
+  adjustCaretPosition,
+  isCaretInsideEntity,
+  checkCaretIsNearZwsp,
+  isSelectedEntity,
+  getEntitiesSelected,
+} from './utils/DraftMatecatUtils/manageCaretPositionNearEntity'
 
 const {hasCommandModifier, isOptionKeyCommand, isCtrlKeyCommand} =
   KeyBindingUtil
@@ -78,14 +85,13 @@ class Editarea extends React.Component {
     const decorator = new CompositeDecorator(this.decoratorsStructure)
     //const decorator = new CompoundDecorator(this.decoratorsStructure);
     // Escape html
-    const translation = DraftMatecatUtils.unescapeHTMLLeaveTags(
-      this.props.translation,
-    )
+    const translation = this.props.translation
+
     // If GuessTag is Enabled, clean translation from tags
     const cleanTranslation = SegmentUtils.checkCurrentSegmentTPEnabled(
       this.props.segment,
     )
-      ? DraftMatecatUtils.cleanSegmentString(translation)
+      ? DraftMatecatUtils.removeTagsFromText(translation)
       : translation
     // Inizializza Editor State con solo testo
     const plainEditorState = EditorState.createEmpty(decorator)
@@ -94,6 +100,10 @@ class Editarea extends React.Component {
       cleanTranslation,
     )
     const {editorState, tagRange} = contentEncoded
+
+    this.isShiftPressedOnNavigation = createRef()
+    this.wasTripleClickTriggered = createRef()
+    this.compositionEventChecks = createRef()
 
     this.state = {
       editorState: editorState,
@@ -114,20 +124,21 @@ class Editarea extends React.Component {
       },
       previousSourceTagMap: null,
     }
-    const cleanTagsTranslation = TagUtils.decodePlaceholdersToPlainText(
-      DraftMatecatUtils.cleanSegmentString(translation),
-    )
+    const cleanTagsTranslation =
+      DraftMatecatUtils.decodePlaceholdersToPlainText(
+        DraftMatecatUtils.removeTagsFromText(translation),
+      )
     this.props.updateCounter(
       DraftMatecatUtils.getCharactersCounter(cleanTagsTranslation),
     )
 
-    this.updateTranslationDebounced = _.debounce(
+    this.updateTranslationDebounced = debounce(
       this.updateTranslationInStore,
       100,
     )
-    this.updateTagsInEditorDebounced = _.debounce(updateTagsInEditor, 500)
-    this.onCompositionStopDebounced = _.debounce(this.onCompositionStop, 1000)
-    this.focusEditorDebounced = _.debounce(this.focusEditor, 500)
+    this.updateTagsInEditorDebounced = debounce(updateTagsInEditor, 500)
+    this.onCompositionStopDebounced = debounce(this.onCompositionStop, 1000)
+    this.focusEditorDebounced = debounce(this.focusEditor, 500)
   }
 
   getSearchParams = () => {
@@ -167,7 +178,7 @@ class Editarea extends React.Component {
       currentInSearchIndex,
       tagRange,
     )
-    _.remove(
+    remove(
       this.decoratorsStructure,
       (decorator) => decorator.name === DraftMatecatConstants.SEARCH_DECORATOR,
     )
@@ -180,7 +191,7 @@ class Editarea extends React.Component {
       qaBlacklistGlossary,
       sid,
     )
-    _.remove(
+    remove(
       this.decoratorsStructure,
       (decorator) =>
         decorator.name === DraftMatecatConstants.QA_BLACKLIST_DECORATOR,
@@ -193,7 +204,7 @@ class Editarea extends React.Component {
     let {lexiqa, sid, lxqDecodedTranslation} = this.props.segment
     // pass decoded translation with tags like <g id='1'>
     let ranges = LexiqaUtils.getRanges(
-      _.cloneDeep(lexiqa.target),
+      cloneDeep(lexiqa.target),
       lxqDecodedTranslation,
       false,
     )
@@ -206,7 +217,7 @@ class Editarea extends React.Component {
         false,
         this.getUpdatedSegmentInfo,
       )
-      _.remove(
+      remove(
         this.decoratorsStructure,
         (decorator) =>
           decorator.name === DraftMatecatConstants.LEXIQA_DECORATOR,
@@ -223,7 +234,7 @@ class Editarea extends React.Component {
       const {editorState} = this.state
       const contentEncoded = DraftMatecatUtils.encodeContent(
         editorState,
-        DraftMatecatUtils.unescapeHTMLLeaveTags(translation),
+        translation,
         this.props.segment.sourceTagMap,
       )
       // this must be done to make the Undo action possible, otherwise encodeContent will delete all editor history
@@ -234,9 +245,12 @@ class Editarea extends React.Component {
         newContentState,
         'insert-fragment',
       )
-      const cleanTagsTranslation = TagUtils.decodePlaceholdersToPlainText(
-        DraftMatecatUtils.cleanSegmentString(translation),
-      )
+      newEditorState = EditorState.moveSelectionToEnd(newEditorState)
+
+      const cleanTagsTranslation =
+        DraftMatecatUtils.decodePlaceholdersToPlainText(
+          DraftMatecatUtils.removeTagsFromText(translation),
+        )
       this.props.updateCounter(
         DraftMatecatUtils.getCharactersCounter(cleanTagsTranslation),
       )
@@ -259,7 +273,7 @@ class Editarea extends React.Component {
       currentInSearch,
     } = this.props.segment
     if (currentInSearch && searchParams.target) {
-      let index = _.findIndex(
+      let index = findIndex(
         occurrencesInSearch.occurrences,
         (item) => item.searchProgressiveIndex === currentInSearchIndex,
       )
@@ -304,7 +318,7 @@ class Editarea extends React.Component {
       // Add missing tag to store for highlight warnings on tags
       const {missingTags} = checkForMissingTags(sourceTagMap, currentTagRange)
       const lxqDecodedTranslation =
-        DraftMatecatUtils.prepareTextForLexiqa(editorState)
+        DraftMatecatUtils.prepareTextForLexiqa(decodedSegment)
       //const currentTagRange = matchTag(decodedSegment); //deactivate if updateTagsInEditor is active
       SegmentActions.updateTranslation(
         segment.sid,
@@ -314,8 +328,8 @@ class Editarea extends React.Component {
         missingTags,
         lxqDecodedTranslation,
       )
-      const cleanTranslation = TagUtils.decodePlaceholdersToPlainText(
-        DraftMatecatUtils.cleanSegmentString(decodedSegment),
+      const cleanTranslation = DraftMatecatUtils.decodePlaceholdersToPlainText(
+        DraftMatecatUtils.removeTagsFromText(decodedSegment),
       )
       this.props.updateCounter(
         DraftMatecatUtils.getCharactersCounter(cleanTranslation),
@@ -343,7 +357,7 @@ class Editarea extends React.Component {
         qaBlacklistGlossary &&
         qaBlacklistGlossary.length > 0 &&
         !activeDecorators[DraftMatecatConstants.QA_BLACKLIST_DECORATOR] /* &&
-        (_.isUndefined(prevQaBlacklistGlossary) ||
+        (isUndefined(prevQaBlacklistGlossary) ||
           !Immutable.fromJS(prevQaBlacklistGlossary).equals(
             Immutable.fromJS(qaBlacklistGlossary),
           )) */
@@ -364,10 +378,9 @@ class Editarea extends React.Component {
       //Lexiqa
       const {lexiqa} = this.props.segment
       const prevLexiqa = prevProps ? prevProps.segment.lexiqa : undefined
-      const currentLexiqaTarget =
-        lexiqa && lexiqa.target && _.size(lexiqa.target)
+      const currentLexiqaTarget = lexiqa && lexiqa.target && size(lexiqa.target)
       const prevLexiqaTarget =
-        prevLexiqa && prevLexiqa.target && _.size(prevLexiqa.target)
+        prevLexiqa && prevLexiqa.target && size(prevLexiqa.target)
       const lexiqaChanged =
         prevLexiqaTarget &&
         currentLexiqaTarget &&
@@ -457,6 +470,15 @@ class Editarea extends React.Component {
         this.focusEditor()
       }
     })
+
+    const {editor: editorElement} = this.editor
+    editorElement.addEventListener('compositionstart', this.onCompositionStart)
+    editorElement.addEventListener('compositionend', this.onCompositionEnd)
+
+    new CommonUtils.DetectTripleClick(
+      this.editAreaRef,
+      () => (this.wasTripleClickTriggered.current = true),
+    )
   }
 
   copyGlossaryToEditArea = (segment, glossaryTranslation) => {
@@ -490,9 +512,16 @@ class Editarea extends React.Component {
       EditAreaConstants.COPY_GLOSSARY_IN_EDIT_AREA,
       this.copyGlossaryToEditArea,
     )
+
+    const {editor: editorElement} = this.editor
+    editorElement.removeEventListener(
+      'compositionstart',
+      this.onCompositionStart,
+    )
+    editorElement.removeEventListener('compositionend', this.onCompositionEnd)
   }
 
-  componentDidUpdate(prevProps) {
+  componentDidUpdate(prevProps, prevState) {
     if (!prevProps.segment.opened && this.props.segment.opened) {
       const newEditorState = EditorState.moveFocusToEnd(this.state.editorState)
       this.setState({editorState: newEditorState})
@@ -512,13 +541,63 @@ class Editarea extends React.Component {
     // update editor state when receive prop of segment "sourceTagMap"
     if (
       this.props.segment.sourceTagMap?.length &&
-      !_.isEqual(
-        this.state.previousSourceTagMap,
-        this.props.segment.sourceTagMap,
-      )
+      !isEqual(this.state.previousSourceTagMap, this.props.segment.sourceTagMap)
     ) {
       this.setState({previousSourceTagMap: this.props.segment.sourceTagMap})
       this.setNewTranslation(this.props.segment.sid, this.props.translation)
+    }
+
+    // Adjust caret position and set focus to entity
+    if (prevState.editorState !== this.state.editorState) {
+      const {editorState} = this.state
+
+      const entitiesSelected = getEntitiesSelected(editorState)
+      SegmentActions.focusTags(editorSync.editorFocused ? entitiesSelected : [])
+
+      const currentFocusOffset = editorState.getSelection().getFocusOffset()
+      const prevFocusOffset = prevState.editorState
+        .getSelection()
+        .getFocusOffset()
+
+      if (prevFocusOffset !== currentFocusOffset) {
+        const direction =
+          currentFocusOffset > prevFocusOffset ? 'right' : 'left'
+
+        adjustCaretPosition({
+          direction,
+          isShiftPressed: this.isShiftPressedOnNavigation.current,
+        })
+      }
+    } else {
+      const selection = window.getSelection()
+      if (selection.focusNode) {
+        const direction =
+          selection.focusOffset < selection.focusNode.length / 2
+            ? 'left'
+            : 'right'
+
+        adjustCaretPosition({
+          direction,
+          isShiftPressed: this.isShiftPressedOnNavigation.current,
+          shouldMoveCursorPreviousElementTag:
+            this.wasTripleClickTriggered.current,
+        })
+      }
+    }
+
+    this.wasTripleClickTriggered.current = false
+  }
+
+  onCompositionStart = () => {
+    this.compositionEventChecks.current = {
+      startIsInsideEntity: isCaretInsideEntity(),
+      endIsTriggered: false,
+    }
+  }
+  onCompositionEnd = () => {
+    this.compositionEventChecks.current = {
+      ...this.compositionEventChecks.current,
+      endIsTriggered: true,
     }
   }
 
@@ -638,7 +717,6 @@ class Editarea extends React.Component {
 
   myKeyBindingFn = (e) => {
     const {displayPopover} = this.state
-    const {handleCursorMovement} = this
     const isChromeBook = navigator.userAgent.indexOf('CrOS') > -1
     if (
       (e.keyCode === 84 || e.key === 't' || e.key === '™') &&
@@ -684,21 +762,34 @@ class Editarea extends React.Component {
       isChromeBook
     ) {
       return 'insert-nbsp-tag' // Chromebook
-    } else if (e.key === 'ArrowLeft' && !e.altKey) {
-      if (e.shiftKey) {
-        if (handleCursorMovement(-1, true, config.isTargetRTL))
-          return 'left-nav-shift'
-      } else {
-        if (handleCursorMovement(-1, false, config.isTargetRTL))
-          return 'left-nav'
-      }
-    } else if (e.key === 'ArrowRight' && !e.altKey) {
-      if (e.shiftKey) {
-        if (handleCursorMovement(1, true, config.isTargetRTL))
-          return 'right-nav-shift'
-      } else {
-        if (handleCursorMovement(1, false, config.isTargetRTL))
-          return 'right-nav'
+    } else if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && !e.altKey) {
+      this.isShiftPressedOnNavigation.current = e.shiftKey
+
+      const direction = e.key === 'ArrowLeft' ? 'left' : 'right'
+
+      // check caret is near zwsp char and move caret position
+      const updatedStateNearZwsp = checkCaretIsNearZwsp({
+        editorState: this.state.editorState,
+        direction,
+        isShiftPressed: e.shiftKey,
+      })
+
+      // check caret is near entity and move caret position
+      const updatedStateNearEntity = checkCaretIsNearEntity({
+        editorState: updatedStateNearZwsp
+          ? updatedStateNearZwsp
+          : this.state.editorState,
+        direction,
+        isShiftPressed: e.shiftKey,
+      })
+
+      if (updatedStateNearEntity || updatedStateNearZwsp) {
+        this.setState({
+          editorState: updatedStateNearEntity
+            ? updatedStateNearEntity
+            : updatedStateNearZwsp,
+        })
+        return `${direction}-nav`
       }
     } else if (e.ctrlKey && e.key === 'k') {
       return 'tm-search'
@@ -707,6 +798,23 @@ class Editarea extends React.Component {
       ((e.ctrlKey && e.altKey) || (CommonUtils.isMacOS() && e.shiftKey))
     ) {
       return 'insert-word-joiner-tag'
+    } else if (e.code === 'BracketLeft' || e.code === 'BracketRight') {
+      if (e.code === 'BracketLeft' && isCtrlKeyCommand(e)) {
+        if (e.shiftKey) {
+          this.typeTextInEditor('“')
+        } else {
+          this.typeTextInEditor('‘')
+        }
+        return 'quote-shortcut'
+      }
+      if (e.code === 'BracketRight' && isCtrlKeyCommand(e)) {
+        if (e.shiftKey) {
+          this.typeTextInEditor('”')
+        } else {
+          this.typeTextInEditor('’')
+        }
+        return 'quote-shortcut'
+      }
     } else if (e.altKey && !e.shiftKey && !e.ctrlKey) {
       const {get, reset} = typingWordJoiner
       if (e.key !== 'Alt') {
@@ -716,6 +824,48 @@ class Editarea extends React.Component {
         }
       } else {
         reset()
+      }
+    } else if (
+      (e.key === 'Backspace' || e.key === 'Delete') &&
+      !isSelectedEntity(this.state.editorState) &&
+      window.getSelection().type === 'Caret'
+    ) {
+      const isRTL = Boolean(config.isTargetRTL)
+      const direction =
+        e.key === 'Backspace'
+          ? !isRTL
+            ? 'left'
+            : 'right'
+          : !isRTL
+          ? 'right'
+          : 'left'
+
+      const updatedStateNearZwsp = checkCaretIsNearZwsp({
+        editorState: this.state.editorState,
+        direction,
+        isShiftPressed: true,
+      })
+
+      // check caret is near entity and move caret position
+      const updatedStateNearEntity = checkCaretIsNearEntity({
+        editorState: updatedStateNearZwsp
+          ? updatedStateNearZwsp
+          : this.state.editorState,
+        direction,
+        isShiftPressed: true,
+      })
+
+      if (updatedStateNearEntity) {
+        const selectionState = updatedStateNearEntity.getSelection()
+        const contentState = updatedStateNearEntity.getCurrentContent()
+
+        const updatedEditorState = EditorState.push(
+          updatedStateNearEntity,
+          Modifier.replaceText(contentState, selectionState, null),
+          'insert-characters',
+        )
+        this.onChange(updatedEditorState)
+        return 'delete-entity'
       }
     }
     return getDefaultKeyBinding(e)
@@ -760,11 +910,7 @@ class Editarea extends React.Component {
         return 'handled'
       case 'left-nav':
         return 'handled'
-      case 'left-nav-shift':
-        return 'handled'
       case 'right-nav':
-        return 'handled'
-      case 'right-nav-shift':
         return 'handled'
       case 'insert-tab-tag':
         insertTagAtSelection('tab')
@@ -777,10 +923,14 @@ class Editarea extends React.Component {
       case 'insert-word-joiner-tag':
         insertTagAtSelection('wordJoiner')
         return 'handled'
+      case 'delete-entity':
+        return 'handled'
       case 'translate':
         return 'not-handled'
       case 'next-translate':
         return 'not-handled'
+      case 'quote-shortcut':
+        return 'handled'
       default:
         return 'not-handled'
     }
@@ -797,10 +947,9 @@ class Editarea extends React.Component {
       editorState,
       DraftMatecatConstants.LEXIQA_DECORATOR,
     )
-    newEditorState = DraftMatecatUtils.insertEntityAtSelection(
-      newEditorState,
-      customTag,
-    )
+
+    newEditorState = insertTag(customTag, newEditorState)
+
     this.setState(
       (prevState) => ({
         activeDecorators: {
@@ -816,25 +965,6 @@ class Editarea extends React.Component {
         this.onCompositionStopDebounced()
       },
     )
-  }
-
-  handleCursorMovement = (step, shift = false, isRTL = false) => {
-    const {editorState} = this.state
-    step = isRTL ? step * -1 : step
-    // When in composition mode avoid setState to let editor commit its "composition state"
-    if (editorState.isInCompositionMode()) return true
-
-    const newState = DraftMatecatUtils.moveCursorJumpEntity(
-      editorState,
-      step,
-      shift,
-      isRTL,
-    )
-    if (newState) {
-      this.setState({editorState: newState})
-      return true
-    }
-    return false
   }
 
   onMouseUpEvent = () => {
@@ -918,12 +1048,12 @@ class Editarea extends React.Component {
 
   removeDecorator = (decoratorName) => {
     if (!decoratorName) {
-      _.remove(
+      remove(
         this.decoratorsStructure,
         (decorator) => decorator.name !== DraftMatecatConstants.TAGS_DECORATOR,
       )
     } else {
-      _.remove(
+      remove(
         this.decoratorsStructure,
         (decorator) => decorator.name === decoratorName,
       )
@@ -932,7 +1062,7 @@ class Editarea extends React.Component {
 
   // has to be followed by a setState for editorState
   disableDecorator = (editorState, decoratorName) => {
-    _.remove(
+    remove(
       this.decoratorsStructure,
       (decorator) => decorator.name === decoratorName,
     )
@@ -949,6 +1079,27 @@ class Editarea extends React.Component {
       activeDecorators,
     } = this.state
     const {closePopover} = this
+
+    // check caret is inside entity and restore previous editorState
+    if (
+      isCaretInsideEntity() ||
+      this.compositionEventChecks.current?.startIsInsideEntity
+    ) {
+      this.setState(
+        () => ({
+          editorState: prevEditorState,
+        }),
+        () => {
+          this.onCompositionStopDebounced()
+        },
+      )
+      if (this.compositionEventChecks?.endIsTriggered)
+        this.compositionEventChecks.current = {
+          startIsInsideEntity: false,
+          endIsTriggered: false,
+        }
+      return
+    }
 
     const contentChanged =
       editorState.getCurrentContent().getPlainText() !==
@@ -1219,9 +1370,7 @@ class Editarea extends React.Component {
     } else if (text) {
       // we're handling an external copy, special chars must be striped from text
       // and we have to add tag for external entities like nbsp or tab
-      let cleanText = DraftMatecatUtils.cleanSegmentString(
-        DraftMatecatUtils.unescapeHTML(text),
-      )
+      let cleanText = DraftMatecatUtils.removeTagsFromText(text)
       // Replace with placeholder
       const nbspSign = tagSignatures['nbsp'].encodedPlaceholder
       const tabSign = tagSignatures['tab'].encodedPlaceholder
@@ -1256,6 +1405,8 @@ class Editarea extends React.Component {
       const plainText = internalClipboard
         .map((block) => block.getText())
         .join('\n')
+        .replace(new RegExp(String.fromCharCode(parseInt('200B', 16)), 'g'), '')
+
       const entitiesMap = DraftMatecatUtils.getEntitiesInFragment(
         internalClipboard,
         editorState,

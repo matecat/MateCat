@@ -29,14 +29,13 @@
      "notes":null
  }
  */
-import _ from 'lodash'
+import {isUndefined, uniq, each} from 'lodash'
 import {EventEmitter} from 'events'
 import Immutable from 'immutable'
 import assign from 'object-assign'
 
 import AppDispatcher from './AppDispatcher'
 import SegmentConstants from '../constants/SegmentConstants'
-import TagUtils from '../utils/tagUtils'
 import SegmentUtils from '../utils/segmentUtils'
 import EditAreaConstants from '../constants/EditAreaConstants'
 import DraftMatecatUtils from './../components/segments/utils/DraftMatecatUtils'
@@ -160,9 +159,9 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
             has_reference: 'false',
             parsed_time_to_edit: ['00', '00', '00', '00'],
             readonly: 'false',
-            segment: TagUtils.transformTextFromBe(splittedSourceAr[i]),
-            decodedSource: DraftMatecatUtils.unescapeHTML(
-              DraftMatecatUtils.decodeTagsToPlainText(segment.segment),
+            segment: splittedSourceAr[i],
+            decodedSource: DraftMatecatUtils.transformTagsToText(
+              segment.segment,
             ),
             segment_hash: segment.segment_hash,
             original_sid: segment.sid,
@@ -171,17 +170,10 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
             split_points_source: [],
             status: status,
             time_to_edit: '0',
-            originalDecodedTranslation: translation
-              ? DraftMatecatUtils.unescapeHTML(
-                  TagUtils.transformTextFromBe(translation),
-                )
-              : '',
-            translation: translation
-              ? TagUtils.transformTextFromBe(translation)
-              : '',
-            decodedTranslation: DraftMatecatUtils.unescapeHTML(
-              DraftMatecatUtils.decodeTagsToPlainText(translation),
-            ),
+            originalDecodedTranslation: translation ? translation : '',
+            translation: translation ? translation : '',
+            decodedTranslation:
+              DraftMatecatUtils.transformTagsToText(translation),
             warning: '0',
             warnings: {},
             tagged: !this.hasSegmentTagProjectionEnabled(segment),
@@ -224,18 +216,18 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         segment.currentInSearch = currentInSearch
         segment.occurrencesInSearch = occurrencesInSearch
         segment.searchParams = this.searchParams
-        segment.segment = TagUtils.transformTextFromBe(segment.segment)
-        segment.translation = TagUtils.transformTextFromBe(segment.translation)
-        segment.originalDecodedTranslation = DraftMatecatUtils.unescapeHTML(
+        segment.originalDecodedTranslation = segment.translation
+        segment.decodedTranslation = DraftMatecatUtils.transformTagsToText(
           segment.translation,
         )
-        segment.decodedTranslation = DraftMatecatUtils.unescapeHTML(
-          DraftMatecatUtils.decodeTagsToPlainText(segment.translation),
+        segment.decodedSource = DraftMatecatUtils.transformTagsToText(
+          segment.segment,
         )
-        segment.decodedSource = DraftMatecatUtils.unescapeHTML(
-          DraftMatecatUtils.decodeTagsToPlainText(segment.segment),
+        segment.updatedSource = SegmentUtils.checkCurrentSegmentTPEnabled(
+          segment,
         )
-        segment.updatedSource = segment.segment
+          ? DraftMatecatUtils.removeTagsFromText(segment.segment)
+          : segment.segment
         segment.openComments = false
         segment.openSplit = false
         newSegments.push(segment)
@@ -373,7 +365,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
   updateOriginalTranslation(sid, translation) {
     const index = this.getSegmentIndex(sid)
     if (index === -1) return
-    const newTrans = DraftMatecatUtils.decodeTagsToPlainText(translation)
+    const newTrans = DraftMatecatUtils.transformTagsToText(translation)
 
     this._segments = this._segments.setIn(
       [index, 'originalDecodedTranslation'],
@@ -602,7 +594,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
   setAlternatives: function (sid, alternatives) {
     const index = this.getSegmentIndex(sid)
     if (index === -1) return
-    if (_.isUndefined(alternatives)) {
+    if (isUndefined(alternatives)) {
       this._segments = this._segments.deleteIn([index, 'alternatives'])
     } else {
       this._segments = this._segments.setIn(
@@ -918,7 +910,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     ).length
     //lexiqa
     if (this._globalWarnings.lexiqa && this._globalWarnings.lexiqa.length > 0) {
-      this._globalWarnings.matecat.INFO.Categories['lexiqa'] = _.uniq(
+      this._globalWarnings.matecat.INFO.Categories['lexiqa'] = uniq(
         this._globalWarnings.lexiqa,
       )
       this._globalWarnings.matecat.INFO.total =
@@ -932,7 +924,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
       this.filterGlobalWarning.bind(this, 'LXQ'),
     )
     if (warnings && warnings.length > 0) {
-      this._globalWarnings.matecat.INFO.Categories['lexiqa'] = _.uniq(warnings)
+      this._globalWarnings.matecat.INFO.Categories['lexiqa'] = uniq(warnings)
       this._globalWarnings.matecat.INFO.total = warnings.length
       this._globalWarnings.matecat.total =
         this._globalWarnings.matecat.total + warnings.length
@@ -1023,8 +1015,8 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     if (SegmentUtils.checkTPEnabled()) {
       if (
         (segment.status === 'NEW' || segment.status === 'DRAFT') &&
-        TagUtils.checkXliffTagsInText(segment.segment) &&
-        !TagUtils.checkXliffTagsInText(segment.translation)
+        DraftMatecatUtils.checkXliffTagsInText(segment.segment) &&
+        !DraftMatecatUtils.checkXliffTagsInText(segment.translation)
       ) {
         return true
       }
@@ -1084,7 +1076,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     let result,
       currentFind = false
     this._segments.forEach((segment) => {
-      if (_.isUndefined(result)) {
+      if (isUndefined(result)) {
         if (currentFind || current_sid === -1) {
           if (segment.get('readonly') === 'true') {
             return false
@@ -1638,7 +1630,7 @@ AppDispatcher.register(function (action) {
       break
     }
     case SegmentConstants.ADD_SEGMENT_PRELOADED_ISSUES:
-      _.each(action.versionsIssues, function (issues, segmentId) {
+      each(action.versionsIssues, function (issues, segmentId) {
         SegmentStore.addSegmentPreloadedIssues(segmentId, issues)
       })
       SegmentStore.emitChange(
@@ -2019,6 +2011,11 @@ AppDispatcher.register(function (action) {
       break
     case SegmentConstants.OPEN_GLOSSARY_FORM_PREFILL:
       SegmentStore.emitChange(SegmentConstants.OPEN_GLOSSARY_FORM_PREFILL, {
+        ...action,
+      })
+      break
+    case SegmentConstants.FOCUS_TAGS:
+      SegmentStore.emitChange(SegmentConstants.FOCUS_TAGS, {
         ...action,
       })
       break

@@ -1,0 +1,15 @@
+{
+  "labels": ["dependencies"],
+  "extends": ["config:base"],
+  "packageRules": [
+    {
+      "updateTypes": ["minor", "patch"],
+      "automerge": false,
+      "minimumReleaseAge": "15 days"
+    }
+  ],
+  "branchConcurrentLimit": 3,
+  "timezone": "Europe/Rome",
+  "schedule": ["after 10pm every weekday", "before 5am every weekday"],
+  "baseBranches": ["develop"]
+}

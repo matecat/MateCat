@@ -1,8 +1,7 @@
 import React from 'react'
-import _ from 'lodash'
+import {isEmpty, isUndefined} from 'lodash'
 
 import EditArea from './Editarea'
-import TagUtils from '../../utils/tagUtils'
 import CursorUtils from '../../utils/cursorUtils'
 import SegmentConstants from '../../constants/SegmentConstants'
 import SegmentStore from '../../stores/SegmentStore'
@@ -10,6 +9,7 @@ import SegmentButtons from './SegmentButtons'
 import SegmentWarnings from './SegmentWarnings'
 import SegmentActions from '../../actions/SegmentActions'
 import {SegmentContext} from './SegmentContext'
+import DraftMatecatUtils from './utils/DraftMatecatUtils'
 
 class SegmentTarget extends React.Component {
   static contextType = SegmentContext
@@ -78,7 +78,7 @@ class SegmentTarget extends React.Component {
     let issues = []
     if (this.props.segment.versions) {
       this.props.segment.versions.forEach(function (version) {
-        if (!_.isEmpty(version.issues)) {
+        if (!isEmpty(version.issues)) {
           issues = issues.concat(version.issues)
         }
       })
@@ -99,8 +99,9 @@ class SegmentTarget extends React.Component {
         this.props.segment.versions[0].translation
           ? this.props.segment.versions[0].translation
           : translation
-      let currentTranslationVersion = TagUtils.matchTag(
-        TagUtils.decodeHtmlInTag(TagUtils.decodePlaceholdersToTextSimple(text)),
+      let currentTranslationVersion = DraftMatecatUtils.transformTagsToHtml(
+        text,
+        config.isTargetRTL,
       )
       textAreaContainer = (
         <div
@@ -121,7 +122,7 @@ class SegmentTarget extends React.Component {
             />
           </div>
           <div className="toolbar">
-            {config.isReview && ReviewExtended.enabled() ? (
+            {config.isReview ? (
               <a
                 href="#"
                 className="revise-lock-editArea active"
@@ -197,7 +198,7 @@ class SegmentTarget extends React.Component {
           />
           {s2tMicro}
           <div className="toolbar">
-            {config.isReview && ReviewExtended.enabled() ? (
+            {config.isReview ? (
               <a
                 href="#"
                 className="revise-lock-editArea"
@@ -205,8 +206,7 @@ class SegmentTarget extends React.Component {
                 title="Highlight text and assign an issue to the selected text."
               />
             ) : null}
-            {ReviewExtended.enabled() &&
-            (issues.length > 0 || config.isReview) ? (
+            {issues.length > 0 || config.isReview ? (
               <a
                 className="revise-qr-link"
                 title="Segment Quality Report."
@@ -260,8 +260,10 @@ class SegmentTarget extends React.Component {
   }
 
   autoFillTagsInTarget(sid) {
-    if (_.isUndefined(sid) || sid === this.props.segment.sid) {
-      let newTranslation = TagUtils.autoFillTagsInTarget(this.props.segment)
+    if (isUndefined(sid) || sid === this.props.segment.sid) {
+      let newTranslation = DraftMatecatUtils.autoFillTagsInTarget(
+        this.props.segment,
+      )
       //lock tags and run again getWarnings
       setTimeout(() => {
         SegmentActions.replaceEditAreaTextContent(

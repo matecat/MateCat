@@ -1,7 +1,7 @@
 import {render, screen, waitFor} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import React from 'react'
-import {rest} from 'msw'
+import {http, HttpResponse} from 'msw'
 import {createRoot} from 'react-dom/client'
 
 import {mswServer} from '../../../../../mocks/mswServer'
@@ -21,7 +21,6 @@ window.config = {
   hostpath: 'https://dev.matecat.com',
 }
 require('../../../../common')
-require('../../../../login')
 require('../../../../user_store')
 
 const props = {
@@ -133,17 +132,14 @@ const apiUserMockResponse = {
 const executeMswServer = () => {
   mswServer.use(
     ...[
-      rest.get('/api/app/user', (req, res, ctx) => {
-        return res(ctx.status(200), ctx.json(apiUserMockResponse))
+      http.get('/api/app/user', () => {
+        return HttpResponse.json(apiUserMockResponse)
       }),
-      rest.get('/api/app/api-key/show', (req, res, ctx) => {
-        return res(
-          ctx.status(200),
-          ctx.json({errors: ['The user has not a valid API key']}),
-        )
+      http.get('/api/app/api-key/show', () => {
+        return HttpResponse.json({errors: ['The user has not a valid API key']})
       }),
-      rest.post('/api/app/user/logout', (req, res, ctx) => {
-        return res(ctx.status(200), ctx.json({}))
+      http.post('/api/app/user/logout', () => {
+        return HttpResponse.json({})
       }),
     ],
   )

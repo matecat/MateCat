@@ -5,6 +5,7 @@ import {
   SPECIAL_ROWS_ID,
   TranslationMemoryGlossaryTabContext,
   getTmDataStructureToSendServer,
+  isOwnerOfKey,
 } from '../TranslationMemoryGlossaryTab/TranslationMemoryGlossaryTab'
 import {MenuButton} from '../../../common/MenuButton/MenuButton'
 import {MenuButtonItem} from '../../../common/MenuButton/MenuButtonItem'
@@ -45,7 +46,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
   const valueChange = useRef(false)
 
   const isMMSharedKey = row.id === SPECIAL_ROWS_ID.defaultTranslationMemory
-  const isOwner = Boolean(row.owner)
+  const isOwner = isOwnerOfKey(row.key)
 
   const onChangeIsLookup = (e) => {
     const isLookup = e.currentTarget.checked
@@ -111,27 +112,31 @@ export const TMKeyRow = ({row, onExpandRow}) => {
     setName(value)
     if (value)
       setTmKeys((prevState) =>
-        prevState.map((tm) => (tm.id === row.id ? {...tm, value} : tm)),
+        prevState.map((tm) => (tm.id === row.id ? {...tm, name: value} : tm)),
       )
   }
 
   const updateKeyName = () => {
     if (valueChange.current) {
-      updateTmKey({
-        key: row.key,
-        description: name,
-      }).catch((errors) => {
-        setNotification({
-          type: 'error',
-          message: errors[0].message,
+      if (name) {
+        updateTmKey({
+          key: row.key,
+          description: name,
+        }).catch((errors) => {
+          setNotification({
+            type: 'error',
+            message: errors[0].message,
+          })
         })
-      })
 
-      if (config.is_cattool) {
-        updateJobKeys({
-          getPublicMatches,
-          dataTm: getTmDataStructureToSendServer({tmKeys}),
-        }).then(() => CatToolActions.onTMKeysChangeStatus())
+        if (config.is_cattool) {
+          updateJobKeys({
+            getPublicMatches,
+            dataTm: getTmDataStructureToSendServer({tmKeys}),
+          }).then(() => CatToolActions.onTMKeysChangeStatus())
+        }
+      } else {
+        setName(row.name)
       }
 
       valueChange.current = false

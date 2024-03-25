@@ -213,13 +213,13 @@
         {
             "localized": [
                 {
-                    "en": "Balkan Gipsy"
+                    "en": "Balkan Romani"
                 }
             ],
-            "isocode": "rm",
+            "isocode": "rmn",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "rm-RO"
+            "rfc3066code": "rmn-BG"
         },
         {
             "localized": [
@@ -600,6 +600,17 @@
         {
             "localized": [
                 {
+                    "en": "Chuj"
+                }
+            ],
+            "isocode": "cac",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "cac-GT"
+        },
+        {
+            "localized": [
+                {
                     "en": "Classical Greek"
                 }
             ],
@@ -691,7 +702,7 @@
                     "en": "Dari"
                 }
             ],
-            "isocode": "fa",
+            "isocode": "prs",
             "enabled": true,
             "rtl": true,
             "rfc3066code": "prs-AF"
@@ -1271,6 +1282,17 @@
         {
             "localized": [
                 {
+                    "en": "Ho"
+                }
+            ],
+            "isocode": "hoc",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "hoc-IN"
+        },
+        {
+            "localized": [
+                {
                     "en": "Hungarian"
                 }
             ],
@@ -1487,6 +1509,17 @@
             "enabled": true,
             "rtl": false,
             "rfc3066code": "kam-KE"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Kanjobal"
+                }
+            ],
+            "isocode": "kjb",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "kjb-GT"
         },
         {
             "localized": [
@@ -1975,6 +2008,17 @@
         {
             "localized": [
                 {
+                    "en": "Mam"
+                }
+            ],
+            "isocode": "mam",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "mam-GT"
+        },
+        {
+            "localized": [
+                {
                     "en": "Mandara"
                 }
             ],
@@ -2185,18 +2229,6 @@
         {
             "localized": [
                 {
-                    "en": "Ndebele"
-                }
-            ],
-            "isocode": "nr",
-            "enabled": true,
-            "rtl": false,
-            "rfc3066code": "nr-ZA",
-            "languageRegionCode": "nso-ZA"
-        },
-        {
-            "localized": [
-                {
                     "en": "Nepali"
                 }
             ],
@@ -2248,6 +2280,18 @@
             "enabled": true,
             "rtl": false,
             "rfc3066code": "kmr-TR"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Northern Ndebele"
+                }
+            ],
+            "isocode": "nd",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "nd-ZW",
+            "languageRegionCode": "nde-ZW"
         },
         {
             "localized": [
@@ -2893,6 +2937,18 @@
         {
             "localized": [
                 {
+                    "en": "Southern Ndebele"
+                }
+            ],
+            "isocode": "nr",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "nr-ZA",
+            "languageRegionCode": "nso-ZA"
+        },
+        {
+            "localized": [
+                {
                     "en": "Southwestern Dinka"
                 }
             ],
@@ -3531,17 +3587,6 @@
             "enabled": true,
             "rtl": false,
             "rfc3066code": "gaz-ET"
-        },
-        {
-            "localized": [
-                {
-                    "en": "Western Persian"
-                }
-            ],
-            "isocode": "pes",
-            "enabled": true,
-            "rtl": true,
-            "rfc3066code": "pes-IR"
         },
         {
             "localized": [

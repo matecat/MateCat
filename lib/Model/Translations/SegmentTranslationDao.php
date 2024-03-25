@@ -370,13 +370,21 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
      */
     public static function addTranslation( Translations_SegmentTranslationStruct $translation_struct, $is_revision ) {
 
+        // avoid version_number null error
+        if($translation_struct->version_number === null){
+            $translation_struct->version_number = 0;
+        }
+
         $keys_to_insert = [
                 'id_segment',
                 'id_job',
                 'status',
                 'translation',
                 'serialized_errors_list',
+                'suggestion',
                 'suggestion_position',
+                'suggestion_source',
+                'suggestion_match',
                 'warning',
                 'translation_date',
                 'version_number',
@@ -414,7 +422,10 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
                 VALUES (" . implode( ", ", $bind_keys ) . ")
 				ON DUPLICATE KEY UPDATE
 				status = :status,
+                suggestion = :suggestion,
                 suggestion_position = :suggestion_position,
+                suggestion_source = :suggestion_source,
+                suggestion_match = :suggestion_match,
                 serialized_errors_list = :serialized_errors_list,
                 time_to_edit = time_to_edit + VALUES( time_to_edit ),
                 translation = :translation,
@@ -743,9 +754,10 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
 
             array_pop( $arrayOfSegmentTranslationToPropagate );
 
-            $propagationAnalyser = new PropagationAnalyser();
-            $propagationTotal    = $propagationAnalyser->analyse( $segmentTranslationStruct, $arrayOfSegmentTranslationToPropagate );
-            $propagationTotal->setTotals( [
+            if($lastRow !== null and is_array($lastRow)){
+                $propagationAnalyser = new PropagationAnalyser();
+                $propagationTotal    = $propagationAnalyser->analyse( $segmentTranslationStruct, $arrayOfSegmentTranslationToPropagate );
+                $propagationTotal->setTotals( [
                     'propagated_ice_total'     => $propagationAnalyser->getPropagatedIceCount(),
                     'not_propagated_total'     => $propagationAnalyser->getNotPropagatedCount(),
                     'propagated_total'         => $propagationAnalyser->getPropagatedCount(),
@@ -753,7 +765,9 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
                     'total'                    => $lastRow[ 0 ],
                     'countSeg'                 => $lastRow[ 1 ],
                     'status'                   => $lastRow[ 2 ],
-            ] );
+                ] );
+            }
+
 
         } catch ( PDOException $e ) {
             throw new Exception( "Error in counting total words for propagation: " . $e->getCode() . ": " . $e->getMessage()
@@ -761,7 +775,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
                     -$e->getCode() );
         }
 
-        if ( !empty( $propagationTotal->getTotals() ) ) {
+        if ( isset($propagationTotal) and $propagationTotal !== null and !empty( $propagationTotal->getTotals() ) ) {
 
             if ( true === $execute_update and !empty( $propagationTotal->getSegmentsForPropagation() ) ) {
 
@@ -837,6 +851,10 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
                             -$e->getCode() );
                 }
             }
+        }
+
+        if(!isset($propagationTotal)){
+            $propagationTotal = new Propagation_PropagationTotalStruct();
         }
 
         return ( new PropagationApi( $propagationTotal ) )->render();
@@ -962,5 +980,25 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
         $conn->commit();
 
         return $affected_rows;
+    }
+
+    /**
+     * @param $id_segment
+     * @param $suggestions
+     */
+    public static function updateSuggestionsArray($id_segment, $suggestions) {
+
+        $conn  = Database::obtain()->getConnection();
+        $query = "UPDATE segment_translations SET suggestions_array = :suggestions_array WHERE id_segment=:id_segment";
+
+        $stmt  = $conn->prepare( $query );
+        $suggestions_array = (!empty($suggestions)) ? json_encode($suggestions) : null;
+
+        $params = [
+            'id_segment'        => $id_segment,
+            'suggestions_array' => $suggestions_array,
+        ];
+
+        $stmt->execute( $params );
     }
 }

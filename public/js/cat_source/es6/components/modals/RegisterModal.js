@@ -6,8 +6,12 @@ import * as RuleRunner from '../common/ruleRunner'
 import * as FormRules from '../common/formRules'
 import {checkRedeemProject as checkRedeemProjectApi} from '../../api/checkRedeemProject'
 import {registerUser} from '../../api/registerUser'
+import CommonUtils from '../../utils/commonUtils'
+import ModalsActions from '../../actions/ModalsActions'
+import ConfirmRegister from './ConfirmRegister'
 
 const PASSWORD_MIN_LENGTH = 12
+const PASSWORD_MAX_LENGTH = 50
 
 class RegisterModal extends React.Component {
   constructor(props) {
@@ -50,12 +54,23 @@ class RegisterModal extends React.Component {
       return false
     }
     this.setState({requestRunning: true})
+    const data = {
+      event: 'open_register_email',
+    }
+    CommonUtils.dispatchAnalyticsEvents(data)
     this.checkRedeemProject().then(
       this.sendRegisterData()
         .then(() => {
-          $('#modal').trigger('confirmregister', [
+          const style = {
+            width: '25%',
+            maxWidth: '450px',
+          }
+          ModalsActions.showModalComponent(
+            ConfirmRegister,
             {emailAddress: self.state.emailAddress},
-          ])
+            'Confirm Registration',
+            style,
+          )
         })
         .catch((response) => {
           var generalErrorText
@@ -83,6 +98,10 @@ class RegisterModal extends React.Component {
   }
 
   googole_popup() {
+    const data = {
+      event: 'open_register_google',
+    }
+    CommonUtils.dispatchAnalyticsEvents(data)
     var url = this.props.googleUrl
     this.checkRedeemProject()
     var newWindow = window.open(url, 'name', 'height=600,width=900')
@@ -325,6 +344,7 @@ const fieldValidations = [
     'Password',
     FormRules.requiredRule,
     FormRules.minLength(PASSWORD_MIN_LENGTH),
+    FormRules.maxLength(PASSWORD_MAX_LENGTH),
     FormRules.atLeastOneSpecialChar(),
   ),
   RuleRunner.ruleRunner(

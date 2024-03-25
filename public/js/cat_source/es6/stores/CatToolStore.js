@@ -1,6 +1,6 @@
 import assign from 'object-assign'
 import {EventEmitter} from 'events'
-import _ from 'lodash'
+import {round, filter} from 'lodash'
 
 import AppDispatcher from './AppDispatcher'
 import CatToolConstants from '../constants/CatToolConstants'
@@ -12,6 +12,7 @@ EventEmitter.prototype.setMaxListeners(0)
 let CatToolStore = assign({}, EventEmitter.prototype, {
   files: null,
   qr: null,
+  languages: [],
   searchResults: {
     searchResults: [], // Array
     occurrencesList: [],
@@ -23,6 +24,7 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
   tmKeys: null,
   keysDomains: null,
   haveKeysGlossary: undefined,
+  jobMetadata: undefined,
   storeFilesInfo: function (files) {
     this.files = files
   },
@@ -35,11 +37,11 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
     stats.revision1Completed =
       stats.revises &&
       stats.revises.length > 0 &&
-      _.round(stats.revises[0].advancement_wc) === stats.TOTAL
+      round(stats.revises[0].advancement_wc) === stats.TOTAL
     stats.revision2Completed =
       stats.revises &&
       stats.revises.length > 1 &&
-      _.round(stats.revises[1].advancement_wc) === stats.TOTAL
+      round(stats.revises[1].advancement_wc) === stats.TOTAL
 
     this._projectProgess = stats
   },
@@ -48,7 +50,7 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
   },
   getQR: function (revisionNumber) {
     if (this.qr) {
-      return _.filter(
+      return filter(
         this.qr.chunk.reviews,
         (rev) => rev.revision_number === revisionNumber,
       )
@@ -60,6 +62,8 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
   },
   clientConnect: function (clientId) {
     this.clientConnected = !!clientId
+    //TODO: remove
+    config.id_client
     this.clientId = clientId
   },
   updateJobTmKeys: function (keys) {
@@ -71,6 +75,9 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
   },
   getJobTmKeys: function () {
     return this.tmKeys
+  },
+  isClientConnected: function () {
+    return this.clientConnected
   },
   getClientId: function () {
     return this.clientId
@@ -86,6 +93,12 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
   },
   setHaveKeysGlossary: function (value) {
     this.haveKeysGlossary = value
+  },
+  setLanguages: function (languages) {
+    this.languages = languages
+  },
+  getLanguages: function () {
+    return this.languages
   },
   emitChange: function () {
     this.emit.apply(this, arguments)
@@ -154,6 +167,9 @@ AppDispatcher.register(function (action) {
       CatToolStore.clientConnect(action.clientId)
       CatToolStore.emitChange(CatToolConstants.CLIENT_CONNECT, action.clientId)
       break
+    case CatToolConstants.CLIENT_RECONNECTION:
+      CatToolStore.emitChange(CatToolConstants.CLIENT_RECONNECTION)
+      break
     case CatToolConstants.ADD_NOTIFICATION:
       CatToolStore.emitChange(
         CatToolConstants.ADD_NOTIFICATION,
@@ -220,6 +236,11 @@ AppDispatcher.register(function (action) {
       break
     case CatToolConstants.OPEN_SETTINGS_PANEL:
       CatToolStore.emitChange(CatToolConstants.OPEN_SETTINGS_PANEL, {
+        ...action,
+      })
+      break
+    case CatToolConstants.GET_JOB_METADATA:
+      CatToolStore.emitChange(CatToolConstants.GET_JOB_METADATA, {
         ...action,
       })
       break

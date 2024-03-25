@@ -2,6 +2,7 @@
 
 namespace TMS;
 
+use API\V2\Exceptions\UnprocessableException;
 use Chunks_ChunkDao;
 use Chunks_ChunkStruct;
 use Constants_TranslationStatus;
@@ -13,8 +14,8 @@ use Engines_Results_MyMemory_ExportResponse;
 use Engines_Results_MyMemory_TmxResponse;
 use Exception;
 use FeatureSet;
-use Files\CSV;
 use INIT;
+use InvalidArgumentException;
 use Log;
 use Matecat\SubFiltering\MateCatFilter;
 use SplTempFileObject;
@@ -22,7 +23,6 @@ use stdClass;
 use TMSService\TMSServiceDao;
 use Upload;
 use Utils;
-use Validator\GlossaryCSVValidator;
 
 class TMSService {
 
@@ -161,14 +161,11 @@ class TMSService {
             case "400" :
                 throw new Exception( "Error uploading TMX file. Please, try again in 5 minutes.", -15 );
             case "403" :
-                throw new Exception( "Invalid key provided", -15 );
+                throw new Exception( "Error: ". $this->formatErrorMessage($importStatus->responseDetails), -15 );
             default:
         }
 
-        $numberOfLanguages = (new GlossaryCSVValidator())->getNumberOfLanguage( $file->getFilePath() );
-
         $file->setUuid( $importStatus->id );
-        $file->setNumberOfLanguages( $numberOfLanguages );
 
     }
 
@@ -197,24 +194,23 @@ class TMSService {
             case "400" :
                 throw new Exception( "Can't load Glossary file right now, try later", -15 );
             case "404":
-                throw new Exception( 'File format not supported, please upload a glossary in XLSX, XLS or ODS format.', -15 );
+                throw new InvalidArgumentException( 'File format not supported, please upload a glossary in XLSX, XLS or ODS format.', -15 );
             case "406":
-                throw new Exception( $importStatus->responseDetails, -15 );
+                throw new InvalidArgumentException( $importStatus->responseDetails, -15 );
             case "403" :
-                $message = 'Invalid TM key provided, please provide a valid MyMemory key.';
 
                 if ( $importStatus->responseDetails === 'HEADER DON\'T MATCH THE CORRECT STRUCTURE' ) {
                     $message = 'The file header does not match the accepted structure. Please change the header structure to the one set out in <a href="https://guides.matecat.com/glossary-file-format" target="_blank">the user guide page</a> and retry upload.';
+                    throw new UnprocessableException( $message, $importStatus->responseStatus );
                 }
 
-                throw new Exception( $message, $importStatus->responseStatus );
+                $message = 'Invalid TM key provided, please provide a valid MyMemory key.';
+                throw new InvalidArgumentException( $message, $importStatus->responseStatus );
+
             default:
         }
 
-        $numberOfLanguages = (new GlossaryCSVValidator())->getNumberOfLanguage( $file->getFilePath() );
-
         $file->setUuid( $importStatus->id );
-        $file->setNumberOfLanguages( $numberOfLanguages );
 
     }
 
@@ -262,7 +258,7 @@ class TMSService {
      * @param $userEmail
      * @param $userName
      *
-     * @return array
+     * @return Engines_Results_MyMemory_ExportResponse
      */
     public function glossaryExport( $key, $keyName, $userEmail, $userName ) {
         return $this->mymemory_engine->glossaryExport( $key, $keyName, $userEmail, $userName );
@@ -279,7 +275,7 @@ class TMSService {
         if ( $allMemories->responseStatus >= 400 || $allMemories->responseData[ 'status' ] == 2 ) {
             Log::doJsonLog( "Error response from TMX status check: " . $allMemories->responseData[ 'log' ] );
             //what the hell? No memories although I've just loaded some? Eject!
-            throw new Exception( "Error response from TMX status check", -15 );
+            throw new Exception( 'Error: '. $this->formatErrorMessage($allMemories->responseData[ 'log' ]), -15 );
         }
 
         switch ( $allMemories->responseData[ 'status' ] ) {
@@ -303,6 +299,19 @@ class TMSService {
 
         return $result;
 
+    }
+
+    /**
+     * @param $message
+     * @return mixed
+     */
+    private function formatErrorMessage($message)
+    {
+        if($message === "THE CHARACTER SET PROVIDED IS INVALID."){
+            return "The encoding of the TMX file uploaded is not valid, please open it in a text editor, convert its encoding to UTF-8 (character corruption might happen) and retry upload";
+        }
+
+        return $message;
     }
 
     /**
@@ -338,18 +347,21 @@ class TMSService {
      * @param $userMail
      * @param $userName
      * @param $userSurname
+     * @param $tm_key
+     * @param bool $strip_tags
      *
      * @return Engines_Results_MyMemory_ExportResponse
      * @throws Exception
      */
-    public function requestTMXEmailDownload( $userMail, $userName, $userSurname, $tm_key ) {
+    public function requestTMXEmailDownload( $userMail, $userName, $userSurname, $tm_key, $strip_tags = false ) {
 
         return $this->mymemory_engine->emailExport(
                 $tm_key,
                 $this->name,
                 $userMail,
                 $userName,
-                $userSurname
+                $userSurname,
+                $strip_tags
         );
     }
 

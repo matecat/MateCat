@@ -10,12 +10,6 @@ abstract class viewController extends controller {
     protected $template = null;
 
     /**
-     * The os platform
-     *
-     * @var string
-     */
-    protected $platform;
-    /**
      * @var Google_Client
      */
     protected $client;
@@ -27,16 +21,6 @@ abstract class viewController extends controller {
 
     protected $login_required = false;
 
-    protected $supportedBrowser;
-
-    /**
-     * Try to identify the browser of users
-     *
-     * @return array
-     */
-    private function getBrowser() {
-        return Utils::getBrowser();
-    }
 
     /**
      * Class constructor
@@ -53,8 +37,6 @@ abstract class viewController extends controller {
             $controllerInstance->doAction();
             die(); // do not complete klein response, set 404 header in render404 instead of 200
         }
-
-        $this->setBrowserSupport();
 
         //SESSION ENABLED
         $this->readLoginInfo( false );
@@ -143,12 +125,19 @@ abstract class viewController extends controller {
      *
      * Initialize template variables that must be initialized to avoid templte errors.
      * These variables are expected to be overridden.
+     * @throws Exception
      */
     private function setInitialTemplateVars() {
 
         if ( is_null( $this->template ) ) {
             throw new Exception( 'Tamplate is not defined' );
         }
+
+        if ( $this->userIsLogged ) {
+            $this->featureSet->loadFromUserEmail( $this->user->email );
+        }
+
+        $this->template->user_plugins =  $this->featureSet->filter('appendInitialTemplateVars', $this->featureSet->getCodes());
 
         $this->template->footer_js            = [];
         $this->template->config_js            = [];
@@ -157,6 +146,8 @@ abstract class viewController extends controller {
         $this->template->gdriveAuthURL        = \ConnectedServices\GDrive::generateGDriveAuthUrl();
         $this->template->enableMultiDomainApi = INIT::$ENABLE_MULTI_DOMAIN_API;
         $this->template->ajaxDomainsNumber    = INIT::$AJAX_DOMAINS;
+
+
     }
 
     /**
@@ -180,17 +171,6 @@ abstract class viewController extends controller {
         $this->collectFlashMessages();
 
         $this->template->googleDriveEnabled = Bootstrap::areOauthKeysPresent() && Bootstrap::isGDriveConfigured();
-    }
-
-    /**
-     *
-     * Set the variables for the browser support
-     *
-     */
-    protected function setBrowserSupport() {
-        $browser_info           = Utils::getBrowser();
-        $this->supportedBrowser = Utils::isSupportedWebBrowser( $browser_info );
-        $this->platform         = strtolower( $browser_info[ 'platform' ] );
     }
 
     /**

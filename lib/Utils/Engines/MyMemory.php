@@ -388,56 +388,6 @@ class Engines_MyMemory extends Engines_AbstractEngine {
      */
     public function glossaryImport( $file, $key, $name = false ) {
 
-        try {
-
-            $origFile = new SplFileObject( $file, 'r+' );
-            $origFile->setFlags( SplFileObject::READ_CSV | SplFileObject::SKIP_EMPTY | SplFileObject::READ_AHEAD );
-
-            $tmpFileName = tempnam( "/tmp", 'GLOS' );
-            $newFile     = new SplFileObject( $tmpFileName, 'r+' );
-            $newFile->setFlags( SplFileObject::READ_CSV | SplFileObject::SKIP_EMPTY | SplFileObject::READ_AHEAD );
-
-            $index = 0;
-
-            foreach ( $origFile as $line_num => $line ) {
-
-                if ( in_array( "1", $line ) ) {
-                    foreach ( $line as $lineKey => $item ) {
-                        if ( $item == "1" ) {
-                            $line[ $lineKey ] = "True";
-                        }
-                    }
-                }
-
-                //copy stream to stream
-                $index++;
-                $newFile->fputcsv( $line );
-            }
-
-            $newFile->fflush();
-
-            $origFile = null;
-            $newFile  = null;
-            copy( $tmpFileName, $file );
-            unlink( $tmpFileName );
-
-        } catch ( RuntimeException $e ) {
-            $this->result = new Engines_Results_MyMemory_TmxResponse( [
-                "responseStatus"  => 406,
-                "responseData"    => null,
-                "responseDetails" => $e->getMessage()
-            ] );
-
-            return $this->result;
-        }
-
-        // validate the CSV
-        $validateCSVFileErrors = $this->validateCSVFile( $file );
-
-        if ( count( $validateCSVFileErrors ) > 0 ) {
-            throw new \Exception( $validateCSVFileErrors[ 0 ] );
-        }
-
         $postFields = [
             'glossary' => $this->getCurlFile( $file ),
             'key'      => trim( $key ),
@@ -475,7 +425,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
      * @param $userEmail
      * @param $userName
      *
-     * @return array
+     * @return Engines_Results_MyMemory_ExportResponse
      */
     public function glossaryExport($key, $keyName, $userEmail, $userName)
     {
@@ -704,20 +654,6 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         return $this->result;
     }
 
-    /**
-     * @param $file
-     * @return ValidatorErrorObject[]
-     * @throws Exception
-     */
-    private function validateCSVFile( $file ) {
-        $validatorObject      = new GlossaryCSVValidatorObject();
-        $validatorObject->csv = $file;
-        $validator            = new GlossaryCSVValidator();
-        $validator->validate( $validatorObject );
-
-        return $validator->getErrors();
-    }
-
     public function import( $file, $key, $name = false ) {
 
         $postFields = [
@@ -747,13 +683,13 @@ class Engines_MyMemory extends Engines_AbstractEngine {
      * @param $userEmail
      * @param $userName
      * @param $userSurname
-     *
+     * @param $strip_tags
      *
      * @return Engines_Results_MyMemory_ExportResponse
      * @throws Exception
      *
      */
-    public function emailExport( $key, $name, $userEmail, $userName, $userSurname ) {
+    public function emailExport( $key, $name, $userEmail, $userName, $userSurname, $strip_tags = false ) {
         $parameters = [];
 
         $parameters[ 'key' ]        = trim( $key );
@@ -761,6 +697,10 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         $parameters[ 'user_name' ]  = trim( $userName ) . " " . trim( $userSurname );
         ( !empty( $name ) ? $parameters[ 'zip_name' ] = $name : $parameters[ 'zip_name' ] = $key );
         $parameters[ 'zip_name' ] = $parameters[ 'zip_name' ] . ".zip";
+
+        if($strip_tags and $strip_tags == true){
+            $parameters['strip_tags'] = 1;
+        }
 
         $this->call( 'tmx_export_email_url', $parameters );
 
@@ -1008,7 +948,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 
         $parameters                 = [];
         $parameters[ 's' ]          = $source_string;
-        $parameters[ 't' ]          = substr($target_string, $l_index, $r_index - $l_index);
+        $parameters[ 't' ]          = mb_substr($target_string, $l_index, $r_index - $l_index);
         $parameters[ 'hint' ]       = $config[ 'suggestion' ];
 
         $this->_setAdditionalCurlParams( [

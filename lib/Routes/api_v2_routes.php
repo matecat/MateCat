@@ -107,7 +107,26 @@ $klein->with('/api/v2/teams', function() {
 }) ;
 
 $klein->with('/api/v2/languages', function() {
-
     route( '', 'GET', '\API\V2\SupportedLanguagesController', 'index' );
-
 });
+
+
+$klein->with('/api/v2/files', function() {
+    route( '', 'GET', '\API\V2\SupportedFilesController', 'index' );
+});
+
+$klein->with( '/api/v2/payable_rate', function () {
+    route( '/schema', 'GET', '\API\V2\PayableRateController', 'schema' );
+    route( '/validate', 'POST', '\API\V2\PayableRateController', 'validate' );
+    route( '', 'GET', '\API\V2\PayableRateController', 'index' );
+    route( '', 'POST', '\API\V2\PayableRateController', 'create' );
+    route( '/[:id]', 'GET', '\API\V2\PayableRateController', 'view' );
+    route( '/[:id]', 'DELETE', '\API\V2\PayableRateController', 'delete' );
+    route( '/[:id]', 'PUT', '\API\V2\PayableRateController', 'edit' );
+} );
+
+// Download files
+route( '/api/v2/original/[:id_job]/[:password]', 'GET',  'API\V2\DownloadOriginalController', 'index' );
+route( '/api/v2/translation/[:id_job]/[:password]', 'GET',  'API\V2\DownloadFileController', 'index' );
+route( '/api/v2/SDLXLIFF/[:id_job]/[:password]/[:filename]', 'GET',  'API\V2\DownloadFileController', 'forceXliff' );
+route( '/api/v2/TMX/[:id_job]/[:password]', 'GET',  'API\V2\ExportTMXController', 'index' );

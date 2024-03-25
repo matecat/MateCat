@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types'
 import update from 'immutability-helper'
-import _ from 'lodash'
+import {size} from 'lodash'
 import React from 'react'
 
 import TextField from '../common/TextField'
@@ -8,6 +8,13 @@ import * as RuleRunner from '../common/ruleRunner'
 import * as FormRules from '../common/formRules'
 import {checkRedeemProject as checkRedeemProjectApi} from '../../api/checkRedeemProject'
 import {loginUser} from '../../api/loginUser'
+import ModalsActions from '../../actions/ModalsActions'
+import ForgotPasswordModal from './ForgotPasswordModal'
+import CatToolActions from '../../actions/CatToolActions'
+import {
+  GOOGLE_LOGIN_LOCAL_STORAGE,
+  GOOGLE_LOGIN_NOTIFICATION,
+} from '../../hooks/useGoogleLoginNotification'
 
 class LoginModal extends React.Component {
   constructor(props) {
@@ -23,6 +30,7 @@ class LoginModal extends React.Component {
     this.handleSubmitClicked = this.handleSubmitClicked.bind(this)
     this.sendLoginData = this.sendLoginData.bind(this)
     this.errorFor = this.errorFor.bind(this)
+    this.timerLoginAttempts
   }
 
   // TODO: find a way to abstract this into the plugin
@@ -51,6 +59,9 @@ class LoginModal extends React.Component {
   }
 
   googole_popup() {
+    // TODO: Remove temp notification warning login google (search in files this todo)
+    this.showNotificationGoogleLogin()
+
     let url = this.props.googleUrl
     let self = this
     this.checkRedeemProject()
@@ -85,8 +96,31 @@ class LoginModal extends React.Component {
     }
   }
 
+  showErrorWithTimer(time) {
+    this.setState({
+      requestRunning: true,
+    })
+    clearInterval(this.timerLoginAttempts)
+    this.timerLoginAttempts = setInterval(() => {
+      time--
+      if (time === 0) {
+        clearInterval(this.timerLoginAttempts)
+        this.setState({
+          requestRunning: false,
+          showErrors: false,
+          generalError: '',
+        })
+      } else {
+        let text = `Too many attempts, please retry in ${time} seconds`
+        this.setState({
+          generalError: text,
+          requestRunning: true,
+        })
+      }
+    }, 1000)
+  }
+
   handleSubmitClicked() {
-    let self = this
     this.setState({showErrors: true})
     if ($.isEmptyObject(this.state.validationErrors) == false) return null
     if (this.state.requestRunning) {
@@ -96,15 +130,20 @@ class LoginModal extends React.Component {
     this.checkRedeemProject().then(
       this.sendLoginData()
         .then(() => {
-          if (self.props.goToManage) {
+          if (this.props.goToManage) {
             window.location = '/manage/'
           } else {
             window.location.reload()
           }
         })
-        .catch(() => {
+        .catch((response) => {
+          if (response.status === 429) {
+            const time = response.headers.get('Retry-After')
+            this.showErrorWithTimer(time)
+            return
+          }
           const text = 'Login failed.'
-          self.setState({
+          this.setState({
             generalError: text,
             requestRunning: false,
           })
@@ -129,11 +168,23 @@ class LoginModal extends React.Component {
   }
 
   openRegisterModal() {
-    $('#modal').trigger('openregister')
+    APP.openRegisterModal()
   }
 
   openForgotPassword() {
-    $('#modal').trigger('openforgotpassword')
+    let props = {}
+    if (config.showModalBoxLogin == 1) {
+      props.redeemMessage = true
+    }
+    const style = {
+      width: '577px',
+    }
+    ModalsActions.showModalComponent(
+      ForgotPasswordModal,
+      props,
+      'Forgot Password',
+      style,
+    )
   }
 
   googleLoginButton() {
@@ -164,7 +215,7 @@ class LoginModal extends React.Component {
     if (!(config.pluggable && config.pluggable.auth_disable_email)) {
       let generalErrorHtml = ''
       let buttonSignInClass =
-        _.size(this.state.validationErrors) === 0 ? '' : 'disabled'
+        size(this.state.validationErrors) === 0 ? '' : 'disabled'
       if (this.state.generalError.length) {
         generalErrorHtml = (
           <div style={{color: 'red', fontSize: '14px'}} className="text">
@@ -223,6 +274,14 @@ class LoginModal extends React.Component {
           </span>
         </div>
       )
+    }
+  }
+
+  showNotificationGoogleLogin() {
+    const googleNotification = localStorage.getItem(GOOGLE_LOGIN_LOCAL_STORAGE)
+    if (!googleNotification) {
+      localStorage.setItem(GOOGLE_LOGIN_LOCAL_STORAGE, 'true')
+      CatToolActions.addNotification(GOOGLE_LOGIN_NOTIFICATION)
     }
   }
 

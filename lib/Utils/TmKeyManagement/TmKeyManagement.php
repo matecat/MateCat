@@ -69,7 +69,7 @@ class TmKeyManagement_TmKeyManagement {
 
         $filter = new TmKeyManagement_Filter( $uid );
         $filter->setGrants( $grant_level )
-                ->setTmType( $type );
+            ->setTmType( $type );
 
         switch ( $user_role ) {
             case TmKeyManagement_Filter::ROLE_TRANSLATOR:
@@ -140,7 +140,7 @@ class TmKeyManagement_TmKeyManagement {
 
             $filter = new TmKeyManagement_Filter();
             $filter->setGrants( $grant_level )
-                    ->setTmType( $type );
+                ->setTmType( $type );
             $tmKey  = array_filter( $tmKey, array( $filter, 'byOwner' ) );
 
             $result_arr[ ] = $tmKey;
@@ -361,26 +361,27 @@ class TmKeyManagement_TmKeyManagement {
                 }
 
                 //override the static values
-                $_job_Key->tm   = filter_var( $reverse_lookup_client_json[ 'elements' ][ $_index_position ]->tm, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
-                $_job_Key->glos = filter_var( $reverse_lookup_client_json[ 'elements' ][ $_index_position ]->glos, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
+                $_job_ket_element = $reverse_lookup_client_json[ 'elements' ][ $_index_position ];
+                $_job_Key->tm   = filter_var( $_job_ket_element->tm, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
+                $_job_Key->glos = filter_var( $_job_ket_element->glos, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
 
                 if ( $userRole == TmKeyManagement_Filter::OWNER ) {
 
                     //override grants
-                    $_job_Key->r = filter_var( $reverse_lookup_client_json[ 'elements' ][ $_index_position ]->r, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
-                    $_job_Key->w = filter_var( $reverse_lookup_client_json[ 'elements' ][ $_index_position ]->w, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
+                    $_job_Key->r = filter_var( $_job_ket_element->r, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
+                    $_job_Key->w = filter_var( $_job_ket_element->w, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
 
                 } elseif ( $userRole == TmKeyManagement_Filter::ROLE_REVISOR || $userRole == TmKeyManagement_Filter::ROLE_TRANSLATOR ) {
 
                     //override role specific grants
-                    $_job_Key->{TmKeyManagement_Filter::$GRANTS_MAP[ $userRole ][ 'r' ]} = filter_var( $reverse_lookup_client_json[ 'elements' ][ $_index_position ]->r, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
-                    $_job_Key->{TmKeyManagement_Filter::$GRANTS_MAP[ $userRole ][ 'w' ]} = filter_var( $reverse_lookup_client_json[ 'elements' ][ $_index_position ]->w, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
+                    $_job_Key->{TmKeyManagement_Filter::$GRANTS_MAP[ $userRole ][ 'r' ]} = filter_var( $_job_ket_element->r, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
+                    $_job_Key->{TmKeyManagement_Filter::$GRANTS_MAP[ $userRole ][ 'w' ]} = filter_var( $_job_ket_element->w, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
 
                 }
 
                 //change name if modified
-                if ( $_job_Key->name != $reverse_lookup_client_json[ 'elements' ][ $_index_position ]->name ) {
-                    $_job_Key->name = $reverse_lookup_client_json[ 'elements' ][ $_index_position ]->name;
+                if ( $_job_Key->name != $_job_ket_element->name ) {
+                    $_job_Key->name = $_job_ket_element->name;
                 }
 
                 //set as owner if it is but should be already set
@@ -403,19 +404,11 @@ class TmKeyManagement_TmKeyManagement {
                     $_job_Key->w = null;
                     $_job_Key->owner = false;
 
-                } elseif ( $userRole == TmKeyManagement_Filter::ROLE_REVISOR || $userRole == TmKeyManagement_Filter::ROLE_TRANSLATOR ) {
+                } elseif ( ($uid !== null and ($uid == $_job_Key->uid_rev or $uid == $_job_Key->uid_transl)) and ($userRole == TmKeyManagement_Filter::ROLE_REVISOR || $userRole == TmKeyManagement_Filter::ROLE_TRANSLATOR) ) {
 
                     //override role specific grants
                     $_job_Key->{TmKeyManagement_Filter::$GRANTS_MAP[ $userRole ][ 'r' ]} = null;
                     $_job_Key->{TmKeyManagement_Filter::$GRANTS_MAP[ $userRole ][ 'w' ]} = null;
-
-                }
-
-                //remove the uid property
-                if ( $userRole == TmKeyManagement_Filter::ROLE_TRANSLATOR ) {
-                    $_job_Key->uid_transl = null;
-                } elseif ( $userRole == TmKeyManagement_Filter::ROLE_REVISOR ) {
-                    $_job_Key->uid_rev = null;
                 }
 
                 //if the key is no more linked to someone, don't add to the resultset, else reorder if it is not an owner key.
@@ -434,7 +427,7 @@ class TmKeyManagement_TmKeyManagement {
                             $server_reorder_position[ -1000000 + $i ] = $_job_Key;
                         } else {
                             // Remove the key!!!
-                            //only the owner can remove it's keys
+                            //only the owner can remove its keys
                         }
 
                     }
@@ -503,10 +496,10 @@ class TmKeyManagement_TmKeyManagement {
                          */
                         $_keyDao = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
                         $dh      = new TmKeyManagement_MemoryKeyStruct( array(
-                                'uid'    => $uid,
-                                'tm_key' => new TmKeyManagement_TmKeyStruct( array(
-                                        'key' => $justCreatedKey->key
-                                ) )
+                            'uid'    => $uid,
+                            'tm_key' => new TmKeyManagement_TmKeyStruct( array(
+                                'key' => $justCreatedKey->key
+                            ) )
                         ) );
 
                         $keyList = $_keyDao->read( $dh );
@@ -532,71 +525,149 @@ class TmKeyManagement_TmKeyManagement {
         }
 
         ksort( $server_reorder_position, SORT_NUMERIC );
-        return array_values( $server_reorder_position );
+
+        $merged_tm_keys = [];
+
+        foreach (array_values( $server_reorder_position ) as $tm_key){
+            if(!self::excludeJobKeyFromMerge($tm_key, $uid)){
+                $merged_tm_keys[] = $tm_key;
+            }
+        }
+
+        return $merged_tm_keys;
+    }
+
+    /**
+     * Exclude keys if r/w are null (which will be deleted)
+     *
+     * @param TmKeyManagement_TmKeyStruct $_job_Key
+     * @param $uid
+     * @return bool
+     */
+    private static function excludeJobKeyFromMerge(TmKeyManagement_TmKeyStruct $_job_Key, $uid = null)
+    {
+        if($uid === null){
+            return false;
+        }
+
+        if($_job_Key->owner){
+            return false;
+        }
+
+        if( $_job_Key->uid_transl == $uid ){
+            if( $_job_Key->w_transl === null and $_job_Key->r_transl === null ){
+                return true;
+            }
+
+        }
+
+        if( $_job_Key->uid_rev == $uid ) {
+            if( $_job_Key->w_rev === null and $_job_Key->r_rev === null ){
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @param TmKeyManagement_TmKeyStruct[] $tm_keys
+     * @param $userEmail
+     * @param $jobOwnerEmail
+     * @return TmKeyManagement_TmKeyStruct[]
+     */
+    public static function filterOutByOwnership(Array $tm_keys, $userEmail, $jobOwnerEmail)
+    {
+
+        foreach ($tm_keys as $k => $tm_key) {
+
+            if ($userEmail != $jobOwnerEmail && $tm_key->owner) {
+                unset($tm_keys[$k]);
+            } elseif ($userEmail == $jobOwnerEmail && !$tm_key->owner) {
+                unset($tm_keys[$k]);
+            }
+
+        }
+
+        return $tm_keys;
 
     }
 
     /**
-     * Removes a tm key from an array of tm keys for a specific user type. <br/>
-     * If the tm key is still linked to some other user, the result will be the same input array,
-     * except for the tm key wo be removed, whose attributes are properly changed according to the user that wanted to
-     * remove it.<br/>
-     * If user type is wrong, this function will return the input array.
-     *
-     * @param array                       $tmKey_arr
-     * @param TmKeyManagement_TmKeyStruct $newTmKey
-     * @param string                      $user_role
-     *
-     * @return array
+     * @param array $emailList
+     * @param TmKeyManagement_MemoryKeyStruct $memoryKeyToUpdate
+     * @param Users_UserStruct $user
+     * @throws Exception
      */
-    public static function deleteTmKey( Array $tmKey_arr, TmKeyManagement_TmKeyStruct $newTmKey, $user_role = TmKeyManagement_Filter::OWNER ) {
-        $result = array();
+    public function shareKey( Array $emailList, TmKeyManagement_MemoryKeyStruct $memoryKeyToUpdate, Users_UserStruct $user ) {
 
-        foreach ( $tmKey_arr as $i => $curr_tm_key ) {
-            /**
-             * @var $curr_tm_key TmKeyManagement_TmKeyStruct
-             */
-            if ( $curr_tm_key->key == $newTmKey->key ) {
-                switch ( $user_role ) {
+        $mkDao = new TmKeyManagement_MemoryKeyDao();
+        $userDao = new Users_UserDao();
 
-                    case TmKeyManagement_Filter::ROLE_TRANSLATOR:
-                        $curr_tm_key->uid_transl = null;
-                        $curr_tm_key->r_transl   = null;
-                        $curr_tm_key->w_transl   = null;
-                        break;
+        foreach ( $emailList as $pos => $email ) {
 
-                    case TmKeyManagement_Filter::ROLE_REVISOR:
-                        $curr_tm_key->uid_rev = null;
-                        $curr_tm_key->r_rev   = null;
-                        $curr_tm_key->w_rev   = null;
-                        break;
+            $userQuery                  = Users_UserStruct::getStruct();
+            $userQuery->email           = $email;
+            $alreadyRegisteredRecipient = $userDao->setCacheTTL( 60 * 10 )->read( $userQuery );
 
-                    case TmKeyManagement_Filter::OWNER:
-                        $curr_tm_key->owner = false;
-                        $curr_tm_key->r     = null;
-                        $curr_tm_key->w     = null;
-                        break;
+            if ( !empty( $alreadyRegisteredRecipient ) ) {
 
-                    case null:
-                        break;
-
-                    default:
-                        break;
+                // do not send the email to myself
+                if ( $memoryKeyToUpdate->uid == $alreadyRegisteredRecipient[ 0 ]->uid ) {
+                    continue;
                 }
 
-                //if the key is still linked to someone, add it to the result.
-                if ( $curr_tm_key->owner ||
-                        !is_null( $curr_tm_key->uid_transl ) ||
-                        !is_null( $curr_tm_key->uid_rev )
-                ) {
-                    $result[ ] = $curr_tm_key;
-                }
+                $memoryKeyToUpdate->uid = $alreadyRegisteredRecipient[ 0 ]->uid;
+                $this->_addToUserKeyRing( $memoryKeyToUpdate, $mkDao );
+
+                /**
+                 * @var Users_UserStruct[] $alreadyRegisteredRecipient
+                 */
+                $email = new TmKeyManagement_ShareKeyEmail(
+                    $user,
+                    [
+                        $alreadyRegisteredRecipient[ 0 ]->email,
+                        $alreadyRegisteredRecipient[ 0 ]->fullName()
+                    ],
+                    $memoryKeyToUpdate
+                );
+                $email->send();
+
             } else {
-                $result[ ] = $curr_tm_key;
+
+                $email = new TmKeyManagement_ShareKeyEmail( $user, [ $email, "" ], $memoryKeyToUpdate );
+                $email->send();
+
             }
+
         }
 
-        return $result;
     }
 
+    /**
+     * @param TmKeyManagement_MemoryKeyStruct $memoryKeyToUpdate
+     * @param TmKeyManagement_MemoryKeyDao $mkDao
+     * @return DataAccess_IDaoStruct|TmKeyManagement_MemoryKeyStruct|null
+     * @throws Exception
+     */
+    protected function _addToUserKeyRing( TmKeyManagement_MemoryKeyStruct $memoryKeyToUpdate, TmKeyManagement_MemoryKeyDao $mkDao ){
+
+        try {
+            $userMemoryKeys = $mkDao->create( $memoryKeyToUpdate );
+        } catch ( PDOException $e ) {
+            //if a constraint violation is raised, it's fine, the key is already in the user keyring
+            //else raise an exception
+            //SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry '1-xxxxxxxxxxx' for key 'PRIMARY'
+            if ( $e->getCode() == 23000 ) {
+                //Ensure the key is enabled on the client KeyRing
+                $userMemoryKeys = $mkDao->enable( $memoryKeyToUpdate );
+            } else {
+                throw $e;
+            }
+
+        }
+
+        return $userMemoryKeys;
+
+    }
 }

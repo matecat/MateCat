@@ -46,12 +46,10 @@ class ResetPasswordModal extends React.Component {
 
     this.sendResetPassword()
       .then(() => {
-        $('#modal').trigger('opensuccess', [
-          {
-            title: 'Reset Password',
-            text: 'Your password has been changed. You can now use the new password to log in.',
-          },
-        ])
+        APP.openSuccessModal({
+          title: 'Reset Password',
+          text: 'Your password has been changed. You can now use the new password to log in.',
+        })
       })
       .catch((response) => {
         let text =
@@ -171,6 +169,7 @@ const fieldValidations = [
     'Password',
     FormRules.requiredRule,
     FormRules.minLength(12),
+    FormRules.maxLength(50),
     FormRules.atLeastOneSpecialChar(),
   ),
   RuleRunner.ruleRunner(

@@ -16,15 +16,15 @@ export const downloadTMX = async ({
   password = config.password,
   key,
   name,
-  email,
+  stripTags,
 }) => {
   const paramsData = {
     action: 'downloadTMX',
     tm_key: key,
     tm_name: name,
+    strip_tags: stripTags,
     ...(idJob && {id_job: idJob}),
     ...(idJob && {password}),
-    email: email,
   }
   const formData = new FormData()
 

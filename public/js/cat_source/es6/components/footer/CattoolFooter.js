@@ -1,8 +1,8 @@
 import React, {useState} from 'react'
-import _ from 'lodash'
+import {round} from 'lodash/math'
 
 import CatToolStore from '../../stores/CatToolStore'
-import CattoolConstants from '../../constants/CatToolConstants'
+import CatToolConstants from '../../constants/CatToolConstants'
 import TooltipInfo from '../segments/TooltipInfo/TooltipInfo.component'
 import SegmentActions from '../../actions/SegmentActions'
 import {CookieConsent} from '../common/CookieConsent'
@@ -34,7 +34,7 @@ const transformStats = (stats) => {
         (parseFloat(reviewedWords.advancement_wc) * 100) / stats.TOTAL
       approvePerc =
         approvePerc > stats.APPROVED_PERC ? stats.APPROVED_PERC : approvePerc
-      a_perc_formatted = approvePerc < 0 ? 0 : _.round(approvePerc, 1)
+      a_perc_formatted = approvePerc < 0 ? 0 : round(approvePerc, 1)
       a_perc = approvePerc
     }
 
@@ -50,12 +50,12 @@ const transformStats = (stats) => {
           ? stats.APPROVED_PERC
           : approvePerc2ndPass
       a_perc_2nd_formatted =
-        approvePerc2ndPass < 0 ? 0 : _.round(approvePerc2ndPass, 1)
+        approvePerc2ndPass < 0 ? 0 : round(approvePerc2ndPass, 1)
       a_perc_2nd = approvePerc2ndPass
       revise_todo_formatted =
         config.revisionNumber === 2
           ? revise_todo_formatted +
-            _.round(parseFloat(reviewedWords.advancement_wc))
+            round(parseFloat(reviewedWords.advancement_wc))
           : revise_todo_formatted
     }
   }
@@ -84,7 +84,6 @@ export const CattolFooter = ({
   source,
   target,
   isCJK,
-  isReview,
 }) => {
   const [stats, setStats] = React.useState()
   const [isShowingTooltip, setIsShowingTooltip] = useState({
@@ -108,15 +107,16 @@ export const CattolFooter = ({
       setStats(transformStats(stats))
     }
 
-    CatToolStore.addListener(CattoolConstants.SET_PROGRESS, listener)
+    CatToolStore.addListener(CatToolConstants.SET_PROGRESS, listener)
 
     return () => {
-      CatToolStore.removeListener(CattoolConstants.SET_PROGRESS, listener)
+      CatToolStore.removeListener(CatToolConstants.SET_PROGRESS, listener)
     }
   }, [])
 
   const onClickTodo = (e, targetName) => {
     e.preventDefault()
+    if (!UI.projectStats) return
     // show tooltip
     if (
       (!config.isReview && UI.projectStats.translationCompleted) ||
@@ -131,7 +131,7 @@ export const CattolFooter = ({
       return
     }
     if (config.isReview) {
-      UI.openNextTranslated()
+      SegmentActions.gotoNextTranslatedSegment()
     } else {
       SegmentActions.gotoNextUntranslatedSegment()
     }
@@ -258,7 +258,7 @@ export const CattolFooter = ({
           onClick={(e) => onClickTodo(e, 'todo')}
           onMouseLeave={removeTooltip}
         >
-          {isReview ? (
+          {config.isReview ? (
             <div id="stat-todo">
               <span>To-do</span> :{' '}
               <strong>{stats?.revise_todo_formatted || '-'}</strong>

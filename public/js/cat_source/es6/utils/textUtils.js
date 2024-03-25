@@ -1,7 +1,8 @@
-import _ from 'lodash'
-import {Base64} from 'js-base64'
+import {isUndefined} from 'lodash'
+
 import {regexWordDelimiter} from '../components/segments/utils/DraftMatecatUtils/textUtils'
 import CommonUtils from './commonUtils'
+import diff_match_patch from 'diff-match-patch'
 
 const TEXT_UTILS = {
   diffMatchPatch: new diff_match_patch(),
@@ -13,95 +14,134 @@ const TEXT_UTILS = {
         Before passing them to the function that makes the diff we replace all the tags with placeholders and we keep a map of the tags
         indexed with the id of the tags.
          */
-    var phTagsObject = {}
+    var phTagsObject = []
     var diff
-    source = source.replace(
-      /&lt;(\/)*(g|x|bx|ex|bpt|ept|ph|it|mrk).*?&gt;/gi,
-      function (match) {
-        var id = Math.floor(Math.random() * 10000)
-        if (_.isUndefined(phTagsObject[match])) {
-          phTagsObject[match] = {
-            id,
-            match,
+    try {
+      source = source.replace(
+        /<(\/)*(g|x|bx|ex|bpt|ept|ph|it|mrk).*?>/gi,
+        function (match) {
+          const existingTag = phTagsObject.find((item) => item.match === match)
+          if (!existingTag) {
+            const id = Math.floor(Math.random() * 10000)
+            phTagsObject.push({
+              id,
+              match,
+            })
+            return '<' + id + '>'
+          } else {
+            return '<' + existingTag.id + '>'
           }
+        },
+      )
+
+      target = target.replace(
+        /<(\/)*(g|x|bx|ex|bpt|ept|ph|it|mrk).*?>/gi,
+        function (match) {
+          const existingTag = phTagsObject.find((item) => item.match === match)
+          if (!existingTag) {
+            const id = Math.floor(Math.random() * 10000)
+            phTagsObject.push({
+              id,
+              match,
+            })
+            return '<' + id + '>'
+          } else {
+            return '<' + existingTag.id + '>'
+          }
+        },
+      )
+
+      diff = dmp.diff_main(
+        this.replacePlaceholder(
+          source.replace(/&nbsp; /g, '  ').replace(/&nbsp;/g, ''),
+        ),
+        this.replacePlaceholder(
+          target.replace(/&nbsp; /g, '  ').replace(/&nbsp;/g, ''),
+        ),
+      )
+
+      dmp.diff_cleanupSemantic(diff)
+
+      /*
+      Before adding spans to identify added or subtracted portions we need to check and fix broken tags
+      */
+      diff = this.setUnclosedTagsInDiff(diff)
+      var diffTxt = ''
+      $.each(diff, (index, text) => {
+        text[1] = text[1].replace(/<(.*?)>/gi, (match, id) => {
+          try {
+            var tag = phTagsObject.find((item) => {
+              return item.id === parseInt(id)
+            })
+            if (!isUndefined(tag)) {
+              return tag.match
+            }
+            return match
+          } catch (e) {
+            return match
+          }
+        })
+
+        if (text[0] === -1) {
+          diffTxt += '<span class="deleted">' + text[1] + '</span>'
+        } else if (text[0] === 1) {
+          diffTxt += '<span class="added">' + text[1] + '</span>'
         } else {
-          id = phTagsObject[match].id
-        }
-        return '<' + id + '>'
-      },
-    )
-
-    target = target.replace(
-      /&lt;(\/)*(g|x|bx|ex|bpt|ept|ph|it|mrk).*?&gt;/gi,
-      function (match) {
-        var id = Math.floor(Math.random() * 10000000)
-        if (_.isUndefined(phTagsObject[match])) {
-          phTagsObject[match] = {
-            id,
-            match,
-          }
-        } else {
-          id = phTagsObject[match].id
-        }
-        return '<' + id + '>'
-      },
-    )
-
-    diff = dmp.diff_main(
-      this.replacePlaceholder(
-        source.replace(/&nbsp; /g, '  ').replace(/&nbsp;/g, ''),
-      ),
-      this.replacePlaceholder(
-        target.replace(/&nbsp; /g, '  ').replace(/&nbsp;/g, ''),
-      ),
-    )
-
-    dmp.diff_cleanupSemantic(diff)
-
-    /*
-        Before adding spans to identify added or subtracted portions we need to check and fix broken tags
-         */
-    diff = this.setUnclosedTagsInDiff(diff)
-    var diffTxt = ''
-    var self = this
-    $.each(diff, function (index, text) {
-      text[1] = text[1].replace(/<(.*?)>/gi, function (match, id) {
-        try {
-          var tag = _.find(phTagsObject, function (item) {
-            return item.id === parseInt(id)
-          })
-          if (!_.isUndefined(tag)) {
-            return tag.match
-          }
-          return match
-        } catch (e) {
-          return match
+          diffTxt += text[1]
         }
       })
-      var rootElem
-      var newElem
-      if (self.htmlDecode(text[1]) === ' ') {
-        text[1] = '&nbsp;'
+      return this.restorePlaceholders(diffTxt)
+    } catch (e) {
+      return source
+    }
+  },
+  /**
+   * Replace temporaly tags with placeholder
+   * @param text
+   */
+  replaceTempTags: (text) => {
+    let tags = []
+    const makeid = (length) => {
+      let result = ''
+      const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
+      const charactersLength = characters.length
+      let counter = 0
+      while (counter < length) {
+        result += characters.charAt(
+          Math.floor(Math.random() * charactersLength),
+        )
+        counter += 1
       }
-
-      if (text[0] === -1) {
-        rootElem = $(document.createElement('div'))
-        newElem = $.parseHTML('<span class="deleted"/>')
-        $(newElem).text(self.htmlDecode(text[1]))
-        rootElem.append(newElem)
-        diffTxt += $(rootElem).html()
-      } else if (text[0] === 1) {
-        rootElem = $(document.createElement('div'))
-        newElem = $.parseHTML('<span class="added"/>')
-        $(newElem).text(self.htmlDecode(text[1]))
-        rootElem.append(newElem)
-        diffTxt += $(rootElem).html()
-      } else {
-        diffTxt += text[1]
+      return result
+    }
+    text = text.replace(
+      /<(\/)*(g|x|bx|ex|bpt|ept|ph|it|mrk).*?>/gi,
+      function (match) {
+        var id = makeid(5)
+        tags.push({
+          id,
+          match,
+        })
+        return '#_' + id + '_#'
+      },
+    )
+    return {tags, text}
+  },
+  restoreTempTags(tags, text) {
+    text = text.replace(/#_([a-zA-Z]*?)_#/gi, (match, id) => {
+      try {
+        const tag = tags.find((item) => {
+          return item.id === id
+        })
+        if (!isUndefined(tag)) {
+          return tag.match
+        }
+        return match
+      } catch (e) {
+        return match
       }
     })
-
-    return this.restorePlaceholders(diffTxt)
+    return text
   },
   /**
    *This function takes in the array that exits the TextUtils.diffMatchPatch.diff_main function and parses the array elements to see if they contain broken tags.
@@ -117,7 +157,7 @@ const TEXT_UTILS = {
     /*
         Function to understand if an element contains broken tags
          */
-    var thereAreIncompletedTagsInDiff = function (text) {
+    var thereAreUncompletedTagsInDiff = function (text) {
       return (
         (text.indexOf('<') > -1 || text.indexOf('>') > -1) &&
         (text.split('<').length - 1 !== text.split('>').length - 1 ||
@@ -129,7 +169,7 @@ const TEXT_UTILS = {
          */
     var thereAreCloseTags = function (text) {
       return (
-        thereAreIncompletedTagsInDiff(text) &&
+        thereAreUncompletedTagsInDiff(text) &&
         (item[1].split('<').length - 1 < item[1].split('>').length - 1 ||
           (item[1].indexOf('>') > -1 &&
             item[1].indexOf('>') < item[1].indexOf('<')))
@@ -140,10 +180,10 @@ const TEXT_UTILS = {
          */
     var thereAreOpenTags = function (text) {
       return (
-        thereAreIncompletedTagsInDiff(text) &&
+        thereAreUncompletedTagsInDiff(text) &&
         (item[1].split('<').length - 1 < item[1].split('>').length - 1 ||
           (item[1].indexOf('<') > -1 &&
-            item[1].indexOf('>') > item[1].indexOf('<')))
+            item[1].indexOf('>') < item[1].indexOf('<')))
       )
     }
     var i
@@ -153,7 +193,7 @@ const TEXT_UTILS = {
     var tagToMoveClose = ''
     for (i = 0; i < array.length; i++) {
       var item = array[i]
-      var thereAreUnclosedTags = thereAreIncompletedTagsInDiff(item[1])
+      var thereAreUnclosedTags = thereAreUncompletedTagsInDiff(item[1])
       if (!adding && item[0] === 0) {
         if (thereAreUnclosedTags) {
           tagToMoveOpen = item[1].substr(
@@ -220,109 +260,8 @@ const TEXT_UTILS = {
     }
   },
 
-  escapeRegExp(str) {
+  escapeRegExp(str = '') {
     return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') // $& means the whole matched string
-  },
-
-  ///*************************************************************************
-  // test jsfiddle http://jsfiddle.net/YgKDu/
-  placehold_xliff_tags(segment) {
-    let LTPLACEHOLDER = '##LESSTHAN##'
-    let GTPLACEHOLDER = '##GREATERTHAN##'
-    segment = segment.replace(/&lt;/gi, LTPLACEHOLDER)
-    segment = segment.replace(/&gt;/gi, GTPLACEHOLDER)
-    return segment
-  },
-
-  restore_xliff_tags(segment) {
-    let LTPLACEHOLDER = '##LESSTHAN##'
-    let GTPLACEHOLDER = '##GREATERTHAN##'
-    let re_lt = new RegExp(LTPLACEHOLDER, 'g')
-    let re_gt = new RegExp(GTPLACEHOLDER, 'g')
-    segment = segment.replace(re_lt, '<')
-    segment = segment.replace(re_gt, '>')
-    return segment
-  },
-  ///*************************************************************************
-
-  cleanupHTMLCharsForDiff(string) {
-    return this.replacePlaceholder(string.replace(/&nbsp;/g, ''))
-  },
-
-  trackChangesHTML(source, target) {
-    /*
-        There are problems when you delete or add a tag next to another, the algorithm that makes the diff fails to recognize the tags,
-        they come out of the function broken.
-        Before passing them to the function that makes the diff we replace all the tags with placeholders and we keep a map of the tags
-        indexed with the id of the tags.
-         */
-    var phTagsObject = {}
-    var diff
-    source = source.replace(
-      /&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk).*?id="(.*?)".*?\/&gt;/gi,
-      function (match, group1, group2) {
-        if (_.isUndefined(phTagsObject[group2])) {
-          phTagsObject[group2] = match
-        }
-        return '<' + Base64.encode(group2) + '> '
-      },
-    )
-
-    target = target.replace(
-      /&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk).*?id="(.*?)".*?\/&gt;/gi,
-      function (match, gruop1, group2) {
-        if (_.isUndefined(phTagsObject[group2])) {
-          phTagsObject[group2] = match
-        }
-        return '<' + Base64.encode(group2) + '> '
-      },
-    )
-
-    diff = this.diffMatchPatch.diff_main(
-      this.cleanupHTMLCharsForDiff(source),
-      this.cleanupHTMLCharsForDiff(target),
-    )
-
-    this.diffMatchPatch.diff_cleanupSemantic(diff)
-
-    /*
-        Before adding spans to identify added or subtracted portions we need to check and fix broken tags
-         */
-    diff = this.setUnclosedTagsInDiff(diff)
-    var diffTxt = ''
-
-    $.each(diff, function (index, text) {
-      text[1] = text[1].replace(/<(.*?)>/gi, function (match, text) {
-        try {
-          var decodedText = Base64.decode(text)
-          if (!_.isUndefined(phTagsObject[decodedText])) {
-            return phTagsObject[decodedText]
-          }
-          return match
-        } catch (e) {
-          return match
-        }
-      })
-      var rootElem
-      var newElem
-      if (this[0] === -1) {
-        rootElem = $(document.createElement('div'))
-        newElem = $.parseHTML('<span class="deleted"/>')
-        $(newElem).text(TEXT_UTILS.htmlDecode(text[1]))
-        rootElem.append(newElem)
-        diffTxt += $(rootElem).html()
-      } else if (text[0] === 1) {
-        rootElem = $(document.createElement('div'))
-        newElem = $.parseHTML('<span class="added"/>')
-        $(newElem).text(TEXT_UTILS.htmlDecode(text[1]))
-        rootElem.append(newElem)
-        diffTxt += $(rootElem).html()
-      } else {
-        diffTxt += text[1]
-      }
-    })
-
-    return this.restorePlaceholders(diffTxt)
   },
 
   execDiff: function (mainStr, cfrStr) {
@@ -371,20 +310,6 @@ const TEXT_UTILS = {
     }
 
     return !!container
-  },
-
-  //Change with TagUtils.decodePlaceholdersToPlainText
-  clenaupTextFromPleaceholders: function (text) {
-    text = text
-      .replace(config.crPlaceholderRegex, '\r')
-      .replace(config.lfPlaceholderRegex, '\n')
-      .replace(config.crlfPlaceholderRegex, '\r\n')
-      .replace(config.tabPlaceholderRegex, '\t')
-      .replace(
-        config.nbspPlaceholderRegex,
-        String.fromCharCode(parseInt(0xa0, 10)),
-      )
-    return text
   },
   replaceUrl: function (textToReplace) {
     let regExpUrl =
@@ -588,6 +513,23 @@ const TEXT_UTILS = {
 
     return result
   },
+  getSinhalaMatches: (value, getSize) => {
+    const regex = /[\u0D80-\u0DFF]/g
+    let match
+    const result = []
+
+    while ((match = regex.exec(value)) !== null) {
+      const char = match[0]
+      result.push({
+        match: char,
+        index: match.index,
+        length: char.length,
+        size: getSize(char),
+      })
+    }
+
+    return result
+  },
   getEmojiMatches: (value, getSize) => {
     const regex =
       /(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/g
@@ -648,6 +590,8 @@ const TEXT_UTILS = {
         TEXT_UTILS.getArmenianMatches(value, TEXT_UTILS.getUft16CharsSize),
       (value) =>
         TEXT_UTILS.getGeorgianMatches(value, TEXT_UTILS.getUft16CharsSize),
+      (value) =>
+        TEXT_UTILS.getSinhalaMatches(value, TEXT_UTILS.getUft16CharsSize),
       (value) =>
         TEXT_UTILS.getEmojiMatches(value, TEXT_UTILS.getUft16CharsSize),
       (value) =>

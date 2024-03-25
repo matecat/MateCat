@@ -12,6 +12,12 @@ body {
   font-family: calibri, Arial, Helvetica, sans-serif;
   -webkit-transition: all 100ms ease-in;
   -moz-transition: all 100ms ease-in;
+  &.no-min-width {
+    min-width: auto;
+  }
+  header {
+    min-width: auto;
+  }
 }
 
 input,
@@ -296,112 +302,6 @@ footer #statistics {
   box-shadow: 0 0 5px #000;
   color: #000;
 }
-
-/*new browser supported */
-.unsupported-device {
-  display: none;
-}
-.unsupported-browser,
-.unsupported-device {
-  background-color: #f5f6f7;
-  height: 100%;
-  overflow: auto;
-  .wrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding-top: 40px;
-    height: 100%;
-    .logoblack {
-      background-size: 200px auto;
-      width: 200px;
-      height: 50px;
-      margin: 0 auto;
-    }
-
-    .container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      width: 100%;
-      max-width: 1024px;
-      padding-top: 20px;
-      > h2 {
-        margin-bottom: 0;
-      }
-      h1 {
-        text-align: center;
-      }
-
-      > p {
-        color: gray;
-        margin-bottom: 20px;
-        text-align: center;
-      }
-
-      .browsers-list {
-        display: flex;
-        flex-direction: row;
-        justify-content: center;
-        width: 100%;
-        color: gray;
-      }
-      .link-more {
-        padding-bottom: 20px;
-      }
-      .browsers-list > li {
-        display: flex;
-        justify-content: center;
-        width: 100%;
-        max-width: 180px;
-        height: 180px;
-        background-color: white;
-        border: 3px solid #e8e8e8;
-        cursor: pointer;
-
-        a {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          text-decoration: none;
-
-          img {
-            width: 110px;
-            height: auto;
-          }
-
-          span {
-            font-weight: bold;
-            font-size: 18px;
-          }
-        }
-
-        &:hover {
-          border-color: #d8d8d8;
-        }
-      }
-
-      .browsers-list {
-        > :first-child {
-          border-top-left-radius: 8px;
-          border-bottom-left-radius: 8px;
-        }
-
-        > :not(:first-child) {
-          border-left: none;
-        }
-
-        > :last-child {
-          border-top-right-radius: 8px;
-          border-bottom-right-radius: 8px;
-        }
-      }
-    }
-  }
-}
-
-/*browser supported box */
 
 .iepopup.nobrowser {
   width: 1200px;
@@ -2972,6 +2872,7 @@ section.currSearchSegment mark.searchMarker {
 
 .offline {
   padding: 0;
+  padding-top: 80px;
 }
 
 .offline .claim {
@@ -2994,7 +2895,10 @@ section.currSearchSegment mark.searchMarker {
 }
 
 .offline h1 {
-  font-size: 40px;
+  font-size: 35px;
+}
+.offline h2 {
+  font-size: 30px;
 }
 
 .offline h2 {
@@ -3456,11 +3360,12 @@ p.tm-warning-message {
 
 @font-face {
   font-family: 'icomoon';
-  src: url('../fonts/icomoon.eot?7sjwen');
-  src: url('../fonts/icomoon.eot?7sjwen#iefix') format('embedded-opentype'),
-    url('../fonts/icomoon.ttf?7sjwen') format('truetype'),
-    url('../fonts/icomoon.woff?7sjwen') format('woff'),
-    url('../fonts/icomoon.svg?7sjwen#icomoon') format('svg');
+  src: url('/public/css/fonts/icomoon.eot?7sjwen');
+  src: url('/public/css/fonts/icomoon.eot?7sjwen#iefix')
+      format('embedded-opentype'),
+    url('/public/css/fonts/icomoon.ttf?7sjwen') format('truetype'),
+    url('/public/css/fonts/icomoon.woff?7sjwen') format('woff'),
+    url('/public/css/fonts/icomoon.svg?7sjwen#icomoon') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -4345,56 +4250,6 @@ body.side-popup {
   color: #3aa9dd;
 }
 
-@media (max-width: 768px) {
-  body.upload-page {
-    min-width: unset;
-    background-color: #f5f6f7;
-    .started header,
-    .wrapper-upload,
-    footer,
-    #template-upload,
-    #template-download,
-    .wrapper-claim,
-    .wrapper-bottom {
-      display: none !important;
-    }
-  }
-  .unsupported-device {
-    display: block;
-  }
-  .unsupported-browser {
-    display: none;
-  }
-  .unsupported-browser,
-  .unsupported-device {
-    .wrapper {
-      min-width: unset !important;
-      .boxes {
-        flex-direction: column !important;
-        gap: 30px;
-      }
-    }
-  }
-
-  .nobrowser {
-    display: block !important;
-  }
-  .nobrowser .col-a img {
-    width: 100px;
-  }
-  .nobrowser .col-b img {
-    width: 250px;
-  }
-
-  #template-upload,
-  #template-download {
-    display: none;
-  }
-  .notifications-wrapper {
-    display: none;
-  }
-}
-
 table.left-aligned tr td {
   text-align: left;
 }
@@ -4870,7 +4725,7 @@ body svg {
 
 .label-with-tooltip {
   position: absolute;
-  z-index: 4;
+  z-index: 12;
   pointer-events: none;
   transform: translate(-50%, -100%);
 

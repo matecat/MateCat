@@ -11,17 +11,7 @@ import linkEntities from './linkEntities'
 import beautifyEntities from './beautifyEntities'
 import decodeTagInfo from './decodeTagInfo'
 import replaceOccurrences from './replaceOccurrences'
-import {
-  getXliffRegExpression,
-  getIdAttributeRegEx,
-  cleanSegmentString,
-  unescapeHTML,
-  unescapeHTMLLeaveTags,
-  decodeTagsToPlainText,
-  formatText,
-  getCharactersCounter,
-  unescapeHTMLinTags,
-} from './textUtils'
+import {formatText, getCharactersCounter} from './textUtils'
 import buildFragmentFromJson from './buildFragmentFromJson'
 import insertText from './insertText'
 import updateEntityData from './updateEntityData'
@@ -31,7 +21,6 @@ import getSelectedText from './getSelectedText'
 import addTagEntityToEditor from './addTagEntityToEditor'
 import canDecorateRange from './canDecorateRange'
 import getEntityStrategy from './getEntityStrategy'
-import moveCursorJumpEntity from './moveCursorJumpEntity'
 import selectionIsEntity from './selectionIsEntity'
 import insertEntityAtSelection from './insertEntityAtSelection'
 import structFromName from './tagFromTagType'
@@ -46,20 +35,30 @@ import activateQaCheckBlacklist from './activateQaCheckBlacklist'
 import prepareTextForLexiqa from './prepareTextForLexiqa'
 import getSelectedTextWithoutEntities from './getSelectedTextWithoutEntities'
 import replaceMultipleText from './replaceMultipleText'
+import {
+  transformTagsToHtml,
+  transformTagsToText,
+  decodeHtmlEntities,
+  encodeHtmlEntities,
+  decodePlaceholdersToPlainText,
+  removeTagsFromText,
+  autoFillTagsInTarget,
+  hasDataOriginalTags,
+  checkXliffTagsInText,
+  removePlaceholdersForGlossary,
+} from './tagUtils'
+import * as manageCaretPositionNearEntity from './manageCaretPositionNearEntity'
 
 const DraftMatecatUtils = {
-  // Text utils
-  cleanSegmentString,
-  getXliffRegExpression,
-  getIdAttributeRegEx,
-  unescapeHTML,
-  unescapeHTMLinTags,
-  unescapeHTMLLeaveTags,
+  // Tag utils
+  removeTagsFromText,
   formatText,
-  // Tag Utils
   matchTag,
   decodeTagInfo,
   tagFromEntity,
+  autoFillTagsInTarget,
+  hasDataOriginalTags,
+  checkXliffTagsInText,
   /*tagFromString,*/
   structFromName,
   // Entity Utils
@@ -74,7 +73,7 @@ const DraftMatecatUtils = {
   addTagEntityToEditor,
   canDecorateRange,
   selectionIsEntity,
-  moveCursorJumpEntity,
+  manageCaretPositionNearEntity,
   insertEntityAtSelection,
   // Fragment Utils
   insertFragment,
@@ -87,7 +86,6 @@ const DraftMatecatUtils = {
   encodeContent,
   decodeSegment,
   replaceOccurrences,
-  decodeTagsToPlainText,
   // General
   insertText,
   getSelectedText,
@@ -102,6 +100,12 @@ const DraftMatecatUtils = {
   getCharactersCounter,
   getSelectedTextWithoutEntities,
   replaceMultipleText,
+  transformTagsToHtml,
+  transformTagsToText,
+  decodeHtmlEntities,
+  encodeHtmlEntities,
+  decodePlaceholdersToPlainText,
+  removePlaceholdersForGlossary,
 }
 
 export default DraftMatecatUtils

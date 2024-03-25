@@ -1,5 +1,4 @@
 import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
-
 /**
  * Set segment to translation on review extended issue panel
  *
@@ -37,9 +36,7 @@ export const setTranslation = async ({
   const contextAfter = UI.getContextAfter(sid)
   const idAfter = UI.getIdAfter(sid)
   const time_to_edit = UI.editTime ? UI.editTime : new Date() - UI.editStart
-  const translationToSend = translation
-    ? translation
-    : TagUtils.prepareTextToSend(segment.translation)
+  const translationToSend = translation ? translation : segment.translation
 
   const obj = {
     id_segment: sid,

@@ -60,7 +60,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
                 'end_offset'          => $this->request->end_offset,
                 'is_full_segment'     => false,
                 'comment'             => $this->request->comment,
-                'uid'                 => $this->user->uid,
+                'uid'                 => (($this->user !== null and $this->user instanceof \Users_UserStruct) ? $this->user->uid : null),
                 'source_page'         => ReviewUtils::revisionNumberToSourcePage( $this->request->revision_number ),
         ];
 
@@ -197,9 +197,9 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
     private function getVersionNumber() {
         if ( null !== $this->request->param( 'version_number' ) ) {
             return $this->request->param( 'version_number' );
-        } else {
-            return $this->validator->translation->version_number;
         }
+
+        return $this->validator->translation->version_number;
     }
 
     /**

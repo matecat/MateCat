@@ -1,11 +1,17 @@
 import React from 'react'
-import _ from 'lodash'
+import {isUndefined, isNull} from 'lodash'
 
 import SegmentStore from '../../stores/SegmentStore'
 import CatToolStore from '../../stores/CatToolStore'
 import SegmentFilter from '../header/cattol/segment_filter/segment_filter'
 import SegmentUtils from '../../utils/segmentUtils'
 import CattoolConstants from '../../constants/CatToolConstants'
+import CommonUtils from '../../utils/commonUtils'
+import {
+  decodePlaceholdersToPlainText,
+  removeTagsFromText,
+} from './utils/DraftMatecatUtils/tagUtils'
+import SegmentActions from '../../actions/SegmentActions'
 
 class SegmentButton extends React.Component {
   constructor(props) {
@@ -22,15 +28,41 @@ class SegmentButton extends React.Component {
     })
   }
 
+  trackTranslatedClick() {
+    //Track first translate event in the session
+    const idProject = config.id_project
+    const key = 'first_segment_confirm' + idProject
+    if (!sessionStorage.getItem(key)) {
+      const event = {
+        event: 'first_segment_confirm',
+        userStatus: APP.USER.isUserLogged() ? 'loggedUser' : 'notLoggedUser',
+        userId:
+          APP.USER.isUserLogged() && APP.USER.STORE.user
+            ? APP.USER.STORE.user.uid
+            : null,
+        idProject: parseInt(idProject),
+      }
+      CommonUtils.dispatchAnalyticsEvents(event)
+      sessionStorage.setItem(key, 'true')
+    }
+  }
+
   clickOnTranslatedButton(event, gotoUntranslated) {
+    this.trackTranslatedClick()
     setTimeout(() =>
-      UI.clickOnTranslatedButton(this.props.segment, gotoUntranslated),
+      SegmentActions.clickOnTranslatedButton(
+        this.props.segment,
+        gotoUntranslated,
+      ),
     )
   }
 
   clickOnApprovedButton(event, gotoNexUnapproved) {
     setTimeout(() =>
-      UI.clickOnApprovedButton(this.props.segment, gotoNexUnapproved),
+      SegmentActions.clickOnApprovedButton(
+        this.props.segment,
+        gotoNexUnapproved,
+      ),
     )
   }
 
@@ -45,6 +77,24 @@ class SegmentButton extends React.Component {
   }
 
   clickOnGuessTags(e) {
+    const {segment} = this.props
+    const contribution = segment.contributions?.matches
+      ? this.props.segment.contributions.matches[0]
+      : undefined
+    if (contribution && contribution.match === 'MT') {
+      const currentTranslation = segment.decodedTranslation
+      const contributionText = removeTagsFromText(
+        decodePlaceholdersToPlainText(contribution.translation),
+      )
+      if (currentTranslation === contributionText) {
+        SegmentActions.replaceEditAreaTextContent(
+          segment.sid,
+          contribution.translation,
+        )
+        SegmentActions.setSegmentAsTagged(segment.sid)
+        return
+      }
+    }
     e.preventDefault()
     $(e.target).addClass('disabled')
     setTimeout(() => UI.startSegmentTagProjection(this.props.segment.sid))
@@ -72,7 +122,7 @@ class SegmentButton extends React.Component {
     )
 
     let revisionCompleted = false
-    if (ReviewExtended.enabled() && this.state.progress) {
+    if (config.isReview && this.state.progress) {
       revisionCompleted =
         config.revisionNumber === 1
           ? this.state.progress.revision1Completed
@@ -81,7 +131,7 @@ class SegmentButton extends React.Component {
       revisionCompleted = this.state.progress.revisionCompleted
     }
     let enableGoToNext =
-      !_.isUndefined(nextSegment) &&
+      !isUndefined(nextSegment) &&
       !revisionCompleted &&
       ((nextSegment.status.toLowerCase() === 'approved' &&
         nextSegment.autopropagated_from == 0) || //Approved and propagation confirmed
@@ -90,18 +140,18 @@ class SegmentButton extends React.Component {
         nextSegment.status === 'DRAFT')
     const filtering =
       SegmentFilter.enabled() && SegmentFilter.filtering() && SegmentFilter.open
-    const className = ReviewExtended.enabled()
-      ? 'revise-button-' + ReviewExtended.number
+    const className = config.isReview
+      ? 'revise-button-' + config.revisionNumber
       : ''
-    enableGoToNext = ReviewExtended.enabled()
-      ? enableGoToNext &&
-        (_.isNull(nextSegment.revision_number) ||
-          (!_.isNull(nextSegment.revision_number) &&
-            (nextSegment.revision_number === config.revisionNumber ||
-              (nextSegment.revision_number === 2 &&
-                config.revisionNumber === 1))) || //Not Same Rev
-          (SegmentUtils.isIceSegment(nextSegment) && !nextSegment.unlocked)) // Ice Locked
-      : enableGoToNext && nextSegment.status.toLowerCase() === 'approved' // Review Simple
+    enableGoToNext =
+      enableGoToNext &&
+      (isNull(nextSegment.revision_number) ||
+        (!isNull(nextSegment.revision_number) &&
+          (nextSegment.revision_number === config.revisionNumber ||
+            (nextSegment.revision_number === 2 &&
+              config.revisionNumber === 1))) || //Not Same Rev
+        (SegmentUtils.isIceSegment(nextSegment) && !nextSegment.unlocked)) // Ice Locked
+
     nextButton = enableGoToNext ? (
       <li>
         <a
@@ -187,7 +237,7 @@ class SegmentButton extends React.Component {
     let translationCompleted =
       this.state.progress && this.state.progress.translationCompleted
     let enableGoToNext =
-      !_.isUndefined(nextSegment) &&
+      !isUndefined(nextSegment) &&
       !translationCompleted &&
       ((nextSegment.status !== 'NEW' &&
         nextSegment.status !== 'DRAFT' &&
@@ -304,8 +354,8 @@ class SegmentButton extends React.Component {
 
   getReviewButton() {
     const classDisable = this.props.disabled ? 'disabled' : ''
-    const className = ReviewExtended.enabled()
-      ? 'revise-button-' + ReviewExtended.number
+    const className = config.isReview
+      ? 'revise-button-' + config.revisionNumber
       : ''
 
     return (

@@ -49,7 +49,7 @@ class INIT {
     public static $USE_COMPILED_ASSETS     = false;
     public static $ENABLE_MULTI_DOMAIN_API = false;
     public static $BLACKLIST_FILE_SIZE_MAX = 2097152;
-
+    public static $XSRF_TOKEN = 'xsrf-token';
 
     /**
      * Use or not the js tracking codes macro import ( Ex: google analytics code injection )
@@ -228,7 +228,7 @@ class INIT {
     public static $DEFAULT_TM_KEY = '';
 
 
-    public static $ENABLED_BROWSERS = [ 'applewebkit', 'chrome', 'safari', 'edge' ]; //, 'firefox');
+    public static $ENABLED_BROWSERS = [ 'applewebkit', 'chrome', 'safari', 'edge', 'firefox' ]; 
 
     // sometimes the browser declare to be Mozilla but does not provide a valid Name (e.g. Safari).
     // This occurs especially in mobile environment. As an example, when you try to open a link from within

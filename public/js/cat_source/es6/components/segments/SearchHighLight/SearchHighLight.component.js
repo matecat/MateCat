@@ -1,7 +1,9 @@
-import _ from 'lodash'
+import React from 'react'
 
 const SearchHighlight = (props) => {
-  let occurrence = _.find(props.occurrences, (occ) => occ.start === props.start)
+  let occurrence = props.occurrences.find(
+    (occ) => occ.start === props.start && occ.key === props.blockKey,
+  )
   if (occurrence && occurrence.searchProgressiveIndex === props.currentIndex) {
     return (
       <span style={{backgroundColor: 'rgb(255,210,14)'}}>{props.children}</span>
@@ -14,4 +16,4 @@ const SearchHighlight = (props) => {
   )
 }
 
-module.exports = SearchHighlight
+export default SearchHighlight

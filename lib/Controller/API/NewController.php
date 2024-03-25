@@ -14,6 +14,8 @@ use ProjectQueue\Queue;
 use QAModelTemplate\QAModelTemplateStruct;
 use Teams\MembershipDao;
 use TMS\TMSService;
+use Validator\EngineValidator;
+use Validator\MMTValidator;
 
 //limit execution time to 300 seconds
 set_time_limit( 300 );
@@ -43,6 +45,11 @@ class NewController extends ajaxController {
     private $private_tm_pass = null;
 
     protected $new_keys = [];
+
+    /**
+     * @var Engines_AbstractEngine
+     */
+    private $mt_engine;
 
     /**
      * @var BasicFeatureStruct[]
@@ -100,6 +107,15 @@ class NewController extends ajaxController {
     protected $files_storage;
 
     protected $httpHeader = "HTTP/1.0 200 OK";
+
+    /**
+     * @var array
+     */
+    private $mmtGlossaries;
+
+    private $deepl_formality;
+
+    private $deepl_id_glossary;
 
     private function setBadRequestHeader() {
         $this->httpHeader = 'HTTP/1.0 400 Bad Request';
@@ -176,7 +192,11 @@ class NewController extends ajaxController {
                         'filter' => FILTER_SANITIZE_STRING,
                         'flags'  => FILTER_REQUIRE_ARRAY,
                 ],
-                'project_info'       => [ 'filter' => FILTER_SANITIZE_STRING ]
+                'project_info'       => [ 'filter' => FILTER_SANITIZE_STRING ],
+                'mmt_glossaries'     => [ 'filter' => FILTER_SANITIZE_STRING ],
+
+                'deepl_formality'    => [ 'filter' => FILTER_SANITIZE_STRING ],
+                'deepl_id_glossary'  => [ 'filter' => FILTER_SANITIZE_STRING ],
         ];
 
         $filterArgs = $this->featureSet->filter( 'filterNewProjectInputFilters', $filterArgs, $this->userIsLogged );
@@ -222,6 +242,9 @@ class NewController extends ajaxController {
             $this->__validateQaModelTemplate();
             $this->__validatePayableRateTemplate();
             $this->__validateQaModel();
+            $this->__validateUserMTEngine();
+            $this->__validateMMTGlossaries();
+            $this->__validateDeepLGlossaryParams();
             $this->__appendFeaturesToProject();
             $this->__generateTargetEngineAssociation();
         } catch ( Exception $ex ) {
@@ -619,6 +642,20 @@ class NewController extends ajaxController {
             $this->projectManager->setTeam( $this->team );
         }
 
+        // mmtGlossaries
+        if( $this->mmtGlossaries ){
+            $projectStructure[ 'mmt_glossaries' ] = $this->mmtGlossaries;
+        }
+
+        // DeepL
+        if( $this->mt_engine instanceof Engines_DeepL and $this->deepl_formality !== null ){
+            $projectStructure['deepl_formality'] = $this->deepl_formality;
+        }
+
+        if( $this->mt_engine instanceof Engines_DeepL and $this->deepl_id_glossary !== null ){
+            $projectStructure['deepl_id_glossary'] = $this->deepl_id_glossary;
+        }
+
         // with the qa template id
         if( $this->qaModelTemplate ) {
             $projectStructure[ 'qa_model_template' ] = $this->qaModelTemplate->getDecodedModel();
@@ -652,6 +689,9 @@ class NewController extends ajaxController {
 
         $projectStructure = $this->featureSet->filter( 'addNewProjectStructureAttributes', $projectStructure, $this->postInput );
 
+        // flag to mark the project "from API"
+        $projectStructure[ 'from_api' ] = true;
+
         $this->projectStructure = $projectStructure;
 
         Queue::sendProject( $projectStructure );
@@ -663,8 +703,7 @@ class NewController extends ajaxController {
 
     /**
      * @param $filename
-     *
-     * @return ArrayObject
+     * @return array
      * @throws \API\V2\Exceptions\AuthenticationError
      * @throws \Exceptions\NotFoundException
      * @throws \Exceptions\ValidationError
@@ -697,9 +736,9 @@ class NewController extends ajaxController {
         $metadata[ 'isGlossary' ]      = $isGlossary;
         $metadata[ 'isTMX' ]           = $isTMX;
         $metadata[ 'proprietary' ]     = [
-                [ 'proprietary' ]            => $info[ 'proprietary' ],
-                [ 'proprietary_name' ]       => $info[ 'proprietary_name' ],
-                [ 'proprietary_short_name' ] => $info[ 'proprietary_short_name' ],
+            'proprietary'            => $info[ 'proprietary' ],
+            'proprietary_name'       => $info[ 'proprietary_name' ],
+            'proprietary_short_name' => $info[ 'proprietary_short_name' ],
         ];
 
         return $metadata;
@@ -843,13 +882,20 @@ class NewController extends ajaxController {
     private function __validateMetadataParam() {
 
         if ( !empty( $this->postInput[ 'metadata' ] ) ) {
+
             if ( strlen( $this->postInput[ 'metadata' ] ) > 2048 ) {
                 throw new Exception( 'metadata string is too long' );
             }
+
             $depth                         = 2; // only converts key value structures
             $assoc                         = true;
             $this->postInput[ 'metadata' ] = html_entity_decode( $this->postInput[ 'metadata' ] );
-            $this->metadata                = json_decode( $this->postInput[ 'metadata' ], $assoc, $depth );
+            $parsedMetadata                = json_decode( $this->postInput[ 'metadata' ], $assoc, $depth );
+
+            if(is_array($parsedMetadata)){
+                $this->metadata = $parsedMetadata;
+            }
+
             Log::doJsonLog( "Passed parameter metadata as json string." );
         }
 
@@ -1132,6 +1178,54 @@ class NewController extends ajaxController {
             }
 
             $this->qaModel = $qaModel;
+        }
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function __validateUserMTEngine(){
+
+        // any other engine than MyMemory
+        if($this->postInput[ 'mt_engine' ] and $this->postInput[ 'mt_engine' ] > 1){
+            EngineValidator::engineBelongsToUser($this->postInput[ 'mt_engine' ], $this->user->uid);
+        }
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function __validateMMTGlossaries(){
+
+        if(!empty( $this->postInput[ 'mmt_glossaries' ] )){
+
+            $mmtGlossaries = html_entity_decode($this->postInput[ 'mmt_glossaries' ]);
+            MMTValidator::validateGlossary($mmtGlossaries);
+
+            $this->mmtGlossaries = $mmtGlossaries;
+        }
+    }
+
+    /**
+     * Validate DeepL params
+     */
+    private function __validateDeepLGlossaryParams() {
+
+        if ( !empty( $this->postInput[ 'deepl_formality' ] ) ) {
+
+            $allowedFormalities = [
+                'default',
+                'prefer_less',
+                'prefer_more'
+            ];
+
+            if(in_array($this->postInput[ 'deepl_formality' ], $allowedFormalities)){
+                $this->deepl_formality = $this->postInput[ 'deepl_formality' ];
+            }
+        }
+
+        if ( !empty( $this->postInput[ 'deepl_id_glossary' ] ) ) {
+            $this->deepl_id_glossary = $this->postInput[ 'deepl_id_glossary' ];
         }
     }
 

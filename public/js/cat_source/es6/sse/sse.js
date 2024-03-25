@@ -2,11 +2,14 @@ import CatToolActions from '../actions/CatToolActions'
 import SegmentActions from '../actions/SegmentActions'
 import SegmentStore from '../stores/SegmentStore'
 import CommonUtils from '../utils/commonUtils'
+import CommentsActions from '../actions/CommentsActions'
 
 let SSE = {
   init: function () {
     // TODO configure this
     this.baseURL = config.sse_base_url
+    this.clientConnected = false
+    this.disconnect = false
     this.initEvents()
   },
   getSource: function (what) {
@@ -39,8 +42,13 @@ let SSE = {
   },
   initEvents: function () {
     $(document).on('sse:ack', function (ev, message) {
+      SSE.clientConnected = true
       config.id_client = message.data.clientId
-      CatToolActions.clientConntected(message.data.clientId)
+      CatToolActions.clientConnected(message.data.clientId)
+      if (SSE.disconnect) {
+        SSE.disconnect = false
+        CatToolActions.clientReconnect()
+      }
     })
     $(document).on('sse:concordance', function (ev, message) {
       SegmentActions.setConcordanceResult(message.data.id_segment, message.data)
@@ -148,6 +156,9 @@ let SSE = {
     $(document).on('sse:glossary_keys', function (ev, message) {
       CatToolActions.setHaveKeysGlossary(message.data.has_glossary)
     })
+    $(document).on('sse:comment', function (ev, message) {
+      CommentsActions.updateCommentsFromSse(message.data)
+    })
     if (config.translation_matches_enabled) {
       $(document).on('sse:contribution', function (ev, message) {
         var segment = SegmentStore.getSegmentByIdToJS(message.data.id_segment)
@@ -228,7 +239,7 @@ let SSE = {
   },
 }
 
-let NOTIFICATIONS = {
+const NOTIFICATIONS = {
   start: function () {
     SSE.init()
     this.source = SSE.getSource('notifications')
@@ -256,8 +267,17 @@ let NOTIFICATIONS = {
       'error',
       () => {
         console.error('SSE: server disconnect')
-        config.id_client = undefined
-        CatToolActions.clientConntected()
+        if (SSE.clientConnected) {
+          SSE.clientConnected = false
+          SSE.disconnect = true
+          setTimeout(() => {
+            if (!SSE.clientConnected) {
+              config.id_client = undefined
+              CatToolActions.clientConnected()
+            }
+          }, 5000)
+        }
+
         // console.log( "readyState: " + NOTIFICATIONS.source.readyState );
         if (NOTIFICATIONS.source.readyState === 2) {
           setTimeout(function () {
@@ -273,4 +293,4 @@ let NOTIFICATIONS = {
   },
 }
 
-module.exports = NOTIFICATIONS
+export default NOTIFICATIONS

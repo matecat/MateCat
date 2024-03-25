@@ -1,6 +1,7 @@
 <?php
 
 
+use ConnectedServices\GDrive\GDriveController;
 use Engines_Intento as Intento;
 use LexiQA\LexiQADecorator;
 
@@ -26,7 +27,7 @@ class newProjectController extends viewController {
         parent::makeTemplate( "upload.html" );
 
         $filterArgs = [
-                'project_name' => [ 'filter' => FILTER_SANITIZE_STRING ]
+            'project_name' => [ 'filter' => FILTER_SANITIZE_STRING ]
         ];
 
         $__postInput        = filter_input_array( INPUT_GET, $filterArgs );
@@ -47,14 +48,12 @@ class newProjectController extends viewController {
             $this->evalSourceLangHistory();
         } catch ( Lang_InvalidLanguageException $e ) {
             Log::doJsonLog( $e->getMessage() );
-            $this->template->noSourceLangHistory = true;
         }
 
         try {
-            $this->evalTragetLangHistory();
+            $this->evalTargetLangHistory();
         } catch ( Lang_InvalidLanguageException $e ) {
             Log::doJsonLog( $e->getMessage() );
-            $this->template->noTargetLangHistory = true;
         }
 
         $this->initUploadDir();
@@ -125,72 +124,43 @@ class newProjectController extends viewController {
     }
 
     private function evalSourceLangHistory() {
-        if ( isset ( $_COOKIE[ Constants::COOKIE_SOURCE_LANG ] ) and $_COOKIE[ Constants::COOKIE_SOURCE_LANG ] == Constants::EMPTY_VAL ) {
-            $this->noSourceLangHistory = true;
-        } else {
 
-            if ( !isset( $_COOKIE[ Constants::COOKIE_SOURCE_LANG ] ) ) {
-                CookieManager::setCookie( Constants::COOKIE_SOURCE_LANG, Constants::EMPTY_VAL,
-                        [
-                                'expires'  => time() + ( 86400 * 365 ),
-                                'path'     => '/',
-                                'domain'   => INIT::$COOKIE_DOMAIN,
-                                'secure'   => true,
-                                'httponly' => true,
-                                'samesite' => 'None',
-                        ]
-                );
-                $this->noSourceLangHistory = true;
-            } else {
-
-                if ( $_COOKIE[ Constants::COOKIE_SOURCE_LANG ] != Constants::EMPTY_VAL ) {
-                    $this->noSourceLangHistory = false;
-                    $this->sourceLangHistory   = $_COOKIE[ Constants::COOKIE_SOURCE_LANG ];
-                    $this->sourceLangAr        = explode( '||', urldecode( $this->sourceLangHistory ) );
-                    $tmpSourceAr               = [];
-                    $tmpSourceArAs             = [];
-                    foreach ( $this->sourceLangAr as $key => $lang ) {
-                        if ( $lang != '' ) {
-                            $tmpSourceAr[ $lang ] = $this->lang_handler->getLocalizedName( $lang );
-
-                            $ar                = [];
-                            $ar[ 'name' ]      = $this->lang_handler->getLocalizedName( $lang );
-                            $ar[ 'code' ]      = $lang;
-                            $ar[ 'selected' ]  = ( $key == '0' ) ? 1 : 0;
-                            $ar[ 'direction' ] = ( $this->lang_handler->isRTL( $lang ) ? 'rtl' : 'ltr' );
-                            array_push( $tmpSourceArAs, $ar );
-                        }
-                    }
-                    $this->sourceLangAr = $tmpSourceAr;
-                    asort( $this->sourceLangAr );
-
-                    $this->array_sort_by_column( $tmpSourceArAs, 'name' );
-                    $this->sourceLangArray = $tmpSourceArAs;
-
-                }
-            }
+        if ( !isset( $_COOKIE[ Constants::COOKIE_SOURCE_LANG ] ) ) {
+            CookieManager::setCookie( Constants::COOKIE_SOURCE_LANG, Constants::EMPTY_VAL,
+                [
+                    'expires'  => time() + ( 86400 * 365 ),
+                    'path'     => '/',
+                    'domain'   => INIT::$COOKIE_DOMAIN,
+                    'secure'   => true,
+                    'httponly' => true,
+                    'samesite' => 'None',
+                ]
+            );
         }
     }
 
     private function setOrGetGuid() {
 
-        // Get the guid from the guid if it exists, otherwise set the guid into the cookie
-        if ( !empty( $_COOKIE[ 'upload_session' ] ) && Utils::isTokenValid( $_COOKIE[ 'upload_session' ] ) ) {
-            Utils::deleteDir( INIT::$UPLOAD_REPOSITORY . '/' . $_COOKIE[ 'upload_session' ] . '/' );
-        }
+        // If isset the GDRIVE_LIST_COOKIE_NAME cookie, do nothing
+        if(!isset($_COOKIE[GDriveController::GDRIVE_LIST_COOKIE_NAME])){
 
-        $this->guid = Utils::createToken();
-        CookieManager::setCookie( "upload_session", $this->guid,
+            // Get the guid from the guid if it exists, otherwise set the guid into the cookie
+            if ( !empty( $_COOKIE[ 'upload_session' ] ) && Utils::isTokenValid( $_COOKIE[ 'upload_session' ] ) ) {
+                Utils::deleteDir( INIT::$UPLOAD_REPOSITORY . '/' . $_COOKIE[ 'upload_session' ] . '/' );
+            }
+
+            $this->guid = Utils::uuid4();
+            CookieManager::setCookie( "upload_session", $this->guid,
                 [
-                        'expires'  => time() + 86400,
-                        'path'     => '/',
-                        'domain'   => INIT::$COOKIE_DOMAIN,
-                        'secure'   => true,
-                        'httponly' => true,
-                        'samesite' => 'None',
+                    'expires'  => time() + 86400,
+                    'path'     => '/',
+                    'domain'   => INIT::$COOKIE_DOMAIN,
+                    'secure'   => true,
+                    'httponly' => false,
+                    'samesite' => 'None',
                 ]
-        );
-
+            );
+        }
     }
 
     private function isUploadTMXAllowed( $default = false ) {
@@ -247,33 +217,10 @@ class newProjectController extends viewController {
         return $count;
     }
 
-    private function getCategories( $output = "array" ) {
-        $ret = [];
-        foreach ( INIT::$SUPPORTED_FILE_TYPES as $key => $value ) {
-            $val = [];
-            foreach ( $value as $ext => $info ) {
-                $val[] = [
-                        'ext'   => $ext,
-                        'class' => $info[ 2 ]
-                ];
-            }
-            $val = array_chunk( $val, 1 );
-
-            $ret[ $key ] = $val;
-        }
-        if ( $output == "json" ) {
-            return json_encode( $ret );
-        }
-
-        return $ret;
-    }
-
     public function setTemplateVars() {
         $source_languages = $this->lang_handler->getEnabledLanguages( 'en' );
         $target_languages = $this->lang_handler->getEnabledLanguages( 'en' );
 
-        $this->template->languages_array     = json_encode( $this->lang_handler->getEnabledLanguages( 'en' ) );
-        $this->template->languages_array_obj = $this->lang_handler->getEnabledLanguages( 'en' );
         $this->template->subject_array       = $this->subjectArray;
 
         $this->template->project_name = $this->project_name;
@@ -288,20 +235,12 @@ class newProjectController extends viewController {
 
         $this->template->isUploadTMXAllowed = false;
         if ( !empty( INIT::$FILTERS_ADDRESS ) ) {
-            $this->template->allowed_file_types = $this->getExtensions( "" );
             $this->template->isUploadTMXAllowed = $this->isUploadTMXAllowed();
-        } else {
-            $this->template->allowed_file_types = $this->getExtensions( "default" );
         }
 
-        $this->template->supported_file_types_array            = $this->getCategories();
         $this->template->unsupported_file_types                = $this->getExtensionsUnsupported();
         $this->template->formats_number                        = $this->countExtensions();
         $this->template->volume_analysis_enabled               = INIT::$VOLUME_ANALYSIS_ENABLED;
-        $this->template->sourceLangHistory                     = $this->sourceLangArray;
-        $this->template->targetLangHistory                     = $this->targetLangArray;
-        $this->template->noSourceLangHistory                   = $this->noSourceLangHistory;
-        $this->template->noTargetLangHistory                   = $this->noTargetLangHistory;
         $this->template->extended_user                         = ( $this->isLoggedIn() !== false ) ? trim( $this->user->fullName() ) : "";
         $this->template->logged_user                           = ( $this->isLoggedIn() !== false ) ? $this->user->shortName() : "";
         $this->template->userMail                              = $this->user->email;
@@ -323,9 +262,6 @@ class newProjectController extends viewController {
 
         $this->template->developerKey = INIT::$OAUTH_BROWSER_API_KEY;
         $this->template->clientId     = INIT::$OAUTH_CLIENT_ID;
-
-        $this->template->currentTargetLang = $this->getCurrentTargetLang();
-        $this->template->currentSourceLang = $this->getCurrentSourceLang();
 
         $this->template->tag_projection_languages = json_encode( ProjectOptionsSanitizer::$tag_projection_allowed_languages );
         LexiQADecorator::getInstance( $this->template )->featureEnabled( $this->featureSet )->decorateViewLexiQA();
@@ -363,59 +299,19 @@ class newProjectController extends viewController {
         return Constants::DEFAULT_SOURCE_LANG;
     }
 
-    private function evalTragetLangHistory() {
-        if ( isset( $_COOKIE[ Constants::COOKIE_TARGET_LANG ] ) and $_COOKIE[ Constants::COOKIE_TARGET_LANG ] == Constants::EMPTY_VAL ) {
-            $this->noTargetLangHistory = true;
-        } else {
-            if ( !isset( $_COOKIE[ Constants::COOKIE_TARGET_LANG ] ) ) {
-                CookieManager::setCookie( Constants::COOKIE_SOURCE_LANG, Constants::EMPTY_VAL,
-                        [
-                                'expires'  => time() + ( 86400 * 365 ),
-                                'path'     => '/',
-                                'domain'   => INIT::$COOKIE_DOMAIN,
-                                'secure'   => true,
-                                'httponly' => true,
-                                'samesite' => 'None',
-                        ]
-                );
-                $this->noTargetLangHistory = true;
-            } else {
-                if ( $_COOKIE[ Constants::COOKIE_TARGET_LANG ] != Constants::EMPTY_VAL ) {
-                    $this->noTargetLangHistory = false;
-                    $this->targetLangHistory   = $_COOKIE[ Constants::COOKIE_TARGET_LANG ];
-                    $this->targetLangAr        = explode( '||', urldecode( $this->targetLangHistory ) );
+    private function evalTargetLangHistory() {
 
-                    $tmpTargetAr   = [];
-                    $tmpTargetArAs = [];
-
-                    foreach ( $this->targetLangAr as $key => $lang ) {
-                        if ( $lang != '' ) {
-                            $langs = explode( ',', urldecode( $lang ) );
-
-                            $cl = "";
-                            foreach ( $langs as $ll ) {
-                                $cl .= $this->lang_handler->getLocalizedName( $ll ) . ',';
-                            }
-                            $cl = substr_replace( $cl, "", -1 );
-
-                            $tmpTargetAr[ $lang ] = $cl;
-
-                            $ar                = [];
-                            $ar[ 'name' ]      = $cl;
-                            $ar[ 'direction' ] = ( $this->lang_handler->isRTL( $lang ) ? 'rtl' : 'ltr' );
-                            $ar[ 'code' ]      = $lang;
-                            $ar[ 'selected' ]  = ( $key == '0' ) ? 1 : 0;
-                            array_push( $tmpTargetArAs, $ar );
-                        }
-                    }
-                    $this->targetLangAr = $tmpTargetAr;
-                    asort( $this->targetLangAr );
-
-                    $this->array_sort_by_column( $tmpTargetArAs, 'name' );
-                    $this->targetLangArray = $tmpTargetArAs;
-
-                }
-            }
+        if ( !isset( $_COOKIE[ Constants::COOKIE_TARGET_LANG ] ) ) {
+            CookieManager::setCookie( Constants::COOKIE_TARGET_LANG, Constants::EMPTY_VAL,
+                [
+                    'expires'  => time() + ( 86400 * 365 ),
+                    'path'     => '/',
+                    'domain'   => INIT::$COOKIE_DOMAIN,
+                    'secure'   => true,
+                    'httponly' => true,
+                    'samesite' => 'None',
+                ]
+            );
         }
     }
 

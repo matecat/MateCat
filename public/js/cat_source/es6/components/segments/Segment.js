@@ -1,6 +1,7 @@
-import _ from 'lodash'
+import {forEach, isUndefined} from 'lodash'
 import Immutable from 'immutable'
 import React from 'react'
+import {union} from 'lodash/array'
 
 import SegmentCommentsContainer from './SegmentCommentsContainer'
 import SegmentsCommentsIcon from './SegmentsCommentsIcon'
@@ -10,27 +11,24 @@ import SegmentConstants from '../../constants/SegmentConstants'
 import SegmentHeader from './SegmentHeader'
 import SegmentFooter from './SegmentFooter'
 import ReviewExtendedPanel from '../review_extended/ReviewExtendedPanel'
-import TagUtils from '../../utils/tagUtils'
 import SegmentUtils from '../../utils/segmentUtils'
 import SegmentFilter from '../header/cattol/segment_filter/segment_filter'
+import SegmentFilterUtils from '../header/cattol/segment_filter/segment_filter'
 import Speech2Text from '../../utils/speech2text'
 import ConfirmMessageModal from '../modals/ConfirmMessageModal'
 import SegmentBody from './SegmentBody'
 import TranslationIssuesSideButton from '../review/TranslationIssuesSideButton'
-import MBC from '../../utils/mbc.main'
 import ModalsActions from '../../actions/ModalsActions'
 import {SegmentContext} from '../segments/SegmentContext'
+import CatToolConstants from '../../constants/CatToolConstants'
+import CatToolStore from '../../stores/CatToolStore'
+import DraftMatecatUtils from './utils/DraftMatecatUtils'
+import CommentsStore from '../../stores/CommentsStore'
+import {SEGMENTS_STATUS} from '../../constants/Constants'
 
 class Segment extends React.Component {
   constructor(props) {
     super(props)
-    this.segmentStatus = {
-      approved: 'APPROVED',
-      translated: 'TRANSLATED',
-      draft: 'DRAFT',
-      new: 'NEW',
-      rejected: 'REJECTED',
-    }
 
     this.createSegmentClasses = this.createSegmentClasses.bind(this)
     this.hightlightEditarea = this.hightlightEditarea.bind(this)
@@ -44,10 +42,11 @@ class Segment extends React.Component {
     this.checkIfCanOpenSegment = this.checkIfCanOpenSegment.bind(this)
     this.handleKeyDown = this.handleKeyDown.bind(this)
     this.forceUpdateSegment = this.forceUpdateSegment.bind(this)
+    this.clientReconnection = this.clientReconnection.bind(this)
 
     let readonly = UI.isReadonlySegment(this.props.segment)
     this.secondPassLocked =
-      this.props.segment.status.toUpperCase() === this.segmentStatus.approved &&
+      this.props.segment.status.toUpperCase() === SEGMENTS_STATUS.APPROVED &&
       this.props.segment.revision_number === 2 &&
       config.revisionNumber !== 2
     this.state = {
@@ -60,12 +59,32 @@ class Segment extends React.Component {
         this.props.enableTagProjection &&
         (this.props.segment.status.toLowerCase() === 'draft' ||
           this.props.segment.status.toLowerCase() === 'new') &&
-        !TagUtils.checkXliffTagsInText(this.props.segment.translation) &&
-        TagUtils.removeAllTags(this.props.segment.segment) !== '',
+        !DraftMatecatUtils.checkXliffTagsInText(
+          this.props.segment.translation,
+        ) &&
+        DraftMatecatUtils.removeTagsFromText(this.props.segment.segment) !== '',
       selectedTextObj: null,
       showActions: false,
     }
     this.timeoutScroll
+  }
+
+  checkOpenSegmentComment() {
+    if (
+      CommentsStore.db.getCommentsCountBySegment &&
+      UI.currentSegmentId === this.props.segment.sid
+    ) {
+      const comments_obj = CommentsStore.db.getCommentsCountBySegment(
+        this.props.segment.sid,
+      )
+      const panelClosed =
+        localStorage.getItem(SegmentActions.localStorageCommentsClosed) ===
+        'true'
+      if (comments_obj.active > 0 && !panelClosed) {
+        SegmentActions.openSegmentComment(this.props.segment.sid)
+        SegmentActions.scrollToSegment(this.props.segment.sid)
+      }
+    }
   }
 
   openSegment(wasOriginatedFromBrowserHistory) {
@@ -97,11 +116,27 @@ class Segment extends React.Component {
       $('html').trigger('open') // used by ui.review to open tab Revise in the footer next-unapproved
 
       //Used by Segment Filter, Comments, Footer, Review extended
-      setTimeout(() =>
-        $(document).trigger('segmentOpened', {
-          segmentId: this.props.segment.original_sid,
-        }),
-      )
+      setTimeout(() => {
+        const segmentId = this.props.segment.original_sid
+        //Segment Filter
+        if (SegmentFilterUtils.enabled() && SegmentFilterUtils.filtering()) {
+          SegmentFilterUtils.setStoredState({
+            lastSegmentId: segmentId,
+          })
+        }
+        //Review
+        if (config.isReview) {
+          const panelClosed =
+            localStorage.getItem(
+              SegmentActions.localStorageReviewPanelClosed,
+            ) === 'true'
+          if (!panelClosed) {
+            SegmentActions.openIssuesPanel({sid: segmentId}, false)
+          }
+          SegmentActions.getSegmentVersionsIssues(segmentId)
+        }
+      })
+      this.checkOpenSegmentComment()
 
       /************/
       UI.editStart = new Date()
@@ -133,9 +168,9 @@ class Segment extends React.Component {
     setTimeout(() =>
       ModalsActions.showModalComponent(ConfirmMessageModal, {
         cancelText: 'Close',
-        successCallback: () => UI.openNextTranslated(sid),
+        successCallback: () => SegmentActions.gotoNextTranslatedSegment(sid),
         successText: 'Open next translated segment',
-        text: UI.alertNotTranslatedMessage,
+        text: 'This segment is not translated yet.<br /> Only translated segments can be revised.',
       }),
     )
   }
@@ -214,7 +249,7 @@ class Segment extends React.Component {
       classes.push('muted')
     }
     if (
-      this.props.segment.status.toUpperCase() === this.segmentStatus.approved &&
+      this.props.segment.status.toUpperCase() === SEGMENTS_STATUS.APPROVED &&
       this.props.segment.revision_number
     ) {
       classes.push('approved-step-' + this.props.segment.revision_number)
@@ -267,7 +302,7 @@ class Segment extends React.Component {
       let classes = this.state.segment_classes.slice()
       if (newClass.indexOf(' ') > 0) {
         let classesSplit = newClass.split(' ')
-        _.forEach(classesSplit, function (item) {
+        forEach(classesSplit, function (item) {
           if (classes.indexOf(item) < 0) {
             classes.push(item)
           }
@@ -298,7 +333,7 @@ class Segment extends React.Component {
       }
       if (className.indexOf(' ') > 0) {
         let classesSplit = className.split(' ')
-        _.forEach(classesSplit, function (item) {
+        forEach(classesSplit, function (item) {
           removeFn(item)
         })
       } else {
@@ -351,12 +386,12 @@ class Segment extends React.Component {
     return classes
   }
   isSplitted() {
-    return !_.isUndefined(this.props.segment.split_group)
+    return !isUndefined(this.props.segment.split_group)
   }
 
   isFirstOfSplit() {
     return (
-      !_.isUndefined(this.props.segment.split_group) &&
+      !isUndefined(this.props.segment.split_group) &&
       this.props.segment.split_group.indexOf(this.props.segment.sid) === 0
     )
   }
@@ -372,7 +407,6 @@ class Segment extends React.Component {
       return (
         <TranslationIssuesSideButton
           sid={this.props.segment.sid.split('-')[0]}
-          reviewType={this.props.reviewType}
           segment={this.props.segment}
           open={this.props.segment.openIssues}
         />
@@ -411,7 +445,7 @@ class Segment extends React.Component {
 
   checkSegmentClasses() {
     let classes = this.state.segment_classes.slice()
-    classes = _.union(classes, this.createSegmentClasses())
+    classes = union(classes, this.createSegmentClasses())
     classes = this.checkSegmentStatus(classes)
     if (classes.indexOf('muted') > -1 && classes.indexOf('editor') > -1) {
       let indexEditor = classes.indexOf('editor')
@@ -497,11 +531,22 @@ class Segment extends React.Component {
         }
       } else if (this.props.segment.openComments) {
         SegmentActions.closeSegmentComment()
-        localStorage.setItem(MBC.localStorageCommentsClosed, true)
       } else if (this.props.segment.openIssues) {
         SegmentActions.closeIssuesPanel()
       }
     }
+  }
+
+  clientReconnection() {
+    SegmentActions.getGlossaryForSegment({
+      sid: this.props.segment.sid,
+      fid: this.props.fid,
+      text: this.props.segment.segment,
+    })
+    SegmentActions.getContributions(
+      this.props.segment.sid,
+      this.props.multiMatchLangs,
+    )
   }
 
   forceUpdateSegment(sid) {
@@ -537,6 +582,10 @@ class Segment extends React.Component {
     SegmentStore.addListener(
       SegmentConstants.FORCE_UPDATE_SEGMENT,
       this.forceUpdateSegment,
+    )
+    CatToolStore.addListener(
+      CatToolConstants.CLIENT_RECONNECTION,
+      this.clientReconnection,
     )
 
     //Review
@@ -579,6 +628,11 @@ class Segment extends React.Component {
     SegmentStore.removeListener(
       SegmentConstants.FORCE_UPDATE_SEGMENT,
       this.forceUpdateSegment,
+    )
+
+    CatToolStore.removeListener(
+      CatToolConstants.CLIENT_RECONNECTION,
+      this.clientReconnection,
     )
 
     //Review
@@ -637,13 +691,6 @@ class Segment extends React.Component {
     ) {
       setTimeout(() => Speech2Text.enableMicrophone(this.$section))
     }
-    if (!prevProps.clientConnected && this.props.clientConnected) {
-      SegmentActions.getGlossaryForSegment({
-        sid: this.props.segment.sid,
-        fid: this.props.fid,
-        text: this.props.segment.segment,
-      })
-    }
     return null
   }
   componentDidUpdate() {}
@@ -684,8 +731,6 @@ class Segment extends React.Component {
       const {
         enableTagProjection,
         isReview,
-        isReviewExtended,
-        reviewType,
         segImmutable,
         segment,
         files,
@@ -695,8 +740,6 @@ class Segment extends React.Component {
       return {
         enableTagProjection: enableTagProjection && !this.props.segment.tagged,
         isReview,
-        isReviewExtended,
-        reviewType,
         segImmutable,
         segment,
         files,
@@ -705,7 +748,6 @@ class Segment extends React.Component {
         locked,
         removeSelection: this.removeSelection.bind(this),
         openSegment: this.openSegment,
-        isReviewImproved: this.props.isReviewImproved,
         clientConnected: this.props.clientConnected,
         clientId: this.props.clientId,
         multiMatchLangs,
@@ -841,7 +883,7 @@ class Segment extends React.Component {
             {config.comments_enabled && this.props.segment.openComments ? (
               <SegmentCommentsContainer />
             ) : null}
-            {this.props.isReviewExtended &&
+            {config.isReview &&
             this.props.segment.openIssues &&
             this.props.segment.opened &&
             (config.isReview || (!config.isReview && segmentHasIssues)) ? (

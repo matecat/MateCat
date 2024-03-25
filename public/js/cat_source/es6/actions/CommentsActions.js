@@ -1,7 +1,10 @@
 import AppDispatcher from '../stores/AppDispatcher'
 import CommentsConstants from '../constants/CommentsConstants'
-import MBC from '../utils/mbc.main'
 import {deleteComment} from '../api/deleteComment/deleteComment'
+import {submitComment as submitCommentApi} from '../api/submitComment'
+import CommonUtils from '../utils/commonUtils'
+import TeamsStore from '../stores/TeamsStore'
+import {markAsResolvedThread} from '../api/markAsResolvedThread'
 
 const CommentsActions = {
   storeComments: function (comments, user) {
@@ -12,18 +15,26 @@ const CommentsActions = {
     })
   },
   sendComment: function (text, sid) {
-    return MBC.submitComment(text, sid).then((resp) => {
+    return submitCommentApi({
+      idSegment: sid,
+      username: TeamsStore.getUserName(),
+      sourcePage: config.revisionNumber ? config.revisionNumber + 1 : 1,
+      message: CommonUtils.parseCommentHtmlBeforeSend(text),
+    }).then((resp) => {
       AppDispatcher.dispatch({
         actionType: CommentsConstants.ADD_COMMENT,
         comment: resp.data.entries[0],
         sid: sid,
       })
-      $(document).trigger('mbc:comment:saved', resp.data.entries[0])
       return resp
     })
   },
   resolveThread: function (sid) {
-    MBC.resolveThread(sid)
+    markAsResolvedThread({
+      idSegment: sid,
+      username: TeamsStore.getUserName(),
+      sourcePage: config.revisionNumber ? config.revisionNumber + 1 : 1,
+    })
       .then((resp) => {
         AppDispatcher.dispatch({
           actionType: CommentsConstants.ADD_COMMENT,
@@ -70,6 +81,18 @@ const CommentsActions = {
         sid,
         idComment: data[0].id,
       })
+    })
+  },
+  openCommentsMenu: () => {
+    AppDispatcher.dispatch({
+      actionType: CommentsConstants.OPEN_MENU,
+    })
+  },
+  saveDraftComment: (sid, comment) => {
+    AppDispatcher.dispatch({
+      actionType: CommentsConstants.SAVE_DRAFT,
+      sid,
+      comment,
     })
   },
 }

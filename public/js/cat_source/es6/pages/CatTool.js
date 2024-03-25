@@ -19,11 +19,15 @@ import {getMTEngines as getMtEnginesApi} from '../api/getMTEngines'
 import {
   DEFAULT_ENGINE_MEMORY,
   MMT_NAME,
+  SETTINGS_PANEL_TABS,
   SettingsPanel,
 } from '../components/settingsPanel'
 import Speech2TextFeature from '../utils/speech2text'
 import SegmentUtils from '../utils/segmentUtils'
 import {getTmKeysJob} from '../api/getTmKeysJob'
+import {getSupportedLanguages} from '../api/getSupportedLanguages'
+import ApplicationStore from '../stores/ApplicationStore'
+import {useGoogleLoginNotification} from '../hooks/useGoogleLoginNotification'
 
 const urlParams = new URLSearchParams(window.location.search)
 const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
@@ -51,6 +55,10 @@ function CatTool() {
   const [getPublicMatches, setGetPublicMatches] = useState(
     Boolean(config.get_public_matches),
   )
+  const [supportedLanguages, setSupportedLanguages] = useState([])
+
+  // TODO: Remove temp notification warning login google (search in files this todo)
+  useGoogleLoginNotification()
 
   const startSegmentIdRef = useRef(UI.startSegmentId)
   const callbackAfterSegmentsResponseRef = useRef()
@@ -64,7 +72,8 @@ function CatTool() {
     })
 
   const closeSettings = useCallback(() => setOpenSettings({isOpen: false}), [])
-  const openTmPanel = () => setOpenSettings({isOpen: true})
+  const openTmPanel = () =>
+    setOpenSettings({isOpen: true, tab: SETTINGS_PANEL_TABS.advancedOptions})
 
   const getTmKeys = () => {
     const promises = [
@@ -136,6 +145,7 @@ function CatTool() {
     }
     const openSettingsPanel = ({value}) =>
       setOpenSettings({isOpen: true, tab: value})
+
     CatToolStore.addListener(CatToolConstants.ON_RENDER, onRenderHandler)
     CatToolStore.addListener(
       CatToolConstants.OPEN_SETTINGS_PANEL,
@@ -149,8 +159,8 @@ function CatTool() {
         where === 'after'
           ? SegmentStore.getLastSegmentId()
           : where === 'before'
-          ? SegmentStore.getFirstSegmentId()
-          : ''
+            ? SegmentStore.getFirstSegmentId()
+            : ''
 
       setOptions((prevState) => ({...prevState, segmentId, where}))
     }
@@ -182,6 +192,14 @@ function CatTool() {
 
   // on mount dispatch some actions
   useEffect(() => {
+    getSupportedLanguages()
+      .then((data) => {
+        ApplicationStore.setLanguages(data)
+        setSupportedLanguages(data)
+      })
+      .catch((error) =>
+        console.log('Error retrieving supported languages', error),
+      )
     CatToolActions.onRender()
     $('html').trigger('start')
     if (LXQ.enabled()) LXQ.initPopup()
@@ -258,7 +276,9 @@ function CatTool() {
       // TODO: da verificare se serve: $(window).trigger('segmentsAdded', {resp: data.files})
       $(window).trigger('segmentsAdded', {resp: data.files})
     }
-    $(document).trigger('files:appended')
+    if (config.isReview) {
+      SegmentActions.addPreloadedIssuesToSegment()
+    }
   }, [segmentsResult, options?.openCurrentSegmentAfter])
 
   // execute callback option from onRender action
@@ -317,23 +337,22 @@ function CatTool() {
               ? options?.where === 'before'
                 ? 'loadingBefore'
                 : options?.where === 'after'
-                ? 'loadingAfter'
-                : 'loading'
+                  ? 'loadingAfter'
+                  : 'loading'
               : ''
           }
         >
           <article id="file" className="loading mbc-commenting-closed">
             <div className="article-segments-container">
               <SegmentsContainer
-                isReview={Review.enabled()}
-                isReviewExtended={ReviewExtended.enabled()}
-                reviewType={Review.type}
+                isReview={config.isReview}
                 enableTagProjection={UI.enableTagProjection}
                 startSegmentId={UI.startSegmentId?.toString()}
                 firstJobSegment={config.first_job_segment}
                 guessTagActive={guessTagActive}
                 speechToTextActive={speechToTextActive}
                 multiMatchLangs={multiMatchLangs}
+                languages={supportedLanguages}
               />
             </div>
           </article>
@@ -361,12 +380,16 @@ function CatTool() {
             setGuessTagActive,
             setSpeechToTextActive,
             sourceLang: {
-              name: CommonUtils.getLanguageNameFromLocale(config.source_rfc),
+              name: ApplicationStore.getLanguageNameFromLocale(
+                config.source_rfc,
+              ),
               code: config.source_rfc,
             },
             targetLangs: [
               {
-                name: CommonUtils.getLanguageNameFromLocale(config.target_rfc),
+                name: ApplicationStore.getLanguageNameFromLocale(
+                  config.target_rfc,
+                ),
                 code: config.target_rfc,
               },
             ],
@@ -387,7 +410,7 @@ function CatTool() {
         target={config.target_rfc}
         isReview={config.isReview}
         isCJK={config.isCJK}
-        languagesArray={config.languages_array}
+        languagesArray={supportedLanguages}
       />
     </>
   )

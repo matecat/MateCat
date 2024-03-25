@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react'
 import {Select} from '../../../common/Select'
 import AlertModal from '../../../modals/AlertModal'
+import ModalsActions from '../../../../actions/ModalsActions'
 
 export const SegmentationRule = ({segmentationRule, setSegmentationRule}) => {
   const [active, setActive] = useState(segmentationRule)

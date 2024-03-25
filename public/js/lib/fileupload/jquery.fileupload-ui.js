@@ -11,7 +11,6 @@
 
 /*jslint nomen: true, unparam: true, regexp: true */
 /*global define, window, document, URL, webkitURL, FileReader */
-
 (function (factory ) {
     'use strict';
     if ( typeof define === 'function' && define.amd ) {
@@ -104,7 +103,7 @@
                     if ( !data.isValidated ) {
                         $( '.cancel button', data.context ).click( function () {
                             if ( UI.checkAnalyzability() ) {
-                                CreateProjectActions.enableAnalyzeButton(true)
+                                UI.enableAnalyzeButton(true)
                             }
                         } );
                     }
@@ -327,7 +326,7 @@
                 if ( !match ) {
                     //console.log( error );
                     _deleteRow( data.context );
-                    CreateProjectActions.hideErrors()
+                    UI.hideUploadErrors()
                     return false;
                 }
 

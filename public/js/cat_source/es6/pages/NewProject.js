@@ -31,6 +31,11 @@ import {getMTEngines as getMtEnginesApi} from '../api/getMTEngines'
 import SegmentUtils from '../utils/segmentUtils'
 import {tmCreateRandUser} from '../api/tmCreateRandUser'
 import {getTmDataStructureToSendServer} from '../components/settingsPanel/Contents/TranslationMemoryGlossaryTab'
+import {getSupportedFiles} from '../api/getSupportedFiles'
+import {getSupportedLanguages} from '../api/getSupportedLanguages'
+import ApplicationActions from '../actions/ApplicationActions'
+import useDeviceCompatibility from '../hooks/useDeviceCompatibility'
+import {useGoogleLoginNotification} from '../hooks/useGoogleLoginNotification'
 
 const SELECT_HEIGHT = 324
 
@@ -45,13 +50,13 @@ const tmKeyFromQueryString = urlParams.get('private_tm_key')
 
 const NewProject = ({
   isLoggedIn = false,
-  languages,
   sourceLanguageSelected,
   targetLanguagesSelected,
   subjectsArray,
   conversionEnabled,
   formatsNumber,
   googleDriveEnabled,
+  restartConversions,
 }) => {
   const [user, setUser] = useState()
   const [tmKeys, setTmKeys] = useState()
@@ -59,18 +64,8 @@ const NewProject = ({
   const [mtEngines, setMtEngines] = useState([DEFAULT_ENGINE_MEMORY])
   const [activeMTEngine, setActiveMTEngine] = useState(DEFAULT_ENGINE_MEMORY)
   const [selectedTeam, setSelectedTeam] = useState()
-  const [sourceLang, setSourceLang] = useState(
-    sourceLanguageSelected
-      ? languages.find((lang) => lang.id === sourceLanguageSelected)
-      : languages[0],
-  )
-  const [targetLangs, setTargetLangs] = useState(
-    targetLanguagesSelected
-      ? languages.filter(
-          (lang) => targetLanguagesSelected.indexOf(lang.id) > -1,
-        )
-      : [languages[0]],
-  )
+  const [sourceLang, setSourceLang] = useState({})
+  const [targetLangs, setTargetLangs] = useState([])
   const [subject, setSubject] = useState(subjectsArray[0])
   const [projectSent, setProjectSent] = useState(false)
   const [errors, setErrors] = useState()
@@ -100,6 +95,13 @@ const NewProject = ({
   )
   const [isImportTMXInProgress, setIsImportTMXInProgress] = useState(false)
   const [isFormReadyToSubmit, setIsFormReadyToSubmit] = useState(false)
+  const [supportedFiles, setSupportedFiles] = useState()
+  const [supportedLanguages, setSupportedLanguages] = useState()
+
+  const isDeviceCompatible = useDeviceCompatibility()
+
+  // TODO: Remove temp notification warning login google (search in files this todo)
+  useGoogleLoginNotification()
 
   const projectNameRef = useRef()
   const prevSourceLang = useRef(sourceLang)
@@ -188,6 +190,8 @@ const NewProject = ({
   }
 
   createProject.current = () => {
+    const {mtGlossaryProps, deeplGlossaryProps} = activeMTEngine ?? {}
+
     const getParams = () => ({
       action: 'createProject',
       file_name: APP.getFilenameFromUploadedFiles(),
@@ -205,6 +209,17 @@ const NewProject = ({
       segmentation_rule: segmentationRule.id === '1' ? '' : segmentationRule.id,
       id_team: selectedTeam ? selectedTeam.id : undefined,
       get_public_matches: getPublicMatches,
+      ...(mtGlossaryProps?.glossaries.length && {
+        mmt_glossaries: JSON.stringify({
+          glossaries: mtGlossaryProps.glossaries,
+          ignore_glossary_case: !mtGlossaryProps.isGlossaryCaseSensitive,
+        }),
+      }),
+      ...(typeof deeplGlossaryProps === 'object' && {
+        ...Object.entries(deeplGlossaryProps)
+          .filter(([, value]) => value)
+          .reduce((acc, [key, value]) => ({...acc, [key]: value}), {}),
+      }),
     })
 
     if (!projectSent) {
@@ -241,6 +256,31 @@ const NewProject = ({
         })
     }
   }
+  const retrieveSupportedLanguages = () => {
+    getSupportedLanguages()
+      .then((data) => {
+        const languages = data.map((lang) => {
+          return {...lang, id: lang.code}
+        })
+        setSupportedLanguages(languages)
+        setSourceLang(
+          sourceLanguageSelected
+            ? languages.find((lang) => lang.id === sourceLanguageSelected)
+            : languages[0],
+        )
+        setTargetLangs(
+          targetLanguagesSelected
+            ? languages.filter(
+                (lang) => targetLanguagesSelected.indexOf(lang.id) > -1,
+              )
+            : [languages[0]],
+        )
+        ApplicationActions.setLanguages(data)
+      })
+      .catch((error) =>
+        console.log('Error retrieving supported languages', error),
+      )
+  }
 
   //TODO: Move it
   useEffect(() => {
@@ -250,7 +290,13 @@ const NewProject = ({
   }, [selectedTeam])
 
   useEffect(() => {
-    APP.checkGDriveEvents()
+    retrieveSupportedLanguages()
+    getSupportedFiles()
+      .then((data) => {
+        setSupportedFiles(data)
+      })
+      .catch((error) => console.log('Error retrieving supported files', error))
+
     UI.addEvents()
     setGuessTagActive(
       SegmentUtils.checkGuessTagCanActivate(sourceLang, targetLangs),
@@ -291,7 +337,7 @@ const NewProject = ({
       CommonUtils.getParameterByName('project_name')
     if (projectNameFromQuerystring)
       projectNameRef.current.value = projectNameFromQuerystring
-
+    APP.checkGDriveEvents()
     return () => {
       TeamsStore.removeListener(TeamConstants.UPDATE_USER, updateUser)
       CreateProjectStore.removeListener(
@@ -379,43 +425,52 @@ const NewProject = ({
   useEffect(() => {
     if (sourceLang) {
       const lang = sourceLang.id
-      if (localStorage.getItem('currentSourceLang') != lang) {
+      if (lang && localStorage.getItem('currentSourceLang') !== lang) {
         localStorage.setItem('currentSourceLang', lang)
       }
     }
     if (targetLangs) {
       const lang = targetLangs.map((lang) => lang.id).join()
-      if (localStorage.getItem('currentTargetLang') != lang) {
+      if (lang && localStorage.getItem('currentTargetLang') !== lang) {
         localStorage.setItem('currentTargetLang', lang)
       }
     }
-    setGuessTagActive(
-      SegmentUtils.checkGuessTagCanActivate(sourceLang, targetLangs),
-    )
-    CreateProjectActions.updateProjectParams({
-      sourceLang,
-      targetLangs,
-      selectedTeam,
-    })
-    if (prevSourceLang.current.id !== sourceLang.id) {
-      prevSourceLang.current = sourceLang
-      UI.UPLOAD_PAGE.restartConversions()
+    if (sourceLang && targetLangs) {
+      setGuessTagActive(
+        SegmentUtils.checkGuessTagCanActivate(sourceLang, targetLangs),
+      )
+      CreateProjectActions.updateProjectParams({
+        sourceLang,
+        targetLangs,
+        selectedTeam,
+      })
+      if (prevSourceLang.current.id !== sourceLang.id) {
+        prevSourceLang.current = sourceLang
+        restartConversions()
+      }
     }
   }, [sourceLang, targetLangs, selectedTeam])
 
   useEffect(() => {
     //TODO: used in main.js, remove
     UI.segmentationRule = segmentationRule.id
-    UI.UPLOAD_PAGE.restartConversions()
+    restartConversions()
   }, [segmentationRule])
 
-  return (
+  useEffect(() => {
+    if (!isDeviceCompatible) {
+      const body = document.querySelector('body')
+      if (body) body.classList.add('no-min-width')
+    }
+  }, [isDeviceCompatible])
+
+  return isDeviceCompatible ? (
     <CreateProjectContext.Provider
       value={{
         SELECT_HEIGHT,
         tmKeys,
         setTmKeys,
-        languages,
+        languages: supportedLanguages,
         targetLangs,
         setTargetLangs,
         setIsOpenMultiselectLanguages,
@@ -443,7 +498,6 @@ const NewProject = ({
       </div>
 
       <div className="wrapper-upload">
-        <div id="matecat-cat" />
         <div id="languageSelector" />
         <div className="translation-row">
           <div className="translation-options">
@@ -538,14 +592,18 @@ const NewProject = ({
         {warnings && (
           <div className="warning-message">
             <i className="icon-warning2 icon"> </i>
-            <p>{warnings}</p>
+            <p dangerouslySetInnerHTML={{
+              __html: warnings
+            }} />
           </div>
         )}
 
         {errors && (
           <div className="error-message">
             <i className="icon-error_outline icon"> </i>
-            <p>{errors}</p>
+            <p dangerouslySetInnerHTML={{
+              __html: errors
+            }} />
           </div>
         )}
 
@@ -560,7 +618,7 @@ const NewProject = ({
               onClick={() => {
                 ModalsActions.showModalComponent(
                   SupportedFilesModal,
-                  {},
+                  {supportedFiles: supportedFiles},
                   'Supported file formats',
                   {minWidth: '80%', height: '80%'},
                 )
@@ -611,7 +669,7 @@ const NewProject = ({
           selectedLanguagesFromDropdown={
             targetLangs.length > 1 ? targetLangs.map(({code}) => code) : []
           }
-          languagesList={config.languages_array}
+          languagesList={supportedLanguages}
           fromLanguage={CreateProjectStore.getSourceLang()}
           onClose={() => setIsOpenMultiselectLanguages(false)}
           onConfirm={(data) => {
@@ -650,16 +708,39 @@ const NewProject = ({
       />
       <Footer />
     </CreateProjectContext.Provider>
+  ) : (
+    <div>
+      <HeaderPortal>
+        <Header
+          showModals={false}
+          showLinks={false}
+          loggedUser={false}
+          showUserMenu={false}
+        />
+      </HeaderPortal>
+      <div className="not-supported-container">
+        <h1>Use Matecat from your desktop</h1>
+        <p>
+          Matecat is not available for mobile devices, you can use it on your
+          desktop with the browser of your choice.
+        </p>
+        <div className="buttons">
+          <a href="https://site.matecat.com/" className="ui primary button">
+            Find out more about Matecat
+          </a>
+        </div>
+      </div>
+    </div>
   )
 }
 NewProject.propTypes = {
   isLoggedIn: PropTypes.bool,
-  languages: PropTypes.array,
   sourceLanguageSelected: PropTypes.string,
   targetLanguagesSelected: PropTypes.string,
   subjectsArray: PropTypes.array,
   conversionEnabled: PropTypes.bool,
   formatsNumber: PropTypes.number,
   googleDriveEnabled: PropTypes.bool,
+  restartConversions: PropTypes.func,
 }
 export default NewProject

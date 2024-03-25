@@ -28,7 +28,7 @@ class Translations_SegmentTranslationStruct extends DataAccess_AbstractDaoSilent
     public $locked;
     public $warning;
     public $serialized_errors_list;
-    public $version_number;
+    public $version_number = 0; // this value should be not null
 
 
     public function isReviewedStatus() {
@@ -42,6 +42,14 @@ class Translations_SegmentTranslationStruct extends DataAccess_AbstractDaoSilent
 
     public function isPreTranslated(){
         return $this->match_type == Constants_SegmentTranslationsMatchType::ICE && !$this->locked;
+    }
+
+    public function isPreApprovedFromTM(){
+        return
+                ( $this->match_type == Constants_SegmentTranslationsMatchType::_100 || $this->match_type == Constants_SegmentTranslationsMatchType::_100_PUBLIC )&&
+                !$this->locked && /* redundant a 100% is not locked */
+                $this->status == Constants_TranslationStatus::STATUS_APPROVED &&
+                empty( $this->version_number );
     }
 
     public function isPostReviewedStatus() {

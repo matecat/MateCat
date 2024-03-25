@@ -1,5 +1,5 @@
 import React from 'react'
-import _ from 'lodash'
+import {isUndefined} from 'lodash'
 
 import ManageConstants from '../../constants/ManageConstants'
 import TeamsStore from '../../stores/TeamsStore'
@@ -39,7 +39,7 @@ class TeamsSelect extends React.Component {
 
   initDropdown = () => {
     let self = this
-    if (this.props.teams.size > 0 && !_.isUndefined(this.dropdownTeams)) {
+    if (this.props.teams.size > 0 && !isUndefined(this.dropdownTeams)) {
       if (this.props.teams.size == 1) {
         this.dropdownTeams.classList.add('only-one-team')
       } else {

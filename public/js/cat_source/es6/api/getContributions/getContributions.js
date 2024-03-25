@@ -1,5 +1,4 @@
 import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
-
 /**
  * Get contributions
  *
@@ -27,7 +26,7 @@ export const getContributions = async ({
   const idBefore = UI.getIdBefore(idSegment)
   const contextAfter = UI.getContextAfter(idSegment)
   const idAfter = UI.getIdAfter(idSegment)
-  const txt = TagUtils.prepareTextToSend(target)
+  const txt = target
 
   const obj = {
     action: 'getContribution',

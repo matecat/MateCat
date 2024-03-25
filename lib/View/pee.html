@@ -2,25 +2,19 @@
 <html>
 <head>
     <title>PEE</title>
-    <link rel="stylesheet" href="${basepath}public/css/build/semantic.css?build=${build_number}"/>
-    <link href="${basepath}public/css/build/common.css?build=${build_number}" rel="stylesheet" type="text/css"/>
-    <link rel="stylesheet" href="${basepath}public/css/build/legacy-misc.css?build=${build_number}"/>
+<!--    <link rel="stylesheet" href="${basepath}public/css/build/semantic.css?build=${build_number}"/>-->
+<!--    <link href="${basepath}public/css/build/common.css?build=${build_number}" rel="stylesheet" type="text/css"/>-->
+<!--    <link rel="stylesheet" href="${basepath}public/css/build/legacy-misc.css?build=${build_number}"/>-->
 
 
-    <script src="${basepath}public/js/build/libs.js?build=${build_number}"></script>
+    <script src="${basepath}public/build/libs.js?build=${build_number}"></script>
 <!--    <script src="${basepath}public/js/build/pee.js"></script>-->
 
 
 
 </head>
 
-<body tal:condition="not:supportedBrowser">
-<div metal:use-macro="unsupported_browser.html/unsupported"/>
-</body>
-<body tal:condition="php:supportedBrowser EQ -2">
-<div metal:use-macro="unsupported_browser.html/unsupported"/>
-</body>
-<body tal:condition="php:supportedBrowser EQ 1" class="started pee-page">
+<body class="started pee-page">
 <header>
     <div class="wrapper">
         <a href="${basepath}" class="logo"></a>
@@ -31,8 +25,7 @@
 <script type="text/javascript">
     /*<![CDATA[*/
     var config = {
-        enable_outsource: 0,
-        languages_array : ${languages_json}
+        enable_outsource: 0
     };
     var langStats = ${dataLangStats};
     /*]]>*/

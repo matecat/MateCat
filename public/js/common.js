@@ -1,10 +1,17 @@
 import Cookies from 'js-cookie'
-import _ from 'lodash'
+import {filter} from 'lodash'
 import TeamsActions from './cat_source/es6/actions/TeamsActions'
 import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessageModal'
 import {downloadFileGDrive} from './cat_source/es6/api/downloadFileGDrive'
 import ModalsActions from './cat_source/es6/actions/ModalsActions'
 import CommonUtils from './cat_source/es6/utils/commonUtils'
+import CatToolActions from './cat_source/es6/actions/CatToolActions'
+import SuccessModal from './cat_source/es6/components/modals/SuccessModal'
+import PreferencesModal from './cat_source/es6/components/modals/PreferencesModal'
+import ResetPasswordModal from './cat_source/es6/components/modals/ResetPasswordModal'
+import RegisterModal from './cat_source/es6/components/modals/RegisterModal'
+import {onModalWindowMounted} from './cat_source/es6/components/modals/ModalWindow'
+import LoginModal from './cat_source/es6/components/modals/LoginModal'
 
 window.APP = null
 
@@ -20,14 +27,135 @@ window.APP = {
         self.setUserImage()
       })
     }
-    this.isCattool = $('body').hasClass('cattool')
     setTimeout(() => this.checkGlobalMassages(), 1000)
   },
   /*************************************************************************************************************/
+  setLoginEvents: function () {
+    if (config.showModalBoxLogin == 1) {
+      APP.openLoginModal()
+    }
+    onModalWindowMounted().then(() => this.checkForPopupToOpen())
+  },
 
+  checkForPopupToOpen: function () {
+    var openFromFlash = APP.lookupFlashServiceParam('popup')
+    if (!openFromFlash) return
+
+    switch (openFromFlash[0].value) {
+      case 'passwordReset':
+        APP.openResetPassword()
+        break
+      case 'profile':
+        // TODO: optimized this, establish a list of events to happen after user data is loaded
+        APP.USER.loadUserData().then(function () {
+          APP.openSuccessModal({
+            title: 'Registration complete',
+            text: 'You are now logged in and ready to use Matecat.',
+          })
+          //After confirm email or google register
+          const data = {
+            event: APP.USER.isGoogleUser()
+              ? 'new_signup_google'
+              : 'new_signup_email',
+            userId:
+              APP.USER.isUserLogged() && APP.USER.STORE.user
+                ? APP.USER.STORE.user.uid
+                : null,
+          }
+          CommonUtils.dispatchAnalyticsEvents(data)
+        })
+
+        break
+      case 'login':
+        APP.openLoginModal()
+        break
+      case 'signup':
+        if (!config.isLoggedIn) {
+          if (APP.lookupFlashServiceParam('signup_email')) {
+            var userMail = APP.lookupFlashServiceParam('signup_email')[0].value
+            APP.openRegisterModal({userMail: userMail})
+          } else {
+            APP.openRegisterModal()
+          }
+        }
+        break
+    }
+  },
+
+  openLoginModal: function (param = {}) {
+    var title = 'Add project to your management panel'
+    var style = {
+      width: '80%',
+      maxWidth: '800px',
+      minWidth: '600px',
+    }
+    var props = {
+      googleUrl: config.authURL,
+      ...param,
+    }
+
+    if (config.showModalBoxLogin == 1) {
+      props.redeemMessage = true
+      title = 'Add project to your management panel'
+    }
+
+    ModalsActions.showModalComponent(LoginModal, props, title, style)
+  },
+  openRegisterModal: (params) => {
+    let props = {
+      googleUrl: config.authURL,
+    }
+    if (config.showModalBoxLogin == 1) {
+      props.redeemMessage = true
+    }
+    if (params) {
+      props = {
+        ...props,
+        ...params,
+      }
+    }
+    ModalsActions.showModalComponent(RegisterModal, props, 'Register Now')
+  },
+  openPreferencesModal: (params) => {
+    let props = {
+      user: APP.USER.STORE.user,
+      metadata: APP.USER.STORE.metadata ? APP.USER.STORE.metadata : {},
+    }
+    if (
+      APP.USER.STORE.connected_services &&
+      APP.USER.STORE.connected_services.length
+    ) {
+      props.service = APP.USER.getDefaultConnectedService()
+    }
+    if (params) {
+      props = {
+        ...props,
+        ...params,
+      }
+    }
+    const style = {
+      width: '700px',
+      maxWidth: '700px',
+    }
+    ModalsActions.showModalComponent(PreferencesModal, props, 'Profile', style)
+  },
+  openSuccessModal: (props) => {
+    ModalsActions.showModalComponent(SuccessModal, props, props.title)
+  },
+  openResetPassword: () => {
+    let props = {closeOnOutsideClick: false, showOldPassword: true}
+    if (APP.lookupFlashServiceParam('popup')) {
+      props.showOldPassword = false
+    }
+    ModalsActions.showModalComponent(
+      ResetPasswordModal,
+      props,
+      'Reset Password',
+    )
+  },
   lookupFlashServiceParam: function (name) {
     if (config.flash_messages && config.flash_messages.service) {
-      return _.filter(config.flash_messages.service, function (service) {
+      return filter(config.flash_messages.service, function (service) {
         return service.key == name
       })
     }
@@ -178,15 +306,8 @@ window.APP = {
     var iFrameForm = $(
       '<form id="fileDownload" action="' +
         config.basepath +
-        '" method="post">' +
-        '<input type="hidden" name="action" value="downloadFile" />' +
-        '<input type="hidden" name="id_job" value="' +
-        idJob +
-        '" />' +
-        '<input type="hidden" name="id_file" value="" />' +
-        '<input type="hidden" name="password" value="' +
-        pass +
-        '"/>' +
+        `api/v2/translation/${idJob}/${pass}` +
+        '" method="GET">' +
         '<input type="hidden" name="download_type" value="all" />' +
         '<input type="hidden" name="downloadToken" value="' +
         downloadToken +
@@ -298,6 +419,6 @@ window.APP = {
   },
 }
 
-$(document).ready(function () {
+document.addEventListener('DOMContentLoaded', function (event) {
   APP.init()
 })

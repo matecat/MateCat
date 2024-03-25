@@ -1,4 +1,4 @@
-import React, {useContext, useState} from 'react'
+import React, {useContext, useEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import {
   SPECIAL_ROWS_ID,
@@ -23,7 +23,12 @@ export const TMCreateResourceRow = ({row}) => {
   const [isUpdating, setIsUpdating] = useState(row.w ?? false)
   const [name, setName] = useState(row.name ?? '')
   const [keyCode, setKeyCode] = useState('')
-  const [submitCheckErrors, setSubmitCheckErrors] = useState()
+
+  const nameRef = useRef()
+
+  useEffect(() => {
+    nameRef.current.focus()
+  }, [])
 
   const onChangeIsLookup = (e) => {
     const isLookup = e.currentTarget.checked
@@ -41,12 +46,10 @@ export const TMCreateResourceRow = ({row}) => {
     const {value: name} = e.currentTarget ?? {}
     setName(name)
     if (name) updateRow({isUpdating, isLookup, name})
-    setSubmitCheckErrors(undefined)
   }
 
   const onChangeKeyCode = (e) => {
     setKeyCode(e.currentTarget.value)
-    setSubmitCheckErrors(undefined)
     setNotification({})
   }
 
@@ -75,7 +78,6 @@ export const TMCreateResourceRow = ({row}) => {
       ),
     )
 
-    setSubmitCheckErrors(undefined)
     setNotification({})
   }
 
@@ -89,7 +91,6 @@ export const TMCreateResourceRow = ({row}) => {
   }
 
   const validateForm = () => {
-    setSubmitCheckErrors(Symbol())
     if (
       !name ||
       (row.id === SPECIAL_ROWS_ID.addSharedResource && (!name || !keyCode))
@@ -133,8 +134,8 @@ export const TMCreateResourceRow = ({row}) => {
             setNotification({
               type: 'error',
               message:
-                errors[0].code === '23000'
-                  ? 'The key you entered is invalid.'
+                !errors || errors[0].code === '23000'
+                  ? 'Invalid key.'
                   : errors[0].message,
             })
           })
@@ -250,15 +251,11 @@ export const TMCreateResourceRow = ({row}) => {
     return true
   }
 
-  const inputNameClasses = `tm-key-create-resource-row-input ${
-    typeof submitCheckErrors === 'symbol' && !name ? ' error' : ''
-  }`
-  const inputKeyCodeClasses = `tm-key-create-resource-row-input ${
-    (typeof submitCheckErrors === 'symbol' && !keyCode) ||
-    (keyCode && !checkSharedKey(false))
-      ? ' error'
-      : ''
-  }`
+  const inputNameClasses = 'tm-key-create-resource-row-input'
+  const inputKeyCodeClasses = 'tm-key-create-resource-row-input'
+
+  const isFormFilled =
+    row.id === SPECIAL_ROWS_ID.addSharedResource ? keyCode && name : name
 
   return (
     <form className="settings-panel-row-content" onSubmit={onSubmit}>
@@ -274,6 +271,7 @@ export const TMCreateResourceRow = ({row}) => {
       </div>
       <div>
         <input
+          ref={nameRef}
           placeholder="Please insert a name for the resource"
           className={inputNameClasses}
           value={name}
@@ -293,18 +291,19 @@ export const TMCreateResourceRow = ({row}) => {
       <div />
       <div className="translation-memory-glossary-tab-buttons-group">
         <button
-          className="ui primary button settings-panel-button-icon tm-key-small-row-button"
+          className="ui primary button settings-panel-button-icon confirm-button"
           type="submit"
+          disabled={!isFormFilled}
         >
-          <Checkmark size={16} />
+          <Checkmark size={12} />
           Confirm
         </button>
         <button
-          className="ui button orange tm-key-small-row-button"
+          className="ui button orange close-button"
           onClick={onReset}
           type="reset"
         >
-          <Close />
+          <Close size={18} />
         </button>
       </div>
     </form>

@@ -100,9 +100,28 @@ class LanguageSelectorList extends React.Component {
 
   getFilteredLanguages = () => {
     const {languagesList, querySearch} = this.props
-    return languagesList.filter(
-      (e) => e.name.toLowerCase().indexOf(querySearch.toLowerCase()) === 0,
-    )
+    const langs =
+      languagesList && languagesList.length
+        ? languagesList.filter(
+            (e) => e.name.toLowerCase().indexOf(querySearch.toLowerCase()) >= 0,
+          )
+        : []
+    const sortInputFirst = (input, data) => {
+      let first = []
+      let others = []
+      for (let i = 0; i < data.length; i++) {
+        if (data[i].name.toLowerCase().indexOf(input.toLowerCase()) === 0) {
+          first.push(data[i])
+        } else {
+          others.push(data[i])
+        }
+      }
+      first.sort()
+      others.sort()
+      return first.concat(others)
+    }
+    //Sort languages
+    return sortInputFirst(querySearch, langs)
   }
 
   getLanguagesInColumns = () => {

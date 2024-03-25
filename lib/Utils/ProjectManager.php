@@ -20,11 +20,8 @@ use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use FilesStorage\S3FilesStorage;
 use Jobs\SplitQueue;
+use LQA\ChunkReviewDao;
 use LQA\QA;
-use Matecat\SubFiltering\Commons\Pipeline;
-use Matecat\SubFiltering\Filters\FromViewNBSPToSpaces;
-use Matecat\SubFiltering\Filters\PhCounter;
-use Matecat\SubFiltering\Filters\SprintfToPH;
 use Matecat\SubFiltering\MateCatFilter;
 use Matecat\XliffParser\XliffParser;
 use Matecat\XliffParser\XliffUtils\DataRefReplacer;
@@ -186,7 +183,10 @@ class ProjectManager {
                     'due_date'                     => null,
                     'qa_model'                     => null,
                     'target_language_mt_engine_id' => [],
-                    'standard_word_count'         => 0
+                    'standard_word_count'          => 0,
+                    'mmt_glossaries'               => null,
+                    'deepl_formality'              => null,
+                    'deepl_id_glossary'            => null,
                 ] );
 
         }
@@ -327,32 +327,10 @@ class ProjectManager {
         return $this->projectStructure;
     }
 
-
     /**
-     *  saveMetadata
-     *
-     * This is where, among other things, we put project options.
-     *
-     * Project options may need to be sanitized so that we can silently ignore impossible combinations,
-     * and we can apply defaults when those are missing.
-     *
+     * Save features in project metadata
      */
-    private function saveMetadata() {
-        $options = $this->projectStructure[ 'metadata' ];
-
-        /**
-         * Here we have the opportunity to add other features as dependencies of the ones
-         * which are already explicitly set.
-         */
-        $this->features->loadProjectDependenciesFromProjectMetadata( $options );
-
-        if ( $this->projectStructure[ 'sanitize_project_options' ] ) {
-            $options = $this->sanitizeProjectOptions( $options );
-        }
-
-        if ( empty( $options ) ) {
-            return;
-        }
+    private function saveFeaturesInMetadata(){
 
         $dao = new Projects_MetadataDao();
 
@@ -363,14 +341,67 @@ class ProjectManager {
                 implode( ',', $featureCodes )
             );
         }
+    }
 
-        foreach ( $options as $key => $value ) {
+    /**
+     *  Save custom project metadata
+     *
+     * This is where, among other things, we put project options.
+     *
+     * Project options may need to be sanitized so that we can silently ignore impossible combinations,
+     * and we can apply defaults when those are missing.
+     *
+     */
+    private function saveMetadata() {
+
+        $options = $this->projectStructure[ 'metadata' ];
+        $dao = new Projects_MetadataDao();
+
+        // "From API" flag
+        if(isset($this->projectStructure['from_api']) and $this->projectStructure['from_api'] == true){
+            $options['from_api'] = 1;
+        }
+
+        if ( $this->projectStructure[ 'sanitize_project_options' ] ) {
+            $options = $this->sanitizeProjectOptions( $options );
+        }
+
+        if(!empty($options)){
+            foreach ( $options as $key => $value ) {
+                $dao->set(
+                    $this->projectStructure[ 'id_project' ],
+                    $key,
+                    $value
+                );
+            }
+        }
+
+        // add MMT Glossaries here
+        if( $this->projectStructure[ 'mmt_glossaries' ] and !empty( $this->projectStructure[ 'mmt_glossaries' ] ) ){
             $dao->set(
                 $this->projectStructure[ 'id_project' ],
-                $key,
-                $value
+                'mmt_glossaries',
+                $this->projectStructure[ 'mmt_glossaries' ]
             );
         }
+
+        // add DeepL params here
+        if( $this->projectStructure[ 'deepl_formality' ] and !empty( $this->projectStructure[ 'deepl_formality' ] ) ){
+            $dao->set(
+                $this->projectStructure[ 'id_project' ],
+                'deepl_formality',
+                $this->projectStructure[ 'deepl_formality' ]
+            );
+        }
+
+        if( $this->projectStructure[ 'deepl_id_glossary' ] and !empty( $this->projectStructure[ 'deepl_id_glossary' ] ) ){
+            $dao->set(
+                $this->projectStructure[ 'id_project' ],
+                'deepl_id_glossary',
+                $this->projectStructure[ 'deepl_id_glossary' ]
+            );
+        }
+
     }
 
     private function sanitizeProjectOptions( $options ) {
@@ -476,6 +507,7 @@ class ProjectManager {
         }
 
         $this->__createProjectRecord();
+        $this->saveFeaturesInMetadata();
         $this->saveMetadata();
 
         //sort files in order to process TMX first
@@ -872,7 +904,8 @@ class ProjectManager {
             foreach ( $array_files as $index => $filename ) {
                 if ( $file_info[ 'original_filename' ] === $filename ) {
                     if ( isset( $this->projectStructure[ 'instructions' ][ $index ] ) && !empty( $this->projectStructure[ 'instructions' ][ $index ] ) ) {
-                        $this->_insertInstructions( $fid, $this->projectStructure[ 'instructions' ][ $index ] );
+                        $instructions = Utils::stripTagsPreservingHrefs($this->projectStructure[ 'instructions' ][ $index ]);
+                        $this->_insertInstructions( $fid, $instructions );
                     }
 
                 }
@@ -1110,6 +1143,8 @@ class ProjectManager {
      */
     protected function _loopForTMXLoadStatus( $memoryFiles ) {
 
+        $time = strtotime( '+30 minutes' );
+
         //TMX Management
         /****************/
         //loop again through files to check for TMX loading
@@ -1123,10 +1158,11 @@ class ProjectManager {
 
                     $result = $this->tmxServiceWrapper->tmxUploadStatus( $file->getUuid() );
 
-                    if ( $result[ 'completed' ] ) {
+                    if ( $result[ 'completed' ] || strtotime( 'now' ) > $time ) {
 
                         //"$fileName" has been loaded into MyMemory"
-                        //exit the loop
+                        // OR the indexer is down or stopped for maintenance
+                        // exit the loop, the import will be executed in a later time
                         break;
 
                     }
@@ -1137,7 +1173,7 @@ class ProjectManager {
                 } catch ( Exception $e ) {
 
                     $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                        "code" => $e->getCode(), "message" => $e->getMessage()
+                            "code" => $e->getCode(), "message" => $e->getMessage()
                     ];
 
                     $this->_log( $e->getMessage() . "\n" . $e->getTraceAsString() );
@@ -1270,7 +1306,7 @@ class ProjectManager {
 
                 //prepare pre-translated segments queries
                 if ( !empty( $projectStructure[ 'translations' ] ) ) {
-                    $this->_insertPreTranslations( $newJob->id );
+                    $this->_insertPreTranslations( $newJob, $projectStructure );
                 }
             } catch ( Exception $e ) {
                 $msg = "\n\n Error, pre-translations lost, project should be re-created. \n\n " . var_export( $e->getMessage(), true );
@@ -1856,7 +1892,8 @@ class ProjectManager {
                             //mrk in the list will not be too!!!
                             $show_in_cattool = 1;
 
-                            $wordCount = CatUtils::segment_raw_word_count( $seg_source[ 'raw-content' ], $this->projectStructure[ 'source_language' ], $this->filter, true );
+                            $wordCount = CatUtils::segment_raw_word_count( $seg_source[ 'raw-content' ], $this->projectStructure[ 'source_language' ], $this->filter );
+                            $wordCount = $this->features->filter( 'wordCount', $wordCount );
 
                             //init tags
                             $seg_source[ 'mrk-ext-prec-tags' ] = '';
@@ -1877,6 +1914,7 @@ class ProjectManager {
 
                                         // could not have attributes, suppress warning
                                         $state = @$xliff_trans_unit[ 'seg-target' ][ $position ][ 'attr' ][ 'state' ];
+                                        $stateQualifier = @$xliff_trans_unit[ 'seg-target' ][ $position ][ 'attr' ][ 'state-qualifier' ];
                                         $target_extract_external = $this->_strip_external( $xliff_trans_unit[ 'seg-target' ][ $position ][ 'raw-content' ], $xliffInfo );
 
                                         //
@@ -1897,14 +1935,13 @@ class ProjectManager {
                                         $src = CatUtils::trimAndStripFromAnHtmlEntityDecoded( $extract_external[ 'seg' ] );
                                         $trg = CatUtils::trimAndStripFromAnHtmlEntityDecoded( $target_extract_external[ 'seg' ] );
 
-                                        $initialTranslationStates = [
-                                            'new',
-                                            'initial',
-                                            'needs-translation',
-                                        ];
-
-                                        if ( !in_array($state, $initialTranslationStates) && $this->__isTranslated( $src, $trg, $xliff_trans_unit ) && !is_numeric( $src ) && !empty( $trg ) ) { //treat 0,1,2.. as translated content!
-
+                                        if (
+                                            !Constants_XliffTranslationStatus::isNew($state) &&
+                                            $this->__isTranslated( $src, $trg, $xliff_trans_unit, $state, $stateQualifier ) &&
+                                            !is_numeric( $src ) &&
+                                            !empty( $trg )
+                                        ) {
+                                            //treat 0,1,2.. as translated content!
                                             $target = $this->filter->fromRawXliffToLayer0( $target_extract_external[ 'seg' ] );
 
                                             //add an empty string to avoid casting to int: 0001 -> 1
@@ -2032,9 +2069,15 @@ class ProjectManager {
 
                             if ( isset( $xliff_trans_unit[ 'target' ][ 'raw-content' ] ) ) {
 
+                                // could not have attributes, suppress warning
+                                $state = (isset($xliff_trans_unit['target']['attr']['state'])) ? $xliff_trans_unit['target']['attr']['state'] : null;
+                                $stateQualifier = (isset($xliff_trans_unit['target']['attr'][ 'state-qualifier' ])) ? $xliff_trans_unit['target']['attr'][ 'state-qualifier' ] : null;
                                 $target_extract_external = $this->_strip_external( $xliff_trans_unit[ 'target' ][ 'raw-content' ], $xliffInfo );
 
-                                if ( $this->__isTranslated( $xliff_trans_unit[ 'source' ][ 'raw-content' ], $target_extract_external[ 'seg' ], $xliff_trans_unit ) ) {
+                                if (
+                                    !Constants_XliffTranslationStatus::isNew($state) &&
+                                    $this->__isTranslated( $xliff_trans_unit[ 'source' ][ 'raw-content' ], $target_extract_external[ 'seg' ], $xliff_trans_unit, $state, $stateQualifier )
+                                ) {
 
                                     $target = $this->filter->fromRawXliffToLayer0( $target_extract_external[ 'seg' ] );
 
@@ -2570,15 +2613,17 @@ class ProjectManager {
     }
 
     /**
-     * @param $jid
+     * @param Jobs_JobStruct $job
+     * @param ArrayObject $projectStructure
      * @throws NotFoundException
      * @throws \API\V2\Exceptions\AuthenticationError
      * @throws \Exceptions\ValidationError
      * @throws \TaskRunner\Exceptions\EndQueueException
      * @throws \TaskRunner\Exceptions\ReQueueException
      */
-    protected function _insertPreTranslations( $jid ) {
+    protected function _insertPreTranslations( Jobs_JobStruct $job, ArrayObject $projectStructure ) {
 
+        $jid = $job->id;
         $this->_cleanSegmentsMetadata();
 
         $status = $this->features->filter( 'filter_status_for_pretranslated_segments',
@@ -2593,7 +2638,7 @@ class ProjectManager {
                 continue;
             }
 
-            //array of segmented translations
+            // array of segmented translations
             foreach ( $struct as $pos => $translation_row ) {
 
                 $position          = (isset($translation_row[ 6 ])) ? $translation_row[ 6 ] : null;
@@ -2623,33 +2668,12 @@ class ProjectManager {
                 $source = $segment->segment;
                 $target = $translation_row [ 2 ];
 
-                //
-                // NOTE 2021-12-20
-                // ------------------------------------------------------
-                // In order to perform an integrity check
-                // we need to transform source and target to layer1
-                // This piece of code mimics setTranslationController (from line 322 to 341)
-
-                /** @var MateCatFilter filter */
+                /** @var $filter MateCatFilter filter */
                 $filter = MateCatFilter::getInstance( $this->features, $chunk->source, $chunk->target, Segments_SegmentOriginalDataDao::getSegmentDataRefMap( $translation_row [ 0 ] ) );
                 $source = $filter->fromLayer0ToLayer1( $source );
                 $target = $filter->fromLayer0ToLayer1( $target );
 
-                $pipeline = new Pipeline( $chunk->source, $chunk->target );
-                $counter  = new PhCounter();
-                $counter->transform( $target );
-
-                for ( $i = 0; $i < $counter->getCount(); $i++ ) {
-                    $pipeline->getNextId();
-                }
-
-                $pipeline->addLast( new FromViewNBSPToSpaces() );
-                $pipeline->addLast( new SprintfToPH() );
-
-                $src = $pipeline->transform( $source );
-                $trg = $pipeline->transform( $target );
-
-                $check = new QA( $src, $trg );
+                $check = new QA( $source, $target );
                 $check->setFeatureSet( $this->features );
                 $check->setSourceSegLang( $chunk->source );
                 $check->setTargetSegLang( $chunk->target );
@@ -2670,12 +2694,11 @@ class ProjectManager {
                     'warning'                => ( $check->thereAreErrors() ) ? 1 : 0,
                     'suggestion_match'       => $iceLockArray[ 'suggestion_match' ],
                     'standard_word_count'    => $iceLockArray[ 'standard_word_count' ],
+                    'version_number'         => (isset($iceLockArray[ 'version_number' ])) ? $iceLockArray[ 'version_number' ] : 0,
                 ];
 
                 $query_translations_values[] = $sql_values;
-
             }
-
         }
 
         // Executing the Query
@@ -2685,34 +2708,50 @@ class ProjectManager {
 
         //clean translations and queries
         unset( $query_translations_values );
-
     }
 
     /**
      * @param $trans_unit
      * @param null $position
+     *
      * @return string
      */
     private function preTranslationStatus($trans_unit, $position = null){
 
         // state handling
+        $state = null;
+        $stateQualifier = null;
+
         if(isset($trans_unit['seg-target'][$position]['attr']) and isset($trans_unit['seg-target'][$position]['attr']['state'])){
             $state = $trans_unit['seg-target'][$position]['attr']['state'];
+        } elseif(isset($trans_unit['target']['attr']) and isset($trans_unit['target']['attr']['state'])){
+            $state = $trans_unit['target']['attr']['state'];
+        }
 
-            switch ($state){
+        if(isset($trans_unit['seg-target'][$position]['attr']) and isset($trans_unit['seg-target'][$position]['attr']['state-qualifier'])){
+            $stateQualifier = $trans_unit['seg-target'][$position]['attr']['state-qualifier'];
+        } elseif(isset($trans_unit['target']['attr']) and isset($trans_unit['target']['attr']['state-qualifier'])){
+            $stateQualifier = $trans_unit['target']['attr']['state-qualifier'];
+        }
 
-                case 'new':
-                case 'needs-translation':
-                case 'initial':
-                    return Constants_TranslationStatus::STATUS_NEW;
+        if($stateQualifier !== null){
+            if(Constants_XliffTranslationStatus::isFuzzyMatch($stateQualifier)){
+                return Constants_TranslationStatus::STATUS_DRAFT;
+            }
+        }
 
-                case 'translated':
-                    return Constants_TranslationStatus::STATUS_TRANSLATED;
+        if($state !== null){
 
-                default:
-                case 'reviewed':
-                case 'final':
-                    return Constants_TranslationStatus::STATUS_APPROVED;
+            if(Constants_XliffTranslationStatus::isNew($state)){
+                return Constants_TranslationStatus::STATUS_NEW;
+            }
+
+            if(Constants_XliffTranslationStatus::isTranslated($state)){
+                return Constants_TranslationStatus::STATUS_TRANSLATED;
+            }
+
+            if(Constants_XliffTranslationStatus::isRevision($state)){
+                return Constants_TranslationStatus::STATUS_APPROVED;
             }
         }
 
@@ -3292,8 +3331,9 @@ class ProjectManager {
      *
      * @param $source
      * @param $target
-     *
      * @param $xliff_trans_unit
+     * @param $state
+     * @param $stateQualifier
      *
      * @return bool|mixed
      * @throws NotFoundException
@@ -3302,11 +3342,23 @@ class ProjectManager {
      * @throws \TaskRunner\Exceptions\EndQueueException
      * @throws \TaskRunner\Exceptions\ReQueueException
      */
-    private function __isTranslated( $source, $target, $xliff_trans_unit ) {
+    private function __isTranslated( $source, $target, $xliff_trans_unit, $state = null, $stateQualifier = null ) {
+
+        // ignore translations for fuzzy matches (xliff 1.2)
+        if($stateQualifier !== null){
+            if(Constants_XliffTranslationStatus::isFuzzyMatch($stateQualifier)){
+                return true;
+            }
+        }
+
+        if($state !== null){
+            return !Constants_XliffTranslationStatus::isNew($state);
+        }
+
         if ( $source != $target ) {
 
             // evaluate if different source and target should be considered translated
-            $differentSourceAndTargetIsTranslated = ( empty( $target ) ) ? false : true;
+            $differentSourceAndTargetIsTranslated = !empty( $target );
             $differentSourceAndTargetIsTranslated = $this->features->filter(
                 'filterDifferentSourceAndTargetIsTranslated',
                 $differentSourceAndTargetIsTranslated, $this->projectStructure, $xliff_trans_unit

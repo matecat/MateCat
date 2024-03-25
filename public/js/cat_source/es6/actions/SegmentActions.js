@@ -1,5 +1,6 @@
 import Cookies from 'js-cookie'
-import _ from 'lodash'
+import {each, forEach, isUndefined} from 'lodash'
+import {debounce} from 'lodash/function'
 
 import AppDispatcher from '../stores/AppDispatcher'
 import SegmentConstants from '../constants/SegmentConstants'
@@ -7,12 +8,10 @@ import EditAreaConstants from '../constants/EditAreaConstants'
 import CatToolConstants from '../constants/CatToolConstants'
 import SegmentStore from '../stores/SegmentStore'
 import TranslationMatches from '../components/segments/utils/translationMatches'
-import TagUtils from '../utils/tagUtils'
 import OfflineUtils from '../utils/offlineUtils'
 import CommonUtils from '../utils/commonUtils'
 import SegmentUtils from '../utils/segmentUtils'
 import CopySourceModal from '../components/modals/CopySourceModal'
-import {unescapeHTMLLeaveTags} from '../components/segments/utils/DraftMatecatUtils/textUtils'
 import CatToolActions from './CatToolActions'
 import ConfirmMessageModal from '../components/modals/ConfirmMessageModal'
 import {getGlossaryForSegment} from '../api/getGlossaryForSegment'
@@ -31,8 +30,19 @@ import {getGlossaryCheck} from '../api/getGlossaryCheck'
 import SearchUtils from '../components/header/cattol/search/searchUtils'
 import CatToolStore from '../stores/CatToolStore'
 import {toggleTagProjectionJob} from '../api/toggleTagProjectionJob'
+import DraftMatecatUtils from '../components/segments/utils/DraftMatecatUtils'
+import {deleteSegmentIssue as deleteSegmentIssueApi} from '../api/deleteSegmentIssue'
+import SegmentsFilterUtil from '../components/header/cattol/segment_filter/segment_filter'
+import {getSegmentsIssues} from '../api/getSegmentsIssues'
+import {sendSegmentVersionIssue} from '../api/sendSegmentVersionIssue'
+import {getSegmentVersionsIssues} from '../api/getSegmentVersionsIssues'
+import {sendSegmentVersionIssueComment} from '../api/sendSegmentVersionIssueComment'
 
 const SegmentActions = {
+  localStorageCommentsClosed:
+    'commentsPanelClosed-' + config.id_job + config.password,
+  localStorageReviewPanelClosed:
+    'issuePanelClosed-' + config.id_job + config.password,
   /********* SEGMENTS *********/
   renderSegments: function (segments, idToOpen) {
     AppDispatcher.dispatch({
@@ -124,7 +134,6 @@ const SegmentActions = {
 
   openSegment: function (sid, wasOriginatedFromBrowserHistory = false) {
     const segment = SegmentStore.getSegmentByIdToJS(sid)
-
     if (segment) {
       //Check first if the segment is in the view
       if (UI.isReadonlySegment(segment) && !SearchUtils.searchEnabled) {
@@ -175,7 +184,7 @@ const SegmentActions = {
     if (SegmentStore.getCurrentSegment())
       this.scrollToSegment(SegmentStore.getCurrentSegment().sid)
   },
-  scrollToSegment: function (sid, callback) {
+  scrollToSegment: function (sid, callback = null) {
     const segment = SegmentStore.getSegmentByIdToJS(sid)
     if (segment) {
       AppDispatcher.dispatch({
@@ -226,6 +235,116 @@ const SegmentActions = {
         status: status,
       })
     }
+  },
+
+  clickOnApprovedButton: function (segment, goToNextUnapproved) {
+    // the event click: 'A.APPROVED' i need to specify the tag a and not only the class
+    // because of the event is triggered even on download button
+    const sid = segment.sid
+
+    const getSegmentRevisionIssues = (segment, revisionNumber) => {
+      let issues = []
+      if (segment.versions && segment.versions.length > 0) {
+        forEach(segment.versions, (version) => {
+          if (version.issues && version.issues.length > 0) {
+            forEach(version.issues, (issue) => {
+              if (issue.revision_number === revisionNumber) {
+                issues.push(issue)
+              }
+            })
+          }
+        })
+      }
+      return issues
+    }
+
+    const issues = getSegmentRevisionIssues(segment, config.revisionNumber)
+
+    /* If segment is modified and there aren't issues and is not an ICE force to add an Issue.
+       If is an ICE we allow to change the translation because is not possible to add an issue
+     */
+
+    if (
+      config.isReview &&
+      !segment.splitted &&
+      segment.modified &&
+      issues.length === 0 &&
+      segment.ice_locked !== '1'
+    ) {
+      SegmentActions.openIssuesPanel({sid: segment.sid}, true)
+      setTimeout(() => SegmentActions.showIssuesMessage(segment.sid, 1))
+      return
+    }
+
+    SegmentActions.removeClassToSegment(sid, 'modified')
+
+    const afterApproveFn = () => {
+      if (goToNextUnapproved) {
+        if (segment.revision_number > 1) {
+          SegmentActions.openNextApproved()
+        } else {
+          SegmentActions.gotoNextTranslatedSegment()
+        }
+      } else {
+        SegmentActions.gotoNextSegment(sid)
+      }
+    }
+
+    UI.setTimeToEdit(sid)
+    UI.changeStatus(segment, 'approved', afterApproveFn) // this does < setTranslation
+
+    // Lock the segment if it's approved in a second pass but was previously approved in first revision
+    if (config.revisionNumber > 1) {
+      CommonUtils.removeFromStorage('unlocked-' + sid)
+    }
+  },
+  openNextApproved: function (sid) {
+    sid = sid || UI.currentSegmentId
+    const nextApprovedSegment = SegmentStore.getNextSegment(
+      sid,
+      null,
+      9,
+      1,
+      true,
+    )
+    const nextApprovedSegmentInPrevious = SegmentStore.getNextSegment(
+      -1,
+      null,
+      9,
+      1,
+      true,
+    )
+    // find in next segments
+    if (nextApprovedSegment) {
+      SegmentActions.openSegment(nextApprovedSegment.sid)
+    } else {
+      // find in not loaded segments or go to the next approved
+      SegmentActions.openSegment(
+        UI.nextUntranslatedSegmentIdByServer
+          ? UI.nextUntranslatedSegmentIdByServer
+          : nextApprovedSegmentInPrevious.sid,
+      )
+    }
+  },
+  /**
+   * After User click on Translated or T+>> Button
+   * @param segment
+   * @param goToNextUntranslated
+   */
+  clickOnTranslatedButton: function (segment, goToNextUntranslated) {
+    SegmentActions.removeClassToSegment(segment.sid, 'modified')
+
+    UI.setTimeToEdit(segment.sid)
+
+    const afterTranslateFn = () => {
+      if (!goToNextUntranslated) {
+        SegmentActions.gotoNextSegment() //Others functionality override this function
+      } else {
+        SegmentActions.gotoNextUntranslatedSegment()
+      }
+    }
+
+    UI.changeStatus(segment, 'translated', afterTranslateFn)
   },
 
   setHeaderPercentage: function (sid, fid, perc, className, createdBy) {
@@ -306,7 +425,7 @@ const SegmentActions = {
     if (!currentSegment) return
 
     var tagProjectionEnabled =
-      TagUtils.hasDataOriginalTags(currentSegment.segment) &&
+      DraftMatecatUtils.hasDataOriginalTags(currentSegment.segment) &&
       !currentSegment.tagged
     if (SegmentUtils.checkTPEnabled() && tagProjectionEnabled) {
       SegmentActions.setSegmentAsTagged(
@@ -368,7 +487,7 @@ const SegmentActions = {
       type: type,
     })
   },
-  selectNextSegmentDebounced: _.debounce(() => {
+  selectNextSegmentDebounced: debounce(() => {
     SegmentActions.selectNextSegment()
   }, 100),
 
@@ -379,7 +498,7 @@ const SegmentActions = {
       direction: 'next',
     })
   },
-  selectPrevSegmentDebounced: _.debounce(() => {
+  selectPrevSegmentDebounced: debounce(() => {
     SegmentActions.selectPrevSegment()
   }, 100),
   selectPrevSegment: function (sid) {
@@ -402,7 +521,6 @@ const SegmentActions = {
       let source = currentSegment.segment
       let sid = currentSegment.sid
       // Escape html
-      source = unescapeHTMLLeaveTags(source)
       SegmentActions.replaceEditAreaTextContent(sid, source)
       SegmentActions.modifiedTranslation(sid, true)
       SegmentActions.getSegmentsQa(currentSegment)
@@ -569,7 +687,7 @@ const SegmentActions = {
     })
   },
   copyTagProjectionInCurrentSegment(sid, translation) {
-    if (!_.isUndefined(translation) && translation.length > 0) {
+    if (!isUndefined(translation) && translation.length > 0) {
       SegmentActions.replaceEditAreaTextContent(sid, translation)
     }
   },
@@ -688,7 +806,9 @@ const SegmentActions = {
     if (shouldRefresh) {
       getGlossaryForSegment({
         idSegment: sid,
-        source: text,
+        source: DraftMatecatUtils.removePlaceholdersForGlossary(
+          DraftMatecatUtils.removeTagsFromText(text),
+        ),
       }).catch(() => {
         OfflineUtils.failedConnection(sid, 'getGlossaryForSegment')
       })
@@ -732,7 +852,9 @@ const SegmentActions = {
         //Response inside SSE Channel
         getGlossaryForSegment({
           idSegment: request.sid,
-          source: request.text,
+          source: DraftMatecatUtils.removePlaceholdersForGlossary(
+            DraftMatecatUtils.removeTagsFromText(request.text),
+          ),
         }).catch(() => {
           OfflineUtils.failedConnection(request.sid, 'getGlossaryForSegment')
         })
@@ -955,22 +1077,36 @@ const SegmentActions = {
   },
 
   openIssuesPanel: function (data, openSegment) {
-    if (UI.openIssuesPanel(data, openSegment)) {
-      AppDispatcher.dispatch({
-        actionType: SegmentConstants.OPEN_ISSUES_PANEL,
-        data: data,
-      })
+    const segment = SegmentStore.getSegmentByIdToJS(data.sid)
+    const canOpenSegment =
+      segment && segment.status !== 'NEW' && segment.status !== 'DRAFT'
+    if (segment && !canOpenSegment) {
+      return false
     }
+    localStorage.setItem(this.localStorageReviewPanelClosed, false)
+    window.dispatchEvent(new Event('resize'))
+    if (data && openSegment) {
+      SegmentActions.openSegment(data.sid)
+      SegmentActions.scrollToSegment(data.sid)
+      window.setTimeout(
+        function (data) {
+          SegmentActions.scrollToSegment(data.sid)
+        },
+        500,
+        data,
+      )
+    }
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.OPEN_ISSUES_PANEL,
+      data: data,
+    })
   },
 
   closeIssuesPanel: function () {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.CLOSE_ISSUES_PANEL,
     })
-    $('body').removeClass(
-      'side-tools-opened review-side-panel-opened review-extended-opened',
-    )
-    localStorage.setItem(ReviewExtended.localStoragePanelClosed, true)
+    localStorage.setItem(this.localStorageReviewPanelClosed, true)
   },
 
   closeSegmentIssuePanel: function (sid) {
@@ -978,7 +1114,7 @@ const SegmentActions = {
       actionType: SegmentConstants.CLOSE_ISSUES_PANEL,
       sid: sid,
     })
-    localStorage.setItem(ReviewExtended.localStoragePanelClosed, true)
+    localStorage.setItem(this.localStorageReviewPanelClosed, true)
     this.scrollToSegment(sid)
   },
 
@@ -991,7 +1127,34 @@ const SegmentActions = {
   },
 
   submitIssue: function (sid, data) {
-    return UI.submitIssues(sid, data)
+    const promise = sendSegmentVersionIssue(sid, {
+      ...data,
+    })
+    promise
+      .then(() => {
+        this.getSegmentVersionsIssues(sid)
+        CatToolActions.reloadQualityReport()
+      })
+      .catch(() => {
+        //todo Capture Error
+        console.log('Error creating issue')
+      })
+
+    return promise
+  },
+
+  getSegmentVersionsIssues: function (segmentId) {
+    const segment = SegmentStore.getSegmentByIdToJS(segmentId)
+    if (segment) {
+      getSegmentVersionsIssues(segmentId)
+        .then((response) => {
+          SegmentActions.addTranslationIssuesToSegment(
+            segmentId,
+            response.versions,
+          )
+        })
+        .catch(() => {})
+    }
   },
 
   issueAdded: function (sid, issueId) {
@@ -1010,10 +1173,19 @@ const SegmentActions = {
     })
   },
 
-  addPreloadedIssuesToSegment: function (issues) {
-    AppDispatcher.dispatch({
-      actionType: SegmentConstants.ADD_SEGMENT_PRELOADED_ISSUES,
-      versionsIssues: issues,
+  addPreloadedIssuesToSegment: function () {
+    getSegmentsIssues().then((data) => {
+      let versionsIssues = {}
+      each(data.issues, (issue) => {
+        if (!versionsIssues[issue.id_segment]) {
+          versionsIssues[issue.id_segment] = []
+        }
+        versionsIssues[issue.id_segment].push(issue)
+      })
+      AppDispatcher.dispatch({
+        actionType: SegmentConstants.ADD_SEGMENT_PRELOADED_ISSUES,
+        versionsIssues: versionsIssues,
+      })
     })
   },
 
@@ -1025,8 +1197,17 @@ const SegmentActions = {
     })
   },
 
-  deleteIssue: function (issue, sid, dontShowMessage) {
-    UI.deleteIssue(issue, sid, dontShowMessage)
+  deleteIssue: function (issue, sid) {
+    deleteSegmentIssueApi({
+      idSegment: sid,
+      idIssue: issue.id,
+    })
+      .then(() => {
+        SegmentActions.confirmDeletedIssue(sid, issue.id)
+        this.getSegmentVersionsIssues(sid)
+        CatToolActions.reloadQualityReport()
+      })
+      .catch(() => {})
   },
 
   confirmDeletedIssue: function (sid, issue_id) {
@@ -1037,8 +1218,12 @@ const SegmentActions = {
     })
   },
 
-  submitComment: function (sid, idIssue, data) {
-    return UI.submitComment(sid, idIssue, data)
+  submitIssueComment: (id_segment, id_issue, data) => {
+    const promise = sendSegmentVersionIssueComment(id_segment, id_issue, data)
+    promise.then(() => {
+      SegmentActions.getSegmentVersionsIssues(id_segment)
+    })
+    return promise
   },
 
   showApproveAllModalWarnirng: function () {
@@ -1200,19 +1385,69 @@ const SegmentActions = {
       actionType: SegmentConstants.OPEN_COMMENTS,
       sid: sid,
     })
+    localStorage.setItem(this.localStorageCommentsClosed, false)
   },
   closeSegmentComment(sid) {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.CLOSE_COMMENTS,
       sid: sid,
     })
+    localStorage.setItem(this.localStorageCommentsClosed, true)
   },
   gotoNextSegment() {
-    let next = SegmentStore.getNextSegment()
-    if (next) {
-      SegmentActions.openSegment(next.sid)
+    if (SegmentsFilterUtil.enabled() && SegmentsFilterUtil.filtering()) {
+      SegmentsFilterUtil.gotoNextSegment(SegmentStore.getCurrentSegmentId())
     } else {
-      this.closeSegment()
+      let next = SegmentStore.getNextSegment()
+      if (next) {
+        SegmentActions.openSegment(next.sid)
+      } else {
+        this.closeSegment()
+      }
+    }
+  },
+  /**
+   * Search for the next translated segment to propose for revision.
+   * This function searches in the current UI first, then falls back
+   * to invoke the server and eventually reload the page to the new
+   * URL.
+   *
+   */
+  gotoNextTranslatedSegment(sid) {
+    sid = sid || SegmentStore.getCurrentSegmentId()
+    // this is expected behaviour in review
+    // change this if we are filtering, go to the next
+    // segment, assuming the sample is what we want to revise.
+    if (SegmentsFilterUtil.enabled() && SegmentsFilterUtil.filtering()) {
+      SegmentsFilterUtil.gotoNextTranslatedSegment(sid)
+    } else {
+      const nextTranslatedSegment = SegmentStore.getNextSegment(
+        sid,
+        null,
+        7,
+        null,
+        true,
+      )
+      const nextTranslatedSegmentInPrevious = SegmentStore.getNextSegment(
+        -1,
+        null,
+        7,
+        null,
+        true,
+      )
+      // find in next segments
+      if (nextTranslatedSegment) {
+        SegmentActions.openSegment(nextTranslatedSegment.sid)
+      } else if (
+        UI.nextUntranslatedSegmentIdByServer ||
+        nextTranslatedSegmentInPrevious
+      ) {
+        SegmentActions.openSegment(
+          UI.nextUntranslatedSegmentIdByServer
+            ? UI.nextUntranslatedSegmentIdByServer
+            : nextTranslatedSegmentInPrevious.sid,
+        )
+      }
     }
   },
   gotoNextUntranslatedSegment() {
@@ -1284,18 +1519,15 @@ const SegmentActions = {
   getSegmentsQa: (segment) => {
     if (!segment) return
 
-    var segment_status = segment.status
-
-    const src_content = TagUtils.prepareTextToSend(segment.updatedSource)
-    const trg_content = TagUtils.prepareTextToSend(segment.translation)
+    const {status, translation, updatedSource} = segment
 
     getLocalWarnings({
       id: segment.sid,
       id_job: config.id_job,
       password: config.password,
-      src_content: src_content,
-      trg_content: trg_content,
-      segment_status: segment_status,
+      src_content: updatedSource,
+      trg_content: translation,
+      segment_status: status,
       characters_counter: segment.charactersCounter ?? 0,
     })
       .then((data) => {
@@ -1353,13 +1585,15 @@ const SegmentActions = {
         resolve()
       }
     }).then(() => {
-      if (CatToolStore.getHaveKeysGlossary() && trg_content) {
+      if (CatToolStore.getHaveKeysGlossary() && translation) {
         const jobTmKeys = CatToolStore.getJobTmKeys()
         getGlossaryCheck({
           idSegment: segment.sid,
-          target: trg_content,
-          source: src_content,
+          target: DraftMatecatUtils.removeTagsFromText(translation),
+          source: DraftMatecatUtils.removeTagsFromText(updatedSource),
           keys: jobTmKeys.map(({key}) => key),
+        }).catch((error) => {
+          console.log('Glossary check failed', error)
         })
       }
     })
@@ -1407,6 +1641,12 @@ const SegmentActions = {
       actionType: SegmentConstants.OPEN_GLOSSARY_FORM_PREFILL,
       sid,
       ...filledFields,
+    })
+  },
+  focusTags: function (tagsSelected) {
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.FOCUS_TAGS,
+      tagsSelected,
     })
   },
 }

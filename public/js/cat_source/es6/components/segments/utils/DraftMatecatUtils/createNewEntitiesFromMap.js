@@ -1,5 +1,6 @@
 import matchTag from './matchTag'
 import {Modifier, SelectionState, ContentState} from 'draft-js'
+import {decodeHtmlEntities} from './tagUtils'
 
 /**
  *
@@ -15,7 +16,7 @@ const createNewEntitiesFromMap = (
   plainText = '',
   sourceTagMap,
 ) => {
-  const excludeReplaceZWSP = ['nbsp']
+  const excludeReplaceZWSP = []
   // Compute tag range ( all tags are included, also nbsp, tab, CR and LF)
   const tagRange = matchTag(plainText) // absolute offset
   // Apply each entity to the block where it belongs

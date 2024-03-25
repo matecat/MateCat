@@ -1,5 +1,3 @@
-import _ from 'lodash'
-
 import GlossaryComponent from '../../GlossaryComponents/GlossaryHighlight.component'
 import TextUtils from '../../../../utils/textUtils.js'
 import * as DraftMatecatConstants from './editorConstants'
@@ -26,7 +24,9 @@ export const activateGlossary = (glossary, sid) => {
     glossaryArray.forEach((item) => {
       if (!item.missingTerm) {
         const arrayMatches = item.matching_words
-        matches = [...matches, ...arrayMatches]
+        matches = [...matches, ...arrayMatches].sort((a, b) =>
+          a.toLowerCase() < b.toLowerCase() ? 1 : -1,
+        ) // Order words alphabetically descending to prioritize composite terms ex. ['Guest favorite', 'guest']
       }
     })
     matches = [...new Set(matches)]

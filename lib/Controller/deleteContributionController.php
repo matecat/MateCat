@@ -4,6 +4,7 @@ use Matecat\SubFiltering\MateCatFilter;
 
 class deleteContributionController extends ajaxController {
 
+    protected $id_segment;
     protected $id_job;
     protected $password;
     private   $id_match;
@@ -19,6 +20,7 @@ class deleteContributionController extends ajaxController {
         parent::__construct();
 
         $filterArgs = [
+                'id_segment'       => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
                 'source_lang'      => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
                 'target_lang'      => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
                 'seg'              => [ 'filter' => FILTER_UNSAFE_RAW ],
@@ -31,11 +33,12 @@ class deleteContributionController extends ajaxController {
 
         $__postInput = filter_input_array( INPUT_POST, $filterArgs );
 
+        $this->id_segment        = $__postInput[ 'id_segment' ];
         $this->source_lang       = $__postInput[ 'source_lang' ];
         $this->target_lang       = $__postInput[ 'target_lang' ];
         $this->source            = trim( $__postInput[ 'seg' ] );
         $this->target            = trim( $__postInput[ 'tra' ] );
-        $this->id_translator     = trim( $__postInput[ 'id_translator' ] ); //no more used
+        $this->id_translator     = (isset($__postInput[ 'id_translator' ]) ? trim( $__postInput[ 'id_translator' ] ) : null );
         $this->password          = trim( $__postInput[ 'password' ] );
         $this->received_password = trim( $__postInput[ 'current_password' ] );
         $this->id_match          = $__postInput[ 'id_match' ];
@@ -87,19 +90,11 @@ class deleteContributionController extends ajaxController {
 
             if ( self::isRevision() ) {
                 $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
-            } elseif ( $this->user->email == $jobStruct[ 'owner' ] ) {
-                $tm_keys = TmKeyManagement_TmKeyManagement::getOwnerKeys( [ $tm_keys ], 'r', 'tm' );
-                $tm_keys = json_encode( $tm_keys );
             }
 
             //get TM keys with read grants
-            $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $tm_keys, 'r', 'tm', $this->user->uid, $this->userRole );
-
-            if ( is_array( $tm_keys ) && !empty( $tm_keys ) ) {
-                foreach ( $tm_keys as $tm_key ) {
-                    $config[ 'id_user' ][] = $tm_key->key;
-                }
-            }
+            $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $tm_keys, 'w', 'tm', $this->user->uid, $this->userRole );
+            $tm_keys = TmKeyManagement_TmKeyManagement::filterOutByOwnership( $tm_keys, $this->user->email, $jobStruct[ 'owner' ] );
 
         } catch ( Exception $e ) {
             $this->result[ 'errors' ][] = [ "code" => -11, "message" => "Cannot retrieve TM keys info." ];
@@ -118,6 +113,11 @@ class deleteContributionController extends ajaxController {
         if ( empty( $tm_keys ) ) {
             //try deleting anyway, it may be a public segment and it may work
             $TMS_RESULT = $tms->delete( $config );
+
+            if($TMS_RESULT){
+                $this->updateSuggestionsArray();
+            }
+
             $set_code[] = $TMS_RESULT;
         } else {
             //loop over the list of keys
@@ -125,6 +125,11 @@ class deleteContributionController extends ajaxController {
                 //issue a separate call for each key
                 $config[ 'id_user' ] = $tm_key->key;
                 $TMS_RESULT          = $tms->delete( $config );
+
+                if($TMS_RESULT){
+                    $this->updateSuggestionsArray();
+                }
+
                 $set_code[]          = $TMS_RESULT;
             }
         }
@@ -140,5 +145,25 @@ class deleteContributionController extends ajaxController {
 
     }
 
+    /**
+     * update suggestions array
+     */
+    private function updateSuggestionsArray() {
+
+        $segmentTranslation = Translations_SegmentTranslationDao::findBySegmentAndJob($this->id_segment, $this->id_job);
+        $oldSuggestionsArray = json_decode($segmentTranslation->suggestions_array);
+
+        if(!empty($oldSuggestionsArray)){
+
+            $newSuggestionsArray = [];
+            foreach ($oldSuggestionsArray as $suggestion){
+                if($suggestion->id != $this->id_match){
+                    $newSuggestionsArray[] = $suggestion;
+                }
+            }
+
+            Translations_SegmentTranslationDao::updateSuggestionsArray($this->id_segment, $newSuggestionsArray);
+        }
+    }
 
 }

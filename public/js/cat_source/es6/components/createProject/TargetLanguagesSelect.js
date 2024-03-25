@@ -21,7 +21,11 @@ export const TargetLanguagesSelect = ({history = []}) => {
   const openModal = () => setIsOpenMultiselectLanguages(true)
 
   return (
-    <div className="select-with-label__wrapper " id="target-lang" onClick={openModal}>
+    <div
+      className="select-with-label__wrapper "
+      id="target-lang"
+      onClick={openModal}
+    >
       <label>To</label>
       <div
         className="select-with-icon__wrapper"

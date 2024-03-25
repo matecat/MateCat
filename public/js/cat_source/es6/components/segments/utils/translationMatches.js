@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import {isUndefined} from 'lodash'
 
 import SegmentUtils from '../../../utils/segmentUtils'
 import CommonUtils from '../../../utils/commonUtils'
@@ -9,7 +9,6 @@ import SegmentActions from '../../../actions/SegmentActions'
 import SegmentStore from '../../../stores/SegmentStore'
 import {getContributions} from '../../../api/getContributions'
 import {deleteContribution} from '../../../api/deleteContribution'
-import TagUtils from '../../../utils/tagUtils'
 
 let TranslationMatches = {
   copySuggestionInEditarea: function (segment, index, translation) {
@@ -19,10 +18,7 @@ let TranslationMatches = {
     translation = translation ? translation : matchToUse.translation
     var percentageClass = this.getPercentuageClass(matchToUse.match)
     if ($.trim(translation) !== '') {
-      SegmentActions.replaceEditAreaTextContent(
-        segment.sid,
-        TagUtils.transformTextFromBe(translation),
-      )
+      SegmentActions.replaceEditAreaTextContent(segment.sid, translation)
       SegmentActions.setHeaderPercentage(
         segment.sid,
         segment.id_file,
@@ -43,7 +39,7 @@ let TranslationMatches = {
   renderContributions: function (data, sid) {
     if (!data) return true
     var segmentObj = SegmentStore.getSegmentByIdToJS(sid)
-    if (_.isUndefined(segmentObj)) return
+    if (isUndefined(segmentObj)) return
 
     SegmentActions.setSegmentContributions(
       segmentObj.sid,
@@ -64,7 +60,7 @@ let TranslationMatches = {
     if (
       matches &&
       matches.length > 0 &&
-      _.isUndefined(matches[0].error) &&
+      isUndefined(matches[0].error) &&
       (parseInt(match) > 70 || match === 'MT')
     ) {
       var editareaLength = segmentObj.translation.length
@@ -80,7 +76,7 @@ let TranslationMatches = {
         translation = currentContribution.translation
         if (SegmentUtils.checkCurrentSegmentTPEnabled(segmentObj)) {
           if (parseInt(match) !== 100) {
-            translation = DraftMatecatUtils.cleanSegmentString(translation)
+            translation = DraftMatecatUtils.removeTagsFromText(translation)
           } else {
             SegmentActions.disableTPOnSegment(segmentObj)
           }
@@ -167,7 +163,7 @@ let TranslationMatches = {
       return $.Deferred().resolve()
     }
 
-    if (_.isUndefined(config.id_client)) {
+    if (isUndefined(config.id_client)) {
       setTimeout(function () {
         TranslationMatches.getContribution(segmentSid, next)
       }, 3000)
@@ -190,7 +186,10 @@ let TranslationMatches = {
   processContributions: function (data, sid) {
     if (config.translation_matches_enabled && data) {
       if (!data) return true
-      this.renderContributions(data, sid)
+      const validMatches = data.matches.filter(
+        ({segment, translation}) => segment && translation,
+      )
+      this.renderContributions({...data, matches: validMatches}, sid)
     }
   },
 
@@ -202,11 +201,12 @@ let TranslationMatches = {
     SegmentActions.setSegmentContributions(UI.getSegmentId(segment), [], errors)
   },
 
-  setDeleteSuggestion: function (source, target, id) {
+  setDeleteSuggestion: function (source, target, id, sid) {
     return deleteContribution({
       source,
       target,
       id,
+      sid,
     }).catch(() => {
       OfflineUtils.failedConnection(0, 'deleteContribution')
     })
@@ -242,4 +242,4 @@ let TranslationMatches = {
   },
 }
 
-module.exports = TranslationMatches
+export default TranslationMatches

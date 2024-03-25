@@ -1,6 +1,6 @@
 import React from 'react'
 import Immutable from 'immutable'
-import _ from 'lodash'
+import {isUndefined} from 'lodash'
 import TEXT_UTILS from '../../utils/textUtils'
 
 class SegmentFooterTabMessages extends React.Component {
@@ -10,30 +10,33 @@ class SegmentFooterTabMessages extends React.Component {
     this.excludeMatchingNotesRegExp
   }
 
+  getFilteredMetadataKeys() {
+    return this.props.metadata.filter(
+      ({meta_key}) => meta_key !== 'sizeRestriction',
+    )
+  }
+  getNoteContentStructure(note) {
+    return TEXT_UTILS.getContentWithAllowedLinkRedirect(note).length > 1
+      ? TEXT_UTILS.getContentWithAllowedLinkRedirect(note).map(
+          (content, index) =>
+            typeof content === 'object' && content.isLink ? (
+              <a key={index} href={content.link} target="_blank">
+                {content.link}
+              </a>
+            ) : (
+              content
+            ),
+        )
+      : note
+  }
   getNotes() {
     let notesHtml = []
-    let self = this
-
-    const getNoteContentStructure = (note) =>
-      TEXT_UTILS.getContentWithAllowedLinkRedirect(note).length > 1
-        ? TEXT_UTILS.getContentWithAllowedLinkRedirect(note).map(
-            (content, index) =>
-              typeof content === 'object' && content.isLink ? (
-                <a key={index} href={content.link} target="_blank">
-                  {content.link}
-                </a>
-              ) : (
-                content
-              ),
-          )
-        : note
-
     if (this.props.notes) {
-      this.props.notes.forEach(function (item, index) {
+      this.props.notes.forEach((item, index) => {
         if (item.note && item.note !== '') {
           if (
-            self.excludeMatchingNotesRegExp &&
-            self.excludeMatchingNotesRegExp.test(item.note)
+            this.excludeMatchingNotesRegExp &&
+            this.excludeMatchingNotesRegExp.test(item.note)
           ) {
             return
           }
@@ -41,7 +44,11 @@ class SegmentFooterTabMessages extends React.Component {
           let html = (
             <div className="note" key={'note-' + index}>
               <span className="note-label">Note: </span>
-              <span>{getNoteContentStructure(note)}</span>
+              <span
+                dangerouslySetInnerHTML={{
+                  __html: this.getNoteContentStructure(note),
+                }}
+              />
             </div>
           )
           notesHtml.push(html)
@@ -96,16 +103,28 @@ class SegmentFooterTabMessages extends React.Component {
     }
 
     // metadata notes
-    if (this.props.metadata?.length > 0) {
+    const metadata =
+      typeof this.getFilteredMetadataKeys === 'function'
+        ? this.getFilteredMetadataKeys()
+        : this.props.metadata.filter(
+            (item) => item.meta_key !== 'sizeRestriction',
+          )
+    if (metadata?.length > 0) {
       notesHtml.push(this.getMetadataNoteTemplate())
     }
     return notesHtml
   }
 
   getMetadataNoteTemplate() {
+    const metadata =
+      typeof this.getFilteredMetadataKeys === 'function'
+        ? this.getFilteredMetadataKeys()
+        : this.props.metadata
     let metadataNotes = []
-    for (const [index, item] of this.props.metadata.entries()) {
-      const {meta_key: label, meta_value: body} = item
+    for (const [index, item] of metadata.entries()) {
+      const {meta_key, meta_value: body} = item
+      const label = meta_key
+
       metadataNotes.push(
         <div className="note" key={`meta-${index}`}>
           <span className="note-label">{label}: </span>
@@ -130,8 +149,8 @@ class SegmentFooterTabMessages extends React.Component {
 
   shouldComponentUpdate(nextProps) {
     return (
-      _.isUndefined(nextProps.notes) ||
-      _.isUndefined(this.props.note) ||
+      isUndefined(nextProps.notes) ||
+      isUndefined(this.props.note) ||
       !Immutable.fromJS(this.props.notes).equals(
         Immutable.fromJS(nextProps.notes),
       ) ||

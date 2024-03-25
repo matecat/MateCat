@@ -114,9 +114,7 @@ class TMAnalysisWorker extends AbstractWorker {
          */
         $this->_matches = $this->_getMatches( $queueElement );
 
-
         $this->_doLog( "--- (Worker " . $this->_workerPid . ") : Segment {$queueElement->params->id_segment} - Job {$queueElement->params->id_job} matches retrieved." );
-        $this->_tryRealignTagID( $queueElement );
 
         /**
          * @throws ReQueueException
@@ -151,23 +149,23 @@ class TMAnalysisWorker extends AbstractWorker {
      */
     protected function _updateRecord( QueueElement $queueElement ) {
 
+        $firstAvailableNotMTMatch = $this->getFirstAvailableNotMTMatch();
         $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new \FeatureSet();
         $filter     = MateCatFilter::getInstance( $featureSet, $queueElement->params->source, $queueElement->params->target, [] );
-        $suggestion = $this->_matches[ 0 ][ 'raw_translation' ]; //No layering needed
+        $suggestion = $firstAvailableNotMTMatch[ 'raw_translation' ]; //No layering needed
 
-        $suggestion_match  = $this->_matches[ 0 ][ 'match' ];
-        $suggestion_json   = json_encode( $this->_matches );
-        $suggestion_source = $this->_matches[ 0 ][ 'created_by' ];
+        $suggestion_match  = $firstAvailableNotMTMatch[ 'match' ];
+        $suggestion_source = $firstAvailableNotMTMatch[ 'created_by' ];
 
         $equivalentWordMapping = json_decode( $queueElement->params->payable_rates, true );
 
         $new_match_type = $this->_getNewMatchType(
-                ( stripos( $this->_matches[ 0 ][ 'created_by' ], "MT" ) !== false ? "MT" : $suggestion_match ),
-                $queueElement->params->match_type,
-                $equivalentWordMapping,
-                /* is Public TM */
-                empty( $this->_matches[ 0 ][ 'memory_key' ] ),
-                isset( $this->_matches[ 0 ][ 'ICE' ] ) && $this->_matches[ 0 ][ 'ICE' ]
+            ( stripos( $firstAvailableNotMTMatch[ 'created_by' ], "MT" ) !== false ? "MT" : $suggestion_match ),
+            $queueElement->params->match_type,
+            $equivalentWordMapping,
+            /* is Public TM */
+            empty( $firstAvailableNotMTMatch[ 'memory_key' ] ),
+            isset( $firstAvailableNotMTMatch[ 'ICE' ] ) && $firstAvailableNotMTMatch[ 'ICE' ]
         );
 
         $eqWordMapping = (isset($equivalentWordMapping[ $new_match_type ])) ? $equivalentWordMapping[ $new_match_type ] : null;
@@ -185,7 +183,12 @@ class TMAnalysisWorker extends AbstractWorker {
             $standard_words = $equivalentWordMapping[ "NO_MATCH" ] * $queueElement->params->raw_word_count / 100;
 
             // realign MT Spaces
-            $check = $this->initPostProcess( $this->_matches[ 0 ][ 'raw_segment' ], $suggestion, $queueElement->params->source, $queueElement->params->target );
+            $check = $this->initPostProcess(
+                $firstAvailableNotMTMatch[ 'raw_segment' ],
+                $suggestion,
+                $queueElement->params->source,
+                $queueElement->params->target
+            );
             $check->realignMTSpaces();
 
             //this should every time be ok because MT preserve tags, but we use the check on the errors
@@ -204,21 +207,37 @@ class TMAnalysisWorker extends AbstractWorker {
 
         }
 
-        ( !empty( $this->_matches[ 0 ][ 'sentence_confidence' ] ) ?
-                $mt_qe = floatval( $this->_matches[ 0 ][ 'sentence_confidence' ] ) :
-                $mt_qe = null
+        ( !empty( $firstAvailableNotMTMatch[ 'sentence_confidence' ] ) ?
+            $mt_qe = floatval( $firstAvailableNotMTMatch[ 'sentence_confidence' ] ) :
+            $mt_qe = null
         );
 
         // perform a consistency check as setTranslation does
         // in order to add spaces to translation if needed
-        $check = $this->initPostProcess( $queueElement->params->segment, $suggestion, $queueElement->params->source, $queueElement->params->target );
+        $check = $this->initPostProcess(
+            $queueElement->params->segment,
+            $suggestion,
+            $queueElement->params->source,
+            $queueElement->params->target
+        );
         $check->performConsistencyCheck();
         $suggestion = $check->getTargetSeg();
         $err_json2  = ( $check->thereAreErrors() ) ? $check->getErrorsJSON() : '';
 
-        $suggestion = $filter->fromLayer1ToLayer0( $suggestion );
+        $suggestion = $filter->fromLayer2ToLayer0( $suggestion );
 
         $segment = ( new \Segments_SegmentDao() )->getById( $queueElement->params->id_segment );
+
+        foreach ( $this->_matches as $k => $m ) {
+            $this->_matches[ $k ][ 'raw_segment' ] = $filter->fromLayer2ToLayer0( $this->_matches[ $k ][ 'raw_segment' ] );
+            $this->_matches[ $k ][ 'segment' ] = $filter->fromLayer2ToLayer0( html_entity_decode($this->_matches[ $k ][ 'segment' ]) );
+            $this->_matches[ $k ][ 'translation' ] = $filter->fromLayer2ToLayer0( html_entity_decode($this->_matches[ $k ][ 'translation' ]) );
+            $this->_matches[ $k ][ 'raw_translation' ] = $filter->fromLayer2ToLayer0( $this->_matches[ $k ][ 'raw_translation' ] );
+        }
+
+        \Log::doJsonLog("PIPPO . " . json_encode($this->_matches));
+
+        $suggestion_json   = json_encode( $this->_matches );
 
         $tm_data                             = [];
         $tm_data[ 'id_job' ]                 = $queueElement->params->id_job;
@@ -264,10 +283,30 @@ class TMAnalysisWorker extends AbstractWorker {
 
 
         $this->featureSet->run( 'postTMSegmentAnalyzed', [
-                'tm_data'       => $tm_data,
-                'queue_element' => $queueElement
+            'tm_data'       => $tm_data,
+            'queue_element' => $queueElement
         ] );
 
+    }
+
+    /**
+     * Get the first available not MT match
+     * @return mixed
+     */
+    private function getFirstAvailableNotMTMatch()
+    {
+        foreach($this->_matches as $match){
+            // return $match if not MT and quality >= 75
+            if(
+                stripos( $match[ 'created_by' ], "MT" ) === false and
+                (int)$match[ 'match' ] >= 75
+            ){
+                return $match;
+            }
+        }
+
+        // return the first match available
+        return $this->_matches[0];
     }
 
     /**
@@ -431,11 +470,21 @@ class TMAnalysisWorker extends AbstractWorker {
             }
         }
 
+        // if MM says is ICE, return ICE
+        if($isICE){
+            return $tm_match_fuzzy_band;
+        }
+
+        // if there is a repetition with a 100% match type, return 100%
+        if ( $ind == "100" && $fast_match_type == 'REPETITIONS' ) {
+            return $tm_match_fuzzy_band;
+        }
+
         /**
          * Apply the TM discount rate and/or force the value obtained from TM for
          * matches between 50%-74% because is never returned in Fast Analysis; it's rate is set default as equals to NO_MATCH
          */
-        if ( $tm_rate_paid < $fast_rate_paid || $fast_match_type == "NO_MATCH" ) {
+        if( in_array( $fast_match_type, ['INTERNAL','REPETITIONS'] ) && $tm_rate_paid <= $fast_rate_paid || $fast_match_type == "NO_MATCH" ){
             return $tm_match_fuzzy_band;
         }
 
@@ -581,13 +630,15 @@ class TMAnalysisWorker extends AbstractWorker {
     }
 
     /**
-     * @param Engines_AbstractEngine  $tmsEngine
-     * @param                         $_config
-     *
-     * @return Engines_Results_MyMemory_Matches[]|null
+     * @param Engines_AbstractEngine $tmsEngine
+     * @param $_config
+     * @return array|Engines_Results_MyMemory_TMS|null
      * @throws EndQueueException
      * @throws NotSupportedMTException
      * @throws ReQueueException
+     * @throws \API\V2\Exceptions\AuthenticationError
+     * @throws \Exceptions\NotFoundException
+     * @throws \Exceptions\ValidationError
      */
     protected function _getTM( Engines_AbstractEngine $tmsEngine, $_config ) {
 
@@ -630,60 +681,6 @@ class TMAnalysisWorker extends AbstractWorker {
         }
 
         return $tms_match;
-
-    }
-
-    /**
-     *  Only if this is not a MT and if it is a ( 90 =< MATCH < 100 ) try to realign tag IDs
-     *
-     * @param QueueElement $queueElement
-     *
-     * @throws DOMException
-     */
-    protected function _tryRealignTagID( QueueElement $queueElement ) {
-
-        //use the first match record
-        // ---> $this->_matches[ 0 ];
-
-        ( isset( $this->_matches[ 0 ][ 'match' ] ) ? $firstMatchVal = floatval( $this->_matches[ 0 ][ 'match' ] ) : null );
-        if ( isset( $firstMatchVal ) && $firstMatchVal >= 90 && $firstMatchVal < 100 ) {
-
-            $srcSearch    = strip_tags( $queueElement->params->segment );
-            $segmentFound = strip_tags( $this->_matches[ 0 ][ 'raw_segment' ] );
-            $srcSearch    = mb_strtolower( preg_replace( '#[\x{20}]{2,}#u', chr( 0x20 ), $srcSearch ) );
-            $segmentFound = mb_strtolower( preg_replace( '#[\x{20}]{2,}#u', chr( 0x20 ), $segmentFound ) );
-
-            $fuzzy = @levenshtein( $srcSearch, $segmentFound ) / log10( mb_strlen( $srcSearch . $segmentFound ) + 1 );
-
-            //levenshtein handle max 255 chars per string and returns -1, so fuzzy var can be less than 0 !!
-            if ( $srcSearch == $segmentFound || ( $fuzzy < 2.5 && $fuzzy > 0 ) ) {
-
-
-                //TODO check fo BUG in html encoding html_entity_decode
-                $qaRealign = new QA( $queueElement->params->segment, html_entity_decode( $this->_matches[ 0 ][ 'raw_translation' ] ) );
-                $qaRealign->setFeatureSet( $this->featureSet );
-                $qaRealign->tryRealignTagID();
-
-                $log_prepend = uniqid( '', true ) . " - SERVER REALIGN IDS PROCEDURE | ";
-                if ( !$qaRealign->thereAreErrors() ) {
-
-                    /*
-                        $this->_doLog( $log_prepend . " - Requested Segment: " . var_export( $queueElement, true ) );
-                        $this->_doLog( $log_prepend . "Fuzzy: " . $fuzzy . " - Try to Execute Tag ID Realignment." );
-                        $this->_doLog( $log_prepend . "TMS RAW RESULT:" );
-                        $this->_doLog( $log_prepend . var_export( $this->_matches[ 0 ]e, true ) );
-                        $this->_doLog( $log_prepend . "Realignment Success:" );
-                    */
-                    $this->_matches[ 0 ][ 'raw_translation' ] = $qaRealign->getTrgNormalized();
-                    $this->_matches[ 0 ][ 'match' ]           = ( $fuzzy == 0 ? '100%' : '99%' );
-
-                } else {
-                    $this->_doLog( $log_prepend . 'Realignment Failed. Skip. Segment: ' . $queueElement->params->id_segment );
-                }
-
-            }
-
-        }
 
     }
 
@@ -821,13 +818,10 @@ class TMAnalysisWorker extends AbstractWorker {
     }
 
     /**
-     * Every time one element of the project is taken from the queue, the worker try to finalize the project.
-     * Only the last worker can finalize the project by setting a lock on Redis.
-     *
      * @param $_params
-     *
-     * @throws ReQueueException
      * @throws ConnectionException
+     * @throws ReQueueException
+     * @throws \ReflectionException
      */
     protected function _tryToCloseProject( $_params ) {
 
@@ -868,12 +862,12 @@ class TMAnalysisWorker extends AbstractWorker {
             $this->_doLog( "--- (Worker $this->_workerPid) : analysis project $_project_id finished : change status to DONE" );
 
             Projects_ProjectDao::updateFields(
-                    [
-                            'status_analysis'      => \Constants_ProjectStatus::STATUS_DONE,
-                            'tm_analysis_wc'       => $project_totals[ 'eq_wc' ],
-                            'standard_analysis_wc' => $project_totals[ 'st_wc' ]
-                    ],
-                    [ 'id' => $_project_id ]
+                [
+                    'status_analysis'      => \Constants_ProjectStatus::STATUS_DONE,
+                    'tm_analysis_wc'       => $project_totals[ 'eq_wc' ],
+                    'standard_analysis_wc' => $project_totals[ 'st_wc' ]
+                ],
+                [ 'id' => $_project_id ]
             );
 
             // update chunks' standard_analysis_wc
@@ -882,9 +876,9 @@ class TMAnalysisWorker extends AbstractWorker {
 
             foreach ( $jobs as $job ) {
                 Jobs_JobDao::updateFields( [
-                        'standard_analysis_wc' => round( $project_totals[ 'st_wc' ] / $numberOfJobs )
+                    'standard_analysis_wc' => round( $project_totals[ 'st_wc' ] / $numberOfJobs )
                 ], [
-                        'id' => $job->id
+                    'id' => $job->id
                 ] );
             }
 
@@ -933,8 +927,8 @@ class TMAnalysisWorker extends AbstractWorker {
 
         $data[ 'tm_analysis_status' ] = "DONE"; // DONE . I don't want it remains in an inconsistent state
         $where                        = [
-                "id_segment" => $elementQueue->params->id_segment,
-                "id_job"     => $elementQueue->params->id_job
+            "id_segment" => $elementQueue->params->id_segment,
+            "id_job"     => $elementQueue->params->id_job
         ];
 
         $db = Database::obtain();

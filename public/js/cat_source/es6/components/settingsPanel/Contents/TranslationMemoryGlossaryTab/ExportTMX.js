@@ -1,4 +1,4 @@
-import React, {useRef} from 'react'
+import React, {useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import useExport, {EXPORT_TYPE} from './hooks/useExport'
 
@@ -11,6 +11,7 @@ export const ExportTMX = ({row, onClose}) => {
     row,
     onClose,
   })
+  const [stripTags, setStripTags] = useState(false)
 
   const formRef = useRef()
 
@@ -24,38 +25,38 @@ export const ExportTMX = ({row, onClose}) => {
         <form
           ref={formRef}
           className={`action-form${isErrorExport ? ' action-form-error' : ''}`}
-          onSubmit={onSubmit}
+          onSubmit={(e) => onSubmit(e, stripTags)}
           onReset={onReset}
         >
-          <div>
+          <div className="translation-memory-glossary-tab-label">
             <span>
-              We will send a link to download the exported TM to this email:
+              We will send a link to download the exported TM to your email.
             </span>
-            <input
-              type="email"
-              className="translation-memory-glossary-tab-input-text"
-              required
-              value={email}
-              onChange={onChange}
-              disabled={isFormDisabled}
-            />
+            <div className="translation-memory-glossary-tab-checkbox">
+              Export TM without tags
+              <input
+                name="tags"
+                type="checkbox"
+                onChange={(e) => setStripTags(e.currentTarget.checked)}
+              ></input>
+            </div>
           </div>
           <div className="translation-memory-glossary-tab-buttons-group align-center">
             <button
               type="submit"
-              className="ui primary button settings-panel-button-icon tm-key-small-row-button"
+              className="ui primary button settings-panel-button-icon confirm-button"
               disabled={isFormDisabled || isErrorExport}
             >
-              <Checkmark size={16} />
+              <Checkmark size={12} />
               Confirm
             </button>
 
             <button
               type="reset"
-              className="ui button orange tm-key-small-row-button"
+              className="ui button orange close-button"
               disabled={isFormDisabled}
             >
-              <Close />
+              <Close size={18} />
             </button>
           </div>
         </form>

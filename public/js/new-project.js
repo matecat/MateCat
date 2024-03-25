@@ -8,8 +8,8 @@ import {projectCreationStatus} from './cat_source/es6/api/projectCreationStatus'
 import AlertModal from './cat_source/es6/components/modals/AlertModal'
 import NotificationBox from './cat_source/es6/components/notificationsComponent/NotificationBox'
 import NewProject from './cat_source/es6/pages/NewProject'
-import CreateProjectStore from './cat_source/es6/stores/CreateProjectStore'
 import CreateProjectActions from './cat_source/es6/actions/CreateProjectActions'
+import CommonUtils from './cat_source/es6/utils/commonUtils'
 
 /**
  * ajax call to clear the uploaded files when an user refresh the home page
@@ -29,9 +29,9 @@ APP.getFilenameFromUploadedFiles = function () {
   return files.substr(7)
 }
 
-UI.UPLOAD_PAGE = {}
+let UPLOAD_PAGE = {}
 
-$.extend(UI.UPLOAD_PAGE, {
+$.extend(UPLOAD_PAGE, {
   init: function () {
     this.addEvents()
   },
@@ -64,13 +64,28 @@ $.extend(UI.UPLOAD_PAGE, {
 })
 
 APP.restartConversion = function () {
-  UI.UPLOAD_PAGE.restartConversions()
+  UPLOAD_PAGE.restartConversions()
 }
 
 APP.checkGDriveEvents = function () {
-  var cookie = Cookies.get('gdrive_files_to_be_listed')
+  const cookieFilesGdrive = 'gdrive_files_to_be_listed'
+  const cookieGdriveResponse = 'gdrive_files_outcome'
+  const cookie = Cookies.get(cookieGdriveResponse)
   if (cookie) {
-    APP.tryListGDriveFiles()
+    const gdriveResponse = JSON.parse(Cookies.get(cookieGdriveResponse))
+    if (gdriveResponse.success) {
+      APP.tryListGDriveFiles()
+    } else if (gdriveResponse.error_msg) {
+      CreateProjectActions.showError(gdriveResponse.error_msg)
+    }
+    Cookies.remove(cookieFilesGdrive, {
+      path: '',
+      domain: '.' + location.hostname,
+    })
+    Cookies.remove(cookieGdriveResponse, {
+      path: '',
+      domain: '.' + location.hostname,
+    })
   }
 }
 APP.handleCreationStatus = function (id_project, password) {
@@ -145,129 +160,70 @@ APP.postProjectCreation = function (d) {
     //reset the clearNotCompletedUploads event that should be called in main.js onbeforeunload
     //--> we don't want to delete the files on the upload directory
     clearNotCompletedUploads = function () {}
-
-    if (config.analysisEnabled) {
-      //this should not be.
-      //A project now are never EMPTY, it is not created anymore
-      if (d.status == 'EMPTY') {
-        console.log('EMPTY')
-        $('body').removeClass('creating')
-        ModalsActions.showModalComponent(
-          AlertModal,
-          {
-            text: 'No text to translate in the file(s).<br />Perhaps it is a scanned file or an image?',
-            buttonText: 'Continue',
-          },
-          'No text to translate',
-        )
-      } else {
-        location.href = d.analyze_url
-      }
+    //this should not be.
+    //A project now are never EMPTY, it is not created anymore
+    if (d.status == 'EMPTY') {
+      console.log('EMPTY')
+      $('body').removeClass('creating')
+      ModalsActions.showModalComponent(
+        AlertModal,
+        {
+          text: 'No text to translate in the file(s).<br />Perhaps it is a scanned file or an image?',
+          buttonText: 'Continue',
+        },
+        'No text to translate',
+      )
     } else {
-      if (Object.keys(d.target_language).length > 1) {
-        //if multiple language selected show a job list
-        d.files = []
-        d.trgLangHumanReadable =
-          CreateProjectStore.getTargetLangsNames.split(',')
-        d.srcLangHumanReadable = CreateProjectStore.getSourceLangName()
-
-        $.each(d.target_language, function (idx, val) {
-          d.files.push({
-            href:
-              config.hostpath +
-              config.basepath +
-              'translate/' +
-              d.project_name +
-              '/' +
-              d.source_language.substring(0, 2) +
-              '-' +
-              val.substring(0, 2) +
-              '/' +
-              d.id_job[idx] +
-              '-' +
-              d.password[idx],
-          })
-        })
-
-        $('.uploadbtn-box').fadeOut('slow', function () {
-          $('.uploadbtn-box').replaceWith(tmpl('job-links-list', d))
-
-          var btnContainer = $('.btncontinue')
-          var btnNew = $('#add-files').clone()
-          btnContainer
-            .fadeOut('slow', function () {
-              btnContainer.html('').addClass('newProject')
-              btnNew.children('span').text('New Project')
-              btnNew.children('i').remove()
-              btnNew.children('input').remove()
-              btnNew
-                .attr({id: 'new-project'})
-                .on('click', function () {
-                  location.href = config.hostpath + config.basepath
-                })
-                .css({margin: 'auto 0'})
-              btnNew.appendTo(btnContainer)
-            })
-            .css({height: '50px'})
-            .fadeIn(1000)
-
-          $('.translate-box input, .translate-box select').attr({
-            disabled: 'disabled',
-          })
-          $('td.delete').empty()
-          $('#info-login').fadeIn(1000)
-          $('#project-' + d.id_project).fadeIn(1000)
-        })
-      } else {
-        location.href =
-          config.hostpath +
-          config.basepath +
-          'translate/' +
-          d.project_name +
-          '/' +
-          d.source_language.substring(0, 2) +
-          '-' +
-          d.target_language[0].substring(0, 2) +
-          '/' +
-          d.id_job[0] +
-          '-' +
-          d.password[0]
+      const data = {
+        event: 'analyze_click',
+        userStatus: APP.USER.isUserLogged() ? 'loggedUser' : 'notLoggedUser',
+        userId:
+          APP.USER.isUserLogged() && APP.USER.STORE.user
+            ? APP.USER.STORE.user.uid
+            : null,
+        idProject: d.id_project,
       }
+      CommonUtils.dispatchAnalyticsEvents(data)
+      location.href = d.analyze_url
     }
   }
 }
 
 $(document).ready(function () {
-  UI.UPLOAD_PAGE.init()
+  UPLOAD_PAGE.init()
   //TODO: REMOVE
   let currentTargetLangs = localStorage.getItem('currentTargetLang')
   let currentSourceLangs = localStorage.getItem('currentSourceLang')
   if (!currentSourceLangs) {
-    currentSourceLangs = config.currentSourceLang
+    currentSourceLangs = 'en-US'
   }
   if (!currentTargetLangs) {
-    currentTargetLangs = config.currentTargetLang
+    currentTargetLangs = 'fr-FR'
   }
-  const newProjectPage = document.getElementsByClassName('new_project__page')[0]
-  const rootNewProjectPage = createRoot(newProjectPage)
-  rootNewProjectPage.render(
-    <NewProject
-      isLoggedIn={!!config.isLoggedIn}
-      languages={config.languages_array.map((lang) => {
-        return {...lang, id: lang.code}
-      })}
-      sourceLanguageSelected={currentSourceLangs}
-      targetLanguagesSelected={currentTargetLangs}
-      subjectsArray={config.subject_array.map((item) => {
-        return {...item, id: item.key, name: item.display}
-      })}
-      conversionEnabled={!!config.conversionEnabled}
-      formatsNumber={config.formats_number}
-      googleDriveEnabled={!!config.googleDriveEnabled}
-    />,
-  )
+  const domMountPoint = document.getElementsByClassName('new_project__page')[0]
+  if (domMountPoint) {
+    const newProjectPage =
+      document.getElementsByClassName('new_project__page')[0]
+    const rootNewProjectPage = createRoot(newProjectPage)
+    rootNewProjectPage.render(
+      <NewProject
+        isLoggedIn={!!config.isLoggedIn}
+        sourceLanguageSelected={currentSourceLangs}
+        targetLanguagesSelected={currentTargetLangs}
+        subjectsArray={config.subject_array.map((item) => {
+          return {...item, id: item.key, name: item.display}
+        })}
+        conversionEnabled={!!config.conversionEnabled}
+        formatsNumber={config.formats_number}
+        googleDriveEnabled={!!config.googleDriveEnabled}
+        restartConversions={UPLOAD_PAGE.restartConversions}
+      />,
+    )
 
-  const mountPoint = document.getElementsByClassName('notifications-wrapper')[0]
-  const root = createRoot(mountPoint)
-  root.render(<NotificationBox />)
+    const mountPoint = document.getElementsByClassName(
+      'notifications-wrapper',
+    )[0]
+    const root = createRoot(mountPoint)
+    root.render(<NotificationBox />)
+  }
 })

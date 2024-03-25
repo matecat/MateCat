@@ -1,4 +1,6 @@
-import _ from 'lodash'
+import {isUndefined, clone} from 'lodash'
+import {find} from 'lodash/collection'
+import {findIndex} from 'lodash/array'
 
 import SegmentActions from '../../../../actions/SegmentActions'
 import CatToolActions from '../../../../actions/CatToolActions'
@@ -9,7 +11,6 @@ import {replaceAllIntoSegments} from '../../../../api/replaceAllIntoSegments'
 import AlertModal from '../../../modals/AlertModal'
 import ModalsActions from '../../../../actions/ModalsActions'
 import {tagSignatures} from '../../../segments/utils/DraftMatecatUtils/tagModel'
-import TagUtils from '../../../../utils/tagUtils'
 
 let SearchUtils = {
   searchEnabled: true,
@@ -63,8 +64,8 @@ let SearchUtils = {
     this.searchParams['strict_mode'] = !params.entireJob
 
     if (
-      _.isUndefined(this.searchParams.source) &&
-      _.isUndefined(this.searchParams.target) &&
+      isUndefined(this.searchParams.source) &&
+      isUndefined(this.searchParams.target) &&
       this.searchParams.status == 'all'
     ) {
       ModalsActions.showModalComponent(
@@ -80,7 +81,7 @@ let SearchUtils = {
     let p = this.searchParams
 
     this.searchMode =
-      !_.isUndefined(p.source) && !_.isUndefined(p.target)
+      !isUndefined(p.source) && !isUndefined(p.target)
         ? 'source&target'
         : 'normal'
 
@@ -96,8 +97,8 @@ let SearchUtils = {
 
       searchTermIntoSegments({
         token: dd.getTime(),
-        source: TagUtils.prepareTextToSend(source),
-        target: TagUtils.prepareTextToSend(target),
+        source: source,
+        target: target,
         status: this.searchParams.status,
         matchcase: this.searchParams['match-case'],
         exactmatch: this.searchParams['exact-match'],
@@ -131,10 +132,8 @@ let SearchUtils = {
     if (response.segments.length > 0) {
       let searchObject = this.createSearchObject(response.segments)
 
-      this.occurrencesList = _.clone(searchObject.occurrencesList)
-      this.searchResultsDictionary = _.clone(
-        searchObject.searchResultsDictionary,
-      )
+      this.occurrencesList = clone(searchObject.occurrencesList)
+      this.searchResultsDictionary = clone(searchObject.searchResultsDictionary)
 
       this.searchParams.current = searchObject.occurrencesList[0]
 
@@ -142,7 +141,7 @@ let SearchUtils = {
         total: response.total,
         searchResults: searchObject.searchResults,
         occurrencesList: this.occurrencesList,
-        searchResultsDictionary: _.clone(this.searchResultsDictionary),
+        searchResultsDictionary: clone(this.searchResultsDictionary),
         featuredSearchResult: 0,
       })
       SegmentActions.addSearchResultToSegments(
@@ -179,7 +178,7 @@ let SearchUtils = {
     let searchObject = this.createSearchObject(this.searchSegmentsResult)
     this.occurrencesList = searchObject.occurrencesList
     this.searchResultsDictionary = searchObject.searchResultsDictionary
-    let newIndex = _.findIndex(
+    let newIndex = findIndex(
       this.occurrencesList,
       (item) => item === currentFeaturedSegment,
     )
@@ -472,8 +471,8 @@ let SearchUtils = {
       txt = TextUtils.escapeRegExp(txt)
       reg = new RegExp('(' + txt + ')', 'g' + ignoreCase)
     } else if (
-      (!_.isUndefined(params.source) && isSource) ||
-      (!_.isUndefined(params.target) && !isSource)
+      (!isUndefined(params.source) && isSource) ||
+      (!isUndefined(params.target) && !isSource)
     ) {
       let txt = params.source ? params.source : params.target
       txt = txt
@@ -499,7 +498,7 @@ let SearchUtils = {
 
     let matchIndex = 0
     text = text.replace(reg, (match, text, index) => {
-      let intervalSpan = _.find(
+      let intervalSpan = find(
         tagsIntervals,
         (item) => index > item.start && index < item.end,
       )

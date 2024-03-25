@@ -68,6 +68,7 @@ class Mmt extends BaseFeature {
      * @param Users_UserStruct $userStruct
      *
      * @return mixed
+     * @throws Exception
      * @see engineController::add()
      *
      * Only one MMT engine per user can be registered
@@ -79,7 +80,13 @@ class Mmt extends BaseFeature {
         $engineEnabled   = $UserMetadataDao->get( $userStruct->uid, self::FEATURE_CODE );
 
         if ( !empty( $engineEnabled ) ) {
-            unset( $enginesList[ Constants_Engines::MMT ] ); // remove the engine from the list of available engines like it was disabled, so it will not be created
+
+            $engine = Engine::getInstance($engineEnabled->value);
+            $engineRecord = $engine->getEngineRecord();
+
+            if($engineRecord->active == 1){
+                unset( $enginesList[ Constants_Engines::MMT ] ); // remove the engine from the list of available engines like it was disabled, so it will not be created
+            }
         }
 
         return $enginesList;
@@ -101,27 +108,40 @@ class Mmt extends BaseFeature {
             return $newCreatedDbRowStruct;
         }
 
-        $engineMmt = new Engines_MMT( $newCreatedDbRowStruct );
+        /** @var Engines_MMT $newTestCreatedMT */
+        try {
+            $newTestCreatedMT = Engine::getInstance( $newCreatedDbRowStruct->id );
+        } catch (Exception $exception){
+            throw new Exception("MMT license not valid");
+        }
 
         // Check account
         try {
-            $engineMmt->checkAccount();
+            $checkAccount = $newTestCreatedMT->checkAccount();
+
+            if(!isset($checkAccount['billingPeriod']['planForCatTool'])){
+                throw new Exception("MMT license not valid");
+            }
+
+            $planForCatTool = $checkAccount['billingPeriod']['planForCatTool'];
+
+            if($planForCatTool === false){
+                throw new Exception("The ModernMT license you entered cannot be used inside CAT tools. Please subscribe to a suitable license to start using the ModernMT plugin.");
+            }
+
         } catch ( Exception $e ){
             ( new EnginesModel_EngineDAO( Database::obtain() ) )->delete( $newCreatedDbRowStruct );
 
-            throw new Exception("MMT license not valid.", $e->getCode());
+            throw new Exception($e->getMessage(), $e->getCode());
         }
 
-        // Connect keys
         try {
-            $extraParams = $newCreatedDbRowStruct->getExtraParamsAsArray();
-            $preImport   = $extraParams[ 'MMT-preimport' ];
 
             // if the MMT-preimport flag is enabled,
             // then all the user's MyMemory keys must be sent to MMT
             // when the engine is created
-            if ( $preImport === true ) {
-                $engineMmt->connectKeys( self::_getKeyringOwnerKeysByUid( $userStruct->uid ) );
+            if ( !empty( $newTestCreatedMT->extra_parameters[ 'MMT-preimport' ] ) ) {
+                $newTestCreatedMT->connectKeys( self::_getKeyringOwnerKeysByUid( $userStruct->uid ) );
             }
 
         } catch ( Exception $e ) {
@@ -134,14 +154,6 @@ class Mmt extends BaseFeature {
 
         return $newCreatedDbRowStruct;
 
-    }
-
-    /**
-     * @param EnginesModel_MMTStruct $newCreatedDbRowStruct
-     */
-    private function rollback(EnginesModel_MMTStruct $newCreatedDbRowStruct)
-    {
-        ( new EnginesModel_EngineDAO( Database::obtain() ) )->delete( $newCreatedDbRowStruct );
     }
 
     /**
