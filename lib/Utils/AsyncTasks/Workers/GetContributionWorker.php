@@ -17,6 +17,7 @@ use Engines_MMT;
 use Exception;
 use FeatureSet;
 use INIT;
+use Jobs_JobStruct;
 use Matecat\SubFiltering\AbstractFilter;
 use Matecat\SubFiltering\MateCatFilter;
 use PostProcess;
@@ -100,7 +101,12 @@ class GetContributionWorker extends AbstractWorker {
 
         $matches = array_slice( $matches, 0, $contributionStruct->resultNum );
         $this->normalizeTMMatches( $matches, $contributionStruct, $featureSet, $jobStruct->target );
-        $this->_updateSuggestionArray($contributionStruct->segmentId, $this->normalizeMatchesToLayer0($matches, $filter));
+
+        // update suggestion array only if concordanceSearch = false
+        // (in this way we automatically exclude TM Search matches)
+        if($contributionStruct->concordanceSearch === false){
+            $this->_updateSuggestionArray($contributionStruct->segmentId, $this->normalizeMatchesToLayer0($matches, $filter));
+        }
 
         $this->_publishPayload( $matches, $contributionStruct );
 
@@ -405,7 +411,7 @@ class GetContributionWorker extends AbstractWorker {
 
     /**
      * @param ContributionRequestStruct $contributionStruct
-     * @param $jobStruct
+     * @param Jobs_JobStruct $jobStruct
      * @param $targetLang
      * @param $featureSet
      * @param bool $isCrossLang
@@ -427,6 +433,13 @@ class GetContributionWorker extends AbstractWorker {
         $_config[ 'id_user' ]        = $this->_extractAvailableKeysForUser( $contributionStruct );
         $_config[ 'num_result' ]     = $contributionStruct->resultNum;
         $_config[ 'isConcordance' ]  = $contributionStruct->concordanceSearch;
+
+        $jobsMetadataDao = new \Jobs\MetadataDao();
+        $dialect_strict = $jobsMetadataDao->get($jobStruct->id, $jobStruct->password, 'dialect_strict');
+
+        if($dialect_strict !== null){
+            $_config['dialect_strict'] = $dialect_strict->value == 1;
+        }
 
         if ( $contributionStruct->concordanceSearch && $contributionStruct->fromTarget ) {
             //invert direction

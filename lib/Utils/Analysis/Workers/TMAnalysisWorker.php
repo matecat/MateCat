@@ -25,6 +25,7 @@ use Exceptions\NotFoundException;
 use Exceptions\ValidationError;
 use FeatureSet;
 use INIT;
+use Jobs\MetadataDao;
 use Jobs_JobDao;
 use Log;
 use Matecat\SubFiltering\MateCatFilter;
@@ -548,7 +549,14 @@ class TMAnalysisWorker extends AbstractWorker {
         $_config[ 'context_after' ]     = $queueElement->params->context_after;
         $_config[ 'additional_params' ] = @$queueElement->params->additional_params;
 
-        $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $queueElement->params->tm_keys, 'r' );
+        $jobsMetadataDao = new MetadataDao();
+        $dialect_strict = $jobsMetadataDao->get($queueElement->params->id_job, $queueElement->params->password, 'dialect_strict');
+
+        if($dialect_strict !== null){
+            $_config['dialect_strict'] = $dialect_strict->value == 1;
+        }
+
+        $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $queueElement->params->tm_keys, 'r', 'tm' );
         if ( is_array( $tm_keys ) && !empty( $tm_keys ) ) {
             foreach ( $tm_keys as $tm_key ) {
                 $_config[ 'id_user' ][] = $tm_key->key;

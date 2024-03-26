@@ -1325,6 +1325,18 @@ class ProjectManager {
             $projectStructure[ 'array_jobs' ][ 'job_languages' ]->offsetSet( $newJob->id, $newJob->id . ":" . $target );
             $projectStructure[ 'array_jobs' ][ 'payable_rates' ]->offsetSet( $newJob->id, $payableRates );
 
+            // dialect_strict
+            if(isset($projectStructure['dialect_strict'])){
+                $jobsMetadataDao = new \Jobs\MetadataDao();
+                $dialectStrictObj = json_decode($projectStructure['dialect_strict'], true);
+
+                foreach ($dialectStrictObj as $lang => $value){
+                    if(trim($lang) === trim($newJob->target)){
+                        $jobsMetadataDao->set($newJob->id, $newJob->password, 'dialect_strict', $value);
+                    }
+                }
+            }
+
             try {
                 if ( isset( $projectStructure[ 'payable_rate_model_id' ] ) and !empty( $projectStructure[ 'payable_rate_model_id' ] ) and $payableRatesTemplate !== null ) {
                     CustomPayableRateDao::assocModelToJob(

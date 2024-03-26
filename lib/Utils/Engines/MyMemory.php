@@ -192,6 +192,10 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         $parameters[ 'mt' ]       = $_config[ 'get_mt' ];
         $parameters[ 'numres' ]   = $_config[ 'num_result' ];
 
+        if(isset($_config['dialect_strict'])){
+            $parameters['dialect_strict'] = $_config['dialect_strict'];
+        }
+
         ( @$_config[ 'onlyprivate' ] ? $parameters[ 'onlyprivate' ] = 1 : null );
         ( @$_config[ 'isConcordance' ] ? $parameters[ 'conc' ] = 'true' : null );
         ( @$_config[ 'isConcordance' ] ? $parameters[ 'extended' ] = '1' : null );
