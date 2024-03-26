@@ -508,10 +508,10 @@ abstract class AbstractStatus {
                 $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'totals' ][ $_jpassword ][ "standard_word_count" ][ 0 ] = $v[ 'standard_word_count' ];
                 $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'totals' ][ $_jpassword ][ "raw_word_count" ][ 0 ]      = $v[ 'raw_word_count' ];
                 //format numbers after sum
-                $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'totals' ][ $_jpassword ][ "TOTAL_PAYABLE" ][ 1 ]       = number_format( $v[ 'eq_word_count' ] + 0.00000001, 0, ".", "," );
-                $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'totals' ][ $_jpassword ][ "eq_word_count" ][ 1 ]       = number_format( $v[ 'eq_word_count' ] + 0.00000001, 0, ".", "," );
-                $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'totals' ][ $_jpassword ][ "standard_word_count" ][ 1 ] = number_format( $v[ 'standard_word_count' ] + 0.00000001, 0, ".", "," );
-                $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'totals' ][ $_jpassword ][ "raw_word_count" ][ 1 ]      = number_format( $v[ 'raw_word_count' ] + 0.00000001, 0, ".", "," );
+                $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'totals' ][ $_jpassword ][ "TOTAL_PAYABLE" ][ 1 ]       = number_format( $v[ 'eq_word_count' ] + 0.00000001 );
+                $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'totals' ][ $_jpassword ][ "eq_word_count" ][ 1 ]       = number_format( $v[ 'eq_word_count' ] + 0.00000001 );
+                $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'totals' ][ $_jpassword ][ "standard_word_count" ][ 1 ] = number_format( $v[ 'standard_word_count' ] + 0.00000001 );
+                $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'totals' ][ $_jpassword ][ "raw_word_count" ][ 1 ]      = number_format( $v[ 'raw_word_count' ] + 0.00000001 );
             }
         }
 
