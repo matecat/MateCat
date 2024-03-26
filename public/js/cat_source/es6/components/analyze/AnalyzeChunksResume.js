@@ -320,7 +320,7 @@ class AnalyzeChunksResume extends React.Component {
           chunkAnalysis.target_name = job.target_name
           chunkAnalysis.source_name = job.source_name
           let total_raw = chunkAnalysis.total_raw
-          let standardWordCount = chunkAnalysis.total_equivalent
+          let standardWordCount = chunkAnalysis.total_industry
           let chunkJob = this.props.project.get('jobs').find((item) => {
             return (
               item.get('id') === chunkAnalysis.id &&
