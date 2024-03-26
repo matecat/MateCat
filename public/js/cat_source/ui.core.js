@@ -114,13 +114,17 @@ window.UI = {
   autopropagateConfirmNeeded: function (segment, propagation) {
     var segmentModified = segment.modified
     var segmentStatus = segment.status.toLowerCase()
-    var statusNotConfirmationNeeded = ['new', 'draft']
+    var statusNotConfirmationNeeded = [
+      SEGMENTS_STATUS.NEW,
+      SEGMENTS_STATUS.DRAFT,
+    ]
     if (propagation) {
       if (config.isReview) {
         return segmentModified || !isUndefined(segment.alternatives)
       } else {
         return (
-          statusNotConfirmationNeeded.indexOf(segmentStatus) === -1 &&
+          statusNotConfirmationNeeded.indexOf(segmentStatus.toUpperCase()) ===
+            -1 &&
           (segmentModified || !isUndefined(segment.alternatives))
         )
       }

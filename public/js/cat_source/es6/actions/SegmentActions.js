@@ -33,7 +33,7 @@ import {toggleTagProjectionJob} from '../api/toggleTagProjectionJob'
 import DraftMatecatUtils from '../components/segments/utils/DraftMatecatUtils'
 import {deleteSegmentIssue as deleteSegmentIssueApi} from '../api/deleteSegmentIssue'
 import SegmentsFilterUtil from '../components/header/cattol/segment_filter/segment_filter'
-import {SEGMENTS_STATUS} from '../constants/Constants'
+import {REVISE_STEP_NUMBER, SEGMENTS_STATUS} from '../constants/Constants'
 import {getSegmentsIssues} from '../api/getSegmentsIssues'
 import {sendSegmentVersionIssue} from '../api/sendSegmentVersionIssue'
 import {getSegmentVersionsIssues} from '../api/getSegmentVersionsIssues'
@@ -292,7 +292,11 @@ const SegmentActions = {
     }
 
     UI.setTimeToEdit(sid)
-    UI.changeStatus(segment, 'approved', afterApproveFn) // this does < setTranslation
+    const status =
+      config.revisionNumber === REVISE_STEP_NUMBER.REVISE1
+        ? SEGMENTS_STATUS.APPROVED
+        : SEGMENTS_STATUS.APPROVED2
+    UI.changeStatus(segment, status, afterApproveFn) // this does < setTranslation
 
     // Lock the segment if it's approved in a second pass but was previously approved in first revision
     if (config.revisionNumber > 1) {

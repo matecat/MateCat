@@ -490,8 +490,8 @@ class Segment extends React.Component {
   checkIfCanOpenSegment() {
     return (
       (this.props.isReview &&
-        !(this.props.segment.status == 'NEW') &&
-        !(this.props.segment.status == 'DRAFT')) ||
+        !(this.props.segment.status.toUpperCase() == SEGMENTS_STATUS.NEW) &&
+        !(this.props.segment.status.toUpperCase() == SEGMENTS_STATUS.DRAFT)) ||
       !this.props.isReview
     )
   }
