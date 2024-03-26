@@ -1,6 +1,6 @@
 <?php
 
-class DropDqfIdFromQASevereties extends AbstractMatecatMigration {
+class DropColumnDqfIdFromQASevereties extends AbstractMatecatMigration {
 
     public $sql_up = [ '
         ALTER TABLE qa_model_template_severities drop column dqf_id;

@@ -1,6 +1,6 @@
 <?php
 
-class DropDqfIdFromSequences extends AbstractMatecatMigration {
+class DropDqfProjectIdSequence extends AbstractMatecatMigration {
 
     public $sql_up = [ '
         ALTER TABLE sequences drop column id_dqf_project;

@@ -1,6 +1,6 @@
 <?php
 
-class RemoveDqfSegments extends AbstractMatecatMigration {
+class DropDqfSegments extends AbstractMatecatMigration {
 
     public $sql_up = [ '
         DROP TABLE `dqf_segments`;

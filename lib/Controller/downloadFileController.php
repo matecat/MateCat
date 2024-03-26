@@ -131,12 +131,12 @@ class downloadFileController extends downloadController {
         $output_content = [];
 
         /*
-           the procedure:
-           1) The original XLIFF file is read directly from the disk; a file handler is obtained.
-           2) The file is read chunk by chunk using a stream parser. For each trans-unit encountered, the target is replaced (or added) with the corresponding translation obtained from the database.
-           3) The parsed portion of the XLIFF in the buffer is flushed to a temporary file.
-           4) The temporary file is sent to the converter, and an original file is obtained.
-           5) The temporary file is then deleted.
+            The procedure:
+            1) The original XLIFF file is read directly from the disk, and a file handler is obtained.
+            2) The file is processed chunk by chunk using a stream parser. For each trans-unit encountered, the target segment is replaced or added with the corresponding translation obtained from the database.
+            3) The parsed portion of the XLIFF in the buffer is written to a temporary file.
+            4) The temporary file is passed to the converter, which generates an updated version of the original file.
+            5) Finally, the temporary file is deleted.
          */
         $sDao = new Segments_SegmentDao();
 
