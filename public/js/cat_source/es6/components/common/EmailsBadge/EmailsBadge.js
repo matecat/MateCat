@@ -139,6 +139,10 @@ export const EmailsBadge = ({
   }
 
   // EFFECTS
+  useEffect(() => {
+    if (!value.length) setEmails([])
+  }, [value.length])
+
   // click outside set value
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -168,7 +172,7 @@ export const EmailsBadge = ({
     const isValid = EMAIL_PATTERN.test(email)
     const isSelected = index === highlightedEmailIndex
     return (
-      <span
+      <div
         key={index}
         className="email-badge-item"
         onClick={(e) => handleClickOnChip(e, index)}
@@ -185,7 +189,7 @@ export const EmailsBadge = ({
         >
           {email}
         </Tag>
-      </span>
+      </div>
     )
   }
   return (

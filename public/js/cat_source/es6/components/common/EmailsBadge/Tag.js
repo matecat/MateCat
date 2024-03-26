@@ -20,12 +20,12 @@ export const Tag = ({
   }
 
   return (
-    <span className={`email-badge-tag ${[status]}`}>
+    <div className={`email-badge-tag ${[status]}`}>
       {children}
       <div className="email-badge-tag-button-close" onClick={handleCLick}>
         <Close size={18} />
       </div>
-    </span>
+    </div>
   )
 }
 

@@ -5,6 +5,7 @@
   flex-direction: column;
   padding: 30px;
   gap: 30px;
+  height: 700px;
 
   .team-name-container {
     align-items: center;
@@ -75,20 +76,76 @@
   }
 
   .members-list {
+    height: 200px;
+    overflow-y: auto;
     > ul {
       list-style-type: none;
       padding: 0;
 
       > li {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 5px 0;
+        margin-bottom: 10px;
+      }
+    }
+
+    .removing-user-message {
+      color: $grey1;
+    }
+
+    .button-remove {
+      margin-left: auto;
+    }
+
+    .container-confirm-form {
+      display: flex;
+      gap: 5px;
+      margin-left: auto;
+
+      button {
+        height: 26px !important;
+        line-height: 1;
+        border-radius: unset;
+      }
+    }
+
+    .confirm-button {
+      font-size: 14px !important;
+      min-width: unset;
+      gap: 5px !important;
+      margin: 0 !important;
+      padding: 0 8px;
+    }
+
+    .close-button {
+      width: 30px;
+      padding: 0 !important;
+      display: flex !important;
+      justify-content: center !important;
+    }
+
+    .pending-member-remove {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-left: auto;
+
+      > span {
+        color: $grey1;
+        font-size: 14px;
       }
     }
   }
 
+  .member-item {
+    display: flex;
+    align-items: center;
+    height: 40px;
+    gap: 10px;
+  }
+
   .member-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 40px;
     max-width: 40px;
     height: 40px;
@@ -97,6 +154,26 @@
     vertical-align: middle;
     text-align: center;
     font-size: 16px;
+    font-weight: bold;
+  }
+
+  .member-info {
+    display: flex;
+    flex-direction: column;
+
+    > :first-child {
+      font-weight: bold;
+    }
+
+    > :not(:first-child) {
+      font-size: 14px;
+      color: $grey1;
+    }
+  }
+
+  .button-close {
+    display: flex;
+    margin-left: auto;
   }
 }
 
@@ -112,5 +189,13 @@
   &:focus {
     outline: none;
     border-color: $linkBlueTransparent;
+  }
+}
+
+.team-modal-create {
+  height: 510px;
+
+  > p {
+    margin: 0;
   }
 }
