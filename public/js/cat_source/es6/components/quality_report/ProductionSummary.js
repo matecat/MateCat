@@ -53,8 +53,8 @@ class ProductionSummary extends React.Component {
       jobPassed === null || reviewedWordsCount === 0
         ? 'qr-norevision'
         : jobPassed
-        ? 'qr-pass'
-        : 'qr-fail'
+          ? 'qr-pass'
+          : 'qr-fail'
     const translator = jobInfo.get('translator')
       ? jobInfo.get('translator').get('email')
       : 'Not assigned'
@@ -85,7 +85,9 @@ class ProductionSummary extends React.Component {
           <JobProgressBar stats={stats} showPercent={false} />
           <div className="percent">
             {Math.round(
-              ((stats.equivalent.approved + stats.equivalent.translated) /
+              ((stats.equivalent.approved +
+                stats.equivalent.approved2 +
+                stats.equivalent.translated) /
                 stats.equivalent.total) *
                 100,
             )}
