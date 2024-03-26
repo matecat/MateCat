@@ -1511,7 +1511,7 @@ class ProjectManager {
             throw new Exception( 'Wrong job id or password. Job segment range not found.', -6 );
         }
 
-        $count_type  = $this->getWordCountType( $row_totals );
+        $count_type  = Projects_MetadataDao::SPLIT_EQUIVALENT_WORD_TYPE;
         $total_words = $row_totals[ $count_type ];
 
         if ( empty( $requestedWordsPerSplit ) ) {
@@ -1594,22 +1594,6 @@ class ProjectManager {
         $projectStructure[ 'split_result' ] = new ArrayObject( $result );
 
         return $projectStructure[ 'split_result' ];
-    }
-
-
-    private function getWordCountType( $row_totals ) {
-        $project_count_type = $this->project->getWordCountType();
-        $eq_word_count      = (float)$row_totals[ 'eq_word_count' ];
-        if (
-                $project_count_type == Projects_MetadataDao::WORD_COUNT_EQUIVALENT &&
-                !empty( $eq_word_count )
-        ) {
-            $count_type = 'eq_word_count';
-        } else {
-            $count_type = 'raw_word_count';
-        }
-
-        return $count_type;
     }
 
     /**
