@@ -65,7 +65,7 @@ class AnalysisFile implements MatchContainerInterface, JsonSerializable {
                 'name'             => $this->name,
                 'original_name'    => $this->original_name,
                 'total_raw'        => $this->total_raw,
-                'total_equivalent' => $this->total_equivalent,
+                'total_equivalent' => round( $this->total_equivalent ),
                 'matches'          => array_values( $this->matches )
         ];
     }
@@ -106,7 +106,7 @@ class AnalysisFile implements MatchContainerInterface, JsonSerializable {
      * @return void
      */
     public function incrementEquivalent( $equivalent ) {
-        $this->total_equivalent += round( $equivalent );
+        $this->total_equivalent += $equivalent;
     }
 
 }

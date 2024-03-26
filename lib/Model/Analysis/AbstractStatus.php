@@ -9,10 +9,13 @@ use API\App\Json\Analysis\AnalysisJob;
 use API\App\Json\Analysis\AnalysisProject;
 use API\App\Json\Analysis\AnalysisProjectSummary;
 use API\App\Json\Analysis\MatchConstants;
+use API\V2\Exceptions\AuthenticationError;
 use Chunks_ChunkDao;
 use Chunks_ChunkStruct;
 use Constants_ProjectStatus;
 use Exception;
+use Exceptions\NotFoundException;
+use Exceptions\ValidationError;
 use FeatureSet;
 use INIT;
 use Langs_LanguageDomains;
@@ -129,7 +132,12 @@ abstract class AbstractStatus {
     /**
      * Perform the computation
      *
+     * @param string $word_count_type
+     *
      * @return $this
+     * @throws AuthenticationError
+     * @throws NotFoundException
+     * @throws ValidationError
      */
     public function fetchData( $word_count_type = Projects_MetadataDao::WORD_COUNT_EQUIVALENT ) {
 
@@ -168,6 +176,10 @@ abstract class AbstractStatus {
 
     }
 
+    /**
+     * @throws NotFoundException
+     * @throws Exception
+     */
     protected function loadObjects() {
 
         $target       = null;
@@ -330,7 +342,7 @@ abstract class AbstractStatus {
 
     /**
      * @return string
-     * @throws \Exception
+     * @throws Exception
      */
     private function getAnalyzeLink() {
         return Routes::analyze( [
@@ -340,6 +352,12 @@ abstract class AbstractStatus {
         ] );
     }
 
+    /**
+     * @throws NotFoundException
+     * @throws ValidationError
+     * @throws AuthenticationError
+     * @throws Exception
+     */
     protected function _oldFormatData() {
 
         $this->result[ 'data' ] = $this->_data_struct;
@@ -453,7 +471,7 @@ abstract class AbstractStatus {
             }
 
             $w           = $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $segInfo[ 'id_file' ] ][ $keyValue ][ 0 ] + $words;
-            $words_print = number_format( $w, 0, ".", "," );
+            $words_print = number_format( $w );
 
             $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $segInfo[ 'id_file' ] ][ $keyValue ] = [
                     $w, $words_print
@@ -461,7 +479,7 @@ abstract class AbstractStatus {
 
             $tmp_tot                                                                         = $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'totals' ][ $jpassword ][ $keyValue ][ 0 ];
             $tmp_tot                                                                         += $words;
-            $words_print                                                                     = number_format( $tmp_tot, 0, ".", "," );
+            $words_print                                                                     = number_format( $tmp_tot );
             $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'totals' ][ $jpassword ][ $keyValue ] = [
                     $tmp_tot, $words_print
             ];
@@ -475,7 +493,7 @@ abstract class AbstractStatus {
             $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $segInfo[ 'id_file' ] ][ 'FILENAME' ] = $segInfo[ 'filename' ];
 
             $total_file_payable                                                                                                  = $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $segInfo[ 'id_file' ] ][ 'TOTAL_PAYABLE' ][ 0 ] += $segInfo[ 'eq_word_count' ];
-            $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $segInfo[ 'id_file' ] ][ 'TOTAL_PAYABLE' ][ 1 ] = number_format( $total_file_payable, 0, ".", "," );
+            $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $segInfo[ 'id_file' ] ][ 'TOTAL_PAYABLE' ][ 1 ] = number_format( $total_file_payable );
 
         }
 
@@ -509,11 +527,11 @@ abstract class AbstractStatus {
             //( no segment_translations )
             $project_data_fallback = Projects_ProjectDao::getProjectAndJobData( $this->id_project );
 
-            foreach ( $project_data_fallback as $i => $_job_fallback ) {
+            foreach ( $project_data_fallback as $_job_fallback ) {
                 $this->result[ 'data' ][ 'jobs' ][ $_job_fallback[ 'jid' ] ][ 'totals' ][ $_job_fallback[ 'jpassword' ] ][ "TOTAL_PAYABLE" ][ 0 ] = $_job_fallback[ 'standard_analysis_wc' ];
 
                 //format numbers after sum
-                $this->result[ 'data' ][ 'jobs' ][ $_job_fallback[ 'jid' ] ][ 'totals' ][ $_job_fallback[ 'jpassword' ] ][ "TOTAL_PAYABLE" ][ 1 ] = number_format( $_job_fallback[ 'standard_analysis_wc' ], 0, ".", "," );
+                $this->result[ 'data' ][ 'jobs' ][ $_job_fallback[ 'jid' ] ][ 'totals' ][ $_job_fallback[ 'jpassword' ] ][ "TOTAL_PAYABLE" ][ 1 ] = number_format( $_job_fallback[ 'standard_analysis_wc' ] );
             }
 
             $_total_wc_standard_analysis
@@ -531,9 +549,9 @@ abstract class AbstractStatus {
             $_total_wc_tm_analysis = $_total_wc_fast_analysis;
         }
 
-        if ( $_total_wc_fast_analysis > 0 ) {
-            $discount_wc = round( 100 * $_total_wc_tm_analysis / $_total_wc_fast_analysis );
-        }
+//        if ( $_total_wc_fast_analysis > 0 ) {
+//            $discount_wc = round( 100 * $_total_wc_tm_analysis / $_total_wc_fast_analysis );
+//        }
 
         $discount_wc = 0;
 
@@ -603,23 +621,23 @@ abstract class AbstractStatus {
         $this->result[ 'data' ][ 'summary' ][ 'TOTAL_PAYABLE' ]     = $_total_wc_tm_analysis;
 
         if ( $this->status_project == 'FAST_OK' or $this->status_project == "DONE" ) {
-            $this->result[ 'data' ][ 'summary' ][ 'PAYABLE_WC_TIME' ] = number_format( $tm_wc_time, 0, ".", "," );
+            $this->result[ 'data' ][ 'summary' ][ 'PAYABLE_WC_TIME' ] = number_format( $tm_wc_time );
             $this->result[ 'data' ][ 'summary' ][ 'PAYABLE_WC_UNIT' ] = $tm_wc_unit;
         } else {
-            $this->result[ 'data' ][ 'summary' ][ 'PAYABLE_WC_TIME' ] = number_format( $fast_wc_time, 0, ".", "," );
+            $this->result[ 'data' ][ 'summary' ][ 'PAYABLE_WC_TIME' ] = number_format( $fast_wc_time );
             $this->result[ 'data' ][ 'summary' ][ 'PAYABLE_WC_UNIT' ] = $fast_wc_unit;
         }
 
-        $this->result[ 'data' ][ 'summary' ][ 'FAST_WC_TIME' ]     = number_format( $fast_wc_time, 0, ".", "," );
+        $this->result[ 'data' ][ 'summary' ][ 'FAST_WC_TIME' ]     = number_format( $fast_wc_time );
         $this->result[ 'data' ][ 'summary' ][ 'FAST_WC_UNIT' ]     = $fast_wc_unit;
-        $this->result[ 'data' ][ 'summary' ][ 'TM_WC_TIME' ]       = number_format( $tm_wc_time, 0, ".", "," );
+        $this->result[ 'data' ][ 'summary' ][ 'TM_WC_TIME' ]       = number_format( $tm_wc_time );
         $this->result[ 'data' ][ 'summary' ][ 'TM_WC_UNIT' ]       = $tm_wc_unit;
-        $this->result[ 'data' ][ 'summary' ][ 'STANDARD_WC_TIME' ] = number_format( $standard_wc_time, 0, ".", "," );
+        $this->result[ 'data' ][ 'summary' ][ 'STANDARD_WC_TIME' ] = number_format( $standard_wc_time );
         $this->result[ 'data' ][ 'summary' ][ 'STANDARD_WC_UNIT' ] = $standard_wc_unit;
-        $this->result[ 'data' ][ 'summary' ][ 'USAGE_FEE' ]        = number_format( $matecat_fee, 2, ".", "," );
-        $this->result[ 'data' ][ 'summary' ][ 'PRICE_PER_WORD' ]   = number_format( $_matecat_price_per_word, 3, ".", "," );
-        $this->result[ 'data' ][ 'summary' ][ 'DISCOUNT' ]         = number_format( $discount, 0, ".", "," );
-        $this->result[ 'data' ][ 'summary' ][ 'DISCOUNT_WC' ]      = number_format( $discount_wc, 0, ".", "," );
+        $this->result[ 'data' ][ 'summary' ][ 'USAGE_FEE' ]        = number_format( $matecat_fee, 2 );
+        $this->result[ 'data' ][ 'summary' ][ 'PRICE_PER_WORD' ]   = number_format( $_matecat_price_per_word, 3 );
+        $this->result[ 'data' ][ 'summary' ][ 'DISCOUNT' ]         = number_format( $discount );
+        $this->result[ 'data' ][ 'summary' ][ 'DISCOUNT_WC' ]      = number_format( $discount_wc );
 
 
         $this->_globals = [
