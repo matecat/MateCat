@@ -4,6 +4,7 @@ namespace API\V2;
 
 
 use API\V2\Validators\ChunkPasswordValidator;
+use API\V2\Validators\LoginValidator;
 use Chunks_ChunkStruct;
 
 class ChunkOptionsController extends BaseChunkController {
@@ -37,6 +38,7 @@ class ChunkOptionsController extends BaseChunkController {
             $Controller->setChunk( $Validator->getChunk() );
         } );
         $this->appendValidator( $Validator );
+        $this->appendValidator( new LoginValidator( $this ) );
     }
 
     protected function filteredParams() {

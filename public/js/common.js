@@ -1,6 +1,6 @@
 import Cookies from 'js-cookie'
 import {filter} from 'lodash'
-import TeamsActions from './cat_source/es6/actions/TeamsActions'
+import UserActions from './cat_source/es6/actions/UserActions'
 import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessageModal'
 import {downloadFileGDrive} from './cat_source/es6/api/downloadFileGDrive'
 import ModalsActions from './cat_source/es6/actions/ModalsActions'
@@ -19,14 +19,6 @@ window.APP = {
   teamStorageName: 'defaultTeam',
   init: function () {
     this.setLoginEvents()
-    if (config.isLoggedIn) {
-      var self = this
-      APP.USER.loadUserData().then((data) => {
-        TeamsActions.updateUser(data)
-        self.setTeamNameInMenu()
-        self.setUserImage()
-      })
-    }
     setTimeout(() => this.checkGlobalMassages(), 1000)
   },
   /*************************************************************************************************************/
@@ -207,33 +199,6 @@ window.APP = {
       } else {
         return teams[0]
       }
-    }
-  },
-  setTeamNameInMenu: function () {
-    if (APP.USER.STORE.teams) {
-      var team = this.getLastTeamSelected(APP.USER.STORE.teams)
-      $('.user-menu-container .organization-name').text(team.name) //??
-    } else {
-      var self = this
-      APP.USER.loadUserData().then(function () {
-        self.setTeamNameInMenu.bind(self)
-      })
-    }
-  },
-
-  setUserImage: function () {
-    if (APP.USER.STORE.user) {
-      if (!APP.USER.STORE.metadata || !APP.USER.STORE.metadata.gplus_picture)
-        return
-      var urlImage = APP.USER.STORE.metadata.gplus_picture
-      var html =
-        '<img class="ui-user-top-image-general user-menu-preferences" src="' +
-        urlImage +
-        '"/>'
-      $('.user-menu-container .ui-user-top-image').replaceWith(html)
-      /*$('.user-menu-preferences').on('click', function (e) {*/
-    } else {
-      setTimeout(this.setUserImage.bind(this), 500)
     }
   },
 

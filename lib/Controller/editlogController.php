@@ -50,6 +50,7 @@ class editlogController extends viewController {
 
     public function doAction() {
 
+        $this->checkLoginRequiredAndRedirect();
         $this->featureSet->filter( 'beginDoAction', $this );
 
         $this->model = new EditLog_EditLogModel( $this->jid, $this->password, $this->featureSet );

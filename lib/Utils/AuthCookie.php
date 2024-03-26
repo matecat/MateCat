@@ -2,40 +2,60 @@
 
 class AuthCookie {
 
-    //get user name in cookie, if present
+    /**
+     * Get user in cookie, if present
+     *
+     * @return mixed
+     */
     public static function getCredentials() {
 
         $payload = self::getData();
 
+        $dao  = new Users_UserDao();
+        $user = $dao->getByUid($payload[ 'user' ][ 'uid' ]);
+
         if ( $payload ) {
-            self::setCredentials( $payload[ 'username' ], $payload[ 'uid' ] );
+            self::setCredentials( $user );
         }
 
         return $payload;
-
     }
 
-    //set a cookie with a username
-    public static function setCredentials( $username, $uid ) {
-        list( $new_cookie_data, $new_expire_date ) = static::generateSignedAuthCookie( $username, $uid );
+    /**
+     * Set a cookie with a username
+     *
+     * @param Users_UserStruct $user
+     */
+    public static function setCredentials( Users_UserStruct $user ) {
+
+        list( $new_cookie_data, $new_expire_date ) = static::generateSignedAuthCookie( $user );
         CookieManager::setCookie( INIT::$AUTHCOOKIENAME, $new_cookie_data,
-                [
-                        'expires'  => $new_expire_date,
-                        'path'     => '/',
-                        'domain'   => INIT::$COOKIE_DOMAIN,
-                        'secure'   => true,
-                        'httponly' => true,
-                        'samesite' => 'None',
-                ]
+            [
+                'expires'  => $new_expire_date,
+                'path'     => '/',
+                'domain'   => INIT::$COOKIE_DOMAIN,
+                'secure'   => true,
+                'httponly' => false,
+                'samesite' => 'None',
+            ]
         );
-
     }
 
-    public static function generateSignedAuthCookie( $username, $uid ) {
+    /**
+     * @param Users_UserStruct $user
+     * @return array
+     */
+    public static function generateSignedAuthCookie( Users_UserStruct $user ) {
 
         $JWT = new SimpleJWT( [
-                'uid'      => $uid,
-                'username' => $username,
+            'metadata' => $user->getMetadataAsKeyValue(),
+            'user' => [
+                'email' => $user->email,
+                'first_name' => $user->first_name,
+                'has_password' => !is_null($user->pass),
+                'last_name' => $user->last_name,
+                'uid' => (int)$user->uid,
+            ],
         ] );
 
         $JWT->setTimeToLive( INIT::$AUTHCOOKIEDURATION );
@@ -43,24 +63,44 @@ class AuthCookie {
         return [ $JWT->jsonSerialize(), $JWT->getExpireDate() ];
     }
 
+    /**
+     * Destroy authentication
+     */
     public static function destroyAuthentication() {
+
         unset( $_COOKIE[ INIT::$AUTHCOOKIENAME ] );
         CookieManager::setCookie( INIT::$AUTHCOOKIENAME, '',
-                [
-                        'expires' => 0,
-                        'path'    => '/',
-                        'domain'  => INIT::$COOKIE_DOMAIN
-                ]
+            [
+                'expires' => 0,
+                'path'    => '/',
+                'domain'  => INIT::$COOKIE_DOMAIN
+            ]
         );
         session_destroy();
     }
 
     /**
-     * get data from cookie
+     * Get data from auth cookie
+     *
+     * Example:
+     *
+     * {
+     *  "metadata": {
+     *    "gplus_picture": "https://lh3.googleusercontent.com/a/xxxxxxxxxx"
+     *  },
+     *  "user": {
+     *    "email": "domenico@translated.net",
+     *    "first_name": "Domenico",
+     *    "has_password": true,
+     *    "last_name": "Lupinetti",
+     *    "uid": 166
+     *  }
+     * }
      *
      * @return mixed
      */
     private static function getData() {
+
         if ( isset( $_COOKIE[ INIT::$AUTHCOOKIENAME ] ) and !empty( $_COOKIE[ INIT::$AUTHCOOKIENAME ] ) ) {
 
             try {

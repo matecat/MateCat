@@ -101,6 +101,8 @@ class catController extends viewController {
      * @throws \Exception
      */
     public function doAction() {
+
+        $this->checkLoginRequiredAndRedirect();
         $this->featureSet->run('beginDoAction', $this);
 
         try {

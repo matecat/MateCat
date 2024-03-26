@@ -5,10 +5,10 @@ import Immutable from 'immutable'
 import {http, HttpResponse} from 'msw'
 
 import TeamsSelect from './TeamsSelect'
-import TeamsActions from '../../actions/TeamsActions'
+import UserActions from '../../actions/UserActions'
 import ModalsActions from '../../actions/ModalsActions'
-import TeamsStore from '../../stores/TeamsStore'
-import TeamConstants from '../../constants/TeamConstants'
+import UserStore from '../../stores/UserStore'
+import TeamConstants from '../../constants/UserConstants'
 import ManageConstants from '../../constants/ManageConstants'
 import {mswServer} from '../../../../../mocks/mswServer'
 let modalVisible = false
@@ -219,7 +219,7 @@ xtest('Click on change team', async () => {
   executeMswServer()
 
   // set teams state
-  TeamsActions.renderTeams(apiUserMockResponse.teams)
+  UserActions.renderTeams(apiUserMockResponse.teams)
 
   const {props} = getFakeProperties(fakeTeamsData.threeTeams)
   render(<TeamsSelect {...props} />)
@@ -228,7 +228,7 @@ xtest('Click on change team', async () => {
   window.scrollTo = () => {}
 
   let teamSelected
-  TeamsStore.addListener(
+  UserStore.addListener(
     TeamConstants.UPDATE_TEAM,
     (team) => (teamSelected = team.get('name')),
   )
@@ -246,7 +246,7 @@ xtest('Click on team settings', async () => {
   const {props} = getFakeProperties(fakeTeamsData.threeTeams)
   render(<TeamsSelect {...props} />)
 
-  TeamsStore.addListener(
+  UserStore.addListener(
     ManageConstants.OPEN_MODIFY_TEAM_MODAL,
     () => (test = true),
   )

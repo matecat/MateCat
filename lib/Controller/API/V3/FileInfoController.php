@@ -12,6 +12,7 @@ use API\V2\BaseChunkController;
 use API\V2\Exceptions\NotFoundException;
 use API\V2\KleinController;
 use API\V2\Validators\ChunkPasswordValidator;
+use API\V2\Validators\LoginValidator;
 use Chunks_ChunkStruct;
 use Files\FilesInfoUtility;
 use Projects_ProjectStruct;
@@ -33,6 +34,7 @@ class FileInfoController extends BaseChunkController {
 //            $this->setFeatureSet( $this->project->getFeaturesSet() );
         } );
         $this->appendValidator( $Validator );
+        $this->appendValidator( new LoginValidator( $this ) );
     }
 
     private function setChunk( Chunks_ChunkStruct $chunk ) {

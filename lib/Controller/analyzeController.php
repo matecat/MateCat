@@ -114,6 +114,8 @@ class analyzeController extends viewController {
 
     public function doAction() {
 
+        $this->checkLoginRequiredAndRedirect();
+
         if ( $this->project_not_found ) {
             $this->render404();
 

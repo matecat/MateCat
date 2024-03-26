@@ -2,6 +2,7 @@
 
 namespace API\V2 ;
 
+use API\V2\Validators\LoginValidator;
 use API\V2\Validators\ProjectPasswordValidator;
 use API\V2\Validators\ProjectValidator;
 use Features\ProjectCompletion\Model\ProjectCompletionStatusModel;
@@ -30,7 +31,7 @@ class ProjectCompletionStatus extends KleinController {
         } );
 
         $this->appendValidator( $validator );
-
+        $this->appendValidator( new LoginValidator( $this ) );
     }
 
     public function status() {

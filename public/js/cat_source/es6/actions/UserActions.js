@@ -1,9 +1,9 @@
 import AppDispatcher from '../stores/AppDispatcher'
-import TeamConstants from '../constants/TeamConstants'
+import TeamConstants from '../constants/UserConstants'
 import {getUserData} from '../api/getUserData'
 import {getTeamMembers} from '../api/getTeamMembers'
 
-let TeamsActions = {
+let UserActions = {
   updateUser: function (user) {
     AppDispatcher.dispatch({
       actionType: TeamConstants.UPDATE_USER,
@@ -70,4 +70,4 @@ let TeamsActions = {
   },
 }
 
-export default TeamsActions
+export default UserActions

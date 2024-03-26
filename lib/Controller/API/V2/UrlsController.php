@@ -9,6 +9,7 @@
 namespace API\V2;
 
 use API\V2\Json\ProjectUrls;
+use API\V2\Validators\LoginValidator;
 use API\V2\Validators\ProjectPasswordValidator;
 use DataAccess\ShapelessConcreteStruct;
 
@@ -61,6 +62,7 @@ class UrlsController extends KleinController {
 
     protected function afterConstruct() {
         $this->validator = new Validators\ProjectPasswordValidator( $this );
+        $this->appendValidator( new LoginValidator( $this ) );
     }
 
 }

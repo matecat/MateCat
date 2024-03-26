@@ -4527,13 +4527,6 @@ div.ui-user-top-image {
   font-size: 15px;
 }
 
-.user-menu-container {
-  padding-left: 50px;
-  position: relative;
-  float: right;
-  font-size: 16px;
-}
-
 #user-menu-dropdown {
   .menu {
     width: 200px;
@@ -4565,21 +4558,6 @@ div.ui-user-top-image {
   border-radius: 500rem;
 }
 
-.user-menu-container .organization-name {
-  color: #fff;
-  font-size: 15px;
-  font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
-  font-weight: 600;
-  text-decoration: none;
-  float: right;
-  line-height: 37px;
-  min-width: 0px;
-  max-width: 110px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
 img.ui-user-top-image-general {
   width: 35px;
   height: auto;
@@ -4589,11 +4567,6 @@ img.ui-user-top-image-general {
   margin: 0 11px;
   margin-top: 2px;
   cursor: pointer;
-}
-
-.cattool .user-menu-container {
-  padding-left: 0px;
-  padding-top: 5px;
 }
 
 .cattool .organization-name {

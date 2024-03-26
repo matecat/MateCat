@@ -10,6 +10,7 @@ namespace API\V3;
 
 use API\V2\Exceptions\ValidationError;
 use API\V2\KleinController;
+use API\V2\Validators\LoginValidator;
 use CatUtils;
 use Langs_Languages;
 use LQA\SizeRestriction;
@@ -35,6 +36,8 @@ class CountWordController extends KleinController {
         } catch ( \Exception $e ) {
             throw new ValidationError( $e->getMessage(), 400 );
         }
+
+        $this->appendValidator( new LoginValidator( $this ) );
 
     }
 

@@ -10,6 +10,7 @@ namespace API\V2;
 
 use API\V2\Json\SegmentVersion as JsonFormatter;
 use API\V2\Validators\ChunkPasswordValidator;
+use API\V2\Validators\LoginValidator;
 use Chunks_ChunkStruct;
 use Features\TranslationVersions\Model\TranslationVersionDao;
 
@@ -55,6 +56,7 @@ class ChunkTranslationVersionController extends BaseChunkController {
             $Controller->setChunk( $Validator->getChunk() );
         } );
         $this->appendValidator( $Validator );
+        $this->appendValidator( new LoginValidator( $this ) );
     }
 
 }

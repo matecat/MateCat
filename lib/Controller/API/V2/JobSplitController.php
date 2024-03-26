@@ -10,6 +10,7 @@ namespace API\V2;
 
 use API\V2\Exceptions\NotFoundException;
 use API\V2\Exceptions\UnprocessableException;
+use API\V2\Validators\LoginValidator;
 use API\V2\Validators\ProjectPasswordValidator;
 use Exception;
 use Jobs_JobStruct;
@@ -41,6 +42,7 @@ class JobSplitController extends KleinController {
             $this->filterJobsById( $this->project_struct->getJobs() );
         } );
         $this->appendValidator( $projectValidator );
+        $this->appendValidator( new LoginValidator( $this ) );
     }
 
     /**

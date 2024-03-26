@@ -7,13 +7,13 @@ import ReactDOM, {flushSync} from 'react-dom'
 
 import ProjectsContainer from './ProjectsContainer'
 import ManageActions from '../../actions/ManageActions'
-import TeamsActions from '../../actions/TeamsActions'
+import UserActions from '../../actions/UserActions'
 import ModalsActions from '../../actions/ModalsActions'
 import CatToolActions from '../../actions/CatToolActions'
 import ProjectsStore from '../../stores/ProjectsStore'
-import TeamsStore from '../../stores/TeamsStore'
+import UserStore from '../../stores/UserStore'
 import ManageConstants from '../../constants/ManageConstants'
-import TeamConstants from '../../constants/TeamConstants'
+import TeamConstants from '../../constants/UserConstants'
 import DashboardHeader from './Header'
 import Header from '../header/Header'
 import {getProjects} from '../../api/getProjects'
@@ -41,7 +41,7 @@ class Dashboard extends React.Component {
 
   getData = () => {
     getUserData().then((data) => {
-      TeamsActions.renderTeams(data.teams)
+      UserActions.renderTeams(data.teams)
       const selectedTeam = APP.getLastTeamSelected(data.teams)
       const teams = data.teams
       this.setState({
@@ -49,7 +49,7 @@ class Dashboard extends React.Component {
         selectedTeam: selectedTeam,
       })
       this.getTeamStructure(selectedTeam).then(() => {
-        TeamsActions.selectTeam(selectedTeam)
+        UserActions.selectTeam(selectedTeam)
         ManageActions.checkPopupInfoTeams()
         this.setState({fetchingProjects: true})
         getProjects({team: selectedTeam, searchFilter: this.Search})
@@ -218,7 +218,7 @@ class Dashboard extends React.Component {
     getUserData()
       .then((data) => {
         this.setState({teams: data.teams})
-        TeamsActions.updateTeams(data.teams)
+        UserActions.updateTeams(data.teams)
       })
       .catch(() => {
         console.log('User not logged')
@@ -414,20 +414,20 @@ class Dashboard extends React.Component {
     )
 
     //Modals
-    TeamsStore.addListener(
+    UserStore.addListener(
       ManageConstants.UPDATE_TEAM_MEMBERS,
       this.removeUserFilter,
     )
-    TeamsStore.addListener(
+    UserStore.addListener(
       ManageConstants.OPEN_CREATE_TEAM_MODAL,
       this.openCreateTeamModal,
     )
-    TeamsStore.addListener(
+    UserStore.addListener(
       ManageConstants.OPEN_MODIFY_TEAM_MODAL,
       this.openModifyTeamModal,
     )
-    TeamsStore.addListener(TeamConstants.RENDER_TEAMS, this.updateTeams)
-    TeamsStore.addListener(TeamConstants.CHOOSE_TEAM, this.updateProjects)
+    UserStore.addListener(TeamConstants.RENDER_TEAMS, this.updateTeams)
+    UserStore.addListener(TeamConstants.CHOOSE_TEAM, this.updateProjects)
   }
 
   componentWillUnmount() {
@@ -454,20 +454,20 @@ class Dashboard extends React.Component {
     )
 
     //Modals
-    TeamsStore.removeListener(
+    UserStore.removeListener(
       ManageConstants.UPDATE_TEAM_MEMBERS,
       this.removeUserFilter,
     )
-    TeamsStore.removeListener(
+    UserStore.removeListener(
       ManageConstants.OPEN_CREATE_TEAM_MODAL,
       this.openCreateTeamModal,
     )
-    TeamsStore.removeListener(
+    UserStore.removeListener(
       ManageConstants.OPEN_MODIFY_TEAM_MODAL,
       this.openModifyTeamModal,
     )
-    TeamsStore.removeListener(TeamConstants.RENDER_TEAMS, this.updateTeams)
-    TeamsStore.removeListener(TeamConstants.CHOOSE_TEAM, this.updateProjects)
+    UserStore.removeListener(TeamConstants.RENDER_TEAMS, this.updateTeams)
+    UserStore.removeListener(TeamConstants.CHOOSE_TEAM, this.updateProjects)
   }
 
   render() {

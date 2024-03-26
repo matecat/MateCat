@@ -21,6 +21,8 @@ RewriteRule ^$ /support [QSA,L]
 
 RewriteRule ^$ index.php?action=newProject [QSA,L]
 
+RewriteRule ^signin[/]?$ index.php?action=signin [QSA,L]
+
 RewriteRule ^action/convertFile[/]?$ index.php?action=convertFile [QSA,L]
 
 RewriteRule ^(translate)[/]?$ index.php?action=cat [L]

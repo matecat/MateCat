@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from 'react'
-import TeamsStore from '../stores/TeamsStore'
+import UserStore from '../stores/UserStore'
 import Header from '../components/header/Header'
 import AnalyzeMain from '../components/analyze/AnalyzeMain'
 import NotificationBox from '../components/notificationsComponent/NotificationBox'
@@ -84,7 +84,7 @@ const AnalyzePage = () => {
           showSubHeader={false}
           showModals={false}
           changeTeam={false}
-          user={TeamsStore.getUser()}
+          user={UserStore.getUser()}
         />
       </header>
       <div className="project-list" id="analyze-container" ref={containerRef}>

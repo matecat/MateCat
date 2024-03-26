@@ -5,13 +5,13 @@
 import AppDispatcher from './AppDispatcher'
 import {EventEmitter} from 'events'
 import ManageConstants from '../constants/ManageConstants'
-import TeamConstants from '../constants/TeamConstants'
+import TeamConstants from '../constants/UserConstants'
 import assign from 'object-assign'
 import Immutable from 'immutable'
 
 EventEmitter.prototype.setMaxListeners(0)
 
-const TeamsStore = assign({}, EventEmitter.prototype, {
+const UserStore = assign({}, EventEmitter.prototype, {
   teams: Immutable.fromJS([]),
   selectedTeam: {},
   user: null,
@@ -88,69 +88,69 @@ const TeamsStore = assign({}, EventEmitter.prototype, {
 AppDispatcher.register(function (action) {
   switch (action.actionType) {
     case TeamConstants.RENDER_TEAMS:
-      TeamsStore.updateAll(action.teams)
-      TeamsStore.emitChange(action.actionType, TeamsStore.teams)
+      UserStore.updateAll(action.teams)
+      UserStore.emitChange(action.actionType, UserStore.teams)
       break
     case ManageConstants.UPDATE_TEAM_NAME:
-      TeamsStore.emitChange(
+      UserStore.emitChange(
         TeamConstants.UPDATE_TEAM,
-        TeamsStore.updateTeamName(action.team),
+        UserStore.updateTeamName(action.team),
       )
-      TeamsStore.emitChange(TeamConstants.UPDATE_TEAMS, TeamsStore.teams)
+      UserStore.emitChange(TeamConstants.UPDATE_TEAMS, UserStore.teams)
       break
     case ManageConstants.UPDATE_TEAM_MEMBERS:
-      TeamsStore.emitChange(
+      UserStore.emitChange(
         TeamConstants.UPDATE_TEAM,
-        TeamsStore.updateTeamMembers(
+        UserStore.updateTeamMembers(
           action.team,
           action.members,
           action.pending_invitations,
         ),
       )
-      TeamsStore.emitChange(TeamConstants.UPDATE_TEAMS, TeamsStore.teams)
+      UserStore.emitChange(TeamConstants.UPDATE_TEAMS, UserStore.teams)
       break
     case TeamConstants.UPDATE_TEAM:
-      TeamsStore.emitChange(
+      UserStore.emitChange(
         TeamConstants.UPDATE_TEAM,
-        TeamsStore.updateTeam(action.team),
+        UserStore.updateTeam(action.team),
       )
-      TeamsStore.emitChange(TeamConstants.UPDATE_TEAMS, TeamsStore.teams)
+      UserStore.emitChange(TeamConstants.UPDATE_TEAMS, UserStore.teams)
       break
     case TeamConstants.UPDATE_TEAMS:
-      TeamsStore.updateAll(action.teams)
-      TeamsStore.emitChange(TeamConstants.UPDATE_TEAMS, TeamsStore.teams)
+      UserStore.updateAll(action.teams)
+      UserStore.emitChange(TeamConstants.UPDATE_TEAMS, UserStore.teams)
       break
     case TeamConstants.CHOOSE_TEAM:
-      TeamsStore.emitChange(action.actionType, action.teamId, action.team)
+      UserStore.emitChange(action.actionType, action.teamId, action.team)
       break
     case ManageConstants.REMOVE_TEAM:
-      TeamsStore.removeTeam(action.team)
-      TeamsStore.emitChange(TeamConstants.RENDER_TEAMS, TeamsStore.teams)
+      UserStore.removeTeam(action.team)
+      UserStore.emitChange(TeamConstants.RENDER_TEAMS, UserStore.teams)
       break
     case TeamConstants.ADD_TEAM:
-      TeamsStore.addTeam(action.team)
-      TeamsStore.emitChange(TeamConstants.RENDER_TEAMS, TeamsStore.teams)
+      UserStore.addTeam(action.team)
+      UserStore.emitChange(TeamConstants.RENDER_TEAMS, UserStore.teams)
       break
     case TeamConstants.UPDATE_USER:
-      TeamsStore.updateUser(action.user)
-      TeamsStore.emitChange(TeamConstants.UPDATE_USER, TeamsStore.user)
+      UserStore.updateUser(action.user)
+      UserStore.emitChange(TeamConstants.UPDATE_USER, UserStore.user)
       break
     // Move this actions
     case ManageConstants.OPEN_CREATE_TEAM_MODAL:
-      TeamsStore.emitChange(action.actionType)
+      UserStore.emitChange(action.actionType)
       break
     case ManageConstants.OPEN_MODIFY_TEAM_MODAL:
-      TeamsStore.emitChange(
+      UserStore.emitChange(
         action.actionType,
         Immutable.fromJS(action.team),
         action.hideChangeName,
       )
       break
     case ManageConstants.OPEN_INFO_TEAMS_POPUP:
-      TeamsStore.emitChange(action.actionType)
+      UserStore.emitChange(action.actionType)
       break
     case ManageConstants.SELECTED_TEAM:
-      TeamsStore.selectedTeam = action.selectedTeam
+      UserStore.selectedTeam = action.selectedTeam
   }
 })
-export default TeamsStore
+export default UserStore

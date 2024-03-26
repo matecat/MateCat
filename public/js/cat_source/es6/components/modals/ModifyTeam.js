@@ -1,5 +1,5 @@
-import TeamConstants from '../../constants/TeamConstants'
-import TeamsStore from '../../stores/TeamsStore'
+import TeamConstants from '../../constants/UserConstants'
+import UserStore from '../../stores/UserStore'
 import ManageActions from '../../actions/ManageActions'
 import React from 'react'
 import CommonUtils from '../../utils/commonUtils'
@@ -392,11 +392,11 @@ class ModifyTeam extends React.Component {
       allowAdditions: true,
       action: this.onLabelCreate,
     })
-    TeamsStore.addListener(TeamConstants.UPDATE_TEAM, this.updateTeam)
+    UserStore.addListener(TeamConstants.UPDATE_TEAM, this.updateTeam)
   }
 
   componentWillUnmount() {
-    TeamsStore.removeListener(TeamConstants.UPDATE_TEAM, this.updateTeam)
+    UserStore.removeListener(TeamConstants.UPDATE_TEAM, this.updateTeam)
   }
 
   shouldComponentUpdate(nextProps, nextState) {

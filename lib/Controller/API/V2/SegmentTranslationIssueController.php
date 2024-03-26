@@ -6,6 +6,7 @@ use API\App\AbstractStatefulKleinController;
 use API\V2\Json\SegmentTranslationIssue as TranslationIssueFormatter;
 use API\V2\Json\TranslationIssueComment;
 use API\V2\Validators\ChunkPasswordValidator;
+use API\V2\Validators\LoginValidator;
 use Database;
 use Exceptions\ValidationError;
 use Features\ReviewExtended\ReviewUtils;
@@ -191,6 +192,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
             $this->validator->validate();
         } );
         $this->appendValidator( $jobValidator );
+        $this->appendValidator( new LoginValidator( $this ) );
 
     }
 

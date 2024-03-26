@@ -2,8 +2,8 @@ import React from 'react'
 
 import TeamSelect from './TeamsSelect'
 import FilterProjects from './manage/FilterProjects'
-import TeamConstants from '../../constants/TeamConstants'
-import TeamsStore from '../../stores/TeamsStore'
+import TeamConstants from '../../constants/UserConstants'
+import UserStore from '../../stores/UserStore'
 import QRStore from '../../stores/QualityReportStore'
 import QRConstants from '../../constants/QualityReportConstants'
 import {ActionMenu} from './ActionMenu'
@@ -28,11 +28,11 @@ class Header extends React.Component {
   }
 
   componentDidMount = () => {
-    TeamsStore.addListener(TeamConstants.RENDER_TEAMS, this.renderTeams)
-    TeamsStore.addListener(TeamConstants.UPDATE_TEAM, this.updateTeam)
-    TeamsStore.addListener(TeamConstants.UPDATE_TEAMS, this.updateTeams)
-    TeamsStore.addListener(TeamConstants.CHOOSE_TEAM, this.chooseTeams)
-    TeamsStore.addListener(TeamConstants.UPDATE_USER, this.updateUser)
+    UserStore.addListener(TeamConstants.RENDER_TEAMS, this.renderTeams)
+    UserStore.addListener(TeamConstants.UPDATE_TEAM, this.updateTeam)
+    UserStore.addListener(TeamConstants.UPDATE_TEAMS, this.updateTeams)
+    UserStore.addListener(TeamConstants.CHOOSE_TEAM, this.chooseTeams)
+    UserStore.addListener(TeamConstants.UPDATE_USER, this.updateUser)
     if (this.props.isQualityReport) {
       QRStore.addListener(QRConstants.RENDER_REPORT, this.storeJobUrls)
     }
@@ -44,11 +44,11 @@ class Header extends React.Component {
   }
 
   componentWillUnmount = () => {
-    TeamsStore.removeListener(TeamConstants.RENDER_TEAMS, this.renderTeams)
-    TeamsStore.removeListener(TeamConstants.UPDATE_TEAM, this.updateTeam)
-    TeamsStore.removeListener(TeamConstants.UPDATE_TEAMS, this.updateTeams)
-    TeamsStore.removeListener(TeamConstants.CHOOSE_TEAM, this.chooseTeams)
-    TeamsStore.removeListener(TeamConstants.UPDATE_USER, this.updateUser)
+    UserStore.removeListener(TeamConstants.RENDER_TEAMS, this.renderTeams)
+    UserStore.removeListener(TeamConstants.UPDATE_TEAM, this.updateTeam)
+    UserStore.removeListener(TeamConstants.UPDATE_TEAMS, this.updateTeams)
+    UserStore.removeListener(TeamConstants.CHOOSE_TEAM, this.chooseTeams)
+    UserStore.removeListener(TeamConstants.UPDATE_USER, this.updateUser)
     if (this.props.isQualityReport) {
       QRStore.removeListener(QRConstants.RENDER_REPORT, this.storeJobUrls)
     }

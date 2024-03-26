@@ -10,7 +10,7 @@ class oauthResponseHandlerController extends viewController{
     private $error ;
 
     /**
-     * @var Google_Service_Oauth2_Userinfoplus
+     * @var Google_Service_Oauth2_Userinfo
      */
     private $remoteUser ;
 
