@@ -140,6 +140,40 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
     }
 
     /**
+     * Get the job's owner uid
+     *
+     * @param $id_job
+     * @param $password
+     * @param int $ttl
+     *
+     * @return null
+     */
+    public static function getOwnerUid( $id_job, $password, $ttl = 86400 ) {
+
+        $thisDao = new self();
+        $conn    = Database::obtain()->getConnection();
+        $stmt = $conn->prepare(
+            "
+                SELECT uid FROM users u
+                join jobs j on j.owner = u.email
+                where j.id = :id_job and password = :password
+            ;
+            "
+        );
+
+        $data = @$thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
+            'id_job'   => $id_job,
+            'password' => $password
+        ] )[ 0 ];
+
+        if(empty($data)){
+            return null;
+        }
+
+        return $data->uid;
+    }
+
+    /**
      * @param                                        $id_job
      * @param                                        $password
      * @param int                                    $ttl

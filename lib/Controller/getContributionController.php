@@ -30,21 +30,21 @@ class getContributionController extends ajaxController {
         parent::__construct();
 
         $filterArgs = [
-                'id_segment'       => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
-                'id_job'           => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
-                'num_results'      => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
-                'text'             => [ 'filter' => FILTER_UNSAFE_RAW ],
-                'id_translator'    => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
-                'password'         => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
-                'current_password' => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
-                'is_concordance'   => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
-                'from_target'      => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
-                'context_before'   => [ 'filter' => FILTER_UNSAFE_RAW ],
-                'context_after'    => [ 'filter' => FILTER_UNSAFE_RAW ],
-                'id_before'        => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
-                'id_after'         => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
-                'id_client'        => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
-                'cross_language'   => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FORCE_ARRAY ]
+            'id_segment'       => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+            'id_job'           => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+            'num_results'      => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+            'text'             => [ 'filter' => FILTER_UNSAFE_RAW ],
+            'id_translator'    => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+            'password'         => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+            'current_password' => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+            'is_concordance'   => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+            'from_target'      => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+            'context_before'   => [ 'filter' => FILTER_UNSAFE_RAW ],
+            'context_after'    => [ 'filter' => FILTER_UNSAFE_RAW ],
+            'id_before'        => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+            'id_after'         => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+            'id_client'        => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+            'cross_language'   => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FORCE_ARRAY ]
         ];
 
         $this->__postInput = filter_input_array( INPUT_POST, $filterArgs );
@@ -120,17 +120,18 @@ class getContributionController extends ajaxController {
         }
 
         $file = (new FilesPartsDao())->getBySegmentId($this->id_segment);
+        $owner = (new Users_UserDao())->getProjectOwner( $this->id_job );
 
         $contributionRequest                    = new ContributionRequestStruct();
         $contributionRequest->id_file           = $file->id_file;
         $contributionRequest->id_job            = $this->id_job;
         $contributionRequest->password          = $this->received_password;
-        $contributionRequest->user              = $this->user;
+        $contributionRequest->user              = $owner;
         $contributionRequest->dataRefMap        = $dataRefMap;
         $contributionRequest->contexts          = [
-                'context_before' => $this->context_before,
-                'segment'        => $this->text,
-                'context_after'  => $this->context_after
+            'context_before' => $this->context_before,
+            'segment'        => $this->text,
+            'context_after'  => $this->context_after
         ];
         $contributionRequest->jobStruct         = $jobStruct;
         $contributionRequest->projectStruct     = $projectStruct;
@@ -175,11 +176,11 @@ class getContributionController extends ajaxController {
 
         //Get contexts
         $segmentsList = ( new Segments_SegmentDao )->setCacheTTL( 60 * 60 * 24 )->getContextAndSegmentByIDs(
-                [
-                        'id_before'  => $this->id_before,
-                        'id_segment' => $this->id_segment,
-                        'id_after'   => $this->id_after
-                ]
+            [
+                'id_before'  => $this->id_before,
+                'id_segment' => $this->id_segment,
+                'id_after'   => $this->id_after
+            ]
         );
 
         $featureSet->filter( 'rewriteContributionContexts', $segmentsList, $this->__postInput );
