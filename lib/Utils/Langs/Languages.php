@@ -165,6 +165,8 @@ class Langs_Languages {
      */
     public function getEnabledLanguages( $localizationLang = 'en' ) {
 
+        $list = [];
+
         foreach ( self::$map_rfc2obj as $rfc => $lang ) {
             //if marked as enabled, add to result
             if ( $lang[ 'enabled' ] ) {
@@ -177,7 +179,10 @@ class Langs_Languages {
             }
         }
 
+        usort($list, function($a, $b) {return strcmp($a['name'], $b['name']);});
+
         return $list;
+
     }
 
     /**

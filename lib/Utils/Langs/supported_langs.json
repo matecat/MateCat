@@ -80,7 +80,7 @@
         {
             "localized": [
                 {
-                    "en": "Arabic Egyptian"
+                    "en": "Arabic (Egypt)"
                 }
             ],
             "isocode": "ar",
@@ -135,7 +135,7 @@
         {
             "localized": [
                 {
-                    "en": "Austrian German"
+                    "en": "German (Austria)"
                 }
             ],
             "isocode": "de",
@@ -279,7 +279,7 @@
         {
             "localized": [
                 {
-                    "en": "Belgian French"
+                    "en": "French (Belgium)"
                 }
             ],
             "isocode": "fr",
@@ -356,7 +356,7 @@
         {
             "localized": [
                 {
-                    "en": "Bosnian"
+                    "en": "Bosnian (Latin script)"
                 }
             ],
             "isocode": "bs",
@@ -368,7 +368,7 @@
         {
             "localized": [
                 {
-                    "en": "Bosnian (Cyrillic)"
+                    "en": "Bosnian (Cyrillic script)"
                 }
             ],
             "isocode": "bs",
@@ -424,7 +424,7 @@
         {
             "localized": [
                 {
-                    "en": "Catalan"
+                    "en": "Catalan (Catalunya)"
                 }
             ],
             "isocode": "ca",
@@ -435,7 +435,7 @@
         {
             "localized": [
                 {
-                    "en": "Catalan Valencian"
+                    "en": "Catalan (Valencia)"
                 }
             ],
             "isocode": "cav",
@@ -534,7 +534,7 @@
         {
             "localized": [
                 {
-                    "en": "Chinese Simplified"
+                    "en": "Chinese (Simplified)"
                 }
             ],
             "isocode": "zh",
@@ -545,7 +545,7 @@
         {
             "localized": [
                 {
-                    "en": "Chinese Trad. (Hong Kong)"
+                    "en": "Chinese (Traditional, Hong Kong)"
                 }
             ],
             "isocode": "zh",
@@ -556,7 +556,7 @@
         {
             "localized": [
                 {
-                    "en": "Chinese Traditional"
+                    "en": "Chinese (Traditional, Taiwan)"
                 }
             ],
             "isocode": "zh",
@@ -567,7 +567,7 @@
         {
             "localized": [
                 {
-                    "en": "Chinese Traditional Macau"
+                    "en": "Chinese (Traditional, Macau)"
                 }
             ],
             "isocode": "zh",
@@ -721,7 +721,7 @@
         {
             "localized": [
                 {
-                    "en": "Dutch"
+                    "en": "Dutch (Netherlands)"
                 }
             ],
             "isocode": "nl",
@@ -776,7 +776,7 @@
         {
             "localized": [
                 {
-                    "en": "English"
+                    "en": "English (United Kingdom)"
                 }
             ],
             "isocode": "en",
@@ -787,7 +787,7 @@
         {
             "localized": [
                 {
-                    "en": "English Australia"
+                    "en": "English (Australia)"
                 }
             ],
             "isocode": "en",
@@ -798,7 +798,7 @@
         {
             "localized": [
                 {
-                    "en": "English Canada"
+                    "en": "English (Canada)"
                 }
             ],
             "isocode": "en",
@@ -809,7 +809,7 @@
         {
             "localized": [
                 {
-                    "en": "English India"
+                    "en": "English (India)"
                 }
             ],
             "isocode": "en",
@@ -820,7 +820,7 @@
         {
             "localized": [
                 {
-                    "en": "English Ireland"
+                    "en": "English (Ireland)"
                 }
             ],
             "isocode": "en",
@@ -831,7 +831,7 @@
         {
             "localized": [
                 {
-                    "en": "English New Zealand"
+                    "en": "English (New Zealand)"
                 }
             ],
             "isocode": "en",
@@ -842,7 +842,7 @@
         {
             "localized": [
                 {
-                    "en": "English Singapore"
+                    "en": "English (Singapore)"
                 }
             ],
             "isocode": "en",
@@ -853,7 +853,7 @@
         {
             "localized": [
                 {
-                    "en": "English South Africa"
+                    "en": "English (South Africa)"
                 }
             ],
             "isocode": "en",
@@ -864,7 +864,7 @@
         {
             "localized": [
                 {
-                    "en": "English US"
+                    "en": "English (USA)"
                 }
             ],
             "isocode": "en",
@@ -963,7 +963,7 @@
         {
             "localized": [
                 {
-                    "en": "Flemish"
+                    "en": "Dutch (Belgium)"
                 }
             ],
             "isocode": "nl",
@@ -985,7 +985,7 @@
         {
             "localized": [
                 {
-                    "en": "French"
+                    "en": "French (France)"
                 }
             ],
             "isocode": "fr",
@@ -996,7 +996,7 @@
         {
             "localized": [
                 {
-                    "en": "French Canada"
+                    "en": "French (Canada)"
                 }
             ],
             "isocode": "fr",
@@ -1007,7 +1007,7 @@
         {
             "localized": [
                 {
-                    "en": "French Swiss"
+                    "en": "French (Switzerland)"
                 }
             ],
             "isocode": "fr",
@@ -1051,7 +1051,7 @@
         {
             "localized": [
                 {
-                    "en": "Gamargu"
+                    "en": "Malgwa"
                 }
             ],
             "isocode": "mfi",
@@ -1084,7 +1084,7 @@
         {
             "localized": [
                 {
-                    "en": "German"
+                    "en": "German (Germany)"
                 }
             ],
             "isocode": "de",
@@ -1381,7 +1381,7 @@
         {
             "localized": [
                 {
-                    "en": "Italian"
+                    "en": "Italian (Italy)"
                 }
             ],
             "isocode": "it",
@@ -1392,7 +1392,7 @@
         {
             "localized": [
                 {
-                    "en": "Italian Swiss"
+                    "en": "Italian (Switzerland)"
                 }
             ],
             "isocode": "it",
@@ -2019,7 +2019,7 @@
         {
             "localized": [
                 {
-                    "en": "Mandara"
+                    "en": "Wandala"
                 }
             ],
             "isocode": "mfi",
@@ -2196,7 +2196,7 @@
         {
             "localized": [
                 {
-                    "en": "Moroccan Arabic"
+                    "en": "Arabic (Morocco)"
                 }
             ],
             "isocode": "ar",
@@ -2362,7 +2362,7 @@
         {
             "localized": [
                 {
-                    "en": "Occitan"
+                    "en": "Occitan (France)"
                 }
             ],
             "isocode": "oc",
@@ -2373,7 +2373,7 @@
         {
             "localized": [
                 {
-                    "en": "Occitan Aran"
+                    "en": "Occitan (Aran)"
                 }
             ],
             "isocode": "oc",
@@ -2517,7 +2517,7 @@
         {
             "localized": [
                 {
-                    "en": "Portuguese"
+                    "en": "Portuguese (Portugal)"
                 }
             ],
             "isocode": "pt",
@@ -2528,7 +2528,7 @@
         {
             "localized": [
                 {
-                    "en": "Portuguese Brazil"
+                    "en": "Portuguese (Brazil)"
                 }
             ],
             "isocode": "pt",
@@ -2550,7 +2550,7 @@
         {
             "localized": [
                 {
-                    "en": "Punjabi"
+                    "en": "Punjabi (India)"
                 }
             ],
             "isocode": "pa",
@@ -2737,7 +2737,7 @@
         {
             "localized": [
                 {
-                    "en": "Serbian Cyrillic"
+                    "en": "Serbian (Cyrillic script)"
                 }
             ],
             "isocode": "sr",
@@ -2749,7 +2749,7 @@
         {
             "localized": [
                 {
-                    "en": "Serbian Latin"
+                    "en": "Serbian (Latin script)"
                 }
             ],
             "isocode": "sr",
@@ -2783,7 +2783,7 @@
         {
             "localized": [
                 {
-                    "en": "Setswana (South Africa)"
+                    "en": "Tswana (South Africa)"
                 }
             ],
             "isocode": "tn",
@@ -2960,7 +2960,7 @@
         {
             "localized": [
                 {
-                    "en": "Spanish"
+                    "en": "Spanish (Spain)"
                 }
             ],
             "isocode": "es",
@@ -2971,7 +2971,7 @@
         {
             "localized": [
                 {
-                    "en": "Spanish Argentina"
+                    "en": "Spanish (Argentina)"
                 }
             ],
             "isocode": "es",
@@ -2982,7 +2982,7 @@
         {
             "localized": [
                 {
-                    "en": "Spanish Colombia"
+                    "en": "Spanish (Colombia)"
                 }
             ],
             "isocode": "es",
@@ -2993,7 +2993,7 @@
         {
             "localized": [
                 {
-                    "en": "Spanish Latin America"
+                    "en": "Spanish (Latin America)"
                 }
             ],
             "isocode": "es",
@@ -3004,7 +3004,7 @@
         {
             "localized": [
                 {
-                    "en": "Spanish Mexico"
+                    "en": "Spanish (Mexico)"
                 }
             ],
             "isocode": "es",
@@ -3015,7 +3015,7 @@
         {
             "localized": [
                 {
-                    "en": "Spanish United States"
+                    "en": "Spanish (USA)"
                 }
             ],
             "isocode": "es",
@@ -3104,7 +3104,7 @@
         {
             "localized": [
                 {
-                    "en": "Swiss German"
+                    "en": "German (Switzerland)"
                 }
             ],
             "isocode": "de",
@@ -3181,7 +3181,7 @@
         {
             "localized": [
                 {
-                    "en": "Tamil India"
+                    "en": "Tamil (India)"
                 }
             ],
             "isocode": "ta",
@@ -3193,7 +3193,7 @@
         {
             "localized": [
                 {
-                    "en": "Tamil Sri Lanka"
+                    "en": "Tamil (Sri Lanka)"
                 }
             ],
             "isocode": "ta",
@@ -3348,7 +3348,7 @@
         {
             "localized": [
                 {
-                    "en": "Tswana"
+                    "en": "Tswana (Botswana)"
                 }
             ],
             "isocode": "tn",
@@ -3558,7 +3558,7 @@
         {
             "localized": [
                 {
-                    "en": "Waray (Philippines)"
+                    "en": "Waray"
                 }
             ],
             "isocode": "war",
