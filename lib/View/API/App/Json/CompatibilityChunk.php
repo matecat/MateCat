@@ -59,7 +59,7 @@ class CompatibilityChunk extends Chunk {
         if ( !empty( $outsourceInfo ) ) {
             $outsource = ( new OutsourceConfirmation( $outsourceInfo ) )->render();
         } else {
-            $translator = ( !empty( $tStruct ) ? ( new JobTranslator() )->renderItem( $tStruct ) : null );
+            $translator = ( !empty( $tStruct ) ? ( new JobTranslator( $tStruct ) )->renderItem() : null );
         }
 
         $jobStats = WordCountStruct::loadFromJob( $chunk );
