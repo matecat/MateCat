@@ -169,6 +169,9 @@ class BatchReviewProcessor {
                 $this->deleteIssues( $model );
             }
 
+            // Commit the transaction to execute successive queries outside the transaction, enabling them to be routed to the slave databases.
+            $this->commitTransaction();
+
             // run chunkReviewUpdated
             foreach ( $this->segmentTransitionPhasesModel as $model ) {
                 foreach ( $model->getChunkReviews() as $chunkReview ) {

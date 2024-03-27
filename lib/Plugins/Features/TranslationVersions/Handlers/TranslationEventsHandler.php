@@ -115,6 +115,7 @@ class TranslationEventsHandler {
             $reviewExtended->processReviewTransitions( $this );
         }
 
+        // PLEASE NOTE: This call is not necessary since the commit is invoked inside the BatchReviewProcessor. However, we are leaving it here for certainty.
         $this->commitTransaction();
 
     }
