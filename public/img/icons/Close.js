@@ -6,7 +6,7 @@ const Close = ({size = 24}) => {
     <svg width={size} height={size} fill="none" viewBox="0 0 24 24">
       <g clipPath="url(#a)">
         <path
-          stroke="#fff"
+          stroke="currentColor"
           strokeLinecap="round"
           strokeLinejoin="round"
           strokeWidth="2.5"

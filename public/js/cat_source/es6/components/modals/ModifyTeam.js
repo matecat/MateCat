@@ -1,222 +1,55 @@
-import TeamConstants from '../../constants/TeamConstants'
-import TeamsStore from '../../stores/TeamsStore'
-import ManageActions from '../../actions/ManageActions'
-import React from 'react'
+import React, {useCallback, useEffect, useState} from 'react'
+import PropTypes from 'prop-types'
 import CommonUtils from '../../utils/commonUtils'
+import TEXT_UTILS from '../../utils/textUtils'
+import {EmailsBadge} from '../common/EmailsBadge/EmailsBadge'
 import IconSearch from '../icons/IconSearch'
 import IconClose from '../icons/IconClose'
-import TEXT_UTILS from '../../utils/textUtils'
+import ManageActions from '../../actions/ManageActions'
 import ModalsActions from '../../actions/ModalsActions'
-class ModifyTeam extends React.Component {
-  constructor(props) {
-    super(props)
-    this.state = {
-      team: this.props.team,
-      inputUserError: false,
-      inputNameError: false,
-      showRemoveMessageUserID: null,
-      readyToSend: false,
-      resendInviteArray: [],
-      searchMember: '',
+import IconEdit from '../icons/IconEdit'
+import Checkmark from '../../../../../img/icons/Checkmark'
+import Close from '../../../../../img/icons/Close'
+import {EMAIL_PATTERN} from '../../constants/Constants'
+import TeamsStore from '../../stores/TeamsStore'
+import TeamConstants from '../../constants/TeamConstants'
+
+export const ModifyTeam = ({team}) => {
+  const [teamState, setTeamState] = useState(team)
+  const [teamName, setTeamName] = useState(teamState.get('name'))
+  const [isModifyingName, setIsModifyingName] = useState(false)
+  const [emailsCollection, setEmailsCollection] = useState([])
+  const [searchMember, setSearchMember] = useState('')
+  const [removeUserId, setRemoveUserId] = useState()
+  const [resendInvitesCollection, setResendInvitesCollection] = useState([])
+
+  useEffect(() => {
+    const updateTeam = (teamUpdated) => {
+      if (teamState.get('id') == teamUpdated.get('id'))
+        setTeamState(teamUpdated)
     }
-    this.updateTeam = this.updateTeam.bind(this)
-    this.onLabelCreate = this.onLabelCreate.bind(this)
+
+    TeamsStore.addListener(TeamConstants.UPDATE_TEAM, updateTeam)
+
+    return () =>
+      TeamsStore.removeListener(TeamConstants.UPDATE_TEAM, updateTeam)
+  }, [teamState])
+
+  const confirmRemoveMember = (userId) => {
+    setRemoveUserId(userId)
   }
 
-  onLabelCreate(value, text) {
-    var self = this
-
-    // if ( APP.checkEmail(text) && event.key === 'Enter') {
-    if (CommonUtils.checkEmail(text)) {
-      $(this.inputNewUSer).dropdown('set selected', value)
-      this.setState({
-        inputUserError: false,
-      })
-      this.addUsers()
-      return true
-    } else if (text.indexOf(',') > -1) {
-      let members = text.split(',')
-      members.forEach(function (item) {
-        self.createLabel(item)
-      })
-      return false
-    } else {
-      this.createLabel(text)
-      return false
-    }
-    // else {
-    //     this.setState({
-    //         inputUserError: true
-    //     });
-    //     $(this.inputNewUSer).dropdown('set text', text);
-    //     return false;
-    // }
-  }
-
-  createLabel(text) {
-    var self = this
-    if (CommonUtils.checkEmail(text)) {
-      $(this.inputNewUSer).find('input.search').val('')
-      $(this.inputNewUSer).dropdown('set selected', text)
-      this.setState({
-        inputUserError: false,
-      })
-      return true
-    } else if (text.indexOf(',') > -1) {
-      let members = text.split(',')
-      members.forEach(function (item) {
-        self.createLabel(item)
-      })
-      return false
-    } else {
-      this.setState({
-        inputUserError: true,
-      })
-      $(this.inputNewUSer).dropdown('set text', text)
-      return true
-    }
-  }
-
-  updateTeam(team) {
-    if (this.state.team.get('id') == team.get('id')) {
-      this.setState({
-        team: team,
-      })
-    }
-  }
-
-  showRemoveUser(userId) {
-    this.setState({
-      showRemoveMessageUserID: userId,
-    })
-  }
-
-  removeUser(user) {
-    ManageActions.removeUserFromTeam(this.state.team, user)
+  const removeUser = (user) => {
+    ManageActions.removeUserFromTeam(teamState, user)
     if (user.get('uid') === APP.USER.STORE.user.uid) {
       ModalsActions.onCloseModal()
     }
-    this.setState({
-      showRemoveMessageUserID: null,
-    })
+    setRemoveUserId()
   }
 
-  undoRemoveAction() {
-    this.setState({
-      showRemoveMessageUserID: null,
-    })
-  }
-
-  resendInvite(mail) {
-    ManageActions.addUserToTeam(this.state.team, mail)
-    var resendInviteArray = this.state.resendInviteArray
-    resendInviteArray.push(mail)
-    this.setState({
-      resendInviteArray: resendInviteArray,
-    })
-  }
-
-  handleKeyPressUserInput(e) {
-    let mail = $(this.inputNewUSer).find('input.search').val()
-    if (e.key == 'Enter') {
-      if (mail == '') {
-        this.addUsers()
-      }
-      return
-    }
-    if (e.key === ' ') {
-      e.stopPropagation()
-      e.preventDefault()
-      this.createLabel(mail)
-    } else {
-      this.setState({
-        inputUserError: false,
-      })
-    }
-    return false
-  }
-
-  addUsers() {
-    var members =
-      $(this.inputNewUSer).dropdown('get value').length > 0
-        ? $(this.inputNewUSer).dropdown('get value').split(',')
-        : []
-    if (members.length > 0) {
-      ManageActions.addUserToTeam(this.state.team, members)
-      $(this.inputNewUSer).dropdown('restore defaults')
-    }
-  }
-
-  addUser() {
-    if (CommonUtils.checkEmail(this.inputNewUSer.value)) {
-      ManageActions.addUserToTeam(this.state.team, this.inputNewUSer.value)
-      var resendInviteArray = this.state.resendInviteArray
-      resendInviteArray.push(this.inputNewUSer.value)
-      this.inputNewUSer.value = ''
-      this.setState({
-        resendInviteArray: resendInviteArray,
-      })
-      return true
-    } else {
-      this.setState({
-        inputUserError: true,
-      })
-      return false
-    }
-  }
-
-  onKeyPressEvent(e) {
-    if (e.key === 'Enter') {
-      this.changeTeamName()
-      return false
-    } else if (this.inputName.value.length == 0) {
-      this.setState({
-        inputNameError: true,
-      })
-    } else {
-      this.setState({
-        inputNameError: false,
-      })
-    }
-  }
-
-  changeTeamName() {
-    if (
-      this.inputName &&
-      this.inputName.value.length > 0 &&
-      this.inputName.value != this.state.team.get('name')
-    ) {
-      ManageActions.changeTeamName(this.state.team.toJS(), this.inputName.value)
-      $(this.inputName).blur()
-      this.setState({
-        readyToSend: true,
-      })
-      return true
-    } else if (this.inputName && this.inputName.value.length == 0) {
-      this.setState({
-        inputNameError: true,
-      })
-      return false
-    }
-    return true
-  }
-
-  applyChanges() {
-    var teamNameOk = this.changeTeamName()
-    if ($(this.inputNewUSer).dropdown('get value').length > 0) {
-      this.addUsers()
-    }
-    if (teamNameOk) {
-      ModalsActions.onCloseModal()
-    }
-  }
-
-  getUserList() {
-    let self = this
-
-    const teamMembers = this.state.team.get('members')
+  const getUserList = () => {
+    const teamMembers = teamState.get('members')
     const filteredMembers = teamMembers.filter((member) => {
-      const {searchMember} = this.state
       const user = member.get('user')
       const fullName = `${user.get('first_name')} ${user.get('last_name')}`
       const regex = new RegExp(TEXT_UTILS.escapeRegExp(searchMember), 'i')
@@ -227,332 +60,239 @@ class ModifyTeam extends React.Component {
     if (!filteredMembers.size)
       return <span className="no-result">No results!</span>
 
-    return filteredMembers.map(function (member, i) {
-      let user = member.get('user')
-      if (
-        user.get('uid') == APP.USER.STORE.user.uid &&
-        self.state.showRemoveMessageUserID == user.get('uid')
-      ) {
-        if (self.state.team.get('members').size > 1) {
-          return (
-            <div className="item" key={'user' + user.get('uid')}>
-              <div className="right floated content top-5 bottom-5">
-                <div
-                  className="ui mini primary button"
-                  onClick={self.removeUser.bind(self, user)}
-                >
-                  <i className="icon-check icon" />
-                  Confirm
-                </div>
-                <div
-                  className="ui icon mini button red"
-                  onClick={self.undoRemoveAction.bind(self)}
-                >
-                  <i className="icon-cancel3 icon" />
-                </div>
-              </div>
-              <div className="content pad-top-10 pad-bottom-8">
-                Are you sure you want to leave this team?
-              </div>
-            </div>
-          )
-        } else {
-          return (
-            <div className="item" key={'user' + user.get('uid')}>
-              <div className="right floated content top-20 bottom-5">
-                <div
-                  className="ui mini primary button"
-                  onClick={self.removeUser.bind(self, user)}
-                >
-                  <i className="icon-check icon" />
-                  Confirm
-                </div>
-                <div
-                  className="ui icon mini button red"
-                  onClick={self.undoRemoveAction.bind(self)}
-                >
-                  <i className="icon-cancel3 icon" />
-                </div>
-              </div>
-              <div className="content pad-top-10 pad-bottom-8">
-                By removing the last member the team will be deleted. All
-                projects will be moved to your Personal area.
-              </div>
-            </div>
-          )
-        }
-      } else if (self.state.showRemoveMessageUserID == user.get('uid')) {
-        return (
-          <div className="item" key={'user' + user.get('uid')}>
-            <div className="right floated content top-5 bottom-5">
-              <div
-                className="ui mini primary button"
-                onClick={self.removeUser.bind(self, user)}
-              >
-                <i className="icon-check icon" /> Confirm
-              </div>
-              <div
-                className="mini ui icon button red"
-                onClick={self.undoRemoveAction.bind(self)}
-              >
-                <i className="icon-cancel3 icon" />
-              </div>
-            </div>
-            <div className="content pad-top-10 pad-bottom-8">
-              Are you sure you want to remove this user?
-            </div>
-          </div>
-        )
-      } else {
-        return (
-          <div className="item" key={'user' + user.get('uid')}>
-            <div
-              className="mini ui button right floated"
-              onClick={self.showRemoveUser.bind(self, user.get('uid'))}
-            >
-              Remove
-            </div>
+    return (
+      <ul>
+        {filteredMembers.map((member, index) => {
+          const user = member.get('user')
+          const userMetadata = member.get('user_metadata')
 
-            {member.get('user_metadata') ? (
-              <img
-                className="ui mini circular image"
-                src={
-                  member.get('user_metadata').get('gplus_picture') + '?sz=80'
-                }
-              />
-            ) : (
-              <div className="ui tiny image label">
-                {CommonUtils.getUserShortName(user.toJS())}
-              </div>
-            )}
+          const isRemovingMe =
+            user.get('uid') == APP.USER.STORE.user.uid &&
+            removeUserId == user.get('uid')
+          const messageRemovingMe =
+            isRemovingMe &&
+            (teamState.get('members').size > 1
+              ? 'Are you sure you want to leave this team?'
+              : 'By removing the last member the team will be deleted. All projects will be moved to your Personal area.')
 
-            <div className="middle aligned content">
-              <div className="content user">
-                {' ' + user.get('first_name') + ' ' + user.get('last_name')}
-              </div>
-              <div className="content email-user-invited">
-                {user.get('email')}
-              </div>
-            </div>
-          </div>
-        )
-      }
-    })
+          const messageRemovingUser =
+            !isRemovingMe &&
+            removeUserId === user.get('uid') &&
+            'Are you sure you want to remove this user?'
+
+          const shouldShowMessage = messageRemovingMe || messageRemovingUser
+
+          return (
+            <li className="member-item" key={index}>
+              {!shouldShowMessage && (
+                <>
+                  {userMetadata ? (
+                    <img
+                      className="member-avatar"
+                      src={userMetadata.get('gplus_picture') + '?sz=80'}
+                    />
+                  ) : (
+                    <span>{CommonUtils.getUserShortName(user.toJS())}</span>
+                  )}
+                  <div className="member-info">
+                    {(user.get('first_name') || user.get('last_name')) && (
+                      <span>{`${user.get('first_name')} ${user.get('last_name')}`}</span>
+                    )}
+                    <span>{user.get('email')}</span>
+                  </div>
+                </>
+              )}
+
+              {messageRemovingMe && (
+                <span className="removing-user-message">
+                  {messageRemovingMe}
+                </span>
+              )}
+              {messageRemovingUser && (
+                <span className="removing-user-message">
+                  {messageRemovingUser}
+                </span>
+              )}
+
+              {removeUserId === user.get('uid') ? (
+                <div className="container-confirm-form">
+                  <button
+                    className="ui primary button confirm-button"
+                    onClick={() => removeUser(user)}
+                  >
+                    <Checkmark size={12} />
+                    Confirm
+                  </button>
+
+                  <button
+                    className="ui button orange close-button"
+                    onClick={() => setRemoveUserId()}
+                  >
+                    <Close size={18} />
+                  </button>
+                </div>
+              ) : (
+                <div
+                  className="mini ui button button-remove"
+                  onClick={() => confirmRemoveMember(user.get('uid'))}
+                >
+                  Remove
+                </div>
+              )}
+            </li>
+          )
+        })}
+      </ul>
+    )
   }
 
-  getPendingInvitations() {
-    let self = this
+  const getPendingInvitations = () => {
     if (
-      !this.state.team.get('pending_invitations') ||
-      !this.state.team.get('pending_invitations').size > 0
+      !teamState.get('pending_invitations') ||
+      !teamState.get('pending_invitations').size > 0
     )
       return
-    return this.state.team.get('pending_invitations').map(function (mail, i) {
-      var inviteResended = self.state.resendInviteArray.indexOf(mail) > -1
-      return (
-        <div className="item pending-invitation" key={'user-invitation' + i}>
-          <div className="ui tiny image label">
-            {mail.substring(0, 1).toUpperCase()}
-          </div>
-          <span className="email content user">{mail}</span>
-          <div>
-            {inviteResended ? (
-              <span className="content pending-msg">Invite sent</span>
-            ) : (
-              <>
-                <span className="content pending-msg">Pending user</span>
-                <div
-                  className="mini ui button right floated"
-                  onClick={self.resendInvite.bind(self, mail)}
-                >
-                  Resend Invite
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      )
-    })
+
+    return (
+      <ul>
+        {teamState.get('pending_invitations').map((email, index) => {
+          const isAlreadyResendInvite = resendInvitesCollection.some(
+            (resendEmail) => resendEmail === email,
+          )
+
+          return (
+            <li className="member-item" key={index}>
+              <div className="member-avatar">
+                {email.substring(0, 1).toUpperCase()}
+              </div>
+              <div className="member-info">
+                <span>{email}</span>
+              </div>
+              <div className="pending-member-remove">
+                {isAlreadyResendInvite ? (
+                  <span>Invite sent</span>
+                ) : (
+                  <>
+                    <span>Pending user</span>
+                    <div
+                      className="mini ui button"
+                      onClick={() => resendInvite(email)}
+                    >
+                      Resend Invite
+                    </div>
+                  </>
+                )}
+              </div>
+            </li>
+          )
+        })}
+      </ul>
+    )
   }
 
-  componentDidUpdate() {
-    var self = this
-    clearTimeout(this.inputTimeout)
-    if (this.state.readyToSend) {
-      this.inputTimeout = setTimeout(function () {
-        self.setState({
-          readyToSend: false,
-        })
-      }, 1000)
+  const onKeyUpTeamName = (event) => {
+    if (event.key === 'Enter') {
+      if (teamName && teamName != teamState.get('name'))
+        ManageActions.changeTeamName(teamState.toJS(), teamName)
+
+      event.currentTarget.blur()
     }
   }
 
-  componentDidMount() {
-    $(this.inputNewUSer).dropdown({
-      allowAdditions: true,
-      action: this.onLabelCreate,
-    })
-    TeamsStore.addListener(TeamConstants.UPDATE_TEAM, this.updateTeam)
+  const onChangeSearchMember = (event) => {
+    setSearchMember(event.target.value)
   }
 
-  componentWillUnmount() {
-    TeamsStore.removeListener(TeamConstants.UPDATE_TEAM, this.updateTeam)
+  const onChangeAddMembers = useCallback(
+    (emails) => setEmailsCollection(emails),
+    [],
+  )
+
+  const inviteMembers = () => {
+    ManageActions.addUserToTeam(teamState, emailsCollection)
+    setEmailsCollection([])
   }
 
-  shouldComponentUpdate(nextProps, nextState) {
-    return (
-      nextState.team !== this.state.team ||
-      nextState.inputUserError !== this.state.inputUserError ||
-      nextState.inputNameError !== this.state.inputNameError ||
-      nextState.showRemoveMessageUserID !==
-        this.state.showRemoveMessageUserID ||
-      nextState.readyToSend !== this.state.readyToSend ||
-      nextState.searchMember !== this.state.searchMember
-    )
+  const resendInvite = (email) => {
+    ManageActions.addUserToTeam(teamState, email)
+    setResendInvitesCollection((prevState) => [...prevState, email])
   }
 
-  onChangeSearchMember(event) {
-    this.setState({searchMember: event.target.value})
-  }
+  const userlist = getUserList()
+  const pendingUsers = getPendingInvitations()
 
-  render() {
-    let usersError = this.state.inputUserError ? 'error' : ''
-    let orgNameError = this.state.inputNameError ? 'error' : ''
-    let userlist = this.getUserList()
-    let pendingUsers = this.getPendingInvitations()
-    let icon =
-      this.state.readyToSend && !this.state.inputNameError ? (
-        <i className="icon-checkmark green icon" />
-      ) : (
-        <i className="icon-pencil icon" />
-      )
-    let applyButtonClass =
-      this.state.inputUserError || this.state.inputNameError ? 'disabled' : ''
-    let middleContainerStyle = this.props.hideChangeName
-      ? {paddingTop: '20px'}
-      : {}
-    return (
-      <div className="modify-team-modal" data-testid="modify-team-modal">
-        {!this.props.hideChangeName ? (
-          <div className="matecat-modal-top">
-            <div className="ui one column grid left aligned">
-              <div className="column">
-                <h2>Change Team Name</h2>
-                <div className={'ui fluid icon input ' + orgNameError}>
-                  <input
-                    type="text"
-                    defaultValue={this.state.team.get('name')}
-                    onKeyUp={this.onKeyPressEvent.bind(this)}
-                    ref={(inputName) => (this.inputName = inputName)}
-                  />
-                  {icon}
-                </div>
-                {this.state.inputNameError ? (
-                  <div className="validation-error">
-                    <span
-                      className="text"
-                      style={{color: 'red', fontSize: '14px'}}
-                    >
-                      Team name is required
-                    </span>
-                  </div>
-                ) : (
-                  ''
-                )}
-              </div>
-            </div>
-          </div>
-        ) : (
-          ''
-        )}
-        {this.state.team.get('type') !== 'personal' ? (
-          <div className="matecat-modal-middle" style={middleContainerStyle}>
-            <div className="ui grid left aligned">
-              <div className="sixteen wide column">
-                <h2>Manage Members</h2>
-                {/* <div className={"ui fluid icon input " + usersError }>
-                                    <input type="text" placeholder="insert email and press enter"
-                                           onKeyUp={this.handleKeyPressUserInput.bind(this)}
-                                           ref={(inputNewUSer) => this.inputNewUSer = inputNewUSer}/>
-                                </div>
-                                {this.state.inputUserError ? (
-                                        <div className="validation-error"><span className="text" style={{color: 'red', fontSize: '14px'}}>A valid email is required</span></div>
-                                    ): ''}*/}
-                <div
-                  className={
-                    'ui multiple search selection dropdown ' + usersError
-                  }
-                  onKeyUp={this.handleKeyPressUserInput.bind(this)}
-                  ref={(inputNewUSer) => (this.inputNewUSer = inputNewUSer)}
-                >
-                  <input name="tags" type="hidden" />
-                  <div className="default text">
-                    Add new people (separate email addresses with a comma)
-                  </div>
-                </div>
-                {this.state.inputUserError ? (
-                  <div className="validation-error">
-                    <span
-                      className="text"
-                      style={{color: 'red', fontSize: '14px'}}
-                    >
-                      A valid email is required
-                    </span>
-                  </div>
-                ) : (
-                  ''
-                )}
-              </div>
-
-              <div className="sixteen wide column">
-                <div className="ui members-list team">
-                  <div className="search-member-container">
-                    <IconSearch />
-                    <input
-                      name="search_member"
-                      placeholder="Search Member"
-                      value={this.state.searchMember}
-                      onChange={this.onChangeSearchMember.bind(this)}
-                    />
-                    <div
-                      className={`reset_button ${
-                        this.state.searchMember
-                          ? 'reset_button--visible'
-                          : 'reset_button--hidden'
-                      }`}
-                      onClick={() => this.setState({searchMember: ''})}
-                    >
-                      <IconClose />
-                    </div>
-                  </div>
-                  <div className="ui divided list">
-                    {pendingUsers}
-                    {userlist}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        ) : (
-          ''
-        )}
-        <div className="matecat-modal-bottom">
-          <div className="ui one column grid right aligned">
-            <div className="column">
-              <button
-                className={
-                  'create-team ui primary button open ' + applyButtonClass
-                }
-                onClick={this.applyChanges.bind(this)}
-              >
-                Close
-              </button>
-            </div>
-          </div>
+  return (
+    <div className="team-modal">
+      <div>
+        <h2>Change Team Name</h2>
+        <div className="team-name-container">
+          <input
+            className="team-modal-input"
+            type="text"
+            value={teamName}
+            onChange={(e) => setTeamName(e.currentTarget.value)}
+            onKeyUp={onKeyUpTeamName}
+            onFocus={() => setIsModifyingName(true)}
+            onBlur={() => setIsModifyingName(false)}
+          />
+          {isModifyingName && <IconEdit />}
         </div>
       </div>
-    )
-  }
+      {teamState.get('type') !== 'personal' && (
+        <div>
+          <h2>Manage Members</h2>
+          <EmailsBadge
+            name="team"
+            value={emailsCollection}
+            onChange={onChangeAddMembers}
+            placeholder="Add new people (separate email addresses with a comma)"
+          />
+          <button
+            className="create-team ui primary button open button-invite"
+            onClick={inviteMembers}
+            disabled={
+              !emailsCollection.length ||
+              emailsCollection.some((email) => !EMAIL_PATTERN.test(email))
+            }
+          >
+            Invite members
+          </button>
+        </div>
+      )}
+
+      <div>
+        <div className="search-members">
+          <IconSearch />
+          <input
+            name="search_member"
+            placeholder="Search Member"
+            value={searchMember}
+            onChange={onChangeSearchMember}
+          />
+          <div
+            className={`reset_button ${
+              searchMember ? 'reset_button--visible' : 'reset_button--hidden'
+            }`}
+            onClick={() => setSearchMember('')}
+          >
+            <IconClose />
+          </div>
+        </div>
+        <div className="members-list">
+          {pendingUsers}
+          {userlist}
+        </div>
+      </div>
+      <button
+        className="create-team ui primary button open button-close"
+        onClick={() => ModalsActions.onCloseModal()}
+      >
+        Close
+      </button>
+    </div>
+  )
 }
 
-export default ModifyTeam
+ModifyTeam.propTypes = {
+  team: PropTypes.object.isRequired,
+}
