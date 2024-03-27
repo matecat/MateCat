@@ -46,6 +46,7 @@ class setTranslationController extends ajaxController {
 
     protected $split_chunk_lengths;
     protected $chosen_suggestion_index;
+    protected $suggestion_array;
     protected $status;
     protected $split_statuses;
 
@@ -101,6 +102,7 @@ class setTranslationController extends ajaxController {
                 'segment'                 => [ 'filter' => FILTER_UNSAFE_RAW ],
                 'version'                 => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
                 'chosen_suggestion_index' => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'suggestion_array'        => [ 'filter' => FILTER_UNSAFE_RAW ],
                 'status'                  => [
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ],
@@ -139,6 +141,7 @@ class setTranslationController extends ajaxController {
         $this->client_target_version = ( empty( $this->__postInput[ 'version' ] ) ? '0' : $this->__postInput[ 'version' ] );
 
         $this->chosen_suggestion_index = $this->__postInput[ 'chosen_suggestion_index' ];
+        $this->suggestion_array        = $this->__postInput[ 'suggestion_array' ];
 
         $this->status         = strtoupper( $this->__postInput[ 'status' ] );
         $this->split_statuses = explode( ",", strtoupper( $this->__postInput[ 'splitStatuses' ] ) ); //strtoupper transforms null to ""
@@ -344,7 +347,7 @@ class setTranslationController extends ajaxController {
 
         $old_translation = $this->_getOldTranslation();
 
-        $old_suggestion_array = json_decode($old_translation->suggestions_array);
+        $old_suggestion_array = json_decode($this->suggestion_array);
         $old_suggestion = ($this->chosen_suggestion_index !== null ? @$old_suggestion_array[$this->chosen_suggestion_index-1] : null);
 
         $new_translation                         = new Translations_SegmentTranslationStruct();
@@ -354,6 +357,7 @@ class setTranslationController extends ajaxController {
         $new_translation->segment_hash           = $this->segment->segment_hash;
         $new_translation->translation            = $translation;
         $new_translation->serialized_errors_list = $err_json;
+        $new_translation->suggestions_array      = $this->suggestion_array;
         $new_translation->suggestion_position    = ($this->chosen_suggestion_index !== null ? $this->chosen_suggestion_index : $old_translation->suggestion_position);
         $new_translation->warning                = $check->thereAreWarnings();
         $new_translation->translation_date       = date( "Y-m-d H:i:s" );

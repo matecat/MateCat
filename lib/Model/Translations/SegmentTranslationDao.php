@@ -988,11 +988,15 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
      */
     public static function updateSuggestionsArray($id_segment, $suggestions) {
 
+        if(empty($suggestions)){
+            return;
+        }
+
         $conn  = Database::obtain()->getConnection();
         $query = "UPDATE segment_translations SET suggestions_array = :suggestions_array WHERE id_segment=:id_segment";
 
         $stmt  = $conn->prepare( $query );
-        $suggestions_array = (!empty($suggestions)) ? json_encode($suggestions) : null;
+        $suggestions_array = json_encode($suggestions);
 
         $params = [
             'id_segment'        => $id_segment,
