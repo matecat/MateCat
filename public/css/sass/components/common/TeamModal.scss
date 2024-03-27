@@ -78,6 +78,8 @@
   .members-list {
     height: 200px;
     overflow-y: auto;
+    padding-right: 5px;
+
     > ul {
       list-style-type: none;
       padding: 0;
