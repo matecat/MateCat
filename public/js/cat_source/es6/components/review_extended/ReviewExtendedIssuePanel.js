@@ -87,8 +87,6 @@ class ReviewExtendedIssuePanel extends React.Component {
       segment.status =
         config.revisionNumber === REVISE_STEP_NUMBER.REVISE1
           ? SEGMENTS_STATUS.APPROVED
-          : config.word_count_type === JOB_WORD_CONT_TYPE.EQUIVALENT
-          ? SEGMENTS_STATUS.APPROVED
           : SEGMENTS_STATUS.APPROVED2
       setTranslation({segment})
         .then((response) => {
