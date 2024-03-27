@@ -8,9 +8,9 @@ RewriteRule ^robots\.txt$ robots-whitelabel.txt [L]
 
 #RewriteRule ^offline\.html$ /lib/View/offline.html [L]
 #RewriteCond %{REQUEST_URI} !/offline.html [NC]
-#RewriteCond %{REQUEST_URI} !/public/css/build/common.css [NC]
-#RewriteCond %{REQUEST_URI} !/public/img/logo.png [NC]
-#RewriteCond %{REQUEST_URI} !/public/img/offline.png [NC]
+#RewriteCond %{REQUEST_URI} !/public/build/runtime\.(.+)\.js [NC]
+#RewriteCond %{REQUEST_URI} !/public/build/commonCss\.(.+)\.(css|js) [NC]
+#RewriteCond %{REQUEST_URI} !/img/meta/favicon(.+)\.svg [NC]
 #RewriteRule $ /offline.html [R=307,L]
 RewriteCond %{REQUEST_URI} /offline.html
 RewriteRule $ / [R=307,L]
