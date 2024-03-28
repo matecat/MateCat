@@ -13,7 +13,7 @@ var spec = {
     version: '2.0.0',
   },
   host: config.swagger_host,
-  schemes: ['http', 'https'],
+  schemes: ['https'],
   produces: ['application/json'],
   paths: {
     '/api/v2/projects/{id_project}/{password}': {
