@@ -12,6 +12,7 @@
 @import 'popup';
 @import 'commons/tooltip';
 @import 'modals/language-selector';
+@import 'commons/aria-label-tooltip';
 
 @import 'upload-page';
 @import 'components/common/Select';
@@ -23,7 +24,6 @@
 @import 'components/common/Button';
 @import 'components/common/Popover';
 
-@import 'commons/aria-label-tooltip';
 @import 'settingsPanel';
 
 .new_project__page {

@@ -25,6 +25,7 @@ export const Dropdown = forwardRef(
       showSearchBar = false,
       searchPlaceholder = 'Search...',
       multipleSelect = 'off',
+      tooltipPosition = 'left',
       onSelect = () => {},
       onToggleOption = () => {},
       onSearchBarFocus = () => {},
@@ -407,9 +408,9 @@ export const Dropdown = forwardRef(
         )}
         {rowTooltip && (
           <div
-            className="dropdown__tooltip"
+            className={`dropdown__tooltip dropdown__tooltip-${tooltipPosition}`}
             aria-label={rowTooltip.label}
-            tooltip-position="left"
+            tooltip-position={tooltipPosition}
             style={{top: rowTooltip.top}}
           ></div>
         )}
@@ -465,6 +466,7 @@ Dropdown.propTypes = {
   showSearchBar: PropTypes.bool,
   searchPlaceholder: PropTypes.string,
   multipleSelect: PropTypes.oneOf(['off', 'dropdown', 'modal']),
+  tooltipPosition: PropTypes.oneOf(['left', 'right']),
   onSelect: PropTypes.func,
   onToggleOption: PropTypes.func,
   onSearchBarFocus: PropTypes.func,

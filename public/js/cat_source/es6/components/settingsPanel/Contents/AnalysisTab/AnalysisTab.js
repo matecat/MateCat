@@ -42,6 +42,7 @@ const getFilteredSchemaCreateUpdate = (template) => {
     version,
     createdAt,
     modifiedAt,
+    deletedAt,
     isTemporary,
     isSelected,
     ...filtered

@@ -71,7 +71,7 @@ const DEFAULT_CONTENTS = (isCattool = config.is_cattool) => {
             id: SETTINGS_PANEL_TABS.qualityFramework,
             label: 'Quality framework',
             description:
-              'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vulputate libero et velit interdum, ac aliquet odio mattis.',
+              'Determines how sentences are split into segments. More details <a href="#">here</a>.',
             component: <QualityFrameworkTab />,
           },
           {

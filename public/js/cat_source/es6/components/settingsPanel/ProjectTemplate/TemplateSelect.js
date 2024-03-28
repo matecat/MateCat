@@ -65,6 +65,7 @@ export const TemplateSelect = ({
         placeholder="Select template"
         className={`project-template-select${isModifyingTemplate ? ' project-template-select-unsaved' : ''}`}
         id="project-template"
+        tooltipPosition="right"
         checkSpaceToReverse={false}
         maxHeightDroplist={maxHeightDroplist ?? 100}
         options={options}

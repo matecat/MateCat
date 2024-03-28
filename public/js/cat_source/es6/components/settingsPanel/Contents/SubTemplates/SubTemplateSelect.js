@@ -35,6 +35,7 @@ export const SubTemplateSelect = () => {
           placeholder="Select template"
           className={`settings-panel-subtemplates-select${isModifyingTemplate ? ' settings-panel-subtemplates-select-unsaved' : ''}`}
           id="project-template"
+          tooltipPosition="right"
           checkSpaceToReverse={false}
           options={options}
           activeOption={activeOption}
