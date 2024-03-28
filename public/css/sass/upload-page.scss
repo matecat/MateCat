@@ -2987,3 +2987,18 @@ a.pull-right.confirmDelete {
     padding-top: 20px;
   }
 }
+
+.language-dropdown-item-container {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+
+  .code-badge {
+    background-color: $grey7;
+    border-radius: 4px;
+    padding: 0px 4px;
+    color: $white;
+    font-size: 14px;
+    white-space: nowrap;
+  }
+}

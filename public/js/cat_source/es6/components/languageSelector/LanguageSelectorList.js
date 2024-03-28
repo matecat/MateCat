@@ -63,7 +63,12 @@ class LanguageSelectorList extends React.Component {
                     className={`lang-item ${elementClass}`}
                     onClick={onClickElement(e)}
                   >
-                    {e.name}
+                    <div className="language-dropdown-item-container">
+                      <span className={`code-badge code-badge-${elementClass}`}>
+                        {e.code}
+                      </span>
+                      <span>{e.name}</span>
+                    </div>
                     <span className={'check'}>
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -103,7 +108,9 @@ class LanguageSelectorList extends React.Component {
     const langs =
       languagesList && languagesList.length
         ? languagesList.filter(
-            (e) => e.name.toLowerCase().indexOf(querySearch.toLowerCase()) >= 0,
+            (e) =>
+              e.name.toLowerCase().indexOf(querySearch.toLowerCase()) >= 0 ||
+              e.id.toLowerCase().indexOf(querySearch.toLowerCase()) >= 0,
           )
         : []
     const sortInputFirst = (input, data) => {

@@ -2367,7 +2367,9 @@ tr.disabled td {
   max-height: 0;
   overflow: hidden;
   z-index: 3;
-  box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12),
+  box-shadow:
+    0 0 0 #e0e0e0,
+    0 0 2px rgba(0, 0, 0, 0.12),
     0 2px 4px rgba(0, 0, 0, 0.24) !important;
 }
 
@@ -3361,7 +3363,8 @@ p.tm-warning-message {
 @font-face {
   font-family: 'icomoon';
   src: url('/public/css/fonts/icomoon.eot?7sjwen');
-  src: url('/public/css/fonts/icomoon.eot?7sjwen#iefix')
+  src:
+    url('/public/css/fonts/icomoon.eot?7sjwen#iefix')
       format('embedded-opentype'),
     url('/public/css/fonts/icomoon.ttf?7sjwen') format('truetype'),
     url('/public/css/fonts/icomoon.woff?7sjwen') format('woff'),
@@ -4198,7 +4201,9 @@ body.side-popup {
 
 @font-face {
   font-family: Calibri;
-  src: local(Calibri), url('../fonts/calibri-webfont.woff') format('woff'),
+  src:
+    local(Calibri),
+    url('../fonts/calibri-webfont.woff') format('woff'),
     url('../fonts/calibri-webfont.ttf') format('truetype'),
     url('../fonts/calibri-webfont.eot'),
     url('../fonts/calibri-webfont.eot?#iefix') format('embedded-opentype');
@@ -4207,7 +4212,8 @@ body.side-popup {
 @font-face {
   font-family: Calibri;
   font-weight: bold;
-  src: local('Calibri Bold'),
+  src:
+    local('Calibri Bold'),
     url('../fonts/calibri_bold-webfont.woff') format('woff'),
     url('../fonts/calibri_bold-webfont.ttf') format('truetype'),
     url('../fonts/calibri_bold-webfont.eot'),
@@ -4515,8 +4521,12 @@ div.ui-user-top-image {
   display: inline-block;
   outline: none;
   text-align: left;
-  -webkit-transition: box-shadow 0.1s ease, width 0.1s ease;
-  transition: box-shadow 0.1s ease, width 0.1s ease;
+  -webkit-transition:
+    box-shadow 0.1s ease,
+    width 0.1s ease;
+  transition:
+    box-shadow 0.1s ease,
+    width 0.1s ease;
   -webkit-tap-highlight-color: transparent;
   float: right;
   text-align: right;
@@ -4725,7 +4735,7 @@ body svg {
 
 .label-with-tooltip {
   position: absolute;
-  z-index: 12;
+  z-index: 14;
   pointer-events: none;
   transform: translate(-50%, -100%);
 
