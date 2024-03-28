@@ -216,7 +216,7 @@ class CatUtils {
             //if needed here can be placed a check for affected_rows == 0 //( the return value of addTranslation )
             Translations_SegmentTranslationDao::addTranslation( $translation, $is_revision );
         } catch ( Exception $e ) {
-            throw  new ControllerReturnException( $e->getMessage(), $e );
+            throw  new ControllerReturnException( $e->getMessage(), $e->getCode(), $e );
         }
 
     }
