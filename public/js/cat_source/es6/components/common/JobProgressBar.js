@@ -19,7 +19,7 @@ const JobProgressBar = ({
   const approvedPerc = (approved * 100) / total
   const approved2Perc = (approved2 * 100) / total
   const draftPerc = ((draft + newWords) * 100) / total
-  const totalPerc = ((total - draft) * 100) / total
+  const totalPerc = ((total - draft - newWords) * 100) / total
   const analysisComplete = !isUndefined(stats.analysis_complete)
     ? stats.analysis_complete
     : true
