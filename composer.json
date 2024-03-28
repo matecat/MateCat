@@ -9,6 +9,7 @@
         "google/apiclient": "^2.4.1",
         "google/apiclient-services": "^0.128",
         "klein/klein": "^2.1",
+        "predis/predis": "^v2.0",
         "matecat/simple-s3": "^1.5",
         "matecat/whole-text-finder": "^1.0",
         "matecat/xliff-parser": "^v2.0",
