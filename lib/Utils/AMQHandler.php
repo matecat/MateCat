@@ -8,14 +8,18 @@
  */
 
 use Analysis\Queue\RedisKeys;
+use Predis\Client as PredisClient;
+use Stomp\Client;
+use Stomp\Exception\ConnectionException;
+use Stomp\Network\Connection;
+use Stomp\StatefulStomp;
+use Stomp\Transport\Message;
 use TaskRunner\Commons\Context;
 
-class AMQHandler extends Stomp {
-
-    protected $amqHandler;
+class AMQHandler extends StatefulStomp {
 
     /**
-     * @var \Predis\Client
+     * @var PredisClient
      */
     protected $redisHandler;
     protected $clientType = null;
@@ -31,17 +35,22 @@ class AMQHandler extends Stomp {
      * Handle a string for the queue name
      * @var string
      *
-     * @throws \StompException
      */
     protected $queueName = null;
 
+    /**
+     * @throws ConnectionException
+     */
     public function __construct( $brokerUri = null ) {
 
         if ( !is_null( $brokerUri ) ) {
-            parent::__construct( $brokerUri );
+            $connection = new Connection( $brokerUri );
         } else {
-            parent::__construct( INIT::$QUEUE_BROKER_ADDRESS );
+            $connection = new Connection( INIT::$QUEUE_BROKER_ADDRESS, 2 );
         }
+
+        $connection->setReadTimeout( 0, 250000 );
+        parent::__construct( new Client( $connection ) );
 
     }
 
@@ -50,7 +59,7 @@ class AMQHandler extends Stomp {
      *
      * Get the connection to Redis server and return it
      *
-     * @throws \Predis\Connection\ConnectionException
+     * @throws ReflectionException
      */
     public function getRedisClient() {
         if ( empty( $this->redisHandler ) ) {
@@ -61,59 +70,35 @@ class AMQHandler extends Stomp {
     }
 
     /**
-     * @param string $queueName
      *
-     * @param null   $properties
-     * @param null   $sync
+     * @param string $destination
+     * @param null   $selector
+     * @param string $ack
+     * @param array  $header
      *
-     * @return bool
-     * @throws StompException
+     * @return int
      * @throws Exception
      */
-    public function subscribe( $queueName = null, $properties = null, $sync = null ) {
-
-        if ( empty( $queueName ) ) {
-            $queueName = RedisKeys::DEFAULT_QUEUE_NAME;
-        }
-
-        if ( !empty( $this->clientType ) && $this->clientType != self::CLIENT_TYPE_SUBSCRIBER ) {
-            throw new Exception( "This client is a $this->clientType. A client can be only publisher or subscriber, not both." );
-        } elseif ( $this->clientType == self::CLIENT_TYPE_SUBSCRIBER ) {
-            //already connected, we want to change the queue
-            $this->queueName = $queueName;
-
-            return parent::subscribe( '/queue/' . RedisKeys::DEFAULT_QUEUE_NAME );
-        }
+    public function subscribe( $destination, $selector = null, $ack = 'client-individual', array $header = [] ) {
 
         $this->clientType = self::CLIENT_TYPE_SUBSCRIBER;
-        $this->connect();
-        $this->setReadTimeout( 0, 250000 );
-        $this->queueName = $queueName;
+        $this->queueName  = $destination;
 
-        return parent::subscribe( '/queue/' . (int)INIT::$INSTANCE_ID . "_" . $queueName );
+        return parent::subscribe( '/queue/' . INIT::$INSTANCE_ID . "_" . $destination, $selector, $ack, $header );
 
     }
 
     /**
-     * @param string             $destination
-     * @param \StompFrame|string $msg
-     * @param array              $properties
-     * @param null               $sync
+     * @param string  $destination
+     * @param Message $message
      *
      * @return bool
      * @throws Exception
      */
-    public function send( $destination, $msg, $properties = [], $sync = null ) {
-
-        if ( !empty( $this->clientType ) && $this->clientType != self::CLIENT_TYPE_PUBLISHER ) {
-            throw new Exception( "This client is a $this->clientType. A client can be only publisher or subscriber, not both." );
-        } elseif ( empty( $this->clientType ) ) {
-            $this->connect();
-        }
+    public function send( $destination, Message $message ) {
 
         $this->clientType = self::CLIENT_TYPE_PUBLISHER;
-
-        return parent::send( '/queue/' . (int)INIT::$INSTANCE_ID . "_" . $destination, $msg, $properties, $sync );
+        return parent::send( '/queue/' . INIT::$INSTANCE_ID . "_" . $destination, $message );
 
     }
 
@@ -132,7 +117,7 @@ class AMQHandler extends Stomp {
         } elseif ( !empty( $this->queueName ) ) {
             $queue = $this->queueName;
         } else {
-            throw new \Exception( 'No queue name provided.' );
+            throw new Exception( 'No queue name provided.' );
         }
 
         $queue_interface_url = INIT::$QUEUE_JMX_ADDRESS . "/api/jolokia/read/org.apache.activemq:type=Broker,brokerName=localhost,destinationType=Queue,destinationName=" . (int)INIT::$INSTANCE_ID . "_" . $queue . "/QueueSize";
@@ -176,7 +161,7 @@ class AMQHandler extends Stomp {
         } elseif ( !empty( $this->queueName ) ) {
             $queue = $this->queueName;
         } else {
-            throw new \Exception( 'No queue name provided.' );
+            throw new Exception( 'No queue name provided.' );
         }
 
         $queue_interface_url = INIT::$QUEUE_JMX_ADDRESS . "/api/jolokia/read/org.apache.activemq:type=Broker,brokerName=localhost,destinationType=Queue,destinationName=" . (int)INIT::$INSTANCE_ID . "_" . $queue . "/ConsumerCount";
@@ -240,11 +225,14 @@ class AMQHandler extends Stomp {
         return $this;
     }
 
+    /**
+     * @throws Exception
+     */
     public function reQueue( $failed_segment, Context $queueInfo ) {
 
         if ( !empty( $failed_segment ) ) {
             Log::doJsonLog( "Failed " . var_export( $failed_segment, true ) );
-            $this->send( $queueInfo->queue_name, json_encode( $failed_segment ), [ 'persistent' => $this->persistent ] );
+            $this->send( $queueInfo->queue_name, new Message( strval( $failed_segment ), [ 'persistent' => $this->persistent ] ) );
         }
 
     }

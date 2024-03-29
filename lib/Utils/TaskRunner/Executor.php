@@ -16,9 +16,10 @@ use Exception;
 use INIT;
 use Log;
 use PDOException;
+use ReflectionException;
 use SplObserver;
 use SplSubject;
-use StompFrame;
+use Stomp\Transport\Frame;
 use TaskRunner\Commons\AbstractWorker;
 use TaskRunner\Commons\Context;
 use TaskRunner\Commons\QueueElement;
@@ -27,6 +28,7 @@ use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\FrameException;
 use TaskRunner\Exceptions\ReQueueException;
 use TaskRunner\Exceptions\WorkerClassException;
+use Utils;
 
 include_once realpath( dirname( __FILE__ ) . '/../../../' ) . "/inc/Bootstrap.php";
 Bootstrap::start();
@@ -43,7 +45,7 @@ class Executor implements SplObserver {
     /**
      * Handler of AMQ connector
      *
-     * @var \AMQHandler
+     * @var AMQHandler
      */
     protected $_queueHandler;
 
@@ -205,11 +207,9 @@ class Executor implements SplObserver {
     /**
      * Main method
      *
-     * @param null $args
-     *
-     * @throws \StompException
+     * @throws Exception
      */
-    public function main( $args = null ) {
+    public function main() {
 
         $this->_frameID = 1;
         do {
@@ -226,7 +226,7 @@ class Executor implements SplObserver {
 
                 //read Message frame from the queue
                 /**
-                 * @var $msgFrame     \StompFrame
+                 * @var $msgFrame     Frame
                  * @var $queueElement QueueElement
                  */
                 list( $msgFrame, $queueElement ) = $this->_readAMQFrame();
@@ -269,7 +269,7 @@ class Executor implements SplObserver {
                 $queueElement->reQueueNum = ++$queueElement->reQueueNum;
                 $amqHandlerPublisher      = new AMQHandler();
                 $amqHandlerPublisher->reQueue( $queueElement, $this->_executionContext );
-                $amqHandlerPublisher->disconnect();
+                $amqHandlerPublisher->getClient()->disconnect();
 
             } catch ( EmptyElementException $e ) {
 
@@ -283,7 +283,7 @@ class Executor implements SplObserver {
                 $queueElement->reQueueNum = ++$queueElement->reQueueNum;
                 $amqHandlerPublisher      = new AMQHandler();
                 $amqHandlerPublisher->reQueue( $queueElement, $this->_executionContext );
-                $amqHandlerPublisher->disconnect();
+                $amqHandlerPublisher->getClient()->disconnect();
                 sleep( 2 );
 
             } catch ( Exception $e ) {
@@ -314,14 +314,13 @@ class Executor implements SplObserver {
     protected function _readAMQFrame() {
 
         /**
-         * @var $msgFrame \StompFrame
+         * @var $msgFrame Frame
          */
-        $msgFrame = null;
         try {
 
-            $msgFrame = $this->_queueHandler->readFrame();
+            $msgFrame = $this->_queueHandler->read();
 
-            if ( $msgFrame instanceof StompFrame && ( $msgFrame->command == "MESSAGE" || array_key_exists( 'MESSAGE', $msgFrame->headers /* Stomp Client bug... hack */ ) ) ) {
+            if ( $msgFrame instanceof Frame && ( $msgFrame->getCommand() == "MESSAGE" || array_key_exists( 'MESSAGE', $msgFrame->getHeaders() ) ) ) {
 
                 $this->_frameID++;
                 $this->_logMsg( "--- (Executor " . $this->_executor_instance_id . ") : processing frame {$this->_frameID}" );
@@ -331,7 +330,7 @@ class Executor implements SplObserver {
                 if ( empty( $queueElement ) ) {
 
                     $this->_queueHandler->ack( $msgFrame );
-                    $msg = \Utils::raiseJsonExceptionError( false );
+                    $msg = Utils::raiseJsonExceptionError( false );
                     $this->_logMsg( [ 'ERROR' => "*** Failed to decode the json frame payload, reason: " . $msg, 'FRAME' => $msgFrame->body ] );
                     throw new FrameException( "*** Failed to decode the json, reason: " . $msg, -1 );
 
@@ -356,7 +355,7 @@ class Executor implements SplObserver {
             /* jump the ack */
         } catch ( Exception $e ) {
             $this->_logMsg( $e->getMessage() );
-            throw new FrameException( "*** \$this->amqHandler->readFrame() Failed. Continue Execution. ***", -1, $e );
+            throw new FrameException( "*** \$this->amqHandler->read() Failed. Continue Execution. ***", -1, $e );
         }
 
         return [ $msgFrame, $queueElement ];
@@ -366,12 +365,13 @@ class Executor implements SplObserver {
     /**
      * Close all opened resources
      *
+     * @throws ReflectionException
      */
     public static function cleanShutDown() {
 
         Database::obtain()->close();
         static::$__INSTANCE->_queueHandler->getRedisClient()->disconnect();
-        static::$__INSTANCE->_queueHandler->disconnect();
+        static::$__INSTANCE->_queueHandler->getClient()->disconnect();
 
         //SHUTDOWN
         $msg = str_pad( " Executor " . getmypid() . ":" . gethostname() . ":" . INIT::$INSTANCE_ID . " HALTED ", 50, "-", STR_PAD_BOTH );
@@ -387,7 +387,7 @@ class Executor implements SplObserver {
      * @param $pid
      *
      * @return int
-     * @throws \Predis\Connection\ConnectionException
+     * @throws ReflectionException
      */
     protected function _myProcessExists( $pid ) {
 
