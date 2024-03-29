@@ -2,6 +2,8 @@
 
 namespace FilesStorage;
 
+use Chunks_ChunkStruct;
+use Exception;
 use FilesStorage\Exceptions\FileSystemException;
 
 /**
@@ -79,7 +81,7 @@ interface IFilesStorage {
      */
 
     /**
-     * Creates the files folder.
+     * Creates the file's folder.
      * Directory structure:
      *
      * files
@@ -102,6 +104,7 @@ interface IFilesStorage {
      * Rebuild the filename that will be taken from disk in files directory
      *
      * @param $id
+     * @param $dateHashPath
      *
      * @return bool|string
      */
@@ -217,7 +220,7 @@ interface IFilesStorage {
      * @param string $destination
      *
      * @return bool
-     * @throws \Exception
+     * @throws Exception
      */
     public function transferFiles($source, $destination);
 
@@ -236,10 +239,10 @@ interface IFilesStorage {
 
     /**
      * @param string              $filePath
-     * @param \Chunks_ChunkStruct $chunkStruct
+     * @param Chunks_ChunkStruct $chunkStruct
      * @param                     $uid
      *
      * @return mixed
      */
-    public function saveBlacklistFile($filePath, \Chunks_ChunkStruct $chunkStruct, $uid);
+    public function saveBlacklistFile($filePath, Chunks_ChunkStruct $chunkStruct, $uid);
 }

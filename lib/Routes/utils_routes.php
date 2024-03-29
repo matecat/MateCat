@@ -7,7 +7,6 @@
  * Time: 10:17
  */
 
-use Klein\Klein;
 global $klein;
 
 $klein->respond( '/utils/pee', function () {
@@ -55,16 +54,6 @@ route( '/api/app/teams/members/invite/[:jwt]',                                  
 
 route( '/api/app/outsource/confirm/[i:id_job]/[:password]',                         'POST', '\API\App\OutsourceConfirmationController', 'confirm' ) ;
 
-$klein->with('/api/app/dqf', function( Klein $klein ) {
-    route('/login/check',                                           'GET',  'Features\Dqf\Controller\API\LoginCheckController', 'check');
-    route('/login',                                                 'GET',  'Features\Dqf\Controller\API\LoginController', 'login');
-    route('/jobs/[:id_job]/[:password]/assign',                     'POST', 'Features\Dqf\Controller\API\GenericController', 'assignProject' );
-    route('/jobs/[:id_job]/[:password]/[:page]/assignment/revoke',  'DELETE', 'Features\Dqf\Controller\API\GenericController', 'revokeAssignment' );
-    route('/projects/[:id_project]/[:password]/assignments',        'GET', 'Features\Dqf\Controller\API\AssignmentsController', 'listAssignments' );
-    route('/user/metadata',                                         'DELETE', 'Features\Dqf\Controller\API\GenericController', 'clearCredentials' );
-});
-
-
 route( '/api/app/utils/pee/graph',                                                  'POST', '\API\App\PeeData', 'getPeePlots' ) ;
 route( '/api/app/utils/pee/table',                                                  'POST', '\API\App\PeeData', 'getPeeTableData' ) ;
 route( '/api/app/jobs/[i:id_job]/[:password]/completion-events/[:id_event]',        'DELETE', 'Features\ProjectCompletion\Controller\CompletionEventController', 'delete' ) ;
@@ -73,8 +62,9 @@ route( '/api/app/jobs/[i:id_job]/[:password]/completion-events/[:id_event]',    
 route( '/api/app/heartbeat/ping',                                                   'GET', '\API\App\HeartBeat', 'ping' ) ;
 
 $klein->with('/api/app/jobs/[:id_job]/[:password]', function() {
-    route( '/quality-report',           'GET', '\Features\SecondPassReview\Controller\API\QualityReportController', 'show' );
-    route( '/quality-report/segments',  'GET', 'Features\SecondPassReview\Controller\API\QualityReportController', 'segments' );
+    route( '', 'GET', '\API\App\CompatibilityChunkController', 'show' ); // YYY [Remove] Backward compatibility.
+    route( '/quality-report',           'GET', '\Features\SecondPassReview\Controller\API\QualityReportController', 'show' ); // alias of /api/v2/jobs/[:id_job]/[:password]/quality-report
+    route( '/quality-report/segments',  'GET', 'Features\SecondPassReview\Controller\API\QualityReportController', 'segments_for_ui' ); // alias of /api/v2/jobs/[:id_job]/[:password]/quality-report/segments
 });
 
 route( '/api/app/jobs/[:id_job]/[:password]/stats',     'GET',  'API\App\StatsController', 'stats' );

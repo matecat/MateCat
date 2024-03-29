@@ -13,6 +13,8 @@ import CatToolActions from '../../actions/CatToolActions'
 import ConfirmMessageModal from '../modals/ConfirmMessageModal'
 import TranslatedIconSmall from '../../../../../img/icons/TranslatedIconSmall'
 import Tooltip from '../common/Tooltip'
+import JobProgressBar from '../common/JobProgressBar'
+import {JOB_WORD_CONT_TYPE} from '../../constants/Constants'
 
 class JobContainer extends React.Component {
   constructor(props) {
@@ -332,9 +334,8 @@ class JobContainer extends React.Component {
   }
 
   getDownloadLabel() {
-    let jobStatus = CommonUtils.getTranslationStatus(
-      this.props.job.get('stats').toJS(),
-    )
+    const stats = this.props.job.get('stats').toJS()
+    let jobTranslated = stats.raw.draft === 0 && stats.raw.new === 0
     let remoteService = this.props.project.get('remote_file_service')
     let label = (
       <a
@@ -345,10 +346,7 @@ class JobContainer extends React.Component {
         <i className="icon-eye icon" /> Draft
       </a>
     )
-    if (
-      (jobStatus === 'translated' || jobStatus === 'approved') &&
-      !remoteService
-    ) {
+    if (jobTranslated && !remoteService) {
       label = (
         <a
           className="item"
@@ -358,10 +356,7 @@ class JobContainer extends React.Component {
           <i className="icon-download icon" /> Download Translation
         </a>
       )
-    } else if (
-      (jobStatus === 'translated' || jobStatus === 'approved') &&
-      remoteService === 'gdrive'
-    ) {
+    } else if (jobTranslated && remoteService === 'gdrive') {
       label = (
         <a
           className="item"
@@ -947,46 +942,7 @@ class JobContainer extends React.Component {
     let idJobLabel = !this.props.isChunk
       ? this.props.job.get('id')
       : this.props.job.get('id') + '-' + this.props.index
-    let approvedPercFormatted = this.props.job
-      .get('stats')
-      .get('APPROVED_PERC_FORMATTED')
-    let approvedPerc = this.props.job.get('stats').get('APPROVED_PERC')
-    let approvedPerc2ndPass, approvedPercFormatted2ndPass
-    if (
-      this.props.project.has('features') &&
-      this.props.project.get('features').indexOf('second_pass_review') > -1 &&
-      this.props.job.get('stats').has('revises') &&
-      this.props.job.get('stats').get('revises').size > 1 &&
-      this.props.job
-        .get('stats')
-        .get('revises')
-        .get(1)
-        .get('advancement_wc') !== 0.0
-    ) {
-      let approved = this.props.job
-        .get('stats')
-        .get('revises')
-        .find((item) => {
-          return item.get('revision_number') === 1
-        })
-      approvedPerc = approved
-        ? (approved.get('advancement_wc') * 100) /
-          this.props.job.get('stats').get('TOTAL')
-        : approvedPerc
-      approvedPercFormatted = round(approvedPerc, 1)
-      let approved2ndPass = this.props.job
-        .get('stats')
-        .get('revises')
-        .find((item) => {
-          return item.get('revision_number') === 2
-        })
-      approvedPerc2ndPass = approved2ndPass
-        ? (approved2ndPass.get('advancement_wc') * 100) /
-          this.props.job.get('stats').get('TOTAL')
-        : approved2ndPass
-      approvedPercFormatted2ndPass = round(approvedPerc2ndPass, 1)
-    }
-
+    const stats = this.props.job.get('stats').toJS()
     return (
       <div className="sixteen wide column chunk-container">
         <div
@@ -1021,88 +977,10 @@ class JobContainer extends React.Component {
                   {this.props.job.get('targetTxt')}
                 </div>
               </div>
-              <div className="progress-bar">
-                <div className="progr">
-                  <div className="meter">
-                    <a
-                      className="warning-bar translate-tooltip"
-                      data-variation="tiny"
-                      data-html={
-                        'Rejected ' +
-                        this.props.job
-                          .get('stats')
-                          .get('REJECTED_PERC_FORMATTED') +
-                        '%'
-                      }
-                      style={{
-                        width:
-                          this.props.job.get('stats').get('REJECTED_PERC') +
-                          '%',
-                      }}
-                      ref={(tooltip) => (this.rejectedTooltip = tooltip)}
-                    />
-                    {approvedPercFormatted2ndPass ? (
-                      <a
-                        className="approved-bar-2nd-pass translate-tooltip"
-                        data-variation="tiny"
-                        data-html={
-                          'Approved ' + approvedPercFormatted2ndPass + '%'
-                        }
-                        style={{width: approvedPerc2ndPass + '%'}}
-                        ref={(tooltip) =>
-                          (this.approved2ndPassTooltip = tooltip)
-                        }
-                      />
-                    ) : null}
-                    <a
-                      className="approved-bar translate-tooltip"
-                      data-variation="tiny"
-                      data-html={'Approved ' + approvedPercFormatted + '%'}
-                      style={{width: approvedPerc + '%'}}
-                      ref={(tooltip) => (this.approvedTooltip = tooltip)}
-                    />
-                    <a
-                      className="translated-bar translate-tooltip"
-                      data-variation="tiny"
-                      data-html={
-                        'Translated ' +
-                        this.props.job
-                          .get('stats')
-                          .get('TRANSLATED_PERC_FORMATTED') +
-                        '%'
-                      }
-                      style={{
-                        width:
-                          this.props.job.get('stats').get('TRANSLATED_PERC') +
-                          '%',
-                      }}
-                      ref={(tooltip) => (this.translatedTooltip = tooltip)}
-                    />
-                    <a
-                      className="draft-bar translate-tooltip"
-                      data-variation="tiny"
-                      data-html={
-                        'Draft ' +
-                        this.props.job
-                          .get('stats')
-                          .get('DRAFT_PERC_FORMATTED') +
-                        '%'
-                      }
-                      style={{
-                        width:
-                          this.props.job.get('stats').get('DRAFT_PERC') + '%',
-                      }}
-                      ref={(tooltip) => (this.draftTooltip = tooltip)}
-                    />
-                  </div>
-                </div>
-              </div>
+              <JobProgressBar stats={stats} />
               <div className="job-payable">
                 <a href={analysisUrl} target="_blank" rel="noreferrer">
-                  <span id="words">
-                    {this.props.job.get('stats').get('TOTAL_FORMATTED')}
-                  </span>{' '}
-                  words
+                  <span id="words">{Math.round(stats.raw.total)}</span> words
                 </a>
               </div>
               <div className="tm-job" data-testid="tm-container">

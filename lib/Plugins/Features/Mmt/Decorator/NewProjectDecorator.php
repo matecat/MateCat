@@ -10,12 +10,12 @@
 namespace Features\Mmt\Decorator;
 
 use AbstractDecorator;
-use Features\Mmt\Utils\Routes;
+use PHPTALWithAppend;
 
 class NewProjectDecorator extends AbstractDecorator {
 
     /**
-     * @var \PHPTALWithAppend
+     * @var PHPTALWithAppend
      */
     protected $template ;
 

@@ -10,6 +10,7 @@
 namespace API\App;
 
 
+use Routes;
 use Teams\InvitedUser;
 
 /**
@@ -24,7 +25,7 @@ class TeamsInvitationsController  extends AbstractStatefulKleinController {
 
         $invite = new InvitedUser( $this->request->jwt, $this->response );
         $invite->prepareUserInvitedSignUpRedirect();
-        $this->response->redirect( \Routes::appRoot() ) ;
+        $this->response->redirect( Routes::appRoot() ) ;
 
     }
 

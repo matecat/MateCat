@@ -10,9 +10,8 @@
 namespace Segments;
 
 use DataAccess_AbstractDao;
-use Database;
-use Exception;
-use Log;
+use DataAccess_IDaoStruct;
+use Projects_ProjectStruct;
 
 class ContextGroupDao extends DataAccess_AbstractDao {
 
@@ -27,11 +26,11 @@ class ContextGroupDao extends DataAccess_AbstractDao {
     protected static $query_get_by_segment_range = "SELECT * FROM context_groups WHERE id_segment BETWEEN :id_segment_start AND :id_segment_stop";
 
     /**
-     * @param \Projects_ProjectStruct $project
+     * @param Projects_ProjectStruct $project
      *
-     * @return \DataAccess_IDaoStruct[]
+     * @return DataAccess_IDaoStruct[]
      */
-    public function getAllByProject( \Projects_ProjectStruct $project ) {
+    public function getAllByProject( Projects_ProjectStruct $project ) {
         $stmt = $this->_getStatementForCache( self::$query_get_all_by_project );
 
         return $this->_fetchObject( $stmt,
@@ -75,7 +74,7 @@ class ContextGroupDao extends DataAccess_AbstractDao {
                 ]
         );
         $_fetchGroup = [];
-        foreach ( $resSet as $offset => $cStruct ) {
+        foreach ( $resSet as $cStruct ) {
             $_fetchGroup[ $cStruct->id_segment ] = $cStruct;
         }
         unset( $resSet );

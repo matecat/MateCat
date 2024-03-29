@@ -54,8 +54,6 @@ abstract class DataAccess_AbstractDaoObjectStruct extends stdClass implements Da
      *
      * @return mixed
      * 
-     * FIXME: current implementation is bogus because it only allows to pass one parameter.
-     *
      */
     protected function cachable($method_name, $params, $function) {
         $resultset = isset( $this->cached_results[ $method_name ] ) ? $this->cached_results[ $method_name ] : null;

@@ -37,11 +37,8 @@ $klein->with('/api/v2/jobs/[:id_job]/[:password]', function() {
     route( '',              'GET', 'API\V2\ChunkController', 'show' );
     route( '/comments',     'GET', 'API\V2\CommentsController', 'index' );
 
-    route( '/quality-report', 'GET', 'Features\ReviewExtended\Controller\API\QualityReportController', 'show' );
-
-    route( '/quality-report/general',          'GET', 'Features\ReviewExtended\Controller\API\QualityReportController', 'general' );
-
-    route( '/quality-report/versions', 'GET', 'Features\ReviewExtended\Controller\API\QualityReportController', 'versions' );
+    route( '/quality-report', 'GET', 'Features\SecondPassReview\Controller\API\QualityReportController', 'show' );
+    route( '/quality-report/general', 'GET', 'Features\SecondPassReview\Controller\API\QualityReportController', 'general' );
 
     route( '/translator', 'GET',  '\API\V2\JobsTranslatorsController', 'get' ) ;
     route( '/translator', 'POST',  '\API\V2\JobsTranslatorsController', 'add' ) ;
@@ -60,7 +57,7 @@ $klein->with('/api/v2/jobs/[:id_job]/[:password]', function() {
     route( '/segments/[:id_segment]/translation-issues/[:id_issue]/comments', 'POST', 'API\V2\SegmentTranslationIssueController', 'createComment' );
     route( '/segments/[:id_segment]/translation-issues/[:id_issue]/comments', 'GET', 'API\V2\SegmentTranslationIssueController', 'getComments' );
 
-    route( '/segments/status', 'POST', '\API\V2\JobStatusController', 'changeSegmentsStatus'  );
+    route( '/segments/status', 'POST', '\API\V2\JobStatusController', 'changeSegmentsStatus' ); // mark as translated bulk
 
     route( '/segments-filter', 'GET', 'Features\SegmentFilter\Controller\API\FilterController', 'index' );
 
@@ -116,17 +113,19 @@ $klein->with('/api/v2/files', function() {
 });
 
 $klein->with( '/api/v2/payable_rate', function () {
-    route( '/schema', 'GET', '\API\V2\PayableRateController', 'schema' );
-    route( '/validate', 'POST', '\API\V2\PayableRateController', 'validate' );
-    route( '', 'GET', '\API\V2\PayableRateController', 'index' );
-    route( '', 'POST', '\API\V2\PayableRateController', 'create' );
-    route( '/[:id]', 'GET', '\API\V2\PayableRateController', 'view' );
-    route( '/[:id]', 'DELETE', '\API\V2\PayableRateController', 'delete' );
-    route( '/[:id]', 'PUT', '\API\V2\PayableRateController', 'edit' );
-} );
+    route('/schema', 'GET', '\API\V2\PayableRateController', 'schema');
+    route('/validate', 'POST', '\API\V2\PayableRateController', 'validate');
+    route('', 'GET', '\API\V2\PayableRateController', 'index');
+    route('', 'POST', '\API\V2\PayableRateController', 'create');
+    route('/[:id]', 'GET', '\API\V2\PayableRateController', 'view');
+    route('/[:id]', 'DELETE', '\API\V2\PayableRateController', 'delete');
+    route('/[:id]', 'PUT', '\API\V2\PayableRateController', 'edit');
+
+});
 
 // Download files
 route( '/api/v2/original/[:id_job]/[:password]', 'GET',  'API\V2\DownloadOriginalController', 'index' );
 route( '/api/v2/translation/[:id_job]/[:password]', 'GET',  'API\V2\DownloadFileController', 'index' );
 route( '/api/v2/SDLXLIFF/[:id_job]/[:password]/[:filename]', 'GET',  'API\V2\DownloadFileController', 'forceXliff' );
 route( '/api/v2/TMX/[:id_job]/[:password]', 'GET',  'API\V2\ExportTMXController', 'index' );
+

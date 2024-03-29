@@ -1,6 +1,9 @@
 <?php
-
+namespace EditLog;
+use DataAccess_AbstractDaoObjectStruct;
+use DataAccess_IDaoStruct;
 use LQA\QA;
+use MyMemory;
 
 /**
  * Created by PhpStorm.
@@ -8,8 +11,13 @@ use LQA\QA;
  * Date: 05/10/15
  * Time: 11.33
  */
-class EditLog_EditLogSegmentStruct extends DataAccess_AbstractDaoObjectStruct implements DataAccess_IDaoStruct {
+class EditLogSegmentStruct extends DataAccess_AbstractDaoObjectStruct implements DataAccess_IDaoStruct {
 
+    const PEE_THRESHOLD = 1;
+    const CACHETIME = 108000;
+    const EDIT_TIME_SLOW_CUT = 30;
+    const EDIT_TIME_FAST_CUT = 0.25;
+    
     /**
      * @var int
      */
@@ -142,8 +150,8 @@ class EditLog_EditLogSegmentStruct extends DataAccess_AbstractDaoObjectStruct im
     public function isValidForEditLog() {
         $secsPerWord = $this->getSecsPerWord();
 
-        return ( $secsPerWord  > EditLog_EditLogModel::EDIT_TIME_FAST_CUT ) &&
-                ( $secsPerWord  < EditLog_EditLogModel::EDIT_TIME_SLOW_CUT );
+        return ( $secsPerWord  > self::EDIT_TIME_FAST_CUT ) &&
+                ( $secsPerWord  < self::EDIT_TIME_SLOW_CUT );
     }
 
     public function isValidForPeeTable(){
@@ -153,7 +161,7 @@ class EditLog_EditLogSegmentStruct extends DataAccess_AbstractDaoObjectStruct im
 
         $secsPerWord = $this->getSecsPerWord();
 
-        return ( $secsPerWord  > EditLog_EditLogModel::EDIT_TIME_FAST_CUT );
+        return ( $secsPerWord  > self::EDIT_TIME_FAST_CUT );
     }
 
     /**

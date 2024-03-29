@@ -1,8 +1,11 @@
 <?php
 
+use WordCount\CounterModel;
+use WordCount\WordCountStruct;
+
 /**
  * @group regression
- * @covers WordCount_CounterModel::setOldWordCount
+ * @covers CounterModel::setOldWordCount
  * User: dinies
  * Date: 15/06/16
  * Time: 17.27
@@ -12,14 +15,14 @@ class SetOldWordCountTest extends AbstractTest
 
     /**
      * @group regression
-     * @covers WordCount_CounterModel::setOldWordCount
+     * @covers CounterModel::setOldWordCount
     */
     public function test_setOldWordCount(){
 
-        $word_count= new WordCount_CounterModel();
+        $word_count= new CounterModel();
 
 
-        $word_count_struct= new WordCount_Struct();
+        $word_count_struct= new WordCountStruct();
         $word_count_struct->setIdJob(999); //sample
         $word_count_struct->setJobPassword("989bob98"); //sample
         $word_count_struct->setNewWords(0);

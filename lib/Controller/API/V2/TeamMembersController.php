@@ -37,7 +37,7 @@ class TeamMembersController extends KleinController {
         $formatter = new Membership( $team->getMembers() ) ;
         $this->response->json( [
                 'members' => $formatter->render(),
-                'pending_invitations' => $pendingInvitation->get( $this->request->id_team )
+                'pending_invitations' => $pendingInvitation->hasPengingInvitation( $this->request->id_team )
         ] );
 
     }
@@ -64,7 +64,7 @@ class TeamMembersController extends KleinController {
         $formatter = new Membership( $full_members_list ) ;
         $this->response->json( [
                 'members' => $formatter->render(),
-                'pending_invitations' => $pendingInvitation->get( $teamStruct->id )
+                'pending_invitations' => $pendingInvitation->hasPengingInvitation( $teamStruct->id )
         ] );
 
     }
@@ -84,7 +84,7 @@ class TeamMembersController extends KleinController {
         $formatter = new Membership( $membersList ) ;
         $this->response->json( [
                 'members' => $formatter->render(),
-                'pending_invitations' => $pendingInvitation->get( $teamStruct->id )
+                'pending_invitations' => $pendingInvitation->hasPengingInvitation( $teamStruct->id )
         ] );
 
     }

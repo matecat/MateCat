@@ -13,15 +13,18 @@ use API\V2\KleinController;
 use API\V2\Validators\ProjectAccessValidator;
 use API\V2\Validators\ProjectPasswordValidator;
 use API\V2\Validators\TeamProjectValidator;
+use Chunks_ChunkDao;
 use Exception;
 use LQA\ChunkReviewDao;
 use LQA\ChunkReviewStruct;
+use Projects_ProjectDao;
+use Projects_ProjectStruct;
 use RevisionFactory;
 
 class ReviewsController extends KleinController {
 
     /**
-     * @var \Projects_ProjectStruct $project
+     * @var Projects_ProjectStruct $project
      */
     protected $project;
 
@@ -52,11 +55,11 @@ class ReviewsController extends KleinController {
         );
 
         // destroy project data cache
-        ( new \Projects_ProjectDao() )->destroyCacheForProjectData( $this->project->id, $this->project->password );
+        ( new Projects_ProjectDao() )->destroyCacheForProjectData( $this->project->id, $this->project->password );
 
         // destroy the 5 minutes chunk review cache
-        $chunk = (new \Chunks_ChunkDao())->getByIdAndPassword($records[ 0 ]->id_job, $records[ 0 ]->password);
-        ( new ChunkReviewDao() )->destroyCacheForFindChunkReviews($chunk, 60 * 5 );
+        $chunk = ( new Chunks_ChunkDao() )->getByIdAndPassword( $records[ 0 ]->id_job, $records[ 0 ]->password );
+        ( new ChunkReviewDao() )->destroyCacheForFindChunkReviews( $chunk, 60 * 5 );
 
         $this->response->json( [
                         'chunk_review' => [
@@ -70,14 +73,17 @@ class ReviewsController extends KleinController {
 
     protected function afterConstruct() {
 
-        $Validator  = new ProjectPasswordValidator( $this );
-        $Controller = $this;
-        $Validator->onSuccess( function () use ( $Validator, $Controller ) {
-            $Controller->setProject( $Validator->getProject() );
+        $Validator = new ProjectPasswordValidator( $this );
+
+        $Validator->onSuccess( function () use ( $Validator ) {
+            $this->project = $Validator->getProject();
+        } )->onSuccess( function () {
             //add more specific validations, it's needed to append after the first validation run because we need the project struct
             ( new TeamProjectValidator( $this ) )->setProject( $this->project )->validate();
-            ( new ProjectAccessValidator( $this ) )->setProject( $this->project )->validate();
+        } )->onSuccess( function () {
+            ( new ProjectAccessValidator( $this, $this->project ) )->validate();
         } );
+
         $this->appendValidator( $Validator );
 
     }
@@ -127,10 +133,6 @@ class ReviewsController extends KleinController {
         }
 
         $this->chunk = $this->latestChunkReview->getChunk();
-    }
-
-    public function setProject( $project ) {
-        $this->project = $project;
     }
 
 }

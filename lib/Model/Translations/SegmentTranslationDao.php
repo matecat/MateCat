@@ -217,88 +217,19 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
         return $db->update( 'segment_translations', $data, $where );
     }
 
-    /**
-     * @param $chunk
-     *
-     * @return int
-     * @throws ReflectionException
-     */
-    public function setApprovedByChunk( $chunk ) {
-
-        $sql = "UPDATE segment_translations
-            SET status = :status
-              WHERE id_job = :id_job AND id_segment BETWEEN :first_segment AND :last_segment";
-
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
-
-        $stmt->execute( [
-                'status'        => Constants_TranslationStatus::STATUS_APPROVED,
-                'id_job'        => $chunk->id,
-                'first_segment' => $chunk->job_first_segment,
-                'last_segment'  => $chunk->job_last_segment
-        ] );
-
-        $counter = new \WordCount_CounterModel;
-        $counter->initializeJobWordCount( $chunk->id, $chunk->password );
-
-        return $stmt->rowCount();
-    }
-
-    /**
-     * @param $chunk
-     *
-     * @return int
-     * @throws ReflectionException
-     */
-    public function setTranslatedByChunk( $chunk ) {
-
-        $sql = "UPDATE segment_translations
-            SET status = :status
-              WHERE id_job = :id_job AND id_segment BETWEEN :first_segment AND :last_segment AND status != :approved_status";
-
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
-
-        $stmt->execute( [
-                'status'          => Constants_TranslationStatus::STATUS_TRANSLATED,
-                'id_job'          => $chunk->id,
-                'first_segment'   => $chunk->job_first_segment,
-                'last_segment'    => $chunk->job_last_segment,
-                'approved_status' => Constants_TranslationStatus::STATUS_APPROVED,
-        ] );
-
-        $counter = new \WordCount_CounterModel;
-        $counter->initializeJobWordCount( $chunk->id, $chunk->password );
-
-        return $stmt->rowCount();
-    }
-
-    public static function getSegmentsWithIssues( $job_id, $segments_ids ) {
-        $where_values = $segments_ids;
-
-        $sql  = "SELECT * FROM segment_translations WHERE id_segment IN (" . str_repeat( '?,', count( $segments_ids ) - 1 ) . '?' . ") AND id_job = ?";
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, '\DataAccess\ShapelessConcreteStruct' );
-        $where_values[] = $job_id;
-        $stmt->execute( $where_values );
-
-        return $stmt->fetchAll();
-    }
-
     public static function getUnchangebleStatus( Chunks_ChunkStruct $chunk, $segments_ids, $status, $source_page ) {
 
         $where_values = [];
         $conn         = Database::obtain()->getConnection();
         $and_ste      = '';
 
-        if ( $status == Constants_TranslationStatus::STATUS_APPROVED ) {
+        if ( $status == Constants_TranslationStatus::STATUS_APPROVED || $status == Constants_TranslationStatus::STATUS_APPROVED2 ) {
             /**
              * if source_page is null, we keep the default behaviour and only allow TRANSLATED and APPROVED segments.
              */
             $where_values[] = Constants_TranslationStatus::STATUS_TRANSLATED;
             $where_values[] = Constants_TranslationStatus::STATUS_APPROVED;
+            $where_values[] = Constants_TranslationStatus::STATUS_APPROVED2;
         } elseif ( $status == Constants_TranslationStatus::STATUS_TRANSLATED ) {
             /**
              * When status is TRANSLATED we can change APPROVED DRAFT and NEW statuses
@@ -307,6 +238,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
             $where_values[] = Constants_TranslationStatus::STATUS_NEW;
             $where_values[] = Constants_TranslationStatus::STATUS_TRANSLATED;
             $where_values[] = Constants_TranslationStatus::STATUS_APPROVED;
+            $where_values[] = Constants_TranslationStatus::STATUS_APPROVED2;
         } else {
             throw new Exception( 'not allowed to change status to ' . $status );
         }
@@ -323,11 +255,13 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
             $join_ste = "LEFT JOIN segment_translation_events ste
                       ON ste.id_segment = st.id_segment
                           AND ste.id_job = ?
-                          AND ste.status = ?
+                          AND ste.status IN ( ?, ? )
                           AND ste.final_revision = 1 ";
 
             $where_values = array_merge( [
-                    $chunk->id, Constants_TranslationStatus::STATUS_APPROVED
+                    $chunk->id,
+                    Constants_TranslationStatus::STATUS_APPROVED,
+                    Constants_TranslationStatus::STATUS_APPROVED2
             ], $where_values );
         } else {
             $join_ste = '';
@@ -367,6 +301,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
      *
      * @return int
      * @throws ReflectionException
+     * @throws PDOException
      */
     public static function addTranslation( Translations_SegmentTranslationStruct $translation_struct, $is_revision ) {
 
@@ -670,12 +605,12 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
         if ( $project->getWordCountType() == Projects_MetadataDao::WORD_COUNT_RAW ) {
             $sum_sql = "SUM( segments.raw_word_count )";
         } else {
-            $sum_sql = " SUM( eq_word_count )";
+            $sum_sql = "SUM( IF( match_type != 'ICE', eq_word_count, segments.raw_word_count ) )";
         }
 
         /**
          * Sum the word count grouped by status, so that we can later update the count on jobs table.
-         * We only count segments with status different than the current, because we don't need to update
+         * We only count segments with status different from the current, because we don't need to update
          * the count for the same status.
          *
          */
@@ -866,7 +801,6 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
      * @param $id_job
      *
      * @return array|null
-     * @throws Exception
      */
     public static function getLast10TranslatedSegmentIDs( $id_job ) {
 
@@ -879,7 +813,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
 		SELECT id_segment
             FROM segment_translations FORCE INDEX (id_job) 
             WHERE id_job = :id_job
-            AND `status` IN ( 'TRANSLATED', 'APPROVED' )
+            AND `status` IN ( 'TRANSLATED', 'APPROVED', 'APPROVED2' )
             AND `translation_date` <= :now AND `translation_date` >= :limit
             ORDER BY translation_date DESC LIMIT 10
 		";
@@ -923,14 +857,13 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
          */
         $query = "
             SELECT 
-                   Round(SUM(IF(Ifnull(st.eq_word_count, 0) = 0, s.raw_word_count,
-                         st.eq_word_count)) /
+                   Round( s.raw_word_count /
                                ( Unix_timestamp(Max(translation_date)) -
                                  Unix_timestamp(Min(translation_date)) ) * 3600) AS words_per_hour
          
             FROM   segment_translations st
             JOIN   segments s ON id = st.id_segment
-            WHERE  status IN ( 'TRANSLATED', 'APPROVED' )
+            WHERE  status IN ( 'TRANSLATED', 'APPROVED', 'APPROVED2' )
                    AND id_job = ?
                    AND id_segment IN ( " . implode( ",", array_fill( 0, count( $estimation_seg_ids ), '?' ) ) . " )
     ";

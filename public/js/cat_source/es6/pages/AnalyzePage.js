@@ -9,6 +9,8 @@ import {getProject} from '../api/getProject'
 import {getVolumeAnalysis} from '../api/getVolumeAnalysis'
 import Immutable from 'immutable'
 import {createRoot} from 'react-dom/client'
+import {ANALYSIS_STATUS} from '../constants/Constants'
+import {useGoogleLoginNotification} from '../hooks/useGoogleLoginNotification'
 
 let pollingTime = 1000
 const segmentsThreshold = 50000
@@ -17,10 +19,14 @@ const AnalyzePage = () => {
   const [project, setProject] = useState()
   const [volumeAnalysis, setVolumeAnalysis] = useState()
   const containerRef = useRef()
+
+  // TODO: Remove temp notification warning login google (search in files this todo)
+  useGoogleLoginNotification()
+
   const getProjectVolumeAnalysisData = () => {
     if (config.jobAnalysis) {
       getJobVolumeAnalysis().then((response) => {
-        const volumeAnalysis = response.data
+        const volumeAnalysis = response
         getProject(config.id_project).then((response) => {
           const project = response.project
           setProject(project)
@@ -30,7 +36,7 @@ const AnalyzePage = () => {
       })
     } else {
       getVolumeAnalysis().then((response) => {
-        const volumeAnalysis = response.data
+        const volumeAnalysis = response
         getProject(config.id_project).then((response) => {
           const project = response.project
           setProject(project)
@@ -42,19 +48,19 @@ const AnalyzePage = () => {
   }
   const pollData = (response) => {
     if (
-      response.data.summary.STATUS !== 'DONE' &&
-      response.data.summary.STATUS !== 'NOT_TO_ANALYZE'
+      response.summary.status !== ANALYSIS_STATUS.DONE &&
+      response.summary.status !== ANALYSIS_STATUS.NOT_TO_ANALYZE
     ) {
-      if (response.data.summary.TOTAL_SEGMENTS > segmentsThreshold) {
-        pollingTime = response.data.summary.TOTAL_SEGMENTS / 20
+      if (response.summary.total_segments > segmentsThreshold) {
+        pollingTime = response.summary.total_segments / 20
       }
 
       setTimeout(function () {
         getVolumeAnalysis().then((response) => {
-          setVolumeAnalysis(response.data)
+          setVolumeAnalysis(response)
           if (
-            response.data.summary.STATUS === 'DONE' ||
-            response.data.summary.STATUS === 'NOT_TO_ANALYZE'
+            response.summary.status === ANALYSIS_STATUS.DONE ||
+            response.summary.status === ANALYSIS_STATUS.NOT_TO_ANALYZE
           ) {
             getProject(config.id_project).then((response) => {
               if (response.project) {
@@ -84,7 +90,6 @@ const AnalyzePage = () => {
       </header>
       <div className="project-list" id="analyze-container" ref={containerRef}>
         <AnalyzeMain
-          jobsInfo={config.jobs}
           project={Immutable.fromJS(project)}
           volumeAnalysis={Immutable.fromJS(volumeAnalysis)}
           parentRef={containerRef}

@@ -10,8 +10,6 @@
 namespace API\V3\Json;
 
 
-use DataAccess_IDaoStruct;
-
 class FilesInfo {
 
     /**

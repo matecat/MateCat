@@ -8,7 +8,9 @@
 
 namespace Features\SecondPassReview\Model;
 
-use Features\ReviewExtended\Model\ChunkReviewDao ;
+use Exception;
+use Features\ReviewExtended\Model\ChunkReviewDao;
+use Projects_ProjectStruct;
 
 class ChunkReviewModel extends \Features\ReviewExtended\ChunkReviewModel {
 
@@ -18,11 +20,11 @@ class ChunkReviewModel extends \Features\ReviewExtended\ChunkReviewModel {
      *
      * Used in AbstractRevisionFeature::postJobMerged and AbstractRevisionFeature::postJobSplitted
      *
-     * @param \Projects_ProjectStruct $project
+     * @param Projects_ProjectStruct $project
      *
-     * @throws \Exception
+     * @throws Exception
      */
-    public function recountAndUpdatePassFailResult( \Projects_ProjectStruct $project ) {
+    public function recountAndUpdatePassFailResult( Projects_ProjectStruct $project ) {
 
         /**
          * Count penalty points based on this source_page

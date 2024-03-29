@@ -132,7 +132,6 @@ class Routes {
     public static function downloadXliff( $id_job, $password, $options = [] ) {
         $host = self::httpHost( $options );
 
-        // TODO: pass in a filename here as last param?
         return "$host/SDLXLIFF/$id_job/$password/$id_job.zip";
     }
 
@@ -273,7 +272,7 @@ class Routes {
     public static function appRoot( $options = [] ) {
         $query = isset( $options[ 'query' ] ) ? $options[ 'query' ] : null;
 
-        $url = self::httpHost( $options ) . \INIT::$BASEURL;
+        $url = self::httpHost( $options ) . INIT::$BASEURL;
 
         if ( $query ) {
             $url .= '?' . http_build_query( $query );
