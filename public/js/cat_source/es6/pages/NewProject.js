@@ -192,11 +192,11 @@ const NewProject = ({
   }
 
   createProject.current = () => {
-    const {mtGlossaryProps, deeplGlossaryProps} = activeMTEngine ?? {}
-
     // update store recently used target languages
     setRecentlyUsedLanguages(targetLangs)
-    return
+
+    const {mtGlossaryProps, deeplGlossaryProps} = activeMTEngine ?? {}
+
     const getParams = () => ({
       action: 'createProject',
       file_name: APP.getFilenameFromUploadedFiles(),
