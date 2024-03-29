@@ -2,7 +2,9 @@
 
 namespace ConnectedServices\LinkedIn;
 
-use Exception;
+use GuzzleHttp\Exception\GuzzleException;
+use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
+use League\OAuth2\Client\Token\AccessToken;
 use Utils;
 
 class LinkedInClient
@@ -27,27 +29,40 @@ class LinkedInClient
 
     /**
      * @param $code
-     * @return \League\OAuth2\Client\Provider\ResourceOwnerInterface
+     * @return string
+     * @throws IdentityProviderException
      */
-    public static function getResourceOwner($code){
-
+    public static function getAuthToken($code){
         $linkedInClient = LinkedInClientFactory::create();
 
-        try {
-            $token = $linkedInClient->getAccessToken('authorization_code', [
-                'code' => $code
-            ]);
+        /** @var AccessToken $token */
+        $token = $linkedInClient->getAccessToken('authorization_code', [
+            'code' => $code
+        ]);
 
-            return $linkedInClient->getResourceOwner($token);
+        return $token->getToken();
+    }
 
-        } catch (Exception $e) {
+    /**
+     * @param $token
+     * @return mixed
+     * @throws GuzzleException
+     */
+    public static function getResourceOwner($token){
 
-            // Failed to get user details
-            exit('Oh dear...');
-        }
+        $linkedInClient = LinkedInClientFactory::create();
+        $response = $linkedInClient->getHttpClient()->request(
+            'GET',
+            'https://api.linkedin.com/v2/userinfo',
+            ['headers' =>
+                [
+                    'Authorization' => "Bearer {$token}"
+                ]
+            ]
+        );
+
+        return json_decode($response->getBody()->getContents());
     }
 }
-
-//https://dev.matecat.com/?code=AQSG1jBQC1BzpuvTypL87NN2VVSSEWTpuPUF3ZrMspEl7GYYMJuREvc4k5bAVLyYtaAMEfP2Ru-Bzw--BZRuCzQo2MrDemEYrIbasJGpmQH8DiYYOSpy-VnxQF1IOEFFAx2zgTDAIExFCwgGfcdhRGuhD3bHNEdr0mWiOsUK-9BBDiX7H_7PrxmmAzkzslH4RYXDy7dbaLmfq_HZ8YE&state=5551e201ee09be84c2d1
 
 //config.linkedInAuthUrl
