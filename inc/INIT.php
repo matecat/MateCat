@@ -278,6 +278,14 @@ class INIT {
     public static $OAUTH_SCOPES;
     public static $OAUTH_BROWSER_API_KEY;
 
+    /**
+     * Linkedin credentials
+     */
+    public static $LINKEDIN_OAUTH_CONFIG;
+    public static $LINKEDIN_OAUTH_CLIENT_ID;
+    public static $LINKEDIN_OAUTH_CLIENT_SECRET;
+    public static $LINKEDIN_OAUTH_REDIRECT_URL;
+
     public static $ENABLE_OMEGAT_DOWNLOAD = false;
     public static $UNLOCKABLE_TAGS        = false;
 
@@ -303,6 +311,10 @@ class INIT {
     public static $REPLACE_HISTORY_TTL;
 
     public function __construct() {
+
+        self::$LINKEDIN_OAUTH_CLIENT_ID = @INIT::$LINKEDIN_OAUTH_CONFIG['LINKEDIN_OAUTH_CLIENT_ID'];
+        self::$LINKEDIN_OAUTH_CLIENT_SECRET = @INIT::$LINKEDIN_OAUTH_CONFIG['LINKEDIN_OAUTH_CLIENT_SECRET'];
+        self::$LINKEDIN_OAUTH_REDIRECT_URL = @INIT::$LINKEDIN_OAUTH_CONFIG['$INKEDIN_OAUTH_REDIRECT_URL'];
 
         self::$OAUTH_CLIENT_ID       = @INIT::$OAUTH_CONFIG[ 'OAUTH_CLIENT_ID' ];
         self::$OAUTH_CLIENT_SECRET   = @INIT::$OAUTH_CONFIG[ 'OAUTH_CLIENT_SECRET' ];

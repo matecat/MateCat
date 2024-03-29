@@ -1,5 +1,8 @@
 <?php
 
+use ConnectedServices\LinkedIn\LinkedInClientFactory;
+use League\OAuth2\Client\Provider\LinkedIn;
+
 abstract class viewController extends controller {
 
     /**
@@ -15,9 +18,19 @@ abstract class viewController extends controller {
     protected $client;
 
     /**
+     * @var LinkedIn
+     */
+    protected $linkedInClient;
+
+    /**
      * @var string
      */
     protected $authURL;
+
+    /**
+     * @var string
+     */
+    protected $linkedInAuthURL;
 
     protected $login_required = false;
 
@@ -143,12 +156,13 @@ abstract class viewController extends controller {
         $this->template->config_js            = [];
         $this->template->css_resources        = [];
         $this->template->authURL              = $this->getAuthUrl();
+        $this->template->linkedInAuthUrl      = $this->getLinkedInAuthUrl();
         $this->template->gdriveAuthURL        = \ConnectedServices\GDrive::generateGDriveAuthUrl();
         $this->template->enableMultiDomainApi = INIT::$ENABLE_MULTI_DOMAIN_API;
         $this->template->ajaxDomainsNumber    = INIT::$AJAX_DOMAINS;
-
-
     }
+
+
 
     /**
      * setTemplateFinalVars
@@ -190,6 +204,28 @@ abstract class viewController extends controller {
         }
 
         return $this->authURL;
+    }
+
+    /**
+     * @return string
+     */
+    public function getLinkedInAuthUrl(){
+        if ( is_null( $this->linkedInAuthURL ) ) {
+
+            $options = [
+                'state' => 'DCEeFWf45A53sdfKef424',
+                'scope' => [
+                    'email',
+                    'profile',
+                    'openid',
+                ]
+            ];
+
+            $this->linkedInClient = LinkedInClientFactory::create();
+            $this->linkedInAuthURL = $this->linkedInClient->getAuthorizationUrl($options);
+        }
+
+        return $this->linkedInAuthURL;
     }
 
     /**
