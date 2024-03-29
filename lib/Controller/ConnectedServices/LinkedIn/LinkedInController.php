@@ -80,7 +80,7 @@ class LinkedInController extends KleinController {
 
         return $this->response->json( [
             "success" => false,
-            "error_msg" => 'The request could not be understood by the server due to malformed syntax. The client SHOULD NOT repeat the request without modifications. "',
+            "error_msg" => 'Malformed request. Please add `code` param to the request. "',
             "error_class" => LinkedInController::class,
             "error_code" => -1,
         ] );
