@@ -105,7 +105,7 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
 
         $bind_values[] = 2;
         $bind_values[] = ( $obj->penalty == null ) ? "14" : $obj->penalty;
-        $bind_values[] = ( $obj->active == null ) ? "1" : $obj->active; //TODO BUG This is every time 1!!!
+        $bind_values[] = intval( $obj->active );
         $bind_values[] = $obj->uid;
 
         $stmt = $this->database->getConnection()->prepare( $query );

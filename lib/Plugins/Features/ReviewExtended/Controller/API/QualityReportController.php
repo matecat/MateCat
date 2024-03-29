@@ -8,12 +8,9 @@
 
 namespace Features\ReviewExtended\Controller\API;
 
-use API\V2\KleinController;
-use API\V2\Validators\ChunkPasswordValidator;
 use API\V2\BaseChunkController;
+use API\V2\Validators\ChunkPasswordValidator;
 use Chunks_ChunkStruct;
-use Constants_JobStatus;
-use Features\ReviewExtended\Model\ArchivedQualityReportDao;
 use Features\ReviewExtended\Model\QualityReportModel;
 use Features\ReviewExtended\ReviewUtils;
 use Features\TranslationVersions\Model\TranslationEventDao;
@@ -25,7 +22,7 @@ use QualityReport\QualityReportSegmentModel;
 class QualityReportController extends BaseChunkController {
 
     const DEFAULT_PER_PAGE = 20;
-    const MAX_PER_PAGE = 200;
+    const MAX_PER_PAGE     = 200;
 
     /**
      * @var Projects_ProjectStruct
@@ -56,10 +53,9 @@ class QualityReportController extends BaseChunkController {
         ] );
     }
 
-    public function segments() {
+    public function segments( $isForUI = false ) {
         $this->return404IfTheJobWasDeleted();
-
-        return $this->renderSegments();
+        $this->renderSegments( $isForUI );
     }
 
     /**
@@ -88,7 +84,7 @@ class QualityReportController extends BaseChunkController {
             $step = self::DEFAULT_PER_PAGE;
         }
 
-        if( $step > self::MAX_PER_PAGE ) {
+        if ( $step > self::MAX_PER_PAGE ) {
             $step = self::MAX_PER_PAGE;
         }
 
@@ -103,7 +99,7 @@ class QualityReportController extends BaseChunkController {
             $segments                   = $qrSegmentModel->getSegmentsForQR( $segments_ids, $isForUI );
 
             $filesInfoUtility = new FilesInfoUtility( $this->chunk );
-            $filesInfo        = $filesInfoUtility->getInfo(false);
+            $filesInfo        = $filesInfoUtility->getInfo( false );
 
             $segments = $this->_formatSegments( $segments, $ttlArray, $filesInfo );
 
@@ -194,7 +190,6 @@ class QualityReportController extends BaseChunkController {
             $seg[ 'pee_translation_revise' ]     = $segment->pee_translation_revise;
             $seg[ 'pee_translation_suggestion' ] = $segment->pee_translation_suggestion;
             $seg[ 'raw_word_count' ]             = $segment->raw_word_count;
-            $seg[ 'secs_per_word' ]              = $segment->secs_per_word;
             $seg[ 'segment' ]                    = $segment->segment;
             $seg[ 'segment_hash' ]               = $segment->segment_hash;
             $seg[ 'id' ]                         = (int)$segment->sid;
@@ -300,24 +295,6 @@ class QualityReportController extends BaseChunkController {
                 'project' => $project,
                 'job'     => $this->chunk,
         ] );
-    }
-
-    public function versions() {
-        $dao      = new ArchivedQualityReportDao();
-        $versions = $dao->getAllByChunk( $this->chunk );
-        $response = [];
-
-        foreach ( $versions as $version ) {
-            $response[] = [
-                    'id'             => (int)$version->id,
-                    'version_number' => (int)$version->version,
-                    'created_at'     => \Utils::api_timestamp( $version->create_date ),
-                    'quality-report' => json_decode( $version->quality_report )
-            ];
-        }
-
-        $this->response->json( [ 'versions' => $response ] );
-
     }
 
     protected function afterConstruct() {

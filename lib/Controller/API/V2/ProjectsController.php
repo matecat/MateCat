@@ -7,6 +7,7 @@ use API\V2\Json\ProjectAnonymous;
 use API\V2\Validators\ProjectAccessValidator;
 use API\V2\Validators\ProjectPasswordValidator;
 use Constants_JobStatus;
+use Exception;
 use Jobs_JobDao;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
@@ -88,19 +89,33 @@ class ProjectsController extends KleinController {
         $this->response->json( [ 'project' => $formatted->renderItem( $this->project ) ] );
     }
 
+    /**
+     * @throws Exception
+     */
     public function cancel() {
-        return $this->changeStatus( Constants_JobStatus::STATUS_CANCELLED );
+        $this->changeStatus( Constants_JobStatus::STATUS_CANCELLED );
     }
 
+    /**
+     * @throws Exception
+     */
     public function archive() {
-        return $this->changeStatus( Constants_JobStatus::STATUS_ARCHIVED );
+        $this->changeStatus( Constants_JobStatus::STATUS_ARCHIVED );
     }
 
+    /**
+     * @throws Exception
+     */
     public function active() {
-        return $this->changeStatus( Constants_JobStatus::STATUS_ACTIVE );
+        $this->changeStatus( Constants_JobStatus::STATUS_ACTIVE );
     }
 
+    /**
+     * @throws Exception
+     */
     protected function changeStatus( $status ) {
+
+        ( new ProjectAccessValidator( $this, $this->project ) )->validate();
 
         $chunks = $this->project->getJobs();
 
@@ -125,8 +140,6 @@ class ProjectsController extends KleinController {
 
         $projectValidator->onSuccess( function () use ( $projectValidator ) {
             $this->project = $projectValidator->getProject();
-        } )->onSuccess( function () {
-            ( new ProjectAccessValidator( $this, $this->project ) )->validate();
         } );
 
         $this->appendValidator( $projectValidator );

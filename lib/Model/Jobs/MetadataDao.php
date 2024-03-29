@@ -2,6 +2,7 @@
 
 namespace Jobs;
 
+use DataAccess_IDaoStruct;
 use Database;
 
 class MetadataDao extends \DataAccess_AbstractDao {
@@ -15,7 +16,7 @@ class MetadataDao extends \DataAccess_AbstractDao {
      * @param     $key
      * @param int $ttl
      *
-     * @return \DataAccess_IDaoStruct[]|MetadataStruct[]
+     * @return DataAccess_IDaoStruct[]|MetadataStruct[]
      */
     public function getByIdJob( $id_job, $key, $ttl = 0 ) {
 
@@ -37,7 +38,7 @@ class MetadataDao extends \DataAccess_AbstractDao {
      * @param     $password
      * @param int $ttl
      *
-     * @return \DataAccess_IDaoStruct[]
+     * @return DataAccess_IDaoStruct[]
      */
     public function getByJobIdAndPassword( $id_job, $password, $ttl = 0 ) {
 

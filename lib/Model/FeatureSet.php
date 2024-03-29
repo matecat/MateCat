@@ -30,7 +30,7 @@ class FeatureSet implements FeatureSetInterface
 
     /**
      * Initializes a new FeatureSet. If $features param is provided, FeaturesSet is populated with the given params.
-     * Otherwise it is populated with mandatory features.
+     * Otherwise, it is populated with mandatory features.
      *
      * @param $features
      *

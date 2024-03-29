@@ -3,6 +3,7 @@
 class Constants {
     const SOURCE_PAGE_TRANSLATE = 1 ;
     const SOURCE_PAGE_REVISION = 2 ;
+    const SOURCE_PAGE_REVISION_2 = 3 ;
 
     const SESSION_ACTUAL_SOURCE_LANG = 'actualSourceLang';
 

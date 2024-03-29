@@ -1,5 +1,6 @@
 import React from 'react'
 import {TransitionGroup, CSSTransition} from 'react-transition-group'
+import {ANALYSIS_STATUS, SEGMENTS_STATUS} from '../../constants/Constants'
 
 class AnalyzeHeader extends React.Component {
   constructor(props) {
@@ -21,8 +22,8 @@ class AnalyzeHeader extends React.Component {
         </div>
       </div>
     )
-    let status = this.props.data.get('STATUS')
-    let in_queue_before = parseInt(this.props.data.get('IN_QUEUE_BEFORE'))
+    let status = this.props.data.get('status')
+    let in_queue_before = parseInt(this.props.data.get('in_queue_before'))
     if (status === 'DONE') {
       html = (
         <div className="analysis-create">
@@ -46,8 +47,8 @@ class AnalyzeHeader extends React.Component {
         </div>
       )
     } else if (
-      status === 'NEW' ||
-      status === 'BUSY' ||
+      status === ANALYSIS_STATUS.NEW ||
+      status === ANALYSIS_STATUS.BUSY ||
       status === '' ||
       in_queue_before > 0
     ) {
@@ -83,7 +84,7 @@ class AnalyzeHeader extends React.Component {
                   <p className="label">
                     There are still{' '}
                     <span className="number">
-                      {this.props.data.get('IN_QUEUE_BEFORE_PRINT')}
+                      {this.props.data.get('in_queue_before')}
                     </span>{' '}
                     segments in queue.
                   </p>
@@ -111,9 +112,9 @@ class AnalyzeHeader extends React.Component {
       this.previousQueueSize = in_queue_before
     } else if (status === 'FAST_OK' && in_queue_before === 0) {
       if (
-        this.lastProgressSegments !== this.props.data.get('SEGMENTS_ANALYZED')
+        this.lastProgressSegments !== this.props.data.get('segments_analyzed')
       ) {
-        this.lastProgressSegments = this.props.data.get('SEGMENTS_ANALYZED')
+        this.lastProgressSegments = this.props.data.get('segments_analyzed')
         this.noProgressTail = 0
         this.showProgressBar = true
         html = this.getProgressBarText()
@@ -141,7 +142,7 @@ class AnalyzeHeader extends React.Component {
           </div>
         </div>
       )
-    } else if (status === 'EMPTY') {
+    } else if (status === ANALYSIS_STATUS.EMPTY) {
       let error = ''
       if (config.support_mail.indexOf('@') === -1) {
         error = config.support_mail
@@ -201,11 +202,11 @@ class AnalyzeHeader extends React.Component {
           <h5>Searching for TM Matches </h5>
           <span className="initial-segments">
             {' '}
-            ({this.props.data.get('SEGMENTS_ANALYZED_PRINT')} of{' '}
+            ({this.props.data.get('segments_analyzed')} of{' '}
           </span>
           <span className="total-segments">
             {' '}
-            {' ' + this.props.data.get('TOTAL_SEGMENTS_PRINT')})
+            {' ' + this.props.data.get('total_segments')})
           </span>
         </div>
       </div>
@@ -215,8 +216,8 @@ class AnalyzeHeader extends React.Component {
   getProgressBar() {
     if (this.showProgressBar) {
       let width =
-        (this.props.data.get('SEGMENTS_ANALYZED') /
-          this.props.data.get('TOTAL_SEGMENTS')) *
+        (this.props.data.get('segments_analyzed') /
+          this.props.data.get('total_segments')) *
           100 +
         '%'
       return (
@@ -245,7 +246,24 @@ class AnalyzeHeader extends React.Component {
     }
     return null
   }
-
+  getSavingWorkCount() {
+    const data = this.props.data.toJS()
+    const {total_equivalent} = data
+    let wcTime = total_equivalent / 3000
+    let wcUnit = 'day'
+    if (wcTime > 0 && wcTime < 1) {
+      wcTime = wcTime * 8 //convert to hours (1 work day = 8 hours)
+      wcUnit = 'hour'
+    }
+    if (wcTime > 0 && wcTime < 1) {
+      wcTime = wcTime * 60
+      wcUnit = 'minute'
+    }
+    if (wcTime > 1) {
+      wcUnit = wcUnit + 's'
+    }
+    return Math.round(wcTime) + ' work ' + wcUnit
+  }
   getWordscount() {
     let tooltipText =
       'Matecat suggests MT only when it helps thanks to a dynamic penalty system. We learn when to ' +
@@ -253,22 +271,25 @@ class AnalyzeHeader extends React.Component {
       'of words corrected by the Matecat community.<br> This data is also used to define a fair pricing ' +
       'scheme that splits the benefits of the technology between the customer and the translator.'
 
-    let status = this.props.data.get('STATUS')
-    let raw_words = this.props.data.get('TOTAL_RAW_WC'),
+    let status = this.props.data.get('status')
+    let raw_words = this.props.data.get('total_raw'),
       weightedWords = ''
     if (
-      (status === 'NEW' ||
+      (status === ANALYSIS_STATUS.NEW ||
         status === '' ||
-        this.props.data.get('IN_QUEUE_BEFORE') > 0) &&
+        this.props.data.get('in_queue_before') > 0) &&
       config.daemon_warning
     ) {
-      weightedWords = this.props.data.get('TOTAL_RAW_WC')
+      weightedWords = this.props.data.get('total_raw')
     } else {
-      if (status === 'DONE' || this.props.data.get('TOTAL_PAYABLE') > 0) {
-        weightedWords = this.props.data.get('TOTAL_PAYABLE')
+      if (
+        status === ANALYSIS_STATUS.DONE ||
+        this.props.data.get('total_equivalent') > 0
+      ) {
+        weightedWords = this.props.data.get('total_equivalent')
       }
-      if (status === 'NOT_TO_ANALYZE') {
-        weightedWords = this.props.data.get('TOTAL_RAW_WC')
+      if (status === ANALYSIS_STATUS.NOT_TO_ANALYZE) {
+        weightedWords = this.props.data.get('total_raw')
       }
     }
     let saving_perc =
@@ -292,8 +313,7 @@ class AnalyzeHeader extends React.Component {
               <div className="content">
                 Saving on word count
                 <div className="sub header">
-                  {this.props.data.get('PAYABLE_WC_TIME')} work{' '}
-                  {this.props.data.get('PAYABLE_WC_UNIT')} at 3.000 w/day
+                  {this.getSavingWorkCount()} at 3.000 w/day
                 </div>
               </div>
             </h2>
@@ -354,8 +374,8 @@ class AnalyzeHeader extends React.Component {
         self.containerSavingWords.classList.remove('updated-count')
       }, 400)
     }
-    let status = this.props.data.get('STATUS')
-    if (status === 'DONE') {
+    let status = this.props.data.get('status')
+    if (status === ANALYSIS_STATUS.DONE) {
       setTimeout(function () {
         self.containerAnalysisComplete &&
           self.containerAnalysisComplete.classList.remove('hide')
@@ -368,8 +388,8 @@ class AnalyzeHeader extends React.Component {
       position: 'bottom center',
     })
     let self = this
-    let status = this.props.data.get('STATUS')
-    if (status === 'DONE') {
+    let status = this.props.data.get('status')
+    if (status === ANALYSIS_STATUS.DONE) {
       this.containerSavingWords.classList.add('updated-count')
       setTimeout(function () {
         self.containerSavingWords.classList.remove('updated-count')

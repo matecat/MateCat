@@ -47,15 +47,6 @@ abstract class AbstractDecorator {
         $this->template->footer_show_revise_link    = false;
         $this->template->footer_show_translate_link = true;
         $this->template->footer_show_editlog_link = false;
-        $this->template->review_class               = 'review';
-        $this->template->review_type                = 'simple';
-
-        // TODO: move this logic in javascript QualityReportButton component
-        if ( $this->controller->getQaOverall() == 'fail' ||
-                $this->controller->getQaOverall() == 'poor'
-        ) {
-            $this->template->header_quality_report_item_class = 'hide';
-        }
 
         $this->template->password        = $this->controller->getPassword();
         $this->template->review_password = $this->controller->getReviewPassword();
@@ -68,8 +59,6 @@ abstract class AbstractDecorator {
         $this->template->footer_show_revise_link    = true;
         $this->template->footer_show_translate_link = false;
         $this->template->footer_show_editlog_link = false;
-        $this->template->review_class               = '';
-        $this->template->review_type                = 'simple';
 
         $this->template->password        = $this->controller->getPassword();
         $this->template->review_password = $this->controller->getPassword();

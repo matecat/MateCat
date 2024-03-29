@@ -1,6 +1,8 @@
 <?php
 
-class Constants_XliffTranslationStatus {
+namespace Constants;
+
+class XliffTranslationStatus {
 
     // xliff 1.2
     const FUZZY_MATCH              = 'fuzzy-match';
@@ -24,67 +26,72 @@ class Constants_XliffTranslationStatus {
 
     /**
      * @param $status
+     *
      * @return bool
      */
-    public static function isFuzzyMatch( $status )
-    {
-        return in_array($status, [
-            self::FUZZY_MATCH,
-            self::MT_SUGGESTION,
-        ]);
+    public static function isFuzzyMatch( $status ) {
+        return in_array( $status, [
+                self::FUZZY_MATCH,
+                self::MT_SUGGESTION,
+        ] );
     }
 
     /**
      * @param $status
+     *
      * @return bool
      */
     public static function isNew( $status ) {
-        return in_array($status, [
-            self::NEW_STATE,
-            self::INITIAL,
-            self::NEEDS_TRANSLATION,
-            self::NEEDS_L10N,
-            self::NEEDS_ADAPTATION,
-        ]);
+        return in_array( $status, [
+                self::NEW_STATE,
+                self::INITIAL,
+                self::NEEDS_TRANSLATION,
+                self::NEEDS_L10N,
+                self::NEEDS_ADAPTATION,
+        ] );
     }
 
     /**
      * @param $status
+     *
      * @return bool
      */
     public static function isTranslated( $status ) {
-        return in_array($status, [
-            self::TRANSLATED,
-            self::NEEDS_REVIEW_ADAPTATION,
-            self::NEEDS_REVIEW_L10N,
-            self::NEEDS_REVIEW_TRANSLATION,
-        ]);
+        return in_array( $status, [
+                self::TRANSLATED,
+                self::NEEDS_REVIEW_ADAPTATION,
+                self::NEEDS_REVIEW_L10N,
+                self::NEEDS_REVIEW_TRANSLATION,
+        ] );
     }
 
     /**
      * @param $status
+     *
      * @return bool
      */
     public static function isRevision( $status ) {
-        return self::isR1($status) or self::isR2($status);
+        return self::isR1( $status );
     }
 
     /**
      * @param $status
+     *
      * @return bool
      */
     public static function isR1( $status ) {
-        return in_array($status, [
-            self::REVIEWED,
-            self::SIGNED_OFF,
-        ]);
+        return in_array( $status, [
+                self::REVIEWED,
+                self::SIGNED_OFF,
+        ] );
     }
 
     /**
      * @param $status
+     *
      * @return bool
      */
-    public static function isR2( $status ) {
+    public static function isFinalState( $status ) {
         return $status === self::FINAL_STATE;
     }
 }

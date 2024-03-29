@@ -466,7 +466,7 @@ abstract class DataAccess_AbstractDao {
      * @param DataAccess_AbstractDaoObjectStruct|DataAccess_IDaoStruct $struct
      * @param array                                                    $options
      *
-     * @return bool
+     * @return int
      * @throws Exception
      */
     public static function updateStruct( DataAccess_IDaoStruct $struct, $options = [] ) {

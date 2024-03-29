@@ -14,13 +14,11 @@
         /*<![CDATA[*/
         var config = {
             basepath: '${basepath | string:/}',
-            qa_equivalent_class: '${qa_equivalent_class | string: 30}',
             id_job: '${jid}',
             password: '${password}',
             isSourceRTL: ${source_rtl | string:false},
             isTargetRTL: ${target_rtl | string:false},
             searchable_statuses : JSON.parse( '${ php: json_encode(searchable_statuses)}'),
-            project_type: '${project_type}',
             enableMultiDomainApi: ${enableMultiDomainApi | string:false},
             ajaxDomainsNumber: ${ajaxDomainsNumber | string:false},
             isAnInternalUser: ${php: var_export( !empty( isAnInternalUser ), true )},
@@ -30,6 +28,7 @@
             user_plugins: JSON.parse( '${ php: json_encode(user_plugins)}'),
             project_plugins: JSON.parse( '${ php: json_encode(project_plugins)}'),
             pname: '${pname}',
+            word_count_type: '${word_count_type}'
 
         };
         /*]]>*/

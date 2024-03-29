@@ -2,7 +2,7 @@
 
 /**
  * @group regression
- * @covers WordCount_CounterModel::methodNameForStatusCall
+ * @covers CounterModel::methodNameForStatusCall
  * User: dinies
  * Date: 13/06/16
  * Time: 12.34
@@ -15,7 +15,7 @@ class MethodNameForStatusCallTest extends AbstractTest
     protected $method_methodNameForStatusCall;
 
     public function setUp(){
-        $this->word_counter= new WordCount_CounterModel();
+        $this->word_counter= new CounterModel();
         $this->mirror_word_counter= new ReflectionClass($this->word_counter);
         $this->method_methodNameForStatusCall= $this->mirror_word_counter->getMethod('methodNameForStatusCall');
         $this->method_methodNameForStatusCall->setAccessible(true);
@@ -23,7 +23,7 @@ class MethodNameForStatusCallTest extends AbstractTest
 
     /**
      * @group regression
-     * @covers WordCount_CounterModel::methodNameForStatusCall
+     * @covers CounterModel::methodNameForStatusCall
      *
      * @param "NEW"
      */
@@ -32,7 +32,7 @@ class MethodNameForStatusCallTest extends AbstractTest
         $this->assertEquals("NewWords", $this->method_methodNameForStatusCall->invoke($this->word_counter, "NEW"));
     }/**
      * @group regression
-     * @covers WordCount_CounterModel::methodNameForStatusCall
+     * @covers CounterModel::methodNameForStatusCall
      *
      * @param "DRAFT"
      */
@@ -41,7 +41,7 @@ class MethodNameForStatusCallTest extends AbstractTest
         $this->assertEquals("DraftWords", $this->method_methodNameForStatusCall->invoke($this->word_counter, "DRAFT"));
     }/**
      * @group regression
- * @covers    WordCount_CounterModel::methodNameForStatusCall
+ * @covers    CounterModel::methodNameForStatusCall
      *
      * @param "TRANSLATED"
      */
@@ -50,7 +50,7 @@ class MethodNameForStatusCallTest extends AbstractTest
         $this->assertEquals("TranslatedWords", $this->method_methodNameForStatusCall->invoke($this->word_counter, "TRANSLATED"));
     }/**
      * @group regression
- * @covers    WordCount_CounterModel::methodNameForStatusCall
+ * @covers    CounterModel::methodNameForStatusCall
      *
      * @param "APPROVED"
      */
@@ -59,7 +59,7 @@ class MethodNameForStatusCallTest extends AbstractTest
         $this->assertEquals("ApprovedWords", $this->method_methodNameForStatusCall->invoke($this->word_counter, "APPROVED"));
     }/**
      * @group regression
- * @covers    WordCount_CounterModel::methodNameForStatusCall
+ * @covers    CounterModel::methodNameForStatusCall
      *
      * @param "REJECTED"
      */
@@ -68,7 +68,7 @@ class MethodNameForStatusCallTest extends AbstractTest
         $this->assertEquals("RejectedWords", $this->method_methodNameForStatusCall->invoke($this->word_counter, "REJECTED"));
     }/**
      * @group regression
- * @covers WordCount_CounterModel::methodNameForStatusCall
+ * @covers CounterModel::methodNameForStatusCall
      *
      * @param "FIXED"
      */
@@ -77,7 +77,7 @@ class MethodNameForStatusCallTest extends AbstractTest
         $this->assertEquals("TranslatedWords", $this->method_methodNameForStatusCall->invoke($this->word_counter, "FIXED"));
     }/**
  * @group     regression
- * @covers WordCount_CounterModel::methodNameForStatusCall
+ * @covers CounterModel::methodNameForStatusCall
      *
      * @param "REBUTTED"
      */
@@ -88,7 +88,7 @@ class MethodNameForStatusCallTest extends AbstractTest
 
     /**
      * @group  regression
-     * @covers WordCount_CounterModel::methodNameForStatusCall
+     * @covers CounterModel::methodNameForStatusCall
      *
      * @param "BARANDFOO"
      */

@@ -4,15 +4,14 @@ namespace API\V3;
 
 use API\V2\BaseChunkController;
 use API\V2\Exceptions\NotFoundException;
-use API\V2\KleinController;
 use Jobs\MetadataDao;
-use LQA\ChunkReviewDao;
+use Jobs_JobStruct;
+use Projects_ProjectStruct;
+use stdClass;
 
 class MetaDataController extends BaseChunkController {
 
     public function index() {
-
-        $result = [];
 
         // params
         $id_job   = $this->request->param( 'id_job' );
@@ -28,25 +27,25 @@ class MetaDataController extends BaseChunkController {
         $this->chunk = $job;
         $this->return404IfTheJobWasDeleted();
 
-        $metadata = new \stdClass();
+        $metadata          = new stdClass();
         $metadata->project = $this->getProjectInfo( $job->getProject() );
-        $metadata->job = $this->getJobMetaData( $job );
-        $metadata->files = $this->getJobFilesMetaData( $job );
+        $metadata->job     = $this->getJobMetaData( $job );
+        $metadata->files   = $this->getJobFilesMetaData( $job );
 
         $this->response->json( $metadata );
     }
 
     /**
-     * @param \Projects_ProjectStruct $project
+     * @param Projects_ProjectStruct $project
      *
-     * @return \stdClass
+     * @return stdClass
      */
-    private function getProjectInfo( \Projects_ProjectStruct $project ) {
+    private function getProjectInfo( Projects_ProjectStruct $project ) {
 
-        $metadata = new \stdClass();
+        $metadata = new stdClass();
 
         foreach ( $project->getMetadata() as $metadatum ) {
-            $key = $metadatum->key;
+            $key            = $metadatum->key;
             $metadata->$key = $metadatum->getValue();
         }
 
@@ -54,17 +53,17 @@ class MetaDataController extends BaseChunkController {
     }
 
     /**
-     * @param \Jobs_JobStruct $job
+     * @param Jobs_JobStruct $job
      *
-     * @return \stdClass
+     * @return stdClass
      */
-    private function getJobMetaData( \Jobs_JobStruct $job ) {
+    private function getJobMetaData( Jobs_JobStruct $job ) {
 
-        $metadata = new \stdClass();
+        $metadata       = new stdClass();
         $jobMetaDataDao = new MetadataDao();
 
         foreach ( $jobMetaDataDao->getByJobIdAndPassword( $job->id, $job->password, 60 * 5 ) as $metadatum ) {
-            $key = $metadatum->key;
+            $key            = $metadatum->key;
             $metadata->$key = $metadatum->value;
         }
 
@@ -72,26 +71,26 @@ class MetaDataController extends BaseChunkController {
     }
 
     /**
-     * @param \Jobs_JobStruct $job
+     * @param Jobs_JobStruct $job
      *
      * @return array
      */
-    private function getJobFilesMetaData( \Jobs_JobStruct $job ) {
+    private function getJobFilesMetaData( Jobs_JobStruct $job ) {
 
         $metadata         = [];
         $filesMetaDataDao = new \Files\MetadataDao();
 
         foreach ( $job->getFiles() as $file ) {
-            $metadatum = new \stdClass();
+            $metadatum = new stdClass();
             foreach ( $filesMetaDataDao->getByJobIdProjectAndIdFile( $job->getProject()->id, $file->id, 60 * 5 ) as $meta ) {
-                $key = $meta->key;
+                $key             = $meta->key;
                 $metadatum->$key = $meta->value;
             }
 
-            $metadataObject = new \stdClass();
-            $metadataObject->id = $file->id;
+            $metadataObject           = new \stdClass();
+            $metadataObject->id       = $file->id;
             $metadataObject->filename = $file->filename;
-            $metadataObject->data = $metadatum;
+            $metadataObject->data     = $metadatum;
 
             $metadata[] = $metadataObject;
         }

@@ -31,10 +31,7 @@ class UserProfile {
                 'user'               => User::renderItem( $user ),
                 'connected_services' => ( new ConnectedService( $servicesStruct ) )->render(),
                 'teams'              => ( new Team() )->render( $teams ),
-
-            //TODO: this is likely to be unsafe to be passed here without a whitelist.
                 'metadata'           => ( empty( $userMetadata ) ? null : $userMetadata ),
-
         ];
 
     }

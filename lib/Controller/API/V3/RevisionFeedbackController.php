@@ -4,11 +4,10 @@ namespace API\V3;
 
 use API\V2\BaseChunkController;
 use API\V2\Exceptions\NotFoundException;
-use API\V2\KleinController;
 use API\V2\Validators\ChunkPasswordValidator;
 use Chunks_ChunkStruct;
-use Revise_FeedbackDAO;
-use Revise_FeedbackStruct;
+use Revise\FeedbackDAO;
+use Revise\FeedbackStruct;
 
 class RevisionFeedbackController extends BaseChunkController {
 
@@ -31,7 +30,7 @@ class RevisionFeedbackController extends BaseChunkController {
     public function feedback() {
 
         // insert or update feedback
-        $feedbackStruct = new Revise_FeedbackStruct();
+        $feedbackStruct = new FeedbackStruct();
         $feedbackStruct->id_job = $this->request->param( 'id_job' );
         $feedbackStruct->password = $this->request->param( 'password' );
         $feedbackStruct->revision_number = $this->request->param( 'revision_number' );
@@ -47,7 +46,7 @@ class RevisionFeedbackController extends BaseChunkController {
         $this->chunk = $job;
         $this->return404IfTheJobWasDeleted();
 
-        $rows = (new Revise_FeedbackDAO())->insertOrUpdate($feedbackStruct);
+        $rows = (new FeedbackDAO())->insertOrUpdate($feedbackStruct);
         $status = ($rows > 0) ? 'ok' : 'ko';
 
         $this->response->json( [
