@@ -1,5 +1,6 @@
 <?php
 
+use ConnectedServices\LinkedIn\LinkedInClient;
 use ConnectedServices\LinkedIn\LinkedInClientFactory;
 use League\OAuth2\Client\Provider\LinkedIn;
 
@@ -16,11 +17,6 @@ abstract class viewController extends controller {
      * @var Google_Client
      */
     protected $client;
-
-    /**
-     * @var LinkedIn
-     */
-    protected $linkedInClient;
 
     /**
      * @var string
@@ -211,18 +207,7 @@ abstract class viewController extends controller {
      */
     public function getLinkedInAuthUrl(){
         if ( is_null( $this->linkedInAuthURL ) ) {
-
-            $options = [
-                'state' => 'DCEeFWf45A53sdfKef424',
-                'scope' => [
-                    'email',
-                    'profile',
-                    'openid',
-                ]
-            ];
-
-            $this->linkedInClient = LinkedInClientFactory::create();
-            $this->linkedInAuthURL = $this->linkedInClient->getAuthorizationUrl($options);
+            $this->linkedInAuthURL = LinkedInClient::getAuthorizationUrl();
         }
 
         return $this->linkedInAuthURL;
