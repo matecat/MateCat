@@ -22,14 +22,6 @@ export const setRecentlyUsedLanguages = (languages) => {
       languages.length === list.length,
   )
 
-  console.log(
-    'isAlreadyExistingCombination',
-    indexAlreadyExistingCombination > -1,
-    'indexAlreadyExistingCombination',
-    indexAlreadyExistingCombination,
-    collection,
-  )
-
   const collectionWithoutDuplicates = collection.filter(
     (item, index) => index !== indexAlreadyExistingCombination,
   )
