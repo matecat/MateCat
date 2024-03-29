@@ -4,7 +4,7 @@ import LanguageSelectorList from './LanguageSelectorList'
 import LanguageSelectorSearch from './LanguageSelectorSearch'
 import LabelWithTooltip from '../common/LabelWithTooltip'
 
-const RECENTLY_USED_LOCAL_STORAGE_KEY = 'target_languages_recently_used'
+const RECENTLY_USED_LOCAL_STORAGE_KEY = `target_languages_recently_used-${config.userMail}`
 const MAX_RECENTLY_USED_STORED = 3
 
 const getRecentyUsedLanguages = () =>
@@ -15,10 +15,32 @@ export const setRecentlyUsedLanguages = (languages) => {
   const collection = JSON.parse(
     localStorage.getItem(RECENTLY_USED_LOCAL_STORAGE_KEY) ?? '[]',
   )
+
+  const indexAlreadyExistingCombination = collection.findIndex(
+    (list) =>
+      languages.every(({id}) => list.some((item) => item.id === id)) &&
+      languages.length === list.length,
+  )
+
+  console.log(
+    'isAlreadyExistingCombination',
+    indexAlreadyExistingCombination > -1,
+    'indexAlreadyExistingCombination',
+    indexAlreadyExistingCombination,
+    collection,
+  )
+
+  const collectionWithoutDuplicates = collection.filter(
+    (item, index) => index !== indexAlreadyExistingCombination,
+  )
+
   const newCollection =
-    collection.length >= MAX_RECENTLY_USED_STORED
-      ? [...collection.filter((item, index) => index > 0), languages]
-      : [...collection, languages]
+    collectionWithoutDuplicates.length >= MAX_RECENTLY_USED_STORED
+      ? [
+          ...collectionWithoutDuplicates.filter((item, index) => index > 0),
+          languages,
+        ]
+      : [...collectionWithoutDuplicates, languages]
 
   localStorage.setItem(
     RECENTLY_USED_LOCAL_STORAGE_KEY,
@@ -82,6 +104,10 @@ class LanguageSelector extends React.Component {
     }
   }
 
+  setSelectLanguagesFromRecentlyUsed = (list) => {
+    this.setState({selectedLanguages: list})
+  }
+
   render() {
     const {
       onQueryChange,
@@ -94,6 +120,8 @@ class LanguageSelector extends React.Component {
     const {languagesList, onClose} = this.props
     const {selectedLanguages, querySearch, fromLanguage, filteredLanguages} =
       this.state
+
+    const recentyUsedLanguages = getRecentyUsedLanguages().reverse()
 
     return (
       <div
@@ -134,18 +162,31 @@ class LanguageSelector extends React.Component {
                   />
                 </div>
               </div>
-              <div className="recently-used">
-                <div className="first-column">
-                  <span className="label">Recently used:</span>
+              {recentyUsedLanguages.length > 0 && (
+                <div className="recently-used">
+                  <div className="first-column">
+                    <span className="label">Recently used:</span>
+                  </div>
+                  <div className="second-column">
+                    {recentyUsedLanguages.map((list, index) => (
+                      <div
+                        className="list-badge"
+                        key={index}
+                        onClick={() =>
+                          this.setSelectLanguagesFromRecentlyUsed(list)
+                        }
+                      >
+                        <LabelWithTooltip>
+                          <span className="language-name">
+                            {list.map(({name}) => name).join(', ')}
+                          </span>
+                        </LabelWithTooltip>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div className="second-column">
-                  {getRecentyUsedLanguages().map((list, index) => (
-                    <LabelWithTooltip className="list-badge" key={index}>
-                      <span>{list.map(({name}) => name).join(', ')}</span>
-                    </LabelWithTooltip>
-                  ))}
-                </div>
-              </div>
+              )}
+
               {(filteredLanguages.length > 0 ||
                 (querySearch && !filteredLanguages.length)) && (
                 <div className="button-all-languages">
@@ -237,8 +278,6 @@ class LanguageSelector extends React.Component {
     //confirm must have 1 language selected
     const {selectedLanguages} = this.state
     this.props.onConfirm(selectedLanguages)
-
-    setRecentlyUsedLanguages(selectedLanguages)
   }
 
   onQueryChange = (querySearch) => {
