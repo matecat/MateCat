@@ -16,6 +16,7 @@ use Exception;
 use INIT;
 use Log;
 use PDOException;
+use Predis\PredisException;
 use ReflectionException;
 use SplObserver;
 use SplSubject;
@@ -161,7 +162,7 @@ class Executor implements SplObserver {
         declare( ticks=10 );
         set_time_limit( 0 );
 
-        if ( !extension_loaded( "pcntl" ) && (bool)ini_get( "enable_dl" ) ) {
+        if ( !extension_loaded( "pcntl" ) && ini_get( "enable_dl" ) ) {
             dl( "pcntl.so" );
         }
         if ( !function_exists( 'pcntl_signal' ) ) {
@@ -308,7 +309,7 @@ class Executor implements SplObserver {
     /**
      * Read frame msg from the queue
      *
-     * @return array[ \StompFrame, QueueElement ]
+     * @return array [ Frame , QueueElement ]
      * @throws FrameException
      */
     protected function _readAMQFrame() {
@@ -366,6 +367,7 @@ class Executor implements SplObserver {
      * Close all opened resources
      *
      * @throws ReflectionException
+     * @throws PredisException
      */
     public static function cleanShutDown() {
 
@@ -388,6 +390,7 @@ class Executor implements SplObserver {
      *
      * @return int
      * @throws ReflectionException
+     * @throws PredisException
      */
     protected function _myProcessExists( $pid ) {
 

@@ -204,7 +204,7 @@ class SetContributionTest extends \AbstractTest {
         $queueElement->classLoad = '\AsyncTasks\Workers\SetContributionWorker';
 
         $stub->expects( $this->once() )
-                ->method('send')
+                ->method( 'publishToQueues' )
                 ->with(
                         $this->stringContains( $contextList->list['CONTRIBUTION']->queue_name ),
                         $this->equalTo( $queueElement ),
@@ -212,7 +212,7 @@ class SetContributionTest extends \AbstractTest {
                 );
 
         //simulate \AMQ Server Down and force an exception
-        $stub->method('send')->will( $this->throwException( new Exception( "Could not connect to localhost:61613 (10/10)" ) ) );
+        $stub->method( 'publishToQueues' )->will( $this->throwException( new Exception( "Could not connect to localhost:61613 (10/10)" ) ) );
 
         //check that this exception is raised up there
         $this->setExpectedExceptionRegExp( '\Exception', '/Could not connect to .*/' );

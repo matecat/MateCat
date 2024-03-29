@@ -9,8 +9,10 @@
 
 use Analysis\Queue\RedisKeys;
 use Predis\Client as PredisClient;
+use Predis\PredisException;
 use Stomp\Client;
 use Stomp\Exception\ConnectionException;
+use Stomp\Exception\StompException;
 use Stomp\Network\Connection;
 use Stomp\StatefulStomp;
 use Stomp\Transport\Message;
@@ -60,6 +62,7 @@ class AMQHandler extends StatefulStomp {
      * Get the connection to Redis server and return it
      *
      * @throws ReflectionException
+     * @throws PredisException
      */
     public function getRedisClient() {
         if ( empty( $this->redisHandler ) ) {
@@ -77,7 +80,7 @@ class AMQHandler extends StatefulStomp {
      * @param array  $header
      *
      * @return int
-     * @throws Exception
+     * @throws StompException
      */
     public function subscribe( $destination, $selector = null, $ack = 'client-individual', array $header = [] ) {
 
@@ -89,16 +92,41 @@ class AMQHandler extends StatefulStomp {
     }
 
     /**
+     * @param string         $destination
+     * @param Message $message
+     *
+     * @return bool
+     * @throws StompException
+     */
+    public function publishToQueues( $destination, Message $message ) {
+
+        $this->clientType = self::CLIENT_TYPE_PUBLISHER;
+        return $this->_send( '/queue/' . INIT::$INSTANCE_ID . "_" . $destination, $message );
+
+    }
+
+    /**
      * @param string  $destination
      * @param Message $message
      *
      * @return bool
-     * @throws Exception
+     * @throws StompException
      */
-    public function send( $destination, Message $message ) {
+    private function _send( $destination, Message $message ) {
+        return $this->send( $destination, $message );
+    }
+
+    /**
+     * @param string         $destination
+     * @param Message $message
+     *
+     * @return bool
+     * @throws StompException
+     */
+    public function publishToTopic( $destination, Message $message ) {
 
         $this->clientType = self::CLIENT_TYPE_PUBLISHER;
-        return parent::send( '/queue/' . INIT::$INSTANCE_ID . "_" . $destination, $message );
+        return $this->_send( $destination, $message );
 
     }
 
@@ -232,7 +260,7 @@ class AMQHandler extends StatefulStomp {
 
         if ( !empty( $failed_segment ) ) {
             Log::doJsonLog( "Failed " . var_export( $failed_segment, true ) );
-            $this->send( $queueInfo->queue_name, new Message( strval( $failed_segment ), [ 'persistent' => $this->persistent ] ) );
+            $this->publishToQueues( $queueInfo->queue_name, new Message( strval( $failed_segment ), [ 'persistent' => $this->persistent ] ) );
         }
 
     }

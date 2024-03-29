@@ -66,7 +66,7 @@ class WorkerClient {
             throw new InvalidArgumentException( 'Empty queue_name: ' . var_export( self::$_QUEUES, true ) . "\n" . var_export( $queue, true ) ) ;
         }
 
-        self::$_HANDLER->send( $queue_name, new Message( strval( $element ), $options ) );
+        self::$_HANDLER->publishToQueues( $queue_name, new Message( strval( $element ), $options ) );
     }
 
 }

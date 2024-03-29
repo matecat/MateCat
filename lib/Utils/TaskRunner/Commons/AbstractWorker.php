@@ -8,12 +8,15 @@
  */
 
 namespace TaskRunner\Commons;
+
 use AMQHandler;
 use Database;
+use INIT;
 use PDOException;
 use SplObserver;
 use SplSubject;
-use Stomp;
+use Stomp\Exception\StompException;
+use Stomp\Transport\Message;
 use TaskRunner\Exceptions\EndQueueException;
 
 /**
@@ -22,9 +25,9 @@ use TaskRunner\Exceptions\EndQueueException;
  */
 abstract class AbstractWorker implements SplSubject {
 
-    const ERR_REQUEUE_END      = 1;
-    const ERR_REQUEUE          = 2;
-    const ERR_EMPTY_ELEMENT    = 3;
+    const ERR_REQUEUE_END   = 1;
+    const ERR_REQUEUE       = 2;
+    const ERR_EMPTY_ELEMENT = 3;
 
     /**
      * Observers container
@@ -81,21 +84,21 @@ abstract class AbstractWorker implements SplSubject {
      *
      * @param $_myPid
      */
-    public function setPid( $_myPid ){
+    public function setPid( $_myPid ) {
         $this->_workerPid = $_myPid;
     }
 
     /**
      * @param Context $context
      */
-    public function setContext( Context $context ){
+    public function setContext( Context $context ) {
         $this->_myContext = $context;
     }
 
     /**
      * @return Context
      */
-    public function getContext(){
+    public function getContext() {
         return $this->_myContext;
     }
 
@@ -105,7 +108,7 @@ abstract class AbstractWorker implements SplSubject {
      *
      * @return string
      */
-    public function getLoggerName(){
+    public function getLoggerName() {
         return $this->_myContext->loggerName;
     }
 
@@ -155,7 +158,7 @@ abstract class AbstractWorker implements SplSubject {
      * @since 5.1.0
      */
     public function notify() {
-        foreach( $this->_observer as $hash => $observer ){
+        foreach ( $this->_observer as $observer ) {
             $observer->update( $this );
         }
     }
@@ -164,15 +167,16 @@ abstract class AbstractWorker implements SplSubject {
      * Method used by the Observer to get the logging message
      * @return string
      */
-    public function getLogMsg(){
+    public function getLogMsg() {
         return $this->_logMsg;
     }
 
     /**
      * Method to be called when a concrete worker must log
+     *
      * @param $msg string
      */
-    protected function _doLog( $msg ){
+    protected function _doLog( $msg ) {
         $this->_logMsg = $msg;
         $this->notify();
     }
@@ -199,7 +203,7 @@ abstract class AbstractWorker implements SplSubject {
      *
      * @throws EndQueueException
      */
-    protected function _endQueueCallback( QueueElement $queueElement ){
+    protected function _endQueueCallback( QueueElement $queueElement ) {
         throw new EndQueueException( "--- (Worker " . $this->_workerPid . ") :  Frame Re-queue max value reached, acknowledge and skip.", self::ERR_REQUEUE_END );
     }
 
@@ -214,7 +218,7 @@ abstract class AbstractWorker implements SplSubject {
      * </code>
      *
      */
-    protected function _checkDatabaseConnection(){
+    protected function _checkDatabaseConnection() {
 
         $db = Database::obtain();
         try {
@@ -232,19 +236,13 @@ abstract class AbstractWorker implements SplSubject {
     /**
      * @param $_object
      *
-     * @throws \StompException
+     * @throws StompException
      */
-    protected function publishMessage( $_object ) {
+    protected function publishToSseTopic( $_object ) {
 
         $message = json_encode( $_object );
-
-        $stomp = new Stomp( \INIT::$QUEUE_BROKER_ADDRESS );
-        $stomp->connect();
-        $stomp->send( \INIT::$SSE_NOTIFICATIONS_QUEUE_NAME,
-            $message,
-            [ 'persistent' => 'false' ]
-        );
-
+        ( new AMQHandler() )->publishToTopic( INIT::$SSE_NOTIFICATIONS_QUEUE_NAME, new Message( $message, [ 'persistent' => 'false' ] ) );
         $this->_doLog( $message );
+
     }
 }
