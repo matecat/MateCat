@@ -110,7 +110,7 @@ class CustomPayableRateStruct extends DataAccess_AbstractDaoSilentStruct impleme
         $size = mb_strlen(json_encode($breakdowns, JSON_NUMERIC_CHECK), '8bit');
 
         if($size > self::MAX_BREAKDOWN_SIZE){
-            throw new Exception('`breakdowns` string is too large. Max size: 64kb');
+            throw new Exception('`breakdowns` string is too large. Max size: 64kb', 400);
         }
 
         if(!isset($breakdowns['default'])){
