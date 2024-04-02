@@ -9,10 +9,8 @@
 
 use Analysis\Queue\RedisKeys;
 use Predis\Client as PredisClient;
-use Predis\PredisException;
 use Stomp\Client;
 use Stomp\Exception\ConnectionException;
-use Stomp\Exception\StompException;
 use Stomp\Network\Connection;
 use Stomp\StatefulStomp;
 use Stomp\Transport\Message;
@@ -62,7 +60,6 @@ class AMQHandler extends StatefulStomp {
      * Get the connection to Redis server and return it
      *
      * @throws ReflectionException
-     * @throws PredisException
      */
     public function getRedisClient() {
         if ( empty( $this->redisHandler ) ) {
@@ -80,7 +77,6 @@ class AMQHandler extends StatefulStomp {
      * @param array  $header
      *
      * @return int
-     * @throws StompException
      */
     public function subscribe( $destination, $selector = null, $ack = 'client-individual', array $header = [] ) {
 
@@ -96,7 +92,6 @@ class AMQHandler extends StatefulStomp {
      * @param Message $message
      *
      * @return bool
-     * @throws StompException
      */
     public function publishToQueues( $destination, Message $message ) {
 
@@ -110,7 +105,6 @@ class AMQHandler extends StatefulStomp {
      * @param Message $message
      *
      * @return bool
-     * @throws StompException
      */
     private function _send( $destination, Message $message ) {
         return $this->send( $destination, $message );
@@ -121,7 +115,6 @@ class AMQHandler extends StatefulStomp {
      * @param Message $message
      *
      * @return bool
-     * @throws StompException
      */
     public function publishToTopic( $destination, Message $message ) {
 
@@ -148,29 +141,9 @@ class AMQHandler extends StatefulStomp {
             throw new Exception( 'No queue name provided.' );
         }
 
-        $queue_interface_url = INIT::$QUEUE_JMX_ADDRESS . "/api/jolokia/read/org.apache.activemq:type=Broker,brokerName=localhost,destinationType=Queue,destinationName=" . (int)INIT::$INSTANCE_ID . "_" . $queue . "/QueueSize";
+        $queue_interface_url = INIT::$QUEUE_JMX_ADDRESS . "/api/jolokia/read/org.apache.activemq:type=Broker,brokerName=localhost,destinationType=Queue,destinationName=" . INIT::$INSTANCE_ID . "_" . $queue . "/QueueSize";
 
-        $mHandler = new MultiCurlHandler();
-
-        $options = [
-                CURLOPT_HEADER         => false,
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_USERAGENT      => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
-                CURLOPT_CONNECTTIMEOUT => 5, // a timeout to call itself should not be too much higher :D
-                CURLOPT_SSL_VERIFYPEER => true,
-                CURLOPT_SSL_VERIFYHOST => 2,
-                CURLOPT_HTTPHEADER     => [ 'Authorization: Basic ' . base64_encode( INIT::$QUEUE_CREDENTIALS ) ]
-        ];
-
-        $resource = $mHandler->createResource( $queue_interface_url, $options );
-        $mHandler->multiExec();
-        $result = $mHandler->getSingleContent( $resource );
-        $mHandler->multiCurlCloseAll();
-        $result = json_decode( $result, true );
-
-        Utils::raiseJsonExceptionError();
-
-        return $result[ 'value' ];
+        return $this->callAmqJmx( $queue_interface_url );
 
     }
 
@@ -192,29 +165,9 @@ class AMQHandler extends StatefulStomp {
             throw new Exception( 'No queue name provided.' );
         }
 
-        $queue_interface_url = INIT::$QUEUE_JMX_ADDRESS . "/api/jolokia/read/org.apache.activemq:type=Broker,brokerName=localhost,destinationType=Queue,destinationName=" . (int)INIT::$INSTANCE_ID . "_" . $queue . "/ConsumerCount";
+        $queue_interface_url = INIT::$QUEUE_JMX_ADDRESS . "/api/jolokia/read/org.apache.activemq:type=Broker,brokerName=localhost,destinationType=Queue,destinationName=" . INIT::$INSTANCE_ID . "_" . $queue . "/ConsumerCount";
 
-        $mHandler = new MultiCurlHandler();
-
-        $options = [
-                CURLOPT_HEADER         => false,
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_USERAGENT      => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
-                CURLOPT_CONNECTTIMEOUT => 5, // a timeout to call itself should not be too much higher :D
-                CURLOPT_SSL_VERIFYPEER => true,
-                CURLOPT_SSL_VERIFYHOST => 2,
-                CURLOPT_HTTPHEADER     => [ 'Authorization: Basic ' . base64_encode( INIT::$QUEUE_CREDENTIALS ) ]
-        ];
-
-        $resource = $mHandler->createResource( $queue_interface_url, $options );
-        $mHandler->multiExec();
-        $result = $mHandler->getSingleContent( $resource );
-        $mHandler->multiCurlCloseAll();
-        $result = json_decode( $result, true );
-
-        Utils::raiseJsonExceptionError();
-
-        return $result[ 'value' ];
+        return $this->callAmqJmx( $queue_interface_url );
 
     }
 
@@ -263,6 +216,36 @@ class AMQHandler extends StatefulStomp {
             $this->publishToQueues( $queueInfo->queue_name, new Message( strval( $failed_segment ), [ 'persistent' => $this->persistent ] ) );
         }
 
+    }
+
+    /**
+     * @param $queue_interface_url
+     *
+     * @return mixed
+     * @throws Exception
+     */
+    public function callAmqJmx( $queue_interface_url ) {
+        $mHandler = new MultiCurlHandler();
+
+        $options = [
+                CURLOPT_HEADER         => false,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_USERAGENT      => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
+                CURLOPT_CONNECTTIMEOUT => 5, // a timeout to call itself should not be too much higher :D
+                CURLOPT_SSL_VERIFYPEER => true,
+                CURLOPT_SSL_VERIFYHOST => 2,
+                CURLOPT_HTTPHEADER     => [ 'Authorization: Basic ' . base64_encode( INIT::$QUEUE_CREDENTIALS ) ]
+        ];
+
+        $resource = $mHandler->createResource( $queue_interface_url, $options );
+        $mHandler->multiExec();
+        $result = $mHandler->getSingleContent( $resource );
+        $mHandler->multiCurlCloseAll();
+        $result = json_decode( $result, true );
+
+        Utils::raiseJsonExceptionError();
+
+        return $result[ 'value' ];
     }
 
 }
