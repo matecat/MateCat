@@ -16,8 +16,10 @@ use Exception;
 use INIT;
 use Log;
 use PDOException;
+use ReflectionException;
 use SplObserver;
 use SplSubject;
+use StompException;
 use StompFrame;
 use TaskRunner\Commons\AbstractWorker;
 use TaskRunner\Commons\Context;
@@ -207,7 +209,7 @@ class Executor implements SplObserver {
      *
      * @param null $args
      *
-     * @throws \StompException
+     * @throws StompException
      */
     public function main( $args = null ) {
 
@@ -366,6 +368,8 @@ class Executor implements SplObserver {
     /**
      * Close all opened resources
      *
+     * @throws ReflectionException
+     * @throws StompException
      */
     public static function cleanShutDown() {
 
@@ -387,7 +391,7 @@ class Executor implements SplObserver {
      * @param $pid
      *
      * @return int
-     * @throws \Predis\Connection\ConnectionException
+     * @throws ReflectionException
      */
     protected function _myProcessExists( $pid ) {
 

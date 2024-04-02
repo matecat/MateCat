@@ -13,6 +13,7 @@ use AMQHandler;
 use Exception;
 use INIT;
 use Log;
+use ReflectionException;
 use TaskRunner\Commons\AbstractDaemon;
 use TaskRunner\Commons\Context;
 use TaskRunner\Commons\ContextList;
@@ -329,7 +330,7 @@ class TaskManager extends AbstractDaemon {
      * @param int     $pid
      * @param int     $num
      *
-     * @throws \Predis\Connection\ConnectionException
+     * @throws ReflectionException
      */
     protected function _killPids( Context $queueInfo = null, $pid = 0, $num = 0 ) {
 
@@ -551,7 +552,7 @@ class TaskManager extends AbstractDaemon {
     /**
      *
      * Remove no more present contexts
-     * @throws \Predis\Connection\ConnectionException
+     * @throws ReflectionException
      */
     protected function _cleanContexts(){
 

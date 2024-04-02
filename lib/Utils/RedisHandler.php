@@ -1,5 +1,7 @@
 <?php
 
+use Predis\Client;
+
 /**
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
@@ -10,7 +12,7 @@
 class RedisHandler {
 
     /**
-     * @var Predis\Client
+     * @var Client
      */
     protected $redisHandler;
 
@@ -19,9 +21,8 @@ class RedisHandler {
      *
      * Get the connection to Redis server and return it
      *
-     * @throws \Predis\Connection\ConnectionException
+     * @return Client
      * @throws ReflectionException
-     * @return Predis\Client
      */
     public function getConnection( ){
 
@@ -51,7 +52,7 @@ class RedisHandler {
 
             }
 
-            $this->redisHandler = new Predis\Client( $connectionParams );
+            $this->redisHandler = new Client( $connectionParams );
 
         }
 
@@ -66,9 +67,9 @@ class RedisHandler {
             $conf = parse_url( $dsnString );
 
             if ( isset( $conf[ 'query' ] ) ) {
-                $instanceID = "&database=" . (int) INIT::$INSTANCE_ID;
+                $instanceID = "&database=" . INIT::$INSTANCE_ID;
             } else {
-                $instanceID = "?database=" . (int) INIT::$INSTANCE_ID;
+                $instanceID = "?database=" . INIT::$INSTANCE_ID;
             }
 
             return $dsnString . $instanceID;

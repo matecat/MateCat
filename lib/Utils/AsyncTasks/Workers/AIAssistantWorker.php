@@ -7,6 +7,9 @@ use AMQHandler;
 use Exception;
 use INIT;
 use Orhanerday\OpenAi\OpenAi;
+use Predis\Client;
+use Predis\Response\Status;
+use ReflectionException;
 use StompException;
 use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\AbstractWorker;
@@ -23,15 +26,14 @@ class AIAssistantWorker extends AbstractWorker
     private $openAi;
 
     /**
-     * @var \Predis\Client
+     * @var Client
      */
     private $redis;
 
     /**
      * AIAssistantWorker constructor.
      * @param AMQHandler $queueHandler
-     * @throws \Predis\Connection\ConnectionException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function __construct(AMQHandler $queueHandler)
     {
@@ -197,7 +199,8 @@ class AIAssistantWorker extends AbstractWorker
      * @param $idJob
      * @param $password
      * @param $value
-     * @return mixed
+     *
+     * @return Status
      */
     private function generateLock($idSegment, $idJob, $password, $value)
     {

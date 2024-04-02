@@ -8,6 +8,8 @@
  */
 
 use Analysis\Queue\RedisKeys;
+use Predis\Client;
+use Predis\Connection\ConnectionInterface;
 use TaskRunner\Commons\Context;
 
 class AMQHandler extends Stomp {
@@ -15,7 +17,7 @@ class AMQHandler extends Stomp {
     protected $amqHandler;
 
     /**
-     * @var \Predis\Client
+     * @var Client
      */
     protected $redisHandler;
     protected $clientType = null;
@@ -50,7 +52,8 @@ class AMQHandler extends Stomp {
      *
      * Get the connection to Redis server and return it
      *
-     * @throws \Predis\Connection\ConnectionException
+     * @return Client|ConnectionInterface
+     * @throws ReflectionException
      */
     public function getRedisClient() {
         if ( empty( $this->redisHandler ) ) {
@@ -132,7 +135,7 @@ class AMQHandler extends Stomp {
         } elseif ( !empty( $this->queueName ) ) {
             $queue = $this->queueName;
         } else {
-            throw new \Exception( 'No queue name provided.' );
+            throw new Exception( 'No queue name provided.' );
         }
 
         $queue_interface_url = INIT::$QUEUE_JMX_ADDRESS . "/api/jolokia/read/org.apache.activemq:type=Broker,brokerName=localhost,destinationType=Queue,destinationName=" . (int)INIT::$INSTANCE_ID . "_" . $queue . "/QueueSize";
@@ -176,7 +179,7 @@ class AMQHandler extends Stomp {
         } elseif ( !empty( $this->queueName ) ) {
             $queue = $this->queueName;
         } else {
-            throw new \Exception( 'No queue name provided.' );
+            throw new Exception( 'No queue name provided.' );
         }
 
         $queue_interface_url = INIT::$QUEUE_JMX_ADDRESS . "/api/jolokia/read/org.apache.activemq:type=Broker,brokerName=localhost,destinationType=Queue,destinationName=" . (int)INIT::$INSTANCE_ID . "_" . $queue . "/ConsumerCount";

@@ -36,8 +36,6 @@ use RedisHandler;
 use ReflectionException;
 use RemoteFiles_RemoteFileDao;
 use Segments_SegmentDao;
-use TaskRunner\Exceptions\EndQueueException;
-use TaskRunner\Exceptions\ReQueueException;
 use Utils;
 use XliffReplacer\XliffReplacerCallback;
 use ZipArchiveExtended;

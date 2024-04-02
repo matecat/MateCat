@@ -336,7 +336,6 @@ class Bootstrap {
                 self::$_ROOT . "/inc/PHPTAL",
                 self::$_ROOT . "/lib/Utils/API",
                 self::$_ROOT . "/lib/Utils",
-                self::$_ROOT . "/lib/Utils/Predis/src",
                 self::$_ROOT . "/lib/Model",
                 self::$_ROOT . "/lib/View",
                 self::$_ROOT . "/lib/Decorator",
