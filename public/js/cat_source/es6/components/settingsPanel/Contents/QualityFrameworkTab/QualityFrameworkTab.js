@@ -8,6 +8,7 @@ import {updateQualityFrameworkTemplate} from '../../../../api/updateQualityFrame
 import {deleteQualityFrameworkTemplate} from '../../../../api/deleteQualityFrameworkTemplate/deleteQualityFrameworkTemplate'
 import {CategoriesSeveritiesTable} from './CategoriesSeveritiesTable'
 import {SCHEMA_KEYS} from '../../../../hooks/useProjectTemplates'
+import CatToolActions from '../../../../actions/CatToolActions'
 
 export const QF_SCHEMA_KEYS = {
   id: 'id',
@@ -42,6 +43,16 @@ export const QualityFrameworkTab = () => {
   const currentTemplateId = currentTemplate?.id
   const currentProjectTemplateQaId = currentProjectTemplate.qaModelTemplateId
   const prevCurrentProjectTemplateQaId = useRef()
+
+  const saveErrorCallback = (error) => {
+    let message = 'There was an error saving your data. Please retry!'
+    CatToolActions.addNotification({
+      title: 'Error saving data',
+      type: 'error',
+      text: message,
+      position: 'br',
+    })
+  }
 
   // retrieve QF templates
   useEffect(() => {
@@ -118,6 +129,7 @@ export const QualityFrameworkTab = () => {
               createApi: createQualityFrameworkTemplate,
               updateApi: updateQualityFrameworkTemplate,
               deleteApi: deleteQualityFrameworkTemplate,
+              saveErrorCallback,
             }}
           />
           <div className="settings-panel-contentwrapper-tab-background">

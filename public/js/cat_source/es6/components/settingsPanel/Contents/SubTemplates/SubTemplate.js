@@ -29,6 +29,7 @@ export const SubTemplates = ({
   createApi,
   updateApi,
   deleteApi,
+  saveErrorCallback,
   portalTarget,
 }) => {
   const [templateModifier, setTemplateModifier] = useState()
@@ -65,7 +66,11 @@ export const SubTemplates = ({
           ...template,
         }))
       })
-      .catch((error) => console.log(error))
+      .catch(async (error) => {
+        if (saveErrorCallback) {
+          saveErrorCallback(error)
+        }
+      })
       .finally(() => {
         setIsRequestInProgress(false)
         setTemplateModifier()
@@ -99,6 +104,7 @@ export const SubTemplates = ({
         getFilteredSchemaCreateUpdate,
         createApi,
         deleteApi,
+        saveErrorCallback,
       }}
     >
       <div className="settings-panel-templates settings-panel-subtemplates">
@@ -161,5 +167,6 @@ SubTemplates.propTypes = {
   createApi: PropTypes.func.isRequired,
   updateApi: PropTypes.func.isRequired,
   deleteApi: PropTypes.func.isRequired,
+  saveErrorCallback: PropTypes.func,
   portalTarget: PropTypes.any,
 }

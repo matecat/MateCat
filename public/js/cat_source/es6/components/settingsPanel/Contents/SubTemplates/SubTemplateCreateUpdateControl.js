@@ -17,6 +17,7 @@ export const SubTemplateCreateUpdateControl = () => {
     schema,
     getFilteredSchemaCreateUpdate,
     createApi,
+    saveErrorCallback,
   } = useContext(SubTemplatesContext)
 
   const createTemplate = () => {
@@ -39,7 +40,11 @@ export const SubTemplateCreateUpdateControl = () => {
           },
         ])
       })
-      .catch((error) => console.log(error))
+      .catch((error) => {
+        if (saveErrorCallback) {
+          saveErrorCallback(error)
+        }
+      })
       .finally(() => setIsRequestInProgress(false))
   }
 

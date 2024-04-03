@@ -9,6 +9,7 @@ import {InputPercentage} from './InputPercentage'
 import {LanguagesExceptions} from './LanguagesExceptions'
 import {BreakdownsTable} from './BreakdownsTable'
 import {SCHEMA_KEYS} from '../../../../hooks/useProjectTemplates'
+import CatToolActions from '../../../../actions/CatToolActions'
 
 export const ANALYSIS_SCHEMA_KEYS = {
   id: 'id',
@@ -101,6 +102,20 @@ export const AnalysisTab = () => {
       }
     })
   }
+
+  const saveErrorCallback = (error) => {
+    let message = 'There was an error saving your data. Please retry!'
+    if (error.status === 400) {
+      message =
+        'Billing model size limit exceeded. Please reduce the number of MT payable rate exceptions and try again.'
+    }
+    CatToolActions.addNotification({
+      title: 'Error saving data',
+      type: 'error',
+      text: message,
+      position: 'br',
+    })
+  }
   // retrieve billing model templates
   useEffect(() => {
     if (templates.length) return
@@ -176,6 +191,7 @@ export const AnalysisTab = () => {
             createApi: createBillingModelTemplate,
             updateApi: updateBillingModelTemplate,
             deleteApi: deleteBillingModelTemplate,
+            saveErrorCallback,
           }}
         />
         <div className="analysis-tab settings-panel-contentwrapper-tab-background">
