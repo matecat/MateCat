@@ -42,10 +42,10 @@ export const MTGlossaryRow = ({engineId, row, setRows, isReadOnly}) => {
       })
       setIsWaitingResult(false)
     }
-    const dispatchErrorImportNotification = () => {
+    const dispatchErrorImportNotification = (error) => {
       setNotification({
         type: 'error',
-        message: `Glossary file ${file.name} import error`,
+        message: error ?? `Glossary file ${file.name} import error`,
       })
       setIsWaitingResult(false)
     }
@@ -67,7 +67,7 @@ export const MTGlossaryRow = ({engineId, row, setRows, isReadOnly}) => {
             .catch(() => dispatchErrorImportNotification())
         }
       })
-      .catch(() => dispatchErrorImportNotification())
+      .catch(({errors}) => dispatchErrorImportNotification(errors))
 
     return () => statusImport.current.cancel()
   }, [file, row.id, engineId, setNotification])
