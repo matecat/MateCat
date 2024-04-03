@@ -1,5 +1,4 @@
 import React, {useRef} from 'react'
-import {round} from 'lodash/math'
 
 import JobMenu from './JobMenu'
 import OutsourceContainer from '../outsource/OutsourceContainer'
@@ -14,7 +13,6 @@ import ConfirmMessageModal from '../modals/ConfirmMessageModal'
 import TranslatedIconSmall from '../../../../../img/icons/TranslatedIconSmall'
 import Tooltip from '../common/Tooltip'
 import JobProgressBar from '../common/JobProgressBar'
-import {JOB_WORD_CONT_TYPE} from '../../constants/Constants'
 
 class JobContainer extends React.Component {
   constructor(props) {
@@ -340,7 +338,13 @@ class JobContainer extends React.Component {
     let label = (
       <a
         className="item"
-        onClick={this.downloadTranslation}
+        onClick={() => {
+          const data = {
+            event: 'download-draft',
+          }
+          CommonUtils.dispatchAnalyticsEvents(data)
+          this.downloadTranslation()
+        }}
         ref={(downloadMenu) => (this.downloadMenu = downloadMenu)}
       >
         <i className="icon-eye icon" /> Draft
