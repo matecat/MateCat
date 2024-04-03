@@ -16,6 +16,7 @@ inc/config.ini
 inc/config.ini*
 inc/config.test.ini
 inc/config.development.ini
+inc/microsoft_oauth_config.ini
 inc/.globalmessage.ini
 inc/oauth-token-key.txt
 .passwd.ini

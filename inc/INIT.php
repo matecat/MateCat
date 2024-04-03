@@ -278,6 +278,14 @@ class INIT {
     public static $OAUTH_SCOPES;
     public static $OAUTH_BROWSER_API_KEY;
 
+    /**
+     * Microsoft credentials
+     */
+    public static $MICROSOFT_OAUTH_CONFIG;
+    public static $MICROSOFT_OAUTH_CLIENT_ID;
+    public static $MICROSOFT_OAUTH_CLIENT_SECRET;
+    public static $MICROSOFT_OAUTH_REDIRECT_URL;
+
     public static $ENABLE_OMEGAT_DOWNLOAD = false;
     public static $UNLOCKABLE_TAGS        = false;
 
@@ -303,6 +311,10 @@ class INIT {
     public static $REPLACE_HISTORY_TTL;
 
     public function __construct() {
+
+        self::$MICROSOFT_OAUTH_CLIENT_ID = @INIT::$MICROSOFT_OAUTH_CONFIG['MICROSOFT_OAUTH_CLIENT_ID'];
+        self::$MICROSOFT_OAUTH_CLIENT_SECRET = @INIT::$MICROSOFT_OAUTH_CONFIG['MICROSOFT_OAUTH_CLIENT_SECRET'];
+        self::$MICROSOFT_OAUTH_REDIRECT_URL = @INIT::$MICROSOFT_OAUTH_CONFIG['MICROSOFT_OAUTH_REDIRECT_URL'];
 
         self::$OAUTH_CLIENT_ID       = @INIT::$OAUTH_CONFIG[ 'OAUTH_CLIENT_ID' ];
         self::$OAUTH_CLIENT_SECRET   = @INIT::$OAUTH_CONFIG[ 'OAUTH_CLIENT_SECRET' ];

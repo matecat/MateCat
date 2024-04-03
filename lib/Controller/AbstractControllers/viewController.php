@@ -1,5 +1,7 @@
 <?php
 
+use ConnectedServices\Microsoft\MicrosoftClient;
+
 abstract class viewController extends controller {
 
     /**
@@ -18,6 +20,11 @@ abstract class viewController extends controller {
      * @var string
      */
     protected $authURL;
+
+    /**
+     * @var string
+     */
+    protected $microsoftAuthURL;
 
     protected $login_required = false;
 
@@ -143,11 +150,23 @@ abstract class viewController extends controller {
         $this->template->config_js            = [];
         $this->template->css_resources        = [];
         $this->template->authURL              = $this->getAuthUrl();
+        $this->template->microsoftAuthUrl      = $this->getMicrosoftAuthUrl();
         $this->template->gdriveAuthURL        = \ConnectedServices\GDrive::generateGDriveAuthUrl();
         $this->template->enableMultiDomainApi = INIT::$ENABLE_MULTI_DOMAIN_API;
         $this->template->ajaxDomainsNumber    = INIT::$AJAX_DOMAINS;
 
 
+    }
+
+    /**
+     * @return string
+     */
+    public function getMicrosoftAuthUrl(){
+        if ( is_null( $this->microsoftAuthURL ) ) {
+            $this->microsoftAuthURL = MicrosoftClient::getAuthorizationUrl();
+        }
+
+        return $this->microsoftAuthURL;
     }
 
     /**
