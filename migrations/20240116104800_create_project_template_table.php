@@ -3,7 +3,7 @@
 class CreateProjectTemplateTable extends AbstractMatecatMigration {
 
     public $sql_up = [ '
-        CREATE TABLE `project_templates` (
+        CREATE TABLE IF NOT EXISTS `project_templates` (
             `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
             `name` VARCHAR(255) NOT NULL,
             `is_default` TINYINT(1) NOT NULL DEFAULT  0,
