@@ -91,6 +91,10 @@ class TranslationEvent {
         return $this->old_translation;
     }
 
+    public function isChangingStatus(){
+        return $this->old_translation->status !== $this->wanted_translation->status;
+    }
+
     public function isBeingLowerReviewed() {
         return $this->old_translation->isReviewedStatus() &&
                 $this->wanted_translation->isReviewedStatus() &&
@@ -153,7 +157,7 @@ class TranslationEvent {
      * @throws Exception
      */
     public function isR1() {
-        return $this->isRevisionNumber( 2 );
+        return $this->isRevisionNumber( Constants::SOURCE_PAGE_REVISION );
     }
 
     /**
@@ -161,7 +165,15 @@ class TranslationEvent {
      * @throws Exception
      */
     public function isR2() {
-        return $this->isRevisionNumber( 3 );
+        return $this->isRevisionNumber( Constants::SOURCE_PAGE_REVISION_2 );
+    }
+
+    /**
+     * @return bool
+     * @throws Exception
+     */
+    public function isTranslation(){
+        return $this->isRevisionNumber( Constants::SOURCE_PAGE_TRANSLATE );
     }
 
     /**

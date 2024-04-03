@@ -9,12 +9,15 @@
 namespace API\V3;
 
 use API\V2\BaseChunkController;
+use API\V2\Exceptions\AuthenticationError;
 use API\V2\Exceptions\NotFoundException;
-use API\V2\KleinController;
 use API\V2\Validators\ChunkPasswordValidator;
 use Chunks_ChunkStruct;
+use Exceptions\ValidationError;
 use Files\FilesInfoUtility;
 use Projects_ProjectStruct;
+use TaskRunner\Exceptions\EndQueueException;
+use TaskRunner\Exceptions\ReQueueException;
 
 
 class FileInfoController extends BaseChunkController {
@@ -45,13 +48,14 @@ class FileInfoController extends BaseChunkController {
 
     public function getInfo() {
 
-        $page = (isset($this->request->page)) ? $this->request->page : 1;
-        $perPage = (isset($this->request->per_page)) ? $this->request->per_page : 200;
+        // those values where not used
+//        $page    = ( isset( $this->request->page ) ) ? $this->request->page : 1;
+//        $perPage = ( isset( $this->request->per_page ) ) ? $this->request->per_page : 200;
 
         $this->return404IfTheJobWasDeleted();
 
         $filesInfoUtility = new FilesInfoUtility( $this->chunk );
-        $this->response->json( $filesInfoUtility->getInfo(true, $page, $perPage) );
+        $this->response->json( $filesInfoUtility->getInfo() );
     }
 
     /**
@@ -79,8 +83,8 @@ class FileInfoController extends BaseChunkController {
 
         $this->return404IfTheJobWasDeleted();
 
-        $id_file = $this->request->param( 'id_file' );
-        $id_file_parts = $this->request->param( 'id_file_parts' );
+        $id_file          = $this->request->param( 'id_file' );
+        $id_file_parts    = $this->request->param( 'id_file_parts' );
         $filesInfoUtility = new FilesInfoUtility( $this->chunk );
         $instructions     = $filesInfoUtility->getInstructions( $id_file, $id_file_parts );
 
@@ -95,11 +99,11 @@ class FileInfoController extends BaseChunkController {
      * save instructions
      *
      * @throws NotFoundException
-     * @throws \API\V2\Exceptions\AuthenticationError
+     * @throws AuthenticationError
      * @throws \Exceptions\NotFoundException
-     * @throws \Exceptions\ValidationError
-     * @throws \TaskRunner\Exceptions\EndQueueException
-     * @throws \TaskRunner\Exceptions\ReQueueException
+     * @throws ValidationError
+     * @throws EndQueueException
+     * @throws ReQueueException
      */
     public function setInstructions() {
 

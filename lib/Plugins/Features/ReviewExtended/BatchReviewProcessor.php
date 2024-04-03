@@ -18,8 +18,13 @@ use Log;
 use LQA\EntryCommentStruct;
 use LQA\EntryDao;
 use PDOException;
+use ReflectionException;
 use RevisionFactory;
 use TransactionableTrait;
+use WordCount\CounterModel;
+use WordCount\WordCountStruct;
+
+;
 
 class BatchReviewProcessor {
 
@@ -35,8 +40,22 @@ class BatchReviewProcessor {
      */
     protected $_translationEventsHandler;
 
+    /**
+     * @var CounterModel
+     */
+    private $jobWordCounter;
+
+    /**
+     * @throws ReflectionException
+     * @throws PDOException
+     */
     public function __construct( TranslationEventsHandler $eventCreator ) {
         $this->_translationEventsHandler = $eventCreator;
+
+        $chunk = $this->_translationEventsHandler->getChunk();
+        $old_wStruct = WordCountStruct::loadFromJob( $chunk );
+        $this->jobWordCounter = new CounterModel( $old_wStruct );
+
     }
 
     /**
@@ -97,7 +116,7 @@ class BatchReviewProcessor {
         $segmentTranslationModels           = [];
 
         foreach ( $this->_translationEventsHandler->getPersistedEvents() as $translationEvent ) {
-            $segmentTranslationModel    = $revisionFactory->getSegmentTranslationModel( $translationEvent, $chunkReviews );
+            $segmentTranslationModel    = $revisionFactory->getSegmentTranslationModel( $translationEvent, $chunkReviews, $this->jobWordCounter );
             $segmentTranslationModels[] = $segmentTranslationModel;
 
             // here we process and count the reviewed word count and
@@ -118,18 +137,39 @@ class BatchReviewProcessor {
      * @return boolean
      * @throws Exception
      */
-    public function commit() {
+    protected function commit() {
 
         try {
             // commit the updates in a transaction
-            $this->openTransaction();
             $this->updatePassFailAndCounts();
+
+            // if empty, no segment status changes are present
+            if ( !empty( $this->jobWordCounter->getValues() ) ) {
+                $newCount                = $this->jobWordCounter->updateDB( $this->jobWordCounter->getValues() );
+                $chunk                   = $this->_translationEventsHandler->getChunk();
+                $chunk->draft_words      = $newCount->getDraftWords();
+                $chunk->new_words        = $newCount->getNewWords();
+                $chunk->translated_words = $newCount->getTranslatedWords();
+                $chunk->approved_words   = $newCount->getApprovedWords();
+                $chunk->approved2_words  = $newCount->getApproved2Words();
+                $chunk->rejected_words   = $newCount->getRejectedWords();
+
+                $chunk->draft_raw_words      = $newCount->getDraftRawWords();
+                $chunk->new_raw_words        = $newCount->getNewRawWords();
+                $chunk->translated_raw_words = $newCount->getTranslatedRawWords();
+                $chunk->approved_raw_words   = $newCount->getApprovedRawWords();
+                $chunk->approved2_raw_words  = $newCount->getApproved2RawWords();
+                $chunk->rejected_raw_words   = $newCount->getRejectedRawWords();
+
+                // updateTodoValues for the JOB
+            }
 
             foreach ( $this->segmentTransitionPhasesModel as $model ) {
                 $this->updateFinalRevisionFlag( $model );
                 $this->deleteIssues( $model );
             }
 
+            // Commit the transaction to execute successive queries outside the transaction, enabling them to be routed to the slave databases.
             $this->commitTransaction();
 
             // run chunkReviewUpdated
@@ -143,7 +183,7 @@ class BatchReviewProcessor {
 
         } catch ( PDOException $e ) {
             $this->rollback();
-            Log::doJsonLog( '$thisnsition UnitOfWork transaction failed: ' . $e->getMessage() );
+            Log::doJsonLog( 'BatchReviewProcessor transaction failed: ' . $e->getMessage() );
 
             return false;
         }

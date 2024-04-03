@@ -14,7 +14,18 @@ use Translators\JobsTranslatorsStruct;
 
 class JobTranslator {
 
-    public function renderItem( JobsTranslatorsStruct $jTranslatorsStruct ) {
+
+    protected $data;
+
+    public function __construct( JobsTranslatorsStruct $translatorsStruct ) {
+        $this->data = $translatorsStruct;
+    }
+
+    public function renderItem( JobsTranslatorsStruct $jTranslatorsStruct = null ) {
+
+        if ( $jTranslatorsStruct == null ) {
+            $jTranslatorsStruct = $this->data;
+        }
 
         $translatorJson = [
                 'email'                 => $jTranslatorsStruct->email,
@@ -27,7 +38,7 @@ class JobTranslator {
                 'user'                  => null
         ];
 
-        if( !empty( $jTranslatorsStruct->id_translator_profile ) ){
+        if ( !empty( $jTranslatorsStruct->id_translator_profile ) ) {
             $translatorJson[ 'user' ] = User::renderItem( $jTranslatorsStruct->getUser() );
         }
 

@@ -270,26 +270,6 @@ $.extend(window.UI, {
           SegmentActions.openSelectedSegment()
         }
       })
-      .on('click', '#previewDropdown .downloadTranslation a', function (e) {
-        e.preventDefault()
-        UI.runDownload()
-      })
-      .on('click', '#action-download', function (e) {
-        if (
-          $(e.target).attr('id') === '#action-download' ||
-          $(e.target).hasClass('dropdown-menu-overlay')
-        ) {
-          e.preventDefault()
-          UI.runDownload()
-        }
-      })
-      .on('click', '#previewDropdown .previewLink a', function (e) {
-        e.preventDefault()
-        UI.runDownload()
-      })
-      .on('click', '#previewDropdown .originalsGDrive', function () {
-        UI.continueDownloadWithGoogleDrive(1)
-      })
       .on('click', '.alert .close', function (e) {
         e.preventDefault()
         $('.alert').remove()
@@ -302,22 +282,6 @@ $.extend(window.UI, {
           SegmentActions.gotoNextUntranslatedSegment()
         }
       })
-
-    $('#navSwitcher').on('click', function (e) {
-      e.preventDefault()
-    })
-    $('#jobNav .currseg').on('click', function (e) {
-      e.preventDefault()
-      var current = SegmentStore.getCurrentSegment()
-      if (!current) {
-        SegmentActions.removeAllSegments()
-        CatToolActions.onRender({
-          firstLoad: false,
-        })
-      } else {
-        SegmentActions.scrollToSegment(current.original_sid)
-      }
-    })
 
     //###################################################
 

@@ -1,5 +1,7 @@
 <?php
 
+use Model\Analysis\Status;
+
 class getVolumeAnalysisController extends ajaxController {
     protected $id_project;
 
@@ -23,6 +25,11 @@ class getVolumeAnalysisController extends ajaxController {
         $this->ppassword  = $__postInput[ 'ppassword' ];
         $this->jpassword  = $__postInput[ 'jpassword' ];
 
+        /**
+         * Retrieve user information
+         */
+        $this->readLoginInfo();
+
     }
 
     public function doAction() {
@@ -42,8 +49,8 @@ class getVolumeAnalysisController extends ajaxController {
             return -1;
         }
 
-        $analysisStatus = new Analysis_WEBStatus( $_project_data, $this->featureSet );
-        $this->result = $analysisStatus->fetchData()->getResult();
+        $analysisStatus = new Status( $_project_data, $this->featureSet, $this->user );
+        $this->result = $analysisStatus->fetchData( Projects_MetadataDao::WORD_COUNT_RAW )->getResult();
 
     }
 

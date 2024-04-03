@@ -85,7 +85,7 @@ export const MTGlossaryRow = ({
             .catch(() => dispatchErrorImportNotification())
         }
       })
-      .catch(() => dispatchErrorImportNotification())
+      .catch(({errors}) => dispatchErrorImportNotification(errors))
 
     return () => statusImport.current.cancel()
   }, [file, row.id, engineId])

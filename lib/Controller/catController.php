@@ -7,6 +7,7 @@ use Exceptions\NotFoundException;
 use LQA\ChunkReviewStruct;
 use TmKeyManagement\UserKeysModel;
 use Engines_Intento as Intento;
+use WordCount\WordCountStruct;
 
 /**
  * Description of catController
@@ -57,7 +58,7 @@ class catController extends viewController {
     private $mt_id;
 
     /**
-     * @var WordCount_Struct
+     * @var WordCountStruct
      */
     private $wStruct ;
 
@@ -105,7 +106,6 @@ class catController extends viewController {
 
         try {
             $this->findJobByIdPasswordAndSourcePage();
-            $this->featureSet->run('handleProjectType', $this);
         } catch( NotFoundException $e ){
             $this->job_not_found = true;
             return;
@@ -137,7 +137,9 @@ class catController extends viewController {
 
 
         $this->wStruct = CatUtils::getWStructFromJobArray( $this->chunk, $this->project );
-        $this->job_stats = CatUtils::getFastStatsForJob( $this->wStruct );
+
+        // YYY [Remove] backward compatibility for current projects
+        $this->job_stats = CatUtils::getFastStatsForJob( $this->wStruct, true, $this->project->getWordCountType() );
 
         if ( self::isRevision() ) {
             $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
@@ -352,23 +354,19 @@ class catController extends viewController {
         $this->template->job_archived       = ( $this->job_archived ) ? 1 : '';
         $this->template->job_cancelled      = $this->job_cancelled;
 
-        $this->template->page        = 'cattool';
         $this->template->cid         = $this->cid;
         $this->template->create_date = $this->create_date;
         $this->template->pname       = $this->project->name;
 
         $this->template->mt_engines = $this->translation_engines;
-        $this->template->not_empty_default_tm_key = !empty( INIT::$DEFAULT_TM_KEY );
-
         $this->template->translation_engines_intento_providers = Intento::getProviderList();
         $this->template->translation_engines_intento_prov_json = Utils::escapeJsonEncode(Intento::getProviderList());
 
-        $this->template->owner_email         = $this->job_owner;
+        $this->template->not_empty_default_tm_key = !empty( INIT::$DEFAULT_TM_KEY );
 
-        $this->job_stats[ 'STATUS_BAR_NO_DISPLAY' ] = ( $this->project->status_analysis == Constants_ProjectStatus::STATUS_DONE ? '' : 'display:none;' );
-        $this->job_stats[ 'ANALYSIS_COMPLETE' ]     = ( $this->project->status_analysis == Constants_ProjectStatus::STATUS_DONE ? true : false );
+        $this->template->word_count_type = $this->project->getWordCountType();
+        $this->job_stats[ 'analysis_complete' ]     = ( $this->project->status_analysis == Constants_ProjectStatus::STATUS_DONE ? true : false );
 
-        $this->template->job_stats             = $this->job_stats;
         $this->template->stat_quality          = $this->qa_data;
 
         $this->template->overall_quality_class = strtolower( $this->getQaOverall() );
@@ -431,14 +429,12 @@ class catController extends viewController {
 
         $this->template->isGDriveProject = $this->isCurrentProjectGDrive();
 
-        $this->template->uses_matecat_filters = Utils::isJobBasedOnMateCatFilters($this->jid);
-
         $projectMetaDataDao = new Projects_MetadataDao();
         $projectMetaData = $projectMetaDataDao->get($this->project->id, Projects_MetadataDao::FEATURES_KEY);
         $this->template->project_plugins = (!empty($projectMetaData)) ?  $this->featureSet->filter('appendInitialTemplateVars', explode(",", $projectMetaData->value)) : [];
 
-        //Maybe some plugin want disable the Split from the config
-        $this->template->splitSegmentEnabled = var_export(true, true);
+        //Maybe some plugin want to disable the Split from the config
+        $this->template->splitSegmentEnabled = 'true';
 
         $this->decorator = new CatDecorator( $this, $this->template );
         $this->decorator->decorate();

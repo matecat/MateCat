@@ -22,6 +22,9 @@
     //min-width: 120px;
     position: relative;
     .meter {
+      > div {
+        display: contents;
+      }
       height: 18px;
       width: 100%;
       float: left;

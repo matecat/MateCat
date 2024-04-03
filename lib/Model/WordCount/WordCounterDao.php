@@ -13,8 +13,8 @@ namespace WordCount;
 use DataAccess_AbstractDao;
 use Database;
 use Log;
+use PDO;
 use PDOException;
-use WordCount_Struct;
 
 class WordCounterDao extends DataAccess_AbstractDao {
 
@@ -27,11 +27,11 @@ class WordCounterDao extends DataAccess_AbstractDao {
      * Update the status of segment_translation is needed to avoid duplicated calls
      * ( The second call fails for status condition )
      *
-     * @param WordCount_Struct $wStruct
+     * @param WordCountStruct $wStruct
      *
      * @return int
      */
-    public static function updateWordCount( WordCount_Struct $wStruct ) {
+    public static function updateWordCount( WordCountStruct $wStruct ) {
 
         $db = Database::obtain();
 
@@ -41,18 +41,32 @@ class WordCounterDao extends DataAccess_AbstractDao {
                         draft_words = draft_words + :draftWords,
                         translated_words = translated_words + :translatedWords,
                         approved_words = approved_words + :approvedWords,
-                        rejected_words = rejected_words + :rejectedWords
+                        approved2_words = approved2_words + :approved2Words,
+                        rejected_words = rejected_words + :rejectedWords,
+                        new_raw_words = new_raw_words + :newRawWords,
+                        draft_raw_words = draft_raw_words + :draftRawWords,
+                        translated_raw_words = translated_raw_words + :translatedRawWords,
+                        approved_raw_words = approved_raw_words + :approvedRawWords,
+                        approved2_raw_words = approved2_raw_words + :approved2RawWords,
+                        rejected_raw_words = rejected_raw_words + :rejectedRawWords
                   WHERE j.id = :id_job
                   AND j.password = :password";
 
         $bind_keys = [
-                'newWords'        => $wStruct->getNewWords(),
-                'draftWords'      => $wStruct->getDraftWords(),
-                'translatedWords' => $wStruct->getTranslatedWords(),
-                'approvedWords'   => $wStruct->getApprovedWords(),
-                'rejectedWords'   => $wStruct->getRejectedWords(),
-                'id_job'          => $wStruct->getIdJob(),
-                'password'        => $wStruct->getJobPassword()
+                'newWords'           => $wStruct->getNewWords(),
+                'draftWords'         => $wStruct->getDraftWords(),
+                'translatedWords'    => $wStruct->getTranslatedWords(),
+                'approvedWords'      => $wStruct->getApprovedWords(),
+                'approved2Words'     => $wStruct->getApproved2Words(),
+                'rejectedWords'      => $wStruct->getRejectedWords(),
+                'newRawWords'        => $wStruct->getNewRawWords(),
+                'draftRawWords'      => $wStruct->getDraftRawWords(),
+                'translatedRawWords' => $wStruct->getTranslatedRawWords(),
+                'approvedRawWords'   => $wStruct->getApprovedRawWords(),
+                'approved2RawWords'  => $wStruct->getApproved2RawWords(),
+                'rejectedRawWords'   => $wStruct->getRejectedRawWords(),
+                'id_job'             => $wStruct->getIdJob(),
+                'password'           => $wStruct->getJobPassword()
         ];
 
         try {
@@ -68,7 +82,7 @@ class WordCounterDao extends DataAccess_AbstractDao {
 
     }
 
-    public static function initializeWordCount( WordCount_Struct $wStruct ) {
+    public static function initializeWordCount( WordCountStruct $wStruct ) {
 
         $db = Database::obtain();
 
@@ -77,7 +91,15 @@ class WordCounterDao extends DataAccess_AbstractDao {
         $data[ 'draft_words' ]      = $wStruct->getDraftWords();
         $data[ 'translated_words' ] = $wStruct->getTranslatedWords();
         $data[ 'approved_words' ]   = $wStruct->getApprovedWords();
+        $data[ 'approved2_words' ]  = $wStruct->getApproved2Words();
         $data[ 'rejected_words' ]   = $wStruct->getRejectedWords();
+
+        $data[ 'new_raw_words' ]        = $wStruct->getNewRawWords();
+        $data[ 'draft_raw_words' ]      = $wStruct->getDraftRawWords();
+        $data[ 'translated_raw_words' ] = $wStruct->getTranslatedRawWords();
+        $data[ 'approved_raw_words' ]   = $wStruct->getApprovedRawWords();
+        $data[ 'approved2_raw_words' ]  = $wStruct->getApproved2RawWords();
+        $data[ 'rejected_raw_words' ]   = $wStruct->getRejectedRawWords();
 
         $where = [
                 'id'       => $wStruct->getIdJob(),
@@ -127,36 +149,48 @@ class WordCounterDao extends DataAccess_AbstractDao {
          *
          */
         $query = "
-            SELECT
+                SELECT
                     j.id,
                     SUM(
-                            IF( st.match_type = 'ICE' AND st.suggestion_match IS NULL AND st.eq_word_count = 0 and s.raw_word_count != 0, s.raw_word_count, st.eq_word_count )
-                       ) as TOTAL,
+                            IF( st.match_type = 'ICE' AND st.eq_word_count = 0 AND s.raw_word_count != 0, s.raw_word_count, st.eq_word_count )
+                        ) AS TOTAL,
                     SUM(
                             IF(
-                                st.status IS NULL OR
-                                st.status = 'NEW',
-                                IF( st.match_type = 'ICE' AND st.suggestion_match IS NULL AND st.eq_word_count = 0 and s.raw_word_count != 0, s.raw_word_count, st.eq_word_count ),0 )
-                       ) as NEW,
+                                        st.status IS NULL OR
+                                        st.status = 'NEW',
+                                        IF( st.match_type = 'ICE' AND st.eq_word_count = 0 AND s.raw_word_count != 0, s.raw_word_count, st.eq_word_count ),0 )
+                        ) AS NEW,
                     SUM(
-                            IF( 
-                                st.status IS NULL OR st.status = 'DRAFT' OR st.status = 'NEW',
-                                IF( st.match_type = 'ICE' AND st.suggestion_match IS NULL AND st.eq_word_count = 0 and s.raw_word_count != 0, s.raw_word_count, st.eq_word_count ),0 )
-                       ) as DRAFT,
+                            IF(
+                                        st.status IS NULL OR st.status = 'DRAFT',
+                                        IF( st.match_type = 'ICE' AND st.eq_word_count = 0 AND s.raw_word_count != 0, s.raw_word_count, st.eq_word_count ),0 )
+                        ) AS DRAFT,
                     SUM(
-                            IF( st.status='TRANSLATED', IF( st.match_type = 'ICE' AND st.suggestion_match IS NULL AND st.eq_word_count = 0 and s.raw_word_count != 0, s.raw_word_count, st.eq_word_count ),0 )
-                       ) as TRANSLATED,
-                       
+                            IF( st.status='TRANSLATED', IF( st.match_type = 'ICE' AND st.eq_word_count = 0 AND s.raw_word_count != 0, s.raw_word_count, st.eq_word_count ),0 )
+                        ) AS TRANSLATED,
+                
                     SUM(
-                            IF(st.status='APPROVED', IF( st.match_type = 'ICE' AND st.suggestion_match IS NULL AND st.eq_word_count = 0 and s.raw_word_count != 0, s.raw_word_count, st.eq_word_count ),0 )
-                       ) as APPROVED,
+                            IF(st.status='APPROVED', IF( st.match_type = 'ICE' AND st.eq_word_count = 0 AND s.raw_word_count != 0, s.raw_word_count, st.eq_word_count ),0 )
+                        ) AS APPROVED,
                     SUM(
-                            IF(st.status='REJECTED', IF( st.match_type = 'ICE' AND st.suggestion_match IS NULL AND st.eq_word_count = 0 and s.raw_word_count != 0, s.raw_word_count, st.eq_word_count ),0 )
-                       ) as REJECTED
+                            IF(st.status='APPROVED2', IF( st.match_type = 'ICE' AND st.eq_word_count = 0 AND s.raw_word_count != 0, s.raw_word_count, st.eq_word_count ),0 )
+                        ) AS APPROVED2,
+                    SUM(
+                            IF(st.status='REJECTED', IF( st.match_type = 'ICE' AND st.eq_word_count = 0 AND s.raw_word_count != 0, s.raw_word_count, st.eq_word_count ),0 )
+                        ) AS REJECTED,
+                    
+                    SUM( s.raw_word_count ) AS TOTAL_RAW,
+                    SUM( IF( st.status IS NULL OR st.status = 'NEW', s.raw_word_count, 0 ) ) AS NEW_RAW,
+                    SUM( IF( st.status IS NULL OR st.status = 'DRAFT', s.raw_word_count, 0 ) ) AS DRAFT_RAW,
+                    SUM( IF( st.status='TRANSLATED', s.raw_word_count, 0 ) ) AS TRANSLATED_RAW,
+                    SUM( IF( st.status='APPROVED', s.raw_word_count, 0 ) ) AS APPROVED_RAW,
+                    SUM( IF( st.status='APPROVED2', s.raw_word_count, 0 ) ) AS APPROVED2_RAW,
+                    SUM( IF(st.status='REJECTED', s.raw_word_count, 0 ) ) AS REJECTED_RAW
+
                 FROM jobs AS j
-                INNER JOIN files_job as fj on j.id = fj.id_job
-                INNER join segments as s on fj.id_file = s.id_file
-                LEFT join segment_translations as st on s.id = st.id_segment and st.id_job = j.id
+                         INNER JOIN files_job AS fj ON j.id = fj.id_job
+                         INNER JOIN segments AS s ON fj.id_file = s.id_file
+                         LEFT JOIN segment_translations AS st ON s.id = st.id_segment AND st.id_job = j.id
                 WHERE j.id = :id_job
  			    AND s.id BETWEEN j.job_first_segment AND j.job_last_segment
 			";
@@ -176,7 +210,7 @@ class WordCounterDao extends DataAccess_AbstractDao {
         }
 
         $stmt = $db->getConnection()->prepare( $query );
-        $stmt->setFetchMode( \PDO::FETCH_ASSOC );
+        $stmt->setFetchMode( PDO::FETCH_ASSOC );
         $stmt->execute( $bind_values );
         $results = $stmt->fetchAll();
         $stmt->closeCursor();

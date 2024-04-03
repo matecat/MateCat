@@ -5,6 +5,10 @@ import CatToolConstants from '../../../../constants/CatToolConstants'
 import CatToolStore from '../../../../stores/CatToolStore'
 import SegmentFilterUtils from './segment_filter'
 import SegmentActions from '../../../../actions/SegmentActions'
+import {
+  JOB_WORD_CONT_TYPE,
+  SEGMENTS_STATUS,
+} from '../../../../constants/Constants'
 
 class SegmentsFilter extends React.Component {
   constructor(props) {
@@ -130,7 +134,11 @@ class SegmentsFilter extends React.Component {
     let revisionNumber
     if (value === 'APPROVED-2') {
       revisionNumber = 2
-      value = 'APPROVED'
+      //YYY
+      value =
+        config.word_count_type === JOB_WORD_CONT_TYPE.EQUIVALENT
+          ? SEGMENTS_STATUS.APPROVED
+          : SEGMENTS_STATUS.APPROVED2
     } else {
       revisionNumber = null
     }

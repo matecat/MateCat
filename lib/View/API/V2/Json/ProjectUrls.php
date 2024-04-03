@@ -8,10 +8,8 @@
 
 namespace API\V2\Json;
 
-use Chunks_ChunkStruct;
 use DataAccess\ShapelessConcreteStruct;
-use Features\ReviewExtended\ReviewUtils;
-use LQA\ChunkReviewDao;
+use Exception;
 use Routes;
 
 class ProjectUrls {
@@ -39,13 +37,11 @@ class ProjectUrls {
      * @param bool $keyAssoc
      *
      * @return array
+     * @throws Exception
      */
     public function render( $keyAssoc = false ) {
 
-        /**
-         * @var $record ShapelessConcreteStruct
-         */
-        foreach ( $this->data as $key => $record ) {
+        foreach ( $this->data as $record ) {
 
             if ( !array_key_exists( $record[ 'id_file' ], $this->files ) ) {
                 $this->files[ $record[ 'id_file' ] ] = [
@@ -89,6 +85,9 @@ class ProjectUrls {
         return $this->formatted;
     }
 
+    /**
+     * @throws Exception
+     */
     protected function generateChunkUrls( $record ) {
 
         if ( !array_key_exists( $record[ 'jpassword' ], $this->chunks ) ) {
@@ -100,12 +99,6 @@ class ProjectUrls {
                     'url'             => $this->reviseUrl( $record )
             ];
 
-
-            $x = [
-                    'password'      => $record[ 'jpassword' ],
-                    'translate_url' => $this->translateUrl( $record ),
-                    'revise_url'    => $this->reviseUrl( $record )
-            ];
         }
 
     }
@@ -115,14 +108,20 @@ class ProjectUrls {
     }
 
 
+    /**
+     * @throws Exception
+     */
     protected function downloadOriginalUrl( $record ) {
-        return \Routes::downloadOriginal(
+        return Routes::downloadOriginal(
                 $record[ 'jid' ],
                 $record[ 'jpassword' ],
                 $record[ 'id_file' ]
         );
     }
 
+    /**
+     * @throws Exception
+     */
     protected function downloadXliffUrl( $record ) {
         return Routes::downloadXliff(
                 $record[ 'jid' ],
@@ -131,6 +130,9 @@ class ProjectUrls {
         );
     }
 
+    /**
+     * @throws Exception
+     */
     protected function downloadFileTranslationUrl( $record ) {
         return Routes::downloadTranslation(
                 $record[ 'jid' ],
@@ -139,6 +141,9 @@ class ProjectUrls {
         );
     }
 
+    /**
+     * @throws Exception
+     */
     protected function downloadTranslationUrl( $record ) {
         return Routes::downloadTranslation(
                 $record[ 'jid' ],
@@ -147,6 +152,9 @@ class ProjectUrls {
         );
     }
 
+    /**
+     * @throws Exception
+     */
     protected function translateUrl( $record ) {
         return Routes::translate(
                 $record[ 'name' ],
@@ -157,8 +165,11 @@ class ProjectUrls {
         );
     }
 
+    /**
+     * @throws Exception
+     */
     protected function reviseUrl( $record ) {
-        return \Routes::revise(
+        return Routes::revise(
                 $record[ 'name' ],
                 $record[ 'jid' ],
                 $record[ 'jpassword' ],

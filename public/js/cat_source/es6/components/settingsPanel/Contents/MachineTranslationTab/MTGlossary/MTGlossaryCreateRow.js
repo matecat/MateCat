@@ -68,7 +68,7 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
             .catch(() => dispatchErrorNotification())
         }
       })
-      .catch(() => dispatchErrorNotification())
+      .catch(({errors}) => dispatchErrorNotification(errors))
   }
 
   const onSubmit = (e) => {
