@@ -2993,12 +2993,9 @@ a.pull-right.confirmDelete {
 
 .project-template-select {
   .select-item-default {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    color: $black;
     & > svg {
       opacity: 1;
+      min-width: 16px;
     }
   }
   .select-item-default-active {
