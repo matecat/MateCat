@@ -1,4 +1,5 @@
 import React from 'react'
+import TEXT_UTILS from '../../utils/textUtils'
 
 class LanguageSelectorList extends React.Component {
   constructor(props) {
@@ -108,10 +109,7 @@ class LanguageSelectorList extends React.Component {
   getFilteredLanguages = () => {
     const {languagesList, querySearch} = this.props
     const regex = new RegExp(
-      querySearch
-        .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-        .split(' ')
-        .join('|'),
+      TEXT_UTILS.escapeRegExp(querySearch).split(' ').join('|'),
       'gi',
     )
     const langs =
