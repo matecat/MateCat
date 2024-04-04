@@ -64,9 +64,11 @@ class LanguageSelectorList extends React.Component {
                     onClick={onClickElement(e)}
                   >
                     <div className="language-dropdown-item-container">
-                      <span className={`code-badge code-badge-${elementClass}`}>
-                        {e.code}
-                      </span>
+                      <div className="code-badge">
+                        <span className={`code-badge-${elementClass}`}>
+                          {e.code}
+                        </span>
+                      </div>
                       <span>{e.name}</span>
                     </div>
                     <span className={'check'}>
@@ -105,12 +107,17 @@ class LanguageSelectorList extends React.Component {
 
   getFilteredLanguages = () => {
     const {languagesList, querySearch} = this.props
+    const regex = new RegExp(
+      querySearch
+        .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+        .split(' ')
+        .join('|'),
+      'gi',
+    )
     const langs =
       languagesList && languagesList.length
         ? languagesList.filter(
-            (e) =>
-              e.name.toLowerCase().indexOf(querySearch.toLowerCase()) >= 0 ||
-              e.id.toLowerCase().indexOf(querySearch.toLowerCase()) >= 0,
+            ({name, id}) => regex.test(name) || regex.test(id),
           )
         : []
     const sortInputFirst = (input, data) => {

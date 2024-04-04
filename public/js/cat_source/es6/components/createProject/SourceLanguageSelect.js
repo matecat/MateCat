@@ -44,7 +44,10 @@ export const SourceLanguageSelect = ({history = []}) => {
         }),
         row: (
           <div className="language-dropdown-item-container">
-            <span className="code-badge">{code}</span>
+            <div className="code-badge">
+              <span>{code}</span>
+            </div>
+
             <span>{name}</span>
           </div>
         ),

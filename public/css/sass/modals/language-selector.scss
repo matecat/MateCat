@@ -83,12 +83,12 @@
           .language-name {
             display: block;
             color: white;
-            font-weight: bold;
             font-size: 14px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
             max-width: calc((90vw - 350px) / 3);
+            line-height: 1.5;
           }
         }
       }
@@ -279,9 +279,9 @@
         &:hover,
         &.hover {
           color: white;
-          padding-left: 26px;
+          // padding-left: 26px;
 
-          &:before {
+          /* &:before {
             position: absolute;
             left: 14px;
             top: 12px;
@@ -289,14 +289,14 @@
             border-style: solid;
             border-width: 5px 0 5px 5px;
             border-color: transparent transparent transparent white;
-          }
+          } */
         }
 
         &:hover:not(.selected),
         &.hover:not(.selected) {
           background: $light-gray;
           color: $medium-blue;
-          padding-left: 26px;
+          // padding-left: 26px;
 
           &:before {
             border-color: transparent transparent transparent $medium-blue;
