@@ -330,12 +330,12 @@ test('Category moveup and movedown', async () => {
   await user.click(moveUpButton)
   refresh()
 
-  expect(screen.getByTestId('qf-category-row-2')).toHaveClass(
-    'quality-framework-not-saved',
-  )
-  expect(screen.getByTestId('qf-category-row-1')).toHaveClass(
-    'quality-framework-not-saved',
-  )
+  expect(
+    contextProps.qualityFrameworkTemplates.currentTemplate.categories[0].label,
+  ).toBe('Tag issues (mismatches, whitespaces)')
+  expect(
+    contextProps.qualityFrameworkTemplates.currentTemplate.categories[1].label,
+  ).toBe('Style (readability, consistent style and tone)')
 
   categoryRow = within(screen.getByTestId('qf-category-row-2'))
   menuButtonShowItems = categoryRow.getByTestId('menu-button-show-items')
@@ -349,12 +349,12 @@ test('Category moveup and movedown', async () => {
   await user.click(moveDownButton)
   refresh()
 
-  expect(screen.getByTestId('qf-category-row-2')).not.toHaveClass(
-    'quality-framework-not-saved',
-  )
-  expect(screen.getByTestId('qf-category-row-1')).not.toHaveClass(
-    'quality-framework-not-saved',
-  )
+  expect(
+    contextProps.qualityFrameworkTemplates.currentTemplate.categories[0].label,
+  ).toBe('Style (readability, consistent style and tone)')
+  expect(
+    contextProps.qualityFrameworkTemplates.currentTemplate.categories[1].label,
+  ).toBe('Tag issues (mismatches, whitespaces)')
 })
 
 test('Category delete', async () => {
@@ -476,10 +476,6 @@ test('Edit severity', async () => {
   expect(screen.getByTestId('qf-severity-cell-2-5')).toHaveClass(
     'cell-not-saved',
   )
-
-  expect(screen.getByTestId('qf-severity-column-1')).toHaveClass(
-    'quality-framework-not-saved',
-  )
 })
 
 test('Severity column rename', async () => {
@@ -518,23 +514,18 @@ test('Severity column rename', async () => {
 
   await user.click(renameButton)
 
-  await user.keyboard(' ')
-  refresh()
-  await user.keyboard('c')
-  refresh()
-  await user.keyboard('o')
-  refresh()
-  await user.keyboard('p')
-  refresh()
-  await user.keyboard('y')
+  const renameSeverity = screen.getByTestId('qf-modify-severity')
+  const renameSeverityContainer = within(renameSeverity)
+
+  const nameInput = renameSeverityContainer.getByPlaceholderText('Name')
+
+  await user.type(nameInput, ' copy')
+
+  await user.click(renameSeverityContainer.getByText('Confirm'))
   refresh()
 
   expect(result.current.currentTemplate.categories[0].severities[1].label).toBe(
     'Minor copy',
-  )
-
-  expect(screen.getByTestId('qf-severity-column-1')).toHaveClass(
-    'quality-framework-not-saved',
   )
 })
 
@@ -572,15 +563,10 @@ test('Severity column move left and right', async () => {
   await user.click(moveLeftButton)
   refresh()
 
-  expect(screen.getByTestId('qf-severity-column-1')).toHaveClass(
-    'quality-framework-not-saved',
-  )
-  expect(screen.getByTestId('qf-severity-column-0')).toHaveClass(
-    'quality-framework-not-saved',
-  )
-  expect(screen.getByTestId('qf-severity-column-2')).not.toHaveClass(
-    'quality-framework-not-saved',
-  )
+  let {severities} = result.current.currentTemplate.categories[0]
+
+  expect(severities[0].label).toBe('Minor')
+  expect(severities[1].label).toBe('Neutral')
 
   severityColumn = within(screen.getByTestId('qf-severity-column-0'))
   menuButtonShowItems = severityColumn.getByTestId('menu-button-show-items')
@@ -593,12 +579,10 @@ test('Severity column move left and right', async () => {
   await user.click(moveRightButton)
   refresh()
 
-  expect(screen.getByTestId('qf-severity-column-1')).not.toHaveClass(
-    'quality-framework-not-saved',
-  )
-  expect(screen.getByTestId('qf-severity-column-0')).not.toHaveClass(
-    'quality-framework-not-saved',
-  )
+  severities = result.current.currentTemplate.categories[0].severities
+
+  expect(severities[0].label).toBe('Neutral')
+  expect(severities[1].label).toBe('Minor')
 })
 
 test('Severity delete', async () => {
@@ -636,10 +620,6 @@ test('Severity delete', async () => {
 
   await user.click(deleteButton)
   refresh()
-
-  expect(screen.getByTestId('qf-severity-column-1')).toHaveClass(
-    'quality-framework-not-saved',
-  )
 
   const column1 = within(screen.queryByTestId('qf-severity-column-1'))
   expect(column1.queryByText('Minor')).not.toBeInTheDocument()

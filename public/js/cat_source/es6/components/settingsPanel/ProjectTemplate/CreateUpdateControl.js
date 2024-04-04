@@ -9,17 +9,13 @@ import Checkmark from '../../../../../../img/icons/Checkmark'
 import {BUTTON_SIZE, BUTTON_TYPE, Button} from '../../common/Button/Button'
 
 export const CreateUpdateControl = () => {
-  const {
-    currentProjectTemplate,
-    setProjectTemplates,
-    modifyingCurrentTemplate,
-  } = useContext(SettingsPanelContext)
+  const {currentProjectTemplate, setProjectTemplates} =
+    useContext(SettingsPanelContext)
   const {
     templateName,
     templateModifier,
-    setTemplateModifier,
-    setTemplateName,
     setIsRequestInProgress,
+    updateNameBehaviour,
   } = useContext(ProjectTemplateContext)
 
   const createTemplate = () => {
@@ -56,17 +52,9 @@ export const CreateUpdateControl = () => {
       .finally(() => setIsRequestInProgress(false))
   }
 
-  const updateName = () => {
-    modifyingCurrentTemplate((prevTemplate) => ({
-      ...prevTemplate,
-      name: templateName,
-    }))
-  }
+  const updateName = () => updateNameBehaviour.current.confirm()
 
-  const cancel = () => {
-    setTemplateModifier()
-    setTemplateName('')
-  }
+  const cancel = () => updateNameBehaviour.current.cancel()
 
   return (
     <>

@@ -2,12 +2,8 @@ import React, {useContext, useEffect, useRef} from 'react'
 import {SubTemplatesContext} from './SubTemplate'
 
 export const SubTemplateNameInput = () => {
-  const {
-    templateName,
-    setTemplateName,
-    modifyingCurrentTemplate,
-    setTemplateModifier,
-  } = useContext(SubTemplatesContext)
+  const {templateName, setTemplateName, updateNameBehaviour} =
+    useContext(SubTemplatesContext)
 
   const container = useRef()
 
@@ -15,17 +11,11 @@ export const SubTemplateNameInput = () => {
 
   useEffect(() => {
     const {current} = container
-    const updateName = () => {
-      modifyingCurrentTemplate((prevTemplate) => ({
-        ...prevTemplate,
-        name: templateName,
-      }))
-    }
 
-    const cancel = () => {
-      setTemplateModifier()
-      setTemplateName('')
-    }
+    const updateName = () => updateNameBehaviour.current.confirm()
+
+    const cancel = () => updateNameBehaviour.current.cancel()
+
     const handleKeyDown = (e) => {
       if (e.key === 'Enter') {
         e.preventDefault()
@@ -40,12 +30,7 @@ export const SubTemplateNameInput = () => {
     current.addEventListener('keydown', handleKeyDown, true)
 
     return () => current.removeEventListener('keydown', handleKeyDown)
-  }, [
-    modifyingCurrentTemplate,
-    setTemplateModifier,
-    setTemplateName,
-    templateName,
-  ])
+  }, [updateNameBehaviour])
 
   return (
     <input

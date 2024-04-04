@@ -1,4 +1,4 @@
-import React, {createContext, useEffect, useState} from 'react'
+import React, {createContext, useEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import {SubTemplateSelect} from './SubTemplateSelect'
 import {SubTemplateNameInput} from './SubTemplateNameInput'
@@ -35,6 +35,41 @@ export const SubTemplates = ({
   const [templateModifier, setTemplateModifier] = useState()
   const [templateName, setTemplateName] = useState('')
   const [isRequestInProgress, setIsRequestInProgress] = useState(false)
+
+  const updateNameBehaviour = useRef({})
+  updateNameBehaviour.current.confirm = () => {
+    const originalTemplate = templates.find(
+      ({id, isTemporary}) => id === currentTemplate.id && !isTemporary,
+    )
+
+    const modifiedTemplate = {
+      ...getFilteredSchemaCreateUpdate(originalTemplate),
+      [schema.name]: templateName,
+    }
+    updateApi({
+      id: originalTemplate.id,
+      template: modifiedTemplate,
+    }).then(() => {
+      flushSync(() =>
+        setTemplates((prevState) =>
+          prevState.map((templateItem) =>
+            templateItem.id === originalTemplate.id
+              ? {...templateItem, [schema.name]: templateName}
+              : templateItem,
+          ),
+        ),
+      )
+
+      modifyingCurrentTemplate((prevTemplate) => ({
+        ...prevTemplate,
+        name: templateName,
+      }))
+    })
+  }
+  updateNameBehaviour.current.cancel = () => {
+    setTemplateModifier()
+    setTemplateName('')
+  }
 
   const updateTemplate = (updatedTemplate = currentTemplate) => {
     const modifiedTemplate = {
@@ -105,6 +140,7 @@ export const SubTemplates = ({
         createApi,
         deleteApi,
         saveErrorCallback,
+        updateNameBehaviour,
       }}
     >
       <div className="settings-panel-templates settings-panel-subtemplates">

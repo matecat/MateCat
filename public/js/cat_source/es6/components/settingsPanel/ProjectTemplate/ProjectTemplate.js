@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useState} from 'react'
+import React, {useContext, useEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import {SettingsPanelContext} from '../SettingsPanelContext'
 import {
@@ -33,6 +33,51 @@ export const ProjectTemplate = ({portalTarget}) => {
   const [templateModifier, setTemplateModifier] = useState()
   const [templateName, setTemplateName] = useState('')
   const [isRequestInProgress, setIsRequestInProgress] = useState(false)
+
+  const updateNameBehaviour = useRef({})
+  updateNameBehaviour.current.confirm = () => {
+    const originalTemplate = projectTemplates.find(
+      ({id, isTemporary}) => id === currentProjectTemplate.id && !isTemporary,
+    )
+
+    /* eslint-disable no-unused-vars */
+    const {
+      created_at,
+      id,
+      uid,
+      modified_at,
+      isTemporary,
+      isSelected,
+      ...modifiedTemplate
+    } = {
+      ...originalTemplate,
+      [SCHEMA_KEYS.name]: templateName,
+    }
+    /* eslint-enable no-unused-vars */
+    updateProjectTemplate({
+      id: originalTemplate.id,
+      template: modifiedTemplate,
+    }).then(() => {
+      flushSync(() =>
+        setProjectTemplates((prevState) =>
+          prevState.map((templateItem) =>
+            templateItem.id === originalTemplate.id
+              ? {...templateItem, [SCHEMA_KEYS.name]: templateName}
+              : templateItem,
+          ),
+        ),
+      )
+
+      modifyingCurrentTemplate((prevTemplate) => ({
+        ...prevTemplate,
+        name: templateName,
+      }))
+    })
+  }
+  updateNameBehaviour.current.cancel = () => {
+    setTemplateModifier()
+    setTemplateName('')
+  }
 
   const isStandardTemplateBool = isStandardTemplate(currentProjectTemplate)
 
@@ -117,6 +162,7 @@ export const ProjectTemplate = ({portalTarget}) => {
         setIsRequestInProgress,
         templateModifier,
         setTemplateModifier,
+        updateNameBehaviour,
       }}
     >
       <div className="settings-panel-templates">

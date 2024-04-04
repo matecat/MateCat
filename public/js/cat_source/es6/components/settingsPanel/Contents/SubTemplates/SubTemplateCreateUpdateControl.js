@@ -8,16 +8,14 @@ export const SubTemplateCreateUpdateControl = () => {
   const {
     setTemplates,
     currentTemplate,
-    modifyingCurrentTemplate,
     templateName,
     templateModifier,
-    setTemplateModifier,
-    setTemplateName,
     setIsRequestInProgress,
     schema,
     getFilteredSchemaCreateUpdate,
     createApi,
     saveErrorCallback,
+    updateNameBehaviour,
   } = useContext(SubTemplatesContext)
 
   const createTemplate = () => {
@@ -48,17 +46,9 @@ export const SubTemplateCreateUpdateControl = () => {
       .finally(() => setIsRequestInProgress(false))
   }
 
-  const updateName = () => {
-    modifyingCurrentTemplate((prevTemplate) => ({
-      ...prevTemplate,
-      name: templateName,
-    }))
-  }
+  const updateName = () => updateNameBehaviour.current.confirm()
 
-  const cancel = () => {
-    setTemplateModifier()
-    setTemplateName('')
-  }
+  const cancel = () => updateNameBehaviour.current.cancel()
 
   return (
     <>
