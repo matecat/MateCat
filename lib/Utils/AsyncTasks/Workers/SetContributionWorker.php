@@ -131,6 +131,7 @@ class SetContributionWorker extends AbstractWorker {
      */
     protected function _set( array $config, ContributionSetStruct $contributionStruct ) {
 
+        $config[ 'uid' ]            = $contributionStruct->uid;
         $config[ 'segment' ]        = $contributionStruct->segment;
         $config[ 'translation' ]    = $contributionStruct->translation;
         $config[ 'context_after' ]  = $contributionStruct->context_after;
@@ -158,6 +159,7 @@ class SetContributionWorker extends AbstractWorker {
     protected function _update( array $config, ContributionSetStruct $contributionStruct ) {
 
         // update the contribution for every key in the job belonging to the user
+        $config[ 'uid' ]            = $contributionStruct->uid;
         $config[ 'segment' ]        = $contributionStruct->oldSegment;
         $config[ 'translation' ]    = $contributionStruct->oldTranslation;
         $config[ 'context_after' ]  = $contributionStruct->context_after;
