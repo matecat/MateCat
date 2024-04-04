@@ -11,6 +11,7 @@ namespace Features;
 
 
 use Analysis\Workers\FastAnalysis;
+use API\V2\Exceptions\AuthenticationError;
 use BasicFeatureStruct;
 use Constants_Engines;
 use Contribution\ContributionSetStruct;
@@ -24,6 +25,8 @@ use EnginesModel_EngineDAO;
 use EnginesModel_EngineStruct;
 use EnginesModel_MMTStruct;
 use Exception;
+use Exceptions\NotFoundException;
+use Exceptions\ValidationError;
 use FeatureSet;
 use FilesStorage\AbstractFilesStorage;
 use INIT;
@@ -35,8 +38,9 @@ use Projects_MetadataDao;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
 use SplFileObject;
-use stdClass;
 use TaskRunner\Commons\QueueElement;
+use TaskRunner\Exceptions\EndQueueException;
+use TaskRunner\Exceptions\ReQueueException;
 use TmKeyManagement_MemoryKeyDao;
 use TmKeyManagement_MemoryKeyStruct;
 use TmKeyManagement_TmKeyManagement;
@@ -319,6 +323,7 @@ class Mmt extends BaseFeature {
      *
      * @return array
      * @throws MMTServiceApiException
+     * @throws Exception
      * @see createProjectController::__appendFeaturesToProject()
      *      Called in @see NewController::__appendFeaturesToProject()
      *
@@ -340,7 +345,6 @@ class Mmt extends BaseFeature {
             $target_language_list = explode( ",", $controller->postInput[ 'target_lang' ] );
             $source_language      = $controller->postInput[ 'source_lang' ];
 
-            $found = true;
             foreach ( $availableLangs as $source => $availableTargets ) {
 
                 //take only the language code $langCode is passed by reference, change the value from inside the callback
@@ -401,7 +405,7 @@ class Mmt extends BaseFeature {
 
                 $tmp_name      = tempnam( sys_get_temp_dir(), 'mmt_cont_req-' );
                 $tmpFileObject = new SplFileObject( tempnam( sys_get_temp_dir(), 'mmt_cont_req-' ), 'w+' );
-                foreach ( $segments as $pos => $segment ) {
+                foreach ( $segments as $segment ) {
                     $tmpFileObject->fwrite( $segment[ 'segment' ] . "\n" );
                 }
 
@@ -604,11 +608,11 @@ class Mmt extends BaseFeature {
      *                          ]
      *
      * @return EnginesModel_EngineStruct|bool
-     * @throws \API\V2\Exceptions\AuthenticationError
-     * @throws \Exceptions\NotFoundException
-     * @throws \Exceptions\ValidationError
-     * @throws \TaskRunner\Exceptions\EndQueueException
-     * @throws \TaskRunner\Exceptions\ReQueueException
+     * @throws AuthenticationError
+     * @throws NotFoundException
+     * @throws ValidationError
+     * @throws EndQueueException
+     * @throws ReQueueException
      * @see engineController::add()
      *
      */
@@ -638,12 +642,10 @@ class Mmt extends BaseFeature {
             $newEngineStruct->extra_parameters[ 'MMT-preimport' ]        = $data->engineData[ 'preimport' ];
             $newEngineStruct->extra_parameters[ 'MMT-context-analyzer' ] = $data->engineData[ 'context_analyzer' ];
 
-            $newEngineStruct = $featureSet->filter( 'disableMMTPreimport', (object)[
+            return $featureSet->filter( 'disableMMTPreimport', (object)[
                     'logged_user'     => $logged_user,
                     'newEngineStruct' => $newEngineStruct
             ] );
-
-            return $newEngineStruct;
         }
 
         return $isValid;

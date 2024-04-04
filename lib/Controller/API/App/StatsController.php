@@ -6,11 +6,10 @@ use API\V2\KleinController;
 use API\V2\Validators\ChunkPasswordValidator;
 use CatUtils;
 use Chunks_ChunkStruct;
-use Features\SecondPassReview;
 use Features\ReviewExtended\ReviewUtils;
-use FeatureSet;
 use LQA\ChunkReviewDao;
-use WordCount_Struct;
+use Projects_MetadataDao;
+use WordCount\WordCountStruct;
 
 /**
  * Class StatsController
@@ -24,48 +23,35 @@ class StatsController extends KleinController {
     /**
      * @var Chunks_ChunkStruct
      */
-    protected $chunk ;
+    protected $chunk;
 
-    public function setChunk( Chunks_ChunkStruct $chunk ){
+    public function setChunk( Chunks_ChunkStruct $chunk ) {
         $this->chunk = $chunk;
     }
 
     /**
-     * @throws \API\V2\Exceptions\AuthenticationError
-     * @throws \Exceptions\NotFoundException
-     * @throws \Exceptions\ValidationError
-     * @throws \TaskRunner\Exceptions\EndQueueException
-     * @throws \TaskRunner\Exceptions\ReQueueException
+     * @return void
      */
     public function stats() {
 
-        $wStruct = new WordCount_Struct();
+        $wStruct = WordCountStruct::loadFromJob( $this->chunk );
 
-        $wStruct->setIdJob( $this->chunk->id );
-        $wStruct->setJobPassword( $this->chunk->password );
-        $wStruct->setNewWords( $this->chunk->new_words );
-        $wStruct->setDraftWords( $this->chunk->draft_words );
-        $wStruct->setTranslatedWords( $this->chunk->translated_words );
-        $wStruct->setApprovedWords( $this->chunk->approved_words );
-        $wStruct->setRejectedWords( $this->chunk->rejected_words );
+        // YYY [Remove] backward compatibility for current projects
+        $counterType = $this->chunk->getProject( 60 * 60 )->getWordCountType();
+        $job_stats   = CatUtils::getFastStatsForJob( $wStruct, true, $counterType );
+        if ( $counterType == Projects_MetadataDao::WORD_COUNT_EQUIVALENT ) {
+            $chunk_reviews        = ( new ChunkReviewDao() )->findChunkReviews( $this->chunk );
+            $job_stats = [ 'stats' => ReviewUtils::formatStats( $job_stats, $chunk_reviews ) ];
+            $job_stats[ 'stats' ][ 'analysis_complete' ] = $this->chunk->getProject()->analysisComplete();
+        } else {
+            $job_stats[ 'analysis_complete' ] = $this->chunk->getProject()->analysisComplete();
+        }
 
-        $job_stats = CatUtils::getFastStatsForJob( $wStruct );
-        $job_stats['ANALYSIS_COMPLETE'] = $this->chunk->getProject()->analysisComplete() ;
-
-        $chunk_reviews = ( new ChunkReviewDao() )->findChunkReviews( $this->chunk ) ;
-
-        $response = [
-            'stats' => ReviewUtils::formatStats( $job_stats, $chunk_reviews )
-        ];
-
-        $this->featureSet = new FeatureSet();
-        $this->featureSet->loadForProject( $this->chunk->getProject( 60 * 60 ) )  ;
-        $response = $this->featureSet->filter('filterStatsControllerResponse', $response, [ 'chunk' => $this->chunk ] );
-        $this->response->json( $response ) ;
+        $this->response->json( $job_stats );
     }
 
     protected function afterConstruct() {
-        $Validator = ( new ChunkPasswordValidator( $this ) );
+        $Validator  = ( new ChunkPasswordValidator( $this ) );
         $Controller = $this;
         $Validator->onSuccess( function () use ( $Validator, $Controller ) {
             $Controller->setChunk( $Validator->getChunk() );

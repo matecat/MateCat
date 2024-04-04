@@ -27,7 +27,7 @@ export const searchTermIntoSegments = async ({
   exactmatch,
   strictMode,
   replace,
-  revisionNumber = config.revisionNumber,
+  revisionNumber,
 }) => {
   const paramsData = {
     action: 'getSearch',

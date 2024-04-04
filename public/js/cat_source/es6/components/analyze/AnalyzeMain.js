@@ -12,8 +12,6 @@ const AnalyzeMain = ({volumeAnalysis, project, parentRef}) => {
   const [scrollTop, setScrollTop] = useState()
   const [jobToScroll, setJobToScroll] = useState()
 
-  const jobsInfo = config.jobs
-
   const spinnerContainer = {
     position: 'absolute',
     height: '100%',
@@ -70,35 +68,36 @@ const AnalyzeMain = ({volumeAnalysis, project, parentRef}) => {
                 project={project}
               />
             </div>
-
-            <AnalyzeChunksResume
-              jobsAnalysis={volumeAnalysis.get('jobs')}
-              jobsInfo={jobsInfo}
-              project={project}
-              status={volumeAnalysis.get('summary').get('STATUS')}
-              showAnalysis={showAnalysis}
-              openAnalysisReport={openAnalysisReport}
-            />
-
-            {showAnalysis ? (
-              <div className="project-body ui grid">
-                <TransitionGroup>
-                  <CSSTransition
-                    key={0}
-                    classNames="transitionAnalyzeMain"
-                    timeout={{enter: 1000, exit: 300}}
-                  >
-                    <ProjectAnalyze
-                      volumeAnalysis={volumeAnalysis.get('jobs')}
-                      project={project}
-                      jobsInfo={jobsInfo}
-                      status={volumeAnalysis.get('summary').get('STATUS')}
-                      jobToScroll={jobToScroll}
-                      showAnalysis={showAnalysis}
-                    />
-                  </CSSTransition>
-                </TransitionGroup>
-              </div>
+            {volumeAnalysis.get('jobs').size > 0 ? (
+              <>
+                {' '}
+                <AnalyzeChunksResume
+                  jobsAnalysis={volumeAnalysis.get('jobs').toJS()}
+                  project={project}
+                  status={volumeAnalysis.get('summary').get('status')}
+                  showAnalysis={showAnalysis}
+                  openAnalysisReport={openAnalysisReport}
+                />
+                {showAnalysis ? (
+                  <div className="project-body ui grid">
+                    <TransitionGroup>
+                      <CSSTransition
+                        key={0}
+                        classNames="transitionAnalyzeMain"
+                        timeout={{enter: 1000, exit: 300}}
+                      >
+                        <ProjectAnalyze
+                          volumeAnalysis={volumeAnalysis.get('jobs')}
+                          project={project}
+                          status={volumeAnalysis.get('summary').get('status')}
+                          jobToScroll={jobToScroll}
+                          showAnalysis={showAnalysis}
+                        />
+                      </CSSTransition>
+                    </TransitionGroup>
+                  </div>
+                ) : null}
+              </>
             ) : null}
           </div>
           {scrollTop > 200 ? (

@@ -2,6 +2,7 @@
 
 use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
+use Model\Analysis\XTRFStatus;
 
 /**
  * User: gremorian
@@ -16,11 +17,6 @@ class downloadAnalysisReportController extends downloadController {
      * @var int
      */
     protected $id_project;
-
-    /**
-     * @var string
-     */
-    protected $download_type;  // switch flag, for now not important
 
     public function __construct() {
 
@@ -38,7 +34,6 @@ class downloadAnalysisReportController extends downloadController {
 
         $this->id_project    = $__postInput[ 'id_project' ];
         $this->password      = $__postInput[ 'password' ];
-        $this->download_type = $__postInput[ 'download_type' ]; // switch flag, for now not important
 
         $this->featureSet = new FeatureSet();
 
@@ -68,8 +63,8 @@ class downloadAnalysisReportController extends downloadController {
 
         $this->featureSet->loadForProject( Projects_ProjectDao::findById( $this->id_project, 60 * 60 * 24 ) );
 
-        $analysisStatus = new Analysis_XTRFStatus( $_project_data, $this->featureSet );
-        $outputContent = $analysisStatus->fetchData()->getResult();
+        $analysisStatus = new XTRFStatus( $_project_data, $this->featureSet );
+        $outputContent = $analysisStatus->fetchData( Projects_MetadataDao::WORD_COUNT_RAW )->getResult();
 
         $this->outputContent = $this->composeZip( $_project_data[0][ 'pname' ], $outputContent );
         $this->_filename     = $_project_data[0][ 'pname' ] . ".zip";
@@ -90,6 +85,12 @@ class downloadAnalysisReportController extends downloadController {
 
     }
 
+    /**
+     * @param string $projectName
+     * @param string[] $outputContent
+     *
+     * @return false|string
+     */
     protected static function composeZip( $projectName , $outputContent ) {
 
         $fileName = tempnam( "/tmp", "zipmat" );

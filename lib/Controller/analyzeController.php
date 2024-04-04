@@ -2,6 +2,9 @@
 
 use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
+use Analysis\Health;
+use API\App\Json\Analysis\AnalysisProject;
+use Model\Analysis\Status;
 
 class analyzeController extends viewController {
 
@@ -28,7 +31,7 @@ class analyzeController extends viewController {
     private $jpassword;
 
     /**
-     * @var Analysis_AnalysisModel
+     * @var AnalysisProject
      */
     public $model;
 
@@ -92,7 +95,7 @@ class analyzeController extends viewController {
 
             $chunks = ( new Chunks_ChunkDao )->getByProjectID( $this->project->id );
 
-            $notDeleted = array_filter( $chunks, function( $element ){
+            $notDeleted = array_filter( $chunks, function ( $element ) {
                 return $element->status_owner != Constants_JobStatus::STATUS_DELETED;
             } );
 
@@ -120,12 +123,12 @@ class analyzeController extends viewController {
             return;
         }
 
-        $this->featureSet->run( 'beginDoAction', $this, [
-                'project' => $this->project, 'page_type' => $this->page_type
-        ] );
-
-        $this->model = new Analysis_AnalysisModel( $this->project, $this->chunk );
-        $this->model->loadData();
+        $_project_data  = Projects_ProjectDao::getProjectAndJobData( $this->pid );
+        $analysisStatus = new Status( $_project_data, $this->featureSet, $this->user );
+        /**
+         * @var AnalysisProject $result
+         */
+        $this->model = $analysisStatus->fetchData( Projects_MetadataDao::WORD_COUNT_RAW )->getResult();
 
         $activity             = new ActivityLogStruct();
         $activity->id_job     = $this->jid;
@@ -159,27 +162,27 @@ class analyzeController extends viewController {
 
         $this->__evalModalBoxForLogin();
 
-        $projectMetaDataDao = new Projects_MetadataDao();
-        $projectMetaData = $projectMetaDataDao->get($this->pid, Projects_MetadataDao::FEATURES_KEY);
-        $this->template->project_plugins = (!empty($projectMetaData)) ?  $this->featureSet->filter('appendInitialTemplateVars', explode(",", $projectMetaData->value)) : [];
+        $projectMetaDataDao              = new Projects_MetadataDao();
+        $projectMetaData                 = $projectMetaDataDao->get( $this->pid, Projects_MetadataDao::FEATURES_KEY );
+        $this->template->project_plugins = ( !empty( $projectMetaData ) ) ? $this->featureSet->filter( 'appendInitialTemplateVars', explode( ",", $projectMetaData->value ) ) : [];
 
-        $this->decorator = new AnalyzeDecorator( $this, $this->template );
-        $this->decorator->decorate();
+        $this->template->pid                   = $this->project->id;
+        $this->template->project_status        = $this->project->status_analysis;
+        $this->template->num_segments          = $this->model->getSummary()->getTotalSegments();
+        $this->template->num_segments_analyzed = $this->model->getSummary()->getSegmentsAnalyzed();
 
-        /**
-         * This loading is forced for HTML customization purpose only
-         * when a plugin in beginDoAction needs to customize the behaviour
-         *
-         * @see FeatureSet::forceAutoLoadFeatures()
-         *
-         */
-        $this->featureSet->forceAutoLoadFeatures();
+        //perform check on running daemons and send a mail randomly
+        $misconfiguration = Health::thereIsAMisconfiguration();
+        if ( $misconfiguration && mt_rand( 1, 3 ) == 1 ) {
+            $msg = "<strong>The analysis daemons seem not to be running despite server configuration.</strong><br />Change the application configuration or start analysis daemons.";
+            Utils::sendErrMailReport( $msg, "Matecat Misconfiguration" );
+        }
+        $this->template->daemon_misconfiguration = var_export( $misconfiguration, true );
+        $this->template->support_mail            = INIT::$SUPPORT_MAIL;
+        $this->template->json_jobs               = json_encode( $this->model );
+        $this->template->split_enabled           = true;
+        $this->template->enable_outsource        = INIT::$ENABLE_OUTSOURCE;
 
-        $this->featureSet->appendDecorators(
-                'AnalyzeDecorator',
-                $this,
-                $this->template
-        );
     }
 
     private function __evalModalBoxForLogin() {

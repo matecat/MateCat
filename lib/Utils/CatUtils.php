@@ -1,10 +1,13 @@
 <?php
 
+use Exceptions\ControllerReturnException;
 use LQA\ChunkReviewDao;
 use LQA\ChunkReviewStruct;
 use Matecat\SubFiltering\Enum\CTypeEnum;
 use Matecat\SubFiltering\MateCatFilter;
 use Validator\IsJobRevisionValidatorObject;
+use WordCount\CounterModel;
+use WordCount\WordCountStruct;
 
 define( "LTPLACEHOLDER", "##LESSTHAN##" );
 define( "GTPLACEHOLDER", "##GREATERTHAN##" );
@@ -34,7 +37,7 @@ class CatUtils {
 
     // CJK and CJ languages
     public static $cjk = [ 'zh' => 1.8, 'ja' => 2.5, 'ko' => 2.5, 'km' => 5 ];
-    public static $cj = [ 'zh' => 1.8, 'ja' => 2.5 ];
+    public static $cj  = [ 'zh' => 1.8, 'ja' => 2.5 ];
 
     /**
      * @param $langCode
@@ -130,8 +133,8 @@ class CatUtils {
     /**
      * Perform a computation on the string to find the length of the strings separated by the placeholder
      *
-     * @param        $segment
-     * @param string $separateWithChar
+     * @param               $segment
+     * @param string        $separateWithChar
      *
      * @param MateCatFilter $Filter
      *
@@ -205,6 +208,7 @@ class CatUtils {
      * @param array                                 $errors
      *
      * @return array
+     * @throws ControllerReturnException
      */
     public static function addSegmentTranslation( Translations_SegmentTranslationStruct $translation, $is_revision, array &$errors ) {
 
@@ -212,10 +216,8 @@ class CatUtils {
             //if needed here can be placed a check for affected_rows == 0 //( the return value of addTranslation )
             Translations_SegmentTranslationDao::addTranslation( $translation, $is_revision );
         } catch ( Exception $e ) {
-            $errors[] = [ "code" => -101, "message" => $e->getMessage() ];
+            throw  new ControllerReturnException( $e->getMessage(), $e->getCode(), $e );
         }
-
-        return $errors;
 
     }
 
@@ -225,23 +227,30 @@ class CatUtils {
      * @param array $job_stats
      *
      * @return array
-     * @throws Exception
      */
-    protected static function _performanceEstimationTime( array $job_stats ) {
+    protected static function _performanceEstimationTime( array $job_stats, $id_job ) {
 
-        $last_10_worked_ids = Translations_SegmentTranslationDao::getLast10TranslatedSegmentIDs( $job_stats[ 'id' ] );
+        $last_10_worked_ids = Translations_SegmentTranslationDao::getLast10TranslatedSegmentIDs( $id_job );
         if ( !empty( $last_10_worked_ids ) and count( $last_10_worked_ids ) === 10 ) {
 
             //perform check on performance if single segment are set to check or globally Forced
             // Calculating words per hour and estimated completion
-            $estimation_temp = Translations_SegmentTranslationDao::getEQWLastHour( $job_stats[ 'id' ], $last_10_worked_ids );
+            $estimation_temp = Translations_SegmentTranslationDao::getEQWLastHour( $id_job, $last_10_worked_ids );
 
-            $job_stats[ 'WORDS_PER_HOUR' ] = number_format( $estimation_temp[ 0 ][ 'words_per_hour' ], 0, '.', ',' );
+            $job_stats[ 'words_per_hour' ] = number_format( $estimation_temp[ 0 ][ 'words_per_hour' ] );
+
             // 7.2 hours
             // $job_stats['ESTIMATED_COMPLETION'] = number_format( ($job_stats['DRAFT']+$job_stats['REJECTED'])/$estimation_temp[0]['words_per_hour'],1);
             // 1 h 32 m
             // $job_stats['ESTIMATED_COMPLETION'] = date("G",($job_stats['DRAFT']+$job_stats['REJECTED'])/$estimation_temp[0]['words_per_hour']*3600) . "h " . date("i",($job_stats['DRAFT']+$job_stats['REJECTED'])/$estimation_temp[0]['words_per_hour']*3600) . "m";
-            $job_stats[ 'ESTIMATED_COMPLETION' ] = date( "z\d G\h i\m", ( $job_stats[ 'DRAFT' ] + $job_stats[ 'REJECTED' ] ) * 3600 / ( !empty( $estimation_temp[ 0 ][ 'words_per_hour' ] ) ? $estimation_temp[ 0 ][ 'words_per_hour' ] : 1 ) - 3600 );
+
+            //YYY [Remove] Backward compatibility
+            if ( isset( $job_stats[ 'DRAFT' ] ) ) {
+                $job_stats[ 'estimated_completion' ] = date( "z\d G\h i\m", ( $job_stats[ 'DRAFT' ] + $job_stats[ 'REJECTED' ] ) * 3600 / ( !empty( $estimation_temp[ 0 ][ 'words_per_hour' ] ) ? $estimation_temp[ 0 ][ 'words_per_hour' ] : 1 ) - 3600 );
+            } else {
+                $job_stats[ 'estimated_completion' ] = date( "z\d G\h i\m", ( $job_stats[ 'equivalent' ][ 'draft' ] + $job_stats[ 'equivalent' ][ 'rejected' ] ) * 3600 / ( !empty( $estimation_temp[ 0 ][ 'words_per_hour' ] ) ? $estimation_temp[ 0 ][ 'words_per_hour' ] : 1 ) - 3600 );
+            }
+
         }
 
         return $job_stats;
@@ -271,12 +280,12 @@ class CatUtils {
      */
     protected static function _getStatsForJob( $job_stats ) {
 
-        $job_stats[ 'TOTAL' ] = self::normalizeNumber($job_stats[ 'TOTAL' ]);
-        $job_stats[ 'TRANSLATED' ] = self::normalizeNumber($job_stats[ 'TRANSLATED' ]);
-        $job_stats[ 'APPROVED' ] = self::normalizeNumber($job_stats[ 'APPROVED' ]);
-        $job_stats[ 'REJECTED' ] = self::normalizeNumber($job_stats[ 'REJECTED' ]);
-        $job_stats[ 'TRANSLATED' ] = self::normalizeNumber($job_stats[ 'TRANSLATED' ]);
-        $job_stats[ 'DRAFT' ] = self::normalizeNumber($job_stats[ 'DRAFT' ]);
+        $job_stats[ 'TOTAL' ]      = self::normalizeNumber( $job_stats[ 'TOTAL' ] );
+        $job_stats[ 'TRANSLATED' ] = self::normalizeNumber( $job_stats[ 'TRANSLATED' ] );
+        $job_stats[ 'APPROVED' ]   = self::normalizeNumber( $job_stats[ 'APPROVED' ] );
+        $job_stats[ 'REJECTED' ]   = self::normalizeNumber( $job_stats[ 'REJECTED' ] );
+        $job_stats[ 'TRANSLATED' ] = self::normalizeNumber( $job_stats[ 'TRANSLATED' ] );
+        $job_stats[ 'DRAFT' ]      = self::normalizeNumber( $job_stats[ 'DRAFT' ] );
 
         $job_stats[ 'PROGRESS' ]             = ( $job_stats[ 'TRANSLATED' ] + $job_stats[ 'APPROVED' ] );
         $job_stats[ 'TOTAL_FORMATTED' ]      = number_format( $job_stats[ 'TOTAL' ], 0, ".", "," );
@@ -292,11 +301,11 @@ class CatUtils {
         $job_stats[ 'TRANSLATED_PERC' ] = ( $job_stats[ 'TRANSLATED' ] / $job_stats[ 'TOTAL' ] * 100 );
         $job_stats[ 'PROGRESS_PERC' ]   = ( $job_stats[ 'PROGRESS' ] / $job_stats[ 'TOTAL' ] ) * 100;
 
-        $job_stats[ 'APPROVED_PERC' ] = self::normalizePercent($job_stats[ 'APPROVED_PERC' ]);
-        $job_stats[ 'REJECTED_PERC' ] = self::normalizePercent($job_stats[ 'REJECTED_PERC' ]);
-        $job_stats[ 'DRAFT_PERC' ] = self::normalizePercent($job_stats[ 'DRAFT_PERC' ]);
-        $job_stats[ 'TRANSLATED_PERC' ] = self::normalizePercent($job_stats[ 'TRANSLATED_PERC' ]);
-        $job_stats[ 'PROGRESS_PERC' ] = self::normalizePercent($job_stats[ 'PROGRESS_PERC' ]);
+        $job_stats[ 'APPROVED_PERC' ]   = self::normalizePercent( $job_stats[ 'APPROVED_PERC' ] );
+        $job_stats[ 'REJECTED_PERC' ]   = self::normalizePercent( $job_stats[ 'REJECTED_PERC' ] );
+        $job_stats[ 'DRAFT_PERC' ]      = self::normalizePercent( $job_stats[ 'DRAFT_PERC' ] );
+        $job_stats[ 'TRANSLATED_PERC' ] = self::normalizePercent( $job_stats[ 'TRANSLATED_PERC' ] );
+        $job_stats[ 'PROGRESS_PERC' ]   = self::normalizePercent( $job_stats[ 'PROGRESS_PERC' ] );
 
         $temp = [
                 $job_stats[ 'TRANSLATED_PERC' ],
@@ -350,10 +359,10 @@ class CatUtils {
 
     /**
      * @param $number
+     *
      * @return int
      */
-    public static function normalizeNumber($number)
-    {
+    public static function normalizeNumber( $number ) {
         if ( $number < 0 ) {
             return 0;
         }
@@ -363,10 +372,10 @@ class CatUtils {
 
     /**
      * @param $percent
+     *
      * @return int
      */
-    public static function normalizePercent($percent)
-    {
+    public static function normalizePercent( $percent ) {
         if ( $percent < 0 ) {
             return 0;
         }
@@ -379,22 +388,31 @@ class CatUtils {
     }
 
     /**
-     * @param WordCount_Struct $wCount
      *
-     * @param bool             $performanceEstimation
+     * // YYY [Remove] backward compatibility for current projects
+     *
+     * This function expose stats supporting new and old version counter
+     *
+     * @param WordCountStruct $wCount
+     * @param bool            $performanceEstimation
      *
      * @return array
-     * @deprecated because if the use of pre-formatted values
      */
-    public static function getFastStatsForJob( WordCount_Struct $wCount, $performanceEstimation = true ) {
-        $job_stats = self::getPlainStatsForJobs( $wCount );
-        $job_stats = self::_getStatsForJob( $job_stats ); //true set estimation check if present
+    public static function getFastStatsForJob( WordCountStruct $wCount, $performanceEstimation = true, $wordCountType = Projects_MetadataDao::WORD_COUNT_RAW ) {
+
+        if ( $wordCountType == Projects_MetadataDao::WORD_COUNT_RAW ) {
+            $job_stats = $wCount->jsonSerialize();
+        } else {
+            $job_stats = self::getPlainStatsForJobs( $wCount );
+            $job_stats = self::_getStatsForJob( $job_stats ); //true set estimation check if present
+        }
 
         if ( !$performanceEstimation ) {
             return $job_stats;
         }
 
-        return self::_performanceEstimationTime( $job_stats );
+        return self::_performanceEstimationTime( $job_stats, $wCount->getIdJob() );
+
     }
 
     /**
@@ -407,14 +425,14 @@ class CatUtils {
      * @return mixed|string
      * @throws \Exception
      */
-    public static function clean_raw_string_4_word_count( $string, $source_lang = 'en-US', MateCatFilter $Filter = null) {
+    public static function clean_raw_string_4_word_count( $string, $source_lang = 'en-US', MateCatFilter $Filter = null ) {
 
         if ( $Filter === null ) {
-            $Filter = MateCatFilter::getInstance(new FeatureSet(), $source_lang, null, []);
+            $Filter = MateCatFilter::getInstance( new FeatureSet(), $source_lang, null, [] );
         }
 
         $string = $Filter->fromLayer0ToLayer1( $string );
-        $string = self::replacePlaceholders($string);
+        $string = self::replacePlaceholders( $string );
 
         //return empty on string composed only by spaces
         //do nothing
@@ -483,23 +501,23 @@ class CatUtils {
 
     /**
      * @param $string
+     *
      * @return string
      */
-    private static function replacePlaceholders($string)
-    {
+    private static function replacePlaceholders( $string ) {
         $pattern = '|<ph id ?= ?["\'](mtc_[0-9]+)["\'] ?(ctype=["\'].+?["\'] ?) ?(equiv-text=["\'].+?["\'] ?)/>|ui';
 
         preg_match_all( $pattern, $string, $matches, PREG_SET_ORDER );
 
-        foreach ($matches as $match){
-            $ctype = trim($match[2]);
-            $ctype = str_replace('"', '', $ctype);
-            $ctype = str_replace('ctype=', '', $ctype);
+        foreach ( $matches as $match ) {
+            $ctype = trim( $match[ 2 ] );
+            $ctype = str_replace( '"', '', $ctype );
+            $ctype = str_replace( 'ctype=', '', $ctype );
 
-            if($ctype !== CTypeEnum::HTML){
-                $string = str_replace($match[0], 'P', $string);
+            if ( $ctype !== CTypeEnum::HTML ) {
+                $string = str_replace( $match[ 0 ], 'P', $string );
             } else {
-                $string = str_replace($match[0], '', $string);
+                $string = str_replace( $match[ 0 ], '', $string );
             }
         }
 
@@ -707,24 +725,16 @@ class CatUtils {
      *
      * @param Projects_ProjectStruct $projectStruct
      *
-     * @return WordCount_Struct
+     * @return WordCountStruct
      * @throws Exception
      */
     public static function getWStructFromJobArray( Jobs_JobStruct $job, Projects_ProjectStruct $projectStruct ) {
 
-        $wStruct = new WordCount_Struct();
-
-        $wStruct->setIdJob( $job[ 'id' ] );
-        $wStruct->setJobPassword( $job[ 'password' ] );
-        $wStruct->setNewWords( $job[ 'new_words' ] );
-        $wStruct->setDraftWords( $job[ 'draft_words' ] );
-        $wStruct->setTranslatedWords( $job[ 'translated_words' ] );
-        $wStruct->setApprovedWords( $job[ 'approved_words' ] );
-        $wStruct->setRejectedWords( $job[ 'rejected_words' ] );
+        $wStruct = WordCountStruct::loadFromJob( $job );
 
         // For projects created with No tm analysis enabled
         if ( $wStruct->getTotal() == 0 && ( $projectStruct[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE || $projectStruct[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE ) ) {
-            $wCounter = new WordCount_CounterModel();
+            $wCounter = new CounterModel();
             $wStruct  = $wCounter->initializeJobWordCount( $job[ 'id' ], $job[ 'password' ] );
             Log::doJsonLog( "BackWard compatibility set Counter." );
 
@@ -736,33 +746,23 @@ class CatUtils {
 
     /**
      * Returns the string representing the overall quality for a job,
-     * taking into account both old revision and new revision.
      *
      * @param Jobs_JobStruct         $job
      *
-     * @param Projects_ProjectStruct $project
-     * @param FeatureSet             $featureSet
      * @param array                  $chunkReviews
      *
      * @return string
      * @throws ReflectionException
      */
-    public static function getQualityOverallFromJobStruct( Jobs_JobStruct $job, Projects_ProjectStruct $project, FeatureSet $featureSet, array $chunkReviews = [] ) {
-        $values = self::getQualityInfoOrChunkReviewStructFromJobStruct( $job, $featureSet, $chunkReviews );
-        $result = null;
+    public static function getQualityOverallFromJobStruct( Jobs_JobStruct $job,  array $chunkReviews = [] ) {
+        $values = self::getChunkReviewStructFromJobStruct( $job, $chunkReviews );
 
-        if ( $featureSet->hasRevisionFeature() ) {
-
-            if ( @$values->is_pass == null ) {
-                $result = $values->is_pass;
-            } elseif ( !empty( $values->is_pass ) ) {
-                $result = 'excellent';
-            } else {
-                $result = 'fail';
-            }
-
+        if ( !isset( $values ) ) {
+            $result = null;
+        } elseif ( !empty( $values->is_pass ) ) {
+            $result = 'excellent';
         } else {
-            $result = strtolower( $values[ 'minText' ] );
+            $result = 'fail';
         }
 
         return $result;
@@ -770,122 +770,33 @@ class CatUtils {
 
     /**
      * @param Jobs_JobStruct $job
-     * @param FeatureSet     $featureSet
      * @param array          $chunkReviews
      *
-     * @return array|\LQA\ChunkReviewStruct|null
+     * @return ChunkReviewStruct|null
      * @throws ReflectionException
      * @internal   param Projects_ProjectStruct $project
-     * @deprecated this method should only return values for legacy revision, it should not return ChunkReviewStruct nor
-     *             it should make use of $featureSet to determine the revision type, use `getQualityOverallFromJobStruct`.
      */
-    public static function getQualityInfoOrChunkReviewStructFromJobStruct( Jobs_JobStruct $job, FeatureSet $featureSet, array $chunkReviews = [] ) {
-
-        $result = null;
-        if ( $featureSet->hasRevisionFeature() ) {
-            // we can pass $chunkReviews by reference
-            // avoiding duplicate queries
-            $result = ($chunkReviews) ? $chunkReviews[0] : ( new ChunkReviewDao() )->findChunkReviews( new Chunks_ChunkStruct( $job->toArray() ) )[ 0 ];
-        } else {
-            $result = self::getQualityInfoFromJobStruct( $job, $featureSet );
-        }
-
-        return $result;
+    public static function getChunkReviewStructFromJobStruct( Jobs_JobStruct $job, array $chunkReviews = [] ) {
+        return ( !empty( $chunkReviews ) ) ? $chunkReviews[ 0 ] : ( new ChunkReviewDao() )->findChunkReviews( new Chunks_ChunkStruct( $job->toArray() ) )[ 0 ];
     }
 
     /**
-     * @param Jobs_JobStruct $job
-     * @param FeatureSet     $featureSet
+     * @param WordCountStruct $wCount
      *
      * @return array
      */
-    public static function getQualityInfoFromJobStruct( Jobs_JobStruct $job, FeatureSet $featureSet ) {
-        $struct      = CatUtils::getWStructFromJobStruct( $job, $job->getProject()->status_analysis );
-        $reviseClass = new Constants_Revise;
-
-        $jobQA = new Revise_JobQA(
-                $job->id,
-                $job->password, $struct->getTotal(),
-                $reviseClass
-        );
-
-        /**
-         * @var $jobQA Revise_JobQA
-         */
-        list( $jobQA, ) = $featureSet->filter( "overrideReviseJobQA", [ $jobQA, $reviseClass ], $job->id, $job->password, $struct->getTotal() );
-        $jobQA->retrieveJobErrorTotals();
-
-        return $jobQA->evalJobVote();
-    }
-
-
-    /**
-     * @param Jobs_JobStruct $job
-     * @param                $analysis_status
-     *
-     * @return WordCount_Struct
-     */
-    public static function getWStructFromJobStruct( Jobs_JobStruct $job, $analysis_status ) {
-
-        $wStruct = new WordCount_Struct();
-
-        $wStruct->setIdJob( $job->id );
-        $wStruct->setJobPassword( $job->password );
-        $wStruct->setNewWords( $job->new_words );
-        $wStruct->setDraftWords( $job->draft_words );
-        $wStruct->setTranslatedWords( $job->translated_words );
-        $wStruct->setApprovedWords( $job->approved_words );
-        $wStruct->setRejectedWords( $job->rejected_words );
-
-        // For projects created with No tm analysis enabled
-        if ( $wStruct->getTotal() == 0 && ( $analysis_status == Constants_ProjectStatus::STATUS_DONE || $analysis_status == Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE ) ) {
-            $wCounter = new WordCount_CounterModel();
-            $wStruct  = $wCounter->initializeJobWordCount( $job->id, $job->password );
-            Log::doJsonLog( "BackWard compatibility set Counter." );
-
-            return $wStruct;
-        }
-
-        return $wStruct;
-    }
-
-    public static function getSerializedCategories( $reviseClass ) {
-        $categoriesDbNames = Constants_Revise::$categoriesDbNames;
-        $categories        = [];
-        foreach ( $categoriesDbNames as $categoryDbName ) {
-
-            $categories[] = [
-                    'label'         => constant( get_class( $reviseClass ) . "::" . strtoupper( $categoryDbName ) ),
-                    'id'            => $categoryDbName,
-                    'severities'    => [
-                            [ 'label' => Constants_Revise::MINOR, 'penalty' => Constants_Revise::$const2ServerValues[ Constants_Revise::MINOR ] ],
-                            [ 'label' => Constants_Revise::MAJOR, 'penalty' => Constants_Revise::$const2ServerValues[ Constants_Revise::MAJOR ] ]
-                    ],
-                    'subcategories' => [],
-                    'options'       => [],
-            ];
-        }
-
-        return $categories;
-    }
-
-    /**
-     * @param WordCount_Struct $wCount
-     *
-     * @return array
-     */
-    public static function getPlainStatsForJobs( WordCount_Struct $wCount ) {
+    public static function getPlainStatsForJobs( WordCountStruct $wCount ) {
         $job_stats                 = [];
         $job_stats[ 'id' ]         = $wCount->getIdJob();
-        $job_stats[ 'DRAFT' ]      = self::normalizeNumber($wCount->getNewWords()) + self::normalizeNumber($wCount->getDraftWords());
-        $job_stats[ 'TRANSLATED' ] = self::normalizeNumber($wCount->getTranslatedWords());
-        $job_stats[ 'APPROVED' ]   = self::normalizeNumber($wCount->getApprovedWords());
-        $job_stats[ 'REJECTED' ]   = self::normalizeNumber($wCount->getRejectedWords());
+        $job_stats[ 'DRAFT' ]      = self::normalizeNumber( $wCount->getNewWords() ) + self::normalizeNumber( $wCount->getDraftWords() );
+        $job_stats[ 'TRANSLATED' ] = self::normalizeNumber( $wCount->getTranslatedWords() );
+        $job_stats[ 'APPROVED' ]   = self::normalizeNumber( $wCount->getApprovedWords() );
+        $job_stats[ 'REJECTED' ]   = self::normalizeNumber( $wCount->getRejectedWords() );
 
         //avoid division by zero warning
         $total                = $wCount->getTotal();
         $job_stats[ 'TOTAL' ] = ( $total == 0 ? 1 : $total );
-        $job_stats[ 'TOTAL' ] = self::normalizeNumber(  $job_stats[ 'TOTAL' ] );
+        $job_stats[ 'TOTAL' ] = self::normalizeNumber( $job_stats[ 'TOTAL' ] );
 
         return $job_stats;
     }
@@ -957,11 +868,11 @@ class CatUtils {
 
         try {
 
-            $jobValidatorObject = new IsJobRevisionValidatorObject();
-            $jobValidatorObject->jid = $jid;
+            $jobValidatorObject           = new IsJobRevisionValidatorObject();
+            $jobValidatorObject->jid      = $jid;
             $jobValidatorObject->password = $password;
 
-            return $jobValidator->validate($jobValidatorObject);
+            return $jobValidator->validate( $jobValidatorObject );
 
         } catch ( \Exception $exception ) {
             return null;
@@ -1039,6 +950,7 @@ class CatUtils {
      *
      * Otherwise the function try to return the corresponding review_password
      *      *
+     *
      * @param Jobs_JobStruct $job
      * @param int            $sourcePage
      *
@@ -1065,25 +977,25 @@ class CatUtils {
      *
      * @return string
      */
-    public static function getLastCharacter($string) {
-        return mb_substr(strip_tags($string), -1);
+    public static function getLastCharacter( $string ) {
+        return mb_substr( strip_tags( $string ), -1 );
     }
 
     /**
      * @param Projects_ProjectStruct $projectStruct
+     *
      * @return mixed
      */
-    public static function getSegmentTranslationsCount(\Projects_ProjectStruct $projectStruct)
-    {
+    public static function getSegmentTranslationsCount( \Projects_ProjectStruct $projectStruct ) {
         $idJobs = [];
 
-        foreach ($projectStruct->getJobs() as $job){
+        foreach ( $projectStruct->getJobs() as $job ) {
             $idJobs[] = $job->id;
         }
 
-        $idJobs = array_unique($idJobs);
+        $idJobs = array_unique( $idJobs );
 
-        return Jobs_JobDao::getSegmentTranslationsCount($idJobs);
+        return Jobs_JobDao::getSegmentTranslationsCount( $idJobs );
     }
 }
 

@@ -14,7 +14,6 @@ use Engine;
 use Engines_EngineInterface;
 use Exception;
 use Exceptions\ValidationError;
-use INIT;
 use Jobs_JobStruct;
 use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\AbstractWorker;
@@ -49,7 +48,6 @@ class SetContributionWorker extends AbstractWorker {
     /**
      * @param AbstractElement $queueElement
      *
-     * @return null
      * @throws EndQueueException
      * @throws ReQueueException
      * @throws Exception
@@ -108,7 +106,7 @@ class SetContributionWorker extends AbstractWorker {
 
     /**
      * !Important Refresh the engine ID for each queueElement received
-     * to avoid set contributions on the wrong engine ID
+     * to avoid set contributions to the wrong engine ID
      *
      * @param ContributionSetStruct $contributionStruct
      *
@@ -201,7 +199,7 @@ class SetContributionWorker extends AbstractWorker {
         if ( !empty( $tm_keys ) ) {
 
             $config[ 'keys' ] = [];
-            foreach ( $tm_keys as $i => $tm_info ) {
+            foreach ( $tm_keys as $tm_info ) {
                 $config[ 'id_user' ][] = $tm_info->key;
             }
 

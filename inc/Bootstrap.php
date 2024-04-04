@@ -330,6 +330,7 @@ class Bootstrap {
     protected static function _setIncludePath( $custom_paths = null ) {
         $def_path = [
                 self::$_ROOT,
+                self::$_ROOT . "/lib",
                 self::$_ROOT . "/lib/Controller/AbstractControllers",
                 self::$_ROOT . "/lib/Controller/API",
                 self::$_ROOT . "/lib/Controller",

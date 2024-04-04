@@ -556,6 +556,8 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
             jobs.password AS jpassword,
             job_first_segment,
             job_last_segment,
+            jobs.subject,
+            jobs.payable_rates,
             CONCAT( jobs.id , '-', jobs.password ) AS jid_jpassword,
             CONCAT( jobs.source, '|', jobs.target ) AS lang_pair,
             CONCAT( projects.name, '/', jobs.source, '-', jobs.target, '/', jobs.id , '-', jobs.password ) AS job_url,

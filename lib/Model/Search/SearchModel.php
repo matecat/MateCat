@@ -16,6 +16,7 @@ use Matecat\Finder\WholeTextFinder;
 use Matecat\SubFiltering\MateCatFilter;
 use PDO;
 use PDOException;
+use Utils;
 
 class SearchModel {
 
@@ -498,6 +499,10 @@ class SearchModel {
     }
 
     /**
+     * // YYY [Remove] Backward compatibility: remove this check revision number is not needed since the status is enough
+     * // YYY [Remove] Segment translation events in this search are no more needed
+     * @Deprecated
+     *
      * Sometimes queries make use of s alias or segments, sometimes they make use of st for segment_translations.
      *
      * @param string $joined_field
@@ -523,6 +528,9 @@ class SearchModel {
     }
 
     /**
+     * // YYY [Remove] Backward compatibility: remove this check revision number is not needed since the status is enough
+     * // YYY [Remove] Segment translation events in this search are no more needed
+     * @Deprecated
      * @return string
      */
     protected function _SteWhere() {
@@ -538,7 +546,7 @@ class SearchModel {
         $first_revision_source_code = \Constants::SOURCE_PAGE_REVISION;
 
         return " AND ( ste.source_page = {$this->queryParams->sourcePage}
-                    OR ( {$this->queryParams->sourcePage} = $first_revision_source_code AND ste.source_page = null )
+                    OR ( {$this->queryParams->sourcePage} = $first_revision_source_code AND ste.source_page IS null )
                ) ";
     }
 

@@ -3,8 +3,13 @@
 namespace Glossary\Blacklist;
 
 use DataAccess\ShapelessConcreteStruct;
+use DataAccess_AbstractDao;
+use DataAccess_IDaoStruct;
+use Database;
+use PDOStatement;
+use ReflectionException;
 
-class BlacklistDao extends \DataAccess_AbstractDao
+class BlacklistDao extends DataAccess_AbstractDao
 {
     const TABLE = 'blacklist_files';
 
@@ -26,23 +31,24 @@ class BlacklistDao extends \DataAccess_AbstractDao
      * @param     $password
      * @param int $ttl
      *
-     * @return \DataAccess_IDaoStruct
+     * @return null|ShapelessConcreteStruct
      */
     public function getByJobIdAndPassword($jobId, $password, $ttl = 60){
         $thisDao = new self();
         $stmt = $this->_getStatementGetByJobIdAndPasswordForCache();
 
+        /** @var  ShapelessConcreteStruct[] $result */
         $result = $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [ 'jid' => $jobId, 'password' => $password ] );
-        return !empty( $result ) ? $result[ 0 ] : [];
+        return !empty( $result ) ? $result[ 0 ] : null;
     }
 
     /**
      *
-     * @return \PDOStatement
+     * @return PDOStatement
      */
     protected function _getStatementGetByJobIdAndPasswordForCache() {
 
-        $conn = \Database::obtain()->getConnection();
+        $conn = Database::obtain()->getConnection();
 
         return $conn->prepare( "SELECT * FROM ". self::TABLE ." where id_job = :jid AND password = :password ");
     }
@@ -63,7 +69,7 @@ class BlacklistDao extends \DataAccess_AbstractDao
      * @param     $id
      * @param int $ttl
      *
-     * @return \DataAccess_IDaoStruct
+     * @return DataAccess_IDaoStruct
      */
     public function getById($id, $ttl = 600){
 
@@ -75,11 +81,11 @@ class BlacklistDao extends \DataAccess_AbstractDao
 
     /**
      *
-     * @return \PDOStatement
+     * @return PDOStatement
      */
     protected function _getStatementGetByIdForCache() {
 
-        $conn = \Database::obtain()->getConnection();
+        $conn = Database::obtain()->getConnection();
 
         return $conn->prepare( "SELECT * FROM ". self::TABLE ." where id = :id ");
     }
@@ -99,7 +105,7 @@ class BlacklistDao extends \DataAccess_AbstractDao
      * @param BlacklistStruct $blacklistStruct
      *
      * @return string|null
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function save( BlacklistStruct $blacklistStruct){
 

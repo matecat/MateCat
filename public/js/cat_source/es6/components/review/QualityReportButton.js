@@ -5,8 +5,9 @@ import {IconQR} from '../icons/IconQR'
 import CatToolStore from '../../stores/CatToolStore'
 import CattoolConstants from '../../constants/CatToolConstants'
 import CatToolActions from '../../actions/CatToolActions'
-import CatToolConstants from '../../constants/CatToolConstants'
 import {reloadQualityReport} from '../../api/reloadQualityReport'
+import CommonUtils from '../../utils/commonUtils'
+import {REVISE_STEP_NUMBER} from '../../constants/Constants'
 
 /**
  * @NOTE because the state of this component is manipulated
@@ -30,10 +31,6 @@ export const QualityReportButton = ({
     ? '?revision_type=' + revision_number
     : ''
   const quality_report_href = useRef(qualityReportHref + qrParam)
-
-  const updateProgress = (stats) => {
-    setProgress(stats)
-  }
 
   const openFeedbackModal = (e) => {
     e.preventDefault()
@@ -67,8 +64,30 @@ export const QualityReportButton = ({
     })
   }
 
+  const checkQualityReport = (stats) => {
+    let reviseCount = config.isReview
+      ? config.revisionNumber === REVISE_STEP_NUMBER.REVISE2
+        ? stats.raw.approved2
+        : stats.raw.approved
+      : null
+    if (config.isReview && reviseCount && reviseCount >= stats.raw.total) {
+      let revise = CatToolStore.getQR(config.revisionNumber)
+      if (revise && !revise[0].feedback) {
+        const isModalClosed =
+          CommonUtils.getFromSessionStorage('feedback-modal')
+        if (!isModalClosed) {
+          CatToolActions.openFeedbackModal('', config.revisionNumber)
+        }
+      }
+    }
+  }
+
   useEffect(() => {
     reloadQualityReportFn()
+    const updateProgress = (stats) => {
+      setProgress(stats)
+      checkQualityReport(stats)
+    }
     CatToolStore.addListener(CattoolConstants.SET_PROGRESS, updateProgress)
     CatToolStore.addListener(CattoolConstants.RELOAD_QR, reloadQualityReportFn)
     return () => {
@@ -82,7 +101,7 @@ export const QualityReportButton = ({
 
   return (
     <div
-      className="action-submenu ui floating ${header_quality_report_item_class}"
+      className={'action-submenu ui floating'}
       id="quality-report-button"
       title="Quality Report"
     >

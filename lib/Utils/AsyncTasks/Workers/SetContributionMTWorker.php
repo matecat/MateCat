@@ -12,7 +12,6 @@ namespace AsyncTasks\Workers;
 use Contribution\ContributionSetStruct;
 use Engine;
 use Exception;
-use Exceptions\ValidationError;
 use Jobs_JobStruct;
 use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\ReQueueException;

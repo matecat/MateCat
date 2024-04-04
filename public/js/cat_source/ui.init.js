@@ -54,13 +54,6 @@ $.extend(window.UI, {
     var interval
     if (action) {
       switch (action) {
-        case 'download':
-          interval = setTimeout(function () {
-            $('#downloadProject').trigger('click')
-            clearInterval(interval)
-          }, 300)
-          CommonUtils.removeParam('action')
-          break
         case 'openComments':
           interval = setTimeout(function () {
             CommentsActions.openCommentsMenu()

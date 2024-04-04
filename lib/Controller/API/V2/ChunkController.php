@@ -66,31 +66,48 @@ class ChunkController extends BaseChunkController {
 
     }
 
+    /**
+     * @throws Exception
+     */
     public function delete() {
         $this->return404IfTheJobWasDeleted();
 
         $this->changeStatus( Constants_JobStatus::STATUS_DELETED );
     }
 
+    /**
+     * @throws Exception
+     */
     public function cancel() {
         $this->return404IfTheJobWasDeleted();
 
         $this->changeStatus( Constants_JobStatus::STATUS_CANCELLED );
     }
 
+    /**
+     * @throws Exception
+     */
     public function archive() {
         $this->return404IfTheJobWasDeleted();
 
         $this->changeStatus( Constants_JobStatus::STATUS_ARCHIVED );
     }
 
+    /**
+     * @throws Exception
+     */
     public function active() {
         $this->return404IfTheJobWasDeleted();
 
         $this->changeStatus( Constants_JobStatus::STATUS_ACTIVE );
     }
 
+    /**
+     * @throws Exception
+     */
     protected function changeStatus( $status ) {
+
+        ( new ProjectAccessValidator( $this, $this->project ) )->validate();
 
         Jobs_JobDao::updateJobStatus( $this->chunk, $status );
         $lastSegmentsList = Translations_SegmentTranslationDao::getMaxSegmentIdsFromJob( $this->chunk );
@@ -111,8 +128,6 @@ class ChunkController extends BaseChunkController {
         $Validator->onSuccess( function () use ( $Validator ) {
             $this->chunk   = $Validator->getChunk();
             $this->project = $Validator->getChunk()->getProject( 60 * 10 );
-        } )->onSuccess( function () {
-            ( new ProjectAccessValidator( $this, $this->project ) )->validate();
         } );
         $this->appendValidator( $Validator );
     }

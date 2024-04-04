@@ -18,7 +18,7 @@ use Log;
 use LogicException;
 use LQA\BxExG\Validator;
 use Matecat\SubFiltering\Filters\LtGtEncode;
-use Matecat\SubFiltering\MateCatFilter;
+use Projects_MetadataDao;
 use Segments_SegmentMetadataDao;
 use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\ReQueueException;
@@ -746,7 +746,7 @@ class QA {
      *
      */
     public function getErrors() {
-        return $this->checkErrorNone( self::ERROR );
+        return $this->checkErrorNone();
     }
 
     /**
@@ -828,7 +828,7 @@ class QA {
      * @return string Json
      */
     public function getNoticesJSON() {
-        return json_encode( $this->checkErrorNone( self::INFO, false ) );
+        return json_encode( $this->checkErrorNone( self::INFO ) );
     }
 
     /**
@@ -983,7 +983,7 @@ class QA {
         if ( !empty( $matches[ 1 ] ) ) {
             $test_src = $seg;
             foreach ( $matches[ 1 ] as $v ) {
-                $key      = "" . sprintf( "%02X", ord( $v ) ) . "";
+                $key      = sprintf( "%02X", ord( $v ) );
                 $test_src = preg_replace( '/(\x{' . sprintf( "%02X", ord( $v ) ) . '}{1})/u', self::$asciiPlaceHoldMap[ $key ][ 'placeHold' ], $test_src, 1 );
             }
 
@@ -1013,7 +1013,7 @@ class QA {
                     $regexp = '/&#x(' . $byte . ');/u';
                 }
 
-                $key = "" . sprintf( "%02X", hexdec( $v ) ) . "";
+                $key = sprintf( "%02X", hexdec( $v ) );
                 if ( array_key_exists( $key, self::$asciiPlaceHoldMap ) ) {
                     $test_src = preg_replace( $regexp, self::$asciiPlaceHoldMap[ $key ][ 'placeHold' ], $test_src );
                 }
@@ -1184,6 +1184,7 @@ class QA {
      * @param DOMNodeList $trgNodeList
      *
      * @return array
+     * @throws Exception
      */
     protected function _mapDom( DOMNodeList $srcNodeList, DOMNodeList $trgNodeList ) {
 
@@ -1274,6 +1275,8 @@ class QA {
      * @param array       &$srcDomElements
      * @param int          $depth
      * @param null         $parentID
+     *
+     * @throws Exception
      */
     protected function _mapElements( DOMNodeList $elementList, array &$srcDomElements = [], $depth = 0, $parentID = null ) {
 
@@ -1629,6 +1632,7 @@ class QA {
     /**
      * Check for errors in tag position
      *
+     * @throws Exception
      */
     protected function _checkTagPositions() {
 
@@ -1727,7 +1731,7 @@ class QA {
      *
      * @param array $tags
      *
-     * @return array|mixed
+     * @return array
      */
     private function extractIdAttributes(array $tags) {
 
@@ -1738,7 +1742,7 @@ class QA {
 
             if (!empty($idMatch[1][0])) {
                 $matches[] = $idMatch[1][0];
-            };
+            }
         }
 
         return $matches;
@@ -1749,7 +1753,7 @@ class QA {
      *
      * @param array $tags
      *
-     * @return array|mixed
+     * @return array
      */
     private function extractEquivTextAttributes(array $tags) {
 
@@ -1760,7 +1764,7 @@ class QA {
 
             if (!empty($equivTextMatch[1][0])) {
                 $matches[] = $equivTextMatch[1][0];
-            };
+            }
         }
 
         return $matches;
@@ -2050,6 +2054,7 @@ class QA {
      * it analyzes the tag count number ( by srcDomMap contents )
      * and check for id correspondence.
      *
+     * @throws Exception
      */
     protected function _checkTagMismatch() {
 
@@ -2075,10 +2080,12 @@ class QA {
      *
      * @param DOMNodeList $srcNodeList
      * @param DOMNodeList $trgNodeList
+     *
+     * @throws Exception
      */
     protected function _checkContentConsistency( DOMNodeList $srcNodeList, DOMNodeList $trgNodeList ) {
 
-        $this->_checkTagMismatch( $srcNodeList, $trgNodeList );
+        $this->_checkTagMismatch();
 
         if ( $this->thereAreErrors() ) {
             $this->_getTagDiff();
@@ -2215,7 +2222,7 @@ class QA {
 
         $Node = $xpath->query( $query );
 
-        return ( ( $Node->length == 0 || $Node == false ) ? new DOMNode( 'g' ) : $Node->item( 0 ) );
+        return ( ( $Node->length == 0 || !$Node ) ? new DOMNode() : $Node->item( 0 ) );
 
     }
 
@@ -2409,7 +2416,7 @@ class QA {
      * @return bool
      */
     protected function _hasHeadNBSP( $s ) {
-        return preg_match( "/^\x{a0}{1}/u", $s );
+        return preg_match( "/^\x{a0}/u", $s );
     }
 
     /**
@@ -2420,7 +2427,7 @@ class QA {
      * @return bool
      */
     protected function _hasTailNBSP( $s ) {
-        return preg_match( "/\x{a0}{1}$/u", $s );
+        return preg_match( "/\x{a0}$/u", $s );
     }
 
     /**
@@ -2561,7 +2568,6 @@ class QA {
 
     /**
      * @param int    $segmentId
-     * @param string $text
      *
      * @return bool
      */
@@ -2604,7 +2610,7 @@ class QA {
         // Add blacklist glossary warnings
         $project = $this->chunk->getProject();
 
-        $dao = new \Projects_MetadataDao() ;
+        $dao = new Projects_MetadataDao() ;
         $has_blacklist = $dao->setCacheTTL( 60 * 60 * 24 )->get( $project->id,  'has_blacklist' ) ;
 
         if($has_blacklist){

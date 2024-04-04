@@ -23,6 +23,9 @@ use LQA\EntryWithCategoryStruct;
 use Routes;
 use TransactionableTrait;
 use Users_UserDao;
+use WordCount\CounterModel;
+
+;
 
 class SegmentTranslationModel implements ISegmentTranslationModel {
 
@@ -37,8 +40,6 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
      * @var Chunks_ChunkStruct
      */
     protected $_chunk;
-
-    protected $affectedChunkReviews = [];
 
     /**
      * @var \Projects_ProjectStruct
@@ -64,12 +65,17 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
      * @var array
      */
     private $_finalRevisions;
+    /**
+     * @var CounterModel
+     */
+    private $_jobWordCounter;
 
-    public function __construct( TranslationEvent $model, array $chunkReviews ) {
-        $this->_event        = $model;
-        $this->_chunkReviews = $chunkReviews;
-        $this->_chunk        = $model->getChunk();
-        $this->_project      = $this->_chunk->getProject();
+    public function __construct( TranslationEvent $model, CounterModel $jobWordCounter, array $chunkReviews ) {
+        $this->_event          = $model;
+        $this->_chunkReviews   = $chunkReviews;
+        $this->_chunk          = $model->getChunk();
+        $this->_project        = $this->_chunk->getProject();
+        $this->_jobWordCounter = $jobWordCounter;
 
         $this->_finalRevisions = ( new TranslationEventDao() )->getFinalRevisionsForSegment(
                 $this->_chunk->id, $this->_event->getSegmentStruct()->id
@@ -181,6 +187,12 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
         $_previousEventSourcePage = $this->_event->getPreviousEventSourcePage();
         $_currentEventSourcePage  = $this->_event->getCurrentEventSourcePage();
 
+        if ( $this->_event->isChangingStatus() ) {
+            $this->_jobWordCounter->setOldStatus( $this->_event->getOldTranslation()->status );
+            $this->_jobWordCounter->setNewStatus( $this->_event->getWantedTranslation()->status );
+            $this->_jobWordCounter->setUpdatedValues( $this->getDeltaWordCount(), $this->_event->getSegmentStruct()->raw_word_count );
+        }
+
         $segmentReviewTransitionModel = new ChunkReviewTranslationEventTransition( $this->_event );
 
         // populate structs for current segment and propagations
@@ -285,10 +297,8 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
                     && $this->_event->currentEventIsOnThisChunk( $chunkReview ) // only one chunk match, R1, R2, R(N) they are mutually excluded
 
             ) {
-
                 $this->increaseAllCounters( $chunkReview );
                 $chunkReviews[] = $chunkReview;
-
             } else { // Upper transition
 
                 /*
@@ -300,7 +310,7 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
                  * and they are not distinguishable
                  *
                  * BUT it's supposed that the first modification entered the previous conditional branch
-                 * AND that an UNMODIFIED ICE never reach this code
+                 * AND that an UNMODIFIED ICE never reach this code BUT pre-translated will do
                  */
                 if ( $this->_event->lastEventWasOnThisChunk( $chunkReview ) ) {
 
