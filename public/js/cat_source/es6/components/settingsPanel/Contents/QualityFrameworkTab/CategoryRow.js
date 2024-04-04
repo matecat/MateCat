@@ -11,6 +11,7 @@ import {switchArrayIndex} from '../../../../utils/commonUtils'
 import LabelWithTooltip from '../../../common/LabelWithTooltip'
 import {ModifyCategory} from './ModifyCategory'
 import {getCategoryLabelAndDescription} from './CategoriesSeveritiesTable'
+import ChevronDown from '../../../../../../../img/icons/ChevronDown'
 
 export const CategoryRow = ({category, index, shouldScrollIntoView}) => {
   const {portalTarget} = useContext(SettingsPanelContext)
@@ -43,8 +44,12 @@ export const CategoryRow = ({category, index, shouldScrollIntoView}) => {
 
     if (!isMatched) return true
 
-    const originalCategory = originalCurrentTemplate.categories[index]
-    const currentCategory = currentTemplate.categories[index]
+    const originalCategory = originalCurrentTemplate.categories.find(
+      ({id}) => id === category.id,
+    )
+    const currentCategory = currentTemplate.categories.find(
+      ({id}) => id === category.id,
+    )
 
     const isModified =
       originalCategory?.id !== currentCategory.id ||
@@ -86,6 +91,7 @@ export const CategoryRow = ({category, index, shouldScrollIntoView}) => {
 
   const isMoveUpDisabled = index === 0
   const isMoveDownDisabled = index === currentTemplate.categories.length - 1
+  const isDeleteDisabled = currentTemplate.categories.length === 1
 
   const menu = (
     <MenuButton
@@ -101,14 +107,15 @@ export const CategoryRow = ({category, index, shouldScrollIntoView}) => {
         data-testid="menu-button-rename"
       >
         <IconEdit />
-        Rename
+        Edit
       </MenuButtonItem>
       <MenuButtonItem
-        className="quality-framework-columns-menu-item"
+        className="quality-framework-columns-menu-item quality-framework-columns-menu-item-moveup"
         onMouseUp={moveUp}
         disabled={isMoveUpDisabled}
         data-testid="menu-button-moveup"
       >
+        <ChevronDown />
         Move up
       </MenuButtonItem>
       <MenuButtonItem
@@ -117,15 +124,17 @@ export const CategoryRow = ({category, index, shouldScrollIntoView}) => {
         disabled={isMoveDownDisabled}
         data-testid="menu-button-movedown"
       >
+        <ChevronDown />
         Move down
       </MenuButtonItem>
       <MenuButtonItem
         className="quality-framework-columns-menu-item"
         onMouseUp={deleteCategory}
         data-testid="menu-button-delete"
+        disabled={isDeleteDisabled}
       >
         <Trash size={16} />
-        Delete category
+        Delete
       </MenuButtonItem>
     </MenuButton>
   )

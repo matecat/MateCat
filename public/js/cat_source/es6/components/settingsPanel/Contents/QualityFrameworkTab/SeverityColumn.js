@@ -8,8 +8,9 @@ import IconEdit from '../../../icons/IconEdit'
 import Trash from '../../../../../../../img/icons/Trash'
 import IconDown from '../../../icons/IconDown'
 import {switchArrayIndex} from '../../../../utils/commonUtils'
-import {isEqual} from 'lodash'
 import LabelWithTooltip from '../../../common/LabelWithTooltip'
+import ChevronDown from '../../../../../../../img/icons/ChevronDown'
+import {ModifySeverity} from './ModifySeverity'
 
 export const SeverityColumn = ({label, index, shouldScrollIntoView}) => {
   const {portalTarget} = useContext(SettingsPanelContext)
@@ -39,14 +40,15 @@ export const SeverityColumn = ({label, index, shouldScrollIntoView}) => {
 
     if (!isMatched) return true
 
-    const originalColumnSeverity = originalCurrentTemplate.categories.map(
-      ({severities}) => severities[index],
-    )
-    const columnsSeverity = currentTemplate.categories.map(
-      ({severities}) => severities[index],
+    const originalColumnSeverity =
+      originalCurrentTemplate.categories[0].severities[index]
+
+    const columnsSeverity = currentTemplate.categories[0].severities.find(
+      ({id}) => id === originalColumnSeverity.id,
     )
 
-    const isModified = !isEqual(originalColumnSeverity, columnsSeverity)
+    const isModified =
+      columnsSeverity && originalColumnSeverity.label !== columnsSeverity?.label
 
     return isModified
   }
@@ -91,24 +93,10 @@ export const SeverityColumn = ({label, index, shouldScrollIntoView}) => {
     }))
   }
 
-  const onChangeName = ({currentTarget: {value}}) => {
-    modifyingCurrentTemplate((prevTemplate) => ({
-      ...prevTemplate,
-      categories: prevTemplate.categories.map((category) => ({
-        ...category,
-        severities: category.severities.map((severity, indexSeverity) => ({
-          ...severity,
-          ...(indexSeverity === index && {
-            label: value,
-          }),
-        })),
-      })),
-    }))
-  }
-
   const isMoveLeftDisabled = index === 0
   const isMoveRightDisabled =
     index === currentTemplate.categories[0].severities.length - 1
+  const isDeleteDisabled = currentTemplate.categories[0].severities.length === 1
 
   const menu = (
     <MenuButton
@@ -127,28 +115,31 @@ export const SeverityColumn = ({label, index, shouldScrollIntoView}) => {
         Rename
       </MenuButtonItem>
       <MenuButtonItem
-        className="quality-framework-columns-menu-item"
+        className="quality-framework-columns-menu-item quality-framework-columns-menu-item-moveleft"
         onMouseUp={moveLeft}
         disabled={isMoveLeftDisabled}
         data-testid="menu-button-moveleft"
       >
+        <ChevronDown />
         Move left
       </MenuButtonItem>
       <MenuButtonItem
-        className="quality-framework-columns-menu-item"
+        className="quality-framework-columns-menu-item quality-framework-columns-menu-item-moveright"
         onMouseUp={moveRight}
         disabled={isMoveRightDisabled}
         data-testid="menu-button-moveright"
       >
+        <ChevronDown />
         Move right
       </MenuButtonItem>
       <MenuButtonItem
         className="quality-framework-columns-menu-item"
         onMouseUp={deleteSeverity}
         data-testid="menu-button-delete"
+        disabled={isDeleteDisabled}
       >
         <Trash size={16} />
-        Delete severity
+        Delete
       </MenuButtonItem>
     </MenuButton>
   )
@@ -160,18 +151,19 @@ export const SeverityColumn = ({label, index, shouldScrollIntoView}) => {
       data-testid={`qf-severity-column-${index}`}
     >
       <LabelWithTooltip className="label" tooltipTarget={portalTarget}>
-        {isEditingName ? (
-          <input
-            autoFocus
-            value={label}
-            onChange={onChangeName}
-            onBlur={() => setIsEditingName(false)}
-          />
-        ) : (
-          <span>{label}</span>
-        )}
+        <span>{label}</span>
       </LabelWithTooltip>
       {menu}
+      {isEditingName && (
+        <ModifySeverity
+          {...{
+            target: ref.current,
+            label,
+            index,
+            setIsEditingName,
+          }}
+        />
+      )}
     </div>
   )
 }

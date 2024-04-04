@@ -13,6 +13,9 @@ import {QualityFrameworkTabContext} from './QualityFrameworkTab'
 import IconAdd from '../../../icons/IconAdd'
 import Checkmark from '../../../../../../../img/icons/Checkmark'
 import {getCodeFromLabel} from './CategoriesSeveritiesTable'
+import {TOOLTIP_POSITION} from '../../../common/Tooltip'
+
+const MAX_ENTRY = 50
 
 export const AddSeverity = () => {
   const {modifyingCurrentTemplate, currentTemplate} = useContext(
@@ -53,6 +56,9 @@ export const AddSeverity = () => {
 
   const onClose = () => setName()
 
+  const isDisabled =
+    currentTemplate.categories[0].severities.length >= MAX_ENTRY
+
   return (
     <div
       className="quality-framework-add-severity"
@@ -65,6 +71,11 @@ export const AddSeverity = () => {
           mode: BUTTON_MODE.BASIC,
           size: BUTTON_SIZE.ICON_SMALL,
           testId: 'add-severity-button',
+          disabled: isDisabled,
+          ...(isDisabled && {
+            tooltip: `You have reached the limit of ${MAX_ENTRY} severities\nallowed in a quality framework`,
+          }),
+          tooltipPosition: TOOLTIP_POSITION.LEFT,
           children: (
             <>
               <IconAdd size={22} />
@@ -98,6 +109,7 @@ export const AddSeverity = () => {
             placeholder="Name"
             value={name}
             onChange={(e) => setName(e.currentTarget.value)}
+            autoFocus
           />
         </div>
       </Popover>

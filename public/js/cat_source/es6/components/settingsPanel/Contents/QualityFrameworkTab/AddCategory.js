@@ -16,7 +16,11 @@ import Checkmark from '../../../../../../../img/icons/Checkmark'
 import {
   getCodeFromLabel,
   formatCategoryDescription,
+  getCategoryLabelAndDescription,
 } from './CategoriesSeveritiesTable'
+import {TOOLTIP_POSITION} from '../../../common/Tooltip'
+
+const MAX_ENTRY = 50
 
 export const AddCategory = () => {
   const {modifyingCurrentTemplate, currentTemplate} = useContext(
@@ -26,10 +30,23 @@ export const AddCategory = () => {
   const [isVisibleDescriptionInput, setIsVisibleDescriptionInput] =
     useState(false)
   const [fields, setFields] = useState({name: '', description: ''})
+  const [error, setError] = useState()
+
+  const validateLabel = (value) => {
+    const labels = currentTemplate.categories.map((categoryItem) =>
+      getCategoryLabelAndDescription(categoryItem),
+    )
+
+    if (labels.some(({label}) => label.toLowerCase() === value.toLowerCase()))
+      setError('Name already in use for another category.')
+    else setError()
+  }
 
   const {name, description} = fields
-  const setName = ({currentTarget: {value}}) =>
+  const setName = ({currentTarget: {value}}) => {
     setFields((prevState) => ({...prevState, name: value}))
+    validateLabel(value)
+  }
   const setDescription = ({currentTarget: {value}}) =>
     setFields((prevState) => ({...prevState, description: value}))
 
@@ -67,6 +84,8 @@ export const AddCategory = () => {
     setFields({name: '', description: ''})
   }
 
+  const isDisabled = currentTemplate.categories.length >= MAX_ENTRY
+
   return (
     <div
       className="quality-framework-add-category"
@@ -78,6 +97,11 @@ export const AddCategory = () => {
           type: BUTTON_TYPE.PRIMARY,
           mode: BUTTON_MODE.BASIC,
           size: BUTTON_SIZE.MEDIUM,
+          disabled: isDisabled,
+          ...(isDisabled && {
+            tooltip: `You have reached the limit of ${MAX_ENTRY} categories\nallowed in a quality framework`,
+          }),
+          tooltipPosition: TOOLTIP_POSITION.RIGHT,
           children: (
             <>
               <IconAdd size={22} /> Add category
@@ -87,7 +111,7 @@ export const AddCategory = () => {
         confirmButtonProps={{
           type: BUTTON_TYPE.PRIMARY,
           size: BUTTON_SIZE.MEDIUM,
-          disabled: !name,
+          disabled: !name || typeof error === 'string',
           children: (
             <>
               <Checkmark size={14} />
@@ -107,11 +131,15 @@ export const AddCategory = () => {
       >
         <div className="add-popover-content">
           <input
-            className="quality-framework-input input"
+            className={`quality-framework-input input${error ? ' quality-framework-input-error' : ''}`}
             placeholder="Name"
             value={name}
             onChange={setName}
+            autoFocus
           />
+          {error && (
+            <span className="quality-framework-error-message">{error}</span>
+          )}
           {!isVisibleDescriptionInput ? (
             <Button
               className="add-description"

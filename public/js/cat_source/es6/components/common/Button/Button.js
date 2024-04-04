@@ -1,5 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import {TOOLTIP_POSITION} from '../Tooltip'
 
 const mergeClassNames = (...args) => {
   return (
@@ -61,6 +62,7 @@ export const Button = React.forwardRef(
       htmlType = BUTTON_HTML_TYPE.BUTTON,
       form,
       tooltip,
+      tooltipPosition,
       onClick = () => {},
       testId,
       className = '',
@@ -95,6 +97,7 @@ export const Button = React.forwardRef(
         disabled={disabled || waiting}
         tabIndex={tabIndex}
         aria-label={tooltip}
+        tooltip-position={tooltipPosition}
         // eslint-disable-next-line react/no-unknown-property
         onClick={onClick}
         data-testid={testId}
@@ -139,6 +142,7 @@ Button.propTypes = {
   htmlType: PropTypes.oneOf([...Object.values(BUTTON_HTML_TYPE)]),
   form: PropTypes.string,
   tooltip: PropTypes.string,
+  tooltipPosition: PropTypes.oneOf([...Object.values(TOOLTIP_POSITION)]),
   onClick: PropTypes.func,
   testId: PropTypes.string,
   className: PropTypes.string,

@@ -1,4 +1,4 @@
-import React, {useMemo, useRef, useState} from 'react'
+import React, {useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import usePortal from '../../hooks/usePortal'
 
@@ -53,14 +53,14 @@ const Tooltip = ({
       position === TOOLTIP_POSITION.LEFT || position === TOOLTIP_POSITION.RIGHT
         ? boundingRect.y + window.scrollY + boundingRect.height / 2
         : position === TOOLTIP_POSITION.TOP
-        ? boundingRect.y + window.scrollY - 7 // 7 = tooltip arrow height
-        : boundingRect.y + window.scrollY + boundingRect.height + 7 // 7 = tooltip arrow height
+          ? boundingRect.y + window.scrollY - 7 // 7 = tooltip arrow height
+          : boundingRect.y + window.scrollY + boundingRect.height + 7 // 7 = tooltip arrow height
     const left =
       position === TOOLTIP_POSITION.TOP || position === TOOLTIP_POSITION.BOTTOM
         ? boundingRect.x + window.scrollX + boundingRect.width / 2
         : position === TOOLTIP_POSITION.LEFT
-        ? boundingRect.x + window.scrollX - 7 // 7 = tooltip arrow width
-        : boundingRect.x + window.scrollX + boundingRect.width + 7 // 7 = tooltip arrow width
+          ? boundingRect.x + window.scrollX - 7 // 7 = tooltip arrow width
+          : boundingRect.x + window.scrollX + boundingRect.width + 7 // 7 = tooltip arrow width
     return {top, left}
   }
 

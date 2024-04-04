@@ -67,31 +67,14 @@ export const SeveritiyRow = ({severity}) => {
 
     if (!isMatched) return true
 
-    const categoryIndex = originalCurrentTemplate.categories.findIndex(
-      ({id}) => id === severity.id_category,
-    )
-    const severityIndex = originalCurrentTemplate.categories[
-      categoryIndex
-    ].severities.findIndex(
-      ({id, id_category}) =>
-        id_category === severity.id_category && id === severity.id,
-    )
+    const originalSeverity = originalCurrentTemplate.categories
+      .find(({id}) => id === severity.id_category)
+      .severities.find(({id}) => id === severity.id)
+    const currentSeverity = currentTemplate.categories
+      .find(({id}) => id === severity.id_category)
+      .severities.find(({id}) => id === severity.id)
 
-    const {
-      label, // eslint-disable-line
-      code, // eslint-disable-line
-      ...originalSeverity
-    } =
-      originalCurrentTemplate.categories[categoryIndex].severities[
-        severityIndex
-      ]
-    const {
-      label: labelCurrent, // eslint-disable-line
-      code: codeCurrent, // eslint-disable-line
-      ...currentSeverity
-    } = currentTemplate.categories[categoryIndex]?.severities[severityIndex] ??
-    {}
-    const isModified = !isEqual(originalSeverity, currentSeverity)
+    const isModified = originalSeverity.penalty !== currentSeverity.penalty
 
     return isModified
   }

@@ -10,12 +10,8 @@ import Checkmark from '../../../../../../../img/icons/Checkmark'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import usePortal from '../../../../hooks/usePortal'
 import {QualityFrameworkTabContext} from './QualityFrameworkTab'
-import {
-  formatCategoryDescription,
-  getCategoryLabelAndDescription,
-} from './CategoriesSeveritiesTable'
 
-export const ModifyCategory = ({target, category, setIsEditingName}) => {
+export const ModifySeverity = ({target, label, index, setIsEditingName}) => {
   const {portalTarget} = useContext(SettingsPanelContext)
   const {modifyingCurrentTemplate, currentTemplate} = useContext(
     QualityFrameworkTabContext,
@@ -23,11 +19,8 @@ export const ModifyCategory = ({target, category, setIsEditingName}) => {
 
   const Portal = usePortal(portalTarget ? portalTarget : document.body)
 
-  const initLabelState = getCategoryLabelAndDescription(category)
-
   const [, setResizingUpdate] = useState()
-  const [label, setLabel] = useState(initLabelState.label)
-  const [description, setDescription] = useState(initLabelState.description)
+  const [labelState, setLabelState] = useState(label)
   const [error, setError] = useState()
 
   const ref = useRef()
@@ -52,11 +45,14 @@ export const ModifyCategory = ({target, category, setIsEditingName}) => {
   const updateLabel = () => {
     modifyingCurrentTemplate((prevTemplate) => ({
       ...prevTemplate,
-      categories: prevTemplate.categories.map((categoryItem) => ({
-        ...categoryItem,
-        ...(categoryItem.id === category.id && {
-          label: `${label}${description ? ' ' + formatCategoryDescription(description) : ''}`,
-        }),
+      categories: prevTemplate.categories.map((category) => ({
+        ...category,
+        severities: category.severities.map((severity, indexSeverity) => ({
+          ...severity,
+          ...(indexSeverity === index && {
+            label: labelState,
+          }),
+        })),
       })),
     }))
 
@@ -64,21 +60,18 @@ export const ModifyCategory = ({target, category, setIsEditingName}) => {
   }
 
   const validateLabel = (value) => {
-    const labels = currentTemplate.categories
-      .filter(({id}) => id !== category.id)
-      .map((categoryItem) => getCategoryLabelAndDescription(categoryItem))
+    const labels = currentTemplate.categories[0].severities
+      .filter((severity, indexItem) => indexItem !== index)
+      .map(({label}) => label)
 
-    if (labels.some(({label}) => label.toLowerCase() === value.toLowerCase()))
-      setError('Name already in use for another category.')
+    if (labels.some((label) => label.toLowerCase() === value.toLowerCase()))
+      setError('Name already in use for another severity.')
     else setError()
   }
 
   const onChangeLabel = ({currentTarget: {value}}) => {
-    setLabel(value)
+    setLabelState(value)
     validateLabel(value)
-  }
-  const onChangeDescription = ({currentTarget: {value}}) => {
-    setDescription(value)
   }
 
   const cancel = () => setIsEditingName(false)
@@ -88,19 +81,13 @@ export const ModifyCategory = ({target, category, setIsEditingName}) => {
       <input
         className={`quality-framework-input input${error ? ' quality-framework-input-error' : ''}`}
         placeholder="Name"
-        value={label}
+        value={labelState}
         onChange={onChangeLabel}
         autoFocus
       />
       {error && (
         <span className="quality-framework-error-message">{error}</span>
       )}
-      <input
-        className="quality-framework-input input"
-        placeholder="Description"
-        value={description}
-        onChange={onChangeDescription}
-      />
     </div>
   )
 
@@ -110,12 +97,12 @@ export const ModifyCategory = ({target, category, setIsEditingName}) => {
     <Portal>
       <div
         ref={ref}
-        className="popover-component-popover quality-framework-modify-category"
+        className="popover-component-popover quality-framework-modify-severity"
         style={{top: `${rect.top}px`, left: `${rect.left}px`}}
-        data-testid="qf-modify-category"
+        data-testid="qf-modify-severity"
       >
         <div className="popover-component-header">
-          <span className="popover-component-title">Edit category</span>
+          <span className="popover-component-title">Rename severity</span>
         </div>
         <div className="popover-component-body">{content}</div>
         <div className="popover-component-actions">
@@ -130,7 +117,6 @@ export const ModifyCategory = ({target, category, setIsEditingName}) => {
             type={BUTTON_TYPE.PRIMARY}
             size={BUTTON_SIZE.MEDIUM}
             onClick={updateLabel}
-            disabled={!label || typeof error === 'string'}
           >
             <Checkmark size={14} />
             Confirm
@@ -141,8 +127,9 @@ export const ModifyCategory = ({target, category, setIsEditingName}) => {
   )
 }
 
-ModifyCategory.propTypes = {
+ModifySeverity.propTypes = {
   target: PropTypes.any.isRequired,
-  category: PropTypes.object.isRequired,
+  label: PropTypes.string.isRequired,
+  index: PropTypes.number.isRequired,
   setIsEditingName: PropTypes.func.isRequired,
 }
