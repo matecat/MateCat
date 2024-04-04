@@ -11,12 +11,15 @@ _dic_cache
 .num_processes
 inc/*.dat
 inc/oauth_config.ini
+inc/github_oauth_config.ini
 inc/linkedin_oauth_config.ini
+inc/microsoft_oauth_config.ini
 inc/Error_Mail_List.ini
 inc/config.ini
 inc/config.ini*
 inc/config.test.ini
 inc/config.development.ini
+
 inc/.globalmessage.ini
 inc/oauth-token-key.txt
 .passwd.ini

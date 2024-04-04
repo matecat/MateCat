@@ -1,8 +1,11 @@
 <?php
 
+use ConnectedServices\ConnectedServiceInterface;
 use ConnectedServices\LinkedIn\LinkedInClient;
 use ConnectedServices\LinkedIn\LinkedInClientFactory;
 use League\OAuth2\Client\Provider\LinkedIn;
+
+use ConnectedServices\Microsoft\MicrosoftClient;
 
 abstract class viewController extends controller {
 
@@ -14,7 +17,7 @@ abstract class viewController extends controller {
     protected $template = null;
 
     /**
-     * @var Google_Client
+     * @var ConnectedServiceInterface
      */
     protected $client;
 
@@ -28,8 +31,12 @@ abstract class viewController extends controller {
      */
     protected $linkedInAuthURL;
 
-    protected $login_required = false;
+    /**
+     * @var string
+     */
+    protected $microsoftAuthURL;
 
+    protected $login_required = false;
 
     /**
      * Class constructor
@@ -153,12 +160,22 @@ abstract class viewController extends controller {
         $this->template->css_resources        = [];
         $this->template->authURL              = $this->getAuthUrl();
         $this->template->linkedInAuthUrl      = $this->getLinkedInAuthUrl();
+        $this->template->microsoftAuthUrl      = $this->getMicrosoftAuthUrl();
         $this->template->gdriveAuthURL        = \ConnectedServices\GDrive::generateGDriveAuthUrl();
         $this->template->enableMultiDomainApi = INIT::$ENABLE_MULTI_DOMAIN_API;
         $this->template->ajaxDomainsNumber    = INIT::$AJAX_DOMAINS;
     }
 
+    /**
+     * @return string
+     */
+    public function getMicrosoftAuthUrl(){
+        if ( is_null( $this->microsoftAuthURL ) ) {
+            $this->microsoftAuthURL = MicrosoftClient::getAuthorizationUrl();
+        }
 
+        return $this->microsoftAuthURL;
+    }
 
     /**
      * setTemplateFinalVars

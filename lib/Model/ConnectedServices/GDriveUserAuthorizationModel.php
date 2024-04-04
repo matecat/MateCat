@@ -8,7 +8,7 @@
 
 namespace ConnectedServices;
 
-use ConnectedServices\GDrive\GoogleClientFactory;
+use ConnectedServices\Google\GoogleClientFactory;
 use Google_Service_Oauth2;
 use Utils;
 

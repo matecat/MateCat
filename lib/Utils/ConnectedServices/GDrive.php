@@ -3,7 +3,7 @@
 
 namespace ConnectedServices;
 
-use ConnectedServices\GDrive\GoogleClientFactory;
+use ConnectedServices\Google\GoogleClientFactory;
 use Exception;
 
 class GDrive {

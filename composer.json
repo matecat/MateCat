@@ -4,7 +4,7 @@
         "robmorgan/phinx": "^0.4.6"
     },
     "require": {
-        "php": ">=5.6.40",
+        "php": ">=7.0",
         "phptal/phptal": "^1.3.0",
         "google/apiclient": "^2.4.1",
         "google/apiclient-services": "^0.128",
@@ -37,6 +37,7 @@
         "ext-gd": "*",
         "orhanerday/open-ai": "^4.7",
         "ext-openssl": "*",
-        "league/oauth2-linkedin": "^5.1"
+        "league/oauth2-linkedin": "^5.1",
+        "stevenmaguire/oauth2-microsoft": "^2.2"
     }
 }

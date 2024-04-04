@@ -2,17 +2,22 @@
 
 namespace ConnectedServices\LinkedIn;
 
+use ConnectedServices\ConnectedServiceInterface;
+use ConnectedServices\ConnectedServiceStruct;
+use ConnectedServices\ConnectedServiceUserModel;
 use GuzzleHttp\Exception\GuzzleException;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use League\OAuth2\Client\Token\AccessToken;
+use OauthClient;
 use Utils;
 
-class LinkedInClient
+class LinkedInClient implements ConnectedServiceInterface
 {
     /**
      * @return string
      */
-    public static function getAuthorizationUrl() {
+    public function getAuthorizationUrl()
+    {
 
         $options = [
             'state' => Utils::randomString(20),
@@ -32,7 +37,8 @@ class LinkedInClient
      * @return string
      * @throws IdentityProviderException
      */
-    public static function getAuthToken($code){
+    public function getAuthToken($code)
+    {
         $linkedInClient = LinkedInClientFactory::create();
 
         /** @var AccessToken $token */
@@ -48,8 +54,8 @@ class LinkedInClient
      * @return mixed
      * @throws GuzzleException
      */
-    public static function getResourceOwner($token){
-
+    public function getResourceOwner($token): ConnectedServiceUserModel
+    {
         $linkedInClient = LinkedInClientFactory::create();
         $response = $linkedInClient->getHttpClient()->request(
             'GET',
@@ -61,7 +67,17 @@ class LinkedInClient
             ]
         );
 
-        return json_decode($response->getBody()->getContents());
+        $fetched = json_decode($response->getBody()->getContents());
+
+        $user = new ConnectedServiceUserModel();
+        $user->email = $fetched->email;
+        $user->name = $fetched->given_name;
+        $user->lastName = $fetched->family_name;
+        $user->picture = $fetched->picture;
+        $user->authToken = $token;
+        $user->provider = OauthClient::LINKEDIN_PROVIDER;
+
+        return $user;
     }
 }
 

@@ -1,16 +1,19 @@
 <?php
 
+use ConnectedServices\ConnectedServiceUserModel;
+
 header("Cache-Control: no-store, no-cache, must-revalidate");  // HTTP/1.1
 header("Cache-Control: post-check=0, pre-check=0", false);
 header("Pragma: no-cache");
 
 class oauthResponseHandlerController extends viewController{
 
+    private $provider ;
     private $code ;
     private $error ;
 
     /**
-     * @var Google_Service_Oauth2_Userinfoplus
+     * @var ConnectedServiceUserModel
      */
     private $remoteUser ;
 
@@ -20,14 +23,16 @@ class oauthResponseHandlerController extends viewController{
 		parent::makeTemplate("oauth_response_handler.html");
 
 		$filterArgs = array(
+			'provider'      => array( 'filter' => FILTER_SANITIZE_STRING),
 			'code'          => array( 'filter' => FILTER_SANITIZE_STRING),
 			'error'         => array( 'filter' => FILTER_SANITIZE_STRING)
 		);
 
 		$__postInput = filter_input_array( INPUT_GET, $filterArgs );
 
-		$this->code  = $__postInput[ 'code' ];
-		$this->error = $__postInput[ 'error' ];
+		$this->provider  = $__postInput[ 'provider' ];
+		$this->code      = $__postInput[ 'code' ];
+		$this->error     = $__postInput[ 'error' ];
 	}
 
     public function doAction() {
@@ -51,23 +56,26 @@ class oauthResponseHandlerController extends viewController{
         $this->_initRemoteUser() ;
 
         $model = new OAuthSignInModel(
-                $this->remoteUser->givenName,
-                $this->remoteUser->familyName, $this->remoteUser->email
+            $this->remoteUser->name,
+            $this->remoteUser->lastName,
+            $this->remoteUser->email
         ) ;
 
         $model->setProfilePicture( $this->remoteUser->picture );
-        $model->setAccessToken( $this->client->getAccessToken() );
+        $model->setAccessToken( $this->remoteUser->authToken );
 
         $model->signIn() ;
     }
 
+    /**
+     * @throws Exception
+     */
     protected function _initRemoteUser() {
-        $this->client = OauthClient::getInstance()->getClient();
-        $this->client->setAccessType( "offline" );
+	    $provider = $this->provider ?? OauthClient::GOOGLE_PROVIDER;
+        $this->client = OauthClient::getInstance($provider)->getClient();
 
-        $plus = new Google_Service_Oauth2($this->client);
-        $this->client->authenticate($this->code);
-        $this->remoteUser = $plus->userinfo->get();
+        $token = $this->client->getAuthToken($this->code);
+        $this->remoteUser = $this->client->getResourceOwner($token);
     }
 
     protected function _respondWithError() {

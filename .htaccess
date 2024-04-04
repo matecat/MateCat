@@ -52,8 +52,6 @@ RewriteRule ^api/v1/new$ index.php?api=true&action=newDetatched [QSA,L]
 RewriteRule ^(api)[/]?([^/]*)?[/]?$ index.php?api=true&action=$2 [QSA,L]
 RewriteRule ^api/(.*)$ router.php [QSA,L]
 RewriteRule ^webhooks/(.*)$ router.php [QSA,L]
-RewriteRule ^linkedin/(.*)$ router.php [QSA,L]
-RewriteRule ^gdrive/(.*)$ router.php [QSA,L]
 RewriteRule ^gdrive/(.*)$ router.php [QSA,L]
 
 RewriteRule ^utils/pee$ router.php [L]

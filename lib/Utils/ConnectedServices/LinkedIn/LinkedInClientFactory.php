@@ -2,10 +2,11 @@
 
 namespace ConnectedServices\LinkedIn;
 
+use ConnectedServices\ConnectedServiceFactoryInterface;
 use INIT;
 use League\OAuth2\Client\Provider\LinkedIn;
 
-class LinkedInClientFactory
+class LinkedInClientFactory implements ConnectedServiceFactoryInterface
 {
     private static $instance;
 

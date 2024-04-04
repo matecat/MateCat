@@ -28,6 +28,7 @@ class Bootstrap {
         self::$CONFIG = parse_ini_file( self::$_ROOT . DIRECTORY_SEPARATOR . 'inc/config.ini', true );
         $OAUTH_CONFIG = @parse_ini_file( self::$_ROOT . DIRECTORY_SEPARATOR . 'inc/oauth_config.ini', true );
         $LINKEDIN_OAUTH_CONFIG = @parse_ini_file( self::$_ROOT . DIRECTORY_SEPARATOR . 'inc/linkedin_oauth_config.ini', true );
+        $MICROSOFT_OAUTH_CONFIG = @parse_ini_file( self::$_ROOT . DIRECTORY_SEPARATOR . 'inc/microsoft_oauth_config.ini', true );
 
         register_shutdown_function( [ 'Bootstrap', 'shutdownFunctionHandler' ] );
         set_exception_handler( [ 'Bootstrap', 'exceptionHandler' ] );
@@ -41,6 +42,7 @@ class Bootstrap {
         @include_once 'vendor/autoload.php';
 
         INIT::$OAUTH_CONFIG = $OAUTH_CONFIG[ 'OAUTH_CONFIG' ];
+        INIT::$MICROSOFT_OAUTH_CONFIG = $MICROSOFT_OAUTH_CONFIG[ 'MICROSOFT_OAUTH_CONFIG' ];
         INIT::$LINKEDIN_OAUTH_CONFIG = $LINKEDIN_OAUTH_CONFIG[ 'LINKEDIN_OAUTH_CONFIG' ];
 
         // Overridable defaults
