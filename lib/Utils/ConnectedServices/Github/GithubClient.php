@@ -11,6 +11,9 @@ use Utils;
 
 class GithubClient implements ConnectedServiceInterface
 {
+    /**
+     * @return string
+     */
     public function getAuthorizationUrl()
     {
         $options = [

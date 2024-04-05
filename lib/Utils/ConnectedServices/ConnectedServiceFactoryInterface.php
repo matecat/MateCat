@@ -5,6 +5,8 @@ namespace ConnectedServices;
 interface ConnectedServiceFactoryInterface
 {
     /**
+     * Create an OAuth2 client
+     *
      * @param null $redirectUrl
      * @return mixed
      */

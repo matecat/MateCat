@@ -29,5 +29,3 @@ class MicrosoftClientFactory implements ConnectedServiceFactoryInterface
         return self::$instance;
     }
 }
-
-//config.microsoftAuthUrl

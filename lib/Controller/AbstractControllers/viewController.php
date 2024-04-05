@@ -1,6 +1,7 @@
 <?php
 
 use ConnectedServices\ConnectedServiceInterface;
+use ConnectedServices\GDrive;
 
 abstract class viewController extends controller {
 
@@ -164,7 +165,7 @@ abstract class viewController extends controller {
         $this->template->githubAuthUrl        = $this->getGithubAuthUrl();
         $this->template->linkedInAuthUrl      = $this->getLinkedInAuthUrl();
         $this->template->microsoftAuthUrl     = $this->getMicrosoftAuthUrl();
-        $this->template->gdriveAuthURL        = \ConnectedServices\GDrive::generateGDriveAuthUrl();
+        $this->template->gdriveAuthURL        = GDrive::generateGDriveAuthUrl();
         $this->template->enableMultiDomainApi = INIT::$ENABLE_MULTI_DOMAIN_API;
         $this->template->ajaxDomainsNumber    = INIT::$AJAX_DOMAINS;
     }

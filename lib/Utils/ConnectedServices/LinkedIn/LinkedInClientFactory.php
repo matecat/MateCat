@@ -29,5 +29,3 @@ class LinkedInClientFactory implements ConnectedServiceFactoryInterface
         return self::$instance;
     }
 }
-
-//config.linkedInAuthUrl

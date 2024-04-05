@@ -18,6 +18,9 @@ class OauthClient {
      */
 	private static $instance;
 
+    /**
+     * @var string
+     */
 	private $provider;
 
     /**

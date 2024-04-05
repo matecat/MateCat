@@ -29,5 +29,3 @@ class GithubClientFactory implements ConnectedServiceFactoryInterface
         return self::$instance;
     }
 }
-
-// config.githubAuthUrl

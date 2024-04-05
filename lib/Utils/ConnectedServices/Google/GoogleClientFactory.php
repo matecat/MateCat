@@ -3,6 +3,9 @@
 namespace ConnectedServices\Google;
 
 use ConnectedServices\ConnectedServiceFactoryInterface;
+use Exception;
+use Google_Client;
+use INIT;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 
@@ -26,17 +29,17 @@ class GoogleClientFactory implements ConnectedServiceFactoryInterface
 
     /**
      * @param null $redirectUrl
-     * @return \Google_Client|mixed
-     * @throws \Exception
+     * @return Google_Client|mixed
+     * @throws Exception
      */
     public static function create($redirectUrl = null) {
 
-        $client = new \Google_Client();
+        $client = new Google_Client();
 
-        $client->setApplicationName( \INIT::$OAUTH_CLIENT_APP_NAME );
-        $client->setClientId( \INIT::$OAUTH_CLIENT_ID );
-        $client->setClientSecret( \INIT::$OAUTH_CLIENT_SECRET );
-        $client->setRedirectUri( ($redirectUrl ? $redirectUrl : \INIT::$OAUTH_REDIRECT_URL ) );
+        $client->setApplicationName( INIT::$OAUTH_CLIENT_APP_NAME );
+        $client->setClientId( INIT::$OAUTH_CLIENT_ID );
+        $client->setClientSecret( INIT::$OAUTH_CLIENT_SECRET );
+        $client->setRedirectUri( ($redirectUrl ? $redirectUrl : INIT::$OAUTH_REDIRECT_URL ) );
         $client->setScopes( static::$OAUTH_SCOPES );
         $client->setAccessType( "offline" );
         $client->setApprovalPrompt('force');
@@ -64,6 +67,6 @@ class GoogleClientFactory implements ConnectedServiceFactoryInterface
      * @return string
      */
     private static function logFilePath() {
-        return \INIT::$LOG_REPOSITORY . '/' . self::$LOGGER_NAME . '.log';
+        return INIT::$LOG_REPOSITORY . '/' . self::$LOGGER_NAME . '.log';
     }
 }

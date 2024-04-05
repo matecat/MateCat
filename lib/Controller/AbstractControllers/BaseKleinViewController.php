@@ -2,6 +2,7 @@
 
 use AbstractControllers\IController;
 use API\App\AbstractStatefulKleinController;
+use ConnectedServices\GDrive;
 
 /**
  * Created by PhpStorm.
@@ -24,9 +25,9 @@ class BaseKleinViewController extends AbstractStatefulKleinController implements
         $this->view->logged_user   = ( $this->isLoggedIn() ) ? $this->user->shortName() : "";
         $this->view->extended_user = ( $this->isLoggedIn() ) ? $this->user->fullName() : "";
         $this->view->userMail      = $this->user->email;
-        $oauth_client = OauthClient::getInstance(OauthClient::GOOGLE_PROVIDER)->getClient();
+        $oauth_client = OauthClient::getInstance()->getClient();
         $this->view->authURL = $oauth_client->createAuthUrl();
-        $this->view->gdriveAuthURL = \ConnectedServices\GDrive::generateGDriveAuthUrl();
+        $this->view->gdriveAuthURL = GDrive::generateGDriveAuthUrl();
         $this->view->dqf_enabled = false ;
         $this->view->googleDriveEnabled = Bootstrap::isGDriveConfigured() ;
 

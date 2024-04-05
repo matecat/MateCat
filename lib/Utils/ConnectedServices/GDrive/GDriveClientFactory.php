@@ -4,6 +4,7 @@ namespace ConnectedServices\GDrive;
 
 use ConnectedServices\ConnectedServiceFactoryInterface;
 use ConnectedServices\Google\GoogleClientFactory;
+use INIT;
 
 class GDriveClientFactory implements ConnectedServiceFactoryInterface
 {
@@ -14,7 +15,7 @@ class GDriveClientFactory implements ConnectedServiceFactoryInterface
      */
     public static function create($redirectUrl = null)
     {
-        return GoogleClientFactory::create(\INIT::$HTTPHOST . "/gdrive/oauth/response");
+        return GoogleClientFactory::create(INIT::$HTTPHOST . "/gdrive/oauth/response");
     }
 }
 
