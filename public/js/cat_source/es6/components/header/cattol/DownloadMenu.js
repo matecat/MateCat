@@ -77,7 +77,7 @@ export const DownloadMenu = ({password, jid, isGDriveProject}) => {
 
   const downloadDraft = () => {
     const data = {
-      event: 'download-draft',
+      event: 'download_draft',
     }
     CommonUtils.dispatchAnalyticsEvents(data)
     runDownload()

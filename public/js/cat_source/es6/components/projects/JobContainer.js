@@ -340,7 +340,7 @@ class JobContainer extends React.Component {
         className="item"
         onClick={() => {
           const data = {
-            event: 'download-draft',
+            event: 'download_draft',
           }
           CommonUtils.dispatchAnalyticsEvents(data)
           this.downloadTranslation()
