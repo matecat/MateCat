@@ -87,13 +87,10 @@ class getSearchController extends ajaxController {
         $this->strictMode            = $__postInput[ 'strict_mode' ];
         $this->revisionNumber        = $__postInput[ 'revision_number' ];
 
-        if ( empty( $this->status ) ) {
-            $this->status = "all";
-        }
-
         switch ( $this->status ) {
             case 'translated':
             case 'approved':
+            case 'approved2':
             case 'rejected':
             case 'draft':
             case 'new':
@@ -116,6 +113,8 @@ class getSearchController extends ajaxController {
                 'strictMode'            => $this->strictMode,
         ] );
 
+        // YYY [Remove] Backward compatibility: remove this check revision number is not needed since the status is enough
+        // YYY [Remove] Segment translation events in this search are no more needed
         if ( in_array( strtoupper( $this->queryParams->status ), Constants_TranslationStatus::$REVISION_STATUSES ) ) {
             if ( !empty( $this->revisionNumber ) ) {
                 $this->queryParams->sourcePage = ReviewUtils::revisionNumberToSourcePage( $this->revisionNumber );

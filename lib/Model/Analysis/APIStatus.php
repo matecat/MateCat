@@ -1,4 +1,7 @@
 <?php
+namespace Model\Analysis;
+
+use Routes;
 
 /**
  * Created by PhpStorm.
@@ -6,8 +9,11 @@
  * Date: 04/05/15
  * Time: 13.37
  *
+ * @deprecated old api model
+ * @deprecated curl -X GET "https://dev.matecat.com/api/status?id_project=95&project_pass=c58749b32943" -H "accept: application/json"
+ *
  */
-class Analysis_APIStatus extends Analysis_AbstractStatus {
+class APIStatus extends AbstractStatus {
 
     protected $_data_struct = array(
         'jobs'    => array(),
@@ -60,26 +66,6 @@ class Analysis_APIStatus extends Analysis_AbstractStatus {
 
             $this->result[ 'jobs' ][ 'langpairs' ][ $job[ 'jid_jpassword' ] ] = $job[ 'lang_pair' ];
             $this->result[ 'jobs' ][ 'job-url' ][ $job[ 'jid_jpassword' ] ]   = "/translate/" . $job[ 'job_url' ];
-
-
-            $this->reviseClass = new Constants_Revise;
-
-            $jobQA = new Revise_JobQA(
-                    $job[ 'jid' ],
-                    $job[ 'jpassword' ],
-                    $this->result[ 'data' ][ 'jobs' ][ $job[ 'jid' ] ][ 'totals' ][ $job[ 'jpassword' ] ][ "TOTAL_PAYABLE" ][ 0 ],
-                    $this->reviseClass
-            );
-
-            list( $jobQA, $this->reviseClass ) = $this->featureSet->filter( "overrideReviseJobQA", [ $jobQA, $this->reviseClass ], $job[ 'jid' ],
-                    $job[ 'jpassword' ],
-                    $this->result[ 'data' ][ 'jobs' ][ $job[ 'jid' ] ][ 'totals' ][ $job[ 'jpassword' ] ][ "TOTAL_PAYABLE" ][ 0 ] );
-
-            $jobQA->retrieveJobErrorTotals();
-            $jobVote = $jobQA->evalJobVote();
-
-            $this->result[ 'jobs' ][ 'job-quality-details' ][ $job[ 'jid_jpassword' ] ] = $jobQA->getQaData();
-            $this->result[ 'jobs' ][ 'quality-overall' ][ $job[ 'jid_jpassword' ] ]     = $jobVote[ 'minText' ];
 
         }
 

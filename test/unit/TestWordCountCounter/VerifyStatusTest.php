@@ -2,7 +2,7 @@
 
 /**
  * @group regression
- * @covers WordCount_CounterModel::_verifyStatus
+ * @covers CounterModel::_verifyStatus
  * User: dinies
  * Date: 13/06/16
  * Time: 12.39
@@ -11,10 +11,10 @@ class VerifyStatusTest extends AbstractTest
 {
     /**
      * @group regression
-     * @covers WordCount_CounterModel::_verifyStatus
+     * @covers CounterModel::_verifyStatus
      */
     public function test__verifyStatus_without_exception_thrown(){
-        $word_counter= new WordCount_CounterModel();
+        $word_counter= new CounterModel();
         $mirror_word_counter= new ReflectionClass($word_counter);
         $method__verifyStatus= $mirror_word_counter->getMethod('_verifyStatus');
         $method__verifyStatus->setAccessible(true);
@@ -30,10 +30,10 @@ class VerifyStatusTest extends AbstractTest
 
     /**
      * @group regression
-     * @covers WordCount_CounterModel::_verifyStatus
+     * @covers CounterModel::_verifyStatus
      */
     public function test__verifyStatus_with_exception_thrown_because_status_is_invalid(){
-        $word_counter= new WordCount_CounterModel();
+        $word_counter= new CounterModel();
         $mirror_word_counter= new ReflectionClass($word_counter);
         $method__verifyStatus= $mirror_word_counter->getMethod('_verifyStatus');
         $method__verifyStatus->setAccessible(true);

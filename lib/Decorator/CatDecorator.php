@@ -1,6 +1,5 @@
 <?php
 
-use Jobs\JobStatsStruct;
 use LexiQA\LexiQADecorator;
 
 class CatDecorator extends \AbstractDecorator {
@@ -22,11 +21,6 @@ class CatDecorator extends \AbstractDecorator {
 
     private $review_type;
 
-    /**
-     * @var JobStatsStruct
-     */
-    private $jobStatsStruct;
-
     private $isGDriveProject ;
 
     private $lang_handler ;
@@ -36,7 +30,6 @@ class CatDecorator extends \AbstractDecorator {
         $this->controller     = $controller;
         $this->template       = $template;
         $this->job            = $this->controller->getChunk();
-        $this->jobStatsStruct = new JobStatsStruct( $this->controller->getJobStats() );
 
         $this->isGDriveProject = $controller->isCurrentProjectGDrive();
 
@@ -48,21 +41,7 @@ class CatDecorator extends \AbstractDecorator {
         $this->template->revisionNumber                   = $this->controller->getRevisionNumber();
         $this->template->isReview                         = $this->controller->getRevisionNumber() > 0  ;
 
-        $this->template->header_quality_report_item_class = '';
-
-        $this->template->header_main_button_enabled = true;
-        $this->template->header_main_button_label   = $this->getHeaderMainButtonLabelNew();
-        $this->template->header_main_button_id      = 'downloadProject';
-
         $this->template->isCJK = false;
-
-        if( $this->jobStatsStruct->isCompleted() && $this->jobStatsStruct->isAllApproved() ){
-            $this->template->header_main_button_class = 'downloadtr-button approved';
-        } elseif( $this->jobStatsStruct->isCompleted() ) {
-            $this->template->header_main_button_class = 'downloadtr-button translated';
-        } else {
-            $this->template->header_main_button_class = 'downloadtr-button draft';
-        }
 
         $this->template->segmentFilterEnabled = true;
 
@@ -73,8 +52,6 @@ class CatDecorator extends \AbstractDecorator {
         $this->setQualityReportHref();
 
         $this->template->searchable_statuses = $this->searchableStatuses();
-        $this->template->project_type        = null;
-
         $this->template->remoteFilesInJob = array();
 
         if ( $this->isGDriveProject ) {
@@ -122,51 +99,9 @@ class CatDecorator extends \AbstractDecorator {
                 Constants_TranslationStatus::STATUS_DRAFT      => 'Draft',
                 Constants_TranslationStatus::STATUS_TRANSLATED => 'Translated',
                 Constants_TranslationStatus::STATUS_APPROVED   => 'Approved',
-                Constants_TranslationStatus::STATUS_REBUTTED   => 'Rebutted'
+                Constants_TranslationStatus::STATUS_APPROVED2  => 'Revised'
         );
     }
-
-  private function getHeaderMainButtonLabel() {
-      $label = '';
-
-      if ( $this->jobStatsStruct->isDownloadable() ) {
-          if($this->isGDriveProject) {
-            $label = 'OPEN IN GOOGLE DRIVE';
-          } else {
-            $label = 'DOWNLOAD TRANSLATION';
-          }
-      } else {
-          if($this->isGDriveProject) {
-            $label = 'PREVIEW IN GOOGLE DRIVE';
-          } else {
-            $label = 'PREVIEW';
-          }
-      }
-
-      return $label;
-  }
-
-    private function getHeaderMainButtonLabelNew() {
-        $label = '';
-
-        if ( $this->jobStatsStruct->isDownloadable() ) {
-            if($this->isGDriveProject) {
-                $label = 'Open in Google Drive';
-            } else {
-                $label = 'Download Translation';
-            }
-        } else {
-            if($this->isGDriveProject) {
-                $label = 'Preview in Google Drive';
-            } else {
-                $label = 'Draft';
-            }
-        }
-
-        return $label;
-    }
-
-
 
     private function setQualityReportHref() {
         $this->template->quality_report_href =

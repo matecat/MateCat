@@ -5,6 +5,7 @@ include_once $root . "/inc/Bootstrap.php";
 Bootstrap::start();
 include_once INIT::$UTILS_ROOT . "/MyMemory.copyrighted.php";
 
+use EditLog\EditLogSegmentStruct;
 use Jobs\PeeJobStatsStruct;
 use TaskRunner\Commons\AbstractDaemon;
 
@@ -170,7 +171,7 @@ class JobPEEAndTimeToEditRunner extends AbstractDaemon
 
                         //iterate over segments.
                         foreach ( $segments as $i => $segment ) {
-                            $segment = new EditLog_EditLogSegmentStruct( $segment );
+                            $segment = new EditLogSegmentStruct( $segment );
                             
                             if ( $segment->isValidForPeeTable() ) {
 

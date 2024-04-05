@@ -20,10 +20,6 @@ use Users_UserStruct;
 
 class UserKeysModel {
 
-    protected $reverse_lookup_user_personal_keys = [
-            'pos' => [], 'elements' => []
-    ];
-
     protected $_user_keys = [ 'totals' => [], 'job_keys' => [] ] ;
 
     protected $user ;
@@ -35,14 +31,14 @@ class UserKeysModel {
         $this->userRole = $role ;
     }
 
-    public function getKeys( $jobKeys ) {
+    public function getKeys( $jobKeys, $ttl = 0 ) {
         /*
          * Take the keys of the user
          */
         try {
             $_keyDao = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
-            $dh      = new TmKeyManagement_MemoryKeyStruct( array( 'uid' => $this->user->uid ) );
-            $keyList = $_keyDao->read( $dh );
+            $dh      = new TmKeyManagement_MemoryKeyStruct( [ 'uid' => $this->user->uid ] );
+            $keyList = $_keyDao->read( $dh, false, $ttl );
 
         } catch ( Exception $e ) {
             $keyList = array();

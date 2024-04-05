@@ -135,10 +135,10 @@ export const TranslationMemoryGlossaryTab = () => {
       indexRow === indexToMove
         ? [rowSelected, row]
         : indexRow === index
-        ? []
-        : indexRow === activeRows.length - 1 && isLastIndexToMove
-        ? [row, rowSelected]
-        : row,
+          ? []
+          : indexRow === activeRows.length - 1 && isLastIndexToMove
+            ? [row, rowSelected]
+            : row,
     )
 
     setKeyRows([...keyRows.filter(({isActive}) => !isActive), ...orderedRows])
@@ -237,9 +237,9 @@ export const TranslationMemoryGlossaryTab = () => {
             id === SPECIAL_ROWS_ID.defaultTranslationMemory
               ? 'row-content-default-memory'
               : id === SPECIAL_ROWS_ID.addSharedResource ||
-                id === SPECIAL_ROWS_ID.newResource
-              ? 'row-content-create-resource'
-              : '',
+                  id === SPECIAL_ROWS_ID.newResource
+                ? 'row-content-create-resource'
+                : '',
           node: !isCreateResourceRow ? (
             <TMKeyRow key={row.id} {...{row, onExpandRow}} />
           ) : (
@@ -324,7 +324,7 @@ export const TranslationMemoryGlossaryTab = () => {
         {typeof isPretranslate100Active === 'boolean' && (
           <div className="translation-memory-glossary-tab-pre-translate">
             <input
-              value={isPretranslate100Active}
+              checked={isPretranslate100Active}
               onChange={(e) =>
                 setIsPretranslate100Active(e.currentTarget.checked)
               }

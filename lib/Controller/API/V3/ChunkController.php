@@ -9,11 +9,11 @@
 namespace API\V3;
 
 use API\V2\BaseChunkController;
-use API\V2\KleinController;
 use API\V2\Validators\ChunkPasswordValidator;
 use API\V3\Json\Chunk;
 use Chunks_ChunkStruct;
-use Constants_JobStatus;
+use Exception;
+use Exceptions\NotFoundException;
 use Projects_ProjectStruct;
 
 class ChunkController extends BaseChunkController {
@@ -22,11 +22,6 @@ class ChunkController extends BaseChunkController {
      * @var Projects_ProjectStruct
      */
     protected $project;
-
-    /**
-     * @var \FeatureSet
-     */
-    protected $featuresSet;
 
     /**
      * @param Chunks_ChunkStruct $chunk
@@ -51,19 +46,8 @@ class ChunkController extends BaseChunkController {
     }
 
     /**
-     * @param \FeatureSet $featuresSet
-     *
-     * @return $this
-     */
-    public function setFeaturesSet( $featuresSet ) {
-        $this->featuresSet = $featuresSet;
-
-        return $this;
-    }
-
-    /**
-     * @throws \Exception
-     * @throws \Exceptions\NotFoundException
+     * @throws Exception
+     * @throws NotFoundException
      */
     public function show() {
 
@@ -74,12 +58,12 @@ class ChunkController extends BaseChunkController {
 
         $this->return404IfTheJobWasDeleted();
 
-        $this->response->json( $format->renderOne($this->chunk) );
+        $this->response->json( $format->renderOne( $this->chunk ) );
 
     }
 
     protected function afterConstruct() {
-        $Validator = new ChunkPasswordValidator( $this ) ;
+        $Validator = new ChunkPasswordValidator( $this );
         $Validator->onSuccess( function () use ( $Validator ) {
             $this->setChunk( $Validator->getChunk() );
             $this->setProject( $Validator->getChunk()->getProject() );

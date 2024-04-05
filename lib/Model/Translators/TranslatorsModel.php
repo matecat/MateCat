@@ -11,16 +11,19 @@ namespace Translators;
 
 
 use API\V2\KleinController;
-use CatUtils;
 use Email\SendToTranslatorForDeliveryChangeEmail;
 use Email\SendToTranslatorForJobSplitEmail;
 use Email\SendToTranslatorForNewJobEmail;
+use Exception;
+use FeatureSet;
 use InvalidArgumentException;
 use Jobs_JobDao;
 use Jobs_JobStruct;
 use Outsource\ConfirmationDao;
 use Projects_ProjectDao;
+use Projects_ProjectStruct;
 use TransactionableTrait;
+use Users_UserDao;
 use Users_UserStruct;
 use Utils;
 
@@ -55,12 +58,12 @@ class TranslatorsModel {
     protected $job_password;
 
     /**
-     * @var \Projects_ProjectStruct
+     * @var Projects_ProjectStruct
      */
     protected $project;
 
     /**
-     * @var \FeatureSet
+     * @var FeatureSet
      */
     protected $featureSet;
 
@@ -147,15 +150,14 @@ class TranslatorsModel {
     public function getTranslator( $cache = 86400 ) {
 
         $jTranslatorsDao    = new JobsTranslatorsDao();
-        $jTranslatorsStruct = $this->jobTranslator = @$jTranslatorsDao->setCacheTTL( $cache )->findByJobsStruct( $this->jStruct )[ 0 ];
 
-        return $jTranslatorsStruct;
+        return $this->jobTranslator = @$jTranslatorsDao->setCacheTTL( $cache )->findByJobsStruct( $this->jStruct )[ 0 ];
 
     }
 
     /**
      * @return JobsTranslatorsStruct
-     * @throws \Exception
+     * @throws Exception
      */
     public function update() {
 
@@ -169,7 +171,7 @@ class TranslatorsModel {
         //create jobs_translator struct to call inside the dao
         $translatorStruct = new JobsTranslatorsStruct();
 
-        $translatorUser = ( new \Users_UserDao() )->setCacheTTL( 60 * 60 )->getByEmail( $this->email );
+        $translatorUser = ( new Users_UserDao() )->setCacheTTL( 60 * 60 )->getByEmail( $this->email );
         if ( !empty( $translatorUser ) ) {
             //associate the translator with an existent user and create a profile if not exists
             $translatorStruct->id_translator_profile = $this->saveProfile( $translatorUser );
@@ -242,6 +244,9 @@ class TranslatorsModel {
 
     }
 
+    /**
+     * @throws Exception
+     */
     protected function saveProfile( Users_UserStruct $existentUser ) {
 
         //associate the translator with an existent user and create a profile
@@ -268,6 +273,9 @@ class TranslatorsModel {
 
     }
 
+    /**
+     * @throws Exception
+     */
     public function changeJobPassword( $newPassword = null ) {
 
         if ( empty( $newPassword ) ) {

@@ -2,6 +2,7 @@
 
 use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
+use WordCount\WordCountStruct;
 
 /**
  * Description of catController
@@ -12,26 +13,14 @@ use ActivityLog\ActivityLogStruct;
  */
 class reviseSummaryController extends viewController {
 
-	private $jid = "";
+	private $jid;
 	private $project_status = "";
-	private $thisUrl;
-	private $categories;
-	private $error_info;
-	private $error_max_thresholds;
-	private $project_type;
-	private $qa_model;
 
     private $data;
     private $job_stats;
     private $job_archived = false;
     private $job_owner_email;
-    private $qa_data;
-    private $qa_overall_text;
-    private $qa_overall_avg;
-    private $qa_equivalent_class;
-    private $totalJobWords;
     private $password;
-    private $reviseClass;
 
     public function __construct() {
 		parent::__construct();
@@ -53,84 +42,21 @@ class reviseSummaryController extends viewController {
 	public function doAction() {
 
         //pay a little query to avoid to fetch 5000 rows
-        $this->data = $jobData = Jobs_JobDao::getByIdAndPassword( $this->jid, $this->password );
+        $this->data = $jobStruct = Jobs_JobDao::getByIdAndPassword( $this->jid, $this->password );
 
-        $wStruct = new WordCount_Struct();
-        $wStruct->setIdJob( $this->jid );
-        $wStruct->setJobPassword( $this->password );
-        $wStruct->setNewWords( $jobData[ 'new_words' ] );
-        $wStruct->setDraftWords( $jobData[ 'draft_words' ] );
-        $wStruct->setTranslatedWords( $jobData[ 'translated_words' ] );
-        $wStruct->setApprovedWords( $jobData[ 'approved_words' ] );
-        $wStruct->setRejectedWords( $jobData[ 'rejected_words' ] );
+        $wStruct = WordCountStruct::loadFromJob( $jobStruct );
 
-        if( $jobData['status'] == Constants_JobStatus::STATUS_ARCHIVED || $jobData['status'] == Constants_JobStatus::STATUS_CANCELLED ){
+        if( $jobStruct['status'] == Constants_JobStatus::STATUS_ARCHIVED || $jobStruct['status'] == Constants_JobStatus::STATUS_CANCELLED ){
             //this job has been archived
             $this->job_archived = true;
-            $this->job_owner_email = $jobData['job_owner'];
+            $this->job_owner_email = $jobStruct['job_owner'];
         }
 
-		$this->job_stats = CatUtils::getFastStatsForJob($wStruct);
-
         $projectStruct = $this->data->getProject();
+        // YYY [Remove] backward compatibility for current projects
+        $this->job_stats = CatUtils::getFastStatsForJob( $wStruct, false, $jobStruct->getProject(60 * 60 )->getWordCountType() );
+
         $this->project_status = $projectStruct;
-
-        /**
-         * Retrieve information about job errors
-         * ( Note: these information are fed by the revision process )
-         * @see setRevisionController
-         */
-
-
-
-        $this->reviseClass = new Constants_Revise();
-
-        $jobQA = new Revise_JobQA(
-                $this->jid,
-                $this->password,
-                $wStruct->getTotal(),
-                $this->reviseClass
-        );
-
-        $project = Projects_ProjectDao::findById($this->project_status['id']);
-
-        $this->featureSet->loadForProject( $project );
-
-        list( $jobQA, $this->reviseClass ) = $this->featureSet->filter( "overrideReviseJobQA", [ $jobQA, $this->reviseClass ], $this->jid,
-                $this->password,
-                $wStruct->getTotal() );
-
-
-        $jobQA->retrieveJobErrorTotals();
-        $jobVote                   = $jobQA->evalJobVote();
-        $this->totalJobWords       = $wStruct->getTotal();
-        $this->qa_data             = $jobQA->getQaData();
-        $this->qa_overall_text     = $jobVote[ 'minText' ];
-        $this->qa_overall_avg      = $jobVote[ 'avg' ];
-        $this->qa_equivalent_class = $jobVote[ 'equivalent_class' ];
-
-
-        //set the labels
-        $this->error_info = array(
-                constant( get_class( $this->reviseClass ) . "::ERR_TYPING" )      => 'Tag issues (mismatches, whitespaces)',
-                constant( get_class( $this->reviseClass ) . "::ERR_TRANSLATION" ) => 'Translation errors (mistranslation, additions or omissions)',
-                constant( get_class( $this->reviseClass ) . "::ERR_TERMINOLOGY" ) => 'Terminology and translation consistency',
-                constant( get_class( $this->reviseClass ) . "::ERR_LANGUAGE" )    => 'Language quality (grammar, punctuation, spelling)',
-                constant( get_class( $this->reviseClass ) . "::ERR_STYLE" )       => 'Style (readability, consistent style and tone)',
-        );
-
-        $this->error_max_thresholds = array(
-                constant( get_class( $this->reviseClass ) . "::ERR_TYPING" )      => constant( get_class( $this->reviseClass ) . "::MAX_TYPING" ),
-                constant( get_class( $this->reviseClass ) . "::ERR_TRANSLATION" ) => constant( get_class( $this->reviseClass ) . "::MAX_TRANSLATION" ),
-                constant( get_class( $this->reviseClass ) . "::ERR_TERMINOLOGY" ) => constant( get_class( $this->reviseClass ) . "::MAX_TERMINOLOGY" ),
-                constant( get_class( $this->reviseClass ) . "::ERR_LANGUAGE" )    => constant( get_class( $this->reviseClass ) . "::MAX_QUALITY" ),
-                constant( get_class( $this->reviseClass ) . "::ERR_STYLE" )       => constant( get_class( $this->reviseClass ) . "::MAX_STYLE" )
-        );
-
-        $codes = $this->featureSet->getCodes();
-
-        $this->project_type = 'old' ;
-        $this->project_type = $this->featureSet->filter('revise_summary_project_type', $this->project_type);
 
         $this->_saveActivity();
 	}
@@ -163,16 +89,14 @@ class reviseSummaryController extends viewController {
 
         $this->template->creation_date = $this->data['create_date'];
 
-        $this->job_stats['STATUS_BAR_NO_DISPLAY'] = ( $this->project_status['status_analysis'] == Constants_ProjectStatus::STATUS_DONE ? '' : 'display:none;' );
-        $this->job_stats['ANALYSIS_COMPLETE']     = ( $this->project_status['status_analysis'] == Constants_ProjectStatus::STATUS_DONE ? true : false );
-        $this->template->job_stats                = $this->job_stats;
+        $this->template->word_count_type        = $this->data->getProject()->getWordCountType();
+        $this->job_stats[ 'analysis_complete' ] = ( $this->project_status[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE ? true : false );
+        $this->template->job_stats              = $this->job_stats;
 
 
         $this->template->build_number  = INIT::$BUILD_NUMBER;
         $this->template->extended_user = ($this->isLoggedIn() !== false ) ? trim( $this->user->fullName() ) : "";
         $this->template->logged_user   = ($this->isLoggedIn() !== false ) ? $this->user->shortName() : "";
-
-        $this->template->reviseClass = $this->reviseClass;
 
         $projectMetaDataDao = new Projects_MetadataDao();
         $projectMetaData = null;
@@ -182,22 +106,6 @@ class reviseSummaryController extends viewController {
         }
 
         $this->template->project_plugins = (!empty($projectMetaData)) ?  $this->featureSet->filter('appendInitialTemplateVars', explode(",", $projectMetaData->value)) : [];
-
-        foreach( $this->qa_data as $k => $value ){
-            $this->qa_data[ $k ][ 'text_content' ] = $this->error_info[ $value[ 'type' ] ];
-        }
-
-//        $nrFormatter = new NumberFormatter("en-US", NumberFormatter::DECIMAL);
-
-        //now set the field values of the qa
-        $this->template->totalJobWords         = $this->totalJobWords;
-        $this->template->qa_data               = $this->qa_data;
-        $this->template->qa_overall            = $this->qa_overall_text;
-        $this->template->qa_overall_avg        = $this->qa_overall_avg;
-        $this->template->qa_equivalent_class   = $this->qa_equivalent_class;
-        $this->template->overall_quality_class = ucfirst( strtolower( str_replace( ' ', '', $this->qa_overall_text ) ) );
-        $this->template->error_max_thresholds = $this->error_max_thresholds;
-//        $this->template->word_interval = $nrFormatter->format( constant( get_class( $this->reviseClass ) . "::WORD_INTERVAL" ) );
 
         /*
          * Line Feed PlaceHolding System
@@ -232,7 +140,6 @@ class reviseSummaryController extends viewController {
         $this->template->searchable_statuses = $this->searchableStatuses();
         $this->template->first_job_segment   = $this->data->job_first_segment ;
 
-        $this->template->project_type = $this->project_type;
     }
 
     /**

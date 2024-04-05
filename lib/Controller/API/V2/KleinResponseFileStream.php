@@ -10,24 +10,22 @@ namespace API\V2;
 
 
 use FilesStorage\AbstractFilesStorage;
-use FilesStorage\FilesStorageFactory;
 use Klein\Response;
 
-class KleinResponseFileStream  {
+class KleinResponseFileStream {
 
     /**
      * @var Response
      */
-    protected $response ;
+    protected $response;
 
     /**
      * KleinResponseFileStream constructor.
      *
      * @param Response $response
      */
-    public function __construct(Response $response )
-    {
-        $this->response = $response ;
+    public function __construct( Response $response ) {
+        $this->response = $response;
     }
 
     /**
@@ -49,19 +47,19 @@ class KleinResponseFileStream  {
      *
      * @internal param KleinController $controller The MIME type of the file
      */
-    public function streamFileFromPointer( $filePointer, $filename = null, $mimeType , $disposition ) {
+    public function streamFileFromPointer( $filePointer, $mimeType, $disposition, $filename = 'downloaded_file.docx' ) {
 
-        $this->response->body('');
+        $this->response->body( '' );
         $this->response->noCache();
 
         if ( null !== $filename ) {
             $filename = AbstractFilesStorage::basename_fix( $filename );
         }
 
-        $this->response->header('Content-type', $mimeType );
-        $this->response->header('Content-Disposition', $disposition . '; filename="'.$filename.'"');
-        $this->response->header('Expires', "0" );
-        $this->response->header('Connection', "close" );
+        $this->response->header( 'Content-type', $mimeType );
+        $this->response->header( 'Content-Disposition', $disposition . '; filename="' . $filename . '"' );
+        $this->response->header( 'Expires', "0" );
+        $this->response->header( 'Connection', "close" );
 
         $this->response->send();
 
@@ -73,12 +71,12 @@ class KleinResponseFileStream  {
 
     }
 
-    public function streamFileDownloadFromPointer( $filePointer, $filename = null ){
-        $this->streamFileFromPointer( $filePointer, $filename, "application/download", 'attachment' );
+    public function streamFileDownloadFromPointer( $filePointer, $filename = null ) {
+        $this->streamFileFromPointer( $filePointer, "application/download", 'attachment', $filename );
     }
 
-    public function streamFileInlineFromPointer( $filePointer, $filename, $mimeType  ){
-        $this->streamFileFromPointer( $filePointer, $filename, $mimeType, 'inline' );
+    public function streamFileInlineFromPointer( $filePointer, $filename, $mimeType ) {
+        $this->streamFileFromPointer( $filePointer, $mimeType, 'inline', $filename );
     }
 
 }

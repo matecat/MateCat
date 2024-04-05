@@ -127,11 +127,11 @@ class NewController extends ajaxController {
         $this->httpHeader = 'HTTP/1.0 401 Unauthorized';
     }
 
-    private function setInternalErrorHeader(){
+    private function setInternalErrorHeader() {
         $this->httpHeader = 'HTTP/1.0 500 Internal Server Error';
     }
 
-    private function setInternalTimeoutHeader(){
+    private function setInternalTimeoutHeader() {
         $this->httpHeader = 'HTTP/1.0 504 Gateway Timeout';
     }
 
@@ -155,29 +155,29 @@ class NewController extends ajaxController {
         }
 
         $filterArgs = [
-                'project_name'       => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
-                'source_lang'        => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
-                'target_lang'        => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
-                'due_date'           => [ 'filter' => FILTER_VALIDATE_INT ],
-                'tms_engine'         => [
+                'project_name'               => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'source_lang'                => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'target_lang'                => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'due_date'                   => [ 'filter' => FILTER_VALIDATE_INT ],
+                'tms_engine'                 => [
                         'filter'  => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR,
                         'options' => [ 'default' => 1, 'min_range' => 0 ]
                 ],
-                'mt_engine'          => [
+                'mt_engine'                  => [
                         'filter'  => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR,
                         'options' => [ 'default' => 1, 'min_range' => 0 ]
                 ],
-                'private_tm_key'     => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
-                'subject'            => [
+                'private_tm_key'             => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'subject'                    => [
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ],
-                'segmentation_rule'  => [
+                'segmentation_rule'          => [
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ],
-                'metadata'           => [
+                'metadata'                   => [
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ],
-                'pretranslate_100'   => [
+                'pretranslate_100'           => [
                         'filter' => [ 'filter' => FILTER_VALIDATE_INT ]
                 ],
                 'id_team'                    => [ 'filter' => FILTER_VALIDATE_INT ],
@@ -216,7 +216,7 @@ class NewController extends ajaxController {
          * in order to avoid mispelling errors
          *
          */
-        $this->postInput['instructions'] = $this->featureSet->filter('encodeInstructions', $_POST['instructions']);
+        $this->postInput[ 'instructions' ] = $this->featureSet->filter( 'encodeInstructions', $_POST[ 'instructions' ] );
 
         /**
          * ----------------------------------
@@ -232,6 +232,7 @@ class NewController extends ajaxController {
         if ( empty( $_FILES ) ) {
             $this->setBadRequestHeader();
             $this->result[ 'errors' ][] = [ "code" => -1, "message" => "Missing file. Not Sent." ];
+
             return -1;
         }
 
@@ -256,6 +257,7 @@ class NewController extends ajaxController {
             $this->api_output[ 'debug' ]   = $ex->getMessage();
             Log::doJsonLog( $ex->getMessage() );
             $this->setBadRequestHeader();
+
             return $ex->getCode();
         }
 
@@ -276,21 +278,10 @@ class NewController extends ajaxController {
     private function __validateSubjects() {
 
         $langDomains = Langs_LanguageDomains::getInstance();
-        $subjectList = $langDomains::getEnabledDomains();
-        // In this list there is an item whose key is "----".
-        // It is useful for UI purposes, but not here. So we unset it
-        foreach ( $subjectList as $idx => $subject ) {
-            if ( $subject[ 'key' ] == '----' ) {
-                unset( $subjectList[ $idx ] );
-                break;
-            }
-        }
-
-        //Array_column() is not supported on PHP 5.4, so i'll rewrite it
-        $subjectList = Utils::array_column( $subjectList, 'key' );
+        $subjectMap  = $langDomains::getEnabledHashMap();
 
         $this->postInput[ 'subject' ] = ( !empty( $this->postInput[ 'subject' ] ) ) ? $this->postInput[ 'subject' ] : 'general';
-        if ( !in_array( $this->postInput[ 'subject' ], $subjectList ) ) {
+        if ( empty( $subjectMap[ $this->postInput[ 'subject' ] ] ) ) {
             throw new Exception( "Subject not allowed: " . $this->postInput[ 'subject' ], -3 );
         }
 
@@ -298,8 +289,8 @@ class NewController extends ajaxController {
 
     private function __appendFeaturesToProject() {
         if ( $this->postInput[ 'project_completion' ] ) {
-            $feature                 = new BasicFeatureStruct();
-            $feature->feature_code   = 'project_completion';
+            $feature                                         = new BasicFeatureStruct();
+            $feature->feature_code                           = 'project_completion';
             $this->projectFeatures[ $feature->feature_code ] = $feature;
         }
 
@@ -365,6 +356,7 @@ class NewController extends ajaxController {
 
         if ( @count( $this->api_output[ 'debug' ] ) > 0 ) {
             $this->setBadRequestHeader();
+
             return -1;
         }
 
@@ -409,6 +401,7 @@ class NewController extends ajaxController {
             Log::doJsonLog( $msg );
             Utils::sendErrMailReport( $msg );
             $this->setBadRequestHeader();
+
             return -1; //exit code
         }
 
@@ -453,7 +446,7 @@ class NewController extends ajaxController {
                         $brokenFileName = ZipArchiveExtended::getFileName( $fileError->name );
 
                         $this->result = new ConvertedFileModel( $fileError->error[ 'code' ] );
-                        $this->result->addError($fileError->error[ 'message' ], $brokenFileName);
+                        $this->result->addError( $fileError->error[ 'message' ], $brokenFileName );
                     }
 
                 }
@@ -520,14 +513,14 @@ class NewController extends ajaxController {
                 $status = $errors = $converter->checkResult();
                 if ( count( $errors ) > 0 ) {
 
-                    $this->result = new ConvertedFileModel(ConversionHandlerStatus::ZIP_HANDLING);
+                    $this->result = new ConvertedFileModel( ConversionHandlerStatus::ZIP_HANDLING );
                     foreach ( $errors as $__err ) {
 
-                        $savedErrors = $this->result->getErrors();
+                        $savedErrors    = $this->result->getErrors();
                         $brokenFileName = ZipArchiveExtended::getFileName( $__err[ 'debug' ] );
 
-                        if( !isset( $savedErrors[$brokenFileName] ) ){
-                            $this->result->addError($__err[ 'message' ], $brokenFileName);
+                        if ( !isset( $savedErrors[ $brokenFileName ] ) ) {
+                            $this->result->addError( $__err[ 'message' ], $brokenFileName );
                         }
                     }
                 }
@@ -551,6 +544,7 @@ class NewController extends ajaxController {
             $this->result[ 'errors' ]      = $status;
             Log::doJsonLog( $status );
             $this->setBadRequestHeader();
+
             return -1;
         }
         /* Do conversions here */
@@ -661,15 +655,15 @@ class NewController extends ajaxController {
         }
 
         // with the qa template id
-        if( $this->qaModelTemplate ) {
+        if ( $this->qaModelTemplate ) {
             $projectStructure[ 'qa_model_template' ] = $this->qaModelTemplate->getDecodedModel();
         }
 
-        if( $this->qaModel ) {
+        if ( $this->qaModel ) {
             $projectStructure[ 'qa_model' ] = $this->qaModel->getDecodedModel();
         }
 
-        if( $this->payableRateModelTemplate ) {
+        if ( $this->payableRateModelTemplate ) {
             $projectStructure[ 'payable_rate_model_id' ] = $this->payableRateModelTemplate->id;
         }
 
@@ -687,6 +681,7 @@ class NewController extends ajaxController {
             $this->api_output[ 'message' ] = $e->getMessage();
             $this->api_output[ 'debug' ]   = $e->getCode();
             $this->setBadRequestHeader();
+
             return -1;
         }
 
@@ -712,6 +707,7 @@ class NewController extends ajaxController {
 
     /**
      * @param $filename
+     *
      * @return array
      * @throws \API\V2\Exceptions\AuthenticationError
      * @throws \Exceptions\NotFoundException
@@ -745,9 +741,9 @@ class NewController extends ajaxController {
         $metadata[ 'isGlossary' ]      = $isGlossary;
         $metadata[ 'isTMX' ]           = $isTMX;
         $metadata[ 'proprietary' ]     = [
-            'proprietary'            => $info[ 'proprietary' ],
-            'proprietary_name'       => $info[ 'proprietary_name' ],
-            'proprietary_short_name' => $info[ 'proprietary_short_name' ],
+                'proprietary'            => $info[ 'proprietary' ],
+                'proprietary_name'       => $info[ 'proprietary_name' ],
+                'proprietary_short_name' => $info[ 'proprietary_short_name' ],
         ];
 
         return $metadata;
@@ -834,7 +830,7 @@ class NewController extends ajaxController {
         $api_key    = @$_SERVER[ 'HTTP_X_MATECAT_KEY' ];
         $api_secret = ( !empty( $_SERVER[ 'HTTP_X_MATECAT_SECRET' ] ) ? $_SERVER[ 'HTTP_X_MATECAT_SECRET' ] : "wrong" );
 
-        if(empty($api_key)){
+        if ( empty( $api_key ) ) {
             return false;
         }
 
@@ -871,9 +867,9 @@ class NewController extends ajaxController {
      */
     private static function __sanitizeTmKeyArr( $elem ) {
 
-        $element = new TmKeyManagement_TmKeyStruct( $elem );
+        $element                  = new TmKeyManagement_TmKeyStruct( $elem );
         $element->complete_format = true;
-        $elem = TmKeyManagement_TmKeyManagement::sanitize( $element );
+        $elem                     = TmKeyManagement_TmKeyManagement::sanitize( $element );
 
         return $elem->toArray();
 
@@ -907,6 +903,9 @@ class NewController extends ajaxController {
 
             Log::doJsonLog( "Passed parameter metadata as json string." );
         }
+
+        // new raw counter model
+        $this->metadata[ Projects_MetadataDao::WORD_COUNT_TYPE_KEY ] = Projects_MetadataDao::WORD_COUNT_RAW;
 
         // project_info
         if ( !empty( $this->postInput[ 'project_info' ] ) ) {
@@ -1023,7 +1022,6 @@ class NewController extends ajaxController {
 
                     $newUser = $APIKeySrv->createMyMemoryKey();
 
-                    //TODO: i need to store an array of these
                     $this->private_tm_user = $newUser->id;
                     $this->private_tm_pass = $newUser->pass;
 
@@ -1107,17 +1105,16 @@ class NewController extends ajaxController {
     /**
      * @throws Exception
      */
-    private function __validateQaModelTemplate()
-    {
+    private function __validateQaModelTemplate() {
         if ( !empty( $this->postInput[ 'id_qa_model_template' ] ) ) {
-            $qaModelTemplate = \QAModelTemplate\QAModelTemplateDao::get([
-                    'id' => $this->postInput[ 'id_qa_model_template' ],
+            $qaModelTemplate = \QAModelTemplate\QAModelTemplateDao::get( [
+                    'id'  => $this->postInput[ 'id_qa_model_template' ],
                     'uid' => $this->getUser()->uid
-            ]);
+            ] );
 
             // check if qa_model template exists
-            if(null === $qaModelTemplate){
-                throw new \Exception('This QA Model template does not exists or does not belongs to the logged in user');
+            if ( null === $qaModelTemplate ) {
+                throw new \Exception( 'This QA Model template does not exists or does not belongs to the logged in user' );
             }
 
             $this->qaModelTemplate = $qaModelTemplate;
@@ -1127,40 +1124,39 @@ class NewController extends ajaxController {
     /**
      * @throws Exception
      */
-    private function __validatePayableRateTemplate()
-    {
+    private function __validatePayableRateTemplate() {
         $payableRateModelTemplate = null;
 
-        if( !empty($this->postInput[ 'payable_rate_template_name' ] ) ){
-            if ( empty( $this->postInput[ 'payable_rate_template_id' ] )) {
-                throw new \Exception('`payable_rate_template_id` param is missing');
+        if ( !empty( $this->postInput[ 'payable_rate_template_name' ] ) ) {
+            if ( empty( $this->postInput[ 'payable_rate_template_id' ] ) ) {
+                throw new \Exception( '`payable_rate_template_id` param is missing' );
             }
         }
 
-        if( !empty($this->postInput[ 'payable_rate_template_id' ] ) ){
-            if ( empty( $this->postInput[ 'payable_rate_template_name' ] )) {
-                throw new \Exception('`payable_rate_template_name` param is missing');
+        if ( !empty( $this->postInput[ 'payable_rate_template_id' ] ) ) {
+            if ( empty( $this->postInput[ 'payable_rate_template_name' ] ) ) {
+                throw new \Exception( '`payable_rate_template_name` param is missing' );
             }
         }
 
-        if( !empty($this->postInput[ 'payable_rate_template_name' ] ) and !empty($this->postInput[ 'payable_rate_template_id' ] ) ){
+        if ( !empty( $this->postInput[ 'payable_rate_template_name' ] ) and !empty( $this->postInput[ 'payable_rate_template_id' ] ) ) {
 
-            $payableRateTemplateId = $this->postInput[ 'payable_rate_template_id' ];
+            $payableRateTemplateId   = $this->postInput[ 'payable_rate_template_id' ];
             $payableRateTemplateName = $this->postInput[ 'payable_rate_template_name' ];
-            $userId = $this->getUser()->uid;
+            $userId                  = $this->getUser()->uid;
 
-            $payableRateModelTemplate = CustomPayableRateDao::getById($payableRateTemplateId);
+            $payableRateModelTemplate = CustomPayableRateDao::getById( $payableRateTemplateId );
 
-            if(null === $payableRateModelTemplate){
-                throw new \Exception('Payable rate model id not valid');
+            if ( null === $payableRateModelTemplate ) {
+                throw new \Exception( 'Payable rate model id not valid' );
             }
 
-            if($payableRateModelTemplate->uid !== $userId){
-                throw new \Exception('Payable rate model is not belonging to the current user');
+            if ( $payableRateModelTemplate->uid !== $userId ) {
+                throw new \Exception( 'Payable rate model is not belonging to the current user' );
             }
 
-            if($payableRateModelTemplate->name !== $payableRateTemplateName){
-                throw new \Exception('Payable rate model name not matching');
+            if ( $payableRateModelTemplate->name !== $payableRateTemplateName ) {
+                throw new \Exception( 'Payable rate model name not matching' );
             }
         }
 
@@ -1175,19 +1171,19 @@ class NewController extends ajaxController {
     private function __validateQaModel() {
         if ( !empty( $this->postInput[ 'id_qa_model' ] ) ) {
 
-            $qaModel = ModelDao::findById($this->postInput[ 'id_qa_model' ]);
+            $qaModel = ModelDao::findById( $this->postInput[ 'id_qa_model' ] );
 
             // check if qa_model exists
-            if(null === $qaModel){
-                throw new \Exception('This QA Model does not exists');
+            if ( null === $qaModel ) {
+                throw new \Exception( 'This QA Model does not exists' );
             }
 
             // check featureSet
-            $qaModelLabel = strtolower($qaModel->label);
+            $qaModelLabel    = strtolower( $qaModel->label );
             $featureSetCodes = $this->getFeatureSet()->getCodes();
 
-            if($qaModelLabel !== 'default' and !in_array($qaModelLabel, $featureSetCodes)){
-                throw new \Exception('This QA Model does not belong to the authenticated user');
+            if ( $qaModelLabel !== 'default' and !in_array( $qaModelLabel, $featureSetCodes ) ) {
+                throw new \Exception( 'This QA Model does not belong to the authenticated user' );
             }
 
             $this->qaModel = $qaModel;

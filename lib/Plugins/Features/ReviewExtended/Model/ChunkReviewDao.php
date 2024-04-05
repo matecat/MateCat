@@ -53,35 +53,6 @@ class ChunkReviewDao extends \LQA\ChunkReviewDao {
         return $penalty_points;
     }
 
-    public function getPenaltyPointsForChunkAndSourcePageAndSegment( $chunk, $segment_ids, $source_page ) {
-        $segment_ids = implode( ',', $segment_ids );
-
-        $sql = "SELECT SUM(penalty_points) FROM qa_entries e
-                JOIN jobs j on j.id = e.id_job
-                    AND e.id_segment >= j.job_first_segment
-                    AND e.id_segment <= j.job_last_segment
-                WHERE j.id = :id_job
-                    AND j.password = :password
-                    AND e.id_segment IN ( $segment_ids ) 
-                    AND source_page = :source_page 
-                    AND e.deleted_at IS NULL
-        ";
-
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
-        $stmt->execute( [
-            'id_job'      => $chunk->id,
-            'password'    => $chunk->password,
-            'source_page' => $source_page
-        ] );
-
-        $count = $stmt->fetch();
-
-        $penalty_points = $count[ 0 ] == null ? 0 : $count[ 0 ];
-
-        return $penalty_points;
-    }
-
     public function countTimeToEdit( Chunks_ChunkStruct $chunk, $source_page ) {
         $sql = "
             SELECT SUM( time_to_edit ) FROM jobs
@@ -112,11 +83,11 @@ class ChunkReviewDao extends \LQA\ChunkReviewDao {
     public function recountAdvancementWords( Chunks_ChunkStruct $chunk, $source_page ) {
 
         $sql = "
-            SELECT (SUM( eq_word_count ) + SUM(s.raw_word_count)) FROM segment_translations st
-				join segments s ON s.id = st.id_segment
+            SELECT SUM( IF( match_type != 'ICE', eq_word_count, s.raw_word_count ) ) FROM segments s
+                JOIN segment_translations st on st.id_segment = s.id
                 JOIN jobs j on j.id = st.id_job
-                AND st.id_segment <= j.job_last_segment
-                AND st.id_segment >= j.job_first_segment
+                AND s.id <= j.job_last_segment
+                AND s.id >= j.job_first_segment
             LEFT JOIN (
             
                 SELECT id_segment as ste_id_segment, source_page 
@@ -129,14 +100,16 @@ class ChunkReviewDao extends \LQA\ChunkReviewDao {
                 ) AS X ON _m_id = segment_translation_events.id
                 ORDER BY id_segment
                 
-            ) ste ON ste.ste_id_segment = st.id_segment
+            ) ste ON ste.ste_id_segment = s.id
 
             WHERE
                 j.id = :id_job AND j.password = :password
                 AND
-                ( source_page = :source_page OR
-                  ( :source_page = 2 AND ste.ste_id_segment IS NULL and match_type = 'ICE' AND locked = 1 and st.status = 'APPROVED' )
-                  ) ;
+                ( 
+                   source_page = :source_page 
+                      OR
+                   ( :source_page = 2 AND ste.ste_id_segment IS NULL and match_type = 'ICE' AND locked = 1 and st.status = 'APPROVED' )
+                ) ;
             ";
 
         $conn = Database::obtain()->getConnection();

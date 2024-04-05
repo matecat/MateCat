@@ -1,8 +1,11 @@
 <?php
 
+use WordCount\CounterModel;
+use WordCount\WordCountStruct;
+
 /**
  * @group regression
- * @covers WordCount_CounterModel::__construct
+ * @covers CounterModel::__construct
  * User: dinies
  * Date: 13/06/16
  * Time: 10.34
@@ -28,7 +31,7 @@ class ConstructorTest extends AbstractTest
 public function setUp(){
     parent::setUp();
     
-    $this->word_count_struct= new WordCount_Struct();
+    $this->word_count_struct= new WordCountStruct();
     $this->word_count_struct->setIdJob($this->job_id);
     $this->word_count_struct->setJobPassword($this->job_password);
     $this->word_count_struct->setNewWords(0);
@@ -47,12 +50,12 @@ public function setUp(){
 
     /**
      * @group regression
-     * @covers WordCount_CounterModel::__construct
+     * @covers CounterModel::__construct
      */
     public function test__constructor_with_ice_segments(){
 
 
-        $word_counter= new WordCount_CounterModel( $this->word_count_struct );
+        $word_counter= new CounterModel( $this->word_count_struct );
         $mirror_word_counter= new ReflectionClass($word_counter);
         $constCache= $mirror_word_counter->getProperty('constCache');
         $constCache->setAccessible(true);
@@ -69,7 +72,7 @@ public function setUp(){
 
         $old_w_count= $mirror_word_counter->getProperty('oldWCount');
         $old_w_count->setAccessible(true);
-        $this->assertTrue( $old_w_count->getValue($word_counter) instanceof WordCount_Struct);
+        $this->assertTrue( $old_w_count->getValue($word_counter) instanceof WordCountStruct);
         $this->assertEquals( $this->word_count_struct, $old_w_count->getValue($word_counter));
 
         $new_status_call= $mirror_word_counter->getProperty('newStatusCall');
@@ -100,12 +103,12 @@ public function setUp(){
 
     /**
      * @group regression
-     * @covers WordCount_CounterModel::__construct
+     * @covers CounterModel::__construct
      */
     public function test__constructor_with_no_args(){
 
 
-        $word_counter= new WordCount_CounterModel();
+        $word_counter= new CounterModel();
         $mirror_word_counter= new ReflectionClass($word_counter);
         $constCache= $mirror_word_counter->getProperty('constCache');
         $constCache->setAccessible(true);

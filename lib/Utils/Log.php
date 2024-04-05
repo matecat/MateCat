@@ -41,11 +41,6 @@ class Log {
 
     protected static function _writeTo( $stringData ) {
 
-        // TODO: move this check into Bootstrap
-        if ( !file_exists( INIT::$LOG_REPOSITORY ) || !is_dir( INIT::$LOG_REPOSITORY ) ) {
-            mkdir( INIT::$LOG_REPOSITORY );
-        }
-
         if ( self::$useMonolog ) {
 
             try {

@@ -2,20 +2,19 @@
 
 namespace API\V2\Validators;
 
-use Database;
 use Exceptions\NotFoundException;
-use Segments_SegmentDao;
 use Translations_SegmentTranslationDao;
+use Translations_SegmentTranslationStruct;
 
 class SegmentTranslation extends Base {
 
     /**
-     * @var \Translations_SegmentTranslationStruct
+     * @var Translations_SegmentTranslationStruct
      */
     public $translation;
 
     /**
-     * @return mixed|void
+     * @return void
      * @throws NotFoundException
      */
     protected function _validate() {
