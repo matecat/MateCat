@@ -61,6 +61,7 @@ class oauthResponseHandlerController extends viewController{
             $this->remoteUser->email
         ) ;
 
+        $model->setProvider( $this->remoteUser->provider );
         $model->setProfilePicture( $this->remoteUser->picture );
         $model->setAccessToken( $this->remoteUser->authToken );
 

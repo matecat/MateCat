@@ -16,6 +16,7 @@ class OAuthSignInModel {
 
     protected $user ;
     protected $profilePictureUrl ;
+    protected $provider;
 
     public function __construct( $firstName, $lastName, $email ) {
         if ( empty($firstName) ) {
@@ -67,6 +68,10 @@ class OAuthSignInModel {
             $this->_updateProfilePicture() ;
         }
 
+        if ( !is_null( $this->provider ) ) {
+            $this->_updateProvider() ;
+        }
+
         $project = new RedeemableProject($this->user, $_SESSION)  ;
         $project->tryToRedeem()  ;
 
@@ -80,6 +85,15 @@ class OAuthSignInModel {
 
     public function setProfilePicture( $pictureUrl ) {
         $this->profilePictureUrl = $pictureUrl ;
+    }
+
+    protected function _updateProvider() {
+        $dao = new MetadataDao();
+        $dao->set($this->user->uid, 'oauth_provider', $this->provider );
+    }
+
+    public function setProvider($provider) {
+        $this->provider = $provider;
     }
 
     protected function _createNewUser() {
