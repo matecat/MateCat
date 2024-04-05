@@ -9,7 +9,10 @@
 namespace ConnectedServices;
 
 use ConnectedServices\GDrive\GDriveClientFactory;
+use Exception;
+use Exceptions\ValidationError;
 use Google_Service_Oauth2;
+use Log;
 use Utils;
 
 class GDriveUserAuthorizationModel {
@@ -38,14 +41,14 @@ class GDriveUserAuthorizationModel {
      *
      * @param $code
      *
-     * @throws \Exceptions\ValidationError
+     * @throws ValidationError
      */
     public function updateOrCreateRecordByCode( $code ) {
         $this->__collectProperties( $code );
 
         // We have the user info email and name, we can save it along with the gdrive token to identify it.
-        \Log::doJsonLog( $this->token ) ;
-        \Log::doJsonLog( $this->userInfo ) ;
+        Log::doJsonLog( $this->token ) ;
+        Log::doJsonLog( $this->userInfo ) ;
 
         $dao = new ConnectedServiceDao();
         $service = $dao->findUserServicesByNameAndEmail(
@@ -65,7 +68,7 @@ class GDriveUserAuthorizationModel {
     /**
      * @param ConnectedServiceStruct $service
      *
-     * @throws \Exception
+     * @throws Exception
      */
     private function __updateService(ConnectedServiceStruct $service ) {
         $dao = new ConnectedServiceDao() ;
@@ -95,7 +98,7 @@ class GDriveUserAuthorizationModel {
 
     /**
      * @param $code
-     * @throws \Exception
+     * @throws Exception
      */
     private function __collectProperties( $code ) {
         $gdriveClient = GDriveClientFactory::create( );
