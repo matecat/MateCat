@@ -10,8 +10,7 @@
 
   .analysis-value-not-saved,
   .analysis-value-not-saved span,
-  .analysis-value-not-saved input,
-  {
+  .analysis-value-not-saved input {
     color: $translatedBlue;
   }
 
@@ -66,8 +65,7 @@
       td:not(:last-child) {
         border-right: 1px solid $grey3;
       }
-      thead > tr >th,
-      {
+      thead > tr > th {
         border-bottom: 1px solid $grey3;
       }
       th {
@@ -77,7 +75,8 @@
       td {
         height: 56px;
       }
-      th, td {
+      th,
+      td {
         width: 94px;
         background-color: $white;
       }
@@ -85,9 +84,7 @@
     input.input-percentage {
       display: block;
       margin: 0 auto;
-
     }
-
   }
   .analysis-tab-exceptionsContainer {
     background: $white;
@@ -102,7 +99,8 @@
       width: 128px;
       margin-top: 24px;
     }
-    h3, span {
+    h3,
+    span {
       font-size: 16px;
       line-height: 24px;
       padding: 0;
@@ -147,7 +145,7 @@
             height: 34px;
             margin: 0 12px 12px;
             border-radius: 4px;
-            border: 1px solid rgba(34, 36, 38, .15);
+            border: 1px solid rgba(34, 36, 38, 0.15);
             background-color: #fff;
             outline: none;
             .dropdown__search-bar-input {
@@ -187,7 +185,5 @@
         width: 148px;
       }
     }
-
   }
-
 }

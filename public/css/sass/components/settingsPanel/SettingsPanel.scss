@@ -342,7 +342,11 @@
 }
 
 .settings-panel-subtemplates {
-  background-color: unset;
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background-color: $white;
+  width: 100%;
   padding: unset;
 
   .settings-panel-templates-container-buttons {
