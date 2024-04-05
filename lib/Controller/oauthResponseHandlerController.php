@@ -52,7 +52,12 @@ class oauthResponseHandlerController extends viewController{
         }
     }
 
+    /**
+     * Successful OAuth2 authentication handling
+     */
     protected function _processSuccessfulOAuth() {
+
+        // OAuth2 authentication
         $this->_initRemoteUser() ;
 
         $model = new OAuthSignInModel(
@@ -68,16 +73,20 @@ class oauthResponseHandlerController extends viewController{
         $model->signIn() ;
     }
 
+    /**
+     * This method fetches the remote user
+     * from the OAuth2 provider
+     */
     protected function _initRemoteUser() {
 
         try {
             $this->client = OauthClient::getInstance($this->provider)->getClient();
-
             $token = $this->client->getAuthToken($this->code);
             $this->remoteUser = $this->client->getResourceOwner($token);
         } catch (Exception $exception){
             $this->error = $exception->getMessage();
 
+            // in case of bad request, redirect to homepage
             header( "Location: " . INIT::$HTTPHOST . INIT::$BASEURL );
             die();
         }
