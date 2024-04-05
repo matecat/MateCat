@@ -13,9 +13,10 @@ class MicrosoftClientFactory implements ConnectedServiceFactoryInterface
     private function __construct(){}
 
     /**
-     * @return Microsoft
+     * @param null $redirectUrl
+     * @return mixed|Microsoft
      */
-    public static function create() {
+    public static function create($redirectUrl = null) {
 
         if ( !self::$instance) {
             self::$instance = new Microsoft([

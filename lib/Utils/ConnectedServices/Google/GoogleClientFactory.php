@@ -25,19 +25,18 @@ class GoogleClientFactory implements ConnectedServiceFactoryInterface
     private static $LOGGER_NAME = 'google_client_logger';
 
     /**
-     * @param string $redirectUri
-     *
-     * @return \Google_Client
+     * @param null $redirectUrl
+     * @return \Google_Client|mixed
      * @throws \Exception
      */
-    public static function create() {
+    public static function create($redirectUrl = null) {
 
         $client = new \Google_Client();
 
         $client->setApplicationName( \INIT::$OAUTH_CLIENT_APP_NAME );
         $client->setClientId( \INIT::$OAUTH_CLIENT_ID );
         $client->setClientSecret( \INIT::$OAUTH_CLIENT_SECRET );
-        $client->setRedirectUri( \INIT::$OAUTH_REDIRECT_URL );
+        $client->setRedirectUri( ($redirectUrl ? $redirectUrl : \INIT::$OAUTH_REDIRECT_URL ) );
         $client->setScopes( static::$OAUTH_SCOPES );
         $client->setAccessType( "offline" );
         $client->setApprovalPrompt('force');

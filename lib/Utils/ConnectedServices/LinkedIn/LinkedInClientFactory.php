@@ -13,9 +13,10 @@ class LinkedInClientFactory implements ConnectedServiceFactoryInterface
     private function __construct(){}
 
     /**
-     * @return LinkedIn
+     * @param null $redirectUrl
+     * @return LinkedIn|mixed
      */
-    public static function create() {
+    public static function create($redirectUrl = null) {
 
         if ( !self::$instance) {
             self::$instance = new LinkedIn([
