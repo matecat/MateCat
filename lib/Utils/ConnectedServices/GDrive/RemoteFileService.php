@@ -50,7 +50,7 @@ class RemoteFileService extends AbstractRemoteFileService {
             $token = json_encode( $token );
         }
 
-        $oauthClient = GoogleClientFactory::create();
+        $oauthClient = GDriveClientFactory::create();
         $oauthClient->setAccessToken( $token );
 
         return new \Google_Service_Drive( $oauthClient );

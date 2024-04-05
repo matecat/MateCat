@@ -14,7 +14,7 @@ class GDriveClientFactory implements ConnectedServiceFactoryInterface
      */
     public static function create($redirectUrl = null)
     {
-        return GoogleClientFactory::create($redirectUrl);
+        return GoogleClientFactory::create(\INIT::$HTTPHOST . "/gdrive/oauth/response");
     }
 }
 
