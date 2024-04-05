@@ -27,6 +27,7 @@ class Bootstrap {
         self::$_ROOT  = realpath( dirname( __FILE__ ) . '/../' );
         self::$CONFIG = parse_ini_file( self::$_ROOT . DIRECTORY_SEPARATOR . 'inc/config.ini', true );
         $OAUTH_CONFIG = @parse_ini_file( self::$_ROOT . DIRECTORY_SEPARATOR . 'inc/oauth_config.ini', true );
+        $GITHUB_OAUTH_CONFIG = @parse_ini_file( self::$_ROOT . DIRECTORY_SEPARATOR . 'inc/github_oauth_config.ini', true );
         $LINKEDIN_OAUTH_CONFIG = @parse_ini_file( self::$_ROOT . DIRECTORY_SEPARATOR . 'inc/linkedin_oauth_config.ini', true );
         $MICROSOFT_OAUTH_CONFIG = @parse_ini_file( self::$_ROOT . DIRECTORY_SEPARATOR . 'inc/microsoft_oauth_config.ini', true );
 
@@ -42,8 +43,9 @@ class Bootstrap {
         @include_once 'vendor/autoload.php';
 
         INIT::$OAUTH_CONFIG = $OAUTH_CONFIG[ 'OAUTH_CONFIG' ];
-        INIT::$MICROSOFT_OAUTH_CONFIG = $MICROSOFT_OAUTH_CONFIG[ 'MICROSOFT_OAUTH_CONFIG' ];
+        INIT::$GITHUB_OAUTH_CONFIG = $GITHUB_OAUTH_CONFIG[ 'GITHUB_OAUTH_CONFIG' ];
         INIT::$LINKEDIN_OAUTH_CONFIG = $LINKEDIN_OAUTH_CONFIG[ 'LINKEDIN_OAUTH_CONFIG' ];
+        INIT::$MICROSOFT_OAUTH_CONFIG = $MICROSOFT_OAUTH_CONFIG[ 'MICROSOFT_OAUTH_CONFIG' ];
 
         // Overridable defaults
         INIT::$ROOT                           = self::$_ROOT; // Accessible by Apache/PHP

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c7c297d811c950ae19cb516e02f02780",
+    "content-hash": "bfc78efc27d3653fc3b35443d67d441f",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -996,6 +996,72 @@
                 "source": "https://github.com/thephpleague/oauth2-client/tree/2.7.0"
             },
             "time": "2023-04-16T18:19:15+00:00"
+        },
+        {
+            "name": "league/oauth2-github",
+            "version": "3.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/thephpleague/oauth2-github.git",
+                "reference": "97f31cd70e76f81e8f5b4e2ab6f3708e2db7ac18"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/thephpleague/oauth2-github/zipball/97f31cd70e76f81e8f5b4e2ab6f3708e2db7ac18",
+                "reference": "97f31cd70e76f81e8f5b4e2ab6f3708e2db7ac18",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "league/oauth2-client": "^2.0",
+                "php": "^7.3 || ^8.0"
+            },
+            "require-dev": {
+                "mockery/mockery": "^1.4",
+                "phpunit/phpunit": "^9.5",
+                "squizlabs/php_codesniffer": "^3.6"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "League\\OAuth2\\Client\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Steven Maguire",
+                    "email": "stevenmaguire@gmail.com",
+                    "homepage": "https://github.com/stevenmaguire"
+                },
+                {
+                    "name": "Woody Gilk",
+                    "email": "woody.gilk@gmail.com",
+                    "homepage": "https://github.com/shadowhand"
+                }
+            ],
+            "description": "Github OAuth 2.0 Client Provider for The PHP League OAuth2-Client",
+            "keywords": [
+                "authorisation",
+                "authorization",
+                "client",
+                "github",
+                "oauth",
+                "oauth2"
+            ],
+            "support": {
+                "issues": "https://github.com/thephpleague/oauth2-github/issues",
+                "source": "https://github.com/thephpleague/oauth2-github/tree/3.1.0"
+            },
+            "time": "2022-11-04T14:01:49+00:00"
         },
         {
             "name": "league/oauth2-linkedin",
@@ -4628,7 +4694,7 @@
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=5.6.40",
+        "php": ">=7.0",
         "ext-curl": "*",
         "ext-pcntl": "*",
         "ext-json": "*",

@@ -72,11 +72,19 @@ class oauthResponseHandlerController extends viewController{
      * @throws Exception
      */
     protected function _initRemoteUser() {
-	    $provider = $this->provider ?? OauthClient::GOOGLE_PROVIDER;
-        $this->client = OauthClient::getInstance($provider)->getClient();
 
-        $token = $this->client->getAuthToken($this->code);
-        $this->remoteUser = $this->client->getResourceOwner($token);
+        try {
+            $provider = $this->provider ?? OauthClient::GOOGLE_PROVIDER;
+            $this->client = OauthClient::getInstance($provider)->getClient();
+
+            $token = $this->client->getAuthToken($this->code);
+            $this->remoteUser = $this->client->getResourceOwner($token);
+        } catch (Exception $exception){
+            $this->error = $exception->getMessage();
+
+            header( "Location: " . INIT::$HTTPHOST . INIT::$BASEURL );
+            die();
+        }
     }
 
     protected function _respondWithError() {

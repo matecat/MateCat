@@ -18,7 +18,6 @@ class LinkedInClient implements ConnectedServiceInterface
      */
     public function getAuthorizationUrl()
     {
-
         $options = [
             'state' => Utils::randomString(20),
             'scope' => [

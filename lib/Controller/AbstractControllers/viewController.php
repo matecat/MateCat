@@ -1,11 +1,6 @@
 <?php
 
 use ConnectedServices\ConnectedServiceInterface;
-use ConnectedServices\LinkedIn\LinkedInClient;
-use ConnectedServices\LinkedIn\LinkedInClientFactory;
-use League\OAuth2\Client\Provider\LinkedIn;
-
-use ConnectedServices\Microsoft\MicrosoftClient;
 
 abstract class viewController extends controller {
 
@@ -22,9 +17,16 @@ abstract class viewController extends controller {
     protected $client;
 
     /**
+     * Google auth URL
+     *
      * @var string
      */
     protected $authURL;
+
+    /**
+     * @var string
+     */
+    protected $githubAuthURL;
 
     /**
      * @var string
@@ -159,8 +161,9 @@ abstract class viewController extends controller {
         $this->template->config_js            = [];
         $this->template->css_resources        = [];
         $this->template->authURL              = $this->getAuthUrl();
+        $this->template->githubAuthUrl        = $this->getGithubAuthUrl();
         $this->template->linkedInAuthUrl      = $this->getLinkedInAuthUrl();
-        $this->template->microsoftAuthUrl      = $this->getMicrosoftAuthUrl();
+        $this->template->microsoftAuthUrl     = $this->getMicrosoftAuthUrl();
         $this->template->gdriveAuthURL        = \ConnectedServices\GDrive::generateGDriveAuthUrl();
         $this->template->enableMultiDomainApi = INIT::$ENABLE_MULTI_DOMAIN_API;
         $this->template->ajaxDomainsNumber    = INIT::$AJAX_DOMAINS;
@@ -207,6 +210,19 @@ abstract class viewController extends controller {
         }
 
         return $this->authURL;
+    }
+
+    /**
+     * @return string
+     * @throws Exception
+     */
+    public function getGithubAuthUrl(){
+        if ( is_null( $this->githubAuthURL ) ) {
+            $this->client  = OauthClient::getInstance(OauthClient::GITHUB_PROVIDER)->getClient();
+            $this->githubAuthURL = $this->client->getAuthorizationUrl();
+        }
+
+        return $this->githubAuthURL;
     }
 
     /**

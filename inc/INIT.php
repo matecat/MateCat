@@ -279,6 +279,14 @@ class INIT {
     public static $OAUTH_BROWSER_API_KEY;
 
     /**
+     * Github credentials
+     */
+    public static $GITHUB_OAUTH_CONFIG;
+    public static $GITHUB_OAUTH_CLIENT_ID;
+    public static $GITHUB_OAUTH_CLIENT_SECRET;
+    public static $GITHUB_OAUTH_REDIRECT_URL;
+
+    /**
      * Linkedin credentials
      */
     public static $LINKEDIN_OAUTH_CONFIG;
@@ -319,6 +327,10 @@ class INIT {
     public static $REPLACE_HISTORY_TTL;
 
     public function __construct() {
+
+        self::$GITHUB_OAUTH_CLIENT_ID = @INIT::$GITHUB_OAUTH_CONFIG['GITHUB_OAUTH_CLIENT_ID'];
+        self::$GITHUB_OAUTH_CLIENT_SECRET = @INIT::$GITHUB_OAUTH_CONFIG['GITHUB_OAUTH_CLIENT_SECRET'];
+        self::$GITHUB_OAUTH_REDIRECT_URL = @INIT::$GITHUB_OAUTH_CONFIG['GITHUB_OAUTH_REDIRECT_URL'];
 
         self::$LINKEDIN_OAUTH_CLIENT_ID = @INIT::$LINKEDIN_OAUTH_CONFIG['LINKEDIN_OAUTH_CLIENT_ID'];
         self::$LINKEDIN_OAUTH_CLIENT_SECRET = @INIT::$LINKEDIN_OAUTH_CONFIG['LINKEDIN_OAUTH_CLIENT_SECRET'];
