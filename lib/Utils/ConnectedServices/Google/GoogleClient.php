@@ -1,6 +1,6 @@
 <?php
 
-namespace ConnectedServices\Microsoft;
+namespace ConnectedServices\Google;
 
 use ConnectedServices\ConnectedServiceInterface;
 use ConnectedServices\ConnectedServiceUserModel;

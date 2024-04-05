@@ -2,8 +2,8 @@
 
 use ConnectedServices\ConnectedServiceInterface;
 use ConnectedServices\LinkedIn\LinkedInClient;
-use ConnectedServices\Microsoft\GithubClient;
-use ConnectedServices\Microsoft\GoogleClient;
+use ConnectedServices\Github\GithubClient;
+use ConnectedServices\Google\GoogleClient;
 use ConnectedServices\Microsoft\MicrosoftClient;
 
 class OauthClient {
@@ -18,6 +18,8 @@ class OauthClient {
      */
 	private static $instance;
 
+	private $provider;
+
     /**
      * @var ConnectedServiceInterface
      */
@@ -28,10 +30,14 @@ class OauthClient {
      * @return OauthClient
      * @throws Exception
      */
-	public static function getInstance($provider = self::GOOGLE_PROVIDER){
-		if(self::$instance == null){
+	public static function getInstance($provider = self::GOOGLE_PROVIDER)
+    {
+		if(self::$instance == null or self::$instance->provider != $provider){
 			self::$instance = new OauthClient($provider);
 		}
+
+        self::$instance->provider = $provider;
+
 		return self::$instance;
 	}
 
@@ -39,9 +45,10 @@ class OauthClient {
      * OauthClient constructor.
      * @param string $provider
      */
-	private function __construct($provider = self::GOOGLE_PROVIDER){
+	private function __construct($provider = null){
 
         switch ($provider){
+
             case self::GITHUB_PROVIDER:
                 $this->client = new GithubClient();
                 break;
@@ -54,13 +61,12 @@ class OauthClient {
                 $this->client = new LinkedInClient();
                 break;
 
+            case null:
             case self::GOOGLE_PROVIDER:
             default:
                 $this->client = new GoogleClient();
                 break;
         }
-
-        throw new InvalidArgumentException('Wrong or missing provider');
 	}
 
     /**

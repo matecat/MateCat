@@ -1,6 +1,6 @@
 <?php
 
-namespace ConnectedServices\Microsoft;
+namespace ConnectedServices\Github;
 
 use ConnectedServices\ConnectedServiceInterface;
 use ConnectedServices\ConnectedServiceUserModel;

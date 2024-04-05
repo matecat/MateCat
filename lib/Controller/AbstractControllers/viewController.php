@@ -167,17 +167,6 @@ abstract class viewController extends controller {
     }
 
     /**
-     * @return string
-     */
-    public function getMicrosoftAuthUrl(){
-        if ( is_null( $this->microsoftAuthURL ) ) {
-            $this->microsoftAuthURL = MicrosoftClient::getAuthorizationUrl();
-        }
-
-        return $this->microsoftAuthURL;
-    }
-
-    /**
      * setTemplateFinalVars
      *
      * Here you have the possiblity to set additional template variables that you always want available in the
@@ -209,11 +198,12 @@ abstract class viewController extends controller {
 
     /**
      * @return string
+     * @throws Exception
      */
     public function getAuthUrl() {
         if ( is_null( $this->authURL ) ) {
             $this->client  = OauthClient::getInstance()->getClient();
-            $this->authURL = $this->client->createAuthUrl();
+            $this->authURL = $this->client->getAuthorizationUrl();
         }
 
         return $this->authURL;
@@ -221,13 +211,28 @@ abstract class viewController extends controller {
 
     /**
      * @return string
+     * @throws Exception
      */
     public function getLinkedInAuthUrl(){
         if ( is_null( $this->linkedInAuthURL ) ) {
-            $this->linkedInAuthURL = LinkedInClient::getAuthorizationUrl();
+            $this->client  = OauthClient::getInstance(OauthClient::LINKEDIN_PROVIDER)->getClient();
+            $this->linkedInAuthURL = $this->client->getAuthorizationUrl();
         }
 
         return $this->linkedInAuthURL;
+    }
+
+    /**
+     * @return string
+     * @throws Exception
+     */
+    public function getMicrosoftAuthUrl(){
+        if ( is_null( $this->microsoftAuthURL ) ) {
+            $this->client  = OauthClient::getInstance(OauthClient::MICROSOFT_PROVIDER)->getClient();
+            $this->microsoftAuthURL = $this->client->getAuthorizationUrl();
+        }
+
+        return $this->microsoftAuthURL;
     }
 
     /**
