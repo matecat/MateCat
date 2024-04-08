@@ -108,14 +108,26 @@ class LanguageSelectorList extends React.Component {
 
   getFilteredLanguages = () => {
     const {languagesList, querySearch} = this.props
-    const regex = new RegExp(
-      TEXT_UTILS.escapeRegExp(querySearch).split(' ').join('|'),
-      'gi',
-    )
+    // const querySplitted = TEXT_UTILS.escapeRegExp(querySearch)
+    //   .split(' ')
+    //   .join('|')
+    // const regex = new RegExp(
+    //   querySplitted.substr(querySplitted.lastIndexOf('|') + 1) === ''
+    //     ? querySplitted.substring(0, querySplitted.lastIndexOf('|'))
+    //     : querySplitted,
+    //   'i',
+    // )
+    const wordsFromQuery = TEXT_UTILS.escapeRegExp(querySearch)
+      .split(' ')
+      .filter((word) => word)
+
     const langs =
       languagesList && languagesList.length
-        ? languagesList.filter(
-            ({name, id}) => regex.test(name) || regex.test(id),
+        ? languagesList.filter(({name, id}) =>
+            wordsFromQuery.every((word) => {
+              const regex = new RegExp(word, 'i')
+              return regex.test(name) || regex.test(id)
+            }),
           )
         : []
     const sortInputFirst = (input, data) => {
