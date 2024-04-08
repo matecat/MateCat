@@ -218,7 +218,13 @@ abstract class viewController extends controller {
      * @throws Exception
      */
     public function getGithubAuthUrl(){
-        if ( is_null( $this->githubAuthURL ) ) {
+        if ( is_null( $this->githubAuthURL )
+            and (
+                !empty(INIT::$GITHUB_OAUTH_CLIENT_SECRET) and
+                !empty(INIT::$GITHUB_OAUTH_CLIENT_ID) and
+                !empty(INIT::$GITHUB_OAUTH_REDIRECT_URL)
+            )
+        ) {
             $this->client  = OauthClient::getInstance(OauthClient::GITHUB_PROVIDER)->getClient();
             $this->githubAuthURL = $this->client->getAuthorizationUrl();
         }
@@ -231,7 +237,13 @@ abstract class viewController extends controller {
      * @throws Exception
      */
     public function getLinkedInAuthUrl(){
-        if ( is_null( $this->linkedInAuthURL ) ) {
+        if ( is_null( $this->linkedInAuthURL )
+            and (
+                !empty(INIT::$LINKEDIN_OAUTH_CLIENT_SECRET) and
+                !empty(INIT::$LINKEDIN_OAUTH_CLIENT_ID) and
+                !empty(INIT::$LINKEDIN_OAUTH_REDIRECT_URL)
+            )
+        ) {
             $this->client  = OauthClient::getInstance(OauthClient::LINKEDIN_PROVIDER)->getClient();
             $this->linkedInAuthURL = $this->client->getAuthorizationUrl();
         }
@@ -244,7 +256,14 @@ abstract class viewController extends controller {
      * @throws Exception
      */
     public function getMicrosoftAuthUrl(){
-        if ( is_null( $this->microsoftAuthURL ) ) {
+        if (
+            is_null( $this->microsoftAuthURL )
+            and (
+                !empty(INIT::$MICROSOFT_OAUTH_CLIENT_SECRET) and
+                !empty(INIT::$MICROSOFT_OAUTH_CLIENT_ID) and
+                !empty(INIT::$MICROSOFT_OAUTH_REDIRECT_URL)
+            )
+        ) {
             $this->client  = OauthClient::getInstance(OauthClient::MICROSOFT_PROVIDER)->getClient();
             $this->microsoftAuthURL = $this->client->getAuthorizationUrl();
         }
