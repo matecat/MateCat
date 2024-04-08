@@ -1,64 +1,64 @@
 <?php
 
+use ConnectedServices\ConnectedServiceInterface;
 use ConnectedServices\ConnectedServiceUserModel;
 
 header("Cache-Control: no-store, no-cache, must-revalidate");  // HTTP/1.1
 header("Cache-Control: post-check=0, pre-check=0", false);
 header("Pragma: no-cache");
 
-class oauthResponseHandlerController extends viewController{
-
-    private $provider ;
-    private $code ;
-    private $error ;
+class oauthResponseHandlerController extends BaseKleinViewController {
 
     /**
      * @var ConnectedServiceUserModel
      */
     private $remoteUser ;
 
-	public function __construct(){
-        parent::sessionStart();
-		parent::__construct();
-		parent::makeTemplate("oauth_response_handler.html");
+    /**
+     * @var ConnectedServiceInterface
+     */
+    private $client;
 
-		$filterArgs = array(
-			'provider'      => array( 'filter' => FILTER_SANITIZE_STRING),
-			'code'          => array( 'filter' => FILTER_SANITIZE_STRING),
-			'error'         => array( 'filter' => FILTER_SANITIZE_STRING)
-		);
+    public function response() {
 
-		$__postInput = filter_input_array( INPUT_GET, $filterArgs );
+        $params = filter_var_array( $this->request->params(), [
+            'provider'      => [ 'filter' => FILTER_SANITIZE_STRING ],
+			'code'          => [ 'filter' => FILTER_SANITIZE_STRING ],
+			'error'         => [ 'filter' => FILTER_SANITIZE_STRING ]
+        ] );
 
-		$this->provider  = $__postInput[ 'provider' ];
-		$this->code      = $__postInput[ 'code' ];
-		$this->error     = $__postInput[ 'error' ];
-	}
+        if (isset($params['code']) && !empty($params['code'])) {
+            $this->_processSuccessfulOAuth($params['code'], $params['provider']) ;
 
-    public function doAction() {
-        if (isset($this->code) && $this->code) {
-            $this->_processSuccessfulOAuth() ;
-        }
-        elseif ( $this->error ) {
-            $this->_respondWithError();
+            $this->response->body( $this->view->execute() );
+            $this->response->send();
+
+        } elseif ( $params['error'] ) {
+            $this->_respondWithError($params['error']);
         }
     }
 
     public function setTemplateVars()
     {
-        // TODO: Implement setTemplateVars() method.
         if ( isset( $_SESSION['wanted_url'] ) ) {
-            $this->template->wanted_url = $_SESSION['wanted_url'] ;
+            $this->view->wanted_url = $_SESSION['wanted_url'] ;
         }
+    }
+
+    protected function afterConstruct() {
+        $this->setTemplateVars();
+        $this->setView( \INIT::$TEMPLATE_ROOT . '/oauth_response_handler.html');
     }
 
     /**
      * Successful OAuth2 authentication handling
+     * @param $code
+     * @param null $provider
      */
-    protected function _processSuccessfulOAuth() {
+    protected function _processSuccessfulOAuth($code, $provider = null) {
 
         // OAuth2 authentication
-        $this->_initRemoteUser() ;
+        $this->_initRemoteUser($code, $provider) ;
 
         $model = new OAuthSignInModel(
             $this->remoteUser->name,
@@ -76,23 +76,23 @@ class oauthResponseHandlerController extends viewController{
     /**
      * This method fetches the remote user
      * from the OAuth2 provider
+     * @param $code
+     * @param null $provider
      */
-    protected function _initRemoteUser() {
+    protected function _initRemoteUser($code, $provider = null) {
 
         try {
-            $this->client = OauthClient::getInstance($this->provider)->getClient();
-            $token = $this->client->getAuthToken($this->code);
+            $this->client = OauthClient::getInstance($provider)->getClient();
+            $token = $this->client->getAuthToken($code);
             $this->remoteUser = $this->client->getResourceOwner($token);
         } catch (Exception $exception){
-            $this->error = $exception->getMessage();
-
             // in case of bad request, redirect to homepage
             header( "Location: " . INIT::$HTTPHOST . INIT::$BASEURL );
             die();
         }
     }
 
-    protected function _respondWithError() {
+    protected function _respondWithError($error) {
         // TODO
     }
 
