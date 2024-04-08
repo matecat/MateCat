@@ -101,40 +101,23 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
      * @return void
      * @throws Exception
      */
-    public function decreaseTodoBar( ChunkReviewStruct $chunkReview ) {
-        $chunkReview->advancement_wc -= $this->getDeltaWordCount();
-    }
-
-    /**
-     * @param ChunkReviewStruct $chunkReview
-     * @param bool              $decreaseTodo
-     *
-     * @return void
-     * @throws Exception
-     */
-    private function decreaseCountersAndRemoveIssues( ChunkReviewStruct $chunkReview, $decreaseTodo = true ) {
+    private function decreaseCountersAndRemoveIssues( ChunkReviewStruct $chunkReview ) {
         $chunkReview->reviewed_words_count -= $this->_event->getSegmentStruct()->raw_word_count;
         $chunkReview->penalty_points       -= $this->getPenaltyPointsForSourcePage( $chunkReview->source_page );
-        if ( $decreaseTodo ) {
-            $chunkReview->advancement_wc -= $this->getDeltaWordCount();
-        }
+
         // when downgrading a revision to translation the issues must be removed ( from R1, R2 or both )
         $this->flagIssuesToBeDeleted( $chunkReview->source_page );
     }
 
     /**
      * @param ChunkReviewStruct $chunkReview
-     * @param bool              $increaseTodo
      *
      * @return void
      * @throws Exception
      */
-    private function increaseAllCounters( ChunkReviewStruct $chunkReview, $increaseTodo = true ) {
+    private function increaseAllCounters( ChunkReviewStruct $chunkReview ) {
         $chunkReview->reviewed_words_count += $this->_event->getSegmentStruct()->raw_word_count;
         $chunkReview->total_tte            += $this->_event->getCurrentEvent()->time_to_edit;
-        if ( $increaseTodo ) {
-            $chunkReview->advancement_wc += $this->getDeltaWordCount();
-        }
     }
 
     /**
@@ -190,7 +173,7 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
         if ( $this->_event->isChangingStatus() ) {
             $this->_jobWordCounter->setOldStatus( $this->_event->getOldTranslation()->status );
             $this->_jobWordCounter->setNewStatus( $this->_event->getWantedTranslation()->status );
-            $this->_jobWordCounter->setUpdatedValues( $this->getDeltaWordCount(), $this->_event->getSegmentStruct()->raw_word_count );
+            $this->_jobWordCounter->setUpdatedValues( $this->_event->getOldTranslation()->eq_word_count, $this->_event->getSegmentStruct()->raw_word_count );
         }
 
         $segmentReviewTransitionModel = new ChunkReviewTranslationEventTransition( $this->_event );
@@ -228,8 +211,7 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
                         $chunkReview->reviewed_words_count += $this->_event->getSegmentStruct()->raw_word_count;
                     }
 
-                    // in this case the to-do progress and tte are added by definition
-                    $chunkReview->advancement_wc += $this->getDeltaWordCount();
+                    // in this case the tte is added by definition
                     $chunkReview->total_tte      += $this->_event->getCurrentEvent()->time_to_edit;
                     $chunkReviews[]              = $chunkReview;
 
@@ -237,7 +219,7 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
 
                     // this case fits any other intermediate chunkReview record when an event exists
                     // i.e.: R3 -> R1 with an event existing in R2
-                    $this->decreaseCountersAndRemoveIssues( $chunkReview, false );
+                    $this->decreaseCountersAndRemoveIssues( $chunkReview );
                     $unsetFinalRevision[] = $chunkReview->source_page;
                     $chunkReviews[]       = $chunkReview;
 
@@ -253,14 +235,9 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
 
                     // this segment already has been in this revision state
                     // reviewed words are discounted from R1/R2
-                    $this->decreaseCountersAndRemoveIssues( $chunkReview, false );
+                    $this->decreaseCountersAndRemoveIssues( $chunkReview );
                     $unsetFinalRevision[] = $chunkReview->source_page;
 
-                }
-
-                // if the last event was on this chunk means that the progress bar must be decreased
-                if ( $this->_event->lastEventWasOnThisChunk( $chunkReview ) ) {
-                    $this->decreaseTodoBar( $chunkReview );
                 }
 
                 $chunkReviews[] = $chunkReview;
@@ -318,8 +295,6 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
                     // this is needed to understand if an event already been made in this specific phase ( we are handling ALL the chunk reviews )
                     // to allow the discount of words
                     if ( $this->aFinalRevisionExistsForThisChunk( $chunkReview ) ) {
-                        // reviewed words are discounted from R1
-                        $this->decreaseTodoBar( $chunkReview );
                         $chunkReviews[] = $chunkReview;
                     }
 
@@ -466,9 +441,6 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
      * @throws Exception
      */
     protected function getDeltaWordCount() {
-        if ( $this->_event->getOldTranslation()->isICE() || $this->_event->getOldTranslation()->isPreTranslated() ) {
-            return $this->_event->getSegmentStruct()->raw_word_count;
-        }
 
         return $this->_event->getOldTranslation()->eq_word_count;
     }
