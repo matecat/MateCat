@@ -18,6 +18,14 @@ export const DownloadMenu = ({password, jid, isGDriveProject}) => {
 
     if (downloadDisabled) return false
 
+    if (!downloadTranslationAvailable) {
+      //Send event
+      const data = {
+        event: 'download_draft',
+      }
+      CommonUtils.dispatchAnalyticsEvents(data)
+    }
+
     if (config.isGDriveProject) {
       continueDownloadFunction = continueDownloadWithGoogleDrive
     } else {
@@ -75,14 +83,6 @@ export const DownloadMenu = ({password, jid, isGDriveProject}) => {
     )
   }
 
-  const downloadDraft = () => {
-    const data = {
-      event: 'download_draft',
-    }
-    CommonUtils.dispatchAnalyticsEvents(data)
-    runDownload()
-  }
-
   useEffect(() => {
     if (stats) {
       setDownloadTranslationAvailable(CommonUtils.isJobCompleted(stats))
@@ -108,15 +108,7 @@ export const DownloadMenu = ({password, jid, isGDriveProject}) => {
         className="dropdown-menu-overlay"
         onClick={() => runDownload()}
       ></div>
-      <ul
-        className="menu"
-        id="previewDropdown"
-        /*data-download={
-          stats && stats['TODO_FORMATTED'] == 0 && stats['ANALYSIS_COMPLETE']
-            ? 'true'
-            : 'false'
-        }*/
-      >
+      <ul className="menu" id="previewDropdown">
         {downloadTranslationAvailable ? (
           <li className="item downloadTranslation" data-value="translation">
             <a
@@ -131,7 +123,7 @@ export const DownloadMenu = ({password, jid, isGDriveProject}) => {
           </li>
         ) : (
           <li className="item previewLink" data-value="draft">
-            <a title="Draft" alt="Draft" href="#" onClick={downloadDraft}>
+            <a title="Draft" alt="Draft" href="#" onClick={() => runDownload()}>
               {isGDriveProject ? 'Preview in Google Drive' : 'Draft'}
             </a>
           </li>
