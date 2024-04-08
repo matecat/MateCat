@@ -1,4 +1,0 @@
-[MICROSOFT_OAUTH_CONFIG]
-MICROSOFT_OAUTH_CLIENT_ID       = xxxxxxxxxxxxxxx
-MICROSOFT_OAUTH_CLIENT_SECRET   = yyyyyyyyyyyyyyy
-MICROSOFT_OAUTH_REDIRECT_URL    = zzzzzzzzzzzzzzz
