@@ -42,7 +42,7 @@
   flex-flow: row wrap;
 
   .user-api-text {
-    width: 70%;
+    width: 65%;
     order: 1;
 
     label,
@@ -71,6 +71,8 @@
   }
 
   .user-api-buttons {
+    display: flex;
+    gap: 6px;
     order: 2;
   }
 
@@ -126,8 +128,7 @@
 .user-name {
   margin-left: 15px;
   line-height: 25px;
-  svg {
-    margin-left: 10px;
+  .user-info-icon-update {
     cursor: pointer;
     color: $grey;
     &:hover {
@@ -137,8 +138,10 @@
 }
 
 .user-info-details {
+  &.user-info-modify {
+    height: 40px;
+  }
   display: flex;
-  height: 40px;
   align-content: center;
   gap: 10px;
   input {

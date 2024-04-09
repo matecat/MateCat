@@ -9,6 +9,13 @@ import {deleteUserApiKey} from '../../api/deleteUserApiKey'
 import IconEdit from '../icons/IconEdit'
 import {modifyUserInfo} from '../../api/modifyUserInfo/modifyUser'
 import TeamsActions from '../../actions/TeamsActions'
+import {
+  Button,
+  BUTTON_MODE,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+} from '../common/Button/Button'
+import IconClose from '../icons/IconClose'
 
 const PreferencesModal = (props) => {
   const [service, setService] = useState(props.service)
@@ -139,12 +146,21 @@ const PreferencesModal = (props) => {
                 <label>This action cannot be undone.</label>
               </div>
               <div className={'user-api-buttons'}>
-                <a className="btn-ok" onClick={() => deleteKey()}>
+                <Button
+                  type={BUTTON_TYPE.PRIMARY}
+                  size={BUTTON_SIZE.MEDIUM}
+                  onClick={() => deleteKey()}
+                >
                   Delete
-                </a>
-                <a onClick={(e) => undoDelete(e)} className={'btn-cancel'}>
+                </Button>
+                <Button
+                  mode={BUTTON_MODE.OUTLINE}
+                  size={BUTTON_SIZE.MEDIUM}
+                  onClick={(e) => undoDelete(e)}
+                  className={'btn-cancel'}
+                >
                   Cancel
-                </a>
+                </Button>
               </div>
             </div>
           ) : (
@@ -185,22 +201,31 @@ const PreferencesModal = (props) => {
               </div>
               {credentialsCreated ? (
                 <div className={'user-api-buttons'}>
-                  <a
+                  <Button
+                    type={BUTTON_TYPE.PRIMARY}
+                    size={BUTTON_SIZE.MEDIUM}
                     onClick={(e) => copyToClipboard(e)}
-                    className={'btn-ok copy'}
                   >
                     <i className="icon-copy icon" />
                     {credentialsCopied ? 'Copied' : 'Copy'}
-                  </a>
-                  <a className="btn-ok" onClick={() => confirmDeleteHandler()}>
+                  </Button>
+                  <Button
+                    type={BUTTON_TYPE.PRIMARY}
+                    size={BUTTON_SIZE.MEDIUM}
+                    onClick={() => confirmDeleteHandler()}
+                  >
                     Delete
-                  </a>
+                  </Button>
                 </div>
               ) : config.isAnInternalUser ? (
                 <div className="user-api-buttons">
-                  <a className="btn-ok" onClick={() => confirmDeleteHandler()}>
+                  <Button
+                    type={BUTTON_TYPE.PRIMARY}
+                    size={BUTTON_SIZE.MEDIUM}
+                    onClick={() => confirmDeleteHandler()}
+                  >
                     Delete
-                  </a>
+                  </Button>
                 </div>
               ) : (
                 <div className="user-api-message">
@@ -256,9 +281,13 @@ const PreferencesModal = (props) => {
             </div>
             <div className="user-api-buttons">
               {config.isAnInternalUser ? (
-                <a className="btn-ok" onClick={() => generateKey()}>
+                <Button
+                  type={BUTTON_TYPE.PRIMARY}
+                  size={BUTTON_SIZE.MEDIUM}
+                  onClick={() => generateKey()}
+                >
                   Generate
-                </a>
+                </Button>
               ) : null}
             </div>
           </div>
@@ -328,7 +357,7 @@ const PreferencesModal = (props) => {
         {avatar}
         <div className="user-name pull-left">
           {modifyUser ? (
-            <div className="user-info-details">
+            <div className={'user-info-details user-info-modify'}>
               <input
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
@@ -338,19 +367,24 @@ const PreferencesModal = (props) => {
                 onChange={(e) => setLastName(e.target.value)}
               />
               <div className="user-info-modify-buttons">
-                <a className="btn-ok" onClick={modifyUserDetails}>
-                  {' '}
-                  Confirm{' '}
-                </a>
-                <button
+                <Button
+                  type={BUTTON_TYPE.PRIMARY}
+                  size={BUTTON_SIZE.MEDIUM}
+                  onClick={modifyUserDetails}
+                >
+                  Confirm
+                </Button>
+                <Button
+                  type={BUTTON_TYPE.WARNING}
+                  size={BUTTON_SIZE.ICON_STANDARD}
                   onClick={() => {
                     setFirstName(props.user.first_name)
                     setLastName(props.user.last_name)
                     setModifyUser(false)
                   }}
                 >
-                  X
-                </button>
+                  <IconClose />
+                </Button>
               </div>
             </div>
           ) : (
@@ -358,7 +392,10 @@ const PreferencesModal = (props) => {
               <strong>
                 {firstName} {lastName}
               </strong>
-              <div onClick={() => setModifyUser(true)}>
+              <div
+                className="user-info-icon-update"
+                onClick={() => setModifyUser(true)}
+              >
                 <IconEdit />
               </div>
             </div>
