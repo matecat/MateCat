@@ -1,50 +1,31 @@
 import React from 'react'
-import {each} from 'lodash/collection'
 import {UNIT_COUNT} from '../../constants/Constants'
+import ChevronRight from '../../../../../img/icons/ChevronRight'
 
-class JobAnalyzeHeader extends React.Component {
-  constructor(props) {
-    super(props)
-  }
-
-  calculateWords() {
-    this.total = 0
-    this.payable = 0
-    let self = this
-
-    each(this.props.jobInfo.chunks, function (chunk) {
-      self.payable = self.payable + chunk.total_equivalent
-      self.total = self.total + chunk.total_raw
-    })
-  }
-
-  shouldComponentUpdate() {
-    return true
-  }
-
-  render() {
-    this.calculateWords()
-    return (
-      <div className="head-chunk sixteen wide column pad-right-10 shadow-1">
-        <div className="source-target">
-          <div className="source-box">{this.props.jobInfo.source_name}</div>
-          <div className="in-to">
-            <i className="icon-chevron-right icon" />
-          </div>
-          <div className="target-box">{this.props.jobInfo.target_name}</div>
+const JobAnalyzeHeader = ({jobInfo}) => {
+  const totalWeighted = jobInfo.total_equivalent
+  return (
+    <div className="job-analyze-header">
+      <div className="job-analyze-header_left">
+        <div>
+          <span>ID: {jobInfo.id}</span>
         </div>
-        {/*<div className="job-not-payable">*/}
-        {/*<span id="raw-words">{parseInt(this.total)}</span> Total words*/}
-        {/*</div>*/}
-        <div className="job-payable">
-          <span id="words">{parseInt(this.payable)}</span>
-          {this.props.jobInfo.count_unit === UNIT_COUNT.WORDS
-            ? ' Matecat Weighted words'
-            : ' Matecat weighted characters'}
+        <div className="job-analyze-languages">
+          <span>{jobInfo.source_name}</span>
+          <ChevronRight size={16} />
+          <span>{jobInfo.target_name}</span>
         </div>
       </div>
-    )
-  }
+      <div className="job-analyze-header_right">
+        <span>{parseInt(totalWeighted)}</span>
+        <span>
+          {jobInfo.count_unit === UNIT_COUNT.WORDS
+            ? ' Matecat Weighted words'
+            : ' Matecat weighted characters'}
+        </span>
+      </div>
+    </div>
+  )
 }
 
 export default JobAnalyzeHeader

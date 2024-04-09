@@ -39,12 +39,6 @@ class ChunkAnalyze extends React.Component {
           showFiles={this.showFiles.bind(this)}
           chunksSize={this.props.chunksSize}
         />
-
-        {/*<CSSTransitionGroup component="div" className="ui grid"*/}
-        {/*transitionName="transition"*/}
-        {/*transitionEnterTimeout={500}*/}
-        {/*transitionLeaveTimeout={500}*/}
-        {/*>*/}
         <TransitionGroup style={{width: '100%', padding: 0}}>
           {this.state.showFiles ? (
             <CSSTransition

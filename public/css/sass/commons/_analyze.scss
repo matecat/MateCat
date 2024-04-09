@@ -777,8 +777,6 @@ body.analyze {
                 //padding-top: 60px;
                 margin-top: 0;
                 &.show-details {
-                  .head-chunk,
-                  .job-table-header > div,
                   .chunk-analyze-container > div {
                     background-color: #eaebef !important;
                   }
@@ -786,36 +784,6 @@ body.analyze {
                 &.outsource-open {
                   margin-left: -35px;
                   margin-right: -35px;
-                }
-
-                .head-chunk {
-                  transition: 0.3s ease;
-                  background-color: $grey5;
-                  padding: 8px 15px;
-                  position: relative;
-                  z-index: 4;
-                  text-align: left;
-                  .job-not-payable {
-                    display: inline-block;
-                    padding: 0 0 0 10px !important;
-                    line-height: 30px;
-                    position: relative;
-                    top: 1px;
-                    display: inline-block;
-                    color: $grey1;
-                    #raw-words {
-                      text-decoration: line-through;
-                    }
-                  }
-                  .job-payable {
-                    padding: 0 10px !important;
-                    min-width: 105px;
-                    line-height: 30px;
-                    font-weight: 700;
-                    position: relative;
-                    top: 1px;
-                    display: inline-block;
-                  }
                 }
               }
             }
@@ -827,10 +795,6 @@ body.analyze {
 }
 
 .analysis {
-  .job-table-header {
-    margin-top: 0 !important;
-    margin-bottom: 0;
-  }
   .chunk-analyze-container {
     margin-top: 0 !important;
     margin-bottom: 0;
@@ -840,8 +804,6 @@ body.analyze {
       width: 103%;
     }
   }
-  .chunks-title-table,
-  .chunks-pay-table,
   .chunk,
   .chunk-detail {
     .left-box {
@@ -850,62 +812,6 @@ body.analyze {
       float: left;
       text-align: left;
       width: 15%;
-    }
-    .single-analysis {
-      display: inline-block;
-      margin: 0 auto;
-      width: 85%;
-      position: relative;
-      float: left;
-      text-align: right;
-      font-size: 15px;
-      line-height: 30px;
-      .single {
-        display: inline-block;
-        width: 8.5%;
-        margin-left: 0;
-        margin-right: -1px;
-        padding: 4px 6px 0 2px;
-        span {
-          font-size: 13px;
-          vertical-align: top;
-        }
-        &.total {
-          width: 8.5%;
-        }
-        &.payable-words {
-        }
-        &.new {
-          width: 5.5%;
-        }
-        &.repetition {
-          width: 9%;
-        }
-        &.internal-matches {
-        }
-        &.p-50-74 {
-        }
-        &.p-75-84 {
-        }
-        &.p-85-94 {
-        }
-        &.p-95-99 {
-        }
-        &.tm-100 {
-          width: 5%;
-        }
-        &.tm-public {
-          width: 6%;
-        }
-        &.tm-context {
-          width: 7%;
-        }
-        &.machine-translation {
-          position: relative;
-          width: 9%;
-          border-right: none;
-        }
-      }
     }
     .right-box {
       width: 10%;
@@ -938,21 +844,6 @@ body.analyze {
           display: inline-block;
         }
       }
-      .single-analysis {
-        display: inline-block;
-        margin: 0 auto;
-        position: relative;
-        float: left;
-        text-align: right;
-        font-size: 14px;
-        line-height: 30px;
-        .single {
-          span {
-            font-size: 12px;
-            font-weight: 700;
-          }
-        }
-      }
     }
 
     @media only screen and (max-width: 991px) and (min-width: 768px) {
@@ -973,21 +864,6 @@ body.analyze {
           }
           &:hover {
             text-decoration: none;
-          }
-        }
-      }
-      .single-analysis {
-        display: inline-block;
-        margin: 0 auto;
-        position: relative;
-        float: left;
-        text-align: center;
-        font-size: 14px;
-        line-height: 30px;
-        .single {
-          span {
-            font-size: 12px;
-            font-weight: 700;
           }
         }
       }
@@ -1012,66 +888,6 @@ body.analyze {
           &:hover {
             text-decoration: none;
           }
-        }
-      }
-      .single-analysis {
-        display: inline-block;
-        margin: 0 auto;
-
-        position: relative;
-        float: left;
-        text-align: center;
-        font-size: 14px;
-        line-height: 30px;
-        .single {
-          span {
-            font-size: 12px;
-            font-weight: 700;
-          }
-        }
-      }
-    }
-  }
-
-  .chunks-title-table {
-    box-shadow: none !important;
-    padding-top: 0 !important;
-    padding-bottom: 0 !important;
-    border-bottom: 1px solid $grey2;
-    .single-analysis {
-      line-height: 25px;
-      .single {
-        line-height: 18px;
-        -webkit-box-sizing: border-box;
-        -moz-box-sizing: border-box;
-        box-sizing: border-box;
-        padding-bottom: 3px;
-        height: 60px;
-        vertical-align: text-top;
-        border: 1px solid $grey1;
-        border-bottom: none;
-        border-top: none;
-        text-align: center;
-        padding-right: 6px;
-      }
-    }
-  }
-
-  .chunks-pay-table {
-    box-shadow: none !important;
-    padding-top: 0 !important;
-    padding-bottom: 3px !important;
-    top: -1px;
-    .single-analysis {
-      .single {
-        border: 1px solid $grey1;
-        border-bottom: none;
-        text-align: right;
-        padding-right: 6px;
-        &.total {
-          width: 16.9%;
-          text-decoration: none;
-          border-left: 1px solid $grey1;
         }
       }
     }
@@ -1113,29 +929,6 @@ body.analyze {
       position: relative;
       top: 1px;
       color: $grey1;
-    }
-    .single-analysis {
-      .single {
-        border-right: 1px solid #e4e6e8;
-        border-left: 1px solid #e4e6e8;
-        text-align: right;
-        padding-right: 6px;
-      }
-      .payable-words {
-        font-weight: 700;
-        transition: 0.3s ease;
-        color: #000000;
-        font-size: 18px;
-      }
-      .payable-words.updated-count {
-        background-color: $approvedGreen;
-        transition: 0.3s ease;
-      }
-
-      .updated-count {
-        background-color: #f9ffb5;
-        transition: 0.4s ease;
-      }
     }
   }
 

@@ -1,0 +1,87 @@
+@import '../../commons/_colors';
+
+
+.job-analyze-header {
+  background-color: $grey2;
+  display: flex;
+  height: 32px;
+  align-items: center;
+  width: 100%;
+  justify-content: space-between;
+  .job-analyze-header_left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .job-analyze-languages, .job-analyze-header_right {
+    span {
+      font-weight: 700;
+      line-height: 16px;
+    }
+  }
+  .job-analyze-languages {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  }
+}
+
+.job-table-header {
+  display: flex;
+  padding: 0 !important;
+  .job-table-header-title {
+    width: 150px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    text-align: right;
+    color: $grey;
+    font-size: 12px;
+    :first-child {
+      height: 56px;
+      padding: 32px 12px 0 0;
+    }
+    > div {
+      height: 32px;
+      padding: 7px 12px;
+    }
+  }
+  .job-table-header-total {
+    width: 100px;
+    padding-top: 63px;
+    font-weight: 700;
+    font-size: 16px;
+    text-align: center;
+    background-color: $grey4 ;
+  }
+  table {
+    border: 1px solid $grey3;
+    border-spacing: 0;
+    border-collapse: separate;
+    border-radius: 4px;
+    overflow: hidden;
+    th:not(:last-child),
+    td:not(:last-child) {
+      border-right: 1px solid $grey3;
+    }
+    thead > tr > th {
+      border-bottom: 1px solid $grey3;
+    }
+    th {
+      height: 56px;
+      padding: 0 12px 5px 20px;
+      text-align: right;
+      font-weight: 400;
+      align-content: flex-end;
+    }
+    td {
+      height: 32px;
+      text-align: right;
+      padding: 0 12px;
+    }
+    th,
+    td {
+      background-color: $grey4;
+    }
+  }
+}
