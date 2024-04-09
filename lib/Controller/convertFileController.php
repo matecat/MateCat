@@ -257,7 +257,7 @@ class convertFileController extends ajaxController {
 
         $this->result->changeCode(ConversionHandlerStatus::ZIP_HANDLING);
 
-        // Error handling
+        // Upload errors handling
         if($error !== null and !empty($error->getErrors())){
             $this->result->changeCode($error->getCode());
             $savedErrors = $this->result->getErrors();
