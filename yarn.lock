@@ -1283,21 +1283,21 @@
   integrity sha512-6EwiSjwWYP7pTckG6I5eyFANjPhmPjUX9JRLUSfNPC7FX7zK9gyZAfUEaECL6ALTpGX5AjnBq3C9XmVWPitNpw==
 
 "@inquirer/confirm@^3.0.0":
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/@inquirer/confirm/-/confirm-3.0.0.tgz#6e1e35d18675fe659752d11021f9fddf547950b7"
-  integrity sha512-LHeuYP1D8NmQra1eR4UqvZMXwxEdDXyElJmmZfU44xdNLL6+GcQBS0uE16vyfZVjH8c22p9e+DStROfE/hyHrg==
+  version "3.1.2"
+  resolved "https://registry.yarnpkg.com/@inquirer/confirm/-/confirm-3.1.2.tgz#2352ff1d600d4c3763b051edbf1052e229eaacc3"
+  integrity sha512-xQeRxRpVOQdBinIyOHX9+/nTrvt84NnaP8hym5ARdLr6a5T1ckowx70sEaItgULBHlxSIJL970BoRfFxlzO2IA==
   dependencies:
-    "@inquirer/core" "^7.0.0"
-    "@inquirer/type" "^1.2.0"
+    "@inquirer/core" "^7.1.2"
+    "@inquirer/type" "^1.2.1"
 
-"@inquirer/core@^7.0.0":
-  version "7.0.0"
-  resolved "https://registry.yarnpkg.com/@inquirer/core/-/core-7.0.0.tgz#18d2d2bb5cc6858765b4dcf3dce544ad15898e81"
-  integrity sha512-g13W5yEt9r1sEVVriffJqQ8GWy94OnfxLCreNSOTw0HPVcszmc/If1KIf7YBmlwtX4klmvwpZHnQpl3N7VX2xA==
+"@inquirer/core@^7.1.2":
+  version "7.1.2"
+  resolved "https://registry.yarnpkg.com/@inquirer/core/-/core-7.1.2.tgz#f16222e8838193c29a868d9d6d5ae3b79313342f"
+  integrity sha512-ne5VhDqruYYzx8mmjDZ9F58ymrLJGxmSHJUcJGiW3tifzvl3goAm6gNX11w6+zUnGE54vgQ6ALDXL3IOSezMRw==
   dependencies:
-    "@inquirer/type" "^1.2.0"
+    "@inquirer/type" "^1.2.1"
     "@types/mute-stream" "^0.0.4"
-    "@types/node" "^20.11.16"
+    "@types/node" "^20.12.4"
     "@types/wrap-ansi" "^3.0.0"
     ansi-escapes "^4.3.2"
     chalk "^4.1.2"
@@ -1305,15 +1305,14 @@
     cli-width "^4.1.0"
     figures "^3.2.0"
     mute-stream "^1.0.0"
-    run-async "^3.0.0"
     signal-exit "^4.1.0"
     strip-ansi "^6.0.1"
     wrap-ansi "^6.2.0"
 
-"@inquirer/type@^1.2.0":
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/@inquirer/type/-/type-1.2.0.tgz#a569613628a881c2104289ca868a7def54e5c49d"
-  integrity sha512-/vvkUkYhrjbm+RolU7V1aUFDydZVKNKqKHR5TsE+j5DXgXFwrsOPcoGUJ02K0O7q7O53CU2DOTMYCHeGZ25WHA==
+"@inquirer/type@^1.2.1":
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/@inquirer/type/-/type-1.2.1.tgz#fbc7ab3a2e5050d0c150642d5e8f5e88faa066b8"
+  integrity sha512-xwMfkPAxeo8Ji/IxfUSqzRi0/+F2GIqJmpc5/thelgMGsjNZcjDDRBO9TLXT1s/hdx/mK5QbVIvgoLIFgXhTMQ==
 
 "@isaacs/cliui@^8.0.2":
   version "8.0.2"
@@ -1602,10 +1601,10 @@
   resolved "https://registry.yarnpkg.com/@mswjs/cookies/-/cookies-1.1.0.tgz#1528eb43630caf83a1d75d5332b30e75e9bb1b5b"
   integrity sha512-0ZcCVQxifZmhwNBoQIrystCb+2sWBY2Zw8lpfJBPCHGCA/HWqehITeCRVIv4VMy8MPlaHo2w2pTHFV2pFfqKPw==
 
-"@mswjs/interceptors@^0.25.16":
-  version "0.25.16"
-  resolved "https://registry.yarnpkg.com/@mswjs/interceptors/-/interceptors-0.25.16.tgz#7955fbb8da479bc691df117dd4c8d889e507ecc2"
-  integrity sha512-8QC8JyKztvoGAdPgyZy49c9vSHHAZjHagwl4RY9E8carULk8ym3iTaiawrT1YoLF/qb449h48f71XDPgkUSOUg==
+"@mswjs/interceptors@^0.26.14":
+  version "0.26.15"
+  resolved "https://registry.yarnpkg.com/@mswjs/interceptors/-/interceptors-0.26.15.tgz#256ad5c89f325c87d972cc27fc7d0d6d382ce804"
+  integrity sha512-HM47Lu1YFmnYHKMBynFfjCp0U/yRskHj/8QEJW0CBEPOlw8Gkmjfll+S9b8M7V5CNDw2/ciRxjjnWeaCiblSIQ==
   dependencies:
     "@open-draft/deferred-promise" "^2.2.0"
     "@open-draft/logger" "^0.3.0"
@@ -1993,10 +1992,10 @@
   dependencies:
     "@types/node" "*"
 
-"@types/node@*", "@types/node@^20.11.16":
-  version "20.11.19"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-20.11.19.tgz#b466de054e9cb5b3831bee38938de64ac7f81195"
-  integrity sha512-7xMnVEcZFu0DikYjWOlRq7NTPETrm7teqUT2WkQjrTIkEgUyyGdWsj/Zg8bEJt5TNklzbPD1X3fqfsHw3SpapQ==
+"@types/node@*", "@types/node@^20.12.4":
+  version "20.12.6"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-20.12.6.tgz#72d068870518d7da1d97b49db401e2d6a1805294"
+  integrity sha512-3KurE8taB8GCvZBPngVbp0lk5CKi8M9f9k1rsADh0Evdz5SzJ+Q+Hx9uHoFGsLnLnd1xmkDQr2hVhlA0Mn0lKQ==
   dependencies:
     undici-types "~5.26.4"
 
@@ -2031,9 +2030,9 @@
   integrity sha512-9aEbYZ3TbYMznPdcdr3SmIrLXwC/AKZXQeCf9Pgao5CKb8CyHuEX5jzWPTkvregvhRJHcpRO6BFoGW9ycaOkYw==
 
 "@types/statuses@^2.0.4":
-  version "2.0.4"
-  resolved "https://registry.yarnpkg.com/@types/statuses/-/statuses-2.0.4.tgz#041143ba4a918e8f080f8b0ffbe3d4cb514e2315"
-  integrity sha512-eqNDvZsCNY49OAXB0Firg/Sc2BgoWsntsLUdybGFOhAfCD6QJ2n9HXUIHGqt5qjrxmMv4wS8WLAw43ZkKcJ8Pw==
+  version "2.0.5"
+  resolved "https://registry.yarnpkg.com/@types/statuses/-/statuses-2.0.5.tgz#f61ab46d5352fd73c863a1ea4e1cef3b0b51ae63"
+  integrity sha512-jmIUGWrAiwu3dZpxntxieC+1n/5c3mjrImkmOSQ2NC5uP6cYO4aAZDdSmRcI5C1oiTmqlZGHC+/NmJrKogbP5A==
 
 "@types/tough-cookie@*":
   version "4.0.5"
@@ -4195,9 +4194,9 @@ he@^1.2.0:
   integrity sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw==
 
 headers-polyfill@^4.0.2:
-  version "4.0.2"
-  resolved "https://registry.yarnpkg.com/headers-polyfill/-/headers-polyfill-4.0.2.tgz#9115a76eee3ce8fbf95b6e3c6bf82d936785b44a"
-  integrity sha512-EWGTfnTqAO2L/j5HZgoM/3z82L7necsJ0pO9Tp0X1wil3PDLrkypTBRgVO2ExehEEvUycejZD3FuRaXpZZc3kw==
+  version "4.0.3"
+  resolved "https://registry.yarnpkg.com/headers-polyfill/-/headers-polyfill-4.0.3.tgz#922a0155de30ecc1f785bcf04be77844ca95ad07"
+  integrity sha512-IScLbePpkvO846sIwOtOTDjutRMWdXdJmXdMvk6gCBHxFO8d+QKOQedyZSxFTTFYRSmlgSTDtXqqq4pcenBXLQ==
 
 html-encoding-sniffer@^3.0.0:
   version "3.0.0"
@@ -5511,15 +5510,15 @@ ms@^2.1.1:
   integrity sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==
 
 msw@^2.1.3:
-  version "2.2.1"
-  resolved "https://registry.yarnpkg.com/msw/-/msw-2.2.1.tgz#5ece7ee81331aabe632fe331f07e71e8a3949499"
-  integrity sha512-DCsZAQwan+2onEcpD86fiEnCKW4IvYzqcwDq/2TIoeNrmBqNp/mJW4wHQyxcoYrRPwgujin7wDFflqiSO1iT/w==
+  version "2.2.13"
+  resolved "https://registry.yarnpkg.com/msw/-/msw-2.2.13.tgz#2fd9f554e77a1f99ef803d94008f5aef5c59b9fa"
+  integrity sha512-ljFf1xZsU0b4zv1l7xzEmC6OZA6yD06hcx0H+dc8V0VypaP3HGYJa1rMLjQbBWl32ptGhcfwcPCWDB1wjmsftw==
   dependencies:
     "@bundled-es-modules/cookie" "^2.0.0"
     "@bundled-es-modules/statuses" "^1.0.1"
     "@inquirer/confirm" "^3.0.0"
     "@mswjs/cookies" "^1.1.0"
-    "@mswjs/interceptors" "^0.25.16"
+    "@mswjs/interceptors" "^0.26.14"
     "@open-draft/until" "^2.1.0"
     "@types/cookie" "^0.6.0"
     "@types/statuses" "^2.0.4"
@@ -5851,9 +5850,9 @@ path-scurry@^1.10.1, path-scurry@^1.6.1:
     minipass "^5.0.0 || ^6.0.2 || ^7.0.0"
 
 path-to-regexp@^6.2.0:
-  version "6.2.1"
-  resolved "https://registry.yarnpkg.com/path-to-regexp/-/path-to-regexp-6.2.1.tgz#d54934d6798eb9e5ef14e7af7962c945906918e5"
-  integrity sha512-JLyh7xT1kizaEvcaXOQwOc2/Yhw6KZOvPf1S8401UyLk86CU79LN3vl7ztXGm/pZ+YjoyAJ4rxmHwbkBXJX+yw==
+  version "6.2.2"
+  resolved "https://registry.yarnpkg.com/path-to-regexp/-/path-to-regexp-6.2.2.tgz#324377a83e5049cbecadc5554d6a63a9a4866b36"
+  integrity sha512-GQX3SSMokngb36+whdpRXE+3f9V8UzyAorlYvOGx87ufGHehNTn5lCxrKtLyZ4Yl/wEKnNnr98ZzOwwDZV5ogw==
 
 path-type@^4.0.0:
   version "4.0.0"
@@ -6309,11 +6308,6 @@ rimraf@^3.0.2:
   integrity sha512-JZkJMZkAGFFPP2YqXZXPbMlMBgsxzE8ILs4lMIX/2o0L9UBw9O/Y3o6wFw/i9YLapcUJWwqbi3kdxIPdC62TIA==
   dependencies:
     glob "^7.1.3"
-
-run-async@^3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/run-async/-/run-async-3.0.0.tgz#42a432f6d76c689522058984384df28be379daad"
-  integrity sha512-540WwVDOMxA6dN6We19EcT9sc3hkXPw5mzRNGM3FkdN/vtE9NFvj5lFAPNwUDmJjXidm3v7TC1cTE7t17Ulm1Q==
 
 run-parallel@^1.1.9:
   version "1.2.0"
@@ -6911,9 +6905,9 @@ type-fest@^3.0.0:
   integrity sha512-tLq3bSNx+xSpwvAJnzrK0Ep5CLNWjvFTOp71URMaAEWBfRb9nnJiBoUe0tF8bI4ZFO3omgBR6NvnbzVUT3Ly4g==
 
 type-fest@^4.9.0:
-  version "4.10.2"
-  resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-4.10.2.tgz#3abdb144d93c5750432aac0d73d3e85fcab45738"
-  integrity sha512-anpAG63wSpdEbLwOqH8L84urkL6PiVIov3EMmgIhhThevh9aiMQov+6Btx0wldNcvm4wV+e2/Rt1QdDwKHFbHw==
+  version "4.15.0"
+  resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-4.15.0.tgz#21da206b89c15774cc718c4f2d693e13a1a14a43"
+  integrity sha512-tB9lu0pQpX5KJq54g+oHOLumOx+pMep4RaM6liXh2PKmVRFF+/vAtUP0ZaJ0kOySfVNjF6doBWPHhBhISKdlIA==
 
 typed-array-buffer@^1.0.0:
   version "1.0.0"
