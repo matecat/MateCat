@@ -3,7 +3,6 @@
 namespace ConnectedServices\LinkedIn;
 
 use ConnectedServices\ConnectedServiceInterface;
-use ConnectedServices\ConnectedServiceStruct;
 use ConnectedServices\ConnectedServiceUserModel;
 use GuzzleHttp\Exception\GuzzleException;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;

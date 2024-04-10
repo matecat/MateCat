@@ -1,6 +1,7 @@
 <?php
 
 use ConnectedServices\ConnectedServiceInterface;
+use ConnectedServices\Facebook\FacebookClient;
 use ConnectedServices\LinkedIn\LinkedInClient;
 use ConnectedServices\Github\GithubClient;
 use ConnectedServices\Google\GoogleClient;
@@ -12,6 +13,7 @@ class OauthClient {
     const GOOGLE_PROVIDER = 'google';
     const LINKEDIN_PROVIDER = 'linkedin';
     const MICROSOFT_PROVIDER = 'microsoft';
+    const FACEBOOK_PROVIDER = 'facebook';
 
     /**
      * @var self
@@ -62,6 +64,10 @@ class OauthClient {
 
             case self::LINKEDIN_PROVIDER:
                 $this->client = new LinkedInClient();
+                break;
+
+            case self::FACEBOOK_PROVIDER:
+                $this->client = new FacebookClient();
                 break;
 
             case null:

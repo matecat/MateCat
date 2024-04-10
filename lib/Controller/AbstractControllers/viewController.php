@@ -39,6 +39,11 @@ abstract class viewController extends controller {
      */
     protected $microsoftAuthURL;
 
+    /**
+     * @var string
+     */
+    protected $facebookAuthURL;
+
     protected $login_required = false;
 
     /**
@@ -165,6 +170,7 @@ abstract class viewController extends controller {
         $this->template->githubAuthUrl        = $this->getGithubAuthUrl();
         $this->template->linkedInAuthUrl      = $this->getLinkedInAuthUrl();
         $this->template->microsoftAuthUrl     = $this->getMicrosoftAuthUrl();
+        $this->template->facebookAuthUrl      = $this->getFacebookAuthUrl();
         $this->template->gdriveAuthURL        = GDrive::generateGDriveAuthUrl();
         $this->template->enableMultiDomainApi = INIT::$ENABLE_MULTI_DOMAIN_API;
         $this->template->ajaxDomainsNumber    = INIT::$AJAX_DOMAINS;
@@ -269,6 +275,26 @@ abstract class viewController extends controller {
         }
 
         return $this->microsoftAuthURL;
+    }
+
+    /**
+     * @return string
+     * @throws Exception
+     */
+    public function getFacebookAuthUrl(){
+        if (
+            is_null( $this->facebookAuthURL )
+            and (
+                !empty(INIT::$FACEBOOK_OAUTH_CLIENT_SECRET) and
+                !empty(INIT::$FACEBOOK_OAUTH_CLIENT_ID) and
+                !empty(INIT::$FACEBOOK_OAUTH_REDIRECT_URL)
+            )
+        ) {
+            $this->client  = OauthClient::getInstance(OauthClient::FACEBOOK_PROVIDER)->getClient();
+            $this->facebookAuthURL = $this->client->getAuthorizationUrl();
+        }
+
+        return $this->facebookAuthURL;
     }
 
     /**

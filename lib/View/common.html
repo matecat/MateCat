@@ -32,6 +32,12 @@
         /*]]>*/
     </tal:block>
 
+    <tal:block tal:condition="php: !empty(facebookAuthUrl)">
+        /*<![CDATA[*/
+            config.facebookAuthUrl = ${structure php:json_encode(facebookAuthUrl)} ;
+        /*]]>*/
+    </tal:block>
+
     <tal:block tal:repeat="config_data config_js">
         /*<![CDATA[*/
         config.pluggable = ${structure php: json_encode( config_data )} ;
