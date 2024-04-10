@@ -1,58 +1,45 @@
-import React from 'react'
+import React, {useState} from 'react'
 import {TransitionGroup, CSSTransition} from 'react-transition-group'
 
 import ChunkAnalyzeHeader from './ChunkAnalyzeHeader'
 import ChunkAnalyzeFile from './ChunkAnalyzeFile'
 
-class ChunkAnalyze extends React.Component {
-  constructor(props) {
-    super(props)
-    this.state = {
-      showFiles: false,
-    }
-  }
+const ChunkAnalyze = ({files, chunkInfo, index, total, chunksSize}) => {
+  const [showFilesInfo, setShowFilesInfo] = useState(false)
 
-  getFiles() {
-    return this.props.files.map((file, i) => {
+  const getFiles = () => {
+    return files.map((file, i) => {
       return <ChunkAnalyzeFile key={i} file={file} />
     })
   }
 
-  showFiles(e) {
+  const showFiles = (e) => {
     e.preventDefault()
-    this.setState({
-      showFiles: !this.state.showFiles,
-    })
+    setShowFilesInfo((prevState) => !prevState)
   }
 
-  shouldComponentUpdate() {
-    return true
-  }
-
-  render() {
-    return (
-      <div className="ui grid chunk-analyze-container">
-        <ChunkAnalyzeHeader
-          index={this.props.index}
-          total={this.props.total}
-          jobInfo={this.props.chunkInfo}
-          showFiles={this.showFiles.bind(this)}
-          chunksSize={this.props.chunksSize}
-        />
-        <TransitionGroup style={{width: '100%', padding: 0}}>
-          {this.state.showFiles ? (
-            <CSSTransition
-              key={0}
-              classNames="transition"
-              timeout={{enter: 500, exit: 300}}
-            >
-              <div>{this.getFiles()}</div>
-            </CSSTransition>
-          ) : null}
-        </TransitionGroup>
-      </div>
-    )
-  }
+  return (
+    <div className="chunk-analyze-container">
+      <ChunkAnalyzeHeader
+        index={index}
+        total={total}
+        jobInfo={chunkInfo}
+        showFiles={showFiles}
+        chunksSize={chunksSize}
+      />
+      <TransitionGroup style={{width: '100%', padding: 0}}>
+        {showFilesInfo ? (
+          <CSSTransition
+            key={0}
+            classNames="transition"
+            timeout={{enter: 500, exit: 300}}
+          >
+            <div>{getFiles()}</div>
+          </CSSTransition>
+        ) : null}
+      </TransitionGroup>
+    </div>
+  )
 }
 
 export default ChunkAnalyze

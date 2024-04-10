@@ -65,10 +65,10 @@
     height: 100%;
     text-align: right;
     color: $grey;
-    font-size: 12px;
     background-color: $grey5;
+    padding-right: 6px;
     :first-child {
-      height: 56px;
+      height: 60px;
     }
     > div {
       height: 32px;
@@ -83,38 +83,79 @@
     text-align: center;
     > div {
       justify-content: center;
-      padding: 0;
+      border-bottom: none;
+      padding-bottom: 10px;
     }
   }
-  /*table {
-    border: 1px solid $grey3;
-    border-spacing: 0;
-    border-collapse: separate;
-    border-radius: 4px;
-    overflow: hidden;
-    th:not(:last-child),
-    td:not(:last-child) {
-      border-right: 1px solid $grey3;
-    }
-    thead > tr > th {
-      border-bottom: 1px solid $grey3;
-    }
-    th {
-      height: 56px;
-      padding-right: 10px;
-      padding-bottom: 4px;
-      text-align: right;
-      font-weight: 400;
-      align-content: flex-end;
-    }
-    td {
-      height: 32px;
-      text-align: right;
-      padding: 0 12px;
-    }
-    th,
-    td {
-      background-color: $grey4;
-    }
-  }*/
 }
+
+.chunk-analyze-container {
+  width: 100%;
+  padding: 0 !important;
+  .chunk-analyze-info {
+    display: grid;
+    grid-template-columns: minmax(100px, 150px) repeat(11, 1fr) minmax(80px, 100px);
+    padding: 16px 0;
+    background-color: $white;
+    .chunk-analyze-info-header {
+      height: 48px;
+      background-color: #f5f6f7;
+      border-radius: 4px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      margin: 0 6px;
+      .chunk-analyze-info-index {
+        color: $black !important;
+        font-weight: 700;
+      }
+      .chunk-analyze-info-files {
+        color: $black !important;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        text-decoration: underline;
+        cursor: pointer;
+      }
+
+      :first-child {
+        color: $grey;
+        font-size: 12px;
+      }
+      > div {
+        height: 24px;
+        width: 100%;
+        color: $black;
+        justify-content: space-between;
+        display: flex;
+        padding: 2px 8px;
+      }
+    }
+    .chunk-analyze-info-total {
+      > div {
+        justify-content: center !important;
+      }
+      :last-child {
+        font-size: 16px !important;
+        font-weight: 700;
+      }
+    }
+    > div {
+      border-right: 1px solid $grey3;
+      &:last-child, &:first-child {
+        border-right: none;
+      }
+      > div:not(.chunk-analyze-info-header) {
+        height: 24px;
+        justify-content: right;
+        display: flex;
+        padding-right: 6px;
+      }
+      :first-child {
+        font-size: 12px;
+        color: $grey;
+      }
+    }
+  }
+}
+
