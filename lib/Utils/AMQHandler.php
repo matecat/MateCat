@@ -13,16 +13,26 @@ use Stomp\Client;
 use Stomp\Exception\ConnectionException;
 use Stomp\Network\Connection;
 use Stomp\StatefulStomp;
+use Stomp\Transport\Frame;
 use Stomp\Transport\Message;
 use TaskRunner\Commons\Context;
 
-class AMQHandler extends StatefulStomp {
+class AMQHandler {
 
     /**
      * @var PredisClient
      */
     protected $redisHandler;
-    protected $clientType = null;
+
+    /**
+     * @var StatefulStomp
+     */
+    protected $statefulStomp;
+    /**
+     * @var Connection
+     */
+    protected static $staticStompConnection;
+    protected $clientType      = null;
 
     protected $queueTotalID = null;
 
@@ -39,19 +49,62 @@ class AMQHandler extends StatefulStomp {
     protected $queueName = null;
 
     /**
+     * Singleton implementation of StatefulStomp in a not static constructor
+     *
      * @throws ConnectionException
      */
-    public function __construct( $brokerUri = null ) {
+    public function __construct( $brokerUri = null, $usePersistentConnection = true ) {
 
-        if ( !is_null( $brokerUri ) ) {
-            $connection = new Connection( $brokerUri );
+        if ( $usePersistentConnection ) {
+
+            if ( !isset( self::$staticStompConnection ) ) {
+                if ( !is_null( $brokerUri ) ) {
+                    self::$staticStompConnection = new Connection( $brokerUri, 2 );
+                } else {
+                    self::$staticStompConnection = new Connection( INIT::$QUEUE_BROKER_ADDRESS, 2 );
+                }
+            }
+
+            $connection = self::$staticStompConnection;
+
         } else {
-            $connection = new Connection( INIT::$QUEUE_BROKER_ADDRESS, 2 );
+
+            if ( !is_null( $brokerUri ) ) {
+                $connection = new Connection( $brokerUri, 2 );
+            } else {
+                $connection = new Connection( INIT::$QUEUE_BROKER_ADDRESS, 2 );
+            }
+
         }
 
-        $connection->setReadTimeout( 0, 250000 );
-        parent::__construct( new Client( $connection ) );
+        $this->statefulStomp = new StatefulStomp( new Client( $connection ) );
 
+    }
+
+    public static function getNewInstanceForDaemons() {
+        return new self( null, false );
+    }
+
+    /**
+     * @return Client
+     */
+    public function getClient() {
+        return $this->statefulStomp->getClient();
+    }
+
+    public function ack( Frame $frame ) {
+        $this->statefulStomp->ack( $frame );
+    }
+
+    public function nack( Frame $frame ) {
+        $this->statefulStomp->nack( $frame );
+    }
+
+    /**
+     * @return false|Frame
+     */
+    public function read() {
+        return $this->statefulStomp->read();
     }
 
     /**
@@ -83,12 +136,12 @@ class AMQHandler extends StatefulStomp {
         $this->clientType = self::CLIENT_TYPE_SUBSCRIBER;
         $this->queueName  = $destination;
 
-        return parent::subscribe( '/queue/' . INIT::$INSTANCE_ID . "_" . $destination, $selector, $ack, $header );
+        return $this->statefulStomp->subscribe( '/queue/' . INIT::$INSTANCE_ID . "_" . $destination, $selector, $ack, $header );
 
     }
 
     /**
-     * @param string         $destination
+     * @param string  $destination
      * @param Message $message
      *
      * @return bool
@@ -96,6 +149,7 @@ class AMQHandler extends StatefulStomp {
     public function publishToQueues( $destination, Message $message ) {
 
         $this->clientType = self::CLIENT_TYPE_PUBLISHER;
+
         return $this->_send( '/queue/' . INIT::$INSTANCE_ID . "_" . $destination, $message );
 
     }
@@ -107,13 +161,14 @@ class AMQHandler extends StatefulStomp {
      * @return bool
      */
     private function _send( $destination, Message $message ) {
-        $r = $this->send( $destination, $message );
-        $this->getClient()->disconnect( true );
+        $r = $this->statefulStomp->send( $destination, $message );
+        $this->statefulStomp->getClient()->disconnect( true );
+
         return $r;
     }
 
     /**
-     * @param string         $destination
+     * @param string  $destination
      * @param Message $message
      *
      * @return bool
@@ -121,6 +176,7 @@ class AMQHandler extends StatefulStomp {
     public function publishToTopic( $destination, Message $message ) {
 
         $this->clientType = self::CLIENT_TYPE_PUBLISHER;
+
         return $this->_send( $destination, $message );
 
     }
