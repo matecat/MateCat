@@ -27,8 +27,37 @@
 }
 
 .job-table-header {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(100px, 150px) repeat(11, 1fr) minmax(80px, 100px);
+  grid-template-rows: 100px;
   padding: 0 !important;
+  border-bottom: 1px solid $grey3;
+  background-color: $grey4 ;
+  > div {
+    &:first-child {
+      border-left: none;
+      > div {
+        border-bottom: none;
+      }
+    }
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    text-align: right;
+    border-left: 1px solid $grey3;
+    :first-child {
+      height: 60px;
+      border-bottom: 1px solid $grey3;
+    }
+    > div {
+      height: 32px;
+      display: flex;
+      justify-content: flex-end;
+      align-items: flex-end;
+      padding-bottom: 2px;
+      padding-right: 6px;
+    }
+  }
   .job-table-header-title {
     width: 150px;
     display: flex;
@@ -37,24 +66,27 @@
     text-align: right;
     color: $grey;
     font-size: 12px;
+    background-color: $grey5;
     :first-child {
       height: 56px;
-      padding: 32px 12px 0 0;
     }
     > div {
       height: 32px;
-      padding: 7px 12px;
     }
   }
   .job-table-header-total {
     width: 100px;
-    padding-top: 63px;
+    display: flex;
+    justify-content: flex-end;
     font-weight: 700;
     font-size: 16px;
     text-align: center;
-    background-color: $grey4 ;
+    > div {
+      justify-content: center;
+      padding: 0;
+    }
   }
-  table {
+  /*table {
     border: 1px solid $grey3;
     border-spacing: 0;
     border-collapse: separate;
@@ -84,5 +116,5 @@
     td {
       background-color: $grey4;
     }
-  }
+  }*/
 }

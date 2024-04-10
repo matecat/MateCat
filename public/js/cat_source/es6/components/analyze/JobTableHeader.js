@@ -7,38 +7,82 @@ const JobTableHeader = ({rates}) => {
         <div>Analysis bucket</div>
         <div>Payable rates</div>
       </div>
-      <table>
-        <thead>
-          <tr>
-            <th>New</th>
-            <th>Repetitions</th>
-            <th>Internal 75-99%</th>
-            <th>TM Partial 50-74%</th>
-            <th>TM Partial 75-84%</th>
-            <th>TM Partial 85-94%</th>
-            <th>TM Partial 95-99%</th>
-            <th>TM 100%</th>
-            <th>Public TM 100%</th>
-            <th>TM 100% in context</th>
-            <th>Machine Translation</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>{rates.NO_MATCH}%</td>
-            <td>{rates.REPETITIONS}%</td>
-            <td>{rates.INTERNAL}%</td>
-            <td>{rates['50%-74%']}%</td>
-            <td>{rates['75%-84%']}%</td>
-            <td>{rates['85%-94%']}%</td>
-            <td>{rates['95%-99%']}%</td>
-            <td>{rates['100%']}%</td>
-            <td>{rates['100%_PUBLIC']}%</td>
-            <td>{rates['ICE'] ? rates['ICE'] : 0}%</td>
-            <td>{rates.MT}%</td>
-          </tr>
-        </tbody>
-      </table>
+      <div>
+        <div>New</div>
+        <div>{rates.NO_MATCH}%</div>
+      </div>
+      <div>
+        <div>Repetitions</div>
+        <div>{rates.REPETITIONS}%</div>
+      </div>
+      <div>
+        <div>
+          Internal
+          <br />
+          75-99%
+        </div>
+        <div>{rates.INTERNAL}%</div>
+      </div>
+      <div>
+        <div>
+          TM Partial
+          <br />
+          50-74%
+        </div>
+        <div>{rates['50%-74%']}%</div>
+      </div>
+      <div>
+        <div>
+          TM Partial
+          <br />
+          75-84%
+        </div>
+        <div>{rates['75%-84%']}%</div>
+      </div>
+      <div>
+        <div>
+          TM Partial
+          <br />
+          85-94%
+        </div>
+        <div>{rates['85%-94%']}%</div>
+      </div>
+      <div>
+        <div>
+          TM Partial
+          <br />
+          95-99%
+        </div>
+        <div>{rates['95%-99%']}%</div>
+      </div>
+      <div>
+        <div>
+          TM
+          <br />
+          100%
+        </div>
+        <div>{rates['100%']}%</div>
+      </div>
+      <div>
+        <div>
+          Public TM
+          <br />
+          100%
+        </div>
+        <div>{rates['100%_PUBLIC']}%</div>
+      </div>
+      <div>
+        <div>
+          TM 100%
+          <br />
+          in context
+        </div>
+        <div>{rates['ICE'] ? rates['ICE'] : 0}%</div>
+      </div>
+      <div>
+        <div>Machine Translation</div>
+        <div>{rates.MT}%</div>
+      </div>
       <div className="job-table-header-total">
         <div>Total</div>
       </div>
