@@ -107,7 +107,9 @@ class AMQHandler extends StatefulStomp {
      * @return bool
      */
     private function _send( $destination, Message $message ) {
-        return $this->send( $destination, $message );
+        $r = $this->send( $destination, $message );
+        $this->getClient()->disconnect( true );
+        return $r;
     }
 
     /**
