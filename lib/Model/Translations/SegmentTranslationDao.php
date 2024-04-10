@@ -217,7 +217,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
         return $db->update( 'segment_translations', $data, $where );
     }
 
-    public static function getUnchangebleStatus( Chunks_ChunkStruct $chunk, $segments_ids, $status, $source_page ) {
+    public static function getUnchangeableStatus( Chunks_ChunkStruct $chunk, $segments_ids, $status, $source_page ) {
 
         $where_values = [];
         $conn         = Database::obtain()->getConnection();
@@ -399,40 +399,23 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
      * @param Translations_SegmentTranslationStruct $translation_struct
      *
      * @return int
-     * @deprecated
-     * @TODO use Update Struct with mask
-     *
+     * @throws Exception
      */
     public static function updateTranslationAndStatusAndDate( Translations_SegmentTranslationStruct $translation_struct ) {
 
-        // persist the version_number in case $translation_struct has already the property hydrated
-        $update_version_number = ( null !== $translation_struct->version_number ) ? 'version_number = :version_number,' : '';
-
-        $query = "UPDATE segment_translations 
-                    SET translation = :translation, 
-                    status = :status, 
-                    $update_version_number
-                    translation_date = :translation_date
-                    WHERE id_segment = :id_segment
-                    AND id_job=:id_job ";
-
         $values = [
-                'translation'      => $translation_struct->translation,
-                'id_segment'       => $translation_struct->id_segment,
-                'id_job'           => $translation_struct->id_job,
-                'status'           => $translation_struct->status,
-                'translation_date' => $translation_struct->translation_date
+                'translation',
+                'status',
+                'translation_date',
         ];
 
+        // persist the version_number in case $translation_struct has already the property hydrated
         if ( null !== $translation_struct->version_number ) {
-            $values['version_number'] = $translation_struct->version_number;
+            $values[] = 'version_number';
         }
 
-        $db   = Database::obtain();
-        $stmt = $db->getConnection()->prepare( $query );
-        $stmt->execute($values);
+        return Translations_SegmentTranslationDao::updateStruct( $translation_struct, $values ) ;
 
-        return $stmt->rowCount();
     }
 
     /**

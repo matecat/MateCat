@@ -20,12 +20,10 @@ class getSearchController extends ajaxController {
     private $function; //can be search, replace
     private $isMatchCaseRequested;
     private $isExactMatchRequested;
-    private $matchCase;
-    private $exactMatch;
     private $strictMode;
     private $revisionNumber;
 
-    private $queryParams = [];
+    private $queryParams;
 
     /**
      * @var Chunks_ChunkStruct
@@ -51,6 +49,7 @@ class getSearchController extends ajaxController {
      * getSearchController constructor.
      * @throws ReflectionException
      * @throws \Predis\Connection\ConnectionException
+     * @throws Exception
      */
     public function __construct() {
 
@@ -113,33 +112,23 @@ class getSearchController extends ajaxController {
                 'strictMode'            => $this->strictMode,
         ] );
 
-        // YYY [Remove] Backward compatibility: remove this check revision number is not needed since the status is enough
-        // YYY [Remove] Segment translation events in this search are no more needed
-        if ( in_array( strtoupper( $this->queryParams->status ), Constants_TranslationStatus::$REVISION_STATUSES ) ) {
-            if ( !empty( $this->revisionNumber ) ) {
-                $this->queryParams->sourcePage = ReviewUtils::revisionNumberToSourcePage( $this->revisionNumber );
-            } else {
-                $this->queryParams->sourcePage = Constants::SOURCE_PAGE_REVISION;
-            }
-        }
-
         $this->db = Database::obtain();
 
         // Search_ReplaceHistory init
-        $srh_driver = ( isset( \INIT::$REPLACE_HISTORY_DRIVER ) and '' !== \INIT::$REPLACE_HISTORY_DRIVER ) ? \INIT::$REPLACE_HISTORY_DRIVER : 'redis';
-        $srh_ttl    = ( isset( \INIT::$REPLACE_HISTORY_TTL ) and '' !== \INIT::$REPLACE_HISTORY_TTL ) ? \INIT::$REPLACE_HISTORY_TTL : 300;
+        $srh_driver = ( isset( INIT::$REPLACE_HISTORY_DRIVER ) and '' !== INIT::$REPLACE_HISTORY_DRIVER ) ? INIT::$REPLACE_HISTORY_DRIVER : 'redis';
+        $srh_ttl    = ( isset( INIT::$REPLACE_HISTORY_TTL ) and '' !== INIT::$REPLACE_HISTORY_TTL ) ? INIT::$REPLACE_HISTORY_TTL : 300;
         $this->srh  = Search_ReplaceHistoryFactory::create( $this->queryParams[ 'job' ], $srh_driver, $srh_ttl );
 
         //get Job Info
         $this->job_data = Chunks_ChunkDao::getByIdAndPassword( (int)$this->job, $this->password );
 
         /** @var MateCatFilter $filter */
-        $filter            = MateCatFilter::getInstance( $this->getFeatureSet(), $this->job_data->source, $this->job_data->target, [] );
+        $filter            = MateCatFilter::getInstance( $this->getFeatureSet(), $this->job_data->source, $this->job_data->target );
         $this->searchModel = new SearchModel( $this->queryParams, $filter );
     }
 
     /**
-     * @return mixed|void
+     * @return void
      * @throws Exception
      */
     public function doAction() {
@@ -169,8 +158,6 @@ class getSearchController extends ajaxController {
                 break;
             default :
                 $this->result[ 'errors' ][] = [ "code" => -11, "message" => "unknown  function. Use find or replace" ];
-
-                return;
         }
     }
 
@@ -189,7 +176,7 @@ class getSearchController extends ajaxController {
         } elseif ( !empty( $this->target ) ) {
             $this->queryParams[ 'key' ] = 'target';
             $this->queryParams[ 'trg' ] = $this->target;
-        } elseif ( empty( $this->source ) and empty( $this->target ) ) {
+        } else {
             $this->queryParams[ 'key' ] = 'status_only';
         }
 
@@ -216,7 +203,7 @@ class getSearchController extends ajaxController {
         $search_results = [];
 
         // perform a regular search
-        $this->doSearch( true );
+        $this->doSearch();
 
         // and then hydrate the $search_results array
         foreach ( $this->result[ 'segments' ] as $segmentId ) {
@@ -231,7 +218,7 @@ class getSearchController extends ajaxController {
 
         // and save replace events
         $replace_version = ( $this->srh->getCursor() + 1 );
-        foreach ( $search_results as $key => $tRow ) {
+        foreach ( $search_results as $tRow ) {
             $this->_saveReplacementEvent( $replace_version, $tRow );
         }
     }
@@ -351,7 +338,7 @@ class getSearchController extends ajaxController {
     /**
      * @param $search_results
      *
-     * @return int|mixed
+     * @return int|void
      * @throws Exception
      */
     private function _updateSegments( $search_results ) {
@@ -376,6 +363,7 @@ class getSearchController extends ajaxController {
             if ( $old_translation->translation !== $tRow[ 'translation' ] && in_array( $old_translation->status, [
                             Constants_TranslationStatus::STATUS_TRANSLATED,
                             Constants_TranslationStatus::STATUS_APPROVED,
+                            Constants_TranslationStatus::STATUS_APPROVED2,
                             Constants_TranslationStatus::STATUS_REJECTED
                     ] )
             ) {
@@ -394,8 +382,7 @@ class getSearchController extends ajaxController {
                             $this->job_data,
                             $this->id_segment,
                             $project,
-                            $versionsHandler,
-                            true
+                            $versionsHandler
                     );
 
                 } catch ( Exception $e ) {
@@ -426,7 +413,7 @@ class getSearchController extends ajaxController {
             $new_translation->translation_date       = date( "Y-m-d H:i:s" );
 
             $version_number = $old_translation->version_number;
-            if ( false === \Utils::stringsAreEqual( $new_translation->translation, $old_translation->translation ) ) {
+            if ( false === Utils::stringsAreEqual( $new_translation->translation, $old_translation->translation ) ) {
                 $version_number++;
             }
 
@@ -496,33 +483,4 @@ class getSearchController extends ajaxController {
         return Constants_TranslationStatus::STATUS_APPROVED;
     }
 
-    /**
-     * @return array
-     * @throws Exception
-     */
-    private function _getSearchResults() {
-        $query = $this->searchModel->_loadReplaceAllQuery();
-
-        return $this->executeQuery( $query );
-    }
-
-    /**
-     * @param $query
-     *
-     * @return array
-     * @throws Exception
-     */
-    private function executeQuery( $query ) {
-        Log::doJsonLog( $query );
-
-        try {
-            $stmt = $this->db->getConnection()->prepare( $query );
-            $stmt->execute();
-
-            return $stmt->fetchAll( \PDO::FETCH_ASSOC );
-        } catch ( \PDOException $e ) {
-            Log::doJsonLog( $e->getMessage() );
-            throw new \Exception( $e->getMessage(), $e->getCode() * -1, $e );
-        }
-    }
 }

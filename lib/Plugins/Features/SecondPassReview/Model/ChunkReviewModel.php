@@ -32,7 +32,6 @@ class ChunkReviewModel extends \Features\ReviewExtended\ChunkReviewModel {
         $chunkReviewDao = new ChunkReviewDao();
         $this->chunk_review->penalty_points = ChunkReviewDao::getPenaltyPointsForChunk( $this->chunk, $this->chunk_review->source_page ) ;
         $this->chunk_review->reviewed_words_count = $chunkReviewDao->getReviewedWordsCountForSecondPass( $this->chunk, $this->chunk_review->source_page ) ;
-        $this->chunk_review->advancement_wc = $chunkReviewDao->recountAdvancementWords( $this->chunk, $this->chunk_review->source_page ) ;
         $this->chunk_review->total_tte = $chunkReviewDao->countTimeToEdit( $this->chunk, $this->chunk_review->source_page ) ;
 
         $this->_updatePassFailResult( $project );

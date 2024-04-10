@@ -2,11 +2,10 @@
 
 use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
+use Engines_Intento as Intento;
 use Exceptions\AuthorizationError;
 use Exceptions\NotFoundException;
 use LQA\ChunkReviewStruct;
-use TmKeyManagement\UserKeysModel;
-use Engines_Intento as Intento;
 use WordCount\WordCountStruct;
 
 /**
@@ -138,8 +137,7 @@ class catController extends viewController {
 
         $this->wStruct = CatUtils::getWStructFromJobArray( $this->chunk, $this->project );
 
-        // YYY [Remove] backward compatibility for current projects
-        $this->job_stats = CatUtils::getFastStatsForJob( $this->wStruct, true, $this->project->getWordCountType() );
+        $this->job_stats = CatUtils::getFastStatsForJob( $this->wStruct );
 
         if ( self::isRevision() ) {
             $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;

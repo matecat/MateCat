@@ -3,7 +3,6 @@
 namespace API\App;
 
 use API\V2\KleinController;
-use Matecat\SubFiltering\MateCatFilter;
 use TmKeyManagement\UserKeysModel;
 use TmKeyManagement_Filter;
 use Utils;

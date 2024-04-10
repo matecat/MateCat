@@ -11,6 +11,7 @@ namespace AsyncTasks\Workers;
 
 use Chunks_ChunkStruct;
 use Database;
+use Exception;
 use Features;
 use Features\ReviewExtended\ReviewUtils;
 use Features\TranslationVersions\Handlers\TranslationEventsHandler;
@@ -20,6 +21,7 @@ use Stomp;
 use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\AbstractWorker;
 use TaskRunner\Commons\QueueElement;
+use TaskRunner\Exceptions\EndQueueException;
 use Translations_SegmentTranslationDao;
 use Users_UserDao;
 use WordCount\CounterModel;
@@ -37,10 +39,11 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker {
     /**
      * @param AbstractElement $queueElement
      *
-     * @return mixed|void
+     * @return void
      * @throws \ReflectionException
      * @throws \StompException
-     * @throws \TaskRunner\Exceptions\EndQueueException
+     * @throws EndQueueException
+     * @throws Exception
      */
     public function process( AbstractElement $queueElement ) {
         /**

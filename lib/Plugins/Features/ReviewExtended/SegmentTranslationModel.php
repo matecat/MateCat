@@ -25,8 +25,6 @@ use TransactionableTrait;
 use Users_UserDao;
 use WordCount\CounterModel;
 
-;
-
 class SegmentTranslationModel implements ISegmentTranslationModel {
 
     use TransactionableTrait;
@@ -435,14 +433,6 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
                 $notifiedEmails[] = $recipientEmail;
             }
         }
-    }
-
-    /**
-     * @throws Exception
-     */
-    protected function getDeltaWordCount() {
-
-        return $this->_event->getOldTranslation()->eq_word_count;
     }
 
     /**
