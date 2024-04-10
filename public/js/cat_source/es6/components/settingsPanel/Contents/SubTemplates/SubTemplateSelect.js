@@ -40,6 +40,7 @@ export const SubTemplateSelect = () => {
           options={options}
           activeOption={activeOption}
           onSelect={onSelect}
+          maxHeightDroplist={300}
         />
       )}
     </>
