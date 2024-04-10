@@ -304,7 +304,13 @@ export const Dropdown = forwardRef(
         }).length > 0
       const isNoResultsFound = option.id === 'noResultsFound'
       const showActiveOptionIcon = isActiveOption || isActiveOptions
-      const {beforeRow, row, afterRow, cancelHandleClick} =
+      const {
+        beforeRow,
+        row,
+        afterRow,
+        cancelHandleClick,
+        getElementToEllipsis,
+      } =
         children?.({
           index,
           ...option,
@@ -337,7 +343,11 @@ export const Dropdown = forwardRef(
               if (!isNoResultsFound && !cancelHandleClick) handleClick(option)
             }}
             onMouseEnter={(e) =>
-              TEXT_UTILS.isContentTextEllipsis(e.target?.firstChild) &&
+              TEXT_UTILS.isContentTextEllipsis(
+                getElementToEllipsis?.()
+                  ? getElementToEllipsis()
+                  : e.target?.firstChild,
+              ) &&
               setRowTooltip({
                 label: option.name,
                 top: e.target.offsetTop - listRef?.current.scrollTop,

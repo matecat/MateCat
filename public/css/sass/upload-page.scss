@@ -2993,19 +2993,39 @@ a.pull-right.confirmDelete {
 
 .project-template-select {
   .select-item-default {
+    display: flex;
+    flex-grow: 1;
+    align-items: center;
+    justify-content: space-between;
+    color: $black;
+
+    .select-item-default-label {
+      display: block;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      max-width: 160px;
+    }
+
     & > svg {
       opacity: 1;
-      min-width: 16px;
     }
   }
-  .select-item-default-active {
-    margin-right: 4px;
-  }
 
-  .dropdown__option {
-    > :first-child {
-      flex-grow: 1;
-      text-align: left;
+  .dropdown__option--is-active-option {
+    .select-item-default {
+      margin-right: 4px;
+      color: $white;
+    }
+  }
+}
+
+.translate-box {
+  .project-template-select {
+    .dropdown__option--is-active-option {
+      .select-item-default {
+        color: $black;
+      }
     }
   }
 }

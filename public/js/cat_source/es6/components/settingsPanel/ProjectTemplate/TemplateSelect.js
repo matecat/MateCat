@@ -1,7 +1,8 @@
-import React, {useEffect, useState} from 'react'
+import React, {createRef, useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
 import {Select} from '../../common/Select'
 import {IconPin} from '../../icons/IconPin'
+import Check from '../../../../../../img/icons/Check'
 
 export const TemplateSelect = ({
   projectTemplates,
@@ -18,18 +19,9 @@ export const TemplateSelect = ({
 
   const options = projectTemplates
     .filter(({isTemporary}) => !isTemporary)
-    .map(({id, name, isDefault, isSelected}) => ({
+    .map(({id, name}) => ({
       id: id.toString(),
-      name: isDefault ? (
-        <span
-          className={`select-item-default${isSelected ? ' select-item-default-active' : ''}`}
-        >
-          {name}
-          <IconPin />
-        </span>
-      ) : (
-        name
-      ),
+      name,
     }))
   const activeOption = currentProjectTemplate && {
     id: currentProjectTemplate.id.toString(),
@@ -56,8 +48,6 @@ export const TemplateSelect = ({
     return () => clearTimeout(tmOut)
   }, [projectTemplates.length])
 
-  // const isLoadingTemplates = !projectTemplates.length
-
   return (
     <>
       <Select
@@ -72,7 +62,32 @@ export const TemplateSelect = ({
         activeOption={activeOption}
         onSelect={onSelect}
         isDisabled={isLoadingTemplates}
-      />
+      >
+        {({id, name, showActiveOptionIcon}) => {
+          const {isDefault} =
+            projectTemplates
+              .filter(({isTemporary}) => !isTemporary)
+              .find((template) => template.id === parseInt(id)) ?? {}
+
+          if (isDefault) {
+            const labelRef = createRef()
+            return {
+              row: (
+                <>
+                  <div className="select-item-default">
+                    <span ref={labelRef} className="select-item-default-label">
+                      {name}
+                    </span>
+                    <IconPin />
+                  </div>
+                  {showActiveOptionIcon && <Check size={16} />}
+                </>
+              ),
+              getElementToEllipsis: () => labelRef.current,
+            }
+          }
+        }}
+      </Select>
       {isLoadingTemplates && !config.is_cattool && (
         <div className="project-template-select-loading">
           <div className="project-template-select-loading-icon"></div>
