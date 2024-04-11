@@ -9,6 +9,7 @@ import TranslatedIcon from '../../../../../img/icons/TranslatedIcon'
 import Tooltip from '../common/Tooltip'
 import CommonUtils from '../../utils/commonUtils'
 import {ANALYSIS_STATUS, UNIT_COUNT} from '../../constants/Constants'
+import LabelWithTooltip from '../common/LabelWithTooltip'
 
 class AnalyzeChunksResume extends React.Component {
   constructor(props) {
@@ -285,15 +286,15 @@ class AnalyzeChunksResume extends React.Component {
                         ID: {jobsAnalysis[indexJob].id}
                       </div>
                       <div className="source-target">
-                        <div className="source-box">
-                          {jobsAnalysis[indexJob].source_name}
-                        </div>
+                        <LabelWithTooltip className="source-box">
+                          <span>{jobsAnalysis[indexJob].source_name}</span>
+                        </LabelWithTooltip>
                         <div className="in-to">
                           <i className="icon-chevron-right icon" />
                         </div>
-                        <div className="target-box">
-                          {jobsAnalysis[indexJob].target_name}
-                        </div>
+                        <LabelWithTooltip className="target-box">
+                          <span>{jobsAnalysis[indexJob].target_name}</span>
+                        </LabelWithTooltip>
                       </div>
                     </div>
                   </div>
@@ -352,15 +353,15 @@ class AnalyzeChunksResume extends React.Component {
                         ID: {jobsAnalysis[indexJob].id}
                       </div>
                       <div className="source-target">
-                        <div className="source-box no-split">
-                          {jobsAnalysis[indexJob].source_name}
-                        </div>
+                        <LabelWithTooltip className="source-box no-split">
+                          <span>{jobsAnalysis[indexJob].source_name}</span>
+                        </LabelWithTooltip>
                         <div className="in-to">
                           <i className="icon-chevron-right icon" />
                         </div>
-                        <div className="target-box no-split">
-                          {jobsAnalysis[indexJob].target_name}
-                        </div>
+                        <LabelWithTooltip className={'target-box no-split'}>
+                          <span>{jobsAnalysis[indexJob].target_name}</span>
+                        </LabelWithTooltip>
                       </div>
                     </div>
                     <div className={'translate-url'}>
@@ -453,15 +454,15 @@ class AnalyzeChunksResume extends React.Component {
               <div className="chunk ui grid shadow-1">
                 <div className="title-job no-split">
                   <div className="source-target">
-                    <div className="source-box no-split">
-                      {jobInfo.get('sourceTxt')}
-                    </div>
+                    <LabelWithTooltip className="source-box no-split">
+                      <span>{jobInfo.get('sourceTxt')}</span>
+                    </LabelWithTooltip>
                     <div className="in-to">
                       <i className="icon-chevron-right icon" />
                     </div>
-                    <div className="target-box no-split">
-                      {jobInfo.get('targetTxt')}
-                    </div>
+                    <LabelWithTooltip className="target-box no-split">
+                      <span>{jobInfo.get('targetTxt')}</span>
+                    </LabelWithTooltip>
                   </div>
                 </div>
                 <div className="titles-compare">

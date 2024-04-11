@@ -1,8 +1,8 @@
 import React, {useRef} from 'react'
 import FileIcon from '../../../../../img/icons/FileIcon'
+import LabelWithTooltip from '../common/LabelWithTooltip'
 const ChunkAnalyzeFile = ({file, index, size}) => {
   const matches = file.matches
-  const refFile = useRef()
   return (
     <div className="chunk-file-detail">
       <div
@@ -13,13 +13,9 @@ const ChunkAnalyzeFile = ({file, index, size}) => {
           <div>
             <FileIcon size={14} />
           </div>
-          <div
-            ref={refFile}
-            className={`chunk-file-detail-name `}
-            title={file.name}
-          >
-            {file.name}
-          </div>
+          <LabelWithTooltip className={`chunk-file-detail-name `}>
+            <span>{file.name}</span>
+          </LabelWithTooltip>
         </div>
       </div>
       <div>
