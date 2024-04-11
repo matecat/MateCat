@@ -343,7 +343,6 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
 
   setStatus(sid, fid, status) {
     const index = this.getSegmentIndex(sid)
-    //YYY
     status =
       config.revisionNumber === REVISE_STEP_NUMBER.REVISE2 &&
       status === SEGMENTS_STATUS.APPROVED
