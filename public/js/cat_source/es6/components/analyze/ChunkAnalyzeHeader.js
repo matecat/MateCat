@@ -1,12 +1,19 @@
 import React from 'react'
-import {size} from 'lodash'
 import ChevronDown from '../../../../../img/icons/ChevronDown'
 
-const ChunkAnalyzeHeader = ({total, index, showFiles, jobInfo, chunksSize}) => {
+const ChunkAnalyzeHeader = ({
+  total,
+  index,
+  showFilesFn,
+  showFiles,
+  jobInfo,
+  chunksSize,
+}) => {
   return (
     <div className="chunk-analyze-info">
+      {showFiles && <div className={`chunk-analyze-info-background`} />}
       <div>
-        <div className={'chunk-analyze-info-header'}>
+        <div className={`chunk-analyze-info-header ${showFiles ? 'open' : ''}`}>
           <div>
             <span className={'chunk-analyze-info-index'}>
               {chunksSize > 1 ? '#' + index : ''}
@@ -14,7 +21,7 @@ const ChunkAnalyzeHeader = ({total, index, showFiles, jobInfo, chunksSize}) => {
             <span>Raw</span>
           </div>
           <div>
-            <div className={'chunk-analyze-info-files'} onClick={showFiles}>
+            <div className={'chunk-analyze-info-files'} onClick={showFilesFn}>
               <ChevronDown size={10} />
               File ({jobInfo.files.length})
             </div>

@@ -26,6 +26,14 @@
   }
 }
 
+.chunks-analyze {
+  padding:0 0 16px 0;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  width: 100%;
+  background-color: $white;
+}
+
 .job-table-header {
   display: grid;
   grid-template-columns: minmax(100px, 150px) repeat(11, 1fr) minmax(80px, 100px);
@@ -95,8 +103,19 @@
   .chunk-analyze-info {
     display: grid;
     grid-template-columns: minmax(100px, 150px) repeat(11, 1fr) minmax(80px, 100px);
-    padding: 16px 0;
+    padding-top: 16px;
     background-color: $white;
+    position: relative;
+    .chunk-analyze-info-background {
+      position: absolute;
+      width: 86%;
+      background: $grey;
+      height: 24px;
+      right: 10px;
+      top: 40px;
+      opacity: 0.1;
+      border-radius: 4px 4px 0 0;
+    }
     .chunk-analyze-info-header {
       height: 48px;
       background-color: #f5f6f7;
@@ -105,6 +124,9 @@
       flex-direction: column;
       align-items: flex-end;
       margin: 0 6px;
+      &.open {
+        border-radius: 4px 4px 0 0;
+      }
       .chunk-analyze-info-index {
         color: $black !important;
         font-weight: 700;
@@ -150,12 +172,79 @@
         justify-content: right;
         display: flex;
         padding-right: 6px;
+        line-height: 24px;
       }
       :first-child {
         font-size: 12px;
         color: $grey;
       }
     }
+  }
+}
+
+.chunk-file-detail {
+  grid-template-columns: minmax(100px, 150px) repeat(11, 1fr) minmax(80px, 100px);
+  grid-template-rows: 24px;
+  display: grid;
+  padding: 0;
+  color: $grey;
+  position: relative;
+  .chunk-file-detail-background {
+    position: absolute;
+    width: 86%;
+    background: $grey;
+    height: 24px;
+    right: 10px;
+    top: 0px;
+    opacity: 0.1;
+    &.last {
+      border-radius: 0 0 4px 4px;
+
+    }
+  }
+  :first-child {
+    border-right: none;
+    justify-content: left;
+  }
+  >div {
+    border-right: 1px solid $grey3;
+    justify-content: right;
+    display: flex;
+    padding-right: 6px;
+    line-height: 24px;
+  }
+  .chunk-file-detail-filename {
+    background-color: $white;
+    padding-right: 0;
+    svg {
+      margin-top: 5px;
+    }
+    .chunk-file-detail-name {
+      height: 24px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 12px;
+      width: 100px;
+      line-height: 24px;
+    }
+    > div {
+      display: flex;
+      align-items: flex-start;
+      margin: 0 6px;
+      padding: 0 6px;
+      width: 100%;
+      gap: 4px;
+      background-color: $grey4;
+      cursor: default;
+      &:hover {
+        background-color: $grey2;
+      }
+    }
+  }
+  .chunk-file-detail-total {
+    justify-content: center;
+    border-right: none;
   }
 }
 

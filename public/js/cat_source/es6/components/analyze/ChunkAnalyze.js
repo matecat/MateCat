@@ -9,7 +9,14 @@ const ChunkAnalyze = ({files, chunkInfo, index, total, chunksSize}) => {
 
   const getFiles = () => {
     return files.map((file, i) => {
-      return <ChunkAnalyzeFile key={i} file={file} />
+      return (
+        <ChunkAnalyzeFile
+          key={i}
+          file={file}
+          index={i + 1}
+          size={files.length}
+        />
+      )
     })
   }
 
@@ -24,20 +31,11 @@ const ChunkAnalyze = ({files, chunkInfo, index, total, chunksSize}) => {
         index={index}
         total={total}
         jobInfo={chunkInfo}
-        showFiles={showFiles}
+        showFilesFn={showFiles}
+        showFiles={showFilesInfo}
         chunksSize={chunksSize}
       />
-      <TransitionGroup style={{width: '100%', padding: 0}}>
-        {showFilesInfo ? (
-          <CSSTransition
-            key={0}
-            classNames="transition"
-            timeout={{enter: 500, exit: 300}}
-          >
-            <div>{getFiles()}</div>
-          </CSSTransition>
-        ) : null}
-      </TransitionGroup>
+      {showFilesInfo ? <div>{getFiles()}</div> : null}
     </div>
   )
 }

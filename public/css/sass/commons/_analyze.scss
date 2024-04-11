@@ -765,7 +765,7 @@ body.analyze {
         margin-top: 35px;
         margin-bottom: 20px;
         .job-header {
-          background-color: #ffffff !important;
+          background-color: $white !important;
           padding: 0 0 !important;
         }
         .job-body {
@@ -777,8 +777,9 @@ body.analyze {
                 //padding-top: 60px;
                 margin-top: 0;
                 &.show-details {
+                  .chunks-analyze,
                   .chunk-analyze-container > div {
-                    background-color: #eaebef !important;
+                    background-color: $grey4 !important;
                   }
                 }
                 &.outsource-open {
@@ -989,7 +990,7 @@ body.analyze {
 }
 
 // Transitions
-.chunk-detail {
+/*.chunk-detail {
   width: 100%;
   height: 35px;
   position: relative;
@@ -1011,7 +1012,7 @@ body.analyze {
     padding-bottom: 0 !important;
     -webkit-transition: height 0.3s ease;
   }
-}
+}*/
 .progress-bar {
   height: 20px;
   position: relative;
