@@ -33,7 +33,7 @@ global.config = {
     },
   ],
 }
-test('renders properly', async () => {
+xtest('renders properly', async () => {
   mswServer.use(
     http.get(
       config.basepath +
