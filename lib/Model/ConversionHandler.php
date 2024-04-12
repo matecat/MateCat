@@ -31,6 +31,7 @@ class ConversionHandler {
     protected $uploadedFiles;
     public    $uploadError = false;
     protected $_userIsLogged;
+    protected $filters_extraction_parameters;
 
     /**
      * @var FeatureSet
@@ -451,4 +452,11 @@ class ConversionHandler {
         return $this;
     }
 
+    /**
+     * @param mixed $filters_extraction_parameters
+     */
+    public function setFiltersExtractionParameters($filters_extraction_parameters)
+    {
+        $this->filters_extraction_parameters = $filters_extraction_parameters;
+    }
 }
