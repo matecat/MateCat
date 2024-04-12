@@ -2,11 +2,11 @@ import React from 'react'
 import {isUndefined} from 'lodash'
 
 import ManageConstants from '../../constants/ManageConstants'
-import TeamsStore from '../../stores/TeamsStore'
+import UserStore from '../../stores/UserStore'
 import IconDown from '../icons/IconDown'
 import IconSettings from '../icons/IconSettings'
 import ManageActions from '../../actions/ManageActions'
-import TeamsActions from '../../actions/TeamsActions'
+import UserActions from '../../actions/UserActions'
 import ModalsActions from '../../actions/ModalsActions'
 
 class TeamsSelect extends React.Component {
@@ -20,14 +20,11 @@ class TeamsSelect extends React.Component {
   }
 
   componentDidMount() {
-    TeamsStore.addListener(
-      ManageConstants.OPEN_INFO_TEAMS_POPUP,
-      this.initPopup,
-    )
+    UserStore.addListener(ManageConstants.OPEN_INFO_TEAMS_POPUP, this.initPopup)
   }
 
   componentWillUnmount() {
-    TeamsStore.removeListener(
+    UserStore.removeListener(
       ManageConstants.OPEN_INFO_TEAMS_POPUP,
       this.initPopup,
     )
@@ -105,7 +102,7 @@ class TeamsSelect extends React.Component {
         window.scrollTo(0, 0)
         ManageActions.changeTeam(selectedTeam.toJS())
       } else {
-        TeamsActions.changeTeamFromUploadPage(selectedTeam.toJS())
+        UserActions.changeTeamFromUploadPage(selectedTeam.toJS())
       }
     }
   }

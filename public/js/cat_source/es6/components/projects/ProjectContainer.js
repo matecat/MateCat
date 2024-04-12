@@ -4,7 +4,7 @@ import {isUndefined} from 'lodash'
 
 import ManageConstants from '../../constants/ManageConstants'
 import JobContainer from './JobContainer'
-import TeamsActions from '../../actions/TeamsActions'
+import UserActions from '../../actions/UserActions'
 import ManageActions from '../../actions/ManageActions'
 import ProjectsStore from '../../stores/ProjectsStore'
 import {getLastProjectActivityLogAction} from '../../api/getLastProjectActivityLogAction'
@@ -551,7 +551,7 @@ class ProjectContainer extends React.Component {
         if (self.projectTeam && self.projectTeam.get('members')) {
           result = this.createUserDropDown(self.projectTeam.get('members'))
         } else {
-          TeamsActions.getAllTeams()
+          UserActions.getAllTeams()
         }
       }
     } else if (this.props.team.get('members')) {

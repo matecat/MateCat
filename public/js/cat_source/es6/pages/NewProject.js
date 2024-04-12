@@ -2,8 +2,8 @@ import React, {useEffect, useRef, useState, useCallback} from 'react'
 import PropTypes from 'prop-types'
 import usePortal from '../hooks/usePortal'
 import Header from '../components/header/Header'
-import TeamsStore from '../stores/TeamsStore'
-import TeamConstants from '../constants/TeamConstants'
+import UserStore from '../stores/UserStore'
+import TeamConstants from '../constants/UserConstants'
 import {Select} from '../components/common/Select'
 import ModalsActions from '../actions/ModalsActions'
 import AlertModal from '../components/modals/AlertModal'
@@ -36,6 +36,7 @@ import {getSupportedLanguages} from '../api/getSupportedLanguages'
 import ApplicationActions from '../actions/ApplicationActions'
 import useDeviceCompatibility from '../hooks/useDeviceCompatibility'
 import {useGoogleLoginNotification} from '../hooks/useGoogleLoginNotification'
+import useAuth from '../hooks/useAuth'
 
 const SELECT_HEIGHT = 324
 
@@ -49,7 +50,6 @@ const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
 const tmKeyFromQueryString = urlParams.get('private_tm_key')
 
 const NewProject = ({
-  isLoggedIn = false,
   sourceLanguageSelected,
   targetLanguagesSelected,
   subjectsArray,
@@ -99,6 +99,7 @@ const NewProject = ({
   const [supportedLanguages, setSupportedLanguages] = useState()
 
   const isDeviceCompatible = useDeviceCompatibility()
+  const {isUserLogged, userInfo} = useAuth()
 
   // TODO: Remove temp notification warning login google (search in files this todo)
   useGoogleLoginNotification()
@@ -147,7 +148,7 @@ const NewProject = ({
       isActive: true,
     }
 
-    if (config.isLoggedIn) {
+    if (isUserLogged) {
       getTmKeysUser().then(({tm_keys}) => {
         const isMatchingKeyFromQuery = tm_keys.some(
           ({key}) => tmKeyFromQueryString === key,
@@ -175,7 +176,7 @@ const NewProject = ({
   }
 
   const getMTEngines = () => {
-    if (config.isLoggedIn) {
+    if (isUserLogged) {
       getMtEnginesApi().then((mtEngines) => {
         mtEngines.push(DEFAULT_ENGINE_MEMORY)
         setMtEngines(mtEngines)
@@ -321,7 +322,7 @@ const NewProject = ({
 
     getTmKeys()
     getMTEngines()
-    TeamsStore.addListener(TeamConstants.UPDATE_USER, updateUser)
+    UserStore.addListener(TeamConstants.UPDATE_USER, updateUser)
     CreateProjectStore.addListener(
       NewProjectConstants.HIDE_ERROR_WARNING,
       hideAllErrors,
@@ -339,7 +340,7 @@ const NewProject = ({
       projectNameRef.current.value = projectNameFromQuerystring
     APP.checkGDriveEvents()
     return () => {
-      TeamsStore.removeListener(TeamConstants.UPDATE_USER, updateUser)
+      UserStore.removeListener(TeamConstants.UPDATE_USER, updateUser)
       CreateProjectStore.removeListener(
         NewProjectConstants.HIDE_ERROR_WARNING,
         hideAllErrors,
@@ -487,7 +488,7 @@ const NewProject = ({
         <Header
           showModals={false}
           showLinks={true}
-          loggedUser={isLoggedIn}
+          loggedUser={isUserLogged}
           user={user}
         />
       </HeaderPortal>
@@ -514,7 +515,7 @@ const NewProject = ({
               />
             </div>
             {/* Team Select*/}
-            {isLoggedIn && (
+            {isUserLogged && (
               <div className="translate-box project-team">
                 <Select
                   label="Team"
@@ -738,7 +739,6 @@ const NewProject = ({
   )
 }
 NewProject.propTypes = {
-  isLoggedIn: PropTypes.bool,
   sourceLanguageSelected: PropTypes.string,
   targetLanguagesSelected: PropTypes.string,
   subjectsArray: PropTypes.array,
