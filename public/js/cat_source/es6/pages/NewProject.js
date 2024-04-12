@@ -592,22 +592,14 @@ const NewProject = ({
         {warnings && (
           <div className="warning-message">
             <i className="icon-warning2 icon"> </i>
-            <p
-              dangerouslySetInnerHTML={{
-                __html: warnings,
-              }}
-            />
+            <p>{warnings}</p>
           </div>
         )}
 
         {errors && (
           <div className="error-message">
             <i className="icon-error_outline icon"> </i>
-            <p
-              dangerouslySetInnerHTML={{
-                __html: errors,
-              }}
-            />
+            <p>{errors}</p>
           </div>
         )}
 
