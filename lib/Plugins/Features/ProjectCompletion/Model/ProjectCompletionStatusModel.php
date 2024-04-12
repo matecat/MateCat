@@ -9,25 +9,38 @@
 namespace Features\ProjectCompletion\Model;
 
 
+use API\V2\Exceptions\AuthenticationError;
 use Chunks_ChunkCompletionEventDao;
 use Chunks_ChunkStruct;
-use Features;
+use Exception;
+use Exceptions\NotFoundException;
+use Exceptions\ValidationError;
 use FeatureSet;
+use Projects_ProjectStruct;
+use TaskRunner\Exceptions\EndQueueException;
+use TaskRunner\Exceptions\ReQueueException;
 use Utils;
 
 class ProjectCompletionStatusModel {
 
     /**
-     * @var \Projects_ProjectStruct
+     * @var Projects_ProjectStruct
      */
     protected $project ;
 
     protected $cachedStatus;
 
-    public function __construct( \Projects_ProjectStruct $project ) {
+    public function __construct( Projects_ProjectStruct $project ) {
         $this->project = $project ;
     }
 
+    /**
+     * @throws NotFoundException
+     * @throws EndQueueException
+     * @throws ReQueueException
+     * @throws ValidationError
+     * @throws AuthenticationError
+     */
     public function getStatus() {
         if ( is_null( $this->cachedStatus ) ) {
             $this->cachedStatus = $this->populateStatus();
@@ -35,6 +48,14 @@ class ProjectCompletionStatusModel {
         return $this->cachedStatus ;
     }
 
+    /**
+     * @throws NotFoundException
+     * @throws ReQueueException
+     * @throws EndQueueException
+     * @throws ValidationError
+     * @throws AuthenticationError
+     * @throws Exception
+     */
     private function populateStatus() {
         $response = [] ;
         $response['revise'] = [] ;
@@ -68,12 +89,15 @@ class ProjectCompletionStatusModel {
         return $response ;
     }
 
+    /**
+     * @throws Exception
+     */
     private function dataForChunkStatus ( Chunks_ChunkStruct $chunk, $is_review ) {
         $record = Chunks_ChunkCompletionEventDao::lastCompletionRecord( $chunk, array(
                 'is_review' => $is_review
         ) );
 
-        if ( $record != false ) {
+        if ( $record ) {
             $is_completed = true;
             $completed_at = Utils::api_timestamp( $record['create_date'] );
             $event_id = $record['id_event'];

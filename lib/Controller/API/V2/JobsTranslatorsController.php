@@ -66,7 +66,7 @@ class JobsTranslatorsController extends KleinController {
                         'job' => [
                                 'id'         => $this->jStruct->id,
                                 'password'   => $this->jStruct->password,
-                                'translator' => ( new JobTranslator() )->renderItem( $tStruct )
+                                'translator' => ( new JobTranslator( $tStruct ) )->renderItem()
                         ]
                 ]
         );
@@ -99,7 +99,7 @@ class JobsTranslatorsController extends KleinController {
         $tStruct       = $this->jStruct->getTranslator();
         $translator    = null;
         if ( empty( $outsourceInfo ) ) {
-            $translator = ( !empty( $tStruct ) ? ( new JobTranslator() )->renderItem( $tStruct ) : null );
+            $translator = ( !empty( $tStruct ) ? ( new JobTranslator( $tStruct ) )->renderItem() : null );
         }
         $this->response->json(
                 [

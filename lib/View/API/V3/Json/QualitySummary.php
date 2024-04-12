@@ -14,13 +14,11 @@ use Chunks_ChunkStruct;
 use Exception;
 use Features\ReviewExtended\Model\QualityReportDao;
 use Features\ReviewExtended\ReviewUtils;
-use Files\FilesPartsDao;
 use Jobs_JobStruct;
 use LQA\ChunkReviewStruct;
 use LQA\EntryDao;
 use Projects_ProjectStruct;
-use QAModelTemplate\QAModelTemplateDao;
-use Revise_FeedbackDAO;
+use Revise\FeedbackDAO;
 use RevisionFactory;
 
 class QualitySummary {
@@ -151,17 +149,16 @@ class QualitySummary {
 
         $feedback = null;
         if($chunkReviewPassword){
-            $feedback = ( new Revise_FeedbackDAO() )->getFeedback( $jStruct->id, $chunkReviewPassword, $revisionNumber );
+            $feedback = ( new FeedbackDAO() )->getFeedback( $jStruct->id, $chunkReviewPassword, $revisionNumber );
         }
 
         return [
             'revision_number'            => $revisionNumber,
             'feedback'                   => ( $feedback and isset( $feedback[ 'feedback' ] ) ) ? $feedback[ 'feedback' ] : null,
             'model_version'              => ( $model_version ? (int)$model_version : null ),
-            'model_id'                   => ( $model_id ? (int)$model_id : null ),
-            'model_label'                => ( $model_label ? $model_label : null ),
+            'model_id'                   => ( !empty( $model_id ) ? (int)$model_id : null ),
+            'model_label'                => ( !empty( $model_label ) ? $model_label : null ),
             'model_template_id'          => ( $model_template_id ? (int)$model_template_id : null ),
-            'equivalent_class'           => $jStruct->getQualityInfo(),
             'is_pass'                    => $is_pass,
             'quality_overall'            => $quality_overall,
             'errors_count'               => (int)$jStruct->getErrorsCount(),
@@ -236,18 +233,18 @@ class QualitySummary {
         }
 
         return [
-            $passFail,
-            $reviseIssues,
-            $quality_overall,
-            $is_pass,
-            $score,
-            $total_issues_weight,
-            $total_reviewed_words_count,
-            $categories,
-            ($model ? $model->hash : null),
-            ($model ? $model->id : null),
-            ($model ? $model->label : null),
-            ($model ? $model->qa_model_template_id : null)
+                $passFail,
+                $reviseIssues,
+                $quality_overall,
+                $is_pass,
+                $score,
+                $total_issues_weight,
+                $total_reviewed_words_count,
+                $categories,
+                ($model ? $model->hash : null),
+                ($model ? $model->id : null),
+                ($model ? $model->label : null),
+                ($model ? $model->qa_model_template_id : null)
         ];
     }
 

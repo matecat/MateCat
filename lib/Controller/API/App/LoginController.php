@@ -9,9 +9,9 @@
 namespace API\App;
 
 use AuthCookie;
-use Klein\Response;
 use CookieManager;
 use INIT;
+use Klein\Response;
 use SimpleJWT;
 use Users\RedeemableProject;
 use Users_UserDao;

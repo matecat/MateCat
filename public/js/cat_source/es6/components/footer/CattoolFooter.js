@@ -1,80 +1,13 @@
 import React, {useState} from 'react'
-import {round} from 'lodash/math'
 
 import CatToolStore from '../../stores/CatToolStore'
 import CatToolConstants from '../../constants/CatToolConstants'
 import TooltipInfo from '../segments/TooltipInfo/TooltipInfo.component'
 import SegmentActions from '../../actions/SegmentActions'
 import {CookieConsent} from '../common/CookieConsent'
-
-const transformStats = (stats) => {
-  let reviewWordsSecondPass
-  let a_perc_2nd_formatted
-  let a_perc_2nd
-
-  const t_perc = stats.TRANSLATED_PERC
-  let a_perc = stats.APPROVED_PERC
-  const d_perc = stats.DRAFT_PERC
-  const r_perc = stats.REJECTED_PERC
-
-  const t_perc_formatted = stats.TRANSLATED_PERC_FORMATTED
-  let a_perc_formatted = stats.APPROVED_PERC_FORMATTED
-  const d_perc_formatted = stats.DRAFT_PERC_FORMATTED
-  const r_perc_formatted = stats.REJECTED_PERC_FORMATTED
-
-  let revise_todo_formatted = Math.round(stats.TRANSLATED + stats.DRAFT)
-
-  if (config.secondRevisionsCount && stats.revises) {
-    const reviewedWords = stats.revises.find(
-      (value) => value.revision_number === 1,
-    )
-
-    if (reviewedWords) {
-      let approvePerc =
-        (parseFloat(reviewedWords.advancement_wc) * 100) / stats.TOTAL
-      approvePerc =
-        approvePerc > stats.APPROVED_PERC ? stats.APPROVED_PERC : approvePerc
-      a_perc_formatted = approvePerc < 0 ? 0 : round(approvePerc, 1)
-      a_perc = approvePerc
-    }
-
-    reviewWordsSecondPass = stats.revises.find(
-      (value) => value.revision_number === 2,
-    )
-
-    if (reviewWordsSecondPass) {
-      let approvePerc2ndPass =
-        (parseFloat(reviewWordsSecondPass.advancement_wc) * 100) / stats.TOTAL
-      approvePerc2ndPass =
-        approvePerc2ndPass > stats.APPROVED_PERC
-          ? stats.APPROVED_PERC
-          : approvePerc2ndPass
-      a_perc_2nd_formatted =
-        approvePerc2ndPass < 0 ? 0 : round(approvePerc2ndPass, 1)
-      a_perc_2nd = approvePerc2ndPass
-      revise_todo_formatted =
-        config.revisionNumber === 2
-          ? revise_todo_formatted +
-            round(parseFloat(reviewedWords.advancement_wc))
-          : revise_todo_formatted
-    }
-  }
-
-  stats.a_perc_formatted = a_perc_formatted
-  stats.a_perc = a_perc
-  stats.t_perc_formatted = t_perc_formatted
-  stats.t_perc = t_perc
-  stats.d_perc_formatted = d_perc_formatted
-  stats.d_perc = d_perc
-  stats.r_perc_formatted = r_perc_formatted
-  stats.r_perc = r_perc
-  stats.a_perc_2nd_formatted = a_perc_2nd_formatted
-  stats.a_perc_2nd = a_perc_2nd
-  stats.revise_todo_formatted =
-    revise_todo_formatted >= 0 ? revise_todo_formatted : 0
-
-  return stats
-}
+import {REVISE_STEP_NUMBER} from '../../constants/Constants'
+import JobProgressBar from '../common/JobProgressBar'
+import {isUndefined} from 'lodash'
 
 export const CattolFooter = ({
   idProject,
@@ -104,7 +37,7 @@ export const CattolFooter = ({
 
   React.useEffect(() => {
     const listener = (stats) => {
-      setStats(transformStats(stats))
+      setStats(stats)
     }
 
     CatToolStore.addListener(CatToolConstants.SET_PROGRESS, listener)
@@ -116,16 +49,16 @@ export const CattolFooter = ({
 
   const onClickTodo = (e, targetName) => {
     e.preventDefault()
-    if (!UI.projectStats) return
+    if (!stats) return
     // show tooltip
     if (
-      (!config.isReview && UI.projectStats.translationCompleted) ||
+      (!config.isReview && stats.translationCompleted) ||
       (config.isReview &&
         config.revisionNumber === 1 &&
-        UI.projectStats.revisionCompleted) ||
+        stats.revisionCompleted) ||
       (config.isReview &&
         config.revisionNumber === 2 &&
-        UI.projectStats.revises[1]?.advancement_wc === UI.projectStats.TOTAL)
+        stats.revision2Completed)
     ) {
       setIsShowingTooltip({progressBar: false, todo: false, [targetName]: true})
       return
@@ -165,56 +98,12 @@ export const CattolFooter = ({
             <span id="footer-target-lang">{targetLang}</span>
           </p>
         </div>
-
-        <div
-          className="progress-bar"
-          onMouseLeave={removeTooltip}
-          data-testid="progress-bar"
-        >
-          <div
-            className="meter"
-            onClick={(e) => onClickTodo(e, 'progressBar')}
-            style={{width: '100%', position: 'relative'}}
-          >
-            {stats == null ? (
-              <div className="bg-loader" />
-            ) : !stats?.ANALYSIS_COMPLETE ? null : (
-              <>
-                <a
-                  className="approved-bar-2nd-pass"
-                  style={{width: stats.a_perc_2nd + '%'}}
-                  title={'2nd Approved ' + stats.a_perc_2nd_formatted}
-                />
-                <a
-                  className="approved-bar"
-                  style={{width: stats.a_perc + '%'}}
-                  title={'Approved ' + stats.a_perc_formatted}
-                />
-                <a
-                  className="translated-bar"
-                  style={{width: stats.t_perc + '%'}}
-                  title={'Translated ' + stats.t_perc_formatted}
-                />
-                <a
-                  className="rejected-bar"
-                  style={{width: stats.r_perc + '%'}}
-                  title={'Rejected ' + stats.r_perc_formatted}
-                />
-                <a
-                  className="draft-bar"
-                  style={{width: stats.d_perc + '%'}}
-                  title={'Draft ' + stats.d_perc_formatted}
-                />
-              </>
-            )}
-          </div>
-
-          <div className="percent">
-            <span id="stat-progress" data-testid="progress-bar-amount">
-              {stats?.PROGRESS_PERC_FORMATTED || '-'}
-            </span>
-            %
-          </div>
+        <div onMouseLeave={removeTooltip}>
+          <JobProgressBar
+            stats={stats}
+            showPercent={true}
+            analysisComplete={stats?.analysis_complete}
+          />
           {getTooltip('progressBar')}
         </div>
 
@@ -247,7 +136,7 @@ export const CattolFooter = ({
               :
               <strong id="total-payable">
                 {' '}
-                {stats?.TOTAL_FORMATTED || '-'}
+                {stats ? Math.round(stats.equivalent.total) : '-'}
               </strong>
             </div>
           </div>
@@ -258,39 +147,58 @@ export const CattolFooter = ({
           onClick={(e) => onClickTodo(e, 'todo')}
           onMouseLeave={removeTooltip}
         >
-          {config.isReview ? (
+          {config.isReview &&
+          config.revisionNumber === REVISE_STEP_NUMBER.REVISE1 ? (
             <div id="stat-todo">
               <span>To-do</span> :{' '}
-              <strong>{stats?.revise_todo_formatted || '-'}</strong>
+              <strong>
+                {stats && !isUndefined(stats.revise_todo)
+                  ? stats.revise_todo
+                  : '-'}
+              </strong>
+            </div>
+          ) : config.isReview &&
+            config.revisionNumber === REVISE_STEP_NUMBER.REVISE2 ? (
+            <div id="stat-todo">
+              <span>To-do</span> :{' '}
+              <strong>
+                {stats && !isUndefined(stats.revise2_todo)
+                  ? stats.revise2_todo
+                  : '-'}
+              </strong>
             </div>
           ) : (
             <div id="stat-todo">
               <span>To-do</span> :{' '}
-              <strong>{stats?.TODO_FORMATTED || '-'}</strong>
+              <strong>
+                {stats && !isUndefined(stats.translate_todo)
+                  ? stats.translate_todo
+                  : '-'}
+              </strong>
             </div>
           )}
           {getTooltip('todo')}
         </div>
 
-        {!!stats && stats?.ANALYSIS_COMPLETE && (
+        {stats && stats.analysis_complete && (
           <div className="statistics-details">
-            {!!stats?.WORDS_PER_HOUR && (
+            {stats?.words_per_hour && (
               <div id="stat-wph" title="Based on last 10 segments performance">
                 Speed:
-                <strong>{stats.WORDS_PER_HOUR}</strong> Words/h
+                <strong>{stats.words_per_hour}</strong> Words/h
               </div>
             )}
 
-            {!!stats?.ESTIMATED_COMPLETION && (
+            {stats?.estimated_completion && (
               <div id="stat-completion">
                 Completed in:
-                <strong>{stats.ESTIMATED_COMPLETION}</strong>
+                <strong>{stats.estimated_completion}</strong>
               </div>
             )}
           </div>
         )}
 
-        {!stats?.ANALYSIS_COMPLETE && (
+        {!stats?.analysis_complete && (
           <div id="analyzing">
             <p className="progress">Calculating word count...</p>
           </div>

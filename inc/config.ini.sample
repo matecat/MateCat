@@ -25,7 +25,6 @@ DB_PASS = "matecat_user"
 
 REDIS_SERVERS = "tcp://localhost:6379?database=0"
 QUEUE_BROKER_ADDRESS = "tcp://localhost:61613"
-QUEUE_DQF_ADDRESS = "tcp://localhost:61613"
 QUEUE_JMX_ADDRESS = "http://localhost:8161"
 QUEUE_CREDENTIALS = "admin:admin"
 SSE_BASE_URL = "localhost/sse"          ;no trailing slash here
@@ -61,15 +60,6 @@ OPENAI_API_KEY = "xxxxxxxxxxxxxxxxxxxxx"
 OPEN_AI_MODEL = "gpt-3.5-turbo"
 OPEN_AI_TIMEOUT = 30
 
-DQF_ENABLED = yes
-DQF_BASE_URL = 'https://dqf-api.stag.taus.net/'
-DQF_API_KEY = api-key
-DQF_ID_PREFIX = devinstance
-DQF_ENCRYPTION_KEY = encryption-key
-DQF_ENCRYPTION_IV = encryption-iv
-DQF_GENERIC_USERNAME = "matecatGeneric@taus.net"
-DQF_GENERIC_PASSWORD = "generic-user-password"
-
 ; Segments partition rule, leave unset to write to `segments` table.
 ; Format of configuration string is: "{id_project}:{table_name};...".
 ; Project ids must be sorted in ascecnding order. Match on `id_project` is "less than" ( < ).
@@ -88,7 +78,6 @@ DB_PASS = "matecat_user"
 
 REDIS_SERVERS = "tcp://localhost:6379"
 QUEUE_BROKER_ADDRESS = "tcp://localhost:61613"
-QUEUE_DQF_ADDRESS = "tcp://localhost:61613"
 QUEUE_JMX_ADDRESS = "http://localhost:8161"
 QUEUE_CREDENTIALS = "admin:admin"
 SSE_BASE_URL = "localhost/sse"          ;no trailing slash here
@@ -133,7 +122,6 @@ DB_PASS = "matecat01"
 
 REDIS_SERVERS = "tcp://localhost:6379"
 QUEUE_BROKER_ADDRESS = "tcp://localhost:61613"
-QUEUE_DQF_ADDRESS = "tcp://localhost:61613"
 QUEUE_JMX_ADDRESS = "http://localhost:8161"
 QUEUE_CREDENTIALS = "admin:admin"
 SSE_BASE_URL      = "localhost/sse"          ;no trailing slash here

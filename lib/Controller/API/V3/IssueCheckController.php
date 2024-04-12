@@ -4,11 +4,14 @@ namespace API\V3;
 
 use API\V2\BaseChunkController;
 use API\V2\Exceptions\NotFoundException;
-use API\V2\KleinController;
+use DataAccess\ShapelessConcreteStruct;
 use Translations_SegmentTranslationDao;
 
 class IssueCheckController extends BaseChunkController {
 
+    /**
+     * @throws NotFoundException
+     */
     public function segments() {
 
         $result = [
@@ -32,7 +35,7 @@ class IssueCheckController extends BaseChunkController {
         $this->chunk = $job;
         $this->return404IfTheJobWasDeleted();
 
-        $modifiedSegments = (new Translations_SegmentTranslationDao())
+        $modifiedSegments = ( new Translations_SegmentTranslationDao() )
                 ->setCacheTTL( 60 * 5 )
                 ->getSegmentTranslationsModifiedByRevisorWithIssueCount( $id_job, $password, $source_page );
 
@@ -40,8 +43,9 @@ class IssueCheckController extends BaseChunkController {
 
         foreach ( $modifiedSegments as $modifiedSegment ) {
 
+            /** @var ShapelessConcreteStruct $modifiedSegment */
             $result[ 'modified_segments' ][] = [
-                    'id_segment' => (int)$modifiedSegment->id_segment,
+                    'id_segment'  => (int)$modifiedSegment->id_segment,
                     'issue_count' => (int)$modifiedSegment->q_count,
             ];
 

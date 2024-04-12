@@ -2,7 +2,6 @@
 
 namespace API\App;
 
-use API\V2\Validators\LoginValidator;
 use CatUtils;
 use TmKeyManagement\UserKeysModel;
 use TmKeyManagement_ClientTmKeyStruct;
@@ -19,7 +18,7 @@ class TmKeyManagementController extends AbstractStatefulKleinController {
         $idJob = $this->request->id_job;
         $password = $this->request->password;
 
-        $chunk = \CatUtils::getJobFromIdAndAnyPassword($idJob, $password);
+        $chunk = CatUtils::getJobFromIdAndAnyPassword($idJob, $password);
 
         if(empty($chunk)){
             $this->response->status()->setCode( 404 );

@@ -1,11 +1,17 @@
 <?php
 
+use API\V2\Exceptions\AuthenticationError;
 use Constants\ConversionHandlerStatus;
 use Conversion\ConvertedFileModel;
+use Exceptions\NotFoundException;
+use Exceptions\ValidationError;
 use FilesStorage\AbstractFilesStorage;
-use FilesStorage\FilesStorageFactory;
 use FilesStorage\Exceptions\FileSystemException;
+use FilesStorage\FilesStorageFactory;
+use Filters\OCRCheck;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
+use TaskRunner\Exceptions\EndQueueException;
+use TaskRunner\Exceptions\ReQueueException;
 
 class ConversionHandler {
 
@@ -38,6 +44,14 @@ class ConversionHandler {
         $this->result = new ConvertedFileModel(ConversionHandlerStatus::OK);
     }
 
+    /**
+     * @throws NotFoundException
+     * @throws EndQueueException
+     * @throws ReQueueException
+     * @throws ValidationError
+     * @throws AuthenticationError
+     * @throws Exception
+     */
     public function doAction() {
 
         $fs              = FilesStorageFactory::create();
@@ -101,7 +115,7 @@ class ConversionHandler {
         if ( !isset( $cachedXliffPath ) or empty( $cachedXliffPath ) ) {
             //we have to convert it
 
-            $ocrCheck = new \Filters\OCRCheck( $this->source_lang );
+            $ocrCheck = new OCRCheck( $this->source_lang );
             if ( $ocrCheck->thereIsError( $file_path ) ) {
                 $this->result->changeCode(ConversionHandlerStatus::OCR_ERROR);
                 $this->result->addError("File is not valid. OCR for RTL languages is not supported.");
@@ -153,16 +167,16 @@ class ConversionHandler {
 
                 } catch (FileSystemException $e){
 
-                    \Log::doJsonLog("FileSystem Exception: Message: " . $e->getMessage());
+                    Log::doJsonLog("FileSystem Exception: Message: " . $e->getMessage());
 
                     $this->result->changeCode(ConversionHandlerStatus::FILESYSTEM_ERROR);
                     $this->result->addError($e->getMessage());
 
                     return false;
 
-                } catch (\Exception $e){
+                } catch ( Exception $e){
 
-                    \Log::doJsonLog("S3 Exception: Message: " . $e->getMessage());
+                    Log::doJsonLog("S3 Exception: Message: " . $e->getMessage());
 
                     $this->result->changeCode(ConversionHandlerStatus::S3_ERROR);
                     $this->result->addError('Sorry, file name too long. Try shortening it and try again.');
@@ -178,7 +192,7 @@ class ConversionHandler {
 
         }
 
-        //if everything went well and we've obtained a path toward a valid package (original+xliff), either via cache or conversion
+        //if everything went well, and we've obtained a path toward a valid package (original+xliff), either via cache or conversion
         if ( isset( $cachedXliffPath ) and !empty( $cachedXliffPath ) ) {
 
             //FILE Found in cache, destroy the already present shasum for other languages ( if user swapped languages )
@@ -202,6 +216,9 @@ class ConversionHandler {
         return 0;
     }
 
+    /**
+     * @throws Exception
+     */
     public function extractZipFile() {
 
         $this->file_name = html_entity_decode( $this->file_name, ENT_QUOTES );
@@ -220,7 +237,7 @@ class ConversionHandler {
             //get system temporary folder
             $tmpFolder = ini_get( 'upload_tmp_dir' );
             ( empty( $tmpFolder ) ) ? $tmpFolder = "/tmp" : null;
-            $tmpFolder .= "/" . uniqid( '' ) . "/";
+            $tmpFolder .= "/" . uniqid() . "/";
 
             mkdir( $tmpFolder, 0777, true );
 
@@ -279,11 +296,11 @@ class ConversionHandler {
         $error = false;
 
         foreach ( $stdResult as $stdFileResult ) {
-            if ( $error == true ) {
+            if ( $error ) {
                 break;
             }
 
-            if ( isset( $stdFileResult->error ) && !empty( $stdFileResult->error ) ) {
+            if ( !empty( $stdFileResult->error ) ) {
                 $error = true;
             }
         }

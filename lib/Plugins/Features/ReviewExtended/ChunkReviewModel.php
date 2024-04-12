@@ -14,13 +14,12 @@ use Exception;
 use Features\ReviewExtended\Model\ChunkReviewDao;
 use LQA\ChunkReviewStruct;
 use LQA\ModelStruct;
-use Projects_ProjectDao;
 use Projects_ProjectStruct;
 
 class ChunkReviewModel implements IChunkReviewModel {
 
     /**
-     * @var \LQA\ChunkReviewStruct
+     * @var ChunkReviewStruct
      */
     protected $chunk_review;
 
@@ -30,11 +29,6 @@ class ChunkReviewModel implements IChunkReviewModel {
      * @var Chunks_ChunkStruct
      */
     protected $chunk;
-
-    /**
-     * @var ModelStruct
-     */
-    protected $lqa_model;
 
     /**
      * @return Chunks_ChunkStruct
@@ -58,11 +52,11 @@ class ChunkReviewModel implements IChunkReviewModel {
      *
      * @param                         $penalty_points
      *
-     * @param \Projects_ProjectStruct $projectStruct
+     * @param Projects_ProjectStruct  $projectStruct
      *
-     * @throws \Exception
+     * @throws Exception
      */
-    public function addPenaltyPoints( $penalty_points, \Projects_ProjectStruct $projectStruct ) {
+    public function addPenaltyPoints( $penalty_points, Projects_ProjectStruct $projectStruct ) {
         $this->chunk_review->penalty_points += $penalty_points;
         $this->_updatePassFailResult( $projectStruct );
     }
@@ -72,11 +66,11 @@ class ChunkReviewModel implements IChunkReviewModel {
      *
      * @param                         $penalty_points
      *
-     * @param \Projects_ProjectStruct $projectStruct
+     * @param Projects_ProjectStruct  $projectStruct
      *
-     * @throws \Exception
+     * @throws Exception
      */
-    public function subtractPenaltyPoints( $penalty_points, \Projects_ProjectStruct $projectStruct  ) {
+    public function subtractPenaltyPoints( $penalty_points, Projects_ProjectStruct $projectStruct  ) {
         $this->chunk_review->penalty_points -= $penalty_points;
         $this->_updatePassFailResult( $projectStruct );
     }
@@ -102,10 +96,11 @@ class ChunkReviewModel implements IChunkReviewModel {
 
     /**
      * WARNING: ( should be protected ) this **MUST** be used only by ChunkReviewModel::[recountAndUpdatePassFailResult, subtractPenaltyPoints, addPenaltyPoints]
+     *
      * @param Projects_ProjectStruct $project
      *
      * @return bool
-     * @throws \Exception
+     * @throws Exception
      */
     public function _updatePassFailResult( Projects_ProjectStruct $project ) {
 
@@ -149,11 +144,11 @@ class ChunkReviewModel implements IChunkReviewModel {
      * This method invokes the recount of reviewed_words_count and
      * penalty_points for the chunk and updates the passfail result.
      *
-     * @param \Projects_ProjectStruct $project
+     * @param Projects_ProjectStruct $project
      *
-     * @throws \Exception
+     * @throws Exception
      */
-    public function recountAndUpdatePassFailResult( \Projects_ProjectStruct $project ) {
+    public function recountAndUpdatePassFailResult( Projects_ProjectStruct $project ) {
 
         $chunkReviewDao = new ChunkReviewDao();
 

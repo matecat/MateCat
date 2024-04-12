@@ -10,9 +10,12 @@
 namespace Engines\Traits;
 
 
-use ArrayObject;
+use Exception;
+use Jobs_JobDao;
 use Jobs_JobStruct;
+use Predis\Connection\ConnectionException;
 use RedisHandler;
+use ReflectionException;
 
 trait HotSwap {
 
@@ -31,8 +34,8 @@ trait HotSwap {
      *
      * @param int            $newTM
      *
-     * @throws \Predis\Connection\ConnectionException
-     * @throws \ReflectionException
+     * @throws ConnectionException
+     * @throws ReflectionException
      */
     protected function swapOn( Jobs_JobStruct $jobStruct, $newMT = 1, $newTM = 1 ){ // 1 == MyMemory
 
@@ -61,13 +64,14 @@ trait HotSwap {
      *
      * @param $project_id
      *
-     * @throws \Predis\Connection\ConnectionException
-     * @throws \ReflectionException
+     * @throws ConnectionException
+     * @throws ReflectionException
+     * @throws Exception
      */
     protected function swapOff( $project_id ){
 
         //There should be more than one job per project, to be generic use a foreach
-        $jobDao = new \Jobs_JobDao();
+        $jobDao = new Jobs_JobDao();
         $jobStructs = $jobDao->getByProjectId( $project_id, 60 );
 
         $redisConn = ( new RedisHandler() )->getConnection();

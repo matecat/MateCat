@@ -1,4 +1,5 @@
 <?php
+namespace EditLog;
 
 /**
  * Created by PhpStorm.
@@ -6,7 +7,7 @@
  * Date: 05/10/15
  * Time: 12.59
  */
-class EditLog_EditLogSegmentClientStruct extends EditLog_EditLogSegmentStruct {
+class EditLogSegmentClientStruct extends EditLogSegmentStruct {
 
     /**
      * @var string

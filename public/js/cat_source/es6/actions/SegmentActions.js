@@ -33,6 +33,7 @@ import {toggleTagProjectionJob} from '../api/toggleTagProjectionJob'
 import DraftMatecatUtils from '../components/segments/utils/DraftMatecatUtils'
 import {deleteSegmentIssue as deleteSegmentIssueApi} from '../api/deleteSegmentIssue'
 import SegmentsFilterUtil from '../components/header/cattol/segment_filter/segment_filter'
+import {REVISE_STEP_NUMBER, SEGMENTS_STATUS} from '../constants/Constants'
 import {getSegmentsIssues} from '../api/getSegmentsIssues'
 import {sendSegmentVersionIssue} from '../api/sendSegmentVersionIssue'
 import {getSegmentVersionsIssues} from '../api/getSegmentVersionsIssues'
@@ -291,7 +292,11 @@ const SegmentActions = {
     }
 
     UI.setTimeToEdit(sid)
-    UI.changeStatus(segment, 'approved', afterApproveFn) // this does < setTranslation
+    const status =
+      config.revisionNumber === REVISE_STEP_NUMBER.REVISE1
+        ? SEGMENTS_STATUS.APPROVED
+        : SEGMENTS_STATUS.APPROVED2
+    UI.changeStatus(segment, status, afterApproveFn) // this does < setTranslation
 
     // Lock the segment if it's approved in a second pass but was previously approved in first revision
     if (config.revisionNumber > 1) {
@@ -829,7 +834,11 @@ const SegmentActions = {
         fid: nextSegment.fid,
         text: nextSegment.segment,
       })
-      let nextSegmentUntranslated = SegmentStore.getNextSegment(sid, fid, 8)
+      let nextSegmentUntranslated = SegmentStore.getNextSegment(
+        sid,
+        fid,
+        SEGMENTS_STATUS.UNTRANSLATED,
+      )
       if (
         nextSegmentUntranslated &&
         requestes[1].sid != nextSegmentUntranslated.sid
@@ -1247,32 +1256,40 @@ const SegmentActions = {
     ModalsActions.showModalComponent(ConfirmMessageModal, props, 'Warning')
   },
   approveFilteredSegments: function (segmentsArray) {
-    if (segmentsArray.length >= 500) {
-      var subArray = segmentsArray.slice(0, 499)
-      var todoArray = segmentsArray.slice(500, segmentsArray.length - 1)
+    if (segmentsArray.length >= 100) {
+      var subArray = segmentsArray.slice(0, 99)
+      var todoArray = segmentsArray.slice(99, segmentsArray.length - 1)
       return this.approveFilteredSegments(subArray).then(() => {
         return this.approveFilteredSegments(todoArray)
       })
     } else {
       const promise = approveSegments(segmentsArray)
       promise.then((response) => {
-        this.checkUnchangebleSegments(response, segmentsArray, 'APPROVED')
+        this.checkUnchangebleSegments(
+          response,
+          segmentsArray,
+          SEGMENTS_STATUS.APPROVED,
+        )
         setTimeout(CatToolActions.updateFooterStatistics(), 2000)
       })
       return promise
     }
   },
   translateFilteredSegments: function (segmentsArray) {
-    if (segmentsArray.length >= 500) {
-      var subArray = segmentsArray.slice(0, 499)
-      var todoArray = segmentsArray.slice(499, segmentsArray.length)
+    if (segmentsArray.length >= 100) {
+      var subArray = segmentsArray.slice(0, 99)
+      var todoArray = segmentsArray.slice(99, segmentsArray.length)
       return this.translateFilteredSegments(subArray).then(() => {
         return this.translateFilteredSegments(todoArray)
       })
     } else {
       const promise = translateSegments(segmentsArray)
       promise.then((response) => {
-        this.checkUnchangebleSegments(response, segmentsArray, 'TRANSLATED')
+        this.checkUnchangebleSegments(
+          response,
+          segmentsArray,
+          SEGMENTS_STATUS.TRANSLATED,
+        )
         setTimeout(CatToolActions.updateFooterStatistics(), 2000)
       })
       return promise
@@ -1424,14 +1441,14 @@ const SegmentActions = {
       const nextTranslatedSegment = SegmentStore.getNextSegment(
         sid,
         null,
-        7,
+        SEGMENTS_STATUS.TRANSLATED,
         null,
         true,
       )
       const nextTranslatedSegmentInPrevious = SegmentStore.getNextSegment(
         -1,
         null,
-        7,
+        SEGMENTS_STATUS.TRANSLATED,
         null,
         true,
       )

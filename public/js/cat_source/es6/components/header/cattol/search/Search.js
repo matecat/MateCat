@@ -16,6 +16,7 @@ import AlertModal from '../../../modals/AlertModal'
 import ModalsActions from '../../../../actions/ModalsActions'
 import {tagSignatures} from '../../../segments/utils/DraftMatecatUtils/tagModel'
 import CommonUtils from '../../../../utils/commonUtils'
+import {REVISE_STEP_NUMBER} from '../../../../constants/Constants'
 
 class Search extends React.Component {
   constructor(props) {
@@ -320,10 +321,10 @@ class Search extends React.Component {
     let search = cloneDeep(this.state.search)
     search['selectStatus'] = value
     if (value === 'APPROVED-2') {
-      search.revisionNumber = 2
+      search.revisionNumber = REVISE_STEP_NUMBER.REVISE2
       search['selectStatus'] = 'APPROVED'
-    } else {
-      search.revisionNumber = null
+    } else if (value === 'APPROVED') {
+      search.revisionNumber = REVISE_STEP_NUMBER.REVISE1
     }
     this.setState({
       search: search,

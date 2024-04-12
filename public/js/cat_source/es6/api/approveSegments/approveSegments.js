@@ -1,5 +1,10 @@
 import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
 import {flattenObject} from '../../utils/queryString'
+import {
+  JOB_WORD_CONT_TYPE,
+  REVISE_STEP_NUMBER,
+  SEGMENTS_STATUS,
+} from '../../constants/Constants'
 
 /**
  * Mark approved filtered segments
@@ -17,9 +22,15 @@ export const approveSegments = async (
   password = config.password,
   revisionNumber = config.revisionNumber,
 ) => {
+  //YYY
   const dataParams = flattenObject({
     segments_id: segments,
-    status: 'approved',
+    status:
+      revisionNumber === REVISE_STEP_NUMBER.REVISE1
+        ? SEGMENTS_STATUS.APPROVED
+        : config.word_count_type === JOB_WORD_CONT_TYPE.EQUIVALENT
+        ? SEGMENTS_STATUS.APPROVED
+        : SEGMENTS_STATUS.APPROVED2,
     client_id: config.id_client,
     revision_number: revisionNumber,
   })

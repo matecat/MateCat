@@ -6,6 +6,8 @@
  * Time: 18.45
  */
 
+use DataAccess\ShapelessConcreteStruct;
+
 /**
  * Class DataAccess_MemoryKeyDao<br/>
  * This class handles the communication with the corresponding table in the database using a CRUD interface
@@ -59,7 +61,7 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
      * @return array|void
      * @throws Exception
      */
-    public function read( TmKeyManagement_MemoryKeyStruct $obj, $traverse = false ) {
+    public function read( TmKeyManagement_MemoryKeyStruct $obj, $traverse = false, $ttl = 0 ) {
         $obj = $this->sanitize( $obj );
 
         $where_params = [];
@@ -116,10 +118,11 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
         $query = sprintf( $query, $where_string );
 
         $stmt = $this->database->getConnection()->prepare( $query );
-        $stmt->execute( $where_params );
-        $stmt->setFetchMode( PDO::FETCH_ASSOC );
 
-        $arr_result = $stmt->fetchAll();
+        /**
+         * @var ShapelessConcreteStruct $arr_result
+         */
+        $arr_result = $this->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), $where_params );
 
         if ( $traverse ) {
 

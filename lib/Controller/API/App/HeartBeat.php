@@ -10,9 +10,11 @@
 namespace API\App;
 
 
+use API\App\Json\Ping;
 use API\V2\KleinController;
 use API\V2\Validators\WhitelistAccessValidator;
-use API\App\Json\Ping;
+use INIT;
+use RuntimeException;
 
 class HeartBeat extends KleinController {
 
@@ -22,8 +24,8 @@ class HeartBeat extends KleinController {
 
     public function ping() {
         \Database::obtain()->ping();
-        if ( !touch( \INIT::$ROOT . DIRECTORY_SEPARATOR . "touch" ) ) {
-            throw new \RuntimeException( "Storage unavailable." );
+        if ( !touch( INIT::$ROOT . DIRECTORY_SEPARATOR . "touch" ) ) {
+            throw new RuntimeException( "Storage unavailable." );
         }
 
         $format = new Ping( $this );

@@ -9,11 +9,13 @@
 namespace Email;
 
 
+use CatUtils;
 use Chunks_ChunkStruct;
+use Projects_MetadataDao;
 use Projects_ProjectStruct;
 use Routes;
 use Users_UserStruct;
-use WordCount_Struct;
+use WordCount\WordCountStruct;
 
 class ProjectAssignedEmail extends AbstractEmail {
 
@@ -40,21 +42,21 @@ class ProjectAssignedEmail extends AbstractEmail {
         $words_count = [];
         foreach ( $this->jobs as $job ) {
             $jStruct  = new Chunks_ChunkStruct( $job->getArrayCopy() );
-            $jobStats = new WordCount_Struct();
+            $jobStats = new WordCountStruct();
             $jobStats->setIdJob( $jStruct->id );
             $jobStats->setDraftWords( $jStruct->draft_words + $jStruct->new_words ); // (draft_words + new_words) AS DRAFT
             $jobStats->setRejectedWords( $jStruct->rejected_words );
             $jobStats->setTranslatedWords( $jStruct->translated_words );
             $jobStats->setApprovedWords( $jStruct->approved_words );
-            $stats         = \CatUtils::getFastStatsForJob( $jobStats, false );
-            $words_count[] = $stats[ 'TOTAL' ];
+            $stats         = CatUtils::getFastStatsForJob( $jobStats, false );
+            $words_count[] = $stats[ Projects_MetadataDao::WORD_COUNT_RAW ][ 'total' ];
         }
 
         return [
                 'user'        => $this->assignee->toArray(),
                 'sender'      => $this->user->toArray(),
                 'project'     => $this->project->toArray(),
-                'words_count' => number_format( array_sum( $words_count ), 0, ".", "," ),
+                'words_count' => number_format( array_sum( $words_count ) ),
                 'project_url' => Routes::analyze( [
                         'project_name' => $this->project->name,
                         'id_project'   => $this->project->id,
