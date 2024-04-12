@@ -1286,8 +1286,8 @@ class NewController extends ajaxController {
 
         if ( !empty( $this->postInput[ 'filters_extraction_parameters' ] ) ) {
 
-            $json = json_decode($this->postInput[ 'filters_extraction_parameters' ]);
-            $schema = file_get_contents( \INIT::$ROOT . '/inc/validation/schema/filter_extraction_parameters.json' );
+            $json = html_entity_decode( $this->postInput[ 'filters_extraction_parameters' ]);
+            $schema = file_get_contents( \INIT::$ROOT . '/inc/validation/schema/filters_extraction_parameters.json' );
 
             $validatorObject = new JSONValidatorObject();
             $validatorObject->json = $json;
@@ -1295,7 +1295,7 @@ class NewController extends ajaxController {
             $validator = new JSONValidator($schema);
             $validator->validate($validatorObject);
 
-            $this->filters_extraction_parameters = $json;
+            $this->filters_extraction_parameters = json_decode($json);
         }
     }
 
