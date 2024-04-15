@@ -240,6 +240,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         $parameters[ 'tnote' ]     = $_config[ 'tnote' ];
         $parameters[ 'langpair' ]  = $_config[ 'source' ] . "|" . $_config[ 'target' ];
         $parameters[ 'de' ]        = $_config[ 'email' ];
+        $parameters[ 'mt' ]        = isset($_config[ 'set_mt' ]) ? $_config[ 'set_mt' ] : true;
         $parameters[ 'client_id' ] = isset($_config[ 'uid' ]) ? $_config[ 'uid' ] : 0;
         $parameters[ 'prop' ]      = $_config[ 'prop' ];
 
