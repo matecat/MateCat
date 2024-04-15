@@ -28,6 +28,8 @@ class convertFileController extends ajaxController {
     protected $convertZipFile = true;
     protected $lang_handler;
 
+    protected $filters_extraction_parameters;
+
     /**
      * @var AbstractFilesStorage
      */
@@ -55,15 +57,20 @@ class convertFileController extends ajaxController {
                 'segmentation_rule' => [
                         'filter' => FILTER_SANITIZE_STRING,
                         'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                ],
+                'filters_extraction_parameters' => [
+                        'filter' => FILTER_SANITIZE_STRING,
+                        'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ]
         ];
 
         $postInput = filter_input_array( INPUT_POST, $filterArgs );
 
-        $this->file_name         = $postInput[ 'file_name' ];
-        $this->source_lang       = $postInput[ "source_lang" ];
-        $this->target_lang       = $postInput[ "target_lang" ];
-        $this->segmentation_rule = $postInput[ "segmentation_rule" ];
+        $this->file_name                     = $postInput[ 'file_name' ];
+        $this->source_lang                   = $postInput[ "source_lang" ];
+        $this->target_lang                   = $postInput[ "target_lang" ];
+        $this->segmentation_rule             = $postInput[ "segmentation_rule" ];
+        $this->filters_extraction_parameters = $postInput[ "filters_extraction_parameters" ];
 
         $this->cookieDir = $_COOKIE[ 'upload_session' ];
         $this->intDir    = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->cookieDir;
@@ -125,6 +132,7 @@ class convertFileController extends ajaxController {
         $conversionHandler->setErrDir( $this->errDir );
         $conversionHandler->setFeatures( $this->featureSet );
         $conversionHandler->setUserIsLogged( $this->userIsLogged );
+        $conversionHandler->setFiltersExtractionParameters( $this->filters_extraction_parameters );
 
         if ( $ext == "zip" ) {
             if ( $this->convertZipFile ) {
