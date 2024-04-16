@@ -75,7 +75,8 @@ class Session {
      * @throws Exception
      */
     public function __construct() {
-        if ( !isset( $_SESSION[ 'uid' ] ) ) {
+
+        if ( !isset( $_COOKIE[ INIT::$AUTHCOOKIENAME ] ) ) {
             throw new \Exception( 'Cannot instantiate session for unlogged user' );
         }
 
