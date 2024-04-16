@@ -82,6 +82,12 @@ export const UserMenu = ({user, userLogged}) => {
     }
   }, [])
 
+  useEffect(() => {
+    if ($(dropdownProfile.current).length) {
+      $(dropdownProfile.current).dropdown()
+    }
+  }, [userLogged])
+
   return (
     <div
       className="ui dropdown"
