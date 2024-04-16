@@ -1,6 +1,5 @@
 import Cookies from 'js-cookie'
 import {filter} from 'lodash'
-import UserActions from './cat_source/es6/actions/UserActions'
 import ConfirmMessageModal from './cat_source/es6/components/modals/ConfirmMessageModal'
 import {downloadFileGDrive} from './cat_source/es6/api/downloadFileGDrive'
 import ModalsActions from './cat_source/es6/actions/ModalsActions'
@@ -23,9 +22,6 @@ window.APP = {
   },
   /*************************************************************************************************************/
   setLoginEvents: function () {
-    if (config.showModalBoxLogin == 1) {
-      APP.openLoginModal()
-    }
     onModalWindowMounted().then(() => this.checkForPopupToOpen())
   },
 
@@ -86,19 +82,11 @@ window.APP = {
       ...param,
     }
 
-    if (config.showModalBoxLogin == 1) {
-      props.redeemMessage = true
-      title = 'Add project to your management panel'
-    }
-
     ModalsActions.showModalComponent(LoginModal, props, title, style)
   },
   openRegisterModal: (params) => {
     let props = {
       googleUrl: config.authURL,
-    }
-    if (config.showModalBoxLogin == 1) {
-      props.redeemMessage = true
     }
     if (params) {
       props = {
@@ -108,28 +96,17 @@ window.APP = {
     }
     ModalsActions.showModalComponent(RegisterModal, props, 'Register Now')
   },
-  openPreferencesModal: (params) => {
-    let props = {
-      user: APP.USER.STORE.user,
-      metadata: APP.USER.STORE.metadata ? APP.USER.STORE.metadata : {},
-    }
-    if (
-      APP.USER.STORE.connected_services &&
-      APP.USER.STORE.connected_services.length
-    ) {
-      props.service = APP.USER.getDefaultConnectedService()
-    }
-    if (params) {
-      props = {
-        ...props,
-        ...params,
-      }
-    }
+  openPreferencesModal: ({showGDriveMessage = false} = {}) => {
     const style = {
       width: '700px',
       maxWidth: '700px',
     }
-    ModalsActions.showModalComponent(PreferencesModal, props, 'Profile', style)
+    ModalsActions.showModalComponent(
+      PreferencesModal,
+      {showGDriveMessage},
+      'Profile',
+      style,
+    )
   },
   openSuccessModal: (props) => {
     ModalsActions.showModalComponent(SuccessModal, props, props.title)

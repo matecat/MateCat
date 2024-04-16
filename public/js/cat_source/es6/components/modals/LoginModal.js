@@ -6,7 +6,6 @@ import React from 'react'
 import TextField from '../common/TextField'
 import * as RuleRunner from '../common/ruleRunner'
 import * as FormRules from '../common/formRules'
-import {checkRedeemProject as checkRedeemProjectApi} from '../../api/checkRedeemProject'
 import {loginUser} from '../../api/loginUser'
 import ModalsActions from '../../actions/ModalsActions'
 import ForgotPasswordModal from './ForgotPasswordModal'
@@ -37,7 +36,6 @@ class LoginModal extends React.Component {
   otherServiceLogin() {
     let url = config.pluggable.other_service_auth_url
     let self = this
-    this.checkRedeemProject()
     let newWindow = window.open(url, 'name', 'height=900,width=900')
     if (window.focus) {
       newWindow.focus()
@@ -64,7 +62,6 @@ class LoginModal extends React.Component {
 
     let url = this.props.googleUrl
     let self = this
-    this.checkRedeemProject()
     let newWindow = window.open(url, 'name', 'height=600,width=900')
     if (window.focus) {
       newWindow.focus()
@@ -127,36 +124,26 @@ class LoginModal extends React.Component {
       return false
     }
     this.setState({requestRunning: true})
-    this.checkRedeemProject().then(
-      this.sendLoginData()
-        .then(() => {
-          if (this.props.goToManage) {
-            window.location = '/manage/'
-          } else {
-            window.location.reload()
-          }
+    this.sendLoginData()
+      .then(() => {
+        if (this.props.goToManage) {
+          window.location = '/manage/'
+        } else {
+          window.location.reload()
+        }
+      })
+      .catch((response) => {
+        if (response.status === 429) {
+          const time = response.headers.get('Retry-After')
+          this.showErrorWithTimer(time)
+          return
+        }
+        const text = 'Login failed.'
+        this.setState({
+          generalError: text,
+          requestRunning: false,
         })
-        .catch((response) => {
-          if (response.status === 429) {
-            const time = response.headers.get('Retry-After')
-            this.showErrorWithTimer(time)
-            return
-          }
-          const text = 'Login failed.'
-          this.setState({
-            generalError: text,
-            requestRunning: false,
-          })
-        }),
-    )
-  }
-
-  checkRedeemProject() {
-    if (this.props.redeemMessage) {
-      return checkRedeemProjectApi()
-    } else {
-      return Promise.resolve()
-    }
+      })
   }
 
   sendLoginData() {
@@ -172,16 +159,12 @@ class LoginModal extends React.Component {
   }
 
   openForgotPassword() {
-    let props = {}
-    if (config.showModalBoxLogin == 1) {
-      props.redeemMessage = true
-    }
     const style = {
       width: '577px',
     }
     ModalsActions.showModalComponent(
       ForgotPasswordModal,
-      props,
+      {},
       'Forgot Password',
       style,
     )
@@ -303,26 +286,6 @@ class LoginModal extends React.Component {
       </div>
     )
 
-    if (this.props.redeemMessage) {
-      htmlMessage = (
-        <div className="login-container-right">
-          <h2 style={{fontSize: '21px'}}>
-            Sign up or sign in to add the project to your management panel and:
-          </h2>
-          <ul className="add-project-manage">
-            <li>Track the progress of your translations</li>
-            <li>Monitor the activity for increased security</li>
-            <li>Manage TMs, MT and glossaries</li>
-          </ul>
-          <a
-            className="register-button btn-confirm-medium sing-up"
-            onClick={this.openRegisterModal}
-          >
-            Sign up
-          </a>
-        </div>
-      )
-    }
     return (
       <div className="login-modal">
         {htmlMessage}

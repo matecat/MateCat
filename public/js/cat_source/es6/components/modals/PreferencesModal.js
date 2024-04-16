@@ -16,9 +16,14 @@ import {
   BUTTON_TYPE,
 } from '../common/Button/Button'
 import IconClose from '../icons/IconClose'
+import UserStore from '../../stores/UserStore'
+import {getUserData} from '../../api/getUserData'
 
 const PreferencesModal = (props) => {
-  const [service, setService] = useState(props.service)
+  const userInfo = UserStore.getUser()
+  const {user, metadata} = userInfo
+  const serviceInfo = UserStore.getDefaultConnectedService()
+  const [service, setService] = useState(serviceInfo)
   const [credentials, setCredentials] = useState(null)
   const [driveActive, setDriveActive] = useState(
     service && (!service.disabled_at || !service.expired_at),
@@ -27,8 +32,8 @@ const PreferencesModal = (props) => {
   const [credentialsCopied, setCredentialsCopied] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [modifyUser, setModifyUser] = useState(false)
-  const [firstName, setFirstName] = useState(props.user.first_name)
-  const [lastName, setLastName] = useState(props.user.last_name)
+  const [firstName, setFirstName] = useState(user.first_name)
+  const [lastName, setLastName] = useState(user.last_name)
 
   useEffect(() => {
     getUserApiKey()
@@ -57,8 +62,9 @@ const PreferencesModal = (props) => {
 
       let interval = setInterval(() => {
         if (newWindow.closed) {
-          APP.USER.loadUserData().then(() => {
-            const updatedService = APP.USER.getDefaultConnectedService()
+          getUserData().then((data) => {
+            UserActions.updateUser(data)
+            const updatedService = UserStore.getDefaultConnectedService()
             if (updatedService) {
               setService(updatedService)
               setDriveActive(true)
@@ -72,10 +78,13 @@ const PreferencesModal = (props) => {
     } else {
       setDriveActive(false)
 
-      if (APP.USER.STORE.connected_services.length) {
+      if (userInfo.connected_services.length) {
         disableGDrive().then((data) => {
-          APP.USER.upsertConnectedService(data.connected_service)
-          setService(APP.USER.getDefaultConnectedService())
+          const connectedServices = UserStore.updateConnectedService(
+            data.connected_service,
+          )
+
+          setService(connectedServices)
         })
       }
     }
@@ -311,7 +320,7 @@ const PreferencesModal = (props) => {
   }
 
   let resetPasswordHtml = ''
-  if (props.user.has_password) {
+  if (user.has_password) {
     resetPasswordHtml = (
       <a className="reset-password pull-left" onClick={openResetPassword}>
         Reset Password
@@ -322,10 +331,10 @@ const PreferencesModal = (props) => {
   let avatar = (
     <div className="avatar-user pull-left">{config.userShortName}</div>
   )
-  if (props.metadata.gplus_picture) {
+  if (metadata.gplus_picture) {
     avatar = (
       <div className="avatar-user pull-left">
-        <img src={props.metadata.gplus_picture} style={{width: '48px'}} />
+        <img src={metadata.gplus_picture} style={{width: '48px'}} />
       </div>
     )
   }
@@ -378,8 +387,8 @@ const PreferencesModal = (props) => {
                   type={BUTTON_TYPE.WARNING}
                   size={BUTTON_SIZE.ICON_STANDARD}
                   onClick={() => {
-                    setFirstName(props.user.first_name)
-                    setLastName(props.user.last_name)
+                    setFirstName(user.first_name)
+                    setLastName(user.last_name)
                     setModifyUser(false)
                   }}
                 >
@@ -400,7 +409,7 @@ const PreferencesModal = (props) => {
               </div>
             </div>
           )}
-          <span className="grey-txt">{props.user.email}</span>
+          <span className="grey-txt">{user.email}</span>
           <br />
         </div>
         <br />

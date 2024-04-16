@@ -10,6 +10,7 @@ import NotificationBox from './cat_source/es6/components/notificationsComponent/
 import NewProject from './cat_source/es6/pages/NewProject'
 import CreateProjectActions from './cat_source/es6/actions/CreateProjectActions'
 import CommonUtils from './cat_source/es6/utils/commonUtils'
+import UserStore from './cat_source/es6/stores/UserStore'
 
 /**
  * ajax call to clear the uploaded files when an user refresh the home page
@@ -62,10 +63,6 @@ $.extend(UPLOAD_PAGE, {
     })
   },
 })
-
-APP.restartConversion = function () {
-  UPLOAD_PAGE.restartConversions()
-}
 
 APP.checkGDriveEvents = function () {
   const cookieFilesGdrive = 'gdrive_files_to_be_listed'
@@ -176,11 +173,8 @@ APP.postProjectCreation = function (d) {
     } else {
       const data = {
         event: 'analyze_click',
-        userStatus: APP.USER.isUserLogged() ? 'loggedUser' : 'notLoggedUser',
-        userId:
-          APP.USER.isUserLogged() && APP.USER.STORE.user
-            ? APP.USER.STORE.user.uid
-            : null,
+        userStatus: 'loggedUser',
+        userId: UserStore.getUser().user.uid,
         idProject: d.id_project,
       }
       CommonUtils.dispatchAnalyticsEvents(data)

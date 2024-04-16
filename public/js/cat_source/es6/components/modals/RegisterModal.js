@@ -4,7 +4,6 @@ import React from 'react'
 import TextField from '../common/TextField'
 import * as RuleRunner from '../common/ruleRunner'
 import * as FormRules from '../common/formRules'
-import {checkRedeemProject as checkRedeemProjectApi} from '../../api/checkRedeemProject'
 import {registerUser} from '../../api/registerUser'
 import CommonUtils from '../../utils/commonUtils'
 import ModalsActions from '../../actions/ModalsActions'
@@ -58,35 +57,33 @@ class RegisterModal extends React.Component {
       event: 'open_register_email',
     }
     CommonUtils.dispatchAnalyticsEvents(data)
-    this.checkRedeemProject().then(
-      this.sendRegisterData()
-        .then(() => {
-          const style = {
-            width: '25%',
-            maxWidth: '450px',
-          }
-          ModalsActions.showModalComponent(
-            ConfirmRegister,
-            {emailAddress: self.state.emailAddress},
-            'Confirm Registration',
-            style,
-          )
+    this.sendRegisterData()
+      .then(() => {
+        const style = {
+          width: '25%',
+          maxWidth: '450px',
+        }
+        ModalsActions.showModalComponent(
+          ConfirmRegister,
+          {emailAddress: self.state.emailAddress},
+          'Confirm Registration',
+          style,
+        )
+      })
+      .catch((response) => {
+        var generalErrorText
+        if (response.responseText) {
+          var data = JSON.parse(response.responseText)
+          generalErrorText = data.error.message
+        } else {
+          generalErrorText =
+            'There was a problem saving the data, please try again later or contact support.'
+        }
+        self.setState({
+          generalError: generalErrorText,
+          requestRunning: false,
         })
-        .catch((response) => {
-          var generalErrorText
-          if (response.responseText) {
-            var data = JSON.parse(response.responseText)
-            generalErrorText = data.error.message
-          } else {
-            generalErrorText =
-              'There was a problem saving the data, please try again later or contact support.'
-          }
-          self.setState({
-            generalError: generalErrorText,
-            requestRunning: false,
-          })
-        }),
-    )
+      })
   }
 
   errorFor(field) {
@@ -103,7 +100,6 @@ class RegisterModal extends React.Component {
     }
     CommonUtils.dispatchAnalyticsEvents(data)
     var url = this.props.googleUrl
-    this.checkRedeemProject()
     var newWindow = window.open(url, 'name', 'height=600,width=900')
     if (window.focus) {
       newWindow.focus()
@@ -132,14 +128,6 @@ class RegisterModal extends React.Component {
       passwordConfirmation: this.state.password_confirmation,
       wantedUrl: window.location.href,
     })
-  }
-
-  checkRedeemProject() {
-    if (this.props.redeemMessage) {
-      return checkRedeemProjectApi()
-    } else {
-      return Promise.resolve()
-    }
   }
 
   onKeyDown = (event) => {
