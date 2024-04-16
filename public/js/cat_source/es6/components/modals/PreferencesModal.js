@@ -1,96 +1,91 @@
-import React from 'react'
+import React, {useState, useEffect} from 'react'
 
-import * as RuleRunner from '../common/ruleRunner'
-import * as FormRules from '../common/formRules'
-import {getUserApiKey} from '../../api/getUserApiKey'
-import {createUserApiKey} from '../../api/createUserApiKey'
-import {deleteUserApiKey} from '../../api/deleteUserApiKey'
-import {connectedServicesGDrive} from '../../api/connectedServicesGDrive'
-import {logoutUser as logoutUserApi} from '../../api/logoutUser'
 import Switch from '../common/Switch'
+import {getUserApiKey} from '../../api/getUserApiKey'
+import {logoutUser as logoutUserApi} from '../../api/logoutUser'
+import {createUserApiKey} from '../../api/createUserApiKey'
+import {connectedServicesGDrive} from '../../api/connectedServicesGDrive'
+import {deleteUserApiKey} from '../../api/deleteUserApiKey'
+import IconEdit from '../icons/IconEdit'
+import {modifyUserInfo} from '../../api/modifyUserInfo/modifyUser'
+import TeamsActions from '../../actions/TeamsActions'
+import {
+  Button,
+  BUTTON_MODE,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+} from '../common/Button/Button'
+import IconClose from '../icons/IconClose'
 
-class PreferencesModal extends React.Component {
-  constructor(props) {
-    super(props)
+const PreferencesModal = (props) => {
+  const [service, setService] = useState(props.service)
+  const [credentials, setCredentials] = useState(null)
+  const [driveActive, setDriveActive] = useState(
+    service && (!service.disabled_at || !service.expired_at),
+  )
+  const [credentialsCreated, setCredentialsCreated] = useState(false)
+  const [credentialsCopied, setCredentialsCopied] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
+  const [modifyUser, setModifyUser] = useState(false)
+  const [firstName, setFirstName] = useState(props.user.first_name)
+  const [lastName, setLastName] = useState(props.user.last_name)
 
-    this.state = {
-      service: this.props.service,
-      credentials: null,
-      driveActive:
-        this.props.service &&
-        (!this.props.service.disabled_at || !this.props.service.expired_at),
-    }
-
+  useEffect(() => {
     getUserApiKey()
       .then((response) => {
-        this.setState({
-          credentials: response,
-          credentialsCreated: false,
-          credentialsCopied: false,
-        })
+        setCredentials(response)
       })
       .catch(() => {
-        this.setState({
-          credentials: null,
-          credentialsCreated: false,
-          credentialsCopied: false,
-        })
+        setCredentials(null)
       })
+  }, [])
+
+  const openResetPassword = () => {
+    APP.openResetPassword() // Assuming APP.openResetPassword() is defined
   }
 
-  openResetPassword() {
-    APP.openResetPassword()
-  }
-
-  checkboxChange(selected) {
+  const checkboxChange = (selected) => {
     if (selected) {
-      this.setState({
-        driveActive: true,
-      })
+      setDriveActive(true)
+
       const url = config.gdriveAuthURL
       const newWindow = window.open(url, 'name', 'height=600,width=900')
 
       if (window.focus) {
         newWindow.focus()
       }
+
       let interval = setInterval(() => {
         if (newWindow.closed) {
           APP.USER.loadUserData().then(() => {
-            const service = APP.USER.getDefaultConnectedService()
-            if (service) {
-              this.setState({
-                service: service,
-                driveActive: true,
-              })
+            const updatedService = APP.USER.getDefaultConnectedService()
+            if (updatedService) {
+              setService(updatedService)
+              setDriveActive(true)
             } else {
-              this.setState({
-                driveActive: false,
-              })
+              setDriveActive(false)
             }
           })
           clearInterval(interval)
         }
       }, 600)
     } else {
-      this.setState({
-        driveActive: false,
-      })
+      setDriveActive(false)
+
       if (APP.USER.STORE.connected_services.length) {
-        this.disableGDrive().then((data) => {
+        disableGDrive().then((data) => {
           APP.USER.upsertConnectedService(data.connected_service)
-          this.setState({
-            service: APP.USER.getDefaultConnectedService(),
-          })
+          setService(APP.USER.getDefaultConnectedService())
         })
       }
     }
   }
 
-  disableGDrive() {
-    return connectedServicesGDrive(this.state.service.id)
+  const disableGDrive = () => {
+    return connectedServicesGDrive(service.id)
   }
 
-  logoutUser() {
+  const logoutUser = () => {
     logoutUserApi().then(() => {
       if ($('body').hasClass('manage')) {
         location.href = config.hostpath + config.basepath
@@ -100,83 +95,89 @@ class PreferencesModal extends React.Component {
     })
   }
 
-  generateKey() {
+  const generateKey = () => {
     createUserApiKey().then((response) => {
-      this.setState({
-        credentials: response,
-        credentialsCreated: true,
-      })
+      setCredentials(response)
+      setCredentialsCreated(true)
     })
   }
 
-  confirmDelete() {
-    this.setState({
-      confirmDelete: true,
-    })
+  const confirmDeleteHandler = () => {
+    setConfirmDelete(true)
   }
 
-  deleteKey() {
+  const deleteKey = () => {
     deleteUserApiKey().then(() => {
-      this.setState({
-        credentials: null,
-        credentialsCreated: false,
-        confirmDelete: false,
-      })
+      setCredentials(null)
+      setCredentialsCreated(false)
+      setConfirmDelete(false)
     })
   }
 
-  undoDelete() {
-    this.setState({
-      confirmDelete: false,
-    })
+  const undoDelete = () => {
+    setConfirmDelete(false)
   }
 
-  copyToClipboard(e) {
+  const copyToClipboard = (e) => {
     e.stopPropagation()
     navigator.clipboard.writeText(
-      `${this.state.credentials.api_key}-${this.state.credentials.api_secret}`,
+      `${credentials.api_key}-${credentials.api_secret}`,
     )
-    this.setState({
-      credentialsCopied: true,
-    })
+    setCredentialsCopied(true)
   }
 
-  getApiKeyHtml() {
+  const modifyUserDetails = () => {
+    modifyUserInfo(firstName, lastName).then(() => {
+      console.log('saved')
+    })
+    setModifyUser(false)
+    TeamsActions.updateUserName({firstName, lastName})
+  }
+
+  const getApiKeyHtml = () => {
     return (
       <div data-testid="preferences-modal">
         <h2>API Key</h2>
-        {this.state.credentials ? (
-          this.state.confirmDelete ? (
+        {credentials ? (
+          confirmDelete ? (
             <div className={'user-api'}>
               <div className={'user-api-text user-api-text-confirm-delete'}>
                 <label>Are you sure you want to delete the token?</label>
                 <label>This action cannot be undone.</label>
               </div>
               <div className={'user-api-buttons'}>
-                <a className="btn-ok" onClick={() => this.deleteKey()}>
+                <Button
+                  type={BUTTON_TYPE.PRIMARY}
+                  size={BUTTON_SIZE.MEDIUM}
+                  onClick={() => deleteKey()}
+                >
                   Delete
-                </a>
-                <a onClick={(e) => this.undoDelete(e)} className={'btn-cancel'}>
+                </Button>
+                <Button
+                  mode={BUTTON_MODE.OUTLINE}
+                  size={BUTTON_SIZE.MEDIUM}
+                  onClick={(e) => undoDelete(e)}
+                  className={'btn-cancel'}
+                >
                   Cancel
-                </a>
+                </Button>
               </div>
             </div>
           ) : (
             <div
               className={
-                'user-api ' +
-                (this.state.credentialsCreated ? 'user-api-created' : '')
+                'user-api ' + (credentialsCreated ? 'user-api-created' : '')
               }
             >
               <div className={'user-api-text'}>
-                {this.state.credentialsCreated ? (
+                {credentialsCreated ? (
                   <>
                     <div>
                       <label>Api Key</label>
                       <input
                         type="text"
                         readOnly
-                        value={this.state.credentials.api_key}
+                        value={credentials.api_key}
                         onFocus={(e) => e.target.select()}
                       />
                     </div>
@@ -185,42 +186,46 @@ class PreferencesModal extends React.Component {
                       <input
                         type="text"
                         readOnly
-                        value={this.state.credentials.api_secret}
+                        value={credentials.api_secret}
                         onFocus={(e) => e.target.select()}
                       />
                     </div>
                   </>
                 ) : (
                   <textarea
-                    ref={(keys) => (this.keys = keys)}
                     rows="1"
                     readOnly={true}
-                    value={
-                      this.state.credentials.api_key +
-                      '-' +
-                      this.state.credentials.api_secret
-                    }
+                    value={credentials.api_key + '-' + credentials.api_secret}
                   />
                 )}
               </div>
-              {this.state.credentialsCreated ? (
+              {credentialsCreated ? (
                 <div className={'user-api-buttons'}>
-                  <a
-                    onClick={(e) => this.copyToClipboard(e)}
-                    className={'btn-ok copy'}
+                  <Button
+                    type={BUTTON_TYPE.PRIMARY}
+                    size={BUTTON_SIZE.MEDIUM}
+                    onClick={(e) => copyToClipboard(e)}
                   >
                     <i className="icon-copy icon" />
-                    {this.state.credentialsCopied ? 'Copied' : 'Copy'}
-                  </a>
-                  <a className="btn-ok" onClick={() => this.confirmDelete()}>
+                    {credentialsCopied ? 'Copied' : 'Copy'}
+                  </Button>
+                  <Button
+                    type={BUTTON_TYPE.PRIMARY}
+                    size={BUTTON_SIZE.MEDIUM}
+                    onClick={() => confirmDeleteHandler()}
+                  >
                     Delete
-                  </a>
+                  </Button>
                 </div>
               ) : config.isAnInternalUser ? (
                 <div className="user-api-buttons">
-                  <a className="btn-ok" onClick={() => this.confirmDelete()}>
+                  <Button
+                    type={BUTTON_TYPE.PRIMARY}
+                    size={BUTTON_SIZE.MEDIUM}
+                    onClick={() => confirmDeleteHandler()}
+                  >
                     Delete
-                  </a>
+                  </Button>
                 </div>
               ) : (
                 <div className="user-api-message">
@@ -241,7 +246,7 @@ class PreferencesModal extends React.Component {
                   </div>
                 </div>
               )}
-              {this.state.credentialsCreated ? (
+              {credentialsCreated ? (
                 <div className={'user-api-message'}>
                   <i className="icon-info3 icon" />
                   <div className={'user-api-message-content'}>
@@ -276,9 +281,13 @@ class PreferencesModal extends React.Component {
             </div>
             <div className="user-api-buttons">
               {config.isAnInternalUser ? (
-                <a className="btn-ok" onClick={() => this.generateKey()}>
+                <Button
+                  type={BUTTON_TYPE.PRIMARY}
+                  size={BUTTON_SIZE.MEDIUM}
+                  onClick={() => generateKey()}
+                >
                   Generate
-                </a>
+                </Button>
               ) : null}
             </div>
           </div>
@@ -287,104 +296,128 @@ class PreferencesModal extends React.Component {
     )
   }
 
-  render() {
-    let gdriveMessage = ''
-    if (this.props.showGDriveMessage) {
-      gdriveMessage = (
-        <div className="preference-modal-message">
-          Connect your Google account to translate files in your Drive
-        </div>
-      )
-    }
-
-    let services_label = 'Allow Matecat to access your files on Google Drive'
-    if (
-      this.state.service &&
-      (!this.state.service.disabled_at || !this.state.service.expired_at)
-    ) {
-      services_label =
-        'Connected to Google Drive (' + this.state.service.email + ')'
-    }
-    let resetPasswordHtml = ''
-    if (this.props.user.has_password) {
-      resetPasswordHtml = (
-        <a
-          className="reset-password pull-left"
-          onClick={this.openResetPassword.bind(this)}
-        >
-          Reset Password
-        </a>
-      )
-    }
-
-    let avatar = (
-      <div className="avatar-user pull-left">{config.userShortName}</div>
+  let gdriveMessage = ''
+  if (props.showGDriveMessage) {
+    gdriveMessage = (
+      <div className="preference-modal-message">
+        Connect your Google account to translate files in your Drive
+      </div>
     )
-    if (this.props.metadata.gplus_picture) {
-      avatar = (
-        <div className="avatar-user pull-left">
-          <img
-            src={this.props.metadata.gplus_picture}
-            style={{width: '48px'}}
+  }
+
+  let services_label = 'Allow Matecat to access your files on Google Drive'
+  if (service && (!service.disabled_at || !service.expired_at)) {
+    services_label = `Connected to Google Drive (${service.email})`
+  }
+
+  let resetPasswordHtml = ''
+  if (props.user.has_password) {
+    resetPasswordHtml = (
+      <a className="reset-password pull-left" onClick={openResetPassword}>
+        Reset Password
+      </a>
+    )
+  }
+
+  let avatar = (
+    <div className="avatar-user pull-left">{config.userShortName}</div>
+  )
+  if (props.metadata.gplus_picture) {
+    avatar = (
+      <div className="avatar-user pull-left">
+        <img src={props.metadata.gplus_picture} style={{width: '48px'}} />
+      </div>
+    )
+  }
+
+  let googleDrive = null
+  if (config.googleDriveEnabled) {
+    googleDrive = (
+      <div>
+        <h2>Google Drive</h2>
+        <div className="user-gdrive">
+          <Switch
+            name="onoffswitch"
+            activeText="ON"
+            inactiveText="OFF"
+            onChange={(selected) => {
+              checkboxChange(selected)
+            }}
+            active={driveActive}
           />
-        </div>
-      )
-    }
-
-    let googleDrive = null
-
-    if (config.googleDriveEnabled) {
-      googleDrive = (
-        <div>
-          <h2>Google Drive</h2>
-          <div className="user-gdrive">
-            <Switch
-              name="onoffswitch"
-              activeText="ON"
-              inactiveText="OFF"
-              onChange={(selected) => {
-                this.checkboxChange(selected)
-              }}
-              active={this.state.driveActive}
-            />
-            <label>{services_label}</label>
-          </div>
-        </div>
-      )
-    }
-
-    return (
-      <div className="preferences-modal">
-        <div className="user-info-form">
-          {avatar}
-          <div className="user-name pull-left">
-            <strong>
-              {this.props.user.first_name} {this.props.user.last_name}
-            </strong>
-            <br />
-            <span className="grey-txt">{this.props.user.email}</span>
-            <br />
-          </div>
-          <br />
-          <div className="user-link">
-            <div
-              id="logoutlink"
-              className="pull-right"
-              onClick={this.logoutUser.bind(this)}
-            >
-              Logout
-            </div>
-            {resetPasswordHtml}
-          </div>
-        </div>
-        <div className="user-info-attributes">
-          <div className="user-reset-password">{gdriveMessage}</div>
-          {this.getApiKeyHtml()}
-          {googleDrive}
+          <label>{services_label}</label>
         </div>
       </div>
     )
   }
+
+  return (
+    <div className="preferences-modal">
+      <div className="user-info-form">
+        {avatar}
+        <div className="user-name pull-left">
+          {modifyUser ? (
+            <div className={'user-info-details user-info-modify'}>
+              <input
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+              />
+              <input
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+              />
+              <div className="user-info-modify-buttons">
+                <Button
+                  type={BUTTON_TYPE.PRIMARY}
+                  size={BUTTON_SIZE.MEDIUM}
+                  onClick={modifyUserDetails}
+                >
+                  Confirm
+                </Button>
+                <Button
+                  type={BUTTON_TYPE.WARNING}
+                  size={BUTTON_SIZE.ICON_STANDARD}
+                  onClick={() => {
+                    setFirstName(props.user.first_name)
+                    setLastName(props.user.last_name)
+                    setModifyUser(false)
+                  }}
+                >
+                  <IconClose />
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="user-info-details">
+              <strong>
+                {firstName} {lastName}
+              </strong>
+              <div
+                className="user-info-icon-update"
+                onClick={() => setModifyUser(true)}
+              >
+                <IconEdit />
+              </div>
+            </div>
+          )}
+          <span className="grey-txt">{props.user.email}</span>
+          <br />
+        </div>
+        <br />
+        <div className="user-link">
+          <div id="logoutlink" className="pull-right" onClick={logoutUser}>
+            Logout
+          </div>
+          {resetPasswordHtml}
+        </div>
+      </div>
+      <div className="user-info-attributes">
+        <div className="user-reset-password">{gdriveMessage}</div>
+        {getApiKeyHtml()}
+        {googleDrive}
+      </div>
+    </div>
+  )
 }
 
 export default PreferencesModal

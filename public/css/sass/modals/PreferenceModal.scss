@@ -1,0 +1,237 @@
+.preferences-modal .user-info-form {
+  font-size: 18px;
+  line-height: 30px;
+  margin-bottom: 30px;
+  background-color: white;
+  //border-bottom: 1px solid #ccc;
+  padding: 35px 20px 20px 50px;
+}
+
+.preferences-modal .user-gdrive {
+  //border: 1px solid #ccc;
+  padding: 10px;
+  background: white;
+  min-height: 50px;
+  margin-bottom: 25px;
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 30px;
+
+  > label {
+    font-size: 15px;
+    color: $grey1;
+  }
+}
+
+.preferences-modal .user-api {
+  border-radius: 4px;
+  background: white;
+  width: 100%;
+  min-height: 54px;
+  margin-bottom: 25px;
+  margin-top: 10px;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 10px;
+  flex-flow: row wrap;
+
+  .user-api-text {
+    width: 65%;
+    order: 1;
+
+    label,
+    textarea {
+      resize: none;
+      line-height: 20px;
+      float: left;
+      font-size: 15px;
+      text-align: left;
+      word-wrap: break-word;
+      color: $grey1;
+      white-space: nowrap;
+      width: 100%;
+      border: none;
+
+      &:focus {
+        outline: none;
+      }
+    }
+  }
+
+  .user-api-text-confirm-delete {
+    label {
+      color: $black;
+    }
+  }
+
+  .user-api-buttons {
+    display: flex;
+    gap: 6px;
+    order: 2;
+  }
+
+  .user-api-message {
+    order: 3;
+    flex: 1 100%;
+    line-height: 40px;
+    margin-top: 13px;
+    border: 1px solid $greenDefault;
+    background-color: #f7fdf7;
+    border-radius: 4px;
+    display: flex;
+    justify-content: center;
+    flex-flow: row;
+    padding: 10px;
+
+    i {
+      color: $greenDefault;
+      margin-top: 8px;
+      margin-left: 20px;
+    }
+
+    .user-api-message-content {
+      margin-left: 10px;
+      line-height: 30px;
+    }
+  }
+
+  &.user-api-created {
+    align-items: baseline;
+
+    .user-api-text {
+      display: flex;
+      flex-direction: row;
+
+      > div input {
+        height: 38px;
+        border-radius: 2px;
+      }
+
+      > :last-child {
+        margin-left: 3px;
+      }
+    }
+  }
+
+  &.user-api-created textarea,
+  &.user-api-created label {
+    color: $black;
+  }
+}
+
+.user-name {
+  margin-left: 15px;
+  line-height: 25px;
+  .user-info-icon-update {
+    cursor: pointer;
+    color: $grey;
+    &:hover {
+      color: $black;
+    }
+  }
+}
+
+.user-info-details {
+  &.user-info-modify {
+    height: 40px;
+  }
+  display: flex;
+  align-content: center;
+  gap: 10px;
+  input {
+    margin-top: 0 !important;
+    width: 150px !important;
+  }
+  .user-info-modify-buttons {
+    display: flex;
+    gap: 5px;
+  }
+}
+
+.user-info-form img {
+  border-radius: 500rem;
+}
+
+.preferences-modal .user-name strong {
+  font-size: 22px;
+}
+
+.preferences-modal .avatar-user {
+  width: 50px;
+  height: 50px;
+  line-height: 50px;
+  text-align: center;
+  font-size: 21px;
+  color: #fff;
+  padding: 0;
+  background: #b7b7b7;
+  border: 1px solid #ccc;
+  -moz-border-radius: 50px;
+  -webkit-border-radius: 50px;
+  border-radius: 50px;
+}
+
+.preferences-modal .user-info-attributes {
+  padding: 20px 50px;
+}
+
+.preferences-modal .user-info-form label {
+  float: left;
+  margin-top: 7px;
+  font-size: 16px;
+}
+
+.preferences-modal .user-reset-password label {
+  float: left;
+  font-size: 18px;
+  margin-top: 25px;
+}
+
+.preferences-modal{
+  .button {
+    font-family: Calibri, Arial, Helvetica, sans-serif;
+    vertical-align: top;
+    border: 1px solid #797979;
+    border-radius: 2px;
+    font-size: 16px;
+    margin-bottom: 15px;
+    margin-left: 80%;
+    background-color: $translatedBlue;
+    transition: 0.3s ease;
+    color: #ffffff;
+    text-shadow: none;
+    background-image: none;
+    cursor: pointer;
+    display: inline-block;
+    min-height: 1em;
+    outline: none;
+    padding: 0.78571429em 1.5em 0.78571429em;
+    font-weight: bold;
+    line-height: 1em;
+    font-style: normal;
+    text-align: center;
+    text-decoration: none;
+    user-select: none;
+    &:hover {
+      background-color: #08b3de;
+      box-shadow:
+              0 0 0 #e0e0e0,
+              0 0 2px rgba(0, 0, 0, 0.12),
+              0 2px 4px rgba(0, 0, 0, 0.24) !important;
+    }
+  }
+}
+
+
+.user-info-form .grey-txt {
+  color: $grey1;
+}
+.reset-password.btn-confirm-medium {
+  float: left;
+}
