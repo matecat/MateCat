@@ -139,9 +139,9 @@ AppDispatcher.register(function (action) {
       UserStore.updateUser(action.user)
       UserStore.emitChange(UserConstants.UPDATE_USER, UserStore.user)
       break
-    case TeamConstants.UPDATE_USER_NAME:
-      TeamsStore.updateUserName(action.info)
-      TeamsStore.emitChange(TeamConstants.UPDATE_USER, TeamsStore.user)
+    case UserConstants.UPDATE_USER_NAME:
+      UserStore.updateUserName(action.info)
+      UserStore.emitChange(UserConstants.UPDATE_USER, UserStore.user)
       break
     // Move this actions
     case ManageConstants.OPEN_CREATE_TEAM_MODAL:

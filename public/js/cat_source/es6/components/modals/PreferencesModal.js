@@ -8,7 +8,7 @@ import {connectedServicesGDrive} from '../../api/connectedServicesGDrive'
 import {deleteUserApiKey} from '../../api/deleteUserApiKey'
 import IconEdit from '../icons/IconEdit'
 import {modifyUserInfo} from '../../api/modifyUserInfo/modifyUser'
-import TeamsActions from '../../actions/TeamsActions'
+import UserActions from '../../actions/UserActions'
 import {
   Button,
   BUTTON_MODE,
@@ -131,7 +131,7 @@ const PreferencesModal = (props) => {
       console.log('saved')
     })
     setModifyUser(false)
-    TeamsActions.updateUserName({firstName, lastName})
+    UserActions.updateUserName({firstName, lastName})
   }
 
   const getApiKeyHtml = () => {
