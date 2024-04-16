@@ -180,6 +180,9 @@ class NewController extends ajaxController {
                 'pretranslate_100'           => [
                         'filter' => [ 'filter' => FILTER_VALIDATE_INT ]
                 ],
+                'pretranslate_101'   => [
+                    'filter' => [ 'filter' => FILTER_VALIDATE_INT ]
+                ],
                 'id_team'                    => [ 'filter' => FILTER_VALIDATE_INT ],
                 'id_qa_model'                => [ 'filter' => FILTER_VALIDATE_INT ],
                 'id_qa_model_template'       => [ 'filter' => FILTER_VALIDATE_INT ],
@@ -623,6 +626,7 @@ class NewController extends ajaxController {
         $projectStructure[ 'owner' ]                = $this->user->email;
         $projectStructure[ 'metadata' ]             = $this->metadata;
         $projectStructure[ 'pretranslate_100' ]     = (int)!!$this->postInput[ 'pretranslate_100' ]; // Force pretranslate_100 to be 0 or 1
+        $projectStructure[ 'pretranslate_101' ]     = isset($this->postInput[ 'pretranslate_101' ]) ? (int)$this->postInput[ 'pretranslate_101' ] : 1;
 
         //default get all public matches from TM
         $projectStructure[ 'only_private' ] = ( !isset( $this->postInput[ 'get_public_matches' ] ) ? false : !$this->postInput[ 'get_public_matches' ] );

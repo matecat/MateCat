@@ -2465,11 +2465,16 @@ var spec = {
     PayableRateSchema: {
       type: 'object',
       properties: {
+        id: {
+          type: 'integer',
+          readOnly: true
+        },
         payable_rate_template_name: {
           type: 'string',
         },
         version: {
           type: 'integer',
+          readOnly: true,
           description:
             "The model version. It's incremented on every model update.",
           example: 1,

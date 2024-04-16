@@ -997,5 +997,32 @@ class CatUtils {
 
         return Jobs_JobDao::getSegmentTranslationsCount( $idJobs );
     }
+
+    /**
+     * This function appends _{x} to a string.
+     *
+     * Example: house   ---> house_1
+     *          house_1 ---> house_2
+     *
+     * @param string $string
+     *
+     * @return string
+     */
+    public static function getUniqueName($string){
+
+        $a = explode("_", $string);
+        $end = (int)end($a);
+
+        if(($end > 0) and count($a)>1 ){
+            array_pop($a);
+        }
+
+        $name = implode('_', $a);
+
+        $return = $name;
+        $return .= '_'.($end+1);
+
+        return $return;
+    }
 }
 

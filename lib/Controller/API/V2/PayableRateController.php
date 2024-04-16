@@ -17,7 +17,12 @@ class PayableRateController extends KleinController
     public function index()
     {
         $currentPage = (isset($_GET['page'])) ? $_GET['page'] : 1;
-        $pagination = 20;
+        $pagination = (isset($_GET['perPage'])) ? $_GET['perPage'] : 20;
+
+        if($pagination > 200){
+            $pagination = 200;
+        }
+
         $uid = $this->getUser()->uid;
 
         return $this->response->json(CustomPayableRateDao::getAllPaginated($uid, $currentPage, $pagination));
@@ -44,10 +49,7 @@ class PayableRateController extends KleinController
 
             $this->response->code(201);
 
-            return $this->response->json([
-                'id'      => (int)$struct->id,
-                'version' => (int)$struct->version,
-            ]);
+            return $this->response->json($struct);
         } catch (JSONValidatorError $exception){
             $errorCode = $exception->getCode() >= 400 ? $exception->getCode()  : 500;
             $this->response->code($errorCode);
@@ -132,10 +134,7 @@ class PayableRateController extends KleinController
             $struct = CustomPayableRateDao::editFromJSON($model, $json);
 
             $this->response->code(200);
-            return $this->response->json([
-                'id'      => (int)$struct->id,
-                'version' => (int)$struct->version,
-            ]);
+            return $this->response->json($struct);
         } catch (JSONValidatorError $exception){
             $errorCode = $exception->getCode() >= 400 ? $exception->getCode()  : 500;
             $this->response->code($errorCode);

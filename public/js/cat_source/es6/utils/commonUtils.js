@@ -648,3 +648,24 @@ class DetectTripleClick {
 CommonUtils.DetectTripleClick = DetectTripleClick
 
 export default CommonUtils
+
+/**
+ * Switch position of an item inside array
+ *
+ * @param {Array} arr
+ * @param {number} targetIndex - index of item to move
+ * @param {number} newIndex - new index to move item
+ * @returns {Array}
+ */
+export function switchArrayIndex(arr, targetIndex, newIndex) {
+  return arr.reduce((acc, cur, index, arr) => {
+    if (index === newIndex) {
+      if (targetIndex > newIndex) return [...acc, arr[targetIndex], cur]
+      else return [...acc, cur, arr[targetIndex]]
+    } else if (index === targetIndex) {
+      return acc
+    }
+
+    return [...acc, cur]
+  }, [])
+}

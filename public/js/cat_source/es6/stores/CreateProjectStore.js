@@ -67,6 +67,13 @@ AppDispatcher.register(function (action) {
     case NewProjectConstants.ENABLE_ANALYZE_BUTTON:
       CreateProjectStore.emitChange(action.actionType, action.value)
       break
+    case NewProjectConstants.UPDATE_PROJECT_TEMPLATES:
+      CreateProjectStore.emitChange(action.actionType, {
+        templates: action.templates,
+        modifiedPropsCurrentProjectTemplate:
+          action.modifiedPropsCurrentProjectTemplate,
+      })
+      break
   }
 })
 export default CreateProjectStore
