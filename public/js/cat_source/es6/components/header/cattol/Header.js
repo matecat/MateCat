@@ -14,7 +14,7 @@ import {SegmentsFilterButton} from './SegmentsFilterButton'
 import {SettingsButton} from './SettingsButton'
 import {ActionMenu} from '../ActionMenu'
 import UserStore from '../../../stores/UserStore'
-import TeamConstants from '../../../constants/UserConstants'
+import UserConstants from '../../../constants/UserConstants'
 import {UserMenu} from '../UserMenu'
 
 export const Header = ({
@@ -51,9 +51,9 @@ export const Header = ({
   useEffect(() => {
     const updateUser = (user) => setUser(user)
 
-    UserStore.addListener(TeamConstants.UPDATE_USER, updateUser)
+    UserStore.addListener(UserConstants.UPDATE_USER, updateUser)
     return () => {
-      UserStore.removeListener(TeamConstants.UPDATE_USER, updateUser)
+      UserStore.removeListener(UserConstants.UPDATE_USER, updateUser)
     }
   }, [])
   return (

@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import usePortal from '../hooks/usePortal'
 import Header from '../components/header/Header'
 import UserStore from '../stores/UserStore'
-import TeamConstants from '../constants/UserConstants'
+import UserConstants from '../constants/UserConstants'
 import {Select} from '../components/common/Select'
 import ModalsActions from '../actions/ModalsActions'
 import AlertModal from '../components/modals/AlertModal'
@@ -413,7 +413,7 @@ const NewProject = ({
 
     getTmKeys()
     getMTEngines()
-    UserStore.addListener(TeamConstants.UPDATE_USER, updateUser)
+    UserStore.addListener(UserConstants.UPDATE_USER, updateUser)
     CreateProjectStore.addListener(
       NewProjectConstants.HIDE_ERROR_WARNING,
       hideAllErrors,
@@ -431,7 +431,7 @@ const NewProject = ({
       projectNameRef.current.value = projectNameFromQuerystring
     APP.checkGDriveEvents()
     return () => {
-      UserStore.removeListener(TeamConstants.UPDATE_USER, updateUser)
+      UserStore.removeListener(UserConstants.UPDATE_USER, updateUser)
       CreateProjectStore.removeListener(
         NewProjectConstants.HIDE_ERROR_WARNING,
         hideAllErrors,

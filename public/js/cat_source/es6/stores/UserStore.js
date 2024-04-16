@@ -5,7 +5,7 @@
 import AppDispatcher from './AppDispatcher'
 import {EventEmitter} from 'events'
 import ManageConstants from '../constants/ManageConstants'
-import TeamConstants from '../constants/UserConstants'
+import UserConstants from '../constants/UserConstants'
 import assign from 'object-assign'
 import Immutable from 'immutable'
 
@@ -87,53 +87,53 @@ const UserStore = assign({}, EventEmitter.prototype, {
 // Register callback to handle all updates
 AppDispatcher.register(function (action) {
   switch (action.actionType) {
-    case TeamConstants.RENDER_TEAMS:
+    case UserConstants.RENDER_TEAMS:
       UserStore.updateAll(action.teams)
       UserStore.emitChange(action.actionType, UserStore.teams)
       break
     case ManageConstants.UPDATE_TEAM_NAME:
       UserStore.emitChange(
-        TeamConstants.UPDATE_TEAM,
+        UserConstants.UPDATE_TEAM,
         UserStore.updateTeamName(action.team),
       )
-      UserStore.emitChange(TeamConstants.UPDATE_TEAMS, UserStore.teams)
+      UserStore.emitChange(UserConstants.UPDATE_TEAMS, UserStore.teams)
       break
     case ManageConstants.UPDATE_TEAM_MEMBERS:
       UserStore.emitChange(
-        TeamConstants.UPDATE_TEAM,
+        UserConstants.UPDATE_TEAM,
         UserStore.updateTeamMembers(
           action.team,
           action.members,
           action.pending_invitations,
         ),
       )
-      UserStore.emitChange(TeamConstants.UPDATE_TEAMS, UserStore.teams)
+      UserStore.emitChange(UserConstants.UPDATE_TEAMS, UserStore.teams)
       break
-    case TeamConstants.UPDATE_TEAM:
+    case UserConstants.UPDATE_TEAM:
       UserStore.emitChange(
-        TeamConstants.UPDATE_TEAM,
+        UserConstants.UPDATE_TEAM,
         UserStore.updateTeam(action.team),
       )
-      UserStore.emitChange(TeamConstants.UPDATE_TEAMS, UserStore.teams)
+      UserStore.emitChange(UserConstants.UPDATE_TEAMS, UserStore.teams)
       break
-    case TeamConstants.UPDATE_TEAMS:
+    case UserConstants.UPDATE_TEAMS:
       UserStore.updateAll(action.teams)
-      UserStore.emitChange(TeamConstants.UPDATE_TEAMS, UserStore.teams)
+      UserStore.emitChange(UserConstants.UPDATE_TEAMS, UserStore.teams)
       break
-    case TeamConstants.CHOOSE_TEAM:
+    case UserConstants.CHOOSE_TEAM:
       UserStore.emitChange(action.actionType, action.teamId, action.team)
       break
     case ManageConstants.REMOVE_TEAM:
       UserStore.removeTeam(action.team)
-      UserStore.emitChange(TeamConstants.RENDER_TEAMS, UserStore.teams)
+      UserStore.emitChange(UserConstants.RENDER_TEAMS, UserStore.teams)
       break
-    case TeamConstants.ADD_TEAM:
+    case UserConstants.ADD_TEAM:
       UserStore.addTeam(action.team)
-      UserStore.emitChange(TeamConstants.RENDER_TEAMS, UserStore.teams)
+      UserStore.emitChange(UserConstants.RENDER_TEAMS, UserStore.teams)
       break
-    case TeamConstants.UPDATE_USER:
+    case UserConstants.UPDATE_USER:
       UserStore.updateUser(action.user)
-      UserStore.emitChange(TeamConstants.UPDATE_USER, UserStore.user)
+      UserStore.emitChange(UserConstants.UPDATE_USER, UserStore.user)
       break
     // Move this actions
     case ManageConstants.OPEN_CREATE_TEAM_MODAL:

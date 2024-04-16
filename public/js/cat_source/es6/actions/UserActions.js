@@ -1,19 +1,19 @@
 import AppDispatcher from '../stores/AppDispatcher'
-import TeamConstants from '../constants/UserConstants'
+import UserConstants from '../constants/UserConstants'
 import {getUserData} from '../api/getUserData'
 import {getTeamMembers} from '../api/getTeamMembers'
 
 let UserActions = {
   updateUser: function (user) {
     AppDispatcher.dispatch({
-      actionType: TeamConstants.UPDATE_USER,
+      actionType: UserConstants.UPDATE_USER,
       user: user,
     })
   },
 
   renderTeams: function (teams, defaultTeam) {
     AppDispatcher.dispatch({
-      actionType: TeamConstants.RENDER_TEAMS,
+      actionType: UserConstants.RENDER_TEAMS,
       teams: teams,
       defaultTeam: defaultTeam,
     })
@@ -24,7 +24,7 @@ let UserActions = {
       team.members = data.members
       team.pending_invitations = data.pending_invitations
       AppDispatcher.dispatch({
-        actionType: TeamConstants.UPDATE_TEAM,
+        actionType: UserConstants.UPDATE_TEAM,
         team: team,
       })
     })
@@ -32,7 +32,7 @@ let UserActions = {
 
   updateTeams: function (teams) {
     AppDispatcher.dispatch({
-      actionType: TeamConstants.UPDATE_TEAMS,
+      actionType: UserConstants.UPDATE_TEAMS,
       teams: teams,
     })
   },
@@ -40,7 +40,7 @@ let UserActions = {
   getAllTeams: function () {
     getUserData().then(function (data) {
       AppDispatcher.dispatch({
-        actionType: TeamConstants.RENDER_TEAMS,
+        actionType: UserConstants.RENDER_TEAMS,
         teams: data.teams,
       })
     })
@@ -48,11 +48,11 @@ let UserActions = {
 
   selectTeam: function (team) {
     AppDispatcher.dispatch({
-      actionType: TeamConstants.UPDATE_TEAM,
+      actionType: UserConstants.UPDATE_TEAM,
       team: team,
     })
     AppDispatcher.dispatch({
-      actionType: TeamConstants.CHOOSE_TEAM,
+      actionType: UserConstants.CHOOSE_TEAM,
       teamId: team.id,
     })
   },
@@ -61,7 +61,7 @@ let UserActions = {
     $('.reloading-upload-page').show()
     APP.setTeamInStorage(team.id)
     AppDispatcher.dispatch({
-      actionType: TeamConstants.CHOOSE_TEAM,
+      actionType: UserConstants.CHOOSE_TEAM,
       teamId: team.id,
     })
     setTimeout(function () {

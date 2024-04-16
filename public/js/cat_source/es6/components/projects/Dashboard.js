@@ -13,7 +13,7 @@ import CatToolActions from '../../actions/CatToolActions'
 import ProjectsStore from '../../stores/ProjectsStore'
 import UserStore from '../../stores/UserStore'
 import ManageConstants from '../../constants/ManageConstants'
-import TeamConstants from '../../constants/UserConstants'
+import UserConstants from '../../constants/UserConstants'
 import DashboardHeader from './Header'
 import Header from '../header/Header'
 import {getProjects} from '../../api/getProjects'
@@ -426,8 +426,8 @@ class Dashboard extends React.Component {
       ManageConstants.OPEN_MODIFY_TEAM_MODAL,
       this.openModifyTeamModal,
     )
-    UserStore.addListener(TeamConstants.RENDER_TEAMS, this.updateTeams)
-    UserStore.addListener(TeamConstants.CHOOSE_TEAM, this.updateProjects)
+    UserStore.addListener(UserConstants.RENDER_TEAMS, this.updateTeams)
+    UserStore.addListener(UserConstants.CHOOSE_TEAM, this.updateProjects)
   }
 
   componentWillUnmount() {
@@ -466,8 +466,8 @@ class Dashboard extends React.Component {
       ManageConstants.OPEN_MODIFY_TEAM_MODAL,
       this.openModifyTeamModal,
     )
-    UserStore.removeListener(TeamConstants.RENDER_TEAMS, this.updateTeams)
-    UserStore.removeListener(TeamConstants.CHOOSE_TEAM, this.updateProjects)
+    UserStore.removeListener(UserConstants.RENDER_TEAMS, this.updateTeams)
+    UserStore.removeListener(UserConstants.CHOOSE_TEAM, this.updateProjects)
   }
 
   render() {

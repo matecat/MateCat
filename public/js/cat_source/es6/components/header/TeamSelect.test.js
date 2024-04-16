@@ -8,7 +8,7 @@ import TeamsSelect from './TeamsSelect'
 import UserActions from '../../actions/UserActions'
 import ModalsActions from '../../actions/ModalsActions'
 import UserStore from '../../stores/UserStore'
-import TeamConstants from '../../constants/UserConstants'
+import UserConstants from '../../constants/UserConstants'
 import ManageConstants from '../../constants/ManageConstants'
 import {mswServer} from '../../../../../mocks/mswServer'
 let modalVisible = false
@@ -229,7 +229,7 @@ xtest('Click on change team', async () => {
 
   let teamSelected
   UserStore.addListener(
-    TeamConstants.UPDATE_TEAM,
+    UserConstants.UPDATE_TEAM,
     (team) => (teamSelected = team.get('name')),
   )
 

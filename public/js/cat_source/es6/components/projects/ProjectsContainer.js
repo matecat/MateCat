@@ -1,7 +1,7 @@
 import React from 'react'
 import {flushSync} from 'react-dom'
 import ProjectContainer from './ProjectContainer'
-import TeamConstants from '../../constants/UserConstants'
+import UserConstants from '../../constants/UserConstants'
 import ManageConstants from '../../constants/ManageConstants'
 import ProjectsStore from '../../stores/ProjectsStore'
 import UserStore from '../../stores/UserStore'
@@ -181,9 +181,9 @@ class ProjectsContainer extends React.Component {
       ManageConstants.SHOW_RELOAD_SPINNER,
       this.showProjectsReloadSpinner,
     )
-    UserStore.addListener(TeamConstants.UPDATE_TEAM, this.updateTeam)
-    UserStore.addListener(TeamConstants.UPDATE_TEAMS, this.updateTeams)
-    UserStore.addListener(TeamConstants.RENDER_TEAMS, this.updateTeams)
+    UserStore.addListener(UserConstants.UPDATE_TEAM, this.updateTeam)
+    UserStore.addListener(UserConstants.UPDATE_TEAMS, this.updateTeams)
+    UserStore.addListener(UserConstants.RENDER_TEAMS, this.updateTeams)
   }
 
   componentWillUnmount() {
@@ -204,9 +204,9 @@ class ProjectsContainer extends React.Component {
       ManageConstants.SHOW_RELOAD_SPINNER,
       this.showProjectsReloadSpinner,
     )
-    UserStore.removeListener(TeamConstants.UPDATE_TEAM, this.updateTeam)
-    UserStore.removeListener(TeamConstants.UPDATE_TEAMS, this.updateTeams)
-    UserStore.removeListener(TeamConstants.RENDER_TEAMS, this.updateTeams)
+    UserStore.removeListener(UserConstants.UPDATE_TEAM, this.updateTeam)
+    UserStore.removeListener(UserConstants.UPDATE_TEAMS, this.updateTeams)
+    UserStore.removeListener(UserConstants.RENDER_TEAMS, this.updateTeams)
   }
 
   componentDidUpdate() {

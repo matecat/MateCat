@@ -26,13 +26,10 @@ function useAuth() {
           setIsUserLogged(true)
           setUserInfo(data.user)
           setConnectedServices(data.connected_services)
-          //TODO ?? Teams hanno uno store ma lo user noooo ??
           UserActions.updateUser(data)
-          console.log('# User connected', data)
         })
       }
     } else {
-      console.log('# User disconnected')
       setIsUserLogged(false)
       setConnectedServices()
       setUserInfo()
