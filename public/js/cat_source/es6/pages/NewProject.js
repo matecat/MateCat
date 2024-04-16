@@ -698,7 +698,7 @@ const NewProject = ({
             <div className="translate-box tmx-select">
               <TmGlossarySelect />
             </div>
-            {isLoggedIn && (
+            {isUserLogged && (
               <div className="translate-box">
                 <TemplateSelect
                   {...{

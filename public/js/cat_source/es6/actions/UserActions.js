@@ -12,7 +12,7 @@ let UserActions = {
   },
   updateUserName: function (info) {
     AppDispatcher.dispatch({
-      actionType: TeamConstants.UPDATE_USER_NAME,
+      actionType: UserConstants.UPDATE_USER_NAME,
       info: info,
     })
   },
