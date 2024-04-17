@@ -1,4 +1,11 @@
-import React, {useEffect, useRef, useState, useCallback, useMemo} from 'react'
+import React, {
+  useEffect,
+  useRef,
+  useState,
+  useCallback,
+  useMemo,
+  useContext,
+} from 'react'
 import usePortal from '../hooks/usePortal'
 import Header from '../components/header/Header'
 import UserStore from '../stores/UserStore'
@@ -43,6 +50,7 @@ import {AlertDeleteResourceProjectTemplates} from '../components/modals/AlertDel
 import {createRoot} from 'react-dom/client'
 import {checkGDriveEvents, restartConversions} from '../utils/newProjectUtils'
 import NotificationBox from '../components/notificationsComponent/NotificationBox'
+import {DataLoader, DataLoaderContext} from '../components/common/DataLoader'
 
 const SELECT_HEIGHT = 324
 
@@ -95,7 +103,8 @@ const NewProject = () => {
   } = useProjectTemplates(Array.isArray(tmKeys))
 
   const isDeviceCompatible = useDeviceCompatibility()
-  const {isUserLogged, userInfo} = useAuth()
+
+  const {isUserLogged, userInfo} = useContext(DataLoaderContext)
 
   // TODO: Remove temp notification warning login google (search in files this todo)
   useGoogleLoginNotification()
@@ -869,11 +878,19 @@ const NewProject = () => {
 }
 export default NewProject
 
+const NewProjectPage = ({props}) => {
+  return (
+    <DataLoader>
+      <NewProject {...props} />
+    </DataLoader>
+  )
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   const newProjectPage = createRoot(
     document.getElementsByClassName('new_project__page')[0],
   )
-  newProjectPage.render(React.createElement(NewProject))
+  newProjectPage.render(React.createElement(NewProjectPage))
 
   const mountPointNotificationBox = document.getElementsByClassName(
     'notifications-wrapper',
@@ -883,7 +900,7 @@ document.addEventListener('DOMContentLoaded', () => {
 })
 
 // TODO Da verificare
-$('.upload-table').on('click', 'a.skip_link', function () {
+/*$('.upload-table').on('click', 'a.skip_link', function () {
   var fname = decodeURIComponent($(this).attr('id').replace('skip_', ''))
 
   UI.skipLangDetectArr[fname] = 'skip'
@@ -894,4 +911,4 @@ $('.upload-table').on('click', 'a.skip_link', function () {
     $(this).remove()
   })
   $(parentTd_label).parent().removeClass('error')
-})
+})*/
