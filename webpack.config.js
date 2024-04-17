@@ -195,7 +195,7 @@ const matecatConfig = async ({env}, {mode}) => {
         path.resolve(__dirname, 'public/js/common.js'),
         path.resolve(
           __dirname,
-          'public/js/cat_source/es6/components/quality_report/QualityReport.js',
+          'public/js/cat_source/es6/pages/QualityReport.js',
         ),
         path.resolve(__dirname, 'public/css/sass/quality-report.scss'),
       ],

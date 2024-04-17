@@ -5,22 +5,23 @@ import {isEmpty} from 'lodash'
 import {debounce} from 'lodash/function'
 import ReactDOM, {flushSync} from 'react-dom'
 
-import ProjectsContainer from './ProjectsContainer'
-import ManageActions from '../../actions/ManageActions'
-import UserActions from '../../actions/UserActions'
-import ModalsActions from '../../actions/ModalsActions'
-import CatToolActions from '../../actions/CatToolActions'
-import ProjectsStore from '../../stores/ProjectsStore'
-import UserStore from '../../stores/UserStore'
-import ManageConstants from '../../constants/ManageConstants'
-import UserConstants from '../../constants/UserConstants'
-import DashboardHeader from './Header'
-import Header from '../header/Header'
-import {getProjects} from '../../api/getProjects'
-import {getUserData} from '../../api/getUserData'
-import {getTeamMembers} from '../../api/getTeamMembers'
-import NotificationBox from '../notificationsComponent/NotificationBox'
-import {CookieConsent} from '../common/CookieConsent'
+import ProjectsContainer from '../components/projects/ProjectsContainer'
+import ManageActions from '../actions/ManageActions'
+import UserActions from '../actions/UserActions'
+import ModalsActions from '../actions/ModalsActions'
+import CatToolActions from '../actions/CatToolActions'
+import ProjectsStore from '../stores/ProjectsStore'
+import UserStore from '../stores/UserStore'
+import ManageConstants from '../constants/ManageConstants'
+import UserConstants from '../constants/UserConstants'
+import DashboardHeader from '../components/projects/Header'
+import Header from '../components/header/Header'
+import {getProjects} from '../api/getProjects'
+import {getUserData} from '../api/getUserData'
+import {getTeamMembers} from '../api/getTeamMembers'
+import NotificationBox from '../components/notificationsComponent/NotificationBox'
+import {CookieConsent} from '../components/common/CookieConsent'
+import {mountPage} from './mountPage'
 
 class Dashboard extends React.Component {
   constructor() {
@@ -502,13 +503,7 @@ class Dashboard extends React.Component {
 
 export default Dashboard
 
-document.addEventListener('DOMContentLoaded', () => {
-  const mountPoint = createRoot(document.getElementById('manage-container'))
-  mountPoint.render(React.createElement(Dashboard, {}))
-
-  //Toast Notifications
-  const mountPointNotifications = createRoot(
-    document.getElementsByClassName('notifications-wrapper')[0],
-  )
-  mountPointNotifications.render(<NotificationBox />)
+mountPage({
+  Component: Dashboard,
+  rootElement: document.getElementById('manage-container'),
 })

@@ -11,6 +11,7 @@ import Immutable from 'immutable'
 import {createRoot} from 'react-dom/client'
 import {ANALYSIS_STATUS} from '../constants/Constants'
 import {useGoogleLoginNotification} from '../hooks/useGoogleLoginNotification'
+import {mountPage} from './mountPage'
 
 let pollingTime = 1000
 const segmentsThreshold = 50000
@@ -107,9 +108,8 @@ const AnalyzePage = () => {
 }
 
 export default AnalyzePage
-document.addEventListener('DOMContentLoaded', () => {
-  const analyzePage = createRoot(
-    document.getElementsByClassName('analyze-page')[0],
-  )
-  analyzePage.render(React.createElement(AnalyzePage))
+
+mountPage({
+  Component: AnalyzePage,
+  rootElement: document.getElementsByClassName('analyze-page')[0],
 })

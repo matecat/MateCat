@@ -120,18 +120,6 @@ const postProjectCreation = (d) => {
               '(ABBYY FineReader or Nuance PDF Converter)',
           )
           break
-        case -17:
-          $.each(d.lang_detect, function (fileName, status) {
-            if (status == 'detect') {
-              UI.addInlineMessage(
-                fileName,
-                'Different source language. <a class="skip_link" id="skip_' +
-                  fileName +
-                  '">Ignore</a>',
-              )
-            }
-          })
-          break
       }
 
       //normal error management

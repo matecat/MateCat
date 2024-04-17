@@ -51,6 +51,7 @@ import {createRoot} from 'react-dom/client'
 import {checkGDriveEvents, restartConversions} from '../utils/newProjectUtils'
 import NotificationBox from '../components/notificationsComponent/NotificationBox'
 import {DataLoader, DataLoaderContext} from '../components/common/DataLoader'
+import {mountPage} from './mountPage'
 
 const SELECT_HEIGHT = 324
 
@@ -878,37 +879,7 @@ const NewProject = () => {
 }
 export default NewProject
 
-const NewProjectPage = ({props}) => {
-  return (
-    <DataLoader>
-      <NewProject {...props} />
-    </DataLoader>
-  )
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  const newProjectPage = createRoot(
-    document.getElementsByClassName('new_project__page')[0],
-  )
-  newProjectPage.render(React.createElement(NewProjectPage))
-
-  const mountPointNotificationBox = document.getElementsByClassName(
-    'notifications-wrapper',
-  )[0]
-  const root = createRoot(mountPointNotificationBox)
-  root.render(<NotificationBox />)
+mountPage({
+  Component: NewProject,
+  rootElement: document.getElementsByClassName('new_project__page')[0],
 })
-
-// TODO Da verificare
-/*$('.upload-table').on('click', 'a.skip_link', function () {
-  var fname = decodeURIComponent($(this).attr('id').replace('skip_', ''))
-
-  UI.skipLangDetectArr[fname] = 'skip'
-
-  var parentTd_label = $(this).parent('.label')
-
-  $(parentTd_label).fadeOut(200, function () {
-    $(this).remove()
-  })
-  $(parentTd_label).parent().removeClass('error')
-})*/
