@@ -37,8 +37,6 @@ RewriteRule ^(jobanalysis)/([^/]*)-([^/]*)-([^/]*)/?$ index.php?action=analyze&p
 
 RewriteRule ^(login)[/]?$ index.php?action=loginPage [L,QSA]
 
-RewriteRule ^(oauth)/(response)[/]?$ index.php?action=oauthResponseHandler [L,QSA]
-
 RewriteRule ^(manage)[/]?$ index.php?action=manage [QSA,L]
 
 RewriteRule ^(revise-summary)/([^/]*)-([^/]*)/?$ index.php?action=reviseSummary&jid=$2&password=$3 [L]

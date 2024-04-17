@@ -14,7 +14,7 @@ class AuthCookie {
         $dao  = new Users_UserDao();
         $user = $dao->getByUid($payload[ 'user' ][ 'uid' ]);
 
-        if ( $payload ) {
+        if ( $payload and $user !== null ) {
             self::setCredentials( $user );
         }
 

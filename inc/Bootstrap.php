@@ -39,7 +39,7 @@ class Bootstrap {
         require_once 'Predis/autoload.php';
         @include_once 'vendor/autoload.php';
 
-        INIT::$OAUTH_CONFIG = $OAUTH_CONFIG[ 'OAUTH_CONFIG' ];
+        INIT::$OAUTH_CONFIG = $OAUTH_CONFIG;
 
         // Overridable defaults
         INIT::$ROOT                           = self::$_ROOT; // Accessible by Apache/PHP
@@ -48,7 +48,6 @@ class Bootstrap {
         INIT::$DEFAULT_NUM_RESULTS_FROM_TM    = 3;
         INIT::$THRESHOLD_MATCH_TM_NOT_TO_SHOW = 50;
         INIT::$TRACKING_CODES_VIEW_PATH       = INIT::$ROOT . "/lib/View";
-
 
         //get the environment configuration
         self::initConfig();

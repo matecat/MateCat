@@ -1,76 +1,97 @@
 <?php
 
+use ConnectedServices\ConnectedServiceInterface;
+use ConnectedServices\ConnectedServiceUserModel;
+
 header("Cache-Control: no-store, no-cache, must-revalidate");  // HTTP/1.1
 header("Cache-Control: post-check=0, pre-check=0", false);
 header("Pragma: no-cache");
 
-class oauthResponseHandlerController extends viewController{
-
-    private $code ;
-    private $error ;
+class oauthResponseHandlerController extends BaseKleinViewController {
 
     /**
-     * @var Google_Service_Oauth2_Userinfo
+     * @var ConnectedServiceUserModel
      */
     private $remoteUser ;
 
-	public function __construct(){
-        parent::sessionStart();
-		parent::__construct();
-		parent::makeTemplate("oauth_response_handler.html");
+    /**
+     * @var ConnectedServiceInterface
+     */
+    private $client;
 
-		$filterArgs = array(
-			'code'          => array( 'filter' => FILTER_SANITIZE_STRING),
-			'error'         => array( 'filter' => FILTER_SANITIZE_STRING)
-		);
+    public function response() {
 
-		$__postInput = filter_input_array( INPUT_GET, $filterArgs );
+        $params = filter_var_array( $this->request->params(), [
+            'provider'      => [ 'filter' => FILTER_SANITIZE_STRING ],
+			'code'          => [ 'filter' => FILTER_SANITIZE_STRING ],
+			'error'         => [ 'filter' => FILTER_SANITIZE_STRING ]
+        ] );
 
-		$this->code  = $__postInput[ 'code' ];
-		$this->error = $__postInput[ 'error' ];
-	}
-
-    public function doAction() {
-        if (isset($this->code) && $this->code) {
-            $this->_processSuccessfulOAuth() ;
+        if (isset($params['code']) && !empty($params['code'])) {
+            $this->_processSuccessfulOAuth($params['code'], $params['provider']) ;
+        } elseif ( $params['error'] ) {
+            $this->_respondWithError($params['error']);
         }
-        elseif ( $this->error ) {
-            $this->_respondWithError();
-        }
+
+        $this->response->body( $this->view->execute() );
+        $this->response->send();
     }
 
     public function setTemplateVars()
     {
-        // TODO: Implement setTemplateVars() method.
         if ( isset( $_SESSION['wanted_url'] ) ) {
-            $this->template->wanted_url = $_SESSION['wanted_url'] ;
+            $this->view->wanted_url = $_SESSION['wanted_url'] ;
         }
     }
 
-    protected function _processSuccessfulOAuth() {
-        $this->_initRemoteUser() ;
+    protected function afterConstruct() {
+        $this->setTemplateVars();
+        $this->setView( \INIT::$TEMPLATE_ROOT . '/oauth_response_handler.html');
+    }
+
+    /**
+     * Successful OAuth2 authentication handling
+     * @param $code
+     * @param null $provider
+     */
+    protected function _processSuccessfulOAuth($code, $provider = null) {
+
+        // OAuth2 authentication
+        $this->_initRemoteUser($code, $provider) ;
 
         $model = new OAuthSignInModel(
-                $this->remoteUser->givenName,
-                $this->remoteUser->familyName, $this->remoteUser->email
+            $this->remoteUser->name,
+            $this->remoteUser->lastName,
+            $this->remoteUser->email
         ) ;
 
+        $model->setProvider( $this->remoteUser->provider );
         $model->setProfilePicture( $this->remoteUser->picture );
-        $model->setAccessToken( $this->client->getAccessToken() );
+        $model->setAccessToken( $this->remoteUser->authToken );
 
         $model->signIn() ;
     }
 
-    protected function _initRemoteUser() {
-        $this->client = OauthClient::getInstance()->getClient();
-        $this->client->setAccessType( "offline" );
+    /**
+     * This method fetches the remote user
+     * from the OAuth2 provider
+     * @param $code
+     * @param null $provider
+     */
+    protected function _initRemoteUser($code, $provider = null) {
 
-        $plus = new Google_Service_Oauth2($this->client);
-        $this->client->authenticate($this->code);
-        $this->remoteUser = $plus->userinfo->get();
+        try {
+            $this->client = OauthClient::getInstance($provider)->getClient();
+            $token = $this->client->getAuthToken($code);
+            $this->remoteUser = $this->client->getResourceOwner($token);
+        } catch (Exception $exception){
+            // in case of bad request, redirect to homepage
+            header( "Location: " . INIT::$HTTPHOST . INIT::$BASEURL );
+            die();
+        }
     }
 
-    protected function _respondWithError() {
+    protected function _respondWithError($error) {
         // TODO
     }
 
