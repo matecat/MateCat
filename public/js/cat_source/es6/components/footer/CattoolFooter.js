@@ -191,7 +191,7 @@ export const CattolFooter = ({
 
             {stats?.estimated_completion && (
               <div id="stat-completion">
-                Completed in:
+                Estimated time until completion:
                 <strong>{stats.estimated_completion}</strong>
               </div>
             )}
