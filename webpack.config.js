@@ -206,7 +206,7 @@ const matecatConfig = async ({env}, {mode}) => {
         path.resolve(__dirname, 'public/js/user_store.js'),
         path.resolve(__dirname, 'public/js/gdrive.upload.js'),
         path.resolve(__dirname, 'public/js/gdrive.picker.js'),
-        path.resolve(__dirname, 'public/js/new-project.js'),
+        path.resolve(__dirname, 'public/js/cat_source/es6/pages/NewProject.js'),
         path.resolve(__dirname, 'public/css/sass/upload-main.scss'),
       ],
       ...entryPoints,
