@@ -38,6 +38,11 @@ class SetContributionMTWorker extends SetContributionWorker {
 
     }
 
+    /**
+     * @param array $config
+     * @param ContributionSetStruct $contributionStruct
+     * @throws Exception
+     */
     protected function _set( array $config, ContributionSetStruct $contributionStruct ) {
 
         $jobStruct = $contributionStruct->getJobStruct();
@@ -58,17 +63,19 @@ class SetContributionMTWorker extends SetContributionWorker {
     }
 
     /**
-     * @param array                 $config
+     * @param array $config
      * @param ContributionSetStruct $contributionStruct
-     *
-     * @throws ReQueueException
+     * @throws Exception
      */
     protected function _update( array $config, ContributionSetStruct $contributionStruct ) {
+
+        $jobStruct = $contributionStruct->getJobStruct();
 
         $config[ 'segment' ]     = $contributionStruct->segment;
         $config[ 'translation' ] = $contributionStruct->translation;
         $config[ 'tuid' ]        = $contributionStruct->id_job . ":" . $contributionStruct->id_segment;
         $config[ 'session' ]     = $contributionStruct->getSessionId();
+        $config[ 'set_mt' ]      = ($jobStruct->id_mt_engine != 1) ? true : false;
 
         // set the contribution for every key in the job belonging to the user
         $res = $this->_engine->update( $config );
