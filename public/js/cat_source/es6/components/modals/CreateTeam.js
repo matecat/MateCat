@@ -3,6 +3,7 @@ import React from 'react'
 import ManageActions from '../../actions/ManageActions'
 import CommonUtils from '../../utils/commonUtils'
 import ModalsActions from '../../actions/ModalsActions'
+import UserStore from '../../stores/UserStore'
 
 class CreateTeam extends React.Component {
   constructor(props) {
@@ -121,7 +122,8 @@ class CreateTeam extends React.Component {
       !this.state.errorDropdown
         ? ''
         : 'disabled'
-    var user = APP.USER.STORE.user
+    const userInfo = UserStore.getUser()
+    const user = userInfo.user
     return (
       <div className="create-team-modal" data-testid="create-team-modal">
         <div className="matecat-modal-top">
@@ -186,10 +188,10 @@ class CreateTeam extends React.Component {
               <div className="ui members-list team">
                 <div className={'ui divided list ' + buttonClass}>
                   <div className="item">
-                    {APP.USER.STORE.metadata ? (
+                    {userInfo.metadata ? (
                       <img
                         className="ui mini circular image "
-                        src={APP.USER.STORE.metadata.gplus_picture + '?sz=80'}
+                        src={userInfo.metadata.gplus_picture + '?sz=80'}
                       />
                     ) : (
                       <div className="ui tiny image label">

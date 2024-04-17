@@ -13,6 +13,7 @@ import {
   removeTagsFromText,
 } from './utils/DraftMatecatUtils/tagUtils'
 import SegmentActions from '../../actions/SegmentActions'
+import UserStore from '../../stores/UserStore'
 
 class SegmentButton extends React.Component {
   constructor(props) {
@@ -34,13 +35,11 @@ class SegmentButton extends React.Component {
     const idProject = config.id_project
     const key = 'first_segment_confirm' + idProject
     if (!sessionStorage.getItem(key)) {
+      const userInfo = UserStore.getUser()
       const event = {
         event: 'first_segment_confirm',
-        userStatus: APP.USER.isUserLogged() ? 'loggedUser' : 'notLoggedUser',
-        userId:
-          APP.USER.isUserLogged() && APP.USER.STORE.user
-            ? APP.USER.STORE.user.uid
-            : null,
+        userStatus: 'loggedUser',
+        userId: userInfo.user.uid,
         idProject: parseInt(idProject),
       }
       CommonUtils.dispatchAnalyticsEvents(event)

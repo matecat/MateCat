@@ -476,7 +476,7 @@ class Dashboard extends React.Component {
       <React.Fragment>
         <DashboardHeader>
           <Header
-            user={APP.USER.STORE}
+            user={UserStore.getUser()}
             showFilterProjects={true}
             loggedUser={true}
           />

@@ -96,7 +96,6 @@ xtest('renders properly', async () => {
   }
 
   require('../../../../common')
-  require('../../../../user_store')
 
   {
     const elHeader = document.createElement('header')

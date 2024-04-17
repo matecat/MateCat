@@ -18,57 +18,9 @@ window.APP = {
   teamStorageName: 'defaultTeam',
   init: function () {
     this.setLoginEvents()
-    setTimeout(() => this.checkGlobalMassages(), 1000)
   },
   /*************************************************************************************************************/
-  setLoginEvents: function () {
-    onModalWindowMounted().then(() => this.checkForPopupToOpen())
-  },
-
-  checkForPopupToOpen: function () {
-    var openFromFlash = APP.lookupFlashServiceParam('popup')
-    if (!openFromFlash) return
-
-    switch (openFromFlash[0].value) {
-      case 'passwordReset':
-        APP.openResetPassword()
-        break
-      case 'profile':
-        // TODO: optimized this, establish a list of events to happen after user data is loaded
-        APP.USER.loadUserData().then(function () {
-          APP.openSuccessModal({
-            title: 'Registration complete',
-            text: 'You are now logged in and ready to use Matecat.',
-          })
-          //After confirm email or google register
-          const data = {
-            event: APP.USER.isGoogleUser()
-              ? 'new_signup_google'
-              : 'new_signup_email',
-            userId:
-              APP.USER.isUserLogged() && APP.USER.STORE.user
-                ? APP.USER.STORE.user.uid
-                : null,
-          }
-          CommonUtils.dispatchAnalyticsEvents(data)
-        })
-
-        break
-      case 'login':
-        APP.openLoginModal()
-        break
-      case 'signup':
-        if (!config.isLoggedIn) {
-          if (APP.lookupFlashServiceParam('signup_email')) {
-            var userMail = APP.lookupFlashServiceParam('signup_email')[0].value
-            APP.openRegisterModal({userMail: userMail})
-          } else {
-            APP.openRegisterModal()
-          }
-        }
-        break
-    }
-  },
+  setLoginEvents: function () {},
 
   openLoginModal: function (param = {}) {
     var title = 'Add project to your management panel'
@@ -129,38 +81,6 @@ window.APP = {
       })
     }
   },
-
-  checkGlobalMassages: function () {
-    if (config.global_message) {
-      var messages = JSON.parse(config.global_message)
-      $.each(messages, function () {
-        var elem = this
-        if (
-          typeof Cookies.get('msg-' + this.token) == 'undefined' &&
-          new Date(this.expire) > new Date()
-        ) {
-          var notification = {
-            title: 'Notice',
-            text: this.msg,
-            type: 'warning',
-            autoDismiss: false,
-            position: 'bl',
-            allowHtml: true,
-            closeCallback: function () {
-              var expireDate = new Date(elem.expire)
-              Cookies.set('msg-' + elem.token, '', {
-                expires: expireDate,
-                secure: true,
-              })
-            },
-          }
-          CatToolActions.addNotification(notification)
-          return false
-        }
-      })
-    }
-  },
-
   getLastTeamSelected: function (teams) {
     if (config.isLoggedIn) {
       if (localStorage.getItem(this.teamStorageName)) {
@@ -277,10 +197,6 @@ window.APP = {
     if (typeof openOriginalFiles === 'undefined') {
       openOriginalFiles = 0
     }
-
-    // TODO: this should be relative to the current USER, find a
-    // way to generate this at runtime.
-    //
 
     if (typeof window.googleDriveWindows == 'undefined') {
       window.googleDriveWindows = {}

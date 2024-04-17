@@ -451,10 +451,11 @@ let ManageActions = {
   },
 
   removeUserFromTeam: function (team, user) {
-    var self = this
-    var userId = user.get('uid')
+    const self = this
+    const userId = user.get('uid')
+    const userInfo = UserStore.getUser()
     removeTeamUser(team.toJS(), userId).then(function (data) {
-      if (userId === APP.USER.STORE.user.uid) {
+      if (userId === userInfo.user.uid) {
         const selectedTeam = UserStore.getSelectedTeam()
 
         if (selectedTeam.id === team.get('id')) {

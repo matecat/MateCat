@@ -5,6 +5,7 @@ import {projectCreationStatus} from '../api/projectCreationStatus'
 import ModalsActions from '../actions/ModalsActions'
 import AlertModal from '../components/modals/AlertModal'
 import CommonUtils from './commonUtils'
+import UserStore from '../stores/UserStore'
 
 // called inside upload_main.js file
 window.clearNotCompletedUploads = function () {
@@ -154,13 +155,12 @@ const postProjectCreation = (d) => {
         'No text to translate',
       )
     } else {
+      const userInfo = UserStore.getUser()
+
       const data = {
         event: 'analyze_click',
-        userStatus: APP.USER.isUserLogged() ? 'loggedUser' : 'notLoggedUser',
-        userId:
-          APP.USER.isUserLogged() && APP.USER.STORE.user
-            ? APP.USER.STORE.user.uid
-            : null,
+        userStatus: 'loggedUser',
+        userId: userInfo.user.uid,
         idProject: d.id_project,
       }
       CommonUtils.dispatchAnalyticsEvents(data)

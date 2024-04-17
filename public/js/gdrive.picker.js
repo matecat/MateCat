@@ -34,7 +34,7 @@ var GDrive = function () {
     try {
       picker.setVisible(true)
     } catch (e) {
-      APP.USER.STORE.connected_services = null
+      UserStore.updateConnectedService({service, is_default: false})
       throw new Error('Picker Error')
     }
   }
@@ -110,7 +110,7 @@ var gdrive = new GDrive()
         gdrive.createPicker(connectedServices)
       })
       .catch(function () {
-        APP.USER.STORE.connected_services = null
+        UserStore.updateConnectedService({default_service, is_default: false})
         showPreferencesWithMessage()
       })
   }
