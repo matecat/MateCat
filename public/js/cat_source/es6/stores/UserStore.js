@@ -14,7 +14,7 @@ EventEmitter.prototype.setMaxListeners(0)
 const UserStore = assign({}, EventEmitter.prototype, {
   teams: Immutable.fromJS([]),
   selectedTeam: {},
-  user: null,
+  userInfo: null,
 
   updateAll: function (teams) {
     this.teams = Immutable.fromJS(teams)
@@ -24,11 +24,11 @@ const UserStore = assign({}, EventEmitter.prototype, {
     this.teams = this.teams.concat(Immutable.fromJS([team]))
   },
   updateUser: function (user) {
-    this.user = user
+    this.userInfo = user
   },
   updateUserName: function ({firstName, lastName}) {
-    this.user.user.first_name = firstName
-    this.user.user.last_name = lastName
+    this.userInfo.user.first_name = firstName
+    this.userInfo.user.last_name = lastName
   },
   updateTeam: function (team) {
     let teamOld = this.teams.find(function (org) {
@@ -75,14 +75,38 @@ const UserStore = assign({}, EventEmitter.prototype, {
   },
 
   getUser: function () {
-    return this.user
+    return this.userInfo
   },
   getUserName: function () {
-    return this.user
-      ? `${this.user.user.first_name} ${this.user.user.last_name}`
+    return this.userInfo
+      ? `${this.userInfo.user.first_name} ${this.userInfo.user.last_name}`
       : 'Anonymous'
   },
-
+  isUserLogged: function () {
+    return !!this.userInfo
+  },
+  getDefaultConnectedService: function () {
+    if (this.userInfo.connected_services.length) {
+      const selectable = this.userInfo.connected_services.filter((item) => {
+        return !item.expired_at && !item.disabled_at
+      })
+      const defaults = selectable.filter((item) => {
+        return item.is_default
+      })
+      return defaults[0] || selectable[0]
+    }
+  },
+  updateConnectedService: function (input_service) {
+    this.userInfo.connected_services = this.userInfo.connected_services.map(
+      (service) => {
+        if (service.id === input_service.id) {
+          return input_service
+        }
+        return service
+      },
+    )
+    return this.userInfo.connected_services
+  },
   emitChange: function () {
     this.emit.apply(this, arguments)
   },
@@ -137,11 +161,11 @@ AppDispatcher.register(function (action) {
       break
     case UserConstants.UPDATE_USER:
       UserStore.updateUser(action.user)
-      UserStore.emitChange(UserConstants.UPDATE_USER, UserStore.user)
+      UserStore.emitChange(UserConstants.UPDATE_USER, UserStore.userInfo)
       break
     case UserConstants.UPDATE_USER_NAME:
       UserStore.updateUserName(action.info)
-      UserStore.emitChange(UserConstants.UPDATE_USER, UserStore.user)
+      UserStore.emitChange(UserConstants.UPDATE_USER, UserStore.userInfo)
       break
     // Move this actions
     case ManageConstants.OPEN_CREATE_TEAM_MODAL:

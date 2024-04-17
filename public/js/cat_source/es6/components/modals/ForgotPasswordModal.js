@@ -5,7 +5,6 @@ import TextField from '../common/TextField'
 import * as RuleRunner from '../common/ruleRunner'
 import * as FormRules from '../common/formRules'
 import {forgotPassword} from '../../api/forgotPassword'
-import {checkRedeemProject as checkRedeemProjectApi} from '../../api/checkRedeemProject'
 
 class ForgotPasswordModal extends React.Component {
   constructor(props) {
@@ -46,40 +45,29 @@ class ForgotPasswordModal extends React.Component {
       return false
     }
     this.setState({requestRunning: true})
-    this.checkRedeemProject().then(
-      this.sendForgotPassword()
-        .then(() => {
-          APP.openSuccessModal({
-            title: 'Forgot Password',
-            text:
-              'We sent an email to ' +
-              self.state.emailAddress +
-              '. Follow the instructions to create a new password.',
-          })
+    this.sendForgotPassword()
+      .then(() => {
+        APP.openSuccessModal({
+          title: 'Forgot Password',
+          text:
+            'We sent an email to ' +
+            self.state.emailAddress +
+            '. Follow the instructions to create a new password.',
         })
-        .catch(({errors}) => {
-          const error = errors?.[0]
-            ? errors[0].message
-            : 'There was a problem saving the data, please try again later or contact support.'
-          self.setState({
-            generalError: error,
-            requestRunning: false,
-          })
-        }),
-    )
+      })
+      .catch(({errors}) => {
+        const error = errors?.[0]
+          ? errors[0].message
+          : 'There was a problem saving the data, please try again later or contact support.'
+        self.setState({
+          generalError: error,
+          requestRunning: false,
+        })
+      })
   }
 
   sendForgotPassword() {
     return forgotPassword(this.state.emailAddress, window.location.href)
-  }
-
-  checkRedeemProject() {
-    checkRedeemProjectApi()
-    if (this.props.redeemMessage) {
-      return checkRedeemProjectApi()
-    } else {
-      return Promise.resolve()
-    }
   }
 
   errorFor(field) {
