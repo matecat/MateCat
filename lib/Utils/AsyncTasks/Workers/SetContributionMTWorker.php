@@ -51,7 +51,7 @@ class SetContributionMTWorker extends SetContributionWorker {
         $config[ 'translation' ] = $contributionStruct->translation;
         $config[ 'session' ]     = $contributionStruct->getSessionId();
         $config[ 'uid' ]         = $contributionStruct->uid;
-        $config[ 'set_mt' ]      = ($jobStruct->id_mt_engine != 1) ? true : false;
+        $config[ 'set_mt' ]      = ($jobStruct->id_mt_engine != 1) ? false : true;
 
         // set the contribution for every key in the job belonging to the user
         $res = $this->_engine->set( $config );
@@ -75,7 +75,7 @@ class SetContributionMTWorker extends SetContributionWorker {
         $config[ 'translation' ] = $contributionStruct->translation;
         $config[ 'tuid' ]        = $contributionStruct->id_job . ":" . $contributionStruct->id_segment;
         $config[ 'session' ]     = $contributionStruct->getSessionId();
-        $config[ 'set_mt' ]      = ($jobStruct->id_mt_engine != 1) ? true : false;
+        $config[ 'set_mt' ]      = ($jobStruct->id_mt_engine != 1) ? false : true;
 
         // set the contribution for every key in the job belonging to the user
         $res = $this->_engine->update( $config );
