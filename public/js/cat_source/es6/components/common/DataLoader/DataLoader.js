@@ -67,15 +67,7 @@ export const DataLoader = ({children}) => {
         APP.openLoginModal()
         break
       case 'signup':
-        if (!config.isLoggedIn) {
-          if (APP.lookupFlashServiceParam('signup_email')) {
-            const userMail =
-              APP.lookupFlashServiceParam('signup_email')[0].value
-            APP.openRegisterModal({userMail: userMail})
-          } else {
-            APP.openRegisterModal()
-          }
-        }
+        APP.openRegisterModal()
         break
       default:
         break
