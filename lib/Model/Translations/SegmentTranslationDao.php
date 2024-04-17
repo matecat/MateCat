@@ -857,7 +857,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
          */
         $query = "
             SELECT 
-                   Round( s.raw_word_count /
+                   Round( SUM( s.raw_word_count ) /
                                ( Unix_timestamp(Max(translation_date)) -
                                  Unix_timestamp(Min(translation_date)) ) * 3600) AS words_per_hour
          
