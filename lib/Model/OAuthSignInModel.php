@@ -80,7 +80,7 @@ class OAuthSignInModel {
 
     protected function _updateProfilePicture() {
         $dao = new MetadataDao();
-        $dao->set($this->user->uid, 'gplus_picture', $this->profilePictureUrl );
+        $dao->set($this->user->uid, $this->provider.'_picture', $this->profilePictureUrl );
     }
 
     public function setProfilePicture( $pictureUrl ) {
