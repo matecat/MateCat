@@ -1321,17 +1321,6 @@
             "isocode": "ig",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "ibo-NG"
-        },
-        {
-            "localized": [
-                {
-                    "en": "Igbo"
-                }
-            ],
-            "isocode": "ig",
-            "enabled": true,
-            "rtl": false,
             "rfc3066code": "ig-NG"
         },
         {
@@ -1619,17 +1608,6 @@
             "enabled": true,
             "rtl": false,
             "rfc3066code": "km-KH"
-        },
-        {
-            "localized": [
-                {
-                    "en": "Kikuyu"
-                }
-            ],
-            "isocode": "kik",
-            "enabled": true,
-            "rtl": false,
-            "rfc3066code": "kik-KE"
         },
         {
             "localized": [
@@ -2567,7 +2545,7 @@
             "isocode": "pa",
             "enabled": true,
             "rtl": true,
-            "rfc3066code": "pnb-PK"
+            "rfc3066code": "pa-PK"
         },
         {
             "localized": [
@@ -2834,17 +2812,6 @@
             "enabled": true,
             "rtl": false,
             "rfc3066code": "szl-PL"
-        },
-        {
-            "localized": [
-                {
-                    "en": "Sindhi"
-                }
-            ],
-            "isocode": "sd",
-            "enabled": true,
-            "rtl": true,
-            "rfc3066code": "snd-PK"
         },
         {
             "localized": [
@@ -3465,17 +3432,6 @@
             "enabled": true,
             "rtl": true,
             "rfc3066code": "ur-PK"
-        },
-        {
-            "localized": [
-                {
-                    "en": "Uyghur"
-                }
-            ],
-            "isocode": "ug",
-            "enabled": true,
-            "rtl": false,
-            "rfc3066code": "uig-CN"
         },
         {
             "localized": [
