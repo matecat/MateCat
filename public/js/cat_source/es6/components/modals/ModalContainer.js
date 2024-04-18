@@ -23,8 +23,31 @@ export const ModalContainer = ({
     if (!ref.current) return
     const refTag = ref.current
     const stopPropagation = (event) => event.stopPropagation()
-    const preventDefault = (event) =>
-      event.key === 'Tab' && event.preventDefault()
+    const preventDefault = (event) => {
+      if (event.key === 'Tab') {
+        let focusable = document
+          .querySelector('#matecat-modal')
+          .querySelectorAll('input,button,select,textarea')
+        if (focusable.length) {
+          let first = focusable[0]
+          let last = focusable[focusable.length - 1]
+          let shift = event.shiftKey
+          if (shift) {
+            if (event.target === first) {
+              // shift-tab pressed on first input in dialog
+              last.focus()
+              event.preventDefault()
+            }
+          } else {
+            if (event.target === last) {
+              // tab pressed on last input in dialog
+              first.focus()
+              event.preventDefault()
+            }
+          }
+        }
+      }
+    }
     refTag.addEventListener('keydown', stopPropagation)
     refTag.addEventListener('keydown', preventDefault)
     refTag.focus()

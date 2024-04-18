@@ -138,8 +138,13 @@
 }
 
 .user-info-details {
+  height: 35px;
+  align-items: center;
   &.user-info-modify {
-    height: 40px;
+    height: 35px;
+    input, button {
+      height: 35px !important;
+    }
   }
   display: flex;
   align-content: center;
