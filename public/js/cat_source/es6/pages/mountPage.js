@@ -20,7 +20,7 @@ export const mountPage = ({Component, rootElement}) => {
     const mountPointNotificationBox = document.getElementsByClassName(
       'notifications-wrapper',
     )[0]
-    const root = createRoot(mountPointNotificationBox)
-    root.render(<NotificationBox />)
+    const notificationBoxRoot = createRoot(mountPointNotificationBox)
+    notificationBoxRoot.render(<NotificationBox />)
   })
 }

@@ -30,3 +30,6 @@ export const UNIT_COUNT = {
   WORDS: 'words',
   CHARACTERS: 'characters',
 }
+
+export const NUM_CONTRIBUTION_RESULTS = 3
+export const NUM_CONCORDANCE_RESULTS = 10

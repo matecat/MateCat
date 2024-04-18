@@ -1,7 +1,6 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react'
 import {CattolFooter} from '../components/footer/CattoolFooter'
 import {Header} from '../components/header/cattol/Header'
-import NotificationBox from '../components/notificationsComponent/NotificationBox'
 import SegmentsContainer from '../components/segments/SegmentsContainer'
 import CatToolStore from '../stores/CatToolStore'
 import CatToolConstants from '../constants/CatToolConstants'
@@ -28,6 +27,7 @@ import {getSupportedLanguages} from '../api/getSupportedLanguages'
 import ApplicationStore from '../stores/ApplicationStore'
 import useProjectTemplates from '../hooks/useProjectTemplates'
 import {useGoogleLoginNotification} from '../hooks/useGoogleLoginNotification'
+import {mountPage} from './mountPage'
 
 const urlParams = new URLSearchParams(window.location.search)
 const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
@@ -382,10 +382,6 @@ function CatTool() {
         <div id="plugin-mount-point"></div>
         {isFreezingSegments && <div className="freezing-overlay"></div>}
       </div>
-
-      <div className="notifications-wrapper">
-        <NotificationBox />
-      </div>
       {openSettings.isOpen && (
         <SettingsPanel
           {...{
@@ -431,3 +427,9 @@ function CatTool() {
 }
 
 export default CatTool
+
+UI.start()
+mountPage({
+  Component: CatTool,
+  rootElement: document.getElementsByClassName('page-content')[0],
+})

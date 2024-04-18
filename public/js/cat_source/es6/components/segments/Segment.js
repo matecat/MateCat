@@ -101,13 +101,6 @@ class Segment extends React.Component {
         SegmentActions.getSegmentsQa(this.props.segment)
       }
 
-      // TODO Remove this block
-      /**************************/
-      //From EditAreaClick
-      if (UI.warningStopped) {
-        UI.warningStopped = false
-        UI.checkWarnings(false)
-      }
       // start old cache
       UI.cacheObjects(this.$section)
       //end old cache

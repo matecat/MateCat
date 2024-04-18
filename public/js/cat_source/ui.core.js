@@ -14,12 +14,56 @@ import {setTranslation} from './es6/api/setTranslation'
 import AlertModal from './es6/components/modals/AlertModal'
 import ModalsActions from './es6/actions/ModalsActions'
 import {SEGMENTS_STATUS} from './es6/constants/Constants'
+import CommentsActions from './es6/actions/CommentsActions'
 
 window.UI = {
+  start: function () {
+    UI.firstLoad = true
+    UI.body = $('body')
+    CommonUtils.setBrowserHistoryBehavior()
+  },
+
+  init: function () {
+    this.isMac = navigator.platform == 'MacIntel' ? true : false
+    this.displayedMessages = []
+    this.unsavedSegmentsToRecover = []
+    this.recoverUnsavedSegmentsTimer = false
+    this.setTranslationTail = []
+    this.executingSetTranslation = []
+
+    this.setEvents()
+    this.checkQueryParams()
+
+    UI.firstLoad = false
+  },
+
+  checkQueryParams: function () {
+    var action = CommonUtils.getParameterByName('action')
+    var interval
+    if (action) {
+      switch (action) {
+        case 'openComments':
+          interval = setTimeout(function () {
+            CommentsActions.openCommentsMenu()
+          }, 500)
+          CommonUtils.removeParam('action')
+          break
+        case 'warnings':
+          interval = setTimeout(function () {
+            if ($('#notifbox.warningbox')) {
+              CatToolActions.toggleQaIssues()
+              clearInterval(interval)
+            }
+          }, 500)
+          CommonUtils.removeParam('action')
+          break
+      }
+    }
+  },
+
   cacheObjects: function (editarea_or_segment) {
     var segment, $segment
 
-    this.editarea = $('.targetarea', $(editarea_or_segment).closest('section'))
     $segment = $(editarea_or_segment).closest('section')
     segment = SegmentStore.getSegmentByIdToJS(UI.getSegmentId($segment))
 
@@ -32,7 +76,6 @@ window.UI = {
   },
 
   removeCacheObjects: function () {
-    this.editarea = ''
     this.currentSegmentId = undefined
     this.currentSegment = undefined
   },
@@ -289,7 +332,6 @@ window.UI = {
         $(document).trigger('getWarning:global:success', {resp: data})
       })
       .catch((errors) => {
-        UI.warningStopped = true
         OfflineUtils.failedConnection(0, 'getWarning')
       })
   },
@@ -798,7 +840,3 @@ window.UI = {
     )
   },
 }
-
-$(document).ready(function () {
-  UI.start()
-})

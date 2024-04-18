@@ -212,18 +212,15 @@ const matecatConfig = async ({env}, {mode}) => {
         path.resolve(__dirname, 'public/build/lxqlicense.js'),
         path.resolve(__dirname, 'public/js/common.js'),
         path.resolve(__dirname, 'public/js/cat_source/ui.core.js'),
-        path.resolve(__dirname, 'public/js/cat_source/ui.init.js'),
         path.resolve(__dirname, 'public/js/cat_source/ui.segment.js'),
         path.resolve(__dirname, 'public/js/cat_source/ui.events.js'),
         path.resolve(__dirname, 'public/js/cat_source/ui.headerTooltips.js'),
+        path.resolve(__dirname, 'public/js/cat_source/es6/pages/CatTool.js'),
         path.resolve(__dirname, 'public/css/sass/main.scss'),
       ],
       dashboard: [
         path.resolve(__dirname, 'public/js/common.js'),
-        path.resolve(
-          __dirname,
-          'public/js/cat_source/es6/components/projects/Dashboard.js',
-        ),
+        path.resolve(__dirname, 'public/js/cat_source/es6/pages/Dashboard.js'),
         path.resolve(__dirname, 'public/css/sass/manage_main.scss'),
       ],
       analyze: [
