@@ -7,6 +7,7 @@ function useAuth() {
   const [isUserLogged, setIsUserLogged] = useState(false)
   const [userInfo, setUserInfo] = useState()
   const [connectedServices, setConnectedServices] = useState()
+  const [userDisconnected, setUserDisconnected] = useState(false)
 
   const parseJWT = (jwt) => {
     try {
@@ -33,6 +34,7 @@ function useAuth() {
         })
       }
     } else {
+      isUserLogged && setTimeout(() => setUserDisconnected(true), 500)
       setIsUserLogged(false)
       setConnectedServices()
       setUserInfo()
@@ -54,6 +56,7 @@ function useAuth() {
     isUserLogged,
     userInfo,
     connectedServices,
+    userDisconnected,
   }
 }
 

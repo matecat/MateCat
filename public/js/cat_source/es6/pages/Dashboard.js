@@ -1,5 +1,4 @@
 import React from 'react'
-import {createRoot} from 'react-dom/client'
 import Immutable from 'immutable'
 import {isEmpty} from 'lodash'
 import {debounce} from 'lodash/function'
@@ -19,9 +18,9 @@ import Header from '../components/header/Header'
 import {getProjects} from '../api/getProjects'
 import {getUserData} from '../api/getUserData'
 import {getTeamMembers} from '../api/getTeamMembers'
-import NotificationBox from '../components/notificationsComponent/NotificationBox'
 import {CookieConsent} from '../components/common/CookieConsent'
 import {mountPage} from './mountPage'
+import {DataLoaderContext} from '../components/common/DataLoader'
 
 class Dashboard extends React.Component {
   constructor() {
@@ -39,7 +38,7 @@ class Dashboard extends React.Component {
       selectedUser: ManageConstants.ALL_MEMBERS_FILTER,
     }
   }
-
+  static contextType = DataLoaderContext
   getData = () => {
     getUserData().then((data) => {
       UserActions.renderTeams(data.teams)
@@ -62,24 +61,26 @@ class Dashboard extends React.Component {
             ManageActions.storeSelectedTeam(selectedTeam)
           })
           .catch((err) => {
-            if (err && err.length && err[0].code == 401) {
-              // Not Logged or not in the team
-              window.location.reload()
-              return
-            }
-
-            if (err && err.length && err[0].code == 404) {
-              this.selectPersonalTeam()
-              return
-            }
-
-            window.location = '/'
+            this.getProjectsErrorHandler(err)
           })
       })
       setTimeout(function () {
         CatToolActions.showHeaderTooltip()
       }, 2000)
     })
+  }
+
+  getProjectsErrorHandler = (err) => {
+    if (err && err.length && err[0].code == 401) {
+      // Not Logged or not in the team
+      window.location.reload()
+      return
+    }
+
+    if (err && err.length && err[0].code == 404) {
+      this.selectPersonalTeam()
+      return
+    }
   }
 
   updateTeams = (teams) => {
@@ -108,19 +109,7 @@ class Dashboard extends React.Component {
           ManageActions.storeSelectedTeam(selectedTeam)
         })
         .catch((err) => {
-          if (err[0].code == 401) {
-            // Not Logged or not in the team
-            window.location.reload()
-            return
-          }
-
-          if (err[0].code == 404) {
-            // Not Logged or not in the team
-            this.selectPersonalTeam()
-            return
-          }
-
-          window.location = '/'
+          this.getProjectsErrorHandler(err)
         })
     }
   }
@@ -182,18 +171,7 @@ class Dashboard extends React.Component {
           }
         })
         .catch((err) => {
-          if (err && err[0]?.code == 401) {
-            //Not Logged or not in the team
-            window.location.reload()
-            return
-          }
-
-          if (err[0]?.code == 404) {
-            this.selectPersonalTeam()
-            return
-          }
-
-          window.location = '/'
+          this.getProjectsErrorHandler(err)
         })
     } else {
       let total_projects = []
@@ -386,7 +364,7 @@ class Dashboard extends React.Component {
             break
           case 'focus':
             console.log('Enter page')
-            if (self.pageLeft) {
+            if (self.pageLeft && self.context.isUserLogged) {
               self.refreshProjects()
             }
             break

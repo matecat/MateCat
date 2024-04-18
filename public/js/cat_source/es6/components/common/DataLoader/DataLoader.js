@@ -4,10 +4,12 @@ import Cookies from 'js-cookie'
 import CatToolActions from '../../../actions/CatToolActions'
 import {onModalWindowMounted} from '../../modals/ModalWindow'
 import CommonUtils from '../../../utils/commonUtils'
+import {UserDisconnectedBox} from './UserDisconnectedBox'
 export const DataLoaderContext = createContext({})
 
 export const DataLoader = ({children}) => {
-  const {isUserLogged, userInfo, connectedServices} = useAuth()
+  const {isUserLogged, userInfo, connectedServices, userDisconnected} =
+    useAuth()
 
   const checkGlobalMassages = () => {
     if (config.global_message) {
@@ -88,6 +90,7 @@ export const DataLoader = ({children}) => {
     <DataLoaderContext.Provider
       value={{isUserLogged, userInfo, connectedServices}}
     >
+      {userDisconnected && <UserDisconnectedBox />}
       {children}
     </DataLoaderContext.Provider>
   )
