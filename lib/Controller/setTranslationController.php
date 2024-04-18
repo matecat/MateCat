@@ -359,7 +359,7 @@ class setTranslationController extends ajaxController {
         $new_translation->segment_hash           = $this->segment->segment_hash;
         $new_translation->translation            = $translation;
         $new_translation->serialized_errors_list = $err_json;
-        $new_translation->suggestions_array      = ($this->chosen_suggestion_index !== null ? $this->suggestion_array : $old_translation->suggestion_array);
+        $new_translation->suggestions_array      = ($this->chosen_suggestion_index !== null ? $this->suggestion_array : $old_translation->suggestions_array);
         $new_translation->suggestion_position    = ($this->chosen_suggestion_index !== null ? $this->chosen_suggestion_index : $old_translation->suggestion_position);
         $new_translation->warning                = $check->thereAreWarnings();
         $new_translation->translation_date       = date( "Y-m-d H:i:s" );
