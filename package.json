@@ -1,7 +1,7 @@
 {
   "scripts": {
     "preversion": "",
-    "version": "sed -i \"s/version .*/version = \\\"v$(jq -r .version package.json)\\\"/g\" ./inc/version.ini",
+    "version": "sed -i \"s/version .*/version = \\\"v${npm_package_version}\\\"/g\" ./inc/version.ini",
     "postversion": "git add ./inc/version.ini && git commit --amend --no-edit && git tag -d v${npm_package_version} && git tag v${npm_package_version}",
     "format": "prettier --write .",
     "lint": "eslint --ignore-path .gitignore .",
