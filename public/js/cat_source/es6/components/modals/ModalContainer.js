@@ -1,5 +1,4 @@
 import React, {useEffect, useRef} from 'react'
-import $ from 'jquery'
 
 export const ModalContainer = ({
   title,
@@ -18,48 +17,41 @@ export const ModalContainer = ({
     document.activeElement.blur()
   }, [])
 
-  // prevent propagation keydown events
-  useEffect(() => {
-    if (!ref.current) return
-    const refTag = ref.current
-    const stopPropagation = (event) => event.stopPropagation()
-    const preventDefault = (event) => {
-      if (event.key === 'Tab') {
-        let focusable = document
-          .querySelector('#matecat-modal')
-          .querySelectorAll('input,button,select,textarea')
-        if (focusable.length) {
-          let first = focusable[0]
-          let last = focusable[focusable.length - 1]
-          let shift = event.shiftKey
-          if (shift) {
-            if (event.target === first) {
-              // shift-tab pressed on first input in dialog
-              last.focus()
-              event.preventDefault()
-            }
-          } else {
-            if (event.target === last) {
-              // tab pressed on last input in dialog
-              first.focus()
-              event.preventDefault()
-            }
+  const onKeyDownHandler = (event) => {
+    event.stopPropagation()
+    if (event.key === 'Tab') {
+      let focusable = document
+        .querySelector('#matecat-modal')
+        .querySelectorAll('input,button,select,textarea')
+      if (focusable.length) {
+        let first = focusable[0]
+        let last = focusable[focusable.length - 1]
+        let shift = event.shiftKey
+        if (shift) {
+          if (event.target === first) {
+            // shift-tab pressed on first input in dialog
+            last.focus()
+            event.preventDefault()
+          }
+        } else {
+          if (event.target === last) {
+            // tab pressed on last input in dialog
+            first.focus()
+            event.preventDefault()
           }
         }
       }
     }
-    refTag.addEventListener('keydown', stopPropagation)
-    refTag.addEventListener('keydown', preventDefault)
-    refTag.focus()
-
-    return () => {
-      refTag.removeEventListener('keydown', stopPropagation)
-      refTag.removeEventListener('keydown', preventDefault)
-    }
-  }, [ref])
+  }
 
   return (
-    <div ref={ref} tabIndex="0" id="matecat-modal" className="matecat-modal">
+    <div
+      ref={ref}
+      tabIndex="0"
+      id="matecat-modal"
+      className="matecat-modal"
+      onKeyDown={onKeyDownHandler}
+    >
       <div
         className="matecat-modal-background"
         onClick={() => {
