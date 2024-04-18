@@ -44,13 +44,9 @@ import {TemplateSelect} from '../components/settingsPanel/ProjectTemplate/Templa
 import {checkLexiqaIsEnabled} from '../components/settingsPanel/Contents/AdvancedOptionsTab/Lexiqa'
 import {checkGuessTagIsEnabled} from '../components/settingsPanel/Contents/AdvancedOptionsTab/GuessTag'
 import {getMMTKeys} from '../api/getMMTKeys/getMMTKeys'
-import {useGoogleLoginNotification} from '../hooks/useGoogleLoginNotification'
-import useAuth from '../hooks/useAuth'
 import {AlertDeleteResourceProjectTemplates} from '../components/modals/AlertDeleteResourceProjectTemplates'
-import {createRoot} from 'react-dom/client'
 import {checkGDriveEvents, restartConversions} from '../utils/newProjectUtils'
-import NotificationBox from '../components/notificationsComponent/NotificationBox'
-import {DataLoader, DataLoaderContext} from '../components/common/DataLoader'
+import {DataLoaderContext} from '../components/common/DataLoader'
 import {mountPage} from './mountPage'
 
 const SELECT_HEIGHT = 324
@@ -106,9 +102,6 @@ const NewProject = () => {
   const isDeviceCompatible = useDeviceCompatibility()
 
   const {isUserLogged, userInfo} = useContext(DataLoaderContext)
-
-  // TODO: Remove temp notification warning login google (search in files this todo)
-  useGoogleLoginNotification()
 
   const projectNameRef = useRef()
   const prevSourceLang = useRef(sourceLang)

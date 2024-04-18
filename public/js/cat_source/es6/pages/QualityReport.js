@@ -9,11 +9,7 @@ import QRConstants from '../constants/QualityReportConstants'
 import Header from '../components/header/Header'
 import {getUserData} from '../api/getUserData'
 import {CookieConsent} from '../components/common/CookieConsent'
-import {
-  GOOGLE_LOGIN_NOTIFICATION,
-  shouldShowNotificationGoogleLogin,
-} from '../hooks/useGoogleLoginNotification'
-import CatToolActions from '../actions/CatToolActions'
+
 import NotificationBox from '../components/notificationsComponent/NotificationBox'
 import {mountPage} from './mountPage'
 
@@ -34,15 +30,6 @@ class QualityReport extends React.Component {
     this.noMoreSegments = this.noMoreSegments.bind(this)
 
     QRActions.loadInitialAjaxData({id_segment: this.state.idSegment})
-
-    // TODO: Remove temp notification warning login google (search in files this todo)
-    const shouldShowNotification = shouldShowNotificationGoogleLogin()
-    if (shouldShowNotification) {
-      setTimeout(
-        () => CatToolActions.addNotification(GOOGLE_LOGIN_NOTIFICATION),
-        100,
-      )
-    }
   }
   getReviseUrlParameter() {
     let url = new URL(window.location.href)
@@ -278,27 +265,16 @@ export default QualityReport
 
 const headerMountPoint = createRoot($('header')[0])
 
-if (config.isLoggedIn) {
-  getUserData().then((data) => {
-    headerMountPoint.render(
-      React.createElement(Header, {
-        showModals: true,
-        showTeams: false,
-        isQualityReport: true,
-        user: data,
-      }),
-    )
-  })
-} else {
+getUserData().then((data) => {
   headerMountPoint.render(
     React.createElement(Header, {
       showModals: true,
       showTeams: false,
       isQualityReport: true,
-      loggedUser: false,
+      user: data,
     }),
   )
-}
+})
 
 mountPage({
   Component: QualityReport,

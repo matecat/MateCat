@@ -65,7 +65,7 @@ const DEFAULT_CONTENTS = (isCattool = config.is_cattool) => {
         'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vulputate libero et velit interdum, ac aliquet odio mattis.',
       component: <MachineTranslationTab />,
     },
-    ...(!isCattool && config.isLoggedIn
+    ...(!isCattool
       ? [
           {
             id: SETTINGS_PANEL_TABS.qualityFramework,
@@ -246,8 +246,7 @@ export const SettingsPanel = ({
     APP.openLoginModal()
   }
 
-  const isEnabledProjectTemplateComponent =
-    config.isLoggedIn === 1 && !config.is_cattool
+  const isEnabledProjectTemplateComponent = !config.is_cattool
 
   return (
     <SettingsPanelContext.Provider

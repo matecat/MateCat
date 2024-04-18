@@ -36,6 +36,7 @@ function useAuth() {
       setIsUserLogged(false)
       setConnectedServices()
       setUserInfo()
+      UserActions.updateUser()
     }
   }, [userInfo])
 

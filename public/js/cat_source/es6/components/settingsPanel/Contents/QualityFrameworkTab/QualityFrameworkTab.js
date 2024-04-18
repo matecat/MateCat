@@ -60,7 +60,7 @@ export const QualityFrameworkTab = () => {
 
     let cleanup = false
 
-    if (config.isLoggedIn === 1 && !config.is_cattool) {
+    if (!config.is_cattool) {
       getQualityFrameworkTemplates().then(({items}) => {
         if (!cleanup) {
           const selectedTemplateId =

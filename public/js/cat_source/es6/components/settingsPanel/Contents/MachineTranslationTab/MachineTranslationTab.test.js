@@ -53,37 +53,7 @@ const WrapperComponent = (contextProps) => {
   )
 }
 
-test('Render Machine translation tab - not logged', async () => {
-  global.config.isLoggedIn = false
-  const values = {
-    mtEngines: mtEnginesMock,
-    setMtEngines: () => {},
-    openLoginModal: jest.fn(),
-    modifyingCurrentTemplate: () => {},
-    currentProjectTemplate: projectTemplatesMock.items[0],
-    projectTemplates: projectTemplatesMock.items,
-  }
-  render(
-    <SettingsPanelContext.Provider value={values}>
-      <MachineTranslationTab />
-    </SettingsPanelContext.Provider>,
-  )
-  const loginButton = screen.getByTestId('login-button')
-  expect(loginButton).toBeInTheDocument()
-  await userEvent.click(loginButton)
-  expect(values.openLoginModal.mock.calls).toHaveLength(1)
-
-  expect(screen.queryByTitle('Add MT engine')).not.toBeInTheDocument()
-
-  const mtName = screen.getByText('MyMemory')
-  expect(mtName).toBeInTheDocument()
-
-  const checkboxMtActive = screen.getByTestId('checkbox-mt-active-MyMemory')
-  expect(checkboxMtActive).toBeChecked()
-})
-
 test('Render Machine translation tab - logged', async () => {
-  global.config.isLoggedIn = true
   config.is_cattool = false
   const values = {
     mtEngines: mtEnginesMock,
@@ -98,7 +68,6 @@ test('Render Machine translation tab - logged', async () => {
       <MachineTranslationTab />
     </SettingsPanelContext.Provider>,
   )
-  expect(screen.queryByTestId('login-button')).not.toBeInTheDocument()
 
   expect(screen.getByTitle('Add MT engine')).toBeInTheDocument()
 
@@ -113,7 +82,6 @@ test('Render Machine translation tab - logged', async () => {
 })
 
 test('Add MT', async () => {
-  global.config.isLoggedIn = true
   const values = {
     mtEngines: mtEnginesMock,
     setMtEngines: () => {},
@@ -141,7 +109,6 @@ test('Add MT', async () => {
 })
 
 test('In cattool', async () => {
-  global.config.isLoggedIn = true
   global.config.ownerIsMe = 1
   config.is_cattool = true
   const values = {
@@ -164,7 +131,6 @@ test('In cattool', async () => {
 
 test('Activate MT', async () => {
   const user = userEvent.setup()
-  global.config.isLoggedIn = true
 
   let values = {
     mtEngines: mtEnginesMock,
@@ -200,7 +166,6 @@ test('Activate MT', async () => {
 
 test('Delete MT Confirm', async () => {
   const user = userEvent.setup()
-  global.config.isLoggedIn = true
 
   const values = {
     mtEngines: mtEnginesMock,
@@ -229,7 +194,6 @@ test('Delete MT Confirm', async () => {
 test('Modern MT and glossary', async () => {
   const user = userEvent.setup()
 
-  global.config.isLoggedIn = true
   config.is_cattool = false
 
   const projectTemplates = [
@@ -329,7 +293,6 @@ test('DeepL and glossary', async () => {
 
   const user = userEvent.setup()
 
-  global.config.isLoggedIn = true
   config.is_cattool = false
 
   const projectTemplates = [

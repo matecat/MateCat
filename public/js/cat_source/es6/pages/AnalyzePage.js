@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react'
+import React, {useContext, useEffect, useRef, useState} from 'react'
 import UserStore from '../stores/UserStore'
 import Header from '../components/header/Header'
 import AnalyzeMain from '../components/analyze/AnalyzeMain'
@@ -8,10 +8,9 @@ import {getJobVolumeAnalysis} from '../api/getJobVolumeAnalysis'
 import {getProject} from '../api/getProject'
 import {getVolumeAnalysis} from '../api/getVolumeAnalysis'
 import Immutable from 'immutable'
-import {createRoot} from 'react-dom/client'
 import {ANALYSIS_STATUS} from '../constants/Constants'
-import {useGoogleLoginNotification} from '../hooks/useGoogleLoginNotification'
 import {mountPage} from './mountPage'
+import {DataLoaderContext} from '../components/common/DataLoader'
 
 let pollingTime = 1000
 const segmentsThreshold = 50000
@@ -20,9 +19,7 @@ const AnalyzePage = () => {
   const [project, setProject] = useState()
   const [volumeAnalysis, setVolumeAnalysis] = useState()
   const containerRef = useRef()
-
-  // TODO: Remove temp notification warning login google (search in files this todo)
-  useGoogleLoginNotification()
+  const {isUserLogged} = useContext(DataLoaderContext)
 
   const getProjectVolumeAnalysisData = () => {
     if (config.jobAnalysis) {
@@ -82,7 +79,7 @@ const AnalyzePage = () => {
     <>
       <header>
         <Header
-          loggedUser={config.isLoggedIn}
+          loggedUser={isUserLogged}
           showSubHeader={false}
           showModals={false}
           changeTeam={false}

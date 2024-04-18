@@ -16,7 +16,7 @@ const UserStore = assign({}, EventEmitter.prototype, {
   selectedTeam: {},
   userInfo: null,
 
-  updateAll: function (teams) {
+  updateTeams: function (teams) {
     this.teams = Immutable.fromJS(teams)
   },
 
@@ -25,6 +25,7 @@ const UserStore = assign({}, EventEmitter.prototype, {
   },
   updateUser: function (user) {
     this.userInfo = user
+    user?.teams && this.updateTeams(user.teams)
   },
   updateUserName: function ({firstName, lastName}) {
     this.userInfo.user.first_name = firstName
@@ -116,7 +117,7 @@ const UserStore = assign({}, EventEmitter.prototype, {
 AppDispatcher.register(function (action) {
   switch (action.actionType) {
     case UserConstants.RENDER_TEAMS:
-      UserStore.updateAll(action.teams)
+      UserStore.updateTeams(action.teams)
       UserStore.emitChange(action.actionType, UserStore.teams)
       break
     case ManageConstants.UPDATE_TEAM_NAME:
@@ -145,7 +146,7 @@ AppDispatcher.register(function (action) {
       UserStore.emitChange(UserConstants.UPDATE_TEAMS, UserStore.teams)
       break
     case UserConstants.UPDATE_TEAMS:
-      UserStore.updateAll(action.teams)
+      UserStore.updateTeams(action.teams)
       UserStore.emitChange(UserConstants.UPDATE_TEAMS, UserStore.teams)
       break
     case UserConstants.CHOOSE_TEAM:

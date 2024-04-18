@@ -82,20 +82,18 @@ window.APP = {
     }
   },
   getLastTeamSelected: function (teams) {
-    if (config.isLoggedIn) {
-      if (localStorage.getItem(this.teamStorageName)) {
-        var lastId = localStorage.getItem(this.teamStorageName)
-        var team = teams.find(function (t) {
-          return parseInt(t.id) === parseInt(lastId)
-        })
-        if (team) {
-          return team
-        } else {
-          return teams[0]
-        }
+    if (localStorage.getItem(this.teamStorageName)) {
+      var lastId = localStorage.getItem(this.teamStorageName)
+      var team = teams.find(function (t) {
+        return parseInt(t.id) === parseInt(lastId)
+      })
+      if (team) {
+        return team
       } else {
         return teams[0]
       }
+    } else {
+      return teams[0]
     }
   },
 

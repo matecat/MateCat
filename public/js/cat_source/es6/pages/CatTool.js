@@ -1,4 +1,10 @@
-import React, {useCallback, useEffect, useRef, useState} from 'react'
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 import {CattolFooter} from '../components/footer/CattoolFooter'
 import {Header} from '../components/header/cattol/Header'
 import SegmentsContainer from '../components/segments/SegmentsContainer'
@@ -26,13 +32,15 @@ import {getTmKeysJob} from '../api/getTmKeysJob'
 import {getSupportedLanguages} from '../api/getSupportedLanguages'
 import ApplicationStore from '../stores/ApplicationStore'
 import useProjectTemplates from '../hooks/useProjectTemplates'
-import {useGoogleLoginNotification} from '../hooks/useGoogleLoginNotification'
 import {mountPage} from './mountPage'
+import {DataLoaderContext} from '../components/common/DataLoader'
 
 const urlParams = new URLSearchParams(window.location.search)
 const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
 
 function CatTool() {
+  const {isUserLogged} = useContext(DataLoaderContext)
+
   const [options, setOptions] = useState({})
   const [wasInitSegments, setWasInitSegments] = useState(false)
   const [isFreezingSegments, setIsFreezingSegments] = useState(false)
@@ -43,9 +51,6 @@ function CatTool() {
   const [mtEngines, setMtEngines] = useState([DEFAULT_ENGINE_MEMORY])
 
   const [supportedLanguages, setSupportedLanguages] = useState([])
-
-  // TODO: Remove temp notification warning login google (search in files this todo)
-  useGoogleLoginNotification()
 
   const startSegmentIdRef = useRef(UI.startSegmentId)
   const callbackAfterSegmentsResponseRef = useRef()
@@ -66,10 +71,7 @@ function CatTool() {
     setOpenSettings({isOpen: true, tab: SETTINGS_PANEL_TABS.advancedOptions})
 
   const getTmKeys = () => {
-    const promises = [
-      getTmKeysJob(),
-      ...(config.isLoggedIn ? [getTmKeysUser()] : []),
-    ]
+    const promises = [getTmKeysJob(), getTmKeysUser()]
     Promise.all(promises)
       .then((values) => {
         const uniqueKeys = values
@@ -113,7 +115,7 @@ function CatTool() {
       }
     }
 
-    if (config.isLoggedIn && config.ownerIsMe) {
+    if (config.ownerIsMe) {
       getMtEnginesApi().then((mtEngines) => {
         setMtEngines([DEFAULT_ENGINE_MEMORY, ...mtEngines])
         setMTCurrentFakeTemplate()
@@ -336,7 +338,7 @@ function CatTool() {
         target_code={config.target_rfc}
         isReview={config.isReview}
         revisionNumber={config.revisionNumber}
-        userLogged={config.isLoggedIn}
+        userLogged={isUserLogged}
         projectName={config.project_name}
         projectCompletionEnabled={config.project_completion_feature_enabled}
         secondRevisionsCount={config.secondRevisionsCount}

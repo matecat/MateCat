@@ -9,11 +9,6 @@ import * as FormRules from '../common/formRules'
 import {loginUser} from '../../api/loginUser'
 import ModalsActions from '../../actions/ModalsActions'
 import ForgotPasswordModal from './ForgotPasswordModal'
-import CatToolActions from '../../actions/CatToolActions'
-import {
-  GOOGLE_LOGIN_LOCAL_STORAGE,
-  GOOGLE_LOGIN_NOTIFICATION,
-} from '../../hooks/useGoogleLoginNotification'
 
 class LoginModal extends React.Component {
   constructor(props) {
@@ -57,9 +52,6 @@ class LoginModal extends React.Component {
   }
 
   googole_popup() {
-    // TODO: Remove temp notification warning login google (search in files this todo)
-    this.showNotificationGoogleLogin()
-
     let url = this.props.googleUrl
     let self = this
     let newWindow = window.open(url, 'name', 'height=600,width=900')
@@ -257,14 +249,6 @@ class LoginModal extends React.Component {
           </span>
         </div>
       )
-    }
-  }
-
-  showNotificationGoogleLogin() {
-    const googleNotification = localStorage.getItem(GOOGLE_LOGIN_LOCAL_STORAGE)
-    if (!googleNotification) {
-      localStorage.setItem(GOOGLE_LOGIN_LOCAL_STORAGE, 'true')
-      CatToolActions.addNotification(GOOGLE_LOGIN_NOTIFICATION)
     }
   }
 
