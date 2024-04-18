@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react'
+import React, {useState, useEffect, useRef} from 'react'
 
 import Switch from '../common/Switch'
 import {getUserApiKey} from '../../api/getUserApiKey'
@@ -29,7 +29,7 @@ const PreferencesModal = (props) => {
   const [modifyUser, setModifyUser] = useState(false)
   const [firstName, setFirstName] = useState(props.user.first_name)
   const [lastName, setLastName] = useState(props.user.last_name)
-
+  const inputName = useRef()
   useEffect(() => {
     getUserApiKey()
       .then((response) => {
@@ -150,6 +150,7 @@ const PreferencesModal = (props) => {
                   type={BUTTON_TYPE.PRIMARY}
                   size={BUTTON_SIZE.MEDIUM}
                   onClick={() => deleteKey()}
+                  tabIndex={0}
                 >
                   Delete
                 </Button>
@@ -158,6 +159,7 @@ const PreferencesModal = (props) => {
                   size={BUTTON_SIZE.MEDIUM}
                   onClick={(e) => undoDelete(e)}
                   className={'btn-cancel'}
+                  tabIndex={0}
                 >
                   Cancel
                 </Button>
@@ -195,6 +197,7 @@ const PreferencesModal = (props) => {
                   <textarea
                     rows="1"
                     readOnly={true}
+                    tabIndex={-1}
                     value={credentials.api_key + '-' + credentials.api_secret}
                   />
                 )}
@@ -205,6 +208,7 @@ const PreferencesModal = (props) => {
                     type={BUTTON_TYPE.PRIMARY}
                     size={BUTTON_SIZE.MEDIUM}
                     onClick={(e) => copyToClipboard(e)}
+                    tabIndex={0}
                   >
                     <i className="icon-copy icon" />
                     {credentialsCopied ? 'Copied' : 'Copy'}
@@ -213,6 +217,7 @@ const PreferencesModal = (props) => {
                     type={BUTTON_TYPE.PRIMARY}
                     size={BUTTON_SIZE.MEDIUM}
                     onClick={() => confirmDeleteHandler()}
+                    tabIndex={0}
                   >
                     Delete
                   </Button>
@@ -223,6 +228,7 @@ const PreferencesModal = (props) => {
                     type={BUTTON_TYPE.PRIMARY}
                     size={BUTTON_SIZE.MEDIUM}
                     onClick={() => confirmDeleteHandler()}
+                    tabIndex={0}
                   >
                     Delete
                   </Button>
@@ -285,6 +291,7 @@ const PreferencesModal = (props) => {
                   type={BUTTON_TYPE.PRIMARY}
                   size={BUTTON_SIZE.MEDIUM}
                   onClick={() => generateKey()}
+                  tabIndex={0}
                 >
                   Generate
                 </Button>
@@ -350,7 +357,9 @@ const PreferencesModal = (props) => {
       </div>
     )
   }
-
+  useEffect(() => {
+    modifyUser && inputName.current.focus()
+  }, [modifyUser])
   return (
     <div className="preferences-modal">
       <div className="user-info-form">
@@ -359,11 +368,14 @@ const PreferencesModal = (props) => {
           {modifyUser ? (
             <div className={'user-info-details user-info-modify'}>
               <input
+                ref={inputName}
                 value={firstName}
+                onKeyUp={(e) => e.key === 'Enter' && modifyUserDetails()}
                 onChange={(e) => setFirstName(e.target.value)}
               />
               <input
                 value={lastName}
+                onKeyUp={(e) => e.key === 'Enter' && modifyUserDetails()}
                 onChange={(e) => setLastName(e.target.value)}
               />
               <div className="user-info-modify-buttons">
@@ -371,12 +383,14 @@ const PreferencesModal = (props) => {
                   type={BUTTON_TYPE.PRIMARY}
                   size={BUTTON_SIZE.MEDIUM}
                   onClick={modifyUserDetails}
+                  tabIndex={0}
                 >
                   Confirm
                 </Button>
                 <Button
                   type={BUTTON_TYPE.WARNING}
                   size={BUTTON_SIZE.ICON_STANDARD}
+                  tabIndex={0}
                   onClick={() => {
                     setFirstName(props.user.first_name)
                     setLastName(props.user.last_name)
@@ -394,7 +408,9 @@ const PreferencesModal = (props) => {
               </strong>
               <div
                 className="user-info-icon-update"
-                onClick={() => setModifyUser(true)}
+                onClick={() => {
+                  setModifyUser(true)
+                }}
               >
                 <IconEdit />
               </div>
