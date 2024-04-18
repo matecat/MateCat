@@ -92,8 +92,9 @@ class ModifyTeam extends React.Component {
   }
 
   removeUser(user) {
+    const userInfo = UserStore.getUser()
     ManageActions.removeUserFromTeam(this.state.team, user)
-    if (user.get('uid') === APP.USER.STORE.user.uid) {
+    if (user.get('uid') === userInfo.user.uid) {
       ModalsActions.onCloseModal()
     }
     this.setState({
@@ -213,7 +214,7 @@ class ModifyTeam extends React.Component {
 
   getUserList() {
     let self = this
-
+    const userInfo = UserStore.getUser()
     const teamMembers = this.state.team.get('members')
     const filteredMembers = teamMembers.filter((member) => {
       const {searchMember} = this.state
@@ -230,7 +231,7 @@ class ModifyTeam extends React.Component {
     return filteredMembers.map(function (member, i) {
       let user = member.get('user')
       if (
-        user.get('uid') == APP.USER.STORE.user.uid &&
+        user.get('uid') == userInfo.user.uid &&
         self.state.showRemoveMessageUserID == user.get('uid')
       ) {
         if (self.state.team.get('members').size > 1) {

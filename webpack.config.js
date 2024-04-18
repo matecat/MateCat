@@ -193,27 +193,24 @@ const matecatConfig = async ({env}, {mode}) => {
     entry: {
       'qa-report': [
         path.resolve(__dirname, 'public/js/common.js'),
-        path.resolve(__dirname, 'public/js/user_store.js'),
         path.resolve(
           __dirname,
-          'public/js/cat_source/es6/components/quality_report/QualityReport.js',
+          'public/js/cat_source/es6/pages/QualityReport.js',
         ),
         path.resolve(__dirname, 'public/css/sass/quality-report.scss'),
       ],
       upload: [
         path.resolve(__dirname, 'public/js/upload_main.js'),
         path.resolve(__dirname, 'public/js/common.js'),
-        path.resolve(__dirname, 'public/js/user_store.js'),
         path.resolve(__dirname, 'public/js/gdrive.upload.js'),
         path.resolve(__dirname, 'public/js/gdrive.picker.js'),
-        path.resolve(__dirname, 'public/js/new-project.js'),
+        path.resolve(__dirname, 'public/js/cat_source/es6/pages/NewProject.js'),
         path.resolve(__dirname, 'public/css/sass/upload-main.scss'),
       ],
       ...entryPoints,
       cattool: [
         path.resolve(__dirname, 'public/build/lxqlicense.js'),
         path.resolve(__dirname, 'public/js/common.js'),
-        path.resolve(__dirname, 'public/js/user_store.js'),
         path.resolve(__dirname, 'public/js/cat_source/ui.core.js'),
         path.resolve(__dirname, 'public/js/cat_source/ui.init.js'),
         path.resolve(__dirname, 'public/js/cat_source/ui.segment.js'),
@@ -223,7 +220,6 @@ const matecatConfig = async ({env}, {mode}) => {
       ],
       dashboard: [
         path.resolve(__dirname, 'public/js/common.js'),
-        path.resolve(__dirname, 'public/js/user_store.js'),
         path.resolve(
           __dirname,
           'public/js/cat_source/es6/components/projects/Dashboard.js',
@@ -232,7 +228,6 @@ const matecatConfig = async ({env}, {mode}) => {
       ],
       analyze: [
         path.resolve(__dirname, 'public/js/common.js'),
-        path.resolve(__dirname, 'public/js/user_store.js'),
         path.resolve(
           __dirname,
           'public/js/cat_source/es6/pages/AnalyzePage.js',
@@ -242,7 +237,6 @@ const matecatConfig = async ({env}, {mode}) => {
       xliffToTarget: [
         path.resolve(__dirname, 'public/js/upload_main.js'),
         path.resolve(__dirname, 'public/js/common.js'),
-        path.resolve(__dirname, 'public/js/user_store.js'),
         path.resolve(__dirname, 'public/js/xliffToTarget.js'),
         path.resolve(__dirname, 'public/css/sass/upload-main.scss'),
         path.resolve(__dirname, 'public/css/sass/main.scss'),

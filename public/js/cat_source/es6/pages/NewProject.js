@@ -1,5 +1,11 @@
-import React, {useEffect, useRef, useState, useCallback, useMemo} from 'react'
-import PropTypes from 'prop-types'
+import React, {
+  useEffect,
+  useRef,
+  useState,
+  useCallback,
+  useMemo,
+  useContext,
+} from 'react'
 import usePortal from '../hooks/usePortal'
 import Header from '../components/header/Header'
 import UserStore from '../stores/UserStore'
@@ -41,6 +47,11 @@ import {getMMTKeys} from '../api/getMMTKeys/getMMTKeys'
 import {useGoogleLoginNotification} from '../hooks/useGoogleLoginNotification'
 import useAuth from '../hooks/useAuth'
 import {AlertDeleteResourceProjectTemplates} from '../components/modals/AlertDeleteResourceProjectTemplates'
+import {createRoot} from 'react-dom/client'
+import {checkGDriveEvents, restartConversions} from '../utils/newProjectUtils'
+import NotificationBox from '../components/notificationsComponent/NotificationBox'
+import {DataLoader, DataLoaderContext} from '../components/common/DataLoader'
+import {mountPage} from './mountPage'
 
 const SELECT_HEIGHT = 324
 
@@ -53,15 +64,18 @@ const urlParams = new URLSearchParams(window.location.search)
 const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
 const tmKeyFromQueryString = urlParams.get('private_tm_key')
 
-const NewProject = ({
-  sourceLanguageSelected,
-  targetLanguagesSelected,
-  subjectsArray,
-  conversionEnabled,
-  formatsNumber,
-  googleDriveEnabled,
-  restartConversions,
-}) => {
+const sourceLanguageSelected =
+  localStorage.getItem('currentSourceLang') ?? 'en-US'
+const targetLanguagesSelected =
+  localStorage.getItem('currentTargetLang') ?? 'fr-FR'
+const subjectsArray = config.subject_array.map((item) => {
+  return {...item, id: item.key, name: item.display}
+})
+const conversionEnabled = Boolean(config.conversionEnabled)
+const formatsNumber = config.formats_number
+const googleDriveEnabled = Boolean(config.googleDriveEnabled)
+
+const NewProject = () => {
   const [user, setUser] = useState()
   const [tmKeys, setTmKeys] = useState()
   const [mtEngines, setMtEngines] = useState([DEFAULT_ENGINE_MEMORY])
@@ -90,7 +104,8 @@ const NewProject = ({
   } = useProjectTemplates(Array.isArray(tmKeys))
 
   const isDeviceCompatible = useDeviceCompatibility()
-  const {isUserLogged, userInfo} = useAuth()
+
+  const {isUserLogged, userInfo} = useContext(DataLoaderContext)
 
   // TODO: Remove temp notification warning login google (search in files this todo)
   useGoogleLoginNotification()
@@ -429,7 +444,7 @@ const NewProject = ({
       CommonUtils.getParameterByName('project_name')
     if (projectNameFromQuerystring)
       projectNameRef.current.value = projectNameFromQuerystring
-    APP.checkGDriveEvents()
+    checkGDriveEvents()
     return () => {
       UserStore.removeListener(UserConstants.UPDATE_USER, updateUser)
       CreateProjectStore.removeListener(
@@ -862,13 +877,9 @@ const NewProject = ({
     </div>
   )
 }
-NewProject.propTypes = {
-  sourceLanguageSelected: PropTypes.string,
-  targetLanguagesSelected: PropTypes.string,
-  subjectsArray: PropTypes.array,
-  conversionEnabled: PropTypes.bool,
-  formatsNumber: PropTypes.number,
-  googleDriveEnabled: PropTypes.bool,
-  restartConversions: PropTypes.func,
-}
 export default NewProject
+
+mountPage({
+  Component: NewProject,
+  rootElement: document.getElementsByClassName('new_project__page')[0],
+})

@@ -20,13 +20,16 @@ function useAuth() {
     const userCookie = Cookies.get(USER_LOGIN_COOKIE)
     if (userCookie) {
       let userToken = parseJWT(userCookie)
-      if (userToken && (!userInfo || userInfo.uid !== userToken.user.uid)) {
+      if (
+        userToken &&
+        (!userInfo || userInfo.user.uid !== userToken.user.uid)
+      ) {
         getUserData().then(function (data) {
-          $(document).trigger('userDataLoaded', data)
           setIsUserLogged(true)
-          setUserInfo(data.user)
+          setUserInfo(data)
           setConnectedServices(data.connected_services)
           UserActions.updateUser(data)
+          $(document).trigger('userDataLoaded', data)
         })
       }
     } else {

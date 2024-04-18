@@ -1,20 +1,21 @@
 import React from 'react'
 import {createRoot} from 'react-dom/client'
 
-import JobSummary from './JobSummary'
-import SegmentsDetails from './SegmentsDetailsContainer'
-import QRActions from '../../actions/QualityReportActions'
-import QRStore from '../../stores/QualityReportStore'
-import QRConstants from '../../constants/QualityReportConstants'
-import Header from '../header/Header'
-import {getUserData} from '../../api/getUserData'
-import {CookieConsent} from '../common/CookieConsent'
+import JobSummary from '../components/quality_report/JobSummary'
+import SegmentsDetails from '../components/quality_report/SegmentsDetailsContainer'
+import QRActions from '../actions/QualityReportActions'
+import QRStore from '../stores/QualityReportStore'
+import QRConstants from '../constants/QualityReportConstants'
+import Header from '../components/header/Header'
+import {getUserData} from '../api/getUserData'
+import {CookieConsent} from '../components/common/CookieConsent'
 import {
   GOOGLE_LOGIN_NOTIFICATION,
   shouldShowNotificationGoogleLogin,
-} from '../../hooks/useGoogleLoginNotification'
-import CatToolActions from '../../actions/CatToolActions'
-import NotificationBox from '../notificationsComponent/NotificationBox'
+} from '../hooks/useGoogleLoginNotification'
+import CatToolActions from '../actions/CatToolActions'
+import NotificationBox from '../components/notificationsComponent/NotificationBox'
+import {mountPage} from './mountPage'
 
 class QualityReport extends React.Component {
   constructor(props) {
@@ -276,7 +277,6 @@ class QualityReport extends React.Component {
 export default QualityReport
 
 const headerMountPoint = createRoot($('header')[0])
-const mountPoint = createRoot(document.getElementById('qr-root'))
 
 if (config.isLoggedIn) {
   getUserData().then((data) => {
@@ -288,7 +288,6 @@ if (config.isLoggedIn) {
         user: data,
       }),
     )
-    mountPoint.render(React.createElement(QualityReport))
   })
 } else {
   headerMountPoint.render(
@@ -299,8 +298,12 @@ if (config.isLoggedIn) {
       loggedUser: false,
     }),
   )
-  mountPoint.render(React.createElement(QualityReport))
 }
+
+mountPage({
+  Component: QualityReport,
+  rootElement: document.getElementById('qr-root'),
+})
 
 const cookieBannerMountPoint = createRoot(
   document.getElementsByTagName('footer')[0],

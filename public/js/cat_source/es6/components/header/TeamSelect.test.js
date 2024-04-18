@@ -28,7 +28,6 @@ window.config = {
 }
 
 require('../../../../common')
-require('../../../../user_store')
 const fakeTeamsData = {
   threeTeams: {
     data: JSON.parse(
@@ -187,9 +186,6 @@ const executeMswServer = () => {
     ],
   )
 }
-
-// set global USER.STORE user info
-window.APP.USER.STORE.user = apiUserMockResponse.user
 
 beforeAll(() => {
   ModalsActions.openCreateTeamModal = () => {}

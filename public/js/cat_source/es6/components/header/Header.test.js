@@ -21,8 +21,6 @@ window.config = {
   hostpath: 'https://dev.matecat.com',
 }
 require('../../../../common')
-require('../../../../user_store')
-
 const props = {
   fromLanguage: true,
   languagesList: true,

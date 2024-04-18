@@ -9,6 +9,7 @@ import GMTSelect from './GMTSelect'
 import {getOutsourceQuote} from '../../api/getOutsourceQuote'
 import {getChangeRates} from '../../api/getChangeRates'
 import CommonUtils from '../../utils/commonUtils'
+import UserStore from '../../stores/UserStore'
 
 class OutsourceVendor extends React.Component {
   constructor(props) {
@@ -342,8 +343,9 @@ class OutsourceVendor extends React.Component {
   }
 
   getUserEmail() {
-    if (APP.USER.STORE.user) {
-      return APP.USER.STORE.user.email
+    const userInfo = UserStore.getUser()
+    if (userInfo.user) {
+      return userInfo.user.email
     } else {
       return ''
     }

@@ -13,6 +13,7 @@ import CatToolActions from '../../actions/CatToolActions'
 import ModalsActions from '../../actions/ModalsActions'
 import ConfirmMessageModal from '../modals/ConfirmMessageModal'
 import Immutable from 'immutable'
+import UserStore from '../../stores/UserStore'
 
 class ProjectContainer extends React.Component {
   constructor(props) {
@@ -49,7 +50,7 @@ class ProjectContainer extends React.Component {
       if (
         (uid !== selectedUser &&
           selectedUser !== ManageConstants.ALL_MEMBERS_FILTER) ||
-        (team.get('type') == 'personal' && uid !== APP.USER.STORE.user.uid)
+        (team.get('type') == 'personal' && uid !== UserStore.getUser().user.uid)
       ) {
         setTimeout(() => {
           $(this.project).transition('fly right')
