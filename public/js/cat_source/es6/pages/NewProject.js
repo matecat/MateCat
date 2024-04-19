@@ -620,43 +620,44 @@ const NewProject = () => {
       <div className="wrapper-upload">
         <div id="languageSelector" />
         <div className="translation-row">
-          <div className="translation-options">
+          <div
+            className={`translation-options ${!isUserLogged ? 'user-not-logged' : ''}`}
+          >
             {/*Project Name*/}
-            <div className="translate-box project-name">
+            <div className="translate-box project-name ">
               <h2>Project name</h2>
               <input
                 name="project-name"
                 type="text"
                 className="upload-input"
                 id="project-name"
-                autoFocus="autofocus"
+                autoFocus={isUserLogged ? 'autofocus' : false}
                 ref={projectNameRef}
+                readOnly={!isUserLogged}
               />
             </div>
             {/* Team Select*/}
-            {isUserLogged && (
-              <div className="translate-box project-team">
-                <Select
-                  label="Team"
-                  id="project-team"
-                  name={'project-team'}
-                  maxHeightDroplist={SELECT_HEIGHT}
-                  showSearchBar={true}
-                  options={
-                    user?.teams
-                      ? user.teams.map((team) => ({
-                          ...team,
-                          id: team.id.toString(),
-                        }))
-                      : []
-                  }
-                  activeOption={selectedTeam}
-                  checkSpaceToReverse={false}
-                  isDisabled={!user || user.teams.length === 1}
-                  onSelect={(option) => setSelectedTeam(option)}
-                />
-              </div>
-            )}
+            <div className="translate-box project-team">
+              <Select
+                label="Team"
+                id="project-team"
+                name={'project-team'}
+                maxHeightDroplist={SELECT_HEIGHT}
+                showSearchBar={true}
+                options={
+                  user?.teams
+                    ? user.teams.map((team) => ({
+                        ...team,
+                        id: team.id.toString(),
+                      }))
+                    : []
+                }
+                activeOption={selectedTeam}
+                checkSpaceToReverse={false}
+                isDisabled={!isUserLogged || user.teams.length === 1}
+                onSelect={(option) => setSelectedTeam(option)}
+              />
+            </div>
             {/*Source Language*/}
             <div className="translate-box source">
               <SourceLanguageSelect
@@ -696,6 +697,7 @@ const NewProject = () => {
                 activeOption={subject}
                 checkSpaceToReverse={false}
                 onSelect={(option) => setSubject(option)}
+                isDisabled={!isUserLogged}
               />
             </div>
             {/*TM and glossary*/}
@@ -715,14 +717,15 @@ const NewProject = () => {
                 />
               </div>
             )}
-
-            <div
-              className={`translate-box settings${isLoadingTemplates ? ' settings-disabled' : ''}`}
-              {...(!isLoadingTemplates && {onClick: openTmPanel})}
-            >
-              <More size={24} />
-              <span className="text">More settings</span>
-            </div>
+            {isUserLogged && (
+              <div
+                className={`translate-box settings${isLoadingTemplates ? ' settings-disabled' : ''}`}
+                {...(!isLoadingTemplates && {onClick: openTmPanel})}
+              >
+                <More size={24} />
+                <span className="text">More settings</span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -739,8 +742,16 @@ const NewProject = () => {
             <p>{errors}</p>
           </div>
         )}
-
-        <UploadFile />
+        {isUserLogged ? (
+          <UploadFile />
+        ) : (
+          <div className="upload-box-not-logged">
+            <h2>
+              <a onClick={APP.openLoginModal}>Sign in</a> to create a project.
+            </h2>
+            <span>Start translating now!</span>
+          </div>
+        )}
       </div>
       <div className="wrapper-bottom">
         {conversionEnabled && (

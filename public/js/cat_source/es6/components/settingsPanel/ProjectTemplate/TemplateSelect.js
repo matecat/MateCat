@@ -11,6 +11,8 @@ export const TemplateSelect = ({
   label,
   maxHeightDroplist,
 }) => {
+  const {isUserLogged} = useContext(DataLoaderContext)
+
   const [isLoadingTemplates, setIsLoadingTemplates] = useState(false)
 
   const isModifyingTemplate = projectTemplates.some(
@@ -61,7 +63,7 @@ export const TemplateSelect = ({
         options={options}
         activeOption={activeOption}
         onSelect={onSelect}
-        isDisabled={isLoadingTemplates}
+        isDisabled={isLoadingTemplates || !isUserLogged}
       >
         {({id, name, showActiveOptionIcon}) => {
           const {isDefault} =

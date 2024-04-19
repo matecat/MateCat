@@ -2,10 +2,12 @@ import React, {useContext} from 'react'
 import PropTypes from 'prop-types'
 import {Select} from '../common/Select'
 import {CreateProjectContext} from './CreateProjectContext'
+import {DataLoaderContext} from '../common/DataLoader'
 
 export const SourceLanguageSelect = ({history = []}) => {
   const {SELECT_HEIGHT, languages, sourceLang, changeSourceLanguage} =
     useContext(CreateProjectContext)
+  const {isUserLogged} = useContext(DataLoaderContext)
 
   return (
     <Select
@@ -18,6 +20,7 @@ export const SourceLanguageSelect = ({history = []}) => {
       activeOption={sourceLang}
       checkSpaceToReverse={false}
       onSelect={(option) => changeSourceLanguage(option)}
+      isDisabled={!isUserLogged}
     >
       {({index, onClose}) => ({
         ...(index === 0 && {
