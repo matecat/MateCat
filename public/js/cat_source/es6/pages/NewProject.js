@@ -218,7 +218,7 @@ const NewProject = () => {
     setSourceLang(option)
   }
 
-  const getTmKeys = () => {
+  const getTmKeys = useCallback(() => {
     // Create key from query string
     const keyFromQueryString = {
       r: true,
@@ -231,41 +231,35 @@ const NewProject = () => {
       isActive: true,
     }
 
-    if (isUserLogged) {
-      getTmKeysUser().then(({tm_keys}) => {
-        const isMatchingKeyFromQuery = tm_keys.some(
-          ({key}) => tmKeyFromQueryString === key,
-        )
+    getTmKeysUser().then(({tm_keys}) => {
+      const isMatchingKeyFromQuery = tm_keys.some(
+        ({key}) => tmKeyFromQueryString === key,
+      )
 
-        setTmKeys([
-          ...tm_keys.map((key) => ({
-            ...key,
-            id: key.key,
-            ...(isMatchingKeyFromQuery &&
-              key.key === tmKeyFromQueryString && {
-                isActive: true,
-                r: true,
-                w: true,
-              }),
-          })),
-          ...(tmKeyFromQueryString && !isMatchingKeyFromQuery
-            ? [keyFromQueryString]
-            : []),
-        ])
-      })
-    } else {
-      setTmKeys([...(tmKeyFromQueryString ? [keyFromQueryString] : [])])
-    }
-  }
+      setTmKeys([
+        ...tm_keys.map((key) => ({
+          ...key,
+          id: key.key,
+          ...(isMatchingKeyFromQuery &&
+            key.key === tmKeyFromQueryString && {
+              isActive: true,
+              r: true,
+              w: true,
+            }),
+        })),
+        ...(tmKeyFromQueryString && !isMatchingKeyFromQuery
+          ? [keyFromQueryString]
+          : []),
+      ])
+    })
+  }, [])
 
-  const getMTEngines = () => {
-    if (isUserLogged) {
-      getMtEnginesApi().then((mtEngines) => {
-        mtEngines.push(DEFAULT_ENGINE_MEMORY)
-        setMtEngines(mtEngines)
-      })
-    }
-  }
+  const getMTEngines = useCallback(() => {
+    getMtEnginesApi().then((mtEngines) => {
+      mtEngines.push(DEFAULT_ENGINE_MEMORY)
+      setMtEngines(mtEngines)
+    })
+  }, [])
 
   createProject.current = () => {
     // const {mtGlossaryProps, deeplGlossaryProps} = activeMTEngine ?? {}
@@ -397,6 +391,8 @@ const NewProject = () => {
   }, [selectedTeam])
 
   useEffect(() => {
+    if (!isUserLogged) return
+
     retrieveSupportedLanguages()
     getSupportedFiles()
       .then((data) => {
@@ -453,7 +449,7 @@ const NewProject = () => {
         enableAnalizeButton,
       )
     }
-  }, [])
+  }, [getMTEngines, getTmKeys, isUserLogged])
 
   useEffect(() => {
     const createKeyFromTMXFile = ({extension, filename}) => {
