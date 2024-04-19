@@ -1,5 +1,8 @@
 {
   "scripts": {
+    "preversion": "",
+    "version": "sed -i \"s/version .*/version = \\\"v${npm_package_version}\\\"/g\" ./inc/version.ini",
+    "postversion": "git add ./inc/version.ini && git commit --amend --no-edit && git tag -d v${npm_package_version} && git tag v${npm_package_version}",
     "format": "prettier --write .",
     "lint": "eslint --ignore-path .gitignore .",
     "test": "jest --watchAll",
@@ -35,16 +38,18 @@
     "react-tagsinput": "^3.19.0",
     "react-transition-group": "^4.2.2",
     "react-virtual": "^2.10.4",
-    "sprintf-js": "^1.1.2"
+    "sprintf-js": "^1.1.2",
+    "@radix-ui/react-context-menu": "^2.1.5",
+    "@radix-ui/react-dropdown-menu": "^2.0.6"
   },
   "devDependencies": {
-    "@babel/core": "7.24.3",
+    "@babel/core": "7.24.4",
     "@babel/eslint-parser": "7.24.1",
     "@babel/plugin-proposal-class-properties": "^7.18.6",
     "@babel/plugin-transform-runtime": "^7.23.7",
     "@babel/preset-env": "^7.23.8",
     "@babel/preset-react": "^7.23.3",
-    "@sentry/webpack-plugin": "2.16.0",
+    "@sentry/webpack-plugin": "2.16.1",
     "@testing-library/jest-dom": "^6.2.0",
     "@testing-library/react": "^15.0.0",
     "@testing-library/user-event": "^14.5.2",
@@ -80,5 +85,5 @@
   "resolutions": {
     "wrap-ansi": "^7.0.0"
   },
-  "version": "2.21.10"
+  "version": "2.21.12"
 }
