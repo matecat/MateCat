@@ -1,0 +1,11 @@
+@import '../../commons/colors';
+.header-buttons {
+  display: flex;
+  gap: 20px;
+  .header-button-signin {
+    color: $white !important;
+  }
+  .header-button-signup {
+    color: $darkBlue !important;
+  }
+}

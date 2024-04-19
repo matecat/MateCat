@@ -373,7 +373,7 @@ header {
   }
   .ui-user-top-image {
     float: right;
-    margin: 0 10px;
+    margin: 0;
     cursor: pointer;
     min-width: 35px;
     @media only screen and (max-width: 1040px) {
@@ -428,14 +428,12 @@ header {
 }
 
 #menu-site {
-  /*margin-top: 8px !important;*/
-  /*float: right !important;*/
-  margin-right: 6px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  border-right: 1px solid rgba(255, 255, 255, 0.24);
+  margin-right: 25px;
   text-align: right;
-  /*
-    border-right: 1px solid #8a8a8a;
-    */
-  /*height: 22px;*/
   .btn {
     background: #fff;
     color: #002b5c;

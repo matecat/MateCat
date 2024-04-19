@@ -1,8 +1,9 @@
-import React, {createRef, useEffect, useState} from 'react'
+import React, {createRef, useContext, useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
 import {Select} from '../../common/Select'
 import {IconPin} from '../../icons/IconPin'
 import Check from '../../../../../../img/icons/Check'
+import {DataLoaderContext} from '../../common/DataLoader'
 
 export const TemplateSelect = ({
   projectTemplates,

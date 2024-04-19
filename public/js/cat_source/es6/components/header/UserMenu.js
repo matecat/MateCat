@@ -4,6 +4,7 @@ import {logoutUser} from '../../api/logoutUser'
 import CatToolStore from '../../stores/CatToolStore'
 import CatToolConstants from '../../constants/CatToolConstants'
 import CatToolActions from '../../actions/CatToolActions'
+import {Button, BUTTON_MODE, BUTTON_SIZE} from '../common/Button/Button'
 
 export const UserMenu = ({user, userLogged}) => {
   const dropdownProfile = useRef()
@@ -143,13 +144,25 @@ export const UserMenu = ({user, userLogged}) => {
           </div>
         </>
       ) : (
-        <div
-          className="ui user-nolog label"
-          onClick={openLoginModal}
-          title="Login"
-        >
+        <div className="header-buttons">
+          <Button
+            className={'header-button-signin'}
+            mode={BUTTON_MODE.OUTLINE}
+            size={BUTTON_SIZE.MEDIUM}
+            onClick={APP.openLoginModal}
+          >
+            Sign In
+          </Button>
+          <Button
+            className={'header-button-signup'}
+            onClick={APP.openRegisterModal}
+            size={BUTTON_SIZE.MEDIUM}
+          >
+            Sign Up
+          </Button>
+
           {/*<i className="icon-user22"/>*/}
-          <IconUserLogout width={40} height={40} color={'#fff'} />
+          {/*<IconUserLogout width={40} height={40} color={'#fff'} />*/}
         </div>
       )}
     </div>
