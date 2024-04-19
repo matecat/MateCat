@@ -1,0 +1,61 @@
+@import "../../commons/colors";
+.home-page-section {
+  padding-bottom: 100px;
+}
+.layout-container {
+  position: relative;
+  z-index: 2;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 64px;
+  .layout-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 48px;
+    .content-box {
+      display: flex;
+      flex-direction: column;
+      text-align: left;
+      gap: 20px;
+      .content-box_header {
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+        h3 {
+          margin-top: 0;
+          font-size: 28px;
+          line-height: 32px;
+        }
+        img {
+          width: 64px;
+          height: 64px;
+        }
+      }
+      p {
+        font-size: 18px;
+        line-height: 24px;
+        color: $grey6;
+      }
+    }
+  }
+}
+
+@media (max-width: 1023px) {
+  .layout-container {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+}
+@media (min-width: 1024px) {
+  .layout-container {
+    max-width: 960px;
+  }
+}
+@media (min-width: 1440px) {
+  .layout-container {
+    max-width: 1280px;
+  }
+}

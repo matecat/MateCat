@@ -48,6 +48,7 @@ import {AlertDeleteResourceProjectTemplates} from '../components/modals/AlertDel
 import {checkGDriveEvents, restartConversions} from '../utils/newProjectUtils'
 import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper'
 import {mountPage} from './mountPage'
+import {HomePageSection} from '../components/createProject/HomePageSection'
 
 const SELECT_HEIGHT = 324
 
@@ -72,7 +73,6 @@ const formatsNumber = config.formats_number
 const googleDriveEnabled = Boolean(config.googleDriveEnabled)
 
 const NewProject = () => {
-  const [user, setUser] = useState()
   const [tmKeys, setTmKeys] = useState()
   const [mtEngines, setMtEngines] = useState([DEFAULT_ENGINE_MEMORY])
   const [sourceLang, setSourceLang] = useState({})
@@ -183,10 +183,11 @@ const NewProject = () => {
 
   const selectedTeam = useMemo(() => {
     const team =
-      user?.teams.find(({id}) => id === currentProjectTemplate?.idTeam) ?? {}
+      userInfo?.teams.find(({id}) => id === currentProjectTemplate?.idTeam) ??
+      {}
 
     return {...team, id: team.id?.toString()}
-  }, [user?.teams, currentProjectTemplate?.idTeam])
+  }, [userInfo?.teams, currentProjectTemplate?.idTeam])
   const setSelectedTeam = ({id}) =>
     modifyingCurrentTemplate((prevTemplate) => ({
       ...prevTemplate,
@@ -402,9 +403,6 @@ const NewProject = () => {
 
     UI.addEvents()
 
-    const updateUser = (user) => {
-      setUser(user)
-    }
     const hideAllErrors = () => {
       setErrors()
       setWarnings()
@@ -417,7 +415,6 @@ const NewProject = () => {
 
     getTmKeys()
     getMTEngines()
-    UserStore.addListener(UserConstants.UPDATE_USER, updateUser)
     CreateProjectStore.addListener(
       NewProjectConstants.HIDE_ERROR_WARNING,
       hideAllErrors,
@@ -435,7 +432,6 @@ const NewProject = () => {
       projectNameRef.current.value = projectNameFromQuerystring
     checkGDriveEvents()
     return () => {
-      UserStore.removeListener(UserConstants.UPDATE_USER, updateUser)
       CreateProjectStore.removeListener(
         NewProjectConstants.HIDE_ERROR_WARNING,
         hideAllErrors,
@@ -608,7 +604,7 @@ const NewProject = () => {
           showModals={false}
           showLinks={true}
           loggedUser={isUserLogged}
-          user={user}
+          user={isUserLogged ? userInfo.user : undefined}
         />
       </HeaderPortal>
       <div className="wrapper-claim">
@@ -645,8 +641,8 @@ const NewProject = () => {
                 maxHeightDroplist={SELECT_HEIGHT}
                 showSearchBar={true}
                 options={
-                  user?.teams
-                    ? user.teams.map((team) => ({
+                  userInfo?.teams
+                    ? userInfo.teams.map((team) => ({
                         ...team,
                         id: team.id.toString(),
                       }))
@@ -654,7 +650,7 @@ const NewProject = () => {
                 }
                 activeOption={selectedTeam}
                 checkSpaceToReverse={false}
-                isDisabled={!isUserLogged || user.teams.length === 1}
+                isDisabled={!isUserLogged || userInfo?.teams.length === 1}
                 onSelect={(option) => setSelectedTeam(option)}
               />
             </div>
@@ -828,7 +824,7 @@ const NewProject = () => {
           onClose: closeSettings,
           isOpened: openSettings.isOpen,
           tabOpen: openSettings.tab,
-          user,
+          user: userInfo?.user,
           tmKeys,
           setTmKeys,
           mtEngines,
@@ -842,6 +838,7 @@ const NewProject = () => {
           checkSpecificTemplatePropsAreModified,
         }}
       />
+      <HomePageSection />
       <Footer />
     </CreateProjectContext.Provider>
   ) : (
