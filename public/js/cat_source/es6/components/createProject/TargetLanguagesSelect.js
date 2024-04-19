@@ -5,7 +5,7 @@ import {CreateProjectContext} from './CreateProjectContext'
 import ChevronDown from '../../../../../img/icons/ChevronDown'
 import {useRef} from 'react'
 import TEXT_UTILS from '../../utils/textUtils'
-import {DataLoaderContext} from '../common/DataLoader'
+import {ApplicationWrapperContext} from '../common/ApplicationWrapper'
 
 export const TargetLanguagesSelect = ({history = []}) => {
   const {
@@ -15,7 +15,7 @@ export const TargetLanguagesSelect = ({history = []}) => {
     setTargetLangs,
     setIsOpenMultiselectLanguages,
   } = useContext(CreateProjectContext)
-  const {isUserLogged} = useContext(DataLoaderContext)
+  const {isUserLogged} = useContext(ApplicationWrapperContext)
 
   const selectedItemRef = useRef()
 

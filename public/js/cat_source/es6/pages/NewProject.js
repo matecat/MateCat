@@ -46,7 +46,7 @@ import {checkGuessTagIsEnabled} from '../components/settingsPanel/Contents/Advan
 import {getMMTKeys} from '../api/getMMTKeys/getMMTKeys'
 import {AlertDeleteResourceProjectTemplates} from '../components/modals/AlertDeleteResourceProjectTemplates'
 import {checkGDriveEvents, restartConversions} from '../utils/newProjectUtils'
-import {DataLoaderContext} from '../components/common/DataLoader'
+import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper'
 import {mountPage} from './mountPage'
 
 const SELECT_HEIGHT = 324
@@ -101,7 +101,7 @@ const NewProject = () => {
 
   const isDeviceCompatible = useDeviceCompatibility()
 
-  const {isUserLogged, userInfo} = useContext(DataLoaderContext)
+  const {isUserLogged, userInfo} = useContext(ApplicationWrapperContext)
 
   const projectNameRef = useRef()
   const prevSourceLang = useRef(sourceLang)

@@ -1,5 +1,5 @@
 import {createRoot} from 'react-dom/client'
-import {DataLoader} from '../components/common/DataLoader'
+import {ApplicationWrapper} from '../components/common/ApplicationWrapper'
 import React from 'react'
 import NotificationBox from '../components/notificationsComponent/NotificationBox'
 
@@ -9,9 +9,9 @@ export const mountPage = ({Component, rootElement}) => {
 
     const Page = () => {
       return (
-        <DataLoader>
+        <ApplicationWrapper>
           <Component />
-        </DataLoader>
+        </ApplicationWrapper>
       )
     }
 

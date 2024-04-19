@@ -20,7 +20,7 @@ import {getUserData} from '../api/getUserData'
 import {getTeamMembers} from '../api/getTeamMembers'
 import {CookieConsent} from '../components/common/CookieConsent'
 import {mountPage} from './mountPage'
-import {DataLoaderContext} from '../components/common/DataLoader'
+import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper'
 
 class Dashboard extends React.Component {
   constructor() {
@@ -38,7 +38,7 @@ class Dashboard extends React.Component {
       selectedUser: ManageConstants.ALL_MEMBERS_FILTER,
     }
   }
-  static contextType = DataLoaderContext
+  static contextType = ApplicationWrapperContext
   getData = () => {
     getUserData().then((data) => {
       UserActions.renderTeams(data.teams)

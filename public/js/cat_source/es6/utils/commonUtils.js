@@ -669,3 +669,20 @@ export function switchArrayIndex(arr, targetIndex, newIndex) {
     return [...acc, cur]
   }, [])
 }
+
+// Custom event handler class: allows namespaced events
+export class EventHandlerClass {
+  constructor() {
+    this.functionMap = {}
+  }
+
+  addEventListener(event, func) {
+    this.functionMap[event] = func
+    document.addEventListener(event.split('.')[0], this.functionMap[event])
+  }
+
+  removeEventListener(event) {
+    document.removeEventListener(event.split('.')[0], this.functionMap[event])
+    delete this.functionMap[event]
+  }
+}

@@ -7,8 +7,8 @@ import UserStore from '../../stores/UserStore'
 import QRStore from '../../stores/QualityReportStore'
 import QRConstants from '../../constants/QualityReportConstants'
 import {ActionMenu} from './ActionMenu'
-import {UserMenu} from './UserMenu'
 import CatToolActions from '../../actions/CatToolActions'
+import {UserMenu} from './UserMenu'
 
 class Header extends React.Component {
   constructor(props) {
@@ -184,9 +184,7 @@ class Header extends React.Component {
               {!!isQualityReport && jobUrls && (
                 <ActionMenu jobUrls={this.state.jobUrls.toJS()} />
               )}
-              {showUserMenu && (
-                <UserMenu user={this.state.user} userLogged={loggedUser} />
-              )}
+              {showUserMenu && <UserMenu />}
             </div>
           </div>
         </nav>

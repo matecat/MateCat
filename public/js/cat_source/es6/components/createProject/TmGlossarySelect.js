@@ -3,12 +3,12 @@ import Check from '../../../../../img/icons/Check'
 import {Select} from '../common/Select'
 import {CreateProjectContext} from './CreateProjectContext'
 import {orderTmKeys} from '../settingsPanel/Contents/TranslationMemoryGlossaryTab'
-import {DataLoaderContext} from '../common/DataLoader'
+import {ApplicationWrapperContext} from '../common/ApplicationWrapper'
 
 export const TmGlossarySelect = () => {
   const {SELECT_HEIGHT, tmKeys, setOpenSettings, modifyingCurrentTemplate} =
     useContext(CreateProjectContext)
-  const {isUserLogged} = useContext(DataLoaderContext)
+  const {isUserLogged} = useContext(ApplicationWrapperContext)
 
   const tmKeyActive = Array.isArray(tmKeys)
     ? tmKeys.filter(({isActive}) => isActive)

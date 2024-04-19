@@ -2,12 +2,12 @@ import React, {useContext} from 'react'
 import PropTypes from 'prop-types'
 import {Select} from '../common/Select'
 import {CreateProjectContext} from './CreateProjectContext'
-import {DataLoaderContext} from '../common/DataLoader'
+import {ApplicationWrapperContext} from '../common/ApplicationWrapper'
 
 export const SourceLanguageSelect = ({history = []}) => {
   const {SELECT_HEIGHT, languages, sourceLang, changeSourceLanguage} =
     useContext(CreateProjectContext)
-  const {isUserLogged} = useContext(DataLoaderContext)
+  const {isUserLogged} = useContext(ApplicationWrapperContext)
 
   return (
     <Select

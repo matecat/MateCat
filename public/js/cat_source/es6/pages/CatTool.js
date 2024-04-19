@@ -33,13 +33,13 @@ import {getSupportedLanguages} from '../api/getSupportedLanguages'
 import ApplicationStore from '../stores/ApplicationStore'
 import useProjectTemplates from '../hooks/useProjectTemplates'
 import {mountPage} from './mountPage'
-import {DataLoaderContext} from '../components/common/DataLoader'
+import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper'
 
 const urlParams = new URLSearchParams(window.location.search)
 const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
 
 function CatTool() {
-  const {isUserLogged} = useContext(DataLoaderContext)
+  const {isUserLogged} = useContext(ApplicationWrapperContext)
 
   const [options, setOptions] = useState({})
   const [wasInitSegments, setWasInitSegments] = useState(false)

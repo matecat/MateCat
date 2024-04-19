@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import {Select} from '../../common/Select'
 import {IconPin} from '../../icons/IconPin'
 import Check from '../../../../../../img/icons/Check'
-import {DataLoaderContext} from '../../common/DataLoader'
+import {ApplicationWrapperContext} from '../../common/ApplicationWrapper'
 
 export const TemplateSelect = ({
   projectTemplates,
@@ -12,7 +12,7 @@ export const TemplateSelect = ({
   label,
   maxHeightDroplist,
 }) => {
-  const {isUserLogged} = useContext(DataLoaderContext)
+  const {isUserLogged} = useContext(ApplicationWrapperContext)
 
   const [isLoadingTemplates, setIsLoadingTemplates] = useState(false)
 

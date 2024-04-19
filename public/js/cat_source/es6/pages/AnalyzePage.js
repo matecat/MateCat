@@ -10,7 +10,7 @@ import {getVolumeAnalysis} from '../api/getVolumeAnalysis'
 import Immutable from 'immutable'
 import {ANALYSIS_STATUS} from '../constants/Constants'
 import {mountPage} from './mountPage'
-import {DataLoaderContext} from '../components/common/DataLoader'
+import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper'
 
 let pollingTime = 1000
 const segmentsThreshold = 50000
@@ -19,7 +19,7 @@ const AnalyzePage = () => {
   const [project, setProject] = useState()
   const [volumeAnalysis, setVolumeAnalysis] = useState()
   const containerRef = useRef()
-  const {isUserLogged} = useContext(DataLoaderContext)
+  const {isUserLogged} = useContext(ApplicationWrapperContext)
 
   const getProjectVolumeAnalysisData = () => {
     if (config.jobAnalysis) {

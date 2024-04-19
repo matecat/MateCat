@@ -1,13 +1,15 @@
-import React, {createContext, useEffect} from 'react'
+import React, {createContext, useEffect, useRef} from 'react'
 import useAuth from '../../../hooks/useAuth'
 import Cookies from 'js-cookie'
 import CatToolActions from '../../../actions/CatToolActions'
 import {onModalWindowMounted} from '../../modals/ModalWindow'
-import CommonUtils from '../../../utils/commonUtils'
+import CommonUtils, {EventHandlerClass} from '../../../utils/commonUtils'
 import {UserDisconnectedBox} from './UserDisconnectedBox'
-export const DataLoaderContext = createContext({})
+export const ApplicationWrapperContext = createContext({})
 
-export const DataLoader = ({children}) => {
+window.eventHandler = new EventHandlerClass()
+
+export const ApplicationWrapper = ({children}) => {
   const {isUserLogged, userInfo, connectedServices, userDisconnected} =
     useAuth()
 
@@ -41,7 +43,8 @@ export const DataLoader = ({children}) => {
     }
   }
 
-  const checkForPopupToOpen = () => {
+  const checkForPopupToOpen = useRef()
+  checkForPopupToOpen.current = () => {
     const openFromFlash = APP.lookupFlashServiceParam('popup')
     if (!openFromFlash) return
 
@@ -56,13 +59,12 @@ export const DataLoader = ({children}) => {
           text: 'You are now logged in and ready to use Matecat.',
         })
         //After confirm email or google register
-        const data = {
+        CommonUtils.dispatchAnalyticsEvents({
           event: !userInfo.user.has_password
             ? 'new_signup_google'
             : 'new_signup_email',
           userId: userInfo.user.uid,
-        }
-        CommonUtils.dispatchAnalyticsEvents(data)
+        })
 
         break
       case 'login':
@@ -82,16 +84,16 @@ export const DataLoader = ({children}) => {
 
   useEffect(() => {
     if (isUserLogged) {
-      onModalWindowMounted().then(() => checkForPopupToOpen())
+      onModalWindowMounted().then(() => checkForPopupToOpen.current())
     }
   }, [isUserLogged])
 
   return (
-    <DataLoaderContext.Provider
+    <ApplicationWrapperContext.Provider
       value={{isUserLogged, userInfo, connectedServices}}
     >
       {userDisconnected && <UserDisconnectedBox />}
       {children}
-    </DataLoaderContext.Provider>
+    </ApplicationWrapperContext.Provider>
   )
 }
