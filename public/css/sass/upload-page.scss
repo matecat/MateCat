@@ -1711,8 +1711,9 @@ button.ui-button::-moz-focus-inner {
   width: 94%;
   min-width: 992px;
   position: relative;
-  padding: 24px;
-  height: 200px;
+  padding: 12px;
+  display: flex;
+  justify-content: space-between;
 }
 
 h2 {
@@ -1736,7 +1737,6 @@ h2.payoff {
   padding: 8px 16px;
   width: auto !important;
   min-width: 200px;
-  margin: -10px 0px 8px 0px;
   -webkit-transition: all 100ms ease-in;
   -moz-transition: all 100ms ease-in;
   font-size: 26px !important;
@@ -2107,7 +2107,7 @@ a {
   font-weight: bold;
   font-size: 16px;
   color: $grey1;
-  margin-top: 48px;
+  margin-top: 0px;
   .supported-file-formats {
     cursor: pointer;
   }
