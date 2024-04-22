@@ -13,12 +13,9 @@ import {
 } from '../common/Button/Button'
 import CommonUtils from '../../utils/commonUtils'
 import {logoutUser} from '../../api/logoutUser'
-import IconUserLogout from '../icons/IconUserLogout'
 
 export const UserMenu = () => {
   const {isUserLogged, userInfo} = useContext(ApplicationWrapperContext)
-
-  const openLoginModal = () => APP.openLoginModal()
 
   const loggedRender = () => {
     const {metadata, user} = userInfo
@@ -28,9 +25,7 @@ export const UserMenu = () => {
       document.location.href = '/manage'
     }
 
-    const openPreferencesModal = () => {
-      APP.openPreferencesModal()
-    }
+    const openPreferencesModal = () => APP.openPreferencesModal()
 
     const logoutUserFn = () => {
       logoutUser().then(() => {
@@ -119,8 +114,25 @@ export const UserMenu = () => {
   return isUserLogged ? (
     loggedRender()
   ) : (
-    <div className="ui user-nolog label" onClick={openLoginModal} title="Login">
-      <IconUserLogout width={40} height={40} color={'#fff'} />
+    <div className="header-buttons">
+      <Button
+        className={'header-button-signin'}
+        mode={BUTTON_MODE.OUTLINE}
+        size={BUTTON_SIZE.MEDIUM}
+        onClick={APP.openLoginModal}
+      >
+        Sign In
+      </Button>
+      <Button
+        className={'header-button-signup'}
+        onClick={APP.openRegisterModal}
+        size={BUTTON_SIZE.MEDIUM}
+      >
+        Sign Up
+      </Button>
+
+      {/*<i className="icon-user22"/>*/}
+      {/*<IconUserLogout width={40} height={40} color={'#fff'} />*/}
     </div>
   )
 }
