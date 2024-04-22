@@ -3,8 +3,26 @@ import useAuth from '../../../hooks/useAuth'
 import Cookies from 'js-cookie'
 import CatToolActions from '../../../actions/CatToolActions'
 import {onModalWindowMounted} from '../../modals/ModalWindow'
-import CommonUtils, {EventHandlerClass} from '../../../utils/commonUtils'
+import CommonUtils from '../../../utils/commonUtils'
 import {UserDisconnectedBox} from './UserDisconnectedBox'
+
+// Custom event handler class: allows namespaced events
+class EventHandlerClass {
+  constructor() {
+    this.functionMap = {}
+  }
+
+  addEventListener(event, func) {
+    this.functionMap[event] = func
+    document.addEventListener(event.split('.')[0], this.functionMap[event])
+  }
+
+  removeEventListener(event) {
+    document.removeEventListener(event.split('.')[0], this.functionMap[event])
+    delete this.functionMap[event]
+  }
+}
+
 export const ApplicationWrapperContext = createContext({})
 
 window.eventHandler = new EventHandlerClass()

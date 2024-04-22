@@ -13,9 +13,12 @@ import {
 } from '../common/Button/Button'
 import CommonUtils from '../../utils/commonUtils'
 import {logoutUser} from '../../api/logoutUser'
+import IconUserLogout from '../icons/IconUserLogout'
 
 export const UserMenu = () => {
   const {isUserLogged, userInfo} = useContext(ApplicationWrapperContext)
+
+  const openLoginModal = () => APP.openLoginModal()
 
   const loggedRender = () => {
     const {metadata, user} = userInfo
@@ -113,5 +116,11 @@ export const UserMenu = () => {
     )
   }
 
-  return isUserLogged ? loggedRender() : <span>Not logged</span>
+  return isUserLogged ? (
+    loggedRender()
+  ) : (
+    <div className="ui user-nolog label" onClick={openLoginModal} title="Login">
+      <IconUserLogout width={40} height={40} color={'#fff'} />
+    </div>
+  )
 }
