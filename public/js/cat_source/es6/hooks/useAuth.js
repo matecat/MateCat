@@ -2,6 +2,8 @@ import {useCallback, useEffect, useState} from 'react'
 import Cookies from 'js-cookie'
 import {getUserData} from '../api/getUserData'
 import UserActions from '../actions/UserActions'
+import UserStore from '../stores/UserStore'
+import UserConstants from '../constants/UserConstants'
 export const USER_LOGIN_COOKIE = 'matecat_login_v6'
 function useAuth() {
   const [isUserLogged, setIsUserLogged] = useState(false)
@@ -26,10 +28,10 @@ function useAuth() {
         (!userInfo || userInfo.user.uid !== userToken.user.uid)
       ) {
         getUserData().then(function (data) {
-          setIsUserLogged(true)
-          setUserInfo(data)
-          setConnectedServices(data.connected_services)
           UserActions.updateUser(data)
+          setUserInfo(data)
+          setIsUserLogged(true)
+          setConnectedServices(data.connected_services)
           $(document).trigger('userDataLoaded', data)
         })
       }
@@ -52,6 +54,20 @@ function useAuth() {
     }
     return () => clearInterval(interval)
   }, [checkUserCookie, userInfo])
+  useEffect(() => {
+    const updateUser = () => {
+      setUserInfo(userInfo)
+      if (userInfo) {
+        setIsUserLogged(true)
+      } else {
+        setUserDisconnected(false)
+      }
+    }
+    UserStore.addListener(UserConstants.UPDATE_USER, updateUser)
+    return () => {
+      UserStore.removeListener(UserConstants.UPDATE_USER, updateUser)
+    }
+  }, [])
   return {
     isUserLogged,
     userInfo,
