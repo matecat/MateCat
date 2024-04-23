@@ -173,7 +173,7 @@ function useAuth() {
       UserStore.removeListener(UserConstants.UPDATE_TEAMS, updateTeams)
       UserStore.removeListener(UserConstants.CHOOSE_TEAM, selectTeam)
     }
-  }, [isUserLogged])
+  }, [isUserLogged, setUserInfo])
 
   console.log('[ useAuth ]', userInfo)
 
