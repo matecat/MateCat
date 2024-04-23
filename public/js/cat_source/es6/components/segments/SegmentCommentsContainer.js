@@ -10,6 +10,7 @@ import CommentsActions from '../../actions/CommentsActions'
 import CommentsConstants from '../../constants/CommentsConstants'
 import SegmentActions from '../../actions/SegmentActions'
 import {SegmentContext} from './SegmentContext'
+import ModalsActions from '../../actions/ModalsActions'
 
 class SegmentCommentsContainer extends React.Component {
   static contextType = SegmentContext
@@ -265,7 +266,7 @@ class SegmentCommentsContainer extends React.Component {
             <a
               className="mbc-comment-link-btn mbc-login-link"
               onClick={() => {
-                APP.openLoginModal()
+                ModalsActions.openLoginModal()
               }}
             >
               Login to receive comments

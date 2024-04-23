@@ -147,7 +147,7 @@ class LoginModal extends React.Component {
   }
 
   openRegisterModal() {
-    APP.openRegisterModal()
+    ModalsActions.openRegisterModal()
   }
 
   openForgotPassword() {

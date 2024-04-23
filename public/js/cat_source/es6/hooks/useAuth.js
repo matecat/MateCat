@@ -4,6 +4,7 @@ import {getUserData} from '../api/getUserData'
 import UserActions from '../actions/UserActions'
 import UserStore from '../stores/UserStore'
 import UserConstants from '../constants/UserConstants'
+import CommonUtils from '../utils/commonUtils'
 export const USER_LOGIN_COOKIE = 'matecat_login_v6'
 function useAuth() {
   const [isUserLogged, setIsUserLogged] = useState(false)
@@ -32,7 +33,7 @@ function useAuth() {
           setUserInfo(data)
           setIsUserLogged(true)
           setConnectedServices(data.connected_services)
-          $(document).trigger('userDataLoaded', data)
+          CommonUtils.dispatchCustomEvent('userDataLoaded', data)
         })
       }
     } else {

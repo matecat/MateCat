@@ -5,6 +5,11 @@ import ModifyTeamModal from '../components/modals/ModifyTeam'
 import {mergeJobChunks} from '../api/mergeJobChunks'
 import AppDispatcher from '../stores/AppDispatcher'
 import ModalsConstants from '../constants/ModalsConstants'
+import LoginModal from '../components/modals/LoginModal'
+import RegisterModal from '../components/modals/RegisterModal'
+import PreferencesModal from '../components/modals/PreferencesModal'
+import SuccessModal from '../components/modals/SuccessModal'
+import ResetPasswordModal from '../components/modals/ResetPasswordModal'
 
 let ModalsActions = {
   showModalComponent: (component, props, title, style, onCloseCallback) => {
@@ -17,6 +22,58 @@ let ModalsActions = {
       onCloseCallback,
     })
   },
+  openLoginModal: function (param = {}) {
+    const title = 'Add project to your management panel'
+    const style = {
+      width: '80%',
+      maxWidth: '800px',
+      minWidth: '600px',
+    }
+    const props = {
+      googleUrl: config.authURL,
+      ...param,
+    }
+
+    ModalsActions.showModalComponent(LoginModal, props, title, style)
+  },
+  openRegisterModal: (params) => {
+    let props = {
+      googleUrl: config.authURL,
+    }
+    if (params) {
+      props = {
+        ...props,
+        ...params,
+      }
+    }
+    ModalsActions.showModalComponent(RegisterModal, props, 'Register Now')
+  },
+  openPreferencesModal: ({showGDriveMessage = false} = {}) => {
+    const style = {
+      width: '700px',
+      maxWidth: '700px',
+    }
+    ModalsActions.showModalComponent(
+      PreferencesModal,
+      {showGDriveMessage},
+      'Profile',
+      style,
+    )
+  },
+  openSuccessModal: (props) => {
+    ModalsActions.showModalComponent(SuccessModal, props, props.title)
+  },
+  openResetPassword: () => {
+    let props = {closeOnOutsideClick: false, showOldPassword: true}
+    if (APP.lookupFlashServiceParam('popup')) {
+      props.showOldPassword = false
+    }
+    ModalsActions.showModalComponent(
+      ResetPasswordModal,
+      props,
+      'Reset Password',
+    )
+  },
   onCloseModal: function () {
     AppDispatcher.dispatch({
       actionType: ModalsConstants.CLOSE_MODAL,
@@ -26,7 +83,7 @@ let ModalsActions = {
     this.showModalComponent(CreateTeamModal, {}, 'Create New Team')
   },
   openModifyTeamModal: function (team, hideChangeName) {
-    var props = {
+    const props = {
       team: team,
       hideChangeName: hideChangeName,
     }
@@ -34,12 +91,12 @@ let ModalsActions = {
   },
 
   openSplitJobModal: function (job, project, callback) {
-    var props = {
+    const props = {
       job: job,
       project: project,
       callback: callback,
     }
-    var style = {width: '670px', maxWidth: '670px'}
+    const style = {width: '670px', maxWidth: '670px'}
     this.showModalComponent(SplitJobModal, props, 'Split Job', style)
   },
   openMergeModal: function (project, job, successCallback) {

@@ -5,6 +5,7 @@ import TextField from '../common/TextField'
 import * as RuleRunner from '../common/ruleRunner'
 import * as FormRules from '../common/formRules'
 import {forgotPassword} from '../../api/forgotPassword'
+import ModalsActions from '../../actions/ModalsActions'
 
 class ForgotPasswordModal extends React.Component {
   constructor(props) {
@@ -23,7 +24,7 @@ class ForgotPasswordModal extends React.Component {
   }
 
   openLoginModal() {
-    APP.openLoginModal()
+    ModalsActions.openLoginModal()
   }
 
   handleFieldChanged(field) {
@@ -47,7 +48,7 @@ class ForgotPasswordModal extends React.Component {
     this.setState({requestRunning: true})
     this.sendForgotPassword()
       .then(() => {
-        APP.openSuccessModal({
+        ModalsActions.openSuccessModal({
           title: 'Forgot Password',
           text:
             'We sent an email to ' +

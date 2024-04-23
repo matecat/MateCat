@@ -743,7 +743,8 @@ const NewProject = () => {
         ) : (
           <div className="upload-box-not-logged">
             <h2>
-              <a onClick={APP.openLoginModal}>Sign in</a> to create a project.
+              <a onClick={ModalsActions.openLoginModal}>Sign in</a> to create a
+              project.
             </h2>
             <span>Start translating now!</span>
           </div>

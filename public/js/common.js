@@ -5,75 +5,14 @@ import {downloadFileGDrive} from './cat_source/es6/api/downloadFileGDrive'
 import ModalsActions from './cat_source/es6/actions/ModalsActions'
 import CommonUtils from './cat_source/es6/utils/commonUtils'
 import CatToolActions from './cat_source/es6/actions/CatToolActions'
-import SuccessModal from './cat_source/es6/components/modals/SuccessModal'
-import PreferencesModal from './cat_source/es6/components/modals/PreferencesModal'
-import ResetPasswordModal from './cat_source/es6/components/modals/ResetPasswordModal'
-import RegisterModal from './cat_source/es6/components/modals/RegisterModal'
-import {onModalWindowMounted} from './cat_source/es6/components/modals/ModalWindow'
-import LoginModal from './cat_source/es6/components/modals/LoginModal'
 
 window.APP = null
 
 window.APP = {
   teamStorageName: 'defaultTeam',
-  init: function () {
-    this.setLoginEvents()
-  },
+
   /*************************************************************************************************************/
-  setLoginEvents: function () {},
 
-  openLoginModal: function (param = {}) {
-    var title = 'Add project to your management panel'
-    var style = {
-      width: '80%',
-      maxWidth: '800px',
-      minWidth: '600px',
-    }
-    var props = {
-      googleUrl: config.authURL,
-      ...param,
-    }
-
-    ModalsActions.showModalComponent(LoginModal, props, title, style)
-  },
-  openRegisterModal: (params) => {
-    let props = {
-      googleUrl: config.authURL,
-    }
-    if (params) {
-      props = {
-        ...props,
-        ...params,
-      }
-    }
-    ModalsActions.showModalComponent(RegisterModal, props, 'Register Now')
-  },
-  openPreferencesModal: ({showGDriveMessage = false} = {}) => {
-    const style = {
-      width: '700px',
-      maxWidth: '700px',
-    }
-    ModalsActions.showModalComponent(
-      PreferencesModal,
-      {showGDriveMessage},
-      'Profile',
-      style,
-    )
-  },
-  openSuccessModal: (props) => {
-    ModalsActions.showModalComponent(SuccessModal, props, props.title)
-  },
-  openResetPassword: () => {
-    let props = {closeOnOutsideClick: false, showOldPassword: true}
-    if (APP.lookupFlashServiceParam('popup')) {
-      props.showOldPassword = false
-    }
-    ModalsActions.showModalComponent(
-      ResetPasswordModal,
-      props,
-      'Reset Password',
-    )
-  },
   lookupFlashServiceParam: function (name) {
     if (config.flash_messages && config.flash_messages.service) {
       return filter(config.flash_messages.service, function (service) {
@@ -274,7 +213,3 @@ window.APP = {
       })
   },
 }
-
-document.addEventListener('DOMContentLoaded', function (event) {
-  APP.init()
-})

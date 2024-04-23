@@ -5,6 +5,7 @@ import CatToolActions from '../../../actions/CatToolActions'
 import {onModalWindowMounted} from '../../modals/ModalWindow'
 import CommonUtils from '../../../utils/commonUtils'
 import {UserDisconnectedBox} from './UserDisconnectedBox'
+import ModalsActions from '../../../actions/ModalsActions'
 
 // Custom event handler class: allows namespaced events
 class EventHandlerClass {
@@ -68,11 +69,11 @@ export const ApplicationWrapper = ({children}) => {
 
     switch (openFromFlash[0].value) {
       case 'passwordReset':
-        APP.openResetPassword()
+        ModalsActions.openResetPassword()
         break
       case 'profile':
         // TODO: optimized this, establish a list of events to happen after user data is loaded
-        APP.openSuccessModal({
+        ModalsActions.openSuccessModal({
           title: 'Registration complete',
           text: 'You are now logged in and ready to use Matecat.',
         })
@@ -86,10 +87,10 @@ export const ApplicationWrapper = ({children}) => {
 
         break
       case 'login':
-        APP.openLoginModal()
+        ModalsActions.openLoginModal()
         break
       case 'signup':
-        APP.openRegisterModal()
+        ModalsActions.openRegisterModal()
         break
       default:
         break

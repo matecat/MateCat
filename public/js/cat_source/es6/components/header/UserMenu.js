@@ -13,6 +13,7 @@ import {
 } from '../common/Button/Button'
 import CommonUtils from '../../utils/commonUtils'
 import {logoutUser} from '../../api/logoutUser'
+import ModalsActions from '../../actions/ModalsActions'
 
 export const UserMenu = () => {
   const {isUserLogged, userInfo} = useContext(ApplicationWrapperContext)
@@ -25,7 +26,7 @@ export const UserMenu = () => {
       document.location.href = '/manage'
     }
 
-    const openPreferencesModal = () => APP.openPreferencesModal()
+    const openPreferencesModal = () => ModalsActions.openPreferencesModal()
 
     const logoutUserFn = () => {
       logoutUser().then(() => {
@@ -119,13 +120,13 @@ export const UserMenu = () => {
         className={'header-button-signin'}
         mode={BUTTON_MODE.OUTLINE}
         size={BUTTON_SIZE.MEDIUM}
-        onClick={APP.openLoginModal}
+        onClick={ModalsActions.openLoginModal}
       >
         Sign In
       </Button>
       <Button
         className={'header-button-signup'}
-        onClick={APP.openRegisterModal}
+        onClick={ModalsActions.openRegisterModal}
         size={BUTTON_SIZE.MEDIUM}
       >
         Sign Up

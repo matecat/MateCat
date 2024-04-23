@@ -508,6 +508,10 @@ const CommonUtils = {
     const event = new CustomEvent('track-error', {detail: message})
     document.dispatchEvent(event)
   },
+  dispatchCustomEvent: (eventName, data = {}) => {
+    const event = new CustomEvent(eventName, {detail: data})
+    document.dispatchEvent(event)
+  },
   dispatchTrackingEvents: (name, message) => {
     const event = new CustomEvent('track-event', {detail: {name, message}})
     document.dispatchEvent(event)

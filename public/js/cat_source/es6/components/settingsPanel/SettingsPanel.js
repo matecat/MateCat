@@ -17,6 +17,7 @@ import {updateProjectTemplate} from '../../api/updateProjectTemplate'
 import {flushSync} from 'react-dom'
 import CreateProjectStore from '../../stores/CreateProjectStore'
 import NewProjectConstants from '../../constants/NewProjectConstants'
+import ModalsActions from '../../actions/ModalsActions'
 
 let tabOpenFromQueryString = new URLSearchParams(window.location.search).get(
   'openTab',
@@ -243,7 +244,7 @@ export const SettingsPanel = ({
 
   const openLoginModal = () => {
     setIsVisible(false)
-    APP.openLoginModal()
+    ModalsActions.openLoginModal()
   }
 
   const isEnabledProjectTemplateComponent = !config.is_cattool

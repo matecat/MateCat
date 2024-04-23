@@ -46,7 +46,7 @@ const PreferencesModal = (props) => {
   }, [])
 
   const openResetPassword = () => {
-    APP.openResetPassword() // Assuming APP.openResetPassword() is defined
+    MouseEvent.openResetPassword()
   }
 
   const checkboxChange = (selected) => {

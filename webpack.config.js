@@ -231,6 +231,10 @@ const matecatConfig = async ({env}, {mode}) => {
         ),
         path.resolve(__dirname, 'public/css/sass/analyze_main.scss'),
       ],
+      signin: [
+        path.resolve(__dirname, 'public/js/cat_source/es6/pages/SignIn.js'),
+        path.resolve(__dirname, 'public/css/sass/signin_page.scss'),
+      ],
       xliffToTarget: [
         path.resolve(__dirname, 'public/js/upload_main.js'),
         path.resolve(__dirname, 'public/js/common.js'),
@@ -350,7 +354,7 @@ const matecatConfig = async ({env}, {mode}) => {
       new HtmlWebPackPlugin({
         filename: path.resolve(__dirname, './lib/View/signin.html'),
         template: path.resolve(__dirname, './lib/View/templates/_signin.html'),
-        chunks: ['signin', 'allPagesPlugins'],
+        chunks: ['signin', 'uploadPlugins', 'allPagesPlugins'],
         publicPath: '/public/build/',
         xhtml: true,
       }),

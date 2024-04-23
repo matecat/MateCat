@@ -91,7 +91,7 @@ class RegisterModal extends React.Component {
   }
 
   openLoginModal() {
-    APP.openLoginModal()
+    ModalsActions.openLoginModal()
   }
 
   googole_popup() {

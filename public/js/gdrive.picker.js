@@ -1,5 +1,6 @@
 import {getUserConnectedService} from './cat_source/es6/api/getUserConnectedService'
 import UserStore from './cat_source/es6/stores/UserStore'
+import ModalsActions from './cat_source/es6/actions/ModalsActions'
 
 var GDrive = function () {
   'use strict'
@@ -79,7 +80,7 @@ var gdrive = new GDrive()
   }
 
   function showPreferencesWithMessage() {
-    APP.openPreferencesModal({showGDriveMessage: true})
+    ModalsActions.openPreferencesModal({showGDriveMessage: true})
   }
 
   function openGoogleDrivePickerIntent() {
@@ -91,7 +92,7 @@ var gdrive = new GDrive()
 
     // TODO: is this enough to know if the user is logged in?
     if (!userInfo) {
-      APP.openLoginModal()
+      ModalsActions.openLoginModal()
       return
     }
 

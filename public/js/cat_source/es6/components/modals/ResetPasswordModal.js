@@ -5,6 +5,7 @@ import TextField from '../common/TextField'
 import * as RuleRunner from '../common/ruleRunner'
 import * as FormRules from '../common/formRules'
 import {resetPasswordUser} from '../../api/resetPasswordUser'
+import ModalsActions from '../../actions/ModalsActions'
 
 class ResetPasswordModal extends React.Component {
   constructor(props) {
@@ -46,7 +47,7 @@ class ResetPasswordModal extends React.Component {
 
     this.sendResetPassword()
       .then(() => {
-        APP.openSuccessModal({
+        ModalsActions.openSuccessModal({
           title: 'Reset Password',
           text: 'Your password has been changed. You can now use the new password to log in.',
         })
