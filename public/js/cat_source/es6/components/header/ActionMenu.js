@@ -23,6 +23,7 @@ export const ActionMenu = ({
   showReviseLink = true,
 }) => {
   const [isExportCsvDisabled, setIsExportCsvDisabled] = useState(false)
+  const [isExportJsonDisabled, setIsExportJsonDisabled] = useState(false)
   const dropdownThreeDots = useRef()
 
   const initDropdowns = () => {
@@ -54,6 +55,15 @@ export const ActionMenu = ({
         >
           <span onClick={!isExportCsvDisabled ? handlerExportCsv : () => {}}>
             Download QA Report CSV
+          </span>
+        </li>
+        <li
+          className={`item${isExportJsonDisabled ? ' disabled' : ''}`}
+          title="Export JSON"
+          data-value="export-json"
+        >
+          <span onClick={!isExportJsonDisabled ? handlerExportJson : () => {}}>
+            Download QA Report JSON
           </span>
         </li>
       </ul>
@@ -140,6 +150,30 @@ export const ActionMenu = ({
       })
       .finally(() => setIsExportCsvDisabled(false))
   }
+
+    const handlerExportJson = () => {
+        setIsExportJsonDisabled(true)
+
+        exportQualityReport({format: 'json'})
+            .then(({blob, filename}) => {
+                const aTag = document.createElement('a')
+                const blobURL = URL.createObjectURL(blob)
+                aTag.download = filename
+                aTag.href = blobURL
+                document.body.appendChild(aTag)
+                aTag.click()
+                document.body.removeChild(aTag)
+            })
+            .catch((errors) => {
+                const notification = {
+                    title: 'Error',
+                    text: `Downloading JSON error status code: ${errors.status}`,
+                    type: 'error',
+                }
+                CatToolActions.addNotification(notification)
+            })
+            .finally(() => setIsExportJsonDisabled(false))
+    }
 
   useEffect(() => {
     initDropdowns()
