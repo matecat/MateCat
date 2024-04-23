@@ -164,10 +164,6 @@ AppDispatcher.register(function (action) {
       UserStore.updateUser(action.user)
       UserStore.emitChange(UserConstants.UPDATE_USER, UserStore.userInfo)
       break
-    case UserConstants.UPDATE_USER_NAME:
-      UserStore.updateUserName(action.info)
-      UserStore.emitChange(UserConstants.UPDATE_USER, UserStore.userInfo)
-      break
     // Move this actions
     case ManageConstants.OPEN_CREATE_TEAM_MODAL:
       UserStore.emitChange(action.actionType)

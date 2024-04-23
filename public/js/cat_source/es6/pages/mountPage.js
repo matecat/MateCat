@@ -2,6 +2,7 @@ import {createRoot} from 'react-dom/client'
 import {ApplicationWrapper} from '../components/common/ApplicationWrapper'
 import React from 'react'
 import NotificationBox from '../components/notificationsComponent/NotificationBox'
+import {ModalWindow} from '../components/modals/ModalWindow'
 
 export const mountPage = ({Component, rootElement}) => {
   document.addEventListener('DOMContentLoaded', () => {
@@ -11,6 +12,7 @@ export const mountPage = ({Component, rootElement}) => {
       return (
         <ApplicationWrapper>
           <Component />
+          <ModalWindow />
         </ApplicationWrapper>
       )
     }

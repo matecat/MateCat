@@ -23,14 +23,18 @@ class EventHandlerClass {
     delete this.functionMap[event]
   }
 }
+window.eventHandler = new EventHandlerClass()
 
 export const ApplicationWrapperContext = createContext({})
 
-window.eventHandler = new EventHandlerClass()
-
 export const ApplicationWrapper = ({children}) => {
-  const {isUserLogged, userInfo, connectedServices, userDisconnected} =
-    useAuth()
+  const {
+    isUserLogged,
+    userInfo,
+    connectedServices,
+    userDisconnected,
+    setUserInfo,
+  } = useAuth()
 
   const checkGlobalMassages = () => {
     if (config.global_message) {
@@ -109,7 +113,7 @@ export const ApplicationWrapper = ({children}) => {
 
   return (
     <ApplicationWrapperContext.Provider
-      value={{isUserLogged, userInfo, connectedServices}}
+      value={{isUserLogged, userInfo, connectedServices, setUserInfo}}
     >
       {userDisconnected && <UserDisconnectedBox />}
       {children}

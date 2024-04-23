@@ -131,9 +131,6 @@ export const UserMenu = () => {
       >
         Sign Up
       </Button>
-
-      {/*<i className="icon-user22"/>*/}
-      {/*<IconUserLogout width={40} height={40} color={'#fff'} />*/}
     </div>
   )
 }

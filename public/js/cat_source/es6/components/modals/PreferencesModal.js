@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef} from 'react'
+import React, {useState, useEffect, useRef, useContext} from 'react'
 
 import Switch from '../common/Switch'
 import {getUserApiKey} from '../../api/getUserApiKey'
@@ -18,9 +18,11 @@ import {
 import IconClose from '../icons/IconClose'
 import UserStore from '../../stores/UserStore'
 import {getUserData} from '../../api/getUserData'
+import {ApplicationWrapperContext} from '../common/ApplicationWrapper'
 
 const PreferencesModal = (props) => {
-  const userInfo = UserStore.getUser()
+  const {userInfo, setUserInfo} = useContext(ApplicationWrapperContext)
+  console.log('----------------------------->', userInfo)
   const {user, metadata} = userInfo
   const serviceInfo = UserStore.getDefaultConnectedService()
   const [service, setService] = useState(serviceInfo)
@@ -35,6 +37,7 @@ const PreferencesModal = (props) => {
   const [firstName, setFirstName] = useState(user.first_name)
   const [lastName, setLastName] = useState(user.last_name)
   const inputName = useRef()
+
   useEffect(() => {
     getUserApiKey()
       .then((response) => {
@@ -140,7 +143,10 @@ const PreferencesModal = (props) => {
       console.log('saved')
     })
     setModifyUser(false)
-    UserActions.updateUserName({firstName, lastName})
+    setUserInfo((prevState) => ({
+      ...prevState,
+      user: {...prevState.user, first_name: firstName, last_name: lastName},
+    }))
   }
 
   const getApiKeyHtml = () => {
@@ -159,7 +165,7 @@ const PreferencesModal = (props) => {
                   type={BUTTON_TYPE.PRIMARY}
                   size={BUTTON_SIZE.MEDIUM}
                   onClick={() => deleteKey()}
-                  tabIndex={0}
+                  tabIndex="0"
                 >
                   Delete
                 </Button>
@@ -168,7 +174,7 @@ const PreferencesModal = (props) => {
                   size={BUTTON_SIZE.MEDIUM}
                   onClick={(e) => undoDelete(e)}
                   className={'btn-cancel'}
-                  tabIndex={0}
+                  tabIndex="0"
                 >
                   Cancel
                 </Button>
@@ -217,7 +223,7 @@ const PreferencesModal = (props) => {
                     type={BUTTON_TYPE.PRIMARY}
                     size={BUTTON_SIZE.MEDIUM}
                     onClick={(e) => copyToClipboard(e)}
-                    tabIndex={0}
+                    tabIndex="0"
                   >
                     <i className="icon-copy icon" />
                     {credentialsCopied ? 'Copied' : 'Copy'}
@@ -226,7 +232,7 @@ const PreferencesModal = (props) => {
                     type={BUTTON_TYPE.PRIMARY}
                     size={BUTTON_SIZE.MEDIUM}
                     onClick={() => confirmDeleteHandler()}
-                    tabIndex={0}
+                    tabIndex="0"
                   >
                     Delete
                   </Button>
@@ -237,7 +243,7 @@ const PreferencesModal = (props) => {
                     type={BUTTON_TYPE.PRIMARY}
                     size={BUTTON_SIZE.MEDIUM}
                     onClick={() => confirmDeleteHandler()}
-                    tabIndex={0}
+                    tabIndex="0"
                   >
                     Delete
                   </Button>
@@ -300,7 +306,7 @@ const PreferencesModal = (props) => {
                   type={BUTTON_TYPE.PRIMARY}
                   size={BUTTON_SIZE.MEDIUM}
                   onClick={() => generateKey()}
-                  tabIndex={0}
+                  tabIndex="0"
                 >
                   Generate
                 </Button>
@@ -392,14 +398,14 @@ const PreferencesModal = (props) => {
                   type={BUTTON_TYPE.PRIMARY}
                   size={BUTTON_SIZE.MEDIUM}
                   onClick={modifyUserDetails}
-                  tabIndex={0}
+                  tabIndex="0"
                 >
                   Confirm
                 </Button>
                 <Button
                   type={BUTTON_TYPE.WARNING}
                   size={BUTTON_SIZE.ICON_STANDARD}
-                  tabIndex={0}
+                  tabIndex="0"
                   onClick={() => {
                     setFirstName(user.first_name)
                     setLastName(user.last_name)
