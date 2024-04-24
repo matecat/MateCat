@@ -48,6 +48,7 @@ import {AlertDeleteResourceProjectTemplates} from '../components/modals/AlertDel
 import {
   checkGDriveEvents,
   getFilenameFromUploadedFiles,
+  handleCreationStatus,
   restartConversions,
 } from '../utils/newProjectUtils'
 import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper'
@@ -334,7 +335,7 @@ const NewProject = () => {
       setProjectSent(true)
       createProjectApi(getParams())
         .then(({data}) => {
-          APP.handleCreationStatus(data.id_project, data.password)
+          handleCreationStatus(data.id_project, data.password)
         })
         .catch((errors) => {
           let errorMsg
