@@ -45,7 +45,11 @@ import {checkLexiqaIsEnabled} from '../components/settingsPanel/Contents/Advance
 import {checkGuessTagIsEnabled} from '../components/settingsPanel/Contents/AdvancedOptionsTab/GuessTag'
 import {getMMTKeys} from '../api/getMMTKeys/getMMTKeys'
 import {AlertDeleteResourceProjectTemplates} from '../components/modals/AlertDeleteResourceProjectTemplates'
-import {checkGDriveEvents, restartConversions} from '../utils/newProjectUtils'
+import {
+  checkGDriveEvents,
+  getFilenameFromUploadedFiles,
+  restartConversions,
+} from '../utils/newProjectUtils'
 import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper'
 import {mountPage} from './mountPage'
 import {HomePageSection} from '../components/createProject/HomePageSection'
@@ -288,7 +292,7 @@ const NewProject = () => {
 
     const getParams = () => ({
       action: 'createProject',
-      file_name: APP.getFilenameFromUploadedFiles(),
+      file_name: getFilenameFromUploadedFiles(),
       project_name: projectNameRef.current.value,
       source_lang: sourceLang.id,
       target_lang: targetLangs.map((lang) => lang.id).join(),
