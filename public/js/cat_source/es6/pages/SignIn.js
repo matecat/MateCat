@@ -2,6 +2,7 @@ import React from 'react'
 import {mountPage} from './mountPage'
 import Header from '../components/header/Header'
 import NotificationBox from '../components/notificationsComponent/NotificationBox'
+import OnBoarding from '../components/onBoarding/OnBoarding'
 const SignIn = () => {
   return (
     <>
@@ -10,7 +11,9 @@ const SignIn = () => {
       </header>
       <div className="signin-page">
         <div className="signin-overlay">
-          <div className="signin-content"></div>
+          <div className="signin-content">
+            <OnBoarding />
+          </div>
         </div>
       </div>
       <div className="notifications-wrapper">
