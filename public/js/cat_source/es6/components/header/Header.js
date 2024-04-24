@@ -59,8 +59,6 @@ const Header = ({
       )
   }, [isQualityReport])
 
-  headerInterface.props = {isUserLogged, userInfo}
-
   const {teams = []} = userInfo ?? {}
   const selectedTeam = teams.find(({isSelected}) => isSelected)
 
