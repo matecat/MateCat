@@ -4,6 +4,8 @@ import {getUserData} from '../api/getUserData'
 import {getTeamMembers} from '../api/getTeamMembers'
 
 let UserActions = {
+  teamStorageName: 'defaultTeam',
+
   updateUser: function (user) {
     AppDispatcher.dispatch({
       actionType: UserConstants.UPDATE_USER,
@@ -59,7 +61,7 @@ let UserActions = {
 
   changeTeamFromUploadPage: function (team) {
     $('.reloading-upload-page').show()
-    APP.setTeamInStorage(team.id)
+    UserActions.setTeamInStorage(team.id)
     AppDispatcher.dispatch({
       actionType: UserConstants.CHOOSE_TEAM,
       teamId: team.id,
@@ -67,6 +69,26 @@ let UserActions = {
     setTimeout(function () {
       $('.reloading-upload-page').hide()
     }, 1000)
+  },
+
+  getLastTeamSelected: function (teams) {
+    if (localStorage.getItem(this.teamStorageName)) {
+      var lastId = localStorage.getItem(this.teamStorageName)
+      var team = teams.find(function (t) {
+        return parseInt(t.id) === parseInt(lastId)
+      })
+      if (team) {
+        return team
+      } else {
+        return teams[0]
+      }
+    } else {
+      return teams[0]
+    }
+  },
+
+  setTeamInStorage(teamId) {
+    localStorage.setItem(this.teamStorageName, teamId)
   },
 }
 

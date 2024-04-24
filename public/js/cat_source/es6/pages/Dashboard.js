@@ -21,6 +21,7 @@ import {getTeamMembers} from '../api/getTeamMembers'
 import {CookieConsent} from '../components/common/CookieConsent'
 import {mountPage} from './mountPage'
 import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper'
+import DownloadFileUtils from '../utils/downloadFileUtils'
 
 class Dashboard extends React.Component {
   constructor() {
@@ -42,7 +43,7 @@ class Dashboard extends React.Component {
   getData = () => {
     getUserData().then((data) => {
       UserActions.renderTeams(data.teams)
-      const selectedTeam = APP.getLastTeamSelected(data.teams)
+      const selectedTeam = UserActions.getLastTeamSelected(data.teams)
       const teams = data.teams
       this.setState({
         teams: teams,
@@ -257,13 +258,18 @@ class Dashboard extends React.Component {
       continueDownloadFunction = function () {
         ModalsActions.onCloseModal()
         ManageActions.disableDownloadButton(job.id)
-        APP.downloadGDriveFile(null, job.id, job.password, callback)
+        DownloadFileUtils.downloadGDriveFile(
+          null,
+          job.id,
+          job.password,
+          callback,
+        )
       }
     } else {
       continueDownloadFunction = function () {
         ModalsActions.onCloseModal()
         ManageActions.disableDownloadButton(job.id)
-        APP.downloadFile(job.id, job.password, callback)
+        DownloadFileUtils.downloadFile(job.id, job.password, callback)
       }
     }
 

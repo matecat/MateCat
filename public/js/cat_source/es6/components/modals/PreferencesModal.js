@@ -22,7 +22,6 @@ import {ApplicationWrapperContext} from '../common/ApplicationWrapper'
 
 const PreferencesModal = (props) => {
   const {userInfo, setUserInfo} = useContext(ApplicationWrapperContext)
-  console.log('----------------------------->', userInfo)
   const {user, metadata} = userInfo
   const serviceInfo = UserStore.getDefaultConnectedService()
   const [service, setService] = useState(serviceInfo)

@@ -5,6 +5,7 @@ import CattolConstants from '../../../constants/CatToolConstants'
 import SegmentStore from '../../../stores/SegmentStore'
 import ModalsActions from '../../../actions/ModalsActions'
 import CatToolActions from '../../../actions/CatToolActions'
+import DownloadFileUtils from '../../../utils/downloadFileUtils'
 
 export const DownloadMenu = ({password, jid, isGDriveProject}) => {
   const [downloadTranslationAvailable, setDownloadTranslationAvailable] =
@@ -54,7 +55,7 @@ export const DownloadMenu = ({password, jid, isGDriveProject}) => {
     const callback = () => {
       setDownloadDisabled(false)
     }
-    APP.downloadFile(config.id_job, config.password, callback)
+    DownloadFileUtils.downloadFile(config.id_job, config.password, callback)
   }
 
   const continueDownloadWithGoogleDrive = (originalFiles) => {
@@ -67,7 +68,7 @@ export const DownloadMenu = ({password, jid, isGDriveProject}) => {
       setDownloadDisabled(false)
     }
 
-    APP.downloadGDriveFile(
+    DownloadFileUtils.downloadGDriveFile(
       originalFiles,
       config.id_job,
       config.password,

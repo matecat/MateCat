@@ -54,6 +54,7 @@ import {
 import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper'
 import {mountPage} from './mountPage'
 import {HomePageSection} from '../components/createProject/HomePageSection'
+import UserActions from '../actions/UserActions'
 
 const SELECT_HEIGHT = 324
 
@@ -392,7 +393,7 @@ const NewProject = () => {
   //TODO: Move it
   useEffect(() => {
     if (typeof selectedTeam?.id !== 'undefined') {
-      APP.setTeamInStorage(selectedTeam.id)
+      UserActions.setTeamInStorage(selectedTeam.id)
     }
   }, [selectedTeam])
 

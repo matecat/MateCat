@@ -30,11 +30,7 @@ export const UserMenu = () => {
 
     const logoutUserFn = () => {
       logoutUser().then(() => {
-        if ($('body').hasClass('manage')) {
-          location.href = config.hostpath + config.basepath
-        } else {
-          window.location.reload()
-        }
+        window.location.reload()
       })
     }
 

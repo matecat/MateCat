@@ -15,6 +15,7 @@ import {updateTeamName} from '../api/updateTeamName'
 import CatToolActions from './CatToolActions'
 import {changeProjectStatus} from '../api/changeProjectStatus'
 import {changeJobStatus} from '../api/changeJobStatus'
+import UserActions from './UserActions'
 
 let ManageActions = {
   /********* Projects *********/
@@ -409,7 +410,7 @@ let ManageActions = {
     createTeam(teamName, members).then((response) => {
       let team = response.team
       this.showReloadSpinner()
-      APP.setTeamInStorage(team.id)
+      UserActions.setTeamInStorage(team.id)
       AppDispatcher.dispatch({
         actionType: UserConstants.ADD_TEAM,
         team: team,
@@ -423,7 +424,7 @@ let ManageActions = {
 
   changeTeam: function (team) {
     this.showReloadSpinner()
-    APP.setTeamInStorage(team.id)
+    UserActions.setTeamInStorage(team.id)
     getTeamMembers(team.id).then(function (data) {
       let selectedTeam = team
       selectedTeam.members = data.members

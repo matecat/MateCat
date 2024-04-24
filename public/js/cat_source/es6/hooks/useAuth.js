@@ -175,8 +175,6 @@ function useAuth() {
     }
   }, [isUserLogged, setUserInfo])
 
-  console.log('[ useAuth ]', userInfo)
-
   return {
     isUserLogged,
     userInfo,

@@ -554,6 +554,13 @@ const CommonUtils = {
     }
     return stats
   },
+  lookupFlashServiceParam: (name) => {
+    if (config.flash_messages && config.flash_messages.service) {
+      return config.flash_messages.service.filter((service) => {
+        return service.key == name
+      })
+    }
+  },
 }
 
 const ParsedHash = function (hash) {

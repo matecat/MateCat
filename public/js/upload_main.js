@@ -132,10 +132,6 @@ window.UI = {
     return checkAnalyzability()
   },
 
-  TMXloaded: function () {
-    this.createKeyByTMX()
-  },
-
   createKeyByTMX: function (extension, filename) {
     CreateProjectActions.createKeyFromTMXFile({extension, filename})
   },

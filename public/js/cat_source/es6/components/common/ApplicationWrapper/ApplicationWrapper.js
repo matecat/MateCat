@@ -68,7 +68,7 @@ export const ApplicationWrapper = ({children}) => {
 
   const checkForPopupToOpen = useRef()
   checkForPopupToOpen.current = () => {
-    const openFromFlash = APP.lookupFlashServiceParam('popup')
+    const openFromFlash = CommonUtils.lookupFlashServiceParam('popup')
     if (!openFromFlash) return
 
     switch (openFromFlash[0].value) {

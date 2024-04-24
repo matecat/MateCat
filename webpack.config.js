@@ -192,7 +192,6 @@ const matecatConfig = async ({env}, {mode}) => {
     },
     entry: {
       'qa-report': [
-        path.resolve(__dirname, 'public/js/common.js'),
         path.resolve(
           __dirname,
           'public/js/cat_source/es6/pages/QualityReport.js',
@@ -201,7 +200,6 @@ const matecatConfig = async ({env}, {mode}) => {
       ],
       upload: [
         path.resolve(__dirname, 'public/js/upload_main.js'),
-        path.resolve(__dirname, 'public/js/common.js'),
         path.resolve(__dirname, 'public/js/gdrive.upload.js'),
         path.resolve(__dirname, 'public/js/gdrive.picker.js'),
         path.resolve(__dirname, 'public/js/cat_source/es6/pages/NewProject.js'),
@@ -210,7 +208,6 @@ const matecatConfig = async ({env}, {mode}) => {
       ...entryPoints,
       cattool: [
         path.resolve(__dirname, 'public/build/lxqlicense.js'),
-        path.resolve(__dirname, 'public/js/common.js'),
         path.resolve(__dirname, 'public/js/cat_source/ui.core.js'),
         path.resolve(__dirname, 'public/js/cat_source/ui.segment.js'),
         path.resolve(__dirname, 'public/js/cat_source/ui.events.js'),
@@ -219,12 +216,10 @@ const matecatConfig = async ({env}, {mode}) => {
         path.resolve(__dirname, 'public/css/sass/main.scss'),
       ],
       dashboard: [
-        path.resolve(__dirname, 'public/js/common.js'),
         path.resolve(__dirname, 'public/js/cat_source/es6/pages/Dashboard.js'),
         path.resolve(__dirname, 'public/css/sass/manage_main.scss'),
       ],
       analyze: [
-        path.resolve(__dirname, 'public/js/common.js'),
         path.resolve(
           __dirname,
           'public/js/cat_source/es6/pages/AnalyzePage.js',
@@ -237,7 +232,6 @@ const matecatConfig = async ({env}, {mode}) => {
       ],
       xliffToTarget: [
         path.resolve(__dirname, 'public/js/upload_main.js'),
-        path.resolve(__dirname, 'public/js/common.js'),
         path.resolve(__dirname, 'public/js/xliffToTarget.js'),
         path.resolve(__dirname, 'public/css/sass/upload-main.scss'),
         path.resolve(__dirname, 'public/css/sass/main.scss'),

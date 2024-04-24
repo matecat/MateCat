@@ -105,10 +105,8 @@ var gdrive = new GDrive()
 
     tryToRefreshToken(default_service)
       .then(function (data) {
-        const connectedServices = UserStore.updateConnectedService(
-          data.connected_service,
-        )
-        gdrive.createPicker(connectedServices)
+        UserStore.updateConnectedService(data.connected_service)
+        gdrive.createPicker(UserStore.getDefaultConnectedService())
       })
       .catch(function () {
         UserStore.updateConnectedService({default_service, is_default: false})

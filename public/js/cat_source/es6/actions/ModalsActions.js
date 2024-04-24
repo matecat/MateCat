@@ -10,6 +10,7 @@ import RegisterModal from '../components/modals/RegisterModal'
 import PreferencesModal from '../components/modals/PreferencesModal'
 import SuccessModal from '../components/modals/SuccessModal'
 import ResetPasswordModal from '../components/modals/ResetPasswordModal'
+import CommonUtils from '../utils/commonUtils'
 
 let ModalsActions = {
   showModalComponent: (component, props, title, style, onCloseCallback) => {
@@ -65,7 +66,7 @@ let ModalsActions = {
   },
   openResetPassword: () => {
     let props = {closeOnOutsideClick: false, showOldPassword: true}
-    if (APP.lookupFlashServiceParam('popup')) {
+    if (CommonUtils.lookupFlashServiceParam('popup')) {
       props.showOldPassword = false
     }
     ModalsActions.showModalComponent(
