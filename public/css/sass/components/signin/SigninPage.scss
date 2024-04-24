@@ -1,5 +1,5 @@
 @import "../../commons/colors";
-.user-disconnect-box{
+.signin-overlay{
   position: fixed;
   top: 0;
   right: 0;
@@ -8,7 +8,7 @@
   z-index: 7;
   background: rgba(0, 0, 0, 0.8);
   backdrop-filter: blur(6px);
-  .user-disconnect-box_content {
+  .signin-content {
     position: fixed;
     top: 50%;
     left: 50%;
@@ -21,10 +21,5 @@
     background-color: $white;
     max-width: 500px;
     padding: 30px;
-    > div {
-      display: flex;
-      align-items: center;
-      gap: 50px;
-    }
   }
 }

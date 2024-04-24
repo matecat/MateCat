@@ -1764,8 +1764,8 @@ h2.payoff {
 }
 
 .uploadbtn-box {
-  text-align: center;
-  float: right;
+  display: flex;
+  align-items: center;
 }
 
 .uploadbtn-box p {

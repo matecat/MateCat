@@ -8,11 +8,13 @@ const SignIn = () => {
       <header>
         <Header showLinks={true} />
       </header>
-      <div>
-        Sign In
-        <div className="notifications-wrapper">
-          <NotificationBox />
+      <div className="signin-page">
+        <div className="signin-overlay">
+          <div className="signin-content"></div>
         </div>
+      </div>
+      <div className="notifications-wrapper">
+        <NotificationBox />
       </div>
     </>
   )
