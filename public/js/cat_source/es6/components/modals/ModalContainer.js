@@ -9,11 +9,11 @@ export const ModalContainer = ({
 }) => {
   const ref = useRef(null)
 
-  const handleClose = (event) => {
+  const handleClose = () => {
     onClose()
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     document.activeElement.blur()
   }, [])
 
