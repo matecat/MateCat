@@ -22,8 +22,10 @@ import {ApplicationWrapperContext} from '../common/ApplicationWrapper'
 
 const PreferencesModal = (props) => {
   const {userInfo, setUserInfo} = useContext(ApplicationWrapperContext)
+
   const {user, metadata} = userInfo
   const serviceInfo = UserStore.getDefaultConnectedService()
+
   const [service, setService] = useState(serviceInfo)
   const [credentials, setCredentials] = useState(null)
   const [driveActive, setDriveActive] = useState(
@@ -35,6 +37,7 @@ const PreferencesModal = (props) => {
   const [modifyUser, setModifyUser] = useState(false)
   const [firstName, setFirstName] = useState(user.first_name)
   const [lastName, setLastName] = useState(user.last_name)
+
   const inputName = useRef()
 
   useEffect(() => {

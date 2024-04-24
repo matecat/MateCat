@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react'
+import React, {useContext, useEffect} from 'react'
 import SubHeaderContainer from './SubHeaderContainer'
 import SegmentFilter from './segment_filter/segment_filter'
 import CatToolActions from '../../../actions/CatToolActions'
@@ -13,9 +13,8 @@ import {CommentsButton} from './CommentsButton'
 import {SegmentsFilterButton} from './SegmentsFilterButton'
 import {SettingsButton} from './SettingsButton'
 import {ActionMenu} from '../ActionMenu'
-import UserStore from '../../../stores/UserStore'
-import UserConstants from '../../../constants/UserConstants'
 import {UserMenu} from '../UserMenu'
+import {ApplicationWrapperContext} from '../../common/ApplicationWrapper'
 
 export const Header = ({
   jid,
@@ -26,7 +25,6 @@ export const Header = ({
   source_code,
   target_code,
   revisionNumber,
-  userLogged,
   projectCompletionEnabled,
   isReview,
   secondRevisionsCount,
@@ -38,24 +36,16 @@ export const Header = ({
   showReviseLink,
   openTmPanel,
 }) => {
-  const [user, setUser] = useState()
+  const {isUserLogged} = useContext(ApplicationWrapperContext)
 
   useEffect(() => {
-    if (userLogged) {
+    if (isUserLogged) {
       setTimeout(function () {
         CatToolActions.showHeaderTooltip()
       }, 3000)
     }
-  }, [])
+  }, [isUserLogged])
 
-  useEffect(() => {
-    const updateUser = (user) => setUser(user)
-
-    UserStore.addListener(UserConstants.UPDATE_USER, updateUser)
-    return () => {
-      UserStore.removeListener(UserConstants.UPDATE_USER, updateUser)
-    }
-  }, [])
   return (
     <header>
       <div className="wrapper">
@@ -140,7 +130,7 @@ export const Header = ({
         </div>
 
         {/*Profile menu*/}
-        <UserMenu user={user} userLogged={userLogged} />
+        <UserMenu />
       </div>
       <div id="header-bars-wrapper">
         <SubHeaderContainer filtersEnabled={SegmentFilter.enabled()} />
