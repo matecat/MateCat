@@ -8,6 +8,7 @@
 
 namespace ConnectedServices\GDrive;
 
+use AuthCookie;
 use ConnectedServices\ConnectedServiceDao;
 use ConnectedServices\ConnectedServiceStruct;
 use ConversionHandler;
@@ -266,7 +267,11 @@ class Session {
      */
     public function getToken() {
         if ( is_null( $this->token ) ) {
-            $this->token = $this->getTokenByUser( $this->__getUser() );
+            $user = $this->__getUser();
+
+            if($user !== null){
+                $this->token = $this->getTokenByUser( $this->__getUser() );
+            }
         }
 
         return $this->token;
@@ -277,8 +282,12 @@ class Session {
      */
     private function __getUser() {
         if ( is_null( $this->user ) ) {
-            $dao        = new Users_UserDao();
-            $this->user = $dao->getByUid( $this->session[ 'uid' ] );
+            $userCredentials = AuthCookie::getCredentials();
+
+            if(!empty($userCredentials)){
+                $dao        = new Users_UserDao();
+                $this->user = $dao->getByUid( $userCredentials['user']['uid'] );
+            }
         }
 
         return $this->user;
