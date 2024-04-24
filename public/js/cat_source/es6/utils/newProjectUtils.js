@@ -66,7 +66,9 @@ export const getFilenameFromUploadedFiles = () => {
     ...tableElementsGDrive.filter(excludeFailed).map(getFilename),
   ]
 
-  return filesList.reduce((acc, cur) => `${acc}@@SEP@@${cur}`, '')
+  return filesList.length > 1
+    ? filesList.reduce((acc, cur) => `${acc}@@SEP@@${cur}`, '')
+    : filesList
 }
 
 export const handleCreationStatus = (id_project, password) => {
