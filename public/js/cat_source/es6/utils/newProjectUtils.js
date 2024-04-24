@@ -58,7 +58,7 @@ export const getFilenameFromUploadedFiles = () => {
   const tableElementsGDrive = Array.from(
     document
       .getElementsByClassName('gdrive-upload-table')[0]
-      .getElementsByClassName('template-download'),
+      .getElementsByClassName('template-gdrive'),
   )
 
   const filesList = [
