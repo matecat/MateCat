@@ -283,8 +283,7 @@ class QualityReportSegmentModel {
         return (
                 $qrSegmentStruct->locked == 1 &&
                 $qrSegmentStruct->status === Constants_TranslationStatus::STATUS_APPROVED &&
-                $qrSegmentStruct->match_type === 'ICE' &&
-                $qrSegmentStruct->source_page == null
+                $qrSegmentStruct->match_type === 'ICE'
         );
     }
 
