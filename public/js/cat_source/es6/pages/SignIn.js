@@ -1,8 +1,11 @@
-import React from 'react'
+import React, {createContext} from 'react'
 import {mountPage} from './mountPage'
 import Header from '../components/header/Header'
 import NotificationBox from '../components/notificationsComponent/NotificationBox'
 import OnBoarding from '../components/onBoarding/OnBoarding'
+
+export const SignInContext = createContext({})
+
 const SignIn = () => {
   return (
     <>

@@ -831,7 +831,7 @@ const NewProject = () => {
           onClose: closeSettings,
           isOpened: openSettings.isOpen,
           tabOpen: openSettings.tab,
-          user: userInfo?.user,
+          user: userInfo,
           tmKeys,
           setTmKeys,
           mtEngines,

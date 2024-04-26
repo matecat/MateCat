@@ -6,7 +6,6 @@ import UserStore from '../stores/UserStore'
 import UserConstants from '../constants/UserConstants'
 import CommonUtils from '../utils/commonUtils'
 import {isEqual} from 'lodash'
-import ManageConstants from '../constants/ManageConstants'
 
 export const USER_LOGIN_COOKIE = 'matecat_login_v6'
 
@@ -120,6 +119,7 @@ function useAuth() {
       // Trick for hubspot
       if (userInfo) CommonUtils.dispatchCustomEvent('userDataLoaded', userInfo)
     }
+    console.log('[ useAuth ] -> userInfo', userInfo)
   }, [userInfo])
 
   // Sync state userInfo with UserStore

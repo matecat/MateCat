@@ -1,5 +1,17 @@
-@import "../../commons/colors";
-.signin-overlay{
+@import '../../commons/colors';
+
+.signin-page {
+  fieldset {
+    padding: 0;
+    border: none;
+  }
+
+  button.link-underline {
+    text-decoration: underline;
+  }
+}
+
+.signin-overlay {
   position: fixed;
   top: 0;
   right: 0;
@@ -8,6 +20,7 @@
   z-index: 7;
   background: rgba(0, 0, 0, 0.8);
   backdrop-filter: blur(6px);
+
   .signin-content {
     position: fixed;
     top: 50%;
@@ -17,9 +30,7 @@
     flex-direction: column;
     margin: 0;
     border-radius: 8px;
-    width: 100%;
     background-color: $white;
-    max-width: 500px;
-    padding: 30px;
+    max-width: 712px;
   }
 }

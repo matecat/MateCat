@@ -1,6 +1,10 @@
 @import 'vendor_mc/semantic/matecat_semantic';
-@import "commons/nav-bar";
+@import 'commons/nav-bar';
 @import 'common-main';
-@import "common";
-@import "components/signin/SigninPage";
-@import "components/signin/Login";
+@import 'common';
+@import 'components/signin/SigninPage';
+@import 'components/signin/OnBoarding';
+@import 'components/signin/Login';
+@import 'components/signin/Register';
+@import 'components/signin/ForgotPassword';
+@import 'components/signin/PasswordReset';
