@@ -1,4 +1,4 @@
-import React, {useContext} from 'react'
+import React, {useContext, useState} from 'react'
 import SocialButtons from './SocialButtons'
 import {useForm, Controller} from 'react-hook-form'
 import {INPUT_TYPE, Input} from '../common/Input/Input'
@@ -12,17 +12,53 @@ import {
 } from '../common/Button/Button'
 import {ONBOARDING_STEP, OnBoardingContext} from './OnBoarding'
 import Checkmark from '../../../../../img/icons/Checkmark'
+import {registerUser} from '../../api/registerUser'
+import ModalsActions from '../../actions/ModalsActions'
+import ConfirmRegister from '../modals/ConfirmRegister'
 
 const Register = () => {
   const {setStep} = useContext(OnBoardingContext)
+  const [errorMessage, setErrorMessage] = useState()
 
   const {handleSubmit, control} = useForm()
 
   const handleFormSubmit = (formData) => {
-    console.log(formData)
+    setErrorMessage()
+    registerUser({
+      firstname: formData.name,
+      surname: formData.surname,
+      email: formData.email,
+      password: formData.password,
+      passwordConfirmation: formData.password,
+      wantedUrl: window.location.href,
+    })
+      .then(() => {
+        const style = {
+          width: '25%',
+          maxWidth: '450px',
+        }
+        ModalsActions.showModalComponent(
+          ConfirmRegister,
+          {emailAddress: formData.email},
+          'Confirm Registration',
+          style,
+        )
+      })
+      .catch((error) => {
+        let generalErrorText
+        if (error.message) {
+          generalErrorText = error.message
+        } else {
+          generalErrorText =
+            'There was a problem saving the data, please try again later or contact support.'
+        }
+        setErrorMessage(generalErrorText)
+      })
   }
 
-  const showTerms = () => {}
+  const showTerms = () => {
+    window.open('https://site.matecat.com/terms/', '_blank')
+  }
   const gotoSignin = () => setStep(ONBOARDING_STEP.LOGIN)
 
   return (
@@ -178,6 +214,9 @@ const Register = () => {
           >
             Create account
           </Button>
+          {errorMessage && (
+            <span className="form-errorMessage">{errorMessage}</span>
+          )}
         </form>
         <div className="footer-links-container">
           Already have an account?{' '}

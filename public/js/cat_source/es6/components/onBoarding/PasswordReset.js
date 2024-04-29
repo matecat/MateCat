@@ -1,6 +1,5 @@
-import React from 'react'
+import React, {useContext, useState} from 'react'
 import {useForm, Controller} from 'react-hook-form'
-import {EMAIL_PATTERN} from '../../constants/Constants'
 import {INPUT_TYPE, Input} from '../common/Input/Input'
 import {
   BUTTON_HTML_TYPE,
@@ -8,64 +7,115 @@ import {
   BUTTON_TYPE,
   Button,
 } from '../common/Button/Button'
+import {resetPasswordUser} from '../../api/resetPasswordUser'
+import {ONBOARDING_STEP, OnBoardingContext} from './OnBoarding'
 
 const PasswordReset = () => {
   const {handleSubmit, control} = useForm()
+  const {setStep} = useContext(OnBoardingContext)
 
+  const [errorMessage, setErrorMessage] = useState()
+  const [showSuccess, setShowSuccess] = useState(false)
   const handleFormSubmit = (formData) => {
-    console.log(formData)
+    setErrorMessage()
+    resetPasswordUser(
+      formData.password,
+      formData.newpassword,
+      formData.newpassword,
+    )
+      .then(() => {
+        setShowSuccess(true)
+      })
+      .catch((errors) => {
+        let text =
+          'There was a problem saving the data, please try again later or contact support.'
+        if (errors && errors.length && errors[0].code === 0) {
+          text = errors[0].message
+        }
+        setErrorMessage(text)
+      })
   }
 
   return (
     <div className="passwordreset-component">
       <h2>Reset password</h2>
-      <p>Copy</p>
-      <form
-        className="passwordreset-form"
-        onSubmit={handleSubmit(handleFormSubmit)}
-      >
-        <fieldset>
-          <Controller
-            control={control}
-            defaultValue=""
-            name="password"
-            rules={{
-              required: 'This field is mandatory',
-            }}
-            render={({field: {name, onChange, value}, fieldState: {error}}) => (
-              <Input
-                type={INPUT_TYPE.PASSWORD}
-                placeholder="Password"
-                {...{name, value, onChange, error}}
+      {showSuccess ? (
+        <>
+          <p>
+            Your password has been changed. You can now use the new password to
+            log in.
+          </p>
+          <div className="passwordreset-form">
+            <Button
+              type={BUTTON_TYPE.PRIMARY}
+              size={BUTTON_SIZE.MEDIUM}
+              htmlType={BUTTON_HTML_TYPE.SUBMIT}
+              onClick={() => setStep(ONBOARDING_STEP.LOGIN)}
+            >
+              Back to sign in
+            </Button>
+          </div>
+        </>
+      ) : (
+        <>
+          {/*<p>Copy</p>*/}
+          <form
+            className="passwordreset-form"
+            onSubmit={handleSubmit(handleFormSubmit)}
+          >
+            <fieldset>
+              <Controller
+                control={control}
+                defaultValue=""
+                name="password"
+                rules={{
+                  required: 'This field is mandatory',
+                }}
+                render={({
+                  field: {name, onChange, value},
+                  fieldState: {error},
+                }) => (
+                  <Input
+                    type={INPUT_TYPE.PASSWORD}
+                    placeholder="Password"
+                    {...{name, value, onChange, error}}
+                  />
+                )}
               />
-            )}
-          />
-        </fieldset>
-        <fieldset>
-          <Controller
-            control={control}
-            defaultValue=""
-            name="newpassword"
-            rules={{
-              required: 'This field is mandatory',
-            }}
-            render={({field: {name, onChange, value}, fieldState: {error}}) => (
-              <Input
-                type={INPUT_TYPE.PASSWORD}
-                placeholder="New Password"
-                {...{name, value, onChange, error}}
+            </fieldset>
+            <fieldset>
+              <Controller
+                control={control}
+                defaultValue=""
+                name="newpassword"
+                rules={{
+                  required: 'This field is mandatory',
+                }}
+                render={({
+                  field: {name, onChange, value},
+                  fieldState: {error},
+                }) => (
+                  <Input
+                    type={INPUT_TYPE.PASSWORD}
+                    placeholder="New Password"
+                    {...{name, value, onChange, error}}
+                  />
+                )}
               />
+            </fieldset>
+            <Button
+              type={BUTTON_TYPE.PRIMARY}
+              size={BUTTON_SIZE.MEDIUM}
+              htmlType={BUTTON_HTML_TYPE.SUBMIT}
+            >
+              Reset
+            </Button>
+            {errorMessage && (
+              <span className="form-errorMessage">{errorMessage}</span>
             )}
-          />
-        </fieldset>
-        <Button
-          type={BUTTON_TYPE.PRIMARY}
-          size={BUTTON_SIZE.MEDIUM}
-          htmlType={BUTTON_HTML_TYPE.SUBMIT}
-        >
-          Reset
-        </Button>
-      </form>
+          </form>
+        </>
+      )}
     </div>
   )
 }

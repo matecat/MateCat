@@ -1,4 +1,4 @@
-import React, {useContext} from 'react'
+import React, {useContext, useRef, useState} from 'react'
 import {
   Button,
   BUTTON_HTML_TYPE,
@@ -11,14 +11,47 @@ import {useForm, Controller} from 'react-hook-form'
 import {EMAIL_PATTERN} from '../../constants/Constants'
 import {Input, INPUT_TYPE} from '../common/Input/Input'
 import {ONBOARDING_STEP, OnBoardingContext} from './OnBoarding'
+import {loginUser} from '../../api/loginUser'
 
 const Login = () => {
   const {setStep} = useContext(OnBoardingContext)
-
+  const [errorMessage, setErrorMessage] = useState()
+  const [requestRunning, setRequestRunning] = useState(false)
   const {handleSubmit, control} = useForm()
-
+  const timerLoginAttempts = useRef()
   const handleFormSubmit = (formData) => {
-    console.log(formData)
+    if (!requestRunning) {
+      setRequestRunning(true)
+      loginUser(formData.email, formData.password)
+        .then(() => {
+          window.location.reload()
+        })
+        .catch((response) => {
+          showError(response)
+        })
+    }
+  }
+
+  const showError = (response) => {
+    if (response.status === 429) {
+      let time = response.headers.get('Retry-After')
+      setRequestRunning(true)
+      clearInterval(timerLoginAttempts.current)
+      timerLoginAttempts.current = setInterval(() => {
+        time--
+        if (time === 0) {
+          clearInterval(timerLoginAttempts.current)
+          setRequestRunning(false)
+          setErrorMessage()
+        } else {
+          setErrorMessage(`Too many attempts, please retry in ${time} seconds`)
+          setRequestRunning(true)
+        }
+      }, 1000)
+    } else {
+      setErrorMessage('Login failed.')
+      setRequestRunning(false)
+    }
   }
 
   const goToSignup = () => setStep(ONBOARDING_STEP.REGISTER)
@@ -79,6 +112,9 @@ const Login = () => {
         >
           Sign in
         </Button>
+        {errorMessage && (
+          <span className="form-errorMessage">{errorMessage}</span>
+        )}
       </form>
 
       <div className="footer-links-container">

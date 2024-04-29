@@ -4,14 +4,12 @@
  * @param {string} old_password
  * @param {string} password
  * @param {string} passwordConfimation
- * @param {bool} isLoggedIn
  * @returns {Promise<object>}
  */
 export const resetPasswordUser = async (
   old_password,
   password,
   passwordConfimation,
-  isLoggedIn,
 ) => {
   const paramsData = {
     old_password,
@@ -25,9 +23,9 @@ export const resetPasswordUser = async (
   })
 
   let url = `/api/app/user/password`
-  if (isLoggedIn) {
+  /*if (isLoggedIn) {
     url = `/api/app/user/password/change`
-  }
+  }*/
 
   const response = await fetch(url, {
     method: 'POST',
@@ -35,7 +33,9 @@ export const resetPasswordUser = async (
     credentials: 'include',
   })
 
-  if (!response.ok) return Promise.reject(response)
+  // if (!response.ok) return Promise.reject(response)
 
-  return response
+  const {errors, ...data} = await response.json()
+  if (errors && errors.length > 0) return Promise.reject(errors)
+  return data
 }

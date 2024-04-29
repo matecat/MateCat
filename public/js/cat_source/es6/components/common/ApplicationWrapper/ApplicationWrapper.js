@@ -106,10 +106,8 @@ export const ApplicationWrapper = ({children}) => {
   }, [])
 
   useEffect(() => {
-    if (isUserLogged) {
-      onModalWindowMounted().then(() => checkForPopupToOpen.current())
-    }
-  }, [isUserLogged])
+    onModalWindowMounted().then(() => checkForPopupToOpen.current())
+  }, [])
 
   return (
     <ApplicationWrapperContext.Provider

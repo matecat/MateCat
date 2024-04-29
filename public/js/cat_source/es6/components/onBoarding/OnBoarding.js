@@ -16,9 +16,15 @@ export const ONBOARDING_STEP = {
 }
 
 export const OnBoardingContext = createContext({})
-
+export const socialUrls = {
+  googleUrl: config.authURL,
+  github: config.githubAuthUrl,
+  microsoft: config.microsoftAuthUrl,
+  linkedIn: config.linkedInAuthUrl,
+  meta: config.facebookAuthUrl,
+}
 const onBoarding = ({
-  step = ONBOARDING_STEP.PASSWORD_RESET,
+  step = ONBOARDING_STEP.LOGIN,
   shouldShowControls = true,
 }) => {
   const [stepState, setStep] = useState(step)
@@ -37,8 +43,21 @@ const onBoarding = ({
     stepState === ONBOARDING_STEP.PASSWORD_RESET ||
     stepState === ONBOARDING_STEP.FORGOT_PASSWORD
 
+  const socialLogin = (url) => {
+    const newWindow = window.open(url, 'name', 'height=600,width=900')
+    if (window.focus) {
+      newWindow.focus()
+    }
+    const interval = setInterval(function () {
+      if (newWindow.closed) {
+        clearInterval(interval)
+        window.location.reload()
+      }
+    }, 600)
+  }
+
   return (
-    <OnBoardingContext.Provider value={{setStep}}>
+    <OnBoardingContext.Provider value={{setStep, socialLogin}}>
       {shouldShowControls && (
         <div className="onboarding-controls">
           <div className="container-buttons">
