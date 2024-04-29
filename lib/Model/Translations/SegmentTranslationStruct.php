@@ -34,6 +34,11 @@ class Translations_SegmentTranslationStruct extends DataAccess_AbstractDaoSilent
         return in_array( $this->status, Constants_TranslationStatus::$REVISION_STATUSES );
     }
 
+    public function is100Match() {
+        // in some cases ICEs are not locked ( translations from bilingual xliff ). Only consider locked ICEs
+        return $this->match_type == Constants_SegmentTranslationsMatchType::_100 && !$this->locked;
+    }
+
     public function isICE() {
         // in some cases ICEs are not locked ( translations from bilingual xliff ). Only consider locked ICEs
         return $this->match_type == Constants_SegmentTranslationsMatchType::ICE && $this->locked;

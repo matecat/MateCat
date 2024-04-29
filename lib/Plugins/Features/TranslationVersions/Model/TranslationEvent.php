@@ -124,6 +124,10 @@ class TranslationEvent {
         return $this->old_translation->isICE() || $this->old_translation->isPreTranslated();
     }
 
+    public function is100MatchPreTranslated() {
+        return $this->old_translation->is100Match();
+    }
+
     /**
      * @return bool
      * @throws Exception
@@ -141,6 +145,15 @@ class TranslationEvent {
         return $this->isIceOrPreTranslated() && // segment is ICE
                 $this->wanted_translation->version_number != 0  // version number is changing
                 ;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isModified100Match() {
+        return $this->is100MatchPreTranslated() && // segment is ICE
+            $this->wanted_translation->version_number != 0  // version number is changing
+            ;
     }
 
     /**

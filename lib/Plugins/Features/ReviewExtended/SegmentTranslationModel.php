@@ -265,17 +265,7 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
 
                 $chunkReviews[] = $chunkReview;
 
-            } elseif (
-                    $this->_event->isEditingCurrentRevision() &&
-                    $this->_event->currentEventIsOnThisChunk( $chunkReview )
-            ) {
-
-                // handle further modifications on the same phase R1/R2, we need to increase TTE only
-                // to count how much time the translator has been on this segment
-                $chunkReview->total_tte += $this->_event->getCurrentEvent()->time_to_edit;
-                $chunkReviews[]         = $chunkReview;
-
-            } elseif (
+            }  elseif (
 
                     /*
                      * THIS IS THE HARDEST PART TO UNDERSTAND
@@ -299,6 +289,23 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
             ) {
                 $this->increaseAllCounters( $chunkReview );
                 $chunkReviews[] = $chunkReview;
+            } elseif(
+                ($this->_event->isR2() || $this->_event->isR1()) &&
+                $this->_event->isModified100Match()
+                && $this->_event->currentEventIsOnThisChunk( $chunkReview )
+            ){
+                $this->increaseAllCounters( $chunkReview );
+                $chunkReviews[] = $chunkReview;
+            } elseif (
+                $this->_event->isEditingCurrentRevision() &&
+                $this->_event->currentEventIsOnThisChunk( $chunkReview )
+            ) {
+
+                // handle further modifications on the same phase R1/R2, we need to increase TTE only
+                // to count how much time the translator has been on this segment
+                $chunkReview->total_tte += $this->_event->getCurrentEvent()->time_to_edit;
+                $chunkReviews[]         = $chunkReview;
+
             } else { // Upper transition
 
                 /*
