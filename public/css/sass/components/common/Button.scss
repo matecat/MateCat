@@ -1,0 +1,267 @@
+@import '../../commons/colors';
+
+button.button-component-container,
+a.button-component-container {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  background-color: transparent;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+
+  &:focus {
+    outline: none;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+
+  svg {
+    flex-shrink: 0;
+    pointer-events: none;
+  }
+
+  display: flex;
+  border-radius: 4px;
+  width: auto;
+  font-weight: 500;
+  transition-property: color, background-color, box-shadow, opacity;
+  transition-duration: 0.3s;
+  transition-timing-function: cubic-bezier(0.77, 0, 0.175, 1);
+
+  // Mode modifiers
+  &.basic {
+    background-color: var(--btnBgColor);
+    color: var(--btnTextColor);
+
+    &:not(:disabled):hover {
+      background-color: var(--btnBgColorAlt);
+      color: var(--btnTextColor);
+    }
+
+    &:disabled {
+      background-color: var(--btnBgColorSemitransAlt);
+      color: var(--btnTextColorDisabled);
+
+      svg {
+        color: var(--btnTextColorDisabled);
+      }
+    }
+  }
+  &.outline {
+    box-shadow: inset 0 0 0 1px var(--btnBorderColor);
+    color: var(--btnAltTextColor);
+
+    &:not(:disabled):global(.button--active) {
+      box-shadow: inset 0 0 0 1px var(--btnBorderColorActive);
+      background-color: var(--btnBgColorSemitransAlt);
+    }
+
+    &:not(:disabled):hover {
+      box-shadow: inset 0 0 0 1px var(--btnBorderColorHover);
+      background-color: var(--btnBgColorSemitrans);
+      color: var(--btnAltTextColorHover);
+    }
+
+    &:disabled {
+      box-shadow: inset 0 0 0 1px var(--btnBorderColorDisabled);
+      color: var(--btnAltTextColorDisabled);
+
+      svg {
+        color: var(--btnAltTextColorDisabled);
+      }
+    }
+  }
+  &.ghost {
+    color: var(--btnAltTextColor);
+
+    &:not(:disabled):global(.button--active),
+    &:not(:disabled):global(.button--active):hover {
+      background-color: var(--btnBgColorSemitransAlt);
+      color: var(--btnAltTextColor);
+    }
+
+    &:not(:disabled):hover {
+      background-color: var(--btnBgColorSemitrans);
+      color: var(--btnAltTextColor);
+    }
+
+    &:disabled {
+      color: var(--btnAltTextColorDisabled);
+
+      svg {
+        color: var(--btnAltTextColorDisabled);
+      }
+    }
+  }
+
+  // Size modifiers
+  &.small {
+    height: 28px;
+    padding: 0 10px;
+    font-size: 12px;
+  }
+  &.standard {
+    height: 40px;
+    padding: 0 16px;
+    line-height: 40px;
+    font-size: 14px;
+  }
+  &.medium {
+    height: 40px;
+    padding: 0 16px;
+    line-height: 40px;
+    font-size: 16px;
+    font-weight: bold;
+  }
+  &.big {
+    height: 48px;
+    padding: 0 24px;
+    line-height: 48px;
+    font-size: 18px;
+    font-weight: bold;
+  }
+  &.iconSmall {
+    width: 24px;
+    height: 24px;
+    line-height: 24px;
+    font-size: 12px;
+  }
+  &.iconStandard {
+    width: 40px;
+    height: 40px;
+    line-height: 40px;
+    font-size: 14px;
+  }
+  &.iconBig {
+    width: 48px;
+    height: 48px;
+    line-height: 48px;
+    font-size: 16px;
+  }
+  &.fullWidth {
+    width: 100%;
+  }
+
+  // Waiting state
+  .hiddenContent {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    white-space: nowrap;
+    visibility: hidden;
+  }
+  &.waiting .spinner {
+    position: absolute;
+  }
+}
+
+// Type modifiers
+.default {
+  --btnTextColor: #{$grey6};
+  --btnTextColorDisabled: #{$grey8};
+  --btnAltTextColor: #{$grey6};
+  --btnAltTextColorHover: #{$grey};
+  --btnAltTextColorDisabled: #{rgba($white, 0.12)};
+
+  --btnBorderColor: #{$grey8};
+  --btnBorderColorHover: #{$grey6};
+  --btnBorderColorActive: #{$grey6};
+  --btnBorderColorDisabled: #{rgba($white, 0.12)};
+
+  --btnBgColor: #{$white};
+  --btnBgColorAlt: #{$grey9};
+  --btnBgColorSemitrans: #{rgba($white, 0.5)};
+  --btnBgColorSemitransAlt: #{rgba($white, 0.5)};
+}
+.primary {
+  --btnTextColor: #{$white};
+  --btnTextColorDisabled: #{$white};
+  --btnAltTextColor: #{$translatedBlue};
+  --btnAltTextColorHover: #{$translatedBlueHover};
+  --btnAltTextColorDisabled: #{rgba($translatedBlue, 0.24)};
+
+  --btnBorderColor: #{rgba($translatedBlue, 0.24)};
+  --btnBorderColorHover: #{$translatedBlueHover};
+  --btnBorderColorActive: #{$translatedBlue};
+  --btnBorderColorDisabled: #{rgba($translatedBlue, 0.24)};
+
+  --btnBgColor: #{$translatedBlue};
+  --btnBgColorAlt: #{$translatedBlueHover};
+  --btnBgColorSemitrans: #{rgba($translatedBlue, 0.12)};
+  --btnBgColorSemitransAlt: #{rgba($translatedBlue, 0.24)};
+}
+.info {
+  --btnTextColor: #{$white};
+  --btnTextColorDisabled: #{$white};
+  --btnAltTextColor: #{$linkBlue};
+  --btnAltTextColorHover: #{$linkBlueHover};
+  --btnAltTextColorDisabled: #{rgba($linkBlue, 0.24)};
+
+  --btnBorderColor: #{rgba($linkBlue, 0.24)};
+  --btnBorderColorHover: #{$linkBlue};
+  --btnBorderColorActive: #{$linkBlue};
+  --btnBorderColorDisabled: #{rgba($linkBlue, 0.24)};
+
+  --btnBgColor: #{$linkBlue};
+  --btnBgColorAlt: #{$linkBlueHover};
+  --btnBgColorSemitrans: #{rgba($linkBlue, 0.12)};
+  --btnBgColorSemitransAlt: #{rgba($linkBlue, 0.24)};
+}
+.success {
+  --btnTextColor: #{$white};
+  --btnTextColorDisabled: #{$white};
+  --btnAltTextColor: #{$greenDefault};
+  --btnAltTextColorHover: #{$greenDefaultHover};
+  --btnAltTextColorDisabled: #{rgba($greenDefault, 0.24)};
+
+  --btnBorderColor: #{rgba($greenDefault, 0.24)};
+  --btnBorderColorHover: #{$greenDefault};
+  --btnBorderColorActive: #{$greenDefault};
+  --btnBorderColorDisabled: #{rgba($greenDefault, 0.24)};
+
+  --btnBgColor: #{$greenDefault};
+  --btnBgColorAlt: #{$greenDefaultHover};
+  --btnBgColorSemitrans: #{rgba($greenDefault, 0.12)};
+  --btnBgColorSemitransAlt: #{rgba($greenDefault, 0.24)};
+}
+.warning {
+  --btnTextColor: #{$white};
+  --btnTextColorDisabled: #{$white};
+  --btnAltTextColor: #{$warning};
+  --btnAltTextColorHover: #{$warningHover};
+  --btnAltTextColorDisabled: #{rgba($warning, 0.24)};
+
+  --btnBorderColor: #{rgba($warning, 0.24)};
+  --btnBorderColorHover: #{$warning};
+  --btnBorderColorActive: #{$warning};
+  --btnBorderColorDisabled: #{rgba($warning, 0.24)};
+
+  --btnBgColor: #{$warning};
+  --btnBgColorAlt: #{$warningHover};
+  --btnBgColorSemitrans: #{rgba($warning, 0.12)};
+  --btnBgColorSemitransAlt: #{rgba($warning, 0.24)};
+}
+.critical {
+  --btnTextColor: #{$white};
+  --btnTextColorDisabled: #{$white};
+  --btnAltTextColor: #{$redDefault};
+  --btnAltTextColorHover: #{$redDefaultHover};
+  --btnAltTextColorDisabled: #{rgba($redDefault, 0.24)};
+
+  --btnBorderColor: #{rgba($redDefault, 0.24)};
+  --btnBorderColorHover: #{$redDefault};
+  --btnBorderColorActive: #{$redDefault};
+  --btnBorderColorDisabled: #{rgba($redDefault, 0.24)};
+
+  --btnBgColor: #{$redDefault};
+  --btnBgColorAlt: #{$redDefaultHover};
+  --btnBgColorSemitrans: #{rgba($redDefault, 0.12)};
+  --btnBgColorSemitransAlt: #{rgba($redDefault, 0.24)};
+}

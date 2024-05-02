@@ -191,6 +191,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         $parameters[ 'de' ]       = $_config[ 'email' ];
         $parameters[ 'mt' ]       = $_config[ 'get_mt' ];
         $parameters[ 'numres' ]   = $_config[ 'num_result' ];
+        $parameters[ 'client_id' ] = isset($_config[ 'uid' ]) ? $_config[ 'uid' ] : 0;
 
         if(isset($_config['dialect_strict'])){
             $parameters['dialect_strict'] = $_config['dialect_strict'];
@@ -215,8 +216,8 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 
         ( !$_config[ 'isGlossary' ] ? $function = "translate_relative_url" : $function = "gloss_get_relative_url" );
 
-
         $parameters = $this->featureSet->filter( 'filterMyMemoryGetParameters', $parameters, $_config );
+
         $this->call( $function, $parameters, true );
 
         if ( isset( $segment_file_chr[ 1 ] ) ) {
@@ -233,17 +234,20 @@ class Engines_MyMemory extends Engines_AbstractEngine {
      * @return array|bool
      */
     public function set( $_config ) {
-        $parameters               = [];
-        $parameters[ 'seg' ]      = preg_replace( "/^(-?@-?)/", "", $_config[ 'segment' ] );
-        $parameters[ 'tra' ]      = preg_replace( "/^(-?@-?)/", "", $_config[ 'translation' ] );
-        $parameters[ 'tnote' ]    = $_config[ 'tnote' ];
-        $parameters[ 'langpair' ] = $_config[ 'source' ] . "|" . $_config[ 'target' ];
-        $parameters[ 'de' ]       = $_config[ 'email' ];
-        $parameters[ 'prop' ]     = $_config[ 'prop' ];
+        $parameters                = [];
+        $parameters[ 'seg' ]       = preg_replace( "/^(-?@-?)/", "", $_config[ 'segment' ] );
+        $parameters[ 'tra' ]       = preg_replace( "/^(-?@-?)/", "", $_config[ 'translation' ] );
+        $parameters[ 'tnote' ]     = $_config[ 'tnote' ];
+        $parameters[ 'langpair' ]  = $_config[ 'source' ] . "|" . $_config[ 'target' ];
+        $parameters[ 'de' ]        = $_config[ 'email' ];
+        $parameters[ 'client_id' ] = isset($_config[ 'uid' ]) ? $_config[ 'uid' ] : 0;
+        $parameters[ 'prop' ]      = $_config[ 'prop' ];
+
         if ( !empty( $_config[ 'context_after' ] ) || !empty( $_config[ 'context_before' ] ) ) {
             $parameters[ 'context_after' ]  = preg_replace( "/^(-?@-?)/", "", @$_config[ 'context_after' ] );
             $parameters[ 'context_before' ] = preg_replace( "/^(-?@-?)/", "", @$_config[ 'context_before' ] );
         }
+
         if ( !empty( $_config[ 'id_user' ] ) ) {
             if ( !is_array( $_config[ 'id_user' ] ) ) {
                 $_config[ 'id_user' ] = [ $_config[ 'id_user' ] ];
@@ -265,14 +269,15 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 
     public function update( $_config ) {
 
-        $parameters               = [];
-        $parameters[ 'seg' ]      = preg_replace( "/^(-?@-?)/", "", $_config[ 'segment' ] );
-        $parameters[ 'tra' ]      = preg_replace( "/^(-?@-?)/", "", $_config[ 'translation' ] );
-        $parameters[ 'newseg' ]   = preg_replace( "/^(-?@-?)/", "", $_config[ 'newsegment' ] );
-        $parameters[ 'newtra' ]   = preg_replace( "/^(-?@-?)/", "", $_config[ 'newtranslation' ] );
-        $parameters[ 'langpair' ] = $_config[ 'source' ] . "|" . $_config[ 'target' ];
-        $parameters[ 'prop' ]     = $_config[ 'prop' ];
-        $parameters[ 'de' ]       = $_config[ 'email' ];
+        $parameters                = [];
+        $parameters[ 'seg' ]       = preg_replace( "/^(-?@-?)/", "", $_config[ 'segment' ] );
+        $parameters[ 'tra' ]       = preg_replace( "/^(-?@-?)/", "", $_config[ 'translation' ] );
+        $parameters[ 'newseg' ]    = preg_replace( "/^(-?@-?)/", "", $_config[ 'newsegment' ] );
+        $parameters[ 'newtra' ]    = preg_replace( "/^(-?@-?)/", "", $_config[ 'newtranslation' ] );
+        $parameters[ 'langpair' ]  = $_config[ 'source' ] . "|" . $_config[ 'target' ];
+        $parameters[ 'prop' ]      = $_config[ 'prop' ];
+        $parameters[ 'client_id' ]  = isset($_config[ 'uid' ]) ? $_config[ 'uid' ] : 0;
+        $parameters[ 'de' ]        = $_config[ 'email' ];
 
         if ( !empty( $_config[ 'context_after' ] ) || !empty( $_config[ 'context_before' ] ) ) {
             $parameters[ 'context_after' ]  = preg_replace( "/^(-?@-?)/", "", @$_config[ 'context_after' ] );
