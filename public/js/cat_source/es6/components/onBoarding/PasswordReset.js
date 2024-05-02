@@ -27,11 +27,10 @@ const PasswordReset = () => {
         setShowSuccess(true)
       })
       .catch((errors) => {
-        let text =
-          'There was a problem saving the data, please try again later or contact support.'
-        if (errors && errors.length && errors[0].code === 0) {
-          text = errors[0].message
-        }
+        const text =
+          errors && errors.length && errors[0].code === 0
+            ? errors[0].message
+            : 'There was a problem saving the data, please try again later or contact support.'
         setErrorMessage(text)
       })
   }

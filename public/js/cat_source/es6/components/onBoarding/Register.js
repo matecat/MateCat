@@ -190,19 +190,30 @@ const Register = () => {
                 fieldState: {error},
               }) => (
                 <div className="terms-and-conditions">
-                  <input type="checkbox" {...{name, value, onChange, error}} />
-                  <span>
-                    Accept{' '}
-                    <Button
-                      className="link-underline"
-                      type={BUTTON_TYPE.PRIMARY}
-                      mode={BUTTON_MODE.LINK}
-                      size={BUTTON_SIZE.LINK_SMALL}
-                      onClick={showTerms}
-                    >
-                      Terms and Conditions
-                    </Button>
-                  </span>
+                  <div className="input-container">
+                    <input
+                      type="checkbox"
+                      {...{name, value, onChange, error}}
+                    />
+                    <span>
+                      Accept{' '}
+                      <Button
+                        className="link-underline"
+                        type={BUTTON_TYPE.PRIMARY}
+                        mode={BUTTON_MODE.LINK}
+                        size={BUTTON_SIZE.LINK_SMALL}
+                        onClick={showTerms}
+                      >
+                        Terms and Conditions
+                      </Button>
+                    </span>
+                  </div>
+
+                  {error && (
+                    <span className="terms-and-conditions-error">
+                      Please agree to the Terms of Service
+                    </span>
+                  )}
                 </div>
               )}
             />

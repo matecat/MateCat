@@ -83,12 +83,22 @@
 
     .terms-and-conditions {
       display: flex;
-      gap: 10px;
+      flex-direction: column;
 
-      > span {
+      .input-container {
         display: flex;
-        color: $grey7;
+        gap: 10px;
+
+        > span {
+          display: flex;
+          color: $grey7;
+        }
       }
+    }
+
+    .terms-and-conditions-error {
+      text-align: left;
+      color: $redDefault;
     }
   }
 

@@ -23,9 +23,9 @@ export const socialUrls = {
   linkedIn: config.linkedInAuthUrl,
   meta: config.facebookAuthUrl,
 }
-const onBoarding = ({
+const OnBoarding = ({
   step = ONBOARDING_STEP.LOGIN,
-  shouldShowControls = true,
+  shouldShowControls = false,
 }) => {
   const [stepState, setStep] = useState(step)
 
@@ -92,9 +92,9 @@ const onBoarding = ({
   )
 }
 
-onBoarding.propTypes = {
+OnBoarding.propTypes = {
   step: PropTypes.oneOf(Object.values(ONBOARDING_STEP)),
   shouldShowControls: PropTypes.bool,
 }
 
-export default onBoarding
+export default OnBoarding
