@@ -5,49 +5,11 @@ import IconClose from '../../../icons/IconClose'
 import {BUTTON_SIZE, BUTTON_TYPE, Button} from '../../../common/Button/Button'
 
 export const SubTemplateCreateUpdateControl = () => {
-  const {
-    setTemplates,
-    currentTemplate,
-    templateName,
-    templateModifier,
-    setIsRequestInProgress,
-    schema,
-    getFilteredSchemaCreateUpdate,
-    createApi,
-    saveErrorCallback,
-    updateNameBehaviour,
-  } = useContext(SubTemplatesContext)
+  const {templateName, templateModifier, updateNameBehaviour, createTemplate} =
+    useContext(SubTemplatesContext)
 
-  const createTemplate = () => {
-    const newTemplate = {
-      ...getFilteredSchemaCreateUpdate(currentTemplate),
-      [schema.name]: templateName,
-    }
-    setIsRequestInProgress(true)
-
-    createApi(newTemplate)
-      .then((template) => {
-        setTemplates((prevState) => [
-          ...prevState
-            .filter(({isTemporary}) => !isTemporary)
-            .map((templateItem) => ({...templateItem, isSelected: false})),
-          {
-            ...newTemplate,
-            ...template,
-            isSelected: true,
-          },
-        ])
-      })
-      .catch((error) => {
-        if (saveErrorCallback) {
-          saveErrorCallback(error)
-        }
-      })
-      .finally(() => setIsRequestInProgress(false))
-  }
-
+  const create = () => createTemplate.current()
   const updateName = () => updateNameBehaviour.current.confirm()
-
   const cancel = () => updateNameBehaviour.current.cancel()
 
   return (
@@ -58,9 +20,10 @@ export const SubTemplateCreateUpdateControl = () => {
         testId="create-update-template"
         onClick={
           templateModifier === SUBTEMPLATE_MODIFIERS.CREATE
-            ? createTemplate
+            ? create
             : updateName
         }
+        disabled={templateName === ''}
       >
         <Checkmark size={14} />
         Confirm

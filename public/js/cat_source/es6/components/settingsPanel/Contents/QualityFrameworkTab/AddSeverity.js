@@ -1,4 +1,4 @@
-import React, {useContext, useState} from 'react'
+import React, {useContext, useRef, useState} from 'react'
 import {
   POPOVER_ALIGN,
   POPOVER_VERTICAL_ALIGN,
@@ -23,6 +23,19 @@ export const AddSeverity = () => {
   )
 
   const [name, setName] = useState('')
+  const [error, setError] = useState()
+
+  const confirmRef = useRef()
+
+  const validateLabel = (value) => {
+    const labels = currentTemplate.categories[0].severities.map(
+      ({label}) => label,
+    )
+
+    if (labels.some((label) => label.toLowerCase() === value.toLowerCase()))
+      setError('Name already in use for another severity.')
+    else setError()
+  }
 
   const addSeverity = () => {
     const {categories = []} = currentTemplate ?? {}
@@ -54,6 +67,9 @@ export const AddSeverity = () => {
     }))
   }
 
+  const confirmWithKeyboard = ({key}) =>
+    key === 'Enter' && confirmRef?.current.click()
+
   const onClose = () => setName()
 
   const isDisabled =
@@ -83,9 +99,10 @@ export const AddSeverity = () => {
           ),
         }}
         confirmButtonProps={{
+          ref: confirmRef,
           type: BUTTON_TYPE.PRIMARY,
           size: BUTTON_SIZE.MEDIUM,
-          disabled: !name,
+          disabled: !name || typeof error === 'string',
           children: (
             <>
               <Checkmark size={14} />
@@ -103,14 +120,24 @@ export const AddSeverity = () => {
         verticalAlign={POPOVER_VERTICAL_ALIGN.TOP}
         onClose={onClose}
       >
-        <div className="add-popover-content">
+        <div
+          className="add-popover-content"
+          tabIndex={0}
+          onKeyUp={confirmWithKeyboard}
+        >
           <input
-            className="quality-framework-input input"
+            className={`quality-framework-input input${error ? ' quality-framework-input-error' : ''}`}
             placeholder="Name"
             value={name}
-            onChange={(e) => setName(e.currentTarget.value)}
+            onChange={(e) => {
+              setName(e.currentTarget.value)
+              validateLabel(e.currentTarget.value)
+            }}
             autoFocus
           />
+          {error && (
+            <span className="quality-framework-error-message">{error}</span>
+          )}
         </div>
       </Popover>
     </div>

@@ -14,13 +14,11 @@
     color: $translatedBlue;
   }
 
-  .settings-panel-contentwrapper-tab-background {
+  &.settings-panel-contentwrapper-tab-background {
     text-align: left;
+    padding: 10px 20px 20px;
   }
-  h2 {
-    padding-left: 0;
-    padding-bottom: 8px;
-  }
+
   span {
     display: block;
     text-align: left;

@@ -1,5 +1,19 @@
 @import '../../commons/colors';
 
+.quality-framework-tab {
+  &.settings-panel-contentwrapper-tab-background {
+    padding: 10px 20px 20px;
+  }
+
+  p {
+    display: block;
+    text-align: left;
+    color: #666666;
+    font-size: 16px;
+    line-height: 24px;
+  }
+}
+
 .quality-framework-box-ept-threshold {
   display: flex;
   gap: 15px;
@@ -33,11 +47,16 @@
     overflow-x: auto;
     overscroll-behavior: none;
     scrollbar-width: thin;
+
+    @media (max-height: 1200px) {
+      max-height: calc(100vh - 470px);
+    }
   }
 
   .categories {
     display: flex;
     position: sticky;
+    z-index: 1;
     left: 0;
     flex-direction: column;
     min-width: 280px;

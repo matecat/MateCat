@@ -24,6 +24,7 @@ export const ModifySeverity = ({target, label, index, setIsEditingName}) => {
   const [error, setError] = useState()
 
   const ref = useRef()
+  const confirmRef = useRef()
 
   useEffect(() => {
     const handler = (e) => {
@@ -74,10 +75,17 @@ export const ModifySeverity = ({target, label, index, setIsEditingName}) => {
     validateLabel(value)
   }
 
+  const confirmWithKeyboard = ({key}) =>
+    key === 'Enter' && confirmRef?.current.click()
+
   const cancel = () => setIsEditingName(false)
 
   const content = (
-    <div className="add-popover-content">
+    <div
+      className="add-popover-content"
+      tabIndex={0}
+      onKeyUp={confirmWithKeyboard}
+    >
       <input
         className={`quality-framework-input input${error ? ' quality-framework-input-error' : ''}`}
         placeholder="Name"
@@ -114,9 +122,11 @@ export const ModifySeverity = ({target, label, index, setIsEditingName}) => {
             Cancel
           </Button>
           <Button
+            ref={confirmRef}
             type={BUTTON_TYPE.PRIMARY}
             size={BUTTON_SIZE.MEDIUM}
             onClick={updateLabel}
+            disabled={!labelState || typeof error === 'string'}
           >
             <Checkmark size={14} />
             Confirm

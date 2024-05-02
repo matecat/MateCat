@@ -196,12 +196,10 @@ export const AnalysisTab = () => {
         />
         <div className="analysis-tab settings-panel-contentwrapper-tab-background">
           <div className="analysis-tab-head">
-            <h2>Lorem ipsum</h2>
+            <h2>Payable rates</h2>
             <span>
-              Lorem ipsum dolor sit amet consectetur. Vestibulum mauris gravida
-              volutpat libero vulputate faucibus ultrices convallis. Non
-              sagittis in condimentum lectus dapibus. Vestibulum volutpat tempus
-              sed sed odio eleifend porta malesuada.
+              Set the payable rate for each analysis bucket. Payable rates are
+              used to calculate the weighted word count for a project.
             </span>
           </div>
           <BreakdownsTable saveValue={setWordsValue} />
@@ -209,10 +207,8 @@ export const AnalysisTab = () => {
             <div className="analysis-tab-subhead">
               <h3>Machine translation</h3>
               <span>
-                Lorem ipsum dolor sit amet consectetur. Vestibulum mauris
-                gravida volutpat libero vulputate faucibus ultrices convallis.
-                Non sagittis in condimentum lectus dapibus. Vestibulum volutpat
-                tempus sed sed odio eleifend porta malesuada.
+                Set the standard payable rate for the machine translation bucket
+                and the necessary language-based exceptions.
               </span>
               <InputPercentage
                 value={mt}

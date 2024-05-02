@@ -45,12 +45,10 @@ export const CategoriesSeveritiesTable = () => {
 
   return (
     <div className="quality-framework-categories-severities">
-      <h2>Lorem ipsum</h2>
+      <h2>Evaluation grid</h2>
       <p>
-        Lorem ipsum dolor sit amet consectetur. Vestibulum mauris gravida
-        volutpat libero vulputate faucibus ultrices convallis. Non sagittis in
-        condimentum lectus dapibus. Vestibulum volutpat tempus sed sed odio
-        eleifend porta malesuada.
+        Manage the categories and severities that revisors can select for the
+        issues found
       </p>
       <div className="quality-framework-categories-table">
         <div className="scroll-area">

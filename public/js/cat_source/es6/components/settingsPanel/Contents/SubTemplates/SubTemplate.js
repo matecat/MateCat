@@ -8,6 +8,7 @@ import {IconSaveChanges} from '../../../icons/IconSaveChanges'
 import {IconSave} from '../../../icons/IconSave'
 import {BUTTON_MODE, BUTTON_SIZE, Button} from '../../../common/Button/Button'
 import {flushSync} from 'react-dom'
+import CatToolActions from '../../../../actions/CatToolActions'
 
 export const SUBTEMPLATE_MODIFIERS = {
   CREATE: 'create',
@@ -69,6 +70,50 @@ export const SubTemplates = ({
   updateNameBehaviour.current.cancel = () => {
     setTemplateModifier()
     setTemplateName('')
+  }
+
+  const createTemplate = useRef()
+  createTemplate.current = () => {
+    if (
+      templates.some(
+        ({name}) => name.toLowerCase() === templateName.toLowerCase(),
+      )
+    ) {
+      // template name already exists
+      CatToolActions.addNotification({
+        title: 'Duplicated name',
+        type: 'error',
+        text: 'This name is already in use, please choose a different one',
+        position: 'br',
+      })
+      return
+    }
+
+    const newTemplate = {
+      ...getFilteredSchemaCreateUpdate(currentTemplate),
+      [schema.name]: templateName,
+    }
+    setIsRequestInProgress(true)
+
+    createApi(newTemplate)
+      .then((template) => {
+        setTemplates((prevState) => [
+          ...prevState
+            .filter(({isTemporary}) => !isTemporary)
+            .map((templateItem) => ({...templateItem, isSelected: false})),
+          {
+            ...newTemplate,
+            ...template,
+            isSelected: true,
+          },
+        ])
+      })
+      .catch((error) => {
+        if (saveErrorCallback) {
+          saveErrorCallback(error)
+        }
+      })
+      .finally(() => setIsRequestInProgress(false))
   }
 
   const updateTemplate = (updatedTemplate = currentTemplate) => {
@@ -136,11 +181,9 @@ export const SubTemplates = ({
         setTemplateModifier,
         schema,
         propConnectProjectTemplate,
-        getFilteredSchemaCreateUpdate,
-        createApi,
         deleteApi,
-        saveErrorCallback,
         updateNameBehaviour,
+        createTemplate,
       }}
     >
       <div className="settings-panel-templates settings-panel-subtemplates">

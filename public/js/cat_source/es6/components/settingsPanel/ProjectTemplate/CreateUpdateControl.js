@@ -2,58 +2,15 @@ import React, {useContext} from 'react'
 import {ProjectTemplateContext} from './ProjectTemplateContext'
 import {TEMPLATE_MODIFIERS} from './ProjectTemplate'
 import IconClose from '../../icons/IconClose'
-import {createProjectTemplate} from '../../../api/createProjectTemplate'
-import {SCHEMA_KEYS} from '../../../hooks/useProjectTemplates'
-import {SettingsPanelContext} from '../SettingsPanelContext'
 import Checkmark from '../../../../../../img/icons/Checkmark'
 import {BUTTON_SIZE, BUTTON_TYPE, Button} from '../../common/Button/Button'
 
 export const CreateUpdateControl = () => {
-  const {currentProjectTemplate, setProjectTemplates} =
-    useContext(SettingsPanelContext)
-  const {
-    templateName,
-    templateModifier,
-    setIsRequestInProgress,
-    updateNameBehaviour,
-  } = useContext(ProjectTemplateContext)
+  const {templateName, templateModifier, updateNameBehaviour, createTemplate} =
+    useContext(ProjectTemplateContext)
 
-  const createTemplate = () => {
-    /* eslint-disable no-unused-vars */
-    const {
-      created_at,
-      id,
-      uid,
-      modified_at,
-      isTemporary,
-      isSelected,
-      ...newTemplate
-    } = {
-      ...currentProjectTemplate,
-      name: templateName,
-      [SCHEMA_KEYS.isDefault]: false,
-    }
-    /* eslint-enable no-unused-vars */
-    setIsRequestInProgress(true)
-
-    createProjectTemplate(newTemplate)
-      .then((template) => {
-        setProjectTemplates((prevState) => [
-          ...prevState
-            .filter(({isTemporary}) => !isTemporary)
-            .map((templateItem) => ({...templateItem, isSelected: false})),
-          {
-            ...template,
-            isSelected: true,
-          },
-        ])
-      })
-      .catch((error) => console.log(error))
-      .finally(() => setIsRequestInProgress(false))
-  }
-
+  const create = () => createTemplate.current()
   const updateName = () => updateNameBehaviour.current.confirm()
-
   const cancel = () => updateNameBehaviour.current.cancel()
 
   return (
@@ -64,9 +21,7 @@ export const CreateUpdateControl = () => {
         size={BUTTON_SIZE.MEDIUM}
         disabled={templateName === ''}
         onClick={
-          templateModifier === TEMPLATE_MODIFIERS.CREATE
-            ? createTemplate
-            : updateName
+          templateModifier === TEMPLATE_MODIFIERS.CREATE ? create : updateName
         }
       >
         <Checkmark size={14} />

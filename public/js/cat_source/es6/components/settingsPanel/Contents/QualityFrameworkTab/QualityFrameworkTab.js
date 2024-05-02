@@ -132,7 +132,7 @@ export const QualityFrameworkTab = () => {
               saveErrorCallback,
             }}
           />
-          <div className="settings-panel-contentwrapper-tab-background">
+          <div className="quality-framework-tab settings-panel-contentwrapper-tab-background">
             <EptThreshold />
             <CategoriesSeveritiesTable />
           </div>

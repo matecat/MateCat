@@ -16,6 +16,7 @@ import {IconPin} from '../../icons/IconPin'
 import {IconSave} from '../../icons/IconSave'
 import {IconSaveChanges} from '../../icons/IconSaveChanges'
 import {BUTTON_MODE, BUTTON_SIZE, Button} from '../../common/Button/Button'
+import {createProjectTemplate} from '../../../api/createProjectTemplate'
 
 export const TEMPLATE_MODIFIERS = {
   CREATE: 'create',
@@ -84,6 +85,41 @@ export const ProjectTemplate = ({portalTarget}) => {
   const isModifyingTemplate = projectTemplates.some(
     ({isTemporary}) => isTemporary,
   )
+
+  const createTemplate = useRef()
+  createTemplate.current = () => {
+    /* eslint-disable no-unused-vars */
+    const {
+      created_at,
+      id,
+      uid,
+      modified_at,
+      isTemporary,
+      isSelected,
+      ...newTemplate
+    } = {
+      ...currentProjectTemplate,
+      name: templateName,
+      [SCHEMA_KEYS.isDefault]: false,
+    }
+    /* eslint-enable no-unused-vars */
+    setIsRequestInProgress(true)
+
+    createProjectTemplate(newTemplate)
+      .then((template) => {
+        setProjectTemplates((prevState) => [
+          ...prevState
+            .filter(({isTemporary}) => !isTemporary)
+            .map((templateItem) => ({...templateItem, isSelected: false})),
+          {
+            ...template,
+            isSelected: true,
+          },
+        ])
+      })
+      .catch((error) => console.log(error))
+      .finally(() => setIsRequestInProgress(false))
+  }
 
   const updateTemplate = (updatedTemplate = currentProjectTemplate) => {
     /* eslint-disable no-unused-vars */
@@ -163,6 +199,7 @@ export const ProjectTemplate = ({portalTarget}) => {
         templateModifier,
         setTemplateModifier,
         updateNameBehaviour,
+        createTemplate,
       }}
     >
       <div className="settings-panel-templates">

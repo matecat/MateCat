@@ -19,7 +19,7 @@ export const Team = ({selectedTeam, setSelectedTeam}) => {
   return (
     <div className="options-box">
       <div className="option-description">
-        <h3>Team</h3>Description
+        <h3>Team</h3>Select what team the project should be created in.
       </div>
       <div className="options-select-container" data-testid="container-team">
         <Select
