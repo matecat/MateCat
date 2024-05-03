@@ -16,7 +16,6 @@ import {deleteMTEngine} from '../../../../api/deleteMTEngine'
 import {DEFAULT_ENGINE_MEMORY} from '../../SettingsPanel'
 import {MTGlossary} from './MTGlossary'
 
-import Close from '../../../../../../../img/icons/Close'
 import AddWide from '../../../../../../../img/icons/AddWide'
 import {DeepL} from './MtEngines/DeepL'
 import {DeepLGlossary} from './DeepLGlossary'
@@ -27,6 +26,8 @@ import {DeleteResource} from './DeleteResource'
 import ModalsActions from '../../../../actions/ModalsActions'
 import {ConfirmDeleteResourceProjectTemplates} from '../../../modals/ConfirmDeleteResourceProjectTemplates'
 import {SCHEMA_KEYS} from '../../../../hooks/useProjectTemplates'
+import IconClose from '../../../icons/IconClose'
+import {BUTTON_TYPE, Button} from '../../../common/Button/Button'
 
 export const MachineTranslationTab = () => {
   const {
@@ -304,12 +305,12 @@ export const MachineTranslationTab = () => {
                 setError()
               }}
             />
-            <button
-              className="ui button orange"
+            <Button
+              type={BUTTON_TYPE.WARNING}
               onClick={() => setAddMTVisible(false)}
             >
-              <Close />
-            </button>
+              <IconClose size={11} />
+            </Button>
           </div>
           {activeAddEngine ? (
             <activeAddEngine.component
