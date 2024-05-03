@@ -58,36 +58,38 @@ const OnBoarding = ({
 
   return (
     <OnBoardingContext.Provider value={{setStep, socialLogin}}>
-      {shouldShowControls && (
-        <div className="onboarding-controls">
-          <div className="container-buttons">
-            <div>
-              {isBackButtonEnabled && (
-                <Button
-                  className="button-back"
-                  mode={BUTTON_MODE.OUTLINE}
-                  size={BUTTON_SIZE.ICON_STANDARD}
-                  onClick={backHandler}
-                >
-                  <ChevronDown />
-                </Button>
-              )}
+      <div className="onboarding-wrapper">
+        {shouldShowControls && (
+          <div className="onboarding-controls">
+            <div className="container-buttons">
+              <div>
+                {isBackButtonEnabled && (
+                  <Button
+                    className="button-back"
+                    mode={BUTTON_MODE.OUTLINE}
+                    size={BUTTON_SIZE.ICON_STANDARD}
+                    onClick={backHandler}
+                  >
+                    <ChevronDown />
+                  </Button>
+                )}
+              </div>
+              <Button
+                className="button-close"
+                size={BUTTON_SIZE.ICON_SMALL}
+                onClick={closeHandler}
+              >
+                <IconClose size={10} />
+              </Button>
             </div>
-            <Button
-              className="button-close"
-              size={BUTTON_SIZE.ICON_SMALL}
-              onClick={closeHandler}
-            >
-              <IconClose size={10} />
-            </Button>
           </div>
-        </div>
-      )}
+        )}
 
-      {stepState === ONBOARDING_STEP.LOGIN && <Login />}
-      {stepState === ONBOARDING_STEP.REGISTER && <Register />}
-      {stepState === ONBOARDING_STEP.PASSWORD_RESET && <PasswordReset />}
-      {stepState === ONBOARDING_STEP.FORGOT_PASSWORD && <ForgotPassword />}
+        {stepState === ONBOARDING_STEP.LOGIN && <Login />}
+        {stepState === ONBOARDING_STEP.REGISTER && <Register />}
+        {stepState === ONBOARDING_STEP.PASSWORD_RESET && <PasswordReset />}
+        {stepState === ONBOARDING_STEP.FORGOT_PASSWORD && <ForgotPassword />}
+      </div>
     </OnBoardingContext.Provider>
   )
 }
