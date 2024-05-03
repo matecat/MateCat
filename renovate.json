@@ -11,5 +11,8 @@
   "branchConcurrentLimit": 3,
   "timezone": "Europe/Rome",
   "schedule": ["after 10pm every weekday", "before 5am every weekday"],
-  "baseBranches": ["develop"]
+  "baseBranches": ["develop"],
+  "git-submodules": {
+    "enabled": true
+  }
 }

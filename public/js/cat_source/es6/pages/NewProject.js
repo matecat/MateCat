@@ -22,11 +22,7 @@ import {TargetLanguagesSelect} from '../components/createProject/TargetLanguages
 import {TmGlossarySelect} from '../components/createProject/TmGlossarySelect'
 import {SourceLanguageSelect} from '../components/createProject/SourceLanguageSelect'
 import CommonUtils from '../utils/commonUtils'
-import {
-  DEFAULT_ENGINE_MEMORY,
-  MMT_NAME,
-  SettingsPanel,
-} from '../components/settingsPanel'
+import {DEFAULT_ENGINE_MEMORY, SettingsPanel} from '../components/settingsPanel'
 import {getMTEngines as getMtEnginesApi} from '../api/getMTEngines'
 import {tmCreateRandUser} from '../api/tmCreateRandUser'
 import {getSupportedFiles} from '../api/getSupportedFiles'
@@ -724,22 +720,14 @@ const NewProject = ({
         {warnings && (
           <div className="warning-message">
             <i className="icon-warning2 icon"> </i>
-            <p
-              dangerouslySetInnerHTML={{
-                __html: warnings,
-              }}
-            />
+            <p>{warnings}</p>
           </div>
         )}
 
         {errors && (
           <div className="error-message">
             <i className="icon-error_outline icon"> </i>
-            <p
-              dangerouslySetInnerHTML={{
-                __html: errors,
-              }}
-            />
+            <p>{errors}</p>
           </div>
         )}
 

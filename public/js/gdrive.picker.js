@@ -17,11 +17,10 @@ var GDrive = function () {
   }
 
   this.createPicker = function (service) {
-    var token = JSON.parse(service.oauth_access_token)
+    const token = JSON.parse(service.oauth_access_token)
 
-    console.log(token.access_token)
-
-    var picker = new google.picker.PickerBuilder()
+    const picker = new google.picker.PickerBuilder()
+      .setAppId(window.clientId)
       .addView(google.picker.ViewId.DOCUMENTS)
       .addView(google.picker.ViewId.PRESENTATIONS)
       .addView(google.picker.ViewId.SPREADSHEETS)

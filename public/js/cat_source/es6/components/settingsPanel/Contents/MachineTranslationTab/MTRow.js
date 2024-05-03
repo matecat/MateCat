@@ -2,6 +2,7 @@ import React, {useContext} from 'react'
 import PropTypes from 'prop-types'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import Trash from '../../../../../../../img/icons/Trash'
+import InfoIcon from '../../../../../../../img/icons/InfoIcon'
 
 export const MTRow = ({row, deleteMT, onCheckboxClick}) => {
   const {currentProjectTemplate} = useContext(SettingsPanelContext)
@@ -9,44 +10,28 @@ export const MTRow = ({row, deleteMT, onCheckboxClick}) => {
 
   return (
     <>
-      <div>
+      <div className="settings-panel-mt-row">
         {row.name}
-        {row.name === 'MyMemory' && (
-          <span>
-            {' '}
-            (
-            <a href="https://guides.matecat.com/my" target="_blank">
-              Details
-            </a>
-            )
-          </span>
+        {row.class_load === 'MMTLite' && (
+          <a
+            href="https://guides.matecat.com/default-machine-translation-engine"
+            target="_blank"
+          >
+            <InfoIcon />
+          </a>
         )}
-        {row.name === 'ModernMT' && (
-          <>
-            <span>
-              {' '}
-              (
-              <a
-                href="https://guides.matecat.com/modernmt-mmt-plug-in"
-                target="_blank"
-              >
-                Details
-              </a>
-              )
-            </span>
-          </>
+        {row.class_load === 'MMT' && (
+          <a
+            href="https://guides.matecat.com/modernmt-mmt-plug-in"
+            target="_blank"
+          >
+            <InfoIcon />
+          </a>
         )}
-        {row.name === 'DeepL' && (
-          <>
-            <span>
-              {' '}
-              (
-              <a href="https://guides.matecat.com/my" target="_blank">
-                Details
-              </a>
-              )
-            </span>
-          </>
+        {row.class_load === 'DeepL' && (
+          <a href="https://guides.matecat.com/my" target="_blank">
+            <InfoIcon />
+          </a>
         )}
       </div>
       <div>{row.description}</div>

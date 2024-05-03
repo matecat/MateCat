@@ -459,10 +459,13 @@
                 "application/xml",
                 "application/x-xml"
 		    ].indexOf( o.files[i].type ) >= 0
+             
 		    ) {
 		    %}
-                {% if ( /resx/.test( o.files[i].name.split('.').pop() ) == false ) { %}
+                {% if ( /resx/.test( o.files[i].name.split('.').pop() ) == false  ) { %}
+                {% if ( /tmx/.test( o.files[i].name.split('.').pop() ) == false  ) { %}
                 <span class="extxml"></span>
+                {% } %}
                 {% } %}
             {% mimeok=1} %}
 

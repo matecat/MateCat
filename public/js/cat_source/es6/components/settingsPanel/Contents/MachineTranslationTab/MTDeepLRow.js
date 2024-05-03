@@ -6,6 +6,7 @@ import {Select} from '../../../common/Select'
 import CatToolStore from '../../../../stores/CatToolStore'
 import CatToolConstants from '../../../../constants/CatToolConstants'
 import CatToolActions from '../../../../actions/CatToolActions'
+import InfoIcon from '../../../../../../../img/icons/InfoIcon'
 
 const FORMALITIES = [
   {name: 'Default', id: 'default'},
@@ -114,12 +115,11 @@ export const MTDeepLRow = ({row, deleteMT, onCheckboxClick}) => {
 
   return (
     <>
-      <div>
-        {row.name} (
+      <div className="settings-panel-mt-row">
+        {row.name}
         <a href="https://guides.matecat.com/my" target="_blank">
-          Details
+          <InfoIcon />
         </a>
-        )
       </div>
       <div>{row.description}</div>
       <div className="settings-panel-cell-center">
