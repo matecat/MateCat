@@ -33,7 +33,14 @@ let ModalsActions = {
     })
   },
   openLoginModal: function () {
-    ModalsActions.showModalComponent(OnBoarding, null, null, null, null, false)
+    ModalsActions.showModalComponent(
+      OnBoarding,
+      null,
+      null,
+      {maxWidth: 'unset', width: 'auto'},
+      null,
+      false,
+    )
   },
   openRegisterModal: () => {
     ModalsActions.showModalComponent(
@@ -42,7 +49,7 @@ let ModalsActions = {
         step: ONBOARDING_STEP.REGISTER,
       },
       null,
-      null,
+      {maxWidth: 'unset', width: 'auto'},
       null,
       false,
     )
