@@ -121,7 +121,7 @@ export const MTDeepLRow = ({row, deleteMT, onCheckboxClick}) => {
           <InfoIcon />
         </a>
       </div>
-      <div>{row.description}</div>
+      <div className="settings-panel-mt-row-description">{row.description}</div>
       <div className="settings-panel-cell-center">
         {!config.is_cattool
           ? formalitySelect

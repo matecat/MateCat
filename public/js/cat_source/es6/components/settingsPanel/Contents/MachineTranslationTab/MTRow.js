@@ -34,7 +34,7 @@ export const MTRow = ({row, deleteMT, onCheckboxClick}) => {
           </a>
         )}
       </div>
-      <div>{row.description}</div>
+      <div className="settings-panel-mt-row-description">{row.description}</div>
       {!config.is_cattool && (
         <div className="settings-panel-cell-center">
           <input
