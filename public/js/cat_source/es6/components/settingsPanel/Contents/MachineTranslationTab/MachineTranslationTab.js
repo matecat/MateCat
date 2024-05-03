@@ -255,9 +255,9 @@ export const MachineTranslationTab = () => {
     const shouldShowDeleteConfirmation =
       deleteMTRequest && activeMTEngineData.id === deleteMTRequest
     const GlossaryComponent =
-      activeMTEngineData.name === 'ModernMT'
+      activeMTEngineData.class_load === 'MMT'
         ? MTGlossary
-        : activeMTEngineData.name === 'DeepL'
+        : activeMTEngineData.class_load === 'DeepL'
           ? DeepLGlossary
           : undefined
 
