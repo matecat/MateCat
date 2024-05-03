@@ -44,11 +44,12 @@ export const SeverityColumn = ({label, index, shouldScrollIntoView}) => {
       originalCurrentTemplate.categories[0].severities[index]
 
     const columnsSeverity = currentTemplate.categories[0].severities.find(
-      ({id}) => id === originalColumnSeverity.id,
+      ({id}) => id === originalColumnSeverity?.id,
     )
 
     const isModified =
-      columnsSeverity && originalColumnSeverity.label !== columnsSeverity?.label
+      columnsSeverity &&
+      originalColumnSeverity?.label !== columnsSeverity?.label
 
     return isModified
   }
