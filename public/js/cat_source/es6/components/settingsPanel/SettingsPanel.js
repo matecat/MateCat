@@ -36,12 +36,12 @@ const DEFAULT_CONTENTS = [
 
 export const DEFAULT_ENGINE_MEMORY = {
   id: 1,
-  name: 'MyMemory',
+  name: 'ModernMT Lite',
   description:
     'Machine translation by the MT engine best suited to your project.',
   default: true,
+  class_load: 'MMTLite',
 }
-export const MMT_NAME = 'ModernMT'
 
 export const SettingsPanel = ({
   onClose,
