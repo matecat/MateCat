@@ -6,6 +6,7 @@ export const ModalContainer = ({
   children,
   onClose,
   closeOnOutsideClick,
+  showHeader,
 }) => {
   const ref = useRef(null)
 
@@ -61,21 +62,23 @@ export const ModalContainer = ({
         }}
       />
       <div className="matecat-modal-content" style={styleContainer}>
-        <div className="matecat-modal-header">
-          <div className="modal-logo" />
+        {showHeader && (
+          <div className="matecat-modal-header">
+            <div className="modal-logo" />
 
-          <div>
-            <h2>{title}</h2>
-          </div>
+            <div>
+              <h2>{title}</h2>
+            </div>
 
-          <div>
-            <span
-              className="close-matecat-modal x-popup"
-              data-testid="close-button"
-              onClick={handleClose}
-            />
+            <div>
+              <span
+                className="close-matecat-modal x-popup"
+                data-testid="close-button"
+                onClick={handleClose}
+              />
+            </div>
           </div>
-        </div>
+        )}
 
         <div className="matecat-modal-body">{children}</div>
       </div>

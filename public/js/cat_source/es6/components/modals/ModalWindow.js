@@ -16,6 +16,7 @@ const initialState = {
   title: '',
   styleContainer: '',
   onCloseCallback: false,
+  showHeader: true,
 }
 
 const componentStatus = (() => {
@@ -59,16 +60,24 @@ export class ModalWindow extends React.Component {
    * for legacy reasons, so before removing we need
    * to refactor these dirty usages first!
    */
-  showModalComponent = (component, props, title, style, onCloseCallback) => {
+  showModalComponent = (
+    component,
+    props = {},
+    title,
+    style,
+    onCloseCallback,
+    showHeader,
+  ) => {
     this.setState({
       ...initialState,
       title,
       component,
+      showHeader,
       compProps: {
         ...initialState.compProps,
         ...props,
         onClose: this.onCloseModal,
-        closeOnSuccess: props.closeOnSuccess ? props.closeOnSuccess : true,
+        closeOnSuccess: props?.closeOnSuccess ? props.closeOnSuccess : true,
       },
       styleContainer: style,
       onCloseCallback: onCloseCallback,
@@ -103,6 +112,7 @@ export class ModalWindow extends React.Component {
       styleContainer,
       compProps,
       isShowingModal,
+      showHeader,
     } = this.state
 
     return (
@@ -113,6 +123,7 @@ export class ModalWindow extends React.Component {
               compProps?.overlay ? ModalOverlay : ModalContainer,
               {
                 title,
+                showHeader,
                 styleContainer,
                 onClose: this.onCloseModal,
                 closeOnOutsideClick: compProps.closeOnOutsideClick,

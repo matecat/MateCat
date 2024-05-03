@@ -11,9 +11,17 @@ import PreferencesModal from '../components/modals/PreferencesModal'
 import SuccessModal from '../components/modals/SuccessModal'
 import ResetPasswordModal from '../components/modals/ResetPasswordModal'
 import CommonUtils from '../utils/commonUtils'
+import OnBoarding, {ONBOARDING_STEP} from '../components/onBoarding/OnBoarding'
 
 let ModalsActions = {
-  showModalComponent: (component, props, title, style, onCloseCallback) => {
+  showModalComponent: (
+    component,
+    props,
+    title,
+    style,
+    onCloseCallback,
+    showHeader = true,
+  ) => {
     AppDispatcher.dispatch({
       actionType: ModalsConstants.SHOW_MODAL,
       component,
@@ -21,33 +29,23 @@ let ModalsActions = {
       title,
       style,
       onCloseCallback,
+      showHeader,
     })
   },
-  openLoginModal: function (param = {}) {
-    const title = 'Add project to your management panel'
-    const style = {
-      width: '80%',
-      maxWidth: '800px',
-      minWidth: '600px',
-    }
-    const props = {
-      googleUrl: config.authURL,
-      ...param,
-    }
-
-    ModalsActions.showModalComponent(LoginModal, props, title, style)
+  openLoginModal: function () {
+    ModalsActions.showModalComponent(OnBoarding, null, null, null, null, false)
   },
-  openRegisterModal: (params) => {
-    let props = {
-      googleUrl: config.authURL,
-    }
-    if (params) {
-      props = {
-        ...props,
-        ...params,
-      }
-    }
-    ModalsActions.showModalComponent(RegisterModal, props, 'Register Now')
+  openRegisterModal: () => {
+    ModalsActions.showModalComponent(
+      OnBoarding,
+      {
+        step: ONBOARDING_STEP.REGISTER,
+      },
+      null,
+      null,
+      null,
+      false,
+    )
   },
   openPreferencesModal: ({showGDriveMessage = false} = {}) => {
     const style = {
@@ -65,14 +63,15 @@ let ModalsActions = {
     ModalsActions.showModalComponent(SuccessModal, props, props.title)
   },
   openResetPassword: () => {
-    let props = {closeOnOutsideClick: false, showOldPassword: true}
-    if (CommonUtils.lookupFlashServiceParam('popup')) {
-      props.showOldPassword = false
-    }
     ModalsActions.showModalComponent(
-      ResetPasswordModal,
-      props,
-      'Reset Password',
+      OnBoarding,
+      {
+        step: ONBOARDING_STEP.PASSWORD_RESET,
+      },
+      null,
+      null,
+      null,
+      false,
     )
   },
   onCloseModal: function () {
