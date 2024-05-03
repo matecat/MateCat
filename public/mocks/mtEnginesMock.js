@@ -4,18 +4,21 @@ export const mtEnginesMock = [
     name: 'ModernMT',
     type: 'MT',
     description: 'ModernMT - Adaptive Neural Machine Translation.',
+    class_load: 'MMT',
   },
   {
     id: 6,
     name: 'Test MT',
     type: 'MT',
     description: 'AltLang Engine',
+    class_load: 'AltLang',
   },
   {
     id: 7,
     name: 'DeepL',
     type: 'MT',
     description: 'DeepL - Accurate translations for individuals and Teams.',
+    class_load: 'DeepL',
   },
   {
     id: 1,
@@ -23,6 +26,7 @@ export const mtEnginesMock = [
     description:
       'Machine translation by the MT engine best suited to your project.',
     default: true,
+    class_load: 'MMTLite',
   },
 ]
 
