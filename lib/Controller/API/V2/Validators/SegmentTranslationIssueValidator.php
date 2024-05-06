@@ -4,14 +4,13 @@ namespace API\V2\Validators;
 
 
 use API\V2\Exceptions\ValidationError;
-use Chunks_ChunkStruct;
 use Exception;
 use Features\ReviewExtended\ReviewUtils;
 use Features\TranslationVersions\Model\TranslationEventDao;
-use LQA\ChunkReviewDao;
 use LQA\ChunkReviewStruct;
 use LQA\EntryDao;
 use LQA\EntryStruct;
+use Translations_SegmentTranslationStruct;
 
 class SegmentTranslationIssueValidator extends Base {
 
@@ -20,7 +19,7 @@ class SegmentTranslationIssueValidator extends Base {
      */
     public $issue;
     /**
-     * @var \Translations_SegmentTranslationStruct
+     * @var Translations_SegmentTranslationStruct
      */
     public $translation;
 

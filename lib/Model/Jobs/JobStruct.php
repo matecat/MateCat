@@ -5,9 +5,11 @@ use Exceptions\NotFoundException;
 use Outsource\ConfirmationDao;
 use Outsource\ConfirmationStruct;
 use Outsource\TranslatedConfirmationStruct;
+use TmKeyManagement\UserKeysModel;
 use Translations\WarningDao;
 use Translators\JobsTranslatorsDao;
 use Translators\JobsTranslatorsStruct;
+use WordCount\WordCountStruct;
 
 class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct, \ArrayAccess {
 
@@ -44,7 +46,7 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
 
     /**
      * Column 'completed' cannot be null, moreover it is BIT(1) and
-     * PDO does not works well in this case without explicitly
+     * PDO does not work well in this case without explicitly
      * tell him that this is an INT.
      * So, we can't set 0 because it will be treated as string, set it to false, it works.
      * @see https://bugs.php.net/bug.php?id=50757
@@ -55,19 +57,19 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
     public $draft_words;
     public $translated_words;
     public $approved_words;
+    public $approved2_words;
     public $rejected_words;
+
+    public $new_raw_words;
+    public $draft_raw_words;
+    public $translated_raw_words;
+    public $approved_raw_words;
+    public $approved2_raw_words;
+    public $rejected_raw_words;
+
     public $subject;
     public $payable_rates;
-    public $revision_stats_typing_min;
-    public $revision_stats_translations_min;
-    public $revision_stats_terminology_min;
-    public $revision_stats_language_quality_min;
-    public $revision_stats_style_min;
-    public $revision_stats_typing_maj;
-    public $revision_stats_translations_maj;
-    public $revision_stats_terminology_maj;
-    public $revision_stats_language_quality_maj;
-    public $revision_stats_style_maj;
+
     public $total_raw_wc;
 
     /**
@@ -227,15 +229,6 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
     }
 
     /**
-     * @return Translations_SegmentTranslationStruct
-     */
-    public function findLatestTranslation() {
-        $dao = new Translations_SegmentTranslationDao( Database::obtain() );
-
-        return $dao->lastTranslationByJobOrChunk( $this );
-    }
-
-    /**
      * @return Chunks_ChunkStruct[]
      */
     public function getChunks() {
@@ -259,8 +252,8 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
      * @return array
      */
     public function getClientKeys( Users_UserStruct $user, $role ){
-        $uKModel = new \TmKeyManagement\UserKeysModel( $user, $role );
-        return $uKModel->getKeys( $this->tm_keys );
+        $uKModel = new UserKeysModel( $user, $role );
+        return $uKModel->getKeys( $this->tm_keys, 60 * 10 );
     }
 
     public function getPeeForTranslatedSegments(){
@@ -276,11 +269,7 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
      * @return float
      */
     public function totalWordsCount() {
-        return $this->new_words +
-        $this->draft_words +
-        $this->translated_words +
-        $this->approved_words +
-        $this->rejected_words;
+        return WordCountStruct::loadFromJob( $this )->getRawTotal();
     }
 
     /**

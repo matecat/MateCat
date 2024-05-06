@@ -5,7 +5,6 @@ namespace Features;
 use API\V2\Exceptions\ValidationError;
 use BasicFeatureStruct;
 use Chunks_ChunkCompletionEventStruct;
-use Chunks_ChunkDao;
 use Chunks_ChunkStruct;
 use Constants;
 use Database;
@@ -16,7 +15,6 @@ use Features\ProjectCompletion\CompletionEventStruct;
 use Features\ReviewExtended\BatchReviewProcessor;
 use Features\ReviewExtended\IChunkReviewModel;
 use Features\ReviewExtended\ISegmentTranslationModel;
-use Features\ReviewExtended\Model\ArchivedQualityReportModel;
 use Features\ReviewExtended\Model\QualityReportModel;
 use Features\TranslationVersions\Handlers\TranslationEventsHandler;
 use Features\TranslationVersions\Model\TranslationEvent;
@@ -31,10 +29,13 @@ use LQA\ChunkReviewStruct;
 use LQA\ModelDao;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
-use Revise_FeedbackDAO;
+use Revise\FeedbackDAO;
 use RevisionFactory;
 use Utils;
+use WordCount\CounterModel;
 use ZipArchive;
+
+;
 
 abstract class AbstractRevisionFeature extends BaseFeature {
 
@@ -120,45 +121,6 @@ abstract class AbstractRevisionFeature extends BaseFeature {
     }
 
     /**
-     * @param       $id_job
-     * @param       $id_project
-     * @param array $options
-     *
-     * @return ChunkReviewStruct[]
-     * @throws Exception
-     */
-    public function createQaChunkReviewRecord( $id_job, $id_project, $options = [] ) {
-
-        $project        = Projects_ProjectDao::findById( $id_project );
-        $chunks         = Chunks_ChunkDao::getByIdProjectAndIdJob( $id_project, $id_job, 0 );
-        $createdRecords = [];
-
-        // expect one chunk
-        if ( !isset( $options[ 'source_page' ] ) ) {
-            $options[ 'source_page' ] = Constants::SOURCE_PAGE_REVISION;
-        }
-
-        foreach ( $chunks as $k => $chunk ) {
-            $data = [
-                    'id_project'  => $id_project,
-                    'id_job'      => $chunk->id,
-                    'password'    => $chunk->password,
-                    'source_page' => $options[ 'source_page' ]
-            ];
-
-            if ( $k == 0 && array_key_exists( 'first_record_password', $options ) != null ) {
-                $data[ 'review_password' ] = $options[ 'first_record_password' ];
-            }
-
-            $chunkReview = ChunkReviewDao::createRecord( $data );
-            $project->getFeaturesSet()->run( 'chunkReviewRecordCreated', $chunkReview, $project );
-            $createdRecords[] = $chunkReview;
-        }
-
-        return $createdRecords;
-    }
-
-    /**
      * @param Chunks_ChunkStruct[]   $chunksArray
      * @param Projects_ProjectStruct $project
      * @param array                  $options
@@ -189,6 +151,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
 
             $chunkReview = ChunkReviewDao::createRecord( $data );
             $project->getFeaturesSet()->run( 'chunkReviewRecordCreated', $chunkReview, $project );
+
             $createdRecords[] = $chunkReview;
         }
 
@@ -362,13 +325,8 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      * @param                       $completion_event_id
      */
     public function project_completion_event_saved( Chunks_ChunkStruct $chunk, CompletionEventStruct $event, $completion_event_id ) {
-        if ( $event->is_review ) {
-            $model = new ArchivedQualityReportModel( $chunk );
-            $model->saveWithUID( $event->uid );
-        } else {
             $model = new QualityReportModel( $chunk );
             $model->resetScore( $completion_event_id );
-        }
     }
 
     /**
@@ -439,8 +397,8 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      * @param $revision_number
      */
     public function review_password_changed( $job_id, $old_password, $new_password, $revision_number ) {
-        $feedbackDao = new Revise_FeedbackDAO();
-        $feedbackDao->updateFeedbackPassword( $job_id, $old_password, $new_password, $revision_number );
+        $feedbackDao = new FeedbackDAO();
+        $feedbackDao->updateFeedbackPassword($job_id, $old_password, $new_password, $revision_number);
     }
 
     /**
@@ -573,10 +531,10 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      *
      * @return ISegmentTranslationModel
      */
-    public function getSegmentTranslationModel( TranslationEvent $translation, array $chunkReviews = [] ) {
+    public function getSegmentTranslationModel( TranslationEvent $translation, CounterModel $jobWordCounter, array $chunkReviews = [] ) {
         $class_name = get_class( $this ) . '\SegmentTranslationModel';
 
-        return new $class_name( $translation, $chunkReviews );
+        return new $class_name( $translation, $jobWordCounter, $chunkReviews );
     }
 
     /**
@@ -593,7 +551,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
     }
 
 
-    public function revise_summary_project_type( $old_value ) {
+    public function summary_project_type( $old_value ) {
         return 'new';
     }
 

@@ -1,4 +1,4 @@
-import React, {useRef} from 'react'
+import React, {useEffect, useRef} from 'react'
 
 export const ModalContainer = ({
   title,
@@ -19,7 +19,29 @@ export const ModalContainer = ({
 
   const onKeyDownHandler = (event) => {
     event.stopPropagation()
-    if (event.key === 'Tab') event.preventDefault()
+    if (event.key === 'Tab') {
+      let focusable = document
+        .querySelector('#matecat-modal')
+        .querySelectorAll('input,button,select,textarea')
+      if (focusable.length) {
+        let first = focusable[0]
+        let last = focusable[focusable.length - 1]
+        let shift = event.shiftKey
+        if (shift) {
+          if (event.target === first) {
+            // shift-tab pressed on first input in dialog
+            last.focus()
+            event.preventDefault()
+          }
+        } else {
+          if (event.target === last) {
+            // tab pressed on last input in dialog
+            first.focus()
+            event.preventDefault()
+          }
+        }
+      }
+    }
   }
 
   return (

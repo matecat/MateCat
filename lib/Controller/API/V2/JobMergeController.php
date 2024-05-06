@@ -7,7 +7,6 @@
  */
 
 namespace API\V2;
-use Analysis\AnalysisDao;
 use API\V2\Exceptions\NotFoundException;
 use API\V2\Validators\ProjectPasswordValidator;
 use Jobs_JobStruct;

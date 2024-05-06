@@ -26,6 +26,10 @@ const TeamsStore = assign({}, EventEmitter.prototype, {
   updateUser: function (user) {
     this.user = user
   },
+  updateUserName: function ({firstName, lastName}) {
+    this.user.user.first_name = firstName
+    this.user.user.last_name = lastName
+  },
   updateTeam: function (team) {
     let teamOld = this.teams.find(function (org) {
       return org.get('id') == team.id
@@ -133,6 +137,10 @@ AppDispatcher.register(function (action) {
       break
     case TeamConstants.UPDATE_USER:
       TeamsStore.updateUser(action.user)
+      TeamsStore.emitChange(TeamConstants.UPDATE_USER, TeamsStore.user)
+      break
+    case TeamConstants.UPDATE_USER_NAME:
+      TeamsStore.updateUserName(action.info)
       TeamsStore.emitChange(TeamConstants.UPDATE_USER, TeamsStore.user)
       break
     // Move this actions

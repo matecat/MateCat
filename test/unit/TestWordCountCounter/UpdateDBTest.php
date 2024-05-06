@@ -1,8 +1,11 @@
 <?php
 
+use WordCount\CounterModel;
+use WordCount\WordCountStruct;
+
 /**
  * @group regression
- * @covers WordCount_CounterModel::updateDB
+ * @covers CounterModel::updateDB
  * User: dinies
  * Date: 14/06/16
  * Time: 18.31
@@ -26,11 +29,11 @@ class UpdateDBTest extends AbstractTest
     protected $job_Dao;
     protected $job_struct;
     /**
-     * @var WordCount_Struct
+     * @var WordCountStruct
      */
     protected $word_count_struct;
     /**
-     * @var WordCount_CounterModel
+     * @var CounterModel
      */
     protected $word_counter;
     /**
@@ -122,7 +125,7 @@ class UpdateDBTest extends AbstractTest
         $this->sql_delete_first_segment = "DELETE FROM ".INIT::$DB_DATABASE.".`segments` WHERE id='" . $this->first_segment_id . "';";
 
 
-        $this->word_count_struct= new WordCount_Struct();
+        $this->word_count_struct= new WordCountStruct();
         $this->word_count_struct->setIdJob($this->job_id);
         $this->word_count_struct->setJobPassword($this->job_password);
         $this->word_count_struct->setNewWords($this->number_of_words_changed);
@@ -136,7 +139,7 @@ class UpdateDBTest extends AbstractTest
 
 
 
-        $this->word_counter= new WordCount_CounterModel( $this->word_count_struct );
+        $this->word_counter= new CounterModel( $this->word_count_struct );
 
         $this->flusher = new Predis\Client(INIT::$REDIS_SERVERS);
         $this->flusher->select( INIT::$INSTANCE_ID );
@@ -154,7 +157,7 @@ class UpdateDBTest extends AbstractTest
 
     /**
      * @group regression
-     * @covers WordCount_CounterModel::updateDB
+     * @covers CounterModel::updateDB
      */
     public function test_updateDB_from_NEW_to_TRANSLATED(){
 
@@ -183,7 +186,7 @@ class UpdateDBTest extends AbstractTest
         $this->word_counter->setNewStatus("TRANSLATED");
 
 
-        $first_word_struct_param= new WordCount_Struct();
+        $first_word_struct_param= new WordCountStruct();
         $first_word_struct_param->setIdJob($this->job_id);
         $first_word_struct_param->setJobPassword($this->job_password);
         $first_word_struct_param->setIdSegment($this->first_segment_id);
@@ -196,7 +199,7 @@ class UpdateDBTest extends AbstractTest
         $first_word_struct_param->setNewStatus("TRANSLATED");
 
 
-        $second_word_struct_param= new WordCount_Struct();
+        $second_word_struct_param= new WordCountStruct();
         $second_word_struct_param->setIdJob($this->job_id);
         $second_word_struct_param->setJobPassword($this->job_password);
         $second_word_struct_param->setIdSegment($this->first_segment_id);
@@ -216,7 +219,7 @@ class UpdateDBTest extends AbstractTest
         $result_word_counter_struct=$this->word_counter->updateDB($struct_wrapper);
 
 
-        $this->assertTrue($result_word_counter_struct instanceof WordCount_Struct);
+        $this->assertTrue($result_word_counter_struct instanceof WordCountStruct);
         $this->assertEquals($this->job_id, $result_word_counter_struct->getIdJob());
         $this->assertEquals($this->job_password, $result_word_counter_struct->getJobPassword());
         $this->assertEquals($this->first_segment_id, $result_word_counter_struct->getIdSegment());

@@ -9,6 +9,7 @@
 namespace Features\ReviewExtended;
 
 use Chunks_ChunkStruct;
+use Exception;
 use LQA\ChunkReviewDao;
 use LQA\ChunkReviewStruct;
 use LQA\ModelStruct;
@@ -20,9 +21,10 @@ class ReviewUtils {
      * @param array $chunkReviews
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     public static function formatStats( $statsArray, $chunkReviews ) {
+
         $statsArray [ 'revises' ] = [];
 
         /** @var ChunkReviewStruct $chunkReview */
@@ -59,8 +61,8 @@ class ReviewUtils {
      * @param ModelStruct $lqaModel
      * @param string      $sourcePage
      *
-     * @return array|mixed
-     * @throws \Exception
+     * @return int
+     * @throws Exception
      */
     public static function filterLQAModelLimit( ModelStruct $lqaModel, $sourcePage ) {
         $limit = $lqaModel->getLimit();
@@ -82,10 +84,9 @@ class ReviewUtils {
      */
     public static function validRevisionNumbers( Chunks_ChunkStruct $chunk ) {
         $chunkReviews         = ( new ChunkReviewDao() )->findChunkReviews( $chunk );
-        $validRevisionNumbers = array_map( function ( $chunkReview ) {
+
+        return array_map( function ( $chunkReview ) {
             return self::sourcePageToRevisionNumber( $chunkReview->source_page );
         }, $chunkReviews );
-
-        return $validRevisionNumbers;
     }
 }

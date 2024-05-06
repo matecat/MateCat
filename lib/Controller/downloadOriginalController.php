@@ -10,10 +10,6 @@ set_time_limit( 180 );
 
 class downloadOriginalController extends downloadController {
 
-    private $download_type;
-    private $id_file;
-    private $id_project;
-
     public function __construct() {
 
         $filterArgs = [
@@ -38,12 +34,13 @@ class downloadOriginalController extends downloadController {
         //$__postInput = filter_var_array( $_POST, $filterArgs );
 
         $this->_user_provided_filename = $__postInput[ 'filename' ];
-        $this->id_file                 = $__postInput[ 'id_file' ];
         $this->id_job                  = $__postInput[ 'id_job' ];
-        $this->download_type           = $__postInput[ 'download_type' ];
         $this->password                = $__postInput[ 'password' ];
     }
 
+    /**
+     * @throws Exception
+     */
     public function doAction() {
 
         // get Job Info, we need only a row of jobs ( split )
@@ -69,9 +66,9 @@ class downloadOriginalController extends downloadController {
         $files_job = $fs->getFilesForJob( $this->id_job, false );
 
         //take the project ID and creation date, array index zero is good, all id are equals
-        $this->id_project = $files_job[ 0 ][ 'id_project' ];
+        $id_project = $files_job[ 0 ][ 'id_project' ];
 
-        $this->project = Projects_ProjectDao::findById( $this->id_project );
+        $this->project = Projects_ProjectDao::findById( $id_project );
 
         $output_content = [];
 
@@ -83,7 +80,7 @@ class downloadOriginalController extends downloadController {
 
             if ( is_array( $zipPathInfo ) ) {
                 $output_content[ $id_file ][ 'output_filename' ] = $zipPathInfo[ 'zipfilename' ];
-                $output_content[ $id_file ][ 'input_filename' ]  = $fs->getOriginalZipPath( $this->project->create_date, $this->id_project, $zipPathInfo[ 'zipfilename' ] );
+                $output_content[ $id_file ][ 'input_filename' ]  = $fs->getOriginalZipPath( $this->project->create_date, $id_project, $zipPathInfo[ 'zipfilename' ] );
             } else {
                 $output_content[ $id_file ][ 'output_filename' ] = $file[ 'filename' ];
                 $output_content[ $id_file ][ 'input_filename' ]  = $file[ 'originalFilePath' ];
@@ -133,7 +130,7 @@ class downloadOriginalController extends downloadController {
 
         $activity             = new ActivityLogStruct();
         $activity->id_job     = $this->id_job;
-        $activity->id_project = $this->id_project;
+        $activity->id_project = $id_project;
         $activity->action     = ActivityLogStruct::DOWNLOAD_ORIGINAL;
         $activity->ip         = Utils::getRealIpAddr();
         $activity->uid        = $this->user->uid;

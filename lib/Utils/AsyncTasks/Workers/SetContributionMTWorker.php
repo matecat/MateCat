@@ -12,7 +12,6 @@ namespace AsyncTasks\Workers;
 use Contribution\ContributionSetStruct;
 use Engine;
 use Exception;
-use Exceptions\ValidationError;
 use Jobs_JobStruct;
 use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\ReQueueException;
@@ -39,11 +38,20 @@ class SetContributionMTWorker extends SetContributionWorker {
 
     }
 
+    /**
+     * @param array $config
+     * @param ContributionSetStruct $contributionStruct
+     * @throws Exception
+     */
     protected function _set( array $config, ContributionSetStruct $contributionStruct ) {
+
+        $jobStruct = $contributionStruct->getJobStruct();
 
         $config[ 'segment' ]     = $contributionStruct->segment;
         $config[ 'translation' ] = $contributionStruct->translation;
         $config[ 'session' ]     = $contributionStruct->getSessionId();
+        $config[ 'uid' ]         = $contributionStruct->uid;
+        $config[ 'set_mt' ]      = ($jobStruct->id_mt_engine != 1) ? false : true;
 
         // set the contribution for every key in the job belonging to the user
         $res = $this->_engine->set( $config );
@@ -55,17 +63,19 @@ class SetContributionMTWorker extends SetContributionWorker {
     }
 
     /**
-     * @param array                 $config
+     * @param array $config
      * @param ContributionSetStruct $contributionStruct
-     *
-     * @throws ReQueueException
+     * @throws Exception
      */
     protected function _update( array $config, ContributionSetStruct $contributionStruct ) {
+
+        $jobStruct = $contributionStruct->getJobStruct();
 
         $config[ 'segment' ]     = $contributionStruct->segment;
         $config[ 'translation' ] = $contributionStruct->translation;
         $config[ 'tuid' ]        = $contributionStruct->id_job . ":" . $contributionStruct->id_segment;
         $config[ 'session' ]     = $contributionStruct->getSessionId();
+        $config[ 'set_mt' ]      = ($jobStruct->id_mt_engine != 1) ? false : true;
 
         // set the contribution for every key in the job belonging to the user
         $res = $this->_engine->update( $config );

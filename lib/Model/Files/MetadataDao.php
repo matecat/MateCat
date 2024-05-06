@@ -8,10 +8,11 @@
 
 namespace Files;
 
+use DataAccess_AbstractDao;
 use DataAccess_IDaoStruct;
 use Database;
 
-class MetadataDao extends \DataAccess_AbstractDao {
+class MetadataDao extends DataAccess_AbstractDao {
 
     const TABLE = 'file_metadata';
 
@@ -34,7 +35,8 @@ class MetadataDao extends \DataAccess_AbstractDao {
                 'id_file'    => $id_file,
         ] );
 
-        return @$result;
+        /** @var $result MetadataStruct[] */
+        return isset( $result ) ? $result : null;
     }
 
     /**
@@ -44,7 +46,7 @@ class MetadataDao extends \DataAccess_AbstractDao {
      * @param null $filePartsId
      * @param int  $ttl
      *
-     * @return DataAccess_IDaoStruct|MetadataStruct
+     * @return MetadataStruct
      */
     public function get( $id_project, $id_file, $key, $filePartsId = null, $ttl = 0 ) {
 
@@ -59,14 +61,17 @@ class MetadataDao extends \DataAccess_AbstractDao {
                 'key'        => $key
         ];
 
-        if($filePartsId){
-            $query .= " AND `files_parts_id` = :files_parts_id";
-            $params['files_parts_id'] = $filePartsId;
+        if ( $filePartsId ) {
+            $query                      .= " AND `files_parts_id` = :files_parts_id";
+            $params[ 'files_parts_id' ] = $filePartsId;
         }
 
-        $stmt = $this->_getStatementForCache($query);
+        $stmt           = $this->_getStatementForCache( $query );
 
-        return @$this->setCacheTTL( $ttl )->_fetchObject( $stmt, new MetadataStruct(), $params )[ 0 ];
+        /** @var $metadataStruct MetadataStruct[] */
+        $metadataStruct = $this->setCacheTTL( $ttl )->_fetchObject( $stmt, new MetadataStruct(), $params );
+
+        return !empty( $metadataStruct ) ? $metadataStruct[ 0 ] : null;
     }
 
     /**
@@ -130,22 +135,22 @@ class MetadataDao extends \DataAccess_AbstractDao {
      * @param array $metadata
      * @param null  $filePartsId
      *
-     * @return bool
+     * @return bool|void
      */
     public function bulkInsert( $id_project, $id_file, array $metadata = [], $filePartsId = null ) {
 
-        $sql = "INSERT INTO file_metadata ( id_project, id_file, `key`, `value`, `files_parts_id` ) VALUES ";
-        $bind_values   = [];
+        $sql         = "INSERT INTO file_metadata ( id_project, id_file, `key`, `value`, `files_parts_id` ) VALUES ";
+        $bind_values = [];
 
         $index = 1;
-        foreach ($metadata as $key => $value){
+        foreach ( $metadata as $key => $value ) {
 
-            $isLast = ($index === count($metadata));
+            $isLast = ( $index === count( $metadata ) );
 
-            if($value !== null and $value !== ''){
+            if ( $value !== null and $value !== '' ) {
                 $sql .= "(?,?,?,?,?)";
 
-                if(!$isLast){
+                if ( !$isLast ) {
                     $sql .= ',';
                 }
 
@@ -158,7 +163,7 @@ class MetadataDao extends \DataAccess_AbstractDao {
             $index++;
         }
 
-        if(!empty($bind_values)){
+        if ( !empty( $bind_values ) ) {
             $conn = Database::obtain()->getConnection();
             $stmt = $conn->prepare( $sql );
 

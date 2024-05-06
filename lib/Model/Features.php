@@ -1,7 +1,6 @@
 <?php
 
 use Features\BaseFeature;
-use Features\Dqf;
 use Features\Mmt;
 use Features\ProjectCompletion;
 use Features\QaCheckBlacklist;
@@ -36,7 +35,6 @@ class Features {
     const TRANSLATION_VERSIONS = TranslationVersions::FEATURE_CODE;
     const QACHECK_GLOSSARY     = QaCheckGlossary::FEATURE_CODE;
     const QACHECK_BLACKLIST    = QaCheckBlacklist::FEATURE_CODE;
-    const DQF                  = Dqf::FEATURE_CODE;
     const REVIEW_EXTENDED      = ReviewExtended::FEATURE_CODE;
     const MMT                  = Mmt::FEATURE_CODE;
     const SECOND_PASS_REVIEW   = SecondPassReview::FEATURE_CODE ;
@@ -46,7 +44,6 @@ class Features {
             Features::TRANSLATION_VERSIONS,
             Features::QACHECK_GLOSSARY,
             Features::QACHECK_BLACKLIST,
-            Features::DQF,
             Features::REVIEW_EXTENDED,
             Features::MMT,
             Features::SECOND_PASS_REVIEW

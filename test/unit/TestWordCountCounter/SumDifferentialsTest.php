@@ -1,8 +1,11 @@
 <?php
 
+use WordCount\CounterModel;
+use WordCount\WordCountStruct;
+
 /**
  * @group regression
- * @covers WordCount_CounterModel::sumDifferentials
+ * @covers CounterModel::sumDifferentials
  * User: dinies
  * Date: 14/06/16
  * Time: 17.16
@@ -14,7 +17,7 @@ class SumDifferentialsTest extends AbstractTest
     protected $job_password;
     protected $segment_id;
     /**
-     * @var WordCount_Struct
+     * @var WordCountStruct
      */
     protected $word_count_struct;
 
@@ -25,7 +28,7 @@ class SumDifferentialsTest extends AbstractTest
         $this->job_password= "bar999foo"; //sample
         $this->segment_id= "789099"; //sample
 
-        $this->word_count_struct= new WordCount_Struct();
+        $this->word_count_struct= new WordCountStruct();
         $this->word_count_struct->setIdJob($this->job_id);
         $this->word_count_struct->setJobPassword($this->job_password);
         $this->word_count_struct->setIdSegment($this->segment_id);
@@ -33,10 +36,9 @@ class SumDifferentialsTest extends AbstractTest
 
     }
     /**
-     * @covers WordCount_CounterModel::sumDifferentials
+     * @covers CounterModel::sumDifferentials
      * @group regression
      *
-     * @param WordCount_Struct[] $wordCount_Struct
      */
     public function test_sumDifferentials_with_rejection()
     {
@@ -49,12 +51,12 @@ class SumDifferentialsTest extends AbstractTest
         $this->word_count_struct->setOldStatus("TRANSLATED");
         $this->word_count_struct->setNewStatus("REJECTED");
 
-        $this->word_counter = new WordCount_CounterModel($this->word_count_struct);
+        $this->word_counter = new CounterModel($this->word_count_struct);
         $this->word_counter->setOldStatus("TRANSLATED");
         $this->word_counter->setNewStatus("REJECTED");
 
 
-        $word_count_struct_param= new WordCount_Struct();
+        $word_count_struct_param= new WordCountStruct();
         $word_count_struct_param->setIdJob($this->job_id);
         $word_count_struct_param->setJobPassword($this->job_password);
         $word_count_struct_param->setIdSegment($this->segment_id);
@@ -69,7 +71,7 @@ class SumDifferentialsTest extends AbstractTest
         $struct_wrapper[]= $word_count_struct_param;
         $result = $this->word_counter->sumDifferentials($struct_wrapper);
 
-        $this->assertTrue($result instanceof WordCount_Struct);
+        $this->assertTrue($result instanceof WordCountStruct);
         $this->assertEquals($this->job_id, $result->getIdJob());
         $this->assertEquals($this->job_password, $result->getJobPassword());
         $this->assertEquals($this->segment_id, $result->getIdSegment());
@@ -83,10 +85,9 @@ class SumDifferentialsTest extends AbstractTest
     }
 
     /**
-     * @covers WordCount_CounterModel::sumDifferentials
+     * @covers CounterModel::sumDifferentials
      * @group regression
      *
-     * @param WordCount_Struct[] $wordCount_Struct
      */
     public function test_sumDifferentials_with_chunks_of_split_from_NEW_to_APPROVED()
     {
@@ -100,13 +101,13 @@ class SumDifferentialsTest extends AbstractTest
         $this->word_count_struct->setNewStatus("APPROVED");
 
 
-        $this->word_counter = new WordCount_CounterModel($this->word_count_struct);
+        $this->word_counter = new CounterModel($this->word_count_struct);
         $this->word_counter->setOldStatus("NEW");
         $this->word_counter->setNewStatus("APPROVED");
 
 
 
-        $first_word_struct_param= new WordCount_Struct();
+        $first_word_struct_param= new WordCountStruct();
         $first_word_struct_param->setIdJob($this->job_id);
         $first_word_struct_param->setJobPassword($this->job_password);
         $first_word_struct_param->setIdSegment($this->segment_id);
@@ -119,7 +120,7 @@ class SumDifferentialsTest extends AbstractTest
         $first_word_struct_param->setNewStatus("APPROVED");
 
 
-        $second_word_struct_param= new WordCount_Struct();
+        $second_word_struct_param= new WordCountStruct();
         $second_word_struct_param->setIdJob($this->job_id);
         $second_word_struct_param->setJobPassword($this->job_password);
         $second_word_struct_param->setIdSegment($this->segment_id);
@@ -138,7 +139,7 @@ class SumDifferentialsTest extends AbstractTest
 
         $result = $this->word_counter->sumDifferentials($struct_wrapper);
 
-        $this->assertTrue($result instanceof WordCount_Struct);
+        $this->assertTrue($result instanceof WordCountStruct);
         $this->assertEquals($this->job_id, $result->getIdJob());
         $this->assertEquals($this->job_password, $result->getJobPassword());
         $this->assertEquals($this->segment_id, $result->getIdSegment());

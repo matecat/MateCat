@@ -21,10 +21,12 @@ use Langs_Languages;
 use LQA\ChunkReviewDao;
 use ManageUtils;
 use OutsourceTo_OutsourceAvailable;
+use Projects_ProjectDao;
+use Projects_ProjectStruct;
 use TmKeyManagement_ClientTmKeyStruct;
 use Users_UserStruct;
 use Utils;
-use WordCount_Struct;
+use WordCount\WordCountStruct;
 
 class Job {
 
@@ -34,7 +36,7 @@ class Job {
     protected $status;
 
     /**
-     * @var \Users_UserStruct
+     * @var Users_UserStruct
      */
     protected $user;
 
@@ -56,7 +58,7 @@ class Job {
     }
 
     /**
-     * @param \Users_UserStruct $user
+     * @param Users_UserStruct $user
      *
      * @return $this
      */
@@ -107,7 +109,7 @@ class Job {
      * @return array
      * @throws \Exception
      */
-    public function renderItem( Chunks_ChunkStruct $chunk, \Projects_ProjectStruct $project, FeatureSet $featureSet ) {
+    public function renderItem( Chunks_ChunkStruct $chunk, Projects_ProjectStruct $project, FeatureSet $featureSet ) {
 
         $outsourceInfo = $chunk->getOutsource();
         $tStruct       = $chunk->getTranslator();
@@ -116,59 +118,16 @@ class Job {
         if ( !empty( $outsourceInfo ) ) {
             $outsource = ( new OutsourceConfirmation( $outsourceInfo ) )->render();
         } else {
-            $translator = ( !empty( $tStruct ) ? ( new JobTranslator() )->renderItem( $tStruct ) : null );
+            $translator = ( !empty( $tStruct ) ? ( new JobTranslator( $tStruct ) )->renderItem() : null );
         }
 
-        $jobStats = new WordCount_Struct();
-        $jobStats->setIdJob( $chunk->id );
-        $jobStats->setDraftWords( $chunk->draft_words + $chunk->new_words ); // (draft_words + new_words) AS DRAFT
-        $jobStats->setRejectedWords( $chunk->rejected_words );
-        $jobStats->setTranslatedWords( $chunk->translated_words );
-        $jobStats->setApprovedWords( $chunk->approved_words );
+        $jobStats = WordCountStruct::loadFromJob( $chunk );
 
         $lang_handler = Langs_Languages::getInstance();
 
         $subject_handler = Langs_LanguageDomains::getInstance();
-        $subjects        = $subject_handler->getEnabledDomains();
-
-        $subjects_keys = Utils::array_column( $subjects, "key" );
-        $subject_key   = array_search( $chunk->subject, $subjects_keys );
-
-        $warningsCount = $chunk->getWarningsCount();
-
-        if ( $featureSet->hasRevisionFeature() ) {
-            $reviseIssues = new \stdClass();
-
-        } else {
-
-            $reviseClass = new \Constants_Revise();
-
-            $jobQA = new \Revise_JobQA(
-                    $chunk->id,
-                    $chunk->password,
-                    $jobStats->getTotal(),
-                    $reviseClass
-            );
-
-            list( $jobQA, $reviseClass ) = $featureSet->filter( "overrideReviseJobQA", [ $jobQA, $reviseClass ], $chunk->id,
-                    $chunk->password,
-                    $jobStats->getTotal() );
-
-            /**
-             * @var $jobQA \Revise_JobQA
-             */
-            $jobQA->retrieveJobErrorTotals();
-            $jobQA->evalJobVote();
-            $qa_data = $jobQA->getQaData();
-
-            $reviseIssues = [];
-            foreach ( $qa_data as $issue ) {
-                $reviseIssues[ str_replace( " ", "_", strtolower( $issue[ 'type' ] ) ) ] = [
-                        'allowed' => $issue[ 'allowed' ],
-                        'found'   => $issue[ 'found' ]
-                ];
-            }
-        }
+        $subjectsHashMap = $subject_handler->getEnabledHashMap();
+        $warningsCount   = $chunk->getWarningsCount();
 
         // Added 5 minutes cache here
         $chunkReviews = ( new ChunkReviewDao() )->findChunkReviews( $chunk, 60 * 5 );
@@ -177,15 +136,15 @@ class Job {
         $outsourceAvailableInfo = $featureSet->filter( 'outsourceAvailableInfo', $chunk->target, $chunk->getProject()->id_customer, $chunk->id );
 
         // if the hook is not triggered by any plugin
-        if(!is_array($outsourceAvailableInfo) or empty($outsourceAvailableInfo)){
+        if ( !is_array( $outsourceAvailableInfo ) or empty( $outsourceAvailableInfo ) ) {
             $outsourceAvailableInfo = [
-                'disabled_email' => false,
-                'custom_payable_rate' => false,
-                'language_not_supported' => false,
+                    'disabled_email'         => false,
+                    'custom_payable_rate'    => false,
+                    'language_not_supported' => false,
             ];
         }
 
-        $outsourceAvailable = OutsourceTo_OutsourceAvailable::isOutsourceAvailable($outsourceAvailableInfo);
+        $outsourceAvailable = OutsourceTo_OutsourceAvailable::isOutsourceAvailable( $outsourceAvailableInfo );
 
         $result = [
                 'id'                    => (int)$chunk->id,
@@ -197,20 +156,20 @@ class Job {
                 'job_first_segment'     => $chunk->job_first_segment,
                 'status'                => $chunk->status_owner,
                 'subject'               => $chunk->subject,
-                'subject_printable'     => $subjects[ $subject_key ][ 'display' ],
+                'subject_printable'     => $subjectsHashMap[ $chunk->subject ],
                 'owner'                 => $chunk->owner,
                 'open_threads_count'    => (int)$chunk->getOpenThreadsCount(),
                 'create_timestamp'      => strtotime( $chunk->create_date ),
                 'created_at'            => Utils::api_timestamp( $chunk->create_date ),
                 'create_date'           => $chunk->create_date,
                 'formatted_create_date' => ManageUtils::formatJobDate( $chunk->create_date ),
-                'quality_overall'       => CatUtils::getQualityOverallFromJobStruct( $chunk, $project, $featureSet, $chunkReviews ),
+                'quality_overall'       => CatUtils::getQualityOverallFromJobStruct( $chunk, $chunkReviews ),
                 'pee'                   => $chunk->getPeeForTranslatedSegments(),
                 'tte'                   => (int)( (int)$chunk->total_time_to_edit / 1000 ),
                 'private_tm_key'        => $this->getKeyList( $chunk ),
                 'warnings_count'        => $warningsCount->warnings_count,
                 'warning_segments'      => ( isset( $warningsCount->warning_segments ) ? $warningsCount->warning_segments : [] ),
-                'stats'                 => ReviewUtils::formatStats( CatUtils::getFastStatsForJob( $jobStats, false ), $chunkReviews ),
+                'stats'                 => $jobStats,
                 'outsource'             => $outsource,
                 'outsource_available'   => $outsourceAvailable,
                 'outsource_info'        => $outsourceAvailableInfo,
@@ -218,10 +177,8 @@ class Job {
                 'total_raw_wc'          => (int)$chunk->total_raw_wc,
                 'standard_wc'           => (float)$chunk->standard_analysis_wc,
                 'quality_summary'       => [
-                        'equivalent_class' => $chunk->getQualityInfo($chunkReviews),
-                        'quality_overall'  => $chunk->getQualityOverall($chunkReviews),
-                        'errors_count'     => (int)$chunk->getErrorsCount(),
-                        'revise_issues'    => $reviseIssues
+                        'quality_overall' => $chunk->getQualityOverall( $chunkReviews ),
+                        'errors_count'    => (int)$chunk->getErrorsCount()
                 ],
 
         ];
@@ -248,7 +205,7 @@ class Job {
         /**
          * @var $projectData ShapelessConcreteStruct[]
          */
-        $projectData = ( new \Projects_ProjectDao() )->setCacheTTL( 60 * 60 * 24 )->getProjectData( $project->id, $project->password );
+        $projectData = ( new Projects_ProjectDao() )->setCacheTTL( 60 * 60 * 24 )->getProjectData( $project->id, $project->password );
 
         $formatted = new ProjectUrls( $projectData );
 

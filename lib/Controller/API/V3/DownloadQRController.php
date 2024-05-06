@@ -101,6 +101,19 @@ class DownloadQRController extends BaseChunkController {
 
         $qrSegmentModel = new QualityReportSegmentModel( $chunk );
 
+        // categories issues
+        $project    = $chunk->getProject();
+        $model      = $project->getLqaModel();
+        $categories = $model !== null ? $model->getCategoriesAndSeverities() : [];
+
+        $categoryIssues = [];
+
+        foreach ($categories as $category){
+            foreach ($category['severities'] as $severity){
+                $categoryIssues[] = $category['label'] . ' ['.$severity['label'].']';
+            }
+        }
+
         $ids = [];
         $this->buildArrayOfSegmentIds($qrSegmentModel, $this->segmentsPerFile,0, $ids);
 
@@ -111,11 +124,11 @@ class DownloadQRController extends BaseChunkController {
 
         // compose a unique file
         if($this->format === 'json'){
-            $uniqueFile = $this->createJsonFile($data);
+            $uniqueFile = $this->createJsonFile($data, $categoryIssues);
         }
 
         if($this->format === 'csv'){
-            $uniqueFile = $this->createCSVFile($data);
+            $uniqueFile = $this->createCSVFile($data, $categoryIssues);
         }
 
         if(!isset($uniqueFile)){
@@ -159,108 +172,58 @@ class DownloadQRController extends BaseChunkController {
      */
     private function buildFileContentFromArrayOfSegmentIds(QualityReportSegmentModel $qrSegmentModel, $segments_ids)
     {
-        $segments  = $qrSegmentModel->getSegmentsForQR( $segments_ids );
+        $segments = $qrSegmentModel->getSegmentsForQR( $segments_ids );
 
-        $data = [];
+        $data     = [];
+
         /** @var \QualityReport_QualityReportSegmentStruct $segment */
         foreach ($segments as $segment){
 
-            $issuesCritical = 0;
-            $issuesEnhancement = 0;
-            $issuesMajor = 0;
-            $issuesMinor = 0;
-            $issuesNeutral = 0;
-            $issuesNone = 0;
-            $issuesRepetition = 0;
-            $issuesPreferentialEdit = 0;
-            $issuesContextMajor = 0;
-            $issuesContextMinor = 0;
+            $issues   = [];
 
             foreach ($segment->issues as $issue){
-                switch ($issue->issue_severity) {
-                    case "Context Major":
-                        $issuesContextMajor++;
-                        break;
 
-                    case "Context Minor":
-                        $issuesContextMinor++;
-                        break;
+                $label = $issue->issue_category . ' ['.$issue->issue_severity.']';
 
-                    case "Preferential edit":
-                        $issuesPreferentialEdit++;
-                        break;
-
-                    case "Critical":
-                        $issuesCritical++;
-                        break;
-
-                    case "Enhancement":
-                        $issuesEnhancement++;
-                        break;
-
-                    case "Major":
-                        $issuesMajor++;
-                        break;
-
-                    case "Minor":
-                        $issuesMinor++;
-                        break;
-
-                    case "Neutral":
-                        $issuesNeutral++;
-                        break;
-
-                    case "None":
-                        $issuesNone++;
-                        break;
-
-                    case "Repetition":
-                        $issuesRepetition++;
-                        break;
+                if(!isset($issues[$label])){
+                    $issues[$label] = 0;
                 }
+
+                $issues[$label] = $issues[$label] + 1;
             }
 
             $data[] = [
-                    $segment->sid,
-                    $segment->target,
-                    $segment->segment,
-                    $segment->raw_word_count,
-                    $segment->translation,
-                    $segment->version,
-                    $segment->ice_locked,
-                    $segment->status,
-                    $segment->time_to_edit,
-                    $segment->filename,
-                    $segment->id_file,
-                    $segment->warning,
-                    $segment->suggestion_match,
-                    $segment->suggestion_source,
-                    $segment->suggestion,
-                    $segment->edit_distance,
-                    $segment->locked,
-                    $segment->match_type,
-                    $segment->pee,
-                    $segment->ice_modified,
-                    $segment->secs_per_word,
-                    $segment->parsed_time_to_edit[0].":".$segment->parsed_time_to_edit[1].":".$segment->parsed_time_to_edit[2].".".$segment->parsed_time_to_edit[3],
-                    $segment->last_translation,
-                    (!empty($segment->last_revisions) and isset($segment->last_revisions[0])) ? $segment->last_revisions[0]['translation'] : null,
-                    (!empty($segment->last_revisions) and isset($segment->last_revisions[1])) ? $segment->last_revisions[1]['translation'] : null,
-                    $segment->pee_translation_revise,
-                    $segment->pee_translation_suggestion,
-                    $segment->version_number,
-                    $segment->source_page,
-                    $segment->is_pre_translated,
-                    $issuesCritical,
-                    $issuesEnhancement,
-                    $issuesMajor,
-                    $issuesMinor,
-                    $issuesNeutral,
-                    $issuesNone,
-                    $issuesRepetition,
-                    $issuesPreferentialEdit,
-                    $issuesContextMajor,
-                    $issuesContextMinor,
+                $segment->sid,
+                $segment->target,
+                $segment->segment,
+                $segment->raw_word_count,
+                $segment->translation,
+                $segment->version,
+                $segment->ice_locked,
+                $segment->status,
+                $segment->time_to_edit,
+                $segment->filename,
+                $segment->id_file,
+                $segment->warning,
+                $segment->suggestion_match,
+                $segment->suggestion_source,
+                $segment->suggestion,
+                $segment->edit_distance,
+                $segment->locked,
+                $segment->match_type,
+                $segment->pee,
+                $segment->ice_modified,
+                $segment->secs_per_word,
+                $segment->parsed_time_to_edit[0].":".$segment->parsed_time_to_edit[1].":".$segment->parsed_time_to_edit[2].".".$segment->parsed_time_to_edit[3],
+                $segment->last_translation,
+                (!empty($segment->last_revisions) and isset($segment->last_revisions[0])) ? $segment->last_revisions[0]['translation'] : null,
+                (!empty($segment->last_revisions) and isset($segment->last_revisions[1])) ? $segment->last_revisions[1]['translation'] : null,
+                $segment->pee_translation_revise,
+                $segment->pee_translation_suggestion,
+                $segment->version_number,
+                $segment->source_page,
+                $segment->is_pre_translated,
+                $issues,
             ];
         }
 
@@ -269,59 +232,62 @@ class DownloadQRController extends BaseChunkController {
 
     /**
      * @param array $data
+     * @param array $categoryIssues
      *
      * @return bool|false|string
      */
-    private function createCSVFile(array $data){
+    private function createCSVFile(array $data, array $categoryIssues){
 
         $headings = [
-                "sid",
-                "target",
-                "segment",
-                "raw_word_count",
-                "translation",
-                "version",
-                "ice_locked",
-                "status",
-                "time_to_edit",
-                "filename",
-                "id_file",
-                "warning",
-                "suggestion_match",
-                "suggestion_source",
-                "suggestion",
-                "edit_distance",
-                "locked",
-                "match_type",
-                "pee",
-                "ice_modified",
-                "secs_per_word",
-                "parsed_time_to_edit",
-                "last_translation",
-                "revision",
-                "second_pass_revision",
-                "pee_translation_revise",
-                "pee_translation_suggestion",
-                "version_number",
-                "source_page",
-                "is_pre_translated",
-                "issues_critical",
-                "issues_enhancement",
-                "issues_major",
-                "issues_minor",
-                "issues_neutral",
-                "issues_none",
-                "issues_repetition",
-                "issues_preferential_edit",
-                "issues_context_major",
-                "issues_context_minor",
+            "sid",
+            "target",
+            "segment",
+            "raw_word_count",
+            "translation",
+            "version",
+            "ice_locked",
+            "status",
+            "time_to_edit",
+            "filename",
+            "id_file",
+            "warning",
+            "suggestion_match",
+            "suggestion_source",
+            "suggestion",
+            "edit_distance",
+            "locked",
+            "match_type",
+            "pee",
+            "ice_modified",
+            "secs_per_word",
+            "parsed_time_to_edit",
+            "last_translation",
+            "revision",
+            "second_pass_revision",
+            "pee_translation_revise",
+            "pee_translation_suggestion",
+            "version_number",
+            "source_page",
+            "is_pre_translated",
         ];
+
+        $headings = array_merge($headings, $categoryIssues);
 
         $csvData = [];
         $csvData[] = $headings;
 
         foreach ($data as $datum){
-            $csvData[] = $datum;
+
+            // issues
+            $issues = $datum[30];
+            unset($datum[30]);
+
+            foreach ($categoryIssues as $categoryIssue){
+                $count = (isset($issues[$categoryIssue])) ? $issues[$categoryIssue] : 0;
+                $datum[] = $count;
+            }
+
+            $csvData[] = array_values($datum);
         }
 
         $tmpFilePath = tempnam("/tmp", '');
@@ -342,55 +308,58 @@ class DownloadQRController extends BaseChunkController {
 
     /**
      * @param array $data
+     * @param array $categoryIssues
      *
      * @return false|string
      */
-    private function createJsonFile(array $data){
+    private function createJsonFile(array $data, array $categoryIssues){
 
         $jsonData = [];
 
         foreach ($data as $datum){
+
+            // issues
+            $issues = $datum[30];
+            unset($datum[30]);
+            $issueValues = [];
+
+            foreach ($categoryIssues as $categoryIssue){
+                $count = (isset($issues[$categoryIssue])) ? $issues[$categoryIssue] : 0;
+                $issueValues[$categoryIssue] = $count;
+            }
+
             $jsonData[] = [
-                    "sid" => $datum[0],
-                    "target" => $datum[1],
-                    "segment" => $datum[2],
-                    "raw_word_count" => $datum[3],
-                    "translation" => $datum[4],
-                    "version" => $datum[5],
-                    "ice_locked" => $datum[6],
-                    "status" => $datum[7],
-                    "time_to_edit" => $datum[8],
-                    "filename" => $datum[9],
-                    "id_file" => $datum[10],
-                    "warning" => $datum[11],
-                    "suggestion_match" => $datum[12],
-                    "suggestion_source" => $datum[13],
-                    "suggestion" => $datum[14],
-                    "edit_distance" => $datum[15],
-                    "locked" => $datum[16],
-                    "match_type" => $datum[17],
-                    "pee" => $datum[18],
-                    "ice_modified" => $datum[19],
-                    "secs_per_word" => $datum[20],
-                    "parsed_time_to_edit" => $datum[21],
-                    "last_translation" => $datum[22],
-                    "revision" => $datum[23],
-                    "second_pass_revision" => $datum[24],
-                    "pee_translation_revise" => $datum[25],
-                    "pee_translation_suggestion" => $datum[26],
-                    "version_number" => $datum[27],
-                    "source_page" => $datum[28],
-                    "is_pre_translated" => $datum[29],
-                    "issues_critical" => $datum[30],
-                    "issues_enhancement" => $datum[31],
-                    "issues_major" => $datum[32],
-                    "issues_minor" => $datum[33],
-                    "issues_neutral" => $datum[34],
-                    "issues_none" => $datum[35],
-                    "issues_repetition" => $datum[36],
-                    "issues_preferential_edit" => $datum[37],
-                    "issues_context_major" => $datum[38],
-                    "issues_context_minor" => $datum[39],
+                "sid" => $datum[0],
+                "target" => $datum[1],
+                "segment" => $datum[2],
+                "raw_word_count" => $datum[3],
+                "translation" => $datum[4],
+                "version" => $datum[5],
+                "ice_locked" => $datum[6],
+                "status" => $datum[7],
+                "time_to_edit" => $datum[8],
+                "filename" => $datum[9],
+                "id_file" => $datum[10],
+                "warning" => $datum[11],
+                "suggestion_match" => $datum[12],
+                "suggestion_source" => $datum[13],
+                "suggestion" => $datum[14],
+                "edit_distance" => $datum[15],
+                "locked" => $datum[16],
+                "match_type" => $datum[17],
+                "pee" => $datum[18],
+                "ice_modified" => $datum[19],
+                "secs_per_word" => $datum[20],
+                "parsed_time_to_edit" => $datum[21],
+                "last_translation" => $datum[22],
+                "revision" => $datum[23],
+                "second_pass_revision" => $datum[24],
+                "pee_translation_revise" => $datum[25],
+                "pee_translation_suggestion" => $datum[26],
+                "version_number" => $datum[27],
+                "source_page" => $datum[28],
+                "is_pre_translated" => $datum[29],
+                "issues" => $issueValues
             ];
         }
 

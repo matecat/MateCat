@@ -77,7 +77,6 @@ class QAModelTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
                 $severityModel->severity_label = $severity->label;
                 $severityModel->severity_code  = $severity->code;
                 $severityModel->penalty  = $severity->penalty;
-                $severityModel->dqf_id  = (isset($severity->dqf_id)) ? $severity->dqf_id : null;
 
                 $QAModelTemplateCategoryStruct->severities[$index2] = $severityModel;
             }

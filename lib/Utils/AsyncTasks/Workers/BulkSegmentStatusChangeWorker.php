@@ -22,7 +22,9 @@ use TaskRunner\Commons\AbstractWorker;
 use TaskRunner\Commons\QueueElement;
 use Translations_SegmentTranslationDao;
 use Users_UserDao;
-use WordCount_CounterModel;
+use WordCount\CounterModel;
+
+;
 
 class BulkSegmentStatusChangeWorker extends AbstractWorker {
 
@@ -49,19 +51,19 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker {
         $this->_doLog( 'data: ' . var_export( $queueElement->params->toArray(), true ) );
 
         $params = $queueElement->params->toArray();
-        /** @var Chunks_ChunkStruct $chunk */
-        $chunk         = new Chunks_ChunkStruct( $params['chunk']->toArray() ) ;
-        $status      = $params['destination_status'] ;
-        $client_id   = $params['client_id'];
-        $user        = ( new Users_UserDao())->getByUid( $params['id_user'] );
-        $source_page = ReviewUtils::revisionNumberToSourcePage( $params['revision_number'] );
+
+        $chunk       = new Chunks_ChunkStruct( $params[ 'chunk' ]->toArray() );
+        $status      = $params[ 'destination_status' ];
+        $client_id   = $params[ 'client_id' ];
+        $user        = ( new Users_UserDao() )->getByUid( $params[ 'id_user' ] );
+        $source_page = ReviewUtils::revisionNumberToSourcePage( $params[ 'revision_number' ] );
 
 
-        $database = Database::obtain() ;
-        $database->begin() ;
+        $database = Database::obtain();
+        $database->begin();
 
-        $batchEventCreator = new TranslationEventsHandler( $chunk ) ;
-        $batchEventCreator->setFeatureSet( $chunk->getProject()->getFeaturesSet() ) ;
+        $batchEventCreator = new TranslationEventsHandler( $chunk );
+        $batchEventCreator->setFeatureSet( $chunk->getProject()->getFeaturesSet() );
         $batchEventCreator->setProject( $chunk->getProject() );
 
         foreach ( $params[ 'segment_ids' ] as $segment_id ) {
@@ -80,15 +82,15 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker {
             Translations_SegmentTranslationDao::updateTranslationAndStatusAndDate( $new_translation );
 
             if ( $chunk->getProject()->hasFeature( Features::TRANSLATION_VERSIONS ) ) {
-                $segmentTransaltionEvent = new TranslationEvent( $old_translation, $new_translation, $user, $source_page ) ;
-                $batchEventCreator->addEvent( $segmentTransaltionEvent ) ;
+                $segmentTranslationEvent = new TranslationEvent( $old_translation, $new_translation, $user, $source_page );
+                $batchEventCreator->addEvent( $segmentTranslationEvent );
             }
         }
 
-        $batchEventCreator->save() ;
+        $batchEventCreator->save();
 
         if ( !empty( $params[ 'segment_ids' ] ) ) {
-            $counter = new WordCount_CounterModel();
+            $counter = new CounterModel();
             $counter->initializeJobWordCount( $chunk->id, $chunk->password );
         }
 

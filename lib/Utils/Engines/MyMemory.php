@@ -1,8 +1,10 @@
 <?php
 
-use Validator\Contracts\ValidatorErrorObject;
-use Validator\GlossaryCSVValidator;
-use Validator\GlossaryCSVValidatorObject;
+use API\V2\Exceptions\AuthenticationError;
+use Exceptions\NotFoundException;
+use Exceptions\ValidationError;
+use TaskRunner\Exceptions\EndQueueException;
+use TaskRunner\Exceptions\ReQueueException;
 
 /**
  * Created by PhpStorm.
@@ -67,8 +69,6 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 
         $dataRefMap = isset($this->_config['dataRefMap']) ? $this->_config['dataRefMap'] : [];
 
-        $result_object = null;
-
         switch ( $functionName ) {
 
             case 'glossary_domains_relative_url':
@@ -124,7 +124,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
                 break;
             default:
 
-                if ( isset( $decoded[ 'matches' ] ) && !empty( $decoded[ 'matches' ] ) ) {
+                if ( !empty( $decoded[ 'matches' ] ) ) {
                     foreach ( $decoded[ 'matches' ] as $pos => $match ) {
                         $decoded[ 'matches' ][ $pos ][ 'segment' ]     = $this->_resetSpecialStrings( $match[ 'segment' ] );
                         $decoded[ 'matches' ][ $pos ][ 'translation' ] = $this->_resetSpecialStrings( $match[ 'translation' ] );
@@ -141,7 +141,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     /**
      * This method is used for help to rebuild result from MyMemory.
      * Because when in CURL you send something using method POST and value's param start with "@"
-     * he assume you are sending a file.
+     * he assumes you are sending a file.
      *
      * Passing prefix you left before, this method, rebuild result putting prefix at start of translated phrase.
      *
@@ -172,11 +172,11 @@ class Engines_MyMemory extends Engines_AbstractEngine {
      * @param $_config
      *
      * @return array
-     * @throws \Exceptions\NotFoundException
-     * @throws \API\V2\Exceptions\AuthenticationError
-     * @throws \Exceptions\ValidationError
-     * @throws \TaskRunner\Exceptions\EndQueueException
-     * @throws \TaskRunner\Exceptions\ReQueueException
+     * @throws NotFoundException
+     * @throws AuthenticationError
+     * @throws ValidationError
+     * @throws EndQueueException
+     * @throws ReQueueException
      */
     public function get( $_config ) {
 
@@ -191,6 +191,11 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         $parameters[ 'de' ]       = $_config[ 'email' ];
         $parameters[ 'mt' ]       = $_config[ 'get_mt' ];
         $parameters[ 'numres' ]   = $_config[ 'num_result' ];
+        $parameters[ 'client_id' ] = isset($_config[ 'uid' ]) ? $_config[ 'uid' ] : 0;
+
+        if(isset($_config['dialect_strict'])){
+            $parameters['dialect_strict'] = $_config['dialect_strict'];
+        }
 
         ( @$_config[ 'onlyprivate' ] ? $parameters[ 'onlyprivate' ] = 1 : null );
         ( @$_config[ 'isConcordance' ] ? $parameters[ 'conc' ] = 'true' : null );
@@ -211,8 +216,8 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 
         ( !$_config[ 'isGlossary' ] ? $function = "translate_relative_url" : $function = "gloss_get_relative_url" );
 
-
         $parameters = $this->featureSet->filter( 'filterMyMemoryGetParameters', $parameters, $_config );
+
         $this->call( $function, $parameters, true );
 
         if ( isset( $segment_file_chr[ 1 ] ) ) {
@@ -229,17 +234,21 @@ class Engines_MyMemory extends Engines_AbstractEngine {
      * @return array|bool
      */
     public function set( $_config ) {
-        $parameters               = [];
-        $parameters[ 'seg' ]      = preg_replace( "/^(-?@-?)/", "", $_config[ 'segment' ] );
-        $parameters[ 'tra' ]      = preg_replace( "/^(-?@-?)/", "", $_config[ 'translation' ] );
-        $parameters[ 'tnote' ]    = $_config[ 'tnote' ];
-        $parameters[ 'langpair' ] = $_config[ 'source' ] . "|" . $_config[ 'target' ];
-        $parameters[ 'de' ]       = $_config[ 'email' ];
-        $parameters[ 'prop' ]     = $_config[ 'prop' ];
+        $parameters                = [];
+        $parameters[ 'seg' ]       = preg_replace( "/^(-?@-?)/", "", $_config[ 'segment' ] );
+        $parameters[ 'tra' ]       = preg_replace( "/^(-?@-?)/", "", $_config[ 'translation' ] );
+        $parameters[ 'tnote' ]     = $_config[ 'tnote' ];
+        $parameters[ 'langpair' ]  = $_config[ 'source' ] . "|" . $_config[ 'target' ];
+        $parameters[ 'de' ]        = $_config[ 'email' ];
+        $parameters[ 'mt' ]        = isset($_config[ 'set_mt' ]) ? $_config[ 'set_mt' ] : true;
+        $parameters[ 'client_id' ] = isset($_config[ 'uid' ]) ? $_config[ 'uid' ] : 0;
+        $parameters[ 'prop' ]      = $_config[ 'prop' ];
+
         if ( !empty( $_config[ 'context_after' ] ) || !empty( $_config[ 'context_before' ] ) ) {
             $parameters[ 'context_after' ]  = preg_replace( "/^(-?@-?)/", "", @$_config[ 'context_after' ] );
             $parameters[ 'context_before' ] = preg_replace( "/^(-?@-?)/", "", @$_config[ 'context_before' ] );
         }
+
         if ( !empty( $_config[ 'id_user' ] ) ) {
             if ( !is_array( $_config[ 'id_user' ] ) ) {
                 $_config[ 'id_user' ] = [ $_config[ 'id_user' ] ];
@@ -261,14 +270,16 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 
     public function update( $_config ) {
 
-        $parameters               = [];
-        $parameters[ 'seg' ]      = preg_replace( "/^(-?@-?)/", "", $_config[ 'segment' ] );
-        $parameters[ 'tra' ]      = preg_replace( "/^(-?@-?)/", "", $_config[ 'translation' ] );
-        $parameters[ 'newseg' ]   = preg_replace( "/^(-?@-?)/", "", $_config[ 'newsegment' ] );
-        $parameters[ 'newtra' ]   = preg_replace( "/^(-?@-?)/", "", $_config[ 'newtranslation' ] );
-        $parameters[ 'langpair' ] = $_config[ 'source' ] . "|" . $_config[ 'target' ];
-        $parameters[ 'prop' ]     = $_config[ 'prop' ];
-        $parameters[ 'de' ]       = $_config[ 'email' ];
+        $parameters                = [];
+        $parameters[ 'seg' ]       = preg_replace( "/^(-?@-?)/", "", $_config[ 'segment' ] );
+        $parameters[ 'tra' ]       = preg_replace( "/^(-?@-?)/", "", $_config[ 'translation' ] );
+        $parameters[ 'newseg' ]    = preg_replace( "/^(-?@-?)/", "", $_config[ 'newsegment' ] );
+        $parameters[ 'newtra' ]    = preg_replace( "/^(-?@-?)/", "", $_config[ 'newtranslation' ] );
+        $parameters[ 'langpair' ]  = $_config[ 'source' ] . "|" . $_config[ 'target' ];
+        $parameters[ 'prop' ]      = $_config[ 'prop' ];
+        $parameters[ 'client_id' ]  = isset($_config[ 'uid' ]) ? $_config[ 'uid' ] : 0;
+        $parameters[ 'de' ]        = $_config[ 'email' ];
+        $parameters[ 'mt' ]        = isset($_config[ 'set_mt' ]) ? $_config[ 'set_mt' ] : true;
 
         if ( !empty( $_config[ 'context_after' ] ) || !empty( $_config[ 'context_before' ] ) ) {
             $parameters[ 'context_after' ]  = preg_replace( "/^(-?@-?)/", "", @$_config[ 'context_after' ] );
@@ -409,7 +420,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     {
         $this->call( 'glossary_import_status_relative_url', [
             'uuid' => $uuid
-        ], false );
+        ] );
 
         return $this->result;
     }
@@ -452,7 +463,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 
             $this->call( $relativeUrl, [
                 'uuid' => $uuid
-            ], false );
+            ] );
 
             if($this->result->responseStatus === 202){
                 sleep( $sleep );
@@ -473,7 +484,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     public function glossaryCheck($source, $target, $sourceLanguage, $targetLanguage, $keys = [])
     {
         $payload = [
-            'de' => \INIT::$MYMEMORY_API_KEY,
+            'de' => INIT::$MYMEMORY_API_KEY,
             'source' => $source,
             'target' => $target,
             'source_language' => $sourceLanguage,
@@ -493,7 +504,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     public function glossaryDomains($keys = [])
     {
         $payload = [
-            'de' => \INIT::$MYMEMORY_API_KEY,
+            'de' => INIT::$MYMEMORY_API_KEY,
             'keys' => $keys,
         ];
         $this->call( "glossary_domains_relative_url", $payload, true, true );
@@ -512,7 +523,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     public function glossaryDelete($idSegment, $idJob, $password, $term)
     {
         $payload = [
-            'de' => \INIT::$MYMEMORY_API_KEY,
+            'de' => INIT::$MYMEMORY_API_KEY,
             "id_segment" => $idSegment,
             "id_job" => $idJob,
             "password" => $password,
@@ -539,7 +550,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     public function glossaryGet($source, $sourceLanguage, $targetLanguage, $keys)
     {
         $payload = [
-            'de' => \INIT::$MYMEMORY_API_KEY,
+            'de' => INIT::$MYMEMORY_API_KEY,
             "source" => $source,
             "source_language" => $sourceLanguage,
             "target_language" => $targetLanguage,
@@ -562,7 +573,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     public function glossarySearch($source, $sourceLanguage, $targetLanguage, $keys)
     {
         $payload = [
-            'de' => \INIT::$MYMEMORY_API_KEY,
+            'de' => INIT::$MYMEMORY_API_KEY,
             "source" => $source,
             "source_language" => $sourceLanguage,
             "target_language" => $targetLanguage,
@@ -584,7 +595,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     public function glossaryKeys($sourceLanguage, $targetLanguage, $keys = [])
     {
         $payload = [
-            'de' => \INIT::$MYMEMORY_API_KEY,
+            'de' => INIT::$MYMEMORY_API_KEY,
             'source_language' => $sourceLanguage,
             'target_language' => $targetLanguage,
             'keys' => $keys,
@@ -605,7 +616,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     public function glossarySet($idSegment, $idJob, $password, $term)
     {
         $payload = [
-            'de' => \INIT::$MYMEMORY_API_KEY,
+            'de' => INIT::$MYMEMORY_API_KEY,
             "id_segment" => $idSegment,
             "id_job" => $idJob,
             "password" => $password,
@@ -633,7 +644,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     public function glossaryUpdate($idSegment, $idJob, $password, $term)
     {
         $payload = [
-            'de' => \INIT::$MYMEMORY_API_KEY,
+            'de' => INIT::$MYMEMORY_API_KEY,
             "id_segment" => $idSegment,
             "id_job" => $idJob,
             "password" => $password,
@@ -693,7 +704,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         ( !empty( $name ) ? $parameters[ 'zip_name' ] = $name : $parameters[ 'zip_name' ] = $key );
         $parameters[ 'zip_name' ] = $parameters[ 'zip_name' ] . ".zip";
 
-        if($strip_tags and $strip_tags == true){
+        if( $strip_tags ){
             $parameters['strip_tags'] = 1;
         }
 
@@ -712,6 +723,9 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     }
 
     /*****************************************/
+    /**
+     * @throws Exception
+     */
     public function createMyMemoryKey() {
 
         //query db
@@ -790,7 +804,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     /**
      * Detect language for an array of file's segments.
      *
-     * @param $segs_array Array An array whose keys are file IDs and values are array of segments.
+     * @param $segs_array Array|RecursiveArrayObject An array whose keys are file IDs and values are array of segments.
      *
      * @return mixed
      */
@@ -873,7 +887,6 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         Log::doJsonLog( "DETECT LANG :", $segmentsToBeDetected );
 
         $options = [
-            CURLOPT_HEADER         => false,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_HEADER         => 0,
             CURLOPT_USERAGENT      => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
@@ -934,10 +947,10 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         //formatting strip
         $re = '(&#09;|\p{Zs}|&#10;|\n|\t|⇥|\x{21E5}|\xc2\xa0|\xE2|\x81|\xA0)+';
         //trim chars that would have been lost with the guess tag
-        preg_match("/" . $re .'$/', $target_string, $r_matches,PREG_OFFSET_CAPTURE, 0);
-        preg_match("/^" . $re . '/', $target_string, $l_matches,PREG_OFFSET_CAPTURE, 0);
+        preg_match("/" . $re .'$/', $target_string, $r_matches,PREG_OFFSET_CAPTURE );
+        preg_match("/^" . $re . '/', $target_string, $l_matches,PREG_OFFSET_CAPTURE );
         $r_index = (isset($r_matches[0][1])) ? $r_matches[0][1] : mb_strlen($target_string);
-        $l_index = (isset($l_matches[0][1])) ? $l_matches[0][1] + mb_strlen($l_matches[0][0]) : 0;
+        $l_index = (isset($l_matches[0][1])) ? (int)$l_matches[0][1] + mb_strlen($l_matches[0][0]) : 0;
         $r_matches =    (isset($r_matches[0][0])) ? $r_matches[0][0] : '';
         $l_matches =    (isset($l_matches[0][0])) ? $l_matches[0][0] :  '';
 

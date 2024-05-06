@@ -5,6 +5,7 @@ import {isNull} from 'lodash/lang'
 import TextUtils from '../../utils/textUtils'
 import SegmentQRLine from './SegmentQRLine'
 import SegmentQRIssue from './SegmentQRIssue'
+import {SEGMENTS_STATUS} from '../../constants/Constants'
 import DraftMatecatUtils from '../segments/utils/DraftMatecatUtils'
 
 class SegmentQR extends React.Component {
@@ -441,7 +442,11 @@ class SegmentQR extends React.Component {
                   'approved-r' + this.props.segment.get('revision_number'),
               )}
             >
-              <b>{this.props.segment.get('status')}</b>
+              <b>
+                {this.props.segment.get('status') === SEGMENTS_STATUS.APPROVED2
+                  ? SEGMENTS_STATUS.APPROVED
+                  : this.props.segment.get('status')}
+              </b>
             </div>
           </div>
         </div>
