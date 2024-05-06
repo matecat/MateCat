@@ -16,15 +16,15 @@ class Comments_BaseCommentStruct extends DataAccess_AbstractDaoSilentStruct impl
     public $message;
 
     public function getThreadId() {
-        return md5($this->id_job . '-' . $this->id_segment . '-' . $this->resolve_date);
+        return md5( $this->id_job . '-' . $this->id_segment . '-' . $this->resolve_date );
     }
 
     public function isComment() {
-        return ((int) $this->message_type == Comments_CommentDao::TYPE_COMMENT);
+        return ( (int)$this->message_type == Comments_CommentDao::TYPE_COMMENT );
     }
 
-    public function templateMessage(){
-        $this->message = \Comments_CommentDao::placeholdContent($this->message);
+    public function templateMessage() {
+        $this->message = Comments_CommentDao::placeholdContent( $this->message );
     }
 
 }

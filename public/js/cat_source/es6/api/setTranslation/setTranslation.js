@@ -56,6 +56,9 @@ export const setTranslation = async ({
     current_password: currentPassword,
     splitStatuses,
     characters_counter: charactersCounter,
+    suggestion_array: segment.contributions
+      ? JSON.stringify(segment.contributions.matches)
+      : undefined,
   }
   const dataParams = Object.fromEntries(
     Object.entries(obj).filter(([_, v]) => v != null),

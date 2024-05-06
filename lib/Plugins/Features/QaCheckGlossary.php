@@ -3,6 +3,7 @@
 namespace Features;
 
 use AMQHandler;
+use Exception;
 use LQA\QA;
 use TaskRunner\Commons\QueueElement;
 use Translations\WarningDao;
@@ -38,8 +39,10 @@ class QaCheckGlossary extends BaseFeature {
 
     }
 
+    /**
+     * @throws Exception
+     */
     protected static function enqueueTranslationCheck( $queue_element ) {
-        WorkerClient::init( new AMQHandler() );
         WorkerClient::enqueue( 'QA_CHECKS',
                 '\Features\QaCheckGlossary\Worker\GlossaryWorker',
                 $queue_element,
@@ -47,6 +50,9 @@ class QaCheckGlossary extends BaseFeature {
         );
     }
 
+    /**
+     * @throws Exception
+     */
     public function setTranslationCommitted( $params ) {
         $translation = $params[ 'translation' ];
 

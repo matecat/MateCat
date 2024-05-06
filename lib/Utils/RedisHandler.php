@@ -24,7 +24,7 @@ class RedisHandler {
      * @return Client
      * @throws ReflectionException
      */
-    public function getConnection( ){
+    public function getConnection() {
 
         $resource = null;
         if( $this->redisHandler != null ){
@@ -34,25 +34,13 @@ class RedisHandler {
             $resource = $reflectorProperty->getValue( $this->redisHandler->getConnection() );
         }
 
-        if(
+        if (
                 $this->redisHandler === null
                 || !$this->redisHandler->getConnection()->isConnected()
                 || !is_resource( $resource )
-        ){
+        ) {
 
-            $connectionParams = INIT::$REDIS_SERVERS;
-
-            if ( is_string( $connectionParams ) ) {
-
-                $connectionParams = $this->formatDSN( $connectionParams );
-
-            } elseif( is_array( $connectionParams ) ){
-
-                $connectionParams = array_map( 'RedisHandler::formatDSN', $connectionParams );
-
-            }
-
-            $this->redisHandler = new Client( $connectionParams );
+            $this->redisHandler = $this->getClient();
 
         }
 
@@ -60,7 +48,27 @@ class RedisHandler {
 
     }
 
-    protected function formatDSN( $dsnString ){
+    /**
+     * @return Client
+     */
+    private function getClient() {
+        $connectionParams = INIT::$REDIS_SERVERS;
+
+        if ( is_string( $connectionParams ) ) {
+
+            $connectionParams = $this->formatDSN( $connectionParams );
+
+        } elseif ( is_array( $connectionParams ) ) {
+
+            $connectionParams = array_map( 'RedisHandler::formatDSN', $connectionParams );
+
+        }
+
+        return  new Client( $connectionParams );
+
+    }
+
+    protected function formatDSN( $dsnString ) {
 
         if ( !is_null( INIT::$INSTANCE_ID ) ) {
 

@@ -8,19 +8,32 @@
  */
 
 use Analysis\Queue\RedisKeys;
-use Predis\Client;
 use Predis\Connection\ConnectionInterface;
+use Predis\Client as PredisClient;
+use Stomp\Client;
+use Stomp\Exception\ConnectionException;
+use Stomp\Network\Connection;
+use Stomp\StatefulStomp;
+use Stomp\Transport\Frame;
+use Stomp\Transport\Message;
 use TaskRunner\Commons\Context;
 
-class AMQHandler extends Stomp {
-
-    protected $amqHandler;
+class AMQHandler {
 
     /**
-     * @var Client
+     * @var PredisClient
      */
     protected $redisHandler;
-    protected $clientType = null;
+
+    /**
+     * @var StatefulStomp
+     */
+    protected $statefulStomp;
+    /**
+     * @var Connection
+     */
+    protected static $staticStompConnection;
+    protected $clientType      = null;
 
     protected $queueTotalID = null;
 
@@ -33,18 +46,66 @@ class AMQHandler extends Stomp {
      * Handle a string for the queue name
      * @var string
      *
-     * @throws \StompException
      */
     protected $queueName = null;
 
-    public function __construct( $brokerUri = null ) {
+    /**
+     * Singleton implementation of StatefulStomp in a not static constructor
+     *
+     * @throws ConnectionException
+     */
+    public function __construct( $brokerUri = null, $usePersistentConnection = true ) {
 
-        if ( !is_null( $brokerUri ) ) {
-            parent::__construct( $brokerUri );
+        if ( $usePersistentConnection ) {
+
+            if ( !isset( self::$staticStompConnection ) ) {
+                if ( !is_null( $brokerUri ) ) {
+                    self::$staticStompConnection = new Connection( $brokerUri, 2 );
+                } else {
+                    self::$staticStompConnection = new Connection( INIT::$QUEUE_BROKER_ADDRESS, 2 );
+                }
+            }
+
+            $connection = self::$staticStompConnection;
+
         } else {
-            parent::__construct( INIT::$QUEUE_BROKER_ADDRESS );
+
+            if ( !is_null( $brokerUri ) ) {
+                $connection = new Connection( $brokerUri, 2 );
+            } else {
+                $connection = new Connection( INIT::$QUEUE_BROKER_ADDRESS, 2 );
+            }
+
         }
 
+        $this->statefulStomp = new StatefulStomp( new Client( $connection ) );
+
+    }
+
+    public static function getNewInstanceForDaemons() {
+        return new self( null, false );
+    }
+
+    /**
+     * @return Client
+     */
+    public function getClient() {
+        return $this->statefulStomp->getClient();
+    }
+
+    public function ack( Frame $frame ) {
+        $this->statefulStomp->ack( $frame );
+    }
+
+    public function nack( Frame $frame ) {
+        $this->statefulStomp->nack( $frame );
+    }
+
+    /**
+     * @return false|Frame
+     */
+    public function read() {
+        return $this->statefulStomp->read();
     }
 
     /**
@@ -64,59 +125,61 @@ class AMQHandler extends Stomp {
     }
 
     /**
-     * @param string $queueName
      *
-     * @param null   $properties
-     * @param null   $sync
+     * @param string $destination
+     * @param null   $selector
+     * @param string $ack
+     * @param array  $header
      *
-     * @return bool
-     * @throws StompException
-     * @throws Exception
+     * @return int
      */
-    public function subscribe( $queueName = null, $properties = null, $sync = null ) {
-
-        if ( empty( $queueName ) ) {
-            $queueName = RedisKeys::DEFAULT_QUEUE_NAME;
-        }
-
-        if ( !empty( $this->clientType ) && $this->clientType != self::CLIENT_TYPE_SUBSCRIBER ) {
-            throw new Exception( "This client is a $this->clientType. A client can be only publisher or subscriber, not both." );
-        } elseif ( $this->clientType == self::CLIENT_TYPE_SUBSCRIBER ) {
-            //already connected, we want to change the queue
-            $this->queueName = $queueName;
-
-            return parent::subscribe( '/queue/' . RedisKeys::DEFAULT_QUEUE_NAME );
-        }
+    public function subscribe( $destination, $selector = null, $ack = 'client-individual', array $header = [] ) {
 
         $this->clientType = self::CLIENT_TYPE_SUBSCRIBER;
-        $this->connect();
-        $this->setReadTimeout( 0, 250000 );
-        $this->queueName = $queueName;
+        $this->queueName  = $destination;
 
-        return parent::subscribe( '/queue/' . (int)INIT::$INSTANCE_ID . "_" . $queueName );
+        return $this->statefulStomp->subscribe( '/queue/' . INIT::$INSTANCE_ID . "_" . $destination, $selector, $ack, $header );
 
     }
 
     /**
-     * @param string             $destination
-     * @param \StompFrame|string $msg
-     * @param array              $properties
-     * @param null               $sync
+     * @param string  $destination
+     * @param Message $message
      *
      * @return bool
-     * @throws Exception
      */
-    public function send( $destination, $msg, $properties = [], $sync = null ) {
-
-        if ( !empty( $this->clientType ) && $this->clientType != self::CLIENT_TYPE_PUBLISHER ) {
-            throw new Exception( "This client is a $this->clientType. A client can be only publisher or subscriber, not both." );
-        } elseif ( empty( $this->clientType ) ) {
-            $this->connect();
-        }
+    public function publishToQueues( $destination, Message $message ) {
 
         $this->clientType = self::CLIENT_TYPE_PUBLISHER;
 
-        return parent::send( '/queue/' . (int)INIT::$INSTANCE_ID . "_" . $destination, $msg, $properties, $sync );
+        return $this->_send( '/queue/' . INIT::$INSTANCE_ID . "_" . $destination, $message );
+
+    }
+
+    /**
+     * @param string  $destination
+     * @param Message $message
+     *
+     * @return bool
+     */
+    private function _send( $destination, Message $message ) {
+        $r = $this->statefulStomp->send( $destination, $message );
+        $this->statefulStomp->getClient()->disconnect( true );
+
+        return $r;
+    }
+
+    /**
+     * @param string  $destination
+     * @param Message $message
+     *
+     * @return bool
+     */
+    public function publishToTopic( $destination, Message $message ) {
+
+        $this->clientType = self::CLIENT_TYPE_PUBLISHER;
+
+        return $this->_send( $destination, $message );
 
     }
 
@@ -138,29 +201,9 @@ class AMQHandler extends Stomp {
             throw new Exception( 'No queue name provided.' );
         }
 
-        $queue_interface_url = INIT::$QUEUE_JMX_ADDRESS . "/api/jolokia/read/org.apache.activemq:type=Broker,brokerName=localhost,destinationType=Queue,destinationName=" . (int)INIT::$INSTANCE_ID . "_" . $queue . "/QueueSize";
+        $queue_interface_url = INIT::$QUEUE_JMX_ADDRESS . "/api/jolokia/read/org.apache.activemq:type=Broker,brokerName=localhost,destinationType=Queue,destinationName=" . INIT::$INSTANCE_ID . "_" . $queue . "/QueueSize";
 
-        $mHandler = new MultiCurlHandler();
-
-        $options = [
-                CURLOPT_HEADER         => false,
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_USERAGENT      => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
-                CURLOPT_CONNECTTIMEOUT => 5, // a timeout to call itself should not be too much higher :D
-                CURLOPT_SSL_VERIFYPEER => true,
-                CURLOPT_SSL_VERIFYHOST => 2,
-                CURLOPT_HTTPHEADER     => [ 'Authorization: Basic ' . base64_encode( INIT::$QUEUE_CREDENTIALS ) ]
-        ];
-
-        $resource = $mHandler->createResource( $queue_interface_url, $options );
-        $mHandler->multiExec();
-        $result = $mHandler->getSingleContent( $resource );
-        $mHandler->multiCurlCloseAll();
-        $result = json_decode( $result, true );
-
-        Utils::raiseJsonExceptionError();
-
-        return $result[ 'value' ];
+        return $this->callAmqJmx( $queue_interface_url );
 
     }
 
@@ -182,29 +225,9 @@ class AMQHandler extends Stomp {
             throw new Exception( 'No queue name provided.' );
         }
 
-        $queue_interface_url = INIT::$QUEUE_JMX_ADDRESS . "/api/jolokia/read/org.apache.activemq:type=Broker,brokerName=localhost,destinationType=Queue,destinationName=" . (int)INIT::$INSTANCE_ID . "_" . $queue . "/ConsumerCount";
+        $queue_interface_url = INIT::$QUEUE_JMX_ADDRESS . "/api/jolokia/read/org.apache.activemq:type=Broker,brokerName=localhost,destinationType=Queue,destinationName=" . INIT::$INSTANCE_ID . "_" . $queue . "/ConsumerCount";
 
-        $mHandler = new MultiCurlHandler();
-
-        $options = [
-                CURLOPT_HEADER         => false,
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_USERAGENT      => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
-                CURLOPT_CONNECTTIMEOUT => 5, // a timeout to call itself should not be too much higher :D
-                CURLOPT_SSL_VERIFYPEER => true,
-                CURLOPT_SSL_VERIFYHOST => 2,
-                CURLOPT_HTTPHEADER     => [ 'Authorization: Basic ' . base64_encode( INIT::$QUEUE_CREDENTIALS ) ]
-        ];
-
-        $resource = $mHandler->createResource( $queue_interface_url, $options );
-        $mHandler->multiExec();
-        $result = $mHandler->getSingleContent( $resource );
-        $mHandler->multiCurlCloseAll();
-        $result = json_decode( $result, true );
-
-        Utils::raiseJsonExceptionError();
-
-        return $result[ 'value' ];
+        return $this->callAmqJmx( $queue_interface_url );
 
     }
 
@@ -243,13 +266,46 @@ class AMQHandler extends Stomp {
         return $this;
     }
 
+    /**
+     * @throws Exception
+     */
     public function reQueue( $failed_segment, Context $queueInfo ) {
 
         if ( !empty( $failed_segment ) ) {
             Log::doJsonLog( "Failed " . var_export( $failed_segment, true ) );
-            $this->send( $queueInfo->queue_name, json_encode( $failed_segment ), [ 'persistent' => $this->persistent ] );
+            $this->publishToQueues( $queueInfo->queue_name, new Message( strval( $failed_segment ), [ 'persistent' => $this->persistent ] ) );
         }
 
+    }
+
+    /**
+     * @param $queue_interface_url
+     *
+     * @return mixed
+     * @throws Exception
+     */
+    public function callAmqJmx( $queue_interface_url ) {
+        $mHandler = new MultiCurlHandler();
+
+        $options = [
+                CURLOPT_HEADER         => false,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_USERAGENT      => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
+                CURLOPT_CONNECTTIMEOUT => 5, // a timeout to call itself should not be too much higher :D
+                CURLOPT_SSL_VERIFYPEER => true,
+                CURLOPT_SSL_VERIFYHOST => 2,
+                CURLOPT_HTTPHEADER     => [ 'Authorization: Basic ' . base64_encode( INIT::$QUEUE_CREDENTIALS ) ]
+        ];
+
+        $resource = $mHandler->createResource( $queue_interface_url, $options );
+        $mHandler->multiExec();
+        $result = $mHandler->getSingleContent( $resource );
+        $mHandler->multiCurlCloseAll();
+        $result = json_decode( $result, true );
+
+        Utils::raiseJsonExceptionError();
+
+        return $result[ 'value' ];
     }
 
 }

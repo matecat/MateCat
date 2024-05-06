@@ -456,7 +456,8 @@ class DownloadFileController extends AbstractDownloadController {
                         // always an array with 1 element, pop it, Ex: array( array() )
                         $oContent = array_pop( $output_content );
 
-                        $filename = $this->generateFilename( $oContent->output_filename );
+                        $filename = $this->generateFilename($oContent->output_filename);
+                        $pathinfo = pathinfo($filename);
 
                         if ( $pathinfo[ 'extension' ] == 'zip' ) {
                             $this->setFilename( $filename );

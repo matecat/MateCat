@@ -10,15 +10,14 @@ use Orhanerday\OpenAi\OpenAi;
 use Predis\Client;
 use Predis\Response\Status;
 use ReflectionException;
-use StompException;
+use Stomp\Exception\StompException;
 use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\AbstractWorker;
 use TaskRunner\Exceptions\EndQueueException;
 use Utils;
 
-class AIAssistantWorker extends AbstractWorker
-{
-    const EXPLAIN_MEANING_ACTION  = 'explain_meaning';
+class AIAssistantWorker extends AbstractWorker {
+    const EXPLAIN_MEANING_ACTION = 'explain_meaning';
 
     /**
      * @var OpenAi
@@ -32,32 +31,31 @@ class AIAssistantWorker extends AbstractWorker
 
     /**
      * AIAssistantWorker constructor.
+     *
      * @param AMQHandler $queueHandler
      * @throws ReflectionException
      */
-    public function __construct(AMQHandler $queueHandler)
-    {
-        parent::__construct($queueHandler);
+    public function __construct( AMQHandler $queueHandler ) {
+        parent::__construct( $queueHandler );
 
-        $timeOut = ( INIT::$OPEN_AI_TIMEOUT) ? INIT::$OPEN_AI_TIMEOUT : 30;
+        $timeOut      = ( INIT::$OPEN_AI_TIMEOUT ) ?: 30;
         $this->openAi = new OpenAi( INIT::$OPENAI_API_KEY );
-        $this->openAi->setTimeout($timeOut);
+        $this->openAi->setTimeout( $timeOut );
 
-        $this->redis = ( new \RedisHandler() )->getConnection();
+        $this->redis = $queueHandler->getRedisClient();
     }
 
     /**
      * @inheritDoc
      * @throws EndQueueException
      */
-    public function process(AbstractElement $queueElement)
-    {
+    public function process( AbstractElement $queueElement ) {
         $params  = $queueElement->params->toArray();
         $action  = $params[ 'action' ];
         $payload = $params[ 'payload' ];
 
         $allowedActions = [
-            self::EXPLAIN_MEANING_ACTION,
+                self::EXPLAIN_MEANING_ACTION,
         ];
 
         if ( false === in_array( $action, $allowedActions ) ) {
@@ -73,27 +71,27 @@ class AIAssistantWorker extends AbstractWorker
 
     /**
      * @param $payload
+     *
      * @throws StompException
      * @throws Exception
      */
-    private function explain_meaning($payload)
-    {
-        $phraseTrimLimit = ceil(INIT::$OPEN_AI_MAX_TOKENS / 2);
-        $phrase = strip_tags( html_entity_decode( $payload['phrase'] ) );
-        $phrase = Utils::truncatePhrase($phrase, $phraseTrimLimit);
-        $txt = "";
+    private function explain_meaning( $payload ) {
+        $phraseTrimLimit = ceil( INIT::$OPEN_AI_MAX_TOKENS / 2 );
+        $phrase          = strip_tags( html_entity_decode( $payload[ 'phrase' ] ) );
+        $phrase          = Utils::truncatePhrase( $phrase, $phraseTrimLimit );
+        $txt             = "";
 
         $lockValue = $this->generateLockValue();
 
-        $this->_doLog("Preparing for OpenAI call for id_segment " . $payload['id_segment']);
-        $this->generateLock($payload['id_segment'], $payload['id_job'], $payload['password'], $lockValue);
-        $this->_doLog("Generated lock for id_segment " . $payload['id_segment']);
+        $this->_doLog( "Preparing for OpenAI call for id_segment " . $payload[ 'id_segment' ] );
+        $this->generateLock( $payload[ 'id_segment' ], $payload[ 'id_job' ], $payload[ 'password' ], $lockValue );
+        $this->_doLog( "Generated lock for id_segment " . $payload[ 'id_segment' ] );
 
-        ( new AIAssistantClient( $this->openAi ) )->findContextForAWord( $payload['word'] , $phrase, $payload['localized_target'], function ($curl_info, $data) use (&$txt, $payload, $lockValue) {
+        ( new AIAssistantClient( $this->openAi ) )->findContextForAWord( $payload[ 'word' ], $phrase, $payload[ 'localized_target' ], function ( $curl_info, $data ) use ( &$txt, $payload, $lockValue ) {
 
-            $currentLockValue = $this->getLockValue($payload['id_segment'], $payload['id_job'], $payload['password']);
-            if($currentLockValue !== $lockValue){
-                $this->_doLog("Current lock invalid. Current value is: " . $currentLockValue. ", ".$lockValue." was expected for id_segment " . $payload['id_segment']);
+            $currentLockValue = $this->getLockValue( $payload[ 'id_segment' ], $payload[ 'id_job' ], $payload[ 'password' ] );
+            if ( $currentLockValue !== $lockValue ) {
+                $this->_doLog( "Current lock invalid. Current value is: " . $currentLockValue . ", " . $lockValue . " was expected for id_segment " . $payload[ 'id_segment' ] );
 
                 return 0;
             }
@@ -107,36 +105,36 @@ class AIAssistantWorker extends AbstractWorker
             //
             $_d = explode( "data: ", $data );
 
-            if(is_array($_d)){
-                foreach( $_d as $clean ){
+            if ( is_array( $_d ) ) {
+                foreach ( $_d as $clean ) {
 
-                    if (strpos($data, "[DONE]\n\n") !== false) {
-                        $this->_doLog("Stream from Open Ai is terminated. Segment id:  " . $payload['id_segment']);
-                        $this->emitMessage( $payload['id_client'], $payload['id_segment'], $txt, false, true );
-                        $this->destroyLock($payload['id_segment'], $payload['id_job'], $payload['password']);
+                    if ( strpos( $data, "[DONE]\n\n" ) !== false ) {
+                        $this->_doLog( "Stream from Open Ai is terminated. Segment id:  " . $payload[ 'id_segment' ] );
+                        $this->emitMessage( $payload[ 'id_client' ], $payload[ 'id_segment' ], $txt, false, true );
+                        $this->destroyLock( $payload[ 'id_segment' ], $payload[ 'id_job' ], $payload[ 'password' ] );
 
                         return 0; // exit
                     } else {
-                        $this->_doLog("Received data stream from OpenAI for id_segment " . $payload['id_segment']);
-                        $arr = json_decode($clean, true);
+                        $this->_doLog( "Received data stream from OpenAI for id_segment " . $payload[ 'id_segment' ] );
+                        $arr = json_decode( $clean, true );
 
-                        if ($data != "data: [DONE]\n\n" and isset($arr["choices"][0]["delta"]["content"])) {
-                            $txt .= $arr["choices"][0]["delta"]["content"];
-                            $this->emitMessage( $payload['id_client'], $payload['id_segment'], $txt );
+                        if ( $data != "data: [DONE]\n\n" and isset( $arr[ "choices" ][ 0 ][ "delta" ][ "content" ] ) ) {
+                            $txt .= $arr[ "choices" ][ 0 ][ "delta" ][ "content" ];
+                            $this->emitMessage( $payload[ 'id_client' ], $payload[ 'id_segment' ], $txt );
                         } else {
                             // Trigger error only if $clean is not empty
-                            if(!empty($clean) and $clean !== ''){
+                            if ( !empty( $clean ) and $clean !== '' ) {
 
                                 // Trigger real errors here
-                                if(Utils::isJson($clean)){
-                                    $clean = json_decode($clean, true);
+                                if ( Utils::isJson( $clean ) ) {
+                                    $clean = json_decode( $clean, true );
 
-                                    if(
-                                        isset($clean['error']) and
-                                        isset($clean['error']["message"])
-                                    ){
-                                        $message = "Received wrong JSON data from OpenAI for id_segment " . $payload['id_segment']. ":" . $clean['error']["message"] ." was received";
-                                        $this->emitErrorMessage( $message, $payload);
+                                    if (
+                                            isset( $clean[ 'error' ] ) and
+                                            isset( $clean[ 'error' ][ "message" ] )
+                                    ) {
+                                        $message = "Received wrong JSON data from OpenAI for id_segment " . $payload[ 'id_segment' ] . ":" . $clean[ 'error' ][ "message" ] . " was received";
+                                        $this->emitErrorMessage( $message, $payload );
 
                                         return 0; // exit
                                     }
@@ -146,8 +144,8 @@ class AIAssistantWorker extends AbstractWorker
                     }
                 }
             } else {
-                $message = "Data received from OpenAI is not as array: " . $_d ." was received for id_segment " . $payload['id_segment'];
-                $this->emitErrorMessage( $message, $payload);
+                $message = "Data received from OpenAI is not as array: " . $_d . " was received for id_segment " . $payload[ 'id_segment' ];
+                $this->emitErrorMessage( $message, $payload );
 
                 return 0; // exit
             }
@@ -162,36 +160,36 @@ class AIAssistantWorker extends AbstractWorker
     /**
      * @param $message
      * @param $payload
+     *
      * @throws StompException
      */
-    private function emitErrorMessage($message, $payload)
-    {
-        $this->_doLog($message);
-        $this->emitMessage( $payload['id_client'], $payload['id_segment'], $message, true );
+    private function emitErrorMessage( $message, $payload ) {
+        $this->_doLog( $message );
+        $this->emitMessage( $payload[ 'id_client' ], $payload[ 'id_segment' ], $message, true );
     }
 
     /**
-     * @param $idClient
-     * @param $idSegment
-     * @param $message
+     * @param      $idClient
+     * @param      $idSegment
+     * @param      $message
      * @param bool $hasError
      * @param bool $completed
+     *
      * @throws StompException
      */
-    private function emitMessage($idClient, $idSegment, $message, $hasError = false, $completed = false)
-    {
-        $this->publishMessage([
-            '_type' => 'ai_assistant_explain_meaning',
-            'data'  => [
-                'id_client' => $idClient,
-                'payload'   => [
-                    'id_segment' => $idSegment,
-                    'has_error' => $hasError,
-                    'completed' => $completed,
-                    'message' => trim($message)
-                ],
-            ]
-        ]);
+    private function emitMessage( $idClient, $idSegment, $message, $hasError = false, $completed = false ) {
+        $this->publishToSseTopic( [
+                '_type' => 'ai_assistant_explain_meaning',
+                'data'  => [
+                        'id_client' => $idClient,
+                        'payload'   => [
+                                'id_segment' => $idSegment,
+                                'has_error'  => $hasError,
+                                'completed'  => $completed,
+                                'message'    => trim( $message )
+                        ],
+                ]
+        ] );
     }
 
     /**
@@ -202,59 +200,58 @@ class AIAssistantWorker extends AbstractWorker
      *
      * @return Status
      */
-    private function generateLock($idSegment, $idJob, $password, $value)
-    {
-        $key = $this->getLockKey($idSegment, $idJob, $password);
+    private function generateLock( $idSegment, $idJob, $password, $value ) {
+        $key = $this->getLockKey( $idSegment, $idJob, $password );
 
-        return $this->redis->set($key, $value);
+        return $this->redis->set( $key, $value );
     }
 
     /**
      * @param $idSegment
      * @param $idJob
      * @param $password
+     *
      * @return int
      */
-    private function destroyLock($idSegment, $idJob, $password)
-    {
-        $key = $this->getLockKey($idSegment, $idJob, $password);
+    private function destroyLock( $idSegment, $idJob, $password ) {
+        $key = $this->getLockKey( $idSegment, $idJob, $password );
 
-        return $this->redis->del([$key]);
+        return $this->redis->del( [ $key ] );
     }
 
     /**
      * @param $idSegment
      * @param $idJob
      * @param $password
+     *
      * @return string
      */
-    private function getLockValue($idSegment, $idJob, $password)
-    {
-        $key = $this->getLockKey($idSegment, $idJob, $password);
+    private function getLockValue( $idSegment, $idJob, $password ) {
+        $key = $this->getLockKey( $idSegment, $idJob, $password );
 
-        return $this->redis->get($key);
+        return $this->redis->get( $key );
     }
 
     /**
      * @param $idSegment
      * @param $idJob
      * @param $password
+     *
      * @return string
      */
-    private function getLockKey($idSegment, $idJob, $password)
-    {
-        return $idSegment.'-'.$idJob.'-'.$password;
+    private function getLockKey( $idSegment, $idJob, $password ) {
+        return $idSegment . '-' . $idJob . '-' . $password;
     }
 
     /**
      * @param int $length
+     *
      * @return string
      * @throws Exception
      */
-    private function generateLockValue($length = 20)
-    {
-        $bytes = random_bytes($length);
+    private function generateLockValue( $length = 20 ) {
+        $bytes = random_bytes( $length );
 
-        return bin2hex($bytes);
+        return bin2hex( $bytes );
     }
 }

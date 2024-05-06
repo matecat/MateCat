@@ -31,7 +31,7 @@ const logger = winston.createLogger( {
     level: 'info',
     format: winston.format.json(),
     transports: [
-        new winston.transports.Console( {level: 'info'} ),
+        new winston.transports.Console( {level: config.log.level} ),
         new winston.transports.File( {filename: path.resolve( __dirname, config.log.file ), level: config.log.level} ),
     ],
 } );
@@ -80,7 +80,7 @@ const corsAllow = ( req, res ) => {
 
 //Event triggered when a message is sent to the client
 browserChannel.on( 'message', function ( message ) {
-    // logger.debug('browserChannel message', message);
+    logger.debug('browserChannel message', message);
 } );
 
 //Event triggered when a client disconnect

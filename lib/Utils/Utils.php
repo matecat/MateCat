@@ -382,7 +382,6 @@ class Utils {
         $queue_element[ 'subject' ] = $subject;
         $queue_element[ 'body' ]    = '<pre>' . self::_getBackTrace() . "<br />" . $htmlContent . '</pre>';
 
-        WorkerClient::init( new AMQHandler() );
         WorkerClient::enqueue( 'MAIL', '\AsyncTasks\Workers\ErrMailWorker', $queue_element, [ 'persistent' => WorkerClient::$_HANDLER->persistent ] );
 
         Log::doJsonLog( 'Message has been sent' );
@@ -801,56 +800,6 @@ class Utils {
     }
 
     /**
-     * @param string $format
-     * @return array
-     */
-    public static function allowedLanguages($format = 'rfc3066code')
-    {
-        $allowedLanguages = [];
-
-        $file = INIT::$UTILS_ROOT . '/Langs/supported_langs.json';
-        $string = file_get_contents( $file );
-        $langs = json_decode( $string, true );
-
-        foreach ($langs['langs'] as $lang){
-            $allowedLanguages[] = (isset($lang[$format])) ? $lang[$format] : $lang['rfc3066code'];
-        }
-
-        return $allowedLanguages;
-    }
-
-    /**
-     * @param string $language
-     * @param string $format
-     * @return bool
-     */
-    public static function isValidLanguage($language, $format = 'rfc3066code')
-    {
-        $allowedLanguages = Utils::allowedLanguages($format);
-
-        return in_array($language, $allowedLanguages);
-    }
-
-    /**
-     * @param $rfc3066code
-     * @return string|null
-     */
-    public static function getLocalizedLanguage($rfc3066code)
-    {
-        $file = INIT::$UTILS_ROOT . '/Langs/supported_langs.json';
-        $string = file_get_contents( $file );
-        $langs = json_decode( $string, true );
-
-        foreach ($langs['langs'] as $lang){
-            if($lang['rfc3066code'] === $rfc3066code){
-                return isset( $lang['localized'][0]['en'] ) ? $lang['localized'][0]['en'] : null;
-            }
-        }
-
-        return null;
-    }
-
-    /**
      * @param string $phrase
      * @param int $max_words
      *
@@ -864,31 +813,6 @@ class Utils {
         }
 
         return $phrase;
-    }
-
-    /**
-     * Examples:
-     *
-     * it-IT  ---> it
-     * es-419 ---> es
-     * to-TO ----> ton
-     *
-     * @param $rfc3066code
-     * @return string|null
-     */
-    public static function convertLanguageToIsoCode($rfc3066code)
-    {
-        $file = INIT::$UTILS_ROOT . '/Langs/supported_langs.json';
-        $string = file_get_contents( $file );
-        $langs = json_decode( $string, true );
-
-        foreach ($langs['langs'] as $lang){
-            if($rfc3066code === $lang['rfc3066code']){
-                return $lang['isocode'];
-            }
-        }
-
-        return null;
     }
 
     /**

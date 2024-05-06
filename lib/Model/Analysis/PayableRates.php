@@ -24,21 +24,6 @@ class Analysis_PayableRates {
     ];
 
     protected static $langPair2MTpayableRates = [
-        "de" => [
-            'tr' => [
-                'NO_MATCH'    => 100,
-                '50%-74%'     => 100,
-                //'75%-99%'     => 60,
-                '75%-84%'     => 60,
-                '85%-94%'     => 60,
-                '95%-99%'     => 60,
-                '100%'        => 30,
-                '100%_PUBLIC' => 30,
-                'REPETITIONS' => 30,
-                'INTERNAL'    => 60,
-                'MT'          => 77
-            ]
-        ],
         "en" => [
             "it" => [
                 'NO_MATCH'    => 100,
@@ -340,19 +325,6 @@ class Analysis_PayableRates {
                 'INTERNAL'    => 60,
                 'MT'          => 77
             ],
-            "tl" => [
-                'NO_MATCH'    => 100,
-                '50%-74%'     => 100,
-                //'75%-99%'     => 60,
-                '75%-84%'     => 60,
-                '85%-94%'     => 60,
-                '95%-99%'     => 60,
-                '100%'        => 30,
-                '100%_PUBLIC' => 30,
-                'REPETITIONS' => 30,
-                'INTERNAL'    => 60,
-                'MT'          => 77
-            ],
             "xh" => [
                 'NO_MATCH'    => 100,
                 '50%-74%'     => 100,
@@ -422,8 +394,9 @@ class Analysis_PayableRates {
      */
     public static function resolveBreakdowns($breakdowns, $source, $target)
     {
-        $isoSource = Utils::convertLanguageToIsoCode($source);
-        $isoTarget = Utils::convertLanguageToIsoCode($target);
+        $languages = Langs_Languages::getInstance();
+        $isoSource = $languages->convertLanguageToIsoCode($source);
+        $isoTarget = $languages->convertLanguageToIsoCode($target);
 
         if ( isset( $breakdowns[ $source ] ) ) {
             if ( isset( $breakdowns[ $source ][ $target ] ) ) {
