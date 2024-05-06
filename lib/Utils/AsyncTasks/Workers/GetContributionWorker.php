@@ -101,12 +101,6 @@ class GetContributionWorker extends AbstractWorker {
         $matches = array_slice( $matches, 0, $contributionStruct->resultNum );
         $this->normalizeTMMatches( $matches, $contributionStruct, $featureSet, $jobStruct->target );
 
-        // update suggestion array only if concordanceSearch = false
-        // (in this way we automatically exclude TM Search matches)
-        if ( $contributionStruct->concordanceSearch === false ) {
-            $this->_updateSuggestionArray( $contributionStruct->segmentId, $this->normalizeMatchesToLayer0( $matches, $filter ) );
-        }
-
         $this->_publishPayload( $matches, $contributionStruct );
 
         // cross language matches

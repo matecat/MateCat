@@ -253,19 +253,18 @@ class convertFileController extends ajaxController {
         $converter->featureSet  = $this->featureSet;
         $converter->doAction();
 
-        $errors = $converter->checkResult();
+        $error = $converter->checkResult();
 
         $this->result->changeCode(ConversionHandlerStatus::ZIP_HANDLING);
 
-        /** @var ConvertedFileModel $__err */
-        foreach ( $errors as $__err ) {
-
-            $this->result->changeCode($__err[ 'message' ]);
+        // Upload errors handling
+        if($error !== null and !empty($error->getErrors())){
+            $this->result->changeCode($error->getCode());
             $savedErrors = $this->result->getErrors();
-            $brokenFileName = ZipArchiveExtended::getFileName( $__err[ 'debug' ] );
+            $brokenFileName = ZipArchiveExtended::getFileName( array_keys($error->getErrors())[0] );
 
             if( !isset( $savedErrors[$brokenFileName] ) ){
-                $this->result->addError($__err[ 'message' ], $brokenFileName);
+                $this->result->addError($error->getErrors()[0]['message'], $brokenFileName);
             }
         }
     }
