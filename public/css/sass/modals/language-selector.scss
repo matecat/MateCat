@@ -260,8 +260,10 @@
       max-height: 100%;
 
       li.lang-item {
-        display: grid;
-        grid-template-columns: auto 17px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 5px;
         cursor: pointer;
         position: relative;
         padding: 8px 12px;

@@ -1520,7 +1520,7 @@ button.ui-button::-moz-focus-inner {
     }
 
     .select__dropdown-wrapper {
-      min-width: 300px;
+      min-width: 350px;
       border: solid 1px #96c8da;
       border-top: unset;
       z-index: 1;
@@ -2990,8 +2990,9 @@ a.pull-right.confirmDelete {
 }
 
 .language-dropdown-item-container {
-  display: flex;
-  gap: 5px;
+  display: grid;
+  grid-template-columns: 70px auto;
+  gap: 10px;
   align-items: center;
   overflow: hidden;
 
@@ -3000,6 +3001,8 @@ a.pull-right.confirmDelete {
     font-weight: normal;
 
     > span {
+      display: block;
+      text-align: center;
       background-color: $grey7;
       border-radius: 4px;
       padding: 2px 4px;
