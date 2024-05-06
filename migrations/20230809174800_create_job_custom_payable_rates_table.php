@@ -1,6 +1,6 @@
 <?php
 
-class CreatePayableRateJobPivotTable extends AbstractMatecatMigration {
+class CreateJobCustomPayableRatesTable extends AbstractMatecatMigration {
 
     public $sql_up = [ '
         CREATE TABLE `job_custom_payable_rates` (

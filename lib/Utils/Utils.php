@@ -1,8 +1,7 @@
 <?php
 
-use Features\ReviewExtended\ReviewUtils as ReviewUtils;
-use FilesStorage\FilesStorageFactory;
 use Behat\Transliterator\Transliterator;
+use Features\ReviewExtended\ReviewUtils as ReviewUtils;
 
 class Utils {
 
@@ -31,7 +30,7 @@ class Utils {
         }
 
         // this regex matches /revise /revise[2-9]
-        preg_match( '/revise([2-9]|\'\')?\//s', $url[ 'path' ], $matches );
+        preg_match( '/revise([2-9]|\'\')?\//', $url[ 'path' ], $matches );
 
         if ( count( $matches ) === 1 ) { // [0] => revise/
             $sourcePage = ReviewUtils::revisionNumberToSourcePage( Constants::SOURCE_PAGE_TRANSLATE );
@@ -72,7 +71,7 @@ class Utils {
             $platform = 'Unknown';
         }
 
-        // Next get the name of the useragent yes seperately and for good reason
+        // Next get the name of the useragent, yes separately and for good reason
         if ( preg_match( '/MSIE|Trident|Edge/i', $u_agent ) && !preg_match( '/Opera/i', $u_agent ) ) {
             $bname = 'Internet Explorer';
             $ub    = "MSIE";
@@ -139,7 +138,7 @@ class Utils {
         // everything to lower and no spaces begin or end
         $string = strtolower( trim( $string ) );
 
-        //replace accent characters, depends your language is needed
+        //replace accent characters, depends on your language is needed
         $string = Utils::replace_accents( $string );
 
         // adding - for spaces and union characters
@@ -152,10 +151,9 @@ class Utils {
         //delete and replace rest of special chars
         $find   = [ '/[^a-z0-9\-<>]/', '/[\-]+/', '/<[^>]*>/' ];
         $repl   = [ '', '-', '' ];
-        $string = preg_replace( $find, $repl, $string );
 
         //return the friendly url
-        return $string;
+        return preg_replace( $find, $repl, $string );
     }
 
     public static function replace_accents( $var ) { //replace for accents catalan spanish and more
@@ -175,11 +173,13 @@ class Utils {
             'r', 'S', 's', 'S', 's', 'S', 's', 'S', 's', 'T', 't', 'T', 't', 'T', 't', 'U', 'u', 'U', 'u', 'U', 'u', 'U', 'u', 'U', 'u', 'U', 'u', 'W', 'w', 'Y', 'y', 'Y', 'Z', 'z', 'Z', 'z', 'Z',
             'z', 's', 'f', 'O', 'o', 'U', 'u', 'A', 'a', 'I', 'i', 'O', 'o', 'U', 'u', 'U', 'u', 'U', 'u', 'U', 'u', 'U', 'u', 'A', 'a', 'AE', 'ae', 'O', 'o'
         ];
-        $var = str_replace( $a, $b, $var );
 
-        return $var;
+        return str_replace( $a, $b, $var );
     }
 
+    /**
+     * @throws Exception
+     */
     public static function getGlobalMessage() {
         $retString = '';
         if ( file_exists( INIT::$ROOT . "/inc/.globalmessage.ini" ) ) {
@@ -254,11 +254,14 @@ class Utils {
         return date( 'Y-m-d H:i:s', $time );
     }
 
+    /**
+     * @throws Exception
+     */
     public static function api_timestamp( $date_string ) {
         if ( $date_string == null ) {
             return null;
         } else {
-            $datetime = new \DateTime( $date_string );
+            $datetime = new DateTime( $date_string );
 
             return $datetime->format( 'c' );
         }
@@ -282,7 +285,8 @@ class Utils {
      * Removes the empty elements from the end of an array
      *
      * @param array $array
-     * @return array|mixed
+     *
+     * @return array
      */
     public static function popArray(array $array)
     {
@@ -319,7 +323,7 @@ class Utils {
     }
 
     public static function is_assoc( $array ) {
-        return is_array( $array ) and (bool)count( array_filter( array_keys( $array ), 'is_string' ) );
+        return is_array( $array ) and count( array_filter( array_keys( $array ), 'is_string' ) );
     }
 
     public static function curlFile( $filePath ) {
@@ -332,6 +336,9 @@ class Utils {
         return $curlFile;
     }
 
+    /**
+     * @return string|void
+     */
     public static function getRealIpAddr() {
 
         foreach ( [
@@ -354,6 +361,9 @@ class Utils {
 
     }
 
+    /**
+     * @throws Exception
+     */
     public static function sendErrMailReport( $htmlContent, $subject = null ) {
 
         if ( !INIT::$SEND_ERR_MAIL_REPORT ) {
@@ -373,7 +383,7 @@ class Utils {
         $queue_element[ 'body' ]    = '<pre>' . self::_getBackTrace() . "<br />" . $htmlContent . '</pre>';
 
         WorkerClient::init( new AMQHandler() );
-        \WorkerClient::enqueue( 'MAIL', '\AsyncTasks\Workers\ErrMailWorker', $queue_element, [ 'persistent' => WorkerClient::$_HANDLER->persistent ] );
+        WorkerClient::enqueue( 'MAIL', '\AsyncTasks\Workers\ErrMailWorker', $queue_element, [ 'persistent' => WorkerClient::$_HANDLER->persistent ] );
 
         Log::doJsonLog( 'Message has been sent' );
 
@@ -455,14 +465,15 @@ class Utils {
         return true;
     }
 
+
     /**
+     * Fixes the file name by sanitizing the given string and ensuring uniqueness in the specified directory.
      *
-     * Remove Un-Wanted Chars from string nameexit
+     * @param string      $stringName The original file name to fix.
+     * @param string|null $directory  Optional. The directory where the file is located. Default is null.
+     * @param bool        $upCount    Optional. Whether to increment the count number if the file name already exists. Default is true.
      *
-     * @param (string) $string
-     *
-     * @return string
-     * @throws Exception
+     * @return string The fixed file name.
      */
     public static function fixFileName( $stringName, $directory = null, $upCount = true ) {
         $string = filter_var( $stringName, FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES ] );
@@ -472,19 +483,41 @@ class Utils {
         return $string;
     }
 
+    /**
+     * Callback function used to update the count name in the given name by replacing it with the incremented count number.
+     *
+     * @param array $matches The matches array containing the count number and extension.
+     *                       The count number is stored in index 1 and the extension is stored in index 2.
+     *
+     * @return string The updated name with the incremented count number.
+     */
     protected function upCountNameCallback( $matches ) {
         $index = isset( $matches[ 1 ] ) ? intval( $matches[ 1 ] ) + 1 : 1;
         $ext   = isset( $matches[ 2 ] ) ? $matches[ 2 ] : '';
         return '_(' . $index . ')' . $ext;
     }
 
+    /**
+     * Updates the count name in the given name by replacing it with the incremented count number.
+     *
+     * @param string $name The name to update the count in.
+     *
+     * @return string The updated name with the incremented count number.
+     */
     protected static function upCountName( $name ) {
         return preg_replace_callback(
-            '/(?:(?:_\(([\d]+)\))?(\.[^.]+))?$/', [ '\Utils', 'upCountNameCallback' ], $name, 1
+            '/(?:(?:_\((\d+)\))?(\.[^.]+))?$/', [ '\Utils', 'upCountNameCallback' ], $name, 1
         );
     }
 
 
+    /**
+     * Check if a file name is valid to prevent directory traversal attacks.
+     *
+     * @param string $fileUpName The file name to check.
+     *
+     * @return bool Returns true if the file name is valid, false otherwise.
+     */
     public static function isValidFileName( $fileUpName ) {
 
         if (
@@ -503,15 +536,6 @@ class Utils {
 
         return true;
 
-    }
-
-    /**
-     * @param $arr
-     *
-     * @return mixed
-     */
-    public static function filterLangDetectArray( $arr ) {
-        return filter_var( $arr, FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
     }
 
     /**
@@ -548,7 +572,7 @@ class Utils {
      *
      * @param bool $raise
      *
-     * @return null|string
+     * @return void|string
      * @throws Exception
      */
     public static function raiseJsonExceptionError( $raise = true ) {
@@ -591,7 +615,7 @@ class Utils {
 
     }
 
-    //Array_column() is not supported on PHP 5.4, so i'll rewrite it
+    //Array_column() is not supported on PHP 5.4, so I'll rewrite it
     public static function array_column( array $input, $column_key, $index_key = null ) {
 
         if ( function_exists( 'array_column' ) ) {
@@ -631,35 +655,6 @@ class Utils {
         return str_replace( "\xEF\xBB\xBF", '', $string );
     }
 
-    public static function isJobBasedOnMateCatFilters( $jobId ) {
-
-        return true; //TODO refactory on the project creation to store info about which file is converted
-
-        try {
-
-            $fs    = FilesStorageFactory::create();
-            $files = $fs->getFilesForJob( $jobId );
-            foreach ( $files as $file ) {
-                $fileType = \Matecat\XliffParser\XliffUtils\XliffProprietaryDetect::getInfo( $files[ 0 ][ 'xliffFilePath' ] );
-                if ( $fileType[ 'proprietary_short_name' ] !== 'matecat_converter' ) {
-                    // If only one XLIFF is not created with MateCat Filters, we can't say
-                    // that the project is entirely based on new Filters
-                    return false;
-                }
-            }
-
-            // If the flow arrives here, all the files' XLIFFs are based on new Filters
-            return true;
-
-        } catch ( \Exception $e ) {
-            $msg = " CRITICAL: " . $jobId . " has no files in storage... " . $e->getMessage();
-            Log::doJsonLog( str_repeat( "*", strlen( $msg ) + 10 ) );
-            Log::doJsonLog( "*****$msg*****" );
-            Log::doJsonLog( str_repeat( "*", strlen( $msg ) + 10 ) );
-        }
-
-    }
-
     /**
      * uploadDirFromSessionCookie
      *
@@ -692,7 +687,7 @@ class Utils {
             $description = Constants::PUBLIC_TM;
 
         } elseif ( !empty( $sug_source ) && stripos( $sug_source, "MyMemory" ) === false ) {
-            // This case if for other sources from MyMemory that are public but we must
+            // This case if for other sources from MyMemory that are public, but we must
             // show the specific name of the source.
             $description = $sug_source;
 
@@ -712,6 +707,9 @@ class Utils {
         return $description;
     }
 
+    /**
+     * @throws Exception
+     */
     public static function keyNameFromUserKeyring( $uid, $key ) {
         if ( $uid === null ) {
             return null;
@@ -746,6 +744,7 @@ class Utils {
      * @param $job_tm_keys
      *
      * @return null|string
+     * @throws Exception
      */
     public static function getDefaultKeyDescription( $key, $job_tm_keys ) {
         $ownerKeys   = TmKeyManagement_TmKeyManagement::getOwnerKeys( [ $job_tm_keys ] );
@@ -773,7 +772,7 @@ class Utils {
      * stringsAreEqual
      *
      * This function needs to handle a special case. When old translation has been saved from a pre-translated XLIFF,
-     * encoding is different than the one receiveed from the UI. Quotes are different for instance.
+     * encoding is different from the one received from the UI. Quotes are different for instance.
      *
      * So we compare the decoded version of the two strings. Should always work.
      *
@@ -804,7 +803,8 @@ class Utils {
     /**
      * @param string $phrase
      * @param int $max_words
-     * @return mixed
+     *
+     * @return string
      */
     public static function truncatePhrase($phrase, $max_words){
 
@@ -865,14 +865,15 @@ class Utils {
 
     /**
      * @param $email
-     * @throws \Exception
+     *
+     * @throws Exception
      */
     public static function validateEmailAddress($email)
     {
         $clean_email = filter_var($email,FILTER_SANITIZE_EMAIL);
 
         if( $email !== $clean_email or !filter_var($email,FILTER_VALIDATE_EMAIL) ){
-            throw new \Exception($email . " is not a valid email address");
+            throw new Exception($email . " is not a valid email address");
         }
     }
 

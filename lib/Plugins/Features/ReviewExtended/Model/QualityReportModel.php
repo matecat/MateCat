@@ -12,9 +12,11 @@ use ArrayObject;
 use Chunks_ChunkCompletionEventDao;
 use Chunks_ChunkStruct;
 use Database;
+use Exception;
 use Features\ReviewExtended\IChunkReviewModel;
+use Features\ReviewExtended\ReviewUtils;
 use LQA\ChunkReviewDao;
-use RecursiveArrayObject;
+use Revise\FeedbackDAO;
 use RevisionFactory;
 use Users_UserDao;
 
@@ -57,19 +59,6 @@ class QualityReportModel {
         $this->chunk = $chunk;
     }
 
-    /**
-     * @param $version
-     *
-     * @deprecated no need for a setter, pass in constructor, no need for mutation here.
-     */
-    public function setVersionNumber( $version ) {
-        $this->version = $version;
-    }
-
-    public function getVersionNumber() {
-        return $this->version;
-    }
-
     public function getChunk() {
         return $this->chunk;
     }
@@ -79,11 +68,9 @@ class QualityReportModel {
     }
 
     public function getStructure() {
-        if ( $this->version ) {
-            return $this->__getArchviedStructure();
-        }
+        $records = QualityReportDao::getSegmentsForQualityReport( $this->chunk );
 
-        return $this->__getCurrentStructure();
+        return $this->buildQualityReportStructure( $records );
     }
 
     public function getChunkReview() {
@@ -174,15 +161,29 @@ class QualityReportModel {
     }
 
     /**
-     *
+     * @return void
+     * @throws Exception
      */
     protected function _attachReviewsData() {
-        $this->quality_report_structure[ 'chunk' ][ 'review' ] = [
-                'percentage'    => $this->getChunkReview()->getReviewedPercentage(),
-                'is_pass'       => !!$this->getChunkReview()->is_pass,
-                'score'         => $this->getScore(),
-                'reviewer_name' => $this->getReviewerName()
-        ];
+        $chunk_reviews = ( new \Features\ReviewExtended\Model\ChunkReviewDao() )->findChunkReviews( $this->chunk );
+
+        $this->quality_report_structure[ 'chunk' ][ 'reviews' ] = [];
+        foreach ( $chunk_reviews as $chunk_review ) {
+
+            // try to load Revision Extended but should not load the Improved ( deprecated )
+            $chunkReviewModel = RevisionFactory::initFromProject( $this->getProject() )->getChunkReviewModel( $chunk_review );
+
+            $revisionNumber = ReviewUtils::sourcePageToRevisionNumber( $chunk_review->source_page );
+            $feedback       = ( new FeedbackDAO() )->getFeedback( $this->chunk->id, $chunk_review->review_password, $revisionNumber );
+
+            $this->quality_report_structure[ 'chunk' ][ 'reviews' ][] = [
+                    'revision_number' => $revisionNumber,
+                    'feedback'        => ( $feedback and isset( $feedback[ 'feedback' ] ) ) ? $feedback[ 'feedback' ] : null,
+                    'is_pass'         => !!$chunk_review->is_pass,
+                    'score'           => $chunkReviewModel->getScore(),
+                    'reviewer_name'   => $this->getReviewerName()
+            ];
+        }
     }
 
     /**
@@ -341,31 +342,6 @@ class QualityReportModel {
         }
 
         return $out;
-    }
-
-    private function __getCurrentStructure() {
-        $records = QualityReportDao::getSegmentsForQualityReport( $this->chunk );
-
-        return $this->buildQualityReportStructure( $records );
-    }
-
-    /**
-     * TODO: this method/feature does not belong here. It should be moved to ReviewImproved since archived quality report
-     * structure is not a core matecat feature.
-     *
-     * @return RecursiveArrayObject
-     */
-    private function __getArchviedStructure() {
-        $archivedRecord = ( new ArchivedQualityReportDao() )->getByChunkAndVersionNumber( $this->chunk, $this->version );
-        $decoded        = new RecursiveArrayObject( json_decode( $archivedRecord->quality_report, true ) );
-
-        foreach ( $decoded[ 'chunk' ][ 'files' ] as $file ) {
-            foreach ( $file[ 'segments' ] as $segment ) {
-                $this->all_segments[] = new ArrayObject( $segment );
-            }
-        }
-
-        return $decoded;
     }
 
 }

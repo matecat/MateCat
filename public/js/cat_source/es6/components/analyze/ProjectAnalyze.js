@@ -11,27 +11,22 @@ class ProjectAnalyze extends React.Component {
   getJobs() {
     let idArray = []
     return this.props.project.get('jobs').map((job) => {
+      const jobInfo = this.props.volumeAnalysis.find(
+        (item) => item.get('id') === job.get('id'),
+      )
       if (
         idArray.indexOf(job.get('id')) < 0 &&
-        !isUndefined(this.props.jobsInfo[job.get('id').toString()]) &&
-        !isUndefined(this.props.volumeAnalysis.get(job.get('id').toString())) &&
-        this.props.volumeAnalysis
+        this.props.volumeAnalysis &&
+        jobInfo
       ) {
-        let jobVolumeAnalysisChunk = this.props.volumeAnalysis
-          .get(job.get('id').toString())
-          .get('chunks')
-        let jobVolumeAnalysisTotal = this.props.volumeAnalysis
-          .get(job.get('id').toString())
-          .get('totals')
         idArray.push(job.get('id'))
         return (
           <JobAnalyze
             key={job.get('password')}
-            chunks={jobVolumeAnalysisChunk}
-            total={jobVolumeAnalysisTotal}
+            chunks={jobInfo.get('chunks')}
             project={this.props.project}
             idJob={job.get('id')}
-            jobInfo={this.props.jobsInfo[job.get('id')]}
+            jobInfo={jobInfo.toJS()}
             status={this.props.status}
             jobToScroll={this.props.jobToScroll}
             showAnalysis={this.props.showAnalysis}

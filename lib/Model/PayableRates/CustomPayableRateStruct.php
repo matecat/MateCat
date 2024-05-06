@@ -6,10 +6,12 @@ use Analysis_PayableRates;
 use DataAccess_AbstractDaoSilentStruct;
 use DataAccess_IDaoStruct;
 use Date\DateTimeUtil;
-use DateTime;
+use DomainException;
+use Exception;
+use JsonSerializable;
 use Utils;
 
-class CustomPayableRateStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct, \JsonSerializable
+class CustomPayableRateStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct, JsonSerializable
 {
     const MAX_BREAKDOWN_SIZE = 65535;
 
@@ -75,7 +77,7 @@ class CustomPayableRateStruct extends DataAccess_AbstractDaoSilentStruct impleme
      * @param string $json
      * @return $this
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function hydrateFromJSON($json)
     {
@@ -85,7 +87,7 @@ class CustomPayableRateStruct extends DataAccess_AbstractDaoSilentStruct impleme
             !isset($json['payable_rate_template_name']) and
             !isset($json['breakdowns'])
         ){
-            throw new \Exception("Cannot instantiate a new CustomPayableRateStruct. Invalid JSON provided.", 403);
+            throw new Exception("Cannot instantiate a new CustomPayableRateStruct. Invalid JSON provided.", 403);
         }
 
         $this->validateBreakdowns($json['breakdowns']);
@@ -102,18 +104,18 @@ class CustomPayableRateStruct extends DataAccess_AbstractDaoSilentStruct impleme
 
     /**
      * @param $breakdowns
-     * @throws \Exception
+     * @throws Exception
      */
     private function validateBreakdowns($breakdowns)
     {
         $size = mb_strlen(json_encode($breakdowns, JSON_NUMERIC_CHECK), '8bit');
 
         if($size > self::MAX_BREAKDOWN_SIZE){
-            throw new \Exception('`breakdowns` string is too large. Max size: 64kb');
+            throw new Exception('`breakdowns` string is too large. Max size: 64kb');
         }
 
         if(!isset($breakdowns['default'])){
-            throw new \DomainException('`default` node is MANDATORY in the breakdowns array.', 403);
+            throw new DomainException('`default` node is MANDATORY in the breakdowns array.', 403);
         }
 
         unset($breakdowns['default']);
@@ -144,7 +146,7 @@ class CustomPayableRateStruct extends DataAccess_AbstractDaoSilentStruct impleme
 
     /**
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     public function jsonSerialize()
     {

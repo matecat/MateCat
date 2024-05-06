@@ -25,7 +25,8 @@ class Constants_JobStatus {
     public static $ALLOWED_STATUSES = [
             self::STATUS_ACTIVE,
             self::STATUS_ARCHIVED,
-            self::STATUS_CANCELLED
+            self::STATUS_CANCELLED,
+            self::STATUS_DELETED
     ];
 
     public static function isAllowedStatus( $status ) {

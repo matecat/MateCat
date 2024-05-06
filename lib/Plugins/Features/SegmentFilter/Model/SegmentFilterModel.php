@@ -8,10 +8,14 @@
 
 namespace Features\SegmentFilter\Model;
 
+use Chunks_ChunkStruct;
+use Exception;
+use Translations_SegmentTranslationStruct;
+
 class SegmentFilterModel {
 
     /**
-     * @var \Chunks_ChunkStruct
+     * @var Chunks_ChunkStruct
      */
     private $chunk;
 
@@ -23,27 +27,21 @@ class SegmentFilterModel {
     /**
      * SegmentFilterModel constructor.
      *
-     * @param \Chunks_ChunkStruct $chunk
+     * @param Chunks_ChunkStruct $chunk
      * @param FilterDefinition    $filter
      *
-     * @throws \API\V2\Exceptions\AuthenticationError
-     * @throws \Exceptions\NotFoundException
-     * @throws \Exceptions\ValidationError
-     * @throws \TaskRunner\Exceptions\EndQueueException
-     * @throws \TaskRunner\Exceptions\ReQueueException
+     * @throws Exception
      */
-    public function __construct( \Chunks_ChunkStruct $chunk, FilterDefinition $filter ) {
+    public function __construct( Chunks_ChunkStruct $chunk, FilterDefinition $filter ) {
         $this->chunk  = $chunk;
         $this->filter = $filter;
-        $this->chunk->getProject()->getFeaturesSet()->filter('filterSegmentFilter', $filter, $chunk) ;
     }
 
     /**
-     * @return null|\Translations_SegmentTranslationStruct[]
-     * @throws \Exception
+     * @return null|Translations_SegmentTranslationStruct[]
+     * @throws Exception
      */
     public function getSegmentList() {
-        $result = null;
 
         if ( $this->filter->isSampled() ) {
             $result = SegmentFilterDao::findSegmentIdsForSample( $this->chunk, $this->filter );

@@ -1,4 +1,3 @@
-import {round} from 'lodash'
 import Cookies from 'js-cookie'
 import Platform from 'platform'
 import OfflineUtils from './offlineUtils'
@@ -6,6 +5,7 @@ import SegmentActions from '../actions/SegmentActions'
 import SegmentStore from '../stores/SegmentStore'
 import AlertModal from '../components/modals/AlertModal'
 import ModalsActions from '../actions/ModalsActions'
+import {JOB_WORD_CONT_TYPE} from '../constants/Constants'
 
 const CommonUtils = {
   millisecondsToTime(milli) {
@@ -16,41 +16,8 @@ const CommonUtils = {
   /**
    * Returns the translation status evaluating the job stats
    */
-  getTranslationStatus(stats) {
-    var t = 'approved'
-    var app = parseFloat(stats.APPROVED)
-    var tra = parseFloat(stats.TRANSLATED)
-    var dra = parseFloat(stats.DRAFT)
-    var rej = parseFloat(stats.REJECTED)
-    var todo = parseFloat(stats.TODO)
-
-    // If second pass enabled
-    if (config.secondRevisionsCount && stats.reviews) {
-      var revWords1 = stats.reviews.find(function (value) {
-        return value.revision_number === 1
-      })
-
-      var revWords2 = stats.reviews.find(function (value) {
-        return value.revision_number === 2
-      })
-
-      if (revWords1 && round(parseFloat(revWords1.advancement_wc)) > 0) {
-        app = parseFloat(revWords1.advancement_wc)
-      } else if (revWords2 && round(parseFloat(revWords2.advancement_wc)) > 0) {
-        app = parseFloat(revWords2.advancement_wc)
-        t = 'approved-2ndpass'
-      }
-    }
-
-    if (tra) t = 'translated'
-    if (dra) t = 'draft'
-    if (rej) t = 'draft'
-
-    if (!tra && !dra && !rej && !app && todo > 0) {
-      t = 'draft'
-    }
-
-    return t
+  isJobCompleted(stats) {
+    return stats.raw.draft === 0 && stats.raw.new === 0
   },
   levenshteinDistance(s1, s2) {
     //       discuss at: http://phpjs.org/functions/levenshtein/
@@ -192,7 +159,7 @@ const CommonUtils = {
       }
     }
     if (
-      $('#downloadProject').hasClass('disabled') ||
+      $('#action-download').hasClass('disabled') ||
       $('tr td a.downloading').length ||
       $('.popup-tm td.uploadfile.uploading').length
     ) {
@@ -420,25 +387,27 @@ const CommonUtils = {
   getParameterByName: function (name, url) {
     if (!url) url = window.location.href
     name = name.replace(/[[\]]/g, '\\$&')
-    var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+    const regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
       results = regex.exec(url)
     if (!results) return null
     if (!results[2]) return ''
     return decodeURIComponent(results[2].replace(/\+/g, ' '))
   },
   removeParam: function (parameter) {
-    var url = document.location.href
-    var urlparts = url.split('?')
+    let url = document.location.href
+    const urlparts = url.split('?')
 
     if (urlparts.length >= 2) {
-      var urlBase = urlparts.shift()
-      var queryString = urlparts.join('?')
+      url = urlparts.shift()
+      const queryString = urlparts.join('?')
 
-      var prefix = encodeURIComponent(parameter) + '='
-      var pars = queryString.split(/[&;]/g)
-      for (var i = pars.length; i-- > 0; )
+      const prefix = encodeURIComponent(parameter) + '='
+      const pars = queryString.split(/[&;]/g)
+      for (let i = pars.length; i-- > 0; )
         if (pars[i].lastIndexOf(prefix, 0) !== -1) pars.splice(i, 1)
-      url = urlBase + '?' + pars.join('&')
+      if (pars.length) {
+        url = url + '?' + pars.join('&')
+      }
       window.history.pushState('', document.title, url) // added this line to push the new url directly to url bar .
     }
     return url
@@ -557,6 +526,31 @@ const CommonUtils = {
     })
     elem.find('.tagging-item').remove()
     return elem.text()
+  },
+  parseOldStats: (stats, type) => {
+    if (type === JOB_WORD_CONT_TYPE.EQUIVALENT) {
+      const rawCopy = {
+        approved:
+          stats.revises.length > 1
+            ? stats.revises[0].advancement_wc
+            : stats.APPROVED,
+        approved2:
+          stats.revises.length > 1 ? stats.revises[1].advancement_wc : 0,
+        draft: stats.DRAFT,
+        new: 0,
+        translated: stats.TRANSLATED,
+        rejected: stats.REJECTED,
+        total: stats.TOTAL,
+      }
+      stats = {
+        estimated_completion: stats.estimated_completion,
+        words_per_hour: stats.words_per_hour,
+        analysis_complete: stats.analysis_complete,
+        raw: rawCopy,
+        equivalent: rawCopy,
+      }
+    }
+    return stats
   },
 }
 

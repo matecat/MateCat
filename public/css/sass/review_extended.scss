@@ -453,9 +453,6 @@ section {
   .revise-button-2 {
     background: $approved2Green;
   }
-  &.approved-step-2 .status {
-    background-color: $approved2Green !important;
-  }
 }
 
 .undo-issue-deleted {

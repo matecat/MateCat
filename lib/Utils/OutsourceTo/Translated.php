@@ -470,10 +470,7 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
         // $jpid is always in the form "JOBID-JOBPASSWORD-outsourced". Get job id and password from it
         list( $jid, $jpsw, ) = explode( "-", $jpid );
         $subject_handler = Langs_LanguageDomains::getInstance();
-        $subjects        = $subject_handler->getEnabledDomains();
-
-        $subjects_keys = Utils::array_column( $subjects, "key" );
-        $subject_key   = array_search( $subject, $subjects_keys );
+        $subjectsHashMap = $subject_handler->getEnabledHashMap();
 
         // languages are in the form:
         //    "langpairs":{
@@ -525,7 +522,7 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
         $itemCart[ 'target' ]            = $target;
         $itemCart[ 'words' ]             = max( (int)$volAnalysis[ 'data' ][ 'jobs' ][ $jid ][ 'totals' ][ $jpsw ][ 'TOTAL_PAYABLE' ][ 0 ], 1 );
         $itemCart[ 'subject' ]           = $subject;
-        $itemCart[ 'subject_printable' ] = $subjects[ $subject_key ][ 'display' ];
+        $itemCart[ 'subject_printable' ] = $subjectsHashMap[ $subject ];
         $itemCart[ 'currency' ]          = $this->currency;
         $itemCart[ 'timezone' ]          = $this->timezone;
         $itemCart[ 'quote_result' ]      = $apiCallResult[ 'code' ];

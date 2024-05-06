@@ -7,13 +7,14 @@
 @import 'commons/aria-label-tooltip';
 @import 'common-main';
 @import 'style';
+@import 'commons/progress-mc-bar';
 @import 'mbc-style';
 @import 'lexiqa';
 @import 'segment-notes';
 @import 'project-completion-feature';
 @import 'editlog';
 @import 'components/header/segmentsFilter';
-@import 'revise';
+@import 'review_extended';
 //components
 @import 'commons/nav-bar';
 @import 'components/segment/segment';
@@ -40,6 +41,7 @@
 @import 'components/common/MenuButton';
 @import 'components/common/Tooltip';
 @import 'components/segment/segmentFooterTabAiAssistant';
+@import 'components/common/Button';
 
 @import 'cattool';
 

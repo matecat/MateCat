@@ -6,43 +6,35 @@
     "categories": [
       {
         "label": "Style (readability, consistent style and tone)",
-        "code": "STY",
-        "dqf_id" : 4
+        "code": "STY"
       }
-      ,{
+    ,{
         "label": "Tag issues (mismatches, whitespaces)",
-        "code": "TAG",
-        "dqf_id" : 5
+        "code": "TAG"
       },
       {
         "label": "Translation errors (mistranslation, additions or omissions)",
-        "code": "TER",
-        "dqf_id" : 1
+        "code": "TER"
       },
       {
         "label": "Terminology and translation consistency",
-        "code": "TRM",
-        "dqf_id" : 3
+        "code": "TRM"
       },
       {
         "label": "Language quality (grammar, punctuation, spelling)",
-        "code": "LQ",
-        "dqf_id" : 2
+        "code": "LQ"
       }
     ],
     "severities": [
       {
         "label": "Neutral",
-        "dqf_id" : 0,
         "penalty": 0
       },{
         "label": "Minor",
-        "dqf_id" : 1,
         "penalty": 0.5
       },
       {
         "label": "Major",
-        "dqf_id" : 2,
         "penalty": 2
       }
     ],

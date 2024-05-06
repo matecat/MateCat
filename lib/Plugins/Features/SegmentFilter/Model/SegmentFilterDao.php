@@ -8,15 +8,16 @@
 
 namespace Features\SegmentFilter\Model;
 
+use Chunks_ChunkStruct;
+use Constants_SegmentTranslationsMatchType;
 use Constants_TranslationStatus;
 use DataAccess\ShapelessConcreteStruct;
 use Database;
+use Exception;
 use Features\ReviewExtended\ReviewUtils;
-use Features\SecondPassReview;
-use Features\SegmentFilter\Model\FilterDefinition;
-use Chunks_ChunkStruct;
 
-
+// YYY [Remove] Backward compatibility, filtering on translation events is no more needed
+// YYY Re-factorize this and rewrite all queries
 class SegmentFilterDao extends \DataAccess_AbstractDao {
 
     /**
@@ -151,45 +152,45 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
             switch ( $filter->sampleType() ) {
                 case 'repetitions':
 //                    $data = array_merge( $data, [
-//                            'match_type' => \Constants_SegmentTranslationsMatchType::REPETITIONS,
+//                            'match_type' => Constants_SegmentTranslationsMatchType::REPETITIONS,
 //                    ] );
                     break;
 
                 case 'mt':
                     $data = array_merge( $data, [
-                            'match_type' => \Constants_SegmentTranslationsMatchType::MT,
+                            'match_type' => Constants_SegmentTranslationsMatchType::MT,
                     ] );
                     break;
 
                 case 'matches':
                     $data = array_merge( $data, [
-                            'match_type_100_public' => \Constants_SegmentTranslationsMatchType::_100_PUBLIC,
-                            'match_type_100'        => \Constants_SegmentTranslationsMatchType::_100,
-                            'match_type_ice'        => \Constants_SegmentTranslationsMatchType::ICE
+                            'match_type_100_public' => Constants_SegmentTranslationsMatchType::_100_PUBLIC,
+                            'match_type_100'        => Constants_SegmentTranslationsMatchType::_100,
+                            'match_type_ice'        => Constants_SegmentTranslationsMatchType::ICE
                     ] );
                     break;
 
                 case 'fuzzies_50_74':
                     $data = array_merge( $data, [
-                            'match_type' => \Constants_SegmentTranslationsMatchType::_50_74,
+                            'match_type' => Constants_SegmentTranslationsMatchType::_50_74,
                     ] );
                     break;
 
                 case 'fuzzies_75_84':
                     $data = array_merge( $data, [
-                            'match_type' => \Constants_SegmentTranslationsMatchType::_75_84,
+                            'match_type' => Constants_SegmentTranslationsMatchType::_75_84,
                     ] );
                     break;
 
                 case 'fuzzies_85_94':
                     $data = array_merge( $data, [
-                            'match_type' => \Constants_SegmentTranslationsMatchType::_85_94,
+                            'match_type' => Constants_SegmentTranslationsMatchType::_85_94,
                     ] );
                     break;
 
                 case 'fuzzies_95_99':
                     $data = array_merge( $data, [
-                            'match_type' => \Constants_SegmentTranslationsMatchType::_95_99,
+                            'match_type' => Constants_SegmentTranslationsMatchType::_95_99,
                     ] );
                     break;
 
@@ -280,7 +281,7 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
      */
     public static function findSegmentIdsForSample( Chunks_ChunkStruct $chunk, FilterDefinition $filter ) {
 
-        $source_page = $chunk->getSourcePage();
+        $source_page = $chunk->getSourcePage() ?: 1;
 
         if ( $filter->sampleSize() > 0 ) {
             $limit = self::__getLimit( $chunk, $filter, $source_page );
@@ -346,7 +347,7 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
                 break;
 
             default:
-                throw new \Exception( 'Sample type is not valid: ' . $filter->sampleType() );
+                throw new Exception( 'Sample type is not valid: ' . $filter->sampleType() );
                 break;
         }
 

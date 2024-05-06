@@ -4,8 +4,13 @@ class Projects_MetadataDao extends DataAccess_AbstractDao {
     const FEATURES_KEY = 'features' ;
     const TABLE = 'project_metadata' ;
 
+    const WORD_COUNT_TYPE_KEY = 'word_count_type';
+
     const WORD_COUNT_RAW = 'raw';
     const WORD_COUNT_EQUIVALENT = 'equivalent';
+
+    const SPLIT_EQUIVALENT_WORD_TYPE = 'eq_word_count';
+    const SPLIT_RAW_WORD_TYPE        = 'raw_word_count';
 
     protected static $_query_get_metadata = "SELECT * FROM project_metadata WHERE id_project = :id_project ";
 

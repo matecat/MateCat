@@ -2,6 +2,7 @@
 
 use DataAccess\LoudArray;
 use DataAccess\ShapelessConcreteStruct;
+use EditLog\EditLogSegmentStruct;
 
 class Jobs_JobDao extends DataAccess_AbstractDao {
 
@@ -21,8 +22,6 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
      * This method is not static and used to cache at Redis level the values for this Job
      *
      * Use when counters of the job value are not important but only the metadata are needed
-     *
-     * XXX: Be careful, used by the ContributionSetStruct
      *
      * @param Jobs_JobStruct $jobQuery
      *
@@ -93,11 +92,11 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
     /**
      * @param Translations_SegmentTranslationStruct $translation
      * @param int                                   $ttl
-     * @param DataAccess_IDaoStruct                 $fetchObject
+     * @param Chunks_ChunkStruct                    $fetchObject
      *
-     * @return DataAccess_IDaoStruct|Jobs_JobStruct
+     * @return Jobs_JobStruct|Chunks_ChunkStruct
      */
-    public static function getBySegmentTranslation( Translations_SegmentTranslationStruct $translation, $ttl = 0, DataAccess_IDaoStruct $fetchObject = null ) {
+    public static function getBySegmentTranslation( Translations_SegmentTranslationStruct $translation, $ttl = 0, Chunks_ChunkStruct $fetchObject = null ) {
 
         $thisDao = new self();
         $conn    = Database::obtain()->getConnection();
@@ -107,6 +106,9 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
             $fetchObject = new Jobs_JobStruct();
         }
 
+        /**
+         * @var Jobs_JobStruct|Chunks_ChunkStruct
+         */
         return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, $fetchObject, [
                 'id_job'     => $translation->id_job,
                 'id_segment' => $translation->id_segment
@@ -137,6 +139,40 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
         ] )[ 0 ];
 
         return ($struct->total) ? (int)$struct->total : 0;
+    }
+
+    /**
+     * Get the job's owner uid
+     *
+     * @param $id_job
+     * @param $password
+     * @param int $ttl
+     *
+     * @return null
+     */
+    public static function getOwnerUid( $id_job, $password, $ttl = 86400 ) {
+
+        $thisDao = new self();
+        $conn    = Database::obtain()->getConnection();
+        $stmt = $conn->prepare(
+            "
+                SELECT uid FROM users u
+                join jobs j on j.owner = u.email
+                where j.id = :id_job and password = :password
+            ;
+            "
+        );
+
+        $data = @$thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
+            'id_job'   => $id_job,
+            'password' => $password
+        ] )[ 0 ];
+
+        if(empty($data)){
+            return null;
+        }
+
+        return $data->uid;
     }
 
     /**
@@ -196,7 +232,7 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
             $fetchObject = new Jobs_JobStruct();
         }
 
-        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, $fetchObject, [ $id_project, \Constants_JobStatus::STATUS_DELETED ] );
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, $fetchObject, [ $id_project, Constants_JobStatus::STATUS_DELETED ] );
 
     }
 
@@ -390,7 +426,7 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
      *
      * @param Jobs_JobStruct $jStruct
      *
-     * @return EditLog_EditLogSegmentStruct[]|DataAccess_IDaoStruct[]
+     * @return EditLogSegmentStruct[]
      */
     public function getAllModifiedSegmentsForPee( Jobs_JobStruct $jStruct ) {
 
@@ -414,13 +450,16 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
 
         $stmt = $this->database->getConnection()->prepare( $query );
 
-        return $this->_fetchObject( $stmt, new EditLog_EditLogSegmentStruct(), [
+        /**
+         * @var EditLogSegmentStruct[]
+         */
+        return $this->_fetchObject( $stmt, new EditLogSegmentStruct(), [
                 'id_job'             => $jStruct->id,
                 'password'           => $jStruct->password,
                 'status_new'         => Constants_TranslationStatus::STATUS_NEW,
                 'status_draft'       => Constants_TranslationStatus::STATUS_DRAFT,
-                'edit_time_fast_cut' => 1000 * EditLog_EditLogModel::EDIT_TIME_FAST_CUT,
-                'edit_time_slow_cut' => 1000 * EditLog_EditLogModel::EDIT_TIME_SLOW_CUT
+                'edit_time_fast_cut' => 1000 * EditLogSegmentStruct::EDIT_TIME_FAST_CUT,
+                'edit_time_slow_cut' => 1000 * EditLogSegmentStruct::EDIT_TIME_SLOW_CUT
         ] );
 
     }
@@ -476,8 +515,8 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
                 'password'           => $password,
                 'status_new'         => Constants_TranslationStatus::STATUS_NEW,
                 'status_draft'       => Constants_TranslationStatus::STATUS_DRAFT,
-                'edit_time_fast_cut' => 1000 * EditLog_EditLogModel::EDIT_TIME_FAST_CUT,
-                'edit_time_slow_cut' => 1000 * EditLog_EditLogModel::EDIT_TIME_SLOW_CUT
+                'edit_time_fast_cut' => 1000 * EditLogSegmentStruct::EDIT_TIME_FAST_CUT,
+                'edit_time_slow_cut' => 1000 * EditLogSegmentStruct::EDIT_TIME_SLOW_CUT
         ] )[ 0 ];
 
     }

@@ -370,7 +370,7 @@ abstract class AbstractFilesStorage implements IFilesStorage {
      * This function was created to perform validations on the TKIT zip file
      * format loaded via API.
      *
-     * XXX: This function only handles the case in which the zip file is *one* for the
+     * WARNING: This function only handles the case in which the zip file is *one* for the
      * project.
      *
      * @param $uploadToken

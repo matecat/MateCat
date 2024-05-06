@@ -153,7 +153,7 @@ class copyAllSource2TargetController extends ajaxController {
         $batchEventCreator->save();
 
         if ( !empty( $params[ 'segment_ids' ] ) ) {
-            $counter = new WordCount_CounterModel();
+            $counter = new CounterModel();
             $counter->initializeJobWordCount( $chunk->id, $chunk->password );
         }
 

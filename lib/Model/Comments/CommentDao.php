@@ -291,8 +291,6 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
      * @deprecated this does not follow latest conventions, please don't use
      *             use getCommentsForChunk.
      *
-     * TODO: refactor this, shoudl return an array of structs
-     *
      * @param Comments_CommentStruct $obj
      *
      * @return array

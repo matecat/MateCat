@@ -39,6 +39,11 @@ import SegmentConstants from '../constants/SegmentConstants'
 import SegmentUtils from '../utils/segmentUtils'
 import EditAreaConstants from '../constants/EditAreaConstants'
 import DraftMatecatUtils from './../components/segments/utils/DraftMatecatUtils'
+import {
+  JOB_WORD_CONT_TYPE,
+  REVISE_STEP_NUMBER,
+  SEGMENTS_STATUS,
+} from '../constants/Constants'
 
 EventEmitter.prototype.setMaxListeners(0)
 
@@ -168,7 +173,12 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
             sid: segment.sid + '-' + (i + 1),
             split_group: splitGroup,
             split_points_source: [],
-            status: status,
+            status:
+              config.word_count_type === JOB_WORD_CONT_TYPE.RAW &&
+              segment.revision_number === REVISE_STEP_NUMBER.REVISE2 &&
+              status.toUpperCase() === SEGMENTS_STATUS.APPROVED
+                ? SEGMENTS_STATUS.APPROVED2
+                : status,
             time_to_edit: '0',
             originalDecodedTranslation: translation ? translation : '',
             translation: translation ? translation : '',
@@ -201,6 +211,11 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         })
       } else {
         segment.saving = false
+        segment.status =
+          segment.revision_number === REVISE_STEP_NUMBER.REVISE2 &&
+          segment.status.toUpperCase() === SEGMENTS_STATUS.APPROVED
+            ? SEGMENTS_STATUS.APPROVED2
+            : segment.status
         segment.splitted = false
         segment.original_translation = segment.translation
         segment.unlocked = SegmentUtils.isUnlockedSegment(segment)
@@ -327,7 +342,13 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
   },
 
   setStatus(sid, fid, status) {
-    var index = this.getSegmentIndex(sid)
+    const index = this.getSegmentIndex(sid)
+    //YYY
+    status =
+      config.revisionNumber === REVISE_STEP_NUMBER.REVISE2 &&
+      status === SEGMENTS_STATUS.APPROVED
+        ? SEGMENTS_STATUS.APPROVED2
+        : status
     if (index === -1) return
     this._segments = this._segments.setIn([index, 'status'], status)
     this._segments = this._segments.setIn(
@@ -1062,17 +1083,6 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     let currentSegment = this.getCurrentSegment()
     if (!current_sid && !currentSegment) return null
     current_sid = !current_sid ? currentSegment.sid : current_sid
-    let allStatus = {
-      1: 'APPROVED',
-      2: 'DRAFT',
-      3: 'FIXED',
-      4: 'NEW',
-      5: 'REBUTTED',
-      6: 'REJECTED',
-      7: 'TRANSLATED',
-      8: 'UNTRANSLATED',
-      9: 'UNAPPROVED',
-    }
     let result,
       currentFind = false
     this._segments.forEach((segment) => {
@@ -1081,24 +1091,30 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
           if (segment.get('readonly') === 'true') {
             return false
           } else if (
-            status === 8 &&
-            (segment.get('status').toUpperCase() === allStatus[2] ||
-              segment.get('status').toUpperCase() === allStatus[4] ||
+            status === SEGMENTS_STATUS.UNTRANSLATED &&
+            (segment.get('status').toUpperCase() === SEGMENTS_STATUS.DRAFT ||
+              segment.get('status').toUpperCase() === SEGMENTS_STATUS.NEW ||
               (autopropagated &&
-                segment.get('status').toUpperCase() === allStatus[7] &&
+                segment.get('status').toUpperCase() ===
+                  SEGMENTS_STATUS.TRANSLATED &&
                 segment.get('autopropagated_from') != 0)) &&
             !segment.get('muted')
           ) {
             result = segment.toJS()
             return false
-          } else if (status === 9 && revisionNumber) {
+          } else if (status === SEGMENTS_STATUS.UNAPPROVED && revisionNumber) {
             // Second pass
             if (
-              ((segment.get('status').toUpperCase() === allStatus[1] ||
-                segment.get('status').toUpperCase() === allStatus[7]) &&
+              ((segment.get('status').toUpperCase() ===
+                SEGMENTS_STATUS.APPROVED ||
+                segment.get('status').toUpperCase() ===
+                  SEGMENTS_STATUS.APPROVED2 ||
+                segment.get('status').toUpperCase() ===
+                  SEGMENTS_STATUS.TRANSLATED) &&
                 segment.get('revision_number') === revisionNumber) ||
               (autopropagated &&
-                segment.get('status').toUpperCase() === allStatus[1] &&
+                segment.get('status').toUpperCase() ===
+                  SEGMENTS_STATUS.APPROVED &&
                 segment.get('autopropagated_from') != 0 &&
                 segment.get('revision_number') !== revisionNumber)
             ) {
@@ -1106,8 +1122,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
               return false
             }
           } else if (
-            ((status &&
-              segment.get('status').toUpperCase() === allStatus[status]) ||
+            ((status && segment.get('status').toUpperCase() === status) ||
               !status) &&
             !segment.get('muted')
           ) {
@@ -1128,7 +1143,13 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     let current = this.getCurrentSegment()
     current = current || this._segments.get(0)
     if (current) {
-      let next = this.getNextSegment(current.sid, null, 8, null, true)
+      let next = this.getNextSegment(
+        current.sid,
+        null,
+        SEGMENTS_STATUS.UNTRANSLATED,
+        null,
+        true,
+      )
       return next ? next.sid : this.nextUntranslatedFromServer
     }
     return undefined

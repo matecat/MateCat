@@ -2,10 +2,11 @@
 
 namespace LQA;
 
+use DataAccess_AbstractDaoSilentStruct;
+use DataAccess_IDaoStruct;
 use Exception;
-use QAModelTemplate\QAModelTemplateDao;
 
-class ModelStruct extends \DataAccess_AbstractDaoSilentStruct implements \DataAccess_IDaoStruct, QAModelInterface {
+class ModelStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct, QAModelInterface {
 
     protected static $auto_increment_fields = ['id'];
     protected static $primary_keys = ['id'];
@@ -48,7 +49,7 @@ class ModelStruct extends \DataAccess_AbstractDaoSilentStruct implements \DataAc
     }
 
     /**
-     * @return mixed
+     * @return int[]
      * @throws Exception
      */
     public function getLimit() {

@@ -7,4 +7,5 @@ export default keyMirror({
   UPDATE_TEAMS: null,
   CHOOSE_TEAM: null,
   UPDATE_USER: null,
+  UPDATE_USER_NAME: null,
 })

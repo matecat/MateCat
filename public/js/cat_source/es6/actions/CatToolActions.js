@@ -1,7 +1,6 @@
 import {createRoot} from 'react-dom/client'
 import React from 'react'
 import $ from 'jquery'
-import {filter} from 'lodash'
 
 import AppDispatcher from '../stores/AppDispatcher'
 import Notifications from '../sse/sse'
@@ -151,46 +150,20 @@ let CatToolActions = {
   },
   updateFooterStatistics: function () {
     getJobStatistics(config.id_job, config.password).then(function (data) {
-      if (data.stats) {
-        CatToolActions.setProgress(data.stats)
-        UI.setDownloadStatus(data.stats)
+      if (data) {
+        CatToolActions.setProgress(data)
       }
     })
   },
-  setProgress: function (stats) {
+  setProgress: function (data) {
+    const stats = CommonUtils.parseOldStats(
+      data.stats ? data.stats : data,
+      config.word_count_type,
+    )
     AppDispatcher.dispatch({
       actionType: CatToolConstants.SET_PROGRESS,
       stats: stats,
     })
-    //TODO move it
-    UI.projectStats = stats
-    this.checkQualityReport(stats)
-  },
-  checkQualityReport: function (stats) {
-    if (stats.APPROVED_PERC > 10) {
-      $('#quality-report-button').attr('data-revised', true)
-    }
-    let reviseCount = config.isReview
-      ? filter(
-          stats.revises,
-          (rev) => rev.revision_number === config.revisionNumber,
-        )
-      : null
-    if (
-      config.isReview &&
-      reviseCount &&
-      reviseCount.length > 0 &&
-      reviseCount[0].advancement_wc >= stats.TOTAL
-    ) {
-      let revise = CatToolStore.getQR(config.revisionNumber)
-      if (revise && !revise[0].feedback) {
-        const isModalClosed =
-          CommonUtils.getFromSessionStorage('feedback-modal')
-        if (!isModalClosed) {
-          CatToolActions.openFeedbackModal('', config.revisionNumber)
-        }
-      }
-    }
   },
   openFeedbackModal: function (feedback, revisionNumber) {
     var props = {

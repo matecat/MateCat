@@ -3,16 +3,14 @@
 namespace API\V2\Json  ;
 
 use Features\ReviewExtended\ReviewUtils;
-use Features\SecondPassReview;
-use LQA\EntryStruct;
 use LQA\EntryCommentDao;
+use LQA\EntryStruct;
+use SplFileObject;
 
 class SegmentTranslationIssue {
 
-    private $categories ;
-
     /**
-     * @var \SplFileObject
+     * @var SplFileObject
      */
     private $csvHandler;
 
@@ -25,7 +23,7 @@ class SegmentTranslationIssue {
         $comments = $dao->findByIssueId( $record->id );
         $record = new EntryStruct( $record->getArrayCopy() );
 
-        $row = [
+        return [
                 'comment'             => $record->comment,
                 'created_at'          => date( 'c', strtotime( $record->create_date ) ),
                 'id'                  => (int)$record->id,
@@ -46,13 +44,11 @@ class SegmentTranslationIssue {
                 'comments'            => $comments,
                 'revision_number'     => ReviewUtils::sourcePageToRevisionNumber( $record->source_page )
         ];
-
-        return $row;
     }
 
     public function genCSVTmpFile( $data ) {
         $filePath   = tempnam( "/tmp", "SegmentsIssuesComments_" );
-        $csvHandler = new \SplFileObject( $filePath, "w" );
+        $csvHandler = new SplFileObject( $filePath, "w" );
         $csvHandler->setCsvControl( ';' );
 
         $this->csvHandler = $csvHandler; // set the handler to allow to clean resource

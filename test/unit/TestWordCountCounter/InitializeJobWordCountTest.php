@@ -1,7 +1,10 @@
 <?php
 
+use WordCount\CounterModel;
+use WordCount\WordCountStruct;
+
 /**
- * @covers WordCount_CounterModel::initializeJobWordCount
+ * @covers CounterModel::initializeJobWordCount
  * @group  regression
  * User: dinies
  * Date: 30/06/16
@@ -13,7 +16,7 @@ class InitializeJobWordCountTest extends AbstractTest {
 
     /**
      * @group  regression
-     * @covers WordCount_CounterModel::initializeJobWordCount
+     * @covers CounterModel::initializeJobWordCount
      */
     function test_initializeJobWordCount() {
 
@@ -34,11 +37,11 @@ class InitializeJobWordCountTest extends AbstractTest {
         }
 
         $job       = new Jobs_JobStruct( $db->getConnection()->query( "SELECT * FROM jobs where id = 1 LIMIT 1" )->fetch() );
-        $wordCount = new WordCount_CounterModel();
+        $wordCount = new CounterModel();
 
         $result = $wordCount->initializeJobWordCount( $job[ 'id' ], $job[ 'password' ] );
 
-        $this->assertTrue( $result instanceof WordCount_Struct );
+        $this->assertTrue( $result instanceof WordCountStruct );
         $this->assertEquals( $job[ 'id' ], $result->getIdJob() );
         $this->assertEquals( $job[ 'password' ], $result->getJobPassword() );
         $this->assertEquals( "114.2", $result->getNewWords() );
