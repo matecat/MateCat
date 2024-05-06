@@ -2,6 +2,7 @@
 
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\S3FilesStorage;
+use Predis\Connection\ConnectionException;
 
 /**
  * Created by PhpStorm.
@@ -37,7 +38,7 @@ class ZipContentObject extends stdClass {
 
     /**
      * @throws ReflectionException
-     * @throws \Predis\Connection\ConnectionException
+     * @throws ConnectionException
      */
     private function setDocumentContentFromS3() {
         $s3Client = S3FilesStorage::getStaticS3Client();

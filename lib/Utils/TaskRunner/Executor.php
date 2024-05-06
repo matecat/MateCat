@@ -16,7 +16,6 @@ use Exception;
 use INIT;
 use Log;
 use PDOException;
-use Predis\PredisException;
 use ReflectionException;
 use SplObserver;
 use SplSubject;
@@ -208,6 +207,8 @@ class Executor implements SplObserver {
     /**
      * Main method
      *
+     * @param null $args
+     *
      * @throws Exception
      */
     public function main() {
@@ -367,7 +368,6 @@ class Executor implements SplObserver {
      * Close all opened resources
      *
      * @throws ReflectionException
-     * @throws PredisException
      */
     public static function cleanShutDown() {
 
@@ -390,7 +390,6 @@ class Executor implements SplObserver {
      *
      * @return int
      * @throws ReflectionException
-     * @throws PredisException
      */
     protected function _myProcessExists( $pid ) {
 

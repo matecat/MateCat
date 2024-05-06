@@ -12,7 +12,7 @@ use Predis\Client;
 class RedisHandler {
 
     /**
-     * @var Predis\Client
+     * @var Client
      */
     protected $redisHandler;
 
@@ -21,7 +21,7 @@ class RedisHandler {
      *
      * Get the connection to Redis server and return it
      *
-     * @return Predis\Client
+     * @return Client
      * @throws ReflectionException
      */
     public function getConnection() {
@@ -64,7 +64,8 @@ class RedisHandler {
 
         }
 
-        return new Predis\Client( $connectionParams );
+        return  new Client( $connectionParams );
+
     }
 
     protected function formatDSN( $dsnString ) {

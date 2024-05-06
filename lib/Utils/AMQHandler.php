@@ -8,6 +8,7 @@
  */
 
 use Analysis\Queue\RedisKeys;
+use Predis\Connection\ConnectionInterface;
 use Predis\Client as PredisClient;
 use Stomp\Client;
 use Stomp\Exception\ConnectionException;
@@ -112,6 +113,7 @@ class AMQHandler {
      *
      * Get the connection to Redis server and return it
      *
+     * @return Client|ConnectionInterface
      * @throws ReflectionException
      */
     public function getRedisClient() {

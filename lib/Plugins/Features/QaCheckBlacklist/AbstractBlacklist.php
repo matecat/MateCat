@@ -3,7 +3,9 @@
 namespace Features\QaCheckBlacklist;
 
 use Matecat\Finder\WholeTextFinder;
+use Predis\Client;
 use RedisHandler;
+use ReflectionException;
 
 abstract class AbstractBlacklist {
 
@@ -28,9 +30,9 @@ abstract class AbstractBlacklist {
     protected $content;
 
     /**
-     * @var \Predis\Client
+     * @var Client
      */
-    protected $redis ;
+    protected $redis;
 
     /**
      * AbstractBlacklist constructor.
@@ -39,13 +41,12 @@ abstract class AbstractBlacklist {
      * @param $id_job
      * @param $password
      *
-     * @throws \Predis\Connection\ConnectionException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function __construct( $path, $id_job, $password ) {
         $this->file_path = $path;
         $this->id_job    = $id_job;
-        $this->password    = $password;
+        $this->password  = $password;
         $this->redis     = ( new RedisHandler() )->getConnection();
     }
 
@@ -64,8 +65,7 @@ abstract class AbstractBlacklist {
     /**
      * @return array|null
      */
-    public function getWords()
-    {
+    public function getWords() {
         $content = $this->getContent();
 
         if ( null !== $content ) {
@@ -79,9 +79,8 @@ abstract class AbstractBlacklist {
     /**
      * @return int|null
      */
-    public function getWordsCount()
-    {
-        return (!empty($this->getWords())) ? count($this->getWords()) : null;
+    public function getWordsCount() {
+        return ( !empty( $this->getWords() ) ) ? count( $this->getWords() ) : null;
     }
 
     /**
@@ -97,27 +96,26 @@ abstract class AbstractBlacklist {
                 $this->redis->sadd( $key, $word );
             }
 
-            $this->redis->expire( $key, 60 * 60 * 24 * 30 ) ;
+            $this->redis->expire( $key, 60 * 60 * 24 * 30 );
         }
     }
 
     /**
      * @return bool
      */
-    private function checkIfBlacklistKeywordsExistsInCache()
-    {
-        $key = $this->getJobCacheKey();
+    private function checkIfBlacklistKeywordsExistsInCache() {
+        $key              = $this->getJobCacheKey();
         $blacklistInRedis = $this->redis->smembers( $key );
 
         return (
-            !$this->redis->exists( $key )
-            or empty( $blacklistInRedis )
-            or ( count($blacklistInRedis) === 1 and $blacklistInRedis[0] == "" )
+                !$this->redis->exists( $key )
+                or empty( $blacklistInRedis )
+                or ( count( $blacklistInRedis ) === 1 and $blacklistInRedis[ 0 ] == "" )
         );
     }
 
     /**
-     * getMatches 
+     * getMatches
      *
      * @param $string
      *
@@ -126,32 +124,32 @@ abstract class AbstractBlacklist {
     public function getMatches( $string ) {
         $this->ensureCached();
 
-        $blacklist_rows = $this->redis->smembers( $this->getJobCacheKey() ) ;
-        $counter = [];
+        $blacklist_rows = $this->redis->smembers( $this->getJobCacheKey() );
+        $counter        = [];
 
-        foreach($blacklist_rows as $blacklist_item) {
-            $blacklist_item = trim( $blacklist_item ) ; 
-            
-            if ( strlen( $blacklist_item ) == 0 ) { 
-                continue ; 
+        foreach ( $blacklist_rows as $blacklist_item ) {
+            $blacklist_item = trim( $blacklist_item );
+
+            if ( strlen( $blacklist_item ) == 0 ) {
+                continue;
             }
 
-            $matches = WholeTextFinder::find($string, $blacklist_item, true, true);
+            $matches   = WholeTextFinder::find( $string, $blacklist_item, true, true );
             $positions = [];
 
-            if ( ! empty($matches) ) {
+            if ( !empty( $matches ) ) {
 
-                foreach ($matches as $match){
+                foreach ( $matches as $match ) {
                     $positions[] = [
-                        'start' => $match[1],
-                        'end' => $match[1] + mb_strlen($match[0]),
+                            'start' => $match[ 1 ],
+                            'end'   => $match[ 1 ] + mb_strlen( $match[ 0 ] ),
                     ];
                 }
 
                 $counter[] = [
-                    'match' => $blacklist_item,
-                    'count' => count($matches),
-                    'positions' => $positions,
+                        'match'     => $blacklist_item,
+                        'count'     => count( $matches ),
+                        'positions' => $positions,
                 ];
             }
         }
@@ -162,8 +160,7 @@ abstract class AbstractBlacklist {
     /**
      * @return string
      */
-    private function getJobCacheKey()
-    {
-        return md5("blacklist:id_job:{$this->id_job}:password:{$this->password}");
+    private function getJobCacheKey() {
+        return md5( "blacklist:id_job:$this->id_job:password:$this->password" );
     }
 }

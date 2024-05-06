@@ -8,7 +8,7 @@ use Exception;
 use INIT;
 use Orhanerday\OpenAi\OpenAi;
 use Predis\Client;
-use Predis\PredisException;
+use Predis\Response\Status;
 use ReflectionException;
 use Stomp\Exception\StompException;
 use TaskRunner\Commons\AbstractElement;
@@ -33,8 +33,6 @@ class AIAssistantWorker extends AbstractWorker {
      * AIAssistantWorker constructor.
      *
      * @param AMQHandler $queueHandler
-     *
-     * @throws PredisException
      * @throws ReflectionException
      */
     public function __construct( AMQHandler $queueHandler ) {
@@ -200,7 +198,7 @@ class AIAssistantWorker extends AbstractWorker {
      * @param $password
      * @param $value
      *
-     * @return mixed
+     * @return Status
      */
     private function generateLock( $idSegment, $idJob, $password, $value ) {
         $key = $this->getLockKey( $idSegment, $idJob, $password );
