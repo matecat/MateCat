@@ -61,7 +61,7 @@ export const MachineTranslationTab = () => {
 
   const enginesList = [
     {
-      name: mtEngines.find(({class_load}) => class_load === 'MMT').name,
+      name: 'ModernMT',
       id: 'mmt',
       component: ModernMt,
     },
@@ -250,15 +250,15 @@ export const MachineTranslationTab = () => {
     : COLUMNS_TABLE
 
   const ActiveMTRow =
-    activeMTEngineData?.class_load === 'DeepL' ? MTDeepLRow : MTRow
+    activeMTEngineData?.engine_type === 'DeepL' ? MTDeepLRow : MTRow
 
   const getExtraNodeActiveRow = () => {
     const shouldShowDeleteConfirmation =
       deleteMTRequest && activeMTEngineData.id === deleteMTRequest
     const GlossaryComponent =
-      activeMTEngineData.class_load === 'MMT'
+      activeMTEngineData.engine_type === 'MMT'
         ? MTGlossary
-        : activeMTEngineData.class_load === 'DeepL'
+        : activeMTEngineData.engine_type === 'DeepL'
           ? DeepLGlossary
           : undefined
 

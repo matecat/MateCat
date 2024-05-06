@@ -12,7 +12,7 @@ export const MTRow = ({row, deleteMT, onCheckboxClick}) => {
     <>
       <div className="settings-panel-mt-row">
         {row.name}
-        {row.class_load === 'MMTLite' && (
+        {row.engine_type === 'MMTLite' && (
           <a
             href="https://guides.matecat.com/default-machine-translation-engine"
             target="_blank"
@@ -20,7 +20,7 @@ export const MTRow = ({row, deleteMT, onCheckboxClick}) => {
             <InfoIcon />
           </a>
         )}
-        {row.class_load === 'MMT' && (
+        {row.engine_type === 'MMT' && (
           <a
             href="https://guides.matecat.com/modernmt-mmt-plug-in"
             target="_blank"
@@ -28,7 +28,7 @@ export const MTRow = ({row, deleteMT, onCheckboxClick}) => {
             <InfoIcon />
           </a>
         )}
-        {row.class_load === 'DeepL' && (
+        {row.engine_type === 'DeepL' && (
           <a href="https://guides.matecat.com/my" target="_blank">
             <InfoIcon />
           </a>

@@ -95,10 +95,16 @@ const DEFAULT_CONTENTS = (isCattool = config.is_cattool) => {
 export const DEFAULT_ENGINE_MEMORY = {
   id: 1,
   name: 'ModernMT Lite',
-  description:
-      <div dangerouslySetInnerHTML={{__html: 'Smart machine translation that learns from your corrections for enhanced quality and productivity thanks to ModernMT’s basic features. To unlock all features, <a target="_blank" href="https://www.modernmt.com/pricing#translators">click here</a>.'}}/>,
+  description: (
+    <div
+      dangerouslySetInnerHTML={{
+        __html:
+          'Smart machine translation that learns from your corrections for enhanced quality and productivity thanks to ModernMT’s basic features. To unlock all features, <a target="_blank" href="https://www.modernmt.com/pricing#translators">click here</a>.',
+      }}
+    />
+  ),
   default: true,
-  class_load: 'MMTLite',
+  engine_type: 'MMTLite',
 }
 
 export const SettingsPanel = ({
