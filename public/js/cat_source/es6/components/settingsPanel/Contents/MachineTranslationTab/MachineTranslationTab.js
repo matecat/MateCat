@@ -46,7 +46,7 @@ export const MachineTranslationTab = () => {
 
   const enginesList = [
     {
-      name: 'ModernMT Full',
+      name: 'ModernMT',
       id: 'mmt',
       component: ModernMt,
     },
@@ -208,7 +208,7 @@ export const MachineTranslationTab = () => {
     : COLUMNS_TABLE
 
   const ActiveMTRow =
-    activeMTEngine?.class_load === 'DeepL' ? MTDeepLRow : MTRow
+    activeMTEngine?.engine_type === 'DeepL' ? MTDeepLRow : MTRow
 
   return (
     <MachineTranslationTabContext.Provider value={{setNotification}}>
@@ -276,7 +276,7 @@ export const MachineTranslationTab = () => {
                       ),
                       isDraggable: false,
                       isActive: true,
-                      ...(activeMTEngine.class_load === 'MMT' &&
+                      ...(activeMTEngine.engine_type === 'MMT' &&
                         ((config.is_cattool && config.ownerIsMe === 1) ||
                           !config.is_cattool) && {
                           isExpanded: true,
@@ -289,7 +289,7 @@ export const MachineTranslationTab = () => {
                             />
                           ),
                         }),
-                      ...(activeMTEngine.class_load === 'DeepL' &&
+                      ...(activeMTEngine.engine_type === 'DeepL' &&
                         ((config.is_cattool && config.ownerIsMe === 1) ||
                           !config.is_cattool) && {
                           isExpanded: true,

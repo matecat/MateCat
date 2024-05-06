@@ -176,7 +176,7 @@ const NewProject = ({
         mtEngines.push(DEFAULT_ENGINE_MEMORY)
         setMtEngines(mtEngines)
         if (config.isAnInternalUser) {
-          const mmt = mtEngines.find((mt) => mt.class_load === 'MMT')
+          const mmt = mtEngines.find((mt) => mt.engine_type === 'MMT')
           if (mmt) {
             setActiveMTEngine(mmt)
           }
