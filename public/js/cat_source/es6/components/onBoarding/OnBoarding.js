@@ -7,6 +7,7 @@ import ForgotPassword from './ForgotPassword'
 import {BUTTON_MODE, BUTTON_SIZE, Button} from '../common/Button/Button'
 import IconClose from '../icons/IconClose'
 import ChevronDown from '../../../../../img/icons/ChevronDown'
+import ModalsActions from '../../actions/ModalsActions'
 
 export const ONBOARDING_STEP = {
   LOGIN: 'login',
@@ -25,7 +26,7 @@ export const socialUrls = {
 }
 const OnBoarding = ({
   step = ONBOARDING_STEP.LOGIN,
-  shouldShowControls = false,
+  isCloseButtonEnabled = false,
 }) => {
   const [stepState, setStep] = useState(step)
 
@@ -37,7 +38,7 @@ const OnBoarding = ({
         : prevState,
     )
 
-  const closeHandler = () => {}
+  const closeHandler = () => ModalsActions.onCloseModal()
 
   const isBackButtonEnabled =
     stepState === ONBOARDING_STEP.PASSWORD_RESET ||
@@ -59,21 +60,21 @@ const OnBoarding = ({
   return (
     <OnBoardingContext.Provider value={{setStep, socialLogin}}>
       <div className="onboarding-wrapper">
-        {shouldShowControls && (
-          <div className="onboarding-controls">
-            <div className="container-buttons">
-              <div>
-                {isBackButtonEnabled && (
-                  <Button
-                    className="button-back"
-                    mode={BUTTON_MODE.OUTLINE}
-                    size={BUTTON_SIZE.ICON_STANDARD}
-                    onClick={backHandler}
-                  >
-                    <ChevronDown />
-                  </Button>
-                )}
-              </div>
+        <div className="onboarding-controls">
+          <div className="container-buttons">
+            <div>
+              {isBackButtonEnabled && (
+                <Button
+                  className="button-back"
+                  mode={BUTTON_MODE.OUTLINE}
+                  size={BUTTON_SIZE.ICON_STANDARD}
+                  onClick={backHandler}
+                >
+                  <ChevronDown />
+                </Button>
+              )}
+            </div>
+            {isCloseButtonEnabled && (
               <Button
                 className="button-close"
                 size={BUTTON_SIZE.ICON_SMALL}
@@ -81,9 +82,9 @@ const OnBoarding = ({
               >
                 <IconClose size={10} />
               </Button>
-            </div>
+            )}
           </div>
-        )}
+        </div>
 
         {stepState === ONBOARDING_STEP.LOGIN && <Login />}
         {stepState === ONBOARDING_STEP.REGISTER && <Register />}
@@ -96,7 +97,7 @@ const OnBoarding = ({
 
 OnBoarding.propTypes = {
   step: PropTypes.oneOf(Object.values(ONBOARDING_STEP)),
-  shouldShowControls: PropTypes.bool,
+  isCloseButtonEnabled: PropTypes.bool,
 }
 
 export default OnBoarding

@@ -35,7 +35,7 @@ let ModalsActions = {
   openLoginModal: function () {
     ModalsActions.showModalComponent(
       OnBoarding,
-      {shouldShowControls: true},
+      {isCloseButtonEnabled: true},
       null,
       {maxWidth: 'unset', width: 'auto'},
       null,
@@ -47,7 +47,7 @@ let ModalsActions = {
       OnBoarding,
       {
         step: ONBOARDING_STEP.REGISTER,
-        shouldShowControls: true,
+        isCloseButtonEnabled: true,
       },
       null,
       {maxWidth: 'unset', width: 'auto'},
@@ -75,7 +75,7 @@ let ModalsActions = {
       OnBoarding,
       {
         step: ONBOARDING_STEP.PASSWORD_RESET,
-        shouldShowControls: true,
+        isCloseButtonEnabled: true,
       },
       null,
       {maxWidth: 'unset', width: 'auto'},
