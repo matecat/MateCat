@@ -15,6 +15,7 @@ class CustomPayableRateStructTest extends PHPUnit_Framework_TestCase {
      */
     public function convertLanguageToIsoCode()
     {
+        $languages = Langs_Languages::getInstance();
         $langs = [
             'es-419' => 'es',
             'es-ES' => 'es',
@@ -25,7 +26,7 @@ class CustomPayableRateStructTest extends PHPUnit_Framework_TestCase {
         ];
 
         foreach ($langs as $rfc3066 => $iso){
-            $isoCode = Utils::convertLanguageToIsoCode($rfc3066);
+            $isoCode = $languages->convertLanguageToIsoCode($rfc3066);
 
 
             $this->assertEquals($iso, $isoCode);
