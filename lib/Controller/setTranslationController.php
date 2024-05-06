@@ -997,7 +997,6 @@ class setTranslationController extends ajaxController {
         );
 
         //assert there is not an exception by following the flow
-        WorkerClient::init( new AMQHandler() );
         Set::contribution( $contributionStruct );
 
         if ( $contributionStruct->id_mt > 1 ) {

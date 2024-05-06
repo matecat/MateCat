@@ -1,6 +1,12 @@
 <?php
 
 use DataAccess\ShapelessConcreteStruct;
+use Email\CommentEmail;
+use Email\CommentMentionEmail;
+use Email\CommentResolveEmail;
+use Stomp\Exception\StompException;
+use Stomp\Transport\Message;
+use Teams\MembershipDao;
 use Url\JobUrlBuilder;
 
 class commentController extends ajaxController {
@@ -52,6 +58,9 @@ class commentController extends ajaxController {
 
     }
 
+    /**
+     * @throws Exception
+     */
     public function doAction() {
 
         $this->job = Jobs_JobDao::getByIdAndPassword( $this->__postInput[ 'id_job' ], $this->__postInput[ 'password' ], 60 * 60 * 24 );
@@ -71,6 +80,9 @@ class commentController extends ajaxController {
 
     }
 
+    /**
+     * @throws StompException
+     */
     private function route() {
         switch ( $this->__postInput[ '_sub' ] ) {
             case 'getRange':
@@ -101,11 +113,15 @@ class commentController extends ajaxController {
         $commentDao = new Comments_CommentDao( Database::obtain() );
 
         $this->result[ 'data' ][ 'entries' ] = [
-                'comments' => $commentDao->getCommentsInJob( $this->struct )
+                'comments' => $commentDao->getCommentsForChunk( $this->job )
         ];
         $this->appendUser();
     }
 
+    /**
+     * @throws StompException
+     * @throws Exception
+     */
     private function resolve() {
         $this->prepareCommentData();
 
@@ -126,6 +142,10 @@ class commentController extends ajaxController {
         }
     }
 
+    /**
+     * @throws StompException
+     * @throws Exception
+     */
     private function create() {
         $this->prepareCommentData();
 
@@ -183,6 +203,7 @@ class commentController extends ajaxController {
 
     /**
      * Delete permanently a comment
+     * @throws StompException
      */
     private function delete(){
 
@@ -316,15 +337,15 @@ class commentController extends ajaxController {
         $project_data = $this->projectData();
 
         foreach ( $this->users_mentioned as $user_mentioned ) {
-            $email = new \Email\CommentMentionEmail( $user_mentioned, $this->struct, $url, $project_data[ 0 ], $this->job );
+            $email = new CommentMentionEmail( $user_mentioned, $this->struct, $url, $project_data[ 0 ], $this->job );
             $email->send();
         }
 
         foreach ( $this->users as $user ) {
             if ( $this->struct->message_type == Comments_CommentDao::TYPE_RESOLVE ) {
-                $email = new \Email\CommentResolveEmail( $user, $this->struct, $url, $project_data[ 0 ], $this->job );
+                $email = new CommentResolveEmail( $user, $this->struct, $url, $project_data[ 0 ], $this->job );
             } else {
-                $email = new \Email\CommentEmail( $user, $this->struct, $url, $project_data[ 0 ], $this->job );
+                $email = new CommentEmail( $user, $this->struct, $url, $project_data[ 0 ], $this->job );
             }
 
             $email->send();
@@ -378,7 +399,7 @@ class commentController extends ajaxController {
 
         if ( strstr( $this->struct->message, "{@team@}" ) ) {
             $project     = $this->job->getProject();
-            $memberships = ( new \Teams\MembershipDao() )->setCacheTTL( 60 * 60 * 24 )->getMemberListByTeamId( $project->id_team, false );
+            $memberships = ( new MembershipDao() )->setCacheTTL( 60 * 60 * 24 )->getMemberListByTeamId( $project->id_team, false );
             foreach ( $memberships as $membership ) {
                 $users[] = $membership->uid;
             }
@@ -480,12 +501,9 @@ class commentController extends ajaxController {
             ]
         ] );
 
-        $stomp = new Stomp( INIT::$QUEUE_BROKER_ADDRESS );
-        $stomp->connect();
-        $stomp->send( INIT::$SSE_NOTIFICATIONS_QUEUE_NAME,
-                $message,
-                [ 'persistent' => 'true' ]
-        );
+        $queueHandler = new AMQHandler();
+        $queueHandler->publishToTopic( INIT::$SSE_NOTIFICATIONS_QUEUE_NAME, new Message( $message ) );
+
     }
 
     /**
@@ -516,18 +534,15 @@ class commentController extends ajaxController {
                 ]
         ] );
 
-        $stomp = new Stomp( INIT::$QUEUE_BROKER_ADDRESS );
-        $stomp->connect();
-        $stomp->send( INIT::$SSE_NOTIFICATIONS_QUEUE_NAME,
-                $message,
-                [ 'persistent' => 'true' ]
-        );
+        $queueHandler = new AMQHandler();
+        $queueHandler->publishToTopic( INIT::$SSE_NOTIFICATIONS_QUEUE_NAME, new Message( $message ) );
+
     }
 
     private function getProjectPasswords() {
         $pws = [];
         foreach ( $this->projectData() as $chunk ) {
-            array_push( $pws, $chunk[ 'jpassword' ] );
+            $pws[] = $chunk[ 'jpassword' ];
         }
 
         return $pws;
