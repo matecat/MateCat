@@ -46,7 +46,7 @@ export const MachineTranslationTab = () => {
 
   const enginesList = [
     {
-      name: mtEngines.find(({class_load}) => class_load === 'MMT').name,
+      name: 'ModernMT Full',
       id: 'mmt',
       component: ModernMt,
     },
