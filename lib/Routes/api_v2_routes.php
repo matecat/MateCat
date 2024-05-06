@@ -129,3 +129,5 @@ route( '/api/v2/translation/[:id_job]/[:password]', 'GET',  'API\V2\DownloadFile
 route( '/api/v2/SDLXLIFF/[:id_job]/[:password]/[:filename]', 'GET',  'API\V2\DownloadFileController', 'forceXliff' );
 route( '/api/v2/TMX/[:id_job]/[:password]', 'GET',  'API\V2\ExportTMXController', 'index' );
 
+// User
+route('/api/v2/user', 'PUT',  'API\V2\UserController', 'edit');
