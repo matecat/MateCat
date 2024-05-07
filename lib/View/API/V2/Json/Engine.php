@@ -30,6 +30,7 @@ class Engine {
                 'name'        => $engine->name,
                 'type'        => $engine->type,
                 'description' => $engine->description,
+                'engine_type' => $engine->class_load,
         ];
 
         return $row;

@@ -45,7 +45,11 @@ export const MachineTranslationTab = () => {
   const [notification, setNotification] = useState({})
 
   const enginesList = [
-    {name: 'ModernMT', id: 'mmt', component: ModernMt},
+    {
+      name: 'ModernMT',
+      id: 'mmt',
+      component: ModernMt,
+    },
     {name: 'AltLang', id: 'altlang', component: AltLang},
     {name: 'Apertium', id: 'apertium', component: Apertium},
     {name: 'DeepL', id: 'deepl', component: DeepL},
@@ -203,7 +207,8 @@ export const MachineTranslationTab = () => {
     ? CUSTOM_ACTIVE_COLUMNS_TABLE_BY_ENGINE[activeMTEngine.name]
     : COLUMNS_TABLE
 
-  const ActiveMTRow = activeMTEngine?.name === 'DeepL' ? MTDeepLRow : MTRow
+  const ActiveMTRow =
+    activeMTEngine?.engine_type === 'DeepL' ? MTDeepLRow : MTRow
 
   return (
     <MachineTranslationTabContext.Provider value={{setNotification}}>
@@ -271,7 +276,7 @@ export const MachineTranslationTab = () => {
                       ),
                       isDraggable: false,
                       isActive: true,
-                      ...(activeMTEngine.name === 'ModernMT' &&
+                      ...(activeMTEngine.engine_type === 'MMT' &&
                         ((config.is_cattool && config.ownerIsMe === 1) ||
                           !config.is_cattool) && {
                           isExpanded: true,
@@ -284,7 +289,7 @@ export const MachineTranslationTab = () => {
                             />
                           ),
                         }),
-                      ...(activeMTEngine.name === 'DeepL' &&
+                      ...(activeMTEngine.engine_type === 'DeepL' &&
                         ((config.is_cattool && config.ownerIsMe === 1) ||
                           !config.is_cattool) && {
                           isExpanded: true,
