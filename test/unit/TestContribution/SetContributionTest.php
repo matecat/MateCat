@@ -16,7 +16,7 @@ class SetContributionTest extends \AbstractTest {
 
     public function setUp(){
         parent::setUp();
-        $redisHandler = new \Predis\Client( \INIT::$REDIS_SERVERS );
+        $redisHandler = new \Predis\Client( INIT::$REDIS_SERVERS );
         $redisHandler->flushdb();
         Database::obtain()->getConnection()->exec( "DELETE FROM jobs WHERE id = 1999999" );
         Database::obtain()->getConnection()->exec( "DELETE FROM projects WHERE id = 22222222" );
@@ -127,7 +127,7 @@ class SetContributionTest extends \AbstractTest {
     }
 
     public function tearDown(){
-        $redisHandler = new \Predis\Client( \INIT::$REDIS_SERVERS );
+        $redisHandler = new \Predis\Client( INIT::$REDIS_SERVERS );
         $redisHandler->flushdb();
         Database::obtain()->getConnection()->exec( "DELETE FROM jobs WHERE id = 1999999" );
         Database::obtain()->getConnection()->exec( "DELETE FROM projects WHERE id = 22222222" );
@@ -146,7 +146,7 @@ class SetContributionTest extends \AbstractTest {
         $contributionStruct->fromRevision         = true;
         $contributionStruct->id_job               = 1999999;
         $contributionStruct->job_password         = "1d7903464318";
-        $contributionStruct->api_key              = \INIT::$MYMEMORY_API_KEY;
+        $contributionStruct->api_key              = INIT::$MYMEMORY_API_KEY;
         $contributionStruct->uid                  = 1234;
         $contributionStruct->oldTranslationStatus = 'NEW';
         $contributionStruct->oldSegment           = $contributionStruct->segment; //we do not change the segment source
@@ -159,7 +159,7 @@ class SetContributionTest extends \AbstractTest {
         $this->assertTrue( true );
 
         //now check that this value is inside AMQ
-        $contextList = ContextList::get( \INIT::$TASK_RUNNER_CONFIG['context_definitions'] );
+        $contextList = ContextList::get( INIT::$TASK_RUNNER_CONFIG['context_definitions'] );
         $amqh = new \AMQHandler();
         $amqh->subscribe(  $contextList->list['CONTRIBUTION']->queue_name  );
         $message = $amqh->readFrame();
@@ -188,7 +188,7 @@ class SetContributionTest extends \AbstractTest {
         $contributionStruct->fromRevision         = true;
         $contributionStruct->id_job               = 1999999;
         $contributionStruct->job_password         = "1d7903464318";
-        $contributionStruct->api_key              = \INIT::$MYMEMORY_API_KEY;
+        $contributionStruct->api_key              = INIT::$MYMEMORY_API_KEY;
         $contributionStruct->uid                  = 1234;
         $contributionStruct->oldTranslationStatus = 'NEW';
         $contributionStruct->oldSegment           = $contributionStruct->segment; //we do not change the segment source
@@ -198,13 +198,13 @@ class SetContributionTest extends \AbstractTest {
         //we want to test that Set::contribution will call send with these parameters
         $stub = $this->getMockBuilder('\AMQHandler')->getMock();
 
-        $contextList = ContextList::get( \INIT::$TASK_RUNNER_CONFIG['context_definitions'] );
+        $contextList = ContextList::get( INIT::$TASK_RUNNER_CONFIG['context_definitions'] );
         $queueElement            = new QueueElement();
         $queueElement->params    = $contributionStruct;
         $queueElement->classLoad = '\AsyncTasks\Workers\SetContributionWorker';
 
         $stub->expects( $this->once() )
-                ->method('send')
+                ->method( 'publishToQueues' )
                 ->with(
                         $this->stringContains( $contextList->list['CONTRIBUTION']->queue_name ),
                         $this->equalTo( $queueElement ),
@@ -212,13 +212,13 @@ class SetContributionTest extends \AbstractTest {
                 );
 
         //simulate \AMQ Server Down and force an exception
-        $stub->method('send')->will( $this->throwException( new \Exception( "Could not connect to localhost:61613 (10/10)" ) ) );
+        $stub->method( 'publishToQueues' )->will( $this->throwException( new Exception( "Could not connect to localhost:61613 (10/10)" ) ) );
 
         //check that this exception is raised up there
         $this->setExpectedExceptionRegExp( '\Exception', '/Could not connect to .*/' );
 
         //init the worker client with the stub Handler
-        \WorkerClient::init( $stub );
+        WorkerClient::init( $stub );
         Set::contribution( $contributionStruct );
 
     }

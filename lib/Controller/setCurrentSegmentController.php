@@ -1,7 +1,5 @@
 <?php
 
-use Matecat\SubFiltering\MateCatFilter;
-
 class setCurrentSegmentController extends ajaxController {
 
     protected $password;
