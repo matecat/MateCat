@@ -86,18 +86,7 @@ abstract class viewController extends controller {
 
         //if no login set and login is required
         if ( !$this->isLoggedIn() ) {
-
-            CookieManager::setCookie( INIT::$REQUESTED_URL_COOKIENAME, $_SERVER[ 'REQUEST_URI' ],
-                [
-                    'expires'  => time() + ( 3600 ), // 1 hour
-                    'path'     => '/',
-                    'domain'   => INIT::$COOKIE_DOMAIN,
-                    'secure'   => true,
-                    'httponly' => false,
-                    'samesite' => 'None',
-                ]
-            );
-
+            $_SESSION['wanted_url'] = $_SERVER[ 'REQUEST_URI' ];
             $mustRedirectToLogin = true;
         }
 

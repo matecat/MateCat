@@ -48,21 +48,14 @@ class newProjectController extends viewController {
      */
     private function redirectToRequestUrlAfterLogin()
     {
-        if($this->isLoggedIn() and isset($_COOKIE[ INIT::$REQUESTED_URL_COOKIENAME ])){
+        if($this->isLoggedIn() and isset($_SESSION[ 'wanted_url' ])){
 
             // if not home redirect
             if($_SERVER['HTTP_REFERER'] !== INIT::$CLI_HTTP_HOST . INIT::$BASEURL){
-                header( "Location: " . INIT::$HTTPHOST . INIT::$BASEURL . $_COOKIE[ INIT::$REQUESTED_URL_COOKIENAME ], true  );
+                header( "Location: " . INIT::$HTTPHOST . INIT::$BASEURL . $_SESSION[ 'wanted_url' ], true  );
             }
 
-            CookieManager::setCookie( INIT::$REQUESTED_URL_COOKIENAME, '',
-                [
-                    'expires' => 0,
-                    'path'    => '/',
-                    'domain'  => INIT::$COOKIE_DOMAIN
-                ]
-            );
-
+            unset($_SESSION[ 'wanted_url' ]);
             exit;
         }
     }

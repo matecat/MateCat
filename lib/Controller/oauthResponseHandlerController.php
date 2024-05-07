@@ -40,7 +40,7 @@ class oauthResponseHandlerController extends BaseKleinViewController {
     public function setTemplateVars()
     {
         if ( isset( $_SESSION['wanted_url'] ) ) {
-            $this->view->wanted_url = $_SESSION['wanted_url'] ;
+            $this->view->wanted_url = $_SESSION['wanted_url'] ; //https://dev.matecat.com/translate/205-txt/en-GB-it-IT/25-8a4ee829fb52
         }
     }
 
