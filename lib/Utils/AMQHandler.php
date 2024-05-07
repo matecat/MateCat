@@ -8,8 +8,6 @@
  */
 
 use Analysis\Queue\RedisKeys;
-use Predis\Connection\ConnectionInterface;
-use Predis\Client as PredisClient;
 use Stomp\Client;
 use Stomp\Exception\ConnectionException;
 use Stomp\Network\Connection;
@@ -21,7 +19,7 @@ use TaskRunner\Commons\Context;
 class AMQHandler {
 
     /**
-     * @var PredisClient
+     * @var Predis\Client
      */
     protected $redisHandler;
 
@@ -33,7 +31,7 @@ class AMQHandler {
      * @var Connection
      */
     protected static $staticStompConnection;
-    protected $clientType      = null;
+    protected        $clientType = null;
 
     protected $queueTotalID = null;
 
@@ -113,7 +111,7 @@ class AMQHandler {
      *
      * Get the connection to Redis server and return it
      *
-     * @return Client|ConnectionInterface
+     * @return Predis\Client
      * @throws ReflectionException
      */
     public function getRedisClient() {
@@ -152,22 +150,17 @@ class AMQHandler {
 
         $this->clientType = self::CLIENT_TYPE_PUBLISHER;
 
-        return $this->_send( '/queue/' . INIT::$INSTANCE_ID . "_" . $destination, $message );
+        return $this->statefulStomp->send( '/queue/' . INIT::$INSTANCE_ID . "_" . $destination, $message );
 
     }
 
     /**
-     * @param string  $destination
-     * @param Message $message
-     *
-     * @return bool
+     * Clean connections
      */
-    private function _send( $destination, Message $message ) {
-        $r = $this->statefulStomp->send( $destination, $message );
+    public function __destruct() {
         $this->statefulStomp->getClient()->disconnect();
-
-        return $r;
     }
+
 
     /**
      * @param string  $destination
@@ -179,7 +172,7 @@ class AMQHandler {
 
         $this->clientType = self::CLIENT_TYPE_PUBLISHER;
 
-        return $this->_send( $destination, $message );
+        return $this->statefulStomp->send( $destination, $message );
 
     }
 

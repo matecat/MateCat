@@ -80,7 +80,7 @@ const corsAllow = ( req, res ) => {
 
 //Event triggered when a message is sent to the client
 browserChannel.on( 'message', function ( message ) {
-    logger.debug('browserChannel message', message);
+    //logger.debug('browserChannel message', message);
 } );
 
 //Event triggered when a client disconnect
