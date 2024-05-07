@@ -18,7 +18,6 @@ import {getTmKeysUser} from '../api/getTmKeysUser'
 import {getMTEngines as getMtEnginesApi} from '../api/getMTEngines'
 import {
   DEFAULT_ENGINE_MEMORY,
-  MMT_NAME,
   SETTINGS_PANEL_TABS,
   SettingsPanel,
 } from '../components/settingsPanel'
@@ -107,7 +106,7 @@ function CatTool() {
         mtEngines.push(DEFAULT_ENGINE_MEMORY)
         setMtEngines(mtEngines)
         if (config.isAnInternalUser && config.active_engine.length > 0) {
-          const mmt = mtEngines.find((mt) => mt.name === MMT_NAME)
+          const mmt = mtEngines.find((mt) => mt.engine_type === 'MMT')
           if (mmt) {
             setActiveMTEngine(mmt)
           }
