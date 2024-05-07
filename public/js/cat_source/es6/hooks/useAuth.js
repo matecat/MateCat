@@ -102,7 +102,7 @@ function useAuth() {
         event: 'user_data_ready',
         userStatus: 'notLoggedUser',
       }
-      CommonUtils.dispatchAnalyticsEvents(event)
+      setTimeout(() => CommonUtils.dispatchAnalyticsEvents(event), 500)
     }
   }
 

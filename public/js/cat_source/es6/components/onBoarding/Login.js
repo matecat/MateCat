@@ -14,7 +14,7 @@ import {ONBOARDING_STEP, OnBoardingContext} from './OnBoarding'
 import {loginUser} from '../../api/loginUser'
 
 const Login = () => {
-  const {setStep} = useContext(OnBoardingContext)
+  const {setStep, redirectAfterLogin} = useContext(OnBoardingContext)
   const [errorMessage, setErrorMessage] = useState()
   const [requestRunning, setRequestRunning] = useState(false)
   const {handleSubmit, control} = useForm()
@@ -25,7 +25,7 @@ const Login = () => {
       setRequestRunning(true)
       loginUser(formData.email, formData.password)
         .then(() => {
-          window.location.reload()
+          redirectAfterLogin()
         })
         .catch((response) => {
           showError(response)

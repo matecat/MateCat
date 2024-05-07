@@ -45,6 +45,15 @@ const OnBoarding = ({
     stepState === ONBOARDING_STEP.PASSWORD_RESET ||
     stepState === ONBOARDING_STEP.FORGOT_PASSWORD
 
+  const redirectAfterLogin = () => {
+    let location = window.location.origin
+    let wantedUrl = window.localStorage.getItem('wanted_url')
+    if (wantedUrl) {
+      location = wantedUrl
+    }
+    window.location.href = location
+  }
+
   const socialLogin = (url) => {
     const data = {
       event: 'open_register',
@@ -58,13 +67,15 @@ const OnBoarding = ({
     const interval = setInterval(function () {
       if (newWindow.closed) {
         clearInterval(interval)
-        window.location.reload()
+        redirectAfterLogin()
       }
     }, 600)
   }
 
   return (
-    <OnBoardingContext.Provider value={{setStep, socialLogin}}>
+    <OnBoardingContext.Provider
+      value={{setStep, socialLogin, redirectAfterLogin}}
+    >
       <div className="onboarding-wrapper">
         <div className="onboarding-controls">
           <div className="container-buttons">
