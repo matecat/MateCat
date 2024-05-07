@@ -84,6 +84,12 @@ function useAuth() {
         (!userInfo || userInfo.user.uid !== userToken.user.uid)
       ) {
         getUserData().then(function (data) {
+          const event = {
+            event: 'user_data_ready',
+            userStatus: 'loggedUser',
+            userId: data.user.uid,
+          }
+          CommonUtils.dispatchAnalyticsEvents(event)
           setUserInfo(data)
           setConnectedServices(data.connected_services)
         })
@@ -92,6 +98,11 @@ function useAuth() {
       if (isUserLogged) setTimeout(() => setUserDisconnected(true), 500)
       setUserInfo()
       setConnectedServices()
+      const event = {
+        event: 'user_data_ready',
+        userStatus: 'notLoggedUser',
+      }
+      CommonUtils.dispatchAnalyticsEvents(event)
     }
   }
 

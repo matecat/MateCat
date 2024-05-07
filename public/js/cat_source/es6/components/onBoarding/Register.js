@@ -15,6 +15,7 @@ import Checkmark from '../../../../../img/icons/Checkmark'
 import {registerUser} from '../../api/registerUser'
 import ModalsActions from '../../actions/ModalsActions'
 import ConfirmRegister from '../modals/ConfirmRegister'
+import CommonUtils from '../../utils/commonUtils'
 
 const Register = () => {
   const {setStep} = useContext(OnBoardingContext)
@@ -24,6 +25,11 @@ const Register = () => {
 
   const handleFormSubmit = (formData) => {
     setErrorMessage()
+    const data = {
+      event: 'open_register',
+      type: 'email',
+    }
+    CommonUtils.dispatchAnalyticsEvents(data)
     registerUser({
       firstname: formData.name,
       surname: formData.surname,

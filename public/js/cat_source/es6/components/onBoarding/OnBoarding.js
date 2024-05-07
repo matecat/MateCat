@@ -8,6 +8,7 @@ import {BUTTON_MODE, BUTTON_SIZE, Button} from '../common/Button/Button'
 import IconClose from '../icons/IconClose'
 import ChevronDown from '../../../../../img/icons/ChevronDown'
 import ModalsActions from '../../actions/ModalsActions'
+import CommonUtils from '../../utils/commonUtils'
 
 export const ONBOARDING_STEP = {
   LOGIN: 'login',
@@ -45,6 +46,11 @@ const OnBoarding = ({
     stepState === ONBOARDING_STEP.FORGOT_PASSWORD
 
   const socialLogin = (url) => {
+    const data = {
+      event: 'open_register',
+      type: 'social',
+    }
+    CommonUtils.dispatchAnalyticsEvents(data)
     const newWindow = window.open(url, 'name', 'height=600,width=900')
     if (window.focus) {
       newWindow.focus()
