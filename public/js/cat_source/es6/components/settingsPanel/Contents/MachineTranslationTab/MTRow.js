@@ -28,7 +28,10 @@ export const MTRow = ({row, deleteMT, onCheckboxClick}) => {
           </a>
         )}
         {row.engine_type === 'DeepL' && (
-          <a href="https://guides.matecat.com/my" target="_blank">
+          <a
+            href="https://guides.matecat.com/machine-translation-engines#DeepL"
+            target="_blank"
+          >
             <InfoIcon />
           </a>
         )}
