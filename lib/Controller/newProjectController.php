@@ -288,8 +288,8 @@ class newProjectController extends viewController {
             return [ 'name' => $tmKeyStruct->name, 'key' => $tmKeyStruct->key ];
         }, $this->keyList ) );
 
-        $this->template->developerKey = INIT::$OAUTH_BROWSER_API_KEY;
-        $this->template->clientId     = INIT::$OAUTH_CLIENT_ID;
+        $this->template->developerKey = INIT::$GOOGLE_OAUTH_BROWSER_API_KEY;
+        $this->template->clientId     = INIT::$GOOGLE_OAUTH_CLIENT_ID;
 
         $this->template->tag_projection_languages = json_encode( ProjectOptionsSanitizer::$tag_projection_allowed_languages );
         LexiQADecorator::getInstance( $this->template )->featureEnabled( $this->featureSet )->decorateViewLexiQA();

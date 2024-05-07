@@ -22,7 +22,7 @@ abstract class viewController extends controller {
      *
      * @var string
      */
-    protected $authURL;
+    protected $googleAuthURL;
 
     /**
      * @var string
@@ -150,10 +150,11 @@ abstract class viewController extends controller {
 
     /**
      * @return string
+     * @throws Exception
      * @deprecated use getAuthUrl instead.
      */
     public function generateAuthURL() {
-        return $this->getAuthUrl();
+        return $this->getGoogleAuthUrl();
     }
 
     /**
@@ -178,7 +179,7 @@ abstract class viewController extends controller {
         $this->template->footer_js            = [];
         $this->template->config_js            = [];
         $this->template->css_resources        = [];
-        $this->template->authURL              = $this->getAuthUrl();
+        $this->template->googleAuthURL        = $this->getGoogleAuthUrl();
         $this->template->githubAuthUrl        = $this->getGithubAuthUrl();
         $this->template->linkedInAuthUrl      = $this->getLinkedInAuthUrl();
         $this->template->microsoftAuthUrl     = $this->getMicrosoftAuthUrl();
@@ -222,13 +223,13 @@ abstract class viewController extends controller {
      * @return string
      * @throws Exception
      */
-    public function getAuthUrl() {
-        if ( is_null( $this->authURL ) ) {
+    public function getGoogleAuthUrl() {
+        if ( is_null( $this->googleAuthURL ) ) {
             $this->client  = OauthClient::getInstance()->getClient();
-            $this->authURL = $this->client->getAuthorizationUrl();
+            $this->googleAuthURL = $this->client->getAuthorizationUrl();
         }
 
-        return $this->authURL;
+        return $this->googleAuthURL;
     }
 
     /**

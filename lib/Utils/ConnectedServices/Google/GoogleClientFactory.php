@@ -36,10 +36,10 @@ class GoogleClientFactory implements ConnectedServiceFactoryInterface
 
         $client = new Google_Client();
 
-        $client->setApplicationName( INIT::$OAUTH_CLIENT_APP_NAME );
-        $client->setClientId( INIT::$OAUTH_CLIENT_ID );
-        $client->setClientSecret( INIT::$OAUTH_CLIENT_SECRET );
-        $client->setRedirectUri( ($redirectUrl ? $redirectUrl : INIT::$OAUTH_REDIRECT_URL ) );
+        $client->setApplicationName( INIT::$GOOGLE_OAUTH_CLIENT_APP_NAME );
+        $client->setClientId( INIT::$GOOGLE_OAUTH_CLIENT_ID );
+        $client->setClientSecret( INIT::$GOOGLE_OAUTH_CLIENT_SECRET );
+        $client->setRedirectUri( ($redirectUrl ? $redirectUrl : INIT::$GOOGLE_OAUTH_REDIRECT_URL ) );
         $client->setScopes( static::$OAUTH_SCOPES );
         $client->setAccessType( "offline" );
         $client->setApprovalPrompt('force');

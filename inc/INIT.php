@@ -272,12 +272,16 @@ class INIT {
      * Done!
      */
     public static $OAUTH_CONFIG;
-    public static $OAUTH_CLIENT_ID;
-    public static $OAUTH_CLIENT_SECRET;
-    public static $OAUTH_CLIENT_APP_NAME;
-    public static $OAUTH_REDIRECT_URL;
-    public static $OAUTH_SCOPES;
-    public static $OAUTH_BROWSER_API_KEY;
+
+    /**
+     * Google credentials
+     */
+    public static $GOOGLE_OAUTH_CLIENT_ID;
+    public static $GOOGLE_OAUTH_CLIENT_SECRET;
+    public static $GOOGLE_OAUTH_CLIENT_APP_NAME;
+    public static $GOOGLE_OAUTH_REDIRECT_URL;
+    public static $GOOGLE_OAUTH_SCOPES;
+    public static $GOOGLE_OAUTH_BROWSER_API_KEY;
 
     /**
      * Github credentials
@@ -349,14 +353,12 @@ class INIT {
         self::$FACEBOOK_OAUTH_CLIENT_SECRET = @INIT::$OAUTH_CONFIG['FACEBOOK_OAUTH_CONFIG']['FACEBOOK_OAUTH_CLIENT_SECRET'];
         self::$FACEBOOK_OAUTH_REDIRECT_URL  = @INIT::$OAUTH_CONFIG['FACEBOOK_OAUTH_CONFIG']['FACEBOOK_OAUTH_REDIRECT_URL'];
 
-        self::$OAUTH_CLIENT_ID       = @INIT::$OAUTH_CONFIG['OAUTH_CONFIG'][ 'OAUTH_CLIENT_ID' ];
-        self::$OAUTH_CLIENT_SECRET   = @INIT::$OAUTH_CONFIG['OAUTH_CONFIG'][ 'OAUTH_CLIENT_SECRET' ];
-        self::$OAUTH_CLIENT_APP_NAME = @INIT::$OAUTH_CONFIG['OAUTH_CONFIG'][ 'OAUTH_CLIENT_APP_NAME' ];
-        self::$OAUTH_BROWSER_API_KEY = @INIT::$OAUTH_CONFIG['OAUTH_CONFIG'][ 'OAUTH_BROWSER_API_KEY' ];
-
-        self::$OAUTH_REDIRECT_URL = INIT::$HTTPHOST . "/webhooks/oauth/response/google";
-
-        self::$OAUTH_SCOPES = [
+        self::$GOOGLE_OAUTH_CLIENT_ID       = @INIT::$OAUTH_CONFIG['GOOGLE_OAUTH_CONFIG'][ 'GOOGLE_OAUTH_CLIENT_ID' ];
+        self::$GOOGLE_OAUTH_CLIENT_SECRET   = @INIT::$OAUTH_CONFIG['GOOGLE_OAUTH_CONFIG'][ 'GOOGLE_OAUTH_CLIENT_SECRET' ];
+        self::$GOOGLE_OAUTH_CLIENT_APP_NAME = @INIT::$OAUTH_CONFIG['GOOGLE_OAUTH_CONFIG'][ 'GOOGLE_OAUTH_CLIENT_APP_NAME' ];
+        self::$GOOGLE_OAUTH_BROWSER_API_KEY = @INIT::$OAUTH_CONFIG['GOOGLE_OAUTH_CONFIG'][ 'GOOGLE_OAUTH_BROWSER_API_KEY' ];
+        self::$GOOGLE_OAUTH_REDIRECT_URL    = INIT::$HTTPHOST . "/webhooks/oauth/response/google";
+        self::$GOOGLE_OAUTH_SCOPES = [
                 'https://www.googleapis.com/auth/userinfo.email',
                 'https://www.googleapis.com/auth/userinfo.profile',
                 'profile'

@@ -491,15 +491,15 @@ class Bootstrap {
      * @return bool true if the main OAuth keys are present, false otherwise
      */
     public static function areOauthKeysPresent() {
-        if ( empty( INIT::$OAUTH_CLIENT_ID ) ) {
+        if ( empty( INIT::$GOOGLE_OAUTH_CLIENT_ID ) ) {
             return false;
         }
 
-        if ( empty( INIT::$OAUTH_CLIENT_SECRET ) ) {
+        if ( empty( INIT::$GOOGLE_OAUTH_CLIENT_SECRET ) ) {
             return false;
         }
 
-        if ( empty( INIT::$OAUTH_CLIENT_APP_NAME ) ) {
+        if ( empty( INIT::$GOOGLE_OAUTH_CLIENT_APP_NAME ) ) {
             return false;
         }
 
@@ -507,7 +507,7 @@ class Bootstrap {
     }
 
     public static function isGDriveConfigured() {
-        if ( empty( INIT::$OAUTH_BROWSER_API_KEY ) ) {
+        if ( empty( INIT::$GOOGLE_OAUTH_BROWSER_API_KEY ) ) {
             return false;
         }
 
