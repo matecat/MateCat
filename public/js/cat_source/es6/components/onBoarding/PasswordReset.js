@@ -79,7 +79,9 @@ const PasswordReset = () => {
                 control={control}
                 defaultValue=""
                 name="password"
-                rules={passwordRules}
+                rules={{
+                  required: 'This field is mandatory',
+                }}
                 render={({
                   field: {name, onChange, value},
                   fieldState: {error},
@@ -96,7 +98,7 @@ const PasswordReset = () => {
               <Controller
                 control={control}
                 defaultValue=""
-                name="newpassword"
+                name="newPassword"
                 rules={passwordRules}
                 render={({
                   field: {name, onChange, value},
@@ -104,7 +106,31 @@ const PasswordReset = () => {
                 }) => (
                   <Input
                     type={INPUT_TYPE.PASSWORD}
-                    placeholder="New Password"
+                    placeholder="New password"
+                    {...{name, value, onChange, error}}
+                  />
+                )}
+              />
+            </fieldset>
+            <fieldset>
+              <Controller
+                control={control}
+                defaultValue=""
+                name="confirmNewPassword"
+                rules={{
+                  required: 'This field is mandatory',
+                  validate: (value, formValues) =>
+                    value !== formValues.newPassword
+                      ? "Passwords don't match"
+                      : true,
+                }}
+                render={({
+                  field: {name, onChange, value},
+                  fieldState: {error},
+                }) => (
+                  <Input
+                    type={INPUT_TYPE.PASSWORD}
+                    placeholder="Confirm new password"
                     {...{name, value, onChange, error}}
                   />
                 )}

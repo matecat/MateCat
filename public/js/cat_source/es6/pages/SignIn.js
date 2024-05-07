@@ -10,7 +10,7 @@ const SignIn = () => {
   return (
     <>
       <header>
-        <Header showLinks={true} />
+        <Header showLinks={true} showUserMenu={false} />
       </header>
       <div className="signin-page">
         <div className="signin-overlay">

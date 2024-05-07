@@ -7,6 +7,7 @@ export const ModalContainer = ({
   onClose,
   closeOnOutsideClick,
   showHeader,
+  styleBody,
 }) => {
   const ref = useRef(null)
 
@@ -80,7 +81,9 @@ export const ModalContainer = ({
           </div>
         )}
 
-        <div className="matecat-modal-body">{children}</div>
+        <div className="matecat-modal-body" style={styleBody}>
+          {children}
+        </div>
       </div>
     </div>
   )

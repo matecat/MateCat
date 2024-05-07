@@ -189,6 +189,30 @@ const Register = () => {
           <fieldset>
             <Controller
               control={control}
+              defaultValue=""
+              name="confirmPassword"
+              rules={{
+                required: 'This field is mandatory',
+                validate: (value, formValues) =>
+                  value !== formValues.password
+                    ? "Passwords don't match"
+                    : true,
+              }}
+              render={({
+                field: {name, onChange, value},
+                fieldState: {error},
+              }) => (
+                <Input
+                  type={INPUT_TYPE.PASSWORD}
+                  placeholder="Confirm password"
+                  {...{name, value, onChange, error}}
+                />
+              )}
+            />
+          </fieldset>
+          <fieldset>
+            <Controller
+              control={control}
               defaultValue={false}
               name="terms"
               rules={{

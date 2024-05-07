@@ -17,6 +17,7 @@ const initialState = {
   styleContainer: '',
   onCloseCallback: false,
   showHeader: true,
+  styleBody: '',
 }
 
 const componentStatus = (() => {
@@ -67,6 +68,7 @@ export class ModalWindow extends React.Component {
     style,
     onCloseCallback,
     showHeader,
+    styleBody,
   ) => {
     this.setState({
       ...initialState,
@@ -82,6 +84,7 @@ export class ModalWindow extends React.Component {
       styleContainer: style,
       onCloseCallback: onCloseCallback,
       isShowingModal: true,
+      styleBody,
     })
   }
 
@@ -113,6 +116,7 @@ export class ModalWindow extends React.Component {
       compProps,
       isShowingModal,
       showHeader,
+      styleBody,
     } = this.state
 
     return (
@@ -127,6 +131,7 @@ export class ModalWindow extends React.Component {
                 styleContainer,
                 onClose: this.onCloseModal,
                 closeOnOutsideClick: compProps.closeOnOutsideClick,
+                styleBody,
               },
               <InjectedComponent {...compProps} />,
             )}

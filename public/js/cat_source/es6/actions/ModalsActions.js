@@ -5,12 +5,8 @@ import {ModifyTeam} from '../components/modals/ModifyTeam'
 import {mergeJobChunks} from '../api/mergeJobChunks'
 import AppDispatcher from '../stores/AppDispatcher'
 import ModalsConstants from '../constants/ModalsConstants'
-import LoginModal from '../components/modals/LoginModal'
-import RegisterModal from '../components/modals/RegisterModal'
 import PreferencesModal from '../components/modals/PreferencesModal'
 import SuccessModal from '../components/modals/SuccessModal'
-import ResetPasswordModal from '../components/modals/ResetPasswordModal'
-import CommonUtils from '../utils/commonUtils'
 import OnBoarding, {ONBOARDING_STEP} from '../components/onBoarding/OnBoarding'
 
 let ModalsActions = {
@@ -21,6 +17,7 @@ let ModalsActions = {
     style,
     onCloseCallback,
     showHeader = true,
+    styleBody,
   ) => {
     AppDispatcher.dispatch({
       actionType: ModalsConstants.SHOW_MODAL,
@@ -30,6 +27,7 @@ let ModalsActions = {
       style,
       onCloseCallback,
       showHeader,
+      styleBody,
     })
   },
   openLoginModal: function () {
@@ -40,6 +38,7 @@ let ModalsActions = {
       {maxWidth: 'unset', width: 'auto'},
       null,
       false,
+      {borderRadius: 'unset', backgroundColor: 'unset'},
     )
   },
   openRegisterModal: () => {
@@ -53,6 +52,7 @@ let ModalsActions = {
       {maxWidth: 'unset', width: 'auto'},
       null,
       false,
+      {borderRadius: 'unset', backgroundColor: 'unset'},
     )
   },
   openPreferencesModal: ({showGDriveMessage = false} = {}) => {
@@ -81,6 +81,7 @@ let ModalsActions = {
       {maxWidth: 'unset', width: 'auto'},
       null,
       false,
+      {borderRadius: 'unset', backgroundColor: 'unset'},
     )
   },
   onCloseModal: function () {
