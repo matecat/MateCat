@@ -164,6 +164,15 @@ const Register = () => {
               name="password"
               rules={{
                 required: 'This field is mandatory',
+                minLength: {
+                  value: 12,
+                  message: 'Password must be at least 12 characters',
+                },
+                pattern: {
+                  value: /[!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]/g,
+                  message:
+                    'Password must contain at least one special character: !"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~',
+                },
               }}
               render={({
                 field: {name, onChange, value},

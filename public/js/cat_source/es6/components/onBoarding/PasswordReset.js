@@ -35,6 +35,19 @@ const PasswordReset = () => {
       })
   }
 
+  const passwordRules = {
+    required: 'This field is mandatory',
+    minLength: {
+      value: 12,
+      message: 'Password must be at least 12 characters',
+    },
+    pattern: {
+      value: /[!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]/g,
+      message:
+        'Password must contain at least one special character: !"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~',
+    },
+  }
+
   return (
     <div className="passwordreset-component">
       <h2>Reset password</h2>
@@ -57,7 +70,6 @@ const PasswordReset = () => {
         </>
       ) : (
         <>
-          {/*<p>Copy</p>*/}
           <form
             className="passwordreset-form"
             onSubmit={handleSubmit(handleFormSubmit)}
@@ -67,9 +79,7 @@ const PasswordReset = () => {
                 control={control}
                 defaultValue=""
                 name="password"
-                rules={{
-                  required: 'This field is mandatory',
-                }}
+                rules={passwordRules}
                 render={({
                   field: {name, onChange, value},
                   fieldState: {error},
@@ -87,9 +97,7 @@ const PasswordReset = () => {
                 control={control}
                 defaultValue=""
                 name="newpassword"
-                rules={{
-                  required: 'This field is mandatory',
-                }}
+                rules={passwordRules}
                 render={({
                   field: {name, onChange, value},
                   fieldState: {error},

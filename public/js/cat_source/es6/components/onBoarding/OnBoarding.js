@@ -18,7 +18,7 @@ export const ONBOARDING_STEP = {
 
 export const OnBoardingContext = createContext({})
 export const socialUrls = {
-  googleUrl: config.authURL,
+  googleUrl: config.googleAuthURL,
   github: config.githubAuthUrl,
   microsoft: config.microsoftAuthUrl,
   linkedIn: config.linkedInAuthUrl,
