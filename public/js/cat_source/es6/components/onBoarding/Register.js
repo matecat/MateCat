@@ -12,17 +12,24 @@ import {
 } from '../common/Button/Button'
 import {ONBOARDING_STEP, OnBoardingContext} from './OnBoarding'
 import Checkmark from '../../../../../img/icons/Checkmark'
-import {registerUser} from '../../api/registerUser'
+// import {registerUser} from '../../api/registerUser'
 import ModalsActions from '../../actions/ModalsActions'
 import ConfirmRegister from '../modals/ConfirmRegister'
 import CommonUtils from '../../utils/commonUtils'
 
+const registerUser = () =>
+  new Promise((resolve) => {
+    resolve()
+  })
+
 const Register = () => {
   const {setStep} = useContext(OnBoardingContext)
   const [errorMessage, setErrorMessage] = useState()
+  const [isShowingConfirmRegistration, setIsShowingConfirmRegistration] =
+    useState(false)
 
-  const {handleSubmit, control} = useForm()
-
+  const {handleSubmit, control, getValues} = useForm()
+  console.log('control', getValues('email'))
   const handleFormSubmit = (formData) => {
     setErrorMessage()
     const data = {
@@ -39,16 +46,17 @@ const Register = () => {
       wantedUrl: window.location.href,
     })
       .then(() => {
-        const style = {
-          width: '25%',
-          maxWidth: '450px',
-        }
-        ModalsActions.showModalComponent(
-          ConfirmRegister,
-          {emailAddress: formData.email},
-          'Confirm Registration',
-          style,
-        )
+        // const style = {
+        //   width: '25%',
+        //   maxWidth: '450px',
+        // }
+        // ModalsActions.showModalComponent(
+        //   ConfirmRegister,
+        //   {emailAddress: formData.email},
+        //   'Confirm Registration',
+        //   style,
+        // )
+        setIsShowingConfirmRegistration(true)
       })
       .catch((error) => {
         let generalErrorText
@@ -67,7 +75,27 @@ const Register = () => {
   }
   const gotoSignin = () => setStep(ONBOARDING_STEP.LOGIN)
 
-  return (
+  const confirmRegistration = (
+    <div className="register-component-confirm-registration">
+      <h2>Confirm registration</h2>
+      <p>
+        {`To complete your registration please follow the instructions in the email we sent you to ${(<strong>{getValues('email')}</strong>)}`}
+      </p>
+      <div className="footer-buttons">
+        <Button type={BUTTON_TYPE.PRIMARY}>OK</Button>
+        <Button
+          className="link-underline"
+          type={BUTTON_TYPE.PRIMARY}
+          mode={BUTTON_MODE.LINK}
+          size={BUTTON_SIZE.LINK_SMALL}
+        >
+          Resend Email
+        </Button>
+      </div>
+    </div>
+  )
+
+  return !isShowingConfirmRegistration ? (
     <div className="register-component">
       <div className="column-info">
         <h2>Sign up to Matecat</h2>
@@ -282,6 +310,8 @@ const Register = () => {
         </div>
       </div>
     </div>
+  ) : (
+    confirmRegistration
   )
 }
 

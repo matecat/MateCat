@@ -119,3 +119,34 @@
     color: $grey7;
   }
 }
+
+.register-component-confirm-registration {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  width: 480px;
+  padding: 48px 64px 48px 64px;
+
+  h2,
+  p {
+    text-align: left;
+  }
+
+  h2 {
+    font-size: 24px;
+    margin-bottom: 15px;
+  }
+
+  p {
+    color: $grey7;
+  }
+
+  .footer-buttons {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    flex-direction: column;
+    gap: 10px;
+  }
+}
