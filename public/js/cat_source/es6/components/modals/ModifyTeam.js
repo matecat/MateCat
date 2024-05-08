@@ -92,7 +92,7 @@ export const ModifyTeam = ({team}) => {
                       src={userMetadata.get('gplus_picture') + '?sz=80'}
                     />
                   ) : (
-                    <span>{CommonUtils.getUserShortName(user.toJS())}</span>
+                    <span>{CommonUtils.getUserShortName(user)}</span>
                   )}
                   <div className="member-info">
                     {(user.get('first_name') || user.get('last_name')) && (
