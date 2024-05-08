@@ -16,6 +16,7 @@ const SignIn = () => {
         <Header showLinks={true} showUserMenu={false} />
       </header>
       <div className="signin-page">
+        <div className="signin-bg" />
         <div className="signin-overlay">
           <div className="signin-content">
             <OnBoarding />

@@ -9,7 +9,6 @@
   z-index: 7;
   background: rgba(0, 0, 0, 0.8);
   backdrop-filter: blur(6px);
-
   .signin-content {
     position: fixed;
     top: 50%;
@@ -20,6 +19,17 @@
     margin: 0;
     max-width: 712px;
   }
+}
+.signin-bg {
+  position: fixed;
+  top: 60px;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-image: url("/public/img/signin_background_big.jpg");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
 }
 
 .onboarding-wrapper {
