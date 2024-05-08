@@ -48,15 +48,16 @@ class newProjectController extends viewController {
      */
     private function redirectToRequestUrlAfterLogin()
     {
-        if($this->isLoggedIn() and isset($_SESSION[ 'wanted_url' ])){
-
-            // if not home redirect
-            if($_SERVER['HTTP_REFERER'] !== INIT::$CLI_HTTP_HOST . INIT::$BASEURL){
+        if($this->isLoggedIn()){
+            // handle redirect after login
+            if(isset($_SESSION[ 'wanted_url' ])){
                 header( "Location: " . INIT::$HTTPHOST . INIT::$BASEURL . $_SESSION[ 'wanted_url' ], false  );
+                unset($_SESSION[ 'wanted_url' ]);
+                exit;
             }
-
+        } else {
+            // we landed on homepage and we are not logged in, unset wanted_url
             unset($_SESSION[ 'wanted_url' ]);
-            exit;
         }
     }
 
