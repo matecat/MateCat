@@ -27,7 +27,6 @@ use FeatureSet;
 use INIT;
 use Jobs\MetadataDao;
 use Jobs_JobDao;
-use Log;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Analysis\AnalysisDao;
 use PDOException;

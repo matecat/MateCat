@@ -1,5 +1,7 @@
 <?php
 
+use Predis\Client;
+
 /**
  * @group regression
  * @covers DataAccess_AbstractDao::_destroyCache
@@ -12,7 +14,7 @@ class DestroyCacheAbstractClassTest extends AbstractTest
     protected $reflector;
     protected $method;
     /**
-     * @var \Predis\Client
+     * @var Client
      */
     protected $cache_con;
     protected $cache_TTL;
@@ -31,7 +33,7 @@ class DestroyCacheAbstractClassTest extends AbstractTest
 
         $this->cache_con = $this->reflector->getProperty("cache_con");
         $this->cache_con->setAccessible(true);
-        $this->cache_con->setValue($this->reflectedClass, new Predis\Client(INIT::$REDIS_SERVERS));
+        $this->cache_con->setValue($this->reflectedClass, new Client(INIT::$REDIS_SERVERS));
 
         $this->cache_TTL= $this->reflector->getProperty("cacheTTL");
         $this->cache_TTL->setAccessible(true);

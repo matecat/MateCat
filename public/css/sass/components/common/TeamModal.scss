@@ -1,0 +1,203 @@
+@import '../../commons/colors';
+
+.team-modal {
+  display: flex;
+  flex-direction: column;
+  padding: 30px;
+  gap: 30px;
+  height: 700px;
+
+  .team-name-container {
+    align-items: center;
+    justify-content: space-between;
+
+    input {
+      padding-right: 20px;
+    }
+
+    svg {
+      position: absolute;
+      right: 40px;
+      margin-top: 12px;
+    }
+  }
+
+  .button-invite {
+    display: flex;
+    margin-left: auto;
+    margin-top: 10px;
+  }
+
+  .search-members {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 8px 0;
+    border-radius: 4px;
+    padding: 6px;
+    font-size: 15px;
+    color: #000;
+    transition: 0.6s;
+
+    > input {
+      flex-grow: 1;
+      background: unset;
+      outline: none;
+      border: none;
+    }
+
+    &:hover {
+      background-color: white;
+    }
+
+    .reset_button {
+      display: flex;
+      cursor: pointer;
+      margin-right: 2px;
+
+      > svg {
+        color: $grey6;
+      }
+    }
+
+    .reset_button--hidden {
+      visibility: hidden;
+    }
+
+    .reset_button--visible {
+      visibility: visible;
+    }
+  }
+
+  .no-result {
+    font-size: 14px;
+    color: #666666;
+    padding: 7px;
+  }
+
+  .members-list {
+    height: 200px;
+    overflow-y: auto;
+    padding-right: 5px;
+
+    > ul {
+      list-style-type: none;
+      padding: 0;
+
+      > li {
+        margin-bottom: 10px;
+      }
+    }
+
+    .removing-user-message {
+      color: $grey1;
+    }
+
+    .button-remove {
+      margin-left: auto;
+    }
+
+    .container-confirm-form {
+      display: flex;
+      gap: 5px;
+      margin-left: auto;
+
+      button {
+        height: 26px !important;
+        line-height: 1;
+        border-radius: unset;
+      }
+    }
+
+    .confirm-button {
+      font-size: 14px !important;
+      min-width: unset;
+      gap: 5px !important;
+      margin: 0 !important;
+      padding: 0 8px;
+    }
+
+    .close-button {
+      width: 30px;
+      padding: 0 !important;
+      display: flex !important;
+      justify-content: center !important;
+    }
+
+    .pending-member-remove {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-left: auto;
+
+      > span {
+        color: $grey1;
+        font-size: 14px;
+      }
+    }
+  }
+
+  .member-item {
+    display: flex;
+    align-items: center;
+    height: 40px;
+    gap: 10px;
+  }
+
+  .member-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    max-width: 40px;
+    height: 40px;
+    background-color: $grey2;
+    border-radius: 50%;
+    vertical-align: middle;
+    text-align: center;
+    font-size: 16px;
+    font-weight: bold;
+  }
+
+  .member-info {
+    display: flex;
+    flex-direction: column;
+
+    > :first-child {
+      font-weight: bold;
+    }
+
+    > :not(:first-child) {
+      font-size: 14px;
+      color: $grey1;
+    }
+  }
+
+  .button-close {
+    display: flex;
+    margin-left: auto;
+  }
+}
+
+.team-modal-input {
+  width: 100%;
+  height: 40px;
+  padding: 0 10px;
+  border-radius: 4px;
+  box-shadow: inset 0 1px 3px #ddd;
+  border: 1px solid rgba(34, 36, 38, 0.15);
+  background-color: white;
+
+  &:focus {
+    outline: none;
+    border-color: $linkBlueTransparent;
+  }
+}
+
+.team-modal-create {
+  height: 510px;
+
+  > p {
+    margin: 0;
+  }
+}

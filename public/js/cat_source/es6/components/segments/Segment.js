@@ -533,15 +533,17 @@ class Segment extends React.Component {
   }
 
   clientReconnection() {
-    SegmentActions.getGlossaryForSegment({
-      sid: this.props.segment.sid,
-      fid: this.props.fid,
-      text: this.props.segment.segment,
-    })
-    SegmentActions.getContributions(
-      this.props.segment.sid,
-      this.props.multiMatchLangs,
-    )
+    if (this.props.segment.opened) {
+      SegmentActions.getGlossaryForSegment({
+        sid: this.props.segment.sid,
+        fid: this.props.fid,
+        text: this.props.segment.segment,
+      })
+      SegmentActions.getContributions(
+        this.props.segment.sid,
+        this.props.multiMatchLangs,
+      )
+    }
   }
 
   forceUpdateSegment(sid) {

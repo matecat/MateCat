@@ -7,6 +7,7 @@
  * Time: 12:42 PM
  */
 
+use Stomp\Transport\Message;
 use TaskRunner\Commons\ContextList;
 use TaskRunner\Commons\QueueElement;
 
@@ -26,8 +27,8 @@ class WorkerClient {
      * @throws Exception
      */
     public static function init( AMQHandler $handler = null ) {
-        if ( \INIT::$TASK_RUNNER_CONFIG ) {
-            $contextList = ContextList::get( \INIT::$TASK_RUNNER_CONFIG['context_definitions'] );
+        if ( INIT::$TASK_RUNNER_CONFIG ) {
+            $contextList = ContextList::get( INIT::$TASK_RUNNER_CONFIG['context_definitions'] );
             self::$_QUEUES  = $contextList->list;
             if( !is_null( $handler ) ){
                 self::$_HANDLER = $handler;
@@ -62,11 +63,10 @@ class WorkerClient {
         $queue_name = self::$_QUEUES[ $queue ]->queue_name ;
 
         if ( empty( $queue_name ) ) {
-            throw new InvalidArgumentException( 'Empty queue_name: ' . var_export( self::$_QUEUES, true ) . "\n" . var_export( $queue, true )
-            ) ;
+            throw new InvalidArgumentException( 'Empty queue_name: ' . var_export( self::$_QUEUES, true ) . "\n" . var_export( $queue, true ) ) ;
         }
 
-        self::$_HANDLER->send( $queue_name, $element, $options );
+        self::$_HANDLER->publishToQueues( $queue_name, new Message( strval( $element ), $options ) );
     }
 
 }
