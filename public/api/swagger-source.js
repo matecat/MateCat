@@ -584,7 +584,7 @@ var spec = {
     },
     '/api/v2/projects/{id_project}/{password}/reviews': {
       post: {
-        tags: ['Job'],
+        tags: ['Project'],
         summary: 'Generate second pass review 2',
         description: 'API to generate a second pass review',
         parameters: [
