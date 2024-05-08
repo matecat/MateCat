@@ -6,12 +6,16 @@ export const UserDisconnectedBox = () => {
     <div className="user-disconnect-box">
       <div className="user-disconnect-box_content">
         <div>
-          User disconnected
+          <h2>Please Sign in again</h2>
+          <p>
+            You were signed out of your account. Please press 'Reload' to sign
+            in to Matecat
+          </p>
           <Button
             type={BUTTON_TYPE.PRIMARY}
             onClick={() => window.location.reload()}
           >
-            Refresh
+            Reload
           </Button>
         </div>
       </div>
