@@ -2,6 +2,7 @@ import AppDispatcher from '../stores/AppDispatcher'
 import UserConstants from '../constants/UserConstants'
 import {getUserData} from '../api/getUserData'
 import {getTeamMembers} from '../api/getTeamMembers'
+import UserStore from '../stores/UserStore'
 
 let UserActions = {
   teamStorageName: 'defaultTeam',
@@ -40,11 +41,10 @@ let UserActions = {
   },
 
   getAllTeams: function () {
-    getUserData().then(function (data) {
-      AppDispatcher.dispatch({
-        actionType: UserConstants.RENDER_TEAMS,
-        teams: data.teams,
-      })
+    const userInfo = UserStore.getUser()
+    AppDispatcher.dispatch({
+      actionType: UserConstants.RENDER_TEAMS,
+      teams: userInfo.teams,
     })
   },
 

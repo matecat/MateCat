@@ -12,24 +12,19 @@ import {
 } from '../common/Button/Button'
 import {ONBOARDING_STEP, OnBoardingContext} from './OnBoarding'
 import Checkmark from '../../../../../img/icons/Checkmark'
-// import {registerUser} from '../../api/registerUser'
-import ModalsActions from '../../actions/ModalsActions'
-import ConfirmRegister from '../modals/ConfirmRegister'
+import {registerUser} from '../../api/registerUser'
 import CommonUtils from '../../utils/commonUtils'
-
-const registerUser = () =>
-  new Promise((resolve) => {
-    resolve()
-  })
+import {resendEmailConfirmation} from '../../api/resendEmailConfirmation/resendEmailConfirmation'
 
 const Register = () => {
-  const {setStep} = useContext(OnBoardingContext)
+  const {setStep, redirectAfterLogin} = useContext(OnBoardingContext)
   const [errorMessage, setErrorMessage] = useState()
   const [isShowingConfirmRegistration, setIsShowingConfirmRegistration] =
     useState(false)
+  const [isEmailSentAgain, setIsEmailSentAgain] = useState(false)
 
   const {handleSubmit, control, getValues} = useForm()
-  console.log('control', getValues('email'))
+
   const handleFormSubmit = (formData) => {
     setErrorMessage()
     const data = {
@@ -46,16 +41,6 @@ const Register = () => {
       wantedUrl: window.location.href,
     })
       .then(() => {
-        // const style = {
-        //   width: '25%',
-        //   maxWidth: '450px',
-        // }
-        // ModalsActions.showModalComponent(
-        //   ConfirmRegister,
-        //   {emailAddress: formData.email},
-        //   'Confirm Registration',
-        //   style,
-        // )
         setIsShowingConfirmRegistration(true)
       })
       .catch((error) => {
@@ -74,6 +59,10 @@ const Register = () => {
     window.open('https://site.matecat.com/terms/', '_blank')
   }
   const gotoSignin = () => setStep(ONBOARDING_STEP.LOGIN)
+  const resendEmail = () =>
+    resendEmailConfirmation(getValues('email')).then(() =>
+      setIsEmailSentAgain(true),
+    )
 
   const confirmRegistration = (
     <div className="register-component-confirm-registration">
@@ -82,15 +71,21 @@ const Register = () => {
         {`To complete your registration please follow the instructions in the email we sent you to ${(<strong>{getValues('email')}</strong>)}`}
       </p>
       <div className="footer-buttons">
-        <Button type={BUTTON_TYPE.PRIMARY}>OK</Button>
+        <Button type={BUTTON_TYPE.PRIMARY} onClick={redirectAfterLogin}>
+          OK
+        </Button>
         <Button
           className="link-underline"
           type={BUTTON_TYPE.PRIMARY}
           mode={BUTTON_MODE.LINK}
           size={BUTTON_SIZE.LINK_SMALL}
+          onClick={resendEmail}
         >
           Resend Email
         </Button>
+        {isEmailSentAgain && (
+          <span className="email-sent-again">Email sent again</span>
+        )}
       </div>
     </div>
   )
