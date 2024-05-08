@@ -43,7 +43,7 @@ class newProjectController extends viewController {
     /**
      * Redirect to requested url after login
      *
-     * If user is logged in and the cookie $REQUESTED_URL_COOKIENAME is set,
+     * If user is logged in and the cookie $_SESSION[ 'wanted_url' ] is set,
      * then redirect to requested url
      */
     private function redirectToRequestUrlAfterLogin()
@@ -52,7 +52,7 @@ class newProjectController extends viewController {
 
             // if not home redirect
             if($_SERVER['HTTP_REFERER'] !== INIT::$CLI_HTTP_HOST . INIT::$BASEURL){
-                header( "Location: " . INIT::$HTTPHOST . INIT::$BASEURL . $_SESSION[ 'wanted_url' ], true  );
+                header( "Location: " . INIT::$HTTPHOST . INIT::$BASEURL . $_SESSION[ 'wanted_url' ], false  );
             }
 
             unset($_SESSION[ 'wanted_url' ]);

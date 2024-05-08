@@ -86,12 +86,12 @@ abstract class viewController extends controller {
 
         //if no login set and login is required
         if ( !$this->isLoggedIn() ) {
-            $_SESSION['wanted_url'] = $_SERVER[ 'REQUEST_URI' ];
+            $_SESSION['wanted_url'] = ltrim($_SERVER[ 'REQUEST_URI' ], '/');
             $mustRedirectToLogin = true;
         }
 
         if ( $mustRedirectToLogin ) {
-            header( "Location: " . INIT::$HTTPHOST . INIT::$BASEURL . "signin", true  );
+            header( "Location: " . INIT::$HTTPHOST . INIT::$BASEURL . "signin", false  );
             exit;
         }
 
