@@ -21,10 +21,12 @@ use Log;
 use PDO;
 use PDOException;
 use Predis\Connection\ConnectionException;
+use Predis\PredisException;
 use Projects_MetadataDao;
 use Projects_ProjectDao;
+use ReflectionException;
 use Segments_SegmentDao;
-use StompException;
+use Stomp\Transport\Message;
 use TaskRunner\Commons\AbstractDaemon;
 use TaskRunner\Commons\Context;
 use TaskRunner\Commons\ContextList;
@@ -375,8 +377,8 @@ class FastAnalysis extends AbstractDaemon {
     }
 
     /**
-     * @throws StompException
-     * @throws ConnectionException
+     * @throws ReflectionException
+     * @throws PredisException
      */
     public static function cleanShutDown() {
 
@@ -392,7 +394,7 @@ class FastAnalysis extends AbstractDaemon {
 
         self::$queueHandler->getRedisClient()->disconnect();
 
-        self::$queueHandler->disconnect();
+        self::$queueHandler->getClient()->disconnect();
         self::$queueHandler = null;
 
     }
@@ -663,7 +665,7 @@ class FastAnalysis extends AbstractDaemon {
                     foreach ( $languages_job as $index => $_language ) {
 
                         list( $id_job, $language ) = explode( ":", $_language );
-                        list( $jid, $password ) = explode( ":", $passwordMap[$index] );
+                        list( , $password ) = explode( ":", $passwordMap[$index] );
 
                         $queue_element[ 'password' ]      = $password;
                         $queue_element[ 'target' ]        = $language;
@@ -674,7 +676,7 @@ class FastAnalysis extends AbstractDaemon {
                         $element->params    = $queue_element;
                         $element->classLoad = '\Analysis\Workers\TMAnalysisWorker';
 
-                        self::$queueHandler->send( $queueInfo->queue_name, $element, [ 'persistent' => self::$queueHandler->persistent ] );
+                        self::$queueHandler->publishToQueues( $queueInfo->queue_name, new Message( $element, [ 'persistent' => self::$queueHandler->persistent ] ) );
                         self::_TimeStampMsg( "AMQ Set Executed " . ( $k + 1 ) . " Language: $language" );
 
                     }
@@ -744,7 +746,7 @@ class FastAnalysis extends AbstractDaemon {
                 s.id as id,
                 s.raw_word_count,
                 GROUP_CONCAT( DISTINCT CONCAT( j.id, ':' , j.target ) ) AS target,
-                CONCAT( "{", GROUP_CONCAT( DISTINCT CONCAT( '"', j.id, '"', ':' , j.payable_rates ) SEPARATOR ',' ), "}" ) AS payable_rates
+                CONCAT( '{', GROUP_CONCAT( DISTINCT CONCAT( '"', j.id, '"', ':' , j.payable_rates ) SEPARATOR ',' ), '}' ) AS payable_rates
             FROM segments AS s
             INNER JOIN files_job AS fj ON fj.id_file = s.id_file
             INNER JOIN jobs as j ON fj.id_job = j.id
@@ -862,7 +864,11 @@ HD;
     }
 
     /**
-     * @throws ConnectionException
+     * @param int $limit
+     *
+     * @return array|false
+     * @throws PredisException
+     * @throws ReflectionException
      */
     protected function _getLockProjectForVolumeAnalysis( $limit = 1 ) {
 

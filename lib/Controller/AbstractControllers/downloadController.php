@@ -1,7 +1,6 @@
 <?php
 
 use FilesStorage\AbstractFilesStorage;
-use FilesStorage\FilesStorageFactory;
 
 /**
  * Created by PhpStorm.

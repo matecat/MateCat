@@ -1,16 +1,18 @@
 import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
+import {flattenObject} from '../../utils/queryString'
 
 export const createTeam = async (teamName, members) => {
-  const params = {
+  const params = flattenObject({
     type: 'general',
     name: teamName,
     members: members,
-  }
+  })
   const formData = new FormData()
 
   Object.keys(params).forEach((key) => {
     formData.append(key, params[key])
   })
+
   const response = await fetch(`${getMatecatApiDomain()}api/v2/teams`, {
     method: 'POST',
     credentials: 'include',

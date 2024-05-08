@@ -19,13 +19,27 @@ window.APP = {
   teamStorageName: 'defaultTeam',
   init: function () {
     this.setLoginEvents()
+
     if (config.isLoggedIn) {
-      var self = this
       APP.USER.loadUserData().then((data) => {
         TeamsActions.updateUser(data)
-        self.setTeamNameInMenu()
-        self.setUserImage()
+        this.setTeamNameInMenu()
+        this.setUserImage()
+        const event = {
+          event: 'user_data_ready',
+          userStatus: 'loggedUser',
+          userId: data.user.uid,
+        }
+        CommonUtils.dispatchAnalyticsEvents(event)
       })
+    } else {
+      const event = {
+        event: 'user_data_ready',
+        userStatus: 'notLoggedUser',
+      }
+      setTimeout(() => {
+        CommonUtils.dispatchAnalyticsEvents(event)
+      }, 500)
     }
     setTimeout(() => this.checkGlobalMassages(), 1000)
   },

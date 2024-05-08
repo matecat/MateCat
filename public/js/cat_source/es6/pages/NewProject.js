@@ -375,6 +375,23 @@ const NewProject = ({
         console.log('Error retrieving supported languages', error),
       )
   }
+  const checkQueryStringParameter = () => {
+    const param = CommonUtils.getParameterByName('open')
+    switch (param) {
+      case 'signin':
+        if (!config.isLoggedIn) {
+          APP.openLoginModal()
+        }
+        CommonUtils.removeParam('open')
+        break
+      case 'signup':
+        if (!config.isLoggedIn) {
+          APP.openRegisterModal()
+        }
+        CommonUtils.removeParam('open')
+        break
+    }
+  }
 
   //TODO: Move it
   useEffect(() => {
@@ -384,6 +401,7 @@ const NewProject = ({
   }, [selectedTeam])
 
   useEffect(() => {
+    checkQueryStringParameter()
     retrieveSupportedLanguages()
     getSupportedFiles()
       .then((data) => {

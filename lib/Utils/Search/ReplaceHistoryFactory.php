@@ -8,8 +8,6 @@ class Search_ReplaceHistoryFactory {
      * @param $ttl
      *
      * @return Search_ReplaceHistory
-     * @throws ReflectionException
-     * @throws \Predis\Connection\ConnectionException
      */
     public static function create( $id_job, $driver, $ttl ) {
         self::_checkDriver( $driver );
@@ -17,16 +15,16 @@ class Search_ReplaceHistoryFactory {
         if ( $driver === 'redis' ) {
             return new Search_ReplaceHistory(
                     $id_job,
-                    new \Search_RedisReplaceEventDAO(),
-                    new \Search_RedisReplaceEventIndexDAO(),
+                    new Search_RedisReplaceEventDAO(),
+                    new Search_RedisReplaceEventIndexDAO(),
                     $ttl
             );
         }
 
         return new Search_ReplaceHistory(
                 $id_job,
-                new \Search_MySQLReplaceEventDAO(),
-                new \Search_MySQLReplaceEventIndexDAO(),
+                new Search_MySQLReplaceEventDAO(),
+                new Search_MySQLReplaceEventIndexDAO(),
                 $ttl
         );
     }
@@ -38,7 +36,7 @@ class Search_ReplaceHistoryFactory {
         $allowed_drivers = [ 'redis', 'mysql' ];
 
         if ( !in_array( $driver, $allowed_drivers ) ) {
-            throw new \InvalidArgumentException( $driver . ' is not an allowed driver ' );
+            throw new InvalidArgumentException( $driver . ' is not an allowed driver ' );
         }
     }
 }

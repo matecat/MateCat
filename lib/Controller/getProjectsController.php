@@ -1,6 +1,5 @@
 <?php
 
-use API\V2\Json\Error;
 use Exceptions\NotFoundException;
 use Teams\MembershipDao;
 use Teams\MembershipStruct;

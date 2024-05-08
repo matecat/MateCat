@@ -27,8 +27,10 @@ use Log;
 use LQA\ChunkReviewDao;
 use LQA\ChunkReviewStruct;
 use LQA\ModelDao;
+use Predis\Connection\ConnectionException;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
+use ReflectionException;
 use Revise\FeedbackDAO;
 use RevisionFactory;
 use Utils;
@@ -67,7 +69,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      * @throws NotFoundException
      */
     public function filter_review_password_to_job_password( ChunkReviewStruct $chunkReviewStruct, $source_page ) {
-        $chunk_review = ( new \LQA\ChunkReviewDao() )->findByJobIdReviewPasswordAndSourcePage( $chunkReviewStruct->id_job, $chunkReviewStruct->review_password, $source_page );
+        $chunk_review = ( new ChunkReviewDao() )->findByJobIdReviewPasswordAndSourcePage( $chunkReviewStruct->id_job, $chunkReviewStruct->review_password, $source_page );
 
         if ( !$chunk_review ) {
             throw new NotFoundException( 'Review record was not found' );
@@ -297,8 +299,9 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      *
      * @param $projectStructure
      *
-     * @throws \Predis\Connection\ConnectionException
-     * @throws \ReflectionException
+     * @throws ConnectionException
+     * @throws \Exceptions\ValidationError
+     * @throws ReflectionException
      */
     public function validateProjectCreation( $projectStructure ) {
         self::loadAndValidateModelFromJsonFile( $projectStructure );
@@ -333,9 +336,8 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      *
      * @param Chunks_ChunkCompletionEventStruct $event
      *
+     * @throws ReflectionException
      * @throws ValidationError
-     * @throws \Exceptions\ValidationError
-     * @throws \ReflectionException
      */
     public function alter_chunk_review_struct( Chunks_ChunkCompletionEventStruct $event ) {
 
@@ -411,8 +413,14 @@ abstract class AbstractRevisionFeature extends BaseFeature {
     }
 
     /**
-     * Sets the QA model fom the uploaded file which was previously validated
-     * and added to the project structure.
+     *  Sets the QA model fom the uploaded file which was previously validated
+     *  and added to the project structure.
+     *
+     * @param $projectStructure
+     *
+     * @return void
+     * @throws ReflectionException
+     * @throws \Exceptions\ValidationError
      */
     private function setQaModelFromJsonFile( $projectStructure ) {
 
@@ -438,8 +446,8 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      * @param             $projectStructure
      * @param null|string $jsonPath
      *
-     * @throws \Predis\Connection\ConnectionException
-     * @throws \ReflectionException
+     * @throws ConnectionException
+     * @throws ReflectionException
      * @throws \Exceptions\ValidationError
      */
 

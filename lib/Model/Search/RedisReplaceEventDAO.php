@@ -1,5 +1,6 @@
 <?php
 
+use Predis\Client;
 use Search\ReplaceEventStruct;
 
 class Search_RedisReplaceEventDAO extends DataAccess_AbstractDao implements Search_ReplaceEventDAOInterface {
@@ -7,7 +8,7 @@ class Search_RedisReplaceEventDAO extends DataAccess_AbstractDao implements Sear
     const TABLE = 'replace_events';
 
     /**
-     * @var \Predis\Client
+     * @var Client
      */
     private $redis;
 
@@ -22,7 +23,6 @@ class Search_RedisReplaceEventDAO extends DataAccess_AbstractDao implements Sear
      * @param null $con
      *
      * @throws ReflectionException
-     * @throws \Predis\Connection\ConnectionException
      */
     public function __construct( $con = null ) {
         parent::__construct( $con );
@@ -50,7 +50,6 @@ class Search_RedisReplaceEventDAO extends DataAccess_AbstractDao implements Sear
      * @param ReplaceEventStruct $eventStruct
      *
      * @return int
-     * @throws ReflectionException
      */
     public function save( ReplaceEventStruct $eventStruct ) {
         // if not directly passed
@@ -69,7 +68,7 @@ class Search_RedisReplaceEventDAO extends DataAccess_AbstractDao implements Sear
         $result = $this->redis->hset( $redisKey, $index, serialize( $eventStruct ) );
         $this->redis->expire( $redisKey, $this->ttl );
 
-        return (true == $result) ? 1 : 0;
+        return $result ? 1 : 0;
     }
 
     /**
@@ -85,7 +84,7 @@ class Search_RedisReplaceEventDAO extends DataAccess_AbstractDao implements Sear
     /**
      * @param $ttl
      *
-     * @return mixed|void
+     * @return void
      */
     public function setTtl( $ttl ) {
         $this->ttl = $ttl;
