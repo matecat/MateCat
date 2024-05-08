@@ -50,9 +50,19 @@ class ChangePasswordController extends ChunkController
             $actual_pwd = $password;
         }
 
-        $user = $this->getUser();
+        $res = (!empty($res)) ? $res : 'job';
+
+        if(!in_array($res, ['prj', 'job'])){
+            $code = 400;
+            $this->response->status()->setCode( $code );
+            $this->response->json( [
+                'error' => '`res` not valid. Allowed values [`prj`, `job`]'
+            ] );
+            exit();
+        }
 
         try {
+            $user = $this->getUser();
             $this->changeThePassword($user, $res, $id, $actual_pwd, $new_pwd, $revision_number);
 
             $this->response->status()->setCode(200);
