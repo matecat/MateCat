@@ -19,6 +19,7 @@ import IconClose from '../icons/IconClose'
 import UserStore from '../../stores/UserStore'
 import {getUserData} from '../../api/getUserData'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper'
+import ModalsActions from '../../actions/ModalsActions'
 
 const PreferencesModal = (props) => {
   const {userInfo, setUserInfo} = useContext(ApplicationWrapperContext)
@@ -51,7 +52,7 @@ const PreferencesModal = (props) => {
   }, [])
 
   const openResetPassword = () => {
-    MouseEvent.openResetPassword()
+    ModalsActions.openResetPassword()
   }
 
   const checkboxChange = (selected) => {
