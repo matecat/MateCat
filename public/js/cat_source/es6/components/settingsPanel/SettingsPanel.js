@@ -56,14 +56,14 @@ const DEFAULT_CONTENTS = (isCattool = config.is_cattool) => {
       id: SETTINGS_PANEL_TABS.translationMemoryGlossary,
       label: 'Translation Memory and Glossary',
       description:
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vulputate libero et velit interdum, ac aliquet odio mattis.',
+        'Manage your language resources and select which should be used on your new project. <a href="https://guides.matecat.com/activ" target="_blank">More details</a>',
       component: <TranslationMemoryGlossaryTab />,
     },
     {
       id: SETTINGS_PANEL_TABS.machineTranslation,
       label: 'Machine Translation',
       description:
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vulputate libero et velit interdum, ac aliquet odio mattis.',
+        'Manage your machine translation engines and select which should be used on your new project. <a href="https://guides.matecat.com/machine-translation-engines" target="_blank">More details</a>',
       component: <MachineTranslationTab />,
     },
     ...(!isCattool
@@ -72,14 +72,14 @@ const DEFAULT_CONTENTS = (isCattool = config.is_cattool) => {
             id: SETTINGS_PANEL_TABS.qualityFramework,
             label: 'Quality framework',
             description:
-              'Determines how sentences are split into segments. More details <a href="#">here</a>.',
+              'Manage your quality frameworks and select which should be used on your new project. <a href="#" target="_blank">More details</a>',
             component: <QualityFrameworkTab />,
           },
           {
             id: SETTINGS_PANEL_TABS.analysis,
             label: 'Analysis',
             description:
-              'Determines what discount percentage is applied to each match category. More details <a href="#">here</a>.',
+              'Manage your billing models and select which should be used on your new project. <a href="#" target="_blank">More details</a>',
             component: <AnalysisTab />,
           },
         ]
@@ -87,8 +87,7 @@ const DEFAULT_CONTENTS = (isCattool = config.is_cattool) => {
     {
       id: SETTINGS_PANEL_TABS.advancedOptions,
       label: 'Advanced settings',
-      description:
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vulputate libero et velit interdum, ac aliquet odio mattis.',
+      description: 'Advanced settings for your project',
       component: <AdvancedOptionsTab />,
     },
   ]

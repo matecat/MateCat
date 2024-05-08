@@ -76,9 +76,9 @@ export const EptThreshold = () => {
     <div>
       <h2>EPT Threshold</h2>
       <p>
-        Select whether 100%/101% matches are in-scope for the job. If they are
-        out of scope, their payable rate will be set to 0% and they will be
-        preapproved and locked in the editor window
+        Select the EPT thresholds for a project to be considered a
+        &quot;Pass&quot; or a &quot;Fail&quot; in both R1 and R2. Lower EPT
+        means better quality.
       </p>
       <div className="quality-framework-box-ept-threshold">
         <div>

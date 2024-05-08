@@ -1,4 +1,4 @@
-import React, {useContext, useState} from 'react'
+import React, {useContext, useRef, useState} from 'react'
 import {
   POPOVER_ALIGN,
   POPOVER_VERTICAL_ALIGN,
@@ -31,6 +31,8 @@ export const AddCategory = () => {
     useState(false)
   const [fields, setFields] = useState({name: '', description: ''})
   const [error, setError] = useState()
+
+  const confirmRef = useRef()
 
   const validateLabel = (value) => {
     const labels = currentTemplate.categories.map((categoryItem) =>
@@ -79,6 +81,9 @@ export const AddCategory = () => {
     }))
   }
 
+  const confirmWithKeyboard = ({key}) =>
+    key === 'Enter' && confirmRef?.current.click()
+
   const onClose = () => {
     setIsVisibleDescriptionInput(false)
     setFields({name: '', description: ''})
@@ -109,6 +114,7 @@ export const AddCategory = () => {
           ),
         }}
         confirmButtonProps={{
+          ref: confirmRef,
           type: BUTTON_TYPE.PRIMARY,
           size: BUTTON_SIZE.MEDIUM,
           disabled: !name || typeof error === 'string',
@@ -129,7 +135,11 @@ export const AddCategory = () => {
         verticalAlign={POPOVER_VERTICAL_ALIGN.TOP}
         onClose={onClose}
       >
-        <div className="add-popover-content">
+        <div
+          className="add-popover-content"
+          tabIndex={0}
+          onKeyUp={confirmWithKeyboard}
+        >
           <input
             className={`quality-framework-input input${error ? ' quality-framework-input-error' : ''}`}
             placeholder="Name"
@@ -155,6 +165,7 @@ export const AddCategory = () => {
               placeholder="Description"
               value={description}
               onChange={setDescription}
+              autoFocus
             />
           )}
         </div>

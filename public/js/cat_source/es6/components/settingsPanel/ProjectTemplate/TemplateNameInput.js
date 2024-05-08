@@ -1,11 +1,15 @@
 import React, {useContext, useEffect, useRef} from 'react'
 import {ProjectTemplateContext} from './ProjectTemplateContext'
-import {SettingsPanelContext} from '../SettingsPanelContext'
+import {TEMPLATE_MODIFIERS} from './ProjectTemplate'
 
 export const TemplateNameInput = () => {
-  const {templateName, setTemplateName, updateNameBehaviour} = useContext(
-    ProjectTemplateContext,
-  )
+  const {
+    templateName,
+    setTemplateName,
+    updateNameBehaviour,
+    createTemplate,
+    templateModifier,
+  } = useContext(ProjectTemplateContext)
   const container = useRef()
 
   const onChangeTemplateName = (e) => setTemplateName(e.currentTarget.value)
@@ -13,25 +17,28 @@ export const TemplateNameInput = () => {
   useEffect(() => {
     const {current} = container
 
+    const create = () => createTemplate.current()
     const updateName = () => updateNameBehaviour.current.confirm()
-
     const cancel = () => updateNameBehaviour.current.cancel()
 
     const handleKeyDown = (e) => {
       if (e.key === 'Enter') {
         e.preventDefault()
-        updateName()
+        if (templateModifier === TEMPLATE_MODIFIERS.CREATE) {
+          create()
+        } else {
+          updateName()
+        }
       } else if (e.key === 'Escape') {
         e.preventDefault()
         e.stopPropagation()
         cancel()
       }
     }
-    console.log('weeeeeeeee')
     current.addEventListener('keydown', handleKeyDown, true)
 
     return () => current.removeEventListener('keydown', handleKeyDown)
-  }, [updateNameBehaviour])
+  }, [updateNameBehaviour, createTemplate, templateModifier])
   return (
     <input
       ref={container}

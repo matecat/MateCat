@@ -597,7 +597,7 @@ const NewProject = () => {
   const isLoadingTemplates = !projectTemplates.length
 
   checkMMTGlossariesWasCancelledIntoTemplates.current({
-    engineId: mtEngines.find(({name}) => name === MMT_NAME)?.id,
+    engineId: mtEngines.find(({class_load}) => class_load === 'MMT')?.id,
     projectTemplates,
   })
 

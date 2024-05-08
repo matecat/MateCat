@@ -16,7 +16,6 @@ import {deleteMTEngine} from '../../../../api/deleteMTEngine'
 import {DEFAULT_ENGINE_MEMORY} from '../../SettingsPanel'
 import {MTGlossary} from './MTGlossary'
 
-import Close from '../../../../../../../img/icons/Close'
 import AddWide from '../../../../../../../img/icons/AddWide'
 import {DeepL} from './MtEngines/DeepL'
 import {DeepLGlossary} from './DeepLGlossary'
@@ -27,6 +26,8 @@ import {DeleteResource} from './DeleteResource'
 import ModalsActions from '../../../../actions/ModalsActions'
 import {ConfirmDeleteResourceProjectTemplates} from '../../../modals/ConfirmDeleteResourceProjectTemplates'
 import {SCHEMA_KEYS} from '../../../../hooks/useProjectTemplates'
+import IconClose from '../../../icons/IconClose'
+import {BUTTON_TYPE, Button} from '../../../common/Button/Button'
 
 export const MachineTranslationTab = () => {
   const {
@@ -248,15 +249,16 @@ export const MachineTranslationTab = () => {
     ? CUSTOM_ACTIVE_COLUMNS_TABLE_BY_ENGINE[activeMTEngineData.name]
     : COLUMNS_TABLE
 
-  const ActiveMTRow = activeMTEngineData?.name === 'DeepL' ? MTDeepLRow : MTRow
+  const ActiveMTRow =
+    activeMTEngineData?.engine_type === 'DeepL' ? MTDeepLRow : MTRow
 
   const getExtraNodeActiveRow = () => {
     const shouldShowDeleteConfirmation =
       deleteMTRequest && activeMTEngineData.id === deleteMTRequest
     const GlossaryComponent =
-      activeMTEngineData.name === 'ModernMT'
+      activeMTEngineData.engine_type === 'MMT'
         ? MTGlossary
-        : activeMTEngineData.name === 'DeepL'
+        : activeMTEngineData.engine_type === 'DeepL'
           ? DeepLGlossary
           : undefined
 
@@ -288,7 +290,7 @@ export const MachineTranslationTab = () => {
 
   return (
     <div className="machine-translation-tab settings-panel-contentwrapper-tab-background">
-      {!config.is_cattool && addMTVisible && (
+      {!config.is_cattool && config.isLoggedIn && addMTVisible && (
         <div className="add-mt-container">
           <h2>Add MT Engine</h2>
           <div className="add-mt-provider" data-testid="add-mt-provider">
@@ -303,12 +305,12 @@ export const MachineTranslationTab = () => {
                 setError()
               }}
             />
-            <button
-              className="ui button orange"
+            <Button
+              type={BUTTON_TYPE.WARNING}
               onClick={() => setAddMTVisible(false)}
             >
-              <Close />
-            </button>
+              <IconClose size={11} />
+            </Button>
           </div>
           {activeAddEngine ? (
             <activeAddEngine.component

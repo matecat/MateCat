@@ -31,6 +31,7 @@ export const ModifyCategory = ({target, category, setIsEditingName}) => {
   const [error, setError] = useState()
 
   const ref = useRef()
+  const confirmRef = useRef()
 
   useEffect(() => {
     const handler = (e) => {
@@ -81,10 +82,17 @@ export const ModifyCategory = ({target, category, setIsEditingName}) => {
     setDescription(value)
   }
 
+  const confirmWithKeyboard = ({key}) =>
+    key === 'Enter' && confirmRef?.current.click()
+
   const cancel = () => setIsEditingName(false)
 
   const content = (
-    <div className="add-popover-content">
+    <div
+      className="add-popover-content"
+      tabIndex={0}
+      onKeyUp={confirmWithKeyboard}
+    >
       <input
         className={`quality-framework-input input${error ? ' quality-framework-input-error' : ''}`}
         placeholder="Name"
@@ -127,6 +135,7 @@ export const ModifyCategory = ({target, category, setIsEditingName}) => {
             Cancel
           </Button>
           <Button
+            ref={confirmRef}
             type={BUTTON_TYPE.PRIMARY}
             size={BUTTON_SIZE.MEDIUM}
             onClick={updateLabel}
