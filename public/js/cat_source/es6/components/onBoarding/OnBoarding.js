@@ -46,12 +46,7 @@ const OnBoarding = ({
     stepState === ONBOARDING_STEP.FORGOT_PASSWORD
 
   const redirectAfterLogin = () => {
-    let location = window.location.origin
-    let wantedUrl = window.localStorage.getItem('wanted_url')
-    if (wantedUrl) {
-      location = wantedUrl
-    }
-    window.location.href = location
+    window.location.href = window.location.origin
   }
 
   const socialLogin = (url) => {
