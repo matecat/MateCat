@@ -75,7 +75,7 @@ $klein->with( '/api/v3/tm-keys', function () {
 route( '/api/v3/projects/[:id_project]/[:password]/segment-analysis',  'GET',  'API\V3\SegmentAnalysisController', 'project' );
 route( '/api/v3/jobs/[:id_job]/[:password]/segment-analysis',          'GET',  'API\V3\SegmentAnalysisController', 'job' );
 route( '/api/v3/create-key',  'POST', 'API\V3\MyMemoryController', 'create' );
-
+route( '/api/v3/change-password',  'POST', 'API\V3\ChangePasswordController', 'changePassword' );
 
 // MMT
 $klein->with( '/api/v3/mmt/[:engineId]', function () {
