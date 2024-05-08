@@ -1,5 +1,7 @@
 <?php
 
+use Predis\Client;
+
 /**
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
@@ -10,7 +12,7 @@
 class RedisHandler {
 
     /**
-     * @var Predis\Client
+     * @var Client
      */
     protected $redisHandler;
 
@@ -19,11 +21,10 @@ class RedisHandler {
      *
      * Get the connection to Redis server and return it
      *
-     * @throws \Predis\Connection\ConnectionException
+     * @return Client
      * @throws ReflectionException
-     * @return Predis\Client
      */
-    public function getConnection( ){
+    public function getConnection() {
 
         $resource = null;
         if( $this->redisHandler != null ){
@@ -33,25 +34,13 @@ class RedisHandler {
             $resource = $reflectorProperty->getValue( $this->redisHandler->getConnection() );
         }
 
-        if(
+        if (
                 $this->redisHandler === null
                 || !$this->redisHandler->getConnection()->isConnected()
                 || !is_resource( $resource )
-        ){
+        ) {
 
-            $connectionParams = INIT::$REDIS_SERVERS;
-
-            if ( is_string( $connectionParams ) ) {
-
-                $connectionParams = $this->formatDSN( $connectionParams );
-
-            } elseif( is_array( $connectionParams ) ){
-
-                $connectionParams = array_map( 'RedisHandler::formatDSN', $connectionParams );
-
-            }
-
-            $this->redisHandler = new Predis\Client( $connectionParams );
+            $this->redisHandler = $this->getClient();
 
         }
 
@@ -59,16 +48,36 @@ class RedisHandler {
 
     }
 
-    protected function formatDSN( $dsnString ){
+    /**
+     * @return Client
+     */
+    private function getClient() {
+        $connectionParams = INIT::$REDIS_SERVERS;
+
+        if ( is_string( $connectionParams ) ) {
+
+            $connectionParams = $this->formatDSN( $connectionParams );
+
+        } elseif ( is_array( $connectionParams ) ) {
+
+            $connectionParams = array_map( 'RedisHandler::formatDSN', $connectionParams );
+
+        }
+
+        return  new Client( $connectionParams );
+
+    }
+
+    protected function formatDSN( $dsnString ) {
 
         if ( !is_null( INIT::$INSTANCE_ID ) ) {
 
             $conf = parse_url( $dsnString );
 
             if ( isset( $conf[ 'query' ] ) ) {
-                $instanceID = "&database=" . (int) INIT::$INSTANCE_ID;
+                $instanceID = "&database=" . INIT::$INSTANCE_ID;
             } else {
-                $instanceID = "?database=" . (int) INIT::$INSTANCE_ID;
+                $instanceID = "?database=" . INIT::$INSTANCE_ID;
             }
 
             return $dsnString . $instanceID;

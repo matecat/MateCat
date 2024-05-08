@@ -394,8 +394,9 @@ class Analysis_PayableRates {
      */
     public static function resolveBreakdowns($breakdowns, $source, $target)
     {
-        $isoSource = Utils::convertLanguageToIsoCode($source);
-        $isoTarget = Utils::convertLanguageToIsoCode($target);
+        $languages = Langs_Languages::getInstance();
+        $isoSource = $languages->convertLanguageToIsoCode($source);
+        $isoTarget = $languages->convertLanguageToIsoCode($target);
 
         if ( isset( $breakdowns[ $source ] ) ) {
             if ( isset( $breakdowns[ $source ][ $target ] ) ) {

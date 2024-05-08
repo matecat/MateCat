@@ -9,6 +9,7 @@
 
 namespace TaskRunner\Commons;
 
+use INIT;
 use Log;
 
 /**
@@ -125,7 +126,7 @@ abstract class AbstractDaemon {
      * @param $msg
      */
     protected static function _TimeStampMsg( $msg ) {
-        if ( \INIT::$DEBUG ) echo "[" . date( DATE_RFC822 ) . "] " . $msg . "\n";
+        if ( INIT::$DEBUG ) echo "[" . date( DATE_RFC822 ) . "] " . $msg . "\n";
         Log::doJsonLog( $msg );
     }
 

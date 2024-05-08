@@ -321,7 +321,7 @@ abstract class AbstractStatus {
                 $chunkStruct->source        = $lang_pair[ 0 ];
                 $chunkStruct->target        = $lang_pair[ 1 ];
                 $chunkStruct->payable_rates = $_job_fallback[ 'payable_rates' ];
-                
+
                 $chunk = new AnalysisChunk( $chunkStruct, $this->_project_data[ 0 ][ 'pname' ], $this->user );
                 $job->setPayableRates( json_decode( $chunkStruct->payable_rates ) );
                 $job->setChunk( $chunk );

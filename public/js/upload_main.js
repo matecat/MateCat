@@ -419,20 +419,6 @@ window.UI = {
           } else {
             CreateProjectActions.enableAnalyzeButton(true)
           }
-
-          /**
-           * Check for TMX file type, we must trigger the creation of a new TM key
-           */
-          var extension =
-            data.files[0].name.split('.')[
-              data.files[0].name.split('.').length - 1
-            ]
-          if (
-            (extension == 'tmx' || extension == 'g') &&
-            config.conversionEnabled
-          ) {
-            UI.createKeyByTMX(extension, data.files[0].name)
-          }
         } else if (fileSpecs.error) {
           CreateProjectActions.enableAnalyzeButton(false)
           $('#fileupload').fileupload('option', 'dropZone', null)
@@ -654,13 +640,14 @@ var convertFile = function (fname, filerow, filesize, enforceConversion) {
               }
             }
 
-            var thisIsATMXFile =
-              file['name'].split('.').pop().toLowerCase() == 'tmx'
+            var extension =
+              file['name'].split('.')[file['name'].split('.').length - 1]
+            var thisIsATMXFile = extension.toLowerCase() == 'tmx'
             var thereIsAKeyInTmPanel = $('#activetm').find('tr.mine').length
 
             /* c'è almeno un file tmx e non ho già generato la chiave => genera la chiave */
             if (thisIsATMXFile && !thereIsAKeyInTmPanel) {
-              UI.createKeyByTMX()
+              UI.createKeyByTMX(extension, file['name'])
             }
 
             $(filerow).after(rowClone)
@@ -690,6 +677,17 @@ var convertFile = function (fname, filerow, filesize, enforceConversion) {
           })
           if (notTranslationFileCount == $('.name').length) {
             CreateProjectActions.enableAnalyzeButton(false)
+          }
+        } else {
+          /**
+           * Check for TMX file type, we must trigger the creation of a new TM key
+           */
+          var extension = fname.split('.')[fname.split('.').length - 1]
+          if (
+            (extension == 'tmx' || extension == 'g') &&
+            config.conversionEnabled
+          ) {
+            UI.createKeyByTMX(extension, fname)
           }
         }
       } else if (data.code <= 0 || errors.length > 0) {

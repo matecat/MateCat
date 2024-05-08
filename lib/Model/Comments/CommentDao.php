@@ -247,7 +247,7 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
      * @return Comments_BaseCommentStruct[]
      */
 
-    public static function getCommentsForChunk( Chunks_ChunkStruct $chunk, $options = array() ) {
+    public static function getCommentsForChunk( Jobs_JobStruct $chunk, $options = array() ) {
 
         $sql = "SELECT 
                   id, 
@@ -262,9 +262,11 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
                   message, 
                   email, 
                   IF ( resolve_date IS NULL, NULL, MD5( CONCAT( id_job, '-', id_segment, '-', resolve_date ) ) 
-                ) AS thread_id FROM comments
+                ) AS thread_id 
+                FROM " . self::TABLE . "
                 WHERE id_job = :id_job 
-                AND message_type IN(1,2)";
+                AND message_type IN(1,2)
+                ORDER BY id_segment ASC, create_date ASC ";
 
         $params = [ 'id_job' => $chunk->id ];
 
@@ -273,54 +275,14 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
             $params['from_id'] = $options['from_id'] ;
         }
 
-        $conn = \Database::obtain()->getConnection();
+        $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->execute( $params );
 
-        $stmt->setFetchMode( \PDO::FETCH_CLASS, '\Comments_BaseCommentStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, '\Comments_BaseCommentStruct' );
         $stmt->execute();
 
         return $stmt->fetchAll();
-    }
-
-
-    /**
-     *
-     * Returns the list of comments in job.
-     *
-     * @deprecated this does not follow latest conventions, please don't use
-     *             use getCommentsForChunk.
-     *
-     * @param Comments_CommentStruct $obj
-     *
-     * @return array
-     */
-    public function getCommentsInJob( Comments_CommentStruct $obj ) {
-
-        $query = "SELECT
-                      id,
-                      id_job, 
-                      id_segment, 
-                      create_date, 
-                      full_name, 
-                      resolve_date, 
-                      source_page, 
-                      message_type, 
-                      message, 
-                      email, 
-                      UNIX_TIMESTAMP( create_date ) AS timestamp, 
-                      IF ( resolve_date IS NULL, NULL,  MD5( CONCAT( id_job, '-', id_segment, '-', resolve_date ) ) 
-                 ) AS thread_id 
-                 FROM " . self::TABLE . "
-                 WHERE id_job = :id_job 
-                 AND message_type IN(1,2)
-                 ORDER BY id_segment ASC, create_date ASC ";
-
-        $stmt = $this->database->getConnection()->prepare( $query );
-        $stmt->setFetchMode( PDO::FETCH_ASSOC );
-        $stmt->execute( [ 'id_job' => $obj->id_job ] );
-        $arr_result = $stmt->fetchAll();
-        return $this->_buildResult( $arr_result );
     }
 
     private function validateComment( $obj ) {

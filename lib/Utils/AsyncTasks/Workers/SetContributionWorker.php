@@ -131,11 +131,14 @@ class SetContributionWorker extends AbstractWorker {
      */
     protected function _set( array $config, ContributionSetStruct $contributionStruct ) {
 
+        $jobStruct = $contributionStruct->getJobStruct();
+
         $config[ 'uid' ]            = $contributionStruct->uid;
         $config[ 'segment' ]        = $contributionStruct->segment;
         $config[ 'translation' ]    = $contributionStruct->translation;
         $config[ 'context_after' ]  = $contributionStruct->context_after;
         $config[ 'context_before' ] = $contributionStruct->context_before;
+        $config[ 'set_mt' ]      = ($jobStruct->id_mt_engine != 1) ? false : true;
 
         //get the Props
         $config[ 'prop' ] = json_encode( $contributionStruct->getProp() );
@@ -158,6 +161,8 @@ class SetContributionWorker extends AbstractWorker {
      */
     protected function _update( array $config, ContributionSetStruct $contributionStruct ) {
 
+        $jobStruct = $contributionStruct->getJobStruct();
+
         // update the contribution for every key in the job belonging to the user
         $config[ 'uid' ]            = $contributionStruct->uid;
         $config[ 'segment' ]        = $contributionStruct->oldSegment;
@@ -165,6 +170,7 @@ class SetContributionWorker extends AbstractWorker {
         $config[ 'context_after' ]  = $contributionStruct->context_after;
         $config[ 'context_before' ] = $contributionStruct->context_before;
         $config[ 'prop' ]           = json_encode( $contributionStruct->getProp() );
+        $config[ 'set_mt' ]         = ($jobStruct->id_mt_engine != 1) ? false : true;
 
         $config[ 'newsegment' ]     = $contributionStruct->segment;
         $config[ 'newtranslation' ] = $contributionStruct->translation;
