@@ -13,6 +13,12 @@ let UserActions = {
       user: user,
     })
   },
+  updateUserName: function (info) {
+    AppDispatcher.dispatch({
+      actionType: TeamConstants.UPDATE_USER_NAME,
+      info: info,
+    })
+  },
 
   renderTeams: function (teams, defaultTeam) {
     AppDispatcher.dispatch({

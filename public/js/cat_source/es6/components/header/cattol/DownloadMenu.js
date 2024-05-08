@@ -19,6 +19,14 @@ export const DownloadMenu = ({password, jid, isGDriveProject}) => {
 
     if (downloadDisabled) return false
 
+    if (!downloadTranslationAvailable) {
+      //Send event
+      const data = {
+        event: 'download_draft',
+      }
+      CommonUtils.dispatchAnalyticsEvents(data)
+    }
+
     if (config.isGDriveProject) {
       continueDownloadFunction = continueDownloadWithGoogleDrive
     } else {
@@ -101,15 +109,7 @@ export const DownloadMenu = ({password, jid, isGDriveProject}) => {
         className="dropdown-menu-overlay"
         onClick={() => runDownload()}
       ></div>
-      <ul
-        className="menu"
-        id="previewDropdown"
-        /*data-download={
-          stats && stats['TODO_FORMATTED'] == 0 && stats['ANALYSIS_COMPLETE']
-            ? 'true'
-            : 'false'
-        }*/
-      >
+      <ul className="menu" id="previewDropdown">
         {downloadTranslationAvailable ? (
           <li className="item downloadTranslation" data-value="translation">
             <a

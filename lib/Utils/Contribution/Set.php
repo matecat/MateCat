@@ -23,7 +23,7 @@ class Set {
     /**
      * @param ContributionSetStruct $contribution
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public static function contribution( ContributionSetStruct $contribution ){
 
@@ -42,6 +42,9 @@ class Set {
 
     }
 
+    /**
+     * @throws Exception
+     */
     public static function contributionMT( ContributionSetStruct $contribution = null ){
         try{
 

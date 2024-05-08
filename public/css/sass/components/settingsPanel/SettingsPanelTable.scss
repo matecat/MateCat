@@ -143,3 +143,17 @@
   opacity: 1;
   overflow: auto;
 }
+
+.settings-panel-mt-row {
+  display: flex;
+  gap: 10px;
+
+  > a {
+    display: flex;
+    align-items: center;
+  }
+}
+
+.settings-panel-mt-row-description {
+  padding: 5px 10px !important;
+}

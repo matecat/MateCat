@@ -96,12 +96,18 @@ const DEFAULT_CONTENTS = (isCattool = config.is_cattool) => {
 
 export const DEFAULT_ENGINE_MEMORY = {
   id: 1,
-  name: 'MyMemory',
-  description:
-    'Machine translation by the MT engine best suited to your project.',
+  name: 'ModernMT Lite',
+  description: (
+    <div
+      dangerouslySetInnerHTML={{
+        __html:
+          'Smart machine translation that learns from your corrections for enhanced quality and productivity thanks to ModernMT’s basic features. To unlock all features, <a target="_blank" href="https://www.modernmt.com/pricing#translators">click here</a>.',
+      }}
+    />
+  ),
   default: true,
+  engine_type: 'MMTLite',
 }
-export const MMT_NAME = 'ModernMT'
 
 export const SettingsPanel = ({
   onClose,

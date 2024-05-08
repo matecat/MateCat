@@ -59,7 +59,11 @@ export const MachineTranslationTab = () => {
   const [deleteMTRequest, setDeleteMTRequest] = useState()
 
   const enginesList = [
-    {name: 'ModernMT', id: 'mmt', component: ModernMt},
+    {
+      name: 'ModernMT',
+      id: 'mmt',
+      component: ModernMt,
+    },
     {name: 'AltLang', id: 'altlang', component: AltLang},
     {name: 'Apertium', id: 'apertium', component: Apertium},
     {name: 'DeepL', id: 'deepl', component: DeepL},

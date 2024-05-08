@@ -2,6 +2,7 @@ import React, {useContext} from 'react'
 import PropTypes from 'prop-types'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import Trash from '../../../../../../../img/icons/Trash'
+import InfoIcon from '../../../../../../../img/icons/InfoIcon'
 
 export const MTRow = ({row, deleteMT, onCheckboxClick}) => {
   const {currentProjectTemplate} = useContext(SettingsPanelContext)
@@ -9,47 +10,34 @@ export const MTRow = ({row, deleteMT, onCheckboxClick}) => {
 
   return (
     <>
-      <div>
+      <div className="settings-panel-mt-row">
         {row.name}
-        {row.name === 'MyMemory' && (
-          <span>
-            {' '}
-            (
-            <a href="https://guides.matecat.com/my" target="_blank">
-              Details
-            </a>
-            )
-          </span>
+        {row.engine_type === 'MMTLite' && (
+          <a
+            href="https://guides.matecat.com/default-machine-translation-engine"
+            target="_blank"
+          >
+            <InfoIcon />
+          </a>
         )}
-        {row.name === 'ModernMT' && (
-          <>
-            <span>
-              {' '}
-              (
-              <a
-                href="https://guides.matecat.com/modernmt-mmt-plug-in"
-                target="_blank"
-              >
-                Details
-              </a>
-              )
-            </span>
-          </>
+        {row.engine_type === 'MMT' && (
+          <a
+            href="https://guides.matecat.com/modernmt-mmt-plug-in"
+            target="_blank"
+          >
+            <InfoIcon />
+          </a>
         )}
-        {row.name === 'DeepL' && (
-          <>
-            <span>
-              {' '}
-              (
-              <a href="https://guides.matecat.com/my" target="_blank">
-                Details
-              </a>
-              )
-            </span>
-          </>
+        {row.engine_type === 'DeepL' && (
+          <a
+            href="https://guides.matecat.com/machine-translation-engines#DeepL"
+            target="_blank"
+          >
+            <InfoIcon />
+          </a>
         )}
       </div>
-      <div>{row.description}</div>
+      <div className="settings-panel-mt-row-description">{row.description}</div>
       {!config.is_cattool && (
         <div className="settings-panel-cell-center">
           <input

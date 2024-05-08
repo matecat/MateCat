@@ -2,11 +2,10 @@
 
 use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
+use Engines_Intento as Intento;
 use Exceptions\AuthorizationError;
 use Exceptions\NotFoundException;
 use LQA\ChunkReviewStruct;
-use TmKeyManagement\UserKeysModel;
-use Engines_Intento as Intento;
 use WordCount\WordCountStruct;
 
 /**

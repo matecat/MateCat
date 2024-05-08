@@ -36,7 +36,6 @@ class Bootstrap {
 
         $this->_setIncludePath();
         spl_autoload_register( [ 'Bootstrap', 'loadClass' ] );
-        require_once 'Predis/autoload.php';
         @include_once 'vendor/autoload.php';
 
         INIT::$OAUTH_CONFIG = $OAUTH_CONFIG;
@@ -336,7 +335,6 @@ class Bootstrap {
                 self::$_ROOT . "/inc/PHPTAL",
                 self::$_ROOT . "/lib/Utils/API",
                 self::$_ROOT . "/lib/Utils",
-                self::$_ROOT . "/lib/Utils/Predis/src",
                 self::$_ROOT . "/lib/Model",
                 self::$_ROOT . "/lib/View",
                 self::$_ROOT . "/lib/Decorator",
