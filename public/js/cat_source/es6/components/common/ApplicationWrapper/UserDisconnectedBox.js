@@ -9,7 +9,7 @@ export const UserDisconnectedBox = () => {
           <h2>Please Sign in again</h2>
           <p>
             You were signed out of your account. Please press 'Reload' to sign
-            in to Matecat
+            in to Matecat again.
           </p>
           <Button
             type={BUTTON_TYPE.PRIMARY}
