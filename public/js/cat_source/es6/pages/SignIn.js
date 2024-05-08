@@ -1,12 +1,15 @@
-import React, {createContext} from 'react'
+import React, {useContext, useEffect} from 'react'
 import {mountPage} from './mountPage'
 import Header from '../components/header/Header'
 import NotificationBox from '../components/notificationsComponent/NotificationBox'
 import OnBoarding from '../components/onBoarding/OnBoarding'
-
-export const SignInContext = createContext({})
+import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper'
 
 const SignIn = () => {
+  const {isUserLogged} = useContext(ApplicationWrapperContext)
+  useEffect(() => {
+    if (isUserLogged) window.location.href = window.location.origin
+  }, [isUserLogged])
   return (
     <>
       <header>
