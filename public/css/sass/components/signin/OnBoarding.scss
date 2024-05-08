@@ -14,8 +14,6 @@
     display: flex;
     justify-content: space-between;
     padding: 20px;
-    @import '../../commons/colors';
-
     .forgotpassword-component {
       display: flex;
       flex-direction: column;
@@ -31,6 +29,7 @@
       p {
         color: $grey7;
       }
+
 
       .forgotpassword-form {
         display: flex;
