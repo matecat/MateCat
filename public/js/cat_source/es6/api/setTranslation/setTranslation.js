@@ -1,4 +1,5 @@
 import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
+import CommonUtils from '../../utils/commonUtils'
 /**
  * Set segment to translation on review extended issue panel
  *
@@ -59,6 +60,10 @@ export const setTranslation = async ({
     suggestion_array: segment.contributions
       ? JSON.stringify(segment.contributions.matches)
       : undefined,
+  }
+  if (!idBefore && !idAfter) {
+    const trackingMessage = `Undefined idBefore and idAfter in setTranslation:  ${JSON.stringify(obj)}`
+    CommonUtils.dispatchTrackingError(trackingMessage)
   }
   const dataParams = Object.fromEntries(
     Object.entries(obj).filter(([_, v]) => v != null),
