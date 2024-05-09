@@ -1,5 +1,6 @@
 import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
 import CommonUtils from '../../utils/commonUtils'
+import SegmentStore from '../../stores/SegmentStore'
 /**
  * Set segment to translation on review extended issue panel
  *
@@ -66,8 +67,14 @@ export const setTranslation = async ({
     !idAfter &&
     config.project_plugins.indexOf('airbnb') === -1
   ) {
-    const trackingMessage = `Undefined idBefore and idAfter in setTranslation:  ${JSON.stringify(obj)}`
-    CommonUtils.dispatchTrackingError(trackingMessage)
+    try {
+      const segments = SegmentStore._segments
+      const segmentInStore = SegmentStore.getSegmentByIdToJS(sid)
+      const trackingMessage = `Undefined idBefore and idAfter in setTranslation, Segments length: ${segments.length}, Segment exist ${segmentInStore ? 'true' : 'false'}`
+      CommonUtils.dispatchTrackingError(trackingMessage)
+    } catch (e) {
+      console.log(e)
+    }
   }
   const dataParams = Object.fromEntries(
     Object.entries(obj).filter(([_, v]) => v != null),
