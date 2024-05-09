@@ -14,7 +14,6 @@ document.body.appendChild(modalElement)
 const mountPoint = createRoot(modalElement)
 afterAll(() => mountPoint.unmount())
 
-require('../../../../common')
 global.config = {
   enable_outsource: 1,
   basepath: 'http://localhost/',

@@ -27,7 +27,6 @@ window.config = {
   hostpath: 'https://dev.matecat.com',
 }
 
-require('../../../../common')
 const fakeTeamsData = {
   threeTeams: {
     data: JSON.parse(

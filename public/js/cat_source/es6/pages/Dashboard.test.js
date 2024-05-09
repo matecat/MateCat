@@ -2,7 +2,7 @@ import {http, HttpResponse} from 'msw'
 import React from 'react'
 import {screen, waitFor, render} from '@testing-library/react'
 
-import {mswServer} from '../../../../../mocks/mswServer'
+import {mswServer} from '../../../../mocks/mswServer'
 import Dashboard from './Dashboard'
 
 xtest('renders properly', async () => {
@@ -94,8 +94,6 @@ xtest('renders properly', async () => {
   global.config = {
     isLoggedIn: true,
   }
-
-  require('../../../../common')
 
   {
     const elHeader = document.createElement('header')

@@ -1,8 +1,12 @@
 import {createRoot} from 'react-dom/client'
-import {act, screen, waitFor} from '@testing-library/react'
+import {act, render, screen, waitFor} from '@testing-library/react'
 import {http, HttpResponse} from 'msw'
 
-import {mswServer} from '../../../../../mocks/mswServer'
+import {mswServer} from '../../../../mocks/mswServer'
+import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper'
+import userMock from '../../../../mocks/userMock'
+import React from 'react'
+import {QualityReport} from './QualityReport'
 
 jest.setTimeout(30000)
 global.config = {
@@ -1295,36 +1299,28 @@ test('renders properly', async () => {
     }),
   )
 
-  require('../../../../common')
-
   const header = document.createElement('header')
 
   const content = document.createElement('div')
   content.id = 'qr-root'
 
-  const modal = document.createElement('div')
-  modal.id = 'modal'
-
   const footer = document.createElement('footer')
 
   document.body.appendChild(header)
   document.body.appendChild(content)
-  document.body.appendChild(modal)
   document.body.appendChild(footer)
 
-  await import('./QualityReport')
+  const {rerender} = render(
+    <ApplicationWrapperContext.Provider
+      value={{isUserLogged: true, userInfo: userMock}}
+    >
+      <QualityReport />
+    </ApplicationWrapperContext.Provider>,
+  )
 
   // expect(screen.getByText('Loading')).toBeVisible()
 
   await waitFor(() => {
     expect(screen.getByText('QR Job summary')).toBeVisible()
-  })
-  act(() => {
-    const modalMountPoint = createRoot(modal)
-    modalMountPoint.unmount()
-    const contentMountPoint = createRoot(content)
-    contentMountPoint.unmount()
-    const headerMountPoint = createRoot(header)
-    headerMountPoint.unmount()
   })
 })
