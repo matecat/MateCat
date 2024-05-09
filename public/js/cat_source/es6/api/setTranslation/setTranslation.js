@@ -70,7 +70,7 @@ export const setTranslation = async ({
     try {
       const segments = SegmentStore._segments
       const segmentInStore = SegmentStore.getSegmentByIdToJS(sid)
-      const trackingMessage = `Undefined idBefore and idAfter in setTranslation, Segments length: ${segments.length}, Segment exist ${segmentInStore ? 'true' : 'false'}`
+      const trackingMessage = `Undefined idBefore and idAfter in setTranslation, Segments length: ${segments.size}, Segment exist ${segmentInStore ? 'true' : 'false'}`
       CommonUtils.dispatchTrackingError(trackingMessage)
     } catch (e) {
       console.log(e)
