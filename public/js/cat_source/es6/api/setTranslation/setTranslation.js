@@ -61,7 +61,11 @@ export const setTranslation = async ({
       ? JSON.stringify(segment.contributions.matches)
       : undefined,
   }
-  if (!idBefore && !idAfter) {
+  if (
+    !idBefore &&
+    !idAfter &&
+    config.project_plugins.indexOf('airbnb') === -1
+  ) {
     const trackingMessage = `Undefined idBefore and idAfter in setTranslation:  ${JSON.stringify(obj)}`
     CommonUtils.dispatchTrackingError(trackingMessage)
   }
