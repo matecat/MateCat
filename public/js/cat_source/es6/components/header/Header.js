@@ -10,6 +10,7 @@ import {ActionMenu} from './ActionMenu'
 import {UserMenu} from './UserMenu'
 import {ComponentExtendInterface} from '../../utils/ComponentExtendInterface'
 import Immutable from 'immutable'
+import {TeamDropdown} from './TeamDropdown'
 
 export class HeaderInterface extends ComponentExtendInterface {
   getMoreLinks() {}
@@ -103,6 +104,11 @@ const Header = ({
             )}
 
             {!!showFilterProjects && (
+              // <TeamDropdown
+              //   isManage={showFilterProjects}
+              //   showModals={showModals}
+              //   changeTeam={changeTeam}
+              // />
               <TeamsSelect
                 isManage={showFilterProjects}
                 showModals={showModals}

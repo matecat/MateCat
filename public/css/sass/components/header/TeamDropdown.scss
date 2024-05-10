@@ -1,0 +1,12 @@
+@import '../../commons/colors';
+
+.team-dropdown {
+  .dropdown {
+    position: absolute;
+    visibility: hidden;
+
+    .open & {
+      visibility: visible;
+    }
+  }
+}
