@@ -170,6 +170,72 @@ const SegmentUtils = {
   getSegmentFileId: (segment) => {
     return segment.id_file
   },
+  collectSplittedStatuses: function (sid, splittedSid, status) {
+    let statuses = []
+    const segments = SegmentStore.getSegmentsInSplit(sid)
+    segments.forEach(() => {
+      const segment = SegmentStore.getSegmentByIdToJS(this.sid)
+      if (splittedSid === this.sid) {
+        statuses.push(status)
+      } else {
+        statuses.push(segment.status)
+      }
+    })
+    return statuses
+  },
+  createSetTranslationRequest: (segment, status, propagate = false) => {
+    let {translation, segment: segmentSource, original_sid: sid} = segment
+    const contextBefore = UI.getContextBefore(sid)
+    const idBefore = UI.getIdBefore(sid)
+    const contextAfter = UI.getContextAfter(sid)
+    const idAfter = UI.getIdAfter(sid)
+    if (segment.splitted) {
+      translation = this.collectSplittedTranslations(sid)
+      segmentSource = this.collectSplittedTranslations(sid, '.source')
+    }
+    if (
+      !idBefore &&
+      !idAfter &&
+      config.project_plugins.indexOf('airbnb') === -1
+    ) {
+      try {
+        const segments = SegmentStore._segments
+        const segmentInStore = SegmentStore.getSegmentByIdToJS(sid)
+        const trackingMessage = `Undefined idBefore and idAfter in setTranslation, Segments length: ${segments.size}, Segment exist ${segmentInStore ? 'true' : 'false'}`
+        CommonUtils.dispatchTrackingError(trackingMessage)
+      } catch (e) {
+        console.log(e)
+      }
+    }
+    return {
+      id_segment: segment.original_sid,
+      id_job: config.id_job,
+      password: config.password,
+      status: status ? status : segment.status,
+      translation: translation,
+      segment: segmentSource,
+      time_to_edit: UI.editTime ? UI.editTime : new Date() - UI.editStart,
+      chosen_suggestion_index: segment.choosenSuggestionIndex,
+      propagate: propagate,
+      context_before: contextBefore,
+      id_before: idBefore,
+      context_after: contextAfter,
+      id_after: idAfter,
+      revision_number: config.revisionNumber,
+      current_password: config.currentPassword,
+      splitStatuses: segment.splitted
+        ? this.collectSplittedStatuses(
+            segment.original_sid,
+            segment.sid,
+            status,
+          ).toString()
+        : null,
+      characters_counter: segment.charactersCounter,
+      suggestion_array: segment.contributions
+        ? JSON.stringify(segment.contributions.matches)
+        : undefined,
+    }
+  },
 }
 
 export default SegmentUtils
