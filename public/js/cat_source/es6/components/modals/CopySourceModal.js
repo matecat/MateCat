@@ -1,7 +1,7 @@
 import React from 'react'
 import Cookies from 'js-cookie'
 import ModalsActions from '../../actions/ModalsActions'
-
+export const COPY_SOURCE_COOKIE = 'source_copied_to_target'
 class CopySourceModal extends React.Component {
   constructor(props) {
     super(props)
@@ -20,21 +20,17 @@ class CopySourceModal extends React.Component {
   }
 
   checkCheckbox() {
-    var checked = this.checkbox.checked
+    const checked = this.checkbox.checked
     if (checked) {
+      sessionStorage.setItem(COPY_SOURCE_COOKIE, 0)
       Cookies.set(
-        'source_copied_to_target-' + config.id_job + '-' + config.password,
+        COPY_SOURCE_COOKIE,
         '0',
         //expiration: 1 day
-        {expires: 30, secure: true},
+        {expires: 1, secure: true},
       )
     } else {
-      Cookies.set(
-        'source_copied_to_target-' + config.id_job + '-' + config.password,
-        null,
-        //set expiration date before the current date to delete the cookie
-        {expires: new Date(1), secure: true},
-      )
+      sessionStorage.removeItem(COPY_SOURCE_COOKIE)
     }
   }
 
