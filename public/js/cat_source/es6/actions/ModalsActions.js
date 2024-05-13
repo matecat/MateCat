@@ -7,7 +7,14 @@ import AppDispatcher from '../stores/AppDispatcher'
 import ModalsConstants from '../constants/ModalsConstants'
 
 let ModalsActions = {
-  showModalComponent: (component, props, title, style, onCloseCallback) => {
+  showModalComponent: (
+    component,
+    props,
+    title,
+    style,
+    onCloseCallback,
+    isCloseButtonDisabled,
+  ) => {
     AppDispatcher.dispatch({
       actionType: ModalsConstants.SHOW_MODAL,
       component,
@@ -15,6 +22,7 @@ let ModalsActions = {
       title,
       style,
       onCloseCallback,
+      isCloseButtonDisabled,
     })
   },
   onCloseModal: function () {

@@ -27,6 +27,8 @@ import {getTmKeysJob} from '../api/getTmKeysJob'
 import {getSupportedLanguages} from '../api/getSupportedLanguages'
 import ApplicationStore from '../stores/ApplicationStore'
 import {useGoogleLoginNotification} from '../hooks/useGoogleLoginNotification'
+import ModalsActions from '../actions/ModalsActions'
+import FatalErrorModal from '../components/modals/FatalErrorModal'
 
 const urlParams = new URLSearchParams(window.location.search)
 const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
@@ -55,6 +57,7 @@ function CatTool() {
     Boolean(config.get_public_matches),
   )
   const [supportedLanguages, setSupportedLanguages] = useState([])
+  const [isAnalysisCompleted, setIsAnalysisCompleted] = useState(false)
 
   // TODO: Remove temp notification warning login google (search in files this todo)
   useGoogleLoginNotification()
@@ -68,6 +71,7 @@ function CatTool() {
         ? options?.segmentId
         : startSegmentIdRef.current,
       where: options?.where,
+      isAnalysisCompleted,
     })
 
   const closeSettings = useCallback(() => setOpenSettings({isOpen: false}), [])
@@ -163,6 +167,22 @@ function CatTool() {
 
       setOptions((prevState) => ({...prevState, segmentId, where}))
     }
+    const checkAnalysisState = ({analysis_complete}) => {
+      setIsAnalysisCompleted(analysis_complete)
+
+      if (!analysis_complete)
+        ModalsActions.showModalComponent(
+          FatalErrorModal,
+          {
+            text: "Analysis isn't completed, please try again soon.",
+          },
+          'Analysis in progress',
+          undefined,
+          undefined,
+          true,
+        )
+    }
+
     SegmentStore.addListener(
       SegmentConstants.FREEZING_SEGMENTS,
       freezingSegments,
@@ -171,6 +191,7 @@ function CatTool() {
       SegmentConstants.GET_MORE_SEGMENTS,
       getMoreSegments,
     )
+    CatToolStore.addListener(CatToolConstants.SET_PROGRESS, checkAnalysisState)
 
     return () => {
       CatToolStore.removeListener(CatToolConstants.ON_RENDER, onRenderHandler)
@@ -185,6 +206,10 @@ function CatTool() {
       SegmentStore.removeListener(
         SegmentConstants.GET_MORE_SEGMENTS,
         getMoreSegments,
+      )
+      CatToolStore.removeListener(
+        CatToolConstants.SET_PROGRESS,
+        checkAnalysisState,
       )
     }
   }, [])
