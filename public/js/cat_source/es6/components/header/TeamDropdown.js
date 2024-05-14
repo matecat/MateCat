@@ -5,8 +5,15 @@ import {BUTTON_TYPE, Button} from '../common/Button/Button'
 import IconDown from '../icons/IconDown'
 import ManageActions from '../../actions/ManageActions'
 import UserActions from '../../actions/UserActions'
+import IconAdd from '../icons/IconAdd'
+import IconSettings from '../icons/IconSettings'
+import ModalsActions from '../../actions/ModalsActions'
 
-export const TeamDropdown = ({isManage, showModals, changeTeam}) => {
+export const TeamDropdown = ({
+  isManage = true,
+  showModals = true,
+  changeTeam = true,
+}) => {
   const {isUserLogged, userInfo, setUserInfo} = useContext(
     ApplicationWrapperContext,
   )
@@ -46,22 +53,31 @@ export const TeamDropdown = ({isManage, showModals, changeTeam}) => {
     setIsDropdownVisible((prevState) => !prevState)
   }
 
-  const onChangeTeam = (id) => {
-    const selectedTeam = teams.find((team) => team.id === id)
+  const onChangeTeam = (team) => {
     setUserInfo((prevState) => ({
       ...prevState,
-      teams: prevState.teams.map((team) => ({
-        ...team,
-        isSelected: team.id === selectedTeam.id,
+      teams: prevState.teams.map((teamItem) => ({
+        ...teamItem,
+        isSelected: teamItem.id === team.id,
       })),
     }))
 
     if (isManage) {
       window.scrollTo(0, 0)
-      ManageActions.changeTeam(selectedTeam)
+      ManageActions.changeTeam(team)
     } else {
-      UserActions.changeTeamFromUploadPage(selectedTeam)
+      UserActions.changeTeamFromUploadPage(team)
     }
+  }
+
+  const openCreateTeams = () => {
+    ModalsActions.openCreateTeamModal()
+  }
+
+  const openModifyTeam = (event, team) => {
+    event.stopPropagation()
+    event.preventDefault()
+    ManageActions.openModifyTeamModal(team)
   }
 
   return (
@@ -76,20 +92,25 @@ export const TeamDropdown = ({isManage, showModals, changeTeam}) => {
         <IconDown width={14} height={14} />
       </Button>
       <div className={`dropdown${isDropdownVisible ? ' open' : ''}`}>
-        {showModals && (
-          <>
-            <Button type={BUTTON_TYPE.INFO}>Create new team</Button>
-            <div className="divider"></div>
-          </>
-        )}
         <ul>
+          {showModals && (
+            <li className="create-new-team" onClick={openCreateTeams}>
+              Create new team <IconAdd size={22} />
+            </li>
+          )}
           {teams.map((team) => (
             <li
               key={team.id}
               className={`${team.id === selectedTeam?.id ? 'active' : ''}`}
-              onClick={() => onChangeTeam(team.id)}
+              onClick={() => onChangeTeam(team)}
             >
               {team.name}
+              <div
+                className="container-icon-settings"
+                onClick={(event) => openModifyTeam(event, team)}
+              >
+                <IconSettings size={16} />
+              </div>
             </li>
           ))}
         </ul>

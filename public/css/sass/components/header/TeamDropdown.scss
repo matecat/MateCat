@@ -28,16 +28,34 @@
       flex-direction: column;
 
       > li {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
         cursor: pointer;
         padding: 10px;
 
         &:hover {
           background-color: $grey9;
+
+          .container-icon-settings {
+            visibility: visible;
+            color: $translatedBlue;
+          }
         }
 
         &.active {
           background-color: $darkBlueHover;
           color: $white;
+
+          .container-icon-settings {
+            color: $white;
+          }
+        }
+
+        .container-icon-settings {
+          display: flex;
+          align-items: center;
+          visibility: hidden;
         }
       }
     }
@@ -56,6 +74,19 @@
       > svg {
         transform: rotate(180deg);
       }
+    }
+  }
+
+  .create-new-team {
+    border-bottom: 1px solid $grey8;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    color: $translatedBlue;
+    font-weight: bold;
+
+    > svg {
+      border: 1px solid $translatedBlue;
+      border-radius: 50%;
     }
   }
 }
