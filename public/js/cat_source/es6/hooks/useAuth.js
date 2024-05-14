@@ -23,11 +23,16 @@ const USER_INFO_SCHEMA = {
 }
 
 function useAuth() {
-  const [userInfo, setStateUserInfo] = useState()
+  const [userInfo, setStateUserInfo] = useState(false)
   const [connectedServices, setConnectedServices] = useState()
   const [userDisconnected, setUserDisconnected] = useState(false)
 
-  const isUserLogged = typeof userInfo === 'object'
+  const isUserLogged =
+    typeof userInfo === 'boolean' && !userInfo
+      ? undefined
+      : typeof userInfo === 'object'
+
+  console.log('isUserLogged', isUserLogged)
 
   const parseJWT = (jwt) => {
     try {
@@ -144,12 +149,17 @@ function useAuth() {
 
     const updateTeams = (data) => {
       const dataJs = data.toJS()
-
       setUserInfo((prevState) => {
         const teams = Array.isArray(dataJs)
-          ? dataJs
+          ? dataJs.map((team) => ({
+              ...team,
+              isSelected: prevState.teams.find(({id}) => id === team.id)
+                ?.isSelected,
+            }))
           : prevState.teams.map((team) =>
-              team.id === dataJs.id ? dataJs : team,
+              team.id === dataJs.id
+                ? {...dataJs, isSelected: team.isSelected}
+                : team,
             )
 
         const updatedUserInfo = {...prevState, teams}

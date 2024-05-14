@@ -3138,7 +3138,9 @@ section.opened.editor .status {
 
 @font-face {
   font-family: Calibri;
-  src: local(Calibri), url('../fonts/calibri-webfont.woff') format('woff'),
+  src:
+    local(Calibri),
+    url('../fonts/calibri-webfont.woff') format('woff'),
     url('../fonts/calibri-webfont.ttf') format('truetype'),
     url('../fonts/calibri-webfont.eot'),
     url('../fonts/calibri-webfont.eot?#iefix') format('embedded-opentype');
@@ -3147,7 +3149,8 @@ section.opened.editor .status {
 @font-face {
   font-family: Calibri;
   font-weight: bold;
-  src: local('Calibri Bold'),
+  src:
+    local('Calibri Bold'),
     url('../fonts/calibri_bold-webfont.woff') format('woff'),
     url('../fonts/calibri_bold-webfont.ttf') format('truetype'),
     url('../fonts/calibri_bold-webfont.eot'),
@@ -4609,6 +4612,10 @@ header {
   .wrapper {
     grid-template-columns: 208px minmax(0, 48px) minmax(200px, max-content) auto max-content; /*208px minmax(0,48px) minmax(200px, max-content) auto 120px;*/
     align-items: center;
+
+    .popover-component-container {
+      margin-left: 15px;
+    }
   }
 
   .logo-menu {

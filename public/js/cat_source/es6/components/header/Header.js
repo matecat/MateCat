@@ -104,20 +104,20 @@ const Header = ({
             )}
 
             {!!showFilterProjects && (
-              // <TeamDropdown
-              //   isManage={showFilterProjects}
-              //   showModals={showModals}
-              //   changeTeam={changeTeam}
-              // />
-              <TeamsSelect
+              <TeamDropdown
                 isManage={showFilterProjects}
                 showModals={showModals}
-                loggedUser={isUserLogged}
-                showTeams={showTeams}
                 changeTeam={changeTeam}
-                teams={Immutable.fromJS(teams)}
-                selectedTeamId={selectedTeam?.id}
               />
+              // <TeamsSelect
+              //   isManage={showFilterProjects}
+              //   showModals={showModals}
+              //   loggedUser={isUserLogged}
+              //   showTeams={showTeams}
+              //   changeTeam={changeTeam}
+              //   teams={Immutable.fromJS(teams)}
+              //   selectedTeamId={selectedTeam?.id}
+              // />
             )}
             {!!isQualityReport && jobUrls && (
               <ActionMenu jobUrls={jobUrls.toJS()} />

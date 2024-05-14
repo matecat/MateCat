@@ -108,25 +108,28 @@ export const UserMenu = () => {
     )
   }
 
-  return isUserLogged ? (
-    loggedRender()
-  ) : (
-    <div className="header-buttons">
-      <Button
-        className={'header-button-signin'}
-        mode={BUTTON_MODE.OUTLINE}
-        size={BUTTON_SIZE.MEDIUM}
-        onClick={ModalsActions.openLoginModal}
-      >
-        Sign In
-      </Button>
-      <Button
-        className={'header-button-signup'}
-        onClick={ModalsActions.openRegisterModal}
-        size={BUTTON_SIZE.MEDIUM}
-      >
-        Sign Up
-      </Button>
-    </div>
+  return (
+    typeof isUserLogged === 'boolean' &&
+    (isUserLogged ? (
+      loggedRender()
+    ) : (
+      <div className="header-buttons">
+        <Button
+          className={'header-button-signin'}
+          mode={BUTTON_MODE.OUTLINE}
+          size={BUTTON_SIZE.MEDIUM}
+          onClick={ModalsActions.openLoginModal}
+        >
+          Sign In
+        </Button>
+        <Button
+          className={'header-button-signup'}
+          onClick={ModalsActions.openRegisterModal}
+          size={BUTTON_SIZE.MEDIUM}
+        >
+          Sign Up
+        </Button>
+      </div>
+    ))
   )
 }

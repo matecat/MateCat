@@ -8,8 +8,6 @@ import React, {
 } from 'react'
 import usePortal from '../hooks/usePortal'
 import Header from '../components/header/Header'
-import UserStore from '../stores/UserStore'
-import UserConstants from '../constants/UserConstants'
 import {Select} from '../components/common/Select'
 import ModalsActions from '../actions/ModalsActions'
 import AlertModal from '../components/modals/AlertModal'
@@ -185,7 +183,7 @@ const NewProject = () => {
 
   const selectedTeam = useMemo(() => {
     const team =
-      userInfo?.teams.find(({id}) => id === currentProjectTemplate?.idTeam) ??
+      userInfo?.teams?.find(({id}) => id === currentProjectTemplate?.idTeam) ??
       {}
 
     return {...team, id: team.id?.toString()}

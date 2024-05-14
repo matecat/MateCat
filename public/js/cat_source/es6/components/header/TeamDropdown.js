@@ -1,57 +1,81 @@
-import React, {useContext, useEffect, useState} from 'react'
+import React, {useCallback, useContext, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
-import UserStore from '../../stores/UserStore'
-import ManageConstants from '../../constants/ManageConstants'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper'
 import {BUTTON_TYPE, Button} from '../common/Button/Button'
+import IconDown from '../icons/IconDown'
+import ManageActions from '../../actions/ManageActions'
+import UserActions from '../../actions/UserActions'
 
 export const TeamDropdown = ({isManage, showModals, changeTeam}) => {
-  const {isUserLogged, userInfo} = useContext(ApplicationWrapperContext)
+  const {isUserLogged, userInfo, setUserInfo} = useContext(
+    ApplicationWrapperContext,
+  )
 
-  const [selectedTeamId, setSelectedTeamId] = useState()
   const [isDropdownVisible, setIsDropdownVisible] = useState(false)
+
+  const triggerRef = useRef()
 
   const {teams = []} = userInfo ?? {}
   const selectedTeam = teams.find(({isSelected}) => isSelected)
 
-  //   useEffect(() => {
-  //     const initPopup = () => {
-  //         const teams = userInfo.teams;
+  const closeDropdown = useCallback((e) => {
+    if (e) e.stopPropagation()
+    if (triggerRef.current && !triggerRef.current.contains(e?.target)) {
+      window.eventHandler.removeEventListener(
+        'mouseup.teamdropdown',
+        closeDropdown,
+      )
 
-  //     if (teams.length == 1 && showModals && showPopup) {
-  //       let tooltipTex =
-  //         "<h4 class='header'>Add your first team!</h4>" +
-  //         "<div class='content'>" +
-  //         '<p>Create a team and invite your colleagues to share and manage projects.</p>' +
-  //         "<a class='close-popup-teams'>Got it!</a>" +
-  //         '</div>'
-  //       $(this.dropdownTeams)
-  //         .popup({
-  //           on: 'click',
-  //           onHidden: self.removePopup,
-  //           html: tooltipTex,
-  //           closable: false,
-  //           onCreate: self.onCreatePopup,
-  //           className: {
-  //             popup: 'ui popup cta-create-team',
-  //           },
-  //         })
-  //         .popup('show')
-  //       this.showPopup = false
-  //     }
-  //     }
+      setIsDropdownVisible(false)
+    }
+  }, [])
 
-  //     UserStore.addListener(ManageConstants.OPEN_INFO_TEAMS_POPUP, initPopup)
-  //   }, [userInfo?.teams])
+  const toggleDropdown = () => {
+    if (isDropdownVisible) {
+      window.eventHandler.removeEventListener(
+        'mousedown.teamdropdown',
+        closeDropdown,
+      )
+    } else {
+      window.eventHandler.addEventListener(
+        'mouseup.teamdropdown',
+        closeDropdown,
+      )
+    }
 
-  const toggleDropdown = () => setIsDropdownVisible((prevState) => !prevState)
+    setIsDropdownVisible((prevState) => !prevState)
+  }
+
+  const onChangeTeam = (id) => {
+    const selectedTeam = teams.find((team) => team.id === id)
+    setUserInfo((prevState) => ({
+      ...prevState,
+      teams: prevState.teams.map((team) => ({
+        ...team,
+        isSelected: team.id === selectedTeam.id,
+      })),
+    }))
+
+    if (isManage) {
+      window.scrollTo(0, 0)
+      ManageActions.changeTeam(selectedTeam)
+    } else {
+      UserActions.changeTeamFromUploadPage(selectedTeam)
+    }
+  }
 
   return (
     <div className={`team-dropdown${isDropdownVisible ? ' open' : ''}`}>
-      <Button type={BUTTON_TYPE.DEFAULT} onClick={toggleDropdown}>
-        Choose team
+      <Button
+        ref={triggerRef}
+        className={`trigger-button${isDropdownVisible ? ' open' : ''}`}
+        type={BUTTON_TYPE.DEFAULT}
+        onClick={toggleDropdown}
+      >
+        {selectedTeam?.name ?? 'Choose team'}
+        <IconDown width={14} height={14} />
       </Button>
-      <div className="dropdown">
+      <div className={`dropdown${isDropdownVisible ? ' open' : ''}`}>
         {showModals && (
           <>
             <Button type={BUTTON_TYPE.INFO}>Create new team</Button>
@@ -60,7 +84,13 @@ export const TeamDropdown = ({isManage, showModals, changeTeam}) => {
         )}
         <ul>
           {teams.map((team) => (
-            <li key={team.id}>{team.name}</li>
+            <li
+              key={team.id}
+              className={`${team.id === selectedTeam?.id ? 'active' : ''}`}
+              onClick={() => onChangeTeam(team.id)}
+            >
+              {team.name}
+            </li>
           ))}
         </ul>
       </div>
