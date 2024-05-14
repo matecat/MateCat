@@ -11,6 +11,9 @@ use Features\ReviewExtended\ReviewUtils;
 use Jobs_JobDao;
 use LQA\ChunkReviewDao;
 use Projects_ProjectDao;
+use Projects_ProjectStruct;
+use Teams\MembershipDao;
+use Users_UserStruct;
 use Utils;
 
 class ChangePasswordController extends ChunkController
@@ -74,7 +77,7 @@ class ChangePasswordController extends ChunkController
             exit();
 
 
-        } catch (\Exception $exception){
+        } catch (Exception $exception){
             $this->response->status()->setCode(500);
             $this->response->json( [
                 'error' => $exception->getMessage()
@@ -84,7 +87,7 @@ class ChangePasswordController extends ChunkController
     }
 
     /**
-     * @param \Users_UserStruct $user
+     * @param Users_UserStruct $user
      * @param $res
      * @param $id
      * @param $actual_pwd
@@ -92,8 +95,9 @@ class ChangePasswordController extends ChunkController
      * @param null $revision_number
      * @throws Exception
      */
-    private function changeThePassword(\Users_UserStruct $user, $res, $id, $actual_pwd, $new_password, $revision_number = null)
+    private function changeThePassword(Users_UserStruct $user, $res, $id, $actual_pwd, $new_password, $revision_number = null)
     {
+        // change project password
         if ( $res == "prj" ) {
 
             $pStruct = Projects_ProjectDao::findByIdAndPassword( $id, $actual_pwd );
@@ -102,11 +106,7 @@ class ChangePasswordController extends ChunkController
                 throw new Exception('Project not found');
             }
 
-            $owner = $pStruct->getOriginalOwner();
-
-            if($owner->uid !== $user->uid){
-                throw new Exception('This job does not belong to the logged user', 403);
-            }
+            $this->checkUserPermissions($pStruct, $user);
 
             $pDao    = new Projects_ProjectDao();
             $pDao->changePassword( $pStruct, $new_password );
@@ -117,11 +117,11 @@ class ChangePasswordController extends ChunkController
 
             $pStruct->getFeaturesSet()->run( 'project_password_changed', $pStruct, $actual_pwd );
 
-        } else {
+        } else { // change job passwords
 
             Database::obtain()->begin();
 
-            if ( $revision_number ) {
+            if ( $revision_number ) { // change job revision password
 
                 $jStruct = CatUtils::getJobFromIdAndAnyPassword( $id, $actual_pwd );
 
@@ -129,11 +129,7 @@ class ChangePasswordController extends ChunkController
                     throw new Exception('Job not found');
                 }
 
-                $owner = $jStruct->getProject()->getOriginalOwner();
-
-                if($owner->uid !== $user->uid){
-                    throw new Exception('This job does not belong to the logged user', 403);
-                }
+                $this->checkUserPermissions($jStruct->getProject(), $user);
 
                 $source_page = ReviewUtils::revisionNumberToSourcePage( $revision_number );
                 $dao         = new ChunkReviewDao();
@@ -143,9 +139,12 @@ class ChangePasswordController extends ChunkController
                     ->run( 'review_password_changed', $id, $actual_pwd, $new_password, $revision_number );
 
 
-            } else {
+            } else { // change job password
                 $jStruct = Jobs_JobDao::getByIdAndPassword( $id, $actual_pwd );
                 $jDao    = new Jobs_JobDao();
+
+                $this->checkUserPermissions($jStruct->getProject(), $user);
+
                 $jDao->changePassword( $jStruct, $new_password );
                 $jStruct->getProject()
                     ->getFeaturesSet()
@@ -157,6 +156,31 @@ class ChangePasswordController extends ChunkController
             $pDao->destroyCacheForProjectData($jStruct->getProject()->id, $jStruct->getProject()->password);
 
             Database::obtain()->commit();
+        }
+    }
+
+    /**
+     * Check if the logged user has the permissions to change the password
+     *
+     * @param Projects_ProjectStruct $project
+     * @param Users_UserStruct $user
+     * @throws Exception
+     */
+    private function checkUserPermissions(Projects_ProjectStruct $project, Users_UserStruct $user)
+    {
+        // check if user is belongs to the project team
+        $team  = $project->getTeam();
+        $check = (new MembershipDao())->findTeamByIdAndUser($team->id, $user);
+
+        if($check === null){
+            throw new Exception('The logged user does not belong to the right team', 403);
+        }
+
+        // check uid
+        $owner = $project->getOriginalOwner();
+
+        if($owner->uid !== $user->uid){
+            throw new Exception('This project does not belong to the logged user', 403);
         }
     }
 }
