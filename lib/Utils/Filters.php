@@ -87,9 +87,9 @@ class Filters {
                 // Super ugly, but this is the way the old FileFormatConverter
                 // cooperated with callers; changing this requires changing the
                 // callers, a huge and risky refactoring work I couldn't afford
-                if ( isset( $response[ "documentContent" ] ) ) {
-                    $response[ 'document_content' ] = base64_decode( $response[ 'documentContent' ] );
-                    unset( $response[ 'documentContent' ] );
+                if ( isset( $response[ "document" ] ) ) {
+                    $response[ 'document_content' ] = base64_decode( $response[ 'document' ] );
+                    unset( $response[ 'document' ] );
                 }
             }
 
