@@ -460,6 +460,7 @@ class setTranslationController extends ajaxController {
         if ( $this->propagate && in_array( $this->status, [
                 Constants_TranslationStatus::STATUS_TRANSLATED,
                 Constants_TranslationStatus::STATUS_APPROVED,
+                Constants_TranslationStatus::STATUS_APPROVED2,
                 Constants_TranslationStatus::STATUS_REJECTED
             ] )
         ) {
