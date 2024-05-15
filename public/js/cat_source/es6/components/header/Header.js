@@ -5,7 +5,6 @@ import CatToolActions from '../../actions/CatToolActions'
 import QualityReportStore from '../../stores/QualityReportStore'
 import QualityReportConstants from '../../constants/QualityReportConstants'
 import FilterProjects from './manage/FilterProjects'
-import TeamsSelect from './TeamsSelect'
 import {ActionMenu} from './ActionMenu'
 import {UserMenu} from './UserMenu'
 import {ComponentExtendInterface} from '../../utils/ComponentExtendInterface'
@@ -109,15 +108,6 @@ const Header = ({
                 showModals={showModals}
                 changeTeam={changeTeam}
               />
-              // <TeamsSelect
-              //   isManage={showFilterProjects}
-              //   showModals={showModals}
-              //   loggedUser={isUserLogged}
-              //   showTeams={showTeams}
-              //   changeTeam={changeTeam}
-              //   teams={Immutable.fromJS(teams)}
-              //   selectedTeamId={selectedTeam?.id}
-              // />
             )}
             {!!isQualityReport && jobUrls && (
               <ActionMenu jobUrls={jobUrls.toJS()} />

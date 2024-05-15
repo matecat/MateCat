@@ -9,14 +9,8 @@ import IconAdd from '../icons/IconAdd'
 import IconSettings from '../icons/IconSettings'
 import ModalsActions from '../../actions/ModalsActions'
 
-export const TeamDropdown = ({
-  isManage = true,
-  showModals = true,
-  changeTeam = true,
-}) => {
-  const {isUserLogged, userInfo, setUserInfo} = useContext(
-    ApplicationWrapperContext,
-  )
+export const TeamDropdown = ({isManage = true, showModals = true}) => {
+  const {userInfo, setUserInfo} = useContext(ApplicationWrapperContext)
 
   const [isDropdownVisible, setIsDropdownVisible] = useState(false)
 
@@ -29,7 +23,7 @@ export const TeamDropdown = ({
     if (e) e.stopPropagation()
     if (triggerRef.current && !triggerRef.current.contains(e?.target)) {
       window.eventHandler.removeEventListener(
-        'mouseup.teamdropdown',
+        'click.teamdropdown',
         closeDropdown,
       )
 
@@ -40,14 +34,11 @@ export const TeamDropdown = ({
   const toggleDropdown = () => {
     if (isDropdownVisible) {
       window.eventHandler.removeEventListener(
-        'mousedown.teamdropdown',
+        'click.teamdropdown',
         closeDropdown,
       )
     } else {
-      window.eventHandler.addEventListener(
-        'mouseup.teamdropdown',
-        closeDropdown,
-      )
+      window.eventHandler.addEventListener('click.teamdropdown', closeDropdown)
     }
 
     setIsDropdownVisible((prevState) => !prevState)
@@ -105,12 +96,14 @@ export const TeamDropdown = ({
               onClick={() => onChangeTeam(team)}
             >
               {team.name}
-              <div
-                className="container-icon-settings"
-                onClick={(event) => openModifyTeam(event, team)}
-              >
-                <IconSettings size={16} />
-              </div>
+              {team.type !== 'personal' && (
+                <div
+                  className="container-icon-settings"
+                  onClick={(event) => openModifyTeam(event, team)}
+                >
+                  <IconSettings size={16} />
+                </div>
+              )}
             </li>
           ))}
         </ul>
@@ -122,5 +115,4 @@ export const TeamDropdown = ({
 TeamDropdown.propTypes = {
   isManage: PropTypes.bool,
   showModals: PropTypes.bool,
-  changeTeam: PropTypes.bool,
 }

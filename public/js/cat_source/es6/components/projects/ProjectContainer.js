@@ -14,6 +14,13 @@ import ModalsActions from '../../actions/ModalsActions'
 import ConfirmMessageModal from '../modals/ConfirmMessageModal'
 import Immutable from 'immutable'
 import UserStore from '../../stores/UserStore'
+import {
+  DROPDOWN_MENU_ALIGN,
+  DropdownMenu,
+} from '../common/DropdownMenu/DropdownMenu'
+import {BUTTON_MODE, BUTTON_SIZE} from '../common/Button/Button'
+import DotsHorizontal from '../../../../../img/icons/DotsHorizontal'
+import {UserProjectDropdown} from './UserProjectDropdown'
 
 class ProjectContainer extends React.Component {
   constructor(props) {
@@ -25,6 +32,7 @@ class ProjectContainer extends React.Component {
       lastAction: null,
       jobsActions: null,
       projectName: this.props.project.get('name'),
+      idTeamSelected: this.props.project.get('id_team'),
     }
     this.getActivityLogUrl = this.getActivityLogUrl.bind(this)
     this.changeUser = this.changeUser.bind(this)
@@ -33,7 +41,6 @@ class ProjectContainer extends React.Component {
       (team) => team.get('id') === this.props.project.get('id_team'),
     )
     this.dropdownUsersInitialized = false
-    this.dropdownTeamsInitialized = false
     this.lastActivityController
   }
 
@@ -103,20 +110,6 @@ class ProjectContainer extends React.Component {
 
     if (this.dropdownUsers)
       this.setStyleUserDropDown(!!this.props.project.get('id_assignee'))
-
-    if (this.dropdownTeams && !this.dropdownTeamsInitialized) {
-      $(this.dropdownTeams).dropdown(
-        'set selected',
-        this.props.project.get('id_team'),
-      )
-      $(this.dropdownTeams).dropdown({
-        fullTextSearch: 'exact',
-        onChange: (value) => {
-          this.changeTeam(value)
-        },
-      })
-      this.dropdownTeamsInitialized = true
-    }
   }
 
   setStyleUserDropDown(hasAssigned) {
@@ -205,84 +198,96 @@ class ProjectContainer extends React.Component {
     }
   }
 
-  getProjectMenu(activityLogUrl) {
-    let menuHtml = (
-      <div className="menu">
-        <div className="scrolling menu">
-          <a
-            className="item"
-            href={activityLogUrl}
-            target="_blank"
-            rel="noreferrer"
-          >
+  getDropdownProjectMenu(activityLogUrl) {
+    const isArchived = this.props.project.get('is_archived')
+    const isCancelled = this.props.project.get('is_cancelled')
+
+    const items = [
+      {
+        label: (
+          <>
             <i className="icon-download-logs icon" />
             Activity Log
-          </a>
+          </>
+        ),
+        onClick: () => window.open(activityLogUrl, '_blank'),
+      },
+      ...(!isArchived && !isCancelled
+        ? [
+            {
+              label: (
+                <>
+                  <i className="icon-drawer icon" />
+                  Archive project
+                </>
+              ),
+              onClick: () => this.archiveProject(),
+            },
+            {
+              label: (
+                <>
+                  <i className="icon-trash-o icon" />
+                  Cancel project
+                </>
+              ),
+              onClick: () => this.removeProject(),
+            },
+          ]
+        : []),
+      ...(isArchived
+        ? [
+            {
+              label: (
+                <>
+                  <i className="icon-drawer unarchive-project icon" />
+                  Unarchive project
+                </>
+              ),
+              onClick: () => this.activateProject(),
+            },
+            {
+              label: (
+                <>
+                  <i className="icon-trash-o icon" />
+                  Cancel project
+                </>
+              ),
+              onClick: () => this.removeProject(),
+            },
+          ]
+        : []),
+      ...(isCancelled
+        ? [
+            {
+              label: (
+                <>
+                  <i className="icon-drawer unarchive-project icon" />
+                  Resume Project
+                </>
+              ),
+              onClick: () => this.activateProject(),
+            },
+            {
+              label: (
+                <>
+                  <i className="icon-drawer icon-trash-o icon" />
+                  Delete project permanently
+                </>
+              ),
+              onClick: () => this.deleteProject(),
+            },
+          ]
+        : []),
+    ]
 
-          <a className="item" onClick={this.archiveProject.bind(this)}>
-            <i className="icon-drawer icon" />
-            Archive project
-          </a>
-
-          <a className="item" onClick={this.removeProject.bind(this)}>
-            <i className="icon-trash-o icon" />
-            Cancel project
-          </a>
-        </div>
-      </div>
+    return (
+      <DropdownMenu
+        className="project-menu-dropdown"
+        toggleButtonProps={{children: <DotsHorizontal size={18} />}}
+        align={DROPDOWN_MENU_ALIGN.RIGHT}
+        items={items}
+      />
     )
-    if (this.props.project.get('is_archived')) {
-      menuHtml = (
-        <div className="menu">
-          <div className="scrolling menu">
-            <a
-              className="item"
-              href={activityLogUrl}
-              target="_blank"
-              rel="noreferrer"
-            >
-              <i className="icon-download-logs icon" />
-              Activity Log
-            </a>
-
-            <a className="item" onClick={this.activateProject.bind(this)}>
-              <i className="icon-drawer unarchive-project icon" />
-              Unarchive project
-            </a>
-
-            <a className="item" onClick={this.removeProject.bind(this)}>
-              <i className="icon-trash-o icon" />
-              Cancel project
-            </a>
-          </div>
-        </div>
-      )
-    } else if (this.props.project.get('is_cancelled')) {
-      menuHtml = (
-        <div className="menu">
-          <div className="scrolling menu">
-            <a
-              className="item"
-              href={activityLogUrl}
-              target="_blank"
-              rel="noreferrer"
-            >
-              <i className="icon-download-logs icon" /> Activity Log
-            </a>
-
-            <a className="item" onClick={this.activateProject.bind(this)}>
-              <i className="icon-drawer unarchive-project icon" /> Resume
-              Project
-            </a>
-            <a className="item" onClick={this.deleteProject.bind(this)}>
-              <i className="icon-drawer icon-trash-o icon" /> Delete project
-              permanently
-            </a>
-          </div>
-        </div>
-      )
-    }
-    return menuHtml
   }
 
   getLastAction() {
@@ -462,7 +467,18 @@ class ProjectContainer extends React.Component {
     ManageActions.openAddTeamMemberModal(this.projectTeam.toJS())
   }
 
-  createUserDropDown(users) {
+  createUserDropDown = (users) => {
+    return (
+      <UserProjectDropdown
+        {...{
+          users: users.toJS(),
+          openAddMember: this.openAddMember.bind(this),
+          changeUser: this.changeUser.bind(this),
+          idAssignee: this.props.project.get('id_assignee'),
+        }}
+      />
+    )
+
     var self = this
     let members = users.map(function (member) {
       let user = member.get('user')
@@ -561,31 +577,33 @@ class ProjectContainer extends React.Component {
     return result
   }
 
-  getDropDownTeams() {
-    let result = ''
-    if (this.props.teams && this.props.teams.size > 1) {
-      let teams = this.props.teams.map(function (team) {
-        return (
-          <div
-            className="item "
-            data-value={team.get('id')}
-            key={'team-dropdown-item' + team.get('id') + team.get('name')}
-          >
-            {team.get('name')}
-          </div>
-        )
-      })
-      result = (
-        <div
-          className={'ui dropdown top right pointing project-team shadow-1 '}
-          ref={(dropdownTeams) => (this.dropdownTeams = dropdownTeams)}
-        >
-          <span className="text"></span>
-          <div className="menu">{teams}</div>
-        </div>
-      )
-    }
-    return result
+  getDropDownTeams = () => {
+    const teams = this.props.teams?.toJS() ?? []
+    const {idTeamSelected} = this.state
+
+    const items = teams.map((team) => ({
+      label: team.name,
+      selected: team.id === idTeamSelected,
+      onClick: () => {
+        this.changeTeam(team.id)
+        this.setState({
+          idTeamSelected: team.id,
+        })
+      },
+    }))
+
+    return (
+      <DropdownMenu
+        className="project-team-dropdown"
+        align={DROPDOWN_MENU_ALIGN.RIGHT}
+        toggleButtonProps={{
+          mode: BUTTON_MODE.BASIC,
+          size: BUTTON_SIZE.SMALL,
+          children: teams.find(({id}) => id === idTeamSelected).name,
+        }}
+        items={items}
+      />
+    )
   }
 
   getDueDate() {
@@ -637,13 +655,14 @@ class ProjectContainer extends React.Component {
       !nextProps.project.equals(this.props.project) ||
       nextState.lastAction !== this.state.lastAction ||
       !nextProps.team.equals(this.props.team) ||
-      !nextProps.teams.equals(this.props.teams)
+      !nextProps.teams.equals(this.props.teams) ||
+      nextState.idTeamSelected !== this.state.idTeamSelected
     )
   }
 
   render() {
     let activityLogUrl = this.getActivityLogUrl()
-    let projectMenu = this.getProjectMenu(activityLogUrl)
+    const dropdownProjectMenu = this.getDropdownProjectMenu(activityLogUrl)
     let jobsLength = this.props.project.get('jobs').size
 
     let targetsLangs = [],
@@ -715,8 +734,8 @@ class ProjectContainer extends React.Component {
     }
 
     // Users dropdown
-    let dropDownUsers = this.getDropDownUsers()
-    let dropDownTeams = this.getDropDownTeams()
+    const dropDownUsers = this.getDropDownUsers()
+    const dropDownTeams = this.getDropDownTeams()
 
     return (
       <div
@@ -755,14 +774,7 @@ class ProjectContainer extends React.Component {
                   <div className="project-activity-icon">
                     {dropDownTeams}
                     {dropDownUsers}
-                    <div
-                      className="project-menu ui icon top right pointing dropdown circular button"
-                      title="Project menu"
-                      ref={(dropdown) => (this.dropdown = dropdown)}
-                    >
-                      <i className="icon-more_vert icon" />
-                      {projectMenu}
-                    </div>
+                    {dropdownProjectMenu}
                   </div>
                 </div>
               </div>
