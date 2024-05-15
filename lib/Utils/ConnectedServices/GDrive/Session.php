@@ -41,6 +41,7 @@ class Session {
     protected $seg_rule;
 
     protected $session;
+    protected $filters_extraction_parameters;
 
     /**
      * @var \Google_Service_Drive
@@ -550,12 +551,14 @@ class Session {
      * @param $source_lang
      * @param $target_lang
      * @param $seg_rule
+     * @param null $filters_extraction_parameters
      */
-    public function setConversionParams( $guid, $source_lang, $target_lang, $seg_rule ) {
-        $this->guid        = $guid;
-        $this->source_lang = $source_lang;
-        $this->target_lang = $target_lang;
-        $this->seg_rule    = $seg_rule;
+    public function setConversionParams( $guid, $source_lang, $target_lang, $seg_rule, $filters_extraction_parameters = null ) {
+        $this->guid                          = $guid;
+        $this->source_lang                   = $source_lang;
+        $this->target_lang                   = $target_lang;
+        $this->seg_rule                      = $seg_rule;
+        $this->filters_extraction_parameters = $filters_extraction_parameters;
     }
 
     /**
