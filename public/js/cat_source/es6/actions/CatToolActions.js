@@ -16,6 +16,7 @@ import {getDomainsList} from '../api/getDomainsList'
 import {checkJobKeysHaveGlossary} from '../api/checkJobKeysHaveGlossary'
 import {getJobMetadata} from '../api/getJobMetadata'
 import CatToolConstants from '../constants/CatToolConstants'
+import SegmentStore from '../stores/SegmentStore'
 
 let CatToolActions = {
   popupInfoUserMenu: () => 'infoUserMenu-' + config.userMail,
@@ -259,7 +260,7 @@ let CatToolActions = {
     })
   },
   onRender: (props = {}) => {
-    UI.nextUntranslatedSegmentIdByServer = null
+    SegmentStore.nextUntranslatedFromServer = null
 
     const segmentToOpen = props.segmentToOpen || false
 

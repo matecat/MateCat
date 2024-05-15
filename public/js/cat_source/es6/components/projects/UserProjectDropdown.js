@@ -83,6 +83,7 @@ export const UserProjectDropdown = ({
       className={`user-project-dropdown-container${isDropdownVisible ? ' open' : ''}`}
     >
       <Button
+        testId="project-teams"
         className={`trigger-button user-project-dropdown${isDropdownVisible ? ' open' : ''}`}
         type={BUTTON_TYPE.BASIC}
         size={BUTTON_SIZE.SMALL}

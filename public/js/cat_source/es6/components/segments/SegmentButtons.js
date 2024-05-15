@@ -97,7 +97,9 @@ class SegmentButton extends React.Component {
     }
     e.preventDefault()
     $(e.target).addClass('disabled')
-    setTimeout(() => UI.startSegmentTagProjection(this.props.segment.sid))
+    setTimeout(() =>
+      SegmentActions.startSegmentTagProjection(this.props.segment.sid),
+    )
     return false
   }
 

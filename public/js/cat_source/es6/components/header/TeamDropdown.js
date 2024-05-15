@@ -72,7 +72,10 @@ export const TeamDropdown = ({isManage = true, showModals = true}) => {
   }
 
   return (
-    <div className={`team-dropdown${isDropdownVisible ? ' open' : ''}`}>
+    <div
+      data-testid="team-select"
+      className={`team-dropdown${isDropdownVisible ? ' open' : ''}`}
+    >
       <Button
         ref={triggerRef}
         className={`trigger-button${isDropdownVisible ? ' open' : ''}`}

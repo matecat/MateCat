@@ -283,7 +283,10 @@ class ProjectContainer extends React.Component {
     return (
       <DropdownMenu
         className="project-menu-dropdown"
-        toggleButtonProps={{children: <DotsHorizontal size={18} />}}
+        toggleButtonProps={{
+          children: <DotsHorizontal size={18} />,
+          testId: 'project-menu-dropdown',
+        }}
         align={DROPDOWN_MENU_ALIGN.RIGHT}
         items={items}
       />
@@ -600,6 +603,7 @@ class ProjectContainer extends React.Component {
           mode: BUTTON_MODE.BASIC,
           size: BUTTON_SIZE.SMALL,
           children: teams.find(({id}) => id === idTeamSelected).name,
+          testId: 'teams-dropdown',
         }}
         items={items}
       />

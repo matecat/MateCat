@@ -44,7 +44,7 @@ class Segment extends React.Component {
     this.forceUpdateSegment = this.forceUpdateSegment.bind(this)
     this.clientReconnection = this.clientReconnection.bind(this)
 
-    let readonly = UI.isReadonlySegment(this.props.segment)
+    let readonly = SegmentUtils.isReadonlySegment(this.props.segment)
     this.secondPassLocked =
       this.props.segment.status.toUpperCase() === SEGMENTS_STATUS.APPROVED2 &&
       this.props.segment.revision_number === 2 &&
@@ -103,9 +103,6 @@ class Segment extends React.Component {
 
       // start old cache
       UI.cacheObjects(this.$section)
-      //end old cache
-
-      UI.evalNextSegment()
 
       $('html').trigger('open') // used by ui.review to open tab Revise in the footer next-unapproved
 
@@ -588,7 +585,7 @@ class Segment extends React.Component {
         this.openSegment()
       })
       setTimeout(() => {
-        UI.setCurrentSegment()
+        UI.setCurrentSegment(this.props.segment.sid)
       }, 0)
     }
   }
@@ -654,7 +651,7 @@ class Segment extends React.Component {
         SegmentActions.scrollToSegment(this.props.segment.sid)
       }, 200)
       setTimeout(() => {
-        UI.setCurrentSegment()
+        UI.setCurrentSegment(this.props.segment.sid)
       }, 0)
       setTimeout(() => {
         if (
@@ -687,7 +684,6 @@ class Segment extends React.Component {
 
   render() {
     let job_marker = ''
-    let timeToEdit = ''
 
     let readonly = this.state.readonly
     let showLockIcon =
@@ -697,19 +693,6 @@ class Segment extends React.Component {
     let split_group = this.props.segment.split_group || []
     let autoPropagable = this.props.segment.repetitions_in_chunk !== '1'
     let originalId = this.props.segment.sid.split('-')[0]
-
-    if (this.props.timeToEdit) {
-      this.segment_edit_min = this.props.segment.parsed_time_to_edit[1]
-      this.segment_edit_sec = this.props.segment.parsed_time_to_edit[2]
-    }
-
-    if (this.props.timeToEdit) {
-      timeToEdit =
-        <span className="edit-min">{this.segment_edit_min}</span> +
-        'm' +
-        <span className="edit-sec">{this.segment_edit_sec}</span> +
-        's'
-    }
 
     let translationIssues = this.getTranslationIssues()
     let locked =
@@ -837,12 +820,6 @@ class Segment extends React.Component {
               saving={this.props.segment.saving}
             />
             <SegmentBody onClick={this.onClickEvent} />
-            <div
-              className="timetoedit"
-              data-raw-time-to-edit={this.props.segment.time_to_edit}
-            >
-              {timeToEdit}
-            </div>
             {SegmentFilter && SegmentFilter.enabled() ? (
               <div className="edit-distance">
                 Edit Distance: {this.props.segment.edit_distance}

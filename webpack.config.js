@@ -209,7 +209,6 @@ const matecatConfig = async ({env}, {mode}) => {
       cattool: [
         path.resolve(__dirname, 'public/build/lxqlicense.js'),
         path.resolve(__dirname, 'public/js/cat_source/ui.core.js'),
-        path.resolve(__dirname, 'public/js/cat_source/ui.segment.js'),
         path.resolve(__dirname, 'public/js/cat_source/ui.events.js'),
         path.resolve(__dirname, 'public/js/cat_source/ui.headerTooltips.js'),
         path.resolve(__dirname, 'public/js/cat_source/es6/pages/CatTool.js'),

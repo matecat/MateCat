@@ -755,6 +755,9 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
       errors: errors,
     })
   },
+  setLastTranslatedSegmentId: function (id) {
+    SegmentStore.lastTranslatedSegmentId = id
+  },
   closeSide: function () {
     this.sideOpen = false
   },
@@ -1077,7 +1080,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     current_sid,
     current_fid,
     status,
-    revisionNumber,
+    revisionNumber = null,
     autopropagated = false,
   ) {
     let currentSegment = this.getCurrentSegment()
@@ -1171,15 +1174,9 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
   },
   getSegmentByIdToJS(sid) {
     let segment = this._segments.find(function (seg) {
-      return seg.get('sid') == sid || seg.get('original_sid') === sid
+      return seg.get('sid') == sid || seg.get('original_sid') == sid
     })
     return segment ? segment.toJS() : null
-  },
-
-  segmentScrollableToCenter(sid) {
-    //If a segment is in the last 5 segment loaded in the UI is scrollable
-    let index = this.getSegmentIndex(sid)
-    return index !== -1 && this._segments.size - 5 > index
   },
 
   getSegmentsSplitGroup(sid) {

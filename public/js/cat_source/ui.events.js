@@ -6,6 +6,7 @@ import SegmentStore from './es6/stores/SegmentStore'
 import CommonUtils from './es6/utils/commonUtils'
 import Shortcuts from './es6/utils/shortcuts'
 import ModalsActions from './es6/actions/ModalsActions'
+import SegmentUtils from './es6/utils/segmentUtils'
 
 $.extend(window.UI, {
   bindShortcuts: function () {
@@ -123,7 +124,7 @@ $.extend(window.UI, {
           e.preventDefault()
           e.stopPropagation()
           var segment = SegmentStore.getCurrentSegment()
-          if (!segment || UI.isReadonlySegment(segment)) {
+          if (!segment || SegmentUtils.isReadonlySegment(segment)) {
             return
           }
           if (config.isReview) {
@@ -137,7 +138,7 @@ $.extend(window.UI, {
               SegmentStore.getNextUntranslatedSegmentId()
             if (!segment.tagged) {
               setTimeout(function () {
-                UI.startSegmentTagProjection(segment.sid)
+                SegmentActions.startSegmentTagProjection(segment.sid)
               })
             } else if (segment.translation.trim() !== '') {
               setTimeout(function () {
@@ -157,7 +158,7 @@ $.extend(window.UI, {
           Shortcuts.shortCutsKeyType
         ],
         function () {
-          UI.translateAndGoToNext()
+          SegmentActions.translateAndGoToNext()
         },
       )
       .on(

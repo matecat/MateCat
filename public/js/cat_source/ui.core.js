@@ -261,24 +261,9 @@ window.UI = {
     }
   },
 
-  setTimeToEdit: function (sid) {
-    let $segment = UI.getSegmentById(sid)
+  setTimeToEdit: function () {
     this.editStop = new Date()
-    var tte = $('.timetoedit', $segment)
     this.editTime = this.editStop - this.editStart
-    this.totalTime = this.editTime + tte.data('raw-time-to-edit')
-    var editedTime = CommonUtils.millisecondsToTime(this.totalTime)
-    if (config.time_to_edit_enabled) {
-      var editSec = $('.timetoedit .edit-sec', $segment)
-      var editMin = $('.timetoedit .edit-min', $segment)
-      editMin.text(
-        editedTime[0].length > 1 ? editedTime[0] : '0' + editedTime[0],
-      )
-      editSec.text(
-        editedTime[1].length > 1 ? editedTime[1] : '0' + editedTime[1],
-      )
-    }
-    tte.data('raw-time-to-edit', this.totalTime)
   },
   startWarning: function () {
     clearTimeout(UI.startWarningTimeout)
@@ -367,19 +352,6 @@ window.UI = {
       }
     })
   },
-  // checkVersion: function () {
-  //   if (this.version != config.build_number) {
-  //     var notification = {
-  //       uid: 'checkVersion',
-  //       title: 'New version of Matecat',
-  //       text: 'A new version of Matecat has been released. Please <a href="#" class="reloadPage">click here</a> or press CTRL+F5 (or CMD+R on Mac) to update.',
-  //       type: 'warning',
-  //       allowHtml: true,
-  //       position: 'bl',
-  //     }
-  //     CatToolActions.addNotification(notification)
-  //   }
-  // },
   registerQACheck: function () {
     clearTimeout(UI.pendingQACheck)
     UI.pendingQACheck = setTimeout(function () {
@@ -496,7 +468,7 @@ window.UI = {
     var reqArguments = arguments
     let segment = SegmentStore.getSegmentByIdToJS(id_segment)
 
-    this.lastTranslatedSegmentId = id_segment
+    SegmentStore.setLastTranslatedSegmentId(id_segment)
 
     try {
       // Attention, to be modified when we will lock tags
@@ -838,5 +810,88 @@ window.UI = {
       'If you must edit it, click on the padlock icon to the left of the segment. ' +
       'The owner of the project will be notified of any edits.'
     )
+  },
+  /***
+   * Overridden by  plugin
+   */
+  getContextBefore: function (segmentId) {
+    const segmentBefore = SegmentStore.getPrevSegment(segmentId)
+    if (!segmentBefore) {
+      return null
+    }
+    var segmentBeforeId = segmentBefore.splitted
+    var isSplitted = segmentBefore.splitted
+    if (isSplitted) {
+      if (segmentBefore.original_sid !== segmentId.split('-')[0]) {
+        return this.collectSplittedTranslations(
+          segmentBefore.original_sid,
+          '.source',
+        )
+      } else {
+        return this.getContextBefore(segmentBeforeId)
+      }
+    } else {
+      return segmentBefore.segment
+    }
+  },
+  /***
+   * Overridden by  plugin
+   */
+  getContextAfter: function (segmentId) {
+    const segmentAfter = SegmentStore.getNextSegment(segmentId)
+    if (!segmentAfter) {
+      return null
+    }
+    var segmentAfterId = segmentAfter.sid
+    var isSplitted = segmentAfter.splitted
+    if (isSplitted) {
+      if (segmentAfter.firstOfSplit) {
+        return this.collectSplittedTranslations(
+          segmentAfter.original_sid,
+          '.source',
+        )
+      } else {
+        return this.getContextAfter(segmentAfterId)
+      }
+    } else {
+      return segmentAfter.segment
+    }
+  },
+  /***
+   * Overridden by  plugin
+   */
+  getIdBefore: function (segmentId) {
+    const segmentBefore = SegmentStore.getPrevSegment(segmentId)
+    // var segmentBefore = findSegmentBefore();
+    if (!segmentBefore) {
+      return null
+    }
+    return segmentBefore.original_sid
+  },
+  /***
+   * Overridden by  plugin
+   */
+  getIdAfter: function (segmentId) {
+    const segmentAfter = SegmentStore.getNextSegment(segmentId)
+    if (!segmentAfter) {
+      return null
+    }
+    return segmentAfter.original_sid
+  },
+
+  /**
+   * Register tabs in segment footer
+   *
+   * Overridden by  plugin
+   */
+  registerFooterTabs: function () {
+    SegmentActions.registerTab('concordances', true, false)
+
+    if (config.translation_matches_enabled) {
+      SegmentActions.registerTab('matches', true, true)
+    }
+
+    SegmentActions.registerTab('glossary', true, false)
+    SegmentActions.registerTab('alternatives', false, false)
   },
 }
