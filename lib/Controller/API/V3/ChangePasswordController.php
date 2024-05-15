@@ -34,18 +34,26 @@ class ChangePasswordController extends ChunkController
 
         if(
             empty($id) or
-            empty($password) or
-            empty($new_password)
+            empty($password)
         ){
             $code = 400;
             $this->response->status()->setCode( $code );
             $this->response->json( [
-                'error' => 'Missing required parameters [`id `, `password`, `new_password`]'
+                'error' => 'Missing required parameters [`id `, `password`]'
             ] );
             exit();
         }
 
         if ( $undo ) {
+
+            // in this case new_password is mandatory
+            if(empty($new_password)){
+                $this->response->json( [
+                    'error' => 'Missing required parameters [`id `, `password`, `new_password`]'
+                ] );
+                exit();
+            }
+
             $new_pwd    = $new_password;
             $actual_pwd = $password;
         } else {
