@@ -13,7 +13,7 @@
     gap: 8px;
 
     label {
-      font: 14px;
+      font-size: 14px;
     }
   }
 }
@@ -53,7 +53,7 @@
     }
     &.isCompressed {
       padding: 10px;
-      font: 14px;
+      font-size: 14px;
     }
     &.isPassword {
       padding-right: 46px;
@@ -89,16 +89,13 @@
     position: absolute;
     top: 12px;
     left: 12px;
-    color: $grey4;
+    color: $grey8;
     cursor: pointer;
     pointer-events: none;
   }
   input.isCompressed + svg {
     top: 10px;
     left: 10px;
-  }
-  input:not(:placeholder-shown) + svg {
-    color: $white;
   }
   input:disabled + svg {
     color: $grey8 !important;

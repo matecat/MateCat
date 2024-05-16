@@ -475,6 +475,7 @@ class ProjectContainer extends React.Component {
       <UserProjectDropdown
         {...{
           users: users.toJS(),
+          project: this.props.project.toJS(),
           openAddMember: this.openAddMember.bind(this),
           changeUser: this.changeUser.bind(this),
           idAssignee: this.props.project.get('id_assignee'),

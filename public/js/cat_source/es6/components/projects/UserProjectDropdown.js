@@ -1,22 +1,29 @@
-import React, {useCallback, useRef, useState} from 'react'
+import React, {useCallback, useContext, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import {BUTTON_SIZE, BUTTON_TYPE, Button} from '../common/Button/Button'
 import IconAdd from '../icons/IconAdd'
 import CommonUtils from '../../utils/commonUtils'
-import {Input} from '../common/Input/Input'
+import {INPUT_SIZE, Input} from '../common/Input/Input'
+import IconSearch from '../icons/IconSearch'
+import {ApplicationWrapperContext} from '../common/ApplicationWrapper'
 
 export const UserProjectDropdown = ({
   users,
+  project,
   openAddMember,
   changeUser,
   idAssignee,
 }) => {
+  const {userInfo} = useContext(ApplicationWrapperContext)
+
   const [isDropdownVisible, setIsDropdownVisible] = useState(false)
   const [filterUsers, setFilterUsers] = useState()
 
   const wrapperRef = useRef()
 
   const selectedUser = users.find(({user}) => user.uid === idAssignee)
+  const isPersonalTeam =
+    userInfo.teams.find(({id}) => id === project.id_team).type === 'personal'
 
   const onChangeSearch = useCallback(
     ({currentTarget: {value}}) => setFilterUsers(value),
@@ -49,6 +56,11 @@ export const UserProjectDropdown = ({
     }
 
     setIsDropdownVisible((prevState) => !prevState)
+  }
+
+  const handlerAddMember = () => {
+    setIsDropdownVisible(false)
+    openAddMember()
   }
 
   const onChangeUser = (userData) => {
@@ -88,6 +100,7 @@ export const UserProjectDropdown = ({
         type={BUTTON_TYPE.BASIC}
         size={BUTTON_SIZE.SMALL}
         onClick={toggleDropdown}
+        disabled={isPersonalTeam}
       >
         {getImgUser(selectedUser)}
         {selectedUser
@@ -96,15 +109,17 @@ export const UserProjectDropdown = ({
       </Button>
       <div className={`dropdown${isDropdownVisible ? ' open' : ''}`}>
         <ul>
-          <li className="add-new-member" onClick={openAddMember}>
+          <li className="add-new-member" onClick={handlerAddMember}>
             Add new member <IconAdd size={22} />
           </li>
           <li className="search-by-name">
             <Input
               name="searchByName"
+              size={INPUT_SIZE.COMPRESSED}
               placeholder="Search by name"
               value={filterUsers}
               onChange={onChangeSearch}
+              icon={<IconSearch />}
             />
           </li>
           {usersList.length > 0 ? (
@@ -128,6 +143,7 @@ export const UserProjectDropdown = ({
 
 UserProjectDropdown.propTypes = {
   users: PropTypes.array.isRequired,
+  project: PropTypes.object.isRequired,
   openAddMember: PropTypes.func.isRequired,
   changeUser: PropTypes.func.isRequired,
   idAssignee: PropTypes.number,

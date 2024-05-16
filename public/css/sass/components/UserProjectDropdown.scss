@@ -48,7 +48,13 @@
   }
 
   .trigger-button {
-    padding: 10px 10px 10px 4px !important;
+    padding: 10px 10px 10px 3px !important;
+
+    &:disabled {
+      box-shadow: unset !important;
+      border: 1px solid $grey8;
+      color: $grey6 !important;
+    }
   }
 
   .add-new-member {
