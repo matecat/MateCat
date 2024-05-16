@@ -10,7 +10,7 @@
   margin-left: -3% !important;
   //margin-right: -2% !important;
   //box-shadow: 0 1px 20px rgba(0, 0, 0, 0.67);
-  overflow: hidden;
+  //overflow: hidden;
   .outsource-header {
     padding: 5px 35px 5px 40px !important;
     z-index: 1;
@@ -45,21 +45,25 @@
   }
   &.transitionOutsource-enter {
     height: 0;
+    overflow: hidden;
   }
 
   &.showTranslator.transitionOutsource-enter.transitionOutsource-enter-active {
     height: 339px;
     -webkit-transition: all 0.3s ease;
+    overflow: hidden;
   }
 
   &.no-outsource.transitionOutsource-enter.transitionOutsource-enter-active {
     height: 140px;
     -webkit-transition: all 0.3s ease;
+    overflow: hidden;
   }
 
   &.showOutsource.transitionOutsource-enter.transitionOutsource-enter-active {
     height: 505px;
     -webkit-transition: all 0.3s ease;
+    overflow: hidden;
   }
 
   &.transitionOutsource-exit.transitionOutsource-exit-active {
