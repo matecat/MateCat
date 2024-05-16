@@ -48,12 +48,40 @@
   }
 
   .trigger-button {
+    position: relative;
     padding: 10px 10px 10px 3px !important;
+    transition: padding 0.2s ease-out;
+
+    &.not-assignee {
+      box-shadow: unset !important;
+      background-color: transparent !important;
+      border: 1px solid $grey7;
+
+      &:hover {
+        border-color: $translatedBlue;
+        color: $translatedBlue !important;
+      }
+
+      > span {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 0 10px;
+      }
+    }
 
     &:disabled {
       box-shadow: unset !important;
       border: 1px solid $grey8;
       color: $grey6 !important;
+    }
+
+    &:hover:not(:disabled):not(.not-assignee) {
+      padding-right: 32px !important;
+
+      .button-remove-assignee {
+        visibility: visible;
+      }
     }
   }
 
@@ -80,5 +108,23 @@
   .no-results {
     text-align: center;
     color: #9e9e9e;
+  }
+
+  .button-remove-assignee {
+    visibility: hidden;
+    position: absolute;
+    right: 3px;
+    display: flex;
+    width: 24px;
+    height: 24px;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba($grey7, 0.5);
+    border-radius: 50%;
+    color: $white;
+
+    &:hover {
+      background-color: rgba($grey7, 0.7);
+    }
   }
 }

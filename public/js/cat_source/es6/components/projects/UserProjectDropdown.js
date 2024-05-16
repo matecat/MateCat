@@ -6,6 +6,7 @@ import CommonUtils from '../../utils/commonUtils'
 import {INPUT_SIZE, Input} from '../common/Input/Input'
 import IconSearch from '../icons/IconSearch'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper'
+import IconClose from '../icons/IconClose'
 
 export const UserProjectDropdown = ({
   users,
@@ -89,6 +90,14 @@ export const UserProjectDropdown = ({
           new RegExp(filterUsers, 'i').test(user.last_name))),
   )
 
+  const removeAssignee = (event) => {
+    event.stopPropagation()
+    changeUser(-1)
+  }
+
+  const isDisabled = isPersonalTeam
+  const isNotAssignee = !selectedUser
+
   return (
     <div
       ref={wrapperRef}
@@ -96,16 +105,32 @@ export const UserProjectDropdown = ({
     >
       <Button
         testId="project-teams"
-        className={`trigger-button user-project-dropdown${isDropdownVisible ? ' open' : ''}`}
+        className={`trigger-button user-project-dropdown${isDropdownVisible ? ' open' : ''}${isNotAssignee ? ' not-assignee' : ''}`}
         type={BUTTON_TYPE.BASIC}
         size={BUTTON_SIZE.SMALL}
         onClick={toggleDropdown}
-        disabled={isPersonalTeam}
+        disabled={isDisabled}
       >
-        {getImgUser(selectedUser)}
-        {selectedUser
-          ? `${selectedUser.user.first_name} ${selectedUser.user.last_name}`
-          : 'Not assigned'}
+        {!isNotAssignee ? (
+          <>
+            {getImgUser(selectedUser)}
+            {selectedUser
+              ? `${selectedUser.user.first_name} ${selectedUser.user.last_name}`
+              : 'Not assigned'}
+            {!isDisabled && (
+              <div className="button-remove-assignee" onClick={removeAssignee}>
+                <IconClose />
+              </div>
+            )}
+          </>
+        ) : (
+          <>
+            <span>
+              <i className="icon-user22" />
+              Not assignee
+            </span>
+          </>
+        )}
       </Button>
       <div className={`dropdown${isDropdownVisible ? ' open' : ''}`}>
         <ul>

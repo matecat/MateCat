@@ -40,7 +40,6 @@ class ProjectContainer extends React.Component {
     this.projectTeam = this.props.teams.find(
       (team) => team.get('id') === this.props.project.get('id_team'),
     )
-    this.dropdownUsersInitialized = false
     this.lastActivityController
   }
 
@@ -82,46 +81,6 @@ class ProjectContainer extends React.Component {
         }
         CatToolActions.addNotification(notification)
       }
-    }
-  }
-
-  initDropdowns() {
-    if (this.dropdownUsers && !this.dropdownUsersInitialized) {
-      if (this.props.project.get('id_assignee')) {
-        $(this.dropdownUsers).dropdown(
-          'set selected',
-          this.props.project.get('id_assignee'),
-        )
-      }
-      $(this.dropdownUsers).dropdown({
-        fullTextSearch: 'exact',
-        onChange: (value) => {
-          this.changeUser(value)
-          if (value !== '-1') this.setStyleUserDropDown(true)
-        },
-      })
-      if (this.projectTeam.get('type') == 'personal') {
-        this.dropdownUsers.classList.add('disabled')
-      } else {
-        this.dropdownUsers.classList.remove('disabled')
-      }
-      this.dropdownUsersInitialized = true
-    }
-
-    if (this.dropdownUsers)
-      this.setStyleUserDropDown(!!this.props.project.get('id_assignee'))
-  }
-
-  setStyleUserDropDown(hasAssigned) {
-    if (hasAssigned) {
-      this.dropdownUsers.classList.remove('project-not-assigned')
-      this.dropdownUsers.classList.add('project-assignee')
-      this.dropdownUsers.classList.add('shadow-1')
-    } else {
-      $(this.dropdownUsers).dropdown('set selected', -1)
-      this.dropdownUsers.classList.remove('project-assignee')
-      this.dropdownUsers.classList.remove('shadow-1')
-      this.dropdownUsers.classList.add('project-not-assigned')
     }
   }
 
@@ -193,7 +152,6 @@ class ProjectContainer extends React.Component {
       this.projectTeam = this.props.teams.find(
         (team) => parseInt(team.get('id')) === parseInt(value),
       )
-      this.dropdownUsersInitialized = false
       this.forceUpdate()
     }
   }
@@ -482,78 +440,6 @@ class ProjectContainer extends React.Component {
         }}
       />
     )
-
-    var self = this
-    let members = users.map(function (member) {
-      let user = member.get('user')
-      let userIcon = (
-        <a className="ui circular label">
-          {CommonUtils.getUserShortName(member.get('user').toJS())}
-        </a>
-      )
-      if (member.get('user_metadata')) {
-        userIcon = (
-          <img
-            className="ui avatar image ui-user-dropdown-image"
-            src={member.get('user_metadata').get('gplus_picture') + '?sz=80'}
-          />
-        )
-      }
-      return (
-        <div
-          className="item"
-          data-value={user.get('uid')}
-          key={'user' + user.get('uid')}
-        >
-          {userIcon}
-          <span className="user-name-dropdown">
-            {user.get('first_name') + ' ' + user.get('last_name')}
-          </span>
-        </div>
-      )
-    })
-
-    return (
-      <div
-        className={'ui dropdown top right pointing'}
-        ref={(dropdownUsers) => (this.dropdownUsers = dropdownUsers)}
-      >
-        <span className="text">
-          <div className="ui not-assigned label">
-            <i className="icon-user22" />
-          </div>
-          Not assigned
-        </span>
-        <div
-          className="ui cancel label"
-          onClick={self.changeUser.bind(self, '-1')}
-        >
-          <i className="icon-cancel3" />
-        </div>
-
-        <div className="menu">
-          <div className="header" onClick={this.openAddMember.bind(this)}>
-            <a href="#">
-              Add New Member <i className="icon-plus3 icon right" />
-            </a>
-          </div>
-          <div className="divider"></div>
-          <div className="ui icon search input">
-            <i className="icon-search icon" />
-            <input type="text" name="UserName" placeholder="Search by name." />
-          </div>
-          <div className="scrolling menu">
-            {members}
-            <div className="item cancel-item" data-value="-1">
-              <div className="ui not-assigned label">
-                <i className="icon-user22" />
-              </div>
-              Not assigned
-            </div>
-          </div>
-        </div>
-      </div>
-    )
   }
 
   /**
@@ -627,16 +513,7 @@ class ProjectContainer extends React.Component {
     )
   }
 
-  componentDidUpdate() {
-    this.initDropdowns()
-  }
-
   componentDidMount() {
-    $(this.dropdown).dropdown({
-      direction: 'downward',
-    })
-    this.initDropdowns()
-
     this.getLastAction()
 
     ProjectsStore.addListener(ManageConstants.HIDE_PROJECT, this.hideProject)
