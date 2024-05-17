@@ -38,7 +38,7 @@ export const ApplicationWrapper = ({children}) => {
 
   const checkGlobalMassages = () => {
     if (config.global_message) {
-      var messages = JSON.parse(config.global_message)
+      const messages = JSON.parse(config.global_message)
       messages.forEach((elem) => {
         if (
           typeof Cookies.get('msg-' + elem.token) == 'undefined' &&
@@ -47,7 +47,7 @@ export const ApplicationWrapper = ({children}) => {
           const notification = {
             title: 'Notice',
             text: elem.msg,
-            type: 'warning',
+            type: elem.level ? elem.level : 'warning',
             autoDismiss: false,
             position: 'bl',
             allowHtml: true,
