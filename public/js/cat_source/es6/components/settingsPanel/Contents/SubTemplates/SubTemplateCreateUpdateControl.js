@@ -3,13 +3,36 @@ import {SUBTEMPLATE_MODIFIERS, SubTemplatesContext} from './SubTemplate'
 import Checkmark from '../../../../../../../img/icons/Checkmark'
 import IconClose from '../../../icons/IconClose'
 import {BUTTON_SIZE, BUTTON_TYPE, Button} from '../../../common/Button/Button'
+import CatToolActions from '../../../../actions/CatToolActions'
 
 export const SubTemplateCreateUpdateControl = () => {
-  const {templateName, templateModifier, updateNameBehaviour, createTemplate} =
-    useContext(SubTemplatesContext)
+  const {
+    templates,
+    currentTemplate,
+    templateName,
+    templateModifier,
+    updateNameBehaviour,
+    createTemplate,
+  } = useContext(SubTemplatesContext)
 
   const create = () => createTemplate.current()
-  const updateName = () => updateNameBehaviour.current.confirm()
+  const updateName = () => {
+    if (
+      templates
+        .filter(({id}) => id !== currentTemplate.id)
+        .some(({name}) => name.toLowerCase() === templateName.toLowerCase())
+    ) {
+      // template name already exists
+      CatToolActions.addNotification({
+        title: 'Duplicated name',
+        type: 'error',
+        text: 'This name is already in use, please choose a different one',
+        position: 'br',
+      })
+    } else {
+      updateNameBehaviour.current.confirm()
+    }
+  }
   const cancel = () => updateNameBehaviour.current.cancel()
 
   return (
