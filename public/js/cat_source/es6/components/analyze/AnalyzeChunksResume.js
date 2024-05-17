@@ -147,7 +147,7 @@ class AnalyzeChunksResume extends React.Component {
     return (
       <div
         className={`open-translate ui primary button open ${
-          status === ANALYSIS_STATUS.NEW ? 'disabled' : ''
+          status !== ANALYSIS_STATUS.DONE ? 'disabled' : ''
         }`}
         onClick={(e) => {
           this.goToTranslate(chunk, index, e)
