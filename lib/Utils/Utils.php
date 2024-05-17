@@ -190,16 +190,20 @@ class Utils {
 
         foreach ($ids as $id){
             $element = $redis->get('global_message_list_element_'.$id);
-            $ttl = $redis->ttl('global_message_list_element_'.$id);
 
-            if($ttl > 0){
+            if($element !== null){
+                $element = unserialize($element);
+
                 $resObject = [
-                    'msg'    => $element,
-                    'token'  => md5( $element ),
-                    'expire' => ( new DateTime( "+".$ttl." seconds" ) )->format( DateTime::W3C )
+                    'msg'    => $element['message'],
+                    'level'  => $element['level'],
+                    'token'  => md5( $element['message'] ),
+                    'expire' => ( new DateTime( $element['expire'] ) )->format( DateTime::W3C )
                 ];
 
                 $retStrings[] = $resObject;
+            } else {
+                $redis->srem('global_message_list_ids', $id);
             }
         }
 
