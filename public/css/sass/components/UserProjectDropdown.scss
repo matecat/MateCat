@@ -1,6 +1,8 @@
 @import '../commons/colors';
 
 .user-project-dropdown-container {
+  position: relative;
+
   .dropdown {
     position: absolute;
     visibility: hidden;
@@ -8,9 +10,9 @@
     background-color: white;
     margin-top: 5px;
     padding: 5px;
-    min-width: 200px;
-    right: 70px;
-    max-height: 320px;
+    min-width: 250px;
+    right: 0;
+    max-height: 450px;
     overflow: auto;
     opacity: 0;
     transition: opacity 0.2s linear;
@@ -102,6 +104,10 @@
   .search-by-name {
     &:hover {
       background-color: unset !important;
+    }
+
+    .input-component {
+      width: 100%;
     }
   }
 
