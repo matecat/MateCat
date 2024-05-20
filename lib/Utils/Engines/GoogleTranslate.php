@@ -26,10 +26,10 @@ class Engines_GoogleTranslate extends Engines_AbstractEngine {
 
     /**
      * @param $rawValue
-     *
-     * @return array
+     * @param array $params
+     * @return array|Engines_Results_MT|mixed
      */
-    protected function _decode( $rawValue ) {
+    protected function _decode( $rawValue, array $params = [] ) {
 
         $all_args =  func_get_args();
         $all_args[ 1 ][ 'text' ] = $all_args[ 1 ][ 'q' ];

@@ -37,10 +37,11 @@ class Engines_Apertium extends Engines_AbstractEngine {
 
     /**
      * @param $rawValue
-     *
-     * @return array
+     * @param array $params
+     * @return array|Engines_Results_MT
+     * @throws Exception
      */
-    protected function _decode( $rawValue ){
+    protected function _decode( $rawValue, array $params = [] ){
         $all_args =  func_get_args();
 
         if( is_string( $rawValue ) ) {

@@ -25,7 +25,7 @@ class DeepLStruct extends EnginesModel_EngineStruct
     /**
      * @var string
      */
-    public $translate_relative_url = "translate";
+    public $translate_relative_url = "v1/translate";
 
     /**
      * @var array

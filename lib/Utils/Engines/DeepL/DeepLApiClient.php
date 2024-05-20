@@ -18,7 +18,7 @@ class DeepLApiClient
      */
     public static function newInstance($apiKey)
     {
-        return new static($apiKey );
+        return new static($apiKey);
     }
 
     /**

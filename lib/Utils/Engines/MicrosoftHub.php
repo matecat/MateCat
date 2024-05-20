@@ -79,7 +79,7 @@ TAG;
         ];
     }
 
-    protected function _decode( $rawValue ) {
+    protected function _decode( $rawValue, array $params = [] ) {
 
         $all_args = func_get_args();
 

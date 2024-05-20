@@ -26,43 +26,20 @@ class Engines_DeepL extends Engines_AbstractEngine
 
     /**
      * @param $rawValue
+     * @param array $params
      * @return array
      */
-    protected function _decode($rawValue)
+    protected function _decode($rawValue, array $params = [])
     {
-        \Log::doJsonLog("PIPPO" . json_encode($rawValue));
+        $rawValue = json_decode($rawValue, true);
+        $translation = $rawValue['translations'][0]['text'];
+        $source = $params['source_lang'];
+        $target = $params['target_lang'];
+        $segment = $params['text'][0];
 
-        $a = 333;
-        $a = 333;
-        $a = 333;
-        $a = 333;
-        $a = 333;
-        $a = 333;
-        $a = 333;
+        $response = new Engines_Results_DeepL_TranslateResponse($translation, $source, $target, $segment);
 
-        return [
-//            'id' => 0,
-//            'create_date' => '0000-00-00',
-//            'segment' => $_config['segment'],
-//            'raw_segment' => $_config['segment'],
-//            'translation' => $translation,
-//            'source_note' => '',
-//            'target_note' => '',
-//            'raw_translation' => $translation,
-//            'quality' => 85,
-//            'reference' => '',
-//            'usage_count' => 0,
-//            'subject' => '',
-//            'created_by' => 'MT-DeepL',
-//            'last_updated_by' => '',
-//            'last_update_date' => '',
-//            'match' => 'MT-DeepL',
-//            'memory_key' => '',
-//            'ICE' => false,
-//            'tm_properties' => [],
-//            'target' => $_config['target'],
-//            'source' => $_config['source'],
-        ];
+        return $response->toJson();
     }
 
     /**
@@ -75,11 +52,13 @@ class Engines_DeepL extends Engines_AbstractEngine
             $target = explode("-", $_config['target']);
 
             $parameters = [
-                'segment' => $_config['segment'],
-                'source' => $source[0],
-                'target' => $target[0],
+                'text' => [
+                    $_config['segment'],
+                ],
+                'source_lang' => $source[0],
+                'target_lang' => $target[0],
                 'formality' => ($_config['formality'] ? $_config['formality'] : null),
-                'idGlossary' => ($_config['idGlossary'] ? $_config['idGlossary'] : null)
+                'glossary_id' => ($_config['idGlossary'] ? $_config['idGlossary'] : null)
             ];
 
             $headers = [
@@ -88,11 +67,15 @@ class Engines_DeepL extends Engines_AbstractEngine
             ];
 
             $this->_setAdditionalCurlParams(
-                array(
+                [
                     CURLOPT_POST => true,
                     CURLOPT_POSTFIELDS => json_encode($parameters),
-                    CURLOPT_HTTPHEADER => $headers
-                )
+                    CURLOPT_HTTPHEADER => $headers,
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_HEADER         => false,
+                    CURLOPT_SSL_VERIFYPEER => true,
+                    CURLOPT_SSL_VERIFYHOST => 2
+                ]
             );
 
             $this->call("translate_relative_url", $parameters, true);

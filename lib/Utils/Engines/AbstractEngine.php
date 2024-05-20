@@ -137,7 +137,7 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
         }
     }
 
-    abstract protected function _decode( $rawValue );
+    abstract protected function _decode( $rawValue, array $params = [] );
 
     public function _call( $url, Array $curl_options = array() ) {
 
@@ -234,7 +234,7 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
          * 
          * Pass the called $function also
         */
-        $this->result = $this->_decode( $rawValue );
+        $this->result = $this->_decode( $rawValue, $parameters );
 
     }
 
