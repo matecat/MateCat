@@ -17,7 +17,7 @@ export const changeJobPassword = async (
   const params = {
     id: job.id,
     password: password,
-    old_password: old_pass,
+    new_password: old_pass,
     revision_number,
     undo: undo,
   }
