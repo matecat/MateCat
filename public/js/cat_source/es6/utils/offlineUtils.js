@@ -177,7 +177,7 @@ const OfflineUtils = {
     callback_to_execute = callback_to_execute || {}
     callback_to_execute.call()
     //console.log(UI.abortedOperations);
-    $.each(this.abortedOperations, function () {
+    this.abortedOperations.forEach(() => {
       var args = this.args
       var operation = this.operation
       if (operation === 'getSegments') {

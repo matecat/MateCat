@@ -10,6 +10,7 @@ import {
   REVISE_STEP_NUMBER,
   SEGMENTS_STATUS,
 } from '../../constants/Constants'
+import SegmentUtils from '../../utils/segmentUtils'
 
 class ReviewExtendedIssuePanel extends React.Component {
   static contextType = SegmentContext
@@ -88,7 +89,8 @@ class ReviewExtendedIssuePanel extends React.Component {
         config.revisionNumber === REVISE_STEP_NUMBER.REVISE1
           ? SEGMENTS_STATUS.APPROVED
           : SEGMENTS_STATUS.APPROVED2
-      setTranslation({segment})
+      const requestObject = SegmentUtils.createSetTranslationRequest(segment)
+      setTranslation(requestObject)
         .then((response) => {
           issue.version = response.translation.version_number
           SegmentActions.setStatus(segment.sid, segment.id_file, segment.status)

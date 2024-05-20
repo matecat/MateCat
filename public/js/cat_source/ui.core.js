@@ -14,6 +14,7 @@ import {setTranslation} from './es6/api/setTranslation'
 import AlertModal from './es6/components/modals/AlertModal'
 import ModalsActions from './es6/actions/ModalsActions'
 import {SEGMENTS_STATUS} from './es6/constants/Constants'
+import SegmentUtils from './es6/utils/segmentUtils'
 
 window.UI = {
   cacheObjects: function (editarea_or_segment) {
@@ -325,19 +326,6 @@ window.UI = {
       }
     })
   },
-  // checkVersion: function () {
-  //   if (this.version != config.build_number) {
-  //     var notification = {
-  //       uid: 'checkVersion',
-  //       title: 'New version of Matecat',
-  //       text: 'A new version of Matecat has been released. Please <a href="#" class="reloadPage">click here</a> or press CTRL+F5 (or CMD+R on Mac) to update.',
-  //       type: 'warning',
-  //       allowHtml: true,
-  //       position: 'bl',
-  //     }
-  //     CatToolActions.addNotification(notification)
-  //   }
-  // },
   registerQACheck: function () {
     clearTimeout(UI.pendingQACheck)
     UI.pendingQACheck = setTimeout(function () {
@@ -446,66 +434,25 @@ window.UI = {
   },
 
   execSetTranslation: function (options, callback_to_execute) {
-    var id_segment = options.id_segment
-    var status = options.status
-    var propagate = options.propagate
-    var sourceSegment, translation
+    const id_segment = options.id_segment
+    const status = options.status
+    const propagate = options.propagate
     this.executingSetTranslation.push(id_segment)
-    var reqArguments = arguments
     let segment = SegmentStore.getSegmentByIdToJS(id_segment)
 
     this.lastTranslatedSegmentId = id_segment
 
-    try {
-      // Attention, to be modified when we will lock tags
-      translation = segment.translation
-      sourceSegment = segment.updatedSource
-    } catch (e) {
-      var indexSegment = UI.executingSetTranslation.indexOf(id_segment)
-      if (indexSegment > -1) {
-        UI.executingSetTranslation.splice(indexSegment, 1)
-      }
-      return false
-    }
-    if (translation === '') {
-      this.unsavedSegmentsToRecover.push(this.currentSegmentId)
-      var index = this.executingSetTranslation.indexOf(id_segment)
-      if (index > -1) {
-        this.executingSetTranslation.splice(index, 1)
-      }
-      return false
-    }
-
-    var isSplitted = segment.splitted
-    if (isSplitted) {
-      translation = this.collectSplittedTranslations(segment.original_sid)
-      sourceSegment = this.collectSplittedTranslations(
-        segment.original_sid,
-        '.source',
-      )
-    }
-    let requestArgs = {
+    const translateRequest = SegmentUtils.createSetTranslationRequest(
       segment,
-      status: status,
-      translation: translation,
-      source: sourceSegment,
-      chosenSuggestionIndex: segment.choosenSuggestionIndex,
-      propagate: propagate,
-    }
-    if (isSplitted) {
-      SegmentActions.setStatus(segment.original_sid, null, status)
-      requestArgs.splitStatuses = this.collectSplittedStatuses(
-        segment.original_sid,
-        segment.sid,
-        status,
-      ).toString()
-    }
+      status,
+      propagate,
+    )
 
     if (callback_to_execute) {
       callback_to_execute.call(this)
     }
 
-    setTranslation(requestArgs)
+    setTranslation(translateRequest)
       .then((data) => {
         const idSegment = options.id_segment
         SegmentActions.setChoosenSuggestion(idSegment, null)
@@ -542,25 +489,11 @@ window.UI = {
         } else {
           UI.addToSetTranslationTail(options)
           OfflineUtils.changeStatusOffline(idSegment)
-          OfflineUtils.failedConnection(reqArguments, 'setTranslation')
+          OfflineUtils.failedConnection(translateRequest, 'setTranslation')
           OfflineUtils.decrementOfflineCacheRemaining()
         }
         SegmentActions.setSegmentSaving(id_segment, false)
       })
-  },
-
-  collectSplittedStatuses: function (sid, splittedSid, status) {
-    var statuses = []
-    var segments = SegmentStore.getSegmentsInSplit(sid)
-    $.each(segments, function () {
-      var segment = SegmentStore.getSegmentByIdToJS(this.sid)
-      if (splittedSid === this.sid) {
-        statuses.push(status)
-      } else {
-        statuses.push(segment.status)
-      }
-    })
-    return statuses
   },
   /**
    *
