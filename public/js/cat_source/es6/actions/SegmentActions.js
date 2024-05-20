@@ -11,7 +11,9 @@ import TranslationMatches from '../components/segments/utils/translationMatches'
 import OfflineUtils from '../utils/offlineUtils'
 import CommonUtils from '../utils/commonUtils'
 import SegmentUtils from '../utils/segmentUtils'
-import CopySourceModal from '../components/modals/CopySourceModal'
+import CopySourceModal, {
+  COPY_SOURCE_COOKIE,
+} from '../components/modals/CopySourceModal'
 import CatToolActions from './CatToolActions'
 import ConfirmMessageModal from '../components/modals/ConfirmMessageModal'
 import {getGlossaryForSegment} from '../api/getGlossaryForSegment'
@@ -549,12 +551,8 @@ const SegmentActions = {
     }
   },
   copyAllSources: function () {
-    if (
-      typeof Cookies.get(
-        'source_copied_to_target-' + config.id_job + '-' + config.password,
-      ) == 'undefined'
-    ) {
-      var props = {
+    if (!sessionStorage.getItem(COPY_SOURCE_COOKIE)) {
+      const props = {
         confirmCopyAllSources: SegmentActions.continueCopyAllSources.bind(this),
         abortCopyAllSources: SegmentActions.abortCopyAllSources.bind(this),
       }
