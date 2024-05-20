@@ -27,7 +27,7 @@ export const changeJobPassword = async (
     formData.append(key, params[key])
   })
   const response = await fetch(
-    `${getMatecatApiDomain()}?action=changePassword`,
+    `${getMatecatApiDomain()}api/app/change-password`,
     {
       method: 'POST',
       credentials: 'include',
