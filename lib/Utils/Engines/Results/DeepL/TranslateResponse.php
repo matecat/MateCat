@@ -41,7 +41,7 @@ class Engines_Results_DeepL_TranslateResponse
         $this->created_by = 'MT-DeepL';
         $this->last_updated_by = '';
         $this->last_update_date = '';
-        $this->match = 'MT-DeepL';
+        $this->match = 85;
         $this->memory_key = '';
         $this->ICE = false;
         $this->tm_properties = [];
