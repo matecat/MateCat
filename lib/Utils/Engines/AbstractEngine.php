@@ -234,7 +234,7 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
          * 
          * Pass the called $function also
         */
-        $this->result = $this->_decode( $rawValue, $parameters, $function );
+        $this->result = $this->_decode( $rawValue );
 
     }
 

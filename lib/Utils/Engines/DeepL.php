@@ -24,9 +24,45 @@ class Engines_DeepL extends Engines_AbstractEngine
         return DeepLApiClient::newInstance($this->apiKey);
     }
 
+    /**
+     * @param $rawValue
+     * @return array
+     */
     protected function _decode($rawValue)
     {
-        throw new DomainException("Method " . __FUNCTION__ . " not implemented.");
+        \Log::doJsonLog("PIPPO" . json_encode($rawValue));
+
+        $a = 333;
+        $a = 333;
+        $a = 333;
+        $a = 333;
+        $a = 333;
+        $a = 333;
+        $a = 333;
+
+        return [
+//            'id' => 0,
+//            'create_date' => '0000-00-00',
+//            'segment' => $_config['segment'],
+//            'raw_segment' => $_config['segment'],
+//            'translation' => $translation,
+//            'source_note' => '',
+//            'target_note' => '',
+//            'raw_translation' => $translation,
+//            'quality' => 85,
+//            'reference' => '',
+//            'usage_count' => 0,
+//            'subject' => '',
+//            'created_by' => 'MT-DeepL',
+//            'last_updated_by' => '',
+//            'last_update_date' => '',
+//            'match' => 'MT-DeepL',
+//            'memory_key' => '',
+//            'ICE' => false,
+//            'tm_properties' => [],
+//            'target' => $_config['target'],
+//            'source' => $_config['source'],
+        ];
     }
 
     /**
@@ -38,60 +74,34 @@ class Engines_DeepL extends Engines_AbstractEngine
             $source = explode("-", $_config['source']);
             $target = explode("-", $_config['target']);
 
-            $client = $this->_getClient();
-            $result = $client->translate(
-                $_config['segment'],
-                $source[0],
-                $target[0],
-                $_config['formality'] ? $_config['formality'] : null,
-                $_config['idGlossary'] ? $_config['idGlossary'] : null
+            $parameters = [
+                'segment' => $_config['segment'],
+                'source' => $source[0],
+                'target' => $target[0],
+                'formality' => ($_config['formality'] ? $_config['formality'] : null),
+                'idGlossary' => ($_config['idGlossary'] ? $_config['idGlossary'] : null)
+            ];
+
+            $headers = [
+                'Authorization: DeepL-Auth-Key ' . $this->apiKey,
+                'Content-Type: application/json'
+            ];
+
+            $this->_setAdditionalCurlParams(
+                array(
+                    CURLOPT_POST => true,
+                    CURLOPT_POSTFIELDS => json_encode($parameters),
+                    CURLOPT_HTTPHEADER => $headers
+                )
             );
 
-            return $this->formatMatches($_config, $result);
+            $this->call("translate_relative_url", $parameters, true);
+
+            return $this->result;
 
         } catch (Exception $e) {
             return $this->GoogleTranslateFallback($_config);
         }
-    }
-
-    /**
-     * @param $_config
-     * @param $result
-     * @return array
-     */
-    private function formatMatches($_config, $result)
-    {
-        $matches = [];
-
-        if (!isset($result['translations'])) {
-            return $matches;
-        }
-
-        $translation = $result['translations'][0]['text'];
-
-        return [
-            'id' => 0,
-            'create_date' => '0000-00-00',
-            'segment' => $_config['segment'],
-            'raw_segment' => $_config['segment'],
-            'translation' => $translation,
-            'source_note' => '',
-            'target_note' => '',
-            'raw_translation' => $translation,
-            'quality' => 85,
-            'reference' => '',
-            'usage_count' => 0,
-            'subject' => '',
-            'created_by' => 'MT-DeepL',
-            'last_updated_by' => '',
-            'last_update_date' => '',
-            'match' => 85,
-            'memory_key' => '',
-            'ICE' => false,
-            'tm_properties' => [],
-            'target' => $_config['target'],
-            'source' => $_config['source'],
-        ];
     }
 
     /**
