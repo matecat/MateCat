@@ -195,7 +195,14 @@ AppDispatcher.register(function (action) {
       CatToolStore.emitChange(CatToolConstants.REMOVE_ALL_NOTIFICATION)
       break
     case ModalsConstants.SHOW_MODAL: {
-      const {component, props, title, style, onCloseCallback} = action
+      const {
+        component,
+        props,
+        title,
+        style,
+        onCloseCallback,
+        isCloseButtonDisabled,
+      } = action
       CatToolStore.emitChange(
         ModalsConstants.SHOW_MODAL,
         component,
@@ -203,6 +210,7 @@ AppDispatcher.register(function (action) {
         title,
         style,
         onCloseCallback,
+        isCloseButtonDisabled,
       )
       break
     }
