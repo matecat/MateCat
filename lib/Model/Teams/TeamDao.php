@@ -105,6 +105,7 @@ class TeamDao extends \DataAccess_AbstractDao {
         $orgId          = TeamDao::insertStruct( $teamStruct );
         $teamStruct->id = $orgId;
 
+
         //add the creator to the list of members
         $params[ 'members' ][] = $orgCreatorUser->email;
 
@@ -112,6 +113,9 @@ class TeamDao extends \DataAccess_AbstractDao {
         if(false === Database::obtain()->getConnection()->inTransaction()){
             Database::obtain()->getConnection()->beginTransaction();
         }
+
+        // get fresh cache from the master database
+        ( new TeamDao() )->setCacheTTL( 60 * 60 * 24 )->findById( $teamStruct->id );
 
         $membersList = ( new MembershipDao )->createList( [
                 'team'    => $teamStruct,
