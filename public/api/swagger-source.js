@@ -590,22 +590,15 @@ var spec = {
         parameters: [
           {
             name: 'id_job',
-            description: 'The id of the job',
+            description: 'The id of the job you intend to generate the Revise 2 step for',
             required: true,
             type: 'string',
           },
           {
             name: 'password',
-            description: 'The password of the job',
+            description: 'The password of the job you intend to generate the Revise 2 step for',
             required: true,
             type: 'string',
-          },
-          {
-            name: 'review_password',
-            description: 'The number of review password (use 2 for create a second pass review)',
-            required: true,
-            type: 'integer',
-            example: 2
           },
         ],
         responses: {
