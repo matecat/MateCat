@@ -80,7 +80,7 @@ class ChangePasswordController extends ChunkController
             $this->response->json( [
                 'id'         => $id,
                 'new_pwd'    => $new_pwd,
-                'actual_pwd' => $actual_pwd,
+                'old_pwd' => $actual_pwd,
             ] );
             exit();
 
