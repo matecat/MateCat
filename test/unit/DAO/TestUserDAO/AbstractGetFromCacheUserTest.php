@@ -46,7 +46,7 @@ class AbstractGetFromCacheUserTest extends AbstractTest {
 
         $this->cache_con = $this->reflector->getProperty( "cache_con" );
         $this->cache_con->setAccessible( true );
-        $this->cache_con->setValue( $this->user_Dao, new Predis\Client( INIT::$REDIS_SERVERS ) );
+        $this->cache_con->setValue( $this->user_Dao, ( new RedisHandler() )->getConnection() );
 
         $this->cache_TTL = $this->reflector->getProperty( "cacheTTL" );
         $this->cache_TTL->setAccessible( true );

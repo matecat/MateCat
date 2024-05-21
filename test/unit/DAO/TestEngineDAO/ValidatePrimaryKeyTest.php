@@ -33,16 +33,17 @@ class ValidatePrimaryKeyTest extends AbstractTest
 
     /**
      * It checks that 'id' and 'uid' aren't null values.
+     * Test that no exceptions are thrown
      * @group regression
      * @covers EnginesModel_EngineDAO::_validatePrimaryKey
+     * @doesNotPerformAssertions
      */
-    public function test__validatePrimaryKey_valid_fields()
-    {
+    public function test__validatePrimaryKey_valid_fields() {
 
-        $this->engine_struct_param->id = 33;
+        $this->engine_struct_param->id  = 33;
         $this->engine_struct_param->uid = 1;
 
-        $this->method->invoke($this->reflectedClass, $this->engine_struct_param);
+        $this->method->invoke( $this->reflectedClass, $this->engine_struct_param );
     }
 
 

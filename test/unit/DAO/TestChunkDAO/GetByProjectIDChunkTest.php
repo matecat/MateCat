@@ -53,16 +53,15 @@ class GetByProjectIdChunkTest extends AbstractTest {
                     ( password, id_project, job_first_segment, job_last_segment, id_translator, tm_keys, 
                     job_type, source, target, total_time_to_edit, only_private_tm, last_opened_segment, id_tms, id_mt_engine, 
                     create_date, last_update, disabled, owner, status_owner, status_translator, status, completed, new_words, 
-                    draft_words, translated_words, approved_words, rejected_words, subject, payable_rates, revision_stats_typing_min, 
-                    revision_stats_translations_min, revision_stats_terminology_min, revision_stats_language_quality_min, revision_stats_style_min, 
-                    revision_stats_typing_maj, revision_stats_translations_maj, revision_stats_terminology_maj, revision_stats_language_quality_maj, 
-                    revision_stats_style_maj, dqf_key, avg_post_editing_effort, total_raw_wc ) VALUES (
+                    draft_words, translated_words, approved_words, rejected_words, subject, payable_rates, avg_post_editing_effort, total_raw_wc,
+                     `approved2_words`, `new_raw_words`, `draft_raw_words`, `translated_raw_words`, `approved_raw_words`, `approved2_raw_words`, `rejected_raw_words`
+                     )  VALUES (
                               '92c5e0ce9316', " . $this->project[ 'id' ] . ", '4564373', '4564383', '', 
                               '[{\"tm\":true,\"glos\":true,\"owner\":true,\"uid_transl\":null,\"uid_rev\":null,\"name\":\"2nd pass\",\"key\":\"XXXXXXXXXXXX\",\"r\":true,\"w\":true,\"r_transl\":null,\"w_transl\":null,\"r_rev\":null,\"w_rev\":null,\"source\":null,\"target\":null}]', 
                               NULL, 'en-GB', 'it-IT', '0', '0', NULL, '1', '1', '2019-06-21 15:22:14', '2019-06-21 15:23:30', '0', 
                               'domenico@translated.net', 'active', NULL, 'active', '0', '36.00', '9.00', '0.00', '0.00', '0.00', 'general', 
                               '{\"NO_MATCH\":100,\"50 % -74 % \":100,\"75 % -84 % \":60,\"85 % -94 % \":60,\"95 % -99 % \":60,\"100 % \":30,\"100 % _PUBLIC\":30,\"REPETITIONS\":30,\"INTERNAL\":60,\"MT\":80}', 
-                              '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', NULL, '0', '150'
+                              '0', '150', 0,0,0,0,0,0,0
                     )"
         );
         $this->job = new Jobs_JobStruct( $this->database_instance->getConnection()->query( "SELECT * FROM jobs LIMIT 1" )->fetch() );
@@ -109,16 +108,6 @@ class GetByProjectIdChunkTest extends AbstractTest {
         $this->assertEquals( $this->job[ 'rejected_words' ], $result[ 'rejected_words' ] );
         $this->assertEquals( $this->job[ 'subject' ], $result[ 'subject' ] );
         $this->assertEquals( $this->job[ 'payable_rates' ], $result[ 'payable_rates' ] );
-        $this->assertEquals( $this->job[ 'revision_stats_typing_min' ], $result[ 'revision_stats_typing_min' ] );
-        $this->assertEquals( $this->job[ 'revision_stats_translations_min' ], $result[ 'revision_stats_translations_min' ] );
-        $this->assertEquals( $this->job[ 'revision_stats_terminology_min' ], $result[ 'revision_stats_terminology_min' ] );
-        $this->assertEquals( $this->job[ 'revision_stats_language_quality_min' ], $result[ 'revision_stats_language_quality_min' ] );
-        $this->assertEquals( $this->job[ 'revision_stats_style_min' ], $result[ 'revision_stats_style_min' ] );
-        $this->assertEquals( $this->job[ 'revision_stats_typing_maj' ], $result[ 'revision_stats_typing_maj' ] );
-        $this->assertEquals( $this->job[ 'revision_stats_translations_maj' ], $result[ 'revision_stats_translations_maj' ] );
-        $this->assertEquals( $this->job[ 'revision_stats_terminology_maj' ], $result[ 'revision_stats_terminology_maj' ] );
-        $this->assertEquals( $this->job[ 'revision_stats_language_quality_maj' ], $result[ 'revision_stats_language_quality_maj' ] );
-        $this->assertEquals( $this->job[ 'revision_stats_style_maj' ], $result[ 'revision_stats_style_maj' ] );
         $this->assertEquals( $this->job[ 'total_raw_wc' ], $result[ 'total_raw_wc' ] );
 
     }

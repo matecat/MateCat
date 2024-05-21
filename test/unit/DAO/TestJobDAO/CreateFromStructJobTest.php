@@ -74,16 +74,6 @@ class CreateFromStructJobTest extends AbstractTest {
                         'rejected_words'                      => "0.00",
                         'subject'                             => "general",
                         'payable_rates'                       => '{"NO_MATCH":100,"50%-74%":100,"75%-84%":60,"85%-94%":60,"95%-99%":60,"100%":30,"100%_PUBLIC":30,"REPETITIONS":30,"INTERNAL":60,"MT":85}',
-                        'revision_stats_typing_min'           => "0",
-                        'revision_stats_translations_min'     => "0",
-                        'revision_stats_terminology_min'      => "0",
-                        'revision_stats_language_quality_min' => "0",
-                        'revision_stats_style_min'            => "0",
-                        'revision_stats_typing_maj'           => "0",
-                        'revision_stats_translations_maj'     => "0",
-                        'revision_stats_terminology_maj'      => "0",
-                        'revision_stats_language_quality_maj' => "0",
-                        'revision_stats_style_maj'            => "0",
                         'total_raw_wc'                        => "1",
                         'validator'                           => "xxxx"
                 ]
@@ -95,9 +85,12 @@ class CreateFromStructJobTest extends AbstractTest {
 
     }
 
+    /**
+     * @throws ReflectionException
+     */
     public function tearDown() {
         $this->database_instance->getConnection()->query( $this->sql_delete_job );
-        $this->cache = new Predis\Client( INIT::$REDIS_SERVERS );
+        $this->cache = ( new RedisHandler() )->getConnection();
         $this->cache->flushdb();
         parent::tearDown();
     }
@@ -109,7 +102,7 @@ class CreateFromStructJobTest extends AbstractTest {
     public function test_createFromStructsJob() {
 
         $result   = $this->job_Dao->createFromStruct( $this->job_struct );
-        $this->id = $this->getTheLastInsertIdByQuery($this->database_instance);
+        $this->id = $this->getTheLastInsertIdByQuery( $this->database_instance );
 
         $this->sql_delete_job = "DELETE FROM " . INIT::$DB_DATABASE . ".`jobs` WHERE id='" . $this->id . "';";
 
@@ -126,7 +119,7 @@ class CreateFromStructJobTest extends AbstractTest {
         $this->assertNull( $result->job_type );
         $this->assertEquals( "156255", $result->total_time_to_edit );
         $this->assertEquals( "0", $result->avg_post_editing_effort );
-        $this->assertFalse( isset($result->id_job_to_revise) );
+        $this->assertFalse( isset( $result->id_job_to_revise ) );
         $this->assertEquals( "182655204", $result->last_opened_segment );
         $this->assertEquals( "1", $result->id_tms );
         $this->assertEquals( "1", $result->id_mt_engine );
@@ -147,18 +140,8 @@ class CreateFromStructJobTest extends AbstractTest {
         $this->assertEquals( "general", $result->subject );
         $payable_rates = '{"NO_MATCH":100,"50%-74%":100,"75%-84%":60,"85%-94%":60,"95%-99%":60,"100%":30,"100%_PUBLIC":30,"REPETITIONS":30,"INTERNAL":60,"MT":85}';
         $this->assertEquals( $payable_rates, $result->payable_rates );
-        $this->assertEquals( "0", $result->revision_stats_typing_min );
-        $this->assertEquals( "0", $result->revision_stats_translations_min );
-        $this->assertEquals( "0", $result->revision_stats_terminology_min );
-        $this->assertEquals( "0", $result->revision_stats_language_quality_min );
-        $this->assertEquals( "0", $result->revision_stats_style_min );
-        $this->assertEquals( "0", $result->revision_stats_typing_maj );
-        $this->assertEquals( "0", $result->revision_stats_translations_maj );
-        $this->assertEquals( "0", $result->revision_stats_terminology_maj );
-        $this->assertEquals( "0", $result->revision_stats_language_quality_maj );
-        $this->assertEquals( "0", $result->revision_stats_style_maj );
         $this->assertEquals( "1", $result->total_raw_wc );
-        $this->assertNull( $result->validator );
+        $this->assertFalse( isset( $result->validator ) );
 
 
     }

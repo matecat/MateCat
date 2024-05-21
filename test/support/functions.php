@@ -1,9 +1,5 @@
 <?php
 
-function setTestConfigFile() {
-    //copyFile('config.ini', 'config.development.ini');
-    copyFile( 'config.test.ini', 'config.ini' );
-}
 
 function copyFile( $source, $destination ) {
     $source      = PROJECT_ROOT . '/inc/' . $source;
@@ -25,10 +21,7 @@ function firstSegmentOfChunk( Chunks_ChunkStruct $chunk ) {
     return $segments[ 0 ];
 }
 
-function restoreDevelopmentConfigFile() {
-    //copyFile('config.ini', 'config.test.ini');
-    copyFile( 'config.development.ini', 'config.ini' );
-}
+
 
 function test_file_path( $file ) {
     return realpath( TEST_DIR . '/support/files/' . $file );

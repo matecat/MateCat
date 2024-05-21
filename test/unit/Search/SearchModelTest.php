@@ -1,8 +1,8 @@
 <?php
 
+use Matecat\SubFiltering\MateCatFilter;
 use Search\SearchModel;
 use Search\SearchQueryParamsStruct;
-use Matecat\SubFiltering\MateCatFilter;
 
 /**
  * Class SearchModelTest
@@ -72,7 +72,7 @@ class SearchModelTest extends AbstractTest {
      * @throws Exception
      */
     public function testSearchTarget() {
-//        $this->_launchSearchAndVerifyResults( 'target', 'Ciao', 4, [ 1, 2, 4 ] );
+        $this->_launchSearchAndVerifyResults( 'target', 'Ciao', 4, [ 1, 2, 4 ] );
         $this->_launchSearchAndVerifyResults( 'target', '%', 2, [ 1 ] );
         $this->_launchSearchAndVerifyResults( 'target', '&', 1, [ 1 ] );
         $this->_launchSearchAndVerifyResults( 'target', ';', 1, [ 3 ] );
@@ -84,6 +84,7 @@ class SearchModelTest extends AbstractTest {
     public function testWholeWordSearch() {
         $this->_launchSearchAndVerifyResults( 'source', 'is', 1, [ 3 ] );
         $this->_launchSearchAndVerifyResults( 'source', 'is', 0, [], true );
+        $this->_launchSearchAndVerifyResults( 'source', 'IS', 0, [], false, true ); //  test match case
         $this->_launchSearchAndVerifyResults( 'source', 'too', 1, [ 3 ], true );
     }
 
@@ -96,15 +97,8 @@ class SearchModelTest extends AbstractTest {
      *
      * @throws Exception
      */
-    private function _launchSearchAndVerifyResults( $key, $word, $expectedCount, array $expectedIds = [], $wholeWord = false ) {
+    private function _launchSearchAndVerifyResults( $key, $word, $expectedCount, array $expectedIds = [], $wholeWord = false, $isMatchCaseRequested = false ) {
 
-        $exactMatch = false;
-
-        if ( true === $wholeWord ) {
-            $exactMatch              = new stdClass();
-            $exactMatch->Space_Left  = '[[:space:]]{0,}';
-            $exactMatch->Space_Right = '([[:space:]]|$)';
-        }
 
         // build $queryParamsStruct
         $queryParamsStruct                                          = new SearchQueryParamsStruct();
@@ -112,12 +106,13 @@ class SearchModelTest extends AbstractTest {
         $queryParamsStruct->password                                = $this->jobPwd;
         $queryParamsStruct->status                                  = 'all';
         $queryParamsStruct->matchCase                               = false;
-        $queryParamsStruct->exactMatch                              = $exactMatch;
+        $queryParamsStruct->isExactMatchRequested                   = $wholeWord;
+        $queryParamsStruct->isMatchCaseRequested                    = $isMatchCaseRequested;
         $queryParamsStruct[ 'key' ]                                 = $key;
         $queryParamsStruct[ ( $key === 'target' ) ? 'trg' : 'src' ] = $word;
 
         // jobData
-        $jobData = Jobs_JobDao::getByIdAndPassword($this->jobId, $this->jobPwd);
+        $jobData = Jobs_JobDao::getByIdAndPassword( $this->jobId, $this->jobPwd );
 
         // instantiate the filters
         $featureSet = new FeatureSet();

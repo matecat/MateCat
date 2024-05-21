@@ -1,6 +1,6 @@
 file1:
   id: @EVER_INCREMENT
-  id_project: @REF:projects:dqf_project_1:id
+  id_project: @REF:projects:simple_project:id
   filename: sample.xlf
   source_language: en-US
   mime_type: xlf

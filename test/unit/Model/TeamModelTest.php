@@ -1,4 +1,5 @@
 <?php
+
 use Teams\TeamStruct;
 
 /**
@@ -18,17 +19,17 @@ class TeamModelTest extends PHPUnit_Framework_TestCase {
         $user       = Factory_User::create();
         $other_user = Factory_User::create();
 
-        $newOrg = new TeamStruct( array(
+        $newOrg = new TeamStruct( [
                 'name'       => 'test team',
                 'created_by' => $user->uid,
                 'type'       => Constants_Teams::GENERAL
-        ) );
+        ] );
 
         $teamModel = new TeamModel( $newOrg );
         $teamModel->setUser( $user );
 
-        $teamModel->addMemberEmail( 'foo@example.org' );
-        $teamModel->addMemberEmail( 'bar@example.org' );
+        $teamModel->addMemberEmail( Factory_User::getNewUser()->getEmail() );
+        $teamModel->addMemberEmail( Factory_User::getNewUser()->getEmail() );
         $teamModel->addMemberEmail( $other_user->email );
 
         $teamModel->create();

@@ -1,5 +1,8 @@
 <?php
 
+use LQA\BxExG\Validator;
+use LQA\QA;
+
 class BxExGValidatorTest extends AbstractTest {
 
     /**
@@ -10,7 +13,7 @@ class BxExGValidatorTest extends AbstractTest {
         $target = '<bx ="23"/><g id="1">Hi</g> this is a string';
 
         $qa        = new QA( $source, $target );
-        $validator = new \BxExG\Validator( $qa );
+        $validator = new Validator( $qa );
 
         $this->assertEmpty( $validator->validate() );
     }
@@ -23,7 +26,7 @@ class BxExGValidatorTest extends AbstractTest {
         $target = '<g id="1"><bx ="23"/>Hi</g> this is a string';
 
         $qa        = new QA( $source, $target );
-        $validator = new \BxExG\Validator( $qa );
+        $validator = new Validator( $qa );
 
         $this->assertCount( 1, $validator->validate() );
         $this->assertEquals( 1300, $validator->validate()[ 0 ] );
@@ -37,7 +40,7 @@ class BxExGValidatorTest extends AbstractTest {
         $target = '<bx ="23"/><g id="1">Hi</g> this is a string';
 
         $qa        = new QA( $source, $target );
-        $validator = new \BxExG\Validator( $qa );
+        $validator = new Validator( $qa );
 
         $this->assertCount( 1, $validator->validate() );
         $this->assertEquals( 1301, $validator->validate()[ 0 ] );
@@ -51,7 +54,7 @@ class BxExGValidatorTest extends AbstractTest {
         $target = '<g id="1"><g id="2"><g id="3"><bx ="23"/>Hi</g> this is a string</g></g>';
 
         $qa        = new QA( $source, $target );
-        $validator = new \BxExG\Validator( $qa );
+        $validator = new Validator( $qa );
 
         $this->assertCount( 1, $validator->validate() );
         $this->assertEquals( 1300, $validator->validate()[ 0 ] );
@@ -66,7 +69,7 @@ class BxExGValidatorTest extends AbstractTest {
         $target = '<g id="1">Se puede conectar un codificador magnético</g> a WELDAUTO para soldadura en altura. ';
 
         $qa        = new QA( $source, $target );
-        $validator = new \BxExG\Validator( $qa );
+        $validator = new Validator( $qa );
 
         $this->assertEmpty( $validator->validate() );
     }
@@ -80,7 +83,7 @@ class BxExGValidatorTest extends AbstractTest {
         $target = 'Graph 2.3 - Financial appraisal vs. planned for 2021, component 2.3<g id="1"></g><g id="2"></g> ';
 
         $qa        = new QA( $source, $target );
-        $validator = new \BxExG\Validator( $qa );
+        $validator = new Validator( $qa );
 
         $this->assertEmpty( $validator->validate() );
 
@@ -89,7 +92,7 @@ class BxExGValidatorTest extends AbstractTest {
         $target = '<g id="1">Grafik 2.3 – </g>2021 yılı finansal <g id="2">fizibilite ve planlanan, bileşen 2.3</g>';
 
         $qa        = new QA( $source, $target );
-        $validator = new \BxExG\Validator( $qa );
+        $validator = new Validator( $qa );
 
         $this->assertEmpty( $validator->validate() );
     }
@@ -103,7 +106,7 @@ class BxExGValidatorTest extends AbstractTest {
         $target = '&lt;div&gt; La mamma è andata a fare <g id="1">la spesa</g> &lt;/div&gt;';
 
         $qa        = new QA( $source, $target );
-        $validator = new \BxExG\Validator( $qa );
+        $validator = new Validator( $qa );
 
         $this->assertEmpty( $validator->validate() );
     }
@@ -116,7 +119,7 @@ class BxExGValidatorTest extends AbstractTest {
         $target = '<g id="1"><bx ="23"/>Hi</g> this is a string';
 
         $qa        = new QA( $source, $target );
-        $validator = new \BxExG\Validator( $qa );
+        $validator = new Validator( $qa );
 
         $this->assertCount( 1, $validator->validate() );
         $this->assertEquals( 1302, $validator->validate()[ 0 ] );
@@ -130,7 +133,7 @@ class BxExGValidatorTest extends AbstractTest {
         $target = '<g id="1"><g id="2"><g id="3">Hi</g> this is a string</g></g><g id="4"></g>';
 
         $qa        = new QA( $source, $target );
-        $validator = new \BxExG\Validator( $qa );
+        $validator = new Validator( $qa );
 
         $this->assertEmpty( $validator->validate() );
     }

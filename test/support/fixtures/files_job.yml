@@ -1,5 +1,5 @@
 fj1:
-  id_job: @REF:jobs:job2:id
+  id_job: @REF:jobs:job1:id
   id_file: @REF:files:file1:id
   assign_date: NULL
   t_delivery_date: NULL

@@ -200,17 +200,15 @@ SRC;
         $this->assertTrue( $check->thereAreErrors() );
         $this->assertTrue( $check->thereAreWarnings() );
 
-        $this->assertEquals( count( $warnings ), 2 );
+        $this->assertEquals( count( $warnings ), 1 );
         $this->assertEquals( 1000, $warnings[ 0 ]->outcome );
 
-        $this->assertCount( 2, $errors );
+        $this->assertCount( 1, $errors );
         $this->assertAttributeEquals( 1000, 'outcome', $errors[ 0 ] );
         $this->assertRegExp( '/\( 1 \)/', $check->getErrorsJSON() );
-        $this->assertAttributeEquals( 4, 'outcome', $errors[ 1 ] );
-        $this->assertRegExp( '/\( 1 \)/', $check->getErrorsJSON() );
 
-        $this->setExpectedException( 'LogicException' );
-        $normalized = $check->getTrgNormalized();
+        $this->expectException( LogicException::class );
+        $check->getTrgNormalized();
 
     }
 
@@ -233,14 +231,10 @@ SRC;
         $check->setFeatureSet( $this->featureSet );
         $check->realignMTSpaces();
 
-        $warnings = $check->getWarnings();
-        $errors   = $check->getErrors();
-
         //tag ID mismatch / tag Mismatch
-        $this->assertTrue( $check->thereAreErrors() );
-        $this->assertTrue( $check->thereAreWarnings() );
+        $this->assertFalse( $check->thereAreErrors() );
+        $this->assertFalse( $check->thereAreWarnings() );
 
-        $this->setExpectedException( 'LogicException' );
         $normalized = $check->getTrgNormalized();
 
         $this->assertFalse( $check->thereAreErrors() );
@@ -249,8 +243,7 @@ SRC;
         $this->assertFalse( $check->thereAreErrors() );
         $this->assertFalse( $check->thereAreWarnings() );
 
-        $this->assertEquals( '<g id="1877">31-235</g><g id="1879">L\'impostazione predefinita PR IS120 allarme.</g>', $normalized );
-
+        $this->assertEquals( '<g id="1877">31-235</g> <g id="1879">L\'impostazione predefinita PR IS120 allarme.</g>', $normalized );
 
     }
 

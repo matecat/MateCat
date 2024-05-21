@@ -1,5 +1,7 @@
 <?php
 
+use Predis\Client;
+
 /**
  * @group  regression
  * @covers EnginesModel_EngineDAO::create
@@ -10,7 +12,7 @@
 class CreateEngineTest extends AbstractTest {
 
     /**
-     * @var \Predis\Client
+     * @var Client
      */
     protected $flusher;
     /**
@@ -47,7 +49,7 @@ class CreateEngineTest extends AbstractTest {
         $this->engine_struct_param->class_load              = "foo_bar";
         $this->engine_struct_param->extra_parameters        = null;
         $this->engine_struct_param->penalty                 = 1;
-        $this->engine_struct_param->active                  = 0;
+        $this->engine_struct_param->active                  = 1;
         $this->engine_struct_param->uid                     = 1;
 
     }
@@ -56,7 +58,7 @@ class CreateEngineTest extends AbstractTest {
     public function tearDown() {
 
         $this->database_instance->getConnection()->query( $this->sql_delete_engine );
-        $this->flusher = new Predis\Client( INIT::$REDIS_SERVERS );
+        $this->flusher = new Client( INIT::$REDIS_SERVERS );
         $this->flusher->flushdb();
         parent::tearDown();
     }

@@ -99,6 +99,9 @@ SRC;
 
     }
 
+    /**
+     * @throws Exception
+     */
     public function testTagPositionHardNesting_1() {
 
         $source_seg = <<<TRG

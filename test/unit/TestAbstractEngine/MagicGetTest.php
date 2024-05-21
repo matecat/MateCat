@@ -15,7 +15,7 @@ class MagicGetTest extends AbstractTest
     protected $engine_struct_param;
     protected $reflector;
     /**
-     * @var Engines_Moses
+     * @var Engines_NONE
      */
     protected $engine;
 
@@ -29,7 +29,7 @@ class MagicGetTest extends AbstractTest
         $this->engine_struct_param->extra_parameters = array('gamma' => "three", 'delta' => "four");
 
 
-        $this->engine = new Engines_Moses($this->engine_struct_param);
+        $this->engine = new Engines_NONE($this->engine_struct_param);
 
 
     }

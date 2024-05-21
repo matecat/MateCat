@@ -9,7 +9,10 @@ use LQA\CategoryStruct;
 use LQA\ChunkReviewDao;
 use LQA\ChunkReviewStruct;
 use LQA\ModelDao;
+use LQA\ModelStruct;
 use Symfony\Component\Yaml\Yaml;
+use Users\MetadataDao;
+use Users\MetadataStruct;
 
 class FixturesLoader {
 
@@ -22,7 +25,6 @@ class FixturesLoader {
     public function loadFixtures() {
         $this->fixtures_map = [] ;
 
-        $this->loadEngines();
         $this->loadUsers();
         $this->loadUserMetadata();
         $this->loadQaModels();
@@ -58,8 +60,8 @@ class FixturesLoader {
 
         foreach( $this->fixtures_map['user_metadata'] as $name => &$record ) {
             $this->replaceTokens( $record ) ;
-            $struct = new \Users\MetadataStruct( $record ) ;
-            \Users\MetadataDao::insertStruct( $struct ) ;
+            $struct = new MetadataStruct( $record ) ;
+            MetadataDao::insertStruct( $struct ) ;
         }
     }
 
@@ -139,7 +141,7 @@ class FixturesLoader {
 
         foreach( $this->fixtures_map['qa_models'] as $name => &$record ) {
             $this->replaceTokens( $record ) ;
-            $struct = new \LQA\ModelStruct( $record  ) ;
+            $struct = new ModelStruct( $record  ) ;
             ModelDao::insertStructWithAutoIncrements( $struct ) ;
         }
     }
@@ -183,21 +185,6 @@ class FixturesLoader {
             $struct = new \Jobs\MetadataStruct( $record ) ;
             \Jobs\MetadataDao::insertStructWithAutoIncrements( $struct ) ;
         }
-    }
-
-    public function loadEngines() {
-        $this->loadFromFile('engines');
-
-        foreach( $this->fixtures_map['engines'] as $name => &$record ) {
-            $this->replaceTokens( $record );
-            $struct = new EnginesModel_EngineStruct( $record ) ;
-            // TODO:
-            EnginesModel_EngineDAO::insertStruct( $struct ) ;
-        }
-
-        $id = $this->fixtures_map[ 'engines' ][ 'engine0' ][ 'id' ] ;
-        Database::obtain()->getConnection()->exec("UPDATE engines SET id = 0 WHERE id = $id ");
-
     }
 
     public function loadFromFile( $file ) {

@@ -1,9 +1,7 @@
 <?php
 
-namespace LQA;
+namespace LQA\SizeRestriction;
 
-use CJKLangUtils;
-use EmojiUtils;
 use Exception;
 use FeatureSet;
 
@@ -22,7 +20,7 @@ class SizeRestriction {
     /**
      * SizeRestriction constructor.
      *
-     * @param $string
+     * @param            $string
      * @param FeatureSet $featureSet
      */
     public function __construct( $string, FeatureSet $featureSet ) {
@@ -75,40 +73,46 @@ class SizeRestriction {
 
     /**
      * @param $limit
+     *
      * @return bool
      */
-    public function checkLimit($limit) {
+    public function checkLimit( $limit ) {
         return $this->getCleanedStringLength() <= $limit;
     }
 
     /**
      * @param $limit
+     *
      * @return int
      */
-    public function getCharactersRemaining($limit) {
+    public function getCharactersRemaining( $limit ) {
         return $limit - $this->getCleanedStringLength();
     }
 
     /**
+     * This method is responsible for counting the characters in a string according to these rules:
+     *
+     * CJK characters should be counted as raw UTF-8 bytes.
+     * The rest should be counted as UTF-8 characters.
+     *
      * @return int
      */
-
     public function getCleanedStringLength() {
 
         try {
 
             $featureCounts = $this->featureSet->filter( 'characterLengthCount', $this->cleanedString );
 
-            if(is_array($featureCounts)){
-                return array_sum($featureCounts);
+            if ( is_array( $featureCounts ) ) {
+                return array_sum( $featureCounts );
             }
 
-            return array_sum([
-                "baseLength"   => mb_strlen( $this->cleanedString ),
-                "cjkMatches"   => CJKLangUtils::getMatches($this->cleanedString),
-                "emojiMatches" => EmojiUtils::getMatches($this->cleanedString),
+            return array_sum( [
+                    "baseLength"   => mb_strlen( $this->cleanedString ),
+                    "cjkMatches"   => CJKLangUtils::getMatches( $this->cleanedString ),
+                    "emojiMatches" => EmojiUtils::getMatches( $this->cleanedString )
+            ] );
 
-            ]);
         } catch ( Exception $e ) {
         }
 

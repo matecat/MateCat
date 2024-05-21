@@ -28,6 +28,9 @@ class CacheBehaviourJobTest extends AbstractTest {
     protected $str_password;
     protected $sql_delete_job;
 
+    /**
+     * @throws ReflectionException
+     */
     public function setUp() {
         parent::setUp();
 
@@ -86,10 +89,10 @@ class CacheBehaviourJobTest extends AbstractTest {
 
         $this->database_instance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
         $this->job_Dao           = new Jobs_JobDao( $this->database_instance );
-        $this->cache             = new Predis\Client( INIT::$REDIS_SERVERS );
+        $this->cache             = ( new RedisHandler() )->getConnection();
         $this->job_Dao->createFromStruct( $this->job_struct );
 
-        $this->id = $this->getTheLastInsertIdByQuery($this->database_instance);
+        $this->id = $this->getTheLastInsertIdByQuery( $this->database_instance );
 
         $this->sql_delete_job = "DELETE FROM " . INIT::$DB_DATABASE . ".`jobs` WHERE id='" . $this->id . "';";
 
@@ -108,14 +111,13 @@ class CacheBehaviourJobTest extends AbstractTest {
      */
     public function test_correct_behaviour_of_cache_with_jobs() {
 
-
         $this->job_struct->id = $this->id;
 
         $reflector = new ReflectionClass( $this->job_Dao );
         $method    = $reflector->getMethod( "_getStatementForCache" );
         $method->setAccessible( true );
 
-        $statement = $method->invoke( $this->job_Dao );
+        $statement = $method->invokeArgs( $this->job_Dao, [ null ] );
 
         //check that there is no cache
         $this->assertEmpty( unserialize(
@@ -143,7 +145,7 @@ class CacheBehaviourJobTest extends AbstractTest {
         ) );
         $this->cache->flushdb();
 
-        $struct_of_second_read = $this->job_Dao->read( $param_job_struct )[ '0' ];
+        $struct_of_second_read = $this->job_Dao->read( $param_job_struct )[ 0 ];
         $result_from_cache     = $cache_result[ '0' ];
 
         $this->assertEquals( $result_from_cache, $struct_of_second_read );

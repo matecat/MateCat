@@ -1,13 +1,11 @@
-<phpunit
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:noNamespaceSchemaLocation="http://schema.phpunit.de/4.5/phpunit.xsd"
-    backupGlobals="false"
-    backupStaticAttributes="false"
-    bootstrap="test/test_helper.php"
-    colors="true"
-    verbose="true"
-    reportUselessTests="true"
-    >
+<phpunit bootstrap="tests/test_helper.php"
+             colors="true"
+             processIsolation="false"
+             stopOnError="false"
+             stopOnFailure="false"
+             syntaxCheck="true"
+             reportUselessTests="true"
+             beStrictAboutTestsThatDoNotTestAnything="true">
     <php>
         <includePath>test/support</includePath>
         <includePath>test/support/lib</includePath>

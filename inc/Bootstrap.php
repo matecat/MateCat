@@ -18,14 +18,20 @@ class Bootstrap {
      */
     private $autoLoadedFeatureSet;
 
-    public static function start() {
-        new self();
+    public static function start( SplFileInfo $config_file = null ) {
+        new self( $config_file );
     }
 
-    private function __construct() {
+    private function __construct( SplFileInfo $config_file = null ) {
 
         self::$_ROOT  = realpath( dirname( __FILE__ ) . '/../' );
-        self::$CONFIG = parse_ini_file( self::$_ROOT . DIRECTORY_SEPARATOR . 'inc/config.ini', true );
+
+        if( $config_file != null ){
+            self::$CONFIG = parse_ini_file( $config_file->getRealPath(), true );
+        } else {
+            self::$CONFIG = parse_ini_file( self::$_ROOT . DIRECTORY_SEPARATOR . 'inc/config.ini', true );
+        }
+
         $OAUTH_CONFIG = @parse_ini_file( self::$_ROOT . DIRECTORY_SEPARATOR . 'inc/oauth_config.ini', true );
 
         register_shutdown_function( [ 'Bootstrap', 'shutdownFunctionHandler' ] );

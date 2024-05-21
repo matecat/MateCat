@@ -4,6 +4,10 @@ language: php
 php:
   - 7.4
 
+services:
+  - mysql
+  - redis
+
 branches:
   only:
     #   - develop
@@ -24,6 +28,7 @@ before_install:
   - sed -i "s/git@github.com:/https:\/\/${CI_USER_TOKEN_MATECATBOT}@github.com\//" .gitmodules
   # Update plugins files submodule
   - git submodule update --init --recursive
+  - mysql < tests/inc/unittest_matecat_local.sql
 
 script:
   - |

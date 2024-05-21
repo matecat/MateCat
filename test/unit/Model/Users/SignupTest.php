@@ -13,8 +13,8 @@ class SignupTest extends PHPUnit_Framework_TestCase {
         $signup = new SignupModel( [
                 'first_name'            => 'John',
                 'last_name'             => 'Doe',
-                'password'              => '1234abcd',
-                'password_confirmation' => '1234abcd',
+                'password'              => '1234abcdxxxxxx!',
+                'password_confirmation' => '1234abcdxxxxxx!',
                 'email'                 => 'foo@example.org'
         ] );
 

@@ -1,10 +1,10 @@
 <?php
 
-use Contribution\ContributionSetStruct,
-        Contribution\Set,
-        TaskRunner\Commons\ContextList,
-        TaskRunner\Commons\QueueElement;
+use AsyncTasks\Workers\SetContributionWorker;
+use Contribution\ContributionSetStruct;
 use Matecat\SubFiltering\MateCatFilter;
+use TaskRunner\Commons\ContextList;
+use TaskRunner\Commons\QueueElement;
 
 /**
  * Created by PhpStorm.
@@ -13,7 +13,11 @@ use Matecat\SubFiltering\MateCatFilter;
  * Time: 23:42
  */
 class SetContributionWorkerTest extends AbstractTest implements SplObserver {
+
     protected $featureSet;
+    /**
+     * @var MateCatFilter
+     */
     protected $filter;
 
     /**
@@ -22,7 +26,7 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver {
     public function update( SplSubject $subject ) {
         // Do Nothing, should be used to log
         /**
-         * @var $subject \AsyncTasks\Workers\SetContributionWorker
+         * @var $subject SetContributionWorker
          */
         $this->assertNotEmpty( $subject->getLogMsg() );
 
@@ -32,6 +36,11 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver {
      * @var ContributionSetStruct
      */
     protected $contributionStruct;
+
+    /**
+     * @var QueueElement
+     */
+    protected $queueElement;
 
     /**
      * @var StompFrame
@@ -48,6 +57,10 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver {
      */
     protected $amq;
 
+    /**
+     * @return void
+     * @throws Exception
+     */
     public function setUp() {
 
         parent::setUp();
@@ -58,53 +71,26 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver {
 
         $this->filter = MateCatFilter::getInstance( $this->featureSet, 'en-US', 'it-IT', [] );
 
-
-        //purge ActiveMQ
-        $curl = new MultiCurlHandler();
-        $curl->createResource(
-                INIT::$QUEUE_JMX_ADDRESS . "/api/jolokia/exec/org.apache.activemq:type=Broker,brokerName=localhost,destinationType=Queue,destinationName=set_contribution/purge",
-                [
-                        CURLOPT_HEADER         => false,
-                        CURLOPT_RETURNTRANSFER => true,
-                        CURLOPT_USERAGENT      => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
-                        CURLOPT_CONNECTTIMEOUT => 5, // a timeout to call itself should not be too much higher :D
-                        CURLOPT_SSL_VERIFYPEER => true,
-                        CURLOPT_SSL_VERIFYHOST => 2,
-                        CURLOPT_HTTPHEADER     => array( 'Authorization: Basic ' . base64_encode( INIT::$QUEUE_CREDENTIALS ) )
-                ]
-        );
-        $curl->multiExec();
-
-        //Queue submission
+        //Reference Queue object
         $this->contributionStruct = new ContributionSetStruct();
-
         $this->contributionStruct->fromRevision         = true;
         $this->contributionStruct->id_job               = 1999999;
         $this->contributionStruct->job_password         = "1d7903464318";
         $this->contributionStruct->segment              = $this->filter->fromLayer2ToLayer0( '<g id="pt2">WASHINGTON </g><g id="pt3">— The Treasury Department and Internal Revenue Service today requested public comment on issues relating to the shared responsibility provisions included in the Affordable Care Act that will apply to certain employers starting in 2014.</g>' );
         $this->contributionStruct->translation          = $this->filter->fromLayer2ToLayer0( '<g id="pt2">WASHINGTON </g><g id="pt3">- Il Dipartimento del Tesoro e Agenzia delle Entrate oggi ha chiesto un commento pubblico su questioni relative alle disposizioni di responsabilità condivise incluse nel Affordable Care Act che si applicheranno a certi datori di lavoro a partire dal 2014.</g>' );
-        $this->contributionStruct->api_key              = \INIT::$MYMEMORY_API_KEY;
+        $this->contributionStruct->api_key              = 'XXX-XXX';
         $this->contributionStruct->uid                  = 1234;
         $this->contributionStruct->oldTranslationStatus = 'NEW';
         $this->contributionStruct->oldSegment           = $this->contributionStruct->segment; //we do not change the segment source
         $this->contributionStruct->oldTranslation       = $this->contributionStruct->translation . " TEST";
 
-        //enqueue the crafted object
-        WorkerClient::init( new AMQHandler() );
-        Set::contribution( $this->contributionStruct );
-
-        //now check that this value is inside AMQ
-        $this->contextList = ContextList::get( \INIT::$TASK_RUNNER_CONFIG[ 'context_definitions' ] );
-        $this->amq         = new \AMQHandler();
-        $this->amq->subscribe( $this->contextList->list[ 'CONTRIBUTION' ]->queue_name );
-        $this->message = $this->amq->readFrame();
-        $this->amq->ack( $this->message );
+        $this->queueElement            = new QueueElement();
+        $this->queueElement->params    = $this->contributionStruct;
+        $this->queueElement->classLoad = '\AsyncTasks\Workers\SetContributionWorker';
 
     }
 
     public function tearDown() {
-        $this->amq->disconnect();
-        $this->amq = null;
         parent::tearDown();
     }
 
@@ -112,44 +98,24 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver {
     /**
      * @throws Exception
      */
-    public function testExecContributionWithoutKeysWorker() {
+    public function test_ExecContribution_WillCall_MemoryEngine() {
+
+        $contextList = ContextList::get( INIT::$TASK_RUNNER_CONFIG[ 'context_definitions' ] );
 
         /**
-         * @var $queueElement \TaskRunner\Commons\QueueElement
+         * @var $_worker SetContributionWorker
          */
-        $queueElement = new QueueElement( json_decode( $this->message->body, true ) );
-        $this->assertEquals( '\AsyncTasks\Workers\SetContributionWorker', $queueElement->classLoad );
-
-        /**
-         * @var $_worker \AsyncTasks\Workers\SetContributionWorker
-         */
-        $_worker = new $queueElement->classLoad( $this->amq );
+        $_worker = new $this->queueElement->classLoad( @$this->getMockBuilder( '\AMQHandler' )->getMock() );
 
         $_worker->attach( $this );
         $_worker->setPid( posix_getpid() );
-        $_worker->setContext( $this->contextList->list[ 'CONTRIBUTION' ] );
+        $_worker->setContext( $contextList->list[ 'CONTRIBUTION' ] );
 
         //create a stub Engine MyMemory
-        $stubEngine = $this->getMockBuilder( '\Engines_MyMemory' )->disableOriginalConstructor()->getMock();
-
-        $stubEngine->method( 'getConfigStruct' )->willReturn( Engine::getInstance( 1 )->getConfigStruct() );
-
-        $_config                  = Engine::getInstance( 1 )->getConfigStruct();
-        $_config[ 'segment' ]     = $this->contributionStruct->segment;
-        $_config[ 'translation' ] = $this->contributionStruct->translation;
-        $_config[ 'tnote' ]       = null;
-        $_config[ 'source' ]      = 'en-US';
-        $_config[ 'target' ]      = 'it-IT';
-        $_config[ 'email' ]       = $this->contributionStruct->api_key;
-        $_config[ 'prop' ]        = json_encode( [
-                'project_id'   => 6666,
-                'project_name' => "Fake Project",
-                'job_id'       => 1999999
-        ] );
-
-        $stubEngine->expects( $this->once() )
-                ->method( 'set' )
-                ->with( $_config )
+        $stubEngine = @$this->getMockBuilder( '\Engines_MyMemory' )->disableOriginalConstructor()->getMock();
+        $stubEngine->expects( $spy = $this->once() )
+                ->method( 'update' )
+                ->with( $this->anything() )
                 ->willReturn(
                         Engines_Results_MyMemory_SetContributionResponse::getInstance(
                                 json_decode( '{"responseData":"OK","responseStatus":200,"responseDetails":[545482283]}', true )
@@ -161,12 +127,12 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver {
         /**
          * @var $queueElement Contribution\ContributionSetStruct
          */
-        $mockParams = $this->getMockBuilder( '\Contribution\ContributionSetStruct' )->getMock();
+        $contributionMockQueueObject = @$this->getMockBuilder( '\Contribution\ContributionSetStruct' )->getMock();
 
-        $mockParams->expects( $this->once() )
+        $contributionMockQueueObject->expects( $this->once() )
                 ->method( 'getJobStruct' )
-                ->willReturn( [
-                        new \Jobs_JobStruct(
+                ->willReturn(
+                        new Jobs_JobStruct(
                                 [
                                         'id'       => $this->contributionStruct->id_job,
                                         'password' => $this->contributionStruct->job_password,
@@ -176,34 +142,26 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver {
                                         'tm_keys'  => "{}"
                                 ]
                         )
-                ] );
-
-        $mockParams->expects( $this->once() )
-                ->method( 'getProp' )->willReturn(
-                        [
-                                'project_id'   => 6666,
-                                'project_name' => "Fake Project",
-                                'job_id'       => 1999999
-                        ]
                 );
 
-        $queueElement->params = $mockParams;
-
-        $queueElement->params->fromRevision         = $this->contributionStruct->fromRevision;
-        $queueElement->params->id_job               = $this->contributionStruct->id_job;
-        $queueElement->params->job_password         = $this->contributionStruct->job_password;
-        $queueElement->params->segment              = $this->contributionStruct->segment;
-        $queueElement->params->translation          = $this->contributionStruct->translation;
-        $queueElement->params->api_key              = $this->contributionStruct->api_key;
-        $queueElement->params->uid                  = $this->contributionStruct->uid;
-        $queueElement->params->oldTranslationStatus = $this->contributionStruct->oldTranslationStatus;
-        $queueElement->params->oldSegment           = $this->contributionStruct->oldSegment;
-        $queueElement->params->oldTranslation       = $this->contributionStruct->oldTranslation;
+        $contributionMockQueueObject->fromRevision         = $this->contributionStruct->fromRevision;
+        $contributionMockQueueObject->id_job               = $this->contributionStruct->id_job;
+        $contributionMockQueueObject->job_password         = $this->contributionStruct->job_password;
+        $contributionMockQueueObject->segment              = $this->contributionStruct->segment;
+        $contributionMockQueueObject->translation          = $this->contributionStruct->translation;
+        $contributionMockQueueObject->api_key              = $this->contributionStruct->api_key;
+        $contributionMockQueueObject->uid                  = $this->contributionStruct->uid;
+        $contributionMockQueueObject->oldTranslationStatus = $this->contributionStruct->oldTranslationStatus;
+        $contributionMockQueueObject->oldSegment           = $this->contributionStruct->oldSegment;
+        $contributionMockQueueObject->oldTranslation       = $this->contributionStruct->oldTranslation;
 
 
         $reflectedMethod = new ReflectionMethod( $_worker, '_execContribution' );
         $reflectedMethod->setAccessible( true );
-        $reflectedMethod->invokeArgs( $_worker, [ $mockParams ] );
+        $reflectedMethod->invokeArgs( $_worker, [ $contributionMockQueueObject ] );
+
+        $invocations = $spy->getInvocations();
+        $this->assertEquals( $this->contributionStruct->segment, $invocations[ 0 ]->parameters[ 0 ][ 'segment' ] );
 
     }
 
@@ -219,7 +177,7 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver {
         $this->assertEquals( '\AsyncTasks\Workers\SetContributionWorker', $queueElement->classLoad );
 
         /**
-         * @var $_worker \AsyncTasks\Workers\SetContributionWorker
+         * @var $_worker SetContributionWorker
          */
         $_worker = new $queueElement->classLoad( $this->amq );
 
@@ -268,7 +226,7 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver {
         $mockParams->expects( $this->once() )
                 ->method( 'getJobStruct' )
                 ->willReturn( [
-                        new \Jobs_JobStruct(
+                        new Jobs_JobStruct(
                                 [
                                         'id'       => $this->contributionStruct->id_job,
                                         'password' => $this->contributionStruct->job_password,
@@ -318,7 +276,7 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver {
         $this->assertEquals( '\AsyncTasks\Workers\SetContributionWorker', $queueElement->classLoad );
 
         /**
-         * @var $_worker \AsyncTasks\Workers\SetContributionWorker
+         * @var $_worker SetContributionWorker
          */
         $_worker = new $queueElement->classLoad( $this->amq );
 
@@ -334,7 +292,7 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver {
         $mockParams->expects( $this->once() )
                 ->method( 'getJobStruct' )
                 ->willReturn( [
-                        new \Jobs_JobStruct(
+                        new Jobs_JobStruct(
                                 [
                                         'id'       => $this->contributionStruct->id_job,
                                         'password' => $this->contributionStruct->job_password,
@@ -379,7 +337,7 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver {
         $this->assertEquals( '\AsyncTasks\Workers\SetContributionWorker', $queueElement->classLoad );
 
         /**
-         * @var $_worker \AsyncTasks\Workers\SetContributionWorker
+         * @var $_worker SetContributionWorker
          */
         $_worker = new $queueElement->classLoad( $this->amq );
 
@@ -425,7 +383,7 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver {
         $mockParams->expects( $this->once() )
                 ->method( 'getJobStruct' )
                 ->willReturn( [
-                        new \Jobs_JobStruct(
+                        new Jobs_JobStruct(
                                 [
                                         'id'       => $this->contributionStruct->id_job,
                                         'password' => $this->contributionStruct->job_password,

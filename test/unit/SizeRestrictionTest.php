@@ -3,7 +3,7 @@
 namespace unit;
 
 use FeatureSet;
-use LQA\SizeRestriction;
+use LQA\SizeRestriction\SizeRestriction;
 use PHPUnit_Framework_TestCase;
 
 class SizeRestrictionTest extends PHPUnit_Framework_TestCase {
@@ -16,8 +16,8 @@ class SizeRestrictionTest extends PHPUnit_Framework_TestCase {
 
         $sizeRestriction = new SizeRestriction( $string, new FeatureSet() );
 
-        $this->assertFalse( $sizeRestriction->checkLimit(55) );
-        $this->assertEquals( -84, $sizeRestriction->getCharactersRemaining() );
+        $this->assertFalse( $sizeRestriction->checkLimit( 55 ) );
+        $this->assertEquals( -84, $sizeRestriction->getCharactersRemaining( 55 ) );
     }
 
     /**
@@ -28,8 +28,8 @@ class SizeRestrictionTest extends PHPUnit_Framework_TestCase {
 
         $sizeRestriction = new SizeRestriction( $string, new FeatureSet() );
 
-        $this->assertTrue( $sizeRestriction->checkLimit(55) );
-        $this->assertEquals( 0, $sizeRestriction->getCharactersRemaining() );
+        $this->assertTrue( $sizeRestriction->checkLimit( 55 ) );
+        $this->assertEquals( 0, $sizeRestriction->getCharactersRemaining( 55 ) );
     }
 
     /**
@@ -40,8 +40,8 @@ class SizeRestrictionTest extends PHPUnit_Framework_TestCase {
 
         $sizeRestriction = new SizeRestriction( $string, new FeatureSet() );
 
-        $this->assertTrue( $sizeRestriction->checkLimit(55) );
-        $this->assertEquals( 50, $sizeRestriction->getCharactersRemaining() );
+        $this->assertTrue( $sizeRestriction->checkLimit( 55 ) );
+        $this->assertEquals( 50, $sizeRestriction->getCharactersRemaining( 55 ) );
     }
 
     /**
@@ -52,8 +52,8 @@ class SizeRestrictionTest extends PHPUnit_Framework_TestCase {
 
         $sizeRestriction = new SizeRestriction( $string, new FeatureSet() );
 
-        $this->assertTrue( $sizeRestriction->checkLimit(55) );
-        $this->assertEquals( 0, $sizeRestriction->getCharactersRemaining() );
+        $this->assertTrue( $sizeRestriction->checkLimit( 55 ) );
+        $this->assertEquals( 0, $sizeRestriction->getCharactersRemaining( 55 ) );
     }
 
     /**
@@ -62,46 +62,46 @@ class SizeRestrictionTest extends PHPUnit_Framework_TestCase {
     public function test_CJK_string() {
 
         $strings = [
-            'ch' => [
-                '「AirCover」？' => 14,
-                '？' => 2,
-                '什么是「AirCover 四海无忧」？' => 29,
-                '我們有關於你 Airbnb 帳號的重要消息。' => 36,
-            ],
-            'jp' => [
-                'これを受け、今後Airbnbでは予約やホスティングを行えませんのでご了承ください。' => 76,
-                'あなたのカテゴリ' => 16,
-                'Airbnb Plusのリ​⁠​ス​⁠​テ​⁠​ィ​⁠​ン​⁠​グ​⁠​を管​⁠​理​⁠​す​⁠​る新​⁠​し​⁠​い​⁠​方​⁠​法' => 45,
-                'AirCoverとは？' => 14,
-                'Aon 在 FCA 的登记号为 310451。' => 30,
-                '9検オフユハ報37覚安チヘリヨ稿漢前のたむほ面今めンざれ握面みレ' => 61,
-                '皆さんこんにちは、トウフグのコウイチでございます。ハロー！' => 58,
-            ],
-            'ko' => [
-                '​2023년 1월 24일 또는 그 후에 에어비앤비 계정을 만들었어요. ' => 59,
-                '​2023년' => 6,
-                '안녕하세요' => 10,
-                '어떤 약관이 적용되나요?' => 23,
-                ' (기본)' => 7,
-                '내 카테고리' => 11,
-            ],
-            'others' => [
-                'रिमाइंडर: कागदपत्र आता अपलोड करा' => 32,
-                'ভেনিছতকৈ অধিক খালৰ সৈতে' => 23,
-                'वेनिस की तुलना में अधिक नहरों के साथ' => 36,
-                'ವೆನಿಸ್‌ಗಿಂತ ಹೆಚ್ಚಿನ ಕಾಲುವೆಗಳೊಂದಿಗೆ' => 33,
-                'വെനീസിനേക്കാളും' => 15,
-                'වැනීසියට වඩා වැඩි' => 17,
-                'வெனிஸை' => 6,
-                'ตัวอักษรไทย' => 11,
-                'తెలుగు లిపి' => 11,
-                'https://www.uber.com/blog/perficient-simplifying-business-travel/' => 65,
-            ]
+                'ch'     => [
+                        '「AirCover」？'                         => 17,
+                        '？'                                   => 3,
+                        '什么是「AirCover 四海无忧」？'          => 39,
+                        '我們有關於你 Airbnb 帳號的重要消息。' => 50,
+                ],
+                'jp'     => [
+                        'これを受け、今後Airbnbでは予約やホスティングを行えませんのでご了承ください。'           => 111,
+                        'あなたのカテゴリ'                                                                     => 24,
+                        'Airbnb Plusのリ​⁠​ス​⁠​テ​⁠​ィ​⁠​ン​⁠​グ​⁠​を管​⁠​理​⁠​す​⁠​る新​⁠​し​⁠​い​⁠​方​⁠​法' => 62,
+                        'AirCoverとは？'                                                                        => 17,
+                        'Aon 在 FCA 的登记号为 310451。'                                                        => 37,
+                        '9検オフユハ報37覚安チヘリヨ稿漢前のたむほ面今めンざれ握面みレ'                        => 90,
+                        '皆さんこんにちは、トウフグのコウイチでございます。ハロー！'                              => 87,
+                ],
+                'ko'     => [
+                        '​2023년 1월 24일 또는 그 후에 에어비앤비 계정을 만들었어요. ' => 80,
+                        '​2023년'                                  => 7,
+                        '안녕하세요'                                   => 15,
+                        '어떤 약관이 적용되나요?'                           => 33,
+                        ' (기본)'                                   => 9,
+                        '내 카테고리'                                  => 16,
+                ],
+                'others' => [
+                        'रिमाइंडर: कागदपत्र आता अपलोड करा'                                  => 32,
+                        'ভেনিছতকৈ অধিক খালৰ সৈতে'                                           => 23,
+                        'वेनिस की तुलना में अधिक नहरों के साथ'                              => 36,
+                        'ವೆನಿಸ್‌ಗಿಂತ ಹೆಚ್ಚಿನ ಕಾಲುವೆಗಳೊಂದಿಗೆ'                                => 33,
+                        'വെനീസിനേക്കാളും'                                                   => 15,
+                        'වැනීසියට වඩා වැඩි'                                                 => 17,
+                        'வெனிஸை'                                                            => 6,
+                        'ตัวอักษรไทย'                                                       => 11,
+                        'తెలుగు లిపి'                                                       => 11,
+                        'https://www.uber.com/blog/perficient-simplifying-business-travel/' => 65,
+                ]
         ];
 
-        foreach($strings as $lang => $langStrings){
-            foreach ($langStrings as $string => $limit){
-                $this->sizeRestrictionAsserts($string, $limit);
+        foreach ( $strings as $lang => $langStrings ) {
+            foreach ( $langStrings as $string => $limit ) {
+                $this->sizeRestrictionAsserts( $string, $limit );
             }
         }
     }
@@ -113,129 +113,129 @@ class SizeRestrictionTest extends PHPUnit_Framework_TestCase {
     public function test_string_with_emoji() {
 
         $strings = [
-           '😀 This is an emoji' => 19,
-            '😁 This is an emoji' => 19,
-            '😂 This is an emoji' => 19,
-            '🤣 This is an emoji' => 19,
-            '😃 This is an emoji' => 19,
-            '😄 This is an emoji' => 19,
-            '😅 This is an emoji' => 19,
-            '😆 This is an emoji' => 19,
-            '😉 This is an emoji' => 19,
-            '😊 This is an emoji' => 19,
-            '😋 This is an emoji' => 19,
-            '😎 This is an emoji' => 19,
-            '😍 This is an emoji' => 19,
-            '😘 This is an emoji' => 19,
-            '🥰 This is an emoji' => 19,
-            '😗 This is an emoji' => 19,
-            '😙 This is an emoji' => 19,
-            '😚 This is an emoji' => 19,
-            '🙂 This is an emoji' => 19,
-            '🤗 This is an emoji' => 19,
-            '🤩 This is an emoji' => 19,
-            '🤔 This is an emoji' => 19,
-            '🤨 This is an emoji' => 19,
-            '😐 This is an emoji' => 19,
-            '😑 This is an emoji' => 19,
-            '😶 This is an emoji' => 19,
-            '🙄 This is an emoji' => 19,
-            '😏 This is an emoji' => 19,
-            '😣 This is an emoji' => 19,
-            '😥 This is an emoji' => 19,
-            '😮 This is an emoji' => 19,
-            '🤐 This is an emoji' => 19,
-            '😯 This is an emoji' => 19,
-            '😪 This is an emoji' => 19,
-            '😫 This is an emoji' => 19,
-            '😴 This is an emoji' => 19,
-            '😌 This is an emoji' => 19,
-            '😛 This is an emoji' => 19,
-            '😜 This is an emoji' => 19,
-            '😝 This is an emoji' => 19,
-            '🤤 This is an emoji' => 19,
-            '😒 This is an emoji' => 19,
-            '😓 This is an emoji' => 19,
-            '😔 This is an emoji' => 19,
-            '😕 This is an emoji' => 19,
-            '🙃 This is an emoji' => 19,
-            '🤑 This is an emoji' => 19,
-            '😲 This is an emoji' => 19,
-            '🙁 This is an emoji' => 19,
-            '😖 This is an emoji' => 19,
-            '😞 This is an emoji' => 19,
-            '😟 This is an emoji' => 19,
-            '😤 This is an emoji' => 19,
-            '😢 This is an emoji' => 19,
-            '😭 This is an emoji' => 19,
-            '😦 This is an emoji' => 19,
-            '😧 This is an emoji' => 19,
-            '😨 This is an emoji' => 19,
-            '😩 This is an emoji' => 19,
-            '🤯 This is an emoji' => 19,
-            '😬 This is an emoji' => 19,
-            '😰 This is an emoji' => 19,
-            '😱 This is an emoji' => 19,
-            '🥵 This is an emoji' => 19,
-            '🥶 This is an emoji' => 19,
-            '😳 This is an emoji' => 19,
-            '🤪 This is an emoji' => 19,
-            '😵 This is an emoji' => 19,
-            '😡 This is an emoji' => 19,
-            '😠 This is an emoji' => 19,
-            '🤬 This is an emoji' => 19,
-            '😷 This is an emoji' => 19,
-            '🤒 This is an emoji' => 19,
-            '🤕 This is an emoji' => 19,
-            '🤢 This is an emoji' => 19,
-            '🤮 This is an emoji' => 19,
-            '🤧 This is an emoji' => 19,
-            '😇 This is an emoji' => 19,
-            '🤠 This is an emoji' => 19,
-            '🤡 This is an emoji' => 19,
-            '🥳 This is an emoji' => 19,
-            '🥴 This is an emoji' => 19,
-            '🥺 This is an emoji' => 19,
-            '🤥 This is an emoji' => 19,
-            '🤫 This is an emoji' => 19,
-            '🤭 This is an emoji' => 19,
-            '🧐 This is an emoji' => 19,
-            '🤓 This is an emoji' => 19,
-            '😈 This is an emoji' => 19,
-            '👿 This is an emoji' => 19,
-            '👹 This is an emoji' => 19,
-            '👺 This is an emoji' => 19,
-            '💀 This is an emoji' => 19,
-            '👻 This is an emoji' => 19,
-            '👽 This is an emoji' => 19,
-            '🤖 This is an emoji' => 19,
-            '💩 This is an emoji' => 19,
-            '😺 This is an emoji' => 19,
-            '😸 This is an emoji' => 19,
-            '😹 This is an emoji' => 19,
-            '😻 This is an emoji' => 19,
-            '😼 This is an emoji' => 19,
-            '😽 This is an emoji' => 19,
-            '🙀 This is an emoji' => 19,
-            '😿 This is an emoji' => 19,
-            '😾 This is an emoji' => 19,
+                '😀 This is an emoji' => 19,
+                '😁 This is an emoji' => 19,
+                '😂 This is an emoji' => 19,
+                '🤣 This is an emoji' => 19,
+                '😃 This is an emoji' => 19,
+                '😄 This is an emoji' => 19,
+                '😅 This is an emoji' => 19,
+                '😆 This is an emoji' => 19,
+                '😉 This is an emoji' => 19,
+                '😊 This is an emoji' => 19,
+                '😋 This is an emoji' => 19,
+                '😎 This is an emoji' => 19,
+                '😍 This is an emoji' => 19,
+                '😘 This is an emoji' => 19,
+                '🥰 This is an emoji' => 19,
+                '😗 This is an emoji' => 19,
+                '😙 This is an emoji' => 19,
+                '😚 This is an emoji' => 19,
+                '🙂 This is an emoji' => 19,
+                '🤗 This is an emoji' => 19,
+                '🤩 This is an emoji' => 19,
+                '🤔 This is an emoji' => 19,
+                '🤨 This is an emoji' => 19,
+                '😐 This is an emoji' => 19,
+                '😑 This is an emoji' => 19,
+                '😶 This is an emoji' => 19,
+                '🙄 This is an emoji' => 19,
+                '😏 This is an emoji' => 19,
+                '😣 This is an emoji' => 19,
+                '😥 This is an emoji' => 19,
+                '😮 This is an emoji' => 19,
+                '🤐 This is an emoji' => 19,
+                '😯 This is an emoji' => 19,
+                '😪 This is an emoji' => 19,
+                '😫 This is an emoji' => 19,
+                '😴 This is an emoji' => 19,
+                '😌 This is an emoji' => 19,
+                '😛 This is an emoji' => 19,
+                '😜 This is an emoji' => 19,
+                '😝 This is an emoji' => 19,
+                '🤤 This is an emoji' => 19,
+                '😒 This is an emoji' => 19,
+                '😓 This is an emoji' => 19,
+                '😔 This is an emoji' => 19,
+                '😕 This is an emoji' => 19,
+                '🙃 This is an emoji' => 19,
+                '🤑 This is an emoji' => 19,
+                '😲 This is an emoji' => 19,
+                '🙁 This is an emoji' => 19,
+                '😖 This is an emoji' => 19,
+                '😞 This is an emoji' => 19,
+                '😟 This is an emoji' => 19,
+                '😤 This is an emoji' => 19,
+                '😢 This is an emoji' => 19,
+                '😭 This is an emoji' => 19,
+                '😦 This is an emoji' => 19,
+                '😧 This is an emoji' => 19,
+                '😨 This is an emoji' => 19,
+                '😩 This is an emoji' => 19,
+                '🤯 This is an emoji' => 19,
+                '😬 This is an emoji' => 19,
+                '😰 This is an emoji' => 19,
+                '😱 This is an emoji' => 19,
+                '🥵 This is an emoji' => 19,
+                '🥶 This is an emoji' => 19,
+                '😳 This is an emoji' => 19,
+                '🤪 This is an emoji' => 19,
+                '😵 This is an emoji' => 19,
+                '😡 This is an emoji' => 19,
+                '😠 This is an emoji' => 19,
+                '🤬 This is an emoji' => 19,
+                '😷 This is an emoji' => 19,
+                '🤒 This is an emoji' => 19,
+                '🤕 This is an emoji' => 19,
+                '🤢 This is an emoji' => 19,
+                '🤮 This is an emoji' => 19,
+                '🤧 This is an emoji' => 19,
+                '😇 This is an emoji' => 19,
+                '🤠 This is an emoji' => 19,
+                '🤡 This is an emoji' => 19,
+                '🥳 This is an emoji' => 19,
+                '🥴 This is an emoji' => 19,
+                '🥺 This is an emoji' => 19,
+                '🤥 This is an emoji' => 19,
+                '🤫 This is an emoji' => 19,
+                '🤭 This is an emoji' => 19,
+                '🧐 This is an emoji' => 19,
+                '🤓 This is an emoji' => 19,
+                '😈 This is an emoji' => 19,
+                '👿 This is an emoji' => 19,
+                '👹 This is an emoji' => 19,
+                '👺 This is an emoji' => 19,
+                '💀 This is an emoji' => 19,
+                '👻 This is an emoji' => 19,
+                '👽 This is an emoji' => 19,
+                '🤖 This is an emoji' => 19,
+                '💩 This is an emoji' => 19,
+                '😺 This is an emoji' => 19,
+                '😸 This is an emoji' => 19,
+                '😹 This is an emoji' => 19,
+                '😻 This is an emoji' => 19,
+                '😼 This is an emoji' => 19,
+                '😽 This is an emoji' => 19,
+                '🙀 This is an emoji' => 19,
+                '😿 This is an emoji' => 19,
+                '😾 This is an emoji' => 19,
         ];
 
-        foreach ($strings as $string => $limit){
-            $this->sizeRestrictionAsserts($string, $limit);
+        foreach ( $strings as $string => $limit ) {
+            $this->sizeRestrictionAsserts( $string, $limit );
         }
     }
 
     /**
      * @param $string
      * @param $limit
+     *
      * @throws \Exception
      */
-    private function sizeRestrictionAsserts($string, $limit)
-    {
+    private function sizeRestrictionAsserts( $string, $limit ) {
         $sizeRestriction = new SizeRestriction( $string, new FeatureSet() );
 
-        $this->assertTrue( $sizeRestriction->checkLimit($limit), "Failed: '" . $string . "'" );
-        $this->assertEquals( 0, $sizeRestriction->getCharactersRemaining($limit), "Failed: '" . $string . "'" );
+        $this->assertTrue( $sizeRestriction->checkLimit( $limit ), "Failed: '" . $string . "'" );
+        $this->assertEquals( 0, $sizeRestriction->getCharactersRemaining( $limit ), "Failed: '" . $string . "'" );
     }
 }

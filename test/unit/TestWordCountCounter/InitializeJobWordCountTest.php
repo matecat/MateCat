@@ -1,5 +1,6 @@
 <?php
 
+use support\lib\TestHelper;
 use WordCount\CounterModel;
 use WordCount\WordCountStruct;
 

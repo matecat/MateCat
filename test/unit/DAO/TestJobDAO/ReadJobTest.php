@@ -75,16 +75,6 @@ class ReadJobTest extends AbstractTest {
                         'rejected_words'                      => "0.00",
                         'subject'                             => "general",
                         'payable_rates'                       => '{"NO_MATCH":100,"50%-74%":100,"75%-84%":60,"85%-94%":60,"95%-99%":60,"100%":30,"100%_PUBLIC":30,"REPETITIONS":30,"INTERNAL":60,"MT":85}',
-                        'revision_stats_typing_min'           => "0",
-                        'revision_stats_translations_min'     => "0",
-                        'revision_stats_terminology_min'      => "0",
-                        'revision_stats_language_quality_min' => "0",
-                        'revision_stats_style_min'            => "0",
-                        'revision_stats_typing_maj'           => "0",
-                        'revision_stats_translations_maj'     => "0",
-                        'revision_stats_terminology_maj'      => "0",
-                        'revision_stats_language_quality_maj' => "0",
-                        'revision_stats_style_maj'            => "0",
                         'total_raw_wc'                        => "1",
                         'validator'                           => "xxxx"
                 ]
@@ -160,18 +150,8 @@ class ReadJobTest extends AbstractTest {
         $this->assertEquals( "general", $result->subject );
         $payable_rates = '{"NO_MATCH":100,"50%-74%":100,"75%-84%":60,"85%-94%":60,"95%-99%":60,"100%":30,"100%_PUBLIC":30,"REPETITIONS":30,"INTERNAL":60,"MT":85}';
         $this->assertEquals( $payable_rates, $result->payable_rates );
-        $this->assertEquals( "0", $result->revision_stats_typing_min );
-        $this->assertEquals( "0", $result->revision_stats_translations_min );
-        $this->assertEquals( "0", $result->revision_stats_terminology_min );
-        $this->assertEquals( "0", $result->revision_stats_language_quality_min );
-        $this->assertEquals( "0", $result->revision_stats_style_min );
-        $this->assertEquals( "0", $result->revision_stats_typing_maj );
-        $this->assertEquals( "0", $result->revision_stats_translations_maj );
-        $this->assertEquals( "0", $result->revision_stats_terminology_maj );
-        $this->assertEquals( "0", $result->revision_stats_language_quality_maj );
-        $this->assertEquals( "0", $result->revision_stats_style_maj );
         $this->assertEquals( "1", $result->total_raw_wc );
-        $this->assertNull( $result->validator );
+        $this->assertFalse( isset( $result->validator ) );
 
     }
 }

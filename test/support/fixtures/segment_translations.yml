@@ -1,6 +1,6 @@
 st1:
   id_segment: @REF:segments:segment1:id
-  id_job: @REF:jobs:job2:id
+  id_job: @REF:jobs:job1:id
   segment_hash: f88037cf8f5d27f475cee79c603cecae
   autopropagated_from: NULL
   status: TRANSLATED
@@ -26,7 +26,7 @@ st1:
 
 st2:
   id_segment: @REF:segments:segment2:id
-  id_job: @REF:jobs:job2:id
+  id_job: @REF:jobs:job1:id
   segment_hash: 3e25960a79dbc69b674cd4ec67a72c62
   autopropagated_from: NULL
   status: TRANSLATED
@@ -52,7 +52,7 @@ st2:
 
 st3:
   id_segment: @REF:segments:segment3:id
-  id_job: @REF:jobs:job2:id
+  id_job: @REF:jobs:job1:id
   segment_hash: 37d2a389ba71f6de1df030220703785d
   autopropagated_from: NULL
   status: TRANSLATED
@@ -78,7 +78,7 @@ st3:
 
 st4:
   id_segment: @REF:segments:segment4:id
-  id_job: @REF:jobs:job2:id
+  id_job: @REF:jobs:job1:id
   segment_hash: 3e25960a79dbc69b674cd4ec67a72c62
   autopropagated_from: NULL
   status: TRANSLATED

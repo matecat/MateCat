@@ -47,10 +47,10 @@ class CacheBehaviourUserTest extends AbstractTest {
         $this->user_struct_param->oauth_access_token = "";
 
 
-        $record = $this->user_Dao->createUser( $this->user_struct_param );
+        $record    = $this->user_Dao->createUser( $this->user_struct_param );
         $this->uid = $record->uid;
 
-        $this->cache = new Predis\Client( INIT::$REDIS_SERVERS );
+        $this->cache = ( new RedisHandler() )->getConnection();
         $this->cache->select( (int)INIT::$INSTANCE_ID );
 
         $this->sql_delete_user = "DELETE FROM " . INIT::$DB_DATABASE . ".`users` WHERE uid='" . $this->uid . "';";
@@ -79,7 +79,7 @@ class CacheBehaviourUserTest extends AbstractTest {
         $readQuery->setAccessible( true );
         list( $query, $bind_params ) = $readQuery->invoke( $this->user_Dao, $UserQuery );
 
-        $getStatementMethod    = $reflector->getMethod( "_getStatementForCache" );
+        $getStatementMethod = $reflector->getMethod( "_getStatementForCache" );
         $getStatementMethod->setAccessible( true );
         $stmt = $getStatementMethod->invoke( $this->user_Dao, $query );
 

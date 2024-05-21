@@ -1,9 +1,6 @@
 <?php
 
 use Features\Airbnb;
-use Features\Ebay;
-use Features\Microsoft;
-use Features\ReviewImproved;
 
 /**
  * Created by PhpStorm.
@@ -13,18 +10,6 @@ use Features\ReviewImproved;
  *
  */
 class FeaturesSetTest extends AbstractTest {
-
-    protected static $microsoftDependencies = [
-            Features::PROJECT_COMPLETION,
-            Features::TRANSLATION_VERSIONS,
-            Features::QACHECK_GLOSSARY
-    ];
-
-    protected static $ebayDependencies = [
-            Features::PROJECT_COMPLETION,
-            Features::TRANSLATION_VERSIONS,
-            ReviewImproved::FEATURE_CODE
-    ];
 
     protected static $airbnbDependencies = [
             Features::TRANSLATION_VERSIONS,
@@ -37,21 +22,8 @@ class FeaturesSetTest extends AbstractTest {
 
     protected function _testForDependenciesOrder( $dependenciesSet ) {
 
-        foreach ( self::$microsoftDependencies as $dep ) {
-            $this->assertTrue( $dependenciesSet[ $dep ] < $dependenciesSet[ Microsoft::FEATURE_CODE ] );
-        }
-
-        foreach ( self::$ebayDependencies as $dep ) {
-            $this->assertTrue( $dependenciesSet[ $dep ] < $dependenciesSet[ Ebay::FEATURE_CODE ] );
-        }
-
         foreach ( self::$airbnbDependencies as $dep ) {
             $this->assertTrue( $dependenciesSet[ $dep ] < $dependenciesSet[ Airbnb::FEATURE_CODE ] );
-        }
-
-        foreach ( self::$abstractReviewDependencies as $dep ) {
-//            $this->assertTrue( $dependenciesSet[ $dep ] < $dependenciesSet[ Features::REVIEW_EXTENDED ] ); // FIX: Undefined index: review_extended
-            $this->assertTrue( $dependenciesSet[ $dep ] < $dependenciesSet[ ReviewImproved::FEATURE_CODE ] );
         }
 
         return true;
@@ -67,7 +39,7 @@ class FeaturesSetTest extends AbstractTest {
 
         for ( $i = 0; $i < 2000; $i++ ) {
 
-            $codes = explode( ",", "qa_check_glossary,airbnb,ebay,review_improved,microsoft,translation_versions,project_completion,review_extended,translated,qa_check_blacklist" );
+            $codes = explode( ",", "qa_check_glossary,airbnb,translation_versions,project_completion,review_extended,translated,qa_check_blacklist" );
             shuffle( $codes );
             shuffle( $codes );
             $code_string = implode( ",", $codes );

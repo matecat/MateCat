@@ -2,6 +2,7 @@
 
 use FilesStorage\S3FilesStorage;
 use Matecat\SimpleS3\Client;
+use Predis\Connection\ConnectionException;
 
 class S3FilesStorageTest extends PHPUnit_Framework_TestCase {
 
@@ -15,6 +16,10 @@ class S3FilesStorageTest extends PHPUnit_Framework_TestCase {
      */
     private $s3Client;
 
+    /**
+     * @throws ReflectionException
+     * @throws ConnectionException
+     */
     public function setUp() {
         parent::setUp();
 
@@ -34,7 +39,7 @@ class S3FilesStorageTest extends PHPUnit_Framework_TestCase {
         copy( $xliffPath, $xliffPathTarget ); // I copy the original xliff file because then
 
         $sha1 = sha1_file( $filePath );
-        $lang = 'it-it';
+        $lang = 'it-IT';
 
         $hashTree = S3FilesStorage::composeCachePath( $sha1 );
         $prefix   = S3FilesStorage::CACHE_PACKAGE_FOLDER . DIRECTORY_SEPARATOR;
@@ -47,6 +52,7 @@ class S3FilesStorageTest extends PHPUnit_Framework_TestCase {
 
     /**
      * @test
+     * @depends test_creation_of_cache_package_into_a_bucket
      * @throws Exception
      */
     public function test_copying_a_file_from_cache_package_bucket_to_file_bucket() {
@@ -62,6 +68,19 @@ class S3FilesStorageTest extends PHPUnit_Framework_TestCase {
     }
 
     /**
+     * @throws ReflectionException
+     * @throws ConnectionException
+     */
+    public function testListItems() {
+        $workItems = S3FilesStorage::getStaticS3Client()->getItemsInABucket( [
+                'bucket' => S3FilesStorage::getFilesStorageBucket(),
+                'prefix' => 'cache-package/c1/68/9bd71f45e76fd5e428f35c00d1f289a7e9e9__it-it/orig'
+        ] );
+
+        $this->assertNotEmpty( $workItems );
+    }
+
+    /**
      * @test
      * @throws Exception
      */
@@ -71,7 +90,7 @@ class S3FilesStorageTest extends PHPUnit_Framework_TestCase {
         $uploadSession     = '{CAD1B6E1-B312-8713-E8C3-97145410FD37}';
         $source            = __DIR__ . '/../../../support/files/queue/' . $uploadSession . '/test.txt';
         $source2           = __DIR__ . '/../../../support/files/queue/' . $uploadSession . '/aad03b600bc4792b3dc4bf3a2d7191327a482d4a|it-IT';
-        $destinationFolder = __DIR__ . '/../../../../local_storage/upload/' . $uploadSession;
+        $destinationFolder = __DIR__ . "/../../../../" . INIT::$STORAGE_DIR . "/upload/" . $uploadSession;
         $destination       = $destinationFolder . '/test.txt';
         $destination2      = $destinationFolder . '/aad03b600bc4792b3dc4bf3a2d7191327a482d4a|it-IT';
 
@@ -81,27 +100,43 @@ class S3FilesStorageTest extends PHPUnit_Framework_TestCase {
         copy( $source, $destination );
         copy( $source2, $destination2 );
 
+        // TEST
         S3FilesStorage::moveFileFromUploadSessionToQueuePath( $uploadSession );
 
-        $items = $this->s3Client->getItemsInABucket( [ 'bucket' => S3FilesStorage::getFilesStorageBucket() ] );
+        $items = $this->s3Client->getItemsInABucket( [
+                'bucket' => S3FilesStorage::getFilesStorageBucket(),
+                'prefix' => S3FilesStorage::QUEUE_FOLDER . DIRECTORY_SEPARATOR . S3FilesStorage::getUploadSessionSafeName( $uploadSession )
+        ] );
 
-        $this->assertGreaterThanOrEqual( 0, $items );
+        $this->assertGreaterThan( 0, $items );
+
+        // TEST
+        $this->fs->deleteQueue( S3FilesStorage::getUploadSessionSafeName( $uploadSession ) );
+
+        $items = $this->s3Client->getItemsInABucket( [
+                'bucket' => S3FilesStorage::getFilesStorageBucket(),
+                'prefix' => S3FilesStorage::QUEUE_FOLDER . DIRECTORY_SEPARATOR . S3FilesStorage::getUploadSessionSafeName( $uploadSession )
+        ] );
+
+        $this->assertEmpty( $items );
+
     }
 
     /**
+     * @depends test_uploading_files_from_queue_folder_to_queue_bucket
      * @test
      * @throws Exception
      */
     public function test_get_hashes_from_dir() {
         $uploadSession = '{CAD1B6E1-B312-8713-E8C3-97145410FD37}';
-        $dirToScan     = \INIT::$QUEUE_PROJECT_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession;
+        $dirToScan     = INIT::$QUEUE_PROJECT_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession;
 
         $hashes = $this->fs->getHashesFromDir( $dirToScan );
 
         $this->assertArrayHasKey( 'conversionHashes', $hashes );
         $this->assertArrayHasKey( 'zipHashes', $hashes );
 
-        $originalFileNames = $hashes[ 'conversionHashes' ][ 'fileName' ][ 'queue-projects/cad1b6e1-b312-8713-e8c3-97145410fd37/aad03b600bc4792b3dc4bf3a2d7191327a482d4a!!it-it' ];
+        $originalFileNames = $hashes[ 'conversionHashes' ][ 'fileName' ][ 'queue-projects/cad1b6e1-b312-8713-e8c3-97145410fd37/aad03b600bc4792b3dc4bf3a2d7191327a482d4a__it-IT' ];
 
         $this->assertEquals( 'test.txt', $originalFileNames[ 0 ] );
     }
@@ -151,7 +186,7 @@ class S3FilesStorageTest extends PHPUnit_Framework_TestCase {
 
         // create a backup file from fixtures folder because the folder in upload folder is deleted every time
         $source            = __DIR__ . '/../../../support/files/zip-with-model-json.zip';
-        $destinationFolder = __DIR__ . '/../../../../local_storage/files_storage/originalZip';
+        $destinationFolder = __DIR__ . "/../../../../" . INIT::$STORAGE_DIR . "/files_storage/originalZip";
         $destination       = $destinationFolder . '/zip-with-model-json.zip';
 
         if ( !file_exists( $destinationFolder ) ) {

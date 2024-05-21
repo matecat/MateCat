@@ -83,7 +83,7 @@ class SetContributionWorker extends AbstractWorker {
             throw new Exception( "Job not found. Password changed?" );
         }
 
-        $this->_loadEngine( $contributionStruct );
+        $this->_loadEngine( $jobStruct );
 
         $config             = $this->_engine->getConfigStruct();
         $config[ 'source' ] = $jobStruct->source;
@@ -94,7 +94,7 @@ class SetContributionWorker extends AbstractWorker {
 
         try {
 
-            $this->_update( $config, $contributionStruct );
+            $this->_update( $config, $contributionStruct, $jobStruct->id_mt_engine );
             $this->_doLog( "Key UPDATE -- Job: $contributionStruct->id_job, Segment: $contributionStruct->id_segment " );
 
         } catch ( ReQueueException $e ) {
@@ -108,14 +108,13 @@ class SetContributionWorker extends AbstractWorker {
      * !Important Refresh the engine ID for each queueElement received
      * to avoid set contributions to the wrong engine ID
      *
-     * @param ContributionSetStruct $contributionStruct
+     * @param Jobs_JobStruct $jobStruct
      *
      * @throws Exception
      * @throws ValidationError
      */
-    protected function _loadEngine( ContributionSetStruct $contributionStruct ) {
+    protected function _loadEngine( Jobs_JobStruct $jobStruct ) {
 
-        $jobStruct = $contributionStruct->getJobStruct();
         if ( empty( $this->_engine ) ) {
             $this->_engine = Engine::getInstance( $jobStruct->id_tms ); //Load MyMemory
         }
@@ -155,13 +154,12 @@ class SetContributionWorker extends AbstractWorker {
     /**
      * @param array                 $config
      * @param ContributionSetStruct $contributionStruct
+     * @param int                   $id_mt_engine
      *
      * @throws ReQueueException
      * @throws ValidationError
      */
-    protected function _update( array $config, ContributionSetStruct $contributionStruct ) {
-
-        $jobStruct = $contributionStruct->getJobStruct();
+    protected function _update( array $config, ContributionSetStruct $contributionStruct, $id_mt_engine = 1 ) {
 
         // update the contribution for every key in the job belonging to the user
         $config[ 'uid' ]            = $contributionStruct->uid;
@@ -170,7 +168,7 @@ class SetContributionWorker extends AbstractWorker {
         $config[ 'context_after' ]  = $contributionStruct->context_after;
         $config[ 'context_before' ] = $contributionStruct->context_before;
         $config[ 'prop' ]           = json_encode( $contributionStruct->getProp() );
-        $config[ 'set_mt' ]         = ($jobStruct->id_mt_engine != 1) ? false : true;
+        $config[ 'set_mt' ]         = ($id_mt_engine != 1) ? false : true;
 
         $config[ 'newsegment' ]     = $contributionStruct->segment;
         $config[ 'newtranslation' ] = $contributionStruct->translation;
