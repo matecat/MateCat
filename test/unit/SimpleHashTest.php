@@ -201,7 +201,7 @@ class SimpleHashTest extends AbstractTest
         sleep(2);
 
         //assert exception
-        $this->setExpectedException( '\DomainException' );
+        $this->expectException( DomainException::class );
         $x->isValid( $result );
         
     }

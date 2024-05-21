@@ -28,9 +28,6 @@ class UpdateFieldProjectTest extends AbstractTest {
         $this->database_instance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
         $this->projectDao        = new Projects_ProjectDao( $this->database_instance );
 
-        $this->database_instance->getConnection()->query( "DELETE FROM projects WHERE 1" );
-        $this->database_instance->getConnection()->query( "DELETE FROM jobs WHERE 1" );
-
         $this->database_instance->getConnection()->query(
                 "INSERT INTO projects
                     ( password, id_customer, id_team, name, create_date, id_engine_tm, id_engine_mt, status_analysis, fast_analysis_wc, 
@@ -41,7 +38,8 @@ class UpdateFieldProjectTest extends AbstractTest {
                     '127.0.0.1', '0', '0', '123', '3', NULL 
                     )"
         );
-        $this->project = new Projects_ProjectStruct( $this->database_instance->getConnection()->query( "SELECT * FROM projects LIMIT 1" )->fetch() );
+        $pId = $this->database_instance->getConnection()->lastInsertId();
+        $this->project = new Projects_ProjectStruct( $this->database_instance->getConnection()->query( "SELECT * FROM projects WHERE id = $pId LIMIT 1" )->fetch() );
 
     }
 
@@ -59,7 +57,7 @@ class UpdateFieldProjectTest extends AbstractTest {
         $project_before_update = $this->project;
         $this->projectDao->updateField( $project_to_update, $field_to_update, $value_to_update );
 
-        $project_after_update = new Projects_ProjectStruct( $this->database_instance->getConnection()->query( "SELECT * FROM projects LIMIT 1" )->fetch() );
+        $project_after_update = new Projects_ProjectStruct( $this->database_instance->getConnection()->query( "SELECT * FROM projects WHERE id = {$this->project->id} LIMIT 1" )->fetch() );
 
         $this->assertNotEquals( $project_before_update[ $field_to_update ], $project_after_update[ $field_to_update ] );
         $this->assertEquals( $value_to_update, $project_after_update[ $field_to_update ] );

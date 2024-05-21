@@ -4,25 +4,7 @@
 -- ------------------------------------------------------
 -- Server version	5.7.44-48-log
 
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
 /*!40101 SET NAMES utf8 */;
-/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
-/*!40103 SET TIME_ZONE='+00:00' */;
-/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
-/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
-/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
-/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
-/*!50717 SELECT COUNT(*) INTO @rocksdb_has_p_s_session_variables FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'performance_schema' AND TABLE_NAME = 'session_variables' */;
-/*!50717 SET @rocksdb_get_is_supported = IF (@rocksdb_has_p_s_session_variables, 'SELECT COUNT(*) INTO @rocksdb_is_supported FROM performance_schema.session_variables WHERE VARIABLE_NAME=\'rocksdb_bulk_load\'', 'SELECT 0') */;
-/*!50717 PREPARE s FROM @rocksdb_get_is_supported */;
-/*!50717 EXECUTE s */;
-/*!50717 DEALLOCATE PREPARE s */;
-/*!50717 SET @rocksdb_enable_bulk_load = IF (@rocksdb_is_supported, 'SET SESSION rocksdb_bulk_load = 1', 'SET @rocksdb_dummy_bulk_load = 0') */;
-/*!50717 PREPARE s FROM @rocksdb_enable_bulk_load */;
-/*!50717 EXECUTE s */;
-/*!50717 DEALLOCATE PREPARE s */;
 
 --
 -- Current Database: `unittest_matecat_local`
@@ -385,7 +367,10 @@ CREATE TABLE `engines` (
 --
 
 /*!40000 ALTER TABLE `engines` DISABLE KEYS */;
-INSERT INTO `engines` VALUES (0,'NONE','NONE','No MT','','',NULL,NULL,NULL,'{}','NONE','',NULL,100,0,NULL),(1,'MyMemory (<a href=\"https://guides.matecat.com/my\" target=\"_blank\">Details</a>)','TM','Machine translation by the MT engine best suited to your project','https://api.mymemory.translated.net','get','set','update','delete_by_id','{\"analyze_url\":\"analyze\",\"api_key_check_auth_url\":\"authkey\",\"api_key_create_user_url\":\"createranduser\",\n\"detect_language_url\":\"langdetect.php\",\"glossary_check_relative_url\":\"v2/glossary/check\",\"glossary_delete_relative_url\":\"v2/glossary/delete\",\"glossary_domains_relative_url\":\"v2/glossary/domains\",\"glossary_entry_status_relative_url\":\"v2/entry/status\",\"glossary_export_relative_url\":\"v2/glossary/export\",\"glossary_get_relative_url\":\"v2/glossary/get\",\"glossary_import_relative_url\":\"v2/glossary/import\",\"glossary_import_status_relative_url\":\"v2/import/status\",\"glossary_keys_relative_url\":\"v2/glossary/keys\",\"glossary_set_relative_url\":\"v2/glossary/set\",\"glossary_update_relative_url\":\"v2/glossary/update\",\"tmx_export_check_url\":\"tmx/export/check\",\"tmx_export_create_url\":\"tmx/export/create\",\"tmx_export_download_url\":\"tmx/export/download\",\"tmx_export_email_url\":\"tmx/export/create\",\"tmx_export_list_url\":\"tmx/export/list\",\"tmx_import_relative_url\":\"tmx/import\",\"tmx_status_relative_url\":\"tmx/status\",\"tags_projection\":\"tags-projection\"}','MyMemory','','1',0,1,NULL);
+INSERT INTO `engines` VALUES (10,'NONE','NONE','No MT','','',NULL,NULL,NULL,'{}','NONE','',NULL,100,0,NULL);
+INSERT INTO `engines`VALUES (11, 'MyMemory (<a href="https://guides.matecat.com/my" target="_blank">Details</a>)', 'TM', 'Machine translation by the MT engine best suited to your project', 'https://api.mymemory.translated.net', 'get', 'set', 'update', 'delete_by_id', '{"analyze_url":"analyze","api_key_check_auth_url":"authkey","api_key_create_user_url":"createranduser","detect_language_url":"langdetect.php","glossary_check_relative_url":"v2/glossary/check","glossary_delete_relative_url":"v2/glossary/delete","glossary_domains_relative_url":"v2/glossary/domains","glossary_entry_status_relative_url":"v2/entry/status","glossary_export_relative_url":"v2/glossary/export","glossary_get_relative_url":"v2/glossary/get","glossary_import_relative_url":"v2/glossary/import","glossary_import_status_relative_url":"v2/import/status","glossary_keys_relative_url":"v2/glossary/keys","glossary_set_relative_url":"v2/glossary/set","glossary_update_relative_url":"v2/glossary/update","tmx_export_email_url":"tmx/export/create","tmx_import_relative_url":"tmx/import","tmx_status_relative_url":"v2/import/status","tags_projection":"tags-projection"}','MyMemory', '', '1', 0, 1, null);
+UPDATE engines SET id = 0 WHERE id = 10;
+UPDATE engines SET id = 1 WHERE id = 11;
 /*!40000 ALTER TABLE `engines` ENABLE KEYS */;
 
 --
@@ -643,7 +628,7 @@ CREATE TABLE `jobs` (
 --
 
 /*!40000 ALTER TABLE `jobs` DISABLE KEYS */;
-INSERT INTO `jobs` VALUES (1886428338,'a90acf203402',1886428330,1,4,NULL,'[]',NULL,'en-GB','es-ES',157967,9700,0,34,1,1,'0000-00-00 00:00:00','0000-00-00 00:00:00',0,'foo@example.org','active',NULL,'active',_binary '\0',0.00,0.00,21751.00,407.00,147.00,'general','{\"NO_MATCH\":100,\"50%-74%\":100,\"75%-84%\":60,\"85%-94%\":60,\"95%-99%\":60,\"100%\":30,\"100%_PUBLIC\":30,\"REPETITIONS\":30,
+INSERT INTO `jobs` VALUES (1886428338,'a90acf203402',1886428330,1,4,NULL,'[{"tm":true,"glos":true,"owner":true,"uid_transl":null,"uid_rev":null,"name":"","key":"XXXXXXXXXXXXXXXX","r":true,"w":true,"r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"source":null,"target":null}]',NULL,'en-GB','es-ES',157967,9700,0,34,1,1,'0000-00-00 00:00:00','0000-00-00 00:00:00',0,'foo@example.org','active',NULL,'active',_binary '\0',0.00,0.00,21751.00,407.00,147.00,'general','{\"NO_MATCH\":100,\"50%-74%\":100,\"75%-84%\":60,\"85%-94%\":60,\"95%-99%\":60,\"100%\":30,\"100%_PUBLIC\":30,\"REPETITIONS\":30,
 \"INTERNAL\":60,\"MT\":80}',1,NULL,0.00,0.00,0.00,0.00,0.00,0.00,0.00);
 /*!40000 ALTER TABLE `jobs` ENABLE KEYS */;
 
@@ -1908,18 +1893,5 @@ USE `unittest_matecat_local`;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
 /*!50001 SET collation_connection      = @saved_col_connection */;
-/*!50112 SET @disable_bulk_load = IF (@is_rocksdb_supported, 'SET SESSION rocksdb_bulk_load = @old_rocksdb_bulk_load', 'SET @dummy_rocksdb_bulk_load = 0') */;
-/*!50112 PREPARE s FROM @disable_bulk_load */;
-/*!50112 EXECUTE s */;
-/*!50112 DEALLOCATE PREPARE s */;
-/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
-
-/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
-/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
-/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
-/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 -- Dump completed on 2024-05-16 17:12:56

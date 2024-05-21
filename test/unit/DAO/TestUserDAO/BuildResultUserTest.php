@@ -17,9 +17,9 @@ class BuildResultUserTest extends AbstractTest
     public function setUp()
     {
         parent::setUp();
-        $this->reflectedClass = new Users_UserDao(Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE));
-        $this->reflector = new ReflectionClass($this->reflectedClass);
-        $this->method = $this->reflector->getMethod("_buildResult");
+        $this->databaseInstance = new Users_UserDao(Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE));
+        $this->reflector        = new ReflectionClass($this->databaseInstance);
+        $this->method           = $this->reflector->getMethod("_buildResult");
         $this->method->setAccessible(true);
 
 
@@ -46,7 +46,7 @@ class BuildResultUserTest extends AbstractTest
                 'oauth_access_token' => ""
             ));
 
-        $actual_array_of_user_structures = $this->method->invoke($this->reflectedClass, $this->array_param);
+        $actual_array_of_user_structures = $this->method->invoke($this->databaseInstance, $this->array_param);
         $actual_user_struct = $actual_array_of_user_structures['0'];
         $this->assertTrue($actual_user_struct instanceof Users_UserStruct);
 

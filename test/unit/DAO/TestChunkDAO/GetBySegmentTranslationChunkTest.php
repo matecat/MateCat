@@ -30,7 +30,7 @@ class GetBySegmentTranslationChunkTest extends AbstractTest {
         parent::setUp();
 
         $this->database_instance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
-        $this->chunk_Dao         = new Chunks_ChunkDao( $this->database_instance );
+        $this->chunk_Dao         = new Chunks_ChunkDao();
 
         $this->database_instance->getConnection()->query(
                 "INSERT INTO jobs
@@ -48,7 +48,9 @@ class GetBySegmentTranslationChunkTest extends AbstractTest {
                               '0', '150', 0,0,0,0,0,0,0
                     )"
         );
-        $this->job = $this->database_instance->getConnection()->query( "SELECT * FROM jobs LIMIT 1" )->fetch();
+
+        $jobId     = $this->database_instance->last_insert();
+        $this->job = $this->database_instance->getConnection()->query( "SELECT * FROM jobs where id = $jobId LIMIT 1" )->fetch();
 
 
         $this->database_instance->getConnection()->query(
@@ -65,7 +67,9 @@ class GetBySegmentTranslationChunkTest extends AbstractTest {
               )"
         );
 
-        $this->_translationsStruct = new Translations_SegmentTranslationStruct( $this->database_instance->getConnection()->query( "SELECT * FROM segment_translations LIMIT 1" )->fetch() );
+        $this->_translationsStruct = new Translations_SegmentTranslationStruct( $this->database_instance->getConnection()->query(
+                "SELECT * FROM segment_translations WHERE id_job = $jobId LIMIT 1"
+        )->fetch() );
 
     }
 

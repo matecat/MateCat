@@ -23,9 +23,9 @@ class DecodeMosesTest extends AbstractTest
         $this->engine_struct_param->type = "MT";
         $this->engine_struct_param->name = "DeepLingoTestEngine";
 
-        $this->reflectedClass = new Engines_Moses($this->engine_struct_param);
-        $this->reflector = new ReflectionClass($this->reflectedClass);
-        $this->method = $this->reflector->getMethod("_decode");
+        $this->databaseInstance = new Engines_Moses($this->engine_struct_param);
+        $this->reflector        = new ReflectionClass($this->databaseInstance);
+        $this->method           = $this->reflector->getMethod("_decode");
         $this->method->setAccessible(true);
         
     }
@@ -91,7 +91,7 @@ LAB;
         );
         $input_function_purpose= "translate_relative_url";
 
-        $actual_return=$this->method->invoke($this->reflectedClass,$json_input,$input_parameters, $input_function_purpose );
+        $actual_return=$this->method->invoke($this->databaseInstance,$json_input,$input_parameters, $input_function_purpose );
         $this->assertContains(" 'id' => '0' ",$actual_return);
         $this->assertContains(" 'raw_segment' => 'house is red'",$actual_return);
         $this->assertContains(" 'translation' => 'maison est rouge.'",$actual_return);
@@ -134,7 +134,7 @@ LAB;
         );
         $input_function_purpose= "translate_relative_url";
 
-        $actual_return=$this->method->invoke($this->reflectedClass,NULL,$input_parameters, $input_function_purpose );
+        $actual_return=$this->method->invoke($this->databaseInstance,NULL,$input_parameters, $input_function_purpose );
         $this->assertContains(" 'id' => '0' ",$actual_return);
         $this->assertContains(" 'raw_segment' => 'house is red'",$actual_return);
         $this->assertContains(" 'translation' => 'maison est rouge.'",$actual_return);

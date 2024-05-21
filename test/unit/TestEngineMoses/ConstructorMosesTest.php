@@ -80,22 +80,22 @@ class ConstructorMosesTest extends AbstractTest
      */
     public function test___construct_of_sub_engine_of_moses()
     {
-        $this->reflectedClass = new Engines_Moses($this->engine_struct_param);
-        $this->reflector = new ReflectionClass($this->reflectedClass);
-        $this->property = $this->reflector->getProperty("engineRecord");
+        $this->databaseInstance = new Engines_Moses($this->engine_struct_param);
+        $this->reflector        = new ReflectionClass($this->databaseInstance);
+        $this->property         = $this->reflector->getProperty("engineRecord");
         $this->property->setAccessible(true);
 
-        $this->assertEquals($this->engine_struct_param, $this->property->getValue($this->reflectedClass));
+        $this->assertEquals($this->engine_struct_param, $this->property->getValue($this->databaseInstance));
 
         $this->property = $this->reflector->getProperty("className");
         $this->property->setAccessible(true);
 
-        $this->assertEquals("Engines_Moses", $this->property->getValue($this->reflectedClass));
+        $this->assertEquals("Engines_Moses", $this->property->getValue($this->databaseInstance));
 
         $this->property = $this->reflector->getProperty("curl_additional_params");
         $this->property->setAccessible(true);
 
-        $this->assertEquals(6, count($this->property->getValue($this->reflectedClass)));
+        $this->assertEquals(6, count($this->property->getValue($this->databaseInstance)));
 
     }
 

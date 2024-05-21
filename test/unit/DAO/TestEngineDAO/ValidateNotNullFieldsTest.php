@@ -22,9 +22,9 @@ class ValidateNotNullFieldsTest extends AbstractTest
     public function setUp()
     {
         parent::setUp();
-        $this->reflectedClass = new EnginesModel_EngineDAO(Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ));
-        $this->reflector = new ReflectionClass($this->reflectedClass);
-        $this->method = $this->reflector->getMethod("_validateNotNullFields");
+        $this->databaseInstance = new EnginesModel_EngineDAO(Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ));
+        $this->reflector        = new ReflectionClass($this->databaseInstance);
+        $this->method           = $this->reflector->getMethod("_validateNotNullFields");
         $this->method->setAccessible(true);
         $this->engine_struct_param = new EnginesModel_EngineStruct();
 
@@ -53,7 +53,7 @@ class ValidateNotNullFieldsTest extends AbstractTest
     {
         $this->engine_struct_param->base_url=null;
         $this->setExpectedException('Exception');
-        $this->method->invoke($this->reflectedClass, $this->engine_struct_param);
+        $this->method->invoke($this->databaseInstance, $this->engine_struct_param);
     }
 
     /**
@@ -68,7 +68,7 @@ class ValidateNotNullFieldsTest extends AbstractTest
 
         $this->engine_struct_param->type=array(20 => "bar");
         $this->setExpectedException('Exception');
-        $this->method->invoke($this->reflectedClass, $this->engine_struct_param);
+        $this->method->invoke($this->databaseInstance, $this->engine_struct_param);
     }
 
     /**
@@ -81,7 +81,7 @@ class ValidateNotNullFieldsTest extends AbstractTest
 
         $this->engine_struct_param->type="bar";
         $this->setExpectedException('Exception');
-        $this->method->invoke($this->reflectedClass, $this->engine_struct_param);
+        $this->method->invoke($this->databaseInstance, $this->engine_struct_param);
     }
 
     /**
@@ -93,7 +93,7 @@ class ValidateNotNullFieldsTest extends AbstractTest
 
         $this->engine_struct_param->type=67;
         $this->setExpectedException('Exception');
-        $this->method->invoke($this->reflectedClass, $this->engine_struct_param);
+        $this->method->invoke($this->databaseInstance, $this->engine_struct_param);
     }
 
     /**
@@ -106,7 +106,7 @@ class ValidateNotNullFieldsTest extends AbstractTest
 
         $this->engine_struct_param->type=1;
         $this->setExpectedException('Exception');
-        $this->method->invoke($this->reflectedClass, $this->engine_struct_param);
+        $this->method->invoke($this->databaseInstance, $this->engine_struct_param);
     }
 
     /**
@@ -119,7 +119,7 @@ class ValidateNotNullFieldsTest extends AbstractTest
 
         $this->engine_struct_param->type=1000;
         $this->setExpectedException('Exception');
-        $this->method->invoke($this->reflectedClass, $this->engine_struct_param);
+        $this->method->invoke($this->databaseInstance, $this->engine_struct_param);
     }
 
 }

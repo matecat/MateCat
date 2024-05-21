@@ -35,9 +35,6 @@ class FindProjectTest extends AbstractTest {
         $this->database_instance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
         $this->projectDao        = new Projects_ProjectDao( $this->database_instance );
 
-        $this->database_instance->getConnection()->query( "DELETE FROM projects WHERE 1" );
-        $this->database_instance->getConnection()->query( "DELETE FROM jobs WHERE 1" );
-
         $this->database_instance->getConnection()->query(
                 "INSERT INTO projects
                     ( password, id_customer, id_team, name, create_date, id_engine_tm, id_engine_mt, status_analysis, fast_analysis_wc, 
@@ -48,7 +45,8 @@ class FindProjectTest extends AbstractTest {
                     '127.0.0.1', '0', '0', '123', '3', NULL 
                     )"
         );
-        $this->project = new Projects_ProjectStruct( $this->database_instance->getConnection()->query( "SELECT * FROM projects LIMIT 1" )->fetch() );
+        $pId = $this->database_instance->getConnection()->lastInsertId();
+        $this->project = new Projects_ProjectStruct( $this->database_instance->getConnection()->query( "SELECT * FROM projects WHERE id = $pId LIMIT 1" )->fetch() );
 
         $this->database_instance->getConnection()->query(
                 "INSERT INTO jobs
@@ -66,7 +64,9 @@ class FindProjectTest extends AbstractTest {
                               '0', '150', 0,0,0,0,0,0,0
                     )"
         );
-        $this->job = new Jobs_JobStruct( $this->database_instance->getConnection()->query( "SELECT * FROM jobs LIMIT 1" )->fetch() );
+
+        $jobId     = $this->database_instance->getConnection()->lastInsertId();
+        $this->job = new Jobs_JobStruct( $this->database_instance->getConnection()->query( "SELECT * FROM jobs WHERE id = $jobId LIMIT 1" )->fetch() );
 
 
     }
@@ -128,23 +128,37 @@ class FindProjectTest extends AbstractTest {
     function test_findByIdCustomer() {
 
         $result_array      = $this->projectDao->findByIdCustomer( $this->project[ 'id_customer' ] );
-        $first_elem_result = $result_array[ '0' ];
-        $this->assertTrue( $first_elem_result instanceof Projects_ProjectStruct );
+        $found = false;
+        foreach( $result_array as $first_elem_result ){
 
-        $this->assertEquals( $this->project[ 'id' ], $first_elem_result->id );
-        $this->assertEquals( $this->project[ 'password' ], $first_elem_result->password );
-        $this->assertEquals( $this->project[ 'name' ], $first_elem_result->name );
-        $this->assertEquals( $this->project[ 'id_customer' ], $first_elem_result->id_customer );
-        $this->assertEquals( $this->project[ 'create_date' ], $first_elem_result->create_date );
-        $this->assertEquals( $this->project[ 'id_engine_tm' ], $first_elem_result->id_engine_tm );
-        $this->assertEquals( $this->project[ 'id_engine_mt' ], $first_elem_result->id_engine_mt );
-        $this->assertEquals( $this->project[ 'status_analysis' ], $first_elem_result->status_analysis );
-        $this->assertEquals( $this->project[ 'fast_analysis_wc' ], $first_elem_result->fast_analysis_wc );
-        $this->assertEquals( $this->project[ 'standard_analysis_wc' ], $first_elem_result->standard_analysis_wc );
-        $this->assertEquals( $this->project[ 'remote_ip_address' ], $first_elem_result->remote_ip_address );
-        $this->assertEquals( $this->project[ 'instance_id' ], $first_elem_result->instance_id );
-        $this->assertEquals( $this->project[ 'pretranslate_100' ], $first_elem_result->pretranslate_100 );
-        $this->assertEquals( $this->project[ 'id_qa_model' ], $first_elem_result->id_qa_model );
+            $this->assertTrue( $first_elem_result instanceof Projects_ProjectStruct );
+
+            if( $this->project[ 'id' ] == $first_elem_result->id ){ // we found the right project
+
+                $found = true;
+
+                $this->assertEquals( $this->project[ 'id' ], $first_elem_result->id );
+                $this->assertEquals( $this->project[ 'password' ], $first_elem_result->password );
+                $this->assertEquals( $this->project[ 'name' ], $first_elem_result->name );
+                $this->assertEquals( $this->project[ 'id_customer' ], $first_elem_result->id_customer );
+                $this->assertEquals( $this->project[ 'create_date' ], $first_elem_result->create_date );
+                $this->assertEquals( $this->project[ 'id_engine_tm' ], $first_elem_result->id_engine_tm );
+                $this->assertEquals( $this->project[ 'id_engine_mt' ], $first_elem_result->id_engine_mt );
+                $this->assertEquals( $this->project[ 'status_analysis' ], $first_elem_result->status_analysis );
+                $this->assertEquals( $this->project[ 'fast_analysis_wc' ], $first_elem_result->fast_analysis_wc );
+                $this->assertEquals( $this->project[ 'standard_analysis_wc' ], $first_elem_result->standard_analysis_wc );
+                $this->assertEquals( $this->project[ 'remote_ip_address' ], $first_elem_result->remote_ip_address );
+                $this->assertEquals( $this->project[ 'instance_id' ], $first_elem_result->instance_id );
+                $this->assertEquals( $this->project[ 'pretranslate_100' ], $first_elem_result->pretranslate_100 );
+                $this->assertEquals( $this->project[ 'id_qa_model' ], $first_elem_result->id_qa_model );
+
+            }
+
+
+        }
+
+        $this->assertTrue( $found );
+
     }
 
     /**

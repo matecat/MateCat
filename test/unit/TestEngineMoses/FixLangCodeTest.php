@@ -22,9 +22,9 @@ class FixLangCodeTest extends AbstractTest
         $this->engine_struct_param = new EnginesModel_EngineStruct();
         $this->engine_struct_param->type = "MT";
 
-        $this->reflectedClass = new Engines_Moses($this->engine_struct_param);
-        $this->reflector = new ReflectionClass($this->reflectedClass);
-        $this->method = $this->reflector->getMethod("_fixLangCode");
+        $this->databaseInstance = new Engines_Moses($this->engine_struct_param);
+        $this->reflector        = new ReflectionClass($this->databaseInstance);
+        $this->method           = $this->reflector->getMethod("_fixLangCode");
         $this->method->setAccessible(true);
     }
     /**
@@ -34,7 +34,7 @@ class FixLangCodeTest extends AbstractTest
      */
     public function test__fixLangCode_with_simple_string(){
         $string= "ENG";
-        $this->assertEquals("eng", $this->method->invoke($this->reflectedClass,$string ));
+        $this->assertEquals("eng", $this->method->invoke($this->databaseInstance,$string ));
     }
 
 
@@ -59,7 +59,7 @@ LABEL;
 dgb            !"£jaéi
 LABEL;
 
-        $this->assertEquals( $expected_string, $this->method->invoke($this->reflectedClass,$input_string ));
+        $this->assertEquals( $expected_string, $this->method->invoke($this->databaseInstance,$input_string ));
     }
 
     /**
@@ -69,7 +69,7 @@ LABEL;
      */
     public function test__fixLangCode_with_eng_language(){
         $string= "en-US";
-        $this->assertEquals("en", $this->method->invoke($this->reflectedClass,$string ));
+        $this->assertEquals("en", $this->method->invoke($this->databaseInstance,$string ));
     }
 
     /**
@@ -79,6 +79,6 @@ LABEL;
      */
     public function test__fixLangCode_with_italian_language(){
         $string= "it-IT";
-        $this->assertEquals("it", $this->method->invoke($this->reflectedClass,$string ));
+        $this->assertEquals("it", $this->method->invoke($this->databaseInstance,$string ));
     }
 }

@@ -16,9 +16,9 @@ class SanitizeInputArrayTest extends AbstractTest
     public function setUp()
     {
         parent::setUp();
-        $this->reflectedClass = new EnginesModel_EngineDAO(Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ));
-        $this->reflector = new ReflectionClass($this->reflectedClass);
-        $this->method = $this->reflector->getMethod("_sanitizeInputArray");
+        $this->databaseInstance = new EnginesModel_EngineDAO(Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ));
+        $this->reflector        = new ReflectionClass($this->databaseInstance);
+        $this->method           = $this->reflector->getMethod("_sanitizeInputArray");
         $this->method->setAccessible(true);
 
 
@@ -42,7 +42,7 @@ class SanitizeInputArrayTest extends AbstractTest
         $this->array_of_structs_input= array($first_struct,$second_struct,$third_struct );
         $type = "EnginesModel_EngineStruct";
 
-        $invoke = $this->method->invoke($this->reflectedClass, $this->array_of_structs_input, $type);
+        $invoke = $this->method->invoke($this->databaseInstance, $this->array_of_structs_input, $type);
         $this->assertEquals($this->array_of_structs_input, $invoke);
     }
 
@@ -66,7 +66,7 @@ class SanitizeInputArrayTest extends AbstractTest
         $type = "EnginesModel_EngineStruct";
 
         $this->setExpectedException("Exception");
-        $this->method->invoke($this->reflectedClass, $this->array_of_structs_input, $type);
+        $this->method->invoke($this->databaseInstance, $this->array_of_structs_input, $type);
 
     }
 }

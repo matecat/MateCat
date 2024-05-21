@@ -1,52 +1,43 @@
 <?php
 
 /**
- * @group regression
+ * @group  regression
  * @covers Database::useDb
  * User: dinies
  * Date: 12/04/16
  * Time: 16.49
  */
-class UseDbTest extends AbstractTest
-{
-    protected $reflector;
-    protected $property;
+class UseDbTest extends AbstractTest {
 
-    public function setUp()
-    {
+    /**
+     * @var Database|IDatabase
+     */
+    protected $databaseInstance;
+
+    public function setUp() {
         parent::setUp();
-        $this->reflectedClass = Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
-        $this->reflector = new ReflectionClass($this->reflectedClass);
-        $this->reflectedClass->close();
-        $this->property = $this->reflector->getProperty('instance');
-        $this->property->setAccessible(true);
-        $this->property->setValue($this->reflectedClass, null);
+        $this->databaseInstance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
     }
 
-    public function tearDown()
-    {
-        $this->reflectedClass = Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE);
-        $this->reflectedClass->close();
-        startConnection();
+    public function tearDown() {
         parent::tearDown();
     }
 
     /**
-     * This test confirm that 'useDB' change correctly the value
-     * of the protected variable 'database' in current instance of database.
-     * @group regression
+     * This test confirms that 'useDB' change correctly the value
+     * of the protected variable 'database' in the current instance of the database class.
+     * @group  regression
      * @covers Database::useDb
      */
-    public function test_useDb_check_private_variable(){
+    public function test_useDb_check_private_variable() {
 
-        /** @var Database $db */
-        $db =  $this->reflectedClass;
+        $this->databaseInstance->useDb( 'information_schema' );
 
-        $instance_after_reset = $db->obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE);
-        $instance_after_reset->useDb('information_schema');
-        $this->property = $this->reflector->getProperty('database');
-        $this->property->setAccessible(true);
-        $current_database_value = $this->property->getValue($instance_after_reset);
-        $this->assertEquals("information_schema",$current_database_value);
+        $reflector = new ReflectionClass( $this->databaseInstance );
+        $property = $reflector->getProperty( 'database' );
+        $property->setAccessible( true );
+
+        $current_database_value = $property->getValue( $this->databaseInstance );
+        $this->assertEquals( "information_schema", $current_database_value );
     }
 }

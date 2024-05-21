@@ -10,7 +10,7 @@ abstract class AbstractTest extends PHPUnit_Framework_TestCase {
 
     protected $thisTest;
 
-    protected $reflectedClass;
+    protected $databaseInstance;
     protected $reflectedMethod;
 
     public function setUp() {

@@ -32,9 +32,6 @@ class GetByIdProjectAndIdJobChunkTest extends AbstractTest {
         $this->database_instance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
         $this->chunk_Dao         = new Chunks_ChunkDao( $this->database_instance );
 
-        $this->database_instance->getConnection()->query( "DELETE FROM projects WHERE 1" );
-        $this->database_instance->getConnection()->query( "DELETE FROM jobs WHERE 1" );
-
         $this->database_instance->getConnection()->query(
                 "INSERT INTO projects
                     ( password, id_customer, id_team, name, create_date, id_engine_tm, id_engine_mt, status_analysis, fast_analysis_wc, 
@@ -45,7 +42,8 @@ class GetByIdProjectAndIdJobChunkTest extends AbstractTest {
                     '127.0.0.1', '0', '0', '123', '3', NULL 
                     )"
         );
-        $this->project = new Projects_ProjectStruct( $this->database_instance->getConnection()->query( "SELECT * FROM projects LIMIT 1" )->fetch() );
+        $pId = $this->database_instance->getConnection()->lastInsertId();
+        $this->project = new Projects_ProjectStruct( $this->database_instance->getConnection()->query( "SELECT * FROM projects WHERE id = $pId LIMIT 1" )->fetch() );
 
         $this->database_instance->getConnection()->query(
                 "INSERT INTO jobs
@@ -63,7 +61,9 @@ class GetByIdProjectAndIdJobChunkTest extends AbstractTest {
                               '0', '150', 0,0,0,0,0,0,0
                     )"
         );
-        $this->job = new Jobs_JobStruct( $this->database_instance->getConnection()->query( "SELECT * FROM jobs LIMIT 1" )->fetch() );
+
+        $jobId     = $this->database_instance->getConnection()->lastInsertId();
+        $this->job = new Jobs_JobStruct( $this->database_instance->getConnection()->query( "SELECT * FROM jobs WHERE id = $jobId LIMIT 1" )->fetch() );
 
 
     }

@@ -31,9 +31,9 @@ class DecodeMyMemoryTest extends AbstractTest
         $this->engine_struct_param = $eng[0];
 
 
-        $this->reflectedClass = new Engines_MyMemory($this->engine_struct_param);
-        $this->reflector = new ReflectionClass($this->reflectedClass);
-        $this->method = $this->reflector->getMethod("_decode");
+        $this->databaseInstance = new Engines_MyMemory($this->engine_struct_param);
+        $this->reflector        = new ReflectionClass($this->databaseInstance);
+        $this->method           = $this->reflector->getMethod("_decode");
         $this->method->setAccessible(true);
 
     }
@@ -56,7 +56,7 @@ LAB;
         );
         $input_function_purpose= "gloss_get_relative_url";
 
-        $actual_result=$this->method->invoke($this->reflectedClass,$json_input,$this->array_param, $input_function_purpose );
+        $actual_result=$this->method->invoke($this->databaseInstance,$json_input,$this->array_param, $input_function_purpose );
 
         /**
          * general check on the keys of TSM object returned
@@ -92,7 +92,7 @@ LAB;
         );
         $input_function_purpose= "translate_relative_url";
 
-        $actual_result=$this->method->invoke($this->reflectedClass,$json_input,$this->array_param, $input_function_purpose );
+        $actual_result=$this->method->invoke($this->databaseInstance,$json_input,$this->array_param, $input_function_purpose );
         /**
          * general check on the keys of Engines_Results_MyMemory_TMS object returned
          */
@@ -133,7 +133,7 @@ LABEL;
 
         $input_function_purpose= "contribute_relative_url";
 
-        $actual_result=$this->method->invoke($this->reflectedClass,$json_input,$this->array_param, $input_function_purpose );
+        $actual_result=$this->method->invoke($this->databaseInstance,$json_input,$this->array_param, $input_function_purpose );
         /**
          * general check on the keys of Engines_Results_MyMemory_SetContributionResponse object returned
          */
@@ -195,7 +195,7 @@ LABEL;
 
         $input_function_purpose= "contribute_relative_url";
 
-        $actual_result=$this->method->invoke($this->reflectedClass,$json_input,$this->array_param, $input_function_purpose );
+        $actual_result=$this->method->invoke($this->databaseInstance,$json_input,$this->array_param, $input_function_purpose );
         /**
          * general check on the keys of Engines_Results_MyMemory_SetContributionResponse object returned
          */
@@ -246,7 +246,7 @@ LAB;
         /**
          * @var Engines_Results_MyMemory_TMS
          */
-        $actual_result=$this->method->invoke($this->reflectedClass,$json_input,$this->array_param, $input_function_purpose );
+        $actual_result=$this->method->invoke($this->databaseInstance,$json_input,$this->array_param, $input_function_purpose );
 
 
 

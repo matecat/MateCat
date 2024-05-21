@@ -19,9 +19,9 @@ class SanitizeInputTest extends AbstractTest
     public function setUp()
     {
         parent::setUp();
-        $this->reflectedClass = new EnginesModel_EngineDAO(Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ));
-        $this->reflector = new ReflectionClass($this->reflectedClass);
-        $this->method = $this->reflector->getMethod("_sanitizeInput");
+        $this->databaseInstance = new EnginesModel_EngineDAO(Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ));
+        $this->reflector        = new ReflectionClass($this->databaseInstance);
+        $this->method           = $this->reflector->getMethod("_sanitizeInput");
         $this->method->setAccessible(true);
 
 
@@ -41,8 +41,8 @@ class SanitizeInputTest extends AbstractTest
 ba""r/foo'
 LABEL;
         $type = "EnginesModel_EngineStruct";
-        $this->assertEquals($this->struct_input, $this->method->invoke($this->reflectedClass, $this->struct_input, $type));
-        $this->assertTrue($this->method->invoke($this->reflectedClass, $this->struct_input, $type) instanceof EnginesModel_EngineStruct);
+        $this->assertEquals($this->struct_input, $this->method->invoke($this->databaseInstance, $this->struct_input, $type));
+        $this->assertTrue($this->method->invoke($this->databaseInstance, $this->struct_input, $type) instanceof EnginesModel_EngineStruct);
     }
 
 
@@ -63,7 +63,7 @@ ba""r/foo'
 LABEL;
         $type = "EnginesModel_EngineStruct";
         $this->setExpectedException("Exception");
-        $invoke = $this->method->invoke($this->reflectedClass, $this->struct_input, $type);
+        $invoke = $this->method->invoke($this->databaseInstance, $this->struct_input, $type);
         $this->assertFalse($invoke instanceof EnginesModel_EngineStruct);
     }
 

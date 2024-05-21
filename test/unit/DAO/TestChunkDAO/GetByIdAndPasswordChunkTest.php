@@ -29,7 +29,6 @@ class GetByIdAndPasswordChunkTest extends AbstractTest {
         $this->database_instance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
         $this->chunk_Dao         = new Chunks_ChunkDao( $this->database_instance );
 
-        $this->database_instance->getConnection()->query( "DELETE FROM jobs WHERE 1" );
         $this->database_instance->getConnection()->query(
                 "INSERT INTO jobs
                     ( password, id_project, job_first_segment, job_last_segment, id_translator, tm_keys, 
@@ -46,7 +45,9 @@ class GetByIdAndPasswordChunkTest extends AbstractTest {
                               '0', '150', 0,0,0,0,0,0,0
                     )"
         );
-        $this->job = $this->database_instance->getConnection()->query( "SELECT * FROM jobs LIMIT 1" )->fetch();
+
+        $jobId = $this->database_instance->getConnection()->lastInsertId();
+        $this->job = $this->database_instance->getConnection()->query( "SELECT * FROM jobs WHERE id = $jobId LIMIT 1" )->fetch();
 
     }
 

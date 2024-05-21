@@ -16,9 +16,9 @@ class GetStructTest extends AbstractTest
     public function setUp()
     {
         parent::setUp();
-        $this->reflectedClass = new EnginesModel_EngineStruct;
-        $this->reflector = new ReflectionClass($this->reflectedClass);
-        $this->method = $this->reflector->getMethod("getStruct");
+        $this->databaseInstance = new EnginesModel_EngineStruct;
+        $this->reflector        = new ReflectionClass($this->databaseInstance);
+        $this->method           = $this->reflector->getMethod("getStruct");
     }
 
     /**
@@ -29,6 +29,6 @@ class GetStructTest extends AbstractTest
      */
     public function test_getStruct_simple()
     {
-        $this->assertTrue($this->method->invoke($this->reflectedClass,NULL) instanceof EnginesModel_EngineStruct);
+        $this->assertTrue($this->method->invoke($this->databaseInstance,NULL) instanceof EnginesModel_EngineStruct);
     }
 }
