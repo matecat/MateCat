@@ -26,7 +26,7 @@ export const getSecondPassReview = async (
     formData.append(key, dataParams[key])
   })
   const response = await fetch(
-    `${getMatecatApiDomain()}plugins/second_pass_review/project/${idProject}/${passwordProject}/reviews`,
+    `${getMatecatApiDomain()}api/v2/projects/${idProject}/${passwordProject}/reviews`,
     {
       method: 'POST',
       credentials: 'include',
