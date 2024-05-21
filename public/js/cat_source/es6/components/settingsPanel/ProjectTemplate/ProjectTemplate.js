@@ -38,6 +38,22 @@ export const ProjectTemplate = ({portalTarget}) => {
 
   const updateNameBehaviour = useRef({})
   updateNameBehaviour.current.confirm = () => {
+    if (
+      projectTemplates
+        .filter(({id}) => id !== currentProjectTemplate.id)
+        .some(({name}) => name.toLowerCase() === templateName.toLowerCase())
+    ) {
+      // template name already exists
+      CatToolActions.addNotification({
+        title: 'Duplicated name',
+        type: 'error',
+        text: 'This name is already in use, please choose a different one',
+        position: 'br',
+      })
+
+      return
+    }
+
     const originalTemplate = projectTemplates.find(
       ({id, isTemporary}) => id === currentProjectTemplate.id && !isTemporary,
     )
