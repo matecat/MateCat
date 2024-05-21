@@ -178,16 +178,15 @@ window.APP = {
   checkGlobalMassages: function () {
     if (config.global_message) {
       var messages = JSON.parse(config.global_message)
-      $.each(messages, function () {
-        var elem = this
+      messages.forEach(function (elem) {
         if (
-          typeof Cookies.get('msg-' + this.token) == 'undefined' &&
-          new Date(this.expire) > new Date()
+          typeof Cookies.get('msg-' + elem.token) == 'undefined' &&
+          new Date(elem.expire) > new Date()
         ) {
           var notification = {
             title: 'Notice',
-            text: this.msg,
-            type: 'warning',
+            text: elem.msg,
+            type: elem.level ? elem.level : 'warning',
             autoDismiss: false,
             position: 'bl',
             allowHtml: true,
