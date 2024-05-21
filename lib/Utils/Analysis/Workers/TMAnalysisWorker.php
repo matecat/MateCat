@@ -166,7 +166,7 @@ class TMAnalysisWorker extends AbstractWorker {
         $equivalentWordMapping = json_decode( $queueElement->params->payable_rates, true );
 
         $new_match_type = $this->_getNewMatchType(
-            ( stripos( $firstAvailableNotMTMatch[ 'created_by' ], "MT" ) !== false ? "MT" : $suggestion_match ),
+            ( stripos( $suggestion_source, "MT" ) !== false ? "MT" : $suggestion_match ),
             $queueElement->params->match_type,
             $queueElement->params->fast_exact_match_type,
             $equivalentWordMapping,
