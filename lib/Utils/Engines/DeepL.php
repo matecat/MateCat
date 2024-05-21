@@ -38,9 +38,29 @@ class Engines_DeepL extends Engines_AbstractEngine
         $target = $parameters['target_lang'];
         $segment = $parameters['text'][0];
 
-       // $response = new Engines_Results_DeepL_TranslateResponse($translation, $source, $target, $segment);
-
-        return [];
+        return [
+            'id' => 0,
+            'create_date' => '0000-00-00',
+            'segment' => $segment,
+            'raw_segment' => $segment,
+            'translation' => $translation,
+            'raw_translation' => $translation,
+            'source_note' => '',
+            'target_note' => '',
+            'quality' => 85,
+            'reference' => '',
+            'usage_count' => 0,
+            'subject' => '',
+            'created_by' => 'MT-DeepL',
+            'last_updated_by' => '',
+            'last_update_date' => '',
+            'match' => 85,
+            'memory_key' => '',
+            'ICE' => false,
+            'tm_properties' => [],
+            'target' => $target,
+            'source' => $source,
+        ];
     }
 
     /**
