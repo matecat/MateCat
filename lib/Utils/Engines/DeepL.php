@@ -51,7 +51,7 @@ class Engines_DeepL extends Engines_AbstractEngine
             'reference' => '',
             'usage_count' => 0,
             'subject' => '',
-            'created_by' => 'MT-DeepL',
+            'created_by' => 'MT-DeepL', //
             'last_updated_by' => '',
             'last_update_date' => '',
             'match' => 85,
