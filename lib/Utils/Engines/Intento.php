@@ -33,8 +33,10 @@ class Engines_Intento extends Engines_AbstractEngine {
 
     /**
      * @param $rawValue
-     *
-     * @return array
+     * @param null $parameters
+     * @param null $function
+     * @return array|Engines_Results_MT
+     * @throws Exception
      */
     protected function _decode($rawValue, $parameters = null, $function = null) {
         $all_args = func_get_args();
