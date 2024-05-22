@@ -18,7 +18,6 @@ export const getSecondPassReview = async (
   const dataParams = {
     id_job: idJob,
     password: passwordJob,
-    revision_number: 2,
   }
 
   const formData = new FormData()
@@ -26,7 +25,7 @@ export const getSecondPassReview = async (
     formData.append(key, dataParams[key])
   })
   const response = await fetch(
-    `${getMatecatApiDomain()}api/v2/projects/${idProject}/${passwordProject}/reviews`,
+    `${getMatecatApiDomain()}api/v2/projects/${idProject}/${passwordProject}/r2`,
     {
       method: 'POST',
       credentials: 'include',
