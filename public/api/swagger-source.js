@@ -270,44 +270,58 @@ var spec = {
         },
       },
     },
-    '/api/change_project_password': {
+    '/api/v2/change-password': {
       post: {
-        tags: ['Project'],
-        summary: 'Change password',
-        description: 'Change the password of a project.',
-        parameters: [
-          {
-            name: 'id_project',
-            in: 'formData',
-            description: 'The id of the project you want to update.',
-            required: true,
-            type: 'integer',
+        tags: ['Project', 'Job'],
+      },
+      summary: 'Change password',
+      description: 'Change the password of a project or a job.',
+      parameters: [
+        {
+          name: 'res',
+          in: 'formData',
+          description: 'Possible values: job, prj (if not specified, job is the default value)',
+          required: false,
+          type: 'string',
+        },
+        {
+          name: 'id',
+          in: 'formData',
+          description: 'The id of the resource (project or job) you want to update.',
+          required: true,
+          type: 'integer',
+        },
+        {
+          name: 'password',
+          in: 'formData',
+          description: 'The OLD password of the resource (project or job) you want to update.',
+          required: true,
+          type: 'string',
+        },
+        {
+          name: 'new_password',
+          in: 'formData',
+          description: 'The NEW password of the new_password you want to update. It is required if undo is defined',
+          required: false,
+          type: 'string',
+        },
+        {
+          name: 'undo',
+          in: 'formData',
+          description: 'If false, the new password is randomly generated.',
+          required: false,
+          type: 'boolean',
+        },
+      ],
+      responses: {
+        200: {
+          description: 'An array of price estimates by product',
+          schema: {
+            $ref: '#/definitions/ChangePasswordResponse',
           },
-          {
-            name: 'old_pass',
-            in: 'formData',
-            description: 'The OLD password of the project you want to update.',
-            required: true,
-            type: 'string',
-          },
-          {
-            name: 'new_pass',
-            in: 'formData',
-            description: 'The NEW password of the project you want to update.',
-            required: true,
-            type: 'string',
-          },
-        ],
-        responses: {
-          200: {
-            description: 'An array of price estimates by product',
-            schema: {
-              $ref: '#/definitions/ChangePasswordResponse',
-            },
-          },
-          default: {
-            description: 'Unexpected error',
-          },
+        },
+        default: {
+          description: 'Unexpected error',
         },
       },
     },
@@ -2933,24 +2947,17 @@ var spec = {
     ChangePasswordResponse: {
       type: 'object',
       properties: {
-        status: {
+        id: {
           type: 'string',
-          description:
-            'Return the exit status of the action. The statuses can be OK or FAIL',
-          enum: ['OK', 'FAIL'],
+          description: 'Returns the id of the resource just updated',
         },
-        id_project: {
+        new_pwd: {
           type: 'string',
-          description: 'Returns the id of the project just updated',
+          description: 'Returns the new pass of the resource just updated',
         },
-        project_pass: {
+        old_pwd: {
           type: 'string',
-          description: 'Returns the new pass of the project just updated',
-        },
-        message: {
-          type: 'string',
-          description:
-            'Return the error message for the action if the status is FAIL',
+          description: 'Returns the old pass of the resource just updated',
         },
       },
     },

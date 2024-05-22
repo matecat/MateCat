@@ -1,6 +1,6 @@
 <?php
 
-namespace API\V3;
+namespace API\V2;
 
 use API\V2\ChunkController;
 use API\V2\Validators\LoginValidator;
