@@ -242,7 +242,7 @@ test('Cancelled job: check Resume job item', () => {
 test('Generate revise 2: onClick flow', async () => {
   mswServer.use(
     ...[
-      http.post('/api/v2/projects/:id/:password/reviews', () => {
+      http.post('/api/v2/projects/:id/:password/r2', () => {
         return HttpResponse.json({
           chunk_review: {
             id: 164,
