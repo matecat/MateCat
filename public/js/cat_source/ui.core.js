@@ -51,7 +51,7 @@ window.UI = {
     return (
       segmentModified ||
       statusAcceptedNotModified.indexOf(segmentStatus) !== -1 ||
-      (!segmentModified && status !== segmentStatus)
+      (!segmentModified && status.toLowerCase() !== segmentStatus)
     )
   },
 
