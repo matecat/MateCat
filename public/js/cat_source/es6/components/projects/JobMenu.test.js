@@ -242,19 +242,15 @@ test('Cancelled job: check Resume job item', () => {
 test('Generate revise 2: onClick flow', async () => {
   mswServer.use(
     ...[
-      http.post(
-        config.basepath +
-          'plugins/second_pass_review/project/:id/:password/reviews',
-        () => {
-          return HttpResponse.json({
-            chunk_review: {
-              id: 164,
-              id_job: 98,
-              review_password: '6688b6b321de',
-            },
-          })
-        },
-      ),
+      http.post('/api/v2/projects/:id/:password/reviews', () => {
+        return HttpResponse.json({
+          chunk_review: {
+            id: 164,
+            id_job: 98,
+            review_password: '6688b6b321de',
+          },
+        })
+      }),
     ],
   )
 
