@@ -49,7 +49,17 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
         stats.equivalent.translated +
         stats.equivalent.approved,
     )
+
+    stats.translate_todo_total = Math.round(stats.raw.draft + stats.raw.new)
+    stats.revise_todo_total = Math.round(
+      stats.translate_todo_total + stats.raw.translated,
+    )
+    stats.revise2_todo_total = Math.round(
+      stats.translate_todo_total + stats.raw.translated + stats.raw.approved,
+    )
+
     this._projectProgress = stats
+    console.log('setProgress: -> stats', stats)
   },
   updateQR: function (qr) {
     this.qr = qr

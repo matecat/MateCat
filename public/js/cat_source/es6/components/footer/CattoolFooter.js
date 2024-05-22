@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, {useEffect, useState} from 'react'
 
 import CatToolStore from '../../stores/CatToolStore'
 import CatToolConstants from '../../constants/CatToolConstants'
@@ -24,18 +24,12 @@ export const CattolFooter = ({
     todo: false,
   })
 
-  let sourceLang = languagesArray.find((item) => item.code == source)?.name
-  let targetLang = languagesArray.find((item) => item.code == target)?.name
+  const sourceLang =
+    languagesArray.find((item) => item.code == source)?.name ?? source
+  const targetLang =
+    languagesArray.find((item) => item.code == target)?.name ?? target
 
-  if (!sourceLang) {
-    sourceLang = source
-  }
-
-  if (!targetLang) {
-    targetLang = target
-  }
-
-  React.useEffect(() => {
+  useEffect(() => {
     const listener = (stats) => {
       setStats(stats)
     }
