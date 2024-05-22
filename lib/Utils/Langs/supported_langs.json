@@ -301,7 +301,18 @@
         {
             "localized": [
                 {
-                    "en": "Bengali"
+                    "en": "Bengali (Bangladesh)"
+                }
+            ],
+            "isocode": "bn",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "bn-BD"
+        },
+        {
+            "localized": [
+                {
+                    "en": "Bengali (India)"
                 }
             ],
             "isocode": "bn",
