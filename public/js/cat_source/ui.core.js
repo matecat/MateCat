@@ -45,7 +45,7 @@ window.UI = {
    * @returns {boolean}
    */
   shouldSegmentAutoPropagate: function (segment, status) {
-    var segmentStatus = segment.status
+    var segmentStatus = segment.status.toLowerCase()
     var statusAcceptedNotModified = ['new', 'draft']
     var segmentModified = segment.modified
     return (
