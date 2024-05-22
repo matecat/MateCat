@@ -439,7 +439,7 @@ window.UI = {
     const propagate = options.propagate
     this.executingSetTranslation.push(id_segment)
     let segment = SegmentStore.getSegmentByIdToJS(id_segment)
-
+    if (!segment) return
     this.lastTranslatedSegmentId = id_segment
 
     const translateRequest = SegmentUtils.createSetTranslationRequest(
@@ -494,24 +494,6 @@ window.UI = {
         }
         SegmentActions.setSegmentSaving(id_segment, false)
       })
-  },
-  /**
-   *
-   * @param sid
-   * @param selector
-   * @returns {string}
-   */
-  collectSplittedTranslations: function (sid, selector) {
-    var totalTranslation = ''
-    var segments = SegmentStore.getSegmentsInSplit(sid)
-    $.each(segments, function (index) {
-      var segment = this
-      totalTranslation +=
-        selector === '.source' ? segment.segment : segment.translation
-      if (index < segments.length - 1)
-        totalTranslation += UI.splittedTranslationPlaceholder
-    })
-    return totalTranslation
   },
 
   processErrors: function (err, operation) {
