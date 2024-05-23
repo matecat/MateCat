@@ -509,7 +509,9 @@ body.analyze {
             .button {
               width: 45%;
             }
-            &.splitted {
+            &.disable-outsource {
+              border-right: none;
+              justify-content: center;
             }
           }
           .outsource-translation {
