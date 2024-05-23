@@ -248,17 +248,20 @@ class AnalyzeChunksResume extends React.Component {
                   </div>
                 </div>
                 <div className="activity-icons">
-                  <div className={'activity-button splitted'}>
+                  <div
+                    className={`activity-button ${config.jobAnalysis ? 'disable-outsource' : ''}`}
+                  >
                     {/*{self.getOpenButton(job.toJS(), job.id + '-' + index)}*/}
                     {this.getDirectOpenButton(
                       chunkAnalysis,
                       job.id + '-' + index,
                     )}
                   </div>
-                  {this.getOutsourceButton(
-                    chunkAnalysis,
-                    chunkAnalysis.id + '-' + index,
-                  )}
+                  {!config.jobAnalysis &&
+                    this.getOutsourceButton(
+                      chunkAnalysis,
+                      chunkAnalysis.id + '-' + index,
+                    )}
                 </div>
                 <OutsourceContainer
                   project={this.props.project}
@@ -412,7 +415,9 @@ class AnalyzeChunksResume extends React.Component {
                     </div>
                   </div>
                   <div className="activity-icons">
-                    <div className="activity-button">
+                    <div
+                      className={`activity-button  ${config.jobAnalysis ? 'disable-outsource' : ''}`}
+                    >
                       {!config.jobAnalysis && config.splitEnabled ? (
                         <div
                           className={
@@ -429,7 +434,8 @@ class AnalyzeChunksResume extends React.Component {
                       {/*{this.getOpenButton(job.toJS(), jobsAnalysis[indexJob].id)}*/}
                       {this.getDirectOpenButton(chunkAnalysis)}
                     </div>
-                    {this.getOutsourceButton(chunkAnalysis, chunkAnalysis.id)}
+                    {!config.jobAnalysis &&
+                      this.getOutsourceButton(chunkAnalysis, chunkAnalysis.id)}
                   </div>
                 </div>
                 <OutsourceContainer
