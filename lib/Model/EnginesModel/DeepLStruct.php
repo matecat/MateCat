@@ -49,7 +49,7 @@ class DeepLStruct extends EnginesModel_EngineStruct
     /**
      * @var int
      */
-    public $penalty = 14;
+    public $penalty = 15; // to get 85% matches
 
     public static function getStruct() {
         return new DeepLStruct();

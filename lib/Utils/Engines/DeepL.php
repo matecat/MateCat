@@ -28,39 +28,25 @@ class Engines_DeepL extends Engines_AbstractEngine
      * @param $rawValue
      * @param array $parameters
      * @param null $function
-     * @return array
+     * @return array|Engines_Results_MT
+     * @throws Exception
      */
     protected function _decode($rawValue, array $parameters = [], $function = null)
     {
         $rawValue = json_decode($rawValue, true);
         $translation = $rawValue['translations'][0]['text'];
+        $translation = $this->_resetSpecialStrings( html_entity_decode($translation, ENT_QUOTES | 16  ) );
         $source = $parameters['source_lang'];
         $target = $parameters['target_lang'];
         $segment = $parameters['text'][0];
 
-        return [
-            'id' => 0,
-            'create_date' => '0000-00-00',
-            'segment' => $segment,
-            'raw_segment' => $segment,
-            'translation' => $translation,
-            'raw_translation' => $translation,
-            'source_note' => '',
-            'target_note' => '',
-            'quality' => 85,
-            'reference' => '',
-            'usage_count' => 0,
-            'subject' => '',
-            'created_by' => 'MT-DeepL', //
-            'last_updated_by' => '',
-            'last_update_date' => '',
-            'match' => 85,
-            'memory_key' => '',
-            'ICE' => false,
-            'tm_properties' => [],
-            'target' => $target,
-            'source' => $source,
-        ];
+        return ( new Engines_Results_MyMemory_Matches(
+            $segment,
+            $translation,
+            "85%",
+            "MT-" . $this->getName(),
+            date( "Y-m-d" )
+        ) )->getMatches(1, [], $source, $target);
     }
 
     /**
