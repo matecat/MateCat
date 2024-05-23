@@ -29,7 +29,7 @@ import ApplicationStore from '../stores/ApplicationStore'
 import {useGoogleLoginNotification} from '../hooks/useGoogleLoginNotification'
 import ModalsActions from '../actions/ModalsActions'
 import FatalErrorModal from '../components/modals/FatalErrorModal'
-import {CattoolFooterNew} from '../components/footer/CattoolFooterNew'
+import {CattoolFooter} from '../components/footer/CattoolFooter'
 
 const urlParams = new URLSearchParams(window.location.search)
 const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
@@ -424,7 +424,7 @@ function CatTool() {
           }}
         />
       )}
-      <CattoolFooterNew
+      <CattoolFooter
         idProject={config.id_project}
         idJob={config.id_job}
         password={config.password}

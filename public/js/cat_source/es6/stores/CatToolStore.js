@@ -59,7 +59,6 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
     )
 
     this._projectProgress = stats
-    console.log('setProgress: -> stats', stats)
   },
   updateQR: function (qr) {
     this.qr = qr

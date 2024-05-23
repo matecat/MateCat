@@ -39,16 +39,31 @@
       font-weight: bold;
     }
 
+    > :last-child {
+      color: $grey6;
+    }
+
     .grey-box-row {
       display: grid;
       gap: 15px;
       grid-template-columns: 80px 1fr auto;
       text-align: left;
+
+      > :last-child:is(span) {
+        font-weight: normal;
+      }
     }
 
     .button-icon {
       width: 14px !important;
       height: 14px !important;
+    }
+  }
+
+  .grey-box-speed-etc {
+    font-weight: bold;
+    > * {
+      color: $black !important;
     }
   }
 }
