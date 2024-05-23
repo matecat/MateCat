@@ -35,7 +35,7 @@ class Translations_SegmentTranslationStruct extends DataAccess_AbstractDaoSilent
     }
 
     /**
-     * This particular pre-translated can be obtained by creating a new project flagging the `Pre-translate 100% matches from TM` check
+     * This particular pre-translated can be obtained by creating a new project flagging the `Pre-translate 100% matches from TM` check on the application.
      *
      * @return bool
      */
