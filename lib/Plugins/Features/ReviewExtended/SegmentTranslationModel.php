@@ -291,7 +291,7 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
                 $chunkReviews[] = $chunkReview;
             } elseif(
                 ($this->_event->isR2() || $this->_event->isR1()) &&
-                $this->_event->isModified100Match()
+                $this->_event->isPreTranslated100ModifiedForTheFirstTime()
                 && $this->_event->currentEventIsOnThisChunk( $chunkReview )
             ){
                 $this->increaseAllCounters( $chunkReview );

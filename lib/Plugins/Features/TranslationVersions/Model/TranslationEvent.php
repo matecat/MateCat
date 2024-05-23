@@ -125,7 +125,7 @@ class TranslationEvent {
     }
 
     public function is100MatchPreTranslated() {
-        return $this->old_translation->is100Match();
+        return $this->old_translation->isPreTranslated100();
     }
 
     /**
@@ -150,10 +150,10 @@ class TranslationEvent {
     /**
      * @return bool
      */
-    public function isModified100Match() {
-        return $this->is100MatchPreTranslated() && // segment is ICE
-            $this->wanted_translation->version_number != 0  // version number is changing
-            ;
+    public function isPreTranslated100ModifiedForTheFirstTime() {
+        return $this->is100MatchPreTranslated() &&
+            $this->old_translation->version_number == 0 &&
+            $this->wanted_translation->version_number == 1;
     }
 
     /**
