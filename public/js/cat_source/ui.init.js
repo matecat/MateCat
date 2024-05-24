@@ -41,7 +41,6 @@ $.extend(window.UI, {
     //this.checkVersion()
 
     // SET EVENTS
-    this.setEvents()
     this.checkQueryParams()
 
     UI.firstLoad = false
