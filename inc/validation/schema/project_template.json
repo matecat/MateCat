@@ -52,6 +52,9 @@
     },
     "qa_model_template_id": {
       "type": ["null", "integer", "string"]
+    },
+    "filters_xliff_config_template_id": {
+      "type": ["null", "integer", "string"]
     }
   },
   "required": [
