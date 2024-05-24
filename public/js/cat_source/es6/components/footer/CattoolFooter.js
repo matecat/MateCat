@@ -92,10 +92,10 @@ export const CattoolFooter = ({
     return (
       <>
         <div className="grey-box-row">
-          <span>Total words:</span>
+          <span>Total words</span>
           {stats ? Math.round(stats.raw.total) : '-'}{' '}
           {config.allow_link_to_analysis && (
-            <Tooltip content="Go to analysis">
+            <Tooltip content="Go to analysis page">
               <Button
                 ref={goToAnalysisRef}
                 className="button-icon"
@@ -109,7 +109,7 @@ export const CattoolFooter = ({
           )}
         </div>
         <div className="grey-box-row">
-          <span>{label}:</span>
+          <span>{label}</span>
           {stats ? Math.round(stats.equivalent.total) : '-'}{' '}
         </div>
       </>
@@ -138,9 +138,9 @@ export const CattoolFooter = ({
     return (
       <>
         <div className="grey-box-row">
-          <span>To do:</span>
+          <span>To do</span>
           {valueTotal ? Math.round(valueTotal) : '-'}{' '}
-          <Tooltip content="Jump to next segment">
+          <Tooltip content="Go to next unconfirmed segment">
             <Button
               ref={openToDoRef}
               className="button-icon"
@@ -159,6 +159,36 @@ export const CattoolFooter = ({
       </>
     )
   }
+
+  const renderSpeedETC = () => (
+    <>
+      <div className="grey-box-row">
+        <span>Speed:</span>
+        {stats?.words_per_hour ?? (
+          <Tooltip
+            content="This information becomes available after you confirm at least ten segments since opening the job"
+            position={TOOLTIP_POSITION.LEFT}
+          >
+            <span ref={speedNaRef}>N/A</span>
+          </Tooltip>
+        )}{' '}
+        <span>Words/h</span>
+      </div>
+      <div className="grey-box-row">
+        <Tooltip content="Estimated time to complete">
+          <span ref={etcLabelRef}>ETC:</span>
+        </Tooltip>
+        {stats?.estimated_completion ?? (
+          <Tooltip
+            content="This information becomes available after you confirm at least ten segments since opening the job"
+            position={TOOLTIP_POSITION.LEFT}
+          >
+            <span ref={etcNARef}>N/A</span>
+          </Tooltip>
+        )}
+      </div>
+    </>
+  )
 
   return (
     <footer className="stats-foo">
@@ -189,35 +219,7 @@ export const CattoolFooter = ({
 
           <div className="grey-box">{renderWordsStats()}</div>
           <div className="grey-box">{renderToDoStats()}</div>
-        </div>
-        <div className="container-right">
-          <div className="grey-box grey-box-speed-etc">
-            <div className="grey-box-row">
-              <span>Speed:</span>
-              {stats?.words_per_hour ?? (
-                <Tooltip
-                  content="This information becomes available after you confirm at least ten segments since opening the job"
-                  position={TOOLTIP_POSITION.LEFT}
-                >
-                  <span ref={speedNaRef}>N/A</span>
-                </Tooltip>
-              )}{' '}
-              <span>Words/h</span>
-            </div>
-            <div className="grey-box-row">
-              <Tooltip content="Estimated time to complete">
-                <span ref={etcLabelRef}>ETC:</span>
-              </Tooltip>
-              {stats?.estimated_completion ?? (
-                <Tooltip
-                  content="This information becomes available after you confirm at least ten segments since opening the job"
-                  position={TOOLTIP_POSITION.LEFT}
-                >
-                  <span ref={etcNARef}>N/A</span>
-                </Tooltip>
-              )}
-            </div>
-          </div>
+          <div className="grey-box grey-box-speed-etc">{renderSpeedETC()}</div>
         </div>
       </div>
       <CookieConsent />
