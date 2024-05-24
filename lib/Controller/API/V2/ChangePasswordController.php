@@ -183,12 +183,5 @@ class ChangePasswordController extends ChunkController
         if($check === null){
             throw new Exception('The logged user does not belong to the right team', 403);
         }
-
-        // check uid
-        $owner = $project->getOriginalOwner();
-
-        if($owner->uid !== $user->uid){
-            throw new Exception('This project does not belong to the logged user', 403);
-        }
     }
 }
