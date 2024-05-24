@@ -17,12 +17,13 @@ class GDriveController extends KleinController {
     const GDRIVE_LIST_COOKIE_NAME = 'gdrive_files_to_be_listed';
     const GDRIVE_OUTCOME_COOKIE_NAME = 'gdrive_files_outcome';
 
-    private $source_lang           = Constants::DEFAULT_SOURCE_LANG;
-    private $target_lang           = Constants::DEFAULT_TARGET_LANG;
-    private $seg_rule              = null;
-    private $guid                  = null;
+    private $source_lang                   = Constants::DEFAULT_SOURCE_LANG;
+    private $target_lang                   = Constants::DEFAULT_TARGET_LANG;
+    private $seg_rule                      = null;
+    private $filters_extraction_parameters = null;
+    private $guid                          = null;
     private $isAsyncReq;
-    private $isImportingSuccessful = true;
+    private $isImportingSuccessful         = true;
 
     /**
      * @var Session
@@ -41,6 +42,8 @@ class GDriveController extends KleinController {
         $this->setIsAsyncReq( $this->request->param( 'isAsync' ) );
         $this->source_lang = $this->getSource();
         $this->target_lang = $this->getTarget();
+
+        // @TODO set filters_extraction_parameters
 
         $_SESSION[ Constants::SESSION_ACTUAL_SOURCE_LANG ] = $this->source_lang;
 
@@ -129,7 +132,7 @@ class GDriveController extends KleinController {
             }
         }
 
-        $this->gdriveUserSession->setConversionParams( $this->guid, $this->source_lang, $this->target_lang, $this->seg_rule );
+        $this->gdriveUserSession->setConversionParams( $this->guid, $this->source_lang, $this->target_lang, $this->seg_rule, $this->filters_extraction_parameters );
 
         for ( $i = 0; $i < count( $listOfIds ) && $this->isImportingSuccessful === true; $i++ ) {
             try {

@@ -15,6 +15,8 @@ use QAModelTemplate\QAModelTemplateStruct;
 use Teams\MembershipDao;
 use TMS\TMSService;
 use Validator\EngineValidator;
+use Validator\JSONValidator;
+use Validator\JSONValidatorObject;
 use Validator\MMTValidator;
 
 //limit execution time to 300 seconds
@@ -119,6 +121,8 @@ class NewController extends ajaxController {
 
     private $dialect_strict;
 
+    private $filters_extraction_parameters;
+
     private function setBadRequestHeader() {
         $this->httpHeader = 'HTTP/1.0 400 Bad Request';
     }
@@ -203,6 +207,8 @@ class NewController extends ajaxController {
 
                 'deepl_formality'    => [ 'filter' => FILTER_SANITIZE_STRING ],
                 'deepl_id_glossary'  => [ 'filter' => FILTER_SANITIZE_STRING ],
+
+                'filters_extraction_parameters'  => [ 'filter' => FILTER_SANITIZE_STRING ],
         ];
 
         $filterArgs = $this->featureSet->filter( 'filterNewProjectInputFilters', $filterArgs, $this->userIsLogged );
@@ -253,6 +259,7 @@ class NewController extends ajaxController {
             $this->__validateMMTGlossaries();
             $this->__validateDeepLGlossaryParams();
             $this->__validateDialectStrictParam();
+            $this->__validateFiltersExtractionParameters();
             $this->__appendFeaturesToProject();
             $this->__generateTargetEngineAssociation();
         } catch ( Exception $ex ) {
@@ -427,6 +434,7 @@ class NewController extends ajaxController {
             $conversionHandler->setErrDir( $errDir );
             $conversionHandler->setFeatures( $this->featureSet );
             $conversionHandler->setUserIsLogged( $this->userIsLogged );
+            $conversionHandler->setFiltersExtractionParameters($this->filters_extraction_parameters);
 
             if ( $ext == "zip" ) {
                 // this makes the conversionhandler accumulate eventual errors on files and continue
@@ -680,6 +688,9 @@ class NewController extends ajaxController {
             $projectStructure[ 'dialect_strict' ] = $this->dialect_strict;
         }
 
+        if( $this->filters_extraction_parameters ) {
+            $projectStructure[ 'filters_extraction_parameters' ] = $this->filters_extraction_parameters;
+        }
 
         //set features override
         $projectStructure[ 'project_features' ] = $this->projectFeatures;
@@ -1274,6 +1285,26 @@ class NewController extends ajaxController {
             }
 
             $this->dialect_strict = html_entity_decode($dialect_strict);
+        }
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function __validateFiltersExtractionParameters(){
+
+        if ( !empty( $this->postInput[ 'filters_extraction_parameters' ] ) ) {
+
+            $json = html_entity_decode( $this->postInput[ 'filters_extraction_parameters' ]);
+            $schema = file_get_contents( \INIT::$ROOT . '/inc/validation/schema/filters_extraction_parameters.json' );
+
+            $validatorObject = new JSONValidatorObject();
+            $validatorObject->json = $json;
+
+            $validator = new JSONValidator($schema);
+            $validator->validate($validatorObject);
+
+            $this->filters_extraction_parameters = json_decode($json);
         }
     }
 

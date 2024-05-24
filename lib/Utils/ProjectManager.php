@@ -123,77 +123,77 @@ class ProjectManager {
      */
     public function __construct( ArrayObject $projectStructure = null ) {
 
-
         if ( $projectStructure == null ) {
             $projectStructure = new RecursiveArrayObject(
                 [
-                    'HTTP_HOST'                    => null,
-                    'id_project'                   => null,
-                    'create_date'                  => date( "Y-m-d H:i:s" ),
-                    'id_customer'                  => self::TRANSLATED_USER,
-                    'project_features'             => [],
-                    'user_ip'                      => null,
-                    'project_name'                 => null,
-                    'result'                       => [ "errors" => [], "data" => [] ],
-                    'private_tm_key'               => 0,
-                    'uploadToken'                  => null,
-                    'array_files'                  => [], //list of file names
-                    'array_files_meta'             => [], //list of file metadata
-                    'file_id_list'                 => [],
-                    'source_language'              => null,
-                    'target_language'              => null,
-                    'job_subject'                  => 'general',
-                    'mt_engine'                    => null,
-                    'tms_engine'                   => null,
-                    'ppassword'                    => null,
-                    'array_jobs'                   => [
+                    'HTTP_HOST'                     => null,
+                    'id_project'                    => null,
+                    'create_date'                   => date( "Y-m-d H:i:s" ),
+                    'id_customer'                   => self::TRANSLATED_USER,
+                    'project_features'              => [],
+                    'user_ip'                       => null,
+                    'project_name'                  => null,
+                    'result'                        => [ "errors" => [], "data" => [] ],
+                    'private_tm_key'                => 0,
+                    'uploadToken'                   => null,
+                    'array_files'                   => [], //list of file names
+                    'array_files_meta'              => [], //list of file metadata
+                    'file_id_list'                  => [],
+                    'source_language'               => null,
+                    'target_language'               => null,
+                    'job_subject'                   => 'general',
+                    'mt_engine'                     => null,
+                    'tms_engine'                    => null,
+                    'ppassword'                     => null,
+                    'array_jobs'                    => [
                         'job_list'      => [],
                         'job_pass'      => [],
                         'job_segments'  => [],
                         'job_languages' => [],
                         'payable_rates' => [],
                     ],
-                    'job_segments'                 => [], //array of job_id => [  min_seg, max_seg  ]
-                    'segments'                     => [], //array of files_id => segments[  ]
-                    'segments-original-data'       => [], //array of files_id => segments-original-data[  ]
-                    'segments_metadata'            => [], //array of segments_metadata
-                    'segments-meta-data'           => [], //array of files_id => segments-meta-data[  ]
-                    'file-part-id'                 => [], //array of files_id => segments-meta-data[  ]
-                    'file-metadata'                => [], //array of files metadata
-                    'translations'                 => [],
-                    'notes'                        => [],
-                    'context-group'                => [],
+                    'job_segments'                  => [], //array of job_id => [  min_seg, max_seg  ]
+                    'segments'                      => [], //array of files_id => segments[  ]
+                    'segments-original-data'        => [], //array of files_id => segments-original-data[  ]
+                    'segments_metadata'             => [], //array of segments_metadata
+                    'segments-meta-data'            => [], //array of files_id => segments-meta-data[  ]
+                    'file-part-id'                  => [], //array of files_id => segments-meta-data[  ]
+                    'file-metadata'                 => [], //array of files metadata
+                    'translations'                  => [],
+                    'notes'                         => [],
+                    'context-group'                 => [],
                     //one translation for every file because translations are files related
-                    'status'                       => Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS,
-                    'job_to_split'                 => null,
-                    'job_to_split_pass'            => null,
-                    'split_result'                 => null,
-                    'job_to_merge'                 => null,
-                    'lang_detect_files'            => [],
-                    'tm_keys'                      => [],
-                    'userIsLogged'                 => false,
-                    'uid'                          => null,
-                    'skip_lang_validation'         => false,
-                    'pretranslate_100'             => 0,
+                    'status'                        => Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS,
+                    'job_to_split'                  => null,
+                    'job_to_split_pass'             => null,
+                    'split_result'                  => null,
+                    'job_to_merge'                  => null,
+                    'lang_detect_files'             => [],
+                    'tm_keys'                       => [],
+                    'userIsLogged'                  => false,
+                    'uid'                           => null,
+                    'skip_lang_validation'          => false,
+                    'pretranslate_100'              => 0,
                     'pretranslate_101'             => 1,
-                    'only_private'                 => 0,
-                    'owner'                        => '',
+                    'only_private'                  => 0,
+                    'owner'                         => '',
                     Projects_MetadataDao::WORD_COUNT_TYPE_KEY => Projects_MetadataDao::WORD_COUNT_RAW,
-                    'metadata'                     => [],
-                    'id_assignee'                  => null,
-                    'session'                      => ( isset( $_SESSION ) ? $_SESSION : false ),
-                    'instance_id'                  => ( !is_null( INIT::$INSTANCE_ID ) ? INIT::$INSTANCE_ID : 0 ),
-                    'id_team'                      => null,
-                    'team'                         => null,
-                    'sanitize_project_options'     => true,
-                    'file_segments_count'          => [],
-                    'due_date'                     => null,
-                    'qa_model'                     => null,
-                    'target_language_mt_engine_id' => [],
-                    'standard_word_count'          => 0,
-                    'mmt_glossaries'               => null,
-                    'deepl_formality'              => null,
-                    'deepl_id_glossary'            => null,
+                    'metadata'                      => [],
+                    'id_assignee'                   => null,
+                    'session'                       => ( isset( $_SESSION ) ? $_SESSION : false ),
+                    'instance_id'                   => ( !is_null( INIT::$INSTANCE_ID ) ? INIT::$INSTANCE_ID : 0 ),
+                    'id_team'                       => null,
+                    'team'                          => null,
+                    'sanitize_project_options'      => true,
+                    'file_segments_count'           => [],
+                    'due_date'                      => null,
+                    'qa_model'                      => null,
+                    'target_language_mt_engine_id'  => [],
+                    'standard_word_count'           => 0,
+                    'mmt_glossaries'                => null,
+                    'deepl_formality'               => null,
+                    'deepl_id_glossary'             => null,
+                    'filters_extraction_parameters' => null,
                 ] );
 
         }
@@ -385,6 +385,10 @@ class ProjectManager {
          * which are already explicitly set.
          */
         $this->features->loadProjectDependenciesFromProjectMetadata( $options );
+
+        if(isset($this->projectStructure['filters_extraction_parameters']) and $this->projectStructure[ 'filters_extraction_parameters' ] ){
+            $options['filters_extraction_parameters'] = json_encode($this->projectStructure['filters_extraction_parameters']);
+        }
 
         if ( $this->projectStructure[ 'sanitize_project_options' ] ) {
             $options = $this->sanitizeProjectOptions( $options );

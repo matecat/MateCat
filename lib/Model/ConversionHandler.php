@@ -31,6 +31,7 @@ class ConversionHandler {
     protected $uploadedFiles;
     public    $uploadError = false;
     protected $_userIsLogged;
+    protected $filters_extraction_parameters;
 
     /**
      * @var FeatureSet
@@ -134,15 +135,15 @@ class ConversionHandler {
                 $single_language = $this->target_lang;
             }
 
-            $convertResult = Filters::sourceToXliff( $file_path, $this->source_lang, $single_language, $this->segmentation_rule );
-            Filters::logConversionToXliff( $convertResult, $file_path, $this->source_lang, $this->target_lang, $this->segmentation_rule );
+            $convertResult = Filters::sourceToXliff( $file_path, $this->source_lang, $single_language, $this->segmentation_rule, $this->filters_extraction_parameters );
+            Filters::logConversionToXliff( $convertResult, $file_path, $this->source_lang, $this->target_lang, $this->segmentation_rule, $this->filters_extraction_parameters );
 
-            if ( $convertResult[ 'isSuccess' ] == 1 ) {
+            if ( $convertResult[ 'successful' ] == 1 ) {
 
                 //store converted content on a temporary path on disk (and off RAM)
                 $cachedXliffPath = tempnam( "/tmp", "MAT_XLF" );
-                file_put_contents( $cachedXliffPath, $convertResult[ 'xliffContent' ] );
-                unset( $convertResult[ 'xliffContent' ] );
+                file_put_contents( $cachedXliffPath, $convertResult[ 'xliff' ] );
+                unset( $convertResult[ 'xliff' ] );
 
                 /*
                    store the converted file in the cache
@@ -451,4 +452,11 @@ class ConversionHandler {
         return $this;
     }
 
+    /**
+     * @param mixed $filters_extraction_parameters
+     */
+    public function setFiltersExtractionParameters($filters_extraction_parameters)
+    {
+        $this->filters_extraction_parameters = $filters_extraction_parameters;
+    }
 }
