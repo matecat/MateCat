@@ -1,4 +1,3 @@
-import Cookies from 'js-cookie'
 import {each, forEach, isUndefined} from 'lodash'
 import {debounce} from 'lodash/function'
 
@@ -666,16 +665,6 @@ const SegmentActions = {
       actionType: SegmentConstants.LOCK_EDIT_AREA,
       fid: fid,
       id: sid,
-    })
-  },
-  undoInSegment: function () {
-    AppDispatcher.dispatch({
-      actionType: SegmentConstants.UNDO_TEXT,
-    })
-  },
-  redoInSegment: function () {
-    AppDispatcher.dispatch({
-      actionType: SegmentConstants.REDO_TEXT,
     })
   },
   setFocusOnEditArea: function () {

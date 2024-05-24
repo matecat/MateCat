@@ -1,5 +1,7 @@
-const Shortcuts = {
-  shortCutsKeyType: navigator.platform === 'MacIntel' ? 'mac' : 'standard',
+import {isMacOS} from './Utils'
+
+export const Shortcuts = {
+  shortCutsKeyType: isMacOS() ? 'mac' : 'standard',
   cattol_formatting_characters: {
     label: 'Formatting characters',
     events: {
@@ -231,5 +233,3 @@ const Shortcuts = {
     },
   },
 }
-
-export default Shortcuts

@@ -3,8 +3,8 @@ import React from 'react'
 import CatToolActions from './es6/actions/CatToolActions'
 import CatTool from './es6/pages/CatTool'
 import CommonUtils from './es6/utils/commonUtils'
-import commentsActions from './es6/actions/CommentsActions'
 import CommentsActions from './es6/actions/CommentsActions'
+import SegmentActions from './es6/actions/SegmentActions'
 
 $.extend(window.UI, {
   start: function () {
@@ -23,9 +23,6 @@ $.extend(window.UI, {
     }
   },
   init: function () {
-    this.isMac = navigator.platform == 'MacIntel' ? true : false
-    this.shortcutLeader = this.isMac ? 'CMD' : 'CTRL'
-
     this.initStart = new Date()
     // this.version = 'x.x.x'
     this.numContributionMatchesResults = 3

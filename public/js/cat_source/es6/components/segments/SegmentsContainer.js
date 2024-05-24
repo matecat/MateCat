@@ -10,6 +10,8 @@ import React, {
 import PropTypes from 'prop-types'
 import Immutable from 'immutable'
 import ReactDOMServer from 'react-dom/server'
+import {useHotkeys} from 'react-hotkeys-hook'
+import {Shortcuts} from '../../utils/shortcuts'
 import VirtualList from '../common/VirtualList/VirtualList'
 import RowSegment from '../common/VirtualList/Rows/RowSegment'
 import SegmentStore from '../../stores/SegmentStore'
@@ -44,6 +46,108 @@ function SegmentsContainer({
   speechToTextActive,
   multiMatchLangs,
 }) {
+  useHotkeys(
+    Shortcuts.cattol.events.copySource.keystrokes[Shortcuts.shortCutsKeyType],
+    (e) => {
+      SegmentActions.copySourceToTarget()
+    },
+    {enableOnContentEditable: true, preventDefault: true},
+  )
+  useHotkeys(
+    Shortcuts.cattol.events.gotoCurrent.keystrokes[Shortcuts.shortCutsKeyType],
+    (e) => {
+      SegmentActions.scrollToCurrentSegment()
+      SegmentActions.setFocusOnEditArea()
+    },
+    {enableOnContentEditable: true, preventDefault: true},
+  )
+  useHotkeys(
+    Shortcuts.cattol.events.openPrevious.keystrokes[Shortcuts.shortCutsKeyType],
+    (e) => {
+      SegmentActions.selectPrevSegmentDebounced()
+    },
+    {enableOnContentEditable: true, preventDefault: true},
+  )
+  useHotkeys(
+    Shortcuts.cattol.events.openNext.keystrokes[Shortcuts.shortCutsKeyType],
+    (e) => {
+      SegmentActions.selectNextSegmentDebounced()
+    },
+    {enableOnContentEditable: true, preventDefault: true},
+  )
+  useHotkeys(
+    'ctrl',
+    () => {
+      SegmentActions.openSelectedSegment()
+    },
+    {keyup: true, enableOnContentEditable: true},
+  )
+  useHotkeys(
+    'meta',
+    () => {
+      SegmentActions.openSelectedSegment()
+    },
+    {keyup: true, enableOnContentEditable: true},
+  )
+  useHotkeys(
+    Shortcuts.cattol.events.openIssuesPanel.keystrokes[
+      Shortcuts.shortCutsKeyType
+    ],
+    (e) => {
+      const segment = SegmentStore.getCurrentSegment()
+      if (segment && config.isReview) {
+        SegmentActions.openIssuesPanel({sid: segment.sid})
+        SegmentActions.scrollToSegment(segment.sid)
+      }
+    },
+    {enableOnContentEditable: true, preventDefault: true},
+  )
+  useHotkeys(
+    Shortcuts.cattol.events.copyContribution1.keystrokes[
+      Shortcuts.shortCutsKeyType
+    ],
+    (e) => {
+      SegmentActions.chooseContributionOnCurrentSegment(1)
+    },
+    {enableOnContentEditable: true, preventDefault: true},
+  )
+  useHotkeys(
+    Shortcuts.cattol.events.copyContribution2.keystrokes[
+      Shortcuts.shortCutsKeyType
+    ],
+    (e) => {
+      SegmentActions.chooseContributionOnCurrentSegment(2)
+    },
+    {enableOnContentEditable: true, preventDefault: true},
+  )
+  useHotkeys(
+    Shortcuts.cattol.events.copyContribution3.keystrokes[
+      Shortcuts.shortCutsKeyType
+    ],
+    (e) => {
+      SegmentActions.chooseContributionOnCurrentSegment(3)
+    },
+    {enableOnContentEditable: true, preventDefault: true},
+  )
+  useHotkeys(
+    Shortcuts.cattol.events.splitSegment.keystrokes[Shortcuts.shortCutsKeyType],
+    (e) => {
+      const segment = SegmentStore.getCurrentSegment()
+      if (segment) {
+        SegmentActions.openSplitSegment(segment.sid)
+      }
+    },
+    {enableOnContentEditable: true, preventDefault: true},
+  )
+  useHotkeys(
+    Shortcuts.cattol.events.openComments.keystrokes[Shortcuts.shortCutsKeyType],
+    (e) => {
+      const current = SegmentStore.getCurrentSegmentId()
+      if (current) SegmentActions.openSegmentComment(current)
+    },
+    {enableOnContentEditable: true, preventDefault: true},
+  )
+
   const [segments, setSegments] = useState(Immutable.fromJS([]))
   const [rows, setRows] = useState([])
   const [essentialRows, setEssentialRows] = useState([])
@@ -435,13 +539,14 @@ function SegmentsContainer({
         ? stopIndexFromStartSegmentId
         : 0
       : // Was added more segments before and i get index by first row of essentialRows
-      essentialRows[0]?.id !== rows[0]?.id
-      ? rows.findIndex(({id}) => id === essentialRows[0]?.id)
-      : // Was added more segments before and i get index by essentialRows length
-      essentialRows[essentialRows.length - 1]?.id !== rows[rows.length - 1]?.id
-      ? essentialRows.length - 1
-      : // default start index of virtual list component
-        startIndex
+        essentialRows[0]?.id !== rows[0]?.id
+        ? rows.findIndex(({id}) => id === essentialRows[0]?.id)
+        : // Was added more segments before and i get index by essentialRows length
+          essentialRows[essentialRows.length - 1]?.id !==
+            rows[rows.length - 1]?.id
+          ? essentialRows.length - 1
+          : // default start index of virtual list component
+            startIndex
 
     rows
       .filter(

@@ -5,7 +5,7 @@ import {CompositeDecorator, Editor, EditorState, Modifier} from 'draft-js'
 
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentActions from '../../actions/SegmentActions'
-import Shortcuts from '../../utils/shortcuts'
+import {Shortcuts} from '../../utils/shortcuts'
 import TagEntity from './TagEntity/TagEntity.component'
 import SegmentUtils from '../../utils/segmentUtils'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
@@ -353,9 +353,8 @@ class SegmentSource extends React.Component {
         this.removeDecorator()
         ;(activeDecorators[DraftMatecatConstants.LEXIQA_DECORATOR] = false),
           (activeDecorators[DraftMatecatConstants.GLOSSARY_DECORATOR] = false),
-          (activeDecorators[
-            DraftMatecatConstants.QA_GLOSSARY_DECORATOR
-          ] = false),
+          (activeDecorators[DraftMatecatConstants.QA_GLOSSARY_DECORATOR] =
+            false),
           this.addSearchDecorator()
         activeDecorators[DraftMatecatConstants.SEARCH_DECORATOR] = true
         changedDecorator = true

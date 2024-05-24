@@ -5,6 +5,8 @@ import {exportQualityReport} from '../../api/exportQualityReport'
 import CatToolActions from '../../actions/CatToolActions'
 import ShortCutsModal from '../modals/ShortCutsModal'
 import ModalsActions from '../../actions/ModalsActions'
+import {useHotkeys} from 'react-hotkeys-hook'
+import {Shortcuts} from '../../utils/shortcuts'
 
 export const ActionMenu = ({
   jobUrls,
@@ -22,6 +24,13 @@ export const ActionMenu = ({
   pid,
   showReviseLink = true,
 }) => {
+  useHotkeys(
+    Shortcuts.cattol.events.openShortcutsModal.keystrokes[
+      Shortcuts.shortCutsKeyType
+    ],
+    (e) => openShortcutsModal(e),
+    {enableOnContentEditable: true},
+  )
   const [isExportCsvDisabled, setIsExportCsvDisabled] = useState(false)
   const [isExportJsonDisabled, setIsExportJsonDisabled] = useState(false)
   const dropdownThreeDots = useRef()
@@ -151,29 +160,29 @@ export const ActionMenu = ({
       .finally(() => setIsExportCsvDisabled(false))
   }
 
-    const handlerExportJson = () => {
-        setIsExportJsonDisabled(true)
+  const handlerExportJson = () => {
+    setIsExportJsonDisabled(true)
 
-        exportQualityReport({format: 'json'})
-            .then(({blob, filename}) => {
-                const aTag = document.createElement('a')
-                const blobURL = URL.createObjectURL(blob)
-                aTag.download = filename
-                aTag.href = blobURL
-                document.body.appendChild(aTag)
-                aTag.click()
-                document.body.removeChild(aTag)
-            })
-            .catch((errors) => {
-                const notification = {
-                    title: 'Error',
-                    text: `Downloading JSON error status code: ${errors.status}`,
-                    type: 'error',
-                }
-                CatToolActions.addNotification(notification)
-            })
-            .finally(() => setIsExportJsonDisabled(false))
-    }
+    exportQualityReport({format: 'json'})
+      .then(({blob, filename}) => {
+        const aTag = document.createElement('a')
+        const blobURL = URL.createObjectURL(blob)
+        aTag.download = filename
+        aTag.href = blobURL
+        document.body.appendChild(aTag)
+        aTag.click()
+        document.body.removeChild(aTag)
+      })
+      .catch((errors) => {
+        const notification = {
+          title: 'Error',
+          text: `Downloading JSON error status code: ${errors.status}`,
+          type: 'error',
+        }
+        CatToolActions.addNotification(notification)
+      })
+      .finally(() => setIsExportJsonDisabled(false))
+  }
 
   useEffect(() => {
     initDropdowns()
