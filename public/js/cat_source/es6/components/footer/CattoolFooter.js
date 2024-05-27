@@ -163,7 +163,7 @@ export const CattoolFooter = ({
   const renderSpeedETC = () => (
     <>
       <div className="grey-box-row">
-        <span>Speed:</span>
+        <span>Speed</span>
         {stats?.words_per_hour ?? (
           <Tooltip
             content="This information becomes available after you confirm at least ten segments since opening the job"
@@ -176,7 +176,7 @@ export const CattoolFooter = ({
       </div>
       <div className="grey-box-row">
         <Tooltip content="Estimated time to complete">
-          <span ref={etcLabelRef}>ETC:</span>
+          <span ref={etcLabelRef}>ETC</span>
         </Tooltip>
         {stats?.estimated_completion ?? (
           <Tooltip
