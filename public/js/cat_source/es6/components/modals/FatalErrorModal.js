@@ -12,7 +12,7 @@ class FatalErrorModal extends React.Component {
 }
 FatalErrorModal.propTypes = {
   title: PropTypes.string,
-  text: PropTypes.string,
+  text: PropTypes.node,
 }
 
 export default FatalErrorModal

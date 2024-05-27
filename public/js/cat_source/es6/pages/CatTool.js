@@ -174,7 +174,20 @@ function CatTool() {
         ModalsActions.showModalComponent(
           FatalErrorModal,
           {
-            text: "Analysis isn't completed, please try again soon.",
+            text: (
+              <span>
+                Access to the editor page is forbidden until the project's
+                analysis is complete. To follow the analysis progress,{' '}
+                <a
+                  rel="noreferrer"
+                  href={`/jobanalysis/${config.id_project}-${config.id_job}-${config.password}`}
+                  target="_blank"
+                >
+                  click here
+                </a>
+                .
+              </span>
+            ),
           },
           'Analysis in progress',
           undefined,
