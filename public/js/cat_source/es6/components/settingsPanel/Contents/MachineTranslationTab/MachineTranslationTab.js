@@ -206,34 +206,36 @@ export const MachineTranslationTab = () => {
   }
 
   useEffect(() => {
-    setMTRows(
-      mtEngines
-        .filter((row) => !activeMTEngine || row.id !== activeMTEngine)
-        .map((row, index) => {
-          return {
-            node: (
-              <MTRow
-                key={index}
-                {...{row}}
-                deleteMT={() => showConfirmDelete.current(row.id)}
-                onCheckboxClick={(row) => setActiveMTEngine(row)}
-              />
-            ),
-            isDraggable: false,
-            ...(deleteMTRequest &&
-              row.id === deleteMTRequest && {
-                isExpanded: true,
-                extraNode: (
-                  <DeleteResource
-                    row={row}
-                    onClose={() => setDeleteMTRequest()}
-                    onConfirm={deleteMT.current}
-                  />
-                ),
-              }),
-          }
-        }),
-    )
+    if (!config.is_cattool) {
+      setMTRows(
+        mtEngines
+          .filter((row) => !activeMTEngine || row.id !== activeMTEngine)
+          .map((row, index) => {
+            return {
+              node: (
+                <MTRow
+                  key={index}
+                  {...{row}}
+                  deleteMT={() => showConfirmDelete.current(row.id)}
+                  onCheckboxClick={(row) => setActiveMTEngine(row)}
+                />
+              ),
+              isDraggable: false,
+              ...(deleteMTRequest &&
+                row.id === deleteMTRequest && {
+                  isExpanded: true,
+                  extraNode: (
+                    <DeleteResource
+                      row={row}
+                      onClose={() => setDeleteMTRequest()}
+                      onConfirm={deleteMT.current}
+                    />
+                  ),
+                }),
+            }
+          }),
+      )
+    }
   }, [activeMTEngine, mtEngines, deleteMTRequest])
 
   const disableMT = () => setActiveMTEngine()
