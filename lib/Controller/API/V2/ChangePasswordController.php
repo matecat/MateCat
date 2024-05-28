@@ -119,8 +119,6 @@ class ChangePasswordController extends ChunkController
             $pDao    = new Projects_ProjectDao();
             $pDao->changePassword( $pStruct, $new_password );
             $pDao->destroyCacheById( $id );
-
-            // invalidate cache for ProjectData
             $pDao->destroyCacheForProjectData($pStruct->id, $pStruct->password);
 
             $pStruct->getFeaturesSet()->run( 'project_password_changed', $pStruct, $actual_pwd );
@@ -162,6 +160,7 @@ class ChangePasswordController extends ChunkController
             // invalidate cache for ProjectData
             $pDao = new Projects_ProjectDao();
             $pDao->destroyCacheForProjectData($jStruct->getProject()->id, $jStruct->getProject()->password);
+            $pDao->destroyCacheById( $jStruct->getProject()->id );
 
             Database::obtain()->commit();
         }
