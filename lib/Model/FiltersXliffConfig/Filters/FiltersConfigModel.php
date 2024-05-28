@@ -12,12 +12,12 @@ use JsonSerializable;
 
 class FiltersConfigModel implements JsonSerializable
 {
-    private $yaml;
-    private $xml;
-    private $json;
-    private $ms_word;
-    private $ms_excel;
-    private $ms_powerpoint;
+    private $yaml = null;
+    private $xml = null;
+    private $json = null;
+    private $ms_word = null;
+    private $ms_excel = null;
+    private $ms_powerpoint = null;
 
     /**
      * FiltersConfigModel constructor.
@@ -29,12 +29,12 @@ class FiltersConfigModel implements JsonSerializable
      * @param MSPowerpoint $ms_powerpoint
      */
     public function __construct(
-        Yaml $yaml,
-        Xml $xml,
-        Json $json,
-        MSWord $ms_word,
-        MSExcel $ms_excel,
-        MSPowerpoint $ms_powerpoint
+        ?Yaml $yaml = null,
+        ?Xml $xml = null,
+        ?Json $json = null,
+        ?MSWord $ms_word = null,
+        ?MSExcel $ms_excel = null,
+        ?MSPowerpoint $ms_powerpoint = null
     )
     {
         $this->yaml = $yaml;

@@ -12,8 +12,6 @@ class FiltersXliffConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruc
 {
     public $id;
     public $uid;
-    public $label;
-    public $version;
     public $created_at;
     public $modified_at;
     public $deleted_at;
@@ -50,7 +48,6 @@ class FiltersXliffConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruc
             'createdAt' => DateTimeUtil::formatIsoDate($this->created_at),
             'modifiedAt' => DateTimeUtil::formatIsoDate($this->modified_at),
             'deletedAt' => DateTimeUtil::formatIsoDate($this->deleted_at),
-
         ];
     }
 }
