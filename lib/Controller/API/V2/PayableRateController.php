@@ -30,10 +30,10 @@ class PayableRateController extends KleinController
     {
         // accept only JSON
         if($this->request->headers()->get('Content-Type') !== 'application/json'){
+            $this->response->code(405);
             $this->response->json([
                 'message' => 'Method not allowed'
             ]);
-            $this->response->code(405);
             exit();
         }
 
