@@ -16,21 +16,22 @@ class FiltersXliffConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruc
     public $modified_at;
     public $deleted_at;
 
-    private $xliff;
-    private $filters;
+    private $xliff = null;
+    private $filters = null;
 
     /**
-     * FiltersXliffConfigTemplateStruct constructor.
      * @param XliffConfigModel $xliff
+     */
+    public function setXliff(XliffConfigModel $xliff): void
+    {
+        $this->xliff = $xliff;
+    }
+
+    /**
      * @param FiltersConfigModel $filters
      */
-    public function __construct(
-        XliffConfigModel $xliff,
-        FiltersConfigModel $filters
-    )
+    public function setFilters(FiltersConfigModel $filters): void
     {
-        parent::__construct();
-        $this->xliff = $xliff;
         $this->filters = $filters;
     }
 
@@ -43,8 +44,8 @@ class FiltersXliffConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruc
         return [
             'id' => (int)$this->id,
             'uid' => (int)$this->uid,
-            'filters' => $this->filters,
-            'xliff' => $this->xliff,
+            'filters' => ($this->filters !== null) ? $this->filters : new \stdClass(),
+            'xliff' => ($this->xliff !== null) ? $this->xliff : new \stdClass(),
             'createdAt' => DateTimeUtil::formatIsoDate($this->created_at),
             'modifiedAt' => DateTimeUtil::formatIsoDate($this->modified_at),
             'deletedAt' => DateTimeUtil::formatIsoDate($this->deleted_at),

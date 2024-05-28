@@ -5,6 +5,7 @@ namespace API\V3;
 use API\V2\KleinController;
 use API\V2\Validators\LoginValidator;
 use Exception;
+use Projects\FiltersXliffConfigTemplateDao;
 use Projects\ProjectTemplateDao;
 use Validator\Errors\JSONValidatorError;
 
@@ -31,7 +32,7 @@ class FiltersXliffConfigTemplateController extends KleinController
 
         try {
             $this->response->status()->setCode( 200 );
-            $this->response->json(ProjectTemplateDao::getAllPaginated($uid, $currentPage, $pagination));
+            $this->response->json(FiltersXliffConfigTemplateDao::getAllPaginated($uid, $currentPage, $pagination));
             exit();
 
         } catch (Exception $exception){
@@ -52,7 +53,7 @@ class FiltersXliffConfigTemplateController extends KleinController
         $id = filter_var( $this->request->id, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_HIGH|FILTER_FLAG_ENCODE_LOW );
 
         try {
-            $model = ProjectTemplateDao::getById($id);
+            $model = FiltersXliffConfigTemplateDao::getById($id);
 
             if(empty($model)){
                 $this->response->code(404);
@@ -196,7 +197,7 @@ class FiltersXliffConfigTemplateController extends KleinController
         $id = filter_var( $this->request->id, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_HIGH|FILTER_FLAG_ENCODE_LOW );
 
         try {
-            $model = ProjectTemplateDao::getById($id);
+            $model = FiltersXliffConfigTemplateDao::getById($id);
 
             if(empty($model)){
                 $this->response->code(404);
@@ -206,7 +207,7 @@ class FiltersXliffConfigTemplateController extends KleinController
                 ]);
             }
 
-            ProjectTemplateDao::remove($id);
+            FiltersXliffConfigTemplateDao::remove($id);
 
             $this->response->json([
                 'id' => (int)$id

@@ -2,24 +2,11 @@
 
 namespace Projects;
 
-use CatUtils;
 use DataAccess_AbstractDao;
 use Database;
-use DateTime;
-use Engine;
-use EnginesModel_EngineDAO;
-use EnginesModel_EngineStruct;
 use Exception;
-use FiltersXliffConfig\Filters\FiltersConfigModel;
 use FiltersXliffConfig\FiltersXliffConfigTemplateStruct;
-use FiltersXliffConfig\Xliff\XliffConfigModel;
-use PayableRates\CustomPayableRateDao;
 use PDO;
-use QAModelTemplate\QAModelTemplateDao;
-use Teams\TeamDao;
-use TmKeyManagement_MemoryKeyDao;
-use TmKeyManagement_MemoryKeyStruct;
-use TmKeyManagement_TmKeyStruct;
 
 class FiltersXliffConfigTemplateDao extends DataAccess_AbstractDao
 {
@@ -29,15 +16,28 @@ class FiltersXliffConfigTemplateDao extends DataAccess_AbstractDao
     const query_by_uid = "SELECT * FROM " . self::TABLE . " WHERE uid = :uid";
 
     /**
+     * @var null
+     */
+    private static $instance = null;
+
+    /**
+     * @return FiltersXliffConfigTemplateDao|null
+     */
+    private static function getInstance(){
+        if(!isset(self::$instance)){
+            self::$instance = new self();
+        }
+
+        return self::$instance;
+    }
+
+    /**
      * @param $uid
      * @return FiltersXliffConfigTemplateStruct
      */
     public static function getDefaultTemplate($uid)
     {
-        $xliff = new XliffConfigModel([], []);
-        $filters = new FiltersConfigModel();
-
-        $default = new FiltersXliffConfigTemplateStruct($xliff, $filters);
+        $default = new FiltersXliffConfigTemplateStruct();
         $default->id = 0;
         $default->uid = $uid;
 
@@ -96,15 +96,55 @@ class FiltersXliffConfigTemplateDao extends DataAccess_AbstractDao
     /**
      * @param $id
      * @param int $ttl
-     * @return ProjectTemplateStruct|null
+     * @return FiltersXliffConfigTemplateStruct|null
      */
     public static function getById($id, $ttl = 60)
     {
         $stmt = self::getInstance()->_getStatementForCache(self::query_by_id);
-        $result = self::getInstance()->setCacheTTL( $ttl )->_fetchObject( $stmt, FiltersXliffConfigTemplateStruct::class, [
+        $result = self::getInstance()->setCacheTTL( $ttl )->_fetchObject( $stmt, new FiltersXliffConfigTemplateStruct(), [
             'id' => $id,
         ] );
 
         return @$result[0];
+    }
+
+    /**
+     * @param $id
+     * @param int $ttl
+     * @return FiltersXliffConfigTemplateStruct|null
+     */
+    public static function getByUid($id, $ttl = 60)
+    {
+        $stmt = self::getInstance()->_getStatementForCache(self::query_by_uid);
+        $result = self::getInstance()->setCacheTTL( $ttl )->_fetchObject( $stmt, new FiltersXliffConfigTemplateStruct(), [
+            'id' => $id,
+        ] );
+
+        return @$result[0];
+    }
+
+    /**
+     * @param $id
+     * @return int
+     */
+    public static function remove( $id )
+    {
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( "DELETE FROM ".self::TABLE." WHERE id = :id " );
+        $stmt->execute( [ 'id' => $id ] );
+
+        self::destroyQueryByIdCache($conn, $id);
+
+        return $stmt->rowCount();
+    }
+
+    /**
+     * @param PDO $conn
+     * @param string $id
+     */
+    private static function destroyQueryByIdCache(PDO $conn, $id)
+    {
+        $stmt = $conn->prepare( self::query_by_id );
+        self::getInstance()->_destroyObjectCache( $stmt, [ 'id' => $id, ] );
     }
 }
