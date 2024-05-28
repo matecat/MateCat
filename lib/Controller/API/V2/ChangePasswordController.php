@@ -164,6 +164,7 @@ class ChangePasswordController extends ChunkController
                     ->run( 'job_password_changed', $jStruct, $actual_pwd );
             }
 
+            // invalidate ChunkReviewDao cache for the job
             $chunkReviewDao = new ChunkReviewDao();
             $chunkReviewDao->destroyCacheForFindChunkReviews($jStruct, 60 * 5 );
 
