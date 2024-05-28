@@ -61,6 +61,13 @@ class ChangePasswordController extends ChunkController
             $actual_pwd = $password;
         }
 
+        if(!empty($revision_number) and !in_array($revision_number, [1,2])){
+            $this->response->json( [
+                'error' => '`revision_number` not valid. Allowed values [1, 2]'
+            ] );
+            exit();
+        }
+
         $res = (!empty($res)) ? $res : 'job';
 
         if(!in_array($res, ['prj', 'job'])){

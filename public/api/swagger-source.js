@@ -312,6 +312,13 @@ var spec = {
           required: false,
           type: 'boolean',
         },
+        {
+          name: 'revision_number',
+          in: 'formData',
+          description: 'The revision number you want to update. Only 1 or 2 are allowed.',
+          required: false,
+          type: 'integer',
+        }
       ],
       responses: {
         200: {
