@@ -176,7 +176,6 @@ a.mbc-new-message-link:hover {
 }
 
 .mbc-comment-textarea {
-  padding: 5px 8px;
   position: relative;
   resize: none;
   word-break: normal;
@@ -189,8 +188,29 @@ a.mbc-new-message-link:hover {
   overflow-y: auto;
   max-height: 160px;
   border-radius: 20px;
-  padding-top: 10px;
-  padding-bottom: 10px;
+
+  .mbc-comment-input__highlighter,
+  textarea {
+    border: unset !important;
+    outline: unset !important;
+    padding: 10px;
+    line-height: 1.2;
+  }
+
+  .mbc-comment-input__suggestions__list {
+    background-color: $white;
+    border: 1px solid $grey8;
+  }
+
+  .mbc-comment-input__suggestions__item {
+    padding: 5px 15px;
+    border-bottom: 1px solid $grey9;
+  }
+
+  .mbc-comment-input__suggestions__item--focused {
+    background-color: rgba($grey9, 0.6);
+    color: $translatedBlue;
+  }
 }
 
 .mbc-comment-textarea:hover {
@@ -213,7 +233,7 @@ a.mbc-new-message-link:hover {
 }
 
 .tagging-item {
-  color: $translatedBlue;
+  background-color: rgba($translatedBlue, 0.3);
 }
 
 .mbc-comment-textinput {
@@ -393,7 +413,9 @@ a.mbc-comment-resolve-btn:visited {
 
 a.mbc-comment-resolve-btn:hover,
 a.mbc-comment-resolve-btn:active {
-  box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12),
+  box-shadow:
+    0 0 0 #e0e0e0,
+    0 0 2px rgba(0, 0, 0, 0.12),
     0 2px 4px rgba(0, 0, 0, 0.24) !important;
 }
 

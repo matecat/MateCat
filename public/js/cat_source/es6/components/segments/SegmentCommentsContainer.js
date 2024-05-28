@@ -10,6 +10,7 @@ import CommentsActions from '../../actions/CommentsActions'
 import CommentsConstants from '../../constants/CommentsConstants'
 import SegmentActions from '../../actions/SegmentActions'
 import {SegmentContext} from './SegmentContext'
+import {Mention, MentionsInput} from 'react-mentions'
 
 class SegmentCommentsContainer extends React.Component {
   static contextType = SegmentContext
@@ -24,6 +25,7 @@ class SegmentCommentsContainer extends React.Component {
       teamUsers: CommentsStore.getTeamUsers(),
       sendCommentError: false,
       showTagging: false,
+      mentionsInputValue: '',
     }
     this.types = {sticky: 3, resolve: 2, comment: 1}
     this.updateComments = this.updateComments.bind(this)
@@ -91,6 +93,18 @@ class SegmentCommentsContainer extends React.Component {
   setTeamUsers(users) {
     this.setState({
       teamUsers: users,
+    })
+  }
+
+  handleChangeMentionsInputValue = (
+    event,
+    newValue,
+    newPlainTextValue,
+    mentions,
+  ) => {
+    console.log(newValue, newPlainTextValue, mentions)
+    this.setState({
+      mentionsInputValue: newValue,
     })
   }
 
@@ -250,6 +264,12 @@ class SegmentCommentsContainer extends React.Component {
 
       htmlComments = commentsHtml
     }
+
+    const userMentionData = this.state.teamUsers.map((user) => ({
+      id: user.uid,
+      display: `${user.first_name} ${user.last_name}`,
+    }))
+
     let loggedUser = !!this.state.user
     // Se utente anonimo aggiungere mbc-comment-anonymous-label a mbc-comment-username
     htmlInsert = (
@@ -271,13 +291,28 @@ class SegmentCommentsContainer extends React.Component {
               Login to receive comments
             </a>
           ) : null}
-          <div
+          {/* <div
             ref={(input) => (this.commentInput = input)}
             onKeyDown={(e) => this.onKeyDown(e)}
             className="mbc-comment-input mbc-comment-textarea"
             contentEditable={true}
             data-placeholder="Write a comment..."
-          />
+          /> */}
+          <MentionsInput
+            inputRef={(input) => (this.commentInput = input)}
+            value={this.state.mentionsInputValue}
+            onChange={this.handleChangeMentionsInputValue}
+            placeholder="Write a comment..."
+            className="mbc-comment-input mbc-comment-textarea"
+          >
+            <Mention
+              type="user"
+              trigger="@"
+              data={userMentionData}
+              className="tagging-item"
+              markup="{@__id__||__display__@}"
+            />
+          </MentionsInput>
           <div>
             <a
               className="ui primary tiny button mbc-comment-btn mbc-comment-send-btn hide"
