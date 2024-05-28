@@ -13,25 +13,42 @@ class Json implements JsonSerializable
     private $context_keys;
 
     /**
-     * Json constructor.
      * @param bool|null $extract_arrays
-     * @param bool|null $escape_forward_slashes
-     * @param array $translate_keys
-     * @param array $do_not_translate_keys
-     * @param array $context_keys
      */
-    public function __construct(
-        ?bool $extract_arrays = null,
-        ?bool $escape_forward_slashes = null,
-        array $translate_keys = [],
-        array $do_not_translate_keys = [],
-        array $context_keys = []
-    )
+    public function setExtractArrays(?bool $extract_arrays): void
     {
         $this->extract_arrays = $extract_arrays;
+    }
+
+    /**
+     * @param bool|null $escape_forward_slashes
+     */
+    public function setEscapeForwardSlashes(?bool $escape_forward_slashes): void
+    {
         $this->escape_forward_slashes = $escape_forward_slashes;
+    }
+
+    /**
+     * @param array $translate_keys
+     */
+    public function setTranslateKeys(array $translate_keys): void
+    {
         $this->translate_keys = $translate_keys;
+    }
+
+    /**
+     * @param array $do_not_translate_keys
+     */
+    public function setDoNotTranslateKeys(array $do_not_translate_keys): void
+    {
         $this->do_not_translate_keys = $do_not_translate_keys;
+    }
+
+    /**
+     * @param array $context_keys
+     */
+    public function setContextKeys(array $context_keys): void
+    {
         $this->context_keys = $context_keys;
     }
 

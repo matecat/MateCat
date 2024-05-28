@@ -20,28 +20,50 @@ class FiltersConfigModel implements JsonSerializable
     private $ms_powerpoint = null;
 
     /**
-     * FiltersConfigModel constructor.
-     * @param Yaml $yaml
-     * @param Xml $xml
-     * @param Json $json
-     * @param MSWord $ms_word
-     * @param MSExcel $ms_excel
-     * @param MSPowerpoint $ms_powerpoint
+     * @param Yaml|null $yaml
      */
-    public function __construct(
-        ?Yaml $yaml = null,
-        ?Xml $xml = null,
-        ?Json $json = null,
-        ?MSWord $ms_word = null,
-        ?MSExcel $ms_excel = null,
-        ?MSPowerpoint $ms_powerpoint = null
-    )
+    public function setYaml(?Yaml $yaml): void
     {
         $this->yaml = $yaml;
+    }
+
+    /**
+     * @param Xml|null $xml
+     */
+    public function setXml(?Xml $xml): void
+    {
         $this->xml = $xml;
+    }
+
+    /**
+     * @param Json|null $json
+     */
+    public function setJson(?Json $json): void
+    {
         $this->json = $json;
+    }
+
+    /**
+     * @param MSWord|null $ms_word
+     */
+    public function setMsWord(?MSWord $ms_word): void
+    {
         $this->ms_word = $ms_word;
+    }
+
+    /**
+     * @param MSExcel|null $ms_excel
+     */
+    public function setMsExcel(?MSExcel $ms_excel): void
+    {
         $this->ms_excel = $ms_excel;
+    }
+
+    /**
+     * @param MSPowerpoint|null $ms_powerpoint
+     */
+    public function setMsPowerpoint(?MSPowerpoint $ms_powerpoint): void
+    {
         $this->ms_powerpoint = $ms_powerpoint;
     }
 

@@ -5,7 +5,7 @@ namespace API\V3;
 use API\V2\KleinController;
 use API\V2\Validators\LoginValidator;
 use Exception;
-use Projects\FiltersXliffConfigTemplateDao;
+use FiltersXliffConfig\FiltersXliffConfigTemplateDao;
 use Projects\ProjectTemplateDao;
 use Validator\Errors\JSONValidatorError;
 
