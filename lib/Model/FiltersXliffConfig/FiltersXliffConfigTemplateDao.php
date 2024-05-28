@@ -2,6 +2,7 @@
 
 namespace FiltersXliffConfig;
 
+use DataAccess\ShapelessConcreteStruct;
 use DataAccess_AbstractDao;
 use Database;
 use Exception;
@@ -112,26 +113,34 @@ class FiltersXliffConfigTemplateDao extends DataAccess_AbstractDao
     public static function getById($id, $ttl = 60)
     {
         $stmt = self::getInstance()->_getStatementForCache(self::query_by_id);
-        $result = self::getInstance()->setCacheTTL( $ttl )->_fetchObject( $stmt, new FiltersXliffConfigTemplateStruct(), [
+        $result = self::getInstance()->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
             'id' => $id,
         ] );
 
-        return @$result[0];
+        if(empty($result)){
+            return null;
+        }
+
+        return self::hydrateTemplateStruct((array)$result[0]);
     }
 
     /**
-     * @param $id
+     * @param $uid
      * @param int $ttl
      * @return FiltersXliffConfigTemplateStruct|null
      */
-    public static function getByUid($id, $ttl = 60)
+    public static function getByUid($uid, $ttl = 60)
     {
         $stmt = self::getInstance()->_getStatementForCache(self::query_by_uid);
-        $result = self::getInstance()->setCacheTTL( $ttl )->_fetchObject( $stmt, new FiltersXliffConfigTemplateStruct(), [
-            'id' => $id,
+        $result = self::getInstance()->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
+            'uid' => $uid,
         ] );
 
-        return @$result[0];
+        if(empty($result)){
+            return null;
+        }
+
+        return self::hydrateTemplateStruct((array)$result[0]);
     }
 
     /**
