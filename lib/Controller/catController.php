@@ -138,7 +138,7 @@ class catController extends viewController {
         $this->wStruct = CatUtils::getWStructFromJobArray( $this->chunk, $this->project );
 
         // YYY [Remove] backward compatibility for current projects
-        $this->job_stats = CatUtils::getFastStatsForJob( $this->wStruct, true, $this->project->getWordCountType() );
+        $this->job_stats = CatUtils::getFastStatsForJob( $this->wStruct, false, $this->project->getWordCountType() );
 
         if ( self::isRevision() ) {
             $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
