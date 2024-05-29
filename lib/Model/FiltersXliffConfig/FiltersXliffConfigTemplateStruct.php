@@ -5,6 +5,7 @@ namespace FiltersXliffConfig;
 use DataAccess_AbstractDaoSilentStruct;
 use Date\DateTimeUtil;
 use Exception;
+use FiltersXliffConfig\Filters\DTO\Json;
 use FiltersXliffConfig\Filters\FiltersConfigModel;
 use FiltersXliffConfig\Xliff\XliffConfigModel;
 use JsonSerializable;
@@ -18,7 +19,14 @@ class FiltersXliffConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruc
     public $modified_at;
     public $deleted_at;
 
+    /**
+     * @var XliffConfigModel
+     */
     private $xliff = null;
+
+    /**
+     * @var FiltersConfigModel
+     */
     private $filters = null;
 
     /**
@@ -30,7 +38,7 @@ class FiltersXliffConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruc
     }
 
     /**
-     * @return null
+     * @return XliffConfigModel
      */
     public function getXliff()
     {
@@ -38,7 +46,7 @@ class FiltersXliffConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruc
     }
 
     /**
-     * @return null
+     * @return FiltersConfigModel
      */
     public function getFilters()
     {
@@ -73,9 +81,47 @@ class FiltersXliffConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruc
 
         $this->name = $json['name'];
 
-        // object here
-        $this->filters = $json['filters'];
-        $this->xliff = $json['xliff'];
+        $filtersConfig = new FiltersConfigModel();
+        $xliffConfig = new XliffConfigModel();
+
+        // xliff
+        if(!empty($json['xliff'])){}
+
+        // filters
+        if(!empty($json['filters'])){
+
+            $filters = $json['filters'];
+
+            // json
+            if(isset($filters['json'])){
+                $jsonDto = new Json();
+
+                if(isset($filters['json']['extract_arrays'])){
+                    $jsonDto->setExtractArrays($filters['json']['extract_arrays']);
+                }
+
+                if(isset($filters['json']['escape_forward_slashes'])){
+                    $jsonDto->setEscapeForwardSlashes($filters['json']['escape_forward_slashes']);
+                }
+
+                if(isset($filters['json']['translate_keys'])){
+                    $jsonDto->setTranslateKeys($filters['json']['translate_keys']);
+                }
+
+                if(isset($filters['json']['do_not_translate_keys'])){
+                    $jsonDto->setDoNotTranslateKeys($filters['json']['do_not_translate_keys']);
+                }
+
+                if(isset($filters['json']['context_keys'])){
+                    $jsonDto->setContextKeys($filters['json']['context_keys']);
+                }
+
+                $filtersConfig->setJson($jsonDto);
+            }
+        }
+
+        $this->setFilters($filtersConfig);
+        $this->setXliff($xliffConfig);
 
         return $this;
     }

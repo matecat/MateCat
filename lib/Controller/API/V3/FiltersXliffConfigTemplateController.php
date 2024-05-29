@@ -188,6 +188,7 @@ class FiltersXliffConfigTemplateController extends KleinController
     public function delete()
     {
         $id = filter_var( $this->request->id, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_HIGH|FILTER_FLAG_ENCODE_LOW );
+        $uid = $this->getUser()->uid;
 
         try {
             $model = FiltersXliffConfigTemplateDao::getById($id);
@@ -200,7 +201,7 @@ class FiltersXliffConfigTemplateController extends KleinController
                 ]);
             }
 
-            FiltersXliffConfigTemplateDao::remove($id);
+            FiltersXliffConfigTemplateDao::remove($id, $uid);
 
             $this->response->json([
                 'id' => (int)$id

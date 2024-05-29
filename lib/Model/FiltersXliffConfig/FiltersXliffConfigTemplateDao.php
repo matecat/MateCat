@@ -72,8 +72,6 @@ class FiltersXliffConfigTemplateDao extends DataAccess_AbstractDao
         $templateStruct->uid = $uid;
 
         return self::save($templateStruct);
-
-
     }
 
     /**
@@ -226,7 +224,7 @@ class FiltersXliffConfigTemplateDao extends DataAccess_AbstractDao
      * @return int
      * @throws Exception
      */
-    public static function remove( $id )
+    public static function remove( $id, $uid )
     {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( "UPDATE ".self::TABLE." SET `deleted_at` = :now WHERE id = :id " );
@@ -236,6 +234,7 @@ class FiltersXliffConfigTemplateDao extends DataAccess_AbstractDao
         ] );
 
         self::destroyQueryByIdCache($conn, $id);
+        self::destroyQueryByUidCache($conn, $uid);
 
         return $stmt->rowCount();
     }
@@ -335,10 +334,10 @@ class FiltersXliffConfigTemplateDao extends DataAccess_AbstractDao
 
                 $filtersConfig->setJson($jsonDto);
             }
-
-            $struct->setFilters($filtersConfig);
-            $struct->setXliff($xliffConfig);
         }
+
+        $struct->setFilters($filtersConfig);
+        $struct->setXliff($xliffConfig);
 
         return $struct;
     }
@@ -353,7 +352,7 @@ class FiltersXliffConfigTemplateDao extends DataAccess_AbstractDao
         $sql = "INSERT INTO " . self::TABLE .
             " ( `uid`, `name`, `filters`, `xliff`, `created_at`, `modified_at` ) " .
             " VALUES " .
-            " ( :uid, :name, :filters, :now, :now ); ";
+            " ( :uid, :name, :filters, :xliff, :now, :now ); ";
 
         $now = (new DateTime())->format('Y-m-d H:i:s');
 
@@ -362,8 +361,8 @@ class FiltersXliffConfigTemplateDao extends DataAccess_AbstractDao
         $stmt->execute( [
             "uid" => $templateStruct->uid,
             "name" => $templateStruct->name,
-            "filters" => serialize($templateStruct->getFilters()),
-            "xliff" => serialize($templateStruct->getXliff()),
+            "filters" => $templateStruct->getFilters()->serialize(),
+            "xliff" => $templateStruct->getXliff()->serialize(),
             'now' => (new DateTime())->format('Y-m-d H:i:s'),
         ] );
 
@@ -374,6 +373,11 @@ class FiltersXliffConfigTemplateDao extends DataAccess_AbstractDao
         return $templateStruct;
     }
 
+    /**
+     * @param FiltersXliffConfigTemplateStruct $templateStruct
+     * @return FiltersXliffConfigTemplateStruct
+     * @throws Exception
+     */
     public static function update(FiltersXliffConfigTemplateStruct $templateStruct)
     {
         $sql = "UPDATE " . self::TABLE . " SET 
