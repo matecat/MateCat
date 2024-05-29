@@ -74,6 +74,7 @@ class FiltersXliffConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruc
         $json = json_decode($json, true);
 
         if(
+            !isset($json['uid']) and
             !isset($json['name']) and
             !isset($json['filters']) and
             !isset($json['xliff'])
@@ -81,10 +82,15 @@ class FiltersXliffConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruc
             throw new Exception("Cannot instantiate a new FiltersXliffConfigTemplateStruct. Invalid data provided.", 403);
         }
 
+        $this->uid = $json['uid'];
         $this->name = $json['name'];
-
         $xliff = (!is_array($json['xliff'])) ? json_decode($json['xliff'], true) : $json['xliff'];
         $filters = (!is_array($json['filters'])) ? json_decode($json['filters'], true) : $json['filters'];
+
+        if(isset($json['id'])){ $this->id = $json['id']; }
+        if(isset($json['created_at'])){ $this->created_at = $json['created_at']; }
+        if(isset($json['deleted_at'])){ $this->deleted_at = $json['deleted_at']; }
+        if(isset($json['modified_at'])){ $this->modified_at = $json['modified_at']; }
 
         $filtersConfig = new FiltersConfigModel();
         $xliffConfig = new XliffConfigModel();

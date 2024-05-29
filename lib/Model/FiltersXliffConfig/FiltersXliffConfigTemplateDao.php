@@ -2,6 +2,7 @@
 
 namespace FiltersXliffConfig;
 
+use CatUtils;
 use DataAccess\ShapelessConcreteStruct;
 use DataAccess_AbstractDao;
 use Database;
@@ -69,6 +70,9 @@ class FiltersXliffConfigTemplateDao extends DataAccess_AbstractDao
 
         $templateStruct = new FiltersXliffConfigTemplateStruct();
         $templateStruct->hydrateFromJSON($json);
+
+        // check name
+        $templateStruct = self::findUniqueName($templateStruct, $uid);
         $templateStruct->uid = $uid;
 
         return self::save($templateStruct);
@@ -86,6 +90,12 @@ class FiltersXliffConfigTemplateDao extends DataAccess_AbstractDao
         self::validateJSON($json);
         $templateStruct->hydrateFromJSON($json);
         $templateStruct->uid = $uid;
+
+        $saved = self::getById($templateStruct->id);
+
+        if($saved->name !== $templateStruct->name){
+            $templateStruct = self::findUniqueName($templateStruct, $uid);
+        }
 
         return self::update($templateStruct);
     }
@@ -106,6 +116,25 @@ class FiltersXliffConfigTemplateDao extends DataAccess_AbstractDao
         if(!$validator->isValid()){
             throw $validator->getErrors()[0]->error;
         }
+    }
+
+    /**
+     * @param FiltersXliffConfigTemplateStruct $projectTemplateStruct
+     * @param $name
+     * @param $uid
+     * @return FiltersXliffConfigTemplateStruct
+     */
+    private static function findUniqueName(FiltersXliffConfigTemplateStruct $projectTemplateStruct, $uid)
+    {
+        $check = FiltersXliffConfigTemplateDao::getByUidAndName($uid, $projectTemplateStruct->name, 0);
+
+        if($check === null){
+            return $projectTemplateStruct;
+        }
+
+        $projectTemplateStruct->name = CatUtils::getUniqueName($projectTemplateStruct->name);
+
+        return self::findUniqueName($projectTemplateStruct, $uid);
     }
 
     /**
@@ -222,6 +251,7 @@ class FiltersXliffConfigTemplateDao extends DataAccess_AbstractDao
 
     /**
      * @param $id
+     * @param $uid
      * @return int
      * @throws Exception
      */
@@ -292,12 +322,6 @@ class FiltersXliffConfigTemplateDao extends DataAccess_AbstractDao
         }
 
         $struct = new FiltersXliffConfigTemplateStruct();
-        $struct->id = $data['id'];
-        $struct->uid = $data['uid'];
-        $struct->name = $data['name'];
-        $struct->created_at = $data['created_at'];
-        $struct->deleted_at = $data['deleted_at'];
-        $struct->modified_at = $data['modified_at'];
 
         return $struct->hydrateFromJSON(json_encode($data));
     }
