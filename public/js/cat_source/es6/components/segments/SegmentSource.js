@@ -20,6 +20,7 @@ import Assistant from '../icons/Assistant'
 import Education from '../icons/Education'
 import {TERM_FORM_FIELDS} from './SegmentFooterTabGlossary/SegmentFooterTabGlossary'
 import {getEntitiesSelected} from './utils/DraftMatecatUtils/manageCaretPositionNearEntity'
+import {UseHotKeysComponent} from '../../hooks/UseHotKeysComponent'
 
 class SegmentSource extends React.Component {
   static contextType = SegmentContext
@@ -380,14 +381,6 @@ class SegmentSource extends React.Component {
       this.setTaggedSource,
     )
     this.$source = $(this.source)
-    this.$source.on(
-      'keydown',
-      null,
-      Shortcuts.cattol.events.searchInConcordance.keystrokes[
-        Shortcuts.shortCutsKeyType
-      ],
-      this.openConcordance,
-    )
     setTimeout(() => {
       this.checkDecorators()
       this.updateSourceInStore()
@@ -399,7 +392,6 @@ class SegmentSource extends React.Component {
       SegmentConstants.CLOSE_SPLIT_SEGMENT,
       this.endSplitMode,
     )
-    this.$source.on('keydown', this.openConcordance)
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -626,6 +618,14 @@ class SegmentSource extends React.Component {
         data-original={this.originalSource}
         {...handlers}
       >
+        <UseHotKeysComponent
+          shortcut={
+            Shortcuts.cattol.events.searchInConcordance.keystrokes[
+              Shortcuts.shortCutsKeyType
+            ]
+          }
+          callback={this.openConcordance}
+        />
         <Editor
           editorState={editorState}
           onChange={onChange}
