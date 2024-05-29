@@ -603,6 +603,38 @@ var spec = {
         },
       },
     },
+    '/api/v2/projects/{id_project}/{password}/reviews': {
+      post: {
+        tags: ['Project'],
+        summary: 'Generate second pass review 2',
+        description: 'API to generate a second pass review',
+        parameters: [
+          {
+            name: 'id_job',
+            description: 'The id of the job you intend to generate the Revise 2 step for',
+            required: true,
+            type: 'string',
+          },
+          {
+            name: 'password',
+            description: 'The password of the job you intend to generate the Revise 2 step for',
+            required: true,
+            type: 'string',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'CreateReview',
+            schema: {
+              $ref: '#/definitions/CreateReview',
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
     '/api/v2/projects/{id_project}/{password}/urls': {
       get: {
         tags: ['Project'],
@@ -3912,6 +3944,33 @@ var spec = {
           type: 'string',
           enum: ['active', 'cancelled', 'archived'],
           required: true,
+        },
+      },
+    },
+
+    CreateReview: {
+      type: 'object',
+      properties: {
+        chunk_review: {
+          type: 'array',
+          items: {
+            $ref: '#/definitions/CreateReviewItem',
+          },
+        },
+      },
+    },
+
+    CreateReviewItem: {
+      type: 'object',
+      properties: {
+        id: {
+          type: 'integer',
+        },
+        id_job: {
+          type: 'string',
+        },
+        review_password: {
+          type: 'string',
         },
       },
     },
