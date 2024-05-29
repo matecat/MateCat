@@ -164,6 +164,7 @@ class FiltersXliffConfigTemplateDao extends DataAccess_AbstractDao
      * @param $id
      * @param int $ttl
      * @return FiltersXliffConfigTemplateStruct|null
+     * @throws Exception
      */
     public static function getById($id, $ttl = 60)
     {
@@ -272,7 +273,8 @@ class FiltersXliffConfigTemplateDao extends DataAccess_AbstractDao
 
     /**
      * @param $data
-     * @return FiltersXliffConfigTemplateStruct
+     * @return FiltersXliffConfigTemplateStruct|null
+     * @throws Exception
      */
     private static function hydrateTemplateStruct($data)
     {
@@ -297,49 +299,7 @@ class FiltersXliffConfigTemplateDao extends DataAccess_AbstractDao
         $struct->deleted_at = $data['deleted_at'];
         $struct->modified_at = $data['modified_at'];
 
-        $xliff = json_decode($data['xliff']);
-        $filters = json_decode($data['filters']);
-
-        $filtersConfig = new FiltersConfigModel();
-        $xliffConfig = new XliffConfigModel();
-
-        // xliff
-        if(!empty($xliff)){}
-
-        // filters
-        if(!empty($filters)){
-
-            if(isset($filters->json)){
-                $jsonDto = new Json();
-
-                if($filters->json->extract_arrays){
-                    $jsonDto->setExtractArrays($filters->json->extract_arrays);
-                }
-
-                if(isset($filters->json->escape_forward_slashes)){
-                    $jsonDto->setEscapeForwardSlashes($filters->json->escape_forward_slashes);
-                }
-
-                if(isset($filters->json->translate_keys)){
-                    $jsonDto->setTranslateKeys($filters->json->translate_keys);
-                }
-
-                if(isset($filters->json->do_not_translate_keys)){
-                    $jsonDto->setDoNotTranslateKeys($filters->json->do_not_translate_keys);
-                }
-
-                if(isset($filters->json->context_keys)){
-                    $jsonDto->setContextKeys($filters->json->context_keys);
-                }
-
-                $filtersConfig->setJson($jsonDto);
-            }
-        }
-
-        $struct->setFilters($filtersConfig);
-        $struct->setXliff($xliffConfig);
-
-        return $struct;
+        return $struct->hydrateFromJSON(json_encode($data));
     }
 
     /**

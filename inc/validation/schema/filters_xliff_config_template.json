@@ -235,33 +235,36 @@
       "required": ["state", "analysis", "editor"],
       "properties": {
         "state": {
-          "type": "string",
-          "enum": [
-            "final",
-            "needs-adaptation",
-            "needs-l10n",
-            "needs-review-adaptation",
-            "needs-review-l10n",
-            "needs-review-translation",
-            "needs-translation",
-            "new",
-            "signed-off",
-            "translated",
-            "exact-match",
-            "fuzzy-match",
-            "id-match",
-            "leveraged-glossary",
-            "leveraged-inherited",
-            "leveraged-mt",
-            "leveraged-repository",
-            "leveraged-tm",
-            "mt-suggestion",
-            "rejected-grammar",
-            "rejected-inaccurate",
-            "rejected-length",
-            "rejected-spelling",
-            "tm-suggestion"
-          ]
+          "type": ["array"],
+          "items": {
+            "type": "string",
+            "enum": [
+              "final",
+              "needs-adaptation",
+              "needs-l10n",
+              "needs-review-adaptation",
+              "needs-review-l10n",
+              "needs-review-translation",
+              "needs-translation",
+              "new",
+              "signed-off",
+              "translated",
+              "exact-match",
+              "fuzzy-match",
+              "id-match",
+              "leveraged-glossary",
+              "leveraged-inherited",
+              "leveraged-mt",
+              "leveraged-repository",
+              "leveraged-tm",
+              "mt-suggestion",
+              "rejected-grammar",
+              "rejected-inaccurate",
+              "rejected-length",
+              "rejected-spelling",
+              "tm-suggestion"
+            ]
+          }
         },
         "analysis": {
           "type": "string",
@@ -285,13 +288,16 @@
       "required": ["state", "analysis", "editor"],
       "properties": {
         "state": {
-          "type": "string",
-          "enum": [
-            "initial",
-            "translated",
-            "reviewed",
-            "final"
-          ]
+          "type": ["array"],
+          "items": {
+            "type": "string",
+            "enum": [
+              "initial",
+              "translated",
+              "reviewed",
+              "final"
+            ]
+          }
         },
         "analysis": {
           "type": "string",

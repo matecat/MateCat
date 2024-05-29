@@ -7,6 +7,8 @@ use Date\DateTimeUtil;
 use Exception;
 use FiltersXliffConfig\Filters\DTO\Json;
 use FiltersXliffConfig\Filters\FiltersConfigModel;
+use FiltersXliffConfig\Xliff\DTO\Xliff12Rule;
+use FiltersXliffConfig\Xliff\DTO\Xliff20Rule;
 use FiltersXliffConfig\Xliff\XliffConfigModel;
 use JsonSerializable;
 
@@ -76,21 +78,39 @@ class FiltersXliffConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruc
             !isset($json['filters']) and
             !isset($json['xliff'])
         ){
-            throw new Exception("Cannot instantiate a new FiltersXliffConfigTemplateStruct. Invalid JSON provided.", 403);
+            throw new Exception("Cannot instantiate a new FiltersXliffConfigTemplateStruct. Invalid data provided.", 403);
         }
 
         $this->name = $json['name'];
+
+        $xliff = (!is_array($json['xliff'])) ? json_decode($json['xliff'], true) : $json['xliff'];
+        $filters = (!is_array($json['filters'])) ? json_decode($json['filters'], true) : $json['filters'];
 
         $filtersConfig = new FiltersConfigModel();
         $xliffConfig = new XliffConfigModel();
 
         // xliff
-        if(!empty($json['xliff'])){}
+        if(!empty($xliff)){
+
+            // xliff12
+            if(isset($xliff['xliff12']) and is_array($xliff['xliff12'])){
+                foreach ($xliff['xliff12'] as $xliff12Rule){
+                    $rule = new Xliff12Rule($xliff12Rule['state'], $xliff12Rule['analysis'], $xliff12Rule['editor']);
+                    $xliffConfig->addRule($rule);
+                }
+            }
+
+            // xliff20
+            if(isset($xliff['xliff20']) and is_array($xliff['xliff20'])){
+                foreach ($xliff['xliff20'] as $xliff20Rule){
+                    $rule = new Xliff20Rule($xliff20Rule['state'], $xliff20Rule['analysis'], $xliff20Rule['editor']);
+                    $xliffConfig->addRule($rule);
+                }
+            }
+        }
 
         // filters
-        if(!empty($json['filters'])){
-
-            $filters = $json['filters'];
+        if(!empty($filters)){
 
             // json
             if(isset($filters['json'])){
