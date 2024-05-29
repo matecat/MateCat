@@ -173,9 +173,8 @@ const SegmentUtils = {
   collectSplittedStatuses: function (sid, splittedSid, status) {
     let statuses = []
     const segments = SegmentStore.getSegmentsInSplit(sid)
-    segments.forEach(() => {
-      const segment = SegmentStore.getSegmentByIdToJS(this.sid)
-      if (splittedSid === this.sid) {
+    segments.forEach((segment) => {
+      if (splittedSid === segment.sid) {
         statuses.push(status)
       } else {
         statuses.push(segment.status)
@@ -190,8 +189,8 @@ const SegmentUtils = {
     const contextAfter = UI.getContextAfter(sid)
     const idAfter = UI.getIdAfter(sid)
     if (segment.splitted) {
-      translation = this.collectSplittedTranslations(sid)
-      segmentSource = this.collectSplittedTranslations(sid, '.source')
+      translation = SegmentUtils.collectSplittedTranslations(sid)
+      segmentSource = SegmentUtils.collectSplittedTranslations(sid, '.source')
     }
     if (
       !idBefore &&
@@ -210,7 +209,7 @@ const SegmentUtils = {
       }
     }
     return {
-      id_segment: segment.original_sid,
+      id_segment: segment.sid,
       id_job: config.id_job,
       password: config.password,
       status: status ? status : segment.status,
@@ -226,7 +225,7 @@ const SegmentUtils = {
       revision_number: config.revisionNumber,
       current_password: config.currentPassword,
       splitStatuses: segment.splitted
-        ? this.collectSplittedStatuses(
+        ? SegmentUtils.collectSplittedStatuses(
             segment.original_sid,
             segment.sid,
             status,
@@ -237,6 +236,23 @@ const SegmentUtils = {
         ? JSON.stringify(segment.contributions.matches)
         : undefined,
     }
+  },
+  /**
+   *
+   * @param sid
+   * @param selector
+   * @returns {string}
+   */
+  collectSplittedTranslations: function (sid, selector) {
+    let totalTranslation = ''
+    const segments = SegmentStore.getSegmentsInSplit(sid)
+    segments.forEach((segment, index) => {
+      totalTranslation +=
+        selector === '.source' ? segment.segment : segment.translation
+      if (index < segments.length - 1)
+        totalTranslation += UI.splittedTranslationPlaceholder
+    })
+    return totalTranslation
   },
 }
 
