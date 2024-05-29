@@ -344,7 +344,7 @@ class Engines_MMT extends Engines_AbstractEngine {
      *
      * @return Engines_Results_AbstractResponse
      */
-    protected function _decode( $rawValue ) {
+    protected function _decode( $rawValue, array $parameters = [], $function = null ) {
 
         $args         = func_get_args();
         $functionName = $args[ 2 ];

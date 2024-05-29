@@ -26,6 +26,6 @@ class Engines_NONE  extends Engines_AbstractEngine {
         return [ 'responseStatus' => 200, 'responseData' => [] ];
     }
 
-    protected function _decode( $rawValue ) {}
+    protected function _decode( $rawValue, array $parameters = [], $function = null ) {}
 
 }
