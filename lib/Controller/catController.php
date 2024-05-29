@@ -180,6 +180,7 @@ class catController extends viewController {
                 "name" => $active_mt_engine[0]->name,
                 "type" => $active_mt_engine[0]->type,
                 "description" => $active_mt_engine[0]->description,
+                'engine_type' => $active_mt_engine[0]->class_load,
             ];
         }
 
