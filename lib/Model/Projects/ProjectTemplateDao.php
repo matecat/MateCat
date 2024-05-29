@@ -256,7 +256,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao
      */
     private static function findUniqueName(ProjectTemplateStruct $projectTemplateStruct, $name, $uid)
     {
-        $check = ProjectTemplateDao::getByUidAndName($uid, $name, 0); // potrebbe essere più veloce fare una query con LIKE name%
+        $check = ProjectTemplateDao::getByUidAndName($uid, $name, 0);
 
         if($check === null){
             return $projectTemplateStruct;

@@ -4,6 +4,7 @@ namespace FiltersXliffConfig;
 
 use DataAccess_AbstractDaoSilentStruct;
 use Date\DateTimeUtil;
+use Exception;
 use FiltersXliffConfig\Filters\FiltersConfigModel;
 use FiltersXliffConfig\Xliff\XliffConfigModel;
 use JsonSerializable;
@@ -50,6 +51,33 @@ class FiltersXliffConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruc
     public function setFilters(FiltersConfigModel $filters): void
     {
         $this->filters = $filters;
+    }
+
+    /**
+     * @param string $json
+     * @return $this
+     *
+     * @throws Exception
+     */
+    public function hydrateFromJSON($json)
+    {
+        $json = json_decode($json, true);
+
+        if(
+            !isset($json['name']) and
+            !isset($json['filters']) and
+            !isset($json['xliff'])
+        ){
+            throw new Exception("Cannot instantiate a new FiltersXliffConfigTemplateStruct. Invalid JSON provided.", 403);
+        }
+
+        $this->name = $json['name'];
+
+        // object here
+        $this->filters = $json['filters'];
+        $this->xliff = $json['xliff'];
+
+        return $this;
     }
 
     /**

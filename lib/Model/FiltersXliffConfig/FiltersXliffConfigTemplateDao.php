@@ -46,6 +46,7 @@ class FiltersXliffConfigTemplateDao extends DataAccess_AbstractDao
         $default = new FiltersXliffConfigTemplateStruct();
         $default->id = 0;
         $default->uid = $uid;
+        $default->name = "default";
 
         $default->setFilters(new FiltersConfigModel());
         $default->setXliff(new XliffConfigModel());
@@ -54,6 +55,59 @@ class FiltersXliffConfigTemplateDao extends DataAccess_AbstractDao
         $default->modified_at = date("Y-m-d H:i:s");
 
         return $default;
+    }
+
+    /**
+     * @param $json
+     * @param $uid
+     * @return FiltersXliffConfigTemplateStruct
+     * @throws Exception
+     */
+    public static function createFromJSON($json, $uid)
+    {
+        self::validateJSON($json);
+
+        $templateStruct = new FiltersXliffConfigTemplateStruct();
+        $templateStruct->hydrateFromJSON($json);
+        $templateStruct->uid = $uid;
+
+        return self::save($templateStruct);
+
+
+    }
+
+    /**
+     * @param FiltersXliffConfigTemplateStruct $templateStruct
+     * @param $json
+     * @param $uid
+     * @return FiltersXliffConfigTemplateStruct
+     * @throws Exception
+     */
+    public static function editFromJSON(FiltersXliffConfigTemplateStruct $templateStruct, $json, $uid)
+    {
+        self::validateJSON($json);
+        $templateStruct->hydrateFromJSON($json);
+        $templateStruct->uid = $uid;
+
+        return self::update($templateStruct);
+    }
+
+    /**
+     * @param $json
+     * @throws \Swaggest\JsonSchema\InvalidValue
+     * @throws \Exception
+     */
+    private static function validateJSON($json)
+    {
+        $validatorObject = new \Validator\JSONValidatorObject();
+        $validatorObject->json = $json;
+        $jsonSchema = file_get_contents( __DIR__ . '/../../../inc/validation/schema/filters_xliff_config_template.json' );
+        $validator = new \Validator\JSONValidator($jsonSchema);
+        $validator->validate($validatorObject);
+
+        if(!$validator->isValid()){
+            throw $validator->getErrors()[0]->error;
+        }
     }
 
     /**

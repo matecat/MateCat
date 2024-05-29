@@ -104,7 +104,7 @@ class FiltersXliffConfigTemplateController extends KleinController
         // try to create the template
         try {
             $json = $this->request->body();
-            $struct = ProjectTemplateDao::createFromJSON($json, $this->getUser()->uid);
+            $struct = FiltersXliffConfigTemplateDao::createFromJSON($json, $this->getUser()->uid);
 
             $this->response->code(201);
 
@@ -132,25 +132,18 @@ class FiltersXliffConfigTemplateController extends KleinController
     public function update()
     {
         // accept only JSON
-        if($this->request->headers()->get('Content-Type') !== 'application/json'){
+        if(!$this->isJsonRequest()){
+            $this->response->code(405);
             $this->response->json([
                 'message' => 'Method not allowed'
             ]);
-            $this->response->code(405);
             exit();
         }
 
         $id = $this->request->param( 'id' );
         $uid = $this->getUser()->uid;
 
-        // mark all templates as not default
-        if($id == 0){
-            ProjectTemplateDao::markAsNotDefault($uid, 0);
-
-            return $this->response->json(ProjectTemplateDao::getDefaultTemplate($uid));
-        }
-
-        $model = ProjectTemplateDao::getById($id);
+        $model = FiltersXliffConfigTemplateDao::getById($id);
 
         if(empty($model)){
             $this->response->code(404);
@@ -170,7 +163,7 @@ class FiltersXliffConfigTemplateController extends KleinController
 
         try {
             $json = $this->request->body();
-            $struct = ProjectTemplateDao::editFromJSON($model, $json, $uid);
+            $struct = FiltersXliffConfigTemplateDao::editFromJSON($model, $json, $uid);
 
             $this->response->code(200);
             return $this->response->json($struct);
