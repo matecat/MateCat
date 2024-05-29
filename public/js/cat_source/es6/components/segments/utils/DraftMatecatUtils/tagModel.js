@@ -15,13 +15,11 @@
 const tagSignatures = {
   ph: {
     type: 'ph',
-    regex:
-      /<ph(?:(?:(?!id).)*?)id="(?:[^"].*?)"(?:(?:(?!equiv-text).)*?)equiv-text="base64:((?:(?!>).)*?)"\/>/g,
+    regex: /<ph\b[^>]+?equiv-text="base64:([^"]+)"[^>]*?>/g,
     selfClosing: true,
     isClosure: false,
     placeholder: null,
-    placeholderRegex:
-      /<ph(?:(?:(?!id).)*?)id="(?:[^"].*?)"(?:(?:(?!equiv-text).)*?)equiv-text="base64:((?:(?!>).)*?)"\/>/,
+    placeholderRegex: /<ph\b[^>]+?equiv-text="base64:([^"]+)"[^>]*?>/,
     decodeNeeded: true,
     errorCheckAvailable: true,
     lexiqaAvailable: false,
