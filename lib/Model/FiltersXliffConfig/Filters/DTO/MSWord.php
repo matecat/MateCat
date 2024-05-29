@@ -16,34 +16,66 @@ class MSWord implements JsonSerializable
     private $exclude_highlight_colors;
 
     /**
-     * MSWord constructor.
      * @param bool|null $extract_doc_properties
-     * @param bool|null $extract_comments
-     * @param bool|null $extract_headers_footers
-     * @param bool|null $extract_hidden_text
-     * @param bool|null $accept_revisions
-     * @param array $exclude_styles
-     * @param array $exclude_text_colors
-     * @param array $exclude_highlight_colors
      */
-    public function __construct(
-        ?bool $extract_doc_properties = null,
-        ?bool $extract_comments = null,
-        ?bool $extract_headers_footers = null,
-        ?bool $extract_hidden_text = null,
-        ?bool $accept_revisions = null,
-        array $exclude_styles = [],
-        array $exclude_text_colors = [],
-        array $exclude_highlight_colors = []
-    )
+    public function setExtractDocProperties(?bool $extract_doc_properties): void
     {
         $this->extract_doc_properties = $extract_doc_properties;
+    }
+
+    /**
+     * @param bool|null $extract_comments
+     */
+    public function setExtractComments(?bool $extract_comments): void
+    {
         $this->extract_comments = $extract_comments;
+    }
+
+    /**
+     * @param bool|null $extract_headers_footers
+     */
+    public function setExtractHeadersFooters(?bool $extract_headers_footers): void
+    {
         $this->extract_headers_footers = $extract_headers_footers;
+    }
+
+    /**
+     * @param bool|null $extract_hidden_text
+     */
+    public function setExtractHiddenText(?bool $extract_hidden_text): void
+    {
         $this->extract_hidden_text = $extract_hidden_text;
+    }
+
+    /**
+     * @param bool|null $accept_revisions
+     */
+    public function setAcceptRevisions(?bool $accept_revisions): void
+    {
         $this->accept_revisions = $accept_revisions;
+    }
+
+    /**
+     * @param array $exclude_styles
+     */
+    public function setExcludeStyles(array $exclude_styles): void
+    {
         $this->exclude_styles = $exclude_styles;
+    }
+
+    /**
+     * @param array $exclude_text_colors
+     */
+    public function setExcludeTextColors(array $exclude_text_colors): void
+    {
         $this->exclude_text_colors = $exclude_text_colors;
+    }
+
+    /**
+     * @param array $exclude_highlight_colors
+     */
+    public function setExcludeHighlightColors(array $exclude_highlight_colors): void
+    {
         $this->exclude_highlight_colors = $exclude_highlight_colors;
     }
 

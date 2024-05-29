@@ -13,25 +13,42 @@ class MSPowerpoint implements JsonSerializable
     private $translate_slides;
 
     /**
-     * MSPowerpoint constructor.
      * @param bool|null $extract_doc_properties
-     * @param bool|null $extract_comments
-     * @param bool|null $extract_hidden_slides
-     * @param bool|null $extract_notes
-     * @param array $translate_slides
      */
-    public function __construct(
-        ?bool $extract_doc_properties = null,
-        ?bool $extract_comments = null,
-        ?bool $extract_hidden_slides = null,
-        ?bool $extract_notes = null,
-        array $translate_slides = []
-    )
+    public function setExtractDocProperties(?bool $extract_doc_properties): void
     {
         $this->extract_doc_properties = $extract_doc_properties;
+    }
+
+    /**
+     * @param bool|null $extract_comments
+     */
+    public function setExtractComments(?bool $extract_comments): void
+    {
         $this->extract_comments = $extract_comments;
+    }
+
+    /**
+     * @param bool|null $extract_hidden_slides
+     */
+    public function setExtractHiddenSlides(?bool $extract_hidden_slides): void
+    {
         $this->extract_hidden_slides = $extract_hidden_slides;
+    }
+
+    /**
+     * @param bool|null $extract_notes
+     */
+    public function setExtractNotes(?bool $extract_notes): void
+    {
         $this->extract_notes = $extract_notes;
+    }
+
+    /**
+     * @param array $translate_slides
+     */
+    public function setTranslateSlides(array $translate_slides): void
+    {
         $this->translate_slides = $translate_slides;
     }
 

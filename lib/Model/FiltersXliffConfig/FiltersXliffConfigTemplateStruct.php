@@ -7,6 +7,8 @@ use Date\DateTimeUtil;
 use Exception;
 use FiltersXliffConfig\Filters\DTO\Json;
 use FiltersXliffConfig\Filters\DTO\MSExcel;
+use FiltersXliffConfig\Filters\DTO\MSPowerpoint;
+use FiltersXliffConfig\Filters\DTO\MSWord;
 use FiltersXliffConfig\Filters\DTO\Xml;
 use FiltersXliffConfig\Filters\DTO\Yaml;
 use FiltersXliffConfig\Filters\FiltersConfigModel;
@@ -194,36 +196,36 @@ class FiltersXliffConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruc
             if(isset($filters['ms_excel'])){
                 $excelDao = new MSExcel();
 
-                if(isset($filters['yaml']['exclude_columns'])){
-                    $excelDao->setExcludeColumns($filters['yaml']['exclude_columns']);
+                if(isset($filters['ms_excel']['exclude_columns'])){
+                    $excelDao->setExcludeColumns($filters['ms_excel']['exclude_columns']);
                 }
 
-                if(isset($filters['yaml']['extract_diagrams'])){
-                    $excelDao->setExtractDiagrams($filters['yaml']['extract_diagrams']);
+                if(isset($filters['ms_excel']['extract_diagrams'])){
+                    $excelDao->setExtractDiagrams($filters['ms_excel']['extract_diagrams']);
                 }
 
-                if(isset($filters['yaml']['extract_comments'])){
-                    $excelDao->setExtractComments($filters['yaml']['extract_comments']);
+                if(isset($filters['ms_excel']['extract_comments'])){
+                    $excelDao->setExtractComments($filters['ms_excel']['extract_comments']);
                 }
 
-                if(isset($filters['yaml']['extract_drawings'])){
-                    $excelDao->setExtractDrawings($filters['yaml']['extract_drawings']);
+                if(isset($filters['ms_excel']['extract_drawings'])){
+                    $excelDao->setExtractDrawings($filters['ms_excel']['extract_drawings']);
                 }
 
-                if(isset($filters['yaml']['extract_hidden_cells'])){
-                    $excelDao->setExtractHiddenCells($filters['yaml']['extract_hidden_cells']);
+                if(isset($filters['ms_excel']['extract_hidden_cells'])){
+                    $excelDao->setExtractHiddenCells($filters['ms_excel']['extract_hidden_cells']);
                 }
 
-                if(isset($filters['yaml']['exclude_text_colors'])){
-                    $excelDao->setExcludeTextColors($filters['yaml']['exclude_text_colors']);
+                if(isset($filters['ms_excel']['exclude_text_colors'])){
+                    $excelDao->setExcludeTextColors($filters['ms_excel']['exclude_text_colors']);
                 }
 
-                if(isset($filters['yaml']['extract_doc_properties'])){
-                    $excelDao->setExtractDocProperties($filters['yaml']['extract_doc_properties']);
+                if(isset($filters['ms_excel']['extract_doc_properties'])){
+                    $excelDao->setExtractDocProperties($filters['ms_excel']['extract_doc_properties']);
                 }
 
-                if(isset($filters['yaml']['extract_sheet_names'])){
-                    $excelDao->setExtractSheetNames($filters['yaml']['extract_sheet_names']);
+                if(isset($filters['ms_excel']['extract_sheet_names'])){
+                    $excelDao->setExtractSheetNames($filters['ms_excel']['extract_sheet_names']);
                 }
 
                 $filtersConfig->setMsExcel($excelDao);
@@ -231,12 +233,68 @@ class FiltersXliffConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruc
 
             // ms word
             if(isset($filters['ms_word'])){
+                $wordDao = new MSWord();
 
+                if(isset($filters['ms_word']['extract_doc_properties'])){
+                    $wordDao->setExtractDocProperties($filters['ms_word']['extract_doc_properties']);
+                }
+
+                if(isset($filters['ms_word']['exclude_text_colors'])){
+                    $wordDao->setExcludeTextColors($filters['ms_word']['exclude_text_colors']);
+                }
+
+                if(isset($filters['ms_word']['extract_comments'])){
+                    $wordDao->setExtractComments($filters['ms_word']['extract_comments']);
+                }
+
+                if(isset($filters['ms_word']['accept_revisions'])){
+                    $wordDao->setAcceptRevisions($filters['ms_word']['accept_revisions']);
+                }
+
+                if(isset($filters['ms_word']['exclude_highlight_colors'])){
+                    $wordDao->setExcludeHighlightColors($filters['ms_word']['exclude_highlight_colors']);
+                }
+
+                if(isset($filters['ms_word']['extract_headers_footers'])){
+                    $wordDao->setExtractHeadersFooters($filters['ms_word']['extract_headers_footers']);
+                }
+
+                if(isset($filters['ms_word']['exclude_styles'])){
+                    $wordDao->setExcludeStyles($filters['ms_word']['exclude_styles']);
+                }
+
+                if(isset($filters['ms_word']['extract_hidden_text'])){
+                    $wordDao->setExtractHiddenText($filters['ms_word']['extract_hidden_text']);
+                }
+
+                $filtersConfig->setMsWord($wordDao);
             }
 
             // ms powerpoint
             if(isset($filters['ms_powerpoint'])){
+                $pptDao = new MSPowerpoint();
 
+                if(isset($filters['ms_powerpoint']['extract_doc_properties'])){
+                    $pptDao->setExtractDocProperties($filters['ms_powerpoint']['extract_doc_properties']);
+                }
+
+                if(isset($filters['ms_powerpoint']['extract_comments'])){
+                    $pptDao->setExtractComments($filters['ms_powerpoint']['extract_comments']);
+                }
+
+                if(isset($filters['ms_powerpoint']['extract_hidden_slides'])){
+                    $pptDao->setExtractHiddenSlides($filters['ms_powerpoint']['extract_hidden_slides']);
+                }
+
+                if(isset($filters['ms_powerpoint']['translate_slides'])){
+                    $pptDao->setTranslateSlides($filters['ms_powerpoint']['translate_slides']);
+                }
+
+                if(isset($filters['ms_powerpoint']['extract_notes'])){
+                    $pptDao->setExtractNotes($filters['ms_powerpoint']['extract_notes']);
+                }
+
+                $filtersConfig->setMsPowerpoint($pptDao);
             }
         }
 
