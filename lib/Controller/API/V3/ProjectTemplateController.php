@@ -92,11 +92,11 @@ class ProjectTemplateController extends KleinController
     public function create()
     {
         // accept only JSON
-        if($this->request->headers()->get('Content-Type') !== 'application/json'){
+        if(!$this->isJsonRequest()){
+            $this->response->code(405);
             $this->response->json([
                 'message' => 'Method not allowed'
             ]);
-            $this->response->code(405);
             exit();
         }
 
