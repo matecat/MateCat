@@ -9,8 +9,9 @@ use FiltersXliffConfig\Filters\DTO\MSWord;
 use FiltersXliffConfig\Filters\DTO\Xml;
 use FiltersXliffConfig\Filters\DTO\Yaml;
 use JsonSerializable;
+use Serializable;
 
-class FiltersConfigModel implements JsonSerializable
+class FiltersConfigModel implements JsonSerializable, Serializable
 {
     private $yaml = null;
     private $xml = null;
@@ -80,5 +81,28 @@ class FiltersConfigModel implements JsonSerializable
             'ms_excel' => $this->ms_excel,
             'ms_powerpoint' => $this->ms_powerpoint,
         ];
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function serialize()
+    {
+        return json_encode([
+            'xml' => $this->xml,
+            'yaml' => $this->yaml,
+            'json' => $this->json,
+            'ms_word' => $this->ms_word,
+            'ms_excel' => $this->ms_excel,
+            'ms_powerpoint' => $this->ms_powerpoint,
+        ]);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function unserialize($serialized)
+    {
+        return json_decode($serialized);
     }
 }

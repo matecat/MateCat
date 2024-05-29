@@ -22,9 +22,9 @@ class ProjectTemplateDao extends DataAccess_AbstractDao
 {
     const TABLE = 'project_templates';
 
-    const query_by_id = "SELECT * FROM " . self::TABLE . " WHERE id = :id";
-    const query_default = "SELECT * FROM " . self::TABLE . " WHERE is_default = :is_default AND uid = :uid";
-    const query_by_uid_name = "SELECT * FROM " . self::TABLE . " WHERE uid = :uid AND name = :name";
+    const query_by_id = "SELECT * FROM " . self::TABLE . " WHERE id = :id AND deleted_at IS NULL";
+    const query_default = "SELECT * FROM " . self::TABLE . " WHERE is_default = :is_default AND uid = :uid AND deleted_at IS NULL";
+    const query_by_uid_name = "SELECT * FROM " . self::TABLE . " WHERE uid = :uid AND name = :name AND deleted_at IS NULL";
 
     /**
      * @param $uid

@@ -6,8 +6,9 @@ use DomainException;
 use FiltersXliffConfig\Xliff\DTO\Xliff12Rule;
 use FiltersXliffConfig\Xliff\DTO\Xliff20Rule;
 use JsonSerializable;
+use Serializable;
 
-class XliffConfigModel implements JsonSerializable
+class XliffConfigModel implements JsonSerializable, Serializable
 {
     private $xliff12 = [];
     private $xliff20 = [];
@@ -33,5 +34,24 @@ class XliffConfigModel implements JsonSerializable
             'xliff12' => $this->xliff12,
             'xliff20' => $this->xliff20,
         ];
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function serialize()
+    {
+        return json_encode([
+            'xliff12' => $this->xliff12,
+            'xliff20' => $this->xliff20,
+        ]);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function unserialize($serialized)
+    {
+        return json_decode($serialized);
     }
 }

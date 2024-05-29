@@ -5,6 +5,7 @@ class CreateFiltersXliffConfigTemplateTable extends AbstractMatecatMigration {
     public $sql_up = [
         'CREATE TABLE IF NOT EXISTS `filters_xliff_config_templates` (
             `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `name` VARCHAR(255) NOT NULL,
             `uid` bigint(20) NOT NULL,
             `xliff` TEXT DEFAULT NULL,
             `filters` TEXT DEFAULT NULL,
@@ -12,7 +13,7 @@ class CreateFiltersXliffConfigTemplateTable extends AbstractMatecatMigration {
             `deleted_at` timestamp NULL DEFAULT NULL,
             `modified_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
             PRIMARY KEY (`id`),
-            KEY `uid_idx` (`uid`) USING BTREE);
+            UNIQUE INDEX `uid_name_idx` (`uid` ASC, `name` ASC));
         '
     ];
 

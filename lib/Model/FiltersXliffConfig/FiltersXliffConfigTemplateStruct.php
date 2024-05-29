@@ -11,6 +11,7 @@ use JsonSerializable;
 class FiltersXliffConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruct implements JsonSerializable
 {
     public $id;
+    public $name;
     public $uid;
     public $created_at;
     public $modified_at;
@@ -25,6 +26,22 @@ class FiltersXliffConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruc
     public function setXliff(XliffConfigModel $xliff): void
     {
         $this->xliff = $xliff;
+    }
+
+    /**
+     * @return null
+     */
+    public function getXliff()
+    {
+        return $this->xliff;
+    }
+
+    /**
+     * @return null
+     */
+    public function getFilters()
+    {
+        return $this->filters;
     }
 
     /**
@@ -44,6 +61,7 @@ class FiltersXliffConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruc
         return [
             'id' => (int)$this->id,
             'uid' => (int)$this->uid,
+            'name' => $this->name,
             'filters' => ($this->filters !== null) ? $this->filters : new \stdClass(),
             'xliff' => ($this->xliff !== null) ? $this->xliff : new \stdClass(),
             'createdAt' => DateTimeUtil::formatIsoDate($this->created_at),
