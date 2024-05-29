@@ -117,7 +117,10 @@ function CatTool() {
           }
         }
         if (config.active_engine && config.active_engine.id) {
-          const activeMT = config.active_engine
+          const activeMT =
+            config.active_engine?.engine_type === 'MMTLite'
+              ? DEFAULT_ENGINE_MEMORY
+              : config.active_engine
           activeMT && setActiveMTEngine(activeMT)
         }
       })

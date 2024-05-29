@@ -1,10 +1,11 @@
 <?php
 
-namespace API\V3;
+namespace API\V2;
 
 use API\V2\ChunkController;
 use API\V2\Validators\LoginValidator;
 use CatUtils;
+use Chunks_ChunkStruct;
 use Database;
 use Exception;
 use Features\ReviewExtended\ReviewUtils;
@@ -59,6 +60,13 @@ class ChangePasswordController extends ChunkController
         } else {
             $new_pwd    = Utils::randomString( 15, true );
             $actual_pwd = $password;
+        }
+
+        if(!empty($revision_number) and !in_array($revision_number, [1,2])){
+            $this->response->json( [
+                'error' => '`revision_number` not valid. Allowed values [1, 2]'
+            ] );
+            exit();
         }
 
         $res = (!empty($res)) ? $res : 'job';
@@ -119,8 +127,6 @@ class ChangePasswordController extends ChunkController
             $pDao    = new Projects_ProjectDao();
             $pDao->changePassword( $pStruct, $new_password );
             $pDao->destroyCacheById( $id );
-
-            // invalidate cache for ProjectData
             $pDao->destroyCacheForProjectData($pStruct->id, $pStruct->password);
 
             $pStruct->getFeaturesSet()->run( 'project_password_changed', $pStruct, $actual_pwd );
@@ -159,9 +165,16 @@ class ChangePasswordController extends ChunkController
                     ->run( 'job_password_changed', $jStruct, $actual_pwd );
             }
 
+            // invalidate ChunkReviewDao cache for the job
+            if($jStruct instanceof Chunks_ChunkStruct){
+                $chunkReviewDao = new ChunkReviewDao();
+                $chunkReviewDao->destroyCacheForFindChunkReviews($jStruct, 60 * 5 );
+            }
+
             // invalidate cache for ProjectData
             $pDao = new Projects_ProjectDao();
             $pDao->destroyCacheForProjectData($jStruct->getProject()->id, $jStruct->getProject()->password);
+            $pDao->destroyCacheById( $jStruct->getProject()->id );
 
             Database::obtain()->commit();
         }
@@ -182,13 +195,6 @@ class ChangePasswordController extends ChunkController
 
         if($check === null){
             throw new Exception('The logged user does not belong to the right team', 403);
-        }
-
-        // check uid
-        $owner = $project->getOriginalOwner();
-
-        if($owner->uid !== $user->uid){
-            throw new Exception('This project does not belong to the logged user', 403);
         }
     }
 }
