@@ -2763,11 +2763,24 @@ class ProjectManager {
 
         // state handling
         $state = null;
+        $stateQualifier = null;
 
         if ( isset( $trans_unit[ 'seg-target' ][ $position ][ 'attr' ] ) and isset( $trans_unit[ 'seg-target' ][ $position ][ 'attr' ][ 'state' ] ) ) {
             $state = $trans_unit[ 'seg-target' ][ $position ][ 'attr' ][ 'state' ];
         } elseif ( isset( $trans_unit[ 'target' ][ 'attr' ] ) and isset( $trans_unit[ 'target' ][ 'attr' ][ 'state' ] ) ) {
             $state = $trans_unit[ 'target' ][ 'attr' ][ 'state' ];
+        }
+
+        if(isset($trans_unit['seg-target'][$position]['attr']) and isset($trans_unit['seg-target'][$position]['attr']['state-qualifier'])){
+            $stateQualifier = $trans_unit['seg-target'][$position]['attr']['state-qualifier'];
+        } elseif(isset($trans_unit['target']['attr']) and isset($trans_unit['target']['attr']['state-qualifier'])){
+            $stateQualifier = $trans_unit['target']['attr']['state-qualifier'];
+        }
+
+        if($stateQualifier !== null){
+            if(XliffTranslationStatus::isFuzzyMatch($stateQualifier)){
+                return Constants_TranslationStatus::STATUS_DRAFT;
+            }
         }
 
         if ( $state !== null ) {
@@ -3379,7 +3392,9 @@ class ProjectManager {
 
         // ignore translations for fuzzy matches (xliff 1.2)
         if ( $stateQualifier !== null ) {
-            return !XliffTranslationStatus::isFuzzyMatch( $stateQualifier );
+            if(XliffTranslationStatus::isFuzzyMatch($stateQualifier)){
+                return true;
+            }
         }
 
         if ( $state !== null ) {
