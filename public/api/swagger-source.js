@@ -270,44 +270,65 @@ var spec = {
         },
       },
     },
-    '/api/change_project_password': {
+    '/api/v2/change-password': {
       post: {
-        tags: ['Project'],
-        summary: 'Change password',
-        description: 'Change the password of a project.',
-        parameters: [
-          {
-            name: 'id_project',
-            in: 'formData',
-            description: 'The id of the project you want to update.',
-            required: true,
-            type: 'integer',
+        tags: ['Project', 'Job'],
+      },
+      summary: 'Change password',
+      description: 'Change the password of a project or a job.',
+      parameters: [
+        {
+          name: 'res',
+          in: 'formData',
+          description: 'Possible values: job, prj (if left empy, job is the default value)',
+          required: false,
+          type: 'string',
+        },
+        {
+          name: 'id',
+          in: 'formData',
+          description: 'The id of the resource (project or job) whose password you want to change.',
+          required: true,
+          type: 'integer',
+        },
+        {
+          name: 'password',
+          in: 'formData',
+          description: 'The current password of the resource (project or job) whose password you want to change.',
+          required: true,
+          type: 'string',
+        },
+        {
+          name: 'new_password',
+          in: 'formData',
+          description: 'Use this to define the new password of the resource whose password you are changing. Becomes mandatory if undo is set to "true".',
+          required: false,
+          type: 'string',
+        },
+        {
+          name: 'revision_number',
+          in: 'formData',
+          description: 'Fill this in if you want to change the password of a revision job. Use this field to specify the revision step whose password you are changing. If this field is filled in, the password sent in the "password" field should be the one for the corresponding revision step. Possible values: 1, 2.',
+          required: false,
+          type: 'integer',
+        },
+        {
+          name: 'undo',
+          in: 'formData',
+          description: 'Set this to "true" if you\'d like to define the new password of the resource you are updating, rather than having a random one generated for you.',
+          required: false,
+          type: 'boolean',
+        }
+      ],
+      responses: {
+        200: {
+          description: 'An array of price estimates by product',
+          schema: {
+            $ref: '#/definitions/ChangePasswordResponse',
           },
-          {
-            name: 'old_pass',
-            in: 'formData',
-            description: 'The OLD password of the project you want to update.',
-            required: true,
-            type: 'string',
-          },
-          {
-            name: 'new_pass',
-            in: 'formData',
-            description: 'The NEW password of the project you want to update.',
-            required: true,
-            type: 'string',
-          },
-        ],
-        responses: {
-          200: {
-            description: 'An array of price estimates by product',
-            schema: {
-              $ref: '#/definitions/ChangePasswordResponse',
-            },
-          },
-          default: {
-            description: 'Unexpected error',
-          },
+        },
+        default: {
+          description: 'Unexpected error',
         },
       },
     },
@@ -2933,24 +2954,17 @@ var spec = {
     ChangePasswordResponse: {
       type: 'object',
       properties: {
-        status: {
+        id: {
           type: 'string',
-          description:
-            'Return the exit status of the action. The statuses can be OK or FAIL',
-          enum: ['OK', 'FAIL'],
+          description: 'Returns the id of the resource just updated',
         },
-        id_project: {
+        new_pwd: {
           type: 'string',
-          description: 'Returns the id of the project just updated',
+          description: 'Returns the new pass of the resource just updated',
         },
-        project_pass: {
+        old_pwd: {
           type: 'string',
-          description: 'Returns the new pass of the project just updated',
-        },
-        message: {
-          type: 'string',
-          description:
-            'Return the error message for the action if the status is FAIL',
+          description: 'Returns the old pass of the resource just updated',
         },
       },
     },

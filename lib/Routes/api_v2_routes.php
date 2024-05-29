@@ -123,6 +123,9 @@ $klein->with( '/api/v2/payable_rate', function () {
 
 });
 
+// change password
+route( '/api/v2/change-password',  'POST', 'API\V2\ChangePasswordController', 'changePassword' );
+
 // Download files
 route( '/api/v2/original/[:id_job]/[:password]', 'GET',  'API\V2\DownloadOriginalController', 'index' );
 route( '/api/v2/translation/[:id_job]/[:password]', 'GET',  'API\V2\DownloadFileController', 'index' );
