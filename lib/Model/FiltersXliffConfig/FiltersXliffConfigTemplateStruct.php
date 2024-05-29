@@ -6,6 +6,9 @@ use DataAccess_AbstractDaoSilentStruct;
 use Date\DateTimeUtil;
 use Exception;
 use FiltersXliffConfig\Filters\DTO\Json;
+use FiltersXliffConfig\Filters\DTO\MSExcel;
+use FiltersXliffConfig\Filters\DTO\Xml;
+use FiltersXliffConfig\Filters\DTO\Yaml;
 use FiltersXliffConfig\Filters\FiltersConfigModel;
 use FiltersXliffConfig\Xliff\DTO\Xliff12Rule;
 use FiltersXliffConfig\Xliff\DTO\Xliff20Rule;
@@ -143,6 +146,97 @@ class FiltersXliffConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruc
                 }
 
                 $filtersConfig->setJson($jsonDto);
+            }
+
+            // xml
+            if(isset($filters['xml'])){
+                $xmlDao = new Xml();
+
+                if(isset($filters['xml']['preserve_whitespace'])){
+                    $xmlDao->setPreserveWhitespace($filters['xml']['preserve_whitespace']);
+                }
+
+                if(isset($filters['xml']['translate_elements'])){
+                    $xmlDao->setTranslateElements($filters['xml']['translate_elements']);
+                }
+
+                if(isset($filters['xml']['do_not_translate_elements'])){
+                    $xmlDao->setDoNotTranslateElements($filters['xml']['do_not_translate_elements']);
+                }
+
+                if(isset($filters['xml']['include_attributes'])){
+                    $xmlDao->setIncludeAttributes($filters['xml']['include_attributes']);
+                }
+
+                $filtersConfig->setXml($xmlDao);
+            }
+
+            // yaml
+            if(isset($filters['yaml'])){
+                $yamlDao = new Yaml();
+
+                if(isset($filters['yaml']['extract_arrays'])){
+                    $yamlDao->setExtractArrays($filters['yaml']['extract_arrays']);
+                }
+
+                if(isset($filters['yaml']['translate_keys'])){
+                    $yamlDao->setTranslateKeys($filters['yaml']['translate_keys']);
+                }
+
+                if(isset($filters['yaml']['do_not_translate_keys'])){
+                    $yamlDao->setDoNotTranslateKeys($filters['yaml']['do_not_translate_keys']);
+                }
+
+                $filtersConfig->setYaml($yamlDao);
+            }
+
+            // ms excel
+            if(isset($filters['ms_excel'])){
+                $excelDao = new MSExcel();
+
+                if(isset($filters['yaml']['exclude_columns'])){
+                    $excelDao->setExcludeColumns($filters['yaml']['exclude_columns']);
+                }
+
+                if(isset($filters['yaml']['extract_diagrams'])){
+                    $excelDao->setExtractDiagrams($filters['yaml']['extract_diagrams']);
+                }
+
+                if(isset($filters['yaml']['extract_comments'])){
+                    $excelDao->setExtractComments($filters['yaml']['extract_comments']);
+                }
+
+                if(isset($filters['yaml']['extract_drawings'])){
+                    $excelDao->setExtractDrawings($filters['yaml']['extract_drawings']);
+                }
+
+                if(isset($filters['yaml']['extract_hidden_cells'])){
+                    $excelDao->setExtractHiddenCells($filters['yaml']['extract_hidden_cells']);
+                }
+
+                if(isset($filters['yaml']['exclude_text_colors'])){
+                    $excelDao->setExcludeTextColors($filters['yaml']['exclude_text_colors']);
+                }
+
+                if(isset($filters['yaml']['extract_doc_properties'])){
+                    $excelDao->setExtractDocProperties($filters['yaml']['extract_doc_properties']);
+                }
+
+                if(isset($filters['yaml']['extract_sheet_names'])){
+                    $excelDao->setExtractSheetNames($filters['yaml']['extract_sheet_names']);
+                }
+
+                $filtersConfig->setMsExcel($excelDao);
+            }
+
+            // ms word
+            if(isset($filters['ms_word'])){
+
+            }
+
+            // ms powerpoint
+            if(isset($filters['ms_powerpoint'])){
+
             }
         }
 

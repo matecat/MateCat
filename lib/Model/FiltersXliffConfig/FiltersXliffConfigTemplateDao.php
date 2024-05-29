@@ -18,9 +18,9 @@ class FiltersXliffConfigTemplateDao extends DataAccess_AbstractDao
 {
     const TABLE = 'filters_xliff_config_templates';
 
-    const query_by_id = "SELECT * FROM " . self::TABLE . " WHERE id = :id";
-    const query_by_uid = "SELECT * FROM " . self::TABLE . " WHERE uid = :uid";
-    const query_by_uid_name = "SELECT * FROM " . self::TABLE . " WHERE uid = :uid AND name = :name";
+    const query_by_id = "SELECT * FROM " . self::TABLE . " WHERE id = :id AND deleted_at IS NULL";
+    const query_by_uid = "SELECT * FROM " . self::TABLE . " WHERE uid = :uid AND deleted_at IS NULL";
+    const query_by_uid_name = "SELECT * FROM " . self::TABLE . " WHERE uid = :uid AND name = :name AND deleted_at IS NULL";
 
     /**
      * @var null
@@ -148,7 +148,7 @@ class FiltersXliffConfigTemplateDao extends DataAccess_AbstractDao
     {
         $conn = \Database::obtain()->getConnection();
 
-        $stmt = $conn->prepare( "SELECT count(id) as count FROM ".self::TABLE." WHERE uid = :uid");
+        $stmt = $conn->prepare( "SELECT count(id) as count FROM ".self::TABLE." WHERE deleted_at IS NULL AND uid = :uid");
         $stmt->execute([
             'uid' => $uid
         ]);
@@ -164,7 +164,7 @@ class FiltersXliffConfigTemplateDao extends DataAccess_AbstractDao
         $models = [];
         $models[] = self::getDefaultTemplate($uid);
 
-        $stmt = $conn->prepare( "SELECT * FROM ".self::TABLE." WHERE uid = :uid ORDER BY id ASC LIMIT $pagination OFFSET $offset ");
+        $stmt = $conn->prepare( "SELECT * FROM ".self::TABLE." WHERE deleted_at IS NULL AND uid = :uid ORDER BY id ASC LIMIT $pagination OFFSET $offset ");
         $stmt->setFetchMode(PDO::FETCH_ASSOC);
         $stmt->execute([
             'uid' => $uid
@@ -213,6 +213,7 @@ class FiltersXliffConfigTemplateDao extends DataAccess_AbstractDao
      * @param $uid
      * @param int $ttl
      * @return FiltersXliffConfigTemplateStruct|null
+     * @throws Exception
      */
     public static function getByUid($uid, $ttl = 60)
     {
@@ -233,6 +234,7 @@ class FiltersXliffConfigTemplateDao extends DataAccess_AbstractDao
      * @param $name
      * @param int $ttl
      * @return FiltersXliffConfigTemplateStruct|null
+     * @throws Exception
      */
     public static function getByUidAndName( $uid, $name, $ttl = 60 )
     {

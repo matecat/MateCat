@@ -12,22 +12,34 @@ class Xml implements JsonSerializable
     private $include_attributes;
 
     /**
-     * Xml constructor.
      * @param bool|null $preserve_whitespace
-     * @param array $translate_elements
-     * @param array $do_not_translate_elements
-     * @param array $include_attributes
      */
-    public function __construct(
-        ?bool $preserve_whitespace = null,
-        array $translate_elements = [],
-        array $do_not_translate_elements = [],
-        array $include_attributes = []
-    )
+    public function setPreserveWhitespace(?bool $preserve_whitespace): void
     {
         $this->preserve_whitespace = $preserve_whitespace;
+    }
+
+    /**
+     * @param array $translate_elements
+     */
+    public function setTranslateElements(array $translate_elements): void
+    {
         $this->translate_elements = $translate_elements;
+    }
+
+    /**
+     * @param array $do_not_translate_elements
+     */
+    public function setDoNotTranslateElements(array $do_not_translate_elements): void
+    {
         $this->do_not_translate_elements = $do_not_translate_elements;
+    }
+
+    /**
+     * @param array $include_attributes
+     */
+    public function setIncludeAttributes(array $include_attributes): void
+    {
         $this->include_attributes = $include_attributes;
     }
 

@@ -11,19 +11,26 @@ class Yaml implements JsonSerializable
     private $do_not_translate_keys;
 
     /**
-     * Yaml constructor.
      * @param bool|null $extract_arrays
-     * @param array $translate_keys
-     * @param array $do_not_translate_keys
      */
-    public function __construct(
-        ?bool $extract_arrays = null,
-        array $translate_keys = [],
-        array $do_not_translate_keys = []
-    )
+    public function setExtractArrays(?bool $extract_arrays): void
     {
         $this->extract_arrays = $extract_arrays;
+    }
+
+    /**
+     * @param array $translate_keys
+     */
+    public function setTranslateKeys(array $translate_keys): void
+    {
         $this->translate_keys = $translate_keys;
+    }
+
+    /**
+     * @param array $do_not_translate_keys
+     */
+    public function setDoNotTranslateKeys(array $do_not_translate_keys): void
+    {
         $this->do_not_translate_keys = $do_not_translate_keys;
     }
 
