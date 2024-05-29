@@ -1,4 +1,5 @@
 import React from 'react'
+import TEXT_UTILS from '../../utils/textUtils'
 
 class LanguageSelectorList extends React.Component {
   constructor(props) {
@@ -63,7 +64,14 @@ class LanguageSelectorList extends React.Component {
                     className={`lang-item ${elementClass}`}
                     onClick={onClickElement(e)}
                   >
-                    {e.name}
+                    <div className="language-dropdown-item-container">
+                      <div className="code-badge">
+                        <span className={`code-badge-${elementClass}`}>
+                          {e.code}
+                        </span>
+                      </div>
+                      <span>{e.name}</span>
+                    </div>
                     <span className={'check'}>
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -100,10 +108,26 @@ class LanguageSelectorList extends React.Component {
 
   getFilteredLanguages = () => {
     const {languagesList, querySearch} = this.props
+    // const querySplitted = TEXT_UTILS.escapeRegExp(querySearch)
+    //   .split(' ')
+    //   .join('|')
+    // const regex = new RegExp(
+    //   querySplitted.substr(querySplitted.lastIndexOf('|') + 1) === ''
+    //     ? querySplitted.substring(0, querySplitted.lastIndexOf('|'))
+    //     : querySplitted,
+    //   'i',
+    // )
+    const wordsFromQuery = TEXT_UTILS.escapeRegExp(querySearch)
+      .split(' ')
+      .filter((word) => word)
+
     const langs =
       languagesList && languagesList.length
-        ? languagesList.filter(
-            (e) => e.name.toLowerCase().indexOf(querySearch.toLowerCase()) >= 0,
+        ? languagesList.filter(({name, id}) =>
+            wordsFromQuery.every((word) => {
+              const regex = new RegExp(word, 'i')
+              return regex.test(name) || regex.test(id)
+            }),
           )
         : []
     const sortInputFirst = (input, data) => {

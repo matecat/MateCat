@@ -123,7 +123,8 @@ a.ui.primary.right.floated.button.tiny.register-ok {
   transition-delay: 0s, 0s, 0.3s;
 }
 
-.success-modal {
+.success-modal,
+.fatal-error-modal {
   padding: 20px;
 }
 

@@ -137,7 +137,7 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
         }
     }
 
-    abstract protected function _decode( $rawValue );
+    abstract protected function _decode( $rawValue, array $parameters = [], $function = null );
 
     public function _call( $url, Array $curl_options = array() ) {
 

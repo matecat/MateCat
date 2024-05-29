@@ -3,7 +3,6 @@ import React from 'react'
 import CatToolActions from './es6/actions/CatToolActions'
 import CatTool from './es6/pages/CatTool'
 import CommonUtils from './es6/utils/commonUtils'
-import commentsActions from './es6/actions/CommentsActions'
 import CommentsActions from './es6/actions/CommentsActions'
 
 $.extend(window.UI, {
