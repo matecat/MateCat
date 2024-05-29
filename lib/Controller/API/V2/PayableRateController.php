@@ -29,11 +29,11 @@ class PayableRateController extends KleinController
     public function create()
     {
         // accept only JSON
-        if($this->request->headers()->get('Content-Type') !== 'application/json'){
+        if( !preg_match( '~^application/json~', $this->request->headers()->get( 'Content-Type' ) ) ){
+            $this->response->code(405);
             $this->response->json([
                 'message' => 'Method not allowed'
             ]);
-            $this->response->code(405);
             exit();
         }
 

@@ -54,12 +54,13 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 
     /**
      * @param $rawValue
-     *
+     * @param array $parameters
+     * @param null $function
      * @return Engines_Results_AbstractResponse
      */
-    protected function _decode( $rawValue ) {
-        $args         = func_get_args();
-        $functionName = $args[ 2 ];
+    protected function _decode( $rawValue, array $parameters = [], $function = null ) {
+
+        $functionName = $function;
 
         if ( is_string( $rawValue ) ) {
             $decoded = json_decode( $rawValue, true );
