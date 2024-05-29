@@ -34,7 +34,7 @@ class Xliff12Rule implements JsonSerializable
         'rejected-inaccurate',
         'rejected-length',
         'rejected-spelling',
-        'tm-suggestion',
+        'tm-suggestion'
     ];
 
     const ALLOWED_ANALYSIS = [
