@@ -215,11 +215,9 @@ class Engines_MyMemory extends Engines_AbstractEngine {
             $parameters[ 'key' ] = implode( ",", $_config[ 'id_user' ] );
         }
 
-        ( !$_config[ 'isGlossary' ] ? $function = "translate_relative_url" : $function = "gloss_get_relative_url" );
-
         $parameters = $this->featureSet->filter( 'filterMyMemoryGetParameters', $parameters, $_config );
 
-        $this->call( $function, $parameters, true );
+        $this->call( "translate_relative_url", $parameters, true );
 
         if ( isset( $segment_file_chr[ 1 ] ) ) {
             $this->rebuildResult( $segment_file_chr[ 1 ] );
@@ -257,9 +255,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
             $parameters[ 'key' ] = implode( ",", $_config[ 'id_user' ] );
         }
 
-        ( !$_config[ 'isGlossary' ] ? $function = "contribute_relative_url" : $function = "gloss_set_relative_url" );
-
-        $this->call( $function, $parameters, true );
+        $this->call( 'contribute_relative_url', $parameters, true );
 
         if ( $this->result->responseStatus != "200" ) {
             return false;
@@ -332,9 +328,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
             $parameters[ 'key' ] = implode( ",", $_config[ 'id_user' ] );
         }
 
-        ( !$_config[ 'isGlossary' ] ? $function = "delete_relative_url" : $function = "gloss_delete_relative_url" );
-
-        $this->call( $function, $parameters, true );
+        $this->call( "delete_relative_url", $parameters, true );
 
         if ( $this->result->responseStatus != "200" &&
                 ( $this->result->responseStatus != "404" ||
@@ -344,40 +338,6 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         }
 
         return true;
-    }
-
-    /**
-     * @param $_config
-     *
-     * @return bool
-     */
-    public function updateGlossary( $_config ) {
-
-        $parameters               = [];
-        $parameters[ 'seg' ]      = $_config[ 'segment' ];
-        $parameters[ 'tra' ]      = $_config[ 'translation' ];
-        $parameters[ 'newseg' ]   = $_config[ 'newsegment' ];
-        $parameters[ 'newtra' ]   = $_config[ 'newtranslation' ];
-        $parameters[ 'langpair' ] = $_config[ 'source' ] . "|" . $_config[ 'target' ];
-        $parameters[ 'snote' ]    = $_config[ 'tnote' ];
-        $parameters[ 'prop' ]     = $_config[ 'prop' ];
-        $parameters[ 'id' ]       = $_config[ 'id_match' ];
-
-        if ( !empty( $_config[ 'id_user' ] ) ) {
-            if ( !is_array( $_config[ 'id_user' ] ) ) {
-                $_config[ 'id_user' ] = [ $_config[ 'id_user' ] ];
-            }
-            $parameters[ 'key' ] = implode( ",", $_config[ 'id_user' ] );
-        }
-
-        $this->call( "gloss_update_relative_url", $parameters );
-
-        if ( $this->result->responseStatus != "200" ) {
-            return false;
-        }
-
-        return true;
-
     }
 
     /**
@@ -615,12 +575,6 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         ];
 
         $this->call( "glossary_set_relative_url", $payload, true, true );
-
-//        if( $this->result->responseData === 'OK' and isset($this->result->responseDetails)){
-//            $uuid = $this->result->responseDetails;
-//            $this->pollForStatus($uuid, 'glossary_entry_status_relative_url');
-//        }
-
         return $this->result;
     }
 
