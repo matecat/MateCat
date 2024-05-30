@@ -5,6 +5,8 @@ import SegmentActions from './es6/actions/SegmentActions'
 import SegmentStore from './es6/stores/SegmentStore'
 import {getTagProjection} from './es6/api/getTagProjection'
 import {setCurrentSegment} from './es6/api/setCurrentSegment'
+import SegmentUtils from './es6/utils/segmentUtils'
+
 ;(function ($) {
   $.extend(window.UI, {
     /*++++++++++  Tag Proj start ++++++++++*/
@@ -162,7 +164,7 @@ import {setCurrentSegment} from './es6/api/setCurrentSegment'
       var isSplitted = segmentBefore.splitted
       if (isSplitted) {
         if (segmentBefore.original_sid !== segmentId.split('-')[0]) {
-          return this.collectSplittedTranslations(
+          return SegmentUtils.collectSplittedTranslations(
             segmentBefore.original_sid,
             '.source',
           )
@@ -182,7 +184,7 @@ import {setCurrentSegment} from './es6/api/setCurrentSegment'
       var isSplitted = segmentAfter.splitted
       if (isSplitted) {
         if (segmentAfter.firstOfSplit) {
-          return this.collectSplittedTranslations(
+          return SegmentUtils.collectSplittedTranslations(
             segmentAfter.original_sid,
             '.source',
           )
