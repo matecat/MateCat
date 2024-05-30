@@ -1,19 +1,18 @@
 /*Split modal*/
 .popup-split {
   box-sizing: content-box;
-  .popup#split-modal-cont {
+  #split-modal-cont {
     margin: 0 auto;
     position: relative;
     padding: 0 0 0 0;
     left: 0;
     top: 0;
-    background: $grey3;
     border-radius: 0 0 4px 4px;
     text-align: left;
     border: 1px solid #666;
     min-width: 670px;
   }
-  .popup .splitbtn-cont {
+  .splitbtn-cont {
     //margin-left: 10px;
     margin-top: 20px;
     //width: 100%;
@@ -63,39 +62,6 @@
   }
   .jobcontainer.splitted .nosplit {
     display: block;
-  }
-  .btnsplit {
-    float: right;
-    margin: 0 auto;
-    padding: 20px 0 20px 0;
-    overflow: hidden;
-    .primary {
-      font-family: Calibri, Arial, Helvetica, sans-serif;
-      //padding: 11px 22px;
-      vertical-align: top;
-      //font-size: 18px;
-      //border: 1px solid #797979;
-      border-radius: 2px;
-      float: right;
-    }
-    .cancel-button {
-      font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
-      //font-size: 18px;
-      margin-top: 0;
-      border: 1px solid $grey1;
-      border-radius: 2px;
-      //padding: 11px 22px;
-      background-color: #fff;
-      margin-right: 15px;
-      color: $grey1;
-      &:hover {
-        background-color: $grey3;
-        //box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
-      }
-      &:focus {
-        box-shadow: none;
-      }
-    }
   }
   .none {
     display: none;
@@ -396,6 +362,12 @@
       border-color: #96c8da;
       box-shadow: none;
     }
+  }
+  .split-box4 {
+    display: flex;
+    justify-content: flex-end;
+    padding: 30px 20px;
+    gap: 20px;
   }
 }
 /************/
