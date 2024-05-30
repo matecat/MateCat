@@ -69,4 +69,33 @@ class WorkerClient {
         self::$_HANDLER->publishToQueues( $queue_name, new Message( strval( $element ), $options ) );
     }
 
+    /**
+     * @param AMQHandler $handler
+     * @param            $queue
+     * @param            $class_name
+     * @param            $data
+     * @param array      $options
+     *
+     */
+    public static function enqueueWithClient( AMQHandler $handler, $queue, $class_name, $data, $options = [] ) {
+
+        if ( !isset( $options['persistent'] ) ) {
+            $options['persistent'] = $handler->persistent ;
+        }
+
+        $element            = new QueueElement();
+        $element->params    = $data;
+        $element->classLoad = $class_name;
+
+        $queue_name = self::$_QUEUES[ $queue ]->queue_name ;
+
+        if ( empty( $queue_name ) ) {
+            throw new InvalidArgumentException( 'Empty queue_name: ' . var_export( self::$_QUEUES, true ) . "\n" . var_export( $queue, true ) ) ;
+        }
+
+        $handler->publishToQueues( $queue_name, new Message( strval( $element ), $options ) );
+        $handler->__destruct();
+
+    }
+
 }
