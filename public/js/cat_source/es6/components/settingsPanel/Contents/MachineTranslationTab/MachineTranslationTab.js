@@ -364,10 +364,12 @@ export const MachineTranslationTab = () => {
         />
       </div>
       {config.isLoggedIn ? (
-        <div className="inactive-mt" data-testid="inactive-mt">
-          <h2>Inactive MT</h2>
-          <SettingsPanelTable columns={COLUMNS_TABLE} rows={MTRows} />
-        </div>
+        !config.is_cattool && (
+          <div className="inactive-mt" data-testid="inactive-mt">
+            <h2>Inactive MT</h2>
+            <SettingsPanelTable columns={COLUMNS_TABLE} rows={MTRows} />
+          </div>
+        )
       ) : (
         <div className="not-logged-user">
           <button
