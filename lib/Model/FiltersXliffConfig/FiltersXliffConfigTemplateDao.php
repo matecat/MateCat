@@ -8,7 +8,6 @@ use DataAccess_AbstractDao;
 use Database;
 use DateTime;
 use Exception;
-use FiltersXliffConfig\Filters\DTO\Json;
 use FiltersXliffConfig\Filters\FiltersConfigModel;
 use FiltersXliffConfig\Xliff\XliffConfigModel;
 use PDO;
@@ -120,9 +119,9 @@ class FiltersXliffConfigTemplateDao extends DataAccess_AbstractDao
 
     /**
      * @param FiltersXliffConfigTemplateStruct $projectTemplateStruct
-     * @param $name
      * @param $uid
      * @return FiltersXliffConfigTemplateStruct
+     * @throws Exception
      */
     private static function findUniqueName(FiltersXliffConfigTemplateStruct $projectTemplateStruct, $uid)
     {
