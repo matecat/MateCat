@@ -8,6 +8,12 @@ use DataAccess_AbstractDao;
 use Database;
 use DateTime;
 use Exception;
+use FiltersXliffConfig\Filters\DTO\Json;
+use FiltersXliffConfig\Filters\DTO\MSExcel;
+use FiltersXliffConfig\Filters\DTO\MSPowerpoint;
+use FiltersXliffConfig\Filters\DTO\MSWord;
+use FiltersXliffConfig\Filters\DTO\Xml;
+use FiltersXliffConfig\Filters\DTO\Yaml;
 use FiltersXliffConfig\Filters\FiltersConfigModel;
 use FiltersXliffConfig\Xliff\XliffConfigModel;
 use PDO;
@@ -48,8 +54,18 @@ class FiltersXliffConfigTemplateDao extends DataAccess_AbstractDao
         $default->uid = $uid;
         $default->name = "default";
 
-        $default->setFilters(new FiltersConfigModel());
-        $default->setXliff(new XliffConfigModel());
+        $filtersConfig = new FiltersConfigModel();
+        $filtersConfig->setJson(new Json());
+        $filtersConfig->setYaml(new Yaml());
+        $filtersConfig->setXml(new Xml());
+        $filtersConfig->setMsWord(new MSWord());
+        $filtersConfig->setMsExcel(new MSExcel());
+        $filtersConfig->setMsPowerpoint(new MSPowerpoint());
+
+        $xliffConfig = new XliffConfigModel();
+
+        $default->setFilters($filtersConfig);
+        $default->setXliff($xliffConfig);
 
         $default->created_at = date("Y-m-d H:i:s");
         $default->modified_at = date("Y-m-d H:i:s");

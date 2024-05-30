@@ -2,7 +2,7 @@
 
 namespace FiltersXliffConfig\Xliff\DTO;
 
-class Xliff20Rule extends Xliff12Rule
+class Xliff20Rule extends AbstractXliffRule
 {
     const ALLOWED_STATES = [
         'initial',
