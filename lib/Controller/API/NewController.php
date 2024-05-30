@@ -123,6 +123,8 @@ class NewController extends ajaxController {
 
     private $filters_extraction_parameters;
 
+    private $xliff_parameters;
+
     private function setBadRequestHeader() {
         $this->httpHeader = 'HTTP/1.0 400 Bad Request';
     }
@@ -209,6 +211,8 @@ class NewController extends ajaxController {
                 'deepl_id_glossary'  => [ 'filter' => FILTER_SANITIZE_STRING ],
 
                 'filters_extraction_parameters'  => [ 'filter' => FILTER_SANITIZE_STRING ],
+
+                'xliff_parameters'  => [ 'filter' => FILTER_SANITIZE_STRING ],
         ];
 
         $filterArgs = $this->featureSet->filter( 'filterNewProjectInputFilters', $filterArgs, $this->userIsLogged );
@@ -260,6 +264,7 @@ class NewController extends ajaxController {
             $this->__validateDeepLGlossaryParams();
             $this->__validateDialectStrictParam();
             $this->__validateFiltersExtractionParameters();
+            $this->__validateXliffParameters();
             $this->__appendFeaturesToProject();
             $this->__generateTargetEngineAssociation();
         } catch ( Exception $ex ) {
@@ -690,6 +695,10 @@ class NewController extends ajaxController {
 
         if( $this->filters_extraction_parameters ) {
             $projectStructure[ 'filters_extraction_parameters' ] = $this->filters_extraction_parameters;
+        }
+
+        if( $this->xliff_parameters ) {
+            $projectStructure[ 'xliff_parameters' ] = $this->xliff_parameters;
         }
 
         //set features override
@@ -1297,6 +1306,26 @@ class NewController extends ajaxController {
 
             $json = html_entity_decode( $this->postInput[ 'filters_extraction_parameters' ]);
             $schema = file_get_contents( \INIT::$ROOT . '/inc/validation/schema/filters_extraction_parameters.json' );
+
+            $validatorObject = new JSONValidatorObject();
+            $validatorObject->json = $json;
+
+            $validator = new JSONValidator($schema);
+            $validator->validate($validatorObject);
+
+            $this->filters_extraction_parameters = json_decode($json);
+        }
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function __validateXliffParameters(){
+
+        if ( !empty( $this->postInput[ 'xliff_parameters' ] ) ) {
+
+            $json = html_entity_decode( $this->postInput[ 'xliff_parameters' ]);
+            $schema = file_get_contents( \INIT::$ROOT . '/inc/validation/schema/xliff_parameters.json' );
 
             $validatorObject = new JSONValidatorObject();
             $validatorObject->json = $json;

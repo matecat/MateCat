@@ -36,6 +36,7 @@ class createProjectController extends ajaxController {
     private $metadata;
     private $dialect_strict;
     private $filters_extraction_parameters;
+    private $xliff_parameters;
 
     /**
      * @var QAModelTemplateStruct
@@ -89,7 +90,9 @@ class createProjectController extends ajaxController {
                 'deepl_formality'    => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
                 'project_completion' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ], // features customization
                 'get_public_matches' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ], // disable public TM matches
-                'dialect_strict'    => [ 'filter' => FILTER_SANITIZE_STRING ],'filters_extraction_parameters' => [ 'filter' => FILTER_SANITIZE_STRING ],
+                'dialect_strict'    => [ 'filter' => FILTER_SANITIZE_STRING ],
+                'filters_extraction_parameters' => [ 'filter' => FILTER_SANITIZE_STRING ],
+                'xliff_parameters' => [ 'filter' => FILTER_SANITIZE_STRING ],
 
                 'qa_model_template_id'       => [ 'filter' => FILTER_VALIDATE_INT ],
                 'payable_rate_template_id'   => [ 'filter' => FILTER_VALIDATE_INT ],
@@ -192,6 +195,7 @@ class createProjectController extends ajaxController {
         $this->__validatePayableRateTemplate();
         $this->__validateDialectStrictParam();
         $this->__validateFiltersExtractionParameters();
+        $this->__validateXliffParameters();
         $this->__appendFeaturesToProject();
         $this->__generateTargetEngineAssociation();
         if ( $this->userIsLogged ) {
@@ -350,6 +354,10 @@ class createProjectController extends ajaxController {
 
         if( $this->filters_extraction_parameters ) {
             $projectStructure[ 'filters_extraction_parameters' ] = $this->filters_extraction_parameters;
+        }
+
+        if( $this->xliff_parameters ) {
+            $projectStructure[ 'xliff_parameters' ] = $this->xliff_parameters;
         }
 
         // with the qa template id
@@ -735,6 +743,26 @@ class createProjectController extends ajaxController {
             $validator->validate($validatorObject);
 
             $this->filters_extraction_parameters = json_decode($json);
+        }
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function __validateXliffParameters()
+    {
+        if ( !empty( $this->postInput[ 'xliff_parameters' ] ) ) {
+
+            $json = html_entity_decode( $this->postInput[ 'xliff_parameters' ]);
+            $schema = file_get_contents( \INIT::$ROOT . '/inc/validation/schema/xliff_parameters.json' );
+
+            $validatorObject = new JSONValidatorObject();
+            $validatorObject->json = $json;
+
+            $validator = new JSONValidator($schema);
+            $validator->validate($validatorObject);
+
+            $this->xliff_parameters = json_decode($json);
         }
     }
 

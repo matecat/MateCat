@@ -194,6 +194,7 @@ class ProjectManager {
                     'deepl_formality'               => null,
                     'deepl_id_glossary'             => null,
                     'filters_extraction_parameters' => null,
+                    'xliff_parameters'              => null,
                 ] );
 
         }
