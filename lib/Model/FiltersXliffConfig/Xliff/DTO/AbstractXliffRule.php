@@ -5,7 +5,7 @@ namespace FiltersXliffConfig\Xliff\DTO;
 use DomainException;
 use JsonSerializable;
 
-abstract class AbstractXliffRule implements JsonSerializable
+abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
 {
     const ALLOWED_STATES = [];
     const ALLOWED_ANALYSIS = [];

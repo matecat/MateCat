@@ -2,8 +2,9 @@
 
 namespace FiltersXliffConfig\Xliff;
 
-use FiltersXliffConfig\Xliff\DTO\AbstractXliffRule;
 use FiltersXliffConfig\Xliff\DTO\Xliff20Rule;
+use FiltersXliffConfig\Xliff\DTO\Xliff12Rule;
+use FiltersXliffConfig\Xliff\DTO\XliffRuleInterface;
 use JsonSerializable;
 use Serializable;
 
@@ -13,13 +14,13 @@ class XliffConfigModel implements JsonSerializable, Serializable
     private $xliff20 = [];
 
     /**
-     * @param AbstractXliffRule $rule
+     * @param XliffRuleInterface $rule
      */
-    public function addRule(AbstractXliffRule $rule)
+    public function addRule(XliffRuleInterface $rule)
     {
         if($rule instanceof Xliff20Rule){
             $this->xliff20[] = $rule;
-        } else {
+        } else if($rule instanceof Xliff12Rule){
             $this->xliff12[] = $rule;
         }
     }

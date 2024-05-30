@@ -5,6 +5,7 @@ namespace API\V3;
 use API\V2\KleinController;
 use API\V2\Validators\LoginValidator;
 use Exception;
+use INIT;
 use Projects\ProjectTemplateDao;
 use Validator\Errors\JSONValidatorError;
 
@@ -238,6 +239,6 @@ class ProjectTemplateController extends KleinController
      */
     private function getProjectTemplateModelSchema()
     {
-        return file_get_contents( \INIT::$ROOT . '/inc/validation/schema/project_template.json' );
+        return file_get_contents( INIT::$ROOT . '/inc/validation/schema/project_template.json' );
     }
 }

@@ -371,6 +371,10 @@ class FiltersXliffConfigTemplateDao extends DataAccess_AbstractDao
         $templateStruct->created_at = $now;
         $templateStruct->modified_at = $now;
 
+        self::destroyQueryByIdCache($conn, $templateStruct->id);
+        self::destroyQueryByUidCache($conn, $templateStruct->uid);
+        self::destroyQueryByUidAndNameCache($conn, $templateStruct->uid, $templateStruct->name);
+
         return $templateStruct;
     }
 

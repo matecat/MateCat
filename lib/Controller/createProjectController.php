@@ -734,7 +734,7 @@ class createProjectController extends ajaxController {
         if ( !empty( $this->postInput[ 'filters_extraction_parameters' ] ) ) {
 
             $json = html_entity_decode( $this->postInput[ 'filters_extraction_parameters' ]);
-            $schema = file_get_contents( \INIT::$ROOT . '/inc/validation/schema/filters_extraction_parameters.json' );
+            $schema = file_get_contents( INIT::$ROOT . '/inc/validation/schema/filters_extraction_parameters.json' );
 
             $validatorObject = new JSONValidatorObject();
             $validatorObject->json = $json;
@@ -754,7 +754,7 @@ class createProjectController extends ajaxController {
         if ( !empty( $this->postInput[ 'xliff_parameters' ] ) ) {
 
             $json = html_entity_decode( $this->postInput[ 'xliff_parameters' ]);
-            $schema = file_get_contents( \INIT::$ROOT . '/inc/validation/schema/xliff_parameters.json' );
+            $schema = file_get_contents( INIT::$ROOT . '/inc/validation/schema/xliff_parameters.json' );
 
             $validatorObject = new JSONValidatorObject();
             $validatorObject->json = $json;

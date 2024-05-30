@@ -4,6 +4,7 @@ namespace API\V3;
 
 use API\V2\KleinController;
 use API\V2\Validators\LoginValidator;
+use INIT;
 use QAModelTemplate\QAModelTemplateDao;
 use Validator\Errors\JSONValidatorError;
 
@@ -216,6 +217,6 @@ class QAModelTemplateController extends KleinController {
      */
     private function getQaModelSchema()
     {
-        return file_get_contents( \INIT::$ROOT . '/inc/validation/schema/qa_model.json' );
+        return file_get_contents( INIT::$ROOT . '/inc/validation/schema/qa_model.json' );
     }
 }

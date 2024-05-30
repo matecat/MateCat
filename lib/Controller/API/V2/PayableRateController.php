@@ -3,6 +3,7 @@
 namespace API\V2;
 
 use API\V2\Validators\LoginValidator;
+use INIT;
 use PayableRates\CustomPayableRateDao;
 use PayableRates\CustomPayableRateStruct;
 use Validator\Errors\JSONValidatorError;
@@ -231,6 +232,6 @@ class PayableRateController extends KleinController
      */
     private function getPayableRateModelSchema()
     {
-        return file_get_contents( \INIT::$ROOT . '/inc/validation/schema/payable_rate.json' );
+        return file_get_contents( INIT::$ROOT . '/inc/validation/schema/payable_rate.json' );
     }
 }

@@ -131,14 +131,14 @@ class Session {
                         // copy orig and cache\INIT::$UPLOAD_REPOSITORY folder
                         $s3Client = S3FilesStorage::getStaticS3Client();
                         $copyOrig = $s3Client->copyFolder( [
-                            'source_bucket' => \INIT::$AWS_STORAGE_BASE_BUCKET,
+                            'source_bucket' => INIT::$AWS_STORAGE_BASE_BUCKET,
                             'source_folder' => $originalCacheFileDir . '/orig',
                             'target_folder' => $newCacheFileDir . '/orig',
                             'delete_source' => false,
                         ] );
 
                         $copyWork = $s3Client->copyFolder( [
-                            'source_bucket' => \INIT::$AWS_STORAGE_BASE_BUCKET,
+                            'source_bucket' => INIT::$AWS_STORAGE_BASE_BUCKET,
                             'source_folder' => $originalCacheFileDir . '/work',
                             'target_folder' => $newCacheFileDir . '/work',
                             'delete_source' => false,
@@ -183,7 +183,7 @@ class Session {
      * @param $newSourceLang
      */
     private function renameTheFileMap( $newSourceLang, $originalSourceLang ) {
-        $uploadDir = \INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->session[ 'upload_session' ];
+        $uploadDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->session[ 'upload_session' ];
 
         /** @var DirectoryIterator $item */
         foreach (
@@ -433,7 +433,7 @@ class Session {
                 $this->deleteDirectory( $pathCache );
             }
 
-            $tempUploadedFileDir = \INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->session['upload_session'];
+            $tempUploadedFileDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->session['upload_session'];
 
             /** @var DirectoryIterator $item */
             foreach ($iterator = new \RecursiveIteratorIterator( new \RecursiveDirectoryIterator( $tempUploadedFileDir, \RecursiveDirectoryIterator::SKIP_DOTS ), \RecursiveIteratorIterator::SELF_FIRST ) as $item) {
@@ -490,7 +490,7 @@ class Session {
      * @return string
      */
     private function getUploadDir() {
-        return \INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . filter_input( INPUT_COOKIE, 'upload_session' );
+        return INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . filter_input( INPUT_COOKIE, 'upload_session' );
     }
 
     /**
@@ -517,7 +517,7 @@ class Session {
             return S3FilesStorage::CACHE_PACKAGE_FOLDER . DIRECTORY_SEPARATOR . $cacheTree . S3FilesStorage::OBJECTS_SAFE_DELIMITER . $sourceLang;
         }
 
-        return \INIT::$CACHE_REPOSITORY . DIRECTORY_SEPARATOR . $cacheTree . "|" . $sourceLang;
+        return INIT::$CACHE_REPOSITORY . DIRECTORY_SEPARATOR . $cacheTree . "|" . $sourceLang;
     }
 
     /**

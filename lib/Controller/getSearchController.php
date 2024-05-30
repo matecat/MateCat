@@ -129,8 +129,8 @@ class getSearchController extends ajaxController {
         $this->db = Database::obtain();
 
         // Search_ReplaceHistory init
-        $srh_driver = ( isset( \INIT::$REPLACE_HISTORY_DRIVER ) and '' !== \INIT::$REPLACE_HISTORY_DRIVER ) ? \INIT::$REPLACE_HISTORY_DRIVER : 'redis';
-        $srh_ttl    = ( isset( \INIT::$REPLACE_HISTORY_TTL ) and '' !== \INIT::$REPLACE_HISTORY_TTL ) ? \INIT::$REPLACE_HISTORY_TTL : 300;
+        $srh_driver = ( isset( INIT::$REPLACE_HISTORY_DRIVER ) and '' !== INIT::$REPLACE_HISTORY_DRIVER ) ? INIT::$REPLACE_HISTORY_DRIVER : 'redis';
+        $srh_ttl    = ( isset( INIT::$REPLACE_HISTORY_TTL ) and '' !== INIT::$REPLACE_HISTORY_TTL ) ? INIT::$REPLACE_HISTORY_TTL : 300;
         $this->srh  = Search_ReplaceHistoryFactory::create( $this->queryParams[ 'job' ], $srh_driver, $srh_ttl );
 
         //get Job Info

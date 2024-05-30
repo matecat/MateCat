@@ -6,6 +6,7 @@ use API\V2\KleinController;
 use API\V2\Validators\LoginValidator;
 use Exception;
 use FiltersXliffConfig\FiltersXliffConfigTemplateDao;
+use INIT;
 use Projects\ProjectTemplateDao;
 use Validator\Errors\JSONValidatorError;
 
@@ -231,6 +232,6 @@ class FiltersXliffConfigTemplateController extends KleinController
      */
     private function getModelSchema()
     {
-        return file_get_contents( \INIT::$ROOT . '/inc/validation/schema/filters_xliff_config_template.json' );
+        return file_get_contents( INIT::$ROOT . '/inc/validation/schema/filters_xliff_config_template.json' );
     }
 }

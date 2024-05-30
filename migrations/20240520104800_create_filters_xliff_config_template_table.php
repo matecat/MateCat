@@ -4,7 +4,7 @@ class CreateFiltersXliffConfigTemplateTable extends AbstractMatecatMigration {
 
     public $sql_up = [
         'CREATE TABLE IF NOT EXISTS `filters_xliff_config_templates` (
-            `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `id` int(11) NOT NULL AUTO_INCREMENT,
             `name` VARCHAR(255) NOT NULL,
             `uid` bigint(20) NOT NULL,
             `xliff` TEXT DEFAULT NULL,
