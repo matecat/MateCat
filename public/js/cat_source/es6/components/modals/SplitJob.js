@@ -242,28 +242,35 @@ const SplitJobModal = ({job, project, callback}) => {
     <div className="modal popup-split">
       <div id="split-modal-cont">
         <div className="splitbtn-cont">
-          <h3>
-            <span className="popup-split-job-id">ID: {job.get('id')} </span>
-            <span className="popup-split-job-title">
-              {job.get('sourceTxt') + ' > ' + job.get('targetTxt')}
-            </span>
-          </h3>
-
-          <div className="container-split-select">
-            <div className="label left">Split job in:</div>
-            <select
-              name="popup-splitselect"
-              className="splitselect left"
-              ref={splitSelectRef}
-              onChange={changeSplitNumber}
-            >
-              {Array.from({length: 49}, (_, i) => (
-                <option key={i + 2} value={i + 2}>
-                  {i + 2}
-                </option>
-              ))}
-            </select>
-            <div className="label left">Chunks</div>
+          <div>
+            <h3>
+              <span className="popup-split-job-id">ID: {job.get('id')} </span>
+              <span className="popup-split-job-title">
+                {job.get('sourceTxt') + ' > ' + job.get('targetTxt')}
+              </span>
+            </h3>
+          </div>
+          <div>
+            <div className="split-checkbox">
+              <span>Split based on raw word count</span>
+              <input type="checkbox" />
+            </div>
+            <div className="container-split-select">
+              <div className="label left">Split job in:</div>
+              <select
+                name="popup-splitselect"
+                className="splitselect left"
+                ref={splitSelectRef}
+                onChange={changeSplitNumber}
+              >
+                {Array.from({length: 49}, (_, i) => (
+                  <option key={i + 2} value={i + 2}>
+                    {i + 2}
+                  </option>
+                ))}
+              </select>
+              <div className="label left">Chunks</div>
+            </div>
           </div>
         </div>
         <div className="popup-box split-box3">

@@ -45,6 +45,19 @@
     font-size: 18px;
     color: $grey1;
     font-weight: bold;
+    display: flex;
+    flex-direction: column;
+    padding: 8px 25px;
+    gap: 18px;
+    > div {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .split-checkbox {
+      display: flex;
+      gap: 10px;
+    }
   }
   .jobcontainer.splitted .splitbtn-cont {
     display: none;
@@ -85,7 +98,6 @@
     color: #333 !important;
     width: 48%;
     display: inline-block;
-    padding-left: 25px;
     vertical-align: text-top;
   }
 
@@ -94,11 +106,6 @@
   }
 
   .container-split-select {
-    display: inline-block;
-    text-align: right;
-    width: 45%;
-    position: relative;
-    top: 2px;
     .label {
       display: inline-block;
     }
