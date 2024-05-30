@@ -276,8 +276,11 @@
         "editor": {
           "type": "string",
           "enum": [
-            "translated,approved,approved2",
-            "ignore-target-content,keep-target-content"
+            "translated",
+            "approved",
+            "approved2",
+            "ignore-target-content",
+            "keep-target-content"
           ]
         }
       }
@@ -309,8 +312,11 @@
         "editor": {
           "type": "string",
           "enum": [
-            "translated,approved,approved2",
-            "ignore-target-content,keep-target-content"
+            "translated",
+            "approved",
+            "approved2",
+            "ignore-target-content",
+            "keep-target-content"
           ]
         }
       }

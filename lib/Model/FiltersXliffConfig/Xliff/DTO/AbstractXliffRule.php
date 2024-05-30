@@ -8,8 +8,19 @@ use JsonSerializable;
 abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
 {
     const ALLOWED_STATES = [];
-    const ALLOWED_ANALYSIS = [];
-    const ALLOWED_EDITOR = [];
+
+    const ALLOWED_ANALYSIS = [
+        "pre-translated",
+        "new"
+    ];
+
+    const ALLOWED_EDITOR = [
+        "translated",
+        "approved",
+        "approved2",
+        "ignore-target-content",
+        "keep-target-content",
+    ];
 
     protected $states;
     protected $analysis;
@@ -26,6 +37,34 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
         $this->setStates($states);
         $this->setAnalysis($analysis);
         $this->setEditor($editor);
+        $this->validateAnalysisAndEditor($analysis, $editor);
+    }
+
+    /**
+     * @param $analysis
+     * @param $editor
+     */
+    protected function validateAnalysisAndEditor($analysis, $editor)
+    {
+        $validationMap = [
+            'new' => [
+                "ignore-target-content",
+                "keep-target-content"
+            ],
+            'pre-translated' => [
+                "translated",
+                "approved",
+                "approved2",
+            ],
+        ];
+
+        if(!isset($validationMap[$analysis])){
+            throw new DomainException("Wrong analysis value");
+        }
+
+        if(!in_array($editor, $validationMap[$analysis])){
+            throw new DomainException("Wrong analysis/editor combination");
+        }
     }
 
     /**
@@ -34,7 +73,7 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
     protected function setStates(array $states)
     {
         if(!is_array($states)){
-            throw new DomainException("Wrong state value");
+            throw new DomainException("Wrong states value");
         }
 
         foreach ($states as $state){
