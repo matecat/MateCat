@@ -121,11 +121,17 @@ class FiltersXliffConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruc
         }
 
         // filters
+        $jsonDto = new Json();
+        $xmlDao = new Xml();
+        $yamlDao = new Yaml();
+        $excelDao = new MSExcel();
+        $wordDao = new MSWord();
+        $pptDao = new MSPowerpoint();
+        
         if(!empty($filters)){
 
             // json
             if(isset($filters['json'])){
-                $jsonDto = new Json();
 
                 if(isset($filters['json']['extract_arrays'])){
                     $jsonDto->setExtractArrays($filters['json']['extract_arrays']);
@@ -146,13 +152,10 @@ class FiltersXliffConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruc
                 if(isset($filters['json']['context_keys'])){
                     $jsonDto->setContextKeys($filters['json']['context_keys']);
                 }
-
-                $filtersConfig->setJson($jsonDto);
             }
 
             // xml
             if(isset($filters['xml'])){
-                $xmlDao = new Xml();
 
                 if(isset($filters['xml']['preserve_whitespace'])){
                     $xmlDao->setPreserveWhitespace($filters['xml']['preserve_whitespace']);
@@ -169,13 +172,10 @@ class FiltersXliffConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruc
                 if(isset($filters['xml']['include_attributes'])){
                     $xmlDao->setIncludeAttributes($filters['xml']['include_attributes']);
                 }
-
-                $filtersConfig->setXml($xmlDao);
             }
 
             // yaml
             if(isset($filters['yaml'])){
-                $yamlDao = new Yaml();
 
                 if(isset($filters['yaml']['extract_arrays'])){
                     $yamlDao->setExtractArrays($filters['yaml']['extract_arrays']);
@@ -188,14 +188,10 @@ class FiltersXliffConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruc
                 if(isset($filters['yaml']['do_not_translate_keys'])){
                     $yamlDao->setDoNotTranslateKeys($filters['yaml']['do_not_translate_keys']);
                 }
-
-                $filtersConfig->setYaml($yamlDao);
             }
 
             // ms excel
             if(isset($filters['ms_excel'])){
-                $excelDao = new MSExcel();
-
                 if(isset($filters['ms_excel']['exclude_columns'])){
                     $excelDao->setExcludeColumns($filters['ms_excel']['exclude_columns']);
                 }
@@ -227,14 +223,10 @@ class FiltersXliffConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruc
                 if(isset($filters['ms_excel']['extract_sheet_names'])){
                     $excelDao->setExtractSheetNames($filters['ms_excel']['extract_sheet_names']);
                 }
-
-                $filtersConfig->setMsExcel($excelDao);
             }
 
             // ms word
             if(isset($filters['ms_word'])){
-                $wordDao = new MSWord();
-
                 if(isset($filters['ms_word']['extract_doc_properties'])){
                     $wordDao->setExtractDocProperties($filters['ms_word']['extract_doc_properties']);
                 }
@@ -266,14 +258,10 @@ class FiltersXliffConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruc
                 if(isset($filters['ms_word']['extract_hidden_text'])){
                     $wordDao->setExtractHiddenText($filters['ms_word']['extract_hidden_text']);
                 }
-
-                $filtersConfig->setMsWord($wordDao);
             }
 
             // ms powerpoint
             if(isset($filters['ms_powerpoint'])){
-                $pptDao = new MSPowerpoint();
-
                 if(isset($filters['ms_powerpoint']['extract_doc_properties'])){
                     $pptDao->setExtractDocProperties($filters['ms_powerpoint']['extract_doc_properties']);
                 }
@@ -293,10 +281,15 @@ class FiltersXliffConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruc
                 if(isset($filters['ms_powerpoint']['extract_notes'])){
                     $pptDao->setExtractNotes($filters['ms_powerpoint']['extract_notes']);
                 }
-
-                $filtersConfig->setMsPowerpoint($pptDao);
             }
         }
+
+        $filtersConfig->setJson($jsonDto);
+        $filtersConfig->setXml($xmlDao);
+        $filtersConfig->setYaml($yamlDao);
+        $filtersConfig->setMsExcel($excelDao);
+        $filtersConfig->setMsWord($wordDao);
+        $filtersConfig->setMsPowerpoint($pptDao);
 
         $this->setFilters($filtersConfig);
         $this->setXliff($xliffConfig);

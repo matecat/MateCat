@@ -10,6 +10,7 @@ use Engine;
 use EnginesModel_EngineDAO;
 use EnginesModel_EngineStruct;
 use Exception;
+use FiltersXliffConfig\FiltersXliffConfigTemplateDao;
 use PayableRates\CustomPayableRateDao;
 use PDO;
 use QAModelTemplate\QAModelTemplateDao;
@@ -177,6 +178,18 @@ class ProjectTemplateDao extends DataAccess_AbstractDao
             }
         }
 
+        // check filters_xliff_config_template_id
+        if($projectTemplateStruct->filters_xliff_config_template_id > 0){
+            $filtersXliffConfigModel = FiltersXliffConfigTemplateDao::getById($projectTemplateStruct->filters_xliff_config_template_id);
+
+            if(empty($filtersXliffConfigModel)){
+                throw new Exception("Not existing Filters and Xliff template.");
+            }
+
+            if($filtersXliffConfigModel->uid !== $projectTemplateStruct->uid){
+                throw new Exception("Filters and Xliff model doesn't belong to the user.");
+            }
+        }
 
         // check qa_id
         if($projectTemplateStruct->qa_model_template_id > 0){
@@ -223,8 +236,6 @@ class ProjectTemplateDao extends DataAccess_AbstractDao
                     throw new Exception("Engine doesn't belong to the user.");
                 }
             }
-
-
         }
 
         // check tm
