@@ -106,7 +106,7 @@ class FiltersXliffConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruc
             // xliff12
             if(isset($xliff['xliff12']) and is_array($xliff['xliff12'])){
                 foreach ($xliff['xliff12'] as $xliff12Rule){
-                    $rule = new Xliff12Rule($xliff12Rule['state'], $xliff12Rule['analysis'], $xliff12Rule['editor']);
+                    $rule = new Xliff12Rule($xliff12Rule['states'], $xliff12Rule['analysis'], $xliff12Rule['editor']);
                     $xliffConfig->addRule($rule);
                 }
             }
@@ -114,7 +114,7 @@ class FiltersXliffConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruc
             // xliff20
             if(isset($xliff['xliff20']) and is_array($xliff['xliff20'])){
                 foreach ($xliff['xliff20'] as $xliff20Rule){
-                    $rule = new Xliff20Rule($xliff20Rule['state'], $xliff20Rule['analysis'], $xliff20Rule['editor']);
+                    $rule = new Xliff20Rule($xliff20Rule['states'], $xliff20Rule['analysis'], $xliff20Rule['editor']);
                     $xliffConfig->addRule($rule);
                 }
             }

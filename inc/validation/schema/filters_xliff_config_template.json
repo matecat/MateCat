@@ -232,9 +232,9 @@
     "xliff12Rule": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["state", "analysis", "editor"],
+      "required": ["states", "analysis", "editor"],
       "properties": {
-        "state": {
+        "states": {
           "type": ["array"],
           "items": {
             "type": "string",
@@ -285,9 +285,9 @@
     "xliff20Rule": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["state", "analysis", "editor"],
+      "required": ["states", "analysis", "editor"],
       "properties": {
-        "state": {
+        "states": {
           "type": ["array"],
           "items": {
             "type": "string",

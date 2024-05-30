@@ -11,39 +11,39 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
     const ALLOWED_ANALYSIS = [];
     const ALLOWED_EDITOR = [];
 
-    protected $state;
+    protected $states;
     protected $analysis;
     protected $editor;
 
     /**
-     * Xliff12Rule constructor.
-     * @param $state
+     * AbstractXliffRule constructor.
+     * @param array $states
      * @param $analysis
      * @param $editor
      */
-    public function __construct(array $state, $analysis, $editor)
+    public function __construct(array $states, $analysis, $editor)
     {
-        $this->setState($state);
+        $this->setStates($states);
         $this->setAnalysis($analysis);
         $this->setEditor($editor);
     }
 
     /**
-     * @param array $state
+     * @param array $states
      */
-    protected function setState(array $state)
+    protected function setStates(array $states)
     {
-        if(!is_array($state)){
+        if(!is_array($states)){
             throw new DomainException("Wrong state value");
         }
 
-        foreach ($state as $s){
-            if(!in_array($s, static::ALLOWED_STATES)){
+        foreach ($states as $state){
+            if(!in_array($state, static::ALLOWED_STATES)){
                 throw new DomainException("Wrong state value");
             }
         }
 
-        $this->state = $state;
+        $this->states = $states;
     }
 
     /**
@@ -76,7 +76,7 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
     public function jsonSerialize()
     {
         return [
-            'state' => $this->state,
+            'states' => $this->states,
             'analysis' => $this->analysis,
             'editor' => $this->editor,
         ];
