@@ -80,6 +80,44 @@ class MSWord implements JsonSerializable
     }
 
     /**
+     * @param $data
+     */
+    public function fromArray($data)
+    {
+        if(isset($data['extract_doc_properties'])){
+            $this->setExtractDocProperties($data['extract_doc_properties']);
+        }
+
+        if(isset($data['exclude_text_colors'])){
+            $this->setExcludeTextColors($data['exclude_text_colors']);
+        }
+
+        if(isset($data['extract_comments'])){
+            $this->setExtractComments($data['extract_comments']);
+        }
+
+        if(isset($data['accept_revisions'])){
+            $this->setAcceptRevisions($data['accept_revisions']);
+        }
+
+        if(isset($data['exclude_highlight_colors'])){
+            $this->setExcludeHighlightColors($data['exclude_highlight_colors']);
+        }
+
+        if(isset($data['extract_headers_footers'])){
+            $this->setExtractHeadersFooters($data['extract_headers_footers']);
+        }
+
+        if(isset($data['exclude_styles'])){
+            $this->setExcludeStyles($data['exclude_styles']);
+        }
+
+        if(isset($data['extract_hidden_text'])){
+            $this->setExtractHiddenText($data['extract_hidden_text']);
+        }
+    }
+
+    /**
      * @inheritDoc
      */
     public function jsonSerialize()

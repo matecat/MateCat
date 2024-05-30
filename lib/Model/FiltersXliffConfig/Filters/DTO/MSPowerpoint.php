@@ -53,6 +53,32 @@ class MSPowerpoint implements JsonSerializable
     }
 
     /**
+     * @param $data
+     */
+    public function fromArray($data)
+    {
+        if(isset($data['extract_doc_properties'])){
+            $this->setExtractDocProperties($data['extract_doc_properties']);
+        }
+
+        if(isset($data['extract_comments'])){
+            $this->setExtractComments($data['extract_comments']);
+        }
+
+        if(isset($data['extract_hidden_slides'])){
+            $this->setExtractHiddenSlides($data['extract_hidden_slides']);
+        }
+
+        if(isset($data['translate_slides'])){
+            $this->setTranslateSlides($data['translate_slides']);
+        }
+
+        if(isset($data['extract_notes'])){
+            $this->setExtractNotes($data['extract_notes']);
+        }
+    }
+
+    /**
      * @inheritDoc
      */
     public function jsonSerialize()

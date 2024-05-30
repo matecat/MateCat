@@ -44,6 +44,28 @@ class Xml implements JsonSerializable
     }
 
     /**
+     * @param $data
+     */
+    public function fromArray($data)
+    {
+        if(isset($data['preserve_whitespace'])){
+            $this->setPreserveWhitespace($data['preserve_whitespace']);
+        }
+
+        if(isset($data['translate_elements'])){
+            $this->setTranslateElements($data['translate_elements']);
+        }
+
+        if(isset($data['do_not_translate_elements'])){
+            $this->setDoNotTranslateElements($data['do_not_translate_elements']);
+        }
+
+        if(isset($data['include_attributes'])){
+            $this->setIncludeAttributes($data['include_attributes']);
+        }
+    }
+
+    /**
      * @inheritDoc
      */
     public function jsonSerialize()

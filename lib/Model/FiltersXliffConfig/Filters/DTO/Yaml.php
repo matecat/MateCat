@@ -35,6 +35,24 @@ class Yaml implements JsonSerializable
     }
 
     /**
+     * @param $data
+     */
+    public function fromArray($data)
+    {
+        if(isset($data['extract_arrays'])){
+            $this->setExtractArrays($data['extract_arrays']);
+        }
+
+        if(isset($data['translate_keys'])){
+            $this->setTranslateKeys($data['translate_keys']);
+        }
+
+        if(isset($data['do_not_translate_keys'])){
+            $this->setDoNotTranslateKeys($data['do_not_translate_keys']);
+        }
+    }
+
+    /**
      * @inheritDoc
      */
     public function jsonSerialize()

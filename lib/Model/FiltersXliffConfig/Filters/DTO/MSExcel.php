@@ -80,6 +80,44 @@ class MSExcel implements JsonSerializable
     }
 
     /**
+     * @param $data
+     */
+    public function fromArray($data)
+    {
+        if(isset($data['exclude_columns'])){
+            $this->setExcludeColumns($data['exclude_columns']);
+        }
+
+        if(isset($data['extract_diagrams'])){
+            $this->setExtractDiagrams($data['extract_diagrams']);
+        }
+
+        if(isset($data['extract_comments'])){
+            $this->setExtractComments($data['extract_comments']);
+        }
+
+        if(isset($data['extract_drawings'])){
+            $this->setExtractDrawings($data['extract_drawings']);
+        }
+
+        if(isset($data['extract_hidden_cells'])){
+            $this->setExtractHiddenCells($data['extract_hidden_cells']);
+        }
+
+        if(isset($data['exclude_text_colors'])){
+            $this->setExcludeTextColors($data['exclude_text_colors']);
+        }
+
+        if(isset($data['extract_doc_properties'])){
+            $this->setExtractDocProperties($data['extract_doc_properties']);
+        }
+
+        if(isset($data['extract_sheet_names'])){
+            $this->setExtractSheetNames($data['extract_sheet_names']);
+        }
+    }
+
+    /**
      * @inheritDoc
      */
     public function jsonSerialize()
