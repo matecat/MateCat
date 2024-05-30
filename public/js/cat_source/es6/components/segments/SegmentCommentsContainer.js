@@ -278,7 +278,7 @@ class SegmentCommentsContainer extends React.Component {
 
     const userMentionData = this.state.teamUsers.map((user) => ({
       id: user.uid,
-      display: `${user.first_name} ${user.last_name}`,
+      display: ` ${user.first_name} ${user.last_name} `,
     }))
 
     let loggedUser = !!this.state.user
@@ -314,7 +314,7 @@ class SegmentCommentsContainer extends React.Component {
               type="user"
               trigger="@"
               data={userMentionData}
-              className="tagging-item"
+              className="tagging-item-textarea"
               markup="{@__id__||__display__@}"
               displayTransform={function (id, display) {
                 return display || id

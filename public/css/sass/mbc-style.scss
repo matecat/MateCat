@@ -194,7 +194,7 @@ a.mbc-new-message-link:hover {
     border: unset !important;
     outline: unset !important;
     padding: 10px;
-    line-height: 1.2;
+    line-height: 1.5;
   }
 
   .mbc-comment-input__suggestions__list {
@@ -233,7 +233,13 @@ a.mbc-new-message-link:hover {
 }
 
 .tagging-item {
+  color: $translatedBlue;
+}
+
+.tagging-item-textarea {
   background-color: rgba($translatedBlue, 0.3);
+  border-radius: 10px;
+  padding: 2px 0;
 }
 
 .mbc-comment-textinput {
