@@ -6,9 +6,8 @@ use FiltersXliffConfig\Xliff\DTO\Xliff20Rule;
 use FiltersXliffConfig\Xliff\DTO\Xliff12Rule;
 use FiltersXliffConfig\Xliff\DTO\XliffRuleInterface;
 use JsonSerializable;
-use Serializable;
 
-class XliffConfigModel implements JsonSerializable, Serializable
+class XliffConfigModel implements JsonSerializable
 {
     private $xliff12 = [];
     private $xliff20 = [];
@@ -39,19 +38,11 @@ class XliffConfigModel implements JsonSerializable, Serializable
     /**
      * @inheritDoc
      */
-    public function serialize()
+    public function __toString()
     {
         return json_encode([
             'xliff12' => $this->xliff12,
             'xliff20' => $this->xliff20,
         ]);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function unserialize($serialized)
-    {
-        return json_decode($serialized);
     }
 }

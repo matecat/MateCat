@@ -11,7 +11,7 @@ use FiltersXliffConfig\Filters\DTO\Yaml;
 use JsonSerializable;
 use Serializable;
 
-class FiltersConfigModel implements JsonSerializable, Serializable
+class FiltersConfigModel implements JsonSerializable
 {
     private $yaml = null;
     private $xml = null;
@@ -86,7 +86,7 @@ class FiltersConfigModel implements JsonSerializable, Serializable
     /**
      * @inheritDoc
      */
-    public function serialize()
+    public function __toString()
     {
         return json_encode([
             'xml' => $this->xml,
@@ -96,13 +96,5 @@ class FiltersConfigModel implements JsonSerializable, Serializable
             'ms_excel' => $this->ms_excel,
             'ms_powerpoint' => $this->ms_powerpoint,
         ]);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function unserialize($serialized)
-    {
-        return json_decode($serialized);
     }
 }

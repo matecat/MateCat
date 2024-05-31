@@ -106,10 +106,15 @@ class FiltersXliffConfigTemplateDao extends DataAccess_AbstractDao
         $templateStruct->hydrateFromJSON($json);
         $templateStruct->uid = $uid;
 
-        $saved = self::getById($templateStruct->id);
+        $saved = self::getByUid($templateStruct->uid);
 
-        if($saved->name !== $templateStruct->name){
-            $templateStruct = self::findUniqueName($templateStruct, $uid);
+        foreach ($saved as $savedElement){
+            if(
+                $savedElement->id !== $templateStruct->id and
+                $savedElement->name === $templateStruct->name
+            ){
+                $templateStruct = self::findUniqueName($templateStruct, $uid);
+            }
         }
 
         return self::update($templateStruct);
@@ -227,7 +232,7 @@ class FiltersXliffConfigTemplateDao extends DataAccess_AbstractDao
     /**
      * @param $uid
      * @param int $ttl
-     * @return FiltersXliffConfigTemplateStruct|null
+     * @return FiltersXliffConfigTemplateStruct[]
      * @throws Exception
      */
     public static function getByUid($uid, $ttl = 60)
@@ -238,10 +243,16 @@ class FiltersXliffConfigTemplateDao extends DataAccess_AbstractDao
         ] );
 
         if(empty($result)){
-            return null;
+            return [];
         }
 
-        return self::hydrateTemplateStruct((array)$result[0]);
+        $res = [];
+
+        foreach ($result as $r){
+            $res[] = self::hydrateTemplateStruct((array)$r);
+        }
+
+        return $res;
     }
 
     /**
@@ -362,8 +373,8 @@ class FiltersXliffConfigTemplateDao extends DataAccess_AbstractDao
         $stmt->execute( [
             "uid" => $templateStruct->uid,
             "name" => $templateStruct->name,
-            "filters" => $templateStruct->getFilters()->serialize(),
-            "xliff" => $templateStruct->getXliff()->serialize(),
+            "filters" => $templateStruct->getFilters(),
+            "xliff" => $templateStruct->getXliff(),
             'now' => (new DateTime())->format('Y-m-d H:i:s'),
         ] );
 
@@ -399,8 +410,8 @@ class FiltersXliffConfigTemplateDao extends DataAccess_AbstractDao
             "id" => $templateStruct->id,
             "uid" => $templateStruct->uid,
             "name" => $templateStruct->name,
-            "filters" => serialize($templateStruct->getFilters()),
-            "xliff" => serialize($templateStruct->getXliff()),
+            "filters" => $templateStruct->getFilters(),
+            "xliff" => $templateStruct->getXliff(),
             'now' => (new DateTime())->format('Y-m-d H:i:s'),
         ] );
 

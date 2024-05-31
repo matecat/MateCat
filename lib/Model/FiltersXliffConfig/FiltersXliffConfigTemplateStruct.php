@@ -2,7 +2,6 @@
 
 namespace FiltersXliffConfig;
 
-use DataAccess_AbstractDaoSilentStruct;
 use Date\DateTimeUtil;
 use Exception;
 use FiltersXliffConfig\Filters\DTO\Json;
@@ -17,7 +16,7 @@ use FiltersXliffConfig\Xliff\DTO\Xliff20Rule;
 use FiltersXliffConfig\Xliff\XliffConfigModel;
 use JsonSerializable;
 
-class FiltersXliffConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruct implements JsonSerializable
+class FiltersXliffConfigTemplateStruct implements JsonSerializable
 {
     public $id;
     public $name;
