@@ -1477,12 +1477,13 @@ class ProjectManager {
      * @param ArrayObject $projectStructure
      * @param int         $num_split
      * @param array       $requestedWordsPerSplit Matecat Equivalent Words ( Only valid for Pro Version )
+     * @param $count_type
      *
      * @return ArrayObject
      *
      * @throws Exception
      */
-    public function getSplitData( ArrayObject $projectStructure, $num_split = 2, $requestedWordsPerSplit = [] ) {
+    public function getSplitData( ArrayObject $projectStructure, $num_split = 2, $requestedWordsPerSplit = [], $count_type  = Projects_MetadataDao::SPLIT_EQUIVALENT_WORD_TYPE ) {
 
         $num_split = (int)$num_split;
 
@@ -1511,7 +1512,6 @@ class ProjectManager {
             throw new Exception( 'Wrong job id or password. Job segment range not found.', -6 );
         }
 
-        $count_type  = Projects_MetadataDao::SPLIT_EQUIVALENT_WORD_TYPE;
         $total_words = $row_totals[ $count_type ];
 
         if ( empty( $requestedWordsPerSplit ) ) {

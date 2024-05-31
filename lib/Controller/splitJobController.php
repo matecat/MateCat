@@ -17,6 +17,7 @@ class splitJobController extends ajaxController {
     private $job_pass;
     private $num_split;
     private $split_values;
+    private $split_raw_words;
 
     private $project_data;
 
@@ -58,15 +59,14 @@ class splitJobController extends ajaxController {
         //NOTE: Global $_POST Overriding from CLI Test scripts
         //$__postInput = filter_var_array( $_POST, $filterArgs );
 
-        $this->exec         = $__postInput[ 'exec' ];
-        $this->project_id   = $__postInput[ 'project_id' ];
-        $this->project_pass = $__postInput[ 'project_pass' ];
-        $this->job_id       = $__postInput[ 'job_id' ];
-        $this->job_pass     = $__postInput[ 'job_pass' ];
-        $this->num_split    = $__postInput[ 'num_split' ];
-        $this->split_values = $__postInput[ 'split_values' ];
-
-
+        $this->exec            = $__postInput[ 'exec' ];
+        $this->project_id      = $__postInput[ 'project_id' ];
+        $this->project_pass    = $__postInput[ 'project_pass' ];
+        $this->job_id          = $__postInput[ 'job_id' ];
+        $this->job_pass        = $__postInput[ 'job_pass' ];
+        $this->num_split       = $__postInput[ 'num_split' ];
+        $this->split_values    = $__postInput[ 'split_values' ];
+        $this->split_raw_words = $__postInput[ 'split_raw_words' ];
     }
 
     protected function valuesToInt( $float_val ) {
@@ -76,7 +76,7 @@ class splitJobController extends ajaxController {
     public function doAction() {
 
         try {
-
+            $count_type = ($this->split_raw_words == true) ? Projects_MetadataDao::SPLIT_RAW_WORD_TYPE : Projects_MetadataDao::SPLIT_EQUIVALENT_WORD_TYPE;
             $this->project_struct = \Projects_ProjectDao::findByIdAndPassword( $this->project_id, $this->project_pass, 60 * 60 );
 
             $pManager = new ProjectManager();
@@ -102,7 +102,7 @@ class splitJobController extends ajaxController {
                     $pStruct[ 'job_to_split' ]      = $this->job_id;
                     $pStruct[ 'job_to_split_pass' ] = $this->job_pass;
 
-                    $pManager->getSplitData( $pStruct, $this->num_split, $this->split_values );
+                    $pManager->getSplitData( $pStruct, $this->num_split, $this->split_values, $count_type );
                     break;
                 case 'apply':
                     $this->checkSplitAccess( $this->project_struct->getJobs() );
@@ -110,7 +110,7 @@ class splitJobController extends ajaxController {
                     $pStruct[ 'job_to_split' ]       = $this->job_id;
                     $pStruct[ 'job_to_split_pass' ]  = $this->job_pass;
 
-                    $pManager->getSplitData( $pStruct, $this->num_split, $this->split_values );
+                    $pManager->getSplitData( $pStruct, $this->num_split, $this->split_values, $count_type );
                     $pManager->applySplit( $pStruct );
                     break;
 
