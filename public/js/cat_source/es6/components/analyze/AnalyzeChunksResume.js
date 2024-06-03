@@ -442,7 +442,7 @@ class AnalyzeChunksResume extends React.Component {
                   project={this.props.project}
                   job={chunkJob}
                   url={chunkAnalysis.urls.t}
-                  standardWC={total_standard}
+                  standardWC={chunkAnalysis.total_equivalent}
                   showTranslatorBox={false}
                   extendedView={true}
                   onClickOutside={this.closeOutsourceModal}
