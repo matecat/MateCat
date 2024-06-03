@@ -91,6 +91,17 @@
         {
             "localized": [
                 {
+                    "en": "Arabic (Jordan)"
+                }
+            ],
+            "isocode": "ar",
+            "enabled": true,
+            "rtl": true,
+            "rfc3066code": "ar-JO"
+        },
+        {
+            "localized": [
+                {
                     "en": "Aragonese"
                 }
             ],
