@@ -280,45 +280,51 @@ var spec = {
         {
           name: 'res',
           in: 'formData',
-          description: 'Possible values: job, prj (if left empy, job is the default value)',
+          description:
+            'Possible values: job, prj (if left empy, job is the default value)',
           required: false,
           type: 'string',
         },
         {
           name: 'id',
           in: 'formData',
-          description: 'The id of the resource (project or job) whose password you want to change.',
+          description:
+            'The id of the resource (project or job) whose password you want to change.',
           required: true,
           type: 'integer',
         },
         {
           name: 'password',
           in: 'formData',
-          description: 'The current password of the resource (project or job) whose password you want to change.',
+          description:
+            'The current password of the resource (project or job) whose password you want to change.',
           required: true,
           type: 'string',
         },
         {
           name: 'new_password',
           in: 'formData',
-          description: 'Use this to define the new password of the resource whose password you are changing. Becomes mandatory if undo is set to "true".',
+          description:
+            'Use this to define the new password of the resource whose password you are changing. Becomes mandatory if undo is set to "true".',
           required: false,
           type: 'string',
         },
         {
           name: 'revision_number',
           in: 'formData',
-          description: 'Fill this in if you want to change the password of a revision job. Use this field to specify the revision step whose password you are changing. If this field is filled in, the password sent in the "password" field should be the one for the corresponding revision step. Possible values: 1, 2.',
+          description:
+            'Fill this in if you want to change the password of a revision job. Use this field to specify the revision step whose password you are changing. If this field is filled in, the password sent in the "password" field should be the one for the corresponding revision step. Possible values: 1, 2.',
           required: false,
           type: 'integer',
         },
         {
           name: 'undo',
           in: 'formData',
-          description: 'Set this to "true" if you\'d like to define the new password of the resource you are updating, rather than having a random one generated for you.',
+          description:
+            'Set this to "true" if you\'d like to define the new password of the resource you are updating, rather than having a random one generated for you.',
           required: false,
           type: 'boolean',
-        }
+        },
       ],
       responses: {
         200: {
@@ -611,13 +617,15 @@ var spec = {
         parameters: [
           {
             name: 'id_job',
-            description: 'The id of the job you intend to generate the Revise 2 step for',
+            description:
+              'The id of the job you intend to generate the Revise 2 step for',
             required: true,
             type: 'string',
           },
           {
             name: 'password',
-            description: 'The password of the job you intend to generate the Revise 2 step for',
+            description:
+              'The password of the job you intend to generate the Revise 2 step for',
             required: true,
             type: 'string',
           },

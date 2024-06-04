@@ -151,29 +151,29 @@ export const ActionMenu = ({
       .finally(() => setIsExportCsvDisabled(false))
   }
 
-    const handlerExportJson = () => {
-        setIsExportJsonDisabled(true)
+  const handlerExportJson = () => {
+    setIsExportJsonDisabled(true)
 
-        exportQualityReport({format: 'json'})
-            .then(({blob, filename}) => {
-                const aTag = document.createElement('a')
-                const blobURL = URL.createObjectURL(blob)
-                aTag.download = filename
-                aTag.href = blobURL
-                document.body.appendChild(aTag)
-                aTag.click()
-                document.body.removeChild(aTag)
-            })
-            .catch((errors) => {
-                const notification = {
-                    title: 'Error',
-                    text: `Downloading JSON error status code: ${errors.status}`,
-                    type: 'error',
-                }
-                CatToolActions.addNotification(notification)
-            })
-            .finally(() => setIsExportJsonDisabled(false))
-    }
+    exportQualityReport({format: 'json'})
+      .then(({blob, filename}) => {
+        const aTag = document.createElement('a')
+        const blobURL = URL.createObjectURL(blob)
+        aTag.download = filename
+        aTag.href = blobURL
+        document.body.appendChild(aTag)
+        aTag.click()
+        document.body.removeChild(aTag)
+      })
+      .catch((errors) => {
+        const notification = {
+          title: 'Error',
+          text: `Downloading JSON error status code: ${errors.status}`,
+          type: 'error',
+        }
+        CatToolActions.addNotification(notification)
+      })
+      .finally(() => setIsExportJsonDisabled(false))
+  }
 
   useEffect(() => {
     initDropdowns()
