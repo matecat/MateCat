@@ -7,7 +7,6 @@
  *
  */
 
-use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
 use API\V2\Exceptions\AuthenticationError;
 use ConnectedServices\GDrive as GDrive;
@@ -24,8 +23,8 @@ use FilesStorage\S3FilesStorage;
 use Jobs\SplitQueue;
 use LQA\QA;
 use Matecat\SubFiltering\MateCatFilter;
+use Matecat\SubFiltering\Utils\DataRefReplacer;
 use Matecat\XliffParser\XliffParser;
-use Matecat\XliffParser\XliffUtils\DataRefReplacer;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use Model\Analysis\AnalysisDao;
 use PayableRates\CustomPayableRateDao;
@@ -126,74 +125,74 @@ class ProjectManager {
 
         if ( $projectStructure == null ) {
             $projectStructure = new RecursiveArrayObject(
-                [
-                    'HTTP_HOST'                    => null,
-                    'id_project'                   => null,
-                    'create_date'                  => date( "Y-m-d H:i:s" ),
-                    'id_customer'                  => self::TRANSLATED_USER,
-                    'project_features'             => [],
-                    'user_ip'                      => null,
-                    'project_name'                 => null,
-                    'result'                       => [ "errors" => [], "data" => [] ],
-                    'private_tm_key'               => 0,
-                    'uploadToken'                  => null,
-                    'array_files'                  => [], //list of file names
-                    'array_files_meta'             => [], //list of file metadata
-                    'file_id_list'                 => [],
-                    'source_language'              => null,
-                    'target_language'              => null,
-                    'job_subject'                  => 'general',
-                    'mt_engine'                    => null,
-                    'tms_engine'                   => null,
-                    'ppassword'                    => null,
-                    'array_jobs'                   => [
-                        'job_list'      => [],
-                        'job_pass'      => [],
-                        'job_segments'  => [],
-                        'job_languages' => [],
-                        'payable_rates' => [],
-                    ],
-                    'job_segments'                 => [], //array of job_id => [  min_seg, max_seg  ]
-                    'segments'                     => [], //array of files_id => segments[  ]
-                    'segments-original-data'       => [], //array of files_id => segments-original-data[  ]
-                    'segments_metadata'            => [], //array of segments_metadata
-                    'segments-meta-data'           => [], //array of files_id => segments-meta-data[  ]
-                    'file-part-id'                 => [], //array of files_id => segments-meta-data[  ]
-                    'file-metadata'                => [], //array of files metadata
-                    'translations'                 => [],
-                    'notes'                        => [],
-                    'context-group'                => [],
-                    //one translation for every file because translations are files related
-                    'status'                       => Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS,
-                    'job_to_split'                 => null,
-                    'job_to_split_pass'            => null,
-                    'split_result'                 => null,
-                    'job_to_merge'                 => null,
-                    'lang_detect_files'            => [],
-                    'tm_keys'                      => [],
-                    'userIsLogged'                 => false,
-                    'uid'                          => null,
-                    'skip_lang_validation'         => false,
-                    'pretranslate_100'             => 0,
-                    'only_private'                 => 0,
-                    'owner'                        => '',
-                    Projects_MetadataDao::WORD_COUNT_TYPE_KEY => Projects_MetadataDao::WORD_COUNT_RAW,
-                    'metadata'                     => [],
-                    'id_assignee'                  => null,
-                    'session'                      => ( isset( $_SESSION ) ? $_SESSION : false ),
-                    'instance_id'                  => ( !is_null( INIT::$INSTANCE_ID ) ? INIT::$INSTANCE_ID : 0 ),
-                    'id_team'                      => null,
-                    'team'                         => null,
-                    'sanitize_project_options'     => true,
-                    'file_segments_count'          => [],
-                    'due_date'                     => null,
-                    'qa_model'                     => null,
-                    'target_language_mt_engine_id' => [],
-                    'standard_word_count'          => 0,
-                    'mmt_glossaries'               => null,
-                    'deepl_formality'              => null,
-                    'deepl_id_glossary'            => null,
-                ] );
+                    [
+                            'HTTP_HOST'                               => null,
+                            'id_project'                              => null,
+                            'create_date'                             => date( "Y-m-d H:i:s" ),
+                            'id_customer'                             => self::TRANSLATED_USER,
+                            'project_features'                        => [],
+                            'user_ip'                                 => null,
+                            'project_name'                            => null,
+                            'result'                                  => [ "errors" => [], "data" => [] ],
+                            'private_tm_key'                          => 0,
+                            'uploadToken'                             => null,
+                            'array_files'                             => [], //list of file names
+                            'array_files_meta'                        => [], //list of file metadata
+                            'file_id_list'                            => [],
+                            'source_language'                         => null,
+                            'target_language'                         => null,
+                            'job_subject'                             => 'general',
+                            'mt_engine'                               => null,
+                            'tms_engine'                              => null,
+                            'ppassword'                               => null,
+                            'array_jobs'                              => [
+                                    'job_list'      => [],
+                                    'job_pass'      => [],
+                                    'job_segments'  => [],
+                                    'job_languages' => [],
+                                    'payable_rates' => [],
+                            ],
+                            'job_segments'                            => [], //array of job_id => [  min_seg, max_seg  ]
+                            'segments'                                => [], //array of files_id => segments[  ]
+                            'segments-original-data'                  => [], //array of files_id => segments-original-data[  ]
+                            'segments_metadata'                       => [], //array of segments_metadata
+                            'segments-meta-data'                      => [], //array of files_id => segments-meta-data[  ]
+                            'file-part-id'                            => [], //array of files_id => segments-meta-data[  ]
+                            'file-metadata'                           => [], //array of files metadata
+                            'translations'                            => [],
+                            'notes'                                   => [],
+                            'context-group'                           => [],
+                        //one translation for every file because translations are files related
+                            'status'                                  => Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS,
+                            'job_to_split'                            => null,
+                            'job_to_split_pass'                       => null,
+                            'split_result'                            => null,
+                            'job_to_merge'                            => null,
+                            'lang_detect_files'                       => [],
+                            'tm_keys'                                 => [],
+                            'userIsLogged'                            => false,
+                            'uid'                                     => null,
+                            'skip_lang_validation'                    => false,
+                            'pretranslate_100'                        => 0,
+                            'only_private'                            => 0,
+                            'owner'                                   => '',
+                            Projects_MetadataDao::WORD_COUNT_TYPE_KEY => Projects_MetadataDao::WORD_COUNT_RAW,
+                            'metadata'                                => [],
+                            'id_assignee'                             => null,
+                            'session'                                 => ( isset( $_SESSION ) ? $_SESSION : false ),
+                            'instance_id'                             => ( !is_null( INIT::$INSTANCE_ID ) ? INIT::$INSTANCE_ID : 0 ),
+                            'id_team'                                 => null,
+                            'team'                                    => null,
+                            'sanitize_project_options'                => true,
+                            'file_segments_count'                     => [],
+                            'due_date'                                => null,
+                            'qa_model'                                => null,
+                            'target_language_mt_engine_id'            => [],
+                            'standard_word_count'                     => 0,
+                            'mmt_glossaries'                          => null,
+                            'deepl_formality'                         => null,
+                            'deepl_id_glossary'                       => null,
+                    ] );
 
         }
 
@@ -342,15 +341,15 @@ class ProjectManager {
     /**
      * Save features in project metadata
      */
-    private function saveFeaturesInMetadata(){
+    private function saveFeaturesInMetadata() {
 
         $dao = new Projects_MetadataDao();
 
         $featureCodes = $this->features->getCodes();
         if ( !empty( $featureCodes ) ) {
             $dao->set( $this->projectStructure[ 'id_project' ],
-                Projects_MetadataDao::FEATURES_KEY,
-                implode( ',', $featureCodes )
+                    Projects_MetadataDao::FEATURES_KEY,
+                    implode( ',', $featureCodes )
             );
         }
     }
@@ -368,50 +367,50 @@ class ProjectManager {
     private function saveMetadata() {
 
         $options = $this->projectStructure[ 'metadata' ];
-        $dao = new Projects_MetadataDao();
+        $dao     = new Projects_MetadataDao();
 
         // "From API" flag
-        if(isset($this->projectStructure['from_api']) and $this->projectStructure[ 'from_api' ] ){
-            $options['from_api'] = 1;
+        if ( isset( $this->projectStructure[ 'from_api' ] ) and $this->projectStructure[ 'from_api' ] ) {
+            $options[ 'from_api' ] = 1;
         }
 
         if ( $this->projectStructure[ 'sanitize_project_options' ] ) {
             $options = $this->sanitizeProjectOptions( $options );
         }
 
-        if(!empty($options)){
+        if ( !empty( $options ) ) {
             foreach ( $options as $key => $value ) {
                 $dao->set(
-                    $this->projectStructure[ 'id_project' ],
-                    $key,
-                    $value
+                        $this->projectStructure[ 'id_project' ],
+                        $key,
+                        $value
                 );
             }
         }
 
         // add MMT Glossaries here
-        if( $this->projectStructure[ 'mmt_glossaries' ] and !empty( $this->projectStructure[ 'mmt_glossaries' ] ) ){
+        if ( $this->projectStructure[ 'mmt_glossaries' ] and !empty( $this->projectStructure[ 'mmt_glossaries' ] ) ) {
             $dao->set(
-                $this->projectStructure[ 'id_project' ],
-                'mmt_glossaries',
-                $this->projectStructure[ 'mmt_glossaries' ]
+                    $this->projectStructure[ 'id_project' ],
+                    'mmt_glossaries',
+                    $this->projectStructure[ 'mmt_glossaries' ]
             );
         }
 
         // add DeepL params here
-        if( $this->projectStructure[ 'deepl_formality' ] and !empty( $this->projectStructure[ 'deepl_formality' ] ) ){
+        if ( $this->projectStructure[ 'deepl_formality' ] and !empty( $this->projectStructure[ 'deepl_formality' ] ) ) {
             $dao->set(
-                $this->projectStructure[ 'id_project' ],
-                'deepl_formality',
-                $this->projectStructure[ 'deepl_formality' ]
+                    $this->projectStructure[ 'id_project' ],
+                    'deepl_formality',
+                    $this->projectStructure[ 'deepl_formality' ]
             );
         }
 
-        if( $this->projectStructure[ 'deepl_id_glossary' ] and !empty( $this->projectStructure[ 'deepl_id_glossary' ] ) ){
+        if ( $this->projectStructure[ 'deepl_id_glossary' ] and !empty( $this->projectStructure[ 'deepl_id_glossary' ] ) ) {
             $dao->set(
-                $this->projectStructure[ 'id_project' ],
-                'deepl_id_glossary',
-                $this->projectStructure[ 'deepl_id_glossary' ]
+                    $this->projectStructure[ 'id_project' ],
+                    'deepl_id_glossary',
+                    $this->projectStructure[ 'deepl_id_glossary' ]
             );
         }
 
@@ -1078,7 +1077,24 @@ class ProjectManager {
         $activity->ip         = $this->projectStructure[ 'user_ip' ];
         $activity->uid        = $this->projectStructure[ 'uid' ];
         $activity->event_date = date( 'Y-m-d H:i:s' );
-        Activity::save( $activity );
+
+        try {
+            WorkerClient::enqueueWithClient(
+                    AMQHandler::getNewInstanceForDaemons(),
+                    'ACTIVITYLOG',
+                    '\AsyncTasks\Workers\ActivityLogWorker',
+                    $activity,
+                    [ 'persistent' => WorkerClient::$_HANDLER->persistent ]
+            );
+        } catch ( Exception $e ) {
+
+            # Handle the error, logging, ...
+            $output = "**** Activity Log failed. AMQ Connection Error. **** ";
+            $output .= "{$e->getMessage()}";
+            $output .= var_export( $activity, true );
+            $this->_log( $output );
+
+        }
 
     }
 
@@ -1326,13 +1342,13 @@ class ProjectManager {
             $projectStructure[ 'array_jobs' ][ 'payable_rates' ]->offsetSet( $newJob->id, $payableRates );
 
             // dialect_strict
-            if(isset($projectStructure['dialect_strict'])){
-                $jobsMetadataDao = new \Jobs\MetadataDao();
-                $dialectStrictObj = json_decode($projectStructure['dialect_strict'], true);
+            if ( isset( $projectStructure[ 'dialect_strict' ] ) ) {
+                $jobsMetadataDao  = new \Jobs\MetadataDao();
+                $dialectStrictObj = json_decode( $projectStructure[ 'dialect_strict' ], true );
 
-                foreach ($dialectStrictObj as $lang => $value){
-                    if(trim($lang) === trim($newJob->target)){
-                        $jobsMetadataDao->set($newJob->id, $newJob->password, 'dialect_strict', $value);
+                foreach ( $dialectStrictObj as $lang => $value ) {
+                    if ( trim( $lang ) === trim( $newJob->target ) ) {
+                        $jobsMetadataDao->set( $newJob->id, $newJob->password, 'dialect_strict', $value );
                     }
                 }
             }
@@ -2089,8 +2105,8 @@ class ProjectManager {
                             if ( isset( $xliff_trans_unit[ 'target' ][ 'raw-content' ] ) ) {
 
                                 // could not have attributes, suppress warning
-                                $state = (isset($xliff_trans_unit['target']['attr']['state'])) ? $xliff_trans_unit['target']['attr']['state'] : null;
-                                $stateQualifier = (isset($xliff_trans_unit['target']['attr'][ 'state-qualifier' ])) ? $xliff_trans_unit['target']['attr'][ 'state-qualifier' ] : null;
+                                $state                   = ( isset( $xliff_trans_unit[ 'target' ][ 'attr' ][ 'state' ] ) ) ? $xliff_trans_unit[ 'target' ][ 'attr' ][ 'state' ] : null;
+                                $stateQualifier          = ( isset( $xliff_trans_unit[ 'target' ][ 'attr' ][ 'state-qualifier' ] ) ) ? $xliff_trans_unit[ 'target' ][ 'attr' ][ 'state-qualifier' ] : null;
                                 $target_extract_external = $this->_strip_external( $xliff_trans_unit[ 'target' ][ 'raw-content' ], $xliffInfo );
 
                                 if ( $this->__isTranslated( $xliff_trans_unit[ 'source' ][ 'raw-content' ], $target_extract_external[ 'seg' ], $xliff_trans_unit, $state, $stateQualifier ) && !is_numeric( $xliff_trans_unit[ 'source' ][ 'raw-content' ] ) && !empty( $target_extract_external[ 'seg' ] ) ) {
@@ -2719,19 +2735,19 @@ class ProjectManager {
 
                 /* WARNING do not change the order of the keys */
                 $sql_values = [
-                    'id_segment'             => $translation_row [ 0 ],
-                    'id_job'                 => $jid,
-                    'segment_hash'           => $translation_row [ 3 ],
-                    'status'                 => $iceLockArray[ 'status' ],
-                    'translation'            => $filter->fromLayer1ToLayer0( $check->getTargetSeg() ),
-                    'locked'                 => 0, // not allowed to change locked status for pre-translations
-                    'match_type'             => $iceLockArray[ 'match_type' ],
-                    'eq_word_count'          => $iceLockArray[ 'eq_word_count' ],
-                    'serialized_errors_list' => ( $check->thereAreErrors() ) ? $check->getErrorsJSON() : '',
-                    'warning'                => ( $check->thereAreErrors() ) ? 1 : 0,
-                    'suggestion_match'       => $iceLockArray[ 'suggestion_match' ],
-                    'standard_word_count'    => $iceLockArray[ 'standard_word_count' ],
-                    'version_number'         => (isset($iceLockArray[ 'version_number' ])) ? $iceLockArray[ 'version_number' ] : 0,
+                        'id_segment'             => $translation_row [ 0 ],
+                        'id_job'                 => $jid,
+                        'segment_hash'           => $translation_row [ 3 ],
+                        'status'                 => $iceLockArray[ 'status' ],
+                        'translation'            => $filter->fromLayer1ToLayer0( $check->getTargetSeg() ),
+                        'locked'                 => 0, // not allowed to change locked status for pre-translations
+                        'match_type'             => $iceLockArray[ 'match_type' ],
+                        'eq_word_count'          => $iceLockArray[ 'eq_word_count' ],
+                        'serialized_errors_list' => ( $check->thereAreErrors() ) ? $check->getErrorsJSON() : '',
+                        'warning'                => ( $check->thereAreErrors() ) ? 1 : 0,
+                        'suggestion_match'       => $iceLockArray[ 'suggestion_match' ],
+                        'standard_word_count'    => $iceLockArray[ 'standard_word_count' ],
+                        'version_number'         => ( isset( $iceLockArray[ 'version_number' ] ) ) ? $iceLockArray[ 'version_number' ] : 0,
                 ];
 
                 $query_translations_values[] = $sql_values;
@@ -2762,7 +2778,7 @@ class ProjectManager {
     private function evaluateTranslationStatus( $trans_unit, $position = null ) {
 
         // state handling
-        $state = null;
+        $state          = null;
         $stateQualifier = null;
 
         if ( isset( $trans_unit[ 'seg-target' ][ $position ][ 'attr' ] ) and isset( $trans_unit[ 'seg-target' ][ $position ][ 'attr' ][ 'state' ] ) ) {
@@ -2771,14 +2787,14 @@ class ProjectManager {
             $state = $trans_unit[ 'target' ][ 'attr' ][ 'state' ];
         }
 
-        if(isset($trans_unit['seg-target'][$position]['attr']) and isset($trans_unit['seg-target'][$position]['attr']['state-qualifier'])){
-            $stateQualifier = $trans_unit['seg-target'][$position]['attr']['state-qualifier'];
-        } elseif(isset($trans_unit['target']['attr']) and isset($trans_unit['target']['attr']['state-qualifier'])){
-            $stateQualifier = $trans_unit['target']['attr']['state-qualifier'];
+        if ( isset( $trans_unit[ 'seg-target' ][ $position ][ 'attr' ] ) and isset( $trans_unit[ 'seg-target' ][ $position ][ 'attr' ][ 'state-qualifier' ] ) ) {
+            $stateQualifier = $trans_unit[ 'seg-target' ][ $position ][ 'attr' ][ 'state-qualifier' ];
+        } elseif ( isset( $trans_unit[ 'target' ][ 'attr' ] ) and isset( $trans_unit[ 'target' ][ 'attr' ][ 'state-qualifier' ] ) ) {
+            $stateQualifier = $trans_unit[ 'target' ][ 'attr' ][ 'state-qualifier' ];
         }
 
-        if($stateQualifier !== null){
-            if(XliffTranslationStatus::isFuzzyMatch($stateQualifier)){
+        if ( $stateQualifier !== null ) {
+            if ( XliffTranslationStatus::isFuzzyMatch( $stateQualifier ) ) {
                 return Constants_TranslationStatus::STATUS_DRAFT;
             }
         }
@@ -2798,7 +2814,7 @@ class ProjectManager {
                 return Constants_TranslationStatus::STATUS_APPROVED;
             }
 
-            if( XliffTranslationStatus::isFinalState( $state ) ){
+            if ( XliffTranslationStatus::isFinalState( $state ) ) {
                 return Constants_TranslationStatus::STATUS_APPROVED2;
             }
 
@@ -3392,7 +3408,7 @@ class ProjectManager {
 
         // ignore translations for fuzzy matches (xliff 1.2)
         if ( $stateQualifier !== null ) {
-            if(XliffTranslationStatus::isFuzzyMatch($stateQualifier)){
+            if ( XliffTranslationStatus::isFuzzyMatch( $stateQualifier ) ) {
                 return true;
             }
         }
