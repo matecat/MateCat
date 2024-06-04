@@ -119,7 +119,9 @@ export const SegmentButton = ({segment, disabled, isReview}) => {
   const getReviewButtons = () => {
     const classDisable = disabled ? 'disabled' : ''
     let nextButton, currentButton
-    let nextSegment = SegmentStore.getNextSegment(segment.sid, segment.fid)
+    let nextSegment = SegmentStore.getNextSegment({
+      current_sid: segment.sid,
+    })
 
     let revisionCompleted = false
     if (config.isReview && progress) {
@@ -230,8 +232,11 @@ export const SegmentButton = ({segment, disabled, isReview}) => {
     let nextButton, currentButton
     const filtering =
       SegmentFilter.enabled() && SegmentFilter.filtering() && SegmentFilter.open
-    let nextSegment = SegmentStore.getNextSegment(segment.sid, segment.fid)
-    let translationCompleted = progress && progress.translationCompleted
+    let nextSegment = SegmentStore.getNextSegment({
+      current_sid: segment.sid,
+    })
+    let translationCompleted =
+      progress && progress.translationCompleted
     let enableGoToNext =
       !isUndefined(nextSegment) &&
       !translationCompleted &&

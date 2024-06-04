@@ -82,7 +82,7 @@ route( '/api/app/jobs/[:id_job]/[:password]/segment-analysis',          'GET',  
 route( '/api/app/projects/[:id_project]/[:password]/quality-framework', 'GET',  'API\App\QualityFrameworkController', 'project' );
 route( '/api/app/jobs/[:id_job]/[:password]/quality-framework',         'GET',  'API\App\QualityFrameworkController', 'job' );
 
-route( '/api/app/change-password',  'POST', 'API\V3\ChangePasswordController', 'changePassword' );
+route( '/api/app/change-password',  'POST', 'API\V2\ChangePasswordController', 'changePassword' );
 
 // TM Keys
 $klein->with( '/api/app/tm-keys', function () {

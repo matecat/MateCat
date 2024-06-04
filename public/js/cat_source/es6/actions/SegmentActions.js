@@ -306,20 +306,18 @@ const SegmentActions = {
   },
   openNextApproved: function (sid) {
     sid = sid || UI.currentSegmentId
-    const nextApprovedSegment = SegmentStore.getNextSegment(
-      sid,
-      null,
-      9,
-      1,
-      true,
-    )
-    const nextApprovedSegmentInPrevious = SegmentStore.getNextSegment(
-      -1,
-      null,
-      9,
-      1,
-      true,
-    )
+    const nextApprovedSegment = SegmentStore.getNextSegment({
+      current_sid: sid,
+      status: SEGMENTS_STATUS.APPROVED,
+      revisionNumber: 1,
+      autopropagated: true,
+    })
+    const nextApprovedSegmentInPrevious = SegmentStore.getNextSegment({
+      current_sid: -1,
+      status: SEGMENTS_STATUS.APPROVED,
+      revisionNumber: 1,
+      autopropagated: true,
+    })
     // find in next segments
     if (nextApprovedSegment) {
       SegmentActions.openSegment(nextApprovedSegment.sid)
@@ -814,18 +812,17 @@ const SegmentActions = {
         text: text,
       },
     ]
-    let nextSegment = SegmentStore.getNextSegment(sid, fid)
+    let nextSegment = SegmentStore.getNextSegment({current_sid: sid})
     if (nextSegment) {
       requestes.push({
         sid: nextSegment.sid,
         fid: nextSegment.fid,
         text: nextSegment.segment,
       })
-      let nextSegmentUntranslated = SegmentStore.getNextSegment(
-        sid,
-        fid,
-        SEGMENTS_STATUS.UNTRANSLATED,
-      )
+      let nextSegmentUntranslated = SegmentStore.getNextSegment({
+        current_sid: sid,
+        status: SEGMENTS_STATUS.UNTRANSLATED,
+      })
       if (
         nextSegmentUntranslated &&
         requestes[1].sid != nextSegmentUntranslated.sid
@@ -840,7 +837,7 @@ const SegmentActions = {
 
     for (let index = 0; index < requestes.length; index++) {
       let request = requestes[index]
-      let segment = SegmentStore.getSegmentByIdToJS(request.sid, request.fid)
+      let segment = SegmentStore.getSegmentByIdToJS(request.sid)
       if (
         segment &&
         (typeof segment.glossary === 'undefined' || sid === request.sid)
@@ -1425,20 +1422,16 @@ const SegmentActions = {
     if (SegmentsFilterUtil.enabled() && SegmentsFilterUtil.filtering()) {
       SegmentsFilterUtil.gotoNextTranslatedSegment(sid)
     } else {
-      const nextTranslatedSegment = SegmentStore.getNextSegment(
-        sid,
-        null,
-        SEGMENTS_STATUS.TRANSLATED,
-        null,
-        true,
-      )
-      const nextTranslatedSegmentInPrevious = SegmentStore.getNextSegment(
-        -1,
-        null,
-        SEGMENTS_STATUS.TRANSLATED,
-        null,
-        true,
-      )
+      const nextTranslatedSegment = SegmentStore.getNextSegment({
+        current_sid: sid,
+        status: SEGMENTS_STATUS.TRANSLATED,
+        autopropagated: true,
+      })
+      const nextTranslatedSegmentInPrevious = SegmentStore.getNextSegment({
+        current_sid: -1,
+        status: SEGMENTS_STATUS.TRANSLATED,
+        autopropagated: true,
+      })
       // find in next segments
       if (nextTranslatedSegment) {
         SegmentActions.openSegment(nextTranslatedSegment.sid)

@@ -1047,6 +1047,7 @@ class JobContainer extends React.Component {
           onClickOutside={this.closeOutsourceModal.bind(this)}
           openOutsource={this.state.openOutsource}
           idJobLabel={idJobLabel}
+          standardWC={parseInt(stats.equivalent.total)}
         />
       </div>
     )

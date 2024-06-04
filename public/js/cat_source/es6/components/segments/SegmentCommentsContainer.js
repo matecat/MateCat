@@ -211,7 +211,10 @@ class SegmentCommentsContainer extends React.Component {
       // Thread is not resolved
       if (
         !isUndefined(comments.length - 1) &&
-        !comments[comments.length - 1].thread_id
+        !(
+          parseInt(comments[comments.length - 1].message_type) ===
+          this.types.resolve
+        )
       ) {
         resolveButton = (
           <a
