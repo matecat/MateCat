@@ -19,7 +19,6 @@ class MultiCurlHandlerTest extends AbstractTest {
         $options = array(
                 CURLOPT_HEADER => false,
                 CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_HEADER => 0,
                 CURLOPT_USERAGENT => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
                 CURLOPT_CONNECTTIMEOUT => 2
         );
@@ -47,7 +46,6 @@ class MultiCurlHandlerTest extends AbstractTest {
                 CURLOPT_URL => 'http://www.google.com/',
                 CURLOPT_HEADER => false,
                 CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_HEADER => 0,
                 CURLOPT_USERAGENT => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
                 CURLOPT_CONNECTTIMEOUT => 2
         );
@@ -76,7 +74,6 @@ class MultiCurlHandlerTest extends AbstractTest {
         $options = array(
                 CURLOPT_HEADER => false,
                 CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_HEADER => 0,
                 CURLOPT_USERAGENT => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
                 CURLOPT_CONNECTTIMEOUT => 2
         );

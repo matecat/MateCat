@@ -18,8 +18,7 @@ class CreateTempInstanceTest extends AbstractTest
 
 
     /**
-     * It checks if the creation of an istance of engine will be successfully created when it invokes the method.
-     * @param EnginesModel_EngineStruct
+     * It checks if the creation of an engine instance is successfully created when it invokes the method.
      * @group regression
      * @covers Engine::createTempInstance
      */
@@ -28,10 +27,10 @@ class CreateTempInstanceTest extends AbstractTest
         $this->engine_struct_param = new EnginesModel_EngineStruct();
 
         $this->engine_struct_param->type = "MT";
-        $this->engine_struct_param->class_load = "DeepLingo";
+        $this->engine_struct_param->class_load = "DeepL";
 
 
         $engine = Engine::createTempInstance($this->engine_struct_param);
-        $this->assertTrue($engine instanceof Engines_DeepLingo);
+        $this->assertTrue($engine instanceof Engines_DeepL);
     }
 }

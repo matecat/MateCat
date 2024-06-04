@@ -8,8 +8,6 @@
  * Time: 17.45
  */
 class GetInstanceTest extends AbstractTest {
-    protected $reflector;
-    protected $property;
     /**
      * @var Database
      */
@@ -57,8 +55,7 @@ class GetInstanceTest extends AbstractTest {
     }
 
     /**
-     * @param id of the engine previously constructed
-     *
+     * @throws Exception
      * @group  regression
      * @covers Engine::getInstance
      */
@@ -69,8 +66,7 @@ class GetInstanceTest extends AbstractTest {
     }
 
     /**
-     * @param id of the engine previously constructed
-     *
+     * @throws Exception
      * @group  regression
      * @covers Engine::getInstance
      */
@@ -81,8 +77,7 @@ class GetInstanceTest extends AbstractTest {
     }
 
     /**
-     * @param id of the engine previously constructed
-     *
+     * @throws Exception
      * @group  regression
      * @covers Engine::getInstance
      */
@@ -93,38 +88,35 @@ class GetInstanceTest extends AbstractTest {
     }
 
     /**
-     * @param  ''
-     *
+     * @throws Exception
      * @group  regression
      * @covers Engine::getInstance
      */
     public function test_getInstance_without_id() {
 
-        $this->setExpectedException( 'Exception' );
+        $this->expectException( Exception::class );
         Engine::getInstance( '' );
     }
 
     /**
-     * @param null
-     *
+     * @throws Exception
      * @group  regression
      * @covers Engine::getInstance
      */
     public function test_getInstance_whit_null_id() {
 
-        $this->setExpectedException( 'Exception' );
+        $this->expectException( Exception::class );
         Engine::getInstance( null );
     }
 
     /**
-     * @param  99
-     *
+     * @throws Exception
      * @group  regression
      * @covers Engine::getInstance
      */
     public function test_getInstance_with_no_mach_for_engine_id() {
 
-        $this->setExpectedException( 'Exception' );
+        $this->expectException( Exception::class );
         Engine::getInstance( $this->id_database + 1 );
     }
 
@@ -132,6 +124,7 @@ class GetInstanceTest extends AbstractTest {
      * verify that the method  name of engine not match the classes of known engines
      * @group  regression
      * @covers Engine::getInstance
+     * @throws Exception
      */
     public function test_getInstance_with_no_mach_for_engine_class_name() {
 
