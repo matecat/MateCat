@@ -6,7 +6,7 @@ import SegmentStore from './es6/stores/SegmentStore'
 import {getTagProjection} from './es6/api/getTagProjection'
 import {setCurrentSegment} from './es6/api/setCurrentSegment'
 import SegmentUtils from './es6/utils/segmentUtils'
-
+import {SEGMENTS_STATUS} from './es6/constants/Constants'
 ;(function ($) {
   $.extend(window.UI, {
     /*++++++++++  Tag Proj start ++++++++++*/
@@ -89,7 +89,10 @@ import SegmentUtils from './es6/utils/segmentUtils'
     evalNextSegment: function () {
       var currentSegment = SegmentStore.getCurrentSegment()
       var nextUntranslated = currentSegment
-        ? SegmentStore.getNextSegment(currentSegment.sid, null, 8)
+        ? SegmentStore.getNextSegment({
+            current_sid: currentSegment.sid,
+            status: SEGMENTS_STATUS.UNTRANSLATED,
+          })
         : null
 
       if (nextUntranslated) {
@@ -99,7 +102,7 @@ import SegmentUtils from './es6/utils/segmentUtils'
         this.nextUntranslatedSegmentId = UI.nextUntranslatedSegmentIdByServer
       }
       var next = currentSegment
-        ? SegmentStore.getNextSegment(currentSegment.sid, null, null)
+        ? SegmentStore.getNextSegment({current_sid: currentSegment.sid})
         : null
       this.nextSegmentId = next ? next.sid : null
     },
@@ -156,7 +159,7 @@ import SegmentUtils from './es6/utils/segmentUtils'
       return SegmentStore.getSegmentsSplitGroup(id)
     },
     getContextBefore: function (segmentId) {
-      var segmentBefore = SegmentStore.getPrevSegment(segmentId)
+      var segmentBefore = SegmentStore.getPrevSegment(segmentId, true)
       if (!segmentBefore) {
         return null
       }
@@ -176,7 +179,10 @@ import SegmentUtils from './es6/utils/segmentUtils'
       }
     },
     getContextAfter: function (segmentId) {
-      var segmentAfter = SegmentStore.getNextSegment(segmentId)
+      var segmentAfter = SegmentStore.getNextSegment({
+        current_sid: segmentId,
+        alsoMutedSegment: true,
+      })
       if (!segmentAfter) {
         return null
       }
@@ -196,7 +202,7 @@ import SegmentUtils from './es6/utils/segmentUtils'
       }
     },
     getIdBefore: function (segmentId) {
-      var segmentBefore = SegmentStore.getPrevSegment(segmentId)
+      var segmentBefore = SegmentStore.getPrevSegment(segmentId, true)
       // var segmentBefore = findSegmentBefore();
       if (!segmentBefore) {
         return null
@@ -204,7 +210,10 @@ import SegmentUtils from './es6/utils/segmentUtils'
       return segmentBefore.original_sid
     },
     getIdAfter: function (segmentId) {
-      var segmentAfter = SegmentStore.getNextSegment(segmentId)
+      var segmentAfter = SegmentStore.getNextSegment({
+        current_sid: segmentId,
+        alsoMutedSegment: true,
+      })
       if (!segmentAfter) {
         return null
       }

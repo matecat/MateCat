@@ -114,12 +114,11 @@ let TranslationMatches = {
       next === 0
         ? segment
         : next == 1
-        ? SegmentStore.getNextSegment(segmentSid)
-        : SegmentStore.getNextSegment(
-            segmentSid,
-            null,
-            SEGMENTS_STATUS.UNTRANSLATED,
-          )
+          ? SegmentStore.getNextSegment({current_sid: segmentSid})
+          : SegmentStore.getNextSegment({
+              current_sid: segmentSid,
+              status: SEGMENTS_STATUS.UNTRANSLATED,
+            })
 
     if (!currentSegment) return
 
