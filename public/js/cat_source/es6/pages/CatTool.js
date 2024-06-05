@@ -28,6 +28,8 @@ import {getSupportedLanguages} from '../api/getSupportedLanguages'
 import ApplicationStore from '../stores/ApplicationStore'
 import useProjectTemplates from '../hooks/useProjectTemplates'
 import {useGoogleLoginNotification} from '../hooks/useGoogleLoginNotification'
+import ModalsActions from '../actions/ModalsActions'
+import FatalErrorModal from '../components/modals/FatalErrorModal'
 
 const urlParams = new URLSearchParams(window.location.search)
 const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
@@ -43,6 +45,7 @@ function CatTool() {
   const [mtEngines, setMtEngines] = useState([DEFAULT_ENGINE_MEMORY])
 
   const [supportedLanguages, setSupportedLanguages] = useState([])
+  const [isAnalysisCompleted, setIsAnalysisCompleted] = useState(false)
 
   // TODO: Remove temp notification warning login google (search in files this todo)
   useGoogleLoginNotification()
@@ -56,6 +59,7 @@ function CatTool() {
         ? options?.segmentId
         : startSegmentIdRef.current,
       where: options?.where,
+      isAnalysisCompleted,
     })
 
   const {projectTemplates, currentProjectTemplate, modifyingCurrentTemplate} =
@@ -179,6 +183,37 @@ function CatTool() {
 
       setOptions((prevState) => ({...prevState, segmentId, where}))
     }
+    const checkAnalysisState = ({analysis_complete}) => {
+      setIsAnalysisCompleted(analysis_complete)
+
+      if (!analysis_complete)
+        ModalsActions.showModalComponent(
+          FatalErrorModal,
+          {
+            text: (
+              <span>
+                Access to the editor page is forbidden until the project's
+                analysis is complete.
+                <br />
+                To follow the analysis' progress,{' '}
+                <a
+                  rel="noreferrer"
+                  href={`/jobanalysis/${config.id_project}-${config.id_job}-${config.password}`}
+                  target="_blank"
+                >
+                  click here
+                </a>
+                .
+              </span>
+            ),
+          },
+          'Analysis in progress',
+          undefined,
+          undefined,
+          true,
+        )
+    }
+
     SegmentStore.addListener(
       SegmentConstants.FREEZING_SEGMENTS,
       freezingSegments,
@@ -187,6 +222,7 @@ function CatTool() {
       SegmentConstants.GET_MORE_SEGMENTS,
       getMoreSegments,
     )
+    CatToolStore.addListener(CatToolConstants.SET_PROGRESS, checkAnalysisState)
 
     return () => {
       CatToolStore.removeListener(CatToolConstants.ON_RENDER, onRenderHandler)
@@ -201,6 +237,10 @@ function CatTool() {
       SegmentStore.removeListener(
         SegmentConstants.GET_MORE_SEGMENTS,
         getMoreSegments,
+      )
+      CatToolStore.removeListener(
+        CatToolConstants.SET_PROGRESS,
+        checkAnalysisState,
       )
     }
   }, [])
@@ -259,9 +299,6 @@ function CatTool() {
         const firstFile = data.files[Object.keys(data.files)[0]]
         if (firstFile) {
           startSegmentIdRef.current = firstFile.segments[0].sid
-        } else {
-          const trackingMessage = `getSegments data: ${JSON.stringify(data)}`
-          CommonUtils.dispatchTrackingError(trackingMessage)
         }
       }
       // TODO: da verificare se serve: this.body.addClass('loaded')

@@ -25,15 +25,13 @@ class Engine {
      * @return array
      */
     public function renderItem( EnginesModel_EngineStruct $engine ) {
-        $row = [
+        return [
                 'id'          => $engine->id,
                 'name'        => $engine->name,
                 'type'        => $engine->type,
                 'description' => $engine->description,
                 'engine_type' => $engine->class_load,
         ];
-
-        return $row;
     }
 
     public function render( $data = null ) {

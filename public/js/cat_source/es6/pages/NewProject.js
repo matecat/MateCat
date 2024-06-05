@@ -14,7 +14,9 @@ import SupportedFilesModal from '../components/modals/SupportedFilesModal'
 import Footer from '../components/footer/Footer'
 import {createProject as createProjectApi} from '../api/createProject'
 import CreateProjectActions from '../actions/CreateProjectActions'
-import LanguageSelector from '../components/languageSelector/LanguageSelector'
+import LanguageSelector, {
+  setRecentlyUsedLanguages,
+} from '../components/languageSelector/LanguageSelector'
 import CreateProjectStore from '../stores/CreateProjectStore'
 import NewProjectConstants from '../constants/NewProjectConstants'
 import {CreateProjectContext} from '../components/createProject/CreateProjectContext'
@@ -255,7 +257,8 @@ const NewProject = ({
   }
 
   createProject.current = () => {
-    // const {mtGlossaryProps, deeplGlossaryProps} = activeMTEngine ?? {}
+    // update store recently used target languages
+    setRecentlyUsedLanguages(targetLangs)
 
     const {
       mt,

@@ -19,7 +19,7 @@ export const SourceLanguageSelect = ({history = []}) => {
       checkSpaceToReverse={false}
       onSelect={(option) => changeSourceLanguage(option)}
     >
-      {({index, onClose}) => ({
+      {({index, name, code, onClose}) => ({
         ...(index === 0 && {
           beforeRow: (
             <ul className="history__list">
@@ -42,6 +42,15 @@ export const SourceLanguageSelect = ({history = []}) => {
             </ul>
           ),
         }),
+        row: (
+          <div className="language-dropdown-item-container">
+            <div className="code-badge">
+              <span>{code}</span>
+            </div>
+
+            <span>{name}</span>
+          </div>
+        ),
       })}
     </Select>
   )
