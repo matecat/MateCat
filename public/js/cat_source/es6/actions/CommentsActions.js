@@ -2,7 +2,6 @@ import AppDispatcher from '../stores/AppDispatcher'
 import CommentsConstants from '../constants/CommentsConstants'
 import {deleteComment} from '../api/deleteComment/deleteComment'
 import {submitComment as submitCommentApi} from '../api/submitComment'
-import CommonUtils from '../utils/commonUtils'
 import TeamsStore from '../stores/TeamsStore'
 import {markAsResolvedThread} from '../api/markAsResolvedThread'
 
@@ -19,7 +18,7 @@ const CommentsActions = {
       idSegment: sid,
       username: TeamsStore.getUserName(),
       sourcePage: config.revisionNumber ? config.revisionNumber + 1 : 1,
-      message: CommonUtils.parseCommentHtmlBeforeSend(text),
+      message: text,
     }).then((resp) => {
       AppDispatcher.dispatch({
         actionType: CommentsConstants.ADD_COMMENT,
