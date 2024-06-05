@@ -279,10 +279,11 @@ class SegmentCommentsContainer extends React.Component {
       htmlComments = commentsHtml
     }
 
-    const userMentionData = this.state.teamUsers.map((user) => ({
-      id: user.uid,
-      display: ` ${user.first_name} ${user.last_name} `,
-    }))
+    const userMentionData =
+      this.state.teamUsers?.map((user) => ({
+        id: user.uid,
+        display: ` ${user.first_name} ${user.last_name} `, // eslint-disable-line
+      })) ?? []
 
     let loggedUser = !!this.state.user
     // Se utente anonimo aggiungere mbc-comment-anonymous-label a mbc-comment-username
