@@ -99,9 +99,6 @@ class engineController extends ajaxController {
             case 'delete':
                 $this->disable();
                 break;
-            case 'execute':
-                $this->execute();
-                break;
             default:
                 break;
         }
@@ -261,16 +258,10 @@ class engineController extends ajaxController {
 
         $engineDAO             = new EnginesModel_EngineDAO( Database::obtain() );
         $newCreatedDbRowStruct = null;
-        $newTestCreatedMT      = null;
 
         if ( array_search( $newEngineStruct->class_load, $engineList ) ) {
-
             $newEngineStruct->active = true;
             $newCreatedDbRowStruct = $engineDAO->create( $newEngineStruct );
-
-            $engineStruct     = EnginesModel_EngineStruct::getStruct();
-            $engineStruct->uid = $this->user->uid;
-            $engineStruct->active = true;
             $this->destroyUserEnginesCache();
         }
 
@@ -287,7 +278,7 @@ class engineController extends ajaxController {
 
         if ( $newEngineStruct instanceof EnginesModel_MicrosoftHubStruct ) {
 
-            $newTestCreatedMT    = Engine::getInstance( $newCreatedDbRowStruct->id );
+            $newTestCreatedMT    = Engine::createTempInstance( $newCreatedDbRowStruct );
             $config              = $newTestCreatedMT->getConfigStruct();
             $config[ 'segment' ] = "Hello World";
             $config[ 'source' ]  = "en-US";
@@ -305,7 +296,7 @@ class engineController extends ajaxController {
 
         } elseif ( $newEngineStruct instanceof EnginesModel_GoogleTranslateStruct ) {
 
-            $newTestCreatedMT    = Engine::getInstance( $newCreatedDbRowStruct->id );
+            $newTestCreatedMT    = Engine::createTempInstance( $newCreatedDbRowStruct );
             $config              = $newTestCreatedMT->getConfigStruct();
             $config[ 'segment' ] = "Hello World";
             $config[ 'source' ]  = "en-US";
@@ -334,10 +325,10 @@ class engineController extends ajaxController {
 
         }
 
-        $this->result[ 'data' ][ 'id' ]   = $newCreatedDbRowStruct->id;
-        $this->result[ 'data' ][ 'name' ] = $newCreatedDbRowStruct->name;
-        $this->result[ 'data' ][ 'description' ] =  $newCreatedDbRowStruct->description;
-        $this->result[ 'data' ][ 'type' ] =  $newCreatedDbRowStruct->type;
+        $this->result[ 'data' ][ 'id' ]          = $newCreatedDbRowStruct->id;
+        $this->result[ 'data' ][ 'name' ]        = $newCreatedDbRowStruct->name;
+        $this->result[ 'data' ][ 'description' ] = $newCreatedDbRowStruct->description;
+        $this->result[ 'data' ][ 'type' ]        = $newCreatedDbRowStruct->type;
     }
 
     /**
@@ -373,63 +364,19 @@ class engineController extends ajaxController {
 
     }
 
-    /**
-     * This method creates a temporary engine and executes one of it's methods
-     */
-    private function execute() {
-
-        $tempEngine  = null;
-        $validEngine = false;
-
-        if ( !$validEngine ) {
-            $this->result[ 'errors' ][] = [ 'code' => -4, 'message' => "Engine not allowed" ];
-
-            return;
-        }
-
-        // this code is commented because EnginesModel_LetsMTStruct was removed
-
-//        $tempEngine = Engine::createTempInstance( $tempEngineRecord );
-//        if ( !$tempEngine instanceof Engines_AbstractEngine ) {
-//            $this->result[ 'errors' ][] = [ 'code' => -12, 'message' => "Creating engine failed. Generic error" ];
-//
-//            return;
-//        }
-//        $functionParams = $this->engineData[ 'functionParams' ];
-//
-//        $function = $this->engineData[ 'function' ];
-//        if ( empty( $function ) ) {
-//            $this->result[ 'errors' ][] = [ 'code' => -10, 'message' => "No function specified" ];
-//
-//            return;
-//        } elseif ( empty( self::$allowed_execute_functions[ strtolower( $this->provider ) ] )
-//                || !in_array( $function, self::$allowed_execute_functions[ strtolower( $this->provider ) ] ) ) {
-//            $this->result[ 'errors' ][] = [ 'code' => -11, 'message' => "Function not allowed" ];
-//
-//            return;
-//        }
-//
-//        $executeResult = $tempEngine->$function( $functionParams );
-//        if ( isset( $executeResult[ 'error' ][ 'code' ] ) ) {
-//            $this->result[ 'errors' ][] = $executeResult[ 'error' ];
-//
-//            return;
-//        }
-//        $this->result[ 'data' ][ 'result' ] = $executeResult;
-    }
 
     /**
      * Destroy cache for engine users query
      *
      * @throws Exception
      */
-    private function destroyUserEnginesCache()
-    {
-        $engineDAO        = new EnginesModel_EngineDAO( Database::obtain() );
-        $engineStruct = EnginesModel_EngineStruct::getStruct();
-        $engineStruct->uid = $this->user->uid;
+    private function destroyUserEnginesCache() {
+        $engineDAO            = new EnginesModel_EngineDAO( Database::obtain() );
+        $engineStruct         = EnginesModel_EngineStruct::getStruct();
+        $engineStruct->uid    = $this->user->uid;
         $engineStruct->active = true;
 
-        $engineDAO->destroyCache($engineStruct);
+        $engineDAO->destroyCache( $engineStruct );
     }
+
 }

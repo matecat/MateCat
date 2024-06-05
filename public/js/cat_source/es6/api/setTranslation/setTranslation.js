@@ -2,66 +2,12 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
 /**
  * Set segment to translation on review extended issue panel
  *
- * @param {Object} segment
- * @param {Object} status
- * @param {string} [idJob=config.id_job]
- * @param {string} translation
- * @param {string} source
- * @param {string} [password=config.password]
- * @param {number} [revisionNumber=config.revisionNumber]
- * @param {number} [chosenSuggestionIndex]
- * @param {string} [currentPassword=config.currentPassword]
- * @param {bool} autosave
- * @param {bool} propagate
- * @param {Object} splitStatuses
+ * @param {Object} objRequest
  * @returns {Promise<object>}
  */
-export const setTranslation = async ({
-  segment,
-  translation,
-  source,
-  idJob = config.id_job,
-  password = config.password,
-  status = segment.status,
-  revisionNumber = config.revisionNumber,
-  currentPassword = config.currentPassword,
-  chosenSuggestionIndex = null,
-  propagate = false,
-  splitStatuses = null,
-}) => {
-  const {sid, segment: segmentDetails, charactersCounter = 0} = segment
-
-  const contextBefore = UI.getContextBefore(sid)
-  const idBefore = UI.getIdBefore(sid)
-  const contextAfter = UI.getContextAfter(sid)
-  const idAfter = UI.getIdAfter(sid)
-  const time_to_edit = UI.editTime ? UI.editTime : new Date() - UI.editStart
-  const translationToSend = translation ? translation : segment.translation
-
-  const obj = {
-    id_segment: sid,
-    id_job: idJob,
-    password,
-    status,
-    translation: translationToSend,
-    segment: source ? source : segmentDetails,
-    time_to_edit: time_to_edit,
-    chosen_suggestion_index: chosenSuggestionIndex,
-    propagate: propagate,
-    context_before: contextBefore,
-    id_before: idBefore,
-    context_after: contextAfter,
-    id_after: idAfter,
-    revision_number: revisionNumber,
-    current_password: currentPassword,
-    splitStatuses,
-    characters_counter: charactersCounter,
-    suggestion_array: segment.contributions
-      ? JSON.stringify(segment.contributions.matches)
-      : undefined,
-  }
+export const setTranslation = async (objRequest) => {
   const dataParams = Object.fromEntries(
-    Object.entries(obj).filter(([_, v]) => v != null),
+    Object.entries(objRequest).filter(([_, v]) => v != null),
   )
 
   const formData = new FormData()

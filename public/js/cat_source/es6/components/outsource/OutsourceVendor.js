@@ -305,9 +305,7 @@ class OutsourceVendor extends React.Component {
 
   getPricePW(price) {
     if (this.state.outsource) {
-      const stats = this.props.job.get('stats').toJS()
-      let words = stats.raw ? stats.raw.total : stats.TOTAL
-      return (parseFloat(price) / words)
+      return (parseFloat(price) / this.props.standardWC)
         .toFixed(3)
         .replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
     }

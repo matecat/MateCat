@@ -76,7 +76,6 @@ route( '/api/v3/projects/[:id_project]/[:password]/segment-analysis',  'GET',  '
 route( '/api/v3/jobs/[:id_job]/[:password]/segment-analysis',          'GET',  'API\V3\SegmentAnalysisController', 'job' );
 route( '/api/v3/create-key',  'POST', 'API\V3\MyMemoryController', 'create' );
 
-
 // MMT
 $klein->with( '/api/v3/mmt/[:engineId]', function () {
     route( '/keys', 'GET', '\API\V3\ModernMTController', 'keys' );
