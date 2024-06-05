@@ -20,6 +20,7 @@ import Assistant from '../icons/Assistant'
 import Education from '../icons/Education'
 import {TERM_FORM_FIELDS} from './SegmentFooterTabGlossary/SegmentFooterTabGlossary'
 import {getEntitiesSelected} from './utils/DraftMatecatUtils/manageCaretPositionNearEntity'
+import {createICUDecorator} from './utils/DraftMatecatUtils/createICUDecorator'
 
 class SegmentSource extends React.Component {
   static contextType = SegmentContext
@@ -74,6 +75,7 @@ class SegmentSource extends React.Component {
         [DraftMatecatConstants.GLOSSARY_DECORATOR]: false,
         [DraftMatecatConstants.QA_GLOSSARY_DECORATOR]: false,
         [DraftMatecatConstants.SEARCH_DECORATOR]: false,
+        [DraftMatecatConstants.ICU_DECORATOR]: true,
       },
       isShowingOptionsToolbar: false,
     }
@@ -82,6 +84,8 @@ class SegmentSource extends React.Component {
       : 0
 
     this.delayAiAssistant
+
+    this.firstIcuCheck = false
   }
 
   getSearchParams = () => {
@@ -224,6 +228,16 @@ class SegmentSource extends React.Component {
       this.removeDecorator(DraftMatecatConstants.LEXIQA_DECORATOR)
     }
   }
+  addIcuDecorator = () => {
+    const {editorState} = this.state
+    const {decodedSegment} = DraftMatecatUtils.decodeSegment(editorState)
+    const newDecorator = createICUDecorator(decodedSegment)
+    remove(
+      this.decoratorsStructure,
+      (decorator) => decorator.name === DraftMatecatConstants.ICU_DECORATOR,
+    )
+    this.decoratorsStructure.push(newDecorator)
+  }
 
   updateSourceInStore = () => {
     if (this.state.source !== '') {
@@ -333,6 +347,11 @@ class SegmentSource extends React.Component {
         changedDecorator = true
         this.removeDecorator(DraftMatecatConstants.SEARCH_DECORATOR)
       }
+      if (!this.firstIcuCheck) {
+        this.firstIcuCheck = true
+        changedDecorator = true
+        this.addIcuDecorator()
+      }
     } else {
       //Search
       if (
@@ -353,9 +372,8 @@ class SegmentSource extends React.Component {
         this.removeDecorator()
         ;(activeDecorators[DraftMatecatConstants.LEXIQA_DECORATOR] = false),
           (activeDecorators[DraftMatecatConstants.GLOSSARY_DECORATOR] = false),
-          (activeDecorators[
-            DraftMatecatConstants.QA_GLOSSARY_DECORATOR
-          ] = false),
+          (activeDecorators[DraftMatecatConstants.QA_GLOSSARY_DECORATOR] =
+            false),
           this.addSearchDecorator()
         activeDecorators[DraftMatecatConstants.SEARCH_DECORATOR] = true
         changedDecorator = true

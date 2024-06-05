@@ -39,6 +39,7 @@ import {
   isSelectedEntity,
   getEntitiesSelected,
 } from './utils/DraftMatecatUtils/manageCaretPositionNearEntity'
+import {createICUDecorator} from './utils/DraftMatecatUtils/createICUDecorator'
 
 const {hasCommandModifier, isOptionKeyCommand, isCtrlKeyCommand} =
   KeyBindingUtil
@@ -65,7 +66,16 @@ class Editarea extends React.Component {
 
   constructor(props) {
     super(props)
-    const {onEntityClick, updateTagsInEditor, getUpdatedSegmentInfo} = this
+    const {onEntityClick, getUpdatedSegmentInfo} = this
+
+    const translation = this.props.translation
+
+    // If GuessTag is Enabled, clean translation from tags
+    const cleanTranslation = SegmentUtils.checkCurrentSegmentTPEnabled(
+      this.props.segment,
+    )
+      ? DraftMatecatUtils.removeTagsFromText(translation)
+      : translation
 
     this.decoratorsStructure = [
       {
@@ -83,16 +93,7 @@ class Editarea extends React.Component {
       },
     ]
     const decorator = new CompositeDecorator(this.decoratorsStructure)
-    //const decorator = new CompoundDecorator(this.decoratorsStructure);
-    // Escape html
-    const translation = this.props.translation
 
-    // If GuessTag is Enabled, clean translation from tags
-    const cleanTranslation = SegmentUtils.checkCurrentSegmentTPEnabled(
-      this.props.segment,
-    )
-      ? DraftMatecatUtils.removeTagsFromText(translation)
-      : translation
     // Inizializza Editor State con solo testo
     const plainEditorState = EditorState.createEmpty(decorator)
     const contentEncoded = DraftMatecatUtils.encodeContent(
@@ -121,6 +122,7 @@ class Editarea extends React.Component {
         [DraftMatecatConstants.LEXIQA_DECORATOR]: false,
         [DraftMatecatConstants.QA_BLACKLIST_DECORATOR]: false,
         [DraftMatecatConstants.SEARCH_DECORATOR]: false,
+        [DraftMatecatConstants.ICU_DECORATOR]: true,
       },
       previousSourceTagMap: null,
     }
@@ -136,9 +138,7 @@ class Editarea extends React.Component {
       this.updateTranslationInStore,
       100,
     )
-    this.updateTagsInEditorDebounced = debounce(updateTagsInEditor, 500)
     this.onCompositionStopDebounced = debounce(this.onCompositionStop, 1000)
-    this.focusEditorDebounced = debounce(this.focusEditor, 500)
   }
 
   getSearchParams = () => {
@@ -164,6 +164,17 @@ class Editarea extends React.Component {
         active: false,
       }
     }
+  }
+
+  addIcuDecorator = () => {
+    const {editorState} = this.state
+    const {decodedSegment} = DraftMatecatUtils.decodeSegment(editorState)
+    const newDecorator = createICUDecorator(decodedSegment)
+    remove(
+      this.decoratorsStructure,
+      (decorator) => decorator.name === DraftMatecatConstants.ICU_DECORATOR,
+    )
+    this.decoratorsStructure.push(newDecorator)
   }
 
   addSearchDecorator = () => {
@@ -343,7 +354,7 @@ class Editarea extends React.Component {
 
   checkDecorators = (prevProps) => {
     let changedDecorator = false
-    const {inSearch} = this.props.segment
+    const {inSearch, translation} = this.props.segment
     const {activeDecorators: prevActiveDecorators, editorState} = this.state
     const activeDecorators = {...prevActiveDecorators}
 
@@ -410,6 +421,10 @@ class Editarea extends React.Component {
         activeDecorators[DraftMatecatConstants.SEARCH_DECORATOR] = false
         changedDecorator = true
         this.removeDecorator(DraftMatecatConstants.SEARCH_DECORATOR)
+      }
+      if (prevProps.segment.translation !== translation) {
+        changedDecorator = true
+        this.addIcuDecorator()
       }
     } else {
       //Search
@@ -837,8 +852,8 @@ class Editarea extends React.Component {
             ? 'left'
             : 'right'
           : !isRTL
-          ? 'right'
-          : 'left'
+            ? 'right'
+            : 'left'
 
       const updatedStateNearZwsp = checkCaretIsNearZwsp({
         editorState: this.state.editorState,

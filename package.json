@@ -21,6 +21,7 @@
     "diff-match-patch": "^1.0.5",
     "draft-js": "^0.11.4",
     "flux": "^4.0.1",
+    "format-message-parse": "^6.2.4",
     "immutability-helper": "^3.1.1",
     "immutable": "^4.0.0-rc.12",
     "jquery": "^3.4.1",
@@ -35,11 +36,11 @@
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-hook-form": "^7.45.4",
+    "react-mentions": "^4.4.10",
     "react-tagsinput": "^3.19.0",
     "react-transition-group": "^4.2.2",
     "react-virtual": "^2.10.4",
-    "sprintf-js": "^1.1.2",
-    "react-mentions": "^4.4.10"
+    "sprintf-js": "^1.1.2"
   },
   "devDependencies": {
     "@babel/core": "7.24.5",
