@@ -10,12 +10,15 @@ import CommentsActions from '../../actions/CommentsActions'
 import CommentsConstants from '../../constants/CommentsConstants'
 import SegmentActions from '../../actions/SegmentActions'
 import {SegmentContext} from './SegmentContext'
+import {MentionsInput} from 'react-mentions'
+import Mention from '../common/Mention'
 
 class SegmentCommentsContainer extends React.Component {
   static contextType = SegmentContext
 
   constructor(props, context) {
     super(props)
+
     this.state = {
       comments: CommentsStore.getCommentsBySegment(
         context.segment.original_sid,
@@ -24,17 +27,17 @@ class SegmentCommentsContainer extends React.Component {
       teamUsers: CommentsStore.getTeamUsers(),
       sendCommentError: false,
       showTagging: false,
+      mentionsInputValue: '',
     }
     this.types = {sticky: 3, resolve: 2, comment: 1}
     this.updateComments = this.updateComments.bind(this)
     this.setFocusOnInput = this.setFocusOnInput.bind(this)
     this.setTeamUsers = this.setTeamUsers.bind(this)
     this.saveDraft = debounce(() => {
-      this.commentInput &&
-        CommentsActions.saveDraftComment(
-          this.context.segment.original_sid,
-          this.commentInput.textContent,
-        )
+      CommentsActions.saveDraftComment(
+        this.context.segment.original_sid,
+        this.state.mentionsInputValue,
+      )
     }, 500)
   }
 
@@ -45,9 +48,12 @@ class SegmentCommentsContainer extends React.Component {
   }
 
   sendComment() {
-    let text = $(this.commentInput).html()
-    if (this.commentInput.textContent.trim().length > 0) {
-      CommentsActions.sendComment(text, this.context.segment.original_sid)
+    const {mentionsMarkup} = this.state
+    if (mentionsMarkup.length > 0) {
+      CommentsActions.sendComment(
+        mentionsMarkup,
+        this.context.segment.original_sid,
+      )
         .catch(() => {
           this.setState({sendCommentError: true})
         })
@@ -55,7 +61,9 @@ class SegmentCommentsContainer extends React.Component {
           this.setState({sendCommentError: false})
           setTimeout(() => {
             if (this.commentInput) {
-              this.commentInput.textContent = ''
+              this.setState({
+                mentionsInputValue: '',
+              })
             }
           })
         })
@@ -91,6 +99,24 @@ class SegmentCommentsContainer extends React.Component {
   setTeamUsers(users) {
     this.setState({
       teamUsers: users,
+    })
+  }
+
+  handleChangeMentionsInputValue = (
+    event,
+    newValue,
+    newPlainTextValue,
+    mentions,
+  ) => {
+    const mentionsMarkup = mentions.reduce(
+      (acc, cur) =>
+        acc.replace(`{@${cur.id}||${cur.display}@}`, `{@${cur.id}@}`),
+      newValue,
+    )
+
+    this.setState({
+      mentionsInputValue: newValue,
+      mentionsMarkup,
     })
   }
 
@@ -145,7 +171,6 @@ class SegmentCommentsContainer extends React.Component {
         threadClass
       let comments = this.state.comments.slice()
       comments.forEach((comment, i) => {
-        let html = []
         if (comment.thread_id !== thread_id) {
           // start a new thread
           if (thread_wrap.length > 0) {
@@ -253,6 +278,12 @@ class SegmentCommentsContainer extends React.Component {
 
       htmlComments = commentsHtml
     }
+
+    const userMentionData = this.state.teamUsers.map((user) => ({
+      id: user.uid,
+      display: ` ${user.first_name} ${user.last_name} `,
+    }))
+
     let loggedUser = !!this.state.user
     // Se utente anonimo aggiungere mbc-comment-anonymous-label a mbc-comment-username
     htmlInsert = (
@@ -274,13 +305,29 @@ class SegmentCommentsContainer extends React.Component {
               Login to receive comments
             </a>
           ) : null}
-          <div
-            ref={(input) => (this.commentInput = input)}
+          <MentionsInput
+            inputRef={(input) => (this.commentInput = input)}
+            value={this.state.mentionsInputValue}
             onKeyDown={(e) => this.onKeyDown(e)}
+            onChange={this.handleChangeMentionsInputValue}
+            placeholder="Write a comment..."
             className="mbc-comment-input mbc-comment-textarea"
-            contentEditable={true}
-            data-placeholder="Write a comment..."
-          />
+          >
+            <Mention
+              type="user"
+              trigger="@"
+              data={userMentionData}
+              className="tagging-item-textarea"
+              markup="{@__id__||__display__@}"
+              displayTransform={function (id, display) {
+                return display || id
+              }}
+              onAdd={() => this.saveDraft()}
+              onRemove={() => null}
+              isLoading={false}
+              appendSpaceOnAdd={false}
+            />
+          </MentionsInput>
           <div>
             <a
               className="ui primary tiny button mbc-comment-btn mbc-comment-send-btn hide"
@@ -321,27 +368,6 @@ class SegmentCommentsContainer extends React.Component {
     )
   }
 
-  addTagging() {
-    let teamUsers = this.state.teamUsers
-    if (teamUsers && teamUsers.length > 0) {
-      $('.mbc-comment-textarea').atwho({
-        at: '@',
-        displayTpl: '<li class="tagging-item">${first_name} ${last_name}</li>',
-        insertTpl:
-          '<span contenteditable="false" class="tagging-item" data-id="${uid}">${first_name} ${last_name}</span>',
-        data: teamUsers,
-        searchKey: 'first_name',
-        limit: teamUsers.length,
-      })
-    }
-    $('.mbc-comment-textarea').on('shown.atwho', () => {
-      this.setState({showTagging: true})
-    })
-    $('.mbc-comment-textarea').on('hidden.atwho', () => {
-      setTimeout(() => this.setState({showTagging: false}), 200)
-    })
-  }
-
   scrollToBottom() {
     const scrollHeight = this.wrap.scrollHeight
     const height = this.wrap.clientHeight
@@ -369,9 +395,11 @@ class SegmentCommentsContainer extends React.Component {
 
   componentDidMount() {
     const draftText = CommentsStore.getDraftComment(this.context.segment.sid)
-    this.commentInput.textContent = draftText ? draftText : ''
+    if (draftText) {
+      this.setState({mentionsInputValue: draftText})
+    }
+
     this.updateComments(this.context.segment.sid)
-    this.addTagging()
     CommentsStore.addListener(
       CommentsConstants.ADD_COMMENT,
       this.updateComments,
