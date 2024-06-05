@@ -14,6 +14,8 @@ class XliffTranslationStatus {
     const NEEDS_REVIEW_L10N        = 'needs-review-l10n';
     const NEEDS_REVIEW_TRANSLATION = 'needs-review-translation';
     const SIGNED_OFF               = 'signed-off';
+    const LEVERAGED_INHERITED      = 'leveraged-inherited';
+    const LEVERAGED_TM             = 'leveraged-tm';
 
     // xliff 2.0 AND 1.2
     const NEW_STATE   = 'new';
@@ -31,8 +33,10 @@ class XliffTranslationStatus {
      */
     public static function isFuzzyMatch( $status ) {
         return in_array( $status, [
-                self::FUZZY_MATCH,
-                self::MT_SUGGESTION,
+            self::FUZZY_MATCH,
+            self::MT_SUGGESTION,
+            self::LEVERAGED_INHERITED,
+            self::LEVERAGED_TM,
         ] );
     }
 
@@ -43,11 +47,11 @@ class XliffTranslationStatus {
      */
     public static function isNew( $status ) {
         return in_array( $status, [
-                self::NEW_STATE,
-                self::INITIAL,
-                self::NEEDS_TRANSLATION,
-                self::NEEDS_L10N,
-                self::NEEDS_ADAPTATION,
+            self::NEW_STATE,
+            self::INITIAL,
+            self::NEEDS_TRANSLATION,
+            self::NEEDS_L10N,
+            self::NEEDS_ADAPTATION,
         ] );
     }
 
@@ -58,10 +62,10 @@ class XliffTranslationStatus {
      */
     public static function isTranslated( $status ) {
         return in_array( $status, [
-                self::TRANSLATED,
-                self::NEEDS_REVIEW_ADAPTATION,
-                self::NEEDS_REVIEW_L10N,
-                self::NEEDS_REVIEW_TRANSLATION,
+            self::TRANSLATED,
+            self::NEEDS_REVIEW_ADAPTATION,
+            self::NEEDS_REVIEW_L10N,
+            self::NEEDS_REVIEW_TRANSLATION,
         ] );
     }
 
@@ -81,8 +85,8 @@ class XliffTranslationStatus {
      */
     public static function isR1( $status ) {
         return in_array( $status, [
-                self::REVIEWED,
-                self::SIGNED_OFF,
+            self::REVIEWED,
+            self::SIGNED_OFF,
         ] );
     }
 
