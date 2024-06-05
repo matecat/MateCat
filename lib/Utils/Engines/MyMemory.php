@@ -541,17 +541,20 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     }
 
     /**
+     * @param $id_job
+     * @param $id_segment
      * @param $source
      * @param $sourceLanguage
      * @param $targetLanguage
      * @param $keys
-     *
      * @return array
      */
-    public function glossaryGet($source, $sourceLanguage, $targetLanguage, $keys)
+    public function glossaryGet($id_job, $id_segment, $source, $sourceLanguage, $targetLanguage, $keys)
     {
         $payload = [
             'de' => INIT::$MYMEMORY_API_KEY,
+            "id_job" => $id_job,
+            "id_segment" => $id_segment,
             "source" => $source,
             "source_language" => $sourceLanguage,
             "target_language" => $targetLanguage,
