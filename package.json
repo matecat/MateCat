@@ -35,11 +35,11 @@
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-hook-form": "^7.45.4",
+    "react-mentions": "^4.4.10",
     "react-tagsinput": "^3.19.0",
     "react-transition-group": "^4.2.2",
     "react-virtual": "^2.10.4",
-    "sprintf-js": "^1.1.2",
-    "react-mentions": "^4.4.10"
+    "sprintf-js": "^1.1.2"
   },
   "devDependencies": {
     "@babel/core": "7.24.5",
@@ -85,5 +85,5 @@
   "resolutions": {
     "wrap-ansi": "^7.0.0"
   },
-  "version": "2.21.37"
+  "version": "2.21.38"
 }
