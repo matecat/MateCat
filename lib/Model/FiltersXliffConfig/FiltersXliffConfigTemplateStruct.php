@@ -3,6 +3,7 @@
 namespace FiltersXliffConfig;
 
 use Date\DateTimeUtil;
+use DomainException;
 use Exception;
 use FiltersXliffConfig\Filters\DTO\Json;
 use FiltersXliffConfig\Filters\DTO\MSExcel;
@@ -13,8 +14,9 @@ use FiltersXliffConfig\Filters\DTO\Yaml;
 use FiltersXliffConfig\Filters\FiltersConfigModel;
 use FiltersXliffConfig\Xliff\DTO\Xliff12Rule;
 use FiltersXliffConfig\Xliff\DTO\Xliff20Rule;
-use FiltersXliffConfig\Xliff\XliffConfigModel;
+use FiltersXliffConfig\Xliff\DTO\XliffConfigModel;
 use JsonSerializable;
+use stdClass;
 
 class FiltersXliffConfigTemplateStruct implements JsonSerializable
 {
@@ -38,7 +40,7 @@ class FiltersXliffConfigTemplateStruct implements JsonSerializable
     /**
      * @param XliffConfigModel $xliff
      */
-    public function setXliff(XliffConfigModel $xliff): void
+    public function setXliff(XliffConfigModel $xliff)
     {
         $this->xliff = $xliff;
     }
@@ -62,7 +64,7 @@ class FiltersXliffConfigTemplateStruct implements JsonSerializable
     /**
      * @param FiltersConfigModel $filters
      */
-    public function setFilters(FiltersConfigModel $filters): void
+    public function setFilters(FiltersConfigModel $filters)
     {
         $this->filters = $filters;
     }
@@ -83,7 +85,7 @@ class FiltersXliffConfigTemplateStruct implements JsonSerializable
             !isset($json['filters']) and
             !isset($json['xliff'])
         ){
-            throw new Exception("Cannot instantiate a new FiltersXliffConfigTemplateStruct. Invalid data provided.", 403);
+            throw new DomainException("Cannot instantiate a new FiltersXliffConfigTemplateStruct. Invalid data provided.", 400);
         }
 
         $this->uid = $json['uid'];
@@ -175,7 +177,7 @@ class FiltersXliffConfigTemplateStruct implements JsonSerializable
 
     /**
      * @inheritDoc
-     * @throws \Exception
+     * @throws Exception
      */
     public function jsonSerialize()
     {
@@ -183,8 +185,8 @@ class FiltersXliffConfigTemplateStruct implements JsonSerializable
             'id' => (int)$this->id,
             'uid' => (int)$this->uid,
             'name' => $this->name,
-            'filters' => ($this->filters !== null) ? $this->filters : new \stdClass(),
-            'xliff' => ($this->xliff !== null) ? $this->xliff : new \stdClass(),
+            'filters' => ($this->filters !== null) ? $this->filters : new stdClass(),
+            'xliff' => ($this->xliff !== null) ? $this->xliff : new stdClass(),
             'createdAt' => DateTimeUtil::formatIsoDate($this->created_at),
             'modifiedAt' => DateTimeUtil::formatIsoDate($this->modified_at),
             'deletedAt' => DateTimeUtil::formatIsoDate($this->deleted_at),

@@ -1333,7 +1333,7 @@ class NewController extends ajaxController {
             $validator = new JSONValidator($schema);
             $validator->validate($validatorObject);
 
-            $this->filters_extraction_parameters = json_decode($json);
+            $this->xliff_parameters = json_decode($json);
         }
     }
 

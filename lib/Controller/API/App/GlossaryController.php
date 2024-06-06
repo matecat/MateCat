@@ -373,7 +373,7 @@ class GlossaryController extends KleinController {
 
         if(!$validator->isValid()){
 
-            $error = $validator->getErrors()[0]->error;
+            $error = $validator->getExceptions()[0]->error;
 
             $this->response->code(400);
             $this->response->json([

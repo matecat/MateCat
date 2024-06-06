@@ -2,9 +2,11 @@
 
 namespace Validator\Errors;
 
+use Exception;
+use JsonSerializable;
 use Swaggest\JsonSchema\Exception\Error;
 
-class JSONValidatorError extends \Exception implements \JsonSerializable
+class JSONValidatorException extends Exception implements JsonSerializable, JsonValidatorExceptionInterface
 {
     /**
      * @var Error
@@ -12,7 +14,7 @@ class JSONValidatorError extends \Exception implements \JsonSerializable
     private $error;
 
     /**
-     * JSONValidatorError constructor.
+     * JSONValidatorException constructor.
      *
      * @param Error $error
      */

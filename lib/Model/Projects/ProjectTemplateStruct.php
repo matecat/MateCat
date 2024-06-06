@@ -4,6 +4,7 @@ namespace Projects;
 
 use DataAccess_AbstractDaoSilentStruct;
 use DataAccess_IDaoStruct;
+use JsonSerializable;
 use PayableRates\CustomPayableRateDao;
 use PayableRates\CustomPayableRateStruct;
 use QAModelTemplate\QAModelTemplateDao;
@@ -11,7 +12,7 @@ use QAModelTemplate\QAModelTemplateStruct;
 use Teams\TeamDao;
 use Teams\TeamStruct;
 
-class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct, \JsonSerializable
+class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct, JsonSerializable
 {
     public $id;
     public $name;

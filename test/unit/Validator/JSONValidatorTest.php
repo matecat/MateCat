@@ -36,7 +36,7 @@ class JSONValidatorTest extends PHPUnit_Framework_TestCase {
         $validator = new \Validator\JSONValidator($jsonSchema);
         $validator->validate($validatorObject);
 
-        $error = $validator->getErrors()[0]->error;
+        $error = $validator->getExceptions()[0]->error;
 
         $this->assertFalse($validator->isValid());
         $this->assertEquals("JSON Validation Error: Too many items in array", $error->getMessage());

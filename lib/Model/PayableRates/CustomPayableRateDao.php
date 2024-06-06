@@ -256,7 +256,7 @@ class CustomPayableRateDao extends DataAccess_AbstractDao
         $validator->validate($validatorObject);
 
         if(!$validator->isValid()){
-            throw $validator->getErrors()[0]->error;
+            throw $validator->getExceptions()[0]->error;
         }
     }
 

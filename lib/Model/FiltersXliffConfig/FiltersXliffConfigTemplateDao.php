@@ -15,9 +15,12 @@ use FiltersXliffConfig\Filters\DTO\MSWord;
 use FiltersXliffConfig\Filters\DTO\Xml;
 use FiltersXliffConfig\Filters\DTO\Yaml;
 use FiltersXliffConfig\Filters\FiltersConfigModel;
-use FiltersXliffConfig\Xliff\XliffConfigModel;
+use FiltersXliffConfig\Xliff\DTO\XliffConfigModel;
 use PDO;
 use Projects\ProjectTemplateStruct;
+use Swaggest\JsonSchema\InvalidValue;
+use Validator\JSONValidator;
+use Validator\JSONValidatorObject;
 
 class FiltersXliffConfigTemplateDao extends DataAccess_AbstractDao
 {
@@ -122,19 +125,18 @@ class FiltersXliffConfigTemplateDao extends DataAccess_AbstractDao
 
     /**
      * @param $json
-     * @throws \Swaggest\JsonSchema\InvalidValue
-     * @throws \Exception
+     * @throws InvalidValue
+     * @throws Exception
      */
-    private static function validateJSON($json)
-    {
-        $validatorObject = new \Validator\JSONValidatorObject();
+    private static function validateJSON( $json ) {
+        $validatorObject       = new JSONValidatorObject();
         $validatorObject->json = $json;
-        $jsonSchema = file_get_contents( __DIR__ . '/../../../inc/validation/schema/filters_xliff_config_template.json' );
-        $validator = new \Validator\JSONValidator($jsonSchema);
-        $validator->validate($validatorObject);
+        $jsonSchema            = file_get_contents( __DIR__ . '/../../../inc/validation/schema/filters_xliff_config_template.json' );
+        $validator             = new JSONValidator( $jsonSchema );
+        $validator->validate( $validatorObject );
 
-        if(!$validator->isValid()){
-            throw $validator->getErrors()[0]->error;
+        if ( !$validator->isValid() ) {
+            throw $validator->getExceptions()[ 0 ]->error;
         }
     }
 
@@ -166,14 +168,14 @@ class FiltersXliffConfigTemplateDao extends DataAccess_AbstractDao
      */
     public static function getAllPaginated($uid, $current = 1, $pagination = 20)
     {
-        $conn = \Database::obtain()->getConnection();
+        $conn = Database::obtain()->getConnection();
 
         $stmt = $conn->prepare( "SELECT count(id) as count FROM ".self::TABLE." WHERE deleted_at IS NULL AND uid = :uid");
         $stmt->execute([
             'uid' => $uid
         ]);
 
-        $count = $stmt->fetch(\PDO::FETCH_ASSOC);
+        $count = $stmt->fetch(PDO::FETCH_ASSOC);
         $count = $count['count'];
         $count = $count + 1;
         $pages = ceil($count / $pagination);
@@ -184,7 +186,7 @@ class FiltersXliffConfigTemplateDao extends DataAccess_AbstractDao
         $models = [];
         $models[] = self::getDefaultTemplate($uid);
 
-        $stmt = $conn->prepare( "SELECT * FROM ".self::TABLE." WHERE deleted_at IS NULL AND uid = :uid ORDER BY id ASC LIMIT $pagination OFFSET $offset ");
+        $stmt = $conn->prepare( "SELECT * FROM ".self::TABLE." WHERE deleted_at IS NULL AND uid = :uid ORDER BY id LIMIT $pagination OFFSET $offset ");
         $stmt->setFetchMode(PDO::FETCH_ASSOC);
         $stmt->execute([
             'uid' => $uid
