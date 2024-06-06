@@ -6,6 +6,7 @@ export const confirmSplitRequest = async (
   project,
   numsplit,
   arrayValues,
+  splitRawWords,
 ) => {
   const params = flattenObject({
     exec: 'apply',
@@ -15,6 +16,7 @@ export const confirmSplitRequest = async (
     job_pass: job.password,
     num_split: numsplit,
     split_values: arrayValues,
+    split_raw_words: splitRawWords,
   })
   const formData = new FormData()
 

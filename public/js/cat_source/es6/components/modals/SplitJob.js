@@ -9,6 +9,7 @@ import {
   BUTTON_SIZE,
   BUTTON_TYPE,
 } from '../common/Button/Button'
+import Tooltip from '../common/Tooltip'
 
 const SplitJobModal = ({job, project, callback}) => {
   const [numSplit, setNumSplit] = useState(2)
@@ -19,46 +20,64 @@ const SplitJobModal = ({job, project, callback}) => {
   const [showError, setShowError] = useState(false)
   const [total, setTotal] = useState(0)
   const [errorMsg, setErrorMsg] = useState('')
+  const [splitRawWord, setSplitRawWords] = useState(false)
+  const [splitData, setSplitData] = useState()
 
   const splitSelectRef = useRef(null)
+  const tooltipRef = useRef()
 
   useEffect(() => {
     getSplitData()
   }, [])
 
-  const getSplitData = () => {
-    checkSplitRequest(job.toJS(), project.toJS(), numSplit, wordsArray)
-      .then((d) => {
-        let arrayChunks = []
-        if (d.data && d.data.chunks) {
-          let total
-          if (d.data.eq_word_count && Math.round(d.data.eq_word_count) !== 0) {
-            total = d.data.eq_word_count
-          } else {
-            total = d.data.raw_word_count
-          }
+  useEffect(() => {
+    checkSplitData()
+  }, [splitData, splitRawWord])
 
-          d.data.chunks.forEach((item, index) => {
-            if (typeof d.data.chunks[index] === 'undefined') {
-              arrayChunks[index] = 0
-            } else {
-              if (d.data.chunks[index].eq_word_count === 0) {
-                arrayChunks[index] = parseInt(
-                  d.data.chunks[index].raw_word_count,
-                )
-              } else {
-                arrayChunks[index] = parseInt(
-                  d.data.chunks[index].eq_word_count,
-                )
-              }
-            }
-          })
-          setWordsArray(arrayChunks)
-          setTotal(total)
-          setShowStartLoader(false)
-          setSplitChecked(true)
-          setShowLoader(false)
+  const checkSplitData = () => {
+    let arrayChunks = []
+    if (splitData && splitData.chunks) {
+      let total
+      if (!splitRawWord) {
+        total = splitData.eq_word_count
+      } else {
+        total = splitData.raw_word_count
+      }
+
+      splitData.chunks.forEach((item, index) => {
+        if (typeof splitData.chunks[index] === 'undefined') {
+          arrayChunks[index] = 0
+        } else {
+          if (splitRawWord) {
+            arrayChunks[index] = parseInt(
+              splitData.chunks[index].raw_word_count,
+            )
+          } else {
+            arrayChunks[index] = parseInt(splitData.chunks[index].eq_word_count)
+          }
         }
+      })
+      if (parseInt(splitData.eq_word_count) === 0) {
+        setSplitRawWords(true)
+      }
+      setWordsArray(arrayChunks)
+      setTotal(total)
+      setShowStartLoader(false)
+      setSplitChecked(true)
+      setShowLoader(false)
+    }
+  }
+
+  const getSplitData = () => {
+    checkSplitRequest(
+      job.toJS(),
+      project.toJS(),
+      numSplit,
+      wordsArray,
+      splitRawWord,
+    )
+      .then(({data}) => {
+        setSplitData(data)
       })
       .catch((errors) => {
         if (errors !== 'undefined' && errors.length) {
@@ -131,29 +150,15 @@ const SplitJobModal = ({job, project, callback}) => {
 
   const checkSplitJob = () => {
     setShowLoader(true)
-    checkSplitRequest(job.toJS(), project.toJS(), numSplit, wordsArray)
-      .then((d) => {
-        let arrayChunks = []
-        if (d.data && d.data.chunks) {
-          d.data.chunks.forEach((item, index) => {
-            if (typeof d.data.chunks[index] === 'undefined') {
-              arrayChunks[index] = 0
-            } else {
-              if (d.data.chunks[index].eq_word_count === 0) {
-                arrayChunks[index] = parseInt(
-                  d.data.chunks[index].raw_word_count,
-                )
-              } else {
-                arrayChunks[index] = parseInt(
-                  d.data.chunks[index].eq_word_count,
-                )
-              }
-            }
-          })
-        }
-        setWordsArray(arrayChunks)
-        setSplitChecked(true)
-        setShowLoader(false)
+    checkSplitRequest(
+      job.toJS(),
+      project.toJS(),
+      numSplit,
+      wordsArray,
+      splitRawWord,
+    )
+      .then(({data}) => {
+        setSplitData(data)
       })
       .catch((errors) => {
         if (typeof errors !== 'undefined' && errors.length) {
@@ -169,7 +174,13 @@ const SplitJobModal = ({job, project, callback}) => {
     setShowLoader(true)
     let array = wordsArray.filter((item) => item > 0)
 
-    confirmSplitRequest(job.toJS(), project.toJS(), array.length, array)
+    confirmSplitRequest(
+      job.toJS(),
+      project.toJS(),
+      array.length,
+      array,
+      splitRawWord,
+    )
       .then((d) => {
         if (d.data && d.data.chunks) {
           callback()
@@ -253,7 +264,26 @@ const SplitJobModal = ({job, project, callback}) => {
           <div>
             <div className="split-checkbox">
               <span>Split based on raw word count</span>
-              <input type="checkbox" />
+              {splitData && parseInt(splitData.eq_word_count) !== 0 ? (
+                <input
+                  type="checkbox"
+                  checked={splitRawWord}
+                  onChange={(e) => setSplitRawWords(e.target.checked)}
+                />
+              ) : (
+                <Tooltip
+                  content={
+                    'The weighted word count for this job is 0, splitting is only available based on raw word count.'
+                  }
+                >
+                  <input
+                    ref={tooltipRef}
+                    type="checkbox"
+                    checked="false"
+                    disabled="true"
+                  />
+                </Tooltip>
+              )}
             </div>
             <div className="container-split-select">
               <div className="label left">Split job in:</div>
