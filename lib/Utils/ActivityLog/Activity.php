@@ -26,7 +26,6 @@ class Activity {
             $output .= "{$e->getMessage()}";
             $output .= var_export( $activityLog, true );
             Log::doJsonLog( $output );
-            Utils::sendErrMailReport( $output );
 
         }
     }

@@ -225,7 +225,7 @@ class QualityReportSegmentModel {
             if ( null === $seg->last_translation and $seg->status === \Constants_TranslationStatus::STATUS_APPROVED ) {
 
                 $first_version = ( new TranslationVersionDao() )->getVersionNumberForTranslation( $this->chunk->id, $seg->sid, 0 );
-                $translation   = ( $first_version ) ? $first_version->translation : $seg->translation;
+                $translation   = ( $first_version ) ? $first_version->translation : null;
 
                 if ( $isForUI ) {
                     $seg->last_translation = $Filter->fromLayer0ToLayer2( $translation );
@@ -283,8 +283,7 @@ class QualityReportSegmentModel {
         return (
                 $qrSegmentStruct->locked == 1 &&
                 $qrSegmentStruct->status === Constants_TranslationStatus::STATUS_APPROVED &&
-                $qrSegmentStruct->match_type === 'ICE' &&
-                $qrSegmentStruct->source_page == null
+                $qrSegmentStruct->match_type === 'ICE'
         );
     }
 

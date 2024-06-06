@@ -159,8 +159,8 @@ class JobContainer extends React.Component {
       ManageActions.changeJobPassword(
         self.props.project,
         self.props.job,
-        data.password,
-        data.undo,
+        data.new_pwd,
+        data.old_pwd,
         revision_number,
       )
       setTimeout(function () {
@@ -169,7 +169,7 @@ class JobContainer extends React.Component {
           CatToolActions.removeNotification(notification)
           changeJobPassword(
             self.props.job.toJS(),
-            data.password,
+            data.new_pwd,
             revision_number,
             1,
             self.oldPassword,
@@ -185,8 +185,8 @@ class JobContainer extends React.Component {
             ManageActions.changeJobPassword(
               self.props.project,
               self.props.job,
-              data.password,
-              data.undo,
+              data.new_pwd,
+              data.old_pwd,
               revision_number,
               translator,
             )
@@ -215,8 +215,8 @@ class JobContainer extends React.Component {
         ManageActions.changeJobPassword(
           self.props.project,
           self.props.job,
-          data.password,
-          data.undo,
+          data.new_pwd,
+          data.old_pwd,
           null,
         )
         setTimeout(function () {
@@ -225,7 +225,7 @@ class JobContainer extends React.Component {
             CatToolActions.removeNotification(notification)
             changeJobPassword(
               self.props.job.toJS(),
-              data.password,
+              data.new_pwd,
               null,
               1,
               self.oldPassword,
@@ -242,8 +242,8 @@ class JobContainer extends React.Component {
               ManageActions.changeJobPassword(
                 self.props.project,
                 self.props.job,
-                data.password,
-                data.undo,
+                data.new_pwd,
+                data.old_pwd,
                 null,
                 translator,
               )

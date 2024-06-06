@@ -159,7 +159,7 @@ class getSegmentsController extends ajaxController {
     }
 
     private function attachNotes( &$segment ) {
-        $segment[ 'notes' ] = @$this->segment_notes[ (int)$segment[ 'sid' ] ];
+        $segment[ 'notes' ] = isset( $this->segment_notes[ (int)$segment[ 'sid' ] ] ) ? $this->segment_notes[ (int)$segment[ 'sid' ] ] : null;
     }
 
     private function prepareNotes( $segments ) {
@@ -192,7 +192,7 @@ class getSegmentsController extends ajaxController {
     }
 
     private function attachContexts( &$segment, $contexts ) {
-        $segment[ 'context_groups' ] = @$contexts[ (int)$segment[ 'sid' ] ];
+        $segment[ 'context_groups' ] = isset( $contexts[ (int)$segment[ 'sid' ] ] ) ? $contexts[ (int)$segment[ 'sid' ] ] : null;
     }
 
 
