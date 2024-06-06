@@ -66,20 +66,6 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
     }
 
     /**
-     * @param XliffRuleInterface[] $existentStates
-     *
-     * @return void
-     */
-    public function validateDuplicatedStates( array $existentStates ) {
-        foreach ( $existentStates as $existentRule ) {
-            $stateIntersect = array_intersect( $existentRule->getStates(), $this->getStates() );
-            if ( !empty( $stateIntersect ) ) {
-                throw new DomainException( "Duplicated states: " . implode( ", ", $stateIntersect ), 400 );
-            }
-        }
-    }
-
-    /**
      * @param array $states
      */
     protected function setStates( array $states ) {
