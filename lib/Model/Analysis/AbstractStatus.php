@@ -172,6 +172,7 @@ abstract class AbstractStatus {
         $target       = null;
         $this->result = $project = new AnalysisProject(
                 $this->_project_data[ 0 ][ 'pname' ],
+                $this->_project_data[ 0 ][ 'status_analysis' ],
                 $this->_project_data[ 0 ][ 'create_date' ],
                 $this->subject,
                 new AnalysisProjectSummary(

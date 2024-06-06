@@ -176,6 +176,14 @@ class AnalysisJob implements JsonSerializable {
     }
 
     /**
+     * @return string
+     */
+    public function getLangPair()
+    {
+        return $this->source."|".$this->target;
+    }
+
+    /**
      * @param bool $outsourceAvailable
      *
      * @return $this
@@ -200,5 +208,4 @@ class AnalysisJob implements JsonSerializable {
     private function getCountUnit( $languageCode ) {
         return array_key_exists( explode( "-", $languageCode )[ 0 ], CatUtils::$cjk ) ? 'characters' : 'words';
     }
-
 }
