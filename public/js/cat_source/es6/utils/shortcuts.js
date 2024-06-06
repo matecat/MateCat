@@ -26,7 +26,7 @@ export const Shortcuts = {
         equivalent: '',
         keystrokes: {
           standard: 'ctrl+bracketLeft',
-          mac: 'meta+bracketLeft',
+          mac: 'ctrl+bracketLeft',
         },
       },
       singleQuoteClose: {
@@ -34,7 +34,7 @@ export const Shortcuts = {
         equivalent: '',
         keystrokes: {
           standard: 'ctrl+bracketRight',
-          mac: 'meta+bracketRight',
+          mac: 'ctrl+bracketRight',
         },
       },
       doubleQuoteOpen: {
@@ -42,7 +42,7 @@ export const Shortcuts = {
         equivalent: '',
         keystrokes: {
           standard: 'ctrl+shift+bracketLeft',
-          mac: 'meta+shift+bracketLeft',
+          mac: 'ctrl+shift+bracketLeft',
         },
       },
       doubleQuoteClose: {
@@ -50,7 +50,7 @@ export const Shortcuts = {
         equivalent: '',
         keystrokes: {
           standard: 'ctrl+shift+bracketRight',
-          mac: 'meta+shift+bracketRight',
+          mac: 'ctrl+shift+bracketRight',
         },
       },
     },
