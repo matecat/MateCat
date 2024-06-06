@@ -58,6 +58,7 @@
     :first-child {
       height: 60px;
       border-bottom: 1px solid $grey3;
+      font-weight: bold;
     }
     > div {
       height: 32px;
@@ -79,6 +80,7 @@
     font-size: 16px;
     :first-child {
       height: 60px;
+      font-weight: normal;
     }
     > div {
       height: 32px;
@@ -108,6 +110,7 @@
     padding-top: 16px;
     background-color: $white;
     position: relative;
+    font-size: 16px;
     .chunk-analyze-info-background {
       position: absolute;
       width: 86%;
@@ -154,6 +157,7 @@
         justify-content: space-between;
         display: flex;
         padding: 2px 8px;
+        font-size: 16px;
       }
     }
     .chunk-analyze-info-total {
@@ -178,7 +182,7 @@
         line-height: 24px;
       }
       :first-child {
-        font-size: 16px;
+        font-size: 14px;
         color: $grey;
       }
     }
