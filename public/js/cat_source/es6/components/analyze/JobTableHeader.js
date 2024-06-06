@@ -5,7 +5,7 @@ const JobTableHeader = ({rates}) => {
     <div className="job-table-header">
       <div className="job-table-header-title">
         <div>Analysis bucket</div>
-        <div>Payable rates</div>
+        <div>Payable rate</div>
       </div>
       <div>
         <div>New</div>

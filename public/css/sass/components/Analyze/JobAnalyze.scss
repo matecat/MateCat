@@ -8,6 +8,7 @@
   align-items: center;
   width: 100%;
   justify-content: space-between;
+  font-size: 16px;
   .job-analyze-header_left {
     display: flex;
     align-items: center;
@@ -53,6 +54,7 @@
     height: 100%;
     text-align: right;
     border-left: 1px solid $grey3;
+    min-width: 66px;
     :first-child {
       height: 60px;
       border-bottom: 1px solid $grey3;
@@ -67,7 +69,6 @@
     }
   }
   .job-table-header-title {
-    width: 150px;
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -75,6 +76,7 @@
     color: $grey;
     background-color: $grey5;
     padding-right: 6px;
+    font-size: 16px;
     :first-child {
       height: 60px;
     }
@@ -87,7 +89,7 @@
     display: flex;
     justify-content: flex-end;
     font-weight: 700;
-    font-size: 16px;
+    font-size: 20px;
     text-align: center;
     > div {
       justify-content: center;
@@ -130,6 +132,7 @@
       .chunk-analyze-info-index {
         color: $black !important;
         font-weight: 700;
+        font-size: 14px;
       }
       .chunk-analyze-info-files {
         color: $black !important;
@@ -142,7 +145,7 @@
 
       :first-child {
         color: $grey;
-        font-size: 12px;
+        font-size: 14px;
       }
       > div {
         height: 24px;
@@ -175,7 +178,7 @@
         line-height: 24px;
       }
       :first-child {
-        font-size: 12px;
+        font-size: 16px;
         color: $grey;
       }
     }
