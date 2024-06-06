@@ -142,6 +142,8 @@ function SegmentsContainer({
   useHotkeys(
     Shortcuts.cattol.events.openComments.keystrokes[Shortcuts.shortCutsKeyType],
     (e) => {
+      e.stopPropagation()
+      e.preventDefault()
       const current = SegmentStore.getCurrentSegmentId()
       if (current) SegmentActions.openSegmentComment(current)
     },
