@@ -39,7 +39,11 @@ import {
   isSelectedEntity,
   getEntitiesSelected,
 } from './utils/DraftMatecatUtils/manageCaretPositionNearEntity'
-import {createICUDecorator} from './utils/DraftMatecatUtils/createICUDecorator'
+import {
+  createICUDecorator,
+  createIcuTokens,
+  isEqualICUTokens,
+} from './utils/DraftMatecatUtils/createICUDecorator'
 
 const {hasCommandModifier, isOptionKeyCommand, isCtrlKeyCommand} =
   KeyBindingUtil
@@ -169,7 +173,7 @@ class Editarea extends React.Component {
   addIcuDecorator = () => {
     const {editorState} = this.state
     const {decodedSegment} = DraftMatecatUtils.decodeSegment(editorState)
-    const newDecorator = createICUDecorator(decodedSegment)
+    const newDecorator = createICUDecorator(decodedSegment, editorState)
     remove(
       this.decoratorsStructure,
       (decorator) => decorator.name === DraftMatecatConstants.ICU_DECORATOR,
@@ -422,7 +426,13 @@ class Editarea extends React.Component {
         changedDecorator = true
         this.removeDecorator(DraftMatecatConstants.SEARCH_DECORATOR)
       }
-      if (prevProps.segment.translation !== translation) {
+      const icuTokens = createIcuTokens(translation, editorState)
+      if (
+        !prevProps ||
+        !this.prevIcuTokens ||
+        !isEqualICUTokens(icuTokens, this.prevIcuTokens)
+      ) {
+        this.prevIcuTokens = icuTokens
         changedDecorator = true
         this.addIcuDecorator()
       }

@@ -231,7 +231,7 @@ class SegmentSource extends React.Component {
   addIcuDecorator = () => {
     const {editorState} = this.state
     const {decodedSegment} = DraftMatecatUtils.decodeSegment(editorState)
-    const newDecorator = createICUDecorator(decodedSegment)
+    const newDecorator = createICUDecorator(decodedSegment, editorState)
     remove(
       this.decoratorsStructure,
       (decorator) => decorator.name === DraftMatecatConstants.ICU_DECORATOR,

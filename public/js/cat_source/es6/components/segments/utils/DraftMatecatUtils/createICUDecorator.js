@@ -1,19 +1,23 @@
 import * as DraftMatecatConstants from './editorConstants'
 import parse from 'format-message-parse'
 import {IcuHighlight} from '../../IcuHighlight'
-export const createICUDecorator = (text = '', sid) => {
-  const tokens = []
-  try {
-    parse(text, {tokens: tokens})
-  } catch (e) {}
-  const tokensWithIndex = parseIcuTokens(tokens)
+import {isEqual} from 'lodash'
+import updateLexiqaWarnings from './updateLexiqaWarnings'
+export const createICUDecorator = (text = '', editorState) => {
+  let tokensWithIndex = []
+  tokensWithIndex = createIcuTokens(text, editorState)
 
   return {
     name: DraftMatecatConstants.ICU_DECORATOR,
     strategy: (contentBlock, callback) => {
       const currentText = contentBlock.getText()
       tokensWithIndex.forEach((token) => {
-        if (token.end <= currentText.length && token.type !== 'text') {
+        const subString = currentText.substring(token.start, token.end)
+        if (
+          token.end <= currentText.length &&
+          token.type !== 'text' &&
+          subString === token.text
+        ) {
           callback(token.start, token.end)
         }
       })
@@ -21,14 +25,19 @@ export const createICUDecorator = (text = '', sid) => {
     component: IcuHighlight,
     props: {
       text,
-      sid,
     },
   }
 }
 
-const parseIcuTokens = (tokens) => {
+export const createIcuTokens = (text, editorState) => {
+  const tokens = []
+  try {
+    parse(text, {tokens: tokens})
+  } catch (e) {
+    console.log(e)
+  }
   let index = 0
-  return tokens.map((token) => {
+  const updatedTokens = tokens.map((token) => {
     const value = {
       type: token[0],
       text: token[1],
@@ -38,4 +47,13 @@ const parseIcuTokens = (tokens) => {
     index = index + token[1].length
     return value
   })
+  return updateLexiqaWarnings(editorState, updatedTokens)
+}
+
+export const isEqualICUTokens = (tokens, otherTokens) => {
+  const filterTokensFn = (token) => token.type !== 'text'
+  return isEqual(
+    tokens.filter(filterTokensFn),
+    otherTokens.filter(filterTokensFn),
+  )
 }
