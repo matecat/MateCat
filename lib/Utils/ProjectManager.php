@@ -20,6 +20,8 @@ use Files\MetadataDao;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use FilesStorage\S3FilesStorage;
+use FiltersXliffConfig\Xliff\DTO\AbstractXliffRule;
+use FiltersXliffConfig\Xliff\DTO\XliffConfigModel;
 use Jobs\SplitQueue;
 use LQA\QA;
 use Matecat\SubFiltering\MateCatFilter;
@@ -124,76 +126,76 @@ class ProjectManager {
 
         if ( $projectStructure == null ) {
             $projectStructure = new RecursiveArrayObject(
-                [
-                    'HTTP_HOST'                     => null,
-                    'id_project'                    => null,
-                    'create_date'                   => date( "Y-m-d H:i:s" ),
-                    'id_customer'                   => self::TRANSLATED_USER,
-                    'project_features'              => [],
-                    'user_ip'                       => null,
-                    'project_name'                  => null,
-                    'result'                        => [ "errors" => [], "data" => [] ],
-                    'private_tm_key'                => 0,
-                    'uploadToken'                   => null,
-                    'array_files'                   => [], //list of file names
-                    'array_files_meta'              => [], //list of file metadata
-                    'file_id_list'                  => [],
-                    'source_language'               => null,
-                    'target_language'               => null,
-                    'job_subject'                   => 'general',
-                    'mt_engine'                     => null,
-                    'tms_engine'                    => null,
-                    'ppassword'                     => null,
-                    'array_jobs'                    => [
-                        'job_list'      => [],
-                        'job_pass'      => [],
-                        'job_segments'  => [],
-                        'job_languages' => [],
-                        'payable_rates' => [],
-                    ],
-                    'job_segments'                  => [], //array of job_id => [  min_seg, max_seg  ]
-                    'segments'                      => [], //array of files_id => segments[  ]
-                    'segments-original-data'        => [], //array of files_id => segments-original-data[  ]
-                    'segments_metadata'             => [], //array of segments_metadata
-                    'segments-meta-data'            => [], //array of files_id => segments-meta-data[  ]
-                    'file-part-id'                  => [], //array of files_id => segments-meta-data[  ]
-                    'file-metadata'                 => [], //array of files metadata
-                    'translations'                  => [],
-                    'notes'                         => [],
-                    'context-group'                 => [],
-                    //one translation for every file because translations are files related
-                    'status'                        => Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS,
-                    'job_to_split'                  => null,
-                    'job_to_split_pass'             => null,
-                    'split_result'                  => null,
-                    'job_to_merge'                  => null,
-                    'lang_detect_files'             => [],
-                    'tm_keys'                       => [],
-                    'userIsLogged'                  => false,
-                    'uid'                           => null,
-                    'skip_lang_validation'          => false,
-                    'pretranslate_100'              => 0,
-                    'pretranslate_101'             => 1,
-                    'only_private'                  => 0,
-                    'owner'                         => '',
-                    Projects_MetadataDao::WORD_COUNT_TYPE_KEY => Projects_MetadataDao::WORD_COUNT_RAW,
-                    'metadata'                      => [],
-                    'id_assignee'                   => null,
-                    'session'                       => ( isset( $_SESSION ) ? $_SESSION : false ),
-                    'instance_id'                   => ( !is_null( INIT::$INSTANCE_ID ) ? INIT::$INSTANCE_ID : 0 ),
-                    'id_team'                       => null,
-                    'team'                          => null,
-                    'sanitize_project_options'      => true,
-                    'file_segments_count'           => [],
-                    'due_date'                      => null,
-                    'qa_model'                      => null,
-                    'target_language_mt_engine_id'  => [],
-                    'standard_word_count'           => 0,
-                    'mmt_glossaries'                => null,
-                    'deepl_formality'               => null,
-                    'deepl_id_glossary'             => null,
-                    'filters_extraction_parameters' => null,
-                    'xliff_parameters'              => null, // todo ArrayObject idratare XliffConfigModel
+                    [
+                            'HTTP_HOST'                               => null,
+                            'id_project'                              => null,
+                            'create_date'                             => date( "Y-m-d H:i:s" ),
+                            'id_customer'                             => self::TRANSLATED_USER,
+                            'project_features'                        => [],
+                            'user_ip'                                 => null,
+                            'project_name'                            => null,
+                            'result'                                  => [ "errors" => [], "data" => [] ],
+                            'private_tm_key'                          => 0,
+                            'uploadToken'                             => null,
+                            'array_files'                             => [], //list of file names
+                            'array_files_meta'                        => [], //list of file metadata
+                            'file_id_list'                            => [],
+                            'source_language'                         => null,
+                            'target_language'                         => null,
+                            'job_subject'                             => 'general',
+                            'mt_engine'                               => null,
+                            'tms_engine'                              => null,
+                            'ppassword'                               => null,
+                            'array_jobs'                              => [
+                                    'job_list'      => [],
+                                    'job_pass'      => [],
+                                    'job_segments'  => [],
+                                    'job_languages' => [],
+                                    'payable_rates' => [],
+                            ],
+                            'job_segments'                            => [], //array of job_id => [  min_seg, max_seg  ]
+                            'segments'                                => [], //array of files_id => segments[  ]
+                            'segments-original-data'                  => [], //array of files_id => segments-original-data[  ]
+                            'segments_metadata'                       => [], //array of segments_metadata
+                            'segments-meta-data'                      => [], //array of files_id => segments-meta-data[  ]
+                            'file-part-id'                            => [], //array of files_id => segments-meta-data[  ]
+                            'file-metadata'                           => [], //array of files metadata
+                            'translations'                            => [],
+                            'notes'                                   => [],
+                            'context-group'                           => [],
+                        //one translation for every file because translations are files related
+                            'status'                                  => Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS,
+                            'job_to_split'                            => null,
+                            'job_to_split_pass'                       => null,
+                            'split_result'                            => null,
+                            'job_to_merge'                            => null,
+                            'lang_detect_files'                       => [],
+                            'tm_keys'                                 => [],
+                            'userIsLogged'                            => false,
+                            'uid'                                     => null,
+                            'skip_lang_validation'                    => false,
+                            'pretranslate_100'                        => 0,
+                            'pretranslate_101'                        => 1,
+                            'only_private'                            => 0,
+                            'owner'                                   => '',
+                            Projects_MetadataDao::WORD_COUNT_TYPE_KEY => Projects_MetadataDao::WORD_COUNT_RAW,
+                            'metadata'                                => [],
+                            'id_assignee'                             => null,
+                            'session'                                 => ( isset( $_SESSION ) ? $_SESSION : false ),
+                            'instance_id'                             => ( !is_null( INIT::$INSTANCE_ID ) ? INIT::$INSTANCE_ID : 0 ),
+                            'id_team'                                 => null,
+                            'team'                                    => null,
+                            'sanitize_project_options'                => true,
+                            'file_segments_count'                     => [],
+                            'due_date'                                => null,
+                            'qa_model'                                => null,
+                            'target_language_mt_engine_id'            => [],
+                            'standard_word_count'                     => 0,
+                            'mmt_glossaries'                          => null,
+                            'deepl_formality'                         => null,
+                            'deepl_id_glossary'                       => null,
+                            'filters_extraction_parameters'           => null,
+                            'xliff_parameters'                        => new RecursiveArrayObject()
                     ] );
 
         }
@@ -232,6 +234,8 @@ class ProjectManager {
         }
 
         $this->projectStructure[ 'array_files_meta' ] = $array_files_meta;
+
+        $this->projectStructure[ 'xliff_parameters' ] = XliffConfigModel::fromArrayObject( $this->projectStructure[ 'xliff_parameters' ] );
 
         $this->metadataDao = new MetadataDao();
     }
@@ -377,8 +381,8 @@ class ProjectManager {
         }
 
         // pretranslate_101
-        if(isset($this->projectStructure['pretranslate_101'])){
-            $options['pretranslate_101'] = $this->projectStructure['pretranslate_101'];
+        if ( isset( $this->projectStructure[ 'pretranslate_101' ] ) ) {
+            $options[ 'pretranslate_101' ] = $this->projectStructure[ 'pretranslate_101' ];
         }
         /**
          * Here we have the opportunity to add other features as dependencies of the ones
@@ -386,8 +390,8 @@ class ProjectManager {
          */
         $this->features->loadProjectDependenciesFromProjectMetadata( $options );
 
-        if(isset($this->projectStructure['filters_extraction_parameters']) and $this->projectStructure[ 'filters_extraction_parameters' ] ){
-            $options['filters_extraction_parameters'] = json_encode($this->projectStructure['filters_extraction_parameters']);
+        if ( isset( $this->projectStructure[ 'filters_extraction_parameters' ] ) and $this->projectStructure[ 'filters_extraction_parameters' ] ) {
+            $options[ 'filters_extraction_parameters' ] = json_encode( $this->projectStructure[ 'filters_extraction_parameters' ] );
         }
 
         if ( $this->projectStructure[ 'sanitize_project_options' ] ) {
@@ -1969,8 +1973,8 @@ class ProjectManager {
                                     if ( $this->features->filter( 'populatePreTranslations', true ) ) {
 
                                         // could not have attributes, suppress warning
-                                        $state                   = @$xliff_trans_unit[ 'seg-target' ][ $position ][ 'attr' ][ 'state' ];
-                                        $stateQualifier          = @$xliff_trans_unit[ 'seg-target' ][ $position ][ 'attr' ][ 'state-qualifier' ];
+                                        $state                   = isset( $xliff_trans_unit[ 'seg-target' ][ $position ][ 'attr' ][ 'state' ] ) ? $xliff_trans_unit[ 'seg-target' ][ $position ][ 'attr' ][ 'state' ] : null;
+                                        $stateQualifier          = isset( $xliff_trans_unit[ 'seg-target' ][ $position ][ 'attr' ][ 'state-qualifier' ] ) ? $xliff_trans_unit[ 'seg-target' ][ $position ][ 'attr' ][ 'state-qualifier' ] : null;
                                         $target_extract_external = $this->_strip_external( $xliff_trans_unit[ 'seg-target' ][ $position ][ 'raw-content' ], $xliffInfo );
 
                                         //
@@ -1991,7 +1995,7 @@ class ProjectManager {
                                         $src = CatUtils::trimAndStripFromAnHtmlEntityDecoded( $extract_external[ 'seg' ] );
                                         $trg = CatUtils::trimAndStripFromAnHtmlEntityDecoded( $target_extract_external[ 'seg' ] );
 
-                                        if ( $this->__isTranslated( $src, $trg, $xliff_trans_unit, $state, $stateQualifier ) && !is_numeric( $src ) && !empty( $trg ) ) { //treat 0,1,2... as translated content!
+                                        if ( $this->__isTranslated( $src, $trg, $xliff_trans_unit, $xliffInfo, $state, $stateQualifier ) && !is_numeric( $src ) && !empty( $trg ) ) { //treat 0,1,2... as translated content!
 
                                             $target = $this->filter->fromRawXliffToLayer0( $target_extract_external[ 'seg' ] );
 
@@ -2125,7 +2129,7 @@ class ProjectManager {
                                 $stateQualifier          = ( isset( $xliff_trans_unit[ 'target' ][ 'attr' ][ 'state-qualifier' ] ) ) ? $xliff_trans_unit[ 'target' ][ 'attr' ][ 'state-qualifier' ] : null;
                                 $target_extract_external = $this->_strip_external( $xliff_trans_unit[ 'target' ][ 'raw-content' ], $xliffInfo );
 
-                                if ( $this->__isTranslated( $xliff_trans_unit[ 'source' ][ 'raw-content' ], $target_extract_external[ 'seg' ], $xliff_trans_unit, $state, $stateQualifier ) && !is_numeric( $xliff_trans_unit[ 'source' ][ 'raw-content' ] ) && !empty( $target_extract_external[ 'seg' ] ) ) {
+                                if ( $this->__isTranslated( $xliff_trans_unit[ 'source' ][ 'raw-content' ], $target_extract_external[ 'seg' ], $xliff_trans_unit, $xliffInfo, $state, $stateQualifier ) && !is_numeric( $xliff_trans_unit[ 'source' ][ 'raw-content' ] ) && !empty( $target_extract_external[ 'seg' ] ) ) {
 
                                     $target = $this->filter->fromRawXliffToLayer0( $target_extract_external[ 'seg' ] );
 
@@ -2155,9 +2159,6 @@ class ProjectManager {
                         } catch ( Exception $exception ) {
                             throw new Exception( $exception->getMessage(), -1 );
                         }
-
-                        $segmentHash = md5( $xliff_trans_unit[ 'source' ][ 'raw-content' ] );
-
 
                         //
                         // -------------------------------------
@@ -3407,30 +3408,55 @@ class ProjectManager {
      *
      * If they  are identical, let plugins decide how to treat the case.
      *
-     * @param $source
-     * @param $target
-     * @param $xliff_trans_unit
-     * @param $state
-     * @param $stateQualifier
+     * @param string      $source
+     * @param string      $target
+     * @param array       $xliff_trans_unit
+     * @param array       $xliffInfo
+     * @param string|null $state
+     * @param string|null $stateQualifier
      *
      * @return bool|mixed
-     * @throws NotFoundException
      * @throws AuthenticationError
-     * @throws ValidationError
      * @throws EndQueueException
+     * @throws NotFoundException
      * @throws ReQueueException
+     * @throws ValidationError
      */
-    private function __isTranslated( $source, $target, $xliff_trans_unit, $state = null, $stateQualifier = null ) {
+    private function __isTranslated( $source, $target, array $xliff_trans_unit, array $xliffInfo, $state = null, $stateQualifier = null ) {
 
-        // ignore translations for fuzzy matches (xliff 1.2)
-        if ( $stateQualifier !== null ) {
-            if ( XliffTranslationStatus::isFuzzyMatch( $stateQualifier ) ) {
-                return true;
+        /**
+         * @var $configModel XliffConfigModel
+         */
+        $configModel = $this->projectStructure[ 'xliff_parameters' ];
+        $rules       = $configModel->getRulesForVersion( $xliffInfo[ 'version' ] );
+
+        foreach ( $rules as $rule ) {
+
+            if ( $stateQualifier !== null && in_array( strtolower( $stateQualifier ), $rule->getStates( 'states-qualifier' ) ) ) {
+
+                if ( $rule->getAnalysis() == AbstractXliffRule::_NEW ) {
+                    return false;
+                } elseif ( $rule->getAnalysis() == AbstractXliffRule::_PRE_TRANSLATED ) {
+                    return true;
+                }
+
+            } elseif ( $stateQualifier !== null ) { // default behaviour
+                // ignore translations for fuzzy matches (xliff 1.2)
+                return XliffTranslationStatus::isFuzzyMatch( strtolower( $stateQualifier ) );
             }
-        }
 
-        if ( $state !== null ) {
-            return !XliffTranslationStatus::isNew( $state );
+            if ( $state !== null && in_array( strtolower( $state ), $rule->getStates( 'states' ) ) ) {
+
+                if ( $rule->getAnalysis() == AbstractXliffRule::_NEW ) {
+                    return false;
+                } elseif ( $rule->getAnalysis() == AbstractXliffRule::_PRE_TRANSLATED ) {
+                    return true;
+                }
+
+            } elseif ( $state !== null ) { // default behaviour
+                return !XliffTranslationStatus::isNew( strtolower( $state ) );
+            }
+
         }
 
         if ( $source != $target ) {

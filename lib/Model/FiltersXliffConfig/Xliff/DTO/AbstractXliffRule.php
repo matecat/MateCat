@@ -4,25 +4,52 @@ namespace FiltersXliffConfig\Xliff\DTO;
 
 use DomainException;
 use JsonSerializable;
+use RecursiveArrayObject;
 
 abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable {
-    const ALLOWED_STATES = [];
+    const ALLOWED_STATES   = [];
+    const STATES_QUALIFIER = [];
+    const STATES           = [];
+
+    // analysis behaviour
+    const _PRE_TRANSLATED        = "pre-translated";
+    const _NEW                   = "new";
+
+    // editor states
+    const _TRANSLATED            = "translated";
+    const _APPROVED              = "approved";
+    const _APPROVED2             = "approved2";
+    const _IGNORE_TARGET_CONTENT = "ignore-target-content";
+    const _KEEP_TARGET_CONTENT   = "keep-target-content";
 
     const ALLOWED_ANALYSIS = [
-            "pre-translated",
-            "new"
+            self::_PRE_TRANSLATED,
+            self::_NEW
     ];
 
     const ALLOWED_EDITOR = [
-            "translated",
-            "approved",
-            "approved2",
-            "ignore-target-content",
-            "keep-target-content",
+            self::_TRANSLATED,
+            self::_APPROVED,
+            self::_APPROVED2,
+            self::_IGNORE_TARGET_CONTENT,
+            self::_KEEP_TARGET_CONTENT,
     ];
 
-    protected $states;
+    /**
+     * @var string[]
+     */
+    protected $states = [
+            'states'           => [],
+            'states-qualifier' => []
+    ];
+
+    /**
+     * @var string
+     */
     protected $analysis;
+    /**
+     * @var string
+     */
     protected $editor;
 
     /**
@@ -74,9 +101,18 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
             if ( !in_array( $state, static::ALLOWED_STATES ) ) {
                 throw new DomainException( "Wrong state value", 400 );
             }
+
+            if ( in_array( $state, static::STATES ) ) {
+                $this->states[ 'states' ][] = strtolower( $state );
+                continue;
+            }
+
+            if ( in_array( $state, static::STATES_QUALIFIER ) ) {
+                $this->states[ 'states-qualifier' ][] = strtolower( $state );
+            }
+
         }
 
-        $this->states = $states;
     }
 
     /**
@@ -87,7 +123,7 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
             throw new DomainException( "Wrong analysis value", 400 );
         }
 
-        $this->analysis = $analysis;
+        $this->analysis = strtolower( $analysis );
     }
 
     /**
@@ -98,25 +134,58 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
             throw new DomainException( "Wrong editor value", 400 );
         }
 
-        $this->editor = $editor;
+        $this->editor = strtolower( $editor );
     }
 
     /**
-     * @return array|mixed
+     * @param RecursiveArrayObject $structure
+     *
+     * @return static
+     */
+    public static function fromArrayObject( RecursiveArrayobject $structure ) {
+        return new static( $structure[ 'states' ]->getArrayCopy(), $structure[ 'analysis' ], $structure[ 'editor' ] );
+    }
+
+    /**
+     * @return array
      */
     public function jsonSerialize() {
+
         return [
-                'states'   => $this->states,
+                'states'   => array_merge( $this->states[ 'states' ], $this->states[ 'states-qualifier' ] ),
                 'analysis' => $this->analysis,
                 'editor'   => $this->editor,
         ];
     }
 
     /**
-     * @return mixed
+     * @param string|null $type
+     *
+     * @return string[]
      */
-    public function getStates() {
-        return $this->states;
+    public function getStates( $type = null ) {
+        switch ( $type ) {
+            case 'states':
+                return $this->states[ 'states' ];
+            case 'states-qualifier':
+                return $this->states[ 'states-qualifier' ];
+            default:
+                return array_merge( $this->states[ 'states' ], $this->states[ 'states-qualifier' ] );
+        }
+    }
+
+    /**
+     * @return string
+     */
+    public function getAnalysis() {
+        return $this->analysis;
+    }
+
+    /**
+     * @return string
+     */
+    public function getEditor() {
+        return $this->editor;
     }
 
 }
