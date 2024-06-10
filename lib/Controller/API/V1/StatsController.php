@@ -24,7 +24,7 @@ class StatsController extends KleinController {
      */
     public function stats() {
         $wStruct = WordCountStruct::loadFromJob( $this->chunk );
-        $wStruct['analysis_complete'] = $this->chunk->getProject()->analysisComplete() ;
+        $wStruct->setAnalysisComplete($this->chunk->getProject()->analysisComplete());
         $this->response->json( $wStruct ) ;
     }
 
