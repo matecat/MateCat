@@ -2793,10 +2793,9 @@ class ProjectManager {
             $stateQualifier = $trans_unit[ 'target' ][ 'attr' ][ 'state-qualifier' ];
         }
 
-        if ( $stateQualifier !== null ) {
-            if ( XliffTranslationStatus::isFuzzyMatch( $stateQualifier ) ) {
-                return Constants_TranslationStatus::STATUS_NEW;
-            }
+        // fuzzy matches are ALWAYS considered NEW (xliff 1.2)
+        if ( $stateQualifier !== null and XliffTranslationStatus::isFuzzyMatch( $stateQualifier ) ) {
+            return Constants_TranslationStatus::STATUS_NEW;
         }
 
         if ( $state !== null ) {
@@ -3407,10 +3406,8 @@ class ProjectManager {
     private function __isTranslated( $source, $target, $xliff_trans_unit, $state = null, $stateQualifier = null ) {
 
         // ignore translations for fuzzy matches (xliff 1.2)
-        if ( $stateQualifier !== null ) {
-            if ( XliffTranslationStatus::isFuzzyMatch( $stateQualifier ) ) {
-                return false;
-            }
+        if ( $stateQualifier !== null and XliffTranslationStatus::isFuzzyMatch( $stateQualifier ) ) {
+            return false;
         }
 
         if ( $state !== null ) {
