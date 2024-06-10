@@ -1995,7 +1995,7 @@ class ProjectManager {
                                         $src = CatUtils::trimAndStripFromAnHtmlEntityDecoded( $extract_external[ 'seg' ] );
                                         $trg = CatUtils::trimAndStripFromAnHtmlEntityDecoded( $target_extract_external[ 'seg' ] );
 
-                                        if ( $this->__isTranslated( $src, $trg, $xliff_trans_unit, $state, $stateQualifier ) && !is_numeric( $src ) && !empty( $trg ) ) { //treat 0,1,2... as translated content!
+                                        if ( $this->__isTranslated( $src, $trg, $xliff_trans_unit, $xliffInfo, $state, $stateQualifier ) && !is_numeric( $src ) && !empty( $trg ) ) { //treat 0,1,2... as translated content!
 
                                             $target = $this->filter->fromRawXliffToLayer0( $target_extract_external[ 'seg' ] );
 
@@ -2129,7 +2129,7 @@ class ProjectManager {
                                 $stateQualifier          = ( isset( $xliff_trans_unit[ 'target' ][ 'attr' ][ 'state-qualifier' ] ) ) ? $xliff_trans_unit[ 'target' ][ 'attr' ][ 'state-qualifier' ] : null;
                                 $target_extract_external = $this->_strip_external( $xliff_trans_unit[ 'target' ][ 'raw-content' ], $xliffInfo );
 
-                                if ( $this->__isTranslated( $xliff_trans_unit[ 'source' ][ 'raw-content' ], $target_extract_external[ 'seg' ], $xliff_trans_unit, $state, $stateQualifier ) && !is_numeric( $xliff_trans_unit[ 'source' ][ 'raw-content' ] ) && !empty( $target_extract_external[ 'seg' ] ) ) {
+                                if ( $this->__isTranslated( $xliff_trans_unit[ 'source' ][ 'raw-content' ], $target_extract_external[ 'seg' ], $xliff_trans_unit, $xliffInfo, $state, $stateQualifier ) && !is_numeric( $xliff_trans_unit[ 'source' ][ 'raw-content' ] ) && !empty( $target_extract_external[ 'seg' ] ) ) {
 
                                     $target = $this->filter->fromRawXliffToLayer0( $target_extract_external[ 'seg' ] );
 
@@ -3472,7 +3472,7 @@ class ProjectManager {
             // fuzzy-match, mt-suggestion, leveraged-tm, leveraged-inherited, leveraged-mt
             // set those state-qualifiers as NEW
             return !XliffTranslationStatus::isStateQualifierNew( strtolower( $stateQualifier ) );
-        }
+            }
 
         if ( $state !== null ) { // default behaviour
             return !XliffTranslationStatus::isStatusNew( strtolower( $state ) );
