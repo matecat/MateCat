@@ -121,15 +121,15 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
         $this->_outsource_url_confirm       = INIT::$HTTPHOST . INIT::$BASEURL . "api/app/outsource/confirm/%u/%s";
 
         $this->_curlOptions = [
-                CURLOPT_HEADER         => 0,
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_SSL_VERIFYPEER => true,
-                CURLOPT_SSL_VERIFYHOST => 2,
-                CURLOPT_HTTPGET        => true,
-                CURLOPT_TIMEOUT        => 10,
-                CURLOPT_USERAGENT      => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
-                CURLOPT_CONNECTTIMEOUT => 5,
-                CURLOPT_FOLLOWLOCATION => true
+            CURLOPT_HEADER         => 0,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_SSL_VERIFYHOST => 2,
+            CURLOPT_HTTPGET        => true,
+            CURLOPT_TIMEOUT        => 10,
+            CURLOPT_USERAGENT      => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
+            CURLOPT_CONNECTTIMEOUT => 5,
+            CURLOPT_FOLLOWLOCATION => true
         ];
     }
 
@@ -216,23 +216,17 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
                 continue;
             }
 
-            // nothing in cache, we have to directly ask to the vendor: compose URL and create a proper curl resource
-
-            // get words from volume analysis, and round decimals to int
-            // NOTE: the vendor returns an error in case words = 0 -> make sure $words is at least 1
-            $words = max( (int)$volAnalysis[ 'data' ][ 'jobs' ][ $job[ 'jid' ] ][ 'totals' ][ $job[ 'jpassword' ] ][ 'TOTAL_PAYABLE' ][ 0 ], 1 );
-
             $url = "https://www.translated.net/hts/matecat-endpoint.php?" . http_build_query( [
                     'f'             => 'outsourced',
                     'cid'           => 'htsdemo',
                     'p'             => 'htsdemo5',
                     'matecat_pid'   => $this->pid,
                     'matecat_ppass' => $this->ppassword,
-                    'matecat_words' => $words,
+                    'matecat_words' => $this->getTotalPayableWords($volAnalysis),
                     'matecat_jid'   => $job[ 'jid' ],
                     'matecat_jpass' => $job[ 'jpassword' ],
                     'of'            => 'json'
-            ], PHP_QUERY_RFC3986 );
+                ], PHP_QUERY_RFC3986 );
 
             $mh->createResource( $url, $this->_curlOptions, $job[ 'jid' ] . "-" . $job[ 'jpassword' ] . "-outsourced" );
 
@@ -321,10 +315,6 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
             //    },
             list( $source, $target ) = explode( "|", $volAnalysis[ 'jobs' ][ 'langpairs' ][ $job[ 'jid' ] . "-" . $job[ 'jpassword' ] ] );
 
-            // get words from volume analysis, and round decimals to int
-            // NOTE: the vendor returns an error in case words = 0 -> make sure $words is at least 1
-            $words = max( (int)$volAnalysis[ 'data' ][ 'jobs' ][ $job[ 'jid' ] ][ 'totals' ][ $job[ 'jpassword' ] ][ 'TOTAL_PAYABLE' ][ 0 ], 1 );
-
             // get delivery date chosen by the user (if any), otherwise set it to 0 to tell the vendor no date has been specified
             // NOTE: UI returns a timestamp in millis. Despite we use the one in millis for the caching ID
             // (See: GUIDE->"NORMAL QUOTES vs OUTSOURCED QUOTES"), we here need to convert it in seconds
@@ -338,7 +328,7 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
                     's'             => $source,
                     't'             => $target,
                     'pn'            => "MATECAT_{$job['jid']}-{$job['jpassword']}",
-                    'w'             => $words,
+                    'w'             => $this->getTotalPayableWords($volAnalysis),
                     'df'            => 'matecat',
                     'matecat_pid'   => $this->pid,
                     'matecat_ppass' => $this->ppassword,
@@ -347,7 +337,7 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
                     'jt'            => 'R',
                     'fd'            => $fixedDeliveryDateForQuote,
                     'of'            => 'json'
-            ], PHP_QUERY_RFC3986 );
+                ], PHP_QUERY_RFC3986 );
 
             Log::doJsonLog( "Not Found in Cache. Call url for Quote:  " . $url );
             $mh->createResource( $url, $this->_curlOptions, $job[ 'jid' ] . "-" . $job[ 'jpassword' ] . "-" . $this->fixedDelivery );
@@ -689,6 +679,33 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
             $urls[ ] = sprintf( $this->_outsource_url_confirm, $job[ 'jid' ], $job[ 'jpassword' ] );
         }
         return $urls;
+    }
+
+    /**
+     * @param $volAnalysis
+     * @return int|mixed
+     */
+    private function getTotalPayableWords($volAnalysis)
+    {
+        if(
+            isset($volAnalysis['summary']) and
+            isset($volAnalysis['summary']['total_equivalent'])
+        ){
+            return (int)$volAnalysis['summary']['total_equivalent'];
+        }
+
+        if(
+            isset($volAnalysis[ 'data' ]) and
+            isset($volAnalysis[ 'data' ][ 'jobs' ]) and
+            isset($volAnalysis[ 'data' ][ 'jobs' ][ $job[ 'jid' ] ]) and
+            isset($volAnalysis[ 'data' ][ 'jobs' ][ $job[ 'jid' ] ][ 'totals' ]) and
+            isset($volAnalysis[ 'data' ][ 'jobs' ][ $job[ 'jid' ] ][ 'totals' ][ $job[ 'jpassword' ] ]) and
+            isset($volAnalysis[ 'data' ][ 'jobs' ][ $job[ 'jid' ] ][ 'totals' ][ $job[ 'jpassword' ] ][ 'TOTAL_PAYABLE' ])
+        ){
+            return max( (int)$volAnalysis[ 'data' ][ 'jobs' ][ $job[ 'jid' ] ][ 'totals' ][ $job[ 'jpassword' ] ][ 'TOTAL_PAYABLE' ][ 0 ], 1 );
+        }
+
+        return 1;
     }
 
 }
