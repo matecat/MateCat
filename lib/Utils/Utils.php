@@ -1,6 +1,7 @@
 <?php
 
 use Behat\Transliterator\Transliterator;
+use CommandLineTasks\Constants\GlobalMessage;
 use Features\ReviewExtended\ReviewUtils as ReviewUtils;
 
 class Utils {
@@ -181,20 +182,32 @@ class Utils {
      * @throws Exception
      */
     public static function getGlobalMessage() {
-        $retString = '';
-        if ( file_exists( INIT::$ROOT . "/inc/.globalmessage.ini" ) ) {
-            $globalMessage = parse_ini_file( INIT::$ROOT . "/inc/.globalmessage.ini" );
-            if ( ( new DateTime( $globalMessage[ 'expire' ] ) )->getTimestamp() > time() ) {
+
+        // pull messages from redis
+        $redis = (new RedisHandler() )->getConnection();
+        $ids = $redis->smembers('global_message_list_ids');
+        $retStrings = [];
+
+        foreach ($ids as $id){
+            $element = $redis->get('global_message_list_element_'.$id);
+
+            if($element !== null){
+                $element = unserialize($element);
+
                 $resObject = [
-                    'msg'    => $globalMessage[ 'message' ],
-                    'token'  => md5( $globalMessage[ 'message' ] ),
-                    'expire' => ( new DateTime( $globalMessage[ 'expire' ] ) )->format( DateTime::W3C )
+                    'msg'    => $element['message'],
+                    'level'  => $element['level'],
+                    'token'  => md5( $element['message'] ),
+                    'expire' => ( new DateTime( $element['expire'] ) )->format( DateTime::W3C )
                 ];
-                $retString = json_encode( [ $resObject ] );
+
+                $retStrings[] = $resObject;
+            } else {
+                $redis->srem('global_message_list_ids', $id);
             }
         }
 
-        return [ 'messages' => $retString ];
+        return [ 'messages' => json_encode($retStrings) ];
     }
 
     public static function encryptPass( $clear_pass, $salt ) {
@@ -382,7 +395,6 @@ class Utils {
         $queue_element[ 'subject' ] = $subject;
         $queue_element[ 'body' ]    = '<pre>' . self::_getBackTrace() . "<br />" . $htmlContent . '</pre>';
 
-        WorkerClient::init( new AMQHandler() );
         WorkerClient::enqueue( 'MAIL', '\AsyncTasks\Workers\ErrMailWorker', $queue_element, [ 'persistent' => WorkerClient::$_HANDLER->persistent ] );
 
         Log::doJsonLog( 'Message has been sent' );
@@ -801,56 +813,6 @@ class Utils {
     }
 
     /**
-     * @param string $format
-     * @return array
-     */
-    public static function allowedLanguages($format = 'rfc3066code')
-    {
-        $allowedLanguages = [];
-
-        $file = INIT::$UTILS_ROOT . '/Langs/supported_langs.json';
-        $string = file_get_contents( $file );
-        $langs = json_decode( $string, true );
-
-        foreach ($langs['langs'] as $lang){
-            $allowedLanguages[] = (isset($lang[$format])) ? $lang[$format] : $lang['rfc3066code'];
-        }
-
-        return $allowedLanguages;
-    }
-
-    /**
-     * @param string $language
-     * @param string $format
-     * @return bool
-     */
-    public static function isValidLanguage($language, $format = 'rfc3066code')
-    {
-        $allowedLanguages = Utils::allowedLanguages($format);
-
-        return in_array($language, $allowedLanguages);
-    }
-
-    /**
-     * @param $rfc3066code
-     * @return string|null
-     */
-    public static function getLocalizedLanguage($rfc3066code)
-    {
-        $file = INIT::$UTILS_ROOT . '/Langs/supported_langs.json';
-        $string = file_get_contents( $file );
-        $langs = json_decode( $string, true );
-
-        foreach ($langs['langs'] as $lang){
-            if($lang['rfc3066code'] === $rfc3066code){
-                return isset( $lang['localized'][0]['en'] ) ? $lang['localized'][0]['en'] : null;
-            }
-        }
-
-        return null;
-    }
-
-    /**
      * @param string $phrase
      * @param int $max_words
      *
@@ -864,31 +826,6 @@ class Utils {
         }
 
         return $phrase;
-    }
-
-    /**
-     * Examples:
-     *
-     * it-IT  ---> it
-     * es-419 ---> es
-     * to-TO ----> ton
-     *
-     * @param $rfc3066code
-     * @return string|null
-     */
-    public static function convertLanguageToIsoCode($rfc3066code)
-    {
-        $file = INIT::$UTILS_ROOT . '/Langs/supported_langs.json';
-        $string = file_get_contents( $file );
-        $langs = json_decode( $string, true );
-
-        foreach ($langs['langs'] as $lang){
-            if($rfc3066code === $lang['rfc3066code']){
-                return $lang['isocode'];
-            }
-        }
-
-        return null;
     }
 
     /**

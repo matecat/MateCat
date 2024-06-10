@@ -1,5 +1,4 @@
 import React, {useRef} from 'react'
-import {round} from 'lodash/math'
 
 import JobMenu from './JobMenu'
 import OutsourceContainer from '../outsource/OutsourceContainer'
@@ -14,7 +13,6 @@ import ConfirmMessageModal from '../modals/ConfirmMessageModal'
 import TranslatedIconSmall from '../../../../../img/icons/TranslatedIconSmall'
 import Tooltip from '../common/Tooltip'
 import JobProgressBar from '../common/JobProgressBar'
-import {JOB_WORD_CONT_TYPE} from '../../constants/Constants'
 
 class JobContainer extends React.Component {
   constructor(props) {
@@ -161,8 +159,8 @@ class JobContainer extends React.Component {
       ManageActions.changeJobPassword(
         self.props.project,
         self.props.job,
-        data.password,
-        data.undo,
+        data.new_pwd,
+        data.old_pwd,
         revision_number,
       )
       setTimeout(function () {
@@ -171,7 +169,7 @@ class JobContainer extends React.Component {
           CatToolActions.removeNotification(notification)
           changeJobPassword(
             self.props.job.toJS(),
-            data.password,
+            data.new_pwd,
             revision_number,
             1,
             self.oldPassword,
@@ -187,8 +185,8 @@ class JobContainer extends React.Component {
             ManageActions.changeJobPassword(
               self.props.project,
               self.props.job,
-              data.password,
-              data.undo,
+              data.new_pwd,
+              data.old_pwd,
               revision_number,
               translator,
             )
@@ -217,8 +215,8 @@ class JobContainer extends React.Component {
         ManageActions.changeJobPassword(
           self.props.project,
           self.props.job,
-          data.password,
-          data.undo,
+          data.new_pwd,
+          data.old_pwd,
           null,
         )
         setTimeout(function () {
@@ -227,7 +225,7 @@ class JobContainer extends React.Component {
             CatToolActions.removeNotification(notification)
             changeJobPassword(
               self.props.job.toJS(),
-              data.password,
+              data.new_pwd,
               null,
               1,
               self.oldPassword,
@@ -244,8 +242,8 @@ class JobContainer extends React.Component {
               ManageActions.changeJobPassword(
                 self.props.project,
                 self.props.job,
-                data.password,
-                data.undo,
+                data.new_pwd,
+                data.old_pwd,
                 null,
                 translator,
               )
@@ -340,7 +338,13 @@ class JobContainer extends React.Component {
     let label = (
       <a
         className="item"
-        onClick={this.downloadTranslation}
+        onClick={() => {
+          const data = {
+            event: 'download_draft',
+          }
+          CommonUtils.dispatchAnalyticsEvents(data)
+          this.downloadTranslation()
+        }}
         ref={(downloadMenu) => (this.downloadMenu = downloadMenu)}
       >
         <i className="icon-eye icon" /> Draft
@@ -1043,6 +1047,7 @@ class JobContainer extends React.Component {
           onClickOutside={this.closeOutsourceModal.bind(this)}
           openOutsource={this.state.openOutsource}
           idJobLabel={idJobLabel}
+          standardWC={parseInt(stats.equivalent.total)}
         />
       </div>
     )

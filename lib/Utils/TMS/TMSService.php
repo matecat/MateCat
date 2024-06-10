@@ -473,6 +473,7 @@ class TMSService {
                             [
                                     Constants_TranslationStatus::STATUS_TRANSLATED,
                                     Constants_TranslationStatus::STATUS_APPROVED,
+                                    Constants_TranslationStatus::STATUS_APPROVED2,
                                     Constants_TranslationStatus::STATUS_FIXED
                             ]
                     ) !== false || !$hideUnconfirmedRows ) {

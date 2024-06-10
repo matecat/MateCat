@@ -1,0 +1,117 @@
+@import '../../commons/colors';
+
+.email-badge {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  width: 100%;
+
+  label {
+    cursor: pointer;
+  }
+}
+
+.email-badge-fakeInput {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 8px;
+  border-radius: 4px;
+  min-width: 0;
+  width: 100%;
+  min-height: 90px;
+  max-height: 200px;
+  padding: 12px;
+  outline: none;
+  cursor: text;
+  overflow-y: auto;
+  box-shadow: inset 0 1px 3px #ddd;
+  border: 1px solid rgba(34, 36, 38, 0.15);
+  background-color: white;
+}
+
+.email-badge-wrapper {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  width: auto;
+
+  input {
+    border: none;
+    width: 100%;
+    padding: 0;
+    outline: none;
+    background: transparent;
+    color: black;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.5;
+  }
+
+  span {
+    visibility: hidden;
+    height: 0;
+    line-height: 0;
+  }
+}
+
+.email-badge-placeholder {
+  position: absolute;
+  inset: 12px;
+  color: $grey7;
+}
+
+.email-badge-item {
+  display: inline-flex;
+  cursor: pointer;
+}
+
+.email-badge-error {
+  color: $redDefault;
+}
+
+.email-badge-tag {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 4px;
+  padding: 2px 4px;
+  cursor: default;
+
+  &.default {
+    background-color: $grey4;
+    color: $grey6;
+  }
+  &.selected {
+    background-color: $translatedBlue;
+    color: $white;
+  }
+  &.invalid {
+    background-color: $redDefault;
+    color: $white;
+  }
+}
+
+.email-badge-tag-remove {
+  flex-shrink: 0;
+  margin: -2px -4px -2px 0 !important;
+
+  &:hover {
+    background-color: transparent !important;
+    color: $grey8 !important;
+  }
+
+  .selected & {
+    color: $grey9 !important;
+
+    &:hover {
+      color: $grey8 !important;
+    }
+  }
+}
+
+.email-badge-tag-button-close {
+  display: flex;
+  cursor: pointer;
+}

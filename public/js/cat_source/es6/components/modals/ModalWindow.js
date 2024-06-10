@@ -59,7 +59,14 @@ export class ModalWindow extends React.Component {
    * for legacy reasons, so before removing we need
    * to refactor these dirty usages first!
    */
-  showModalComponent = (component, props, title, style, onCloseCallback) => {
+  showModalComponent = (
+    component,
+    props,
+    title,
+    style,
+    onCloseCallback,
+    isCloseButtonDisabled,
+  ) => {
     this.setState({
       ...initialState,
       title,
@@ -73,6 +80,7 @@ export class ModalWindow extends React.Component {
       styleContainer: style,
       onCloseCallback: onCloseCallback,
       isShowingModal: true,
+      isCloseButtonDisabled: isCloseButtonDisabled,
     })
   }
 
@@ -103,6 +111,7 @@ export class ModalWindow extends React.Component {
       styleContainer,
       compProps,
       isShowingModal,
+      isCloseButtonDisabled,
     } = this.state
 
     return (
@@ -116,6 +125,7 @@ export class ModalWindow extends React.Component {
                 styleContainer,
                 onClose: this.onCloseModal,
                 closeOnOutsideClick: compProps.closeOnOutsideClick,
+                isCloseButtonDisabled,
               },
               <InjectedComponent {...compProps} />,
             )}

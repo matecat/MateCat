@@ -65,7 +65,6 @@ class JobStatusController extends BaseChunkController {
             if ( !empty( $segments_id ) ) {
 
                 try {
-                    WorkerClient::init( new AMQHandler() );
                     WorkerClient::enqueue( 'JOBS', '\AsyncTasks\Workers\BulkSegmentStatusChangeWorker',
                             [
                                     'segment_ids'        => $segments_id,

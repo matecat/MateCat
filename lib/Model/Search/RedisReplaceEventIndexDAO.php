@@ -1,11 +1,13 @@
 <?php
 
+use Predis\Client;
+
 class Search_RedisReplaceEventIndexDAO extends DataAccess_AbstractDao implements Search_ReplaceEventIndexDAOInterface {
 
     const TABLE = 'replace_events_current_version';
 
     /**
-     * @var \Predis\Client
+     * @var Client
      */
     private $redis;
 
@@ -20,7 +22,6 @@ class Search_RedisReplaceEventIndexDAO extends DataAccess_AbstractDao implements
      * @param null $con
      *
      * @throws ReflectionException
-     * @throws \Predis\Connection\ConnectionException
      */
     public function __construct( $con = null ) {
         parent::__construct( $con );
@@ -63,7 +64,7 @@ class Search_RedisReplaceEventIndexDAO extends DataAccess_AbstractDao implements
     /**
      * @param $ttl
      *
-     * @return mixed|void
+     * @return void
      */
     public function setTtl( $ttl ) {
         $this->ttl = $ttl;

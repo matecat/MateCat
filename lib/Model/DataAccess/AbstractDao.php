@@ -190,7 +190,7 @@ abstract class DataAccess_AbstractDao {
     /**
      * Cache Initialization
      *
-     * @return $this
+     * @return void
      */
     protected function _cacheSetConnection() {
         if ( !isset( self::$cache_con ) || empty( self::$cache_con ) ) {
@@ -213,7 +213,7 @@ abstract class DataAccess_AbstractDao {
      * @return mixed
      */
     protected function _getFromCache( $query ) {
-        if ( \INIT::$SKIP_SQL_CACHE || $this->cacheTTL == 0 ) {
+        if ( INIT::$SKIP_SQL_CACHE || $this->cacheTTL == 0 ) {
             return null;
         }
 

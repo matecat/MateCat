@@ -17,14 +17,19 @@ use FeatureSet;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use INIT;
+use Jobs_JobDao;
 use Log;
+use Model\Analysis\AnalysisDao;
 use PDO;
 use PDOException;
 use Predis\Connection\ConnectionException;
+use Predis\PredisException;
 use Projects_MetadataDao;
 use Projects_ProjectDao;
+use Projects_ProjectStruct;
+use ReflectionException;
 use Segments_SegmentDao;
-use StompException;
+use Stomp\Transport\Message;
 use TaskRunner\Commons\AbstractDaemon;
 use TaskRunner\Commons\Context;
 use TaskRunner\Commons\ContextList;
@@ -240,8 +245,27 @@ class FastAnalysis extends AbstractDaemon {
                 // INSERT DATA
                 self::_TimeStampMsg( "Inserting segments..." );
 
+                // define variable for the sake of the code, even if empty
+                $projectStruct = new Projects_ProjectStruct();
+
                 try {
-                    $insertReportRes = $this->_insertFastAnalysis( $pid, PayableRates::$DEFAULT_PAYABLE_RATES, $featureSet, $perform_Tms_Analysis );
+
+                    /**
+                     * Ensure we have fresh data from master node
+                     */
+                    Database::obtain()->getConnection()->beginTransaction();
+                    $projectStruct         = Projects_ProjectDao::findById( $pid );
+                    $projectFeaturesString = $projectStruct->getMetadataValue( Projects_MetadataDao::FEATURES_KEY );
+                    Database::obtain()->getConnection()->commit();
+
+                    $insertReportRes = $this->_insertFastAnalysis(
+                            $projectStruct,
+                            $projectFeaturesString,
+                            PayableRates::$DEFAULT_PAYABLE_RATES,
+                            $featureSet,
+                            $perform_Tms_Analysis
+                    );
+
                 } catch ( Exception $e ) {
                     //Logging done and email sent
                     //set to error
@@ -262,6 +286,11 @@ class FastAnalysis extends AbstractDaemon {
                 self::_updateProject( $pid, $status );
                 $fs = $this->files_storage;
                 $fs::deleteFastAnalysisFile( $pid );
+
+                ( new Jobs_JobDao() )->destroyCacheByProjectId( $pid );
+                Projects_ProjectDao::destroyCacheById( $pid );
+                Projects_ProjectDao::destroyCacheByIdAndPassword( $pid, $projectStruct->password );
+                AnalysisDao::destroyCacheByProjectId( $pid );
 
             }
 
@@ -375,8 +404,8 @@ class FastAnalysis extends AbstractDaemon {
     }
 
     /**
-     * @throws StompException
-     * @throws ConnectionException
+     * @throws ReflectionException
+     * @throws PredisException
      */
     public static function cleanShutDown() {
 
@@ -392,7 +421,7 @@ class FastAnalysis extends AbstractDaemon {
 
         self::$queueHandler->getRedisClient()->disconnect();
 
-        self::$queueHandler->disconnect();
+        self::$queueHandler->getClient()->disconnect();
         self::$queueHandler = null;
 
     }
@@ -429,8 +458,8 @@ class FastAnalysis extends AbstractDaemon {
                                       eq_word_count, 
                                       standard_word_count 
                                  ) VALUES "
-            . implode( ", ", $tuple_list ) .
-            " ON DUPLICATE KEY UPDATE
+                . implode( ", ", $tuple_list ) .
+                " ON DUPLICATE KEY UPDATE
                         match_type = VALUES( match_type ),
                         eq_word_count = VALUES( eq_word_count ),
                         standard_word_count = VALUES( standard_word_count )
@@ -444,24 +473,24 @@ class FastAnalysis extends AbstractDaemon {
     }
 
     /**
-     * @param            $pid
-     * @param            $equivalentWordMapping
-     * @param FeatureSet $featureSet
-     * @param bool       $perform_Tms_Analysis
+     * @param Projects_ProjectStruct $projectStruct
+     * @param                        $projectFeaturesString
+     * @param                        $equivalentWordMapping
+     * @param FeatureSet             $featureSet
+     * @param bool                   $perform_Tms_Analysis
      *
      * @return float|int
      * @throws Exception
      */
-    protected function _insertFastAnalysis( $pid, $equivalentWordMapping, FeatureSet $featureSet, $perform_Tms_Analysis = true ) {
+    protected function _insertFastAnalysis(
+            Projects_ProjectStruct $projectStruct,
+                                   $projectFeaturesString,
+                                   $equivalentWordMapping,
+            FeatureSet             $featureSet,
+                                   $perform_Tms_Analysis = true
+    ) {
 
-        /**
-         * Ensure we have fresh data from master node
-         */
-        Database::obtain()->getConnection()->beginTransaction();
-        $projectStruct         = Projects_ProjectDao::findById( $pid );
-        $projectFeaturesString = $projectStruct->getMetadataValue( Projects_MetadataDao::FEATURES_KEY );
-        Database::obtain()->getConnection()->commit();
-
+        $pid               = $projectStruct->id;
         $total_eq_wc       = 0;
         $total_standard_wc = 0;
 
@@ -511,13 +540,13 @@ class FastAnalysis extends AbstractDaemon {
                      * IMPORTANT
                      * id_job will be taken from languages ( 80415:fr-FR,80416:it-IT )
                      */
-                    $this->segments[$k]['pid'] = (int)$pid;
-                    $this->segments[$k]['ppassword'] = $projectStruct->password;
-                    $this->segments[$k]['date_insert'] = date_create()->format('Y-m-d H:i:s');
-                    $this->segments[$k]['eq_word_count'] = ((float)$eq_word > $segment->raw_word_count) ? $segment->raw_word_count : (float)$eq_word;
-                    $this->segments[$k]['standard_word_count'] = ((float)$standard_words > $segment->raw_word_count) ? $segment->raw_word_count : (float)$standard_words;
-                    $this->segments[$k]['match_type'] = $match_type;
-                    $this->segments[$k]['fast_exact_match_type'] = $v[ 'match_type' ];
+                    $this->segments[ $k ][ 'pid' ]                   = (int)$pid;
+                    $this->segments[ $k ][ 'ppassword' ]             = $projectStruct->password;
+                    $this->segments[ $k ][ 'date_insert' ]           = date_create()->format( 'Y-m-d H:i:s' );
+                    $this->segments[ $k ][ 'eq_word_count' ]         = ( (float)$eq_word > $segment->raw_word_count ) ? $segment->raw_word_count : (float)$eq_word;
+                    $this->segments[ $k ][ 'standard_word_count' ]   = ( (float)$standard_words > $segment->raw_word_count ) ? $segment->raw_word_count : (float)$standard_words;
+                    $this->segments[ $k ][ 'match_type' ]            = $match_type;
+                    $this->segments[ $k ][ 'fast_exact_match_type' ] = $v[ 'match_type' ];
 
                 } elseif ( $perform_Tms_Analysis ) {
 
@@ -643,8 +672,8 @@ class FastAnalysis extends AbstractDaemon {
                 $queue_element[ 'context_before' ]   = @$this->segments[ $k - 1 ][ 'segment' ];
                 $queue_element[ 'context_after' ]    = @$this->segments[ $k + 1 ][ 'segment' ];
 
-                $jsid = explode("-", $queue_element[ 'jsid' ]); // 749-49:7acfb82b8168,50:47c70434fe78,51:f3f5551e9c4f
-                $passwordMap = explode(",", $jsid[1]);
+                $jsid        = explode( "-", $queue_element[ 'jsid' ] ); // 749-49:7acfb82b8168,50:47c70434fe78,51:f3f5551e9c4f
+                $passwordMap = explode( ",", $jsid[ 1 ] );
 
                 /**
                  * remove some unuseful fields
@@ -663,7 +692,7 @@ class FastAnalysis extends AbstractDaemon {
                     foreach ( $languages_job as $index => $_language ) {
 
                         list( $id_job, $language ) = explode( ":", $_language );
-                        list( $jid, $password ) = explode( ":", $passwordMap[$index] );
+                        list( , $password ) = explode( ":", $passwordMap[ $index ] );
 
                         $queue_element[ 'password' ]      = $password;
                         $queue_element[ 'target' ]        = $language;
@@ -674,7 +703,7 @@ class FastAnalysis extends AbstractDaemon {
                         $element->params    = $queue_element;
                         $element->classLoad = '\Analysis\Workers\TMAnalysisWorker';
 
-                        self::$queueHandler->send( $queueInfo->queue_name, $element, [ 'persistent' => self::$queueHandler->persistent ] );
+                        self::$queueHandler->publishToQueues( $queueInfo->queue_name, new Message( $element, [ 'persistent' => self::$queueHandler->persistent ] ) );
                         self::_TimeStampMsg( "AMQ Set Executed " . ( $k + 1 ) . " Language: $language" );
 
                     }
@@ -744,7 +773,7 @@ class FastAnalysis extends AbstractDaemon {
                 s.id as id,
                 s.raw_word_count,
                 GROUP_CONCAT( DISTINCT CONCAT( j.id, ':' , j.target ) ) AS target,
-                CONCAT( "{", GROUP_CONCAT( DISTINCT CONCAT( '"', j.id, '"', ':' , j.payable_rates ) SEPARATOR ',' ), "}" ) AS payable_rates
+                CONCAT( '{', GROUP_CONCAT( DISTINCT CONCAT( '"', j.id, '"', ':' , j.payable_rates ) SEPARATOR ',' ), '}' ) AS payable_rates
             FROM segments AS s
             INNER JOIN files_job AS fj ON fj.id_file = s.id_file
             INNER JOIN jobs as j ON fj.id_job = j.id
@@ -790,9 +819,9 @@ HD;
      * @throws Exception
      */
     protected function _setTotal( array $config = [
-        'total'     => null,
-        'pid'       => null,
-        'queueInfo' => null
+            'total'     => null,
+            'pid'       => null,
+            'queueInfo' => null
     ] ) {
 
         if ( empty( $this->queueTotalID ) && empty( $config[ 'pid' ] ) ) {
@@ -862,7 +891,11 @@ HD;
     }
 
     /**
-     * @throws ConnectionException
+     * @param int $limit
+     *
+     * @return array|false
+     * @throws PredisException
+     * @throws ReflectionException
      */
     protected function _getLockProjectForVolumeAnalysis( $limit = 1 ) {
 

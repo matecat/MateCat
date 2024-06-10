@@ -14,7 +14,9 @@ import SupportedFilesModal from '../components/modals/SupportedFilesModal'
 import Footer from '../components/footer/Footer'
 import {createProject as createProjectApi} from '../api/createProject'
 import CreateProjectActions from '../actions/CreateProjectActions'
-import LanguageSelector from '../components/languageSelector/LanguageSelector'
+import LanguageSelector, {
+  setRecentlyUsedLanguages,
+} from '../components/languageSelector/LanguageSelector'
 import CreateProjectStore from '../stores/CreateProjectStore'
 import NewProjectConstants from '../constants/NewProjectConstants'
 import {CreateProjectContext} from '../components/createProject/CreateProjectContext'
@@ -22,11 +24,7 @@ import {TargetLanguagesSelect} from '../components/createProject/TargetLanguages
 import {TmGlossarySelect} from '../components/createProject/TmGlossarySelect'
 import {SourceLanguageSelect} from '../components/createProject/SourceLanguageSelect'
 import CommonUtils from '../utils/commonUtils'
-import {
-  DEFAULT_ENGINE_MEMORY,
-  MMT_NAME,
-  SettingsPanel,
-} from '../components/settingsPanel'
+import {DEFAULT_ENGINE_MEMORY, SettingsPanel} from '../components/settingsPanel'
 import {getMTEngines as getMtEnginesApi} from '../api/getMTEngines'
 import SegmentUtils from '../utils/segmentUtils'
 import {tmCreateRandUser} from '../api/tmCreateRandUser'
@@ -180,7 +178,7 @@ const NewProject = ({
         mtEngines.push(DEFAULT_ENGINE_MEMORY)
         setMtEngines(mtEngines)
         if (config.isAnInternalUser) {
-          const mmt = mtEngines.find((mt) => mt.name === MMT_NAME)
+          const mmt = mtEngines.find((mt) => mt.engine_type === 'MMT')
           if (mmt) {
             setActiveMTEngine(mmt)
           }
@@ -190,6 +188,9 @@ const NewProject = ({
   }
 
   createProject.current = () => {
+    // update store recently used target languages
+    setRecentlyUsedLanguages(targetLangs)
+
     const {mtGlossaryProps, deeplGlossaryProps} = activeMTEngine ?? {}
 
     const getParams = () => ({
@@ -281,6 +282,23 @@ const NewProject = ({
         console.log('Error retrieving supported languages', error),
       )
   }
+  const checkQueryStringParameter = () => {
+    const param = CommonUtils.getParameterByName('open')
+    switch (param) {
+      case 'signin':
+        if (!config.isLoggedIn) {
+          APP.openLoginModal()
+        }
+        CommonUtils.removeParam('open')
+        break
+      case 'signup':
+        if (!config.isLoggedIn) {
+          APP.openRegisterModal()
+        }
+        CommonUtils.removeParam('open')
+        break
+    }
+  }
 
   //TODO: Move it
   useEffect(() => {
@@ -290,6 +308,7 @@ const NewProject = ({
   }, [selectedTeam])
 
   useEffect(() => {
+    checkQueryStringParameter()
     retrieveSupportedLanguages()
     getSupportedFiles()
       .then((data) => {
@@ -592,22 +611,14 @@ const NewProject = ({
         {warnings && (
           <div className="warning-message">
             <i className="icon-warning2 icon"> </i>
-            <p
-              dangerouslySetInnerHTML={{
-                __html: warnings,
-              }}
-            />
+            <p>{warnings}</p>
           </div>
         )}
 
         {errors && (
           <div className="error-message">
             <i className="icon-error_outline icon"> </i>
-            <p
-              dangerouslySetInnerHTML={{
-                __html: errors,
-              }}
-            />
+            <p>{errors}</p>
           </div>
         )}
 

@@ -265,7 +265,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     } else {
       selectedSegment = selectedSegment.toJS()
     }
-    let next = this.getNextSegment(selectedSegment.sid)
+    let next = this.getNextSegment({current_sid: selectedSegment.sid})
     if (next) {
       var index = this.getSegmentIndex(next.sid)
       this._segments = this._segments.map((segment) =>
@@ -281,8 +281,10 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     })
     if (!selectedSegment) {
       selectedSegment = this.getCurrentSegment()
-    } else {
+    } else if (selectedSegment) {
       selectedSegment = selectedSegment.toJS()
+    } else {
+      return
     }
     let prev = this.getPrevSegment(selectedSegment.sid)
     if (prev) {
@@ -311,36 +313,6 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
       segment.set('selected', false),
     )
   },
-  removeSplit(oldSid, newSegments, fid, splitGroup) {
-    var self = this
-    var elementsToRemove = []
-
-    newSegments.forEach(function (element) {
-      element.split_group = splitGroup
-    })
-
-    newSegments = Immutable.fromJS(newSegments)
-    var indexes = []
-    this._segments.map(function (segment, index) {
-      if (
-        segment.get('sid').split('-').length &&
-        segment.get('sid').split('-')[0] == oldSid
-      ) {
-        elementsToRemove.push(segment)
-        indexes.push(index)
-        return index
-      }
-    })
-    if (elementsToRemove.length) {
-      elementsToRemove.forEach(function (seg) {
-        self._segments = self._segments.splice(self._segments.indexOf(seg), 1)
-      })
-      this._segments = this._segments.splice(indexes[0], 0, ...newSegments)
-
-      // Array.prototype.splice.apply(currentSegments, [indexes[0], 0].concat(newSegments));
-    }
-  },
-
   setStatus(sid, fid, status) {
     const index = this.getSegmentIndex(sid)
     status =
@@ -1057,28 +1029,28 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
   /**
    *
    * @param current_sid
-   * @param current_fid
    * @param status
    * status values:
    * null|undefined|false NEXT WITHOUT CHECK STATUS
-   * 1 APPROVED
-   * 2 DRAFT
-   * 3 FIXED
-   * 4 NEW
-   * 5 REBUTTED
-   * 6 REJECTED
-   * 7 TRANSLATED
-   * 8 UNTRANSLATED | is draft or new
+   * APPROVED
+   * DRAFT
+   * FIXED
+   * NEW
+   * REBUTTED
+   * REJECTED
+   * TRANSLATED
+   * UNTRANSLATED | is draft or new
    * @param revisionNumber
    * @param autopropagated
+   * @param alsoMutedSegment
    */
-  getNextSegment(
-    current_sid,
-    current_fid,
-    status,
-    revisionNumber,
+  getNextSegment({
+    current_sid = null,
+    status = null,
+    revisionNumber = null,
     autopropagated = false,
-  ) {
+    alsoMutedSegment = false,
+  } = {}) {
     let currentSegment = this.getCurrentSegment()
     if (!current_sid && !currentSegment) return null
     current_sid = !current_sid ? currentSegment.sid : current_sid
@@ -1097,7 +1069,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
                 segment.get('status').toUpperCase() ===
                   SEGMENTS_STATUS.TRANSLATED &&
                 segment.get('autopropagated_from') != 0)) &&
-            !segment.get('muted')
+            (alsoMutedSegment || (!alsoMutedSegment && !segment.get('muted')))
           ) {
             result = segment.toJS()
             return false
@@ -1123,7 +1095,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
           } else if (
             ((status && segment.get('status').toUpperCase() === status) ||
               !status) &&
-            !segment.get('muted')
+            (alsoMutedSegment || (!alsoMutedSegment && !segment.get('muted')))
           ) {
             result = segment.toJS()
             return false
@@ -1142,13 +1114,11 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     let current = this.getCurrentSegment()
     current = current || this._segments.get(0)
     if (current) {
-      let next = this.getNextSegment(
-        current.sid,
-        null,
-        SEGMENTS_STATUS.UNTRANSLATED,
-        null,
-        true,
-      )
+      let next = this.getNextSegment({
+        current_sid: current.sid,
+        status: SEGMENTS_STATUS.UNTRANSLATED,
+        autopropagated: true,
+      })
       return next ? next.sid : this.nextUntranslatedFromServer
     }
     return undefined
@@ -1166,7 +1136,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     ) {
       return segment
     }
-    return this.getPrevSegment(segment.sid)
+    return this.getPrevSegment(segment.sid, alsoMutedSegments)
   },
   getSegmentByIdToJS(sid) {
     let segment = this._segments.find(function (seg) {

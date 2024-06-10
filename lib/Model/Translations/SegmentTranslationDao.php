@@ -316,6 +316,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
                 'status',
                 'translation',
                 'serialized_errors_list',
+                'suggestions_array',
                 'suggestion',
                 'suggestion_position',
                 'suggestion_source',
@@ -357,6 +358,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
                 VALUES (" . implode( ", ", $bind_keys ) . ")
 				ON DUPLICATE KEY UPDATE
 				status = :status,
+			    suggestions_array = :suggestions_array,
                 suggestion = :suggestion,
                 suggestion_position = :suggestion_position,
                 suggestion_source = :suggestion_source,
@@ -840,7 +842,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
          */
         $query = "
             SELECT 
-                   Round( s.raw_word_count /
+                   Round( SUM( s.raw_word_count ) /
                                ( Unix_timestamp(Max(translation_date)) -
                                  Unix_timestamp(Min(translation_date)) ) * 3600) AS words_per_hour
          
@@ -904,11 +906,15 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
      */
     public static function updateSuggestionsArray($id_segment, $suggestions) {
 
+        if(empty($suggestions)){
+            return;
+        }
+
         $conn  = Database::obtain()->getConnection();
         $query = "UPDATE segment_translations SET suggestions_array = :suggestions_array WHERE id_segment=:id_segment";
 
         $stmt  = $conn->prepare( $query );
-        $suggestions_array = (!empty($suggestions)) ? json_encode($suggestions) : null;
+        $suggestions_array = json_encode($suggestions);
 
         $params = [
             'id_segment'        => $id_segment,

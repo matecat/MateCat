@@ -1,5 +1,4 @@
 @import 'vendor_mc/semantic/matecat_semantic';
-@import 'vendor_mc/jquery.atwho';
 @import 'commons/colors';
 @import 'commons/matecat_fonts';
 @import 'commons/icons';
@@ -14,7 +13,7 @@
 @import 'project-completion-feature';
 @import 'editlog';
 @import 'components/header/segmentsFilter';
-@import 'revise';
+@import 'review_extended';
 //components
 @import 'commons/nav-bar';
 @import 'components/segment/segment';
@@ -41,6 +40,7 @@
 @import 'components/common/MenuButton';
 @import 'components/common/Tooltip';
 @import 'components/segment/segmentFooterTabAiAssistant';
+@import 'components/common/Button';
 
 @import 'cattool';
 
