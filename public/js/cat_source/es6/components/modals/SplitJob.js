@@ -20,7 +20,9 @@ const SplitJobModal = ({job, project, callback}) => {
   const [showError, setShowError] = useState(false)
   const [total, setTotal] = useState(0)
   const [errorMsg, setErrorMsg] = useState('')
-  const [splitRawWord, setSplitRawWords] = useState(false)
+  const [splitRawWord, setSplitRawWords] = useState(
+    job.get('stats').get('equivalent').get('total') === 0,
+  )
   const [splitData, setSplitData] = useState()
 
   const splitSelectRef = useRef(null)
