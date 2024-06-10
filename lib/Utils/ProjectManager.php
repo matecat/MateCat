@@ -2795,7 +2795,7 @@ class ProjectManager {
 
         if ( $stateQualifier !== null ) {
             if ( XliffTranslationStatus::isFuzzyMatch( $stateQualifier ) ) {
-                return Constants_TranslationStatus::STATUS_DRAFT;
+                return Constants_TranslationStatus::STATUS_NEW;
             }
         }
 
@@ -3409,7 +3409,7 @@ class ProjectManager {
         // ignore translations for fuzzy matches (xliff 1.2)
         if ( $stateQualifier !== null ) {
             if ( XliffTranslationStatus::isFuzzyMatch( $stateQualifier ) ) {
-                return true;
+                return false;
             }
         }
 
