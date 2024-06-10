@@ -35,8 +35,6 @@ class WordCountStruct implements JsonSerializable {
     protected $old_status = null;
     protected $new_status = null;
 
-    protected $analysis_complete = false;
-
     protected $total;
 
     /**
@@ -404,28 +402,11 @@ class WordCountStruct implements JsonSerializable {
     }
 
     /**
-     * @return bool
-     */
-    public function isAnalysisComplete()
-    {
-        return $this->analysis_complete;
-    }
-
-    /**
-     * @param bool $analysis_complete
-     */
-    public function setAnalysisComplete($analysis_complete)
-    {
-        $this->analysis_complete = $analysis_complete;
-    }
-
-    /**
      * @return array|mixed
      */
     public function jsonSerialize() {
 
         return [
-            'analysis_complete' => $this->analysis_complete,
             Projects_MetadataDao::WORD_COUNT_EQUIVALENT => [
                     'new'        => $this->new_words,
                     'draft'      => $this->draft_words,
@@ -441,6 +422,31 @@ class WordCountStruct implements JsonSerializable {
                     'approved'   => $this->approved_raw_words,
                     'approved2'  => $this->approved2_raw_words,
                     'total'      => $this->getRawTotal()
+            ]
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    public function toArray()
+    {
+        return [
+            Projects_MetadataDao::WORD_COUNT_EQUIVALENT => [
+                'new'        => $this->new_words,
+                'draft'      => $this->draft_words,
+                'translated' => $this->translated_words,
+                'approved'   => $this->approved_words,
+                'approved2'  => $this->approved2_words,
+                'total'      => $this->getTotal()
+            ],
+            Projects_MetadataDao::WORD_COUNT_RAW        => [
+                'new'        => $this->new_raw_words,
+                'draft'      => $this->draft_raw_words,
+                'translated' => $this->translated_raw_words,
+                'approved'   => $this->approved_raw_words,
+                'approved2'  => $this->approved2_raw_words,
+                'total'      => $this->getRawTotal()
             ]
         ];
     }
