@@ -1483,7 +1483,7 @@ class ProjectManager {
      *
      * @throws Exception
      */
-    public function getSplitData( ArrayObject $projectStructure, $num_split = 2, $requestedWordsPerSplit = [], $count_type  = Projects_MetadataDao::SPLIT_EQUIVALENT_WORD_TYPE ) {
+    public function getSplitData( ArrayObject $projectStructure, $num_split = 2, $requestedWordsPerSplit = [], $count_type = Projects_MetadataDao::SPLIT_EQUIVALENT_WORD_TYPE ) {
 
         $num_split = (int)$num_split;
 
@@ -1513,6 +1513,14 @@ class ProjectManager {
         }
 
         $total_words = $row_totals[ $count_type ];
+
+        // if the requested $count_type is empty (for example: equivalent raw count = 0),
+        // switch to the other one
+        if($total_words == 0){
+            $new_count_type = ($count_type === Projects_MetadataDao::SPLIT_EQUIVALENT_WORD_TYPE) ? Projects_MetadataDao::SPLIT_RAW_WORD_TYPE : Projects_MetadataDao::SPLIT_EQUIVALENT_WORD_TYPE;
+            $total_words = $row_totals[$new_count_type];
+            $count_type = $new_count_type;
+        }
 
         if ( empty( $requestedWordsPerSplit ) ) {
             /*
