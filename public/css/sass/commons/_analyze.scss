@@ -775,8 +775,11 @@ body.analyze {
         .job-body {
           background-color: $grey5;
           .chunks {
+            overflow-x: auto;
             .chunk-container {
               padding-top: 0;
+              overflow-x: auto;
+              min-width: 1100px;
               .analysis {
                 //padding-top: 60px;
                 margin-top: 0;
