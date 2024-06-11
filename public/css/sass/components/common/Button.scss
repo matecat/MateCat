@@ -63,7 +63,7 @@ a.button-component-container {
       background-color: var(--btnBgColorSemitransAlt);
     }
 
-    &:not(:disabled):hover ,
+    &:not(:disabled):hover,
     &:not(:disabled):focus {
       box-shadow: inset 0 0 0 1px var(--btnBorderColorHover);
       background-color: var(--btnBgColorSemitrans);
@@ -89,7 +89,7 @@ a.button-component-container {
     }
 
     &:not(:disabled):hover,
-    &:not(:disabled):focus{
+    &:not(:disabled):focus {
       background-color: var(--btnBgColorSemitrans);
       color: var(--btnAltTextColor);
     }

@@ -7,8 +7,8 @@ use Features;
 use FeatureSet;
 use LQA\QA;
 use Matecat\SubFiltering\MateCatFilter;
+use Matecat\SubFiltering\Utils\DataRefReplacer;
 use Matecat\XliffParser\XliffReplacer\XliffReplacerCallbackInterface;
-use Matecat\XliffParser\XliffUtils\DataRefReplacer;
 
 class XliffReplacerCallback implements XliffReplacerCallbackInterface {
 

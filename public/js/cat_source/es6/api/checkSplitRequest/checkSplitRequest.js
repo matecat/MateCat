@@ -8,7 +8,7 @@ export const checkSplitRequest = async (
   arrayValues,
   splitRawWords,
 ) => {
-  const params = flattenObject({
+  const params = {
     exec: 'check',
     project_id: project.id,
     project_pass: project.password,
@@ -17,7 +17,7 @@ export const checkSplitRequest = async (
     num_split: numsplit,
     split_values: arrayValues,
     split_raw_words: splitRawWords,
-  })
+  }
   const formData = new FormData()
 
   Object.keys(params).forEach((key) => {
