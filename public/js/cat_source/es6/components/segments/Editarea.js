@@ -172,8 +172,9 @@ class Editarea extends React.Component {
 
   addIcuDecorator = () => {
     const {editorState} = this.state
-    const {decodedSegment} = DraftMatecatUtils.decodeSegment(editorState)
-    const newDecorator = createICUDecorator(decodedSegment, editorState)
+    let contentState = editorState.getCurrentContent()
+    let plainText = contentState.getPlainText()
+    const newDecorator = createICUDecorator(plainText, editorState)
     remove(
       this.decoratorsStructure,
       (decorator) => decorator.name === DraftMatecatConstants.ICU_DECORATOR,
