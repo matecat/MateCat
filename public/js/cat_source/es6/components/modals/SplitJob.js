@@ -330,6 +330,11 @@ const SplitJobModal = ({job, project, callback}) => {
           </div>
         </div>
         <div className="popup-box split-box4">
+          {showError && (
+            <div className="error">
+              <span className="err-msg">{errorMsg}</span>
+            </div>
+          )}
           <Button
             mode={BUTTON_MODE.OUTLINE}
             size={BUTTON_SIZE.MEDIUM}
@@ -358,11 +363,6 @@ const SplitJobModal = ({job, project, callback}) => {
           {showLoader && (
             <div className="loader">
               <i className="fa fa-spinner fa-spin"></i>
-            </div>
-          )}
-          {showError && (
-            <div className="error">
-              <span className="err-msg">{errorMsg}</span>
             </div>
           )}
         </div>
