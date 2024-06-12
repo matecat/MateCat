@@ -52,7 +52,7 @@ class FilterSegments extends React.Component {
     filter[type] = value
     if (type === 'status' && value === 'APPROVED-2') {
       filter.revision_number = 2
-      filter[type] = 'APPROVED'
+      filter[type] = 'APPROVED2'
     } else if (type === 'status' && value === 'APPROVED') {
       filter.revision_number = 1
     } else {
