@@ -43,6 +43,7 @@ trait ProjectWordCount {
                     , COUNT( s.id ) AS project_segments,
                     SUM(
                         CASE
+                            WHEN st.tm_analysis_status = 'SKIPPED' THEN 1
                             WHEN st.standard_word_count != 0 THEN IF( st.tm_analysis_status = 'DONE', 1, 0 )
                             WHEN st.standard_word_count = 0 THEN 1
                         END
@@ -52,7 +53,7 @@ trait ProjectWordCount {
                 INNER JOIN jobs j ON j.id=st.id_job
                 WHERE j.id_project = :pid
                 AND st.locked = 0
-                AND match_type != 'ICE'
+                AND match_type NOT IN ( 'ICE', 'SKIPPED' )
                 GROUP BY id_job WITH ROLLUP
         ";
 

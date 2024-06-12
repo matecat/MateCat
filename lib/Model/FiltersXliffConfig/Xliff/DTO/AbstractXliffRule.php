@@ -8,9 +8,8 @@ use JsonSerializable;
 use RecursiveArrayObject;
 
 abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable {
-    const ALLOWED_STATES   = [];
-    const STATES_QUALIFIER = [];
-    const STATES           = [];
+    protected static $_STATE_QUALIFIERS = [];
+    protected static $_STATES           = [];
 
     // analysis behaviour
     const _ANALYSIS_PRE_TRANSLATED = "pre-translated";
@@ -23,12 +22,12 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
     const _IGNORE_TARGET_CONTENT = "ignore-target-content";
     const _KEEP_TARGET_CONTENT   = "keep-target-content";
 
-    const ALLOWED_ANALYSIS = [
+    const ALLOWED_ANALYSIS_VALUES = [
             self::_ANALYSIS_PRE_TRANSLATED,
             self::_ANALYSIS_NEW
     ];
 
-    const ALLOWED_EDITOR = [
+    const ALLOWED_EDITOR_VALUES = [
             self::_TRANSLATED,
             self::_APPROVED,
             self::_APPROVED2,
@@ -41,7 +40,19 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
      */
     protected $states = [
             'states'           => [],
-            'states-qualifier' => []
+            'state-qualifiers' => []
+    ];
+
+    protected static $VALIDATION_MAP = [
+            self::_ANALYSIS_NEW            => [
+                    self::_IGNORE_TARGET_CONTENT,
+                    self::_KEEP_TARGET_CONTENT
+            ],
+            self::_ANALYSIS_PRE_TRANSLATED => [
+                    self::_TRANSLATED,
+                    self::_APPROVED,
+                    self::_APPROVED2,
+            ],
     ];
 
     /**
@@ -72,23 +83,12 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
      * @param $editor
      */
     protected function validateAnalysisAndEditor( $analysis, $editor ) {
-        $validationMap = [
-                self::_ANALYSIS_NEW            => [
-                        self::_IGNORE_TARGET_CONTENT,
-                        self::_KEEP_TARGET_CONTENT
-                ],
-                self::_ANALYSIS_PRE_TRANSLATED => [
-                        self::_TRANSLATED,
-                        self::_APPROVED,
-                        self::_APPROVED2,
-                ],
-        ];
 
-        if ( !isset( $validationMap[ $analysis ] ) ) {
+        if ( !isset( static::$VALIDATION_MAP[ $analysis ] ) ) {
             throw new DomainException( "Wrong analysis value", 400 );
         }
 
-        if ( !in_array( $editor, $validationMap[ $analysis ] ) ) {
+        if ( !in_array( $editor, static::$VALIDATION_MAP[ $analysis ] ) ) {
             throw new DomainException( "Wrong analysis/editor combination", 400 );
         }
     }
@@ -99,17 +99,17 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
     protected function setStates( array $states ) {
 
         foreach ( $states as $state ) {
-            if ( !in_array( $state, static::ALLOWED_STATES ) ) {
+            if ( !in_array( $state, array_merge( static::$_STATES, static::$_STATE_QUALIFIERS ) ) ) {
                 throw new DomainException( "Wrong state value", 400 );
             }
 
-            if ( in_array( $state, static::STATES ) ) {
+            if ( in_array( $state, static::$_STATES ) ) {
                 $this->states[ 'states' ][] = strtolower( $state );
                 continue;
             }
 
-            if ( in_array( $state, static::STATES_QUALIFIER ) ) {
-                $this->states[ 'states-qualifier' ][] = strtolower( $state );
+            if ( in_array( $state, static::$_STATE_QUALIFIERS ) ) {
+                $this->states[ 'state-qualifiers' ][] = strtolower( $state );
             }
 
         }
@@ -120,7 +120,7 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
      * @param $analysis
      */
     protected function setAnalysis( $analysis ) {
-        if ( !in_array( $analysis, static::ALLOWED_ANALYSIS ) ) {
+        if ( !in_array( $analysis, static::ALLOWED_ANALYSIS_VALUES ) ) {
             throw new DomainException( "Wrong analysis value", 400 );
         }
 
@@ -131,7 +131,7 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
      * @param $editor
      */
     protected function setEditor( $editor ) {
-        if ( !in_array( $editor, static::ALLOWED_EDITOR ) ) {
+        if ( !in_array( $editor, static::ALLOWED_EDITOR_VALUES ) ) {
             throw new DomainException( "Wrong editor value", 400 );
         }
 
@@ -153,7 +153,7 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
     public function jsonSerialize() {
 
         return [
-                'states'   => array_merge( $this->states[ 'states' ], $this->states[ 'states-qualifier' ] ),
+                'states'   => array_merge( $this->states[ 'states' ], $this->states[ 'state-qualifiers' ] ),
                 'analysis' => $this->analysis,
                 'editor'   => $this->editor,
         ];
@@ -168,31 +168,31 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
         switch ( $type ) {
             case 'states':
                 return $this->states[ 'states' ];
-            case 'states-qualifier':
-                return $this->states[ 'states-qualifier' ];
+            case 'state-qualifiers':
+                return $this->states[ 'state-qualifiers' ];
             default:
-                return array_merge( $this->states[ 'states' ], $this->states[ 'states-qualifier' ] );
+                return array_merge( $this->states[ 'states' ], $this->states[ 'state-qualifiers' ] );
         }
     }
 
     /**
      * @return string
      */
-    public function getAnalysis() {
+    protected function getAnalysis() {
         return $this->analysis;
     }
 
     /**
      * @return string
      */
-    public function getEditor() {
+    protected function getEditor() {
         return $this->editor;
     }
 
     /**
      * @return string
      */
-    public function asEditorStatus(){
+    public function asEditorStatus() {
 
         if ( $this->getAnalysis() == AbstractXliffRule::_ANALYSIS_PRE_TRANSLATED ) {
             switch ( $this->getEditor() ) {
@@ -205,20 +205,31 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
             }
         }
 
-        return Constants_TranslationStatus::STATUS_NEW; // here is impossible to have an editor rule AbstractXliffRule::_IGNORE_TARGET_CONTENT, so keep as new
+        // here is impossible to have an editor rule AbstractXliffRule::_IGNORE_TARGET_CONTENT, so keep as draft
+        return Constants_TranslationStatus::STATUS_DRAFT;
 
     }
 
     /**
+     * @param string|null $source
+     * @param string|null $target
+     *
      * @return bool
      */
-    public function isTranslated(){
+    public function isTranslated( $source = null, $target = null ) {
         if ( $this->getAnalysis() == AbstractXliffRule::_ANALYSIS_NEW && $this->getEditor() == AbstractXliffRule::_IGNORE_TARGET_CONTENT ) {
             return false;
         } else {
             // all cases
             return true;
         }
+    }
+
+    /**
+     * @return string
+     */
+    public function asMatchType() {
+        return 'INTERNAL';
     }
 
 }

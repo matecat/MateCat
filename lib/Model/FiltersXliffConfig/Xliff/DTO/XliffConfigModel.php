@@ -89,6 +89,32 @@ class XliffConfigModel implements JsonSerializable {
     }
 
     /**
+     * @param int    $versionNumber
+     * @param string $state
+     * @param string $stateQualifier
+     *
+     * @return XliffRuleInterface
+     */
+    public function getMatchingRule( $versionNumber, $state, $stateQualifier ) {
+
+        // here we must analyze and check only for editor status
+        foreach ( $this->getRulesForVersion( $versionNumber ) as $rule ) {
+
+            if ( $stateQualifier !== null && in_array( strtolower( $stateQualifier ), $rule->getStates( 'state-qualifiers' ) ) ) {
+                return $rule;
+            }
+
+            if ( $state !== null && in_array( strtolower( $state ), $rule->getStates( 'states' ) ) ) {
+                return $rule;
+            }
+
+        }
+
+        return new DefaultRule( array_filter( [ $state, $stateQualifier ] ), AbstractXliffRule::_ANALYSIS_PRE_TRANSLATED, null );
+
+    }
+
+    /**
      * @inheritDoc
      */
     public

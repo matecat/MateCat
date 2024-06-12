@@ -3,17 +3,13 @@
 namespace FiltersXliffConfig\Xliff\DTO;
 
 interface XliffRuleInterface {
+
+    /**
+     * @param $type
+     *
+     * @return string[]
+     */
     public function getStates( $type = null );
-
-    /**
-     * @return string
-     */
-    public function getAnalysis();
-
-    /**
-     * @return string
-     */
-    public function getEditor();
 
     /**
      * @return string
@@ -21,8 +17,16 @@ interface XliffRuleInterface {
     public function asEditorStatus();
 
     /**
+     * @param string|null $source
+     * @param string|null $target
+     *
      * @return bool
      */
-    public function isTranslated();
+    public function isTranslated( $source = null, $target = null );
+
+    /**
+     * @return string
+     */
+    public function asMatchType();
 
 }

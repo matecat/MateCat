@@ -304,24 +304,6 @@ class ProjectManager {
     }
 
     /**
-     * @param $id
-     *
-     * @throws NotFoundException
-     * @throws Exception
-     */
-    public function setProjectIdAndLoadProject( $id ) {
-        $this->project = Projects_ProjectDao::findById( $id, 60 * 60 );
-        if ( !$this->project ) {
-            throw new NotFoundException( "Project was not found: id $id " );
-        }
-        $this->projectStructure[ 'id_project' ]  = $this->project->id;
-        $this->projectStructure[ 'id_customer' ] = $this->project->id_customer;
-
-        $this->reloadFeatures();
-
-    }
-
-    /**
      * @throws Exception
      */
     public function setProjectAndReLoadFeatures( Projects_ProjectStruct $pStruct ) {
@@ -1972,9 +1954,8 @@ class ProjectManager {
 
                                     if ( $this->features->filter( 'populatePreTranslations', true ) ) {
 
-                                        // could not have attributes, suppress warning
-                                        $state                   = isset( $xliff_trans_unit[ 'seg-target' ][ $position ][ 'attr' ][ 'state' ] ) ? $xliff_trans_unit[ 'seg-target' ][ $position ][ 'attr' ][ 'state' ] : null;
-                                        $stateQualifier          = isset( $xliff_trans_unit[ 'seg-target' ][ $position ][ 'attr' ][ 'state-qualifier' ] ) ? $xliff_trans_unit[ 'seg-target' ][ $position ][ 'attr' ][ 'state-qualifier' ] : null;
+                                        $stateValues = $this->getTargetStatesFromTransUnit( $xliff_trans_unit, $position );
+
                                         $target_extract_external = $this->_strip_external( $xliff_trans_unit[ 'seg-target' ][ $position ][ 'raw-content' ], $xliffInfo );
 
                                         //
@@ -1995,7 +1976,7 @@ class ProjectManager {
                                         $src = CatUtils::trimAndStripFromAnHtmlEntityDecoded( $extract_external[ 'seg' ] );
                                         $trg = CatUtils::trimAndStripFromAnHtmlEntityDecoded( $target_extract_external[ 'seg' ] );
 
-                                        if ( $this->__isTranslated( $src, $trg, $xliff_trans_unit, $xliffInfo, $state, $stateQualifier ) && !is_numeric( $src ) && !empty( $trg ) ) { //treat 0,1,2... as translated content!
+                                        if ( $this->__isTranslated( $src, $trg, $stateValues[ 'state' ], $stateValues[ 'state-qualifier' ] ) && !is_numeric( $src ) && !empty( $trg ) ) { //treat 0,1,2... as translated content!
 
                                             $target = $this->filter->fromRawXliffToLayer0( $target_extract_external[ 'seg' ] );
 
@@ -2124,12 +2105,11 @@ class ProjectManager {
 
                             if ( isset( $xliff_trans_unit[ 'target' ][ 'raw-content' ] ) ) {
 
-                                // could not have attributes, suppress warning
-                                $state                   = ( isset( $xliff_trans_unit[ 'target' ][ 'attr' ][ 'state' ] ) ) ? $xliff_trans_unit[ 'target' ][ 'attr' ][ 'state' ] : null;
-                                $stateQualifier          = ( isset( $xliff_trans_unit[ 'target' ][ 'attr' ][ 'state-qualifier' ] ) ) ? $xliff_trans_unit[ 'target' ][ 'attr' ][ 'state-qualifier' ] : null;
+                                $stateValues = $this->getTargetStatesFromTransUnit( $xliff_trans_unit );
+
                                 $target_extract_external = $this->_strip_external( $xliff_trans_unit[ 'target' ][ 'raw-content' ], $xliffInfo );
 
-                                if ( $this->__isTranslated( $xliff_trans_unit[ 'source' ][ 'raw-content' ], $target_extract_external[ 'seg' ], $xliff_trans_unit, $xliffInfo, $state, $stateQualifier ) && !is_numeric( $xliff_trans_unit[ 'source' ][ 'raw-content' ] ) && !empty( $target_extract_external[ 'seg' ] ) ) {
+                                if ( $this->__isTranslated( $xliff_trans_unit[ 'source' ][ 'raw-content' ], $target_extract_external[ 'seg' ], $stateValues[ 'state' ], $stateValues[ 'state-qualifier' ] ) && !is_numeric( $xliff_trans_unit[ 'source' ][ 'raw-content' ] ) && !empty( $target_extract_external[ 'seg' ] ) ) {
 
                                     $target = $this->filter->fromRawXliffToLayer0( $target_extract_external[ 'seg' ] );
 
@@ -2230,7 +2210,6 @@ class ProjectManager {
 
         }
 
-        // *NOTE*: PHP>=5.3 throws UnexpectedValueException, but PHP 5.2 throws ErrorException
         //use generic
         if ( count( $this->projectStructure[ 'segments' ][ $fid ] ) == 0 || $_fileCounter_Show_In_Cattool == 0 ) {
             $this->_log( "Segment import - no segments found in {$file_info[ 'original_filename' ]}\n" );
@@ -2318,7 +2297,7 @@ class ProjectManager {
         $fileDateSha1Path = $yearMonthPath . DIRECTORY_SEPARATOR . $sha1_original;
 
         //return structure
-        $filesStructure = [];
+        $fileStructures = [];
 
         foreach ( $_originalFileNames as $pos => $originalFileName ) {
 
@@ -2349,25 +2328,11 @@ class ProjectManager {
 
             $this->projectStructure[ 'file_id_list' ]->append( $fid );
 
-            $filesStructure[ $fid ] = [ 'fid' => $fid, 'original_filename' => $originalFileName, 'path_cached_xliff' => $cachedXliffFilePathName, 'mime_type' => $mimeType ];
+            $fileStructures[ $fid ] = [ 'fid' => $fid, 'original_filename' => $originalFileName, 'path_cached_xliff' => $cachedXliffFilePathName, 'mime_type' => $mimeType ];
         }
 
-        return $filesStructure;
+        return $fileStructures;
     }
-
-    /**
-     * @param ArrayObject $projectStructure
-     * @param             $file_name
-     * @param             $mime_type
-     * @param             $fileDateSha1Path
-     *
-     * @return mixed|string
-     * @throws Exception
-     */
-    protected function _insertFile( ArrayObject $projectStructure, $file_name, $mime_type, $fileDateSha1Path ) {
-        return ProjectManagerModel::insertFile( $projectStructure, $file_name, $mime_type, $fileDateSha1Path );
-    }
-
 
     /**
      * @throws NotFoundException
@@ -2683,11 +2648,6 @@ class ProjectManager {
      * @param Jobs_JobStruct $job
      * @param ArrayObject    $projectStructure
      *
-     * @throws NotFoundException
-     * @throws AuthenticationError
-     * @throws ValidationError
-     * @throws EndQueueException
-     * @throws ReQueueException
      * @throws Exception
      */
     protected function _insertPreTranslations( Jobs_JobStruct $job, ArrayObject $projectStructure ) {
@@ -2708,35 +2668,26 @@ class ProjectManager {
 
                 $position = ( isset( $translation_row[ 6 ] ) ) ? $translation_row[ 6 ] : null;
                 $segment  = ( new Segments_SegmentDao() )->getById( $translation_row [ 0 ] );
-//                $ice_payable_rates = ( isset( $this->projectStructure[ 'array_jobs' ][ 'payable_rates' ][ $jid ][ 'ICE' ] ) ) ? $this->projectStructure[ 'array_jobs' ][ 'payable_rates' ][ $jid ][ 'ICE' ] : null;
-//                $ice_payable_rates = ( isset( $this->projectStructure[ 'array_jobs' ][ 'payable_rates' ][ $jid ][ 'NO_MATCH' ] ) ) ? $this->projectStructure[ 'array_jobs' ][ 'payable_rates' ][ $jid ][ 'NO_MATCH' ] : null;
 
                 if ( is_string( $this->projectStructure[ 'array_jobs' ][ 'payable_rates' ][ $jid ] ) ) {
                     $payable_rates = json_decode( $this->projectStructure[ 'array_jobs' ][ 'payable_rates' ][ $jid ], true );
                 }
 
-                $ice_payable_rates = ( isset( $payable_rates[ 'NO_MATCH' ] ) ) ? $payable_rates[ 'NO_MATCH' ] : null;
-                $originalState     = isset( $translation_row[ 4 ][ 'seg-target' ][ $position ][ 'attr' ][ 'state' ] ) ? $translation_row[ 4 ][ 'seg-target' ][ $position ][ 'attr' ][ 'state' ] : null;
+                /**
+                 * @var $configModel XliffConfigModel
+                 */
+                $configModel = $this->projectStructure[ 'xliff_parameters' ];
+                $stateValues = $this->getTargetStatesFromTransUnit( $translation_row[ 4 ], $position );
 
-                $iceLockArray = $this->features->filter( 'setSegmentTranslationFromXliffValues',
-                        [
-                                'approved'            => @$translation_row [ 4 ][ 'attr' ][ 'approved' ],
-                                'locked'              => 0,
-                                'match_type'          => 'NO_MATCH',
-                            // we want to be consistent, eq_word_count must be set to the correct value discounted by payable rate, no more exceptions.
-                                'eq_word_count'       => floatval( $segment->raw_word_count / 100 * $ice_payable_rates ),
-                                'standard_word_count' => null,
-                                'status'              => $this->evaluateTranslationStatus( $translation_row[ 4 ], $position ),
-                                'suggestion_match'    => null,
-                                'suggestion'          => null,
-                                'trans-unit'          => $translation_row[ 4 ],
-                                'payable_rates'       => $this->projectStructure[ 'array_jobs' ][ 'payable_rates' ][ $jid ]
-                        ],
-                        $this->projectStructure,
-                        $this->filter
+                $rule = $configModel->getMatchingRule(
+                        $this->projectStructure[ 'current-xliff-info' ][ 'version' ],
+                        $stateValues[ 'state' ],
+                        $stateValues[ 'state-qualifier' ]
                 );
 
-                if ( XliffTranslationStatus::isFinalState( $originalState ) ) {
+                $ice_payable_rates = ( isset( $payable_rates[ $rule->asMatchType() ] ) ) ? $payable_rates[ $rule->asMatchType() ] : null;
+
+                if ( XliffTranslationStatus::isFinalState( $stateValues[ 'state' ] ) ) {
                     $createSecondPassReview = true;
                 }
 
@@ -2757,21 +2708,21 @@ class ProjectManager {
                 $check->setIdSegment( $translation_row [ 0 ] );
                 $check->performConsistencyCheck();
 
-                /* WARNING do not change the order of the keys */
+                /* WARNING: do not change the order of the keys */
                 $sql_values = [
                         'id_segment'             => $translation_row [ 0 ],
                         'id_job'                 => $jid,
                         'segment_hash'           => $translation_row [ 3 ],
-                        'status'                 => $iceLockArray[ 'status' ],
+                        'status'                 => $rule->asEditorStatus(),
                         'translation'            => $filter->fromLayer1ToLayer0( $check->getTargetSeg() ),
                         'locked'                 => 0, // not allowed to change locked status for pre-translations
-                        'match_type'             => $iceLockArray[ 'match_type' ],
-                        'eq_word_count'          => $iceLockArray[ 'eq_word_count' ],
+                        'match_type'             => $rule->asMatchType(),
+                        'eq_word_count'          => floatval( $segment->raw_word_count / 100 * $ice_payable_rates ),
                         'serialized_errors_list' => ( $check->thereAreErrors() ) ? $check->getErrorsJSON() : '',
                         'warning'                => ( $check->thereAreErrors() ) ? 1 : 0,
-                        'suggestion_match'       => $iceLockArray[ 'suggestion_match' ],
-                        'standard_word_count'    => $iceLockArray[ 'standard_word_count' ],
-                        'version_number'         => ( isset( $iceLockArray[ 'version_number' ] ) ) ? $iceLockArray[ 'version_number' ] : 0,
+                        'suggestion_match'       => null,
+                        'standard_word_count'    => null,
+                        'version_number'         => 0,
                 ];
 
                 $query_translations_values[] = $sql_values;
@@ -2794,12 +2745,11 @@ class ProjectManager {
     }
 
     /**
-     * @param      $trans_unit
-     * @param null $position
+     * @param array $trans_unit
      *
-     * @return string
+     * @return array
      */
-    private function evaluateTranslationStatus( $trans_unit, $position = null ) {
+    protected function getTargetStatesFromTransUnit( $trans_unit, $position = null ) {
 
         // state handling
         $state          = null;
@@ -2817,288 +2767,19 @@ class ProjectManager {
             $stateQualifier = $trans_unit[ 'target' ][ 'attr' ][ 'state-qualifier' ];
         }
 
-        /**
-         * @var $configModel XliffConfigModel
-         */
-        $configModel = $this->projectStructure[ 'xliff_parameters' ];
-        $rules       = $configModel->getRulesForVersion( $this->projectStructure[ 'current-xliff-info' ][ 'version' ] );
+        return [ 'state' => $state, 'state-qualifier' => $stateQualifier ];
 
-        // here we must analyze and check only for editor status
-        foreach ( $rules as $rule ) {
-
-            if ( $stateQualifier !== null && in_array( strtolower( $stateQualifier ), $rule->getStates( 'states-qualifier' ) ) ) {
-                return $rule->asEditorStatus();
-            }
-
-            if ( $state !== null && in_array( strtolower( $state ), $rule->getStates( 'states' ) ) ) {
-                return $rule->asEditorStatus();
-            }
-
-        }
-
-        // default behavior
-        if ( $stateQualifier !== null ) {
-            if ( XliffTranslationStatus::isStateQualifierNew( $stateQualifier ) ) {
-                return Constants_TranslationStatus::STATUS_NEW;
-            }
-        }
-
-        // default behavior
-        if ( $state !== null ) {
-
-            if ( XliffTranslationStatus::isStatusNew( $state ) ) {
-                return Constants_TranslationStatus::STATUS_NEW;
-            }
-
-            if ( XliffTranslationStatus::isTranslated( $state ) ) {
-                return Constants_TranslationStatus::STATUS_TRANSLATED;
-            }
-
-            if ( XliffTranslationStatus::isRevision( $state ) ) {
-                return Constants_TranslationStatus::STATUS_APPROVED;
-            }
-
-            if ( XliffTranslationStatus::isFinalState( $state ) ) {
-                return Constants_TranslationStatus::STATUS_APPROVED2;
-            }
-
-        }
-
-        // retro-compatibility
-        return Constants_TranslationStatus::STATUS_APPROVED;
     }
 
     /**
-     * @param       $segment
-     * @param array $xliffInfo
+     * @param string $segment
      *
      * @return array
-     * @throws AuthenticationError
-     * @throws NotFoundException
-     * @throws ValidationError
-     * @throws EndQueueException
-     * @throws ReQueueException
      */
-    protected function _strip_external( $segment, $xliffInfo = [
-            'info'                   => [],
-            'proprietary'            => false,
-            'proprietary_name'       => null,
-            'proprietary_short_name' => null,
-            'version'                => 1,
-            'converter_version'      => null,
-    ] ) {
+    protected function _strip_external( $segment ) {
 
         // Definitely DISABLED
-        if ( true ) {
-            return [ 'prec' => null, 'seg' => $segment, 'succ' => null ];
-        }
-
-        if ( $xliffInfo[ 'version' ] == 2 ) {
-            return [ 'prec' => null, 'seg' => $segment, 'succ' => null ];
-        }
-
-        if ( $this->features->filter( 'skipTagLessFeature', false, $segment ) ) {
-            return [ 'prec' => null, 'seg' => $segment, 'succ' => null ];
-        }
-
-        // With regular expressions you can't strip a segment like this:
-        //   <g>hello <g>world</g></g>
-        // While keeping untouched this other:
-        //   <g>hello</g> <g>world</g>
-
-        // For this reason, regular expression are not suitable for this task.
-        // The previous version of this function used regular expressions,
-        // but was limited. The new version works in every situation and is
-        // equally fast (tested in a batch execution on the segments of 500
-        // real docs).
-
-        // The function scans the entire string looking for tags and letters.
-        // Spaces and self-closing tags are ignored. After the string scan,
-        // the function remembers the first and last letter, and the positions
-        // of all tags openings/closures. In the second step the function checks
-        // all the tags opened or closed between the first and last letter, and
-        // ensures that closures and openings of those tags are not stripped out.
-
-        //TODO IMPROVEMENT:
-        // - Why scan entire string if the fist char is not a less-than sign? We can't strip nothing
-        // - Why continue if the first char is a less-than sign but we realize that it is not a tag?
-
-        $segmentLength = strlen( $segment );
-
-        // This is the fastest way I found to spot Unicode whitespaces in the string.
-        // Removing this step gives a gain of 7% in speed.
-        $isSpace = [];
-
-        if ( preg_match_all( '|\p{Mc}+|u', $segment, $matches, PREG_OFFSET_CAPTURE ) ) {
-            foreach ( $matches[ 0 ] as $match ) {
-                // All the bytes in the matched groups are whitespaces and must be
-                // ignored in the next steps
-                $start = $match[ 1 ];
-                $end   = $start + strlen( $match[ 0 ] );
-                for ( $i = $start; $i < $end; $i++ ) {
-                    $isSpace[ $i ] = true;
-                }
-            }
-        }
-
-        // Used as a stack: push on tag openings, pop on tag closure
-        $openings = [];
-        // Stores all the tags found: key is '<' position of the opening tag,
-        // value is '>' position of the closure tag.
-        $tags = [];
-        // If the XML in the segment is malformed, no stripping is performed and the
-        // segment is returned as it is
-        $malformed = false;
-
-        // The positions of first and last letters
-        $firstLetter = -1;
-        $lastLetter  = -1;
-
-        // Scan the input segment
-        for ( $i = 0; $i < $segmentLength; $i++ ) {
-            if ( isset( $isSpace[ $i ] ) ) {  // Using isset is faster than checking the addressed value
-                // The current char is a space, skip it
-                continue;
-
-            } elseif ( $segment[ $i ] == '<' ) {
-                // A tag is starting here
-                $tagStart = $i;
-
-                if ( $i == $segmentLength - 1 ) {
-                    // If this is the last char of the string, we have a problem
-                    $malformed = true;
-                    break;
-                }
-
-                $i++;
-                // It's a closure tag if it starts with '</'
-                $closureTag = ( $segment[ $i ] == '/' );
-
-                // Fast-forward to the '>' char
-                while ( $i < $segmentLength && $segment[ $i ] != '>' ) {
-                    $i++;
-                }
-
-                if ( $i == $segmentLength && $segment[ $i ] != '>' ) {
-                    // If we reached the end of the string and no '>' was found
-                    // the segment is malformed
-                    $malformed = true;
-                    break;
-                }
-
-                if ( $segment[ $i - 1 ] == '/' ) {
-                    // If the tag ends with '/>' it's a self-closing tag, and
-                    // it can be skipped
-                    continue;
-
-                } else {
-                    if ( $closureTag ) {
-                        // It's a closure tag
-                        if ( count( $openings ) == 0 ) {
-                            // If there are no openings in the stack the input is malformed
-                            $malformed = true;
-                            break;
-                        }
-                        $opening = array_pop( $openings );
-                        // Remember the tag opening and closure for later
-                        $tags[ $opening ] = $i;
-
-                    } else {
-                        // It's an opening tag, add it to the stack
-                        $openings[] = $tagStart;
-                        // Following line ensures that the tags in the array
-                        // are sorted by openings; leaving just the assignment in the
-                        // closure handling code would make the array sorted by
-                        // closures, breaking the logic of the loop in the next step
-                        $tags[ $tagStart ] = -1;
-                    }
-                }
-
-            } else {
-                // If here, the char is not a space, and it's not inside a tag
-                if ( $firstLetter == -1 ) {
-                    $firstLetter = $i;
-                }
-                $lastLetter = $i;
-            }
-        }
-
-        if ( count( $openings ) != 0 ) {
-            // If after the entire string scan we have pending openings in the stack,
-            // the input is malformed
-            $malformed = true;
-        }
-
-        if ( $malformed ) {
-            // If malformed don't strip anything, return the input as it is
-            $before       = '';
-            $cleanSegment = $segment;
-            $after        = '';
-
-        } elseif ( $firstLetter == -1 ) {
-            // No letters found, so the entire segment can be stripped
-            $before       = $segment;
-            $cleanSegment = '';
-            $after        = '';
-
-        } else {
-            // Here is the regular situation.
-            // Start supposing that the output segment starts at the first letter
-            // and ends at the last one.
-            $segStart = $firstLetter;
-            $segEnd   = $lastLetter;
-
-            // Loop through all the tags found
-            foreach ( $tags as $start => $end ) {
-                // At the first tag starting after the last letter we're done here
-                if ( $start > $lastLetter ) {
-                    break;
-                }
-                if ( $start > $firstLetter && $start < $lastLetter ) {
-                    // Found an opening tag in the meaningful slice: ensure that
-                    // the closure tag is not stripped out
-                    $segEnd = max( $segEnd, $end );
-                } elseif ( $end > $firstLetter && $end < $lastLetter ) {
-                    // Found a closure tag in the meaningful slice: ensure that
-                    // the opening tag is not stripped out
-                    $segStart = min( $segStart, $start );
-                }
-            }
-
-            // Almost finished
-            $before       = substr( $segment, 0, $segStart );
-            $cleanSegment = substr( $segment, $segStart, $segEnd - $segStart + 1 );
-            $after        = substr( $segment, $segEnd + 1 );
-
-            // Following line needed in case $segEnd points to the last char of $segment
-            if ( $after === false ) {
-                $after = '';
-            }
-        }
-
-        return [ 'prec' => $before, 'seg' => $cleanSegment, 'succ' => $after ];
-    }
-
-    /**
-     * @param $mimeType
-     *
-     * @return bool
-     */
-    public static function notesAllowedByMimeType( $mimeType ) {
-        return in_array( $mimeType, [ 'sdlxliff', 'xliff', 'xlf' ] );
-    }
-
-    public static function getExtensionFromMimeType( $mime_type ) {
-
-        if ( array_key_exists( $mime_type, INIT::$MIME_TYPES ) ) {
-            if ( array_key_exists( 'default', INIT::$MIME_TYPES[ $mime_type ] ) ) {
-                return INIT::$MIME_TYPES[ $mime_type ][ 'default' ];
-            }
-
-            return INIT::$MIME_TYPES[ $mime_type ][ array_rand( INIT::$MIME_TYPES[ $mime_type ] ) ]; // rand :D
-        }
-
-        return null;
+        return [ 'prec' => null, 'seg' => $segment, 'succ' => null ];
 
     }
 
@@ -3207,9 +2888,9 @@ class ProjectManager {
         if ( $this->projectStructure[ 'notes' ]->offsetExists( $internal_id ) ) {
 
             if ( count( $this->projectStructure[ 'notes' ][ $internal_id ][ 'json' ] ) != 0 ) {
-                array_push( $this->projectStructure[ 'notes' ][ $internal_id ][ 'json_segment_ids' ], $row[ 'id' ] );
+                $this->projectStructure[ 'notes' ][ $internal_id ][ 'json_segment_ids' ][] = $row[ 'id' ];
             } else {
-                array_push( $this->projectStructure[ 'notes' ][ $internal_id ][ 'segment_ids' ], $row[ 'id' ] );
+                $this->projectStructure[ 'notes' ][ $internal_id ][ 'segment_ids' ][] = $row[ 'id' ];
             }
 
         }
@@ -3261,7 +2942,7 @@ class ProjectManager {
         $internal_id = $row[ 'internal_id' ];
 
         if ( $this->projectStructure[ 'context-group' ]->offsetExists( $internal_id ) ) {
-            array_push( $this->projectStructure[ 'context-group' ][ $internal_id ][ 'context_json_segment_ids' ], $row[ 'id' ] );
+            $this->projectStructure[ 'context-group' ][ $internal_id ][ 'context_json_segment_ids' ][] = $row[ 'id' ];
         }
 
     }
@@ -3283,38 +2964,6 @@ class ProjectManager {
 
     private static function sanitizedUnitId( $trans_unitID, $fid ) {
         return $fid . "|" . $trans_unitID;
-    }
-
-    private function fileMustBeConverted( $filePathName, $forceXliff ) {
-
-        $mustBeConverted = XliffProprietaryDetect::fileMustBeConverted( $filePathName, $forceXliff, INIT::$FILTERS_ADDRESS );
-
-        /**
-         * Application misconfiguration.
-         * upload should not be happened, but if we are here, raise an error.
-         * @see upload.class.php
-         * */
-        if ( -1 === $mustBeConverted ) {
-            $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                    "code"    => -8,
-                    "message" => "Proprietary xlf format detected. Not able to import this XLIFF file. ($filePathName)"
-            ];
-            if ( PHP_SAPI != 'cli' ) {
-                CookieManager::setCookie( "upload_session", "",
-                        [
-                                'expires'  => time() - 10000,
-                                'path'     => '/',
-                                'domain'   => INIT::$COOKIE_DOMAIN,
-                                'secure'   => true,
-                                'httponly' => true,
-                                'samesite' => 'None',
-                        ]
-                );
-            }
-        }
-
-        return $mustBeConverted;
-
     }
 
     /**
@@ -3436,64 +3085,23 @@ class ProjectManager {
      *
      * @param string      $source
      * @param string      $target
-     * @param array       $xliff_trans_unit
      * @param string|null $state
      * @param string|null $stateQualifier
      *
-     * @return bool|mixed
-     * @throws AuthenticationError
-     * @throws EndQueueException
-     * @throws NotFoundException
-     * @throws ReQueueException
-     * @throws ValidationError
+     * @return bool
      */
-    private function __isTranslated( $source, $target, array $xliff_trans_unit, $state = null, $stateQualifier = null ) {
+    private function __isTranslated( $source, $target, $state = null, $stateQualifier = null ) {
 
         /**
          * @var $configModel XliffConfigModel
          */
         $configModel = $this->projectStructure[ 'xliff_parameters' ];
-        $rules       = $configModel->getRulesForVersion( $this->projectStructure[ 'current-xliff-info' ][ 'version' ] );
-
-        foreach ( $rules as $rule ) {
-
-            if ( $stateQualifier !== null && in_array( strtolower( $stateQualifier ), $rule->getStates( 'states-qualifier' ) ) ) {
-                return $rule->isTranslated();
-            }
-
-            if ( $state !== null && in_array( strtolower( $state ), $rule->getStates( 'states' ) ) ) {
-                return $rule->isTranslated();
-            }
-
-        }
-
-        if ( $stateQualifier !== null ) { // default behavior
-            // Ignore translations for fuzzy matches (xliff 1.2)
-            // fuzzy-match, mt-suggestion, leveraged-tm, leveraged-inherited, leveraged-mt
-            // set those state-qualifiers as NEW
-            return !XliffTranslationStatus::isStateQualifierNew( strtolower( $stateQualifier ) );
-            }
-
-        if ( $state !== null ) { // default behaviour
-            return !XliffTranslationStatus::isStatusNew( strtolower( $state ) );
-        }
-
-        if ( $source != $target ) {
-
-            // evaluate if different source and target should be considered translated
-            $differentSourceAndTargetIsTranslated = !empty( $target );
-
-            return $this->features->filter(
-                    'filterDifferentSourceAndTargetIsTranslated',
-                    $differentSourceAndTargetIsTranslated, $this->projectStructure, $xliff_trans_unit
-            );
-            //return true;
-        }
-
-        return $this->features->filter(
-                'filterIdenticalSourceAndTargetIsTranslated',
-                false, // evaluate if identical source and target should be considered non translated
-                $this->projectStructure, $xliff_trans_unit
+        $rule        = $configModel->getMatchingRule(
+                $this->projectStructure[ 'current-xliff-info' ][ 'version' ],
+                $state,
+                $stateQualifier
         );
+
+        return $rule->isTranslated( $source, $target );
     }
 }

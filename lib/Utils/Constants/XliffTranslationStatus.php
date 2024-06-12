@@ -41,6 +41,23 @@ class XliffTranslationStatus {
             self::FINAL_STATE
     ];
 
+    const ALL_STATES = [
+            self::FINAL_STATE,
+            self::NEEDS_ADAPTATION,
+            self::NEEDS_L10N,
+            self::NEEDS_REVIEW_ADAPTATION,
+            self::NEEDS_REVIEW_L10N,
+            self::NEEDS_REVIEW_TRANSLATION,
+            self::NEEDS_TRANSLATION,
+            self::NEW_STATE,
+            self::SIGNED_OFF,
+            self::TRANSLATED,
+            self::INITIAL,
+            self::TRANSLATED,
+            self::REVIEWED,
+            self::FINAL_STATE
+    ];
+
     // xliff 1.2 state-qualifiers
     // @see https://docs.oasis-open.org/xliff/v1.2/os/xliff-core.html#state-qualifier
     const EXACT_MATCH          = 'exact-match';
@@ -78,6 +95,7 @@ class XliffTranslationStatus {
 
     /**
      * Those state-qualifiers (xliff 1.2) must force the translation to status NEW
+     *
      * @param $status
      *
      * @return bool
