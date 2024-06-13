@@ -37,94 +37,9 @@ class OCRCheck {
     );
 
     /**
-     * @var array
-     */
-    private $supportedLatinLangs = array(
-            "Afrikaans",
-            "Albanian",
-            "Aragonese",
-            "Asturian",
-            "Basque",
-            "Belarus",
-            "Bosnian",
-            "Breton",
-            "Catalan",
-            "Cebuano",
-            "Croatian",
-            "Czech",
-            "Danish",
-            "Dutch",
-            "English",
-            "English US",
-            "Esperanto",
-            "Estonian",
-            "Faroese",
-            "Finnish",
-            "French",
-            "Galician",
-            "German",
-            "Hawaiian",
-            "Hungarian",
-            "Icelandic",
-            "Indonesian",
-            "Irish Gaelic",
-            "Italian",
-            "Latvian",
-            "Lithuanian",
-            "Maori",
-            "Malay",
-            "Maltese",
-            "Montenegrin",
-            "Ndebele",
-            "Norwegian Bokmål",
-            "Norwegian Nynorsk",
-            "Occitan",
-            "Polish",
-            "Portuguese",
-            "Quechua",
-            "Romanian",
-            "Serbian Latin",
-            "Slovak",
-            "Slovenian",
-            "Spanish",
-            "Spanish Latin America",
-            "Spanish Colombia",
-            "Spanish Mexico",
-            "Swahili",
-            "Swedish",
-            "Tagalog",
-            "Tatar",
-            "Tsonga",
-            "Turkish",
-            "Turkmen",
-            "Uzbek",
-            "Venda",
-            "Vietnamese",
-            "Welsh",
-            "Xhosa",
-            "Zulu"
-    );
-
-    private $notSupportedOrRTL = [
-            'ar-SA'  => 'Arabic',
-            'dv-DV'  => 'Maldivian',
-            'fa-IR'  => 'Persian',
-            'ha-NG'  => 'Hausa',
-            'he-IL'  => 'Hebrew',
-            'jv-ID'  => 'Javanese',
-            'kr-KAU' => 'Kanuri',
-            'ku-CKB' => 'Kurdish Sorani',
-            'ps-PK'  => 'Pashto',
-            'so-SO'  => 'Somali',
-            'syc-TR' => 'Syriac (Aramaic)',
-            'tmh-DZ' => 'Tamashek (Tuareg)',
-            'yi-YD'  => 'Yiddish'
-    ];
-
-    /**
      * @var string
      */
-    protected $localizedLangName;
+    protected $source_lang;
 
     /**
      * OCRCheck constructor.
@@ -132,7 +47,7 @@ class OCRCheck {
      * @param $source_lang
      */
     public function __construct( $source_lang ) {
-        $this->localizedLangName = Langs_Languages::getInstance()->getLocalizedName( $source_lang );
+        $this->source_lang = $source_lang;
     }
 
     /**
@@ -146,7 +61,9 @@ class OCRCheck {
             return false;
         }
 
-        if( array_search( $this->localizedLangName, $this->supportedLatinLangs ) === false ){
+        $languages = Langs_Languages::getInstance();
+
+        if( array_search( $this->source_lang, $languages::getLanguagesWithOcrSupported() ) === false ){
             /**
              * @var $finfo finfo
              */
@@ -167,7 +84,9 @@ class OCRCheck {
             return false;
         }
 
-        if( array_search( $this->localizedLangName, $this->notSupportedOrRTL ) !== false ){
+        $languages = Langs_Languages::getInstance();
+
+        if( array_search( $this->source_lang, $languages::getLanguagesWithOcrNotSupported() ) !== false ){
             /**
              * @var $finfo finfo
              */
