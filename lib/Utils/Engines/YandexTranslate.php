@@ -29,10 +29,12 @@ class Engines_YandexTranslate extends Engines_AbstractEngine {
 
     /**
      * @param $rawValue
-     *
-     * @return array
+     * @param array $parameters
+     * @param null $function
+     * @return array|Engines_Results_MT
+     * @throws Exception
      */
-    protected function _decode( $rawValue ) {
+    protected function _decode( $rawValue, array $parameters = [], $function = null ) {
         $all_args = func_get_args();
 
         if ( is_string( $rawValue ) ) {

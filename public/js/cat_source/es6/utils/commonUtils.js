@@ -519,15 +519,6 @@ const CommonUtils = {
     const event = new CustomEvent('dataLayer-event', {detail: data})
     document.dispatchEvent(event)
   },
-  parseCommentHtmlBeforeSend: (text) => {
-    var elem = $('<div></div>').html(text)
-    elem.find('.atwho-inserted').each(function () {
-      var id = $(this).find('.tagging-item').data('id')
-      $(this).html('{@' + id + '@}')
-    })
-    elem.find('.tagging-item').remove()
-    return elem.text()
-  },
   parseOldStats: (stats, type) => {
     if (type === JOB_WORD_CONT_TYPE.EQUIVALENT) {
       const rawCopy = {

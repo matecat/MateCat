@@ -37,10 +37,12 @@ class Engines_Altlang extends Engines_AbstractEngine {
 
     /**
      * @param $rawValue
+     * @param array $parameters
+     * @param null $function
      * @return array|Engines_Results_MT
      * @throws Exception
      */
-    protected function _decode( $rawValue ){
+    protected function _decode( $rawValue, array $parameters = [], $function = null ){
 
         $all_args =  func_get_args();
 

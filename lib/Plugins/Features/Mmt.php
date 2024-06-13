@@ -114,7 +114,7 @@ class Mmt extends BaseFeature {
 
         /** @var Engines_MMT $newTestCreatedMT */
         try {
-            $newTestCreatedMT = Engine::getInstance( $newCreatedDbRowStruct->id );
+            $newTestCreatedMT = Engine::createTempInstance( $newCreatedDbRowStruct );
         } catch (Exception $exception){
             throw new Exception("MMT license not valid");
         }
@@ -191,22 +191,8 @@ class Mmt extends BaseFeature {
 
             if ( !empty( $engineEnabled ) && $engineEnabled->value == $engineStruct->id /* redundant */ ) {
                 $UserMetadataDao->delete( $engineStruct->uid, self::FEATURE_CODE ); // delete the engine from user
-
-                // Commented this block because we don't want to remove all the keys from MMT when disconnecting a license, same license can be used on other tools
-
-//                $extraParams = $engineStruct->getExtraParamsAsArray();
-//                $preImport = $extraParams['MMT-preimport'];
-//
-//                if($preImport === true){
-//                    $mmt = new Engines_MMT($engineStruct);
-//                    $memories = $mmt->getAllMemories();
-//
-//                    foreach ($memories as $memory){
-//                        $mmt->deleteMemory($memory['externalId']);
-//                    }
-//                }
-
             }
+
         }
     }
 

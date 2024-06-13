@@ -4,7 +4,7 @@
  * @author domenico domenico@translated.net / ostico@gmail.com
  * Date: 27/02/15
  * Time: 11.34
- * 
+ *
  */
 
 class Engine {
@@ -30,14 +30,14 @@ class Engine {
         /**
          * @var $engineRecord EnginesModel_EngineStruct
          */
-        $engineRecord = @$eng[0];
+        $engineRecord = isset( $eng[ 0 ] ) ? $eng[ 0 ] : null;
 
         if ( empty( $engineRecord ) ) {
             throw new Exception( "Engine $id not found", -2 );
         }
 
         $className = 'Engines_' . $engineRecord->class_load;
-        if( !class_exists( $className, true ) ){
+        if ( !class_exists( $className, true ) ) {
             throw new Exception( "Engine Class $className not Found" );
         }
 
@@ -47,10 +47,12 @@ class Engine {
 
     /**
      * @param EnginesModel_EngineStruct $engineRecord
+     *
      * @return mixed
      */
-    public static function createTempInstance( $engineRecord ) {
+    public static function createTempInstance( EnginesModel_EngineStruct $engineRecord ) {
         $className = 'Engines_' . $engineRecord->class_load;
+
         return new $className( $engineRecord );
     }
 
