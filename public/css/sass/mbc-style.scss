@@ -177,7 +177,6 @@ a.mbc-new-message-link:hover {
 
 .mbc-comment-textarea {
   position: relative;
-  resize: none;
   word-break: normal;
   outline: none;
   color: #000;
@@ -185,7 +184,7 @@ a.mbc-new-message-link:hover {
   box-shadow: inset 0 1px 2px #ccc;
   -webkit-box-shadow: inset 0 1px 2px #ccc;
   min-height: 40px;
-  overflow-y: auto;
+  overflow-y: auto !important;
   max-height: 160px;
   border-radius: 20px;
 
@@ -195,21 +194,6 @@ a.mbc-new-message-link:hover {
     outline: unset !important;
     padding: 10px;
     line-height: 1.5;
-  }
-
-  .mbc-comment-input__suggestions__list {
-    background-color: $white;
-    border: 1px solid $grey8;
-  }
-
-  .mbc-comment-input__suggestions__item {
-    padding: 5px 15px;
-    border-bottom: 1px solid $grey9;
-  }
-
-  .mbc-comment-input__suggestions__item--focused {
-    background-color: rgba($grey9, 0.6);
-    color: $translatedBlue;
   }
 }
 
@@ -230,6 +214,25 @@ a.mbc-new-message-link:hover {
   position: absolute;
   top: 10px;
   pointer-events: none;
+}
+
+.mbc-comment-input__suggestions {
+  z-index: 2 !important;
+}
+
+.mbc-comment-input__suggestions__list {
+  background-color: $white;
+  border: 1px solid $grey8;
+}
+
+.mbc-comment-input__suggestions__item {
+  padding: 5px 15px;
+  border-bottom: 1px solid $grey9;
+}
+
+.mbc-comment-input__suggestions__item--focused {
+  background-color: rgba($grey9, 0.6);
+  color: $translatedBlue;
 }
 
 .tagging-item {
