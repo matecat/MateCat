@@ -222,7 +222,10 @@ class QualityReportSegmentModel {
 
             // If the segment was APPROVED
             // check if exists a version 0 'translation' (which means that the segment was modified); if not then use the current 'translation'
-            if ( null === $seg->last_translation and $seg->status === \Constants_TranslationStatus::STATUS_APPROVED ) {
+            if (
+                null === $seg->last_translation and
+                ($seg->status === Constants_TranslationStatus::STATUS_APPROVED or $seg->status === Constants_TranslationStatus::STATUS_APPROVED2 )
+            ) {
 
                 $first_version = ( new TranslationVersionDao() )->getVersionNumberForTranslation( $this->chunk->id, $seg->sid, 0 );
                 $translation   = ( $first_version ) ? $first_version->translation : null;
@@ -281,8 +284,8 @@ class QualityReportSegmentModel {
      */
     private function isAnApprovedIce( QualityReport_QualityReportSegmentStruct $qrSegmentStruct ) {
         return (
-                $qrSegmentStruct->locked == 1 &&
-                $qrSegmentStruct->status === Constants_TranslationStatus::STATUS_APPROVED &&
+                $qrSegmentStruct->locked == 1 and
+                ($qrSegmentStruct->status === Constants_TranslationStatus::STATUS_APPROVED or $qrSegmentStruct->status === Constants_TranslationStatus::STATUS_APPROVED2) and
                 $qrSegmentStruct->match_type === 'ICE'
         );
     }
