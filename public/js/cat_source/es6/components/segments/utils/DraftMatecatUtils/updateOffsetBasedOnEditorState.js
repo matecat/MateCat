@@ -1,23 +1,22 @@
 import {each, cloneDeep} from 'lodash'
 
-import getEntities from './getEntities'
-import {isToReplaceForLexiqa} from './tagModel'
+// import getEntities from './getEntities'
 
-const updateLexiqaWarnings = (editorState, warnings) => {
+const updateOffsetBasedOnEditorState = (editorState, warnings) => {
   const contentState = editorState.getCurrentContent()
   const blocks = contentState.getBlockMap()
   let maxCharsInBlocks = 0
   let updatedWarnings = []
-  const entities = getEntities(editorState)
+  // const entities = getEntities(editorState)
   blocks.forEach((loopedContentBlock) => {
     const firstBlockKey = contentState.getFirstBlock().getKey()
     const loopedBlockKey = loopedContentBlock.getKey()
     // Add current block length
     const newLineChar = loopedBlockKey !== firstBlockKey ? 1 : 0
     maxCharsInBlocks += loopedContentBlock.getLength() + newLineChar
-    const entitiesInBlock = entities.filter(
+    /* const entitiesInBlock = entities.filter(
       (ent) => ent.blockKey === loopedBlockKey,
-    )
+    )*/
     each(warnings, (warn) => {
       // Todo: warnings between 2 block are now ignored
       const alreadyScannedChars =
@@ -64,4 +63,4 @@ const updateLexiqaWarnings = (editorState, warnings) => {
   return updatedWarnings
 }
 
-export default updateLexiqaWarnings
+export default updateOffsetBasedOnEditorState

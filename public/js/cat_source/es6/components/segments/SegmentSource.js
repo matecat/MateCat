@@ -12,7 +12,7 @@ import DraftMatecatUtils from './utils/DraftMatecatUtils'
 import * as DraftMatecatConstants from './utils/DraftMatecatUtils/editorConstants'
 import SegmentConstants from '../../constants/SegmentConstants'
 import LexiqaUtils from '../../utils/lxq.main'
-import updateLexiqaWarnings from './utils/DraftMatecatUtils/updateLexiqaWarnings'
+import updateOffsetBasedOnEditorState from './utils/DraftMatecatUtils/updateOffsetBasedOnEditorState'
 import getFragmentFromSelection from './utils/DraftMatecatUtils/DraftSource/src/component/handlers/edit/getFragmentFromSelection'
 import {getSplitPointTag} from './utils/DraftMatecatUtils/tagModel'
 import {SegmentContext} from './SegmentContext'
@@ -20,7 +20,10 @@ import Assistant from '../icons/Assistant'
 import Education from '../icons/Education'
 import {TERM_FORM_FIELDS} from './SegmentFooterTabGlossary/SegmentFooterTabGlossary'
 import {getEntitiesSelected} from './utils/DraftMatecatUtils/manageCaretPositionNearEntity'
-import {createICUDecorator} from './utils/DraftMatecatUtils/createICUDecorator'
+import {
+  createICUDecorator,
+  createIcuTokens,
+} from './utils/DraftMatecatUtils/createICUDecorator'
 
 class SegmentSource extends React.Component {
   static contextType = SegmentContext
@@ -209,7 +212,10 @@ class SegmentSource extends React.Component {
       lxqDecodedSource,
       true,
     )
-    const updatedLexiqaWarnings = updateLexiqaWarnings(editorState, ranges)
+    const updatedLexiqaWarnings = updateOffsetBasedOnEditorState(
+      editorState,
+      ranges,
+    )
     if (updatedLexiqaWarnings.length > 0) {
       const newDecorator = DraftMatecatUtils.activateLexiqa(
         editorState,
@@ -230,9 +236,10 @@ class SegmentSource extends React.Component {
   }
   addIcuDecorator = () => {
     const {editorState} = this.state
-    let contentState = editorState.getCurrentContent()
-    let plainText = contentState.getPlainText()
-    const newDecorator = createICUDecorator(plainText, editorState)
+    const contentState = editorState.getCurrentContent()
+    const plainText = contentState.getPlainText()
+    const tokens = createIcuTokens(plainText, editorState)
+    const newDecorator = createICUDecorator(tokens)
     remove(
       this.decoratorsStructure,
       (decorator) => decorator.name === DraftMatecatConstants.ICU_DECORATOR,

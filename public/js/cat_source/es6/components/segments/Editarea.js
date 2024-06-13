@@ -24,7 +24,7 @@ import insertTag from './utils/DraftMatecatUtils/TagMenu/insertTag'
 import checkForMissingTags from './utils/DraftMatecatUtils/TagMenu/checkForMissingTag'
 import updateEntityData from './utils/DraftMatecatUtils/updateEntityData'
 import LexiqaUtils from '../../utils/lxq.main'
-import updateLexiqaWarnings from './utils/DraftMatecatUtils/updateLexiqaWarnings'
+import updateOffsetBasedOnEditorState from './utils/DraftMatecatUtils/updateOffsetBasedOnEditorState'
 import {tagSignatures} from './utils/DraftMatecatUtils/tagModel'
 import SegmentActions from '../../actions/SegmentActions'
 import getFragmentFromSelection from './utils/DraftMatecatUtils/DraftSource/src/component/handlers/edit/getFragmentFromSelection'
@@ -170,11 +170,8 @@ class Editarea extends React.Component {
     }
   }
 
-  addIcuDecorator = () => {
-    const {editorState} = this.state
-    let contentState = editorState.getCurrentContent()
-    let plainText = contentState.getPlainText()
-    const newDecorator = createICUDecorator(plainText, editorState)
+  addIcuDecorator = (tokens) => {
+    const newDecorator = createICUDecorator(tokens)
     remove(
       this.decoratorsStructure,
       (decorator) => decorator.name === DraftMatecatConstants.ICU_DECORATOR,
@@ -224,7 +221,10 @@ class Editarea extends React.Component {
       lxqDecodedTranslation,
       false,
     )
-    const updatedLexiqaWarnings = updateLexiqaWarnings(editorState, ranges)
+    const updatedLexiqaWarnings = updateOffsetBasedOnEditorState(
+      editorState,
+      ranges,
+    )
     if (updatedLexiqaWarnings.length > 0) {
       const newDecorator = DraftMatecatUtils.activateLexiqa(
         editorState,
@@ -359,7 +359,7 @@ class Editarea extends React.Component {
 
   checkDecorators = (prevProps) => {
     let changedDecorator = false
-    const {inSearch, translation} = this.props.segment
+    const {inSearch} = this.props.segment
     const {activeDecorators: prevActiveDecorators, editorState} = this.state
     const activeDecorators = {...prevActiveDecorators}
 
@@ -427,7 +427,9 @@ class Editarea extends React.Component {
         changedDecorator = true
         this.removeDecorator(DraftMatecatConstants.SEARCH_DECORATOR)
       }
-      const icuTokens = createIcuTokens(translation, editorState)
+      const contentState = editorState.getCurrentContent()
+      const plainText = contentState.getPlainText()
+      const icuTokens = createIcuTokens(plainText, editorState)
       if (
         !prevProps ||
         !this.prevIcuTokens ||
@@ -435,7 +437,7 @@ class Editarea extends React.Component {
       ) {
         this.prevIcuTokens = icuTokens
         changedDecorator = true
-        this.addIcuDecorator()
+        this.addIcuDecorator(icuTokens)
       }
     } else {
       //Search

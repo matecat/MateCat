@@ -2,16 +2,13 @@ import * as DraftMatecatConstants from './editorConstants'
 import parse from 'format-message-parse'
 import {IcuHighlight} from '../../IcuHighlight'
 import {isEqual} from 'lodash'
-import updateLexiqaWarnings from './updateLexiqaWarnings'
-export const createICUDecorator = (text = '', editorState) => {
-  let tokensWithIndex = []
-  tokensWithIndex = createIcuTokens(text, editorState)
-
+import updateOffsetBasedOnEditorState from './updateOffsetBasedOnEditorState'
+export const createICUDecorator = (tokens = []) => {
   return {
     name: DraftMatecatConstants.ICU_DECORATOR,
     strategy: (contentBlock, callback) => {
       const currentText = contentBlock.getText()
-      tokensWithIndex.forEach((token) => {
+      tokens.forEach((token) => {
         const subString = currentText.substring(token.start, token.end)
         if (
           token.end <= currentText.length &&
@@ -24,16 +21,24 @@ export const createICUDecorator = (text = '', editorState) => {
     },
     component: IcuHighlight,
     props: {
-      text,
+      tokens,
     },
   }
 }
 
 export const createIcuTokens = (text, editorState) => {
   const tokens = []
+  let error
   try {
     parse(text, {tokens: tokens})
   } catch (e) {
+    error = {
+      type: 'error',
+      text: e.found,
+      start: e.column,
+      end: e.column + e.found.length,
+      message: e.message,
+    }
     console.log(e)
   }
   let index = 0
@@ -47,7 +52,8 @@ export const createIcuTokens = (text, editorState) => {
     index = index + token[1].length
     return value
   })
-  return updateLexiqaWarnings(editorState, updatedTokens)
+  if (error) updatedTokens.push(error)
+  return updateOffsetBasedOnEditorState(editorState, updatedTokens)
 }
 
 export const isEqualICUTokens = (tokens, otherTokens) => {
