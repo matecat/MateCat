@@ -5,4 +5,22 @@
   display: inline-block;
   position: relative;
   color: $linkBlue;
+  &.icuItem-error {
+    color: $redDefault;
+    cursor: pointer;
+  }
 }
+
+.icu-tooltip {
+  padding: 6px;
+  max-width: 400px;
+  h3 {
+    font-size: 16px;
+    margin: 0;
+    margin-bottom: 4px;
+  }
+  p {
+    white-space: normal;
+  }
+}
+
