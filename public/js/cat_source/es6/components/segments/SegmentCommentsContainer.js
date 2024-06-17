@@ -285,6 +285,13 @@ class SegmentCommentsContainer extends React.Component {
         display: ` ${user.first_name} ${user.last_name} `, // eslint-disable-line
       })) ?? []
 
+    // workaround - textarea fit to content
+    if (this.commentInput) {
+      setTimeout(() => {
+        this.commentInput.style.height = `${this.commentInput.parentNode.clientHeight}px`
+      }, 200)
+    }
+
     let loggedUser = !!this.state.user
     // Se utente anonimo aggiungere mbc-comment-anonymous-label a mbc-comment-username
     htmlInsert = (
@@ -313,6 +320,7 @@ class SegmentCommentsContainer extends React.Component {
             onChange={this.handleChangeMentionsInputValue}
             placeholder="Write a comment..."
             className="mbc-comment-input mbc-comment-textarea"
+            suggestionsPortalHost={document.body}
           >
             <Mention
               type="user"
