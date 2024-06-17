@@ -1,31 +1,34 @@
 import React from 'react'
 import Cookies from 'js-cookie'
-
+import DatePicker from 'react-datepicker'
 import GMTSelect from './GMTSelect'
 import CommonUtils from '../../utils/commonUtils'
 import {addJobTranslator} from '../../api/addJobTranslator'
 import ModalsActions from '../../actions/ModalsActions'
 import CatToolActions from '../../actions/CatToolActions'
 import ManageActions from '../../actions/ManageActions'
+import 'react-datepicker/dist/react-datepicker.css'
 
 class AssignToTranslator extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
       timezone: Cookies.get('matecat_timezone'),
+      deliveryDate: this.props.job.get('translator')
+        ? new Date(
+            this.props.job.get('translator').get('delivery_timestamp') * 1000,
+          )
+        : new Date(),
     }
   }
 
   shareJob() {
     //Check email and validations errors
 
-    let date = $(this.dateInput).calendar('get date')
+    let date = this.state.deliveryDate
     let time = $(this.dropdownTime).dropdown('get value')
     date.setHours(time)
-    // TODO : Change this line when the time change
-    date.setMinutes(
-      date.getMinutes() + (1 - parseFloat(this.state.timezone)) * 60,
-    )
+    date.setMinutes(0)
 
     let email = this.email.value
     const job = this.props.job.toJS()
@@ -209,22 +212,6 @@ class AssignToTranslator extends React.Component {
     }
   }
 
-  initDate() {
-    let self = this
-    let today = new Date()
-    $(this.dateInput).calendar({
-      type: 'date',
-      minDate: new Date(today.getFullYear(), today.getMonth(), today.getDate()),
-      className: {
-        calendar: 'calendar-outsource',
-      },
-      onChange: function (date, text) {
-        if (text === '') return false
-        self.checkSendToTranslatorButton()
-      },
-    })
-  }
-
   initTime() {
     let self = this
     let time = 12
@@ -243,21 +230,12 @@ class AssignToTranslator extends React.Component {
   }
 
   componentDidMount() {
-    this.initDate()
     this.initTime()
   }
 
-  componentDidUpdate() {
-    this.initDate()
-  }
-
   render() {
-    let date = new Date()
     let translatorEmail = ''
     if (this.props.job.get('translator')) {
-      date = new Date(
-        this.props.job.get('translator').get('delivery_timestamp') * 1000,
-      )
       translatorEmail = this.props.job.get('translator').get('email')
     }
     return (
@@ -279,16 +257,16 @@ class AssignToTranslator extends React.Component {
                 </div>
                 <div className="field translator-delivery ">
                   <label>Delivery date</label>
-                  <div
-                    className="ui calendar"
-                    ref={(date) => (this.dateInput = date)}
-                  >
+                  <div className="ui calendar">
                     <div className="ui input">
-                      <input
-                        type="text"
-                        placeholder="Date"
-                        value={date}
-                        onChange={this.checkSendToTranslatorButton.bind(this)}
+                      <DatePicker
+                        selected={this.state.deliveryDate}
+                        onChange={(date) => {
+                          this.setState({
+                            deliveryDate: date,
+                          })
+                          this.checkSendToTranslatorButton()
+                        }}
                       />
                     </div>
                   </div>

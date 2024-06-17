@@ -467,6 +467,7 @@ const CommonUtils = {
       time2: $.format.date(dd, 'HH') + ':' + $.format.date(dd, 'mm'),
       year: $.format.date(dd, 'yyyy'),
       gmt: timeZone,
+      monthIndex: dd.getMonth(),
     }
   },
   getGMTZoneString: function () {
