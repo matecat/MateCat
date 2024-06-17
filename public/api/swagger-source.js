@@ -1045,6 +1045,13 @@ var spec = {
               type: 'array',
               items: {type: 'double'},
             },
+            {
+              name: 'split_raw_words',
+              in: 'formData',
+              description:
+                'Split the job by raw words instead of equivalent words',
+              type: 'boolean',
+            },
           ],
           responses: {
             200: {
@@ -2750,249 +2757,225 @@ var spec = {
     Status: {
       type: 'object',
       properties: {
-          name: {
-              type: "string"
+        name: {
+          type: 'string',
+        },
+        status: {
+          type: 'string',
+        },
+        create_date: {
+          type: 'string',
+        },
+        subject: {
+          type: 'string',
+        },
+        jobs: {
+          type: 'array',
+          items: {
+            $ref: '#/definitions/StatusJob',
           },
-          status: {
-              type: "string"
-          },
-          create_date: {
-              type: "string"
-          },
-          subject: {
-              type: "string"
-          },
-          jobs: {
-            type: 'array',
-            items: {
-              $ref: '#/definitions/StatusJob',
-            }
-          }
+        },
       },
     },
     StatusJob: {
       type: 'object',
       properties: {
         id: {
-          type: "integer"
+          type: 'integer',
         },
         source: {
-          type: "string"
+          type: 'string',
         },
         source_name: {
-          type: "string"
+          type: 'string',
         },
         target: {
-          type: "string"
+          type: 'string',
         },
         target_name: {
-          type: "string"
+          type: 'string',
         },
         chunks: {
           type: 'array',
           items: {
             $ref: '#/definitions/StatusChunk',
-          }
+          },
         },
         summary: {
-          type: "object",
+          type: 'object',
           properties: {
             in_queue_before: {
-              type: "integer"
+              type: 'integer',
             },
             total_segments: {
-              type: "integer"
+              type: 'integer',
             },
             segments_analyzed: {
-              type: "integer"
+              type: 'integer',
             },
             status: {
-              type: "string"
+              type: 'string',
             },
             total_raw: {
-              type: "integer"
+              type: 'integer',
             },
             total_industry: {
-              type: "integer"
+              type: 'integer',
             },
             total_equivalent: {
-              type: "integer"
+              type: 'integer',
             },
             discount: {
-              type: "integer"
-            }
+              type: 'integer',
+            },
           },
           required: [
-            "in_queue_before",
-            "total_segments",
-            "segments_analyzed",
-            "status",
-            "total_raw",
-            "total_industry",
-            "total_equivalent",
-            "discount"
-          ]
+            'in_queue_before',
+            'total_segments',
+            'segments_analyzed',
+            'status',
+            'total_raw',
+            'total_industry',
+            'total_equivalent',
+            'discount',
+          ],
         },
         analyze_url: {
-          type: "string"
-        }
+          type: 'string',
+        },
       },
       required: [
-        "id",
-        "source",
-        "source_name",
-        "target",
-        "target_name",
-        "summary",
-        "chunks"
-      ]
+        'id',
+        'source',
+        'source_name',
+        'target',
+        'target_name',
+        'summary',
+        'chunks',
+      ],
     },
     StatusChunk: {
       type: 'object',
       properties: {
         password: {
-          "type": "string"
+          type: 'string',
         },
         status: {
-          "type": "string"
+          type: 'string',
         },
         engines: {
-          type: "object",
+          type: 'object',
           properties: {
             tm: {
-              type: "object",
+              type: 'object',
               properties: {
                 id: {
-                  type: "integer"
+                  type: 'integer',
                 },
                 name: {
-                  type: "string"
+                  type: 'string',
                 },
                 type: {
-                  type: "string"
+                  type: 'string',
                 },
                 description: {
-                  type: "string"
-                }
+                  type: 'string',
+                },
               },
-              required: [
-                "id",
-                "name",
-                "type",
-                "description"
-              ]
+              required: ['id', 'name', 'type', 'description'],
             },
             mt: {
-              type: "object",
+              type: 'object',
               properties: {
                 id: {
-                  type: "integer"
+                  type: 'integer',
                 },
                 name: {
-                  type: "string"
+                  type: 'string',
                 },
                 type: {
-                  type: "string"
+                  type: 'string',
                 },
                 description: {
-                  type: "string"
-                }
+                  type: 'string',
+                },
               },
-              required: [
-                "id",
-                "name",
-                "type",
-                "description"
-              ]
-            }
+              required: ['id', 'name', 'type', 'description'],
+            },
           },
-          required: [
-            "tm",
-            "mt"
-          ]
+          required: ['tm', 'mt'],
         },
         memory_keys: {
-          "type": "array",
-          "items": {}
+          type: 'array',
+          items: {},
         },
         urls: {
-          type: "object",
+          type: 'object',
           properties: {
             t: {
-              "type": "string"
+              type: 'string',
             },
             r1: {
-              "type": "string"
+              type: 'string',
             },
             r2: {
-              "type": "string"
-            }
+              type: 'string',
+            },
           },
-          required: [
-            "t",
-            "r1"
-          ]
+          required: ['t', 'r1'],
         },
         files: {
-          type: "array",
+          type: 'array',
           items: {
             $ref: '#/definitions/StatusFile',
-          }
-        }
+          },
+        },
       },
-      required: [
-        "password",
-        "status",
-        "engines"
-      ]
+      required: ['password', 'status', 'engines'],
     },
     StatusFile: {
       type: 'object',
       properties: {
         id: {
-          type: "integer"
+          type: 'integer',
         },
         id_file_part: {
-          type: "integer"
+          type: 'integer',
         },
         name: {
-          type: "string"
+          type: 'string',
         },
         original_name: {
-          type: "string"
+          type: 'string',
         },
         total_raw: {
-          type: "integer"
+          type: 'integer',
         },
         total_equivalent: {
-          type: "integer"
+          type: 'integer',
         },
         matches: {
-          type: "array",
+          type: 'array',
           items: {
             $ref: '#/definitions/StatusFileMatch',
-          }
-        }
+          },
+        },
       },
     },
     StatusFileMatch: {
       type: 'object',
       properties: {
         raw: {
-          "type": "integer"
+          type: 'integer',
         },
         equivalent: {
-          type: "integer"
+          type: 'integer',
         },
         type: {
-          "type": "string"
-        }
+          type: 'string',
+        },
       },
-      required: [
-        "raw",
-        "equivalent",
-        "type"
-      ]
+      required: ['raw', 'equivalent', 'type'],
     },
     'Data-Status': {
       type: 'object',

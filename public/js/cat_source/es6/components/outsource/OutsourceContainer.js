@@ -37,7 +37,8 @@ class OutsourceContainer extends React.Component {
       !$(evt.target).hasClass('faster') &&
       !$(evt.target).hasClass('need-it-faster-close') &&
       !$(evt.target).hasClass('need-it-faster-close-icon') &&
-      !$(evt.target).hasClass('get-price')
+      !$(evt.target).hasClass('get-price') &&
+      !$(evt.target).hasClass('react-datepicker__day')
     ) {
       this.props.onClickOutside(evt)
     }
@@ -79,10 +80,10 @@ class OutsourceContainer extends React.Component {
       (this.props.showTranslatorBox && !this.props.openOutsource)
         ? 'no-outsource'
         : this.props.showTranslatorBox && this.props.openOutsource
-        ? 'showTranslator'
-        : this.props.openOutsource
-        ? 'showOutsource'
-        : ''
+          ? 'showTranslator'
+          : this.props.openOutsource
+            ? 'showOutsource'
+            : ''
 
     return (
       <TransitionGroup>
