@@ -52,9 +52,8 @@ class FilterSegments extends React.Component {
     filter[type] = value
     if (type === 'status' && value === 'APPROVED-2') {
       filter.revision_number = 2
-      filter[type] = 'APPROVED'
-    }
-    if (type === 'status' && value === 'APPROVED') {
+      filter[type] = 'APPROVED2'
+    } else if (type === 'status' && value === 'APPROVED') {
       filter.revision_number = 1
     } else {
       filter.revision_number = null
@@ -158,26 +157,27 @@ class FilterSegments extends React.Component {
     let optionsStatus = config.searchable_statuses.map((item, index) => {
       return (
         <React.Fragment key={index}>
-          <div className="item" key={index} data-value={item.value}>
-            <div
-              className={
-                'ui ' + item.label.toLowerCase() + '-color empty circular label'
-              }
-            />
-            {item.label}
-          </div>
-          {this.props.secondPassReviewEnabled && item.value === 'APPROVED' ? (
+          {item.value === 'APPROVED2' ? (
             <div className="item" key={index + '-2'} data-value={'APPROVED-2'}>
+              <div
+                className={
+                  'ui ' + 'approved-2ndpass-color empty circular label'
+                }
+              />
+              APPROVED
+            </div>
+          ) : (
+            <div className="item" key={index} data-value={item.value}>
               <div
                 className={
                   'ui ' +
                   item.label.toLowerCase() +
-                  '-2ndpass-color empty circular label'
+                  '-color empty circular label'
                 }
               />
               {item.label}
             </div>
-          ) : null}
+          )}
         </React.Fragment>
       )
     })
