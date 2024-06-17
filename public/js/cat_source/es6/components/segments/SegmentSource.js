@@ -226,7 +226,7 @@ class SegmentSource extends React.Component {
   }
 
   updateSourceInStore = () => {
-    if (this.state.source !== '') {
+    if (this.state.source !== '') {\
       const {editorState, tagRange} = this.state
       let contentState = editorState.getCurrentContent()
       let plainText = contentState.getPlainText()
