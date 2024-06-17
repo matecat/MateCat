@@ -1044,6 +1044,13 @@ var spec = {
               type: 'array',
               items: {type: 'double'},
             },
+            {
+              name: 'split_raw_words',
+              in: 'formData',
+              description:
+                  'Split the job by raw words instead of equivalent words',
+              type: 'boolean',
+            },
           ],
           responses: {
             200: {
