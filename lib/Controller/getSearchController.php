@@ -397,8 +397,7 @@ class getSearchController extends ajaxController {
                             $this->job_data,
                             $this->id_segment,
                             $project,
-                            $versionsHandler,
-                            true
+                            $versionsHandler
                     );
 
                 } catch ( Exception $e ) {
