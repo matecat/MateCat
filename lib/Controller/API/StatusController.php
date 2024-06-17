@@ -1,6 +1,6 @@
 <?php
 
-use Model\Analysis\APIStatus;
+use Model\Analysis\Status;
 
 /**
  * Created by PhpStorm.
@@ -97,9 +97,7 @@ class StatusController extends ajaxController {
             return -1;
         }
 
-        $analysisStatus   = new APIStatus( $_project_data, $this->featureSet );
+        $analysisStatus = new Status( $_project_data, $this->featureSet, $this->user );
         $this->api_output = $analysisStatus->fetchData()->getResult();
-
     }
-
 } 

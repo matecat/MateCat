@@ -542,8 +542,7 @@ class setTranslationController extends ajaxController {
 
         $newTotals = WordCountStruct::loadFromJob( $this->chunk );
 
-        // YYY [Remove] backward compatibility for current projects
-        $job_stats                        = CatUtils::getFastStatsForJob( $newTotals, true, $this->project->getWordCountType() );
+        $job_stats = CatUtils::getFastStatsForJob( $newTotals );
         $job_stats[ 'analysis_complete' ] = (
                 $this->project[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE ||
                 $this->project[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE
@@ -605,11 +604,9 @@ class setTranslationController extends ajaxController {
         $job_status   = $redisHandler->getConnection()->get( 'job_completeness:' . $this->id_job );
         if (
                 (
-                    // YYY [Remove] this condition 'TRANSLATED_PERC' is for backward compatibility
-                        @$job_stats[ 'TRANSLATED_PERC' ] == '100' ||
                         (
-                                @$job_stats[ Projects_MetadataDao::WORD_COUNT_RAW ][ 'draft' ] +
-                                @$job_stats[ Projects_MetadataDao::WORD_COUNT_RAW ][ 'new' ] == 0
+                                $job_stats[ Projects_MetadataDao::WORD_COUNT_RAW ][ 'draft' ] +
+                                $job_stats[ Projects_MetadataDao::WORD_COUNT_RAW ][ 'new' ] == 0
                         )
                         && empty( $job_status )
                 )
@@ -631,13 +628,6 @@ class setTranslationController extends ajaxController {
         }
 
         $this->result[ 'propagation' ] = $propagationTotal;
-        $this->result[ 'stats' ]       = $this->featureSet->filter(
-                'filterStatsResponse',
-                $this->result[ 'stats' ],
-                [ 'chunk' => $this->chunk, 'segmentId' => $this->id_segment ],
-                $this->project->getWordCountType()
-        );
-
         $this->evalSetContribution( $new_translation, $old_translation );
     }
 

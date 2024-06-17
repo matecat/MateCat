@@ -236,14 +236,7 @@ class CatUtils {
             $estimation_temp  = Translations_SegmentTranslationDao::getWordsPerSecond( $id_job, $last_10_worked_ids );
             $words_per_second = ( !empty( $estimation_temp[ 0 ][ 'words_per_second' ] ) ? $estimation_temp[ 0 ][ 'words_per_second' ] : 1 ); // avoid division by zero
 
-            $job_stats[ 'words_per_hour' ] = number_format( $words_per_second * 3600 );
-
-            //YYY [Remove] Backward compatibility
-            if ( isset( $job_stats[ 'DRAFT' ] ) ) {
-                $totalWordsToDo = $job_stats[ 'NEW' ] + $job_stats[ 'DRAFT' ] + $job_stats[ 'REJECTED' ];
-            } else {
-                $totalWordsToDo = $job_stats[ 'raw' ][ 'new' ] + $job_stats[ 'raw' ][ 'draft' ] + $job_stats[ 'raw' ][ 'rejected' ];
-            }
+            $totalWordsToDo = $job_stats[ 'raw' ][ 'new' ] + $job_stats[ 'raw' ][ 'draft' ] + $job_stats[ 'raw' ][ 'rejected' ];
 
             $totalTimeSeconds = $totalWordsToDo / $words_per_second;
 
@@ -393,8 +386,6 @@ class CatUtils {
 
     /**
      *
-     * // YYY [Remove] backward compatibility for current projects
-     *
      * This function expose stats supporting new and old version counter
      *
      * @param WordCountStruct $wCount
@@ -402,15 +393,9 @@ class CatUtils {
      *
      * @return array
      */
-    public static function getFastStatsForJob( WordCountStruct $wCount, $performanceEstimation = true, $wordCountType = Projects_MetadataDao::WORD_COUNT_RAW ) {
+    public static function getFastStatsForJob( WordCountStruct $wCount, $performanceEstimation = true ) {
 
-        if ( $wordCountType == Projects_MetadataDao::WORD_COUNT_RAW ) {
-            $job_stats = $wCount->jsonSerialize();
-        } else {
-            $job_stats = self::getPlainStatsForJobs( $wCount );
-            $job_stats = self::_getStatsForJob( $job_stats ); //true set estimation check if present
-        }
-
+        $job_stats = $wCount->jsonSerialize();
         if ( !$performanceEstimation ) {
             return $job_stats;
         }
