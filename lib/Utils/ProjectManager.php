@@ -194,7 +194,6 @@ class ProjectManager {
                     'deepl_id_glossary'             => null,
                     'filters_extraction_parameters' => null,
                 ] );
-
         }
 
         $this->projectStructure = $projectStructure;
@@ -349,8 +348,8 @@ class ProjectManager {
         $featureCodes = $this->features->getCodes();
         if ( !empty( $featureCodes ) ) {
             $dao->set( $this->projectStructure[ 'id_project' ],
-                Projects_MetadataDao::FEATURES_KEY,
-                implode( ',', $featureCodes )
+                    Projects_MetadataDao::FEATURES_KEY,
+                    implode( ',', $featureCodes )
             );
         }
     }
@@ -396,9 +395,9 @@ class ProjectManager {
         if ( !empty( $options ) ) {
             foreach ( $options as $key => $value ) {
                 $dao->set(
-                    $this->projectStructure[ 'id_project' ],
-                    $key,
-                    $value
+                        $this->projectStructure[ 'id_project' ],
+                        $key,
+                        $value
                 );
             }
         }
@@ -406,26 +405,26 @@ class ProjectManager {
         // add MMT Glossaries here
         if ( $this->projectStructure[ 'mmt_glossaries' ] and !empty( $this->projectStructure[ 'mmt_glossaries' ] ) ) {
             $dao->set(
-                $this->projectStructure[ 'id_project' ],
-                'mmt_glossaries',
-                $this->projectStructure[ 'mmt_glossaries' ]
+                    $this->projectStructure[ 'id_project' ],
+                    'mmt_glossaries',
+                    $this->projectStructure[ 'mmt_glossaries' ]
             );
         }
 
         // add DeepL params here
         if ( $this->projectStructure[ 'deepl_formality' ] and !empty( $this->projectStructure[ 'deepl_formality' ] ) ) {
             $dao->set(
-                $this->projectStructure[ 'id_project' ],
-                'deepl_formality',
-                $this->projectStructure[ 'deepl_formality' ]
+                    $this->projectStructure[ 'id_project' ],
+                    'deepl_formality',
+                    $this->projectStructure[ 'deepl_formality' ]
             );
         }
 
         if ( $this->projectStructure[ 'deepl_id_glossary' ] and !empty( $this->projectStructure[ 'deepl_id_glossary' ] ) ) {
             $dao->set(
-                $this->projectStructure[ 'id_project' ],
-                'deepl_id_glossary',
-                $this->projectStructure[ 'deepl_id_glossary' ]
+                    $this->projectStructure[ 'id_project' ],
+                    'deepl_id_glossary',
+                    $this->projectStructure[ 'deepl_id_glossary' ]
             );
         }
 
@@ -1095,11 +1094,12 @@ class ProjectManager {
 
         try {
             WorkerClient::enqueueWithClient(
-                AMQHandler::getNewInstanceForDaemons(),
-                'ACTIVITYLOG',
-                '\AsyncTasks\Workers\ActivityLogWorker',
-                $activity,
-                [ 'persistent' => WorkerClient::$_HANDLER->persistent ]
+                  AMQHandler::getNewInstanceForDaemons(),
+                  'ACTIVITYLOG',
+                  '\AsyncTasks\Workers\ActivityLogWorker',
+                  $activity,
+                  [ 'persistent' => WorkerClient::$_HANDLER->persistent ]
+
             );
         } catch ( Exception $e ) {
 
