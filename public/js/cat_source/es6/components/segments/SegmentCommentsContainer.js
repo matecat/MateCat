@@ -210,6 +210,13 @@ class SegmentCommentsContainer extends React.Component {
         } else {
           let text = nl2br(comment.message)
           text = parseCommentHtml(text)
+          const formattedDate = new Date(
+            comment.timestamp ? comment.timestamp * 1000 : comment.create_date,
+          )
+            .toString()
+            .split('(')[0]
+            .trim()
+
           thread_wrap.push(
             <div className="mbc-show-comment mbc-clearfix" key={'comment-' + i}>
               <span className="mbc-comment-label mbc-comment-username mbc-comment-username-label mbc-truncate">
@@ -220,7 +227,7 @@ class SegmentCommentsContainer extends React.Component {
               </span>
               <div className="mbc-comment-info-wrap mbc-clearfix">
                 <span className="mbc-comment-info mbc-comment-time pull-left">
-                  {comment.formatted_date}
+                  {formattedDate}
                 </span>
               </div>
               <p
