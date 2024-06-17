@@ -19,7 +19,7 @@ export const TargetLanguagesSelect = ({history = []}) => {
 
   const getActiveLabel = () => targetLangs.map(({name}) => name).join(',')
   const openModal = () => setIsOpenMultiselectLanguages(true)
-
+  console
   return (
     <div
       className="select-with-label__wrapper "
@@ -27,16 +27,11 @@ export const TargetLanguagesSelect = ({history = []}) => {
       onClick={openModal}
     >
       <label>To</label>
-      <div
-        className="select-with-icon__wrapper"
-        aria-label={
-          TEXT_UTILS.isContentTextEllipsis(selectedItemRef?.current)
-            ? getActiveLabel()
-            : null
-        }
-      >
+      <div className="select-with-icon__wrapper" aria-label={getActiveLabel()}>
         <span ref={selectedItemRef} className="select select--is-multiple">
-          {getActiveLabel()}
+          {targetLangs.length > 1
+            ? `${targetLangs.length} languages`
+            : targetLangs?.[0]?.name}
         </span>
         <input
           readOnly={true}
