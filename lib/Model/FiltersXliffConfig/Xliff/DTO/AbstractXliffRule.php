@@ -2,6 +2,7 @@
 
 namespace FiltersXliffConfig\Xliff\DTO;
 
+use API\App\Json\Analysis\MatchConstants;
 use Constants_TranslationStatus;
 use DomainException;
 use JsonSerializable;
@@ -35,6 +36,8 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
             self::_KEEP_TARGET_CONTENT,
     ];
 
+    const ALLOWED_MATCH_TYPES = MatchConstants::forValue;
+
     /**
      * @var string[]
      */
@@ -63,18 +66,24 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
      * @var string
      */
     protected $editor;
+    /**
+     * @var string
+     */
+    protected $matchCategory = 'ice';
 
     /**
      * AbstractXliffRule constructor.
      *
-     * @param array $states
-     * @param       $analysis
-     * @param       $editor
+     * @param array       $states
+     * @param string      $analysis
+     * @param string      $editor
+     * @param string|null $matchCategory
      */
-    public function __construct( array $states, $analysis, $editor ) {
+    public function __construct( array $states, $analysis, $editor, $matchCategory = null ) {
         $this->setStates( $states );
         $this->setAnalysis( $analysis );
         $this->setEditor( $editor );
+        $this->setMatchCategory( $matchCategory );
         $this->validateAnalysisAndEditor( $analysis, $editor );
     }
 
@@ -139,12 +148,29 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
     }
 
     /**
+     * Accept null values and keep the default ICE
+     *
+     * @param string $matchCategory
+     *
+     * @return void
+     */
+    protected function setMatchCategory( $matchCategory = null ) {
+
+        if ( !empty( $matchCategory ) && !in_array( $matchCategory, static::ALLOWED_MATCH_TYPES ) ) {
+            throw new DomainException( "Wrong match_category value", 400 );
+        } elseif ( !empty( $matchCategory ) ) {
+            $this->matchCategory = $matchCategory;
+        }
+
+    }
+
+    /**
      * @param RecursiveArrayObject $structure
      *
-     * @return static
+     * @return AbstractXliffRule
      */
     public static function fromArrayObject( RecursiveArrayobject $structure ) {
-        return new static( $structure[ 'states' ]->getArrayCopy(), $structure[ 'analysis' ], $structure[ 'editor' ] );
+        return new static( $structure[ 'states' ]->getArrayCopy(), $structure[ 'analysis' ], $structure[ 'editor' ], $structure[ 'match_category' ] ?? null );
     }
 
     /**
@@ -153,9 +179,10 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
     public function jsonSerialize() {
 
         return [
-                'states'   => array_merge( $this->states[ 'states' ], $this->states[ 'state-qualifiers' ] ),
-                'analysis' => $this->analysis,
-                'editor'   => $this->editor,
+                'states'         => array_merge( $this->states[ 'states' ], $this->states[ 'state-qualifiers' ] ),
+                'analysis'       => $this->analysis,
+                'editor'         => $this->editor,
+                'match_category' => $this->matchCategory
         ];
     }
 
@@ -229,7 +256,7 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
      * @return string
      */
     public function asMatchType() {
-        return 'INTERNAL';
+        return $this->matchCategory;
     }
 
 }

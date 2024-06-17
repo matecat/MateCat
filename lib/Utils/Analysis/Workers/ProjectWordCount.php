@@ -53,7 +53,7 @@ trait ProjectWordCount {
                 INNER JOIN jobs j ON j.id=st.id_job
                 WHERE j.id_project = :pid
                 AND st.locked = 0
-                AND match_type NOT IN ( 'ICE', 'SKIPPED' )
+                AND match_type != 'ICE'
                 GROUP BY id_job WITH ROLLUP
         ";
 

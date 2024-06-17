@@ -219,13 +219,20 @@ class FiltersXliffConfigTemplateController extends KleinController {
      * @return Response
      */
     public function schema() {
-        return $this->response->json( json_decode( $this->getModelSchema() ) );
+        return $this->response->json( $this->getModelSchema() );
     }
 
     /**
      * @return false|string
      */
     private function getModelSchema() {
-        return file_get_contents( INIT::$ROOT . '/inc/validation/schema/filters_xliff_config_template.json' );
+        $filters_template_schema                                         = json_decode( file_get_contents( INIT::$ROOT . '/inc/validation/schema/filters_xliff_config_template.json' ) );
+        $xliff_schema                                                    = json_decode( file_get_contents( INIT::$ROOT . '/inc/validation/schema/xliff_parameters.json' ) );
+        $filters_template_schema->properties->xliff->properties->xliff12 = $xliff_schema->properties->xliff12;
+        $filters_template_schema->properties->xliff->properties->xliff20 = $xliff_schema->properties->xliff20;
+        $filters_template_schema->definitions->xliff12Rule               = $xliff_schema->definitions->xliff12Rule;
+        $filters_template_schema->definitions->xliff20Rule               = $xliff_schema->definitions->xliff20Rule;
+
+        return $filters_template_schema;
     }
 }

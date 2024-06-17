@@ -110,7 +110,7 @@ class XliffConfigModel implements JsonSerializable {
 
         }
 
-        return new DefaultRule( array_filter( [ $state, $stateQualifier ] ), AbstractXliffRule::_ANALYSIS_PRE_TRANSLATED, null );
+        return new DefaultRule( array_filter( [ $state, $stateQualifier ] ), AbstractXliffRule::_ANALYSIS_PRE_TRANSLATED, null, null );
 
     }
 

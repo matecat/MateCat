@@ -19,7 +19,7 @@ class AnalysisJobSummary implements MatchContainerInterface, JsonSerializable {
     protected $matches = [];
 
     public function __construct() {
-        foreach ( MatchConstants::$forValue as $matchType ) {
+        foreach ( MatchConstants::forValue as $matchType ) {
             $this->matches[ $matchType ] = AnalysisMatch::forName( $matchType );
         }
     }

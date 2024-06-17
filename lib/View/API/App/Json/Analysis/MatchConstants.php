@@ -26,7 +26,7 @@ class MatchConstants {
     const _INTERNAL     = 'internal';
     const _NUMBERS_ONLY = 'numbers_only';
 
-    public static $forValue = [
+    const forValue = [
             self::_NEW          => self::_NEW,
             self::_50_74        => self::_50_74,
             self::_75_84        => self::_75_84,
@@ -49,7 +49,7 @@ class MatchConstants {
      */
     public static function validate( $name ) {
 
-        if ( !array_key_exists( $name, self::$forValue ) ) {
+        if ( !array_key_exists( $name, self::forValue ) ) {
             throw new RuntimeException( "Invalid match type: " . $name );
         }
 

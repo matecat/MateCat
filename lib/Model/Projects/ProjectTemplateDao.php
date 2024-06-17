@@ -9,6 +9,7 @@ use DateTime;
 use Engine;
 use Exception;
 use FiltersXliffConfig\FiltersXliffConfigTemplateDao;
+use INIT;
 use PayableRates\CustomPayableRateDao;
 use PDO;
 use QAModelTemplate\QAModelTemplateDao;
@@ -288,7 +289,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
     private static function validateJSON( $json ) {
         $validatorObject       = new JSONValidatorObject();
         $validatorObject->json = $json;
-        $jsonSchema            = file_get_contents( __DIR__ . '/../../../inc/validation/schema/project_template.json' );
+        $jsonSchema            = file_get_contents( INIT::$ROOT . '/inc/validation/schema/project_template.json' );
         $validator             = new JSONValidator( $jsonSchema );
         $validator->validate( $validatorObject );
 

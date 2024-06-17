@@ -93,8 +93,4 @@ class DefaultRule extends AbstractXliffRule {
 
     }
 
-    public function asMatchType() {
-        return 'ICE';
-    }
-
 }

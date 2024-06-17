@@ -14,17 +14,13 @@
       "additionalProperties": false,
       "properties": {
         "xliff12": {
-          "type": ["null", "array"],
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/xliff12Rule"
+          "ReferenceToExternalSchema": {
+            "$ref": "xliff_parameters.json#/definitions/xliff12Rule"
           }
         },
         "xliff20": {
-          "type": ["null", "array"],
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/xliff20Rule"
+          "ReferenceToExternalSchema": {
+            "$ref": "xliff_parameters.json#/definitions/xliff20Rule"
           }
         }
       }
@@ -226,98 +222,6 @@
             }
           },
           "additionalProperties": false
-        }
-      }
-    },
-    "xliff12Rule": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["states", "analysis", "editor"],
-      "properties": {
-        "states": {
-          "type": ["array"],
-          "items": {
-            "type": "string",
-            "enum": [
-              "final",
-              "needs-adaptation",
-              "needs-l10n",
-              "needs-review-adaptation",
-              "needs-review-l10n",
-              "needs-review-translation",
-              "needs-translation",
-              "new",
-              "signed-off",
-              "translated",
-              "exact-match",
-              "fuzzy-match",
-              "id-match",
-              "leveraged-glossary",
-              "leveraged-inherited",
-              "leveraged-mt",
-              "leveraged-repository",
-              "leveraged-tm",
-              "mt-suggestion",
-              "rejected-grammar",
-              "rejected-inaccurate",
-              "rejected-length",
-              "rejected-spelling",
-              "tm-suggestion"
-            ]
-          }
-        },
-        "analysis": {
-          "type": "string",
-          "enum": [
-            "pre-translated",
-            "new"
-          ]
-        },
-        "editor": {
-          "type": "string",
-          "enum": [
-            "translated",
-            "approved",
-            "approved2",
-            "ignore-target-content",
-            "keep-target-content"
-          ]
-        }
-      }
-    },
-    "xliff20Rule": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["states", "analysis", "editor"],
-      "properties": {
-        "states": {
-          "type": ["array"],
-          "items": {
-            "type": "string",
-            "enum": [
-              "initial",
-              "translated",
-              "reviewed",
-              "final"
-            ]
-          }
-        },
-        "analysis": {
-          "type": "string",
-          "enum": [
-            "pre-translated",
-            "new"
-          ]
-        },
-        "editor": {
-          "type": "string",
-          "enum": [
-            "translated",
-            "approved",
-            "approved2",
-            "ignore-target-content",
-            "keep-target-content"
-          ]
         }
       }
     }

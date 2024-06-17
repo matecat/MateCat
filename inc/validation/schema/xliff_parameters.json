@@ -2,7 +2,7 @@
   "type": "object",
   "additionalProperties": false,
   "properties": {
-  "xliff12": {
+    "xliff12": {
       "type": ["null", "array"],
       "items": {
         "type": "object",
@@ -71,6 +71,24 @@
             "ignore-target-content",
             "keep-target-content"
           ]
+        },
+        "match_category": {
+          "type": "string",
+          "enum": [
+            "new",
+            "50_74",
+            "75_84",
+            "85_94",
+            "95_99",
+            "100",
+            "100_public",
+            "ice",
+            "mt",
+            "repetitions",
+            "internal"
+          ],
+          "default": "internal",
+          "optional": true
         }
       }
     },
@@ -107,6 +125,24 @@
             "ignore-target-content",
             "keep-target-content"
           ]
+        },
+        "match_category": {
+          "type": "string",
+          "enum": [
+            "new",
+            "50_74",
+            "75_84",
+            "85_94",
+            "95_99",
+            "100",
+            "100_public",
+            "ice",
+            "MT",
+            "repetitions",
+            "internal"
+          ],
+          "default": "internal",
+          "optional": true
         }
       }
     }

@@ -3,7 +3,10 @@
 namespace Validator;
 
 use Exception;
+use INIT;
+use Swaggest\JsonSchema\Context;
 use Swaggest\JsonSchema\InvalidValue;
+use Swaggest\JsonSchema\RemoteRefProvider;
 use Swaggest\JsonSchema\Schema;
 use Swaggest\JsonSchema\SchemaContract;
 use Validator\Contracts\AbstractValidator;
@@ -26,23 +29,28 @@ class JSONValidator extends AbstractValidator {
      * @param $jsonSchema
      *
      * @throws InvalidValue
-     * @throws \Exception
+     * @throws Exception
      */
     public function __construct( $jsonSchema ) {
         $this->isValidJSONSchema( $jsonSchema );
-        $this->schemaContract = Schema::import( json_decode( $jsonSchema ) );
+        $this->schemaContract = Schema::import( json_decode( $jsonSchema ), new Context( new class implements RemoteRefProvider {
+            public function getSchemaData( $url ) {
+                return json_decode( file_get_contents( INIT::$ROOT . '/inc/validation/schema/' . $url ) );
+            }
+
+        }) );
     }
 
     /**
      * @param $jsonSchema
      *
-     * @throws \Exception
+     * @throws Exception
      */
     private function isValidJSONSchema( $jsonSchema ) {
         json_decode( $jsonSchema );
 
         if ( json_last_error() !== JSON_ERROR_NONE ) {
-            throw new \Exception( 'The JSON schema is not valid' );
+            throw new Exception( 'The JSON schema is not valid' );
         }
     }
 
@@ -50,7 +58,7 @@ class JSONValidator extends AbstractValidator {
      * @param ValidatorObject $object
      *
      * @return bool
-     * @throws \Exception
+     * @throws Exception
      */
     public function validate( ValidatorObject $object ) {
 
