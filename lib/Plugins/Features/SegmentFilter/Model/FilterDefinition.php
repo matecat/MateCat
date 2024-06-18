@@ -9,8 +9,6 @@
 namespace Features\SegmentFilter\Model;
 
 
-use Constants_TranslationStatus;
-
 class FilterDefinition {
 
     /**
@@ -30,15 +28,6 @@ class FilterDefinition {
 
     public function isRevision(){
         return !empty( $this->filter_data['revision'] ) && $this->filter_data['revision'] == 1;
-    }
-
-    public function revisionNumber() {
-        if ( in_array( $this->getSegmentStatus(), Constants_TranslationStatus::$REVISION_STATUSES ) ) {
-            if ( empty( $this->filter_data['revision_number']) ) {
-                $this->filter_data['revision_number'] = 1 ;
-            }
-            return $this->filter_data['revision_number'] ;
-        }
     }
 
     public function isSampled() {
@@ -68,23 +57,6 @@ class FilterDefinition {
     public function isValid() {
         // TODO: validate revision number
         return ( $this->isSampled() || $this->getSegmentStatus() != '' ) ;
-    }
-
-    public function setCustomCondition( $condition, $data ) {
-        $this->custom_conditions_sql [] = $condition ;
-        array_merge( $this->custom_conditions_data, $data) ;
-    }
-
-    public function hasCustomCondition() {
-        return !empty( $this->custom_conditions_sql );
-    }
-
-    public function getCustomConditionSQL() {
-        return implode(" AND ", $this->custom_conditions_sql ) ;
-    }
-
-    public function getCustomConditionData() {
-        return $this->custom_conditions_data ;
     }
 
 }

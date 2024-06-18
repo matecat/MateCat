@@ -210,6 +210,13 @@ class SegmentCommentsContainer extends React.Component {
         } else {
           let text = nl2br(comment.message)
           text = parseCommentHtml(text)
+          const formattedDate = new Date(
+            comment.timestamp ? comment.timestamp * 1000 : comment.create_date,
+          )
+            .toString()
+            .split('(')[0]
+            .trim()
+
           thread_wrap.push(
             <div className="mbc-show-comment mbc-clearfix" key={'comment-' + i}>
               <span className="mbc-comment-label mbc-comment-username mbc-comment-username-label mbc-truncate">
@@ -220,7 +227,7 @@ class SegmentCommentsContainer extends React.Component {
               </span>
               <div className="mbc-comment-info-wrap mbc-clearfix">
                 <span className="mbc-comment-info mbc-comment-time pull-left">
-                  {comment.formatted_date}
+                  {formattedDate}
                 </span>
               </div>
               <p
@@ -285,6 +292,13 @@ class SegmentCommentsContainer extends React.Component {
         display: ` ${user.first_name} ${user.last_name} `, // eslint-disable-line
       })) ?? []
 
+    // workaround - textarea fit to content
+    if (this.commentInput) {
+      setTimeout(() => {
+        this.commentInput.style.height = `${this.commentInput.parentNode.clientHeight}px`
+      }, 200)
+    }
+
     let loggedUser = !!this.state.user
     // Se utente anonimo aggiungere mbc-comment-anonymous-label a mbc-comment-username
     htmlInsert = (
@@ -313,6 +327,7 @@ class SegmentCommentsContainer extends React.Component {
             onChange={this.handleChangeMentionsInputValue}
             placeholder="Write a comment..."
             className="mbc-comment-input mbc-comment-textarea"
+            suggestionsPortalHost={document.body}
           >
             <Mention
               type="user"

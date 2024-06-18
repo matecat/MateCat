@@ -7,6 +7,9 @@ class XliffTranslationStatus {
     // xliff 1.2
     const FUZZY_MATCH              = 'fuzzy-match';
     const MT_SUGGESTION            = 'mt-suggestion';
+    const LEVERAGED_TM             = 'leveraged-tm';
+    const LEVERAGED_INHERITED      = 'leveraged-inherited';
+    const LEVERAGED_MT             = 'leveraged-mt';
     const NEEDS_TRANSLATION        = 'needs-translation';
     const NEEDS_L10N               = 'needs-l10n';
     const NEEDS_ADAPTATION         = 'needs-adaptation';
@@ -25,14 +28,19 @@ class XliffTranslationStatus {
     const REVIEWED = 'reviewed';
 
     /**
-     * @param $status
+     * Consider ALWAYS a segment as untranslated if has a fuzzy match state-qualifier
+     *
+     * @param $stateQualifier
      *
      * @return bool
      */
-    public static function isFuzzyMatch( $status ) {
-        return in_array( $status, [
-                self::FUZZY_MATCH,
-                self::MT_SUGGESTION,
+    public static function isFuzzyMatch($stateQualifier ) {
+        return in_array( $stateQualifier, [
+            self::FUZZY_MATCH,
+            self::MT_SUGGESTION,
+            self::LEVERAGED_TM,
+            self::LEVERAGED_INHERITED,
+            self::LEVERAGED_MT,
         ] );
     }
 

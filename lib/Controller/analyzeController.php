@@ -128,7 +128,7 @@ class analyzeController extends viewController {
         /**
          * @var AnalysisProject $result
          */
-        $this->model = $analysisStatus->fetchData( Projects_MetadataDao::WORD_COUNT_RAW )->getResult();
+        $this->model = $analysisStatus->fetchData()->getResult();
 
         $activity             = new ActivityLogStruct();
         $activity->id_job     = $this->jid;

@@ -13,7 +13,7 @@ namespace API\V2\Json;
 use API\App\Json\OutsourceConfirmation;
 use CatUtils;
 use Chunks_ChunkStruct;
-use DataAccess\ShapelessConcreteStruct;
+use Exception;
 use Features\ReviewExtended\ReviewUtils as ReviewUtils;
 use FeatureSet;
 use Langs_LanguageDomains;
@@ -24,6 +24,7 @@ use OutsourceTo_OutsourceAvailable;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
 use TmKeyManagement_ClientTmKeyStruct;
+use TmKeyManagement_Filter;
 use Users_UserStruct;
 use Utils;
 use WordCount\WordCountStruct;
@@ -91,9 +92,9 @@ class Job {
         }
 
         if ( !$this->called_from_api ) {
-            $out = $jStruct->getClientKeys( $this->user, \TmKeyManagement_Filter::OWNER )[ 'job_keys' ];
+            $out = $jStruct->getClientKeys( $this->user, TmKeyManagement_Filter::OWNER )[ 'job_keys' ];
         } else {
-            $out = $jStruct->getClientKeys( $this->user, \TmKeyManagement_Filter::ROLE_TRANSLATOR )[ 'job_keys' ];
+            $out = $jStruct->getClientKeys( $this->user, TmKeyManagement_Filter::ROLE_TRANSLATOR )[ 'job_keys' ];
         }
 
         return ( new JobClientKeys( $out ) )->render();
@@ -103,11 +104,11 @@ class Job {
     /**
      * @param                         $chunk Chunks_ChunkStruct
      *
-     * @param \Projects_ProjectStruct $project
+     * @param Projects_ProjectStruct  $project
      * @param FeatureSet              $featureSet
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     public function renderItem( Chunks_ChunkStruct $chunk, Projects_ProjectStruct $project, FeatureSet $featureSet ) {
 
@@ -127,6 +128,7 @@ class Job {
 
         $subject_handler = Langs_LanguageDomains::getInstance();
         $subjectsHashMap = $subject_handler->getEnabledHashMap();
+
         $warningsCount   = $chunk->getWarningsCount();
 
         // Added 5 minutes cache here
@@ -169,6 +171,7 @@ class Job {
                 'private_tm_key'        => $this->getKeyList( $chunk ),
                 'warnings_count'        => $warningsCount->warnings_count,
                 'warning_segments'      => ( isset( $warningsCount->warning_segments ) ? $warningsCount->warning_segments : [] ),
+                'word_count_type'       => $chunk->getProject()->getWordCountType(),
                 'stats'                 => $jobStats,
                 'outsource'             => $outsource,
                 'outsource_available'   => $outsourceAvailable,
@@ -202,9 +205,6 @@ class Job {
 
         $project = $chunk->getProject();
 
-        /**
-         * @var $projectData ShapelessConcreteStruct[]
-         */
         $projectData = ( new Projects_ProjectDao() )->setCacheTTL( 60 * 60 * 24 )->getProjectData( $project->id, $project->password );
 
         $formatted = new ProjectUrls( $projectData );

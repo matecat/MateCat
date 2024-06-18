@@ -5,6 +5,7 @@ namespace API\V1;
 
 use API\V2\KleinController;
 use API\V2\Validators\ChunkPasswordValidator;
+use CatUtils;
 use Chunks_ChunkStruct;
 use WordCount\WordCountStruct;
 
@@ -24,8 +25,10 @@ class StatsController extends KleinController {
      */
     public function stats() {
         $wStruct = WordCountStruct::loadFromJob( $this->chunk );
-        $wStruct['analysis_complete'] = $this->chunk->getProject()->analysisComplete() ;
-        $this->response->json( $wStruct ) ;
+        $job_stats   = CatUtils::getFastStatsForJob( $wStruct );
+        $job_stats[ 'analysis_complete' ] = $this->chunk->getProject()->analysisComplete();
+
+        $this->response->json( $job_stats );
     }
 
     protected function afterConstruct() {
