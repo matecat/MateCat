@@ -12,7 +12,7 @@ class FileExtensionMimeTypeGuesser implements MimeTypeGuesserInterface
      */
     public function isGuesserSupported()
     {
-        return true;
+        return function_exists('pathinfo');
     }
 
     /**
