@@ -323,7 +323,7 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
                         'df'            => 'matecat',
                         'matecat_pid'   => $this->pid,
                         'matecat_ppass' => $this->ppassword,
-                        'matecat_pname' => $volAnalysis[ 'data' ][ 'summary' ][ 'NAME' ],
+                        'matecat_pname' => $volAnalysis[ 'name' ],
                         'subject'       => $subject,
                         'jt'            => 'R',
                         'fd'            => $fixedDeliveryDateForQuote,
@@ -404,11 +404,11 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
             //  }
             $itemCart                    = new Shop_ItemHTSQuoteJob();
             $itemCart[ 'id' ]            = $jpid;
-            $itemCart[ 'project_name' ]  = $volAnalysis[ 'data' ][ 'summary' ][ 'NAME' ];
+            $itemCart[ 'project_name' ]  = $volAnalysis[ 'name' ];
             $itemCart[ 'name' ]          = "MATECAT_$jpid";
             $itemCart[ 'source' ]        = $langPairs['source'];
             $itemCart[ 'target' ]        = $langPairs['target'];
-            $itemCart[ 'words' ]         = max( (int)$volAnalysis[ 'data' ][ 'jobs' ][ $jid ][ 'totals' ][ $jpsw ][ 'TOTAL_PAYABLE' ][ 0 ], 1 );
+            $itemCart[ 'words' ]         = $this->getTotalPayableWords($volAnalysis);
             $itemCart[ 'subject' ]       = $subject;
             $itemCart[ 'currency' ]      = $this->currency;
             $itemCart[ 'timezone' ]      = $this->timezone;
@@ -449,15 +449,9 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
         $subject_handler = Langs_LanguageDomains::getInstance();
         $subjectsHashMap = $subject_handler->getEnabledHashMap();
 
-        // languages are in the form:
-        //    "langpairs":{
-        //       "5888-e94bd2f79afd":"en-GB|fr-FR",
-        //       "5889-c853a841dafd":"en-GB|de-DE",
-        //       "5890-e852ca45c66e":"en-GB|it-IT",
-        //       "5891-b43f2f067319":"en-GB|es-ES"
-        //    },
-        // get source and target from volume analysis
-        list( $source, $target ) = explode( "|", $volAnalysis[ 'jobs' ][ 'langpairs' ][ "$jid-$jpsw" ] );
+        $langPairs = $this->getLangPairs($jid, $jpsw, $volAnalysis);
+        $source = $langPairs['source'];
+        $target = $langPairs['target'];
 
         // instantiate the Shop_ItemHTSQuoteJob and fill it
         // SAMPLE VENDOR REPLY:
@@ -493,11 +487,11 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
 
         $itemCart                        = new Shop_ItemHTSQuoteJob();
         $itemCart[ 'id' ]                = $jpid;
-        $itemCart[ 'project_name' ]      = $volAnalysis[ 'data' ][ 'summary' ][ 'NAME' ];
+        $itemCart[ 'project_name' ]      = $volAnalysis[ 'name' ];
         $itemCart[ 'name' ]              = "MATECAT_$jpid";
         $itemCart[ 'source' ]            = $source;
         $itemCart[ 'target' ]            = $target;
-        $itemCart[ 'words' ]             = max( (int)$volAnalysis[ 'data' ][ 'jobs' ][ $jid ][ 'totals' ][ $jpsw ][ 'TOTAL_PAYABLE' ][ 0 ], 1 );
+        $itemCart[ 'words' ]             = $this->getTotalPayableWords($volAnalysis);
         $itemCart[ 'subject' ]           = $subject;
         $itemCart[ 'subject_printable' ] = $subjectsHashMap[ $subject ];
         $itemCart[ 'currency' ]          = $this->currency;
