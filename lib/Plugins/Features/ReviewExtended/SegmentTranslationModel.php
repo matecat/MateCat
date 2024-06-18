@@ -240,17 +240,7 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
 
                 $chunkReviews[] = $chunkReview;
 
-            } elseif (
-                    $this->_event->isEditingCurrentRevision() &&
-                    $this->_event->currentEventIsOnThisChunk( $chunkReview )
-            ) {
-
-                // handle further modifications on the same phase R1/R2, we need to increase TTE only
-                // to count how much time the translator has been on this segment
-                $chunkReview->total_tte += $this->_event->getCurrentEvent()->time_to_edit;
-                $chunkReviews[]         = $chunkReview;
-
-            } elseif (
+            }  elseif (
 
                     /*
                      * THIS IS THE HARDEST PART TO UNDERSTAND
@@ -274,6 +264,26 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
             ) {
                 $this->increaseAllCounters( $chunkReview );
                 $chunkReviews[] = $chunkReview;
+            } elseif(
+                // These if statement is for 100% pre-translated for the first time.
+                // Those 100% are obtained flagging `Pre-translate 100% matches from TM` check on the application.
+                // This fix is needed to allow those segment to increase reviewed word count when modified for the first time
+                ($this->_event->isR2() || $this->_event->isR1()) &&
+                $this->_event->isPreTranslated100ModifiedForTheFirstTime()
+                && $this->_event->currentEventIsOnThisChunk( $chunkReview )
+            ){
+                $this->increaseAllCounters( $chunkReview );
+                $chunkReviews[] = $chunkReview;
+            } elseif (
+                $this->_event->isEditingCurrentRevision() &&
+                $this->_event->currentEventIsOnThisChunk( $chunkReview )
+            ) {
+
+                // handle further modifications on the same phase R1/R2, we need to increase TTE only
+                // to count how much time the translator has been on this segment
+                $chunkReview->total_tte += $this->_event->getCurrentEvent()->time_to_edit;
+                $chunkReviews[]         = $chunkReview;
+
             } else { // Upper transition
 
                 /*
