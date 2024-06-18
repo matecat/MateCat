@@ -1155,7 +1155,6 @@ article {
 body #outer {
   //overflow: hidden;
   position: relative;
-  display: inline-block;
   height: 100%;
   width: 100%;
 }
@@ -3138,7 +3137,9 @@ section.opened.editor .status {
 
 @font-face {
   font-family: Calibri;
-  src: local(Calibri), url('../fonts/calibri-webfont.woff') format('woff'),
+  src:
+    local(Calibri),
+    url('../fonts/calibri-webfont.woff') format('woff'),
     url('../fonts/calibri-webfont.ttf') format('truetype'),
     url('../fonts/calibri-webfont.eot'),
     url('../fonts/calibri-webfont.eot?#iefix') format('embedded-opentype');
@@ -3147,7 +3148,8 @@ section.opened.editor .status {
 @font-face {
   font-family: Calibri;
   font-weight: bold;
-  src: local('Calibri Bold'),
+  src:
+    local('Calibri Bold'),
     url('../fonts/calibri_bold-webfont.woff') format('woff'),
     url('../fonts/calibri_bold-webfont.ttf') format('truetype'),
     url('../fonts/calibri_bold-webfont.eot'),

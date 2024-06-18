@@ -62,7 +62,7 @@ route( '/api/app/jobs/[i:id_job]/[:password]/completion-events/[:id_event]',    
 route( '/api/app/heartbeat/ping',                                                   'GET', '\API\App\HeartBeat', 'ping' ) ;
 
 $klein->with('/api/app/jobs/[:id_job]/[:password]', function() {
-    route( '', 'GET', '\API\App\CompatibilityChunkController', 'show' ); // YYY [Remove] Backward compatibility.
+    route( '', 'GET', '\API\V3\ChunkController', 'show' );
     route( '/quality-report',           'GET', '\Features\SecondPassReview\Controller\API\QualityReportController', 'show' ); // alias of /api/v2/jobs/[:id_job]/[:password]/quality-report
     route( '/quality-report/segments',  'GET', 'Features\SecondPassReview\Controller\API\QualityReportController', 'segments_for_ui' ); // alias of /api/v2/jobs/[:id_job]/[:password]/quality-report/segments
 });
