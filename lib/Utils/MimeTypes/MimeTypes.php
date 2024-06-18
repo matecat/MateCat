@@ -69,8 +69,8 @@ class MimeTypes
             }
         }
 
-        $this->registerGuesser(new FileExtensionMimeTypeGuesser());
         $this->registerGuesser(new FileinfoMimeTypeGuesser());
+        $this->registerGuesser(new FileExtensionMimeTypeGuesser());
         $this->registerGuesser(new FileBinaryMimeTypeGuesser());
     }
 
@@ -94,6 +94,7 @@ class MimeTypes
      * Registers a MIME type guesser.
      *
      * The last registered guesser has precedence over the other ones.
+     * @param MimeTypeGuesserInterface $guesser
      */
     public function registerGuesser(MimeTypeGuesserInterface $guesser): void
     {
@@ -150,6 +151,9 @@ class MimeTypes
      */
     public function guessMimeType($path)
     {
+        // 1. FileBinaryMimeTypeGuesser
+        // 2. FileExtensionMimeTypeGuesser
+        // 3. FileinfoMimeTypeGuesser
         foreach ($this->guessers as $guesser) {
             if (!$guesser->isGuesserSupported()) {
                 continue;

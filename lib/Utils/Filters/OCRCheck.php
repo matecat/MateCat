@@ -65,11 +65,8 @@ class OCRCheck {
         $languages = Langs_Languages::getInstance();
 
         if( array_search( $this->source_lang, $languages::getLanguagesWithOcrSupported() ) === false ){
-            /**
-             * @var $finfo finfo
-             */
-            $finfo = new finfo();
-            $mimeType = $finfo->file( $filePath, FILEINFO_MIME_TYPE );
+
+            $mimeType = (new MimeTypes())->guessMimeType($filePath);
             if( array_search( $mimeType, $this->mimeTypes ) !== false  ){
                 return true;
             }
