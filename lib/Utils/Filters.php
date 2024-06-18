@@ -4,8 +4,8 @@ use FilesStorage\AbstractFilesStorage;
 
 class Filters {
 
-    const SOURCE_TO_XLIFF_ENDPOINT = "/api/v1/original2xliff";
-    const XLIFF_TO_TARGET_ENDPOINT = "/api/v1/xliff2translated";
+    const SOURCE_TO_XLIFF_ENDPOINT = "/api/v2/original2xliff";
+    const XLIFF_TO_TARGET_ENDPOINT = "/api/v2/xliff2translated";
 
     /**
      * @param $dataGroups       array each value must be an associative array
