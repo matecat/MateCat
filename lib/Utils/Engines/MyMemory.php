@@ -296,11 +296,8 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 
         $this->call( "update_relative_url", $parameters, true );
 
-        if ( $this->result->responseStatus != "200" ) {
-            return false;
-        }
-
-        return true;
+        // Let the caller handle the error management.
+        return $this->result;
 
     }
 
