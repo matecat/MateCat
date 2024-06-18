@@ -247,7 +247,7 @@ class CatUtils {
 
             // Format the time in 'Dd Hh Mm Ss' format
             $job_stats[ 'estimated_completion' ] = sprintf( '%dd %dh %02dm', $days, $hours, $minutes );
-
+            $job_stats[ 'words_per_hour' ]       = round( $words_per_second * 3600 );
         }
 
         return $job_stats;
