@@ -2,7 +2,6 @@
 
 namespace MimeTypes\Guesser;
 
-use finfo;
 use MimeTypes\Constants\MimeTypesMap;
 
 class FileExtensionMimeTypeGuesser implements MimeTypeGuesserInterface

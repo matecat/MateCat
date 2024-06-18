@@ -13,7 +13,6 @@ use MimeTypes\MimeTypes;
  * Time: 12:08
  */
 
-//TODO remove when Filters will return a warning for the ocr with a wrong language type
 /**
  * Class OCRCheck
  *
@@ -29,12 +28,12 @@ class OCRCheck {
      * @var array
      */
     private $mimeTypes = array(
-            'image/jpeg',
-            'image/gif',
-            'application/octet-stream', //bmp files
-            'image/tiff',
-            'application/pdf',
-            'image/jpeg',
+        'image/jpeg',
+        'image/gif',
+        'application/octet-stream', //bmp files
+        'image/tiff',
+        'application/pdf',
+        'image/jpeg',
     );
 
     /**
@@ -76,6 +75,11 @@ class OCRCheck {
 
     }
 
+    /**
+     * @param $filePath
+     *
+     * @return bool
+     */
     public function thereIsError( $filePath ){
 
         if( !INIT::$FILTERS_OCR_CHECK ){
