@@ -68,7 +68,7 @@ class SearchModel {
             );
 
             /**
-             * Escape for database
+             * Escape for the database
              */
             $sqlBatch[]  = "(?,?,?)";
             $sqlValues[] = $tRow[ 'id_segment' ];
@@ -77,9 +77,10 @@ class SearchModel {
 
         }
 
-        //MySQL default max_allowed_packet is 16MB, this system surely need more
-        //but we can assume that max translation length is more or less 2.5KB
-        // so, for 100 translations of that size we can have 250KB + 20% char strings for query and id.
+        // MySQL default max_allowed_packet is 16MB.
+        // This system surely needs more,
+        // but we can assume that max translation length is more or less 2.5KB
+        // so, for 100 translations of that size we can have 250KB + 20% char strings for a query and id.
         // 300KB is a very low number compared to 16MB
         $sqlBatchChunk  = array_chunk( $sqlBatch, 100 );
         $sqlValuesChunk = array_chunk( $sqlValues, 100 * 3 );
@@ -120,7 +121,7 @@ class SearchModel {
 
             }
 
-            //we must divide by 2 because Insert count as 1 but fails and duplicate key update count as 2
+            // we must divide by 2 because the Insert, count as 1 but fails, and duplicate key update count as 2
             //Log::doJsonLog( "Replace ALL Batch " . ($k +1) . " - Affected Rows " . ( $db->affected_rows / 2 ) );
 
         }
@@ -135,7 +136,6 @@ class SearchModel {
      */
     public function search($strictMode = true) {
 
-        $sql = null;
         switch ( $this->queryParams->key ) {
             case 'source':
                 $results = $this->_getQuery( $this->_loadSearchInSourceQuery($strictMode) );
@@ -147,7 +147,7 @@ class SearchModel {
                 $rawResults = array_merge_recursive( $this->_getQuery( $this->_loadSearchInSourceQuery($strictMode) ), $this->_getQuery( $this->_loadSearchInTargetQuery($strictMode) ) );
                 $results    = [];
 
-                // in this case $results is the merge of the results of two queries,
+                // in this case, $results is the merge of two queries results,
                 // every segment id will possibly have 2 occurrences (source and target)
                 foreach ( $rawResults as $rawResult ) {
                     $results[ $rawResult[ 'id' ] ][] = $rawResult[ 'text' ];
@@ -266,7 +266,7 @@ class SearchModel {
             $results = $stmt->fetchAll( PDO::FETCH_ASSOC );
         } catch ( PDOException $e ) {
             Log::doJsonLog( $e->getMessage() );
-            throw new \Exception( $e->getMessage(), $e->getCode() * -1, $e );
+            throw new Exception( $e->getMessage(), $e->getCode() * -1, $e );
         }
 
         return $results;
@@ -286,7 +286,7 @@ class SearchModel {
             $stmt->execute( $data );
         } catch ( PDOException $e ) {
             Log::doJsonLog( $e->getMessage() );
-            throw new \Exception( $e->getMessage(), $e->getCode() * -1, $e );
+            throw new Exception( $e->getMessage(), $e->getCode() * -1, $e );
         }
 
         return $stmt->rowCount();
@@ -350,18 +350,14 @@ class SearchModel {
 
         $this->_loadParams();
         $password_where = ($strictMode) ? ' AND st.id_segment between j.job_first_segment and j.job_last_segment AND j.password = "'.$this->queryParams->password.'"' : '';
-        $ste_join  = $this->_SteJoinInSegments( 'st.id_segment' );
-        $ste_where = $this->_SteWhere();
 
         $query = "
         SELECT  st.id_segment as id, st.translation as text, od.map as original_map
 			FROM segment_translations st
 			INNER JOIN jobs j ON j.id = st.id_job
 			LEFT JOIN segment_original_data od on od.id_segment = st.id_segment
-			$ste_join
 			WHERE st.id_job = {$this->queryParams->job} 
 			{$password_where}
-			$ste_where
 			AND st.status != 'NEW'
 			{$this->queryParams->where_status}
 			GROUP BY st.id_segment";
@@ -379,8 +375,6 @@ class SearchModel {
 
         $this->_loadParams();
         $password_where = ($strictMode) ? ' AND s.id between j.job_first_segment and j.job_last_segment AND j.password = "'.$this->queryParams->password.'"' : '';
-        $ste_join  = $this->_SteJoinInSegments();
-        $ste_where = $this->_SteWhere();
 
         $query = "
         SELECT s.id, s.segment as text, od.map as original_map
@@ -389,10 +383,8 @@ class SearchModel {
 			INNER JOIN jobs j ON j.id = fj.id_job
 			LEFT JOIN segment_translations st on st.id_segment = s.id AND st.id_job = fj.id_job
 			LEFT JOIN segment_original_data od on od.id_segment = s.id
-            $ste_join
 			WHERE fj.id_job = {$this->queryParams->job}
 			{$password_where}
-			$ste_where
 			AND show_in_cattool = 1
 			{$this->queryParams->where_status}
 			GROUP BY s.id";
@@ -401,62 +393,14 @@ class SearchModel {
 
     }
 
-    /**
-     * @return string
-     */
-    protected function _loadSearchCoupledQuery() {
-
-        $this->_loadParams();
-        $ste_join  = $this->_SteJoinInSegments();
-        $ste_where = $this->_SteWhere();
-
-        $query = "
-        SELECT st.id_segment as id
-			FROM segment_translations as st
-			JOIN segments as s on id = id_segment
-			$ste_join
-			WHERE st.id_job = {$this->queryParams->job}
-		    AND st.translation 
-		        REGEXP {$this->queryParams->matchCase->SQL_REGEXP_CASE} 
-		          '{$this->queryParams->exactMatch->Space_Left}{$this->queryParams->regexpEscapedTrg}{$this->queryParams->exactMatch->Space_Right}'
-			AND s.segment 
-			    REGEXP {$this->queryParams->matchCase->SQL_REGEXP_CASE} 
-			      '{$this->queryParams->exactMatch->Space_Left}{$this->queryParams->regexpEscapedSrc}{$this->queryParams->exactMatch->Space_Right}'
-			AND LENGTH( 
-			    REPLACE ( 
-			      {$this->queryParams->matchCase->SQL_LENGHT_CASE}( {$this->concatColumn('segment')} ), 
-			      {$this->queryParams->matchCase->SQL_LENGHT_CASE}( '{$this->getTheSpacedString($this->queryParams->source)}' ), 
-			      ''
-			    ) 
-			) != LENGTH( s.segment )
-			AND LENGTH( 
-			    REPLACE ( 
-			      {$this->queryParams->matchCase->SQL_LENGHT_CASE}( {$this->concatColumn('st.translation')} ), 
-			      {$this->queryParams->matchCase->SQL_LENGHT_CASE}( '{$this->getTheSpacedString($this->queryParams->target)}' ), 
-			      ''
-			    ) 
-			) != LENGTH( st.translation )
-			AND st.status != 'NEW'
-			{$this->queryParams->where_status}
-			$ste_where
-		";
-
-        return $query;
-
-    }
-
     protected function _loadSearchStatusOnlyQuery() {
 
         $this->_loadParams();
-        $ste_join  = $this->_SteJoinInSegments( 'st.id_segment' );
-        $ste_where = $this->_SteWhere();
 
         $query = "
         SELECT st.id_segment as id
 			FROM segment_translations as st
-			$ste_join
 			WHERE st.id_job = {$this->queryParams->job}
-			$ste_where
 		    {$this->queryParams->where_status}
 		";
 
@@ -467,17 +411,12 @@ class SearchModel {
     public function _loadReplaceAllQuery() {
 
         $this->_loadParams();
-        $ste_join  = $this->_SteJoinInSegments();
-        $ste_where = $this->_SteWhere();
 
         $sql = "
         SELECT st.id_segment, st.id_job, st.translation, st.status
             FROM segment_translations st
             JOIN jobs ON st.id_job = jobs.id AND password = '{$this->queryParams->password}' AND jobs.id = {$this->queryParams->job}
             JOIN segments as s ON st.id_segment = s.id 
-
-            $ste_join
-
             WHERE id_job = {$this->queryParams->job}
             AND id_segment BETWEEN jobs.job_first_segment AND jobs.job_last_segment
             AND st.status != 'NEW'
@@ -485,9 +424,6 @@ class SearchModel {
             	REGEXP {$this->queryParams->matchCase->SQL_REGEXP_CASE} 
 		          '{$this->queryParams->exactMatch->Space_Left}{$this->queryParams->regexpEscapedTrg}{$this->queryParams->exactMatch->Space_Right}'
             {$this->queryParams->where_status}
-
-            $ste_where
-
         ";
 
         if ( !empty( $this->queryParams->regexpEscapedSrc ) ) {
@@ -496,81 +432,6 @@ class SearchModel {
         }
 
         return $sql;
-    }
-
-    /**
-     * // YYY [Remove] Backward compatibility: remove this check revision number is not needed since the status is enough
-     * // YYY [Remove] Segment translation events in this search are no more needed
-     * @Deprecated
-     *
-     * Sometimes queries make use of s alias or segments, sometimes they make use of st for segment_translations.
-     *
-     * @param string $joined_field
-     *
-     * @return string
-     */
-    protected function _SteJoinInSegments( $joined_field = 's.id' ) {
-        if ( !$this->queryParams->sourcePage ) {
-            return '';
-        }
-
-        return "
-            LEFT JOIN (
-                SELECT id_segment as ste_id_segment, source_page 
-                FROM  segment_translation_events 
-                JOIN ( 
-                    SELECT max(id) as _m_id FROM segment_translation_events
-                        WHERE id_job = {$this->queryParams->job}
-                        GROUP BY id_segment 
-                    ) AS X ON _m_id = segment_translation_events.id
-                ORDER BY id_segment
-            ) ste ON ste.ste_id_segment = $joined_field ";
-    }
-
-    /**
-     * // YYY [Remove] Backward compatibility: remove this check revision number is not needed since the status is enough
-     * // YYY [Remove] Segment translation events in this search are no more needed
-     * @Deprecated
-     * @return string
-     */
-    protected function _SteWhere() {
-        if ( !$this->queryParams->sourcePage ) {
-            return '';
-        }
-
-        /**
-         * This variable $first_revision_source_code is necessary because in case of first revision
-         * segment_translations_events may not have records
-         * for APPROVED segments ( in case of ICE match ). While in second pass reviews or later this should not happen.
-         */
-        $first_revision_source_code = \Constants::SOURCE_PAGE_REVISION;
-
-        return " AND ( ste.source_page = {$this->queryParams->sourcePage}
-                    OR ( {$this->queryParams->sourcePage} = $first_revision_source_code AND ste.source_page IS null )
-               ) ";
-    }
-
-    public function loadReplaceQueryFromIds( $ids ) {
-        $ids = implode( ',', $ids );
-        $sql = "
-        SELECT st.id_segment, st.id_job, st.translation, st.status
-            FROM segment_translations st
-            WHERE id_segment IN ('{$ids}')
-        ";
-
-        return $sql;
-    }
-
-
-    /**
-     * Gets the spaced string for a search query
-     *
-     * @param string $string
-     *
-     * @return string
-     */
-    private function getTheSpacedString( $string ) {
-        return $this->getSpacerForSearchQueries() . trim( $string ) . $this->getSpacerForSearchQueries();
     }
 
     /**
@@ -593,45 +454,4 @@ class SearchModel {
         return ( $exactMatch->Space_Left !== '' and $exactMatch->Space_Right !== '' );
     }
 
-    /**
-     * @return bool
-     */
-    private function isMatchCaseEnabled() {
-        $matchCase = $this->queryParams->matchCase;
-
-        return ( $matchCase->SQL_REGEXP_CASE !== '' and $matchCase->SQL_LENGHT_CASE !== 'LOWER' and $matchCase->REGEXP_MODIFIER !== 'iu' );
-    }
-
-    /**
-     * -----------------------------------------------------------------------------------
-     * This method add a black space at the beginning and the end of column value
-     * -----------------------------------------------------------------------------------
-     *
-     * DOCUMENTATION:
-     *
-     * When we perform a "whole word" query, we need to add a black space at the beginning and at the end of the string against the query is performed. Why?
-     *
-     * Look at the example below:
-     *
-     * we are searching for "This" in "This is a test file"
-     *
-     * 1) the string, in the select query, is transformed to " This is a test file "
-     * 2) then we make word count for " This "
-     *
-     * As you can see, the blank spaces are needed, because in "whole word" queries we search for words separated by two blank spaces (" This " in our example).
-     *
-     * Otherwise, if we do not add the black spaces, no results were found:
-     *
-     * we are searching for "This" in "This is a test file"
-     *
-     * 1) the string remains as is
-     * 2) we make word count for " This "
-     *
-     * And as expected no results are found.
-     *
-     * @return string
-     */
-    private function concatColumn( $column ) {
-        return 'CONCAT(" ", ' . $column . ', " " )';
-    }
 }

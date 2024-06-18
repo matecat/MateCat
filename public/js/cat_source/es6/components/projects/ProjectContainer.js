@@ -416,12 +416,6 @@ class ProjectContainer extends React.Component {
       ) {
         let lastAction = self.getLastJobAction(job.get('id'))
         let isChunkOutsourced = self.thereIsChunkOutsourced(job.get('id'))
-        //YYY
-        const jobStats = CommonUtils.parseOldStats(
-          job.get('stats').toJS(),
-          job.get('word_count_type'),
-        )
-        job = job.set('stats', Immutable.fromJS(jobStats))
         let item = (
           <JobContainer
             key={job.get('id') + '-' + i}

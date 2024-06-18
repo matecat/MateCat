@@ -102,8 +102,8 @@ class XliffTranslationStatus {
      */
     public static function isStateQualifierNew( $status ) {
         return in_array( $status, [
-                self::FUZZY_MATCH,
-                self::MT_SUGGESTION,
+            self::FUZZY_MATCH,
+            self::MT_SUGGESTION,
                 self::LEVERAGED_INHERITED,
                 self::LEVERAGED_TM,
                 self::LEVERAGED_MT
