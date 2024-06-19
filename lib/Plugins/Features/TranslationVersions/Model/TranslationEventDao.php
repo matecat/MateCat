@@ -8,6 +8,7 @@
 
 namespace Features\TranslationVersions\Model;
 
+use Constants_TranslationStatus;
 use DataAccess\ShapelessConcreteStruct;
 use Database;
 use PDO;
@@ -74,6 +75,7 @@ class TranslationEventDao extends \DataAccess_AbstractDao {
         $sql = "SELECT * FROM segment_translation_events
                 WHERE id_job = :id_job
                     AND id_segment = :id_segment
+                    AND status != :draft
                     AND final_revision = 1
                 ";
 
@@ -82,7 +84,8 @@ class TranslationEventDao extends \DataAccess_AbstractDao {
         $stmt->setFetchMode( PDO::FETCH_CLASS, TranslationEventStruct::class );
         $stmt->execute( [
                 'id_job'     => $id_job,
-                'id_segment' => $id_segment
+                'id_segment' => $id_segment,
+                'draft'      => Constants_TranslationStatus::STATUS_DRAFT
         ] );
 
         return $stmt->fetchAll();
@@ -122,12 +125,12 @@ class TranslationEventDao extends \DataAccess_AbstractDao {
 
     /**
      * @param array $id_segment_list
-     * @param int $id_job
+     * @param int   $id_job
      *
      * @return \DataAccess_IDaoStruct[]
      */
     public function getTteForSegments( $id_segment_list, $id_job ) {
-        $in  = str_repeat('?,', count($id_segment_list) - 1) . '?';
+        $in  = str_repeat( '?,', count( $id_segment_list ) - 1 ) . '?';
         $sql = "
             SELECT 
                     id_segment, 
@@ -142,7 +145,7 @@ class TranslationEventDao extends \DataAccess_AbstractDao {
                 ORDER BY id_segment, source_page
         ";
 
-        $stmt   = $this->_getStatementForCache( $sql );
+        $stmt              = $this->_getStatementForCache( $sql );
         $id_segment_list[] = $id_job;
 
         return @$this->_fetchObject( $stmt, new ShapelessConcreteStruct, $id_segment_list );
@@ -150,10 +153,10 @@ class TranslationEventDao extends \DataAccess_AbstractDao {
 
     /**
      * @param TranslationEventStruct[] $structs
+     *
      * @return bool
      */
-    public function bulkInsert(array $structs = [])
-    {
+    public function bulkInsert( array $structs = [] ) {
         $sql = "INSERT INTO segment_translation_events
             (
                 `id_job`,
@@ -168,14 +171,14 @@ class TranslationEventDao extends \DataAccess_AbstractDao {
             )
             VALUES ";
 
-        $bind_values   = [];
+        $bind_values = [];
 
-        foreach ($structs as $index => $struct){
-            $isLast = ($index === (count($structs)-1));
+        foreach ( $structs as $index => $struct ) {
+            $isLast = ( $index === ( count( $structs ) - 1 ) );
 
             $sql .= "(?,?,?,?,?,?,?,?,?)";
 
-            if(!$isLast){
+            if ( !$isLast ) {
                 $sql .= ',';
             }
 
@@ -185,12 +188,12 @@ class TranslationEventDao extends \DataAccess_AbstractDao {
             $bind_values[] = $struct->version_number;
             $bind_values[] = $struct->source_page;
             $bind_values[] = $struct->status;
-            $bind_values[] = (($struct->create_date instanceof \DateTime) ? $struct->create_date->format("Y-m-d H:i:s") : $struct->create_date);
+            $bind_values[] = ( ( $struct->create_date instanceof \DateTime ) ? $struct->create_date->format( "Y-m-d H:i:s" ) : $struct->create_date );
             $bind_values[] = $struct->final_revision;
             $bind_values[] = $struct->time_to_edit;
         }
 
-        if(!empty($bind_values)){
+        if ( !empty( $bind_values ) ) {
             $conn = Database::obtain()->getConnection();
             $stmt = $conn->prepare( $sql );
 
@@ -200,9 +203,10 @@ class TranslationEventDao extends \DataAccess_AbstractDao {
 
     /**
      * @param TranslationEventStruct $struct
+     *
      * @return int
      */
-    public function insert(TranslationEventStruct $struct){
+    public function insert( TranslationEventStruct $struct ) {
         $sql = "INSERT INTO segment_translation_events
                     (
                         `id_job`,
@@ -233,15 +237,15 @@ class TranslationEventDao extends \DataAccess_AbstractDao {
         $stmt = $conn->prepare( $sql );
 
         $stmt->execute( [
-            'id_job' => $struct->id_job,
-            'id_segment' => $struct->id_segment,
-            'uid' => $struct->uid,
-            'version_number' => $struct->version_number,
-            'source_page' => $struct->source_page,
-            'status' => $struct->status,
-            'create_date' => (($struct->create_date instanceof \DateTime) ? $struct->create_date->format("Y-m-d H:i:s") : $struct->create_date),
-            'final_revision' => $struct->final_revision == 1,
-            'time_to_edit' => $struct->time_to_edit,
+                'id_job'         => $struct->id_job,
+                'id_segment'     => $struct->id_segment,
+                'uid'            => $struct->uid,
+                'version_number' => $struct->version_number,
+                'source_page'    => $struct->source_page,
+                'status'         => $struct->status,
+                'create_date'    => ( ( $struct->create_date instanceof \DateTime ) ? $struct->create_date->format( "Y-m-d H:i:s" ) : $struct->create_date ),
+                'final_revision' => $struct->final_revision == 1,
+                'time_to_edit'   => $struct->time_to_edit,
         ] );
 
         return $stmt->rowCount();

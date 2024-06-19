@@ -9,7 +9,6 @@
 namespace Features\ReviewExtended;
 
 use Chunks_ChunkStruct;
-use Constants;
 use Exception;
 use Features\SecondPassReview\Email\RevisionChangedNotificationEmail;
 use Features\SecondPassReview\Model\TranslationEventDao;
@@ -174,6 +173,18 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
             $this->_jobWordCounter->setUpdatedValues( $this->_event->getOldTranslation()->eq_word_count, $this->_event->getSegmentStruct()->raw_word_count );
         }
 
+        /**
+         * Rules
+         *
+         * All progress counts of reviewed words in R1 and R2 no longer take into account the concept of pre-translation and are updated as follows:
+         *
+         * 1. Based on the change of status
+         * 2. Upon pressing the "APPROVE" button, when modifying a segment in the same status or accepting the segment without changes
+         *    - After the first modification or acceptance, the count does not increase further unless there is a change of status
+         * 3. For unmodified ICE segments, the progress is not counted unless there is a change of status
+         *
+         */
+
         $segmentReviewTransitionModel = new ChunkReviewTranslationEventTransition( $this->_event );
 
         // populate structs for current segment and propagations
@@ -188,11 +199,22 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
             $chunkReview->password    = $this->_chunkReviews[ $i ]->password;
             $chunkReview->source_page = $this->_chunkReviews[ $i ]->source_page;
 
-            // we are not taking in consideration the changes in the content
-            if ( $this->_event->isBeingLowerReviewed() ) {
+            if( $this->_event->isSegmentDraft() ){
+                continue;
+            }
 
-                // in this case we are handling the chunk ( state ) from which the segment comes
-                if ( $this->_event->lastEventWasOnThisChunk( $chunkReview ) ) {
+            if ( $this->_event->isChangingStatus() ) {
+                // - When passing from translated to R1 this will not trigger
+                // - When passing from R1 to R1 this will not trigger because of NOT changing status
+                // - When passing from R2 to R1 this will not trigger because the previous event is R2
+                if (
+                        $this->_event->iceIsAboutToBeReviewed() &&
+                        $this->_event->currentEventIsOnThisChunk( $chunkReview )
+                ) {
+                    $this->increaseAllCounters( $chunkReview );
+                    $chunkReviews[] = $chunkReview;
+                } // in this case, we are handling the chunk (state) from which the segment comes
+                elseif ( $this->_event->lastEventWasOnThisChunk( $chunkReview ) && $this->_event->isLowerTransition() ) { // check for lower transition, we want to not decrement R1 when a segment pass from R1 to R2
 
                     // whenever a revision is lower reviewed, we expect the upper revisions to be invalidated.
                     // the value of the revised words is subtracted from the higher revision and added to the lower one.
@@ -200,7 +222,7 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
                     $unsetFinalRevision[] = $chunkReview->source_page;
                     $chunkReviews[]       = $chunkReview;
 
-                    // in this case we are handling the chunk ( state ) where the segment must go
+                    // in this case, we are handling the chunk (state) where the segment must go
                 } elseif ( $this->_event->currentEventIsOnThisChunk( $chunkReview ) ) {
 
                     // There is a downgrade on this review, and it is the first time it happens
@@ -209,14 +231,16 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
                         $chunkReview->reviewed_words_count += $this->_event->getSegmentStruct()->raw_word_count;
                     }
 
-                    // in this case the tte is added by definition
-                    $chunkReview->total_tte      += $this->_event->getCurrentEvent()->time_to_edit;
-                    $chunkReviews[]              = $chunkReview;
+                    // in this case, the tte is added by definition
+                    $chunkReview->total_tte += $this->_event->getCurrentEvent()->time_to_edit;
+                    $chunkReviews[]         = $chunkReview;
 
-                } elseif ( $this->aFinalRevisionExistsForThisChunk( $chunkReview ) ) {
+                } elseif ( $this->aFinalRevisionExistsForThisChunk( $chunkReview ) && $this->_event->isLowerTransition() ) {  // check for lower transition, we want to not decrement when upgrading statuses
 
-                    // this case fits any other intermediate chunkReview record when an event exists
+                    // This case fits any other intermediate chunkReview record when an event exists
                     // i.e.: R3 -> R1 with an event existing in R2
+                    // this segment already has been in this revision state
+                    // reviewed words are discounted from R1/R2
                     $this->decreaseCountersAndRemoveIssues( $chunkReview );
                     $unsetFinalRevision[] = $chunkReview->source_page;
                     $chunkReviews[]       = $chunkReview;
@@ -224,94 +248,19 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
                 }
 
             } elseif (
-                    $this->_event->isDowngradedToTranslated() &&
-                    $this->_event->getCurrentEventSourcePage() == Constants::SOURCE_PAGE_TRANSLATE // this is redundant, but we add it for security
+                    $this->_event->isEditingCurrentRevisionButNotIce() &&
+                    $this->_event->currentEventIsOnThisChunk( $chunkReview )
             ) {
 
-                // we are coming from R1 or R2 to Translated
-                if ( $this->aFinalRevisionExistsForThisChunk( $chunkReview ) ) {
-
-                    // this segment already has been in this revision state
-                    // reviewed words are discounted from R1/R2
-                    $this->decreaseCountersAndRemoveIssues( $chunkReview );
-                    $unsetFinalRevision[] = $chunkReview->source_page;
-
+                // There is a segment acceptance with or without modifications in the same revision phase
+                // we must add the reviewed word count
+                if ( !$this->aFinalRevisionExistsForThisChunk( $chunkReview ) ) {
+                    $chunkReview->reviewed_words_count += $this->_event->getSegmentStruct()->raw_word_count;
                 }
 
-                $chunkReviews[] = $chunkReview;
-
-            }  elseif (
-
-                    /*
-                     * THIS IS THE HARDEST PART TO UNDERSTAND
-                     *
-                     * Here we treat ICEs and pre-translated segments specifically, they must be handled here only for the FIRST STATUS CHANGE
-                     *
-                     * When the ICE has NOT BEEN modified before.
-                     *
-                     *       From ICE (approved) to Approved R2: changes up are made to the progress bar
-                     *              and the raw words in the segment are added to the reviewed words for R2.
-                     *       From ICE (approved) to Approved R1:
-                     *          If the reviewer has edited the target text, changes up are made to the progress bar
-                     *              and the raw words in the segment are added to the reviewed words for R1.
-                     *          If the reviewer has not edited the target text, no changes.
-                     *              BUT this is implicit because we never reached this function
-                     */
-                    $this->_event->iceIsAboutToBeReviewedForTheFirstTime() &&
-                    ( $this->_event->isR2() || $this->_event->isModifiedIce() )
-                    && $this->_event->currentEventIsOnThisChunk( $chunkReview ) // only one chunk match, R1, R2, R(N) they are mutually excluded
-
-            ) {
-                $this->increaseAllCounters( $chunkReview );
-                $chunkReviews[] = $chunkReview;
-            } elseif(
-                // These if statement is for 100% pre-translated for the first time.
-                // Those 100% are obtained flagging `Pre-translate 100% matches from TM` check on the application.
-                // This fix is needed to allow those segment to increase reviewed word count when modified for the first time
-                ($this->_event->isR2() || $this->_event->isR1()) &&
-                $this->_event->isPreTranslated100ModifiedForTheFirstTime()
-                && $this->_event->currentEventIsOnThisChunk( $chunkReview )
-            ){
-                $this->increaseAllCounters( $chunkReview );
-                $chunkReviews[] = $chunkReview;
-            } elseif (
-                $this->_event->isEditingCurrentRevision() &&
-                $this->_event->currentEventIsOnThisChunk( $chunkReview )
-            ) {
-
-                // handle further modifications on the same phase R1/R2, we need to increase TTE only
-                // to count how much time the translator has been on this segment
+                // in this case, the tte is added by definition
                 $chunkReview->total_tte += $this->_event->getCurrentEvent()->time_to_edit;
                 $chunkReviews[]         = $chunkReview;
-
-            } else { // Upper transition
-
-                /*
-                 * HERE we are handling the UPWARD Revision
-                 *
-                 * *** NOTE ***
-                 *
-                 * when an ICE is modified/handled for the first time, those conditions are always true,
-                 * and they are not distinguishable
-                 *
-                 * BUT it's supposed that the first modification entered the previous conditional branch
-                 * AND that an UNMODIFIED ICE never reach this code BUT pre-translated will do
-                 */
-                if ( $this->_event->lastEventWasOnThisChunk( $chunkReview ) ) {
-
-                    // this is a transition from R1 to R2, otherwise is a direct transition from ICE to R2
-                    // this is needed to understand if an event already been made in this specific phase ( we are handling ALL the chunk reviews )
-                    // to allow the discount of words
-                    if ( $this->aFinalRevisionExistsForThisChunk( $chunkReview ) ) {
-                        $chunkReviews[] = $chunkReview;
-                    }
-
-                } elseif ( $this->_event->currentEventIsOnThisChunk( $chunkReview ) ) { // when an ICE is modified/handled for the first time this is always true
-
-                    $this->increaseAllCounters( $chunkReview );
-                    $chunkReviews[] = $chunkReview;
-
-                }
 
             }
 
@@ -336,7 +285,7 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
      * @throws Exception
      */
     public function sendNotificationEmail() {
-        if ( $this->_event->isPropagationSource() && $this->_event->isBeingLowerReviewedOrTranslated() ) {
+        if ( $this->_event->isPropagationSource() && $this->_event->isLowerTransition() ) {
             $chunkReviewsWithFinalRevisions = [];
             foreach ( $this->_chunkReviews as $chunkReview ) {
                 if ( in_array( $chunkReview->source_page, $this->_sourcePagesWithFinalRevisions ) ) {

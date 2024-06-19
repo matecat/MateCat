@@ -256,7 +256,7 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
      * @return string
      */
     public function asMatchType() {
-        return $this->matchCategory;
+        return MatchConstants::toInternalMatchTypeValue( $this->matchCategory );
     }
 
 }

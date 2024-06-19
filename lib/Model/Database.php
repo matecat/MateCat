@@ -319,7 +319,7 @@ class Database implements IDatabase {
         $mask = array_combine( $mask, $mask );
 
         foreach ( $attrs as $key => $value ) {
-            if ( @$mask[ $key ] ) {
+            if ( array_key_exists( $key, $mask ) ) {
                 if ( $no_nulls && is_null( $value ) ) {
                     unset( $mask[ $key ] );
                     continue;

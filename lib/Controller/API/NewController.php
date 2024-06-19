@@ -186,8 +186,8 @@ class NewController extends ajaxController {
                 'pretranslate_100'           => [
                         'filter' => [ 'filter' => FILTER_VALIDATE_INT ]
                 ],
-                'pretranslate_101'   => [
-                    'filter' => [ 'filter' => FILTER_VALIDATE_INT ]
+                'pretranslate_101'           => [
+                        'filter' => [ 'filter' => FILTER_VALIDATE_INT ]
                 ],
                 'id_team'                    => [ 'filter' => FILTER_VALIDATE_INT ],
                 'id_qa_model'                => [ 'filter' => FILTER_VALIDATE_INT ],
@@ -204,15 +204,15 @@ class NewController extends ajaxController {
                         'filter' => FILTER_SANITIZE_STRING,
                         'flags'  => FILTER_REQUIRE_ARRAY,
                 ],
-                'project_info'       => [ 'filter' => FILTER_SANITIZE_STRING ],
-                'mmt_glossaries'     => [ 'filter' => FILTER_SANITIZE_STRING ],
+                'project_info'               => [ 'filter' => FILTER_SANITIZE_STRING ],
+                'mmt_glossaries'             => [ 'filter' => FILTER_SANITIZE_STRING ],
 
-                'deepl_formality'    => [ 'filter' => FILTER_SANITIZE_STRING ],
-                'deepl_id_glossary'  => [ 'filter' => FILTER_SANITIZE_STRING ],
+                'deepl_formality'   => [ 'filter' => FILTER_SANITIZE_STRING ],
+                'deepl_id_glossary' => [ 'filter' => FILTER_SANITIZE_STRING ],
 
-                'filters_extraction_parameters'  => [ 'filter' => FILTER_SANITIZE_STRING ],
+                'filters_extraction_parameters' => [ 'filter' => FILTER_SANITIZE_STRING ],
 
-                'xliff_parameters'  => [ 'filter' => FILTER_SANITIZE_STRING ],
+                'xliff_parameters' => [ 'filter' => FILTER_SANITIZE_STRING ],
         ];
 
         $filterArgs = $this->featureSet->filter( 'filterNewProjectInputFilters', $filterArgs, $this->userIsLogged );
@@ -229,7 +229,7 @@ class NewController extends ajaxController {
          * in order to avoid mispelling errors
          *
          */
-        $this->postInput[ 'instructions' ] = $this->featureSet->filter( 'encodeInstructions', $_POST[ 'instructions' ] );
+        $this->postInput[ 'instructions' ] = $this->featureSet->filter( 'encodeInstructions', $_POST[ 'instructions' ] ?? null );
 
         /**
          * ----------------------------------
@@ -369,7 +369,7 @@ class NewController extends ajaxController {
 
         $fs = FilesStorageFactory::create();
 
-        if ( @count( $this->api_output[ 'debug' ] ) > 0 ) {
+        if ( isset( $this->api_output[ 'debug' ] ) && count( $this->api_output[ 'debug' ] ) > 0 ) {
             $this->setBadRequestHeader();
 
             return -1;
@@ -439,7 +439,7 @@ class NewController extends ajaxController {
             $conversionHandler->setErrDir( $errDir );
             $conversionHandler->setFeatures( $this->featureSet );
             $conversionHandler->setUserIsLogged( $this->userIsLogged );
-            $conversionHandler->setFiltersExtractionParameters($this->filters_extraction_parameters);
+            $conversionHandler->setFiltersExtractionParameters( $this->filters_extraction_parameters );
 
             if ( $ext == "zip" ) {
                 // this makes the conversionhandler accumulate eventual errors on files and continue
@@ -527,21 +527,21 @@ class NewController extends ajaxController {
                 $converter->doAction();
 
                 $status = $error = $converter->checkResult();
-                if($error !== null and !empty($error->getErrors())){
+                if ( $error !== null and !empty( $error->getErrors() ) ) {
 
                     $this->result = new ConvertedFileModel( ConversionHandlerStatus::ZIP_HANDLING );
-                    $this->result->changeCode($error->getCode());
-                    $savedErrors = $this->result->getErrors();
-                    $brokenFileName = ZipArchiveExtended::getFileName( array_keys($error->getErrors())[0] );
+                    $this->result->changeCode( $error->getCode() );
+                    $savedErrors    = $this->result->getErrors();
+                    $brokenFileName = ZipArchiveExtended::getFileName( array_keys( $error->getErrors() )[ 0 ] );
 
-                    if( !isset( $savedErrors[$brokenFileName] ) ){
-                        $this->result->addError($error->getErrors()[0]['message'], $brokenFileName);
+                    if ( !isset( $savedErrors[ $brokenFileName ] ) ) {
+                        $this->result->addError( $error->getErrors()[ 0 ][ 'message' ], $brokenFileName );
                     }
 
                     $this->result = $status = [
-                        'code' => $error->getCode(),
-                        'data' => $error->getData(),
-                        'errors' => $error->getErrors(),
+                            'code'   => $error->getCode(),
+                            'data'   => $error->getData(),
+                            'errors' => $error->getErrors(),
                     ];
                 }
             } else {
@@ -561,8 +561,8 @@ class NewController extends ajaxController {
         // Upload errors handling
         if ( !empty( $status ) ) {
             $this->api_output[ 'message' ] = 'Project Conversion Failure';
-            $this->api_output[ 'debug' ]   = $status[2][array_keys($status[2])[0]];
-            $this->result[ 'errors' ]      = $status[2][array_keys($status[2])[0]];
+            $this->api_output[ 'debug' ]   = $status[ 2 ][ array_keys( $status[ 2 ] )[ 0 ] ];
+            $this->result[ 'errors' ]      = $status[ 2 ][ array_keys( $status[ 2 ] )[ 0 ] ];
             Log::doJsonLog( $status );
             $this->setBadRequestHeader();
 
@@ -644,7 +644,7 @@ class NewController extends ajaxController {
         $projectStructure[ 'owner' ]                = $this->user->email;
         $projectStructure[ 'metadata' ]             = $this->metadata;
         $projectStructure[ 'pretranslate_100' ]     = (int)!!$this->postInput[ 'pretranslate_100' ]; // Force pretranslate_100 to be 0 or 1
-        $projectStructure[ 'pretranslate_101' ]     = isset($this->postInput[ 'pretranslate_101' ]) ? (int)$this->postInput[ 'pretranslate_101' ] : 1;
+        $projectStructure[ 'pretranslate_101' ]     = isset( $this->postInput[ 'pretranslate_101' ] ) ? (int)$this->postInput[ 'pretranslate_101' ] : 1;
 
         //default get all public matches from TM
         $projectStructure[ 'only_private' ] = ( !isset( $this->postInput[ 'get_public_matches' ] ) ? false : !$this->postInput[ 'get_public_matches' ] );
@@ -663,17 +663,17 @@ class NewController extends ajaxController {
         }
 
         // mmtGlossaries
-        if( $this->mmtGlossaries ){
+        if ( $this->mmtGlossaries ) {
             $projectStructure[ 'mmt_glossaries' ] = $this->mmtGlossaries;
         }
 
         // DeepL
-        if( $this->mt_engine instanceof Engines_DeepL and $this->deepl_formality !== null ){
-            $projectStructure['deepl_formality'] = $this->deepl_formality;
+        if ( $this->mt_engine instanceof Engines_DeepL and $this->deepl_formality !== null ) {
+            $projectStructure[ 'deepl_formality' ] = $this->deepl_formality;
         }
 
-        if( $this->mt_engine instanceof Engines_DeepL and $this->deepl_id_glossary !== null ){
-            $projectStructure['deepl_id_glossary'] = $this->deepl_id_glossary;
+        if ( $this->mt_engine instanceof Engines_DeepL and $this->deepl_id_glossary !== null ) {
+            $projectStructure[ 'deepl_id_glossary' ] = $this->deepl_id_glossary;
         }
 
         // with the qa template id
@@ -689,15 +689,15 @@ class NewController extends ajaxController {
             $projectStructure[ 'payable_rate_model_id' ] = $this->payableRateModelTemplate->id;
         }
 
-        if( $this->dialect_strict ) {
+        if ( $this->dialect_strict ) {
             $projectStructure[ 'dialect_strict' ] = $this->dialect_strict;
         }
 
-        if( $this->filters_extraction_parameters ) {
+        if ( $this->filters_extraction_parameters ) {
             $projectStructure[ 'filters_extraction_parameters' ] = $this->filters_extraction_parameters;
         }
 
-        if( $this->xliff_parameters ) {
+        if ( $this->xliff_parameters ) {
             $projectStructure[ 'xliff_parameters' ] = $this->xliff_parameters;
         }
 
@@ -926,7 +926,7 @@ class NewController extends ajaxController {
             $this->postInput[ 'metadata' ] = html_entity_decode( $this->postInput[ 'metadata' ] );
             $parsedMetadata                = json_decode( $this->postInput[ 'metadata' ], $assoc, $depth );
 
-            if(is_array($parsedMetadata)){
+            if ( is_array( $parsedMetadata ) ) {
                 $this->metadata = $parsedMetadata;
             }
 
@@ -979,7 +979,7 @@ class NewController extends ajaxController {
         $read        = true;
         $write       = true;
 
-        $permissionString = @$tmKeyInfo[ 1 ];
+        $permissionString = $tmKeyInfo[ 1 ] ?? null;
 
         //if the key is not set, return null. It will be filtered in the next lines.
         if ( empty( $tmKeyInfo[ 0 ] ) ) {
@@ -1222,23 +1222,23 @@ class NewController extends ajaxController {
     /**
      * @throws Exception
      */
-    private function __validateUserMTEngine(){
+    private function __validateUserMTEngine() {
 
         // any other engine than MyMemory
-        if($this->postInput[ 'mt_engine' ] and $this->postInput[ 'mt_engine' ] > 1){
-            EngineValidator::engineBelongsToUser($this->postInput[ 'mt_engine' ], $this->user->uid);
+        if ( $this->postInput[ 'mt_engine' ] and $this->postInput[ 'mt_engine' ] > 1 ) {
+            EngineValidator::engineBelongsToUser( $this->postInput[ 'mt_engine' ], $this->user->uid );
         }
     }
 
     /**
      * @throws Exception
      */
-    private function __validateMMTGlossaries(){
+    private function __validateMMTGlossaries() {
 
-        if(!empty( $this->postInput[ 'mmt_glossaries' ] )){
+        if ( !empty( $this->postInput[ 'mmt_glossaries' ] ) ) {
 
-            $mmtGlossaries = html_entity_decode($this->postInput[ 'mmt_glossaries' ]);
-            MMTValidator::validateGlossary($mmtGlossaries);
+            $mmtGlossaries = html_entity_decode( $this->postInput[ 'mmt_glossaries' ] );
+            MMTValidator::validateGlossary( $mmtGlossaries );
 
             $this->mmtGlossaries = $mmtGlossaries;
         }
@@ -1252,12 +1252,12 @@ class NewController extends ajaxController {
         if ( !empty( $this->postInput[ 'deepl_formality' ] ) ) {
 
             $allowedFormalities = [
-                'default',
-                'prefer_less',
-                'prefer_more'
+                    'default',
+                    'prefer_less',
+                    'prefer_more'
             ];
 
-            if(in_array($this->postInput[ 'deepl_formality' ], $allowedFormalities)){
+            if ( in_array( $this->postInput[ 'deepl_formality' ], $allowedFormalities ) ) {
                 $this->deepl_formality = $this->postInput[ 'deepl_formality' ];
             }
         }
@@ -1274,66 +1274,65 @@ class NewController extends ajaxController {
      *
      * @throws Exception
      */
-    private function __validateDialectStrictParam()
-    {
+    private function __validateDialectStrictParam() {
         if ( !empty( $this->postInput[ 'dialect_strict' ] ) ) {
 
-            $dialect_strict = trim(html_entity_decode($this->postInput[ 'dialect_strict' ]));
-            $target_languages = preg_replace('/\s+/', '', $this->postInput[ 'target_lang' ]);
-            $targets = explode( ',', trim($target_languages) );
-            $dialectStrictObj = json_decode($dialect_strict, true);
+            $dialect_strict   = trim( html_entity_decode( $this->postInput[ 'dialect_strict' ] ) );
+            $target_languages = preg_replace( '/\s+/', '', $this->postInput[ 'target_lang' ] );
+            $targets          = explode( ',', trim( $target_languages ) );
+            $dialectStrictObj = json_decode( $dialect_strict, true );
 
-            foreach ($dialectStrictObj as $lang => $value){
-                if(!in_array($lang, $targets)){
-                    throw new \Exception('Wrong `dialect_strict` object, language, ' . $lang . ' is not one of the project target languages');
+            foreach ( $dialectStrictObj as $lang => $value ) {
+                if ( !in_array( $lang, $targets ) ) {
+                    throw new \Exception( 'Wrong `dialect_strict` object, language, ' . $lang . ' is not one of the project target languages' );
                 }
 
-                if(!is_bool($value)){
-                    throw new \Exception('Wrong `dialect_strict` object, not boolean declared value for ' . $lang);
+                if ( !is_bool( $value ) ) {
+                    throw new \Exception( 'Wrong `dialect_strict` object, not boolean declared value for ' . $lang );
                 }
             }
 
-            $this->dialect_strict = html_entity_decode($dialect_strict);
+            $this->dialect_strict = html_entity_decode( $dialect_strict );
         }
     }
 
     /**
      * @throws Exception
      */
-    private function __validateFiltersExtractionParameters(){
+    private function __validateFiltersExtractionParameters() {
 
         if ( !empty( $this->postInput[ 'filters_extraction_parameters' ] ) ) {
 
-            $json = html_entity_decode( $this->postInput[ 'filters_extraction_parameters' ]);
+            $json   = html_entity_decode( $this->postInput[ 'filters_extraction_parameters' ] );
             $schema = file_get_contents( INIT::$ROOT . '/inc/validation/schema/filters_extraction_parameters.json' );
 
-            $validatorObject = new JSONValidatorObject();
+            $validatorObject       = new JSONValidatorObject();
             $validatorObject->json = $json;
 
-            $validator = new JSONValidator($schema);
-            $validator->validate($validatorObject);
+            $validator = new JSONValidator( $schema );
+            $validator->validate( $validatorObject );
 
-            $this->filters_extraction_parameters = json_decode($json);
+            $this->filters_extraction_parameters = json_decode( $json );
         }
     }
 
     /**
      * @throws Exception
      */
-    private function __validateXliffParameters(){
+    private function __validateXliffParameters() {
 
         if ( !empty( $this->postInput[ 'xliff_parameters' ] ) ) {
 
-            $json = html_entity_decode( $this->postInput[ 'xliff_parameters' ]);
+            $json   = html_entity_decode( $this->postInput[ 'xliff_parameters' ] );
             $schema = file_get_contents( INIT::$ROOT . '/inc/validation/schema/xliff_parameters.json' );
 
-            $validatorObject = new JSONValidatorObject();
+            $validatorObject       = new JSONValidatorObject();
             $validatorObject->json = $json;
 
-            $validator = new JSONValidator($schema);
-            $validator->validate($validatorObject);
+            $validator = new JSONValidator( $schema );
+            $validator->validate( $validatorObject );
 
-            $this->xliff_parameters = json_decode($json);
+            $this->xliff_parameters = json_decode( $json );
         }
     }
 
