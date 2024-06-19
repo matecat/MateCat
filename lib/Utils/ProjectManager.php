@@ -386,6 +386,12 @@ class ProjectManager {
             $options[ 'from_api' ] = 1;
         }
 
+        // xliff_parameters
+        if( isset( $this->projectStructure[ 'xliff_parameters' ] ) and $this->projectStructure[ 'xliff_parameters' ] instanceof XliffConfigModel ){
+            $configModel = $this->projectStructure[ 'xliff_parameters' ];
+            $options[ 'xliff_parameters' ] = $configModel->jsonSerialize();
+        }
+
         // pretranslate_101
         if ( isset( $this->projectStructure[ 'pretranslate_101' ] ) ) {
             $options[ 'pretranslate_101' ] = $this->projectStructure[ 'pretranslate_101' ];
@@ -407,9 +413,9 @@ class ProjectManager {
         if ( !empty( $options ) ) {
             foreach ( $options as $key => $value ) {
                 $dao->set(
-                        $this->projectStructure[ 'id_project' ],
-                        $key,
-                        $value
+                    $this->projectStructure[ 'id_project' ],
+                    $key,
+                    $value
                 );
             }
         }
