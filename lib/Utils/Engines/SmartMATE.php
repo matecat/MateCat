@@ -51,7 +51,7 @@ class Engines_SmartMATE extends Engines_AbstractEngine {
 
     }
 
-    protected function _decode( $rawValue ) {
+    protected function _decode( $rawValue, array $parameters = [], $function = null ) {
 
         $all_args = func_get_args();
 

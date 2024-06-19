@@ -18,7 +18,7 @@ $klein->with('/api/v3/projects/[:id_project]/[:password]', function() {
 });
 
 $klein->with( '/api/v3/jobs/[:id_job]/[:password]', function () {
-    route( '', 'GET', '\API\V3\ChunkController', 'show' ); //this do not show some info like teams and translators
+    route( '', 'GET', '\API\V3\ChunkController', 'show' ); //this does not show some info like teams and translators
     route( '/quality-report/segments', 'GET', 'Features\SecondPassReview\Controller\API\QualityReportController', 'segments' );
     route( '/files', 'GET', '\API\V3\FileInfoController', 'getInfo' );
     route( '/file/[:id_file]/instructions', 'GET', '\API\V3\FileInfoController', 'getInstructions' );
@@ -75,7 +75,6 @@ $klein->with( '/api/v3/tm-keys', function () {
 route( '/api/v3/projects/[:id_project]/[:password]/segment-analysis',  'GET',  'API\V3\SegmentAnalysisController', 'project' );
 route( '/api/v3/jobs/[:id_job]/[:password]/segment-analysis',          'GET',  'API\V3\SegmentAnalysisController', 'job' );
 route( '/api/v3/create-key',  'POST', 'API\V3\MyMemoryController', 'create' );
-
 
 // MMT
 $klein->with( '/api/v3/mmt/[:engineId]', function () {

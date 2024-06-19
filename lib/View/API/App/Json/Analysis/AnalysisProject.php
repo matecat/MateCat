@@ -19,6 +19,11 @@ class AnalysisProject implements JsonSerializable {
     protected $name = null;
 
     /**
+     * @var
+     */
+    protected $status;
+
+    /**
      * @var AnalysisJob[]
      */
     protected $jobs = [];
@@ -39,36 +44,44 @@ class AnalysisProject implements JsonSerializable {
      */
     protected $subject;
 
-    public function __construct( $name, $create_date, $subject, AnalysisProjectSummary $summary ) {
+    public function __construct( $name, $status, $create_date, $subject, AnalysisProjectSummary $summary ) {
         $this->name       = $name;
+        $this->status     = $status;
         $this->summary    = $summary;
         $this->subject    = $subject;
         $this->createDate = $create_date;
     }
 
     /**
-     * @inheritDoc
+     * @return mixed
      */
-    public function jsonSerialize() {
-        return [
-                'name'        => $this->name,
-                'create_date' => $this->createDate,
-                'subject'     => $this->subject,
-                'jobs'        => array_values( $this->jobs ),
-                'summary'     => $this->summary,
-                'analyze_url' => $this->analyzeLink
-        ];
+    public function getStatus()
+    {
+        return $this->status;
     }
 
     /**
-     * @param string $analyze
-     *
-     * @return $this
+     * @param mixed $status
      */
-    public function setAnalyzeLink( $analyze ) {
-        $this->analyzeLink = $analyze;
+    public function setStatus($status)
+    {
+        $this->status = $status;
+    }
 
-        return $this;
+    /**
+     * @return string
+     */
+    public function getAnalyzeLink()
+    {
+        return $this->analyzeLink;
+    }
+
+    /**
+     * @param string $analyzeLink
+     */
+    public function setAnalyzeLink($analyzeLink)
+    {
+        $this->analyzeLink = $analyzeLink;
     }
 
     /**
@@ -126,4 +139,18 @@ class AnalysisProject implements JsonSerializable {
         return $this->createDate;
     }
 
+    /**
+     * @inheritDoc
+     */
+    public function jsonSerialize() {
+        return [
+            'name'        => $this->name,
+            'status'      => $this->status,
+            'create_date' => $this->createDate,
+            'subject'     => $this->subject,
+            'jobs'        => array_values( $this->jobs ),
+            'summary'     => $this->summary,
+            'analyze_url' => $this->analyzeLink
+        ];
+    }
 }

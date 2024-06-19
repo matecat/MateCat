@@ -2,8 +2,6 @@
 @import 'modals/tmShareModal';
 @import 'modals/PreferenceModal';
 
-
-
 body.side-popup {
   overflow: hidden !important;
   font-family: Calibri, Arial, Helvetica, sans-serif;
@@ -125,7 +123,8 @@ a.ui.primary.right.floated.button.tiny.register-ok {
   transition-delay: 0s, 0s, 0.3s;
 }
 
-.success-modal {
+.success-modal,
+.fatal-error-modal {
   padding: 20px;
 }
 
@@ -157,8 +156,6 @@ a.ui.primary.right.floated.button.tiny.register-ok {
 .user-reset-password {
   width: 100%;
 }
-
-
 
 .login-container-right {
   width: 41%;
@@ -379,7 +376,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
 .matecat-modal,
 .matecat-modal-overlay {
   display: block;
-  z-index: 13;
+  z-index: 12;
   position: fixed;
   left: 0;
   top: 0;

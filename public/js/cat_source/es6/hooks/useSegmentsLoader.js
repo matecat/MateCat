@@ -13,6 +13,7 @@ function useSegmentsLoader({
   where = 'center',
   idJob = config.id_job,
   password = config.password,
+  isAnalysisCompleted,
 }) {
   const [isLoading, setIsLoading] = useState(false)
   const [result, setResult] = useState(undefined)
@@ -22,6 +23,8 @@ function useSegmentsLoader({
     thereAreNoItemsBefore: false,
     thereAreNoItemsAfter: false,
   })
+  const isAnalysisCompletedRef = useRef()
+  isAnalysisCompletedRef.current = isAnalysisCompleted
 
   useEffect(() => {
     if (where === 'center') {
@@ -74,6 +77,21 @@ function useSegmentsLoader({
             current.thereAreNoItemsAfter = true
         }
         setResult({data, segmentId: segmentIdValue, where: data.where})
+
+        // Sentry tracking
+        try {
+          if (
+            isAnalysisCompleted.current &&
+            where === 'center' &&
+            (typeof data.files === 'undefined' ||
+              (data.files && !Object.keys(data.files).length))
+          ) {
+            const trackingMessage = `getSegments (jid: ${idJob}, password: ${password}, step: ${where === 'center' ? INIT_NUM_SEGMENTS : MORE_NUM_SEGMENTS}, segment: ${segmentIdValue}, where: ${where}) response: ${JSON.stringify(data)}`
+            CommonUtils.dispatchTrackingError(trackingMessage)
+          }
+        } catch (error) {
+          //
+        }
       })
       .catch((errors) => {
         if (wasCleaned) return
@@ -101,6 +119,7 @@ useSegmentsLoader.propTypes = {
   where: PropTypes.string,
   idJob: PropTypes.string,
   password: PropTypes.string,
+  isAnalysisCompleted: PropTypes.bool,
 }
 
 export default useSegmentsLoader

@@ -217,7 +217,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
         return $db->update( 'segment_translations', $data, $where );
     }
 
-    public static function getUnchangebleStatus( Chunks_ChunkStruct $chunk, $segments_ids, $status, $source_page ) {
+    public static function getUnchangeableStatus( Chunks_ChunkStruct $chunk, $segments_ids, $status, $source_page ) {
 
         $where_values = [];
         $conn         = Database::obtain()->getConnection();
@@ -380,7 +380,6 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
 
         if ( empty( $translation[ 'translation' ] ) && !is_numeric( $translation[ 'translation' ] ) ) {
             $msg = "Error setTranslationUpdate. Empty translation found." . var_export( $_POST, true );
-            Log::doJsonLog( $msg );
             throw new PDOException( $msg );
         }
 
@@ -390,7 +389,6 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
         try {
             $stmt->execute( $bind_values );
         } catch ( PDOException $e ) {
-            Log::doJsonLog( $e->getMessage() );
             throw new PDOException( "Error when (UPDATE) the translation for the segment {$translation['id_segment']} - Error: {$e->getCode()}" );
         }
 
@@ -401,40 +399,23 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
      * @param Translations_SegmentTranslationStruct $translation_struct
      *
      * @return int
-     * @deprecated
-     * @TODO use Update Struct with mask
-     *
+     * @throws Exception
      */
     public static function updateTranslationAndStatusAndDate( Translations_SegmentTranslationStruct $translation_struct ) {
 
-        // persist the version_number in case $translation_struct has already the property hydrated
-        $update_version_number = ( null !== $translation_struct->version_number ) ? 'version_number = :version_number,' : '';
-
-        $query = "UPDATE segment_translations 
-                    SET translation = :translation, 
-                    status = :status, 
-                    $update_version_number
-                    translation_date = :translation_date
-                    WHERE id_segment = :id_segment
-                    AND id_job=:id_job ";
-
         $values = [
-                'translation'      => $translation_struct->translation,
-                'id_segment'       => $translation_struct->id_segment,
-                'id_job'           => $translation_struct->id_job,
-                'status'           => $translation_struct->status,
-                'translation_date' => $translation_struct->translation_date
+                'translation',
+                'status',
+                'translation_date',
         ];
 
+        // persist the version_number in case $translation_struct has already the property hydrated
         if ( null !== $translation_struct->version_number ) {
-            $values['version_number'] = $translation_struct->version_number;
+            $values[] = 'version_number';
         }
 
-        $db   = Database::obtain();
-        $stmt = $db->getConnection()->prepare( $query );
-        $stmt->execute($values);
+        return Translations_SegmentTranslationDao::updateStruct( $translation_struct, $values ) ;
 
-        return $stmt->rowCount();
     }
 
     /**
@@ -804,11 +785,11 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
      *
      * @return array|null
      */
-    public static function getLast10TranslatedSegmentIDs( $id_job ) {
+    public static function getLast10TranslatedSegmentIDsInLastHour( $id_job ) {
 
         // temporal interval of 1 hour
-        $now = new \DateTime();
-        $limit = new \DateTime('-1 hour');
+        $now   = new DateTime();
+        $limit = new DateTime( '-1 hour' );
 
         // Force Index guarantee that the optimizer will not choose translation_date and scan the full table for new jobs.
         $query = "
@@ -822,14 +803,14 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
 
         $db = Database::obtain();
         try {
-            //sometimes we can have broken projects in our Database that are not related to a job id
-            //the query that extract the projects info returns a null job id for these projects, so skip the exception
+            // Sometimes there could be broken projects that are not related to a job ID.
+            // The query that extracts the project info returns a null job ID for these projects, so skip the exception.
             $stmt = $db->getConnection()->prepare( $query );
             $stmt->setFetchMode( PDO::FETCH_ASSOC );
             $stmt->execute( [
                     'id_job' => $id_job,
-                    'limit' => $limit->format('Y-m-d H:i:s'),
-                    'now' => $now->format('Y-m-d H:i:s'),
+                    'limit'  => $limit->format( 'Y-m-d H:i:s' ),
+                    'now'    => $now->format( 'Y-m-d H:i:s' ),
             ] );
 
             $results = [];
@@ -850,7 +831,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
      *
      * @return array
      */
-    public static function getEQWLastHour( $id_job, $estimation_seg_ids ) {
+    public static function getWordsPerSecond( $id_job, $estimation_seg_ids ) {
 
         /**
          * If the translator translated the last ten segments in less than 1 hour
@@ -859,10 +840,10 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
          */
         $query = "
             SELECT 
-                   Round( SUM( s.raw_word_count ) /
-                               ( Unix_timestamp(Max(translation_date)) -
-                                 Unix_timestamp(Min(translation_date)) ) * 3600) AS words_per_hour
-         
+                   Round( 
+                        SUM( s.raw_word_count ) / ( Unix_timestamp(Max(translation_date)) - Unix_timestamp(Min(translation_date)) )
+                   ) AS words_per_second
+            
             FROM   segment_translations st
             JOIN   segments s ON id = st.id_segment
             WHERE  status IN ( 'TRANSLATED', 'APPROVED', 'APPROVED2' )
@@ -874,9 +855,8 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
         $stmt = $db->getConnection()->prepare( $query );
         $stmt->setFetchMode( PDO::FETCH_ASSOC );
         $stmt->execute( array_merge( [ $id_job ], $estimation_seg_ids ) );
-        $results = $stmt->fetchAll();
 
-        return $results;
+        return $stmt->fetchAll();
     }
 
     /**

@@ -2,13 +2,14 @@
   position: absolute;
   z-index: 12;
   border-radius: 2px;
-  padding: 6px;
+  padding: 5px 10px;
   background-color: $white;
-  box-shadow: 0 0 24px rgba($black, 0.4);
-  color: $black;
+  box-shadow: 0 0 16px rgba($black, 0.25);
+  color: $grey6;
   pointer-events: none;
   white-space: pre;
   text-align: left;
+  border-radius: 5px;
   &.top {
     transform: translate(-50%, -100%);
   }

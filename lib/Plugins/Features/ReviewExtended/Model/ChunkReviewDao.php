@@ -147,19 +147,17 @@ class ChunkReviewDao extends \LQA\ChunkReviewDao {
         // in MySQL a sum of a null value to an integer returns 0
         // in MySQL division by zero returns NULL, so we have to coalesce null values from is_pass division
         $sql = "INSERT INTO 
-            qa_chunk_reviews ( id, id_job, password, penalty_points, reviewed_words_count, advancement_wc, total_tte ) 
+            qa_chunk_reviews ( id, id_job, password, penalty_points, reviewed_words_count, total_tte ) 
         VALUES( 
             :id,
             :id_job,
             :password,
             :penalty_points,
             :reviewed_words_count,
-            :advancement_wc,
             :total_tte
         ) ON DUPLICATE KEY UPDATE
         penalty_points = GREATEST( COALESCE( penalty_points, 0 ) + COALESCE( VALUES( penalty_points ), 0 ), 0 ),
         reviewed_words_count = GREATEST( reviewed_words_count + VALUES( reviewed_words_count ), 0 ),
-        advancement_wc = GREATEST( advancement_wc + VALUES( advancement_wc ), 0 ),
         total_tte = GREATEST( total_tte + VALUES( total_tte ), 0 ),        
         is_pass = IF( 
 				COALESCE(
@@ -177,7 +175,6 @@ class ChunkReviewDao extends \LQA\ChunkReviewDao {
             'password'             => $chunkReview_partial->password,
             'penalty_points'       => empty( $data[ 'penalty_points' ] ) ? 0 : $data[ 'penalty_points' ],
             'reviewed_words_count' => $data[ 'reviewed_words_count' ],
-            'advancement_wc'       => $data[ 'advancement_wc' ],
             'total_tte'            => $data[ 'total_tte' ],
         ] );
 

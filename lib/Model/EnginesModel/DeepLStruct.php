@@ -25,7 +25,7 @@ class DeepLStruct extends EnginesModel_EngineStruct
     /**
      * @var string
      */
-    public $translate_relative_url = "translate";
+    public $translate_relative_url = "v1/translate";
 
     /**
      * @var array
@@ -49,7 +49,7 @@ class DeepLStruct extends EnginesModel_EngineStruct
     /**
      * @var int
      */
-    public $penalty = 14;
+    public $penalty = 15; // to get 85% matches
 
     public static function getStruct() {
         return new DeepLStruct();

@@ -235,6 +235,7 @@ var spec = {
     },
     '/api/status': {
       get: {
+        deprecated: true,
         tags: ['Project'],
         summary: 'Retrieve the status of a project',
         description:
@@ -270,44 +271,71 @@ var spec = {
         },
       },
     },
-    '/api/change_project_password': {
+    '/api/v2/change-password': {
       post: {
-        tags: ['Project'],
-        summary: 'Change password',
-        description: 'Change the password of a project.',
-        parameters: [
-          {
-            name: 'id_project',
-            in: 'formData',
-            description: 'The id of the project you want to update.',
-            required: true,
-            type: 'integer',
+        tags: ['Project', 'Job'],
+      },
+      summary: 'Change password',
+      description: 'Change the password of a project or a job.',
+      parameters: [
+        {
+          name: 'res',
+          in: 'formData',
+          description:
+            'Possible values: job, prj (if left empy, job is the default value)',
+          required: false,
+          type: 'string',
+        },
+        {
+          name: 'id',
+          in: 'formData',
+          description:
+            'The id of the resource (project or job) whose password you want to change.',
+          required: true,
+          type: 'integer',
+        },
+        {
+          name: 'password',
+          in: 'formData',
+          description:
+            'The current password of the resource (project or job) whose password you want to change.',
+          required: true,
+          type: 'string',
+        },
+        {
+          name: 'new_password',
+          in: 'formData',
+          description:
+            'Use this to define the new password of the resource whose password you are changing. Becomes mandatory if undo is set to "true".',
+          required: false,
+          type: 'string',
+        },
+        {
+          name: 'revision_number',
+          in: 'formData',
+          description:
+            'Fill this in if you want to change the password of a revision job. Use this field to specify the revision step whose password you are changing. If this field is filled in, the password sent in the "password" field should be the one for the corresponding revision step. Possible values: 1, 2.',
+          required: false,
+          type: 'integer',
+        },
+        {
+          name: 'undo',
+          in: 'formData',
+          description:
+            'Set this to "true" if you\'d like to define the new password of the resource you are updating, rather than having a random one generated for you.',
+          required: false,
+          type: 'boolean',
+        },
+      ],
+      responses: {
+        200: {
+          description: 'An array of price estimates by product',
+          schema: {
+            $ref: '#/definitions/ChangePasswordResponse',
           },
-          {
-            name: 'old_pass',
-            in: 'formData',
-            description: 'The OLD password of the project you want to update.',
-            required: true,
-            type: 'string',
-          },
-          {
-            name: 'new_pass',
-            in: 'formData',
-            description: 'The NEW password of the project you want to update.',
-            required: true,
-            type: 'string',
-          },
-        ],
-        responses: {
-          200: {
-            description: 'An array of price estimates by product',
-            schema: {
-              $ref: '#/definitions/ChangePasswordResponse',
-            },
-          },
-          default: {
-            description: 'Unexpected error',
-          },
+        },
+        default: {
+          description: 'Unexpected error',
         },
       },
     },
@@ -574,6 +602,40 @@ var spec = {
             description: 'ChangeStatus',
             schema: {
               $ref: '#/definitions/ChangeStatus',
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v2/projects/{id_project}/{password}/reviews': {
+      post: {
+        tags: ['Project'],
+        summary: 'Generate second pass review 2',
+        description: 'API to generate a second pass review',
+        parameters: [
+          {
+            name: 'id_job',
+            description:
+              'The id of the job you intend to generate the Revise 2 step for',
+            required: true,
+            type: 'string',
+          },
+          {
+            name: 'password',
+            description:
+              'The password of the job you intend to generate the Revise 2 step for',
+            required: true,
+            type: 'string',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'CreateReview',
+            schema: {
+              $ref: '#/definitions/CreateReview',
             },
           },
           default: {
@@ -982,6 +1044,13 @@ var spec = {
                 'Number of word count values of each chunk returned in split check API',
               type: 'array',
               items: {type: 'double'},
+            },
+            {
+              name: 'split_raw_words',
+              in: 'formData',
+              description:
+                'Split the job by raw words instead of equivalent words',
+              type: 'boolean',
             },
           ],
           responses: {
@@ -2693,38 +2762,225 @@ var spec = {
     Status: {
       type: 'object',
       properties: {
-        errors: {
-          type: 'array',
-          items: {
-            type: 'object',
-          },
-          description:
-            'A list of objects containing error message at system wide level. Every error has a negative numeric code and a textual message ( currently the only error reported is the wrong version number in config.inc.php file and happens only after Matecat updates, so you should never see it ).',
-        },
-        data: {
-          $ref: '#/definitions/Data-Status',
+        name: {
+          type: 'string',
         },
         status: {
           type: 'string',
-          description:
-            'The analysis status of the project. ANALYZING - analysis/creation still in progress; NO_SEGMENTS_FOUND - the project has no segments to analyze (have you uploaded a file containing only images?); ANALYSIS_NOT_ENABLED - no analysis will be performed because of Matecat configuration; DONE - the analysis/creation is completed; FAIL - the analysis/creation is failed.',
-          enum: [
-            'ANALYZING',
-            'NO_SEGMENTS_FOUND',
-            'ANALYSIS_NOT_ENABLED',
-            'DONE',
-            'FAIL',
-          ],
         },
-        analyze: {
+        create_date: {
           type: 'string',
-          description:
-            "A link to the analyze page; it's a human readable version of this API output",
+        },
+        subject: {
+          type: 'string',
         },
         jobs: {
-          $ref: '#/definitions/Jobs-Status',
+          type: 'array',
+          items: {
+            $ref: '#/definitions/StatusJob',
+          },
         },
       },
+    },
+    StatusJob: {
+      type: 'object',
+      properties: {
+        id: {
+          type: 'integer',
+        },
+        source: {
+          type: 'string',
+        },
+        source_name: {
+          type: 'string',
+        },
+        target: {
+          type: 'string',
+        },
+        target_name: {
+          type: 'string',
+        },
+        chunks: {
+          type: 'array',
+          items: {
+            $ref: '#/definitions/StatusChunk',
+          },
+        },
+        summary: {
+          type: 'object',
+          properties: {
+            in_queue_before: {
+              type: 'integer',
+            },
+            total_segments: {
+              type: 'integer',
+            },
+            segments_analyzed: {
+              type: 'integer',
+            },
+            status: {
+              type: 'string',
+            },
+            total_raw: {
+              type: 'integer',
+            },
+            total_industry: {
+              type: 'integer',
+            },
+            total_equivalent: {
+              type: 'integer',
+            },
+            discount: {
+              type: 'integer',
+            },
+          },
+          required: [
+            'in_queue_before',
+            'total_segments',
+            'segments_analyzed',
+            'status',
+            'total_raw',
+            'total_industry',
+            'total_equivalent',
+            'discount',
+          ],
+        },
+        analyze_url: {
+          type: 'string',
+        },
+      },
+      required: [
+        'id',
+        'source',
+        'source_name',
+        'target',
+        'target_name',
+        'summary',
+        'chunks',
+      ],
+    },
+    StatusChunk: {
+      type: 'object',
+      properties: {
+        password: {
+          type: 'string',
+        },
+        status: {
+          type: 'string',
+        },
+        engines: {
+          type: 'object',
+          properties: {
+            tm: {
+              type: 'object',
+              properties: {
+                id: {
+                  type: 'integer',
+                },
+                name: {
+                  type: 'string',
+                },
+                type: {
+                  type: 'string',
+                },
+                description: {
+                  type: 'string',
+                },
+              },
+              required: ['id', 'name', 'type', 'description'],
+            },
+            mt: {
+              type: 'object',
+              properties: {
+                id: {
+                  type: 'integer',
+                },
+                name: {
+                  type: 'string',
+                },
+                type: {
+                  type: 'string',
+                },
+                description: {
+                  type: 'string',
+                },
+              },
+              required: ['id', 'name', 'type', 'description'],
+            },
+          },
+          required: ['tm', 'mt'],
+        },
+        memory_keys: {
+          type: 'array',
+          items: {},
+        },
+        urls: {
+          type: 'object',
+          properties: {
+            t: {
+              type: 'string',
+            },
+            r1: {
+              type: 'string',
+            },
+            r2: {
+              type: 'string',
+            },
+          },
+          required: ['t', 'r1'],
+        },
+        files: {
+          type: 'array',
+          items: {
+            $ref: '#/definitions/StatusFile',
+          },
+        },
+      },
+      required: ['password', 'status', 'engines'],
+    },
+    StatusFile: {
+      type: 'object',
+      properties: {
+        id: {
+          type: 'integer',
+        },
+        id_file_part: {
+          type: 'integer',
+        },
+        name: {
+          type: 'string',
+        },
+        original_name: {
+          type: 'string',
+        },
+        total_raw: {
+          type: 'integer',
+        },
+        total_equivalent: {
+          type: 'integer',
+        },
+        matches: {
+          type: 'array',
+          items: {
+            $ref: '#/definitions/StatusFileMatch',
+          },
+        },
+      },
+    },
+    StatusFileMatch: {
+      type: 'object',
+      properties: {
+        raw: {
+          type: 'integer',
+        },
+        equivalent: {
+          type: 'integer',
+        },
+        type: {
+          type: 'string',
+        },
+      },
+      required: ['raw', 'equivalent', 'type'],
     },
     'Data-Status': {
       type: 'object',
@@ -2938,24 +3194,17 @@ var spec = {
     ChangePasswordResponse: {
       type: 'object',
       properties: {
-        status: {
+        id: {
           type: 'string',
-          description:
-            'Return the exit status of the action. The statuses can be OK or FAIL',
-          enum: ['OK', 'FAIL'],
+          description: 'Returns the id of the resource just updated',
         },
-        id_project: {
+        new_pwd: {
           type: 'string',
-          description: 'Returns the id of the project just updated',
+          description: 'Returns the new pass of the resource just updated',
         },
-        project_pass: {
+        old_pwd: {
           type: 'string',
-          description: 'Returns the new pass of the project just updated',
-        },
-        message: {
-          type: 'string',
-          description:
-            'Return the error message for the action if the status is FAIL',
+          description: 'Returns the old pass of the resource just updated',
         },
       },
     },
@@ -3903,6 +4152,33 @@ var spec = {
           type: 'string',
           enum: ['active', 'cancelled', 'archived'],
           required: true,
+        },
+      },
+    },
+
+    CreateReview: {
+      type: 'object',
+      properties: {
+        chunk_review: {
+          type: 'array',
+          items: {
+            $ref: '#/definitions/CreateReviewItem',
+          },
+        },
+      },
+    },
+
+    CreateReviewItem: {
+      type: 'object',
+      properties: {
+        id: {
+          type: 'integer',
+        },
+        id_job: {
+          type: 'string',
+        },
+        review_password: {
+          type: 'string',
         },
       },
     },

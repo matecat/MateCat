@@ -14,6 +14,7 @@ use API\V2\Validators\ProjectPasswordValidator;
 use Exception;
 use Jobs_JobStruct;
 use ProjectManager;
+use Projects_MetadataDao;
 use Projects_ProjectStruct;
 
 
@@ -78,12 +79,14 @@ class JobSplitController extends KleinController {
         $this->pManager = new ProjectManager();
         $this->pManager->setProjectAndReLoadFeatures( $this->project_struct );
 
+        $count_type = ($this->request->param("split_raw_words") == true) ? Projects_MetadataDao::SPLIT_RAW_WORD_TYPE : Projects_MetadataDao::SPLIT_EQUIVALENT_WORD_TYPE;
+
         $pStruct = $this->pManager->getProjectStructure();
 
         $pStruct[ 'job_to_split' ]      = $this->job->id;
         $pStruct[ 'job_to_split_pass' ] = $this->job->password;
 
-        $this->pManager->getSplitData( $pStruct, $this->request->num_split, $this->request->split_values );
+        $this->pManager->getSplitData( $pStruct, $this->request->num_split, $this->request->split_values, $count_type );
 
         return $pStruct;
     }

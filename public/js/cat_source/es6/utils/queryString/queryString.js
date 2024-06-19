@@ -1,3 +1,5 @@
+import {isUndefined} from 'lodash'
+
 /**
  * Convert object nested properties into arrays
  *
@@ -39,7 +41,7 @@ const getArraysOfNestedProps = (obj) => {
           copyPath,
         )
       } else {
-        copyPath.push(!prop ? '' : prop)
+        copyPath.push(isUndefined(prop) ? '' : prop)
         result.push(copyPath)
       }
     }
