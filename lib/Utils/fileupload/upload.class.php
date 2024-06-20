@@ -1,6 +1,7 @@
 <?php
 
 use FilesStorage\AbstractFilesStorage;
+use MimeTypes\MimeTypes;
 
 define( "DIRSEP", "//" );
 
@@ -330,7 +331,7 @@ class UploadHandler {
      */
     private function getMimeContentType( $filename ) {
         if ( function_exists( 'mime_content_type' ) ) {
-            return mime_content_type( $filename );
+            return (new MimeTypes())->guessMimeType( $filename );
         }
 
         if ( function_exists( 'finfo_open' ) ) {

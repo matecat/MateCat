@@ -53,9 +53,10 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     }
 
     /**
-     * @param $rawValue
+     * @param       $rawValue
      * @param array $parameters
-     * @param null $function
+     * @param null  $function
+     *
      * @return Engines_Results_AbstractResponse
      */
     protected function _decode( $rawValue, array $parameters = [], $function = null ) {
@@ -495,6 +496,8 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     }
 
     /**
+     * @param $id_job
+     * @param $id_segment
      * @param $source
      * @param $sourceLanguage
      * @param $targetLanguage
@@ -502,9 +505,11 @@ class Engines_MyMemory extends Engines_AbstractEngine {
      *
      * @return array
      */
-    public function glossaryGet( $source, $sourceLanguage, $targetLanguage, $keys ) {
+    public function glossaryGet( $id_job, $id_segment, $source, $sourceLanguage, $targetLanguage, $keys ) {
         $payload = [
                 'de'              => INIT::$MYMEMORY_API_KEY,
+                "id_job"          => $id_job,
+                "id_segment"      => $id_segment,
                 "source"          => $source,
                 "source_language" => $sourceLanguage,
                 "target_language" => $targetLanguage,
@@ -575,6 +580,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         ];
 
         $this->call( "glossary_set_relative_url", $payload, true, true );
+
         return $this->result;
     }
 

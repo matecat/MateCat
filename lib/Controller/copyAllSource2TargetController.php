@@ -3,6 +3,7 @@
 use Features\ReviewExtended\ReviewUtils;
 use Features\TranslationVersions\Handlers\TranslationEventsHandler;
 use Features\TranslationVersions\Model\TranslationEvent;
+use WordCount\CounterModel;
 
 /**
  * Created by PhpStorm.

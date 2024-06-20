@@ -134,11 +134,7 @@ class SegmentsFilter extends React.Component {
     let revisionNumber
     if (value === 'APPROVED-2') {
       revisionNumber = 2
-      //YYY
-      value =
-        config.word_count_type === JOB_WORD_CONT_TYPE.EQUIVALENT
-          ? SEGMENTS_STATUS.APPROVED
-          : SEGMENTS_STATUS.APPROVED2
+      value = SEGMENTS_STATUS.APPROVED2
     } else {
       revisionNumber = null
     }

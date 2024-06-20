@@ -1,6 +1,7 @@
 <?php
 
 use FilesStorage\AbstractFilesStorage;
+use MimeTypes\MimeTypes;
 
 /**
  * Created by PhpStorm.
@@ -275,7 +276,7 @@ class ZipArchiveExtended extends ZipArchive {
 
         foreach ( $filesArray as $filePath => &$objectFile ) {
             $objectFile[ 'error' ] = $fileErrors[ $filePath ];
-            $objectFile[ 'type' ]  = @mime_content_type( $tmp_folder . $filePath );
+            $objectFile[ 'type' ]  = (new MimeTypes())->guessMimeType( $tmp_folder . $filePath );
         }
 
         return $filesArray;

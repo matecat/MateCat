@@ -29,6 +29,7 @@ import ApplicationStore from '../stores/ApplicationStore'
 import {useGoogleLoginNotification} from '../hooks/useGoogleLoginNotification'
 import ModalsActions from '../actions/ModalsActions'
 import FatalErrorModal from '../components/modals/FatalErrorModal'
+import {CattoolFooter} from '../components/footer/CattoolFooter'
 
 const urlParams = new URLSearchParams(window.location.search)
 const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
@@ -177,7 +178,22 @@ function CatTool() {
         ModalsActions.showModalComponent(
           FatalErrorModal,
           {
-            text: "Analysis isn't completed, please try again soon.",
+            text: (
+              <span>
+                Access to the editor page is forbidden until the project's
+                analysis is complete.
+                <br />
+                To follow the analysis' progress,{' '}
+                <a
+                  rel="noreferrer"
+                  href={`/jobanalysis/${config.id_project}-${config.id_job}-${config.password}`}
+                  target="_blank"
+                >
+                  click here
+                </a>
+                .
+              </span>
+            ),
           },
           'Analysis in progress',
           undefined,
@@ -426,7 +442,7 @@ function CatTool() {
           }}
         />
       )}
-      <CattolFooter
+      <CattoolFooter
         idProject={config.id_project}
         idJob={config.id_job}
         password={config.password}

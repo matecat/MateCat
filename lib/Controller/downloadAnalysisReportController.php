@@ -64,7 +64,7 @@ class downloadAnalysisReportController extends downloadController {
         $this->featureSet->loadForProject( Projects_ProjectDao::findById( $this->id_project, 60 * 60 * 24 ) );
 
         $analysisStatus = new XTRFStatus( $_project_data, $this->featureSet );
-        $outputContent = $analysisStatus->fetchData( Projects_MetadataDao::WORD_COUNT_RAW )->getResult();
+        $outputContent = $analysisStatus->fetchData()->getResult();
 
         $this->outputContent = $this->composeZip( $_project_data[0][ 'pname' ], $outputContent );
         $this->_filename     = $_project_data[0][ 'pname' ] . ".zip";
