@@ -306,7 +306,7 @@ abstract class DataAccess_AbstractDao {
      *
      * @return DataAccess_IDaoStruct[]
      */
-    protected function _fetchObject( PDOStatement $stmt, DataAccess_IDaoStruct $fetchClass, Array $bindParams ) {
+    protected function _fetchObject( PDOStatement $stmt, DataAccess_IDaoStruct $fetchClass, Array $bindParams ): array {
 
         $_cacheResult = $this->_getFromCache( $stmt->queryString . $this->_serializeForCacheKey( $bindParams ) );
 

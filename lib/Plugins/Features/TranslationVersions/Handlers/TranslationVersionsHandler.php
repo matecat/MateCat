@@ -99,11 +99,7 @@ class TranslationVersionsHandler implements VersionHandlerInterface {
         if ( $version_saved ) {
             $new_translation->version_number = $old_translation->version_number + 1;
         } else {
-            $new_translation->version_number = $old_translation->version_number;
-        }
-
-        if ( $new_translation->version_number == null ) {
-            $new_translation->version_number = 0;
+            $new_translation->version_number = $old_translation->version_number ?? 0;
         }
 
         return $version_saved;

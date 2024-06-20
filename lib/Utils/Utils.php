@@ -783,21 +783,13 @@ class Utils {
     /**
      * stringsAreEqual
      *
-     * This function needs to handle a special case. When old translation has been saved from a pre-translated XLIFF,
-     * encoding is different from the one received from the UI. Quotes are different for instance.
-     *
-     * So we compare the decoded version of the two strings. Should always work.
-     *
      * @param $stringA
      * @param $stringB
      *
      * @return bool
      */
     public static function stringsAreEqual( $stringA, $stringB ) {
-        $old = html_entity_decode( $stringA, ENT_XML1 | ENT_QUOTES );
-        $new = html_entity_decode( $stringB, ENT_XML1 | ENT_QUOTES );
-
-        return $new == $old;
+        return $stringA == $stringB;
     }
 
     /**

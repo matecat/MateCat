@@ -97,7 +97,7 @@ class TranslationEventDao extends \DataAccess_AbstractDao {
      *
      * @return TranslationEventStruct|null
      */
-    public function getLatestEventForSegment( $id_job, $id_segment ) {
+    public function getLatestEventForSegment( $id_job, $id_segment ): ?TranslationEventStruct {
 
         $sql = "SELECT * FROM segment_translation_events
                 WHERE id_job = :id_job

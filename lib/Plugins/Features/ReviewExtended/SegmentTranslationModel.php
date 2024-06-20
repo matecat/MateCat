@@ -19,6 +19,7 @@ use LQA\EntryCommentStruct;
 use LQA\EntryDao;
 use LQA\EntryStruct;
 use LQA\EntryWithCategoryStruct;
+use Projects_ProjectStruct;
 use Routes;
 use TransactionableTrait;
 use Users_UserDao;
@@ -39,7 +40,7 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
     protected $_chunk;
 
     /**
-     * @var \Projects_ProjectStruct
+     * @var Projects_ProjectStruct
      */
     protected $_project;
 
@@ -90,7 +91,7 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
      *
      * @return bool
      */
-    private function aFinalRevisionExistsForThisChunk( ChunkReviewStruct $chunkReview ) {
+    private function aFinalRevisionExistsForThisChunk( ChunkReviewStruct $chunkReview ): bool {
         return in_array( $chunkReview->source_page, $this->_sourcePagesWithFinalRevisions );
     }
 
@@ -106,17 +107,6 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
 
         // when downgrading a revision to translation, the issues must be removed (from R1, R2 or both)
         $this->flagIssuesToBeDeleted( $chunkReview->source_page );
-    }
-
-    /**
-     * @param ChunkReviewStruct $chunkReview
-     *
-     * @return void
-     * @throws Exception
-     */
-    private function increaseAllCounters( ChunkReviewStruct $chunkReview ) {
-        $chunkReview->reviewed_words_count += $this->_event->getSegmentStruct()->raw_word_count;
-        $chunkReview->total_tte            += $this->_event->getCurrentEvent()->time_to_edit;
     }
 
     private function increaseCountersButCheckForFinalRevision( ChunkReviewStruct $chunkReview ) {
@@ -138,12 +128,12 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
      * 1. Based on the change of status
      * 2. Upon pressing the "APPROVE" button, when modifying a segment in the same status or accepting the segment without changes
      *    - After the first modification or acceptance, the count does not increase further unless there is a change of status
-     * 3. For unmodified ICE segments, the progress is not counted unless there is a change of status
+     * 3. For unmodified ICE segments, the progress is not counted unless there is a change of status (no acceptance counts)
      *
      * @return ChunkReviewTranslationEventTransition
      * @throws Exception
      */
-    public function evaluateAndGetChunkReviewTranslationEventTransition() {
+    public function evaluateAndGetChunkReviewTranslationEventTransition(): ChunkReviewTranslationEventTransition {
 
         $chunkReviews       = [];
         $unsetFinalRevision = [];
@@ -172,21 +162,13 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
             $chunkReview->password    = $this->_chunkReviews[ $i ]->password;
             $chunkReview->source_page = $this->_chunkReviews[ $i ]->source_page;
 
-            if ( $this->_event->isSegmentDraft() ) {
+            if ( $this->_event->isADraftChange() ) {
                 continue;
             }
 
             if ( $this->_event->isChangingStatus() ) {
-                // - When passing from Translated to R1, this will not trigger
-                // - When passing from R1 to R1 this will not trigger because of NOT changing status
-                // - When passing from R2 to R1 this will not trigger because the previous event was R2
-                if (
-                        $this->_event->iceIsAboutToBeReviewed() &&
-                        $this->_event->currentEventIsOnThisChunk( $chunkReview )
-                ) {
-                    $this->increaseAllCounters( $chunkReview );
-                    $chunkReviews[] = $chunkReview;
-                } elseif ( $this->_event->currentEventIsOnThisChunk( $chunkReview ) ) {
+
+                if ( $this->_event->currentEventIsOnThisChunk( $chunkReview ) ) {
 
                     // There is a change status to this review, and it is the first time it happens;
                     // we must add the reviewed word count
@@ -212,7 +194,8 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
                 }
 
             } elseif (
-                    $this->_event->isEditingCurrentRevisionButNotIce() &&
+                    // All can pass except unmodified ices
+                    !$this->_event->isUnModifiedIce() &&
                     $this->_event->currentEventIsOnThisChunk( $chunkReview )
             ) {
 
@@ -360,7 +343,7 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
      *
      * @return int
      */
-    protected function getPenaltyPointsForSourcePage( $source_page ) {
+    protected function getPenaltyPointsForSourcePage( $source_page ): int {
         if ( !isset( $this->_issuesDeletionList[ $source_page ] ) || !is_array( $this->_issuesDeletionList[ $source_page ] ) ) {
             return 0;
         }
