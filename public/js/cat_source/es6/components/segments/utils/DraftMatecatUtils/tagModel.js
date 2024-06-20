@@ -212,7 +212,7 @@ const tagSignatures = {
     selfClosing: true,
     isClosure: false,
     placeholder: '\u00b7',
-    encodedPlaceholder: '·',
+    encodedPlaceholder: ' ',
     placeholderRegex: null,
     decodeNeeded: false,
     errorCheckAvailable: false,
