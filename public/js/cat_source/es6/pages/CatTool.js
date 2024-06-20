@@ -420,7 +420,6 @@ function CatTool() {
             <div className="article-segments-container">
               <SegmentsContainer
                 isReview={config.isReview}
-                enableTagProjection={UI.enableTagProjection}
                 startSegmentId={UI.startSegmentId?.toString()}
                 firstJobSegment={config.first_job_segment}
                 guessTagActive={guessTagActive}

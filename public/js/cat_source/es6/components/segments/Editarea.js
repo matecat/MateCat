@@ -752,6 +752,8 @@ class Editarea extends React.Component {
       return 'close-tag-menu'
     } else if (e.key === 'Tab') {
       return e.shiftKey ? null : 'insert-tab-tag'
+    } else if (e.code === 'Space') {
+      return 'insert-space-tag'
     } else if (
       (e.key === ' ' || e.key === 'Spacebar' || e.key === ' ') &&
       ((isCtrlKeyCommand(e) && e.shiftKey) ||
@@ -917,6 +919,9 @@ class Editarea extends React.Component {
         return 'handled'
       case 'insert-tab-tag':
         insertTagAtSelection('tab')
+        return 'handled'
+      case 'insert-space-tag':
+        insertTagAtSelection('space')
         return 'handled'
       case 'insert-nbsp-tag':
         insertTagAtSelection('nbsp')

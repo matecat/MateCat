@@ -208,6 +208,23 @@ const tagSignatures = {
     replaceForLexiqa: true,
     lexiqaText: ' ',
   },
+  space: {
+    type: 'space',
+    regex: /(?<!<[^>]*)\s(?![^<]*>)/g,
+    selfClosing: true,
+    isClosure: false,
+    placeholder: '\u00b7',
+    encodedPlaceholder: '·',
+    placeholderRegex: null,
+    decodeNeeded: false,
+    errorCheckAvailable: false,
+    lexiqaAvailable: true,
+    glossaryAvailable: true,
+    style: 'tag-selfclosed tag-space-placeholder',
+    showTooltip: false,
+    replaceForLexiqa: true,
+    lexiqaText: ' ',
+  },
 }
 
 function TagStruct(offset = -1, length = 0, type = null, name = null) {
