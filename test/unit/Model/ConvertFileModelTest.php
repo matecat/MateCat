@@ -27,6 +27,6 @@ class ConvertFileModelTest extends PHPUnit_Framework_TestCase {
 
         $json = json_encode( $model );
 
-        $this->assertEquals( '{"code":-3,"errors":[{"code":-3,"message":"Source not valid"}],"data":[]}', $json );
+        $this->assertEquals( '{"code":-3,"errors":[{"code":-3,"message":"Source not valid","debug":null}],"warnings":[],"data":[]}', $json );
     }
 }

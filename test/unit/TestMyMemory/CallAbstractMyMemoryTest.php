@@ -397,7 +397,7 @@ TAB;
 
         $function_param = "delete_relative_url";
 
-        $url_mock_param = "http://api.mymemory.translated.net/delete?langpair=IT%7CEN&de=demo%40matecat.com&seg=Il+Sistema+registra+le+informazioni+sul+nuovo+film.&tra=The+system+moves++hands+up+in+the+air.";
+        $url_mock_param = "https://api.mymemory.translated.net/delete_by_id?langpair=IT%7CEN&de=demo%40matecat.com&seg=Il+Sistema+registra+le+informazioni+sul+nuovo+film.&tra=The+system+moves++hands+up+in+the+air.";
 
         $mock_json_return = <<<'TAB'
 {"responseStatus":200,"responseData":"Found and deleted 1 segments"}
@@ -407,7 +407,7 @@ TAB;
         /**
          * @var Engines_MyMemory
          */
-        $engine_MyMemory = $this->getMockBuilder( '\Engines_MyMemory' )->setConstructorArgs( [ $this->engine_struct_param_My_Memory ] )->setMethods( [ '_call' ] )->getMock();
+        $engine_MyMemory = @$this->getMockBuilder( '\Engines_MyMemory' )->setConstructorArgs( [ $this->engine_struct_param_My_Memory ] )->setMethods( [ '_call' ] )->getMock();
         $engine_MyMemory->expects( $this->once() )->method( '_call' )->with( $url_mock_param, $this->curl_param )->willReturn( $mock_json_return );
 
         $engine_MyMemory->call( $function_param, $this->array_param_of_call_for_del );
