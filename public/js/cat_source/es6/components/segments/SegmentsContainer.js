@@ -37,7 +37,6 @@ const listRef = createRef()
 
 function SegmentsContainer({
   isReview,
-  enableTagProjection,
   startSegmentId,
   firstJobSegment,
   guessTagActive,
@@ -435,13 +434,14 @@ function SegmentsContainer({
         ? stopIndexFromStartSegmentId
         : 0
       : // Was added more segments before and i get index by first row of essentialRows
-      essentialRows[0]?.id !== rows[0]?.id
-      ? rows.findIndex(({id}) => id === essentialRows[0]?.id)
-      : // Was added more segments before and i get index by essentialRows length
-      essentialRows[essentialRows.length - 1]?.id !== rows[rows.length - 1]?.id
-      ? essentialRows.length - 1
-      : // default start index of virtual list component
-        startIndex
+        essentialRows[0]?.id !== rows[0]?.id
+        ? rows.findIndex(({id}) => id === essentialRows[0]?.id)
+        : // Was added more segments before and i get index by essentialRows length
+          essentialRows[essentialRows.length - 1]?.id !==
+            rows[rows.length - 1]?.id
+          ? essentialRows.length - 1
+          : // default start index of virtual list component
+            startIndex
 
     rows
       .filter(
@@ -659,7 +659,6 @@ function SegmentsContainer({
       segImmutable,
       timeToEdit: config.time_to_edit_enabled,
       isReview,
-      enableTagProjection,
       speech2textEnabledFn: Speech2Text.enabled,
       setLastSelectedSegment: (sid) => setLastSelectedSegment({sid}),
       setBulkSelection,
@@ -727,7 +726,6 @@ function SegmentsContainer({
 
 SegmentsContainer.propTypes = {
   isReview: PropTypes.bool,
-  enableTagProjection: PropTypes.any,
   startSegmentId: PropTypes.string,
   firstJobSegment: PropTypes.string,
 }
