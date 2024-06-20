@@ -14,6 +14,8 @@ class Langs_Languages {
     private static $map_rfc2obj; //internal support map rfc -> language data
     private static $map_iso2rfc; //associative map iso -> rfc codes
     private static $languages_definition; // the complete json struct
+    private static $ocr_supported;
+    private static $ocr_notSupported;
 
     /**
      * Langs_Languages constructor.
@@ -48,11 +50,22 @@ class Langs_Languages {
 
                     //add associative reference
                     self::$languages_definition[ $k1 ][ 'localized' ][ $isocode ] = $localizedTag;
+
+                    // ocr support
+                    if($lang['ocr']['supported'] === true){
+                        self::$ocr_supported[ $localizedTag ] = $lang[ 'rfc3066code' ];
+                    }
+
+                    if($lang['ocr']['not_supported_or_rtl'] === true){
+                        self::$ocr_notSupported[ $localizedTag ] = $lang[ 'rfc3066code' ];
+                    }
                 }
 
                 //remove positional reference
                 unset( self::$languages_definition[ $k1 ][ 'localized' ][ $k2 ] );
             }
+
+
         }
 
         //create internal support objects representation
@@ -310,6 +323,22 @@ class Langs_Languages {
         }
 
         return null;
+    }
+
+    /**
+     * @return mixed
+     */
+    public static function getLanguagesWithOcrSupported()
+    {
+        return self::$ocr_supported;
+    }
+
+    /**
+     * @return mixed
+     */
+    public static function getLanguagesWithOcrNotSupported()
+    {
+        return self::$ocr_notSupported;
     }
 }
 
