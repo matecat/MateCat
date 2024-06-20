@@ -147,12 +147,6 @@ class convertFileController extends ajaxController {
             $conversionHandler->doAction();
             $this->result = $conversionHandler->getResult();
         }
-
-        if ( $this->result->hasErrors() ) {
-            foreach (array_values( $this->result->getErrors() ) as $error){
-                $this->result->addError($error['message']);
-            }
-        }
     }
 
     private function validateSourceLang() {

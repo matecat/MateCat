@@ -1,5 +1,7 @@
 <?php
 
+use MimeTypes\MimeTypes;
+
 /**
  *
  * @author Domenico Lupinetti - Ostico@gmail.com
@@ -116,7 +118,7 @@ class Upload {
 
         $fileName    = $fileUp[ 'name' ];
         $fileTmpName = $fileUp[ 'tmp_name' ];
-        $fileType    = $fileUp[ 'type' ] = mime_content_type( $fileUp[ 'tmp_name' ] );
+        $fileType    = $fileUp[ 'type' ] = (new MimeTypes())->guessMimeType( $fileUp[ 'tmp_name' ] );
         $fileError   = $fileUp[ 'error' ];
         $fileSize    = $fileUp[ 'size' ];
 
