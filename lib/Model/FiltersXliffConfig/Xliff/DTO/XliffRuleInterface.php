@@ -9,12 +9,12 @@ interface XliffRuleInterface {
      *
      * @return string[]
      */
-    public function getStates( $type = null );
+    public function getStates( $type = null ): array;
 
     /**
      * @return string
      */
-    public function asEditorStatus();
+    public function asEditorStatus(): string;
 
     /**
      * @param string|null $source
@@ -22,11 +22,27 @@ interface XliffRuleInterface {
      *
      * @return bool
      */
-    public function isTranslated( $source = null, $target = null );
+    public function isTranslated( string $source = null, string $target = null ): bool;
 
     /**
      * @return string
      */
-    public function asMatchType();
+    public function asMatchType(): string;
+
+    /**
+     * @param int   $raw_word_count
+     * @param array $payable_rates
+     *
+     * @return float
+     */
+    public function asStandardWordCount( int $raw_word_count, array $payable_rates ): float;
+
+    /**
+     * @param int   $raw_word_count
+     * @param array $payable_rates
+     *
+     * @return float
+     */
+    public function asEquivalentWordCount( int $raw_word_count, array $payable_rates ): float;
 
 }

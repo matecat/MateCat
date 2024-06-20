@@ -26,7 +26,7 @@ class DefaultRule extends AbstractXliffRule {
             self::_ANALYSIS_PRE_TRANSLATED => [ null ],
     ];
 
-    public function asEditorStatus() {
+    public function asEditorStatus(): string {
 
         // default behavior
         if ( !empty( $this->getStates( "state-qualifiers" )[ 0 ] ) ) {
@@ -69,7 +69,7 @@ class DefaultRule extends AbstractXliffRule {
      *
      * @return bool
      */
-    public function isTranslated( $source = null, $target = null ) {
+    public function isTranslated( string $source = null, string $target = null ): bool {
 
         if ( !empty( $this->getStates( "state-qualifiers" )[ 0 ] ) ) { // default behavior
             // Ignore translations for fuzzy matches (xliff 1.2)

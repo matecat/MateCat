@@ -76,10 +76,10 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
      *
      * @param array       $states
      * @param string      $analysis
-     * @param string      $editor
+     * @param string|null $editor
      * @param string|null $matchCategory
      */
-    public function __construct( array $states, $analysis, $editor, $matchCategory = null ) {
+    public function __construct( array $states, string $analysis, string $editor = null, string $matchCategory = null ) {
         $this->setStates( $states );
         $this->setAnalysis( $analysis );
         $this->setEditor( $editor );
@@ -91,7 +91,7 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
      * @param $analysis
      * @param $editor
      */
-    protected function validateAnalysisAndEditor( $analysis, $editor ) {
+    protected function validateAnalysisAndEditor( $analysis, $editor ): void {
 
         if ( !isset( static::$VALIDATION_MAP[ $analysis ] ) ) {
             throw new DomainException( "Wrong analysis value", 400 );
@@ -105,7 +105,7 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
     /**
      * @param array $states
      */
-    protected function setStates( array $states ) {
+    protected function setStates( array $states ): void {
 
         foreach ( $states as $state ) {
             if ( !in_array( $state, array_merge( static::$_STATES, static::$_STATE_QUALIFIERS ) ) ) {
@@ -128,7 +128,7 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
     /**
      * @param $analysis
      */
-    protected function setAnalysis( $analysis ) {
+    protected function setAnalysis( $analysis ): void {
         if ( !in_array( $analysis, static::ALLOWED_ANALYSIS_VALUES ) ) {
             throw new DomainException( "Wrong analysis value", 400 );
         }
@@ -139,7 +139,7 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
     /**
      * @param $editor
      */
-    protected function setEditor( $editor ) {
+    protected function setEditor( $editor ): void {
         if ( !in_array( $editor, static::ALLOWED_EDITOR_VALUES ) ) {
             throw new DomainException( "Wrong editor value", 400 );
         }
@@ -150,11 +150,11 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
     /**
      * Accept null values and keep the default ICE
      *
-     * @param string $matchCategory
+     * @param string|null $matchCategory
      *
      * @return void
      */
-    protected function setMatchCategory( $matchCategory = null ) {
+    protected function setMatchCategory( string $matchCategory = null ): void {
 
         if ( !empty( $matchCategory ) && !in_array( $matchCategory, static::ALLOWED_MATCH_TYPES ) ) {
             throw new DomainException( "Wrong match_category value", 400 );
@@ -169,14 +169,14 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
      *
      * @return AbstractXliffRule
      */
-    public static function fromArrayObject( RecursiveArrayobject $structure ) {
+    public static function fromArrayObject( RecursiveArrayobject $structure ): AbstractXliffRule {
         return new static( $structure[ 'states' ]->getArrayCopy(), $structure[ 'analysis' ], $structure[ 'editor' ], $structure[ 'match_category' ] ?? null );
     }
 
     /**
      * @return array
      */
-    public function jsonSerialize() {
+    public function jsonSerialize(): array {
 
         return [
                 'states'         => array_merge( $this->states[ 'states' ], $this->states[ 'state-qualifiers' ] ),
@@ -191,7 +191,7 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
      *
      * @return string[]
      */
-    public function getStates( $type = null ) {
+    public function getStates( $type = null ): array {
         switch ( $type ) {
             case 'states':
                 return $this->states[ 'states' ];
@@ -205,21 +205,21 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
     /**
      * @return string
      */
-    protected function getAnalysis() {
+    protected function getAnalysis(): string {
         return $this->analysis;
     }
 
     /**
      * @return string
      */
-    protected function getEditor() {
+    protected function getEditor(): string {
         return $this->editor;
     }
 
     /**
      * @return string
      */
-    public function asEditorStatus() {
+    public function asEditorStatus(): string {
 
         if ( $this->getAnalysis() == AbstractXliffRule::_ANALYSIS_PRE_TRANSLATED ) {
             switch ( $this->getEditor() ) {
@@ -243,7 +243,7 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
      *
      * @return bool
      */
-    public function isTranslated( $source = null, $target = null ) {
+    public function isTranslated( string $source = null, string $target = null ): bool {
         if ( $this->getAnalysis() == AbstractXliffRule::_ANALYSIS_NEW && $this->getEditor() == AbstractXliffRule::_IGNORE_TARGET_CONTENT ) {
             return false;
         } else {
@@ -255,8 +255,32 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
     /**
      * @return string
      */
-    public function asMatchType() {
+    public function asMatchType(): string {
         return MatchConstants::toInternalMatchTypeValue( $this->matchCategory );
+    }
+
+    /**
+     * @param int   $raw_word_count
+     * @param array $payable_rates
+     *
+     * @return float
+     */
+    public function asStandardWordCount( int $raw_word_count, array $payable_rates ): float {
+        if ( $this->matchCategory == MatchConstants::_MT ) {
+            return $raw_word_count;
+        }
+
+        return $this->asEquivalentWordCount( $raw_word_count, $payable_rates );
+    }
+
+    /**
+     * @param int   $raw_word_count
+     * @param array $payable_rates
+     *
+     * @return float
+     */
+    public function asEquivalentWordCount( int $raw_word_count, array $payable_rates ): float {
+        return floatval( $raw_word_count / 100 * ( $payable_rates[ $this->asMatchType() ] ?? 0 ) );
     }
 
 }

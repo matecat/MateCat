@@ -387,8 +387,8 @@ class ProjectManager {
         }
 
         // xliff_parameters
-        if( isset( $this->projectStructure[ 'xliff_parameters' ] ) and $this->projectStructure[ 'xliff_parameters' ] instanceof XliffConfigModel ){
-            $configModel = $this->projectStructure[ 'xliff_parameters' ];
+        if ( isset( $this->projectStructure[ 'xliff_parameters' ] ) and $this->projectStructure[ 'xliff_parameters' ] instanceof XliffConfigModel ) {
+            $configModel                   = $this->projectStructure[ 'xliff_parameters' ];
             $options[ 'xliff_parameters' ] = json_encode( $configModel );
         }
 
@@ -413,9 +413,9 @@ class ProjectManager {
         if ( !empty( $options ) ) {
             foreach ( $options as $key => $value ) {
                 $dao->set(
-                    $this->projectStructure[ 'id_project' ],
-                    $key,
-                    $value
+                        $this->projectStructure[ 'id_project' ],
+                        $key,
+                        $value
                 );
             }
         }
@@ -2711,6 +2711,8 @@ class ProjectManager {
 
                 if ( is_string( $this->projectStructure[ 'array_jobs' ][ 'payable_rates' ][ $jid ] ) ) {
                     $payable_rates = json_decode( $this->projectStructure[ 'array_jobs' ][ 'payable_rates' ][ $jid ], true );
+                } else {
+                    $payable_rates = $this->projectStructure[ 'array_jobs' ][ 'payable_rates' ][ $jid ];
                 }
 
                 /**
@@ -2724,8 +2726,6 @@ class ProjectManager {
                         $stateValues[ 'state' ],
                         $stateValues[ 'state-qualifier' ]
                 );
-
-                $ice_payable_rates = ( isset( $payable_rates[ $rule->asMatchType() ] ) ) ? $payable_rates[ $rule->asMatchType() ] : null;
 
                 if ( XliffTranslationStatus::isFinalState( $stateValues[ 'state' ] ) ) {
                     $createSecondPassReview = true;
@@ -2757,11 +2757,11 @@ class ProjectManager {
                         'translation'            => $filter->fromLayer1ToLayer0( $check->getTargetSeg() ),
                         'locked'                 => 0, // not allowed to change locked status for pre-translations
                         'match_type'             => $rule->asMatchType(),
-                        'eq_word_count'          => floatval( $segment->raw_word_count / 100 * $ice_payable_rates ),
+                        'eq_word_count'          => $rule->asEquivalentWordCount( (int)$segment->raw_word_count, $payable_rates ),
                         'serialized_errors_list' => ( $check->thereAreErrors() ) ? $check->getErrorsJSON() : '',
                         'warning'                => ( $check->thereAreErrors() ) ? 1 : 0,
                         'suggestion_match'       => null,
-                        'standard_word_count'    => null,
+                        'standard_word_count'    => $rule->asStandardWordCount( (int)$segment->raw_word_count, $payable_rates ),
                         'version_number'         => 0,
                 ];
 
@@ -2782,6 +2782,7 @@ class ProjectManager {
 
         //clean translations and queries
         unset( $query_translations_values );
+
     }
 
     /**
@@ -2825,12 +2826,12 @@ class ProjectManager {
 
     protected static function _sanitizeName( $nameString ) {
 
-        $nameString = preg_replace( '/[^\p{L}0-9a-zA-Z_\.\-]/u', "_", $nameString );
+        $nameString = preg_replace( '/[^\p{L}0-9a-zA-Z_.\-]/u', "_", $nameString );
         $nameString = preg_replace( '/_{2,}/', "_", $nameString );
         $nameString = str_replace( '_.', ".", $nameString );
 
         // project name validation
-        $pattern = '/^[\p{L}\ 0-9a-zA-Z_\.\-]+$/u';
+        $pattern = '/^[\p{L}\s0-9a-zA-Z_.\-]+$/u';
 
         if ( !preg_match( $pattern, $nameString ) ) {
             return false;

@@ -22,7 +22,7 @@ class XliffConfigModel implements JsonSerializable {
     /**
      * @param XliffRuleInterface $rule
      */
-    public function addRule( XliffRuleInterface $rule ) {
+    public function addRule( XliffRuleInterface $rule ): void {
         if ( $rule instanceof Xliff20Rule ) {
             $this->validateDuplicatedStates( $rule, self::XLIFF_20 );
             $this->ruleSets[ self::XLIFF_20 ][] = $rule;
@@ -38,7 +38,7 @@ class XliffConfigModel implements JsonSerializable {
      *
      * @return void
      */
-    public function validateDuplicatedStates( XliffRuleInterface $rule, $type ) {
+    public function validateDuplicatedStates( XliffRuleInterface $rule, string $type ): void {
         foreach ( $this->ruleSets[ $type ] as $existentRule ) {
             $stateIntersect = array_intersect( $existentRule->getStates(), $rule->getStates() );
             if ( !empty( $stateIntersect ) ) {
@@ -52,7 +52,7 @@ class XliffConfigModel implements JsonSerializable {
      *
      * @return static
      */
-    public static function fromArrayObject( RecursiveArrayobject $structure ) {
+    public static function fromArrayObject( RecursiveArrayobject $structure ): XliffConfigModel {
         $self = new static();
         foreach ( $structure as $ruleType => $ruleSet ) {
 
@@ -74,11 +74,11 @@ class XliffConfigModel implements JsonSerializable {
     }
 
     /**
-     * @param $versionNumber
+     * @param int $versionNumber
      *
      * @return XliffRuleInterface[]
      */
-    public function getRulesForVersion( $versionNumber ) {
+    public function getRulesForVersion( int $versionNumber ): array {
         if ( $versionNumber == 1 ) {
             return $this->ruleSets[ static::XLIFF_12 ];
         } elseif ( $versionNumber == 2 ) {
@@ -89,13 +89,13 @@ class XliffConfigModel implements JsonSerializable {
     }
 
     /**
-     * @param int    $versionNumber
-     * @param string $state
-     * @param string $stateQualifier
+     * @param int         $versionNumber
+     * @param string|null $state
+     * @param string|null $stateQualifier
      *
      * @return XliffRuleInterface
      */
-    public function getMatchingRule( $versionNumber, $state, $stateQualifier ) {
+    public function getMatchingRule( int $versionNumber, string $state = null, string $stateQualifier = null ): XliffRuleInterface {
 
         // here we must analyze and check only for editor status
         foreach ( $this->getRulesForVersion( $versionNumber ) as $rule ) {
@@ -118,14 +118,12 @@ class XliffConfigModel implements JsonSerializable {
      * @inheritDoc
      */
     public
-    function jsonSerialize() {
+    function jsonSerialize(): array {
         return $this->ruleSets;
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function __toString() {
+    public function __toString(): string {
         return json_encode( $this->ruleSets );
     }
+
 }
