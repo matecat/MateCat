@@ -107,9 +107,8 @@ class TranslationEvent {
         return $this->isIce() &&
                 $this->old_translation->isReviewedStatus() &&
                 $this->wanted_translation->isReviewedStatus() &&
-                // we are moving an ICE directly from R1 or R2 ( previous sourcePage is equal to current )
-                // or from its initial status
-                // because those 2 values are equals even if an ice is approved with no modifications for the first time ( no previous event )
+                // We are moving an ICE directly from R1 or R2 or vice versa depending on the initial status, so the previous sourcePage is equal to current.
+                // In this case, those 2 values are equals even if an ice match is approved with no modifications for the first time (no previous event).
                 $this->getPreviousEventSourcePage() == $this->getCurrentEventSourcePage() &&
                 $this->getCurrentEventSourcePage() >= Constants::SOURCE_PAGE_REVISION;
     }

@@ -66,7 +66,7 @@ abstract class DataAccess_AbstractDao {
     }
 
     /**
-     * @return \Database|IDatabase
+     * @return Database|IDatabase
      */
     public function getDatabaseHandler() {
         return $this->database;

@@ -389,7 +389,7 @@ class ProjectManager {
         // xliff_parameters
         if( isset( $this->projectStructure[ 'xliff_parameters' ] ) and $this->projectStructure[ 'xliff_parameters' ] instanceof XliffConfigModel ){
             $configModel = $this->projectStructure[ 'xliff_parameters' ];
-            $options[ 'xliff_parameters' ] = $configModel->jsonSerialize();
+            $options[ 'xliff_parameters' ] = json_encode( $configModel );
         }
 
         // pretranslate_101
