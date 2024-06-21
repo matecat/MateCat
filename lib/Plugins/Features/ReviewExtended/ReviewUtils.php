@@ -9,33 +9,26 @@
 namespace Features\ReviewExtended;
 
 use Chunks_ChunkStruct;
+use Constants_TranslationStatus;
 use Exception;
 use LQA\ChunkReviewDao;
-use LQA\ChunkReviewStruct;
 use LQA\ModelStruct;
 
 class ReviewUtils {
 
     /**
-     * @param array $statsArray
-     * @param array $chunkReviews
+     * @param $number
      *
-     * @return array
-     * @throws Exception
+     * @return string|null
      */
-    public static function formatStats( $statsArray, $chunkReviews ) {
+    public static function sourcePageToTranslationStatus( $number = null ){
+        $statuses = [
+                1 => Constants_TranslationStatus::STATUS_TRANSLATED,
+                2 => Constants_TranslationStatus::STATUS_APPROVED,
+                3 => Constants_TranslationStatus::STATUS_APPROVED2
+        ];
 
-        $statsArray [ 'revises' ] = [];
-
-        /** @var ChunkReviewStruct $chunkReview */
-        foreach ( $chunkReviews as $chunkReview ) {
-            $statsArray[ 'revises' ][] = [
-                    'revision_number' => ReviewUtils::sourcePageToRevisionNumber( $chunkReview->source_page ),
-                    'advancement_wc'  => (float)$chunkReview->advancement_wc
-            ];
-        }
-
-        return $statsArray;
+        return empty( $number ) ? null : $statuses[ $number ];
     }
 
     /**

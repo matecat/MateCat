@@ -235,6 +235,7 @@ var spec = {
     },
     '/api/status': {
       get: {
+        deprecated: true,
         tags: ['Project'],
         summary: 'Retrieve the status of a project',
         description:
@@ -1043,6 +1044,13 @@ var spec = {
                 'Number of word count values of each chunk returned in split check API',
               type: 'array',
               items: {type: 'double'},
+            },
+            {
+              name: 'split_raw_words',
+              in: 'formData',
+              description:
+                'Split the job by raw words instead of equivalent words',
+              type: 'boolean',
             },
           ],
           responses: {
@@ -2749,38 +2757,225 @@ var spec = {
     Status: {
       type: 'object',
       properties: {
-        errors: {
-          type: 'array',
-          items: {
-            type: 'object',
-          },
-          description:
-            'A list of objects containing error message at system wide level. Every error has a negative numeric code and a textual message ( currently the only error reported is the wrong version number in config.inc.php file and happens only after Matecat updates, so you should never see it ).',
-        },
-        data: {
-          $ref: '#/definitions/Data-Status',
+        name: {
+          type: 'string',
         },
         status: {
           type: 'string',
-          description:
-            'The analysis status of the project. ANALYZING - analysis/creation still in progress; NO_SEGMENTS_FOUND - the project has no segments to analyze (have you uploaded a file containing only images?); ANALYSIS_NOT_ENABLED - no analysis will be performed because of Matecat configuration; DONE - the analysis/creation is completed; FAIL - the analysis/creation is failed.',
-          enum: [
-            'ANALYZING',
-            'NO_SEGMENTS_FOUND',
-            'ANALYSIS_NOT_ENABLED',
-            'DONE',
-            'FAIL',
-          ],
         },
-        analyze: {
+        create_date: {
           type: 'string',
-          description:
-            "A link to the analyze page; it's a human readable version of this API output",
+        },
+        subject: {
+          type: 'string',
         },
         jobs: {
-          $ref: '#/definitions/Jobs-Status',
+          type: 'array',
+          items: {
+            $ref: '#/definitions/StatusJob',
+          },
         },
       },
+    },
+    StatusJob: {
+      type: 'object',
+      properties: {
+        id: {
+          type: 'integer',
+        },
+        source: {
+          type: 'string',
+        },
+        source_name: {
+          type: 'string',
+        },
+        target: {
+          type: 'string',
+        },
+        target_name: {
+          type: 'string',
+        },
+        chunks: {
+          type: 'array',
+          items: {
+            $ref: '#/definitions/StatusChunk',
+          },
+        },
+        summary: {
+          type: 'object',
+          properties: {
+            in_queue_before: {
+              type: 'integer',
+            },
+            total_segments: {
+              type: 'integer',
+            },
+            segments_analyzed: {
+              type: 'integer',
+            },
+            status: {
+              type: 'string',
+            },
+            total_raw: {
+              type: 'integer',
+            },
+            total_industry: {
+              type: 'integer',
+            },
+            total_equivalent: {
+              type: 'integer',
+            },
+            discount: {
+              type: 'integer',
+            },
+          },
+          required: [
+            'in_queue_before',
+            'total_segments',
+            'segments_analyzed',
+            'status',
+            'total_raw',
+            'total_industry',
+            'total_equivalent',
+            'discount',
+          ],
+        },
+        analyze_url: {
+          type: 'string',
+        },
+      },
+      required: [
+        'id',
+        'source',
+        'source_name',
+        'target',
+        'target_name',
+        'summary',
+        'chunks',
+      ],
+    },
+    StatusChunk: {
+      type: 'object',
+      properties: {
+        password: {
+          type: 'string',
+        },
+        status: {
+          type: 'string',
+        },
+        engines: {
+          type: 'object',
+          properties: {
+            tm: {
+              type: 'object',
+              properties: {
+                id: {
+                  type: 'integer',
+                },
+                name: {
+                  type: 'string',
+                },
+                type: {
+                  type: 'string',
+                },
+                description: {
+                  type: 'string',
+                },
+              },
+              required: ['id', 'name', 'type', 'description'],
+            },
+            mt: {
+              type: 'object',
+              properties: {
+                id: {
+                  type: 'integer',
+                },
+                name: {
+                  type: 'string',
+                },
+                type: {
+                  type: 'string',
+                },
+                description: {
+                  type: 'string',
+                },
+              },
+              required: ['id', 'name', 'type', 'description'],
+            },
+          },
+          required: ['tm', 'mt'],
+        },
+        memory_keys: {
+          type: 'array',
+          items: {},
+        },
+        urls: {
+          type: 'object',
+          properties: {
+            t: {
+              type: 'string',
+            },
+            r1: {
+              type: 'string',
+            },
+            r2: {
+              type: 'string',
+            },
+          },
+          required: ['t', 'r1'],
+        },
+        files: {
+          type: 'array',
+          items: {
+            $ref: '#/definitions/StatusFile',
+          },
+        },
+      },
+      required: ['password', 'status', 'engines'],
+    },
+    StatusFile: {
+      type: 'object',
+      properties: {
+        id: {
+          type: 'integer',
+        },
+        id_file_part: {
+          type: 'integer',
+        },
+        name: {
+          type: 'string',
+        },
+        original_name: {
+          type: 'string',
+        },
+        total_raw: {
+          type: 'integer',
+        },
+        total_equivalent: {
+          type: 'integer',
+        },
+        matches: {
+          type: 'array',
+          items: {
+            $ref: '#/definitions/StatusFileMatch',
+          },
+        },
+      },
+    },
+    StatusFileMatch: {
+      type: 'object',
+      properties: {
+        raw: {
+          type: 'integer',
+        },
+        equivalent: {
+          type: 'integer',
+        },
+        type: {
+          type: 'string',
+        },
+      },
+      required: ['raw', 'equivalent', 'type'],
     },
     'Data-Status': {
       type: 'object',

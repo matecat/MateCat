@@ -6,6 +6,8 @@ use Chunks_ChunkStruct;
 use Constants;
 use DataAccess\ShapelessConcreteStruct;
 use DataAccess_IDaoStruct;
+use Database;
+use Features\ReviewExtended\ReviewUtils;
 
 class ChunkReviewDao extends \DataAccess_AbstractDao {
 
@@ -22,7 +24,7 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
         $sql = "UPDATE qa_chunk_reviews SET password = :new_password
                WHERE id_job = :id_job AND password = :old_password ";
 
-        $conn = \Database::obtain()->getConnection();
+        $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->execute( [
             'id_job'       => $id_job,
@@ -37,7 +39,7 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
         $sql = "UPDATE qa_chunk_reviews SET review_password = :new_review_password
                WHERE id_job = :id_job AND review_password = :old_review_password AND source_page = :source_page";
 
-        $conn = \Database::obtain()->getConnection();
+        $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->execute( [
             'id_job'              => $id_job,
@@ -57,7 +59,7 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
     public static function findByIdJob( $id_job ) {
         $sql  = "SELECT * FROM qa_chunk_reviews " .
             " WHERE id_job = :id_job ORDER BY id";
-        $conn = \Database::obtain()->getConnection();
+        $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->setFetchMode( \PDO::FETCH_CLASS, 'LQA\ChunkReviewStruct' );
         $stmt->execute( [ 'id_job' => $id_job ] );
@@ -76,7 +78,7 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
             " WHERE id_job = :id_job 
                 AND password = :password
                 AND source_page = :source_page ORDER BY id";
-        $conn = \Database::obtain()->getConnection();
+        $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->setFetchMode( \PDO::FETCH_CLASS, 'LQA\ChunkReviewStruct' );
         $stmt->execute( [
@@ -98,7 +100,7 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
     public static function findById( $id ) {
         $sql  = "SELECT * FROM qa_chunk_reviews " .
             " WHERE id = :id ";
-        $conn = \Database::obtain()->getConnection();
+        $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->setFetchMode( \PDO::FETCH_CLASS, 'LQA\ChunkReviewStruct' );
         $stmt->execute( [ 'id' => $id ] );
@@ -125,7 +127,7 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
               BETWEEN jobs.job_first_segment AND jobs.job_last_segment
             ";
 
-        $conn = \Database::obtain()->getConnection();
+        $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->execute( [ 'id_job' => $chunk->id, 'password' => $chunk->password ] );
         $count = $stmt->fetch();
@@ -156,7 +158,7 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
               BETWEEN jobs.job_first_segment AND jobs.job_last_segment
              ";
 
-        $conn = \Database::obtain()->getConnection();
+        $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
 
         $stmt->execute( array_merge( [ $chunk->id, $chunk->password ], $statuses ) );
@@ -169,30 +171,35 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
     }
 
     /**
-     * @param $id_job
-     * @param $password
+     * @param $chunk
      * @param $source_page
      *
      * @return mixed
      */
     public function getReviewedWordsCountForSecondPass( $chunk, $source_page ) {
-        $sql = " SELECT SUM(raw_word_count) FROM segments s 
- 
+
+        $translationStatus = ReviewUtils::sourcePageToTranslationStatus( $source_page );
+
+        $sql = "SELECT SUM(raw_word_count) 
+        FROM segments s 
         JOIN segment_translations st on st.id_segment = s.id 
         JOIN jobs j on j.id = st.id_job 
                 AND s.id <= j.job_last_segment 
                 AND s.id >= j.job_first_segment 
-        JOIN 
-                segment_translation_events ste on ste.id_segment = s.id 
-                AND ste.final_revision = 1      
-                AND ste.source_page = :source_page
-                AND ste.id_job = :id_job
         WHERE 
-                j.id = :id_job AND j.password = :password ";
+                j.id = :id_job 
+            AND j.password = :password 
+            AND st.status = :translation_status
+            AND st.version_number != 0
+        ";
 
-        $conn = \Database::obtain()->getConnection();
+        $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
-        $stmt->execute( [ 'id_job' => $chunk->id, 'password' => $chunk->password, 'source_page' => $source_page ] );
+        $stmt->execute( [
+                'id_job'             => $chunk->id,
+                'password'           => $chunk->password,
+                'translation_status' => $translationStatus
+        ] );
 
         $result = $stmt->fetch();
 
@@ -240,7 +247,7 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
 
         $findChunkReviewsStatement = $this->_findChunkReviewsStatement($chunksArray, $default_condition, $ttl);
 
-        $conn = \Database::obtain()->getConnection();
+        $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $findChunkReviewsStatement['sql'] );
 
         return $this->setCacheTTL( $ttl )->_fetchObject( $stmt, new ChunkReviewStruct(), $findChunkReviewsStatement['parameters'] );
@@ -315,7 +322,7 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
             (SELECT count(id) from qa_chunk_reviews cr where cr.id_job = :jid and cr.review_password=:password and cr.source_page = 3) as r2
         from jobs where id = :jid;";
 
-        $conn = \Database::obtain()->getConnection();
+        $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
 
         $parameters = [
@@ -333,7 +340,7 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
     public static function findByProjectId( $id_project ) {
         $sql  = "SELECT * FROM qa_chunk_reviews " .
             " WHERE id_project = :id_project ORDER BY id ";
-        $conn = \Database::obtain()->getConnection();
+        $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->setFetchMode( \PDO::FETCH_CLASS, 'LQA\ChunkReviewStruct' );
         $stmt->execute( [ 'id_project' => $id_project ] );
@@ -354,7 +361,7 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
             " WHERE review_password = :review_password " .
             " AND id_job = :id_job ";
 
-        $conn = \Database::obtain()->getConnection();
+        $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->setFetchMode( \PDO::FETCH_CLASS, 'LQA\ChunkReviewStruct' );
         $stmt->execute(
@@ -377,7 +384,7 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
             " WHERE id_job = :id_job " .
             " ORDER BY id DESC LIMIT 1 ";
 
-        $conn = \Database::obtain()->getConnection();
+        $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->setFetchMode( \PDO::FETCH_CLASS, 'LQA\ChunkReviewStruct' );
         $stmt->execute(
@@ -398,7 +405,7 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
             " AND id_job = :id_job " .
             " AND source_page = :source_page ";
 
-        $conn = \Database::obtain()->getConnection();
+        $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->setFetchMode( \PDO::FETCH_CLASS, 'LQA\ChunkReviewStruct' );
         $stmt->execute(
@@ -421,7 +428,7 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
             " AND id_job = :id_job " .
             " AND source_page = :source_page ";
 
-        $conn = \Database::obtain()->getConnection();
+        $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->setFetchMode( \PDO::FETCH_CLASS, 'LQA\ChunkReviewStruct' );
         $stmt->execute(
@@ -443,7 +450,7 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
      */
     public static function findByJobIdAndPassword( $id_job, $password ) {
 
-        $conn = \Database::obtain()->getConnection();
+        $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( " 
             SELECT * FROM " . self::TABLE . " 
             WHERE id_job = :id_job 
@@ -478,7 +485,7 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
             $query                   .= " AND source_page=:source_page";
         }
 
-        $conn = \Database::obtain()->getConnection();
+        $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $query );
 
 
@@ -511,28 +518,26 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
             'password',
             'review_password',
             'source_page',
-            'advancement_wc',
             'total_tte',
             'avg_pee'
         ] );
 
         $sql = "INSERT INTO " . self::TABLE .
-            " ( id_project, id_job, password, review_password, source_page, advancement_wc, total_tte, avg_pee ) " .
+            " ( id_project, id_job, password, review_password, source_page, total_tte, avg_pee ) " .
             " VALUES " .
-            " ( :id_project, :id_job, :password, :review_password, :source_page, :advancement_wc, :total_tte, :avg_pee ) 
+            " ( :id_project, :id_job, :password, :review_password, :source_page, :total_tte, :avg_pee ) 
                     ON DUPLICATE KEY UPDATE
                         id_project = :id_project,
                         id_job = :id_job,
                         password = :password,
                         review_password = :review_password,
                         source_page = :source_page,
-                        advancement_wc = :advancement_wc,
                         total_tte = :total_tte,
                         avg_pee = :avg_pee
                 
                 ";
 
-        $conn = \Database::obtain()->getConnection();
+        $conn = Database::obtain()->getConnection();
 
         $stmt = $conn->prepare( $sql );
         $stmt->execute( $attrs );
@@ -544,7 +549,7 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
 
     public static function deleteByJobId( $id_job ) {
         $sql  = "DELETE FROM qa_chunk_reviews WHERE id_job = :id_job ";
-        $conn = \Database::obtain()->getConnection();
+        $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
 
         return $stmt->execute( [ 'id_job' => $id_job ] );
@@ -574,7 +579,7 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
             " jobs.password = qa_chunk_reviews.password " .
             $sql_condition;
 
-        $conn = \Database::obtain()->getConnection();
+        $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->setFetchMode( \PDO::FETCH_CLASS, 'LQA\ChunkReviewStruct' );
         $stmt->execute();
@@ -605,7 +610,7 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
                                 ) )
                 ) sums GROUP BY id_job, source_page ; ";
 
-        $conn = \Database::obtain()->getConnection();
+        $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->execute( [ 'id_job' => $chunk->id, 'password' => $chunk->password ] );
 

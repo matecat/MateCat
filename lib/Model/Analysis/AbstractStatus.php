@@ -20,7 +20,6 @@ use FeatureSet;
 use INIT;
 use Langs_LanguageDomains;
 use OutsourceTo_OutsourceAvailable;
-use Projects_MetadataDao;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
 use Routes;
@@ -132,24 +131,12 @@ abstract class AbstractStatus {
     /**
      * Perform the computation
      *
-     * @param string $word_count_type
-     *
      * @return $this
-     * @throws AuthenticationError
      * @throws NotFoundException
-     * @throws ValidationError
      */
-    public function fetchData( $word_count_type = Projects_MetadataDao::WORD_COUNT_EQUIVALENT ) {
+    public function fetchData() {
 
         $this->_fetchProjectData();
-
-        //YYY [Remove] backward API compatibility
-        //  XTRFStatus::class to download txt report
-        //  old deprecated API curl -X GET "https://dev.matecat.com/api/status?id_project=95&project_pass=c58749b32943" -H "accept: application/json"
-        if ( $word_count_type == Projects_MetadataDao::WORD_COUNT_EQUIVALENT ) {
-            return $this->_oldFormatData();
-
-        }
 
         return $this->loadObjects();
 
@@ -185,6 +172,7 @@ abstract class AbstractStatus {
         $target       = null;
         $this->result = $project = new AnalysisProject(
                 $this->_project_data[ 0 ][ 'pname' ],
+                $this->_project_data[ 0 ][ 'status_analysis' ],
                 $this->_project_data[ 0 ][ 'create_date' ],
                 $this->subject,
                 new AnalysisProjectSummary(

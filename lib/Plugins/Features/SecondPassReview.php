@@ -21,7 +21,6 @@ use Klein\Klein;
 use LQA\ChunkReviewDao;
 use LQA\ChunkReviewStruct;
 use NewController;
-use Projects_MetadataDao;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
 
@@ -50,48 +49,6 @@ class SecondPassReview extends BaseFeature {
     public function chunkReviewRecordCreated( ChunkReviewStruct $chunkReview, Projects_ProjectStruct $projectStruct ) {
         // This is needed to properly populate advancement wc for ICE matches
         ( new ChunkReviewModel( $chunkReview ) )->recountAndUpdatePassFailResult( $projectStruct );
-    }
-
-    /**
-     * This callback is necessary so that ICE matches are included in advancement_wc.
-     *
-     * @param $project_id
-     * @param $_analyzed_report
-     *
-     * @throws Exception
-     */
-    public function afterTMAnalysisCloseProject( $project_id, $_analyzed_report ) {
-        $project      = Projects_ProjectDao::findById( $project_id, 300 );
-        $chunkReviews = ( new ChunkReviewDao() )->findChunkReviewsForList( $project->getChunks() );
-        foreach ( $chunkReviews as $chunkReview ) {
-            $model = new ChunkReviewModel( $chunkReview );
-            $model->recountAndUpdatePassFailResult( $project );
-        }
-    }
-
-    /**
-     * YYY this is the only place where we maintain the double counter systems
-     *     to allow current projects to be consistent
-     * YYY [Remove] backward compatibility for current projects
-     *
-     * @param        $inputStats
-     * @param        $options
-     * @param string $word_count_type
-     *
-     * @return array
-     * @throws Exception
-     */
-    public function filterStatsResponse( $inputStats, $options, $word_count_type = Projects_MetadataDao::WORD_COUNT_EQUIVALENT ) {
-
-        if( $word_count_type == Projects_MetadataDao::WORD_COUNT_RAW ){
-            return $inputStats;
-        }
-
-        /** @var Chunks_ChunkStruct $chunk */
-        $chunk        = $options[ 'chunk' ];
-        $chunkReviews = ( new ChunkReviewDao() )->findChunkReviews( $chunk, 0 );
-
-        return ReviewUtils::formatStats( $inputStats, $chunkReviews );
     }
 
     public function filterGetSegmentsResult( $data, Chunks_ChunkStruct $chunk ) {

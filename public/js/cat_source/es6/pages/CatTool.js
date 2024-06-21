@@ -31,6 +31,7 @@ import ModalsActions from '../actions/ModalsActions'
 import FatalErrorModal from '../components/modals/FatalErrorModal'
 import {Shortcuts} from '../utils/shortcuts'
 import CommonUtils from '../utils/commonUtils'
+import {CattoolFooter} from '../components/footer/CattoolFooter'
 
 const urlParams = new URLSearchParams(window.location.search)
 const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
@@ -450,7 +451,7 @@ function CatTool() {
           }}
         />
       )}
-      <CattolFooter
+      <CattoolFooter
         idProject={config.id_project}
         idJob={config.id_job}
         password={config.password}

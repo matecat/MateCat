@@ -571,17 +571,7 @@ const NewProject = ({
             </a>
             {/*Target Language*/}
             <div className="translate-box target">
-              <TargetLanguagesSelect
-                history={
-                  historySourceTargets?.targets
-                    ? historySourceTargets.targets
-                        .split('||')
-                        .flatMap((item) =>
-                          item.length ? [item.split(',')] : [],
-                        )
-                    : []
-                }
-              />
+              <TargetLanguagesSelect />
             </div>
             {/*Project Subject*/}
             <div className="translate-box project-subject">
