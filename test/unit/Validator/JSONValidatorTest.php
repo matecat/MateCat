@@ -57,7 +57,7 @@ class JSONValidatorTest extends PHPUnit_Framework_TestCase {
 
     public function testValidUberQAModelFile()
     {
-        $jsonSchema = file_get_contents( __DIR__ . '/../../../inc/qa_model/schema.json' );
+        $jsonSchema = file_get_contents( INIT::$ROOT . '/inc/validation/schema/qa_model.json' );
         $uberQaModel = file_get_contents(__DIR__.'/../../support/files/json/files/uber_qa_model.json');
 
         $validatorObject = new \Validator\JSONValidatorObject();

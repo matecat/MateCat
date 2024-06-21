@@ -1,5 +1,7 @@
 <?php
 
+use WordCount\CounterModel;
+
 /**
  * @group regression
  * @covers CounterModel::methodNameForStatusCall

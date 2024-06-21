@@ -65,7 +65,7 @@ class TmKeyManagementTest extends AbstractTest {
         self::$dummyTmKey_edit       = true;
         self::$uid_translator        = 123;
 
-        self::$validJsonTmKeyArr                  = '[{"tm":true,"glos":false,"owner":true,"uid_transl":null,"uid_rev":null,"name":"My personal Key","key":"993dddb1c603b4e57f69","r":"1","w":"0","r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"source":null,"target":null}]';
+        self::$validJsonTmKeyArr = '[{"tm":true,"glos":false,"owner":true,"uid_transl":null,"uid_rev":null,"name":"My personal Key","key":"993dddb1c603b4e57f69","r":"1","w":"0","r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"source":null,"target":null}]';
 
         /**
          * Invalid Json because of "glos":true"owner":true,
@@ -82,13 +82,13 @@ class TmKeyManagementTest extends AbstractTest {
         self::$invalidTypeString  = "invalidTypeString";
         self::$invalidRoleString  = "invalidRoleString";
 
-        $newTm                     = array();
+        $newTm                     = [];
         $newTm[ 'key' ]            = sha1( chr( rand( 97, 122 ) ) );
-        $newTm[ 'owner' ]          = $newTm[ 'key' ] & 1;
-        $newTm[ 'r' ]              = $newTm[ 'key' ][ 5 ] & 1;
-        $newTm[ 'w' ]              = $newTm[ 'key' ][ 12 ] & 1;
-        $newTm[ 'r_transl' ]       = $newTm[ 'key' ][ 2 ] & 1;
-        $newTm[ 'w_transl' ]       = $newTm[ 'key' ][ 4 ] & 1;
+        $newTm[ 'owner' ]          = ord( $newTm[ 'key' ] ) & 1;
+        $newTm[ 'r' ]              = ord( $newTm[ 'key' ][ 5 ] ) & 1;
+        $newTm[ 'w' ]              = ord( $newTm[ 'key' ][ 12 ] ) & 1;
+        $newTm[ 'r_transl' ]       = ord( $newTm[ 'key' ][ 2 ] ) & 1;
+        $newTm[ 'w_transl' ]       = ord( $newTm[ 'key' ][ 4 ] ) & 1;
         $newTm[ 'uid_transl' ]     = rand( 1, 1024 );
         self::$validTmKeyStructArr = $newTm;
 
@@ -116,11 +116,6 @@ class TmKeyManagementTest extends AbstractTest {
 
         self::$client_json_INVALID_GHI = '[{"key":"0000123GHI","name":"My GHI","r":0,"w":0}]';
 
-    }
-
-    public function tearDown() {
-        parent::tearDown();
-//        MemcacheHandler::close();
     }
 
     public function testGetTmKeyStructure_noArgs() {
@@ -162,7 +157,7 @@ class TmKeyManagementTest extends AbstractTest {
     }
 
     public function testGetTmKeyStructure_withArgs() {
-        $args = array(
+        $args = [
                 'key'        => self::$dummyTmKey_key,
                 'uid_transl' => self::$dummyTmKey_uid_transl,
                 'r_transl'   => self::$dummyTmKey_r_transl,
@@ -170,7 +165,7 @@ class TmKeyManagementTest extends AbstractTest {
                 'owner'      => self::$dummyTmKey_owner,
                 'r'          => self::$dummyTmKey_r,
                 'w'          => self::$dummyTmKey_w
-        );
+        ];
 
         $structure = TmKeyManagement_TmKeyManagement::getTmKeyStructure( $args );
 
@@ -225,7 +220,7 @@ class TmKeyManagementTest extends AbstractTest {
      */
     public function testGetClientTmKeyStructure_withArgs() {
 
-        $args = array(
+        $args = [
                 'key'        => self::$dummyTmKey_key,
                 'uid_transl' => self::$dummyTmKey_uid_transl,
                 'r_transl'   => self::$dummyTmKey_r_transl,
@@ -234,7 +229,7 @@ class TmKeyManagementTest extends AbstractTest {
                 'r'          => self::$dummyTmKey_r,
                 'w'          => self::$dummyTmKey_w,
                 'edit'       => self::$dummyTmKey_edit
-        );
+        ];
 
         $structure = TmKeyManagement_TmKeyManagement::getClientTmKeyStructure( $args );
 
@@ -264,8 +259,8 @@ class TmKeyManagementTest extends AbstractTest {
     public function testGetJobTmKeys_validInput_noRole_noUid_readKeys() {
 
         $_jobTmKeys = json_encode(
-                array(
-                        array(
+                [
+                        [
                                 'tm'         => true,
                                 'glos'       => true,
                                 'owner'      => true,
@@ -281,8 +276,8 @@ class TmKeyManagementTest extends AbstractTest {
                                 'w_rev'      => null,
                                 'source'     => null,
                                 'target'     => null
-                        ),
-                        array(
+                        ],
+                        [
                                 'tm'         => true,
                                 'glos'       => true,
                                 'owner'      => false,
@@ -298,8 +293,8 @@ class TmKeyManagementTest extends AbstractTest {
                                 'w_rev'      => null,
                                 'source'     => null,
                                 'target'     => null
-                        ),
-                        array(
+                        ],
+                        [
                                 'tm'         => true,
                                 'glos'       => true,
                                 'owner'      => false,
@@ -315,335 +310,8 @@ class TmKeyManagementTest extends AbstractTest {
                                 'w_rev'      => null,
                                 'source'     => null,
                                 'target'     => null
-                        )
-                )
-        );
-
-        /**
-         * EXPECTED:
-         * An array containing two TmKeyManagement_TmKeyStruct object representing:
-         * the key 'ABC'
-         * the key 'GHI'
-         */
-        $tmKeys = null;
-
-        try {
-            $tmKeys = TmKeyManagement_TmKeyManagement::getJobTmKeys(
-                    $_jobTmKeys,
-                    'r',
-                    'tm'
-            );
-
-        } catch ( Exception $e ) {
-            //An error occurred: test failed
-            $this->assertTrue( false );
-        }
-
-        $this->assertTrue( is_array( $tmKeys ) );
-
-        $this->assertEquals( 2, count( $tmKeys ) );
-
-        /**
-         * @var $fstKey TmKeyManagement_TmKeyStruct
-         */
-        $fstKey = $tmKeys[ 0 ];
-
-        /**
-         * @var $sndKey TmKeyManagement_TmKeyStruct
-         */
-        $sndKey = $tmKeys[ 1 ];
-
-        $this->assertTrue( $fstKey->owner );
-        $this->assertEquals( 'ABC', $fstKey->key );
-        $this->assertEquals( 1, $fstKey->r );
-        $this->assertEquals( 1, $fstKey->w );
-        $this->assertNull( $fstKey->uid_transl );
-        $this->assertNull( $fstKey->r_transl );
-        $this->assertNull( $fstKey->w_transl );
-
-        $this->assertFalse( $sndKey->owner );
-        $this->assertEquals( 'GHI', $sndKey->key );
-        $this->assertNull( $sndKey->r );
-        $this->assertNull( $sndKey->w );
-        $this->assertNull( $sndKey->uid_transl );
-        $this->assertEquals( 1, $sndKey->r_transl );
-        $this->assertEquals( 1, $sndKey->w_transl );
-    }
-
-    public function testGetJobTmKeys_validInput_noRole_noUid_writeKeys() {
-
-        $_jobTmKeys = json_encode(
-                array(
-                        array(
-                                'tm'         => true,
-                                'glos'       => true,
-                                'owner'      => true,
-                                'uid_transl' => null,
-                                'uid_rev'    => null,
-                                'name'       => 'My personal Key',
-                                'key'        => 'ABC',
-                                'r'          => '1',
-                                'w'          => '1',
-                                'r_transl'   => null,
-                                'w_transl'   => null,
-                                'r_rev'      => null,
-                                'w_rev'      => null,
-                                'source'     => null,
-                                'target'     => null
-                        ),
-                        array(
-                                'tm'         => true,
-                                'glos'       => true,
-                                'owner'      => false,
-                                'uid_transl' => 560,
-                                'uid_rev'    => null,
-                                'name'       => 'My personal Key',
-                                'key'        => 'DEF',
-                                'r'          => null,
-                                'w'          => null,
-                                'r_transl'   => '1',
-                                'w_transl'   => '0',
-                                'r_rev'      => null,
-                                'w_rev'      => null,
-                                'source'     => null,
-                                'target'     => null
-                        ),
-                        array(
-                                'tm'         => true,
-                                'glos'       => true,
-                                'owner'      => false,
-                                'uid_transl' => null,
-                                'uid_rev'    => null,
-                                'name'       => 'My personal Key',
-                                'key'        => 'GHI',
-                                'r'          => null,
-                                'w'          => null,
-                                'r_transl'   => '1',
-                                'w_transl'   => '1',
-                                'r_rev'      => null,
-                                'w_rev'      => null,
-                                'source'     => null,
-                                'target'     => null
-                        )
-                )
-        );
-
-        /**
-         * EXPECTED:
-         * An array containing two TmKeyManagement_TmKeyStruct object representing:
-         * the key 'ABC'
-         * the key 'GHI'
-         */
-        $tmKeys = null;
-
-        try {
-            $tmKeys = TmKeyManagement_TmKeyManagement::getJobTmKeys(
-                    $_jobTmKeys,
-                    'w',
-                    'tm'
-            );
-
-        } catch ( Exception $e ) {
-            //An error occurred: test failed
-            $this->assertTrue( false );
-        }
-
-        $this->assertTrue( is_array( $tmKeys ) );
-
-        $this->assertEquals( 2, count( $tmKeys ) );
-
-        /**
-         * @var $fstKey TmKeyManagement_TmKeyStruct
-         */
-        $fstKey = $tmKeys[ 0 ];
-
-        /**
-         * @var $sndKey TmKeyManagement_TmKeyStruct
-         */
-        $sndKey = $tmKeys[ 1 ];
-
-        $this->assertTrue( $fstKey->owner );
-        $this->assertEquals( 'ABC', $fstKey->key );
-        $this->assertEquals( 1, $fstKey->r );
-        $this->assertEquals( 1, $fstKey->w );
-        $this->assertNull( $fstKey->uid_transl );
-        $this->assertNull( $fstKey->r_transl );
-        $this->assertNull( $fstKey->w_transl );
-
-        $this->assertFalse( $sndKey->owner );
-        $this->assertEquals( 'GHI', $sndKey->key );
-        $this->assertNull( $sndKey->r );
-        $this->assertNull( $sndKey->w );
-        $this->assertNull( $sndKey->uid_transl );
-        $this->assertEquals( 1, $sndKey->r_transl );
-        $this->assertEquals( 1, $sndKey->w_transl );
-    }
-
-    public function testGetJobTmKeys_validInput_noRole_noUid_readwriteKeys() {
-
-        $_jobTmKeys = json_encode(
-                array(
-                        array(
-                                'tm'         => true,
-                                'glos'       => true,
-                                'owner'      => true,
-                                'uid_transl' => null,
-                                'uid_rev'    => null,
-                                'name'       => 'My personal Key',
-                                'key'        => 'ABC',
-                                'r'          => '1',
-                                'w'          => '1',
-                                'r_transl'   => null,
-                                'w_transl'   => null,
-                                'r_rev'      => null,
-                                'w_rev'      => null,
-                                'source'     => null,
-                                'target'     => null
-                        ),
-                        array(
-                                'tm'         => true,
-                                'glos'       => true,
-                                'owner'      => false,
-                                'uid_transl' => 560,
-                                'uid_rev'    => null,
-                                'name'       => 'My personal Key',
-                                'key'        => 'DEF',
-                                'r'          => null,
-                                'w'          => null,
-                                'r_transl'   => '1',
-                                'w_transl'   => '0',
-                                'r_rev'      => null,
-                                'w_rev'      => null,
-                                'source'     => null,
-                                'target'     => null
-                        ),
-                        array(
-                                'tm'         => true,
-                                'glos'       => true,
-                                'owner'      => false,
-                                'uid_transl' => null,
-                                'uid_rev'    => null,
-                                'name'       => 'My personal Key',
-                                'key'        => 'GHI',
-                                'r'          => null,
-                                'w'          => null,
-                                'r_transl'   => '1',
-                                'w_transl'   => '1',
-                                'r_rev'      => null,
-                                'w_rev'      => null,
-                                'source'     => null,
-                                'target'     => null
-                        )
-                )
-        );
-
-        /**
-         * EXPECTED:
-         * An array containing two TmKeyManagement_TmKeyStruct object representing:
-         * the key 'ABC'
-         * the key 'GHI'
-         */
-        $tmKeys = null;
-
-        try {
-            $tmKeys = TmKeyManagement_TmKeyManagement::getJobTmKeys(
-                    $_jobTmKeys,
-                    'rw',
-                    'tm'
-            );
-
-        } catch ( Exception $e ) {
-            //An error occurred: test failed
-            $this->assertTrue( false );
-        }
-
-        $this->assertTrue( is_array( $tmKeys ) );
-
-        $this->assertEquals( 2, count( $tmKeys ) );
-
-        /**
-         * @var $fstKey TmKeyManagement_TmKeyStruct
-         */
-        $fstKey = $tmKeys[ 0 ];
-
-        /**
-         * @var $sndKey TmKeyManagement_TmKeyStruct
-         */
-        $sndKey = $tmKeys[ 1 ];
-
-        $this->assertTrue( $fstKey->owner );
-        $this->assertEquals( 'ABC', $fstKey->key );
-        $this->assertEquals( 1, $fstKey->r );
-        $this->assertEquals( 1, $fstKey->w );
-        $this->assertNull( $fstKey->uid_transl );
-        $this->assertNull( $fstKey->r_transl );
-        $this->assertNull( $fstKey->w_transl );
-
-        $this->assertFalse( $sndKey->owner );
-        $this->assertEquals( 'GHI', $sndKey->key );
-        $this->assertNull( $sndKey->r );
-        $this->assertNull( $sndKey->w );
-        $this->assertNull( $sndKey->uid_transl );
-        $this->assertEquals( 1, $sndKey->r_transl );
-        $this->assertEquals( 1, $sndKey->w_transl );
-    }
-
-    public function testGetJobTmKeys_validInput_roleTranslator_noUid_readKeys() {
-
-        $_jobTmKeys = json_encode(
-                array(
-                        array(
-                                'tm'         => true,
-                                'glos'       => true,
-                                'owner'      => true,
-                                'uid_transl' => null,
-                                'uid_rev'    => null,
-                                'name'       => 'My personal Key',
-                                'key'        => 'ABC',
-                                'r'          => '1',
-                                'w'          => '1',
-                                'r_transl'   => null,
-                                'w_transl'   => null,
-                                'r_rev'      => null,
-                                'w_rev'      => null,
-                                'source'     => null,
-                                'target'     => null
-                        ),
-                        array(
-                                'tm'         => true,
-                                'glos'       => true,
-                                'owner'      => false,
-                                'uid_transl' => 560,
-                                'uid_rev'    => null,
-                                'name'       => 'My personal Key',
-                                'key'        => 'DEF',
-                                'r'          => null,
-                                'w'          => null,
-                                'r_transl'   => '1',
-                                'w_transl'   => '0',
-                                'r_rev'      => null,
-                                'w_rev'      => null,
-                                'source'     => null,
-                                'target'     => null
-                        ),
-                        array(
-                                'tm'         => true,
-                                'glos'       => true,
-                                'owner'      => false,
-                                'uid_transl' => null,
-                                'uid_rev'    => null,
-                                'name'       => 'My personal Key',
-                                'key'        => 'GHI',
-                                'r'          => null,
-                                'w'          => null,
-                                'r_transl'   => '1',
-                                'w_transl'   => '1',
-                                'r_rev'      => null,
-                                'w_rev'      => null,
-                                'source'     => null,
-                                'target'     => null
-                        )
-                )
+                        ]
+                ]
         );
 
         /**
@@ -659,8 +327,7 @@ class TmKeyManagementTest extends AbstractTest {
                     $_jobTmKeys,
                     'r',
                     'tm',
-                    null,
-                    TmKeyManagement_Filter::ROLE_TRANSLATOR
+                    560
             );
 
         } catch ( Exception $e ) {
@@ -691,19 +358,343 @@ class TmKeyManagementTest extends AbstractTest {
         $this->assertNull( $fstKey->w_transl );
 
         $this->assertFalse( $sndKey->owner );
-        $this->assertEquals( 'GHI', $sndKey->key );
+        $this->assertEquals( 'DEF', $sndKey->key );
         $this->assertNull( $sndKey->r );
         $this->assertNull( $sndKey->w );
-        $this->assertNull( $sndKey->uid_transl );
+        $this->assertEquals( 560, $sndKey->uid_transl );
         $this->assertEquals( 1, $sndKey->r_transl );
-        $this->assertEquals( 1, $sndKey->w_transl );
+        $this->assertEquals( 0, $sndKey->w_transl );
+    }
+
+    public function testGetJobTmKeys_validInput_noRole_Uid_writeKeys() {
+
+        $_jobTmKeys = json_encode(
+                [
+                        [
+                                'tm'         => true,
+                                'glos'       => true,
+                                'owner'      => true,
+                                'uid_transl' => null,
+                                'uid_rev'    => null,
+                                'name'       => 'My personal Key',
+                                'key'        => 'ABC',
+                                'r'          => '1',
+                                'w'          => '1',
+                                'r_transl'   => null,
+                                'w_transl'   => null,
+                                'r_rev'      => null,
+                                'w_rev'      => null,
+                                'source'     => null,
+                                'target'     => null
+                        ],
+                        [
+                                'tm'         => true,
+                                'glos'       => true,
+                                'owner'      => false,
+                                'uid_transl' => 560,
+                                'uid_rev'    => null,
+                                'name'       => 'My personal Key',
+                                'key'        => 'DEF',
+                                'r'          => null,
+                                'w'          => null,
+                                'r_transl'   => '1',
+                                'w_transl'   => '0',
+                                'r_rev'      => null,
+                                'w_rev'      => null,
+                                'source'     => null,
+                                'target'     => null
+                        ],
+                        [
+                                'tm'         => true,
+                                'glos'       => true,
+                                'owner'      => false,
+                                'uid_transl' => null,
+                                'uid_rev'    => null,
+                                'name'       => 'My personal Key',
+                                'key'        => 'GHI',
+                                'r'          => null,
+                                'w'          => null,
+                                'r_transl'   => '1',
+                                'w_transl'   => '1',
+                                'r_rev'      => null,
+                                'w_rev'      => null,
+                                'source'     => null,
+                                'target'     => null
+                        ]
+                ]
+        );
+
+        /**
+         * EXPECTED:
+         * An array containing one TmKeyManagement_TmKeyStruct object representing:
+         * the key 'ABC'
+         * DEF key should not be kept because it is not writable even if mine (user 560)
+         */
+        $tmKeys = null;
+
+        try {
+            $tmKeys = TmKeyManagement_TmKeyManagement::getJobTmKeys(
+                    $_jobTmKeys,
+                    'w',
+                    'tm',
+                    560
+            );
+
+        } catch ( Exception $e ) {
+            //An error occurred: test failed
+            $this->assertTrue( false );
+        }
+
+        $this->assertTrue( is_array( $tmKeys ) );
+
+        // DEF key should not be kept because it is not writable even if mine
+        $this->assertEquals( 1, count( $tmKeys ) );
+
+        /**
+         * @var $fstKey TmKeyManagement_TmKeyStruct
+         */
+        $fstKey = $tmKeys[ 0 ];
+
+        $this->assertTrue( $fstKey->owner );
+        $this->assertEquals( 'ABC', $fstKey->key );
+        $this->assertEquals( 1, $fstKey->r );
+        $this->assertEquals( 1, $fstKey->w );
+        $this->assertNull( $fstKey->uid_transl );
+        $this->assertNull( $fstKey->r_transl );
+        $this->assertNull( $fstKey->w_transl );
+
+    }
+
+    public function testGetJobTmKeys_validInput_noRole_Uid_readwriteKeys() {
+
+        $_jobTmKeys = json_encode(
+                [
+                        [
+                                'tm'         => true,
+                                'glos'       => true,
+                                'owner'      => true,
+                                'uid_transl' => null,
+                                'uid_rev'    => null,
+                                'name'       => 'My personal Key',
+                                'key'        => 'ABC',
+                                'r'          => '1',
+                                'w'          => '1',
+                                'r_transl'   => null,
+                                'w_transl'   => null,
+                                'r_rev'      => null,
+                                'w_rev'      => null,
+                                'source'     => null,
+                                'target'     => null
+                        ],
+                        [
+                                'tm'         => true,
+                                'glos'       => true,
+                                'owner'      => false,
+                                'uid_transl' => 560,
+                                'uid_rev'    => null,
+                                'name'       => 'My personal Key',
+                                'key'        => 'DEF',
+                                'r'          => null,
+                                'w'          => null,
+                                'r_transl'   => '1',
+                                'w_transl'   => '0',
+                                'r_rev'      => null,
+                                'w_rev'      => null,
+                                'source'     => null,
+                                'target'     => null
+                        ],
+                        [
+                                'tm'         => true,
+                                'glos'       => true,
+                                'owner'      => false,
+                                'uid_transl' => null,
+                                'uid_rev'    => null,
+                                'name'       => 'My personal Key',
+                                'key'        => 'GHI',
+                                'r'          => null,
+                                'w'          => null,
+                                'r_transl'   => '1',
+                                'w_transl'   => '1',
+                                'r_rev'      => null,
+                                'w_rev'      => null,
+                                'source'     => null,
+                                'target'     => null
+                        ]
+                ]
+        );
+
+        /**
+         * EXPECTED:
+         * An array containing one TmKeyManagement_TmKeyStruct object representing:
+         * the key 'ABC'
+         * DEF key should not be kept because it is not writable even if mine (user 560)
+         */
+        $tmKeys = null;
+
+        try {
+            $tmKeys = TmKeyManagement_TmKeyManagement::getJobTmKeys(
+                    $_jobTmKeys,
+                    'rw',
+                    'tm',
+                    560
+            );
+
+        } catch ( Exception $e ) {
+            //An error occurred: test failed
+            $this->assertTrue( false );
+        }
+
+        $this->assertTrue( is_array( $tmKeys ) );
+
+        $this->assertEquals( 1, count( $tmKeys ) );
+
+        /**
+         * @var $fstKey TmKeyManagement_TmKeyStruct
+         */
+        $fstKey = $tmKeys[ 0 ];
+
+        $this->assertTrue( $fstKey->owner );
+        $this->assertEquals( 'ABC', $fstKey->key );
+        $this->assertEquals( 1, $fstKey->r );
+        $this->assertEquals( 1, $fstKey->w );
+        $this->assertNull( $fstKey->uid_transl );
+        $this->assertNull( $fstKey->r_transl );
+        $this->assertNull( $fstKey->w_transl );
+
+    }
+
+    public function testGetJobTmKeys_validInput_roleTranslator_Uid_readKeys_1() {
+
+        $_jobTmKeys = json_encode(
+                [
+                        [
+                                'tm'         => true,
+                                'glos'       => true,
+                                'owner'      => true,
+                                'uid_transl' => null,
+                                'uid_rev'    => null,
+                                'name'       => 'My personal Key',
+                                'key'        => 'ABC',
+                                'r'          => '1',
+                                'w'          => '1',
+                                'r_transl'   => null,
+                                'w_transl'   => null,
+                                'r_rev'      => null,
+                                'w_rev'      => null,
+                                'source'     => null,
+                                'target'     => null
+                        ],
+                        [
+                                'tm'         => true,
+                                'glos'       => true,
+                                'owner'      => false,
+                                'uid_transl' => 560,
+                                'uid_rev'    => null,
+                                'name'       => 'My personal Key',
+                                'key'        => 'DEF',
+                                'r'          => null,
+                                'w'          => null,
+                                'r_transl'   => '1',
+                                'w_transl'   => '0',
+                                'r_rev'      => null,
+                                'w_rev'      => null,
+                                'source'     => null,
+                                'target'     => null
+                        ],
+                        [
+                                'tm'         => true,
+                                'glos'       => true,
+                                'owner'      => false,
+                                'uid_transl' => 560,
+                                'uid_rev'    => null,
+                                'name'       => 'My personal Key 2',
+                                'key'        => 'DEF2',
+                                'r'          => null,
+                                'w'          => null,
+                                'r_transl'   => '0',
+                                'w_transl'   => '1',
+                                'r_rev'      => null,
+                                'w_rev'      => null,
+                                'source'     => null,
+                                'target'     => null
+                        ],
+                        [
+                                'tm'         => true,
+                                'glos'       => true,
+                                'owner'      => false,
+                                'uid_transl' => null,
+                                'uid_rev'    => null,
+                                'name'       => 'My personal Key',
+                                'key'        => 'GHI',
+                                'r'          => null,
+                                'w'          => null,
+                                'r_transl'   => '1',
+                                'w_transl'   => '1',
+                                'r_rev'      => null,
+                                'w_rev'      => null,
+                                'source'     => null,
+                                'target'     => null
+                        ]
+                ]
+        );
+
+        /**
+         * EXPECTED:
+         * An array containing two TmKeyManagement_TmKeyStruct object representing:
+         * the key 'ABC'
+         * the key 'DEF'
+         */
+        $tmKeys = null;
+
+        try {
+            $tmKeys = TmKeyManagement_TmKeyManagement::getJobTmKeys(
+                    $_jobTmKeys,
+                    'r',
+                    'tm',
+                    560
+            );
+
+        } catch ( Exception $e ) {
+            //An error occurred: test failed
+            $this->assertTrue( false );
+        }
+
+        $this->assertTrue( is_array( $tmKeys ) );
+
+        $this->assertEquals( 2, count( $tmKeys ) );
+
+        /**
+         * @var $fstKey TmKeyManagement_TmKeyStruct
+         */
+        $fstKey = $tmKeys[ 0 ];
+
+        /**
+         * @var $sndKey TmKeyManagement_TmKeyStruct
+         */
+        $sndKey = $tmKeys[ 1 ];
+
+        $this->assertTrue( $fstKey->owner );
+        $this->assertEquals( 'ABC', $fstKey->key );
+        $this->assertEquals( 1, $fstKey->r );
+        $this->assertEquals( 1, $fstKey->w );
+        $this->assertNull( $fstKey->uid_transl );
+        $this->assertNull( $fstKey->r_transl );
+        $this->assertNull( $fstKey->w_transl );
+
+        $this->assertFalse( $sndKey->owner );
+        $this->assertEquals( 'DEF', $sndKey->key );
+        $this->assertNull( $sndKey->r );
+        $this->assertNull( $sndKey->w );
+        $this->assertEquals( 560, $sndKey->uid_transl );
+        $this->assertEquals( 1, $sndKey->r_transl );
+        $this->assertEquals( 0, $sndKey->w_transl );
     }
 
     public function testGetJobTmKeys_validInput_roleTranslator_noUid_writeKeys() {
 
         $_jobTmKeys = json_encode(
-                array(
-                        array(
+                [
+                        [
                                 'tm'         => true,
                                 'glos'       => true,
                                 'owner'      => true,
@@ -719,8 +710,8 @@ class TmKeyManagementTest extends AbstractTest {
                                 'w_rev'      => null,
                                 'source'     => null,
                                 'target'     => null
-                        ),
-                        array(
+                        ],
+                        [
                                 'tm'         => true,
                                 'glos'       => true,
                                 'owner'      => false,
@@ -736,8 +727,8 @@ class TmKeyManagementTest extends AbstractTest {
                                 'w_rev'      => null,
                                 'source'     => null,
                                 'target'     => null
-                        ),
-                        array(
+                        ],
+                        [
                                 'tm'         => true,
                                 'glos'       => true,
                                 'owner'      => false,
@@ -753,15 +744,14 @@ class TmKeyManagementTest extends AbstractTest {
                                 'w_rev'      => null,
                                 'source'     => null,
                                 'target'     => null
-                        )
-                )
+                        ]
+                ]
         );
 
         /**
          * EXPECTED:
          * An array containing two TmKeyManagement_TmKeyStruct object representing:
          * the key 'ABC'
-         * the key 'GHI'
          */
         $tmKeys = null;
 
@@ -781,17 +771,12 @@ class TmKeyManagementTest extends AbstractTest {
 
         $this->assertTrue( is_array( $tmKeys ) );
 
-        $this->assertEquals( 2, count( $tmKeys ) );
+        $this->assertEquals( 1, count( $tmKeys ) );
 
         /**
          * @var $fstKey TmKeyManagement_TmKeyStruct
          */
         $fstKey = $tmKeys[ 0 ];
-
-        /**
-         * @var $sndKey TmKeyManagement_TmKeyStruct
-         */
-        $sndKey = $tmKeys[ 1 ];
 
         $this->assertTrue( $fstKey->owner );
         $this->assertEquals( 'ABC', $fstKey->key );
@@ -801,132 +786,14 @@ class TmKeyManagementTest extends AbstractTest {
         $this->assertNull( $fstKey->r_transl );
         $this->assertNull( $fstKey->w_transl );
 
-        $this->assertFalse( $sndKey->owner );
-        $this->assertEquals( 'GHI', $sndKey->key );
-        $this->assertNull( $sndKey->r );
-        $this->assertNull( $sndKey->w );
-        $this->assertNull( $sndKey->uid_transl );
-        $this->assertEquals( 1, $sndKey->r_transl );
-        $this->assertEquals( 1, $sndKey->w_transl );
-    }
-
-    public function testGetJobTmKeys_validInput_roleTranslator_noUid_readwriteKeys() {
-
-        $_jobTmKeys = json_encode(
-                array(
-                        array(
-                                'tm'         => true,
-                                'glos'       => true,
-                                'owner'      => true,
-                                'uid_transl' => null,
-                                'uid_rev'    => null,
-                                'name'       => 'My personal Key',
-                                'key'        => 'ABC',
-                                'r'          => '1',
-                                'w'          => '1',
-                                'r_transl'   => null,
-                                'w_transl'   => null,
-                                'r_rev'      => null,
-                                'w_rev'      => null,
-                                'source'     => null,
-                                'target'     => null
-                        ),
-                        array(
-                                'tm'         => true,
-                                'glos'       => true,
-                                'owner'      => false,
-                                'uid_transl' => 560,
-                                'uid_rev'    => null,
-                                'name'       => 'My personal Key',
-                                'key'        => 'DEF',
-                                'r'          => null,
-                                'w'          => null,
-                                'r_transl'   => '1',
-                                'w_transl'   => '0',
-                                'r_rev'      => null,
-                                'w_rev'      => null,
-                                'source'     => null,
-                                'target'     => null
-                        ),
-                        array(
-                                'tm'         => true,
-                                'glos'       => true,
-                                'owner'      => false,
-                                'uid_transl' => null,
-                                'uid_rev'    => null,
-                                'name'       => 'My personal Key',
-                                'key'        => 'GHI',
-                                'r'          => null,
-                                'w'          => null,
-                                'r_transl'   => '1',
-                                'w_transl'   => '1',
-                                'r_rev'      => null,
-                                'w_rev'      => null,
-                                'source'     => null,
-                                'target'     => null
-                        )
-                )
-        );
-
-        /**
-         * EXPECTED:
-         * An array containing two TmKeyManagement_TmKeyStruct object representing:
-         * the key 'ABC'
-         * the key 'GHI'
-         */
-        $tmKeys = null;
-
-        try {
-            $tmKeys = TmKeyManagement_TmKeyManagement::getJobTmKeys(
-                    $_jobTmKeys,
-                    'rw',
-                    'tm',
-                    null,
-                    TmKeyManagement_Filter::ROLE_TRANSLATOR
-            );
-
-        } catch ( Exception $e ) {
-            //An error occurred: test failed
-            $this->assertTrue( false );
-        }
-
-        $this->assertTrue( is_array( $tmKeys ) );
-
-        $this->assertEquals( 2, count( $tmKeys ) );
-
-        /**
-         * @var $fstKey TmKeyManagement_TmKeyStruct
-         */
-        $fstKey = $tmKeys[ 0 ];
-
-        /**
-         * @var $sndKey TmKeyManagement_TmKeyStruct
-         */
-        $sndKey = $tmKeys[ 1 ];
-
-        $this->assertTrue( $fstKey->owner );
-        $this->assertEquals( 'ABC', $fstKey->key );
-        $this->assertEquals( 1, $fstKey->r );
-        $this->assertEquals( 1, $fstKey->w );
-        $this->assertNull( $fstKey->uid_transl );
-        $this->assertNull( $fstKey->r_transl );
-        $this->assertNull( $fstKey->w_transl );
-
-        $this->assertFalse( $sndKey->owner );
-        $this->assertEquals( 'GHI', $sndKey->key );
-        $this->assertNull( $sndKey->r );
-        $this->assertNull( $sndKey->w );
-        $this->assertNull( $sndKey->uid_transl );
-        $this->assertEquals( 1, $sndKey->r_transl );
-        $this->assertEquals( 1, $sndKey->w_transl );
     }
 
     public function testGetJobTmKeys_validInput_roleTranslator_uid_readKeys() {
 
         $_idTranslator = 560;
         $_jobTmKeys    = json_encode(
-                array(
-                        array(
+                [
+                        [
                                 'tm'         => true,
                                 'glos'       => true,
                                 'owner'      => true,
@@ -942,8 +809,8 @@ class TmKeyManagementTest extends AbstractTest {
                                 'w_rev'      => null,
                                 'source'     => null,
                                 'target'     => null
-                        ),
-                        array(
+                        ],
+                        [
                                 'tm'         => true,
                                 'glos'       => true,
                                 'owner'      => false,
@@ -959,8 +826,8 @@ class TmKeyManagementTest extends AbstractTest {
                                 'w_rev'      => null,
                                 'source'     => null,
                                 'target'     => null
-                        ),
-                        array(
+                        ],
+                        [
                                 'tm'         => true,
                                 'glos'       => true,
                                 'owner'      => false,
@@ -976,8 +843,8 @@ class TmKeyManagementTest extends AbstractTest {
                                 'w_rev'      => null,
                                 'source'     => null,
                                 'target'     => null
-                        )
-                )
+                        ]
+                ]
         );
 
         /**
@@ -1040,8 +907,8 @@ class TmKeyManagementTest extends AbstractTest {
 
         $_idTranslator = 560;
         $_jobTmKeys    = json_encode(
-                array(
-                        array(
+                [
+                        [
                                 'tm'         => true,
                                 'glos'       => true,
                                 'owner'      => true,
@@ -1057,8 +924,8 @@ class TmKeyManagementTest extends AbstractTest {
                                 'w_rev'      => null,
                                 'source'     => null,
                                 'target'     => null
-                        ),
-                        array(
+                        ],
+                        [
                                 'tm'         => true,
                                 'glos'       => true,
                                 'owner'      => false,
@@ -1074,8 +941,8 @@ class TmKeyManagementTest extends AbstractTest {
                                 'w_rev'      => null,
                                 'source'     => null,
                                 'target'     => null
-                        ),
-                        array(
+                        ],
+                        [
                                 'tm'         => true,
                                 'glos'       => true,
                                 'owner'      => false,
@@ -1091,8 +958,8 @@ class TmKeyManagementTest extends AbstractTest {
                                 'w_rev'      => null,
                                 'source'     => null,
                                 'target'     => null
-                        )
-                )
+                        ]
+                ]
         );
 
         /**
@@ -1141,8 +1008,8 @@ class TmKeyManagementTest extends AbstractTest {
 
         $_idTranslator = 560;
         $_jobTmKeys    = json_encode(
-                array(
-                        array(
+                [
+                        [
                                 'tm'         => true,
                                 'glos'       => true,
                                 'owner'      => true,
@@ -1158,8 +1025,8 @@ class TmKeyManagementTest extends AbstractTest {
                                 'w_rev'      => null,
                                 'source'     => null,
                                 'target'     => null
-                        ),
-                        array(
+                        ],
+                        [
                                 'tm'         => true,
                                 'glos'       => true,
                                 'owner'      => false,
@@ -1175,8 +1042,8 @@ class TmKeyManagementTest extends AbstractTest {
                                 'w_rev'      => null,
                                 'source'     => null,
                                 'target'     => null
-                        ),
-                        array(
+                        ],
+                        [
                                 'tm'         => true,
                                 'glos'       => true,
                                 'owner'      => false,
@@ -1192,15 +1059,16 @@ class TmKeyManagementTest extends AbstractTest {
                                 'w_rev'      => null,
                                 'source'     => null,
                                 'target'     => null
-                        )
-                )
+                        ]
+                ]
         );
 
         /**
          * EXPECTED:
-         * An array containing two TmKeyManagement_TmKeyStruct object representing:
+         * An array containing one TmKeyManagement_TmKeyStruct object representing:
          * the key 'ABC'
-         * the key 'DEF'
+         *
+         * The key 'DEF' has no write permissions even if mine
          */
         $tmKeys = null;
 
@@ -1220,17 +1088,12 @@ class TmKeyManagementTest extends AbstractTest {
 
         $this->assertTrue( is_array( $tmKeys ) );
 
-        $this->assertEquals( 2, count( $tmKeys ) );
+        $this->assertEquals( 1, count( $tmKeys ) );
 
         /**
          * @var $fstKey TmKeyManagement_TmKeyStruct
          */
         $fstKey = $tmKeys[ 0 ];
-
-        /**
-         * @var $sndKey TmKeyManagement_TmKeyStruct
-         */
-        $sndKey = $tmKeys[ 1 ];
 
         $this->assertTrue( $fstKey->owner );
         $this->assertEquals( 'ABC', $fstKey->key );
@@ -1239,14 +1102,6 @@ class TmKeyManagementTest extends AbstractTest {
         $this->assertNull( $fstKey->uid_transl );
         $this->assertNull( $fstKey->r_transl );
         $this->assertNull( $fstKey->w_transl );
-
-        $this->assertFalse( $sndKey->owner );
-        $this->assertEquals( 'DEF', $sndKey->key );
-        $this->assertNull(  $sndKey->r );
-        $this->assertNull(  $sndKey->w );
-        $this->assertEquals( 560, $sndKey->uid_transl );
-        $this->assertEquals( 1, $sndKey->r_transl );
-        $this->assertEquals( 0, $sndKey->w_transl );
 
     }
 
@@ -1655,40 +1510,6 @@ class TmKeyManagementTest extends AbstractTest {
         $this->assertTrue( is_array( $resultMerge ) );
         $this->assertEquals( 2, count( $resultMerge ) );
 
-        $MemoryDao = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
-        $dh        = new TmKeyManagement_MemoryKeyStruct( array(
-                'uid' => 123
-        ) );
-
-        $insertedKeys = $MemoryDao->read( $dh );
-
-        $this->assertEquals( 1, count( $insertedKeys ) );
-        $this->assertEquals( '0000123DEF', $insertedKeys[ 0 ]->tm_key->key );
-        $this->assertEquals( '123', $insertedKeys[ 0 ]->uid );
-
-        /**
-         * @var $firstKey TmKeyManagement_TmKeyStruct
-         */
-        $firstKey = $resultMerge[ 0 ];
-
-        /**
-         * @var $secondKey TmKeyManagement_TmKeyStruct
-         */
-        $secondKey = $resultMerge[ 1 ];
-
-        $this->assertEquals( "0000123ABC", $firstKey->key );
-        $this->assertNull( $firstKey->r_transl );
-        $this->assertNull( $firstKey->w_transl );
-        $this->assertEquals( 1, $firstKey->owner );
-        $this->assertEquals( 1, $firstKey->r );
-        $this->assertEquals( 1, $firstKey->w );
-
-        $this->assertEquals( "0000123DEF", $secondKey->key );
-        $this->assertEquals( 1, $secondKey->r_transl );
-        $this->assertEquals( 0, $secondKey->w_transl );
-        $this->assertEquals( 0, $secondKey->owner );
-        $this->assertNull( $secondKey->r );
-        $this->assertNull( $secondKey->w );
     }
 
     public function testMergeJsonKeys_validInput_clientABCGHIJKL_serverABCGHIDEF_anonymous() {
@@ -1720,9 +1541,9 @@ class TmKeyManagementTest extends AbstractTest {
         );
 
         $MemoryDao = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
-        $dh        = new TmKeyManagement_MemoryKeyStruct( array(
+        $dh        = new TmKeyManagement_MemoryKeyStruct( [
                 'uid' => 123
-        ) );
+        ] );
 
         $insertedKeys = $MemoryDao->read( $dh );
 
@@ -1784,10 +1605,9 @@ class TmKeyManagementTest extends AbstractTest {
 
         $this->assertEquals( "0000123JKL", $thirdKey->key );
         $this->assertTrue( $thirdKey->r_transl );
-        if (version_compare(PHP_VERSION, 5.4) >= 0){
+        if ( version_compare( PHP_VERSION, 5.4 ) >= 0 ) {
             $this->assertFalse( $thirdKey->w_transl );
-        }
-        else{
+        } else {
             $this->assertNull( $thirdKey->w_transl );
         }
         $this->assertEquals( 123, $thirdKey->uid_transl );
@@ -1835,7 +1655,7 @@ class TmKeyManagementTest extends AbstractTest {
         );
 
         $this->assertTrue( is_array( $resultMerge ) );
-        $this->assertEquals( 4, count( $resultMerge ) );
+        $this->assertEquals( 3, count( $resultMerge ) );
 
         /**
          * @var $firstKey TmKeyManagement_TmKeyStruct
@@ -1852,17 +1672,11 @@ class TmKeyManagementTest extends AbstractTest {
          */
         $thirdKey = $resultMerge[ 2 ];
 
-        /**
-         * @var $thirdKey TmKeyManagement_TmKeyStruct
-         */
-        $fourthKey = $resultMerge[ 3 ];
-
         $this->assertEquals( "0000123MNO", $firstKey->key );
         $this->assertTrue( $firstKey->r_transl );
-        if (version_compare(PHP_VERSION, 5.4) >= 0){
+        if ( version_compare( PHP_VERSION, 5.4 ) >= 0 ) {
             $this->assertFalse( $firstKey->w_transl );
-        }
-        else{
+        } else {
             $this->assertNull( $firstKey->w_transl );
         }
         $this->assertEquals( "My MNO", $firstKey->name );
@@ -1874,10 +1688,9 @@ class TmKeyManagementTest extends AbstractTest {
 
         //This key must be untouched because client sent hashed
         $this->assertEquals( "0000123ABC", $secondKey->key );
-        if (version_compare(PHP_VERSION, 5.4) >= 0){
+        if ( version_compare( PHP_VERSION, 5.4 ) >= 0 ) {
             $this->assertFalse( $secondKey->r_transl );
-        }
-        else{
+        } else {
             $this->assertNull( $secondKey->r_transl );
         }
         $this->assertTrue( $secondKey->w_transl );
@@ -1888,10 +1701,9 @@ class TmKeyManagementTest extends AbstractTest {
         $this->assertEquals( 0, $secondKey->w );
 
         $this->assertEquals( "0000123GHI", $thirdKey->key );
-        if (version_compare(PHP_VERSION, 5.4) >= 0){
+        if ( version_compare( PHP_VERSION, 5.4 ) >= 0 ) {
             $this->assertFalse( $thirdKey->r_transl );
-        }
-        else{
+        } else {
             $this->assertNull( $thirdKey->r_transl );
         }
         $this->assertTrue( $thirdKey->w_transl );
@@ -1901,22 +1713,9 @@ class TmKeyManagementTest extends AbstractTest {
         $this->assertEquals( 0, $thirdKey->r );
         $this->assertEquals( 0, $thirdKey->w );
 
-        $this->assertEquals( "0000123DEF", $fourthKey->key );
-        $this->assertNull( $fourthKey->r_transl );
-        $this->assertNull( $fourthKey->w_transl );
-        $this->assertNull( $fourthKey->uid_transl );
-        $this->assertEquals( "My DEF", $fourthKey->name );
-        $this->assertEquals( 0, $fourthKey->owner );
-        $this->assertEquals( 0, $fourthKey->r );
-        $this->assertEquals( 0, $fourthKey->w );
-        $this->assertEquals( 456, $fourthKey->uid_rev );
-        $this->assertEquals( 1, $fourthKey->r_rev );
-        $this->assertEquals( 1, $fourthKey->w_rev );
-
-
     }
 
-    public function testUniqueKeys(){
+    public function testUniqueKeys() {
 
         $client_json = '[
                             {"key":"0000123MNO","name":"My MNO","r":1,"w":0},
@@ -1934,7 +1733,7 @@ class TmKeyManagementTest extends AbstractTest {
          *
          */
 
-        $this->setExpectedException( 'Exception', "A key is already present in this project.", 5);
+        $this->setExpectedException( 'Exception', "A key is already present in this project.", 5 );
 
         TmKeyManagement_TmKeyManagement::mergeJsonKeys(
                 $client_json,
@@ -1945,15 +1744,14 @@ class TmKeyManagementTest extends AbstractTest {
 
     }
 
-    public function testJsonSerialization(){
+    public function testJsonSerialization() {
 
         $client_json = '[{"key":"0000123MNO","name":"My MNO","r":1,"w":0}]';
-        $result_arr = array_map( array( 'TmKeyManagement_TmKeyManagement', 'getTmKeyStructure' ), json_decode( $client_json ) );
+        $result_arr  = array_map( [ 'TmKeyManagement_TmKeyManagement', 'getTmKeyStructure' ], json_decode( $client_json ) );
 
-        $this->assertNotContains( 'u0000readable_chars',json_encode($result_arr) );
+        $this->assertNotContains( 'u0000readable_chars', json_encode( $result_arr ) );
 
-        $this->assertNotContains( 'u0000readable_chars', json_encode( $result_arr[0]->toArray() ) );
-
+        $this->assertNotContains( 'u0000readable_chars', json_encode( $result_arr[ 0 ]->toArray() ) );
 
 
     }

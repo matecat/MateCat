@@ -84,7 +84,7 @@ T;
         ];
 
 
-        $url_mock_param = "http://api.mymemory.translated.net/createranduser?";
+        $url_mock_param = "https://api.mymemory.translated.net/createranduser?";
         $rawValue_error = [
                 'error'          => [
                         'code'     => -6,
@@ -109,7 +109,7 @@ T;
          * creation of the engine
          * @var Engines_MyMemory
          */
-        $engine_MyMemory = $this->getMockBuilder( '\Engines_MyMemory' )->setConstructorArgs( [ $engine_struct_param ] )->setMethods( [ '_call' ] )->getMock();
+        $engine_MyMemory = @$this->getMockBuilder( '\Engines_MyMemory' )->setConstructorArgs( [ $engine_struct_param ] )->setMethods( [ '_call' ] )->getMock();
 
         $engine_MyMemory->expects( $this->once() )->method( '_call' )->with( $url_mock_param, $curl_mock_param )->willReturn( $rawValue_error );
 
@@ -123,9 +123,9 @@ T;
         $this->assertEquals( "", $result->key );
         $this->assertEquals( "", $result->id );
         $this->assertEquals( "", $result->pass );
-        $this->assertFalse( key_exists( 'responseStatus', $result ) );
-        $this->assertFalse( key_exists( 'responseDetails', $result ) );
-        $this->assertFalse( key_exists( 'responseData', $result ) );
+        $this->assertFalse( isset( $result->responseStatus ) );
+        $this->assertFalse( isset( $result->responseDetails ) );
+        $this->assertFalse( isset( $result->responseData ) );
 
         $this->assertTrue( $result->error instanceof Engines_Results_ErrorMatches );
 
