@@ -52,11 +52,8 @@ class reviseSummaryController extends viewController {
             $this->job_owner_email = $jobStruct['job_owner'];
         }
 
-        $projectStruct = $this->data->getProject();
-        // YYY [Remove] backward compatibility for current projects
-        $this->job_stats = CatUtils::getFastStatsForJob( $wStruct, false, $jobStruct->getProject(60 * 60 )->getWordCountType() );
-
-        $this->project_status = $projectStruct;
+        $this->job_stats = CatUtils::getFastStatsForJob( $wStruct, false );
+        $this->project_status = $this->data->getProject();
 
         $this->_saveActivity();
 	}

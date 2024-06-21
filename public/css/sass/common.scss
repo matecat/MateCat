@@ -1,3 +1,4 @@
+@import "commons/colors";
 html,
 body {
   height: 100%;
@@ -1453,6 +1454,10 @@ span.text-req {
 .file_upload_error,
 .error {
   color: #ff3300;
+}
+
+.file_upload_warning {
+  color: $warning;
 }
 
 .error {

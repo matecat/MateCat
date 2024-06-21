@@ -11,6 +11,7 @@ namespace AsyncTasks\Workers;
 
 use Chunks_ChunkStruct;
 use Database;
+use Exception;
 use Features;
 use Features\ReviewExtended\ReviewUtils;
 use Features\TranslationVersions\Handlers\TranslationEventsHandler;
@@ -39,9 +40,10 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker {
      * @param AbstractElement $queueElement
      *
      * @return void
-     * @throws ReflectionException
-     * @throws StompException
+     * @throws \ReflectionException
+     * @throws \StompException
      * @throws EndQueueException
+     * @throws Exception
      */
     public function process( AbstractElement $queueElement ) {
         /**

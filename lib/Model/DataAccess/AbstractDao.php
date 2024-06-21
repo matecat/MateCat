@@ -494,7 +494,7 @@ abstract class DataAccess_AbstractDao {
                 self::structKeys( $struct )
         );
 
-        \Log::doJsonLog( [
+        Log::doJsonLog( [
                 'table'  => static::TABLE,
                 'sql'    => $sql,
                 'attr'   => $attrs,

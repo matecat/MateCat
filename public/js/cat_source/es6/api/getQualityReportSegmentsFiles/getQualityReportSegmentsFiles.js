@@ -6,7 +6,6 @@ export const getQualityReportSegmentsFiles = async (filter, segmentId) => {
   if (filter) {
     data.filter = filter
   }
-  data.revision_number = config.revisionNumber
   let url = `${getMatecatApiDomain()}api/app/jobs/${config.id_job}/${
     config.password
   }/quality-report/segments?${objToQueryString(data)}`

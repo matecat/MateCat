@@ -1,5 +1,7 @@
 <?php
 
+use MimeTypes\MimeTypes;
+
 set_time_limit( 180 );
 
 class xliffToTargetController extends downloadController {
@@ -23,7 +25,7 @@ class xliffToTargetController extends downloadController {
               "fileName" => (isset($conversion['fileName']) ? $conversion['fileName'] : $conversion['filename']),
               "fileContent" => base64_encode($conversion['document_content']),
               "size" => filesize($file_path),
-              "type" => mime_content_type($file_path),
+              "type" => (new MimeTypes())->guessMimeType($file_path),
               "message" => "File downloaded! Check your download folder"
             ));
             $this->_filename     = $conversion['fileName'];

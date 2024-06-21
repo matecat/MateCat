@@ -112,7 +112,6 @@ class ChunkReviewModel implements IChunkReviewModel {
 
         $update_result = ChunkReviewDao::updateStruct( $this->chunk_review, [
                         'fields' => [
-                                'advancement_wc',
                                 'reviewed_words_count',
                                 'is_pass',
                                 'penalty_points',
@@ -154,8 +153,6 @@ class ChunkReviewModel implements IChunkReviewModel {
 
         $this->chunk_review->penalty_points       = ChunkReviewDao::getPenaltyPointsForChunk( $this->chunk );
         $this->chunk_review->reviewed_words_count = ChunkReviewDao::getReviewedWordsCountForChunk( $this->chunk );
-
-        $this->chunk_review->advancement_wc = $chunkReviewDao->recountAdvancementWords( $this->chunk, $this->chunk_review->source_page );
         $this->chunk_review->total_tte      = $chunkReviewDao->countTimeToEdit( $this->chunk, $this->chunk_review->source_page );
 
         $this->_updatePassFailResult( $project );
