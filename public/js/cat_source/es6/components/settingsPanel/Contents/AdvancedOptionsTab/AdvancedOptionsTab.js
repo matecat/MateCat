@@ -8,6 +8,7 @@ import {CharacterCounter} from './CharacterCounter'
 import {AiAssistant} from './AiAssistant'
 import {SegmentationRule} from './SegmentationRule'
 import {Team} from './Team'
+import {SpacePlaceholder} from './SpacePlaceholder'
 
 export const AdvancedOptionsTab = () => {
   const {
@@ -132,6 +133,8 @@ export const AdvancedOptionsTab = () => {
       {config.isLoggedIn === 1 && !config.is_cattool && (
         <Team {...{selectedTeam, setSelectedTeam}} />
       )}
+
+      {config.is_cattool && <SpacePlaceholder />}
     </div>
   )
 }
