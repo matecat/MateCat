@@ -187,7 +187,7 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
             } else {
                 $log[ 'response' ] = $rawValue;
             }
-            \Log::doJsonLog( $log );
+            Log::doJsonLog( $log );
         }
 
         return $rawValue;

@@ -1,7 +1,7 @@
 <?php
 
-use support\lib\TestHelper;
 use WordCount\CounterModel;
+use WordCount\WordCounterDao;
 use WordCount\WordCountStruct;
 
 /**
@@ -21,39 +21,71 @@ class InitializeJobWordCountTest extends AbstractTest {
      */
     function test_initializeJobWordCount() {
 
-        TestHelper::resetDb();
+        $wordCounterMock = @$this->getMockBuilder( WordCounterDao::class )->getMock();
+        $wordCounterMock
+                ->expects( $this->once() )
+                ->method( 'getStatsForJob' )
+                ->with(
+                        $this->equalTo( 1 ),
+                        $this->isEmpty(),
+                        $this->equalTo( 'a_password' )
+                )->willReturn(
+                        json_decode( '[{
+                                        "id": 1,
+                                        "TOTAL": 5.4,
+                                        "NEW": 2.4,
+                                        "DRAFT": 0,
+                                        "TRANSLATED": 0,
+                                        "APPROVED": 3,
+                                        "APPROVED2": 1,
+                                        "REJECTED": 0,
+                                        "TOTAL_RAW": 17,
+                                        "NEW_RAW": 4,
+                                        "DRAFT_RAW": 0,
+                                        "TRANSLATED_RAW": 6,
+                                        "APPROVED_RAW": 5,
+                                        "APPROVED2_RAW": 2,
+                                        "REJECTED_RAW": 0
+                                      }]', true
+                        )
+                );
 
-        $db = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
-        $PDO = $db->getConnection();
+        $wordCounterMock
+                ->expects( $spy = $this->once() )
+                ->method( 'initializeWordCount' )
+                ->with( $this->isInstanceOf( WordCountStruct::class ) )
+                ->willReturn( 1 );
 
-        $sql = file( INIT::$ROOT . '/test/support/files/ProjectDump.sql' );
-
-        foreach( $sql as $statement){
-            try {
-                $PDO->query( $statement );
-            } catch( Exception $e ){
-                print_r( $statement );
-                print_r( $e->getTraceAsString() );
-            }
-        }
-
-        $job       = new Jobs_JobStruct( $db->getConnection()->query( "SELECT * FROM jobs where id = 1 LIMIT 1" )->fetch() );
         $wordCount = new CounterModel();
+        $result    = $wordCount->initializeJobWordCount( 1, 'a_password', $wordCounterMock );
 
-        $result = $wordCount->initializeJobWordCount( $job[ 'id' ], $job[ 'password' ] );
+        $invocation = $spy->getInvocations()[ 0 ];
+
+        $this->assertEquals( $invocation->parameters[ 0 ], $result );
+        $this->assertSame( $invocation->parameters[ 0 ], $result ); // same instance
 
         $this->assertTrue( $result instanceof WordCountStruct );
-        $this->assertEquals( $job[ 'id' ], $result->getIdJob() );
-        $this->assertEquals( $job[ 'password' ], $result->getJobPassword() );
-        $this->assertEquals( "114.2", $result->getNewWords() );
-        $this->assertEquals( "0.00", $result->getDraftWords() );
-        $this->assertEquals( "0.00", $result->getTranslatedWords() );
-        $this->assertEquals( "155", $result->getApprovedWords() );
-        $this->assertEquals( "0.00", $result->getRejectedWords() );
+        $this->assertEquals( 1, $result->getIdJob() );
+        $this->assertEquals( 'a_password', $result->getJobPassword() );
         $this->assertNull( $result->getIdSegment() );
         $this->assertNull( $result->getOldStatus() );
         $this->assertNull( $result->getNewStatus() );
-        $this->assertEquals( 269.2, $result->getTotal() );
+
+        $this->assertEquals( 2.4, $result->getNewWords() );
+        $this->assertEquals( 0, $result->getDraftWords() );
+        $this->assertEquals( 0, $result->getTranslatedWords() );
+        $this->assertEquals( 3, $result->getApprovedWords() );
+        $this->assertEquals( 1, $result->getApproved2Words() );
+        $this->assertEquals( 0, $result->getRejectedWords() );
+        $this->assertEquals( 6.4, $result->getTotal() );
+
+        $this->assertEquals( 4, $result->getNewRawWords() );
+        $this->assertEquals( 0, $result->getDraftRawWords() );
+        $this->assertEquals( 6, $result->getTranslatedRawWords() );
+        $this->assertEquals( 5, $result->getApprovedRawWords() );
+        $this->assertEquals( 2, $result->getApproved2RawWords() );
+        $this->assertEquals( 0, $result->getRejectedRawWords() );
+        $this->assertEquals( 17, $result->getRawTotal() );
 
     }
 }
