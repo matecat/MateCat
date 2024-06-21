@@ -1,5 +1,4 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react'
-import {CattolFooter} from '../components/footer/CattoolFooter'
 import {Header} from '../components/header/cattol/Header'
 import NotificationBox from '../components/notificationsComponent/NotificationBox'
 import SegmentsContainer from '../components/segments/SegmentsContainer'
@@ -13,7 +12,6 @@ import SegmentStore from '../stores/SegmentStore'
 import SegmentConstants from '../constants/SegmentConstants'
 import useSegmentsLoader from '../hooks/useSegmentsLoader'
 import LXQ from '../utils/lxq.main'
-import CommonUtils from '../utils/commonUtils'
 import {getTmKeysUser} from '../api/getTmKeysUser'
 import {getMTEngines as getMtEnginesApi} from '../api/getMTEngines'
 import {
@@ -31,9 +29,17 @@ import {useGoogleLoginNotification} from '../hooks/useGoogleLoginNotification'
 import ModalsActions from '../actions/ModalsActions'
 import FatalErrorModal from '../components/modals/FatalErrorModal'
 import {CattoolFooter} from '../components/footer/CattoolFooter'
+import {setTagSignatureMiddleware} from '../components/segments/utils/DraftMatecatUtils/tagModel'
+import {SPACE_PLACEHOLDER_STORAGE_KEY} from '../components/settingsPanel/Contents/AdvancedOptionsTab/SpacePlaceholder'
 
 const urlParams = new URLSearchParams(window.location.search)
 const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
+
+// check space placeholder is active on init
+setTagSignatureMiddleware(
+  'space',
+  () => window.localStorage.getItem(SPACE_PLACEHOLDER_STORAGE_KEY) === 'true',
+)
 
 function CatTool() {
   const [options, setOptions] = useState({})

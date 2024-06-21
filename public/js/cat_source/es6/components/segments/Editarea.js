@@ -463,6 +463,10 @@ class Editarea extends React.Component {
       EditAreaConstants.COPY_GLOSSARY_IN_EDIT_AREA,
       this.copyGlossaryToEditArea,
     )
+    SegmentStore.addListener(
+      SegmentConstants.REFRESH_TAG_MAP,
+      this.refreshTagMap,
+    )
     setTimeout(() => {
       this.checkDecorators()
       this.updateTranslationInStore()
@@ -499,6 +503,10 @@ class Editarea extends React.Component {
     }
   }
 
+  refreshTagMap = () => {
+    this.setNewTranslation(this.props.segment.sid, this.props.translation)
+  }
+
   componentWillUnmount() {
     SegmentStore.removeListener(
       SegmentConstants.REPLACE_TRANSLATION,
@@ -511,6 +519,10 @@ class Editarea extends React.Component {
     SegmentStore.removeListener(
       EditAreaConstants.COPY_GLOSSARY_IN_EDIT_AREA,
       this.copyGlossaryToEditArea,
+    )
+    SegmentStore.removeListener(
+      SegmentConstants.REFRESH_TAG_MAP,
+      this.refreshTagMap,
     )
 
     const {editor: editorElement} = this.editor
