@@ -429,11 +429,7 @@ class setTranslationController extends ajaxController {
          * Translation is inserted here.
          */
         try {
-
-            if ( !Utils::stringsAreEqual( $new_translation->translation, $old_translation->translation ) ) {
-                CatUtils::addSegmentTranslation( $new_translation, self::isRevision() );
-            }
-
+            CatUtils::addSegmentTranslation( $new_translation, self::isRevision() );
         } catch ( ControllerReturnException $e ) {
             $db->rollback();
             throw  $e;
@@ -476,7 +472,7 @@ class setTranslationController extends ajaxController {
 
             try {
 
-                if ( $this->VersionsHandler !== null && !Utils::stringsAreEqual( $new_translation->translation, $old_translation->translation ) ) {
+                if ( $this->VersionsHandler !== null ) {
                     $propagationTotal = Translations_SegmentTranslationDao::propagateTranslation(
                             $TPropagation,
                             $this->chunk,
