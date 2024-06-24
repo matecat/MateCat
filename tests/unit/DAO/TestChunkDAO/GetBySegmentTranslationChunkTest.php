@@ -46,7 +46,7 @@ class GetBySegmentTranslationChunkTest extends AbstractTest {
                               '92c5e0ce9316', '55718', '4564373', '4564383', '', 
                               '[{\"tm\":true,\"glos\":true,\"owner\":true,\"uid_transl\":null,\"uid_rev\":null,\"name\":\"2nd pass\",\"key\":\"XXXXXXXXXXXX\",\"r\":true,\"w\":true,\"r_transl\":null,\"w_transl\":null,\"r_rev\":null,\"w_rev\":null,\"source\":null,\"target\":null}]', 
                               NULL, 'en-GB', 'it-IT', '0', '0', NULL, '1', '1', '2019-06-21 15:22:14', '2019-06-21 15:23:30', '0', 
-                              'domenico@translated.net', 'active', NULL, 'active', '0', '36.00', '9.00', '0.00', '0.00', '0.00', 'general', 
+                              'domenico@translated.net', 'active', NULL, 'active', false, '36.00', '9.00', '0.00', '0.00', '0.00', 'general', 
                               '{\"NO_MATCH\":100,\"50 % -74 % \":100,\"75 % -84 % \":60,\"85 % -94 % \":60,\"95 % -99 % \":60,\"100 % \":30,\"100 % _PUBLIC\":30,\"REPETITIONS\":30,\"INTERNAL\":60,\"MT\":80}', 
                               '0', '150', 0,0,0,0,0,0,0
                     )"

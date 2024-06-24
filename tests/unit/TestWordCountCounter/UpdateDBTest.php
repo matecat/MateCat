@@ -83,7 +83,7 @@ class UpdateDBTest extends AbstractTest
                 'status_owner' => "active",
                 'status' => "active",
                 'status_translator' => null,
-                'completed' => "\0",
+                'completed' => false,
                 'new_words' => "{$this->number_of_words_changed}",
                 'draft_words' => "0.00",
                 'translated_words' => "0.00",

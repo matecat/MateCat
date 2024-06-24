@@ -72,7 +72,7 @@ class SetContributionTest extends AbstractTest {
             'active', 
             NULL, 
             'active', 
-            '\0', 
+            false, 
             '94.80', 
             '0.00', 
             '10.50', 

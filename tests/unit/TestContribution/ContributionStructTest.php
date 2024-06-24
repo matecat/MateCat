@@ -52,7 +52,7 @@ class ContributionStructTest extends AbstractTest {
                         'status_owner'            => 'active',
                         'status_translator'       => null,
                         'status'                  => 'active',
-                        'completed'               => '1',
+                        'completed'               => true,
                         'new_words'               => '94.80',
                         'draft_words'             => '0.00',
                         'translated_words'        => '10.50',

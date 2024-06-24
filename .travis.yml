@@ -4,6 +4,20 @@ language: php
 php:
   - 7.4
 
+addons:
+  apt:
+    packages:
+      - php-json
+      - php-xml
+      - php-curl
+      - php-mysql
+      - php-mbstring
+      - php-dev
+      - php-redis
+      - php-zip
+      - php-gd
+      - libzip-dev
+
 services:
   - mysql
   - redis
@@ -77,8 +91,8 @@ script:
     
     else
       
-      export AWS_ACCESS_KEY_ID=${BETA_AWS_ACCESS_KEY_ID}
-      export AWS_SECRET_ACCESS_KEY=${BETA_AWS_SECRET_ACCESS_KEY}
+      export AWS_ACCESS_KEY_ID=${TEST_AWS_ACCESS_KEY_ID}
+      export AWS_SECRET_ACCESS_KEY=${TEST_AWS_SECRET_ACCESS_KEY}
     
       php -r "readfile('https://getcomposer.org/installer');" | php
       php composer.phar -n install || exit 1
