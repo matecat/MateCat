@@ -1,5 +1,5 @@
 os: linux
-dist: bionic
+dist: focal
 language: php
 php:
   - 7.4
@@ -97,13 +97,11 @@ script:
       php composer.phar -n install || exit 1
       rm composer.phar
   
-      mysql -u root -e "SET @@GLOBAL.sql_mode='NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION';" || exit 1
+      mysql -u root -e "SET @@GLOBAL.sql_mode=(SELECT REPLACE(@@GLOBAL.sql_mode,'ONLY_FULL_GROUP_BY',''));" || exit 1
       mysql -u root < tests/inc/unittest_matecat_local.sql
   
       ./vendor/bin/phpunit --configuration ./phpunit.xml || exit 1
       rm -rf ./vendor || exit 1
-    
-      # docker-compose -f docker/docker-compose-ci.yml build base-node test-node || exit 1
 
     fi
 
