@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d89f79cb3c18280d3c53103473487123",
+    "content-hash": "b29e2aa16bdbadd36d2cef58a782bf4b",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -1114,16 +1114,16 @@
         },
         {
             "name": "matecat/emoji-to-entity-converter",
-            "version": "v1.0.4",
+            "version": "v1.0.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/emoji-to-entity-converter.git",
-                "reference": "b742870539a2285f9b6776799256c3bf2bcb0d62"
+                "reference": "d4c294c5114793e3b9f6e262b48aac5b4cfc30d9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/emoji-to-entity-converter/zipball/b742870539a2285f9b6776799256c3bf2bcb0d62",
-                "reference": "b742870539a2285f9b6776799256c3bf2bcb0d62",
+                "url": "https://api.github.com/repos/matecat/emoji-to-entity-converter/zipball/d4c294c5114793e3b9f6e262b48aac5b4cfc30d9",
+                "reference": "d4c294c5114793e3b9f6e262b48aac5b4cfc30d9",
                 "shasum": ""
             },
             "require": {
@@ -1164,9 +1164,9 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/emoji-to-entity-converter/issues",
-                "source": "https://github.com/matecat/emoji-to-entity-converter/tree/v1.0.4"
+                "source": "https://github.com/matecat/emoji-to-entity-converter/tree/v1.0.6"
             },
-            "time": "2024-04-23T12:10:05+00:00"
+            "time": "2024-06-24T13:38:56+00:00"
         },
         {
             "name": "matecat/simple-s3",
@@ -4929,7 +4929,7 @@
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=5.6.40",
+        "php": ">=7.4",
         "ext-curl": "*",
         "ext-pcntl": "*",
         "ext-json": "*",
