@@ -628,7 +628,8 @@ CREATE TABLE `jobs` (
 --
 
 /*!40000 ALTER TABLE `jobs` DISABLE KEYS */;
-INSERT INTO `jobs` VALUES (1886428338,'a90acf203402',1886428330,1,4,NULL,'[{"tm":true,"glos":true,"owner":true,"uid_transl":null,"uid_rev":null,"name":"","key":"XXXXXXXXXXXXXXXX","r":true,"w":true,"r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"source":null,"target":null}]',NULL,'en-GB','es-ES',157967,9700,0,34,1,1,'0000-00-00 00:00:00','0000-00-00 00:00:00',0,'foo@example.org','active',NULL,'active',_binary '\0',0.00,0.00,21751.00,407.00,147.00,'general','{\"NO_MATCH\":100,\"50%-74%\":100,\"75%-84%\":60,\"85%-94%\":60,\"95%-99%\":60,\"100%\":30,\"100%_PUBLIC\":30,\"REPETITIONS\":30,
+INSERT INTO `jobs` VALUES (1886428338,'a90acf203402',1886428330,1,4,NULL,'[{"tm":true,"glos":true,"owner":true,"uid_transl":null,"uid_rev":null,"name":"","key":"XXXXXXXXXXXXXXXX","r":true,"w":true,"r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"source":null,"target":null}]',NULL,'en-GB','es-ES',157967,9700,0,34,1,1,'2024-01-01 00:00:00','2024-01-01 00:00:01',0,'foo@example.org',
+                           'active',NULL,'active',_binary '\0',0.00,0.00,21751.00,407.00,147.00,'general','{\"NO_MATCH\":100,\"50%-74%\":100,\"75%-84%\":60,\"85%-94%\":60,\"95%-99%\":60,\"100%\":30,\"100%_PUBLIC\":30,\"REPETITIONS\":30,
 \"INTERNAL\":60,\"MT\":80}',1,NULL,0.00,0.00,0.00,0.00,0.00,0.00,0.00);
 /*!40000 ALTER TABLE `jobs` ENABLE KEYS */;
 
@@ -901,7 +902,7 @@ CREATE TABLE `phinxlog` (
   `version` bigint(20) NOT NULL,
   `migration_name` varchar(100) DEFAULT NULL,
   `start_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `end_time` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `end_time` timestamp NOT NULL DEFAULT '2024-01-01 00:00:00',
   PRIMARY KEY (`version`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -981,7 +982,7 @@ CREATE TABLE `projects` (
 --
 
 /*!40000 ALTER TABLE `projects` DISABLE KEYS */;
-INSERT INTO `projects` VALUES (1886428330,'441ad0a84b52','foo@example.org','testXLif.xlf','0000-00-00 00:00:00',NULL,NULL,'DONE',0.00,0.00,22305.00,'172.17.0.1',0,0,NULL,32786,18052,NULL);
+INSERT INTO `projects` VALUES (1886428330,'441ad0a84b52','foo@example.org','testXLif.xlf','2024-01-01 00:00:00',NULL,NULL,'DONE',0.00,0.00,22305.00,'172.17.0.1',0,0,NULL,32786,18052,NULL);
 /*!40000 ALTER TABLE `projects` ENABLE KEYS */;
 
 --
@@ -1291,7 +1292,7 @@ CREATE TABLE `qa_models` (
 --
 
 /*!40000 ALTER TABLE `qa_models` DISABLE KEYS */;
-INSERT INTO `qa_models` VALUES (1886428326,NULL,'0000-00-00 00:00:00','MateCat default','points_per_thousand','{\"limit\":20}',NULL,NULL);
+INSERT INTO `qa_models` VALUES (1886428326,NULL,'2024-01-01 00:00:00','MateCat default','points_per_thousand','{\"limit\":20}',NULL,NULL);
 /*!40000 ALTER TABLE `qa_models` ENABLE KEYS */;
 
 --
@@ -1867,7 +1868,7 @@ CREATE TABLE `users` (
 --
 
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1886428310,'fabrizio@translated.net','foobar','1234abcd','0000-00-00 00:00:00','Fabrizio','Regini',NULL,NULL,NULL,NULL,'0000-00-00 00:00:00');
+INSERT INTO `users` VALUES (1886428310,'fabrizio@translated.net','foobar','1234abcd','2024-01-01 00:00:00','Fabrizio','Regini',NULL,NULL,NULL,NULL,'2024-01-01 00:00:00');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 
 --
