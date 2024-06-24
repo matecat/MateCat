@@ -154,11 +154,8 @@ class GlossaryImportTest extends AbstractTest {
         $this->engine_MyMemory->expects( $this->once() )->method( '_call' )->willReturn( $rawValue_error );
 
 
-        $path_of_the_original_file   = INIT::$ROOT . '/test/support/files/glossary/GlossaryImportcorrectBehaviourOriginal.g';
-        $this->path_of_file_for_test = INIT::$ROOT . '/test/support/files/glossary/GlossaryImportcorrectBehaviourTemp.g';
-
-
-        chmod( $path_of_the_original_file, 0644 );
+        $path_of_the_original_file   = INIT::$ROOT . '/test/support/files/glossary/GlossaryInvalidHeader.csv';
+        $this->path_of_file_for_test = INIT::$ROOT . '/test/support/files/glossary/GlossaryInvalidHeader.csv';
 
         copy( $path_of_the_original_file, $this->path_of_file_for_test );
 
