@@ -79,7 +79,15 @@ script:
       
       export AWS_ACCESS_KEY_ID=${BETA_AWS_ACCESS_KEY_ID}
       export AWS_SECRET_ACCESS_KEY=${BETA_AWS_SECRET_ACCESS_KEY}
-      docker-compose -f docker/docker-compose-ci.yml build base-node test-node || exit 1
+    
+      php -r "readfile('https://getcomposer.org/installer');" | php
+      php composer.phar -n install || exit 1
+      rm composer.phar
+  
+      ./vendor/bin/phpunit --configuration ./phpunit.xml || exit 1
+      rm -rf ./vendor || exit 1
+    
+      # docker-compose -f docker/docker-compose-ci.yml build base-node test-node || exit 1
 
     fi
 
