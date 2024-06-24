@@ -7,15 +7,14 @@
              reportUselessTests="true"
              beStrictAboutTestsThatDoNotTestAnything="true">
     <php>
-        <includePath>test/support</includePath>
-        <includePath>test/support/lib</includePath>
+        <includePath>tests/TestHelpers</includePath>
     </php>
     <testsuites>
         <!--<testsuite name="cURL based tests">-->
             <!--<directory>test/integration</directory>-->
         <!--</testsuite>-->
         <testsuite name="Unit tests">
-            <directory>test/unit</directory>
+            <directory>tests/unit/</directory>
         </testsuite>
     </testsuites>
 </phpunit>

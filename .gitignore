@@ -64,8 +64,6 @@ phinx.yml
 .lastjobprocessed_jpeer
 .maxJobToProcess_jpeer
 
-inc/dqf/dqf_test_secret.ini
-
 mmt_fallback_key.ini
 
 inc/google_translate/mmt_fallback_credentials.json

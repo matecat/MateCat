@@ -13,6 +13,7 @@ branches:
     #   - develop
     - /^v?(\d+\.)?(\d+\.)?(\d+)(-[a-z\d]+)?$/
     - freddy
+    - refactory-on-get-browser
     #  - master
 
 git:
