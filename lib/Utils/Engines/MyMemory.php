@@ -344,17 +344,16 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     /**
      * Post a file to myMemory
      *
-     * Remove the first line from csv ( source and target )
+     * Remove the first line from csv (source and target)
      * and rewrite the csv because MyMemory doesn't want the header line
      *
-     * @param            $file
-     * @param            $key
-     * @param bool|false $name
+     * @param string $file
+     * @param string $key
+     * @param string $name
      *
      * @return Engines_Results_MyMemory_TmxResponse
-     * @throws Exception
      */
-    public function glossaryImport( $file, $key, $name = false ) {
+    public function glossaryImport( string $file, string $key, string $name = '' ): Engines_Results_MyMemory_TmxResponse {
 
         $postFields = [
                 'glossary' => $this->getCurlFile( $file ),
