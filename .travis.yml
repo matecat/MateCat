@@ -1,5 +1,5 @@
 os: linux
-dist: focal
+dist: bionic
 language: php
 php:
   - 7.4
