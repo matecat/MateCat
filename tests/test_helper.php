@@ -14,9 +14,9 @@ set_include_path( get_include_path() . PATH_SEPARATOR . TEST_DIR );
 require( PROJECT_ROOT . 'inc/Bootstrap.php' );
 
 if( getenv( 'TRAVIS' ) ){
-    Bootstrap::start( new SplFileInfo( TEST_DIR . '/inc/config.travis.ini' ) );
+    Bootstrap::start( new SplFileInfo( TEST_DIR . '/inc/config.travis.ini' ), new SplFileInfo( TEST_DIR . '/inc/task_manager_config.ini' ) );
 } else {
-    Bootstrap::start( new SplFileInfo( TEST_DIR . '/inc/config.local.ini' ) );
+    Bootstrap::start( new SplFileInfo( TEST_DIR . '/inc/config.local.ini' ), new SplFileInfo( TEST_DIR . '/inc/task_manager_config.ini' ) );
 }
 
 disableAmqWorkerClientHelper();
