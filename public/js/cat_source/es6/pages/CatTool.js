@@ -29,17 +29,9 @@ import {useGoogleLoginNotification} from '../hooks/useGoogleLoginNotification'
 import ModalsActions from '../actions/ModalsActions'
 import FatalErrorModal from '../components/modals/FatalErrorModal'
 import {CattoolFooter} from '../components/footer/CattoolFooter'
-import {setTagSignatureMiddleware} from '../components/segments/utils/DraftMatecatUtils/tagModel'
-import {SPACE_PLACEHOLDER_STORAGE_KEY} from '../components/settingsPanel/Contents/AdvancedOptionsTab/SpacePlaceholder'
 
 const urlParams = new URLSearchParams(window.location.search)
 const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
-
-// check space placeholder is active on init
-setTagSignatureMiddleware(
-  'space',
-  () => window.localStorage.getItem(SPACE_PLACEHOLDER_STORAGE_KEY) === 'true',
-)
 
 function CatTool() {
   const [options, setOptions] = useState({})
