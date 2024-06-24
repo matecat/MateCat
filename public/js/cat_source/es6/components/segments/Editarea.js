@@ -764,7 +764,7 @@ class Editarea extends React.Component {
       return 'close-tag-menu'
     } else if (e.key === 'Tab') {
       return e.shiftKey ? null : 'insert-tab-tag'
-    } else if (e.code === 'Space') {
+    } else if (e.code === 'Space' && tagSignatures.space) {
       return 'insert-space-tag'
     } else if (
       (e.key === ' ' || e.key === 'Spacebar' || e.key === ' ') &&
@@ -933,8 +933,13 @@ class Editarea extends React.Component {
         insertTagAtSelection('tab')
         return 'handled'
       case 'insert-space-tag':
-        insertTagAtSelection('space')
-        return 'handled'
+        if (tagSignatures.space) {
+          insertTagAtSelection('space')
+          return 'handled'
+        } else {
+          return 'not-handled'
+        }
+
       case 'insert-nbsp-tag':
         insertTagAtSelection('nbsp')
         return 'handled'

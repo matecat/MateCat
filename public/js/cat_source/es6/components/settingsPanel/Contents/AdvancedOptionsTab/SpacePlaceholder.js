@@ -5,6 +5,12 @@ import {setTagSignatureMiddleware} from '../../../segments/utils/DraftMatecatUti
 
 export const SPACE_PLACEHOLDER_STORAGE_KEY = 'spacePlaceholder'
 
+// check space placeholder is active on init
+setTagSignatureMiddleware(
+  'space',
+  () => window.localStorage.getItem(SPACE_PLACEHOLDER_STORAGE_KEY) === 'true',
+)
+
 export const SpacePlaceholder = () => {
   const [active, setActive] = useState(
     window.localStorage.getItem(SPACE_PLACEHOLDER_STORAGE_KEY) === 'true',
