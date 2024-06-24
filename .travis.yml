@@ -79,7 +79,7 @@ script:
       
       export AWS_ACCESS_KEY_ID=${BETA_AWS_ACCESS_KEY_ID}
       export AWS_SECRET_ACCESS_KEY=${BETA_AWS_SECRET_ACCESS_KEY}
-      docker-compose -f docker/docker-compose-ci.yml build test-node || exit 1
+      docker-compose -f docker/docker-compose-ci.yml build base-node test-node || exit 1
 
     fi
 
