@@ -42,7 +42,7 @@ class CreateFromStructJobTest extends AbstractTest {
          * job initialization
          */
         $this->job_password   = "7barandfoo71";
-        $this->job_id_project = "4325344";
+        $this->job_id_project = random_int(100000, 99000000);
         $this->job_owner      = "barandfoo@translated.net";
         $this->job_struct     = new Jobs_JobStruct(
                 [
