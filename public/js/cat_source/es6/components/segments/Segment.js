@@ -56,7 +56,7 @@ class Segment extends React.Component {
       readonly: readonly,
       inBulk: false,
       tagProjectionEnabled:
-        this.props.enableTagProjection &&
+        this.props.guessTagActive &&
         (this.props.segment.status.toLowerCase() === 'draft' ||
           this.props.segment.status.toLowerCase() === 'new') &&
         !DraftMatecatUtils.checkXliffTagsInText(
@@ -726,7 +726,7 @@ class Segment extends React.Component {
 
     const getContextProps = () => {
       const {
-        enableTagProjection,
+        guessTagActive,
         isReview,
         segImmutable,
         segment,
@@ -735,7 +735,7 @@ class Segment extends React.Component {
         multiMatchLangs,
       } = this.props
       return {
-        enableTagProjection: enableTagProjection && !this.props.segment.tagged,
+        enableTagProjection: guessTagActive && !this.props.segment.tagged,
         isReview,
         segImmutable,
         segment,

@@ -1,0 +1,122 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "is_default": {
+      "type": "boolean"
+    },
+    "id_team": {
+      "type": ["integer", "string"]
+    },
+    "speech2text": {
+      "type": "boolean"
+    },
+    "lexica": {
+      "type": "boolean"
+    },
+    "tag_projection": {
+      "type": "boolean"
+    },
+    "pretranslate_100": {
+      "type": "boolean"
+    },
+    "pretranslate_101": {
+      "type": "boolean"
+    },
+    "get_public_matches": {
+      "type": "boolean"
+    },
+    "cross_language_matches": {
+      "type": ["null", "object"],
+      "$ref": "#/definitions/cross_language_matches"
+    },
+    "segmentation_rule": {
+      "type": ["null", "object"]
+    },
+    "tm": {
+      "type": ["null", "array"],
+      "items": {
+        "type": "object",
+        "$ref": "#/definitions/tm"
+      }
+    },
+    "mt": {
+      "type": ["null", "object"],
+      "$ref": "#/definitions/mt"
+    },
+    "payable_rate_template_id": {
+      "type": ["null", "integer", "string"]
+    },
+    "qa_model_template_id": {
+      "type": ["null", "integer", "string"]
+    },
+    "filters_xliff_config_template_id": {
+      "type": ["null", "integer", "string"]
+    }
+  },
+  "required": [
+    "name",
+    "id_team",
+    "speech2text",
+    "lexica",
+    "tag_projection",
+    "pretranslate_100",
+    "get_public_matches"
+  ],
+  "definitions": {
+    "cross_language_matches": {
+      "type": ["null", "object"],
+      "properties": {
+        "primary": {
+          "type": ["null", "string"]
+        },
+        "secondary": {
+          "type": ["null", "string"]
+        }
+      }
+    },
+    "tm": {
+      "type": "object",
+      "properties": {
+        "glos": {
+          "type": "boolean"
+        },
+        "is_shared": {
+          "type": "boolean"
+        },
+        "key": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "owner": {
+          "type": "boolean"
+        },
+        "tm": {
+          "type": "boolean"
+        },
+        "r": {
+          "type": "boolean"
+        },
+        "w": {
+          "type": "boolean"
+        }
+      }
+    },
+    "mt": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": ["integer", "string"]
+        },
+        "extra": {
+          "type": "object"
+        }
+      }
+    }
+  }
+}

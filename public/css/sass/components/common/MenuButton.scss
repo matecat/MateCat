@@ -14,7 +14,7 @@
     cursor: pointer;
   }
 
-  > * {
+  > button {
     color: $black;
     background: $grey4;
     padding: 4px 8px;
@@ -22,7 +22,7 @@
     border: 1px solid $grey7;
   }
 
-  > :first-child {
+  .label {
     border-radius: 2px 0 0 2px;
 
     &:hover {
@@ -30,7 +30,7 @@
     }
   }
 
-  :last-child {
+  .icon {
     display: flex;
     align-items: center;
     border-radius: 0 2px 2px 0;
@@ -48,7 +48,9 @@
   z-index: 20;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12),
+  box-shadow:
+    0 0 0 #e0e0e0,
+    0 0 2px rgba(0, 0, 0, 0.12),
     0 2px 4px rgba(0, 0, 0, 0.24);
   padding: 8px;
   background-color: $white;
@@ -57,7 +59,9 @@
   > :not(:last-child) {
     border-bottom: solid 1px $grey4;
   }
+}
 
+.menu-button-items-rect-arrow {
   &::before {
     content: '';
     border-left: 8px solid transparent;
@@ -68,26 +72,30 @@
     right: 0;
     position: absolute;
   }
-  &.menu-button-items-reversed {
-    transform: translateY(calc((100% + 4px) * -1));
-    margin-top: 0px;
-    &::after {
-      content: '';
-      border-left: 8px solid transparent;
-      border-right: 0px solid transparent;
-      border-top: 8px solid #ffffff;
-      top: 100%;
-      right: 0;
-      left: auto;
-      position: absolute;
-    }
-    &::before {
-      visibility: hidden;
-    }
+}
+
+.menu-button-items-reversed {
+  transform: translateY(calc((100% + 4px) * -1));
+  margin-top: 0px;
+  &::after {
+    content: '';
+    border-left: 8px solid transparent;
+    border-right: 0px solid transparent;
+    border-top: 8px solid #ffffff;
+    top: 100%;
+    right: 0;
+    left: auto;
+    position: absolute;
+  }
+  &::before {
+    visibility: hidden;
   }
 }
 
 .menu-button-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
   border: none;
   padding: 8px;
   text-align: left;
@@ -95,7 +103,7 @@
   background-color: unset;
   cursor: pointer;
 
-  &:hover {
+  &:not(:disabled):hover {
     background-color: $grey9;
     color: $translatedBlue;
   }

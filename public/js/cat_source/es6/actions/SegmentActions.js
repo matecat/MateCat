@@ -1657,6 +1657,15 @@ const SegmentActions = {
       tagsSelected,
     })
   },
+  refreshTagMap: function () {
+    SegmentActions.renderSegments(
+      SegmentStore._segments.toJS(),
+      SegmentStore.getCurrentSegment()?.sid,
+    )
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.REFRESH_TAG_MAP,
+    })
+  },
 }
 
 export default SegmentActions

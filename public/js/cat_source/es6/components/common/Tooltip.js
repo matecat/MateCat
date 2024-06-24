@@ -1,4 +1,4 @@
-import React, {useMemo, useRef, useState} from 'react'
+import React, {useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import usePortal from '../../hooks/usePortal'
 

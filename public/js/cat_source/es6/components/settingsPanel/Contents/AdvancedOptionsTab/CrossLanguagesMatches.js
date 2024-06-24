@@ -11,22 +11,35 @@ export const CrossLanguagesMatches = ({
     return {name: lang.name, id: lang.code}
   })
   const [activeLang1, setActiveLang1] = useState(
-    multiMatchLangs
-      ? languages.find((lang) => lang.id === multiMatchLangs.primary)
-      : undefined,
+    languages.find((lang) => lang.id === multiMatchLangs?.primary),
   )
   const [activeLang2, setActiveLang2] = useState(
-    multiMatchLangs
-      ? languages.find((lang) => lang.id === multiMatchLangs.secondary)
-      : undefined,
+    languages.find((lang) => lang.id === multiMatchLangs?.secondary),
   )
+
+  useEffect(() => {
+    const languages = ApplicationStore.getLanguages().map((lang) => {
+      return {name: lang.name, id: lang.code}
+    })
+
+    setActiveLang1(
+      languages.find((lang) => lang.id === multiMatchLangs?.primary),
+    )
+
+    setActiveLang2(
+      languages.find((lang) => lang.id === multiMatchLangs?.secondary),
+    )
+  }, [multiMatchLangs?.primary, multiMatchLangs?.secondary])
 
   useEffect(() => {
     const settings = {
       primary: activeLang1?.id,
       secondary: activeLang2?.id,
     }
-    setMultiMatchLangs(settings)
+
+    setMultiMatchLangs(
+      typeof activeLang1?.id !== 'undefined' ? settings : undefined,
+    )
     localStorage.setItem('multiMatchLangs', JSON.stringify(settings))
     if (SegmentActions.getContribution && config.is_cattool) {
       if (settings.primary) {
@@ -38,7 +51,7 @@ export const CrossLanguagesMatches = ({
         SegmentActions.updateAllSegments()
       }
     }
-  }, [activeLang1, activeLang2])
+  }, [activeLang1, activeLang2, setMultiMatchLangs])
 
   useEffect(() => {
     if (!activeLang1) {
@@ -47,14 +60,17 @@ export const CrossLanguagesMatches = ({
   }, [activeLang1])
   return (
     <div className="options-box multi-match">
-      <h3>Cross-language Matches</h3>
       <div className="option-description">
+        <h3>Cross-language Matches</h3>
         <p>
           Get translation suggestions in other target languages you know as
           reference.
         </p>
       </div>
-      <div className="options-select-container">
+      <div
+        className="options-select-container"
+        data-testid="container-crosslanguagesmatches"
+      >
         <Select
           name="multi-match-1"
           id="multi-match-1"

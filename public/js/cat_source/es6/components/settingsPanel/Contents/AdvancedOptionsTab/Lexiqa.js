@@ -1,8 +1,35 @@
 import React, {useEffect, useState} from 'react'
 import Switch from '../../../common/Switch'
-import CommonUtils from '../../../../utils/commonUtils'
 import LXQ from '../../../../utils/lxq.main'
 import ApplicationStore from '../../../../stores/ApplicationStore'
+
+export const checkLexiqaIsEnabled = ({
+  sourceLang,
+  targetLangs,
+  acceptedLanguages = config.lexiqa_languages,
+  license = config.lxq_license,
+}) => {
+  let notAcceptedLanguages = []
+  const targetLanguages = targetLangs
+  const sourceAccepted = acceptedLanguages.indexOf(sourceLang.code) > -1
+  const targetAccepted =
+    targetLanguages.filter(function (n) {
+      if (acceptedLanguages.indexOf(n.code) === -1) {
+        notAcceptedLanguages.push(
+          ApplicationStore.getLanguageNameFromLocale(n.code),
+        )
+      }
+      return acceptedLanguages.indexOf(n.code) != -1
+    }).length > 0
+
+  if (!sourceAccepted) {
+    notAcceptedLanguages.push(sourceLang.name)
+  }
+  //disable LexiQA
+  const disableLexiQA = !(sourceAccepted && targetAccepted && license)
+
+  return {disableLexiQA, notAcceptedLanguages}
+}
 
 export const Lexiqa = ({
   lexiqaActive,
@@ -25,29 +52,11 @@ export const Lexiqa = ({
     }
   }
   useEffect(() => {
-    const acceptedLanguages = config.lexiqa_languages.slice()
-    let notAcceptedLanguages = []
-    const targetLanguages = targetLangs
-    const sourceAccepted = acceptedLanguages.indexOf(sourceLang.code) > -1
-    const targetAccepted =
-      targetLanguages.filter(function (n) {
-        if (acceptedLanguages.indexOf(n.code) === -1) {
-          notAcceptedLanguages.push(
-            ApplicationStore.getLanguageNameFromLocale(n.code),
-          )
-        }
-        return acceptedLanguages.indexOf(n.code) != -1
-      }).length > 0
+    const {disableLexiQA, notAcceptedLanguages} = checkLexiqaIsEnabled({
+      sourceLang,
+      targetLangs,
+    })
 
-    if (!sourceAccepted) {
-      notAcceptedLanguages.push(sourceLang.name)
-    }
-    //disable LexiQA
-    const disableLexiQA = !(
-      sourceAccepted &&
-      targetAccepted &&
-      config.lxq_license
-    )
     if (notAcceptedLanguages.length > 0) {
       setNotSupportedLangs(notAcceptedLanguages)
     }
@@ -55,17 +64,17 @@ export const Lexiqa = ({
       setDisable(true)
       setLexiqaActive(false)
     }
-  }, [sourceLang, targetLangs])
+  }, [sourceLang, targetLangs, setLexiqaActive])
 
   return (
     <div className="options-box qa-box">
       {/*  Lexiqa
     TODO: check lexiqa licence active
   */}
-      <h3>
-        QA by <img src="/public/img/lexiqa-new-2.png" />
-      </h3>
       <div className="option-description">
+        <h3>
+          QA by <img src="/public/img/lexiqa-new-2.png" />
+        </h3>
         <p>
           {!lexiqaLicense && (
             <span className="option-qa-box-languages">
@@ -96,7 +105,12 @@ export const Lexiqa = ({
         </p>
       </div>
       <div className="options-box-value">
-        <Switch active={lexiqaActive} onChange={onChange} disabled={disabled} />
+        <Switch
+          active={lexiqaActive}
+          onChange={onChange}
+          disabled={disabled}
+          testId="switch-lexiqa"
+        />
       </div>
     </div>
   )

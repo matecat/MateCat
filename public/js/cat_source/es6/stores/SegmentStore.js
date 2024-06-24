@@ -2009,6 +2009,13 @@ AppDispatcher.register(function (action) {
         ...action,
       })
       break
+    case SegmentConstants.REFRESH_TAG_MAP:
+      SegmentStore.emitChange(SegmentConstants.REFRESH_TAG_MAP)
+      SegmentStore.emitChange(
+        SegmentConstants.RENDER_SEGMENTS,
+        SegmentStore._segments,
+      )
+      break
     default:
       SegmentStore.emitChange(action.actionType, action.sid, action.data)
   }

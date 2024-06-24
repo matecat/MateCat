@@ -35,6 +35,7 @@ export const Select = ({
   showSearchBar = false,
   searchPlaceholder,
   multipleSelect = 'off',
+  tooltipPosition,
   isDisabled = false,
   offsetParent,
   onSelect = () => {},
@@ -115,7 +116,7 @@ export const Select = ({
       const wrapperTopPosition = wrapperNode.offsetTop
       const offsetParentElement = offsetParent
         ? offsetParent
-        : wrapperNode.offsetParent
+        : wrapperNode.offsetParent ?? document.body
       //console.log('Select offsetParent:', offsetParentElement);
       const parentHeight = offsetParentElement.getBoundingClientRect().height
       const parentScrollTop =
@@ -279,6 +280,7 @@ export const Select = ({
               onSelect: handleSelect,
               onToggleOption,
               multipleSelect,
+              tooltipPosition,
               optionsSelectedCopySingular,
               optionsSelectedCopyPlural,
               resetSelectedOptions,
@@ -302,17 +304,17 @@ Select.propTypes = {
   options: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.string,
-      name: PropTypes.string,
+      name: PropTypes.node,
     }),
   ),
   activeOption: PropTypes.shape({
     id: PropTypes.string,
-    name: PropTypes.string,
+    name: PropTypes.node,
   }),
   activeOptions: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.string,
-      name: PropTypes.string,
+      name: PropTypes.node,
     }),
   ),
   isValid: PropTypes.bool,
@@ -320,6 +322,7 @@ Select.propTypes = {
   showSearchBar: PropTypes.bool,
   searchPlaceholder: PropTypes.string,
   multipleSelect: PropTypes.oneOf(['off', 'dropdown']),
+  tooltipPosition: PropTypes.string,
   isDisabled: PropTypes.bool,
   offsetParent: PropTypes.object,
   onSelect: PropTypes.func,

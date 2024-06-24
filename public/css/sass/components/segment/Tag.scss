@@ -333,6 +333,24 @@
     }
   }
 
+  &.tag-space-placeholder {
+    font-size: 16px;
+    margin: 0;
+    color: #08beec;
+    background-color: transparent;
+    &:before {
+      border: none;
+    }
+    &:after {
+      border: none;
+    }
+    span {
+      &::selection {
+        color: #002b5c;
+      }
+    }
+  }
+
   &.tag-lf {
     &:before {
       border: none;

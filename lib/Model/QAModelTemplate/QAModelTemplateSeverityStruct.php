@@ -25,7 +25,6 @@ class QAModelTemplateSeverityStruct extends DataAccess_AbstractDaoSilentStruct i
             'code' => $this->severity_code,
             'label' => $this->severity_label,
             'penalty' => floatval($this->penalty),
-            'sort' => $this->sort,
         ];
     }
 }

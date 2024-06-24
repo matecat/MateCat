@@ -349,9 +349,10 @@ class TagEntity extends Component {
 
     // Basic style accordin to language direction
     const baseStyle =
-      isRTL && tagSignatures[entityName].styleRTL
+      tagSignatures[entityName] &&
+      (isRTL && tagSignatures[entityName].styleRTL
         ? tagSignatures[entityName].styleRTL
-        : tagSignatures[entityName].style
+        : tagSignatures[entityName].style)
 
     // Check if tag is in an active segment
     const tagInactive = !segmentOpened ? 'tag-inactive' : ''

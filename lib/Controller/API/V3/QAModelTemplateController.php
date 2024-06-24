@@ -23,7 +23,12 @@ class QAModelTemplateController extends KleinController {
     public function index()
     {
         $currentPage = (isset($_GET['page'])) ? $_GET['page'] : 1;
-        $pagination = 20;
+        $pagination = (isset($_GET['perPage'])) ? $_GET['perPage'] : 20;
+
+        if($pagination > 200){
+            $pagination = 200;
+        }
+
         $uid = $this->getUser()->uid;
 
         return $this->response->json(QAModelTemplateDao::getAllPaginated($uid, $currentPage, $pagination));
@@ -48,12 +53,10 @@ class QAModelTemplateController extends KleinController {
         // try to create the template
         try {
             $json = $this->request->body();
-            $id = QAModelTemplateDao::createFromJSON($json, $this->getUser()->uid);
+            $model = QAModelTemplateDao::createFromJSON($json, $this->getUser()->uid);
 
             $this->response->code(201);
-            return $this->response->json([
-                'id' => $id
-            ]);
+            return $this->response->json($model);
         } catch (JSONValidatorError $exception){
             $this->response->code(500);
 
@@ -92,7 +95,7 @@ class QAModelTemplateController extends KleinController {
             QAModelTemplateDao::remove($id);
 
             return $this->response->json([
-                'id' => $id
+                'id' => (int)$id
             ]);
         } catch (\Exception $exception){
             $this->response->code(500);
@@ -126,12 +129,10 @@ class QAModelTemplateController extends KleinController {
 
         try {
             $json = $this->request->body();
-            $id = QAModelTemplateDao::editFromJSON($model, $json);
+            $model = QAModelTemplateDao::editFromJSON($model, $json);
 
             $this->response->code(200);
-            return $this->response->json([
-                'id' => $id
-            ]);
+            return $this->response->json($model);
         } catch (JSONValidatorError $exception){
             $this->response->code(500);
 

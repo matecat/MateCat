@@ -1,6 +1,6 @@
 <?php
 
-class AlterTableJobsForRawWordCount extends AbstractMatecatMigration {
+class AlterTableJobsForRawWc extends AbstractMatecatMigration {
 
     public $sql_up = [ "
         alter table jobs

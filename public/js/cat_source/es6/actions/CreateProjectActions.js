@@ -31,6 +31,16 @@ const CreateProjectActions = {
       value,
     })
   },
+  updateProjectTemplates: ({
+    templates,
+    modifiedPropsCurrentProjectTemplate,
+  }) => {
+    AppDispatcher.dispatch({
+      actionType: NewProjectConstants.UPDATE_PROJECT_TEMPLATES,
+      templates,
+      modifiedPropsCurrentProjectTemplate,
+    })
+  },
 }
 
 export default CreateProjectActions

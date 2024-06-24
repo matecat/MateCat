@@ -12,7 +12,7 @@
     },
  */
 
-const tagSignatures = {
+const tagSignaturesMap = {
   ph: {
     type: 'ph',
     regex: /<ph\b[^>]+?equiv-text="base64:([^"]+)"[^>]*?\/>/g,
@@ -206,7 +206,52 @@ const tagSignatures = {
     replaceForLexiqa: true,
     lexiqaText: ' ',
   },
+  space: {
+    type: 'space',
+    regex: /(?<!<[^>]*)\s(?![^<]*>)/g,
+    selfClosing: true,
+    isClosure: false,
+    placeholder: '\u00b7',
+    encodedPlaceholder: ' ',
+    placeholderRegex: null,
+    decodeNeeded: false,
+    errorCheckAvailable: false,
+    lexiqaAvailable: true,
+    glossaryAvailable: true,
+    style: 'tag-selfclosed tag-space-placeholder',
+    showTooltip: false,
+    replaceForLexiqa: true,
+    lexiqaText: ' ',
+  },
 }
+
+const tagSignaturesMiddleware = (() => {
+  const callbacks = {}
+  return {
+    callbacks,
+    set: (tagName, callback) => (callbacks[tagName] = callback),
+  }
+})()
+
+const setTagSignatureMiddleware = tagSignaturesMiddleware.set
+
+const tagSignatures = new Proxy(tagSignaturesMap, {
+  getOwnPropertyDescriptor(target, prop) {
+    const value = tagSignaturesMiddleware.callbacks[prop]?.(target[prop])
+
+    const enumerable =
+      typeof value !== 'boolean' || (typeof value === 'boolean' && value)
+
+    return {enumerable, configurable: true, value: target[prop]}
+  },
+  get(target, prop) {
+    const value = tagSignaturesMiddleware.callbacks[prop]?.(target[prop])
+
+    if (typeof value === 'boolean' && !value) return
+
+    return typeof value === 'object' ? value : target[prop]
+  },
+})
 
 function TagStruct(offset = -1, length = 0, type = null, name = null) {
   this.offset = offset
@@ -330,4 +375,5 @@ export {
   getXliffRegExpression,
   isToReplaceForLexiqa,
   getTagSignature,
+  setTagSignatureMiddleware,
 }

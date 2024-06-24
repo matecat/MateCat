@@ -2,6 +2,7 @@ import PropTypes from 'prop-types'
 import React from 'react'
 import CommonUtils from '../../utils/commonUtils'
 import {shareTmKey} from '../../api/shareTmKey'
+import CatToolActions from '../../actions/CatToolActions'
 
 class ShareTmModal extends React.Component {
   constructor(props) {
@@ -45,6 +46,14 @@ class ShareTmModal extends React.Component {
         emails: emails,
       })
         .then(() => {
+          CatToolActions.addNotification({
+            title: 'Resource shared',
+            type: 'success',
+            text: `The resource has been shared.`,
+            position: 'br',
+            allowHtml: true,
+            timer: 5000,
+          })
           callback.call()
           this.props.onClose()
         })

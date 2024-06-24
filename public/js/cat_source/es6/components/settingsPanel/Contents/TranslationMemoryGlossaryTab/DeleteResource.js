@@ -1,42 +1,15 @@
-import React, {useContext, useEffect, useRef} from 'react'
+import React from 'react'
 import PropTypes from 'prop-types'
-import {deleteTmKey} from '../../../../api/deleteTmKey'
-import {TranslationMemoryGlossaryTabContext} from './TranslationMemoryGlossaryTab'
-import CatToolActions from '../../../../actions/CatToolActions'
 
 import Checkmark from '../../../../../../../img/icons/Checkmark'
 import Close from '../../../../../../../img/icons/Close'
-import {SettingsPanelContext} from '../../SettingsPanelContext'
 
-export const DeleteResource = ({row, onClose}) => {
-  const {setTmKeys} = useContext(SettingsPanelContext)
-  const {setNotification} = useContext(TranslationMemoryGlossaryTabContext)
-
-  const tmOutOnCloseRef = useRef()
-
-  useEffect(() => {
-    return () => clearTimeout(tmOutOnCloseRef.current)
-  }, [])
-
+export const DeleteResource = ({row, onClose, onConfirm}) => {
   const onClickConfirm = () => {
-    deleteTmKey({key: row.key})
-      .then(() => {
-        setTmKeys((prevState) => prevState.filter(({key}) => key !== row.key))
-        if (config.is_cattool) CatToolActions.onTMKeysChangeStatus()
-        tmOutOnCloseRef.current = setTimeout(onClose, 2000)
-      })
-      .catch(() => {
-        setNotification({
-          type: 'error',
-          message: 'There was an error saving your data. Please retry!',
-          rowKey: row.key,
-        })
-        onClose()
-      })
+    onConfirm()
   }
 
   const onClickClose = () => {
-    setNotification({})
     onClose()
   }
 
@@ -45,7 +18,7 @@ export const DeleteResource = ({row, onClose}) => {
       <div className="action-form">
         <div>
           <span>
-            Do you really want to delete this resource (<b>{row.key}</b>)
+            Do you really want to delete this resource (<b>{row.name}</b>)
           </span>
         </div>
         <div className="translation-memory-glossary-tab-buttons-group align-center">
@@ -72,4 +45,5 @@ export const DeleteResource = ({row, onClose}) => {
 DeleteResource.propTypes = {
   row: PropTypes.object.isRequired,
   onClose: PropTypes.func,
+  onConfirm: PropTypes.func,
 }

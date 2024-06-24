@@ -25,6 +25,7 @@ export const Dropdown = forwardRef(
       showSearchBar = false,
       searchPlaceholder = 'Search...',
       multipleSelect = 'off',
+      tooltipPosition = 'left',
       onSelect = () => {},
       onToggleOption = () => {},
       onSearchBarFocus = () => {},
@@ -303,7 +304,13 @@ export const Dropdown = forwardRef(
         }).length > 0
       const isNoResultsFound = option.id === 'noResultsFound'
       const showActiveOptionIcon = isActiveOption || isActiveOptions
-      const {beforeRow, row, afterRow, cancelHandleClick} =
+      const {
+        beforeRow,
+        row,
+        afterRow,
+        cancelHandleClick,
+        getElementToEllipsis,
+      } =
         children?.({
           index,
           ...option,
@@ -336,7 +343,11 @@ export const Dropdown = forwardRef(
               if (!isNoResultsFound && !cancelHandleClick) handleClick(option)
             }}
             onMouseEnter={(e) =>
-              TEXT_UTILS.isContentTextEllipsis(e.target?.firstChild) &&
+              TEXT_UTILS.isContentTextEllipsis(
+                getElementToEllipsis?.()
+                  ? getElementToEllipsis()
+                  : e.target?.firstChild,
+              ) &&
               setRowTooltip({
                 label: option.name,
                 top: e.target.offsetTop - listRef?.current.scrollTop,
@@ -407,9 +418,9 @@ export const Dropdown = forwardRef(
         )}
         {rowTooltip && (
           <div
-            className="dropdown__tooltip"
+            className={`dropdown__tooltip dropdown__tooltip-${tooltipPosition}`}
             aria-label={rowTooltip.label}
-            tooltip-position="left"
+            tooltip-position={tooltipPosition}
             style={{top: rowTooltip.top}}
           ></div>
         )}
@@ -443,28 +454,29 @@ Dropdown.propTypes = {
   options: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.string,
-      name: PropTypes.string,
+      name: PropTypes.node,
     }),
   ).isRequired,
   activeOption: PropTypes.shape({
     id: PropTypes.string,
-    name: PropTypes.string,
+    name: PropTypes.node,
   }),
   activeOptions: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.string,
-      name: PropTypes.string,
+      name: PropTypes.node,
     }),
   ),
   mostPopularOptions: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.string,
-      name: PropTypes.string,
+      name: PropTypes.node,
     }),
   ),
   showSearchBar: PropTypes.bool,
   searchPlaceholder: PropTypes.string,
   multipleSelect: PropTypes.oneOf(['off', 'dropdown', 'modal']),
+  tooltipPosition: PropTypes.oneOf(['left', 'right']),
   onSelect: PropTypes.func,
   onToggleOption: PropTypes.func,
   onSearchBarFocus: PropTypes.func,

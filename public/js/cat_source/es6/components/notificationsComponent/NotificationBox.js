@@ -115,11 +115,11 @@ const NotificationBox = () => {
     <div className="notifications-wrapper-inside">
       {notifications.length > 0
         ? Object.keys(positions).map((position, index) => {
-            const _notifications = notifications.filter(function (
-              notification,
-            ) {
-              return position === notification.position
-            })
+            const _notifications = notifications.filter(
+              function (notification) {
+                return position === notification.position
+              },
+            )
 
             if (_notifications.length) {
               let items = []

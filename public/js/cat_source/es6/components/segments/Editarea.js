@@ -463,6 +463,10 @@ class Editarea extends React.Component {
       EditAreaConstants.COPY_GLOSSARY_IN_EDIT_AREA,
       this.copyGlossaryToEditArea,
     )
+    SegmentStore.addListener(
+      SegmentConstants.REFRESH_TAG_MAP,
+      this.refreshTagMap,
+    )
     setTimeout(() => {
       this.checkDecorators()
       this.updateTranslationInStore()
@@ -499,6 +503,10 @@ class Editarea extends React.Component {
     }
   }
 
+  refreshTagMap = () => {
+    this.setNewTranslation(this.props.segment.sid, this.props.translation)
+  }
+
   componentWillUnmount() {
     SegmentStore.removeListener(
       SegmentConstants.REPLACE_TRANSLATION,
@@ -511,6 +519,10 @@ class Editarea extends React.Component {
     SegmentStore.removeListener(
       EditAreaConstants.COPY_GLOSSARY_IN_EDIT_AREA,
       this.copyGlossaryToEditArea,
+    )
+    SegmentStore.removeListener(
+      SegmentConstants.REFRESH_TAG_MAP,
+      this.refreshTagMap,
     )
 
     const {editor: editorElement} = this.editor
@@ -749,6 +761,8 @@ class Editarea extends React.Component {
       return 'close-tag-menu'
     } else if (e.key === 'Tab') {
       return e.shiftKey ? null : 'insert-tab-tag'
+    } else if (e.code === 'Space' && tagSignatures.space) {
+      return 'insert-space-tag'
     } else if (
       (e.key === ' ' || e.key === 'Spacebar' || e.key === ' ') &&
       ((isCtrlKeyCommand(e) && e.shiftKey) ||
@@ -837,8 +851,8 @@ class Editarea extends React.Component {
             ? 'left'
             : 'right'
           : !isRTL
-          ? 'right'
-          : 'left'
+            ? 'right'
+            : 'left'
 
       const updatedStateNearZwsp = checkCaretIsNearZwsp({
         editorState: this.state.editorState,
@@ -915,6 +929,14 @@ class Editarea extends React.Component {
       case 'insert-tab-tag':
         insertTagAtSelection('tab')
         return 'handled'
+      case 'insert-space-tag':
+        if (tagSignatures.space) {
+          insertTagAtSelection('space')
+          return 'handled'
+        } else {
+          return 'not-handled'
+        }
+
       case 'insert-nbsp-tag':
         insertTagAtSelection('nbsp')
         return 'handled'
