@@ -30,14 +30,14 @@ class GetInstanceTest extends AbstractTest {
         /**
          * user insertion
          */
-        $this->sql_insert_user = "INSERT INTO " . INIT::$DB_DATABASE . ".`users` (`uid`, `email`, `salt`, `pass`, `create_date`, `first_name`, `last_name` ) VALUES ('100044', 'bar@foo.net', '12345trewq', '987654321qwerty', '2016-04-11 13:41:54', 'Bar', 'Foo' );";
+        $this->sql_insert_user = "INSERT INTO " . INIT::$DB_DATABASE . ".`users` (`email`, `salt`, `pass`, `create_date`, `first_name`, `last_name` ) VALUES ('bar@foo.net', '12345trewq', '987654321qwerty', '2016-04-11 13:41:54', 'Bar', 'Foo' );";
         $this->database_instance->getConnection()->query( $this->sql_insert_user );
         $this->id_user = $this->database_instance->getConnection()->lastInsertId();
 
         /**
          * engine insertion
          */
-        $this->sql_insert_engine = "INSERT INTO " . INIT::$DB_DATABASE . ".`engines` (`id`, `name`, `type`, `description`, `base_url`, `translate_relative_url`, `contribute_relative_url`, `delete_relative_url`, `others`, `class_load`, `extra_parameters`, `google_api_compliant_version`, `penalty`, `active`, `uid`) VALUES ('10', 'DeepLingo En/Fr iwslt', 'MT', 'DeepLingo Engine', 'http://mtserver01.deeplingo.com:8019', 'translate', NULL, NULL, '{}', 'Apertium', '{\"client_secret\":\"gala15 \"}', '2', '14', '1', " . $this->id_user . ");";
+        $this->sql_insert_engine = "INSERT INTO " . INIT::$DB_DATABASE . ".`engines` (`name`, `type`, `description`, `base_url`, `translate_relative_url`, `contribute_relative_url`, `delete_relative_url`, `others`, `class_load`, `extra_parameters`, `google_api_compliant_version`, `penalty`, `active`, `uid`) VALUES ( 'DeepLingo En/Fr iwslt', 'MT', 'DeepLingo Engine', 'http://mtserver01.deeplingo.com:8019', 'translate', NULL, NULL, '{}', 'Apertium', '{\"client_secret\":\"gala15 \"}', '2', '14', '1', " . $this->id_user . ");";
         $this->database_instance->getConnection()->query( $this->sql_insert_engine );
         $this->id_database = $this->database_instance->getConnection()->lastInsertId();
 
