@@ -30,7 +30,7 @@ class GetInstanceTest extends AbstractTest {
         /**
          * user insertion
          */
-        $this->sql_insert_user = "INSERT INTO " . INIT::$DB_DATABASE . ".`users` (`email`, `salt`, `pass`, `create_date`, `first_name`, `last_name` ) VALUES ('bar@foo.net', '12345trewq', '987654321qwerty', '2016-04-11 13:41:54', 'Bar', 'Foo' );";
+        $this->sql_insert_user = "INSERT INTO " . INIT::$DB_DATABASE . ".`users` (`email`, `salt`, `pass`, `create_date`, `first_name`, `last_name` ) VALUES ( '" . uniqid( '', true ) . "bar@foo.net', '12345trewq', '987654321qwerty', '2016-04-11 13:41:54', 'Bar', 'Foo' );";
         $this->database_instance->getConnection()->query( $this->sql_insert_user );
         $this->id_user = $this->database_instance->getConnection()->lastInsertId();
 

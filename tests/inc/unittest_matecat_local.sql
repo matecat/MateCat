@@ -819,7 +819,7 @@ CREATE TABLE `outsource_confirmation` (
   `id_vendor` int(11) NOT NULL DEFAULT '1',
   `vendor_name` varchar(255) NOT NULL DEFAULT 'Translated',
   `create_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `delivery_date` timestamp NOT NULL,
+  `delivery_date` timestamp NOT NULL DEFAULT '2024-01-01 00:00:00',
   `currency` varchar(25) NOT NULL DEFAULT 'EUR',
   `price` float(11,2) NOT NULL DEFAULT '0.00',
   `quote_pid` varchar(36) DEFAULT NULL,

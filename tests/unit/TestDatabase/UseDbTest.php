@@ -23,6 +23,7 @@ class UseDbTest extends AbstractTest {
     }
 
     public function tearDown() {
+        $this->databaseInstance->useDb( 'unittest_matecat_local' );
         parent::tearDown();
     }
 

@@ -20,6 +20,7 @@ addons:
 
 services:
   - redis
+  - mysql
 
 branches:
   only:
@@ -96,22 +97,25 @@ script:
       php composer.phar -n install || exit 1
       rm composer.phar
   
-      docker run --name mysql5744 --rm -d -e MYSQL_ALLOW_EMPTY_PASSWORD=root -e MYSQL_TCP_PORT=3306 -p 3306:3306 mysql:5.7.44
-    
-      RET=1
-      while [[ RET -ne 0 ]]; do
-          echo "=> Waiting for confirmation of MySQL service startup"
-          sleep 5
-          mysql -u root -h 127.0.0.1 -e "status" # > /dev/null 2>&1
-          RET=$?
-      done
+      #      docker run --name mysql5744 --rm -d -e MYSQL_ALLOW_EMPTY_PASSWORD=root -e MYSQL_TCP_PORT=3306 -p 3306:3306 mysql:5.7.44
+      #
+      #      RET=1
+      #      while [[ RET -ne 0 ]]; do
+      #          echo "=> Waiting for confirmation of MySQL service startup"
+      #          sleep 5
+      #          mysql -u root -h 127.0.0.1 -e "status" # > /dev/null 2>&1
+      #          RET=$?
+      #      done
   
+      mysql -u root -h 127.0.0.1 -e "SET @@GLOBAL.sql_mode='NO_ENGINE_SUBSTITUTION';" || exit 1
+      mysql -u root -h 127.0.0.1 -e "SET @@GLOBAL.explicit_defaults_for_timestamp='ON';" || exit 1
+      mysql -u root -h 127.0.0.1 -e "SET @@GLOBAL.character_set_server='utf8';" || exit 1
       mysql -u root -h 127.0.0.1 < tests/inc/unittest_matecat_local.sql || exit 1
   
       ./vendor/bin/phpunit --configuration ./phpunit.xml || exit 1
       rm -rf ./vendor || exit 1
     
-      docker kill mysql5744
+      # docker kill mysql5744
 
     fi
 
