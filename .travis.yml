@@ -102,11 +102,11 @@ script:
       while [[ RET -ne 0 ]]; do
           echo "=> Waiting for confirmation of MySQL service startup"
           sleep 5
-          mysql -u root -e "status" # > /dev/null 2>&1
+          mysql -u root -h 127.0.0.1 -e "status" # > /dev/null 2>&1
           RET=$?
       done
   
-      mysql -u root < tests/inc/unittest_matecat_local.sql || exit 1
+      mysql -u root -h 127.0.0.1 < tests/inc/unittest_matecat_local.sql || exit 1
   
       ./vendor/bin/phpunit --configuration ./phpunit.xml || exit 1
       rm -rf ./vendor || exit 1
