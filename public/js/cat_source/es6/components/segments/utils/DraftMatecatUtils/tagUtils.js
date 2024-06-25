@@ -94,6 +94,7 @@ export const transformTagsToLexiqaText = (text) => {
     for (let key in tagSignatures) {
       const {placeholderRegex, decodeNeeded, placeholder, regex, lexiqaText} =
         tagSignatures[key]
+      console.log(`@${key}`, tagSignatures[key])
       if (placeholderRegex) {
         let globalRegex = new RegExp(
           placeholderRegex.source,
@@ -104,6 +105,7 @@ export const transformTagsToLexiqaText = (text) => {
             ? decodeHtmlEntities(Base64.decode(text))
             : match
           tag = !isToReplaceForLexiqa(key) ? '<' + tag + '>' : lexiqaText
+          console.log('apertura', tag)
           return tag
         })
       } else if (regex) {
@@ -111,6 +113,7 @@ export const transformTagsToLexiqaText = (text) => {
         text = text.replace(globalRegex, (match) => {
           let tag = placeholder ? placeholder : match
           tag = !isToReplaceForLexiqa(key) ? '<' + tag + '>' : lexiqaText
+          console.log('chiusura', tag)
           return tag
         })
       }

@@ -120,7 +120,7 @@ const tagSignatures = {
     style: 'tag-selfclosed tag-nbsp',
     showTooltip: false,
     replaceForLexiqa: true,
-    lexiqaText: ' ',
+    lexiqaText: '​ ​',
   },
   tab: {
     type: 'tab',
@@ -137,7 +137,7 @@ const tagSignatures = {
     style: 'tag-selfclosed tag-tab',
     showTooltip: false,
     replaceForLexiqa: true,
-    lexiqaText: ' ',
+    lexiqaText: '​ ​',
   },
   carriageReturn: {
     type: 'carriageReturn',
@@ -154,7 +154,7 @@ const tagSignatures = {
     style: 'tag-selfclosed tag-cr',
     showTooltip: false,
     replaceForLexiqa: true,
-    lexiqaText: '\n',
+    lexiqaText: '​\n​',
   },
   lineFeed: {
     type: 'lineFeed',
@@ -171,7 +171,7 @@ const tagSignatures = {
     style: 'tag-selfclosed tag-lf',
     showTooltip: false,
     replaceForLexiqa: true,
-    lexiqaText: '\n',
+    lexiqaText: '​\n​',
   },
   splitPoint: {
     type: 'splitpoint',
@@ -204,7 +204,7 @@ const tagSignatures = {
     style: 'tag-selfclosed tag-word-joiner',
     showTooltip: false,
     replaceForLexiqa: true,
-    lexiqaText: ' ',
+    lexiqaText: '​ ​',
   },
 }
 
