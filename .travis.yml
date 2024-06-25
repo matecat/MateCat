@@ -19,7 +19,6 @@ addons:
       - libzip-dev
 
 services:
-  - mysql
   - redis
 
 branches:
@@ -97,11 +96,22 @@ script:
       php composer.phar -n install || exit 1
       rm composer.phar
   
-      mysql -u root -e "SET @@GLOBAL.sql_mode=(SELECT REPLACE(@@GLOBAL.sql_mode,'ONLY_FULL_GROUP_BY',''));" || exit 1
+      docker run --name mysql5744 --rm -e MYSQL_ALLOW_EMPTY_PASSWORD=root -e MYSQL_TCP_PORT=3306 -p 3306:3306 mysql:5.7.44
+    
+      RET=1
+      while [[ RET -ne 0 ]]; do
+          echo "=> Waiting for confirmation of MySQL service startup"
+          sleep 5
+          mysql -u root -e "status" # > /dev/null 2>&1
+          RET=$?
+      done
+  
       mysql -u root < tests/inc/unittest_matecat_local.sql || exit 1
   
       ./vendor/bin/phpunit --configuration ./phpunit.xml || exit 1
       rm -rf ./vendor || exit 1
+    
+      docker kill mysql5744
 
     fi
 
