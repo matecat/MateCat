@@ -28,15 +28,16 @@ before_install:
 script:
   - |
     
-    # load services
-    docker-compose -f docker/docker-compose-ci.yml build mysql redis > /dev/null 2>&1
-    docker-compose -f docker/docker-compose-ci.yml create mysql redis > /dev/null 2>&1
+    echo "Load services"
+    docker-compose -f docker/docker-compose-ci.yml build mysql redis > /dev/null
+    docker-compose -f docker/docker-compose-ci.yml create mysql redis > /dev/null
     
     # keep logs for the base node
     docker-compose -f docker/docker-compose-ci.yml build base-node
     
     # silent for test node
-    docker-compose -f docker/docker-compose-ci.yml build test-node > /dev/null 2>&1
+    echo "Build test node"
+    docker-compose -f docker/docker-compose-ci.yml build test-node > /dev/null
     
     # Run tests
     docker-compose -f docker/docker-compose-ci.yml up test-node --exit-code-from test-node || exit 1
