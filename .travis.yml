@@ -28,6 +28,9 @@ before_install:
 
 script:
   - |
+    
+    # Run tests
+    docker-compose -f docker/docker-compose-ci.yml up test-node --exit-code-from test-node || exit 1
 
     if [[ ! -z "${TRAVIS_TAG}" ]] ; then
 
@@ -69,13 +72,6 @@ script:
 
       docker push 208060995276.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-web-node:latest
       docker push 208060995276.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-daemons-node:latest
-    
-    else
-      
-      export AWS_ACCESS_KEY_ID=${TEST_AWS_ACCESS_KEY_ID}
-      export AWS_SECRET_ACCESS_KEY=${TEST_AWS_SECRET_ACCESS_KEY}
-      
-      docker-compose -f docker/docker-compose-ci.yml up test-node --exit-code-from test-node || exit 1
 
     fi
 
