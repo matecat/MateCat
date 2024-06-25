@@ -37,7 +37,7 @@ export const SpacePlaceholder = () => {
         <Switch
           active={active}
           onChange={onChange}
-          testId="switch-chars-counter"
+          testId="switch-space-counter"
         />
       </div>
     </div>

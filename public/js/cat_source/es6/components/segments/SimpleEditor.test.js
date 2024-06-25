@@ -1,6 +1,9 @@
 import {render, screen} from '@testing-library/react'
 import React from 'react'
 import SimpleEditor from './SimpleEditor'
+import {setTagSignatureMiddleware} from './utils/DraftMatecatUtils/tagModel'
+
+setTagSignatureMiddleware('space', () => false)
 
 test('Test input string', () => {
   let text = 'Cia&apos;o &amp;nbsp; &amp;nbsp; &amp;lt; &amp;lt;come stai? '
