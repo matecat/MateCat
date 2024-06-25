@@ -246,7 +246,7 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver {
         /**
          * @var $queueElement Contribution\ContributionSetStruct
          */
-        $contributionMockQueueObject = $this->getMockBuilder( '\Contribution\ContributionSetStruct' )->getMock();
+        $contributionMockQueueObject = @$this->getMockBuilder( '\Contribution\ContributionSetStruct' )->getMock();
 
         $contributionMockQueueObject->expects( $this->once() )->method( 'getProp' );
         $contributionMockQueueObject->expects( $this->once() )
@@ -293,7 +293,7 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver {
         $stubEngine->expects( $this->once() )
                 ->method( 'update' )
                 ->with( $this->anything() )
-                ->willReturn( false );
+                ->willReturn( new Engines_Results_MyMemory_SetContributionResponse( [ 'responseStatus' => 500, 'responseData' => [] ] ) );
 
         $_worker->setEngine( $stubEngine );
 
