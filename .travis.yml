@@ -100,7 +100,7 @@ script:
       mysql -u root -h 127.0.0.1 < tests/inc/unittest_matecat_local.sql || exit 1
 
       docker-compose -f docker/docker-compose-ci.yml create test-node || exit 1
-      docker-compose -f docker/docker-compose-ci.yml start test-node || exit 1
+      docker-compose -f docker/docker-compose-ci.yml up test-node || exit 1
 
     fi
 

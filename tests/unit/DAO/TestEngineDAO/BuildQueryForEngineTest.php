@@ -10,7 +10,7 @@ use TestHelpers\AbstractTest;
  * Date: 14/04/16
  * Time: 19.40
  */
-class uBuildQueryForEngineTest extends AbstractTest
+class BuildQueryForEngineTest extends AbstractTest
 {
 
     protected $reflector;
