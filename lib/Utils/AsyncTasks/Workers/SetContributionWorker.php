@@ -127,6 +127,7 @@ class SetContributionWorker extends AbstractWorker {
      *
      * @throws ReQueueException
      * @throws ValidationError
+     * @throws EndQueueException
      */
     protected function _set( array $config, ContributionSetStruct $contributionStruct ) {
 
@@ -137,16 +138,19 @@ class SetContributionWorker extends AbstractWorker {
         $config[ 'translation' ]    = $contributionStruct->translation;
         $config[ 'context_after' ]  = $contributionStruct->context_after;
         $config[ 'context_before' ] = $contributionStruct->context_before;
-        $config[ 'set_mt' ]      = ($jobStruct->id_mt_engine != 1) ? false : true;
+        $config[ 'set_mt' ]         = ( $jobStruct->id_mt_engine != 1 ) ? false : true;
 
         //get the Props
         $config[ 'prop' ] = json_encode( $contributionStruct->getProp() );
 
         // set the contribution for every key in the job belonging to the user
         $res = $this->_engine->set( $config );
-        if ( !$res ) {
-            //reset the engine
-            $this->_raiseException( 'Set', $config );
+        if ( $res->responseStatus >= 400 && $res->responseStatus < 500 ) {
+            $this->_raiseEndQueueException( 'Set', $config );
+        } elseif ( $res->responseStatus != 200 ) {
+            $this->_raiseReQueueException( 'Set', $config );
+        } else {
+            $this->_doLog( "Set complete" );
         }
 
     }
@@ -158,6 +162,7 @@ class SetContributionWorker extends AbstractWorker {
      *
      * @throws ReQueueException
      * @throws ValidationError
+     * @throws EndQueueException
      */
     protected function _update( array $config, ContributionSetStruct $contributionStruct, $id_mt_engine = 1 ) {
 
@@ -173,10 +178,15 @@ class SetContributionWorker extends AbstractWorker {
         $config[ 'newsegment' ]     = $contributionStruct->segment;
         $config[ 'newtranslation' ] = $contributionStruct->translation;
 
+        $this->_doLog( "Executing Update on " . get_class( $this->_engine ) );
         $res = $this->_engine->update( $config );
-        if ( !$res ) {
-            //reset the engine
-            $this->_raiseException( 'Update', $config );
+
+        if ( $res->responseStatus >= 400 && $res->responseStatus < 500 ) {
+            $this->_raiseEndQueueException( 'Update', $config );
+        } elseif ( $res->responseStatus != 200 ) {
+            $this->_raiseReQueueException( 'Update', $config );
+        } else {
+            $this->_doLog( "Update complete" );
         }
 
     }
@@ -219,7 +229,7 @@ class SetContributionWorker extends AbstractWorker {
      *
      * @throws ReQueueException
      */
-    protected function _raiseException( $type, array $config ) {
+    protected function _raiseReQueueException( $type, array $config ) {
         //reset the engine
         $engineName    = get_class( $this->_engine );
         $this->_engine = null;
@@ -235,6 +245,30 @@ class SetContributionWorker extends AbstractWorker {
         }
 
         throw new ReQueueException( "$type failed on " . $engineName . ": Values " . var_export( $config, true ), $errNum );
+    }
+
+    /**
+     * @param string $type
+     * @param array  $config
+     *
+     * @throws EndQueueException
+     */
+    protected function _raiseEndQueueException( $type, array $config ) {
+        //reset the engine
+        $engineName    = get_class( $this->_engine );
+        $this->_engine = null;
+
+        switch ( strtolower( $type ) ) {
+            case 'update':
+                $errNum = self::ERR_UPDATE_FAILED;
+                break;
+            case 'set':
+            default:
+                $errNum = self::ERR_SET_FAILED;
+                break;
+        }
+
+        throw new EndQueueException( "$type failed on " . $engineName . ": Values " . var_export( $config, true ), $errNum );
     }
 
 }

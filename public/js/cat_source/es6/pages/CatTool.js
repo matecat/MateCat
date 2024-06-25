@@ -1,4 +1,5 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react'
+import {useHotkeys} from 'react-hotkeys-hook'
 import {CattolFooter} from '../components/footer/CattoolFooter'
 import {Header} from '../components/header/cattol/Header'
 import NotificationBox from '../components/notificationsComponent/NotificationBox'
@@ -13,7 +14,6 @@ import SegmentStore from '../stores/SegmentStore'
 import SegmentConstants from '../constants/SegmentConstants'
 import useSegmentsLoader from '../hooks/useSegmentsLoader'
 import LXQ from '../utils/lxq.main'
-import CommonUtils from '../utils/commonUtils'
 import {getTmKeysUser} from '../api/getTmKeysUser'
 import {getMTEngines as getMtEnginesApi} from '../api/getMTEngines'
 import {
@@ -29,12 +29,19 @@ import ApplicationStore from '../stores/ApplicationStore'
 import {useGoogleLoginNotification} from '../hooks/useGoogleLoginNotification'
 import ModalsActions from '../actions/ModalsActions'
 import FatalErrorModal from '../components/modals/FatalErrorModal'
+import {Shortcuts} from '../utils/shortcuts'
+import CommonUtils from '../utils/commonUtils'
 import {CattoolFooter} from '../components/footer/CattoolFooter'
 
 const urlParams = new URLSearchParams(window.location.search)
 const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
 
 function CatTool() {
+  useHotkeys(
+    Shortcuts.cattol.events.openSettings.keystrokes[Shortcuts.shortCutsKeyType],
+    () => CatToolActions.openSettingsPanel(),
+    {enableOnContentEditable: true},
+  )
   const [options, setOptions] = useState({})
   const [wasInitSegments, setWasInitSegments] = useState(false)
   const [isFreezingSegments, setIsFreezingSegments] = useState(false)
@@ -201,7 +208,9 @@ function CatTool() {
           true,
         )
     }
-
+    window.onbeforeunload = function (e) {
+      return CommonUtils.goodbye(e)
+    }
     SegmentStore.addListener(
       SegmentConstants.FREEZING_SEGMENTS,
       freezingSegments,

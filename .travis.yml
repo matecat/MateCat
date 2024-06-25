@@ -6,7 +6,7 @@ php:
 
 branches:
   only:
-    #   - develop
+    - develop
     - /^v?(\d+\.)?(\d+\.)?(\d+)(-[a-z\d]+)?$/
     - freddy
     #  - master

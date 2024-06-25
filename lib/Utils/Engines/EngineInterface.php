@@ -19,14 +19,14 @@ interface Engines_EngineInterface {
     /**
      * @param $_config
      *
-     * @return bool
+     * @return mixed
      */
     public function set( $_config );
 
     /**
      * @param $_config
      *
-     * @return bool
+     * @return mixed
      */
     public function update( $_config );
 

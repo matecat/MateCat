@@ -690,9 +690,7 @@ var convertFile = function (fname, filerow, filesize, enforceConversion) {
             UI.createKeyByTMX(extension, fname)
           }
         }
-      } else if (data.code <= 0 || errors.length > 0) {
-        console.log(errors[0].message)
-
+      } else if (data.code <= 0 && errors.length > 0) {
         $('td.size', filerow)
           .next()
           .addClass('file_upload_error')
@@ -716,6 +714,26 @@ var convertFile = function (fname, filerow, filesize, enforceConversion) {
           CreateProjectActions.enableAnalyzeButton(true)
           $(filerow).removeClass('failed')
         }
+      } else if (data.code <= 0 && data.warnings.length > 0) {
+        const warnings = data.warnings
+        $('td.size', filerow)
+          .next()
+          .addClass('file_upload_warning')
+          .empty()
+          .attr('colspan', '2')
+          .css({'font-size': '14px'})
+          .append(
+            '<span class="label label-important">' +
+              warnings[0].message +
+              '</span>',
+          )
+        setTimeout(function () {
+          $('.progress', filerow).remove()
+          $('.operation', filerow).remove()
+        }, 50)
+
+        //filters ocr warning
+        CreateProjectActions.enableAnalyzeButton(true)
       }
     })
     .catch(function (d) {

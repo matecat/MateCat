@@ -1,5 +1,4 @@
 import Cookies from 'js-cookie'
-import Platform from 'platform'
 import OfflineUtils from './offlineUtils'
 import SegmentActions from '../actions/SegmentActions'
 import SegmentStore from '../stores/SegmentStore'
@@ -492,20 +491,6 @@ const CommonUtils = {
   fileHasInstructions: (file) =>
     file && file.metadata && file.metadata.instructions,
 
-  /**
-   * Returns true if the current OS is MacOS or iOS, false otherwise
-   *
-   * @returns {boolean}
-   */
-  isMacOS: () => {
-    const os = Platform.os && Platform.os.family
-    return (
-      os &&
-      (os.indexOf('Mac') >= 0 ||
-        os.indexOf('OS X') >= 0 ||
-        os.indexOf('iOS') >= 0)
-    )
-  },
   isAllowedLinkRedirect: () => false,
   dispatchTrackingError: (message) => {
     const event = new CustomEvent('track-error', {detail: message})

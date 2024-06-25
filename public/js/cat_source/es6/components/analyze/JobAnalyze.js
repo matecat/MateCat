@@ -95,7 +95,7 @@ class JobAnalyze extends React.Component {
                   status={this.props.status}
                 />
                 <JobTableHeader rates={this.props.jobInfo.payable_rates} />
-                {this.getChunks()}
+                <div className="chunks-analyze">{this.getChunks()}</div>
               </div>
             </div>
           </div>
