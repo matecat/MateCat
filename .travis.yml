@@ -96,7 +96,7 @@ script:
       php composer.phar -n install || exit 1
       rm composer.phar
   
-      docker run --name mysql5744 --rm -e MYSQL_ALLOW_EMPTY_PASSWORD=root -e MYSQL_TCP_PORT=3306 -p 3306:3306 mysql:5.7.44
+      docker run --name mysql5744 --rm -d -e MYSQL_ALLOW_EMPTY_PASSWORD=root -e MYSQL_TCP_PORT=3306 -p 3306:3306 mysql:5.7.44
     
       RET=1
       while [[ RET -ne 0 ]]; do
