@@ -43,7 +43,7 @@ class SegmentFooterTabMessages extends React.Component {
           let note = item.note
           let html = (
             <div className="note" key={'note-' + index}>
-              <span className="note-label">Note: </span>
+              <span className="note-label">Note:</span>
               <span
                 dangerouslySetInnerHTML={{
                   __html: this.getNoteContentStructure(note),
