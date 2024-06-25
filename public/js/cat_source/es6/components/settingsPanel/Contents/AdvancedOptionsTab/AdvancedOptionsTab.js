@@ -101,6 +101,8 @@ export const AdvancedOptionsTab = () => {
         speechToTextActive={speechToTextActive}
       />
 
+      {config.is_cattool && <SpacePlaceholder />}
+
       {config.show_tag_projection && (
         <GuessTag
           setGuessTagActive={setGuessTagActive}
@@ -133,8 +135,6 @@ export const AdvancedOptionsTab = () => {
       {config.isLoggedIn === 1 && !config.is_cattool && (
         <Team {...{selectedTeam, setSelectedTeam}} />
       )}
-
-      {config.is_cattool && <SpacePlaceholder />}
     </div>
   )
 }

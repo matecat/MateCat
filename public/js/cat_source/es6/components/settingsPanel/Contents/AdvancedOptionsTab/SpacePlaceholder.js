@@ -3,7 +3,7 @@ import Switch from '../../../common/Switch'
 import SegmentActions from '../../../../actions/SegmentActions'
 import {setTagSignatureMiddleware} from '../../../segments/utils/DraftMatecatUtils/tagModel'
 
-export const SPACE_PLACEHOLDER_STORAGE_KEY = 'spacePlaceholder'
+const SPACE_PLACEHOLDER_STORAGE_KEY = 'spacePlaceholder'
 
 // check space placeholder is active on init
 setTagSignatureMiddleware(
@@ -27,8 +27,11 @@ export const SpacePlaceholder = () => {
   return (
     <div className="options-box charscounter">
       <div className="option-description">
-        <h3>Space placeholder</h3>
-        <p>bla bla</p>
+        <h3>Show whitespace characters</h3>
+        <p>
+          Activate this option to have whitespaces replaced with a dot in the
+          source and target of segments and TM matches.
+        </p>
       </div>
       <div className="options-box-value">
         <Switch
