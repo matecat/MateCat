@@ -29,7 +29,8 @@ script:
   - |
     
     # load services
-    docker-compose -f docker/docker-compose-ci.yml up mysql redis > /dev/null 2>&1
+    docker-compose -f docker/docker-compose-ci.yml build mysql redis > /dev/null 2>&1
+    docker-compose -f docker/docker-compose-ci.yml create mysql redis > /dev/null 2>&1
     
     # keep logs for the base node
     docker-compose -f docker/docker-compose-ci.yml build base-node
