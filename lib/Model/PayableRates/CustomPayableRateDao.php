@@ -7,6 +7,7 @@ use DataAccess_AbstractDao;
 use Database;
 use Date\DateTimeUtil;
 use DateTime;
+use INIT;
 use PDO;
 
 class CustomPayableRateDao extends DataAccess_AbstractDao
