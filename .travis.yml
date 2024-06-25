@@ -2,25 +2,7 @@ os: linux
 dist: focal
 language: php
 php:
-  - 7.4.33
-
-addons:
-  apt:
-    packages:
-      - php-json
-      - php-xml
-      - php-curl
-      - php-mysql
-      - php-mbstring
-      - php-dev
-      - php-redis
-      - php-zip
-      - php-gd
-      - libzip-dev
-
-services:
-  - redis
-  - mysql
+  - 7.4
 
 branches:
   only:
@@ -92,14 +74,7 @@ script:
       
       export AWS_ACCESS_KEY_ID=${TEST_AWS_ACCESS_KEY_ID}
       export AWS_SECRET_ACCESS_KEY=${TEST_AWS_SECRET_ACCESS_KEY}
-      docker-compose -f docker/docker-compose-ci.yml build base-node test-node || exit 1
       
-      mysql -u root -h 127.0.0.1 -e "SET @@GLOBAL.sql_mode='NO_ENGINE_SUBSTITUTION';" || exit 1
-      mysql -u root -h 127.0.0.1 -e "SET @@GLOBAL.explicit_defaults_for_timestamp='ON';" || exit 1
-      mysql -u root -h 127.0.0.1 -e "SET @@GLOBAL.character_set_server='utf8';" || exit 1
-      mysql -u root -h 127.0.0.1 < tests/inc/unittest_matecat_local.sql || exit 1
-
-      docker-compose -f docker/docker-compose-ci.yml create test-node || exit 1
       docker-compose -f docker/docker-compose-ci.yml up test-node || exit 1
 
     fi
