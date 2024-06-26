@@ -7,21 +7,17 @@ import {flattenObject} from '../../utils/queryString'
  * @param {Array} segments
  * @param {string} [idJob=config.id_job]
  * @param {string} [password=config.password]
- * @param {string} [idClient=config.id_client]
- * @param {number} [revisionNumber=config.revisionNumber]
  * @returns {Promise<object>}
  */
 export const translateSegments = async (
   segments,
   idJob = config.id_job,
   password = config.password,
-  revisionNumber = config.revisionNumber,
 ) => {
   const dataParams = flattenObject({
     segments_id: segments,
     status: 'translated',
     client_id: config.id_client,
-    revision_number: revisionNumber,
   })
   const formData = new FormData()
 
