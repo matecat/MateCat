@@ -1,4 +1,6 @@
-<phpunit bootstrap="tests/test_helper.php"
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/5.7/phpunit.xsd"
+             bootstrap="tests/test_helper.php"
              colors="true"
              processIsolation="false"
              stopOnError="false"
@@ -17,4 +19,11 @@
             <directory>tests/unit/</directory>
         </testsuite>
     </testsuites>
+
+    <filter>
+        <whitelist processUncoveredFilesFromWhitelist="true">
+            <directory suffix=".php">./lib</directory>
+        </whitelist>
+    </filter>
+
 </phpunit>
