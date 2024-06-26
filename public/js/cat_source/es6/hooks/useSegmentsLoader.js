@@ -71,7 +71,8 @@ function useSegmentsLoader({
             current.thereAreNoItemsBefore = true
           if (
             isFilesObjectEmpty &&
-            SegmentStore.getLastSegmentId() === config.last_job_segment &&
+            parseInt(SegmentStore.getLastSegmentId()) ===
+              parseInt(config.last_job_segment) &&
             where === 'after'
           )
             current.thereAreNoItemsAfter = true
