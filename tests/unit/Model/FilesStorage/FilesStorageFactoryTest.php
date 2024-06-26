@@ -3,8 +3,9 @@
 use FilesStorage\FilesStorageFactory;
 use FilesStorage\FsFilesStorage;
 use FilesStorage\S3FilesStorage;
+use TestHelpers\AbstractTest;
 
-class FilesStorageFactoryTest extends PHPUnit_Framework_TestCase {
+class FilesStorageFactoryTest extends AbstractTest {
 
     /**
      * @test

@@ -1,6 +1,7 @@
 <?php
 
 use Teams\TeamStruct;
+use TestHelpers\AbstractTest;
 
 /**
  * Created by PhpStorm.
@@ -8,7 +9,7 @@ use Teams\TeamStruct;
  * Date: 16/02/2017
  * Time: 10:08
  */
-class TeamModelTest extends PHPUnit_Framework_TestCase {
+class TeamModelTest extends AbstractTest {
 
     /**
      * TODO: remove this test once we are able to test email

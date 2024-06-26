@@ -1,9 +1,10 @@
 <?php
 
-use Validator\GlossaryCSVValidatorObject;
+use TestHelpers\AbstractTest;
 use Validator\GlossaryCSVValidator;
+use Validator\GlossaryCSVValidatorObject;
 
-class GlossaryCSVValidatorTest extends PHPUnit_Framework_TestCase {
+class GlossaryCSVValidatorTest extends AbstractTest {
 
     public function testFiles()
     {

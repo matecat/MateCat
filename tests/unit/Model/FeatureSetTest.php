@@ -1,12 +1,14 @@
 <?php
 
+use TestHelpers\AbstractTest;
+
 /**
  * Created by PhpStorm.
  * User: fregini
  * Date: 09/06/2017
  * Time: 16:51
  */
-class FeatureSetTest extends PHPUnit_Framework_TestCase {
+class FeatureSetTest extends AbstractTest {
 
     function test_getSortedFeatures() {
         $featureSet = new FeatureSet();

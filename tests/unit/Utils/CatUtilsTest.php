@@ -1,6 +1,8 @@
 <?php
 
-class CatUtilsTest extends PHPUnit_Framework_TestCase {
+use TestHelpers\AbstractTest;
+
+class CatUtilsTest extends AbstractTest {
     /**
      * @throws Exception
      */

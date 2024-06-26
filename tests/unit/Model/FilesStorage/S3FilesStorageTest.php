@@ -1,9 +1,9 @@
 <?php
 
-use TestHelpers\AbstractTest;
 use FilesStorage\S3FilesStorage;
 use Matecat\SimpleS3\Client;
 use Predis\Connection\ConnectionException;
+use TestHelpers\AbstractTest;
 
 class S3FilesStorageTest extends AbstractTest {
 

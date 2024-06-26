@@ -2,8 +2,9 @@
 
 use Constants\ConversionHandlerStatus;
 use Conversion\ConvertedFileModel;
+use TestHelpers\AbstractTest;
 
-class ConvertFileModelTest extends PHPUnit_Framework_TestCase {
+class ConvertFileModelTest extends AbstractTest {
 
     function test_model() {
         $model = new ConvertedFileModel();

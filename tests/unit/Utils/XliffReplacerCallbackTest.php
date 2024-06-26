@@ -1,8 +1,9 @@
 <?php
 
+use TestHelpers\AbstractTest;
 use XliffReplacer\XliffReplacerCallback;
 
-class XliffReplacerCallbackTest extends PHPUnit_Framework_TestCase
+class XliffReplacerCallbackTest extends AbstractTest
 {
     /**
      * @throws Exception

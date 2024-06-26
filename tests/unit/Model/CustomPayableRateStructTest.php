@@ -1,6 +1,7 @@
 <?php
 
 use PayableRates\CustomPayableRateStruct;
+use TestHelpers\AbstractTest;
 
 /**
  * Created by PhpStorm.
@@ -8,7 +9,7 @@ use PayableRates\CustomPayableRateStruct;
  * Date: 09/06/2017
  * Time: 16:51
  */
-class CustomPayableRateStructTest extends PHPUnit_Framework_TestCase {
+class CustomPayableRateStructTest extends AbstractTest {
 
     /**
      * @test

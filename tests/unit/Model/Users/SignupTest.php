@@ -1,8 +1,9 @@
 <?php
 
+use TestHelpers\AbstractTest;
 use Users\SignupModel;
 
-class SignupTest extends PHPUnit_Framework_TestCase {
+class SignupTest extends AbstractTest {
 
     public function setup() {
         Database::obtain()->getConnection()->exec( 'DELETE FROM users' );

@@ -4,9 +4,9 @@ namespace unit;
 
 use FeatureSet;
 use LQA\SizeRestriction\SizeRestriction;
-use PHPUnit_Framework_TestCase;
+use TestHelpers\AbstractTest;
 
-class SizeRestrictionTest extends PHPUnit_Framework_TestCase {
+class SizeRestrictionTest extends AbstractTest {
 
     /**
      * @test
