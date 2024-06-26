@@ -11,6 +11,12 @@ import {DeepLGlossaryCreateRow} from './DeepLGlossaryCreateRow'
 import CatToolStore from '../../../../../stores/CatToolStore'
 import CatToolConstants from '../../../../../constants/CatToolConstants'
 import CatToolActions from '../../../../../actions/CatToolActions'
+import {DeleteResource} from '../DeleteResource'
+import {deleteDeepLGlossary} from '../../../../../api/deleteDeepLGlossary'
+import CreateProjectActions from '../../../../../actions/CreateProjectActions'
+import ModalsActions from '../../../../../actions/ModalsActions'
+import {ConfirmDeleteResourceProjectTemplates} from '../../../../modals/ConfirmDeleteResourceProjectTemplates'
+import {SCHEMA_KEYS} from '../../../../../hooks/useProjectTemplates'
 
 const COLUMNS_TABLE = [
   {name: 'Activate'},
@@ -22,21 +28,103 @@ const COLUMNS_TABLE = [
 export const DEEPL_GLOSSARY_CREATE_ROW_ID = 'createRow'
 
 export const DeepLGlossary = ({id, isCattoolPage = false}) => {
-  const {activeMTEngine, setActiveMTEngine} = useContext(SettingsPanelContext)
+  const {currentProjectTemplate, modifyingCurrentTemplate, projectTemplates} =
+    useContext(SettingsPanelContext)
 
-  const [isShowingRows, setIsShowingRows] = useState(
-    activeMTEngine.mtGlossaryProps?.isOpened ?? false,
-  )
+  const {mt: {extra: deeplGlossaryProps} = {}} = currentProjectTemplate ?? {}
+
+  const [isShowingRows, setIsShowingRows] = useState(false)
   const [rows, setRows] = useState()
+  const [deleteGlossaryRequest, setDeleteGlossaryRequest] = useState()
 
   const activeGlossaryRef = useRef()
-  activeGlossaryRef.current =
-    activeMTEngine.deeplGlossaryProps?.deepl_id_glossary
+  activeGlossaryRef.current = deeplGlossaryProps?.deepl_id_glossary
+
+  const deleteGlossary = useRef()
+  deleteGlossary.current = (glossary = deleteGlossaryRequest) => {
+    deleteDeepLGlossary({engineId: id, id: glossary.id})
+      .then((data) => {
+        if (data.id === glossary.id) {
+          setRows((prevState) => prevState.filter(({id}) => id !== glossary.id))
+
+          const templatesInvolved = projectTemplates
+            .filter(
+              (template) =>
+                template.mt?.extra?.deepl_id_glossary === glossary.id,
+            )
+            .map((template) => {
+              const mtObject = template.mt
+              const {deepl_id_glossary, ...extra} = mtObject.extra // eslint-disable-line
+
+              return {
+                ...template,
+                [SCHEMA_KEYS.mt]: {
+                  ...mtObject,
+                  extra: {
+                    ...extra,
+                    ...(deepl_id_glossary !== glossary.id && {
+                      deepl_id_glossary,
+                    }),
+                  },
+                },
+              }
+            })
+          CatToolActions.addNotification({
+            title: 'Glossary deleted',
+            type: 'success',
+            text: `The glossary (<b>${glossary.name}</b>) has been successfully deleted`,
+            position: 'br',
+            allowHtml: true,
+            timer: 5000,
+          })
+          CreateProjectActions.updateProjectTemplates({
+            templates: templatesInvolved,
+            modifiedPropsCurrentProjectTemplate: {
+              mt: templatesInvolved.find(({isTemporary}) => isTemporary)?.mt,
+            },
+          })
+        }
+      })
+      .catch(() => {
+        CatToolActions.addNotification({
+          title: 'Glossary delete error',
+          type: 'error',
+          text: 'Error deleting glossary',
+          position: 'br',
+          allowHtml: true,
+          timer: 5000,
+        })
+      })
+      .finally(() => setDeleteGlossaryRequest())
+  }
+
+  const showConfirmDelete = useRef()
+  showConfirmDelete.current = (glossary) => {
+    const templatesInvolved = projectTemplates.filter(
+      (template) => template.mt?.extra?.deepl_id_glossary === glossary.id,
+    )
+
+    if (templatesInvolved.length) {
+      ModalsActions.showModalComponent(
+        ConfirmDeleteResourceProjectTemplates,
+        {
+          projectTemplatesInvolved: templatesInvolved,
+          successCallback: () => deleteGlossary.current(glossary),
+          content:
+            'The DeepL glossary you are about to delete is used in the following project creation template(s):',
+        },
+        'Confirm deletion',
+      )
+    } else {
+      setDeleteGlossaryRequest(glossary)
+    }
+  }
 
   const updateRowsState = useCallback(
     (value) => {
       setRows((prevState) => {
         const newValue = typeof value === 'function' ? value(prevState) : value
+        if (!Array.isArray(newValue)) return prevState
 
         return newValue.map((row) => ({
           ...row,
@@ -54,12 +142,25 @@ export const DeepLGlossary = ({id, isCattoolPage = false}) => {
                   setRows: updateRowsState,
                   isReadOnly: isCattoolPage,
                 }}
+                deleteGlossaryConfirm={showConfirmDelete.current}
               />
             ),
+          ...(deleteGlossaryRequest &&
+            deleteGlossaryRequest.id === row.id && {
+              isExpanded: true,
+              extraNode: (
+                <DeleteResource
+                  row={deleteGlossaryRequest}
+                  onClose={() => setDeleteGlossaryRequest()}
+                  onConfirm={deleteGlossary.current}
+                  type={'glossary'}
+                />
+              ),
+            }),
         }))
       })
     },
-    [id, isCattoolPage],
+    [id, isCattoolPage, deleteGlossaryRequest],
   )
 
   useEffect(() => {
@@ -117,16 +218,58 @@ export const DeepLGlossary = ({id, isCattoolPage = false}) => {
   }, [id, isCattoolPage, updateRowsState])
 
   useEffect(() => {
-    if (isCattoolPage || !rows) return
+    if (!isCattoolPage) {
+      const deeplIdGlossary = activeGlossaryRef.current
 
-    setActiveMTEngine((prevState) => ({
-      ...prevState,
-      deeplGlossaryProps: {
-        ...prevState.deeplGlossaryProps,
-        deepl_id_glossary: rows.find(({isActive}) => isActive)?.id,
-      },
-    }))
-  }, [rows, isCattoolPage, setActiveMTEngine])
+      updateRowsState((prevState) =>
+        Array.isArray(prevState)
+          ? prevState.map(({name, id: idRow}) => {
+              const isActive =
+                typeof deeplIdGlossary !== 'undefined'
+                  ? idRow === deeplIdGlossary
+                  : false
+
+              return {
+                id: idRow,
+                name,
+                isActive,
+              }
+            })
+          : prevState,
+      )
+    }
+  }, [currentProjectTemplate.id, isCattoolPage, updateRowsState])
+
+  useEffect(() => {
+    if (
+      isCattoolPage ||
+      !rows ||
+      (rows.length === 1 &&
+        rows.some(({id}) => id === DEEPL_GLOSSARY_CREATE_ROW_ID))
+    )
+      return
+
+    const activeRow = rows.find(({isActive}) => isActive)
+
+    modifyingCurrentTemplate((prevTemplate) => {
+      const prevMt = prevTemplate.mt
+      const prevMTExtra = prevMt?.extra ?? {}
+      const {deepl_id_glossary, ...deepLExtra} = prevMTExtra //eslint-disable-line
+
+      return {
+        ...prevTemplate,
+        mt: {
+          ...prevMt,
+          extra: {
+            ...deepLExtra,
+            ...(activeRow && {
+              deepl_id_glossary: activeRow.id,
+            }),
+          },
+        },
+      }
+    })
+  }, [rows, isCattoolPage, modifyingCurrentTemplate])
 
   const addGlossary = () => {
     const row = {
@@ -144,13 +287,13 @@ export const DeepLGlossary = ({id, isCattoolPage = false}) => {
   const onShowingRows = () => {
     setIsShowingRows((prevState) => !prevState)
     if (!isCattoolPage) {
-      setActiveMTEngine((prevState) => ({
-        ...prevState,
-        deeplGlossaryProps: {
-          ...prevState.deeplGlossaryProps,
-          isOpened: !isShowingRows,
-        },
-      }))
+      // setActiveMTEngine((prevState) => ({
+      //   ...prevState,
+      //   deeplGlossaryProps: {
+      //     ...prevState.deeplGlossaryProps,
+      //     isOpened: !isShowingRows,
+      //   },
+      // }))
     }
   }
 
@@ -162,6 +305,7 @@ export const DeepLGlossary = ({id, isCattoolPage = false}) => {
         <button
           className={`${isShowingRows ? 'rotate' : ''}`}
           onClick={onShowingRows}
+          title="Glossary options"
         >
           <ArrowDown />
           Glossary options

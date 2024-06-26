@@ -1,12 +1,13 @@
-import React, {useRef, useState} from 'react'
+import React, {useEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import useExport, {EXPORT_TYPE} from './hooks/useExport'
 
 import Checkmark from '../../../../../../../img/icons/Checkmark'
 import Close from '../../../../../../../img/icons/Close'
+import CatToolActions from '../../../../actions/CatToolActions'
 
 export const ExportTMX = ({row, onClose}) => {
-  const {email, status, onSubmit, onReset, onChange} = useExport({
+  const {email, status, onSubmit, onReset} = useExport({
     type: EXPORT_TYPE.tmx,
     row,
     onClose,
@@ -17,11 +18,23 @@ export const ExportTMX = ({row, onClose}) => {
 
   const isFormDisabled = false
   const isErrorExport = status && status.errors
-  const isSuccessfullExport = status && status.successfull
+
+  useEffect(() => {
+    if (status && status.successfull) {
+      const notification = {
+        title: 'Request submitted',
+        text: `You should receive the link at ${email}`,
+        type: 'success',
+        position: 'br',
+        allowHtml: true,
+        timer: 5000,
+      }
+      CatToolActions.addNotification(notification)
+    }
+  }, [status])
 
   return (
     <div className="translation-memory-glossary-tab-export">
-      {!isSuccessfullExport ? (
         <form
           ref={formRef}
           className={`action-form${isErrorExport ? ' action-form-error' : ''}`}
@@ -51,21 +64,15 @@ export const ExportTMX = ({row, onClose}) => {
               Confirm
             </button>
 
-            <button
-              type="reset"
-              className="ui button orange close-button"
-              disabled={isFormDisabled}
-            >
-              <Close size={18} />
-            </button>
-          </div>
-        </form>
-      ) : (
-        <div className="export-successfull">
-          <span>You should receive the link at {email}</span>
-          <span>Request submitted</span>
+          <button
+            type="reset"
+            className="ui button orange close-button"
+            disabled={isFormDisabled}
+          >
+            <Close size={18} />
+          </button>
         </div>
-      )}
+      </form>
     </div>
   )
 }
