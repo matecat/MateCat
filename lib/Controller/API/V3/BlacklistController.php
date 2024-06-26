@@ -15,6 +15,7 @@ use Exception;
 use Exceptions\NotFoundException;
 use Features\QaCheckBlacklist\Utils\BlacklistUtils;
 use Glossary\Blacklist\BlacklistDao;
+use INIT;
 use RedisHandler;
 use WorkerClient;
 
@@ -107,7 +108,7 @@ class BlacklistController extends KleinController {
         }
 
         // validate file size
-        if ( $this->file[ 'size' ] > \INIT::$BLACKLIST_FILE_SIZE_MAX ) {
+        if ( $this->file[ 'size' ] > INIT::$BLACKLIST_FILE_SIZE_MAX ) {
             $this->returnError( 'Filesize limit is 2Mb' );
         }
 

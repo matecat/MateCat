@@ -8,6 +8,7 @@
 
 namespace Features\ReviewExtended\Decorator;
 
+use INIT;
 use LQA\ChunkReviewDao;
 use LQA\ModelStruct;
 
@@ -41,7 +42,7 @@ class CatDecorator extends \AbstractDecorator {
         $this->template->project_type         = null;
         $this->template->segmentFilterEnabled = true;
 
-        $this->template->quality_report_href = \INIT::$BASEURL . "revise-summary/{$this->controller->getChunk()->id}-{$this->controller->getChunk()->password}";
+        $this->template->quality_report_href = INIT::$BASEURL . "revise-summary/{$this->controller->getChunk()->id}-{$this->controller->getChunk()->password}";
 
         $this->template->showReplaceOptionsInSearch = true;
 

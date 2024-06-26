@@ -24,7 +24,7 @@ class JSONRequestValidator extends Base {
      * @throws Exception
      */
     protected function _validate() {
-        if($this->request->headers()->get('Content-Type') !== 'application/json'){
+        if ( !preg_match( '~^application/json~', $this->request->headers()->get( 'Content-Type' ) ) ) {
             throw new Exception('Content type provided not valid (application/json expected)', 405);
         }
     }

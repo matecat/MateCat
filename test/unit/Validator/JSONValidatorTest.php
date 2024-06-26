@@ -1,5 +1,9 @@
 <?php
+require( '/home/hashashiyyin/PhpstormProjects/matecat/inc/Bootstrap.php' );
+Bootstrap::start();
 
+use Validator\JSONValidator;
+use Validator\JSONValidatorObject;
 class JSONValidatorTest extends PHPUnit_Framework_TestCase {
 
     public function testInvalidSchema()
@@ -7,7 +11,7 @@ class JSONValidatorTest extends PHPUnit_Framework_TestCase {
         $jsonSchema = file_get_contents( __DIR__ . '/../../support/files/json/schema/invalid.json' );
 
         try {
-            $validator = new \Validator\JSONValidator($jsonSchema);
+            $validator = new JSONValidator($jsonSchema);
         } catch (\Exception $exception){
             $this->assertEquals($exception->getMessage(), 'The JSON schema is not valid');
         }
@@ -18,9 +22,9 @@ class JSONValidatorTest extends PHPUnit_Framework_TestCase {
         $jsonSchema = file_get_contents( __DIR__ . '/../../support/files/json/schema/schema_1.json' );
         $invalidFile = file_get_contents(__DIR__.'/../../support/files/json/files/invalid.json');
 
-        $validatorObject = new \Validator\JSONValidatorObject();
+        $validatorObject = new JSONValidatorObject();
         $validatorObject->json = $invalidFile;
-        $validator = new \Validator\JSONValidator($jsonSchema);
+        $validator = new JSONValidator($jsonSchema);
         $validator->validate($validatorObject);
 
         $this->assertFalse($validator->isValid());
@@ -31,12 +35,12 @@ class JSONValidatorTest extends PHPUnit_Framework_TestCase {
         $jsonSchema = file_get_contents( __DIR__ . '/../../support/files/json/schema/schema_1.json' );
         $invalidFile = file_get_contents(__DIR__.'/../../support/files/json/files/invalid_maxItems.json');
 
-        $validatorObject = new \Validator\JSONValidatorObject();
+        $validatorObject = new JSONValidatorObject();
         $validatorObject->json = $invalidFile;
-        $validator = new \Validator\JSONValidator($jsonSchema);
+        $validator = new JSONValidator($jsonSchema);
         $validator->validate($validatorObject);
 
-        $error = $validator->getErrors()[0]->error;
+        $error = $validator->getExceptions()[0]->error;
 
         $this->assertFalse($validator->isValid());
         $this->assertEquals("JSON Validation Error: Too many items in array", $error->getMessage());
@@ -47,9 +51,9 @@ class JSONValidatorTest extends PHPUnit_Framework_TestCase {
         $jsonSchema = file_get_contents( __DIR__ . '/../../support/files/json/schema/schema_1.json' );
         $invalidFile = file_get_contents(__DIR__.'/../../support/files/json/files/valid.json');
 
-        $validatorObject = new \Validator\JSONValidatorObject();
+        $validatorObject = new JSONValidatorObject();
         $validatorObject->json = $invalidFile;
-        $validator = new \Validator\JSONValidator($jsonSchema);
+        $validator = new JSONValidator($jsonSchema);
         $validator->validate($validatorObject);
 
         $this->assertTrue($validator->isValid());
@@ -57,12 +61,12 @@ class JSONValidatorTest extends PHPUnit_Framework_TestCase {
 
     public function testValidUberQAModelFile()
     {
-        $jsonSchema = file_get_contents( __DIR__ . '/../../../inc/qa_model/schema.json' );
+        $jsonSchema = file_get_contents( __DIR__ . '/../../../inc/qa_model.json' );
         $uberQaModel = file_get_contents(__DIR__.'/../../support/files/json/files/uber_qa_model.json');
 
-        $validatorObject = new \Validator\JSONValidatorObject();
+        $validatorObject = new JSONValidatorObject();
         $validatorObject->json = $uberQaModel;
-        $validator = new \Validator\JSONValidator($jsonSchema);
+        $validator = new JSONValidator($jsonSchema);
         $validator->validate($validatorObject);
 
         $this->assertTrue($validator->isValid());

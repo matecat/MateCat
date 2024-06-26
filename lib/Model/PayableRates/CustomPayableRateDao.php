@@ -7,6 +7,7 @@ use DataAccess_AbstractDao;
 use Database;
 use Date\DateTimeUtil;
 use DateTime;
+use INIT;
 use PDO;
 
 class CustomPayableRateDao extends DataAccess_AbstractDao
@@ -252,12 +253,12 @@ class CustomPayableRateDao extends DataAccess_AbstractDao
     {
         $validatorObject = new \Validator\JSONValidatorObject();
         $validatorObject->json = $json;
-        $jsonSchema = file_get_contents( __DIR__ . '/../../../inc/validation/schema/payable_rate.json' );
+        $jsonSchema = file_get_contents( INIT::$ROOT . '/inc/validation/schema/payable_rate.json' );
         $validator = new \Validator\JSONValidator($jsonSchema);
         $validator->validate($validatorObject);
 
         if(!$validator->isValid()){
-            throw $validator->getErrors()[0]->error;
+            throw $validator->getExceptions()[0]->error;
         }
     }
 

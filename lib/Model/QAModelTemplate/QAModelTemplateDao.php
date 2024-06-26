@@ -5,6 +5,11 @@ namespace QAModelTemplate;
 use DataAccess_AbstractDao;
 use Date\DateTimeUtil;
 use DateTime;
+use Exception;
+use INIT;
+use Swaggest\JsonSchema\InvalidValue;
+use Validator\JSONValidator;
+use Validator\JSONValidatorObject;
 
 class QAModelTemplateDao extends DataAccess_AbstractDao
 {
@@ -17,8 +22,8 @@ class QAModelTemplateDao extends DataAccess_AbstractDao
      * @param null $uid
      *
      * @return QAModelTemplateStruct
-     * @throws \Swaggest\JsonSchema\InvalidValue
-     * @throws \Exception
+     * @throws InvalidValue
+     * @throws Exception
      */
     public static function createFromJSON($json, $uid = null)
     {
@@ -36,19 +41,19 @@ class QAModelTemplateDao extends DataAccess_AbstractDao
 
     /**
      * @param $json
-     * @throws \Swaggest\JsonSchema\InvalidValue
-     * @throws \Exception
+     * @throws InvalidValue
+     * @throws Exception
      */
     private static function validateJSON($json)
     {
-        $validatorObject = new \Validator\JSONValidatorObject();
+        $validatorObject = new JSONValidatorObject();
         $validatorObject->json = $json;
-        $jsonSchema = file_get_contents( __DIR__ . '/../../../inc/validation/schema/qa_model.json' );
-        $validator = new \Validator\JSONValidator($jsonSchema);
+        $jsonSchema = file_get_contents( INIT::$ROOT . '/inc/validation/schema/qa_model.json' );
+        $validator = new JSONValidator($jsonSchema);
         $validator->validate($validatorObject);
 
         if(!$validator->isValid()){
-            throw $validator->getErrors()[0]->error;
+            throw $validator->getExceptions()[0]->error;
         }
     }
 
@@ -57,8 +62,8 @@ class QAModelTemplateDao extends DataAccess_AbstractDao
      * @param                       $json
      *
      * @return QAModelTemplateStruct
-     * @throws \Swaggest\JsonSchema\InvalidValue
-     * @throws \Exception
+     * @throws InvalidValue
+     * @throws Exception
      */
     public static function editFromJSON(QAModelTemplateStruct $QAModelTemplateStruct, $json)
     {
@@ -71,7 +76,7 @@ class QAModelTemplateDao extends DataAccess_AbstractDao
     /**
      * @param $id
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public static function remove($id)
     {
@@ -135,7 +140,7 @@ class QAModelTemplateDao extends DataAccess_AbstractDao
             ] );
 
             $conn->commit();
-        } catch (\Exception $exception){
+        } catch ( Exception $exception){
             $conn->rollBack();
 
             throw $exception;
@@ -145,11 +150,11 @@ class QAModelTemplateDao extends DataAccess_AbstractDao
     /**
      * @param $uid
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     private static function getDefaultTemplate($uid)
     {
-        $defaultTemplate = file_get_contents( __DIR__ . '/../../../inc/qa_model.json' );
+        $defaultTemplate = file_get_contents( INIT::$ROOT . '/inc/qa_model.json' );
         $defaultTemplateModel = json_decode($defaultTemplate, true);
 
         $categories = [];
@@ -350,7 +355,7 @@ class QAModelTemplateDao extends DataAccess_AbstractDao
      * @param QAModelTemplateStruct $modelTemplateStruct
      *
      * @return QAModelTemplateStruct
-     * @throws \Exception
+     * @throws Exception
      */
     public static function save(QAModelTemplateStruct $modelTemplateStruct)
     {
@@ -425,7 +430,7 @@ class QAModelTemplateDao extends DataAccess_AbstractDao
             $modelTemplateStruct->id = $QAModelTemplateId;
 
             return $modelTemplateStruct;
-        } catch (\Exception $exception){
+        } catch ( Exception $exception){
             $conn->rollBack();
 
             throw $exception;
@@ -436,7 +441,7 @@ class QAModelTemplateDao extends DataAccess_AbstractDao
      * @param QAModelTemplateStruct $modelTemplateStruct
      *
      * @return mixed
-     * @throws \Exception
+     * @throws Exception
      */
     public static function update(QAModelTemplateStruct $modelTemplateStruct)
     {
@@ -518,7 +523,7 @@ class QAModelTemplateDao extends DataAccess_AbstractDao
             $conn->commit();
 
             return $modelTemplateStruct;
-        } catch (\Exception $exception){
+        } catch ( Exception $exception){
             $conn->rollBack();
 
             throw $exception;

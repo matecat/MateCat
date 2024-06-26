@@ -10,5 +10,5 @@
 namespace Features\ReviewExtended;
 
 interface ISegmentTranslationModel {
-    public function evaluateAndGetChunkReviewTranslationEventTransition();
+    public function evaluateAndGetChunkReviewTranslationEventTransition(): ChunkReviewTranslationEventTransition;
 }

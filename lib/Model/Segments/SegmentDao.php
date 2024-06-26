@@ -98,11 +98,11 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
      * @param $id_job
      * @param $password
      * @param $id_segment
-     * @param $ttl (default 86400 = 24 hours)
+     * @param int $ttl (default 86400 = 24 hours)
      *
-     * @return \Segments_SegmentStruct|\DataAccess_IDaoStruct
+     * @return Segments_SegmentStruct|null
      */
-    function getByChunkIdAndSegmentId( $id_job, $password, $id_segment, $ttl = 86400 ) {
+    function getByChunkIdAndSegmentId( $id_job, $password, $id_segment, int $ttl = 86400 ): ?Segments_SegmentStruct {
 
         $query = " SELECT segments.* FROM segments " .
                 " INNER JOIN files_job fj USING (id_file) " .
@@ -116,13 +116,16 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
         $conn    = Database::obtain()->getConnection();
         $stmt    = $conn->prepare( $query );
 
+        /**
+         * @var $fetched Segments_SegmentStruct[]
+         */
         $fetched = $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Segments_SegmentStruct(), [
                 'id_job'     => $id_job,
                 'password'   => $password,
                 'id_segment' => $id_segment
         ] );
 
-        return isset( $fetched[ 0 ] ) ? $fetched[ 0 ] : null;
+        return $fetched[ 0 ] ?? null;
     }
 
     /**

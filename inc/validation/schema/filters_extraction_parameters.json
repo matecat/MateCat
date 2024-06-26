@@ -1,0 +1,193 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "json": {
+      "type": "object",
+      "properties": {
+        "extract_arrays": {
+          "type": "boolean",
+          "nullable": true,
+          "default": false
+        },
+        "escape_forward_slashes": {
+          "type": "boolean",
+          "nullable":  true,
+          "default": false
+        },
+        "translate_keys": {
+          "type": "array",
+          "nullable":  true
+        },
+        "do_not_translate_keys": {
+          "type": "array",
+          "nullable":  true
+        },
+        "context_keys": {
+          "type": "array",
+          "nullable":  true
+        }
+      },
+      "additionalProperties": false
+    },
+    "xml": {
+      "type": "object",
+      "properties":  {
+        "preserve_whitespace": {
+          "type": "boolean",
+          "nullable":  true,
+          "default": false
+        },
+        "translate_elements": {
+          "type": "array",
+          "nullable":  true
+        },
+        "do_not_translate_elements": {
+          "type": "array",
+          "nullable":  true
+        },
+        "include_attributes": {
+          "type": "array",
+          "nullable":  true
+        }
+      },
+      "additionalProperties": false
+    },
+    "yaml": {
+      "type": "object",
+      "properties":  {
+        "extract_arrays": {
+          "type": "boolean",
+          "nullable":  true,
+          "default": false
+        },
+        "translate_keys": {
+          "type": "array",
+          "nullable":  true
+        },
+        "do_not_translate_keys": {
+          "type": "array",
+          "nullable":  true
+        }
+      },
+      "additionalProperties": false
+    },
+    "ms_word": {
+      "type": "object",
+      "properties":  {
+        "extract_doc_properties": {
+          "type": "boolean",
+          "nullable":  true,
+          "default": false
+        },
+        "extract_comments": {
+          "type": "boolean",
+          "nullable":  true,
+          "default": false
+        },
+        "extract_headers_footers": {
+          "type": "boolean",
+          "nullable":  true,
+          "default": false
+        },
+        "extract_hidden_text": {
+          "type": "boolean",
+          "nullable":  true,
+          "default": false
+        },
+        "accept_revisions": {
+          "type": "boolean",
+          "nullable":  true,
+          "default": false
+        },
+        "exclude_styles": {
+          "type": "array",
+          "nullable":  true
+        },
+        "exclude_text_colors": {
+          "type": "array",
+          "nullable":  true
+        },
+        "exclude_highlight_colors": {
+          "type": "array",
+          "nullable":  true
+        }
+      },
+      "additionalProperties": false
+    },
+    "ms_excel": {
+      "type": "object",
+      "properties":  {
+        "extract_doc_properties": {
+          "type": "boolean",
+          "nullable":  true,
+          "default": false
+        },
+        "extract_comments": {
+          "type": "boolean",
+          "nullable":  true,
+          "default": false
+        },
+        "extract_hidden_cells": {
+          "type": "boolean",
+          "nullable":  true,
+          "default": false
+        },
+        "extract_diagrams": {
+          "type": "boolean",
+          "nullable":  true,
+          "default": false
+        },
+        "extract_drawings": {
+          "type": "boolean",
+          "nullable":  true,
+          "default": false
+        },
+        "extract_sheet_names": {
+          "type": "boolean",
+          "nullable":  true,
+          "default": false
+        },
+        "exclude_text_colors": {
+          "type": "array",
+          "nullable":  true
+        },
+        "exclude_columns": {
+          "type": "array",
+          "nullable":  true
+        }
+      },
+      "additionalProperties": false
+    },
+    "ms_powerpoint": {
+      "type": "object",
+      "properties":  {
+        "extract_doc_properties": {
+          "type": "boolean",
+          "nullable":  true,
+          "default": false
+        },
+        "extract_comments": {
+          "type": "boolean",
+          "nullable":  true,
+          "default": false
+        },
+        "extract_hidden_slides": {
+          "type": "boolean",
+          "nullable":  true,
+          "default": false
+        },
+        "extract_notes": {
+          "type": "boolean",
+          "nullable":  true,
+          "default": false
+        },
+        "translate_slides": {
+          "type": "array",
+          "nullable":  true
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

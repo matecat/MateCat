@@ -306,4 +306,12 @@ abstract class KleinController implements IController {
     protected function afterValidate() {
 
     }
+
+    /**
+     * @return false|int
+     */
+    protected function isJsonRequest()
+    {
+        return preg_match( '~^application/json~', $this->request->headers()->get( 'Content-Type' ) ) ;
+    }
 }

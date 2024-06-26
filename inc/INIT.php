@@ -60,7 +60,6 @@ class INIT {
      */
     public static $TRACKING_CODES_VIEW_PATH = "";
 
-    public static $QUEUE_NAME                   = "matecat_analysis_queue";
     public static $COMMENTS_ENABLED             = true;
     public static $SSE_NOTIFICATIONS_QUEUE_NAME = "/topic/matecat_sse_notifications";
     public static $SSE_BASE_URL;
@@ -93,9 +92,6 @@ class INIT {
     public static $DEFAULT_NUM_RESULTS_FROM_TM;
     public static $THRESHOLD_MATCH_TM_NOT_TO_SHOW;
     public static $TIME_TO_EDIT_ENABLED;
-    public static $DEFAULT_FILE_TYPES;
-    public static $CONVERSION_FILE_TYPES;
-    public static $CONVERSION_FILE_TYPES_PARTIALLY_SUPPORTED;
     public static $AUTHSECRET;
     public static $AUTHSECRET_PATH;
     public static $REFERENCE_REPOSITORY;
@@ -122,20 +118,6 @@ class INIT {
     public static $OPEN_AI_MODEL;
     public static $OPEN_AI_TIMEOUT;
     public static $OPEN_AI_MAX_TOKENS;
-    public static $OPEN_AI_MAX_REQUEST_TOKENS;
-
-    /**
-     * DQF configuration
-     *
-     */
-    public static $DQF_BASE_URL;
-    public static $DQF_ID_PREFIX = '';
-    public static $DQF_API_KEY;
-    public static $DQF_ENCRYPTION_KEY;
-    public static $DQF_ENCRYPTION_IV;
-
-    public static $DQF_GENERIC_USERNAME;
-    public static $DQF_GENERIC_PASSWORD;
 
     /**
      * We proose that lxq_server is in a configuration file
@@ -206,7 +188,6 @@ class INIT {
     /**
      * The MateCat Version
      */
-    //TODO: Rename variable to MATECAT_VERSION
     public static $BUILD_NUMBER;
 
     /**
@@ -227,14 +208,7 @@ class INIT {
      */
     public static $DEFAULT_TM_KEY = '';
 
-
     public static $ENABLED_BROWSERS = [ 'applewebkit', 'chrome', 'safari', 'edge', 'firefox' ]; 
-
-    // sometimes the browser declare to be Mozilla but does not provide a valid Name (e.g. Safari).
-    // This occurs especially in mobile environment. As an example, when you try to open a link from within
-    // the GMail app, it redirect to an internal browser that does not declare a valid user agent
-    // In this case we will show a notice on the top of the page instead of deny the access
-    public static $UNTESTED_BROWSERS = [ 'mozillageneric' ];
 
     /**
      * If you don't have a client id and client secret, please visit
@@ -320,8 +294,6 @@ class INIT {
         self::$MIME_TYPES = include( 'Mime2Extension.php' );
     }
 
-    public static $SPELL_CHECK_TRANSPORT_TYPE = 'shell';
-    public static $SPELL_CHECK_ENABLED        = false;
     public static $SUPPORTED_FILE_TYPES       = [
             'Office'              => [
                     'pages'   => [ '', '', 'extdoc' ],
@@ -427,8 +399,6 @@ class INIT {
             'indd' => [ '', "Try converting to INX" ]
     ];
 
-    public static $DEPRECATE_LEGACY_XLIFFS = true;
-
     /*
      * The maximum filename length accepted.
      * Usually OSes accept names of 255 characters at most.
@@ -437,7 +407,7 @@ class INIT {
      */
     public static $MAX_FILENAME_LENGTH = 210;
 
-    public static $AUTOLOAD_PLUGINS = [];
+    public static $AUTOLOAD_PLUGINS = [ "second_pass_review" ];
 
     /**
      * Definitions for the asynchronous task runner

@@ -53,7 +53,7 @@ class AnalysisFile implements MatchContainerInterface, JsonSerializable {
         $this->id_file_part  = $id_file_part;
         $this->name          = $name;
         $this->original_name = $original_name;
-        foreach ( MatchConstants::$forValue as $matchType ) {
+        foreach ( MatchConstants::forValue as $matchType ) {
             $this->matches[ $matchType ] = AnalysisMatch::forName( $matchType );
         }
     }

@@ -39,14 +39,9 @@ trait ProjectWordCount {
                     password,
                     SUM(eq_word_count) AS eq_wc,
                     SUM(standard_word_count) AS st_wc
-                    , SUM( IF( IFNULL( eq_word_count, -1 ) = -1, raw_word_count, eq_word_count) ) as TOTAL
+                    , SUM( IF( COALESCE( eq_word_count, 0 ) = 0, raw_word_count, eq_word_count) ) as TOTAL
                     , COUNT( s.id ) AS project_segments,
-                    SUM(
-                        CASE
-                            WHEN st.standard_word_count != 0 THEN IF( st.tm_analysis_status = 'DONE', 1, 0 )
-                            WHEN st.standard_word_count = 0 THEN 1
-                        END
-                    ) AS num_analyzed
+                    SUM( IF( st.tm_analysis_status IN( 'SKIPPED', 'DONE' ), 1, 0 ) ) AS num_analyzed
                 FROM segment_translations st
                 JOIN segments s ON s.id = id_segment
                 INNER JOIN jobs j ON j.id=st.id_job

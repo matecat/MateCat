@@ -648,7 +648,8 @@ header {
                                 font-size: 14px;
                                 background: #ffffff;
                                 color: #787878;
-                                box-shadow: 0 0 0 #e0e0e0,
+                                box-shadow:
+                                  0 0 0 #e0e0e0,
                                   0 0 2px rgba(0, 0, 0, 0.12),
                                   0 2px 4px rgba(0, 0, 0, 0.24) !important;
                                 max-height: 300px;
@@ -845,7 +846,9 @@ header {
     .filtered {
       .ui.basic.button {
         background-color: #ffffff !important;
-        box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12),
+        box-shadow:
+          0 0 0 #e0e0e0,
+          0 0 2px rgba(0, 0, 0, 0.12),
           0 2px 4px rgba(0, 0, 0, 0.24) !important;
         color: #000000 !important;
         padding: 9px 20px 9px 15px;
@@ -864,7 +867,9 @@ header {
     .active {
       .ui.basic.button {
         background: transparent none !important;
-        box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12),
+        box-shadow:
+          0 0 0 #e0e0e0,
+          0 0 2px rgba(0, 0, 0, 0.12),
           0 2px 4px rgba(0, 0, 0, 0.24) !important;
         color: #000000 !important;
         padding: 9px 20px 9px 15px;

@@ -26,7 +26,7 @@ function route( $path, $method, $controller, $action ) {
     } );
 }
 
-$klein->onError( function ( Klein $klein, $err_msg, $err_type, Exception $exception ) {
+$klein->onError( function ( Klein $klein, $err_msg, $err_type,  $exception ) {
     // TODO: still need to catch fatal errors here with 500 code
     $klein->response()->noCache();
 

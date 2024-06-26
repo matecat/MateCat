@@ -10,6 +10,8 @@ use PayableRates\CustomPayableRateStruct;
 use ProjectQueue\Queue;
 use QAModelTemplate\QAModelTemplateStruct;
 use Validator\EngineValidator;
+use Validator\JSONValidator;
+use Validator\JSONValidatorObject;
 use Validator\MMTValidator;
 
 class createProjectController extends ajaxController {
@@ -33,6 +35,8 @@ class createProjectController extends ajaxController {
     private $due_date;
     private $metadata;
     private $dialect_strict;
+    private $filters_extraction_parameters;
+    private $xliff_parameters;
 
     /**
      * @var QAModelTemplateStruct
@@ -87,6 +91,8 @@ class createProjectController extends ajaxController {
                 'project_completion' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ], // features customization
                 'get_public_matches' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ], // disable public TM matches
                 'dialect_strict'    => [ 'filter' => FILTER_SANITIZE_STRING ],
+                'filters_extraction_parameters' => [ 'filter' => FILTER_SANITIZE_STRING ],
+                'xliff_parameters' => [ 'filter' => FILTER_SANITIZE_STRING ],
 
                 'qa_model_template_id'       => [ 'filter' => FILTER_VALIDATE_INT ],
                 'payable_rate_template_id'   => [ 'filter' => FILTER_VALIDATE_INT ],
@@ -188,6 +194,8 @@ class createProjectController extends ajaxController {
         $this->__validateQaModelTemplate();
         $this->__validatePayableRateTemplate();
         $this->__validateDialectStrictParam();
+        $this->__validateFiltersExtractionParameters();
+        $this->__validateXliffParameters();
         $this->__appendFeaturesToProject();
         $this->__generateTargetEngineAssociation();
         if ( $this->userIsLogged ) {
@@ -306,27 +314,27 @@ class createProjectController extends ajaxController {
 
         $projectStructure = $projectManager->getProjectStructure();
 
-        $projectStructure[ 'project_name' ]                 = $this->project_name;
-        $projectStructure[ 'private_tm_key' ]               = $this->private_tm_key;
-        $projectStructure[ 'uploadToken' ]                  = $_COOKIE[ 'upload_session' ];
-        $projectStructure[ 'array_files' ]                  = $arFiles; //list of file name
-        $projectStructure[ 'array_files_meta' ]             = $arMeta; //list of file metadata
-        $projectStructure[ 'source_language' ]              = $this->source_lang;
-        $projectStructure[ 'target_language' ]              = explode( ',', $this->target_lang );
-        $projectStructure[ 'job_subject' ]                  = $this->job_subject;
-        $projectStructure[ 'mt_engine' ]                    = $this->mt_engine;
-        $projectStructure[ 'tms_engine' ]                   = $this->tms_engine;
-        $projectStructure[ 'status' ]                       = Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
-        $projectStructure[ 'lang_detect_files' ]            = $this->lang_detect_files;
-        $projectStructure[ 'skip_lang_validation' ]         = true;
-        $projectStructure[ 'pretranslate_100' ]             = $this->pretranslate_100;
+        $projectStructure[ 'project_name' ]                  = $this->project_name;
+        $projectStructure[ 'private_tm_key' ]                = $this->private_tm_key;
+        $projectStructure[ 'uploadToken' ]                   = $_COOKIE[ 'upload_session' ];
+        $projectStructure[ 'array_files' ]                   = $arFiles; //list of file name
+        $projectStructure[ 'array_files_meta' ]              = $arMeta; //list of file metadata
+        $projectStructure[ 'source_language' ]               = $this->source_lang;
+        $projectStructure[ 'target_language' ]               = explode( ',', $this->target_lang );
+        $projectStructure[ 'job_subject' ]                   = $this->job_subject;
+        $projectStructure[ 'mt_engine' ]                     = $this->mt_engine;
+        $projectStructure[ 'tms_engine' ]                    = $this->tms_engine;
+        $projectStructure[ 'status' ]                        = Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
+        $projectStructure[ 'lang_detect_files' ]             = $this->lang_detect_files;
+        $projectStructure[ 'skip_lang_validation' ]          = true;
+        $projectStructure[ 'pretranslate_100' ]              = $this->pretranslate_100;
         $projectStructure[ 'pretranslate_101' ]             = $this->pretranslate_101;
-        $projectStructure[ 'dialect_strict' ]               = $this->dialect_strict;
-        $projectStructure[ 'only_private' ]                 = $this->only_private;
-        $projectStructure[ 'due_date' ]                     = $this->due_date;
-        $projectStructure[ 'target_language_mt_engine_id' ] = $this->postInput[ 'target_language_mt_engine_id' ];
-        $projectStructure[ 'user_ip' ]                      = Utils::getRealIpAddr();
-        $projectStructure[ 'HTTP_HOST' ]                    = INIT::$HTTPHOST;
+        $projectStructure[ 'dialect_strict' ]                = $this->dialect_strict;
+        $projectStructure[ 'only_private' ]                  = $this->only_private;
+        $projectStructure[ 'due_date' ]                      = $this->due_date;
+        $projectStructure[ 'target_language_mt_engine_id' ]  = $this->postInput[ 'target_language_mt_engine_id' ];
+        $projectStructure[ 'user_ip' ]                       = Utils::getRealIpAddr();
+        $projectStructure[ 'HTTP_HOST' ]                     = INIT::$HTTPHOST;
 
         // MMT Glossaries
         // (if $engine is not an MMT instance, ignore 'mmt_glossaries')
@@ -342,6 +350,14 @@ class createProjectController extends ajaxController {
 
         if ( $engine instanceof Engines_DeepL and $this->deepl_id_glossary !== null ) {
             $projectStructure[ 'deepl_id_glossary' ] = $this->deepl_id_glossary;
+        }
+
+        if( $this->filters_extraction_parameters ) {
+            $projectStructure[ 'filters_extraction_parameters' ] = $this->filters_extraction_parameters;
+        }
+
+        if( $this->xliff_parameters ) {
+            $projectStructure[ 'xliff_parameters' ] = $this->xliff_parameters;
         }
 
         // with the qa template id
@@ -707,6 +723,46 @@ class createProjectController extends ajaxController {
             }
 
             $this->dialect_strict = html_entity_decode($dialect_strict);
+        }
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function __validateFiltersExtractionParameters()
+    {
+        if ( !empty( $this->postInput[ 'filters_extraction_parameters' ] ) ) {
+
+            $json = html_entity_decode( $this->postInput[ 'filters_extraction_parameters' ]);
+            $schema = file_get_contents( INIT::$ROOT . '/inc/validation/schema/filters_extraction_parameters.json' );
+
+            $validatorObject = new JSONValidatorObject();
+            $validatorObject->json = $json;
+
+            $validator = new JSONValidator($schema);
+            $validator->validate($validatorObject);
+
+            $this->filters_extraction_parameters = json_decode($json);
+        }
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function __validateXliffParameters()
+    {
+        if ( !empty( $this->postInput[ 'xliff_parameters' ] ) ) {
+
+            $json = html_entity_decode( $this->postInput[ 'xliff_parameters' ]);
+            $schema = file_get_contents( INIT::$ROOT . '/inc/validation/schema/xliff_parameters.json' );
+
+            $validatorObject = new JSONValidatorObject();
+            $validatorObject->json = $json;
+
+            $validator = new JSONValidator($schema);
+            $validator->validate($validatorObject);
+
+            $this->xliff_parameters = json_decode($json);
         }
     }
 

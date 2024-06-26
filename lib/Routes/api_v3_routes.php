@@ -106,3 +106,13 @@ $klein->with( '/api/v3/project-template', function () {
     route( '/[:id]', 'PUT', '\API\V3\ProjectTemplateController', 'update' );
     route( '/[:id]', 'GET', '\API\V3\ProjectTemplateController', 'get' );
 } );
+
+// FILTERS AND XLIFF CONFIG
+$klein->with( '/api/v3/filters-xliff-config-template', function () {
+    route( '/schema', 'GET', '\API\V3\FiltersXliffConfigTemplateController', 'schema' );
+    route( '/', 'GET', '\API\V3\FiltersXliffConfigTemplateController', 'all' );
+    route( '/', 'POST', '\API\V3\FiltersXliffConfigTemplateController', 'create' );
+    route( '/[:id]', 'DELETE', '\API\V3\FiltersXliffConfigTemplateController', 'delete' );
+    route( '/[:id]', 'PUT', '\API\V3\FiltersXliffConfigTemplateController', 'update' );
+    route( '/[:id]', 'GET', '\API\V3\FiltersXliffConfigTemplateController', 'get' );
+} );

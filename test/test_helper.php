@@ -1,6 +1,6 @@
 <?php
 putenv( 'phpunit=1' );
-
+die();
 declare( ticks = 10 );
 require( 'functions.php' );
 setupSignalHandler();
