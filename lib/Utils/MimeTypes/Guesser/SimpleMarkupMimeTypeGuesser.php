@@ -51,6 +51,7 @@ class SimpleMarkupMimeTypeGuesser implements MimeTypeGuesserInterface {
             throw new RuntimeException( "could not open XML input" );
         }
         $buffer = fread( $fp, 1024 );
+        fclose( $fp );
 
         $r4 = stripos( $buffer, '<tmx' ) !== false && stripos( $buffer, '<?xml' ) !== false;
         $r3 = stripos( $buffer, '<html' ) !== false;
