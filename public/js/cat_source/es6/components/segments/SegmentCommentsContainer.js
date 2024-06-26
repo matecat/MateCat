@@ -295,7 +295,8 @@ class SegmentCommentsContainer extends React.Component {
     // workaround - textarea fit to content
     if (this.commentInput) {
       setTimeout(() => {
-        this.commentInput.style.height = `${this.commentInput.parentNode.clientHeight}px`
+        if (this.commentInput)
+          this.commentInput.style.height = `${this.commentInput.parentNode.clientHeight}px`
       }, 200)
     }
 
