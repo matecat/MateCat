@@ -18,7 +18,11 @@ class AlertModal extends React.Component {
               className="column left aligned matecat-modal-body"
               style={{fontSize: '18px'}}
             >
-              <p dangerouslySetInnerHTML={this.allowHTML(this.props.text)} />
+              {typeof this.props.text === 'string' ? (
+                <p dangerouslySetInnerHTML={this.allowHTML(this.props.text)} />
+              ) : (
+                this.props.text
+              )}
             </div>
             <div className="column right aligned">
               <div
@@ -35,7 +39,7 @@ class AlertModal extends React.Component {
   }
 }
 AlertModal.propTypes = {
-  text: PropTypes.string,
+  text: PropTypes.node,
 }
 
 export default AlertModal

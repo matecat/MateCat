@@ -407,8 +407,8 @@ const TEXT_UTILS = {
           TEXT_UTILS.isSupportingRegexLookAheadLookBehind() && !config.isCJK
             ? findWithRegex
             : config.isCJK
-            ? findWithRegexCJK
-            : findWithRegexWordSeparator,
+              ? findWithRegexCJK
+              : findWithRegexWordSeparator,
       }
     } catch (e) {
       return {}
@@ -602,6 +602,8 @@ const TEXT_UTILS = {
     ],
   },
   removeHiddenCharacters: (value) => value.replace(/\u2060/g, ''),
+  stripUnderscore: (value) =>
+    value.replace(/_[^_]/g, (match) => match[1].toUpperCase()),
 }
 
 export default TEXT_UTILS
