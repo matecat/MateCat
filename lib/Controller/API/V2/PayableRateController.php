@@ -42,6 +42,7 @@ class PayableRateController extends KleinController {
             $this->response->json( [
                     'message' => 'Method not allowed'
             ] );
+            $this->response->code(405);
             exit();
         }
 

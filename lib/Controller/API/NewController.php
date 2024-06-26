@@ -189,6 +189,9 @@ class NewController extends ajaxController {
                 'pretranslate_101'           => [
                         'filter' => [ 'filter' => FILTER_VALIDATE_INT ]
                 ],
+                'pretranslate_101'   => [
+                    'filter' => [ 'filter' => FILTER_VALIDATE_INT ]
+                ],
                 'id_team'                    => [ 'filter' => FILTER_VALIDATE_INT ],
                 'id_qa_model'                => [ 'filter' => FILTER_VALIDATE_INT ],
                 'id_qa_model_template'       => [ 'filter' => FILTER_VALIDATE_INT ],

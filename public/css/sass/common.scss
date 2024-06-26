@@ -1,3 +1,4 @@
+@import 'commons/colors';
 html,
 body {
   height: 100%;
@@ -1453,6 +1454,10 @@ span.text-req {
 .file_upload_error,
 .error {
   color: #ff3300;
+}
+
+.file_upload_warning {
+  color: $warning;
 }
 
 .error {
@@ -4727,31 +4732,4 @@ a.pull-left.btn-ok.uploadtm {
 
 body svg {
   padding: 0 !important;
-}
-
-.label-with-tooltip {
-  position: absolute;
-  z-index: 14;
-  pointer-events: none;
-  transform: translate(-50%, -100%);
-
-  &:after {
-    position: absolute;
-    left: 50%;
-    margin-left: -4px;
-    border-left: 4px solid transparent;
-    border-right: 4px solid transparent;
-    border-top: 6px solid #eaebee;
-    content: '';
-  }
-}
-
-.label-with-tooltip-content {
-  border-radius: 4px;
-  padding: 4px 8px;
-  background-color: #eaebee;
-  color: #666666;
-  white-space: normal;
-  font-size: 14px;
-  font-weight: normal;
 }

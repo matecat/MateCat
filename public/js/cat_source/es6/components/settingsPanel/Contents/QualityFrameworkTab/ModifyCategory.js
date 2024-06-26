@@ -13,6 +13,7 @@ import {QualityFrameworkTabContext} from './QualityFrameworkTab'
 import {
   formatCategoryDescription,
   getCategoryLabelAndDescription,
+  getCodeFromLabel,
 } from './CategoriesSeveritiesTable'
 
 export const ModifyCategory = ({target, category, setIsEditingName}) => {
@@ -53,12 +54,16 @@ export const ModifyCategory = ({target, category, setIsEditingName}) => {
   const updateLabel = () => {
     modifyingCurrentTemplate((prevTemplate) => ({
       ...prevTemplate,
-      categories: prevTemplate.categories.map((categoryItem) => ({
-        ...categoryItem,
-        ...(categoryItem.id === category.id && {
-          label: `${label}${description ? ' ' + formatCategoryDescription(description) : ''}`,
-        }),
-      })),
+      categories: prevTemplate.categories.map((categoryItem) => {
+        const name = `${label}${description ? ' ' + formatCategoryDescription(description) : ''}`
+        return {
+          ...categoryItem,
+          ...(categoryItem.id === category.id && {
+            label: name,
+            code: getCodeFromLabel(name),
+          }),
+        }
+      }),
     }))
 
     setIsEditingName(false)

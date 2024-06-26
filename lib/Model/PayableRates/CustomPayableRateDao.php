@@ -198,9 +198,10 @@ class CustomPayableRateDao extends DataAccess_AbstractDao
         $uid = $payableRateModel->uid;
 
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( "UPDATE ".self::TABLE." SET `deleted_at` = :now WHERE id = :id " );
+        $stmt = $conn->prepare( "UPDATE ".self::TABLE." SET `name` = :name, `deleted_at` = :now WHERE id = :id " );
         $stmt->execute( [
             'id'  => $id,
+            'name'  => uniqid($payableRateModel->name . '_'),
             'now' => (new DateTime())->format('Y-m-d H:i:s'),
         ] );
 

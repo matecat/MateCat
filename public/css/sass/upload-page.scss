@@ -2995,6 +2995,66 @@ a.pull-right.confirmDelete {
   }
 }
 
+.project-template-select {
+  .select-item-default {
+    display: flex;
+    flex-grow: 1;
+    align-items: center;
+    justify-content: space-between;
+    color: $black;
+
+    .select-item-default-label {
+      display: block;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      max-width: 160px;
+    }
+
+    & > svg {
+      opacity: 1;
+    }
+  }
+
+  .dropdown__option--is-active-option {
+    .select-item-default {
+      margin-right: 4px;
+      color: $white;
+    }
+  }
+}
+
+.translate-box {
+  .project-template-select {
+    .dropdown__option--is-active-option {
+      .select-item-default {
+        color: $black;
+      }
+    }
+  }
+}
+
+.project-template-select-unsaved {
+  .select {
+    color: $translatedBlue !important;
+  }
+}
+
+.project-template-select-loading {
+  position: absolute;
+  z-index: 2;
+  width: 100%;
+  height: 36px;
+  top: 24px;
+  background-color: rgba(255, 255, 255, 0.9);
+
+  .project-template-select-loading-icon {
+    background: url(../../img/loading.gif) 47% 6px no-repeat !important;
+    background-size: 24px !important;
+    height: 100%;
+  }
+}
+
 .language-dropdown-item-container {
   display: grid;
   grid-template-columns: 70px auto;
