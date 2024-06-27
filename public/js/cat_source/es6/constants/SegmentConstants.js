@@ -90,8 +90,6 @@ const SegmentConstants = keyMirror({
   ADD_SEARCH_RESULTS: null,
   REMOVE_SEARCH_RESULTS: null,
   ADD_CURRENT_SEARCH: null,
-  UNDO_TEXT: null,
-  REDO_TEXT: null,
   FOCUS_EDITAREA: null,
   FILL_TAGS_IN_TARGET: null,
   SELECT_SEGMENT: null,

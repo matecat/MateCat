@@ -5,6 +5,8 @@ import {exportQualityReport} from '../../api/exportQualityReport'
 import CatToolActions from '../../actions/CatToolActions'
 import ShortCutsModal from '../modals/ShortCutsModal'
 import ModalsActions from '../../actions/ModalsActions'
+import {useHotkeys} from 'react-hotkeys-hook'
+import {Shortcuts} from '../../utils/shortcuts'
 
 export const ActionMenu = ({
   jobUrls,
@@ -22,6 +24,13 @@ export const ActionMenu = ({
   pid,
   showReviseLink = true,
 }) => {
+  useHotkeys(
+    Shortcuts.cattol.events.openShortcutsModal.keystrokes[
+      Shortcuts.shortCutsKeyType
+    ],
+    (e) => openShortcutsModal(e),
+    {enableOnContentEditable: true},
+  )
   const [isExportCsvDisabled, setIsExportCsvDisabled] = useState(false)
   const [isExportJsonDisabled, setIsExportJsonDisabled] = useState(false)
   const dropdownThreeDots = useRef()
