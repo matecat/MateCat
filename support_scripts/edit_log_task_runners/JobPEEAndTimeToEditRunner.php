@@ -59,7 +59,7 @@ class JobPEEAndTimeToEditRunner extends AbstractDaemon
         Log::$fileName            = "evaluatePEE.log";
     }
 
-    function main( $args = null ) {
+    function main( array $args = null ) {
 
         $this->truncateOldRecords();
 

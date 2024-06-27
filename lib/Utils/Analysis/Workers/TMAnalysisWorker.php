@@ -33,6 +33,7 @@ use PDOException;
 use PostProcess;
 use Predis\Connection\ConnectionException;
 use Projects_ProjectDao;
+use ReflectionException;
 use Segments_SegmentDao;
 use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\AbstractWorker;
@@ -61,7 +62,7 @@ class TMAnalysisWorker extends AbstractWorker {
      *
      * @var array|null
      */
-    protected $_matches = null;
+    protected ?array $_matches = null;
 
     const ERR_EMPTY_WORD_COUNT = 4;
     const ERR_WRONG_PROJECT    = 5;
@@ -69,7 +70,7 @@ class TMAnalysisWorker extends AbstractWorker {
     /**
      * @var FeatureSet
      */
-    protected $featureSet;
+    protected FeatureSet $featureSet;
 
     /**
      * Concrete Method to start the activity of the worker
@@ -156,8 +157,7 @@ class TMAnalysisWorker extends AbstractWorker {
     protected function _updateRecord( QueueElement $queueElement ) {
 
         $firstAvailableNotMTMatch = $this->getFirstAvailableNotMTMatch();
-        $featureSet               = ( $this->featureSet !== null ) ? $this->featureSet : new FeatureSet();
-        $filter                   = MateCatFilter::getInstance( $featureSet, $queueElement->params->source, $queueElement->params->target );
+        $filter                   = MateCatFilter::getInstance( $this->featureSet, $queueElement->params->source, $queueElement->params->target );
         $suggestion               = $firstAvailableNotMTMatch[ 'raw_translation' ]; //No layering needed
 
         $suggestion_match  = $firstAvailableNotMTMatch[ 'match' ];
@@ -326,7 +326,7 @@ class TMAnalysisWorker extends AbstractWorker {
      *
      * @return PostProcess
      */
-    private function initPostProcess( $source_seg, $target_seg, $source_lang, $target_lang ) {
+    private function initPostProcess( $source_seg, $target_seg, $source_lang, $target_lang ): PostProcess {
         $check = new PostProcess( $source_seg, $target_seg );
         $check->setFeatureSet( $this->featureSet );
         $check->setSourceSegLang( $source_lang );
@@ -341,7 +341,7 @@ class TMAnalysisWorker extends AbstractWorker {
      *
      * @return false|string
      */
-    private function mergeJsonErrors( $err_json, $err_json2 ) {
+    private function mergeJsonErrors( string $err_json, string $err_json2 ) {
         if ( $err_json === '' and $err_json2 === '' ) {
             return '';
         }
@@ -414,13 +414,13 @@ class TMAnalysisWorker extends AbstractWorker {
      * @throws Exception
      */
     protected function _getNewMatchType(
-            $tm_match_type,
-            $fast_match_type,
-            $fast_exact_match_type,
-            &$equivalentWordMapping,
-            $publicTM = false,
-            $isICE = false
-    ) {
+            string $tm_match_type,
+            string $fast_match_type,
+            string $fast_exact_match_type,
+            array  &$equivalentWordMapping,
+            bool   $publicTM = false,
+            bool $isICE = false
+    ): string {
         $fast_match_type = strtoupper( $fast_match_type );
         $fast_rate_paid  = $equivalentWordMapping[ $fast_match_type ];
 
@@ -535,7 +535,7 @@ class TMAnalysisWorker extends AbstractWorker {
      * @return array
      * @throws Exception
      */
-    protected function _getMatches( QueueElement $queueElement ) {
+    protected function _getMatches( QueueElement $queueElement ): array {
 
         $_config              = [];
         $_config[ 'segment' ] = $queueElement->params->segment;
@@ -643,7 +643,7 @@ class TMAnalysisWorker extends AbstractWorker {
      */
     protected function _getMT( Engines_AbstractEngine $mtEngine, $_config, QueueElement $queueElement ) {
 
-        $mt_result = null;
+        $mt_result = false;
 
         try {
 
@@ -744,7 +744,7 @@ class TMAnalysisWorker extends AbstractWorker {
      *
      * @return int
      */
-    protected static function _compareScore( $a, $b ) {
+    protected static function _compareScore( $a, $b ): int {
         if ( floatval( $a[ 'match' ] ) == floatval( $b[ 'match' ] ) ) {
             return 0;
         }
@@ -781,7 +781,7 @@ class TMAnalysisWorker extends AbstractWorker {
      * @param $queueElement QueueElement
      * @param $process_pid  int
      *
-     * @throws ConnectionException
+     * @throws ReflectionException
      */
     protected function _initializeTMAnalysis( QueueElement $queueElement, $process_pid ) {
 
@@ -825,7 +825,7 @@ class TMAnalysisWorker extends AbstractWorker {
      * @param $eq_words
      * @param $standard_words
      *
-     * @throws ConnectionException
+     * @throws ReflectionException
      */
     protected function _incrementAnalyzedCount( $pid, $eq_words, $standard_words ) {
         $this->_queueHandler->getRedisClient()->incrby( RedisKeys::PROJ_EQ_WORD_COUNT . $pid, (int)( $eq_words * 1000 ) );
@@ -841,7 +841,7 @@ class TMAnalysisWorker extends AbstractWorker {
      *
      * @throws Exception
      */
-    protected function _decSegmentsToAnalyzeOfWaitingProjects( $project_id ) {
+    protected function _decSegmentsToAnalyzeOfWaitingProjects( int $project_id ) {
 
         if ( empty( $project_id ) ) {
             throw new Exception( 'Can Not send without a Queue ID. \Analysis\QueueHandler::setQueueID ', self::ERR_WRONG_PROJECT );
@@ -872,8 +872,8 @@ class TMAnalysisWorker extends AbstractWorker {
     /**
      * @param $_params
      *
-     * @throws ConnectionException
      * @throws ReQueueException
+     * @throws ReflectionException
      */
     protected function _tryToCloseProject( $_params ) {
 
@@ -970,9 +970,8 @@ class TMAnalysisWorker extends AbstractWorker {
      *
      * @param $elementQueue QueueElement
      *
-     * @throws Exception
      * @throws ReQueueException
-     * @throws ConnectionException
+     * @throws ReflectionException
      */
     protected function _forceSetSegmentAnalyzed( QueueElement $elementQueue ) {
 
