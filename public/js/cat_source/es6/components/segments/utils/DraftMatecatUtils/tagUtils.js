@@ -6,7 +6,6 @@ import {
 import {Base64} from 'js-base64'
 import TextUtils from '../../../../utils/textUtils'
 import {isUndefined} from 'lodash'
-import matchTagUtils from '../../../segments/utils/DraftMatecatUtils/matchTag'
 import getEntities from './getEntities'
 
 export const transformTagsToHtml = (text, isRtl = 0) => {
@@ -130,32 +129,32 @@ export const transformTagsToLexiqaText = (text, editorState) => {
     text = decodeHtmlEntities(tempText)
     text = TextUtils.restoreTempTags(tags, text)
 
-    newTransform({source: text, entities: getEntities(editorState)})
+    text = newTransform({source: text, entities: getEntities(editorState)})
 
-    for (let key in tagSignatures) {
-      const {placeholderRegex, decodeNeeded, placeholder, regex, lexiqaText} =
-        tagSignatures[key]
-      if (placeholderRegex) {
-        let globalRegex = new RegExp(
-          placeholderRegex.source,
-          placeholderRegex.flags + 'g',
-        )
-        text = text.replace(globalRegex, (match, text, index) => {
-          let tag = decodeNeeded
-            ? decodeHtmlEntities(Base64.decode(text))
-            : match
-          tag = !isToReplaceForLexiqa(key) ? '<' + tag + '>' : lexiqaText
-          return tag
-        })
-      } else if (regex) {
-        let globalRegex = new RegExp(regex)
-        text = text.replace(globalRegex, (match, index) => {
-          let tag = placeholder ? placeholder : match
-          tag = !isToReplaceForLexiqa(key) ? '<' + tag + '>' : lexiqaText
-          return tag
-        })
-      }
-    }
+    // for (let key in tagSignatures) {
+    //   const {placeholderRegex, decodeNeeded, placeholder, regex, lexiqaText} =
+    //     tagSignatures[key]
+    //   if (placeholderRegex) {
+    //     let globalRegex = new RegExp(
+    //       placeholderRegex.source,
+    //       placeholderRegex.flags + 'g',
+    //     )
+    //     text = text.replace(globalRegex, (match, text, index) => {
+    //       let tag = decodeNeeded
+    //         ? decodeHtmlEntities(Base64.decode(text))
+    //         : match
+    //       tag = !isToReplaceForLexiqa(key) ? '<' + tag + '>' : lexiqaText
+    //       return tag
+    //     })
+    //   } else if (regex) {
+    //     let globalRegex = new RegExp(regex)
+    //     text = text.replace(globalRegex, (match, index) => {
+    //       let tag = placeholder ? placeholder : match
+    //       tag = !isToReplaceForLexiqa(key) ? '<' + tag + '>' : lexiqaText
+    //       return tag
+    //     })
+    //   }
+    // }
   } catch (e) {
     console.error('Error parsing tag in transformTagsToHtml function')
   }

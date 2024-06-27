@@ -39,6 +39,8 @@ import {
   isSelectedEntity,
   getEntitiesSelected,
 } from './utils/DraftMatecatUtils/manageCaretPositionNearEntity'
+import {isMacOS} from '../../utils/Utils'
+import getEntities from './utils/DraftMatecatUtils/getEntities'
 
 const {hasCommandModifier, isOptionKeyCommand, isCtrlKeyCommand} =
   KeyBindingUtil
@@ -613,6 +615,8 @@ class Editarea extends React.Component {
       popoverPosition,
     } = this.state
 
+    console.log('--------------------------->', getEntities(editorState))
+
     const {
       onChange,
       copyFragment,
@@ -840,8 +844,8 @@ class Editarea extends React.Component {
             ? 'left'
             : 'right'
           : !isRTL
-          ? 'right'
-          : 'left'
+            ? 'right'
+            : 'left'
 
       const updatedStateNearZwsp = checkCaretIsNearZwsp({
         editorState: this.state.editorState,
