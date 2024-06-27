@@ -1,7 +1,7 @@
 import {transformTagsToLexiqaText} from './tagUtils'
 
-const prepareTextForLexiqa = (textSource, editorState) => {
-  let newText = transformTagsToLexiqaText(textSource, editorState)
+const prepareTextForLexiqa = (textSource) => {
+  let newText = transformTagsToLexiqaText(textSource)
   return newText
 }
 

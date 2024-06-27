@@ -320,10 +320,9 @@ class Editarea extends React.Component {
       // Add missing tag to store for highlight warnings on tags
       const {missingTags} = checkForMissingTags(sourceTagMap, currentTagRange)
 
-      const lxqDecodedTranslation = DraftMatecatUtils.prepareTextForLexiqa(
-        decodedSegment,
-        editorState,
-      )
+      const lxqDecodedTranslation =
+        DraftMatecatUtils.prepareTextForLexiqa(decodedSegment)
+
       //const currentTagRange = matchTag(decodedSegment); //deactivate if updateTagsInEditor is active
       SegmentActions.updateTranslation(
         segment.sid,
@@ -614,8 +613,6 @@ class Editarea extends React.Component {
       focusedTagIndex,
       popoverPosition,
     } = this.state
-
-    console.log('--------------------------->', getEntities(editorState))
 
     const {
       onChange,

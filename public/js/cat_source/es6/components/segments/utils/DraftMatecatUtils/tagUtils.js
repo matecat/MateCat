@@ -7,6 +7,7 @@ import {Base64} from 'js-base64'
 import TextUtils from '../../../../utils/textUtils'
 import {isUndefined} from 'lodash'
 import getEntities from './getEntities'
+import matchTagStructure from '../../../segments/utils/DraftMatecatUtils/matchTag'
 
 export const transformTagsToHtml = (text, isRtl = 0) => {
   isRtl = !!isRtl
@@ -87,9 +88,9 @@ export const transformTagsToText = (text) => {
   return text
 }
 
-const newTransform = ({source, entities}) => {
-  return entities.reduce(
-    (acc, {entity: {data}}) => {
+const newTransform = ({source, tagsStruct}) => {
+  return tagsStruct.reduce(
+    (acc, {data}) => {
       const {value, difference} = acc
       const {lexiqaText, decodeNeeded} = tagSignatures[data.name]
 
@@ -123,13 +124,16 @@ const newTransform = ({source, entities}) => {
   ).value
 }
 
-export const transformTagsToLexiqaText = (text, editorState) => {
+export const transformTagsToLexiqaText = (text) => {
   try {
     let {tags, text: tempText} = TextUtils.replaceTempTags(text)
     text = decodeHtmlEntities(tempText)
     text = TextUtils.restoreTempTags(tags, text)
-
-    text = newTransform({source: text, entities: getEntities(editorState)})
+    const tagsStruct = matchTagStructure(text).sort((a, b) =>
+      a.offset > b.offset ? 1 : -1,
+    )
+    console.log('@@@@@@@@@@@', tagsStruct)
+    text = newTransform({source: text, tagsStruct})
 
     // for (let key in tagSignatures) {
     //   const {placeholderRegex, decodeNeeded, placeholder, regex, lexiqaText} =
