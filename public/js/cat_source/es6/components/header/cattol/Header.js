@@ -52,83 +52,85 @@ export const Header = ({
         <div className="logo-menu">
           <a href="/" className="logo" />
         </div>
+        {isUserLogged ? (
+          <>
+            {/*Revision number  */}
 
-        {/*Revision number  */}
-
-        <div className="header-el-placeholder">
-          {revisionNumber >= 1 && (
-            <div
-              className={`revision-mark revision-r${revisionNumber}`}
-              title="Revision number"
-            >
-              R{revisionNumber}
+            <div className="header-el-placeholder">
+              {revisionNumber >= 1 && (
+                <div
+                  className={`revision-mark revision-r${revisionNumber}`}
+                  title="Revision number"
+                >
+                  R{revisionNumber}
+                </div>
+              )}
             </div>
-          )}
-        </div>
 
-        {/*Files Menu*/}
-        <FilesMenu projectName={projectName} />
+            {/*Files Menu*/}
+            <FilesMenu projectName={projectName} />
 
-        {/*Icons header*/}
-        <div className="action-menu">
-          {projectCompletionEnabled && (
-            <MarkAsCompleteButton
-              featureEnabled={projectCompletionEnabled}
-              isReview={isReview}
-            />
-          )}
+            {/*Icons header*/}
+            <div className="action-menu">
+              {projectCompletionEnabled && (
+                <MarkAsCompleteButton
+                  featureEnabled={projectCompletionEnabled}
+                  isReview={isReview}
+                />
+              )}
 
-          {/*Files instructions*/}
-          <JobMetadata idJob={jid} password={password} />
+              {/*Files instructions*/}
+              <JobMetadata idJob={jid} password={password} />
 
-          {/*Download Menu*/}
-          <DownloadMenu
-            password={password}
-            jid={jid}
-            isGDriveProject={isGDriveProject}
-          />
+              {/*Download Menu*/}
+              <DownloadMenu
+                password={password}
+                jid={jid}
+                isGDriveProject={isGDriveProject}
+              />
 
-          {/*Quality Report*/}
-          <QualityReportButton
-            isReview={isReview}
-            revisionNumber={revisionNumber}
-            overallQualityClass={overallQualityClass}
-            qualityReportHref={qualityReportHref}
-            secondRevisionsCount={secondRevisionsCount}
-          />
+              {/*Quality Report*/}
+              <QualityReportButton
+                isReview={isReview}
+                revisionNumber={revisionNumber}
+                overallQualityClass={overallQualityClass}
+                qualityReportHref={qualityReportHref}
+                secondRevisionsCount={secondRevisionsCount}
+              />
 
-          {/*Segments Issues*/}
-          <SegmentsQAButton />
+              {/*Segments Issues*/}
+              <SegmentsQAButton />
 
-          {/*Search*/}
-          <SearchButton />
+              {/*Search*/}
+              <SearchButton />
 
-          {/*Comments*/}
-          <CommentsButton />
+              {/*Comments*/}
+              <CommentsButton />
 
-          {/*Segments filter*/}
-          <SegmentsFilterButton />
+              {/*Segments filter*/}
+              <SegmentsFilterButton />
 
-          {/*Settings Icon*/}
-          <SettingsButton openTmPanel={openTmPanel} />
+              {/*Settings Icon*/}
+              <SettingsButton openTmPanel={openTmPanel} />
 
-          {/*Dropdown menu*/}
-          <ActionMenu
-            cattoolMenu={true}
-            isReview={isReview}
-            projectName={projectName}
-            source_code={source_code}
-            target_code={target_code}
-            jid={jid}
-            pid={pid}
-            password={password}
-            reviewPassword={reviewPassword}
-            allowLinkToAnalysis={allowLinkToAnalysis}
-            analysisEnabled={analysisEnabled}
-            showReviseLink={showReviseLink}
-          />
-        </div>
-
+              {/*Dropdown menu*/}
+              <ActionMenu
+                cattoolMenu={true}
+                isReview={isReview}
+                projectName={projectName}
+                source_code={source_code}
+                target_code={target_code}
+                jid={jid}
+                pid={pid}
+                password={password}
+                reviewPassword={reviewPassword}
+                allowLinkToAnalysis={allowLinkToAnalysis}
+                analysisEnabled={analysisEnabled}
+                showReviseLink={showReviseLink}
+              />
+            </div>
+          </>
+        ) : null}
         {/*Profile menu*/}
         <UserMenu />
       </div>
