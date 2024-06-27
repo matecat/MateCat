@@ -11,7 +11,6 @@ use API\V2\Validators\ProjectPasswordValidator;
 use Constants_JobStatus;
 use Exceptions\ValidationError;
 use Model\Analysis\Status;
-use Projects_MetadataDao;
 use Projects_ProjectDao;
 
 class StatusController extends KleinController {
@@ -37,7 +36,7 @@ class StatusController extends KleinController {
         /**
          * @var AnalysisProject $result
          */
-        $result = $analysisStatus->fetchData( Projects_MetadataDao::WORD_COUNT_RAW )->getResult();
+        $result = $analysisStatus->fetchData()->getResult();
 
         // return 404 if there are no chunks
         // (or they were deleted)

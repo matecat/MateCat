@@ -180,6 +180,9 @@ class NewController extends ajaxController {
                 'pretranslate_100'           => [
                         'filter' => [ 'filter' => FILTER_VALIDATE_INT ]
                 ],
+                'pretranslate_101'   => [
+                    'filter' => [ 'filter' => FILTER_VALIDATE_INT ]
+                ],
                 'id_team'                    => [ 'filter' => FILTER_VALIDATE_INT ],
                 'id_qa_model'                => [ 'filter' => FILTER_VALIDATE_INT ],
                 'id_qa_model_template'       => [ 'filter' => FILTER_VALIDATE_INT ],
@@ -510,19 +513,23 @@ class NewController extends ajaxController {
                 $converter->setUser( $this->user );
                 $converter->doAction();
 
-                $status = $errors = $converter->checkResult();
-                if ( count( $errors ) > 0 ) {
+                $status = $error = $converter->checkResult();
+                if($error !== null and !empty($error->getErrors())){
 
                     $this->result = new ConvertedFileModel( ConversionHandlerStatus::ZIP_HANDLING );
-                    foreach ( $errors as $__err ) {
+                    $this->result->changeCode($error->getCode());
+                    $savedErrors = $this->result->getErrors();
+                    $brokenFileName = ZipArchiveExtended::getFileName( array_keys($error->getErrors())[0] );
 
-                        $savedErrors    = $this->result->getErrors();
-                        $brokenFileName = ZipArchiveExtended::getFileName( $__err[ 'debug' ] );
-
-                        if ( !isset( $savedErrors[ $brokenFileName ] ) ) {
-                            $this->result->addError( $__err[ 'message' ], $brokenFileName );
-                        }
+                    if( !isset( $savedErrors[$brokenFileName] ) ){
+                        $this->result->addError($error->getErrors()[0]['message'], $brokenFileName);
                     }
+
+                    $this->result = $status = [
+                        'code' => $error->getCode(),
+                        'data' => $error->getData(),
+                        'errors' => $error->getErrors(),
+                    ];
                 }
             } else {
 
@@ -538,10 +545,11 @@ class NewController extends ajaxController {
 
         $status = array_values( $status );
 
+        // Upload errors handling
         if ( !empty( $status ) ) {
             $this->api_output[ 'message' ] = 'Project Conversion Failure';
-            $this->api_output[ 'debug' ]   = $status;
-            $this->result[ 'errors' ]      = $status;
+            $this->api_output[ 'debug' ]   = $status[2][array_keys($status[2])[0]];
+            $this->result[ 'errors' ]      = $status[2][array_keys($status[2])[0]];
             Log::doJsonLog( $status );
             $this->setBadRequestHeader();
 
@@ -623,6 +631,7 @@ class NewController extends ajaxController {
         $projectStructure[ 'owner' ]                = $this->user->email;
         $projectStructure[ 'metadata' ]             = $this->metadata;
         $projectStructure[ 'pretranslate_100' ]     = (int)!!$this->postInput[ 'pretranslate_100' ]; // Force pretranslate_100 to be 0 or 1
+        $projectStructure[ 'pretranslate_101' ]     = isset($this->postInput[ 'pretranslate_101' ]) ? (int)$this->postInput[ 'pretranslate_101' ] : 1;
 
         //default get all public matches from TM
         $projectStructure[ 'only_private' ] = ( !isset( $this->postInput[ 'get_public_matches' ] ) ? false : !$this->postInput[ 'get_public_matches' ] );

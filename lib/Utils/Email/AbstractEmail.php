@@ -9,6 +9,7 @@
 namespace Email;
 
 use AMQHandler;
+use Exception;
 use INIT;
 use Log;
 use WorkerClient;
@@ -48,12 +49,12 @@ abstract class AbstractEmail {
     }
 
     /**
-     * TODO: implement some kind of hook to improve testability
      *
      * @param $mailConf
+     *
+     * @throws Exception
      */
     protected function _enqueueEmailDelivery( $mailConf ) {
-        WorkerClient::init( new AMQHandler() );
         WorkerClient::enqueue(
                 'MAIL',
                 '\AsyncTasks\Workers\MailWorker',

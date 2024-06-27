@@ -6,9 +6,6 @@ use API\V2\KleinController;
 use API\V2\Validators\ChunkPasswordValidator;
 use CatUtils;
 use Chunks_ChunkStruct;
-use Features\ReviewExtended\ReviewUtils;
-use LQA\ChunkReviewDao;
-use Projects_MetadataDao;
 use WordCount\WordCountStruct;
 
 /**
@@ -35,17 +32,8 @@ class StatsController extends KleinController {
     public function stats() {
 
         $wStruct = WordCountStruct::loadFromJob( $this->chunk );
-
-        // YYY [Remove] backward compatibility for current projects
-        $counterType = $this->chunk->getProject( 60 * 60 )->getWordCountType();
-        $job_stats   = CatUtils::getFastStatsForJob( $wStruct, true, $counterType );
-        if ( $counterType == Projects_MetadataDao::WORD_COUNT_EQUIVALENT ) {
-            $chunk_reviews        = ( new ChunkReviewDao() )->findChunkReviews( $this->chunk );
-            $job_stats = [ 'stats' => ReviewUtils::formatStats( $job_stats, $chunk_reviews ) ];
-            $job_stats[ 'stats' ][ 'analysis_complete' ] = $this->chunk->getProject()->analysisComplete();
-        } else {
-            $job_stats[ 'analysis_complete' ] = $this->chunk->getProject()->analysisComplete();
-        }
+        $job_stats   = CatUtils::getFastStatsForJob( $wStruct );
+        $job_stats[ 'analysis_complete' ] = $this->chunk->getProject()->analysisComplete();
 
         $this->response->json( $job_stats );
     }

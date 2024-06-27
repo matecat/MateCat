@@ -2,6 +2,43 @@ import React from 'react'
 
 import LanguageSelectorList from './LanguageSelectorList'
 import LanguageSelectorSearch from './LanguageSelectorSearch'
+import LabelWithTooltip from '../common/LabelWithTooltip'
+
+const RECENTLY_USED_LOCAL_STORAGE_KEY = `target_languages_recently_used-${config.userMail}`
+const MAX_RECENTLY_USED_STORED = 3
+
+const getRecentyUsedLanguages = () =>
+  JSON.parse(localStorage.getItem(RECENTLY_USED_LOCAL_STORAGE_KEY) ?? '[]')
+export const setRecentlyUsedLanguages = (languages) => {
+  if (!languages.length) return
+
+  const collection = JSON.parse(
+    localStorage.getItem(RECENTLY_USED_LOCAL_STORAGE_KEY) ?? '[]',
+  )
+
+  const indexAlreadyExistingCombination = collection.findIndex(
+    (list) =>
+      languages.every(({id}) => list.some((item) => item.id === id)) &&
+      languages.length === list.length,
+  )
+
+  const collectionWithoutDuplicates = collection.filter(
+    (item, index) => index !== indexAlreadyExistingCombination,
+  )
+
+  const newCollection =
+    collectionWithoutDuplicates.length >= MAX_RECENTLY_USED_STORED
+      ? [
+          ...collectionWithoutDuplicates.filter((item, index) => index > 0),
+          languages,
+        ]
+      : [...collectionWithoutDuplicates, languages]
+
+  localStorage.setItem(
+    RECENTLY_USED_LOCAL_STORAGE_KEY,
+    JSON.stringify(newCollection),
+  )
+}
 
 class LanguageSelector extends React.Component {
   constructor(props) {
@@ -59,19 +96,24 @@ class LanguageSelector extends React.Component {
     }
   }
 
+  setSelectLanguagesFromRecentlyUsed = (list) => {
+    this.setState({selectedLanguages: list})
+  }
+
   render() {
     const {
       onQueryChange,
       onToggleLanguage,
       onConfirm,
       preventDismiss,
-      onRestore,
       onReset,
       onResetResults,
     } = this
     const {languagesList, onClose} = this.props
     const {selectedLanguages, querySearch, fromLanguage, filteredLanguages} =
       this.state
+
+    const recentyUsedLanguages = getRecentyUsedLanguages().reverse()
 
     return (
       <div
@@ -84,7 +126,7 @@ class LanguageSelector extends React.Component {
       >
         <div className="matecat-modal-content" onClick={preventDismiss}>
           <div className="matecat-modal-header">
-            <span className={'modal-title'}>Multiple Languages</span>
+            <span className={'modal-title'}>Target languages</span>
             <span className="close-matecat-modal x-popup" onClick={onClose} />
           </div>
 
@@ -112,6 +154,31 @@ class LanguageSelector extends React.Component {
                   />
                 </div>
               </div>
+              {recentyUsedLanguages.length > 0 && (
+                <div className="recently-used">
+                  <div className="first-column">
+                    <span className="label">Recently used:</span>
+                  </div>
+                  <div className="second-column">
+                    {recentyUsedLanguages.map((list, index) => (
+                      <div
+                        className="list-badge"
+                        key={index}
+                        onClick={() =>
+                          this.setSelectLanguagesFromRecentlyUsed(list)
+                        }
+                      >
+                        <LabelWithTooltip>
+                          <span className="language-name">
+                            {list.map(({name}) => name).join(', ')}
+                          </span>
+                        </LabelWithTooltip>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {(filteredLanguages.length > 0 ||
                 (querySearch && !filteredLanguages.length)) && (
                 <div className="button-all-languages">
@@ -180,15 +247,12 @@ class LanguageSelector extends React.Component {
               <span className={'badge'}>
                 {selectedLanguages && selectedLanguages.length}
               </span>
-              <span className={'label'}>language selected</span>
+              <span className={'label'}>
+                {`Language${selectedLanguages?.length === 0 || selectedLanguages?.length > 1 ? 's' : ''}`}{' '}
+                selected
+              </span>
             </div>
             <div className="">
-              <button
-                className={'modal-btn secondary gray'}
-                onClick={onRestore}
-              >
-                Restore all
-              </button>
               <button className={'modal-btn primary blue'} onClick={onConfirm}>
                 Confirm
               </button>
@@ -239,13 +303,6 @@ class LanguageSelector extends React.Component {
     //when add a language, restore query search.
   }
 
-  onRestore = () => {
-    const {initialLanguages} = this.state
-    this.setState({
-      selectedLanguages: initialLanguages,
-      querySearch: '',
-    })
-  }
   onReset = () => {
     this.setState({
       selectedLanguages: [],

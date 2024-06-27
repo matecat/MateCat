@@ -9,6 +9,7 @@ import TranslatedIcon from '../../../../../img/icons/TranslatedIcon'
 import Tooltip from '../common/Tooltip'
 import CommonUtils from '../../utils/commonUtils'
 import {ANALYSIS_STATUS, UNIT_COUNT} from '../../constants/Constants'
+import LabelWithTooltip from '../common/LabelWithTooltip'
 
 class AnalyzeChunksResume extends React.Component {
   constructor(props) {
@@ -81,8 +82,11 @@ class AnalyzeChunksResume extends React.Component {
   }
 
   openOutsourceModal = (idJob, chunk) => (e) => {
+    const {status} = this.props
     e.stopPropagation()
     e.preventDefault()
+    if (status !== ANALYSIS_STATUS.DONE) return
+
     const data = {
       event: 'outsource_request',
     }
@@ -147,7 +151,7 @@ class AnalyzeChunksResume extends React.Component {
     return (
       <div
         className={`open-translate ui primary button open ${
-          status === ANALYSIS_STATUS.NEW ? 'disabled' : ''
+          status !== ANALYSIS_STATUS.DONE ? 'disabled' : ''
         }`}
         onClick={(e) => {
           this.goToTranslate(chunk, index, e)
@@ -163,6 +167,7 @@ class AnalyzeChunksResume extends React.Component {
       <OutsourceButton
         chunk={chunk}
         index={index}
+        status={this.props.status}
         openOutsourceModal={this.openOutsourceModal}
       />
     )
@@ -244,17 +249,20 @@ class AnalyzeChunksResume extends React.Component {
                   </div>
                 </div>
                 <div className="activity-icons">
-                  <div className={'activity-button splitted'}>
+                  <div
+                    className={`activity-button ${config.jobAnalysis ? 'disable-outsource' : ''}`}
+                  >
                     {/*{self.getOpenButton(job.toJS(), job.id + '-' + index)}*/}
                     {this.getDirectOpenButton(
                       chunkAnalysis,
                       job.id + '-' + index,
                     )}
                   </div>
-                  {this.getOutsourceButton(
-                    chunkAnalysis,
-                    chunkAnalysis.id + '-' + index,
-                  )}
+                  {!config.jobAnalysis &&
+                    this.getOutsourceButton(
+                      chunkAnalysis,
+                      chunkAnalysis.id + '-' + index,
+                    )}
                 </div>
                 <OutsourceContainer
                   project={this.props.project}
@@ -285,15 +293,15 @@ class AnalyzeChunksResume extends React.Component {
                         ID: {jobsAnalysis[indexJob].id}
                       </div>
                       <div className="source-target">
-                        <div className="source-box">
-                          {jobsAnalysis[indexJob].source_name}
-                        </div>
+                        <LabelWithTooltip className="source-box">
+                          <span>{jobsAnalysis[indexJob].source_name}</span>
+                        </LabelWithTooltip>
                         <div className="in-to">
                           <i className="icon-chevron-right icon" />
                         </div>
-                        <div className="target-box">
-                          {jobsAnalysis[indexJob].target_name}
-                        </div>
+                        <LabelWithTooltip className="target-box">
+                          <span>{jobsAnalysis[indexJob].target_name}</span>
+                        </LabelWithTooltip>
                       </div>
                     </div>
                   </div>
@@ -352,15 +360,15 @@ class AnalyzeChunksResume extends React.Component {
                         ID: {jobsAnalysis[indexJob].id}
                       </div>
                       <div className="source-target">
-                        <div className="source-box no-split">
-                          {jobsAnalysis[indexJob].source_name}
-                        </div>
+                        <LabelWithTooltip className="source-box no-split">
+                          <span>{jobsAnalysis[indexJob].source_name}</span>
+                        </LabelWithTooltip>
                         <div className="in-to">
                           <i className="icon-chevron-right icon" />
                         </div>
-                        <div className="target-box no-split">
-                          {jobsAnalysis[indexJob].target_name}
-                        </div>
+                        <LabelWithTooltip className={'target-box no-split'}>
+                          <span>{jobsAnalysis[indexJob].target_name}</span>
+                        </LabelWithTooltip>
                       </div>
                     </div>
                     <div className={'translate-url'}>
@@ -408,7 +416,9 @@ class AnalyzeChunksResume extends React.Component {
                     </div>
                   </div>
                   <div className="activity-icons">
-                    <div className="activity-button">
+                    <div
+                      className={`activity-button  ${config.jobAnalysis ? 'disable-outsource' : ''}`}
+                    >
                       {!config.jobAnalysis && config.splitEnabled ? (
                         <div
                           className={
@@ -425,14 +435,15 @@ class AnalyzeChunksResume extends React.Component {
                       {/*{this.getOpenButton(job.toJS(), jobsAnalysis[indexJob].id)}*/}
                       {this.getDirectOpenButton(chunkAnalysis)}
                     </div>
-                    {this.getOutsourceButton(chunkAnalysis, chunkAnalysis.id)}
+                    {!config.jobAnalysis &&
+                      this.getOutsourceButton(chunkAnalysis, chunkAnalysis.id)}
                   </div>
                 </div>
                 <OutsourceContainer
                   project={this.props.project}
                   job={chunkJob}
                   url={chunkAnalysis.urls.t}
-                  standardWC={total_standard}
+                  standardWC={chunkAnalysis.total_equivalent}
                   showTranslatorBox={false}
                   extendedView={true}
                   onClickOutside={this.closeOutsourceModal}
@@ -453,15 +464,15 @@ class AnalyzeChunksResume extends React.Component {
               <div className="chunk ui grid shadow-1">
                 <div className="title-job no-split">
                   <div className="source-target">
-                    <div className="source-box no-split">
-                      {jobInfo.get('sourceTxt')}
-                    </div>
+                    <LabelWithTooltip className="source-box no-split">
+                      <span>{jobInfo.get('sourceTxt')}</span>
+                    </LabelWithTooltip>
                     <div className="in-to">
                       <i className="icon-chevron-right icon" />
                     </div>
-                    <div className="target-box no-split">
-                      {jobInfo.get('targetTxt')}
-                    </div>
+                    <LabelWithTooltip className="target-box no-split">
+                      <span>{jobInfo.get('targetTxt')}</span>
+                    </LabelWithTooltip>
                   </div>
                 </div>
                 <div className="titles-compare">
@@ -573,7 +584,7 @@ class AnalyzeChunksResume extends React.Component {
   }
 }
 
-const OutsourceButton = ({chunk, index, openOutsourceModal}) => {
+const OutsourceButton = ({chunk, index, openOutsourceModal, status}) => {
   const outsourceButton = useRef()
   return !chunk.outsource_available &&
     chunk.outsource_info?.custom_payable_rate ? (
@@ -602,7 +613,9 @@ const OutsourceButton = ({chunk, index, openOutsourceModal}) => {
     </div>
   ) : (
     <div
-      className={'outsource-translation'}
+      className={`outsource-translation  ${
+        status !== ANALYSIS_STATUS.DONE ? 'outsource-translation-disabled' : ''
+      }`}
       onClick={openOutsourceModal(index, chunk)}
       id="open-quote-request"
     >

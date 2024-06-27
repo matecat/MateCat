@@ -18,7 +18,6 @@ import {getTmKeysUser} from '../api/getTmKeysUser'
 import {getMTEngines as getMtEnginesApi} from '../api/getMTEngines'
 import {
   DEFAULT_ENGINE_MEMORY,
-  MMT_NAME,
   SETTINGS_PANEL_TABS,
   SettingsPanel,
 } from '../components/settingsPanel'
@@ -27,7 +26,11 @@ import SegmentUtils from '../utils/segmentUtils'
 import {getTmKeysJob} from '../api/getTmKeysJob'
 import {getSupportedLanguages} from '../api/getSupportedLanguages'
 import ApplicationStore from '../stores/ApplicationStore'
+import useProjectTemplates from '../hooks/useProjectTemplates'
 import {useGoogleLoginNotification} from '../hooks/useGoogleLoginNotification'
+import ModalsActions from '../actions/ModalsActions'
+import FatalErrorModal from '../components/modals/FatalErrorModal'
+import {CattoolFooter} from '../components/footer/CattoolFooter'
 
 const urlParams = new URLSearchParams(window.location.search)
 const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
@@ -41,21 +44,9 @@ function CatTool() {
   })
   const [tmKeys, setTmKeys] = useState()
   const [mtEngines, setMtEngines] = useState([DEFAULT_ENGINE_MEMORY])
-  const [activeMTEngine, setActiveMTEngine] = useState()
-  const [guessTagActive, setGuessTagActive] = useState(
-    SegmentUtils.checkTPEnabled(),
-  )
-  const [lexiqaActive, setLexiqaActive] = useState(!!config.lxq_enabled)
-  const [speechToTextActive, setSpeechToTextActive] = useState(
-    Speech2TextFeature.enabled(),
-  )
-  const [multiMatchLangs, setMultiMatchLangs] = useState(
-    SegmentUtils.checkCrossLanguageSettings(),
-  )
-  const [getPublicMatches, setGetPublicMatches] = useState(
-    Boolean(config.get_public_matches),
-  )
+
   const [supportedLanguages, setSupportedLanguages] = useState([])
+  const [isAnalysisCompleted, setIsAnalysisCompleted] = useState(false)
 
   // TODO: Remove temp notification warning login google (search in files this todo)
   useGoogleLoginNotification()
@@ -69,7 +60,11 @@ function CatTool() {
         ? options?.segmentId
         : startSegmentIdRef.current,
       where: options?.where,
+      isAnalysisCompleted,
     })
+
+  const {projectTemplates, currentProjectTemplate, modifyingCurrentTemplate} =
+    useProjectTemplates(true)
 
   const closeSettings = useCallback(() => setOpenSettings({isOpen: false}), [])
   const openTmPanel = () =>
@@ -80,51 +75,76 @@ function CatTool() {
       getTmKeysJob(),
       ...(config.isLoggedIn ? [getTmKeysUser()] : []),
     ]
-    Promise.all(promises).then((values) => {
-      const uniqueKeys = values
-        .flatMap((item) => [...item.tm_keys])
-        .reduce(
-          (acc, cur) =>
-            !acc.some(({key}) => key === cur.key) ? [...acc, cur] : acc,
-          [],
-        )
-      setTmKeys(
-        uniqueKeys.map((key) => {
+    Promise.all(promises)
+      .then((values) => {
+        const uniqueKeys = values
+          .flatMap((item) => [...item.tm_keys])
+          .reduce(
+            (acc, cur) =>
+              !acc.some(({key}) => key === cur.key) ? [...acc, cur] : acc,
+            [],
+          )
+        const updatedTmKeys = uniqueKeys.map((key) => {
           return {
             ...key,
             id: key.key,
             isActive: Boolean(key.r || key.w),
             isLocked: !key.owner,
           }
-        }),
-      )
-    })
+        })
+        setTmKeys(updatedTmKeys)
+        modifyingCurrentTemplate((prevTemplate) => ({
+          ...prevTemplate,
+          tm: updatedTmKeys.filter(({isActive}) => isActive),
+          getPublicMatches: config.get_public_matches === 1,
+        }))
+      })
+      .finally(() => getMTEngines())
   }
 
   const getMTEngines = () => {
-    if (config.isLoggedIn) {
+    const setMTCurrentFakeTemplate = () => {
+      if (config.active_engine && config.active_engine.id) {
+        const activeMT = config.active_engine
+        if (activeMT) {
+          modifyingCurrentTemplate((prevTemplate) => ({
+            ...prevTemplate,
+            mt: {
+              ...prevTemplate.mt,
+              id: activeMT.id,
+            },
+          }))
+        }
+      }
+    }
+
+    if (config.isLoggedIn && config.ownerIsMe) {
       getMtEnginesApi().then((mtEngines) => {
-        mtEngines.push(DEFAULT_ENGINE_MEMORY)
-        setMtEngines(mtEngines)
-        if (config.isAnInternalUser && config.active_engine.length > 0) {
-          const mmt = mtEngines.find((mt) => mt.name === MMT_NAME)
-          if (mmt) {
-            setActiveMTEngine(mmt)
-          }
-        }
-        if (config.active_engine && config.active_engine.id) {
-          const activeMT = config.active_engine
-          activeMT && setActiveMTEngine(activeMT)
-        }
+        setMtEngines([DEFAULT_ENGINE_MEMORY, ...mtEngines])
+        setMTCurrentFakeTemplate()
       })
+    } else {
+      setMTCurrentFakeTemplate()
     }
   }
+
+  // parse advanced settings options
+  useEffect(() => {
+    if (typeof currentProjectTemplate?.id === 'undefined') return
+
+    modifyingCurrentTemplate((prevTemplate) => ({
+      ...prevTemplate,
+      speech2text: Speech2TextFeature.enabled(),
+      tagProjection: SegmentUtils.checkTPEnabled(),
+      lexica: config.lxq_enabled === 1,
+      crossLanguageMatches: SegmentUtils.checkCrossLanguageSettings(),
+    }))
+  }, [currentProjectTemplate?.id, modifyingCurrentTemplate])
 
   // actions listener
   useEffect(() => {
     // CatTool onRender action
     getTmKeys()
-    getMTEngines()
     const onRenderHandler = (options) => {
       const {
         actionType, // eslint-disable-line
@@ -164,6 +184,37 @@ function CatTool() {
 
       setOptions((prevState) => ({...prevState, segmentId, where}))
     }
+    const checkAnalysisState = ({analysis_complete}) => {
+      setIsAnalysisCompleted(analysis_complete)
+
+      if (!analysis_complete)
+        ModalsActions.showModalComponent(
+          FatalErrorModal,
+          {
+            text: (
+              <span>
+                Access to the editor page is forbidden until the project's
+                analysis is complete.
+                <br />
+                To follow the analysis' progress,{' '}
+                <a
+                  rel="noreferrer"
+                  href={`/jobanalysis/${config.id_project}-${config.id_job}-${config.password}`}
+                  target="_blank"
+                >
+                  click here
+                </a>
+                .
+              </span>
+            ),
+          },
+          'Analysis in progress',
+          undefined,
+          undefined,
+          true,
+        )
+    }
+
     SegmentStore.addListener(
       SegmentConstants.FREEZING_SEGMENTS,
       freezingSegments,
@@ -172,6 +223,7 @@ function CatTool() {
       SegmentConstants.GET_MORE_SEGMENTS,
       getMoreSegments,
     )
+    CatToolStore.addListener(CatToolConstants.SET_PROGRESS, checkAnalysisState)
 
     return () => {
       CatToolStore.removeListener(CatToolConstants.ON_RENDER, onRenderHandler)
@@ -186,6 +238,10 @@ function CatTool() {
       SegmentStore.removeListener(
         SegmentConstants.GET_MORE_SEGMENTS,
         getMoreSegments,
+      )
+      CatToolStore.removeListener(
+        CatToolConstants.SET_PROGRESS,
+        checkAnalysisState,
       )
     }
   }, [])
@@ -244,9 +300,6 @@ function CatTool() {
         const firstFile = data.files[Object.keys(data.files)[0]]
         if (firstFile) {
           startSegmentIdRef.current = firstFile.segments[0].sid
-        } else {
-          const trackingMessage = `getSegments data: ${JSON.stringify(data)}`
-          CommonUtils.dispatchTrackingError(trackingMessage)
         }
       }
       // TODO: da verificare se serve: this.body.addClass('loaded')
@@ -303,6 +356,12 @@ function CatTool() {
     }, 1000)
     UI.registerFooterTabs()
   }, [wasInitSegments])
+
+  const {
+    tagProjection: guessTagActive,
+    speech2text: speechToTextActive,
+    crossLanguageMatches: multiMatchLangs,
+  } = currentProjectTemplate ?? {}
 
   return (
     <>
@@ -369,16 +428,12 @@ function CatTool() {
         <SettingsPanel
           {...{
             onClose: closeSettings,
+            isOpened: openSettings.isOpen,
             tabOpen: openSettings.tab,
             tmKeys,
             setTmKeys,
             mtEngines,
             setMtEngines,
-            activeMTEngine,
-            setActiveMTEngine,
-            guessTagActive,
-            setGuessTagActive,
-            setSpeechToTextActive,
             sourceLang: {
               name: ApplicationStore.getLanguageNameFromLocale(
                 config.source_rfc,
@@ -393,16 +448,13 @@ function CatTool() {
                 code: config.target_rfc,
               },
             ],
-            lexiqaActive,
-            setLexiqaActive,
-            multiMatchLangs,
-            setMultiMatchLangs,
-            getPublicMatches,
-            setGetPublicMatches,
+            projectTemplates,
+            currentProjectTemplate,
+            modifyingCurrentTemplate,
           }}
         />
       )}
-      <CattolFooter
+      <CattoolFooter
         idProject={config.id_project}
         idJob={config.id_job}
         password={config.password}

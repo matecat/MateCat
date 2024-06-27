@@ -387,25 +387,27 @@ const CommonUtils = {
   getParameterByName: function (name, url) {
     if (!url) url = window.location.href
     name = name.replace(/[[\]]/g, '\\$&')
-    var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+    const regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
       results = regex.exec(url)
     if (!results) return null
     if (!results[2]) return ''
     return decodeURIComponent(results[2].replace(/\+/g, ' '))
   },
   removeParam: function (parameter) {
-    var url = document.location.href
-    var urlparts = url.split('?')
+    let url = document.location.href
+    const urlparts = url.split('?')
 
     if (urlparts.length >= 2) {
-      var urlBase = urlparts.shift()
-      var queryString = urlparts.join('?')
+      url = urlparts.shift()
+      const queryString = urlparts.join('?')
 
-      var prefix = encodeURIComponent(parameter) + '='
-      var pars = queryString.split(/[&;]/g)
-      for (var i = pars.length; i-- > 0; )
+      const prefix = encodeURIComponent(parameter) + '='
+      const pars = queryString.split(/[&;]/g)
+      for (let i = pars.length; i-- > 0; )
         if (pars[i].lastIndexOf(prefix, 0) !== -1) pars.splice(i, 1)
-      url = urlBase + '?' + pars.join('&')
+      if (pars.length) {
+        url = url + '?' + pars.join('&')
+      }
       window.history.pushState('', document.title, url) // added this line to push the new url directly to url bar .
     }
     return url
@@ -465,6 +467,7 @@ const CommonUtils = {
       time2: $.format.date(dd, 'HH') + ':' + $.format.date(dd, 'mm'),
       year: $.format.date(dd, 'yyyy'),
       gmt: timeZone,
+      monthIndex: dd.getMonth(),
     }
   },
   getGMTZoneString: function () {
@@ -515,40 +518,6 @@ const CommonUtils = {
   dispatchAnalyticsEvents: (data) => {
     const event = new CustomEvent('dataLayer-event', {detail: data})
     document.dispatchEvent(event)
-  },
-  parseCommentHtmlBeforeSend: (text) => {
-    var elem = $('<div></div>').html(text)
-    elem.find('.atwho-inserted').each(function () {
-      var id = $(this).find('.tagging-item').data('id')
-      $(this).html('{@' + id + '@}')
-    })
-    elem.find('.tagging-item').remove()
-    return elem.text()
-  },
-  parseOldStats: (stats, type) => {
-    if (type === JOB_WORD_CONT_TYPE.EQUIVALENT) {
-      const rawCopy = {
-        approved:
-          stats.revises.length > 1
-            ? stats.revises[0].advancement_wc
-            : stats.APPROVED,
-        approved2:
-          stats.revises.length > 1 ? stats.revises[1].advancement_wc : 0,
-        draft: stats.DRAFT,
-        new: 0,
-        translated: stats.TRANSLATED,
-        rejected: stats.REJECTED,
-        total: stats.TOTAL,
-      }
-      stats = {
-        estimated_completion: stats.estimated_completion,
-        words_per_hour: stats.words_per_hour,
-        analysis_complete: stats.analysis_complete,
-        raw: rawCopy,
-        equivalent: rawCopy,
-      }
-    }
-    return stats
   },
 }
 
@@ -648,3 +617,24 @@ class DetectTripleClick {
 CommonUtils.DetectTripleClick = DetectTripleClick
 
 export default CommonUtils
+
+/**
+ * Switch position of an item inside array
+ *
+ * @param {Array} arr
+ * @param {number} targetIndex - index of item to move
+ * @param {number} newIndex - new index to move item
+ * @returns {Array}
+ */
+export function switchArrayIndex(arr, targetIndex, newIndex) {
+  return arr.reduce((acc, cur, index, arr) => {
+    if (index === newIndex) {
+      if (targetIndex > newIndex) return [...acc, arr[targetIndex], cur]
+      else return [...acc, cur, arr[targetIndex]]
+    } else if (index === targetIndex) {
+      return acc
+    }
+
+    return [...acc, cur]
+  }, [])
+}

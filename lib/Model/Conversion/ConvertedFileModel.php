@@ -19,6 +19,11 @@ class ConvertedFileModel implements \JsonSerializable
     /**
      * @var array
      */
+    private $warnings;
+
+    /**
+     * @var array
+     */
     private $data;
 
     /**
@@ -36,6 +41,7 @@ class ConvertedFileModel implements \JsonSerializable
             $this->changeCode($code);
         }
 
+        $this->warnings = [];
         $this->errors = [];
         $this->data = [];
     }
@@ -104,20 +110,11 @@ class ConvertedFileModel implements \JsonSerializable
      */
     public function addError($messageError, $debug = null)
     {
-        if($debug){
-            $this->errors[$debug] = [
-                'code' => $this->code,
-                'message' => $messageError,
-                'debug' => $debug
-            ];
-
-        } else {
-            $this->errors[] = [
-                    'code' => $this->code,
-                    'message' => $messageError,
-            ];
-        }
-
+        $this->errors[] = [
+            'code' => $this->code,
+            'message' => $messageError,
+            'debug' => $debug,
+        ];
     }
 
     /**
@@ -133,6 +130,32 @@ class ConvertedFileModel implements \JsonSerializable
     public function hasErrors()
     {
         return !empty($this->errors);
+    }
+
+    /**
+     * @param string $messageError
+     */
+    public function addWarning($messageError)
+    {
+        $this->warnings[] = [
+            'code' => $this->code,
+            'message' => $messageError,
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    public function getWarnings() {
+        return $this->warnings;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasWarnings()
+    {
+        return !empty($this->warnings);
     }
 
     /**
@@ -159,6 +182,7 @@ class ConvertedFileModel implements \JsonSerializable
         return [
             'code' => $this->getCode(),
             'errors' => $this->getErrors(),
+            'warnings' => $this->getWarnings(),
             'data' => $this->getData(),
         ];
     }

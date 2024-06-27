@@ -7,7 +7,6 @@
  *
  */
 
-use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
 use API\V2\Exceptions\AuthenticationError;
 use ConnectedServices\GDrive as GDrive;
@@ -24,8 +23,8 @@ use FilesStorage\S3FilesStorage;
 use Jobs\SplitQueue;
 use LQA\QA;
 use Matecat\SubFiltering\MateCatFilter;
+use Matecat\SubFiltering\Utils\DataRefReplacer;
 use Matecat\XliffParser\XliffParser;
-use Matecat\XliffParser\XliffUtils\DataRefReplacer;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use Model\Analysis\AnalysisDao;
 use PayableRates\CustomPayableRateDao;
@@ -123,78 +122,78 @@ class ProjectManager {
      */
     public function __construct( ArrayObject $projectStructure = null ) {
 
-
         if ( $projectStructure == null ) {
             $projectStructure = new RecursiveArrayObject(
                 [
-                    'HTTP_HOST'                    => null,
-                    'id_project'                   => null,
-                    'create_date'                  => date( "Y-m-d H:i:s" ),
-                    'id_customer'                  => self::TRANSLATED_USER,
-                    'project_features'             => [],
-                    'user_ip'                      => null,
-                    'project_name'                 => null,
-                    'result'                       => [ "errors" => [], "data" => [] ],
-                    'private_tm_key'               => 0,
-                    'uploadToken'                  => null,
-                    'array_files'                  => [], //list of file names
-                    'array_files_meta'             => [], //list of file metadata
-                    'file_id_list'                 => [],
-                    'source_language'              => null,
-                    'target_language'              => null,
-                    'job_subject'                  => 'general',
-                    'mt_engine'                    => null,
-                    'tms_engine'                   => null,
-                    'ppassword'                    => null,
-                    'array_jobs'                   => [
+                    'HTTP_HOST'                     => null,
+                    'id_project'                    => null,
+                    'create_date'                   => date( "Y-m-d H:i:s" ),
+                    'id_customer'                   => self::TRANSLATED_USER,
+                    'project_features'              => [],
+                    'user_ip'                       => null,
+                    'project_name'                  => null,
+                    'result'                        => [ "errors" => [], "data" => [] ],
+                    'private_tm_key'                => 0,
+                    'uploadToken'                   => null,
+                    'array_files'                   => [], //list of file names
+                    'array_files_meta'              => [], //list of file metadata
+                    'file_id_list'                  => [],
+                    'source_language'               => null,
+                    'target_language'               => null,
+                    'job_subject'                   => 'general',
+                    'mt_engine'                     => null,
+                    'tms_engine'                    => null,
+                    'ppassword'                     => null,
+                    'array_jobs'                    => [
                         'job_list'      => [],
                         'job_pass'      => [],
                         'job_segments'  => [],
                         'job_languages' => [],
                         'payable_rates' => [],
                     ],
-                    'job_segments'                 => [], //array of job_id => [  min_seg, max_seg  ]
-                    'segments'                     => [], //array of files_id => segments[  ]
-                    'segments-original-data'       => [], //array of files_id => segments-original-data[  ]
-                    'segments_metadata'            => [], //array of segments_metadata
-                    'segments-meta-data'           => [], //array of files_id => segments-meta-data[  ]
-                    'file-part-id'                 => [], //array of files_id => segments-meta-data[  ]
-                    'file-metadata'                => [], //array of files metadata
-                    'translations'                 => [],
-                    'notes'                        => [],
-                    'context-group'                => [],
+                    'job_segments'                  => [], //array of job_id => [  min_seg, max_seg  ]
+                    'segments'                      => [], //array of files_id => segments[  ]
+                    'segments-original-data'        => [], //array of files_id => segments-original-data[  ]
+                    'segments_metadata'             => [], //array of segments_metadata
+                    'segments-meta-data'            => [], //array of files_id => segments-meta-data[  ]
+                    'file-part-id'                  => [], //array of files_id => segments-meta-data[  ]
+                    'file-metadata'                 => [], //array of files metadata
+                    'translations'                  => [],
+                    'notes'                         => [],
+                    'context-group'                 => [],
                     //one translation for every file because translations are files related
-                    'status'                       => Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS,
-                    'job_to_split'                 => null,
-                    'job_to_split_pass'            => null,
-                    'split_result'                 => null,
-                    'job_to_merge'                 => null,
-                    'lang_detect_files'            => [],
-                    'tm_keys'                      => [],
-                    'userIsLogged'                 => false,
-                    'uid'                          => null,
-                    'skip_lang_validation'         => false,
-                    'pretranslate_100'             => 0,
-                    'only_private'                 => 0,
-                    'owner'                        => '',
+                    'status'                        => Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS,
+                    'job_to_split'                  => null,
+                    'job_to_split_pass'             => null,
+                    'split_result'                  => null,
+                    'job_to_merge'                  => null,
+                    'lang_detect_files'             => [],
+                    'tm_keys'                       => [],
+                    'userIsLogged'                  => false,
+                    'uid'                           => null,
+                    'skip_lang_validation'          => false,
+                    'pretranslate_100'              => 0,
+                    'pretranslate_101'             => 1,
+                    'only_private'                  => 0,
+                    'owner'                         => '',
                     Projects_MetadataDao::WORD_COUNT_TYPE_KEY => Projects_MetadataDao::WORD_COUNT_RAW,
-                    'metadata'                     => [],
-                    'id_assignee'                  => null,
-                    'session'                      => ( isset( $_SESSION ) ? $_SESSION : false ),
-                    'instance_id'                  => ( !is_null( INIT::$INSTANCE_ID ) ? INIT::$INSTANCE_ID : 0 ),
-                    'id_team'                      => null,
-                    'team'                         => null,
-                    'sanitize_project_options'     => true,
-                    'file_segments_count'          => [],
-                    'due_date'                     => null,
-                    'qa_model'                     => null,
-                    'target_language_mt_engine_id' => [],
-                    'standard_word_count'          => 0,
-                    'mmt_glossaries'               => null,
-                    'deepl_formality'              => null,
-                    'deepl_id_glossary'            => null,
+                    'metadata'                      => [],
+                    'id_assignee'                   => null,
+                    'session'                       => ( isset( $_SESSION ) ? $_SESSION : false ),
+                    'instance_id'                   => ( !is_null( INIT::$INSTANCE_ID ) ? INIT::$INSTANCE_ID : 0 ),
+                    'id_team'                       => null,
+                    'team'                          => null,
+                    'sanitize_project_options'      => true,
+                    'file_segments_count'           => [],
+                    'due_date'                      => null,
+                    'qa_model'                      => null,
+                    'target_language_mt_engine_id'  => [],
+                    'standard_word_count'           => 0,
+                    'mmt_glossaries'                => null,
+                    'deepl_formality'               => null,
+                    'deepl_id_glossary'             => null,
+                    'filters_extraction_parameters' => null,
                 ] );
-
         }
 
         $this->projectStructure = $projectStructure;
@@ -217,9 +216,9 @@ class ProjectManager {
         $this->filter = MateCatFilter::getInstance( $this->features );
 
         $this->projectStructure[ 'array_files' ] = $this->features->filter(
-                'filter_project_manager_array_files',
-                $this->projectStructure[ 'array_files' ],
-                $this->projectStructure
+            'filter_project_manager_array_files',
+            $this->projectStructure[ 'array_files' ],
+            $this->projectStructure
         );
 
         // sync array_files_meta
@@ -269,8 +268,8 @@ class ProjectManager {
 
         if ( !$newName ) {
             $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                    "code"    => -5,
-                    "message" => "Invalid Project Name " . $this->projectStructure[ 'project_name' ] . ": it should only contain numbers and letters!"
+                "code"    => -5,
+                "message" => "Invalid Project Name " . $this->projectStructure[ 'project_name' ] . ": it should only contain numbers and letters!"
             ];
             throw new Exception( "Invalid Project Name " . $this->projectStructure[ 'project_name' ] . ": it should only contain numbers and letters!", -5 );
         }
@@ -284,8 +283,8 @@ class ProjectManager {
     protected function _validateUploadToken() {
         if ( !isset( $this->projectStructure[ 'uploadToken' ] ) || !Utils::isTokenValid( $this->projectStructure[ 'uploadToken' ] ) ) {
             $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                    "code"    => -19,
-                    "message" => "Invalid Upload Token."
+                "code"    => -19,
+                "message" => "Invalid Upload Token."
             ];
             throw new Exception( "Invalid Upload Token.", -19 );
         }
@@ -342,15 +341,15 @@ class ProjectManager {
     /**
      * Save features in project metadata
      */
-    private function saveFeaturesInMetadata(){
+    private function saveFeaturesInMetadata() {
 
         $dao = new Projects_MetadataDao();
 
         $featureCodes = $this->features->getCodes();
         if ( !empty( $featureCodes ) ) {
             $dao->set( $this->projectStructure[ 'id_project' ],
-                Projects_MetadataDao::FEATURES_KEY,
-                implode( ',', $featureCodes )
+                    Projects_MetadataDao::FEATURES_KEY,
+                    implode( ',', $featureCodes )
             );
         }
     }
@@ -368,50 +367,64 @@ class ProjectManager {
     private function saveMetadata() {
 
         $options = $this->projectStructure[ 'metadata' ];
-        $dao = new Projects_MetadataDao();
+        $dao     = new Projects_MetadataDao();
 
         // "From API" flag
-        if(isset($this->projectStructure['from_api']) and $this->projectStructure[ 'from_api' ] ){
-            $options['from_api'] = 1;
+        if ( isset( $this->projectStructure[ 'from_api' ] ) and $this->projectStructure[ 'from_api' ] ) {
+            $options[ 'from_api' ] = 1;
+        }
+
+        // pretranslate_101
+        if(isset($this->projectStructure['pretranslate_101'])){
+            $options['pretranslate_101'] = $this->projectStructure['pretranslate_101'];
+        }
+        /**
+         * Here we have the opportunity to add other features as dependencies of the ones
+         * which are already explicitly set.
+         */
+        $this->features->loadProjectDependenciesFromProjectMetadata( $options );
+
+        if(isset($this->projectStructure['filters_extraction_parameters']) and $this->projectStructure[ 'filters_extraction_parameters' ] ){
+            $options['filters_extraction_parameters'] = json_encode($this->projectStructure['filters_extraction_parameters']);
         }
 
         if ( $this->projectStructure[ 'sanitize_project_options' ] ) {
             $options = $this->sanitizeProjectOptions( $options );
         }
 
-        if(!empty($options)){
+        if ( !empty( $options ) ) {
             foreach ( $options as $key => $value ) {
                 $dao->set(
-                    $this->projectStructure[ 'id_project' ],
-                    $key,
-                    $value
+                        $this->projectStructure[ 'id_project' ],
+                        $key,
+                        $value
                 );
             }
         }
 
         // add MMT Glossaries here
-        if( $this->projectStructure[ 'mmt_glossaries' ] and !empty( $this->projectStructure[ 'mmt_glossaries' ] ) ){
+        if ( $this->projectStructure[ 'mmt_glossaries' ] and !empty( $this->projectStructure[ 'mmt_glossaries' ] ) ) {
             $dao->set(
-                $this->projectStructure[ 'id_project' ],
-                'mmt_glossaries',
-                $this->projectStructure[ 'mmt_glossaries' ]
+                    $this->projectStructure[ 'id_project' ],
+                    'mmt_glossaries',
+                    $this->projectStructure[ 'mmt_glossaries' ]
             );
         }
 
         // add DeepL params here
-        if( $this->projectStructure[ 'deepl_formality' ] and !empty( $this->projectStructure[ 'deepl_formality' ] ) ){
+        if ( $this->projectStructure[ 'deepl_formality' ] and !empty( $this->projectStructure[ 'deepl_formality' ] ) ) {
             $dao->set(
-                $this->projectStructure[ 'id_project' ],
-                'deepl_formality',
-                $this->projectStructure[ 'deepl_formality' ]
+                    $this->projectStructure[ 'id_project' ],
+                    'deepl_formality',
+                    $this->projectStructure[ 'deepl_formality' ]
             );
         }
 
-        if( $this->projectStructure[ 'deepl_id_glossary' ] and !empty( $this->projectStructure[ 'deepl_id_glossary' ] ) ){
+        if ( $this->projectStructure[ 'deepl_id_glossary' ] and !empty( $this->projectStructure[ 'deepl_id_glossary' ] ) ) {
             $dao->set(
-                $this->projectStructure[ 'id_project' ],
-                'deepl_id_glossary',
-                $this->projectStructure[ 'deepl_id_glossary' ]
+                    $this->projectStructure[ 'id_project' ],
+                    'deepl_id_glossary',
+                    $this->projectStructure[ 'deepl_id_glossary' ]
             );
         }
 
@@ -424,8 +437,8 @@ class ProjectManager {
         $sanitizer = new ProjectOptionsSanitizer( $options );
 
         $sanitizer->setLanguages(
-                $this->projectStructure[ 'source_language' ],
-                $this->projectStructure[ 'target_language' ]
+            $this->projectStructure[ 'source_language' ],
+            $this->projectStructure[ 'target_language' ]
         );
 
         return $sanitizer->sanitize();
@@ -481,7 +494,7 @@ class ProjectManager {
              * Normalize ArrayObject team in TeamStruct
              */
             $this->projectStructure[ 'team' ] = new TeamStruct(
-                    $this->features->filter( 'filter_team_for_project_creation', $this->projectStructure[ 'team' ]->getArrayCopy() )
+                $this->features->filter( 'filter_team_for_project_creation', $this->projectStructure[ 'team' ]->getArrayCopy() )
             );
 
             //clean the cache for the team member list of assigned projects
@@ -641,17 +654,17 @@ class ProjectManager {
                     $fs->makeCachePackage( $sha1, $this->projectStructure[ 'source_language' ], false, $filePathName );
                 } catch ( Exception $e ) {
                     $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                            "code"    => -230,
-                            "message" => $e->getMessage()
+                        "code"    => -230,
+                        "message" => $e->getMessage()
                     ];
                 }
 
                 // put reference to cache in upload dir to link cache to session
                 $fs->linkSessionToCacheForAlreadyConvertedFiles(
-                        $sha1,
-                        $this->projectStructure[ 'source_language' ],
-                        $this->projectStructure[ 'uploadToken' ],
-                        $fileName
+                    $sha1,
+                    $this->projectStructure[ 'source_language' ],
+                    $this->projectStructure[ 'uploadToken' ],
+                    $fileName
                 );
 
                 //add newly created link to list
@@ -672,8 +685,8 @@ class ProjectManager {
             $this->_log( $e );
             //Zip file Handling
             $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                    "code"    => $e->getCode(),
-                    "message" => $e->getMessage()
+                "code"    => $e->getCode(),
+                "message" => $e->getMessage()
             ];
         }
 
@@ -743,39 +756,39 @@ class ProjectManager {
 
                         //Failed to store the original Zip
                         $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                                "code" => -10, "message" => $e->getMessage()
+                            "code" => -10, "message" => $e->getMessage()
                         ];
 
                     } elseif ( $e->getCode() == -11 ) {
                         $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                                "code" => $e->getCode(), "message" => "Failed to store reference files on disk. Permission denied"
+                            "code" => $e->getCode(), "message" => "Failed to store reference files on disk. Permission denied"
                         ];
                     } elseif ( $e->getCode() == -12 ) {
                         $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                                "code" => $e->getCode(), "message" => "Failed to store reference files in database"
+                            "code" => $e->getCode(), "message" => "Failed to store reference files in database"
                         ];
                     } // SEVERE EXCEPTIONS HERE
                     elseif ( $e->getCode() == -6 ) {
                         //"File not found on server after upload."
                         $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                                "code"    => $e->getCode(),
-                                "message" => $e->getMessage()
+                            "code"    => $e->getCode(),
+                            "message" => $e->getMessage()
                         ];
                     } elseif ( $e->getCode() == -3 ) {
                         $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                                "code"    => -16,
-                                "message" => "File not found. Failed to save XLIFF conversion on disk."
+                            "code"    => -16,
+                            "message" => "File not found. Failed to save XLIFF conversion on disk."
                         ];
                     } elseif ( $e->getCode() == -13 ) {
                         $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                                "code" => $e->getCode(), "message" => $e->getMessage()
+                            "code" => $e->getCode(), "message" => $e->getMessage()
                         ];
                         //we can not write to disk!! Break project creation
                     } // S3 EXCEPTIONS HERE
                     elseif ( $e->getCode() == -200 ) {
                         $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                                "code"    => -200,
-                                "message" => $e->getMessage()
+                            "code"    => -200,
+                            "message" => $e->getMessage()
                         ];
                     } else {
                         if ( $e->getCode() == 0 ) {
@@ -785,8 +798,8 @@ class ProjectManager {
 
                             if ( strpos( $e->getMessage(), $copyErrorMsg ) !== false ) {
                                 $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                                        "code"    => -200,
-                                        "message" => 'There was a problem during the upload of your file(s). Please, try to rename your file(s) avoiding non-standard characters'
+                                    "code"    => -200,
+                                    "message" => 'There was a problem during the upload of your file(s). Please, try to rename your file(s) avoiding non-standard characters'
                                 ];
                             }
                         }
@@ -839,10 +852,10 @@ class ProjectManager {
             }
 
             $featureSet->run( "beforeInsertSegments", $this->projectStructure,
-                    [
-                            'total_project_segments' => $this->total_segments,
-                            'files_wc'               => $this->files_word_count
-                    ]
+                [
+                    'total_project_segments' => $this->total_segments,
+                    'files_wc'               => $this->files_word_count
+                ]
             );
 
             foreach ( $totalFilesStructure as $fid => $empty ) {
@@ -856,15 +869,15 @@ class ProjectManager {
 
             if ( $e->getCode() == -1 ) {
                 $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                        "code" => -1, "message" => "No text to translate in the file {$e->getMessage()}."
+                    "code" => -1, "message" => "No text to translate in the file {$e->getMessage()}."
                 ];
                 if ( INIT::$FILE_STORAGE_METHOD != 's3' ) {
                     $fs->deleteHashFromUploadDir( $this->uploadDir, $linkFile );
                 }
             } elseif ( $e->getCode() == -4 ) {
                 $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                        "code"    => -7,
-                        "message" => "Xliff Import Error: {$e->getMessage()}"
+                    "code"    => -7,
+                    "message" => "Xliff Import Error: {$e->getMessage()}"
                 ];
             } elseif ( $e->getCode() == 400 ) {
 
@@ -872,14 +885,14 @@ class ProjectManager {
 
                 //invalid Trans-unit value found empty ID
                 $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                        "code"    => $e->getCode(),
-                        "message" => $message,
+                    "code"    => $e->getCode(),
+                    "message" => $message,
                 ];
             } else {
 
                 //Generic error
                 $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                        "code" => $e->getCode(), "message" => $e->getMessage()
+                    "code" => $e->getCode(), "message" => $e->getMessage()
                 ];
             }
 
@@ -947,9 +960,9 @@ class ProjectManager {
         $featureSet->run( 'postProjectCreate', $this->projectStructure );
 
         Projects_ProjectDao::updateAnalysisStatus(
-                $this->projectStructure[ 'id_project' ],
-                $this->projectStructure[ 'status' ],
-                $this->files_word_count * count( $this->projectStructure[ 'array_jobs' ][ 'job_languages' ] )
+            $this->projectStructure[ 'id_project' ],
+            $this->projectStructure[ 'status' ],
+            $this->files_word_count * count( $this->projectStructure[ 'array_jobs' ][ 'job_languages' ] )
         );
 
         $this->pushActivityLog();
@@ -1039,14 +1052,14 @@ class ProjectManager {
     private function writeFastAnalysisData() {
 
         $job_id_passes = ltrim(
-                array_reduce(
-                        array_keys( $this->projectStructure[ 'array_jobs' ][ 'job_segments' ]->getArrayCopy() ),
-                        function ( $acc, $value ) {
-                            $acc .= "," . strtr( $value, '-', ':' );
+            array_reduce(
+                array_keys( $this->projectStructure[ 'array_jobs' ][ 'job_segments' ]->getArrayCopy() ),
+                function ( $acc, $value ) {
+                    $acc .= "," . strtr( $value, '-', ':' );
 
-                            return $acc;
-                        }
-                ), "," );
+                    return $acc;
+                }
+            ), "," );
 
         foreach ( $this->projectStructure[ 'segments_metadata' ] as &$segmentElement ) {
 
@@ -1078,7 +1091,25 @@ class ProjectManager {
         $activity->ip         = $this->projectStructure[ 'user_ip' ];
         $activity->uid        = $this->projectStructure[ 'uid' ];
         $activity->event_date = date( 'Y-m-d H:i:s' );
-        Activity::save( $activity );
+
+        try {
+            WorkerClient::enqueueWithClient(
+                  AMQHandler::getNewInstanceForDaemons(),
+                  'ACTIVITYLOG',
+                  '\AsyncTasks\Workers\ActivityLogWorker',
+                  $activity,
+                  [ 'persistent' => WorkerClient::$_HANDLER->persistent ]
+
+            );
+        } catch ( Exception $e ) {
+
+            # Handle the error, logging, ...
+            $output = "**** Activity Log failed. AMQ Connection Error. **** ";
+            $output .= "{$e->getMessage()}";
+            $output .= var_export( $activity, true );
+            $this->_log( $output );
+
+        }
 
     }
 
@@ -1088,17 +1119,17 @@ class ProjectManager {
      */
     public function getAnalyzeURL() {
         return Routes::analyze(
-                [
-                        'project_name' => $this->projectStructure[ 'project_name' ],
-                        'id_project'   => $this->projectStructure[ 'id_project' ],
-                        'password'     => $this->projectStructure[ 'ppassword' ]
-                ],
-                [
-                        'http_host' => ( is_null( $this->projectStructure[ 'HTTP_HOST' ] ) ?
-                                INIT::$HTTPHOST :
-                                $this->projectStructure[ 'HTTP_HOST' ]
-                        ),
-                ]
+            [
+                'project_name' => $this->projectStructure[ 'project_name' ],
+                'id_project'   => $this->projectStructure[ 'id_project' ],
+                'password'     => $this->projectStructure[ 'ppassword' ]
+            ],
+            [
+                'http_host' => ( is_null( $this->projectStructure[ 'HTTP_HOST' ] ) ?
+                    INIT::$HTTPHOST :
+                    $this->projectStructure[ 'HTTP_HOST' ]
+                ),
+            ]
         );
     }
 
@@ -1122,10 +1153,10 @@ class ProjectManager {
                 if ( 'tmx' == $ext ) {
 
                     $file = new TMSFile(
-                            "$this->uploadDir/$fileName",
-                            $this->projectStructure[ 'private_tm_key' ][ 0 ][ 'key' ],
-                            $fileName,
-                            $pos
+                        "$this->uploadDir/$fileName",
+                        $this->projectStructure[ 'private_tm_key' ][ 0 ][ 'key' ],
+                        $fileName,
+                        $pos
                     );
 
                     $memoryFiles[] = $file;
@@ -1145,8 +1176,8 @@ class ProjectManager {
             } catch ( Exception $e ) {
 
                 $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                        "code"    => $e->getCode(),
-                        "message" => $e->getMessage()
+                    "code"    => $e->getCode(),
+                    "message" => $e->getMessage()
                 ];
 
                 throw new Exception( $e );
@@ -1197,7 +1228,7 @@ class ProjectManager {
                 } catch ( Exception $e ) {
 
                     $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                            "code" => $e->getCode(), "message" => $e->getMessage()
+                        "code" => $e->getCode(), "message" => $e->getMessage()
                     ];
 
                     $this->_log( $e->getMessage() . "\n" . $e->getTraceAsString() );
@@ -1224,9 +1255,9 @@ class ProjectManager {
         foreach ( $linkFiles[ 'zipHashes' ] as $zipHash ) {
 
             $result = $fs->linkZipToProject(
-                    $this->projectStructure[ 'create_date' ],
-                    $zipHash,
-                    $this->projectStructure[ 'id_project' ]
+                $this->projectStructure[ 'create_date' ],
+                $zipHash,
+                $this->projectStructure[ 'id_project' ]
             );
 
             if ( !$result ) {
@@ -1312,9 +1343,9 @@ class ProjectManager {
             $newJob->only_private_tm   = (int)$projectStructure[ 'only_private' ];
 
             $this->features->run( "beforeInsertJobStruct", $newJob, $projectStructure, [
-                            'total_project_segments' => $this->total_segments,
-                            'files_wc'               => $this->files_word_count
-                    ]
+                    'total_project_segments' => $this->total_segments,
+                    'files_wc'               => $this->files_word_count
+                ]
             );
 
             $newJob = Jobs_JobDao::createFromStruct( $newJob );
@@ -1326,13 +1357,13 @@ class ProjectManager {
             $projectStructure[ 'array_jobs' ][ 'payable_rates' ]->offsetSet( $newJob->id, $payableRates );
 
             // dialect_strict
-            if(isset($projectStructure['dialect_strict'])){
-                $jobsMetadataDao = new \Jobs\MetadataDao();
-                $dialectStrictObj = json_decode($projectStructure['dialect_strict'], true);
+            if ( isset( $projectStructure[ 'dialect_strict' ] ) ) {
+                $jobsMetadataDao  = new \Jobs\MetadataDao();
+                $dialectStrictObj = json_decode( $projectStructure[ 'dialect_strict' ], true );
 
-                foreach ($dialectStrictObj as $lang => $value){
-                    if(trim($lang) === trim($newJob->target)){
-                        $jobsMetadataDao->set($newJob->id, $newJob->password, 'dialect_strict', $value);
+                foreach ( $dialectStrictObj as $lang => $value ) {
+                    if ( trim( $lang ) === trim( $newJob->target ) ) {
+                        $jobsMetadataDao->set( $newJob->id, $newJob->password, 'dialect_strict', $value );
                     }
                 }
             }
@@ -1340,10 +1371,10 @@ class ProjectManager {
             try {
                 if ( isset( $projectStructure[ 'payable_rate_model_id' ] ) and !empty( $projectStructure[ 'payable_rate_model_id' ] ) and $payableRatesTemplate !== null ) {
                     CustomPayableRateDao::assocModelToJob(
-                            $projectStructure[ 'payable_rate_model_id' ],
-                            $newJob->id,
-                            $payableRatesTemplate->version,
-                            $payableRatesTemplate->name
+                        $projectStructure[ 'payable_rate_model_id' ],
+                        $newJob->id,
+                        $payableRatesTemplate->version,
+                        $payableRatesTemplate->name
                     );
                 }
 
@@ -1412,8 +1443,8 @@ class ProjectManager {
         $langsDetected = $res[ 'responseData' ][ 'translatedText' ];
         $this->_log( __CLASS__ . " - DETECT LANG RES: " . $langsDetected );
         if ( $res !== null &&
-                is_array( $langsDetected ) &&
-                count( $langsDetected ) == count( $this->projectStructure[ 'array_files' ] )
+            is_array( $langsDetected ) &&
+            count( $langsDetected ) == count( $this->projectStructure[ 'array_files' ] )
         ) {
 
             $counter = 0;
@@ -1441,8 +1472,8 @@ class ProjectManager {
 
                 //Check job's detected language. In case of undefined language, mark it as valid
                 if ( $fileLang !== 'und' &&
-                        $fileLang != $sourceLang &&
-                        $sourceLanguageExtendedName != $languageExtendedName
+                    $fileLang != $sourceLang &&
+                    $sourceLanguageExtendedName != $languageExtendedName
                 ) {
 
                     $filename2SourceLangCheck[ $currFileName ] = 'warning';
@@ -1450,9 +1481,9 @@ class ProjectManager {
                     $languageExtendedName = ucfirst( $languageExtendedName );
 
                     $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                            "code"    => -17,
-                            "message" => "The source language you selected seems " .
-                                    "to be different from the source language in \"$currFileName\". Please check."
+                        "code"    => -17,
+                        "message" => "The source language you selected seems " .
+                            "to be different from the source language in \"$currFileName\". Please check."
                     ];
                 } else {
                     $filename2SourceLangCheck[ $currFileName ] = 'ok';
@@ -1477,12 +1508,13 @@ class ProjectManager {
      * @param ArrayObject $projectStructure
      * @param int         $num_split
      * @param array       $requestedWordsPerSplit Matecat Equivalent Words ( Only valid for Pro Version )
+     * @param $count_type
      *
      * @return ArrayObject
      *
      * @throws Exception
      */
-    public function getSplitData( ArrayObject $projectStructure, $num_split = 2, $requestedWordsPerSplit = [] ) {
+    public function getSplitData( ArrayObject $projectStructure, $num_split = 2, $requestedWordsPerSplit = [], $count_type = Projects_MetadataDao::SPLIT_EQUIVALENT_WORD_TYPE ) {
 
         $num_split = (int)$num_split;
 
@@ -1511,8 +1543,20 @@ class ProjectManager {
             throw new Exception( 'Wrong job id or password. Job segment range not found.', -6 );
         }
 
-        $count_type  = Projects_MetadataDao::SPLIT_EQUIVALENT_WORD_TYPE;
         $total_words = $row_totals[ $count_type ];
+
+        // if the requested $count_type is empty (for example: equivalent raw count = 0),
+        // switch to the other one
+        if($total_words < $num_split){
+            $new_count_type = ($count_type === Projects_MetadataDao::SPLIT_EQUIVALENT_WORD_TYPE) ? Projects_MetadataDao::SPLIT_RAW_WORD_TYPE : Projects_MetadataDao::SPLIT_EQUIVALENT_WORD_TYPE;
+            $total_words = $row_totals[$new_count_type];
+            $count_type = $new_count_type;
+        }
+
+        // if the total number of words is < the number of chunks, throw an exception
+        if($total_words < $num_split){
+            throw new Exception( 'The number of words is insufficient for the requested amount of chunks.', -6 );
+        }
 
         if ( empty( $requestedWordsPerSplit ) ) {
             /*
@@ -1535,12 +1579,12 @@ class ProjectManager {
 
             if ( !array_key_exists( $chunk, $counter ) ) {
                 $counter[ $chunk ] = [
-                        'standard_word_count' => 0,
-                        'eq_word_count'       => 0,
-                        'raw_word_count'      => 0,
-                        'segment_start'       => $row[ 'id' ],
-                        'segment_end'         => 0,
-                        'last_opened_segment' => 0,
+                    'standard_word_count' => 0,
+                    'eq_word_count'       => 0,
+                    'raw_word_count'      => 0,
+                    'segment_start'       => $row[ 'id' ],
+                    'segment_end'         => 0,
+                    'last_opened_segment' => 0,
                 ];
             }
 
@@ -1619,11 +1663,11 @@ class ProjectManager {
         if ( !empty( $jTranslatorStruct ) && !empty( $this->projectStructure[ 'uid' ] ) ) {
 
             $translatorModel
-                    ->setUserInvite( ( new Users_UserDao() )->setCacheTTL( 60 * 60 )->getByUid( $this->projectStructure[ 'uid' ] ) )
-                    ->setDeliveryDate( $jTranslatorStruct->delivery_date )
-                    ->setJobOwnerTimezone( $jTranslatorStruct->job_owner_timezone )
-                    ->setEmail( $jTranslatorStruct->email )
-                    ->setNewJobPassword( Utils::randomString() );
+                ->setUserInvite( ( new Users_UserDao() )->setCacheTTL( 60 * 60 )->getByUid( $this->projectStructure[ 'uid' ] ) )
+                ->setDeliveryDate( $jTranslatorStruct->delivery_date )
+                ->setJobOwnerTimezone( $jTranslatorStruct->job_owner_timezone )
+                ->setEmail( $jTranslatorStruct->email )
+                ->setNewJobPassword( Utils::randomString() );
 
             $translatorModel->update();
         }
@@ -1680,7 +1724,7 @@ class ProjectManager {
             $projectStructure[ 'array_jobs' ][ 'job_pass' ]->append( $jobToSplit[ 'password' ] );
 
             $projectStructure[ 'array_jobs' ][ 'job_segments' ]->offsetSet( $projectStructure[ 'job_to_split' ] . "-" . $jobToSplit[ 'password' ], new ArrayObject( [
-                    $contents[ 'segment_start' ], $contents[ 'segment_end' ]
+                $contents[ 'segment_start' ], $contents[ 'segment_end' ]
             ] ) );
 
         }
@@ -1974,12 +2018,12 @@ class ProjectManager {
                                              * @see http://docs.oasis-open.org/xliff/v1.2/os/xliff-core.html#trans-unit
                                              */
                                             $this->projectStructure[ 'translations' ][ $trans_unit_reference ]->offsetSet(
-                                                    $seg_source[ 'mid' ],
-                                                    new ArrayObject( [
-                                                            2 => $target,
-                                                            4 => $xliff_trans_unit,
-                                                            6 => $position,
-                                                    ] )
+                                                $seg_source[ 'mid' ],
+                                                new ArrayObject( [
+                                                    2 => $target,
+                                                    4 => $xliff_trans_unit,
+                                                    6 => $position,
+                                                ] )
                                             );
 
                                             //seg-source and target translation can have different mrk id
@@ -2040,19 +2084,19 @@ class ProjectManager {
 
                             // segment struct
                             $segStruct = new Segments_SegmentStruct( [
-                                    'id_file'                 => $fid,
-                                    'id_file_part'            => ( isset( $filePartsId ) ) ? $filePartsId : null,
-                                    'id_project'              => $this->projectStructure[ 'id_project' ],
-                                    'internal_id'             => $xliff_trans_unit[ 'attr' ][ 'id' ],
-                                    'xliff_mrk_id'            => $seg_source[ 'mid' ],
-                                    'xliff_ext_prec_tags'     => $seg_source[ 'ext-prec-tags' ],
-                                    'xliff_mrk_ext_prec_tags' => $seg_source[ 'mrk-ext-prec-tags' ],
-                                    'segment'                 => $this->filter->fromRawXliffToLayer0( $seg_source[ 'raw-content' ] ),
-                                    'segment_hash'            => $segmentHash,
-                                    'xliff_mrk_ext_succ_tags' => $seg_source[ 'mrk-ext-succ-tags' ],
-                                    'xliff_ext_succ_tags'     => $seg_source[ 'ext-succ-tags' ],
-                                    'raw_word_count'          => $wordCount,
-                                    'show_in_cattool'         => $show_in_cattool
+                                'id_file'                 => $fid,
+                                'id_file_part'            => ( isset( $filePartsId ) ) ? $filePartsId : null,
+                                'id_project'              => $this->projectStructure[ 'id_project' ],
+                                'internal_id'             => $xliff_trans_unit[ 'attr' ][ 'id' ],
+                                'xliff_mrk_id'            => $seg_source[ 'mid' ],
+                                'xliff_ext_prec_tags'     => $seg_source[ 'ext-prec-tags' ],
+                                'xliff_mrk_ext_prec_tags' => $seg_source[ 'mrk-ext-prec-tags' ],
+                                'segment'                 => $this->filter->fromRawXliffToLayer0( $seg_source[ 'raw-content' ] ),
+                                'segment_hash'            => $segmentHash,
+                                'xliff_mrk_ext_succ_tags' => $seg_source[ 'mrk-ext-succ-tags' ],
+                                'xliff_ext_succ_tags'     => $seg_source[ 'ext-succ-tags' ],
+                                'raw_word_count'          => $wordCount,
+                                'show_in_cattool'         => $show_in_cattool
                             ] );
 
                             $this->projectStructure[ 'segments' ][ $fid ]->append( $segStruct );
@@ -2089,8 +2133,8 @@ class ProjectManager {
                             if ( isset( $xliff_trans_unit[ 'target' ][ 'raw-content' ] ) ) {
 
                                 // could not have attributes, suppress warning
-                                $state = (isset($xliff_trans_unit['target']['attr']['state'])) ? $xliff_trans_unit['target']['attr']['state'] : null;
-                                $stateQualifier = (isset($xliff_trans_unit['target']['attr'][ 'state-qualifier' ])) ? $xliff_trans_unit['target']['attr'][ 'state-qualifier' ] : null;
+                                $state                   = ( isset( $xliff_trans_unit[ 'target' ][ 'attr' ][ 'state' ] ) ) ? $xliff_trans_unit[ 'target' ][ 'attr' ][ 'state' ] : null;
+                                $stateQualifier          = ( isset( $xliff_trans_unit[ 'target' ][ 'attr' ][ 'state-qualifier' ] ) ) ? $xliff_trans_unit[ 'target' ][ 'attr' ][ 'state-qualifier' ] : null;
                                 $target_extract_external = $this->_strip_external( $xliff_trans_unit[ 'target' ][ 'raw-content' ], $xliffInfo );
 
                                 if ( $this->__isTranslated( $xliff_trans_unit[ 'source' ][ 'raw-content' ], $target_extract_external[ 'seg' ], $xliff_trans_unit, $state, $stateQualifier ) && !is_numeric( $xliff_trans_unit[ 'source' ][ 'raw-content' ] ) && !empty( $target_extract_external[ 'seg' ] ) ) {
@@ -2108,10 +2152,10 @@ class ProjectManager {
                                      * @see http://docs.oasis-open.org/xliff/v1.2/os/xliff-core.html#trans-unit
                                      */
                                     $this->projectStructure[ 'translations' ][ $trans_unit_reference ]->append(
-                                            new ArrayObject( [
-                                                    2 => $target,
-                                                    4 => $xliff_trans_unit,
-                                            ] )
+                                        new ArrayObject( [
+                                            2 => $target,
+                                            4 => $xliff_trans_unit,
+                                        ] )
                                     );
                                 }
                             }
@@ -2124,15 +2168,11 @@ class ProjectManager {
                             throw new Exception( $exception->getMessage(), -1 );
                         }
 
-                        $segmentHash = md5( $xliff_trans_unit[ 'source' ][ 'raw-content' ] );
-
-
                         //
                         // -------------------------------------
                         // START SEGMENTS META
                         // -------------------------------------
                         //
-
                         $metadataStruct = new Segments_SegmentMetadataStruct();
 
                         // check if there is sizeRestriction
@@ -2153,10 +2193,8 @@ class ProjectManager {
                         // segment original data
                         if ( !empty( $segmentOriginalData ) ) {
 
-                            $dataRefReplacer           = new DataRefReplacer( $segmentOriginalData );
                             $segmentOriginalDataStruct = new Segments_SegmentOriginalDataStruct( [
-                                    'data'             => $segmentOriginalData,
-                                    'replaced_segment' => $dataRefReplacer->replace( $this->filter->fromRawXliffToLayer0( $xliff_trans_unit[ 'source' ][ 'raw-content' ] ) ),
+                                'data' => $segmentOriginalData,
                             ] );
 
                             $this->projectStructure[ 'segments-original-data' ][ $fid ]->append( $segmentOriginalDataStruct );
@@ -2170,16 +2208,16 @@ class ProjectManager {
                         $segmentHash = $this->createSegmentHash( $xliff_trans_unit[ 'source' ][ 'raw-content' ], $segmentOriginalData, $sizeRestriction );
 
                         $segStruct = new Segments_SegmentStruct( [
-                                'id_file'             => $fid,
-                                'id_file_part'        => ( isset( $filePartsId ) ) ? $filePartsId : null,
-                                'id_project'          => $this->projectStructure[ 'id_project' ],
-                                'internal_id'         => $xliff_trans_unit[ 'attr' ][ 'id' ],
-                                'xliff_ext_prec_tags' => ( !is_null( $prec_tags ) ? $prec_tags : null ),
-                                'segment'             => $this->filter->fromRawXliffToLayer0( $xliff_trans_unit[ 'source' ][ 'raw-content' ] ),
-                                'segment_hash'        => $segmentHash,
-                                'xliff_ext_succ_tags' => ( !is_null( $succ_tags ) ? $succ_tags : null ),
-                                'raw_word_count'      => $wordCount,
-                                'show_in_cattool'     => $show_in_cattool
+                            'id_file'             => $fid,
+                            'id_file_part'        => ( isset( $filePartsId ) ) ? $filePartsId : null,
+                            'id_project'          => $this->projectStructure[ 'id_project' ],
+                            'internal_id'         => $xliff_trans_unit[ 'attr' ][ 'id' ],
+                            'xliff_ext_prec_tags' => ( !is_null( $prec_tags ) ? $prec_tags : null ),
+                            'segment'             => $this->filter->fromRawXliffToLayer0( $xliff_trans_unit[ 'source' ][ 'raw-content' ] ),
+                            'segment_hash'        => $segmentHash,
+                            'xliff_ext_succ_tags' => ( !is_null( $succ_tags ) ? $succ_tags : null ),
+                            'raw_word_count'      => $wordCount,
+                            'show_in_cattool'     => $show_in_cattool
                         ] );
 
                         $this->projectStructure[ 'segments' ][ $fid ]->append( $segStruct );
@@ -2303,10 +2341,10 @@ class ProjectManager {
             }
 
             $moved = $fs->moveFromCacheToFileDir(
-                    $fileDateSha1Path,
-                    $this->projectStructure[ 'source_language' ],
-                    $fid,
-                    $originalFileName
+                $fileDateSha1Path,
+                $this->projectStructure[ 'source_language' ],
+                $fid,
+                $originalFileName
             );
 
             // check if the files were moved
@@ -2398,9 +2436,9 @@ class ProjectManager {
                 Segments_SegmentOriginalDataDao::insertRecord( $id_segment, $map );
 
                 $this->projectStructure[ 'segments' ][ $fid ][ $position ]->segment = $this->features->filter(
-                        'correctTagErrors',
-                        $this->projectStructure[ 'segments' ][ $fid ][ $position ]->segment,
-                        $map
+                    'correctTagErrors',
+                    $this->projectStructure[ 'segments' ][ $fid ][ $position ]->segment,
+                    $map
                 );
             }
 
@@ -2417,14 +2455,14 @@ class ProjectManager {
             $this->projectStructure[ 'file_segments_count' ] [ $fid ]++;
 
             $_metadata = [
-                    'id'                => $id_segment,
-                    'internal_id'       => self::sanitizedUnitId( $this->projectStructure[ 'segments' ][ $fid ][ $position ]->internal_id, $fid ),
-                    'segment'           => $this->projectStructure[ 'segments' ][ $fid ][ $position ]->segment,
-                    'segment_hash'      => $this->projectStructure[ 'segments' ][ $fid ][ $position ]->segment_hash,
-                    'raw_word_count'    => $this->projectStructure[ 'segments' ][ $fid ][ $position ]->raw_word_count,
-                    'xliff_mrk_id'      => $this->projectStructure[ 'segments' ][ $fid ][ $position ]->xliff_mrk_id,
-                    'show_in_cattool'   => $this->projectStructure[ 'segments' ][ $fid ][ $position ]->show_in_cattool,
-                    'additional_params' => null,
+                'id'                => $id_segment,
+                'internal_id'       => self::sanitizedUnitId( $this->projectStructure[ 'segments' ][ $fid ][ $position ]->internal_id, $fid ),
+                'segment'           => $this->projectStructure[ 'segments' ][ $fid ][ $position ]->segment,
+                'segment_hash'      => $this->projectStructure[ 'segments' ][ $fid ][ $position ]->segment_hash,
+                'raw_word_count'    => $this->projectStructure[ 'segments' ][ $fid ][ $position ]->raw_word_count,
+                'xliff_mrk_id'      => $this->projectStructure[ 'segments' ][ $fid ][ $position ]->xliff_mrk_id,
+                'show_in_cattool'   => $this->projectStructure[ 'segments' ][ $fid ][ $position ]->show_in_cattool,
+                'additional_params' => null,
             ];
 
             /*
@@ -2447,8 +2485,8 @@ class ProjectManager {
         // can read the id of the segments table to reference it in other inserts in other tables.
         //
         if ( !(
-                empty( $this->projectStructure[ 'notes' ] ) &&
-                empty( $this->projectStructure[ 'translations' ] )
+            empty( $this->projectStructure[ 'notes' ] ) &&
+            empty( $this->projectStructure[ 'translations' ] )
         )
         ) {
 
@@ -2523,9 +2561,9 @@ class ProjectManager {
     protected function _cleanSegmentsMetadata() {
         //More cleaning on the segments, remove show_in_cattool == false
         $this->projectStructure[ 'segments_metadata' ]->exchangeArray(
-                array_filter( $this->projectStructure[ 'segments_metadata' ]->getArrayCopy(), function ( $value ) {
-                    return $value[ 'show_in_cattool' ] == 1;
-                } )
+            array_filter( $this->projectStructure[ 'segments_metadata' ]->getArrayCopy(), function ( $value ) {
+                return $value[ 'show_in_cattool' ] == 1;
+            } )
         );
     }
 
@@ -2538,8 +2576,8 @@ class ProjectManager {
     protected function _saveSegmentMetadata( $id_segment, Segments_SegmentMetadataStruct $metadataStruct = null ) {
 
         if ( $metadataStruct !== null and
-                isset( $metadataStruct->meta_key ) and $metadataStruct->meta_key !== '' and
-                isset( $metadataStruct->meta_value ) and $metadataStruct->meta_value !== ''
+            isset( $metadataStruct->meta_key ) and $metadataStruct->meta_key !== '' and
+            isset( $metadataStruct->meta_value ) and $metadataStruct->meta_value !== ''
         ) {
             $metadataStruct->id_segment = $id_segment;
             Segments_SegmentMetadataDao::save( $metadataStruct );
@@ -2560,21 +2598,21 @@ class ProjectManager {
      * @throws Exception
      */
     protected function _manageAlternativeTranslations( $xliff_trans_unit, $xliff_file_attributes, $xliffInfo = [
-            'info'                   => [],
-            'proprietary'            => false,
-            'proprietary_name'       => null,
-            'proprietary_short_name' => null,
-            'version'                => 1,
-            'converter_version'      => null,
+        'info'                   => [],
+        'proprietary'            => false,
+        'proprietary_name'       => null,
+        'proprietary_short_name' => null,
+        'version'                => 1,
+        'converter_version'      => null,
     ] ) {
 
         //Source and target language are mandatory, moreover do not set matches on public area
         if (
-                !isset( $xliff_trans_unit[ 'alt-trans' ] ) ||
-                empty( $xliff_file_attributes[ 'source-language' ] ) ||
-                empty( $xliff_file_attributes[ 'target-language' ] ) ||
-                count( $this->projectStructure[ 'private_tm_key' ] ) == 0 ||
-                $this->features->filter( 'doNotManageAlternativeTranslations', true, $xliff_trans_unit, $xliff_file_attributes )
+            !isset( $xliff_trans_unit[ 'alt-trans' ] ) ||
+            empty( $xliff_file_attributes[ 'source-language' ] ) ||
+            empty( $xliff_file_attributes[ 'target-language' ] ) ||
+            count( $this->projectStructure[ 'private_tm_key' ] ) == 0 ||
+            $this->features->filter( 'doNotManageAlternativeTranslations', true, $xliff_trans_unit, $xliff_file_attributes )
         ) {
             return;
         }
@@ -2635,7 +2673,7 @@ class ProjectManager {
 
                 //get the Props
                 $config[ 'prop' ] = json_encode( [
-                        "match-quality" => $altTrans[ 'attr' ][ 'match-quality' ]
+                    "match-quality" => $altTrans[ 'attr' ][ 'match-quality' ]
                 ] );
 
             }
@@ -2679,21 +2717,21 @@ class ProjectManager {
                 $originalState     = @$translation_row[ 4 ][ 'seg-target' ][ $position ][ 'attr' ][ 'state' ];
 
                 $iceLockArray = $this->features->filter( 'setSegmentTranslationFromXliffValues',
-                        [
-                                'approved'            => @$translation_row [ 4 ][ 'attr' ][ 'approved' ],
-                                'locked'              => 0,
-                                'match_type'          => 'ICE',
-                            // we want to be consistent, eq_word_count must be set to the correct value discounted by payable rate, no more exceptions.
-                                'eq_word_count'       => floatval( $segment->raw_word_count / 100 * $ice_payable_rates ),
-                                'standard_word_count' => null,
-                                'status'              => $this->evaluateTranslationStatus( $translation_row[ 4 ], $position ),
-                                'suggestion_match'    => null,
-                                'suggestion'          => null,
-                                'trans-unit'          => $translation_row[ 4 ],
-                                'payable_rates'       => $this->projectStructure[ 'array_jobs' ][ 'payable_rates' ][ $jid ]
-                        ],
-                        $this->projectStructure,
-                        $this->filter
+                    [
+                        'approved'            => @$translation_row [ 4 ][ 'attr' ][ 'approved' ],
+                        'locked'              => 0,
+                        'match_type'          => 'ICE',
+                        // we want to be consistent, eq_word_count must be set to the correct value discounted by payable rate, no more exceptions.
+                        'eq_word_count'       => floatval( $segment->raw_word_count / 100 * $ice_payable_rates ),
+                        'standard_word_count' => null,
+                        'status'              => $this->evaluateTranslationStatus( $translation_row[ 4 ], $position ),
+                        'suggestion_match'    => null,
+                        'suggestion'          => null,
+                        'trans-unit'          => $translation_row[ 4 ],
+                        'payable_rates'       => $this->projectStructure[ 'array_jobs' ][ 'payable_rates' ][ $jid ]
+                    ],
+                    $this->projectStructure,
+                    $this->filter
                 );
 
                 if ( XliffTranslationStatus::isFinalState( $originalState ) ) {
@@ -2731,7 +2769,7 @@ class ProjectManager {
                     'warning'                => ( $check->thereAreErrors() ) ? 1 : 0,
                     'suggestion_match'       => $iceLockArray[ 'suggestion_match' ],
                     'standard_word_count'    => $iceLockArray[ 'standard_word_count' ],
-                    'version_number'         => (isset($iceLockArray[ 'version_number' ])) ? $iceLockArray[ 'version_number' ] : 0,
+                    'version_number'         => ( isset( $iceLockArray[ 'version_number' ] ) ) ? $iceLockArray[ 'version_number' ] : 0,
                 ];
 
                 $query_translations_values[] = $sql_values;
@@ -2762,12 +2800,24 @@ class ProjectManager {
     private function evaluateTranslationStatus( $trans_unit, $position = null ) {
 
         // state handling
-        $state = null;
+        $state          = null;
+        $stateQualifier = null;
 
         if ( isset( $trans_unit[ 'seg-target' ][ $position ][ 'attr' ] ) and isset( $trans_unit[ 'seg-target' ][ $position ][ 'attr' ][ 'state' ] ) ) {
             $state = $trans_unit[ 'seg-target' ][ $position ][ 'attr' ][ 'state' ];
         } elseif ( isset( $trans_unit[ 'target' ][ 'attr' ] ) and isset( $trans_unit[ 'target' ][ 'attr' ][ 'state' ] ) ) {
             $state = $trans_unit[ 'target' ][ 'attr' ][ 'state' ];
+        }
+
+        if ( isset( $trans_unit[ 'seg-target' ][ $position ][ 'attr' ] ) and isset( $trans_unit[ 'seg-target' ][ $position ][ 'attr' ][ 'state-qualifier' ] ) ) {
+            $stateQualifier = $trans_unit[ 'seg-target' ][ $position ][ 'attr' ][ 'state-qualifier' ];
+        } elseif ( isset( $trans_unit[ 'target' ][ 'attr' ] ) and isset( $trans_unit[ 'target' ][ 'attr' ][ 'state-qualifier' ] ) ) {
+            $stateQualifier = $trans_unit[ 'target' ][ 'attr' ][ 'state-qualifier' ];
+        }
+
+        // fuzzy matches are ALWAYS considered NEW (xliff 1.2)
+        if ( $stateQualifier !== null and XliffTranslationStatus::isFuzzyMatch( $stateQualifier ) ) {
+            return Constants_TranslationStatus::STATUS_NEW;
         }
 
         if ( $state !== null ) {
@@ -2785,7 +2835,7 @@ class ProjectManager {
                 return Constants_TranslationStatus::STATUS_APPROVED;
             }
 
-            if( XliffTranslationStatus::isFinalState( $state ) ){
+            if ( XliffTranslationStatus::isFinalState( $state ) ) {
                 return Constants_TranslationStatus::STATUS_APPROVED2;
             }
 
@@ -2807,12 +2857,12 @@ class ProjectManager {
      * @throws ReQueueException
      */
     protected function _strip_external( $segment, $xliffInfo = [
-            'info'                   => [],
-            'proprietary'            => false,
-            'proprietary_name'       => null,
-            'proprietary_short_name' => null,
-            'version'                => 1,
-            'converter_version'      => null,
+        'info'                   => [],
+        'proprietary'            => false,
+        'proprietary_name'       => null,
+        'proprietary_short_name' => null,
+        'version'                => 1,
+        'converter_version'      => null,
     ] ) {
 
         // Definitely DISABLED
@@ -3223,19 +3273,19 @@ class ProjectManager {
          * */
         if ( -1 === $mustBeConverted ) {
             $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                    "code"    => -8,
-                    "message" => "Proprietary xlf format detected. Not able to import this XLIFF file. ($filePathName)"
+                "code"    => -8,
+                "message" => "Proprietary xlf format detected. Not able to import this XLIFF file. ($filePathName)"
             ];
             if ( PHP_SAPI != 'cli' ) {
                 CookieManager::setCookie( "upload_session", "",
-                        [
-                                'expires'  => time() - 10000,
-                                'path'     => '/',
-                                'domain'   => INIT::$COOKIE_DOMAIN,
-                                'secure'   => true,
-                                'httponly' => true,
-                                'samesite' => 'None',
-                        ]
+                    [
+                        'expires'  => time() - 10000,
+                        'path'     => '/',
+                        'domain'   => INIT::$COOKIE_DOMAIN,
+                        'secure'   => true,
+                        'httponly' => true,
+                        'samesite' => 'None',
+                    ]
                 );
             }
         }
@@ -3281,7 +3331,7 @@ class ProjectManager {
             } catch ( Exception $e ) {
 
                 $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                        "code" => $e->getCode(), "message" => $e->getMessage()
+                    "code" => $e->getCode(), "message" => $e->getMessage()
                 ];
 
                 return;
@@ -3378,8 +3428,8 @@ class ProjectManager {
     private function __isTranslated( $source, $target, $xliff_trans_unit, $state = null, $stateQualifier = null ) {
 
         // ignore translations for fuzzy matches (xliff 1.2)
-        if ( $stateQualifier !== null ) {
-            return !XliffTranslationStatus::isFuzzyMatch( $stateQualifier );
+        if ( $stateQualifier !== null and XliffTranslationStatus::isFuzzyMatch( $stateQualifier ) ) {
+            return false;
         }
 
         if ( $state !== null ) {
@@ -3392,16 +3442,16 @@ class ProjectManager {
             $differentSourceAndTargetIsTranslated = !empty( $target );
 
             return $this->features->filter(
-                    'filterDifferentSourceAndTargetIsTranslated',
-                    $differentSourceAndTargetIsTranslated, $this->projectStructure, $xliff_trans_unit
+                'filterDifferentSourceAndTargetIsTranslated',
+                $differentSourceAndTargetIsTranslated, $this->projectStructure, $xliff_trans_unit
             );
             //return true;
         }
 
         return $this->features->filter(
-                'filterIdenticalSourceAndTargetIsTranslated',
-                false, // evaluate if identical source and target should be considered non translated
-                $this->projectStructure, $xliff_trans_unit
+            'filterIdenticalSourceAndTargetIsTranslated',
+            false, // evaluate if identical source and target should be considered non translated
+            $this->projectStructure, $xliff_trans_unit
         );
     }
 }

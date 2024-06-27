@@ -205,15 +205,13 @@ class CatUtils {
     /**
      * @param Translations_SegmentTranslationStruct $translation
      * @param                                       $is_revision
-     * @param array                                 $errors
      *
-     * @return array
+     * @return void
      * @throws ControllerReturnException
      */
-    public static function addSegmentTranslation( Translations_SegmentTranslationStruct $translation, $is_revision, array &$errors ) {
+    public static function addSegmentTranslation( Translations_SegmentTranslationStruct $translation, $is_revision ) {
 
         try {
-            //if needed here can be placed a check for affected_rows == 0 //( the return value of addTranslation )
             Translations_SegmentTranslationDao::addTranslation( $translation, $is_revision );
         } catch ( Exception $e ) {
             throw  new ControllerReturnException( $e->getMessage(), $e->getCode(), $e );
@@ -225,32 +223,31 @@ class CatUtils {
      * Make an estimation on performance
      *
      * @param array $job_stats
+     * @param       $id_job
      *
      * @return array
      */
     protected static function _performanceEstimationTime( array $job_stats, $id_job ) {
 
-        $last_10_worked_ids = Translations_SegmentTranslationDao::getLast10TranslatedSegmentIDs( $id_job );
+        $last_10_worked_ids = Translations_SegmentTranslationDao::getLast10TranslatedSegmentIDsInLastHour( $id_job );
         if ( !empty( $last_10_worked_ids ) and count( $last_10_worked_ids ) === 10 ) {
 
-            //perform check on performance if single segment are set to check or globally Forced
             // Calculating words per hour and estimated completion
-            $estimation_temp = Translations_SegmentTranslationDao::getEQWLastHour( $id_job, $last_10_worked_ids );
+            $estimation_temp  = Translations_SegmentTranslationDao::getWordsPerSecond( $id_job, $last_10_worked_ids );
+            $words_per_second = ( !empty( $estimation_temp[ 0 ][ 'words_per_second' ] ) ? $estimation_temp[ 0 ][ 'words_per_second' ] : 1 ); // avoid division by zero
 
-            $job_stats[ 'words_per_hour' ] = number_format( $estimation_temp[ 0 ][ 'words_per_hour' ] );
+            $totalWordsToDo = $job_stats[ 'raw' ][ 'new' ] + $job_stats[ 'raw' ][ 'draft' ] + $job_stats[ 'raw' ][ 'rejected' ];
 
-            // 7.2 hours
-            // $job_stats['ESTIMATED_COMPLETION'] = number_format( ($job_stats['DRAFT']+$job_stats['REJECTED'])/$estimation_temp[0]['words_per_hour'],1);
-            // 1 h 32 m
-            // $job_stats['ESTIMATED_COMPLETION'] = date("G",($job_stats['DRAFT']+$job_stats['REJECTED'])/$estimation_temp[0]['words_per_hour']*3600) . "h " . date("i",($job_stats['DRAFT']+$job_stats['REJECTED'])/$estimation_temp[0]['words_per_hour']*3600) . "m";
+            $totalTimeSeconds = $totalWordsToDo / $words_per_second;
 
-            //YYY [Remove] Backward compatibility
-            if ( isset( $job_stats[ 'DRAFT' ] ) ) {
-                $job_stats[ 'estimated_completion' ] = date( "z\d G\h i\m", ( $job_stats[ 'DRAFT' ] + $job_stats[ 'REJECTED' ] ) * 3600 / ( !empty( $estimation_temp[ 0 ][ 'words_per_hour' ] ) ? $estimation_temp[ 0 ][ 'words_per_hour' ] : 1 ) - 3600 );
-            } else {
-                $job_stats[ 'estimated_completion' ] = date( "z\d G\h i\m", ( $job_stats[ 'equivalent' ][ 'draft' ] + $job_stats[ 'equivalent' ][ 'rejected' ] ) * 3600 / ( !empty( $estimation_temp[ 0 ][ 'words_per_hour' ] ) ? $estimation_temp[ 0 ][ 'words_per_hour' ] : 1 ) - 3600 );
-            }
+            // Convert the total time into days, hours, minutes, and seconds
+            $days    = floor( $totalTimeSeconds / 86400 );
+            $hours   = floor( ( $totalTimeSeconds % 86400 ) / 3600 );
+            $minutes = floor( ( $totalTimeSeconds % 3600 ) / 60 );
 
+            // Format the time in 'Dd Hh Mm Ss' format
+            $job_stats[ 'estimated_completion' ] = sprintf( '%dd %dh %02dm', $days, $hours, $minutes );
+            $job_stats[ 'words_per_hour' ]       = round( $words_per_second * 3600 );
         }
 
         return $job_stats;
@@ -389,8 +386,6 @@ class CatUtils {
 
     /**
      *
-     * // YYY [Remove] backward compatibility for current projects
-     *
      * This function expose stats supporting new and old version counter
      *
      * @param WordCountStruct $wCount
@@ -398,15 +393,9 @@ class CatUtils {
      *
      * @return array
      */
-    public static function getFastStatsForJob( WordCountStruct $wCount, $performanceEstimation = true, $wordCountType = Projects_MetadataDao::WORD_COUNT_RAW ) {
+    public static function getFastStatsForJob( WordCountStruct $wCount, $performanceEstimation = true ) {
 
-        if ( $wordCountType == Projects_MetadataDao::WORD_COUNT_RAW ) {
-            $job_stats = $wCount->jsonSerialize();
-        } else {
-            $job_stats = self::getPlainStatsForJobs( $wCount );
-            $job_stats = self::_getStatsForJob( $job_stats ); //true set estimation check if present
-        }
-
+        $job_stats = $wCount->jsonSerialize();
         if ( !$performanceEstimation ) {
             return $job_stats;
         }
@@ -747,14 +736,14 @@ class CatUtils {
     /**
      * Returns the string representing the overall quality for a job,
      *
-     * @param Jobs_JobStruct         $job
+     * @param Jobs_JobStruct $job
      *
-     * @param array                  $chunkReviews
+     * @param array          $chunkReviews
      *
      * @return string
      * @throws ReflectionException
      */
-    public static function getQualityOverallFromJobStruct( Jobs_JobStruct $job,  array $chunkReviews = [] ) {
+    public static function getQualityOverallFromJobStruct( Jobs_JobStruct $job, array $chunkReviews = [] ) {
         $values = self::getChunkReviewStructFromJobStruct( $job, $chunkReviews );
 
         if ( !isset( $values ) ) {
@@ -996,6 +985,33 @@ class CatUtils {
         $idJobs = array_unique( $idJobs );
 
         return Jobs_JobDao::getSegmentTranslationsCount( $idJobs );
+    }
+
+    /**
+     * This function appends _{x} to a string.
+     *
+     * Example: house   ---> house_1
+     *          house_1 ---> house_2
+     *
+     * @param string $string
+     *
+     * @return string
+     */
+    public static function getUniqueName($string){
+
+        $a = explode("_", $string);
+        $end = (int)end($a);
+
+        if(($end > 0) and count($a)>1 ){
+            array_pop($a);
+        }
+
+        $name = implode('_', $a);
+
+        $return = $name;
+        $return .= '_'.($end+1);
+
+        return $return;
     }
 }
 

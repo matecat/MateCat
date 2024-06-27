@@ -175,6 +175,7 @@ class glossaryController extends ajaxController {
         $params = [
                 'action'  => 'get',
                 'payload' => [
+                        'id_job'     => $this->id_job,
                         'id_segment'     => $this->id_segment,
                         'id_client'      => $this->id_client,
                         'tm_keys'        => $this->jobData[ 'tm_keys' ],

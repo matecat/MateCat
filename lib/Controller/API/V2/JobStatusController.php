@@ -57,7 +57,7 @@ class JobStatusController extends BaseChunkController {
         if ( in_array( $status, [
                 Constants_TranslationStatus::STATUS_TRANSLATED, Constants_TranslationStatus::STATUS_APPROVED, Constants_TranslationStatus::STATUS_APPROVED2
         ] ) ) {
-            $unchangeable_segments = Translations_SegmentTranslationDao::getUnchangebleStatus(
+            $unchangeable_segments = Translations_SegmentTranslationDao::getUnchangeableStatus(
                     $this->chunk, $segments_id, $status, $source_page
             );
             $segments_id          = array_diff( $segments_id, $unchangeable_segments );
@@ -65,7 +65,6 @@ class JobStatusController extends BaseChunkController {
             if ( !empty( $segments_id ) ) {
 
                 try {
-                    WorkerClient::init( new AMQHandler() );
                     WorkerClient::enqueue( 'JOBS', '\AsyncTasks\Workers\BulkSegmentStatusChangeWorker',
                             [
                                     'segment_ids'        => $segments_id,

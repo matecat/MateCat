@@ -18,7 +18,7 @@ $klein->with('/api/v3/projects/[:id_project]/[:password]', function() {
 });
 
 $klein->with( '/api/v3/jobs/[:id_job]/[:password]', function () {
-    route( '', 'GET', '\API\V3\ChunkController', 'show' ); //this do not show some info like teams and translators
+    route( '', 'GET', '\API\V3\ChunkController', 'show' ); //this does not show some info like teams and translators
     route( '/quality-report/segments', 'GET', 'Features\SecondPassReview\Controller\API\QualityReportController', 'segments' );
     route( '/files', 'GET', '\API\V3\FileInfoController', 'getInfo' );
     route( '/file/[:id_file]/instructions', 'GET', '\API\V3\FileInfoController', 'getInstructions' );
@@ -76,7 +76,6 @@ route( '/api/v3/projects/[:id_project]/[:password]/segment-analysis',  'GET',  '
 route( '/api/v3/jobs/[:id_job]/[:password]/segment-analysis',          'GET',  'API\V3\SegmentAnalysisController', 'job' );
 route( '/api/v3/create-key',  'POST', 'API\V3\MyMemoryController', 'create' );
 
-
 // MMT
 $klein->with( '/api/v3/mmt/[:engineId]', function () {
     route( '/keys', 'GET', '\API\V3\ModernMTController', 'keys' );
@@ -96,4 +95,14 @@ $klein->with( '/api/v3/deepl/[:engineId]', function () {
     route( '/glossaries/[:id]', 'DELETE', '\API\V3\DeepLGlossaryController', 'delete' );
     route( '/glossaries/[:id]', 'GET', '\API\V3\DeepLGlossaryController', 'get' );
     route( '/glossaries/[:id]/entries', 'GET', '\API\V3\DeepLGlossaryController', 'getEntries' );
+} );
+
+// PROJECT TEMPLATE
+$klein->with( '/api/v3/project-template', function () {
+    route( '/schema', 'GET', '\API\V3\ProjectTemplateController', 'schema' );
+    route( '/', 'GET', '\API\V3\ProjectTemplateController', 'all' );
+    route( '/', 'POST', '\API\V3\ProjectTemplateController', 'create' );
+    route( '/[:id]', 'DELETE', '\API\V3\ProjectTemplateController', 'delete' );
+    route( '/[:id]', 'PUT', '\API\V3\ProjectTemplateController', 'update' );
+    route( '/[:id]', 'GET', '\API\V3\ProjectTemplateController', 'get' );
 } );

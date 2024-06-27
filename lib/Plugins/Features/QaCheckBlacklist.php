@@ -10,10 +10,12 @@ namespace Features;
 
 use AMQHandler;
 use Chunks_ChunkStruct;
+use Exception;
 use Features\QaCheckBlacklist\Utils\BlacklistUtils;
 use Projects\ProjectModel;
 use Projects_ProjectDao;
 use RedisHandler;
+use ReflectionException;
 use Segments_SegmentStruct;
 use TaskRunner\Commons\QueueElement;
 use Translations\WarningDao;
@@ -27,6 +29,9 @@ class QaCheckBlacklist extends BaseFeature {
 
     const BLACKLIST_SCOPE = 'blacklist' ;
 
+    /**
+     * @throws Exception
+     */
     public function postTMSegmentAnalyzed( $params ) {
         $tm_data = $params['tm_data'];
 
@@ -48,8 +53,10 @@ class QaCheckBlacklist extends BaseFeature {
 
     }
 
+    /**
+     * @throws Exception
+     */
     protected static function enqueueTranslationCheck( $queue_element ) {
-        WorkerClient::init( new AMQHandler() );
         WorkerClient::enqueue( 'QA_CHECKS',
                 '\Features\QaCheckBlacklist\Worker\BlacklistWorker',
                 $queue_element,
@@ -57,12 +64,19 @@ class QaCheckBlacklist extends BaseFeature {
         );
     }
 
+    /**
+     * @throws Exception
+     */
     public function postProjectCreate( $projectStructure ) {
         $project_struct = Projects_ProjectDao::findById( $projectStructure[ 'result' ][ 'id_project' ] );
         $project_model = new ProjectModel($project_struct );
         $project_model->saveBlacklistPresence();
     }
 
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
     public function setTranslationCommitted( $params ) {
         $translation = $params[ 'translation' ];
 

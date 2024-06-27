@@ -80,21 +80,21 @@ const AnalyzeMain = ({volumeAnalysis, project, parentRef}) => {
                 />
                 {showAnalysis ? (
                   <div className="project-body ui grid">
-                    <TransitionGroup>
+                    {/*<TransitionGroup>
                       <CSSTransition
                         key={0}
                         classNames="transitionAnalyzeMain"
                         timeout={{enter: 1000, exit: 300}}
-                      >
-                        <ProjectAnalyze
-                          volumeAnalysis={volumeAnalysis.get('jobs')}
-                          project={project}
-                          status={volumeAnalysis.get('summary').get('status')}
-                          jobToScroll={jobToScroll}
-                          showAnalysis={showAnalysis}
-                        />
-                      </CSSTransition>
-                    </TransitionGroup>
+                      >*/}
+                    <ProjectAnalyze
+                      volumeAnalysis={volumeAnalysis.get('jobs')}
+                      project={project}
+                      status={volumeAnalysis.get('summary').get('status')}
+                      jobToScroll={jobToScroll}
+                      showAnalysis={showAnalysis}
+                    />
+                    {/* </CSSTransition>
+                    </TransitionGroup>*/}
                   </div>
                 ) : null}
               </>

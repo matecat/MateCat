@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import {
   SPECIAL_ROWS_ID,
   TranslationMemoryGlossaryTabContext,
+  orderTmKeys,
 } from './TranslationMemoryGlossaryTab'
 import {tmCreateRandUser} from '../../../../api/tmCreateRandUser'
 import {createNewTmKey} from '../../../../api/createNewTmKey'
@@ -12,12 +13,12 @@ import {getInfoTmKey} from '../../../../api/getInfoTmKey'
 
 import Checkmark from '../../../../../../../img/icons/Checkmark'
 import Close from '../../../../../../../img/icons/Close'
+import CatToolActions from '../../../../actions/CatToolActions'
 
 export const TMCreateResourceRow = ({row}) => {
-  const {tmKeys, setTmKeys} = useContext(SettingsPanelContext)
-  const {setSpecialRows, setNotification} = useContext(
-    TranslationMemoryGlossaryTabContext,
-  )
+  const {tmKeys, setTmKeys, modifyingCurrentTemplate} =
+    useContext(SettingsPanelContext)
+  const {setSpecialRows} = useContext(TranslationMemoryGlossaryTabContext)
 
   const [isLookup, setIsLookup] = useState(row.r ?? false)
   const [isUpdating, setIsUpdating] = useState(row.w ?? false)
@@ -50,7 +51,6 @@ export const TMCreateResourceRow = ({row}) => {
 
   const onChangeKeyCode = (e) => {
     setKeyCode(e.currentTarget.value)
-    setNotification({})
   }
 
   const updateRow = ({isLookup, isUpdating, name, keyCode}) => {
@@ -77,8 +77,6 @@ export const TMCreateResourceRow = ({row}) => {
           id !== SPECIAL_ROWS_ID.newResource,
       ),
     )
-
-    setNotification({})
   }
 
   const onSubmit = (e) => {
@@ -104,6 +102,16 @@ export const TMCreateResourceRow = ({row}) => {
     return true
   }
 
+  const executeModifyCurrentTemplate = (updatedKeys) => {
+    modifyingCurrentTemplate((prevTemplate) => ({
+      ...prevTemplate,
+      tm: orderTmKeys(
+        updatedKeys.filter(({isActive}) => isActive),
+        prevTemplate.tm.map(({key}) => key),
+      ).map(({id, isActive, ...rest}) => rest), //eslint-disable-line
+    }))
+  }
+
   const getNewItem = (key) => ({
     r: isLookup,
     w: isUpdating,
@@ -114,7 +122,7 @@ export const TMCreateResourceRow = ({row}) => {
     key,
     is_shared: false,
     id: key,
-    isActive: true,
+    isActive: isLookup ? isLookup : !isLookup && !isUpdating ? false : true,
   })
 
   const createNewResource = () => {
@@ -127,16 +135,29 @@ export const TMCreateResourceRow = ({row}) => {
           description: name,
         })
           .then(() => {
-            setTmKeys((prevState) => [getNewItem(key), ...prevState])
+            const updatedKeys = [getNewItem(key), ...tmKeys]
+            setTmKeys(updatedKeys)
+            executeModifyCurrentTemplate(updatedKeys)
             onReset()
+            CatToolActions.addNotification({
+              title: 'Resource created ',
+              type: 'success',
+              text: `Resource <b>${name}</b> created successfully`,
+              position: 'br',
+              allowHtml: true,
+              timer: 5000,
+            })
           })
           .catch((errors) => {
-            setNotification({
+            CatToolActions.addNotification({
+              title: 'Invalid key',
               type: 'error',
-              message:
-                !errors || errors[0].code === '23000'
-                  ? 'Invalid key.'
+              text:
+                  !errors || errors[0].code === '23000'
+                  ? 'The key you entered is invalid.'
                   : errors[0].message,
+              position: 'br',
+              timer: 5000,
             })
           })
       } else {
@@ -148,24 +169,28 @@ export const TMCreateResourceRow = ({row}) => {
 
   const addSharedResource = () => {
     const key = keyCode
-
     const createNewTmKeyCallback = () =>
       createNewTmKey({
         key,
         description: name,
       })
         .then(() => {
-          setTmKeys((prevState) => [getNewItem(key), ...prevState])
+          const updatedKeys = [getNewItem(key), ...tmKeys]
+          setTmKeys(updatedKeys)
+          executeModifyCurrentTemplate(updatedKeys)
           onReset()
           getInfoTmKeyCallback()
         })
         .catch((errors) => {
-          setNotification({
+          CatToolActions.addNotification({
+            title: 'Invalid key',
             type: 'error',
-            message:
+            text:
               errors[0].code === '23000'
                 ? 'The key you entered is invalid.'
                 : errors[0].message,
+            position: 'br',
+            timer: 5000,
           })
         })
 
@@ -190,9 +215,12 @@ export const TMCreateResourceRow = ({row}) => {
         if (data.success === true) createNewTmKeyCallback()
       })
       .catch(() => {
-        setNotification({
+        CatToolActions.addNotification({
+          title: 'Invalid key',
           type: 'error',
-          message: 'The key you entered is invalid.',
+          text: 'The key you entered is invalid.',
+          position: 'br',
+          timer: 5000,
         })
       })
   }
@@ -200,18 +228,18 @@ export const TMCreateResourceRow = ({row}) => {
   const activateInactiveSharedKey = ({event, rowAlreadyAssigned}) => {
     onReset()
 
-    setTmKeys((prevState) =>
-      prevState.map((tm) =>
-        tm.id === rowAlreadyAssigned.id
-          ? {
-              ...tm,
-              isActive: true,
-              r: true,
-              w: true,
-            }
-          : tm,
-      ),
+    const updatedKeys = tmKeys.map((tm) =>
+      tm.id === rowAlreadyAssigned.id
+        ? {
+            ...tm,
+            isActive: true,
+            r: true,
+            w: true,
+          }
+        : tm,
     )
+    setTmKeys(updatedKeys)
+    executeModifyCurrentTemplate(updatedKeys)
 
     event.preventDefault()
   }
@@ -222,27 +250,17 @@ export const TMCreateResourceRow = ({row}) => {
       .find(({key}) => key === keyCode)
 
     if (rowAlreadyAssigned) {
-      const message = rowAlreadyAssigned.isActive ? (
-        <p>The key is already assigned to one of your Active TMs.</p>
-      ) : (
-        <p>
-          The key is already assigned to one of your Inactive TMs.{' '}
-          <a
-            className="active-tm-key-link activate-key"
-            href="/"
-            onClick={(event) =>
-              activateInactiveSharedKey({event, rowAlreadyAssigned})
-            }
-          >
-            Click here to activate it
-          </a>
-        </p>
-      )
+      const message = rowAlreadyAssigned.isActive
+        ? 'The key is already assigned to one of your Active TMs.'
+        : 'The key is already assigned to one of your Inactive TMs.'
 
       if (dispathNotification) {
-        setNotification({
+        CatToolActions.addNotification({
+          title: 'Invalid key',
           type: 'error',
-          message,
+          text: message,
+          position: 'br',
+          timer: 5000,
         })
       }
 
@@ -276,7 +294,8 @@ export const TMCreateResourceRow = ({row}) => {
           className={inputNameClasses}
           value={name}
           onChange={onChangeName}
-        ></input>
+          data-testid={row.id}
+        />
       </div>
       <div>
         {row.id === SPECIAL_ROWS_ID.addSharedResource && (
@@ -285,6 +304,7 @@ export const TMCreateResourceRow = ({row}) => {
             className={inputKeyCodeClasses}
             value={keyCode}
             onChange={onChangeKeyCode}
+            data-testid={`input-${row.id}`}
           ></input>
         )}
       </div>
@@ -294,6 +314,7 @@ export const TMCreateResourceRow = ({row}) => {
           className="ui primary button settings-panel-button-icon confirm-button"
           type="submit"
           disabled={!isFormFilled}
+          data-testid="create-tmkey-confirm"
         >
           <Checkmark size={12} />
           Confirm

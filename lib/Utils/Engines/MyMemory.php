@@ -54,12 +54,13 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 
     /**
      * @param $rawValue
-     *
+     * @param array $parameters
+     * @param null $function
      * @return Engines_Results_AbstractResponse
      */
-    protected function _decode( $rawValue ) {
-        $args         = func_get_args();
-        $functionName = $args[ 2 ];
+    protected function _decode( $rawValue, array $parameters = [], $function = null ) {
+
+        $functionName = $function;
 
         if ( is_string( $rawValue ) ) {
             $decoded = json_decode( $rawValue, true );
@@ -240,6 +241,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         $parameters[ 'tnote' ]     = $_config[ 'tnote' ];
         $parameters[ 'langpair' ]  = $_config[ 'source' ] . "|" . $_config[ 'target' ];
         $parameters[ 'de' ]        = $_config[ 'email' ];
+        $parameters[ 'mt' ]        = isset($_config[ 'set_mt' ]) ? $_config[ 'set_mt' ] : true;
         $parameters[ 'client_id' ] = isset($_config[ 'uid' ]) ? $_config[ 'uid' ] : 0;
         $parameters[ 'prop' ]      = $_config[ 'prop' ];
 
@@ -278,6 +280,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         $parameters[ 'prop' ]      = $_config[ 'prop' ];
         $parameters[ 'client_id' ]  = isset($_config[ 'uid' ]) ? $_config[ 'uid' ] : 0;
         $parameters[ 'de' ]        = $_config[ 'email' ];
+        $parameters[ 'mt' ]        = isset($_config[ 'set_mt' ]) ? $_config[ 'set_mt' ] : true;
 
         if ( !empty( $_config[ 'context_after' ] ) || !empty( $_config[ 'context_before' ] ) ) {
             $parameters[ 'context_after' ]  = preg_replace( "/^(-?@-?)/", "", @$_config[ 'context_after' ] );
@@ -293,11 +296,8 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 
         $this->call( "update_relative_url", $parameters, true );
 
-        if ( $this->result->responseStatus != "200" ) {
-            return false;
-        }
-
-        return true;
+        // Let the caller handle the error management.
+        return $this->result;
 
     }
 
@@ -538,17 +538,20 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     }
 
     /**
+     * @param $id_job
+     * @param $id_segment
      * @param $source
      * @param $sourceLanguage
      * @param $targetLanguage
      * @param $keys
-     *
      * @return array
      */
-    public function glossaryGet($source, $sourceLanguage, $targetLanguage, $keys)
+    public function glossaryGet($id_job, $id_segment, $source, $sourceLanguage, $targetLanguage, $keys)
     {
         $payload = [
             'de' => INIT::$MYMEMORY_API_KEY,
+            "id_job" => $id_job,
+            "id_segment" => $id_segment,
             "source" => $source,
             "source_language" => $sourceLanguage,
             "target_language" => $targetLanguage,

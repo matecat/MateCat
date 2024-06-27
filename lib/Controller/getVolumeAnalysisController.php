@@ -50,7 +50,7 @@ class getVolumeAnalysisController extends ajaxController {
         }
 
         $analysisStatus = new Status( $_project_data, $this->featureSet, $this->user );
-        $this->result = $analysisStatus->fetchData( Projects_MetadataDao::WORD_COUNT_RAW )->getResult();
+        $this->result = $analysisStatus->fetchData()->getResult();
 
     }
 

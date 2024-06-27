@@ -62,7 +62,7 @@ route( '/api/app/jobs/[i:id_job]/[:password]/completion-events/[:id_event]',    
 route( '/api/app/heartbeat/ping',                                                   'GET', '\API\App\HeartBeat', 'ping' ) ;
 
 $klein->with('/api/app/jobs/[:id_job]/[:password]', function() {
-    route( '', 'GET', '\API\App\CompatibilityChunkController', 'show' ); // YYY [Remove] Backward compatibility.
+    route( '', 'GET', '\API\V3\ChunkController', 'show' );
     route( '/quality-report',           'GET', '\Features\SecondPassReview\Controller\API\QualityReportController', 'show' ); // alias of /api/v2/jobs/[:id_job]/[:password]/quality-report
     route( '/quality-report/segments',  'GET', 'Features\SecondPassReview\Controller\API\QualityReportController', 'segments_for_ui' ); // alias of /api/v2/jobs/[:id_job]/[:password]/quality-report/segments
 });
@@ -81,6 +81,8 @@ route( '/api/app/jobs/[:id_job]/[:password]/segment-analysis',          'GET',  
 
 route( '/api/app/projects/[:id_project]/[:password]/quality-framework', 'GET',  'API\App\QualityFrameworkController', 'project' );
 route( '/api/app/jobs/[:id_job]/[:password]/quality-framework',         'GET',  'API\App\QualityFrameworkController', 'job' );
+
+route( '/api/app/change-password',  'POST', 'API\V2\ChangePasswordController', 'changePassword' );
 
 // TM Keys
 $klein->with( '/api/app/tm-keys', function () {

@@ -1,13 +1,20 @@
 import ConfirmMessageModal from '../components/modals/ConfirmMessageModal'
 import SplitJobModal from '../components/modals/SplitJob'
-import CreateTeamModal from '../components/modals/CreateTeam'
-import ModifyTeamModal from '../components/modals/ModifyTeam'
+import {CreateTeam} from '../components/modals/CreateTeam'
+import {ModifyTeam} from '../components/modals/ModifyTeam'
 import {mergeJobChunks} from '../api/mergeJobChunks'
 import AppDispatcher from '../stores/AppDispatcher'
 import ModalsConstants from '../constants/ModalsConstants'
 
 let ModalsActions = {
-  showModalComponent: (component, props, title, style, onCloseCallback) => {
+  showModalComponent: (
+    component,
+    props,
+    title,
+    style,
+    onCloseCallback,
+    isCloseButtonDisabled,
+  ) => {
     AppDispatcher.dispatch({
       actionType: ModalsConstants.SHOW_MODAL,
       component,
@@ -15,6 +22,7 @@ let ModalsActions = {
       title,
       style,
       onCloseCallback,
+      isCloseButtonDisabled,
     })
   },
   onCloseModal: function () {
@@ -23,14 +31,14 @@ let ModalsActions = {
     })
   },
   openCreateTeamModal: function () {
-    this.showModalComponent(CreateTeamModal, {}, 'Create New Team')
+    this.showModalComponent(CreateTeam, {}, 'Create New Team')
   },
   openModifyTeamModal: function (team, hideChangeName) {
     var props = {
       team: team,
       hideChangeName: hideChangeName,
     }
-    this.showModalComponent(ModifyTeamModal, props, 'Manage Team')
+    this.showModalComponent(ModifyTeam, props, 'Manage Team')
   },
 
   openSplitJobModal: function (job, project, callback) {

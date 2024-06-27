@@ -12,15 +12,14 @@ use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use FilesStorage\S3FilesStorage;
 use LQA\ChunkReviewDao;
-use Matecat\SimpleS3\Client;
 use Matecat\XliffParser\Exception\NotSupportedVersionException;
 use Matecat\XliffParser\Exception\NotValidFileException;
+use Matecat\XliffParser\Utils\Files as XliffFiles;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use Predis\Connection\ConnectionException;
 use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\ReQueueException;
 use XliffReplacer\XliffReplacerCallback;
-use Matecat\XliffParser\Utils\Files as XliffFiles;
 
 set_time_limit( 180 );
 

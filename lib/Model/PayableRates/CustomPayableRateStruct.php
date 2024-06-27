@@ -22,6 +22,7 @@ class CustomPayableRateStruct extends DataAccess_AbstractDaoSilentStruct impleme
     public $breakdowns;
     public $created_at;
     public $modified_at;
+    public $deleted_at;
 
     /**
      * @return string
@@ -47,12 +48,13 @@ class CustomPayableRateStruct extends DataAccess_AbstractDaoSilentStruct impleme
      */
     public function getPayableRates($source, $target)
     {
+        $languages = \Langs_Languages::getInstance();
         $breakdowns = $this->getBreakdownsArray();
 
         // $isoSource and $isoTarget is in 'isocode' format
         // $source and $target are in 'rfc3066code' format
-        $isoSource = Utils::convertLanguageToIsoCode($source);
-        $isoTarget = Utils::convertLanguageToIsoCode($target);
+        $isoSource = $languages->convertLanguageToIsoCode($source);
+        $isoTarget = $languages->convertLanguageToIsoCode($target);
 
         if($isoSource === null){
             return $breakdowns['default'];
@@ -110,7 +112,7 @@ class CustomPayableRateStruct extends DataAccess_AbstractDaoSilentStruct impleme
         $size = mb_strlen(json_encode($breakdowns, JSON_NUMERIC_CHECK), '8bit');
 
         if($size > self::MAX_BREAKDOWN_SIZE){
-            throw new Exception('`breakdowns` string is too large. Max size: 64kb');
+            throw new Exception('`breakdowns` string is too large. Max size: 64kb', 400);
         }
 
         if(!isset($breakdowns['default'])){
@@ -136,9 +138,10 @@ class CustomPayableRateStruct extends DataAccess_AbstractDaoSilentStruct impleme
         // rfc3066code --->  es-ES
         // isocode     --->  es
         $format = (strlen($lang) > 3) ? 'rfc3066code' : 'isocode';
+        $languages = \Langs_Languages::getInstance();
 
-        if(!Utils::isValidLanguage($lang, $format)){
-            throw new DomainException($lang . ' is not a supported language', 403);
+        if(!$languages->isValidLanguage($lang, $format)){
+            throw new \DomainException($lang . ' is not a supported language', 403);
         }
     }
 
@@ -152,10 +155,11 @@ class CustomPayableRateStruct extends DataAccess_AbstractDaoSilentStruct impleme
             'id' => (int)$this->id,
             'uid' => (int)$this->uid,
             'version' => (int)$this->version,
-            'name' => $this->name,
+            'payable_rate_template_name' => $this->name,
             'breakdowns' => $this->getBreakdownsArray(),
             'createdAt' => DateTimeUtil::formatIsoDate($this->created_at),
             'modifiedAt' => DateTimeUtil::formatIsoDate($this->modified_at),
+            'deletedAt' => DateTimeUtil::formatIsoDate($this->deleted_at),
         ];
     }
 }

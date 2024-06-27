@@ -48,7 +48,7 @@ class ConvertFileWrapper extends convertFileController {
 
     /**
      * Check on executed conversion results
-     * @return ConvertedFileModel[]
+     * @return ConvertedFileModel
      */
     public function checkResult() {
 
@@ -65,7 +65,7 @@ class ConvertFileWrapper extends convertFileController {
             return end( $this->resultStack );
         }
 
-        return [];
+        return null;
 
     }
 

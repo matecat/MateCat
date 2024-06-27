@@ -11,15 +11,17 @@ namespace AsyncTasks\Workers;
 
 use Chunks_ChunkStruct;
 use Database;
+use Exception;
 use Features;
 use Features\ReviewExtended\ReviewUtils;
 use Features\TranslationVersions\Handlers\TranslationEventsHandler;
 use Features\TranslationVersions\Model\TranslationEvent;
-use INIT;
-use Stomp;
+use ReflectionException;
+use Stomp\Exception\StompException;
 use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\AbstractWorker;
 use TaskRunner\Commons\QueueElement;
+use TaskRunner\Exceptions\EndQueueException;
 use Translations_SegmentTranslationDao;
 use Users_UserDao;
 use WordCount\CounterModel;
@@ -37,10 +39,11 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker {
     /**
      * @param AbstractElement $queueElement
      *
-     * @return mixed|void
+     * @return void
      * @throws \ReflectionException
      * @throws \StompException
-     * @throws \TaskRunner\Exceptions\EndQueueException
+     * @throws EndQueueException
+     * @throws Exception
      */
     public function process( AbstractElement $queueElement ) {
         /**
@@ -105,7 +108,7 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker {
                     'status'      => $status
             ];
 
-            $message = json_encode( [
+            $message = [
                     '_type' => 'bulk_segment_status_change',
                     'data'  => [
                             'id_job'    => $chunk->id,
@@ -113,14 +116,10 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker {
                             'id_client' => $client_id,
                             'payload'   => $payload,
                     ]
-            ] );
+            ];
 
-            $stomp = new Stomp( INIT::$QUEUE_BROKER_ADDRESS );
-            $stomp->connect();
-            $stomp->send( INIT::$SSE_NOTIFICATIONS_QUEUE_NAME,
-                    $message,
-                    [ 'persistent' => 'true' ]
-            );
+            $this->publishToSseTopic( $message );
+
         }
     }
 
