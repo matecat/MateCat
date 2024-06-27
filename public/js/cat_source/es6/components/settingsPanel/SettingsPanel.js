@@ -254,9 +254,6 @@ export const SettingsPanel = ({
 
   const isEnabledProjectTemplateComponent = !config.is_cattool
 
-  const isEnabledProjectTemplateComponent =
-    config.isLoggedIn === 1 && !config.is_cattool
-
   return (
     <SettingsPanelContext.Provider
       value={{
