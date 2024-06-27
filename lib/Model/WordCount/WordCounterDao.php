@@ -82,7 +82,7 @@ class WordCounterDao extends DataAccess_AbstractDao {
 
     }
 
-    public static function initializeWordCount( WordCountStruct $wStruct ) {
+    public function initializeWordCount( WordCountStruct $wStruct ) {
 
         $db = Database::obtain();
 
@@ -131,7 +131,7 @@ class WordCounterDao extends DataAccess_AbstractDao {
      * @return array
      *
      */
-    public static function getStatsForJob( $id_job, $id_file = null, $jPassword = null ) {
+    public function getStatsForJob( $id_job, $id_file = null, $jPassword = null ) {
 
         /*
          * -- TOTAL field is not used, but we keep here to easy check the values and for documentation

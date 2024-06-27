@@ -85,7 +85,7 @@ class JobUrlBuilder {
         // 1. if project is passed we gain a query
         if ( $project == null ) {
             // 2. find the correlated project, if not passed
-            $project = Projects_ProjectDao::findById( $job->id_project );
+            $project = Projects_ProjectDao::findById( $job->id_project, 60 * 10 );
         }
 
         if ( !$project ) {

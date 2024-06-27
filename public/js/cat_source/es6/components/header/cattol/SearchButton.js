@@ -1,7 +1,14 @@
 import React from 'react'
 import SearchUtils from './search/searchUtils'
+import {useHotkeys} from 'react-hotkeys-hook'
+import {Shortcuts} from '../../../utils/shortcuts'
 
 export const SearchButton = () => {
+  useHotkeys(
+    Shortcuts.cattol.events.openSearch.keystrokes[Shortcuts.shortCutsKeyType],
+    (e) => openSearch(e),
+    {enableOnContentEditable: true},
+  )
   const openSearch = (event) => {
     SearchUtils.toggleSearch(event)
   }

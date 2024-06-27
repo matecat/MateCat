@@ -419,39 +419,6 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param $timestamp
-     * @param $first_segment
-     * @param $last_segment
-     * @param $id_job
-     *
-     * @return array
-     */
-    public static function getUpdatedTranslations( $timestamp, $first_segment, $last_segment, $id_job ) {
-
-        $query = "SELECT 
-            id_segment as sid, 
-            status,
-            translation 
-        FROM segment_translations
-		WHERE
-		    id_segment BETWEEN :first_segment AND :last_segment
-		AND translation_date > FROM_UNIXTIME( :timestamp )
-		AND id_job = :id_job";
-
-        $db   = Database::obtain();
-        $stmt = $db->getConnection()->prepare( $query );
-        $stmt->setFetchMode( PDO::FETCH_ASSOC );
-        $stmt->execute( [
-                'timestamp'     => $timestamp,
-                'first_segment' => $first_segment,
-                'last_segment'  => $last_segment,
-                'id_job'        => $id_job
-        ] );
-
-        return $stmt->fetchAll();
-    }
-
-    /**
      * @param $id_job
      * @param $password
      * @param $source_page

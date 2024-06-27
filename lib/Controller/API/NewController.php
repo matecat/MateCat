@@ -627,7 +627,6 @@ class NewController extends ajaxController {
         $projectStructure[ 'mt_engine' ]            = $this->postInput[ 'mt_engine' ];
         $projectStructure[ 'tms_engine' ]           = $this->postInput[ 'tms_engine' ];
         $projectStructure[ 'status' ]               = Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
-        $projectStructure[ 'skip_lang_validation' ] = true;
         $projectStructure[ 'owner' ]                = $this->user->email;
         $projectStructure[ 'metadata' ]             = $this->metadata;
         $projectStructure[ 'pretranslate_100' ]     = (int)!!$this->postInput[ 'pretranslate_100' ]; // Force pretranslate_100 to be 0 or 1
