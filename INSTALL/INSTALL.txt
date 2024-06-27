@@ -2,13 +2,13 @@ INSTALL.TXT
 ===========
 
 Server side requirements
-- Apache 2 + MySql (version >= 5.1) + PHP 5 (version >= 5.3) + PHP 5 CLI (version >= 5.3)
+- Apache 2 + MySql (version >= 5.1) + PHP 7 (version >= 7.4) + PHP 5 CLI (version >= 7.4)
 - Apache htaccess enabled
 - Apache rewrite module installed
 - Apache filter  module installed
 - Apache deflate module installed
 - Apache headers module installed
-- PHP5 JSON ( php5-json ) module installed ( For PHP Versions >= 5.5 ). N.B.: Apache needs to be restarted to apply changes
+- PHP7 JSON ( php7-json ) module installed ( For PHP Versions >= 7.4 ). N.B.: Apache needs to be restarted to apply changes
 - PHP magic_quotes_gpc off
 - PHP cURL lib
 - Edit php.ini and set at least:
@@ -81,11 +81,11 @@ Instructions (based on a Debian distro)
 7) enable the new virtualhost
     a2enmod matecat.conf
 8) set php magic quotes off
-	edit /etc/php5/apache2/php.ini ---> magic_quotes_runtime = Off
+	edit /etc/php/7.4/cli/php.ini ---> magic_quotes_runtime = Off
 9) restart apache
     apache2ctl restart
-10) enable pcntl in php5 CLI php.ini by removing pcntl functions from
-    disable_functions in /etc/php5/cli/php.ini
+10) enable pcntl in php7 CLI php.ini by removing pcntl functions from
+    disable_functions in /etc/php/7.4/cli/php.ini
 
 11)If you don't have a client id and client secret, please visit
    Google Developers Console (https://console.developers.google.com/)
