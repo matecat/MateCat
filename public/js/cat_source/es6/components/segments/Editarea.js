@@ -40,7 +40,6 @@ import {
   getEntitiesSelected,
 } from './utils/DraftMatecatUtils/manageCaretPositionNearEntity'
 import {isMacOS} from '../../utils/Utils'
-import getEntities from './utils/DraftMatecatUtils/getEntities'
 
 const {hasCommandModifier, isOptionKeyCommand, isCtrlKeyCommand} =
   KeyBindingUtil

@@ -88,7 +88,16 @@ export const transformTagsToText = (text) => {
   return text
 }
 
-const newTransform = ({source, tagsStruct}) => {
+export const transformTagsToLexiqaText = (text) => {
+  const tagsStruct = matchTagStructure(text).sort((a, b) =>
+    a.offset > b.offset ? 1 : -1,
+  )
+
+  let textNormalized = text
+  const {tags, text: tempText} = TextUtils.replaceTempTags(text)
+  textNormalized = decodeHtmlEntities(tempText)
+  textNormalized = TextUtils.restoreTempTags(tags, textNormalized)
+
   return tagsStruct.reduce(
     (acc, {data}) => {
       const {value, difference} = acc
@@ -97,72 +106,21 @@ const newTransform = ({source, tagsStruct}) => {
       const offsetStart = data.originalOffset - difference
       const offsetEnd = offsetStart + data.encodedText.length
 
-      console.log(data)
-      console.log('difference', difference)
-      console.log(offsetStart, offsetEnd)
-
       const placeholder = isToReplaceForLexiqa(data.name)
         ? lexiqaText
         : decodeNeeded
           ? data.decodedText
           : data.id
 
-      const newValue = `${value.slice(0, offsetStart)}​${placeholder}​${value.substring(offsetEnd)}`
-      console.log('relative difference', value.length - newValue.length)
-      console.log('length', value.length, newValue.length)
-      console.log('newValue', newValue)
-      console.log(
-        '➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤➤',
-      )
+      const newValue = `${value.slice(0, offsetStart)}<${placeholder}>${value.substring(offsetEnd)}`
 
       return {
         value: newValue,
         difference: difference + (value.length - newValue.length),
       }
     },
-    {value: source, difference: 0},
+    {value: textNormalized, difference: 0},
   ).value
-}
-
-export const transformTagsToLexiqaText = (text) => {
-  try {
-    let {tags, text: tempText} = TextUtils.replaceTempTags(text)
-    text = decodeHtmlEntities(tempText)
-    text = TextUtils.restoreTempTags(tags, text)
-    const tagsStruct = matchTagStructure(text).sort((a, b) =>
-      a.offset > b.offset ? 1 : -1,
-    )
-    console.log('@@@@@@@@@@@', tagsStruct)
-    text = newTransform({source: text, tagsStruct})
-
-    // for (let key in tagSignatures) {
-    //   const {placeholderRegex, decodeNeeded, placeholder, regex, lexiqaText} =
-    //     tagSignatures[key]
-    //   if (placeholderRegex) {
-    //     let globalRegex = new RegExp(
-    //       placeholderRegex.source,
-    //       placeholderRegex.flags + 'g',
-    //     )
-    //     text = text.replace(globalRegex, (match, text, index) => {
-    //       let tag = decodeNeeded
-    //         ? decodeHtmlEntities(Base64.decode(text))
-    //         : match
-    //       tag = !isToReplaceForLexiqa(key) ? '<' + tag + '>' : lexiqaText
-    //       return tag
-    //     })
-    //   } else if (regex) {
-    //     let globalRegex = new RegExp(regex)
-    //     text = text.replace(globalRegex, (match, index) => {
-    //       let tag = placeholder ? placeholder : match
-    //       tag = !isToReplaceForLexiqa(key) ? '<' + tag + '>' : lexiqaText
-    //       return tag
-    //     })
-    //   }
-    // }
-  } catch (e) {
-    console.error('Error parsing tag in transformTagsToHtml function')
-  }
-  return text
 }
 
 // Associate tag of type g with integer id
