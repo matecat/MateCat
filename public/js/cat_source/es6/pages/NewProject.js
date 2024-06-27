@@ -555,11 +555,16 @@ const NewProject = ({
     }
   }, [sourceLang, targetLangs, selectedTeam])
 
-  // useEffect(() => {
-  //   //TODO: used in main.js, remove
-  //   UI.segmentationRule = segmentationRule.id
-  //   restartConversions()
-  // }, [segmentationRule])
+  useEffect(() => {
+    //TODO: used in main.js, remove
+    if (currentProjectTemplate) {
+      const {segmentationRule} = currentProjectTemplate
+      if (UI.segmentationRule !== segmentationRule.id) {
+        UI.segmentationRule = segmentationRule.id
+        restartConversions()
+      }
+    }
+  }, [currentProjectTemplate?.segmentationRule])
 
   useEffect(() => {
     if (!isDeviceCompatible) {
