@@ -122,11 +122,14 @@
 }
 
 .options-box {
-  margin: 0;
-  width: 96%;
   display: flex;
+  gap: 40px;
+  align-items: center;
   padding: 30px 0;
-  border-bottom: 1px solid #eee;
+
+  &:first-child {
+    padding: 0 0 15px;
+  }
 }
 
 .cattool .advanced-options-box .seg_rule h3,
@@ -154,19 +157,16 @@
 }
 
 .advanced-options-box .options-box h3 {
-  text-align: right;
   font-size: 19px;
-  float: left;
-  width: 18%;
-  margin: 3px 0 0;
 }
 
 .advanced-options-box .options-box .option-description {
-  width: 45%;
-  clear: none;
+  width: 65%;
+  display: flex;
+  flex-direction: column;
   font-size: 15px;
-  margin: 0px 2% 0 5%;
   line-height: 22px;
+  align-items: start;
   text-align: left;
 }
 
