@@ -1,3 +1,4 @@
+import {NUM_CONCORDANCE_RESULTS} from '../../constants/Constants'
 import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
 
 /**
@@ -27,7 +28,7 @@ export const getConcordance = async (
     id_segment: UI.currentSegmentId,
     text: query,
     id_job: idJob,
-    num_results: UI.numMatchesResults,
+    num_results: NUM_CONCORDANCE_RESULTS,
     password: password,
     id_client: idClient,
     current_password: currentPassword,

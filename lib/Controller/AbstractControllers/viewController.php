@@ -1,5 +1,8 @@
 <?php
 
+use ConnectedServices\ConnectedServiceInterface;
+use ConnectedServices\GDrive;
+
 abstract class viewController extends controller {
 
     /**
@@ -10,17 +13,41 @@ abstract class viewController extends controller {
     protected $template = null;
 
     /**
-     * @var Google_Client
+     * @var ConnectedServiceInterface
      */
     protected $client;
 
     /**
+     * Google auth URL
+     *
      * @var string
      */
-    protected $authURL;
+    protected $googleAuthURL;
 
-    protected $login_required = false;
+    /**
+     * @var string
+     */
+    protected $githubAuthURL;
 
+    /**
+     * @var string
+     */
+    protected $linkedInAuthURL;
+
+    /**
+     * @var string
+     */
+    protected $microsoftAuthURL;
+
+    /**
+     * @var string
+     */
+    protected $facebookAuthURL;
+
+    /**
+     * @var bool
+     */
+    protected $login_required = true;
 
     /**
      * Class constructor
@@ -49,6 +76,7 @@ abstract class viewController extends controller {
      * Perform Authentication Requests and set incoming url
      */
     public function checkLoginRequiredAndRedirect() {
+
         if ( !$this->login_required ) {
             return true;
         }
@@ -58,15 +86,12 @@ abstract class viewController extends controller {
 
         //if no login set and login is required
         if ( !$this->isLoggedIn() ) {
-            //take note of url we wanted to go after
-            $_SESSION[ 'wanted_url' ] = $_SERVER[ 'REQUEST_URI' ];
-            $mustRedirectToLogin      = true;
+            $_SESSION['wanted_url'] = ltrim($_SERVER[ 'REQUEST_URI' ], '/');
+            $mustRedirectToLogin = true;
         }
 
         if ( $mustRedirectToLogin ) {
-            FlashMessage::set( 'popup', 'login', FlashMessage::SERVICE );
-
-            header( 'Location: ' . Routes::appRoot() );
+            header( "Location: " . INIT::$HTTPHOST . INIT::$BASEURL . "signin", false  );
             exit;
         }
 
@@ -114,10 +139,11 @@ abstract class viewController extends controller {
 
     /**
      * @return string
+     * @throws Exception
      * @deprecated use getAuthUrl instead.
      */
     public function generateAuthURL() {
-        return $this->getAuthUrl();
+        return $this->getGoogleAuthUrl();
     }
 
     /**
@@ -142,12 +168,14 @@ abstract class viewController extends controller {
         $this->template->footer_js            = [];
         $this->template->config_js            = [];
         $this->template->css_resources        = [];
-        $this->template->authURL              = $this->getAuthUrl();
-        $this->template->gdriveAuthURL        = \ConnectedServices\GDrive::generateGDriveAuthUrl();
+        $this->template->googleAuthURL        = $this->getGoogleAuthUrl();
+        $this->template->githubAuthUrl        = $this->getGithubAuthUrl();
+        $this->template->linkedInAuthUrl      = $this->getLinkedInAuthUrl();
+        $this->template->microsoftAuthUrl     = $this->getMicrosoftAuthUrl();
+        $this->template->facebookAuthUrl      = $this->getFacebookAuthUrl();
+        $this->template->gdriveAuthURL        = GDrive::generateGDriveAuthUrl();
         $this->template->enableMultiDomainApi = INIT::$ENABLE_MULTI_DOMAIN_API;
         $this->template->ajaxDomainsNumber    = INIT::$AJAX_DOMAINS;
-
-
     }
 
     /**
@@ -182,14 +210,93 @@ abstract class viewController extends controller {
 
     /**
      * @return string
+     * @throws Exception
      */
-    public function getAuthUrl() {
-        if ( is_null( $this->authURL ) ) {
+    public function getGoogleAuthUrl() {
+        if ( is_null( $this->googleAuthURL ) ) {
             $this->client  = OauthClient::getInstance()->getClient();
-            $this->authURL = $this->client->createAuthUrl();
+            $this->googleAuthURL = $this->client->getAuthorizationUrl();
         }
 
-        return $this->authURL;
+        return $this->googleAuthURL;
+    }
+
+    /**
+     * @return string
+     * @throws Exception
+     */
+    public function getGithubAuthUrl(){
+        if ( is_null( $this->githubAuthURL )
+            and (
+                !empty(INIT::$GITHUB_OAUTH_CLIENT_SECRET) and
+                !empty(INIT::$GITHUB_OAUTH_CLIENT_ID) and
+                !empty(INIT::$GITHUB_OAUTH_REDIRECT_URL)
+            )
+        ) {
+            $this->client  = OauthClient::getInstance(OauthClient::GITHUB_PROVIDER)->getClient();
+            $this->githubAuthURL = $this->client->getAuthorizationUrl();
+        }
+
+        return $this->githubAuthURL;
+    }
+
+    /**
+     * @return string
+     * @throws Exception
+     */
+    public function getLinkedInAuthUrl(){
+        if ( is_null( $this->linkedInAuthURL )
+            and (
+                !empty(INIT::$LINKEDIN_OAUTH_CLIENT_SECRET) and
+                !empty(INIT::$LINKEDIN_OAUTH_CLIENT_ID) and
+                !empty(INIT::$LINKEDIN_OAUTH_REDIRECT_URL)
+            )
+        ) {
+            $this->client  = OauthClient::getInstance(OauthClient::LINKEDIN_PROVIDER)->getClient();
+            $this->linkedInAuthURL = $this->client->getAuthorizationUrl();
+        }
+
+        return $this->linkedInAuthURL;
+    }
+
+    /**
+     * @return string
+     * @throws Exception
+     */
+    public function getMicrosoftAuthUrl(){
+        if (
+            is_null( $this->microsoftAuthURL )
+            and (
+                !empty(INIT::$MICROSOFT_OAUTH_CLIENT_SECRET) and
+                !empty(INIT::$MICROSOFT_OAUTH_CLIENT_ID) and
+                !empty(INIT::$MICROSOFT_OAUTH_REDIRECT_URL)
+            )
+        ) {
+            $this->client  = OauthClient::getInstance(OauthClient::MICROSOFT_PROVIDER)->getClient();
+            $this->microsoftAuthURL = $this->client->getAuthorizationUrl();
+        }
+
+        return $this->microsoftAuthURL;
+    }
+
+    /**
+     * @return string
+     * @throws Exception
+     */
+    public function getFacebookAuthUrl(){
+        if (
+            is_null( $this->facebookAuthURL )
+            and (
+                !empty(INIT::$FACEBOOK_OAUTH_CLIENT_SECRET) and
+                !empty(INIT::$FACEBOOK_OAUTH_CLIENT_ID) and
+                !empty(INIT::$FACEBOOK_OAUTH_REDIRECT_URL)
+            )
+        ) {
+            $this->client  = OauthClient::getInstance(OauthClient::FACEBOOK_PROVIDER)->getClient();
+            $this->facebookAuthURL = $this->client->getAuthorizationUrl();
+        }
+
+        return $this->facebookAuthURL;
     }
 
     /**

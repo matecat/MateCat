@@ -12,7 +12,6 @@ const modalElement = document.createElement('div')
 modalElement.id = 'modal'
 document.body.appendChild(modalElement)
 
-require('../../../../common')
 window.config = {
   enable_outsource: 1,
   basepath: 'http://localhost/',

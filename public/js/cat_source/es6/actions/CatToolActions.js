@@ -16,6 +16,7 @@ import {getDomainsList} from '../api/getDomainsList'
 import {checkJobKeysHaveGlossary} from '../api/checkJobKeysHaveGlossary'
 import {getJobMetadata} from '../api/getJobMetadata'
 import CatToolConstants from '../constants/CatToolConstants'
+import SegmentStore from '../stores/SegmentStore'
 
 let CatToolActions = {
   popupInfoUserMenu: () => 'infoUserMenu-' + config.userMail,
@@ -122,31 +123,6 @@ let CatToolActions = {
 
     config.last_job_segment = lastSegment
     config.firstSegmentOfFiles = files
-  },
-  renderHeader: () => {
-    const mountPoint = createRoot($('header')[0])
-    mountPoint.render(
-      React.createElement(Header, {
-        pid: config.id_project,
-        jid: config.job_id,
-        password: config.password,
-        reviewPassword: config.review_password,
-        source_code: config.source_rfc,
-        target_code: config.target_rfc,
-        isReview: config.isReview,
-        revisionNumber: config.revisionNumber,
-        userLogged: config.isLoggedIn,
-        projectName: config.project_name,
-        projectCompletionEnabled: config.project_completion_feature_enabled,
-        secondRevisionsCount: config.secondRevisionsCount,
-        overallQualityClass: config.overall_quality_class,
-        qualityReportHref: config.quality_report_href,
-        allowLinkToAnalysis: config.allow_link_to_analysis,
-        analysisEnabled: config.analysis_enabled,
-        isGDriveProject: config.isGDriveProject,
-        showReviseLink: config.footer_show_revise_link,
-      }),
-    )
   },
   updateFooterStatistics: function () {
     getJobStatistics(config.id_job, config.password).then(function (data) {
@@ -281,7 +257,7 @@ let CatToolActions = {
     })
   },
   onRender: (props = {}) => {
-    UI.nextUntranslatedSegmentIdByServer = null
+    SegmentStore.nextUntranslatedFromServer = null
 
     const segmentToOpen = props.segmentToOpen || false
 

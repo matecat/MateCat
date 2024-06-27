@@ -4250,7 +4250,6 @@ body.side-popup {
   font-weight: bold;
   margin-left: 5px;
   margin-top: 6px;
-  margin-right: 23px;
 }
 
 #menu-site li a.bigred:hover {
@@ -4542,13 +4541,6 @@ div.ui-user-top-image {
   font-size: 15px;
 }
 
-.user-menu-container {
-  padding-left: 50px;
-  position: relative;
-  float: right;
-  font-size: 16px;
-}
-
 #user-menu-dropdown {
   .menu {
     width: 200px;
@@ -4600,11 +4592,6 @@ img.ui-user-top-image-general {
   margin: 0 11px;
   margin-top: 2px;
   cursor: pointer;
-}
-
-.cattool .user-menu-container {
-  padding-left: 0px;
-  padding-top: 5px;
 }
 
 .cattool .organization-name {

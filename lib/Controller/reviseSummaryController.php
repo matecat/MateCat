@@ -41,6 +41,8 @@ class reviseSummaryController extends viewController {
 
 	public function doAction() {
 
+        $this->checkLoginRequiredAndRedirect();
+
         //pay a little query to avoid to fetch 5000 rows
         $this->data = $jobStruct = Jobs_JobDao::getByIdAndPassword( $this->jid, $this->password );
 

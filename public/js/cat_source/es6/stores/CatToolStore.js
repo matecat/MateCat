@@ -211,6 +211,8 @@ AppDispatcher.register(function (action) {
         style,
         onCloseCallback,
         isCloseButtonDisabled,
+        showHeader,
+        styleBody,
       } = action
       CatToolStore.emitChange(
         ModalsConstants.SHOW_MODAL,
@@ -219,6 +221,8 @@ AppDispatcher.register(function (action) {
         title,
         style,
         onCloseCallback,
+        showHeader,
+        styleBody,
         isCloseButtonDisabled,
       )
       break

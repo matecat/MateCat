@@ -3116,15 +3116,6 @@ section.opened.editor .status {
   display: block !important;
 }
 
-.timetoedit {
-  font-size: 12px;
-  text-align: left;
-  margin: 15px -55px 0 0;
-  color: #666666;
-  position: absolute;
-  right: 0;
-}
-
 .editarea #placeHolder {
   display: none;
 }
@@ -4611,6 +4602,10 @@ header {
   .wrapper {
     grid-template-columns: 208px minmax(0, 48px) minmax(200px, max-content) auto max-content; /*208px minmax(0,48px) minmax(200px, max-content) auto 120px;*/
     align-items: center;
+
+    .popover-component-container {
+      margin-left: 15px;
+    }
   }
 
   .logo-menu {

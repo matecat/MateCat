@@ -1,3 +1,4 @@
+import {NUM_CONTRIBUTION_RESULTS} from '../../constants/Constants'
 import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
 /**
  * Get contributions
@@ -35,7 +36,7 @@ export const getContributions = async ({
     id_segment: idSegment,
     text: txt,
     id_job: idJob,
-    num_results: UI.numContributionMatchesResults,
+    num_results: NUM_CONTRIBUTION_RESULTS,
     context_before: contextBefore ? contextBefore : '',
     id_before: idBefore ? idBefore : '',
     context_after: contextAfter,

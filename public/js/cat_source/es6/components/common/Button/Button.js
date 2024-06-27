@@ -31,6 +31,7 @@ export const BUTTON_MODE = {
   BASIC: 'basic',
   OUTLINE: 'outline',
   GHOST: 'ghost',
+  LINK: 'link',
 }
 export const BUTTON_SIZE = {
   SMALL: 'small',
@@ -40,6 +41,9 @@ export const BUTTON_SIZE = {
   ICON_SMALL: 'iconSmall',
   ICON_STANDARD: 'iconStandard',
   ICON_BIG: 'iconBig',
+  LINK_SMALL: 'linkSmall',
+  LINK_MEDIUM: 'linkMedium',
+  LINK_BIG: 'linkBig',
 }
 export const BUTTON_HTML_TYPE = {
   BUTTON: 'button',
@@ -66,6 +70,7 @@ export const Button = React.forwardRef(
       onClick = () => {},
       testId,
       className = '',
+      ...props
     },
     ref,
   ) => {
@@ -101,6 +106,7 @@ export const Button = React.forwardRef(
         // eslint-disable-next-line react/no-unknown-property
         onClick={onClick}
         data-testid={testId}
+        {...props}
       >
         {waiting ? (
           <>

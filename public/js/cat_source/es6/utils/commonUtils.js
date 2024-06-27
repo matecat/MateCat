@@ -511,6 +511,10 @@ const CommonUtils = {
     const event = new CustomEvent('track-error', {detail: message})
     document.dispatchEvent(event)
   },
+  dispatchCustomEvent: (eventName, data = {}) => {
+    const event = new CustomEvent(eventName, {detail: data})
+    document.dispatchEvent(event)
+  },
   dispatchTrackingEvents: (name, message) => {
     const event = new CustomEvent('track-event', {detail: {name, message}})
     document.dispatchEvent(event)
@@ -518,6 +522,13 @@ const CommonUtils = {
   dispatchAnalyticsEvents: (data) => {
     const event = new CustomEvent('dataLayer-event', {detail: data})
     document.dispatchEvent(event)
+  },
+  lookupFlashServiceParam: (name) => {
+    if (config.flash_messages && config.flash_messages.service) {
+      return config.flash_messages.service.filter((service) => {
+        return service.key == name
+      })
+    }
   },
 }
 

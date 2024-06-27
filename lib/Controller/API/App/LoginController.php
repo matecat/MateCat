@@ -73,7 +73,7 @@ class LoginController extends AbstractStatefulKleinController  {
         $user = $dao->getByEmail( $params[ 'email' ] );
 
         if ( $user && ( !is_null( $user->email_confirmed_at ) || !is_null( $user->oauth_access_token ) ) && $user->passwordMatch( $params[ 'password' ] ) ) {
-            AuthCookie::setCredentials( $user->email, $user->uid );
+            AuthCookie::setCredentials( $user );
 
             $user->confirmation_token = null;
             $user->oauth_access_token = null;
@@ -84,6 +84,19 @@ class LoginController extends AbstractStatefulKleinController  {
             $project = new RedeemableProject( $user, $_SESSION );
             $project->tryToRedeem();
             $this->response->code( 200 );
+
+            // redirect if there is the request url cookie
+            if(isset($_SESSION[ 'wanted_url' ])){
+
+                // if not home redirect
+                if($_SERVER['HTTP_REFERER'] !== INIT::$CLI_HTTP_HOST . INIT::$BASEURL){
+                    $this->response->redirect($_SESSION[ 'wanted_url' ]);
+                }
+
+                // clear the session
+                unset($_SESSION[ 'wanted_url' ]);
+            }
+
         } else {
             $this->incrementRateLimitCounter($params[ 'email' ], '/api/app/user/login');
             $this->response->code( 404 );

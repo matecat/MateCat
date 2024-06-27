@@ -298,7 +298,6 @@ afterAll(() => {
 })
 
 require('../../../ui.core')
-require('../../../ui.segment')
 UI.start = () => {}
 
 const props = {

@@ -6,6 +6,7 @@ namespace API\V1;
 use API\V2\KleinController;
 use API\V2\Validators\ChunkPasswordValidator;
 use CatUtils;
+use API\V2\Validators\LoginValidator;
 use Chunks_ChunkStruct;
 use WordCount\WordCountStruct;
 
@@ -40,6 +41,7 @@ class StatsController extends KleinController {
         } );
 
         $this->appendValidator( $Validator );
+        $this->appendValidator( new LoginValidator( $this ) );
 
     }
 

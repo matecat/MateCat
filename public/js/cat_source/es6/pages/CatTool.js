@@ -1,7 +1,12 @@
-import React, {useCallback, useEffect, useRef, useState} from 'react'
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 import {CattolFooter} from '../components/footer/CattoolFooter'
 import {Header} from '../components/header/cattol/Header'
-import NotificationBox from '../components/notificationsComponent/NotificationBox'
 import SegmentsContainer from '../components/segments/SegmentsContainer'
 import CatToolStore from '../stores/CatToolStore'
 import CatToolConstants from '../constants/CatToolConstants'
@@ -27,15 +32,18 @@ import {getTmKeysJob} from '../api/getTmKeysJob'
 import {getSupportedLanguages} from '../api/getSupportedLanguages'
 import ApplicationStore from '../stores/ApplicationStore'
 import useProjectTemplates from '../hooks/useProjectTemplates'
-import {useGoogleLoginNotification} from '../hooks/useGoogleLoginNotification'
 import ModalsActions from '../actions/ModalsActions'
 import FatalErrorModal from '../components/modals/FatalErrorModal'
 import {CattoolFooter} from '../components/footer/CattoolFooter'
+import {mountPage} from './mountPage'
+import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper'
 
 const urlParams = new URLSearchParams(window.location.search)
 const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
 
 function CatTool() {
+  const {isUserLogged} = useContext(ApplicationWrapperContext)
+
   const [options, setOptions] = useState({})
   const [wasInitSegments, setWasInitSegments] = useState(false)
   const [isFreezingSegments, setIsFreezingSegments] = useState(false)
@@ -47,9 +55,6 @@ function CatTool() {
 
   const [supportedLanguages, setSupportedLanguages] = useState([])
   const [isAnalysisCompleted, setIsAnalysisCompleted] = useState(false)
-
-  // TODO: Remove temp notification warning login google (search in files this todo)
-  useGoogleLoginNotification()
 
   const startSegmentIdRef = useRef(UI.startSegmentId)
   const callbackAfterSegmentsResponseRef = useRef()
@@ -71,10 +76,7 @@ function CatTool() {
     setOpenSettings({isOpen: true, tab: SETTINGS_PANEL_TABS.advancedOptions})
 
   const getTmKeys = () => {
-    const promises = [
-      getTmKeysJob(),
-      ...(config.isLoggedIn ? [getTmKeysUser()] : []),
-    ]
+    const promises = [getTmKeysJob(), getTmKeysUser()]
     Promise.all(promises)
       .then((values) => {
         const uniqueKeys = values
@@ -118,7 +120,7 @@ function CatTool() {
       }
     }
 
-    if (config.isLoggedIn && config.ownerIsMe) {
+    if (config.ownerIsMe) {
       getMtEnginesApi().then((mtEngines) => {
         setMtEngines([DEFAULT_ENGINE_MEMORY, ...mtEngines])
         setMTCurrentFakeTemplate()
@@ -374,7 +376,7 @@ function CatTool() {
         target_code={config.target_rfc}
         isReview={config.isReview}
         revisionNumber={config.revisionNumber}
-        userLogged={config.isLoggedIn}
+        userLogged={isUserLogged}
         projectName={config.project_name}
         projectCompletionEnabled={config.project_completion_feature_enabled}
         secondRevisionsCount={config.secondRevisionsCount}
@@ -419,10 +421,6 @@ function CatTool() {
         </div>
         <div id="plugin-mount-point"></div>
         {isFreezingSegments && <div className="freezing-overlay"></div>}
-      </div>
-
-      <div className="notifications-wrapper">
-        <NotificationBox />
       </div>
       {openSettings.isOpen && (
         <SettingsPanel
@@ -469,3 +467,9 @@ function CatTool() {
 }
 
 export default CatTool
+
+UI.start()
+mountPage({
+  Component: CatTool,
+  rootElement: document.getElementsByClassName('page-content')[0],
+})
