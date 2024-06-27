@@ -49,6 +49,7 @@ const historySourceTargets = {
 const urlParams = new URLSearchParams(window.location.search)
 const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
 const tmKeyFromQueryString = urlParams.get('private_tm_key')
+let isTmKeyFromQueryStringAddedToTemplate = false
 
 const NewProject = ({
   isLoggedIn = false,
@@ -213,6 +214,8 @@ const NewProject = ({
       r: true,
       w: true,
       owner: true,
+      tm: true,
+      glos: true,
       name: 'No Description',
       key: tmKeyFromQueryString,
       is_shared: false,
@@ -592,6 +595,45 @@ const NewProject = ({
         : prevState,
     )
   }, [currentProjectTemplate?.tm])
+
+  // check key from querystring and adding to current template
+  useEffect(() => {
+    if (
+      tmKeyFromQueryString &&
+      !isTmKeyFromQueryStringAddedToTemplate &&
+      Array.isArray(currentProjectTemplate?.tm) &&
+      tmKeys?.length
+    ) {
+      modifyingCurrentTemplate((prevTemplate) => {
+        console.log(prevTemplate)
+        const isMatched = prevTemplate.tm.some(
+          ({key}) => key === tmKeyFromQueryString,
+        )
+        // eslint-disable-next-line
+        const {id, isActive, ...tmFound} = tmKeys.find(
+          ({key}) => key === tmKeyFromQueryString,
+        )
+
+        return {
+          ...prevTemplate,
+          tm: isMatched
+            ? prevTemplate.tm.map((item) => ({
+                ...item,
+                ...(item.key === tmKeyFromQueryString && {
+                  isActive: true,
+                  r: true,
+                  w: true,
+                }),
+              }))
+            : [
+                ...prevTemplate.tm,
+                ...(tmFound ? [{...tmFound, r: true, w: true}] : []),
+              ],
+        }
+      })
+      isTmKeyFromQueryStringAddedToTemplate = true
+    }
+  }, [currentProjectTemplate?.tm, tmKeys, modifyingCurrentTemplate])
 
   const isLoadingTemplates = !projectTemplates.length
 
