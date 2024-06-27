@@ -22,16 +22,16 @@ class SetContributionMTWorker extends SetContributionWorker {
     const REDIS_PROPAGATED_ID_KEY = "mt_j:%s:s:%s";
 
     /**
-     * @param ContributionSetStruct $contributionStruct
+     * @param Jobs_JobStruct $jobStruct
      *
      * @throws EndQueueException
      * @see SetContributionWorker::_loadEngine
      *
      */
-    protected function _loadEngine( ContributionSetStruct $contributionStruct ) {
+    protected function _loadEngine( Jobs_JobStruct $jobStruct ) {
 
         try {
-            $this->_engine = Engine::getInstance( $contributionStruct->id_mt ); //Load MT Adaptive Engine
+            $this->_engine = Engine::getInstance( $jobStruct->id_mt ); //Load MT Adaptive Engine
         } catch ( Exception $e ) {
             throw new EndQueueException( $e->getMessage(), self::ERR_NO_TM_ENGINE );
         }
@@ -67,15 +67,13 @@ class SetContributionMTWorker extends SetContributionWorker {
      * @param ContributionSetStruct $contributionStruct
      * @throws Exception
      */
-    protected function _update( array $config, ContributionSetStruct $contributionStruct ) {
-
-        $jobStruct = $contributionStruct->getJobStruct();
+    protected function _update( array $config, ContributionSetStruct $contributionStruct, $id_mt_engine = 0 ) {
 
         $config[ 'segment' ]     = $contributionStruct->segment;
         $config[ 'translation' ] = $contributionStruct->translation;
         $config[ 'tuid' ]        = $contributionStruct->id_job . ":" . $contributionStruct->id_segment;
         $config[ 'session' ]     = $contributionStruct->getSessionId();
-        $config[ 'set_mt' ]      = ($jobStruct->id_mt_engine != 1) ? false : true;
+        $config[ 'set_mt' ]      = ($id_mt_engine != 1) ? false : true;
 
         // set the contribution for every key in the job belonging to the user
         $res = $this->_engine->update( $config );

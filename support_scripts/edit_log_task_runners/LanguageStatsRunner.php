@@ -19,7 +19,7 @@ class LanguageStatsRunner extends AbstractDaemon {
         self::$sleepTime = 10; //60 * 60 * 24 * 30 * 1;
     }
 
-    function main( $args = null ) {
+    function main( array $args = null ) {
 
         $lsDao = new LanguageStats_LanguageStatsDAO( Database::obtain() );
 

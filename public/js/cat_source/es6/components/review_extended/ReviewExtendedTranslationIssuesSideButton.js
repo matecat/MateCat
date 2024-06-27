@@ -1,7 +1,7 @@
 import React from 'react'
 import SegmentActions from '../../actions/SegmentActions'
 
-import Shortcuts from '../../utils/shortcuts'
+import {Shortcuts} from '../../utils/shortcuts'
 import SegmentUtils from '../../utils/segmentUtils'
 
 class ReviewExtendedTranslationIssuesSideButton extends React.Component {

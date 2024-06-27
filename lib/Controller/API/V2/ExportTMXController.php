@@ -123,7 +123,7 @@ class ExportTMXController extends AbstractDownloadController {
     /**
      * @Override
      */
-    public function finalize() {
+    public function finalize($forceXliff = false) {
 
         $buffer = ob_get_contents();
         ob_get_clean();

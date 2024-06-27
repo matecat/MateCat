@@ -16,7 +16,6 @@ use Features;
 use Features\ReviewExtended\ReviewUtils;
 use Features\TranslationVersions\Handlers\TranslationEventsHandler;
 use Features\TranslationVersions\Model\TranslationEvent;
-use ReflectionException;
 use Stomp\Exception\StompException;
 use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\AbstractWorker;
@@ -26,13 +25,12 @@ use Translations_SegmentTranslationDao;
 use Users_UserDao;
 use WordCount\CounterModel;
 
-;
 
 class BulkSegmentStatusChangeWorker extends AbstractWorker {
 
-    protected $maxRequeueNum = 3;
+    protected int $maxRequeueNum = 3;
 
-    public function getLoggerName() {
+    public function getLoggerName(): string {
         return 'bulk_segment_status_change.log';
     }
 
@@ -41,7 +39,7 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker {
      *
      * @return void
      * @throws \ReflectionException
-     * @throws \StompException
+     * @throws StompException
      * @throws EndQueueException
      * @throws Exception
      */

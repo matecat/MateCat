@@ -2536,7 +2536,7 @@ var spec = {
       properties: {
         id: {
           type: 'integer',
-          readOnly: true
+          readOnly: true,
         },
         payable_rate_template_name: {
           type: 'string',

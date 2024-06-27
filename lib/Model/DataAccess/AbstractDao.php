@@ -191,6 +191,7 @@ abstract class DataAccess_AbstractDao {
      * Cache Initialization
      *
      * @return void
+     * @throws ReflectionException
      */
     protected function _cacheSetConnection() {
         if ( !isset( self::$cache_con ) || empty( self::$cache_con ) ) {
@@ -202,6 +203,7 @@ abstract class DataAccess_AbstractDao {
                 self::$cache_con = null;
                 Log::doJsonLog( $e->getMessage() );
                 Log::doJsonLog( "No Redis server(s) configured." );
+                throw $e;
             }
 
         }

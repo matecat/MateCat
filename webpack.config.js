@@ -220,7 +220,6 @@ const matecatConfig = async ({env}, {mode}) => {
         path.resolve(__dirname, 'public/js/cat_source/ui.core.js'),
         path.resolve(__dirname, 'public/js/cat_source/ui.init.js'),
         path.resolve(__dirname, 'public/js/cat_source/ui.segment.js'),
-        path.resolve(__dirname, 'public/js/cat_source/ui.events.js'),
         path.resolve(__dirname, 'public/js/cat_source/ui.headerTooltips.js'),
         path.resolve(__dirname, 'public/css/sass/main.scss'),
       ],
@@ -299,7 +298,6 @@ const matecatConfig = async ({env}, {mode}) => {
             src: [
               './public/js/lib/jquery-3.3.1.min.js',
               './public/js/lib/jquery-ui.min.js',
-              './public/js/lib/jquery.hotkeys.min.js',
               './public/js/lib/jquery-dateFormat.min.js',
               './public/js/lib/semantic.min.js',
             ],

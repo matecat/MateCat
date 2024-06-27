@@ -1646,32 +1646,28 @@ class QA {
     }
 
     /**
-     * @param $source
-     * @param $target
+     * @param      $source
+     * @param      $target
      * @param bool $performIdCheck
      * @param bool $performTagPositionsCheck
+     *
      */
-    public function performTagPositionCheck($source, $target, $performIdCheck = true, $performTagPositionsCheck = true)
-    {
-        $new = '/(<[a-zA-Z0-9\-\"\/ =:\_]+>|<\/([a-zA-Z]+)>)/';
+    public function performTagPositionCheck( $source, $target, $performIdCheck = true, $performTagPositionsCheck = true ) {
+        $regexpMatch = '#(<[^/]+?>)|(</.+?>)|(<[^>]+?/>)#';
 
         // extract tag from source
-        preg_match_all( $new, $source, $matches );
-        // $complete_malformedSrcStruct   = array_filter($matches[ 0 ], function ($item) { return str_replace( " ", "", $item ); });
-        $open_malformedXmlSrcStruct    = $matches[ 1 ];
-        $closing_malformedXmlSrcStruct = $matches[ 2 ];
+        preg_match_all( $regexpMatch, $source, $matches );
+        $complete_toCheckSrcStruct    = $matches[ 0 ];
+        $opening_toCheckSrcStruct     = $matches[ 1 ];
+        $closing_toCheckSrcStruct     = $matches[ 2 ];
+        $selfClosing_toCheckSrcStruct = $matches[ 3 ];
 
         // extract tag from target
-        preg_match_all( $new, $target, $matches );
-        $complete_malformedTrgStruct   = array_filter($matches[ 0 ], function ($item) { return str_replace( " ", "", $item ); });
-        $open_malformedXmlTrgStruct    = $matches[ 1 ];
-        $closing_malformedXmlTrgStruct = $matches[ 2 ];
-
-        // extract self closing tags from source and target
-        preg_match_all( '#(<[^>]+/>)#', $source, $selfClosingTags_src );
-        preg_match_all( '#(<[^>]+/>)#', $target, $selfClosingTags_trg );
-        $selfClosingTags_src = $selfClosingTags_src[ 1 ];
-        $selfClosingTags_trg = $selfClosingTags_trg[ 1 ];
+        preg_match_all( $regexpMatch, $target, $matches );
+        $complete_toCheckTrgStruct    = $matches[ 0 ];
+        $opening_toCheckTrgStruct     = $matches[ 1 ];
+        $closing_toCheckTrgStruct     = $matches[ 2 ];
+        $selfClosing_toCheckTrgStruct = $matches[ 3 ];
 
         //
         // ===========================================
@@ -1688,36 +1684,32 @@ class QA {
         // - In this case check for equiv-text mismatch and throw a ERR_TAG_MISMATCH Error
         //
 
-        $srcOpIds = $this->extractIdAttributes($open_malformedXmlSrcStruct);
-        $trgOpIds = $this->extractIdAttributes($open_malformedXmlTrgStruct);
-        $srcClIds = $this->extractIdAttributes($closing_malformedXmlSrcStruct);
-        $trgClIds = $this->extractIdAttributes($closing_malformedXmlTrgStruct);
-        $srcOpEquivText = $this->extractEquivTextAttributes($open_malformedXmlSrcStruct);
-        $trgOpEquivText = $this->extractEquivTextAttributes($open_malformedXmlTrgStruct);
-        $srcClEquivText = $this->extractEquivTextAttributes($closing_malformedXmlSrcStruct);
-        $trgClEquivText = $this->extractEquivTextAttributes($closing_malformedXmlTrgStruct);
-        $scrSCIds = $this->extractIdAttributes($selfClosingTags_src);
-        $trgSCIds = $this->extractIdAttributes($selfClosingTags_trg);
-        $srcSCEquivText = $this->extractEquivTextAttributes($selfClosingTags_src);
-        $trgSCEquivText = $this->extractEquivTextAttributes($selfClosingTags_trg);
+        $srcOpeningTagIds = $this->extractIdAttributes( $opening_toCheckSrcStruct );
+        $trgOpeningTagIds = $this->extractIdAttributes( $opening_toCheckTrgStruct );
+
+        $srcOpeningTagEquivText = $this->extractEquivTextAttributes( $opening_toCheckSrcStruct );
+        $trgOpeningTagEquivText = $this->extractEquivTextAttributes( $opening_toCheckTrgStruct );
+
+        $scrSelfClosingTagIds       = $this->extractIdAttributes( $selfClosing_toCheckSrcStruct );
+        $trgSelfClosingTagIds       = $this->extractIdAttributes( $selfClosing_toCheckTrgStruct );
+        $srcSelfClosingTagEquivText = $this->extractEquivTextAttributes( $selfClosing_toCheckSrcStruct );
+        $trgSelfClosingTagEquivText = $this->extractEquivTextAttributes( $selfClosing_toCheckTrgStruct );
 
         // check in equiv-text
-        $this->checkContentAndAddTagMismatchError($srcOpEquivText, $trgOpEquivText, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
-        $this->checkContentAndAddTagMismatchError($srcClEquivText, $trgClEquivText, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
-        $this->checkContentAndAddTagMismatchError($srcSCEquivText, $trgSCEquivText, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
+        $this->checkContentAndAddTagMismatchError( $srcOpeningTagEquivText, $trgOpeningTagEquivText, self::ERR_TAG_MISMATCH, $complete_toCheckTrgStruct );
+        $this->checkContentAndAddTagMismatchError( $srcSelfClosingTagEquivText, $trgSelfClosingTagEquivText, self::ERR_TAG_MISMATCH, $complete_toCheckTrgStruct );
 
         // check for id mismatch
-        if($performIdCheck){
-            $this->checkContentAndAddTagMismatchError($srcOpIds, $trgOpIds, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
-            $this->checkContentAndAddTagMismatchError($srcClIds, $trgClIds, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
-            $this->checkContentAndAddTagMismatchError($scrSCIds, $trgSCIds, self::ERR_TAG_MISMATCH, $complete_malformedTrgStruct);
+        if ( $performIdCheck ) {
+            $this->checkContentAndAddTagMismatchError( $srcOpeningTagIds, $trgOpeningTagIds, self::ERR_TAG_MISMATCH, $complete_toCheckTrgStruct );
+            $this->checkContentAndAddTagMismatchError( $scrSelfClosingTagIds, $trgSelfClosingTagIds, self::ERR_TAG_MISMATCH, $complete_toCheckTrgStruct );
         }
 
         // check for warnings only if there are no errors
-        if( !$this->thereAreErrors() and $performTagPositionsCheck ){
-            $this->checkTagPositionsAndAddTagOrderError($srcOpIds, $trgOpIds, self::ERR_TAG_ORDER, $complete_malformedTrgStruct);
-            $this->checkTagPositionsAndAddTagOrderError($srcClIds, $trgClIds, self::ERR_TAG_ORDER, $complete_malformedTrgStruct);
-            $this->checkTagPositionsAndAddTagOrderError($scrSCIds, $trgSCIds, self::ERR_TAG_ORDER, $complete_malformedTrgStruct);
+        if ( !$this->thereAreErrors() and $performTagPositionsCheck ) {
+            $this->checkTagPositionsAndAddTagOrderError( $opening_toCheckSrcStruct, $opening_toCheckTrgStruct, self::ERR_TAG_ORDER );
+            $this->checkTagPositionsAndAddTagOrderError( $selfClosing_toCheckSrcStruct, $selfClosing_toCheckTrgStruct, self::ERR_TAG_ORDER );
+            $this->checkTagPositionsAndAddTagOrderError( $closing_toCheckSrcStruct, $closing_toCheckTrgStruct, self::ERR_TAG_ORDER );
         }
 
         // If there are errors get tag diff for the UI
@@ -1776,14 +1768,20 @@ class QA {
      * @param array  $src
      * @param array  $trg
      * @param string $error
-     * @param array  $originalTargetValues
+     *
      */
-    private function checkTagPositionsAndAddTagOrderError(array $src, array $trg, $error, array $originalTargetValues) {
+    private function checkTagPositionsAndAddTagOrderError( array $src, array $trg, $error ) {
 
-        foreach ($trg as $pos => $value){
-            if($value !== $src[$pos]){
-                $this->addError( $error );
-                $this->tagPositionError[] = ( new LtGtEncode() )->transform( $originalTargetValues[$pos] );
+        foreach ( $trg as $pos => $value ) {
+            if ( $value !== $src[ $pos ] ) {
+                if ( !empty( $value ) ) {
+                    $this->addError( $error );
+                    try {
+                        $this->tagPositionError[] = ( new LtGtEncode() )->transform( $value );
+                    } catch ( Exception $ignore ) {
+                        // it's impossible to have an exception here, suppress abstract method signature exception
+                    }
+                }
 
                 return;
             }
