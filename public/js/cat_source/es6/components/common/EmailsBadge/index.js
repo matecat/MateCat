@@ -1,1 +1,1 @@
-export * from './EmailsBadge';
+export * from './EmailsBadge'

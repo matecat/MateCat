@@ -20,6 +20,7 @@ $klein->with('/api/v2/projects/[:id_project]/[:password]', function() {
     route( '/cancel', 'POST', 'API\V2\ProjectsController', 'cancel' );
     route( '/archive', 'POST', 'API\V2\ProjectsController', 'archive' );
     route( '/active', 'POST', 'API\V2\ProjectsController', 'active' );
+    route( '/r2', 'POST', 'API\V2\ReviewsController', 'createReview' );
 });
 
 route( '/api/v2/project-completion-status/[i:id_project]', 'GET', '\API\V2\ProjectCompletionStatus', 'status' );
@@ -122,6 +123,9 @@ $klein->with( '/api/v2/payable_rate', function () {
     route('/[:id]', 'PUT', '\API\V2\PayableRateController', 'edit');
 
 });
+
+// change password
+route( '/api/v2/change-password',  'POST', 'API\V2\ChangePasswordController', 'changePassword' );
 
 // Download files
 route( '/api/v2/original/[:id_job]/[:password]', 'GET',  'API\V2\DownloadOriginalController', 'index' );

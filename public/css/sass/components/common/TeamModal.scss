@@ -11,14 +11,30 @@
     align-items: center;
     justify-content: space-between;
 
-    input {
-      padding-right: 20px;
+    .container-input {
+      display: flex;
+      gap: 5px;
+
+      input[type='text'] {
+        width: auto;
+        flex-grow: 1;
+        margin-right: 5px;
+      }
     }
 
-    svg {
-      position: absolute;
-      right: 40px;
-      margin-top: 12px;
+    .container-button-edit {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      height: 40px;
+    }
+
+    .button-edit {
+      transition: none !important;
+      &:hover {
+        background-color: unset !important;
+        color: $black !important;
+      }
     }
   }
 

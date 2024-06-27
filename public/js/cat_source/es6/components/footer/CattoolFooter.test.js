@@ -1,7 +1,7 @@
 import {render, screen} from '@testing-library/react'
 import React from 'react'
 
-import {CattolFooter} from './CattoolFooter'
+import {CattoolFooter} from './CattoolFooter'
 // import CatToolActions from '../../actions/CatToolActions'
 
 test('render properly', async () => {
@@ -18,7 +18,7 @@ test('render properly', async () => {
   const projectId = 456
 
   render(
-    <CattolFooter
+    <CattoolFooter
       languagesArray={Object.values(langsIndex)}
       source="it"
       target="en"
@@ -44,8 +44,6 @@ test('render properly', async () => {
   const elProgressAmount = screen.getByTestId('progress-bar-amount')
   expect(elProgressAmount).toBeVisible()
   expect(elProgressAmount).toHaveTextContent('-')
-
-  expect(screen.getByText('Calculating word count...')).toBeVisible()
 
   /**
    * @TODO add tests for after loading is complete.

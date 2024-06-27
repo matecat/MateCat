@@ -41,6 +41,7 @@ class ProjectOptionsSanitizer {
             'en-SG',
             'et-EE',
             'fi-FI',
+            'nl-BE',
             'fr-FR',
             'fr-CA',
             'fr-CH',

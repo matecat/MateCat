@@ -18,6 +18,7 @@ let ModalsActions = {
     onCloseCallback,
     showHeader = true,
     styleBody,
+    isCloseButtonDisabled,
   ) => {
     AppDispatcher.dispatch({
       actionType: ModalsConstants.SHOW_MODAL,
@@ -28,6 +29,7 @@ let ModalsActions = {
       onCloseCallback,
       showHeader,
       styleBody,
+      isCloseButtonDisabled,
     })
   },
   openLoginModal: function () {

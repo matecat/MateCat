@@ -13,7 +13,7 @@ global.config = {
   basepath: 'http://localhost/',
   enableMultiDomainApi: false,
   id_job: 123,
-  password: 'fake-password',
+  password: '184031c05e34',
   searchable_statuses: [
     {
       value: 'NEW',
@@ -1079,7 +1079,8 @@ test('renders properly', async () => {
         })
       },
     ),
-    http.get(config.basepath + 'api/v3/jobs/:job_id/:password', () => {
+
+    http.get(config.basepath + 'api/app/jobs/:job_id/:password', () => {
       return HttpResponse.json({
         job: {
           id: 3,

@@ -296,27 +296,12 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
 
         }
 
-        if ( isset( $options[ 'filter' ][ 'revision_number' ] ) && !empty( $options[ 'filter' ][ 'revision_number' ] ) ) {
-            $join_revision_number = " JOIN segment_translation_events ste on s.id = ste.id_segment " .
-                    " AND ste.id_job = j.id  " .
-                    " AND ste.source_page = :source_page  " .
-                    " AND ste.version_number = st.version_number " .
-                    " AND ste.final_revision = 1 ";
-
-            $options_conditions_values[ 'source_page' ] = ReviewUtils::revisionNumberToSourcePage(
-                    $options[ 'filter' ] [ 'revision_number' ]
-            );
-        } else {
-            $join_revision_number = '';
-        }
-
         $queryAfter = "
                 SELECT * FROM (
                     (SELECT distinct(s.id) AS __sid
                     FROM segments s
                     JOIN segment_translations st ON s.id = st.id_segment
                     JOIN jobs j ON j.id = st.id_job
-                    $join_revision_number
                     %s 
                     WHERE st.id_job = :id_job
                         AND j.password = :password
@@ -334,7 +319,6 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                     FROM segments s
                     JOIN segment_translations st ON s.id = st.id_segment
                     JOIN jobs j ON j.id = st.id_job
-                    $join_revision_number
                     %s
                     WHERE st.id_job = :id_job
                         AND j.password = :password
@@ -358,7 +342,6 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                         FROM segments s
                         JOIN segment_translations st ON s.id = st.id_segment
                         JOIN jobs j ON j.id = st.id_job
-                        $join_revision_number
                         %s
                         WHERE st.id_job = :id_job
                             AND j.password = :password

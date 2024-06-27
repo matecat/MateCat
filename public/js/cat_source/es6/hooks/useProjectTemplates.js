@@ -31,6 +31,7 @@ const STANDARD_TEMPLATE = {
   pretranslate_101: true,
   created_at: 'Fri, 02 Feb 24 16:48:34 +0100',
   modified_at: 'Fri, 02 Feb 24 16:48:34 +0100',
+  filters_xliff_config_template_id: null,
 }
 
 export const SCHEMA_KEYS = {
@@ -53,6 +54,7 @@ export const SCHEMA_KEYS = {
   getPublicMatches: 'get_public_matches',
   pretranslate100: 'pretranslate_100',
   pretranslate101: 'pretranslate_101',
+  filtersXliffConfigTemplateId: 'filters_xliff_config_template_id',
 }
 
 function useProjectTemplates(canRetrieveTemplates) {

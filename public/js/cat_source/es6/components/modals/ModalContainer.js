@@ -8,6 +8,7 @@ export const ModalContainer = ({
   closeOnOutsideClick,
   showHeader,
   styleBody,
+  isCloseButtonDisabled,
 }) => {
   const ref = useRef(null)
 
@@ -57,7 +58,7 @@ export const ModalContainer = ({
       <div
         className="matecat-modal-background"
         onClick={() => {
-          if (closeOnOutsideClick) {
+          if (closeOnOutsideClick && !isCloseButtonDisabled) {
             handleClose()
           }
         }}
@@ -70,7 +71,7 @@ export const ModalContainer = ({
             <div>
               <h2>{title}</h2>
             </div>
-
+            {!isCloseButtonDisabled && (
             <div>
               <span
                 className="close-matecat-modal x-popup"
@@ -78,6 +79,7 @@ export const ModalContainer = ({
                 onClick={handleClose}
               />
             </div>
+            )}
           </div>
         )}
 

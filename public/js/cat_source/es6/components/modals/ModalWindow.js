@@ -69,6 +69,7 @@ export class ModalWindow extends React.Component {
     onCloseCallback,
     showHeader,
     styleBody,
+    isCloseButtonDisabled,
   ) => {
     this.setState({
       ...initialState,
@@ -85,6 +86,7 @@ export class ModalWindow extends React.Component {
       onCloseCallback: onCloseCallback,
       isShowingModal: true,
       styleBody,
+      isCloseButtonDisabled: isCloseButtonDisabled,
     })
   }
 
@@ -117,6 +119,7 @@ export class ModalWindow extends React.Component {
       isShowingModal,
       showHeader,
       styleBody,
+      isCloseButtonDisabled,
     } = this.state
 
     return (
@@ -132,6 +135,7 @@ export class ModalWindow extends React.Component {
                 onClose: this.onCloseModal,
                 closeOnOutsideClick: compProps.closeOnOutsideClick,
                 styleBody,
+                isCloseButtonDisabled,
               },
               <InjectedComponent {...compProps} />,
             )}

@@ -57,7 +57,7 @@ class SetContributionMTWorker extends SetContributionWorker {
         $res = $this->_engine->set( $config );
 
         if ( !$res ) {
-            $this->_raiseException( 'set', $config );
+            $this->_raiseReQueueException( 'set', $config );
         }
 
     }
@@ -81,7 +81,7 @@ class SetContributionMTWorker extends SetContributionWorker {
         $res = $this->_engine->update( $config );
 
         if ( !$res ) {
-            $this->_raiseException( 'update', $config );
+            $this->_raiseReQueueException( 'update', $config );
         }
 
     }

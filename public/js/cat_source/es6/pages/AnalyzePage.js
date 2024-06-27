@@ -24,7 +24,14 @@ const AnalyzePage = () => {
   const getProjectVolumeAnalysisData = () => {
     if (config.jobAnalysis) {
       getJobVolumeAnalysis().then((response) => {
-        const volumeAnalysis = response
+        //TODO Temp fix to filter only the requested job
+        let filteredJob = response.jobs.find((job) =>
+          job.chunks.find((chunk) => chunk.password === config.jpassword),
+        )
+        filteredJob.chunks = filteredJob.chunks.filter(
+          (chunk) => chunk.password === config.jpassword,
+        )
+        const volumeAnalysis = {...response, jobs: [filteredJob]}
         getProject(config.id_project).then((response) => {
           const project = response.project
           setProject(project)

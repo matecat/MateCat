@@ -10,6 +10,7 @@ import Checkmark from '../../../../../../../img/icons/Checkmark'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import usePortal from '../../../../hooks/usePortal'
 import {QualityFrameworkTabContext} from './QualityFrameworkTab'
+import {getCodeFromLabel} from './CategoriesSeveritiesTable'
 
 export const ModifySeverity = ({target, label, index, setIsEditingName}) => {
   const {portalTarget} = useContext(SettingsPanelContext)
@@ -52,6 +53,7 @@ export const ModifySeverity = ({target, label, index, setIsEditingName}) => {
           ...severity,
           ...(indexSeverity === index && {
             label: labelState,
+            code: getCodeFromLabel(labelState),
           }),
         })),
       })),

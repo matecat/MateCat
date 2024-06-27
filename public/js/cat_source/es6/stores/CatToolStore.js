@@ -49,6 +49,15 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
         stats.equivalent.translated +
         stats.equivalent.approved,
     )
+
+    stats.translate_todo_total = Math.round(stats.raw.draft + stats.raw.new)
+    stats.revise_todo_total = Math.round(
+      stats.translate_todo_total + stats.raw.translated,
+    )
+    stats.revise2_todo_total = Math.round(
+      stats.translate_todo_total + stats.raw.translated + stats.raw.approved,
+    )
+
     this._projectProgress = stats
   },
   updateQR: function (qr) {
@@ -201,6 +210,7 @@ AppDispatcher.register(function (action) {
         title,
         style,
         onCloseCallback,
+        isCloseButtonDisabled,
         showHeader,
         styleBody,
       } = action
@@ -213,6 +223,7 @@ AppDispatcher.register(function (action) {
         onCloseCallback,
         showHeader,
         styleBody,
+        isCloseButtonDisabled,
       )
       break
     }

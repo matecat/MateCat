@@ -118,10 +118,9 @@ class SegmentButton extends React.Component {
   getReviewButtons() {
     const classDisable = this.props.disabled ? 'disabled' : ''
     let nextButton, currentButton
-    let nextSegment = SegmentStore.getNextSegment(
-      this.props.segment.sid,
-      this.props.segment.fid,
-    )
+    let nextSegment = SegmentStore.getNextSegment({
+      current_sid: this.props.segment.sid,
+    })
 
     let revisionCompleted = false
     if (config.isReview && this.state.progress) {
@@ -234,10 +233,9 @@ class SegmentButton extends React.Component {
     let nextButton, currentButton
     const filtering =
       SegmentFilter.enabled() && SegmentFilter.filtering() && SegmentFilter.open
-    let nextSegment = SegmentStore.getNextSegment(
-      this.props.segment.sid,
-      this.props.segment.fid,
-    )
+    let nextSegment = SegmentStore.getNextSegment({
+      current_sid: this.props.segment.sid,
+    })
     let translationCompleted =
       this.state.progress && this.state.progress.translationCompleted
     let enableGoToNext =

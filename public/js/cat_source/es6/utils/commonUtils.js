@@ -467,6 +467,7 @@ const CommonUtils = {
       time2: $.format.date(dd, 'HH') + ':' + $.format.date(dd, 'mm'),
       year: $.format.date(dd, 'yyyy'),
       gmt: timeZone,
+      monthIndex: dd.getMonth(),
     }
   },
   getGMTZoneString: function () {
@@ -521,47 +522,6 @@ const CommonUtils = {
   dispatchAnalyticsEvents: (data) => {
     const event = new CustomEvent('dataLayer-event', {detail: data})
     document.dispatchEvent(event)
-  },
-  parseCommentHtmlBeforeSend: (text) => {
-    var elem = $('<div></div>').html(text)
-    elem.find('.atwho-inserted').each(function () {
-      var id = $(this).find('.tagging-item').data('id')
-      $(this).html('{@' + id + '@}')
-    })
-    elem.find('.tagging-item').remove()
-    return elem.text()
-  },
-  parseOldStats: (stats, type) => {
-    if (type === JOB_WORD_CONT_TYPE.EQUIVALENT) {
-      const rawCopy = {
-        approved:
-          stats.revises.length > 1
-            ? stats.revises[0].advancement_wc
-            : stats.APPROVED,
-        approved2:
-          stats.revises.length > 1 ? stats.revises[1].advancement_wc : 0,
-        draft: stats.DRAFT,
-        new: 0,
-        translated: stats.TRANSLATED,
-        rejected: stats.REJECTED,
-        total: stats.TOTAL,
-      }
-      stats = {
-        estimated_completion: stats.estimated_completion,
-        words_per_hour: stats.words_per_hour,
-        analysis_complete: stats.analysis_complete,
-        raw: rawCopy,
-        equivalent: rawCopy,
-      }
-    }
-    return stats
-  },
-  lookupFlashServiceParam: (name) => {
-    if (config.flash_messages && config.flash_messages.service) {
-      return config.flash_messages.service.filter((service) => {
-        return service.key == name
-      })
-    }
   },
 }
 

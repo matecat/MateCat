@@ -207,7 +207,6 @@ class BatchReviewProcessor {
                 $data[ $chunkReview->id ][ 'chunkReview_partials' ] = $chunkReview;
                 $data[ $chunkReview->id ][ 'penalty_points' ]       = isset( $data[ $chunkReview->id ][ 'penalty_points' ] ) ? $data[ $chunkReview->id ][ 'penalty_points' ] + $chunkReview->penalty_points : $chunkReview->penalty_points;
                 $data[ $chunkReview->id ][ 'reviewed_words_count' ] = isset( $data[ $chunkReview->id ][ 'reviewed_words_count' ] ) ? $data[ $chunkReview->id ][ 'reviewed_words_count' ] + $chunkReview->reviewed_words_count : $chunkReview->reviewed_words_count;
-                $data[ $chunkReview->id ][ 'advancement_wc' ]       = isset( $data[ $chunkReview->id ][ 'advancement_wc' ] ) ? $data[ $chunkReview->id ][ 'advancement_wc' ] + $chunkReview->advancement_wc : $chunkReview->advancement_wc;
                 $data[ $chunkReview->id ][ 'total_tte' ]            = isset( $data[ $chunkReview->id ][ 'total_tte' ] ) ? $data[ $chunkReview->id ][ 'total_tte' ] + $chunkReview->total_tte : $chunkReview->total_tte;
             }
         }

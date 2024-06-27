@@ -132,10 +132,7 @@ let CatToolActions = {
     })
   },
   setProgress: function (data) {
-    const stats = CommonUtils.parseOldStats(
-      data.stats ? data.stats : data,
-      config.word_count_type,
-    )
+    const stats = data.stats ? data.stats : data
     AppDispatcher.dispatch({
       actionType: CatToolConstants.SET_PROGRESS,
       stats: stats,

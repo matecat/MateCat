@@ -3,6 +3,7 @@ import Immutable from 'immutable'
 import Cookies from 'js-cookie'
 import {isUndefined} from 'lodash'
 import {isNull} from 'lodash/lang'
+import DatePicker from 'react-datepicker'
 
 import OutsourceInfo from './OutsourceInfo'
 import GMTSelect from './GMTSelect'
@@ -11,6 +12,7 @@ import {getChangeRates} from '../../api/getChangeRates'
 import CommonUtils from '../../utils/commonUtils'
 import UserStore from '../../stores/UserStore'
 
+import 'react-datepicker/dist/react-datepicker.css'
 class OutsourceVendor extends React.Component {
   constructor(props) {
     super(props)
@@ -33,6 +35,10 @@ class OutsourceVendor extends React.Component {
       errorQuote: false,
       needItFaster: false,
       errorOutsource: false,
+      deliveryDate:
+        this.props.job && this.props.job.get('outsource')
+          ? new Date(this.props.job.get('outsource').get('delivery_date'))
+          : null,
     }
     this.getOutsourceQuote = this.getOutsourceQuote.bind(this)
     if (config.enable_outsource) {
@@ -115,6 +121,7 @@ class OutsourceVendor extends React.Component {
           revision: chunk.get('typeOfService') === 'premium' ? true : false,
           jobOutsourced: chunk.get('outsourced') === '1',
           outsourceConfirmed: chunk.get('outsourced') === '1',
+          deliveryDate: new Date(chunk.get('delivery')),
         })
       } else {
         self.setState({
@@ -306,9 +313,7 @@ class OutsourceVendor extends React.Component {
 
   getPricePW(price) {
     if (this.state.outsource) {
-      const stats = this.props.job.get('stats').toJS()
-      let words = stats.raw ? stats.raw.total : stats.TOTAL
-      return (parseFloat(price) / words)
+      return (parseFloat(price) / this.props.standardWC)
         .toFixed(3)
         .replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
     }
@@ -364,12 +369,10 @@ class OutsourceVendor extends React.Component {
   }
 
   getNewRates() {
-    let date = $(this.calendar).calendar('get date')
+    let date = this.state.deliveryDate
     let time = $(this.dropdownTime).dropdown('get value')
     date.setHours(time)
-    date.setMinutes(
-      date.getMinutes() + (2 - parseFloat(this.state.timezone)) * 60,
-    )
+    date.setMinutes((2 - parseFloat(this.state.timezone)) * 60)
     let timestamp = new Date(date).getTime()
     let now = new Date().getTime()
     if (timestamp < now) {
@@ -661,16 +664,13 @@ class OutsourceVendor extends React.Component {
                             ref={(calendar) => (this.calendar = calendar)}
                           >
                             <div className="ui input">
-                              <input
-                                type="text"
-                                placeholder="Date"
-                                defaultValue={
-                                  delivery.day +
-                                  '/' +
-                                  delivery.month +
-                                  '/' +
-                                  delivery.year
-                                }
+                              <DatePicker
+                                selected={this.state.deliveryDate}
+                                onChange={(date) => {
+                                  this.setState({
+                                    deliveryDate: date,
+                                  })
+                                }}
                               />
                             </div>
                           </div>
@@ -1166,7 +1166,7 @@ class OutsourceVendor extends React.Component {
       let date = this.getDeliveryDate()
       $(this.dropdownTime).dropdown('set selected', date.time2.split(':')[0])
       let today = new Date()
-      $(this.calendar).calendar({
+      /*$(this.calendar).calendar({
         type: 'date',
         minDate: new Date(
           today.getFullYear(),
@@ -1179,7 +1179,7 @@ class OutsourceVendor extends React.Component {
         onVisible: function () {
           $(this).find('table tbody tr td:first-child').addClass('disabled')
         },
-      })
+      })*/
 
       let currencyToShow = Cookies.get('matecat_currency')
       $(this.currencySelect).dropdown('set selected', currencyToShow)
@@ -1212,7 +1212,8 @@ class OutsourceVendor extends React.Component {
       nextState.jobOutsourced !== this.state.jobOutsourced ||
       nextState.errorPastDate !== this.state.errorPastDate ||
       nextState.quoteNotAvailable !== this.state.quoteNotAvailable ||
-      nextState.needItFaster !== this.state.needItFaster
+      nextState.needItFaster !== this.state.needItFaster ||
+      nextState.deliveryDate !== this.state.deliveryDate
     )
   }
 

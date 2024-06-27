@@ -54,12 +54,13 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 
     /**
      * @param $rawValue
-     *
+     * @param array $parameters
+     * @param null $function
      * @return Engines_Results_AbstractResponse
      */
-    protected function _decode( $rawValue ) {
-        $args         = func_get_args();
-        $functionName = $args[ 2 ];
+    protected function _decode( $rawValue, array $parameters = [], $function = null ) {
+
+        $functionName = $function;
 
         if ( is_string( $rawValue ) ) {
             $decoded = json_decode( $rawValue, true );
@@ -295,11 +296,8 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 
         $this->call( "update_relative_url", $parameters, true );
 
-        if ( $this->result->responseStatus != "200" ) {
-            return false;
-        }
-
-        return true;
+        // Let the caller handle the error management.
+        return $this->result;
 
     }
 
@@ -540,17 +538,20 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     }
 
     /**
+     * @param $id_job
+     * @param $id_segment
      * @param $source
      * @param $sourceLanguage
      * @param $targetLanguage
      * @param $keys
-     *
      * @return array
      */
-    public function glossaryGet($source, $sourceLanguage, $targetLanguage, $keys)
+    public function glossaryGet($id_job, $id_segment, $source, $sourceLanguage, $targetLanguage, $keys)
     {
         $payload = [
             'de' => INIT::$MYMEMORY_API_KEY,
+            "id_job" => $id_job,
+            "id_segment" => $id_segment,
             "source" => $source,
             "source_language" => $sourceLanguage,
             "target_language" => $targetLanguage,

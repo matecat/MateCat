@@ -79,7 +79,13 @@ TAG;
         ];
     }
 
-    protected function _decode( $rawValue ) {
+    /**
+     * @param $rawValue
+     * @param array $parameters
+     * @param null $function
+     * @return array|Engines_Results_MT
+     */
+    protected function _decode( $rawValue, array $parameters = [], $function = null ) {
 
         $all_args = func_get_args();
 

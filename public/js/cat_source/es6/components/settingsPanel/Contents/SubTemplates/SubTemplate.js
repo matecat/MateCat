@@ -39,6 +39,22 @@ export const SubTemplates = ({
 
   const updateNameBehaviour = useRef({})
   updateNameBehaviour.current.confirm = () => {
+    if (
+      templates
+        .filter(({id}) => id !== currentTemplate.id)
+        .some(({name}) => name.toLowerCase() === templateName.toLowerCase())
+    ) {
+      // template name already exists
+      CatToolActions.addNotification({
+        title: 'Duplicated name',
+        type: 'error',
+        text: 'This name is already in use, please choose a different one',
+        position: 'br',
+      })
+
+      return
+    }
+
     const originalTemplate = templates.find(
       ({id, isTemporary}) => id === currentTemplate.id && !isTemporary,
     )

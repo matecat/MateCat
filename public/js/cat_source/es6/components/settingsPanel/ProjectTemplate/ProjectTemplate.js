@@ -17,6 +17,7 @@ import {IconSave} from '../../icons/IconSave'
 import {IconSaveChanges} from '../../icons/IconSaveChanges'
 import {BUTTON_MODE, BUTTON_SIZE, Button} from '../../common/Button/Button'
 import {createProjectTemplate} from '../../../api/createProjectTemplate'
+import CatToolActions from '../../../actions/CatToolActions'
 
 export const TEMPLATE_MODIFIERS = {
   CREATE: 'create',
@@ -37,6 +38,22 @@ export const ProjectTemplate = ({portalTarget}) => {
 
   const updateNameBehaviour = useRef({})
   updateNameBehaviour.current.confirm = () => {
+    if (
+      projectTemplates
+        .filter(({id}) => id !== currentProjectTemplate.id)
+        .some(({name}) => name.toLowerCase() === templateName.toLowerCase())
+    ) {
+      // template name already exists
+      CatToolActions.addNotification({
+        title: 'Duplicated name',
+        type: 'error',
+        text: 'This name is already in use, please choose a different one',
+        position: 'br',
+      })
+
+      return
+    }
+
     const originalTemplate = projectTemplates.find(
       ({id, isTemporary}) => id === currentProjectTemplate.id && !isTemporary,
     )
@@ -88,6 +105,21 @@ export const ProjectTemplate = ({portalTarget}) => {
 
   const createTemplate = useRef()
   createTemplate.current = () => {
+    if (
+      projectTemplates.some(
+        ({name}) => name.toLowerCase() === templateName.toLowerCase(),
+      )
+    ) {
+      // template name already exists
+      CatToolActions.addNotification({
+        title: 'Duplicated name',
+        type: 'error',
+        text: 'This name is already in use, please choose a different one',
+        position: 'br',
+      })
+      return
+    }
+
     /* eslint-disable no-unused-vars */
     const {
       created_at,

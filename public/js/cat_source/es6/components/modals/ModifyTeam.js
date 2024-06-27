@@ -14,6 +14,12 @@ import {EMAIL_PATTERN} from '../../constants/Constants'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper'
 import UserConstants from '../../constants/UserConstants'
 import UserStore from '../../stores/UserStore'
+import {
+  BUTTON_MODE,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+  Button,
+} from '../common/Button/Button'
 
 export const ModifyTeam = ({team}) => {
   const {userInfo} = useContext(ApplicationWrapperContext)
@@ -192,12 +198,10 @@ export const ModifyTeam = ({team}) => {
     )
   }
 
-  const onKeyUpTeamName = (event) => {
-    if (event.key === 'Enter') {
-      if (teamName && teamName != teamState.get('name'))
-        ManageActions.changeTeamName(teamState.toJS(), teamName)
-
-      event.currentTarget.blur()
+  const saveTeamName = () => {
+    if (teamName && teamName != teamState.get('name')) {
+      ManageActions.changeTeamName(teamState.toJS(), teamName)
+      setIsModifyingName(false)
     }
   }
 
@@ -228,16 +232,42 @@ export const ModifyTeam = ({team}) => {
       <div>
         <h2>Change Team Name</h2>
         <div className="team-name-container">
-          <input
-            className="team-modal-input"
-            type="text"
-            value={teamName}
-            onChange={(e) => setTeamName(e.currentTarget.value)}
-            onKeyUp={onKeyUpTeamName}
-            onFocus={() => setIsModifyingName(true)}
-            onBlur={() => setIsModifyingName(false)}
-          />
-          {isModifyingName && <IconEdit />}
+          {isModifyingName ? (
+            <div className="container-input">
+              <input
+                className="team-modal-input"
+                type="text"
+                value={teamName}
+                onChange={(e) => setTeamName(e.currentTarget.value)}
+              />
+              <Button
+                type={BUTTON_TYPE.PRIMARY}
+                size={BUTTON_SIZE.MEDIUM}
+                onClick={saveTeamName}
+              >
+                Confirm
+              </Button>
+              <Button
+                type={BUTTON_TYPE.WARNING}
+                size={BUTTON_SIZE.ICON_STANDARD}
+                onClick={() => setIsModifyingName(false)}
+              >
+                <IconClose />
+              </Button>
+            </div>
+          ) : (
+            <div className="container-button-edit">
+              {teamName}
+              <Button
+                className="button-edit"
+                mode={BUTTON_MODE.GHOST}
+                size={BUTTON_SIZE.ICON_SMALL}
+                onClick={() => setIsModifyingName(true)}
+              >
+                <IconEdit />
+              </Button>
+            </div>
+          )}
         </div>
       </div>
       {teamState.get('type') !== 'personal' && (

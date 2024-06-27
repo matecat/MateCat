@@ -1,7 +1,6 @@
 <?php
 
-
-class Comments_BaseCommentStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct {
+class Comments_BaseCommentStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct, JsonSerializable {
 
     public $id;
     public $id_job;
@@ -27,4 +26,23 @@ class Comments_BaseCommentStruct extends DataAccess_AbstractDaoSilentStruct impl
         $this->message = Comments_CommentDao::placeholdContent( $this->message );
     }
 
+    /**
+     * @inheritDoc
+     */
+    public function jsonSerialize()
+    {
+        return [
+            'id' => (int)$this->id,
+            'id_job' => (int)$this->id_job,
+            'id_segment' => (int)$this->id_segment,
+            'create_date' => $this->create_date,
+            'email' => $this->email,
+            'full_name' => $this->full_name,
+            'uid' => (int)$this->uid,
+            'resolve_date' => $this->resolve_date,
+            'source_page' => (int)$this->source_page,
+            'message_type' => $this->message_type,
+            'message' => $this->message,
+        ];
+    }
 }

@@ -14,6 +14,7 @@ import {setTranslation} from './es6/api/setTranslation'
 import AlertModal from './es6/components/modals/AlertModal'
 import ModalsActions from './es6/actions/ModalsActions'
 import {SEGMENTS_STATUS} from './es6/constants/Constants'
+import SegmentUtils from './es6/utils/segmentUtils'
 import CommentsActions from './es6/actions/CommentsActions'
 
 window.UI = {
@@ -87,13 +88,13 @@ window.UI = {
    * @returns {boolean}
    */
   shouldSegmentAutoPropagate: function (segment, status) {
-    var segmentStatus = segment.status
+    var segmentStatus = segment.status.toLowerCase()
     var statusAcceptedNotModified = ['new', 'draft']
     var segmentModified = segment.modified
     return (
       segmentModified ||
       statusAcceptedNotModified.indexOf(segmentStatus) !== -1 ||
-      (!segmentModified && status !== segmentStatus)
+      (!segmentModified && status.toLowerCase() !== segmentStatus)
     )
   },
 
@@ -460,66 +461,25 @@ window.UI = {
   },
 
   execSetTranslation: function (options, callback_to_execute) {
-    var id_segment = options.id_segment
-    var status = options.status
-    var propagate = options.propagate
-    var sourceSegment, translation
+    const id_segment = options.id_segment
+    const status = options.status
+    const propagate = options.propagate
     this.executingSetTranslation.push(id_segment)
-    var reqArguments = arguments
     let segment = SegmentStore.getSegmentByIdToJS(id_segment)
-
+    if (!segment) return
     SegmentStore.setLastTranslatedSegmentId(id_segment)
 
-    try {
-      // Attention, to be modified when we will lock tags
-      translation = segment.translation
-      sourceSegment = segment.updatedSource
-    } catch (e) {
-      var indexSegment = UI.executingSetTranslation.indexOf(id_segment)
-      if (indexSegment > -1) {
-        UI.executingSetTranslation.splice(indexSegment, 1)
-      }
-      return false
-    }
-    if (translation === '') {
-      this.unsavedSegmentsToRecover.push(this.currentSegmentId)
-      var index = this.executingSetTranslation.indexOf(id_segment)
-      if (index > -1) {
-        this.executingSetTranslation.splice(index, 1)
-      }
-      return false
-    }
-
-    var isSplitted = segment.splitted
-    if (isSplitted) {
-      translation = this.collectSplittedTranslations(segment.original_sid)
-      sourceSegment = this.collectSplittedTranslations(
-        segment.original_sid,
-        '.source',
-      )
-    }
-    let requestArgs = {
+    const translateRequest = SegmentUtils.createSetTranslationRequest(
       segment,
-      status: status,
-      translation: translation,
-      source: sourceSegment,
-      chosenSuggestionIndex: segment.choosenSuggestionIndex,
-      propagate: propagate,
-    }
-    if (isSplitted) {
-      SegmentActions.setStatus(segment.original_sid, null, status)
-      requestArgs.splitStatuses = this.collectSplittedStatuses(
-        segment.original_sid,
-        segment.sid,
-        status,
-      ).toString()
-    }
+      status,
+      propagate,
+    )
 
     if (callback_to_execute) {
       callback_to_execute.call(this)
     }
 
-    setTranslation(requestArgs)
+    setTranslation(translateRequest)
       .then((data) => {
         const idSegment = options.id_segment
         SegmentActions.setChoosenSuggestion(idSegment, null)
@@ -556,43 +516,11 @@ window.UI = {
         } else {
           UI.addToSetTranslationTail(options)
           OfflineUtils.changeStatusOffline(idSegment)
-          OfflineUtils.failedConnection(reqArguments, 'setTranslation')
+          OfflineUtils.failedConnection(translateRequest, 'setTranslation')
           OfflineUtils.decrementOfflineCacheRemaining()
         }
         SegmentActions.setSegmentSaving(id_segment, false)
       })
-  },
-
-  collectSplittedStatuses: function (sid, splittedSid, status) {
-    var statuses = []
-    var segments = SegmentStore.getSegmentsInSplit(sid)
-    $.each(segments, function () {
-      var segment = SegmentStore.getSegmentByIdToJS(this.sid)
-      if (splittedSid === this.sid) {
-        statuses.push(status)
-      } else {
-        statuses.push(segment.status)
-      }
-    })
-    return statuses
-  },
-  /**
-   *
-   * @param sid
-   * @param selector
-   * @returns {string}
-   */
-  collectSplittedTranslations: function (sid, selector) {
-    var totalTranslation = ''
-    var segments = SegmentStore.getSegmentsInSplit(sid)
-    $.each(segments, function (index) {
-      var segment = this
-      totalTranslation +=
-        selector === '.source' ? segment.segment : segment.translation
-      if (index < segments.length - 1)
-        totalTranslation += UI.splittedTranslationPlaceholder
-    })
-    return totalTranslation
   },
 
   processErrors: function (err, operation) {

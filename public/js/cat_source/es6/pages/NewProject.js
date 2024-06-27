@@ -18,7 +18,9 @@ import SupportedFilesModal from '../components/modals/SupportedFilesModal'
 import Footer from '../components/footer/Footer'
 import {createProject as createProjectApi} from '../api/createProject'
 import CreateProjectActions from '../actions/CreateProjectActions'
-import LanguageSelector from '../components/languageSelector/LanguageSelector'
+import LanguageSelector, {
+  setRecentlyUsedLanguages,
+} from '../components/languageSelector/LanguageSelector'
 import CreateProjectStore from '../stores/CreateProjectStore'
 import NewProjectConstants from '../constants/NewProjectConstants'
 import {CreateProjectContext} from '../components/createProject/CreateProjectContext'
@@ -263,8 +265,6 @@ const NewProject = () => {
   }, [])
 
   createProject.current = () => {
-    // const {mtGlossaryProps, deeplGlossaryProps} = activeMTEngine ?? {}
-
     const {
       mt,
       tm,
@@ -285,7 +285,8 @@ const NewProject = () => {
     const isGuessTagEnabled =
       checkGuessTagIsEnabled({sourceLang, targetLangs}).arrayIntersection
         .length > 0
-
+    // update store recently used target languages
+    setRecentlyUsedLanguages(targetLangs)
     const getParams = () => ({
       action: 'createProject',
       file_name: getFilenameFromUploadedFiles(),
@@ -687,17 +688,7 @@ const NewProject = () => {
             </a>
             {/*Target Language*/}
             <div className="translate-box target">
-              <TargetLanguagesSelect
-                history={
-                  historySourceTargets?.targets
-                    ? historySourceTargets.targets
-                        .split('||')
-                        .flatMap((item) =>
-                          item.length ? [item.split(',')] : [],
-                        )
-                    : []
-                }
-              />
+              <TargetLanguagesSelect />
             </div>
             {/*Project Subject*/}
             <div className="translate-box project-subject">
