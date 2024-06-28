@@ -6,6 +6,8 @@ import {
 import {Base64} from 'js-base64'
 import TextUtils from '../../../../utils/textUtils'
 import {isUndefined} from 'lodash'
+import getEntities from './getEntities'
+import matchTagStructure from '../../../segments/utils/DraftMatecatUtils/matchTag'
 
 export const transformTagsToHtml = (text, isRtl = 0) => {
   isRtl = !!isRtl
@@ -87,38 +89,44 @@ export const transformTagsToText = (text) => {
 }
 
 export const transformTagsToLexiqaText = (text) => {
-  try {
-    let {tags, text: tempText} = TextUtils.replaceTempTags(text)
-    text = decodeHtmlEntities(tempText)
-    text = TextUtils.restoreTempTags(tags, text)
-    for (let key in tagSignatures) {
-      const {placeholderRegex, decodeNeeded, placeholder, regex, lexiqaText} =
-        tagSignatures[key]
-      if (placeholderRegex) {
-        let globalRegex = new RegExp(
-          placeholderRegex.source,
-          placeholderRegex.flags + 'g',
-        )
-        text = text.replace(globalRegex, (match, text) => {
-          let tag = decodeNeeded
-            ? decodeHtmlEntities(Base64.decode(text))
-            : match
-          tag = !isToReplaceForLexiqa(key) ? '<' + tag + '>' : lexiqaText
-          return tag
-        })
-      } else if (regex) {
-        let globalRegex = new RegExp(regex)
-        text = text.replace(globalRegex, (match) => {
-          let tag = placeholder ? placeholder : match
-          tag = !isToReplaceForLexiqa(key) ? '<' + tag + '>' : lexiqaText
-          return tag
-        })
+  const tagsStruct = matchTagStructure(text).sort((a, b) =>
+    a.offset > b.offset ? 1 : -1,
+  )
+
+  let textNormalized = text
+  const {tags, text: tempText} = TextUtils.replaceTempTags(text)
+  textNormalized = decodeHtmlEntities(tempText)
+  textNormalized = TextUtils.restoreTempTags(tags, textNormalized)
+
+  return tagsStruct.reduce(
+    (acc, {data}) => {
+      const {value, difference} = acc
+      const {convertToLexiqaIgnoreAnglesBrackets, lexiqaText, decodeNeeded} =
+        tagSignatures[data.name]
+
+      const offsetStart = data.originalOffset - difference
+      const offsetEnd = offsetStart + data.encodedText.length
+
+      const placeholderText = isToReplaceForLexiqa(data.name)
+        ? lexiqaText
+        : decodeNeeded
+          ? data.decodedText
+          : data.id !== ''
+            ? data.id
+            : data.placeholder
+
+      const shouldIgnoreAngleBrackets = convertToLexiqaIgnoreAnglesBrackets
+
+      const placeholder = `${!shouldIgnoreAngleBrackets ? '<' : ''}${placeholderText}${!shouldIgnoreAngleBrackets ? '>' : ''}`
+      const newValue = `${value.slice(0, offsetStart)}${placeholder}${value.substring(offsetEnd)}`
+
+      return {
+        value: newValue,
+        difference: difference + (value.length - newValue.length),
       }
-    }
-  } catch (e) {
-    console.error('Error parsing tag in transformTagsToHtml function')
-  }
-  return text
+    },
+    {value: textNormalized, difference: 0},
+  ).value
 }
 
 // Associate tag of type g with integer id
