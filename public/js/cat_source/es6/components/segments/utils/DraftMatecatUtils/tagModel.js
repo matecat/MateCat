@@ -224,6 +224,7 @@ const tagSignaturesMap = {
     showTooltip: false,
     replaceForLexiqa: true,
     lexiqaText: ' ',
+    convertToLexiqaIgnoreAnglesBrackets: true,
   },
 }
 
