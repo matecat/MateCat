@@ -221,7 +221,7 @@ const tagSignaturesMap = {
     style: 'tag-selfclosed tag-space-placeholder',
     showTooltip: false,
     replaceForLexiqa: true,
-    lexiqaText: '​',
+    lexiqaText: ' ',
   },
 }
 
