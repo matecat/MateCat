@@ -101,18 +101,24 @@ export const transformTagsToLexiqaText = (text) => {
   return tagsStruct.reduce(
     (acc, {data}) => {
       const {value, difference} = acc
-      const {lexiqaText, decodeNeeded} = tagSignatures[data.name]
+      const {convertToLexiqaIgnoreAnglesBrackets, lexiqaText, decodeNeeded} =
+        tagSignatures[data.name]
 
       const offsetStart = data.originalOffset - difference
       const offsetEnd = offsetStart + data.encodedText.length
 
-      const placeholder = isToReplaceForLexiqa(data.name)
+      const placeholderText = isToReplaceForLexiqa(data.name)
         ? lexiqaText
         : decodeNeeded
           ? data.decodedText
-          : data.id
+          : data.id !== ''
+            ? data.id
+            : data.placeholder
 
-      const newValue = `${value.slice(0, offsetStart)}<${placeholder}>${value.substring(offsetEnd)}`
+      const shouldIgnoreAngleBrackets = convertToLexiqaIgnoreAnglesBrackets
+
+      const placeholder = `${!shouldIgnoreAngleBrackets ? '<' : ''}${placeholderText}${!shouldIgnoreAngleBrackets ? '>' : ''}`
+      const newValue = `${value.slice(0, offsetStart)}${placeholder}${value.substring(offsetEnd)}`
 
       return {
         value: newValue,
