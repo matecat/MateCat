@@ -1,5 +1,6 @@
 import {renderHook, act, waitFor} from '@testing-library/react'
 import projectTemplatesMock from '../../../../mocks/projectTemplateMock'
+import tmKeysMock from '../../../../mocks/tmKeysMock'
 import useProjectTemplates from './useProjectTemplates'
 import {mswServer} from '../../../../mocks/mswServer'
 import {HttpResponse, http} from 'msw'
@@ -20,7 +21,7 @@ beforeEach(() => {
 })
 
 test('Get templates', async () => {
-  const {result} = renderHook(() => useProjectTemplates(true))
+  const {result} = renderHook(() => useProjectTemplates(tmKeysMock.tm_keys))
 
   await waitFor(() => {
     expect(result.current.projectTemplates?.length).toBe(2)
@@ -31,7 +32,7 @@ test('Get templates', async () => {
 })
 
 test('Change current template', async () => {
-  const {result} = renderHook(() => useProjectTemplates(true))
+  const {result} = renderHook(() => useProjectTemplates(tmKeysMock.tm_keys))
   const {setProjectTemplates} = result.current
 
   await waitFor(() => {
@@ -51,7 +52,7 @@ test('Change current template', async () => {
 })
 
 test('Modyfing current template', async () => {
-  const {result} = renderHook(() => useProjectTemplates(true))
+  const {result} = renderHook(() => useProjectTemplates(tmKeysMock.tm_keys))
   const {modifyingCurrentTemplate} = result.current
 
   await waitFor(() => {
@@ -82,7 +83,7 @@ test('Modyfing current template', async () => {
 })
 
 test('Modifyng current template with wrong prop', async () => {
-  const {result} = renderHook(() => useProjectTemplates(true))
+  const {result} = renderHook(() => useProjectTemplates(tmKeysMock.tm_keys))
   const {modifyingCurrentTemplate} = result.current
 
   await waitFor(() => {
@@ -100,7 +101,7 @@ test('Modifyng current template with wrong prop', async () => {
 })
 
 test('Check is modified specific property', async () => {
-  const {result} = renderHook(() => useProjectTemplates(true))
+  const {result} = renderHook(() => useProjectTemplates(tmKeysMock.tm_keys))
   const {modifyingCurrentTemplate, checkSpecificTemplatePropsAreModified} =
     result.current
 
@@ -127,7 +128,7 @@ test('Check is modified specific property', async () => {
 test('Cattool page', async () => {
   global.config.is_cattool = true
 
-  const {result} = renderHook(() => useProjectTemplates(true))
+  const {result} = renderHook(() => useProjectTemplates(tmKeysMock.tm_keys))
 
   await waitFor(() => {
     expect(result.current.projectTemplates?.length).toBe(1)
