@@ -606,6 +606,11 @@ class UploadHandler {
 
     protected function _isRightMime( $fileUp ) {
 
+        // blank textual files
+        if($fileUp->type === 'inode/x-empty'){
+            return true;
+        }
+
         //Mime White List, take them from ProjectManager.php
         foreach ( INIT::$MIME_TYPES as $key => $value ) {
             if ( strpos( $key, $fileUp->type ) !== false ) {
