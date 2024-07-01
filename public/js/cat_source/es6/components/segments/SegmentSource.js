@@ -20,6 +20,7 @@ import Assistant from '../icons/Assistant'
 import Education from '../icons/Education'
 import {TERM_FORM_FIELDS} from './SegmentFooterTabGlossary/SegmentFooterTabGlossary'
 import {getEntitiesSelected} from './utils/DraftMatecatUtils/manageCaretPositionNearEntity'
+import {flushSync} from 'react-dom'
 
 class SegmentSource extends React.Component {
   static contextType = SegmentContext
@@ -473,7 +474,9 @@ class SegmentSource extends React.Component {
     )
     const {editorState, tagRange} = contentEncoded
 
-    this.setState({editorState, tagRange})
+    flushSync(() => this.setState({editorState, tagRange}))
+
+    this.updateSourceInStore()
   }
 
   allowHTML(string) {
