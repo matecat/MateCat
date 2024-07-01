@@ -79,7 +79,8 @@ export const checkCaretIsNearZwsp = ({
     const pointOffset = start + step
 
     const updatedSelection = SelectionState.createEmpty(anchorKey).merge({
-      anchorOffset: blockedOffset ? blockedOffset : pointOffset,
+      anchorOffset:
+        typeof blockedOffset === 'number' ? blockedOffset : pointOffset,
       focusOffset: pointOffset,
       focusKey,
       isBackward,
@@ -136,7 +137,8 @@ export const moveCaretOutsideEntity = ({
   const pointOffset = step < 0 ? entity.start : entity.end
 
   const updatedSelection = SelectionState.createEmpty(anchorKey).merge({
-    anchorOffset: blockedOffset ? blockedOffset : pointOffset,
+    anchorOffset:
+      typeof blockedOffset === 'number' ? blockedOffset : pointOffset,
     focusOffset: pointOffset,
     focusKey,
     isBackward,
