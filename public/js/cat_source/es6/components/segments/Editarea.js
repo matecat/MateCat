@@ -764,7 +764,13 @@ class Editarea extends React.Component {
       return 'close-tag-menu'
     } else if (e.key === 'Tab') {
       return e.shiftKey ? null : 'insert-tab-tag'
-    } else if (e.code === 'Space' && tagSignatures.space) {
+    } else if (
+      e.code === 'Space' &&
+      !e.ctrlKey &&
+      !e.altKey &&
+      !e.shiftKey &&
+      tagSignatures.space
+    ) {
       return 'insert-space-tag'
     } else if (
       (e.key === ' ' || e.key === 'Spacebar' || e.key === ' ') &&
