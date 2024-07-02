@@ -22,12 +22,18 @@ export const SegmentButton = ({segment, disabled, isReview}) => {
     Shortcuts.cattol.events.translate_nextUntranslated.keystrokes[
       Shortcuts.shortCutsKeyType
     ],
-    (e) => clickOnTranslatedButton(e, true),
+    (e) =>
+      config.isReview
+        ? clickOnApprovedButton(e, true)
+        : clickOnTranslatedButton(e, true),
     {enableOnContentEditable: true},
   )
   useHotkeys(
     Shortcuts.cattol.events.translate.keystrokes[Shortcuts.shortCutsKeyType],
-    (e) => clickOnTranslatedButton(e, false),
+    (e) =>
+      config.isReview
+        ? clickOnApprovedButton(e, false)
+        : clickOnTranslatedButton(e, false),
     {enableOnContentEditable: true},
   )
 
