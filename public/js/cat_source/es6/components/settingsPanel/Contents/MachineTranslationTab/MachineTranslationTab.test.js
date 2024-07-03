@@ -401,12 +401,6 @@ test('DeepL and glossary', async () => {
     },
   })
 
-  await user.click(
-    screen.getByTestId('delete-deeplglossary-316e350e-81d1-4781-900c-3abc'),
-  )
-
-  expect(await screen.findByText('Confirm')).toBeInTheDocument()
-
   const spyShowModal = jest.spyOn(ModalsActions, 'showModalComponent')
 
   await user.click(

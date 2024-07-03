@@ -133,8 +133,10 @@ export const ModifyCategory = ({target, category, setIsEditingName}) => {
         <div
           className="popover-component-body"
           onKeyDown={(event) => {
-            cancel()
-            event.stopPropagation()
+            if (event.key === 'Escape') {
+              cancel()
+              event.stopPropagation()
+            }
           }}
         >
           {content}

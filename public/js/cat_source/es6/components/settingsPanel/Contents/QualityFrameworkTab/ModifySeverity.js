@@ -117,8 +117,10 @@ export const ModifySeverity = ({target, label, index, setIsEditingName}) => {
         <div
           className="popover-component-body"
           onKeyDown={(event) => {
-            cancel()
-            event.stopPropagation()
+            if (event.key === 'Escape') {
+              cancel()
+              event.stopPropagation()
+            }
           }}
         >
           {content}
