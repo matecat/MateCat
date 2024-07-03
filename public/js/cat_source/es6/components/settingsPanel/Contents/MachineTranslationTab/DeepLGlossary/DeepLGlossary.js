@@ -116,7 +116,17 @@ export const DeepLGlossary = ({id, isCattoolPage = false}) => {
         'Confirm deletion',
       )
     } else {
-      setDeleteGlossaryRequest(glossary)
+      ModalsActions.showModalComponent(
+        ConfirmDeleteResourceProjectTemplates,
+        {
+          projectTemplatesInvolved: templatesInvolved,
+          successCallback: () => deleteGlossary.current(glossary),
+          content:
+            'You are about to delete a resource linked to an DeepL license. If you confirm, it will be deleted permanently for you and any other user of the same license.',
+          footerContent: '',
+        },
+        'Confirm deletion',
+      )
     }
   }
 
@@ -298,6 +308,9 @@ export const DeepLGlossary = ({id, isCattoolPage = false}) => {
   }
 
   const haveRecords = rows?.length > 0
+  const shouldHideNewButton = rows?.some(
+    ({id}) => id === DEEPL_GLOSSARY_CREATE_ROW_ID,
+  )
 
   return (
     <div className="mt-glossary">
@@ -325,7 +338,7 @@ export const DeepLGlossary = ({id, isCattoolPage = false}) => {
             (haveRecords ? (
               <div className="main-buttons-container">
                 <button
-                  className="grey-button create-glossary-button"
+                  className={`grey-button create-glossary-button${shouldHideNewButton ? ' create-glossary-button-disabled' : ''}`}
                   onClick={addGlossary}
                 >
                   <IconAdd size={18} />

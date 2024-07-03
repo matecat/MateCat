@@ -119,6 +119,7 @@ export const Popover = ({
         <div
           className={`popover-component-popover popover-component-${align} popover-component-${verticalAlign} ${className}`}
           data-testid="popover"
+          onKeyDown={handleCancel}
         >
           {title && (
             <div className="popover-component-header">

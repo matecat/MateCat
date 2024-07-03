@@ -130,7 +130,15 @@ export const ModifyCategory = ({target, category, setIsEditingName}) => {
         <div className="popover-component-header">
           <span className="popover-component-title">Edit category</span>
         </div>
-        <div className="popover-component-body">{content}</div>
+        <div
+          className="popover-component-body"
+          onKeyDown={(event) => {
+            cancel()
+            event.stopPropagation()
+          }}
+        >
+          {content}
+        </div>
         <div className="popover-component-actions">
           <Button
             mode={BUTTON_MODE.OUTLINE}

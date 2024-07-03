@@ -25,14 +25,21 @@ export const MoreMenu = ({portalTarget}) => {
     setIsRequestInProgress(true)
     deleteProjectTemplate(currentProjectTemplate.id)
       .then(({id}) =>
-        setProjectTemplates((prevState) =>
-          prevState
+        setProjectTemplates((prevState) => {
+          const isDeleteTemplateDefault = prevState.find(
+            (template) => template.id === id,
+          ).isDefault
+
+          return prevState
             .filter((template) => template.id !== id)
             .map((template) => ({
               ...template,
               isSelected: isStandardTemplate(template),
-            })),
-        ),
+              ...(isDeleteTemplateDefault && {
+                isDefault: isStandardTemplate(template),
+              }),
+            }))
+        }),
       )
       .catch((error) => console.log(error))
       .finally(() => setIsRequestInProgress(false))
