@@ -474,40 +474,6 @@ var spec = {
         },
       },
     },
-    '/api/v1/jobs/{id_job}/{password}/stats': {
-      get: {
-        tags: ['Job'],
-        summary: 'Statistics',
-        description: 'Statistics',
-        parameters: [
-          {
-            name: 'id_job',
-            in: 'path',
-            description: 'The id of the job',
-            required: true,
-            type: 'string',
-          },
-          {
-            name: 'password',
-            in: 'path',
-            description: 'The password of the job',
-            required: true,
-            type: 'string',
-          },
-        ],
-        responses: {
-          200: {
-            description: 'Statistics',
-            schema: {
-              $ref: '#/definitions/Stats',
-            },
-          },
-          default: {
-            description: 'Unexpected error',
-          },
-        },
-      },
-    },
     '/api/v2/jobs/{id_job}/{password}/cancel': {
       post: {
         tags: ['Job'],
@@ -3205,89 +3171,6 @@ var spec = {
         old_pwd: {
           type: 'string',
           description: 'Returns the old pass of the resource just updated',
-        },
-      },
-    },
-    Stats: {
-      type: 'object',
-      properties: {
-        id: {
-          type: 'integer',
-        },
-        DRAFT: {
-          type: 'number',
-        },
-        TRANSLATED: {
-          type: 'number',
-        },
-        APPROVED: {
-          type: 'number',
-        },
-        REJECTED: {
-          type: 'number',
-        },
-        TOTAL: {
-          type: 'number',
-        },
-        PROGRESS: {
-          type: 'number',
-        },
-        TOTAL_FORMATTED: {
-          type: 'number',
-        },
-        PROGRESS_FORMATTED: {
-          type: 'string',
-        },
-        APPROVED_FORMATTED: {
-          type: 'string',
-        },
-        REJECTED_FORMATTED: {
-          type: 'string',
-        },
-        DRAFT_FORMATTED: {
-          type: 'string',
-        },
-        TRANSLATED_FORMATTED: {
-          type: 'string',
-        },
-        APPROVED_PERC: {
-          type: 'number',
-        },
-        REJECTED_PERC: {
-          type: 'number',
-        },
-        DRAFT_PERC: {
-          type: 'number',
-        },
-        TRANSLATED_PERC: {
-          type: 'number',
-        },
-        PROGRESS_PERC: {
-          type: 'number',
-        },
-        TRANSLATED_PERC_FORMATTED: {
-          type: 'number',
-        },
-        DRAFT_PERC_FORMATTED: {
-          type: 'number',
-        },
-        APPROVED_PERC_FORMATTED: {
-          type: 'number',
-        },
-        REJECTED_PERC_FORMATTED: {
-          type: 'number',
-        },
-        PROGRESS_PERC_FORMATTED: {
-          type: 'number',
-        },
-        TODO_FORMATTED: {
-          type: 'string',
-        },
-        DOWNLOAD_STATUS: {
-          type: 'string',
-        },
-        ANALYSIS_COMPLETE: {
-          type: 'string',
         },
       },
     },
