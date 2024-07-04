@@ -600,6 +600,22 @@ class Editarea extends React.Component {
       }
     }
 
+    // Select all triple click
+    if (this.wasTripleClickTriggered.current) {
+      const {editorState} = this.state
+      const contentState = editorState.getCurrentContent()
+
+      const selectAll = editorState.getSelection().merge({
+        anchorKey: contentState.getFirstBlock().getKey(),
+        anchorOffset: 0,
+        focusOffset: contentState.getLastBlock().getText().length,
+        focusKey: contentState.getLastBlock().getKey(),
+      })
+
+      const newEditorState = EditorState.forceSelection(editorState, selectAll)
+      this.setState({editorState: newEditorState})
+    }
+
     this.wasTripleClickTriggered.current = false
   }
 
