@@ -411,7 +411,7 @@ test('DeepL and glossary', async () => {
 
   const modalContent = spyShowModal.mock.calls[0][1].content
   expect(modalContent).toBe(
-    'The DeepL glossary you are about to delete is used in the following project creation template(s):',
+    'The glossary you are about to delete is linked to a DeepL license and used in the following project creation template(s):',
   )
 
   const newButton = screen.getByText('New')

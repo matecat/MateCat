@@ -111,7 +111,9 @@ export const DeepLGlossary = ({id, isCattoolPage = false}) => {
           projectTemplatesInvolved: templatesInvolved,
           successCallback: () => deleteGlossary.current(glossary),
           content:
-            'The DeepL glossary you are about to delete is used in the following project creation template(s):',
+            'The glossary you are about to delete is linked to a DeepL license and used in the following project creation template(s):',
+          footerContent:
+            'If you confirm, it will be removed from the template(s) and deleted permanently for you and any other user of the same license.',
         },
         'Confirm deletion',
       )
