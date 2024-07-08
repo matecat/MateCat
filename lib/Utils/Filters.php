@@ -182,6 +182,14 @@ class Filters {
 
     /**
      * Logs a conversion to xliff, doing also file backup in case of failure.
+     *
+     * @param $response
+     * @param $sentFile
+     * @param $sourceLang
+     * @param $targetLang
+     * @param $segmentation
+     *
+     * @throws Exception
      */
     public static function logConversionToXliff( $response, $sentFile, $sourceLang, $targetLang, $segmentation ) {
         self::logConversion( $response, true, $sentFile, [ 'source' => $sourceLang, 'target' => $targetLang ], [ 'segmentation_rule' => $segmentation ] );
@@ -189,6 +197,13 @@ class Filters {
 
     /**
      * Logs a conversion to target, doing also file backup in case of failure.
+     *
+     * @param $response
+     * @param $sentFile
+     * @param $jobData
+     * @param $sourceFileData
+     *
+     * @throws Exception
      */
     public static function logConversionToTarget( $response, $sentFile, $jobData, $sourceFileData ) {
         self::logConversion( $response, false, $sentFile, $jobData, $sourceFileData );
@@ -198,6 +213,14 @@ class Filters {
      * Logs every conversion made. In order to make this method work, ensure
      * you have the matecat_conversions_log database properly configured.
      * See /lib/Model/matecat_conversions_log.sql
+     *
+     * @param $response
+     * @param $toXliff
+     * @param $sentFile
+     * @param $jobData
+     * @param $sourceFileData
+     *
+     * @throws Exception
      */
     private static function logConversion( $response, $toXliff, $sentFile, $jobData, $sourceFileData ) {
         try {
@@ -232,6 +255,7 @@ class Filters {
                 'source_file_name' => ( $toXliff ? AbstractFilesStorage::basename_fix( $sentFile ) : $sourceFileData[ 'filename' ] ),
                 'source_file_ext'  => ( $toXliff ? AbstractFilesStorage::pathinfo_fix( $sentFile, PATHINFO_EXTENSION ) : $sourceFileData[ 'mime_type' ] ),
                 'source_file_sha1' => ( $toXliff ? sha1_file( $sentFile ) : $sourceFileData[ 'sha1_original_file' ] ),
+                'segmentation'     => isset($sourceFileData['segmentation_rule']) ? $sourceFileData['segmentation_rule'] : null,
         ];
 
         $query = 'INSERT INTO conversions_log ('
@@ -249,15 +273,12 @@ class Filters {
         }
 
         if ( $response[ 'isSuccess' ] !== true ) {
-
             if ( INIT::$FILTERS_EMAIL_FAILURES ) {
                 Utils::sendErrMailReport( "MateCat: conversion failed.\n\n" . print_r( $info, true ) );
             }
 
             self::backupFailedConversion( $sentFile );
-
         }
-
     }
 
     /**
