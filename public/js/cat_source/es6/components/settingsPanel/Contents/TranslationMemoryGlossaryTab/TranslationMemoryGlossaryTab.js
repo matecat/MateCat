@@ -249,7 +249,7 @@ export const TranslationMemoryGlossaryTab = () => {
           const copyAcc = [...acc]
           const index = [
             defaultTranslationMemoryRow,
-            ...tmCurrentProjectTemplate,
+            ...(tmCurrentProjectTemplate ? tmCurrentProjectTemplate : []),
           ].findIndex(({id}) => id === cur.id)
 
           if (index >= 0) {
