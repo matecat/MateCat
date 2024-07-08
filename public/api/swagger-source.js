@@ -947,6 +947,21 @@ var spec = {
               required: true,
               type: 'integer',
             },
+            {
+              name: 'split_values',
+              in: 'formData',
+              description:
+                  'Number of word count values of each chunk returned in split check API',
+              type: 'array',
+              items: {type: 'double'},
+            },
+            {
+              name: 'split_raw_words',
+              in: 'formData',
+              description:
+                  'Split the job by raw words instead of equivalent words',
+              type: 'boolean',
+            },
           ],
           responses: {
             200: {
