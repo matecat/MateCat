@@ -35,10 +35,10 @@ export const TemplateNameInput = () => {
         cancel()
       }
     }
-    current.addEventListener('keydown', handleKeyDown, true)
+    if (templateName) current.addEventListener('keydown', handleKeyDown)
 
     return () => current.removeEventListener('keydown', handleKeyDown)
-  }, [updateNameBehaviour, createTemplate, templateModifier])
+  }, [updateNameBehaviour, createTemplate, templateModifier, templateName])
   return (
     <input
       ref={container}
