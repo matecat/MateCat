@@ -6,6 +6,7 @@ import SegmentStore from './es6/stores/SegmentStore'
 import CommonUtils from './es6/utils/commonUtils'
 import Shortcuts from './es6/utils/shortcuts'
 import ModalsActions from './es6/actions/ModalsActions'
+import {SETTINGS_PANEL_TABS} from './es6/components/settingsPanel'
 
 $.extend(window.UI, {
   bindShortcuts: function () {
@@ -38,7 +39,7 @@ $.extend(window.UI, {
           Shortcuts.shortCutsKeyType
         ],
         function () {
-          CatToolActions.openSettingsPanel()
+          CatToolActions.openSettingsPanel(SETTINGS_PANEL_TABS.advancedOptions)
         },
       )
       .on(
