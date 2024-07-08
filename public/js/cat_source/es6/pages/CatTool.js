@@ -39,7 +39,7 @@ const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
 function CatTool() {
   useHotkeys(
     Shortcuts.cattol.events.openSettings.keystrokes[Shortcuts.shortCutsKeyType],
-    () => CatToolActions.openSettingsPanel(),
+    () => CatToolActions.openSettingsPanel(SETTINGS_PANEL_TABS.advancedOptions),
     {enableOnContentEditable: true},
   )
   const [options, setOptions] = useState({})
