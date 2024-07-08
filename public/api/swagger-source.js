@@ -3907,6 +3907,34 @@ var spec = {
       },
     },
 
+    Stats: {
+      type: 'object',
+      properties: {
+        equivalent: {
+          type: 'object',
+          properties: {
+            new: { type: 'number' },
+            draft: { type: 'number' },
+            translated: { type: 'number' },
+            approved: { type: 'number' },
+            approved2: { type: 'number' },
+            total: { type: 'number' },
+          },
+        },
+        raw: {
+          type: 'object',
+          properties: {
+            new: { type: 'number' },
+            draft: { type: 'number' },
+            translated: { type: 'number' },
+            approved: { type: 'number' },
+            approved2: { type: 'number' },
+            total: { type: 'number' },
+          },
+        }
+      },
+    },
+
     JobTranslatorItem: {
       type: 'object',
       properties: {
