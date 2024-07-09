@@ -199,9 +199,10 @@ const SegmentUtils = {
           ).toString()
         : null,
       characters_counter: segment.charactersCounter,
-      suggestion_array: segment.contributions
-        ? JSON.stringify(segment.contributions.matches)
-        : undefined,
+      suggestion_array:
+        segment.contributions && !config.isReview
+          ? JSON.stringify(segment.contributions.matches)
+          : undefined,
     }
   },
   /**
