@@ -1654,6 +1654,7 @@ button.ui-button::-moz-focus-inner {
   margin: 0 auto;
   width: 94%;
   min-width: 992px;
+  max-width: 1600px;
   position: relative;
   padding: 24px;
   background: $grey5;
@@ -1714,6 +1715,7 @@ button.ui-button::-moz-focus-inner {
   position: relative;
   padding: 24px;
   height: 200px;
+  max-width: 1600px;
 }
 
 h2 {
