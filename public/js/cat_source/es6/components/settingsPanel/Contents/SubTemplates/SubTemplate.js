@@ -112,7 +112,6 @@ export const SubTemplates = ({
       ...getFilteredSchemaCreateUpdate(currentTemplate),
       [schema.name]: templateName,
     }
-    setIsRequestInProgress(true)
 
     // Check new template has identical settings to the another one already existing
     const templatesIdenticalSettings =
@@ -123,13 +122,6 @@ export const SubTemplates = ({
           const comparableTemplate = getFilteredSchemaToCompare(template)
           const comparableCurrentTemplate =
             getFilteredSchemaToCompare(currentTemplate)
-
-          console.log(
-            'comparableTemplate',
-            comparableTemplate,
-            'comparableCurrentTemplate',
-            comparableCurrentTemplate,
-          )
 
           return isEqual(comparableTemplate, comparableCurrentTemplate)
         })
@@ -143,6 +135,8 @@ export const SubTemplates = ({
         return
       }
     }
+
+    setIsRequestInProgress(true)
 
     createApi(newTemplate)
       .then((template) => {
