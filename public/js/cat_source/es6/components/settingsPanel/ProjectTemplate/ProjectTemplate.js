@@ -18,6 +18,9 @@ import {IconSaveChanges} from '../../icons/IconSaveChanges'
 import {BUTTON_MODE, BUTTON_SIZE, Button} from '../../common/Button/Button'
 import {createProjectTemplate} from '../../../api/createProjectTemplate'
 import CatToolActions from '../../../actions/CatToolActions'
+import {isEqual} from 'lodash'
+import ModalsActions from '../../../actions/ModalsActions'
+import {ConfirmDeleteResourceProjectTemplates} from '../../modals/ConfirmDeleteResourceProjectTemplates'
 
 export const TEMPLATE_MODIFIERS = {
   CREATE: 'create',
@@ -103,8 +106,27 @@ export const ProjectTemplate = ({portalTarget}) => {
     ({isTemporary}) => isTemporary,
   )
 
+  const getModalTryingSaveIdenticalSettingsTemplate = (
+    projectTemplatesInvolved,
+  ) =>
+    new Promise((resolve, reject) => {
+      ModalsActions.showModalComponent(
+        ConfirmDeleteResourceProjectTemplates,
+        {
+          projectTemplatesInvolved,
+          successCallback: () => resolve(),
+          cancelCallback: () => reject(),
+          content:
+            'The template you are trying to save has identical settings to the following template:',
+          footerContent:
+            'Please confirm that you want to save a template with the same settings as an existing template',
+        },
+        'Template',
+      )
+    })
+
   const createTemplate = useRef()
-  createTemplate.current = () => {
+  createTemplate.current = async () => {
     if (
       projectTemplates.some(
         ({name}) => name.toLowerCase() === templateName.toLowerCase(),
@@ -118,6 +140,49 @@ export const ProjectTemplate = ({portalTarget}) => {
         position: 'br',
       })
       return
+    }
+
+    // Check new template has identical settings to the another one already existing
+    const templatesIdenticalSettings =
+      /* eslint-disable no-unused-vars */
+      projectTemplates
+        .filter(({id}) => id !== currentProjectTemplate.id)
+        .filter((template) => {
+          const {
+            created_at,
+            id,
+            uid,
+            modified_at,
+            is_default,
+            name,
+            isTemporary,
+            isSelected,
+            ...comparableTemplate
+          } = template
+
+          const {
+            created_at: createdAtCurrent,
+            id: idCurrent,
+            uid: uidCurrent,
+            modified_at: modifiedAtCurrent,
+            is_default: isDefaultCurrent,
+            name: nameCurrent,
+            isTemporary: isTemporaryCurrent,
+            isSelected: isSelectedCurrent,
+            ...comparableCurrentProjectTemplate
+          } = currentProjectTemplate
+
+          return isEqual(comparableTemplate, comparableCurrentProjectTemplate)
+        })
+    /* eslint-enable no-unused-vars */
+    if (templatesIdenticalSettings.length) {
+      try {
+        await getModalTryingSaveIdenticalSettingsTemplate(
+          templatesIdenticalSettings,
+        )
+      } catch (error) {
+        return
+      }
     }
 
     /* eslint-disable no-unused-vars */
