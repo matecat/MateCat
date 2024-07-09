@@ -12,7 +12,11 @@ class ConfirmMessageModal extends React.Component {
         <div className="matecat-modal-middle">
           <div className={'ui one column grid ' + this.props.modalName}>
             <div className="column left aligned" style={{fontSize: '18px'}}>
-              <p dangerouslySetInnerHTML={this.allowHTML(this.props.text)} />
+              {typeof this.props.text === 'string' ? (
+                <p dangerouslySetInnerHTML={this.allowHTML(this.props.text)} />
+              ) : (
+                this.props.text
+              )}
             </div>
             <div className="column right aligned">
               {this.props.cancelCallback || this.props.cancelText ? (
@@ -62,7 +66,7 @@ class ConfirmMessageModal extends React.Component {
   }
 }
 ConfirmMessageModal.propTypes = {
-  text: PropTypes.string,
+  text: PropTypes.node,
 }
 
 export default ConfirmMessageModal

@@ -4,12 +4,13 @@ import Upload from '../../../../../../../../img/icons/Upload'
 import Checkmark from '../../../../../../../../img/icons/Checkmark'
 import Close from '../../../../../../../../img/icons/Close'
 import {MTGlossaryStatus, MT_GLOSSARY_CREATE_ROW_ID} from './MTGlossary'
-import {MachineTranslationTabContext} from '..'
 import {createMemoryAndImportGlossary} from '../../../../../api/createMemoryAndImportGlossary/createMemoryAndImportGlossary'
 import LabelWithTooltip from '../../../../common/LabelWithTooltip'
+import CatToolActions from '../../../../../actions/CatToolActions'
+import {SettingsPanelContext} from '../../../SettingsPanelContext'
 
 export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
-  const {setNotification} = useContext(MachineTranslationTabContext)
+  const {portalTarget} = useContext(SettingsPanelContext)
 
   const [isActive, setIsActive] = useState(row.isActive)
   const [name, setName] = useState(row.name ?? '')
@@ -21,25 +22,22 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
 
   useEffect(() => {
     statusEntry.current = new MTGlossaryStatus()
-    ref.current.scrollIntoView({behavior: 'smooth', block: 'nearest'})
+    ref.current.scrollIntoView?.({behavior: 'smooth', block: 'nearest'})
 
     return () => statusEntry.current.cancel()
   }, [])
 
   const onChangeIsActive = (e) => {
     setIsActive(e.currentTarget.checked)
-    resetErrors()
   }
 
   const onChangeName = (e) => {
     const {value} = e.currentTarget ?? {}
     setName(value)
-    resetErrors()
   }
 
   const onChangeFile = (e) => {
     if (e.target.files) setFile(Array.from(e.target.files)[0])
-    resetErrors()
   }
 
   const createNewGlossary = () => {
@@ -84,9 +82,13 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
 
   const validateForm = () => {
     if (!name || !file) {
-      setNotification({
+      CatToolActions.addNotification({
+        title: 'Glossary create error',
         type: 'error',
-        message: !name ? 'Name mandatory' : 'File mandatory',
+        text: !name ? 'Name mandatory' : 'File mandatory',
+        position: 'br',
+        allowHtml: true,
+        timer: 5000,
       })
       return false
     }
@@ -98,22 +100,27 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
     setRows((prevState) =>
       prevState.filter(({id}) => id !== MT_GLOSSARY_CREATE_ROW_ID),
     )
-    setNotification()
   }
 
-  const resetErrors = () => setNotification()
-
   const dispatchSuccessfullNotification = () => {
-    setNotification({
+    CatToolActions.addNotification({
+      title: 'Glossary created',
       type: 'success',
-      message: 'Glossary created succesfully',
+      text: 'Glossary created successfully',
+      position: 'br',
+      allowHtml: true,
+      timer: 5000,
     })
     setIsWaitingResult(false)
   }
-  const dispatchErrorNotification = (message) => {
-    setNotification({
+  const dispatchErrorNotification = () => {
+    CatToolActions.addNotification({
+      title: 'Glossary create error',
       type: 'error',
-      message: message ?? 'Glossary create error',
+      text: 'Error creating glossary',
+      position: 'br',
+      allowHtml: true,
+      timer: 5000,
     })
     setIsWaitingResult(false)
   }
@@ -154,6 +161,7 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
           value={name}
           onChange={onChangeName}
           disabled={isWaitingResult}
+          data-testid="mtglossary-create-name"
         />
         <div className="glossary-row-import-button">
           <input
@@ -170,7 +178,7 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
               Choose file
             </label>
           ) : (
-            <LabelWithTooltip>
+            <LabelWithTooltip tooltipTarget={portalTarget}>
               <div className="filename">
                 <label>{file.name}</label>
               </div>
@@ -187,6 +195,7 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
           className="ui primary button settings-panel-button-icon confirm-button"
           type="submit"
           disabled={isWaitingResult || !isFormFilled}
+          data-testid="mtglossary-create-confirm"
         >
           <Checkmark size={12} />
           Confirm

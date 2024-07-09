@@ -1,6 +1,5 @@
-import {useContext, useEffect, useState, useRef} from 'react'
+import {useEffect, useState, useRef} from 'react'
 import PropTypes from 'prop-types'
-import {TranslationMemoryGlossaryTabContext} from '../TranslationMemoryGlossaryTab'
 import ModalsActions from '../../../../../actions/ModalsActions'
 import AlertModal from '../../../../modals/AlertModal'
 import {loadTMX} from '../../../../../api/loadTMX'
@@ -9,6 +8,7 @@ import {uploadGlossary} from '../../../../../api/uploadGlossary/uploadGlossary'
 import {uploadTm} from '../../../../../api/uploadTm'
 import {checkGlossaryImport} from '../../../../../api/checkGlossaryImport'
 import ConfirmMessageModal from '../../../../modals/ConfirmMessageModal'
+import CatToolActions from '../../../../../actions/CatToolActions'
 
 export const IMPORT_TYPE = {
   tmx: 'tmx',
@@ -18,8 +18,6 @@ export const IMPORT_TYPE = {
 const DELAY_GET_STATUS = 1000
 
 function useImport({type, row, onClose}) {
-  const {setNotification} = useContext(TranslationMemoryGlossaryTabContext)
-
   const [files, setFiles] = useState([])
   const [uuids, setUuids] = useState(undefined)
   const [status, setStatus] = useState([])
@@ -70,10 +68,13 @@ function useImport({type, row, onClose}) {
               error.errors && error.errors.length > 0
                 ? error.errors[0].message
                 : 'Error while importing your file'
-            setNotification({
+            CatToolActions.addNotification({
+              title: 'Error import',
               type: 'error',
-              message: message,
-              rowKey: key,
+              text: message,
+              position: 'br',
+              allowHtml: true,
+              timer: 5000,
             })
           })
       })
@@ -82,12 +83,10 @@ function useImport({type, row, onClose}) {
     getStatus()
 
     return () => clearTimeout(tmOut)
-  }, [uuids, key, type, setNotification])
+  }, [uuids, key, type])
 
   const onChangeFiles = (e) => {
     setStatus([])
-    setNotification({})
-
     if (e.target.files && e.target.files.length > 0) {
       if (
         e.target.files[0].size > config.maxTMXFileSize &&
@@ -167,16 +166,18 @@ function useImport({type, row, onClose}) {
     setFiles([])
     setUuids(undefined)
     setStatus([])
-    setNotification({})
 
     if (!uuids?.length) onCloseRef.current()
   }
 
   const onErrorUpload = (error) => {
-    setNotification({
+    CatToolActions.addNotification({
+      title: 'Error upload',
       type: 'error',
-      message: error.errors[0].message,
-      rowKey: key,
+      text: error.errors[0].message,
+      position: 'br',
+      allowHtml: true,
+      timer: 5000,
     })
     setStatus([{errors: error.errors}])
     setUuids(undefined)
