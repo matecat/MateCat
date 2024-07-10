@@ -29,7 +29,6 @@ export const SubTemplateMoreMenu = ({portalTarget}) => {
     isRequestInProgress,
     setIsRequestInProgress,
     setTemplateModifier,
-    templateName,
     setTemplateName,
     propConnectProjectTemplate,
     deleteApi,
@@ -122,10 +121,8 @@ export const SubTemplateMoreMenu = ({portalTarget}) => {
         disabled={isRequestInProgress}
         className="settings-panel-templates-button-more"
         onMouseUp={() => {
-          if (templateName) {
-            setTemplateModifier(SUBTEMPLATE_MODIFIERS.UPDATE)
-            setTemplateName(currentTemplate.name)
-          }
+          setTemplateModifier(SUBTEMPLATE_MODIFIERS.UPDATE)
+          setTemplateName(currentTemplate.name)
         }}
       >
         <IconEdit />

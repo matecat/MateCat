@@ -1,6 +1,5 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react'
 import {useHotkeys} from 'react-hotkeys-hook'
-import {CattolFooter} from '../components/footer/CattoolFooter'
 import {Header} from '../components/header/cattol/Header'
 import NotificationBox from '../components/notificationsComponent/NotificationBox'
 import SegmentsContainer from '../components/segments/SegmentsContainer'
@@ -82,6 +81,9 @@ function CatTool() {
       getTmKeysJob(),
       ...(config.isLoggedIn ? [getTmKeysUser()] : []),
     ]
+
+    let modifiedTemplate = {}
+
     Promise.all(promises)
       .then((values) => {
         const uniqueKeys = values
@@ -100,21 +102,24 @@ function CatTool() {
           }
         })
         setTmKeys(updatedTmKeys)
-        modifyingCurrentTemplate((prevTemplate) => ({
-          ...prevTemplate,
-          tm: updatedTmKeys.filter(({isActive}) => isActive),
-          getPublicMatches: config.get_public_matches === 1,
-        }))
+        modifyingCurrentTemplate((prevTemplate) => {
+          modifiedTemplate = {
+            ...prevTemplate,
+            tm: updatedTmKeys.filter(({isActive}) => isActive),
+            getPublicMatches: config.get_public_matches === 1,
+          }
+          return modifiedTemplate
+        })
       })
-      .finally(() => getMTEngines())
+      .finally(() => getMTEngines(modifiedTemplate))
   }
 
-  const getMTEngines = () => {
+  const getMTEngines = (prevTemplate) => {
     const setMTCurrentFakeTemplate = () => {
       if (config.active_engine && config.active_engine.id) {
         const activeMT = config.active_engine
         if (activeMT) {
-          modifyingCurrentTemplate((prevTemplate) => ({
+          modifyingCurrentTemplate(() => ({
             ...prevTemplate,
             mt: {
               ...prevTemplate.mt,
