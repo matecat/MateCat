@@ -34,6 +34,11 @@ const STANDARD_TEMPLATE = {
   filters_xliff_config_template_id: null,
 }
 
+const CATTOOL_TEMPLATE = {
+  id: 0,
+  name: '',
+}
+
 export const SCHEMA_KEYS = {
   id: 'id',
   uid: 'uid',
@@ -57,7 +62,7 @@ export const SCHEMA_KEYS = {
   filtersXliffConfigTemplateId: 'filters_xliff_config_template_id',
 }
 
-function useProjectTemplates(tmKeys) {
+function useProjectTemplates(tmKeys, isCattool = config.is_cattool) {
   const {
     templates: projectTemplates,
     setTemplates: setProjectTemplates,
@@ -100,6 +105,12 @@ function useProjectTemplates(tmKeys) {
 
     return () => (cleanup = true)
   }, [canRetrieveTemplates, setProjectTemplates])
+
+  useEffect(() => {
+    if (isCattool) {
+      setProjectTemplates([{...CATTOOL_TEMPLATE, isSelected: true}])
+    }
+  }, [isCattool, setProjectTemplates])
 
   return {
     projectTemplates,
