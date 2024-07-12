@@ -474,7 +474,7 @@ class SegmentFilterDao extends DataAccess_AbstractDao {
                         AND jobs.id = :id_job
                         AND jobs.password = :password
                         AND st.id_segment BETWEEN :job_first_segment AND :job_last_segment
-
+                        AND st.match_type = :match_type
                 WHERE 1
 
                         $where->sql
