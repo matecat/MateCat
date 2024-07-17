@@ -1,6 +1,6 @@
 <?php
 
-namespace FiltersXliffConfig;
+namespace Filters;
 
 use CatUtils;
 use DataAccess\ShapelessConcreteStruct;
@@ -8,7 +8,6 @@ use DataAccess_AbstractDao;
 use Database;
 use DateTime;
 use Exception;
-use Filters\FiltersConfigTemplateStruct;
 use Filters\DTO\Json;
 use Filters\DTO\MSExcel;
 use Filters\DTO\MSPowerpoint;

@@ -5,7 +5,7 @@ namespace API\V3;
 use API\V2\KleinController;
 use API\V2\Validators\LoginValidator;
 use Exception;
-use FiltersXliffConfig\FiltersXliffConfigTemplateDao;
+use Filters\FiltersConfigTemplateDao;
 use INIT;
 use Klein\Response;
 use Validator\Errors\JSONValidatorException;
@@ -32,7 +32,7 @@ class FiltersConfigTemplateController extends KleinController {
         try {
             $this->response->status()->setCode( 200 );
 
-            return $this->response->json( FiltersXliffConfigTemplateDao::getAllPaginated( $uid, $currentPage, $pagination ) );
+            return $this->response->json( FiltersConfigTemplateDao::getAllPaginated( $uid, $currentPage, $pagination ) );
 
         } catch ( Exception $exception ) {
             $code = ( $exception->getCode() > 0 ) ? $exception->getCode() : 500;
@@ -51,7 +51,7 @@ class FiltersConfigTemplateController extends KleinController {
         $id = filter_var( $this->request->id, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_ENCODE_LOW );
 
         try {
-            $model = FiltersXliffConfigTemplateDao::getById( $id );
+            $model = FiltersConfigTemplateDao::getById( $id );
 
             if ( empty( $model ) ) {
                 $this->response->code( 404 );
@@ -101,7 +101,7 @@ class FiltersConfigTemplateController extends KleinController {
         // try to create the template
         try {
             $json   = $this->request->body();
-            $struct = FiltersXliffConfigTemplateDao::createFromJSON( $json, $this->getUser()->uid );
+            $struct = FiltersConfigTemplateDao::createFromJSON( $json, $this->getUser()->uid );
 
             $this->response->code( 201 );
 
@@ -141,7 +141,7 @@ class FiltersConfigTemplateController extends KleinController {
         $id  = $this->request->param( 'id' );
         $uid = $this->getUser()->uid;
 
-        $model = FiltersXliffConfigTemplateDao::getById( $id );
+        $model = FiltersConfigTemplateDao::getById( $id );
 
         if ( empty( $model ) ) {
             $this->response->code( 404 );
@@ -161,7 +161,7 @@ class FiltersConfigTemplateController extends KleinController {
 
         try {
             $json   = $this->request->body();
-            $struct = FiltersXliffConfigTemplateDao::editFromJSON( $model, $json, $uid );
+            $struct = FiltersConfigTemplateDao::editFromJSON( $model, $json, $uid );
 
             $this->response->code( 200 );
 
@@ -189,7 +189,7 @@ class FiltersConfigTemplateController extends KleinController {
         $uid = $this->getUser()->uid;
 
         try {
-            $model = FiltersXliffConfigTemplateDao::getById( $id );
+            $model = FiltersConfigTemplateDao::getById( $id );
 
             if ( empty( $model ) ) {
                 $this->response->code( 404 );
@@ -199,7 +199,7 @@ class FiltersConfigTemplateController extends KleinController {
                 ] );
             }
 
-            FiltersXliffConfigTemplateDao::remove( $id, $uid );
+            FiltersConfigTemplateDao::remove( $id, $uid );
 
             return $this->response->json( [
                     'id' => (int)$id
@@ -225,14 +225,8 @@ class FiltersConfigTemplateController extends KleinController {
     /**
      * @return false|string
      */
-    private function getModelSchema() {
-        $filters_template_schema                                         = json_decode( file_get_contents( INIT::$ROOT . '/inc/validation/schema/filters_xliff_config_template.json' ) );
-        $xliff_schema                                                    = json_decode( file_get_contents( INIT::$ROOT . '/inc/validation/schema/xliff_parameters.json' ) );
-        $filters_template_schema->properties->xliff->properties->xliff12 = $xliff_schema->properties->xliff12;
-        $filters_template_schema->properties->xliff->properties->xliff20 = $xliff_schema->properties->xliff20;
-        $filters_template_schema->definitions->xliff12Rule               = $xliff_schema->definitions->xliff12Rule;
-        $filters_template_schema->definitions->xliff20Rule               = $xliff_schema->definitions->xliff20Rule;
-
-        return $filters_template_schema;
+    private function getModelSchema()
+    {
+        return json_decode( file_get_contents( INIT::$ROOT . '/inc/validation/schema/filters_xliff_config_template.json' ) );
     }
 }

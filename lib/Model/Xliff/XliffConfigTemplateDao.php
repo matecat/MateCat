@@ -1,6 +1,6 @@
 <?php
 
-namespace FiltersXliffConfig;
+namespace Xliff;
 
 use CatUtils;
 use DataAccess\ShapelessConcreteStruct;
@@ -14,7 +14,6 @@ use Projects\ProjectTemplateStruct;
 use Swaggest\JsonSchema\InvalidValue;
 use Validator\JSONValidator;
 use Validator\JSONValidatorObject;
-use Xliff\XliffConfigTemplateStruct;
 
 class XliffConfigTemplateDao extends DataAccess_AbstractDao
 {
