@@ -14,9 +14,9 @@ use Projects\ProjectTemplateStruct;
 use Swaggest\JsonSchema\InvalidValue;
 use Validator\JSONValidator;
 use Validator\JSONValidatorObject;
-use Xliff\XliffConfigStruct;
+use Xliff\XliffConfigTemplateStruct;
 
-class XliffConfigDao extends DataAccess_AbstractDao
+class XliffConfigTemplateDao extends DataAccess_AbstractDao
 {
     const TABLE = 'xliff_config_templates';
 
@@ -30,7 +30,7 @@ class XliffConfigDao extends DataAccess_AbstractDao
     private static $instance = null;
 
     /**
-     * @return XliffConfigDao|null
+     * @return XliffConfigTemplateDao|null
      */
     private static function getInstance() {
         if ( !isset( self::$instance ) ) {
@@ -43,10 +43,10 @@ class XliffConfigDao extends DataAccess_AbstractDao
     /**
      * @param $uid
      *
-     * @return XliffConfigStruct
+     * @return XliffConfigTemplateStruct
      */
     public static function getDefaultTemplate( $uid ) {
-        $default       = new XliffConfigStruct();
+        $default       = new XliffConfigTemplateStruct();
         $default->id   = 0;
         $default->uid  = $uid;
         $default->name = "default";
@@ -60,13 +60,13 @@ class XliffConfigDao extends DataAccess_AbstractDao
      * @param $json
      * @param $uid
      *
-     * @return XliffConfigStruct
+     * @return XliffConfigTemplateStruct
      * @throws Exception
      */
     public static function createFromJSON( $json, $uid ) {
         self::validateJSON( $json );
 
-        $templateStruct = new XliffConfigStruct();
+        $templateStruct = new XliffConfigTemplateStruct();
         $templateStruct->hydrateFromJSON( $json, $uid );
 
         // check name
@@ -76,14 +76,14 @@ class XliffConfigDao extends DataAccess_AbstractDao
     }
 
     /**
-     * @param XliffConfigStruct $templateStruct
+     * @param XliffConfigTemplateStruct $templateStruct
      * @param $json
      * @param $uid
      *
-     * @return XliffConfigStruct
+     * @return XliffConfigTemplateStruct
      * @throws Exception
      */
-    public static function editFromJSON( XliffConfigStruct $templateStruct, $json, $uid ) {
+    public static function editFromJSON(XliffConfigTemplateStruct $templateStruct, $json, $uid ) {
         self::validateJSON( $json );
         $templateStruct->hydrateFromJSON( $json, $uid );
 
@@ -120,14 +120,14 @@ class XliffConfigDao extends DataAccess_AbstractDao
     }
 
     /**
-     * @param XliffConfigStruct $projectTemplateStruct
+     * @param XliffConfigTemplateStruct $projectTemplateStruct
      * @param $uid
      *
-     * @return XliffConfigStruct
+     * @return XliffConfigTemplateStruct
      * @throws Exception
      */
-    private static function findUniqueName( XliffConfigStruct $projectTemplateStruct, $uid ) {
-        $check = XliffConfigDao::getByUidAndName( $uid, $projectTemplateStruct->name, 0 );
+    private static function findUniqueName(XliffConfigTemplateStruct $projectTemplateStruct, $uid ) {
+        $check = XliffConfigTemplateDao::getByUidAndName( $uid, $projectTemplateStruct->name, 0 );
 
         if ( $check === null ) {
             return $projectTemplateStruct;
@@ -194,7 +194,7 @@ class XliffConfigDao extends DataAccess_AbstractDao
      * @param     $id
      * @param int $ttl
      *
-     * @return XliffConfigStruct|null
+     * @return XliffConfigTemplateStruct|null
      * @throws Exception
      */
     public static function getById( $id, $ttl = 60 ) {
@@ -214,7 +214,7 @@ class XliffConfigDao extends DataAccess_AbstractDao
      * @param     $uid
      * @param int $ttl
      *
-     * @return XliffConfigStruct[]
+     * @return XliffConfigTemplateStruct[]
      * @throws Exception
      */
     public static function getByUid( $uid, $ttl = 60 ) {
@@ -241,7 +241,7 @@ class XliffConfigDao extends DataAccess_AbstractDao
      * @param     $name
      * @param int $ttl
      *
-     * @return XliffConfigStruct|null
+     * @return XliffConfigTemplateStruct|null
      * @throws Exception
      */
     public static function getByUidAndName( $uid, $name, $ttl = 60 ) {
@@ -310,7 +310,7 @@ class XliffConfigDao extends DataAccess_AbstractDao
     /**
      * @param $data
      *
-     * @return XliffConfigStruct|null
+     * @return XliffConfigTemplateStruct|null
      * @throws Exception
      */
     private static function hydrateTemplateStruct( $data ) {
@@ -323,18 +323,18 @@ class XliffConfigDao extends DataAccess_AbstractDao
             return null;
         }
 
-        $struct = new XliffConfigStruct();
+        $struct = new XliffConfigTemplateStruct();
 
         return $struct->hydrateFromJSON( json_encode( $data ) );
     }
 
     /**
-     * @param XliffConfigStruct $templateStruct
+     * @param XliffConfigTemplateStruct $templateStruct
      *
-     * @return XliffConfigStruct
+     * @return XliffConfigTemplateStruct
      * @throws Exception
      */
-    public static function save( XliffConfigStruct $templateStruct ) {
+    public static function save(XliffConfigTemplateStruct $templateStruct ) {
         $sql = "INSERT INTO " . self::TABLE .
                 " ( `uid`, `name`, `rules`, `created_at`, `modified_at` ) " .
                 " VALUES " .
@@ -363,12 +363,12 @@ class XliffConfigDao extends DataAccess_AbstractDao
     }
 
     /**
-     * @param XliffConfigStruct $templateStruct
+     * @param XliffConfigTemplateStruct $templateStruct
      *
-     * @return XliffConfigStruct
+     * @return XliffConfigTemplateStruct
      * @throws Exception
      */
-    public static function update( XliffConfigStruct $templateStruct ) {
+    public static function update(XliffConfigTemplateStruct $templateStruct ) {
         $sql = "UPDATE " . self::TABLE . " SET 
             `uid` = :uid, 
             `name` = :name,

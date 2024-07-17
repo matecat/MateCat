@@ -13,7 +13,7 @@ use Filters\DTO\Xml;
 use Filters\DTO\Yaml;
 use JsonSerializable;
 
-class FiltersConfigStruct extends DataAccess_AbstractDaoSilentStruct implements JsonSerializable
+class FiltersConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruct implements JsonSerializable
 {
     public $id;
     public $name;

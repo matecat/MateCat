@@ -13,7 +13,7 @@ use Xliff\DTO\Xliff12Rule;
 use Xliff\DTO\Xliff20Rule;
 use Xliff\DTO\XliffRuleInterface;
 
-class XliffConfigStruct extends DataAccess_AbstractDaoSilentStruct implements JsonSerializable {
+class XliffConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruct implements JsonSerializable {
 
     const XLIFF_12 = 'xliff12';
     const XLIFF_20 = 'xliff20';
@@ -66,7 +66,7 @@ class XliffConfigStruct extends DataAccess_AbstractDaoSilentStruct implements Js
      *
      * @return static
      */
-    public static function fromArrayObject( RecursiveArrayobject $structure ): XliffConfigStruct {
+    public static function fromArrayObject( RecursiveArrayobject $structure ): XliffConfigTemplateStruct {
         $self = new static();
         foreach ( $structure as $ruleType => $ruleSet ) {
 

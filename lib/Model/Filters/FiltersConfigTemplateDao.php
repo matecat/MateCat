@@ -8,7 +8,7 @@ use DataAccess_AbstractDao;
 use Database;
 use DateTime;
 use Exception;
-use Filters\FiltersConfigStruct;
+use Filters\FiltersConfigTemplateStruct;
 use Filters\DTO\Json;
 use Filters\DTO\MSExcel;
 use Filters\DTO\MSPowerpoint;
@@ -22,7 +22,7 @@ use Swaggest\JsonSchema\InvalidValue;
 use Validator\JSONValidator;
 use Validator\JSONValidatorObject;
 
-class FiltersConfigDao extends DataAccess_AbstractDao
+class FiltersConfigTemplateDao extends DataAccess_AbstractDao
 {
     const TABLE = 'filters_config_templates';
 
@@ -49,10 +49,10 @@ class FiltersConfigDao extends DataAccess_AbstractDao
     /**
      * @param $uid
      *
-     * @return FiltersConfigStruct
+     * @return FiltersConfigTemplateStruct
      */
     public static function getDefaultTemplate( $uid ) {
-        $default       = new FiltersConfigStruct();
+        $default       = new FiltersConfigTemplateStruct();
         $default->id   = 0;
         $default->uid  = $uid;
         $default->name = "default";
@@ -80,7 +80,7 @@ class FiltersConfigDao extends DataAccess_AbstractDao
     public static function createFromJSON( $json, $uid ) {
         self::validateJSON( $json );
 
-        $templateStruct = new FiltersConfigStruct();
+        $templateStruct = new FiltersConfigTemplateStruct();
         $templateStruct->hydrateFromJSON( $json, $uid );
 
         // check name
@@ -90,14 +90,14 @@ class FiltersConfigDao extends DataAccess_AbstractDao
     }
 
     /**
-     * @param FiltersConfigStruct $templateStruct
+     * @param FiltersConfigTemplateStruct $templateStruct
      * @param $json
      * @param $uid
      *
-     * @return FiltersConfigStruct
+     * @return FiltersConfigTemplateStruct
      * @throws Exception
      */
-    public static function editFromJSON( FiltersConfigStruct $templateStruct, $json, $uid ) {
+    public static function editFromJSON(FiltersConfigTemplateStruct $templateStruct, $json, $uid ) {
         self::validateJSON( $json );
         $templateStruct->hydrateFromJSON( $json, $uid );
 
@@ -134,14 +134,14 @@ class FiltersConfigDao extends DataAccess_AbstractDao
     }
 
     /**
-     * @param FiltersConfigStruct $projectTemplateStruct
+     * @param FiltersConfigTemplateStruct $projectTemplateStruct
      * @param                                  $uid
      *
-     * @return FiltersConfigStruct
+     * @return FiltersConfigTemplateStruct
      * @throws Exception
      */
-    private static function findUniqueName( FiltersConfigStruct $projectTemplateStruct, $uid ) {
-        $check = FiltersConfigDao::getByUidAndName( $uid, $projectTemplateStruct->name, 0 );
+    private static function findUniqueName(FiltersConfigTemplateStruct $projectTemplateStruct, $uid ) {
+        $check = FiltersConfigTemplateDao::getByUidAndName( $uid, $projectTemplateStruct->name, 0 );
 
         if ( $check === null ) {
             return $projectTemplateStruct;
@@ -324,7 +324,7 @@ class FiltersConfigDao extends DataAccess_AbstractDao
     /**
      * @param $data
      *
-     * @return FiltersConfigStruct|null
+     * @return FiltersConfigTemplateStruct|null
      * @throws Exception
      */
     private static function hydrateTemplateStruct( $data ) {
@@ -338,18 +338,18 @@ class FiltersConfigDao extends DataAccess_AbstractDao
             return null;
         }
 
-        $struct = new FiltersConfigStruct();
+        $struct = new FiltersConfigTemplateStruct();
 
         return $struct->hydrateFromJSON( json_encode( $data ) );
     }
 
     /**
-     * @param FiltersConfigStruct $templateStruct
+     * @param FiltersConfigTemplateStruct $templateStruct
      *
-     * @return FiltersConfigStruct
+     * @return FiltersConfigTemplateStruct
      * @throws Exception
      */
-    public static function save( FiltersConfigStruct $templateStruct ) {
+    public static function save(FiltersConfigTemplateStruct $templateStruct ) {
         $sql = "INSERT INTO " . self::TABLE .
                 " ( `uid`, `name`, `rules`, `created_at`, `modified_at` ) " .
                 " VALUES " .
@@ -378,12 +378,12 @@ class FiltersConfigDao extends DataAccess_AbstractDao
     }
 
     /**
-     * @param FiltersConfigStruct $templateStruct
+     * @param FiltersConfigTemplateStruct $templateStruct
      *
-     * @return FiltersConfigStruct
+     * @return FiltersConfigTemplateStruct
      * @throws Exception
      */
-    public static function update( FiltersConfigStruct $templateStruct ) {
+    public static function update(FiltersConfigTemplateStruct $templateStruct ) {
         $sql = "UPDATE " . self::TABLE . " SET 
             `uid` = :uid, 
             `name` = :name,
