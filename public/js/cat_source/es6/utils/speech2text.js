@@ -82,10 +82,7 @@ const Speech2Text = {
     }
   },
   startSpeechRecognition: function (microphone) {
-    var segmentSection = microphone.closest('section')
-    var segment = SegmentStore.getSegmentByIdToJS(
-      UI.getSegmentId(segmentSection),
-    )
+    const segment = SegmentStore.getCurrentSegment()
 
     if (!microphone.hasClass('micSpeechActive')) {
       microphone.addClass('micSpeechActive')
