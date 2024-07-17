@@ -10,12 +10,23 @@ const Speech2Text = {
   disable: function () {
     if (config.speech2text_enabled) {
       config.speech2text_enabled = 0
+      Speech2Text.initialized = false
+      $(document).off('contribution:copied')
     }
   },
   enable: function () {
     if (!config.speech2text_enabled) {
       config.speech2text_enabled = 1
     }
+  },
+  init: function () {
+    Speech2Text.initialized = true
+    Speech2Text.loadRecognition()
+    $(document).on('contribution:copied', function (ev, data) {
+      if (Speech2Text.microphone && Speech2Text.sid == data.segment.sid) {
+        Speech2Text.finalTranscript = data.translation + ' '
+      }
+    })
   },
   recognition: null,
   recognizing: false,
@@ -57,11 +68,6 @@ const Speech2Text = {
         'Web Speech API is not supported by this browser. Upgrade to Chrome version 25 or later.',
       )
     }
-  },
-  disableMicrophone: function (segment) {
-    var microphone = segment.find('.micSpeech')
-    microphone.unbind('click')
-    Speech2Text.stopSpeechRecognition(microphone)
   },
   clickMicrophone: function (event) {
     var microphone = $(event.currentTarget)
@@ -194,19 +200,6 @@ const Speech2Text = {
     return !Speech2Text.recognizing || match == '100%'
   },
 }
-
-Speech2Text.init = function () {
-  Speech2Text.initialized = true
-  Speech2Text.loadRecognition()
-  $(document).on('contribution:copied', function (ev, data) {
-    if (
-      Speech2Text.microphone.closest('section').attr('id') == data.segment.sid
-    ) {
-      Speech2Text.finalTranscript = data.translation + ' '
-    }
-  })
-}
-
 document.addEventListener('DOMContentLoaded', function (event) {
   if (Speech2Text.enabled()) {
     Speech2Text.init()
