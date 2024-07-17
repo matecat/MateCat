@@ -8,14 +8,13 @@ use DataAccess_AbstractDao;
 use Database;
 use DateTime;
 use Exception;
-use FiltersXliffConfig\Filters\DTO\Json;
-use FiltersXliffConfig\Filters\DTO\MSExcel;
-use FiltersXliffConfig\Filters\DTO\MSPowerpoint;
-use FiltersXliffConfig\Filters\DTO\MSWord;
-use FiltersXliffConfig\Filters\DTO\Xml;
-use FiltersXliffConfig\Filters\DTO\Yaml;
-use FiltersXliffConfig\Filters\FiltersConfigModel;
-use FiltersXliffConfig\Xliff\DTO\XliffConfigModel;
+use Filters\FiltersConfigStruct;
+use Filters\DTO\Json;
+use Filters\DTO\MSExcel;
+use Filters\DTO\MSPowerpoint;
+use Filters\DTO\MSWord;
+use Filters\DTO\Xml;
+use Filters\DTO\Yaml;
 use INIT;
 use PDO;
 use Projects\ProjectTemplateStruct;
@@ -50,26 +49,20 @@ class FiltersConfigDao extends DataAccess_AbstractDao
     /**
      * @param $uid
      *
-     * @return FiltersXliffConfigTemplateStruct
+     * @return FiltersConfigStruct
      */
     public static function getDefaultTemplate( $uid ) {
-        $default       = new FiltersXliffConfigTemplateStruct();
+        $default       = new FiltersConfigStruct();
         $default->id   = 0;
         $default->uid  = $uid;
         $default->name = "default";
 
-        $filtersConfig = new FiltersConfigModel();
-        $filtersConfig->setJson( new Json() );
-        $filtersConfig->setYaml( new Yaml() );
-        $filtersConfig->setXml( new Xml() );
-        $filtersConfig->setMsWord( new MSWord() );
-        $filtersConfig->setMsExcel( new MSExcel() );
-        $filtersConfig->setMsPowerpoint( new MSPowerpoint() );
-
-        $xliffConfig = new XliffConfigModel();
-
-        $default->setFilters( $filtersConfig );
-        $default->setXliff( $xliffConfig );
+        $default->setJson( new Json() );
+        $default->setYaml( new Yaml() );
+        $default->setXml( new Xml() );
+        $default->setMsWord( new MSWord() );
+        $default->setMsExcel( new MSExcel() );
+        $default->setMsPowerpoint( new MSPowerpoint() );
 
         $default->created_at  = date( "Y-m-d H:i:s" );
         $default->modified_at = date( "Y-m-d H:i:s" );
@@ -87,24 +80,24 @@ class FiltersConfigDao extends DataAccess_AbstractDao
     public static function createFromJSON( $json, $uid ) {
         self::validateJSON( $json );
 
-        $templateStruct = new FiltersXliffConfigTemplateStruct();
+        $templateStruct = new FiltersConfigStruct();
         $templateStruct->hydrateFromJSON( $json, $uid );
 
         // check name
-        $templateStruct      = self::findUniqueName( $templateStruct, $uid );
+        $templateStruct = self::findUniqueName( $templateStruct, $uid );
 
         return self::save( $templateStruct );
     }
 
     /**
-     * @param FiltersXliffConfigTemplateStruct $templateStruct
-     * @param                                  $json
-     * @param                                  $uid
+     * @param FiltersConfigStruct $templateStruct
+     * @param $json
+     * @param $uid
      *
-     * @return FiltersXliffConfigTemplateStruct
+     * @return FiltersConfigStruct
      * @throws Exception
      */
-    public static function editFromJSON( FiltersXliffConfigTemplateStruct $templateStruct, $json, $uid ) {
+    public static function editFromJSON( FiltersConfigStruct $templateStruct, $json, $uid ) {
         self::validateJSON( $json );
         $templateStruct->hydrateFromJSON( $json, $uid );
 
@@ -131,7 +124,7 @@ class FiltersConfigDao extends DataAccess_AbstractDao
     private static function validateJSON( $json ) {
         $validatorObject       = new JSONValidatorObject();
         $validatorObject->json = $json;
-        $jsonSchema            = file_get_contents( INIT::$ROOT . '/inc/validation/schema/filters_xliff_config_template.json' );
+        $jsonSchema            = file_get_contents( INIT::$ROOT . '/inc/validation/schema/filters_extraction_parameters.json' );
         $validator             = new JSONValidator( $jsonSchema );
         $validator->validate( $validatorObject );
 
@@ -141,14 +134,14 @@ class FiltersConfigDao extends DataAccess_AbstractDao
     }
 
     /**
-     * @param FiltersXliffConfigTemplateStruct $projectTemplateStruct
+     * @param FiltersConfigStruct $projectTemplateStruct
      * @param                                  $uid
      *
-     * @return FiltersXliffConfigTemplateStruct
+     * @return FiltersConfigStruct
      * @throws Exception
      */
-    private static function findUniqueName( FiltersXliffConfigTemplateStruct $projectTemplateStruct, $uid ) {
-        $check = FiltersXliffConfigTemplateDao::getByUidAndName( $uid, $projectTemplateStruct->name, 0 );
+    private static function findUniqueName( FiltersConfigStruct $projectTemplateStruct, $uid ) {
+        $check = FiltersConfigDao::getByUidAndName( $uid, $projectTemplateStruct->name, 0 );
 
         if ( $check === null ) {
             return $projectTemplateStruct;
@@ -179,8 +172,8 @@ class FiltersConfigDao extends DataAccess_AbstractDao
         $count  = $count[ 'count' ];
         $count  = $count + 1;
         $pages  = ceil( $count / $pagination );
-        $prev   = ( $current !== 1 ) ? "/api/v3/filters-xliff-config-template?page=" . ( $current - 1 ) : null;
-        $next   = ( $current < $pages ) ? "/api/v3/filters-xliff-config-template?page=" . ( $current + 1 ) : null;
+        $prev   = ( $current !== 1 ) ? "/api/v3/filters-config-template?page=" . ( $current - 1 ) : null;
+        $next   = ( $current < $pages ) ? "/api/v3/filters-config-template?page=" . ( $current + 1 ) : null;
         $offset = ( $current - 1 ) * $pagination;
 
         $models   = [];
@@ -331,7 +324,7 @@ class FiltersConfigDao extends DataAccess_AbstractDao
     /**
      * @param $data
      *
-     * @return FiltersXliffConfigTemplateStruct|null
+     * @return FiltersConfigStruct|null
      * @throws Exception
      */
     private static function hydrateTemplateStruct( $data ) {
@@ -345,22 +338,22 @@ class FiltersConfigDao extends DataAccess_AbstractDao
             return null;
         }
 
-        $struct = new FiltersXliffConfigTemplateStruct();
+        $struct = new FiltersConfigStruct();
 
         return $struct->hydrateFromJSON( json_encode( $data ) );
     }
 
     /**
-     * @param FiltersXliffConfigTemplateStruct $templateStruct
+     * @param FiltersConfigStruct $templateStruct
      *
-     * @return FiltersXliffConfigTemplateStruct
+     * @return FiltersConfigStruct
      * @throws Exception
      */
-    public static function save( FiltersXliffConfigTemplateStruct $templateStruct ) {
+    public static function save( FiltersConfigStruct $templateStruct ) {
         $sql = "INSERT INTO " . self::TABLE .
-                " ( `uid`, `name`, `filters`, `xliff`, `created_at`, `modified_at` ) " .
+                " ( `uid`, `name`, `rules`, `created_at`, `modified_at` ) " .
                 " VALUES " .
-                " ( :uid, :name, :filters, :xliff, :now, :now ); ";
+                " ( :uid, :name, :rules, :now, :now ); ";
 
         $now = ( new DateTime() )->format( 'Y-m-d H:i:s' );
 
@@ -369,8 +362,7 @@ class FiltersConfigDao extends DataAccess_AbstractDao
         $stmt->execute( [
                 "uid"     => $templateStruct->uid,
                 "name"    => $templateStruct->name,
-                "filters" => $templateStruct->getFilters(),
-                "xliff"   => $templateStruct->getXliff(),
+                "rules"   => $templateStruct->getRulesAsString(),
                 'now'     => ( new DateTime() )->format( 'Y-m-d H:i:s' ),
         ] );
 
@@ -386,17 +378,16 @@ class FiltersConfigDao extends DataAccess_AbstractDao
     }
 
     /**
-     * @param FiltersXliffConfigTemplateStruct $templateStruct
+     * @param FiltersConfigStruct $templateStruct
      *
-     * @return FiltersXliffConfigTemplateStruct
+     * @return FiltersConfigStruct
      * @throws Exception
      */
-    public static function update( FiltersXliffConfigTemplateStruct $templateStruct ) {
+    public static function update( FiltersConfigStruct $templateStruct ) {
         $sql = "UPDATE " . self::TABLE . " SET 
             `uid` = :uid, 
             `name` = :name,
-            `filters` = :filters, 
-            `xliff` = :xliff,
+            `rules` = :rules, 
             `modified_at` = :now 
          WHERE id = :id;";
 
@@ -406,8 +397,7 @@ class FiltersConfigDao extends DataAccess_AbstractDao
                 "id"      => $templateStruct->id,
                 "uid"     => $templateStruct->uid,
                 "name"    => $templateStruct->name,
-                "filters" => $templateStruct->getFilters(),
-                "xliff"   => $templateStruct->getXliff(),
+                "rules"   => $templateStruct->getRulesAsString(),
                 'now'     => ( new DateTime() )->format( 'Y-m-d H:i:s' ),
         ] );
 

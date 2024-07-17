@@ -10,7 +10,7 @@ use INIT;
 use Klein\Response;
 use Validator\Errors\JSONValidatorException;
 
-class FiltersXliffConfigTemplateController extends KleinController {
+class XliffConfigTemplateController extends KleinController {
     protected function afterConstruct() {
         parent::afterConstruct();
         $this->appendValidator( new LoginValidator( $this ) );

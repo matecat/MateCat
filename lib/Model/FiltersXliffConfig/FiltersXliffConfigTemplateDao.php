@@ -362,7 +362,6 @@ class FiltersXliffConfigTemplateDao extends DataAccess_AbstractDao {
                 " ( :uid, :name, :filters, :xliff, :now, :now ); ";
 
         $now = ( new DateTime() )->format( 'Y-m-d H:i:s' );
-
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->execute( [
@@ -370,7 +369,7 @@ class FiltersXliffConfigTemplateDao extends DataAccess_AbstractDao {
                 "name"    => $templateStruct->name,
                 "filters" => $templateStruct->getFilters(),
                 "xliff"   => $templateStruct->getXliff(),
-                'now'     => ( new DateTime() )->format( 'Y-m-d H:i:s' ),
+                'now'     => $now,
         ] );
 
         $templateStruct->id          = $conn->lastInsertId();
