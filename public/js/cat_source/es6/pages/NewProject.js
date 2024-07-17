@@ -184,7 +184,7 @@ const NewProject = ({
             const projectTemplatesInvolved = projectTemplates.filter(
               ({mt}) =>
                 mt.id === engineId &&
-                typeof mt.extra.deepl_id_glossary !== 'undefined' &&
+                typeof mt.extra?.deepl_id_glossary !== 'undefined' &&
                 !glossaries.some(
                   ({glossary_id}) =>
                     glossary_id === mt.extra?.deepl_id_glossary,
