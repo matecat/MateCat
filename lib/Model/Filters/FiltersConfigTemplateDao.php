@@ -73,7 +73,7 @@ class FiltersConfigTemplateDao extends DataAccess_AbstractDao
      * @param $json
      * @param $uid
      *
-     * @return FiltersXliffConfigTemplateStruct
+     * @return FiltersConfigTemplateStruct
      * @throws Exception
      */
     public static function createFromJSON( $json, $uid ) {
@@ -207,7 +207,7 @@ class FiltersConfigTemplateDao extends DataAccess_AbstractDao
      * @param     $id
      * @param int $ttl
      *
-     * @return FiltersXliffConfigTemplateStruct|null
+     * @return FiltersConfigTemplateStruct|null
      * @throws Exception
      */
     public static function getById( $id, $ttl = 60 ) {
@@ -227,7 +227,7 @@ class FiltersConfigTemplateDao extends DataAccess_AbstractDao
      * @param     $uid
      * @param int $ttl
      *
-     * @return FiltersXliffConfigTemplateStruct[]
+     * @return FiltersConfigTemplateStruct[]
      * @throws Exception
      */
     public static function getByUid( $uid, $ttl = 60 ) {
@@ -254,7 +254,7 @@ class FiltersConfigTemplateDao extends DataAccess_AbstractDao
      * @param     $name
      * @param int $ttl
      *
-     * @return FiltersXliffConfigTemplateStruct|null
+     * @return FiltersConfigTemplateStruct|null
      * @throws Exception
      */
     public static function getByUidAndName( $uid, $name, $ttl = 60 ) {
@@ -330,9 +330,7 @@ class FiltersConfigTemplateDao extends DataAccess_AbstractDao
         if (
                 !isset( $data[ 'id' ] ) or
                 !isset( $data[ 'uid' ] ) or
-                !isset( $data[ 'name' ] ) or
-                !isset( $data[ 'xliff' ] ) or
-                !isset( $data[ 'filters' ] )
+                !isset( $data[ 'name' ] )
         ) {
             return null;
         }
@@ -350,18 +348,23 @@ class FiltersConfigTemplateDao extends DataAccess_AbstractDao
      */
     public static function save(FiltersConfigTemplateStruct $templateStruct ) {
         $sql = "INSERT INTO " . self::TABLE .
-                " ( `uid`, `name`, `rules`, `created_at`, `modified_at` ) " .
+                " ( `uid`, `name`, `json`, `xml`, `yaml`, `ms_excel`, `ms_word`, `ms_powerpoint`, `created_at`, `modified_at` ) " .
                 " VALUES " .
-                " ( :uid, :name, :rules, :now, :now ); ";
+                " ( :uid, :name, :json, :xml, :yaml, :ms_excel, :ms_word, :ms_powerpoint, :now, :now ); ";
 
         $now = ( new DateTime() )->format( 'Y-m-d H:i:s' );
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->execute( [
-                "uid"     => $templateStruct->uid,
-                "name"    => $templateStruct->name,
-                "rules"   => $templateStruct->getRulesAsString(),
+                "uid"           => $templateStruct->uid,
+                "name"          => $templateStruct->name,
+                "json"          => json_encode($templateStruct->getJson()),
+                "xml"           => json_encode($templateStruct->getXml()),
+                "yaml"          => json_encode($templateStruct->getYaml()),
+                "ms_excel"      => json_encode($templateStruct->getMsExcel()),
+                "ms_word"       => json_encode($templateStruct->getMsWord()),
+                "ms_powerpoint" => json_encode($templateStruct->getMsPowerpoint()),
                 'now'     => ( new DateTime() )->format( 'Y-m-d H:i:s' ),
         ] );
 
@@ -386,7 +389,12 @@ class FiltersConfigTemplateDao extends DataAccess_AbstractDao
         $sql = "UPDATE " . self::TABLE . " SET 
             `uid` = :uid, 
             `name` = :name,
-            `rules` = :rules, 
+            `json` = :json, 
+            `xml` = :xml, 
+            `yaml` = :yaml, 
+            `ms_excel` = :ms_excel, 
+            `ms_word` = :ms_word, 
+            `ms_powerpoint` = :ms_powerpoint, 
             `modified_at` = :now 
          WHERE id = :id;";
 
@@ -396,7 +404,12 @@ class FiltersConfigTemplateDao extends DataAccess_AbstractDao
                 "id"      => $templateStruct->id,
                 "uid"     => $templateStruct->uid,
                 "name"    => $templateStruct->name,
-                "rules"   => $templateStruct->getRulesAsString(),
+                "json"   => json_encode($templateStruct->getJson()),
+                "xml"   => json_encode($templateStruct->getXml()),
+                "yaml"   => json_encode($templateStruct->getYaml()),
+                "ms_excel"   => json_encode($templateStruct->getMsExcel()),
+                "ms_word"   => json_encode($templateStruct->getMsWord()),
+                "ms_powerpoint"   => json_encode($templateStruct->getMsPowerpoint()),
                 'now'     => ( new DateTime() )->format( 'Y-m-d H:i:s' ),
         ] );
 

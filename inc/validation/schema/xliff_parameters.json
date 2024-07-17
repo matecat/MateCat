@@ -2,18 +2,23 @@
   "type": "object",
   "additionalProperties": false,
   "properties": {
-    "xliff12": {
-      "type": ["null", "array"],
-      "items": {
-        "type": "object",
-        "$ref": "#/definitions/xliff12Rule"
-      }
+    "name": {
+      "type": "string"
     },
-    "xliff20": {
-      "type": ["null", "array"],
-      "items": {
-        "type": "object",
-        "$ref": "#/definitions/xliff20Rule"
+    "rules": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "xliff12": {
+          "ReferenceToExternalSchema": {
+            "$ref": "xliff_parameters.json#/definitions/xliff12Rule"
+          }
+        },
+        "xliff20": {
+          "ReferenceToExternalSchema": {
+            "$ref": "xliff_parameters.json#/definitions/xliff20Rule"
+          }
+        }
       }
     }
   },

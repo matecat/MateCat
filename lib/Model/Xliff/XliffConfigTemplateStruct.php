@@ -146,6 +146,7 @@ class XliffConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruct imple
 
         $this->uid  = $json[ 'uid' ] ?? $uid;
         $this->name = $json[ 'name' ];
+        $this->ruleSets = [];
 
         if ( isset( $json[ 'id' ] ) ) {
             $this->id = $json[ 'id' ];
@@ -163,18 +164,21 @@ class XliffConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruct imple
             $this->modified_at = $json[ 'modified_at' ];
         }
 
-        // xliff12
+        // rules
         if(isset($json[ 'rules' ])){
-            if ( isset( $json[ 'rules' ][ 'xliff12' ] ) and is_array( $json[ 'rules' ][ 'xliff12' ] ) ) {
-                foreach ( $json[ 'rules' ][ 'xliff12' ] as $xliff12Rule ) {
+
+            $rules = (is_array($json[ 'rules' ])) ? $json[ 'rules' ] : json_decode($json[ 'rules' ], true);
+
+            if ( isset( $rules[ 'xliff12' ] ) and is_array( $rules[ 'xliff12' ] ) ) {
+                foreach ( $rules[ 'xliff12' ] as $xliff12Rule ) {
                     $rule = new Xliff12Rule( $xliff12Rule[ 'states' ], $xliff12Rule[ 'analysis' ], $xliff12Rule[ 'editor' ], $xliff12Rule[ 'match_category' ] ?? null );
                     $this->addRule( $rule );
                 }
             }
 
             // xliff20
-            if ( isset( $json[ 'rules' ][ 'xliff20' ] ) and is_array( $json[ 'rules' ][ 'xliff20' ] ) ) {
-                foreach ( $json[ 'rules' ][ 'xliff20' ] as $xliff20Rule ) {
+            if ( isset( $rules[ 'xliff20' ] ) and is_array( $rules[ 'xliff20' ] ) ) {
+                foreach ( $rules[ 'xliff20' ] as $xliff20Rule ) {
                     $rule = new Xliff20Rule( $xliff20Rule[ 'states' ], $xliff20Rule[ 'analysis' ], $xliff20Rule[ 'editor' ], $xliff20Rule[ 'match_category' ] ?? null );
                     $this->addRule( $rule );
                 }
@@ -202,6 +206,7 @@ class XliffConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruct imple
         return [
             'id'         => (int)$this->id,
             'uid'        => (int)$this->uid,
+            'name'      => $this->name,
             'rules'      => $this->ruleSets,
             'createdAt'  => DateTimeUtil::formatIsoDate( $this->created_at ),
             'modifiedAt' => DateTimeUtil::formatIsoDate( $this->modified_at ),

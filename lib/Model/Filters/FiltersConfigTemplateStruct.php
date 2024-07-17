@@ -29,6 +29,54 @@ class FiltersConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruct imp
     private $ms_powerpoint = null;
 
     /**
+     * @return null
+     */
+    public function getYaml()
+    {
+        return $this->yaml;
+    }
+
+    /**
+     * @return null
+     */
+    public function getXml()
+    {
+        return $this->xml;
+    }
+
+    /**
+     * @return null
+     */
+    public function getJson()
+    {
+        return $this->json;
+    }
+
+    /**
+     * @return null
+     */
+    public function getMsWord()
+    {
+        return $this->ms_word;
+    }
+
+    /**
+     * @return null
+     */
+    public function getMsExcel()
+    {
+        return $this->ms_excel;
+    }
+
+    /**
+     * @return null
+     */
+    public function getMsPowerpoint()
+    {
+        return $this->ms_powerpoint;
+    }
+
+    /**
      * @param Yaml|null $yaml
      */
     public function setYaml(?Yaml $yaml): void
@@ -121,34 +169,39 @@ class FiltersConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruct imp
 
         // json
         if ( isset( $json[ 'json' ] ) ) {
-            $jsonDto->fromArray( $json[ 'json' ] );
+            $rules = (is_array($json[ 'json' ])) ? $json[ 'json' ] : json_decode($json[ 'json' ], true);
+            $jsonDto->fromArray( $rules );
         }
 
         // xml
         if ( isset( $json[ 'xml' ] ) ) {
-            $xmlDto->fromArray( $json[ 'xml' ] );
+            $xml = (is_array($json[ 'xml' ])) ? $json[ 'xml' ] : json_decode($json[ 'xml' ], true);
+            $xmlDto->fromArray( $xml );
         }
 
         // yaml
         if ( isset( $json[ 'yaml' ] ) ) {
-            $yamlDto->fromArray( $json[ 'yaml' ] );
+            $yaml = (is_array($json[ 'yaml' ])) ? $json[ 'yaml' ] : json_decode($json[ 'yaml' ], true);
+            $yamlDto->fromArray( $yaml );
         }
 
         // ms excel
         if ( isset( $json[ 'ms_excel' ] ) ) {
-            $excelDto->fromArray( $json[ 'ms_excel' ] );
+            $excel = (is_array($json[ 'ms_excel' ])) ? $json[ 'ms_excel' ] : json_decode($json[ 'ms_excel' ], true);
+            $excelDto->fromArray( $excel );
         }
 
         // ms word
         if ( isset( $json[ 'ms_word' ] ) ) {
-            $wordDto->fromArray( $json[ 'ms_word' ] );
+            $word = (is_array($json[ 'ms_word' ])) ? $json[ 'ms_word' ] : json_decode($json[ 'ms_word' ], true);
+            $wordDto->fromArray( $word );
         }
 
         // ms powerpoint
         if ( isset( $json[ 'ms_powerpoint' ] ) ) {
-            $pptDto->fromArray( $json[ 'ms_powerpoint' ] );
+            $powerpoint = (is_array($json[ 'ms_powerpoint' ])) ? $json[ 'ms_powerpoint' ] : json_decode($json[ 'ms_powerpoint' ], true);
+            $pptDto->fromArray( $powerpoint );
         }
-
 
         $this->setJson( $jsonDto );
         $this->setXml( $xmlDto );
