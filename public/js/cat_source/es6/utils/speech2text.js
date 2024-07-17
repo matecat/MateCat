@@ -49,8 +49,7 @@ const Speech2Text = {
   },
   enableMicrophone: function (segment) {
     Speech2Text.microphone = segment.find('.micSpeech')
-    var idSegment = UI.getSegmentId(segment)
-    var segmentObj = SegmentStore.getSegmentByIdToJS(idSegment)
+    const segmentObj = SegmentStore.getCurrentSegment()
     if (Speech2Text.recognition) {
       Speech2Text.targetElement = segmentObj.translation
       Speech2Text.sid = segmentObj.sid
