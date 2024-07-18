@@ -7,18 +7,21 @@
  */
 
 /**
- * Trait TransactionableTrait
+ * Trait TransactionalTrait
  *
- * This trait is to be used whenever the class expects to use a database transaction.
- * The class may not be aware of the fact that a transaction is already started, so
- * it should not call begin transaction if a transaction is already open and should
- * not call commit transaction if a transaction was not started by itself. Assuming
- * the containing code will take care for committing the larger transaction.
+ * This trait is intended for use in classes that interact with database transactions.
+ *
+ * The class using this trait may not be aware of an ongoing transaction, so
+ * it should not call `beginTransaction` if a transaction is already open.
+ *
+ * Additionally, it should not call `commitTransaction` if it did not initiate the transaction itself.
+ *
+ * It is assumed that the surrounding code will handle committing the larger transaction.
  *
  */
-trait TransactionableTrait {
+trait TransactionalTrait {
 
-    private static $__transactionStarted = false ;
+    private static bool $__transactionStarted = false ;
 
     protected function openTransaction() {
         if ( ! Database::obtain()->getConnection()->inTransaction() ) {

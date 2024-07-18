@@ -13,7 +13,7 @@ use API\V2\Validators\ChunkPasswordValidator;
 use Chunks_ChunkStruct;
 use Features\ReviewExtended\Model\QualityReportModel;
 use Features\ReviewExtended\ReviewUtils;
-use Features\TranslationVersions\Model\TranslationEventDao;
+use Features\TranslationEvents\Model\TranslationEventDao;
 use Files\FilesInfoUtility;
 use INIT;
 use Projects_ProjectStruct;

@@ -6,7 +6,9 @@ use Chunks_ChunkStruct;
 use Constants_TranslationStatus;
 use Exception;
 use Exceptions\ControllerReturnException;
-use Features\TranslationVersions\Model\TranslationEvent;
+use Features\ReviewExtended\BatchReviewProcessor;
+use Features\TranslationEvents\Model\TranslationEvent;
+use Features\TranslationEvents\TranslationEventsHandler;
 use Features\TranslationVersions\Model\TranslationVersionDao;
 use Features\TranslationVersions\Model\TranslationVersionStruct;
 use Features\TranslationVersions\VersionHandlerInterface;
@@ -128,12 +130,12 @@ class TranslationVersionsHandler implements VersionHandlerInterface {
         }
 
         // avoid version_number null error
-        if($new_translation->version_number === null){
+        if ( $new_translation->version_number === null ) {
             $new_translation->version_number = 0;
         }
 
         // avoid version_number null error
-        if($old_translation->version_number === null){
+        if ( $old_translation->version_number === null ) {
             $old_translation->version_number = 0;
         }
 
@@ -246,8 +248,7 @@ class TranslationVersionsHandler implements VersionHandlerInterface {
         }
 
         try {
-            $translationEventsHandler->save();
-            // $event->setChunkReviewsList( $chunkReviews ) ;
+            $translationEventsHandler->save( new BatchReviewProcessor() );
             ( new Jobs_JobDao() )->destroyCacheByProjectId( $chunk->id_project );
             Projects_ProjectDao::destroyCacheById( $chunk->id_project );
         } catch ( Exception $e ) {

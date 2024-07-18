@@ -1,14 +1,14 @@
 <?php
 
-namespace Features\TranslationVersions\Model;
+namespace Features\TranslationEvents\Model;
 
 use Chunks_ChunkStruct;
 use Constants;
 use Constants_TranslationStatus;
 use Database;
 use Exception;
-use Exceptions\ValidationError;
 use LQA\ChunkReviewStruct;
+use LQA\EntryWithCategoryStruct;
 use Segments_SegmentDao;
 use Segments_SegmentStruct;
 use Translations_SegmentTranslationStruct;
@@ -20,37 +20,70 @@ class TranslationEvent {
     /**
      * @var Translations_SegmentTranslationStruct
      */
-    protected $old_translation;
+    protected Translations_SegmentTranslationStruct $old_translation;
 
     /**
      * @var Translations_SegmentTranslationStruct
      */
-    protected $wanted_translation;
+    protected Translations_SegmentTranslationStruct $wanted_translation;
 
-    protected $user;
+    /**
+     * @var Users_UserStruct|null
+     */
+    protected ?Users_UserStruct $user;
 
-    protected $source_page;
+    /**
+     * @var int
+     */
+    protected int $source_page;
+
+    /**
+     * @var TranslationEventStruct|null
+     */
+    protected ?TranslationEventStruct $previous_event;
 
     /**
      * @var TranslationEventStruct
      */
-    protected $previous_event;
+    protected TranslationEventStruct $translation_event_struct;
+
+    protected bool $_isPropagationSource = true;
 
     /**
-     * @var TranslationEventStruct
+     * @var Chunks_ChunkStruct
      */
-    protected $current_event;
-
-    protected $_isPropagationSource = true;
+    private Chunks_ChunkStruct $chunk;
 
     /**
-     * @var Chunks_ChunkStruct|null
+     * @var bool
      */
-    private $chunk;
+    private bool $prepared = false;
+
+    /**
+     * @var bool
+     */
+    private bool $revisionFlagAllowed = true;
+
+    /**
+     * @var array
+     */
+    private array $unsetFinalRevision = [];
+
+    /**
+     * @var ChunkReviewStruct[]
+     */
+    private array $chunk_reviews_to_update = [];
+
+    /**
+     * @var EntryWithCategoryStruct[]
+     */
+    private array $issues_to_delete = [];
 
     public function __construct( Translations_SegmentTranslationStruct $old_translation,
                                  Translations_SegmentTranslationStruct $translation,
-                                                                       $user, $source_page_code ) {
+                                 ?Users_UserStruct                     $user,
+                                 int                                   $source_page_code
+    ) {
 
         $this->old_translation    = $old_translation;
         $this->wanted_translation = $translation;
@@ -73,11 +106,21 @@ class TranslationEvent {
      * @return Users_UserStruct|null
      * @throws Exception
      */
-    public function getEventUser(): ?Users_UserStruct {
-        if ( $this->getCurrentEvent()->uid ) {
-            return ( new Users_UserDao() )->getByUid( $this->getCurrentEvent()->uid );
+    public function getUser(): ?Users_UserStruct {
+
+        if ( isset( $this->user ) && $this->user->uid ) {
+            return $this->user;
         }
+
+//        if ( $this->getTranslationEventStruct()->uid ) {
+//            return ( new Users_UserDao() )->getByUid( $this->getTranslationEventStruct()->uid );
+//        }
+
         return null;
+    }
+
+    public function getSourcePage(): int {
+        return $this->source_page;
     }
 
     /**
@@ -85,10 +128,6 @@ class TranslationEvent {
      * @throws Exception
      */
     public function getOldTranslation(): Translations_SegmentTranslationStruct {
-        if ( is_null( $this->old_translation ) ) {
-            throw new Exception( 'Old translation is not set' );
-        }
-
         return $this->old_translation;
     }
 
@@ -151,76 +190,19 @@ class TranslationEvent {
     /**
      * @return bool
      */
-    public function isPersisted(): bool {
-        return isset( $this->current_event ) && !is_null( $this->current_event->id );
+    public function isPrepared(): bool {
+        return $this->prepared;
     }
 
     /**
-     * @throws ValidationError
-     * @throws Exception
+     * @param bool $prepared
+     *
+     * @return $this
      */
-    public function save() {
+    public function setPrepared( bool $prepared ): TranslationEvent {
+        $this->prepared = $prepared;
 
-        if ( isset( $this->current_event ) ) {
-            throw new Exception( 'The current event was persisted already. Use getCurrentEvent to retrieve it.' );
-        }
-
-        if (
-                in_array( $this->wanted_translation[ 'status' ], Constants_TranslationStatus::$REVISION_STATUSES ) &&
-                $this->source_page < Constants::SOURCE_PAGE_REVISION
-        ) {
-            throw new ValidationError( 'Setting revised state from translation is not allowed.', -2000 );
-        }
-
-        if (
-                in_array( $this->wanted_translation[ 'status' ], Constants_TranslationStatus::$TRANSLATION_STATUSES ) &&
-                $this->source_page >= Constants::SOURCE_PAGE_REVISION
-        ) {
-            throw new ValidationError( 'Setting translated state from revision is not allowed.', -2000 );
-        }
-
-
-        /*
-         * This is true IF:
-         * - the translation content is different from previous
-         * OR
-         * - the status is changed
-         * OR
-         * - the action event happened on a different page than the previous
-         *    ( unmodified ICEs always have the previous event source page equals to the actual one )
-         */
-        if ( !$this->_saveRequired() ) {
-            return;
-        }
-
-        $this->current_event                 = new TranslationEventStruct();
-        $this->current_event->id_job         = $this->wanted_translation[ 'id_job' ];
-        $this->current_event->id_segment     = $this->wanted_translation[ 'id_segment' ];
-        $this->current_event->uid            = ( $this->user->uid != null ? $this->user->uid : 0 );
-        $this->current_event->status         = $this->wanted_translation[ 'status' ];
-        $this->current_event->version_number = ( $this->wanted_translation[ 'version_number' ] != null ? $this->wanted_translation[ 'version_number' ] : 0 );
-        $this->current_event->source_page    = $this->source_page;
-
-        if ( $this->isPropagationSource() ) {
-            $this->current_event->time_to_edit = $this->wanted_translation[ 'time_to_edit' ];
-        }
-
-        $this->current_event->setTimestamp( 'create_date', time() );
-
-        $this->current_event->id = TranslationEventDao::insertStruct( $this->current_event );
-
-    }
-
-    /**
-     * @return bool
-     * @throws Exception
-     */
-    protected function _saveRequired(): bool {
-        return (
-                $this->old_translation->translation != $this->wanted_translation->translation ||
-                $this->old_translation->status != $this->wanted_translation->status ||
-                $this->source_page != $this->getPreviousEventSourcePage()
-        );
+        return $this;
     }
 
     /**
@@ -228,8 +210,8 @@ class TranslationEvent {
      *
      * @return TranslationEventStruct|null
      */
-    public function getLatestEventForSegment(): ?TranslationEventStruct {
-        if ( !isset( $this->previous_event ) ) {
+    private function getLatestEventForSegment(): ?TranslationEventStruct {
+        if ( empty( $this->previous_event ) ) {
             $this->previous_event = ( new TranslationEventDao() )->getLatestEventForSegment(
                     $this->old_translation->id_job,
                     $this->old_translation->id_segment
@@ -243,12 +225,23 @@ class TranslationEvent {
      * @return TranslationEventStruct
      * @throws Exception
      */
-    public function getCurrentEvent(): TranslationEventStruct {
-        if ( !isset( $this->current_event ) ) {
-            throw new Exception( 'The current segment was not persisted yet. Run save() first.' );
+    public function getTranslationEventStruct(): TranslationEventStruct {
+        if ( !isset( $this->translation_event_struct ) ) {
+            throw new Exception( 'The current segment was not prepared yet. Run TranslationEventsHandler::prepareEventStruct() first.' );
         }
 
-        return $this->current_event;
+        return $this->translation_event_struct;
+    }
+
+    /**
+     * @param TranslationEventStruct $translation_event_struct
+     *
+     * @return $this
+     */
+    public function setTranslationEventStruct( TranslationEventStruct $translation_event_struct ): TranslationEvent {
+        $this->translation_event_struct = $translation_event_struct;
+
+        return $this;
     }
 
     /**
@@ -284,7 +277,7 @@ class TranslationEvent {
      *
      * @return int
      */
-    public function statusAsSourcePage( $status ): int {
+    private function statusAsSourcePage( $status ): int {
 
         switch ( $status ) {
             case $status == Constants_TranslationStatus::STATUS_TRANSLATED:
@@ -304,7 +297,7 @@ class TranslationEvent {
      * @throws Exception
      */
     public function getCurrentEventSourcePage(): int {
-        return $this->getCurrentEvent()->source_page;
+        return $this->getTranslationEventStruct()->source_page;
     }
 
     /**
@@ -321,6 +314,74 @@ class TranslationEvent {
      */
     public function setPropagationSource( bool $value ): void {
         $this->_isPropagationSource = $value;
+    }
+
+    /**
+     * This flag is meant to force setting the final_revision flag to 0
+     * For events like a "GREEN" ICE acceptance without modification in R1 phase.
+     * These events by definition should be registered but not set as final_revision (no modification means any revision)
+     *
+     * @return bool
+     */
+    public function isFinalRevisionFlagAllowed(): bool {
+        return $this->revisionFlagAllowed;
+    }
+
+    /**
+     * @param bool $revisionFlagAllowed
+     *
+     * @return $this
+     */
+    public function setRevisionFlagAllowed( bool $revisionFlagAllowed ): TranslationEvent {
+        $this->revisionFlagAllowed = $revisionFlagAllowed;
+
+        return $this;
+    }
+
+    /**
+     * @return int[]
+     */
+    public function getUnsetFinalRevision(): array {
+        return $this->unsetFinalRevision;
+    }
+
+    /**
+     * @param int $source_page
+     */
+    public function setFinalRevisionToRemove( int $source_page ) {
+        $this->unsetFinalRevision[] = $source_page;
+    }
+
+    /**
+     * @return ChunkReviewStruct[]
+     */
+    public function getChunkReviews(): array {
+        return $this->chunk_reviews_to_update;
+    }
+
+    /**
+     * @param ChunkReviewStruct $chunk_review
+     */
+    public function setChunkReviewForPassFailUpdate( ChunkReviewStruct $chunk_review ) {
+        if ( false === isset( $this->chunk_reviews_to_update[ $chunk_review->id ] ) ) {
+            $this->chunk_reviews_to_update[ $chunk_review->id ] = $chunk_review;
+        }
+    }
+
+    /**
+     * @return EntryWithCategoryStruct[]
+     */
+    public function getIssuesToDelete(): array {
+        return $this->issues_to_delete;
+    }
+
+    /**
+     * @param EntryWithCategoryStruct $issue
+     */
+    public function addIssueToDelete( EntryWithCategoryStruct $issue ) {
+        if ( false === isset( $this->issues_to_delete[ $issue->id ] ) ) {
+            $this->issues_to_delete[ $issue->id ] = $issue;
+        }
     }
 
 }

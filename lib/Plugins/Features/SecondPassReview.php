@@ -16,12 +16,10 @@ use Features;
 use Features\ReviewExtended\Controller\API\Json\ProjectUrls;
 use Features\ReviewExtended\ReviewUtils as ReviewUtils;
 use Features\SecondPassReview\Model\ChunkReviewModel;
-use Features\TranslationVersions\Model\TranslationEventDao;
+use Features\TranslationEvents\Model\TranslationEventDao;
 use Klein\Klein;
-use LQA\ChunkReviewDao;
 use LQA\ChunkReviewStruct;
 use NewController;
-use Projects_ProjectDao;
 use Projects_ProjectStruct;
 
 class SecondPassReview extends BaseFeature {

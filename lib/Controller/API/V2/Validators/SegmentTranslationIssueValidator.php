@@ -6,7 +6,7 @@ namespace API\V2\Validators;
 use API\V2\Exceptions\ValidationError;
 use Exception;
 use Features\ReviewExtended\ReviewUtils;
-use Features\TranslationVersions\Model\TranslationEventDao;
+use Features\TranslationEvents\Model\TranslationEventDao;
 use LQA\ChunkReviewStruct;
 use LQA\EntryDao;
 use LQA\EntryStruct;

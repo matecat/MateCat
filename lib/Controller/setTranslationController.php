@@ -508,36 +508,37 @@ class setTranslationController extends ajaxController {
 
         }
 
-
-        /*
-         * Hooked by TranslationVersions which manage translation versions
-         *
-         * This is also the init handler of all R1/R2 handling and Qr score calculation by
-         *  *** translationVersionSaved *** hook in TranslationEventsHandler.php hooked by AbstractRevisionFeature
-         */
-        if ( $this->VersionsHandler !== null ) {
-            $this->VersionsHandler->storeTranslationEvent( [
-                    'translation'      => $new_translation,
-                    'old_translation'  => $old_translation,
-                    'propagation'      => $propagationTotal,
-                    'chunk'            => $this->chunk,
-                    'segment'          => $this->segment,
-                    'user'             => $this->user,
-                    'source_page_code' => ReviewUtils::revisionNumberToSourcePage( $this->revisionNumber ),
-                    'features'         => $this->featureSet,
-                    'project'          => $this->project
-            ] );
-        }
-
         //COMMIT THE TRANSACTION
         try {
+
+            /*
+             * Hooked by TranslationVersions which manage translation versions
+             *
+             * This is also the init handler of all R1/R2 handling and Qr score calculation by
+             * by TranslationEventsHandler and BatchReviewProcessor
+             */
+            if ( $this->VersionsHandler !== null ) {
+                $this->VersionsHandler->storeTranslationEvent( [
+                        'translation'      => $new_translation,
+                        'old_translation'  => $old_translation,
+                        'propagation'      => $propagationTotal,
+                        'chunk'            => $this->chunk,
+                        'segment'          => $this->segment,
+                        'user'             => $this->user,
+                        'source_page_code' => ReviewUtils::revisionNumberToSourcePage( $this->revisionNumber ),
+                        'features'         => $this->featureSet,
+                        'project'          => $this->project
+                ] );
+            }
+
             $db->commit();
+
         } catch ( Exception $e ) {
             $this->result[ 'errors' ][] = [ "code" => -101, "message" => $e->getMessage() ];
             Log::doJsonLog( "Lock: Transaction Aborted. " . $e->getMessage() );
             $db->rollback();
 
-            return $e->getCode();
+            throw $e;
         }
 
         $newTotals = WordCountStruct::loadFromJob( $this->chunk );

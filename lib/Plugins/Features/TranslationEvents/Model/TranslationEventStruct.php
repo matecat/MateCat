@@ -6,7 +6,7 @@
  * Time: 17:24
  */
 
-namespace Features\TranslationVersions\Model;
+namespace Features\TranslationEvents\Model;
 
 
 use DataAccess_AbstractDaoSilentStruct;

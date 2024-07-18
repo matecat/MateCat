@@ -13,11 +13,11 @@ use Chunks_ChunkStruct;
 use Database;
 use Exception;
 use Features;
+use Features\ReviewExtended\BatchReviewProcessor;
 use Features\ReviewExtended\ReviewUtils;
-use Features\TranslationVersions\Handlers\TranslationEventsHandler;
-use Features\TranslationVersions\Model\TranslationEvent;
+use Features\TranslationEvents\Model\TranslationEvent;
+use Features\TranslationEvents\TranslationEventsHandler;
 use ReflectionException;
-use Stomp\Exception\StompException;
 use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\AbstractWorker;
 use TaskRunner\Commons\QueueElement;
@@ -40,8 +40,7 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker {
      * @param AbstractElement $queueElement
      *
      * @return void
-     * @throws \ReflectionException
-     * @throws \StompException
+     * @throws ReflectionException
      * @throws EndQueueException
      * @throws Exception
      */
@@ -90,7 +89,7 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker {
             }
         }
 
-        $batchEventCreator->save();
+        $batchEventCreator->save( new BatchReviewProcessor() );
 
         if ( !empty( $params[ 'segment_ids' ] ) ) {
             $counter = new CounterModel();

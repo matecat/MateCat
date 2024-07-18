@@ -4,10 +4,10 @@ use API\V2\Validators\SegmentTranslationIssueValidator;
 use Features\AbstractRevisionFeature;
 use Features\BaseFeature;
 use Features\ReviewExtended;
-use Features\ReviewExtended\ISegmentTranslationModel;
+use Features\ReviewExtended\IReviewedWordCountModel;
 use Features\SecondPassReview\Model\ChunkReviewModel;
 use Features\SecondPassReview\TranslationIssueModel;
-use Features\TranslationVersions\Model\TranslationEvent;
+use Features\TranslationEvents\Model\TranslationEvent;
 use Klein\Request;
 use LQA\ChunkReviewStruct;
 use WordCount\CounterModel;
@@ -63,10 +63,10 @@ class RevisionFactory {
      * @param TranslationEvent    $translationEvent
      * @param ChunkReviewStruct[] $chunkReviews
      *
-     * @return ISegmentTranslationModel
+     * @return IReviewedWordCountModel
      */
-    public function getSegmentTranslationModel( TranslationEvent $translationEvent, array $chunkReviews, CounterModel $jobWordCounter ) {
-        return $this->revision->getSegmentTranslationModel( $translationEvent, $jobWordCounter, $chunkReviews );
+    public function getReviewedWordCountModel( TranslationEvent $translationEvent, array $chunkReviews, CounterModel $jobWordCounter ) {
+        return $this->revision->getReviewedWordCountModel( $translationEvent, $jobWordCounter, $chunkReviews );
     }
 
     /**
@@ -74,7 +74,7 @@ class RevisionFactory {
      *
      * @param Request $request
      *
-     * @return SegmentTranslationIssueValidator|\Features\ReviewImproved\Controller\API\V2\Validators\SegmentTranslationIssueValidator
+     * @return SegmentTranslationIssueValidator
      * @throws Exception
      */
     public function getTranslationIssuesValidator( Request $request ) {

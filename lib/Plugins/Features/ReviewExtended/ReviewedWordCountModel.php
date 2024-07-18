@@ -11,53 +11,53 @@ namespace Features\ReviewExtended;
 use Chunks_ChunkStruct;
 use Exception;
 use Features\SecondPassReview\Email\RevisionChangedNotificationEmail;
-use Features\SecondPassReview\Model\TranslationEventDao;
-use Features\TranslationVersions\Model\TranslationEvent;
-use Features\TranslationVersions\Model\TranslationEventStruct;
+use Features\TranslationEvents\Model\TranslationEvent;
+use Features\TranslationEvents\Model\TranslationEventDao;
+use Features\TranslationEvents\Model\TranslationEventStruct;
 use LQA\ChunkReviewStruct;
 use LQA\EntryCommentStruct;
 use LQA\EntryDao;
 use LQA\EntryStruct;
-use LQA\EntryWithCategoryStruct;
 use Projects_ProjectStruct;
 use Routes;
-use TransactionableTrait;
+use TransactionalTrait;
 use Users_UserDao;
+use Utils;
 use WordCount\CounterModel;
 
-class SegmentTranslationModel implements ISegmentTranslationModel {
+class ReviewedWordCountModel implements IReviewedWordCountModel {
 
-    use TransactionableTrait;
+    use TransactionalTrait;
 
     /**
      * @var TranslationEvent
      */
-    protected $_event;
+    protected TranslationEvent $_event;
 
     /**
-     * @var Chunks_ChunkStruct
+     * @var ?Chunks_ChunkStruct
      */
-    protected $_chunk;
+    protected ?Chunks_ChunkStruct $_chunk;
 
     /**
      * @var Projects_ProjectStruct
      */
-    protected $_project;
+    protected Projects_ProjectStruct $_project;
 
     /**
      * @var ChunkReviewStruct[]
      */
-    protected $_chunkReviews;
+    protected array $_chunkReviews;
 
     /**
      * @var array
      */
-    protected $_issuesDeletionList = [];
+    protected array $_issuesDeletionList = [];
 
     /**
      * @var array
      */
-    protected $_sourcePagesWithFinalRevisions;
+    protected array $_sourcePagesWithFinalRevisions;
 
     /**
      * @var array
@@ -66,12 +66,12 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
     /**
      * @var CounterModel
      */
-    private $_jobWordCounter;
+    private CounterModel $_jobWordCounter;
 
-    public function __construct( TranslationEvent $model, CounterModel $jobWordCounter, array $chunkReviews ) {
-        $this->_event          = $model;
+    public function __construct( TranslationEvent $event, CounterModel $jobWordCounter, array $chunkReviews ) {
+        $this->_event          = $event;
         $this->_chunkReviews   = $chunkReviews;
-        $this->_chunk          = $model->getChunk();
+        $this->_chunk          = $event->getChunk();
         $this->_project        = $this->_chunk->getProject();
         $this->_jobWordCounter = $jobWordCounter;
 
@@ -84,6 +84,13 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
             return $event->source_page;
         }, $this->_finalRevisions );
 
+    }
+
+    /**
+     * @return TranslationEvent
+     */
+    public function getEvent(): TranslationEvent {
+        return $this->_event;
     }
 
     /**
@@ -101,23 +108,27 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
      * @return void
      * @throws Exception
      */
-    private function decreaseCountersAndRemoveIssues( ChunkReviewStruct $chunkReview ) {
-        $chunkReview->reviewed_words_count -= $this->_event->getSegmentStruct()->raw_word_count;
-        $chunkReview->penalty_points       -= $this->getPenaltyPointsForSourcePage( $chunkReview->source_page );
-
+    private function decreaseCounters( ChunkReviewStruct $chunkReview ) {
         // when downgrading a revision to translation, the issues must be removed (from R1, R2 or both)
         $this->flagIssuesToBeDeleted( $chunkReview->source_page );
+        $chunkReview->reviewed_words_count -= $this->_event->getSegmentStruct()->raw_word_count;
+        $chunkReview->penalty_points       -= $this->getPenaltyPointsForSourcePage( $chunkReview->source_page );
     }
 
+    /**
+     * @throws Exception
+     */
     private function increaseCountersButCheckForFinalRevision( ChunkReviewStruct $chunkReview ) {
         // There is a change status or acceptance to this review, and it is the first time it happens;
         // we must add the reviewed word count
         if ( !$this->aFinalRevisionExistsForThisChunk( $chunkReview ) ) {
             $chunkReview->reviewed_words_count += $this->_event->getSegmentStruct()->raw_word_count;
+        } else {
+            $this->_event->setRevisionFlagAllowed( false );
         }
 
         // in this case, the tte is added by definition
-        $chunkReview->total_tte += $this->_event->getCurrentEvent()->time_to_edit;
+        $chunkReview->total_tte += $this->_event->getTranslationEventStruct()->time_to_edit;
     }
 
     /**
@@ -130,25 +141,15 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
      *    - After the first modification or acceptance, the count does not increase further unless there is a change of status
      * 3. For unmodified ICE segments, the progress is not counted unless there is a change of status (no acceptance counts)
      *
-     * @return ChunkReviewTranslationEventTransition
      * @throws Exception
      */
-    public function evaluateAndGetChunkReviewTranslationEventTransition(): ChunkReviewTranslationEventTransition {
-
-        $chunkReviews       = [];
-        $unsetFinalRevision = [];
-
-        // for debugging purposes
-        $_previousEventSourcePage = $this->_event->getPreviousEventSourcePage();
-        $_currentEventSourcePage  = $this->_event->getCurrentEventSourcePage();
+    public function evaluateChunkReviewEventTransitions(): void {
 
         if ( $this->_event->isChangingStatus() ) {
             $this->_jobWordCounter->setOldStatus( $this->_event->getOldTranslation()->status );
             $this->_jobWordCounter->setNewStatus( $this->_event->getWantedTranslation()->status );
             $this->_jobWordCounter->setUpdatedValues( $this->_event->getOldTranslation()->eq_word_count, $this->_event->getSegmentStruct()->raw_word_count );
         }
-
-        $segmentReviewTransitionModel = new ChunkReviewTranslationEventTransition( $this->_event );
 
         // populate structs for current segment and propagations
         // we are iterating on ALL the revision levels (chunks)
@@ -164,16 +165,14 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
 
             if ( $this->_event->isADraftChange() ) {
                 continue;
-            }
-
-            if ( $this->_event->isChangingStatus() ) {
+            } elseif ( $this->_event->isChangingStatus() ) {
 
                 if ( $this->_event->currentEventIsOnThisChunk( $chunkReview ) ) {
 
                     // There is a change status to this review, and it is the first time it happens;
                     // we must add the reviewed word count
                     $this->increaseCountersButCheckForFinalRevision( $chunkReview );
-                    $chunkReviews[] = $chunkReview;
+                    $this->_event->setChunkReviewForPassFailUpdate( $chunkReview );
 
                 } elseif ( $this->aFinalRevisionExistsForThisChunk( $chunkReview ) && $this->_event->isLowerTransition() ) {  // check for lower transition, we want to not decrement when upgrading statuses
 
@@ -187,40 +186,46 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
                     //
                     // This segment already has been in R1 revision state
                     // reviewed words are discounted from R1
-                    $this->decreaseCountersAndRemoveIssues( $chunkReview );
-                    $unsetFinalRevision[] = $chunkReview->source_page;
-                    $chunkReviews[]       = $chunkReview;
+                    $this->decreaseCounters( $chunkReview );
+
+                    $this->_event->setFinalRevisionToRemove( (int)$chunkReview->source_page );
+                    $this->_event->setChunkReviewForPassFailUpdate( $chunkReview );
 
                 }
 
-            } elseif (
+            } elseif ( $this->_event->isIce() ) {
+
+                if (
+                        // This case happens because we have the same status for ICEs and Approved segments.
                     // All can pass except unmodified ices
-                    !$this->_event->isUnModifiedIce() &&
-                    $this->_event->currentEventIsOnThisChunk( $chunkReview )
-            ) {
+                        !$this->_event->isUnModifiedIce() &&
+                        $this->_event->currentEventIsOnThisChunk( $chunkReview )
+                ) {
 
-                // There is a segment acceptance with or without modifications in the same revision phase, and it is the first time it's happened;
-                // we must add the reviewed word count
-                $this->increaseCountersButCheckForFinalRevision( $chunkReview );
-                $chunkReviews[] = $chunkReview;
+                    // There is a segment acceptance with or without modifications in the same revision phase, and it is the first time it's happened;
+                    // we must add the reviewed word count.
+                    $this->increaseCountersButCheckForFinalRevision( $chunkReview );
+                    $this->_event->setChunkReviewForPassFailUpdate( $chunkReview );
 
+                }
+
+            } else {
+                $this->_event->setRevisionFlagAllowed( false );
             }
 
         }
 
-        foreach ( $chunkReviews as $chunkReview ) {
-            $segmentReviewTransitionModel->addChunkReview( $chunkReview );
+    }
+
+    /**
+     * Delete all issues
+     *
+     */
+    public function deleteIssues() {
+        foreach ( $this->_event->getIssuesToDelete() as $issue ) {
+            $issue->addComments( ( new EntryCommentStruct() )->getEntriesById( $issue->id ) );
+            EntryDao::deleteEntry( $issue );
         }
-
-        foreach ( $this->_issuesDeletionList as $issuesToDelete ) {
-            foreach ( $issuesToDelete as $issueToDelete ) {
-                $segmentReviewTransitionModel->addIssueToDelete( $issueToDelete );
-            }
-        }
-
-        $segmentReviewTransitionModel->unsetFinalRevision( $unsetFinalRevision );
-
-        return $segmentReviewTransitionModel;
     }
 
     /**
@@ -242,12 +247,13 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
     /**
      * @param $source_page
      */
-    protected function flagIssuesToBeDeleted( $source_page ) {
-        $issue = EntryDao::findByIdSegmentAndSourcePage( $this->_event->getSegmentStruct()->id, $this->_chunk->id, $source_page );
+    private function flagIssuesToBeDeleted( $source_page ) {
 
-        if ( $issue ) {
-            $this->_issuesDeletionList[ $source_page ] = $issue;
+        $issue = EntryDao::findByIdSegmentAndSourcePage( $this->_event->getSegmentStruct()->id, $this->_chunk->id, $source_page );
+        foreach ( $issue as $issueToDelete ) {
+            $this->_event->addIssueToDelete( $issueToDelete );
         }
+
     }
 
     /**
@@ -256,33 +262,29 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
      *
      * @throws Exception
      */
-    protected function _sendNotificationEmail( $finalRevisions, $chunkReviewsWithFinalRevisions ) {
+    private function _sendNotificationEmail( $finalRevisions, $chunkReviewsWithFinalRevisions ) {
         $emails                   = [];
-        $userWhoChangedTheSegment = $this->_event->getEventUser();
+        $userWhoChangedTheSegment = $this->_event->getUser();
         $revision                 = $chunkReviewsWithFinalRevisions[ $this->_event->getPreviousEventSourcePage() ];
 
         $serialized_issues = [];
-        if ( isset( $this->_issuesDeletionList[ $this->_event->getPreviousEventSourcePage() ] ) ) {
 
-            /** @var EntryWithCategoryStruct $issue */
-            foreach ( $this->_issuesDeletionList[ $this->_event->getPreviousEventSourcePage() ] as $k => $issue ) {
-                $serialized               = $issue->toArray();
-                $serialized[ 'comments' ] = [];
+        foreach ( $this->_event->getIssuesToDelete() as $issue ) {
+            $serialized               = $issue->toArray();
+            $serialized[ 'comments' ] = [];
 
-                /** @var EntryCommentStruct $comment */
-                foreach ( $issue->getComments() as $comment ) {
-                    $serialized[ 'comments' ][] = $comment->toArray();
-                }
-
-                $serialized_issues [] = $serialized;
+            /** @var EntryCommentStruct $comment */
+            foreach ( $issue->getComments() as $comment ) {
+                $serialized[ 'comments' ][] = $comment->toArray();
             }
 
+            $serialized_issues [] = $serialized;
         }
 
         $segmentInfo = [
-                'segment_source'  => \Utils::htmlentitiesToUft8WithoutDoubleEncoding( $this->_event->getSegmentStruct()->segment ),
-                'old_translation' => \Utils::htmlentitiesToUft8WithoutDoubleEncoding( $this->_event->getOldTranslation()->translation ),
-                'new_translation' => \Utils::htmlentitiesToUft8WithoutDoubleEncoding( $this->_event->getWantedTranslation()->translation ),
+                'segment_source'  => Utils::htmlentitiesToUft8WithoutDoubleEncoding( $this->_event->getSegmentStruct()->segment ),
+                'old_translation' => Utils::htmlentitiesToUft8WithoutDoubleEncoding( $this->_event->getOldTranslation()->translation ),
+                'new_translation' => Utils::htmlentitiesToUft8WithoutDoubleEncoding( $this->_event->getWantedTranslation()->translation ),
                 'issues'          => $serialized_issues
         ];
 
@@ -343,14 +345,17 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
      *
      * @return int
      */
-    protected function getPenaltyPointsForSourcePage( $source_page ): int {
-        if ( !isset( $this->_issuesDeletionList[ $source_page ] ) || !is_array( $this->_issuesDeletionList[ $source_page ] ) ) {
-            return 0;
-        }
+    private function getPenaltyPointsForSourcePage( $source_page ): int {
 
-        return array_reduce( $this->_issuesDeletionList[ $source_page ], function ( $carry, EntryStruct $issue ) {
+        $toReduce = $this->_event->getIssuesToDelete();
+        $issues   = array_filter( $toReduce, function ( EntryStruct $issue ) use ( $source_page ) {
+            return $issue->source_page == $source_page;
+        } );
+
+        return array_reduce( $issues, function ( $carry, EntryStruct $issue ) {
             return $carry + $issue->penalty_points;
         }, 0 );
+
     }
 
 }

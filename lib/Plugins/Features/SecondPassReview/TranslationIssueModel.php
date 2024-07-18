@@ -11,7 +11,7 @@ namespace Features\SecondPassReview;
 
 use Features\ReviewExtended\Model\ChunkReviewDao;
 use Features\SecondPassReview\Model\ChunkReviewModel;
-use Features\SecondPassReview\Model\TranslationEventDao;
+use Features\TranslationEvents\Model\TranslationEventDao;
 use LQA\EntryDao;
 
 class TranslationIssueModel extends \Features\ReviewExtended\TranslationIssueModel {

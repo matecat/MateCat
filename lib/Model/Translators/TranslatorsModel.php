@@ -22,14 +22,14 @@ use Jobs_JobStruct;
 use Outsource\ConfirmationDao;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
-use TransactionableTrait;
+use TransactionalTrait;
 use Users_UserDao;
 use Users_UserStruct;
 use Utils;
 
 class TranslatorsModel {
 
-    use TransactionableTrait;
+    use TransactionalTrait;
 
     /**
      * @var Users_UserStruct

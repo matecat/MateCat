@@ -11,6 +11,7 @@ namespace Features\ReviewExtended\Model;
 use Chunks_ChunkStruct;
 use Constants;
 use Database;
+use Exception;
 use Features\ReviewExtended\ReviewUtils;
 use LQA\ChunkReviewStruct;
 
@@ -129,19 +130,17 @@ class ChunkReviewDao extends \LQA\ChunkReviewDao {
 
     /**
      *
-     * @param ChunkReviewStruct $chunkReview
-     * @param array             $data
+     * @param int   $chunkReviewID
+     * @param array $data
      *
-     * @return ChunkReviewStruct
-     * @throws \Exception
+     * @throws Exception
      */
-
     public function passFailCountsAtomicUpdate( $chunkReviewID, $data = [] ) {
 
         /**
          * @var $chunkReview_partial ChunkReviewStruct
          */
-        $chunkReview_partial = $data[ 'chunkReview_partials' ];
+        $chunkReview_partial = $data[ 'chunkReview' ];
         $data[ 'force_pass_at' ]        = ReviewUtils::filterLQAModelLimit( $chunkReview_partial->getChunk()->getProject()->getLqaModel(), $chunkReview_partial->source_page );
 
         // in MySQL a sum of a null value to an integer returns 0
@@ -177,8 +176,6 @@ class ChunkReviewDao extends \LQA\ChunkReviewDao {
             'reviewed_words_count' => $data[ 'reviewed_words_count' ],
             'total_tte'            => $data[ 'total_tte' ],
         ] );
-
-        return ChunkReviewDao::findById( $chunkReviewID );
 
     }
 

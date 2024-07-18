@@ -64,7 +64,7 @@ class ReviewUtils {
             /**
              * Limit array index equals to $source_page -2.
              */
-            return isset( $limit[ $sourcePage - 2 ] ) ? $limit[ $sourcePage - 2 ] : end( $limit );
+            return $limit[ $sourcePage - 2 ] ?? end( $limit );
         }
 
         return $limit;

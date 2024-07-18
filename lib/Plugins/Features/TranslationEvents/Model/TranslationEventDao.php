@@ -6,7 +6,7 @@
  * Time: 17:20
  */
 
-namespace Features\TranslationVersions\Model;
+namespace Features\TranslationEvents\Model;
 
 use Constants_TranslationStatus;
 use DataAccess\ShapelessConcreteStruct;
@@ -20,6 +20,23 @@ class TranslationEventDao extends \DataAccess_AbstractDao {
 
     protected static $auto_increment_field = [ 'id' ];
     protected static $primary_keys         = [ 'id' ];
+
+    public function unsetFinalRevisionFlag( int $id_job, array $id_segments, array $source_pages ): int {
+
+        $sql = " UPDATE segment_translation_events SET final_revision = 0 " .
+                " WHERE id_job = :id_job " .
+                " AND id_segment IN ( " . implode( ',', $id_segments ) . " ) " .
+                " AND source_page IN ( " . implode( ',', $source_pages ) . " ) ";
+
+        $conn = $this->getDatabaseHandler()->getConnection();
+        $stmt = $conn->prepare( $sql );
+
+        $stmt->execute( [
+                'id_job' => $id_job,
+        ] );
+
+        return $stmt->rowCount();
+    }
 
     /**
      * @param $id_job

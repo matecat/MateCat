@@ -12,12 +12,10 @@ use Exception;
 use Exceptions\NotFoundException;
 use Features;
 use Features\ProjectCompletion\CompletionEventStruct;
-use Features\ReviewExtended\BatchReviewProcessor;
 use Features\ReviewExtended\IChunkReviewModel;
-use Features\ReviewExtended\ISegmentTranslationModel;
+use Features\ReviewExtended\IReviewedWordCountModel;
 use Features\ReviewExtended\Model\QualityReportModel;
-use Features\TranslationVersions\Handlers\TranslationEventsHandler;
-use Features\TranslationVersions\Model\TranslationEvent;
+use Features\TranslationEvents\Model\TranslationEvent;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use INIT;
@@ -308,17 +306,6 @@ abstract class AbstractRevisionFeature extends BaseFeature {
     }
 
     /**
-     * @param TranslationEventsHandler $eventCreator
-     *
-     * @throws Exception
-     * @internal param TranslationEvent $event
-     */
-    public function processReviewTransitions( TranslationEventsHandler $eventCreator ) {
-        $batchReviewProcessor = new BatchReviewProcessor( $eventCreator );
-        $batchReviewProcessor->process();
-    }
-
-    /**
      *
      * /TODO move in review Improved???
      * project_completion_event_saved
@@ -539,8 +526,8 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      *
      * @return ISegmentTranslationModel
      */
-    public function getSegmentTranslationModel( TranslationEvent $translation, CounterModel $jobWordCounter, array $chunkReviews = [] ) {
-        $class_name = get_class( $this ) . '\SegmentTranslationModel';
+    public function getReviewedWordCountModel( TranslationEvent $translation, CounterModel $jobWordCounter, array $chunkReviews = [] ) {
+        $class_name = get_class( $this ) . '\ReviewedWordCountModel';
 
         return new $class_name( $translation, $jobWordCounter, $chunkReviews );
     }
