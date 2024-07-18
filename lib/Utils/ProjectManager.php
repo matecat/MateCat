@@ -20,7 +20,7 @@ use Files\MetadataDao;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use FilesStorage\S3FilesStorage;
-use FiltersXliffConfig\Xliff\DTO\XliffConfigModel;
+use Xliff\XliffConfigTemplateStruct;
 use Jobs\SplitQueue;
 use LQA\QA;
 use Matecat\SubFiltering\MateCatFilter;
@@ -310,7 +310,7 @@ class ProjectManager {
             }
 
             // when the request comes from ProjectCreation daemon, it is already an ArrayObject
-            $this->projectStructure[ 'xliff_parameters' ] = XliffConfigModel::fromArrayObject( $this->projectStructure[ 'xliff_parameters' ] );
+            $this->projectStructure[ 'xliff_parameters' ] = XliffConfigTemplateStruct::fromArrayObject( $this->projectStructure[ 'xliff_parameters' ] );
 
         } catch ( DomainException $ex ) {
             $this->projectStructure[ 'result' ][ 'errors' ][] = [
@@ -387,7 +387,7 @@ class ProjectManager {
         }
 
         // xliff_parameters
-        if ( isset( $this->projectStructure[ 'xliff_parameters' ] ) and $this->projectStructure[ 'xliff_parameters' ] instanceof XliffConfigModel ) {
+        if ( isset( $this->projectStructure[ 'xliff_parameters' ] ) and $this->projectStructure[ 'xliff_parameters' ] instanceof XliffConfigTemplateStruct ) {
             $configModel                   = $this->projectStructure[ 'xliff_parameters' ];
             $options[ 'xliff_parameters' ] = json_encode( $configModel );
         }
@@ -2716,7 +2716,7 @@ class ProjectManager {
                 }
 
                 /**
-                 * @var $configModel XliffConfigModel
+                 * @var $configModel XliffConfigTemplateStruct
                  */
                 $configModel = $this->projectStructure[ 'xliff_parameters' ];
                 $stateValues = $this->getTargetStatesFromTransUnit( $translation_row[ 4 ], $position );
@@ -3134,7 +3134,7 @@ class ProjectManager {
     private function __isTranslated( $source, $target, $state = null, $stateQualifier = null ) {
 
         /**
-         * @var $configModel XliffConfigModel
+         * @var $configModel XliffConfigTemplateStruct
          */
         $configModel = $this->projectStructure[ 'xliff_parameters' ];
         $rule        = $configModel->getMatchingRule(

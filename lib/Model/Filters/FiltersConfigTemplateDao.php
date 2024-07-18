@@ -35,7 +35,7 @@ class FiltersConfigTemplateDao extends DataAccess_AbstractDao
     private static $instance = null;
 
     /**
-     * @return FiltersXliffConfigTemplateDao|null
+     * @return FiltersConfigTemplateDao|null
      */
     private static function getInstance() {
         if ( !isset( self::$instance ) ) {

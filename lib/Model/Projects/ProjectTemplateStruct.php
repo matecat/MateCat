@@ -28,7 +28,8 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
     public $tm;
     public $payable_rate_template_id;
     public $qa_model_template_id;
-    public $filters_xliff_config_template_id;
+    public $filters_template_id;
+    public $xliff_config_template_id;
     public $pretranslate_100;
     public $pretranslate_101;
     public $get_public_matches;
@@ -61,7 +62,8 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
         $this->tm = $json->tm;
         $this->payable_rate_template_id = $json->payable_rate_template_id;
         $this->qa_model_template_id = $json->qa_model_template_id;
-        $this->filters_xliff_config_template_id = $json->filters_xliff_config_template_id;
+        $this->filters_template_id = $json->filters_template_id;
+        $this->xliff_config_template_id = $json->xliff_config_template_id;
 
         return $this;
     }
@@ -248,7 +250,8 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
             'tm' => $this->getTm(),
             'payable_rate_template_id' => $this->payable_rate_template_id ? (int)$this->payable_rate_template_id : 0,
             'qa_model_template_id' => $this->qa_model_template_id ? (int)$this->qa_model_template_id : 0,
-            'filters_xliff_config_template_id' => $this->filters_xliff_config_template_id ? (int)$this->filters_xliff_config_template_id : 0,
+            'filters_template_id' => $this->filters_template_id ? (int)$this->filters_template_id : 0,
+            'xliff_config_template_id' => $this->xliff_config_template_id ? (int)$this->xliff_config_template_id : 0,
             'get_public_matches' => (bool)$this->get_public_matches,
             'pretranslate_100' => (bool)$this->pretranslate_100,
             'pretranslate_101' => (bool)$this->pretranslate_101,

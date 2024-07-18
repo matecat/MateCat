@@ -8,6 +8,7 @@ use Database;
 use DateTime;
 use Engine;
 use Exception;
+use Filters\FiltersConfigTemplateDao;
 use FiltersXliffConfig\FiltersXliffConfigTemplateDao;
 use INIT;
 use PayableRates\CustomPayableRateDao;
@@ -21,6 +22,7 @@ use TmKeyManagement_MemoryKeyStruct;
 use TmKeyManagement_TmKeyStruct;
 use Validator\JSONValidator;
 use Validator\JSONValidatorObject;
+use Xliff\XliffConfigTemplateDao;
 
 class ProjectTemplateDao extends DataAccess_AbstractDao {
     const TABLE = 'project_templates';
@@ -179,16 +181,29 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
             }
         }
 
-        // check filters_xliff_config_template_id
-        if ( $projectTemplateStruct->filters_xliff_config_template_id > 0 ) {
-            $filtersXliffConfigModel = FiltersXliffConfigTemplateDao::getById( $projectTemplateStruct->filters_xliff_config_template_id );
+        // check xliff_config_template_id
+        if ( $projectTemplateStruct->xliff_config_template_id > 0 ) {
+            $xliffConfigModel = XliffConfigTemplateDao::getById( $projectTemplateStruct->xliff_config_template_id );
 
-            if ( empty( $filtersXliffConfigModel ) ) {
-                throw new Exception( "Not existing Filters and Xliff template." );
+            if ( empty( $xliffConfigModel ) ) {
+                throw new Exception( "Not existing Xliff template." );
             }
 
-            if ( $filtersXliffConfigModel->uid !== $projectTemplateStruct->uid ) {
-                throw new Exception( "Filters and Xliff model doesn't belong to the user." );
+            if ( $xliffConfigModel->uid !== $projectTemplateStruct->uid ) {
+                throw new Exception( "Xliff model doesn't belong to the user." );
+            }
+        }
+
+        // check filters_template_id
+        if ( $projectTemplateStruct->filters_template_id > 0 ) {
+            $filtersConfigModel = FiltersConfigTemplateDao::getById( $projectTemplateStruct->filters_template_id );
+
+            if ( empty( $filtersConfigModel ) ) {
+                throw new Exception( "Not existing Filters config template." );
+            }
+
+            if ( $filtersConfigModel->uid !== $projectTemplateStruct->uid ) {
+                throw new Exception( "Filters config model doesn't belong to the user." );
             }
         }
 
