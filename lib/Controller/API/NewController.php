@@ -4,6 +4,7 @@ use Constants\ConversionHandlerStatus;
 use Conversion\ConvertedFileModel;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
+use Filters\FiltersConfigTemplateDao;
 use LQA\ModelDao;
 use LQA\ModelStruct;
 use Matecat\XliffParser\Utils\Files as XliffFiles;
@@ -211,8 +212,10 @@ class NewController extends ajaxController {
             'deepl_id_glossary' => [ 'filter' => FILTER_SANITIZE_STRING ],
 
             'filters_extraction_parameters' => [ 'filter' => FILTER_SANITIZE_STRING ],
-
             'xliff_parameters' => [ 'filter' => FILTER_SANITIZE_STRING ],
+
+            'filters_extraction_parameters_template_id'   => [ 'filter' => FILTER_VALIDATE_INT ],
+            'xliff_parameters_template_id'   => [ 'filter' => FILTER_VALIDATE_INT ],
         ];
 
         $filterArgs = $this->featureSet->filter( 'filterNewProjectInputFilters', $filterArgs, $this->userIsLogged );
@@ -1325,6 +1328,16 @@ class NewController extends ajaxController {
             $validator->validate( $validatorObject );
 
             $this->filters_extraction_parameters = json_decode( $json );
+
+        } elseif( !empty($this->postInput[ 'filters_extraction_parameters_template_id' ]) ){
+
+            $filtersTemplate = FiltersConfigTemplateDao::getById($this->postInput[ 'filters_extraction_parameters_template_id' ]);
+
+            if($filtersTemplate === null){
+                throw new Exception("filters_extraction_parameters_template_id not valid");
+            }
+
+            $this->filters_extraction_parameters =  $filtersTemplate->toArray();
         }
     }
 
@@ -1351,7 +1364,15 @@ class NewController extends ajaxController {
             $validator->validate( $validatorObject );
 
             $this->xliff_parameters = json_decode( $json );
+        } elseif( !empty( $this->postInput[ 'xliff_parameters_template_id' ] ) ){
+
+            $xliffConfigTemplate = \Xliff\XliffConfigTemplateDao::getById($this->postInput[ 'xliff_parameters_template_id' ]);
+
+            if($xliffConfigTemplate === null){
+                throw new Exception("xliff_parameters_template_id not valid");
+            }
+
+            $this->xliff_parameters =  $xliffConfigTemplate->toArray();
         }
     }
-
 }
