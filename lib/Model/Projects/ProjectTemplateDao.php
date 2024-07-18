@@ -8,6 +8,7 @@ use Database;
 use DateTime;
 use Engine;
 use Exception;
+use Filters\FiltersConfigTemplateDao;
 use FiltersXliffConfig\FiltersXliffConfigTemplateDao;
 use INIT;
 use PayableRates\CustomPayableRateDao;
@@ -21,6 +22,7 @@ use TmKeyManagement_MemoryKeyStruct;
 use TmKeyManagement_TmKeyStruct;
 use Validator\JSONValidator;
 use Validator\JSONValidatorObject;
+use Xliff\XliffConfigTemplateDao;
 
 class ProjectTemplateDao extends DataAccess_AbstractDao {
     const TABLE = 'project_templates';
@@ -53,7 +55,8 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
         $default->get_public_matches               = true;
         $default->payable_rate_template_id         = 0;
         $default->qa_model_template_id             = 0;
-        $default->filters_xliff_config_template_id = 0;
+        $default->xliff_config_template_id         = 0;
+        $default->filters_template_id              = 0;
         $default->segmentation_rule                = [
                 "name" => "General",
                 "id"   => "standard"
@@ -179,16 +182,29 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
             }
         }
 
-        // check filters_xliff_config_template_id
-        if ( $projectTemplateStruct->filters_xliff_config_template_id > 0 ) {
-            $filtersXliffConfigModel = FiltersXliffConfigTemplateDao::getById( $projectTemplateStruct->filters_xliff_config_template_id );
+        // check xliff_config_template_id
+        if ( $projectTemplateStruct->xliff_config_template_id > 0 ) {
+            $xliffConfigModel = XliffConfigTemplateDao::getById( $projectTemplateStruct->xliff_config_template_id );
 
-            if ( empty( $filtersXliffConfigModel ) ) {
-                throw new Exception( "Not existing Filters and Xliff template." );
+            if ( empty( $xliffConfigModel ) ) {
+                throw new Exception( "Not existing Xliff template." );
             }
 
-            if ( $filtersXliffConfigModel->uid !== $projectTemplateStruct->uid ) {
-                throw new Exception( "Filters and Xliff model doesn't belong to the user." );
+            if ( $xliffConfigModel->uid !== $projectTemplateStruct->uid ) {
+                throw new Exception( "Xliff model doesn't belong to the user." );
+            }
+        }
+
+        // check filters_template_id
+        if ( $projectTemplateStruct->filters_template_id > 0 ) {
+            $filtersConfigModel = FiltersConfigTemplateDao::getById( $projectTemplateStruct->filters_template_id );
+
+            if ( empty( $filtersConfigModel ) ) {
+                throw new Exception( "Not existing Filters config template." );
+            }
+
+            if ( $filtersConfigModel->uid !== $projectTemplateStruct->uid ) {
+                throw new Exception( "Filters config model doesn't belong to the user." );
             }
         }
 
@@ -409,9 +425,9 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
      */
     public static function save( ProjectTemplateStruct $projectTemplateStruct ) {
         $sql = "INSERT INTO " . self::TABLE .
-                " ( `name`, `is_default`, `uid`, `id_team`, `speech2text`, `lexica`, `tag_projection`, `cross_language_matches`, `segmentation_rule`, `tm`, `mt`, `payable_rate_template_id`,`qa_model_template_id`, `filters_xliff_config_template_id`, `pretranslate_100`, `pretranslate_101`, `get_public_matches`, `created_at`, `modified_at` ) " .
+                " ( `name`, `is_default`, `uid`, `id_team`, `speech2text`, `lexica`, `tag_projection`, `cross_language_matches`, `segmentation_rule`, `tm`, `mt`, `payable_rate_template_id`,`qa_model_template_id`, `filters_template_id`, `xliff_config_template_id`, `pretranslate_100`, `pretranslate_101`, `get_public_matches`, `created_at`, `modified_at` ) " .
                 " VALUES " .
-                " ( :name, :is_default, :uid, :id_team, :speech2text, :lexica, :tag_projection, :cross_language_matches, :segmentation_rule, :tm, :mt, :payable_rate_template_id, :qa_model_template_id, :filters_xliff_config_template_id, :pretranslate_100, :pretranslate_101, :get_public_matches, :now, :now ); ";
+                " ( :name, :is_default, :uid, :id_team, :speech2text, :lexica, :tag_projection, :cross_language_matches, :segmentation_rule, :tm, :mt, :payable_rate_template_id, :qa_model_template_id, :filters_template_id, :xliff_config_template_id, :pretranslate_100, :pretranslate_101, :get_public_matches, :now, :now ); ";
 
         $now = ( new DateTime() )->format( 'Y-m-d H:i:s' );
 
@@ -434,7 +450,8 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
                 "get_public_matches"               => $projectTemplateStruct->get_public_matches,
                 "payable_rate_template_id"         => $projectTemplateStruct->payable_rate_template_id,
                 "qa_model_template_id"             => $projectTemplateStruct->qa_model_template_id,
-                "filters_xliff_config_template_id" => $projectTemplateStruct->filters_xliff_config_template_id,
+                "filters_template_id"              => $projectTemplateStruct->filters_template_id,
+                "xliff_config_template_id"         => $projectTemplateStruct->xliff_config_template_id,
                 'now'                              => ( new DateTime() )->format( 'Y-m-d H:i:s' ),
         ] );
 
@@ -473,7 +490,8 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
             `get_public_matches` = :get_public_matches,
             `payable_rate_template_id` = :payable_rate_template_id, 
             `qa_model_template_id` = :qa_model_template_id, 
-            `filters_xliff_config_template_id` = :filters_xliff_config_template_id, 
+            `filters_template_id` = :filters_template_id, 
+            `xliff_config_template_id` = :xliff_config_template_id, 
             `modified_at` = :now 
          WHERE id = :id;";
 
@@ -497,7 +515,8 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
                 "get_public_matches"               => $projectTemplateStruct->get_public_matches,
                 "payable_rate_template_id"         => $projectTemplateStruct->payable_rate_template_id,
                 "qa_model_template_id"             => $projectTemplateStruct->qa_model_template_id,
-                "filters_xliff_config_template_id" => $projectTemplateStruct->filters_xliff_config_template_id,
+                "xliff_config_template_id"         => $projectTemplateStruct->xliff_config_template_id,
+                "filters_template_id"              => $projectTemplateStruct->filters_template_id,
                 'now'                              => ( new DateTime() )->format( 'Y-m-d H:i:s' ),
         ] );
 

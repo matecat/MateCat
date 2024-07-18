@@ -1,6 +1,6 @@
 <?php
 
-namespace FiltersXliffConfig\Xliff\DTO;
+namespace Xliff\DTO;
 
 use Constants\XliffTranslationStatus;
 

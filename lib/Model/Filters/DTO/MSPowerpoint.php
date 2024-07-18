@@ -1,6 +1,6 @@
 <?php
 
-namespace FiltersXliffConfig\Filters\DTO;
+namespace Filters\DTO;
 
 use JsonSerializable;
 

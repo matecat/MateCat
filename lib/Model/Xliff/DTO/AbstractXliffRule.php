@@ -1,6 +1,6 @@
 <?php
 
-namespace FiltersXliffConfig\Xliff\DTO;
+namespace Xliff\DTO;
 
 use API\App\Json\Analysis\MatchConstants;
 use Constants_TranslationStatus;
@@ -189,14 +189,17 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
     /**
      * @param string|null $type
      *
-     * @return string[]
+     * @return string|array
      */
-    public function getStates( $type = null ): array {
+    public function getStates( $type = null ): array
+    {
         switch ( $type ) {
             case 'states':
                 return $this->states[ 'states' ];
+
             case 'state-qualifiers':
                 return $this->states[ 'state-qualifiers' ];
+
             default:
                 return array_merge( $this->states[ 'states' ], $this->states[ 'state-qualifiers' ] );
         }

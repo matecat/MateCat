@@ -1,13 +1,6 @@
 <?php
-/**
- * Created by PhpStorm.
- * @author hashashiyyin domenico@translated.net / ostico@gmail.com
- * Date: 11/06/24
- * Time: 17:27
- *
- */
 
-namespace FiltersXliffConfig\Xliff\DTO;
+namespace Xliff\DTO;
 
 use Constants\XliffTranslationStatus;
 use Constants_TranslationStatus;
