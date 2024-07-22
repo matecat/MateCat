@@ -6,7 +6,8 @@ export const getGoogleDriveUploadedFiles = async () => {
   })
 
   if (!res.ok) {
-    return Promise.reject(res)
+    const error = await res.json()
+    return Promise.reject(error)
   }
 
   const {errors, ...restData} = await res.json()

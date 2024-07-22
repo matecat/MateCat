@@ -341,7 +341,7 @@ class TmKeyManagement_TmKeyManagement {
             } elseif ( $_index_position !== false ) { // so, here the key exists in client
 
                 //this is an anonymous user, and a key exists in job
-                if( $_index_position !== false && $uid == null ){
+                if( $uid == null ){
 
                     //check anonymous user, an anonymous user can not change a not anonymous key
                     if ( $userRole == TmKeyManagement_Filter::ROLE_TRANSLATOR ) {
@@ -528,7 +528,7 @@ class TmKeyManagement_TmKeyManagement {
 
         $merged_tm_keys = [];
 
-        foreach (array_values( $server_reorder_position ) as $tm_key){
+        foreach ( $server_reorder_position as $tm_key){
             if(!self::excludeJobKeyFromMerge($tm_key, $uid)){
                 $merged_tm_keys[] = $tm_key;
             }

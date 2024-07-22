@@ -14,6 +14,7 @@ use DataAccess_AbstractDaoObjectStruct;
 use DataAccess_IDaoStruct;
 use Database;
 use Exceptions\ValidationError;
+use Jobs_JobDao;
 use Jobs_JobStruct;
 use Projects_MetadataDao;
 use Projects_MetadataStruct;
@@ -131,8 +132,8 @@ class ContributionSetStruct extends DataAccess_AbstractDaoObjectStruct implement
         }
 
         return $this->cachable( '_contributionJob', $this, function () {
-            $JobDao = new \Jobs_JobDao( Database::obtain() );
-            $jobStruct = new \Jobs_JobStruct();
+            $JobDao = new Jobs_JobDao( Database::obtain() );
+            $jobStruct = new Jobs_JobStruct();
             $jobStruct->id = $this->id_job;
             $jobStruct->password = $this->job_password;
             return @$JobDao->setCacheTTL( 60 * 60 )->read( $jobStruct )[ 0 ];

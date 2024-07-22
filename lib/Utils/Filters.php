@@ -72,7 +72,7 @@ class Filters {
                 if ( $response === '{"message":"Invalid RapidAPI Key"}' ) {
                     $errResponse[ 'errorMessage' ] = "Failed RapidAPI authentication. Check FILTERS_RAPIDAPI_KEY in config.ini";
                 } elseif (isset($originalResponse->errorMessage)) {
-                    $errResponse[ 'errorMessage' ] = $originalResponse->errorMessage;
+                    $errResponse[ 'errorMessage' ] = self::formatErrorMessage($originalResponse->errorMessage);
                 } else {
                     if ( $info[ 'errno' ] ) {
                         $errResponse[ 'errorMessage' ] = "Curl error $info[errno]: $info[error]";
@@ -104,6 +104,18 @@ class Filters {
         }
 
         return $responses;
+    }
+
+    /**
+     * @param string $error
+     * @return string
+     */
+    private static function formatErrorMessage($error){
+
+        // Error from Excel files
+        $error = str_replace("net.translated.matecat.filters.ExtendedExcelException: ", "", $error);
+
+        return $error;
     }
 
     /**
