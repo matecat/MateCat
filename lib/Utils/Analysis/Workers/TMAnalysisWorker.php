@@ -157,7 +157,8 @@ class TMAnalysisWorker extends AbstractWorker {
     protected function _updateRecord( QueueElement $queueElement ) {
 
         $firstAvailableNotMTMatch = $this->getFirstAvailableNotMTMatch();
-        $filter                   = MateCatFilter::getInstance( $this->featureSet, $queueElement->params->source, $queueElement->params->target );
+        $featureSet               = ( $this->featureSet !== null ) ? $this->featureSet : new FeatureSet();
+        $filter                   = MateCatFilter::getInstance( $featureSet, $queueElement->params->source, $queueElement->params->target );
         $suggestion               = $firstAvailableNotMTMatch[ 'raw_translation' ]; //No layering needed
 
         $suggestion_match  = $firstAvailableNotMTMatch[ 'match' ];
@@ -872,6 +873,7 @@ class TMAnalysisWorker extends AbstractWorker {
     /**
      * @param $_params
      *
+     * @throws ConnectionException
      * @throws ReQueueException
      * @throws ReflectionException
      */
