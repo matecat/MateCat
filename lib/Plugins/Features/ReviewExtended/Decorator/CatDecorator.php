@@ -51,18 +51,6 @@ class CatDecorator extends \AbstractDecorator {
     }
 
     /**
-     * @param $json
-     * @return string
-     */
-    protected function aaa($json)
-    {
-        $json = str_replace("'", "\\'", $json);
-        $json = str_replace("\\\"","\\\\\\\"", $json); // needed by JSON.parse() function
-
-        return $json;
-    }
-
-    /**
      * Empty method because it's not necessery to do again what is written into the parent
      */
     protected function decorateForRevision() {
