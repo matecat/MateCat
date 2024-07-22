@@ -87,12 +87,6 @@ class SegmentFilterDao extends DataAccess_AbstractDao {
 
         if ( $filter->sampleData() ) {
             switch ( $filter->sampleType() ) {
-                case 'repetitions':
-                    $data = array_merge( $data, [
-                            'match_type' => Constants_SegmentTranslationsMatchType::REPETITIONS,
-                    ] );
-                    break;
-
                 case 'mt':
                     $data = array_merge( $data, [
                             'match_type' => Constants_SegmentTranslationsMatchType::MT,
@@ -474,7 +468,6 @@ class SegmentFilterDao extends DataAccess_AbstractDao {
                         AND jobs.id = :id_job
                         AND jobs.password = :password
                         AND st.id_segment BETWEEN :job_first_segment AND :job_last_segment
-                        AND st.match_type = :match_type
                 WHERE 1
 
                         $where->sql
