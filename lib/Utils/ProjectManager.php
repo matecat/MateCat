@@ -869,7 +869,8 @@ class ProjectManager {
 
             if ( $e->getCode() == -1 ) {
                 $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                    "code" => -1, "message" => "No text to translate in the file {$e->getMessage()}."
+                    "code" => -1,
+                    "message" => "No text to translate in the file {$e->getMessage()}."
                 ];
                 if ( INIT::$FILE_STORAGE_METHOD != 's3' ) {
                     $fs->deleteHashFromUploadDir( $this->uploadDir, $linkFile );
@@ -889,10 +890,10 @@ class ProjectManager {
                     "message" => $message,
                 ];
             } else {
-
                 //Generic error
                 $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                    "code" => $e->getCode(), "message" => $e->getMessage()
+                    "code" => $e->getCode(),
+                    "message" => $e->getMessage()
                 ];
             }
 
@@ -3120,7 +3121,7 @@ class ProjectManager {
         if ( isset( $trans_unit[ 'notes' ] ) ) {
 
             if ( count( $trans_unit[ 'notes' ] ) > self::SEGMENT_NOTES_LIMIT ) {
-                throw new Exception( ' a segment can have a maximum of ' . self::SEGMENT_NOTES_LIMIT . ' notes' );
+                throw new Exception( 'File upload failed: a segment can have a maximum of ' . self::SEGMENT_NOTES_LIMIT . ' notes.', -44 );
             }
 
             foreach ( $trans_unit[ 'notes' ] as $note ) {
