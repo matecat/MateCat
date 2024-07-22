@@ -1,12 +1,19 @@
 {
   "type": "object",
   "additionalProperties": false,
+  "required": [
+    "rules",
+    "name"
+  ],
   "properties": {
     "name": {
       "type": "string"
     },
     "rules": {
-      "type": ["null", "object"],
+      "type": [
+        "null",
+        "object"
+      ],
       "additionalProperties": false,
       "properties": {
         "xliff12": {
@@ -26,10 +33,16 @@
     "xliff12Rule": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["states", "analysis", "editor"],
+      "required": [
+        "states",
+        "analysis",
+        "editor"
+      ],
       "properties": {
         "states": {
-          "type": ["array"],
+          "type": [
+            "array"
+          ],
           "items": {
             "type": "string",
             "enum": [
@@ -100,10 +113,16 @@
     "xliff20Rule": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["states", "analysis", "editor"],
+      "required": [
+        "states",
+        "analysis",
+        "editor"
+      ],
       "properties": {
         "states": {
-          "type": ["array"],
+          "type": [
+            "array"
+          ],
           "items": {
             "type": "string",
             "enum": [

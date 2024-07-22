@@ -13,124 +13,111 @@ use Filters\DTO\Xml;
 use Filters\DTO\Yaml;
 use JsonSerializable;
 
-class FiltersConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruct implements JsonSerializable
-{
-    public $id;
-    public $name;
-    public $uid;
-    public $created_at;
-    public $modified_at;
-    public $deleted_at;
-    private $yaml = null;
-    private $xml = null;
-    private $json = null;
-    private $ms_word = null;
-    private $ms_excel = null;
-    private $ms_powerpoint = null;
+class FiltersConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruct implements JsonSerializable {
+    public ?int           $id            = null;
+    public string         $name;
+    public int            $uid;
+    public ?string        $created_at    = null;
+    public ?string        $modified_at   = null;
+    public ?string        $deleted_at    = null;
+    private ?Yaml         $yaml          = null;
+    private ?Xml          $xml           = null;
+    private ?Json         $json          = null;
+    private ?MSWord       $ms_word       = null;
+    private ?MSExcel      $ms_excel      = null;
+    private ?MSPowerpoint $ms_powerpoint = null;
 
     /**
      * @return null
      */
-    public function getYaml()
-    {
+    public function getYaml() {
         return $this->yaml;
     }
 
     /**
      * @return null
      */
-    public function getXml()
-    {
+    public function getXml() {
         return $this->xml;
     }
 
     /**
      * @return null
      */
-    public function getJson()
-    {
+    public function getJson() {
         return $this->json;
     }
 
     /**
      * @return null
      */
-    public function getMsWord()
-    {
+    public function getMsWord() {
         return $this->ms_word;
     }
 
     /**
      * @return null
      */
-    public function getMsExcel()
-    {
+    public function getMsExcel() {
         return $this->ms_excel;
     }
 
     /**
      * @return null
      */
-    public function getMsPowerpoint()
-    {
+    public function getMsPowerpoint() {
         return $this->ms_powerpoint;
     }
 
     /**
      * @param Yaml|null $yaml
      */
-    public function setYaml(?Yaml $yaml): void
-    {
+    public function setYaml( ?Yaml $yaml ): void {
         $this->yaml = $yaml;
     }
 
     /**
      * @param Xml|null $xml
      */
-    public function setXml(?Xml $xml): void
-    {
+    public function setXml( ?Xml $xml ): void {
         $this->xml = $xml;
     }
 
     /**
      * @param Json|null $json
      */
-    public function setJson(?Json $json): void
-    {
+    public function setJson( ?Json $json ): void {
         $this->json = $json;
     }
 
     /**
      * @param MSWord|null $ms_word
      */
-    public function setMsWord(?MSWord $ms_word): void
-    {
+    public function setMsWord( ?MSWord $ms_word ): void {
         $this->ms_word = $ms_word;
     }
 
     /**
      * @param MSExcel|null $ms_excel
      */
-    public function setMsExcel(?MSExcel $ms_excel): void
-    {
+    public function setMsExcel( ?MSExcel $ms_excel ): void {
         $this->ms_excel = $ms_excel;
     }
 
     /**
      * @param MSPowerpoint|null $ms_powerpoint
      */
-    public function setMsPowerpoint(?MSPowerpoint $ms_powerpoint): void
-    {
+    public function setMsPowerpoint( ?MSPowerpoint $ms_powerpoint ): void {
         $this->ms_powerpoint = $ms_powerpoint;
     }
 
     /**
-     * @param $json
+     * @param      $json
      * @param null $uid
+     *
      * @return $this
      */
-    public function hydrateFromJSON( $json, $uid = null )
-    {
+    public function hydrateFromJSON( $json, $uid = null ) {
         $json = json_decode( $json, true );
 
         if ( !isset( $json[ 'name' ] ) ) {
@@ -169,37 +156,37 @@ class FiltersConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruct imp
 
         // json
         if ( isset( $json[ 'json' ] ) ) {
-            $rules = (is_array($json[ 'json' ])) ? $json[ 'json' ] : json_decode($json[ 'json' ], true);
+            $rules = ( is_array( $json[ 'json' ] ) ) ? $json[ 'json' ] : json_decode( $json[ 'json' ], true );
             $jsonDto->fromArray( $rules );
         }
 
         // xml
         if ( isset( $json[ 'xml' ] ) ) {
-            $xml = (is_array($json[ 'xml' ])) ? $json[ 'xml' ] : json_decode($json[ 'xml' ], true);
+            $xml = ( is_array( $json[ 'xml' ] ) ) ? $json[ 'xml' ] : json_decode( $json[ 'xml' ], true );
             $xmlDto->fromArray( $xml );
         }
 
         // yaml
         if ( isset( $json[ 'yaml' ] ) ) {
-            $yaml = (is_array($json[ 'yaml' ])) ? $json[ 'yaml' ] : json_decode($json[ 'yaml' ], true);
+            $yaml = ( is_array( $json[ 'yaml' ] ) ) ? $json[ 'yaml' ] : json_decode( $json[ 'yaml' ], true );
             $yamlDto->fromArray( $yaml );
         }
 
         // ms excel
         if ( isset( $json[ 'ms_excel' ] ) ) {
-            $excel = (is_array($json[ 'ms_excel' ])) ? $json[ 'ms_excel' ] : json_decode($json[ 'ms_excel' ], true);
+            $excel = ( is_array( $json[ 'ms_excel' ] ) ) ? $json[ 'ms_excel' ] : json_decode( $json[ 'ms_excel' ], true );
             $excelDto->fromArray( $excel );
         }
 
         // ms word
         if ( isset( $json[ 'ms_word' ] ) ) {
-            $word = (is_array($json[ 'ms_word' ])) ? $json[ 'ms_word' ] : json_decode($json[ 'ms_word' ], true);
+            $word = ( is_array( $json[ 'ms_word' ] ) ) ? $json[ 'ms_word' ] : json_decode( $json[ 'ms_word' ], true );
             $wordDto->fromArray( $word );
         }
 
         // ms powerpoint
         if ( isset( $json[ 'ms_powerpoint' ] ) ) {
-            $powerpoint = (is_array($json[ 'ms_powerpoint' ])) ? $json[ 'ms_powerpoint' ] : json_decode($json[ 'ms_powerpoint' ], true);
+            $powerpoint = ( is_array( $json[ 'ms_powerpoint' ] ) ) ? $json[ 'ms_powerpoint' ] : json_decode( $json[ 'ms_powerpoint' ], true );
             $pptDto->fromArray( $powerpoint );
         }
 
@@ -217,37 +204,35 @@ class FiltersConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruct imp
      * @return false|string
      * @throws \Exception
      */
-    public function getRulesAsString()
-    {
-        return json_encode([
-            'xml'           => $this->xml,
-            'yaml'          => $this->yaml,
-            'json'          => $this->json,
-            'ms_word'       => $this->ms_word,
-            'ms_excel'      => $this->ms_excel,
-            'ms_powerpoint' => $this->ms_powerpoint,
-        ]);
+    public function getRulesAsString() {
+        return json_encode( [
+                'xml'           => $this->xml,
+                'yaml'          => $this->yaml,
+                'json'          => $this->json,
+                'ms_word'       => $this->ms_word,
+                'ms_excel'      => $this->ms_excel,
+                'ms_powerpoint' => $this->ms_powerpoint,
+        ] );
     }
 
     /**
      * @return array|mixed
      * @throws \Exception
      */
-    public function jsonSerialize()
-    {
+    public function jsonSerialize() {
         return [
-            'id'            => (int)$this->id,
-            'uid'           => (int)$this->uid,
-            'name'          => $this->name,
-            'xml'           => $this->xml,
-            'yaml'          => $this->yaml,
-            'json'          => $this->json,
-            'ms_word'       => $this->ms_word,
-            'ms_excel'      => $this->ms_excel,
-            'ms_powerpoint' => $this->ms_powerpoint,
-            'createdAt'     => DateTimeUtil::formatIsoDate( $this->created_at ),
-            'modifiedAt'    => DateTimeUtil::formatIsoDate( $this->modified_at ),
-            'deletedAt'     => DateTimeUtil::formatIsoDate( $this->deleted_at ),
+                'id'            => $this->id,
+                'uid'           => $this->uid,
+                'name'          => $this->name,
+                'xml'           => $this->xml,
+                'yaml'          => $this->yaml,
+                'json'          => $this->json,
+                'ms_word'       => $this->ms_word,
+                'ms_excel'      => $this->ms_excel,
+                'ms_powerpoint' => $this->ms_powerpoint,
+                'createdAt'     => DateTimeUtil::formatIsoDate( $this->created_at ),
+                'modifiedAt'    => DateTimeUtil::formatIsoDate( $this->modified_at ),
+                'deletedAt'     => DateTimeUtil::formatIsoDate( $this->deleted_at ),
         ];
     }
 }

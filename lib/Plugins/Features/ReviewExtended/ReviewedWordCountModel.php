@@ -10,7 +10,7 @@ namespace Features\ReviewExtended;
 
 use Chunks_ChunkStruct;
 use Exception;
-use Features\SecondPassReview\Email\RevisionChangedNotificationEmail;
+use Features\ReviewExtended\Email\RevisionChangedNotificationEmail;
 use Features\TranslationEvents\Model\TranslationEvent;
 use Features\TranslationEvents\Model\TranslationEventDao;
 use Features\TranslationEvents\Model\TranslationEventStruct;

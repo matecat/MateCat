@@ -8,12 +8,33 @@ use Exception;
 use INIT;
 use Klein\Response;
 use Projects\ProjectTemplateDao;
+use Swaggest\JsonSchema\InvalidValue;
 use Validator\Errors\JSONValidatorException;
+use Validator\JSONValidator;
+use Validator\JSONValidatorObject;
 
 class ProjectTemplateController extends KleinController {
     protected function afterConstruct() {
         parent::afterConstruct();
         $this->appendValidator( new LoginValidator( $this ) );
+    }
+
+    /**
+     * @param $json
+     *
+     * @throws InvalidValue
+     * @throws Exception
+     */
+    private function validateJSON( $json ) {
+        $validatorObject       = new JSONValidatorObject();
+        $validatorObject->json = $json;
+        $jsonSchema            = file_get_contents( INIT::$ROOT . '/inc/validation/schema/project_template.json' );
+        $validator             = new JSONValidator( $jsonSchema );
+        $validator->validate( $validatorObject );
+
+        if ( !$validator->isValid() ) {
+            throw $validator->getExceptions()[ 0 ]->error;
+        }
     }
 
     /**
@@ -51,14 +72,10 @@ class ProjectTemplateController extends KleinController {
         $id = filter_var( $this->request->id, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_ENCODE_LOW );
 
         try {
-            $model = ProjectTemplateDao::getById( $id );
+            $model = ProjectTemplateDao::getByIdAndUser( $id, $this->getUser()->uid );
 
             if ( empty( $model ) ) {
-                $this->response->code( 404 );
-
-                return $this->response->json( [
-                        'error' => 'Model not found'
-                ] );
+                throw new Exception( 'Model not found', 404 );
             }
 
             if ( $model->uid !== $this->getUser()->uid ) {
@@ -91,16 +108,18 @@ class ProjectTemplateController extends KleinController {
     public function create() {
         // accept only JSON
         if ( !$this->isJsonRequest() ) {
-            $this->response->code( 405 );
+            $this->response->code( 404 );
 
             return $this->response->json( [
-                    'message' => 'Method not allowed'
+                    'message' => 'Bad Request'
             ] );
         }
 
         // try to create the template
         try {
-            $json   = $this->request->body();
+            $json = $this->request->body();
+            $this->validateJSON( $json );
+
             $struct = ProjectTemplateDao::createFromJSON( $json, $this->getUser()->uid );
 
             $this->response->code( 201 );

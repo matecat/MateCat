@@ -95,14 +95,14 @@ class ChunkReviewModel implements IChunkReviewModel {
     }
 
     /**
-     * WARNING: ( should be protected ) this **MUST** be used only by ChunkReviewModel::[recountAndUpdatePassFailResult, subtractPenaltyPoints, addPenaltyPoints]
+     * Used only by ChunkReviewModel::[recountAndUpdatePassFailResult, subtractPenaltyPoints, addPenaltyPoints]
      *
      * @param Projects_ProjectStruct $project
      *
      * @return bool
      * @throws Exception
      */
-    public function _updatePassFailResult( Projects_ProjectStruct $project ) {
+    protected function _updatePassFailResult( Projects_ProjectStruct $project ) {
 
         if($project->getLqaModel()){
             $this->chunk_review->is_pass = ( $this->getScore() <= $this->getQALimit( $project->getLqaModel() ) );
@@ -140,8 +140,10 @@ class ChunkReviewModel implements IChunkReviewModel {
     }
 
     /**
-     * This method invokes the recount of reviewed_words_count and
-     * penalty_points for the chunk and updates the passfail result.
+     *
+     * Used to recount total in qa_chunk reviews in case of: [ split/merge/chunk record created/disaster recovery ]
+     *
+     * Used in AbstractRevisionFeature::postJobMerged and AbstractRevisionFeature::postJobSplitted
      *
      * @param Projects_ProjectStruct $project
      *
@@ -149,11 +151,13 @@ class ChunkReviewModel implements IChunkReviewModel {
      */
     public function recountAndUpdatePassFailResult( Projects_ProjectStruct $project ) {
 
+        /**
+         * Count penalty points based on this source_page
+         */
         $chunkReviewDao = new ChunkReviewDao();
-
-        $this->chunk_review->penalty_points       = ChunkReviewDao::getPenaltyPointsForChunk( $this->chunk );
-        $this->chunk_review->reviewed_words_count = ChunkReviewDao::getReviewedWordsCountForChunk( $this->chunk );
-        $this->chunk_review->total_tte      = $chunkReviewDao->countTimeToEdit( $this->chunk, $this->chunk_review->source_page );
+        $this->chunk_review->penalty_points = ChunkReviewDao::getPenaltyPointsForChunk( $this->chunk, $this->chunk_review->source_page ) ;
+        $this->chunk_review->reviewed_words_count = $chunkReviewDao->getReviewedWordsCountForSecondPass( $this->chunk, $this->chunk_review->source_page ) ;
+        $this->chunk_review->total_tte = $chunkReviewDao->countTimeToEdit( $this->chunk, $this->chunk_review->source_page ) ;
 
         $this->_updatePassFailResult( $project );
     }

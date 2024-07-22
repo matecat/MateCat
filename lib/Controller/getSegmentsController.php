@@ -118,7 +118,11 @@ class getSegmentsController extends ajaxController {
                 $this->data[ $id_file ][ 'segments' ]    = [];
             }
 
-            $seg = $featureSet->filter( 'filter_get_segments_segment_data', $seg );
+            if ( isset( $seg[ 'edit_distance' ] ) ) {
+                $seg[ 'edit_distance' ] = round( $seg[ 'edit_distance' ] / 1000, 2 );
+            } else {
+                $seg[ 'edit_distance' ] = 0;
+            }
 
             $seg[ 'parsed_time_to_edit' ] = CatUtils::parse_time_to_edit( $seg[ 'time_to_edit' ] );
 

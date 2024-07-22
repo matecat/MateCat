@@ -10,7 +10,6 @@ use Engine;
 use Exception;
 use Filters\FiltersConfigTemplateDao;
 use FiltersXliffConfig\FiltersXliffConfigTemplateDao;
-use INIT;
 use PayableRates\CustomPayableRateDao;
 use PDO;
 use QAModelTemplate\QAModelTemplateDao;
@@ -20,16 +19,15 @@ use Teams\TeamDao;
 use TmKeyManagement_MemoryKeyDao;
 use TmKeyManagement_MemoryKeyStruct;
 use TmKeyManagement_TmKeyStruct;
-use Validator\JSONValidator;
-use Validator\JSONValidatorObject;
 use Xliff\XliffConfigTemplateDao;
 
 class ProjectTemplateDao extends DataAccess_AbstractDao {
     const TABLE = 'project_templates';
 
-    const query_by_id       = "SELECT * FROM " . self::TABLE . " WHERE id = :id";
-    const query_default     = "SELECT * FROM " . self::TABLE . " WHERE is_default = :is_default AND uid = :uid";
-    const query_by_uid_name = "SELECT * FROM " . self::TABLE . " WHERE uid = :uid AND name = :name";
+    const query_by_id         = "SELECT * FROM " . self::TABLE . " WHERE id = :id";
+    const query_by_id_and_uid = "SELECT * FROM " . self::TABLE . " WHERE id = :id AND uid = :uid";
+    const query_default       = "SELECT * FROM " . self::TABLE . " WHERE is_default = :is_default AND uid = :uid";
+    const query_by_uid_name   = "SELECT * FROM " . self::TABLE . " WHERE uid = :uid AND name = :name";
 
     /**
      * @param $uid
@@ -41,23 +39,23 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
         $defaultProject = self::getTheDefaultProject( $uid );
         $team           = ( new TeamDao() )->getPersonalByUid( $uid );
 
-        $default                                   = new ProjectTemplateStruct();
-        $default->id                               = 0;
-        $default->name                             = "Standard";
-        $default->speech2text                      = false;
-        $default->is_default                       = empty( $defaultProject );
-        $default->id_team                          = $team->id;
-        $default->lexica                           = true;
-        $default->tag_projection                   = true;
-        $default->uid                              = $uid;
-        $default->pretranslate_100                 = false;
-        $default->pretranslate_101                 = true;
-        $default->get_public_matches               = true;
-        $default->payable_rate_template_id         = 0;
-        $default->qa_model_template_id             = 0;
-        $default->xliff_config_template_id         = 0;
-        $default->filters_template_id              = 0;
-        $default->segmentation_rule                = [
+        $default                           = new ProjectTemplateStruct();
+        $default->id                       = 0;
+        $default->name                     = "Standard";
+        $default->speech2text              = false;
+        $default->is_default               = empty( $defaultProject );
+        $default->id_team                  = $team->id;
+        $default->lexica                   = true;
+        $default->tag_projection           = true;
+        $default->uid                      = $uid;
+        $default->pretranslate_100         = false;
+        $default->pretranslate_101         = true;
+        $default->get_public_matches       = true;
+        $default->payable_rate_template_id = 0;
+        $default->qa_model_template_id     = 0;
+        $default->xliff_config_template_id = 0;
+        $default->filters_template_id      = 0;
+        $default->segmentation_rule        = [
                 "name" => "General",
                 "id"   => "standard"
         ];
@@ -107,7 +105,6 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
      * @throws Exception
      */
     public static function createFromJSON( $json, $uid ) {
-        self::validateJSON( $json );
 
         $projectTemplateStruct = new ProjectTemplateStruct();
         $projectTemplateStruct->hydrateFromJSON( $json );
@@ -297,24 +294,6 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param $json
-     *
-     * @throws InvalidValue
-     * @throws Exception
-     */
-    private static function validateJSON( $json ) {
-        $validatorObject       = new JSONValidatorObject();
-        $validatorObject->json = $json;
-        $jsonSchema            = file_get_contents( INIT::$ROOT . '/inc/validation/schema/project_template.json' );
-        $validator             = new JSONValidator( $jsonSchema );
-        $validator->validate( $validatorObject );
-
-        if ( !$validator->isValid() ) {
-            throw $validator->getExceptions()[ 0 ]->error;
-        }
-    }
-
-    /**
      * @param     $uid
      * @param int $current
      * @param int $pagination
@@ -398,6 +377,25 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
     }
 
     /**
+     * @param     $id
+     * @param int $ttl
+     *
+     * @return ProjectTemplateStruct|null
+     */
+    public static function getByIdAndUser( $id, $uid, $ttl = 60 ) {
+        $stmt = self::getInstance()->_getStatementForCache( self::query_by_id_and_uid );
+        /**
+         * @var $result ProjectTemplateStruct[]
+         */
+        $result = self::getInstance()->setCacheTTL( $ttl )->_fetchObject( $stmt, new ProjectTemplateStruct(), [
+                'id'  => $id,
+                'uid' => $uid,
+        ] );
+
+        return $result[ 0 ] ?? null;
+    }
+
+    /**
      * @param     $uid
      * @param     $name
      * @param int $ttl
@@ -434,25 +432,25 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->execute( [
-                "name"                             => $projectTemplateStruct->name,
-                "is_default"                       => $projectTemplateStruct->is_default,
-                "uid"                              => $projectTemplateStruct->uid,
-                "id_team"                          => $projectTemplateStruct->id_team,
-                "speech2text"                      => $projectTemplateStruct->speech2text,
-                "lexica"                           => $projectTemplateStruct->lexica,
-                "tag_projection"                   => $projectTemplateStruct->tag_projection,
-                "cross_language_matches"           => $projectTemplateStruct->crossLanguageMatchesToJson(),
-                "segmentation_rule"                => $projectTemplateStruct->segmentationRuleToJson(),
-                "mt"                               => $projectTemplateStruct->mtToJson(),
-                "tm"                               => $projectTemplateStruct->tmToJson(),
-                "pretranslate_100"                 => $projectTemplateStruct->pretranslate_100,
-                "pretranslate_101"                 => $projectTemplateStruct->pretranslate_101,
-                "get_public_matches"               => $projectTemplateStruct->get_public_matches,
-                "payable_rate_template_id"         => $projectTemplateStruct->payable_rate_template_id,
-                "qa_model_template_id"             => $projectTemplateStruct->qa_model_template_id,
-                "filters_template_id"              => $projectTemplateStruct->filters_template_id,
-                "xliff_config_template_id"         => $projectTemplateStruct->xliff_config_template_id,
-                'now'                              => ( new DateTime() )->format( 'Y-m-d H:i:s' ),
+                "name"                     => $projectTemplateStruct->name,
+                "is_default"               => $projectTemplateStruct->is_default,
+                "uid"                      => $projectTemplateStruct->uid,
+                "id_team"                  => $projectTemplateStruct->id_team,
+                "speech2text"              => $projectTemplateStruct->speech2text,
+                "lexica"                   => $projectTemplateStruct->lexica,
+                "tag_projection"           => $projectTemplateStruct->tag_projection,
+                "cross_language_matches"   => $projectTemplateStruct->crossLanguageMatchesToJson(),
+                "segmentation_rule"        => $projectTemplateStruct->segmentationRuleToJson(),
+                "mt"                       => $projectTemplateStruct->mtToJson(),
+                "tm"                       => $projectTemplateStruct->tmToJson(),
+                "pretranslate_100"         => $projectTemplateStruct->pretranslate_100,
+                "pretranslate_101"         => $projectTemplateStruct->pretranslate_101,
+                "get_public_matches"       => $projectTemplateStruct->get_public_matches,
+                "payable_rate_template_id" => $projectTemplateStruct->payable_rate_template_id,
+                "qa_model_template_id"     => $projectTemplateStruct->qa_model_template_id,
+                "filters_template_id"      => $projectTemplateStruct->filters_template_id,
+                "xliff_config_template_id" => $projectTemplateStruct->xliff_config_template_id,
+                'now'                      => ( new DateTime() )->format( 'Y-m-d H:i:s' ),
         ] );
 
         $projectTemplateStruct->id          = $conn->lastInsertId();
@@ -498,26 +496,26 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->execute( [
-                "id"                               => $projectTemplateStruct->id,
-                "name"                             => $projectTemplateStruct->name,
-                "is_default"                       => $projectTemplateStruct->is_default,
-                "uid"                              => $projectTemplateStruct->uid,
-                "id_team"                          => $projectTemplateStruct->id_team,
-                "speech2text"                      => $projectTemplateStruct->speech2text,
-                "lexica"                           => $projectTemplateStruct->lexica,
-                "tag_projection"                   => $projectTemplateStruct->tag_projection,
-                "cross_language_matches"           => $projectTemplateStruct->crossLanguageMatchesToJson(),
-                "segmentation_rule"                => $projectTemplateStruct->segmentationRuleToJson(),
-                "mt"                               => $projectTemplateStruct->mtToJson(),
-                "tm"                               => $projectTemplateStruct->tmToJson(),
-                "pretranslate_100"                 => $projectTemplateStruct->pretranslate_100,
-                "pretranslate_101"                 => $projectTemplateStruct->pretranslate_101,
-                "get_public_matches"               => $projectTemplateStruct->get_public_matches,
-                "payable_rate_template_id"         => $projectTemplateStruct->payable_rate_template_id,
-                "qa_model_template_id"             => $projectTemplateStruct->qa_model_template_id,
-                "xliff_config_template_id"         => $projectTemplateStruct->xliff_config_template_id,
-                "filters_template_id"              => $projectTemplateStruct->filters_template_id,
-                'now'                              => ( new DateTime() )->format( 'Y-m-d H:i:s' ),
+                "id"                       => $projectTemplateStruct->id,
+                "name"                     => $projectTemplateStruct->name,
+                "is_default"               => $projectTemplateStruct->is_default,
+                "uid"                      => $projectTemplateStruct->uid,
+                "id_team"                  => $projectTemplateStruct->id_team,
+                "speech2text"              => $projectTemplateStruct->speech2text,
+                "lexica"                   => $projectTemplateStruct->lexica,
+                "tag_projection"           => $projectTemplateStruct->tag_projection,
+                "cross_language_matches"   => $projectTemplateStruct->crossLanguageMatchesToJson(),
+                "segmentation_rule"        => $projectTemplateStruct->segmentationRuleToJson(),
+                "mt"                       => $projectTemplateStruct->mtToJson(),
+                "tm"                       => $projectTemplateStruct->tmToJson(),
+                "pretranslate_100"         => $projectTemplateStruct->pretranslate_100,
+                "pretranslate_101"         => $projectTemplateStruct->pretranslate_101,
+                "get_public_matches"       => $projectTemplateStruct->get_public_matches,
+                "payable_rate_template_id" => $projectTemplateStruct->payable_rate_template_id,
+                "qa_model_template_id"     => $projectTemplateStruct->qa_model_template_id,
+                "xliff_config_template_id" => $projectTemplateStruct->xliff_config_template_id,
+                "filters_template_id"      => $projectTemplateStruct->filters_template_id,
+                'now'                      => ( new DateTime() )->format( 'Y-m-d H:i:s' ),
         ] );
 
         self::destroyQueryByIdCache( $conn, $projectTemplateStruct->id );

@@ -6,7 +6,7 @@
  * Time: 13:06
  */
 
-namespace Features\SecondPassReview\Email ;
+namespace Features\ReviewExtended\Email ;
 
 use Email\AbstractEmail;
 use Users_UserStruct;

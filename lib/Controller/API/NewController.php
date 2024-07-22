@@ -19,6 +19,7 @@ use Validator\EngineValidator;
 use Validator\JSONValidator;
 use Validator\JSONValidatorObject;
 use Validator\MMTValidator;
+use Xliff\XliffConfigTemplateDao;
 
 //limit execution time to 300 seconds
 set_time_limit( 300 );
@@ -64,15 +65,15 @@ class NewController extends ajaxController {
     const MAX_NUM_KEYS = 6;
 
     private static $allowed_seg_rules = [
-        'standard',
-        'patent',
-        'paragraph',
-        ''
+            'standard',
+            'patent',
+            'paragraph',
+            ''
     ];
 
     protected $api_output = [
-        'status'  => 'FAIL',
-        'message' => 'Untraceable error (sorry, not mapped)'
+            'status'  => 'FAIL',
+            'message' => 'Untraceable error (sorry, not mapped)'
     ];
 
     /**
@@ -162,60 +163,60 @@ class NewController extends ajaxController {
         }
 
         $filterArgs = [
-            'project_name'               => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
-            'source_lang'                => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
-            'target_lang'                => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
-            'due_date'                   => [ 'filter' => FILTER_VALIDATE_INT ],
-            'tms_engine'                 => [
-                'filter'  => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR,
-                'options' => [ 'default' => 1, 'min_range' => 0 ]
-            ],
-            'mt_engine'                  => [
-                'filter'  => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR,
-                'options' => [ 'default' => 1, 'min_range' => 0 ]
-            ],
-            'private_tm_key'             => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
-            'subject'                    => [
-                'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-            ],
-            'segmentation_rule'          => [
-                'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-            ],
-            'metadata'                   => [
-                'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-            ],
-            'pretranslate_100'           => [
-                'filter' => [ 'filter' => FILTER_VALIDATE_INT ]
-            ],
-            'pretranslate_101'           => [
-                'filter' => [ 'filter' => FILTER_VALIDATE_INT ]
-            ],
-            'id_team'                    => [ 'filter' => FILTER_VALIDATE_INT ],
-            'id_qa_model'                => [ 'filter' => FILTER_VALIDATE_INT ],
-            'id_qa_model_template'       => [ 'filter' => FILTER_VALIDATE_INT ],
-            'payable_rate_template_id'   => [ 'filter' => FILTER_VALIDATE_INT ],
-            'payable_rate_template_name' => [ 'filter' => FILTER_SANITIZE_STRING ],
-            'dialect_strict'             => [ 'filter' => FILTER_SANITIZE_STRING ],
-            'lexiqa'                     => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
-            'speech2text'                => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
-            'tag_projection'             => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
-            'project_completion'         => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
-            'get_public_matches'         => [ 'filter' => FILTER_VALIDATE_BOOLEAN ], // disable public TM matches
-            'instructions'               => [
-                'filter' => FILTER_SANITIZE_STRING,
-                'flags'  => FILTER_REQUIRE_ARRAY,
-            ],
-            'project_info'               => [ 'filter' => FILTER_SANITIZE_STRING ],
-            'mmt_glossaries'             => [ 'filter' => FILTER_SANITIZE_STRING ],
+                'project_name'               => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'source_lang'                => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'target_lang'                => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'due_date'                   => [ 'filter' => FILTER_VALIDATE_INT ],
+                'tms_engine'                 => [
+                        'filter'  => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR,
+                        'options' => [ 'default' => 1, 'min_range' => 0 ]
+                ],
+                'mt_engine'                  => [
+                        'filter'  => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR,
+                        'options' => [ 'default' => 1, 'min_range' => 0 ]
+                ],
+                'private_tm_key'             => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'subject'                    => [
+                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                ],
+                'segmentation_rule'          => [
+                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                ],
+                'metadata'                   => [
+                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                ],
+                'pretranslate_100'           => [
+                        'filter' => [ 'filter' => FILTER_VALIDATE_INT ]
+                ],
+                'pretranslate_101'           => [
+                        'filter' => [ 'filter' => FILTER_VALIDATE_INT ]
+                ],
+                'id_team'                    => [ 'filter' => FILTER_VALIDATE_INT ],
+                'id_qa_model'                => [ 'filter' => FILTER_VALIDATE_INT ],
+                'id_qa_model_template'       => [ 'filter' => FILTER_VALIDATE_INT ],
+                'payable_rate_template_id'   => [ 'filter' => FILTER_VALIDATE_INT ],
+                'payable_rate_template_name' => [ 'filter' => FILTER_SANITIZE_STRING ],
+                'dialect_strict'             => [ 'filter' => FILTER_SANITIZE_STRING ],
+                'lexiqa'                     => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'speech2text'                => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'tag_projection'             => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'project_completion'         => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'get_public_matches'         => [ 'filter' => FILTER_VALIDATE_BOOLEAN ], // disable public TM matches
+                'instructions'               => [
+                        'filter' => FILTER_SANITIZE_STRING,
+                        'flags'  => FILTER_REQUIRE_ARRAY,
+                ],
+                'project_info'               => [ 'filter' => FILTER_SANITIZE_STRING ],
+                'mmt_glossaries'             => [ 'filter' => FILTER_SANITIZE_STRING ],
 
-            'deepl_formality'   => [ 'filter' => FILTER_SANITIZE_STRING ],
-            'deepl_id_glossary' => [ 'filter' => FILTER_SANITIZE_STRING ],
+                'deepl_formality'   => [ 'filter' => FILTER_SANITIZE_STRING ],
+                'deepl_id_glossary' => [ 'filter' => FILTER_SANITIZE_STRING ],
 
-            'filters_extraction_parameters' => [ 'filter' => FILTER_SANITIZE_STRING ],
-            'xliff_parameters' => [ 'filter' => FILTER_SANITIZE_STRING ],
+                'filters_extraction_parameters' => [ 'filter' => FILTER_SANITIZE_STRING ],
+                'xliff_parameters'              => [ 'filter' => FILTER_SANITIZE_STRING ],
 
-            'filters_extraction_parameters_template_id'   => [ 'filter' => FILTER_VALIDATE_INT ],
-            'xliff_parameters_template_id'   => [ 'filter' => FILTER_VALIDATE_INT ],
+                'filters_extraction_parameters_template_id' => [ 'filter' => FILTER_VALIDATE_INT ],
+                'xliff_parameters_template_id'              => [ 'filter' => FILTER_VALIDATE_INT ],
         ];
 
         $filterArgs = $this->featureSet->filter( 'filterNewProjectInputFilters', $filterArgs, $this->userIsLogged );
@@ -313,7 +314,7 @@ class NewController extends ajaxController {
         }
 
         $this->projectFeatures = $this->featureSet->filter(
-            'filterCreateProjectFeatures', $this->projectFeatures, $this
+                'filterCreateProjectFeatures', $this->projectFeatures, $this
         );
 
     }
@@ -386,9 +387,9 @@ class NewController extends ajaxController {
             $this->setBadRequestHeader();
             $stdResult                     = [];
             $this->result                  = [
-                'errors' => [
-                    [ "code" => -1, "message" => $e->getMessage() ]
-                ]
+                    'errors' => [
+                            [ "code" => -1, "message" => $e->getMessage() ]
+                    ]
             ];
             $this->api_output[ 'message' ] = $e->getMessage();
         }
@@ -472,8 +473,8 @@ class NewController extends ajaxController {
 
                 $realFileObjectInfo  = $fileObjects;
                 $realFileObjectNames = array_map(
-                    [ 'ZipArchiveExtended', 'getFileName' ],
-                    $fileObjects
+                        [ 'ZipArchiveExtended', 'getFileName' ],
+                        $fileObjects
                 );
 
                 foreach ( $realFileObjectNames as $i => &$fileObject ) {
@@ -482,8 +483,8 @@ class NewController extends ajaxController {
                     $filesize       = filesize( $intDir . DIRECTORY_SEPARATOR . $__realFileName );
 
                     $fileObject               = [
-                        'name' => $__fileName,
-                        'size' => $filesize
+                            'name' => $__fileName,
+                            'size' => $filesize
                     ];
                     $realFileObjectInfo[ $i ] = $fileObject;
                 }
@@ -496,8 +497,8 @@ class NewController extends ajaxController {
                     foreach ( $fileObjects as $fName ) {
 
                         if ( isset( $fileErrors ) &&
-                            isset( $fileErrors->{$fName} ) &&
-                            !empty( $fileErrors->{$fName}->error )
+                                isset( $fileErrors->{$fName} ) &&
+                                !empty( $fileErrors->{$fName}->error )
                         ) {
                             continue;
                         }
@@ -542,9 +543,9 @@ class NewController extends ajaxController {
                     }
 
                     $this->result = $status = [
-                        'code'   => $error->getCode(),
-                        'data'   => $error->getData(),
-                        'errors' => $error->getErrors(),
+                            'code'   => $error->getCode(),
+                            'data'   => $error->getData(),
+                            'errors' => $error->getErrors(),
                     ];
                 }
             } else {
@@ -599,7 +600,7 @@ class NewController extends ajaxController {
                     //check if file begins with the name of the zip file.
                     // If so, then it was stored in the zip file.
                     if ( strpos( $storedFileName, $__fName ) !== false &&
-                        substr( $storedFileName, 0, strlen( $__fName ) ) == $__fName
+                            substr( $storedFileName, 0, strlen( $__fName ) ) == $__fName
                     ) {
                         //add file name to the files array
                         $newArFiles[] = $storedFileName;
@@ -755,10 +756,10 @@ class NewController extends ajaxController {
         $getMemoryType = XliffFiles::getMemoryFileType( $filename );
 
         $forceXliff      = $this->getFeatureSet()->filter(
-            'forceXLIFFConversion',
-            INIT::$FORCE_XLIFF_CONVERSION,
-            $this->userIsLogged,
-            $info[ 'info' ][ 'dirname' ] . DIRECTORY_SEPARATOR . "$filename"
+                'forceXLIFFConversion',
+                INIT::$FORCE_XLIFF_CONVERSION,
+                $this->userIsLogged,
+                $info[ 'info' ][ 'dirname' ] . DIRECTORY_SEPARATOR . "$filename"
         );
         $mustBeConverted = XliffProprietaryDetect::fileMustBeConverted( $filename, $forceXliff, INIT::$FILTERS_ADDRESS );
 
@@ -773,9 +774,9 @@ class NewController extends ajaxController {
         $metadata[ 'isGlossary' ]      = $isGlossary;
         $metadata[ 'isTMX' ]           = $isTMX;
         $metadata[ 'proprietary' ]     = [
-            'proprietary'            => $info[ 'proprietary' ],
-            'proprietary_name'       => $info[ 'proprietary_name' ],
-            'proprietary_short_name' => $info[ 'proprietary_short_name' ],
+                'proprietary'            => $info[ 'proprietary' ],
+                'proprietary_name'       => $info[ 'proprietary_name' ],
+                'proprietary_short_name' => $info[ 'proprietary_short_name' ],
         ];
 
         return $metadata;
@@ -867,7 +868,7 @@ class NewController extends ajaxController {
         }
 
         if ( false !== strpos( @$_SERVER[ 'HTTP_X_MATECAT_KEY' ], '-' ) ) {
-            list( $api_key, $api_secret ) = explode( '-', $_SERVER[ 'HTTP_X_MATECAT_KEY' ] );
+            [ $api_key, $api_secret ] = explode( '-', $_SERVER[ 'HTTP_X_MATECAT_KEY' ] );
         }
 
         if ( $api_key && $api_secret ) {
@@ -881,10 +882,10 @@ class NewController extends ajaxController {
             $this->user = $key->getUser();
 
             $this->userIsLogged = (
-                !empty( $this->user->uid ) &&
-                !empty( $this->user->email ) &&
-                !empty( $this->user->first_name ) &&
-                !empty( $this->user->last_name )
+                    !empty( $this->user->uid ) &&
+                    !empty( $this->user->email ) &&
+                    !empty( $this->user->first_name ) &&
+                    !empty( $this->user->last_name )
             );
 
         }
@@ -971,7 +972,7 @@ class NewController extends ajaxController {
 
         $this->metadata = $this->featureSet->filter( 'filterProjectMetadata', $this->metadata, $this->postInput );
         $this->metadata = $this->featureSet->filter( 'createProjectAssignInputMetadata', $this->metadata, [
-            'input' => $this->postInput
+                'input' => $this->postInput
         ] );
 
     }
@@ -1009,9 +1010,9 @@ class NewController extends ajaxController {
         }
 
         return [
-            'key' => $tmKeyInfo[ 0 ],
-            'r'   => $read,
-            'w'   => $write,
+                'key' => $tmKeyInfo[ 0 ],
+                'r'   => $read,
+                'w'   => $write,
         ];
     }
 
@@ -1019,8 +1020,8 @@ class NewController extends ajaxController {
 
         try {
             $this->private_tm_key = array_map(
-                [ 'NewController', '__parseTmKeyInput' ],
-                explode( ",", $this->postInput[ 'private_tm_key' ] )
+                    [ 'NewController', '__parseTmKeyInput' ],
+                    explode( ",", $this->postInput[ 'private_tm_key' ] )
             );
         } catch ( Exception $e ) {
             throw new Exception( $e->getMessage(), -6 );
@@ -1058,13 +1059,13 @@ class NewController extends ajaxController {
                     $this->private_tm_pass = $newUser->pass;
 
                     $this->private_tm_key[ $__key_idx ] =
-                        [
-                            'key'  => $newUser->key,
-                            'name' => null,
-                            'r'    => $tm_key[ 'r' ],
-                            'w'    => $tm_key[ 'w' ]
+                            [
+                                    'key'  => $newUser->key,
+                                    'name' => null,
+                                    'r'    => $tm_key[ 'r' ],
+                                    'w'    => $tm_key[ 'w' ]
 
-                        ];
+                            ];
                     $this->new_keys[]                   = $newUser->key;
 
                 } catch ( Exception $e ) {
@@ -1077,10 +1078,10 @@ class NewController extends ajaxController {
                 $uid = $this->user->uid;
 
                 $this_tm_key = [
-                    'key'  => $tm_key[ 'key' ],
-                    'name' => null,
-                    'r'    => $tm_key[ 'r' ],
-                    'w'    => $tm_key[ 'w' ]
+                        'key'  => $tm_key[ 'key' ],
+                        'name' => null,
+                        'r'    => $tm_key[ 'r' ],
+                        'w'    => $tm_key[ 'w' ]
                 ];
 
                 /**
@@ -1093,11 +1094,11 @@ class NewController extends ajaxController {
                      * @var $keyRing TmKeyManagement_MemoryKeyStruct[]
                      */
                     $keyRing = $mkDao->read(
-                        ( new TmKeyManagement_MemoryKeyStruct( [
-                            'uid'    => $uid,
-                            'tm_key' => new TmKeyManagement_TmKeyStruct( $this_tm_key )
-                        ] )
-                        )
+                            ( new TmKeyManagement_MemoryKeyStruct( [
+                                    'uid'    => $uid,
+                                    'tm_key' => new TmKeyManagement_TmKeyStruct( $this_tm_key )
+                            ] )
+                            )
                     );
 
                     if ( count( $keyRing ) > 0 ) {
@@ -1140,8 +1141,8 @@ class NewController extends ajaxController {
     private function __validateQaModelTemplate() {
         if ( !empty( $this->postInput[ 'id_qa_model_template' ] ) ) {
             $qaModelTemplate = \QAModelTemplate\QAModelTemplateDao::get( [
-                'id'  => $this->postInput[ 'id_qa_model_template' ],
-                'uid' => $this->getUser()->uid
+                    'id'  => $this->postInput[ 'id_qa_model_template' ],
+                    'uid' => $this->getUser()->uid
             ] );
 
             // check if qa_model template exists
@@ -1255,9 +1256,9 @@ class NewController extends ajaxController {
         if ( !empty( $this->postInput[ 'deepl_formality' ] ) ) {
 
             $allowedFormalities = [
-                'default',
-                'prefer_less',
-                'prefer_more'
+                    'default',
+                    'prefer_less',
+                    'prefer_more'
             ];
 
             if ( in_array( $this->postInput[ 'deepl_formality' ], $allowedFormalities ) ) {
@@ -1285,8 +1286,8 @@ class NewController extends ajaxController {
             $targets          = explode( ',', trim( $target_languages ) );
 
             // first check if `dialect_strict` is a valid JSON
-            if(!Utils::isJson($dialect_strict)){
-                throw new Exception("dialect_strict is not a valid JSON");
+            if ( !Utils::isJson( $dialect_strict ) ) {
+                throw new Exception( "dialect_strict is not a valid JSON" );
             }
 
             $dialectStrictObj = json_decode( $dialect_strict, true );
@@ -1315,8 +1316,8 @@ class NewController extends ajaxController {
             $json = html_entity_decode( $this->postInput[ 'filters_extraction_parameters' ] );
 
             // first check if `filters_extraction_parameters` is a valid JSON
-            if(!Utils::isJson($json)){
-                throw new Exception("filters_extraction_parameters is not a valid JSON");
+            if ( !Utils::isJson( $json ) ) {
+                throw new Exception( "filters_extraction_parameters is not a valid JSON" );
             }
 
             $schema = file_get_contents( INIT::$ROOT . '/inc/validation/schema/filters_extraction_parameters.json' );
@@ -1329,15 +1330,15 @@ class NewController extends ajaxController {
 
             $this->filters_extraction_parameters = json_decode( $json );
 
-        } elseif( !empty($this->postInput[ 'filters_extraction_parameters_template_id' ]) ){
+        } elseif ( !empty( $this->postInput[ 'filters_extraction_parameters_template_id' ] ) ) {
 
-            $filtersTemplate = FiltersConfigTemplateDao::getById($this->postInput[ 'filters_extraction_parameters_template_id' ]);
+            $filtersTemplate = FiltersConfigTemplateDao::getById( $this->postInput[ 'filters_extraction_parameters_template_id' ] );
 
-            if($filtersTemplate === null){
-                throw new Exception("filters_extraction_parameters_template_id not valid");
+            if ( $filtersTemplate === null ) {
+                throw new Exception( "filters_extraction_parameters_template_id not valid" );
             }
 
-            $this->filters_extraction_parameters =  $filtersTemplate->toArray();
+            $this->filters_extraction_parameters = $filtersTemplate->toArray();
         }
     }
 
@@ -1351,8 +1352,8 @@ class NewController extends ajaxController {
             $json = html_entity_decode( $this->postInput[ 'xliff_parameters' ] );
 
             // first check if `xliff_parameters` is a valid JSON
-            if(!Utils::isJson($json)){
-                throw new Exception("xliff_parameters is not a valid JSON");
+            if ( !Utils::isJson( $json ) ) {
+                throw new Exception( "xliff_parameters is not a valid JSON" );
             }
 
             $schema = file_get_contents( INIT::$ROOT . '/inc/validation/schema/xliff_parameters.json' );
@@ -1364,15 +1365,15 @@ class NewController extends ajaxController {
             $validator->validate( $validatorObject );
 
             $this->xliff_parameters = json_decode( $json );
-        } elseif( !empty( $this->postInput[ 'xliff_parameters_template_id' ] ) ){
+        } elseif ( !empty( $this->postInput[ 'xliff_parameters_template_id' ] ) ) {
 
-            $xliffConfigTemplate = \Xliff\XliffConfigTemplateDao::getById($this->postInput[ 'xliff_parameters_template_id' ]);
+            $xliffConfigTemplate = XliffConfigTemplateDao::getByIdAndUser( $this->postInput[ 'xliff_parameters_template_id' ], $this->getUser()->uid );
 
-            if($xliffConfigTemplate === null){
-                throw new Exception("xliff_parameters_template_id not valid");
+            if ( $xliffConfigTemplate === null ) {
+                throw new Exception( "xliff_parameters_template_id not valid" );
             }
 
-            $this->xliff_parameters =  $xliffConfigTemplate->toArray();
+            $this->xliff_parameters = $xliffConfigTemplate->toArray();
         }
     }
 }

@@ -175,7 +175,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
      * @param $password
      * @param $issue
      *
-     * @return TranslationIssueModel|SecondPassReview\TranslationIssueModel
+     * @return TranslationIssueModel
      */
     protected function _getSegmentTranslationIssueModel( $id_job, $password, $issue ) {
         return $this->revisionFactory->getTranslationIssueModel( $id_job, $password, $issue );

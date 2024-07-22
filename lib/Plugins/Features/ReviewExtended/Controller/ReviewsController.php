@@ -6,7 +6,7 @@
  * Time: 17:18
  */
 
-namespace Features\SecondPassReview\Controller;
+namespace Features\ReviewExtended\Controller;
 
 use API\V2\Exceptions\ValidationError;
 use API\V2\KleinController;

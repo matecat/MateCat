@@ -81,53 +81,6 @@ class ChunkReviewDao extends \LQA\ChunkReviewDao {
         return ( !$result || $result[ 0 ] == null ) ? 0 : $result[ 0 ];
     }
 
-    public function recountAdvancementWords( Chunks_ChunkStruct $chunk, $source_page ) {
-
-        $sql = "
-            SELECT SUM( IF( match_type != 'ICE', eq_word_count, s.raw_word_count ) ) FROM segments s
-                JOIN segment_translations st on st.id_segment = s.id
-                JOIN jobs j on j.id = st.id_job
-                AND s.id <= j.job_last_segment
-                AND s.id >= j.job_first_segment
-            LEFT JOIN (
-            
-                SELECT id_segment as ste_id_segment, source_page 
-                FROM  segment_translation_events 
-                JOIN ( 
-                    SELECT max(id) as _m_id FROM segment_translation_events
-                        WHERE id_job = :id_job
-                        AND id_segment BETWEEN :job_first_segment AND :job_last_segment
-                        GROUP BY id_segment 
-                ) AS X ON _m_id = segment_translation_events.id
-                ORDER BY id_segment
-                
-            ) ste ON ste.ste_id_segment = s.id
-
-            WHERE
-                j.id = :id_job AND j.password = :password
-                AND
-                ( 
-                   source_page = :source_page 
-                      OR
-                   ( :source_page = 2 AND ste.ste_id_segment IS NULL and match_type = 'ICE' AND locked = 1 and st.status = 'APPROVED' )
-                ) ;
-            ";
-
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
-        $stmt->execute( [
-            'id_job'            => $chunk->id,
-            'password'          => $chunk->password,
-            'source_page'       => $source_page,
-            'job_first_segment' => $chunk->job_first_segment,
-            'job_last_segment'  => $chunk->job_last_segment
-        ] );
-
-        $result = $stmt->fetch();
-
-        return $result[ 0 ] == null ? 0 : $result[ 0 ];
-    }
-
     /**
      *
      * @param int   $chunkReviewID
@@ -140,7 +93,7 @@ class ChunkReviewDao extends \LQA\ChunkReviewDao {
         /**
          * @var $chunkReview_partial ChunkReviewStruct
          */
-        $chunkReview_partial = $data[ 'chunkReview' ];
+        $chunkReview_partial = $data[ 'chunkReview_partials' ];
         $data[ 'force_pass_at' ]        = ReviewUtils::filterLQAModelLimit( $chunkReview_partial->getChunk()->getProject()->getLqaModel(), $chunkReview_partial->source_page );
 
         // in MySQL a sum of a null value to an integer returns 0

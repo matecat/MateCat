@@ -5,15 +5,38 @@ namespace API\V3;
 use API\V2\KleinController;
 use API\V2\Validators\LoginValidator;
 use Exception;
-use Xliff\XliffConfigTemplateDao;
 use INIT;
 use Klein\Response;
+use PDOException;
+use Swaggest\JsonSchema\InvalidValue;
 use Validator\Errors\JSONValidatorException;
+use Validator\JSONValidator;
+use Validator\JSONValidatorObject;
+use Xliff\XliffConfigTemplateDao;
 
 class XliffConfigTemplateController extends KleinController {
     protected function afterConstruct() {
         parent::afterConstruct();
         $this->appendValidator( new LoginValidator( $this ) );
+    }
+
+
+    /**
+     * @param $json
+     *
+     * @throws InvalidValue
+     * @throws Exception
+     */
+    private function validateJSON( $json ) {
+        $validatorObject       = new JSONValidatorObject();
+        $validatorObject->json = $json;
+        $jsonSchema            = file_get_contents( INIT::$ROOT . '/inc/validation/schema/xliff_parameters.json' );
+        $validator             = new JSONValidator( $jsonSchema );
+        $validator->validate( $validatorObject );
+
+        if ( !$validator->isValid() ) {
+            throw $validator->getExceptions()[ 0 ]->error;
+        }
     }
 
     /**
@@ -51,22 +74,10 @@ class XliffConfigTemplateController extends KleinController {
         $id = filter_var( $this->request->id, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_ENCODE_LOW );
 
         try {
-            $model = XliffConfigTemplateDao::getById( $id );
+            $model = XliffConfigTemplateDao::getByIdAndUser( $id, $this->getUser()->uid );
 
             if ( empty( $model ) ) {
-                $this->response->code( 404 );
-
-                return $this->response->json( [
-                        'error' => 'Model not found'
-                ] );
-            }
-
-            if ( $model->uid !== $this->getUser()->uid ) {
-                $this->response->code( 403 );
-
-                return $this->response->json( [
-                        'error' => 'You are not authorized to see this model'
-                ] );
+                throw new Exception( 'Model not found', 404 );
             }
 
             $this->response->status()->setCode( 200 );
@@ -94,21 +105,36 @@ class XliffConfigTemplateController extends KleinController {
             $this->response->code( 400 );
 
             return $this->response->json( [
-                    'message' => 'Method not allowed'
+                    'message' => 'Bad Request'
             ] );
         }
 
         // try to create the template
         try {
-            $json   = $this->request->body();
-            $struct = XliffConfigTemplateDao::createFromJSON( $json, $this->getUser()->uid );
+            $json = $this->request->body();
+            $this->validateJSON( $json );
+
+            try {
+                $struct = XliffConfigTemplateDao::createFromJSON( $json, $this->getUser()->uid );
+            } catch ( PDOException $e ) {
+                if ( $e->getCode() == 23000 ) {
+                    $this->response->code( 404 );
+
+                    return $this->response->json( [
+                            'error' => "Invalid unique template name"
+                    ] );
+                } else {
+                    throw $e;
+                }
+            }
 
             $this->response->code( 201 );
 
             return $this->response->json( $struct );
 
         } catch ( JSONValidatorException $exception ) {
-            $this->response->code( 500 );
+            $errorCode = max( $exception->getCode(), 400 );
+            $this->response->code( $errorCode );
 
             return $this->response->json( $exception );
         } catch ( Exception $exception ) {
@@ -134,44 +160,34 @@ class XliffConfigTemplateController extends KleinController {
             $this->response->code( 400 );
 
             return $this->response->json( [
-                    'message' => 'Method not allowed'
+                    'message' => 'Bad Request'
             ] );
         }
 
         $id  = $this->request->param( 'id' );
         $uid = $this->getUser()->uid;
 
-        $model = XliffConfigTemplateDao::getById( $id );
-
-        if ( empty( $model ) ) {
-            $this->response->code( 404 );
-
-            return $this->response->json( [
-                    'error' => 'Model not found'
-            ] );
-        }
-
-        if ( $this->getUser()->uid !== $model->uid ) {
-            $this->response->code( 401 );
-
-            return $this->response->json( [
-                    'error' => 'User not allowed'
-            ] );
-        }
-
         try {
-            $json   = $this->request->body();
+            $json = $this->request->body();
+            $this->validateJSON( $json );
+
+            $model = XliffConfigTemplateDao::getByIdAndUser( $id, $uid );
+
+            if ( empty( $model ) ) {
+                throw new Exception( 'Model not found', 404 );
+            }
+
             $struct = XliffConfigTemplateDao::editFromJSON( $model, $json, $uid );
 
             $this->response->code( 200 );
 
             return $this->response->json( $struct );
         } catch ( JSONValidatorException $exception ) {
-            $errorCode = $exception->getCode() >= 400 ? $exception->getCode() : 500;
+            $errorCode = max( $exception->getCode(), 400 );
             $this->response->code( $errorCode );
 
             return $this->response->json( $exception );
-        } catch ( \Exception $exception ) {
+        } catch ( Exception $exception ) {
             $errorCode = $exception->getCode() >= 400 ? $exception->getCode() : 500;
             $this->response->code( $errorCode );
 
@@ -189,25 +205,20 @@ class XliffConfigTemplateController extends KleinController {
         $uid = $this->getUser()->uid;
 
         try {
-            $model = XliffConfigTemplateDao::getById( $id );
 
-            if ( empty( $model ) ) {
-                $this->response->code( 404 );
+            $count = XliffConfigTemplateDao::remove( $id, $uid );
 
-                return $this->response->json( [
-                        'error' => 'Model not found'
-                ] );
+            if ( $count == 0 ) {
+                throw new Exception( 'Model not found', 404 );
             }
-
-            XliffConfigTemplateDao::remove( $id, $uid );
 
             return $this->response->json( [
                     'id' => (int)$id
             ] );
 
         } catch ( Exception $exception ) {
-            $code = ( $exception->getCode() > 0 ) ? $exception->getCode() : 500;
-            $this->response->status()->setCode( $code );
+            $errorCode = $exception->getCode() >= 400 ? $exception->getCode() : 500;
+            $this->response->code( $errorCode );
 
             return $this->response->json( [
                     'error' => $exception->getMessage()
@@ -225,8 +236,7 @@ class XliffConfigTemplateController extends KleinController {
     /**
      * @return false|string
      */
-    private function getModelSchema()
-    {
+    private function getModelSchema() {
         return json_decode( file_get_contents( INIT::$ROOT . '/inc/validation/schema/xliff_parameters.json' ) );
     }
 }

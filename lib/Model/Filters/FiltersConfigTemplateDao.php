@@ -14,20 +14,17 @@ use Filters\DTO\MSPowerpoint;
 use Filters\DTO\MSWord;
 use Filters\DTO\Xml;
 use Filters\DTO\Yaml;
-use INIT;
 use PDO;
 use Projects\ProjectTemplateStruct;
-use Swaggest\JsonSchema\InvalidValue;
-use Validator\JSONValidator;
-use Validator\JSONValidatorObject;
+use Utils;
 
-class FiltersConfigTemplateDao extends DataAccess_AbstractDao
-{
+class FiltersConfigTemplateDao extends DataAccess_AbstractDao {
     const TABLE = 'filters_config_templates';
 
-    const query_by_id       = "SELECT * FROM " . self::TABLE . " WHERE id = :id AND deleted_at IS NULL";
-    const query_by_uid      = "SELECT * FROM " . self::TABLE . " WHERE uid = :uid AND deleted_at IS NULL";
-    const query_by_uid_name = "SELECT * FROM " . self::TABLE . " WHERE uid = :uid AND name = :name AND deleted_at IS NULL";
+    const query_by_id         = "SELECT * FROM " . self::TABLE . " WHERE id = :id AND deleted_at IS NULL";
+    const query_by_id_and_uid = "SELECT * FROM " . self::TABLE . " WHERE id = :id AND uid = :uid AND deleted_at IS NULL";
+    const query_by_uid        = "SELECT * FROM " . self::TABLE . " WHERE uid = :uid AND deleted_at IS NULL";
+    const query_by_uid_name   = "SELECT * FROM " . self::TABLE . " WHERE uid = :uid AND name = :name AND deleted_at IS NULL";
 
     /**
      * @var null
@@ -77,8 +74,6 @@ class FiltersConfigTemplateDao extends DataAccess_AbstractDao
      * @throws Exception
      */
     public static function createFromJSON( $json, $uid ) {
-        self::validateJSON( $json );
-
         $templateStruct = new FiltersConfigTemplateStruct();
         $templateStruct->hydrateFromJSON( $json, $uid );
 
@@ -90,56 +85,26 @@ class FiltersConfigTemplateDao extends DataAccess_AbstractDao
 
     /**
      * @param FiltersConfigTemplateStruct $templateStruct
-     * @param $json
-     * @param $uid
+     * @param                             $json
+     * @param                             $uid
      *
      * @return FiltersConfigTemplateStruct
      * @throws Exception
      */
-    public static function editFromJSON(FiltersConfigTemplateStruct $templateStruct, $json, $uid ) {
-        self::validateJSON( $json );
+    public static function editFromJSON( FiltersConfigTemplateStruct $templateStruct, $json, $uid ) {
         $templateStruct->hydrateFromJSON( $json, $uid );
-
-        $saved = self::getByUid( $templateStruct->uid );
-
-        foreach ( $saved as $savedElement ) {
-            if (
-                    $savedElement->id !== $templateStruct->id and
-                    $savedElement->name === $templateStruct->name
-            ) {
-                $templateStruct = self::findUniqueName( $templateStruct, $uid );
-            }
-        }
 
         return self::update( $templateStruct );
     }
 
     /**
-     * @param $json
-     *
-     * @throws InvalidValue
-     * @throws Exception
-     */
-    private static function validateJSON( $json ) {
-        $validatorObject       = new JSONValidatorObject();
-        $validatorObject->json = $json;
-        $jsonSchema            = file_get_contents( INIT::$ROOT . '/inc/validation/schema/filters_extraction_parameters.json' );
-        $validator             = new JSONValidator( $jsonSchema );
-        $validator->validate( $validatorObject );
-
-        if ( !$validator->isValid() ) {
-            throw $validator->getExceptions()[ 0 ]->error;
-        }
-    }
-
-    /**
-     * @param FiltersConfigTemplateStruct $projectTemplateStruct
+     * @param FiltersConfigTemplateStruct      $projectTemplateStruct
      * @param                                  $uid
      *
      * @return FiltersConfigTemplateStruct
      * @throws Exception
      */
-    private static function findUniqueName(FiltersConfigTemplateStruct $projectTemplateStruct, $uid ) {
+    private static function findUniqueName( FiltersConfigTemplateStruct $projectTemplateStruct, $uid ) {
         $check = FiltersConfigTemplateDao::getByUidAndName( $uid, $projectTemplateStruct->name, 0 );
 
         if ( $check === null ) {
@@ -224,29 +189,25 @@ class FiltersConfigTemplateDao extends DataAccess_AbstractDao
     }
 
     /**
+     * @param     $id
      * @param     $uid
      * @param int $ttl
      *
-     * @return FiltersConfigTemplateStruct[]
+     * @return FiltersConfigTemplateStruct|null
      * @throws Exception
      */
-    public static function getByUid( $uid, $ttl = 60 ) {
-        $stmt   = self::getInstance()->_getStatementForCache( self::query_by_uid );
+    public static function getByIdAndUser( $id, $uid, $ttl = 60 ) {
+        $stmt   = self::getInstance()->_getStatementForCache( self::query_by_id_and_uid );
         $result = self::getInstance()->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
+                'id'  => $id,
                 'uid' => $uid,
         ] );
 
         if ( empty( $result ) ) {
-            return [];
+            return null;
         }
 
-        $res = [];
-
-        foreach ( $result as $r ) {
-            $res[] = self::hydrateTemplateStruct( (array)$r );
-        }
-
-        return $res;
+        return self::hydrateTemplateStruct( (array)$result[ 0 ] );
     }
 
     /**
@@ -280,10 +241,12 @@ class FiltersConfigTemplateDao extends DataAccess_AbstractDao
      */
     public static function remove( $id, $uid ) {
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( "UPDATE " . self::TABLE . " SET `deleted_at` = :now WHERE id = :id " );
+        $stmt = $conn->prepare( "UPDATE " . self::TABLE . " SET `deleted_at` = :now WHERE id = :id AND uid = :uid;" );
         $stmt->execute( [
-                'id'  => $id,
-                'now' => ( new DateTime() )->format( 'Y-m-d H:i:s' ),
+                'id'   => $id,
+                'uid'  => $uid,
+                'now'  => ( new DateTime() )->format( 'Y-m-d H:i:s' ),
+                'name' => 'deleted_' . Utils::randomString()
         ] );
 
         self::destroyQueryByIdCache( $conn, $id );
@@ -346,7 +309,7 @@ class FiltersConfigTemplateDao extends DataAccess_AbstractDao
      * @return FiltersConfigTemplateStruct
      * @throws Exception
      */
-    public static function save(FiltersConfigTemplateStruct $templateStruct ) {
+    public static function save( FiltersConfigTemplateStruct $templateStruct ) {
         $sql = "INSERT INTO " . self::TABLE .
                 " ( `uid`, `name`, `json`, `xml`, `yaml`, `ms_excel`, `ms_word`, `ms_powerpoint`, `created_at`, `modified_at` ) " .
                 " VALUES " .
@@ -359,13 +322,13 @@ class FiltersConfigTemplateDao extends DataAccess_AbstractDao
         $stmt->execute( [
                 "uid"           => $templateStruct->uid,
                 "name"          => $templateStruct->name,
-                "json"          => json_encode($templateStruct->getJson()),
-                "xml"           => json_encode($templateStruct->getXml()),
-                "yaml"          => json_encode($templateStruct->getYaml()),
-                "ms_excel"      => json_encode($templateStruct->getMsExcel()),
-                "ms_word"       => json_encode($templateStruct->getMsWord()),
-                "ms_powerpoint" => json_encode($templateStruct->getMsPowerpoint()),
-                'now'     => ( new DateTime() )->format( 'Y-m-d H:i:s' ),
+                "json"          => json_encode( $templateStruct->getJson() ),
+                "xml"           => json_encode( $templateStruct->getXml() ),
+                "yaml"          => json_encode( $templateStruct->getYaml() ),
+                "ms_excel"      => json_encode( $templateStruct->getMsExcel() ),
+                "ms_word"       => json_encode( $templateStruct->getMsWord() ),
+                "ms_powerpoint" => json_encode( $templateStruct->getMsPowerpoint() ),
+                'now'           => ( new DateTime() )->format( 'Y-m-d H:i:s' ),
         ] );
 
         $templateStruct->id          = $conn->lastInsertId();
@@ -385,7 +348,7 @@ class FiltersConfigTemplateDao extends DataAccess_AbstractDao
      * @return FiltersConfigTemplateStruct
      * @throws Exception
      */
-    public static function update(FiltersConfigTemplateStruct $templateStruct ) {
+    public static function update( FiltersConfigTemplateStruct $templateStruct ) {
         $sql = "UPDATE " . self::TABLE . " SET 
             `uid` = :uid, 
             `name` = :name,
@@ -401,16 +364,16 @@ class FiltersConfigTemplateDao extends DataAccess_AbstractDao
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->execute( [
-                "id"      => $templateStruct->id,
-                "uid"     => $templateStruct->uid,
-                "name"    => $templateStruct->name,
-                "json"   => json_encode($templateStruct->getJson()),
-                "xml"   => json_encode($templateStruct->getXml()),
-                "yaml"   => json_encode($templateStruct->getYaml()),
-                "ms_excel"   => json_encode($templateStruct->getMsExcel()),
-                "ms_word"   => json_encode($templateStruct->getMsWord()),
-                "ms_powerpoint"   => json_encode($templateStruct->getMsPowerpoint()),
-                'now'     => ( new DateTime() )->format( 'Y-m-d H:i:s' ),
+                "id"            => $templateStruct->id,
+                "uid"           => $templateStruct->uid,
+                "name"          => $templateStruct->name,
+                "json"          => json_encode( $templateStruct->getJson() ),
+                "xml"           => json_encode( $templateStruct->getXml() ),
+                "yaml"          => json_encode( $templateStruct->getYaml() ),
+                "ms_excel"      => json_encode( $templateStruct->getMsExcel() ),
+                "ms_word"       => json_encode( $templateStruct->getMsWord() ),
+                "ms_powerpoint" => json_encode( $templateStruct->getMsPowerpoint() ),
+                'now'           => ( new DateTime() )->format( 'Y-m-d H:i:s' ),
         ] );
 
         self::destroyQueryByIdCache( $conn, $templateStruct->id );

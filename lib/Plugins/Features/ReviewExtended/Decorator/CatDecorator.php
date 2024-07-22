@@ -39,7 +39,6 @@ class CatDecorator extends \AbstractDecorator {
         $this->template->lqa_flat_categories  = (null !== $model ) ? $this->getCategoriesAsJson( $model ) : '';
         $this->template->review_type          = 'extended';
         $this->template->review_extended      = true;
-        $this->template->project_type         = null;
         $this->template->segmentFilterEnabled = true;
 
         $this->template->quality_report_href = INIT::$BASEURL . "revise-summary/{$this->controller->getChunk()->id}-{$this->controller->getChunk()->password}";
@@ -47,6 +46,13 @@ class CatDecorator extends \AbstractDecorator {
         $this->template->showReplaceOptionsInSearch = true;
 
         $this->template->overall_quality_class = $this->getOverallQualityClass();
+
+        $secondRevisions = ChunkReviewDao::findSecondRevisionsChunkReviewsByChunkIds( [ [
+                $this->controller->getChunk()->id,
+                $this->controller->getChunk()->password
+        ] ]  ) ;
+
+        $this->template->secondRevisionsCount = count( $secondRevisions );
 
         $this->assignCatDecorator();
     }

@@ -4,9 +4,7 @@ use API\V2\Validators\SegmentTranslationIssueValidator;
 use Features\AbstractRevisionFeature;
 use Features\BaseFeature;
 use Features\ReviewExtended;
-use Features\ReviewExtended\IReviewedWordCountModel;
-use Features\SecondPassReview\Model\ChunkReviewModel;
-use Features\SecondPassReview\TranslationIssueModel;
+use Features\ReviewExtended\ReviewedWordCountModel;
 use Features\TranslationEvents\Model\TranslationEvent;
 use Klein\Request;
 use LQA\ChunkReviewStruct;
@@ -49,13 +47,9 @@ class RevisionFactory {
     /**
      * @param ChunkReviewStruct $chunkReviewStruct
      *
-     * @return ReviewExtended\IChunkReviewModel|ChunkReviewModel
+     * @return ReviewExtended\IChunkReviewModel
      */
     public function getChunkReviewModel( ChunkReviewStruct $chunkReviewStruct ) {
-        if ( $this->_isSecondPass() ) {
-            return new ChunkReviewModel( $chunkReviewStruct );
-        }
-
         return $this->revision->getChunkReviewModel( $chunkReviewStruct );
     }
 
@@ -63,7 +57,7 @@ class RevisionFactory {
      * @param TranslationEvent    $translationEvent
      * @param ChunkReviewStruct[] $chunkReviews
      *
-     * @return IReviewedWordCountModel
+     * @return ReviewedWordCountModel
      */
     public function getReviewedWordCountModel( TranslationEvent $translationEvent, array $chunkReviews, CounterModel $jobWordCounter ) {
         return $this->revision->getReviewedWordCountModel( $translationEvent, $jobWordCounter, $chunkReviews );
@@ -97,14 +91,10 @@ class RevisionFactory {
      * @param $password
      * @param $issue
      *
-     * @return ReviewExtended\TranslationIssueModel|Features\SecondPassReview\TranslationIssueModel
+     * @return ReviewExtended\TranslationIssueModel
      */
     public function getTranslationIssueModel( $id_job, $password, $issue ) {
-        if ( $this->_isSecondPass() ) {
-            return new TranslationIssueModel( $id_job, $password, $issue );
-        } else {
-            return $this->revision->getTranslationIssueModel( $id_job, $password, $issue );
-        }
+        return $this->revision->getTranslationIssueModel( $id_job, $password, $issue );
     }
 
     /**

@@ -20,7 +20,6 @@ use Files\MetadataDao;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use FilesStorage\S3FilesStorage;
-use Xliff\XliffConfigTemplateStruct;
 use Jobs\SplitQueue;
 use LQA\QA;
 use Matecat\SubFiltering\MateCatFilter;
@@ -38,6 +37,8 @@ use TMS\TMSFile;
 use TMS\TMSService;
 use Translators\TranslatorsModel;
 use WordCount\CounterModel;
+use Xliff\DTO\XliffRulesModel;
+use Xliff\XliffConfigTemplateStruct;
 
 class ProjectManager {
 
@@ -193,7 +194,7 @@ class ProjectManager {
                             'mmt_glossaries'                          => null,
                             'deepl_formality'                         => null,
                             'deepl_id_glossary'                       => null,
-                            'filters_extraction_parameters'           => null,
+                            'filters_extraction_parameters'           => new RecursiveArrayObject(),
                             'xliff_parameters'                        => new RecursiveArrayObject()
                     ] );
         }
@@ -310,7 +311,7 @@ class ProjectManager {
             }
 
             // when the request comes from ProjectCreation daemon, it is already an ArrayObject
-            $this->projectStructure[ 'xliff_parameters' ] = XliffConfigTemplateStruct::fromArrayObject( $this->projectStructure[ 'xliff_parameters' ] );
+            $this->projectStructure[ 'xliff_parameters' ] = XliffRulesModel::fromArrayObject( $this->projectStructure[ 'xliff_parameters' ] );
 
         } catch ( DomainException $ex ) {
             $this->projectStructure[ 'result' ][ 'errors' ][] = [
@@ -2716,7 +2717,7 @@ class ProjectManager {
                 }
 
                 /**
-                 * @var $configModel XliffConfigTemplateStruct
+                 * @var $configModel XliffRulesModel
                  */
                 $configModel = $this->projectStructure[ 'xliff_parameters' ];
                 $stateValues = $this->getTargetStatesFromTransUnit( $translation_row[ 4 ], $position );
@@ -3134,7 +3135,7 @@ class ProjectManager {
     private function __isTranslated( $source, $target, $state = null, $stateQualifier = null ) {
 
         /**
-         * @var $configModel XliffConfigTemplateStruct
+         * @var $configModel XliffRulesModel
          */
         $configModel = $this->projectStructure[ 'xliff_parameters' ];
         $rule        = $configModel->getMatchingRule(
