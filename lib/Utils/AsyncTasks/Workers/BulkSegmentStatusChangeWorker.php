@@ -91,11 +91,6 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker {
 
         $batchEventCreator->save( new BatchReviewProcessor() );
 
-        if ( !empty( $params[ 'segment_ids' ] ) ) {
-            $counter = new CounterModel();
-            $counter->initializeJobWordCount( $chunk->id, $chunk->password );
-        }
-
         $this->_doLog( 'completed' );
 
         $database->commit();
