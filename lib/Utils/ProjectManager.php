@@ -843,7 +843,6 @@ class ProjectManager {
                         throw $e;
                     }
                 }
-
             }
 
             //Allow projects with less than 250.000 words or characters ( for cjk languages )
@@ -2166,7 +2165,10 @@ class ProjectManager {
                             $this->__addNotesToProjectStructure( $xliff_trans_unit, $fid );
                             $this->__addTUnitContextsToProjectStructure( $xliff_trans_unit, $fid );
                         } catch ( Exception $exception ) {
-                            throw new Exception( $exception->getMessage(), -1 );
+                            throw new Exception(
+                                $exception->getMessage(),
+                                $exception->getCode() ?? -1
+                            );
                         }
 
                         //
