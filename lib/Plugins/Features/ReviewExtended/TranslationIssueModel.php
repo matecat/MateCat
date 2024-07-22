@@ -147,7 +147,7 @@ class TranslationIssueModel {
         //
         // $this->chunkReview may not refer to the chunk review associated to issue source page
         //
-        $chunkReview    = Model\ChunkReviewDao::findByIdJobAndPasswordAndSourcePage( $this->chunk->id, $this->chunk->password, $this->issue->source_page );
+        $chunkReview    = ChunkReviewDao::findByIdJobAndPasswordAndSourcePage( $this->chunk->id, $this->chunk->password, $this->issue->source_page );
         $final_revision = ( new TranslationEventDao() )->getFinalRevisionForSegmentAndSourcePage(
                 $chunkReview->id_job,
                 $this->issue->id_segment,

@@ -919,8 +919,8 @@ class CatUtils {
         $job = \Jobs_JobDao::getByIdAndPassword( $jobId, $jobPassword );
 
         if ( !$job ) {
-            /** @var ChunkReviewStruct $chunkReview */
-            $chunkReview = \Features\ReviewExtended\Model\ChunkReviewDao::findByReviewPasswordAndJobId( $jobPassword, $jobId );
+
+            $chunkReview = ChunkReviewDao::findByReviewPasswordAndJobId( $jobPassword, $jobId );
 
             if ( !$chunkReview ) {
                 return null;

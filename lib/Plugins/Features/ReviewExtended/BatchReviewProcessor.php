@@ -11,9 +11,9 @@ namespace Features\ReviewExtended;
 use Chunks_ChunkStruct;
 use Exception;
 use Features\ReviewExtended\Email\BatchReviewProcessorAlertEmail;
-use Features\ReviewExtended\Model\ChunkReviewDao;
 use Features\TranslationEvents\Model\TranslationEvent;
 use Log;
+use LQA\ChunkReviewDao;
 use Projects_ProjectStruct;
 use ReflectionException;
 use RevisionFactory;
@@ -127,7 +127,7 @@ class BatchReviewProcessor {
             foreach ( $segmentTranslationModel->getEvent()->getChunkReviews() as $chunkReview ) {
 
                 // prepare data to update pass fail values
-                $data[ $chunkReview->id ][ 'chunkReview_partials' ] = $chunkReview;
+                $data[ $chunkReview->id ][ 'chunkReview' ]          = $chunkReview;
                 $data[ $chunkReview->id ][ 'penalty_points' ]       = ( $data[ $chunkReview->id ][ 'penalty_points' ] ?? 0 ) + $chunkReview->penalty_points;
                 $data[ $chunkReview->id ][ 'reviewed_words_count' ] = ( $data[ $chunkReview->id ][ 'reviewed_words_count' ] ?? 0 ) + $chunkReview->reviewed_words_count;
                 $data[ $chunkReview->id ][ 'total_tte' ]            = ( $data[ $chunkReview->id ][ 'total_tte' ] ?? 0 ) + $chunkReview->total_tte;
