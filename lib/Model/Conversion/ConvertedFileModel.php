@@ -1,11 +1,11 @@
 <?php
 
-namespace Conversion ;
+namespace Conversion;
 
 use Constants\ConversionHandlerStatus;
+use Exception;
 
-class ConvertedFileModel implements \JsonSerializable
-{
+class ConvertedFileModel implements \JsonSerializable {
     /**
      * @var int
      */
@@ -31,19 +31,18 @@ class ConvertedFileModel implements \JsonSerializable
      *
      * @param null $code
      *
-     * @throws \Exception
+     * @throws Exception
      */
-    public function __construct($code = null)
-    {
-        if(empty($code)){
+    public function __construct( $code = null ) {
+        if ( empty( $code ) ) {
             $this->code = ConversionHandlerStatus::NOT_CONVERTED;
         } else {
-            $this->changeCode($code);
+            $this->changeCode( $code );
         }
 
         $this->warnings = [];
-        $this->errors = [];
-        $this->data = [];
+        $this->errors   = [];
+        $this->data     = [];
     }
 
     /**
@@ -51,39 +50,37 @@ class ConvertedFileModel implements \JsonSerializable
      *
      * @return bool
      */
-    private function validateCode($code)
-    {
+    private function validateCode( $code ) {
         $allowed = [
-            ConversionHandlerStatus::ZIP_HANDLING,
-            ConversionHandlerStatus::OK ,
-            ConversionHandlerStatus::NOT_CONVERTED,
-            ConversionHandlerStatus::INVALID_FILE,
-            ConversionHandlerStatus::NESTED_ZIP_FILES_NOT_ALLOWED,
-            ConversionHandlerStatus::SOURCE_ERROR,
-            ConversionHandlerStatus::TARGET_ERROR,
-            ConversionHandlerStatus::UPLOAD_ERROR,
-            ConversionHandlerStatus::MISCONFIGURATION,
-            ConversionHandlerStatus::INVALID_TOKEN,
-            ConversionHandlerStatus::INVALID_SEGMENTATION_RULE,
-            ConversionHandlerStatus::OCR_WARNING,
-            ConversionHandlerStatus::OCR_ERROR,
-            ConversionHandlerStatus::GENERIC_ERROR,
-            ConversionHandlerStatus::FILESYSTEM_ERROR,
-            ConversionHandlerStatus::S3_ERROR,
+                ConversionHandlerStatus::ZIP_HANDLING,
+                ConversionHandlerStatus::OK,
+                ConversionHandlerStatus::NOT_CONVERTED,
+                ConversionHandlerStatus::INVALID_FILE,
+                ConversionHandlerStatus::NESTED_ZIP_FILES_NOT_ALLOWED,
+                ConversionHandlerStatus::SOURCE_ERROR,
+                ConversionHandlerStatus::TARGET_ERROR,
+                ConversionHandlerStatus::UPLOAD_ERROR,
+                ConversionHandlerStatus::MISCONFIGURATION,
+                ConversionHandlerStatus::INVALID_TOKEN,
+                ConversionHandlerStatus::INVALID_SEGMENTATION_RULE,
+                ConversionHandlerStatus::OCR_WARNING,
+                ConversionHandlerStatus::OCR_ERROR,
+                ConversionHandlerStatus::GENERIC_ERROR,
+                ConversionHandlerStatus::FILESYSTEM_ERROR,
+                ConversionHandlerStatus::S3_ERROR,
         ];
 
-        return in_array($code, $allowed);
+        return in_array( $code, $allowed );
     }
 
     /**
      * @param $code
      *
-     * @throws \Exception
+     * @throws Exception
      */
-    public function changeCode($code)
-    {
-        if(!$this->validateCode($code)){
-            throw new \Exception($code . ' is not a valid code');
+    public function changeCode( $code ) {
+        if ( !$this->validateCode( $code ) ) {
+            throw new Exception( $code . ' is not a valid code' );
         }
 
         $this->code = $code;
@@ -99,21 +96,19 @@ class ConvertedFileModel implements \JsonSerializable
     /**
      * @return bool
      */
-    public function hasAnErrorCode()
-    {
+    public function hasAnErrorCode() {
         return $this->code <= 0;
     }
 
     /**
      * @param string $messageError
-     * @param null $debug
+     * @param null   $debug
      */
-    public function addError($messageError, $debug = null)
-    {
+    public function addError( $messageError, $debug = null ) {
         $this->errors[] = [
-            'code' => $this->code,
-            'message' => $messageError,
-            'debug' => $debug,
+                'code'    => $this->code,
+                'message' => $messageError,
+                'debug'   => $debug,
         ];
     }
 
@@ -127,19 +122,17 @@ class ConvertedFileModel implements \JsonSerializable
     /**
      * @return bool
      */
-    public function hasErrors()
-    {
-        return !empty($this->errors);
+    public function hasErrors() {
+        return !empty( $this->errors );
     }
 
     /**
      * @param string $messageError
      */
-    public function addWarning($messageError)
-    {
+    public function addWarning( $messageError ) {
         $this->warnings[] = [
-            'code' => $this->code,
-            'message' => $messageError,
+                'code'    => $this->code,
+                'message' => $messageError,
         ];
     }
 
@@ -153,9 +146,8 @@ class ConvertedFileModel implements \JsonSerializable
     /**
      * @return bool
      */
-    public function hasWarnings()
-    {
-        return !empty($this->warnings);
+    public function hasWarnings() {
+        return !empty( $this->warnings );
     }
 
     /**
@@ -169,21 +161,19 @@ class ConvertedFileModel implements \JsonSerializable
      * @param $key
      * @param $value
      */
-    public function addData( $key, $value )
-    {
-        $this->data[$key] = $value;
+    public function addData( $key, $value ) {
+        $this->data[ $key ] = $value;
     }
 
     /**
      * @return array
      */
-    public function jsonSerialize()
-    {
+    public function jsonSerialize() {
         return [
-            'code' => $this->getCode(),
-            'errors' => $this->getErrors(),
-            'warnings' => $this->getWarnings(),
-            'data' => $this->getData(),
+                'code'     => $this->getCode(),
+                'errors'   => $this->getErrors(),
+                'warnings' => $this->getWarnings(),
+                'data'     => $this->getData(),
         ];
     }
 }

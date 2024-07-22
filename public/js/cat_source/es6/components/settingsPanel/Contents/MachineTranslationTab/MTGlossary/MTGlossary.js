@@ -230,7 +230,7 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
     let memories = []
     const getJobMetadata = ({jobMetadata: {project} = {}}) => {
       const rows = memories.filter(({id}) =>
-        project.mmt_glossaries.glossaries.some((value) => value === id),
+        project.mmt_glossaries?.glossaries.some((value) => value === id),
       )
       updateRowsState(rows.map(({id, name}) => ({id, name, isActive: true})))
     }

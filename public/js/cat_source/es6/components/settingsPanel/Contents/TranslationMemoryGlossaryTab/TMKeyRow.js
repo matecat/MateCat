@@ -277,7 +277,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
 
   const showConfirmDelete = () => {
     const templatesInvolved = projectTemplates.filter((template) =>
-      template.tm.some(({key}) => key === row.key),
+      template.tm?.some(({key}) => key === row.key),
     )
 
     if (templatesInvolved.length) {

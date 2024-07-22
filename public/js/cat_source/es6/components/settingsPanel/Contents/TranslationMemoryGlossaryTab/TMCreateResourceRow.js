@@ -153,7 +153,7 @@ export const TMCreateResourceRow = ({row}) => {
               title: 'Invalid key',
               type: 'error',
               text:
-                  !errors || errors[0].code === '23000'
+                !errors || errors[0].code === '23000'
                   ? 'The key you entered is invalid.'
                   : errors[0].message,
               position: 'br',
