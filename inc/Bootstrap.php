@@ -18,14 +18,20 @@ class Bootstrap {
      */
     private $autoLoadedFeatureSet;
 
-    public static function start() {
-        new self();
+    public static function start( SplFileInfo $config_file = null, SplFileInfo $task_runner_config_file = null ) {
+        new self( $config_file, $task_runner_config_file );
     }
 
-    private function __construct() {
+    private function __construct( SplFileInfo $config_file = null, SplFileInfo $task_runner_config_file = null ) {
 
         self::$_ROOT  = realpath( dirname( __FILE__ ) . '/../' );
-        self::$CONFIG = parse_ini_file( self::$_ROOT . DIRECTORY_SEPARATOR . 'inc/config.ini', true );
+
+        if( $config_file != null ){
+            self::$CONFIG = parse_ini_file( $config_file->getRealPath(), true );
+        } else {
+            self::$CONFIG = parse_ini_file( self::$_ROOT . DIRECTORY_SEPARATOR . 'inc/config.ini', true );
+        }
+
         $OAUTH_CONFIG = @parse_ini_file( self::$_ROOT . DIRECTORY_SEPARATOR . 'inc/oauth_config.ini', true );
 
         register_shutdown_function( [ 'Bootstrap', 'shutdownFunctionHandler' ] );
@@ -51,6 +57,12 @@ class Bootstrap {
 
         //get the environment configuration
         self::initConfig();
+
+        if( $task_runner_config_file != null ){
+            INIT::$TASK_RUNNER_CONFIG = parse_ini_file( $task_runner_config_file->getRealPath(), true );
+        } else {
+            INIT::$TASK_RUNNER_CONFIG = parse_ini_file( self::$_ROOT . DIRECTORY_SEPARATOR . 'inc/task_manager_config.ini', true );
+        }
 
         ini_set( 'display_errors', false );
         if ( INIT::$PRINT_ERRORS ) {
@@ -79,8 +91,6 @@ class Bootstrap {
         INIT::$MODEL_ROOT                      = INIT::$ROOT . '/lib/Model';
         INIT::$CONTROLLER_ROOT                 = INIT::$ROOT . '/lib/Controller';
         INIT::$UTILS_ROOT                      = INIT::$ROOT . '/lib/Utils';
-
-        INIT::$TASK_RUNNER_CONFIG = parse_ini_file( self::$_ROOT . DIRECTORY_SEPARATOR . 'inc/task_manager_config.ini', true );
 
         try {
             Log::$uniqID = ( isset( $_COOKIE[ INIT::$PHP_SESSION_NAME ] ) ? substr( $_COOKIE[ INIT::$PHP_SESSION_NAME ], 0, 13 ) : uniqid() );

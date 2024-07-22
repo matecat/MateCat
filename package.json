@@ -6,7 +6,7 @@
     "format": "prettier --write .",
     "lint": "eslint --ignore-path .gitignore .",
     "test": "jest --watchAll",
-    "coverage": "jest --coverage",
+    "coverage": "jest --silent --coverage",
     "prepare": "husky install support_scripts/husky",
     "watch": "webpack --mode development --watch",
     "build:dev": "webpack --mode development",

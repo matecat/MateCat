@@ -66,7 +66,7 @@ class downloadAnalysisReportController extends downloadController {
         $analysisStatus = new XTRFStatus( $_project_data, $this->featureSet );
         $outputContent = $analysisStatus->fetchData()->getResult();
 
-        $this->outputContent = $this->composeZip( $_project_data[0][ 'pname' ], $outputContent );
+        $this->outputContent = $this->composeZip( $outputContent, $_project_data[0][ 'pname' ] );
         $this->_filename     = $_project_data[0][ 'pname' ] . ".zip";
 
         /**
@@ -91,7 +91,7 @@ class downloadAnalysisReportController extends downloadController {
      *
      * @return false|string
      */
-    protected static function composeZip( $projectName , $outputContent ) {
+    protected static function composeZip( Array $outputContent, $projectName = null, $ignore = false ) {
 
         $fileName = tempnam( "/tmp", "zipmat" );
         $zip  = new ZipArchive();
