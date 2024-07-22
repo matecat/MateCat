@@ -361,6 +361,9 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
   const haveRecords = rows?.length > 0
   const isVisibleGlossaryOptions =
     !isCattoolPage || (isCattoolPage && haveRecords)
+  const shouldHideNewButton = rows?.some(
+    ({id}) => id === MT_GLOSSARY_CREATE_ROW_ID,
+  )
 
   return (
     <div className="mt-glossary">
@@ -391,7 +394,7 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
             (haveRecords ? (
               <div className="main-buttons-container">
                 <button
-                  className="grey-button create-glossary-button"
+                  className={`grey-button create-glossary-button${shouldHideNewButton ? ' create-glossary-button-disabled' : ''}`}
                   onClick={addGlossary}
                   title="Add glossary"
                 >

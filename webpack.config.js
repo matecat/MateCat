@@ -11,6 +11,7 @@ const fs = require('fs')
 const ini = require('ini')
 
 const buildPath = './public/build/'
+const lxqDownload = './public/buildResources/'
 
 const downloadFile = async (url, dest, cb) => {
   const file = fs.createWriteStream(dest)
@@ -39,18 +40,18 @@ const matecatConfig = async ({env}, {mode}) => {
   const lxqLicence = config[config.ENV]?.LXQ_LICENSE
   if (lxqLicence) {
     const lxqServer = config[config.ENV].LXQ_SERVER
-    if (!fs.existsSync(buildPath)) {
-      fs.mkdirSync(buildPath)
+    if (!fs.existsSync(lxqDownload)) {
+      fs.mkdirSync(lxqDownload)
     }
     await downloadFile(
       lxqServer + '/js/lxqlicense.js',
-      buildPath + 'lxqlicense.js',
+      lxqDownload + 'lxqlicense.js',
     )
   } else {
-    if (!fs.existsSync(buildPath)) {
-      fs.mkdirSync(buildPath)
+    if (!fs.existsSync(lxqDownload)) {
+      fs.mkdirSync(lxqDownload)
     }
-    fs.closeSync(fs.openSync(buildPath + 'lxqlicense.js', 'w'))
+    fs.closeSync(fs.openSync(lxqDownload + 'lxqlicense.js', 'w'))
   }
   let pluginsCattoolFiles = []
   let pluginsUploadFiles = []
@@ -120,6 +121,7 @@ const matecatConfig = async ({env}, {mode}) => {
         ? '[name].[fullhash].chunk.js'
         : '[name].[contenthash].chunk.js',
       publicPath: '/public/build/',
+      clean: true,
     },
     optimization: {
       moduleIds: 'deterministic',
@@ -214,7 +216,7 @@ const matecatConfig = async ({env}, {mode}) => {
       ],
       ...entryPoints,
       cattool: [
-        path.resolve(__dirname, 'public/build/lxqlicense.js'),
+        path.resolve(__dirname, lxqDownload + 'lxqlicense.js'),
         path.resolve(__dirname, 'public/js/common.js'),
         path.resolve(__dirname, 'public/js/user_store.js'),
         path.resolve(__dirname, 'public/js/cat_source/ui.core.js'),
