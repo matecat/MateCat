@@ -45,6 +45,9 @@ class OutsourceVendor extends React.Component {
 
     this.retrieveChangeRates()
 
+    // Note 2024-07-08
+    // I temporary removed RUB and TRY because the Translated API
+    // does not return the corresponding conversion rates
     this.currencies = {
       EUR: {symbol: '€', name: 'Euro (EUR)'},
       USD: {symbol: 'US$', name: 'US dollar (USD)'},
@@ -53,10 +56,10 @@ class OutsourceVendor extends React.Component {
       NZD: {symbol: '$', name: 'New Zealand dollar (NZD)'},
       GBP: {symbol: '£', name: 'Pound sterling (GBP)'},
       BRL: {symbol: 'R$', name: 'Real (BRL)'},
-      RUB: {symbol: 'руб', name: 'Russian ruble (RUB)'},
+      //RUB: {symbol: 'руб', name: 'Russian ruble (RUB)'},
       SEK: {symbol: 'kr', name: 'Swedish krona (SEK)'},
       CHF: {symbol: 'Fr.', name: 'Swiss franc (CHF)'},
-      TRY: {symbol: 'TL', name: 'Turkish lira (TL)'},
+      //TRY: {symbol: 'TL', name: 'Turkish lira (TL)'},
       KRW: {symbol: '￦', name: 'Won (KRW)'},
       JPY: {symbol: '￥', name: 'Yen (JPY)'},
       PLN: {symbol: 'zł', name: 'Złoty (PLN)'},
@@ -790,13 +793,13 @@ class OutsourceVendor extends React.Component {
                             >
                               Real (BRL)
                             </div>
-                            <div
-                              className="item"
-                              data-value="RUB"
-                              data-symbol="руб"
-                            >
-                              Russian ruble (RUB)
-                            </div>
+                            {/*<div*/}
+                            {/*  className="item"*/}
+                            {/*  data-value="RUB"*/}
+                            {/*  data-symbol="руб"*/}
+                            {/*>*/}
+                            {/*  Russian ruble (RUB)*/}
+                            {/*</div>*/}
                             <div
                               className="item"
                               data-value="SEK"
@@ -811,13 +814,13 @@ class OutsourceVendor extends React.Component {
                             >
                               Swiss franc (CHF)
                             </div>
-                            <div
-                              className="item"
-                              data-value="TRY"
-                              data-symbol="TL"
-                            >
-                              Turkish lira (TL)
-                            </div>
+                            {/*<div*/}
+                            {/*  className="item"*/}
+                            {/*  data-value="TRY"*/}
+                            {/*  data-symbol="TL"*/}
+                            {/*>*/}
+                            {/*  Turkish lira (TL)*/}
+                            {/*</div>*/}
                             <div
                               className="item"
                               data-value="KRW"
@@ -1048,13 +1051,13 @@ class OutsourceVendor extends React.Component {
                             >
                               Real (BRL)
                             </div>
-                            <div
-                              className="item"
-                              data-value="RUB"
-                              data-symbol="руб"
-                            >
-                              Russian ruble (RUB)
-                            </div>
+                            {/*<div*/}
+                            {/*  className="item"*/}
+                            {/*  data-value="RUB"*/}
+                            {/*  data-symbol="руб"*/}
+                            {/*>*/}
+                            {/*  Russian ruble (RUB)*/}
+                            {/*</div>*/}
                             <div
                               className="item"
                               data-value="SEK"
@@ -1069,13 +1072,13 @@ class OutsourceVendor extends React.Component {
                             >
                               Swiss franc (CHF)
                             </div>
-                            <div
-                              className="item"
-                              data-value="TRY"
-                              data-symbol="TL"
-                            >
-                              Turkish lira (TL)
-                            </div>
+                            {/*<div*/}
+                            {/*  className="item"*/}
+                            {/*  data-value="TRY"*/}
+                            {/*  data-symbol="TL"*/}
+                            {/*>*/}
+                            {/*  Turkish lira (TL)*/}
+                            {/*</div>*/}
                             <div
                               className="item"
                               data-value="KRW"

@@ -68,6 +68,7 @@ div.segment-notes ul.graysmall li span.note-label {
   white-space: pre-wrap;
   display: flex;
   align-content: center;
+  gap: 4px;
 }
 .segments-notes-container .metadata-notes {
   display: flex;
@@ -94,6 +95,7 @@ div.segment-notes ul.graysmall li span.note-label {
 .segments-notes-container .note-label,
 .segments-notes-container .context-group-name {
   font-weight: bold;
+  white-space: nowrap;
 }
 
 .tab-preview-screenshot {

@@ -66,6 +66,7 @@ export const Button = React.forwardRef(
       onClick = () => {},
       testId,
       className = '',
+      ...props
     },
     ref,
   ) => {
@@ -101,6 +102,7 @@ export const Button = React.forwardRef(
         // eslint-disable-next-line react/no-unknown-property
         onClick={onClick}
         data-testid={testId}
+        {...props}
       >
         {waiting ? (
           <>

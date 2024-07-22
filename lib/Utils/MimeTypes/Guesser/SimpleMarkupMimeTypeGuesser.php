@@ -58,16 +58,16 @@ class SimpleMarkupMimeTypeGuesser implements MimeTypeGuesserInterface {
         $r4 = stripos( $buffer, '<tmx' ) !== false && $r1;
         $r3 = stripos( $buffer, '<html' ) !== false;
 
-        if ( $r4 || $r1 ) {
-            return 'text/xml';
-        }
-
         if ( $r3 ) {
             return 'text/html';
         }
 
         if ( $r2 ) {
             return 'application/x-xliff';
+        }
+
+        if ( $r1 || $r4 ) {
+            return 'text/xml';
         }
 
         return null;

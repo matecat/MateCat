@@ -474,40 +474,6 @@ var spec = {
         },
       },
     },
-    '/api/v1/jobs/{id_job}/{password}/stats': {
-      get: {
-        tags: ['Job'],
-        summary: 'Statistics',
-        description: 'Statistics',
-        parameters: [
-          {
-            name: 'id_job',
-            in: 'path',
-            description: 'The id of the job',
-            required: true,
-            type: 'string',
-          },
-          {
-            name: 'password',
-            in: 'path',
-            description: 'The password of the job',
-            required: true,
-            type: 'string',
-          },
-        ],
-        responses: {
-          200: {
-            description: 'Statistics',
-            schema: {
-              $ref: '#/definitions/Stats',
-            },
-          },
-          default: {
-            description: 'Unexpected error',
-          },
-        },
-      },
-    },
     '/api/v2/jobs/{id_job}/{password}/cancel': {
       post: {
         tags: ['Job'],
@@ -980,6 +946,21 @@ var spec = {
               description: 'Number of chuck you want to split',
               required: true,
               type: 'integer',
+            },
+            {
+              name: 'split_values',
+              in: 'formData',
+              description:
+                  'Number of word count values of each chunk returned in split check API',
+              type: 'array',
+              items: {type: 'double'},
+            },
+            {
+              name: 'split_raw_words',
+              in: 'formData',
+              description:
+                  'Split the job by raw words instead of equivalent words',
+              type: 'boolean',
             },
           ],
           responses: {
@@ -3208,89 +3189,6 @@ var spec = {
         },
       },
     },
-    Stats: {
-      type: 'object',
-      properties: {
-        id: {
-          type: 'integer',
-        },
-        DRAFT: {
-          type: 'number',
-        },
-        TRANSLATED: {
-          type: 'number',
-        },
-        APPROVED: {
-          type: 'number',
-        },
-        REJECTED: {
-          type: 'number',
-        },
-        TOTAL: {
-          type: 'number',
-        },
-        PROGRESS: {
-          type: 'number',
-        },
-        TOTAL_FORMATTED: {
-          type: 'number',
-        },
-        PROGRESS_FORMATTED: {
-          type: 'string',
-        },
-        APPROVED_FORMATTED: {
-          type: 'string',
-        },
-        REJECTED_FORMATTED: {
-          type: 'string',
-        },
-        DRAFT_FORMATTED: {
-          type: 'string',
-        },
-        TRANSLATED_FORMATTED: {
-          type: 'string',
-        },
-        APPROVED_PERC: {
-          type: 'number',
-        },
-        REJECTED_PERC: {
-          type: 'number',
-        },
-        DRAFT_PERC: {
-          type: 'number',
-        },
-        TRANSLATED_PERC: {
-          type: 'number',
-        },
-        PROGRESS_PERC: {
-          type: 'number',
-        },
-        TRANSLATED_PERC_FORMATTED: {
-          type: 'number',
-        },
-        DRAFT_PERC_FORMATTED: {
-          type: 'number',
-        },
-        APPROVED_PERC_FORMATTED: {
-          type: 'number',
-        },
-        REJECTED_PERC_FORMATTED: {
-          type: 'number',
-        },
-        PROGRESS_PERC_FORMATTED: {
-          type: 'number',
-        },
-        TODO_FORMATTED: {
-          type: 'string',
-        },
-        DOWNLOAD_STATUS: {
-          type: 'string',
-        },
-        ANALYSIS_COMPLETE: {
-          type: 'string',
-        },
-      },
-    },
     Urls: {
       type: 'object',
       properties: {
@@ -4021,6 +3919,34 @@ var spec = {
         original_download_url: {type: 'string'},
         translation_download_url: {type: 'string'},
         xliff_download_url: {type: 'string'},
+      },
+    },
+
+    Stats: {
+      type: 'object',
+      properties: {
+        equivalent: {
+          type: 'object',
+          properties: {
+            new: { type: 'number' },
+            draft: { type: 'number' },
+            translated: { type: 'number' },
+            approved: { type: 'number' },
+            approved2: { type: 'number' },
+            total: { type: 'number' },
+          },
+        },
+        raw: {
+          type: 'object',
+          properties: {
+            new: { type: 'number' },
+            draft: { type: 'number' },
+            translated: { type: 'number' },
+            approved: { type: 'number' },
+            approved2: { type: 'number' },
+            total: { type: 'number' },
+          },
+        }
       },
     },
 
