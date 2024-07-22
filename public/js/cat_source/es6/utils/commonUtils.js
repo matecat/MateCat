@@ -168,7 +168,7 @@ const CommonUtils = {
     }
 
     if (OfflineUtils.offline) {
-      if (UI.setTranslationTail.length) {
+      if (UI.setTranslationTail && UI.setTranslationTail.length) {
         return say_goodbye(
           'You are working in offline mode. If you proceed to refresh you will lose all the pending translations. ' +
             'Do you want to proceed with the refresh ?',
