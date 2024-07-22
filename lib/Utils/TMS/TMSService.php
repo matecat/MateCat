@@ -456,12 +456,17 @@ class TMSService {
                 }
             }
 
+            $contextPre = (isset($result[($k-1)])) ? $result[($k-1)]['segment'] : '';
+            $contextPost = (isset($result[($k+1)])) ? $result[($k+1)]['segment'] : '';
+
             $tmx = '
     <tu tuid="' . $row[ 'id_segment' ] . '" creationdate="' . $dateCreate->format( 'Ymd\THis\Z' ) . '" datatype="plaintext" srclang="' . $sourceLang . '">
         <prop type="x-MateCAT-id_job">' . $row[ 'id_job' ] . '</prop>
         <prop type="x-MateCAT-id_segment">' . $row[ 'id_segment' ] . '</prop>
         <prop type="x-MateCAT-filename">' . htmlspecialchars( $row[ 'filename' ], ENT_DISALLOWED, "UTF-8" ) . '</prop>
         <prop type="x-MateCAT-status">' . $row[ 'status' ] . '</prop>
+        <prop type="x-context-pre">'.$contextPre.'</prop>
+        <prop type="x-context-post">'.$contextPost.'</prop>
         ' . $chunkPropString . '
         ' . $tmOrigin . '
         <tuv xml:lang="' . $sourceLang . '">
