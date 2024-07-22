@@ -377,8 +377,7 @@ class AnalyzeHeader extends React.Component {
     let status = this.props.data.get('status')
     if (status === ANALYSIS_STATUS.DONE) {
       setTimeout(function () {
-        self.containerAnalysisComplete &&
-          self.containerAnalysisComplete.classList.remove('hide')
+        self.containerAnalysisComplete?.classList.remove('hide')
       }, 600)
     }
   }
@@ -393,7 +392,7 @@ class AnalyzeHeader extends React.Component {
       this.containerSavingWords.classList.add('updated-count')
       setTimeout(function () {
         self.containerSavingWords.classList.remove('updated-count')
-        self.containerAnalysisComplete.classList.remove('hide')
+        self.containerAnalysisComplete?.classList.remove('hide')
       }, 400)
     }
   }

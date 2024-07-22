@@ -49,7 +49,7 @@ class SegmentCommentsContainer extends React.Component {
 
   sendComment() {
     const {mentionsMarkup} = this.state
-    if (mentionsMarkup.length > 0) {
+    if (mentionsMarkup?.length > 0) {
       CommentsActions.sendComment(
         mentionsMarkup,
         this.context.segment.original_sid,
