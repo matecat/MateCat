@@ -24,6 +24,7 @@ use LQA\EntryCommentDao;
 use Matecat\SubFiltering\MateCatFilter;
 use QualityReport_QualityReportSegmentStruct;
 use Segments_SegmentDao;
+use Segments_SegmentOriginalDataDao;
 
 class QualityReportSegmentModel {
 
@@ -187,7 +188,7 @@ class QualityReportSegmentModel {
 
         foreach ( $data as $index => $seg ) {
 
-            $dataRefMap = \Segments_SegmentOriginalDataDao::getSegmentDataRefMap( $seg->sid );
+            $dataRefMap = Segments_SegmentOriginalDataDao::getSegmentDataRefMap( $seg->sid );
 
             /** @var MateCatFilter $Filter */
             $Filter = MateCatFilter::getInstance( $featureSet, $this->chunk->source, $this->chunk->target, $dataRefMap );
@@ -197,72 +198,103 @@ class QualityReportSegmentModel {
             $this->_commonSegmentAssignments( $seg, $Filter, $featureSet, $this->chunk, $isForUI );
             $this->_assignIssues( $seg, isset( $issues ) ? $issues : [], $issue_comments );
             $this->_assignComments( $seg, $comments );
-            $this->_populateLastTranslationAndRevision( $seg, $Filter, $last_translations, $last_revisions, $codes, $isForUI );
 
             // If the segment is pre-translated (maybe from a previously XLIFF file)
 
-            // If the segment is TRANSLATED
-            // 'last_translation' and 'suggestion' from 'translation' and
-            // set is_pre_translated to true
-            if ( null === $seg->last_translation and $seg->status === \Constants_TranslationStatus::STATUS_TRANSLATED ) {
-
+            if ( $seg->getTmAnalysisStatus() == 'SKIPPED' ) {
+                $seg->last_revisions    = [];
+                $seg->is_pre_translated = true;
                 if ( $isForUI ) {
-                    $seg->last_translation = $Filter->fromLayer0ToLayer2( $seg->translation );
+                    $seg->suggestion = $Filter->fromLayer0ToLayer2( $seg->suggestion );
+                }
+                switch ( $seg->status ) {
+                    case Constants_TranslationStatus::STATUS_APPROVED:
+                        $seg->last_revisions[] = [
+                                'revision_number' => 1,
+                                'translation'     => $seg->translation
+                        ];
+                        break;
+                    case Constants_TranslationStatus::STATUS_APPROVED2:
+                        $seg->last_revisions[] = [
+                                'revision_number' => 2,
+                                'translation'     => $seg->translation
+                        ];
+                        break;
+                    case Constants_TranslationStatus::STATUS_TRANSLATED:
+                        $seg->last_translation = $Filter->fromLayer0ToLayer2( $seg->translation );
+                        break;
+                    default:
+                        $seg->is_pre_translated = false;
+                        break;
+                }
+            } else {
+
+                $this->_populateLastTranslationAndRevision( $seg, $Filter, $last_translations, $last_revisions, $codes, $isForUI );
+
+                // If the segment is TRANSLATED
+                // 'last_translation' and 'suggestion' from 'translation' and
+                // set is_pre_translated to true
+                if ( null === $seg->last_translation and $seg->status === \Constants_TranslationStatus::STATUS_TRANSLATED ) {
+
+                    if ( $isForUI ) {
+                        $seg->last_translation = $Filter->fromLayer0ToLayer2( $seg->translation );
+                    }
+
+                    // this means the job has a bilingual file
+                    if ( '' === $seg->suggestion ) {
+                        if ( $isForUI ) {
+                            $seg->suggestion = $Filter->fromLayer0ToLayer2( $seg->translation );
+                        }
+                    }
+
+                    $seg->is_pre_translated = true;
                 }
 
-                // this means the job has a bilingual file
-                if ( '' === $seg->suggestion ) {
+                // If the segment was APPROVED
+                // check if exists a version 0 'translation' (which means that the segment was modified); if not then use the current 'translation'
+                if (
+                        null === $seg->last_translation and
+                        ( $seg->status === Constants_TranslationStatus::STATUS_APPROVED or $seg->status === Constants_TranslationStatus::STATUS_APPROVED2 )
+                ) {
+
+                    $first_version = ( new TranslationVersionDao() )->getVersionNumberForTranslation( $this->chunk->id, $seg->sid, 0 );
+                    $translation   = ( $first_version ) ? $first_version->translation : null;
+
                     if ( $isForUI ) {
-                        $seg->suggestion = $Filter->fromLayer0ToLayer2( $seg->translation );
+                        $seg->last_translation = $Filter->fromLayer0ToLayer2( $translation );
+                    }
+
+                    // this means the job has a bilingual file
+                    if ( '' === $seg->suggestion ) {
+                        if ( $isForUI ) {
+                            $seg->suggestion = $Filter->fromLayer0ToLayer2( $translation );
+                        }
+                    }
+
+                    if ( null === $seg->last_translation ) {
+                        $seg->last_translation = $seg->suggestion;
+                    }
+
+                    $seg->is_pre_translated = true;
+
+                    //
+                    // -------------------------------
+                    // Note 2020-05-29
+                    // -------------------------------
+                    //
+                    // We check if the segment is not a pre-approved, locked ICE without associated events.
+                    // In this case we won't to add it twice to last_revisions array
+                    //
+                    $revisionCount = ( false === $this->isAnApprovedIce( $seg ) ) ? count( $this->_getChunkReviews() ) : 1;
+
+                    for ( $i = 1; $i <= $revisionCount; $i++ ) {
+                        $seg->last_revisions [] = [
+                                'revision_number' => $i,
+                                'translation'     => $translation
+                        ];
                     }
                 }
 
-                $seg->is_pre_translated = true;
-            }
-
-            // If the segment was APPROVED
-            // check if exists a version 0 'translation' (which means that the segment was modified); if not then use the current 'translation'
-            if (
-                null === $seg->last_translation and
-                ($seg->status === Constants_TranslationStatus::STATUS_APPROVED or $seg->status === Constants_TranslationStatus::STATUS_APPROVED2 )
-            ) {
-
-                $first_version = ( new TranslationVersionDao() )->getVersionNumberForTranslation( $this->chunk->id, $seg->sid, 0 );
-                $translation   = ( $first_version ) ? $first_version->translation : null;
-
-                if ( $isForUI ) {
-                    $seg->last_translation = $Filter->fromLayer0ToLayer2( $translation );
-                }
-
-                // this means the job has a bilingual file
-                if ( '' === $seg->suggestion ) {
-                    if ( $isForUI ) {
-                        $seg->suggestion = $Filter->fromLayer0ToLayer2( $translation );
-                    }
-                }
-
-                if ( null === $seg->last_translation ) {
-                    $seg->last_translation = $seg->suggestion;
-                }
-
-                $seg->is_pre_translated = true;
-
-                //
-                // -------------------------------
-                // Note 2020-05-29
-                // -------------------------------
-                //
-                // We check if the segment is not a pre-approved, locked ICE without associated events.
-                // In this case we won't to add it twice to last_revisions array
-                //
-                $revisionCount = ( false === $this->isAnApprovedIce( $seg ) ) ? count( $this->_getChunkReviews() ) : 1;
-
-                for ( $i = 1; $i <= $revisionCount; $i++ ) {
-                    $seg->last_revisions [] = [
-                            'revision_number' => $i,
-                            'translation'     => $translation
-                    ];
-                }
             }
 
             $seg->pee_translation_revise     = $seg->getPEEBwtTranslationRevise();
@@ -285,7 +317,7 @@ class QualityReportSegmentModel {
     private function isAnApprovedIce( QualityReport_QualityReportSegmentStruct $qrSegmentStruct ) {
         return (
                 $qrSegmentStruct->locked == 1 and
-                ($qrSegmentStruct->status === Constants_TranslationStatus::STATUS_APPROVED or $qrSegmentStruct->status === Constants_TranslationStatus::STATUS_APPROVED2) and
+                ( $qrSegmentStruct->status === Constants_TranslationStatus::STATUS_APPROVED or $qrSegmentStruct->status === Constants_TranslationStatus::STATUS_APPROVED2 ) and
                 $qrSegmentStruct->match_type === 'ICE'
         );
     }
@@ -312,7 +344,7 @@ class QualityReportSegmentModel {
      * @throws \Exception
      */
     protected function _populateLastTranslationAndRevision( $seg, MateCatFilter $Filter, $last_translations, $last_revisions, $codes, $isForUI = false ) {
-        $last_translation = $this->_findLastTransaltion( $seg, $Filter, $last_translations, $isForUI );
+        $last_translation = $this->_findLastTranslation( $seg, $Filter, $last_translations, $isForUI );
 
         // last revision version object
         $last_segment_revisions = $this->_findLastRevision( $seg, $Filter, $last_revisions, $isForUI );
@@ -361,7 +393,7 @@ class QualityReportSegmentModel {
      * @return mixed|null
      * @throws \Exception
      */
-    protected function _findLastTransaltion( $seg, MateCatFilter $Filter, $last_translations, $isForUI = false ) {
+    protected function _findLastTranslation( $seg, MateCatFilter $Filter, $last_translations, $isForUI = false ) {
         $find_last_translation_version = null;
         if ( isset( $last_translations ) && !empty( $last_translations ) ) {
             foreach ( $last_translations as $last_translation ) {

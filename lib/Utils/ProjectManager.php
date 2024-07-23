@@ -2756,6 +2756,7 @@ class ProjectManager {
                         'segment_hash'           => $translation_row [ 3 ],
                         'status'                 => $rule->asEditorStatus(),
                         'translation'            => $filter->fromLayer1ToLayer0( $check->getTargetSeg() ),
+                        'suggestion'             => $filter->fromLayer1ToLayer0( $check->getTargetSeg() ),
                         'locked'                 => 0, // not allowed to change locked status for pre-translations
                         'match_type'             => $rule->asMatchType(),
                         'eq_word_count'          => $rule->asEquivalentWordCount( (int)$segment->raw_word_count, $payable_rates ),

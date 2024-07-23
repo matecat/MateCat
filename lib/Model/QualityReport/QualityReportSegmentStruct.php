@@ -81,6 +81,15 @@ class QualityReport_QualityReportSegmentStruct extends DataAccess_AbstractDaoObj
 
     public $dataRefMap = [];
 
+    protected $tm_analysis_status;
+
+    /**
+     * @return mixed
+     */
+    public function getTmAnalysisStatus() {
+        return $this->tm_analysis_status;
+    }
+
     /**
      * @return float
      */

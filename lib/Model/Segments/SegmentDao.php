@@ -438,6 +438,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                 st.locked,
                 st.match_type,
                 st.version_number,
+                st.tm_analysis_status,
                 ste.source_page
                 
                 FROM segments s
