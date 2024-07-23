@@ -2,7 +2,6 @@
 
 namespace Xliff;
 
-use CatUtils;
 use DataAccess\ShapelessConcreteStruct;
 use DataAccess_AbstractDao;
 use Database;
@@ -21,14 +20,14 @@ class XliffConfigTemplateDao extends DataAccess_AbstractDao {
     const query_by_uid_name   = "SELECT * FROM " . self::TABLE . " WHERE uid = :uid AND name = :name AND deleted_at IS NULL";
 
     /**
-     * @var null
+     * @var XliffConfigTemplateDao|null
      */
-    private static $instance = null;
+    private static ?XliffConfigTemplateDao $instance = null;
 
     /**
-     * @return XliffConfigTemplateDao|null
+     * @return XliffConfigTemplateDao
      */
-    private static function getInstance() {
+    private static function getInstance(): XliffConfigTemplateDao {
         if ( !isset( self::$instance ) ) {
             self::$instance = new self();
         }
@@ -41,7 +40,7 @@ class XliffConfigTemplateDao extends DataAccess_AbstractDao {
      *
      * @return XliffConfigTemplateStruct
      */
-    public static function getDefaultTemplate( $uid ) {
+    public static function getDefaultTemplate( $uid ): XliffConfigTemplateStruct {
         $default              = new XliffConfigTemplateStruct();
         $default->id          = 0;
         $default->uid         = $uid;
@@ -59,7 +58,7 @@ class XliffConfigTemplateDao extends DataAccess_AbstractDao {
      * @return XliffConfigTemplateStruct
      * @throws Exception
      */
-    public static function createFromJSON( $json, $uid ) {
+    public static function createFromJSON( $json, $uid ): XliffConfigTemplateStruct {
         $templateStruct = new XliffConfigTemplateStruct();
         $templateStruct->hydrateFromJSON( $json, $uid );
 
@@ -74,40 +73,21 @@ class XliffConfigTemplateDao extends DataAccess_AbstractDao {
      * @return XliffConfigTemplateStruct
      * @throws Exception
      */
-    public static function editFromJSON( XliffConfigTemplateStruct $templateStruct, $json, $uid ) {
+    public static function editFromJSON( XliffConfigTemplateStruct $templateStruct, $json, $uid ): XliffConfigTemplateStruct {
         $templateStruct->hydrateFromJSON( $json, $uid );
 
         return self::update( $templateStruct );
     }
 
     /**
-     * @param XliffConfigTemplateStruct $projectTemplateStruct
-     * @param                           $uid
-     *
-     * @return XliffConfigTemplateStruct
-     * @throws Exception
-     */
-    private static function findUniqueName( XliffConfigTemplateStruct $projectTemplateStruct, $uid ) {
-        $check = XliffConfigTemplateDao::getByUidAndName( $uid, $projectTemplateStruct->name, 0 );
-
-        if ( $check === null ) {
-            return $projectTemplateStruct;
-        }
-
-        $projectTemplateStruct->name = CatUtils::getUniqueName( $projectTemplateStruct->name );
-
-        return self::findUniqueName( $projectTemplateStruct, $uid );
-    }
-
-    /**
-     * @param     $uid
+     * @param int $uid
      * @param int $current
      * @param int $pagination
      *
      * @return array
      * @throws Exception
      */
-    public static function getAllPaginated( $uid, $current = 1, $pagination = 20 ) {
+    public static function getAllPaginated( int $uid, int $current = 1, int $pagination = 20 ): array {
         $conn = Database::obtain()->getConnection();
 
         $stmt = $conn->prepare( "SELECT count(id) as count FROM " . self::TABLE . " WHERE deleted_at IS NULL AND uid = :uid" );
@@ -160,7 +140,7 @@ class XliffConfigTemplateDao extends DataAccess_AbstractDao {
      * @return XliffConfigTemplateStruct|null
      * @throws Exception
      */
-    public static function getById( $id, $ttl = 60 ) {
+    public static function getById( $id, int $ttl = 60 ): ?XliffConfigTemplateStruct {
         $stmt   = self::getInstance()->_getStatementForCache( self::query_by_id );
         $result = self::getInstance()->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
                 'id' => $id,
@@ -174,14 +154,14 @@ class XliffConfigTemplateDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param     $id
-     * @param     $uid
+     * @param int $id
+     * @param int $uid
      * @param int $ttl
      *
      * @return XliffConfigTemplateStruct|null
      * @throws Exception
      */
-    public static function getByIdAndUser( $id, $uid, $ttl = 60 ) {
+    public static function getByIdAndUser( int $id, int $uid, int $ttl = 60 ): ?XliffConfigTemplateStruct {
         $stmt   = self::getInstance()->_getStatementForCache( self::query_by_id_and_uid );
         $result = self::getInstance()->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
                 'id'  => $id,
@@ -196,13 +176,13 @@ class XliffConfigTemplateDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param     $uid
+     * @param int $uid
      * @param int $ttl
      *
      * @return XliffConfigTemplateStruct[]
      * @throws Exception
      */
-    public static function getByUid( $uid, $ttl = 60 ) {
+    public static function getByUid( int $uid, int $ttl = 60 ): array {
         $stmt   = self::getInstance()->_getStatementForCache( self::query_by_uid );
         $result = self::getInstance()->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
                 'uid' => $uid,
@@ -222,14 +202,14 @@ class XliffConfigTemplateDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param     $uid
-     * @param     $name
-     * @param int $ttl
+     * @param int    $uid
+     * @param string $name
+     * @param int    $ttl
      *
      * @return XliffConfigTemplateStruct|null
      * @throws Exception
      */
-    public static function getByUidAndName( $uid, $name, $ttl = 60 ) {
+    public static function getByUidAndName( int $uid, string $name, int $ttl = 60 ) {
         $stmt   = self::getInstance()->_getStatementForCache( self::query_by_uid_name );
         $result = self::getInstance()->setCacheTTL( $ttl )->_fetchObject( $stmt, new ProjectTemplateStruct(), [
                 'uid'  => $uid,
@@ -244,15 +224,14 @@ class XliffConfigTemplateDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param $id
-     * @param $uid
+     * @param int $id
+     * @param int $uid
      *
      * @return int
-     * @throws Exception
      */
-    public static function remove( $id, $uid ) {
+    public static function remove( int $id, int $uid ): int {
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( "UPDATE " . self::TABLE . " SET `name` = :name AND `deleted_at` = :now WHERE id = :id AND uid = :uid;" );
+        $stmt = $conn->prepare( "UPDATE " . self::TABLE . " SET `name` = :name , `deleted_at` = :now WHERE id = :id AND uid = :uid;" );
         $stmt->execute( [
                 'id'   => $id,
                 'uid'  => $uid,
@@ -267,40 +246,39 @@ class XliffConfigTemplateDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param PDO    $conn
-     * @param string $id
+     * @param PDO $conn
+     * @param int $id
      */
-    private static function destroyQueryByIdCache( PDO $conn, $id ) {
+    private static function destroyQueryByIdCache( PDO $conn, int $id ) {
         $stmt = $conn->prepare( self::query_by_id );
         self::getInstance()->_destroyObjectCache( $stmt, [ 'id' => $id, ] );
     }
 
     /**
      * @param PDO $conn
-     * @param     $uid
+     * @param int $uid
      */
-    private static function destroyQueryByUidCache( PDO $conn, $uid ) {
+    private static function destroyQueryByUidCache( PDO $conn, int $uid ) {
         $stmt = $conn->prepare( self::query_by_uid );
         self::getInstance()->_destroyObjectCache( $stmt, [ 'uid' => $uid ] );
     }
 
     /**
      * @param PDO    $conn
-     * @param string $uid
+     * @param int    $uid
      * @param string $name
      */
-    private static function destroyQueryByUidAndNameCache( PDO $conn, $uid, $name ) {
+    private static function destroyQueryByUidAndNameCache( PDO $conn, int $uid, string $name ) {
         $stmt = $conn->prepare( self::query_by_uid_name );
         self::getInstance()->_destroyObjectCache( $stmt, [ 'uid' => $uid, 'name' => $name, ] );
     }
 
     /**
-     * @param $data
+     * @param array $data
      *
      * @return XliffConfigTemplateStruct|null
-     * @throws Exception
      */
-    private static function hydrateTemplateStruct( $data ) {
+    private static function hydrateTemplateStruct( array $data ): ?XliffConfigTemplateStruct {
         if (
                 !isset( $data[ 'id' ] ) or
                 !isset( $data[ 'uid' ] ) or
@@ -321,7 +299,7 @@ class XliffConfigTemplateDao extends DataAccess_AbstractDao {
      * @return XliffConfigTemplateStruct
      * @throws Exception
      */
-    public static function save( XliffConfigTemplateStruct $templateStruct ) {
+    public static function save( XliffConfigTemplateStruct $templateStruct ): XliffConfigTemplateStruct {
         $sql = "INSERT INTO " . self::TABLE .
                 " ( `uid`, `name`, `rules`, `created_at`, `modified_at` ) " .
                 " VALUES " .
@@ -355,7 +333,7 @@ class XliffConfigTemplateDao extends DataAccess_AbstractDao {
      * @return XliffConfigTemplateStruct
      * @throws Exception
      */
-    public static function update( XliffConfigTemplateStruct $templateStruct ) {
+    public static function update( XliffConfigTemplateStruct $templateStruct ): XliffConfigTemplateStruct {
         $sql = "UPDATE " . self::TABLE . " SET 
             `uid` = :uid, 
             `name` = :name,

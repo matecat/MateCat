@@ -10,6 +10,7 @@ use Klein\Response;
 use PDOException;
 use Swaggest\JsonSchema\InvalidValue;
 use Validator\Errors\JSONValidatorException;
+use Validator\Errors\JsonValidatorGenericException;
 use Validator\JSONValidator;
 use Validator\JSONValidatorObject;
 use Xliff\XliffConfigTemplateDao;
@@ -24,25 +25,23 @@ class XliffConfigTemplateController extends KleinController {
     /**
      * @param $json
      *
+     * @throws JSONValidatorException
+     * @throws JsonValidatorGenericException
      * @throws InvalidValue
-     * @throws Exception
+     * @throws \Swaggest\JsonSchema\Exception
      */
     private function validateJSON( $json ) {
         $validatorObject       = new JSONValidatorObject();
         $validatorObject->json = $json;
-        $jsonSchema            = file_get_contents( INIT::$ROOT . '/inc/validation/schema/xliff_parameters.json' );
-        $validator             = new JSONValidator( $jsonSchema );
+        $jsonSchema            = file_get_contents( INIT::$ROOT . '/inc/validation/schema/xliff_parameters_rules_wrapper.json' );
+        $validator             = new JSONValidator( $jsonSchema, true );
         $validator->validate( $validatorObject );
-
-        if ( !$validator->isValid() ) {
-            throw $validator->getExceptions()[ 0 ]->error;
-        }
     }
 
     /**
      * Get all entries
      */
-    public function all() {
+    public function all(): Response {
         $currentPage = ( isset( $_GET[ 'page' ] ) ) ? $_GET[ 'page' ] : 1;
         $pagination  = ( isset( $_GET[ 'perPage' ] ) ) ? $_GET[ 'perPage' ] : 20;
 
@@ -70,7 +69,7 @@ class XliffConfigTemplateController extends KleinController {
     /**
      * Get a single entry
      */
-    public function get() {
+    public function get(): Response {
         $id = filter_var( $this->request->id, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_ENCODE_LOW );
 
         try {
@@ -99,7 +98,7 @@ class XliffConfigTemplateController extends KleinController {
      *
      * @return Response
      */
-    public function create() {
+    public function create(): Response {
         // accept only JSON
         if ( !$this->isJsonRequest() ) {
             $this->response->code( 400 );
@@ -114,29 +113,30 @@ class XliffConfigTemplateController extends KleinController {
             $json = $this->request->body();
             $this->validateJSON( $json );
 
-            try {
-                $struct = XliffConfigTemplateDao::createFromJSON( $json, $this->getUser()->uid );
-            } catch ( PDOException $e ) {
-                if ( $e->getCode() == 23000 ) {
-                    $this->response->code( 404 );
-
-                    return $this->response->json( [
-                            'error' => "Invalid unique template name"
-                    ] );
-                } else {
-                    throw $e;
-                }
-            }
-
+            $struct = XliffConfigTemplateDao::createFromJSON( $json, $this->getUser()->uid );
             $this->response->code( 201 );
 
             return $this->response->json( $struct );
 
-        } catch ( JSONValidatorException $exception ) {
+        } catch ( JSONValidatorException|JsonValidatorGenericException|InvalidValue $exception ) {
             $errorCode = max( $exception->getCode(), 400 );
             $this->response->code( $errorCode );
 
-            return $this->response->json( $exception );
+            return $this->response->json( [ 'error' => $exception->getMessage() ] );
+        } catch ( PDOException $e ) {
+            if ( $e->getCode() == 23000 ) {
+                $this->response->code( 400 );
+
+                return $this->response->json( [
+                        'error' => "Invalid unique template name"
+                ] );
+            } else {
+                $this->response->code( 500 );
+
+                return $this->response->json( [
+                        'error' => $e->getMessage()
+                ] );
+            }
         } catch ( Exception $exception ) {
 
             $errorCode = $exception->getCode() >= 400 ? $exception->getCode() : 500;
@@ -154,7 +154,7 @@ class XliffConfigTemplateController extends KleinController {
      * @return Response
      * @throws Exception
      */
-    public function update() {
+    public function update(): Response {
         // accept only JSON
         if ( !$this->isJsonRequest() ) {
             $this->response->code( 400 );
@@ -182,11 +182,11 @@ class XliffConfigTemplateController extends KleinController {
             $this->response->code( 200 );
 
             return $this->response->json( $struct );
-        } catch ( JSONValidatorException $exception ) {
+        } catch ( JSONValidatorException|JsonValidatorGenericException|InvalidValue  $exception ) {
             $errorCode = max( $exception->getCode(), 400 );
             $this->response->code( $errorCode );
 
-            return $this->response->json( $exception );
+            return $this->response->json( [ 'error' => $exception->getMessage() ] );
         } catch ( Exception $exception ) {
             $errorCode = $exception->getCode() >= 400 ? $exception->getCode() : 500;
             $this->response->code( $errorCode );
@@ -200,7 +200,7 @@ class XliffConfigTemplateController extends KleinController {
     /**
      * Delete an entry
      */
-    public function delete() {
+    public function delete(): Response {
         $id  = filter_var( $this->request->id, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_ENCODE_LOW );
         $uid = $this->getUser()->uid;
 
@@ -229,14 +229,20 @@ class XliffConfigTemplateController extends KleinController {
     /**
      * @return Response
      */
-    public function schema() {
+    public function schema(): Response {
         return $this->response->json( $this->getModelSchema() );
     }
 
     /**
-     * @return false|string
+     * @return object|mixed
      */
-    private function getModelSchema() {
-        return json_decode( file_get_contents( INIT::$ROOT . '/inc/validation/schema/xliff_parameters.json' ) );
+    private function getModelSchema(): object {
+        $skeletonSchema = JSONValidator::getValidJSONSchema( file_get_contents( INIT::$ROOT . '/inc/validation/schema/xliff_parameters_rules_wrapper.json' ) );
+        $contentSchema  = JSONValidator::getValidJSONSchema( file_get_contents( INIT::$ROOT . '/inc/validation/schema/xliff_parameters_rules_content.json' ) );
+
+        $skeletonSchema->properties->rules->properties = $contentSchema->properties;
+        $skeletonSchema->definitions                   = $contentSchema->definitions;
+
+        return $skeletonSchema;
     }
 }

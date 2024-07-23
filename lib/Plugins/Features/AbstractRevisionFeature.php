@@ -63,7 +63,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      * @throws Exception
      */
     public function filterCreateProjectFeatures( array $projectFeatures, $controller ): array {
-        $projectFeatures[ self::FEATURE_CODE ] = new BasicFeatureStruct( [ 'feature_code' => self::FEATURE_CODE ] );
+        $projectFeatures[ static::FEATURE_CODE ] = new BasicFeatureStruct( [ 'feature_code' => static::FEATURE_CODE ] );
         return $projectFeatures;
     }
 

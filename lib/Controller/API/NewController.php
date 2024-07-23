@@ -1356,15 +1356,15 @@ class NewController extends ajaxController {
                 throw new Exception( "xliff_parameters is not a valid JSON" );
             }
 
-            $schema = file_get_contents( INIT::$ROOT . '/inc/validation/schema/xliff_parameters.json' );
+            $schema = file_get_contents( INIT::$ROOT . '/inc/validation/schema/xliff_parameters_rules_content.json' );
 
             $validatorObject       = new JSONValidatorObject();
             $validatorObject->json = $json;
 
-            $validator = new JSONValidator( $schema );
+            $validator = new JSONValidator( $schema, true );
             $validator->validate( $validatorObject );
+            $this->xliff_parameters = $validatorObject->decoded;
 
-            $this->xliff_parameters = json_decode( $json );
         } elseif ( !empty( $this->postInput[ 'xliff_parameters_template_id' ] ) ) {
 
             $xliffConfigTemplate = XliffConfigTemplateDao::getByIdAndUser( $this->postInput[ 'xliff_parameters_template_id' ], $this->getUser()->uid );

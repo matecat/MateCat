@@ -27,42 +27,60 @@ class XliffConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruct imple
     public ?XliffRulesModel $rules = null;
 
     /**
-     * @param      $json
-     * @param null $uid
+     * @param string $json
+     * @param null   $uid
      *
      * @return $this
      */
-    public function hydrateFromJSON( $json, $uid = null ): XliffConfigTemplateStruct {
+    public function hydrateFromJSON( string $json, $uid = null ): XliffConfigTemplateStruct {
 
-        $json  = json_decode( $json, true );
-        $rules = ( is_array( $json[ 'rules' ] ) ) ? $json[ 'rules' ] : json_decode( $json[ 'rules' ], true );
+        $decoded_json = json_decode( $json, true );
 
-        if ( !isset( $json[ 'name' ] ) ) {
+        if ( !isset( $decoded_json[ 'name' ] ) ) {
             throw new DomainException( "Cannot instantiate a new XliffConfigStruct. Invalid data provided.", 400 );
         }
 
-        if ( empty( $uid ) && empty( $json[ 'uid' ] ) ) {
+        if ( empty( $uid ) && empty( $decoded_json[ 'uid' ] ) ) {
             throw new DomainException( "Cannot instantiate a new XliffConfigStruct. Invalid user id provided.", 400 );
         }
 
-        $this->uid  = $json[ 'uid' ] ?? $uid;
-        $this->name = $json[ 'name' ];
+        $this->uid  = $decoded_json[ 'uid' ] ?? $uid;
+        $this->name = $decoded_json[ 'name' ];
 
-        if ( isset( $json[ 'id' ] ) ) {
-            $this->id = $json[ 'id' ];
+        if ( isset( $decoded_json[ 'id' ] ) ) {
+            $this->id = $decoded_json[ 'id' ];
         }
 
-        if ( isset( $json[ 'created_at' ] ) ) {
-            $this->created_at = $json[ 'created_at' ];
+        if ( isset( $decoded_json[ 'created_at' ] ) ) {
+            $this->created_at = $decoded_json[ 'created_at' ];
         }
 
-        if ( isset( $json[ 'deleted_at' ] ) ) {
-            $this->deleted_at = $json[ 'deleted_at' ];
+        if ( isset( $decoded_json[ 'deleted_at' ] ) ) {
+            $this->deleted_at = $decoded_json[ 'deleted_at' ];
         }
 
-        if ( isset( $json[ 'modified_at' ] ) ) {
-            $this->modified_at = $json[ 'modified_at' ];
+        if ( isset( $decoded_json[ 'modified_at' ] ) ) {
+            $this->modified_at = $decoded_json[ 'modified_at' ];
         }
+
+        // rules
+        if ( isset( $decoded_json[ 'rules' ] ) ) {
+            $this->hydrateRulesFromJson( $json );
+        }
+
+        return $this;
+
+    }
+
+    /**
+     * @param string $json
+     *
+     * @return XliffConfigTemplateStruct
+     */
+    public function hydrateRulesFromJson( string $json ): XliffConfigTemplateStruct {
+
+        $json  = json_decode( $json, true );
+        $rules = ( is_array( $json[ 'rules' ] ) ) ? $json[ 'rules' ] : json_decode( $json[ 'rules' ], true );
 
         $this->rules = new XliffRulesModel();
 
@@ -101,8 +119,7 @@ class XliffConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruct imple
                 'name'       => $this->name,
                 'rules'      => $this->rules ?? new stdClass(),
                 'createdAt'  => DateTimeUtil::formatIsoDate( $this->created_at ),
-                'modifiedAt' => DateTimeUtil::formatIsoDate( $this->modified_at ),
-                'deletedAt'  => DateTimeUtil::formatIsoDate( $this->deleted_at ),
+                'modifiedAt' => DateTimeUtil::formatIsoDate( $this->modified_at )
         ];
     }
 }

@@ -2,7 +2,6 @@
 
 namespace Filters;
 
-use CatUtils;
 use DataAccess\ShapelessConcreteStruct;
 use DataAccess_AbstractDao;
 use Database;
@@ -29,12 +28,12 @@ class FiltersConfigTemplateDao extends DataAccess_AbstractDao {
     /**
      * @var null
      */
-    private static $instance = null;
+    private static ?FiltersConfigTemplateDao $instance = null;
 
     /**
-     * @return FiltersConfigTemplateDao|null
+     * @return FiltersConfigTemplateDao
      */
-    private static function getInstance() {
+    private static function getInstance(): FiltersConfigTemplateDao {
         if ( !isset( self::$instance ) ) {
             self::$instance = new self();
         }
@@ -47,7 +46,7 @@ class FiltersConfigTemplateDao extends DataAccess_AbstractDao {
      *
      * @return FiltersConfigTemplateStruct
      */
-    public static function getDefaultTemplate( $uid ) {
+    public static function getDefaultTemplate( $uid ): FiltersConfigTemplateStruct {
         $default       = new FiltersConfigTemplateStruct();
         $default->id   = 0;
         $default->uid  = $uid;
@@ -73,12 +72,9 @@ class FiltersConfigTemplateDao extends DataAccess_AbstractDao {
      * @return FiltersConfigTemplateStruct
      * @throws Exception
      */
-    public static function createFromJSON( $json, $uid ) {
+    public static function createFromJSON( $json, $uid ): FiltersConfigTemplateStruct {
         $templateStruct = new FiltersConfigTemplateStruct();
         $templateStruct->hydrateFromJSON( $json, $uid );
-
-        // check name
-        $templateStruct = self::findUniqueName( $templateStruct, $uid );
 
         return self::save( $templateStruct );
     }
@@ -91,40 +87,20 @@ class FiltersConfigTemplateDao extends DataAccess_AbstractDao {
      * @return FiltersConfigTemplateStruct
      * @throws Exception
      */
-    public static function editFromJSON( FiltersConfigTemplateStruct $templateStruct, $json, $uid ) {
+    public static function editFromJSON( FiltersConfigTemplateStruct $templateStruct, $json, $uid ): FiltersConfigTemplateStruct {
         $templateStruct->hydrateFromJSON( $json, $uid );
 
         return self::update( $templateStruct );
     }
 
     /**
-     * @param FiltersConfigTemplateStruct      $projectTemplateStruct
-     * @param                                  $uid
-     *
-     * @return FiltersConfigTemplateStruct
-     * @throws Exception
-     */
-    private static function findUniqueName( FiltersConfigTemplateStruct $projectTemplateStruct, $uid ) {
-        $check = FiltersConfigTemplateDao::getByUidAndName( $uid, $projectTemplateStruct->name, 0 );
-
-        if ( $check === null ) {
-            return $projectTemplateStruct;
-        }
-
-        $projectTemplateStruct->name = CatUtils::getUniqueName( $projectTemplateStruct->name );
-
-        return self::findUniqueName( $projectTemplateStruct, $uid );
-    }
-
-    /**
-     * @param     $uid
+     * @param int $uid
      * @param int $current
      * @param int $pagination
      *
      * @return array
-     * @throws Exception
      */
-    public static function getAllPaginated( $uid, $current = 1, $pagination = 20 ) {
+    public static function getAllPaginated( int $uid, int $current = 1, int $pagination = 20 ) {
         $conn = Database::obtain()->getConnection();
 
         $stmt = $conn->prepare( "SELECT count(id) as count FROM " . self::TABLE . " WHERE deleted_at IS NULL AND uid = :uid" );
@@ -169,13 +145,12 @@ class FiltersConfigTemplateDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param     $id
+     * @param int $id
      * @param int $ttl
      *
      * @return FiltersConfigTemplateStruct|null
-     * @throws Exception
      */
-    public static function getById( $id, $ttl = 60 ) {
+    public static function getById( int $id, int $ttl = 60 ): ?FiltersConfigTemplateStruct {
         $stmt   = self::getInstance()->_getStatementForCache( self::query_by_id );
         $result = self::getInstance()->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
                 'id' => $id,
@@ -189,14 +164,13 @@ class FiltersConfigTemplateDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param     $id
-     * @param     $uid
+     * @param int $id
+     * @param int $uid
      * @param int $ttl
      *
      * @return FiltersConfigTemplateStruct|null
-     * @throws Exception
      */
-    public static function getByIdAndUser( $id, $uid, $ttl = 60 ) {
+    public static function getByIdAndUser( int $id, int $uid, int $ttl = 60 ) {
         $stmt   = self::getInstance()->_getStatementForCache( self::query_by_id_and_uid );
         $result = self::getInstance()->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
                 'id'  => $id,
@@ -211,14 +185,13 @@ class FiltersConfigTemplateDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param     $uid
-     * @param     $name
-     * @param int $ttl
+     * @param int    $uid
+     * @param string $name
+     * @param int    $ttl
      *
      * @return FiltersConfigTemplateStruct|null
-     * @throws Exception
      */
-    public static function getByUidAndName( $uid, $name, $ttl = 60 ) {
+    public static function getByUidAndName( int $uid, string $name, int $ttl = 60 ): ?FiltersConfigTemplateStruct {
         $stmt   = self::getInstance()->_getStatementForCache( self::query_by_uid_name );
         $result = self::getInstance()->setCacheTTL( $ttl )->_fetchObject( $stmt, new ProjectTemplateStruct(), [
                 'uid'  => $uid,
@@ -233,15 +206,14 @@ class FiltersConfigTemplateDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param $id
-     * @param $uid
+     * @param int $id
+     * @param int $uid
      *
      * @return int
-     * @throws Exception
      */
-    public static function remove( $id, $uid ) {
+    public static function remove( int $id, int $uid ): int {
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( "UPDATE " . self::TABLE . " SET `deleted_at` = :now WHERE id = :id AND uid = :uid;" );
+        $stmt = $conn->prepare( "UPDATE " . self::TABLE . " SET `name` = :name , `deleted_at` = :now WHERE id = :id AND uid = :uid;" );
         $stmt->execute( [
                 'id'   => $id,
                 'uid'  => $uid,
@@ -256,40 +228,39 @@ class FiltersConfigTemplateDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param PDO    $conn
-     * @param string $id
+     * @param PDO $conn
+     * @param int $id
      */
-    private static function destroyQueryByIdCache( PDO $conn, $id ) {
+    private static function destroyQueryByIdCache( PDO $conn, int $id ) {
         $stmt = $conn->prepare( self::query_by_id );
         self::getInstance()->_destroyObjectCache( $stmt, [ 'id' => $id, ] );
     }
 
     /**
      * @param PDO $conn
-     * @param     $uid
+     * @param int $uid
      */
-    private static function destroyQueryByUidCache( PDO $conn, $uid ) {
+    private static function destroyQueryByUidCache( PDO $conn, int $uid ) {
         $stmt = $conn->prepare( self::query_by_uid );
         self::getInstance()->_destroyObjectCache( $stmt, [ 'uid' => $uid ] );
     }
 
     /**
      * @param PDO    $conn
-     * @param string $uid
+     * @param int    $uid
      * @param string $name
      */
-    private static function destroyQueryByUidAndNameCache( PDO $conn, $uid, $name ) {
+    private static function destroyQueryByUidAndNameCache( PDO $conn, int $uid, string $name ) {
         $stmt = $conn->prepare( self::query_by_uid_name );
         self::getInstance()->_destroyObjectCache( $stmt, [ 'uid' => $uid, 'name' => $name, ] );
     }
 
     /**
-     * @param $data
+     * @param array $data
      *
      * @return FiltersConfigTemplateStruct|null
-     * @throws Exception
      */
-    private static function hydrateTemplateStruct( $data ) {
+    private static function hydrateTemplateStruct( array $data ): ?FiltersConfigTemplateStruct {
         if (
                 !isset( $data[ 'id' ] ) or
                 !isset( $data[ 'uid' ] ) or
@@ -309,7 +280,7 @@ class FiltersConfigTemplateDao extends DataAccess_AbstractDao {
      * @return FiltersConfigTemplateStruct
      * @throws Exception
      */
-    public static function save( FiltersConfigTemplateStruct $templateStruct ) {
+    public static function save( FiltersConfigTemplateStruct $templateStruct ): FiltersConfigTemplateStruct {
         $sql = "INSERT INTO " . self::TABLE .
                 " ( `uid`, `name`, `json`, `xml`, `yaml`, `ms_excel`, `ms_word`, `ms_powerpoint`, `created_at`, `modified_at` ) " .
                 " VALUES " .
@@ -348,7 +319,7 @@ class FiltersConfigTemplateDao extends DataAccess_AbstractDao {
      * @return FiltersConfigTemplateStruct
      * @throws Exception
      */
-    public static function update( FiltersConfigTemplateStruct $templateStruct ) {
+    public static function update( FiltersConfigTemplateStruct $templateStruct ): FiltersConfigTemplateStruct {
         $sql = "UPDATE " . self::TABLE . " SET 
             `uid` = :uid, 
             `name` = :name,

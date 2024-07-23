@@ -108,7 +108,7 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
     protected function setStates( array $states ): void {
 
         foreach ( $states as $state ) {
-            if ( !in_array( $state, array_merge( static::$_STATES, static::$_STATE_QUALIFIERS ) ) ) {
+            if ( !in_array( $state, array_merge( static::$_STATES, static::$_STATE_QUALIFIERS ) ) && empty( preg_match( '/^x-.+$/', $state ) ) ) {
                 throw new DomainException( "Wrong state value", 400 );
             }
 
@@ -191,8 +191,7 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
      *
      * @return string|array
      */
-    public function getStates( $type = null ): array
-    {
+    public function getStates( $type = null ): array {
         switch ( $type ) {
             case 'states':
                 return $this->states[ 'states' ];

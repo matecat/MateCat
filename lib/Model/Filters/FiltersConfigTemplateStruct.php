@@ -231,8 +231,7 @@ class FiltersConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruct imp
                 'ms_excel'      => $this->ms_excel,
                 'ms_powerpoint' => $this->ms_powerpoint,
                 'createdAt'     => DateTimeUtil::formatIsoDate( $this->created_at ),
-                'modifiedAt'    => DateTimeUtil::formatIsoDate( $this->modified_at ),
-                'deletedAt'     => DateTimeUtil::formatIsoDate( $this->deleted_at ),
+                'modifiedAt'    => DateTimeUtil::formatIsoDate( $this->modified_at )
         ];
     }
 }
