@@ -49,6 +49,32 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
     }
 
     /**
+     * @param array $id_segments
+     * @param int   $id_job
+     * @param int   $ttl
+     *
+     * @return Translations_SegmentTranslationStruct[]
+     */
+    public static function getSegmentsList( array $id_segments, int $id_job, int $ttl = 0 ): array {
+        $conn = Database::obtain()->getConnection();
+
+        $sql = "SELECT * FROM segment_translations WHERE " .
+                " id_segment IN ( " . implode( ', ', array_fill( 0, count( $id_segments ), '?' ) ) . " ) AND " .
+                " id_job = ? ";
+
+        $stmt = $conn->prepare( $sql );
+
+        $thisDao = new self();
+
+        /**
+         * @var $result Translations_SegmentTranslationStruct[]
+         */
+        $result = $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Translations_SegmentTranslationStruct(), array_merge( $id_segments, [ $id_job ] ) );
+
+        return !empty( $result ) ? $result : [];
+    }
+
+    /**
      * @param $segmentIdList
      * @param $date
      *
@@ -65,22 +91,6 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
             $values = array_merge( [ $date ], $segmentIdList );
             $stmt->execute( $values );
         }
-    }
-
-    protected function getSegmentsForPropagation( $params, $status = Constants_TranslationStatus::STATUS_TRANSLATED ) {
-
-        $selectSegmentsToPropagate = " SELECT * FROM segment_translations " .
-                " WHERE id_job = :id_job " .
-                " AND segment_hash = :segment_hash " .
-                " AND id_segment BETWEEN :job_first_segment AND :job_last_segment " .
-                " AND id_segment <> :id_segment ; ";
-
-        $conn = $this->database->getConnection();
-        $stmt = $conn->prepare( $selectSegmentsToPropagate );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'Translations_SegmentTranslationStruct' );
-        $stmt->execute( $params );
-
-        return $stmt->fetchAll();
     }
 
     /**
@@ -119,7 +129,8 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
         return $stmt->fetchAll();
     }
 
-    protected function _buildResult( $array_result ) {}
+    protected function _buildResult( $array_result ) {
+    }
 
     /**
      * @param Translations_SegmentTranslationStruct $struct
@@ -143,58 +154,6 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
                 'id_job'       => $struct->id_job,
                 'segment_hash' => $struct->segment_hash,
                 'warning'      => $severity
-        ] );
-
-        return $stmt->rowCount();
-    }
-
-    /**
-     * @param $data
-     *
-     * @return int
-     */
-    public static function updateEditDistanceForSetTranslation( $data ) {
-
-        $sql = "UPDATE segment_translations
-            SET edit_distance = :edit_distance
-              WHERE id_segment = :id_segment
-              AND id_job = :id_job
-              AND segment_hash = :segment_hash";
-
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
-
-        $stmt->execute( [
-                'id_segment'    => $data[ 'id_segment' ],
-                'id_job'        => $data[ 'id_job' ],
-                'segment_hash'  => $data[ 'segment_hash' ],
-                'edit_distance' => $data[ 'edit_distance' ]
-        ] );
-
-        return $stmt->rowCount();
-    }
-
-    /**
-     * @param $data
-     *
-     * @return int
-     */
-    public static function updateEditDistanceForPropagation( $data ) {
-
-        $sql = "UPDATE segment_translations
-            SET edit_distance = :edit_distance
-              WHERE id_segment <> :id_segment
-              AND id_job = :id_job
-              AND segment_hash = :segment_hash         ";
-
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
-
-        $stmt->execute( [
-                'id_segment'    => $data[ 'id_segment' ],
-                'id_job'        => $data[ 'id_job' ],
-                'segment_hash'  => $data[ 'segment_hash' ],
-                'edit_distance' => $data[ 'edit_distance' ]
         ] );
 
         return $stmt->rowCount();
@@ -284,9 +243,9 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
                     GROUP BY st.id_segment
                     ";
 
-        $where_values = array_merge( $where_values, $segments_ids );
+        $where_values   = array_merge( $where_values, $segments_ids );
         $where_values[] = $chunk->id;
-        $stmt         = $conn->prepare( $sql );
+        $stmt           = $conn->prepare( $sql );
 
         $stmt->execute( $where_values );
 
@@ -306,7 +265,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
     public static function addTranslation( Translations_SegmentTranslationStruct $translation_struct, $is_revision ) {
 
         // avoid version_number null error
-        if($translation_struct->version_number === null){
+        if ( $translation_struct->version_number === null ) {
             $translation_struct->version_number = 0;
         }
 
@@ -414,41 +373,8 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
             $values[] = 'version_number';
         }
 
-        return Translations_SegmentTranslationDao::updateStruct( $translation_struct, $values ) ;
+        return Translations_SegmentTranslationDao::updateStruct( $translation_struct, $values );
 
-    }
-
-    /**
-     * @param $timestamp
-     * @param $first_segment
-     * @param $last_segment
-     * @param $id_job
-     *
-     * @return array
-     */
-    public static function getUpdatedTranslations( $timestamp, $first_segment, $last_segment, $id_job ) {
-
-        $query = "SELECT 
-            id_segment as sid, 
-            status,
-            translation 
-        FROM segment_translations
-		WHERE
-		    id_segment BETWEEN :first_segment AND :last_segment
-		AND translation_date > FROM_UNIXTIME( :timestamp )
-		AND id_job = :id_job";
-
-        $db   = Database::obtain();
-        $stmt = $db->getConnection()->prepare( $query );
-        $stmt->setFetchMode( PDO::FETCH_ASSOC );
-        $stmt->execute( [
-                'timestamp'     => $timestamp,
-                'first_segment' => $first_segment,
-                'last_segment'  => $last_segment,
-                'id_job'        => $id_job
-        ] );
-
-        return $stmt->fetchAll();
     }
 
     /**
@@ -517,7 +443,6 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
         $conn = Database::obtain()->getConnection();
 
         //Works on the basis that MAX( id_segment ) is the same for ALL Jobs in the same Project
-        // furthermore, we need a random ID so, don't worry about MySQL stupidity on random MAX
         //example: http://dev.mysql.com/doc/refman/5.0/en/example-maximum-column-group-row.html
         $select_max_id = "
 			SELECT MAX(id_segment) as id_segment
@@ -577,11 +502,11 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
      */
     public static function propagateTranslation(
             Translations_SegmentTranslationStruct $segmentTranslationStruct,
-            Chunks_ChunkStruct $chunkStruct,
-            $_idSegment,
-            Projects_ProjectStruct $project,
-            VersionHandlerInterface $versionHandler,
-            $execute_update = true
+            Chunks_ChunkStruct                    $chunkStruct,
+                                                  $_idSegment,
+            Projects_ProjectStruct                $project,
+            VersionHandlerInterface               $versionHandler,
+                                                  $execute_update = true
     ) {
         $db = Database::obtain();
 
@@ -672,17 +597,17 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
 
             array_pop( $arrayOfSegmentTranslationToPropagate );
 
-            if($lastRow !== null and is_array($lastRow)){
+            if ( $lastRow !== null and is_array( $lastRow ) ) {
                 $propagationAnalyser = new PropagationAnalyser();
                 $propagationTotal    = $propagationAnalyser->analyse( $segmentTranslationStruct, $arrayOfSegmentTranslationToPropagate );
                 $propagationTotal->setTotals( [
-                    'propagated_ice_total'     => $propagationAnalyser->getPropagatedIceCount(),
-                    'not_propagated_total'     => $propagationAnalyser->getNotPropagatedCount(),
-                    'propagated_total'         => $propagationAnalyser->getPropagatedCount(),
-                    'not_propagated_ice_total' => $propagationAnalyser->getNotPropagatedIceCount(),
-                    'total'                    => $lastRow[ 0 ],
-                    'countSeg'                 => $lastRow[ 1 ],
-                    'status'                   => $lastRow[ 2 ],
+                        'propagated_ice_total'     => $propagationAnalyser->getPropagatedIceCount(),
+                        'not_propagated_total'     => $propagationAnalyser->getNotPropagatedCount(),
+                        'propagated_total'         => $propagationAnalyser->getPropagatedCount(),
+                        'not_propagated_ice_total' => $propagationAnalyser->getNotPropagatedIceCount(),
+                        'total'                    => $lastRow[ 0 ],
+                        'countSeg'                 => $lastRow[ 1 ],
+                        'status'                   => $lastRow[ 2 ],
                 ] );
             }
 
@@ -693,7 +618,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
                     -$e->getCode() );
         }
 
-        if ( isset($propagationTotal) and $propagationTotal !== null and !empty( $propagationTotal->getTotals() ) ) {
+        if ( isset( $propagationTotal ) and $propagationTotal !== null and !empty( $propagationTotal->getTotals() ) ) {
 
             if ( true === $execute_update and !empty( $propagationTotal->getSegmentsForPropagation() ) ) {
 
@@ -708,16 +633,16 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
 
                         // UPDATE ONLY THIS FIELDS
                         $fields_to_update = [
-                            'translation',
-                            'version_number',
-                            'status',
-                            'translation_date',
-                            'autopropagated_from',
-                            'serialized_errors_list',
-                            'warning',
+                                'translation',
+                                'version_number',
+                                'status',
+                                'translation_date',
+                                'autopropagated_from',
+                                'serialized_errors_list',
+                                'warning',
                         ];
 
-                        if(in_array($key, $fields_to_update)){
+                        if ( in_array( $key, $fields_to_update ) ) {
                             $place_holders_fields[] = "$key = ?";
                             $field_values[]         = $value;
                         }
@@ -771,7 +696,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
             }
         }
 
-        if(!isset($propagationTotal)){
+        if ( !isset( $propagationTotal ) ) {
             $propagationTotal = new Propagation_PropagationTotalStruct();
         }
 
@@ -901,21 +826,21 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
      * @param $id_segment
      * @param $suggestions
      */
-    public static function updateSuggestionsArray($id_segment, $suggestions) {
+    public static function updateSuggestionsArray( $id_segment, $suggestions ) {
 
-        if(empty($suggestions)){
+        if ( empty( $suggestions ) ) {
             return;
         }
 
         $conn  = Database::obtain()->getConnection();
         $query = "UPDATE segment_translations SET suggestions_array = :suggestions_array WHERE id_segment=:id_segment";
 
-        $stmt  = $conn->prepare( $query );
-        $suggestions_array = json_encode($suggestions);
+        $stmt              = $conn->prepare( $query );
+        $suggestions_array = json_encode( $suggestions );
 
         $params = [
-            'id_segment'        => $id_segment,
-            'suggestions_array' => $suggestions_array,
+                'id_segment'        => $id_segment,
+                'suggestions_array' => $suggestions_array,
         ];
 
         $stmt->execute( $params );

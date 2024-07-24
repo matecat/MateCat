@@ -3,6 +3,7 @@
 namespace Features\TranslationVersions\Model;
 
 use Chunks_ChunkStruct;
+use Constants;
 use DataAccess\ShapelessConcreteStruct;
 use DataAccess_AbstractDao;
 use DataAccess_IDaoStruct;
@@ -253,54 +254,45 @@ class TranslationVersionDao extends DataAccess_AbstractDao {
 
         $db = Database::obtain()->getConnection();
 
-        $prepare_str_segments_id = str_repeat( ' ?, ', count( $segments_id ) - 1 ) . " ?";
+        $final_flag = "";
+        if( $source_page > Constants::SOURCE_PAGE_TRANSLATE ){
+            // when searching for revision, search for the final revision flag
+            $final_flag = " AND final_revision = 1 ";
+        }
+        $prepare_str_segments_id = implode( ', ', array_fill( 0, count( $segments_id ), '?' ) );
 
         $query = "SELECT 
-
-    stv.id_segment,
-    stv.translation,
-    ste.version_number
-
-    FROM
-        (
-            SELECT id_segment, translation, version_number, id_job
-            FROM segment_translation_versions
-            WHERE id_segment IN (
-                $prepare_str_segments_id
-            )
-            AND id_job = ?
-            UNION
-            SELECT id_segment, translation, version_number, id_job
-            FROM segment_translations
-            WHERE id_segment IN (
-                $prepare_str_segments_id
-            )
-            AND id_job = ?
-        ) stv
-    JOIN
-        (
-                SELECT
-                    MAX(version_number) AS version_number, ste.id_segment
-                FROM
-                    segment_translation_events ste
-
-                WHERE id_segment IN (
-                    $prepare_str_segments_id
-                )
-                AND ste.id_job = ?
-                AND ste.source_page = ?
-
-                GROUP BY id_segment
-
-        ) AS ste ON stv.version_number = ste.version_number AND stv.id_segment = ste.id_segment";
+                            stv.id_segment,
+                            stv.translation,
+                            ste.version_number
+                  FROM (
+                            SELECT id_segment, translation, version_number, id_job
+                            FROM segment_translation_versions
+                            WHERE id_segment IN ( $prepare_str_segments_id )
+                            AND id_job = ?
+                        UNION
+                            SELECT id_segment, translation, version_number, id_job
+                            FROM segment_translations
+                            WHERE id_segment IN ( $prepare_str_segments_id )
+                            AND id_job = ?
+                  ) AS stv
+                  JOIN (
+                        SELECT MAX(version_number) AS version_number, ste.id_segment
+                        FROM segment_translation_events ste
+                        WHERE id_segment IN ( $prepare_str_segments_id )
+                        AND ste.id_job = ?
+                        AND ste.source_page = ?
+                        $final_flag
+                        GROUP BY id_segment
+                  ) AS ste 
+                    ON stv.version_number = ste.version_number 
+                    AND stv.id_segment = ste.id_segment ";
 
         $stmt = $db->prepare( $query );
         $stmt->setFetchMode( PDO::FETCH_CLASS, '\DataAccess\ShapelessConcreteStruct' );
         $stmt->execute( array_merge( $segments_id, [ $job_id ], $segments_id, [ $job_id ], $segments_id, [ $job_id ], [ $source_page ] ) );
 
-        $results = $stmt->fetchAll();
-
-        return $results;
+        return $stmt->fetchAll();
 
 
     }

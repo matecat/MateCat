@@ -57,15 +57,7 @@ class ChunkReviewModel implements IChunkReviewModel {
      * @throws Exception
      */
     public function addPenaltyPoints( $penalty_points, Projects_ProjectStruct $projectStruct ) {
-
-        $data = [
-                'chunkReview'          => $this->chunk_review,
-                'penalty_points'       => $penalty_points,
-                'reviewed_words_count' => 0,
-                'total_tte'            => 0,
-        ];
-
-        $this->_updatePassFailResult( $projectStruct, $data );
+        $this->updateChunkReviewCountersAndPassFail( $penalty_points, 0, 0, $projectStruct );
     }
 
     /**
@@ -78,12 +70,22 @@ class ChunkReviewModel implements IChunkReviewModel {
      * @throws Exception
      */
     public function subtractPenaltyPoints( $penalty_points, Projects_ProjectStruct $projectStruct ) {
+        $this->updateChunkReviewCountersAndPassFail( -$penalty_points, 0, 0, $projectStruct );
+    }
 
+    /**
+     * Update chunk review
+     *
+     * Warning, integer parameters are expected signed (+/-) for increment or decrement
+     *
+     * @throws Exception
+     */
+    public function updateChunkReviewCountersAndPassFail( int $penalty_points, int $reviewed_word_count, int $tte, Projects_ProjectStruct $projectStruct ){
         $data = [
                 'chunkReview'          => $this->chunk_review,
-                'penalty_points'       => -$penalty_points,
-                'reviewed_words_count' => 0,
-                'total_tte'            => 0,
+                'penalty_points'       => $penalty_points,
+                'reviewed_words_count' => $reviewed_word_count,
+                'total_tte'            => $tte,
         ];
 
         $this->_updatePassFailResult( $projectStruct, $data );

@@ -72,7 +72,7 @@ class TranslationEvent {
     /**
      * @var ChunkReviewStruct[]
      */
-    private array $chunk_reviews_to_update = [];
+    private array $chunk_reviews_partials_to_update = [];
 
     /**
      * @var EntryWithCategoryStruct[]
@@ -111,10 +111,6 @@ class TranslationEvent {
         if ( isset( $this->user ) && $this->user->uid ) {
             return $this->user;
         }
-
-//        if ( $this->getTranslationEventStruct()->uid ) {
-//            return ( new Users_UserDao() )->getByUid( $this->getTranslationEventStruct()->uid );
-//        }
 
         return null;
     }
@@ -355,16 +351,16 @@ class TranslationEvent {
     /**
      * @return ChunkReviewStruct[]
      */
-    public function getChunkReviews(): array {
-        return $this->chunk_reviews_to_update;
+    public function getChunkReviewsPartials(): array {
+        return $this->chunk_reviews_partials_to_update;
     }
 
     /**
      * @param ChunkReviewStruct $chunk_review
      */
     public function setChunkReviewForPassFailUpdate( ChunkReviewStruct $chunk_review ) {
-        if ( false === isset( $this->chunk_reviews_to_update[ $chunk_review->id ] ) ) {
-            $this->chunk_reviews_to_update[ $chunk_review->id ] = $chunk_review;
+        if ( false === isset( $this->chunk_reviews_partials_to_update[ $chunk_review->id ] ) ) {
+            $this->chunk_reviews_partials_to_update[ $chunk_review->id ] = $chunk_review;
         }
     }
 

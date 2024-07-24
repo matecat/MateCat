@@ -52,11 +52,6 @@ class ReviewedWordCountModel implements IReviewedWordCountModel {
     /**
      * @var array
      */
-    protected array $_issuesDeletionList = [];
-
-    /**
-     * @var array
-     */
     protected array $_sourcePagesWithFinalRevisions;
 
     /**
@@ -113,22 +108,27 @@ class ReviewedWordCountModel implements IReviewedWordCountModel {
         $this->flagIssuesToBeDeleted( $chunkReview->source_page );
         $chunkReview->reviewed_words_count -= $this->_event->getSegmentStruct()->raw_word_count;
         $chunkReview->penalty_points       -= $this->getPenaltyPointsForSourcePage( $chunkReview->source_page );
+
+        $this->_event->setFinalRevisionToRemove( (int)$chunkReview->source_page );
+        $this->_event->setChunkReviewForPassFailUpdate( $chunkReview );
     }
 
     /**
      * @throws Exception
      */
     private function increaseCountersButCheckForFinalRevision( ChunkReviewStruct $chunkReview ) {
-        // There is a change status or acceptance to this review, and it is the first time it happens;
-        // we must add the reviewed word count
+        // There is a change status to this review, we must check if is the first time it happens;
+        // in that case, we must add the reviewed word count
         if ( !$this->aFinalRevisionExistsForThisChunk( $chunkReview ) ) {
             $chunkReview->reviewed_words_count += $this->_event->getSegmentStruct()->raw_word_count;
         } else {
-            $this->_event->setRevisionFlagAllowed( false );
+            $this->_event->setFinalRevisionToRemove( (int)$chunkReview->source_page ); // remove the previous final flag to allow the new one
         }
 
         // in this case, the tte is added by definition
         $chunkReview->total_tte += $this->_event->getTranslationEventStruct()->time_to_edit;
+
+        $this->_event->setChunkReviewForPassFailUpdate( $chunkReview );
     }
 
     /**
@@ -155,7 +155,7 @@ class ReviewedWordCountModel implements IReviewedWordCountModel {
         // we are iterating on ALL the revision levels (chunks)
         for ( $i = 0; $i < count( $this->_chunkReviews ); $i++ ) {
 
-            // build a new ChunkReviewStruct
+            // build a new ChunkReviewStruct for partials
             $chunkReview              = new ChunkReviewStruct();
             $chunkReview->id          = $this->_chunkReviews[ $i ]->id;
             $chunkReview->id_project  = $this->_chunkReviews[ $i ]->id_project;
@@ -169,10 +169,10 @@ class ReviewedWordCountModel implements IReviewedWordCountModel {
 
                 if ( $this->_event->currentEventIsOnThisChunk( $chunkReview ) ) {
 
-                    // There is a change status to this review, and it is the first time it happens;
-                    // we must add the reviewed word count
+                    // There is a change status to this review, we must check if is the first time it happens;
+                    // in that case, we must add the reviewed word count
+                    // otherwise remove the previous final flag to allow the new one
                     $this->increaseCountersButCheckForFinalRevision( $chunkReview );
-                    $this->_event->setChunkReviewForPassFailUpdate( $chunkReview );
 
                 } elseif ( $this->aFinalRevisionExistsForThisChunk( $chunkReview ) && $this->_event->isLowerTransition() ) {  // check for lower transition, we want to not decrement when upgrading statuses
 
@@ -188,9 +188,6 @@ class ReviewedWordCountModel implements IReviewedWordCountModel {
                     // reviewed words are discounted from R1
                     $this->decreaseCounters( $chunkReview );
 
-                    $this->_event->setFinalRevisionToRemove( (int)$chunkReview->source_page );
-                    $this->_event->setChunkReviewForPassFailUpdate( $chunkReview );
-
                 }
 
             } elseif ( $this->_event->isIce() ) {
@@ -198,19 +195,45 @@ class ReviewedWordCountModel implements IReviewedWordCountModel {
                 if (
                         // This case happens because we have the same status for ICEs and Approved segments.
                     // All can pass except unmodified ices
+                    // Rule 3:
+                    //   3. For unmodified ICE segments, the progress is not counted unless there is a change of status (acceptance doesn't count)
                         !$this->_event->isUnModifiedIce() &&
                         $this->_event->currentEventIsOnThisChunk( $chunkReview )
                 ) {
 
-                    // There is a segment acceptance with or without modifications in the same revision phase, and it is the first time it's happened;
-                    // we must add the reviewed word count.
+                    // There is an ICE segment acceptance with or without modifications in the same revision phase.
+                    // - If it is the first time it's happened, we must add the reviewed word count.
+                    // - If it is not the first modification, we will find a revision flag, will not increase the reviewed word count but will unset the previous final flag
                     $this->increaseCountersButCheckForFinalRevision( $chunkReview );
-                    $this->_event->setChunkReviewForPassFailUpdate( $chunkReview );
 
+                } elseif ( $this->_event->currentEventIsOnThisChunk( $chunkReview ) ) {
+                    /*
+                     * R1/R2 Accept (without modifications) an ICE revision on the same level; we want not to flag them as final revision (only track the acceptance)
+                     */
+                    $this->_event->setRevisionFlagAllowed( false );
                 }
 
             } else {
-                $this->_event->setRevisionFlagAllowed( false );
+
+                /*
+                 * No change status
+                 * Here:
+                 * - 1) R1/R2 Modify a revision made by him on the same level
+                 * - 2) Translation events
+                */
+                if ( $this->_event->currentEventIsOnThisChunk( $chunkReview ) ) {
+                    /*
+                     * - 1) R1/R2 Modify an existent revision made by him on the same level
+                     */
+                    $this->increaseCountersButCheckForFinalRevision( $chunkReview );
+
+                } elseif ( $this->_event->getWantedTranslation()->isTranslationStatus() ) {
+                    /*
+                     * - 2) Handle translation events since they are not revisions
+                     */
+                    $this->_event->setRevisionFlagAllowed( false );
+                }
+
             }
 
         }
@@ -221,7 +244,8 @@ class ReviewedWordCountModel implements IReviewedWordCountModel {
      * Delete all issues
      *
      */
-    public function deleteIssues() {
+    public
+    function deleteIssues() {
         foreach ( $this->_event->getIssuesToDelete() as $issue ) {
             $issue->addComments( ( new EntryCommentStruct() )->getEntriesById( $issue->id ) );
             EntryDao::deleteEntry( $issue );
@@ -231,7 +255,8 @@ class ReviewedWordCountModel implements IReviewedWordCountModel {
     /**
      * @throws Exception
      */
-    public function sendNotificationEmail() {
+    public
+    function sendNotificationEmail() {
         if ( $this->_event->isPropagationSource() && $this->_event->isLowerTransition() ) {
             $chunkReviewsWithFinalRevisions = [];
             foreach ( $this->_chunkReviews as $chunkReview ) {
@@ -247,7 +272,8 @@ class ReviewedWordCountModel implements IReviewedWordCountModel {
     /**
      * @param $source_page
      */
-    private function flagIssuesToBeDeleted( $source_page ) {
+    private
+    function flagIssuesToBeDeleted( $source_page ) {
 
         $issue = EntryDao::findByIdSegmentAndSourcePage( $this->_event->getSegmentStruct()->id, $this->_chunk->id, $source_page );
         foreach ( $issue as $issueToDelete ) {
@@ -262,7 +288,8 @@ class ReviewedWordCountModel implements IReviewedWordCountModel {
      *
      * @throws Exception
      */
-    private function _sendNotificationEmail( $finalRevisions, $chunkReviewsWithFinalRevisions ) {
+    private
+    function _sendNotificationEmail( $finalRevisions, $chunkReviewsWithFinalRevisions ) {
         $emails                   = [];
         $userWhoChangedTheSegment = $this->_event->getUser();
         $revision                 = $chunkReviewsWithFinalRevisions[ $this->_event->getPreviousEventSourcePage() ];
@@ -345,7 +372,8 @@ class ReviewedWordCountModel implements IReviewedWordCountModel {
      *
      * @return int
      */
-    private function getPenaltyPointsForSourcePage( $source_page ): int {
+    private
+    function getPenaltyPointsForSourcePage( $source_page ): int {
 
         $toReduce = $this->_event->getIssuesToDelete();
         $issues   = array_filter( $toReduce, function ( EntryStruct $issue ) use ( $source_page ) {

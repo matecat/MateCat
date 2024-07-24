@@ -99,7 +99,7 @@ class QualityReport_QualityReportSegmentStruct extends DataAccess_AbstractDaoObj
     }
 
     public function isICEModified(){
-        return ( $this->getPEE() != 0 && $this->isICE() );
+        return ( $this->version_number != 0 && $this->isICE() );
     }
 
     public function isICE(){

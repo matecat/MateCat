@@ -124,24 +124,17 @@ class BatchReviewProcessor {
             $segmentTranslationModel->deleteIssues();
             $segmentTranslationModel->sendNotificationEmail();
 
-            foreach ( $segmentTranslationModel->getEvent()->getChunkReviews() as $chunkReview ) {
-
-                // prepare data to update pass fail values
-                $data[ $chunkReview->id ][ 'chunkReview' ]          = $chunkReview;
-                $data[ $chunkReview->id ][ 'penalty_points' ]       = ( $data[ $chunkReview->id ][ 'penalty_points' ] ?? 0 ) + $chunkReview->penalty_points;
-                $data[ $chunkReview->id ][ 'reviewed_words_count' ] = ( $data[ $chunkReview->id ][ 'reviewed_words_count' ] ?? 0 ) + $chunkReview->reviewed_words_count;
-                $data[ $chunkReview->id ][ 'total_tte' ]            = ( $data[ $chunkReview->id ][ 'total_tte' ] ?? 0 ) + $chunkReview->total_tte;
+            foreach ( $segmentTranslationModel->getEvent()->getChunkReviewsPartials() as $chunkReview ) {
 
                 // send chunkReviewUpdated notifications through FeaturesSet hook
                 $project          = $chunkReview->getChunk()->getProject();
                 $chunkReviewModel = new ChunkReviewModel( $chunkReview );
-                $project->getFeaturesSet()->run( 'chunkReviewUpdated', $chunkReview, true, $chunkReviewModel, $project );
+                $chunkReviewModel->updateChunkReviewCountersAndPassFail( $chunkReview->penalty_points, $chunkReview->reviewed_words_count, $chunkReview->total_tte, $project );
 
             }
 
         }
 
-        $this->updatePassFailAndCounts( $data );
         $this->updateJobWordCounter();
 
     }
@@ -173,22 +166,5 @@ class BatchReviewProcessor {
         }
 
     }
-
-    /**
-     * Update chunk review is_pass and counters
-     *
-     * @throws Exception
-     */
-    private function updatePassFailAndCounts( array $data ) {
-
-        // just ONE UPDATE for each ChunkReview
-        $chunkReviewDao = new ChunkReviewDao();
-        foreach ( $data as $id => $datum ) {
-            $chunkReviewDao->passFailCountsAtomicUpdate( $id, $datum );
-        }
-
-
-    }
-
 
 }
