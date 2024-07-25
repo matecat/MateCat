@@ -159,11 +159,34 @@ export const SubTemplates = ({
       .finally(() => setIsRequestInProgress(false))
   }
 
-  const updateTemplate = (updatedTemplate = currentTemplate) => {
+  const updateTemplate = async (updatedTemplate = currentTemplate) => {
     const modifiedTemplate = {
       ...getFilteredSchemaCreateUpdate(updatedTemplate),
       [schema.name]: updatedTemplate.name,
     }
+
+    const templatesIdenticalSettings =
+      /* eslint-disable no-unused-vars */
+      templates
+        .filter(({id}) => id !== currentTemplate.id)
+        .filter((template) => {
+          const comparableTemplate = getFilteredSchemaToCompare(template)
+          const comparableCurrentTemplate =
+            getFilteredSchemaToCompare(currentTemplate)
+
+          return isEqual(comparableTemplate, comparableCurrentTemplate)
+        })
+    /* eslint-enable no-unused-vars */
+    if (templatesIdenticalSettings.length) {
+      try {
+        await getModalTryingSaveIdenticalSettingsTemplate(
+          templatesIdenticalSettings,
+        )
+      } catch (error) {
+        return
+      }
+    }
+
     setIsRequestInProgress(true)
 
     updateApi({

@@ -218,7 +218,52 @@ export const ProjectTemplate = ({portalTarget}) => {
       .finally(() => setIsRequestInProgress(false))
   }
 
-  const updateTemplate = (updatedTemplate = currentProjectTemplate) => {
+  const updateTemplate = async (updatedTemplate = currentProjectTemplate) => {
+    // Check new template has identical settings to the another one already existing
+    const templatesIdenticalSettings =
+      /* eslint-disable no-unused-vars */
+      projectTemplates
+        .filter(({id}) => id !== currentProjectTemplate.id)
+        .filter((template) => {
+          const {
+            created_at,
+            id,
+            uid,
+            modified_at,
+            is_default,
+            name,
+            isTemporary,
+            isSelected,
+            ...comparableTemplate
+          } = template
+
+          const {
+            created_at: createdAtCurrent,
+            id: idCurrent,
+            uid: uidCurrent,
+            modified_at: modifiedAtCurrent,
+            is_default: isDefaultCurrent,
+            name: nameCurrent,
+            isTemporary: isTemporaryCurrent,
+            isSelected: isSelectedCurrent,
+            ...comparableCurrentProjectTemplate
+          } = currentProjectTemplate
+
+          return isEqual(comparableTemplate, comparableCurrentProjectTemplate)
+        })
+    /* eslint-enable no-unused-vars */
+    if (templatesIdenticalSettings.length) {
+      try {
+        await getModalTryingSaveIdenticalSettingsTemplate(
+          templatesIdenticalSettings,
+        )
+      } catch (error) {
+        return
+      }
+    }
+
+    /* eslint-disable no-unused-vars */
+
     /* eslint-disable no-unused-vars */
     const {
       created_at,
@@ -233,6 +278,7 @@ export const ProjectTemplate = ({portalTarget}) => {
       name: updatedTemplate.name,
     }
     /* eslint-enable no-unused-vars */
+
     setIsRequestInProgress(true)
 
     updateProjectTemplate({
