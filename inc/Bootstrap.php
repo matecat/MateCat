@@ -198,7 +198,7 @@ class Bootstrap {
             $message = "Service Unavailable";
             \Utils::sendErrMailReport( $exception->getMessage() . "" . $exception->getTraceAsString(), 'Generic error' );
             \Log::doJsonLog( [ "error" => $exception->getMessage(), "trace" => $exception->getTrace() ] );
-        } catch ( Exception $e ) {
+        } catch ( Throwable $e ) {
             $code    = 500;
             $message = "Internal Server Error";
             \Utils::sendErrMailReport( $exception->getMessage() . "" . $exception->getTraceAsString(), 'Generic error' );
@@ -290,7 +290,7 @@ class Bootstrap {
 
                     Log::$fileName = 'fatal_errors.txt';
                     Log::doJsonLog( $output );
-                    Utils::sendErrMailReport( $output );
+//                    Utils::sendErrMailReport( $output );
 
                     if ( stripos( PHP_SAPI, 'cli' ) === false ) {
                         header( "HTTP/1.1 500 Internal Server Error" );

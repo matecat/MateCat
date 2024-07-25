@@ -96,6 +96,7 @@ class QualityFrameworkController extends KleinController {
             }
 
             $json['template_model'] = $parentTemplate->getDecodedModel()['model'];
+
         }
 
         return $json;
