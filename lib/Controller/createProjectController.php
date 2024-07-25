@@ -326,7 +326,6 @@ class createProjectController extends ajaxController {
         $projectStructure[ 'tms_engine' ]                   = $this->tms_engine;
         $projectStructure[ 'status' ]                       = Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
         $projectStructure[ 'lang_detect_files' ]            = $this->lang_detect_files;
-        $projectStructure[ 'skip_lang_validation' ]         = true;
         $projectStructure[ 'pretranslate_100' ]             = $this->pretranslate_100;
         $projectStructure[ 'pretranslate_101' ]             = $this->pretranslate_101;
         $projectStructure[ 'dialect_strict' ]               = $this->dialect_strict;

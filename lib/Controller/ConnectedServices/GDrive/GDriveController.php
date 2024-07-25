@@ -3,6 +3,7 @@
 namespace ConnectedServices\GDrive;
 
 use API\V2\KleinController;
+use Aws\S3\Exception\S3Exception;
 use Bootstrap;
 use Constants;
 use CookieManager;
@@ -247,6 +248,10 @@ class GDriveController extends KleinController {
             return "Google Drive does not allow exports of files in this format. Please open the file in Google Drive and save it as a Google Drive file.";
         }
 
+        if (strpos($message, 'The specified key does not exist.') !== false) {
+            return "The name of the file you are trying to upload is too long, please shorten it and try again.";
+        }
+
         return $message;
     }
 
@@ -254,20 +259,42 @@ class GDriveController extends KleinController {
      * @throws Exception
      */
     public function listImportedFiles() {
-        $response = $this->gdriveUserSession->getFileStructureForJsonOutput();
-        $this->response->json( $response );
 
-        // delete the cookie
-        CookieManager::setCookie( self::GDRIVE_LIST_COOKIE_NAME, "",
-            [
-                'expires'  => time() - 3600,
-                'path'     => '/',
-                'domain'   => INIT::$COOKIE_DOMAIN,
-                'secure'   => true,
-                'httponly' => false,
-                'samesite' => 'None',
-            ]
-        );
+        try {
+            $response = $this->gdriveUserSession->getFileStructureForJsonOutput();
+            $this->response->json( $response );
+
+            // delete the cookie
+            CookieManager::setCookie( self::GDRIVE_LIST_COOKIE_NAME, "",
+                [
+                    'expires'  => time() - 3600,
+                    'path'     => '/',
+                    'domain'   => INIT::$COOKIE_DOMAIN,
+                    'secure'   => true,
+                    'httponly' => false,
+                    'samesite' => 'None',
+                ]
+            );
+        } catch (S3Exception $e){
+
+            $errorCode = 400;
+            $this->response->code($errorCode);
+            $this->response->json( [
+                'code' => $errorCode,
+                'class' => get_class($e),
+                'msg' => $this->formatErrorMessage($this->getExceptionMessage($e))
+            ] );
+        } catch (Exception $e){
+
+            $errorCode = $e->getCode() >= 400 ? $e->getCode() : 500;
+            $this->response->code($errorCode);
+            $this->response->json( [
+                'code' => $errorCode,
+                'class' => get_class($e),
+                'msg' => $this->formatErrorMessage($this->getExceptionMessage($e))
+            ] );
+        }
+
     }
 
     /**

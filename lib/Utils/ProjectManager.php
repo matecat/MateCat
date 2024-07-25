@@ -173,7 +173,6 @@ class ProjectManager {
                             'tm_keys'                                 => [],
                             'userIsLogged'                            => false,
                             'uid'                                     => null,
-                            'skip_lang_validation'                    => false,
                             'pretranslate_100'                        => 0,
                             'pretranslate_101'                        => 1,
                             'only_private'                            => 0,
@@ -760,11 +759,6 @@ class ProjectManager {
 
                     if ( count( $filesStructure ) === 0 ) {
                         throw new Exception( 'Files could not be saved in database.', -6 );
-                    }
-
-                    //check if the files language equals the source language. If not, set an error message.
-                    if ( !$this->projectStructure[ 'skip_lang_validation' ] ) {
-                        $this->validateFilesLanguages();
                     }
 
                 } catch ( Exception $e ) {
@@ -1427,95 +1421,6 @@ class ProjectManager {
 
         $this->features->run( 'processJobsCreated', $projectStructure );
 
-    }
-
-    /**
-     * This function executes a language detection call to mymemory for an array of segments,
-     * located in projectStructure
-     * @throws Exception
-     */
-    private function validateFilesLanguages() {
-        /**
-         * @var $filesSegments RecursiveArrayObject
-         */
-        $filesSegments = $this->projectStructure[ 'segments' ];
-
-        /**
-         * This is a map <file_name, check_result>, where check_result is one
-         * of these status strings:<br/>
-         * - ok         --> the language detected for this file is the same of source language<br/>
-         * - warning    --> the language detected for this file is different from the source language
-         *
-         */
-        $filename2SourceLangCheck = [];
-
-        //istantiate MyMemory analyzer and detect languages for each file uploaded
-        $mma = Engine::getInstance( 1 /* MyMemory */ );
-        /**
-         * @var $mma Engines_MyMemory
-         */
-        $res = $mma->detectLanguage( $filesSegments, $this->projectStructure[ 'lang_detect_files' ] );
-
-        //for each language detected, check if it's not equal to the source language
-        $langsDetected = $res[ 'responseData' ][ 'translatedText' ];
-        $this->_log( __CLASS__ . " - DETECT LANG RES: " . $langsDetected );
-        if ( $res !== null &&
-                is_array( $langsDetected ) &&
-                count( $langsDetected ) == count( $this->projectStructure[ 'array_files' ] )
-        ) {
-
-            $counter = 0;
-            foreach ( $langsDetected as $fileLang ) {
-
-                $currFileName = $this->projectStructure[ 'array_files' ][ $counter ];
-
-                //get language code
-                if ( strpos( $fileLang, "-" ) === false ) {
-                    //PHP Strict: Only variables should be passed by reference
-                    $_tmp       = explode( "-", $this->projectStructure[ 'source_language' ] );
-                    $sourceLang = array_shift( $_tmp );
-                } else {
-                    $sourceLang = $this->projectStructure[ 'source_language' ];
-                }
-
-                $this->_log( __CLASS__ . " - DETECT LANG COMPARISON: $fileLang@@$sourceLang" );
-                //get extended language name using google language code
-                $languageExtendedName = Langs_GoogleLanguageMapper::getLanguageCode( $fileLang );
-
-                //get extended language name using standard language code
-                $langClass                  = Langs_Languages::getInstance();
-                $sourceLanguageExtendedName = strtolower( $langClass->getLocalizedName( $sourceLang ) );
-                $this->_log( __CLASS__ . " - DETECT LANG NAME COMPARISON: $sourceLanguageExtendedName@@$languageExtendedName" );
-
-                //Check job's detected language. In case of undefined language, mark it as valid
-                if ( $fileLang !== 'und' &&
-                        $fileLang != $sourceLang &&
-                        $sourceLanguageExtendedName != $languageExtendedName
-                ) {
-
-                    $filename2SourceLangCheck[ $currFileName ] = 'warning';
-
-                    $languageExtendedName = ucfirst( $languageExtendedName );
-
-                    $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                            "code"    => -17,
-                            "message" => "The source language you selected seems " .
-                                    "to be different from the source language in \"$currFileName\". Please check."
-                    ];
-                } else {
-                    $filename2SourceLangCheck[ $currFileName ] = 'ok';
-                }
-
-                $counter++;
-            }
-
-            if ( in_array( "warning", array_values( $filename2SourceLangCheck ) ) ) {
-                $this->projectStructure[ 'result' ][ 'lang_detect' ] = $filename2SourceLangCheck;
-            }
-        } else {
-            //There are errors while parsing JSON.
-            //Noop
-        }
     }
 
     /**

@@ -23,6 +23,7 @@ use Stomp\Transport\Frame;
 use TaskRunner\Commons\AbstractWorker;
 use TaskRunner\Commons\Context;
 use TaskRunner\Commons\QueueElement;
+use TaskRunner\Commons\SignalHandlerTrait;
 use TaskRunner\Exceptions\EmptyElementException;
 use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\FrameException;
@@ -36,58 +37,53 @@ Bootstrap::start();
 /**
  * Class Executor
  * Process class spawned from the Task Manager
- * Every Executor is bind to it's context ( queue name, process Redis set, ecc. )
+ * Every Executor is bind to its context (queue name, process Redis set, ecc.)
  *
  * @package TaskRunner
  */
 class Executor implements SplObserver {
+
+    use SignalHandlerTrait;
 
     /**
      * Handler of AMQ connector
      *
      * @var AMQHandler
      */
-    protected $_queueHandler;
+    protected AMQHandler $_queueHandler;
 
     /**
      * Context of execution
      *
      * @var Context
      */
-    protected $_executionContext;
+    protected Context $_executionContext;
 
     /**
      * AMQ frames read
      *
      * @var int
      */
-    protected $_frameID = 0;
-
-    /**
-     * Static singleton instance reference
-     *
-     * @var static
-     */
-    public static $__INSTANCE;
+    protected int $_frameID = 0;
 
     /**
      * Flag for control the instance running status. Setting to false cause the Executor process to stop.
      *
      * @var bool
      */
-    public $RUNNING = true;
+    public bool $RUNNING = true;
 
     /**
      * The process id of the Executor
      *
      * @var int
      */
-    public $_executorPID;
+    public int $_executorPID;
 
     /**
      * @var string
      */
-    public $_executor_instance_id;
+    public string $_executor_instance_id;
 
     /**
      * Logging method
@@ -104,9 +100,9 @@ class Executor implements SplObserver {
     /**
      * Concrete worker
      *
-     * @var AbstractWorker
+     * @var ?AbstractWorker
      */
-    protected $_worker;
+    protected ?AbstractWorker $_worker = null;
 
     /**
      * Executor constructor.
@@ -116,7 +112,7 @@ class Executor implements SplObserver {
     protected function __construct( Context $_context ) {
 
         $this->_executorPID          = posix_getpid();
-        $this->_executor_instance_id = $this->_executorPID . ":" . gethostname() . ":" . (int)INIT::$INSTANCE_ID;
+        $this->_executor_instance_id = $this->_executorPID . ":" . gethostname() . ":" . INIT::$INSTANCE_ID;
 
         Log::$fileName = $_context->loggerName;
 
@@ -152,63 +148,19 @@ class Executor implements SplObserver {
      *
      * @return static
      */
-    public static function getInstance( Context $queueContext ) {
+    public static function getInstance( Context $queueContext ): Executor {
 
-        if ( PHP_SAPI != 'cli' || isset ( $_SERVER [ 'HTTP_HOST' ] ) ) {
-            die ( "This script can be run only in CLI Mode.\n\n" );
-        }
+        $__INSTANCE = new static( $queueContext );
+        $__INSTANCE->installHandler();
 
-        declare( ticks=10 );
-        set_time_limit( 0 );
+        return $__INSTANCE;
 
-        if ( !extension_loaded( "pcntl" ) && ini_get( "enable_dl" ) ) {
-            dl( "pcntl.so" );
-        }
-        if ( !function_exists( 'pcntl_signal' ) ) {
-            $msg = "****** PCNTL EXTENSION NOT LOADED. KILLING THIS PROCESS COULD CAUSE UNPREDICTABLE ERRORS ******";
-        } else {
-
-            pcntl_signal( SIGTERM, [ get_called_class(), 'sigSwitch' ] );
-            pcntl_signal( SIGINT, [ get_called_class(), 'sigSwitch' ] );
-            pcntl_signal( SIGHUP, [ get_called_class(), 'sigSwitch' ] );
-
-            $msg = str_pad( " Signal Handler Installed ", 50, "-", STR_PAD_BOTH );
-
-        }
-
-        static::$__INSTANCE = new static( $queueContext );
-
-//        static::$__INSTANCE->_logMsg( $msg );
-
-        return static::$__INSTANCE;
-
-    }
-
-    /**
-     * Posix signal handler
-     *
-     * @param $sig_no
-     */
-    public static function sigSwitch( $sig_no ) {
-
-//        static::$__INSTANCE->_logMsg( "Trapped Signal : $sig_no" );
-
-        switch ( $sig_no ) {
-            case SIGTERM :
-            case SIGINT :
-            case SIGHUP :
-                static::$__INSTANCE->RUNNING = false;
-                break;
-            default :
-                break;
-        }
     }
 
     /**
      * Main method
      *
-     * @param null $args
-     *
+     * @throws ReflectionException
      * @throws Exception
      */
     public function main() {
@@ -231,7 +183,7 @@ class Executor implements SplObserver {
                  * @var $msgFrame     Frame
                  * @var $queueElement QueueElement
                  */
-                list( $msgFrame, $queueElement ) = $this->_readAMQFrame();
+                [ $msgFrame, $queueElement ] = $this->_readAMQFrame();
 
             } catch ( Exception $e ) {
 
@@ -303,7 +255,7 @@ class Executor implements SplObserver {
 
         } while ( $this->RUNNING );
 
-        self::cleanShutDown();
+        $this->cleanShutDown();
 
     }
 
@@ -313,7 +265,7 @@ class Executor implements SplObserver {
      * @return array [ Frame , QueueElement ]
      * @throws FrameException
      */
-    protected function _readAMQFrame() {
+    protected function _readAMQFrame(): array {
 
         /**
          * @var $msgFrame Frame
@@ -341,7 +293,7 @@ class Executor implements SplObserver {
                 $queueElement = new QueueElement( $queueElement );
 
                 //empty message what to do?? it should not be there, acknowledge and process the next one
-                if ( empty( $queueElement->classLoad ) || !class_exists( $queueElement->classLoad, true ) ) {
+                if ( empty( $queueElement->classLoad ) || !class_exists( $queueElement->classLoad ) ) {
 
                     $this->_queueHandler->ack( $msgFrame );
                     throw new WorkerClassException( "--- (Executor " . $this->_executor_instance_id . ") : found frame but no valid Worker Class found: wait 2 seconds" );
@@ -369,15 +321,27 @@ class Executor implements SplObserver {
      *
      * @throws ReflectionException
      */
-    public static function cleanShutDown() {
+    public function cleanShutDown() {
 
         Database::obtain()->close();
-        static::$__INSTANCE->_queueHandler->getRedisClient()->disconnect();
-        static::$__INSTANCE->_queueHandler->getClient()->disconnect();
+
+        $this->_queueHandler->getRedisClient()->srem(
+                $this->_executionContext->pid_set_name,
+                $this->_executor_instance_id
+        );
+
+        $was_run_from_task_manager = $this->_queueHandler->getRedisClient()->get( gethostname() . ":" . $this->_executionContext->queue_name );
+
+        if ( $was_run_from_task_manager > 0 ) {
+            $this->_queueHandler->getRedisClient()->decr( gethostname() . ":" . $this->_executionContext->queue_name );
+        }
+
+        $this->_queueHandler->getRedisClient()->disconnect();
+        $this->_queueHandler->getClient()->disconnect();
 
         //SHUTDOWN
         $msg = str_pad( " Executor " . getmypid() . ":" . gethostname() . ":" . INIT::$INSTANCE_ID . " HALTED ", 50, "-", STR_PAD_BOTH );
-        static::$__INSTANCE->_logMsg( $msg );
+        $this->_logMsg( $msg );
 
         die();
 
@@ -391,14 +355,14 @@ class Executor implements SplObserver {
      * @return int
      * @throws ReflectionException
      */
-    protected function _myProcessExists( $pid ) {
+    protected function _myProcessExists( $pid ): int {
 
         return $this->_queueHandler->getRedisClient()->sismember( $this->_executionContext->pid_set_name, $pid );
 
     }
 
     /**
-     * Update method, called by the subject when the application tell him to notify the Observer
+     * Update method, called by the subject when the application tells him to notify the Observer
      *
      * @param SplSubject $subject
      */

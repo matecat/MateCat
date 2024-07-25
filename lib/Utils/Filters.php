@@ -72,7 +72,7 @@ class Filters {
                 if ( $response === '{"message":"Invalid RapidAPI Key"}' ) {
                     $errResponse[ 'errorMessage' ] = "Failed RapidAPI authentication. Check FILTERS_RAPIDAPI_KEY in config.ini";
                 } elseif (isset($originalResponse->errorMessage)) {
-                    $errResponse[ 'errorMessage' ] = $originalResponse->errorMessage;
+                    $errResponse[ 'errorMessage' ] = self::formatErrorMessage($originalResponse->errorMessage);
                 } else {
                     if ( $info[ 'errno' ] ) {
                         $errResponse[ 'errorMessage' ] = "Curl error $info[errno]: $info[error]";
@@ -104,6 +104,18 @@ class Filters {
         }
 
         return $responses;
+    }
+
+    /**
+     * @param string $error
+     * @return string
+     */
+    private static function formatErrorMessage($error){
+
+        // Error from Excel files
+        $error = str_replace("net.translated.matecat.filters.ExtendedExcelException: ", "", $error);
+
+        return $error;
     }
 
     /**
@@ -245,12 +257,13 @@ class Filters {
 
     /**
      * Logs a conversion to xliff, doing also file backup in case of failure.
+     *
      * @param $response
      * @param $sentFile
      * @param $sourceLang
      * @param $targetLang
      * @param $segmentation
-     * @param $extractionParameters
+     *
      * @throws Exception
      */
     public static function logConversionToXliff( $response, $sentFile, $sourceLang, $targetLang, $segmentation, $extractionParameters ) {
@@ -261,10 +274,12 @@ class Filters {
 
     /**
      * Logs a conversion to target, doing also file backup in case of failure.
+     *
      * @param $response
      * @param $sentFile
      * @param $jobData
      * @param $sourceFileData
+     *
      * @throws Exception
      */
     public static function logConversionToTarget( $response, $sentFile, $jobData, $sourceFileData ) {
@@ -275,11 +290,13 @@ class Filters {
      * Logs every conversion made. In order to make this method work, ensure
      * you have the matecat_conversions_log database properly configured.
      * See /lib/Model/matecat_conversions_log.sql
+     *
      * @param $response
      * @param $toXliff
      * @param $sentFile
      * @param $jobData
      * @param $sourceFileData
+     *
      * @throws Exception
      */
     private static function logConversion( $response, $toXliff, $sentFile, $jobData, $sourceFileData ) {
@@ -315,6 +332,7 @@ class Filters {
                 'source_file_name' => ( $toXliff ? AbstractFilesStorage::basename_fix( $sentFile ) : $sourceFileData[ 'filename' ] ),
                 'source_file_ext'  => ( $toXliff ? AbstractFilesStorage::pathinfo_fix( $sentFile, PATHINFO_EXTENSION ) : $sourceFileData[ 'mime_type' ] ),
                 'source_file_sha1' => ( $toXliff ? sha1_file( $sentFile ) : $sourceFileData[ 'sha1_original_file' ] ),
+                'segmentation'     => isset($sourceFileData['segmentation_rule']) ? $sourceFileData['segmentation_rule'] : null,
         ];
 
         $query = 'INSERT INTO conversions_log ('
@@ -338,9 +356,7 @@ class Filters {
             }
 
             self::backupFailedConversion( $sentFile );
-
         }
-
     }
 
     /**

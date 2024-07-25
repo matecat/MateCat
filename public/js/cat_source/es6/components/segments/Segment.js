@@ -703,7 +703,7 @@ class Segment extends React.Component {
 
     let split_group = this.props.segment.split_group || []
     let autoPropagable = this.props.segment.repetitions_in_chunk !== '1'
-    let originalId = this.props.segment.sid.split('-')[0]
+    let originalId = this.props.segment.original_sid
 
     if (this.props.timeToEdit) {
       this.segment_edit_min = this.props.segment.parsed_time_to_edit[1]

@@ -13,23 +13,22 @@ use Database;
 use Log;
 use PDO;
 use PDOException;
+use RuntimeException;
 
 trait ProjectWordCount {
 
     /**
      * This function is heavy, use but only if it is necessary
      *
-     * TODO cached
-     *
-     * ( Used in TMAnalysisWorker and FastAnalysis )
+     * (Used in TMAnalysisWorker and FastAnalysis)
      *
      * @param $pid
      *
      * @return array
      */
-    protected function getProjectSegmentsTranslationSummary( $pid ) {
+    protected function getProjectSegmentsTranslationSummary( $pid ): array {
 
-        //TOTAL and eq_word should be equals BUT
+        //TOTAL and eq_word should be equals, BUT
         //tm Analysis can fail on some rows because of external service nature, so use TOTAL field instead of eq_word
         //to set the global word counter in job
         //Ref: jobs.new_words
@@ -55,7 +54,7 @@ trait ProjectWordCount {
 
             $db = Database::obtain();
             //Needed to address the query to the master database if exists
-            \Database::obtain()->begin();
+            Database::obtain()->begin();
             $stmt = $db->getConnection()->prepare( $query );
             $stmt->setFetchMode( PDO::FETCH_ASSOC );
             $stmt->execute( [ 'pid' => $pid ] );
@@ -64,7 +63,7 @@ trait ProjectWordCount {
         } catch ( PDOException $e ) {
             Log::doJsonLog( $e->getMessage() );
 
-            return $e->getCode() * -1;
+            throw new RuntimeException( $e );
         }
 
         return $results;

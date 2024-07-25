@@ -352,6 +352,7 @@ class Database implements IDatabase {
 
     /**
      * TODO this trim should be removed and ALL codebase migrated from $db->escape() to prepared Statements
+     * @deprecated
      * @Override
      * {@inheritdoc}
      */

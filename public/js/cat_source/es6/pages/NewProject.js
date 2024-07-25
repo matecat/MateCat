@@ -38,6 +38,7 @@ import {checkGuessTagIsEnabled} from '../components/settingsPanel/Contents/Advan
 import {getMMTKeys} from '../api/getMMTKeys/getMMTKeys'
 import {useGoogleLoginNotification} from '../hooks/useGoogleLoginNotification'
 import {AlertDeleteResourceProjectTemplates} from '../components/modals/AlertDeleteResourceProjectTemplates'
+import {getDeepLGlosssaries} from '../api/getDeepLGlosssaries/getDeepLGlosssaries'
 
 const SELECT_HEIGHT = 324
 
@@ -49,6 +50,7 @@ const historySourceTargets = {
 const urlParams = new URLSearchParams(window.location.search)
 const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
 const tmKeyFromQueryString = urlParams.get('private_tm_key')
+let isTmKeyFromQueryStringAddedToTemplate = false
 
 const NewProject = ({
   isLoggedIn = false,
@@ -85,7 +87,7 @@ const NewProject = ({
     setProjectTemplates,
     modifyingCurrentTemplate,
     checkSpecificTemplatePropsAreModified,
-  } = useProjectTemplates(Array.isArray(tmKeys))
+  } = useProjectTemplates(tmKeys)
 
   const isDeviceCompatible = useDeviceCompatibility()
 
@@ -168,6 +170,78 @@ const NewProject = ({
     })(),
   )
 
+  const checkDeepLGlossaryWasCancelledIntoTemplates = useRef(
+    (() => {
+      let wasChecked = false
+
+      return ({engineId, projectTemplates}) => {
+        if (
+          !wasChecked &&
+          typeof engineId === 'number' &&
+          projectTemplates.length
+        ) {
+          getDeepLGlosssaries({engineId}).then(({glossaries}) => {
+            const projectTemplatesInvolved = projectTemplates.filter(
+              ({mt}) =>
+                mt.id === engineId &&
+                typeof mt.extra?.deepl_id_glossary !== 'undefined' &&
+                !glossaries.some(
+                  ({glossary_id}) =>
+                    glossary_id === mt.extra?.deepl_id_glossary,
+                ),
+            )
+
+            if (projectTemplatesInvolved.length) {
+              const projectTemplatesUpdated = projectTemplatesInvolved.map(
+                (template) => {
+                  const {deepl_id_glossary, ...prevExtra} =
+                    template.mt.extra ?? {}
+
+                  return {
+                    ...template,
+                    [SCHEMA_KEYS.mt]: {
+                      ...template.mt,
+                      extra: {
+                        ...prevExtra,
+                        ...(glossaries.some(
+                          ({glossary_id}) => glossary_id === deepl_id_glossary,
+                        ) && {
+                          deepl_id_glossary,
+                        }),
+                      },
+                    },
+                  }
+                },
+              )
+
+              // Notify template to server without glossaries delete
+              CreateProjectActions.updateProjectTemplates({
+                templates: projectTemplatesUpdated,
+                modifiedPropsCurrentProjectTemplate: {
+                  tm: projectTemplatesUpdated.find(
+                    ({isTemporary}) => isTemporary,
+                  )?.tm,
+                },
+              })
+
+              ModalsActions.showModalComponent(
+                AlertDeleteResourceProjectTemplates,
+                {
+                  projectTemplatesInvolved,
+                  content:
+                    'A different user has deleted one or more of the DeepL glossaries used in the following project creation template(s):',
+                },
+                'MT glossary deletion',
+              )
+            }
+          })
+
+          wasChecked = true
+        }
+      }
+    })(),
+  )
+
   const closeSettings = useCallback(() => setOpenSettings({isOpen: false}), [])
 
   const selectedTeam = useMemo(() => {
@@ -213,6 +287,8 @@ const NewProject = ({
       r: true,
       w: true,
       owner: true,
+      tm: true,
+      glos: true,
       name: 'No Description',
       key: tmKeyFromQueryString,
       is_shared: false,
@@ -221,27 +297,29 @@ const NewProject = ({
     }
 
     if (config.isLoggedIn) {
-      getTmKeysUser().then(({tm_keys}) => {
-        const isMatchingKeyFromQuery = tm_keys.some(
-          ({key}) => tmKeyFromQueryString === key,
-        )
+      getTmKeysUser()
+        .then(({tm_keys}) => {
+          const isMatchingKeyFromQuery = tm_keys.some(
+            ({key}) => tmKeyFromQueryString === key,
+          )
 
-        setTmKeys([
-          ...tm_keys.map((key) => ({
-            ...key,
-            id: key.key,
-            ...(isMatchingKeyFromQuery &&
-              key.key === tmKeyFromQueryString && {
-                isActive: true,
-                r: true,
-                w: true,
-              }),
-          })),
-          ...(tmKeyFromQueryString && !isMatchingKeyFromQuery
-            ? [keyFromQueryString]
-            : []),
-        ])
-      })
+          setTmKeys([
+            ...tm_keys.map((key) => ({
+              ...key,
+              id: key.key,
+              ...(isMatchingKeyFromQuery &&
+                key.key === tmKeyFromQueryString && {
+                  isActive: true,
+                  r: true,
+                  w: true,
+                }),
+            })),
+            ...(tmKeyFromQueryString && !isMatchingKeyFromQuery
+              ? [keyFromQueryString]
+              : []),
+          ])
+        })
+        .catch(() => setTmKeys([]))
     } else {
       setTmKeys([...(tmKeyFromQueryString ? [keyFromQueryString] : [])])
     }
@@ -555,11 +633,16 @@ const NewProject = ({
     }
   }, [sourceLang, targetLangs, selectedTeam])
 
-  // useEffect(() => {
-  //   //TODO: used in main.js, remove
-  //   UI.segmentationRule = segmentationRule.id
-  //   restartConversions()
-  // }, [segmentationRule])
+  useEffect(() => {
+    //TODO: used in main.js, remove
+    if (currentProjectTemplate) {
+      const {segmentationRule} = currentProjectTemplate
+      if (UI.segmentationRule !== segmentationRule.id) {
+        UI.segmentationRule = segmentationRule.id
+        restartConversions()
+      }
+    }
+  }, [currentProjectTemplate?.segmentationRule])
 
   useEffect(() => {
     if (!isDeviceCompatible) {
@@ -588,10 +671,53 @@ const NewProject = ({
     )
   }, [currentProjectTemplate?.tm])
 
+  // check key from querystring and adding to current template
+  useEffect(() => {
+    if (
+      tmKeyFromQueryString &&
+      !isTmKeyFromQueryStringAddedToTemplate &&
+      Array.isArray(currentProjectTemplate?.tm) &&
+      tmKeys?.length
+    ) {
+      modifyingCurrentTemplate((prevTemplate) => {
+        console.log(prevTemplate)
+        const isMatched = prevTemplate.tm.some(
+          ({key}) => key === tmKeyFromQueryString,
+        )
+        // eslint-disable-next-line
+        const {id, isActive, ...tmFound} = tmKeys.find(
+          ({key}) => key === tmKeyFromQueryString,
+        )
+
+        return {
+          ...prevTemplate,
+          tm: isMatched
+            ? prevTemplate.tm.map((item) => ({
+                ...item,
+                ...(item.key === tmKeyFromQueryString && {
+                  isActive: true,
+                  r: true,
+                  w: true,
+                }),
+              }))
+            : [
+                ...prevTemplate.tm,
+                ...(tmFound ? [{...tmFound, r: true, w: true}] : []),
+              ],
+        }
+      })
+      isTmKeyFromQueryStringAddedToTemplate = true
+    }
+  }, [currentProjectTemplate?.tm, tmKeys, modifyingCurrentTemplate])
+
   const isLoadingTemplates = !projectTemplates.length
 
   checkMMTGlossariesWasCancelledIntoTemplates.current({
     engineId: mtEngines.find(({engine_type}) => engine_type === 'MMT')?.id,
+    projectTemplates,
+  })
+  checkDeepLGlossaryWasCancelledIntoTemplates.current({
+    engineId: mtEngines.find(({engine_type}) => engine_type === 'DeepL')?.id,
     projectTemplates,
   })
 
@@ -774,11 +900,19 @@ const NewProject = ({
         <div className="uploadbtn-box">
           {!projectSent ? (
             <input
-              disabled={!isFormReadyToSubmit || isImportTMXInProgress}
+              disabled={
+                !isFormReadyToSubmit ||
+                isImportTMXInProgress ||
+                projectTemplates.length === 0
+              }
               name=""
               type="button"
               className={`uploadbtn${
-                !isFormReadyToSubmit || isImportTMXInProgress ? ' disabled' : ''
+                !isFormReadyToSubmit ||
+                isImportTMXInProgress ||
+                projectTemplates.length === 0
+                  ? ' disabled'
+                  : ''
               }`}
               value="Analyze"
               onClick={createProject.current}

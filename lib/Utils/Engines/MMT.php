@@ -100,21 +100,21 @@ class Engines_MMT extends Engines_AbstractEngine {
         }
 
         $client = $this->_getClient();
-        $_keys = $this->_reMapKeyList( @$_config[ 'keys' ] );
+        $_keys = $this->_reMapKeyList( $_config[ 'keys' ] ?? [] );
 
         try {
             $translation = $client->translate(
                 $_config[ 'source' ],
                 $_config[ 'target' ],
                 $_config[ 'segment' ],
-                @$_config[ 'mt_context' ],
+                $_config[ 'mt_context' ] ?? null,
                 $_keys,
-                @$_config[ 'job_id' ],
+                $_config[ 'job_id' ] ?? null,
                 static::GET_REQUEST_TIMEOUT,
-                @$_config[ 'priority' ],
-                $_config[ 'session' ],
-                @$_config[ 'glossaries' ],
-                @$_config[ 'ignore_glossary_case' ]
+                $_config[ 'priority' ] ?? null,
+                $_config[ 'session' ] ?? null,
+                $_config[ 'glossaries' ] ?? null,
+                $_config[ 'ignore_glossary_case' ] ?? null
             );
 
             return ( new Engines_Results_MyMemory_Matches(
@@ -123,7 +123,7 @@ class Engines_MMT extends Engines_AbstractEngine {
                     100 - $this->getPenalty() . "%",
                     "MT-" . $this->getName(),
                     date( "Y-m-d" )
-            ) )->getMatches(2, [], $_config[ 'source' ], $_config[ 'target' ]);
+            ) )->getMatches(1, [], $_config[ 'source' ], $_config[ 'target' ]);
         } catch ( Exception $e ) {
             return $this->GoogleTranslateFallback( $_config );
         }

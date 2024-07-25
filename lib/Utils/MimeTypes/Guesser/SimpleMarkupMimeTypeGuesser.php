@@ -53,14 +53,10 @@ class SimpleMarkupMimeTypeGuesser implements MimeTypeGuesserInterface {
         $buffer = fread( $fp, 1024 );
         fclose( $fp );
 
-        $r4 = stripos( $buffer, '<tmx' ) !== false && stripos( $buffer, '<?xml' ) !== false;
-        $r3 = stripos( $buffer, '<html' ) !== false;
-        $r2 = stripos( $buffer, '<xliff' ) !== false && stripos( $buffer, '<?xml' ) !== false;
         $r1 = stripos( $buffer, '<?xml' ) !== false;
-
-        if ( $r4 ) {
-            return 'application/x-tiled-tmx';
-        }
+        $r2 = stripos( $buffer, '<xliff' ) !== false && $r1;
+        $r4 = stripos( $buffer, '<tmx' ) !== false && $r1;
+        $r3 = stripos( $buffer, '<html' ) !== false;
 
         if ( $r3 ) {
             return 'text/html';
@@ -70,8 +66,8 @@ class SimpleMarkupMimeTypeGuesser implements MimeTypeGuesserInterface {
             return 'application/x-xliff';
         }
 
-        if ( $r1 ) {
-            return 'application/xml';
+        if ( $r1 || $r4 ) {
+            return 'text/xml';
         }
 
         return null;

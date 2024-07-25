@@ -24,15 +24,13 @@ use TaskRunner\Commons\QueueElement;
 use TaskRunner\Exceptions\EndQueueException;
 use Translations_SegmentTranslationDao;
 use Users_UserDao;
-use WordCount\CounterModel;
 
-;
 
 class BulkSegmentStatusChangeWorker extends AbstractWorker {
 
-    protected $maxRequeueNum = 3;
+    protected int $maxRequeueNum = 3;
 
-    public function getLoggerName() {
+    public function getLoggerName(): string {
         return 'bulk_segment_status_change.log';
     }
 

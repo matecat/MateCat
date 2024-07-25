@@ -35,8 +35,8 @@ class CatDecorator extends \AbstractDecorator {
          * on the client starting from raw category records.
          */
         $this->template->lqa_categories = (null !== $model ) ? $model->getSerializedCategories() : null;
-
         $this->template->lqa_flat_categories  = (null !== $model ) ? $this->getCategoriesAsJson( $model ) : '';
+
         $this->template->review_type          = 'extended';
         $this->template->review_extended      = true;
         $this->template->segmentFilterEnabled = true;
@@ -85,7 +85,7 @@ class CatDecorator extends \AbstractDecorator {
             $out[] = $category->toArrayWithJsonDecoded();
         }
 
-        return json_encode( $out );
+        return json_encode( $out, JSON_HEX_APOS );
     }
 
     private function getOverallQualityClass() {
