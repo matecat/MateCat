@@ -147,6 +147,7 @@ export const TranslationMemoryGlossaryTab = () => {
           w: false,
           isActive: false,
           ...(tmFromTemplate && {...tmFromTemplate, isActive: true}),
+          name: tmItem.name,
         }
       }),
     )
