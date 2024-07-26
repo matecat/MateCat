@@ -49,32 +49,6 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param array $id_segments
-     * @param int   $id_job
-     * @param int   $ttl
-     *
-     * @return Translations_SegmentTranslationStruct[]
-     */
-    public static function getSegmentsList( array $id_segments, int $id_job, int $ttl = 0 ): array {
-        $conn = Database::obtain()->getConnection();
-
-        $sql = "SELECT * FROM segment_translations WHERE " .
-                " id_segment IN ( " . implode( ', ', array_fill( 0, count( $id_segments ), '?' ) ) . " ) AND " .
-                " id_job = ? ";
-
-        $stmt = $conn->prepare( $sql );
-
-        $thisDao = new self();
-
-        /**
-         * @var $result Translations_SegmentTranslationStruct[]
-         */
-        $result = $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Translations_SegmentTranslationStruct(), array_merge( $id_segments, [ $id_job ] ) );
-
-        return !empty( $result ) ? $result : [];
-    }
-
-    /**
      * @param $segmentIdList
      * @param $date
      *

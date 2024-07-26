@@ -7,7 +7,7 @@
     "lint": "eslint --ignore-path .gitignore .",
     "test": "jest --watchAll",
     "coverage": "jest --silent --coverage",
-    "prepare": "husky install support_scripts/husky",
+    "prepare": "husky support_scripts/husky",
     "watch": "webpack --mode development --watch",
     "build:dev": "webpack --mode development",
     "build:production": "webpack --mode production"

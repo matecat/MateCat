@@ -243,6 +243,47 @@ class TranslationVersionDao extends DataAccess_AbstractDao {
 
     }
 
+    public function getAllRelevantEvents( array $segments_id, int $job_id ){
+
+        $db = Database::obtain()->getConnection();
+
+        $prepare_str_segments_id = implode( ', ', array_fill( 0, count( $segments_id ), '?' ) );
+
+        $query = "
+    SELECT
+        stv.id_segment,
+        stv.translation,
+        ste.version_number,
+        ste.source_page
+    FROM (
+         SELECT id_segment, translation, version_number, id_job
+         FROM segment_translation_versions
+         WHERE id_segment IN ( $prepare_str_segments_id )
+           AND id_job = ?
+         UNION
+         SELECT id_segment, translation, version_number, id_job
+         FROM segment_translations
+         WHERE id_segment IN ( $prepare_str_segments_id )
+           AND id_job = ?
+     ) AS stv
+     JOIN (
+            SELECT MAX(version_number) AS version_number, ste.id_segment, ste.source_page
+            FROM segment_translation_events ste
+            WHERE id_segment IN ( $prepare_str_segments_id )
+              AND ste.id_job = ?
+              AND IF( source_page > 1 , final_revision = 1 , source_page = 1 )
+            GROUP BY id_segment, ste.source_page
+     ) AS ste ON stv.version_number = ste.version_number AND stv.id_segment = ste.id_segment;
+";
+
+        $stmt = $db->prepare( $query );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, '\DataAccess\ShapelessConcreteStruct' );
+        $stmt->execute( array_merge( $segments_id, [ $job_id ], $segments_id, [ $job_id ], $segments_id, [ $job_id ] ) );
+
+        return $stmt->fetchAll();
+
+    }
+
     /**
      * @param      $segments_id
      * @param      $job_id

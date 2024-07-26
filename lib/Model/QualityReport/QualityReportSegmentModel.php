@@ -15,12 +15,12 @@ use Constants;
 use Constants_TranslationStatus;
 use Features\ReviewExtended\Model\QualityReportDao;
 use Features\ReviewExtended\ReviewUtils;
-use Features\TranslationVersions;
 use Features\TranslationVersions\Model\TranslationVersionDao;
 use FeatureSet;
 use LQA\CategoryDao;
 use LQA\CategoryStruct;
 use LQA\ChunkReviewDao;
+use LQA\ChunkReviewStruct;
 use LQA\EntryCommentDao;
 use Matecat\SubFiltering\MateCatFilter;
 use QualityReport_QualityReportSegmentStruct;
@@ -170,10 +170,9 @@ class QualityReportSegmentModel {
 
         $commentsDao = new Comments_CommentDao;
         $comments    = $commentsDao->getThreadsBySegments( $segment_ids, $this->chunk->id );
-        $codes       = $featureSet->getCodes();
 
         $last_revisions         = [];
-        $last_flatten_revisions = [];
+        $all_versions_flattened = [];
 
         $translationVersionDao = new TranslationVersionDao;
         $last_translations     = $translationVersionDao->getLastRevisionsBySegmentsAndSourcePage(
@@ -184,9 +183,10 @@ class QualityReportSegmentModel {
             $last_revisions [ $chunkReview->source_page ] = $revs = $translationVersionDao->getLastRevisionsBySegmentsAndSourcePage(
                     $segment_ids, $this->chunk->id, $chunkReview->source_page
             );
-            $last_flatten_revisions                       = array_merge( $last_flatten_revisions, $revs );
+//            $all_versions_flattened                       = array_merge( $all_versions_flattened, $revs );
         }
-        $all_versions_flattened = array_merge( $last_translations, $last_flatten_revisions );
+//        $all_versions_flattened = array_merge( $last_translations, $all_versions_flattened );
+        $all_versions_flattened = $translationVersionDao->getAllRelevantEvents( $segment_ids, $this->chunk->id );
 
         $segments = [];
 
@@ -233,7 +233,7 @@ class QualityReportSegmentModel {
                 }
             } else {
 
-                $this->_populateLastTranslationAndRevision( $seg, $Filter, $last_translations, $last_revisions, $codes, $isForUI );
+                $this->_populateLastTranslationAndRevision( $seg, $Filter, $last_translations, $last_revisions, $isForUI );
 
             }
 
@@ -263,7 +263,7 @@ class QualityReportSegmentModel {
     }
 
     /**
-     * @return \LQA\ChunkReviewStruct[]
+     * @return ChunkReviewStruct[]
      */
     protected function _getChunkReviews() {
         if ( is_null( $this->_chunkReviews ) ) {
@@ -274,16 +274,16 @@ class QualityReportSegmentModel {
     }
 
     /**
-     * @param $last_translations
-     * @param $seg
-     * @param $Filter
-     * @param $last_revisions
-     * @param $codes
-     * @param $isForUI
+     * @param               $seg
+     * @param MateCatFilter $Filter
+     * @param               $last_translations
+     * @param               $last_revisions
+     * @param bool          $isForUI
      *
      * @throws \Exception
      */
-    protected function _populateLastTranslationAndRevision( $seg, MateCatFilter $Filter, $last_translations, $last_revisions, $codes, $isForUI = false ) {
+    protected function _populateLastTranslationAndRevision( $seg, MateCatFilter $Filter, $last_translations, $last_revisions, $isForUI = false ) {
+
         $last_translation = $this->_findLastTranslation( $seg, $Filter, $last_translations, $isForUI );
 
         // last revision version object
@@ -323,19 +323,17 @@ class QualityReportSegmentModel {
      * @throws \Exception
      */
     protected function _findLastTranslation( $seg, MateCatFilter $Filter, $last_translations, $isForUI = false ) {
-        $find_last_translation_version = null;
         if ( !empty( $last_translations ) ) {
             foreach ( $last_translations as $last_translation ) {
                 if ( $last_translation->id_segment == $seg->sid ) {
-                    $translation                   = ( $isForUI ) ? $Filter->fromLayer0ToLayer2( $last_translation->translation ) : $last_translation->translation;
-                    $last_translation->translation = $translation;
-                    $find_last_translation_version = $last_translation;
-                    break;
+                    $last_translation->translation = ( $isForUI ) ? $Filter->fromLayer0ToLayer2( $last_translation->translation ) : $last_translation->translation;
+
+                    return $last_translation;
                 }
             }
         }
 
-        return $find_last_translation_version;
+        return null;
     }
 
     /**
@@ -348,14 +346,13 @@ class QualityReportSegmentModel {
      * @throws \Exception
      */
     protected function _findLastRevision( $seg, MateCatFilter $Filter, $last_revisions, $isForUI = false ) {
-        $segment_last_revisions = [];
 
+        $segment_last_revisions = [];
         if ( !empty( $last_revisions ) ) {
             foreach ( $last_revisions as $source_page => $source_page_revisions ) {
                 foreach ( $source_page_revisions as $last_revision ) {
                     if ( $last_revision->id_segment == $seg->sid ) {
-                        $last_translation                       = ( $isForUI ) ? $Filter->fromLayer0ToLayer2( $last_revision->translation ) : $last_revision->translation;
-                        $last_revision->translation             = $last_translation;
+                        $last_revision->translation = ( $isForUI ) ? $Filter->fromLayer0ToLayer2( $last_revision->translation ) : $last_revision->translation;
                         $segment_last_revisions[ $source_page ] = $last_revision;
                         break;
                     }
