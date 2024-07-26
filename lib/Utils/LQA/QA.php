@@ -1789,13 +1789,11 @@ class QA {
     private
     function checkTagPositionsAndAddTagOrderError( array $src, array $trg, $error ) {
 
-        $at_least_one_error_found = false;
         foreach ( $trg as $pos => $value ) {
-            if ( $value !== $src[ $pos ] ) {
+            if ( $value !== ( $src[ $pos ] ?? null ) ) {
                 if ( !empty( $value ) ) {
 
                     $this->addError( $error );
-                    $at_least_one_error_found = true;
 
                     try {
                         $this->tagPositionError[] = '&lt;' . $value . '&gt;';
@@ -1803,12 +1801,12 @@ class QA {
                         // it's impossible to have an exception here, suppress abstract method signature exception
                     }
 
+                    return true;
+
                 }
 
             }
         }
-
-        return $at_least_one_error_found;
 
     }
 
