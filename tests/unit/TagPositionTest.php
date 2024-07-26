@@ -66,7 +66,7 @@ SRC;
 
         $this->assertCount( 1, $checkPosition );
 
-        $this->assertEquals( '<x id="1879"/>', html_entity_decode( end( $checkPosition ) ) );
+        $this->assertEquals( '<g id="1878">', html_entity_decode( end( $checkPosition ) ) );
 
 
     }
@@ -94,7 +94,7 @@ SRC;
         $checkPosition     = $check->getTargetTagPositionError();
         $checkPositionVals = array_keys( $checkPosition );
 
-        $this->assertCount( 1, $checkPosition );
+        $this->assertCount( 2, $checkPosition );
 
         $this->assertEquals( '</g>', html_entity_decode( end( $checkPosition ) ) );
 
@@ -127,9 +127,9 @@ SRC;
         $checkPosition     = $check->getTargetTagPositionError();
         $checkPositionVals = array_keys( $checkPosition );
 
-        $this->assertCount( 1, $checkPosition );
+        $this->assertCount( 2, $checkPosition );
 
-        $this->assertEquals( '<g id="1633">', html_entity_decode( end( $checkPosition ) ) );
+        $this->assertEquals( '</g>', html_entity_decode( end( $checkPosition ) ) );
 
 
     }
@@ -157,7 +157,7 @@ TRG;
         $checkPosition     = $check->getTargetTagPositionError();
         $checkPositionVals = array_keys( $checkPosition );
 
-        $this->assertCount( 1, $checkPosition );
+        $this->assertCount( 2, $checkPosition );
 
         $this->assertEquals( '</g>', html_entity_decode( end( $checkPosition ) ) );
 
