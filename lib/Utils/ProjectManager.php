@@ -1925,7 +1925,7 @@ class ProjectManager {
                                         $src = CatUtils::trimAndStripFromAnHtmlEntityDecoded( $extract_external[ 'seg' ] );
                                         $trg = CatUtils::trimAndStripFromAnHtmlEntityDecoded( $target_extract_external[ 'seg' ] );
 
-                                        if ( $this->__isTranslated( $src, $trg, $stateValues[ 'state' ], $stateValues[ 'state-qualifier' ] ) && !is_numeric( $src ) && !empty( $trg ) ) { //treat 0,1,2... as translated content!
+                                        if ( $this->__isTranslated( $src, $trg, $stateValues[ 'state' ], $stateValues[ 'state-qualifier' ] ) && !empty( $trg ) ) { //treat 0,1,2... as translated content!
 
                                             $target = $this->filter->fromRawXliffToLayer0( $target_extract_external[ 'seg' ] );
 
@@ -2058,7 +2058,7 @@ class ProjectManager {
 
                                 $target_extract_external = $this->_strip_external( $xliff_trans_unit[ 'target' ][ 'raw-content' ], $xliffInfo );
 
-                                if ( $this->__isTranslated( $xliff_trans_unit[ 'source' ][ 'raw-content' ], $target_extract_external[ 'seg' ], $stateValues[ 'state' ], $stateValues[ 'state-qualifier' ] ) && !is_numeric( $xliff_trans_unit[ 'source' ][ 'raw-content' ] ) && !empty( $target_extract_external[ 'seg' ] ) ) {
+                                if ( $this->__isTranslated( $xliff_trans_unit[ 'source' ][ 'raw-content' ], $target_extract_external[ 'seg' ], $stateValues[ 'state' ], $stateValues[ 'state-qualifier' ] ) && !empty( $target_extract_external[ 'seg' ] ) ) {
 
                                     $target = $this->filter->fromRawXliffToLayer0( $target_extract_external[ 'seg' ] );
 
@@ -3031,14 +3031,14 @@ class ProjectManager {
      * This function returns true or false based on user-defined rules, or XLIFF states as the default behavior.
      * This function is used to filter out segments from the analysis queue and to allow working directly on their states and payable rates.
      *
-     * @param string      $source
-     * @param string      $target
+     * @param string|null $source
+     * @param string|null $target
      * @param string|null $state
      * @param string|null $stateQualifier
      *
      * @return bool
      */
-    private function __isTranslated( $source, $target, $state = null, $stateQualifier = null ) {
+    private function __isTranslated( string $source = null, string $target = null, string $state = null, string $stateQualifier = null ): bool {
 
         /**
          * @var $configModel XliffRulesModel
