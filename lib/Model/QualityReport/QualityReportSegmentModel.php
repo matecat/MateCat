@@ -13,6 +13,7 @@ use Chunks_ChunkStruct;
 use Comments_CommentDao;
 use Constants;
 use Constants_TranslationStatus;
+use Exception;
 use Features\ReviewExtended\Model\QualityReportDao;
 use Features\ReviewExtended\ReviewUtils;
 use Features\TranslationVersions\Model\TranslationVersionDao;
@@ -44,7 +45,7 @@ class QualityReportSegmentModel {
      * @param array  $options
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     public function getSegmentsIdForQR( $step, $ref_segment, $where = "after", $options = [] ) {
         if ( isset( $options[ 'filter' ][ 'issue_category' ] ) && $options[ 'filter' ][ 'issue_category' ] != 'all' ) {
@@ -91,7 +92,7 @@ class QualityReportSegmentModel {
      * @param Chunks_ChunkStruct                       $chunk
      * @param bool                                     $isForUI
      *
-     * @throws \Exception
+     * @throws Exception
      */
     protected function _commonSegmentAssignments( QualityReport_QualityReportSegmentStruct $seg, MateCatFilter $Filter, FeatureSet $featureSet, Chunks_ChunkStruct $chunk, $isForUI = false ) {
         $seg->warnings            = $seg->getLocalWarning( $featureSet, $chunk );
@@ -148,7 +149,7 @@ class QualityReportSegmentModel {
      * @param bool  $isForUI
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     public function getSegmentsForQR( array $segment_ids, $isForUI = false ) {
         $segmentsDao = new Segments_SegmentDao;
@@ -171,22 +172,21 @@ class QualityReportSegmentModel {
         $commentsDao = new Comments_CommentDao;
         $comments    = $commentsDao->getThreadsBySegments( $segment_ids, $this->chunk->id );
 
-        $last_revisions         = [];
-        $all_versions_flattened = [];
+        $all_events = [];
 
         $translationVersionDao = new TranslationVersionDao;
-        $last_translations     = $translationVersionDao->getLastRevisionsBySegmentsAndSourcePage(
-                $segment_ids, $this->chunk->id, Constants::SOURCE_PAGE_TRANSLATE
-        );
+//        $last_translations     = $translationVersionDao->getLastRevisionsBySegmentsAndSourcePage(
+//                $segment_ids, $this->chunk->id, Constants::SOURCE_PAGE_TRANSLATE
+//        );
 
-        foreach ( $this->_getChunkReviews() as $chunkReview ) {
-            $last_revisions [ $chunkReview->source_page ] = $revs = $translationVersionDao->getLastRevisionsBySegmentsAndSourcePage(
-                    $segment_ids, $this->chunk->id, $chunkReview->source_page
-            );
-//            $all_versions_flattened                       = array_merge( $all_versions_flattened, $revs );
-        }
+//        foreach ( $this->_getChunkReviews() as $chunkReview ) {
+//            $last_revisions [ $chunkReview->source_page ] = $revs = $translationVersionDao->getLastRevisionsBySegmentsAndSourcePage(
+//                    $segment_ids, $this->chunk->id, $chunkReview->source_page
+//            );
+////            $all_versions_flattened                       = array_merge( $all_versions_flattened, $revs );
+//        }
 //        $all_versions_flattened = array_merge( $last_translations, $all_versions_flattened );
-        $all_versions_flattened = $translationVersionDao->getAllRelevantEvents( $segment_ids, $this->chunk->id );
+        $all_events = $translationVersionDao->getAllRelevantEvents( $segment_ids, $this->chunk->id );
 
         $segments = [];
 
@@ -202,40 +202,7 @@ class QualityReportSegmentModel {
             $this->_commonSegmentAssignments( $seg, $Filter, $featureSet, $this->chunk, $isForUI );
             $this->_assignIssues( $seg, $issues ?? [], $issue_comments );
             $this->_assignComments( $seg, $comments );
-
-            // If the segment is pre-translated (maybe from a previously XLIFF file) and NOT modified
-            if (
-                    $seg->getTmAnalysisStatus() == 'SKIPPED' &&
-                    !$this->isSegmentIdInArray( $seg->sid, $all_versions_flattened )
-            ) {
-                $seg->last_revisions    = [];
-                $seg->is_pre_translated = true;
-                $seg->suggestion        = ( $isForUI ) ? $Filter->fromLayer0ToLayer2( $seg->suggestion ) : $seg->suggestion;
-                switch ( $seg->status ) {
-                    case Constants_TranslationStatus::STATUS_APPROVED:
-                        $seg->last_revisions[] = [
-                                'revision_number' => 1,
-                                'translation'     => ( $isForUI ) ? $Filter->fromLayer0ToLayer2( $seg->translation ) : $seg->translation
-                        ];
-                        break;
-                    case Constants_TranslationStatus::STATUS_APPROVED2:
-                        $seg->last_revisions[] = [
-                                'revision_number' => 2,
-                                'translation'     => ( $isForUI ) ? $Filter->fromLayer0ToLayer2( $seg->translation ) : $seg->translation
-                        ];
-                        break;
-                    case Constants_TranslationStatus::STATUS_TRANSLATED:
-                        $seg->last_translation = ( $isForUI ) ? $Filter->fromLayer0ToLayer2( $seg->translation ) : $seg->translation;
-                        break;
-                    default:
-                        $seg->is_pre_translated = false; // not reached condition
-                        break;
-                }
-            } else {
-
-                $this->_populateLastTranslationAndRevision( $seg, $Filter, $last_translations, $last_revisions, $isForUI );
-
-            }
+            $this->_populateLastTranslationAndRevision( $seg, $Filter, $all_events, $isForUI );
 
             $seg->pee_translation_revise     = $seg->getPEEBwtTranslationRevise();
             $seg->pee_translation_suggestion = $seg->getPEEBwtTranslationSuggestion();
@@ -244,22 +211,6 @@ class QualityReportSegmentModel {
         }
 
         return $segments;
-    }
-
-    /**
-     * This function checks if a segment is an approved locked ICE without associated events
-     * (in other terms is a pre-approved segment)
-     *
-     * @param QualityReport_QualityReportSegmentStruct $qrSegmentStruct
-     *
-     * @return bool
-     */
-    private function isAnApprovedIce( QualityReport_QualityReportSegmentStruct $qrSegmentStruct ) {
-        return (
-                $qrSegmentStruct->locked == 1 and
-                ( $qrSegmentStruct->status === Constants_TranslationStatus::STATUS_APPROVED or $qrSegmentStruct->status === Constants_TranslationStatus::STATUS_APPROVED2 ) and
-                $qrSegmentStruct->match_type === 'ICE'
-        );
     }
 
     /**
@@ -274,109 +225,105 @@ class QualityReportSegmentModel {
     }
 
     /**
-     * @param               $seg
-     * @param MateCatFilter $Filter
-     * @param               $last_translations
-     * @param               $last_revisions
-     * @param bool          $isForUI
+     * @param QualityReport_QualityReportSegmentStruct $seg
+     * @param MateCatFilter                            $Filter
+     * @param SegmentEventsStruct[]                    $events
+     * @param bool                                     $isForUI
      *
-     * @throws \Exception
+     * @throws Exception
      */
-    protected function _populateLastTranslationAndRevision( $seg, MateCatFilter $Filter, $last_translations, $last_revisions, $isForUI = false ) {
+    protected function _populateLastTranslationAndRevision(
+            QualityReport_QualityReportSegmentStruct $seg,
+            MateCatFilter                            $Filter,
+            array                                    $events,
+            bool                                     $isForUI = false
+    ): void {
 
-        $last_translation = $this->_findLastTranslation( $seg, $Filter, $last_translations, $isForUI );
-
-        // last revision version object
-        $last_segment_revisions = $this->_findLastRevision( $seg, $Filter, $last_revisions, $isForUI );
-
+        // If the segment is pre-translated (maybe from a previously XLIFF file) and NOT modified
         if (
-                $seg->status == Constants_TranslationStatus::STATUS_TRANSLATED ||
-                $seg->status == Constants_TranslationStatus::STATUS_APPROVED ||
-                $seg->status == Constants_TranslationStatus::STATUS_APPROVED2
+                $seg->getTmAnalysisStatus() == 'SKIPPED' &&
+                !$this->isSegmentEventInArray( $seg->sid, $events )
         ) {
 
-            if ( !empty( $last_translation ) ) {
-                $seg->last_translation = $last_translation->translation;
+            $seg->last_revisions    = [];
+            $seg->is_pre_translated = true;
+            switch ( $seg->status ) {
+                case Constants_TranslationStatus::STATUS_APPROVED:
+                    $seg->last_revisions[] = [
+                            'revision_number' => 1,
+                            'translation'     => ( $isForUI ) ? $Filter->fromLayer0ToLayer2( $seg->translation ) : $seg->translation
+                    ];
+                    break;
+                case Constants_TranslationStatus::STATUS_APPROVED2:
+                    $seg->last_revisions[] = [
+                            'revision_number' => 2,
+                            'translation'     => ( $isForUI ) ? $Filter->fromLayer0ToLayer2( $seg->translation ) : $seg->translation
+                    ];
+                    break;
+                case Constants_TranslationStatus::STATUS_TRANSLATED:
+                    $seg->last_translation = ( $isForUI ) ? $Filter->fromLayer0ToLayer2( $seg->translation ) : $seg->translation;
+                    break;
+                default:
+                    $seg->is_pre_translated = false; // unreachable condition
+                    break;
             }
 
-            if ( !empty( $last_segment_revisions ) ) {
-                $seg->last_revisions = [];
-                foreach ( $last_segment_revisions as $source_page => $revision ) {
+        } elseif ( Constants_TranslationStatus::isNotInitialStatus( $seg->status ) ) {
+
+            foreach ( $events as $event ) {
+
+                if ( $seg->sid != $event->id_segment ) {
+                    continue;
+                }
+
+                $translation = ( $isForUI ) ? $Filter->fromLayer0ToLayer2( $event->translation ) : $event->translation;
+
+                if ( $event->source_page == Constants::SOURCE_PAGE_TRANSLATE ) {
+                    $seg->last_translation = $translation;
+                } else {
                     $seg->last_revisions[] = [
-                            'revision_number' => ReviewUtils::sourcePageToRevisionNumber( $source_page ),
-                            'translation'     => $revision->translation
+                            'revision_number' => ReviewUtils::sourcePageToRevisionNumber( $event->source_page ),
+                            'translation'     => $translation
                     ];
                 }
 
             }
+
         }
 
     }
 
     /**
-     * @param               $seg
-     * @param MateCatFilter $Filter
-     * @param               $last_translations
-     * @param bool          $isForUI
-     *
-     * @return mixed|null
-     * @throws \Exception
-     */
-    protected function _findLastTranslation( $seg, MateCatFilter $Filter, $last_translations, $isForUI = false ) {
-        if ( !empty( $last_translations ) ) {
-            foreach ( $last_translations as $last_translation ) {
-                if ( $last_translation->id_segment == $seg->sid ) {
-                    $last_translation->translation = ( $isForUI ) ? $Filter->fromLayer0ToLayer2( $last_translation->translation ) : $last_translation->translation;
-
-                    return $last_translation;
-                }
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * @param               $seg
-     * @param MateCatFilter $Filter
-     * @param               $last_revisions
-     * @param               $isForUI
-     *
-     * @return null
-     * @throws \Exception
-     */
-    protected function _findLastRevision( $seg, MateCatFilter $Filter, $last_revisions, $isForUI = false ) {
-
-        $segment_last_revisions = [];
-        if ( !empty( $last_revisions ) ) {
-            foreach ( $last_revisions as $source_page => $source_page_revisions ) {
-                foreach ( $source_page_revisions as $last_revision ) {
-                    if ( $last_revision->id_segment == $seg->sid ) {
-                        $last_revision->translation = ( $isForUI ) ? $Filter->fromLayer0ToLayer2( $last_revision->translation ) : $last_revision->translation;
-                        $segment_last_revisions[ $source_page ] = $last_revision;
-                        break;
-                    }
-                }
-            }
-        }
-
-        return $segment_last_revisions;
-    }
-
-    /**
-     * @param array $revisions
-     * @param int   $current_id
+     * @param SegmentEventsStruct[] $haystack_events
+     * @param int                   $needle_segment_id
      *
      * @return bool
      */
-    protected function isSegmentIdInArray( int $current_id, array $revisions ): bool {
-        foreach ( $revisions as $revSegment ) {
-            if ( $revSegment->id_segment == $current_id ) {
+    protected function isSegmentEventInArray( int $needle_segment_id, array $haystack_events ): bool {
+        foreach ( $haystack_events as $event ) {
+            if ( $event->id_segment == $needle_segment_id ) {
                 return true;
             }
         }
 
         return false;
+    }
+
+    /**
+     * @param int                   $needle_segment_id
+     * @param int                   $needle_source_page
+     * @param SegmentEventsStruct[] $haystack_events
+     *
+     * @return mixed|null
+     */
+    protected function filterEvent( int $needle_segment_id, int $needle_source_page, array $haystack_events ) {
+        foreach ( $haystack_events as $event ) {
+            if ( $event->id_segment == $needle_segment_id && $event->source_page == $needle_source_page ) {
+                return $event;
+            }
+        }
+
+        return null;
     }
 
 }

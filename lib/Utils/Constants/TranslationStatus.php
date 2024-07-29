@@ -18,7 +18,7 @@ class Constants_TranslationStatus {
     const STATUS_FIXED      = 'FIXED';
     const STATUS_REBUTTED   = 'REBUTTED';
 
-    public static $DB_STATUSES_MAP = [
+    public static array $DB_STATUSES_MAP = [
             self::STATUS_NEW        => 1,
             self::STATUS_DRAFT      => 2,
             self::STATUS_TRANSLATED => 3,
@@ -29,7 +29,7 @@ class Constants_TranslationStatus {
             self::STATUS_APPROVED2  => 8,
     ];
 
-    public static $STATUSES = [
+    public static array $STATUSES = [
             self::STATUS_NEW,
             self::STATUS_DRAFT,
             self::STATUS_TRANSLATED,
@@ -38,28 +38,33 @@ class Constants_TranslationStatus {
             self::STATUS_REBUTTED,
     ];
 
-    public static $INITIAL_STATUSES = [
+    public static array $INITIAL_STATUSES = [
             self::STATUS_NEW,
             self::STATUS_DRAFT
     ];
 
-    public static $TRANSLATION_STATUSES = [
+    public static array $TRANSLATION_STATUSES = [
             self::STATUS_TRANSLATED
     ];
 
 
-    public static $REVISION_STATUSES = [
+    public static array $REVISION_STATUSES = [
             self::STATUS_APPROVED,
             self::STATUS_APPROVED2,
             self::STATUS_REJECTED
     ];
 
-    public static $POST_REVISION_STATUSES = [
+    public static array $POST_REVISION_STATUSES = [
             self::STATUS_FIXED,
             self::STATUS_REBUTTED
     ];
 
-    public static function isReviewedStatus( $status ) {
+    public static function isReviewedStatus( $status ): bool {
         return in_array( $status, Constants_TranslationStatus::$REVISION_STATUSES );
     }
+
+    public static function isNotInitialStatus( $status ): bool {
+        return !in_array( $status, Constants_TranslationStatus::$INITIAL_STATUSES );
+    }
+
 }
