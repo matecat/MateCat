@@ -12,6 +12,7 @@ use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use PayableRates\CustomPayableRateDao;
 use PayableRates\CustomPayableRateStruct;
 use ProjectQueue\Queue;
+use QAModelTemplate\QAModelTemplateDao;
 use QAModelTemplate\QAModelTemplateStruct;
 use Teams\MembershipDao;
 use TMS\TMSService;
@@ -1139,14 +1140,14 @@ class NewController extends ajaxController {
      */
     private function __validateQaModelTemplate() {
         if ( !empty( $this->postInput[ 'id_qa_model_template' ] ) ) {
-            $qaModelTemplate = \QAModelTemplate\QAModelTemplateDao::get( [
+            $qaModelTemplate = QAModelTemplateDao::get( [
                     'id'  => $this->postInput[ 'id_qa_model_template' ],
                     'uid' => $this->getUser()->uid
             ] );
 
             // check if qa_model template exists
             if ( null === $qaModelTemplate ) {
-                throw new \Exception( 'This QA Model template does not exists or does not belongs to the logged in user' );
+                throw new Exception( 'This QA Model template does not exists or does not belongs to the logged in user' );
             }
 
             $this->qaModelTemplate = $qaModelTemplate;
@@ -1161,13 +1162,13 @@ class NewController extends ajaxController {
 
         if ( !empty( $this->postInput[ 'payable_rate_template_name' ] ) ) {
             if ( empty( $this->postInput[ 'payable_rate_template_id' ] ) ) {
-                throw new \Exception( '`payable_rate_template_id` param is missing' );
+                throw new Exception( '`payable_rate_template_id` param is missing' );
             }
         }
 
         if ( !empty( $this->postInput[ 'payable_rate_template_id' ] ) ) {
             if ( empty( $this->postInput[ 'payable_rate_template_name' ] ) ) {
-                throw new \Exception( '`payable_rate_template_name` param is missing' );
+                throw new Exception( '`payable_rate_template_name` param is missing' );
             }
         }
 
@@ -1180,15 +1181,15 @@ class NewController extends ajaxController {
             $payableRateModelTemplate = CustomPayableRateDao::getById( $payableRateTemplateId );
 
             if ( null === $payableRateModelTemplate ) {
-                throw new \Exception( 'Payable rate model id not valid' );
+                throw new Exception( 'Payable rate model id not valid' );
             }
 
             if ( $payableRateModelTemplate->uid !== $userId ) {
-                throw new \Exception( 'Payable rate model is not belonging to the current user' );
+                throw new Exception( 'Payable rate model is not belonging to the current user' );
             }
 
             if ( $payableRateModelTemplate->name !== $payableRateTemplateName ) {
-                throw new \Exception( 'Payable rate model name not matching' );
+                throw new Exception( 'Payable rate model name not matching' );
             }
         }
 
@@ -1207,7 +1208,7 @@ class NewController extends ajaxController {
 
             // check if qa_model exists
             if ( null === $qaModel ) {
-                throw new \Exception( 'This QA Model does not exists' );
+                throw new Exception( 'This QA Model does not exists' );
             }
 
             // check featureSet
@@ -1215,7 +1216,7 @@ class NewController extends ajaxController {
             $featureSetCodes = $this->getFeatureSet()->getCodes();
 
             if ( $qaModelLabel !== 'default' and !in_array( $qaModelLabel, $featureSetCodes ) ) {
-                throw new \Exception( 'This QA Model does not belong to the authenticated user' );
+                throw new Exception( 'This QA Model does not belong to the authenticated user' );
             }
 
             $this->qaModel = $qaModel;
