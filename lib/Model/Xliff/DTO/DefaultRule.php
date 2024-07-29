@@ -9,13 +9,14 @@ class DefaultRule extends AbstractXliffRule {
 
     /**
      * @see https://docs.oasis-open.org/xliff/v1.2/os/xliff-core.html
+     * @see https://docs.oasis-open.org/xliff/xliff-core/v2.0/xliff-core-v2.0.html
      */
-    protected static $_STATES           = XliffTranslationStatus::ALL_STATES;
-    protected static $_STATE_QUALIFIERS = XliffTranslationStatus::STATE_QUALIFIER_12;
+    protected static array $_STATES           = XliffTranslationStatus::ALL_STATES;
+    protected static array $_STATE_QUALIFIERS = XliffTranslationStatus::STATE_QUALIFIER_12;
 
     const ALLOWED_EDITOR_VALUES = [ null ];
 
-    protected static $VALIDATION_MAP = [
+    protected static array $VALIDATION_MAP = [
             self::_ANALYSIS_PRE_TRANSLATED => [ null ],
     ];
 
