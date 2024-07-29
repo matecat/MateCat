@@ -329,6 +329,7 @@ class engineController extends ajaxController {
         $this->result[ 'data' ][ 'name' ]        = $newCreatedDbRowStruct->name;
         $this->result[ 'data' ][ 'description' ] = $newCreatedDbRowStruct->description;
         $this->result[ 'data' ][ 'type' ]        = $newCreatedDbRowStruct->type;
+        $this->result[ 'data' ][ 'engine_type' ] = $newCreatedDbRowStruct->class_load;
     }
 
     /**

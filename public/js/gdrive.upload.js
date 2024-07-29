@@ -7,93 +7,100 @@ import CreateProjectStore from './cat_source/es6/stores/CreateProjectStore'
 import CreateProjectActions from './cat_source/es6/actions/CreateProjectActions'
 
 APP.tryListGDriveFiles = function () {
-  getGoogleDriveUploadedFiles().then((listFiles) => {
-    $('.files-gdrive').html('')
+  getGoogleDriveUploadedFiles()
+    .then((listFiles) => {
+      $('.files-gdrive').html('')
 
-    if (listFiles && listFiles.hasOwnProperty('files')) {
-      APP.displayGDriveFiles()
+      if (listFiles && listFiles.hasOwnProperty('files')) {
+        APP.displayGDriveFiles()
 
-      $.each(listFiles.files, function (index, file) {
-        var iconClass = ''
+        $.each(listFiles.files, function (index, file) {
+          var iconClass = ''
 
-        if (file.fileExtension == 'docx') {
-          iconClass = 'extgdoc'
-        } else if (file.fileExtension == 'pptx') {
-          iconClass = 'extgsli'
-        } else if (file.fileExtension == 'xlsx') {
-          iconClass = 'extgsheet'
-        }
+          if (file.fileExtension == 'docx') {
+            iconClass = 'extgdoc'
+          } else if (file.fileExtension == 'pptx') {
+            iconClass = 'extgsli'
+          } else if (file.fileExtension == 'xlsx') {
+            iconClass = 'extgsheet'
+          }
 
-        $('<tr/>', {
-          class: 'template-gdrive fade ready',
-          style: 'display: table-row;',
+          $('<tr/>', {
+            class: 'template-gdrive fade ready',
+            style: 'display: table-row;',
+          })
+            .append(
+              $('<td/>', {
+                class: 'preview',
+              }).append(
+                $('<span/>', {
+                  class: iconClass,
+                }),
+              ),
+            )
+            .append(
+              $('<td/>', {
+                class: 'name',
+                text: file.fileName,
+              }),
+            )
+            .append(
+              $('<td/>', {
+                class: 'size',
+              }).append(
+                $('<span/>', {
+                  text: APP.formatBytes(file.fileSize),
+                }),
+              ),
+            )
+            .append(
+              $('<td/>', {
+                class: 'delete',
+              }).append(
+                $('<button/>', {
+                  class:
+                    'btn btn-dange ui-button ui-widget ui-state-default ui-corner-all ui-button-text-icon-primary',
+                  'data-fileid': file.fileId,
+                  role: 'button',
+                  'aria-disabled': 'false',
+                  click: function () {
+                    APP.deleteGDriveFile($(this).data('fileid'))
+                  },
+                })
+                  .append(
+                    $('<span/>', {
+                      class: 'ui-button-icon-primary ui-icon ui-icon-trash',
+                    }),
+                  )
+                  .append(
+                    $('<span/>', {
+                      class: 'ui-button-text',
+                    })
+                      .append(
+                        $('<i/>', {
+                          class: 'icon-ban-circle icon-white',
+                        }),
+                      )
+                      .append(
+                        $('<span/>', {
+                          text: 'Delete',
+                        }),
+                      ),
+                  ),
+              ),
+            )
+            .appendTo('.files-gdrive')
         })
-          .append(
-            $('<td/>', {
-              class: 'preview',
-            }).append(
-              $('<span/>', {
-                class: iconClass,
-              }),
-            ),
-          )
-          .append(
-            $('<td/>', {
-              class: 'name',
-              text: file.fileName,
-            }),
-          )
-          .append(
-            $('<td/>', {
-              class: 'size',
-            }).append(
-              $('<span/>', {
-                text: APP.formatBytes(file.fileSize),
-              }),
-            ),
-          )
-          .append(
-            $('<td/>', {
-              class: 'delete',
-            }).append(
-              $('<button/>', {
-                class:
-                  'btn btn-dange ui-button ui-widget ui-state-default ui-corner-all ui-button-text-icon-primary',
-                'data-fileid': file.fileId,
-                role: 'button',
-                'aria-disabled': 'false',
-                click: function () {
-                  APP.deleteGDriveFile($(this).data('fileid'))
-                },
-              })
-                .append(
-                  $('<span/>', {
-                    class: 'ui-button-icon-primary ui-icon ui-icon-trash',
-                  }),
-                )
-                .append(
-                  $('<span/>', {
-                    class: 'ui-button-text',
-                  })
-                    .append(
-                      $('<i/>', {
-                        class: 'icon-ban-circle icon-white',
-                      }),
-                    )
-                    .append(
-                      $('<span/>', {
-                        text: 'Delete',
-                      }),
-                    ),
-                ),
-            ),
-          )
-          .appendTo('.files-gdrive')
-      })
-    } else {
-      APP.hideGDriveFiles()
-    }
-  })
+      } else {
+        APP.hideGDriveFiles()
+      }
+    })
+    .catch((error) => {
+      if (error.code === 400) {
+        const message = <span>{error.msg}</span>
+        CreateProjectActions.showError(message)
+      }
+    })
 }
 
 APP.restartGDriveConversions = function () {

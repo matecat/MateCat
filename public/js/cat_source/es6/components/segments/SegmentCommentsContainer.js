@@ -49,7 +49,7 @@ class SegmentCommentsContainer extends React.Component {
 
   sendComment() {
     const {mentionsMarkup} = this.state
-    if (mentionsMarkup.length > 0) {
+    if (mentionsMarkup?.length > 0) {
       CommentsActions.sendComment(
         mentionsMarkup,
         this.context.segment.original_sid,
@@ -295,7 +295,8 @@ class SegmentCommentsContainer extends React.Component {
     // workaround - textarea fit to content
     if (this.commentInput) {
       setTimeout(() => {
-        this.commentInput.style.height = `${this.commentInput.parentNode.clientHeight}px`
+        if (this.commentInput)
+          this.commentInput.style.height = `${this.commentInput.parentNode.clientHeight}px`
       }, 200)
     }
 

@@ -83,7 +83,7 @@ trait Oauth {
 
         //variable assignment only used for debugging purpose
         $debugParam = $engineDAO->destroyCache( $engineStruct );
-        $engineDAO->atomicUpdate( $record );
+        $engineDAO->updateByStruct( $record );
 
         if( is_null( $this->token ) ){
             throw new Exception( $objResponse['error_description'] );

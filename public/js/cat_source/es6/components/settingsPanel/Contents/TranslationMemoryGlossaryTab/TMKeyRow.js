@@ -278,7 +278,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
   const showConfirmDelete = () => {
     const templatesInvolved = projectTemplates
       .filter(({isTemporary}) => !isTemporary)
-      .filter((template) => template.tm.some(({key}) => key === row.key))
+      .filter((template) => template.tm?.some(({key}) => key === row.key))
 
     if (templatesInvolved.length) {
       ModalsActions.showModalComponent(

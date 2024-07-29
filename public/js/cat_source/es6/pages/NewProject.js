@@ -38,6 +38,7 @@ import {checkGuessTagIsEnabled} from '../components/settingsPanel/Contents/Advan
 import {getMMTKeys} from '../api/getMMTKeys/getMMTKeys'
 import {useGoogleLoginNotification} from '../hooks/useGoogleLoginNotification'
 import {AlertDeleteResourceProjectTemplates} from '../components/modals/AlertDeleteResourceProjectTemplates'
+import {getDeepLGlosssaries} from '../api/getDeepLGlosssaries/getDeepLGlosssaries'
 
 const SELECT_HEIGHT = 324
 
@@ -86,7 +87,7 @@ const NewProject = ({
     setProjectTemplates,
     modifyingCurrentTemplate,
     checkSpecificTemplatePropsAreModified,
-  } = useProjectTemplates(Array.isArray(tmKeys))
+  } = useProjectTemplates(tmKeys)
 
   const isDeviceCompatible = useDeviceCompatibility()
 
@@ -169,6 +170,78 @@ const NewProject = ({
     })(),
   )
 
+  const checkDeepLGlossaryWasCancelledIntoTemplates = useRef(
+    (() => {
+      let wasChecked = false
+
+      return ({engineId, projectTemplates}) => {
+        if (
+          !wasChecked &&
+          typeof engineId === 'number' &&
+          projectTemplates.length
+        ) {
+          getDeepLGlosssaries({engineId}).then(({glossaries}) => {
+            const projectTemplatesInvolved = projectTemplates.filter(
+              ({mt}) =>
+                mt.id === engineId &&
+                typeof mt.extra?.deepl_id_glossary !== 'undefined' &&
+                !glossaries.some(
+                  ({glossary_id}) =>
+                    glossary_id === mt.extra?.deepl_id_glossary,
+                ),
+            )
+
+            if (projectTemplatesInvolved.length) {
+              const projectTemplatesUpdated = projectTemplatesInvolved.map(
+                (template) => {
+                  const {deepl_id_glossary, ...prevExtra} =
+                    template.mt.extra ?? {}
+
+                  return {
+                    ...template,
+                    [SCHEMA_KEYS.mt]: {
+                      ...template.mt,
+                      extra: {
+                        ...prevExtra,
+                        ...(glossaries.some(
+                          ({glossary_id}) => glossary_id === deepl_id_glossary,
+                        ) && {
+                          deepl_id_glossary,
+                        }),
+                      },
+                    },
+                  }
+                },
+              )
+
+              // Notify template to server without glossaries delete
+              CreateProjectActions.updateProjectTemplates({
+                templates: projectTemplatesUpdated,
+                modifiedPropsCurrentProjectTemplate: {
+                  tm: projectTemplatesUpdated.find(
+                    ({isTemporary}) => isTemporary,
+                  )?.tm,
+                },
+              })
+
+              ModalsActions.showModalComponent(
+                AlertDeleteResourceProjectTemplates,
+                {
+                  projectTemplatesInvolved,
+                  content:
+                    'A different user has deleted one or more of the DeepL glossaries used in the following project creation template(s):',
+                },
+                'MT glossary deletion',
+              )
+            }
+          })
+
+          wasChecked = true
+        }
+      }
+    })(),
+  )
+
   const closeSettings = useCallback(() => setOpenSettings({isOpen: false}), [])
 
   const selectedTeam = useMemo(() => {
@@ -224,27 +297,29 @@ const NewProject = ({
     }
 
     if (config.isLoggedIn) {
-      getTmKeysUser().then(({tm_keys}) => {
-        const isMatchingKeyFromQuery = tm_keys.some(
-          ({key}) => tmKeyFromQueryString === key,
-        )
+      getTmKeysUser()
+        .then(({tm_keys}) => {
+          const isMatchingKeyFromQuery = tm_keys.some(
+            ({key}) => tmKeyFromQueryString === key,
+          )
 
-        setTmKeys([
-          ...tm_keys.map((key) => ({
-            ...key,
-            id: key.key,
-            ...(isMatchingKeyFromQuery &&
-              key.key === tmKeyFromQueryString && {
-                isActive: true,
-                r: true,
-                w: true,
-              }),
-          })),
-          ...(tmKeyFromQueryString && !isMatchingKeyFromQuery
-            ? [keyFromQueryString]
-            : []),
-        ])
-      })
+          setTmKeys([
+            ...tm_keys.map((key) => ({
+              ...key,
+              id: key.key,
+              ...(isMatchingKeyFromQuery &&
+                key.key === tmKeyFromQueryString && {
+                  isActive: true,
+                  r: true,
+                  w: true,
+                }),
+            })),
+            ...(tmKeyFromQueryString && !isMatchingKeyFromQuery
+              ? [keyFromQueryString]
+              : []),
+          ])
+        })
+        .catch(() => setTmKeys([]))
     } else {
       setTmKeys([...(tmKeyFromQueryString ? [keyFromQueryString] : [])])
     }
@@ -641,6 +716,10 @@ const NewProject = ({
     engineId: mtEngines.find(({engine_type}) => engine_type === 'MMT')?.id,
     projectTemplates,
   })
+  checkDeepLGlossaryWasCancelledIntoTemplates.current({
+    engineId: mtEngines.find(({engine_type}) => engine_type === 'DeepL')?.id,
+    projectTemplates,
+  })
 
   return isDeviceCompatible ? (
     <CreateProjectContext.Provider
@@ -821,11 +900,19 @@ const NewProject = ({
         <div className="uploadbtn-box">
           {!projectSent ? (
             <input
-              disabled={!isFormReadyToSubmit || isImportTMXInProgress}
+              disabled={
+                !isFormReadyToSubmit ||
+                isImportTMXInProgress ||
+                projectTemplates.length === 0
+              }
               name=""
               type="button"
               className={`uploadbtn${
-                !isFormReadyToSubmit || isImportTMXInProgress ? ' disabled' : ''
+                !isFormReadyToSubmit ||
+                isImportTMXInProgress ||
+                projectTemplates.length === 0
+                  ? ' disabled'
+                  : ''
               }`}
               value="Analyze"
               onClick={createProject.current}

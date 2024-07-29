@@ -10,12 +10,23 @@ const Speech2Text = {
   disable: function () {
     if (config.speech2text_enabled) {
       config.speech2text_enabled = 0
+      Speech2Text.initialized = false
+      $(document).off('contribution:copied')
     }
   },
   enable: function () {
     if (!config.speech2text_enabled) {
       config.speech2text_enabled = 1
     }
+  },
+  init: function () {
+    Speech2Text.initialized = true
+    Speech2Text.loadRecognition()
+    $(document).on('contribution:copied', function (ev, data) {
+      if (Speech2Text.microphone && Speech2Text.sid == data.segment.sid) {
+        Speech2Text.finalTranscript = data.translation + ' '
+      }
+    })
   },
   recognition: null,
   recognizing: false,
@@ -38,8 +49,7 @@ const Speech2Text = {
   },
   enableMicrophone: function (segment) {
     Speech2Text.microphone = segment.find('.micSpeech')
-    var idSegment = UI.getSegmentId(segment)
-    var segmentObj = SegmentStore.getSegmentByIdToJS(idSegment)
+    const segmentObj = SegmentStore.getCurrentSegment()
     if (Speech2Text.recognition) {
       Speech2Text.targetElement = segmentObj.translation
       Speech2Text.sid = segmentObj.sid
@@ -58,11 +68,6 @@ const Speech2Text = {
       )
     }
   },
-  disableMicrophone: function (segment) {
-    var microphone = segment.find('.micSpeech')
-    microphone.unbind('click')
-    Speech2Text.stopSpeechRecognition(microphone)
-  },
   clickMicrophone: function (event) {
     var microphone = $(event.currentTarget)
 
@@ -77,10 +82,7 @@ const Speech2Text = {
     }
   },
   startSpeechRecognition: function (microphone) {
-    var segmentSection = microphone.closest('section')
-    var segment = SegmentStore.getSegmentByIdToJS(
-      UI.getSegmentId(segmentSection),
-    )
+    const segment = SegmentStore.getCurrentSegment()
 
     if (!microphone.hasClass('micSpeechActive')) {
       microphone.addClass('micSpeechActive')
@@ -194,19 +196,6 @@ const Speech2Text = {
     return !Speech2Text.recognizing || match == '100%'
   },
 }
-
-Speech2Text.init = function () {
-  Speech2Text.initialized = true
-  Speech2Text.loadRecognition()
-  $(document).on('contribution:copied', function (ev, data) {
-    if (
-      Speech2Text.microphone.closest('section').attr('id') == data.segment.sid
-    ) {
-      Speech2Text.finalTranscript = data.translation + ' '
-    }
-  })
-}
-
 document.addEventListener('DOMContentLoaded', function (event) {
   if (Speech2Text.enabled()) {
     Speech2Text.init()
