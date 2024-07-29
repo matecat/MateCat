@@ -1,5 +1,7 @@
-const Shortcuts = {
-  shortCutsKeyType: navigator.platform === 'MacIntel' ? 'mac' : 'standard',
+import {isMacOS} from './Utils'
+
+export const Shortcuts = {
+  shortCutsKeyType: isMacOS() ? 'mac' : 'standard',
   cattol_formatting_characters: {
     label: 'Formatting characters',
     events: {
@@ -24,7 +26,7 @@ const Shortcuts = {
         equivalent: '',
         keystrokes: {
           standard: 'ctrl+bracketLeft',
-          mac: 'meta+bracketLeft',
+          mac: 'ctrl+bracketLeft',
         },
       },
       singleQuoteClose: {
@@ -32,7 +34,7 @@ const Shortcuts = {
         equivalent: '',
         keystrokes: {
           standard: 'ctrl+bracketRight',
-          mac: 'meta+bracketRight',
+          mac: 'ctrl+bracketRight',
         },
       },
       doubleQuoteOpen: {
@@ -40,7 +42,7 @@ const Shortcuts = {
         equivalent: '',
         keystrokes: {
           standard: 'ctrl+shift+bracketLeft',
-          mac: 'meta+shift+bracketLeft',
+          mac: 'ctrl+shift+bracketLeft',
         },
       },
       doubleQuoteClose: {
@@ -48,7 +50,7 @@ const Shortcuts = {
         equivalent: '',
         keystrokes: {
           standard: 'ctrl+shift+bracketRight',
-          mac: 'meta+shift+bracketRight',
+          mac: 'ctrl+shift+bracketRight',
         },
       },
     },
@@ -231,5 +233,3 @@ const Shortcuts = {
     },
   },
 }
-
-export default Shortcuts

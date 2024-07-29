@@ -124,6 +124,7 @@ export const MachineTranslationTab = () => {
             description: data.description
               ? data.description
               : activeAddEngine.name,
+            engine_type: data.engine_type,
           }
           setMtEngines((prevStateMT) => {
             return [newMT, ...prevStateMT]

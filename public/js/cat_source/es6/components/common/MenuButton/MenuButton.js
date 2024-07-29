@@ -59,7 +59,7 @@ export const MenuButton = ({
         ? ref.current?.children[1]
         : ref.current?.children[0]
 
-      if (!target.contains(e.target)) setItemsCoords(undefined)
+      if (!target || !target.contains(e.target)) setItemsCoords(undefined)
     }
     const handlerResize = () => setPortalPosition.current(true)
 

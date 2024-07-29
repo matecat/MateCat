@@ -27,7 +27,7 @@ class ModelStruct extends DataAccess_AbstractDaoSilentStruct implements DataAcce
      * @return string
      */
     public function getSerializedCategories() {
-        return json_encode( ['categories' => CategoryDao::getCategoriesAndSeverities( $this->id ) ] ) ;
+        return json_encode( ['categories' => CategoryDao::getCategoriesAndSeverities( $this->id ) ], JSON_HEX_APOS ) ;
     }
 
     public function getCategoriesAndSeverities() {

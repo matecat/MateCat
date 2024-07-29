@@ -668,14 +668,28 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
      */
     private function getTotalPayableWords($volAnalysis)
     {
-        if(
-            isset($volAnalysis['summary']) and
-            isset($volAnalysis['summary']['total_equivalent'])
-        ){
-            return (int)$volAnalysis['summary']['total_equivalent'];
+        $total = 0;
+        $jobList = $this->jobList;
+
+        foreach ($jobList as $job){
+
+            $jid       = $job['jid'];
+            $jpassword = $job['jpassword'];
+
+            foreach ($volAnalysis['jobs'] as $jobVolAnalysis){
+                foreach ($jobVolAnalysis['chunks'] as $chunkVolAnalysis){
+                    if($jid == $jobVolAnalysis['id'] and $jpassword == $chunkVolAnalysis['password']){
+                        $total = $total + $chunkVolAnalysis['total_equivalent'];
+                    }
+                }
+            }
         }
 
-        return 1;
+        if($total === 0){
+            return 1;
+        }
+
+        return (int)$total;
     }
 
     /**

@@ -39,6 +39,7 @@ import {
   isSelectedEntity,
   getEntitiesSelected,
 } from './utils/DraftMatecatUtils/manageCaretPositionNearEntity'
+import {isMacOS} from '../../utils/Utils'
 
 const {hasCommandModifier, isOptionKeyCommand, isCtrlKeyCommand} =
   KeyBindingUtil
@@ -317,8 +318,10 @@ class Editarea extends React.Component {
       )
       // Add missing tag to store for highlight warnings on tags
       const {missingTags} = checkForMissingTags(sourceTagMap, currentTagRange)
+
       const lxqDecodedTranslation =
         DraftMatecatUtils.prepareTextForLexiqa(decodedSegment)
+
       //const currentTagRange = matchTag(decodedSegment); //deactivate if updateTagsInEditor is active
       SegmentActions.updateTranslation(
         segment.sid,
@@ -752,7 +755,7 @@ class Editarea extends React.Component {
     } else if (
       (e.key === ' ' || e.key === 'Spacebar' || e.key === ' ') &&
       ((isCtrlKeyCommand(e) && e.shiftKey) ||
-        (CommonUtils.isMacOS() && isOptionKeyCommand(e) && !e.ctrlKey))
+        (isMacOS() && isOptionKeyCommand(e) && !e.ctrlKey))
     ) {
       return 'insert-nbsp-tag' // Windows && Mac
     } else if (
@@ -795,7 +798,7 @@ class Editarea extends React.Component {
       return 'tm-search'
     } else if (
       (e.key === ' ' || e.key === 'Spacebar' || e.key === ' ') &&
-      ((e.ctrlKey && e.altKey) || (CommonUtils.isMacOS() && e.shiftKey))
+      ((e.ctrlKey && e.altKey) || (isMacOS() && e.shiftKey))
     ) {
       return 'insert-word-joiner-tag'
     } else if (e.code === 'BracketLeft' || e.code === 'BracketRight') {
@@ -837,8 +840,8 @@ class Editarea extends React.Component {
             ? 'left'
             : 'right'
           : !isRTL
-          ? 'right'
-          : 'left'
+            ? 'right'
+            : 'left'
 
       const updatedStateNearZwsp = checkCaretIsNearZwsp({
         editorState: this.state.editorState,
