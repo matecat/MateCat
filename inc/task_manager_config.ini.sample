@@ -38,11 +38,11 @@ P3[loggerName]    = "tm_analysis_P3.log"
 ;;##############################
 ;;######    Key Name P4    #####
 ;;##############################
-P3[queue_name]    = "analysis_queue_P4"
-P3[pid_set_name]  = "ch_pid_set_p4"
-P3[max_executors] = 1
-P3[redis_key]     = "p4_list"
-P3[loggerName]    = "tm_analysis_P4.log"
+P4[queue_name]    = "analysis_queue_P4"
+P4[pid_set_name]  = "ch_pid_set_p4"
+P4[max_executors] = 1
+P4[redis_key]     = "p4_list"
+P4[loggerName]    = "tm_analysis_P4.log"
 
 ;;##################################
 ;;##### Key Name project_queue #####
