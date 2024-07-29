@@ -144,9 +144,11 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
 
   const showConfirmDelete = useRef()
   showConfirmDelete.current = (glossary) => {
-    const templatesInvolved = projectTemplates.filter((template) =>
-      template.mt?.extra?.glossaries?.some((value) => value === glossary.id),
-    )
+    const templatesInvolved = projectTemplates
+      .filter(({isTemporary}) => !isTemporary)
+      .filter((template) =>
+        template.mt?.extra?.glossaries?.some((value) => value === glossary.id),
+      )
 
     if (templatesInvolved.length) {
       ModalsActions.showModalComponent(
@@ -198,7 +200,9 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
                   setRows: updateRowsState,
                   isReadOnly: isCattoolPage,
                 }}
-                deleteGlossaryConfirm={showConfirmDelete.current}
+                deleteGlossaryConfirm={(glossary) =>
+                  showConfirmDelete.current(glossary)
+                }
               />
             ),
           ...(deleteGlossaryRequest &&
