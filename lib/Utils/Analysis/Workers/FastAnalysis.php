@@ -734,11 +734,9 @@ class FastAnalysis extends AbstractDaemon {
                 break;
         }
 
-        //Set NO_MATCH word count multiplier for internal fuzzy matches on standard_words
+        //Set the industry word count equals to the equivalent word count, here we have no machine translation.
+        // - The word count for Industry is by definition equal to the word count for Equivalent, except for machine translation (next phase).
         $standard_words = $eq_word;
-        if ( $match_type == "INTERNAL" ) {
-            $standard_words = $segmentArray[ 'wc' ] * $equivalentWordMapping[ "NO_MATCH" ] / 100;
-        }
 
         return [ $eq_word, $standard_words, $match_type ];
 
