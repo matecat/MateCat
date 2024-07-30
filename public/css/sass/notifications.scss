@@ -151,6 +151,15 @@
   color: $notification-info;
 }
 
+.notification-message{
+  a {
+    color:  $notification-info;
+  }
+  a.bold {
+    font-weight: bold;
+  }
+}
+
 .notifications-wrapper-inside {
   .translator-notification-sent {
     font-weight: bold;
