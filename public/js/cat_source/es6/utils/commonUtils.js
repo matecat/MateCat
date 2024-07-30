@@ -504,6 +504,10 @@ const CommonUtils = {
     const event = new CustomEvent('dataLayer-event', {detail: data})
     document.dispatchEvent(event)
   },
+  dispatchCustomEvent: (name, data) => {
+    const event = new CustomEvent(name, {detail: data})
+    document.dispatchEvent(event)
+  },
 }
 
 const ParsedHash = function (hash) {

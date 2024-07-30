@@ -122,9 +122,6 @@ const NotificationItem = ({
 
   return (
     <div className={styleNameContainer} style={getNotificationStyle()}>
-      {position === 'bl' && type === 'info' ? (
-        <div className="notifications-cat-smiling" />
-      ) : null}
       {dismissable ? (
         <span
           className={'notification-close-button'}
