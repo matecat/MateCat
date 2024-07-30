@@ -407,8 +407,8 @@ const TEXT_UTILS = {
           TEXT_UTILS.isSupportingRegexLookAheadLookBehind() && !config.isCJK
             ? findWithRegex
             : config.isCJK
-            ? findWithRegexCJK
-            : findWithRegexWordSeparator,
+              ? findWithRegexCJK
+              : findWithRegexWordSeparator,
       }
     } catch (e) {
       return {}

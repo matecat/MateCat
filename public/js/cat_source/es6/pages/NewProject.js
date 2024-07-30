@@ -180,16 +180,18 @@ const NewProject = ({
             const projectTemplatesInvolved = projectTemplates.filter(
               ({mt}) =>
                 mt.id === engineId &&
-                typeof mt.extra.deepl_id_glossary !== 'undefined' &&
+                typeof mt.extra?.deepl_id_glossary !== 'undefined' &&
                 !glossaries.some(
-                  ({glossary_id}) => glossary_id === mt.extra.deepl_id_glossary,
+                  ({glossary_id}) =>
+                    glossary_id === mt.extra?.deepl_id_glossary,
                 ),
             )
 
             if (projectTemplatesInvolved.length) {
               const projectTemplatesUpdated = projectTemplatesInvolved.map(
                 (template) => {
-                  const {deepl_id_glossary, ...prevExtra} = template.mt.extra // eslint-disable-line
+                  const {deepl_id_glossary, ...prevExtra} =
+                    template.mt.extra ?? {}
 
                   return {
                     ...template,
@@ -198,8 +200,7 @@ const NewProject = ({
                       extra: {
                         ...prevExtra,
                         ...(glossaries.some(
-                          ({glossary_id}) =>
-                            glossary_id === template.mt.extra.deepl_id_glossary,
+                          ({glossary_id}) => glossary_id === deepl_id_glossary,
                         ) && {
                           deepl_id_glossary,
                         }),
@@ -292,27 +293,29 @@ const NewProject = ({
     }
 
     if (config.isLoggedIn) {
-      getTmKeysUser().then(({tm_keys}) => {
-        const isMatchingKeyFromQuery = tm_keys.some(
-          ({key}) => tmKeyFromQueryString === key,
-        )
+      getTmKeysUser()
+        .then(({tm_keys}) => {
+          const isMatchingKeyFromQuery = tm_keys.some(
+            ({key}) => tmKeyFromQueryString === key,
+          )
 
-        setTmKeys([
-          ...tm_keys.map((key) => ({
-            ...key,
-            id: key.key,
-            ...(isMatchingKeyFromQuery &&
-              key.key === tmKeyFromQueryString && {
-                isActive: true,
-                r: true,
-                w: true,
-              }),
-          })),
-          ...(tmKeyFromQueryString && !isMatchingKeyFromQuery
-            ? [keyFromQueryString]
-            : []),
-        ])
-      })
+          setTmKeys([
+            ...tm_keys.map((key) => ({
+              ...key,
+              id: key.key,
+              ...(isMatchingKeyFromQuery &&
+                key.key === tmKeyFromQueryString && {
+                  isActive: true,
+                  r: true,
+                  w: true,
+                }),
+            })),
+            ...(tmKeyFromQueryString && !isMatchingKeyFromQuery
+              ? [keyFromQueryString]
+              : []),
+          ])
+        })
+        .catch(() => setTmKeys([]))
     } else {
       setTmKeys([...(tmKeyFromQueryString ? [keyFromQueryString] : [])])
     }
@@ -893,11 +896,19 @@ const NewProject = ({
         <div className="uploadbtn-box">
           {!projectSent ? (
             <input
-              disabled={!isFormReadyToSubmit || isImportTMXInProgress}
+              disabled={
+                !isFormReadyToSubmit ||
+                isImportTMXInProgress ||
+                projectTemplates.length === 0
+              }
               name=""
               type="button"
               className={`uploadbtn${
-                !isFormReadyToSubmit || isImportTMXInProgress ? ' disabled' : ''
+                !isFormReadyToSubmit ||
+                isImportTMXInProgress ||
+                projectTemplates.length === 0
+                  ? ' disabled'
+                  : ''
               }`}
               value="Analyze"
               onClick={createProject.current}

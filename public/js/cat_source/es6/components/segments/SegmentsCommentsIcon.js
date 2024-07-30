@@ -4,7 +4,7 @@ import {isUndefined} from 'lodash'
 import CommentsStore from '../../stores/CommentsStore'
 import SegmentActions from '../../actions/SegmentActions'
 import CommentsConstants from '../../constants/CommentsConstants'
-import Shortcuts from '../../utils/shortcuts'
+import {Shortcuts} from '../../utils/shortcuts'
 import {SegmentContext} from './SegmentContext'
 
 class SegmentsCommentsIcon extends React.Component {

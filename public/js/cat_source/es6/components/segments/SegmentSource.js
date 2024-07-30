@@ -5,7 +5,7 @@ import {CompositeDecorator, Editor, EditorState, Modifier} from 'draft-js'
 
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentActions from '../../actions/SegmentActions'
-import Shortcuts from '../../utils/shortcuts'
+import {Shortcuts} from '../../utils/shortcuts'
 import TagEntity from './TagEntity/TagEntity.component'
 import SegmentUtils from '../../utils/segmentUtils'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
@@ -20,6 +20,8 @@ import Assistant from '../icons/Assistant'
 import Education from '../icons/Education'
 import {TERM_FORM_FIELDS} from './SegmentFooterTabGlossary/SegmentFooterTabGlossary'
 import {getEntitiesSelected} from './utils/DraftMatecatUtils/manageCaretPositionNearEntity'
+import {UseHotKeysComponent} from '../../hooks/UseHotKeysComponent'
+import {flushSync} from 'react-dom'
 
 class SegmentSource extends React.Component {
   static contextType = SegmentContext
@@ -379,15 +381,11 @@ class SegmentSource extends React.Component {
       SegmentConstants.SET_SEGMENT_TAGGED,
       this.setTaggedSource,
     )
-    this.$source = $(this.source)
-    this.$source.on(
-      'keydown',
-      null,
-      Shortcuts.cattol.events.searchInConcordance.keystrokes[
-        Shortcuts.shortCutsKeyType
-      ],
-      this.openConcordance,
+    SegmentStore.addListener(
+      SegmentConstants.REFRESH_TAG_MAP,
+      this.refreshTagMap,
     )
+    this.$source = $(this.source)
     setTimeout(() => {
       this.checkDecorators()
       this.updateSourceInStore()
@@ -399,7 +397,10 @@ class SegmentSource extends React.Component {
       SegmentConstants.CLOSE_SPLIT_SEGMENT,
       this.endSplitMode,
     )
-    this.$source.on('keydown', this.openConcordance)
+    SegmentStore.removeListener(
+      SegmentConstants.REFRESH_TAG_MAP,
+      this.refreshTagMap,
+    )
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -447,6 +448,27 @@ class SegmentSource extends React.Component {
       const entitiesSelected = getEntitiesSelected(editorState)
       SegmentActions.focusTags(entitiesSelected)
     }
+  }
+
+  refreshTagMap = () => {
+    const translation = this.props.segment.segment
+
+    // If GuessTag enabled, clean string from tag
+    const cleanSource = SegmentUtils.checkCurrentSegmentTPEnabled(
+      this.props.segment,
+    )
+      ? DraftMatecatUtils.removeTagsFromText(translation)
+      : translation
+    // New EditorState with translation
+    const contentEncoded = DraftMatecatUtils.encodeContent(
+      this.state.editorState,
+      cleanSource,
+    )
+    const {editorState, tagRange} = contentEncoded
+
+    flushSync(() => this.setState({editorState, tagRange}))
+
+    this.updateSourceInStore()
   }
 
   allowHTML(string) {
@@ -626,6 +648,14 @@ class SegmentSource extends React.Component {
         data-original={this.originalSource}
         {...handlers}
       >
+        <UseHotKeysComponent
+          shortcut={
+            Shortcuts.cattol.events.searchInConcordance.keystrokes[
+              Shortcuts.shortCutsKeyType
+            ]
+          }
+          callback={this.openConcordance}
+        />
         <Editor
           editorState={editorState}
           onChange={onChange}

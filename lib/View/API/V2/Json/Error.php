@@ -11,6 +11,7 @@ namespace API\V2\Json;
 
 
 use Exception;
+use Throwable;
 
 class Error {
 
@@ -37,7 +38,7 @@ class Error {
 
         foreach ( $data as $error ) {
 
-            if ( $error instanceof Exception ) {
+            if ( $error instanceof Throwable ) {
                 $code   = $error->getCode();
                 $output = $error->getMessage();
             } else {

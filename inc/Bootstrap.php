@@ -18,14 +18,20 @@ class Bootstrap {
      */
     private $autoLoadedFeatureSet;
 
-    public static function start() {
-        new self();
+    public static function start( SplFileInfo $config_file = null, SplFileInfo $task_runner_config_file = null ) {
+        new self( $config_file, $task_runner_config_file );
     }
 
-    private function __construct() {
+    private function __construct( SplFileInfo $config_file = null, SplFileInfo $task_runner_config_file = null ) {
 
         self::$_ROOT  = realpath( dirname( __FILE__ ) . '/../' );
-        self::$CONFIG = parse_ini_file( self::$_ROOT . DIRECTORY_SEPARATOR . 'inc/config.ini', true );
+
+        if( $config_file != null ){
+            self::$CONFIG = parse_ini_file( $config_file->getRealPath(), true );
+        } else {
+            self::$CONFIG = parse_ini_file( self::$_ROOT . DIRECTORY_SEPARATOR . 'inc/config.ini', true );
+        }
+
         $OAUTH_CONFIG = @parse_ini_file( self::$_ROOT . DIRECTORY_SEPARATOR . 'inc/oauth_config.ini', true );
 
         register_shutdown_function( [ 'Bootstrap', 'shutdownFunctionHandler' ] );
@@ -51,6 +57,12 @@ class Bootstrap {
 
         //get the environment configuration
         self::initConfig();
+
+        if( $task_runner_config_file != null ){
+            INIT::$TASK_RUNNER_CONFIG = parse_ini_file( $task_runner_config_file->getRealPath(), true );
+        } else {
+            INIT::$TASK_RUNNER_CONFIG = parse_ini_file( self::$_ROOT . DIRECTORY_SEPARATOR . 'inc/task_manager_config.ini', true );
+        }
 
         ini_set( 'display_errors', false );
         if ( INIT::$PRINT_ERRORS ) {
@@ -79,8 +91,6 @@ class Bootstrap {
         INIT::$MODEL_ROOT                      = INIT::$ROOT . '/lib/Model';
         INIT::$CONTROLLER_ROOT                 = INIT::$ROOT . '/lib/Controller';
         INIT::$UTILS_ROOT                      = INIT::$ROOT . '/lib/Utils';
-
-        INIT::$TASK_RUNNER_CONFIG = parse_ini_file( self::$_ROOT . DIRECTORY_SEPARATOR . 'inc/task_manager_config.ini', true );
 
         try {
             Log::$uniqID = ( isset( $_COOKIE[ INIT::$PHP_SESSION_NAME ] ) ? substr( $_COOKIE[ INIT::$PHP_SESSION_NAME ], 0, 13 ) : uniqid() );
@@ -173,26 +183,26 @@ class Bootstrap {
         } catch ( Exceptions\NotFoundException $e ) {
             $code    = 404;
             $message = "Not Found";
-            \Log::doJsonLog( [ "error" => 'Record Not found error for URI: ' . $_SERVER[ 'REQUEST_URI' ] . " - " . "{$exception->getMessage()} ", "trace" => $exception->getTrace() ] );
+            Log::doJsonLog( [ "error" => 'Record Not found error for URI: ' . $_SERVER[ 'REQUEST_URI' ] . " - " . "{$exception->getMessage()} ", "trace" => $exception->getTrace() ] );
         } catch ( Exceptions\AuthorizationError $e ) {
             $code    = 403;
             $message = "Forbidden";
-            \Log::doJsonLog( [ "error" => 'Access not allowed error for URI: ' . $_SERVER[ 'REQUEST_URI' ] . " - " . "{$exception->getMessage()} ", "trace" => $exception->getTrace() ] );
+            Log::doJsonLog( [ "error" => 'Access not allowed error for URI: ' . $_SERVER[ 'REQUEST_URI' ] . " - " . "{$exception->getMessage()} ", "trace" => $exception->getTrace() ] );
         } catch ( Exceptions\ValidationError $e ) {
             $code             = 409;
             $message          = "Conflict";
             $response_message = $exception->getMessage();
-            \Log::doJsonLog( [ "error" => 'The request could not be completed due to a conflict with the current state of the resource. - ' . "{$exception->getMessage()} ", "trace" => $exception->getTrace() ] );
+            Log::doJsonLog( [ "error" => 'The request could not be completed due to a conflict with the current state of the resource. - ' . "{$exception->getMessage()} ", "trace" => $exception->getTrace() ] );
         } catch ( \PDOException $e ) {
             $code    = 503;
             $message = "Service Unavailable";
-            \Utils::sendErrMailReport( $exception->getMessage() . "" . $exception->getTraceAsString(), 'Generic error' );
-            \Log::doJsonLog( [ "error" => $exception->getMessage(), "trace" => $exception->getTrace() ] );
-        } catch ( Exception $e ) {
+//            \Utils::sendErrMailReport( $exception->getMessage() . "" . $exception->getTraceAsString(), 'Generic error' );
+            Log::doJsonLog( [ "error" => $exception->getMessage(), "trace" => $exception->getTrace() ] );
+        } catch ( Throwable $e ) {
             $code    = 500;
             $message = "Internal Server Error";
-            \Utils::sendErrMailReport( $exception->getMessage() . "" . $exception->getTraceAsString(), 'Generic error' );
-            \Log::doJsonLog( [ "error" => $exception->getMessage(), "trace" => $exception->getTrace() ] );
+//            \Utils::sendErrMailReport( $exception->getMessage() . "" . $exception->getTraceAsString(), 'Generic error' );
+            Log::doJsonLog( [ "error" => $exception->getMessage(), "trace" => $exception->getTrace() ] );
         }
 
         if ( stripos( PHP_SAPI, 'cli' ) === false ) {
@@ -280,7 +290,7 @@ class Bootstrap {
 
                     Log::$fileName = 'fatal_errors.txt';
                     Log::doJsonLog( $output );
-                    Utils::sendErrMailReport( $output );
+//                    Utils::sendErrMailReport( $output );
 
                     if ( stripos( PHP_SAPI, 'cli' ) === false ) {
                         header( "HTTP/1.1 500 Internal Server Error" );

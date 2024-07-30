@@ -175,7 +175,10 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
 
     }
 
-    public function atomicUpdate( EnginesModel_EngineStruct $obj ) {
+    /**
+     * @throws Exception
+     */
+    public function updateByStruct( EnginesModel_EngineStruct $obj ) {
         $obj = $this->sanitize( clone $obj );
 
         $this->_validatePrimaryKey( $obj );
