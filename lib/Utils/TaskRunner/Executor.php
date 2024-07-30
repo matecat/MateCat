@@ -330,10 +330,9 @@ class Executor implements SplObserver {
                 $this->_executor_instance_id
         );
 
-        $was_run_from_task_manager = $this->_queueHandler->getRedisClient()->get( gethostname() . ":" . $this->_executionContext->queue_name );
-
-        if ( $was_run_from_task_manager > 0 ) {
-            $this->_queueHandler->getRedisClient()->decr( gethostname() . ":" . $this->_executionContext->queue_name );
+        $decr = $this->_queueHandler->getRedisClient()->decr( gethostname() . ":" . $this->_executionContext->queue_name );
+        if( $decr < 0 ){
+            $this->_queueHandler->getRedisClient()->set( gethostname() . ":" . $this->_executionContext->queue_name, 0 );
         }
 
         $this->_queueHandler->getRedisClient()->disconnect();

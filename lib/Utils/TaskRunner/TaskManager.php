@@ -16,7 +16,6 @@ use Log;
 use ReflectionException;
 use TaskRunner\Commons\AbstractDaemon;
 use TaskRunner\Commons\Context;
-use TaskRunner\Commons\ContextList;
 use TaskRunner\Commons\RedisKeys;
 
 /**
@@ -28,45 +27,11 @@ use TaskRunner\Commons\RedisKeys;
 class TaskManager extends AbstractDaemon {
 
     /**
-     * Handler of AMQ connector
-     *
-     * @var AMQHandler
-     */
-    protected AMQHandler $_queueHandler;
-
-    /**
      * Number of running processes
      *
      * @var int
      */
     protected int $_runningPids = 0;
-
-    /**
-     * List of contexts loaded from configuration file
-     * @var array
-     */
-    protected array $_context_definitions = [];
-
-    /**
-     * Optional context index on which the task runner works
-     *
-     * @var string|null
-     */
-    protected ?string $_contextIndex;
-
-    /**
-     * Path to che configuration file
-     *
-     * @var string
-     */
-    protected string $_configFile;
-
-    /**
-     * Context list definitions
-     *
-     * @var ContextList
-     */
-    protected $_queueContextList = [];
 
     /**
      * Deleted context (removed from config file at runtime) will be putted here to be removed
@@ -99,7 +64,7 @@ class TaskManager extends AbstractDaemon {
 
         try {
 
-            $this->_queueHandler = AMQHandler::getNewInstanceForDaemons();
+            $this->queueHandler = AMQHandler::getNewInstanceForDaemons();
             $this->_updateConfiguration();
 
         } catch ( Exception $ex ) {
@@ -124,9 +89,9 @@ class TaskManager extends AbstractDaemon {
 
         /*
          * Kill all managers. "There can be only one."
-         * Register My Host address ( and also overwrite the old one )
+         * Register My Host address (and also overwrite the old one)
          */
-        if ( !$this->_queueHandler->getRedisClient()->sadd( RedisKeys::TASK_RUNNER_PID, gethostname() . ":" . INIT::$INSTANCE_ID ) ) {
+        if ( !$this->queueHandler->getRedisClient()->sadd( RedisKeys::TASK_RUNNER_PID, gethostname() . ":" . INIT::$INSTANCE_ID ) ) {
             //kill all it's children
             $this->_killPids();
         }
@@ -136,7 +101,7 @@ class TaskManager extends AbstractDaemon {
 
             try {
 
-                if ( !$this->_queueHandler->getRedisClient()->sismember( RedisKeys::TASK_RUNNER_PID, gethostname() . ":" . INIT::$INSTANCE_ID ) ) {
+                if ( !$this->queueHandler->getRedisClient()->sismember( RedisKeys::TASK_RUNNER_PID, gethostname() . ":" . INIT::$INSTANCE_ID ) ) {
                     $this->_logTimeStampedMsg( "(parent " . $this->myProcessPid . " }) : ERROR OCCURRED, MY PID DISAPPEARED FROM REDIS:  PARENT EXITING !!" );
                     self::cleanShutDown();
                     die();
@@ -155,7 +120,7 @@ class TaskManager extends AbstractDaemon {
 
             foreach ( $this->_queueContextList->list as $context ) {
 
-//                $this->_TimeStampMsg( "(parent " . $this->tHandlerPID . ") : queue " . gethostname() . ":" . $context->queue_name . " contains $context->pid_list_len processes" );
+//                $this->_logTimeStampedMsg( "(parent " . $this->myProcessPid . ") : queue " . gethostname() . ":" . $context->queue_name . " contains $context->pid_list_len processes" );
 
                 $numProcessesDiff             = $context->pid_list_len - $context->max_executors;
                 $numProcessesToLaunchOrDelete = abs( $numProcessesDiff );
@@ -220,14 +185,14 @@ class TaskManager extends AbstractDaemon {
         while ( $dead > 0 ) {
             $this->_logTimeStampedMsg( "(parent " . $this->myProcessPid . "): child $dead exited." );
             foreach ( $this->_queueContextList->list as $queue ) {
-                $_was_active_but_unexpectedly_dead = $this->_queueHandler->getRedisClient()->sismember( $queue->pid_set_name, $dead . ":" . gethostname() . ":" . INIT::$INSTANCE_ID );
+                $_was_active_but_unexpectedly_dead = $this->queueHandler->getRedisClient()->sismember( $queue->pid_set_name, $dead . ":" . gethostname() . ":" . INIT::$INSTANCE_ID );
                 if ( $_was_active_but_unexpectedly_dead ) {
                     $this->_logTimeStampedMsg( "(parent " . $this->myProcessPid . "): unexpectedly dead, deleting file ...." );
                     $this->_killPids( null, $dead );
                     $this->_logTimeStampedMsg( "(parent " . $this->myProcessPid . "): DONE" );
                 } else {
                     // Executor exited by user kill or was a normal exit (clean)
-                    $queue->pid_list_len = $this->_queueHandler->getRedisClient()->get( gethostname() . ":" . $queue->queue_name );
+                    $queue->pid_list_len = $this->queueHandler->getRedisClient()->get( gethostname() . ":" . $queue->queue_name ) ?? 0;
                 }
             }
 
@@ -262,7 +227,7 @@ class TaskManager extends AbstractDaemon {
         while ( $processLaunched < $numProcesses ) {
 
             try {
-                $context->pid_list_len = $this->_queueHandler->getRedisClient()->incr( gethostname() . ":" . $context->queue_name );
+                $context->pid_list_len = $this->queueHandler->getRedisClient()->incr( gethostname() . ":" . $context->queue_name );
 //                $this->_TimeStampMsg( "(parent " . $this->tHandlerPID . ") : queue " . gethostname() . ":" . $context->queue_name . " counter incremented, now it contains $context->pid_list_len processes" );
             } catch ( Exception $e ) {
                 throw new Exception( "(parent " . gethostname() . ":" . INIT::$INSTANCE_ID . ") ERROR: " . $e->getMessage() . " ... EXITING.", static::ERR_NOT_INCREMENT );
@@ -308,11 +273,11 @@ class TaskManager extends AbstractDaemon {
         $msg = str_pad( " SHUTDOWN slow children." . gethostname() . ":" . INIT::$INSTANCE_ID, 50, "-", STR_PAD_BOTH );
         $this->_logTimeStampedMsg( $msg );
         $this->_killPids();
-        $this->_queueHandler->getRedisClient()->srem( RedisKeys::TASK_RUNNER_PID, gethostname() . ":" . INIT::$INSTANCE_ID );
+        $this->queueHandler->getRedisClient()->srem( RedisKeys::TASK_RUNNER_PID, gethostname() . ":" . INIT::$INSTANCE_ID );
         $msg = str_pad( " TASK RUNNER " . gethostname() . ":" . INIT::$INSTANCE_ID . " HALTED ", 50, "-", STR_PAD_BOTH );
         $this->_logTimeStampedMsg( $msg );
 
-        $this->_queueHandler->getRedisClient()->disconnect();
+        $this->queueHandler->getRedisClient()->disconnect();
 
     }
 
@@ -346,9 +311,9 @@ class TaskManager extends AbstractDaemon {
         if ( !empty( $pid ) && !empty( $queueInfo ) ) {
 
             $this->_logTimeStampedMsg( "Killing pid $pid from " . $queueInfo->pid_set_name );
-            $numDeleted += $this->_queueHandler->getRedisClient()->srem( $queueInfo->pid_set_name, $pid . ":" . gethostname() . ":" . INIT::$INSTANCE_ID );
+            $numDeleted += $this->queueHandler->getRedisClient()->srem( $queueInfo->pid_set_name, $pid . ":" . gethostname() . ":" . INIT::$INSTANCE_ID );
             posix_kill( $pid, SIGINT );
-            $queueInfo->pid_list_len = $this->_queueHandler->getRedisClient()->decr( gethostname() . ":" . $queueInfo->queue_name );
+            $queueInfo->pid_list_len = $this->queueHandler->getRedisClient()->decr( gethostname() . ":" . $queueInfo->queue_name );
 
         } elseif ( !empty( $pid ) && empty( $queueInfo ) ) {
 
@@ -358,10 +323,10 @@ class TaskManager extends AbstractDaemon {
              */
             foreach ( $this->_queueContextList->list as $queue ) {
 
-                $deleted = $this->_queueHandler->getRedisClient()->srem( $queue->pid_set_name, $pid . ":" . gethostname() . ":" . INIT::$INSTANCE_ID );
+                $deleted = $this->queueHandler->getRedisClient()->srem( $queue->pid_set_name, $pid . ":" . gethostname() . ":" . INIT::$INSTANCE_ID );
                 if ( $deleted ) {
                     posix_kill( $pid, SIGINT );
-                    $queue->pid_list_len = $this->_queueHandler->getRedisClient()->decr( gethostname() . ":" . $queue->queue_name );
+                    $queue->pid_list_len = $this->queueHandler->getRedisClient()->decr( gethostname() . ":" . $queue->queue_name );
                     $this->_logTimeStampedMsg( "Found. Killed pid $pid from queue " . gethostname() . ":$queue->queue_name." );
                     $numDeleted += $deleted;
                 }
@@ -371,15 +336,15 @@ class TaskManager extends AbstractDaemon {
         } elseif ( !empty( $num ) && !empty( $queueInfo ) ) {
 
             $this->_logTimeStampedMsg( "Killing $num pid from " . $queueInfo->pid_set_name );
-            $queueBefore = $this->_queueHandler->getRedisClient()->scard( $queueInfo->pid_set_name );
-            $pNameList   = $this->_queueHandler->getRedisClient()->smembers( $queueInfo->pid_set_name );
+            $queueBefore = $this->queueHandler->getRedisClient()->scard( $queueInfo->pid_set_name );
+            $pNameList   = $this->queueHandler->getRedisClient()->smembers( $queueInfo->pid_set_name );
             $i           = 0;
             foreach ( $pNameList as $pidName ) {
                 [ $pid, $hostName, $instanceID ] = explode( ":", $pidName );
                 if ( $hostName == gethostname() ) {
                     posix_kill( $pid, SIGINT );
-                    $this->_queueHandler->getRedisClient()->srem( $queueInfo->pid_set_name, $pidName );
-                    $queueInfo->pid_list_len = $this->_queueHandler->getRedisClient()->decr( $hostName . ":" . $queueInfo->queue_name );
+                    $this->queueHandler->getRedisClient()->srem( $queueInfo->pid_set_name, $pidName );
+                    $queueInfo->pid_list_len = $this->queueHandler->getRedisClient()->decr( $hostName . ":" . $queueInfo->queue_name );
                     $i++;
                 }
 
@@ -388,20 +353,20 @@ class TaskManager extends AbstractDaemon {
                 }
 
             }
-            $queueAfter = $this->_queueHandler->getRedisClient()->scard( $queueInfo->pid_set_name );
+            $queueAfter = $this->queueHandler->getRedisClient()->scard( $queueInfo->pid_set_name );
             $numDeleted = $queueBefore - $queueAfter;
 
         } elseif ( !empty( $queueInfo ) ) {
 
             $this->_logTimeStampedMsg( "Killing all processes from " . $queueInfo->pid_set_name );
-            $numDeleted = $this->_queueHandler->getRedisClient()->scard( $queueInfo->pid_set_name );
-            $pNameList  = $this->_queueHandler->getRedisClient()->smembers( $queueInfo->pid_set_name );
+            $numDeleted = $this->queueHandler->getRedisClient()->scard( $queueInfo->pid_set_name );
+            $pNameList  = $this->queueHandler->getRedisClient()->smembers( $queueInfo->pid_set_name );
             foreach ( $pNameList as $pidName ) {
                 [ $pid, $hostName, $instanceId ] = explode( ":", $pidName );
                 if ( $hostName == gethostname() ) {
                     posix_kill( $pid, SIGINT );
-                    $this->_queueHandler->getRedisClient()->srem( $queueInfo->pid_set_name, $pidName );
-                    $this->_queueHandler->getRedisClient()->decr( $hostName . ":" . $queueInfo->queue_name );
+                    $this->queueHandler->getRedisClient()->srem( $queueInfo->pid_set_name, $pidName );
+                    $this->queueHandler->getRedisClient()->decr( $hostName . ":" . $queueInfo->queue_name );
                 }
             }
 
@@ -427,11 +392,11 @@ class TaskManager extends AbstractDaemon {
                     $pidName = false;
                     if ( $queue->max_executors < $queue->pid_list_len ) {
                         //ok, queue can be reduced because it's upper limit exceed the max queue consumers
-                        $pidName = $this->_queueHandler->getRedisClient()->spop( $queue->pid_set_name );
+                        $pidName = $this->queueHandler->getRedisClient()->spop( $queue->pid_set_name );
                         if ( $pidName ) {
                             [ $pid, $hostName, $instanceId ] = explode( ":", $pidName );
                             if ( $hostName == gethostname() ) {
-                                $queue->pid_list_len = $this->_queueHandler->getRedisClient()->decr( $hostName . ":" . $queue->queue_name );
+                                $queue->pid_list_len = $this->queueHandler->getRedisClient()->decr( $hostName . ":" . $queue->queue_name );
                                 posix_kill( $pid, SIGINT );
                             } else {
                                 $pidName = false;
@@ -458,13 +423,13 @@ class TaskManager extends AbstractDaemon {
 
             $this->_logTimeStampedMsg( "Killing ALL processes." );
             foreach ( $this->_queueContextList->list as $queue ) {
-                $pNameList = $this->_queueHandler->getRedisClient()->smembers( $queue->pid_set_name );
+                $pNameList = $this->queueHandler->getRedisClient()->smembers( $queue->pid_set_name );
                 foreach ( $pNameList as $pName ) {
                     [ $pid, $hostName, $instanceId ] = explode( ":", $pName );
                     if ( $hostName == gethostname() ) {
                         posix_kill( $pid, SIGINT );
-                        $this->_queueHandler->getRedisClient()->srem( $queue->pid_set_name, $pName );
-                        $this->_queueHandler->getRedisClient()->decr( $hostName . ":" . $queue->queue_name );
+                        $this->queueHandler->getRedisClient()->srem( $queue->pid_set_name, $pName );
+                        $this->queueHandler->getRedisClient()->decr( $hostName . ":" . $queue->queue_name );
                         $numDeleted++;
                     }
                 }
@@ -488,25 +453,13 @@ class TaskManager extends AbstractDaemon {
      */
     protected function _updateConfiguration(): void {
 
-        $config = @parse_ini_file( $this->_configFile, true );
-
-        if ( empty( $this->_configFile ) || empty( $config[ 'context_definitions' ] ) ) {
-            throw new Exception( 'Wrong configuration file provided.' );
-        }
-
-        Log::$fileName              = $config[ 'loggerName' ];
-        $this->_context_definitions = $config[ 'context_definitions' ];
-
-        if ( empty( $this->_contextIndex ) ) {
-            $contextList = $this->_context_definitions;
-        } else {
-            $contextList = [ $this->_context_definitions[ $this->_contextIndex ] ];
-        }
+        $configuration              = $this->getConfiguration();
+        Log::$fileName              = $configuration->getLoggerName();
 
         if ( empty( $this->_queueContextList->list ) ) {
 
             //First Execution, load build object
-            $this->_queueContextList = ContextList::get( $contextList );
+            $this->_queueContextList = $configuration->getContextList();
 
             //exit method
             return;
@@ -524,7 +477,7 @@ class TaskManager extends AbstractDaemon {
          *</pre>
          *
          */
-        if ( $diff = array_diff_key( $this->_queueContextList->list, ContextList::get( $contextList )->list ) ) {
+        if ( $diff = array_diff_key( $this->_queueContextList->list, $configuration->getContextList()->list ) ) {
 
             //remove no more present contexts
             foreach ( $diff as $_key => $_cont ) {
@@ -534,17 +487,17 @@ class TaskManager extends AbstractDaemon {
 
         }
 
-        foreach ( $this->_context_definitions as $contextName => $context ) {
+        foreach ( $configuration->getContextList()->list as $contextName => $context ) {
 
             if ( isset( $this->_queueContextList->list[ $contextName ] ) ) {
 
                 //update the max executor number for this element
-                $this->_queueContextList->list[ $contextName ]->max_executors = $context[ 'max_executors' ];
+                $this->_queueContextList->list[ $contextName ]->max_executors = $context->max_executors;
 
             } else {
 
                 //create a new Object execution context
-                $this->_queueContextList->list[ $contextName ] = Context::buildFromArray( $context );
+                $this->_queueContextList->list[ $contextName ] = $context;
 
             }
 
