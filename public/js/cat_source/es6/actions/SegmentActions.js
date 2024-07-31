@@ -1516,7 +1516,7 @@ const SegmentActions = {
   getSegmentsQa: (segment) => {
     if (!segment) return
 
-    const {status, translation, updatedSource} = segment
+    const {status, translation, segment: updatedSource} = segment
 
     getLocalWarnings({
       id: segment.sid,
