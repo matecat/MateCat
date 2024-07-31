@@ -2622,7 +2622,7 @@ class QA {
             return true;
         }
 
-        $limit = Segments_SegmentMetadataDao::get( $segmentId, self::SIZE_RESTRICTION ) ?? null;
+        $limit = Segments_SegmentMetadataDao::get( $segmentId, self::SIZE_RESTRICTION )[ 0 ] ?? null;
 
         if ( $limit ) {
 
