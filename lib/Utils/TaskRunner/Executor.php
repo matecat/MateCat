@@ -22,7 +22,6 @@ use SplSubject;
 use Stomp\Transport\Frame;
 use TaskRunner\Commons\AbstractWorker;
 use TaskRunner\Commons\Context;
-use TaskRunner\Commons\QueueCounterTrait;
 use TaskRunner\Commons\QueueElement;
 use TaskRunner\Commons\SignalHandlerTrait;
 use TaskRunner\Exceptions\EmptyElementException;
@@ -45,7 +44,6 @@ Bootstrap::start();
 class Executor implements SplObserver {
 
     use SignalHandlerTrait;
-    use QueueCounterTrait;
 
     /**
      * Handler of AMQ connector
@@ -331,11 +329,6 @@ class Executor implements SplObserver {
         $this->_queueHandler->getRedisClient()->srem(
                 $this->_executionContext->pid_set_name,
                 $this->_executor_instance_id
-        );
-
-        $this->_decrement(
-                $this->_queueHandler->getRedisHandler(),
-                gethostname() . ":" . $this->_executionContext->queue_name,
         );
 
         $this->_queueHandler->getRedisClient()->disconnect();

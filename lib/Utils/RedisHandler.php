@@ -110,7 +110,7 @@ class RedisHandler {
 
         $time      = microtime( true );
         $exit_time = $time + $wait_time_seconds;
-        $sleep     = 1000;
+        $sleep     = 500000; // microseconds
 
         do {
 
