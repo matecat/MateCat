@@ -29,6 +29,7 @@ use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\FrameException;
 use TaskRunner\Exceptions\ReQueueException;
 use TaskRunner\Exceptions\WorkerClassException;
+use Throwable;
 use Utils;
 
 include_once realpath( dirname( __FILE__ ) . '/../../../' ) . "/inc/Bootstrap.php";
@@ -330,9 +331,22 @@ class Executor implements SplObserver {
                 $this->_executor_instance_id
         );
 
-        $decr = $this->_queueHandler->getRedisClient()->decr( gethostname() . ":" . $this->_executionContext->queue_name );
-        if( $decr < 0 ){
-            $this->_queueHandler->getRedisClient()->set( gethostname() . ":" . $this->_executionContext->queue_name, 0 );
+        try {
+
+            $this->_queueHandler->getRedisHandler()->tryLock( gethostname() . ":" . $this->_executionContext->queue_name, 60 );
+
+            $decr = $this->_queueHandler->getRedisClient()->decr( gethostname() . ":" . $this->_executionContext->queue_name );
+            if ( $decr < 0 ) {
+                $this->_queueHandler->getRedisClient()->set( gethostname() . ":" . $this->_executionContext->queue_name, 0 );
+            }
+
+        } catch ( Exception $e ) {
+            $this->_logMsg( $e->getMessage() );
+        } finally {
+            try {
+                $this->_queueHandler->getRedisHandler()->unlock( gethostname() . ":" . $this->_executionContext->queue_name );
+            } catch ( Throwable $ignore ) {
+            }
         }
 
         $this->_queueHandler->getRedisClient()->disconnect();

@@ -19,7 +19,7 @@ use TaskRunner\Commons\Context;
 class AMQHandler {
 
     /**
-     * @var Predis\Client
+     * @var RedisHandler
      */
     protected $redisHandler;
 
@@ -114,12 +114,19 @@ class AMQHandler {
      * @return Predis\Client
      * @throws ReflectionException
      */
-    public function getRedisClient() {
+    public function getRedisClient(): Predis\Client {
         if ( empty( $this->redisHandler ) ) {
             $this->redisHandler = new RedisHandler();
         }
 
         return $this->redisHandler->getConnection();
+    }
+
+    /**
+     * @return RedisHandler
+     */
+    public function getRedisHandler(): RedisHandler {
+        return $this->redisHandler;
     }
 
     /**

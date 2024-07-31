@@ -29,8 +29,8 @@ P3[max_executors] = 5
 ;;##############################
 ;;######    Key Name P4    #####
 ;;##############################
-P3[queue_name]    = "analysis_queue_P4"
-P3[max_executors] = 5
+P4[queue_name]    = "analysis_queue_P4"
+P4[max_executors] = 5
 
 ;;##############################
 ;;##### Key Name MailQueue #####
