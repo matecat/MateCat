@@ -104,10 +104,9 @@ class RedisHandler {
      * @param string $key
      * @param int    $wait_time_seconds
      *
-     * @return bool
      * @throws Exception
      */
-    public function tryLock( string $key, int $wait_time_seconds = 10 ): bool {
+    public function tryLock( string $key, int $wait_time_seconds = 10 ): void {
 
         $time      = microtime( true );
         $exit_time = $time + $wait_time_seconds;
@@ -121,7 +120,7 @@ class RedisHandler {
             if ( $lock ) {
                 $this->redisClient->expire( "lock:" . $key, $wait_time_seconds );
 
-                return true;
+                return;
             }
 
             usleep( $sleep );
