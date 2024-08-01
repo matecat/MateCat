@@ -238,7 +238,7 @@ class TaskManager extends AbstractDaemon {
                 $processLaunched    += 1;
                 $this->_runningPids += 1;
                 $context->pid_list_len++;
-                $msg = str_pad( "(parent " . gethostname() . ":" . INIT::$INSTANCE_ID . " spawned 1 new child in " . gethostname() . ":" . $context->queue_name, 50, "-", STR_PAD_BOTH );
+                $msg = str_pad( "(parent " . gethostname() . ":" . INIT::$INSTANCE_ID . " spawned 1 new child in " . $context->pid_set_name, 50, "-", STR_PAD_BOTH );
                 $this->_logTimeStampedMsg( $msg );
 
             } else {
