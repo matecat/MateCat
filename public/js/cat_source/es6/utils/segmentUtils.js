@@ -11,6 +11,8 @@ const SegmentUtils = {
    */
   tpCanActivate: undefined,
   TagProjectionCanActivate: undefined,
+  localStorageUnlockedSegments: 'unlocked-segments-' + config.id_job,
+
   /**
    * Tag Projection: check if is enable the Tag Projection
    */
@@ -46,9 +48,53 @@ const SegmentUtils = {
     return segment.ice_locked === '1'
   },
   isUnlockedSegment: function (segment) {
-    return !isNull(CommonUtils.getFromStorage('unlocked-' + segment.sid))
+    // return !isNull(CommonUtils.getFromStorage('unlocked-' + segment.sid))
+    if (localStorage.getItem(this.localStorageUnlockedAllSegments)) return true
+    let segmentsUnlocked = localStorage.getItem(
+      this.localStorageUnlockedSegments,
+    )
+    let index = -1
+    if (segmentsUnlocked) {
+      segmentsUnlocked = segmentsUnlocked.split(',')
+      index = segmentsUnlocked.indexOf(segment.sid)
+    }
+    return index !== -1
   },
-
+  addUnlockedSegment: function (sid) {
+    let segmentsUnlocked = localStorage.getItem(
+      this.localStorageUnlockedSegments,
+    )
+    if (segmentsUnlocked) {
+      segmentsUnlocked = segmentsUnlocked.split(',')
+      segmentsUnlocked.push(sid)
+    } else {
+      segmentsUnlocked = [sid]
+    }
+    localStorage.setItem(
+      this.localStorageUnlockedSegments,
+      segmentsUnlocked.join(),
+    )
+  },
+  removeUnlockedSegment(sid) {
+    let segmentsUnlocked = localStorage.getItem(
+      this.localStorageUnlockedSegments,
+    )
+    if (segmentsUnlocked) {
+      segmentsUnlocked = segmentsUnlocked.split(',')
+      const index = segmentsUnlocked.indexOf(sid)
+      if (index > 0) {
+        segmentsUnlocked.splice(index, 1)
+        localStorage.setItem(
+          this.localStorageUnlockedSegments,
+          segmentsUnlocked.join(),
+        )
+      }
+    }
+    localStorage.setItem(
+      this.localStorageUnlockedSegments,
+      segmentsUnlocked.join(),
+    )
+  },
   /**
    * Characters counter local storage
    */

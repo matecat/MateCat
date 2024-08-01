@@ -301,7 +301,7 @@ const SegmentActions = {
 
     // Lock the segment if it's approved in a second pass but was previously approved in first revision
     if (config.revisionNumber > 1) {
-      CommonUtils.removeFromStorage('unlocked-' + sid)
+      SegmentUtils.removeUnlockedSegment(sid)
     }
   },
   openNextApproved: function (sid) {
@@ -1324,13 +1324,12 @@ const SegmentActions = {
     })
 
     if (!unlocked) {
-      //TODO: move this to SegmentActions
-      CommonUtils.removeFromStorage('unlocked-' + segment.sid)
+      SegmentUtils.removeUnlockedSegment(segment.sid)
       if (segment.inBulk) {
         this.toggleSegmentOnBulk(segment.sid, fid)
       }
     } else {
-      CommonUtils.addInStorage('unlocked-' + segment.sid, true)
+      SegmentUtils.addUnlockedSegment(segment.sid)
       SegmentActions.openSegment(segment.sid)
     }
   },
@@ -1340,8 +1339,9 @@ const SegmentActions = {
       actionType: SegmentConstants.SET_UNLOCKED_SEGMENTS,
       segments,
     })
+    SegmentUtils.unlockAllSegments()
     segments.forEach((segmentSid) => {
-      CommonUtils.addInStorage('unlocked-' + segmentSid, true)
+      SegmentUtils.addUnlockedSegment(segmentSid)
     })
   },
 
