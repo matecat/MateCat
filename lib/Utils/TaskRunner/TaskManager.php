@@ -142,18 +142,18 @@ class TaskManager extends AbstractDaemon {
 
                         $this->_logTimeStampedMsg( "(parent " . $this->myProcessPid . ") : need to delete $numProcessesToLaunchOrDelete processes on " . $context->queue_name );
                         $this->_killPids( $context, 0, $numProcessesToLaunchOrDelete );
-                        sleep( 1 );
 
                     } else {
 
                         if ( !( ( round( microtime( true ), 3 ) * 1000 ) % 10 ) ) {
                             $this->_logTimeStampedMsg( "(parent) : PARENT MONITORING PAUSE (" . gethostname() . ":" . INIT::$INSTANCE_ID . ") sleeping ...." );
-                            usleep( 1000 );
                         }
 
                         self::_balanceQueues();
 
                     }
+
+                    usleep( 500000 );
 
                 }
 

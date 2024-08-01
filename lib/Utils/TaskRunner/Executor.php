@@ -189,7 +189,6 @@ class Executor implements SplObserver {
 
 //                $this->_logMsg( "--- (Executor " . $this->_executorPID . ") : Failed to read frame from AMQ. Doing nothing, wait and re-try in next cycle." );
 //                $this->_logMsg( $e->getMessage() );
-                usleep( 250000 );
                 continue;
 
             }

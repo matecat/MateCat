@@ -76,6 +76,8 @@ class AMQHandler {
 
         }
 
+        $connection->setReadTimeout( 2, 500000 );
+
         $this->statefulStomp = new StatefulStomp( new Client( $connection ) );
 
     }
