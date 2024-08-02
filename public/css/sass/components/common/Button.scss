@@ -12,7 +12,13 @@ a.button-component-container {
   text-decoration: none;
   white-space: nowrap;
   cursor: pointer;
-
+  display: flex;
+  border-radius: 4px;
+  width: auto;
+  font-weight: 500;
+  transition-property: color, background-color, box-shadow, opacity;
+  transition-duration: 0.3s;
+  transition-timing-function: cubic-bezier(0.77, 0, 0.175, 1);
   &:focus {
     outline: none;
   }
@@ -26,13 +32,7 @@ a.button-component-container {
     pointer-events: none;
   }
 
-  display: flex;
-  border-radius: 4px;
-  width: auto;
-  font-weight: 500;
-  transition-property: color, background-color, box-shadow, opacity;
-  transition-duration: 0.3s;
-  transition-timing-function: cubic-bezier(0.77, 0, 0.175, 1);
+
 
   // Mode modifiers
   &.basic {
