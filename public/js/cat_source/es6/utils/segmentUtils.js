@@ -1,8 +1,7 @@
-import {isNull} from 'lodash'
-
 import CommonUtils from './commonUtils'
 import SegmentStore from '../stores/SegmentStore'
 import DraftMatecatUtils from '../components/segments/utils/DraftMatecatUtils'
+import {SEGMENTS_STATUS} from '../constants/Constants'
 
 const SegmentUtils = {
   /**
@@ -47,6 +46,13 @@ const SegmentUtils = {
   isIceSegment: function (segment) {
     return segment.ice_locked === '1'
   },
+  isSecondPassLockedSegment: function (segment) {
+    return (
+      segment.status?.toUpperCase() === SEGMENTS_STATUS.APPROVED2 &&
+      segment.revision_number === 2 &&
+      config.revisionNumber !== 2
+    )
+  },
   isUnlockedSegment: function (segment) {
     // return !isNull(CommonUtils.getFromStorage('unlocked-' + segment.sid))
     if (localStorage.getItem(this.localStorageUnlockedAllSegments)) return true
@@ -66,7 +72,7 @@ const SegmentUtils = {
     )
     if (segmentsUnlocked) {
       segmentsUnlocked = segmentsUnlocked.split(',')
-      segmentsUnlocked.push(sid)
+      if (segmentsUnlocked.indexOf(sid) === -1) segmentsUnlocked.push(sid)
     } else {
       segmentsUnlocked = [sid]
     }
@@ -82,7 +88,7 @@ const SegmentUtils = {
     if (segmentsUnlocked) {
       segmentsUnlocked = segmentsUnlocked.split(',')
       const index = segmentsUnlocked.indexOf(sid)
-      if (index > 0) {
+      if (index > -1) {
         segmentsUnlocked.splice(index, 1)
         localStorage.setItem(
           this.localStorageUnlockedSegments,

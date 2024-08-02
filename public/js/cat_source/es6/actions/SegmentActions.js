@@ -8,7 +8,6 @@ import CatToolConstants from '../constants/CatToolConstants'
 import SegmentStore from '../stores/SegmentStore'
 import TranslationMatches from '../components/segments/utils/translationMatches'
 import OfflineUtils from '../utils/offlineUtils'
-import CommonUtils from '../utils/commonUtils'
 import SegmentUtils from '../utils/segmentUtils'
 import CopySourceModal, {
   COPY_SOURCE_COOKIE,
@@ -39,6 +38,7 @@ import {getSegmentsIssues} from '../api/getSegmentsIssues'
 import {sendSegmentVersionIssue} from '../api/sendSegmentVersionIssue'
 import {getSegmentVersionsIssues} from '../api/getSegmentVersionsIssues'
 import {sendSegmentVersionIssueComment} from '../api/sendSegmentVersionIssueComment'
+import {getFilteredSegments} from '../api/getFilteredSegments'
 
 const SegmentActions = {
   localStorageCommentsClosed:
@@ -1330,6 +1330,16 @@ const SegmentActions = {
       }
     } else {
       SegmentUtils.addUnlockedSegment(segment.sid)
+      if (!SegmentUtils.isSecondPassLockedSegment(segment)) {
+        SegmentStore.consecutiveUnlockSegments.push(segment.sid)
+        if (SegmentStore.consecutiveUnlockSegments.length > 2) {
+          getFilteredSegments(config.id_job, config.password, {
+            sample: {type: 'ice'},
+          }).then((data) => {
+            SegmentActions.unlockSegments(data.segment_ids)
+          })
+        }
+      }
       SegmentActions.openSegment(segment.sid)
     }
   },
@@ -1339,7 +1349,6 @@ const SegmentActions = {
       actionType: SegmentConstants.SET_UNLOCKED_SEGMENTS,
       segments,
     })
-    SegmentUtils.unlockAllSegments()
     segments.forEach((segmentSid) => {
       SegmentUtils.addUnlockedSegment(segmentSid)
     })

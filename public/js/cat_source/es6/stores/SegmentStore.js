@@ -99,6 +99,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
   searchParams: {},
   nextUntranslatedFromServer: null,
   consecutiveCopySourceNum: [],
+  consecutiveUnlockSegments: [],
   clipboardFragment: '',
   clipboardPlainText: '',
   sideOpen: false,
