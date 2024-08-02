@@ -38,7 +38,10 @@ import {getSegmentsIssues} from '../api/getSegmentsIssues'
 import {sendSegmentVersionIssue} from '../api/sendSegmentVersionIssue'
 import {getSegmentVersionsIssues} from '../api/getSegmentVersionsIssues'
 import {sendSegmentVersionIssueComment} from '../api/sendSegmentVersionIssueComment'
-import {getFilteredSegments} from '../api/getFilteredSegments'
+import {
+  HIDE_UNLOCK_ALL_SEGMENTS_MODAL_STORAGE,
+  UnlockAllSegmentsModal,
+} from '../components/modals/UnlockAllSegmentsModal'
 
 const SegmentActions = {
   localStorageCommentsClosed:
@@ -1330,17 +1333,24 @@ const SegmentActions = {
       }
     } else {
       SegmentUtils.addUnlockedSegment(segment.sid)
-      if (!SegmentUtils.isSecondPassLockedSegment(segment)) {
-        SegmentStore.consecutiveUnlockSegments.push(segment.sid)
-        if (SegmentStore.consecutiveUnlockSegments.length > 2) {
-          getFilteredSegments(config.id_job, config.password, {
-            sample: {type: 'ice'},
-          }).then((data) => {
-            SegmentActions.unlockSegments(data.segment_ids)
-          })
-        }
-      }
+      SegmentActions.checkUnlockAllSegmentsModal(segment)
       SegmentActions.openSegment(segment.sid)
+    }
+  },
+
+  checkUnlockAllSegmentsModal(segment) {
+    if (!SegmentUtils.isSecondPassLockedSegment(segment)) {
+      SegmentStore.consecutiveUnlockSegments.push(segment.sid)
+      if (
+        SegmentStore.consecutiveUnlockSegments.length >= 3 &&
+        !localStorage.getItem(HIDE_UNLOCK_ALL_SEGMENTS_MODAL_STORAGE)
+      ) {
+        ModalsActions.showModalComponent(
+          UnlockAllSegmentsModal,
+          {},
+          'Unlock all ICE locked segments',
+        )
+      }
     }
   },
 
