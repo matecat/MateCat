@@ -120,7 +120,7 @@ class Segment extends React.Component {
       setTimeout(() => {
         const segmentId = this.props.segment.original_sid
         //Segment Filter
-        if (SegmentFilterUtils.enabled() && SegmentFilterUtils.filtering()) {
+        if (SegmentFilterUtils.enabled()) {
           SegmentFilterUtils.setStoredState({
             lastSegmentId: segmentId,
           })
