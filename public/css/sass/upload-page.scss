@@ -2544,11 +2544,6 @@ header {
 .supported-formats {
   height: 100%;
   .fileformat {
-    h3 {
-      padding: 0 30px;
-      background-color: #efefef;
-      text-align: center;
-    }
     display: flex;
     flex-direction: row;
     height: calc(100% - 50px);
@@ -2556,6 +2551,12 @@ header {
     gap: 8px;
     justify-content: space-between;
     overflow: auto;
+    h3 {
+      padding: 0 30px;
+      background-color: #efefef;
+      text-align: center;
+    }
+
     span {
       padding: 10px 0px 10px 40px;
       margin: 5px 0 0 0;
