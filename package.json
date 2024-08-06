@@ -9,7 +9,8 @@
     "coverage": "jest --silent --coverage",
     "watch": "webpack --mode development --watch",
     "build:dev": "webpack --mode development",
-    "build:production": "webpack --mode production"
+    "build:production": "webpack --mode production",
+    "prepare": "husky"
   },
   "workspaces": [
     "plugins/*"
