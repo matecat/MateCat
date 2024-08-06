@@ -53,7 +53,7 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface {
      * @inheritDoc
      * @throws Exception
      */
-    public function thereAreErrors( $segmentId, $segment, $translation, array $dataRefMap = [], $error = null ) {
+    public function thereAreErrors( int $segmentId, string $segment, string $translation, ?array $dataRefMap = [], ?string $error = null ): bool {
 
         // if there are ERR_SIZE_RESTRICTION errors, return true
         if($error !== null){
