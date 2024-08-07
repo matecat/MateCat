@@ -22,6 +22,7 @@ import {TERM_FORM_FIELDS} from './SegmentFooterTabGlossary/SegmentFooterTabGloss
 import {getEntitiesSelected} from './utils/DraftMatecatUtils/manageCaretPositionNearEntity'
 import {UseHotKeysComponent} from '../../hooks/UseHotKeysComponent'
 import {flushSync} from 'react-dom'
+import {removeZeroWidthSpace} from './utils/DraftMatecatUtils/tagUtils'
 
 class SegmentSource extends React.Component {
   static contextType = SegmentContext
@@ -232,6 +233,7 @@ class SegmentSource extends React.Component {
       const {editorState, tagRange} = this.state
       let contentState = editorState.getCurrentContent()
       let plainText = contentState.getPlainText()
+      plainText = removeZeroWidthSpace(plainText)
       const {decodedSegment} = DraftMatecatUtils.decodeSegment(editorState)
       const lxqDecodedSource =
         DraftMatecatUtils.prepareTextForLexiqa(decodedSegment)
@@ -880,6 +882,7 @@ class SegmentSource extends React.Component {
         .map((block) => block.getText())
         .join('\n')
         .replace(new RegExp(String.fromCharCode(parseInt('200B', 16)), 'g'), '')
+        .replace(/·/g, ' ')
 
       const entitiesMap = DraftMatecatUtils.getEntitiesInFragment(
         internalClipboard,

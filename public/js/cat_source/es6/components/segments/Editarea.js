@@ -40,6 +40,7 @@ import {
   getEntitiesSelected,
 } from './utils/DraftMatecatUtils/manageCaretPositionNearEntity'
 import {isMacOS} from '../../utils/Utils'
+import {removeZeroWidthSpace} from './utils/DraftMatecatUtils/tagUtils'
 
 const {hasCommandModifier, isOptionKeyCommand, isCtrlKeyCommand} =
   KeyBindingUtil
@@ -305,12 +306,8 @@ class Editarea extends React.Component {
       DraftMatecatUtils.decodeSegment(editorState)
     if (decodedSegment !== '') {
       let contentState = editorState.getCurrentContent()
-      let plainText = contentState
-        .getPlainText()
-        .replace(
-          new RegExp(String.fromCharCode(parseInt('200B', 16)), 'gi'),
-          '',
-        )
+      let plainText = removeZeroWidthSpace(contentState.getPlainText())
+
       // Match tag without compute tag id
       const currentTagRange = DraftMatecatUtils.matchTagInEditor(
         editorState,
@@ -1453,6 +1450,7 @@ class Editarea extends React.Component {
         .map((block) => block.getText())
         .join('\n')
         .replace(new RegExp(String.fromCharCode(parseInt('200B', 16)), 'g'), '')
+        .replace(/·/g, ' ')
 
       const entitiesMap = DraftMatecatUtils.getEntitiesInFragment(
         internalClipboard,

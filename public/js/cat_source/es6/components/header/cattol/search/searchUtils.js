@@ -36,13 +36,20 @@ let SearchUtils = {
     $('section.currSearchSegment').removeClass('currSearchSegment')
 
     let nbspRegexp = new RegExp(tagSignatures.nbsp.placeholder, 'g')
-    let searchSource = params.searchSource.replace(nbspRegexp, ' ')
+    let spaceRegexp = tagSignatures.space
+      ? new RegExp(tagSignatures.space.placeholder, 'g')
+      : null
+    let searchSource = params.searchSource
+      .replace(nbspRegexp, ' ')
+      .replace(spaceRegexp, ' ')
     if (searchSource !== '' && searchSource !== ' ') {
       this.searchParams.source = searchSource
     } else {
       delete this.searchParams.source
     }
-    let searchTarget = params.searchTarget.replace(nbspRegexp, ' ')
+    let searchTarget = params.searchTarget
+      .replace(nbspRegexp, ' ')
+      .replace(spaceRegexp, ' ')
     if (searchTarget !== '' && searchTarget !== ' ') {
       this.searchParams.target = searchTarget
     } else {
@@ -201,9 +208,20 @@ let SearchUtils = {
     return searchObject
   },
 
-  getSearchRegExp(textToMatch, ignoreCase, isExactMatch) {
+  getSearchRegExp(
+    textToMatch,
+    ignoreCase,
+    isExactMatch,
+    addZWSVOnSpace = false,
+  ) {
     let ignoreFlag = ignoreCase ? '' : 'i'
     textToMatch = TextUtils.escapeRegExp(textToMatch)
+    if (tagSignatures.space && addZWSVOnSpace) {
+      textToMatch = textToMatch.replace(
+        /·/g,
+        '​' + tagSignatures.space.placeholder + '​',
+      )
+    }
     let reg = new RegExp('(' + textToMatch + ')', 'g' + ignoreFlag)
     if (isExactMatch) {
       reg = new RegExp('\\b(' + textToMatch + ')\\b', 'g' + ignoreFlag)
@@ -228,6 +246,15 @@ let SearchUtils = {
     searchParams.target = this.searchParams.target
       ? this.searchParams.target.replace(/ /g, tagSignatures.nbsp.placeholder)
       : null
+
+    if (tagSignatures.space) {
+      searchParams.target = this.searchParams.target
+        ? searchParams.target.replace(/ /g, tagSignatures.space.placeholder)
+        : this.searchParams.target
+      searchParams.source = this.searchParams.source
+        ? searchParams.source.replace(/ /g, tagSignatures.space.placeholder)
+        : this.searchParams.source
+    }
     searchParams.ingnoreCase = !!this.searchParams['match-case']
     searchParams.exactMatch = this.searchParams['exact-match']
     let searchResults = segments.map((sid) => {

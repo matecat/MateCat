@@ -333,3 +333,10 @@ export const checkXliffTagsInText = (text) => {
   const reg = getXliffRegExpression()
   return reg.test(text)
 }
+
+export const removeZeroWidthSpace = (text) => {
+  return text.replace(
+    new RegExp(String.fromCharCode(parseInt('200B', 16)), 'gi'),
+    '',
+  )
+}

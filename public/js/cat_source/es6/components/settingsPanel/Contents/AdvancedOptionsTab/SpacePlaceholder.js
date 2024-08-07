@@ -2,14 +2,7 @@ import React, {useState} from 'react'
 import Switch from '../../../common/Switch'
 import SegmentActions from '../../../../actions/SegmentActions'
 import {setTagSignatureMiddleware} from '../../../segments/utils/DraftMatecatUtils/tagModel'
-
-const SPACE_PLACEHOLDER_STORAGE_KEY = 'spacePlaceholder'
-
-// check space placeholder is active on init
-setTagSignatureMiddleware(
-  'space',
-  () => window.localStorage.getItem(SPACE_PLACEHOLDER_STORAGE_KEY) === 'true',
-)
+import {SPACE_PLACEHOLDER_STORAGE_KEY} from '../../../../constants/Constants'
 
 export const SpacePlaceholder = () => {
   const [active, setActive] = useState(

@@ -21,6 +21,7 @@ const activateSearch = (
       highlightTerm,
       params.ingnoreCase,
       params.exactMatch,
+      true,
     )
     return {
       name: DraftMatecatConstants.SEARCH_DECORATOR,
@@ -55,9 +56,11 @@ const activateSearch = (
       if (occurrences[index]) {
         if (!occurrences[index].start || occurrences[index].key === key) {
           occurrences[index].start = start
+          occurrences[index].end = end
           occurrences[index].key = key
         } else if (occurrences[index + 1]) {
           occurrences[index + 1].start = start
+          occurrences[index].end = end
           occurrences[index + 1].key = key
           // index++
         }

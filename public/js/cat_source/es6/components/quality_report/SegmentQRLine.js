@@ -1,10 +1,24 @@
-import React from 'react'
-
-class SegmentQRLine extends React.Component {
-  allowHTML(string) {
+import React, {useRef} from 'react'
+const SegmentQRLine = ({
+  showSuggestionSource = false,
+  segment,
+  classes,
+  onClickLabel,
+  label,
+  showDiffButton,
+  diffActive = false,
+  onClickDiff,
+  text,
+  showSegmentWords = false,
+  showIceMatchInfo = false,
+  tte,
+  showIsPretranslated,
+}) => {
+  const textRef = useRef()
+  const allowHTML = (string) => {
     return {__html: string}
   }
-  getTimeToEdit(tte) {
+  const getTimeToEdit = (tte) => {
     let str_pad_left = function (string, pad, length) {
       return (new Array(length + 1).join(pad) + string).slice(-length)
     }
@@ -32,135 +46,134 @@ class SegmentQRLine extends React.Component {
       return str_pad_left(seconds, '0', 2) + "''"
     }
   }
-  render() {
-    let suggestionMatch, suggestionMatchClass
-    if (this.props.showSuggestionSource) {
-      suggestionMatch =
-        this.props.segment.get('match_type') === 'ICE'
-          ? 101
-          : parseInt(this.props.segment.get('suggestion_match'))
-      suggestionMatchClass =
-        suggestionMatch === 101
-          ? 'per-blu'
-          : suggestionMatch === 100
+  let suggestionMatch, suggestionMatchClass
+  if (showSuggestionSource) {
+    suggestionMatch =
+      segment.get('match_type') === 'ICE'
+        ? 101
+        : parseInt(segment.get('suggestion_match'))
+    suggestionMatchClass =
+      suggestionMatch === 101
+        ? 'per-blu'
+        : suggestionMatch === 100
           ? 'per-green'
           : suggestionMatch > 0 && suggestionMatch <= 99
-          ? 'per-orange'
-          : ''
-    }
-
-    return (
-      <div className={this.props.classes}>
-        {this.props.onClickLabel ? (
-          <a className="segment-content qr-segment-title">
-            <b onClick={this.props.onClickLabel}>{this.props.label}</b>
-            {this.props.showDiffButton ? (
-              <button
-                className={this.props.diffActive ? 'active' : ''}
-                onClick={this.props.onClickDiff}
-                title="Show Diff"
-              >
-                <i className="icon-eye2 icon" />
-              </button>
-            ) : null}
-          </a>
-        ) : (
-          <div className="segment-content qr-segment-title">
-            <b>{this.props.label}</b>
-          </div>
-        )}
-
-        <div
-          className="segment-content qr-text"
-          dangerouslySetInnerHTML={this.allowHTML(this.props.text)}
-        />
-
-        {this.props.showSegmentWords ? (
-          <div className="segment-content qr-spec">
-            <div>Words:</div>
-            <div>
-              <b>{parseInt(this.props.segment.get('raw_word_count'))}</b>
-            </div>
-          </div>
-        ) : null}
-
-        {this.props.showSuggestionSource ? (
-          <div className="segment-content qr-spec">
-            <div
-              className={
-                this.props.segment.get('suggestion_source') === 'MT'
-                  ? 'per-yellow'
-                  : null
-              }
-            >
-              <b>{this.props.segment.get('suggestion_source')}</b>
-            </div>
-            {this.props.segment.get('suggestion_source') &&
-            this.props.segment.get('suggestion_source') !== 'MT' ? (
-              <div className={'tm-percent ' + suggestionMatchClass}>
-                {suggestionMatch}%
-              </div>
-            ) : null}
-          </div>
-        ) : null}
-
-        {this.props.showIceMatchInfo &&
-        this.props.segment.get('ice_locked') === '1' ? (
-          <div className="segment-content qr-spec">
-            {this.props.segment.get('ice_locked') === '1' ? (
-              <div>
-                <b>ICE Match</b>
-                {this.props.segment.get('ice_modified') ? (
-                  <div>(Modified)</div>
-                ) : null}
-              </div>
-            ) : null}
-
-            {this.props.tte ? (
-              <div className={'tte-container'}>
-                <b>TTE:</b>
-                <div>
-                  <div>{this.getTimeToEdit(this.props.tte)}</div>
-                </div>
-              </div>
-            ) : null}
-          </div>
-        ) : this.props.tte ? (
-          <div className="segment-content qr-spec tte">
-            <b>TTE:</b>
-            <div>
-              <div>{this.getTimeToEdit(this.props.tte)}</div>
-            </div>
-          </div>
-        ) : null}
-
-        {this.props.showIsPretranslated ? (
-          <div className="segment-content qr-spec">
-            <div>
-              <b>Pre-Translated</b>
-            </div>
-          </div>
-        ) : null}
-        {!(
-          this.props.showIceMatchInfo &&
-          this.props.segment.get('ice_locked') === '1'
-        ) &&
-        !this.props.showSuggestionSource &&
-        !this.props.showSegmentWords &&
-        !this.props.tte &&
-        !this.props.showIsPretranslated ? (
-          <div className="segment-content qr-spec" />
-        ) : null}
-      </div>
-    )
+            ? 'per-orange'
+            : ''
   }
-}
 
-SegmentQRLine.defaultProps = {
-  showSegmentWords: false,
-  showSuggestionSource: false,
-  showIceMatchInfo: false,
-  diffActive: false,
+  const copyText = async (e) => {
+    const internalClipboard = document.getSelection()
+    if (internalClipboard) {
+      e.preventDefault()
+      // Get plain text form internalClipboard fragment
+      const plainText = internalClipboard
+        .toString()
+        .replace(new RegExp(String.fromCharCode(parseInt('200B', 16)), 'g'), '')
+        .replace(/·/g, ' ')
+      return await navigator.clipboard.writeText(plainText)
+    }
+  }
+
+  return (
+    <div className={classes}>
+      {onClickLabel ? (
+        <a className="segment-content qr-segment-title">
+          <b onClick={onClickLabel}>{label}</b>
+          {showDiffButton ? (
+            <button
+              className={diffActive ? 'active' : ''}
+              onClick={onClickDiff}
+              title="Show Diff"
+            >
+              <i className="icon-eye2 icon" />
+            </button>
+          ) : null}
+        </a>
+      ) : (
+        <div className="segment-content qr-segment-title">
+          <b>{label}</b>
+        </div>
+      )}
+
+      <div
+        className="segment-content qr-text"
+        ref={textRef}
+        onCopy={copyText}
+        onCut={copyText}
+        dangerouslySetInnerHTML={allowHTML(text)}
+      />
+
+      {showSegmentWords ? (
+        <div className="segment-content qr-spec">
+          <div>Words:</div>
+          <div>
+            <b>{parseInt(segment.get('raw_word_count'))}</b>
+          </div>
+        </div>
+      ) : null}
+
+      {showSuggestionSource ? (
+        <div className="segment-content qr-spec">
+          <div
+            className={
+              segment.get('suggestion_source') === 'MT' ? 'per-yellow' : null
+            }
+          >
+            <b>{segment.get('suggestion_source')}</b>
+          </div>
+          {segment.get('suggestion_source') &&
+          segment.get('suggestion_source') !== 'MT' ? (
+            <div className={'tm-percent ' + suggestionMatchClass}>
+              {suggestionMatch}%
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+
+      {showIceMatchInfo && segment.get('ice_locked') === '1' ? (
+        <div className="segment-content qr-spec">
+          {segment.get('ice_locked') === '1' ? (
+            <div>
+              <b>ICE Match</b>
+              {segment.get('ice_modified') ? <div>(Modified)</div> : null}
+            </div>
+          ) : null}
+
+          {tte ? (
+            <div className={'tte-container'}>
+              <b>TTE:</b>
+              <div>
+                <div>{getTimeToEdit(tte)}</div>
+              </div>
+            </div>
+          ) : null}
+        </div>
+      ) : tte ? (
+        <div className="segment-content qr-spec tte">
+          <b>TTE:</b>
+          <div>
+            <div>{getTimeToEdit(tte)}</div>
+          </div>
+        </div>
+      ) : null}
+
+      {showIsPretranslated ? (
+        <div className="segment-content qr-spec">
+          <div>
+            <b>Pre-Translated</b>
+          </div>
+        </div>
+      ) : null}
+      {!(showIceMatchInfo && segment.get('ice_locked') === '1') &&
+      !showSuggestionSource &&
+      !showSegmentWords &&
+      !tte &&
+      !showIsPretranslated ? (
+        <div className="segment-content qr-spec" />
+      ) : null}
+    </div>
+  )
 }
 
 export default SegmentQRLine
