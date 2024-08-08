@@ -105,7 +105,7 @@ class CustomPayableRateDao extends DataAccess_AbstractDao
      * @return CustomPayableRateStruct
      */
     public static function getById( $id, $ttl = 60 ) {
-        $stmt = self::getInstance()->_getStatementForCache(self::query_by_id);
+        $stmt = self::getInstance()->_getStatementForQuery(self::query_by_id);
         $result = self::getInstance()->setCacheTTL( $ttl )->_fetchObject( $stmt, new CustomPayableRateStruct(), [
             'id' => $id,
         ] );
@@ -120,7 +120,7 @@ class CustomPayableRateDao extends DataAccess_AbstractDao
      * @return CustomPayableRateStruct
      */
     public static function getByUidAndName( $uid, $name, $ttl = 60 ) {
-        $stmt = self::getInstance()->_getStatementForCache(self::query_by_uid_name);
+        $stmt = self::getInstance()->_getStatementForQuery(self::query_by_uid_name);
         $result = self::getInstance()->setCacheTTL( $ttl )->_fetchObject( $stmt, new CustomPayableRateStruct(), [
             'uid' => $uid,
             'name' => $name,

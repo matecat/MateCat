@@ -161,7 +161,7 @@ class TranslationEventDao extends \DataAccess_AbstractDao {
                 ORDER BY id_segment, source_page
         ";
 
-        $stmt              = $this->_getStatementForCache( $sql );
+        $stmt              = $this->_getStatementForQuery( $sql );
         $id_segment_list[] = $id_job;
 
         return @$this->_fetchObject( $stmt, new ShapelessConcreteStruct, $id_segment_list );

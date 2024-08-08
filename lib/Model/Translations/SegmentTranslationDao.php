@@ -395,7 +395,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
             and ste.source_page = :source_page
             group by ste.id_segment;";
 
-        $stmt = $this->_getStatementForCache( $query );
+        $stmt = $this->_getStatementForQuery( $query );
 
         return $this->_fetchObject( $stmt,
                 new ShapelessConcreteStruct(),

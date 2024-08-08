@@ -55,7 +55,7 @@ class JobsTranslatorsDao extends \DataAccess_AbstractDao {
             $data = [ 'id_job' => $jobStruct->id ];
         }
 
-        $stmt                     = $this->_getStatementForCache( $query );
+        $stmt                     = $this->_getStatementForQuery( $query );
         $jobsTranslatorsQuery     = new JobsTranslatorsStruct();
 
         return $this->_fetchObject( $stmt,
@@ -75,7 +75,7 @@ class JobsTranslatorsDao extends \DataAccess_AbstractDao {
             $data = [ 'id_job' => $jobStruct->id ];
         }
 
-        $stmt = $this->_getStatementForCache( $query );
+        $stmt = $this->_getStatementForQuery( $query );
         return $this->_destroyObjectCache( $stmt, $data );
 
     }

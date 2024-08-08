@@ -32,7 +32,7 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
      */
     public function read( Jobs_JobStruct $jobQuery ) {
 
-        $stmt = $this->_getStatementForCache( null );
+        $stmt = $this->_getStatementForQuery( null );
 
         return $this->_fetchObject( $stmt,
                 $jobQuery,
@@ -48,7 +48,7 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
      *
      * @return PDOStatement
      */
-    protected function _getStatementForCache( $query ) {
+    protected function _getStatementForQuery( $query ) {
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare(
@@ -79,7 +79,7 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
         /*
         * build the query
         */
-        $stmt = $this->_getStatementForCache( null );
+        $stmt = $this->_getStatementForQuery( null );
 
         return $this->_destroyObjectCache( $stmt,
                 [

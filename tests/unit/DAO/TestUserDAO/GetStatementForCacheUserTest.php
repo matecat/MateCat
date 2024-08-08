@@ -5,7 +5,7 @@ use TestHelpers\AbstractTest;
 
 /**
  * @group regression
- * @covers Users_UserDao::_getStatementForCache
+ * @covers Users_UserDao::_getStatementForQuery
  * User: dinies
  * Date: 27/05/16
  * Time: 19.55

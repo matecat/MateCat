@@ -54,7 +54,7 @@ class XliffConfigTemplateController extends KleinController {
         try {
             $this->response->status()->setCode( 200 );
 
-            return $this->response->json( XliffConfigTemplateDao::getAllPaginated( $uid, $currentPage, $pagination ) );
+            return $this->response->json( XliffConfigTemplateDao::getAllPaginated( $uid, "/api/v3/xliff-config-template?page=", $currentPage, $pagination ) );
 
         } catch ( Exception $exception ) {
             $code = ( $exception->getCode() > 0 ) ? $exception->getCode() : 500;

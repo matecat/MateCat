@@ -183,7 +183,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
      */
     public function getContextAndSegmentByIDs( $id_list ) {
         $query = "SELECT id, segment FROM segments WHERE id IN( :id_before, :id_segment, :id_after ) ORDER BY id ASC";
-        $stmt  = $this->_getStatementForCache( $query );
+        $stmt  = $this->_getStatementForQuery( $query );
         /** @var $res Segments_SegmentStruct[] */
         $res = $this->_fetchObject( $stmt,
                 new Segments_SegmentStruct(),
@@ -734,7 +734,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
     }
 
     public function destroyCacheForGlobalTranslationMismatches( Jobs_JobStruct $job ) {
-        $stmt = $this->_getStatementForCache( self::$queryForGlobalMismatches );
+        $stmt = $this->_getStatementForQuery( self::$queryForGlobalMismatches );
 
         return $this->_destroyObjectCache( $stmt, [
                 'id_job'        => $job->id,
@@ -777,7 +777,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
          */
         if ( $sid != null ) {
 
-            $stmt = $this->_getStatementForCache( self::$queryForLocalMismatches );
+            $stmt = $this->_getStatementForQuery( self::$queryForLocalMismatches );
 
             return $this->_fetchObject( $stmt, new ShapelessConcreteStruct, [
                             'job_first_segment' => $jStructs[ 0 ]->job_first_segment,
@@ -809,7 +809,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
              *                    HAVING translations_available > 1
              *            ";
              */
-            $stmt = $this->_getStatementForCache( self::$queryForGlobalMismatches );
+            $stmt = $this->_getStatementForQuery( self::$queryForGlobalMismatches );
             $list = $this->_fetchObject( $stmt, new ShapelessConcreteStruct, [
                             'id_job'        => $currentJob->id,
                             'st_approved'   => Constants_TranslationStatus::STATUS_APPROVED,

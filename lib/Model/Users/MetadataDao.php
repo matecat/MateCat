@@ -17,7 +17,7 @@ class MetadataDao extends \DataAccess_AbstractDao {
             return [];
         }
 
-        $stmt = $this->_getStatementForCache(
+        $stmt = $this->_getStatementForQuery(
                 "SELECT * FROM user_metadata WHERE " .
                 " uid IN( " . str_repeat( '?,', count( $UIDs ) - 1 ) . '?' . " ) "
         );
@@ -57,7 +57,7 @@ class MetadataDao extends \DataAccess_AbstractDao {
      * @return MetadataStruct
      */
   public function get( $uid, $key ) {
-      $stmt = $this->_getStatementForCache( self::_query_metadata_by_uid_key );
+      $stmt = $this->_getStatementForQuery( self::_query_metadata_by_uid_key );
       $result = $this->_fetchObject( $stmt, new MetadataStruct(), [
               'uid' => $uid,
               'key' => $key
@@ -66,7 +66,7 @@ class MetadataDao extends \DataAccess_AbstractDao {
   }
 
   public function destroyCacheKey( $uid, $key ){
-      $stmt = $this->_getStatementForCache( self::_query_metadata_by_uid_key );
+      $stmt = $this->_getStatementForQuery( self::_query_metadata_by_uid_key );
       return $this->_destroyObjectCache( $stmt, [ 'uid' => $uid, 'key' => $key ] );
   }
 

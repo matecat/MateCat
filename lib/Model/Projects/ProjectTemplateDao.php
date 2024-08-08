@@ -346,7 +346,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
      * @return ProjectTemplateStruct|null
      */
     public static function getTheDefaultProject( $uid, $ttl = 0 ) {
-        $stmt = self::getInstance()->_getStatementForCache( self::query_default );
+        $stmt = self::getInstance()->_getStatementForQuery( self::query_default );
         /**
          * @var $result ProjectTemplateStruct[]
          */
@@ -365,7 +365,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
      * @return ProjectTemplateStruct|null
      */
     public static function getById( $id, $ttl = 60 ) {
-        $stmt = self::getInstance()->_getStatementForCache( self::query_by_id );
+        $stmt = self::getInstance()->_getStatementForQuery( self::query_by_id );
         /**
          * @var $result ProjectTemplateStruct[]
          */
@@ -383,7 +383,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
      * @return ProjectTemplateStruct|null
      */
     public static function getByIdAndUser( $id, $uid, $ttl = 60 ) {
-        $stmt = self::getInstance()->_getStatementForCache( self::query_by_id_and_uid );
+        $stmt = self::getInstance()->_getStatementForQuery( self::query_by_id_and_uid );
         /**
          * @var $result ProjectTemplateStruct[]
          */
@@ -403,7 +403,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
      * @return ProjectTemplateStruct|null
      */
     public static function getByUidAndName( $uid, $name, $ttl = 60 ) {
-        $stmt = self::getInstance()->_getStatementForCache( self::query_by_uid_name );
+        $stmt = self::getInstance()->_getStatementForQuery( self::query_by_uid_name );
         /**
          * @var $result ProjectTemplateStruct[]
          */

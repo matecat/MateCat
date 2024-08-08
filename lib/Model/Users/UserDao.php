@@ -64,7 +64,7 @@ class Users_UserDao extends DataAccess_AbstractDao {
         $query = "SELECT * FROM " . self::TABLE .
                 " WHERE uid IN ( " . str_repeat( '?,', count( $sanitized_array ) - 1 ) . '?' . " ) ";
 
-        $stmt = $this->_getStatementForCache( $query );
+        $stmt = $this->_getStatementForQuery( $query );
 
         /**
          * @var $__resultSet Users_UserStruct[]
@@ -182,7 +182,7 @@ class Users_UserDao extends DataAccess_AbstractDao {
      * @return ?Users_UserStruct
      */
     public function getByUid( $id ): ?Users_UserStruct {
-        $stmt = $this->_getStatementForCache( self::$_query_user_by_uid );
+        $stmt = $this->_getStatementForQuery( self::$_query_user_by_uid );
 
         /**
          * @var $res ?Users_UserStruct
@@ -198,7 +198,7 @@ class Users_UserDao extends DataAccess_AbstractDao {
     }
 
     public function destroyCacheByUid( $uid ) {
-        $stmt = $this->_getStatementForCache( self::$_query_user_by_uid );
+        $stmt = $this->_getStatementForQuery( self::$_query_user_by_uid );
 
         return $this->_destroyObjectCache( $stmt,
                 [
@@ -213,7 +213,7 @@ class Users_UserDao extends DataAccess_AbstractDao {
      * @return ?Users_UserStruct
      */
     public function getByEmail( $email ) {
-        $stmt             = $this->_getStatementForCache( self::$_query_user_by_email );
+        $stmt             = $this->_getStatementForQuery( self::$_query_user_by_email );
 
         /**
          * @var $res ?Users_UserStruct
@@ -232,7 +232,7 @@ class Users_UserDao extends DataAccess_AbstractDao {
      * @return bool|int
      */
     public function destroyCacheByEmail( $email ) {
-        $stmt             = $this->_getStatementForCache( self::$_query_user_by_email );
+        $stmt             = $this->_getStatementForQuery( self::$_query_user_by_email );
         $userQuery        = new Users_UserStruct();
         $userQuery->email = $email;
 
@@ -254,7 +254,7 @@ class Users_UserDao extends DataAccess_AbstractDao {
     public function read( DataAccess_IDaoStruct $UserQuery ) {
 
         [ $query, $where_parameters ] = $this->_buildReadQuery( $UserQuery );
-        $stmt = $this->_getStatementForCache( $query );
+        $stmt = $this->_getStatementForQuery( $query );
 
         return $this->_fetchObject( $stmt,
                 $UserQuery,
@@ -306,7 +306,7 @@ class Users_UserDao extends DataAccess_AbstractDao {
      */
     public function getProjectOwner( $job_id ) {
 
-        $stmt = $this->_getStatementForCache( self::$_query_owner_by_job_id );
+        $stmt = $this->_getStatementForQuery( self::$_query_owner_by_job_id );
 
         /**
          * @var $res Users_UserStruct
@@ -322,7 +322,7 @@ class Users_UserDao extends DataAccess_AbstractDao {
     public function getProjectAssignee( $project_id ) {
         $project_id = (int)$project_id;
 
-        $stmt = $this->_getStatementForCache( self::$_query_assignee_by_project_id );
+        $stmt = $this->_getStatementForQuery( self::$_query_assignee_by_project_id );
 
         return $this->_fetchObject( $stmt,
                 new Users_UserStruct(),

@@ -78,7 +78,7 @@ class ActivityLogDao extends DataAccess_AbstractDao {
      */
     public function read( DataAccess_IDaoStruct $activityQuery, $whereKeys = [ 'id_project' => 0 ] ) {
 
-        $stmt = $this->_getStatementForCache();
+        $stmt = $this->_getStatementForQuery();
 
         return $this->_fetchObject( $stmt,
                 $activityQuery,
@@ -91,7 +91,7 @@ class ActivityLogDao extends DataAccess_AbstractDao {
      *
      * @return PDOStatement
      */
-    protected function _getStatementForCache( $query = null ) {
+    protected function _getStatementForQuery( $query = null ) {
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare(
@@ -124,7 +124,7 @@ class ActivityLogDao extends DataAccess_AbstractDao {
         /*
         * build the query
         */
-        $stmt = $this->_getStatementForCache();
+        $stmt = $this->_getStatementForQuery();
         return $this->_destroyObjectCache( $stmt,
                 array(
                         'id_project' => $activityQuery->id_project
