@@ -674,7 +674,6 @@ LXQ.init = function () {
     }
 
     var redoHighlighting = function (segmentId, insource) {
-      // var segment = UI.getSegmentById(segmentId);
       var highlights = {
         source: {
           numbers: [],

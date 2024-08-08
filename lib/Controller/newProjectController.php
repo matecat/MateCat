@@ -40,8 +40,30 @@ class newProjectController extends viewController {
 
     }
 
+    /**
+     * Redirect to requested url after login
+     *
+     * If user is logged in and the cookie $_SESSION[ 'wanted_url' ] is set,
+     * then redirect to requested url
+     */
+    private function redirectToRequestUrlAfterLogin()
+    {
+        if($this->isLoggedIn()){
+            // handle redirect after login
+            if(isset($_SESSION[ 'wanted_url' ])){
+                header( "Location: " . INIT::$HTTPHOST . INIT::$BASEURL . $_SESSION[ 'wanted_url' ], false  );
+                unset($_SESSION[ 'wanted_url' ]);
+                exit;
+            }
+        } else {
+            // we landed on homepage and we are not logged in, unset wanted_url
+            unset($_SESSION[ 'wanted_url' ]);
+        }
+    }
+
     public function doAction() {
 
+        $this->redirectToRequestUrlAfterLogin();
         $this->setOrGetGuid();
 
         try {
@@ -260,8 +282,8 @@ class newProjectController extends viewController {
             return [ 'name' => $tmKeyStruct->name, 'key' => $tmKeyStruct->key ];
         }, $this->keyList ) );
 
-        $this->template->developerKey = INIT::$OAUTH_BROWSER_API_KEY;
-        $this->template->clientId     = INIT::$OAUTH_CLIENT_ID;
+        $this->template->developerKey = INIT::$GOOGLE_OAUTH_BROWSER_API_KEY;
+        $this->template->clientId     = INIT::$GOOGLE_OAUTH_CLIENT_ID;
 
         $this->template->tag_projection_languages = json_encode( ProjectOptionsSanitizer::$tag_projection_allowed_languages );
         LexiQADecorator::getInstance( $this->template )->featureEnabled( $this->featureSet )->decorateViewLexiQA();

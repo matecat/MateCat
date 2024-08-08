@@ -10,6 +10,7 @@
 @import 'commons/divider';
 @import 'commons/progress-mc-bar';
 @import 'commons/buttons';
+@import 'common-components';
 @import 'popup';
 
 @import 'common-modals';
@@ -22,9 +23,4 @@
 @import 'commons/analyze';
 @import 'commons/outsource';
 @import 'commons/date-picker-translator';
-@import 'components/common/CookieConsent';
-@import 'components/common/Tooltip';
-@import 'components/common/Button';
-@import 'components/common/LabelWithTooltip';
-@import 'components/common/Switch';
 @import "components/Analyze/JobAnalyze";

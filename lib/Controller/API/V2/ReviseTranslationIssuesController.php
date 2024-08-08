@@ -11,6 +11,7 @@ namespace API\V2;
 
 use API\V2\Json\SegmentVersion;
 use API\V2\Validators\JobPasswordValidator;
+use API\V2\Validators\LoginValidator;
 use API\V2\Validators\SegmentTranslation;
 use Chunks_ChunkDao;
 use Features\TranslationVersions\Model\TranslationVersionDao;
@@ -25,6 +26,7 @@ class ReviseTranslationIssuesController extends BaseChunkController {
         } );
         $this->appendValidator( $validator );
         $this->appendValidator( new SegmentTranslation( $this->request ) );
+        $this->appendValidator( new LoginValidator( $this ) );
     }
 
     public function index() {

@@ -82,7 +82,7 @@ function useProjectTemplates(tmKeys, isCattool = config.is_cattool) {
 
     let cleanup = false
 
-    if (config.isLoggedIn === 1 && !config.is_cattool) {
+    if (!config.is_cattool) {
       getProjectTemplates().then(({items}) => {
         if (!cleanup) {
           setProjectTemplates(

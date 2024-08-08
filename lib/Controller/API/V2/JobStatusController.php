@@ -10,6 +10,7 @@ namespace API\V2;
 
 use AMQHandler;
 use API\V2\Validators\ChunkPasswordValidator;
+use API\V2\Validators\LoginValidator;
 use Constants_TranslationStatus;
 use Exception;
 use Features\ReviewExtended\ReviewUtils;
@@ -27,6 +28,7 @@ class JobStatusController extends BaseChunkController {
         } );
 
         $this->appendValidator( $chunkValidator );
+        $this->appendValidator( new LoginValidator( $this ) );
     }
 
     /**

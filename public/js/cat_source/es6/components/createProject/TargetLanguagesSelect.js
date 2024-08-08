@@ -2,15 +2,17 @@ import React, {useContext} from 'react'
 import {CreateProjectContext} from './CreateProjectContext'
 import ChevronDown from '../../../../../img/icons/ChevronDown'
 import {useRef} from 'react'
+import TEXT_UTILS from '../../utils/textUtils'
+import {ApplicationWrapperContext} from '../common/ApplicationWrapper'
 
 export const TargetLanguagesSelect = () => {
   const {targetLangs, setIsOpenMultiselectLanguages} =
     useContext(CreateProjectContext)
-
+  const {isUserLogged} = useContext(ApplicationWrapperContext)
   const selectedItemRef = useRef()
 
   const getActiveLabel = () => targetLangs.map(({name}) => name).join(',')
-  const openModal = () => setIsOpenMultiselectLanguages(true)
+  const openModal = () => isUserLogged && setIsOpenMultiselectLanguages(true)
 
   return (
     <div

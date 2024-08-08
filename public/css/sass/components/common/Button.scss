@@ -102,6 +102,26 @@ a.button-component-container {
       }
     }
   }
+  &.link {
+    color: var(--btnAltTextColor);
+
+    &:not(:disabled):global(.button--active) {
+      color: $grey8;
+    }
+
+    &:not(:disabled):hover,
+    &:not(:disabled):focus {
+      color: $black;
+    }
+
+    &:disabled {
+      color: var(--btnAltTextColorDisabled);
+
+      svg {
+        color: var(--btnAltTextColorDisabled);
+      }
+    }
+  }
 
   // Size modifiers
   &.small {
@@ -149,6 +169,18 @@ a.button-component-container {
   }
   &.fullWidth {
     width: 100%;
+  }
+  &.linkSmall {
+    height: auto;
+    font-size: 14px;
+  }
+  &.linkMedium {
+    height: auto;
+    font-size: 16px;
+  }
+  &.linkBig {
+    height: auto;
+    font-size: 18px;
   }
 
   // Waiting state

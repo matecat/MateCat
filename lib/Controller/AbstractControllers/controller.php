@@ -59,6 +59,11 @@ abstract class controller implements IController {
     }
 
     public function userIsLogged() {
+
+        // @TODO check cookie
+
+
+
         return $this->userIsLogged;
     }
 
@@ -152,26 +157,27 @@ abstract class controller implements IController {
 
     public function setUserCredentials() {
 
+        $userCredentials = AuthCookie::getCredentials();
+
         $this->user        = new Users_UserStruct();
-        $this->user->uid   = ( isset( $_SESSION[ 'uid' ] ) && !empty( $_SESSION[ 'uid' ] ) ? $_SESSION[ 'uid' ] : null );
-        $this->user->email = ( isset( $_SESSION[ 'cid' ] ) && !empty( $_SESSION[ 'cid' ] ) ? $_SESSION[ 'cid' ] : null );
+        $this->user->uid   = ( isset( $userCredentials['user'] ) && !empty( $userCredentials['user']['uid'] ) ? $userCredentials['user']['uid'] : null );
+        $this->user->email = ( isset( $userCredentials['user'] ) && !empty( $userCredentials['user']['email'] ) ? $userCredentials['user']['email'] : null );
 
         try {
-
             $userDao            = new Users_UserDao( Database::obtain() );
             $loggedUser         = $userDao->setCacheTTL( 3600 )->read( $this->user )[ 0 ]; // one hour cache
             $this->userIsLogged = (
-                    !empty( $loggedUser->uid ) &&
-                    !empty( $loggedUser->email ) &&
-                    !empty( $loggedUser->first_name ) &&
-                    !empty( $loggedUser->last_name )
+                !empty( $loggedUser->uid ) and
+                !empty( $loggedUser->email ) and
+                !empty( $loggedUser->first_name ) and
+                !empty( $loggedUser->last_name )
             );
 
         } catch ( Exception $e ) {
             Log::doJsonLog( 'User not logged.' );
         }
-        $this->user = ( $this->userIsLogged ? $loggedUser : $this->user );
 
+        $this->user = ( $this->userIsLogged ? $loggedUser : $this->user );
     }
 
     /**

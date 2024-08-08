@@ -193,7 +193,7 @@ class SignupModel {
             $email->send();
         }
 
-        AuthCookie::setCredentials( $user->email, $user->uid );
+        AuthCookie::setCredentials( $user );
 
         return $user;
 

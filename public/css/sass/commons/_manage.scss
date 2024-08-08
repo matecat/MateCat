@@ -137,9 +137,11 @@ div#manage-container {
         }
       }
       .project-activity-icon {
-        padding: 2px 12px 0px !important;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        justify-content: end;
         font-family: Calibri, Arial, Helvetica, sans-serif;
-        position: relative;
         top: 4px;
 
         .ui.dropdown {
@@ -217,7 +219,6 @@ div#manage-container {
             }
           }
           &.project-assignee {
-            margin-right: 8px;
             background-color: #ffffff !important;
             vertical-align: top;
             /*height: 30px !important;*/
@@ -664,7 +665,9 @@ div#manage-container {
                 box-shadow: none !important;
                 color: #7eaf3e !important;
                 &:hover {
-                  box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12),
+                  box-shadow:
+                    0 0 0 #e0e0e0,
+                    0 0 2px rgba(0, 0, 0, 0.12),
                     0 2px 4px rgba(0, 0, 0, 0.24) !important;
                 }
                 &:active {
@@ -724,7 +727,9 @@ div#manage-container {
                 border-radius: 2px;
                 float: right;
                 &:hover {
-                  box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12),
+                  box-shadow:
+                    0 0 0 #e0e0e0,
+                    0 0 2px rgba(0, 0, 0, 0.12),
                     0 2px 4px rgba(0, 0, 0, 0.24) !important;
                 }
                 &:focus {
@@ -1033,4 +1038,25 @@ div#manage-container {
 
 .ui.dropdown .scrolling.menu {
   border-top: none;
+}
+
+.project-team-dropdown,
+.user-project-dropdown {
+  line-height: 1;
+  border-radius: 15px !important;
+  box-shadow:
+    0 0 0 #e0e0e0,
+    0 0 2px rgba(0, 0, 0, 0.12),
+    0 2px 4px rgba(0, 0, 0, 0.24) !important;
+}
+
+.project-menu-dropdown {
+  border-radius: 50% !important;
+  width: 28px !important;
+  height: 28px !important;
+  background-color: rgba($grey8, 0.5) !important;
+
+  &:hover {
+    background-color: rgba($grey8, 1) !important;
+  }
 }

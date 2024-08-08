@@ -122,7 +122,7 @@ export const AnalysisTab = () => {
 
     let cleanup = false
 
-    if (config.isLoggedIn === 1 && !config.is_cattool) {
+    if (!config.is_cattool) {
       getBillingModelTemplates().then(({items}) => {
         if (!cleanup) {
           const selectedTemplateId =

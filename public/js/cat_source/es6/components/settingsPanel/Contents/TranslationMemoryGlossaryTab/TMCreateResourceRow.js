@@ -129,41 +129,36 @@ export const TMCreateResourceRow = ({row}) => {
     tmCreateRandUser().then((response) => {
       const {key} = response.data
 
-      if (config.isLoggedIn) {
-        createNewTmKey({
-          key,
-          description: name,
+      createNewTmKey({
+        key,
+        description: name,
+      })
+        .then(() => {
+          const updatedKeys = [getNewItem(key), ...tmKeys]
+          setTmKeys(updatedKeys)
+          executeModifyCurrentTemplate(updatedKeys)
+          onReset()
+          CatToolActions.addNotification({
+            title: 'Resource created ',
+            type: 'success',
+            text: `Resource <b>${name}</b> created successfully`,
+            position: 'br',
+            allowHtml: true,
+            timer: 5000,
+          })
         })
-          .then(() => {
-            const updatedKeys = [getNewItem(key), ...tmKeys]
-            setTmKeys(updatedKeys)
-            executeModifyCurrentTemplate(updatedKeys)
-            onReset()
-            CatToolActions.addNotification({
-              title: 'Resource created ',
-              type: 'success',
-              text: `Resource <b>${name}</b> created successfully`,
-              position: 'br',
-              allowHtml: true,
-              timer: 5000,
-            })
+        .catch((errors) => {
+          CatToolActions.addNotification({
+            title: 'Invalid key',
+            type: 'error',
+            text:
+              !errors || errors[0].code === '23000'
+                ? 'The key you entered is invalid.'
+                : errors[0].message,
+            position: 'br',
+            timer: 5000,
           })
-          .catch((errors) => {
-            CatToolActions.addNotification({
-              title: 'Invalid key',
-              type: 'error',
-              text:
-                !errors || errors[0].code === '23000'
-                  ? 'The key you entered is invalid.'
-                  : errors[0].message,
-              position: 'br',
-              timer: 5000,
-            })
-          })
-      } else {
-        setTmKeys((prevState) => [...(prevState ?? []), getNewItem(key)])
-        onReset()
-      }
+        })
     })
   }
 

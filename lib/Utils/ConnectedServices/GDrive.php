@@ -3,7 +3,7 @@
 
 namespace ConnectedServices;
 
-use ConnectedServices\GDrive\GoogleClientFactory;
+use ConnectedServices\GDrive\GDriveClientFactory;
 use Exception;
 
 class GDrive {
@@ -13,7 +13,7 @@ class GDrive {
      * @throws Exception
      */
     public static function generateGDriveAuthUrl() {
-        $oauthClient = GoogleClientFactory::create();
+        $oauthClient = GDriveClientFactory::create( );
 
         return $oauthClient->createAuthUrl();
     }
@@ -28,7 +28,7 @@ class GDrive {
      * @throws Exception
      */
     public static function getsNewToken( $raw_token ) {
-        $client = GoogleClientFactory::create();
+        $client = GDriveClientFactory::create();
         $client->setAccessToken( $raw_token );
 
         $json_token    = json_decode( $raw_token, true );
