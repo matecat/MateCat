@@ -82,7 +82,7 @@ class CacheBehaviourUserTest extends AbstractTest {
         $readQuery->setAccessible( true );
         [ $query, $bind_params ] = $readQuery->invoke( $this->user_Dao, $UserQuery );
 
-        $getStatementMethod = $reflector->getMethod( "_getStatementForCache" );
+        $getStatementMethod = $reflector->getMethod( "_getStatementForQuery" );
         $getStatementMethod->setAccessible( true );
         $stmt = $getStatementMethod->invoke( $this->user_Dao, $query );
 

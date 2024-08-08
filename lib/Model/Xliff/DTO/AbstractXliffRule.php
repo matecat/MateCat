@@ -167,7 +167,7 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
      * @return AbstractXliffRule
      */
     public static function fromArrayObject( RecursiveArrayobject $structure ): AbstractXliffRule {
-        return new static( $structure[ 'states' ]->getArrayCopy(), $structure[ 'analysis' ], $structure[ 'editor' ], $structure[ 'match_category' ] ?? null );
+        return new static( $structure[ 'states' ]->getArrayCopy(), $structure[ 'analysis' ], $structure[ 'editor' ] ?? null, $structure[ 'match_category' ] ?? null );
     }
 
     /**
@@ -192,6 +192,10 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
 
         return $result;
 
+    }
+
+    public function getArrayCopy(): array {
+        return $this->jsonSerialize();
     }
 
     /**

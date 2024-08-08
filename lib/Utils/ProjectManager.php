@@ -300,9 +300,7 @@ class ProjectManager {
 
             // when the request comes from api or ajax
             if ( !$this->projectStructure[ 'xliff_parameters' ] instanceof ArrayObject ) {
-                if ( $this->projectStructure[ 'xliff_parameters' ] instanceof stdClass ) {
-                    $this->projectStructure[ 'xliff_parameters' ] = new RecursiveArrayObject( json_decode( json_encode( $this->projectStructure[ 'xliff_parameters' ] ), true ) );
-                } elseif ( is_array( $this->projectStructure[ 'xliff_parameters' ] ) ) {
+                if ( is_array( $this->projectStructure[ 'xliff_parameters' ] ) ) {
                     $this->projectStructure[ 'xliff_parameters' ] = new RecursiveArrayObject( $this->projectStructure[ 'xliff_parameters' ] );
                 } else {
                     throw new DomainException( "Invalid xliff_parameters value found.", 400 );

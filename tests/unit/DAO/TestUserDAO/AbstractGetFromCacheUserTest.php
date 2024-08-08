@@ -43,7 +43,7 @@ class AbstractGetFromCacheUserTest extends AbstractTest {
         $this->method_getFromCache->setAccessible( true );
 
         $this->reflector                   = new ReflectionClass( Users_UserDao::class );
-        $this->method_getStatementForCache = $this->reflector->getMethod( "_getStatementForCache" );
+        $this->method_getStatementForCache = $this->reflector->getMethod( "_getStatementForQuery" );
         $this->method_getStatementForCache->setAccessible( true );
 
 

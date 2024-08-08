@@ -16,10 +16,10 @@ class ConstructorDatabaseTest extends AbstractTest {
 
     public function setUp() {
         parent::setUp();
-        $this->databaseInstance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
-        $this->databaseInstance->close();
+        $this->jobDao = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
+        $this->jobDao->close();
 
-        $this->reflector = new ReflectionClass( $this->databaseInstance );
+        $this->reflector = new ReflectionClass( $this->jobDao );
 
     }
 
@@ -38,11 +38,11 @@ class ConstructorDatabaseTest extends AbstractTest {
         // get the singleton static instance reference
         $property = $this->reflector->getProperty( 'instance' );
         $property->setAccessible( true );
-        $property->setValue( $this->databaseInstance, null ); // unset
+        $property->setValue( $this->jobDao, null ); // unset
 
         $this->expectException( '\InvalidArgumentException' );
 
-        $this->databaseInstance->obtain();
+        $this->jobDao->obtain();
 
 
     }

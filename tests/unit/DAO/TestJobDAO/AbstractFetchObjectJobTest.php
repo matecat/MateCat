@@ -110,13 +110,13 @@ class AbstractFetchObjectJobTest extends AbstractTest {
 
 
         $this->reflector                   = new ReflectionClass( $this->job_Dao );
-        $this->method_getStatementForCache = $this->reflector->getMethod( "_getStatementForCache" );
+        $this->method_getStatementForCache = $this->reflector->getMethod( "_getStatementForQuery" );
         $this->method_getStatementForCache->setAccessible( true );
         /**
          * Params
          */
 
-        $this->stmt_param = $this->method_getStatementForCache->invokeArgs( $this->job_Dao, [ null ] );
+        $this->stmt_param = $this->method_getStatementForCache->invokeArgs( $this->job_Dao, [ "select * from jobs where id = :id_job and password = :password limit 1" ] );
 
 
         $this->fetchClass_param           = new \Jobs_JobStruct();
@@ -240,7 +240,7 @@ class AbstractFetchObjectJobTest extends AbstractTest {
          */
 
 
-        $mock_job_Dao = $this->getMockBuilder( '\Jobs_JobDao' )
+        $mock_job_Dao = @$this->getMockBuilder( '\Jobs_JobDao' )
                 ->setConstructorArgs( [ $this->database_instance ] )
                 ->setMethods( [ '_setInCache' ] )
                 ->getMock();

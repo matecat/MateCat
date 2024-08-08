@@ -1373,7 +1373,7 @@ class NewController extends ajaxController {
                 throw new Exception( "xliff_parameters_template_id not valid" );
             }
 
-            $this->xliff_parameters = $xliffConfigTemplate->toArray();
+            $this->xliff_parameters = $xliffConfigTemplate->rules->getArrayCopy();
         }
     }
 }

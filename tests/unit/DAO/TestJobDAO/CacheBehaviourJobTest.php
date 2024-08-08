@@ -117,10 +117,13 @@ class CacheBehaviourJobTest extends AbstractTest {
         $this->job_struct->id = $this->id;
 
         $reflector = new ReflectionClass( $this->job_Dao );
-        $method    = $reflector->getMethod( "_getStatementForCache" );
+        $method    = $reflector->getMethod( "_getStatementForQuery" );
         $method->setAccessible( true );
 
-        $statement = $method->invokeArgs( $this->job_Dao, [ null ] );
+        $propReflection = $reflector->getProperty( '_query_cache' );
+        $propReflection->setAccessible( true );
+
+        $statement = $method->invokeArgs( $this->job_Dao, [ $propReflection->getValue( $this->job_Dao ) ] );
 
         //check that there is no cache
         $this->assertEmpty( unserialize(

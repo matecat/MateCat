@@ -69,7 +69,7 @@ class AbstractFetchObjectUserTest extends AbstractTest {
 
 
         $this->reflector                   = new ReflectionClass( $this->user_Dao );
-        $this->method_getStatementForCache = $this->reflector->getMethod( "_getStatementForCache" );
+        $this->method_getStatementForCache = $this->reflector->getMethod( "_getStatementForQuery" );
         $this->method_getStatementForCache->setAccessible( true );
         /**
          * Params

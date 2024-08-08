@@ -89,7 +89,7 @@ class XliffConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruct imple
 
             if ( isset( $rules[ 'xliff12' ] ) and is_array( $rules[ 'xliff12' ] ) ) {
                 foreach ( $rules[ 'xliff12' ] as $xliff12Rule ) {
-                    $rule = new Xliff12Rule( $xliff12Rule[ 'states' ], $xliff12Rule[ 'analysis' ], $xliff12Rule[ 'editor' ], $xliff12Rule[ 'match_category' ] ?? null );
+                    $rule = new Xliff12Rule( $xliff12Rule[ 'states' ], $xliff12Rule[ 'analysis' ], $xliff12Rule[ 'editor' ] ?? null, $xliff12Rule[ 'match_category' ] ?? null );
                     $this->rules->addRule( $rule );
                 }
             }
@@ -97,7 +97,7 @@ class XliffConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruct imple
             // xliff20
             if ( isset( $rules[ 'xliff20' ] ) and is_array( $rules[ 'xliff20' ] ) ) {
                 foreach ( $rules[ 'xliff20' ] as $xliff20Rule ) {
-                    $rule = new Xliff20Rule( $xliff20Rule[ 'states' ], $xliff20Rule[ 'analysis' ], $xliff20Rule[ 'editor' ], $xliff20Rule[ 'match_category' ] ?? null );
+                    $rule = new Xliff20Rule( $xliff20Rule[ 'states' ], $xliff20Rule[ 'analysis' ], $xliff20Rule[ 'editor' ] ?? null, $xliff20Rule[ 'match_category' ] ?? null );
                     $this->rules->addRule( $rule );
                 }
             }

@@ -75,7 +75,7 @@ class JobStructTest extends AbstractTest {
             )
         );
 
-        $this->jobDao = new Jobs_JobDao( Database::obtain()->getConnection() );
+        $this->jobDao = new Jobs_JobDao( Database::obtain() );
 
     }
 

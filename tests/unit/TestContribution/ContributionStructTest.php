@@ -134,9 +134,13 @@ class ContributionStructTest extends AbstractTest {
     public function testJobStructCacheSystem() {
 
         $redisHandler = ( new RedisHandler() )->getConnection();
-        $refMethod    = new ReflectionMethod( '\Jobs_JobDao', '_getStatementForCache' );
+        $refMethod    = new ReflectionMethod( '\Jobs_JobDao', '_getStatementForQuery' );
         $refMethod->setAccessible( true );
-        $statement = $refMethod->invoke( new Jobs_JobDao( Database::obtain() ), [ null ] );
+        $propReflection = new ReflectionProperty( '\Jobs_JobDao', '_query_cache' );
+        $propReflection->setAccessible( true );
+
+        $underTest = new Jobs_JobDao( Database::obtain() );
+        $statement = $refMethod->invoke( $underTest, $propReflection->getValue( $underTest ) );
 
         //check that there is no cache
         $this->assertEmpty( unserialize(

@@ -50,7 +50,7 @@ class AbstractGetFromCacheJobTest extends AbstractTest {
         $this->method_getFromCache->setAccessible( true );
 
         $this->reflector                   = new ReflectionClass( $this->job_Dao );
-        $this->method_getStatementForCache = $this->reflector->getMethod( "_getStatementForCache" );
+        $this->method_getStatementForCache = $this->reflector->getMethod( "_getStatementForQuery" );
         $this->method_getStatementForCache->setAccessible( true );
 
 
@@ -134,7 +134,10 @@ class AbstractGetFromCacheJobTest extends AbstractTest {
          */
         $this->stmt_param = new PDOStatement();
 
-        $this->stmt_param = $this->method_getStatementForCache->invoke( $this->job_Dao, "SELECT * FROM " . INIT::$DB_DATABASE . ".`jobs` WHERE  id = :id_job AND password = :password " );
+        $propReflection = $this->reflector->getProperty( '_query_cache' );
+        $propReflection->setAccessible( true );
+
+        $this->stmt_param = $this->method_getStatementForCache->invoke( $this->job_Dao, $propReflection->getValue( $this->job_Dao ) );
 
         $this->bindParams_param = [
                 'id_job'   => $this->job_id,

@@ -50,10 +50,10 @@ class ConfirmationDao extends \DataAccess_AbstractDao {
         $stmt                     = $this->_getStatementForQuery( $query );
         $confirmationStruct     = new TranslatedConfirmationStruct();
 
-        return @$this->_fetchObject( $stmt,
+        return $this->_fetchObject( $stmt,
                 $confirmationStruct,
                 $data
-        )[0];
+        )[0] ?? null;
 
     }
 

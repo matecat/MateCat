@@ -149,13 +149,13 @@ trait DaoCacheTrait {
     }
 
     /**
-     * @param int $cacheSecondsTTL
+     * @param ?int $cacheSecondsTTL
      *
      * @return DaoCacheTrait
      */
-    public function setCacheTTL( int $cacheSecondsTTL ): self {
+    public function setCacheTTL( ?int $cacheSecondsTTL ): self {
         if ( !INIT::$SKIP_SQL_CACHE ) {
-            $this->cacheTTL = $cacheSecondsTTL;
+            $this->cacheTTL = $cacheSecondsTTL ?? 0;
         }
 
         return $this;

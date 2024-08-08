@@ -45,7 +45,7 @@ abstract class DataAccess_AbstractDao {
      */
     const TABLE = null;
 
-    public function __construct( $con = null ) {
+    public function __construct( Database $con = null ) {
         /**
          * @var $con Database
          */
