@@ -100,9 +100,11 @@ export const DeepLGlossary = ({id, isCattoolPage = false}) => {
 
   const showConfirmDelete = useRef()
   showConfirmDelete.current = (glossary) => {
-    const templatesInvolved = projectTemplates.filter(
-      (template) => template.mt?.extra?.deepl_id_glossary === glossary.id,
-    )
+    const templatesInvolved = projectTemplates
+      .filter(({isTemporary}) => !isTemporary)
+      .filter(
+        (template) => template.mt?.extra?.deepl_id_glossary === glossary.id,
+      )
 
     if (templatesInvolved.length) {
       ModalsActions.showModalComponent(
@@ -154,7 +156,9 @@ export const DeepLGlossary = ({id, isCattoolPage = false}) => {
                   setRows: updateRowsState,
                   isReadOnly: isCattoolPage,
                 }}
-                deleteGlossaryConfirm={showConfirmDelete.current}
+                deleteGlossaryConfirm={(glossary) =>
+                  showConfirmDelete.current(glossary)
+                }
               />
             ),
           ...(deleteGlossaryRequest &&

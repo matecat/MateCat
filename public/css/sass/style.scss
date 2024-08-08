@@ -4714,6 +4714,8 @@ header {
         border: solid 1px #cdd4de;
 
         .item {
+          padding: 0 !important;
+          border-radius: 3px;
           a,
           > span {
             display: block;
@@ -4735,10 +4737,6 @@ header {
             display: block;
             width: 100%;
           }
-
-          padding: 0 !important;
-          border-radius: 3px;
-
           .disabled {
             > span {
               color: lightgray;

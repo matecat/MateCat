@@ -39,6 +39,7 @@ import {
   isSelectedEntity,
   getEntitiesSelected,
 } from './utils/DraftMatecatUtils/manageCaretPositionNearEntity'
+import {isMacOS} from '../../utils/Utils'
 
 const {hasCommandModifier, isOptionKeyCommand, isCtrlKeyCommand} =
   KeyBindingUtil
@@ -465,6 +466,10 @@ class Editarea extends React.Component {
       EditAreaConstants.COPY_GLOSSARY_IN_EDIT_AREA,
       this.copyGlossaryToEditArea,
     )
+    SegmentStore.addListener(
+      SegmentConstants.REFRESH_TAG_MAP,
+      this.refreshTagMap,
+    )
     setTimeout(() => {
       this.checkDecorators()
       this.updateTranslationInStore()
@@ -501,6 +506,10 @@ class Editarea extends React.Component {
     }
   }
 
+  refreshTagMap = () => {
+    this.setNewTranslation(this.props.segment.sid, this.props.translation)
+  }
+
   componentWillUnmount() {
     SegmentStore.removeListener(
       SegmentConstants.REPLACE_TRANSLATION,
@@ -513,6 +522,10 @@ class Editarea extends React.Component {
     SegmentStore.removeListener(
       EditAreaConstants.COPY_GLOSSARY_IN_EDIT_AREA,
       this.copyGlossaryToEditArea,
+    )
+    SegmentStore.removeListener(
+      SegmentConstants.REFRESH_TAG_MAP,
+      this.refreshTagMap,
     )
 
     const {editor: editorElement} = this.editor
@@ -585,6 +598,22 @@ class Editarea extends React.Component {
             this.wasTripleClickTriggered.current,
         })
       }
+    }
+
+    // Select all triple click
+    if (this.wasTripleClickTriggered.current) {
+      const {editorState} = this.state
+      const contentState = editorState.getCurrentContent()
+
+      const selectAll = editorState.getSelection().merge({
+        anchorKey: contentState.getFirstBlock().getKey(),
+        anchorOffset: 0,
+        focusOffset: contentState.getLastBlock().getText().length,
+        focusKey: contentState.getLastBlock().getKey(),
+      })
+
+      const newEditorState = EditorState.forceSelection(editorState, selectAll)
+      this.setState({editorState: newEditorState})
     }
 
     this.wasTripleClickTriggered.current = false
@@ -752,9 +781,17 @@ class Editarea extends React.Component {
     } else if (e.key === 'Tab') {
       return e.shiftKey ? null : 'insert-tab-tag'
     } else if (
+      e.code === 'Space' &&
+      !e.ctrlKey &&
+      !e.altKey &&
+      !e.shiftKey &&
+      tagSignatures.space
+    ) {
+      return 'insert-space-tag'
+    } else if (
       (e.key === ' ' || e.key === 'Spacebar' || e.key === ' ') &&
       ((isCtrlKeyCommand(e) && e.shiftKey) ||
-        (CommonUtils.isMacOS() && isOptionKeyCommand(e) && !e.ctrlKey))
+        (isMacOS() && isOptionKeyCommand(e) && !e.ctrlKey))
     ) {
       return 'insert-nbsp-tag' // Windows && Mac
     } else if (
@@ -797,7 +834,7 @@ class Editarea extends React.Component {
       return 'tm-search'
     } else if (
       (e.key === ' ' || e.key === 'Spacebar' || e.key === ' ') &&
-      ((e.ctrlKey && e.altKey) || (CommonUtils.isMacOS() && e.shiftKey))
+      ((e.ctrlKey && e.altKey) || (isMacOS() && e.shiftKey))
     ) {
       return 'insert-word-joiner-tag'
     } else if (e.code === 'BracketLeft' || e.code === 'BracketRight') {
@@ -917,6 +954,14 @@ class Editarea extends React.Component {
       case 'insert-tab-tag':
         insertTagAtSelection('tab')
         return 'handled'
+      case 'insert-space-tag':
+        if (tagSignatures.space) {
+          insertTagAtSelection('space')
+          return 'handled'
+        } else {
+          return 'not-handled'
+        }
+
       case 'insert-nbsp-tag':
         insertTagAtSelection('nbsp')
         return 'handled'

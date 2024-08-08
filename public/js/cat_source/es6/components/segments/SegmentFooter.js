@@ -21,6 +21,7 @@ import SegmentUtils from '../../utils/segmentUtils'
 import {SegmentFooterTabAiAssistant} from './SegmentFooterTabAiAssistant'
 import IconCloseCircle from '../icons/IconCloseCircle'
 import CatToolActions from '../../actions/CatToolActions'
+import {isMacOS} from '../../utils/Utils'
 
 export const TAB = {
   MATCHES: 'matches',
@@ -80,6 +81,8 @@ const TAB_ITEMS = {
 const DELAY_MESSAGE = 7000
 
 function SegmentFooter() {
+  const isMac = isMacOS()
+
   const [configurations, setConfigurations] = useState(
     SegmentStore._footerTabsConfig.toJS(),
   )
@@ -165,8 +168,8 @@ function SegmentFooter() {
     const handleShortcutsKeyDown = (e) => {
       if (segment.opened) {
         if (
-          (UI.isMac && e.ctrlKey && e.altKey && e.code === 'KeyS') ||
-          (!UI.isMac && e.altKey && e.code === 'KeyS')
+          (isMac && e.ctrlKey && e.altKey && e.code === 'KeyS') ||
+          (!isMac && e.altKey && e.code === 'KeyS')
         ) {
           setUserChangedTab({[Symbol()]: nextTab})
         }
@@ -235,8 +238,8 @@ function SegmentFooter() {
         open: hasNotes
           ? item.name === TAB.MESSAGES
           : !hasNotes && item.name === TAB.MESSAGES
-          ? false
-          : configurations[item.name]?.open,
+            ? false
+            : configurations[item.name]?.open,
       })),
     )
   }, [configurations, segment, hasNotes])
@@ -472,8 +475,8 @@ function SegmentFooter() {
     const isLoading = isInitTabLoading(tab)
       ? true
       : tabItems.find(({code}) => code === tab.code)?.isLoading
-      ? true
-      : false
+        ? true
+        : false
     const countResult = !isLoading && getTabIndex(tab)
     const onClickRemoveTab = (event) => {
       setTabStateChanges({

@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react'
-import {CattolFooter} from '../components/footer/CattoolFooter'
+import {useHotkeys} from 'react-hotkeys-hook'
 import {Header} from '../components/header/cattol/Header'
 import NotificationBox from '../components/notificationsComponent/NotificationBox'
 import SegmentsContainer from '../components/segments/SegmentsContainer'
@@ -13,7 +13,6 @@ import SegmentStore from '../stores/SegmentStore'
 import SegmentConstants from '../constants/SegmentConstants'
 import useSegmentsLoader from '../hooks/useSegmentsLoader'
 import LXQ from '../utils/lxq.main'
-import CommonUtils from '../utils/commonUtils'
 import {getTmKeysUser} from '../api/getTmKeysUser'
 import {getMTEngines as getMtEnginesApi} from '../api/getMTEngines'
 import {
@@ -30,12 +29,19 @@ import useProjectTemplates from '../hooks/useProjectTemplates'
 import {useGoogleLoginNotification} from '../hooks/useGoogleLoginNotification'
 import ModalsActions from '../actions/ModalsActions'
 import FatalErrorModal from '../components/modals/FatalErrorModal'
+import {Shortcuts} from '../utils/shortcuts'
+import CommonUtils from '../utils/commonUtils'
 import {CattoolFooter} from '../components/footer/CattoolFooter'
 
 const urlParams = new URLSearchParams(window.location.search)
 const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
 
 function CatTool() {
+  useHotkeys(
+    Shortcuts.cattol.events.openSettings.keystrokes[Shortcuts.shortCutsKeyType],
+    () => CatToolActions.openSettingsPanel(SETTINGS_PANEL_TABS.advancedOptions),
+    {enableOnContentEditable: true},
+  )
   const [options, setOptions] = useState({})
   const [wasInitSegments, setWasInitSegments] = useState(false)
   const [isFreezingSegments, setIsFreezingSegments] = useState(false)
@@ -75,6 +81,9 @@ function CatTool() {
       getTmKeysJob(),
       ...(config.isLoggedIn ? [getTmKeysUser()] : []),
     ]
+
+    let modifiedTemplate = {}
+
     Promise.all(promises)
       .then((values) => {
         const uniqueKeys = values
@@ -93,21 +102,25 @@ function CatTool() {
           }
         })
         setTmKeys(updatedTmKeys)
-        modifyingCurrentTemplate((prevTemplate) => ({
-          ...prevTemplate,
-          tm: updatedTmKeys.filter(({isActive}) => isActive),
-          getPublicMatches: config.get_public_matches === 1,
-        }))
+        modifyingCurrentTemplate((prevTemplate) => {
+          modifiedTemplate = {
+            ...prevTemplate,
+            tm: updatedTmKeys.filter(({isActive}) => isActive),
+            getPublicMatches: config.get_public_matches === 1,
+          }
+          return modifiedTemplate
+        })
       })
-      .finally(() => getMTEngines())
+      .catch(() => setTmKeys([]))
+      .finally(() => getMTEngines(modifiedTemplate))
   }
 
-  const getMTEngines = () => {
+  const getMTEngines = (prevTemplate) => {
     const setMTCurrentFakeTemplate = () => {
       if (config.active_engine && config.active_engine.id) {
         const activeMT = config.active_engine
         if (activeMT) {
-          modifyingCurrentTemplate((prevTemplate) => ({
+          modifyingCurrentTemplate(() => ({
             ...prevTemplate,
             mt: {
               ...prevTemplate.mt,
@@ -214,7 +227,9 @@ function CatTool() {
           true,
         )
     }
-
+    window.onbeforeunload = function (e) {
+      return CommonUtils.goodbye(e)
+    }
     SegmentStore.addListener(
       SegmentConstants.FREEZING_SEGMENTS,
       freezingSegments,
@@ -405,7 +420,6 @@ function CatTool() {
             <div className="article-segments-container">
               <SegmentsContainer
                 isReview={config.isReview}
-                enableTagProjection={UI.enableTagProjection}
                 startSegmentId={UI.startSegmentId?.toString()}
                 firstJobSegment={config.first_job_segment}
                 guessTagActive={guessTagActive}

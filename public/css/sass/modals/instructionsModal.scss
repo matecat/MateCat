@@ -27,12 +27,12 @@
         color: #000;
       }
       &.current {
+        //color: #fff;
+        background: #dee4ea;
         &:hover {
           background: #d9e0e8;
           //color: #fff;
         }
-        //color: #fff;
-        background: #dee4ea;
         .current-icon {
           display: block;
           float: right;
