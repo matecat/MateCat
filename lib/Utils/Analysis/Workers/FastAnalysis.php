@@ -31,7 +31,6 @@ use Segments_SegmentDao;
 use Stomp\Transport\Message;
 use TaskRunner\Commons\AbstractDaemon;
 use TaskRunner\Commons\Context;
-use TaskRunner\Commons\ContextList;
 use TaskRunner\Commons\QueueElement;
 use UnexpectedValueException;
 use Utils;
@@ -49,11 +48,6 @@ class FastAnalysis extends AbstractDaemon {
     use ProjectWordCount;
 
     /**
-     * @var AMQHandler|null
-     */
-    protected ?AMQHandler $queueHandler;
-
-    /**
      * @var array
      */
     protected array $segments;
@@ -69,11 +63,6 @@ class FastAnalysis extends AbstractDaemon {
     protected array $actual_project_row;
 
     /**
-     * @var string
-     */
-    protected string $_configFile;
-
-    /**
      * @var AbstractFilesStorage
      */
     protected $files_storage;
@@ -85,25 +74,16 @@ class FastAnalysis extends AbstractDaemon {
     const ERR_FILE_NOT_FOUND = 131;
 
     /**
-     * @var ContextList
-     */
-    protected $_queueContextList = [];
-
-    /**
      * Reload Configuration every cycle
      *
      * @throws Exception
      */
     protected function _updateConfiguration(): void {
 
-        $config = @parse_ini_file( $this->_configFile, true );
-
-        if ( empty( $this->_configFile ) || empty( $config[ 'context_definitions' ] ) ) {
-            throw new Exception( 'Wrong configuration file provided.' );
-        }
+        $configuration = $this->getConfiguration();
 
         //First Execution, load build object
-        $this->_queueContextList = ContextList::get( $config[ 'context_definitions' ] );
+        $this->_queueContextList = $configuration->getContextList();
 
     }
 
@@ -125,11 +105,13 @@ class FastAnalysis extends AbstractDaemon {
     /**
      * @throws Exception
      */
-    protected function __construct( string $configFile ) {
+    protected function __construct( string $configFile, ?string $contextIndex = null ) {
 
         parent::__construct();
 
-        $this->_configFile = $configFile;
+        $this->_configFile   = $configFile;
+        $this->_contextIndex = $contextIndex;
+
         Log::resetLogger();
         Log::$fileName = 'fastAnalysis.log';
 
@@ -159,6 +141,12 @@ class FastAnalysis extends AbstractDaemon {
     public function main( array $args = null ) {
 
         do {
+
+            if ( !$this->queueHandler->getRedisClient()->sismember( RedisKeys::FAST_PID_SET, $this->myProcessPid . ":" . gethostname() . ":" . INIT::$INSTANCE_ID ) ) {
+                // suicide gracefully
+                $this->RUNNING = false;
+                continue;
+            }
 
             try {
                 $this->_checkDatabaseConnection();

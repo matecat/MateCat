@@ -189,7 +189,6 @@ class Executor implements SplObserver {
 
 //                $this->_logMsg( "--- (Executor " . $this->_executorPID . ") : Failed to read frame from AMQ. Doing nothing, wait and re-try in next cycle." );
 //                $this->_logMsg( $e->getMessage() );
-                usleep( 250000 );
                 continue;
 
             }
@@ -320,6 +319,7 @@ class Executor implements SplObserver {
      * Close all opened resources
      *
      * @throws ReflectionException
+     * @throws Exception
      */
     public function cleanShutDown() {
 
@@ -329,12 +329,6 @@ class Executor implements SplObserver {
                 $this->_executionContext->pid_set_name,
                 $this->_executor_instance_id
         );
-
-        $was_run_from_task_manager = $this->_queueHandler->getRedisClient()->get( gethostname() . ":" . $this->_executionContext->queue_name );
-
-        if ( $was_run_from_task_manager > 0 ) {
-            $this->_queueHandler->getRedisClient()->decr( gethostname() . ":" . $this->_executionContext->queue_name );
-        }
 
         $this->_queueHandler->getRedisClient()->disconnect();
         $this->_queueHandler->getClient()->disconnect();
