@@ -140,6 +140,9 @@
 .user-info-details {
   height: 35px;
   align-items: center;
+  display: flex;
+  align-content: center;
+  gap: 10px;
   &.user-info-modify {
     height: 35px;
     input,
@@ -147,9 +150,7 @@
       height: 35px !important;
     }
   }
-  display: flex;
-  align-content: center;
-  gap: 10px;
+
   input {
     margin-top: 0 !important;
     width: 150px !important;

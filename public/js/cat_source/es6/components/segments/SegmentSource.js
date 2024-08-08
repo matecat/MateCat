@@ -21,6 +21,7 @@ import Education from '../icons/Education'
 import {TERM_FORM_FIELDS} from './SegmentFooterTabGlossary/SegmentFooterTabGlossary'
 import {getEntitiesSelected} from './utils/DraftMatecatUtils/manageCaretPositionNearEntity'
 import {UseHotKeysComponent} from '../../hooks/UseHotKeysComponent'
+import {flushSync} from 'react-dom'
 
 class SegmentSource extends React.Component {
   static contextType = SegmentContext
@@ -380,6 +381,10 @@ class SegmentSource extends React.Component {
       SegmentConstants.SET_SEGMENT_TAGGED,
       this.setTaggedSource,
     )
+    SegmentStore.addListener(
+      SegmentConstants.REFRESH_TAG_MAP,
+      this.refreshTagMap,
+    )
     this.$source = $(this.source)
     setTimeout(() => {
       this.checkDecorators()
@@ -391,6 +396,10 @@ class SegmentSource extends React.Component {
     SegmentStore.removeListener(
       SegmentConstants.CLOSE_SPLIT_SEGMENT,
       this.endSplitMode,
+    )
+    SegmentStore.removeListener(
+      SegmentConstants.REFRESH_TAG_MAP,
+      this.refreshTagMap,
     )
   }
 
@@ -439,6 +448,27 @@ class SegmentSource extends React.Component {
       const entitiesSelected = getEntitiesSelected(editorState)
       SegmentActions.focusTags(entitiesSelected)
     }
+  }
+
+  refreshTagMap = () => {
+    const translation = this.props.segment.segment
+
+    // If GuessTag enabled, clean string from tag
+    const cleanSource = SegmentUtils.checkCurrentSegmentTPEnabled(
+      this.props.segment,
+    )
+      ? DraftMatecatUtils.removeTagsFromText(translation)
+      : translation
+    // New EditorState with translation
+    const contentEncoded = DraftMatecatUtils.encodeContent(
+      this.state.editorState,
+      cleanSource,
+    )
+    const {editorState, tagRange} = contentEncoded
+
+    flushSync(() => this.setState({editorState, tagRange}))
+
+    this.updateSourceInStore()
   }
 
   allowHTML(string) {

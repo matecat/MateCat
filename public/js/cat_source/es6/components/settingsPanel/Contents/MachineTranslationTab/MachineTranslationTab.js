@@ -187,9 +187,9 @@ export const MachineTranslationTab = () => {
 
   const showConfirmDelete = useRef()
   showConfirmDelete.current = (id) => {
-    const templatesInvolved = projectTemplates.filter(
-      (template) => template.mt.id === id,
-    )
+    const templatesInvolved = projectTemplates
+      .filter(({isTemporary}) => !isTemporary)
+      .filter((template) => template.mt.id === id)
 
     if (templatesInvolved.length) {
       ModalsActions.showModalComponent(

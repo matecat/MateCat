@@ -1,4 +1,5 @@
 <?php
+
 namespace LQA;
 
 use API\V2\Exceptions\AuthenticationError;
@@ -17,7 +18,6 @@ use FeatureSet;
 use Log;
 use LogicException;
 use LQA\BxExG\Validator;
-use Matecat\SubFiltering\Filters\LtGtEncode;
 use Projects_MetadataDao;
 use Segments_SegmentMetadataDao;
 use TaskRunner\Exceptions\EndQueueException;
@@ -283,12 +283,12 @@ class QA {
 
     const ERR_SYMBOL_MISMATCH = 1200;
 
-    const ERR_EX_BX_NESTED_IN_G = 1300;
+    const ERR_EX_BX_NESTED_IN_G    = 1300;
     const ERR_EX_BX_WRONG_POSITION = 1301;
     const ERR_EX_BX_COUNT_MISMATCH = 1302;
 
     const SMART_COUNT_PLURAL_MISMATCH = 2000;
-    const SMART_COUNT_MISMATCH = 2001;
+    const SMART_COUNT_MISMATCH        = 2001;
 
     const ERR_SIZE_RESTRICTION = 3000;
 
@@ -321,35 +321,35 @@ class QA {
      * @var array(string)
      */
     protected $_errorMap = [
-        0    => '',
-        1    => 'Tag count mismatch',
-        2    => 'bad source xml',
-        3    => 'bad target xml',
-        4    => 'Tag ID mismatch: Check and edit tags with differing IDs.',
-        5    => 'Heading whitespaces mismatch',
-        6    => 'Tail whitespaces mismatch',
-        7    => 'Heading tab mismatch',
-        8    => 'Tail tab mismatch',
-        9    => 'Heading carriage return mismatch',
-        10   => 'Tail carriage return mismatch',
-        11   => 'Char mismatch between tags',
-        12   => 'End line char mismatch',
-        13   => 'Wrong format for x tag. Should be < x .... />',
-        14   => 'Char mismatch before a tag',
-        15   => 'Tag order mismatch',
-        16   => 'New line mismatch',
-        17   => 'Dollar sign mismatch',
-        18   => 'Ampersand sign mismatch',
-        19   => 'At sign mismatch',
-        20   => 'Hash sign mismatch',
-        21   => 'Pound sign mismatch',
-        22   => 'Percent sign mismatch',
-        23   => 'Equalsign sign mismatch',
-        24   => 'Tab sign mismatch',
-        25   => 'Star sign mismatch',
-        26   => 'Glossary mismatch',
-        27   => 'Special char entity mismatch',
-        29   => 'File-breaking tag issue',
+            0    => '',
+            1    => 'Tag count mismatch',
+            2    => 'bad source xml',
+            3    => 'bad target xml',
+            4    => 'Tag ID mismatch: Check and edit tags with differing IDs.',
+            5    => 'Heading whitespaces mismatch',
+            6    => 'Tail whitespaces mismatch',
+            7    => 'Heading tab mismatch',
+            8    => 'Tail tab mismatch',
+            9    => 'Heading carriage return mismatch',
+            10   => 'Tail carriage return mismatch',
+            11   => 'Char mismatch between tags',
+            12   => 'End line char mismatch',
+            13   => 'Wrong format for x tag. Should be < x .... />',
+            14   => 'Char mismatch before a tag',
+            15   => 'Tag order mismatch',
+            16   => 'New line mismatch',
+            17   => 'Dollar sign mismatch',
+            18   => 'Ampersand sign mismatch',
+            19   => 'At sign mismatch',
+            20   => 'Hash sign mismatch',
+            21   => 'Pound sign mismatch',
+            22   => 'Percent sign mismatch',
+            23   => 'Equalsign sign mismatch',
+            24   => 'Tab sign mismatch',
+            25   => 'Star sign mismatch',
+            26   => 'Glossary mismatch',
+            27   => 'Special char entity mismatch',
+            29   => 'File-breaking tag issue',
 
         /*
          * grouping
@@ -357,7 +357,7 @@ class QA {
          *  2 =>  'bad source xml',
          *  3 =>  'bad target xml',
          */
-        1000 => 'Tag mismatch.',
+            1000 => 'Tag mismatch.',
 
         /*
          * grouping
@@ -370,14 +370,14 @@ class QA {
          *  12 => 'End line char mismatch',
          *  14 => 'Char mismatch before a tag',
          */
-        1100 => 'More/fewer whitespaces found next to the tags.',
+            1100 => 'More/fewer whitespaces found next to the tags.',
 
-        1101 => 'More/fewer whitespaces found in the text.',
+            1101 => 'More/fewer whitespaces found in the text.',
 
-        1102 => 'Leading space in target not corresponding to source.',
-        1103 => 'Trailing space in target not corresponding to source.',
-        1104 => 'Whitespace(s) mismatch AFTER a tag.',
-        1105 => 'Whitespace(s) mismatch BEFORE a tag.',
+            1102 => 'Leading space in target not corresponding to source.',
+            1103 => 'Trailing space in target not corresponding to source.',
+            1104 => 'Whitespace(s) mismatch AFTER a tag.',
+            1105 => 'Whitespace(s) mismatch BEFORE a tag.',
         /*
          * grouping
          * 17 => 'Dollar sign mismatch',
@@ -390,18 +390,18 @@ class QA {
          * 24 => 'Tab sign mismatch',
          * 25 => 'Star sign mismatch',
          */
-        1200 => 'Symbol mismatch',
+            1200 => 'Symbol mismatch',
 
-        1300 => 'Found nested <ex> and/or <bx> tag(s) inside a <g> tag',
-        1301 => 'Wrong <ex> and/or <bx> placement',
-        1302 => '<ex>, <bx> and/or <g> total count mismatch',
+            1300 => 'Found nested <ex> and/or <bx> tag(s) inside a <g> tag',
+            1301 => 'Wrong <ex> and/or <bx> placement',
+            1302 => '<ex>, <bx> and/or <g> total count mismatch',
 
-        2000 => 'Smart count plural forms mismatch',
-        2001 => '%smartcount tag count mismatch',
+            2000 => 'Smart count plural forms mismatch',
+            2001 => '%smartcount tag count mismatch',
 
-        3000 => 'Characters limit exceeded',
+            3000 => 'Characters limit exceeded',
 
-        4000 => 'Glossary blacklist match detected',
+            4000 => 'Glossary blacklist match detected',
     ];
 
     protected $_tipMap = [
@@ -411,10 +411,10 @@ class QA {
          *  2 =>  'bad source xml',
          *  3 =>  'bad target xml',
          */
-        29   => "Should be < g ... > ... < /g >",
-        1000 => "Press 'alt + t' shortcut to add tags or delete extra tags.",
-        3000 => 'Maximum characters limit exceeded.',
-        4000 => 'Glossary blacklist match detected',
+            29   => "Should be < g ... > ... < /g >",
+            1000 => "Press 'alt + t' shortcut to add tags or delete extra tags.",
+            3000 => 'Maximum characters limit exceeded.',
+            4000 => 'Glossary blacklist match detected',
 
     ];
 
@@ -431,45 +431,45 @@ class QA {
      *
      * @param array $errorMap
      */
-    public function addCustomError( Array $errorMap ) {
+    public function addCustomError( array $errorMap ) {
         $this->_errorMap[ $errorMap[ 'code' ] ] = $errorMap[ 'debug' ];
         $this->_tipMap[ $errorMap[ 'code' ] ]   = $errorMap[ 'tip' ];
     }
 
     protected static $asciiPlaceHoldMap = [
-        '00' => [ 'symbol' => 'NULL', 'placeHold' => '##$_00$##', 'numeral' => 0x00 ],
-        '01' => [ 'symbol' => 'SOH', 'placeHold' => '##$_01$##', 'numeral' => 0x01 ],
-        '02' => [ 'symbol' => 'STX', 'placeHold' => '##$_02$##', 'numeral' => 0x02 ],
-        '03' => [ 'symbol' => 'ETX', 'placeHold' => '##$_03$##', 'numeral' => 0x03 ],
-        '04' => [ 'symbol' => 'EOT', 'placeHold' => '##$_04$##', 'numeral' => 0x04 ],
-        '05' => [ 'symbol' => 'ENQ', 'placeHold' => '##$_05$##', 'numeral' => 0x05 ],
-        '06' => [ 'symbol' => 'ACK', 'placeHold' => '##$_06$##', 'numeral' => 0x06 ],
-        '07' => [ 'symbol' => 'BEL', 'placeHold' => '##$_07$##', 'numeral' => 0x07 ],
-        '08' => [ 'symbol' => 'BS', 'placeHold' => '##$_08$##', 'numeral' => 0x08 ],
-        '09' => [ 'symbol' => 'HT', 'placeHold' => '##$_09$##', 'numeral' => 0x09 ],
-        '0A' => [ 'symbol' => 'LF', 'placeHold' => '##$_0A$##', 'numeral' => 0x0A ],
-        '0B' => [ 'symbol' => 'VT', 'placeHold' => '##$_0B$##', 'numeral' => 0x0B ],
-        '0C' => [ 'symbol' => 'FF', 'placeHold' => '##$_0C$##', 'numeral' => 0x0C ],
-        '0D' => [ 'symbol' => 'CR', 'placeHold' => '##$_0D$##', 'numeral' => 0x0D ],
-        '0E' => [ 'symbol' => 'SO', 'placeHold' => '##$_0E$##', 'numeral' => 0x0E ],
-        '0F' => [ 'symbol' => 'SI', 'placeHold' => '##$_0F$##', 'numeral' => 0x0F ],
-        '10' => [ 'symbol' => 'DLE', 'placeHold' => '##$_10$##', 'numeral' => 0x10 ],
-        '11' => [ 'symbol' => 'DC', 'placeHold' => '##$_11$##', 'numeral' => 0x11 ],
-        '12' => [ 'symbol' => 'DC', 'placeHold' => '##$_12$##', 'numeral' => 0x12 ],
-        '13' => [ 'symbol' => 'DC', 'placeHold' => '##$_13$##', 'numeral' => 0x13 ],
-        '14' => [ 'symbol' => 'DC', 'placeHold' => '##$_14$##', 'numeral' => 0x14 ],
-        '15' => [ 'symbol' => 'NAK', 'placeHold' => '##$_15$##', 'numeral' => 0x15 ],
-        '16' => [ 'symbol' => 'SYN', 'placeHold' => '##$_16$##', 'numeral' => 0x16 ],
-        '17' => [ 'symbol' => 'ETB', 'placeHold' => '##$_17$##', 'numeral' => 0x17 ],
-        '18' => [ 'symbol' => 'CAN', 'placeHold' => '##$_18$##', 'numeral' => 0x18 ],
-        '19' => [ 'symbol' => 'EM', 'placeHold' => '##$_19$##', 'numeral' => 0x19 ],
-        '1A' => [ 'symbol' => 'SUB', 'placeHold' => '##$_1A$##', 'numeral' => 0x1A ],
-        '1B' => [ 'symbol' => 'ESC', 'placeHold' => '##$_1B$##', 'numeral' => 0x1B ],
-        '1C' => [ 'symbol' => 'FS', 'placeHold' => '##$_1C$##', 'numeral' => 0x1C ],
-        '1D' => [ 'symbol' => 'GS', 'placeHold' => '##$_1D$##', 'numeral' => 0x1D ],
-        '1E' => [ 'symbol' => 'RS', 'placeHold' => '##$_1E$##', 'numeral' => 0x1E ],
-        '1F' => [ 'symbol' => 'US', 'placeHold' => '##$_1F$##', 'numeral' => 0x1F ],
-        '7F' => [ 'symbol' => 'DEL', 'placeHold' => '##$_7F$##', 'numeral' => 0x7F ],
+            '00' => [ 'symbol' => 'NULL', 'placeHold' => '##$_00$##', 'numeral' => 0x00 ],
+            '01' => [ 'symbol' => 'SOH', 'placeHold' => '##$_01$##', 'numeral' => 0x01 ],
+            '02' => [ 'symbol' => 'STX', 'placeHold' => '##$_02$##', 'numeral' => 0x02 ],
+            '03' => [ 'symbol' => 'ETX', 'placeHold' => '##$_03$##', 'numeral' => 0x03 ],
+            '04' => [ 'symbol' => 'EOT', 'placeHold' => '##$_04$##', 'numeral' => 0x04 ],
+            '05' => [ 'symbol' => 'ENQ', 'placeHold' => '##$_05$##', 'numeral' => 0x05 ],
+            '06' => [ 'symbol' => 'ACK', 'placeHold' => '##$_06$##', 'numeral' => 0x06 ],
+            '07' => [ 'symbol' => 'BEL', 'placeHold' => '##$_07$##', 'numeral' => 0x07 ],
+            '08' => [ 'symbol' => 'BS', 'placeHold' => '##$_08$##', 'numeral' => 0x08 ],
+            '09' => [ 'symbol' => 'HT', 'placeHold' => '##$_09$##', 'numeral' => 0x09 ],
+            '0A' => [ 'symbol' => 'LF', 'placeHold' => '##$_0A$##', 'numeral' => 0x0A ],
+            '0B' => [ 'symbol' => 'VT', 'placeHold' => '##$_0B$##', 'numeral' => 0x0B ],
+            '0C' => [ 'symbol' => 'FF', 'placeHold' => '##$_0C$##', 'numeral' => 0x0C ],
+            '0D' => [ 'symbol' => 'CR', 'placeHold' => '##$_0D$##', 'numeral' => 0x0D ],
+            '0E' => [ 'symbol' => 'SO', 'placeHold' => '##$_0E$##', 'numeral' => 0x0E ],
+            '0F' => [ 'symbol' => 'SI', 'placeHold' => '##$_0F$##', 'numeral' => 0x0F ],
+            '10' => [ 'symbol' => 'DLE', 'placeHold' => '##$_10$##', 'numeral' => 0x10 ],
+            '11' => [ 'symbol' => 'DC', 'placeHold' => '##$_11$##', 'numeral' => 0x11 ],
+            '12' => [ 'symbol' => 'DC', 'placeHold' => '##$_12$##', 'numeral' => 0x12 ],
+            '13' => [ 'symbol' => 'DC', 'placeHold' => '##$_13$##', 'numeral' => 0x13 ],
+            '14' => [ 'symbol' => 'DC', 'placeHold' => '##$_14$##', 'numeral' => 0x14 ],
+            '15' => [ 'symbol' => 'NAK', 'placeHold' => '##$_15$##', 'numeral' => 0x15 ],
+            '16' => [ 'symbol' => 'SYN', 'placeHold' => '##$_16$##', 'numeral' => 0x16 ],
+            '17' => [ 'symbol' => 'ETB', 'placeHold' => '##$_17$##', 'numeral' => 0x17 ],
+            '18' => [ 'symbol' => 'CAN', 'placeHold' => '##$_18$##', 'numeral' => 0x18 ],
+            '19' => [ 'symbol' => 'EM', 'placeHold' => '##$_19$##', 'numeral' => 0x19 ],
+            '1A' => [ 'symbol' => 'SUB', 'placeHold' => '##$_1A$##', 'numeral' => 0x1A ],
+            '1B' => [ 'symbol' => 'ESC', 'placeHold' => '##$_1B$##', 'numeral' => 0x1B ],
+            '1C' => [ 'symbol' => 'FS', 'placeHold' => '##$_1C$##', 'numeral' => 0x1C ],
+            '1D' => [ 'symbol' => 'GS', 'placeHold' => '##$_1D$##', 'numeral' => 0x1D ],
+            '1E' => [ 'symbol' => 'RS', 'placeHold' => '##$_1E$##', 'numeral' => 0x1E ],
+            '1F' => [ 'symbol' => 'US', 'placeHold' => '##$_1F$##', 'numeral' => 0x1F ],
+            '7F' => [ 'symbol' => 'DEL', 'placeHold' => '##$_7F$##', 'numeral' => 0x7F ],
     ];
 
     protected static $regexpAscii = '/([\x{00}-\x{1F}\x{7F}]{1})/u';
@@ -530,78 +530,78 @@ class QA {
             case self::ERR_TARGET:
             case self::ERR_TAG_MISMATCH:
                 $this->exceptionList[ self::ERROR ][] = errObject::get( [
-                    'outcome' => self::ERR_TAG_MISMATCH,
-                    'debug'   => $this->_errorMap[ self::ERR_TAG_MISMATCH ],
-                    'tip'     => $this->_getTipValue( self::ERR_TAG_MISMATCH )
+                        'outcome' => self::ERR_TAG_MISMATCH,
+                        'debug'   => $this->_errorMap[ self::ERR_TAG_MISMATCH ],
+                        'tip'     => $this->_getTipValue( self::ERR_TAG_MISMATCH )
                 ] );
                 break;
             case self::ERR_TAG_ID:
                 $this->exceptionList[ self::ERROR ][] = errObject::get( [
-                    'outcome' => self::ERR_TAG_ID,
-                    'debug'   => $this->_errorMap[ self::ERR_TAG_ID ],
-                    'tip'     => $this->_getTipValue( self::ERR_TAG_ID )
+                        'outcome' => self::ERR_TAG_ID,
+                        'debug'   => $this->_errorMap[ self::ERR_TAG_ID ],
+                        'tip'     => $this->_getTipValue( self::ERR_TAG_ID )
                 ] );
                 break;
             case self::ERR_EX_BX_COUNT_MISMATCH:
                 $this->exceptionList[ self::ERROR ][] = errObject::get( [
-                    'outcome' => self::ERR_EX_BX_COUNT_MISMATCH,
-                    'debug'   => $this->_errorMap[ self::ERR_EX_BX_COUNT_MISMATCH ],
-                    'tip'     => $this->_getTipValue( self::ERR_EX_BX_COUNT_MISMATCH )
+                        'outcome' => self::ERR_EX_BX_COUNT_MISMATCH,
+                        'debug'   => $this->_errorMap[ self::ERR_EX_BX_COUNT_MISMATCH ],
+                        'tip'     => $this->_getTipValue( self::ERR_EX_BX_COUNT_MISMATCH )
                 ] );
                 break;
             case self::ERR_EX_BX_NESTED_IN_G:
                 $this->exceptionList[ self::ERROR ][] = errObject::get( [
-                    'outcome' => self::ERR_EX_BX_NESTED_IN_G,
-                    'debug'   => $this->_errorMap[ self::ERR_EX_BX_NESTED_IN_G ],
-                    'tip'     => $this->_getTipValue( self::ERR_EX_BX_NESTED_IN_G )
+                        'outcome' => self::ERR_EX_BX_NESTED_IN_G,
+                        'debug'   => $this->_errorMap[ self::ERR_EX_BX_NESTED_IN_G ],
+                        'tip'     => $this->_getTipValue( self::ERR_EX_BX_NESTED_IN_G )
                 ] );
                 break;
             case self::ERR_EX_BX_WRONG_POSITION:
                 $this->exceptionList[ self::WARNING ][] = errObject::get( [
-                    'outcome' => self::ERR_EX_BX_WRONG_POSITION,
-                    'debug'   => $this->_errorMap[ self::ERR_EX_BX_WRONG_POSITION ],
-                    'tip'     => $this->_getTipValue( self::ERR_EX_BX_WRONG_POSITION )
+                        'outcome' => self::ERR_EX_BX_WRONG_POSITION,
+                        'debug'   => $this->_errorMap[ self::ERR_EX_BX_WRONG_POSITION ],
+                        'tip'     => $this->_getTipValue( self::ERR_EX_BX_WRONG_POSITION )
                 ] );
                 break;
             case self::ERR_UNCLOSED_X_TAG:
             case self::ERR_UNCLOSED_G_TAG:
             case self::SMART_COUNT_PLURAL_MISMATCH:
                 $this->exceptionList[ self::ERROR ][] = errObject::get( [
-                    'outcome' => $errCode,
-                    'debug'   => $this->_errorMap[ $errCode ],
-                    'tip'     => $this->_getTipValue( $errCode )
+                        'outcome' => $errCode,
+                        'debug'   => $this->_errorMap[ $errCode ],
+                        'tip'     => $this->_getTipValue( $errCode )
                 ] );
                 break;
             case self::SMART_COUNT_MISMATCH:
                 $this->exceptionList[ self::ERROR ][] = errObject::get( [
-                    'outcome' => $errCode,
-                    'debug'   => $this->_errorMap[ self::SMART_COUNT_MISMATCH ],
-                    'tip'     => $this->_getTipValue( self::SMART_COUNT_MISMATCH )
+                        'outcome' => $errCode,
+                        'debug'   => $this->_errorMap[ self::SMART_COUNT_MISMATCH ],
+                        'tip'     => $this->_getTipValue( self::SMART_COUNT_MISMATCH )
                 ] );
                 break;
 
             case self::ERR_SIZE_RESTRICTION:
                 $this->exceptionList[ self::ERROR ][] = errObject::get( [
-                    'outcome' => $errCode,
-                    'debug'   => $this->_errorMap[ self::ERR_SIZE_RESTRICTION ],
-                    'tip'     => $this->_getTipValue( self::ERR_SIZE_RESTRICTION )
+                        'outcome' => $errCode,
+                        'debug'   => $this->_errorMap[ self::ERR_SIZE_RESTRICTION ],
+                        'tip'     => $this->_getTipValue( self::ERR_SIZE_RESTRICTION )
                 ] );
                 break;
 
             case self::GLOSSARY_BLACKLIST_MATCH:
                 $this->exceptionList[ self::WARNING ][] = errObject::get( [
-                    'outcome' => $errCode,
-                    'debug'   => $this->_errorMap[ self::GLOSSARY_BLACKLIST_MATCH ],
-                    'tip'     => $this->_getTipValue( self::GLOSSARY_BLACKLIST_MATCH )
+                        'outcome' => $errCode,
+                        'debug'   => $this->_errorMap[ self::GLOSSARY_BLACKLIST_MATCH ],
+                        'tip'     => $this->_getTipValue( self::GLOSSARY_BLACKLIST_MATCH )
                 ] );
                 break;
 
             case self::ERR_WS_HEAD:
             case self::ERR_WS_TAIL:
                 $this->exceptionList[ self::INFO ][] = errObject::get( [
-                    'outcome' => self::ERR_SPACE_MISMATCH_TEXT,
-                    'debug'   => $this->_errorMap[ self::ERR_SPACE_MISMATCH_TEXT ],
-                    'tip'     => $this->_getTipValue( self::ERR_SPACE_MISMATCH_TEXT )
+                        'outcome' => self::ERR_SPACE_MISMATCH_TEXT,
+                        'debug'   => $this->_errorMap[ self::ERR_SPACE_MISMATCH_TEXT ],
+                        'tip'     => $this->_getTipValue( self::ERR_SPACE_MISMATCH_TEXT )
                 ] );
                 break;
 
@@ -609,53 +609,53 @@ class QA {
             case self::ERR_TAB_HEAD:
             case self::ERR_TAB_TAIL:
                 $this->exceptionList[ self::INFO ][] = errObject::get( [
-                    'outcome' => self::ERR_TAB_MISMATCH,
-                    'debug'   => $this->_errorMap[ self::ERR_TAB_MISMATCH ],
-                    'tip'     => $this->_getTipValue( self::ERR_TAB_MISMATCH )
+                        'outcome' => self::ERR_TAB_MISMATCH,
+                        'debug'   => $this->_errorMap[ self::ERR_TAB_MISMATCH ],
+                        'tip'     => $this->_getTipValue( self::ERR_TAB_MISMATCH )
                 ] );
                 break;
 
             case self::ERR_BOUNDARY_HEAD:
                 $this->exceptionList[ self::INFO ][] = errObject::get( [
-                    'outcome' => self::ERR_BOUNDARY_HEAD_SPACE_MISMATCH,
-                    'debug'   => $this->_errorMap[ self::ERR_BOUNDARY_HEAD_SPACE_MISMATCH ],
-                    'tip'     => $this->_getTipValue( self::ERR_BOUNDARY_HEAD_SPACE_MISMATCH )
+                        'outcome' => self::ERR_BOUNDARY_HEAD_SPACE_MISMATCH,
+                        'debug'   => $this->_errorMap[ self::ERR_BOUNDARY_HEAD_SPACE_MISMATCH ],
+                        'tip'     => $this->_getTipValue( self::ERR_BOUNDARY_HEAD_SPACE_MISMATCH )
                 ] );
                 break;
 
             case self::ERR_BOUNDARY_TAIL:
                 // if source target is CJ we won't to add an trailing space mismatch error
-                if(false === CatUtils::isCJ($this->getSourceSegLang())){
+                if ( false === CatUtils::isCJ( $this->getSourceSegLang() ) ) {
                     $this->exceptionList[ self::INFO ][] = errObject::get( [
-                        'outcome' => self::ERR_BOUNDARY_TAIL_SPACE_MISMATCH,
-                        'debug'   => $this->_errorMap[ self::ERR_BOUNDARY_TAIL_SPACE_MISMATCH ],
-                        'tip'     => $this->_getTipValue( self::ERR_BOUNDARY_TAIL_SPACE_MISMATCH )
+                            'outcome' => self::ERR_BOUNDARY_TAIL_SPACE_MISMATCH,
+                            'debug'   => $this->_errorMap[ self::ERR_BOUNDARY_TAIL_SPACE_MISMATCH ],
+                            'tip'     => $this->_getTipValue( self::ERR_BOUNDARY_TAIL_SPACE_MISMATCH )
                     ] );
                 }
                 break;
 
             case self::ERR_SPACE_MISMATCH_AFTER_TAG:
                 $this->exceptionList[ self::INFO ][] = errObject::get( [
-                    'outcome' => self::ERR_SPACE_MISMATCH_AFTER_TAG,
-                    'debug'   => $this->_errorMap[ self::ERR_SPACE_MISMATCH_AFTER_TAG ],
-                    'tip'     => $this->_getTipValue( self::ERR_SPACE_MISMATCH_AFTER_TAG )
+                        'outcome' => self::ERR_SPACE_MISMATCH_AFTER_TAG,
+                        'debug'   => $this->_errorMap[ self::ERR_SPACE_MISMATCH_AFTER_TAG ],
+                        'tip'     => $this->_getTipValue( self::ERR_SPACE_MISMATCH_AFTER_TAG )
                 ] );
                 break;
 
             case self::ERR_SPACE_MISMATCH_BEFORE_TAG:
                 $this->exceptionList[ self::INFO ][] = errObject::get( [
-                    'outcome' => self::ERR_SPACE_MISMATCH_BEFORE_TAG,
-                    'debug'   => $this->_errorMap[ self::ERR_SPACE_MISMATCH_BEFORE_TAG ],
-                    'tip'     => $this->_getTipValue( self::ERR_SPACE_MISMATCH_BEFORE_TAG )
+                        'outcome' => self::ERR_SPACE_MISMATCH_BEFORE_TAG,
+                        'debug'   => $this->_errorMap[ self::ERR_SPACE_MISMATCH_BEFORE_TAG ],
+                        'tip'     => $this->_getTipValue( self::ERR_SPACE_MISMATCH_BEFORE_TAG )
                 ] );
                 break;
 
 
             case self::ERR_BOUNDARY_HEAD_TEXT:
                 $this->exceptionList[ self::INFO ][] = errObject::get( [
-                    'outcome' => self::ERR_SPACE_MISMATCH,
-                    'debug'   => $this->_errorMap[ self::ERR_SPACE_MISMATCH ],
-                    'tip'     => $this->_getTipValue( self::ERR_SPACE_MISMATCH )
+                        'outcome' => self::ERR_SPACE_MISMATCH,
+                        'debug'   => $this->_errorMap[ self::ERR_SPACE_MISMATCH ],
+                        'tip'     => $this->_getTipValue( self::ERR_SPACE_MISMATCH )
                 ] );
                 break;
 
@@ -672,26 +672,26 @@ class QA {
             case self::ERR_SPECIAL_ENTITY_MISMATCH :
             case self::ERR_SYMBOL_MISMATCH :
                 $this->exceptionList[ self::INFO ][] = errObject::get( [
-                    'outcome' => self::ERR_SYMBOL_MISMATCH,
-                    'debug'   => $this->_errorMap[ self::ERR_SYMBOL_MISMATCH ],
-                    'tip'     => $this->_getTipValue( self::ERR_SYMBOL_MISMATCH )
+                        'outcome' => self::ERR_SYMBOL_MISMATCH,
+                        'debug'   => $this->_errorMap[ self::ERR_SYMBOL_MISMATCH ],
+                        'tip'     => $this->_getTipValue( self::ERR_SYMBOL_MISMATCH )
                 ] );
                 break;
 
             case self::ERR_NEWLINE_MISMATCH:
                 $this->exceptionList[ self::INFO ][] = errObject::get( [
-                    'outcome' => self::ERR_NEWLINE_MISMATCH,
-                    'debug'   => $this->_errorMap[ self::ERR_NEWLINE_MISMATCH ],
-                    'tip'     => $this->_getTipValue( self::ERR_NEWLINE_MISMATCH )
+                        'outcome' => self::ERR_NEWLINE_MISMATCH,
+                        'debug'   => $this->_errorMap[ self::ERR_NEWLINE_MISMATCH ],
+                        'tip'     => $this->_getTipValue( self::ERR_NEWLINE_MISMATCH )
                 ] );
                 break;
 
             case self::ERR_TAG_ORDER:
             default:
                 $this->exceptionList[ self::WARNING ][] = errObject::get( [
-                    'outcome' => $errCode,
-                    'debug'   => $this->_errorMap[ $errCode ],
-                    'tip'     => $this->_getTipValue( $errCode )
+                        'outcome' => $errCode,
+                        'debug'   => $this->_errorMap[ $errCode ],
+                        'tip'     => $this->_getTipValue( $errCode )
                 ] );
                 break;
         }
@@ -795,7 +795,7 @@ class QA {
     public static function JSONtoExceptionList( $jsonString ) {
         $that      = new static( null, null );
         $jsonValue = json_decode( $jsonString, true );
-        if( is_array( $jsonValue ) ){
+        if ( is_array( $jsonValue ) ) {
             array_walk( $jsonValue, function ( $errArray, $key ) use ( $that ) {
                 $that->addError( $errArray[ 'outcome' ] );
             } );
@@ -854,9 +854,9 @@ class QA {
 
         if ( !$this->_thereAreErrorLevel( $level ) ) {
             return [
-                errObject::get( [
-                    'outcome' => self::ERR_NONE, 'debug' => $this->_errorMap[ self::ERR_NONE ] . " [ 0 ]"
-                ] )
+                    errObject::get( [
+                            'outcome' => self::ERR_NONE, 'debug' => $this->_errorMap[ self::ERR_NONE ] . " [ 0 ]"
+                    ] )
             ];
         }
 
@@ -898,7 +898,7 @@ class QA {
              */
             foreach ( $list as $errObj ) {
                 $errObj->debug = $errObj->getOrigDebug() .
-                    " ( " . $errorCount[ $errObj->outcome ] . " )";
+                        " ( " . $errorCount[ $errObj->outcome ] . " )";
             }
 
         }
@@ -932,8 +932,8 @@ class QA {
          *
          * @see getTrgNormalized
          */
-        $source_seg = $this->replaceAscii($source_seg);
-        $target_seg = $this->replaceAscii($target_seg);
+        $source_seg = $this->replaceAscii( $source_seg );
+        $target_seg = $this->replaceAscii( $target_seg );
 
         /**
          * Do it again for entities because
@@ -943,8 +943,8 @@ class QA {
          * does not works for not printable chars
          *
          */
-        $source_seg = $this->replaceEntities($source_seg);
-        $target_seg = $this->replaceEntities($target_seg);
+        $source_seg = $this->replaceEntities( $source_seg );
+        $target_seg = $this->replaceEntities( $target_seg );
 
         /**
          * We insert a default placeholder inside empty html tags to avoid saveXML() function invoked by getTrgNormalized()
@@ -954,8 +954,8 @@ class QA {
          *
          * <g id="23"></g> would be contracted to <g ="23"/>
          */
-        $source_seg = $this->fillEmptyHTMLTagsWithPlaceholder($source_seg);
-        $target_seg = $this->fillEmptyHTMLTagsWithPlaceholder($target_seg);
+        $source_seg = $this->fillEmptyHTMLTagsWithPlaceholder( $source_seg );
+        $target_seg = $this->fillEmptyHTMLTagsWithPlaceholder( $target_seg );
 
         $this->source_seg = $source_seg;
         $this->target_seg = $target_seg;
@@ -976,7 +976,7 @@ class QA {
      *
      * @return string|string[]|null
      */
-    private function replaceAscii($seg){
+    private function replaceAscii( $seg ) {
 
         preg_match_all( self::$regexpAscii, $seg, $matches );
 
@@ -999,7 +999,7 @@ class QA {
      *
      * @return string|string[]|null
      */
-    private function replaceEntities($seg) {
+    private function replaceEntities( $seg ) {
 
         preg_match_all( self::$regexpEntity, $seg, $matches );
 
@@ -1032,16 +1032,16 @@ class QA {
      *
      * @return string|string[]
      */
-    private function fillEmptyHTMLTagsWithPlaceholder($seg) {
+    private function fillEmptyHTMLTagsWithPlaceholder( $seg ) {
 
-        preg_match_all('/<([^ >]+)[^>]*><\/\1>/', $seg, $matches);
+        preg_match_all( '/<([^ >]+)[^>]*><\/\1>/', $seg, $matches );
 
         if ( !empty( $matches[ 0 ] ) ) {
-            foreach ($matches[ 0 ]  as $match){
-                $matches = explode("><", $match);
-                $replacedHtmlTag = $matches[0].'>'.self::$emptyHtmlTagsPlaceholder.'<'.$matches[1];
+            foreach ( $matches[ 0 ] as $match ) {
+                $matches         = explode( "><", $match );
+                $replacedHtmlTag = $matches[ 0 ] . '>' . self::$emptyHtmlTagsPlaceholder . '<' . $matches[ 1 ];
 
-                $seg = str_replace($match, $replacedHtmlTag, $seg);
+                $seg = str_replace( $match, $replacedHtmlTag, $seg );
             }
         }
 
@@ -1055,8 +1055,7 @@ class QA {
         $this->id_segment = $id_segment;
     }
 
-    public function setCharactersCount( $characters_count )
-    {
+    public function setCharactersCount( $characters_count ) {
         $this->characters_count = (int)$characters_count;
     }
 
@@ -1141,7 +1140,7 @@ class QA {
      * @return string
      */
     public function getTargetSeg() {
-        return str_replace(self::$emptyHtmlTagsPlaceholder, '', $this->target_seg);
+        return str_replace( self::$emptyHtmlTagsPlaceholder, '', $this->target_seg );
     }
 
     public function getDomMaps() {
@@ -1290,14 +1289,14 @@ class QA {
 
                 $elementID = $element->getAttribute( 'id' );
 
-                if($this->_addThisElementToDomMap($element)){
+                if ( $this->_addThisElementToDomMap( $element ) ) {
                     $plainRef = [
-                        'type'       => 'DOMElement',
-                        'name'       => $element->tagName,
-                        'id'         => $elementID,
-                        'parent_id'  => $parentID,
-                        'node_idx'   => $i,
-                        'innerHTML'  => $element->ownerDocument->saveXML( $element ),
+                            'type'      => 'DOMElement',
+                            'name'      => $element->tagName,
+                            'id'        => $elementID,
+                            'parent_id' => $parentID,
+                            'node_idx'  => $i,
+                            'innerHTML' => $element->ownerDocument->saveXML( $element ),
                     ];
 
                     //set depth and increment for next occurrence
@@ -1328,7 +1327,7 @@ class QA {
                         $regex     = "<ph id\s*=\s*[\"']mtc_[0-9]+[\"'] equiv-text\s*=\s*[\"']base64:([^\"']+)[\"']\s*/>";
                         preg_match_all( $regex, $innerHTML, $html, PREG_SET_ORDER );
 
-                        if(isset($html[ 0 ][ 1 ])){
+                        if ( isset( $html[ 0 ][ 1 ] ) ) {
                             $html = base64_decode( $html[ 0 ][ 1 ] );
                             @$srcDomElements[ 'refID' ][ $html ] = $element->tagName;
                         } else {
@@ -1346,12 +1345,12 @@ class QA {
             } else {
 
                 $plainRef = [
-                    'type'      => 'DOMText',
-                    'name'      => null,
-                    'id'        => null,
-                    'parent_id' => $parentID,
-                    'node_idx'  => $i,
-                    'content'   => $elementList->item( $i )->textContent,
+                        'type'      => 'DOMText',
+                        'name'      => null,
+                        'id'        => null,
+                        'parent_id' => $parentID,
+                        'node_idx'  => $i,
+                        'content'   => $elementList->item( $i )->textContent,
                 ];
 
                 //set depth and increment for next occurrence
@@ -1378,23 +1377,23 @@ class QA {
      * @param DOMElement $element
      *
      * @return bool
-     *@throws Exception
+     * @throws Exception
      */
-    protected function _addThisElementToDomMap( DOMElement $element) {
+    protected function _addThisElementToDomMap( DOMElement $element ) {
 
         $tagsToBeExcludedFromChecks = [];
 
         // This is a map (***SPECIFIC FOR EVERY PLUGIN IN USE***)
         // of tags to exclude from consistency check
-        if(null !== $this->featureSet){
-            $tagsToBeExcludedFromChecks = $this->featureSet->filter('injectExcludedTagsInQa', []);
+        if ( null !== $this->featureSet ) {
+            $tagsToBeExcludedFromChecks = $this->featureSet->filter( 'injectExcludedTagsInQa', [] );
         }
 
-        if(empty($tagsToBeExcludedFromChecks)){
+        if ( empty( $tagsToBeExcludedFromChecks ) ) {
             return true;
         }
 
-        return $this->elementIsToBeExcludedFromChecks($element, $tagsToBeExcludedFromChecks);
+        return $this->elementIsToBeExcludedFromChecks( $element, $tagsToBeExcludedFromChecks );
     }
 
     /**
@@ -1402,26 +1401,26 @@ class QA {
      * if has any dataRef attribute
      *
      * @param DOMElement $element
-     * @param array $tagsToBeExcludedFromChecks
+     * @param array      $tagsToBeExcludedFromChecks
      *
      * @return bool
      */
-    private function elementIsToBeExcludedFromChecks( DOMElement $element, $tagsToBeExcludedFromChecks) {
+    private function elementIsToBeExcludedFromChecks( DOMElement $element, $tagsToBeExcludedFromChecks ) {
 
         $elementHasDataRef = false;
-        $elementValue = null;
+        $elementValue      = null;
 
-        foreach ($element->attributes as $attribute){
-            if ($attribute->name === 'equiv-text'){
-                $elementValue = base64_decode( str_replace('base64:','', $attribute->value) );
+        foreach ( $element->attributes as $attribute ) {
+            if ( $attribute->name === 'equiv-text' ) {
+                $elementValue = base64_decode( str_replace( 'base64:', '', $attribute->value ) );
             }
 
-            if($attribute->name === 'dataRef'){
+            if ( $attribute->name === 'dataRef' ) {
                 $elementHasDataRef = true;
             }
         }
 
-        return !(in_array($elementValue, $tagsToBeExcludedFromChecks) and $elementHasDataRef);
+        return !( in_array( $elementValue, $tagsToBeExcludedFromChecks ) and $elementHasDataRef );
     }
 
     /**
@@ -1583,7 +1582,7 @@ class QA {
     public function performConsistencyCheck() {
 
         try {
-            list( $srcNodeList, $trgNodeList ) = $this->_prepareDOMStructures();
+            [ $srcNodeList, $trgNodeList ] = $this->_prepareDOMStructures();
         } catch ( DOMException $ex ) {
             return $this->getErrors();
         }
@@ -1611,7 +1610,7 @@ class QA {
     public function performTagCheckOnly() {
 
         try {
-            list( $srcNodeList, $trgNodeList ) = $this->_prepareDOMStructures();
+            [ $srcNodeList, $trgNodeList ] = $this->_prepareDOMStructures();
         } catch ( DOMException $ex ) {
             return $this->getErrors();
         }
@@ -1640,8 +1639,8 @@ class QA {
         $customCheckTagPositions = $this->getFeatureSet()->filter( 'checkTagPositions', self::ERR_NONE, $this );
 
         // if a custom check was already performed run this:
-        if($customCheckTagPositions !== true){
-            $this->performTagPositionCheck($this->source_seg, $this->target_seg);
+        if ( $customCheckTagPositions !== true ) {
+            $this->performTagPositionCheck( $this->source_seg, $this->target_seg );
         }
     }
 
@@ -1653,21 +1652,24 @@ class QA {
      *
      */
     public function performTagPositionCheck( $source, $target, $performIdCheck = true, $performTagPositionsCheck = true ) {
-        $regexpMatch = '#(<[^/]+?>)|(</.+?>)|(<[^>]+?/>)#';
+        $regexpMatch = '#<([^/]+?)>|<(/.+?)>|<([^>]+?)/>#';
 
         // extract tag from source
-        preg_match_all( $regexpMatch, $source, $matches );
-        $complete_toCheckSrcStruct    = $matches[ 0 ];
-        $opening_toCheckSrcStruct     = $matches[ 1 ];
-        $closing_toCheckSrcStruct     = $matches[ 2 ];
-        $selfClosing_toCheckSrcStruct = $matches[ 3 ];
+        preg_match_all( $regexpMatch, $source, $__complete_toCheckSrcStruct );
+        $_opening_toCheckSrcStruct     = $__complete_toCheckSrcStruct[ 1 ];
+        $_closing_toCheckSrcStruct     = $__complete_toCheckSrcStruct[ 2 ];
+        $_selfClosing_toCheckSrcStruct = $__complete_toCheckSrcStruct[ 3 ];
 
         // extract tag from target
-        preg_match_all( $regexpMatch, $target, $matches );
-        $complete_toCheckTrgStruct    = $matches[ 0 ];
-        $opening_toCheckTrgStruct     = $matches[ 1 ];
-        $closing_toCheckTrgStruct     = $matches[ 2 ];
-        $selfClosing_toCheckTrgStruct = $matches[ 3 ];
+        preg_match_all( $regexpMatch, $target, $__complete_toCheckTrgStruct );
+        $_opening_toCheckTrgStruct     = $__complete_toCheckTrgStruct[ 1 ];
+        $_closing_toCheckTrgStruct     = $__complete_toCheckTrgStruct[ 2 ];
+        $_selfClosing_toCheckTrgStruct = $__complete_toCheckTrgStruct[ 3 ];
+
+        // Normal tags can be self-closing, we should normalize since they should be valid in both forms
+        $_normalizedSrcTags = $this->normalizeTags( $_opening_toCheckSrcStruct, $_selfClosing_toCheckSrcStruct );
+        $_normalizedTrgTags = $this->normalizeTags( $_opening_toCheckTrgStruct, $_selfClosing_toCheckTrgStruct );
+
 
         //
         // ===========================================
@@ -1684,38 +1686,50 @@ class QA {
         // - In this case check for equiv-text mismatch and throw a ERR_TAG_MISMATCH Error
         //
 
-        $srcOpeningTagIds = $this->extractIdAttributes( $opening_toCheckSrcStruct );
-        $trgOpeningTagIds = $this->extractIdAttributes( $opening_toCheckTrgStruct );
+        $srcAllTagId = $this->extractIdAttributes( $__complete_toCheckSrcStruct[ 0 ] );
+        $trgAllTagId = $this->extractIdAttributes( $__complete_toCheckTrgStruct[ 0 ] );
 
-        $srcOpeningTagEquivText = $this->extractEquivTextAttributes( $opening_toCheckSrcStruct );
-        $trgOpeningTagEquivText = $this->extractEquivTextAttributes( $opening_toCheckTrgStruct );
-
-        $scrSelfClosingTagIds       = $this->extractIdAttributes( $selfClosing_toCheckSrcStruct );
-        $trgSelfClosingTagIds       = $this->extractIdAttributes( $selfClosing_toCheckTrgStruct );
-        $srcSelfClosingTagEquivText = $this->extractEquivTextAttributes( $selfClosing_toCheckSrcStruct );
-        $trgSelfClosingTagEquivText = $this->extractEquivTextAttributes( $selfClosing_toCheckTrgStruct );
+        $srcTagEquivText = $this->extractEquivTextAttributes( $_normalizedSrcTags );
+        $trgTagEquivText = $this->extractEquivTextAttributes( $_normalizedTrgTags );
 
         // check in equiv-text
-        $this->checkContentAndAddTagMismatchError( $srcOpeningTagEquivText, $trgOpeningTagEquivText, self::ERR_TAG_MISMATCH, $complete_toCheckTrgStruct );
-        $this->checkContentAndAddTagMismatchError( $srcSelfClosingTagEquivText, $trgSelfClosingTagEquivText, self::ERR_TAG_MISMATCH, $complete_toCheckTrgStruct );
+        $this->checkContentAndAddTagMismatchError( $srcTagEquivText, $trgTagEquivText, self::ERR_TAG_MISMATCH, $__complete_toCheckTrgStruct[ 0 ] );
 
         // check for id mismatch
         if ( $performIdCheck ) {
-            $this->checkContentAndAddTagMismatchError( $srcOpeningTagIds, $trgOpeningTagIds, self::ERR_TAG_MISMATCH, $complete_toCheckTrgStruct );
-            $this->checkContentAndAddTagMismatchError( $scrSelfClosingTagIds, $trgSelfClosingTagIds, self::ERR_TAG_MISMATCH, $complete_toCheckTrgStruct );
+            $this->checkContentAndAddTagMismatchError( $srcAllTagId, $trgAllTagId, self::ERR_TAG_MISMATCH, $__complete_toCheckTrgStruct[ 0 ] );
         }
 
         // check for warnings only if there are no errors
         if ( !$this->thereAreErrors() and $performTagPositionsCheck ) {
-            $this->checkTagPositionsAndAddTagOrderError( $opening_toCheckSrcStruct, $opening_toCheckTrgStruct, self::ERR_TAG_ORDER );
-            $this->checkTagPositionsAndAddTagOrderError( $selfClosing_toCheckSrcStruct, $selfClosing_toCheckTrgStruct, self::ERR_TAG_ORDER );
-            $this->checkTagPositionsAndAddTagOrderError( $closing_toCheckSrcStruct, $closing_toCheckTrgStruct, self::ERR_TAG_ORDER );
+            $this->checkTagPositionsAndAddTagOrderError( $_normalizedSrcTags, $_normalizedTrgTags, self::ERR_TAG_ORDER );
+            $this->checkTagPositionsAndAddTagOrderError( $_closing_toCheckSrcStruct, $_closing_toCheckTrgStruct, self::ERR_TAG_ORDER );
         }
 
         // If there are errors get tag diff for the UI
         if ( $this->thereAreErrors() ) {
             $this->_getTagDiff();
         }
+    }
+
+    private
+    function normalizeTags( $_opening_toCheck, $_selfClosing_toCheck ) {
+
+        $_normalizedTags = [];
+        foreach ( $_opening_toCheck as $p => $v ) {
+            if ( !empty( $v ) ) {
+                $_normalizedTags[ $p ] = $v;
+            }
+        }
+
+        foreach ( $_selfClosing_toCheck as $p => $v ) {
+            if ( !empty( $v ) ) {
+                $_normalizedTags[ $p ] = $v;
+            }
+        }
+
+        return $_normalizedTags;
+
     }
 
     /**
@@ -1725,15 +1739,16 @@ class QA {
      *
      * @return array
      */
-    private function extractIdAttributes(array $tags) {
+    private
+    function extractIdAttributes( array $tags ) {
 
         $matches = [];
 
-        foreach ($tags as $tag){
-            preg_match_all('/id\s*=\s*["\']([^"\']+)["\']\s*/', $tag, $idMatch);
+        foreach ( $tags as $tag ) {
+            preg_match_all( '/id\s*=\s*["\']([^"\']+)["\']\s*/', $tag, $idMatch );
 
-            if (!empty($idMatch[1][0])) {
-                $matches[] = $idMatch[1][0];
+            if ( !empty( $idMatch[ 1 ][ 0 ] ) ) {
+                $matches[] = $idMatch[ 1 ][ 0 ];
             }
         }
 
@@ -1747,15 +1762,16 @@ class QA {
      *
      * @return array
      */
-    private function extractEquivTextAttributes(array $tags) {
+    private
+    function extractEquivTextAttributes( array $tags ) {
 
         $matches = [];
 
-        foreach ($tags as $tag){
-            preg_match_all('/equiv-text\s*=\s*["\']base64:([^"\']+)["\']\s*/', $tag, $equivTextMatch);
+        foreach ( $tags as $tag ) {
+            preg_match_all( '/equiv-text\s*=\s*["\']base64:([^"\']+)["\']\s*/', $tag, $equivTextMatch );
 
-            if (!empty($equivTextMatch[1][0])) {
-                $matches[] = $equivTextMatch[1][0];
+            if ( !empty( $equivTextMatch[ 1 ][ 0 ] ) ) {
+                $matches[] = $equivTextMatch[ 1 ][ 0 ];
             }
         }
 
@@ -1763,51 +1779,63 @@ class QA {
     }
 
     /**
-     * This function performs a positional check and throw a ERR_TAG_ORDER Warning
+     * This function performs a positional check and throws an ERR_TAG_ORDER Warning
      *
      * @param array  $src
      * @param array  $trg
      * @param string $error
      *
      */
-    private function checkTagPositionsAndAddTagOrderError( array $src, array $trg, $error ) {
+    private
+    function checkTagPositionsAndAddTagOrderError( array $src, array $trg, $error ) {
 
         foreach ( $trg as $pos => $value ) {
-            if ( $value !== $src[ $pos ] ) {
+            if ( $value !== ( $src[ $pos ] ?? null ) ) {
                 if ( !empty( $value ) ) {
+
                     $this->addError( $error );
+
                     try {
-                        $this->tagPositionError[] = ( new LtGtEncode() )->transform( $value );
+                        $this->tagPositionError[] = '&lt;' . $value . '&gt;';
                     } catch ( Exception $ignore ) {
                         // it's impossible to have an exception here, suppress abstract method signature exception
                     }
+
+                    return true;
+
                 }
 
-                return;
             }
         }
+
     }
 
     /**
-     * This function performs a content check and throw a ERR_TAG_MISMATCH Error
+     * This function performs a content check and throws an ERR_TAG_MISMATCH Error
      *
-     * @param array  $src
-     * @param array  $trg
-     * @param string $error
-     * @param array  $originalTargetValues
+     * @param array $src
+     * @param array $trg
+     * @param int   $error
+     * @param array $originalTargetValues
+     *
      */
-    private function checkContentAndAddTagMismatchError(array $src, array $trg, $error, array $originalTargetValues) {
+    private
+    function checkContentAndAddTagMismatchError( array $src, array $trg, int $error, array $originalTargetValues ) {
 
-        foreach ($trg as $pos => $value){
-            $index = array_search($value, $src);
+        foreach ( $trg as $pos => $value ) {
+            $index = array_search( $value, $src );
 
-            if($index === false){
+            if ( $index === false ) {
                 $this->addError( $error );
-                $this->tagPositionError[] = ( new LtGtEncode() )->transform( $originalTargetValues[$pos] );
+                try {
+                    $this->tagPositionError[] = '&lt;' . $originalTargetValues[ $pos ] . '&gt;';
+                } catch ( Exception $ignore ) {
+                    // it's impossible to have an exception here, suppress abstract method signature exception
+                }
 
                 return;
             } else {
-                unset($src[$index]);
+                unset( $src[ $index ] );
             }
         }
     }
@@ -1817,7 +1845,8 @@ class QA {
      * All withespaces, tabs, carriage return, new lines between tags are checked
      *
      */
-    protected function _checkTagsBoundary() {
+    protected
+    function _checkTagsBoundary() {
 
         //perform first char Line check if tags are not presents
         preg_match_all( '#^[\s\t\x{a0}\r\n]+[^<]+#u', $this->source_seg, $source_tags );
@@ -1842,7 +1871,7 @@ class QA {
         $source_tags = $source_tags[ 0 ];
         $target_tags = $target_tags[ 0 ];
 
-        $this->checkWhiteSpaces($source_tags, $target_tags);
+        $this->checkWhiteSpaces( $source_tags, $target_tags );
 
         //get all special chars ( and spaces ) after a tag x or ph
         //</x> ...
@@ -1852,7 +1881,7 @@ class QA {
         $source_tags = $source_tags[ 0 ];
         $target_tags = $target_tags[ 0 ];
 
-        $this->checkWhiteSpaces($source_tags, $target_tags);
+        $this->checkWhiteSpaces( $source_tags, $target_tags );
 
         //get All special chars between G TAGS before first char occurrence
         //</g> nnn<g ...>
@@ -1877,11 +1906,11 @@ class QA {
 
             // Append a space to target for normalization
             // only if target is NOT a CJ language
-            if(false === CatUtils::isCJ($this->target_seg_lang)){
+            if ( false === CatUtils::isCJ( $this->target_seg_lang ) ) {
                 $this->target_seg = rtrim( $this->target_seg );
                 $this->target_seg .= ' ';
 
-                $this->addError(self::ERR_BOUNDARY_TAIL);
+                $this->addError( self::ERR_BOUNDARY_TAIL );
             }
 
         } elseif ( ( count( $source_tags[ 0 ] ) != count( $target_tags[ 0 ] ) ) && empty( $source_tags[ 0 ] ) ) {
@@ -1897,9 +1926,9 @@ class QA {
         // and source terminates with CJKTerminateChars
         // then we add a trailing space to target
         //
-        if(CatUtils::isCJ($this->source_seg_lang) and false === CatUtils::isCJ($this->target_seg_lang)){
-            $lastChar = CatUtils::getLastCharacter($this->source_seg);
-            if(in_array($lastChar, CatUtils::CJKFullwidthPunctuationChars())){
+        if ( CatUtils::isCJ( $this->source_seg_lang ) and false === CatUtils::isCJ( $this->target_seg_lang ) ) {
+            $lastChar = CatUtils::getLastCharacter( $this->source_seg );
+            if ( in_array( $lastChar, CatUtils::CJKFullwidthPunctuationChars() ) ) {
                 $this->target_seg = rtrim( $this->target_seg );
                 $this->target_seg .= ' ';
             }
@@ -1915,24 +1944,24 @@ class QA {
      * @param $source_tags
      * @param $target_tags
      */
-    private function checkWhiteSpaces($source_tags, $target_tags)
-    {
-        $diffS = array_diff($target_tags, $source_tags);
-        $diffT = array_diff($source_tags, $target_tags);
+    private
+    function checkWhiteSpaces( $source_tags, $target_tags ) {
+        $diffS = array_diff( $target_tags, $source_tags );
+        $diffT = array_diff( $source_tags, $target_tags );
 
-        $this->checkDiff($diffS);
-        $this->checkDiff($diffT);
+        $this->checkDiff( $diffS );
+        $this->checkDiff( $diffT );
     }
 
     /**
      * @param array $diff
      */
-    private function checkDiff($diff = [])
-    {
-        foreach ($diff as $diffItem){
-            if($diffItem !== rtrim($diffItem)){
+    private
+    function checkDiff( $diff = [] ) {
+        foreach ( $diff as $diffItem ) {
+            if ( $diffItem !== rtrim( $diffItem ) ) {
                 $this->addError( self::ERR_SPACE_MISMATCH_AFTER_TAG );
-            } elseif ($diffItem !== ltrim($diffItem)){
+            } elseif ( $diffItem !== ltrim( $diffItem ) ) {
                 $this->addError( self::ERR_SPACE_MISMATCH_BEFORE_TAG );
             }
         }
@@ -1950,7 +1979,8 @@ class QA {
      * @return errObject[]|null
      * @throws Exception|DOMException
      */
-    public function tryRealignTagID() {
+    public
+    function tryRealignTagID() {
 
         try {
             $this->_prepareDOMStructures();
@@ -1976,35 +2006,35 @@ class QA {
                 //Steps:
 
                 //- re-align ids
-                if(isset($this->trgDomMap[ 'g' ])){
+                if ( isset( $this->trgDomMap[ 'g' ] ) ) {
                     foreach ( $this->trgDomMap[ 'g' ] as $pos => $tagID ) {
                         $pattern[]     = '|<g id ?= ?["\']{1}(' . $tagID . ')["\']{1} ?>|ui';
                         $replacement[] = '<g id="###' . $this->srcDomMap[ 'g' ][ $pos ] . '###">';
                     }
                 }
 
-                if(isset($this->trgDomMap[ 'x' ])){
+                if ( isset( $this->trgDomMap[ 'x' ] ) ) {
                     foreach ( $this->trgDomMap[ 'x' ] as $pos => $tagID ) {
                         $pattern[]     = '|<x id ?= ?["\']{1}(' . $tagID . ')["\']{1} ?/>|ui';
                         $replacement[] = '<x id="###' . $this->srcDomMap[ 'x' ][ $pos ] . '###" />';
                     }
                 }
 
-                if(isset($this->trgDomMap[ 'bx' ])){
+                if ( isset( $this->trgDomMap[ 'bx' ] ) ) {
                     foreach ( $this->trgDomMap[ 'bx' ] as $pos => $tagID ) {
                         $pattern[]     = '|<bx id ?= ?["\']{1}(' . $tagID . ')["\']{1} ?/>|ui';
                         $replacement[] = '<bx id="###' . $this->srcDomMap[ 'bx' ][ $pos ] . '###" />';
                     }
                 }
 
-                if(isset($this->trgDomMap[ 'ex' ])){
+                if ( isset( $this->trgDomMap[ 'ex' ] ) ) {
                     foreach ( $this->trgDomMap[ 'ex' ] as $pos => $tagID ) {
                         $pattern[]     = '|<ex id ?= ?["\']{1}(' . $tagID . ')["\']{1} ?/>|ui';
                         $replacement[] = '<ex id="###' . $this->srcDomMap[ 'ex' ][ $pos ] . '###" />';
                     }
                 }
 
-                if(isset($this->trgDomMap[ 'ph' ])){
+                if ( isset( $this->trgDomMap[ 'ph' ] ) ) {
                     foreach ( $this->trgDomMap[ 'ph' ] as $pos => $tagID ) {
                         $pattern[]     = '|<ph id ?= ?["\']{1}(' . $tagID . ')["\']{1} (equiv-text=["\'].+?["\'] ?)/>|ui';
                         $replacement[] = '<ph id="###' . $this->srcDomMap[ 'ph' ][ $pos ] . '###" $2/>';
@@ -2054,7 +2084,8 @@ class QA {
      *
      * @throws Exception
      */
-    protected function _checkTagMismatch() {
+    protected
+    function _checkTagMismatch() {
 
         $targetNumDiff = $this->_checkTagCountMismatch( count( $this->srcDomMap[ 'DOMElement' ] ), count( $this->trgDomMap[ 'DOMElement' ] ) );
         if ( $targetNumDiff == 0 ) {
@@ -2064,8 +2095,8 @@ class QA {
         if ( $targetNumDiff == 0 && ( isset( $this->srcDomMap[ 'innerHTML' ] ) || isset( $this->trgDomMap[ 'innerHTML' ] ) ) ) {
             // check for Tag ID MISMATCH (double check with content)
             $innerHtmlArray = array_diff_assoc( $this->srcDomMap[ 'innerHTML' ], $this->trgDomMap[ 'innerHTML' ] );
-            $diffArray = array_diff_assoc( $this->srcDomMap[ 'refID' ], $this->trgDomMap[ 'refID' ] );
-            if ( !empty( $innerHtmlArray ) and  !empty( $diffArray ) and !empty( $this->trgDomMap[ 'DOMElement' ] ) ) {
+            $diffArray      = array_diff_assoc( $this->srcDomMap[ 'refID' ], $this->trgDomMap[ 'refID' ] );
+            if ( !empty( $innerHtmlArray ) and !empty( $diffArray ) and !empty( $this->trgDomMap[ 'DOMElement' ] ) ) {
                 $this->addError( self::ERR_TAG_ID );
             }
         }
@@ -2081,7 +2112,8 @@ class QA {
      *
      * @throws Exception
      */
-    protected function _checkContentConsistency( DOMNodeList $srcNodeList, DOMNodeList $trgNodeList ) {
+    protected
+    function _checkContentConsistency( DOMNodeList $srcNodeList, DOMNodeList $trgNodeList ) {
 
         $this->_checkTagMismatch();
 
@@ -2115,7 +2147,7 @@ class QA {
             } else {
 
                 $srcNode = $srcNodeList->item( $srcTagReference[ 'node_idx' ] );
-                if($srcNode !== null){
+                if ( $srcNode !== null ) {
                     $srcNodeContent = $srcNode->textContent;
                 }
 
@@ -2125,9 +2157,9 @@ class QA {
                     }
                 }
 
-                $trgTagPos      = $trgTagReference[ 'node_idx' ];
-                $trgNode        = $trgNodeList->item( $trgTagPos );
-                if($trgNode !== null){
+                $trgTagPos = $trgTagReference[ 'node_idx' ];
+                $trgNode   = $trgNodeList->item( $trgTagPos );
+                if ( $trgNode !== null ) {
                     $trgNodeContent = $trgNode->textContent;
                 }
             }
@@ -2158,7 +2190,7 @@ class QA {
              */
             $domSrcNodeString = $srcNode->ownerDocument->saveXML( $srcNode );
 
-            if(isset($trgNodeContent) and isset($srcNodeContent)){
+            if ( isset( $trgNodeContent ) and isset( $srcNodeContent ) ) {
                 if ( !preg_match( '/^<g[^>]+></', $domSrcNodeString ) ) {
                     $this->_checkHeadWhiteSpaces( $srcNodeContent, $trgNodeContent, $trgTagReference );
                 }
@@ -2177,12 +2209,13 @@ class QA {
      *
      * Please see the corresponding documentation on \BxExG\Validator class
      */
-    protected function _checkBxAndExInsideG() {
+    protected
+    function _checkBxAndExInsideG() {
 
-        $bxExGValidator = new Validator($this);
-        $errors = $bxExGValidator->validate();
+        $bxExGValidator = new Validator( $this );
+        $errors         = $bxExGValidator->validate();
 
-        foreach ($errors as $error){
+        foreach ( $errors as $error ) {
             $this->addError( $error );
         }
     }
@@ -2195,7 +2228,8 @@ class QA {
      *
      * @return DOMNode
      */
-    protected function _queryDOMElement( DOMDocument $domDoc, $TagReference ) {
+    protected
+    function _queryDOMElement( DOMDocument $domDoc, $TagReference ) {
 
         //Old implementation
 //        $availableParentList = $domDoc->getElementsByTagName( $TagReference[ 'name' ] );
@@ -2249,7 +2283,8 @@ class QA {
      * @return int
      * @throws Exception
      */
-    protected function _checkTagCountMismatch( $srcNodeCount, $trgNodeCount ) {
+    protected
+    function _checkTagCountMismatch( $srcNodeCount, $trgNodeCount ) {
 
         $this->addError( $this->getFeatureSet()->filter( 'checkTagMismatch', self::ERR_NONE, $this ) );
 
@@ -2267,7 +2302,8 @@ class QA {
      * @param $trgNodeContent
      * @param $trgTagReference
      */
-    protected function _checkHeadWhiteSpaces( $srcNodeContent, $trgNodeContent, $trgTagReference ) {
+    protected
+    function _checkHeadWhiteSpaces( $srcNodeContent, $trgNodeContent, $trgTagReference ) {
 
         //backup and check start string
         $_srcNodeContent = $srcNodeContent;
@@ -2335,7 +2371,8 @@ class QA {
      * @param $srcNodeContent
      * @param $trgNodeContent
      */
-    protected function _checkTailWhiteSpaces( $srcNodeContent, $trgNodeContent ) {
+    protected
+    function _checkTailWhiteSpaces( $srcNodeContent, $trgNodeContent ) {
 
         //backup and check start string
         $_srcNodeContent = $srcNodeContent;
@@ -2413,7 +2450,8 @@ class QA {
      *
      * @return bool
      */
-    protected function _hasHeadNBSP( $s ) {
+    protected
+    function _hasHeadNBSP( $s ) {
         return preg_match( "/^\x{a0}/u", $s );
     }
 
@@ -2424,7 +2462,8 @@ class QA {
      *
      * @return bool
      */
-    protected function _hasTailNBSP( $s ) {
+    protected
+    function _hasTailNBSP( $s ) {
         return preg_match( "/\x{a0}$/u", $s );
     }
 
@@ -2434,7 +2473,8 @@ class QA {
      * @return string
      * @throws LogicException
      */
-    public function getTrgNormalized() {
+    public
+    function getTrgNormalized() {
 
         if ( !$this->thereAreErrors() ) {
 
@@ -2445,7 +2485,7 @@ class QA {
             /**
              * Remove placeholder from empty HTML tags
              */
-            $matches[ 1 ] = str_replace(self::$emptyHtmlTagsPlaceholder, '', $matches[ 1 ]);
+            $matches[ 1 ] = str_replace( self::$emptyHtmlTagsPlaceholder, '', $matches[ 1 ] );
 
             /**
              * Why i do this?? I'm replacing Placeholders of non printable chars
@@ -2482,7 +2522,8 @@ class QA {
      * @param string $trgNodeContent
      *
      */
-    protected function _checkHeadTabs( $srcNodeContent, $trgNodeContent ) {
+    protected
+    function _checkHeadTabs( $srcNodeContent, $trgNodeContent ) {
         $headSrcTabs = mb_stripos( $srcNodeContent, "\t", 0, 'utf-8' );
         $headTrgTabs = mb_stripos( $trgNodeContent, "\t", 0, 'utf-8' );
         if ( ( $headSrcTabs === 0 || $headTrgTabs === 0 ) && $headSrcTabs !== $headTrgTabs ) {
@@ -2496,7 +2537,8 @@ class QA {
      * @param string $srcNodeContent
      * @param string $trgNodeContent
      */
-    protected function _checkTailTabs( $srcNodeContent, $trgNodeContent ) {
+    protected
+    function _checkTailTabs( $srcNodeContent, $trgNodeContent ) {
 
         $srcLen = mb_strlen( $srcNodeContent );
         $trgLen = mb_strlen( $trgNodeContent );
@@ -2516,7 +2558,8 @@ class QA {
      * @param string $trgNodeContent
      *
      */
-    protected function _checkHeadCRNL( $srcNodeContent, $trgNodeContent ) {
+    protected
+    function _checkHeadCRNL( $srcNodeContent, $trgNodeContent ) {
 
         $headSrcCRNL = mb_split( '^[\r\n]+', $srcNodeContent );
         $headTrgCRNL = mb_split( '^[\r\n]+', $trgNodeContent );
@@ -2534,7 +2577,8 @@ class QA {
      * @param string $trgNodeContent
      *
      */
-    protected function _checkTailCRNL( $srcNodeContent, $trgNodeContent ) {
+    protected
+    function _checkTailCRNL( $srcNodeContent, $trgNodeContent ) {
 
         $headSrcCRNL = mb_split( '[\r\n]+$', $srcNodeContent );
         $headTrgCRNL = mb_split( '[\r\n]+$', $trgNodeContent );
@@ -2544,7 +2588,8 @@ class QA {
 
     }
 
-    protected function _checkNewLineConsistency() {
+    protected
+    function _checkNewLineConsistency() {
         $nrOfNewLinesInSource = mb_substr_count( $this->source_seg, self::$asciiPlaceHoldMap[ '0A' ][ 'placeHold' ] );
         $nrOfNewLinesInTarget = mb_substr_count( $this->target_seg, self::$asciiPlaceHoldMap[ '0A' ][ 'placeHold' ] );
 
@@ -2553,7 +2598,8 @@ class QA {
         }
     }
 
-    protected function _checkSizeRestriction() {
+    protected
+    function _checkSizeRestriction() {
         // check size restriction
         if ( $this->id_segment ) {
 
@@ -2565,17 +2611,18 @@ class QA {
     }
 
     /**
-     * @param int    $segmentId
+     * @param int $segmentId
      *
      * @return bool
      */
-    private function _filterCheckSizeRestriction( $segmentId ) {
+    private
+    function _filterCheckSizeRestriction( $segmentId ) {
 
-        if(!$this->characters_count){
+        if ( !$this->characters_count ) {
             return true;
         }
 
-        $limit = @Segments_SegmentMetadataDao::get( $segmentId, self::SIZE_RESTRICTION )[ 0 ];
+        $limit = Segments_SegmentMetadataDao::get( $segmentId, self::SIZE_RESTRICTION )[ 0 ] ?? null;
 
         if ( $limit ) {
 
@@ -2599,37 +2646,38 @@ class QA {
      * @throws EndQueueException
      * @throws ReQueueException
      */
-    protected function _checkGlossaryBlacklist()
-    {
-        if($this->chunk === null or $this->featureSet === null){
+    protected
+    function _checkGlossaryBlacklist() {
+        if ( $this->chunk === null or $this->featureSet === null ) {
             return;
         }
 
         // Add blacklist glossary warnings
         $project = $this->chunk->getProject();
 
-        $dao = new Projects_MetadataDao() ;
-        $has_blacklist = $dao->setCacheTTL( 60 * 60 * 24 )->get( $project->id,  'has_blacklist' ) ;
+        $dao           = new Projects_MetadataDao();
+        $has_blacklist = $dao->setCacheTTL( 60 * 60 * 24 )->get( $project->id, 'has_blacklist' );
 
-        if($has_blacklist){
+        if ( $has_blacklist ) {
             $data = [];
             $data = $this->featureSet->filter( 'filterSegmentWarnings', $data, [
-                'src_content' => $this->source_seg,
-                'trg_content' => $this->target_seg,
-                'project'     => $this->chunk->getProject(),
-                'chunk'       => $this->chunk
+                    'src_content' => $this->source_seg,
+                    'trg_content' => $this->target_seg,
+                    'project'     => $this->chunk->getProject(),
+                    'chunk'       => $this->chunk
             ] );
 
-            if(isset($data['blacklist']) and !empty($data['blacklist']['matches']) ){
-                $this->addError(QA::GLOSSARY_BLACKLIST_MATCH);
+            if ( isset( $data[ 'blacklist' ] ) and !empty( $data[ 'blacklist' ][ 'matches' ] ) ) {
+                $this->addError( QA::GLOSSARY_BLACKLIST_MATCH );
             }
         }
     }
 
-    protected function _checkSymbolConsistency() {
+    protected
+    function _checkSymbolConsistency() {
 
         $symbols = [
-            '€', '@', '&amp;', '£', '%', '=', self::$asciiPlaceHoldMap[ '09' ][ 'placeHold' ], '\\*'
+                '€', '@', '&amp;', '£', '%', '=', self::$asciiPlaceHoldMap[ '09' ][ 'placeHold' ], '\\*'
         ];
 
         $specialSymbols = [ '$', '#' ];
@@ -2637,19 +2685,19 @@ class QA {
         foreach ( $symbols as $sym ) {
 
             // find all real &amp; (excluding all &amp; with an entity, like &amp;&apos;)
-            if($sym === '&amp;'){
-                $this->source_seg = str_replace('&amp;amp;','&amp;', $this->source_seg); // &amp; are escaped as &amp;amp;
-                $this->target_seg = str_replace('&amp;amp;','&amp;', $this->target_seg);
-                $regex = '/&amp;(?!(\#[1-9]\d{1,3}|[A-Za-z][0-9A-Za-z]+);)/iu';
+            if ( $sym === '&amp;' ) {
+                $this->source_seg = str_replace( '&amp;amp;', '&amp;', $this->source_seg ); // &amp; are escaped as &amp;amp;
+                $this->target_seg = str_replace( '&amp;amp;', '&amp;', $this->target_seg );
+                $regex            = '/&amp;(?!(\#[1-9]\d{1,3}|[A-Za-z][0-9A-Za-z]+);)/iu';
             } else {
-                $regex = '/'.$sym.'/iu';
+                $regex = '/' . $sym . '/iu';
             }
 
-            preg_match_all($regex, strip_tags( $this->source_seg ), $symbolOccurrencesInSource);
-            preg_match_all($regex, strip_tags( $this->target_seg ), $symbolOccurrencesInTarget);
+            preg_match_all( $regex, strip_tags( $this->source_seg ), $symbolOccurrencesInSource );
+            preg_match_all( $regex, strip_tags( $this->target_seg ), $symbolOccurrencesInTarget );
 
-            $symbolOccurrencesInSourceCount = count($symbolOccurrencesInSource[0]);
-            $symbolOccurrencesInTargetCount = count($symbolOccurrencesInTarget[0]);
+            $symbolOccurrencesInSourceCount = count( $symbolOccurrencesInSource[ 0 ] );
+            $symbolOccurrencesInTargetCount = count( $symbolOccurrencesInTarget[ 0 ] );
 
             for ( $i = 0; $i < abs( $symbolOccurrencesInSourceCount - $symbolOccurrencesInTargetCount ); $i++ ) {
                 switch ( $sym ) {
