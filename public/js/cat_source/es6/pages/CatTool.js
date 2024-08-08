@@ -83,6 +83,7 @@ function CatTool() {
 
   const getTmKeys = () => {
     const promises = [getTmKeysJob(), getTmKeysUser()]
+    let modifiedTemplate = {}
     Promise.all(promises)
       .then((values) => {
         const uniqueKeys = values

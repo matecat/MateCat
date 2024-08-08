@@ -32,7 +32,6 @@ window.UI = {
     this.setTranslationTail = []
     this.executingSetTranslation = []
 
-    this.setEvents()
     this.checkQueryParams()
 
     UI.firstLoad = false

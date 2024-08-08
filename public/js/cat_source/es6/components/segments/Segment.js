@@ -585,7 +585,7 @@ class Segment extends React.Component {
         this.openSegment()
       })
       setTimeout(() => {
-        UI.setCurrentSegment(this.props.segment.sid)
+        SegmentActions.setCurrentSegment(this.props.segment.sid)
       }, 0)
     }
   }
@@ -651,7 +651,7 @@ class Segment extends React.Component {
         SegmentActions.scrollToSegment(this.props.segment.sid)
       }, 200)
       setTimeout(() => {
-        UI.setCurrentSegment(this.props.segment.sid)
+        SegmentActions.setCurrentSegment(this.props.segment.sid)
       }, 0)
       setTimeout(() => {
         if (
