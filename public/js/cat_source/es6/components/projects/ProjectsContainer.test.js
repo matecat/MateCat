@@ -6,6 +6,9 @@ import {http, HttpResponse} from 'msw'
 import ProjectsContainer from './ProjectsContainer'
 import ManageActions from '../../actions/ManageActions'
 import {mswServer} from '../../../../../mocks/mswServer'
+import userMock from '../../../../../mocks/userMock'
+import {ApplicationWrapperContext} from '../common/ApplicationWrapper'
+import ProjectContainer from './ProjectContainer'
 
 // create modal div
 const modalElement = document.createElement('div')
@@ -734,8 +737,13 @@ const executeMswServer = () => {
 test('Rendering elements', async () => {
   executeMswServer()
   const {props, projects} = getFakeProperties(fakeProjectsData.projects)
-
-  render(<ProjectsContainer {...props} />)
+  render(
+    <ApplicationWrapperContext.Provider
+      value={{isUserLogged: true, userInfo: userMock}}
+    >
+      <ProjectsContainer {...props} />
+    </ApplicationWrapperContext.Provider>,
+  )
 
   // set ProjectStore state
   const {data, dataTeam, dataTeams} = fakeProjectsData.projects

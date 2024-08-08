@@ -24,7 +24,7 @@ export default {
   ],
   teams: [
     {
-      id: 5235,
+      id: 1,
       name: 'Personal',
       type: 'personal',
       created_at: '2017-02-24T18:25:52+01:00',
@@ -5146,7 +5146,7 @@ export default {
         },
         {
           id: 126622,
-          id_team: 97011,
+          id_team: 1,
           user: {
             uid: 100854,
             first_name: 'Suhaila ',

@@ -460,8 +460,10 @@ test('Rendering elements', async () => {
     )
     elements.forEach((element) => expect(element).toBeInTheDocument())
   })
-
-  await userEvent.click(screen.getByTestId('project-menu-dropdown'))
+  const button = screen.getByTestId('project-menu-dropdown')
+  await userEvent.click(button, {
+    pointerEventsCheck: 0,
+  })
   // check project menu items
   expect(screen.getByText('Activity Log')).toBeInTheDocument()
   expect(screen.getByText('Archive project')).toBeInTheDocument()

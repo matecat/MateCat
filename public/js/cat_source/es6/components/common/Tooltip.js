@@ -82,9 +82,7 @@ const Tooltip = ({
         </Portal>
       )}
     </div>
-  ) : (
-    false
-  )
+  ) : null
 }
 
 Tooltip.propTypes = {
