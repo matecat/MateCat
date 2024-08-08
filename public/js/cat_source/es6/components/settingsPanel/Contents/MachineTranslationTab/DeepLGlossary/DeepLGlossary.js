@@ -100,9 +100,11 @@ export const DeepLGlossary = ({id, isCattoolPage = false}) => {
 
   const showConfirmDelete = useRef()
   showConfirmDelete.current = (glossary) => {
-    const templatesInvolved = projectTemplates.filter(
-      (template) => template.mt?.extra?.deepl_id_glossary === glossary.id,
-    )
+    const templatesInvolved = projectTemplates
+      .filter(({isTemporary}) => !isTemporary)
+      .filter(
+        (template) => template.mt?.extra?.deepl_id_glossary === glossary.id,
+      )
 
     if (templatesInvolved.length) {
       ModalsActions.showModalComponent(
@@ -111,12 +113,24 @@ export const DeepLGlossary = ({id, isCattoolPage = false}) => {
           projectTemplatesInvolved: templatesInvolved,
           successCallback: () => deleteGlossary.current(glossary),
           content:
-            'The DeepL glossary you are about to delete is used in the following project creation template(s):',
+            'The glossary you are about to delete is linked to a DeepL license and used in the following project creation template(s):',
+          footerContent:
+            'If you confirm, it will be removed from the template(s) and deleted permanently for you and any other user of the same license.',
         },
         'Confirm deletion',
       )
     } else {
-      setDeleteGlossaryRequest(glossary)
+      ModalsActions.showModalComponent(
+        ConfirmDeleteResourceProjectTemplates,
+        {
+          projectTemplatesInvolved: templatesInvolved,
+          successCallback: () => deleteGlossary.current(glossary),
+          content:
+            'You are about to delete a resource linked to an DeepL license. If you confirm, it will be deleted permanently for you and any other user of the same license.',
+          footerContent: '',
+        },
+        'Confirm deletion',
+      )
     }
   }
 
@@ -142,7 +156,9 @@ export const DeepLGlossary = ({id, isCattoolPage = false}) => {
                   setRows: updateRowsState,
                   isReadOnly: isCattoolPage,
                 }}
-                deleteGlossaryConfirm={showConfirmDelete.current}
+                deleteGlossaryConfirm={(glossary) =>
+                  showConfirmDelete.current(glossary)
+                }
               />
             ),
           ...(deleteGlossaryRequest &&
@@ -298,6 +314,9 @@ export const DeepLGlossary = ({id, isCattoolPage = false}) => {
   }
 
   const haveRecords = rows?.length > 0
+  const shouldHideNewButton = rows?.some(
+    ({id}) => id === DEEPL_GLOSSARY_CREATE_ROW_ID,
+  )
 
   return (
     <div className="mt-glossary">
@@ -325,7 +344,7 @@ export const DeepLGlossary = ({id, isCattoolPage = false}) => {
             (haveRecords ? (
               <div className="main-buttons-container">
                 <button
-                  className="grey-button create-glossary-button"
+                  className={`grey-button create-glossary-button${shouldHideNewButton ? ' create-glossary-button-disabled' : ''}`}
                   onClick={addGlossary}
                 >
                   <IconAdd size={18} />

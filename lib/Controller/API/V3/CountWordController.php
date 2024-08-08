@@ -13,7 +13,7 @@ use API\V2\KleinController;
 use API\V2\Validators\LoginValidator;
 use CatUtils;
 use Langs_Languages;
-use LQA\SizeRestriction;
+use LQA\SizeRestriction\SizeRestriction;
 use Matecat\SubFiltering\MateCatFilter;
 
 

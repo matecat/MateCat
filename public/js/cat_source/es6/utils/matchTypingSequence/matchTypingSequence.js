@@ -13,7 +13,7 @@ export default (sequence, delay = 1000) => {
   return {
     get: (keyIdentifier) => {
       if (tmOut) clearTimeout(tmOut)
-      if (!keyIdentifier) throw new Error('keyIdentifier prop is not defined.')
+      if (!keyIdentifier) return
       typingCollection.push(keyIdentifier)
       const hasBeenMatched = sequence.every((key, index) =>
         Array.isArray(key)

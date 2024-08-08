@@ -9,6 +9,7 @@ import {HttpResponse, http} from 'msw'
 import projectTemplatesMock from '../../../../../../mocks/projectTemplateMock'
 import userMock from '../../../../../../mocks/userMock'
 import {ApplicationWrapperContext} from '../../common/ApplicationWrapper'
+import tmKeysMock from '../../../../../../mocks/tmKeysMock'
 
 global.config = {
   basepath: 'http://localhost/',
@@ -45,7 +46,7 @@ beforeEach(() => {
 test('Render properly', async () => {
   const user = userEvent.setup()
 
-  const {result} = renderHook(() => useProjectTemplates(true))
+  const {result} = renderHook(() => useProjectTemplates(tmKeysMock.tm_keys))
 
   await waitFor(() => {
     expect(result.current.projectTemplates?.length).toBe(2)
@@ -97,7 +98,7 @@ test('Render properly', async () => {
 test('Create, update and delete template', async () => {
   const user = userEvent.setup()
 
-  const {result} = renderHook(() => useProjectTemplates(true))
+  const {result} = renderHook(() => useProjectTemplates(tmKeysMock.tm_keys))
   const {modifyingCurrentTemplate} = result.current
 
   await waitFor(() => {
@@ -290,7 +291,7 @@ test('Create, update and delete template', async () => {
 test('Set template as default', async () => {
   const user = userEvent.setup()
 
-  const {result} = renderHook(() => useProjectTemplates(true))
+  const {result} = renderHook(() => useProjectTemplates(tmKeysMock.tm_keys))
 
   await waitFor(() => {
     expect(result.current.projectTemplates?.length).toBe(2)

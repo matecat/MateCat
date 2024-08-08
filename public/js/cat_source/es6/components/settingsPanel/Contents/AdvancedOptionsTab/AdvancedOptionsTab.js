@@ -8,6 +8,7 @@ import {CharacterCounter} from './CharacterCounter'
 import {AiAssistant} from './AiAssistant'
 import {SegmentationRule} from './SegmentationRule'
 import {Team} from './Team'
+import {SpacePlaceholder} from './SpacePlaceholder'
 
 export const AdvancedOptionsTab = () => {
   const {
@@ -99,6 +100,8 @@ export const AdvancedOptionsTab = () => {
         setSpeechToTextActive={setSpeechToTextActive}
         speechToTextActive={speechToTextActive}
       />
+
+      {config.is_cattool && <SpacePlaceholder />}
 
       {config.show_tag_projection && (
         <GuessTag

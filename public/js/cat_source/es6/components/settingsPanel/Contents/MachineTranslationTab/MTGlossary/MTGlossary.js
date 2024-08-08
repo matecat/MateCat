@@ -144,9 +144,11 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
 
   const showConfirmDelete = useRef()
   showConfirmDelete.current = (glossary) => {
-    const templatesInvolved = projectTemplates.filter((template) =>
-      template.mt?.extra?.glossaries?.some((value) => value === glossary.id),
-    )
+    const templatesInvolved = projectTemplates
+      .filter(({isTemporary}) => !isTemporary)
+      .filter((template) =>
+        template.mt?.extra?.glossaries?.some((value) => value === glossary.id),
+      )
 
     if (templatesInvolved.length) {
       ModalsActions.showModalComponent(
@@ -198,7 +200,9 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
                   setRows: updateRowsState,
                   isReadOnly: isCattoolPage,
                 }}
-                deleteGlossaryConfirm={showConfirmDelete.current}
+                deleteGlossaryConfirm={(glossary) =>
+                  showConfirmDelete.current(glossary)
+                }
               />
             ),
           ...(deleteGlossaryRequest &&
@@ -230,7 +234,7 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
     let memories = []
     const getJobMetadata = ({jobMetadata: {project} = {}}) => {
       const rows = memories.filter(({id}) =>
-        project.mmt_glossaries.glossaries.some((value) => value === id),
+        project.mmt_glossaries?.glossaries.some((value) => value === id),
       )
       updateRowsState(rows.map(({id, name}) => ({id, name, isActive: true})))
     }
@@ -361,6 +365,9 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
   const haveRecords = rows?.length > 0
   const isVisibleGlossaryOptions =
     !isCattoolPage || (isCattoolPage && haveRecords)
+  const shouldHideNewButton = rows?.some(
+    ({id}) => id === MT_GLOSSARY_CREATE_ROW_ID,
+  )
 
   return (
     <div className="mt-glossary">
@@ -391,7 +398,7 @@ export const MTGlossary = ({id, isCattoolPage = false}) => {
             (haveRecords ? (
               <div className="main-buttons-container">
                 <button
-                  className="grey-button create-glossary-button"
+                  className={`grey-button create-glossary-button${shouldHideNewButton ? ' create-glossary-button-disabled' : ''}`}
                   onClick={addGlossary}
                   title="Add glossary"
                 >

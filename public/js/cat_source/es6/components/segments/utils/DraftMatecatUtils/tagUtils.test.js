@@ -1,4 +1,7 @@
+import {setTagSignatureMiddleware} from './tagModel'
 import {transformTagsToHtml, transformTagsToText} from './tagUtils'
+
+setTagSignatureMiddleware('space', () => false)
 
 test('Tags and placeholders to html', () => {
   let text =

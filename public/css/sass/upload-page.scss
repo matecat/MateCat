@@ -1654,6 +1654,7 @@ button.ui-button::-moz-focus-inner {
   margin: 0 auto;
   width: 94%;
   min-width: 992px;
+  max-width: 1600px;
   position: relative;
   padding: 24px;
   background: $grey5;
@@ -1712,9 +1713,11 @@ button.ui-button::-moz-focus-inner {
   width: 94%;
   min-width: 992px;
   position: relative;
-  padding: 12px;
+  padding: 24px;
+  height: 200px;
   display: flex;
   justify-content: space-between;
+  max-width: 1600px;
 }
 
 h2 {
@@ -2140,7 +2143,7 @@ a {
 .gdrive-upload-files {
   position: relative;
   border: 1px dashed #ccc;
-  margin: 18px 72px;
+  margin: 18px 0 0;
   min-height: 200px;
   /*min-height: 270px;*/
   -moz-border-radius: 4px;
@@ -2542,11 +2545,6 @@ header {
 .supported-formats {
   height: 100%;
   .fileformat {
-    h3 {
-      padding: 0 30px;
-      background-color: #efefef;
-      text-align: center;
-    }
     display: flex;
     flex-direction: row;
     height: calc(100% - 50px);
@@ -2554,6 +2552,12 @@ header {
     gap: 8px;
     justify-content: space-between;
     overflow: auto;
+    h3 {
+      padding: 0 30px;
+      background-color: #efefef;
+      text-align: center;
+    }
+
     span {
       padding: 10px 0px 10px 40px;
       margin: 5px 0 0 0;

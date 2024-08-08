@@ -5,6 +5,7 @@ namespace API\App;
 use API\V2\KleinController;
 use API\V2\Validators\LoginValidator;
 use Exceptions\NotFoundException;
+use LQA\ModelDao;
 use Projects_ProjectStruct;
 use QAModelTemplate\QAModelTemplateDao;
 
@@ -71,7 +72,7 @@ class QualityFrameworkController extends KleinController {
     private function renderQualityFramework(Projects_ProjectStruct $projectStruct)
     {
         $idQaModel = $projectStruct->id_qa_model;
-        $qaModel = \LQA\ModelDao::findById($idQaModel);
+        $qaModel = ModelDao::findById($idQaModel);
 
         if($qaModel === null){
             $this->response->code( 500 );
@@ -87,9 +88,15 @@ class QualityFrameworkController extends KleinController {
         $json['template_model'] = null;
 
         if($qaModel->qa_model_template_id){
+
             $parentTemplate = QAModelTemplateDao::get(['id' => $qaModel->qa_model_template_id ]);
 
+            if($parentTemplate === null){
+                return $json;
+            }
+
             $json['template_model'] = $parentTemplate->getDecodedModel()['model'];
+
         }
 
         return $json;

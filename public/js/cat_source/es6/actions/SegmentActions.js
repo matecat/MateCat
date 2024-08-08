@@ -1,4 +1,3 @@
-import Cookies from 'js-cookie'
 import {each, forEach, isUndefined} from 'lodash'
 import {debounce} from 'lodash/function'
 
@@ -729,16 +728,6 @@ const SegmentActions = {
       actionType: SegmentConstants.LOCK_EDIT_AREA,
       fid: fid,
       id: sid,
-    })
-  },
-  undoInSegment: function () {
-    AppDispatcher.dispatch({
-      actionType: SegmentConstants.UNDO_TEXT,
-    })
-  },
-  redoInSegment: function () {
-    AppDispatcher.dispatch({
-      actionType: SegmentConstants.REDO_TEXT,
     })
   },
   setFocusOnEditArea: function () {
@@ -1764,6 +1753,15 @@ const SegmentActions = {
       .catch(() => {
         OfflineUtils.failedConnection(requestData, 'setCurrentSegment')
       })
+  },
+  refreshTagMap: function () {
+    SegmentActions.renderSegments(
+      SegmentStore._segments.toJS(),
+      SegmentStore.getCurrentSegment()?.sid,
+    )
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.REFRESH_TAG_MAP,
+    })
   },
 }
 

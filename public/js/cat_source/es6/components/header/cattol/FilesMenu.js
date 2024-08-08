@@ -1,7 +1,7 @@
 import React, {useEffect, useState, useRef} from 'react'
 import {getJobFileInfo} from '../../../api/getJobFileInfo'
 import CatToolActions from '../../../actions/CatToolActions'
-import Shortcuts from '../../../utils/shortcuts'
+import {Shortcuts} from '../../../utils/shortcuts'
 import CommonUtils from '../../../utils/commonUtils'
 import SegmentActions from '../../../actions/SegmentActions'
 import SegmentStore from '../../../stores/SegmentStore'

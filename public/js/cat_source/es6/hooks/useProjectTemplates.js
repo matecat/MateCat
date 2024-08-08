@@ -1,4 +1,4 @@
-import {useEffect} from 'react'
+import {useEffect, useRef} from 'react'
 import PropTypes from 'prop-types'
 import {getProjectTemplates} from '../api/getProjectTemplates/getProjectTemplates'
 import useTemplates from './useTemplates'
@@ -34,6 +34,11 @@ const STANDARD_TEMPLATE = {
   filters_xliff_config_template_id: null,
 }
 
+const CATTOOL_TEMPLATE = {
+  id: 0,
+  name: '',
+}
+
 export const SCHEMA_KEYS = {
   id: 'id',
   uid: 'uid',
@@ -57,7 +62,7 @@ export const SCHEMA_KEYS = {
   filtersXliffConfigTemplateId: 'filters_xliff_config_template_id',
 }
 
-function useProjectTemplates(canRetrieveTemplates) {
+function useProjectTemplates(tmKeys, isCattool = config.is_cattool) {
   const {
     templates: projectTemplates,
     setTemplates: setProjectTemplates,
@@ -65,6 +70,11 @@ function useProjectTemplates(canRetrieveTemplates) {
     modifyingCurrentTemplate,
     checkSpecificTemplatePropsAreModified,
   } = useTemplates(SCHEMA_KEYS)
+
+  const tmKeysRef = useRef()
+  tmKeysRef.current = tmKeys
+
+  const canRetrieveTemplates = Array.isArray(tmKeys)
 
   // retrieve templates
   useEffect(() => {
@@ -78,6 +88,12 @@ function useProjectTemplates(canRetrieveTemplates) {
           setProjectTemplates(
             items.map((template) => ({
               ...template,
+              tm: template.tm.map((item) => ({
+                ...item,
+                name:
+                  tmKeysRef.current.find(({key}) => key === item.key)?.name ??
+                  item.name,
+              })),
               isSelected: template.is_default,
             })),
           )
@@ -89,6 +105,12 @@ function useProjectTemplates(canRetrieveTemplates) {
 
     return () => (cleanup = true)
   }, [canRetrieveTemplates, setProjectTemplates])
+
+  useEffect(() => {
+    if (isCattool) {
+      setProjectTemplates([{...CATTOOL_TEMPLATE, isSelected: true}])
+    }
+  }, [isCattool, setProjectTemplates])
 
   return {
     projectTemplates,

@@ -5,7 +5,7 @@ import React, {
   useRef,
   useState,
 } from 'react'
-import {CattolFooter} from '../components/footer/CattoolFooter'
+import {useHotkeys} from 'react-hotkeys-hook'
 import {Header} from '../components/header/cattol/Header'
 import SegmentsContainer from '../components/segments/SegmentsContainer'
 import CatToolStore from '../stores/CatToolStore'
@@ -18,7 +18,6 @@ import SegmentStore from '../stores/SegmentStore'
 import SegmentConstants from '../constants/SegmentConstants'
 import useSegmentsLoader from '../hooks/useSegmentsLoader'
 import LXQ from '../utils/lxq.main'
-import CommonUtils from '../utils/commonUtils'
 import {getTmKeysUser} from '../api/getTmKeysUser'
 import {getMTEngines as getMtEnginesApi} from '../api/getMTEngines'
 import {
@@ -34,6 +33,8 @@ import ApplicationStore from '../stores/ApplicationStore'
 import useProjectTemplates from '../hooks/useProjectTemplates'
 import ModalsActions from '../actions/ModalsActions'
 import FatalErrorModal from '../components/modals/FatalErrorModal'
+import {Shortcuts} from '../utils/shortcuts'
+import CommonUtils from '../utils/commonUtils'
 import {CattoolFooter} from '../components/footer/CattoolFooter'
 import {mountPage} from './mountPage'
 import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper'
@@ -42,6 +43,11 @@ const urlParams = new URLSearchParams(window.location.search)
 const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
 
 function CatTool() {
+  useHotkeys(
+    Shortcuts.cattol.events.openSettings.keystrokes[Shortcuts.shortCutsKeyType],
+    () => CatToolActions.openSettingsPanel(SETTINGS_PANEL_TABS.advancedOptions),
+    {enableOnContentEditable: true},
+  )
   const {isUserLogged} = useContext(ApplicationWrapperContext)
 
   const [options, setOptions] = useState({})
@@ -95,21 +101,25 @@ function CatTool() {
           }
         })
         setTmKeys(updatedTmKeys)
-        modifyingCurrentTemplate((prevTemplate) => ({
-          ...prevTemplate,
-          tm: updatedTmKeys.filter(({isActive}) => isActive),
-          getPublicMatches: config.get_public_matches === 1,
-        }))
+        modifyingCurrentTemplate((prevTemplate) => {
+          modifiedTemplate = {
+            ...prevTemplate,
+            tm: updatedTmKeys.filter(({isActive}) => isActive),
+            getPublicMatches: config.get_public_matches === 1,
+          }
+          return modifiedTemplate
+        })
       })
-      .finally(() => getMTEngines())
+      .catch(() => setTmKeys([]))
+      .finally(() => getMTEngines(modifiedTemplate))
   }
 
-  const getMTEngines = () => {
+  const getMTEngines = (prevTemplate) => {
     const setMTCurrentFakeTemplate = () => {
       if (config.active_engine && config.active_engine.id) {
         const activeMT = config.active_engine
         if (activeMT) {
-          modifyingCurrentTemplate((prevTemplate) => ({
+          modifyingCurrentTemplate(() => ({
             ...prevTemplate,
             mt: {
               ...prevTemplate.mt,
@@ -216,7 +226,9 @@ function CatTool() {
           true,
         )
     }
-
+    window.onbeforeunload = function (e) {
+      return CommonUtils.goodbye(e)
+    }
     SegmentStore.addListener(
       SegmentConstants.FREEZING_SEGMENTS,
       freezingSegments,
@@ -407,7 +419,6 @@ function CatTool() {
             <div className="article-segments-container">
               <SegmentsContainer
                 isReview={config.isReview}
-                enableTagProjection={UI.enableTagProjection}
                 startSegmentId={UI.startSegmentId?.toString()}
                 firstJobSegment={config.first_job_segment}
                 guessTagActive={guessTagActive}

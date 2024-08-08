@@ -884,6 +884,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     let totalWarnings = []
     Object.keys(warnings).map((key) => {
       let totalCategoryWarnings = []
+      if (key === 'total') return
       Object.keys(warnings[key].Categories).map((key2) => {
         totalCategoryWarnings.push(...warnings[key].Categories[key2])
         totalWarnings.push(...warnings[key].Categories[key2])
@@ -898,31 +899,27 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
       })
     })
     this._globalWarnings.matecat = warnings
-    this._globalWarnings.matecat.total = totalWarnings.filter(
-      (value, index, self) => {
-        return self.indexOf(value) === index
-      },
-    ).length
+    this._globalWarnings.matecat.total = uniq(totalWarnings).length
     //lexiqa
     if (this._globalWarnings.lexiqa && this._globalWarnings.lexiqa.length > 0) {
       this._globalWarnings.matecat.INFO.Categories['lexiqa'] = uniq(
         this._globalWarnings.lexiqa,
       )
       this._globalWarnings.matecat.INFO.total =
-        this._globalWarnings.lexiqa.length
-      this._globalWarnings.matecat.total =
-        this._globalWarnings.matecat.total + this._globalWarnings.lexiqa.length
+        this._globalWarnings.matecat.INFO.Categories['lexiqa'].length
+      this._globalWarnings.matecat.total = uniq([
+        ...totalWarnings,
+        ...this._globalWarnings.matecat.INFO.Categories['lexiqa'],
+      ]).length
     }
   },
   updateLexiqaWarnings: function (warnings) {
-    this._globalWarnings.lexiqa = warnings.filter(
-      this.filterGlobalWarning.bind(this, 'LXQ'),
+    this._globalWarnings.lexiqa = uniq(
+      warnings.filter(this.filterGlobalWarning.bind(this, 'LXQ')),
     )
     if (warnings && warnings.length > 0) {
-      this._globalWarnings.matecat.INFO.Categories['lexiqa'] = uniq(warnings)
-      this._globalWarnings.matecat.INFO.total = warnings.length
-      this._globalWarnings.matecat.total =
-        this._globalWarnings.matecat.total + warnings.length
+      this._globalWarnings.matecat.INFO.Categories['lexiqa'] = warnings
+      this.updateGlobalWarnings(this._globalWarnings.matecat)
     } else {
       this.removeLexiqaWarning()
     }
@@ -2005,6 +2002,13 @@ AppDispatcher.register(function (action) {
       SegmentStore.emitChange(SegmentConstants.FOCUS_TAGS, {
         ...action,
       })
+      break
+    case SegmentConstants.REFRESH_TAG_MAP:
+      SegmentStore.emitChange(SegmentConstants.REFRESH_TAG_MAP)
+      SegmentStore.emitChange(
+        SegmentConstants.RENDER_SEGMENTS,
+        SegmentStore._segments,
+      )
       break
     default:
       SegmentStore.emitChange(action.actionType, action.sid, action.data)

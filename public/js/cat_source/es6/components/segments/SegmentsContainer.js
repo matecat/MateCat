@@ -10,6 +10,8 @@ import React, {
 import PropTypes from 'prop-types'
 import Immutable from 'immutable'
 import ReactDOMServer from 'react-dom/server'
+import {useHotkeys} from 'react-hotkeys-hook'
+import {Shortcuts} from '../../utils/shortcuts'
 import VirtualList from '../common/VirtualList/VirtualList'
 import RowSegment from '../common/VirtualList/Rows/RowSegment'
 import SegmentStore from '../../stores/SegmentStore'
@@ -37,13 +39,116 @@ const listRef = createRef()
 
 function SegmentsContainer({
   isReview,
-  enableTagProjection,
   startSegmentId,
   firstJobSegment,
   guessTagActive,
   speechToTextActive,
   multiMatchLangs,
 }) {
+  useHotkeys(
+    Shortcuts.cattol.events.copySource.keystrokes[Shortcuts.shortCutsKeyType],
+    (e) => {
+      SegmentActions.copySourceToTarget()
+    },
+    {enableOnContentEditable: true, preventDefault: true},
+  )
+  useHotkeys(
+    Shortcuts.cattol.events.gotoCurrent.keystrokes[Shortcuts.shortCutsKeyType],
+    (e) => {
+      SegmentActions.scrollToCurrentSegment()
+      SegmentActions.setFocusOnEditArea()
+    },
+    {enableOnContentEditable: true, preventDefault: true},
+  )
+  useHotkeys(
+    Shortcuts.cattol.events.openPrevious.keystrokes[Shortcuts.shortCutsKeyType],
+    (e) => {
+      SegmentActions.selectPrevSegmentDebounced()
+    },
+    {enableOnContentEditable: true, preventDefault: true},
+  )
+  useHotkeys(
+    Shortcuts.cattol.events.openNext.keystrokes[Shortcuts.shortCutsKeyType],
+    (e) => {
+      SegmentActions.selectNextSegmentDebounced()
+    },
+    {enableOnContentEditable: true, preventDefault: true},
+  )
+  useHotkeys(
+    'ctrl',
+    () => {
+      SegmentActions.openSelectedSegment()
+    },
+    {keyup: true, enableOnContentEditable: true},
+  )
+  useHotkeys(
+    'meta',
+    () => {
+      SegmentActions.openSelectedSegment()
+    },
+    {keyup: true, enableOnContentEditable: true},
+  )
+  useHotkeys(
+    Shortcuts.cattol.events.openIssuesPanel.keystrokes[
+      Shortcuts.shortCutsKeyType
+    ],
+    (e) => {
+      const segment = SegmentStore.getCurrentSegment()
+      if (segment && config.isReview) {
+        SegmentActions.openIssuesPanel({sid: segment.sid})
+        SegmentActions.scrollToSegment(segment.sid)
+      }
+    },
+    {enableOnContentEditable: true, preventDefault: true},
+  )
+  useHotkeys(
+    Shortcuts.cattol.events.copyContribution1.keystrokes[
+      Shortcuts.shortCutsKeyType
+    ],
+    (e) => {
+      SegmentActions.chooseContributionOnCurrentSegment(1)
+    },
+    {enableOnContentEditable: true, preventDefault: true},
+  )
+  useHotkeys(
+    Shortcuts.cattol.events.copyContribution2.keystrokes[
+      Shortcuts.shortCutsKeyType
+    ],
+    (e) => {
+      SegmentActions.chooseContributionOnCurrentSegment(2)
+    },
+    {enableOnContentEditable: true, preventDefault: true},
+  )
+  useHotkeys(
+    Shortcuts.cattol.events.copyContribution3.keystrokes[
+      Shortcuts.shortCutsKeyType
+    ],
+    (e) => {
+      SegmentActions.chooseContributionOnCurrentSegment(3)
+    },
+    {enableOnContentEditable: true, preventDefault: true},
+  )
+  useHotkeys(
+    Shortcuts.cattol.events.splitSegment.keystrokes[Shortcuts.shortCutsKeyType],
+    (e) => {
+      const segment = SegmentStore.getCurrentSegment()
+      if (segment) {
+        SegmentActions.openSplitSegment(segment.sid)
+      }
+    },
+    {enableOnContentEditable: true, preventDefault: true},
+  )
+  useHotkeys(
+    Shortcuts.cattol.events.openComments.keystrokes[Shortcuts.shortCutsKeyType],
+    (e) => {
+      e.stopPropagation()
+      e.preventDefault()
+      const current = SegmentStore.getCurrentSegmentId()
+      if (current) SegmentActions.openSegmentComment(current)
+    },
+    {enableOnContentEditable: true, preventDefault: true},
+  )
+
   const [segments, setSegments] = useState(Immutable.fromJS([]))
   const [rows, setRows] = useState([])
   const [essentialRows, setEssentialRows] = useState([])
@@ -565,7 +670,7 @@ function SegmentsContainer({
           id,
           height: rowsRenderedHeight.current.get(id)
             ? rowsRenderedHeight.current.get(id)
-            : cachedRowsHeightMap.current.get(id) ?? height,
+            : (cachedRowsHeightMap.current.get(id) ?? height),
           hasRendered,
         })),
       )
@@ -659,7 +764,6 @@ function SegmentsContainer({
       segment,
       segImmutable,
       isReview,
-      enableTagProjection,
       speech2textEnabledFn: Speech2Text.enabled,
       setLastSelectedSegment: (sid) => setLastSelectedSegment({sid}),
       setBulkSelection,
@@ -727,7 +831,6 @@ function SegmentsContainer({
 
 SegmentsContainer.propTypes = {
   isReview: PropTypes.bool,
-  enableTagProjection: PropTypes.any,
   startSegmentId: PropTypes.string,
   firstJobSegment: PropTypes.string,
 }
