@@ -9,6 +9,8 @@ import {deleteQualityFrameworkTemplate} from '../../../../api/deleteQualityFrame
 import {CategoriesSeveritiesTable} from './CategoriesSeveritiesTable'
 import {SCHEMA_KEYS} from '../../../../hooks/useProjectTemplates'
 import CatToolActions from '../../../../actions/CatToolActions'
+import ModalsActions from '../../../../actions/ModalsActions'
+import {ConfirmDeleteResourceProjectTemplates} from '../../../modals/ConfirmDeleteResourceProjectTemplates'
 
 export const QF_SCHEMA_KEYS = {
   id: 'id',
@@ -25,6 +27,43 @@ export const QF_SCHEMA_KEYS = {
 const getFilteredSchemaCreateUpdate = (template) => {
   const {id, uid, isTemporary, isSelected, ...filtered} = template // eslint-disable-line
   return filtered
+}
+const getFilteredSchemaToCompare = (template) => {
+  /* eslint-disable no-unused-vars */
+  const {
+    id,
+    uid,
+    isTemporary,
+    isSelected,
+    label,
+    createdAt,
+    deletedAt,
+    modifiedAt,
+    ...filtered
+  } = template
+
+  const {id: idPassfail, id_template, ...filteredPassfail} = filtered.passfail
+
+  return {
+    ...filtered,
+    categories: filtered.categories.map(
+      ({id, id_parent, id_template, ...filteredCategories}) => {
+        return {
+          ...filteredCategories,
+          severities: filteredCategories.severities.map(
+            ({id, id_category, ...filteredSeverities}) => filteredSeverities,
+          ),
+        }
+      },
+    ),
+    passfail: {
+      ...filteredPassfail,
+      thresholds: filteredPassfail.thresholds.map(
+        ({id, id_passfail, ...filteredThresholds}) => filteredThresholds,
+      ),
+    },
+  }
+  /* eslint-enable no-unused-vars */
 }
 
 export const QualityFrameworkTabContext = createContext({})
@@ -53,6 +92,23 @@ export const QualityFrameworkTab = () => {
       position: 'br',
     })
   }
+
+  const getModalTryingSaveIdenticalSettingsTemplate = (templatesInvolved) =>
+    new Promise((resolve, reject) => {
+      ModalsActions.showModalComponent(
+        ConfirmDeleteResourceProjectTemplates,
+        {
+          projectTemplatesInvolved: templatesInvolved,
+          successCallback: () => resolve(),
+          cancelCallback: () => reject(),
+          content:
+            'The quality framework you are trying to save has identical settings to the following quality framework:',
+          footerContent:
+            'Please confirm that you want to save a quality framework with the same settings as an existing quality framework',
+        },
+        'Quality framework',
+      )
+    })
 
   // retrieve QF templates
   useEffect(() => {
@@ -126,6 +182,8 @@ export const QualityFrameworkTab = () => {
               schema: QF_SCHEMA_KEYS,
               propConnectProjectTemplate: SCHEMA_KEYS.qaModelTemplateId,
               getFilteredSchemaCreateUpdate,
+              getFilteredSchemaToCompare,
+              getModalTryingSaveIdenticalSettingsTemplate,
               createApi: createQualityFrameworkTemplate,
               updateApi: updateQualityFrameworkTemplate,
               deleteApi: deleteQualityFrameworkTemplate,
