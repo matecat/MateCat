@@ -15,6 +15,7 @@ use LQA\ChunkReviewDao;
 use Matecat\XliffParser\Exception\NotSupportedVersionException;
 use Matecat\XliffParser\Exception\NotValidFileException;
 use Matecat\XliffParser\Utils\Files as XliffFiles;
+use Matecat\XliffParser\XliffParser;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use Predis\Connection\ConnectionException;
 use TaskRunner\Exceptions\EndQueueException;
@@ -207,7 +208,7 @@ class downloadFileController extends downloadController {
                     copy( $xliffFilePath, $outputPath );
                 } else {
                     // instantiate parser
-                    $xsp = new \Matecat\XliffParser\XliffParser();
+                    $xsp = new XliffParser();
 
                     // instantiateXliffReplacerCallback
                     $xliffReplacerCallback = new XliffReplacerCallback( $this->featureSet, $this->job->source, $_target_lang );
@@ -670,7 +671,7 @@ class downloadFileController extends downloadController {
         if ( stripos( substr( $documentContent, 0, 100 ), "<?xml " ) === false ) {
 
             $is_utf8 = false;
-            list( $original_charset, $documentContent ) = CatUtils::convertEncoding( 'UTF-8', $documentContent );
+            [ $original_charset, $documentContent ] = CatUtils::convertEncoding( 'UTF-8', $documentContent );
 
         }
 
@@ -705,7 +706,7 @@ class downloadFileController extends downloadController {
         }
 
         if ( !$is_utf8 ) {
-            list( , $documentContent ) = CatUtils::convertEncoding( $original_charset, $documentContent );
+            [ , $documentContent ] = CatUtils::convertEncoding( $original_charset, $documentContent );
         }
 
         return $documentContent;

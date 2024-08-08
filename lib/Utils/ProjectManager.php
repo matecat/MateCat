@@ -3167,38 +3167,6 @@ class ProjectManager {
         return $fid . "|" . $trans_unitID;
     }
 
-    private function fileMustBeConverted( $filePathName, $forceXliff ) {
-
-        $mustBeConverted = XliffProprietaryDetect::fileMustBeConverted( $filePathName, $forceXliff, INIT::$FILTERS_ADDRESS );
-
-        /**
-         * Application misconfiguration.
-         * upload should not be happened, but if we are here, raise an error.
-         * @see upload.class.php
-         * */
-        if ( -1 === $mustBeConverted ) {
-            $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                "code"    => -8,
-                "message" => "Proprietary xlf format detected. Not able to import this XLIFF file. ($filePathName)"
-            ];
-            if ( PHP_SAPI != 'cli' ) {
-                CookieManager::setCookie( "upload_session", "",
-                    [
-                        'expires'  => time() - 10000,
-                        'path'     => '/',
-                        'domain'   => INIT::$COOKIE_DOMAIN,
-                        'secure'   => true,
-                        'httponly' => true,
-                        'samesite' => 'None',
-                    ]
-                );
-            }
-        }
-
-        return $mustBeConverted;
-
-    }
-
     /**
      *
      * What this function does:
