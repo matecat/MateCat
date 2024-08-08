@@ -2157,7 +2157,9 @@ var spec = {
       post: {
         tags: ['Glossary'],
         summary: 'Import Glossary',
-        description: 'Import glossary file (.xlsx)',
+        description: '### Import glossary file (.xlsx) \n' +
+            'If your glossary has **between two and ten locales in it**, you will be able to use it for jobs **in any of the possible combinations of the locales** (e.g. if you have en-US, es-ES and it-IT in a glossary you will be able to use it for en-US <> es-ES, en-US <> it-IT and es-ES <> it-IT jobs).\n' +
+            'If your glossary has **more than 10 locales**, Matecat will only create combinations between **the first locale column from the left and the rest of the locales** (e.g. if in a glossary you have en-US as the first locale from the left, es-ES, it-IT and 10 more locales, you will be able to use it for en-US <> es-ES and en-US <> it-IT, but not for es-ES <> it-IT).',
         parameters: [
           {
             name: 'files',
