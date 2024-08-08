@@ -240,6 +240,7 @@ class XliffConfigTemplateDao extends DataAccess_AbstractDao {
         ] );
 
         self::destroyQueryByIdCache( $conn, $id );
+        self::destroyQueryByIdAndUidCache( $conn, $id, $uid );
         self::destroyQueryByUidCache( $conn, $uid );
 
         return $stmt->rowCount();
@@ -261,6 +262,15 @@ class XliffConfigTemplateDao extends DataAccess_AbstractDao {
     private static function destroyQueryByUidCache( PDO $conn, int $uid ) {
         $stmt = $conn->prepare( self::query_by_uid );
         self::getInstance()->_destroyObjectCache( $stmt, [ 'uid' => $uid ] );
+    }
+
+    /**
+     * @param PDO $conn
+     * @param int $uid
+     */
+    private static function destroyQueryByIdAndUidCache( PDO $conn, int $id, int $uid ) {
+        $stmt = $conn->prepare( self::query_by_id_and_uid );
+        self::getInstance()->_destroyObjectCache( $stmt, [ 'uid' => $uid, 'id' => $id ] );
     }
 
     /**
@@ -321,6 +331,7 @@ class XliffConfigTemplateDao extends DataAccess_AbstractDao {
         $templateStruct->modified_at = $now;
 
         self::destroyQueryByIdCache( $conn, $templateStruct->id );
+        self::destroyQueryByIdAndUidCache( $conn, $templateStruct->id, $templateStruct->uid );
         self::destroyQueryByUidCache( $conn, $templateStruct->uid );
         self::destroyQueryByUidAndNameCache( $conn, $templateStruct->uid, $templateStruct->name );
 
@@ -352,6 +363,7 @@ class XliffConfigTemplateDao extends DataAccess_AbstractDao {
         ] );
 
         self::destroyQueryByIdCache( $conn, $templateStruct->id );
+        self::destroyQueryByIdAndUidCache( $conn, $templateStruct->id, $templateStruct->uid );
         self::destroyQueryByUidCache( $conn, $templateStruct->uid );
         self::destroyQueryByUidAndNameCache( $conn, $templateStruct->uid, $templateStruct->name );
 
