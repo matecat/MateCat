@@ -21,7 +21,6 @@ class XliffConfigTemplateController extends KleinController {
         $this->appendValidator( new LoginValidator( $this ) );
     }
 
-
     /**
      * @param $json
      *
@@ -42,8 +41,9 @@ class XliffConfigTemplateController extends KleinController {
      * Get all entries
      */
     public function all(): Response {
-        $currentPage = ( isset( $_GET[ 'page' ] ) ) ? $_GET[ 'page' ] : 1;
-        $pagination  = ( isset( $_GET[ 'perPage' ] ) ) ? $_GET[ 'perPage' ] : 20;
+
+        $currentPage = $this->request->param( 'page' ) ?? 1;
+        $pagination  = $this->request->param( 'perPage' ) ?? 20;
 
         if ( $pagination > 200 ) {
             $pagination = 200;
@@ -99,17 +99,15 @@ class XliffConfigTemplateController extends KleinController {
      * @return Response
      */
     public function create(): Response {
-        // accept only JSON
-        if ( !$this->isJsonRequest() ) {
-            $this->response->code( 400 );
-
-            return $this->response->json( [
-                    'message' => 'Bad Request'
-            ] );
-        }
 
         // try to create the template
         try {
+
+            // accept only JSON
+            if ( !$this->isJsonRequest() ) {
+                throw new Exception( 'Bad Request', 400 );
+            }
+
             $json = $this->request->body();
             $this->validateJSON( $json );
 
@@ -155,19 +153,17 @@ class XliffConfigTemplateController extends KleinController {
      * @throws Exception
      */
     public function update(): Response {
-        // accept only JSON
-        if ( !$this->isJsonRequest() ) {
-            $this->response->code( 400 );
-
-            return $this->response->json( [
-                    'message' => 'Bad Request'
-            ] );
-        }
-
-        $id  = $this->request->param( 'id' );
-        $uid = $this->getUser()->uid;
 
         try {
+
+            // accept only JSON
+            if ( !$this->isJsonRequest() ) {
+                throw new Exception( 'Bad Request', 400 );
+            }
+
+            $id  = $this->request->param( 'id' );
+            $uid = $this->getUser()->uid;
+
             $json = $this->request->body();
             $this->validateJSON( $json );
 

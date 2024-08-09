@@ -1332,7 +1332,7 @@ class NewController extends ajaxController {
 
         } elseif ( !empty( $this->postInput[ 'filters_extraction_parameters_template_id' ] ) ) {
 
-            $filtersTemplate = FiltersConfigTemplateDao::getById( $this->postInput[ 'filters_extraction_parameters_template_id' ] );
+            $filtersTemplate = FiltersConfigTemplateDao::getByIdAndUser( $this->postInput[ 'filters_extraction_parameters_template_id' ], $this->getUser()->uid );
 
             if ( $filtersTemplate === null ) {
                 throw new Exception( "filters_extraction_parameters_template_id not valid" );

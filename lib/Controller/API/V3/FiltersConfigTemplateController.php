@@ -41,8 +41,9 @@ class FiltersConfigTemplateController extends KleinController {
      * Get all entries
      */
     public function all(): Response {
-        $currentPage = ( isset( $_GET[ 'page' ] ) ) ? $_GET[ 'page' ] : 1;
-        $pagination  = ( isset( $_GET[ 'perPage' ] ) ) ? $_GET[ 'perPage' ] : 20;
+
+        $currentPage = $this->request->param( 'page' ) ?? 1;
+        $pagination  = $this->request->param( 'perPage' ) ?? 20;
 
         if ( $pagination > 200 ) {
             $pagination = 200;
@@ -53,7 +54,7 @@ class FiltersConfigTemplateController extends KleinController {
         try {
             $this->response->status()->setCode( 200 );
 
-            return $this->response->json( FiltersConfigTemplateDao::getAllPaginated( $uid, $currentPage, $pagination ) );
+            return $this->response->json( FiltersConfigTemplateDao::getAllPaginated( $uid, "/api/v3/filters-config-template?page=", $currentPage, $pagination ) );
 
         } catch ( Exception $exception ) {
             $code = ( $exception->getCode() > 0 ) ? $exception->getCode() : 500;
@@ -98,17 +99,14 @@ class FiltersConfigTemplateController extends KleinController {
      * @return Response
      */
     public function create(): Response {
-        // accept only JSON
-        if ( !$this->isJsonRequest() ) {
-            $this->response->code( 400 );
-
-            return $this->response->json( [
-                    'message' => 'Bad Request'
-            ] );
-        }
 
         // try to create the template
         try {
+
+            // accept only JSON
+            if ( !$this->isJsonRequest() ) {
+                throw new Exception( 'Bad Request', 400 );
+            }
 
             $json = $this->request->body();
             $this->validateJSON( $json );
@@ -154,25 +152,24 @@ class FiltersConfigTemplateController extends KleinController {
      * @throws Exception
      */
     public function update(): Response {
-        // accept only JSON
-        if ( !$this->isJsonRequest() ) {
-            $this->response->code( 400 );
-
-            return $this->response->json( [
-                    'message' => 'Bad Request'
-            ] );
-        }
-
-        $id  = $this->request->param( 'id' );
-        $uid = $this->getUser()->uid;
-
-        $model = FiltersConfigTemplateDao::getByIdAndUser( $id, $uid );
-
-        if ( empty( $model ) ) {
-            throw new Exception( 'Model not found', 404 );
-        }
 
         try {
+
+            // accept only JSON
+            if ( !$this->isJsonRequest() ) {
+                throw new Exception( 'Bad Request', 400 );
+            }
+
+            $id  = $this->request->param( 'id' );
+            $uid = $this->getUser()->uid;
+
+
+            $model = FiltersConfigTemplateDao::getByIdAndUser( $id, $uid );
+
+            if ( empty( $model ) ) {
+                throw new Exception( 'Model not found', 404 );
+            }
+
             $json = $this->request->body();
             $this->validateJSON( $json );
 
@@ -236,6 +233,6 @@ class FiltersConfigTemplateController extends KleinController {
      * @return object|mixed
      */
     private function getModelSchema(): object {
-        return json_decode( file_get_contents( INIT::$ROOT . '/inc/validation/schema/filters_extraction_parameters.json' ) );
+        return json_decode( file_get_contents( INIT::$ROOT . ' / inc / validation / schema / filters_extraction_parameters . json' ) );
     }
 }

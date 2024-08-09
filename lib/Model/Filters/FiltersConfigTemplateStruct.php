@@ -5,6 +5,7 @@ namespace Filters;
 use DataAccess_AbstractDaoSilentStruct;
 use Date\DateTimeUtil;
 use DomainException;
+use Exception;
 use Filters\DTO\Json;
 use Filters\DTO\MSExcel;
 use Filters\DTO\MSPowerpoint;
@@ -30,42 +31,42 @@ class FiltersConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruct imp
     /**
      * @return null
      */
-    public function getYaml() {
+    public function getYaml(): ?Yaml {
         return $this->yaml;
     }
 
     /**
      * @return null
      */
-    public function getXml() {
+    public function getXml(): ?Xml {
         return $this->xml;
     }
 
     /**
      * @return null
      */
-    public function getJson() {
+    public function getJson(): ?Json {
         return $this->json;
     }
 
     /**
      * @return null
      */
-    public function getMsWord() {
+    public function getMsWord(): ?MSWord {
         return $this->ms_word;
     }
 
     /**
      * @return null
      */
-    public function getMsExcel() {
+    public function getMsExcel(): ?MSExcel {
         return $this->ms_excel;
     }
 
     /**
      * @return null
      */
-    public function getMsPowerpoint() {
+    public function getMsPowerpoint(): ?MSPowerpoint {
         return $this->ms_powerpoint;
     }
 
@@ -117,7 +118,7 @@ class FiltersConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruct imp
      *
      * @return $this
      */
-    public function hydrateFromJSON( $json, $uid = null ) {
+    public function hydrateFromJSON( $json, $uid = null ): FiltersConfigTemplateStruct {
         $json = json_decode( $json, true );
 
         if ( !isset( $json[ 'name' ] ) ) {
@@ -202,9 +203,9 @@ class FiltersConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruct imp
 
     /**
      * @return false|string
-     * @throws \Exception
+     * @throws Exception
      */
-    public function getRulesAsString() {
+    public function getRulesAsString(): string {
         return json_encode( [
                 'xml'           => $this->xml,
                 'yaml'          => $this->yaml,
@@ -216,10 +217,10 @@ class FiltersConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruct imp
     }
 
     /**
-     * @return array|mixed
-     * @throws \Exception
+     * @return array
+     * @throws Exception
      */
-    public function jsonSerialize() {
+    public function jsonSerialize(): array {
         return [
                 'id'            => $this->id,
                 'uid'           => $this->uid,

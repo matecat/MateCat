@@ -7,12 +7,15 @@ use DataAccess_AbstractDao;
 use Database;
 use DateTime;
 use Exception;
+use Pagination\Pager;
+use Pagination\PaginationParameters;
 use PDO;
 use Projects\ProjectTemplateStruct;
 use ReflectionException;
 use Utils;
 
 class XliffConfigTemplateDao extends DataAccess_AbstractDao {
+
     const TABLE = 'xliff_config_templates';
 
     const query_by_id         = "SELECT * FROM " . self::TABLE . " WHERE id = :id AND deleted_at IS NULL";
@@ -39,11 +42,11 @@ class XliffConfigTemplateDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param $uid
+     * @param int $uid
      *
      * @return XliffConfigTemplateStruct
      */
-    public static function getDefaultTemplate( $uid ): XliffConfigTemplateStruct {
+    public static function getDefaultTemplate( int $uid ): XliffConfigTemplateStruct {
         $default              = new XliffConfigTemplateStruct();
         $default->id          = 0;
         $default->uid         = $uid;
@@ -55,13 +58,13 @@ class XliffConfigTemplateDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param $json
-     * @param $uid
+     * @param string $json
+     * @param int    $uid
      *
      * @return XliffConfigTemplateStruct
      * @throws Exception
      */
-    public static function createFromJSON( $json, $uid ): XliffConfigTemplateStruct {
+    public static function createFromJSON( string $json, int $uid ): XliffConfigTemplateStruct {
         $templateStruct = new XliffConfigTemplateStruct();
         $templateStruct->hydrateFromJSON( $json, $uid );
 
@@ -70,13 +73,13 @@ class XliffConfigTemplateDao extends DataAccess_AbstractDao {
 
     /**
      * @param XliffConfigTemplateStruct $templateStruct
-     * @param                           $json
-     * @param                           $uid
+     * @param string                    $json
+     * @param int                       $uid
      *
      * @return XliffConfigTemplateStruct
      * @throws Exception
      */
-    public static function editFromJSON( XliffConfigTemplateStruct $templateStruct, $json, $uid ): XliffConfigTemplateStruct {
+    public static function editFromJSON( XliffConfigTemplateStruct $templateStruct, string $json, int $uid ): XliffConfigTemplateStruct {
         $templateStruct->hydrateFromJSON( $json, $uid );
 
         return self::update( $templateStruct );
@@ -93,46 +96,32 @@ class XliffConfigTemplateDao extends DataAccess_AbstractDao {
      * @throws ReflectionException
      */
     public static function getAllPaginated( int $uid, string $baseRoute, int $current = 1, int $pagination = 20, int $ttl = 60 * 60 * 24 ): array {
-        $conn = Database::obtain()->getConnection();
 
-        $stmt = $conn->prepare( "SELECT count(id) as count FROM " . self::TABLE . " WHERE deleted_at IS NULL AND uid = :uid" );
-        $stmt->execute( [
-                'uid' => $uid
-        ] );
+        $pdo = Database::obtain()->getConnection();
 
-        $count  = $stmt->fetch( PDO::FETCH_ASSOC );
-        $count  = $count[ 'count' ];
-        $count  = $count + 1;
-        $pages  = ceil( $count / $pagination );
-        $prev   = ( $current !== 1 ) ? $baseRoute . ( $current - 1 ) : null;
-        $next   = ( $current < $pages ) ? $baseRoute . ( $current + 1 ) : null;
-        $offset = ( $current - 1 ) * $pagination;
+        $pager = new Pager( $pdo );
+
+        $totals = $pager->count(
+                "SELECT count(id) FROM " . self::TABLE . " WHERE deleted_at IS NULL AND uid = :uid",
+                [ 'uid' => $uid ]
+        );
+
+        $paginationParameters = new PaginationParameters( static::query_paginated, [ 'uid' => $uid ], ShapelessConcreteStruct::class, $baseRoute, $current, $pagination );
+        $paginationParameters->setCache( self::paginated_map_key . ":" . $uid, $ttl );
+
+        $result = $pager->getPagination( $totals, $paginationParameters );
 
         $models   = [];
         $models[] = self::getDefaultTemplate( $uid );
 
-        $stmt   = self::getInstance()->_getStatementForQuery( sprintf( static::query_paginated, $pagination, $offset ) );
-        $result = self::getInstance()->setCacheTTL( $ttl )->_fetchObjectMap( self::paginated_map_key . ":" . $uid, $stmt, ShapelessConcreteStruct::class, [
-                'uid' => $uid
-        ] );
-
-        foreach ( $result as $item ) {
-            $model = self::hydrateTemplateStruct( $item->getArrayCopy() );
-
-            if ( $model !== null ) {
-                $models[] = $model;
-            }
+        foreach ( $result[ 'items' ] as $item ) {
+            $models[] = self::hydrateTemplateStruct( $item->getArrayCopy() );
         }
 
-        return [
-                'current_page' => $current,
-                'per_page'     => $pagination,
-                'last_page'    => $pages,
-                'total_count'  => (int)$count,
-                'prev'         => $prev,
-                'next'         => $next,
-                'items'        => $models,
-        ];
+        $result[ 'items' ] = $models;
+
+        return $result;
+
     }
 
     /**

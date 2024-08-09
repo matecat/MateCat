@@ -2,6 +2,7 @@
 
 namespace Xliff;
 
+use DataAccess\ArrayAccessTrait;
 use DataAccess_AbstractDaoSilentStruct;
 use Date\DateTimeUtil;
 use DomainException;

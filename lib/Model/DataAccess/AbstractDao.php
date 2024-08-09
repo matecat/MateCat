@@ -264,13 +264,13 @@ abstract class DataAccess_AbstractDao {
      * Returns a string suitable for updates of the fields
      * provided by the attributes array.
      *
-     * @param $attrs array of full attributes to update
-     * @param $mask  array of attributes to include in the update
+     * @param            $attrs array of full attributes to update
+     * @param array|null $mask  array of attributes to include in the update
      *
      * @return string
      */
 
-    protected static function buildUpdateSet( $attrs, $mask ) {
+    protected static function buildUpdateSet( array $attrs, ?array $mask = [] ): string {
         $map = [];
         $pks = static::$primary_keys;
 

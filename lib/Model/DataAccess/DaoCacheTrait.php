@@ -12,6 +12,7 @@ namespace DataAccess;
 use Exception;
 use INIT;
 use Log;
+use PDO;
 use PDOStatement;
 use Predis\Client;
 use RedisHandler;
@@ -122,7 +123,7 @@ trait DaoCacheTrait {
         if ( isset( self::$cache_con ) && !empty( self::$cache_con ) ) {
             $key   = md5( $query );
             $value = unserialize( self::$cache_con->hget( $keyMap, $key ) );
-            $this->_logCache( "GET", $key, $value, $query );
+            $this->_logCache( "GETMAP: " . $keyMap, $key, $value, $query );
         }
 
         return $value ?: null;
@@ -144,14 +145,14 @@ trait DaoCacheTrait {
             $key = md5( $query );
             self::$cache_con->hset( $keyMap, $key, serialize( $value ) );
             self::$cache_con->expire( $keyMap, $this->cacheTTL );
-            $this->_logCache( "SET", $key, $value, $query );
+            $this->_logCache( "SETMAP: " . $keyMap, $key, $value, $query );
         }
     }
 
     /**
      * @param ?int $cacheSecondsTTL
      *
-     * @return DaoCacheTrait
+     * @return self
      */
     public function setCacheTTL( ?int $cacheSecondsTTL ): self {
         if ( !INIT::$SKIP_SQL_CACHE ) {
@@ -197,22 +198,6 @@ trait DaoCacheTrait {
     }
 
     /**
-     * @param string $keyMap
-     *
-     * @return bool
-     * @throws ReflectionException
-     */
-    protected function _destroyCacheMap( string $keyMap ): bool {
-        $this->_cacheSetConnection();
-        if ( isset( self::$cache_con ) && !empty( self::$cache_con ) ) {
-            return self::$cache_con->del( $keyMap );
-        }
-
-        return false;
-
-    }
-
-    /**
      * @param PDOStatement $stmt
      * @param array        $bindParams
      *
@@ -220,13 +205,7 @@ trait DaoCacheTrait {
      * @throws ReflectionException
      */
     protected function _destroyObjectCache( PDOStatement $stmt, array $bindParams ) {
-        $this->_cacheSetConnection();
-        if ( isset( self::$cache_con ) && !empty( self::$cache_con ) ) {
-            return self::$cache_con->del( md5( $stmt->queryString . $this->_serializeForCacheKey( $bindParams ) ) );
-        }
-
-        return false;
-
+        return $this->_destroyCache( $stmt->queryString . $this->_serializeForCacheKey( $bindParams ) );
     }
 
     /**
