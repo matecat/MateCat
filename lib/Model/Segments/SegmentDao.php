@@ -98,11 +98,11 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
      * @param $id_job
      * @param $password
      * @param $id_segment
-     * @param $ttl (default 86400 = 24 hours)
+     * @param int $ttl (default 86400 = 24 hours)
      *
-     * @return \Segments_SegmentStruct|\DataAccess_IDaoStruct
+     * @return Segments_SegmentStruct|null
      */
-    function getByChunkIdAndSegmentId( $id_job, $password, $id_segment, $ttl = 86400 ) {
+    function getByChunkIdAndSegmentId( $id_job, $password, $id_segment, int $ttl = 86400 ): ?Segments_SegmentStruct {
 
         $query = " SELECT segments.* FROM segments " .
                 " INNER JOIN files_job fj USING (id_file) " .
@@ -116,13 +116,16 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
         $conn    = Database::obtain()->getConnection();
         $stmt    = $conn->prepare( $query );
 
+        /**
+         * @var $fetched Segments_SegmentStruct[]
+         */
         $fetched = $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Segments_SegmentStruct(), [
                 'id_job'     => $id_job,
                 'password'   => $password,
                 'id_segment' => $id_segment
         ] );
 
-        return isset( $fetched[ 0 ] ) ? $fetched[ 0 ] : null;
+        return $fetched[ 0 ] ?? null;
     }
 
     /**
@@ -180,7 +183,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
      */
     public function getContextAndSegmentByIDs( $id_list ) {
         $query = "SELECT id, segment FROM segments WHERE id IN( :id_before, :id_segment, :id_after ) ORDER BY id ASC";
-        $stmt  = $this->_getStatementForCache( $query );
+        $stmt  = $this->_getStatementForQuery( $query );
         /** @var $res Segments_SegmentStruct[] */
         $res = $this->_fetchObject( $stmt,
                 new Segments_SegmentStruct(),
@@ -435,6 +438,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                 st.locked,
                 st.match_type,
                 st.version_number,
+                st.tm_analysis_status,
                 ste.source_page
                 
                 FROM segments s
@@ -730,7 +734,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
     }
 
     public function destroyCacheForGlobalTranslationMismatches( Jobs_JobStruct $job ) {
-        $stmt = $this->_getStatementForCache( self::$queryForGlobalMismatches );
+        $stmt = $this->_getStatementForQuery( self::$queryForGlobalMismatches );
 
         return $this->_destroyObjectCache( $stmt, [
                 'id_job'        => $job->id,
@@ -773,7 +777,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
          */
         if ( $sid != null ) {
 
-            $stmt = $this->_getStatementForCache( self::$queryForLocalMismatches );
+            $stmt = $this->_getStatementForQuery( self::$queryForLocalMismatches );
 
             return $this->_fetchObject( $stmt, new ShapelessConcreteStruct, [
                             'job_first_segment' => $jStructs[ 0 ]->job_first_segment,
@@ -805,7 +809,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
              *                    HAVING translations_available > 1
              *            ";
              */
-            $stmt = $this->_getStatementForCache( self::$queryForGlobalMismatches );
+            $stmt = $this->_getStatementForQuery( self::$queryForGlobalMismatches );
             $list = $this->_fetchObject( $stmt, new ShapelessConcreteStruct, [
                             'id_job'        => $currentJob->id,
                             'st_approved'   => Constants_TranslationStatus::STATUS_APPROVED,

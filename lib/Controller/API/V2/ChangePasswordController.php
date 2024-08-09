@@ -168,7 +168,7 @@ class ChangePasswordController extends ChunkController
             // invalidate ChunkReviewDao cache for the job
             if($jStruct instanceof Chunks_ChunkStruct){
                 $chunkReviewDao = new ChunkReviewDao();
-                $chunkReviewDao->destroyCacheForFindChunkReviews($jStruct, 60 * 5 );
+                $chunkReviewDao->destroyCacheForFindChunkReviews($jStruct );
             }
 
             // invalidate cache for ProjectData

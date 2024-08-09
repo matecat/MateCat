@@ -43,10 +43,10 @@ class SegmentQRLine extends React.Component {
         suggestionMatch === 101
           ? 'per-blu'
           : suggestionMatch === 100
-          ? 'per-green'
-          : suggestionMatch > 0 && suggestionMatch <= 99
-          ? 'per-orange'
-          : ''
+            ? 'per-green'
+            : suggestionMatch > 0 && suggestionMatch <= 99
+              ? 'per-orange'
+              : ''
     }
 
     return (
@@ -134,10 +134,16 @@ class SegmentQRLine extends React.Component {
           </div>
         ) : null}
 
-        {this.props.showIsPretranslated ? (
+        {this.props.showIsPretranslated && !this.props.rev ? (
           <div className="segment-content qr-spec">
             <div>
               <b>Pre-Translated</b>
+            </div>
+          </div>
+        ) : this.props.showIsPretranslated && this.props.rev ? (
+          <div className="segment-content qr-spec">
+            <div>
+              <b>Pre-Approved</b>
             </div>
           </div>
         ) : null}

@@ -36,7 +36,7 @@ class TranslatorsProfilesDao extends \DataAccess_AbstractDao {
      */
     public function getByProfile( TranslatorProfilesStruct $profile ) {
 
-        $stmt = $this->_getStatementForCache( self::$_query_by_uid_src_trg_rev );
+        $stmt = $this->_getStatementForQuery( self::$_query_by_uid_src_trg_rev );
 
         return @$this->_fetchObject( $stmt,
                 $profile,

@@ -237,8 +237,8 @@ class SegmentQR extends React.Component {
       let textToDiff = this.revise
         ? this.revise
         : this.target
-        ? this.target
-        : this.suggestion
+          ? this.target
+          : this.suggestion
       let diffHtml = this.getDiffPatch(textToDiff, revise2)
       this.setState({
         translateDiffOn: false,
@@ -483,6 +483,7 @@ class SegmentQR extends React.Component {
                 this.props.segment.get('is_pre_translated') &&
                 this.props.segment.get('ice_locked') !== '1'
               }
+              rev={0}
             />
           ) : null}
           {!isNull(this.props.segment.get('last_revisions')) && revise ? (
@@ -497,6 +498,11 @@ class SegmentQR extends React.Component {
               diffActive={this.state.reviseDiffOn}
               showIceMatchInfo={isNull(target)}
               tte={this.props.segment.get('time_to_edit_revise')}
+              showIsPretranslated={
+                this.props.segment.get('is_pre_translated') &&
+                this.props.segment.get('ice_locked') !== '1'
+              }
+              rev={1}
             />
           ) : null}
           {!isNull(this.props.segment.get('last_revisions')) && revise2 ? (
@@ -511,6 +517,11 @@ class SegmentQR extends React.Component {
               diffActive={this.state.revise2DiffOn}
               showIceMatchInfo={isNull(target) && isNull(revise)}
               tte={this.props.segment.get('time_to_edit_revise_2')}
+              showIsPretranslated={
+                this.props.segment.get('is_pre_translated') &&
+                this.props.segment.get('ice_locked') !== '1'
+              }
+              rev={2}
             />
           ) : null}
           {this.state.automatedQaOpen ||

@@ -5,9 +5,10 @@ namespace API\V2;
 use API\V2\Validators\LoginValidator;
 use Exception;
 use Klein\Response;
+use INIT;
 use PayableRates\CustomPayableRateDao;
 use PayableRates\CustomPayableRateStruct;
-use Validator\Errors\JSONValidatorError;
+use Validator\Errors\JSONValidatorException;
 use Validator\JSONValidator;
 use Validator\JSONValidatorObject;
 
@@ -36,10 +37,11 @@ class PayableRateController extends KleinController {
     public function create() {
 
         // accept only JSON
-        if($this->request->headers()->get('Content-Type') !== 'application/json'){
-            $this->response->json([
-                'message' => 'Method not allowed'
-            ]);
+        if(!$this->isJsonRequest()){
+            $this->response->code(405);
+            $this->response->json( [
+                    'message' => 'Method not allowed'
+            ] );
             $this->response->code(405);
             exit();
         }
@@ -52,7 +54,7 @@ class PayableRateController extends KleinController {
             $this->response->code( 201 );
 
             return $this->response->json( $struct );
-        } catch ( JSONValidatorError $exception ) {
+        } catch ( JSONValidatorException $exception ) {
             $errorCode = $exception->getCode() >= 400 ? $exception->getCode() : 500;
             $this->response->code( $errorCode );
 
@@ -138,7 +140,7 @@ class PayableRateController extends KleinController {
             $this->response->code( 200 );
 
             return $this->response->json( $struct );
-        } catch ( JSONValidatorError $exception ) {
+        } catch ( JSONValidatorException $exception ) {
             $errorCode = $exception->getCode() >= 400 ? $exception->getCode() : 500;
             $this->response->code( $errorCode );
 
@@ -202,7 +204,7 @@ class PayableRateController extends KleinController {
             $validator             = new JSONValidator( $this->getPayableRateModelSchema() );
             $validator->validate( $validatorObject );
 
-            $errors = $validator->getErrors();
+            $errors = $validator->getExceptions();
 
             if ( $validator->isValid() ) {
                 $customPayableRateStruct = new CustomPayableRateStruct();
@@ -229,7 +231,8 @@ class PayableRateController extends KleinController {
     /**
      * @return false|string
      */
-    private function getPayableRateModelSchema() {
-        return file_get_contents( \INIT::$ROOT . '/inc/validation/schema/payable_rate.json' );
+    private function getPayableRateModelSchema()
+    {
+        return file_get_contents( INIT::$ROOT . '/inc/validation/schema/payable_rate.json' );
     }
 }

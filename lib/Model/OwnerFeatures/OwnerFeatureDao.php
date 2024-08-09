@@ -81,7 +81,7 @@ class OwnerFeatures_OwnerFeatureDao extends DataAccess_AbstractDao {
      */
     public static function destroyCacheByIdCustomer( $id_customer ){
         $thisDao = new self();
-        $stmt = $thisDao->_getStatementForCache( self::query_by_user_email );
+        $stmt = $thisDao->_getStatementForQuery( self::query_by_user_email );
         return $thisDao->_destroyObjectCache( $stmt, [ 'id_customer' => $id_customer ] );
     }
 

@@ -3,6 +3,7 @@
 namespace Features\ReviewExtended\Email;
 
 use Email\AbstractEmail;
+use INIT;
 use LQA\ChunkReviewStruct;
 
 class BatchReviewProcessorAlertEmail extends AbstractEmail {
@@ -49,7 +50,7 @@ class BatchReviewProcessorAlertEmail extends AbstractEmail {
      * @return void
      */
     public function send() {
-        $mailConf = @parse_ini_file( \INIT::$ROOT . '/inc/Error_Mail_List.ini', true );
+        $mailConf = @parse_ini_file( INIT::$ROOT . '/inc/Error_Mail_List.ini', true );
 
         if ( !empty( $mailConf[ 'email_list' ] ) ) {
             foreach ( $mailConf[ 'email_list' ] as $email => $uName ) {

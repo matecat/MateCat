@@ -7,6 +7,7 @@ use DataAccess_AbstractDao;
 use Database;
 use Date\DateTimeUtil;
 use DateTime;
+use INIT;
 use PDO;
 
 class CustomPayableRateDao extends DataAccess_AbstractDao
@@ -104,7 +105,7 @@ class CustomPayableRateDao extends DataAccess_AbstractDao
      * @return CustomPayableRateStruct
      */
     public static function getById( $id, $ttl = 60 ) {
-        $stmt = self::getInstance()->_getStatementForCache(self::query_by_id);
+        $stmt = self::getInstance()->_getStatementForQuery(self::query_by_id);
         $result = self::getInstance()->setCacheTTL( $ttl )->_fetchObject( $stmt, new CustomPayableRateStruct(), [
             'id' => $id,
         ] );
@@ -119,7 +120,7 @@ class CustomPayableRateDao extends DataAccess_AbstractDao
      * @return CustomPayableRateStruct
      */
     public static function getByUidAndName( $uid, $name, $ttl = 60 ) {
-        $stmt = self::getInstance()->_getStatementForCache(self::query_by_uid_name);
+        $stmt = self::getInstance()->_getStatementForQuery(self::query_by_uid_name);
         $result = self::getInstance()->setCacheTTL( $ttl )->_fetchObject( $stmt, new CustomPayableRateStruct(), [
             'uid' => $uid,
             'name' => $name,
@@ -252,12 +253,12 @@ class CustomPayableRateDao extends DataAccess_AbstractDao
     {
         $validatorObject = new \Validator\JSONValidatorObject();
         $validatorObject->json = $json;
-        $jsonSchema = file_get_contents( __DIR__ . '/../../../inc/validation/schema/payable_rate.json' );
+        $jsonSchema = file_get_contents( INIT::$ROOT . '/inc/validation/schema/payable_rate.json' );
         $validator = new \Validator\JSONValidator($jsonSchema);
         $validator->validate($validatorObject);
 
         if(!$validator->isValid()){
-            throw $validator->getErrors()[0]->error;
+            throw $validator->getExceptions()[0]->error;
         }
     }
 

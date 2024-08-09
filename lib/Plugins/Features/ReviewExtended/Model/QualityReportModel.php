@@ -165,7 +165,7 @@ class QualityReportModel {
      * @throws Exception
      */
     protected function _attachReviewsData() {
-        $chunk_reviews = ( new \Features\ReviewExtended\Model\ChunkReviewDao() )->findChunkReviews( $this->chunk );
+        $chunk_reviews = ( new ChunkReviewDao() )->findChunkReviews( $this->chunk );
 
         $this->quality_report_structure[ 'chunk' ][ 'reviews' ] = [];
         foreach ( $chunk_reviews as $chunk_review ) {

@@ -606,7 +606,7 @@ class CatUtils {
         Log::doJsonLog( $cmd );
 
         $file_info = shell_exec( $cmd );
-        list( , $charset ) = explode( "=", $file_info );
+        [ , $charset ] = explode( "=", $file_info );
         $charset = trim( $charset );
 
         if ( $charset == 'utf-16le' ) {
@@ -919,8 +919,8 @@ class CatUtils {
         $job = \Jobs_JobDao::getByIdAndPassword( $jobId, $jobPassword );
 
         if ( !$job ) {
-            /** @var ChunkReviewStruct $chunkReview */
-            $chunkReview = \Features\ReviewExtended\Model\ChunkReviewDao::findByReviewPasswordAndJobId( $jobPassword, $jobId );
+
+            $chunkReview = ChunkReviewDao::findByReviewPasswordAndJobId( $jobPassword, $jobId );
 
             if ( !$chunkReview ) {
                 return null;
@@ -997,19 +997,23 @@ class CatUtils {
      *
      * @return string
      */
-    public static function getUniqueName($string){
+    public static function getUniqueName( $string ) {
 
-        $a = explode("_", $string);
-        $end = (int)end($a);
-
-        if(($end > 0) and count($a)>1 ){
-            array_pop($a);
+        if ( empty( $string ) ) {
+            return Utils::randomString();
         }
 
-        $name = implode('_', $a);
+        $a   = explode( "_", $string );
+        $end = (int)end( $a );
+
+        if ( ( $end > 0 ) and count( $a ) > 1 ) {
+            array_pop( $a );
+        }
+
+        $name = implode( '_', $a );
 
         $return = $name;
-        $return .= '_'.($end+1);
+        $return .= '_' . ( $end + 1 );
 
         return $return;
     }

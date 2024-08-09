@@ -47,19 +47,19 @@ class ConfirmationDao extends \DataAccess_AbstractDao {
         $query = self::$_query_get_by_job_id_password;
         $data = [ 'id_job' => $jobStruct->id, 'password' => $jobStruct->password ];
 
-        $stmt                     = $this->_getStatementForCache( $query );
+        $stmt                     = $this->_getStatementForQuery( $query );
         $confirmationStruct     = new TranslatedConfirmationStruct();
 
-        return @$this->_fetchObject( $stmt,
+        return $this->_fetchObject( $stmt,
                 $confirmationStruct,
                 $data
-        )[0];
+        )[0] ?? null;
 
     }
 
     public function destroyConfirmationCache( \Jobs_JobStruct $jobStruct ) {
         $query = self::$_query_get_by_job_id_password;
-        $stmt  = $this->_getStatementForCache( $query );
+        $stmt  = $this->_getStatementForQuery( $query );
         return $this->_destroyObjectCache( $stmt,
                 array(
                         'id_job'   => $jobStruct->id,

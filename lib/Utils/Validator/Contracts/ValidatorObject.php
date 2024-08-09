@@ -2,9 +2,10 @@
 
 namespace Validator\Contracts;
 
+use ArrayAccess;
 use DataAccess\ArrayAccessTrait;
 
-abstract class ValidatorObject implements \ArrayAccess {
+abstract class ValidatorObject implements ArrayAccess {
 
     use ArrayAccessTrait;
 

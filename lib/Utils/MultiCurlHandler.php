@@ -188,11 +188,11 @@ class MultiCurlHandler {
             $this->multi_curl_log[ $tokenHash ][ "url" ]           = $this->multi_curl_info[ $tokenHash ][ 'curlinfo_effective_url' ];
 
             if ( $this->high_verbosity ) {
-                $this->multi_curl_log[ $tokenHash ][ 'options' ]                      = @$this->curl_options_requests[ $tokenHash ];
-                $this->multi_curl_log[ $tokenHash ][ 'options' ][ "post_parameters" ] = @$this->curl_options_requests[ $tokenHash ][ CURLOPT_POSTFIELDS ];
+                $this->multi_curl_log[ $tokenHash ][ 'options' ]                      = isset( $this->curl_options_requests[ $tokenHash ] ) ? $this->curl_options_requests[ $tokenHash ] : null;
+                $this->multi_curl_log[ $tokenHash ][ 'options' ][ "post_parameters" ] = isset( $this->curl_options_requests[ $tokenHash ][ CURLOPT_POSTFIELDS ] ) ? $this->curl_options_requests[ $tokenHash ][ CURLOPT_POSTFIELDS ] : null;
                 unset( $this->multi_curl_info[ $tokenHash ][ 'logging' ][ 'options' ][ CURLOPT_POSTFIELDS ] );
             } else {
-                $this->multi_curl_log[ $tokenHash ][ 'options' ][ "post_parameters" ] = @$this->curl_options_requests[ $tokenHash ][ CURLOPT_POSTFIELDS ];
+                $this->multi_curl_log[ $tokenHash ][ 'options' ][ "post_parameters" ] = isset( $this->curl_options_requests[ $tokenHash ][ CURLOPT_POSTFIELDS ] ) ? $this->curl_options_requests[ $tokenHash ][ CURLOPT_POSTFIELDS ] : null;
             }
 
             if ( $this->hasError( $tokenHash ) ) {

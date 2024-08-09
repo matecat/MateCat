@@ -1,8 +1,9 @@
 <?php
 
+use Features\ReviewExtended\BatchReviewProcessor;
 use Features\ReviewExtended\ReviewUtils;
-use Features\TranslationVersions\Handlers\TranslationEventsHandler;
-use Features\TranslationVersions\Model\TranslationEvent;
+use Features\TranslationEvents\Model\TranslationEvent;
+use Features\TranslationEvents\TranslationEventsHandler;
 use WordCount\CounterModel;
 
 /**
@@ -128,10 +129,10 @@ class copyAllSource2TargetController extends ajaxController {
                 continue;
             }
 
-            $new_translation              = clone $old_translation;
-            $new_translation->translation = $segment->segment;
-            $new_translation->status      = Constants_TranslationStatus::STATUS_DRAFT;
-            $new_translation->translation_date      = date( "Y-m-d H:i:s" );
+            $new_translation                   = clone $old_translation;
+            $new_translation->translation      = $segment->segment;
+            $new_translation->status           = Constants_TranslationStatus::STATUS_DRAFT;
+            $new_translation->translation_date = date( "Y-m-d H:i:s" );
 
 
             try {
@@ -141,6 +142,7 @@ class copyAllSource2TargetController extends ajaxController {
                 self::$errorMap[ $errorCode ][ 'internalMessage' ] .= $e->getMessage();
                 $this->addError( $errorCode );
                 $database->rollback();
+
                 return;
             }
 
@@ -151,7 +153,7 @@ class copyAllSource2TargetController extends ajaxController {
         }
 
         // save all events
-        $batchEventCreator->save();
+        $batchEventCreator->save( new BatchReviewProcessor() );
 
         if ( !empty( $params[ 'segment_ids' ] ) ) {
             $counter = new CounterModel();

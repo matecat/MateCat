@@ -29,9 +29,9 @@ class Users_UserDao extends DataAccess_AbstractDao {
     /**
      * @param Users_UserStruct $userStruct
      *
-     * @return int|void
+     * @return int
      */
-    public function delete( Users_UserStruct $userStruct ) {
+    public function delete( Users_UserStruct $userStruct ): int {
 
         $conn = $this->database->getConnection();
         $stmt = $conn->prepare( " DELETE FROM users WHERE uid = ?" );
@@ -45,11 +45,11 @@ class Users_UserDao extends DataAccess_AbstractDao {
      *
      * @return Users_UserStruct[]
      */
-    public function getByUids( $uids_array ) {
+    public function getByUids( $uids_array ): array {
 
         $sanitized_array = [];
 
-        foreach ( $uids_array as $k => $v ) {
+        foreach ( $uids_array as $v ) {
             if ( !is_numeric( $v ) ) {
                 $sanitized_array[] = (int)$v[ 'uid' ];
             } else {
@@ -64,8 +64,11 @@ class Users_UserDao extends DataAccess_AbstractDao {
         $query = "SELECT * FROM " . self::TABLE .
                 " WHERE uid IN ( " . str_repeat( '?,', count( $sanitized_array ) - 1 ) . '?' . " ) ";
 
-        $stmt = $this->_getStatementForCache( $query );
+        $stmt = $this->_getStatementForQuery( $query );
 
+        /**
+         * @var $__resultSet Users_UserStruct[]
+         */
         $__resultSet = $this->_fetchObject(
                 $stmt,
                 new Users_UserStruct(),
@@ -86,23 +89,24 @@ class Users_UserDao extends DataAccess_AbstractDao {
      *
      * @return Users_UserStruct
      */
-    public function getByConfirmationToken( $token ) {
+    public function getByConfirmationToken( $token ): Users_UserStruct {
         $conn = $this->database->getConnection();
         $stmt = $conn->prepare( " SELECT * FROM users WHERE confirmation_token = ?" );
         $stmt->execute( [ $token ] );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, '\Users_UserStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, Users_UserStruct::class );
 
         return $stmt->fetch();
     }
 
     /**
      * @param Users_UserStruct $obj
+     *
      * @return Users_UserStruct
      * @throws ReflectionException
      */
-    public function createUser( Users_UserStruct $obj ) {
+    public function createUser( Users_UserStruct $obj ): ?Users_UserStruct {
         $conn = $this->database->getConnection();
-        \Database::obtain()->begin();
+        Database::obtain()->begin();
 
         $obj->create_date = date( 'Y-m-d H:i:s' );
 
@@ -131,12 +135,13 @@ class Users_UserDao extends DataAccess_AbstractDao {
 
     /**
      * @param Users_UserStruct $obj
+     *
      * @return Users_UserStruct
      * @throws ReflectionException
      */
     public function updateUser( Users_UserStruct $obj ) {
         $conn = $this->database->getConnection();
-        \Database::obtain()->begin();
+        Database::obtain()->begin();
 
         $stmt = $conn->prepare( "UPDATE users
             SET 
@@ -150,19 +155,19 @@ class Users_UserDao extends DataAccess_AbstractDao {
                 confirmation_token = :confirmation_token, 
                 oauth_access_token = :oauth_access_token 
             WHERE uid = :uid 
-        ");
+        " );
 
-        $stmt->execute( $obj->toArray([
-            'uid',
-            'email',
-            'salt',
-            'pass',
-            'create_date',
-            'first_name',
-            'last_name',
-            'confirmation_token',
-            'oauth_access_token'
-            ])
+        $stmt->execute( $obj->toArray( [
+                'uid',
+                'email',
+                'salt',
+                'pass',
+                'create_date',
+                'first_name',
+                'last_name',
+                'confirmation_token',
+                'oauth_access_token'
+        ] )
         );
 
         $record = $this->getByUid( $obj->uid );
@@ -174,29 +179,30 @@ class Users_UserDao extends DataAccess_AbstractDao {
     /**
      * @param $id
      *
-     * @return Users_UserStruct
+     * @return ?Users_UserStruct
      */
-    public function getByUid( $id ) {
-        $stmt           = $this->_getStatementForCache( self::$_query_user_by_uid );
-        $userQuery      = new Users_UserStruct();
-        $userQuery->uid = $id;
+    public function getByUid( $id ): ?Users_UserStruct {
+        $stmt = $this->_getStatementForQuery( self::$_query_user_by_uid );
 
-        return @$this->_fetchObject( $stmt,
-                $userQuery,
+        /**
+         * @var $res ?Users_UserStruct
+         */
+        $res = $this->_fetchObject( $stmt,
+                new Users_UserStruct(),
                 [
-                        'uid' => $userQuery->uid,
+                        'uid' => $id,
                 ]
-        )[ 0 ];
+        )[ 0 ] ?? null;
+
+        return $res;
     }
 
-    public function destroyCacheByUid( $id ) {
-        $stmt           = $this->_getStatementForCache( self::$_query_user_by_uid );
-        $userQuery      = new Users_UserStruct();
-        $userQuery->uid = $id;
+    public function destroyCacheByUid( $uid ) {
+        $stmt = $this->_getStatementForQuery( self::$_query_user_by_uid );
 
         return $this->_destroyObjectCache( $stmt,
                 [
-                        'uid' => $userQuery->uid = $id,
+                        'uid' => $uid,
                 ]
         );
     }
@@ -204,17 +210,20 @@ class Users_UserDao extends DataAccess_AbstractDao {
     /**
      * @param string $email
      *
-     * @return Users_UserStruct
+     * @return ?Users_UserStruct
      */
     public function getByEmail( $email ) {
-        $stmt             = $this->_getStatementForCache( self::$_query_user_by_email );
-        $UserQuery        = new Users_UserStruct();
-        $UserQuery->email = $email;
+        $stmt             = $this->_getStatementForQuery( self::$_query_user_by_email );
 
-        return @$this->_fetchObject( $stmt,
-                $UserQuery,
-                [ 'email' => $UserQuery->email ]
-        )[ 0 ];
+        /**
+         * @var $res ?Users_UserStruct
+         */
+        $res = $this->_fetchObject( $stmt,
+                new Users_UserStruct(),
+                [ 'email' => $email ]
+        )[ 0 ] ?? null;
+
+        return $res;
     }
 
     /**
@@ -223,7 +232,7 @@ class Users_UserDao extends DataAccess_AbstractDao {
      * @return bool|int
      */
     public function destroyCacheByEmail( $email ) {
-        $stmt             = $this->_getStatementForCache( self::$_query_user_by_email );
+        $stmt             = $this->_getStatementForQuery( self::$_query_user_by_email );
         $userQuery        = new Users_UserStruct();
         $userQuery->email = $email;
 
@@ -244,8 +253,8 @@ class Users_UserDao extends DataAccess_AbstractDao {
      */
     public function read( DataAccess_IDaoStruct $UserQuery ) {
 
-        list( $query, $where_parameters ) = $this->_buildReadQuery( $UserQuery );
-        $stmt = $this->_getStatementForCache( $query );
+        [ $query, $where_parameters ] = $this->_buildReadQuery( $UserQuery );
+        $stmt = $this->_getStatementForQuery( $query );
 
         return $this->_fetchObject( $stmt,
                 $UserQuery,
@@ -254,6 +263,9 @@ class Users_UserDao extends DataAccess_AbstractDao {
 
     }
 
+    /**
+     * @throws Exception
+     */
     protected function _buildReadQuery( DataAccess_IDaoStruct $UserQuery ) {
         $UserQuery = $this->sanitize( $UserQuery );
 
@@ -290,23 +302,27 @@ class Users_UserDao extends DataAccess_AbstractDao {
     /***
      * @param $job_id
      *
-     * @return Users_UserStruct[]
+     * @return Users_UserStruct
      */
     public function getProjectOwner( $job_id ) {
-        $job_id = (int)$job_id;
 
-        $stmt = $this->_getStatementForCache( self::$_query_owner_by_job_id );
+        $stmt = $this->_getStatementForQuery( self::$_query_owner_by_job_id );
 
-        return $this->_fetchObject( $stmt,
+        /**
+         * @var $res Users_UserStruct
+         */
+        $res = $this->_fetchObject( $stmt,
                 new Users_UserStruct(),
-                [ 'job_id' => $job_id ]
-        )[ 0 ];
+                [ 'job_id' => (int)$job_id ]
+        )[ 0 ] ?? null;
+
+        return $res;
     }
 
     public function getProjectAssignee( $project_id ) {
         $project_id = (int)$project_id;
 
-        $stmt = $this->_getStatementForCache( self::$_query_assignee_by_project_id );
+        $stmt = $this->_getStatementForQuery( self::$_query_assignee_by_project_id );
 
         return $this->_fetchObject( $stmt,
                 new Users_UserStruct(),

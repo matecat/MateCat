@@ -6,5 +6,7 @@ use Validator\Contracts\ValidatorObject;
 
 class JSONValidatorObject extends ValidatorObject {
 
-    public $json;
+    public string $json;
+    public object $decoded;
+
 }

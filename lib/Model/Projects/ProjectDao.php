@@ -486,9 +486,9 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
      */
     public function getProjectData( $pid, $project_password = null, $jid = null, $jpassword = null ) {
 
-        list( $query, $values ) = $this->_getProjectDataSQLAndValues( $pid, $project_password, $jid, $jpassword );
+        [ $query, $values ] = $this->_getProjectDataSQLAndValues( $pid, $project_password, $jid, $jpassword );
 
-        $stmt = $this->_getStatementForCache( $query );
+        $stmt = $this->_getStatementForQuery( $query );
 
         return $this->_fetchObject( $stmt,
                 new ShapelessConcreteStruct(),
@@ -498,9 +498,9 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
     }
 
     public function destroyCacheForProjectData( $pid, $project_password = null, $jid = null, $jpassword = null ) {
-        list( $query, $values ) = $this->_getProjectDataSQLAndValues( $pid, $project_password, $jid, $jpassword );
+        [ $query, $values ] = $this->_getProjectDataSQLAndValues( $pid, $project_password, $jid, $jpassword );
 
-        $stmt = $this->_getStatementForCache( $query );
+        $stmt = $this->_getStatementForQuery( $query );
 
         return $this->_destroyObjectCache( $stmt, $values );
 

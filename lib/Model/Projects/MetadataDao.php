@@ -44,7 +44,7 @@ class Projects_MetadataDao extends DataAccess_AbstractDao {
   }
 
   public function destroyMetadataCache( $id ){
-      $stmt = $this->_getStatementForCache( self::$_query_get_metadata );
+      $stmt = $this->_getStatementForQuery( self::$_query_get_metadata );
       return $this->_destroyObjectCache( $stmt, [ 'id_project' => $id ] );
   }
 
@@ -56,7 +56,7 @@ class Projects_MetadataDao extends DataAccess_AbstractDao {
      * @return Projects_MetadataStruct|null
      */
   public function get( $id_project, $key, $ttl = 0 ) {
-      $stmt = $this->setCacheTTL( $ttl )->_getStatementForCache(
+      $stmt = $this->setCacheTTL( $ttl )->_getStatementForQuery(
               "SELECT * FROM project_metadata WHERE " .
               " id_project = :id_project " .
               " AND `key` = :key "

@@ -21,12 +21,12 @@ class QualityFrameworkController extends KleinController {
      */
     public function project() {
 
-        $idProject = $this->request->param('id_project');
-        $password = $this->request->param('password');
+        $idProject = $this->request->param( 'id_project' );
+        $password  = $this->request->param( 'password' );
 
         try {
-            $project = (new \Projects_ProjectDao())->findByIdAndPassword($idProject, $password);
-        } catch (NotFoundException $exception) {
+            $project = ( new \Projects_ProjectDao() )->findByIdAndPassword( $idProject, $password );
+        } catch ( NotFoundException $exception ) {
             $this->response->code( 500 );
             $this->response->json( [
                     'error' => [
@@ -36,7 +36,7 @@ class QualityFrameworkController extends KleinController {
             exit();
         }
 
-        $this->response->json($this->renderQualityFramework($project));
+        $this->response->json( $this->renderQualityFramework( $project ) );
         exit();
     }
 
@@ -45,22 +45,22 @@ class QualityFrameworkController extends KleinController {
      */
     public function job() {
 
-        $idJob = $this->request->param('id_job');
-        $password = $this->request->param('password');
+        $idJob    = $this->request->param( 'id_job' );
+        $password = $this->request->param( 'password' );
 
-        $job = \CatUtils::getJobFromIdAndAnyPassword($idJob, $password);
+        $job = \CatUtils::getJobFromIdAndAnyPassword( $idJob, $password );
 
-        if($job === null){
+        if ( $job === null ) {
             $this->response->code( 500 );
             $this->response->json( [
-                'error' => [
-                    'message' => 'Job not found'
-                ]
+                    'error' => [
+                            'message' => 'Job not found'
+                    ]
             ] );
             exit();
         }
 
-        $this->response->json($this->renderQualityFramework($job->getProject()));
+        $this->response->json( $this->renderQualityFramework( $job->getProject() ) );
         exit();
     }
 
@@ -69,12 +69,11 @@ class QualityFrameworkController extends KleinController {
      *
      * @return array
      */
-    private function renderQualityFramework(Projects_ProjectStruct $projectStruct)
-    {
+    private function renderQualityFramework( Projects_ProjectStruct $projectStruct ) {
         $idQaModel = $projectStruct->id_qa_model;
-        $qaModel = ModelDao::findById($idQaModel);
+        $qaModel   = ModelDao::findById( $idQaModel );
 
-        if($qaModel === null){
+        if ( $qaModel === null ) {
             $this->response->code( 500 );
             $this->response->json( [
                     'error' => [
@@ -84,18 +83,18 @@ class QualityFrameworkController extends KleinController {
             exit();
         }
 
-        $json = $qaModel->getDecodedModel();
-        $json['template_model'] = null;
+        $json                     = $qaModel->getDecodedModel();
+        $json[ 'template_model' ] = null;
 
-        if($qaModel->qa_model_template_id){
+        if ( $qaModel->qa_model_template_id ) {
 
-            $parentTemplate = QAModelTemplateDao::get(['id' => $qaModel->qa_model_template_id ]);
+            $parentTemplate = QAModelTemplateDao::get( [ 'id' => $qaModel->qa_model_template_id ] );
 
-            if($parentTemplate === null){
+            if ( $parentTemplate === null ) {
                 return $json;
             }
 
-            $json['template_model'] = $parentTemplate->getDecodedModel()['model'];
+            $json[ 'template_model' ] = $parentTemplate->getDecodedModel()[ 'model' ];
 
         }
 

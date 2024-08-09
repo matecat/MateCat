@@ -30,54 +30,49 @@ class Translations_SegmentTranslationStruct extends DataAccess_AbstractDaoSilent
     public $serialized_errors_list;
     public $version_number = 0; // this value should be not null
 
-    public function isReviewedStatus() {
+    public function isReviewedStatus(): bool {
         return in_array( $this->status, Constants_TranslationStatus::$REVISION_STATUSES );
     }
 
-    public function isICE() {
-        // in some cases ICEs are not locked ( translations from bilingual xliff ). Only consider locked ICEs
+    public function isICE(): bool {
+        // In some cases, ICEs are not locked (translations from bilingual xliff). Only consider locked ICEs
         return $this->match_type == Constants_SegmentTranslationsMatchType::ICE && $this->locked;
     }
 
-    public function isPreTranslated(){
-        return $this->match_type == Constants_SegmentTranslationsMatchType::ICE && !$this->locked;
+    /**
+     * @return bool
+     */
+    public function isPreTranslated(): bool {
+        return $this->tm_analysis_status == 'SKIPPED';
     }
 
-    public function isPreApprovedFromTM(){
-        return
-                ( $this->match_type == Constants_SegmentTranslationsMatchType::_100 || $this->match_type == Constants_SegmentTranslationsMatchType::_100_PUBLIC )&&
-                !$this->locked && /* redundant a 100% is not locked */
-                $this->status == Constants_TranslationStatus::STATUS_APPROVED &&
-                empty( $this->version_number );
-    }
-
-    public function isPostReviewedStatus() {
+    public function isPostReviewedStatus(): bool {
         return in_array( $this->status, Constants_TranslationStatus::$POST_REVISION_STATUSES );
     }
 
-    public function isRejected(){
+    public function isRejected(): bool {
         return $this->status == Constants_TranslationStatus::STATUS_REJECTED;
     }
 
-    public function isTranslationStatus() {
+    public function isTranslationStatus(): bool {
         return !$this->isReviewedStatus();
     }
 
     /**
-     * @return Jobs_JobStruct
+     * @return Jobs_JobStruct|null
      */
-    public function getJob() {
+    public function getJob(): ?Jobs_JobStruct {
         return $this->cachable( __FUNCTION__, $this->id_job, function ( $id_job ) {
-            return Jobs_JobDao::getById( $id_job )[ 0 ];
+            return Jobs_JobDao::getById( $id_job )[ 0 ] ?? null;
         } );
     }
 
     /**
-     * @return Jobs_JobStruct[]|null
+     * @return Chunks_ChunkStruct[]|null
      */
-    public function getChunk() {
+    public function getChunk(): ?Chunks_ChunkStruct {
         return $this->cachable( __FUNCTION__, $this->id_job, function ( $id_job ) {
-            return Jobs_JobDao::getById( $id_job )[ 0 ];
+            return Jobs_JobDao::getById( $id_job, 0, new Chunks_ChunkStruct() )[ 0 ] ?? null;
         } );
     }
 

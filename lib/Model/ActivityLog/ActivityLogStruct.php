@@ -79,7 +79,7 @@ class ActivityLogStruct extends DataAccess_AbstractDaoSilentStruct implements Da
 
     const TRANSLATION_DELIVERED = 101;
 
-    protected $cached_results = [];
+    protected array $cached_results = [];
 
     /**
      * @var int

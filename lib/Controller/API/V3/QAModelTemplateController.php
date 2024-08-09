@@ -4,8 +4,9 @@ namespace API\V3;
 
 use API\V2\KleinController;
 use API\V2\Validators\LoginValidator;
+use INIT;
 use QAModelTemplate\QAModelTemplateDao;
-use Validator\Errors\JSONValidatorError;
+use Validator\Errors\JSONValidatorException;
 
 
 class QAModelTemplateController extends KleinController {
@@ -42,11 +43,11 @@ class QAModelTemplateController extends KleinController {
     public function create() {
 
         // accept only JSON
-        if($this->request->headers()->get('Content-Type') !== 'application/json'){
+        if(!$this->isJsonRequest()){
+            $this->response->code(405);
             $this->response->json([
                 'message' => 'Method not allowed'
             ]);
-            $this->response->code(405);
             exit();
         }
 
@@ -57,7 +58,7 @@ class QAModelTemplateController extends KleinController {
 
             $this->response->code(201);
             return $this->response->json($model);
-        } catch (JSONValidatorError $exception){
+        } catch (JSONValidatorException $exception){
             $this->response->code(500);
 
             return $this->response->json($exception);
@@ -133,7 +134,7 @@ class QAModelTemplateController extends KleinController {
 
             $this->response->code(200);
             return $this->response->json($model);
-        } catch (JSONValidatorError $exception){
+        } catch (JSONValidatorException $exception){
             $this->response->code(500);
 
             return $this->response->json($exception);
@@ -195,7 +196,7 @@ class QAModelTemplateController extends KleinController {
             $validator = new \Validator\JSONValidator($this->getQaModelSchema());
             $validator->validate($validatorObject);
 
-            $errors = $validator->getErrors();
+            $errors = $validator->getExceptions();
             $code = ($validator->isValid()) ? 200 : 500;
 
             $this->response->code($code);
@@ -216,6 +217,6 @@ class QAModelTemplateController extends KleinController {
      */
     private function getQaModelSchema()
     {
-        return file_get_contents( \INIT::$ROOT . '/inc/validation/schema/qa_model.json' );
+        return file_get_contents( INIT::$ROOT . '/inc/validation/schema/qa_model.json' );
     }
 }

@@ -182,8 +182,8 @@ class GlossariesController extends AbstractStatefulKleinController {
         $validator            = new GlossaryCSVValidator();
         $validator->validate( $validatorObject );
 
-        if ( count( $validator->getErrors() ) > 0 ) {
-            throw new ValidationError( $validator->getErrors()[ 0 ] );
+        if ( count( $validator->getExceptions() ) > 0 ) {
+            throw new ValidationError( $validator->getExceptions()[ 0 ] );
         }
 
         return $validator;

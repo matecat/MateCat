@@ -19,7 +19,7 @@ $klein->with('/api/v3/projects/[:id_project]/[:password]', function() {
 
 $klein->with( '/api/v3/jobs/[:id_job]/[:password]', function () {
     route( '', 'GET', '\API\V3\ChunkController', 'show' ); //this does not show some info like teams and translators
-    route( '/quality-report/segments', 'GET', 'Features\SecondPassReview\Controller\API\QualityReportController', 'segments' );
+    route( '/quality-report/segments', 'GET', 'Features\ReviewExtended\Controller\API\QualityReportController', 'segments' );
     route( '/files', 'GET', '\API\V3\FileInfoController', 'getInfo' );
     route( '/file/[:id_file]/instructions', 'GET', '\API\V3\FileInfoController', 'getInstructions' );
     route( '/file/[:id_file]/[:id_file_parts]/instructions', 'GET', '\API\V3\FileInfoController', 'getInstructionsByFilePartsId' );
@@ -105,4 +105,23 @@ $klein->with( '/api/v3/project-template', function () {
     route( '/[:id]', 'DELETE', '\API\V3\ProjectTemplateController', 'delete' );
     route( '/[:id]', 'PUT', '\API\V3\ProjectTemplateController', 'update' );
     route( '/[:id]', 'GET', '\API\V3\ProjectTemplateController', 'get' );
+} );
+
+// FILTERS AND XLIFF CONFIG
+$klein->with( '/api/v3/xliff-config-template', function () {
+    route( '/schema', 'GET', '\API\V3\XliffConfigTemplateController', 'schema' );
+    route( '/', 'GET', '\API\V3\XliffConfigTemplateController', 'all' );
+    route( '/', 'POST', '\API\V3\XliffConfigTemplateController', 'create' );
+    route( '/[:id]', 'DELETE', '\API\V3\XliffConfigTemplateController', 'delete' );
+    route( '/[:id]', 'PUT', '\API\V3\XliffConfigTemplateController', 'update' );
+    route( '/[:id]', 'GET', '\API\V3\XliffConfigTemplateController', 'get' );
+} );
+
+$klein->with( '/api/v3/filters-config-template', function () {
+    route( '/schema', 'GET', '\API\V3\FiltersConfigTemplateController', 'schema' );
+    route( '/', 'GET', '\API\V3\FiltersConfigTemplateController', 'all' );
+    route( '/', 'POST', '\API\V3\FiltersConfigTemplateController', 'create' );
+    route( '/[:id]', 'DELETE', '\API\V3\FiltersConfigTemplateController', 'delete' );
+    route( '/[:id]', 'PUT', '\API\V3\FiltersConfigTemplateController', 'update' );
+    route( '/[:id]', 'GET', '\API\V3\FiltersConfigTemplateController', 'get' );
 } );

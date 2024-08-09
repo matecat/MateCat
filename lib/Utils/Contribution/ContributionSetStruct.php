@@ -26,7 +26,7 @@ use TaskRunner\Commons\Params;
  */
 class ContributionSetStruct extends DataAccess_AbstractDaoObjectStruct implements DataAccess_IDaoStruct {
 
-    protected $cached_results = array();
+    protected array $cached_results = array();
 
     /**
      * @var int

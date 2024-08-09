@@ -13,4 +13,8 @@
 
 interface DataAccess_IDaoStruct {
 
+    public function getArrayCopy();
+    public function count();
+    public function toArray( $mask = null );
+
 }

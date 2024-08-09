@@ -20,9 +20,9 @@ class PreserveSpecialStringsTest extends AbstractTest {
         $this->engine_struct_param       = new EnginesModel_EngineStruct();
         $this->engine_struct_param->type = "MT";
 
-        $this->databaseInstance = new Engines_NONE( $this->engine_struct_param );
-        $this->reflector        = new ReflectionClass( $this->databaseInstance );
-        $this->method           = $this->reflector->getMethod( "_preserveSpecialStrings" );
+        $this->jobDao    = new Engines_NONE( $this->engine_struct_param );
+        $this->reflector = new ReflectionClass( $this->jobDao );
+        $this->method    = $this->reflector->getMethod( "_preserveSpecialStrings" );
         $this->method->setAccessible( true );
 
 
@@ -35,7 +35,7 @@ class PreserveSpecialStringsTest extends AbstractTest {
     public function test__preserveSpecialStrings() {
         $input_string    = "la casa è rossa";
         $expected_string = "la casa è rossa";
-        $this->assertEquals( $expected_string, $this->method->invoke( $this->databaseInstance, $input_string ) );
+        $this->assertEquals( $expected_string, $this->method->invoke( $this->jobDao, $input_string ) );
     }
 
 
@@ -53,7 +53,7 @@ LAB;
 "lsdfòoi2342'ì850dàrpKPHIOtlh234'950\\     è' rossa"
         2345\\\          ///* /5*   
 LAB;
-        $this->assertEquals( $expected_string, $this->method->invoke( $this->databaseInstance, $input_string ) );
+        $this->assertEquals( $expected_string, $this->method->invoke( $this->jobDao, $input_string ) );
     }
 
 
@@ -83,7 +83,7 @@ LABEL;
                 da
      //           
 LABEL;
-        $this->assertEquals( $expected_string, $this->method->invoke( $this->databaseInstance, $input_string ) );
+        $this->assertEquals( $expected_string, $this->method->invoke( $this->jobDao, $input_string ) );
     }
 
     /**
@@ -102,7 +102,7 @@ LABEL;
     "File %@ not found." = "Le fichier %@ n’existe pas.";
 LABEL;
 
-        $this->assertRegExp( '/[^%d,%@]/', $this->method->invoke( $this->databaseInstance, $input_string ) );
+        $this->assertRegExp( '/[^%d,%@]/', $this->method->invoke( $this->jobDao, $input_string ) );
 
     }
 

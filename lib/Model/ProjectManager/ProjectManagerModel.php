@@ -103,8 +103,9 @@ class ProjectManagerModel {
                         segment_hash, 
                         status, 
                         translation, 
+                        suggestion,
                         translation_date, /* NOW() */
-                        tm_analysis_status, /* DONE */
+                        tm_analysis_status, /* SKIPPED */
                         locked, 
                         match_type, 
                         eq_word_count,
@@ -116,7 +117,7 @@ class ProjectManagerModel {
                 )
                 VALUES ";
 
-        $tuple_marks = "( ?, ?, ?, ?, ?, NOW(), 'DONE', ?, ?, ?, ?, ?, ?, ?, ? )";
+        $tuple_marks = "( ?, ?, ?, ?, ?, ?, NOW(), 'SKIPPED', ?, ?, ?, ?, ?, ?, ?, ? )";
 
         Log::doJsonLog( "Pre-Translations: Total Rows to insert: " . count( $query_translations_values ) );
 

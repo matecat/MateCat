@@ -7,26 +7,32 @@ use BasicFeatureStruct;
 use Chunks_ChunkCompletionEventStruct;
 use Chunks_ChunkStruct;
 use Constants;
+use createProjectController;
 use Database;
 use Exception;
 use Exceptions\NotFoundException;
 use Features;
 use Features\ProjectCompletion\CompletionEventStruct;
-use Features\ReviewExtended\BatchReviewProcessor;
+use Features\ReviewExtended\ChunkReviewModel;
+use Features\ReviewExtended\Controller\API\Json\ProjectUrls;
 use Features\ReviewExtended\IChunkReviewModel;
-use Features\ReviewExtended\ISegmentTranslationModel;
 use Features\ReviewExtended\Model\QualityReportModel;
-use Features\TranslationVersions\Handlers\TranslationEventsHandler;
-use Features\TranslationVersions\Model\TranslationEvent;
+use Features\ReviewExtended\ReviewedWordCountModel;
+use Features\ReviewExtended\ReviewUtils;
+use Features\ReviewExtended\TranslationIssueModel;
+use Features\TranslationEvents\Model\TranslationEvent;
+use Features\TranslationEvents\Model\TranslationEventDao;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use INIT;
 use Jobs_JobDao;
 use Jobs_JobStruct;
+use Klein\Klein;
 use Log;
 use LQA\ChunkReviewDao;
 use LQA\ChunkReviewStruct;
 use LQA\ModelDao;
+use NewController;
 use Predis\Connection\ConnectionException;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
@@ -47,6 +53,79 @@ abstract class AbstractRevisionFeature extends BaseFeature {
 
     public function __construct( BasicFeatureStruct $feature ) {
         parent::__construct( $feature );
+    }
+
+    /**
+     * @param array $projectFeatures
+     * @param $controller NewController|createProjectController
+     *
+     * @return array
+     * @throws Exception
+     */
+    public function filterCreateProjectFeatures( array $projectFeatures, $controller ): array {
+        $projectFeatures[ static::FEATURE_CODE ] = new BasicFeatureStruct( [ 'feature_code' => static::FEATURE_CODE ] );
+        return $projectFeatures;
+    }
+
+    public static function loadRoutes( Klein $klein ) {
+        route( '/project/[:id_project]/[:password]/reviews', 'POST',
+                'Features\ReviewExtended\Controller\ReviewsController', 'createReview' );
+    }
+
+    public static function projectUrls( $formatted ) {
+        return new ProjectUrls( $formatted->getData() );
+    }
+
+    public function filterGetSegmentsResult( $data, Chunks_ChunkStruct $chunk ) {
+
+        if ( empty( $data[ 'files' ] ) ) {
+            // this means that there are no more segments after
+            return $data;
+        }
+
+        reset( $data[ 'files' ] );
+
+        $firstFile = current( $data[ 'files' ] );
+        $lastFile  = end( $data[ 'files' ] );
+        $firstSid  = $firstFile[ 'segments' ][ 0 ][ 'sid' ];
+
+        if ( isset( $lastFile[ 'segments' ] ) and is_array( $lastFile[ 'segments' ] ) ) {
+            $lastSegment = end( $lastFile[ 'segments' ] );
+            $lastSid     = $lastSegment[ 'sid' ];
+
+            $segment_translation_events = ( new TranslationEventDao() )->getLatestEventsInSegmentInterval(
+                    $chunk->id, $firstSid, $lastSid );
+
+            $by_id_segment = [];
+            foreach ( $segment_translation_events as $record ) {
+                $by_id_segment[ $record->id_segment ] = $record;
+            }
+
+            foreach ( $data[ 'files' ] as $file => $content ) {
+                foreach ( $content[ 'segments' ] as $key => $segment ) {
+
+                    if ( isset( $by_id_segment[ $segment[ 'sid' ] ] ) ) {
+                        $data [ 'files' ] [ $file ] [ 'segments' ] [ $key ] [ 'revision_number' ] = ReviewUtils::sourcePageToRevisionNumber(
+                                $by_id_segment[ $segment[ 'sid' ] ]->source_page
+                        );
+                    }
+
+                }
+            }
+        }
+
+        return $data;
+    }
+
+    /**
+     * @param ChunkReviewStruct      $chunkReview
+     * @param Projects_ProjectStruct $projectStruct
+     *
+     * @throws Exception
+     */
+    public function chunkReviewRecordCreated( ChunkReviewStruct $chunkReview, Projects_ProjectStruct $projectStruct ) {
+        // This is needed to properly populate advancement wc for ICE matches
+        ( new ChunkReviewModel( $chunkReview ) )->recountAndUpdatePassFailResult( $projectStruct );
     }
 
     /**
@@ -96,17 +175,6 @@ abstract class AbstractRevisionFeature extends BaseFeature {
         return $chunk_review->review_password;
     }
 
-
-    public function filter_get_segments_segment_data( $seg ) {
-        if ( isset( $seg[ 'edit_distance' ] ) ) {
-            $seg[ 'edit_distance' ] = round( $seg[ 'edit_distance' ] / 1000, 2 );
-        } else {
-            $seg[ 'edit_distance' ] = 0;
-        }
-
-        return $seg;
-    }
-
     /**
      * Performs post project creation tasks for the current project.
      * Evaluates if a qa model is present in the feature options.
@@ -123,9 +191,9 @@ abstract class AbstractRevisionFeature extends BaseFeature {
     }
 
     /**
-     * @param Chunks_ChunkStruct[]   $chunksArray
-     * @param Projects_ProjectStruct $project
-     * @param array                  $options
+     * @param Chunks_ChunkStruct[]|ChunkReviewStruct[] $chunksArray
+     * @param Projects_ProjectStruct                   $project
+     * @param array                                    $options
      *
      * @return array
      * @throws Exception
@@ -273,6 +341,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
 
         ChunkReviewDao::deleteByJobId( $id_job );
 
+        /** @var $chunksStructArray Chunks_ChunkStruct[] */
         $chunksStructArray = Jobs_JobDao::getById( $id_job, 0, new Chunks_ChunkStruct() );
 
         $reviews = [];
@@ -308,19 +377,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
     }
 
     /**
-     * @param TranslationEventsHandler $eventCreator
      *
-     * @throws Exception
-     * @internal param TranslationEvent $event
-     */
-    public function processReviewTransitions( TranslationEventsHandler $eventCreator ) {
-        $batchReviewProcessor = new BatchReviewProcessor( $eventCreator );
-        $batchReviewProcessor->process();
-    }
-
-    /**
-     *
-     * /TODO move in review Improved???
      * project_completion_event_saved
      *
      * @param Chunks_ChunkStruct    $chunk
@@ -527,22 +584,18 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      * @return IChunkReviewModel
      */
     public function getChunkReviewModel( ChunkReviewStruct $chunkReviewStruct ) {
-        $class_name = get_class( $this ) . '\ChunkReviewModel';
-
-        return new $class_name( $chunkReviewStruct );
+        return new ChunkReviewModel( $chunkReviewStruct );
     }
 
     /**
      * @param TranslationEvent    $translation
-     *
+     * @param CounterModel        $jobWordCounter
      * @param ChunkReviewStruct[] $chunkReviews
      *
-     * @return ISegmentTranslationModel
+     * @return ReviewedWordCountModel
      */
-    public function getSegmentTranslationModel( TranslationEvent $translation, CounterModel $jobWordCounter, array $chunkReviews = [] ) {
-        $class_name = get_class( $this ) . '\SegmentTranslationModel';
-
-        return new $class_name( $translation, $jobWordCounter, $chunkReviews );
+    public function getReviewedWordCountModel( TranslationEvent $translation, CounterModel $jobWordCounter, array $chunkReviews = [] ) {
+        return new ReviewedWordCountModel( $translation, $jobWordCounter, $chunkReviews );
     }
 
     /**
@@ -553,14 +606,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      * @return mixed
      */
     public function getTranslationIssueModel( $id_job, $password, $issue ) {
-        $class_name = get_class( $this ) . '\TranslationIssueModel';
-
-        return new $class_name( $id_job, $password, $issue );
-    }
-
-
-    public function summary_project_type( $old_value ) {
-        return 'new';
+        return new TranslationIssueModel( $id_job, $password, $issue );
     }
 
 }

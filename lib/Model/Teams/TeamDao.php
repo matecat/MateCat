@@ -62,7 +62,7 @@ class TeamDao extends \DataAccess_AbstractDao {
      */
     public function findById( $id ) {
 
-        $stmt          = $this->_getStatementForCache( self::$_query_find_by_id );
+        $stmt          = $this->_getStatementForQuery( self::$_query_find_by_id );
         $teamQuery     = new TeamStruct();
         $teamQuery->id = $id;
 
@@ -138,7 +138,7 @@ class TeamDao extends \DataAccess_AbstractDao {
      */
     public function getAssigneeWithProjectsByTeam( TeamStruct $team ){
 
-        $stmt = $this->_getStatementForCache( self::$_query_get_assignee_with_projects );
+        $stmt = $this->_getStatementForQuery( self::$_query_get_assignee_with_projects );
         return $this->_fetchObject( $stmt,
                 new MembershipStruct(),
                 array(
@@ -154,7 +154,7 @@ class TeamDao extends \DataAccess_AbstractDao {
      * @return bool|int
      */
     public function destroyCacheAssignee( TeamStruct $team ){
-        $stmt = $this->_getStatementForCache( self::$_query_get_assignee_with_projects );
+        $stmt = $this->_getStatementForQuery( self::$_query_get_assignee_with_projects );
         return $this->_destroyObjectCache( $stmt,
                 array(
                         'id_team' => $team->id,
@@ -163,7 +163,7 @@ class TeamDao extends \DataAccess_AbstractDao {
     }
 
     public function destroyCacheById( $id ) {
-        $stmt          = $this->_getStatementForCache( self::$_query_find_by_id );
+        $stmt          = $this->_getStatementForQuery( self::$_query_find_by_id );
         $teamQuery     = new TeamStruct();
         $teamQuery->id = $id;
 
@@ -179,7 +179,7 @@ class TeamDao extends \DataAccess_AbstractDao {
     }
 
     public function getPersonalByUid( $uid ) {
-        $stmt                  = $this->_getStatementForCache( self::$_query_get_personal_by_id );
+        $stmt                  = $this->_getStatementForQuery( self::$_query_get_personal_by_id );
         $teamQuery             = new TeamStruct();
         $teamQuery->created_by = $uid;
 
@@ -193,7 +193,7 @@ class TeamDao extends \DataAccess_AbstractDao {
     }
 
     public function destroyCachePersonalByUid( $uid ) {
-        $stmt                  = $this->_getStatementForCache( self::$_query_get_personal_by_id );
+        $stmt                  = $this->_getStatementForQuery( self::$_query_get_personal_by_id );
         $teamQuery             = new TeamStruct();
         $teamQuery->created_by = $uid;
 
@@ -207,7 +207,7 @@ class TeamDao extends \DataAccess_AbstractDao {
 
     public function findUserCreatedTeams( \Users_UserStruct $user ) {
 
-        $stmt = $this->_getStatementForCache( self::$_query_get_user_teams );
+        $stmt = $this->_getStatementForQuery( self::$_query_get_user_teams );
 
         $teamQuery             = new TeamStruct();
         $teamQuery->created_by = $user->uid;
@@ -222,7 +222,7 @@ class TeamDao extends \DataAccess_AbstractDao {
     }
 
     public function destroyCacheUserCreatedTeams( \Users_UserStruct $user ) {
-        $stmt = $this->_getStatementForCache( self::$_query_get_user_teams );
+        $stmt = $this->_getStatementForQuery( self::$_query_get_user_teams );
 
         $teamQuery             = new TeamStruct();
         $teamQuery->created_by = $user->uid;
