@@ -287,7 +287,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
         $result = $pager->getPagination( $totals, $paginationParameters );
 
         $models   = [];
-        $models[] = self::getDefaultTemplate( $uid );
+        $models[] = self::getDefaultTemplate( $uid ); // YYY REMOVE
 
         $result[ 'items' ] = array_merge( $models, $result[ 'items' ] );
 
@@ -302,7 +302,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
      * @return ProjectTemplateStruct|null
      * @throws ReflectionException
      */
-    public static function getTheDefaultProject( int $uid, int $ttl = 0 ): ?ProjectTemplateStruct {
+    public static function getTheDefaultProject( int $uid, int $ttl = 60 * 60 * 24 ): ?ProjectTemplateStruct {
         $stmt = self::getInstance()->_getStatementForQuery( self::query_default );
         /**
          * @var $result ProjectTemplateStruct[]
@@ -322,7 +322,8 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
      * @return ProjectTemplateStruct|null
      * @throws ReflectionException
      */
-    public static function getById( int $id, int $ttl = 60 ) {
+    public
+    static function getById( int $id, int $ttl = 60 ) {
         $stmt = self::getInstance()->_getStatementForQuery( self::query_by_id );
         /**
          * @var $result ProjectTemplateStruct[]
@@ -342,7 +343,8 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
      * @return ProjectTemplateStruct|null
      * @throws ReflectionException
      */
-    public static function getByIdAndUser( int $id, int $uid, int $ttl = 60 ): ?ProjectTemplateStruct {
+    public
+    static function getByIdAndUser( int $id, int $uid, int $ttl = 60 ): ?ProjectTemplateStruct {
         $stmt = self::getInstance()->_getStatementForQuery( self::query_by_id_and_uid );
         /**
          * @var $result ProjectTemplateStruct[]
@@ -363,7 +365,8 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
      * @return ProjectTemplateStruct|null
      * @throws ReflectionException
      */
-    public static function getByUidAndName( int $uid, string $name, int $ttl = 60 ): ?ProjectTemplateStruct {
+    public
+    static function getByUidAndName( int $uid, string $name, int $ttl = 60 ): ?ProjectTemplateStruct {
         $stmt = self::getInstance()->_getStatementForQuery( self::query_by_uid_name );
         /**
          * @var $result ProjectTemplateStruct[]
@@ -382,7 +385,8 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
      * @return ProjectTemplateStruct
      * @throws Exception
      */
-    public static function save( ProjectTemplateStruct $projectTemplateStruct ): ProjectTemplateStruct {
+    public
+    static function save( ProjectTemplateStruct $projectTemplateStruct ): ProjectTemplateStruct {
         $sql = "INSERT INTO " . self::TABLE .
                 " ( `name`, `is_default`, `uid`, `id_team`, `speech2text`, `lexica`, `tag_projection`, `cross_language_matches`, `segmentation_rule`, `tm`, `mt`, `payable_rate_template_id`,`qa_model_template_id`, `filters_template_id`, `xliff_config_template_id`, `pretranslate_100`, `pretranslate_101`, `get_public_matches`, `created_at` ) " .
                 " VALUES " .
@@ -436,7 +440,8 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
      * @return ProjectTemplateStruct
      * @throws Exception
      */
-    public static function update( ProjectTemplateStruct $projectTemplateStruct ): ProjectTemplateStruct {
+    public
+    static function update( ProjectTemplateStruct $projectTemplateStruct ): ProjectTemplateStruct {
         $sql = "UPDATE " . self::TABLE . " SET 
             `name` = :name, 
             `is_default` = :is_default, 
@@ -502,7 +507,8 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
      *
      * @throws ReflectionException
      */
-    public static function markAsNotDefault( int $uid, int $excludeId ) {
+    public
+    static function markAsNotDefault( int $uid, int $excludeId ) {
         $sql = "UPDATE " . self::TABLE . " SET 
             `is_default` = :is_default
              WHERE uid= :uid 
@@ -524,6 +530,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
         ] );
 
         foreach ( $stmt->fetchAll() as $project ) {
+            self::destroyDefaultTemplateCache( $conn, $uid );
             self::destroyQueryByIdCache( $conn, $project[ 'id' ] );
             self::destroyQueryByIdAndUserCache( $conn, $project[ 'id' ], $uid );
             self::destroyQueryPaginated( $uid );
@@ -537,7 +544,8 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
      * @return int
      * @throws ReflectionException
      */
-    public static function remove( int $id, int $uid ): int {
+    public
+    static function remove( int $id, int $uid ): int {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( "DELETE FROM " . self::TABLE . " WHERE id = :id " );
         $stmt->execute( [ 'id' => $id ] );
@@ -556,7 +564,8 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
      *
      * @throws ReflectionException
      */
-    private static function destroyQueryByUidAndNameCache( PDO $conn, int $uid, string $name ) {
+    private
+    static function destroyQueryByUidAndNameCache( PDO $conn, int $uid, string $name ) {
         $stmt = $conn->prepare( self::query_by_uid_name );
         self::getInstance()->_destroyObjectCache( $stmt, [ 'uid' => $uid, 'name' => $name, ] );
     }
@@ -567,7 +576,8 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
      *
      * @throws ReflectionException
      */
-    private static function destroyQueryByIdCache( PDO $conn, int $id ) {
+    private
+    static function destroyQueryByIdCache( PDO $conn, int $id ) {
         $stmt = $conn->prepare( self::query_by_id );
         self::getInstance()->_destroyObjectCache( $stmt, [ 'id' => $id, ] );
     }
@@ -579,7 +589,8 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
      *
      * @throws ReflectionException
      */
-    private static function destroyQueryByIdAndUserCache( PDO $conn, int $id, int $uid ) {
+    private
+    static function destroyQueryByIdAndUserCache( PDO $conn, int $id, int $uid ) {
         $stmt = $conn->prepare( self::query_by_id_and_uid );
         self::getInstance()->_destroyObjectCache( $stmt, [ 'id' => $id, 'uid' => $uid ] );
     }
@@ -589,8 +600,17 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
      *
      * @throws ReflectionException
      */
-    private static function destroyQueryPaginated( int $uid ) {
+    private
+    static function destroyQueryPaginated( int $uid ) {
         self::getInstance()->_destroyCache( self::paginated_map_key . ":" . $uid, false );
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    public static function destroyDefaultTemplateCache( PDO $conn, int $uid ) {
+        $stmt = $conn->prepare( self::query_default );
+        self::getInstance()->_destroyObjectCache( $stmt, [ 'uid' => $uid, ] );
     }
 
 }

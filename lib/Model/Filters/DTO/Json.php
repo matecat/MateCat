@@ -6,6 +6,9 @@ use Countable;
 use JsonSerializable;
 
 class Json implements JsonSerializable, Countable {
+
+    use DefaultTrait;
+
     private bool  $extract_arrays         = false;
     private bool  $escape_forward_slashes = false;
     private array $translate_keys         = [];

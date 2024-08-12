@@ -248,6 +248,18 @@ class ProjectTemplateController extends KleinController {
     }
 
     /**
+     * @throws Exception
+     */
+    public function default() {
+
+        $this->response->status()->setCode( 200 );
+        $this->response->json(
+                ProjectTemplateDao::getDefaultTemplate( $this->getUser()->uid )
+        );
+
+    }
+
+    /**
      * @return false|string
      */
     private function getProjectTemplateModelSchema() {

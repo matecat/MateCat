@@ -6,6 +6,9 @@ use Countable;
 use JsonSerializable;
 
 class Yaml implements JsonSerializable, Countable {
+
+    use DefaultTrait;
+
     private bool  $extract_arrays        = false;
     private array $translate_keys        = [];
     private array $do_not_translate_keys = [];

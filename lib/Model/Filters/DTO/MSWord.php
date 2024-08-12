@@ -6,6 +6,9 @@ use Countable;
 use JsonSerializable;
 
 class MSWord implements JsonSerializable, Countable {
+
+    use DefaultTrait;
+
     private bool  $extract_doc_properties   = false;
     private bool  $extract_comments         = false;
     private bool  $extract_headers_footers  = false;

@@ -10,7 +10,6 @@ use Exception;
 use Pagination\Pager;
 use Pagination\PaginationParameters;
 use PDO;
-use Projects\ProjectTemplateStruct;
 use ReflectionException;
 use Utils;
 
@@ -111,8 +110,8 @@ class XliffConfigTemplateDao extends DataAccess_AbstractDao {
 
         $result = $pager->getPagination( $totals, $paginationParameters );
 
-        $models   = [];
-        $models[] = self::getDefaultTemplate( $uid );
+        $models = [];
+//        $models[] = self::getDefaultTemplate( $uid );
 
         foreach ( $result[ 'items' ] as $item ) {
             $models[] = self::hydrateTemplateStruct( $item->getArrayCopy() );
@@ -192,28 +191,6 @@ class XliffConfigTemplateDao extends DataAccess_AbstractDao {
         }
 
         return $res;
-    }
-
-    /**
-     * @param int    $uid
-     * @param string $name
-     * @param int    $ttl
-     *
-     * @return XliffConfigTemplateStruct|null
-     * @throws Exception
-     */
-    public static function getByUidAndName( int $uid, string $name, int $ttl = 60 ) {
-        $stmt   = self::getInstance()->_getStatementForQuery( self::query_by_uid_name );
-        $result = self::getInstance()->setCacheTTL( $ttl )->_fetchObject( $stmt, new ProjectTemplateStruct(), [
-                'uid'  => $uid,
-                'name' => $name,
-        ] );
-
-        if ( empty( $result ) ) {
-            return null;
-        }
-
-        return self::hydrateTemplateStruct( (array)$result[ 0 ] );
     }
 
     /**

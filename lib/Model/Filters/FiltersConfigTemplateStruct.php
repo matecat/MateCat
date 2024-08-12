@@ -13,8 +13,10 @@ use Filters\DTO\MSWord;
 use Filters\DTO\Xml;
 use Filters\DTO\Yaml;
 use JsonSerializable;
+use stdClass;
 
 class FiltersConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruct implements JsonSerializable {
+
     public ?int           $id            = null;
     public string         $name;
     public int            $uid;
@@ -220,4 +222,25 @@ class FiltersConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruct imp
                 'modifiedAt'    => DateTimeUtil::formatIsoDate( $this->modified_at )
         ];
     }
+
+    public static function default( int $uid ): stdClass {
+
+        $default       = new stdClass();
+        $default->id   = 0;
+        $default->uid  = $uid;
+        $default->name = "default";
+
+        $default->xml           = Xml::default();
+        $default->yaml          = Yaml::default();
+        $default->json          = Json::default();
+        $default->ms_word       = MSWord::default();
+        $default->ms_excel      = MSExcel::default();
+        $default->ms_powerpoint = MSPowerpoint::default();
+        $default->created_at    = date( "Y-m-d H:i:s" );
+        $default->modified_at   = date( "Y-m-d H:i:s" );
+
+        return $default;
+
+    }
+
 }

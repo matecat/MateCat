@@ -7,17 +7,12 @@ use DataAccess_AbstractDao;
 use Database;
 use DateTime;
 use Exception;
-use Filters\DTO\Json;
-use Filters\DTO\MSExcel;
-use Filters\DTO\MSPowerpoint;
-use Filters\DTO\MSWord;
-use Filters\DTO\Xml;
-use Filters\DTO\Yaml;
 use Pagination\Pager;
 use Pagination\PaginationParameters;
 use PDO;
 use Projects\ProjectTemplateStruct;
 use ReflectionException;
+use stdClass;
 use Utils;
 
 class FiltersConfigTemplateDao extends DataAccess_AbstractDao {
@@ -49,25 +44,10 @@ class FiltersConfigTemplateDao extends DataAccess_AbstractDao {
     /**
      * @param int $uid
      *
-     * @return FiltersConfigTemplateStruct
+     * @return stdClass
      */
-    public static function getDefaultTemplate( int $uid ): FiltersConfigTemplateStruct {
-        $default       = new FiltersConfigTemplateStruct();
-        $default->id   = 0;
-        $default->uid  = $uid;
-        $default->name = "default";
-
-        $default->setJson( new Json() );
-        $default->setYaml( new Yaml() );
-        $default->setXml( new Xml() );
-        $default->setMsWord( new MSWord() );
-        $default->setMsExcel( new MSExcel() );
-        $default->setMsPowerpoint( new MSPowerpoint() );
-
-        $default->created_at  = date( "Y-m-d H:i:s" );
-        $default->modified_at = date( "Y-m-d H:i:s" );
-
-        return $default;
+    public static function getDefaultTemplate( int $uid ): stdClass {
+        return FiltersConfigTemplateStruct::default( $uid );
     }
 
     /**
@@ -124,7 +104,7 @@ class FiltersConfigTemplateDao extends DataAccess_AbstractDao {
         $result = $pager->getPagination( $totals, $paginationParameters );
 
         $models   = [];
-        $models[] = self::getDefaultTemplate( $uid );
+//        $models[] = self::getDefaultTemplate( $uid );
 
         /**
          * @var FiltersConfigTemplateStruct $item

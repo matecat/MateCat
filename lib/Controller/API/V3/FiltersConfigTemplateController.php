@@ -197,7 +197,7 @@ class FiltersConfigTemplateController extends KleinController {
      * Delete an entry
      */
     public function delete(): Response {
-        $id  = filter_var( $this->request->paramsNamed()->get('id'), FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_ENCODE_LOW );
+        $id  = filter_var( $this->request->paramsNamed()->get( 'id' ), FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_ENCODE_LOW );
         $uid = $this->getUser()->uid;
 
         try {
@@ -227,6 +227,18 @@ class FiltersConfigTemplateController extends KleinController {
      */
     public function schema(): Response {
         return $this->response->json( $this->getModelSchema() );
+    }
+
+    /**
+     * @return void
+     */
+    public function default() {
+
+        $this->response->status()->setCode( 200 );
+        $this->response->json(
+                FiltersConfigTemplateDao::getDefaultTemplate( $this->getUser()->uid )
+        );
+
     }
 
     /**

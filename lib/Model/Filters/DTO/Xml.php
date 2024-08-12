@@ -6,6 +6,9 @@ use Countable;
 use JsonSerializable;
 
 class Xml implements JsonSerializable, Countable {
+
+    use DefaultTrait;
+
     private bool  $preserve_whitespace       = false;
     private array $translate_elements        = [];
     private array $do_not_translate_elements = [];
