@@ -108,23 +108,7 @@ class GlossaryController extends KleinController {
     {
         $jsonSchemaPath =  __DIR__ . '/../../../../inc/validation/schema/glossary/get.json' ;
         $json = $this->createThePayloadForWorker($jsonSchemaPath);
-
-        $tmKeys = [];
-
-        foreach ($json['tmKeys'] as $tmKey){
-
-            // allowing only terms belonging to the owner of the job
-            if($tmKey['owner'] == true){
-                $tmKeys[] = $tmKey;
-            }
-
-            // additional terms are also visible for the other users (NOT the owner of the job) who added them
-            if($this->userIsLogged() and ($this->user->uid == $tmKey['uid_transl'] or $this->user->uid == $tmKey['uid_rev'])){
-                $tmKeys[] = $tmKey;
-            }
-        }
-
-        $json['tmKeys'] = $tmKeys;
+        $json['tmKeys'] = $this->keysBelongingToJobOwner($json['tmKeys']);
 
         $params = [
                 'action' => 'get',
@@ -174,6 +158,7 @@ class GlossaryController extends KleinController {
     {
         $jsonSchemaPath =  __DIR__ . '/../../../../inc/validation/schema/glossary/search.json' ;
         $json = $this->createThePayloadForWorker($jsonSchemaPath);
+        $json['tmKeys'] = $this->keysBelongingToJobOwner($json['tmKeys']);
 
         $params = [
                 'action' => 'search',
@@ -306,6 +291,30 @@ class GlossaryController extends KleinController {
         }
 
         return $json;
+    }
+
+    /**
+     * @param $tmKeys
+     * @return array
+     */
+    private function keysBelongingToJobOwner($tmKeys)
+    {
+        $return = [];
+
+        foreach ($tmKeys as $tmKey){
+
+            // allowing only terms belonging to the owner of the job
+            if(isset($tmKey['owner']) and $tmKey['owner'] == true){
+                $return[] = $tmKey;
+            }
+
+            // additional terms are also visible for the other users (NOT the owner of the job) who added them
+            if($this->userIsLogged() and ($this->user->uid == $tmKey['uid_transl'] or $this->user->uid == $tmKey['uid_rev'])){
+                $return[] = $tmKey;
+            }
+        }
+
+        return $return;
     }
 
     /**
