@@ -197,7 +197,7 @@ class FiltersConfigTemplateController extends KleinController {
      * Delete an entry
      */
     public function delete(): Response {
-        $id  = filter_var( $this->request->id(), FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_ENCODE_LOW );
+        $id  = filter_var( $this->request->paramsNamed()->get('id'), FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_ENCODE_LOW );
         $uid = $this->getUser()->uid;
 
         try {
