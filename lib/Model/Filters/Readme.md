@@ -569,33 +569,52 @@ GET /api/v3/filters-config-template/default
 
 ```json
 {
-  "id": 1,
+  "id": 0,
   "uid": 1,
-  "name": "filters-template-modificato",
+  "name": "default",
   "xml": {
-    "preserve_whitespace": true,
-    "translate_elements": [
-      "ciao",
-      "casa2"
-    ]
+    "preserve_whitespace": false,
+    "translate_elements": [],
+    "do_not_translate_elements": [],
+    "translate_attributes": []
   },
   "yaml": {
-    "translate_keys": [
-      "saas",
-      "ddddd",
-      "sss"
-    ]
+    "extract_arrays": false,
+    "translate_keys": [],
+    "do_not_translate_keys": []
   },
   "json": {
-    "extract_arrays": true,
-    "translate_keys": [
-      "pappa"
-    ]
+    "extract_arrays": false,
+    "escape_forward_slashes": false,
+    "translate_keys": [],
+    "do_not_translate_keys": [],
+    "context_keys": [],
+    "character_limit": []
   },
-  "ms_word": [],
-  "ms_excel": [],
-  "ms_powerpoint": [],
-  "createdAt": "2024-08-12T17:42:15+02:00",
-  "modifiedAt": "2024-08-12T18:02:44+02:00"
+  "ms_word": {
+    "extract_doc_properties": false,
+    "extract_comments": false,
+    "extract_headers_footers": false,
+    "extract_hidden_text": false,
+    "accept_revisions": false,
+    "exclude_styles": [],
+    "exclude_highlight_colors": []
+  },
+  "ms_excel": {
+    "extract_doc_properties": false,
+    "extract_hidden_cells": false,
+    "extract_diagrams": false,
+    "extract_drawings": false,
+    "extract_sheet_names": false,
+    "exclude_columns": []
+  },
+  "ms_powerpoint": {
+    "extract_doc_properties": false,
+    "extract_hidden_slides": false,
+    "extract_notes": true,
+    "translate_slides": []
+  },
+  "created_at": "2024-08-12 19:41:16",
+  "modified_at": "2024-08-12 19:41:16"
 }
 ```
