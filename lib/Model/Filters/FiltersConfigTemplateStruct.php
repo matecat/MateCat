@@ -202,21 +202,6 @@ class FiltersConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruct imp
     }
 
     /**
-     * @return false|string
-     * @throws Exception
-     */
-    public function getRulesAsString(): string {
-        return json_encode( [
-                'xml'           => $this->xml,
-                'yaml'          => $this->yaml,
-                'json'          => $this->json,
-                'ms_word'       => $this->ms_word,
-                'ms_excel'      => $this->ms_excel,
-                'ms_powerpoint' => $this->ms_powerpoint,
-        ] );
-    }
-
-    /**
      * @return array
      * @throws Exception
      */
