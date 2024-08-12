@@ -112,3 +112,12 @@ $klein->with('/api/app/files', function() {
     route( '', 'GET', '\API\App\SupportedFilesController', 'index' );
 });
 
+// PROJECT TEMPLATE
+$klein->with( '/api/app/project-template', function () {
+    route( '/default', 'GET', '\API\V3\ProjectTemplateController', 'default' );
+} );
+
+// FILTERS CONFIG
+$klein->with( '/api/app/filters-config-template', function () {
+    route( '/default', 'GET', '\API\V3\FiltersConfigTemplateController', 'default' );
+} );

@@ -100,7 +100,6 @@ $klein->with( '/api/v3/deepl/[:engineId]', function () {
 // PROJECT TEMPLATE
 $klein->with( '/api/v3/project-template', function () {
     route( '/schema', 'GET', '\API\V3\ProjectTemplateController', 'schema' );
-    route( '/default', 'GET', '\API\V3\ProjectTemplateController', 'default' );
     route( '/', 'GET', '\API\V3\ProjectTemplateController', 'all' );
     route( '/', 'POST', '\API\V3\ProjectTemplateController', 'create' );
     route( '/[:id]', 'DELETE', '\API\V3\ProjectTemplateController', 'delete' );
@@ -120,7 +119,6 @@ $klein->with( '/api/v3/xliff-config-template', function () {
 
 $klein->with( '/api/v3/filters-config-template', function () {
     route( '/schema', 'GET', '\API\V3\FiltersConfigTemplateController', 'schema' );
-    route( '/default', 'GET', '\API\V3\FiltersConfigTemplateController', 'default' );
     route( '/', 'GET', '\API\V3\FiltersConfigTemplateController', 'all' );
     route( '/', 'POST', '\API\V3\FiltersConfigTemplateController', 'create' );
     route( '/[:id]', 'DELETE', '\API\V3\FiltersConfigTemplateController', 'delete' );
