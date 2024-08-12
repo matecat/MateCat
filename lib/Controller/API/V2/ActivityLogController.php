@@ -28,7 +28,7 @@ class ActivityLogController extends KleinController {
         $rawContent = $activityLogDao->getAllForProject( $validator->getIdProject() ) ;
 
         $formatted = new Activity( $rawContent ) ;
-        $this->response->json( array( 'activity' => $formatted->render() ) );
+        $this->response->json( $formatted->render() );
     }
 
     public function lastOnProject(){
