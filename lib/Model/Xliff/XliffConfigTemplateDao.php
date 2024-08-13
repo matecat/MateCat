@@ -289,9 +289,17 @@ class XliffConfigTemplateDao extends DataAccess_AbstractDao {
             return null;
         }
 
-        $struct = new XliffConfigTemplateStruct();
+        $struct       = new XliffConfigTemplateStruct();
+        $struct->id   = $data[ 'id' ];
+        $struct->uid  = $data[ 'uid' ];
+        $struct->name = $data[ 'name' ];
 
-        return $struct->hydrateFromJSON( json_encode( $data ) );
+        $struct->created_at  = $data[ 'created_at' ];
+        $struct->modified_at = $data[ 'modified_at' ];
+        $struct->deleted_at  = $data[ 'deleted_at' ];
+        $struct->hydrateRulesFromJson( $data[ 'rules' ] );
+
+        return $struct;
     }
 
     /**

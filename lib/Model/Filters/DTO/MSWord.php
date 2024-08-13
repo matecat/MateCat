@@ -5,7 +5,7 @@ namespace Filters\DTO;
 use Countable;
 use JsonSerializable;
 
-class MSWord implements JsonSerializable, Countable {
+class MSWord implements IDto, JsonSerializable, Countable {
 
     use DefaultTrait;
 

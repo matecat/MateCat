@@ -159,11 +159,11 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
             $team = $teamDao->findById( $projectTemplateStruct->id_team );
 
             if ( $team === null ) {
-                throw new Exception( "User group not found." );
+                throw new Exception( "User group not found.", 404 );
             }
 
             if ( !$team->hasUser( $projectTemplateStruct->uid ) ) {
-                throw new Exception( "This user does not belong to this group." );
+                throw new Exception( "This user does not belong to this group.", 403 );
             }
         }
 
@@ -172,7 +172,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
             $xliffConfigModel = XliffConfigTemplateDao::getByIdAndUser( $projectTemplateStruct->xliff_config_template_id, $projectTemplateStruct->uid );
 
             if ( empty( $xliffConfigModel ) ) {
-                throw new Exception( "Not existing Xliff template." );
+                throw new Exception( "Not existing Xliff template.", 404 );
             }
 
         }
@@ -182,7 +182,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
             $filtersConfigModel = FiltersConfigTemplateDao::getByIdAndUser( $projectTemplateStruct->filters_template_id, $projectTemplateStruct->uid );
 
             if ( empty( $filtersConfigModel ) ) {
-                throw new Exception( "Not existing Filters config template." );
+                throw new Exception( "Not existing Filters config template.", 404 );
             }
 
         }
@@ -195,12 +195,9 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
             ] );
 
             if ( empty( $qaModel ) ) {
-                throw new Exception( "Not existing QA template." );
+                throw new Exception( "Not existing QA template.", 404 );
             }
 
-            if ( $qaModel->uid !== $projectTemplateStruct->uid ) {
-                throw new Exception( "QA model doesn't belong to the user." );
-            }
         }
 
         // check pr_id
@@ -208,7 +205,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
             $payableRateModel = CustomPayableRateDao::getByIdAndUser( $projectTemplateStruct->payable_rate_template_id, $projectTemplateStruct->uid );
 
             if ( empty( $payableRateModel ) ) {
-                throw new Exception( "Not existing payable rate template." );
+                throw new Exception( "Not existing payable rate template.", 404 );
             }
 
         }
@@ -227,7 +224,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
                 $engineRecord = $engine->getEngineRecord();
 
                 if ( $engineRecord->id > 1 and $engineRecord->uid !== $projectTemplateStruct->uid ) {
-                    throw new Exception( "Engine doesn't belong to the user." );
+                    throw new Exception( "Engine doesn't belong to the user.", 403 );
                 }
             }
         }
@@ -247,7 +244,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
                 );
 
                 if ( empty( $keyRing ) ) {
-                    throw new Exception( "TM key doesn't belong to the user." );
+                    throw new Exception( "TM key doesn't belong to the user.", 403 );
                 }
             }
         }

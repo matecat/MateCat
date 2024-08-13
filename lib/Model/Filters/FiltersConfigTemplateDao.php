@@ -103,7 +103,7 @@ class FiltersConfigTemplateDao extends DataAccess_AbstractDao {
 
         $result = $pager->getPagination( $totals, $paginationParameters );
 
-        $models   = [];
+        $models = [];
 //        $models[] = self::getDefaultTemplate( $uid );
 
         /**
@@ -277,9 +277,17 @@ class FiltersConfigTemplateDao extends DataAccess_AbstractDao {
             return null;
         }
 
-        $struct = new FiltersConfigTemplateStruct();
+        $struct              = new FiltersConfigTemplateStruct();
+        $struct->id          = $data[ 'id' ];
+        $struct->uid         = $data[ 'uid' ];
+        $struct->name        = $data[ 'name' ];
+        $struct->created_at  = $data[ 'created_at' ];
+        $struct->modified_at = $data[ 'modified_at' ];
+        $struct->deleted_at  = $data[ 'deleted_at' ];
 
-        return $struct->hydrateFromJSON( json_encode( $data ) );
+        $struct->hydrateAllDto( $data );
+
+        return $struct;
     }
 
     /**

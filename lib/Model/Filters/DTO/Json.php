@@ -5,7 +5,7 @@ namespace Filters\DTO;
 use Countable;
 use JsonSerializable;
 
-class Json implements JsonSerializable, Countable {
+class Json implements IDto, JsonSerializable, Countable {
 
     use DefaultTrait;
 

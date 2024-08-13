@@ -5,7 +5,7 @@ namespace Filters\DTO;
 use Countable;
 use JsonSerializable;
 
-class MSPowerpoint implements JsonSerializable, Countable {
+class MSPowerpoint implements IDto, JsonSerializable, Countable {
 
     use DefaultTrait;
 

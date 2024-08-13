@@ -5,7 +5,7 @@ namespace Filters\DTO;
 use Countable;
 use JsonSerializable;
 
-class MSExcel implements JsonSerializable, Countable {
+class MSExcel implements IDto, JsonSerializable, Countable {
 
     use DefaultTrait;
 
