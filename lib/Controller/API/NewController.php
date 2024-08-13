@@ -1334,7 +1334,7 @@ class NewController extends ajaxController {
                 throw new Exception( "filters_extraction_parameters_template_id not valid" );
             }
 
-            $this->filters_extraction_parameters = $filtersTemplate->toArray();
+            $this->filters_extraction_parameters = $filtersTemplate;
         }
     }
 

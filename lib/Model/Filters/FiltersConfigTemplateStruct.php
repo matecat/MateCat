@@ -23,12 +23,12 @@ class FiltersConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruct imp
     public ?string        $created_at    = null;
     public ?string        $modified_at   = null;
     public ?string        $deleted_at    = null;
-    private ?Yaml         $yaml          = null;
-    private ?Xml          $xml           = null;
-    private ?Json         $json          = null;
-    private ?MSWord       $ms_word       = null;
-    private ?MSExcel      $ms_excel      = null;
-    private ?MSPowerpoint $ms_powerpoint = null;
+    public ?Yaml         $yaml          = null;
+    public ?Xml          $xml           = null;
+    public ?Json         $json          = null;
+    public ?MSWord       $ms_word       = null;
+    public ?MSExcel      $ms_excel      = null;
+    public ?MSPowerpoint $ms_powerpoint = null;
 
     /**
      * @return null
