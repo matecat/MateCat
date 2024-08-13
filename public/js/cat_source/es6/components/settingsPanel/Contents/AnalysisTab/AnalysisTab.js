@@ -1,5 +1,8 @@
 import React, {useContext, useEffect, useRef} from 'react'
-import {getBillingModelTemplates} from '../../../../api/getBillingModelTemplates'
+import {
+  getBillingModelTemplateDefault,
+  getBillingModelTemplates,
+} from '../../../../api/getBillingModelTemplates'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {createBillingModelTemplate} from '../../../../api/createBillingModelTemplate'
 import {updateBillingModelTemplate} from '../../../../api/updateBillingModelTemplate'
@@ -123,6 +126,25 @@ export const AnalysisTab = () => {
     let cleanup = false
 
     if (config.isLoggedIn === 1 && !config.is_cattool) {
+      Promise.all([
+        getBillingModelTemplateDefault(),
+        getBillingModelTemplates(),
+      ]).then(([templateDefault, templates]) => {
+        const items = [templateDefault, ...templates.items]
+        if (!cleanup) {
+          const selectedTemplateId =
+            items.find(({id}) => id === currentProjectTemplateBillingId)?.id ??
+            0
+
+          setTemplates(
+            items.map((template) => ({
+              ...template,
+              isSelected: template.id === selectedTemplateId,
+            })),
+          )
+        }
+      })
+
       getBillingModelTemplates().then(({items}) => {
         if (!cleanup) {
           const selectedTemplateId =

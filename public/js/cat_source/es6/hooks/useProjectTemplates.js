@@ -1,6 +1,9 @@
 import {useEffect, useRef} from 'react'
 import PropTypes from 'prop-types'
-import {getProjectTemplates} from '../api/getProjectTemplates/getProjectTemplates'
+import {
+  getProjectTemplateDefault,
+  getProjectTemplates,
+} from '../api/getProjectTemplates/getProjectTemplates'
 import useTemplates from './useTemplates'
 
 export const isStandardTemplate = ({id} = {}) => id === 0
@@ -85,22 +88,33 @@ function useProjectTemplates(tmKeys, isCattool = config.is_cattool) {
     let cleanup = false
 
     if (config.isLoggedIn === 1 && !config.is_cattool) {
-      getProjectTemplates().then(({items}) => {
-        if (!cleanup) {
-          setProjectTemplates(
-            items.map((template) => ({
-              ...template,
-              tm: template.tm.map((item) => ({
-                ...item,
-                name:
-                  tmKeysRef.current.find(({key}) => key === item.key)?.name ??
-                  item.name,
+      Promise.all([getProjectTemplateDefault(), getProjectTemplates()]).then(
+        ([templateDefault, {items}]) => {
+          if (!cleanup) {
+            const itsNotEventDefault = items.every(
+              ({is_default}) => !is_default,
+            )
+            setProjectTemplates(
+              [
+                {
+                  ...templateDefault,
+                  ...(itsNotEventDefault && {is_default: true}),
+                },
+                ...items,
+              ].map((template) => ({
+                ...template,
+                tm: template.tm.map((item) => ({
+                  ...item,
+                  name:
+                    tmKeysRef.current.find(({key}) => key === item.key)?.name ??
+                    item.name,
+                })),
+                isSelected: template.is_default,
               })),
-              isSelected: template.is_default,
-            })),
-          )
-        }
-      })
+            )
+          }
+        },
+      )
     } else {
       setProjectTemplates([{...STANDARD_TEMPLATE, isSelected: true}])
     }
