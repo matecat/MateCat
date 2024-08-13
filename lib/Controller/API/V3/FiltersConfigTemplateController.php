@@ -70,7 +70,7 @@ class FiltersConfigTemplateController extends KleinController {
      * Get a single entry
      */
     public function get(): Response {
-        $id = filter_var( $this->request->id, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_ENCODE_LOW );
+        $id = filter_var( $this->request->param( 'id' ), FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_ENCODE_LOW );
 
         try {
             $model = FiltersConfigTemplateDao::getByIdAndUser( $id, $this->getUser()->uid );

@@ -88,7 +88,7 @@ class QualityFrameworkController extends KleinController {
 
         if ( $qaModel->qa_model_template_id ) {
 
-            $parentTemplate = QAModelTemplateDao::get( [ 'id' => $qaModel->qa_model_template_id ] );
+            $parentTemplate = QAModelTemplateDao::get( [ 'id' => $qaModel->qa_model_template_id, 'uid' => $this->getUser()->uid ] );
 
             if ( $parentTemplate === null ) {
                 return $json;

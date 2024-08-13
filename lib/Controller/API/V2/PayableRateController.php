@@ -4,11 +4,14 @@ namespace API\V2;
 
 use API\V2\Validators\LoginValidator;
 use Exception;
-use Klein\Response;
 use INIT;
+use Klein\Response;
 use PayableRates\CustomPayableRateDao;
 use PayableRates\CustomPayableRateStruct;
+use ReflectionException;
+use Swaggest\JsonSchema\InvalidValue;
 use Validator\Errors\JSONValidatorException;
+use Validator\Errors\JsonValidatorGenericException;
 use Validator\JSONValidator;
 use Validator\JSONValidatorObject;
 
@@ -18,9 +21,13 @@ class PayableRateController extends KleinController {
         $this->appendValidator( new LoginValidator( $this ) );
     }
 
-    public function index() {
-        $currentPage = ( isset( $_GET[ 'page' ] ) ) ? $_GET[ 'page' ] : 1;
-        $pagination  = ( isset( $_GET[ 'perPage' ] ) ) ? $_GET[ 'perPage' ] : 20;
+    /**
+     * @throws ReflectionException
+     */
+    public function index(): Response {
+
+        $currentPage = $this->request->param( 'page' ) ?? 1;
+        $pagination  = $this->request->param( 'perPage' ) ?? 20;
 
         if ( $pagination > 200 ) {
             $pagination = 200;
@@ -34,31 +41,29 @@ class PayableRateController extends KleinController {
     /**
      * @return Response
      */
-    public function create() {
-
-        // accept only JSON
-        if(!$this->isJsonRequest()){
-            $this->response->code(405);
-            $this->response->json( [
-                    'message' => 'Method not allowed'
-            ] );
-            $this->response->code(405);
-            exit();
-        }
+    public function create(): Response {
 
         // try to create the template
         try {
-            $json   = $this->request->body();
+
+            // accept only JSON
+            if ( !$this->isJsonRequest() ) {
+                throw new Exception( 'Method not allowed', 405 );
+            }
+
+            $json = $this->request->body();
+            $this->validateJSON( $json );
+
             $struct = CustomPayableRateDao::createFromJSON( $json, $this->getUser()->uid );
 
             $this->response->code( 201 );
 
             return $this->response->json( $struct );
-        } catch ( JSONValidatorException $exception ) {
-            $errorCode = $exception->getCode() >= 400 ? $exception->getCode() : 500;
+        } catch ( JSONValidatorException|JsonValidatorGenericException|InvalidValue $exception ) {
+            $errorCode = max( $exception->getCode(), 400 );
             $this->response->code( $errorCode );
 
-            return $this->response->json( $exception );
+            return $this->response->json( [ 'error' => $exception->getMessage() ] );
         } catch ( Exception $exception ) {
             $errorCode = $exception->getCode() >= 400 ? $exception->getCode() : 500;
             $this->response->code( $errorCode );
@@ -72,29 +77,17 @@ class PayableRateController extends KleinController {
     /**
      * @return Response
      */
-    public function delete() {
+    public function delete(): Response {
 
-        $id    = $this->request->param( 'id' );
-        $model = CustomPayableRateDao::getById( $id );
-
-        if ( empty( $model ) ) {
-            $this->response->code( 404 );
-
-            return $this->response->json( [
-                    'error' => 'Model not found'
-            ] );
-        }
-
-        if ( $this->getUser()->uid !== $model->uid ) {
-            $this->response->code( 401 );
-
-            return $this->response->json( [
-                    'error' => 'User not allowed'
-            ] );
-        }
+        $id = $this->request->param( 'id' );
 
         try {
-            CustomPayableRateDao::remove( $id );
+
+            $count = CustomPayableRateDao::remove( $id, $this->getUser()->uid );
+
+            if ( $count == 0 ) {
+                throw new Exception( 'Model not found', 404 );
+            }
 
             return $this->response->json( [
                     'id' => (int)$id
@@ -112,39 +105,36 @@ class PayableRateController extends KleinController {
     /**
      * @return Response
      */
-    public function edit() {
-
-        $id    = $this->request->param( 'id' );
-        $model = CustomPayableRateDao::getById( $id );
-
-        if ( empty( $model ) ) {
-            $this->response->code( 404 );
-
-            return $this->response->json( [
-                    'error' => 'Model not found'
-            ] );
-        }
-
-        if ( $this->getUser()->uid !== $model->uid ) {
-            $this->response->code( 401 );
-
-            return $this->response->json( [
-                    'error' => 'User not allowed'
-            ] );
-        }
+    public function edit(): Response {
 
         try {
-            $json   = $this->request->body();
+
+            // accept only JSON
+            if ( !$this->isJsonRequest() ) {
+                throw new Exception( 'Bad Request', 400 );
+            }
+
+            $id = $this->request->param( 'id' );
+
+            $model = CustomPayableRateDao::getByIdAndUser( $id, $this->getUser()->uid );
+            if ( empty( $model ) ) {
+                throw new Exception( 'Model not found', 404 );
+            }
+
+            $json = $this->request->body();
+            $this->validateJSON( $json );
+
             $struct = CustomPayableRateDao::editFromJSON( $model, $json );
 
             $this->response->code( 200 );
 
             return $this->response->json( $struct );
-        } catch ( JSONValidatorException $exception ) {
-            $errorCode = $exception->getCode() >= 400 ? $exception->getCode() : 500;
+
+        } catch ( JSONValidatorException|JsonValidatorGenericException|InvalidValue $exception ) {
+            $errorCode = max( $exception->getCode(), 400 );
             $this->response->code( $errorCode );
 
-            return $this->response->json( $exception );
+            return $this->response->json( [ 'error' => $exception->getMessage() ] );
         } catch ( Exception $exception ) {
             $errorCode = $exception->getCode() >= 400 ? $exception->getCode() : 500;
             $this->response->code( $errorCode );
@@ -158,27 +148,28 @@ class PayableRateController extends KleinController {
     /**
      * @return Response
      */
-    public function view() {
-        $id    = $this->request->param( 'id' );
-        $model = CustomPayableRateDao::getById( $id );
+    public function view(): Response {
 
-        if ( empty( $model ) ) {
-            $this->response->code( 404 );
+        try {
+
+            $id    = $this->request->param( 'id' );
+            $model = CustomPayableRateDao::getByIdAndUser( $id, $this->getUser()->uid );
+
+            if ( empty( $model ) ) {
+                throw new Exception( 'Model not found', 404 );
+            }
+
+            return $this->response->json( $model );
+
+        } catch ( Exception $exception ) {
+            $errorCode = $exception->getCode() >= 400 ? $exception->getCode() : 500;
+            $this->response->code( $errorCode );
 
             return $this->response->json( [
-                    'error' => 'Model not found'
+                    'error' => $exception->getMessage()
             ] );
         }
 
-        if ( $this->getUser()->uid !== $model->uid ) {
-            $this->response->code( 401 );
-
-            return $this->response->json( [
-                    'error' => 'User not allowed'
-            ] );
-        }
-
-        return $this->response->json( $model );
     }
 
     /**
@@ -186,7 +177,7 @@ class PayableRateController extends KleinController {
      *
      * @return Response
      */
-    public function schema() {
+    public function schema(): Response {
         return $this->response->json( json_decode( $this->getPayableRateModelSchema() ) );
     }
 
@@ -195,7 +186,7 @@ class PayableRateController extends KleinController {
      *
      * @return Response
      */
-    public function validate() {
+    public function validate(): Response {
         try {
             $json = $this->request->body();
 
@@ -231,8 +222,36 @@ class PayableRateController extends KleinController {
     /**
      * @return false|string
      */
-    private function getPayableRateModelSchema()
-    {
+    private function getPayableRateModelSchema() {
         return file_get_contents( INIT::$ROOT . '/inc/validation/schema/payable_rate.json' );
     }
+
+    /**
+     * @throws Exception
+     */
+    public function default() {
+
+        $this->response->status()->setCode( 200 );
+        $this->response->json(
+                CustomPayableRateDao::getDefaultTemplate( $this->getUser()->uid )
+        );
+
+    }
+
+    /**
+     * @param string $json
+     *
+     * @throws InvalidValue
+     * @throws JSONValidatorException
+     * @throws \Swaggest\JsonSchema\Exception
+     * @throws JsonValidatorGenericException
+     */
+    private static function validateJSON( string $json ) {
+        $validatorObject       = new JSONValidatorObject();
+        $validatorObject->json = $json;
+        $jsonSchema            = file_get_contents( INIT::$ROOT . '/inc/validation/schema/payable_rate.json' );
+        $validator             = new JSONValidator( $jsonSchema, true );
+        $validator->validate( $validatorObject );
+    }
+
 }

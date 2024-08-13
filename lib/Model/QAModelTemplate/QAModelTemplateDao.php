@@ -2,18 +2,25 @@
 
 namespace QAModelTemplate;
 
+use DataAccess\ShapelessConcreteStruct;
 use DataAccess_AbstractDao;
 use Database;
 use Date\DateTimeUtil;
 use DateTime;
 use Exception;
 use INIT;
+use Pagination\Pager;
+use Pagination\PaginationParameters;
 use PDO;
+use ReflectionException;
 use Swaggest\JsonSchema\InvalidValue;
 use Validator\JSONValidator;
 use Validator\JSONValidatorObject;
 
 class QAModelTemplateDao extends DataAccess_AbstractDao {
+
+    const query_paginated   = "SELECT id FROM qa_model_templates WHERE deleted_at IS NULL AND uid = :uid LIMIT %u OFFSET %u ";
+    const paginated_map_key = __CLASS__ . "::getAllPaginated";
 
     /**
      * validate a json against schema and then
@@ -26,7 +33,7 @@ class QAModelTemplateDao extends DataAccess_AbstractDao {
      * @throws InvalidValue
      * @throws Exception
      */
-    public static function createFromJSON( $json, $uid = null ) {
+    public static function createFromJSON( $json, $uid = null ): QAModelTemplateStruct {
         self::validateJSON( $json );
 
         $QAModelTemplateStruct = new QAModelTemplateStruct();
@@ -65,7 +72,7 @@ class QAModelTemplateDao extends DataAccess_AbstractDao {
      * @throws InvalidValue
      * @throws Exception
      */
-    public static function editFromJSON( QAModelTemplateStruct $QAModelTemplateStruct, $json ) {
+    public static function editFromJSON( QAModelTemplateStruct $QAModelTemplateStruct, $json ): QAModelTemplateStruct {
         self::validateJSON( $json );
         $QAModelTemplateStruct->hydrateFromJSON( $json );
 
@@ -73,15 +80,12 @@ class QAModelTemplateDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param $id
+     * @param int $id
+     * @param int $uid
      *
-     * @throws Exception
+     * @throws ReflectionException
      */
-    public static function remove( $id ) {
-        $qaTemplateModel = self::get( [
-                'id' => $id
-        ] );
-        $uid             = $qaTemplateModel->uid;
+    public static function remove( int $id, int $uid ) {
 
         $conn = Database::obtain()->getConnection();
         $conn->beginTransaction();
@@ -143,6 +147,8 @@ class QAModelTemplateDao extends DataAccess_AbstractDao {
             $conn->rollBack();
 
             throw $exception;
+        } finally {
+            static::destroyQueryPaginated( $uid );
         }
     }
 
@@ -152,7 +158,7 @@ class QAModelTemplateDao extends DataAccess_AbstractDao {
      * @return array
      * @throws Exception
      */
-    private static function getDefaultTemplate( $uid ) {
+    public static function getDefaultTemplate( $uid ): array {
         $defaultTemplate      = file_get_contents( INIT::$ROOT . '/inc/qa_model.json' );
         $defaultTemplateModel = json_decode( $defaultTemplate, true );
 
@@ -222,85 +228,76 @@ class QAModelTemplateDao extends DataAccess_AbstractDao {
      * @param int $uid
      * @param int $current
      * @param int $pagination
+     * @param int $ttl
      *
      * @return array
-     * @throws Exception
+     * @throws ReflectionException
      */
-    public static function getAllPaginated( $uid, $current = 1, $pagination = 20 ) {
+    public static function getAllPaginated( int $uid, int $current = 1, int $pagination = 20, int $ttl = 60 * 60 * 24 ): array {
+
         $conn = Database::obtain()->getConnection();
 
-        $stmt = $conn->prepare( "SELECT count(id) as count FROM qa_model_templates WHERE deleted_at IS NULL AND uid = :uid" );
-        $stmt->execute( [
-                'uid' => $uid
-        ] );
+        $pager  = new Pager( $conn );
+        $totals = $pager->count(
+                "SELECT count(id) FROM qa_model_templates WHERE deleted_at IS NULL AND uid = :uid",
+                [ 'uid' => $uid ]
+        );
 
-        $count  = $stmt->fetch( PDO::FETCH_ASSOC );
-        $pages  = ceil( $count[ 'count' ] / $pagination );
-        $prev   = ( $current !== 1 ) ? "/api/v3/qa_model_template?page=" . ( $current - 1 ) : null;
-        $next   = ( $current < $pages ) ? "/api/v3/qa_model_template?page=" . ( $current + 1 ) : null;
-        $offset = ( $current - 1 ) * $pagination;
+        $paginationParameters = new PaginationParameters( self::query_paginated, [ 'uid' => $uid ], ShapelessConcreteStruct::class, "/api/v3/qa_model_template?page=", $current, $pagination );
+        $paginationParameters->setCache( self::paginated_map_key . ":" . $uid, $ttl );
+
+        $result = $pager->getPagination( $totals, $paginationParameters );
 
         $models   = [];
-        $models[] = self::getDefaultTemplate( $uid );
-
-        $stmt = $conn->prepare( "SELECT id FROM qa_model_templates WHERE deleted_at IS NULL AND uid = :uid LIMIT $pagination OFFSET $offset " );
-        $stmt->execute( [
-                'uid' => $uid
-        ] );
-
-        foreach ( $stmt->fetchAll( PDO::FETCH_ASSOC ) as $model ) {
+        foreach ( $result[ 'items' ] as $model ) {
             $models[] = self::get( [
                     'id'  => $model[ 'id' ],
                     'uid' => $uid
             ] );
         }
 
-        return [
-                'current_page' => (int)$current,
-                'per_page'     => (int)$pagination,
-                'last_page'    => (int)$pages,
-                'prev'         => $prev,
-                'next'         => $next,
-                'items'        => $models,
-        ];
+        $result[ 'items' ] = $models;
+
+        return $result;
     }
 
     /**
-     * @param $uid
-     *
-     * @return QAModelTemplateStruct
+     * @throws Exception
      */
-    public static function getByUser( $uid ) {
-        return self::get( [
-                'uid' => $uid
-        ] );
+    public static function getQaModelTemplateByIdAndUid( PDO $conn, array $meta = [] ) {
+
+        $query  = "SELECT * FROM qa_model_templates WHERE deleted_at IS NULL ";
+        $params = [];
+
+        if ( empty( $meta[ 'id' ] ) || empty( $meta[ 'uid' ] ) ) {
+            throw new Exception( "id and uid parameters must be provided." );
+        }
+
+        $query          .= " AND id=:id ";
+        $params[ 'id' ] = $meta[ 'id' ];
+
+        $query           .= " AND uid=:uid ";
+        $params[ 'uid' ] = $meta[ 'uid' ];
+
+        $stmt = $conn->prepare( $query );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, QAModelTemplateStruct::class );
+        $stmt->execute( $params );
+
+        return $stmt->fetch();
+
     }
 
     /**
      * @param array $meta
      *
      * @return QAModelTemplateStruct
+     * @throws Exception
      */
-    public static function get( array $meta = [] ) {
-        $conn   = Database::obtain()->getConnection();
-        $query  = "SELECT * FROM qa_model_templates WHERE deleted_at IS NULL ";
-        $params = [];
+    public static function get( array $meta = [] ): ?QAModelTemplateStruct {
 
-        if ( isset( $meta[ 'id' ] ) and '' !== $meta[ 'id' ] ) {
-            $query          .= " AND id=:id ";
-            $params[ 'id' ] = $meta[ 'id' ];
-        }
+        $conn = Database::obtain()->getConnection();
 
-        if ( isset( $meta[ 'uid' ] ) and '' !== $meta[ 'uid' ] ) {
-            $query           .= " AND uid=:uid ";
-            $params[ 'uid' ] = $meta[ 'uid' ];
-        }
-
-        $stmt = $conn->prepare( $query );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, QAModelTemplateStruct::class );
-        $stmt->execute( $params );
-
-        $QAModelTemplateStruct = $stmt->fetch();
+        $QAModelTemplateStruct = self::getQaModelTemplateByIdAndUid( $conn, $meta );
 
         if ( !$QAModelTemplateStruct ) {
             return null;
@@ -354,7 +351,7 @@ class QAModelTemplateDao extends DataAccess_AbstractDao {
      * @return QAModelTemplateStruct
      * @throws Exception
      */
-    public static function save( QAModelTemplateStruct $modelTemplateStruct ) {
+    public static function save( QAModelTemplateStruct $modelTemplateStruct ): QAModelTemplateStruct {
         $conn = Database::obtain()->getConnection();
         $conn->beginTransaction();
 
@@ -430,6 +427,8 @@ class QAModelTemplateDao extends DataAccess_AbstractDao {
             $conn->rollBack();
 
             throw $exception;
+        } finally {
+            static::destroyQueryPaginated( $modelTemplateStruct->uid );
         }
     }
 
@@ -444,12 +443,13 @@ class QAModelTemplateDao extends DataAccess_AbstractDao {
         $conn->beginTransaction();
 
         try {
-            $stmt = $conn->prepare( "UPDATE qa_model_templates SET uid=:uid, version=:version, label=:label WHERE id=:id" );
+            $stmt = $conn->prepare( "UPDATE qa_model_templates SET uid=:uid, version=:version, label=:label, modified_at=:modified_at WHERE id=:id" );
             $stmt->execute( [
-                    'version' => $modelTemplateStruct->version,
-                    'label'   => $modelTemplateStruct->label,
-                    'uid'     => $modelTemplateStruct->uid,
-                    'id'      => $modelTemplateStruct->id,
+                    'version'     => $modelTemplateStruct->version,
+                    'label'       => $modelTemplateStruct->label,
+                    'uid'         => $modelTemplateStruct->uid,
+                    'id'          => $modelTemplateStruct->id,
+                    'modified_at' => ( new DateTime() )->format( 'Y-m-d H:i:s' )
             ] );
 
             // UPSERT
@@ -522,6 +522,19 @@ class QAModelTemplateDao extends DataAccess_AbstractDao {
             $conn->rollBack();
 
             throw $exception;
+        } finally {
+            static::destroyQueryPaginated( $modelTemplateStruct->uid );
         }
     }
+
+    /**
+     * @param int $uid
+     *
+     * @throws ReflectionException
+     */
+    private
+    static function destroyQueryPaginated( int $uid ) {
+        ( new static() )->_destroyCache( self::paginated_map_key . ":" . $uid, false );
+    }
+
 }

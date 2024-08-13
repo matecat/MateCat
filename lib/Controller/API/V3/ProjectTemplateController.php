@@ -70,21 +70,13 @@ class ProjectTemplateController extends KleinController {
      * Get a single entry
      */
     public function get(): Response {
-        $id = filter_var( $this->request->id, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_ENCODE_LOW );
+        $id = filter_var( $this->request->param( 'id' ), FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_ENCODE_LOW );
 
         try {
             $model = ProjectTemplateDao::getByIdAndUser( $id, $this->getUser()->uid );
 
             if ( empty( $model ) ) {
                 throw new Exception( 'Model not found', 404 );
-            }
-
-            if ( $model->uid !== $this->getUser()->uid ) {
-                $this->response->code( 403 );
-
-                return $this->response->json( [
-                        'error' => 'You are not authorized to see this model'
-                ] );
             }
 
             $this->response->status()->setCode( 200 );
@@ -214,7 +206,7 @@ class ProjectTemplateController extends KleinController {
      * Delete an entry
      */
     public function delete(): Response {
-        $id = filter_var( $this->request->id, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_ENCODE_LOW );
+        $id = filter_var( $this->request->param( 'id' ), FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_ENCODE_LOW );
 
         try {
 

@@ -168,34 +168,29 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
 
         // check xliff_config_template_id
         if ( $projectTemplateStruct->xliff_config_template_id > 0 ) {
-            $xliffConfigModel = XliffConfigTemplateDao::getById( $projectTemplateStruct->xliff_config_template_id );
+            $xliffConfigModel = XliffConfigTemplateDao::getByIdAndUser( $projectTemplateStruct->xliff_config_template_id, $projectTemplateStruct->uid );
 
             if ( empty( $xliffConfigModel ) ) {
                 throw new Exception( "Not existing Xliff template." );
             }
 
-            if ( $xliffConfigModel->uid !== $projectTemplateStruct->uid ) {
-                throw new Exception( "Xliff model doesn't belong to the user." );
-            }
         }
 
         // check filters_template_id
         if ( $projectTemplateStruct->filters_template_id > 0 ) {
-            $filtersConfigModel = FiltersConfigTemplateDao::getById( $projectTemplateStruct->filters_template_id );
+            $filtersConfigModel = FiltersConfigTemplateDao::getByIdAndUser( $projectTemplateStruct->filters_template_id, $projectTemplateStruct->uid );
 
             if ( empty( $filtersConfigModel ) ) {
                 throw new Exception( "Not existing Filters config template." );
             }
 
-            if ( $filtersConfigModel->uid !== $projectTemplateStruct->uid ) {
-                throw new Exception( "Filters config model doesn't belong to the user." );
-            }
         }
 
         // check qa_id
         if ( $projectTemplateStruct->qa_model_template_id > 0 ) {
-            $qaModel = QAModelTemplateDao::get( [
-                    'id' => $projectTemplateStruct->qa_model_template_id
+            $qaModel = QAModelTemplateDao::getQaModelTemplateByIdAndUid( Database::obtain()->getConnection(), [
+                    'id'  => $projectTemplateStruct->qa_model_template_id,
+                    'uid' => $projectTemplateStruct->uid
             ] );
 
             if ( empty( $qaModel ) ) {
@@ -209,15 +204,12 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
 
         // check pr_id
         if ( $projectTemplateStruct->payable_rate_template_id > 0 ) {
-            $payableRateModel = CustomPayableRateDao::getById( $projectTemplateStruct->payable_rate_template_id );
+            $payableRateModel = CustomPayableRateDao::getByIdAndUser( $projectTemplateStruct->payable_rate_template_id, $projectTemplateStruct->uid );
 
             if ( empty( $payableRateModel ) ) {
                 throw new Exception( "Not existing payable rate template." );
             }
 
-            if ( $payableRateModel->uid !== $projectTemplateStruct->uid ) {
-                throw new Exception( "Billing model doesn't belong to the user." );
-            }
         }
 
         // check mt
@@ -284,14 +276,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
         $paginationParameters = new PaginationParameters( static::query_paginated, [ 'uid' => $uid ], ProjectTemplateStruct::class, $baseRoute, $current, $pagination );
         $paginationParameters->setCache( self::paginated_map_key . ":" . $uid, $ttl );
 
-        $result = $pager->getPagination( $totals, $paginationParameters );
-
-        $models   = [];
-        $models[] = self::getDefaultTemplate( $uid ); // YYY REMOVE
-
-        $result[ 'items' ] = array_merge( $models, $result[ 'items' ] );
-
-        return $result;
+        return $pager->getPagination( $totals, $paginationParameters );
 
     }
 

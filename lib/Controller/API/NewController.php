@@ -1178,14 +1178,10 @@ class NewController extends ajaxController {
             $payableRateTemplateName = $this->postInput[ 'payable_rate_template_name' ];
             $userId                  = $this->getUser()->uid;
 
-            $payableRateModelTemplate = CustomPayableRateDao::getById( $payableRateTemplateId );
+            $payableRateModelTemplate = CustomPayableRateDao::getByIdAndUser( $payableRateTemplateId, $userId );
 
             if ( null === $payableRateModelTemplate ) {
                 throw new Exception( 'Payable rate model id not valid' );
-            }
-
-            if ( $payableRateModelTemplate->uid !== $userId ) {
-                throw new Exception( 'Payable rate model is not belonging to the current user' );
             }
 
             if ( $payableRateModelTemplate->name !== $payableRateTemplateName ) {

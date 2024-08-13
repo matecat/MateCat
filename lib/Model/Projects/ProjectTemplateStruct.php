@@ -177,49 +177,6 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
     }
 
     /**
-     * @return TeamStruct|null
-     */
-    public function getTeam() {
-        if ( is_null( $this->id_team ) ) {
-            return null;
-        }
-
-        $dao = new TeamDao();
-
-        return $dao->findById( $this->id_team );
-    }
-
-    /**
-     * @return CustomPayableRateStruct|null
-     */
-    public function getPayableRate() {
-        if ( is_null( $this->payable_rate_template_id ) ) {
-            return null;
-        }
-
-        return CustomPayableRateDao::getById( $this->payable_rate_template_id );
-    }
-
-    /**
-     * @return QAModelTemplateStruct|null
-     */
-    public function getQATemplateModel() {
-        if ( is_null( $this->qa_model_template_id ) ) {
-            return null;
-        }
-
-        $qaModels = QAModelTemplateDao::get( [
-                'id' => $this->qa_model_template_id
-        ] );
-
-        if ( count( $qaModels ) == 1 ) {
-            return $qaModels[ 0 ];
-        }
-
-        return null;
-    }
-
-    /**
      * @inheritDoc
      */
     public function jsonSerialize() {

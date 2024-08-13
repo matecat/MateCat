@@ -8,6 +8,7 @@ use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use PayableRates\CustomPayableRateDao;
 use PayableRates\CustomPayableRateStruct;
 use ProjectQueue\Queue;
+use QAModelTemplate\QAModelTemplateDao;
 use QAModelTemplate\QAModelTemplateStruct;
 use Validator\EngineValidator;
 use Validator\JSONValidator;
@@ -655,14 +656,14 @@ class createProjectController extends ajaxController {
      */
     private function __validateQaModelTemplate() {
         if ( !empty( $this->postInput[ 'qa_model_template_id' ] ) and $this->postInput[ 'qa_model_template_id' ] > 0 ) {
-            $qaModelTemplate = \QAModelTemplate\QAModelTemplateDao::get( [
+            $qaModelTemplate = QAModelTemplateDao::get( [
                     'id'  => $this->postInput[ 'qa_model_template_id' ],
                     'uid' => $this->getUser()->uid
             ] );
 
             // check if qa_model template exists
             if ( null === $qaModelTemplate ) {
-                throw new \Exception( 'This QA Model template does not exists or does not belongs to the logged in user' );
+                throw new Exception( 'This QA Model template does not exists or does not belongs to the logged in user' );
             }
 
             $this->qaModelTemplate = $qaModelTemplate;
@@ -680,15 +681,12 @@ class createProjectController extends ajaxController {
             $payableRateTemplateId = $this->postInput[ 'payable_rate_template_id' ];
             $userId                = $this->getUser()->uid;
 
-            $payableRateModelTemplate = CustomPayableRateDao::getById( $payableRateTemplateId );
+            $payableRateModelTemplate = CustomPayableRateDao::getByIdAndUser( $payableRateTemplateId, $userId );
 
             if ( null === $payableRateModelTemplate ) {
-                throw new \Exception( 'Payable rate model id not valid' );
+                throw new Exception( 'Payable rate model id not valid' );
             }
 
-            if ( $payableRateModelTemplate->uid !== $userId ) {
-                throw new \Exception( 'Payable rate model is not belonging to the current user' );
-            }
         }
 
         $this->payableRateModelTemplate = $payableRateModelTemplate;
@@ -710,11 +708,11 @@ class createProjectController extends ajaxController {
 
             foreach ( $dialectStrictObj as $lang => $value ) {
                 if ( !in_array( $lang, $targets ) ) {
-                    throw new \Exception( 'Wrong `dialect_strict` object, language, ' . $lang . ' is not one of the project target languages' );
+                    throw new Exception( 'Wrong `dialect_strict` object, language, ' . $lang . ' is not one of the project target languages' );
                 }
 
                 if ( !is_bool( $value ) ) {
-                    throw new \Exception( 'Wrong `dialect_strict` object, not boolean declared value for ' . $lang );
+                    throw new Exception( 'Wrong `dialect_strict` object, not boolean declared value for ' . $lang );
                 }
             }
 

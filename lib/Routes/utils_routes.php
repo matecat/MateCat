@@ -27,62 +27,62 @@ $klein->respond( '/utils/pee', function () {
 
 } );
 
-route( '/api/app/teams/[i:id_team]/members/public',                                 'GET',  '\API\App\TeamPublicMembersController', 'publicList' );
+route( '/api/app/teams/[i:id_team]/members/public', 'GET', '\API\App\TeamPublicMembersController', 'publicList' );
 
-route( '/api/app/user',                                                             'GET',  'API\App\UserController', 'show' );
-route( '/api/app/user/password/change',                                             'POST', 'API\App\UserController', 'changePasswordAsLoggedUser' );
+route( '/api/app/user', 'GET', 'API\App\UserController', 'show' );
+route( '/api/app/user/password/change', 'POST', 'API\App\UserController', 'changePasswordAsLoggedUser' );
 
 
-route( '/api/app/user/login',                                                       'POST', 'API\App\LoginController', 'login' );
-route( '/api/app/user/logout',                                                      'POST', 'API\App\LoginController', 'logout' );
-route( '/api/app/user/login/token',                                                 'GET',  'API\App\LoginController', 'token' );
+route( '/api/app/user/login', 'POST', 'API\App\LoginController', 'login' );
+route( '/api/app/user/logout', 'POST', 'API\App\LoginController', 'logout' );
+route( '/api/app/user/login/token', 'GET', 'API\App\LoginController', 'token' );
 
-route( '/api/app/user',                                                             'POST', 'API\App\SignupController', 'create' );
-route( '/api/app/user/metadata',                                                    'POST', 'API\App\UserMetadataController', 'update' );
+route( '/api/app/user', 'POST', 'API\App\SignupController', 'create' );
+route( '/api/app/user/metadata', 'POST', 'API\App\UserMetadataController', 'update' );
 
-route( '/api/app/user/confirm/[:token]',                                            'GET',  'API\App\SignupController', 'confirm' );
-route( '/api/app/user/resend_email_confirm',                                        'POST', 'API\App\SignupController', 'resendEmailConfirm' );
-route( '/api/app/user/forgot_password',                                             'POST', 'API\App\SignupController', 'forgotPassword' );
-route( '/api/app/user/password_reset/[:token]',                                     'GET',  'API\App\SignupController', 'authForPasswordReset' );
-route( '/api/app/user/password',                                                    'POST', 'API\App\SignupController', 'setNewPassword' );
-route( '/api/app/user/redeem_project',                                              'POST', 'API\App\SignupController', 'redeemProject' );
+route( '/api/app/user/confirm/[:token]', 'GET', 'API\App\SignupController', 'confirm' );
+route( '/api/app/user/resend_email_confirm', 'POST', 'API\App\SignupController', 'resendEmailConfirm' );
+route( '/api/app/user/forgot_password', 'POST', 'API\App\SignupController', 'forgotPassword' );
+route( '/api/app/user/password_reset/[:token]', 'GET', 'API\App\SignupController', 'authForPasswordReset' );
+route( '/api/app/user/password', 'POST', 'API\App\SignupController', 'setNewPassword' );
+route( '/api/app/user/redeem_project', 'POST', 'API\App\SignupController', 'redeemProject' );
 
-route( '/api/app/connected_services/[:id_service]/verify',                          'GET',  'ConnectedServices\ConnectedServicesController', 'verify' );
-route( '/api/app/connected_services/[:id_service]',                                 'POST', 'ConnectedServices\ConnectedServicesController', 'update' );
+route( '/api/app/connected_services/[:id_service]/verify', 'GET', 'ConnectedServices\ConnectedServicesController', 'verify' );
+route( '/api/app/connected_services/[:id_service]', 'POST', 'ConnectedServices\ConnectedServicesController', 'update' );
 
-route( '/api/app/teams/members/invite/[:jwt]',                                      'GET',  '\API\App\TeamsInvitationsController', 'collectBackInvitation' ) ;
+route( '/api/app/teams/members/invite/[:jwt]', 'GET', '\API\App\TeamsInvitationsController', 'collectBackInvitation' );
 
-route( '/api/app/outsource/confirm/[i:id_job]/[:password]',                         'POST', '\API\App\OutsourceConfirmationController', 'confirm' ) ;
+route( '/api/app/outsource/confirm/[i:id_job]/[:password]', 'POST', '\API\App\OutsourceConfirmationController', 'confirm' );
 
-route( '/api/app/utils/pee/graph',                                                  'POST', '\API\App\PeeData', 'getPeePlots' ) ;
-route( '/api/app/utils/pee/table',                                                  'POST', '\API\App\PeeData', 'getPeeTableData' ) ;
-route( '/api/app/jobs/[i:id_job]/[:password]/completion-events/[:id_event]',        'DELETE', 'Features\ProjectCompletion\Controller\CompletionEventController', 'delete' ) ;
+route( '/api/app/utils/pee/graph', 'POST', '\API\App\PeeData', 'getPeePlots' );
+route( '/api/app/utils/pee/table', 'POST', '\API\App\PeeData', 'getPeeTableData' );
+route( '/api/app/jobs/[i:id_job]/[:password]/completion-events/[:id_event]', 'DELETE', 'Features\ProjectCompletion\Controller\CompletionEventController', 'delete' );
 
 //Health check
-route( '/api/app/heartbeat/ping',                                                   'GET', '\API\App\HeartBeat', 'ping' ) ;
+route( '/api/app/heartbeat/ping', 'GET', '\API\App\HeartBeat', 'ping' );
 
-$klein->with('/api/app/jobs/[:id_job]/[:password]', function() {
+$klein->with( '/api/app/jobs/[:id_job]/[:password]', function () {
     route( '', 'GET', '\API\V3\ChunkController', 'show' );
-    route( '/quality-report',           'GET', '\Features\ReviewExtended\Controller\API\QualityReportController', 'show' ); // alias of /api/v2/jobs/[:id_job]/[:password]/quality-report
-    route( '/quality-report/segments',  'GET', 'Features\ReviewExtended\Controller\API\QualityReportController', 'segments_for_ui' ); // alias of /api/v2/jobs/[:id_job]/[:password]/quality-report/segments
-});
-
-route( '/api/app/jobs/[:id_job]/[:password]/stats',     'GET',  'API\App\StatsController', 'stats' );
-route( '/api/app/jobs/[:id_job]/[:password]/segments',  'POST',  'API\App\FilesController', 'segments' );
-
-$klein->with( '/api/app/api-key', function () {
-    route( '/create',   'POST', '\API\App\ApiKeyController', 'create' );
-    route( '/show',     'GET', '\API\App\ApiKeyController', 'show' );
-    route( '/delete',   'DELETE', '\API\App\ApiKeyController', 'delete' );
+    route( '/quality-report', 'GET', '\Features\ReviewExtended\Controller\API\QualityReportController', 'show' ); // alias of /api/v2/jobs/[:id_job]/[:password]/quality-report
+    route( '/quality-report/segments', 'GET', 'Features\ReviewExtended\Controller\API\QualityReportController', 'segments_for_ui' ); // alias of /api/v2/jobs/[:id_job]/[:password]/quality-report/segments
 } );
 
-route( '/api/app/projects/[:id_project]/[:password]/segment-analysis',  'GET',  'API\V3\SegmentAnalysisController', 'project' ); // to be deleted from here
-route( '/api/app/jobs/[:id_job]/[:password]/segment-analysis',          'GET',  'API\V3\SegmentAnalysisController', 'job' );     // to be deleted from here
+route( '/api/app/jobs/[:id_job]/[:password]/stats', 'GET', 'API\App\StatsController', 'stats' );
+route( '/api/app/jobs/[:id_job]/[:password]/segments', 'POST', 'API\App\FilesController', 'segments' );
 
-route( '/api/app/projects/[:id_project]/[:password]/quality-framework', 'GET',  'API\App\QualityFrameworkController', 'project' );
-route( '/api/app/jobs/[:id_job]/[:password]/quality-framework',         'GET',  'API\App\QualityFrameworkController', 'job' );
+$klein->with( '/api/app/api-key', function () {
+    route( '/create', 'POST', '\API\App\ApiKeyController', 'create' );
+    route( '/show', 'GET', '\API\App\ApiKeyController', 'show' );
+    route( '/delete', 'DELETE', '\API\App\ApiKeyController', 'delete' );
+} );
 
-route( '/api/app/change-password',  'POST', 'API\V2\ChangePasswordController', 'changePassword' );
+route( '/api/app/projects/[:id_project]/[:password]/segment-analysis', 'GET', 'API\V3\SegmentAnalysisController', 'project' ); // to be deleted from here
+route( '/api/app/jobs/[:id_job]/[:password]/segment-analysis', 'GET', 'API\V3\SegmentAnalysisController', 'job' );     // to be deleted from here
+
+route( '/api/app/projects/[:id_project]/[:password]/quality-framework', 'GET', 'API\App\QualityFrameworkController', 'project' );
+route( '/api/app/jobs/[:id_job]/[:password]/quality-framework', 'GET', 'API\App\QualityFrameworkController', 'job' );
+
+route( '/api/app/change-password', 'POST', 'API\V2\ChangePasswordController', 'changePassword' );
 
 // TM Keys
 $klein->with( '/api/app/tm-keys', function () {
@@ -102,15 +102,25 @@ $klein->with( '/api/app/glossary', function () {
 } );
 
 // AI Assistant
-route( '/api/app/ai-assistant', 'POST',  'API\App\AIAssistantController', 'index' );
+route( '/api/app/ai-assistant', 'POST', 'API\App\AIAssistantController', 'index' );
 
-$klein->with('/api/app/languages', function() {
+$klein->with( '/api/app/languages', function () {
     route( '', 'GET', '\API\App\SupportedLanguagesController', 'index' );
-});
+} );
 
-$klein->with('/api/app/files', function() {
+$klein->with( '/api/app/files', function () {
     route( '', 'GET', '\API\App\SupportedFilesController', 'index' );
-});
+} );
+
+//PAYABLE RATES
+$klein->with( '/api/app/payable_rate', function () {
+    route( '/default', 'GET', '\API\V2\PayableRateController', 'default' );
+} );
+
+//QA MODELS
+$klein->with( '/api/app/qa_model_template', function () {
+    route( '/default', 'GET', '\API\V3\QAModelTemplateController', 'default' );
+} );
 
 // PROJECT TEMPLATE
 $klein->with( '/api/app/project-template', function () {
