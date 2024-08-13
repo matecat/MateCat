@@ -91,14 +91,14 @@ function useProjectTemplates(tmKeys, isCattool = config.is_cattool) {
       Promise.all([getProjectTemplateDefault(), getProjectTemplates()]).then(
         ([templateDefault, {items}]) => {
           if (!cleanup) {
-            const itsNotEventDefault = items.every(
+            const shouldStandardToBeDefault = items.every(
               ({is_default}) => !is_default,
             )
             setProjectTemplates(
               [
                 {
                   ...templateDefault,
-                  ...(itsNotEventDefault && {is_default: true}),
+                  ...(shouldStandardToBeDefault && {is_default: true}),
                 },
                 ...items,
               ].map((template) => ({

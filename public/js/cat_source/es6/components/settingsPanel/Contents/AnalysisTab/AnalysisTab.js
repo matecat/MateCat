@@ -144,21 +144,6 @@ export const AnalysisTab = () => {
           )
         }
       })
-
-      getBillingModelTemplates().then(({items}) => {
-        if (!cleanup) {
-          const selectedTemplateId =
-            items.find(({id}) => id === currentProjectTemplateBillingId)?.id ??
-            0
-
-          setTemplates(
-            items.map((template) => ({
-              ...template,
-              isSelected: template.id === selectedTemplateId,
-            })),
-          )
-        }
-      })
     } else {
       // not logged in
     }
