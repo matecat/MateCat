@@ -128,7 +128,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
      */
     public static function editFromJSON( ProjectTemplateStruct $projectTemplateStruct, string $json, int $id, int $uid ): ProjectTemplateStruct {
 
-        $projectTemplateStruct->hydrateFromJSON( $json, $id, $uid );
+        $projectTemplateStruct->hydrateFromJSON( $json, $uid, $id );
 
         self::checkValues( $projectTemplateStruct );
 

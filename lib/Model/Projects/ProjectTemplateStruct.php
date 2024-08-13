@@ -35,7 +35,7 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
      *
      * @return $this
      */
-    public function hydrateFromJSON( string $json, int $id, int $uid ): ProjectTemplateStruct {
+    public function hydrateFromJSON( string $json, int $uid, ?int $id = null ): ProjectTemplateStruct {
         $json = json_decode( $json );
 
         $this->id                       = $json->id ?? $id;
