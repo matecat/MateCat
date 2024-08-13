@@ -5,6 +5,7 @@
  * Date: 09/09/16
  * Time: 10:08
  */
+global $klein;
 
 $klein->with('/api/v2/projects/[:id_project]/[:password]', function() {
     route( '',                      'GET',  'API\V2\ProjectsController',    'get'     ); //this do not show some info like teams and translators

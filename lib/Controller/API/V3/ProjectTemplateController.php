@@ -181,7 +181,7 @@ class ProjectTemplateController extends KleinController {
                 throw new Exception( 'Model not found', 404 );
             }
 
-            $struct = ProjectTemplateDao::editFromJSON( $model, $json, $uid );
+            $struct = ProjectTemplateDao::editFromJSON( $model, $json, $id, $uid );
 
             $this->response->code( 200 );
 

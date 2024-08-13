@@ -4,14 +4,7 @@ namespace Projects;
 
 use DataAccess_AbstractDaoSilentStruct;
 use DataAccess_IDaoStruct;
-use Exception;
 use JsonSerializable;
-use PayableRates\CustomPayableRateDao;
-use PayableRates\CustomPayableRateStruct;
-use QAModelTemplate\QAModelTemplateDao;
-use QAModelTemplate\QAModelTemplateStruct;
-use Teams\TeamDao;
-use Teams\TeamStruct;
 
 class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct, JsonSerializable {
     public $id;
@@ -42,10 +35,10 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
      *
      * @return $this
      */
-    public function hydrateFromJSON( string $json, int $uid ): ProjectTemplateStruct {
+    public function hydrateFromJSON( string $json, int $id, int $uid ): ProjectTemplateStruct {
         $json = json_decode( $json );
 
-        $this->id                       = $json->id;
+        $this->id                       = $json->id ?? $id;
         $this->uid                      = $json->uid ?? $uid;
         $this->name                     = $json->name;
         $this->is_default               = ( isset( $json->is_default ) ) ? $json->is_default : false;

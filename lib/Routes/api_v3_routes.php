@@ -5,6 +5,7 @@
  * Date: 11/09/2018
  * Time: 18:00
  */
+global $klein;
 
 $klein->with( '/api/v3/projects', function () {
     route( '/analysis/status/[i:id_project]/[:password]', 'GET', '\API\V3\StatusController', 'index' );
