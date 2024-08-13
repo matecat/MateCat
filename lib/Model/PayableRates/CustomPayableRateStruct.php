@@ -9,6 +9,7 @@ use Date\DateTimeUtil;
 use DomainException;
 use Exception;
 use JsonSerializable;
+use Langs_Languages;
 
 class CustomPayableRateStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct, JsonSerializable {
     const MAX_BREAKDOWN_SIZE = 65535;
@@ -25,14 +26,14 @@ class CustomPayableRateStruct extends DataAccess_AbstractDaoSilentStruct impleme
     /**
      * @return string
      */
-    public function breakdownsToJson() {
+    public function breakdownsToJson(): string {
         return json_encode( $this->breakdowns );
     }
 
     /**
      * @return array
      */
-    public function getBreakdownsArray() {
+    public function getBreakdownsArray(): array {
         return ( is_string( $this->breakdowns ) ? json_decode( $this->breakdowns, true ) : $this->breakdowns );
     }
 
@@ -42,8 +43,8 @@ class CustomPayableRateStruct extends DataAccess_AbstractDaoSilentStruct impleme
      *
      * @return array
      */
-    public function getPayableRates( $source, $target ) {
-        $languages  = \Langs_Languages::getInstance();
+    public function getPayableRates( string $source, string $target ): array {
+        $languages  = Langs_Languages::getInstance();
         $breakdowns = $this->getBreakdownsArray();
 
         // $isoSource and $isoTarget is in 'isocode' format
@@ -76,7 +77,7 @@ class CustomPayableRateStruct extends DataAccess_AbstractDaoSilentStruct impleme
      *
      * @throws Exception
      */
-    public function hydrateFromJSON( $json ) {
+    public function hydrateFromJSON( string $json ): CustomPayableRateStruct {
         $json = json_decode( $json, true );
 
         if (
@@ -132,10 +133,10 @@ class CustomPayableRateStruct extends DataAccess_AbstractDaoSilentStruct impleme
         // rfc3066code --->  es-ES
         // isocode     --->  es
         $format    = ( strlen( $lang ) > 3 ) ? 'rfc3066code' : 'isocode';
-        $languages = \Langs_Languages::getInstance();
+        $languages = Langs_Languages::getInstance();
 
         if ( !$languages->isValidLanguage( $lang, $format ) ) {
-            throw new \DomainException( $lang . ' is not a supported language', 403 );
+            throw new DomainException( $lang . ' is not a supported language', 403 );
         }
     }
 

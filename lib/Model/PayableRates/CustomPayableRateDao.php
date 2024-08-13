@@ -58,7 +58,6 @@ class CustomPayableRateDao extends DataAccess_AbstractDao {
                 ],
                 'createdAt'                  => DateTimeUtil::formatIsoDate( date( "Y-m-d H:i:s" ) ),
                 'modifiedAt'                 => DateTimeUtil::formatIsoDate( date( "Y-m-d H:i:s" ) ),
-                'deletedAt'                  => null,
         ];
     }
 
