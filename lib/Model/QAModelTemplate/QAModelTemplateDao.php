@@ -91,7 +91,7 @@ class QAModelTemplateDao extends DataAccess_AbstractDao {
         $conn->beginTransaction();
 
         try {
-            $stmt = $conn->prepare( "UPDATE qa_model_templates SET deleted_at = :now WHERE id = :id AND `deleted_at` IS NOT NULL;" );
+            $stmt = $conn->prepare( "UPDATE qa_model_templates SET deleted_at = :now WHERE id = :id AND `deleted_at` IS NULL;" );
             $stmt->execute( [
                     'id'  => $id,
                     'now' => ( new DateTime() )->format( 'Y-m-d H:i:s' )
