@@ -222,7 +222,7 @@ class CustomPayableRateDao extends DataAccess_AbstractDao {
     public static function remove( int $id, int $uid ): int {
 
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( "UPDATE " . self::TABLE . " SET `name` = :name, `deleted_at` = :now WHERE id = :id AND uid = :uid" );
+        $stmt = $conn->prepare( "UPDATE " . self::TABLE . " SET `name` = :name, `deleted_at` = :now WHERE id = :id AND uid = :uid AND `deleted_at` IS NOT NULL;" );
         $stmt->execute( [
                 'id'   => $id,
                 'uid'  => $uid,

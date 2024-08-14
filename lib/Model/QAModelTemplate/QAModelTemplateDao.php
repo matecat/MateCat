@@ -91,13 +91,17 @@ class QAModelTemplateDao extends DataAccess_AbstractDao {
         $conn->beginTransaction();
 
         try {
-            $stmt = $conn->prepare( "UPDATE qa_model_templates SET deleted_at = :now WHERE id = :id " );
+            $stmt = $conn->prepare( "UPDATE qa_model_templates SET deleted_at = :now WHERE id = :id AND `deleted_at` IS NOT NULL;" );
             $stmt->execute( [
                     'id'  => $id,
                     'now' => ( new DateTime() )->format( 'Y-m-d H:i:s' )
             ] );
 
             $deleted = $stmt->rowCount();
+
+            if( !$deleted ){
+                return 0;
+            }
 
             $stmt = $conn->prepare( "SELECT * FROM qa_model_template_passfails WHERE id_template=:id_template " );
             $stmt->setFetchMode( PDO::FETCH_CLASS, QAModelTemplatePassfailStruct::class );
