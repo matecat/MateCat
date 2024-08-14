@@ -707,7 +707,7 @@ CREATE TABLE `payable_rate_templates` (
   `deleted_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uid_name_idx` (`uid`,`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Table structure for table `phinxlog`
@@ -722,8 +722,7 @@ CREATE TABLE `phinxlog`
     `start_time` timestamp  NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     `end_time`   timestamp  NOT NULL DEFAULT '0000-00-00 00:00:00',
     PRIMARY KEY (`version`)
-) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8mb4;
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -817,7 +816,7 @@ CREATE TABLE `project_templates` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uid_name_idx` (`uid`,`name`),
   KEY `uid_idx` (`uid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1048,7 +1047,7 @@ CREATE TABLE `qa_model_templates` (
   `deleted_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `uid` (`uid`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=93 DEFAULT CHARSET=utf8
+) ENGINE=InnoDB AUTO_INCREMENT=93 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1582,13 +1581,6 @@ WHERE id = 11;
 INSERT INTO sequences (id_segment, id_project)
 VALUES (IFNULL((SELECT MAX(id) + 1 FROM segments), 1), IFNULL((SELECT MAX(id) + 1 FROM projects), 1));
 
-#Create the user 'matecat'@'%' IF NOT EXISTS
--- CREATE USER 'matecat'@'%' IDENTIFIED BY 'matecat01';
-
-# Grants for 'matecat'@'%'
-GRANT SELECT, INSERT, UPDATE, DELETE, EXECUTE, SHOW VIEW ON `matecat`.* TO 'matecat'@'%' IDENTIFIED BY 'matecat01';
-
-
 CREATE SCHEMA IF NOT EXISTS `matecat_conversions_log` DEFAULT CHARACTER SET utf8mb4;
 USE matecat_conversions_log;
 CREATE TABLE IF NOT EXISTS conversions_log
@@ -1629,12 +1621,6 @@ CREATE TABLE IF NOT EXISTS conversions_log
 )
     ENGINE = InnoDB
     DEFAULT CHARACTER SET = utf8mb4;
-
-#Create the user 'matecat'@'%' ( even if already created )
-# Grants for 'matecat'@'%'
-GRANT SELECT, INSERT, UPDATE, DELETE, EXECUTE, SHOW VIEW ON `matecat_conversions_log`.* TO 'matecat'@'%' IDENTIFIED BY 'matecat01';
-
-GRANT DROP ON `matecat`.`jobs_stats` TO 'PEEWorker'@'%' IDENTIFIED BY 'matecat02';
 
 USE `matecat`;
 
