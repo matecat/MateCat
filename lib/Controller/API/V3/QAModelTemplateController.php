@@ -272,7 +272,7 @@ class QAModelTemplateController extends KleinController {
     public function default(): Response {
 
         $this->response->status()->setCode( 200 );
-        $this->response->json(
+        return $this->response->json(
                 QAModelTemplateDao::getDefaultTemplate( $this->getUser()->uid )
         );
 
