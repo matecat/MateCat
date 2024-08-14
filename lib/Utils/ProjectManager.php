@@ -2449,7 +2449,12 @@ class ProjectManager {
                      */
 
                     // Remove an existent translation, we won't send these segment to the analysis because it is marked as locked
-                    unset( $segments_metadata[ $k ] );
+                    /*
+                     * Commented because of
+                     *
+                     * https://app.asana.com/0/1134617950425092/1202822242420298
+                     */
+                    // unset( $segments_metadata[ $k ] );
 
                 }
 
