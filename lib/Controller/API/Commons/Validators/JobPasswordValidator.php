@@ -1,13 +1,13 @@
 <?php
 
-namespace API\V2\Validators;
+namespace API\Commons\Validators;
 
 /**
  * @deprecated use Validators\ChunkPasswordValidator
  */
 
-use API\V2\Exceptions\NotFoundException;
-use API\V2\KleinController;
+use API\Commons\Exceptions\NotFoundException;
+use API\Commons\KleinController;
 use Jobs_JobDao;
 use Jobs_JobStruct;
 

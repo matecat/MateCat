@@ -7,10 +7,10 @@
  *
  */
 
-namespace API\V2\Validators;
+namespace API\Commons\Validators;
 
-use API\V2\Exceptions\NotFoundException;
-use API\V2\KleinController;
+use API\Commons\Exceptions\NotFoundException;
+use API\Commons\KleinController;
 
 class SegmentValidator extends Base {
 

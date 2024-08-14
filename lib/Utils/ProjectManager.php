@@ -8,7 +8,7 @@
  */
 
 use ActivityLog\ActivityLogStruct;
-use API\V2\Exceptions\AuthenticationError;
+use API\Commons\Exceptions\AuthenticationError;
 use ConnectedServices\GDrive as GDrive;
 use ConnectedServices\GDrive\Session;
 use Constants\XliffTranslationStatus;

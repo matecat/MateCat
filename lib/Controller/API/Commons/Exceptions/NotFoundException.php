@@ -7,7 +7,7 @@
  *
  */
 
-namespace API\V2\Exceptions;
+namespace API\Commons\Exceptions;
 
 
 class NotFoundException extends \Exceptions\NotFoundException {

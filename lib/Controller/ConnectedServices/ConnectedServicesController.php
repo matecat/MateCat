@@ -9,8 +9,8 @@
 namespace ConnectedServices;
 
 
-use API\App\AbstractStatefulKleinController;
 use API\App\Json\ConnectedService;
+use API\Commons\AbstractStatefulKleinController;
 use Exceptions\NotFoundException;
 
 class ConnectedServicesController extends AbstractStatefulKleinController  {

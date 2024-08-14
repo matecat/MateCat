@@ -2,14 +2,15 @@
 
 namespace API\V3;
 
-use API\V2\KleinController;
-use API\V2\Validators\LoginValidator;
-use Database;
+use API\Commons\KleinController;
+use API\Commons\Validators\LoginValidator;
 use Exception;
 use INIT;
 use Klein\Response;
 use QAModelTemplate\QAModelTemplateDao;
+use Swaggest\JsonSchema\InvalidValue;
 use Validator\Errors\JSONValidatorException;
+use Validator\Errors\JsonValidatorGenericException;
 use Validator\JSONValidator;
 use Validator\JSONValidatorObject;
 
@@ -22,6 +23,22 @@ class QAModelTemplateController extends KleinController {
     }
 
     /**
+     * @param $json
+     *
+     * @throws InvalidValue
+     * @throws JSONValidatorException
+     * @throws \Swaggest\JsonSchema\Exception
+     * @throws JsonValidatorGenericException
+     */
+    private function validateJSON( $json ) {
+        $validatorObject       = new JSONValidatorObject();
+        $validatorObject->json = $json;
+        $jsonSchema            = file_get_contents( INIT::$ROOT . '/inc/validation/schema/qa_model.json' );
+        $validator             = new JSONValidator( $jsonSchema, true );
+        $validator->validate( $validatorObject );
+    }
+
+    /**
      * fetch all
      *
      * @return Response
@@ -29,16 +46,27 @@ class QAModelTemplateController extends KleinController {
      */
     public function index(): Response {
 
-        $currentPage = $this->request->param( 'page' ) ?? 1;
-        $pagination  = $this->request->param( 'perPage' ) ?? 20;
+        try {
 
-        if ( $pagination > 200 ) {
-            $pagination = 200;
+            $currentPage = $this->request->param( 'page' ) ?? 1;
+            $pagination  = $this->request->param( 'perPage' ) ?? 20;
+
+            if ( $pagination > 200 ) {
+                $pagination = 200;
+            }
+
+            $uid = $this->getUser()->uid;
+
+            return $this->response->json( QAModelTemplateDao::getAllPaginated( $uid, "/api/v3/qa_model_template?page=", (int)$currentPage, (int)$pagination ) );
+
+        } catch ( Exception $exception ) {
+            $code = ( $exception->getCode() > 0 ) ? $exception->getCode() : 500;
+            $this->response->status()->setCode( $code );
+
+            return $this->response->json( [
+                    'error' => $exception->getMessage()
+            ] );
         }
-
-        $uid = $this->getUser()->uid;
-
-        return $this->response->json( QAModelTemplateDao::getAllPaginated( $uid, $currentPage, $pagination ) );
     }
 
     /**
@@ -56,16 +84,19 @@ class QAModelTemplateController extends KleinController {
                 throw new Exception( 'Method not allowed', 405 );
             }
 
-            $json  = $this->request->body();
+            $json = $this->request->body();
+
+            $this->validateJSON( $json );
+
             $model = QAModelTemplateDao::createFromJSON( $json, $this->getUser()->uid );
 
             $this->response->code( 201 );
 
             return $this->response->json( $model );
-        } catch ( JSONValidatorException $exception ) {
+        } catch ( JSONValidatorException|JsonValidatorGenericException|InvalidValue $exception ) {
             $this->response->code( 400 );
 
-            return $this->response->json( $exception );
+            return $this->response->json( [ 'error' => $exception->getMessage() ] );
         } catch ( Exception $exception ) {
 
             $errorCode = $exception->getCode() >= 400 ? $exception->getCode() : 500;
@@ -81,23 +112,19 @@ class QAModelTemplateController extends KleinController {
      * @return Response
      */
     public function delete(): Response {
-        $id = $this->request->param( 'id' );
 
         try {
 
-            $model = QAModelTemplateDao::getQaModelTemplateByIdAndUid( Database::obtain()->getConnection(), [
-                    'id'  => $id,
-                    'uid' => $this->getUser()->uid
-            ] );
+            $id = (int)$this->request->param( 'id' );
 
-            if ( empty( $model ) ) {
+            $deleted = QAModelTemplateDao::remove( $id, $this->getUser()->uid );
+
+            if ( empty( $deleted ) ) {
                 throw new Exception( 'Model not found', 404 );
             }
 
-            QAModelTemplateDao::remove( $id, $this->getUser()->uid );
-
             return $this->response->json( [
-                    'id' => (int)$id
+                    'id' => $id
             ] );
 
         } catch ( Exception $exception ) {
@@ -120,7 +147,8 @@ class QAModelTemplateController extends KleinController {
 
         try {
 
-            $id    = $this->request->param( 'id' );
+            $id = (int)$this->request->param( 'id' );
+
             $model = QAModelTemplateDao::get( [
                     'id'  => $id,
                     'uid' => $this->getUser()->uid
@@ -130,18 +158,22 @@ class QAModelTemplateController extends KleinController {
                 throw new Exception( 'Model not found', 404 );
             }
 
-            $json  = $this->request->body();
+            $json = $this->request->body();
+
+            $this->validateJSON( $json );
+
             $model = QAModelTemplateDao::editFromJSON( $model, $json );
 
             $this->response->code( 200 );
 
             return $this->response->json( $model );
-        } catch ( JSONValidatorException $exception ) {
-            $this->response->code( 400 );
 
-            return $this->response->json( $exception );
+        } catch ( JSONValidatorException|JsonValidatorGenericException|InvalidValue  $exception ) {
+            $errorCode = max( $exception->getCode(), 400 );
+            $this->response->code( $errorCode );
+
+            return $this->response->json( [ 'error' => $exception->getMessage() ] );
         } catch ( Exception $exception ) {
-
             $errorCode = $exception->getCode() >= 400 ? $exception->getCode() : 500;
             $this->response->code( $errorCode );
 
@@ -155,23 +187,36 @@ class QAModelTemplateController extends KleinController {
      * fetch single
      *
      * @return Response
+     * @throws Exception
      */
     public function view(): Response {
-        $id    = $this->request->param( 'id' );
-        $model = QAModelTemplateDao::get( [
-                'id'  => $id,
-                'uid' => $this->getUser()->uid
-        ] );
 
-        if ( !empty( $model ) ) {
+        try {
+
+            (int)$id = $this->request->param( 'id' );
+
+            $model = QAModelTemplateDao::get( [
+                    'id'  => $id,
+                    'uid' => $this->getUser()->uid
+            ] );
+
+            if ( empty( $model ) ) {
+                throw new Exception( 'Model not found', 404 );
+            }
+
+            $this->response->code( 200 );
+
             return $this->response->json( $model );
+
+        } catch ( Exception $exception ) {
+            $errorCode = $exception->getCode() >= 400 ? $exception->getCode() : 500;
+            $this->response->code( $errorCode );
+
+            return $this->response->json( [
+                    'error' => $exception->getMessage()
+            ] );
         }
 
-        $this->response->code( 404 );
-
-        return $this->response->json( [
-                'error' => 'Model not found'
-        ] );
     }
 
     /**
@@ -215,16 +260,16 @@ class QAModelTemplateController extends KleinController {
     }
 
     /**
-     * @return false|string
+     * @return string
      */
-    private function getQaModelSchema() {
+    private function getQaModelSchema(): string {
         return file_get_contents( INIT::$ROOT . '/inc/validation/schema/qa_model.json' );
     }
 
     /**
      * @throws Exception
      */
-    public function default() {
+    public function default(): Response {
 
         $this->response->status()->setCode( 200 );
         $this->response->json(

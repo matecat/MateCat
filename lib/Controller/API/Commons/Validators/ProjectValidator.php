@@ -1,10 +1,10 @@
 <?php
 
-namespace API\V2\Validators;
+namespace API\Commons\Validators;
 
-use API\V2\Exceptions\AuthenticationError;
-use API\V2\Exceptions\NotFoundException;
-use API\V2\KleinController;
+use API\Commons\Exceptions\AuthenticationError;
+use API\Commons\Exceptions\NotFoundException;
+use API\Commons\KleinController;
 use ApiKeys_ApiKeyStruct;
 use Log;
 

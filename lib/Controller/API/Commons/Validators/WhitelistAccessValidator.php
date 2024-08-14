@@ -7,11 +7,11 @@
  *
  */
 
-namespace API\V2\Validators;
+namespace API\Commons\Validators;
 
 
 use AbstractControllers\IController;
-use API\V2\KleinController;
+use API\Commons\KleinController;
 use DomainException;
 use Utils;
 

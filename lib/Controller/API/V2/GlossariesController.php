@@ -8,9 +8,9 @@
 
 namespace API\V2;
 
-use API\App\AbstractStatefulKleinController;
-use API\V2\Exceptions\ValidationError;
-use API\V2\Validators\LoginValidator;
+use API\Commons\AbstractStatefulKleinController;
+use API\Commons\Exceptions\ValidationError;
+use API\Commons\Validators\LoginValidator;
 use Bootstrap;
 use Exception;
 use InvalidArgumentException;

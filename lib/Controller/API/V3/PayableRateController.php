@@ -1,8 +1,9 @@
 <?php
 
-namespace API\V2;
+namespace API\V3;
 
-use API\V2\Validators\LoginValidator;
+use API\Commons\KleinController;
+use API\Commons\Validators\LoginValidator;
 use Exception;
 use INIT;
 use Klein\Response;

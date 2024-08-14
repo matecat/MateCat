@@ -10,7 +10,7 @@
 namespace Translators;
 
 
-use API\V2\KleinController;
+use API\Commons\KleinController;
 use Email\SendToTranslatorForDeliveryChangeEmail;
 use Email\SendToTranslatorForJobSplitEmail;
 use Email\SendToTranslatorForNewJobEmail;

@@ -2,15 +2,14 @@
 
 namespace API\V2;
 
-use API\App\AbstractStatefulKleinController;
+use API\Commons\AbstractStatefulKleinController;
+use API\Commons\Validators\ChunkPasswordValidator;
 use API\V2\Json\SegmentTranslationIssue as TranslationIssueFormatter;
 use API\V2\Json\TranslationIssueComment;
-use API\V2\Validators\ChunkPasswordValidator;
 use Database;
 use Exceptions\ValidationError;
 use Features\ReviewExtended\ReviewUtils;
 use Features\ReviewExtended\TranslationIssueModel;
-use Features\SecondPassReview;
 use LQA\EntryCommentDao;
 use LQA\EntryDao as EntryDao;
 use LQA\EntryStruct;
@@ -24,7 +23,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
     protected $revisionFactory;
 
     /**
-     * @var Validators\SegmentTranslationIssueValidator
+     * @var \API\Commons\Validators\SegmentTranslationIssueValidator
      */
     private $validator;
     private $issue;

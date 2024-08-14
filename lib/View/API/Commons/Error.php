@@ -7,7 +7,7 @@
  *
  */
 
-namespace API\V2\Json;
+namespace API\Commons;
 
 
 use Exception;

@@ -2,8 +2,8 @@
 
 namespace API\V3;
 
-use API\V2\KleinController;
-use API\V2\Validators\LoginValidator;
+use API\Commons\KleinController;
+use API\Commons\Validators\LoginValidator;
 use Exception;
 use INIT;
 use Klein\Response;
@@ -42,19 +42,19 @@ class ProjectTemplateController extends KleinController {
      */
     public function all(): Response {
 
-        $currentPage = $this->request->param( 'page' ) ?? 1;
-        $pagination  = $this->request->param( 'perPage' ) ?? 20;
-
-        if ( $pagination > 200 ) {
-            $pagination = 200;
-        }
-
         try {
+
+            $currentPage = $this->request->param( 'page' ) ?? 1;
+            $pagination  = $this->request->param( 'perPage' ) ?? 20;
+
+            if ( $pagination > 200 ) {
+                $pagination = 200;
+            }
 
             $uid = $this->getUser()->uid;
             $this->response->status()->setCode( 200 );
 
-            return $this->response->json( ProjectTemplateDao::getAllPaginated( $uid, "/api/v3/project-template?page=", $currentPage, $pagination ) );
+            return $this->response->json( ProjectTemplateDao::getAllPaginated( $uid, "/api/v3/project-template?page=", (int)$currentPage, (int)$pagination ) );
 
         } catch ( Exception $exception ) {
             $code = ( $exception->getCode() > 0 ) ? $exception->getCode() : 500;
@@ -70,9 +70,11 @@ class ProjectTemplateController extends KleinController {
      * Get a single entry
      */
     public function get(): Response {
-        $id = filter_var( $this->request->param( 'id' ), FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_ENCODE_LOW );
 
         try {
+
+            $id = (int)$this->request->param( 'id' );
+
             $model = ProjectTemplateDao::getByIdAndUser( $id, $this->getUser()->uid );
 
             if ( empty( $model ) ) {
@@ -159,11 +161,11 @@ class ProjectTemplateController extends KleinController {
         try {
 
             // accept only JSON
-            if ( $this->request->headers()->get( 'Content-Type' ) !== 'application/json' ) {
+            if ( !$this->isJsonRequest() ) {
                 throw new Exception( 'Bad Request', 400 );
             }
 
-            $id   = $this->request->param( 'id' );
+            $id   = (int)$this->request->param( 'id' );
             $uid  = $this->getUser()->uid;
             $json = $this->request->body();
             $this->validateJSON( $json );
@@ -206,9 +208,10 @@ class ProjectTemplateController extends KleinController {
      * Delete an entry
      */
     public function delete(): Response {
-        $id = filter_var( $this->request->param( 'id' ), FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_ENCODE_LOW );
 
         try {
+
+            $id = (int)$this->request->param( 'id' );
 
             $count = ProjectTemplateDao::remove( $id, $this->getUser()->uid );
 
@@ -217,7 +220,7 @@ class ProjectTemplateController extends KleinController {
             }
 
             return $this->response->json( [
-                    'id' => (int)$id
+                    'id' => $id
             ] );
 
         } catch ( Exception $exception ) {
@@ -242,19 +245,20 @@ class ProjectTemplateController extends KleinController {
     /**
      * @throws Exception
      */
-    public function default() {
+    public function default(): Response {
 
         $this->response->status()->setCode( 200 );
-        $this->response->json(
+
+        return $this->response->json(
                 ProjectTemplateDao::getDefaultTemplate( $this->getUser()->uid )
         );
 
     }
 
     /**
-     * @return false|string
+     * @return string
      */
-    private function getProjectTemplateModelSchema() {
+    private function getProjectTemplateModelSchema(): string {
         return file_get_contents( INIT::$ROOT . '/inc/validation/schema/project_template.json' );
     }
 }

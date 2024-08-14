@@ -1,6 +1,6 @@
 <?php
 
-namespace API\V2\Validators;
+namespace API\Commons\Validators;
 
 use Exception;
 use Klein\Request;

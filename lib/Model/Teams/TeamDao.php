@@ -9,8 +9,10 @@
 namespace Teams;
 
 use Constants_Teams;
+use DataAccess_IDaoStruct;
 use Database;
 use PDO;
+use ReflectionException;
 use Users_UserStruct;
 use Utils;
 
@@ -58,7 +60,7 @@ class TeamDao extends \DataAccess_AbstractDao {
     /**
      * @param $id
      *
-     * @return \DataAccess_IDaoStruct|\DataAccess_IDaoStruct[]|TeamStruct
+     * @return DataAccess_IDaoStruct|DataAccess_IDaoStruct[]|TeamStruct
      */
     public function findById( $id ) {
 
@@ -134,7 +136,7 @@ class TeamDao extends \DataAccess_AbstractDao {
     /**
      * @param TeamStruct $team
      *
-     * @return \DataAccess_IDaoStruct[]|MembershipStruct[]
+     * @return DataAccess_IDaoStruct[]|MembershipStruct[]
      */
     public function getAssigneeWithProjectsByTeam( TeamStruct $team ){
 
@@ -174,15 +176,30 @@ class TeamDao extends \DataAccess_AbstractDao {
         );
     }
 
-    public function getPersonalByUser( Users_UserStruct $user ) {
+    /**
+     * @param Users_UserStruct $user
+     *
+     * @return TeamStruct
+     * @throws ReflectionException
+     */
+    public function getPersonalByUser( Users_UserStruct $user ): TeamStruct {
         return $this->getPersonalByUid( $user->uid );
     }
 
-    public function getPersonalByUid( $uid ) {
+    /**
+     * @param $uid
+     *
+     * @return TeamStruct
+     * @throws ReflectionException
+     */
+    public function getPersonalByUid( $uid ): TeamStruct {
         $stmt                  = $this->_getStatementForQuery( self::$_query_get_personal_by_id );
         $teamQuery             = new TeamStruct();
         $teamQuery->created_by = $uid;
 
+        /**
+         * @var TeamStruct
+         */
         return $this->_fetchObject( $stmt,
                 $teamQuery,
                 array(

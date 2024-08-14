@@ -742,7 +742,7 @@ class NewController extends ajaxController {
      * @param $filename
      *
      * @return array
-     * @throws \API\V2\Exceptions\AuthenticationError
+     * @throws \API\Commons\Exceptions\AuthenticationError
      * @throws \Exceptions\NotFoundException
      * @throws \Exceptions\ValidationError
      * @throws \TaskRunner\Exceptions\EndQueueException
@@ -810,14 +810,7 @@ class NewController extends ajaxController {
     }
 
     protected function _pollForCreationResult() {
-        $time = time();
-        do {
-            $this->result = Queue::getPublishedResults( $this->projectStructure[ 'id_project' ] ); //LOOP for 290 seconds **** UGLY **** Deprecate in API V2
-            if ( $this->result != null ) {
-                break;
-            }
-            sleep( 2 );
-        } while ( time() - $time <= 290 );
+        $this->result['errors'] = $this->projectStructure[ 'result' ][ 'errors' ]->getArrayCopy();
     }
 
     private function __validateSourceLang( Langs_Languages $lang_handler ) {

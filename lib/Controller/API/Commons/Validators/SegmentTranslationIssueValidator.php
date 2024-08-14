@@ -1,9 +1,9 @@
 <?php
 
-namespace API\V2\Validators;
+namespace API\Commons\Validators;
 
 
-use API\V2\Exceptions\ValidationError;
+use API\Commons\Exceptions\ValidationError;
 use Exception;
 use Features\ReviewExtended\ReviewUtils;
 use Features\TranslationEvents\Model\TranslationEventDao;

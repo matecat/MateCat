@@ -8,11 +8,11 @@
 
 namespace Features\ReviewExtended\Controller;
 
-use API\V2\Exceptions\ValidationError;
-use API\V2\KleinController;
-use API\V2\Validators\ProjectAccessValidator;
-use API\V2\Validators\ProjectPasswordValidator;
-use API\V2\Validators\TeamProjectValidator;
+use API\Commons\Exceptions\ValidationError;
+use API\Commons\KleinController;
+use API\Commons\Validators\ProjectAccessValidator;
+use API\Commons\Validators\ProjectPasswordValidator;
+use API\Commons\Validators\TeamProjectValidator;
 use Chunks_ChunkDao;
 use Exception;
 use LQA\ChunkReviewDao;

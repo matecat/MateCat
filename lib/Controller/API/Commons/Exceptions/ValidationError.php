@@ -1,6 +1,6 @@
 <?php
 
-namespace API\V2\Exceptions  ;
+namespace API\Commons\Exceptions  ;
 use Exception;
 
 class ValidationError extends Exception {

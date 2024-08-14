@@ -5,33 +5,35 @@ namespace Projects;
 use DataAccess_AbstractDaoSilentStruct;
 use DataAccess_IDaoStruct;
 use JsonSerializable;
+use stdClass;
 
 class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct, JsonSerializable {
-    public $id;
-    public $name;
-    public $is_default = false;
-    public $uid;
-    public $id_team;
-    public $speech2text;
-    public $lexica;
-    public $tag_projection;
-    public $cross_language_matches;
-    public $segmentation_rule;
-    public $mt;
-    public $tm;
-    public $payable_rate_template_id;
-    public $qa_model_template_id;
-    public $filters_template_id;
-    public $xliff_config_template_id;
-    public $pretranslate_100;
-    public $pretranslate_101;
-    public $get_public_matches;
-    public $created_at;
-    public $modified_at;
+    public ?int    $id                       = null;
+    public string  $name                     = "";
+    public bool    $is_default               = false;
+    public int     $uid                      = 0;
+    public int     $id_team                  = 0;
+    public bool    $speech2text              = false;
+    public bool    $lexica                   = true;
+    public bool    $tag_projection           = true;
+    public ?string $cross_language_matches   = null;
+    public ?string $segmentation_rule        = null;
+    public ?string $mt                       = null;
+    public ?string $tm                       = null;
+    public int     $payable_rate_template_id = 0;
+    public int     $qa_model_template_id     = 0;
+    public int     $filters_template_id      = 0;
+    public int     $xliff_config_template_id = 0;
+    public bool    $pretranslate_100         = false;
+    public bool    $pretranslate_101         = false;
+    public bool    $get_public_matches       = true;
+    public string  $created_at;
+    public ?string $modified_at              = null;
 
     /**
-     * @param string $json
-     * @param int    $uid
+     * @param string   $json
+     * @param int      $uid
+     * @param int|null $id
      *
      * @return $this
      */
@@ -46,13 +48,13 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
         $this->speech2text              = $json->speech2text;
         $this->lexica                   = $json->lexica;
         $this->tag_projection           = $json->tag_projection;
-        $this->cross_language_matches   = $json->cross_language_matches;
-        $this->segmentation_rule        = $json->segmentation_rule;
+        $this->cross_language_matches   = json_encode( $json->cross_language_matches );
+        $this->segmentation_rule        = json_encode( $json->segmentation_rule );
         $this->pretranslate_100         = $json->pretranslate_100;
         $this->pretranslate_101         = $json->pretranslate_101;
         $this->get_public_matches       = $json->get_public_matches;
-        $this->mt                       = $json->mt;
-        $this->tm                       = $json->tm;
+        $this->mt                       = json_encode( $json->mt );
+        $this->tm                       = json_encode( $json->tm );
         $this->payable_rate_template_id = $json->payable_rate_template_id;
         $this->qa_model_template_id     = $json->qa_model_template_id;
         $this->filters_template_id      = $json->filters_template_id;
@@ -62,126 +64,62 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
     }
 
     /**
-     * @return mixed
+     * @return ?object
      */
-    public function getCrossLanguageMatches() {
-        if ( is_string( $this->cross_language_matches ) ) {
+    public function getCrossLanguageMatches(): ?object {
+        if ( !empty( $this->cross_language_matches ) ) {
             return json_decode( $this->cross_language_matches );
         }
 
-        return $this->cross_language_matches;
+        return new stdClass();
     }
 
     /**
-     * @return array
+     * @return object
      */
-    public function getSegmentationRule() {
-        if ( is_string( $this->segmentation_rule ) ) {
+    public function getSegmentationRule(): object {
+        if ( !empty( $this->segmentation_rule ) ) {
             return json_decode( $this->segmentation_rule );
         }
 
-        return $this->segmentation_rule;
+        return new stdClass();
     }
 
     /**
-     * @return mixed
+     * @return object
      */
-    public function getMt() {
-        if ( is_string( $this->mt ) ) {
+    public function getMt(): object {
+        if ( !empty( $this->mt ) ) {
             return json_decode( $this->mt );
         }
 
-        return $this->mt;
+        return new stdClass();
     }
 
     /**
      * @return array
      */
-    public function getTm() {
-        if ( is_string( $this->tm ) ) {
+    public function getTm(): array {
+        if ( !empty( $this->tm ) ) {
             return json_decode( $this->tm );
         }
 
-        if ( empty( $this->tm ) ) {
-            return [];
-        }
-
-        return $this->tm;
-    }
-
-    /**
-     * @return string
-     */
-    public function crossLanguageMatchesToJson() {
-        if ( empty( $this->cross_language_matches ) ) {
-            return null;
-        }
-
-        if ( !is_string( $this->cross_language_matches ) ) {
-            return json_encode( $this->cross_language_matches );
-        }
-
-        return $this->cross_language_matches;
-    }
-
-    /**
-     * @return string
-     */
-    public function segmentationRuleToJson() {
-        if ( empty( $this->segmentation_rule ) ) {
-            return null;
-        }
-
-        if ( !is_string( $this->segmentation_rule ) ) {
-            return json_encode( $this->segmentation_rule );
-        }
-
-        return $this->segmentation_rule;
-    }
-
-    /**
-     * @return string
-     */
-    public function tmToJson() {
-        if ( empty( $this->tm ) ) {
-            return null;
-        }
-
-        if ( !is_string( $this->tm ) ) {
-            return json_encode( $this->tm );
-        }
-
-        return $this->tm;
-    }
-
-    /**
-     * @return string
-     */
-    public function mtToJson() {
-        if ( empty( $this->mt ) ) {
-            return null;
-        }
-
-        if ( !is_string( $this->mt ) ) {
-            return json_encode( $this->mt );
-        }
-
-        return $this->mt;
+        return [];
     }
 
     /**
      * @inheritDoc
      */
-    public function jsonSerialize() {
+    public function jsonSerialize(): array {
         return [
                 'id'                       => (int)$this->id,
                 'name'                     => $this->name,
-                'is_default'               => (bool)$this->is_default,
-                'uid'                      => (int)$this->uid,
-                'id_team'                  => (int)$this->id_team,
-                'speech2text'              => (bool)$this->speech2text,
-                'lexica'                   => (bool)$this->lexica,
-                'tag_projection'           => (bool)$this->tag_projection,
+                'is_default'               => $this->is_default,
+                'uid'                      => $this->uid,
+                'id_team'                  => $this->id_team,
+                'speech2text'              => $this->speech2text,
+                'lexica'                   => $this->lexica,
+                'tag_projection'           => $this->tag_projection,
                 'cross_language_matches'   => $this->getCrossLanguageMatches(),
                 'segmentation_rule'        => $this->getSegmentationRule(),
                 'mt'                       => $this->getMt(),
@@ -190,9 +128,9 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
                 'qa_model_template_id'     => $this->qa_model_template_id ? (int)$this->qa_model_template_id : 0,
                 'filters_template_id'      => $this->filters_template_id ? (int)$this->filters_template_id : 0,
                 'xliff_config_template_id' => $this->xliff_config_template_id ? (int)$this->xliff_config_template_id : 0,
-                'get_public_matches'       => (bool)$this->get_public_matches,
-                'pretranslate_100'         => (bool)$this->pretranslate_100,
-                'pretranslate_101'         => (bool)$this->pretranslate_101,
+                'get_public_matches'       => $this->get_public_matches,
+                'pretranslate_100'         => $this->pretranslate_100,
+                'pretranslate_101'         => $this->pretranslate_101,
                 'created_at'               => date_create( $this->created_at )->format( DATE_RFC822 ),
                 'modified_at'              => date_create( $this->modified_at )->format( DATE_RFC822 ),
         ];

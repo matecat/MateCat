@@ -58,15 +58,15 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
         $default->qa_model_template_id     = 0;
         $default->xliff_config_template_id = 0;
         $default->filters_template_id      = 0;
-        $default->segmentation_rule        = [
+        $default->segmentation_rule        = json_encode( [
                 "name" => "General",
                 "id"   => "standard"
-        ];
+        ] );
 
         // MT
-        $default->mt = self::getUserDefaultMt();
+        $default->mt = json_encode( self::getUserDefaultMt() );
 
-        $default->tm          = [];
+        $default->tm          = json_encode( [] );
         $default->created_at  = date( "Y-m-d H:i:s" );
         $default->modified_at = date( "Y-m-d H:i:s" );
 
@@ -306,7 +306,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
      * @throws ReflectionException
      */
     public
-    static function getById( int $id, int $ttl = 60 ) {
+    static function getById( int $id, int $ttl = 60 ): ?ProjectTemplateStruct {
         $stmt = self::getInstance()->_getStatementForQuery( self::query_by_id );
         /**
          * @var $result ProjectTemplateStruct[]
@@ -341,28 +341,6 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param int    $uid
-     * @param string $name
-     * @param int    $ttl
-     *
-     * @return ProjectTemplateStruct|null
-     * @throws ReflectionException
-     */
-    public
-    static function getByUidAndName( int $uid, string $name, int $ttl = 60 ): ?ProjectTemplateStruct {
-        $stmt = self::getInstance()->_getStatementForQuery( self::query_by_uid_name );
-        /**
-         * @var $result ProjectTemplateStruct[]
-         */
-        $result = self::getInstance()->setCacheTTL( $ttl )->_fetchObject( $stmt, new ProjectTemplateStruct(), [
-                'uid'  => $uid,
-                'name' => $name,
-        ] );
-
-        return $result[ 0 ] ?? null;
-    }
-
-    /**
      * @param ProjectTemplateStruct $projectTemplateStruct
      *
      * @return ProjectTemplateStruct
@@ -387,10 +365,10 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
                 "speech2text"              => $projectTemplateStruct->speech2text,
                 "lexica"                   => $projectTemplateStruct->lexica,
                 "tag_projection"           => $projectTemplateStruct->tag_projection,
-                "cross_language_matches"   => $projectTemplateStruct->crossLanguageMatchesToJson(),
-                "segmentation_rule"        => $projectTemplateStruct->segmentationRuleToJson(),
-                "mt"                       => $projectTemplateStruct->mtToJson(),
-                "tm"                       => $projectTemplateStruct->tmToJson(),
+                "cross_language_matches"   => $projectTemplateStruct->cross_language_matches,
+                "segmentation_rule"        => $projectTemplateStruct->segmentation_rule,
+                "mt"                       => $projectTemplateStruct->mt,
+                "tm"                       => $projectTemplateStruct->tm,
                 "pretranslate_100"         => $projectTemplateStruct->pretranslate_100,
                 "pretranslate_101"         => $projectTemplateStruct->pretranslate_101,
                 "get_public_matches"       => $projectTemplateStruct->get_public_matches,
@@ -458,10 +436,10 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
                 "speech2text"              => $projectTemplateStruct->speech2text,
                 "lexica"                   => $projectTemplateStruct->lexica,
                 "tag_projection"           => $projectTemplateStruct->tag_projection,
-                "cross_language_matches"   => $projectTemplateStruct->crossLanguageMatchesToJson(),
-                "segmentation_rule"        => $projectTemplateStruct->segmentationRuleToJson(),
-                "mt"                       => $projectTemplateStruct->mtToJson(),
-                "tm"                       => $projectTemplateStruct->tmToJson(),
+                "cross_language_matches"   => $projectTemplateStruct->cross_language_matches,
+                "segmentation_rule"        => $projectTemplateStruct->segmentation_rule,
+                "mt"                       => $projectTemplateStruct->mt,
+                "tm"                       => $projectTemplateStruct->tm,
                 "pretranslate_100"         => $projectTemplateStruct->pretranslate_100,
                 "pretranslate_101"         => $projectTemplateStruct->pretranslate_101,
                 "get_public_matches"       => $projectTemplateStruct->get_public_matches,
@@ -542,7 +520,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
 
     /**
      * @param PDO    $conn
-     * @param string $uid
+     * @param int    $uid
      * @param string $name
      *
      * @throws ReflectionException
@@ -554,8 +532,8 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param PDO    $conn
-     * @param string $id
+     * @param PDO $conn
+     * @param int $id
      *
      * @throws ReflectionException
      */

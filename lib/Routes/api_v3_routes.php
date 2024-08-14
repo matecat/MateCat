@@ -59,13 +59,13 @@ $klein->with( '/api/v3/qa_model_template', function () {
 } );
 
 $klein->with( '/api/v3/payable_rate', function () {
-    route( '/schema', 'GET', '\API\V2\PayableRateController', 'schema' );
-    route( '/validate', 'POST', '\API\V2\PayableRateController', 'validate' );
-    route( '', 'GET', '\API\V2\PayableRateController', 'index' );
-    route( '', 'POST', '\API\V2\PayableRateController', 'create' );
-    route( '/[i:id]', 'GET', '\API\V2\PayableRateController', 'view' );
-    route( '/[i:id]', 'DELETE', '\API\V2\PayableRateController', 'delete' );
-    route( '/[i:id]', 'PUT', '\API\V2\PayableRateController', 'edit' );
+    route( '/schema', 'GET', '\API\V3\PayableRateController', 'schema' );
+    route( '/validate', 'POST', '\API\V3\PayableRateController', 'validate' );
+    route( '', 'GET', '\API\V3\PayableRateController', 'index' );
+    route( '', 'POST', '\API\V3\PayableRateController', 'create' );
+    route( '/[i:id]', 'GET', '\API\V3\PayableRateController', 'view' );
+    route( '/[i:id]', 'DELETE', '\API\V3\PayableRateController', 'delete' );
+    route( '/[i:id]', 'PUT', '\API\V3\PayableRateController', 'edit' );
 } );
 
 // TM Keys

@@ -1,6 +1,6 @@
 <?php
 
-use API\V2\Validators\SegmentTranslationIssueValidator;
+use API\Commons\Validators\SegmentTranslationIssueValidator;
 use Features\AbstractRevisionFeature;
 use Features\BaseFeature;
 use Features\ReviewExtended;

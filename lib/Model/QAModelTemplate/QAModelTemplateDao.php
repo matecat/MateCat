@@ -34,7 +34,6 @@ class QAModelTemplateDao extends DataAccess_AbstractDao {
      * @throws Exception
      */
     public static function createFromJSON( $json, $uid = null ): QAModelTemplateStruct {
-        self::validateJSON( $json );
 
         $QAModelTemplateStruct = new QAModelTemplateStruct();
         $QAModelTemplateStruct->hydrateFromJSON( $json );
@@ -73,7 +72,7 @@ class QAModelTemplateDao extends DataAccess_AbstractDao {
      * @throws Exception
      */
     public static function editFromJSON( QAModelTemplateStruct $QAModelTemplateStruct, $json ): QAModelTemplateStruct {
-        self::validateJSON( $json );
+
         $QAModelTemplateStruct->hydrateFromJSON( $json );
 
         return self::update( $QAModelTemplateStruct );
@@ -83,9 +82,10 @@ class QAModelTemplateDao extends DataAccess_AbstractDao {
      * @param int $id
      * @param int $uid
      *
+     * @return int
      * @throws ReflectionException
      */
-    public static function remove( int $id, int $uid ) {
+    public static function remove( int $id, int $uid ): int {
 
         $conn = Database::obtain()->getConnection();
         $conn->beginTransaction();
@@ -96,6 +96,8 @@ class QAModelTemplateDao extends DataAccess_AbstractDao {
                     'id'  => $id,
                     'now' => ( new DateTime() )->format( 'Y-m-d H:i:s' )
             ] );
+
+            $deleted = $stmt->rowCount();
 
             $stmt = $conn->prepare( "SELECT * FROM qa_model_template_passfails WHERE id_template=:id_template " );
             $stmt->setFetchMode( PDO::FETCH_CLASS, QAModelTemplatePassfailStruct::class );
@@ -143,6 +145,9 @@ class QAModelTemplateDao extends DataAccess_AbstractDao {
             ] );
 
             $conn->commit();
+
+            return $deleted;
+
         } catch ( Exception $exception ) {
             $conn->rollBack();
 
@@ -233,7 +238,7 @@ class QAModelTemplateDao extends DataAccess_AbstractDao {
      * @return array
      * @throws ReflectionException
      */
-    public static function getAllPaginated( int $uid, int $current = 1, int $pagination = 20, int $ttl = 60 * 60 * 24 ): array {
+    public static function getAllPaginated( int $uid, string $baseRoute, int $current = 1, int $pagination = 20, int $ttl = 60 * 60 * 24 ): array {
 
         $conn = Database::obtain()->getConnection();
 
@@ -243,7 +248,7 @@ class QAModelTemplateDao extends DataAccess_AbstractDao {
                 [ 'uid' => $uid ]
         );
 
-        $paginationParameters = new PaginationParameters( self::query_paginated, [ 'uid' => $uid ], ShapelessConcreteStruct::class, "/api/v3/qa_model_template?page=", $current, $pagination );
+        $paginationParameters = new PaginationParameters( self::query_paginated, [ 'uid' => $uid ], ShapelessConcreteStruct::class, $baseRoute, $current, $pagination );
         $paginationParameters->setCache( self::paginated_map_key . ":" . $uid, $ttl );
 
         $result = $pager->getPagination( $totals, $paginationParameters );

@@ -10,7 +10,7 @@
 namespace Analysis\Workers;
 
 use Analysis\Queue\RedisKeys;
-use API\V2\Exceptions\AuthenticationError;
+use API\Commons\Exceptions\AuthenticationError;
 use Constants\Ices;
 use Constants_ProjectStatus;
 use Constants_TranslationStatus;

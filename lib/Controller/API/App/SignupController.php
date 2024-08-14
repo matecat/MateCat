@@ -2,6 +2,7 @@
 
 namespace API\App;
 
+use API\Commons\AbstractStatefulKleinController;
 use Exception;
 use Exceptions\ValidationError;
 use FlashMessage;

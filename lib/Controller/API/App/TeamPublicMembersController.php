@@ -9,8 +9,8 @@
 
 namespace API\App;
 
+use API\Commons\KleinController;
 use API\V2\Json\Membership;
-use API\V2\KleinController;
 use Teams\MembershipDao;
 
 class TeamPublicMembersController extends KleinController {

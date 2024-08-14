@@ -2,7 +2,7 @@
 
 namespace Features;
 
-use API\V2\Exceptions\ValidationError;
+use API\Commons\Exceptions\ValidationError;
 use BasicFeatureStruct;
 use Chunks_ChunkCompletionEventStruct;
 use Chunks_ChunkStruct;

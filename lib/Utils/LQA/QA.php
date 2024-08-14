@@ -2,7 +2,7 @@
 
 namespace LQA;
 
-use API\V2\Exceptions\AuthenticationError;
+use API\Commons\Exceptions\AuthenticationError;
 use CatUtils;
 use Chunks_ChunkStruct;
 use DOMDocument;

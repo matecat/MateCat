@@ -2,7 +2,7 @@
 
 namespace ConnectedServices\GDrive;
 
-use API\V2\KleinController;
+use API\Commons\KleinController;
 use Aws\S3\Exception\S3Exception;
 use Bootstrap;
 use Constants;

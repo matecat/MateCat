@@ -8,8 +8,8 @@
 
 namespace Features\ReviewExtended\Controller\API;
 
+use API\Commons\Validators\ChunkPasswordValidator;
 use API\V2\BaseChunkController;
-use API\V2\Validators\ChunkPasswordValidator;
 use Chunks_ChunkStruct;
 use Exception;
 use Features\ReviewExtended\Model\QualityReportModel;

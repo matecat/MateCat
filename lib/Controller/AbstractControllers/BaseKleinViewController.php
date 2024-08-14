@@ -1,7 +1,7 @@
 <?php
 
 use AbstractControllers\IController;
-use API\App\AbstractStatefulKleinController;
+use API\Commons\AbstractStatefulKleinController;
 
 /**
  * Created by PhpStorm.

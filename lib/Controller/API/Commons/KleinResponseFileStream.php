@@ -6,7 +6,7 @@
  * Time: 12:15
  */
 
-namespace API\V2;
+namespace API\Commons;
 
 
 use FilesStorage\AbstractFilesStorage;

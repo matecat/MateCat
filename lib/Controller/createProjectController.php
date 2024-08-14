@@ -208,7 +208,7 @@ class createProjectController extends ajaxController {
      * setProjectFeatures
      *
      * @throws \Exceptions\NotFoundException
-     * @throws \API\V2\Exceptions\AuthenticationError
+     * @throws \API\Commons\Exceptions\AuthenticationError
      * @throws \Exceptions\ValidationError
      * @throws \TaskRunner\Exceptions\EndQueueException
      * @throws \TaskRunner\Exceptions\ReQueueException
@@ -425,7 +425,7 @@ class createProjectController extends ajaxController {
      * @param $filename
      *
      * @return ArrayObject
-     * @throws \API\V2\Exceptions\AuthenticationError
+     * @throws \API\Commons\Exceptions\AuthenticationError
      * @throws \Exceptions\NotFoundException
      * @throws \Exceptions\ValidationError
      * @throws \TaskRunner\Exceptions\EndQueueException

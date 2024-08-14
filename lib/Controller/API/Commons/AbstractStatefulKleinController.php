@@ -6,9 +6,8 @@
  * Time: 18:13
  */
 
-namespace API\App;
+namespace API\Commons;
 
-use API\V2\KleinController;
 use Bootstrap;
 use Exception;
 

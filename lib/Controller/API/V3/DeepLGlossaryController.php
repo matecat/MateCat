@@ -2,8 +2,8 @@
 
 namespace API\V3;
 
-use API\V2\KleinController;
-use API\V2\Validators\LoginValidator;
+use API\Commons\KleinController;
+use API\Commons\Validators\LoginValidator;
 use Engines_DeepL;
 use Exception;
 use Files\CSV as CSVParser;

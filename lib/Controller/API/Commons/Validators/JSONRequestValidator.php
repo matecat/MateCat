@@ -1,8 +1,8 @@
 <?php
 
-namespace API\V2\Validators;
+namespace API\Commons\Validators;
 
-use API\V2\KleinController;
+use API\Commons\KleinController;
 use Exception;
 
 class JSONRequestValidator extends Base {

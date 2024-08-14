@@ -1,11 +1,11 @@
 <?php
 
-namespace API\V2;
+namespace API\Commons;
 
 use AbstractControllers\IController;
 use AbstractControllers\TimeLogger;
-use API\V2\Exceptions\AuthenticationError;
-use API\V2\Validators\Base;
+use API\Commons\Exceptions\AuthenticationError;
+use API\Commons\Validators\Base;
 use ApiKeys_ApiKeyStruct;
 use AuthCookie;
 use CookieManager;
@@ -175,7 +175,7 @@ abstract class KleinController implements IController {
         $this->api_secret = $headers[ 'x-matecat-secret' ];
 
         if ( FALSE !== strpos( $this->api_key, '-' ) ) {
-            list( $this->api_key, $this->api_secret ) = explode('-', $this->api_key ) ;
+            [ $this->api_key, $this->api_secret ] = explode('-', $this->api_key ) ;
         }
 
         if ( !$this->validKeys() ) {

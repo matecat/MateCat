@@ -2,8 +2,7 @@
 
 namespace API\V2;
 
-use API\V2\ChunkController;
-use API\V2\Validators\LoginValidator;
+use API\Commons\Validators\LoginValidator;
 use CatUtils;
 use Chunks_ChunkStruct;
 use Database;

@@ -6,10 +6,10 @@
  * Time: 00:02
  */
 
-namespace API\V2\Validators;
+namespace API\Commons\Validators;
 
 
-use API\V2\KleinController;
+use API\Commons\KleinController;
 use Exceptions\NotFoundException;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;

@@ -2,8 +2,8 @@
 
 namespace API\V3;
 
-use API\V2\KleinController;
-use API\V2\Validators\LoginValidator;
+use API\Commons\KleinController;
+use API\Commons\Validators\LoginValidator;
 use Exception;
 use INIT;
 use Klein\Response;
@@ -42,19 +42,20 @@ class XliffConfigTemplateController extends KleinController {
      */
     public function all(): Response {
 
-        $currentPage = $this->request->param( 'page' ) ?? 1;
-        $pagination  = $this->request->param( 'perPage' ) ?? 20;
-
-        if ( $pagination > 200 ) {
-            $pagination = 200;
-        }
-
-        $uid = $this->getUser()->uid;
-
         try {
+
+            $currentPage = $this->request->param( 'page' ) ?? 1;
+            $pagination  = $this->request->param( 'perPage' ) ?? 20;
+
+            if ( $pagination > 200 ) {
+                $pagination = 200;
+            }
+
+            $uid = $this->getUser()->uid;
+
             $this->response->status()->setCode( 200 );
 
-            return $this->response->json( XliffConfigTemplateDao::getAllPaginated( $uid, "/api/v3/xliff-config-template?page=", $currentPage, $pagination ) );
+            return $this->response->json( XliffConfigTemplateDao::getAllPaginated( $uid, "/api/v3/xliff-config-template?page=", (int)$currentPage, (int)$pagination ) );
 
         } catch ( Exception $exception ) {
             $code = ( $exception->getCode() > 0 ) ? $exception->getCode() : 500;
@@ -70,9 +71,11 @@ class XliffConfigTemplateController extends KleinController {
      * Get a single entry
      */
     public function get(): Response {
-        $id = filter_var( $this->request->param( 'id' ), FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_ENCODE_LOW );
 
         try {
+
+            $id = (int)$this->request->param( 'id' );
+
             $model = XliffConfigTemplateDao::getByIdAndUser( $id, $this->getUser()->uid );
 
             if ( empty( $model ) ) {
@@ -161,7 +164,7 @@ class XliffConfigTemplateController extends KleinController {
                 throw new Exception( 'Bad Request', 400 );
             }
 
-            $id  = $this->request->param( 'id' );
+            $id  = (int)$this->request->param( 'id' );
             $uid = $this->getUser()->uid;
 
             $json = $this->request->body();
@@ -197,10 +200,11 @@ class XliffConfigTemplateController extends KleinController {
      * Delete an entry
      */
     public function delete(): Response {
-        $id  = filter_var( $this->request->paramsNamed()->get('id'), FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_ENCODE_LOW );
-        $uid = $this->getUser()->uid;
 
         try {
+
+            $id  = (int)$this->request->paramsNamed()->get('id');
+            $uid = $this->getUser()->uid;
 
             $count = XliffConfigTemplateDao::remove( $id, $uid );
 
@@ -209,7 +213,7 @@ class XliffConfigTemplateController extends KleinController {
             }
 
             return $this->response->json( [
-                    'id' => (int)$id
+                    'id' => $id
             ] );
 
         } catch ( Exception $exception ) {

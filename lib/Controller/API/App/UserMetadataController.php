@@ -9,6 +9,7 @@
 namespace API\App;
 
 
+use API\Commons\AbstractStatefulKleinController;
 use Bootstrap;
 use Exceptions\NotFoundException;
 use Users\MetadataModel;

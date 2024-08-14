@@ -114,7 +114,7 @@ $klein->with( '/api/app/files', function () {
 
 //PAYABLE RATES
 $klein->with( '/api/app/payable_rate', function () {
-    route( '/default', 'GET', '\API\V2\PayableRateController', 'default' );
+    route( '/default', 'GET', '\API\V3\PayableRateController', 'default' );
 } );
 
 //QA MODELS

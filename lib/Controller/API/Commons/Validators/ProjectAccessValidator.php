@@ -1,9 +1,9 @@
 <?php
 
-namespace API\V2\Validators;
+namespace API\Commons\Validators;
 
-use API\V2\Exceptions\AuthorizationError;
-use API\V2\KleinController;
+use API\Commons\Exceptions\AuthorizationError;
+use API\Commons\KleinController;
 use Projects_ProjectStruct;
 use Teams\MembershipDao;
 use Teams\TeamStruct;
