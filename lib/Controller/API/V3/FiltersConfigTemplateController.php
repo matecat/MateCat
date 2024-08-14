@@ -249,6 +249,6 @@ class FiltersConfigTemplateController extends KleinController {
      * @return object|mixed
      */
     private function getModelSchema(): object {
-        return json_decode( file_get_contents( INIT::$ROOT . ' / inc / validation / schema / filters_extraction_parameters . json' ) );
+        return json_decode( file_get_contents( INIT::$ROOT . '/inc/validation/schema/filters_extraction_parameters.json' ) );
     }
 }

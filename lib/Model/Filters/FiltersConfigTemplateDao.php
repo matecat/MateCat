@@ -104,7 +104,6 @@ class FiltersConfigTemplateDao extends DataAccess_AbstractDao {
         $result = $pager->getPagination( $totals, $paginationParameters );
 
         $models = [];
-//        $models[] = self::getDefaultTemplate( $uid );
 
         /**
          * @var FiltersConfigTemplateStruct $item
@@ -227,7 +226,7 @@ class FiltersConfigTemplateDao extends DataAccess_AbstractDao {
      * @throws ReflectionException
      */
     private static function destroyQueryByIdAndUserCache( PDO $conn, int $id, int $uid ) {
-        $stmt = $conn->prepare( self::query_by_id );
+        $stmt = $conn->prepare( self::query_by_id_and_uid );
         self::getInstance()->_destroyObjectCache( $stmt, [ 'id' => $id, 'uid' => $uid ] );
     }
 

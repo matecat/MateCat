@@ -70,7 +70,7 @@ class CustomPayableRateDao extends DataAccess_AbstractDao {
      * @return array
      * @throws ReflectionException
      */
-    public static function getAllPaginated( int $uid, int $current = 1, int $pagination = 20, int $ttl = 60 * 60 * 24 ): array {
+    public static function getAllPaginated( int $uid, string $baseRoute, int $current = 1, int $pagination = 20, int $ttl = 60 * 60 * 24 ): array {
 
         $conn = Database::obtain()->getConnection();
 
@@ -80,7 +80,7 @@ class CustomPayableRateDao extends DataAccess_AbstractDao {
                 [ 'uid' => $uid ]
         );
 
-        $paginationParameters = new PaginationParameters( self::query_paginated, [ 'uid' => $uid ], CustomPayableRateStruct::class, "/api/v3/payable_rate?page=", $current, $pagination );
+        $paginationParameters = new PaginationParameters( self::query_paginated, [ 'uid' => $uid ], CustomPayableRateStruct::class, $baseRoute, $current, $pagination );
         $paginationParameters->setCache( self::paginated_map_key . ":" . $uid, $ttl );
 
         return $pager->getPagination( $totals, $paginationParameters );

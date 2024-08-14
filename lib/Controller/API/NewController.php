@@ -634,21 +634,21 @@ class NewController extends ajaxController {
         $projectStructure[ 'project_name' ] = $this->postInput[ 'project_name' ];
         $projectStructure[ 'job_subject' ]  = $this->postInput[ 'subject' ];
 
-        $projectStructure[ 'private_tm_key' ]       = $this->private_tm_key;
-        $projectStructure[ 'private_tm_user' ]      = $this->private_tm_user;
-        $projectStructure[ 'private_tm_pass' ]      = $this->private_tm_pass;
-        $projectStructure[ 'uploadToken' ]          = $uploadFile->getDirUploadToken();
-        $projectStructure[ 'array_files' ]          = $arFiles; //list of file name
-        $projectStructure[ 'array_files_meta' ]     = $arMeta; //list of file metadata
-        $projectStructure[ 'source_language' ]      = $this->postInput[ 'source_lang' ];
-        $projectStructure[ 'target_language' ]      = explode( ',', $this->postInput[ 'target_lang' ] );
-        $projectStructure[ 'mt_engine' ]            = $this->postInput[ 'mt_engine' ];
-        $projectStructure[ 'tms_engine' ]           = $this->postInput[ 'tms_engine' ];
-        $projectStructure[ 'status' ]               = Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
-        $projectStructure[ 'owner' ]                = $this->user->email;
-        $projectStructure[ 'metadata' ]             = $this->metadata;
-        $projectStructure[ 'pretranslate_100' ]     = (int)!!$this->postInput[ 'pretranslate_100' ]; // Force pretranslate_100 to be 0 or 1
-        $projectStructure[ 'pretranslate_101' ]     = isset( $this->postInput[ 'pretranslate_101' ] ) ? (int)$this->postInput[ 'pretranslate_101' ] : 1;
+        $projectStructure[ 'private_tm_key' ]   = $this->private_tm_key;
+        $projectStructure[ 'private_tm_user' ]  = $this->private_tm_user;
+        $projectStructure[ 'private_tm_pass' ]  = $this->private_tm_pass;
+        $projectStructure[ 'uploadToken' ]      = $uploadFile->getDirUploadToken();
+        $projectStructure[ 'array_files' ]      = $arFiles; //list of file name
+        $projectStructure[ 'array_files_meta' ] = $arMeta; //list of file metadata
+        $projectStructure[ 'source_language' ]  = $this->postInput[ 'source_lang' ];
+        $projectStructure[ 'target_language' ]  = explode( ',', $this->postInput[ 'target_lang' ] );
+        $projectStructure[ 'mt_engine' ]        = $this->postInput[ 'mt_engine' ];
+        $projectStructure[ 'tms_engine' ]       = $this->postInput[ 'tms_engine' ];
+        $projectStructure[ 'status' ]           = Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
+        $projectStructure[ 'owner' ]            = $this->user->email;
+        $projectStructure[ 'metadata' ]         = $this->metadata;
+        $projectStructure[ 'pretranslate_100' ] = (int)!!$this->postInput[ 'pretranslate_100' ]; // Force pretranslate_100 to be 0 or 1
+        $projectStructure[ 'pretranslate_101' ] = isset( $this->postInput[ 'pretranslate_101' ] ) ? (int)$this->postInput[ 'pretranslate_101' ] : 1;
 
         //default get all public matches from TM
         $projectStructure[ 'only_private' ] = ( !isset( $this->postInput[ 'get_public_matches' ] ) ? false : !$this->postInput[ 'get_public_matches' ] );
@@ -810,7 +810,7 @@ class NewController extends ajaxController {
     }
 
     protected function _pollForCreationResult() {
-        $this->result['errors'] = $this->projectStructure[ 'result' ][ 'errors' ]->getArrayCopy();
+        $this->result[ 'errors' ] = $this->projectStructure[ 'result' ][ 'errors' ]->getArrayCopy();
     }
 
     private function __validateSourceLang( Langs_Languages $lang_handler ) {
@@ -1352,7 +1352,7 @@ class NewController extends ajaxController {
 
             $validator = new JSONValidator( $schema, true );
             $validator->validate( $validatorObject );
-            $this->xliff_parameters = $validatorObject->decoded;
+            $this->xliff_parameters = json_decode( $json, true ); // decode again because we need an associative array and not stdClass
 
         } elseif ( !empty( $this->postInput[ 'xliff_parameters_template_id' ] ) ) {
 

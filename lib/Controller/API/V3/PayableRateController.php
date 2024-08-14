@@ -23,20 +23,32 @@ class PayableRateController extends KleinController {
     }
 
     /**
-     * @throws ReflectionException
+     * @return Response
      */
     public function index(): Response {
 
-        $currentPage = $this->request->param( 'page' ) ?? 1;
-        $pagination  = $this->request->param( 'perPage' ) ?? 20;
+        try {
 
-        if ( $pagination > 200 ) {
-            $pagination = 200;
+            $currentPage = $this->request->param( 'page' ) ?? 1;
+            $pagination  = $this->request->param( 'perPage' ) ?? 20;
+
+            if ( $pagination > 200 ) {
+                $pagination = 200;
+            }
+
+            $uid = $this->getUser()->uid;
+
+            return $this->response->json( CustomPayableRateDao::getAllPaginated( $uid, "/api/v3/payable_rate?page=", (int)$currentPage, (int)$pagination ) );
+
+        } catch ( Exception $exception ) {
+            $code = ( $exception->getCode() > 0 ) ? $exception->getCode() : 500;
+            $this->response->status()->setCode( $code );
+
+            return $this->response->json( [
+                    'error' => $exception->getMessage()
+            ] );
         }
 
-        $uid = $this->getUser()->uid;
-
-        return $this->response->json( CustomPayableRateDao::getAllPaginated( $uid, $currentPage, $pagination ) );
     }
 
     /**
