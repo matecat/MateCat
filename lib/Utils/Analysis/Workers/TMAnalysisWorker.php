@@ -278,6 +278,7 @@ class TMAnalysisWorker extends AbstractWorker {
             $message   = ( $updateRes == 0 ) ? "No row found: " . $tm_data[ 'id_segment' ] . "-" . $tm_data[ 'id_job' ] : "Row found: " . $tm_data[ 'id_segment' ] . "-" . $tm_data[ 'id_job' ] . " - UPDATED.";
             $this->_doLog( $message );
         } catch ( Exception $exception ) {
+            $this->_doLog( "**** " . $exception->getMessage() );
             $this->_doLog( "**** Error occurred during the storing (UPDATE) of the suggestions for the segment {$tm_data[ 'id_segment' ]}" );
             throw new ReQueueException( "**** Error occurred during the storing (UPDATE) of the suggestions for the segment {$tm_data[ 'id_segment' ]}", self::ERR_REQUEUE );
         }
@@ -359,11 +360,10 @@ class TMAnalysisWorker extends AbstractWorker {
     }
 
     /**
-     * @throws ReQueueException
-     * @throws ValidationError
-     * @throws NotFoundException
-     * @throws EndQueueException
-     * @throws AuthenticationError
+     * @param $tm_data
+     * @param $queueElementParams
+     *
+     * @return array
      */
     protected function _iceLockCheck( $tm_data, $queueElementParams ) {
 
@@ -381,15 +381,10 @@ class TMAnalysisWorker extends AbstractWorker {
                     $tm_data[ 'locked' ] = true;
                 }
 
-                $tm_data = $this->featureSet->filter( 'checkIceLocked', $tm_data, $queueElementParams );
-
             } elseif ( $queueElementParams->pretranslate_100 ) {
                 $tm_data[ 'status' ] = Constants_TranslationStatus::STATUS_TRANSLATED;
                 $tm_data[ 'locked' ] = false;
             }
-
-            //custom condition for 100% matches
-            $tm_data = $this->featureSet->filter( 'check100MatchLocked', $tm_data, $queueElementParams );
 
         }
 

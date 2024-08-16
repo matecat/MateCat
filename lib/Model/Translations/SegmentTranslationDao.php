@@ -140,14 +140,24 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
      */
     public static function setAnalysisValue( $data ) {
 
-        $where = [
-                "id_segment" => $data[ 'id_segment' ],
-                "id_job"     => $data[ 'id_job' ]
-        ];
+        $query = "UPDATE `segment_translations` SET ";
+        foreach ( $data as $key => $value ) {
+            $query .= "$key = :$key ,";
+        }
 
-        $db = Database::obtain();
+        $query = rtrim( $query, "," );
+        $query .= "
+                WHERE id_segment = :id_segment 
+                  AND id_job = :id_job
+                  AND tm_analysis_status != 'SKIPPED';";
 
-        return $db->update( 'segment_translations', $data, $where );
+        $db   = Database::obtain();
+        $stmt = $db->getConnection()->prepare( $query );
+
+        $stmt->execute( $data );
+
+        return $stmt->rowCount();
+
     }
 
     public static function getUnchangeableStatus( Chunks_ChunkStruct $chunk, $segments_ids, $status, $source_page ) {

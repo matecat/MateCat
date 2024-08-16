@@ -52,7 +52,7 @@ class MatchConstants {
      *
      * @return string
      */
-    public static function toInternalMatchTypeValue( $match_type ) {
+    public static function toInternalMatchTypeValue( string $match_type ): string {
         switch ( $match_type ) {
             case self::_REPETITIONS:
                 return 'REPETITIONS';
@@ -89,7 +89,7 @@ class MatchConstants {
      * @return string
      * @throws RuntimeException
      */
-    public static function validate( $name ) {
+    public static function validate( $name ): string {
 
         if ( !array_key_exists( $name, self::forValue ) ) {
             throw new RuntimeException( "Invalid match type: " . $name );
