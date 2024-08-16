@@ -878,7 +878,8 @@ class ProjectManager {
 
             if ( $e->getCode() == -1 ) {
                 $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                        "code" => -1, "message" => "No text to translate in the file {$e->getMessage()}."
+                        "code"    => -1,
+                        "message" => "No text to translate in the file {$e->getMessage()}."
                 ];
                 if ( INIT::$FILE_STORAGE_METHOD != 's3' ) {
                     $fs->deleteHashFromUploadDir( $this->uploadDir, $linkFile );
@@ -901,7 +902,8 @@ class ProjectManager {
 
                 //Generic error
                 $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                        "code" => $e->getCode(), "message" => $e->getMessage()
+                        "code"    => $e->getCode(),
+                        "message" => $e->getMessage()
                 ];
             }
 
@@ -1108,7 +1110,6 @@ class ProjectManager {
                     '\AsyncTasks\Workers\ActivityLogWorker',
                     $activity,
                     [ 'persistent' => WorkerClient::$_HANDLER->persistent ]
-
             );
         } catch ( Exception $e ) {
 
@@ -1793,9 +1794,9 @@ class ProjectManager {
         $xliffParser = new XliffParser();
 
         try {
-            $xliff                                          = $xliffParser->xliffToArray( $xliff_file_content );
-            $xliffInfo                                      = XliffProprietaryDetect::getInfoByStringData( $xliff_file_content );
-            $this->projectStructure[ 'current-xliff-info' ] = $xliffInfo;
+            $xliff                                                  = $xliffParser->xliffToArray( $xliff_file_content );
+            $xliffInfo                                              = XliffProprietaryDetect::getInfoByStringData( $xliff_file_content );
+            $this->projectStructure[ 'current-xliff-info' ][ $fid ] = $xliffInfo;
         } catch ( Exception $e ) {
             throw new Exception( "Failed to parse " . $file_info[ 'original_filename' ], ( $e->getCode() != 0 ? $e->getCode() : -4 ), $e );
         }
@@ -1923,7 +1924,13 @@ class ProjectManager {
                                         $src = CatUtils::trimAndStripFromAnHtmlEntityDecoded( $extract_external[ 'seg' ] );
                                         $trg = CatUtils::trimAndStripFromAnHtmlEntityDecoded( $target_extract_external[ 'seg' ] );
 
-                                        if ( $this->__isTranslated( $src, $trg, $stateValues[ 'state' ], $stateValues[ 'state-qualifier' ] ) && !empty( $trg ) ) { //treat 0,1,2... as translated content!
+                                        if ( $this->__isTranslated(
+                                                        $src,
+                                                        $trg,
+                                                        $fid,
+                                                        $stateValues[ 'state' ],
+                                                        $stateValues[ 'state-qualifier' ] ) && !empty( $trg )
+                                        ) { //treat 0,1,2... as translated content!
 
                                             $target = $this->filter->fromRawXliffToLayer0( $target_extract_external[ 'seg' ] );
 
@@ -1942,7 +1949,7 @@ class ProjectManager {
                                                     new ArrayObject( [
                                                             2 => $target,
                                                             4 => $xliff_trans_unit,
-                                                            6 => $position,
+                                                            6 => $position, // this value is the mrk positional order
                                                     ] )
                                             );
 
@@ -2056,7 +2063,13 @@ class ProjectManager {
 
                                 $target_extract_external = $this->_strip_external( $xliff_trans_unit[ 'target' ][ 'raw-content' ], $xliffInfo );
 
-                                if ( $this->__isTranslated( $xliff_trans_unit[ 'source' ][ 'raw-content' ], $target_extract_external[ 'seg' ], $stateValues[ 'state' ], $stateValues[ 'state-qualifier' ] ) && !empty( $target_extract_external[ 'seg' ] ) ) {
+                                if ( $this->__isTranslated(
+                                                $xliff_trans_unit[ 'source' ][ 'raw-content' ],
+                                                $target_extract_external[ 'seg' ],
+                                                $fid,
+                                                $stateValues[ 'state' ],
+                                                $stateValues[ 'state-qualifier' ] ) && !empty( $target_extract_external[ 'seg' ] )
+                                ) {
 
                                     $target = $this->filter->fromRawXliffToLayer0( $target_extract_external[ 'seg' ] );
 
@@ -2084,7 +2097,10 @@ class ProjectManager {
                             $this->__addNotesToProjectStructure( $xliff_trans_unit, $fid );
                             $this->__addTUnitContextsToProjectStructure( $xliff_trans_unit, $fid );
                         } catch ( Exception $exception ) {
-                            throw new Exception( $exception->getMessage(), -1 );
+                            throw new Exception(
+                                    $exception->getMessage(),
+                                    $exception->getCode() ?? -1
+                            );
                         }
 
                         //
@@ -2367,6 +2383,7 @@ class ProjectManager {
                     'xliff_mrk_id'      => $this->projectStructure[ 'segments' ][ $fid ][ $position ]->xliff_mrk_id,
                     'show_in_cattool'   => $this->projectStructure[ 'segments' ][ $fid ][ $position ]->show_in_cattool,
                     'additional_params' => null,
+                    'file_id'           => $fid,
             ];
 
             /*
@@ -2441,11 +2458,17 @@ class ProjectManager {
 
                     $this->projectStructure[ 'translations' ][ $row[ 'internal_id' ] ][ $short_var_counter ]->offsetSet( 0, $row[ 'id' ] );
                     $this->projectStructure[ 'translations' ][ $row[ 'internal_id' ] ][ $short_var_counter ]->offsetSet( 1, $row[ 'internal_id' ] );
-                    //WARNING offset 2 is the target translation
+                    /**
+                     * WARNING offset 2 is the target translation
+                     */
                     $this->projectStructure[ 'translations' ][ $row[ 'internal_id' ] ][ $short_var_counter ]->offsetSet( 3, $row[ 'segment_hash' ] );
                     /**
                      * WARNING offset 4 is the Trans-Unit
                      * @see http://docs.oasis-open.org/xliff/v1.2/os/xliff-core.html#trans-unit
+                     */
+                    $this->projectStructure[ 'translations' ][ $row[ 'internal_id' ] ][ $short_var_counter ]->offsetSet( 5, $row[ 'file_id' ] );
+                    /**
+                     * WARNING Offset 6 is possibly the MRK order position.
                      */
 
                     // Remove an existent translation, we won't send these segment to the analysis because it is marked as locked
@@ -2626,7 +2649,7 @@ class ProjectManager {
                 $stateValues = $this->getTargetStatesFromTransUnit( $translation_row[ 4 ], $position );
 
                 $rule = $configModel->getMatchingRule(
-                        $this->projectStructure[ 'current-xliff-info' ][ 'version' ],
+                        $this->projectStructure[ 'current-xliff-info' ][ $translation_row[ 5 ] /* file_id */ ][ 'version' ],
                         $stateValues[ 'state' ],
                         $stateValues[ 'state-qualifier' ]
                 );
@@ -3036,14 +3059,14 @@ class ProjectManager {
      *
      * @return bool
      */
-    private function __isTranslated( string $source = null, string $target = null, string $state = null, string $stateQualifier = null ): bool {
+    private function __isTranslated( string $source = null, string $target = null, int $file_id = null, string $state = null, string $stateQualifier = null ): bool {
 
         /**
          * @var $configModel XliffRulesModel
          */
         $configModel = $this->projectStructure[ 'xliff_parameters' ];
         $rule        = $configModel->getMatchingRule(
-                $this->projectStructure[ 'current-xliff-info' ][ 'version' ],
+                $this->projectStructure[ 'current-xliff-info' ][ $file_id ][ 'version' ],
                 $state,
                 $stateQualifier
         );
