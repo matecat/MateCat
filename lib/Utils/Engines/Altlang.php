@@ -86,18 +86,21 @@ class Engines_Altlang extends Engines_AbstractEngine {
     /**
      * @param $_config
      * @return array|Engines_Results_AbstractResponse|void
-     * @throws \Exception
+     * @throws Exception
      */
     public function get( $_config ) {
 
         // Fallback on MyMemory in case of not supported source/target combination
-        if(!$this->checkLanguageCombination($_config[ 'source' ], $_config[ 'target' ])){
+        if ( !$this->checkLanguageCombination( $_config[ 'source' ], $_config[ 'target' ] ) ) {
 
             /** @var Engines_MyMemory $myMemory */
-            $myMemory = Engine::getInstance(1);
+            $myMemory = Engine::getInstance( 1 );
 
-            $result = $myMemory->get($_config);
-            $this->result = $result->get_as_array();
+            /**
+             * @var $result Engines_Results_MyMemory_TMS
+             */
+            $result       = $myMemory->get( $_config );
+            $this->result = $result->get_matches_as_array();
 
             return $this->result;
         }
