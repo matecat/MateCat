@@ -26,18 +26,28 @@ class SignupController extends AbstractStatefulKleinController {
     public function create() {
 
         $user = $this->request->param( 'user' );
+        $userIp = Utils::getRealIpAddr();
 
-        $checkRateLimit = $this->checkRateLimitResponse( $this->response, $user[ 'email' ], '/api/app/user' );
-        if ( $checkRateLimit instanceof Response ) {
-            $this->response = $checkRateLimit;
+        // rate limit on email
+        $checkRateLimitOnEmail = $this->checkRateLimitResponse( $this->response, $user[ 'email' ], '/api/app/user', 3 );
+        if ( $checkRateLimitOnEmail instanceof Response ) {
+            $this->response = $checkRateLimitOnEmail;
+
+            return;
+        }
+
+        // rate limit on IP
+        $checkRateLimitOnIp = $this->checkRateLimitResponse( $this->response, $userIp, '/api/app/user', 3 );
+        if ( $checkRateLimitOnIp instanceof Response ) {
+            $this->response = $checkRateLimitOnIp;
 
             return;
         }
 
         $signup = new SignupModel( $user );
+        $this->incrementRateLimitCounter( $userIp, '/api/app/user' );
 
-        //email
-
+        // email
         if ( $signup->valid() ) {
             $signup->process();
             $this->response->code( 200 );

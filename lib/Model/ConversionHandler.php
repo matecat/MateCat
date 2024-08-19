@@ -188,7 +188,7 @@ class ConversionHandler {
             } else {
 
                 $this->result->changeCode(ConversionHandlerStatus::GENERIC_ERROR);
-                $this->result->addError($convertResult[ 'errorMessage' ], AbstractFilesStorage::basename_fix( $this->file_name ));
+                $this->result->addError($this->formatConversionFailureMessage($convertResult[ 'errorMessage' ]), AbstractFilesStorage::basename_fix( $this->file_name ));
 
                 return false;
             }
@@ -217,6 +217,26 @@ class ConversionHandler {
         }
 
         return 0;
+    }
+
+    /**
+     * @param string $message
+     * @return string
+     */
+    private function formatConversionFailureMessage($message)
+    {
+        // WinConverter error
+        if (strpos($message, 'WinConverter') !== false) {
+
+            // file conversion error
+            if (strpos($message, 'WinConverter error 5') !== false) {
+                return 'Scanned file conversion issue, please convert it to editable format (e.g. docx) and retry upload';
+            }
+
+            return 'File conversion issue, please contact us at <a href="mailto:support@matecat.com">support@matecat.com</a>';
+        }
+
+        return $message;
     }
 
     /**
