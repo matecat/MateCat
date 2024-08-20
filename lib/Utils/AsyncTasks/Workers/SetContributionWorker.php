@@ -12,6 +12,7 @@ namespace AsyncTasks\Workers;
 use Contribution\ContributionSetStruct;
 use Engine;
 use Engines_EngineInterface;
+use Engines_NONE;
 use Exception;
 use Exceptions\ValidationError;
 use Jobs_JobStruct;
@@ -29,19 +30,17 @@ class SetContributionWorker extends AbstractWorker {
     const ERR_UPDATE_FAILED = 6;
     const ERR_NO_TM_ENGINE  = 5;
 
-    const REDIS_PROPAGATED_ID_KEY = "j:%s:s:%s";
-
     /**
      * @var Engines_EngineInterface
      */
-    protected $_engine;
+    protected Engines_EngineInterface $_engine;
 
     /**
      * This method is for testing purpose. Set a dependency injection
      *
      * @param Engines_EngineInterface $_tms
      */
-    public function setEngine( $_tms ) {
+    public function setEngine( Engines_EngineInterface $_tms ) {
         $this->_engine = $_tms;
     }
 
@@ -173,7 +172,7 @@ class SetContributionWorker extends AbstractWorker {
         $config[ 'context_after' ]  = $contributionStruct->context_after;
         $config[ 'context_before' ] = $contributionStruct->context_before;
         $config[ 'prop' ]           = json_encode( $contributionStruct->getProp() );
-        $config[ 'set_mt' ]         = ($id_mt_engine != 1) ? false : true;
+        $config[ 'set_mt' ]         = ( $id_mt_engine != 1 ) ? false : true;
 
         $config[ 'newsegment' ]     = $contributionStruct->segment;
         $config[ 'newtranslation' ] = $contributionStruct->translation;
@@ -232,7 +231,7 @@ class SetContributionWorker extends AbstractWorker {
     protected function _raiseReQueueException( $type, array $config ) {
         //reset the engine
         $engineName    = get_class( $this->_engine );
-        $this->_engine = null;
+        $this->_engine = new Engines_NONE( [] );
 
         switch ( strtolower( $type ) ) {
             case 'update':

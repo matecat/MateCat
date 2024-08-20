@@ -35,7 +35,7 @@ class CreateEngineTest extends AbstractTest {
         parent::setUp();
         $this->database_instance   = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
 
-        $this->database_instance->getConnection()->query( "DELETE FROM engines WHERE id > 1" );
+        $this->database_instance->getConnection()->query( "DELETE FROM engines WHERE id > 2" );
 
         $this->engine_Dao          = new EnginesModel_EngineDAO( $this->database_instance );
         $this->engine_struct_param = new EnginesModel_EngineStruct();

@@ -56,7 +56,7 @@ class CrudEngineTest extends AbstractTest {
     public function tearDown() {
 
         $this->database_instance->getConnection()->query( "DELETE FROM " . INIT::$DB_DATABASE . ".`users` WHERE email='bar@foo.net'" );
-        $this->database_instance->getConnection()->query( "DELETE FROM engines WHERE id > 1" );
+        $this->database_instance->getConnection()->query( "DELETE FROM engines WHERE id > 2" );
         $this->flusher->flushdb();
         parent::tearDown();
 
