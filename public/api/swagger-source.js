@@ -271,6 +271,42 @@ var spec = {
         },
       },
     },
+    '/api/v2/projects/{id_project}/{password}/analysis/status': {
+      get: {
+        tags: ['Project'],
+        summary: 'Retrieve the status of a project',
+        description: 'Check Status of a created Project With HTTP POST.',
+        parameters: [
+          {
+            name: 'id_project',
+            in: 'query',
+            description:
+                'The identifier of the project, should be the value returned by the /new method.',
+            required: true,
+            type: 'integer',
+          },
+          {
+            name: 'project_pass',
+            in: 'query',
+            description:
+                'The password associated with the project, should be the value returned by the /new method ( associated with the id_project )',
+            required: true,
+            type: 'string',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'An array of price estimates by product',
+            schema: {
+              $ref: '#/definitions/Status',
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      }
+    },
     '/api/v2/change-password': {
       post: {
         tags: ['Project', 'Job'],
