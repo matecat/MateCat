@@ -37,9 +37,21 @@ class GlossaryController extends KleinController {
         $json = $this->createThePayloadForWorker($jsonSchemaPath);
         $json['tmKeys'] = $this->keysBelongingToJobOwner($json['tmKeys']);
 
+        // filter the keys sent by the FE
+        $tmKeys = $json['tmKeys'];
+        $json['keys'] = array_filter($json['keys'], function($el) use($tmKeys) {
+            foreach($tmKeys as $tmKey){
+                if($tmKey['key'] === $el){
+                    return true;
+                }
+            }
+
+            return false;
+        });
+
         $params = [
-                'action' => 'check',
-                'payload' => $json,
+            'action' => 'check',
+            'payload' => $json,
         ];
 
         $this->enqueueWorker( self::GLOSSARY_READ, $params );
