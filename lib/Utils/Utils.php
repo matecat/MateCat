@@ -1,7 +1,6 @@
 <?php
 
 use Behat\Transliterator\Transliterator;
-use CommandLineTasks\Constants\GlobalMessage;
 use Features\ReviewExtended\ReviewUtils as ReviewUtils;
 
 class Utils {
@@ -74,7 +73,7 @@ class Utils {
             $platform = 'MacOSX';
             if ( preg_match( '/iphone/i', $u_agent ) ) {
                 $platform = 'iOS';
-            } elseif( preg_match( '/ipad/i', $u_agent )){
+            } elseif ( preg_match( '/ipad/i', $u_agent ) ) {
                 $platform = 'ipadOS';
             }
         } elseif ( preg_match( '/windows|win32/i', $u_agent ) ) {
@@ -118,25 +117,25 @@ class Utils {
         // finally, get the correct version number
         $known   = [ 'Version', $ub, 'other' ];
         $pattern = '#(?<browser>' . join( '|', $known ) . ')[/ ]+(?<version>[0-9.|a-zA-Z._]*)#i';
-        if ( !preg_match_all( $pattern, $u_agent, $matches  ) ) {
+        if ( !preg_match_all( $pattern, $u_agent, $matches ) ) {
             // we have no matching number, continue
         }
 
         // see how many we have
         $i = count( $matches[ 'browser' ] );
-        if ( $i != 1 ) {
+        if ( $i > 1 ) {
 
             //we will have two since we are not using 'other' argument yet
             //see if the version is before or after the name
             //if it is before then use the name's version
-            if( strtolower( $matches['browser'][0] ) == 'version' && strtolower( $matches['browser'][1] ) != 'safari' ){
-                $version = isset( $matches[ 'version' ][ 1 ] ) ? $matches[ 'version' ][ 1 ] : null;
+            if ( strtolower( $matches[ 'browser' ][ 0 ] ) == 'version' && strtolower( $matches[ 'browser' ][ 1 ] ) != 'safari' ) {
+                $version = $matches[ 'version' ][ 1 ] ?? null;
             } else {
-                $version = isset( $matches[ 'version' ][ 0 ] ) ? $matches[ 'version' ][ 0 ] : null;
+                $version = $matches[ 'version' ][ 0 ] ?? null;
             }
 
         } else {
-            $version = isset( $matches[ 'version' ][ 0 ] ) ? $matches[ 'version' ][ 0 ] : null;
+            $version = $matches[ 'version' ][ 0 ] ?? null;
         }
 
         // check if we have a number
@@ -201,30 +200,30 @@ class Utils {
     public static function getGlobalMessage() {
 
         // pull messages from redis
-        $redis = (new RedisHandler() )->getConnection();
-        $ids = $redis->smembers('global_message_list_ids');
+        $redis      = ( new RedisHandler() )->getConnection();
+        $ids        = $redis->smembers( 'global_message_list_ids' );
         $retStrings = [];
 
-        foreach ($ids as $id){
-            $element = $redis->get('global_message_list_element_'.$id);
+        foreach ( $ids as $id ) {
+            $element = $redis->get( 'global_message_list_element_' . $id );
 
-            if($element !== null){
-                $element = unserialize($element);
+            if ( $element !== null ) {
+                $element = unserialize( $element );
 
                 $resObject = [
-                    'msg'    => $element['message'],
-                    'level'  => $element['level'],
-                    'token'  => md5( $element['message'] ),
-                    'expire' => ( new DateTime( $element['expire'] ) )->format( DateTime::W3C )
+                        'msg'    => $element[ 'message' ],
+                        'level'  => $element[ 'level' ],
+                        'token'  => md5( $element[ 'message' ] ),
+                        'expire' => ( new DateTime( $element[ 'expire' ] ) )->format( DateTime::W3C )
                 ];
 
                 $retStrings[] = $resObject;
             } else {
-                $redis->srem('global_message_list_ids', $id);
+                $redis->srem( 'global_message_list_ids', $id );
             }
         }
 
-        return [ 'messages' => json_encode($retStrings) ];
+        return [ 'messages' => json_encode( $retStrings ) ];
     }
 
     public static function encryptPass( $clear_pass, $salt ) {

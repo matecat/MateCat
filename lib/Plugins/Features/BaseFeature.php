@@ -1,6 +1,7 @@
 <?php
 
-namespace Features ;
+namespace Features;
+
 use BasicFeatureStruct;
 use Exception;
 use INIT;
@@ -21,9 +22,9 @@ abstract class BaseFeature implements IBaseFeature {
     /**
      * @var Logger
      */
-    private $log ;
+    private $log;
 
-    protected $logger_name ;
+    protected $logger_name;
 
     /**
      * @var bool This property defines if the feature is automatically active when projects are created,
@@ -31,14 +32,14 @@ abstract class BaseFeature implements IBaseFeature {
      *           If this property is true, the feature is added to project's metadata `features` string.
      *           This property is only used to activate features that come from owner_features records.
      */
-    protected $autoActivateOnProject = true ;
+    protected $autoActivateOnProject = true;
 
     /**
      * @var bool This property defines if the feature is to be included in project features even if
      *           it's not defined in project features. This should be set to `true` when adding features
      *           that should be enabled systemwide, even on older projects.
      */
-    protected $forceOnProject = false ;
+    protected $forceOnProject = false;
 
     protected static $dependencies = [];
 
@@ -53,10 +54,11 @@ abstract class BaseFeature implements IBaseFeature {
 
     public static function getConfig() {
         $config_file_path = realpath( self::getPluginBasePath() . '/../config.ini' );
-        if ( ! file_exists( $config_file_path ) ) {
-            throw new Exception('Config file not found', 500 );
+        if ( !file_exists( $config_file_path ) ) {
+            throw new Exception( 'Config file not found', 500 );
         }
-        return parse_ini_file( $config_file_path ) ;
+
+        return parse_ini_file( $config_file_path );
     }
 
     /**
@@ -71,21 +73,23 @@ abstract class BaseFeature implements IBaseFeature {
      */
     public function __construct( BasicFeatureStruct $feature ) {
         $fCode = static::FEATURE_CODE;
-        if( empty( $fCode ) ) throw new LogicException( "Plugin code not defined." );
-        $this->feature = $feature ;
-        $this->logger_name = $this->feature->feature_code . '_plugin' ;
+        if ( empty( $fCode ) ) {
+            throw new LogicException( "Plugin code not defined." );
+        }
+        $this->feature     = $feature;
+        $this->logger_name = $this->feature->feature_code . '_plugin';
     }
 
     public function isAutoActivableOnProject() {
-        return $this->autoActivateOnProject ;
+        return $this->autoActivateOnProject;
     }
 
     public function isForceableOnProject() {
-        return $this->forceOnProject ;
+        return $this->forceOnProject;
     }
 
     public static function getDependencies() {
-        return static::$dependencies ;
+        return static::$dependencies;
     }
 
     /**
@@ -96,34 +100,36 @@ abstract class BaseFeature implements IBaseFeature {
      */
     public function getLogger() {
         if ( $this->log == null ) {
-            $this->log = new Logger( $this->logger_name );
-            $streamHandler = new StreamHandler( $this->logFilePath(),  Logger::INFO );
+            $this->log     = new Logger( $this->logger_name );
+            $streamHandler = new StreamHandler( $this->logFilePath(), Logger::INFO );
             $streamHandler->setFormatter( new LineFormatter( "%message%\n", "", true, true ) );
             $this->log->pushHandler( $streamHandler );
         }
+
         return $this->log;
     }
 
     private function logFilePath() {
-       return INIT::$LOG_REPOSITORY . '/' . $this->logger_name . '.log';
+        return INIT::$LOG_REPOSITORY . '/' . $this->logger_name . '.log';
     }
 
 
     public static function getClassPath() {
-        $rc = new ReflectionClass(get_called_class());
-        return dirname( $rc->getFileName() ) . '/' . pathinfo($rc->getFileName(), PATHINFO_FILENAME ) ;
+        $rc = new ReflectionClass( get_called_class() );
+
+        return dirname( $rc->getFileName() ) . '/' . pathinfo( $rc->getFileName(), PATHINFO_FILENAME );
     }
 
     public static function getPluginBasePath() {
-        return realpath(  static::getClassPath() . '/../..' ) ;
+        return realpath( static::getClassPath() . '/../..' );
     }
 
     public static function getTemplatesPath() {
-        return static::getClassPath() . '/View' ;
+        return static::getClassPath() . '/View';
     }
 
     public function getFeatureStruct() {
-        return $this->feature ;
+        return $this->feature;
     }
 
     /**
@@ -131,7 +137,8 @@ abstract class BaseFeature implements IBaseFeature {
      *
      * @see \Features::loadRoutes
      */
-    public static function loadRoutes( Klein $klein ){}
+    public static function loadRoutes( Klein $klein ) {
+    }
 
     /**
      *
@@ -140,7 +147,11 @@ abstract class BaseFeature implements IBaseFeature {
      */
     public function getBuildFiles() {
         $path = realpath( self::getPluginBasePath() . '/../static/build' );
-        return scandir($path);
+        if ( empty( $path ) ) {
+            return false;
+        }
+
+        return scandir( $path );
     }
 
 }

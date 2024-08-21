@@ -28,7 +28,6 @@ class createProjectController extends ajaxController {
     private $mt_engine;
     private $tms_engine = 1;  //1 default MyMemory
     private $private_tm_key;
-    private $lang_detect_files;
     private $disable_tms_engine_flag;
     private $pretranslate_100;
     private $pretranslate_101;
@@ -76,10 +75,6 @@ class createProjectController extends ajaxController {
                 'due_date'           => [ 'filter' => FILTER_VALIDATE_INT ],
                 'mt_engine'          => [ 'filter' => FILTER_VALIDATE_INT ],
                 'disable_tms_engine' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
-                'lang_detect_files'  => [
-                        'filter'  => FILTER_CALLBACK,
-                        'options' => "Utils::filterLangDetectArray"
-                ],
                 'private_tm_key'     => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
                 'pretranslate_100'   => [ 'filter' => FILTER_VALIDATE_INT ],
                 'pretranslate_101'   => [ 'filter' => FILTER_VALIDATE_INT ],
@@ -158,7 +153,6 @@ class createProjectController extends ajaxController {
         $this->mt_engine               = ( $this->postInput[ 'mt_engine' ] != null ? $this->postInput[ 'mt_engine' ] : 0 );       // null NON è ammesso
         $this->disable_tms_engine_flag = $this->postInput[ 'disable_tms_engine' ]; // se false allora MyMemory
         $this->private_tm_key          = $__postPrivateTmKey;
-        $this->lang_detect_files       = $this->postInput[ 'lang_detect_files' ];
         $this->pretranslate_100        = $this->postInput[ 'pretranslate_100' ];
         $this->pretranslate_101        = $this->postInput[ 'pretranslate_101' ];
         $this->only_private            = ( is_null( $this->postInput[ 'get_public_matches' ] ) ? false : !$this->postInput[ 'get_public_matches' ] );
@@ -326,7 +320,6 @@ class createProjectController extends ajaxController {
         $projectStructure[ 'mt_engine' ]                    = $this->mt_engine;
         $projectStructure[ 'tms_engine' ]                   = $this->tms_engine;
         $projectStructure[ 'status' ]                       = Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
-        $projectStructure[ 'lang_detect_files' ]            = $this->lang_detect_files;
         $projectStructure[ 'pretranslate_100' ]             = $this->pretranslate_100;
         $projectStructure[ 'pretranslate_101' ]             = $this->pretranslate_101;
         $projectStructure[ 'dialect_strict' ]               = $this->dialect_strict;

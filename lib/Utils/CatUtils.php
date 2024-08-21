@@ -236,7 +236,7 @@ class CatUtils {
             $estimation_temp  = Translations_SegmentTranslationDao::getWordsPerSecond( $id_job, $last_10_worked_ids );
             $words_per_second = ( !empty( $estimation_temp[ 0 ][ 'words_per_second' ] ) ? $estimation_temp[ 0 ][ 'words_per_second' ] : 1 ); // avoid division by zero
 
-            $totalWordsToDo = $job_stats[ 'raw' ][ 'new' ] + $job_stats[ 'raw' ][ 'draft' ] + $job_stats[ 'raw' ][ 'rejected' ];
+            $totalWordsToDo = $job_stats[ 'raw' ][ 'new' ] + $job_stats[ 'raw' ][ 'draft' ] + ( $job_stats[ 'raw' ][ 'rejected' ] ?? 0 );
 
             $totalTimeSeconds = $totalWordsToDo / $words_per_second;
 

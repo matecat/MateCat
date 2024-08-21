@@ -19,7 +19,8 @@ abstract class viewController extends controller {
      */
     protected $authURL;
 
-    protected $login_required = false;
+    protected                       $login_required = false;
+    private ?Projects_ProjectStruct $project        = null;
 
 
     /**
@@ -137,7 +138,7 @@ abstract class viewController extends controller {
             $this->featureSet->loadFromUserEmail( $this->user->email );
         }
 
-        $this->template->user_plugins =  $this->featureSet->filter('appendInitialTemplateVars', $this->featureSet->getCodes());
+        $this->template->user_plugins = $this->featureSet->filter( 'appendInitialTemplateVars', $this->featureSet->getCodes() );
 
         $this->template->footer_js            = [];
         $this->template->config_js            = [];
@@ -158,14 +159,14 @@ abstract class viewController extends controller {
      */
     private function setTemplateFinalVars() {
 
-        $MMTLicense = $this->userIsLogged ? $this->featureSet->filter( "MMTLicense", $this->user) : [];
-        $isAnInternalUser  = $this->userIsLogged ? $this->featureSet->filter( "isAnInternalUser", $this->user->email) : false;
+        $MMTLicense       = $this->userIsLogged ? $this->featureSet->filter( "MMTLicense", $this->user ) : [];
+        $isAnInternalUser = $this->userIsLogged ? $this->featureSet->filter( "isAnInternalUser", $this->user->email ) : false;
 
         $this->template->logged_user      = $this->user->shortName();
         $this->template->extended_user    = $this->user->fullName();
         $this->template->isAnInternalUser = $isAnInternalUser;
-        $this->template->isMMTEnabled     = (isset($MMTLicense['enabled']) and $isAnInternalUser) ? $MMTLicense['enabled'] : false;
-        $this->template->MMTId            = (isset($MMTLicense['id']) and $isAnInternalUser) ? $MMTLicense['id'] : null;
+        $this->template->isMMTEnabled     = ( isset( $MMTLicense[ 'enabled' ] ) and $isAnInternalUser ) ? $MMTLicense[ 'enabled' ] : false;
+        $this->template->MMTId            = ( isset( $MMTLicense[ 'id' ] ) and $isAnInternalUser ) ? $MMTLicense[ 'id' ] : null;
         $this->template->isLoggedIn       = $this->userIsLogged;
         $this->template->userMail         = $this->user->email;
         $this->collectFlashMessages();
@@ -247,7 +248,7 @@ abstract class viewController extends controller {
             $this->template->maxFileSize         = INIT::$MAX_UPLOAD_FILE_SIZE;
             $this->template->maxTMXFileSize      = INIT::$MAX_UPLOAD_TMX_FILE_SIZE;
             $this->template->dqf_enabled         = false;
-            $this->template->isOpenAiEnabled     = !empty(INIT::$OPENAI_API_KEY);
+            $this->template->isOpenAiEnabled     = !empty( INIT::$OPENAI_API_KEY );
 
             ( INIT::$VOLUME_ANALYSIS_ENABLED ? $this->template->analysis_enabled = true : null );
             $this->template->setOutputMode( PHPTAL::HTML5 );
@@ -289,6 +290,7 @@ abstract class viewController extends controller {
      * Remove MMT from mt_engines if is an internal user
      *
      * @param array $engines
+     *
      * @return array
      * @throws \API\Commons\Exceptions\AuthenticationError
      * @throws \Exceptions\NotFoundException
@@ -296,17 +298,17 @@ abstract class viewController extends controller {
      * @throws \TaskRunner\Exceptions\EndQueueException
      * @throws \TaskRunner\Exceptions\ReQueueException
      */
-    protected function removeMMTFromEngines(array $engines = []) {
+    protected function removeMMTFromEngines( array $engines = [] ) {
 
-        $isAnInternalUser  = $this->userIsLogged ? $this->featureSet->filter( "isAnInternalUser", $this->user->email) : false;
+        $isAnInternalUser = $this->userIsLogged ? $this->featureSet->filter( "isAnInternalUser", $this->user->email ) : false;
 
-        if($isAnInternalUser){
-            $MMTLicense = $this->userIsLogged ? $this->featureSet->filter( "MMTLicense", $this->user) : [];
+        if ( $isAnInternalUser ) {
+            $MMTLicense = $this->userIsLogged ? $this->featureSet->filter( "MMTLicense", $this->user ) : [];
 
-            if(!empty($MMTLicense) and isset($MMTLicense['id'])){
-                foreach ($engines as $index => $engine){
-                    if($engine->id === $MMTLicense['id']){
-                        unset($engines[$index]);
+            if ( !empty( $MMTLicense ) and isset( $MMTLicense[ 'id' ] ) ) {
+                foreach ( $engines as $index => $engine ) {
+                    if ( $engine->id === $MMTLicense[ 'id' ] ) {
+                        unset( $engines[ $index ] );
                     }
                 }
             }

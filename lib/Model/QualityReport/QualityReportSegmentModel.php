@@ -64,7 +64,7 @@ class QualityReportSegmentModel {
         /**
          * Validate revision_number param
          */
-        if ( !empty( $options[ 'filter' ] ) && in_array( $options[ 'filter' ] [ 'status' ], Constants_TranslationStatus::$REVISION_STATUSES ) ) {
+        if ( !empty( $options[ 'filter' ] ) && in_array( ( $options[ 'filter' ] [ 'status' ] ?? '' ), Constants_TranslationStatus::$REVISION_STATUSES ) ) {
             if ( isset( $options[ 'filter' ][ 'revision_number' ] ) ) {
 
                 $validRevisionNumbers = array_map( function ( $chunkReview ) {

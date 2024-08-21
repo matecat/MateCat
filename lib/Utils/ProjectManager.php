@@ -169,7 +169,6 @@ class ProjectManager {
                             'job_to_split_pass'                       => null,
                             'split_result'                            => null,
                             'job_to_merge'                            => null,
-                            'lang_detect_files'                       => [],
                             'tm_keys'                                 => [],
                             'userIsLogged'                            => false,
                             'uid'                                     => null,
@@ -929,7 +928,6 @@ class ProjectManager {
         $this->projectStructure[ 'result' ][ 'source_language' ] = $this->projectStructure[ 'source_language' ];
         $this->projectStructure[ 'result' ][ 'target_language' ] = $this->projectStructure[ 'target_language' ];
         $this->projectStructure[ 'result' ][ 'status' ]          = $this->projectStructure[ 'status' ];
-        $this->projectStructure[ 'result' ][ 'lang_detect' ]     = $this->projectStructure[ 'lang_detect_files' ];
 
 
         foreach ( $totalFilesStructure as $fid => $file_info ) {
