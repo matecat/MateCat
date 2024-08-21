@@ -32,7 +32,7 @@ class CrudEngineTest extends AbstractTest {
 
         $this->database_instance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
         $this->database_instance->getConnection()->query( "DELETE FROM " . INIT::$DB_DATABASE . ".`users` WHERE email='bar@foo.net'" );
-        $this->database_instance->getConnection()->query( "DELETE FROM engines WHERE id > 1" );
+        $this->database_instance->getConnection()->query( "DELETE FROM engines WHERE id > 2" );
 
         $sql_insert_user = "INSERT INTO " . INIT::$DB_DATABASE . ".`users` (`uid`, `email`, `salt`, `pass`, `create_date`, `first_name`, `last_name` ) VALUES (NULL,'bar@foo.net', '12345trewq', '987654321qwerty', '2016-04-11 13:41:54', 'Bar', 'Foo' );";
         $this->database_instance->getConnection()->query( $sql_insert_user );
