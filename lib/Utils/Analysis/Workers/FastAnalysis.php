@@ -438,9 +438,9 @@ class FastAnalysis extends AbstractDaemon {
                                  ) VALUES "
                 . implode( ", ", $tuple_list ) .
                 " ON DUPLICATE KEY UPDATE
-                        match_type = IF( tm_analysis_status = 'SKIPPED', match_type, VALUES( match_type ) ),
-                        eq_word_count = IF( tm_analysis_status = 'SKIPPED', match_type,VALUES( eq_word_count ) ),
-                        standard_word_count = IF( tm_analysis_status = 'SKIPPED', match_type, VALUES( standard_word_count ) )
+                        match_type          = IF( tm_analysis_status = 'SKIPPED', match_type, VALUES( match_type ) ),
+                        eq_word_count       = IF( tm_analysis_status = 'SKIPPED', eq_word_count, VALUES( eq_word_count ) ),
+                        standard_word_count = IF( tm_analysis_status = 'SKIPPED', standard_word_count, VALUES( standard_word_count ) )
                 ";
 
         $this->_logTimeStampedMsg( "Executed " . ( count( $tuple_list ) ) );

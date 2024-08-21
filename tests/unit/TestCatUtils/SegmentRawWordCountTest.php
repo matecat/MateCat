@@ -1,8 +1,11 @@
 <?php
 
+namespace unit\TestCatUtils;
+
+use CatUtils;
 use TestHelpers\AbstractTest;
 
-class CatUtilsTest extends AbstractTest {
+class SegmentRawWordCountTest extends AbstractTest {
     /**
      * @throws Exception
      */
