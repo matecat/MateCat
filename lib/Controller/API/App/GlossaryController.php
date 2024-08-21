@@ -35,14 +35,7 @@ class GlossaryController extends KleinController {
     {
         $jsonSchemaPath =  __DIR__ . '/../../../../inc/validation/schema/glossary/check.json';
         $json = $this->createThePayloadForWorker($jsonSchemaPath);
-
-        $keys = [];
-
-        foreach($json['tmKeys'] as $tmKey){
-            $keys[] = $tmKey['key'];
-        }
-
-        $json['keys'] = $keys;
+        $json['tmKeys'] = $this->keysBelongingToJobOwner($json['tmKeys']);
 
         $params = [
                 'action' => 'check',
@@ -303,14 +296,18 @@ class GlossaryController extends KleinController {
 
         foreach ($tmKeys as $tmKey){
 
-            // allowing only terms belonging to the owner of the job
-            if(isset($tmKey['owner']) and $tmKey['owner'] == true){
-                $return[] = $tmKey;
-            }
+            // allowing only terms with read permission
+            if( isset($tmKey['r']) and $tmKey['r'] == 1 ){
 
-            // additional terms are also visible for the other users (NOT the owner of the job) who added them
-            if($this->userIsLogged() and ($this->user->uid == $tmKey['uid_transl'] or $this->user->uid == $tmKey['uid_rev'])){
-                $return[] = $tmKey;
+                // allowing only terms belonging to the owner of the job
+                if(isset($tmKey['owner']) and $tmKey['owner'] == true){
+                    $return[] = $tmKey;
+                }
+
+                // additional terms are also visible for the other users (NOT the owner of the job) who added them
+                if( $this->userIsLogged() and ($this->user->uid == $tmKey['uid_transl'] or $this->user->uid == $tmKey['uid_rev'])){
+                    $return[] = $tmKey;
+                }
             }
         }
 
