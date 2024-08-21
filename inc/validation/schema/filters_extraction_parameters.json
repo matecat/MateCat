@@ -211,8 +211,7 @@
         },
         "extract_hidden_slides": {
           "type": "boolean",
-          "nullable": true,
-          "default": false
+          "nullable": true
         },
         "extract_notes": {
           "type": "boolean",

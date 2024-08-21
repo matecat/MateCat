@@ -24,9 +24,9 @@ class Bootstrap {
 
     private function __construct( SplFileInfo $config_file = null, SplFileInfo $task_runner_config_file = null ) {
 
-        self::$_ROOT  = realpath( dirname( __FILE__ ) . '/../' );
+        self::$_ROOT = realpath( dirname( __FILE__ ) . '/../' );
 
-        if( $config_file != null ){
+        if ( $config_file != null ) {
             self::$CONFIG = parse_ini_file( $config_file->getRealPath(), true );
         } else {
             self::$CONFIG = parse_ini_file( self::$_ROOT . DIRECTORY_SEPARATOR . 'inc/config.ini', true );
@@ -58,7 +58,7 @@ class Bootstrap {
         //get the environment configuration
         self::initConfig();
 
-        if( $task_runner_config_file != null ){
+        if ( $task_runner_config_file != null ) {
             INIT::$TASK_RUNNER_CONFIG = parse_ini_file( $task_runner_config_file->getRealPath(), true );
         } else {
             INIT::$TASK_RUNNER_CONFIG = parse_ini_file( self::$_ROOT . DIRECTORY_SEPARATOR . 'inc/task_manager_config.ini', true );
@@ -206,37 +206,40 @@ class Bootstrap {
         }
 
         if ( stripos( PHP_SAPI, 'cli' ) === false ) {
+
             header( "HTTP/1.1 " . $code . " " . $message );
-        }
 
-        if ( ( isset( $_SERVER[ 'HTTP_X_REQUESTED_WITH' ] ) && strtolower( $_SERVER[ 'HTTP_X_REQUESTED_WITH' ] ) == 'xmlhttprequest' ) || @$_SERVER[ 'REQUEST_METHOD' ] == 'POST' ) {
+            if ( ( isset( $_SERVER[ 'HTTP_X_REQUESTED_WITH' ] ) && strtolower( $_SERVER[ 'HTTP_X_REQUESTED_WITH' ] ) == 'xmlhttprequest' ) || @$_SERVER[ 'REQUEST_METHOD' ] == 'POST' ) {
 
-            //json_rersponse
-            if ( INIT::$PRINT_ERRORS ) {
-                echo json_encode( [
-                        "errors" => [ [ "code" => -1000, "message" => $exception->getMessage() ] ], "data" => []
-                ] );
+                //json_rersponse
+                if ( INIT::$PRINT_ERRORS ) {
+                    echo json_encode( [
+                            "errors" => [ [ "code" => -1000, "message" => $exception->getMessage() ] ], "data" => []
+                    ] );
+                } else {
+                    echo json_encode( [
+                            "errors"  => [
+                                    [
+                                            "code"    => -1000,
+                                            "message" => $response_message
+                                    ]
+                            ], "data" => []
+                    ] );
+                }
+
             } else {
-                echo json_encode( [
-                        "errors"  => [
-                                [
-                                        "code"    => -1000,
-                                        "message" => $response_message
-                                ]
-                        ], "data" => []
-                ] );
+                $controllerInstance = new CustomPage();
+                $controllerInstance->setTemplate( "$code.html" );
+                $controllerInstance->setCode( $code );
+                $controllerInstance->doAction();
             }
 
-        } elseif ( INIT::$PRINT_ERRORS ) {
+        } else {
             echo $exception->getMessage() . "\n";
             echo $exception->getTraceAsString() . "\n";
-        } else {
-            $controllerInstance = new CustomPage();
-            $controllerInstance->setTemplate( "$code.html" );
-            $controllerInstance->setCode( $code );
-            $controllerInstance->doAction();
-            die(); // do not complete the response and set the header
         }
+
+        die(); // do not complete the response and set the header
 
     }
 
