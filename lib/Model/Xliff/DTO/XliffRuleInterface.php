@@ -2,17 +2,21 @@
 
 namespace Xliff\DTO;
 
+use Exception;
+
 interface XliffRuleInterface {
 
     /**
      * @param $type
      *
      * @return string[]
+     * @throws Exception
      */
     public function getStates( $type = null ): array;
 
     /**
      * @return string
+     * @throws Exception
      */
     public function asEditorStatus(): string;
 
@@ -26,6 +30,7 @@ interface XliffRuleInterface {
 
     /**
      * @return string
+     * @throws Exception
      */
     public function asMatchType(): string;
 
@@ -34,6 +39,7 @@ interface XliffRuleInterface {
      * @param array $payable_rates
      *
      * @return float
+     * @throws Exception
      */
     public function asStandardWordCount( int $raw_word_count, array $payable_rates ): float;
 
@@ -42,6 +48,7 @@ interface XliffRuleInterface {
      * @param array $payable_rates
      *
      * @return float
+     * @throws Exception
      */
     public function asEquivalentWordCount( int $raw_word_count, array $payable_rates ): float;
 

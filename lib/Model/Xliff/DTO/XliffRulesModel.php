@@ -3,6 +3,7 @@
 namespace Xliff\DTO;
 
 use DomainException;
+use Exception;
 use JsonSerializable;
 use RecursiveArrayObject;
 
@@ -21,6 +22,8 @@ class XliffRulesModel implements JsonSerializable {
 
     /**
      * @param XliffRuleInterface $rule
+     *
+     * @throws Exception
      */
     public function addRule( XliffRuleInterface $rule ): void {
         if ( $rule instanceof Xliff20Rule ) {
@@ -37,6 +40,7 @@ class XliffRulesModel implements JsonSerializable {
      * @param string             $type
      *
      * @return void
+     * @throws Exception
      */
     public function validateDuplicatedStates( XliffRuleInterface $rule, string $type ): void {
         foreach ( $this->ruleSets[ $type ] as $existentRule ) {
@@ -51,6 +55,7 @@ class XliffRulesModel implements JsonSerializable {
      * @param RecursiveArrayObject $structure
      *
      * @return static
+     * @throws Exception
      */
     public static function fromArrayObject( RecursiveArrayobject $structure ): XliffRulesModel {
         $self = new static();
@@ -94,6 +99,7 @@ class XliffRulesModel implements JsonSerializable {
      * @param string|null $stateQualifier
      *
      * @return XliffRuleInterface
+     * @throws Exception
      */
     public function getMatchingRule( int $versionNumber, string $state = null, string $stateQualifier = null ): XliffRuleInterface {
 

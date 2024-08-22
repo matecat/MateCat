@@ -5,7 +5,9 @@ namespace Xliff\DTO;
 use API\App\Json\Analysis\MatchConstants;
 use Constants_TranslationStatus;
 use DomainException;
+use Exception;
 use JsonSerializable;
+use LogicException;
 use RecursiveArrayObject;
 
 abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable {
@@ -45,16 +47,6 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
             'state-qualifiers' => []
     ];
 
-    protected static array $VALIDATION_MAP = [
-            self::_ANALYSIS_NEW            => [ null ],
-            self::_ANALYSIS_PRE_TRANSLATED => [
-                    self::_DRAFT,
-                    self::_TRANSLATED,
-                    self::_APPROVED,
-                    self::_APPROVED2,
-            ],
-    ];
-
     /**
      * @var string
      */
@@ -77,26 +69,11 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
      * @param string|null $matchCategory
      */
     public function __construct( array $states, string $analysis, string $editor = null, string $matchCategory = null ) {
+        // follow exact assignment order
         $this->setStates( $states );
         $this->setAnalysis( $analysis );
         $this->setEditor( $editor );
         $this->setMatchCategory( $matchCategory );
-        $this->validateAnalysisAndEditor( $analysis, $editor );
-    }
-
-    /**
-     * @param $analysis
-     * @param $editor
-     */
-    protected function validateAnalysisAndEditor( $analysis, $editor ): void {
-
-        if ( !isset( static::$VALIDATION_MAP[ $analysis ] ) ) {
-            throw new DomainException( "Wrong analysis value", 400 );
-        }
-
-        if ( !in_array( $editor, static::$VALIDATION_MAP[ $analysis ] ) ) {
-            throw new DomainException( "Wrong analysis/editor combination", 400 );
-        }
     }
 
     /**
@@ -134,10 +111,13 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
     }
 
     /**
-     * @param $editor
+     * @param string|null $editor
      */
-    protected function setEditor( $editor ): void {
-        if ( !in_array( $editor, static::ALLOWED_EDITOR_VALUES ) ) {
+    protected function setEditor( ?string $editor = null ): void {
+
+        if ( $this->getAnalysis() == AbstractXliffRule::_ANALYSIS_NEW && !empty( $editor ) ) {
+            throw new DomainException( "Wrong editor value. A `new` rule can not have an assigned editor value.", 400 );
+        } elseif ( !in_array( $editor, static::ALLOWED_EDITOR_VALUES ) ) {
             throw new DomainException( "Wrong editor value", 400 );
         }
 
@@ -151,10 +131,12 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
      *
      * @return void
      */
-    protected function setMatchCategory( string $matchCategory = null ): void {
+    protected function setMatchCategory( ?string $matchCategory = null ): void {
 
         if ( !empty( $matchCategory ) && !in_array( $matchCategory, static::ALLOWED_MATCH_TYPES ) ) {
             throw new DomainException( "Wrong match_category value", 400 );
+        } elseif ( $this->getAnalysis() == AbstractXliffRule::_ANALYSIS_NEW && !empty( $matchCategory ) ) {
+            throw new DomainException( "Wrong match_category value. A `new` rule can not have an assigned match category.", 400 );
         } elseif ( !empty( $matchCategory ) ) {
             $this->matchCategory = $matchCategory;
         }
@@ -269,8 +251,14 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
 
     /**
      * @return string
+     * @throws Exception
      */
     public function asMatchType(): string {
+
+        if ( $this->getAnalysis() == AbstractXliffRule::_ANALYSIS_NEW ) {
+            throw new LogicException( "Invalid call for rule. A `new` analysis rule do not have a match category.", 500 );
+        }
+
         return MatchConstants::toInternalMatchTypeValue( $this->matchCategory );
     }
 
@@ -279,6 +267,7 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
      * @param array $payable_rates
      *
      * @return float
+     * @throws Exception
      */
     public function asStandardWordCount( int $raw_word_count, array $payable_rates ): float {
         if ( $this->matchCategory == MatchConstants::_MT ) {
@@ -293,8 +282,14 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
      * @param array $payable_rates
      *
      * @return float
+     * @throws Exception
      */
     public function asEquivalentWordCount( int $raw_word_count, array $payable_rates ): float {
+
+        if ( $this->getAnalysis() == AbstractXliffRule::_ANALYSIS_NEW ) {
+            throw new LogicException( "Invalid call for rule. A `new` analysis rule do not have a defined word count.", 500 );
+        }
+
         return floatval( $raw_word_count / 100 * ( $payable_rates[ $this->asMatchType() ] ?? 0 ) );
     }
 

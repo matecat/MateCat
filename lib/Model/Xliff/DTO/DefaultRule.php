@@ -4,6 +4,7 @@ namespace Xliff\DTO;
 
 use Constants\XliffTranslationStatus;
 use Constants_TranslationStatus;
+use LogicException;
 
 class DefaultRule extends AbstractXliffRule {
 
@@ -16,9 +17,15 @@ class DefaultRule extends AbstractXliffRule {
 
     const ALLOWED_EDITOR_VALUES = [ null ];
 
-    protected static array $VALIDATION_MAP = [
-            self::_ANALYSIS_PRE_TRANSLATED => [ null ],
-    ];
+    /**
+     * @param $analysis
+     */
+    protected function setAnalysis( $analysis ): void {
+        if ( $analysis == AbstractXliffRule::_ANALYSIS_NEW ) {
+            throw new LogicException( "DefaultRule is designed to be pre-translated only.", 500 );
+        }
+        parent::setAnalysis( $analysis );
+    }
 
     public function asEditorStatus(): string {
 

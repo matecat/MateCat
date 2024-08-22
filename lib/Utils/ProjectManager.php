@@ -3055,10 +3055,12 @@ class ProjectManager {
      *
      * @param string|null $source
      * @param string|null $target
+     * @param int|null    $file_id
      * @param string|null $state
      * @param string|null $stateQualifier
      *
      * @return bool
+     * @throws Exception
      */
     private function __isTranslated( string $source = null, string $target = null, int $file_id = null, string $state = null, string $stateQualifier = null ): bool {
 
