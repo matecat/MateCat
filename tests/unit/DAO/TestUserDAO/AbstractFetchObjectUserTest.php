@@ -158,7 +158,7 @@ class AbstractFetchObjectUserTest extends AbstractTest {
 
         $this->assertEquals( $this->uid, $result->uid );
         $this->assertEquals( "barandfoo@translated.net", $result->email );
-        $this->assertRegExp( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $result->create_date );
+        $this->assertMatchesRegularExpression( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $result->create_date );
         $this->assertEquals( "Edoardo", $result->first_name );
         $this->assertEquals( "BarAndFoo", $result->last_name );
         $this->assertNull( $result->salt );
@@ -204,7 +204,7 @@ class AbstractFetchObjectUserTest extends AbstractTest {
         $result = $wrapped_result[ '0' ];
 
         //we expect that the record will be fetched from database
-        $this->assertRegExp( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $result->create_date );
+        $this->assertMatchesRegularExpression( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $result->create_date );
         $this->assertNotEquals( "2016-04-29 00:00:00", $result->create_date );
 
     }

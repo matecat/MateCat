@@ -107,7 +107,7 @@ class GetByUidsUserTest extends AbstractTest {
         $this->assertTrue( $user instanceof Users_UserStruct );
         $this->assertEquals( "{$this->uid_1}", $user->uid );
         $this->assertEquals( "bar_first@foo.net", $user->email );
-        $this->assertRegExp( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $user->create_date );
+        $this->assertMatchesRegularExpression( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $user->create_date );
         $this->assertEquals( "Bar_1", $user->first_name );
         $this->assertEquals( "Foo_1", $user->last_name );
         $this->assertEquals( 12345, $user->salt );
@@ -118,7 +118,7 @@ class GetByUidsUserTest extends AbstractTest {
         $this->assertTrue( $user instanceof Users_UserStruct );
         $this->assertEquals( "{$this->uid_2}", $user->uid );
         $this->assertEquals( "bar_second@foo.net", $user->email );
-        $this->assertRegExp( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $user->create_date );
+        $this->assertMatchesRegularExpression( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $user->create_date );
         $this->assertEquals( "Bar_2", $user->first_name );
         $this->assertEquals( "Foo_2", $user->last_name );
         $this->assertEquals( 1543, $user->salt );
@@ -130,7 +130,7 @@ class GetByUidsUserTest extends AbstractTest {
         $this->assertTrue( $user instanceof Users_UserStruct );
         $this->assertEquals( "{$this->uid_3}", $user->uid );
         $this->assertEquals( "bar_third@foo.net", $user->email );
-        $this->assertRegExp( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $user->create_date );
+        $this->assertMatchesRegularExpression( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $user->create_date );
         $this->assertEquals( "Bar_3", $user->first_name );
         $this->assertEquals( "Foo_3", $user->last_name );
         $this->assertEquals( 16785, $user->salt );

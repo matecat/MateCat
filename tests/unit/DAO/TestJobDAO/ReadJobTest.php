@@ -136,8 +136,8 @@ class ReadJobTest extends AbstractTest {
         $this->assertEquals( "182655204", $result->last_opened_segment );
         $this->assertEquals( "1", $result->id_tms );
         $this->assertEquals( "1", $result->id_mt_engine );
-        $this->assertRegExp( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $result->create_date );
-        $this->assertRegExp( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $result->last_update );
+        $this->assertMatchesRegularExpression( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $result->create_date );
+        $this->assertMatchesRegularExpression( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $result->last_update );
         $this->assertEquals( "0", $result->disabled );
         $this->assertEquals( $this->job_owner, $result->owner );
         $this->assertEquals( "active", $result->status_owner );

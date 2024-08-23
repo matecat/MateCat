@@ -81,8 +81,8 @@ class CreateApyKeyTest extends AbstractTest {
         $this->assertEquals( "1999", $result[ 'uid' ] );
         $this->assertEquals( "c4ca4238bar92382fake509a6f758foo", $result[ 'api_key' ] );
         $this->assertEquals( "api_secret", $result[ 'api_secret' ] );
-        $this->assertRegExp( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $result[ 'create_date' ] );
-        $this->assertRegExp( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $result[ 'last_update' ] );
+        $this->assertMatchesRegularExpression( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $result[ 'create_date' ] );
+        $this->assertMatchesRegularExpression( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $result[ 'last_update' ] );
         $this->assertEquals( '1', $result[ 'enabled' ] );
 
 

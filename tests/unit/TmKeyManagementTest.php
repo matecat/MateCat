@@ -120,21 +120,21 @@ class TmKeyManagementTest extends AbstractTest {
         $structure = TmKeyManagement_TmKeyManagement::getTmKeyStructure();
 
         $this->assertInstanceOf( "TmKeyManagement_TmKeyStruct", $structure );
-        $this->assertObjectHasAttribute( "tm", $structure );
-        $this->assertObjectHasAttribute( "glos", $structure );
-        $this->assertObjectHasAttribute( "owner", $structure );
-        $this->assertObjectHasAttribute( "uid_transl", $structure );
-        $this->assertObjectHasAttribute( "uid_rev", $structure );
-        $this->assertObjectHasAttribute( "name", $structure );
-        $this->assertObjectHasAttribute( "key", $structure );
-        $this->assertObjectHasAttribute( "r", $structure );
-        $this->assertObjectHasAttribute( "w", $structure );
-        $this->assertObjectHasAttribute( "r_transl", $structure );
-        $this->assertObjectHasAttribute( "w_transl", $structure );
-        $this->assertObjectHasAttribute( "r_rev", $structure );
-        $this->assertObjectHasAttribute( "w_rev", $structure );
-        $this->assertObjectHasAttribute( "source", $structure );
-        $this->assertObjectHasAttribute( "target", $structure );
+        $this->assertObjectHasProperty( "tm", $structure );
+        $this->assertObjectHasProperty( "glos", $structure );
+        $this->assertObjectHasProperty( "owner", $structure );
+        $this->assertObjectHasProperty( "uid_transl", $structure );
+        $this->assertObjectHasProperty( "uid_rev", $structure );
+        $this->assertObjectHasProperty( "name", $structure );
+        $this->assertObjectHasProperty( "key", $structure );
+        $this->assertObjectHasProperty( "r", $structure );
+        $this->assertObjectHasProperty( "w", $structure );
+        $this->assertObjectHasProperty( "r_transl", $structure );
+        $this->assertObjectHasProperty( "w_transl", $structure );
+        $this->assertObjectHasProperty( "r_rev", $structure );
+        $this->assertObjectHasProperty( "w_rev", $structure );
+        $this->assertObjectHasProperty( "source", $structure );
+        $this->assertObjectHasProperty( "target", $structure );
 
         $this->assertNull( $structure->tm );
         $this->assertNull( $structure->glos );
@@ -168,21 +168,21 @@ class TmKeyManagementTest extends AbstractTest {
         $structure = TmKeyManagement_TmKeyManagement::getTmKeyStructure( $args );
 
         $this->assertInstanceOf( "TmKeyManagement_TmKeyStruct", $structure );
-        $this->assertObjectHasAttribute( "tm", $structure );
-        $this->assertObjectHasAttribute( "glos", $structure );
-        $this->assertObjectHasAttribute( "owner", $structure );
-        $this->assertObjectHasAttribute( "uid_transl", $structure );
-        $this->assertObjectHasAttribute( "uid_rev", $structure );
-        $this->assertObjectHasAttribute( "name", $structure );
-        $this->assertObjectHasAttribute( "key", $structure );
-        $this->assertObjectHasAttribute( "r", $structure );
-        $this->assertObjectHasAttribute( "w", $structure );
-        $this->assertObjectHasAttribute( "r_transl", $structure );
-        $this->assertObjectHasAttribute( "w_transl", $structure );
-        $this->assertObjectHasAttribute( "r_rev", $structure );
-        $this->assertObjectHasAttribute( "w_rev", $structure );
-        $this->assertObjectHasAttribute( "source", $structure );
-        $this->assertObjectHasAttribute( "target", $structure );
+        $this->assertObjectHasProperty( "tm", $structure );
+        $this->assertObjectHasProperty( "glos", $structure );
+        $this->assertObjectHasProperty( "owner", $structure );
+        $this->assertObjectHasProperty( "uid_transl", $structure );
+        $this->assertObjectHasProperty( "uid_rev", $structure );
+        $this->assertObjectHasProperty( "name", $structure );
+        $this->assertObjectHasProperty( "key", $structure );
+        $this->assertObjectHasProperty( "r", $structure );
+        $this->assertObjectHasProperty( "w", $structure );
+        $this->assertObjectHasProperty( "r_transl", $structure );
+        $this->assertObjectHasProperty( "w_transl", $structure );
+        $this->assertObjectHasProperty( "r_rev", $structure );
+        $this->assertObjectHasProperty( "w_rev", $structure );
+        $this->assertObjectHasProperty( "source", $structure );
+        $this->assertObjectHasProperty( "target", $structure );
 
         $this->assertNull( $structure->tm );
         $this->assertNull( $structure->glos );
@@ -208,7 +208,7 @@ class TmKeyManagementTest extends AbstractTest {
         $structure = TmKeyManagement_TmKeyManagement::getClientTmKeyStructure();
 
         $this->assertInstanceOf( "TmKeyManagement_ClientTmKeyStruct", $structure );
-        $this->assertObjectHasAttribute( "edit", $structure );
+        $this->assertObjectHasProperty( "edit", $structure );
 
         $this->assertTrue( $structure->edit );
     }
@@ -232,7 +232,7 @@ class TmKeyManagementTest extends AbstractTest {
         $structure = TmKeyManagement_TmKeyManagement::getClientTmKeyStructure( $args );
 
         $this->assertInstanceOf( "TmKeyManagement_ClientTmKeyStruct", $structure );
-        $this->assertObjectHasAttribute( "edit", $structure );
+        $this->assertObjectHasProperty( "edit", $structure );
 
         $this->assertTrue( $structure->edit );
         $this->assertNull( $structure->tm );

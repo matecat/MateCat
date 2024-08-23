@@ -78,7 +78,7 @@ class ReadUserTest extends AbstractTest {
         $this->assertTrue( $user instanceof Users_UserStruct );
         $this->assertEquals( $this->uid, $user->uid );
         $this->assertEquals( "barandfoo@translated.net", $user->email );
-        $this->assertRegExp( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $user->create_date );
+        $this->assertMatchesRegularExpression( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $user->create_date );
         $this->assertEquals( "Edoardo", $user->first_name );
         $this->assertEquals( "BarAndFoo", $user->last_name );
         $this->assertNull( $user->salt );
@@ -98,7 +98,7 @@ class ReadUserTest extends AbstractTest {
         $this->assertTrue( $user instanceof Users_UserStruct );
         $this->assertEquals( $this->uid, $user->uid );
         $this->assertEquals( "barandfoo@translated.net", $user->email );
-        $this->assertRegExp( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $user->create_date );
+        $this->assertMatchesRegularExpression( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $user->create_date );
         $this->assertEquals( "Edoardo", $user->first_name );
         $this->assertEquals( "BarAndFoo", $user->last_name );
         $this->assertNull( $user->salt );

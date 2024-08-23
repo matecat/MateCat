@@ -102,7 +102,7 @@ LABEL;
     "File %@ not found." = "Le fichier %@ n’existe pas.";
 LABEL;
 
-        $this->assertRegExp( '/[^%d,%@]/', $this->method->invoke( $this->jobDao, $input_string ) );
+        $this->assertMatchesRegularExpression( '/[^%d,%@]/', $this->method->invoke( $this->jobDao, $input_string ) );
 
     }
 

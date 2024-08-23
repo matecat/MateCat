@@ -35,7 +35,7 @@ class GetUserApiKeyTest extends AbstractTest {
         $this->assertEquals( "{$this->test_data->user->email}", $user->email );
         $this->assertEquals( "{$this->test_data->user->salt}", $user->salt );
         $this->assertEquals( "{$this->test_data->user->pass}", $user->pass );
-        $this->assertRegExp( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $user->create_date );
+        $this->assertMatchesRegularExpression( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $user->create_date );
         $this->assertEquals( "{$this->test_data->user->create_date}", $user->create_date );
         $this->assertEquals( "{$this->test_data->user->first_name}", $user->first_name );
         $this->assertEquals( "{$this->test_data->user->last_name}", $user->last_name );
