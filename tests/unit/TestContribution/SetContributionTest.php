@@ -13,7 +13,6 @@ use Contribution\Set;
 use TaskRunner\Commons\ContextList;
 use TaskRunner\Commons\QueueElement;
 use TestHelpers\AbstractTest;
-use TestHelpers\InvocationInspector;
 
 class SetContributionTest extends AbstractTest {
 
@@ -174,7 +173,7 @@ class SetContributionTest extends AbstractTest {
         // PHPUnit will not check for its content,
         // but instead it will raise the exception
         $this->expectException( Exception::class );
-        $this->expectExceptionMessageRegExp( '/Could not connect to .*/' );
+        $this->expectExceptionMessageMatches( '/Could not connect to .*/' );
 
         //init the worker client with the stub Handler
         WorkerClient::init( $stub );

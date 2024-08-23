@@ -30,8 +30,6 @@ class ServerCheckTest extends AbstractTest {
         $this->assertNotEmpty( $params );
         $this->assertNotEmpty( $params->getUpload() );
 
-        $this->assertAttributeNotEmpty( 'upload', $params );
-
     }
 
 
@@ -43,8 +41,8 @@ class ServerCheckTest extends AbstractTest {
 
         $this->assertNotEmpty( $params );
 
-        $this->assertAttributeNotEmpty( 'post_max_size', $params );
-        $this->assertAttributeNotEmpty( 'upload_max_filesize', $params );
+        $this->assertNotEmpty( $params->getPostMaxSize() );
+        $this->assertNotEmpty( $params->getUploadMaxFilesize() );
 
         $this->assertNotEquals( $params->getPostMaxSize(), -1 );
         $this->assertNotEquals( $params->getUploadMaxFilesize(), -1 );

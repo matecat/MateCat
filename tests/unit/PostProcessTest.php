@@ -206,8 +206,8 @@ SRC;
         $this->assertEquals( 1000, $warnings[ 0 ]->outcome );
 
         $this->assertCount( 1, $errors );
-        $this->assertAttributeEquals( 1000, 'outcome', $errors[ 0 ] );
-        $this->assertRegExp( '/\( 1 \)/', $check->getErrorsJSON() );
+        $this->assertEquals( 1000, $errors[ 0 ]->outcome );
+        $this->assertMatchesRegularExpression( '/\( 1 \)/', $check->getErrorsJSON() );
 
         $this->expectException( LogicException::class );
         $check->getTrgNormalized();

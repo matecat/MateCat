@@ -1747,10 +1747,8 @@ class TmKeyManagementTest extends AbstractTest {
         $client_json = '[{"key":"0000123MNO","name":"My MNO","r":1,"w":0}]';
         $result_arr  = array_map( [ 'TmKeyManagement_TmKeyManagement', 'getTmKeyStructure' ], json_decode( $client_json ) );
 
-        $this->assertNotContains( 'u0000readable_chars', json_encode( $result_arr ) );
-
-        $this->assertNotContains( 'u0000readable_chars', json_encode( $result_arr[ 0 ]->toArray() ) );
-
+        $this->assertTrue( strpos( json_encode( $result_arr ), 'u0000readable_chars' ) === false );
+        $this->assertTrue( strpos( json_encode( $result_arr[ 0 ]->toArray() ), 'u0000readable_chars' ) === false );
 
     }
 
