@@ -5,8 +5,6 @@
              processIsolation="false"
              stopOnError="false"
              stopOnFailure="false"
-             syntaxCheck="true"
-             reportUselessTests="true"
              beStrictAboutTestsThatDoNotTestAnything="true">
     <php>
         <includePath>tests/TestHelpers</includePath>
