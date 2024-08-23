@@ -93,7 +93,7 @@ class ParseTimeToEditTest extends AbstractTest
     public function test_parse_time_to_edit_unexpected_array_input()
     {
         $this->source_time = array("00", "00", "00", "00");
-        $this->setExpectedException('\InvalidArgumentException');
+        $this->expectException('\InvalidArgumentException');
         CatUtils::parse_time_to_edit($this->source_time);
     }
 }

@@ -65,7 +65,7 @@ LABEL;
 ba""r/foo'
 LABEL;
         $type = "EnginesModel_EngineStruct";
-        $this->setExpectedException("Exception");
+        $this->expectException("Exception");
         $invoke = $this->method->invoke($this->databaseInstance, $this->struct_input, $type);
         $this->assertFalse($invoke instanceof EnginesModel_EngineStruct);
     }

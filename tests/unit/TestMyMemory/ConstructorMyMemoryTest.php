@@ -74,7 +74,7 @@ class ConstructorMyMemoryTest extends AbstractTest
     public function test___construct_failure()
     {
         $this->engine_struct_param->type = "fooo";
-        $this->setExpectedException("Exception");
+        $this->expectException("Exception");
         new Engines_MyMemory($this->engine_struct_param);
     }
 }

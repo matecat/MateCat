@@ -2,7 +2,7 @@
 
 namespace TestHelpers;
 use Database;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 
 /**
  * User: domenico
@@ -10,7 +10,7 @@ use PHPUnit_Framework_TestCase;
  * Time: 15.21
  *
  */
-abstract class AbstractTest extends PHPUnit_Framework_TestCase {
+abstract class AbstractTest extends TestCase {
 
     protected $thisTest;
 

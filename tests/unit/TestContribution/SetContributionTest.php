@@ -115,7 +115,7 @@ class SetContributionTest extends AbstractTest {
         $queueElement->params    = $contributionStruct;
         $queueElement->classLoad = '\AsyncTasks\Workers\SetContributionWorker';
 
-        $contextList = ContextList::get( INIT::$TASK_RUNNER_CONFIG['context_definitions'] );
+        $contextList = ContextList::get( INIT::$TASK_RUNNER_CONFIG[ 'context_definitions' ] );
 
         $amqHandlerMock = @$this->getMockBuilder( '\AMQHandler' )->getMock();
 
@@ -135,7 +135,7 @@ class SetContributionTest extends AbstractTest {
 
         $invocations = $spy->getInvocations();
 
-        $this->assertContains( '\\\\AsyncTasks\\\\Workers\\\\SetContributionWorker', $invocations[ 0 ]->parameters[ 1 ]->body );
+        $this->assertContains( '\\\\AsyncTasks\\\\Workers\\\\SetContributionWorker', $invocations[ 0 ]->getParameters()[ 1 ]->body );
 
     }
 

@@ -65,21 +65,21 @@ class ServerCheckTest extends AbstractTest {
         $this->assertNotEquals( spl_object_hash( $upload ), $allServerParams->getUpload() );
         $this->assertNotEquals( spl_object_hash( $upload ), $servCheck->getUploadParams() );
 
-        $this->setExpectedException('DomainException');
+        $this->expectException('DomainException');
         $allServerParams->field_test_not_existent = "kkk";
-        $this->setExpectedException('Exception');
+        $this->expectException('Exception');
         echo $allServerParams->field_test_not_existent;
 
 
-        $this->setExpectedException('DomainException');
+        $this->expectException('DomainException');
         $upload->field_test_not_existent = "kkk";
-        $this->setExpectedException('Exception');
+        $this->expectException('Exception');
         echo $upload->field_test_not_existent;
 
 
-        $this->setExpectedException('DomainException');
+        $this->expectException('DomainException');
         $mysql_params->field_test_not_existent = "kkk";
-        $this->setExpectedException('Exception');
+        $this->expectException('Exception');
         echo $mysql_params->field_test_not_existent;
 
     }

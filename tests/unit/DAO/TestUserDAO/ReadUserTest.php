@@ -60,7 +60,7 @@ class ReadUserTest extends AbstractTest {
      */
     public function test_read_user_without_where_conditions() {
         $this->user_struct_param = Users_UserStruct::getStruct();
-        $this->setExpectedException( 'Exception' );
+        $this->expectException( 'Exception' );
         $this->user_Dao->setCacheTTL( 2 )->read( $this->user_struct_param );
 
     }

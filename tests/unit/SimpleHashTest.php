@@ -18,7 +18,7 @@ class SimpleHashTest extends AbstractTest
         $invited_by_uid   = 166;
         $email            = "domenico@translated.net";
         $request_info     = [ "team_id" => 1 ];
-        $this->setExpectedException( '\UnexpectedValueException' );
+        $this->expectException( '\UnexpectedValueException' );
         new SimpleJWT( [
                 $invited_by_uid,
                 $email,
@@ -95,7 +95,7 @@ class SimpleHashTest extends AbstractTest
         $result[ 'payload' ][ 'context' ][ 'invited_by_uid' ] = 123;
 
         //assert exception
-        $this->setExpectedException( '\DomainException' );
+        $this->expectException( '\DomainException' );
         $x->isValid( $result );
 
     }
@@ -117,7 +117,7 @@ class SimpleHashTest extends AbstractTest
         $result[ 'signature' ] = "376715df7403f293a019fab9d048e2a904216108fc85190dc824d35375f94bc9";
 
         //assert exception
-        $this->setExpectedException( '\DomainException' );
+        $this->expectException( '\DomainException' );
         $x->isValid( $result );
 
     }

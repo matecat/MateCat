@@ -60,7 +60,7 @@ class ValidatePrimaryKeyTest extends AbstractTest
 
         $this->engine_struct_param->id = NULL;
         $this->engine_struct_param->uid = 1;
-        $this->setExpectedException("Exception");
+        $this->expectException("Exception");
         $this->method->invoke($this->databaseInstance, $this->engine_struct_param);
     }
 
@@ -75,7 +75,7 @@ class ValidatePrimaryKeyTest extends AbstractTest
 
         $this->engine_struct_param->id = 33;
         $this->engine_struct_param->uid = NULL;
-        $this->setExpectedException("Exception");
+        $this->expectException("Exception");
         $this->method->invoke($this->databaseInstance, $this->engine_struct_param);
     }
 }

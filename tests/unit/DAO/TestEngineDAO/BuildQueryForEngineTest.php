@@ -103,7 +103,7 @@ class BuildQueryForEngineTest extends AbstractTest
     public function test__buildQueryForEngine_with_given_engine_struct_without_properties_inizialized()
     {
 
-        $this->setExpectedException('\Exception');
+        $this->expectException('\Exception');
         $this->method->invoke($this->databaseInstance, $this->engine_struct);
     }
 }

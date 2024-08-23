@@ -19,4 +19,7 @@ if( getenv( 'TRAVIS' ) ){
     Bootstrap::start( new SplFileInfo( TEST_DIR . '/inc/config.local.ini' ), new SplFileInfo( TEST_DIR . '/inc/task_manager_config.ini' ) );
 }
 
-disableAmqWorkerClientHelper();
+try {
+    disableAmqWorkerClientHelper();
+} catch ( ReflectionException $ignore ) {
+}

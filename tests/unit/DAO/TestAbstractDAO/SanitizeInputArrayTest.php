@@ -68,7 +68,7 @@ class SanitizeInputArrayTest extends AbstractTest
         $this->array_of_structs_input= array($first_struct,$second_struct,$third_struct );
         $type = "EnginesModel_EngineStruct";
 
-        $this->setExpectedException("Exception");
+        $this->expectException("Exception");
         $this->method->invoke($this->databaseInstance, $this->array_of_structs_input, $type);
 
     }

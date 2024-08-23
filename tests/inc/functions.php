@@ -31,9 +31,10 @@ function setupSignalHandler() {
  * We have to manually instantiate a MockObject Generator
  *
  * @return void
+ * @throws ReflectionException
  */
 function disableAmqWorkerClientHelper() {
-    WorkerClient::$_HANDLER = @( new PHPUnit_Framework_MockObject_Generator() )->getMock(
+    WorkerClient::$_HANDLER = @( new PHPUnit\Framework\MockObject\Generator() )->getMock(
             AMQHandler::class,
             [], [], '', false
     );

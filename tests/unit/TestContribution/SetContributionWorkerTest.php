@@ -161,8 +161,8 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver {
         $reflectedMethod->invokeArgs( $_worker, [ $contributionMockQueueObject ] );
 
         $invocations = $stubEngineParameterSpy->getInvocations();
-        $this->assertEquals( $this->contributionStruct->segment, $invocations[ 0 ]->parameters[ 0 ][ 'segment' ] );
-        $this->assertEquals( [ 'XXXXXXXXXXXXXXXX' ], $invocations[ 0 ]->parameters[ 0 ][ 'id_user' ] );
+        $this->assertEquals( $this->contributionStruct->segment, $invocations[ 0 ]->getParameters()[ 0 ][ 'segment' ] );
+        $this->assertEquals( [ 'XXXXXXXXXXXXXXXX' ], $invocations[ 0 ]->getParameters()[ 0 ][ 'id_user' ] );
 
     }
 
@@ -227,8 +227,8 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver {
         $reflectedMethod->invokeArgs( $_worker, [ $contributionMockQueueObject ] );
 
         $invocations = $stubEngineParameterSpy->getInvocations();
-        $this->assertEquals( $this->contributionStruct->segment, $invocations[ 0 ]->parameters[ 0 ][ 'segment' ] );
-        $this->assertEquals( [ 'XXXXXXXXXXXXXXXXXXX', 'YYYYYYYYYYYYYYYYYYYY' ], $invocations[ 0 ]->parameters[ 0 ][ 'id_user' ] );
+        $this->assertEquals( $this->contributionStruct->segment, $invocations[ 0 ]->getParameters()[ 0 ][ 'segment' ] );
+        $this->assertEquals( [ 'XXXXXXXXXXXXXXXXXXX', 'YYYYYYYYYYYYYYYYYYYY' ], $invocations[ 0 ]->getParameters()[ 0 ][ 'id_user' ] );
 
     }
 
