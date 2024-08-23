@@ -22,7 +22,7 @@ class UseDbTest extends AbstractTest {
         $this->jobDao = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
     }
 
-public function tearDown(): void {
+    public function tearDown(): void {
         $this->jobDao->useDb( 'unittest_matecat_local' );
         parent::tearDown();
     }

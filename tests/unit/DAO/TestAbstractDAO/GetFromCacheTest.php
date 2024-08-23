@@ -43,7 +43,7 @@ class GetFromCacheTest extends AbstractTest {
         $this->cache_TTL->setValue( $this->job_Dao, 30 );
     }
 
-public function tearDown(): void {
+    public function tearDown(): void {
 
         $this->cache_con->getValue( $this->job_Dao )->flushdb();
         parent::tearDown();

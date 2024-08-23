@@ -39,7 +39,7 @@ class SetInCacheTest extends AbstractTest {
 
     }
 
-public function tearDown(): void {
+    public function tearDown(): void {
         $this->cache_con->getValue( $this->jobDao )->flushdb();
         parent::tearDown();
     }

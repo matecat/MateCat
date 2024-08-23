@@ -40,7 +40,7 @@ H;
 
     }
 
-public function tearDown(): void {
+    public function tearDown(): void {
 
         $this->database_instance->getConnection()->query( "DELETE FROM engines WHERE id=" . $this->engine_id . ";" );
         $this->database_instance->getConnection()->query( "DELETE FROM engines WHERE id=" . $this->not_valid_engine_id . ";" );

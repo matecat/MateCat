@@ -101,7 +101,7 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
 
     }
 
-public function tearDown(): void {
+    public function tearDown(): void {
         parent::tearDown();
     }
 
@@ -171,7 +171,7 @@ public function tearDown(): void {
         $reflectedMethod->setAccessible( true );
         $reflectedMethod->invokeArgs( $_worker, [ $contributionMockQueueObject ] );
 
-        $inspector = new InvocationInspector( $stubEngineParameterSpy );
+        $inspector   = new InvocationInspector( $stubEngineParameterSpy );
         $invocations = $inspector->getInvocations();
         $this->assertEquals( $this->contributionStruct->segment, $invocations[ 0 ]->getParameters()[ 0 ][ 'segment' ] );
         $this->assertEquals( [ 'XXXXXXXXXXXXXXXX' ], $invocations[ 0 ]->getParameters()[ 0 ][ 'keys' ] );
@@ -242,7 +242,7 @@ public function tearDown(): void {
         $reflectedMethod->setAccessible( true );
         $reflectedMethod->invokeArgs( $_worker, [ $contributionMockQueueObject ] );
 
-        $inspector = new InvocationInspector( $stubEngineParameterSpy );
+        $inspector   = new InvocationInspector( $stubEngineParameterSpy );
         $invocations = $inspector->getInvocations();
 
         $this->assertEquals( $this->contributionStruct->segment, $invocations[ 0 ]->getParameters()[ 0 ][ 'segment' ] );

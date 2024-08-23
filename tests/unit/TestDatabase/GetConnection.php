@@ -47,7 +47,7 @@ class GetConnection extends AbstractTest {
 
     }
 
-public function tearDown(): void {
+    public function tearDown(): void {
         $this->jobDao = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
         $this->jobDao->close();
         startConnection();
