@@ -9,7 +9,6 @@ use TestHelpers\AbstractTest;
  * Date: 14/10/14
  * Time: 19.17
  */
-
 class TmKeyManagementTest extends AbstractTest {
 
     private static $dummyTmKey_key;
@@ -49,12 +48,7 @@ class TmKeyManagementTest extends AbstractTest {
     private static $client_json_GHI;
     private static $client_json_INVALID_GHI;
 
-
-    public function __construct() {
-    }
-
-
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
 
 //        MemcacheHandler::getInstance( array( '127.0.0.1:11211' => 1 ) )->flush();
@@ -1347,7 +1341,7 @@ class TmKeyManagementTest extends AbstractTest {
 
     public function testMergeJsonKeys_validInput_clientGHI_INVALID_serverGHI() {
 
-        $this->setExpectedException( 'Exception', "Please, select Lookup and/or Update to activate your TM in this project" );
+        $this->expectException( 'Exception', "Please, select Lookup and/or Update to activate your TM in this project" );
         $resultMerge = TmKeyManagement_TmKeyManagement::mergeJsonKeys(
                 self::$client_json_INVALID_GHI,
                 self::$srv_json_GHI
@@ -1357,7 +1351,7 @@ class TmKeyManagementTest extends AbstractTest {
 
     public function testMergeJsonKeys_InvalidRole() {
 
-        $this->setExpectedException( 'Exception', "Invalid Role Type string." );
+        $this->expectException( 'Exception', "Invalid Role Type string." );
         $resultMerge = TmKeyManagement_TmKeyManagement::mergeJsonKeys(
                 self::$client_json_GHI,
                 self::$srv_json_GHI,
@@ -1369,7 +1363,7 @@ class TmKeyManagementTest extends AbstractTest {
 
     public function testMergeJsonKeys_InvalidAnonymousOWNER() {
 
-        $this->setExpectedException( 'Exception', "Anonymous user can not be OWNER" );
+        $this->expectException( 'Exception', "Anonymous user can not be OWNER" );
         $resultMerge = TmKeyManagement_TmKeyManagement::mergeJsonKeys(
                 self::$client_json_GHI,
                 self::$srv_json_GHI,
@@ -1519,7 +1513,7 @@ class TmKeyManagementTest extends AbstractTest {
     public function testMergeJsonKeys_validInput_clientABCGHIJKL_serverABCGHIDEF_anonymous() {
 
         //ABC Key and GHI key already present in job, they can not be modified by an anonymous user
-        $this->setExpectedException( 'Exception', "Anonymous user can not modify existent keys." );
+        $this->expectException( 'Exception', "Anonymous user can not modify existent keys." );
 
         //this should not to be, because a client can not send not hashed keys
         //already present in job as an anonymous user
@@ -1737,7 +1731,7 @@ class TmKeyManagementTest extends AbstractTest {
          *
          */
 
-        $this->setExpectedException( 'Exception', "A key is already present in this project.", 5 );
+        $this->expectException( 'Exception', "A key is already present in this project.", 5 );
 
         TmKeyManagement_TmKeyManagement::mergeJsonKeys(
                 $client_json,
@@ -1753,10 +1747,8 @@ class TmKeyManagementTest extends AbstractTest {
         $client_json = '[{"key":"0000123MNO","name":"My MNO","r":1,"w":0}]';
         $result_arr  = array_map( [ 'TmKeyManagement_TmKeyManagement', 'getTmKeyStructure' ], json_decode( $client_json ) );
 
-        $this->assertNotContains( 'u0000readable_chars', json_encode( $result_arr ) );
-
-        $this->assertNotContains( 'u0000readable_chars', json_encode( $result_arr[ 0 ]->toArray() ) );
-
+        $this->assertTrue( strpos( json_encode( $result_arr ), 'u0000readable_chars' ) === false );
+        $this->assertTrue( strpos( json_encode( $result_arr[ 0 ]->toArray() ), 'u0000readable_chars' ) === false );
 
     }
 

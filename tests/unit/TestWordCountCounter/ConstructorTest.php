@@ -29,7 +29,7 @@ class ConstructorTest extends AbstractTest {
     protected $word_count_struct;
 
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
 
         $this->word_count_struct = new WordCountStruct();

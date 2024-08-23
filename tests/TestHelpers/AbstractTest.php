@@ -1,8 +1,9 @@
 <?php
 
 namespace TestHelpers;
+
 use Database;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 
 /**
  * User: domenico
@@ -10,19 +11,19 @@ use PHPUnit_Framework_TestCase;
  * Time: 15.21
  *
  */
-abstract class AbstractTest extends PHPUnit_Framework_TestCase {
+abstract class AbstractTest extends TestCase {
 
     protected $thisTest;
 
     protected $jobDao;
     protected $reflectedMethod;
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
         $this->thisTest = microtime( true );
     }
 
-    public function tearDown() {
+    public function tearDown(): void {
         parent::tearDown();
         $resultTime = microtime( true ) - $this->thisTest;
         echo " " . str_pad( get_class( $this ) . " " . $this->getName( false ), 35, " ", STR_PAD_RIGHT ) . " - Did in " . $resultTime . " seconds.\n";

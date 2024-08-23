@@ -22,7 +22,7 @@ class ConnectTest extends AbstractTest {
     /**
      * @throws ReflectionException
      */
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
 
         // get the singleton and close the connection
@@ -48,7 +48,7 @@ class ConnectTest extends AbstractTest {
         $this->assertNull( $current_value );
     }
 
-    public function tearDown() {
+    public function tearDown(): void {
         parent::tearDown();
     }
 

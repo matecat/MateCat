@@ -5,7 +5,7 @@ use Users\SignupModel;
 
 class SignupTest extends AbstractTest {
 
-    public function setup() {
+    public function setUp(): void {
         Database::obtain()->getConnection()->exec( 'DELETE FROM users' );
     }
 

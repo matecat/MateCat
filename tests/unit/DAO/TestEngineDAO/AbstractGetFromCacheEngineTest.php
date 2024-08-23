@@ -32,7 +32,7 @@ class AbstractGetFromCacheEngineTest extends AbstractTest {
     protected $_filteredQueryParams;
     protected $method_serializeForCacheKey;
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
         $this->database_instance      = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
         $this->engine_Dao             = new EnginesModel_EngineDAO( $this->database_instance );
@@ -67,7 +67,7 @@ class AbstractGetFromCacheEngineTest extends AbstractTest {
 
 
         $this->engine_Dao->create( $this->engine_struct_param );
-        $this->id = $this->getTheLastInsertIdByQuery($this->database_instance);
+        $this->id = $this->getTheLastInsertIdByQuery( $this->database_instance );
 
         $this->engine_struct_param->id = $this->id;
 
@@ -106,7 +106,7 @@ class AbstractGetFromCacheEngineTest extends AbstractTest {
 
     }
 
-    public function tearDown() {
+    public function tearDown(): void {
         $this->database_instance->getConnection()->query( $this->sql_delete_engine );
 
         $this->cache_con->getValue( $this->engine_Dao )->flushdb();
@@ -138,7 +138,7 @@ class AbstractGetFromCacheEngineTest extends AbstractTest {
         $serializedValues = $this->method_serializeForCacheKey->invoke( $this->engine_Dao, $this->_filteredQueryParams );
 
         /** @var EnginesModel_EngineStruct[] $function_return */
-        $function_return = $this->_getFromCacheReflected->invoke( $this->engine_Dao, $this->cache_key . $serializedValues );
+        $function_return      = $this->_getFromCacheReflected->invoke( $this->engine_Dao, $this->cache_key . $serializedValues );
         $function_return[ 0 ] = $function_return[ 0 ]->toArray();
         $this->assertEquals( $this->cache_value, $function_return );
     }

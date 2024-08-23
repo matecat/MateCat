@@ -32,7 +32,7 @@ class GetByIdApikeyTest extends AbstractTest {
     protected $apikey_id;
 
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
         $this->database_instance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
         $this->apikey_Dao        = new ApiKeys_ApiKeyDao( $this->database_instance );
@@ -47,14 +47,14 @@ class GetByIdApikeyTest extends AbstractTest {
 
 
         $this->database_instance->getConnection()->query( $this->sql_insert_apikey );
-        $this->apikey_id = $this->getTheLastInsertIdByQuery($this->database_instance);
+        $this->apikey_id = $this->getTheLastInsertIdByQuery( $this->database_instance );
 
         $this->sql_delete_apikey = "DELETE FROM " . INIT::$DB_DATABASE . ".`api_keys` WHERE uid='" . $this->apikey_id . "';";
 
     }
 
 
-    public function tearDown() {
+    public function tearDown(): void {
 
         $this->database_instance->getConnection()->query( $this->sql_delete_apikey );
         $this->flusher = new Predis\Client( INIT::$REDIS_SERVERS );

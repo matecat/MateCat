@@ -14,7 +14,7 @@ class ConstructorDatabaseTest extends AbstractTest {
 
     protected $reflector;
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
         $this->jobDao = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
         $this->jobDao->close();
@@ -23,7 +23,7 @@ class ConstructorDatabaseTest extends AbstractTest {
 
     }
 
-    public function tearDown() {
+    public function tearDown(): void {
         parent::tearDown();
     }
 

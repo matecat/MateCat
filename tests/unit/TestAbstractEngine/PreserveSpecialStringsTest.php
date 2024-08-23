@@ -15,7 +15,7 @@ class PreserveSpecialStringsTest extends AbstractTest {
     protected $reflector;
     protected $method;
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
         $this->engine_struct_param       = new EnginesModel_EngineStruct();
         $this->engine_struct_param->type = "MT";

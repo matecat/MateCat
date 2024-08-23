@@ -15,7 +15,7 @@ class GetUserApiKeyTest extends AbstractTest {
     protected $uid;
     private   $test_data;
 
-    function setup() {
+    public function setUp(): void {
 
         /**
          * environment initialization

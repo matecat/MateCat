@@ -9,6 +9,7 @@ use TaskRunner\Commons\ContextList;
 use TaskRunner\Commons\QueueElement;
 use TaskRunner\Exceptions\EndQueueException;
 use TestHelpers\AbstractTest;
+use TestHelpers\InvocationInspector;
 
 
 /**
@@ -66,7 +67,7 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
      * @return void
      * @throws Exception
      */
-    public function setUp() {
+    public function setUp(): void {
 
         parent::setUp();
 
@@ -100,7 +101,7 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
 
     }
 
-    public function tearDown() {
+public function tearDown(): void {
         parent::tearDown();
     }
 
@@ -170,11 +171,12 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
         $reflectedMethod->setAccessible( true );
         $reflectedMethod->invokeArgs( $_worker, [ $contributionMockQueueObject ] );
 
-        $invocations = $stubEngineParameterSpy->getInvocations();
-        $this->assertEquals( $this->contributionStruct->segment, $invocations[ 0 ]->parameters[ 0 ][ 'segment' ] );
-        $this->assertEquals( [ 'XXXXXXXXXXXXXXXX' ], $invocations[ 0 ]->parameters[ 0 ][ 'keys' ] );
-        $this->assertEquals( '1999999:9876', $invocations[ 0 ]->parameters[ 0 ][ 'tuid' ] );
-        $this->assertEquals( 'ed1814ac9699c651fdfca4912b1b6729', $invocations[ 0 ]->parameters[ 0 ][ 'session' ] );
+        $inspector = new InvocationInspector( $stubEngineParameterSpy );
+        $invocations = $inspector->getInvocations();
+        $this->assertEquals( $this->contributionStruct->segment, $invocations[ 0 ]->getParameters()[ 0 ][ 'segment' ] );
+        $this->assertEquals( [ 'XXXXXXXXXXXXXXXX' ], $invocations[ 0 ]->getParameters()[ 0 ][ 'keys' ] );
+        $this->assertEquals( '1999999:9876', $invocations[ 0 ]->getParameters()[ 0 ][ 'tuid' ] );
+        $this->assertEquals( 'ed1814ac9699c651fdfca4912b1b6729', $invocations[ 0 ]->getParameters()[ 0 ][ 'session' ] );
 
     }
 
@@ -240,11 +242,13 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
         $reflectedMethod->setAccessible( true );
         $reflectedMethod->invokeArgs( $_worker, [ $contributionMockQueueObject ] );
 
-        $invocations = $stubEngineParameterSpy->getInvocations();
-        $this->assertEquals( $this->contributionStruct->segment, $invocations[ 0 ]->parameters[ 0 ][ 'segment' ] );
-        $this->assertEquals( [ 'XXXXXXXXXXXXXXXXXXX', 'YYYYYYYYYYYYYYYYYYYY' ], $invocations[ 0 ]->parameters[ 0 ][ 'keys' ] );
-        $this->assertEquals( '1999999:9876', $invocations[ 0 ]->parameters[ 0 ][ 'tuid' ] );
-        $this->assertEquals( 'ed1814ac9699c651fdfca4912b1b6729', $invocations[ 0 ]->parameters[ 0 ][ 'session' ] );
+        $inspector = new InvocationInspector( $stubEngineParameterSpy );
+        $invocations = $inspector->getInvocations();
+
+        $this->assertEquals( $this->contributionStruct->segment, $invocations[ 0 ]->getParameters()[ 0 ][ 'segment' ] );
+        $this->assertEquals( [ 'XXXXXXXXXXXXXXXXXXX', 'YYYYYYYYYYYYYYYYYYYY' ], $invocations[ 0 ]->getParameters()[ 0 ][ 'keys' ] );
+        $this->assertEquals( '1999999:9876', $invocations[ 0 ]->getParameters()[ 0 ][ 'tuid' ] );
+        $this->assertEquals( 'ed1814ac9699c651fdfca4912b1b6729', $invocations[ 0 ]->getParameters()[ 0 ][ 'session' ] );
 
     }
 

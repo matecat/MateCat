@@ -18,7 +18,7 @@ class CacheSetConnectionTest extends AbstractTest {
 
     protected $initial_redis_configuration;
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
         $this->jobDao    = new EnginesModel_EngineDAO( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
         $this->reflector = new ReflectionClass( $this->jobDao );
@@ -29,9 +29,9 @@ class CacheSetConnectionTest extends AbstractTest {
 
     }
 
-    public function tearDown() {
+    public function tearDown(): void {
         parent::tearDown();
-        if( !empty( $this->initial_redis_configuration ) ) {
+        if ( !empty( $this->initial_redis_configuration ) ) {
             INIT::$REDIS_SERVERS = $this->initial_redis_configuration;
         }
     }
@@ -57,7 +57,7 @@ class CacheSetConnectionTest extends AbstractTest {
 
         $this->cache_conn->setValue( $this->jobDao, null );
         $this->initial_redis_configuration = INIT::$REDIS_SERVERS;
-        INIT::$REDIS_SERVERS   = "tcp://fake_localhost_and_fake_port:7777";
+        INIT::$REDIS_SERVERS               = "tcp://fake_localhost_and_fake_port:7777";
         $this->expectException( ConnectionException::class );
         $this->method->invoke( $this->jobDao );
     }

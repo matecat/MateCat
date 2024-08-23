@@ -16,7 +16,7 @@ class LastInsertTest extends AbstractTest {
     protected $sql_insert_second_value;
     protected $sql_drop;
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
         $this->jobDao = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
 
@@ -27,7 +27,7 @@ class LastInsertTest extends AbstractTest {
 
     }
 
-    public function tearDown() {
+    public function tearDown(): void {
         parent::tearDown();
         $this->jobDao->getConnection()->query( $this->sql_drop );
     }

@@ -32,7 +32,7 @@ class CreateApyKeyTest extends AbstractTest {
     protected $database_instance;
     protected $actual_apikey;
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
         $this->database_instance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
 
@@ -52,7 +52,7 @@ class CreateApyKeyTest extends AbstractTest {
     }
 
 
-    public function tearDown() {
+    public function tearDown(): void {
 
         $this->database_instance->getConnection()->query( $this->sql_delete_apikey );
         $this->flusher = new Predis\Client( INIT::$REDIS_SERVERS );

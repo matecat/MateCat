@@ -4,34 +4,31 @@ use TestHelpers\AbstractTest;
 
 
 /**
- * @group regression
+ * @group  regression
  * @covers EnginesModel_EngineStruct::getStruct
  * User: dinies
  * Date: 20/04/16
  * Time: 18.57
  */
-class GetStructTest extends AbstractTest
-{
+class GetStructTest extends AbstractTest {
     protected $array_param;
     protected $reflector;
     protected $method;
 
-    public function setUp()
-    {
+    public function setUp(): void {
         parent::setUp();
         $this->jobDao    = new EnginesModel_EngineStruct;
-        $this->reflector = new ReflectionClass($this->jobDao);
-        $this->method    = $this->reflector->getMethod("getStruct");
+        $this->reflector = new ReflectionClass( $this->jobDao );
+        $this->method    = $this->reflector->getMethod( "getStruct" );
     }
 
     /**
      * @return EnginesModel_EngineStruct
      * It returns a EnginesModel_EngineStruct
-     * @group regression
+     * @group  regression
      * @covers EnginesModel_EngineStruct::getStruct
      */
-    public function test_getStruct_simple()
-    {
-        $this->assertTrue($this->method->invoke($this->jobDao,NULL) instanceof EnginesModel_EngineStruct);
+    public function test_getStruct_simple() {
+        $this->assertTrue( $this->method->invoke( $this->jobDao, null ) instanceof EnginesModel_EngineStruct );
     }
 }
