@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "90e21d799ca19ef887559949e9a490d0",
+    "content-hash": "2aaddf363d268134e6f3559ee2d96640",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -1344,16 +1344,16 @@
         },
         {
             "name": "matecat/xliff-parser",
-            "version": "v2.1.2",
+            "version": "v2.2.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/xliff-parser.git",
-                "reference": "cd421c56a3635b34a02a569643cd9f2bededa2ba"
+                "reference": "99af1c7e64a5191a947335aaf46b23538de70bc6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/cd421c56a3635b34a02a569643cd9f2bededa2ba",
-                "reference": "cd421c56a3635b34a02a569643cd9f2bededa2ba",
+                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/99af1c7e64a5191a947335aaf46b23538de70bc6",
+                "reference": "99af1c7e64a5191a947335aaf46b23538de70bc6",
                 "shasum": ""
             },
             "require": {
@@ -1366,7 +1366,7 @@
                 "ext-xml": "*",
                 "matecat/emoji-to-entity-converter": "^1",
                 "matecat/xml-dom-parser": "^1",
-                "php": ">=5.5",
+                "php": ">=7.4",
                 "psr/log": "*"
             },
             "require-dev": {
@@ -1405,9 +1405,9 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/xliff-parser/issues",
-                "source": "https://github.com/matecat/xliff-parser/tree/v2.1.2"
+                "source": "https://github.com/matecat/xliff-parser/tree/v2.2.2"
             },
-            "time": "2024-07-26T13:44:54+00:00"
+            "time": "2024-08-08T09:22:12+00:00"
         },
         {
             "name": "matecat/xml-dom-parser",
