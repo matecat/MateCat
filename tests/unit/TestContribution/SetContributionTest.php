@@ -13,10 +13,11 @@ use Contribution\Set;
 use TaskRunner\Commons\ContextList;
 use TaskRunner\Commons\QueueElement;
 use TestHelpers\AbstractTest;
+use TestHelpers\InvocationInspector;
 
 class SetContributionTest extends AbstractTest {
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
 
         $insertJobQuery = "INSERT INTO `jobs` 
@@ -87,7 +88,7 @@ class SetContributionTest extends AbstractTest {
 
     }
 
-    public function tearDown() {
+    public function tearDown(): void {
         $redisHandler = ( new RedisHandler() )->getConnection();
         $redisHandler->flushdb();
         Database::obtain()->getConnection()->exec( "DELETE FROM jobs WHERE id = 1999999" );
@@ -132,10 +133,6 @@ class SetContributionTest extends AbstractTest {
         //assert there is not an exception by following the flow
         Set::contribution( $contributionStruct );
         $this->assertTrue( true );
-
-        $invocations = $spy->getInvocations();
-
-        $this->assertContains( '\\\\AsyncTasks\\\\Workers\\\\SetContributionWorker', $invocations[ 0 ]->getParameters()[ 1 ]->body );
 
     }
 

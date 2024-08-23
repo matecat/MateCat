@@ -33,7 +33,7 @@ class AbstractGetFromCacheUserTest extends AbstractTest {
     protected $stmt_param;
     protected $bindParams_param;
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
         $this->database_instance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
         $this->user_Dao          = new Users_UserDao( $this->database_instance );
@@ -107,7 +107,7 @@ class AbstractGetFromCacheUserTest extends AbstractTest {
 
     }
 
-    public function tearDown() {
+    public function tearDown(): void {
 
         $this->database_instance->getConnection()->query( $this->sql_delete_user );
         $this->cache_con->getValue( $this->user_Dao )->flushdb();

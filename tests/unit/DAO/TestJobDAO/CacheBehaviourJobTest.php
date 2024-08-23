@@ -34,7 +34,7 @@ class CacheBehaviourJobTest extends AbstractTest {
     /**
      * @throws ReflectionException
      */
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
 
 
@@ -102,7 +102,7 @@ class CacheBehaviourJobTest extends AbstractTest {
 
     }
 
-    public function tearDown() {
+    public function tearDown(): void {
         $this->database_instance->getConnection()->query( $this->sql_delete_job );
         $this->cache->flushdb();
         parent::tearDown();

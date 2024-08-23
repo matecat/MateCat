@@ -14,7 +14,6 @@ class FilesStorageFactoryTest extends AbstractTest {
         $fileStorage = FilesStorageFactory::create();
 
 
-
         $this->assertInstanceOf( S3FilesStorage::class, $fileStorage );
     }
 

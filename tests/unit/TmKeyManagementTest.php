@@ -9,7 +9,6 @@ use TestHelpers\AbstractTest;
  * Date: 14/10/14
  * Time: 19.17
  */
-
 class TmKeyManagementTest extends AbstractTest {
 
     private static $dummyTmKey_key;
@@ -49,7 +48,7 @@ class TmKeyManagementTest extends AbstractTest {
     private static $client_json_GHI;
     private static $client_json_INVALID_GHI;
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
 
 //        MemcacheHandler::getInstance( array( '127.0.0.1:11211' => 1 ) )->flush();

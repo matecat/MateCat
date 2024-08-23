@@ -22,7 +22,7 @@ class ContributionStructTest extends AbstractTest {
 
     protected $expected = [];
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
 
         $this->expected = new Jobs_JobStruct(
@@ -81,7 +81,7 @@ class ContributionStructTest extends AbstractTest {
 
     }
 
-    public function tearDown() {
+    public function tearDown(): void {
         $redisHandler = ( new RedisHandler() )->getConnection();
         $redisHandler->flushdb();
         parent::tearDown();

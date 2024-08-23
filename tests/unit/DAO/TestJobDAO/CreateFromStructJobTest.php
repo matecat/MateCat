@@ -34,7 +34,7 @@ class CreateFromStructJobTest extends AbstractTest {
     protected $job_owner;
     protected $sql_delete_job;
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
 
 
@@ -42,43 +42,43 @@ class CreateFromStructJobTest extends AbstractTest {
          * job initialization
          */
         $this->job_password   = "7barandfoo71";
-        $this->job_id_project = random_int(100000, 99000000);
+        $this->job_id_project = random_int( 100000, 99000000 );
         $this->job_owner      = "barandfoo@translated.net";
         $this->job_struct     = new Jobs_JobStruct(
                 [
-                        'id'                                  => null, //SET NULL FOR AUTOINCREMENT -> in this case is only stored in cache so i will chose a casual value
-                        'password'                            => $this->job_password,
-                        'id_project'                          => $this->job_id_project,
-                        'job_first_segment'                   => "182655137",
-                        'job_last_segment'                    => "182655236",
-                        'source'                              => "nl-NL",
-                        'target'                              => "de-DE",
-                        'tm_keys'                             => '[{"tm":true,"glos":true,"owner":true,"uid_transl":null,"uid_rev":null,"name":"","key":"e1f9153f48c4c7e9328d","r":true,"w":true,"r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"source":null,"target":null}]',
-                        'id_translator'                       => "",
-                        'job_type'                            => null,
-                        'total_time_to_edit'                  => "156255",
-                        'avg_post_editing_effort'             => "0",
-                        'id_job_to_revise'                    => null,
-                        'last_opened_segment'                 => "182655204",
-                        'id_tms'                              => "1",
-                        'id_mt_engine'                        => "1",
-                        'create_date'                         => "2016-03-30 13:18:09",
-                        'last_update'                         => "2016-03-30 13:21:02",
-                        'disabled'                            => "0",
-                        'owner'                               => $this->job_owner,
-                        'status_owner'                        => "active",
-                        'status'                              => "active",
-                        'status_translator'                   => null,
-                        'completed'                           => false,
-                        'new_words'                           => "-12.60",
-                        'draft_words'                         => "0.00",
-                        'translated_words'                    => "728.15",
-                        'approved_words'                      => "0.00",
-                        'rejected_words'                      => "0.00",
-                        'subject'                             => "general",
-                        'payable_rates'                       => '{"NO_MATCH":100,"50%-74%":100,"75%-84%":60,"85%-94%":60,"95%-99%":60,"100%":30,"100%_PUBLIC":30,"REPETITIONS":30,"INTERNAL":60,"MT":85}',
-                        'total_raw_wc'                        => "1",
-                        'validator'                           => "xxxx"
+                        'id'                      => null, //SET NULL FOR AUTOINCREMENT -> in this case is only stored in cache so i will chose a casual value
+                        'password'                => $this->job_password,
+                        'id_project'              => $this->job_id_project,
+                        'job_first_segment'       => "182655137",
+                        'job_last_segment'        => "182655236",
+                        'source'                  => "nl-NL",
+                        'target'                  => "de-DE",
+                        'tm_keys'                 => '[{"tm":true,"glos":true,"owner":true,"uid_transl":null,"uid_rev":null,"name":"","key":"e1f9153f48c4c7e9328d","r":true,"w":true,"r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"source":null,"target":null}]',
+                        'id_translator'           => "",
+                        'job_type'                => null,
+                        'total_time_to_edit'      => "156255",
+                        'avg_post_editing_effort' => "0",
+                        'id_job_to_revise'        => null,
+                        'last_opened_segment'     => "182655204",
+                        'id_tms'                  => "1",
+                        'id_mt_engine'            => "1",
+                        'create_date'             => "2016-03-30 13:18:09",
+                        'last_update'             => "2016-03-30 13:21:02",
+                        'disabled'                => "0",
+                        'owner'                   => $this->job_owner,
+                        'status_owner'            => "active",
+                        'status'                  => "active",
+                        'status_translator'       => null,
+                        'completed'               => false,
+                        'new_words'               => "-12.60",
+                        'draft_words'             => "0.00",
+                        'translated_words'        => "728.15",
+                        'approved_words'          => "0.00",
+                        'rejected_words'          => "0.00",
+                        'subject'                 => "general",
+                        'payable_rates'           => '{"NO_MATCH":100,"50%-74%":100,"75%-84%":60,"85%-94%":60,"95%-99%":60,"100%":30,"100%_PUBLIC":30,"REPETITIONS":30,"INTERNAL":60,"MT":85}',
+                        'total_raw_wc'            => "1",
+                        'validator'               => "xxxx"
                 ]
         );
 
@@ -91,7 +91,7 @@ class CreateFromStructJobTest extends AbstractTest {
     /**
      * @throws ReflectionException
      */
-    public function tearDown() {
+    public function tearDown(): void {
         $this->database_instance->getConnection()->query( $this->sql_delete_job );
         $this->cache = ( new RedisHandler() )->getConnection();
         $this->cache->flushdb();

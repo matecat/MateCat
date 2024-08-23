@@ -25,7 +25,7 @@ class UpdateFieldProjectTest extends AbstractTest {
     /** @var Projects_ProjectStruct */
     protected $project;
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
 
         $this->database_instance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
@@ -41,7 +41,7 @@ class UpdateFieldProjectTest extends AbstractTest {
                     '127.0.0.1', '0', '0', '123', '3', NULL 
                     )"
         );
-        $pId = $this->database_instance->getConnection()->lastInsertId();
+        $pId           = $this->database_instance->getConnection()->lastInsertId();
         $this->project = new Projects_ProjectStruct( $this->database_instance->getConnection()->query( "SELECT * FROM projects WHERE id = $pId LIMIT 1" )->fetch() );
 
     }

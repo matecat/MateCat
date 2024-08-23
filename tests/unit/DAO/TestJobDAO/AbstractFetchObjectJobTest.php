@@ -45,7 +45,7 @@ class AbstractFetchObjectJobTest extends AbstractTest {
     protected $bindParams_param;
 
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
         $this->database_instance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
         $this->job_Dao           = new Jobs_JobDao( $this->database_instance );
@@ -130,7 +130,7 @@ class AbstractFetchObjectJobTest extends AbstractTest {
 
     }
 
-    public function tearDown() {
+    public function tearDown(): void {
         $this->cache = new Predis\Client( INIT::$REDIS_SERVERS );
 
         $this->database_instance->getConnection()->query( $this->sql_delete_job );

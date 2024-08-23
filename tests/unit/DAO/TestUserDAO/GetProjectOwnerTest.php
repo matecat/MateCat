@@ -42,7 +42,7 @@ class GetProjectOwnerTest extends AbstractTest {
     protected $job_struct;
 
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
         $this->database_instance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
         $this->user_Dao          = new Users_UserDao( $this->database_instance );
@@ -53,7 +53,7 @@ class GetProjectOwnerTest extends AbstractTest {
         $this->email_owner     = "bar@foo.net";
         $this->sql_insert_user = "INSERT INTO " . INIT::$DB_DATABASE . ".`users` (`uid`, `email`, `salt`, `pass`, `create_date`, `first_name`, `last_name` ) VALUES (NULL, '" . $this->email_owner . "', '12345trewq', '987654321qwerty', '2016-04-11 13:41:54', 'Bar', 'Foo' );";
         $this->database_instance->getConnection()->query( $this->sql_insert_user );
-        $this->uid_user = $this->getTheLastInsertIdByQuery($this->database_instance);
+        $this->uid_user = $this->getTheLastInsertIdByQuery( $this->database_instance );
 
         $this->sql_delete_user = "DELETE FROM " . INIT::$DB_DATABASE . ".`users` WHERE uid='" . $this->uid_user . "';";
 
@@ -114,7 +114,7 @@ class GetProjectOwnerTest extends AbstractTest {
 
         $this->job_Dao = new Jobs_JobDao( $this->database_instance );
         $this->job_Dao->createFromStruct( $this->job_struct );
-        $this->id_job = $this->getTheLastInsertIdByQuery($this->database_instance);
+        $this->id_job = $this->getTheLastInsertIdByQuery( $this->database_instance );
 
         $this->sql_delete_job = "DELETE FROM jobs WHERE id='" . $this->id_job . "';";
 
@@ -122,7 +122,7 @@ class GetProjectOwnerTest extends AbstractTest {
     }
 
 
-    public function tearDown() {
+    public function tearDown(): void {
         $this->database_instance->getConnection()->query( $this->sql_delete_job );
         $this->database_instance->getConnection()->query( $this->sql_delete_user );
         $this->flusher = new Predis\Client( INIT::$REDIS_SERVERS );

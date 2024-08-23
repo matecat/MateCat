@@ -46,7 +46,7 @@ class UpdateDBTest extends AbstractTest {
     protected $second_half_of_number;
 
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
         $this->first_half_of_number    = "4";
         $this->second_half_of_number   = "11";
@@ -148,7 +148,7 @@ class UpdateDBTest extends AbstractTest {
 
     }
 
-    public function tearDown() {
+    public function tearDown(): void {
         $this->database_instance->getConnection()->query( $this->sql_delete_job );
         $this->database_instance->getConnection()->query( $this->sql_delete_first_segment );
         $this->flusher->select( INIT::$INSTANCE_ID );

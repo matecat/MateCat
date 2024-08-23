@@ -2,6 +2,7 @@
 
 
 use TestHelpers\AbstractTest;
+use TestHelpers\InvocationInspector;
 use WordCount\CounterModel;
 use WordCount\WordCounterDao;
 use WordCount\WordCountStruct;
@@ -23,7 +24,7 @@ class InitializeJobWordCountTest extends AbstractTest {
      */
     function test_initializeJobWordCount() {
 
-        $wordCounterMock = @$this->getMockBuilder( WordCounterDao::class )->getMock();
+        $wordCounterMock = $this->getMockBuilder( WordCounterDao::class )->getMock();
         $wordCounterMock
                 ->expects( $this->once() )
                 ->method( 'getStatsForJob' )
@@ -61,7 +62,8 @@ class InitializeJobWordCountTest extends AbstractTest {
         $wordCount = new CounterModel();
         $result    = $wordCount->initializeJobWordCount( 1, 'a_password', $wordCounterMock );
 
-        $invocation = $spy->getInvocations()[ 0 ];
+        $inspector   = new InvocationInspector( $spy );
+        $invocation = $inspector->getInvocations()[ 0 ];
 
         $this->assertEquals( $invocation->getParameters()[ 0 ], $result );
         $this->assertSame( $invocation->getParameters()[ 0 ], $result ); // same instance

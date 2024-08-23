@@ -17,12 +17,12 @@ class UseDbTest extends AbstractTest {
      */
     protected $databaseInstance;
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
         $this->databaseInstance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
     }
 
-    public function tearDown() {
+    public function tearDown(): void {
         $this->databaseInstance->useDb( 'unittest_matecat_local' );
         parent::tearDown();
     }
@@ -38,7 +38,7 @@ class UseDbTest extends AbstractTest {
         $this->databaseInstance->useDb( 'information_schema' );
 
         $reflector = new ReflectionClass( $this->databaseInstance );
-        $property = $reflector->getProperty( 'database' );
+        $property  = $reflector->getProperty( 'database' );
         $property->setAccessible( true );
 
         $current_database_value = $property->getValue( $this->databaseInstance );

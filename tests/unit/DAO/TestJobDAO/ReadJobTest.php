@@ -34,7 +34,7 @@ class ReadJobTest extends AbstractTest {
     protected $job_struct_param;
 
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
         $this->database_instance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
         $this->job_Dao           = new Jobs_JobDao( $this->database_instance );
@@ -47,50 +47,50 @@ class ReadJobTest extends AbstractTest {
         $this->job_owner    = "barandfoo@translated.net";
         $this->job_struct   = new Jobs_JobStruct(
                 [
-                        'id'                                  => null, //SET NULL FOR AUTOINCREMENT -> in this case is only stored in cache so i will chose a casual value
-                        'password'                            => $this->job_password,
-                        'id_project'                          => "432999999",
-                        'job_first_segment'                   => "182655137",
-                        'job_last_segment'                    => "182655236",
-                        'source'                              => "nl-NL",
-                        'target'                              => "de-DE",
-                        'tm_keys'                             => '[{"tm":true,"glos":true,"owner":true,"uid_transl":null,"uid_rev":null,"name":"","key":"e1f9153f48c4c7e9328d","r":true,"w":true,"r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"source":null,"target":null}]',
-                        'id_translator'                       => "",
-                        'job_type'                            => null,
-                        'total_time_to_edit'                  => "156255",
-                        'avg_post_editing_effort'             => "0",
-                        'id_job_to_revise'                    => null,
-                        'last_opened_segment'                 => "182655204",
-                        'id_tms'                              => "1",
-                        'id_mt_engine'                        => "1",
-                        'create_date'                         => "2016-03-30 13:18:09",
-                        'last_update'                         => "2016-03-30 13:21:02",
-                        'disabled'                            => "0",
-                        'owner'                               => $this->job_owner,
-                        'status_owner'                        => "active",
-                        'status'                              => "active",
-                        'status_translator'                   => null,
-                        'completed'                           => false,
-                        'new_words'                           => "-12.60",
-                        'draft_words'                         => "0.00",
-                        'translated_words'                    => "728.15",
-                        'approved_words'                      => "0.00",
-                        'rejected_words'                      => "0.00",
-                        'subject'                             => "general",
-                        'payable_rates'                       => '{"NO_MATCH":100,"50%-74%":100,"75%-84%":60,"85%-94%":60,"95%-99%":60,"100%":30,"100%_PUBLIC":30,"REPETITIONS":30,"INTERNAL":60,"MT":85}',
-                        'total_raw_wc'                        => "1",
-                        'validator'                           => "xxxx"
+                        'id'                      => null, //SET NULL FOR AUTOINCREMENT -> in this case is only stored in cache so i will chose a casual value
+                        'password'                => $this->job_password,
+                        'id_project'              => "432999999",
+                        'job_first_segment'       => "182655137",
+                        'job_last_segment'        => "182655236",
+                        'source'                  => "nl-NL",
+                        'target'                  => "de-DE",
+                        'tm_keys'                 => '[{"tm":true,"glos":true,"owner":true,"uid_transl":null,"uid_rev":null,"name":"","key":"e1f9153f48c4c7e9328d","r":true,"w":true,"r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"source":null,"target":null}]',
+                        'id_translator'           => "",
+                        'job_type'                => null,
+                        'total_time_to_edit'      => "156255",
+                        'avg_post_editing_effort' => "0",
+                        'id_job_to_revise'        => null,
+                        'last_opened_segment'     => "182655204",
+                        'id_tms'                  => "1",
+                        'id_mt_engine'            => "1",
+                        'create_date'             => "2016-03-30 13:18:09",
+                        'last_update'             => "2016-03-30 13:21:02",
+                        'disabled'                => "0",
+                        'owner'                   => $this->job_owner,
+                        'status_owner'            => "active",
+                        'status'                  => "active",
+                        'status_translator'       => null,
+                        'completed'               => false,
+                        'new_words'               => "-12.60",
+                        'draft_words'             => "0.00",
+                        'translated_words'        => "728.15",
+                        'approved_words'          => "0.00",
+                        'rejected_words'          => "0.00",
+                        'subject'                 => "general",
+                        'payable_rates'           => '{"NO_MATCH":100,"50%-74%":100,"75%-84%":60,"85%-94%":60,"95%-99%":60,"100%":30,"100%_PUBLIC":30,"REPETITIONS":30,"INTERNAL":60,"MT":85}',
+                        'total_raw_wc'            => "1",
+                        'validator'               => "xxxx"
                 ]
         );
         $this->job_Dao->createFromStruct( $this->job_struct );
 
-        $this->job_id = $this->getTheLastInsertIdByQuery($this->database_instance);
+        $this->job_id = $this->getTheLastInsertIdByQuery( $this->database_instance );
 
         $this->sql_delete_job = "DELETE FROM  " . INIT::$DB_DATABASE . ".`jobs` WHERE id='" . $this->job_id . "';";
 
     }
 
-    public function tearDown() {
+    public function tearDown(): void {
         $this->database_instance->getConnection()->query( $this->sql_delete_job );
         $this->flusher = new Predis\Client( INIT::$REDIS_SERVERS );
         $this->flusher->flushdb();
@@ -132,7 +132,7 @@ class ReadJobTest extends AbstractTest {
         $this->assertNull( $result->job_type );
         $this->assertEquals( "156255", $result->total_time_to_edit );
         $this->assertEquals( "0", $result->avg_post_editing_effort );
-        $this->assertFalse( isset($result->id_job_to_revise) );
+        $this->assertFalse( isset( $result->id_job_to_revise ) );
         $this->assertEquals( "182655204", $result->last_opened_segment );
         $this->assertEquals( "1", $result->id_tms );
         $this->assertEquals( "1", $result->id_mt_engine );
