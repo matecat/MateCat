@@ -11,12 +11,14 @@ use TestHelpers\AbstractTest;
 use Xliff\DTO\AbstractXliffRule;
 use Xliff\DTO\DefaultRule;
 use Xliff\DTO\Xliff12Rule;
+use Xliff\DTO\Xliff20Rule;
 use Xliff\DTO\XliffRulesModel;
 
 class XliffRulesModelTest extends AbstractTest {
 
     /**
      * @test
+     * @throws Exception
      */
     public function shouldNotAcceptDuplicatedStates() {
 
@@ -36,6 +38,7 @@ class XliffRulesModelTest extends AbstractTest {
 
     /**
      * @test
+     * @throws Exception
      */
     public function shouldGetTheRightRule() {
 
@@ -55,5 +58,76 @@ class XliffRulesModelTest extends AbstractTest {
         $this->assertEquals( $defaultRule, $rulesModel->getMatchingRule( 2, 'translated' ) ); // there is not 2.0 rule defined
 
     }
+
+    /**
+     * @test
+     * @throws Exception
+     */
+    public function shouldLoadFromArrayObject() {
+
+        $array = [
+                "xliff12" => [
+                        [
+                                "states"   => [
+                                        "new",
+                                        "translated",
+                                        "needs-review-adaptation",
+                                        "needs-review-l10n"
+                                ],
+                                "analysis" => "new"
+                        ],
+                        [
+                                "states"         => [
+                                        "signed-off",
+                                        "final"
+                                ],
+                                "analysis"       => "pre-translated",
+                                "editor"         => "translated",
+                                "match_category" => "50_74"
+                        ],
+                        [
+                                "states"         => [
+                                        "exact-match",
+                                        "id-match",
+                                        "leveraged-repository",
+                                        "mt-suggestion"
+                                ],
+                                "analysis"       => "pre-translated",
+                                "editor"         => "approved",
+                                "match_category" => "ice"
+                        ]
+                ],
+                "xliff20" => [
+                        [
+                                "states"   => [
+                                        "final"
+                                ],
+                                "analysis" => "new"
+                        ]
+                ]
+        ];
+
+        $arrayObject = new RecursiveArrayObject( $array );
+
+        $rulesModel = XliffRulesModel::fromArrayObject( $arrayObject );
+
+        $this->assertNotEmpty( $rulesModel );
+        $this->assertEquals( $array, $rulesModel->getArrayCopy() );
+
+
+        $rule1 = new Xliff20Rule( [ 'final' ], 'new' );
+        $rule2 = new Xliff12Rule( [
+                "exact-match",
+                "id-match",
+                "leveraged-repository",
+                "mt-suggestion"
+        ], 'pre-translated', 'approved', 'ice' );
+
+        $this->assertEquals( $rule1, $rulesModel->getMatchingRule( 2, 'final' ) );
+        $this->assertEquals( $rule2, $rulesModel->getMatchingRule( 1, null, 'exact-match' ) );
+        $this->assertEquals( json_encode( $rule2 ), json_encode( $rulesModel->getMatchingRule( 1, null, "id-match" ) ) );
+
+    }
+
 
 }
