@@ -415,7 +415,7 @@ class TMAnalysisWorker extends AbstractWorker {
             string $fast_exact_match_type,
             array  &$equivalentWordMapping,
             bool   $publicTM = false,
-            bool $isICE = false
+            bool   $isICE = false
     ): string {
         $fast_match_type = strtoupper( $fast_match_type );
         $fast_rate_paid  = $equivalentWordMapping[ $fast_match_type ];
@@ -903,7 +903,16 @@ class TMAnalysisWorker extends AbstractWorker {
                 throw new ReQueueException();
             }
 
-            //TODO use a simplest query to get job id and password
+            /*
+             * Remove this job from the project list
+             */
+            $this->_queueHandler->getRedisClient()->lrem( $this->_myContext->redis_key, 0, $_project_id );
+
+            $this->_doLog( "--- (Worker $this->_workerPid) : trying to initialize job total word count." );
+
+            $database = Database::obtain();
+            $database->begin();
+
             $_analyzed_report = $this->getProjectSegmentsTranslationSummary( $_project_id );
 
             array_pop( $_analyzed_report ); //remove Rollup
@@ -931,20 +940,12 @@ class TMAnalysisWorker extends AbstractWorker {
                 ] );
             }
 
-            /*
-             * Remove this job from the project list
-             */
-            $this->_queueHandler->getRedisClient()->lrem( $this->_myContext->redis_key, 0, $_project_id );
-
-            $this->_doLog( "--- (Worker $this->_workerPid) : trying to initialize job total word count." );
-
-            $database = Database::obtain();
             foreach ( $_analyzed_report as $job_info ) {
                 $counter = new CounterModel();
-                $database->begin();
                 $counter->initializeJobWordCount( $job_info[ 'id_job' ], $job_info[ 'password' ] );
-                $database->commit();
             }
+
+            $database->commit();
 
             try {
                 $this->featureSet->run( 'afterTMAnalysisCloseProject', $_project_id, $_analyzed_report );

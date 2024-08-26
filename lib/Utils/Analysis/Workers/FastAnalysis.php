@@ -575,36 +575,43 @@ class FastAnalysis extends AbstractDaemon {
         unset( $chunks_bind_values );
         unset( $chunks_st );
 
-        /*
-         * IF NO TM ANALYSIS, update the jobs global word count
-         */
-        if ( !$perform_Tms_Analysis ) {
-
-            $_details = $this->getProjectSegmentsTranslationSummary( $pid );
-
-            $this->_logTimeStampedMsg( "--- trying to initialize job total word count." );
-
-            $project_details = array_pop( $_details ); //Don't remove, needed to remove rollup row
-
-            foreach ( $_details as $job_info ) {
-                $counter = new CounterModel();
-                $counter->initializeJobWordCount( $job_info[ 'id_job' ], $job_info[ 'password' ] );
-            }
-
-        }
-        /* IF NO TM ANALYSIS, upload the jobs global word count */
-
         //_TimeStampMsg( "Done." );
 
         $data2 = [ 'fast_analysis_wc' => $total_eq_wc ];
         $where = [ "id" => $pid ];
 
 
+        $db = Database::obtain();
+        $db->begin();
+
         try {
-            $db                       = Database::obtain();
+
+            /*
+             * IF NO TM ANALYSIS, update the jobs global word count
+            */
+            if ( !$perform_Tms_Analysis ) {
+
+                $_details = $this->getProjectSegmentsTranslationSummary( $pid );
+
+                $this->_logTimeStampedMsg( "--- trying to initialize job total word count." );
+
+                $project_details = array_pop( $_details ); //Don't remove, needed to remove rollup row
+
+                foreach ( $_details as $job_info ) {
+                    $counter = new CounterModel();
+                    $counter->initializeJobWordCount( $job_info[ 'id_job' ], $job_info[ 'password' ] );
+                }
+
+            }
+            /* IF NO TM ANALYSIS, upload the jobs global word count */
+
             $project_creation_success = $db->update( 'projects', $data2, $where );
+
+            $db->commit();
+
         } catch ( PDOException $e ) {
             $this->_logTimeStampedMsg( $e->getMessage() );
+            $db->rollback();
 
             return $e->getCode() * -1;
         }

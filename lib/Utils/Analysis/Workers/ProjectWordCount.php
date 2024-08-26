@@ -37,16 +37,15 @@ trait ProjectWordCount {
                     id_job,
                     password,
                     SUM(eq_word_count) AS eq_wc,
-                    SUM(standard_word_count) AS st_wc
-                    , SUM( IF( COALESCE( eq_word_count, 0 ) = 0, raw_word_count, eq_word_count) ) as TOTAL
-                    , COUNT( s.id ) AS project_segments,
-                    SUM( IF( st.tm_analysis_status IN( 'SKIPPED', 'DONE' ), 1, 0 ) ) AS num_analyzed
+                    SUM(standard_word_count) AS st_wc,
+                    SUM( IF( COALESCE( eq_word_count, 0 ) = 0, raw_word_count, eq_word_count) ) as TOTAL,
+                    COUNT( s.id ) AS project_segments,
+                    0 AS num_analyzed
                 FROM segment_translations st
-                JOIN segments s ON s.id = id_segment
-                INNER JOIN jobs j ON j.id=st.id_job
+                     JOIN segments s ON s.id = id_segment
+                     INNER JOIN jobs j ON j.id=st.id_job
                 WHERE j.id_project = :pid
-                AND st.locked = 0
-                AND match_type != 'ICE'
+                AND s.show_in_cattool = 1
                 GROUP BY id_job WITH ROLLUP
         ";
 
@@ -54,12 +53,10 @@ trait ProjectWordCount {
 
             $db = Database::obtain();
             //Needed to address the query to the master database if exists
-            Database::obtain()->begin();
             $stmt = $db->getConnection()->prepare( $query );
             $stmt->setFetchMode( PDO::FETCH_ASSOC );
             $stmt->execute( [ 'pid' => $pid ] );
             $results = $stmt->fetchAll();
-            $db->getConnection()->commit();
         } catch ( PDOException $e ) {
             Log::doJsonLog( $e->getMessage() );
 
