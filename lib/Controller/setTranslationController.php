@@ -2,7 +2,7 @@
 
 use Contribution\ContributionSetStruct;
 use Contribution\Set;
-use EditLog\EditLogSegmentClientStruct;
+use EditLog\EditLogSegmentStruct;
 use Exceptions\ControllerReturnException;
 use Exceptions\NotFoundException;
 use Features\ReviewExtended\ReviewUtils;
@@ -209,7 +209,7 @@ class setTranslationController extends ajaxController {
         }
 
 
-        list( $__translation, $this->split_chunk_lengths ) = CatUtils::parseSegmentSplit( $this->__postInput[ 'translation' ], '', $this->filter );
+        [ $__translation, $this->split_chunk_lengths ] = CatUtils::parseSegmentSplit( $this->__postInput[ 'translation' ], '', $this->filter );
 
         if ( is_null( $__translation ) || $__translation === '' ) {
             Log::doJsonLog( "Empty Translation \n\n" . var_export( $_POST, true ) );
@@ -542,7 +542,7 @@ class setTranslationController extends ajaxController {
 
         $newTotals = WordCountStruct::loadFromJob( $this->chunk );
 
-        $job_stats = CatUtils::getFastStatsForJob( $newTotals );
+        $job_stats                        = CatUtils::getFastStatsForJob( $newTotals );
         $job_stats[ 'analysis_complete' ] = (
                 $this->project[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE ||
                 $this->project[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE
@@ -790,7 +790,7 @@ class setTranslationController extends ajaxController {
         }
 
         $segmentRawWordCount  = $this->segment->raw_word_count;
-        $editLogSegmentStruct = new EditLogSegmentClientStruct(
+        $editLogSegmentStruct = new EditLogSegmentStruct(
                 [
                         'suggestion'     => $old_translation[ 'suggestion' ],
                         'translation'    => $old_translation[ 'translation' ],
@@ -805,8 +805,7 @@ class setTranslationController extends ajaxController {
         $oldPEE          = $editLogSegmentStruct->getPEE();
         $oldPee_weighted = $oldPEE * $segmentRawWordCount;
 
-        $editLogSegmentStruct->translation    = $new_translation[ 'translation' ];
-        $editLogSegmentStruct->pe_effort_perc = null;
+        $editLogSegmentStruct->translation = $new_translation[ 'translation' ];
 
         $newPEE          = $editLogSegmentStruct->getPEE();
         $newPee_weighted = $newPEE * $segmentRawWordCount;
@@ -947,7 +946,7 @@ class setTranslationController extends ajaxController {
         $contributionStruct->id_segment   = $this->id_segment;
         $contributionStruct->segment      = $this->filter->fromLayer0ToLayer1( $this->segment[ 'segment' ] );
         $contributionStruct->translation  = $this->filter->fromLayer0ToLayer1( $_Translation[ 'translation' ] );
-        $contributionStruct->api_key              = INIT::$MYMEMORY_API_KEY;
+        $contributionStruct->api_key      = INIT::$MYMEMORY_API_KEY;
         $contributionStruct->uid          = ( $ownerUid !== null ) ? $ownerUid : 0;;
         $contributionStruct->oldTranslationStatus = $old_translation[ 'status' ];
         $contributionStruct->oldSegment           = $this->filter->fromLayer0ToLayer1( $this->segment[ 'segment' ] ); //

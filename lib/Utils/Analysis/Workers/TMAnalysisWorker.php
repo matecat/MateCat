@@ -287,12 +287,6 @@ class TMAnalysisWorker extends AbstractWorker {
         $this->_decSegmentsToAnalyzeOfWaitingProjects( $queueElement->params->pid );
         $this->_tryToCloseProject( $queueElement->params );
 
-
-        $this->featureSet->run( 'postTMSegmentAnalyzed', [
-                'tm_data'       => $tm_data,
-                'queue_element' => $queueElement
-        ] );
-
     }
 
     /**

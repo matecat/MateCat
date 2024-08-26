@@ -1,2 +1,0 @@
-DB_USER = "This is an user that has only drop privilege on table jobs_stats"
-DB_PASS = "This is the password"
