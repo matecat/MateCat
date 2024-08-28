@@ -286,7 +286,7 @@ var spec = {
             type: 'integer',
           },
           {
-            name: 'project_pass',
+            name: 'password',
             in: 'query',
             description:
                 'The password associated with the project, should be the value returned by the /new method ( associated with the id_project )',
