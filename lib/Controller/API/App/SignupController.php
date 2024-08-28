@@ -141,19 +141,8 @@ class SignupController extends AbstractStatefulKleinController {
      */
     public function forgotPassword() {
 
-        // first, validate email and wanted_url
-        $this->validateForgotPasswordRequest(
-            $this->request->param( 'email' ),
-            $this->request->param( 'wanted_url' )
-        );
-
-        if($this->response->status()->getCode() == 400 ){
-           return;
-        }
-
-        // then, add the request rate limit
-        $checkRateLimitEmail = $this->checkRateLimitResponse( $this->response, $this->request->param( 'email' ), '/api/app/user/forgot_password', 5 );
-        $checkRateLimitIp    = $this->checkRateLimitResponse( $this->response, Utils::getRealIpAddr(), '/api/app/user/forgot_password', 5 );
+        $checkRateLimitEmail = $this->checkRateLimitResponse( $this->response, $this->request->param( 'email' ) ?? "BLANK_EMAIL", '/api/app/user/forgot_password', 5 );
+        $checkRateLimitIp    = $this->checkRateLimitResponse( $this->response, Utils::getRealIpAddr() ?? "127.0.0.1", '/api/app/user/forgot_password', 5 );
 
         if ( $checkRateLimitIp instanceof Response ) {
             $this->response = $checkRateLimitIp;
@@ -167,86 +156,64 @@ class SignupController extends AbstractStatefulKleinController {
             return;
         }
 
-        $doForgotPassword = $this->doForgotPassword( $this->request->param( 'email' ), $this->request->param( 'wanted_url' ) );
+        $doForgotPassword = $this->doForgotPassword();
 
-        $this->incrementRateLimitCounter( $this->request->param( 'email' ), '/api/app/user/forgot_password' );
+        $this->incrementRateLimitCounter( $this->request->param( 'email' ) ?? "BLANK_EMAIL", '/api/app/user/forgot_password' );
+        $this->incrementRateLimitCounter( Utils::getRealIpAddr() ?? "127.0.0.1", '/api/app/user/forgot_password' );
 
-        $this->response->code( empty( $doForgotPassword ) ? 200 : 500 );
+        $this->response->code( $doForgotPassword['code'] );
         $this->response->json( [
                 'email'      => $this->request->param( 'email' ),
                 'wanted_url' => $this->request->param( 'wanted_url' ),
-                'errors'     => $doForgotPassword,
+                'errors'     => $doForgotPassword['errors'],
         ] );
     }
 
     /**
-     * @param $email
-     * @param $wanted_url
-     */
-    private function validateForgotPasswordRequest($email, $wanted_url) {
-        if(empty($email)){
-            $this->response->code( 400 );
-            $this->response->json( [
-                'error' => [
-                    'message' => '`email` is a mandatary field.'
-                ]
-            ] );
-
-            return;
-        }
-
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $this->response->code( 400 );
-            $this->response->json( [
-                'error' => [
-                    'message' => 'The email address is not valid'
-                ]
-            ] );
-
-            return;
-        }
-
-        if(empty($wanted_url)){
-            $this->response->code( 400 );
-            $this->response->json( [
-                'error' => [
-                    'message' => '`wanted_url` is a mandatary field.'
-                ]
-            ] );
-
-            return;
-        }
-
-        if (!filter_var($wanted_url, FILTER_VALIDATE_URL)) {
-            $this->response->code( 400 );
-            $this->response->json( [
-                'error' => [
-                    'message' => 'The wanted_url is not a valid URL.'
-                ]
-            ] );
-
-            return;
-        }
-    }
-
-    /**
-     * @param $email
-     * @param $wanted_url
      * @return array
      */
-    private function doForgotPassword($email, $wanted_url) {
+    private function doForgotPassword() {
 
-        $errors = [];
+        $email      = $this->request->param( 'email' );
+        $wanted_url = $this->request->param( 'wanted_url' );
+        $errors     = [];
+        $code       = 200;
 
-        try {
-            if ( !SignupModel::forgotPassword( $email, $wanted_url ) ) {
-                Log::doJsonLog( 'Failed attempt to recover password with email ' . $email );
-            }
-        } catch ( Exception $exception ) {
-            $errors[] = 'Error updating database.';
+        if ( !$email ) {
+            $errors[] = 'email is a mandatary field.';
+            $code = 400;
         }
 
-        return $errors;
+        if ( !$wanted_url ) {
+            $errors[] = 'wanted_url is a mandatary field.';
+            $code = 400;
+        }
+
+        if ( !filter_var( $email, FILTER_VALIDATE_EMAIL ) ) {
+            $errors[] = 'email is not valid.';
+            $code = 400;
+        }
+
+        if ( !filter_var( $wanted_url, FILTER_VALIDATE_URL ) ) {
+            $errors[] = 'wanted_url is not a valid URL.';
+            $code = 400;
+        }
+
+        if ( empty( $errors ) ) {
+            try {
+                if ( !SignupModel::forgotPassword( $email, $wanted_url ) ) {
+                    Log::doJsonLog( 'Failed attempt to recover password with email ' . $email );
+                }
+            } catch ( Exception $exception ) {
+                $errors[] = 'Error updating database.';
+                $code = $exception->getCode() > 0 ? $exception->getCode() : 500;
+            }
+        }
+
+        return [
+            'errors' => $errors,
+            'code' => $code,
+        ];
     }
 
 
