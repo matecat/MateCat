@@ -34,6 +34,10 @@ class ChangePasswordModel {
             throw new ValidationError( "Invalid password" );
         }
 
+        if ( $old_password === $new_password ) {
+            throw new ValidationError( "New password cannot be the same as your old password" );
+        }
+
         UserPasswordValidator::validatePassword( $new_password, $new_password_confirmation );
 
         $this->user->pass = Utils::encryptPass( $new_password, $this->user->salt );
