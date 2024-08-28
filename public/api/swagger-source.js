@@ -279,7 +279,7 @@ var spec = {
         parameters: [
           {
             name: 'id_project',
-            in: 'query',
+            in: 'path',
             description:
                 'The identifier of the project, should be the value returned by the /new method.',
             required: true,
@@ -287,7 +287,7 @@ var spec = {
           },
           {
             name: 'password',
-            in: 'query',
+            in: 'path',
             description:
                 'The password associated with the project, should be the value returned by the /new method ( associated with the id_project )',
             required: true,
