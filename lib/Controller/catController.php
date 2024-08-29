@@ -393,7 +393,6 @@ class catController extends viewController {
         $this->template->tagLockCustomizable  = ( INIT::$UNLOCKABLE_TAGS == true ) ? true : false;
         $this->template->maxNumSegments       = INIT::$MAX_NUM_SEGMENTS;
         $this->template->copySourceInterval   = INIT::$COPY_SOURCE_INTERVAL;
-        $this->template->time_to_edit_enabled = INIT::$TIME_TO_EDIT_ENABLED;
 
         /*
          * Line Feed PlaceHolding System

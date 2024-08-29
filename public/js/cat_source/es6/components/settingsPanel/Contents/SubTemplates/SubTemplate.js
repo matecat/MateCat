@@ -9,6 +9,7 @@ import {IconSave} from '../../../icons/IconSave'
 import {BUTTON_MODE, BUTTON_SIZE, Button} from '../../../common/Button/Button'
 import {flushSync} from 'react-dom'
 import CatToolActions from '../../../../actions/CatToolActions'
+import {isEqual} from 'lodash'
 
 export const SUBTEMPLATE_MODIFIERS = {
   CREATE: 'create',
@@ -27,6 +28,8 @@ export const SubTemplates = ({
   schema,
   propConnectProjectTemplate,
   getFilteredSchemaCreateUpdate,
+  getFilteredSchemaToCompare,
+  getModalTryingSaveIdenticalSettingsTemplate,
   createApi,
   updateApi,
   deleteApi,
@@ -89,7 +92,7 @@ export const SubTemplates = ({
   }
 
   const createTemplate = useRef()
-  createTemplate.current = () => {
+  createTemplate.current = async () => {
     if (
       templates.some(
         ({name}) => name.toLowerCase() === templateName.toLowerCase(),
@@ -109,6 +112,30 @@ export const SubTemplates = ({
       ...getFilteredSchemaCreateUpdate(currentTemplate),
       [schema.name]: templateName,
     }
+
+    // Check new template has identical settings to the another one already existing
+    const templatesIdenticalSettings =
+      /* eslint-disable no-unused-vars */
+      templates
+        .filter(({id}) => id !== currentTemplate.id)
+        .filter((template) => {
+          const comparableTemplate = getFilteredSchemaToCompare(template)
+          const comparableCurrentTemplate =
+            getFilteredSchemaToCompare(currentTemplate)
+
+          return isEqual(comparableTemplate, comparableCurrentTemplate)
+        })
+    /* eslint-enable no-unused-vars */
+    if (templatesIdenticalSettings.length) {
+      try {
+        await getModalTryingSaveIdenticalSettingsTemplate(
+          templatesIdenticalSettings,
+        )
+      } catch (error) {
+        return
+      }
+    }
+
     setIsRequestInProgress(true)
 
     createApi(newTemplate)
@@ -132,11 +159,34 @@ export const SubTemplates = ({
       .finally(() => setIsRequestInProgress(false))
   }
 
-  const updateTemplate = (updatedTemplate = currentTemplate) => {
+  const updateTemplate = async (updatedTemplate = currentTemplate) => {
     const modifiedTemplate = {
       ...getFilteredSchemaCreateUpdate(updatedTemplate),
       [schema.name]: updatedTemplate.name,
     }
+
+    const templatesIdenticalSettings =
+      /* eslint-disable no-unused-vars */
+      templates
+        .filter(({id}) => id !== currentTemplate.id)
+        .filter((template) => {
+          const comparableTemplate = getFilteredSchemaToCompare(template)
+          const comparableCurrentTemplate =
+            getFilteredSchemaToCompare(currentTemplate)
+
+          return isEqual(comparableTemplate, comparableCurrentTemplate)
+        })
+    /* eslint-enable no-unused-vars */
+    if (templatesIdenticalSettings.length) {
+      try {
+        await getModalTryingSaveIdenticalSettingsTemplate(
+          templatesIdenticalSettings,
+        )
+      } catch (error) {
+        return
+      }
+    }
+
     setIsRequestInProgress(true)
 
     updateApi({
@@ -259,6 +309,8 @@ SubTemplates.propTypes = {
   schema: PropTypes.object.isRequired,
   propConnectProjectTemplate: PropTypes.string.isRequired,
   getFilteredSchemaCreateUpdate: PropTypes.func.isRequired,
+  getFilteredSchemaToCompare: PropTypes.func.isRequired,
+  getModalTryingSaveIdenticalSettingsTemplate: PropTypes.func.isRequired,
   createApi: PropTypes.func.isRequired,
   updateApi: PropTypes.func.isRequired,
   deleteApi: PropTypes.func.isRequired,
