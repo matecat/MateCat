@@ -49,7 +49,6 @@ class Bootstrap {
         // Overridable defaults
         INIT::$ROOT                           = self::$_ROOT; // Accessible by Apache/PHP
         INIT::$BASEURL                        = "/"; // Accessible by the browser
-        INIT::$TIME_TO_EDIT_ENABLED           = false;
         INIT::$DEFAULT_NUM_RESULTS_FROM_TM    = 3;
         INIT::$THRESHOLD_MATCH_TM_NOT_TO_SHOW = 50;
         INIT::$TRACKING_CODES_VIEW_PATH       = INIT::$ROOT . "/lib/View";
