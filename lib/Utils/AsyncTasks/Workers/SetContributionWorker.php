@@ -31,9 +31,9 @@ class SetContributionWorker extends AbstractWorker {
     const ERR_NO_TM_ENGINE  = 5;
 
     /**
-     * @var Engines_EngineInterface
+     * @var ?Engines_EngineInterface
      */
-    protected Engines_EngineInterface $_engine;
+    protected ?Engines_EngineInterface $_engine = null;
 
     /**
      * This method is for testing purpose. Set a dependency injection
@@ -231,7 +231,7 @@ class SetContributionWorker extends AbstractWorker {
     protected function _raiseReQueueException( $type, array $config ) {
         //reset the engine
         $engineName    = get_class( $this->_engine );
-        $this->_engine = new Engines_NONE( [] );
+        $this->_engine = null;
 
         switch ( strtolower( $type ) ) {
             case 'update':
