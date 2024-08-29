@@ -10,6 +10,8 @@ import {LanguagesExceptions} from './LanguagesExceptions'
 import {BreakdownsTable} from './BreakdownsTable'
 import {SCHEMA_KEYS} from '../../../../hooks/useProjectTemplates'
 import CatToolActions from '../../../../actions/CatToolActions'
+import ModalsActions from '../../../../actions/ModalsActions'
+import {ConfirmDeleteResourceProjectTemplates} from '../../../modals/ConfirmDeleteResourceProjectTemplates'
 
 export const ANALYSIS_SCHEMA_KEYS = {
   id: 'id',
@@ -48,6 +50,25 @@ const getFilteredSchemaCreateUpdate = (template) => {
     isSelected,
     ...filtered
   } = template
+  /* eslint-enable no-unused-vars */
+  return filtered
+}
+
+const getFilteredSchemaToCompare = (template) => {
+  /* eslint-disable no-unused-vars */
+  const {
+    id,
+    uid,
+    version,
+    createdAt,
+    modifiedAt,
+    deletedAt,
+    payable_rate_template_name,
+    isTemporary,
+    isSelected,
+    ...filtered
+  } = template
+
   /* eslint-enable no-unused-vars */
   return filtered
 }
@@ -116,6 +137,24 @@ export const AnalysisTab = () => {
       position: 'br',
     })
   }
+
+  const getModalTryingSaveIdenticalSettingsTemplate = (templatesInvolved) =>
+    new Promise((resolve, reject) => {
+      ModalsActions.showModalComponent(
+        ConfirmDeleteResourceProjectTemplates,
+        {
+          projectTemplatesInvolved: templatesInvolved,
+          successCallback: () => resolve(),
+          cancelCallback: () => reject(),
+          content:
+            'The billing model you are trying to save has identical settings to the following billing model:',
+          footerContent:
+            'Please confirm that you want to save a billing model with the same settings as an existing billing model',
+        },
+        'Billing model',
+      )
+    })
+
   // retrieve billing model templates
   useEffect(() => {
     if (templates.length) return
@@ -188,6 +227,8 @@ export const AnalysisTab = () => {
             schema: ANALYSIS_SCHEMA_KEYS,
             propConnectProjectTemplate: SCHEMA_KEYS.payableRateTemplateId,
             getFilteredSchemaCreateUpdate,
+            getFilteredSchemaToCompare,
+            getModalTryingSaveIdenticalSettingsTemplate,
             createApi: createBillingModelTemplate,
             updateApi: updateBillingModelTemplate,
             deleteApi: deleteBillingModelTemplate,
