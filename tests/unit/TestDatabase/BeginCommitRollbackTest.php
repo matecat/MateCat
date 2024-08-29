@@ -33,7 +33,7 @@ class BeginCommitRollbackTest extends AbstractTest {
     protected $sql_insert_second_value;
     protected $sql_drop;
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
 
         $this->raw_client_instance = new PDO(
@@ -57,7 +57,7 @@ class BeginCommitRollbackTest extends AbstractTest {
         $this->raw_client_instance->query( $this->sql_create );
     }
 
-    public function tearDown() {
+    public function tearDown(): void {
         $this->raw_client_instance->query( $this->sql_drop );
         parent::tearDown();
     }
@@ -125,5 +125,5 @@ class BeginCommitRollbackTest extends AbstractTest {
         $this->assertEquals( $alfa_view_after_commit_state, $beta_view_after_commit_state );
 
     }
-    
+
 }

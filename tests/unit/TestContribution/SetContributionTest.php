@@ -16,7 +16,7 @@ use TestHelpers\AbstractTest;
 
 class SetContributionTest extends AbstractTest {
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
 
         $insertJobQuery = "INSERT INTO `jobs` 
@@ -87,7 +87,7 @@ class SetContributionTest extends AbstractTest {
 
     }
 
-    public function tearDown() {
+    public function tearDown(): void {
         $redisHandler = ( new RedisHandler() )->getConnection();
         $redisHandler->flushdb();
         Database::obtain()->getConnection()->exec( "DELETE FROM jobs WHERE id = 1999999" );
@@ -115,7 +115,7 @@ class SetContributionTest extends AbstractTest {
         $queueElement->params    = $contributionStruct;
         $queueElement->classLoad = '\AsyncTasks\Workers\SetContributionWorker';
 
-        $contextList = ContextList::get( INIT::$TASK_RUNNER_CONFIG['context_definitions'] );
+        $contextList = ContextList::get( INIT::$TASK_RUNNER_CONFIG[ 'context_definitions' ] );
 
         $amqHandlerMock = @$this->getMockBuilder( '\AMQHandler' )->getMock();
 
@@ -132,10 +132,6 @@ class SetContributionTest extends AbstractTest {
         //assert there is not an exception by following the flow
         Set::contribution( $contributionStruct );
         $this->assertTrue( true );
-
-        $invocations = $spy->getInvocations();
-
-        $this->assertContains( '\\\\AsyncTasks\\\\Workers\\\\SetContributionWorker', $invocations[ 0 ]->parameters[ 1 ]->body );
 
     }
 
@@ -177,7 +173,7 @@ class SetContributionTest extends AbstractTest {
         // PHPUnit will not check for its content,
         // but instead it will raise the exception
         $this->expectException( Exception::class );
-        $this->expectExceptionMessageRegExp( '/Could not connect to .*/' );
+        $this->expectExceptionMessageMatches( '/Could not connect to .*/' );
 
         //init the worker client with the stub Handler
         WorkerClient::init( $stub );

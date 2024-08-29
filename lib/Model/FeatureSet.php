@@ -1,7 +1,7 @@
 <?php
 
 use AbstractControllers\IController;
-use API\V2\Exceptions\AuthenticationError;
+use API\Commons\Exceptions\AuthenticationError;
 use Exceptions\ValidationError;
 use Features\BaseFeature;
 use Matecat\SubFiltering\Contracts\FeatureSetInterface;

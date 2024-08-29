@@ -987,7 +987,7 @@ var spec = {
               name: 'split_values',
               in: 'formData',
               description:
-                  'Number of word count values of each chunk returned in split check API',
+                'Number of word count values of each chunk returned in split check API',
               type: 'array',
               items: {type: 'double'},
             },
@@ -995,7 +995,7 @@ var spec = {
               name: 'split_raw_words',
               in: 'formData',
               description:
-                  'Split the job by raw words instead of equivalent words',
+                'Split the job by raw words instead of equivalent words',
               type: 'boolean',
             },
           ],
@@ -3966,25 +3966,25 @@ var spec = {
         equivalent: {
           type: 'object',
           properties: {
-            new: { type: 'number' },
-            draft: { type: 'number' },
-            translated: { type: 'number' },
-            approved: { type: 'number' },
-            approved2: { type: 'number' },
-            total: { type: 'number' },
+            new: {type: 'number'},
+            draft: {type: 'number'},
+            translated: {type: 'number'},
+            approved: {type: 'number'},
+            approved2: {type: 'number'},
+            total: {type: 'number'},
           },
         },
         raw: {
           type: 'object',
           properties: {
-            new: { type: 'number' },
-            draft: { type: 'number' },
-            translated: { type: 'number' },
-            approved: { type: 'number' },
-            approved2: { type: 'number' },
-            total: { type: 'number' },
+            new: {type: 'number'},
+            draft: {type: 'number'},
+            translated: {type: 'number'},
+            approved: {type: 'number'},
+            approved2: {type: 'number'},
+            total: {type: 'number'},
           },
-        }
+        },
       },
     },
 

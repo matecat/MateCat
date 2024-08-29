@@ -15,7 +15,7 @@ class PostProcessTest extends AbstractTest {
     /**
      * @throws \Exception
      */
-    public function setUp() {
+    public function setUp(): void {
 
         parent::setUp();
 
@@ -23,7 +23,7 @@ class PostProcessTest extends AbstractTest {
         $this->featureSet->loadFromString( "translation_versions,review_extended,mmt,airbnb" );
         //$featureSet->loadFromString( "project_completion,translation_versions,qa_check_glossary,microsoft" );
 
-        $this->filter = MateCatFilter::getInstance( $this->featureSet, 'en-EN','it-IT', [] );
+        $this->filter = MateCatFilter::getInstance( $this->featureSet, 'en-EN', 'it-IT', [] );
 
     }
 
@@ -206,8 +206,8 @@ SRC;
         $this->assertEquals( 1000, $warnings[ 0 ]->outcome );
 
         $this->assertCount( 1, $errors );
-        $this->assertAttributeEquals( 1000, 'outcome', $errors[ 0 ] );
-        $this->assertRegExp( '/\( 1 \)/', $check->getErrorsJSON() );
+        $this->assertEquals( 1000, $errors[ 0 ]->outcome );
+        $this->assertMatchesRegularExpression( '/\( 1 \)/', $check->getErrorsJSON() );
 
         $this->expectException( LogicException::class );
         $check->getTrgNormalized();

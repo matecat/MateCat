@@ -37,7 +37,7 @@ class GetByUidsUserTest extends AbstractTest {
     protected $uid_3;
 
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
         $this->database_instance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
         $this->user_Dao          = new Users_UserDao( $this->database_instance );
@@ -52,17 +52,17 @@ class GetByUidsUserTest extends AbstractTest {
          * 1st
          */
         $this->database_instance->getConnection()->query( $this->sql_insert_user_1 );
-        $this->uid_1 = $this->getTheLastInsertIdByQuery($this->database_instance);
+        $this->uid_1 = $this->getTheLastInsertIdByQuery( $this->database_instance );
         /**
          * 2nd
          */
         $this->database_instance->getConnection()->query( $this->sql_insert_user_2 );
-        $this->uid_2 = $this->getTheLastInsertIdByQuery($this->database_instance);
+        $this->uid_2 = $this->getTheLastInsertIdByQuery( $this->database_instance );
         /**
          * 3rd
          */
         $this->database_instance->getConnection()->query( $this->sql_insert_user_3 );
-        $this->uid_3 = $this->getTheLastInsertIdByQuery($this->database_instance);
+        $this->uid_3 = $this->getTheLastInsertIdByQuery( $this->database_instance );
 
 
         $this->sql_delete_user_1 = "DELETE FROM " . INIT::$DB_DATABASE . ".`users` WHERE uid='" . $this->uid_1 . "';";
@@ -72,7 +72,7 @@ class GetByUidsUserTest extends AbstractTest {
     }
 
 
-    public function tearDown() {
+    public function tearDown(): void {
 
         $this->database_instance->getConnection()->query( $this->sql_delete_user_1 );
         $this->database_instance->getConnection()->query( $this->sql_delete_user_2 );
@@ -107,7 +107,7 @@ class GetByUidsUserTest extends AbstractTest {
         $this->assertTrue( $user instanceof Users_UserStruct );
         $this->assertEquals( "{$this->uid_1}", $user->uid );
         $this->assertEquals( "bar_first@foo.net", $user->email );
-        $this->assertRegExp( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $user->create_date );
+        $this->assertMatchesRegularExpression( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $user->create_date );
         $this->assertEquals( "Bar_1", $user->first_name );
         $this->assertEquals( "Foo_1", $user->last_name );
         $this->assertEquals( 12345, $user->salt );
@@ -118,7 +118,7 @@ class GetByUidsUserTest extends AbstractTest {
         $this->assertTrue( $user instanceof Users_UserStruct );
         $this->assertEquals( "{$this->uid_2}", $user->uid );
         $this->assertEquals( "bar_second@foo.net", $user->email );
-        $this->assertRegExp( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $user->create_date );
+        $this->assertMatchesRegularExpression( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $user->create_date );
         $this->assertEquals( "Bar_2", $user->first_name );
         $this->assertEquals( "Foo_2", $user->last_name );
         $this->assertEquals( 1543, $user->salt );
@@ -130,7 +130,7 @@ class GetByUidsUserTest extends AbstractTest {
         $this->assertTrue( $user instanceof Users_UserStruct );
         $this->assertEquals( "{$this->uid_3}", $user->uid );
         $this->assertEquals( "bar_third@foo.net", $user->email );
-        $this->assertRegExp( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $user->create_date );
+        $this->assertMatchesRegularExpression( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $user->create_date );
         $this->assertEquals( "Bar_3", $user->first_name );
         $this->assertEquals( "Foo_3", $user->last_name );
         $this->assertEquals( 16785, $user->salt );

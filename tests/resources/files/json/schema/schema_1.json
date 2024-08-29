@@ -15,7 +15,9 @@
       }
     }
   },
-  "required": ["id"],
+  "required": [
+    "id"
+  ],
   "definitions": {
     "order": {
       "type": "object",
@@ -31,7 +33,9 @@
           "format": "date-time"
         }
       },
-      "required": ["id"]
+      "required": [
+        "id"
+      ]
     }
   }
 }

@@ -274,7 +274,7 @@ class SegmentFilterDao extends DataAccess_AbstractDao {
         }
 
         $thisDao = new self();
-        $stmt    = $thisDao->_getStatementForCache( $sql );
+        $stmt    = $thisDao->_getStatementForQuery( $sql );
 
         return $thisDao->_fetchObject( $stmt, new ShapelessConcreteStruct, $data );
     }

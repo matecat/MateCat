@@ -8,8 +8,8 @@
 
 namespace API\V2;
 
+use API\Commons\Validators\ChunkPasswordValidator;
 use API\V2\Json\SegmentTranslationIssue as JsonFormatter;
-use API\V2\Validators\ChunkPasswordValidator;
 use Chunks_ChunkStruct;
 
 class ChunkTranslationIssueController extends BaseChunkController {

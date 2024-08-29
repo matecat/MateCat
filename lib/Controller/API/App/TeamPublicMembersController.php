@@ -2,10 +2,10 @@
 
 namespace API\App;
 
+use API\Commons\KleinController;
+use API\Commons\Validators\LoginValidator;
+use API\Commons\Validators\TeamAccessValidator;
 use API\V2\Json\Membership;
-use API\V2\KleinController;
-use API\V2\Validators\LoginValidator;
-use API\V2\Validators\TeamAccessValidator;
 use Teams\MembershipDao;
 
 class TeamPublicMembersController extends KleinController {
@@ -18,9 +18,10 @@ class TeamPublicMembersController extends KleinController {
     /**
      * Get team members list
      */
-    public function publicList(){
+    public function publicList() {
         $memberships = ( new MembershipDao() )->setCacheTTL( 60 * 60 * 24 )->getMemberListByTeamId( $this->request->id_team );
-        $formatter = new Membership( $memberships ) ;
+        $formatter   = new Membership( $memberships );
         $this->response->json( $formatter->renderPublic() );
     }
+
 }

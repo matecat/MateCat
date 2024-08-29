@@ -11,8 +11,8 @@ namespace API\App;
 
 
 use API\App\Json\Ping;
-use API\V2\KleinController;
-use API\V2\Validators\WhitelistAccessValidator;
+use API\Commons\KleinController;
+use API\Commons\Validators\WhitelistAccessValidator;
 use INIT;
 use RuntimeException;
 

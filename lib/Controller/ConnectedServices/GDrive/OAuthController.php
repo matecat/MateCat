@@ -9,6 +9,7 @@
 namespace ConnectedServices\GDrive;
 
 use ConnectedServices\GDriveUserAuthorizationModel;
+use INIT;
 
 class OAuthController extends \BaseKleinViewController
 {
@@ -63,7 +64,7 @@ EOF;
             throw  new \Exception('Logged user not found.') ;
         }
 
-        $this->setView( \INIT::$TEMPLATE_ROOT . '/ConnectedServices/gdrive_oauth.html');
+        $this->setView( INIT::$TEMPLATE_ROOT . '/ConnectedServices/gdrive_oauth.html');
 
     }
 }

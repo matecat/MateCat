@@ -32,7 +32,7 @@ class CreateApyKeyTest extends AbstractTest {
     protected $database_instance;
     protected $actual_apikey;
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
         $this->database_instance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
 
@@ -52,7 +52,7 @@ class CreateApyKeyTest extends AbstractTest {
     }
 
 
-    public function tearDown() {
+    public function tearDown(): void {
 
         $this->database_instance->getConnection()->query( $this->sql_delete_apikey );
         $this->flusher = new Predis\Client( INIT::$REDIS_SERVERS );
@@ -81,8 +81,8 @@ class CreateApyKeyTest extends AbstractTest {
         $this->assertEquals( "1999", $result[ 'uid' ] );
         $this->assertEquals( "c4ca4238bar92382fake509a6f758foo", $result[ 'api_key' ] );
         $this->assertEquals( "api_secret", $result[ 'api_secret' ] );
-        $this->assertRegExp( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $result[ 'create_date' ] );
-        $this->assertRegExp( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $result[ 'last_update' ] );
+        $this->assertMatchesRegularExpression( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $result[ 'create_date' ] );
+        $this->assertMatchesRegularExpression( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $result[ 'last_update' ] );
         $this->assertEquals( '1', $result[ 'enabled' ] );
 
 

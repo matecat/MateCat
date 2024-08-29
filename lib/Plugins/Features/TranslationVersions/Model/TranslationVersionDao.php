@@ -3,11 +3,13 @@
 namespace Features\TranslationVersions\Model;
 
 use Chunks_ChunkStruct;
+use Constants;
 use DataAccess\ShapelessConcreteStruct;
 use DataAccess_AbstractDao;
 use DataAccess_IDaoStruct;
 use Database;
 use PDO;
+use QualityReport\SegmentEventsStruct;
 use Translations_SegmentTranslationStruct;
 use Utils;
 
@@ -103,13 +105,13 @@ class TranslationVersionDao extends DataAccess_AbstractDao {
      * @return TranslationVersionStruct[]
      */
     public static function getVersionsForTranslation( $id_job, $id_segment, $version_number = null ) {
-        $sql = "SELECT * FROM segment_translation_versions " .
+        $sql    = "SELECT * FROM segment_translation_versions " .
                 " WHERE id_job = :id_job AND id_segment = :id_segment ";
         $params = [ 'id_job' => $id_job, 'id_segment' => $id_segment ];
 
-        if($version_number !== null){
-            $sql .= ' AND version_number = :version_number';
-            $params['version_number'] = $version_number;
+        if ( $version_number !== null ) {
+            $sql                        .= ' AND version_number = :version_number';
+            $params[ 'version_number' ] = $version_number;
         }
 
         $sql .= " ORDER BY creation_date DESC ";
@@ -117,7 +119,7 @@ class TranslationVersionDao extends DataAccess_AbstractDao {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
 
-        $stmt->execute($params);
+        $stmt->execute( $params );
 
         $stmt->setFetchMode(
                 PDO::FETCH_CLASS,
@@ -243,6 +245,53 @@ class TranslationVersionDao extends DataAccess_AbstractDao {
     }
 
     /**
+     * @param array $segments_id
+     * @param int   $job_id
+     *
+     * @return SegmentEventsStruct[]
+     */
+    public function getAllRelevantEvents( array $segments_id, int $job_id ): array {
+
+        $db = Database::obtain()->getConnection();
+
+        $prepare_str_segments_id = implode( ', ', array_fill( 0, count( $segments_id ), '?' ) );
+
+        $query = "
+            SELECT
+                stv.id_segment,
+                stv.translation,
+                ste.version_number,
+                ste.source_page
+            FROM (
+                 SELECT id_segment, translation, version_number, id_job
+                 FROM segment_translation_versions
+                 WHERE id_segment IN ( $prepare_str_segments_id )
+                   AND id_job = ?
+                 UNION
+                 SELECT id_segment, translation, version_number, id_job
+                 FROM segment_translations
+                 WHERE id_segment IN ( $prepare_str_segments_id )
+                   AND id_job = ?
+            ) AS stv
+            JOIN (
+                   SELECT MAX(version_number) AS version_number, ste.id_segment, ste.source_page
+                   FROM segment_translation_events ste
+                   WHERE id_segment IN ( $prepare_str_segments_id )
+                     AND ste.id_job = ?
+                     AND IF( source_page > 1 , final_revision = 1 , source_page = 1 )
+                   GROUP BY id_segment, ste.source_page
+            ) AS ste ON stv.version_number = ste.version_number AND stv.id_segment = ste.id_segment;
+";
+
+        $stmt = $db->prepare( $query );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, SegmentEventsStruct::class );
+        $stmt->execute( array_merge( $segments_id, [ $job_id ], $segments_id, [ $job_id ], $segments_id, [ $job_id ] ) );
+
+        return $stmt->fetchAll();
+
+    }
+
+    /**
      * @param      $segments_id
      * @param      $job_id
      * @param null $source_page
@@ -253,54 +302,45 @@ class TranslationVersionDao extends DataAccess_AbstractDao {
 
         $db = Database::obtain()->getConnection();
 
-        $prepare_str_segments_id = str_repeat( ' ?, ', count( $segments_id ) - 1 ) . " ?";
+        $final_flag = "";
+        if ( $source_page > Constants::SOURCE_PAGE_TRANSLATE ) {
+            // when searching for revision, search for the final revision flag
+            $final_flag = " AND final_revision = 1 ";
+        }
+        $prepare_str_segments_id = implode( ', ', array_fill( 0, count( $segments_id ), '?' ) );
 
         $query = "SELECT 
-
-    stv.id_segment,
-    stv.translation,
-    ste.version_number
-
-    FROM
-        (
-            SELECT id_segment, translation, version_number, id_job
-            FROM segment_translation_versions
-            WHERE id_segment IN (
-                $prepare_str_segments_id
-            )
-            AND id_job = ?
-            UNION
-            SELECT id_segment, translation, version_number, id_job
-            FROM segment_translations
-            WHERE id_segment IN (
-                $prepare_str_segments_id
-            )
-            AND id_job = ?
-        ) stv
-    JOIN
-        (
-                SELECT
-                    MAX(version_number) AS version_number, ste.id_segment
-                FROM
-                    segment_translation_events ste
-
-                WHERE id_segment IN (
-                    $prepare_str_segments_id
-                )
-                AND ste.id_job = ?
-                AND ste.source_page = ?
-
-                GROUP BY id_segment
-
-        ) AS ste ON stv.version_number = ste.version_number AND stv.id_segment = ste.id_segment";
+                            stv.id_segment,
+                            stv.translation,
+                            ste.version_number
+                  FROM (
+                            SELECT id_segment, translation, version_number, id_job
+                            FROM segment_translation_versions
+                            WHERE id_segment IN ( $prepare_str_segments_id )
+                            AND id_job = ?
+                        UNION
+                            SELECT id_segment, translation, version_number, id_job
+                            FROM segment_translations
+                            WHERE id_segment IN ( $prepare_str_segments_id )
+                            AND id_job = ?
+                  ) AS stv
+                  JOIN (
+                        SELECT MAX(version_number) AS version_number, ste.id_segment
+                        FROM segment_translation_events ste
+                        WHERE id_segment IN ( $prepare_str_segments_id )
+                        AND ste.id_job = ?
+                        AND ste.source_page = ?
+                        $final_flag
+                        GROUP BY id_segment
+                  ) AS ste 
+                    ON stv.version_number = ste.version_number 
+                    AND stv.id_segment = ste.id_segment ";
 
         $stmt = $db->prepare( $query );
         $stmt->setFetchMode( PDO::FETCH_CLASS, '\DataAccess\ShapelessConcreteStruct' );
         $stmt->execute( array_merge( $segments_id, [ $job_id ], $segments_id, [ $job_id ], $segments_id, [ $job_id ], [ $source_page ] ) );
 
-        $results = $stmt->fetchAll();
-
-        return $results;
+        return $stmt->fetchAll();
 
 
     }

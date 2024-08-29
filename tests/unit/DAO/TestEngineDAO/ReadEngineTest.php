@@ -31,7 +31,7 @@ class ReadEngineTest extends AbstractTest {
     protected $database_instance;
     protected $actual;
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
         $this->database_instance   = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
         $this->engine_Dao          = new EnginesModel_EngineDAO( $this->database_instance );

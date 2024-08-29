@@ -42,7 +42,7 @@ class VerifyStatusTest extends AbstractTest {
         $method__verifyStatus = $mirror_word_counter->getMethod( '_verifyStatus' );
         $method__verifyStatus->setAccessible( true );
 
-        $this->setExpectedException( 'BadMethodCallException' );
+        $this->expectException( 'BadMethodCallException' );
         $method__verifyStatus->invoke( $word_counter, "BARANDFOO" );
     }
 }

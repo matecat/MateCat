@@ -1,12 +1,12 @@
 <?php
 
-use API\V2\Exceptions\AuthenticationError;
-use API\V2\Exceptions\AuthorizationError;
-use API\V2\Exceptions\ExternalServiceException;
-use API\V2\Exceptions\NotFoundException;
-use API\V2\Exceptions\UnprocessableException;
-use API\V2\Exceptions\ValidationError;
-use API\V2\Json\Error;
+use API\Commons\Error;
+use API\Commons\Exceptions\AuthenticationError;
+use API\Commons\Exceptions\AuthorizationError;
+use API\Commons\Exceptions\ExternalServiceException;
+use API\Commons\Exceptions\NotFoundException;
+use API\Commons\Exceptions\UnprocessableException;
+use API\Commons\Exceptions\ValidationError;
 use Exceptions\ValidationError as Model_ValidationError;
 use Klein\Klein;
 

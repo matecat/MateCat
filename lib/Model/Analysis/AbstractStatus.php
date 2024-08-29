@@ -9,7 +9,7 @@ use API\App\Json\Analysis\AnalysisJob;
 use API\App\Json\Analysis\AnalysisProject;
 use API\App\Json\Analysis\AnalysisProjectSummary;
 use API\App\Json\Analysis\MatchConstants;
-use API\V2\Exceptions\AuthenticationError;
+use API\Commons\Exceptions\AuthenticationError;
 use Chunks_ChunkDao;
 use Chunks_ChunkStruct;
 use Constants_ProjectStatus;

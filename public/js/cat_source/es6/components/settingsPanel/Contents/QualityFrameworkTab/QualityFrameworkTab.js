@@ -1,7 +1,10 @@
 import React, {useEffect, useRef, useContext, createContext} from 'react'
 import {SubTemplates} from '../SubTemplates'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
-import {getQualityFrameworkTemplates} from '../../../../api/getQualityFrameworkTemplates/getQualityFrameworkTemplates'
+import {
+  getQualityFrameworkTemplateDefault,
+  getQualityFrameworkTemplates,
+} from '../../../../api/getQualityFrameworkTemplates/getQualityFrameworkTemplates'
 import {EptThreshold} from './EptThreshold'
 import {createQualityFrameworkTemplate} from '../../../../api/createQualityFrameworkTemplate/createQualityFrameworkTemplate'
 import {updateQualityFrameworkTemplate} from '../../../../api/updateQualityFrameworkTemplate/updateQualityFrameworkTemplate'
@@ -117,7 +120,11 @@ export const QualityFrameworkTab = () => {
     let cleanup = false
 
     if (config.isLoggedIn === 1 && !config.is_cattool) {
-      getQualityFrameworkTemplates().then(({items}) => {
+      Promise.all([
+        getQualityFrameworkTemplateDefault(),
+        getQualityFrameworkTemplates(),
+      ]).then(([templateDefault, templates]) => {
+        const items = [templateDefault, ...templates.items]
         if (!cleanup) {
           const selectedTemplateId =
             items.find(({id}) => id === currentProjectTemplateQaId)?.id ?? 0

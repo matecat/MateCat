@@ -2,7 +2,7 @@
 
 namespace Projects;
 
-use API\V2\Exceptions\AuthorizationError;
+use API\Commons\Exceptions\AuthorizationError;
 use Constants_Teams;
 use Exceptions\ValidationError;
 use Features\QaCheckBlacklist\Utils\BlacklistUtils;

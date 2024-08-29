@@ -31,7 +31,7 @@ class ReadUserTest extends AbstractTest {
     protected $uid;
 
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
         $this->database_instance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
         $this->user_Dao          = new Users_UserDao( $this->database_instance );
@@ -41,13 +41,13 @@ class ReadUserTest extends AbstractTest {
          */
         $this->sql_insert_user = "INSERT INTO " . INIT::$DB_DATABASE . ".`users` (`uid`, `email`, `salt`, `pass`, `create_date`, `first_name`, `last_name` ) VALUES (NULL, 'barandfoo@translated.net', '666777888', 'bd40541bFAKE0cbar143033and731foo', '2016-04-29 18:06:42', 'Edoardo', 'BarAndFoo');";
         $this->database_instance->getConnection()->query( $this->sql_insert_user );
-        $this->uid = $this->getTheLastInsertIdByQuery($this->database_instance);
+        $this->uid = $this->getTheLastInsertIdByQuery( $this->database_instance );
 
         $this->sql_delete_user = "DELETE FROM " . INIT::$DB_DATABASE . ".`users` WHERE uid='" . $this->uid . "';";
 
     }
 
-    public function tearDown() {
+    public function tearDown(): void {
         $this->database_instance->getConnection()->query( $this->sql_delete_user );
         $this->flusher = new Predis\Client( INIT::$REDIS_SERVERS );
         $this->flusher->flushdb();
@@ -60,7 +60,7 @@ class ReadUserTest extends AbstractTest {
      */
     public function test_read_user_without_where_conditions() {
         $this->user_struct_param = Users_UserStruct::getStruct();
-        $this->setExpectedException( 'Exception' );
+        $this->expectException( 'Exception' );
         $this->user_Dao->setCacheTTL( 2 )->read( $this->user_struct_param );
 
     }
@@ -78,7 +78,7 @@ class ReadUserTest extends AbstractTest {
         $this->assertTrue( $user instanceof Users_UserStruct );
         $this->assertEquals( $this->uid, $user->uid );
         $this->assertEquals( "barandfoo@translated.net", $user->email );
-        $this->assertRegExp( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $user->create_date );
+        $this->assertMatchesRegularExpression( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $user->create_date );
         $this->assertEquals( "Edoardo", $user->first_name );
         $this->assertEquals( "BarAndFoo", $user->last_name );
         $this->assertNull( $user->salt );
@@ -98,7 +98,7 @@ class ReadUserTest extends AbstractTest {
         $this->assertTrue( $user instanceof Users_UserStruct );
         $this->assertEquals( $this->uid, $user->uid );
         $this->assertEquals( "barandfoo@translated.net", $user->email );
-        $this->assertRegExp( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $user->create_date );
+        $this->assertMatchesRegularExpression( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $user->create_date );
         $this->assertEquals( "Edoardo", $user->first_name );
         $this->assertEquals( "BarAndFoo", $user->last_name );
         $this->assertNull( $user->salt );
