@@ -57,7 +57,7 @@ class updateJobKeysController extends ajaxController {
         $this->received_password = $_postInput[ 'current_password' ];
         $this->job_id            = $_postInput[ 'job_id' ];
         $this->job_pass          = $_postInput[ 'job_pass' ];
-        $this->tm_keys           = $_postInput[ 'data' ]; // this will be filtered inside the TmKeyManagement class
+        $this->tm_keys           = CatUtils::sanitizeJSON($_postInput[ 'data' ]); // this will be filtered inside the TmKeyManagement class
         $this->only_private      = !$_postInput[ 'get_public_matches' ];
 
         //check for eventual errors on the input passed

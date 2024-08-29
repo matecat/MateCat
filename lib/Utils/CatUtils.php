@@ -1013,5 +1013,19 @@ class CatUtils {
 
         return $return;
     }
+
+    /**
+     * @param $json
+     * @return false|string
+     */
+    public static function sanitizeJSON($json)
+    {
+        $json = json_decode($json, true);
+        array_walk_recursive($json, function(&$item, $key){
+            $item = filter_var( $item, FILTER_SANITIZE_STRING );
+        });
+
+        return json_encode($json);
+    }
 }
 
