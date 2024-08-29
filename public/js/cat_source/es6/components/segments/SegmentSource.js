@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {createRef} from 'react'
 import Immutable from 'immutable'
 import {remove, cloneDeep, size, isUndefined} from 'lodash'
 import {CompositeDecorator, Editor, EditorState, Modifier} from 'draft-js'
@@ -22,6 +22,7 @@ import {TERM_FORM_FIELDS} from './SegmentFooterTabGlossary/SegmentFooterTabGloss
 import {getEntitiesSelected} from './utils/DraftMatecatUtils/manageCaretPositionNearEntity'
 import {UseHotKeysComponent} from '../../hooks/UseHotKeysComponent'
 import {flushSync} from 'react-dom'
+import CommonUtils from '../../utils/commonUtils'
 
 class SegmentSource extends React.Component {
   static contextType = SegmentContext
@@ -84,6 +85,8 @@ class SegmentSource extends React.Component {
       : 0
 
     this.delayAiAssistant
+
+    this.wasTripleClickTriggered = createRef()
   }
 
   getSearchParams = () => {
@@ -390,6 +393,11 @@ class SegmentSource extends React.Component {
       this.checkDecorators()
       this.updateSourceInStore()
     })
+
+    new CommonUtils.DetectTripleClick(
+      this.source,
+      () => (this.wasTripleClickTriggered.current = true),
+    )
   }
 
   componentWillUnmount() {
@@ -448,6 +456,24 @@ class SegmentSource extends React.Component {
       const entitiesSelected = getEntitiesSelected(editorState)
       SegmentActions.focusTags(entitiesSelected)
     }
+
+    // Select all triple click
+    if (this.wasTripleClickTriggered.current) {
+      const {editorState} = this.state
+      const contentState = editorState.getCurrentContent()
+
+      const selectAll = editorState.getSelection().merge({
+        anchorKey: contentState.getFirstBlock().getKey(),
+        anchorOffset: 0,
+        focusOffset: contentState.getLastBlock().getText().length,
+        focusKey: contentState.getLastBlock().getKey(),
+      })
+
+      const newEditorState = EditorState.forceSelection(editorState, selectAll)
+      this.setState({editorState: newEditorState})
+    }
+
+    this.wasTripleClickTriggered.current = false
   }
 
   refreshTagMap = () => {
