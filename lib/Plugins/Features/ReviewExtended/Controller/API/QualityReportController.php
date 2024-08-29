@@ -8,12 +8,13 @@
 
 namespace Features\ReviewExtended\Controller\API;
 
+use API\Commons\Validators\ChunkPasswordValidator;
 use API\V2\BaseChunkController;
-use API\V2\Validators\ChunkPasswordValidator;
 use Chunks_ChunkStruct;
+use Exception;
 use Features\ReviewExtended\Model\QualityReportModel;
 use Features\ReviewExtended\ReviewUtils;
-use Features\TranslationVersions\Model\TranslationEventDao;
+use Features\TranslationEvents\Model\TranslationEventDao;
 use Files\FilesInfoUtility;
 use INIT;
 use Projects_ProjectStruct;
@@ -56,6 +57,13 @@ class QualityReportController extends BaseChunkController {
     public function segments( $isForUI = false ) {
         $this->return404IfTheJobWasDeleted();
         $this->renderSegments( $isForUI );
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function segments_for_ui() {
+        $this->segments( true );
     }
 
     /**

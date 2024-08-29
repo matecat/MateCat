@@ -22,7 +22,7 @@ class GetUpdatedValueTest extends AbstractTest {
      */
     protected $word_count_struct;
 
-    public function setup() {
+    public function setUp(): void {
         parent::setUp();
         $this->job_id       = 9999; //sample
         $this->job_password = "bar999foo"; //sample

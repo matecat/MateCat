@@ -30,7 +30,7 @@ class CreateUserTest extends AbstractTest {
     protected $actual;
 
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
         $this->database_instance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
         $this->user_Dao          = new Users_UserDao( $this->database_instance );
@@ -60,7 +60,7 @@ class CreateUserTest extends AbstractTest {
     }
 
 
-    public function tearDown() {
+    public function tearDown(): void {
 
         $this->database_instance->getConnection()->query( $this->sql_delete_user );
         $this->flusher = new Predis\Client( INIT::$REDIS_SERVERS );
@@ -85,7 +85,7 @@ class CreateUserTest extends AbstractTest {
         $this->assertEquals( "barandfoo@translated.net", $result[ 'email' ] );
         $this->assertEquals( "801b32d6a9ce745", $result[ 'salt' ] );
         $this->assertEquals( "bd40541bFAKE0cbar143033and731foo", $result[ 'pass' ] );
-        $this->assertRegExp( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $result[ 'create_date' ] );
+        $this->assertMatchesRegularExpression( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $result[ 'create_date' ] );
         $this->assertEquals( "Edoardo", $result[ 'first_name' ] );
         $this->assertEquals( "BarAndFoo", $result[ 'last_name' ] );
         $this->assertNull( $result[ 'oauth_access_token' ] );

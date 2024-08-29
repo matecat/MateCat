@@ -2,7 +2,7 @@
 
 use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
-use API\V2\Exceptions\AuthenticationError;
+use API\Commons\Exceptions\AuthenticationError;
 use ConnectedServices\ConnectedServiceDao;
 use ConnectedServices\GDrive;
 use ConnectedServices\GDriveTokenVerifyModel;
@@ -670,7 +670,7 @@ class downloadFileController extends downloadController {
         if ( stripos( substr( $documentContent, 0, 100 ), "<?xml " ) === false ) {
 
             $is_utf8 = false;
-            list( $original_charset, $documentContent ) = CatUtils::convertEncoding( 'UTF-8', $documentContent );
+            [ $original_charset, $documentContent ] = CatUtils::convertEncoding( 'UTF-8', $documentContent );
 
         }
 
@@ -705,7 +705,7 @@ class downloadFileController extends downloadController {
         }
 
         if ( !$is_utf8 ) {
-            list( , $documentContent ) = CatUtils::convertEncoding( $original_charset, $documentContent );
+            [ , $documentContent ] = CatUtils::convertEncoding( $original_charset, $documentContent );
         }
 
         return $documentContent;

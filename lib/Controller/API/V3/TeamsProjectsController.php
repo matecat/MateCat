@@ -9,11 +9,11 @@
 namespace API\V3;
 
 
-use API\V2\Exceptions\NotFoundException;
+use API\Commons\Exceptions\NotFoundException;
+use API\Commons\KleinController;
+use API\Commons\Validators\LoginValidator;
+use API\Commons\Validators\TeamAccessValidator;
 use API\V2\Json\Project;
-use API\V2\KleinController;
-use API\V2\Validators\LoginValidator;
-use API\V2\Validators\TeamAccessValidator;
 use INIT;
 use Projects_ProjectDao;
 use Teams\TeamStruct;

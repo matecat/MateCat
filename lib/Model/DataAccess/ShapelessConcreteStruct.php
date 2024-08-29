@@ -32,7 +32,7 @@ class ShapelessConcreteStruct extends DataAccess_AbstractDaoObjectStruct impleme
         return $this->$name;
     }
 
-    public function getArrayCopy() {
+    public function getArrayCopy(): array {
         return (array)$this;
     }
 

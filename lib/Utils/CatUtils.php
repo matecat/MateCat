@@ -236,7 +236,7 @@ class CatUtils {
             $estimation_temp  = Translations_SegmentTranslationDao::getWordsPerSecond( $id_job, $last_10_worked_ids );
             $words_per_second = ( !empty( $estimation_temp[ 0 ][ 'words_per_second' ] ) ? $estimation_temp[ 0 ][ 'words_per_second' ] : 1 ); // avoid division by zero
 
-            $totalWordsToDo = $job_stats[ 'raw' ][ 'new' ] + $job_stats[ 'raw' ][ 'draft' ] + $job_stats[ 'raw' ][ 'rejected' ];
+            $totalWordsToDo = $job_stats[ 'raw' ][ 'new' ] + $job_stats[ 'raw' ][ 'draft' ] + ( $job_stats[ 'raw' ][ 'rejected' ] ?? 0 );
 
             $totalTimeSeconds = $totalWordsToDo / $words_per_second;
 
@@ -606,7 +606,7 @@ class CatUtils {
         Log::doJsonLog( $cmd );
 
         $file_info = shell_exec( $cmd );
-        list( , $charset ) = explode( "=", $file_info );
+        [ , $charset ] = explode( "=", $file_info );
         $charset = trim( $charset );
 
         if ( $charset == 'utf-16le' ) {
@@ -919,8 +919,8 @@ class CatUtils {
         $job = \Jobs_JobDao::getByIdAndPassword( $jobId, $jobPassword );
 
         if ( !$job ) {
-            /** @var ChunkReviewStruct $chunkReview */
-            $chunkReview = \Features\ReviewExtended\Model\ChunkReviewDao::findByReviewPasswordAndJobId( $jobPassword, $jobId );
+
+            $chunkReview = ChunkReviewDao::findByReviewPasswordAndJobId( $jobPassword, $jobId );
 
             if ( !$chunkReview ) {
                 return null;
@@ -997,19 +997,23 @@ class CatUtils {
      *
      * @return string
      */
-    public static function getUniqueName($string){
+    public static function getUniqueName( $string ) {
 
-        $a = explode("_", $string);
-        $end = (int)end($a);
-
-        if(($end > 0) and count($a)>1 ){
-            array_pop($a);
+        if ( empty( $string ) ) {
+            return Utils::randomString();
         }
 
-        $name = implode('_', $a);
+        $a   = explode( "_", $string );
+        $end = (int)end( $a );
+
+        if ( ( $end > 0 ) and count( $a ) > 1 ) {
+            array_pop( $a );
+        }
+
+        $name = implode( '_', $a );
 
         $return = $name;
-        $return .= '_'.($end+1);
+        $return .= '_' . ( $end + 1 );
 
         return $return;
     }

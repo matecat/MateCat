@@ -2,10 +2,11 @@
 
 namespace API\V2;
 
+use API\Commons\KleinController;
+use API\Commons\Validators\ProjectAccessValidator;
+use API\Commons\Validators\ProjectPasswordValidator;
 use API\V2\Json\Project;
 use API\V2\Json\ProjectAnonymous;
-use API\V2\Validators\ProjectAccessValidator;
-use API\V2\Validators\ProjectPasswordValidator;
 use Constants_JobStatus;
 use Exception;
 use Jobs_JobDao;

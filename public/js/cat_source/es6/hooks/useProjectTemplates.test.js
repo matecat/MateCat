@@ -14,9 +14,16 @@ global.config = {
 
 beforeEach(() => {
   mswServer.use(
-    http.get(`${config.basepath}api/v3/project-template/`, () => {
-      return HttpResponse.json(projectTemplatesMock)
-    }),
+    ...[
+      http.get(`${config.basepath}api/app/project-template/default`, () => {
+        return HttpResponse.json(projectTemplatesMock.items[0])
+      }),
+      http.get(`${config.basepath}api/v3/project-template/`, () => {
+        return HttpResponse.json({
+          items: projectTemplatesMock.items.filter(({id}) => id !== 0),
+        })
+      }),
+    ],
   )
 })
 

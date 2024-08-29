@@ -81,6 +81,15 @@ class QualityReport_QualityReportSegmentStruct extends DataAccess_AbstractDaoObj
 
     public $dataRefMap = [];
 
+    protected $tm_analysis_status;
+
+    /**
+     * @return mixed
+     */
+    public function getTmAnalysisStatus() {
+        return $this->tm_analysis_status;
+    }
+
     /**
      * @return float
      */
@@ -90,7 +99,7 @@ class QualityReport_QualityReportSegmentStruct extends DataAccess_AbstractDaoObj
     }
 
     public function isICEModified(){
-        return ( $this->getPEE() != 0 && $this->isICE() );
+        return ( $this->version_number != 0 && $this->isICE() );
     }
 
     public function isICE(){

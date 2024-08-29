@@ -7,10 +7,10 @@
     "lint": "eslint --ignore-path .gitignore .",
     "test": "jest --watchAll",
     "coverage": "jest --silent --coverage",
+    "prepare": "husky",
     "watch": "webpack --mode development --watch",
     "build:dev": "webpack --mode development",
-    "build:production": "webpack --mode production",
-    "prepare": "husky"
+    "build:production": "webpack --mode production"
   },
   "workspaces": [
     "plugins/*"

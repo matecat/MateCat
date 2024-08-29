@@ -1,7 +1,7 @@
 <?php
 
 use API\App\Json\PeeTableData;
-use API\V2\Validators\WhitelistAccessValidator;
+use API\Commons\Validators\WhitelistAccessValidator;
 
 class peeViewController extends viewController {
 

@@ -4,6 +4,8 @@
 namespace API\V2;
 
 
+use API\Commons\KleinController;
+
 class SupportedLanguagesController extends KleinController {
 
 

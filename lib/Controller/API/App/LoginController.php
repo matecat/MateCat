@@ -8,6 +8,7 @@
 
 namespace API\App;
 
+use API\Commons\AbstractStatefulKleinController;
 use AuthCookie;
 use CookieManager;
 use INIT;

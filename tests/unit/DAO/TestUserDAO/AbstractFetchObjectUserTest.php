@@ -43,7 +43,7 @@ class AbstractFetchObjectUserTest extends AbstractTest {
     protected $bindParams_param;
 
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
         $this->database_instance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
         $this->user_Dao          = new Users_UserDao( $this->database_instance );
@@ -69,7 +69,7 @@ class AbstractFetchObjectUserTest extends AbstractTest {
 
 
         $this->reflector                   = new ReflectionClass( $this->user_Dao );
-        $this->method_getStatementForCache = $this->reflector->getMethod( "_getStatementForCache" );
+        $this->method_getStatementForCache = $this->reflector->getMethod( "_getStatementForQuery" );
         $this->method_getStatementForCache->setAccessible( true );
         /**
          * Params
@@ -91,7 +91,7 @@ class AbstractFetchObjectUserTest extends AbstractTest {
 
     }
 
-    public function tearDown() {
+    public function tearDown(): void {
         $this->cache = new Predis\Client( INIT::$REDIS_SERVERS );
 
         $this->database_instance->getConnection()->query( $this->sql_delete_user );
@@ -158,7 +158,7 @@ class AbstractFetchObjectUserTest extends AbstractTest {
 
         $this->assertEquals( $this->uid, $result->uid );
         $this->assertEquals( "barandfoo@translated.net", $result->email );
-        $this->assertRegExp( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $result->create_date );
+        $this->assertMatchesRegularExpression( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $result->create_date );
         $this->assertEquals( "Edoardo", $result->first_name );
         $this->assertEquals( "BarAndFoo", $result->last_name );
         $this->assertNull( $result->salt );
@@ -204,7 +204,7 @@ class AbstractFetchObjectUserTest extends AbstractTest {
         $result = $wrapped_result[ '0' ];
 
         //we expect that the record will be fetched from database
-        $this->assertRegExp( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $result->create_date );
+        $this->assertMatchesRegularExpression( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $result->create_date );
         $this->assertNotEquals( "2016-04-29 00:00:00", $result->create_date );
 
     }

@@ -2,9 +2,9 @@
 
 namespace API\V2;
 
+use API\Commons\Validators\JobPasswordValidator;
+use API\Commons\Validators\SegmentValidator;
 use API\V2\Json\SegmentVersion as JsonFormatter;
-use API\V2\Validators\JobPasswordValidator;
-use API\V2\Validators\SegmentValidator;
 use Features\TranslationVersions\Model\TranslationVersionDao;
 
 
