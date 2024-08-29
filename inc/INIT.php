@@ -91,7 +91,6 @@ class INIT {
     public static $UTILS_ROOT;
     public static $DEFAULT_NUM_RESULTS_FROM_TM;
     public static $THRESHOLD_MATCH_TM_NOT_TO_SHOW;
-    public static $TIME_TO_EDIT_ENABLED;
     public static $AUTHSECRET;
     public static $AUTHSECRET_PATH;
     public static $REFERENCE_REPOSITORY;
@@ -252,7 +251,6 @@ class INIT {
     public static $OAUTH_SCOPES;
     public static $OAUTH_BROWSER_API_KEY;
 
-    public static $ENABLE_OMEGAT_DOWNLOAD = false;
     public static $UNLOCKABLE_TAGS        = false;
 
     public static $SKIP_SQL_CACHE = false;
