@@ -12,6 +12,8 @@
     },
  */
 
+import {SPACE_PLACEHOLDER_STORAGE_KEY} from '../../../../constants/Constants'
+
 const tagSignaturesMap = {
   ph: {
     type: 'ph',
@@ -252,7 +254,11 @@ const tagSignaturesMiddleware = (() => {
 })()
 
 const setTagSignatureMiddleware = tagSignaturesMiddleware.set
-
+// check space placeholder is active on init
+setTagSignatureMiddleware(
+  'space',
+  () => window.localStorage.getItem(SPACE_PLACEHOLDER_STORAGE_KEY) === 'true',
+)
 const tagSignatures = new Proxy(tagSignaturesMap, {
   getOwnPropertyDescriptor(target, prop) {
     const value = tagSignaturesMiddleware.callbacks[prop]?.(target[prop])
