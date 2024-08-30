@@ -80,7 +80,7 @@ class ChunkReviewModel implements IChunkReviewModel {
      *
      * @throws Exception
      */
-    public function updateChunkReviewCountersAndPassFail( int $penalty_points, int $reviewed_word_count, int $tte, Projects_ProjectStruct $projectStruct ){
+    public function updateChunkReviewCountersAndPassFail( float $penalty_points, int $reviewed_word_count, int $tte, Projects_ProjectStruct $projectStruct ){
         $data = [
                 'chunkReview'          => $this->chunk_review,
                 'penalty_points'       => $penalty_points,
