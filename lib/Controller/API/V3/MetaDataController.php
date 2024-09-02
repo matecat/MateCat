@@ -2,8 +2,8 @@
 
 namespace API\V3;
 
+use API\Commons\Exceptions\NotFoundException;
 use API\V2\BaseChunkController;
-use API\V2\Exceptions\NotFoundException;
 use Jobs\MetadataDao;
 use Jobs_JobStruct;
 use Projects_ProjectStruct;

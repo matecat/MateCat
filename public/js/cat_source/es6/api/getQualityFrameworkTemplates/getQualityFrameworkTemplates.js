@@ -21,3 +21,25 @@ export const getQualityFrameworkTemplates = async () => {
 
   return data
 }
+
+/**
+ * Return default QA template
+ *
+ * @returns {Promise<object>}
+ */
+export const getQualityFrameworkTemplateDefault = async () => {
+  const response = await fetch(
+    `${getMatecatApiDomain()}api/app/qa_model_template/default`,
+    {
+      method: 'GET',
+      credentials: 'include',
+    },
+  )
+
+  if (!response.ok) return Promise.reject(response)
+
+  const {errors, ...data} = await response.json()
+  if (errors && errors.length > 0) return Promise.reject(errors)
+
+  return data
+}

@@ -3,6 +3,7 @@
 namespace ConnectedServices\Factory;
 
 use ConnectedServices\Google\GoogleClientLogsFormatter;
+use INIT;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 
@@ -34,9 +35,9 @@ abstract class AbstractGoogleClientFactory {
 
         $client = new \Google_Client();
 
-        $client->setApplicationName( \INIT::$OAUTH_CLIENT_APP_NAME );
-        $client->setClientId( \INIT::$OAUTH_CLIENT_ID );
-        $client->setClientSecret( \INIT::$OAUTH_CLIENT_SECRET );
+        $client->setApplicationName( INIT::$OAUTH_CLIENT_APP_NAME );
+        $client->setClientId( INIT::$OAUTH_CLIENT_ID );
+        $client->setClientSecret( INIT::$OAUTH_CLIENT_SECRET );
         $client->setRedirectUri( $redirectUri );
         $client->setScopes( static::$OAUTH_SCOPES );
         $client->setAccessType( "offline" );
@@ -65,6 +66,6 @@ abstract class AbstractGoogleClientFactory {
      * @return string
      */
     private static function logFilePath() {
-        return \INIT::$LOG_REPOSITORY . '/' . self::$LOGGER_NAME . '.log';
+        return INIT::$LOG_REPOSITORY . '/' . self::$LOGGER_NAME . '.log';
     }
 }

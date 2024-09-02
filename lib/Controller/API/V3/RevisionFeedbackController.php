@@ -2,9 +2,9 @@
 
 namespace API\V3;
 
+use API\Commons\Exceptions\NotFoundException;
+use API\Commons\Validators\ChunkPasswordValidator;
 use API\V2\BaseChunkController;
-use API\V2\Exceptions\NotFoundException;
-use API\V2\Validators\ChunkPasswordValidator;
 use Chunks_ChunkStruct;
 use Revise\FeedbackDAO;
 use Revise\FeedbackStruct;

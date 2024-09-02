@@ -3,8 +3,8 @@
 namespace API\V1;
 
 
-use API\V2\KleinController;
-use API\V2\Validators\ChunkPasswordValidator;
+use API\Commons\KleinController;
+use API\Commons\Validators\ChunkPasswordValidator;
 use CatUtils;
 use Chunks_ChunkStruct;
 use WordCount\WordCountStruct;

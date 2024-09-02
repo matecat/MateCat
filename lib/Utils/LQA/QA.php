@@ -2,7 +2,7 @@
 
 namespace LQA;
 
-use API\V2\Exceptions\AuthenticationError;
+use API\Commons\Exceptions\AuthenticationError;
 use CatUtils;
 use Chunks_ChunkStruct;
 use DOMDocument;
@@ -432,8 +432,8 @@ class QA {
      * @param array $errorMap
      */
     public function addCustomError( array $errorMap ) {
-        $this->_errorMap[ $errorMap[ 'code' ] ] = $errorMap[ 'debug' ];
-        $this->_tipMap[ $errorMap[ 'code' ] ]   = $errorMap[ 'tip' ];
+        $this->_errorMap[ $errorMap[ 'code' ] ] = $errorMap[ 'debug' ] ?? null;
+        $this->_tipMap[ $errorMap[ 'code' ] ]   = $errorMap[ 'tip' ] ?? null;
     }
 
     protected static $asciiPlaceHoldMap = [
@@ -2231,26 +2231,8 @@ class QA {
     protected
     function _queryDOMElement( DOMDocument $domDoc, $TagReference ) {
 
-        //Old implementation
-//        $availableParentList = $domDoc->getElementsByTagName( $TagReference[ 'name' ] );
-//        $availableParentsLen = $availableParentList->length;
-//
-//        for ( $i = 0; $i < $availableParentsLen; $i++ ) {
-//
-//            $element = $availableParentList->item( $i );
-//            if ( $element->getAttribute( 'id' ) == $TagReference[ 'id' ] ) {
-//
-//                /**
-//                 * @var DOMElement $Node
-//                 */
-//                $Node = $element;
-//
-//                Log::doJsonLog( 'Found: ' . $availableParentList->item($i)->textContent );
-//            }
-//        }
-
         $xpath = new DOMXPath( $domDoc );
-        $query = '//*[@id="' . $TagReference[ 'id' ] . '"]';
+        $query = '//*[@id="' . ( $TagReference[ 'id' ] ?? '' ) . '"]';
 
         $Node = $xpath->query( $query );
 
@@ -2622,7 +2604,7 @@ class QA {
             return true;
         }
 
-        $limit = Segments_SegmentMetadataDao::get( $segmentId, self::SIZE_RESTRICTION ) ?? null;
+        $limit = Segments_SegmentMetadataDao::get( $segmentId, self::SIZE_RESTRICTION )[ 0 ] ?? null;
 
         if ( $limit ) {
 

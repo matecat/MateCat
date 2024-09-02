@@ -2,6 +2,7 @@
 
 namespace API\App;
 
+use API\Commons\AbstractStatefulKleinController;
 use CatUtils;
 use TmKeyManagement\UserKeysModel;
 use TmKeyManagement_ClientTmKeyStruct;

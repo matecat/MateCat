@@ -73,6 +73,20 @@ class userKeysController extends ajaxController {
             $this->result[ 'success' ]  = false;
         }
 
+        // Prevent XSS attack
+        // ===========================
+        // POC. Try to add this string in the input:
+        // <details x=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx:2 open ontoggle="prompt(document.cookie);">
+        // in this case, an error MUST be thrown
+
+        if($_POST['description'] !== $this->description){
+            $this->result[ 'errors' ][] = array(
+                'code'    => -3,
+                'message' => "Invalid key description"
+            );
+            $this->result[ 'success' ]  = false;
+        }
+
         if ( array_search( $this->exec, self::$allowed_exec ) === false ) {
             $this->result[ 'errors' ][] = array(
                     'code'    => -5,

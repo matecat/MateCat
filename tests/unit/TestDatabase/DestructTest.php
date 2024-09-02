@@ -12,11 +12,11 @@ use TestHelpers\AbstractTest;
  */
 class DestructTest extends AbstractTest {
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
     }
 
-    public function tearDown() {
+    public function tearDown(): void {
         parent::tearDown();
     }
 
@@ -32,7 +32,7 @@ class DestructTest extends AbstractTest {
         $instance_to_destruct->connect();
 
         $reflector = new ReflectionClass( $instance_to_destruct );
-        $method = $reflector->getMethod( "__destruct" );
+        $method    = $reflector->getMethod( "__destruct" );
         $method->invoke( $instance_to_destruct );
 
         $connection = $reflector->getProperty( 'connection' );

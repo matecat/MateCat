@@ -9,16 +9,17 @@
 class RecursiveArrayObject extends ArrayObject {
 
     /**
-     * overwrites the ArrayObject constructor for
+     * Overwrites the ArrayObject constructor for
      * iteration through the "array". When the item
      * is an array, it creates another static() instead
      * of an array
      *
-     * @param array $array
-     * @param int  $flag
-     * @param string  $iteratorClass
+     * @param array  $array
+     * @param int    $flag
+     * @param string $iteratorClass
      */
-    public function __construct( Array $array = array(), $flag = 0, $iteratorClass = 'ArrayIterator' ) {
+    public function __construct( array $array = [], $flag = 0, $iteratorClass = ArrayIterator::class ) {
+        parent::__construct( [], $flag, $iteratorClass );
         foreach ( $array as $key => $value ) {
             if ( is_array( $value ) ) {
                 $value = new static( $value, $flag, $iteratorClass );

@@ -10,7 +10,8 @@
 namespace API\App;
 
 
-use API\V2\Exceptions\AuthorizationError;
+use API\Commons\AbstractStatefulKleinController;
+use API\Commons\Exceptions\AuthorizationError;
 use Outsource\ConfirmationDao;
 use Outsource\TranslatedConfirmationStruct;
 use Translators\TranslatorsModel;

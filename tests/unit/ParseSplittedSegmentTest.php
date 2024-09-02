@@ -22,7 +22,7 @@ class ParseSplittedSegmentTest extends AbstractTest {
     /**
      * @throws \Exception
      */
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
     }
 
@@ -33,7 +33,7 @@ class ParseSplittedSegmentTest extends AbstractTest {
 
         $request = [ "123-1", "123-2", "234", "ciao", "567", "536", "244" ];
 
-        foreach( $request as $pos => $integer ) {
+        foreach ( $request as $pos => $integer ) {
             $result = (int)$integer;
             if ( empty( $result ) ) {
                 unset( $request[ $pos ] );
@@ -41,7 +41,7 @@ class ParseSplittedSegmentTest extends AbstractTest {
             }
             $request[ $pos ] = $result;
         }
-        $segments_id   = array_unique( $request );
+        $segments_id = array_unique( $request );
 
         $this->assertEquals( [ 123, 234, 567, 536, 244 ], array_values( $segments_id ) );
 

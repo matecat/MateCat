@@ -9,6 +9,7 @@
 
 namespace TaskRunner\Commons;
 
+use AMQHandler;
 use Exception;
 use INIT;
 use Log;
@@ -25,6 +26,11 @@ use Log;
 abstract class AbstractDaemon {
 
     use SignalHandlerTrait;
+
+    /**
+     * @var AMQHandler|null
+     */
+    protected ?AMQHandler $queueHandler;
 
     /**
      * Flag for control the instance running status. Setting to false cause the daemon to stop.
@@ -47,12 +53,32 @@ abstract class AbstractDaemon {
     protected static int $sleepTime = 2;
 
     /**
+     * @var string
+     */
+    protected string $_configFile;
+
+    /**
+     * Optional context index on which the task runner works
+     *
+     * @var string|null
+     */
+    protected ?string $_contextIndex;
+
+    /**
+     * Context list definitions
+     *
+     * @var ContextList
+     */
+    protected $_queueContextList = [];
+
+    /**
      * AbstractDaemon constructor.
      *
      * @param ?string $configFile
      * @param ?string $contextIndex
      */
     protected function __construct( string $configFile = null, string $contextIndex = null ) {
+        INIT::$PRINT_ERRORS = true;
         $this->myProcessPid = posix_getpid();
     }
 
@@ -105,5 +131,12 @@ abstract class AbstractDaemon {
      * @throws Exception
      */
     abstract protected function _updateConfiguration(): void;
+
+    /**
+     * @throws Exception
+     */
+    public function getConfiguration(): Configuration {
+        return new Configuration( $this->_configFile, $this->_contextIndex );
+    }
 
 }

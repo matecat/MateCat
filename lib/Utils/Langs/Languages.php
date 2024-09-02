@@ -140,7 +140,7 @@ class Langs_Languages {
      * http://www.w3.org/International/articles/language-tags/
      */
     public function getLangRegionCode( $localizedName ) {
-        @$value = self::$map_rfc2obj[ self::$map_string2rfc[ $localizedName ] ][ 'languageRegionCode' ];
+        $value = self::$map_rfc2obj[ self::$map_string2rfc[ $localizedName ] ][ 'languageRegionCode' ] ?? null;
         if ( empty( $value ) ) {
             $value = $this->get3066Code( $localizedName );
         }
