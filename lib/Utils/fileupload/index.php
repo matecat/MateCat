@@ -13,11 +13,11 @@ error_reporting(E_ALL | E_STRICT);
 
 ini_set('max_input_time',3600);
 
-require realpath( dirname(__FILE__) . '/../../../' ) . '/inc/Bootstrap.php';
+require_once realpath( dirname(__FILE__) . '/../../../' ) . '/inc/Bootstrap.php';
 @Bootstrap::start();
 @Bootstrap::sessionStart();
 @Bootstrap::sessionClose();
-require('upload.class.php');
+require_once('upload.class.php');
 
 $upload_handler = new UploadHandler();
 

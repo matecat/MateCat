@@ -26,7 +26,7 @@ class TmxImportMyMemoryTest extends AbstractTest {
 
     protected $resource;
 
-    public function tearDown() {
+    public function tearDown(): void {
         if ( is_resource( $this->resource ) ) {
             fclose( $this->resource );
         }
@@ -95,20 +95,20 @@ class TmxImportMyMemoryTest extends AbstractTest {
         /**
          * Getting Status
          */
-        $ready      = false;
-        $time       = 0;
+        $ready = false;
+        $time  = 0;
         while ( ( !$ready ) && ( $time < 100 ) ) {
             usleep( 500000 );//0.5 sec
             $time++;
             $importResult = $engine_MyMemory->getStatus( $result->id );
-            if( $importResult->responseData[ 'status' ] == 1 ){
+            if ( $importResult->responseData[ 'status' ] == 1 ) {
                 $ready = true;
             }
         }
 
         $this->assertTrue( $importResult instanceof Engines_Results_MyMemory_TmxResponse );
         $this->assertTrue( Utils::isTokenValid( $importResult->id ) );
-        $this->assertEquals( $importResult->id , $importResult->id );
+        $this->assertEquals( $importResult->id, $importResult->id );
         $this->assertEquals( 200, $importResult->responseStatus );
         $this->assertEquals( "", $importResult->responseDetails );
         $this->assertCount( 9, $importResult->responseData );

@@ -46,11 +46,11 @@ class UpdateDBTest extends AbstractTest {
     protected $second_half_of_number;
 
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
         $this->first_half_of_number    = "4";
         $this->second_half_of_number   = "11";
-        $sum_of_numbers                = (int)$this->first_half_of_number + (int)$this->second_half_of_number;
+        $sum_of_numbers                = number_format( (int)$this->first_half_of_number + (int)$this->second_half_of_number, 2 );
         $this->number_of_words_changed = "{$sum_of_numbers}";
         $this->database_instance       = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
 
@@ -148,7 +148,7 @@ class UpdateDBTest extends AbstractTest {
 
     }
 
-    public function tearDown() {
+    public function tearDown(): void {
         $this->database_instance->getConnection()->query( $this->sql_delete_job );
         $this->database_instance->getConnection()->query( $this->sql_delete_first_segment );
         $this->flusher->select( INIT::$INSTANCE_ID );

@@ -4,7 +4,6 @@ import SegmentActions from '../actions/SegmentActions'
 import SegmentStore from '../stores/SegmentStore'
 import AlertModal from '../components/modals/AlertModal'
 import ModalsActions from '../actions/ModalsActions'
-import {JOB_WORD_CONT_TYPE} from '../constants/Constants'
 
 const CommonUtils = {
   millisecondsToTime(milli) {
@@ -584,17 +583,40 @@ class DetectTripleClick {
     target.addEventListener('mousedown', this.handler)
   }
 
-  handler = () => {
+  handler = (e) => {
     this.count++
 
-    if (this.count == 3) {
-      this.callback()
+    if (this.count === 3) {
+      const {focusNode} = window.getSelection()
+      const rect = focusNode?.parentNode?.getBoundingClientRect()
+      const selectionWidth = this.getSelectionWidth()
+      const limitLeft =
+        typeof selectionWidth === 'object' ? selectionWidth.x : rect.x
+      const limitRight =
+        typeof selectionWidth === 'object'
+          ? rect.x + (selectionWidth.width + (selectionWidth.x - rect.x))
+          : rect.x + rect.width
+
+      if (e.clientX >= limitLeft && e.clientX <= limitRight) this.callback()
+
       this.reset()
       return
     }
 
     clearTimeout(this.tmOut)
     this.tmOut = setTimeout(() => this.reset(), 500)
+  }
+
+  getSelectionWidth = () => {
+    const selection = window.getSelection()
+    if (selection.rangeCount) {
+      const range = selection.getRangeAt(0).cloneRange()
+      if (range.getBoundingClientRect) {
+        var rect = range.getBoundingClientRect()
+        const width = rect.right - rect.left
+        return {width, x: rect.left}
+      }
+    }
   }
 
   reset() {

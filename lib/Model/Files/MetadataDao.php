@@ -24,7 +24,7 @@ class MetadataDao extends DataAccess_AbstractDao {
      * @return DataAccess_IDaoStruct[]
      */
     public function getByJobIdProjectAndIdFile( $id_project, $id_file, $ttl = 0 ) {
-        $stmt = $this->_getStatementForCache(
+        $stmt = $this->_getStatementForQuery(
                 "SELECT * FROM " . self::TABLE . " WHERE " .
                 " id_project = :id_project " .
                 " AND id_file = :id_file "
@@ -66,7 +66,7 @@ class MetadataDao extends DataAccess_AbstractDao {
             $params[ 'files_parts_id' ] = $filePartsId;
         }
 
-        $stmt           = $this->_getStatementForCache( $query );
+        $stmt           = $this->_getStatementForQuery( $query );
 
         /** @var $metadataStruct MetadataStruct[] */
         $metadataStruct = $this->setCacheTTL( $ttl )->_fetchObject( $stmt, new MetadataStruct(), $params );

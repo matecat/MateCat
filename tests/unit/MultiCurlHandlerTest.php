@@ -10,7 +10,6 @@ use TestHelpers\AbstractTest;
  * Time: 15.31
  *
  */
-
 class MultiCurlHandlerTest extends AbstractTest {
 
     public function testInstance() {
@@ -18,14 +17,14 @@ class MultiCurlHandlerTest extends AbstractTest {
         $this->assertInstanceOf( 'MultiCurlHandler', $mh );
     }
 
-    public function testCreateSingle(){
+    public function testCreateSingle() {
 
-        $options = array(
-                CURLOPT_HEADER => false,
+        $options = [
+                CURLOPT_HEADER         => false,
                 CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_USERAGENT => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
+                CURLOPT_USERAGENT      => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
                 CURLOPT_CONNECTTIMEOUT => 2
-        );
+        ];
 
         $mh = new MultiCurlHandler();
 
@@ -46,13 +45,13 @@ class MultiCurlHandlerTest extends AbstractTest {
 
     public function testAddSingle() {
 
-        $options = array(
-                CURLOPT_URL => 'http://www.google.com/',
-                CURLOPT_HEADER => false,
+        $options = [
+                CURLOPT_URL            => 'http://www.google.com/',
+                CURLOPT_HEADER         => false,
                 CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_USERAGENT => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
+                CURLOPT_USERAGENT      => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
                 CURLOPT_CONNECTTIMEOUT => 2
-        );
+        ];
 
         $ch = curl_init();
         curl_setopt_array( $ch, $options );
@@ -73,17 +72,17 @@ class MultiCurlHandlerTest extends AbstractTest {
 
     }
 
-    public function testMultipleCurlCreate(){
+    public function testMultipleCurlCreate() {
 
-        $options = array(
-                CURLOPT_HEADER => false,
+        $options = [
+                CURLOPT_HEADER         => false,
                 CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_USERAGENT => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
+                CURLOPT_USERAGENT      => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
                 CURLOPT_CONNECTTIMEOUT => 2
-        );
+        ];
 
-        $mh = new MultiCurlHandler();
-        $hashes = array();
+        $mh     = new MultiCurlHandler();
+        $hashes = [];
 
         $tokenHash1 = $mh->createResource( 'http://www.google.com/', $options );
         $this->assertNotEmpty( $tokenHash1 );
@@ -103,13 +102,13 @@ class MultiCurlHandlerTest extends AbstractTest {
 
         $mh->multiExec();
 
-        $multiContent  = $mh->getAllContents();
+        $multiContent = $mh->getAllContents();
         $this->assertNotEmpty( $multiContent );
 
         $singleContent = $mh->getSingleContent( $tokenHash2 );
         $this->assertNotEmpty( $singleContent );
 
-        foreach( $multiContent as $hash => $result ){
+        foreach ( $multiContent as $hash => $result ) {
             $this->assertEquals( $mh->getSingleContent( $hash ), $result );
         }
 

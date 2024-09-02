@@ -45,7 +45,7 @@ class AbstractFetchObjectJobTest extends AbstractTest {
     protected $bindParams_param;
 
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
         $this->database_instance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
         $this->job_Dao           = new Jobs_JobDao( $this->database_instance );
@@ -110,13 +110,13 @@ class AbstractFetchObjectJobTest extends AbstractTest {
 
 
         $this->reflector                   = new ReflectionClass( $this->job_Dao );
-        $this->method_getStatementForCache = $this->reflector->getMethod( "_getStatementForCache" );
+        $this->method_getStatementForCache = $this->reflector->getMethod( "_getStatementForQuery" );
         $this->method_getStatementForCache->setAccessible( true );
         /**
          * Params
          */
 
-        $this->stmt_param = $this->method_getStatementForCache->invokeArgs( $this->job_Dao, [ null ] );
+        $this->stmt_param = $this->method_getStatementForCache->invokeArgs( $this->job_Dao, [ "select * from jobs where id = :id_job and password = :password limit 1" ] );
 
 
         $this->fetchClass_param           = new \Jobs_JobStruct();
@@ -130,7 +130,7 @@ class AbstractFetchObjectJobTest extends AbstractTest {
 
     }
 
-    public function tearDown() {
+    public function tearDown(): void {
         $this->cache = new Predis\Client( INIT::$REDIS_SERVERS );
 
         $this->database_instance->getConnection()->query( $this->sql_delete_job );
@@ -205,8 +205,8 @@ class AbstractFetchObjectJobTest extends AbstractTest {
         $this->assertEquals( "182655204", $result->last_opened_segment );
         $this->assertEquals( "1", $result->id_tms );
         $this->assertEquals( "1", $result->id_mt_engine );
-        $this->assertRegExp( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $result->create_date );
-        $this->assertRegExp( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $result->last_update );
+        $this->assertMatchesRegularExpression( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $result->create_date );
+        $this->assertMatchesRegularExpression( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $result->last_update );
         $this->assertEquals( "0", $result->disabled );
         $this->assertEquals( "barandfoo@translated.net", $result->owner );
         $this->assertEquals( "active", $result->status_owner );
@@ -240,7 +240,7 @@ class AbstractFetchObjectJobTest extends AbstractTest {
          */
 
 
-        $mock_job_Dao = $this->getMockBuilder( '\Jobs_JobDao' )
+        $mock_job_Dao = @$this->getMockBuilder( '\Jobs_JobDao' )
                 ->setConstructorArgs( [ $this->database_instance ] )
                 ->setMethods( [ '_setInCache' ] )
                 ->getMock();
@@ -274,8 +274,8 @@ class AbstractFetchObjectJobTest extends AbstractTest {
         $this->assertEquals( "182655204", $result->last_opened_segment );
         $this->assertEquals( "1", $result->id_tms );
         $this->assertEquals( "1", $result->id_mt_engine );
-        $this->assertRegExp( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $result->create_date );
-        $this->assertRegExp( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $result->last_update );
+        $this->assertMatchesRegularExpression( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $result->create_date );
+        $this->assertMatchesRegularExpression( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $result->last_update );
         $this->assertEquals( "0", $result->disabled );
         $this->assertEquals( "barandfoo@translated.net", $result->owner );
         $this->assertEquals( "active", $result->status_owner );

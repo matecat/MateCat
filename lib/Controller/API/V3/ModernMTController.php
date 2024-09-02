@@ -2,8 +2,8 @@
 
 namespace API\V3;
 
+use API\Commons\Validators\LoginValidator;
 use API\V2\BaseChunkController;
-use API\V2\Validators\LoginValidator;
 use CURLFile;
 use Engines_MMT;
 use Exception;

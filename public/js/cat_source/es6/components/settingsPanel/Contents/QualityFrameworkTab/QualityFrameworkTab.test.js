@@ -45,9 +45,16 @@ const WrapperComponent = (contextProps) => {
 
 beforeEach(() => {
   mswServer.use(
-    http.get(`${config.basepath}api/v3/qa_model_template`, () => {
-      return HttpResponse.json(qaModelTemplateMocks)
-    }),
+    ...[
+      http.get(`${config.basepath}api/app/qa_model_template/default`, () => {
+        return HttpResponse.json(qaModelTemplateMocks.items[0])
+      }),
+      http.get(`${config.basepath}api/v3/qa_model_template`, () => {
+        return HttpResponse.json({
+          items: qaModelTemplateMocks.items.filter(({id}) => id !== 0),
+        })
+      }),
+    ],
   )
 })
 

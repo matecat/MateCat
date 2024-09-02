@@ -18,7 +18,7 @@ class SanitizeEngineTest extends AbstractTest {
     protected $engine_struct_input;
     protected $engine_struct_expected;
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
         $this->engine_Dao             = new EnginesModel_EngineDAO( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
         $this->engine_struct_input    = new EnginesModel_EngineStruct();

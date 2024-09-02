@@ -11,7 +11,7 @@ namespace Features;
 
 
 use Analysis\Workers\FastAnalysis;
-use API\V2\Exceptions\AuthenticationError;
+use API\Commons\Exceptions\AuthenticationError;
 use BasicFeatureStruct;
 use Constants_Engines;
 use Contribution\ContributionSetStruct;
@@ -335,13 +335,13 @@ class Mmt extends BaseFeature {
 
                 //take only the language code $langCode is passed by reference, change the value from inside the callback
                 array_walk( $availableTargets, function ( &$langCode ) {
-                    list( $langCode, ) = explode( "-", $langCode );
+                    [ $langCode, ] = explode( "-", $langCode );
                 } );
 
-                list( $mSourceCode, ) = explode( "-", $source_language );
+                [ $mSourceCode, ] = explode( "-", $source_language );
                 if ( $source == $mSourceCode ) {
                     foreach ( $target_language_list as $_matecatTarget ) {
-                        list( $mTargetCode, ) = explode( "-", $_matecatTarget );
+                        [ $mTargetCode, ] = explode( "-", $_matecatTarget );
                         if ( in_array( $mTargetCode, $availableTargets ) ) {
                             $controller->postInput[ 'target_language_mt_engine_id' ][ $_matecatTarget ] = $controller->postInput[ 'mt_engine' ];
                         } else {
@@ -384,7 +384,7 @@ class Mmt extends BaseFeature {
                 $targets      = [];
                 $jobLanguages = [];
                 foreach ( explode( ',', $segments[ 0 ][ 'target' ] ) as $jid_Lang ) {
-                    list( $jobId, $target ) = explode( ":", $jid_Lang );
+                    [ $jobId, $target ] = explode( ":", $jid_Lang );
                     $jobLanguages[ $jobId ] = $source . "|" . $target;
                     $targets[]              = $target;
                 }

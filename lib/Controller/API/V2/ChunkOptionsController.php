@@ -3,7 +3,7 @@
 namespace API\V2;
 
 
-use API\V2\Validators\ChunkPasswordValidator;
+use API\Commons\Validators\ChunkPasswordValidator;
 use Chunks_ChunkStruct;
 
 class ChunkOptionsController extends BaseChunkController {

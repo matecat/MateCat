@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {createRef} from 'react'
 import Immutable from 'immutable'
 import {remove, cloneDeep, size, isUndefined} from 'lodash'
 import {CompositeDecorator, Editor, EditorState, Modifier} from 'draft-js'
@@ -18,10 +18,12 @@ import {getSplitPointTag} from './utils/DraftMatecatUtils/tagModel'
 import {SegmentContext} from './SegmentContext'
 import Assistant from '../icons/Assistant'
 import Education from '../icons/Education'
-import {TERM_FORM_FIELDS} from './SegmentFooterTabGlossary/SegmentFooterTabGlossary'
+import {TERM_FORM_FIELDS} from './SegmentFooterTabGlossary'
 import {getEntitiesSelected} from './utils/DraftMatecatUtils/manageCaretPositionNearEntity'
 import {UseHotKeysComponent} from '../../hooks/UseHotKeysComponent'
 import {flushSync} from 'react-dom'
+import {removeZeroWidthSpace} from './utils/DraftMatecatUtils/tagUtils'
+import CommonUtils from '../../utils/commonUtils'
 
 class SegmentSource extends React.Component {
   static contextType = SegmentContext
@@ -84,6 +86,8 @@ class SegmentSource extends React.Component {
       : 0
 
     this.delayAiAssistant
+
+    this.wasTripleClickTriggered = createRef()
   }
 
   getSearchParams = () => {
@@ -232,6 +236,7 @@ class SegmentSource extends React.Component {
       const {editorState, tagRange} = this.state
       let contentState = editorState.getCurrentContent()
       let plainText = contentState.getPlainText()
+      plainText = removeZeroWidthSpace(plainText)
       const {decodedSegment} = DraftMatecatUtils.decodeSegment(editorState)
       const lxqDecodedSource =
         DraftMatecatUtils.prepareTextForLexiqa(decodedSegment)
@@ -390,6 +395,11 @@ class SegmentSource extends React.Component {
       this.checkDecorators()
       this.updateSourceInStore()
     })
+
+    new CommonUtils.DetectTripleClick(
+      this.source,
+      () => (this.wasTripleClickTriggered.current = true),
+    )
   }
 
   componentWillUnmount() {
@@ -448,6 +458,24 @@ class SegmentSource extends React.Component {
       const entitiesSelected = getEntitiesSelected(editorState)
       SegmentActions.focusTags(entitiesSelected)
     }
+
+    // Select all triple click
+    if (this.wasTripleClickTriggered.current) {
+      const {editorState} = this.state
+      const contentState = editorState.getCurrentContent()
+
+      const selectAll = editorState.getSelection().merge({
+        anchorKey: contentState.getFirstBlock().getKey(),
+        anchorOffset: 0,
+        focusOffset: contentState.getLastBlock().getText().length,
+        focusKey: contentState.getLastBlock().getKey(),
+      })
+
+      const newEditorState = EditorState.forceSelection(editorState, selectAll)
+      this.setState({editorState: newEditorState})
+    }
+
+    this.wasTripleClickTriggered.current = false
   }
 
   refreshTagMap = () => {
@@ -880,6 +908,7 @@ class SegmentSource extends React.Component {
         .map((block) => block.getText())
         .join('\n')
         .replace(new RegExp(String.fromCharCode(parseInt('200B', 16)), 'g'), '')
+        .replace(/·/g, ' ')
 
       const entitiesMap = DraftMatecatUtils.getEntitiesInFragment(
         internalClipboard,

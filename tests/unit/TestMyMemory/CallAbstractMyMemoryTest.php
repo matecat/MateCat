@@ -44,7 +44,7 @@ class CallAbstractMyMemoryTest extends AbstractTest {
     /**
      * @throws Exception
      */
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
 
         $engine_struct_MyMemory     = EnginesModel_EngineStruct::getStruct();

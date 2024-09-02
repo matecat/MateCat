@@ -38,10 +38,10 @@ class SearchModelTest extends AbstractTest {
      */
     private $jobPwd;
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
 
-        $conn  = Database::obtain()->getConnection();
+        $conn = Database::obtain()->getConnection();
 
         // job id pre-filled in import sql
         $query = "SELECT id,password FROM unittest_matecat_local.jobs WHERE id = 1886428338 ORDER BY id desc LIMIT 1;";

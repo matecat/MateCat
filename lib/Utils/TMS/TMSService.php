@@ -2,7 +2,7 @@
 
 namespace TMS;
 
-use API\V2\Exceptions\UnprocessableException;
+use API\Commons\Exceptions\UnprocessableException;
 use Chunks_ChunkDao;
 use Chunks_ChunkStruct;
 use Constants_TranslationStatus;

@@ -1,5 +1,7 @@
 <?php
 
+use Klein\Klein;
+
 function sig_handler( $signo ) {
 
     echo "\n\033[41m" . str_pad( "Caught signal \033[1m$signo", 39, " ", STR_PAD_BOTH ) . "\033[0m\n";
@@ -31,10 +33,22 @@ function setupSignalHandler() {
  * We have to manually instantiate a MockObject Generator
  *
  * @return void
+ * @throws ReflectionException
  */
 function disableAmqWorkerClientHelper() {
-    WorkerClient::$_HANDLER = @( new PHPUnit_Framework_MockObject_Generator() )->getMock(
+    WorkerClient::$_HANDLER = @( new PHPUnit\Framework\MockObject\Generator() )->getMock(
             AMQHandler::class,
+            [], [], '', false
+    );
+}
+
+function route() {
+    // fake function for router command in Matecat
+}
+
+function mockKleinFramework() {
+    return @( new PHPUnit\Framework\MockObject\Generator() )->getMock(
+            Klein::class,
             [], [], '', false
     );
 }
