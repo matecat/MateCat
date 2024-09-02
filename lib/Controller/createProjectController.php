@@ -8,8 +8,11 @@ use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use PayableRates\CustomPayableRateDao;
 use PayableRates\CustomPayableRateStruct;
 use ProjectQueue\Queue;
+use QAModelTemplate\QAModelTemplateDao;
 use QAModelTemplate\QAModelTemplateStruct;
 use Validator\EngineValidator;
+use Validator\JSONValidator;
+use Validator\JSONValidatorObject;
 use Validator\MMTValidator;
 
 class createProjectController extends ajaxController {
@@ -25,7 +28,6 @@ class createProjectController extends ajaxController {
     private $mt_engine;
     private $tms_engine = 1;  //1 default MyMemory
     private $private_tm_key;
-    private $lang_detect_files;
     private $disable_tms_engine_flag;
     private $pretranslate_100;
     private $pretranslate_101;
@@ -33,6 +35,8 @@ class createProjectController extends ajaxController {
     private $due_date;
     private $metadata;
     private $dialect_strict;
+    private $filters_extraction_parameters;
+    private $xliff_parameters;
 
     /**
      * @var QAModelTemplateStruct
@@ -71,25 +75,23 @@ class createProjectController extends ajaxController {
                 'due_date'           => [ 'filter' => FILTER_VALIDATE_INT ],
                 'mt_engine'          => [ 'filter' => FILTER_VALIDATE_INT ],
                 'disable_tms_engine' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
-                'lang_detect_files' => [
-                        'filter'  => FILTER_CALLBACK,
-                        'options' => "Utils::filterLangDetectArray"
-                ],
-                'private_tm_key'    => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
-                'pretranslate_100'  => [ 'filter' => FILTER_VALIDATE_INT ],
-                'pretranslate_101'  => [ 'filter' => FILTER_VALIDATE_INT ],
-                'id_team'           => [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR ],
+                'private_tm_key'     => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'pretranslate_100'   => [ 'filter' => FILTER_VALIDATE_INT ],
+                'pretranslate_101'   => [ 'filter' => FILTER_VALIDATE_INT ],
+                'id_team'            => [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR ],
 
-                'mmt_glossaries'     => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'mmt_glossaries' => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
 
-                'deepl_id_glossary'  => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
-                'deepl_formality'    => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
-                'project_completion' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ], // features customization
-                'get_public_matches' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ], // disable public TM matches
-                'dialect_strict'    => [ 'filter' => FILTER_SANITIZE_STRING ],
+                'deepl_id_glossary'             => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'deepl_formality'               => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'project_completion'            => [ 'filter' => FILTER_VALIDATE_BOOLEAN ], // features customization
+                'get_public_matches'            => [ 'filter' => FILTER_VALIDATE_BOOLEAN ], // disable public TM matches
+                'dialect_strict'                => [ 'filter' => FILTER_SANITIZE_STRING ],
+                'filters_extraction_parameters' => [ 'filter' => FILTER_SANITIZE_STRING ],
+                'xliff_parameters'              => [ 'filter' => FILTER_SANITIZE_STRING ],
 
-                'qa_model_template_id'       => [ 'filter' => FILTER_VALIDATE_INT ],
-                'payable_rate_template_id'   => [ 'filter' => FILTER_VALIDATE_INT ],
+                'qa_model_template_id'     => [ 'filter' => FILTER_VALIDATE_INT ],
+                'payable_rate_template_id' => [ 'filter' => FILTER_VALIDATE_INT ],
         ];
 
         $this->readLoginInfo( false );
@@ -151,7 +153,6 @@ class createProjectController extends ajaxController {
         $this->mt_engine               = ( $this->postInput[ 'mt_engine' ] != null ? $this->postInput[ 'mt_engine' ] : 0 );       // null NON è ammesso
         $this->disable_tms_engine_flag = $this->postInput[ 'disable_tms_engine' ]; // se false allora MyMemory
         $this->private_tm_key          = $__postPrivateTmKey;
-        $this->lang_detect_files       = $this->postInput[ 'lang_detect_files' ];
         $this->pretranslate_100        = $this->postInput[ 'pretranslate_100' ];
         $this->pretranslate_101        = $this->postInput[ 'pretranslate_101' ];
         $this->only_private            = ( is_null( $this->postInput[ 'get_public_matches' ] ) ? false : !$this->postInput[ 'get_public_matches' ] );
@@ -188,6 +189,8 @@ class createProjectController extends ajaxController {
         $this->__validateQaModelTemplate();
         $this->__validatePayableRateTemplate();
         $this->__validateDialectStrictParam();
+        $this->__validateFiltersExtractionParameters();
+        $this->__validateXliffParameters();
         $this->__appendFeaturesToProject();
         $this->__generateTargetEngineAssociation();
         if ( $this->userIsLogged ) {
@@ -199,7 +202,7 @@ class createProjectController extends ajaxController {
      * setProjectFeatures
      *
      * @throws \Exceptions\NotFoundException
-     * @throws \API\V2\Exceptions\AuthenticationError
+     * @throws \API\Commons\Exceptions\AuthenticationError
      * @throws \Exceptions\ValidationError
      * @throws \TaskRunner\Exceptions\EndQueueException
      * @throws \TaskRunner\Exceptions\ReQueueException
@@ -317,8 +320,6 @@ class createProjectController extends ajaxController {
         $projectStructure[ 'mt_engine' ]                    = $this->mt_engine;
         $projectStructure[ 'tms_engine' ]                   = $this->tms_engine;
         $projectStructure[ 'status' ]                       = Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
-        $projectStructure[ 'lang_detect_files' ]            = $this->lang_detect_files;
-        $projectStructure[ 'skip_lang_validation' ]         = true;
         $projectStructure[ 'pretranslate_100' ]             = $this->pretranslate_100;
         $projectStructure[ 'pretranslate_101' ]             = $this->pretranslate_101;
         $projectStructure[ 'dialect_strict' ]               = $this->dialect_strict;
@@ -344,12 +345,20 @@ class createProjectController extends ajaxController {
             $projectStructure[ 'deepl_id_glossary' ] = $this->deepl_id_glossary;
         }
 
+        if ( $this->filters_extraction_parameters ) {
+            $projectStructure[ 'filters_extraction_parameters' ] = $this->filters_extraction_parameters;
+        }
+
+        if ( $this->xliff_parameters ) {
+            $projectStructure[ 'xliff_parameters' ] = $this->xliff_parameters;
+        }
+
         // with the qa template id
-        if( $this->qaModelTemplate ) {
+        if ( $this->qaModelTemplate ) {
             $projectStructure[ 'qa_model_template' ] = $this->qaModelTemplate->getDecodedModel();
         }
 
-        if( $this->payableRateModelTemplate ) {
+        if ( $this->payableRateModelTemplate ) {
             $projectStructure[ 'payable_rate_model_id' ] = $this->payableRateModelTemplate->id;
         }
 
@@ -409,7 +418,7 @@ class createProjectController extends ajaxController {
      * @param $filename
      *
      * @return ArrayObject
-     * @throws \API\V2\Exceptions\AuthenticationError
+     * @throws \API\Commons\Exceptions\AuthenticationError
      * @throws \Exceptions\NotFoundException
      * @throws \Exceptions\ValidationError
      * @throws \TaskRunner\Exceptions\EndQueueException
@@ -638,17 +647,16 @@ class createProjectController extends ajaxController {
     /**
      * @throws Exception
      */
-    private function __validateQaModelTemplate()
-    {
+    private function __validateQaModelTemplate() {
         if ( !empty( $this->postInput[ 'qa_model_template_id' ] ) and $this->postInput[ 'qa_model_template_id' ] > 0 ) {
-            $qaModelTemplate = \QAModelTemplate\QAModelTemplateDao::get([
-                'id' => $this->postInput[ 'qa_model_template_id' ],
-                'uid' => $this->getUser()->uid
-            ]);
+            $qaModelTemplate = QAModelTemplateDao::get( [
+                    'id'  => $this->postInput[ 'qa_model_template_id' ],
+                    'uid' => $this->getUser()->uid
+            ] );
 
             // check if qa_model template exists
-            if(null === $qaModelTemplate){
-                throw new \Exception('This QA Model template does not exists or does not belongs to the logged in user');
+            if ( null === $qaModelTemplate ) {
+                throw new Exception( 'This QA Model template does not exists or does not belongs to the logged in user' );
             }
 
             $this->qaModelTemplate = $qaModelTemplate;
@@ -658,24 +666,20 @@ class createProjectController extends ajaxController {
     /**
      * @throws Exception
      */
-    private function __validatePayableRateTemplate()
-    {
+    private function __validatePayableRateTemplate() {
         $payableRateModelTemplate = null;
 
-        if( !empty($this->postInput[ 'payable_rate_template_id' ] ) and $this->postInput[ 'payable_rate_template_id' ] > 0 ){
+        if ( !empty( $this->postInput[ 'payable_rate_template_id' ] ) and $this->postInput[ 'payable_rate_template_id' ] > 0 ) {
 
             $payableRateTemplateId = $this->postInput[ 'payable_rate_template_id' ];
-            $userId = $this->getUser()->uid;
+            $userId                = $this->getUser()->uid;
 
-            $payableRateModelTemplate = CustomPayableRateDao::getById($payableRateTemplateId);
+            $payableRateModelTemplate = CustomPayableRateDao::getByIdAndUser( $payableRateTemplateId, $userId );
 
-            if(null === $payableRateModelTemplate){
-                throw new \Exception('Payable rate model id not valid');
+            if ( null === $payableRateModelTemplate ) {
+                throw new Exception( 'Payable rate model id not valid' );
             }
 
-            if($payableRateModelTemplate->uid !== $userId){
-                throw new \Exception('Payable rate model is not belonging to the current user');
-            }
         }
 
         $this->payableRateModelTemplate = $payableRateModelTemplate;
@@ -688,25 +692,61 @@ class createProjectController extends ajaxController {
      *
      * @throws Exception
      */
-    private function __validateDialectStrictParam()
-    {
+    private function __validateDialectStrictParam() {
         if ( !empty( $this->postInput[ 'dialect_strict' ] ) ) {
-            $dialect_strict = trim(html_entity_decode($this->postInput[ 'dialect_strict' ]));
-            $target_languages = preg_replace('/\s+/', '', $this->postInput[ 'target_lang' ]);
-            $targets = explode( ',', trim($target_languages) );
-            $dialectStrictObj = json_decode($dialect_strict, true);
+            $dialect_strict   = trim( html_entity_decode( $this->postInput[ 'dialect_strict' ] ) );
+            $target_languages = preg_replace( '/\s+/', '', $this->postInput[ 'target_lang' ] );
+            $targets          = explode( ',', trim( $target_languages ) );
+            $dialectStrictObj = json_decode( $dialect_strict, true );
 
-            foreach ($dialectStrictObj as $lang => $value){
-                if(!in_array($lang, $targets)){
-                    throw new \Exception('Wrong `dialect_strict` object, language, ' . $lang . ' is not one of the project target languages');
+            foreach ( $dialectStrictObj as $lang => $value ) {
+                if ( !in_array( $lang, $targets ) ) {
+                    throw new Exception( 'Wrong `dialect_strict` object, language, ' . $lang . ' is not one of the project target languages' );
                 }
 
-                if(!is_bool($value)){
-                    throw new \Exception('Wrong `dialect_strict` object, not boolean declared value for ' . $lang);
+                if ( !is_bool( $value ) ) {
+                    throw new Exception( 'Wrong `dialect_strict` object, not boolean declared value for ' . $lang );
                 }
             }
 
-            $this->dialect_strict = html_entity_decode($dialect_strict);
+            $this->dialect_strict = html_entity_decode( $dialect_strict );
+        }
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function __validateFiltersExtractionParameters() {
+        if ( !empty( $this->postInput[ 'filters_extraction_parameters' ] ) ) {
+
+            $json   = html_entity_decode( $this->postInput[ 'filters_extraction_parameters' ] );
+            $schema = file_get_contents( INIT::$ROOT . '/inc/validation/schema/filters_extraction_parameters.json' );
+
+            $validatorObject       = new JSONValidatorObject();
+            $validatorObject->json = $json;
+
+            $validator = new JSONValidator( $schema );
+            $validator->validate( $validatorObject );
+
+            $this->filters_extraction_parameters = json_decode( $json );
+        }
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function __validateXliffParameters() {
+        if ( !empty( $this->postInput[ 'xliff_parameters' ] ) ) {
+
+            $json   = html_entity_decode( $this->postInput[ 'xliff_parameters' ] );
+            $schema = file_get_contents( INIT::$ROOT . '/inc/validation/schema/xliff_parameters_rules_content.json' );
+
+            $validatorObject       = new JSONValidatorObject();
+            $validatorObject->json = $json;
+
+            $validator = new JSONValidator( $schema, true );
+            $validator->validate( $validatorObject );
+            $this->xliff_parameters = $validatorObject->decoded;
         }
     }
 

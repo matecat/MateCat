@@ -1,5 +1,5 @@
 <?php
-require __DIR__ . '/Bootstrap.php';
+include_once __DIR__ . '/Bootstrap.php';
 Bootstrap::start();
 
 return array(

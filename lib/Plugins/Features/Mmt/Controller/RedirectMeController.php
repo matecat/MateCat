@@ -10,7 +10,7 @@
 namespace Features\Mmt\Controller;
 
 
-use API\V2\Validators\LoginValidator;
+use API\Commons\Validators\LoginValidator;
 use Engine;
 use Engines_MMT;
 use INIT;

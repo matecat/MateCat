@@ -5,11 +5,11 @@ use ActivityLog\ActivityLogStruct;
 use WordCount\WordCountStruct;
 
 /**
- * Description of catController
  *
- * @Deprecated
+ * @see https://dev.matecat.com/revise-summary/9763519-772d1081eef6
  *
- * @author antonio
+ * Quality Report Controller
+ *
  */
 class reviseSummaryController extends viewController {
 

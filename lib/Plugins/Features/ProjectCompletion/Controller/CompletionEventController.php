@@ -9,7 +9,7 @@
 
 namespace Features\ProjectCompletion\Controller;
 
-use API\V2\Validators\ChunkPasswordValidator;
+use API\Commons\Validators\ChunkPasswordValidator;
 use BaseKleinViewController;
 use Chunks_ChunkCompletionEventDao;
 use Chunks_ChunkCompletionEventStruct;
@@ -89,7 +89,7 @@ class CompletionEventController extends BaseKleinViewController {
 
     /**
      * @throws \Exceptions\NotFoundException
-     * @throws \API\V2\Exceptions\AuthenticationError
+     * @throws \API\Commons\Exceptions\AuthenticationError
      * @throws \Exceptions\ValidationError
      */
     public function delete() {
@@ -110,7 +110,7 @@ class CompletionEventController extends BaseKleinViewController {
 
     /**
      * @throws \Exceptions\NotFoundException
-     * @throws \API\V2\Exceptions\AuthenticationError
+     * @throws \API\Commons\Exceptions\AuthenticationError
      * @throws \Exceptions\ValidationError
      */
     private function __performUndo() {

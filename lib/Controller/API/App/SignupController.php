@@ -2,6 +2,7 @@
 
 namespace API\App;
 
+use API\Commons\AbstractStatefulKleinController;
 use Exception;
 use Exceptions\ValidationError;
 use FlashMessage;
@@ -25,18 +26,28 @@ class SignupController extends AbstractStatefulKleinController {
     public function create() {
 
         $user = $this->request->param( 'user' );
+        $userIp = Utils::getRealIpAddr();
 
-        $checkRateLimit = $this->checkRateLimitResponse( $this->response, $user[ 'email' ], '/api/app/user' );
-        if ( $checkRateLimit instanceof Response ) {
-            $this->response = $checkRateLimit;
+        // rate limit on email
+        $checkRateLimitOnEmail = $this->checkRateLimitResponse( $this->response, $user[ 'email' ], '/api/app/user', 3 );
+        if ( $checkRateLimitOnEmail instanceof Response ) {
+            $this->response = $checkRateLimitOnEmail;
+
+            return;
+        }
+
+        // rate limit on IP
+        $checkRateLimitOnIp = $this->checkRateLimitResponse( $this->response, $userIp, '/api/app/user', 3 );
+        if ( $checkRateLimitOnIp instanceof Response ) {
+            $this->response = $checkRateLimitOnIp;
 
             return;
         }
 
         $signup = new SignupModel( $user );
+        $this->incrementRateLimitCounter( $userIp, '/api/app/user' );
 
-        //email
-
+        // email
         if ( $signup->valid() ) {
             $signup->process();
             $this->response->code( 200 );
@@ -131,8 +142,8 @@ class SignupController extends AbstractStatefulKleinController {
      */
     public function forgotPassword() {
 
-        $checkRateLimitEmail = $this->checkRateLimitResponse( $this->response, $this->request->param( 'email' ), '/api/app/user/forgot_password', 5 );
-        $checkRateLimitIp    = $this->checkRateLimitResponse( $this->response, Utils::getRealIpAddr(), '/api/app/user/forgot_password', 5 );
+        $checkRateLimitEmail = $this->checkRateLimitResponse( $this->response, $this->request->param( 'email' ) ?? "BLANK_EMAIL", '/api/app/user/forgot_password', 5 );
+        $checkRateLimitIp    = $this->checkRateLimitResponse( $this->response, Utils::getRealIpAddr() ?? "127.0.0.1", '/api/app/user/forgot_password', 5 );
 
         if ( $checkRateLimitIp instanceof Response ) {
             $this->response = $checkRateLimitIp;
@@ -148,13 +159,14 @@ class SignupController extends AbstractStatefulKleinController {
 
         $doForgotPassword = $this->doForgotPassword();
 
-        $this->incrementRateLimitCounter( $this->request->param( 'email' ), '/api/app/user/forgot_password' );
+        $this->incrementRateLimitCounter( $this->request->param( 'email' ) ?? "BLANK_EMAIL", '/api/app/user/forgot_password' );
+        $this->incrementRateLimitCounter( Utils::getRealIpAddr() ?? "127.0.0.1", '/api/app/user/forgot_password' );
 
-        $this->response->code( empty( $doForgotPassword ) ? 200 : 500 );
+        $this->response->code( $doForgotPassword['code'] );
         $this->response->json( [
                 'email'      => $this->request->param( 'email' ),
                 'wanted_url' => $this->request->param( 'wanted_url' ),
-                'errors'     => $doForgotPassword,
+                'errors'     => $doForgotPassword['errors'],
         ] );
     }
 
@@ -166,21 +178,26 @@ class SignupController extends AbstractStatefulKleinController {
         $email      = $this->request->param( 'email' );
         $wanted_url = $this->request->param( 'wanted_url' );
         $errors     = [];
+        $code       = 200;
 
         if ( !$email ) {
             $errors[] = 'email is a mandatary field.';
+            $code = 400;
         }
 
         if ( !$wanted_url ) {
             $errors[] = 'wanted_url is a mandatary field.';
+            $code = 400;
         }
 
         if ( !filter_var( $email, FILTER_VALIDATE_EMAIL ) ) {
             $errors[] = 'email is not valid.';
+            $code = 400;
         }
 
         if ( !filter_var( $wanted_url, FILTER_VALIDATE_URL ) ) {
             $errors[] = 'wanted_url is not a valid URL.';
+            $code = 400;
         }
 
         if ( empty( $errors ) ) {
@@ -190,10 +207,14 @@ class SignupController extends AbstractStatefulKleinController {
                 }
             } catch ( Exception $exception ) {
                 $errors[] = 'Error updating database.';
+                $code = $exception->getCode() > 0 ? $exception->getCode() : 500;
             }
         }
 
-        return $errors;
+        return [
+            'errors' => $errors,
+            'code' => $code,
+        ];
     }
 
 

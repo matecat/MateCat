@@ -26,12 +26,19 @@ class ChangePasswordModel {
     }
 
     /**
+     * @param $old_password
+     * @param $new_password
+     * @param $new_password_confirmation
      * @throws ValidationError
      */
     public function changePassword( $old_password, $new_password, $new_password_confirmation ) {
 
         if ( !Utils::verifyPass( $old_password, $this->user->salt, $this->user->pass ) ) {
             throw new ValidationError( "Invalid password" );
+        }
+
+        if ( $old_password === $new_password ) {
+            throw new ValidationError( "New password cannot be the same as your old password" );
         }
 
         UserPasswordValidator::validatePassword( $new_password, $new_password_confirmation );

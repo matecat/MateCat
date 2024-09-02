@@ -8,11 +8,11 @@
 
 namespace API\V3;
 
-use API\V2\Exceptions\ValidationError;
-use API\V2\KleinController;
+use API\Commons\Exceptions\ValidationError;
+use API\Commons\KleinController;
 use CatUtils;
 use Langs_Languages;
-use LQA\SizeRestriction;
+use LQA\SizeRestriction\SizeRestriction;
 use Matecat\SubFiltering\MateCatFilter;
 
 

@@ -4,8 +4,8 @@ use FilesStorage\AbstractFilesStorage;
 
 class Filters {
 
-    const SOURCE_TO_XLIFF_ENDPOINT = "/AutomationService/original2xliff";
-    const XLIFF_TO_TARGET_ENDPOINT = "/AutomationService/xliff2original";
+    const SOURCE_TO_XLIFF_ENDPOINT = "/api/v2/original2xliff";
+    const XLIFF_TO_TARGET_ENDPOINT = "/api/v2/xliff2translated";
 
     /**
      * @param $dataGroups       array each value must be an associative array
@@ -72,7 +72,7 @@ class Filters {
                 if ( $response === '{"message":"Invalid RapidAPI Key"}' ) {
                     $errResponse[ 'errorMessage' ] = "Failed RapidAPI authentication. Check FILTERS_RAPIDAPI_KEY in config.ini";
                 } elseif (isset($originalResponse->errorMessage)) {
-                    $errResponse[ 'errorMessage' ] = $originalResponse->errorMessage;
+                    $errResponse[ 'errorMessage' ] = self::formatErrorMessage($originalResponse->errorMessage);
                 } else {
                     if ( $info[ 'errno' ] ) {
                         $errResponse[ 'errorMessage' ] = "Curl error $info[errno]: $info[error]";
@@ -87,9 +87,9 @@ class Filters {
                 // Super ugly, but this is the way the old FileFormatConverter
                 // cooperated with callers; changing this requires changing the
                 // callers, a huge and risky refactoring work I couldn't afford
-                if ( isset( $response[ "documentContent" ] ) ) {
-                    $response[ 'document_content' ] = base64_decode( $response[ 'documentContent' ] );
-                    unset( $response[ 'documentContent' ] );
+                if ( isset( $response[ "document" ] ) ) {
+                    $response[ 'document_content' ] = base64_decode( $response[ 'document' ] );
+                    unset( $response[ 'document' ] );
                 }
             }
 
@@ -104,6 +104,18 @@ class Filters {
         }
 
         return $responses;
+    }
+
+    /**
+     * @param string $error
+     * @return string
+     */
+    private static function formatErrorMessage($error){
+
+        // Error from Excel files
+        $error = str_replace("net.translated.matecat.filters.ExtendedExcelException: ", "", $error);
+
+        return $error;
     }
 
     /**
@@ -127,32 +139,95 @@ class Filters {
         return false;
     }
 
-    public static function sourceToXliff( $filePath, $sourceLang, $targetLang, $segmentation ) {
+    /**
+     * Convert source file to XLIFF
+     *
+     * @param $filePath
+     * @param $sourceLang
+     * @param $targetLang
+     * @param $segmentation
+     * @param null $extractionParams
+     * @return mixed
+     */
+    public static function sourceToXliff( $filePath, $sourceLang, $targetLang, $segmentation, $extractionParams = null ) {
         $basename  = AbstractFilesStorage::pathinfo_fix( $filePath, PATHINFO_FILENAME );
         $extension = AbstractFilesStorage::pathinfo_fix( $filePath, PATHINFO_EXTENSION );
         $filename  = "$basename.$extension";
 
         $data = [
-                'documentContent' => Utils::curlFile( $filePath ),
-                'sourceLocale'    => Langs_Languages::getInstance()->getLangRegionCode( $sourceLang ),
-                'targetLocale'    => Langs_Languages::getInstance()->getLangRegionCode( $targetLang ),
-                'segmentation'    => $segmentation,
-            // This parameter is mandatory for older filters and optional for
-            // newer ones, because it can be obtained by documentContent;
-            // however when new filters extract filename from documentContent
-            // they do it forcing ISO-8859-1 encoding, because of a bug in the
-            // MIMEPull library. So unless this bug is there is better to use
-            // the following parameter to send filename in UTF-8
-                'fileName'        => $filename,
-            // The following is needed only by older filters versions
-                'fileExtension'   => $extension
+            'document'        => Utils::curlFile( $filePath ),
+            'sourceLocale'    => Langs_Languages::getInstance()->getLangRegionCode( $sourceLang ),
+            'targetLocale'    => Langs_Languages::getInstance()->getLangRegionCode( $targetLang ),
+            'segmentation'    => $segmentation,
+            'utf8FileName'    => $filename
         ];
+
+        if($extractionParams !== null){
+
+            $params = null;
+
+            // send extraction params based on file extension
+            switch ($extension){
+                case "json":
+                    if(isset($extractionParams->json)){
+                        $params = $extractionParams->json;
+                    }
+
+                    break;
+
+                case "xml":
+                    if(isset($extractionParams->xml)){
+                        $params = $extractionParams->xml;
+                    }
+
+                    break;
+
+                case "yaml":
+                    if(isset($extractionParams->yaml)){
+                        $params = $extractionParams->yaml;
+                    }
+
+                    break;
+
+                case "doc":
+                case "docx":
+                    if(isset($extractionParams->ms_word)){
+                        $params = $extractionParams->ms_word;
+                    }
+
+                    break;
+
+                case "xls":
+                case "xlsx":
+                    if(isset($extractionParams->ms_excel)){
+                        $params = $extractionParams->ms_excel;
+                    }
+
+                    break;
+
+                case "ppt":
+                case "pptx":
+                    if(isset($extractionParams->ms_powerpoint)){
+                        $params = $extractionParams->ms_powerpoint;
+                    }
+
+                    break;
+            }
+
+            if($params !== null){
+                $data['extractionParams'] = json_encode($params);
+            }
+        }
 
         $filtersResponse = self::sendToFilters( [ $data ], self::SOURCE_TO_XLIFF_ENDPOINT );
 
         return $filtersResponse[ 0 ];
     }
 
+    /**
+     * @param $xliffsData
+     * @return array
+     */
     public static function xliffToTarget( $xliffsData ) {
         $dataGroups = [];
         $tmpFiles   = [];
@@ -167,7 +242,7 @@ class Filters {
             $tmpFiles[ $id ] = $tmpXliffFile;
             file_put_contents( $tmpXliffFile, $xliffData[ 'document_content' ] );
 
-            $dataGroups[ $id ] = [ 'xliffContent' => Utils::curlFile( $tmpXliffFile ) ];
+            $dataGroups[ $id ] = [ 'xliff' => Utils::curlFile( $tmpXliffFile ) ];
         }
 
         $responses = self::sendToFilters( $dataGroups, self::XLIFF_TO_TARGET_ENDPOINT );
@@ -191,7 +266,9 @@ class Filters {
      *
      * @throws Exception
      */
-    public static function logConversionToXliff( $response, $sentFile, $sourceLang, $targetLang, $segmentation ) {
+    public static function logConversionToXliff( $response, $sentFile, $sourceLang, $targetLang, $segmentation, $extractionParameters ) {
+
+        // @TODO $extractionParameters to MySQL table?
         self::logConversion( $response, true, $sentFile, [ 'source' => $sourceLang, 'target' => $targetLang ], [ 'segmentation_rule' => $segmentation ] );
     }
 
@@ -242,7 +319,7 @@ class Filters {
                 'filters_version'  => @$response[ 'instanceVersion' ],
                 'client_ip'        => Utils::getRealIpAddr(),
                 'to_xliff'         => $toXliff,
-                'success'          => ( $response[ 'isSuccess' ] === true ),
+                'success'          => ( $response[ 'successful' ] === true ),
                 'error_message'    => @$response[ 'errorMessage' ],
                 'conversion_time'  => $response[ 'time' ],
                 'sent_file_size'   => filesize( $sentFile ),
@@ -272,7 +349,8 @@ class Filters {
             Log::doJsonLog( "Unable to log the conversion: " . $ex->getMessage() );
         }
 
-        if ( $response[ 'isSuccess' ] !== true ) {
+        if ( $response[ 'successful' ] !== true ) {
+
             if ( INIT::$FILTERS_EMAIL_FAILURES ) {
                 Utils::sendErrMailReport( "MateCat: conversion failed.\n\n" . print_r( $info, true ) );
             }

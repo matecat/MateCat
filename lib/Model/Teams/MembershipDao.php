@@ -64,7 +64,7 @@ class MembershipDao extends \DataAccess_AbstractDao {
      */
     public function findUserTeams( Users_UserStruct $user ) {
 
-        $stmt      = $this->_getStatementForCache( self::$_query_user_teams );
+        $stmt      = $this->_getStatementForQuery( self::$_query_user_teams );
         $teamQuery = new TeamStruct();
 
         return static::resultOrNull( $this->_fetchObject( $stmt,
@@ -84,7 +84,7 @@ class MembershipDao extends \DataAccess_AbstractDao {
      *
      */
     public function destroyCacheUserTeams( Users_UserStruct $user ) {
-        $stmt = $this->_getStatementForCache( self::$_query_user_teams );
+        $stmt = $this->_getStatementForQuery( self::$_query_user_teams );
 
         return $this->_destroyObjectCache( $stmt,
                 [
@@ -102,7 +102,7 @@ class MembershipDao extends \DataAccess_AbstractDao {
      * @return null|TeamStruct
      */
     public function findTeamByIdAndUser( $id, Users_UserStruct $user ) {
-        $stmt = $this->_getStatementForCache( self::$_query_team_from_uid_and_id );
+        $stmt = $this->_getStatementForQuery( self::$_query_team_from_uid_and_id );
 
         return static::resultOrNull( $this->_fetchObject( $stmt, ( new TeamStruct() ), [ $user->uid, $id ] )[ 0 ] );
     }
@@ -117,7 +117,7 @@ class MembershipDao extends \DataAccess_AbstractDao {
      *
      */
     public function destroyCacheTeamByIdAndUser( $id, Users_UserStruct $user ) {
-        $stmt = $this->_getStatementForCache( self::$_query_team_from_uid_and_id );
+        $stmt = $this->_getStatementForQuery( self::$_query_team_from_uid_and_id );
 
         return $this->_destroyObjectCache( $stmt, [ $user->uid, $id ] );
     }
@@ -129,7 +129,7 @@ class MembershipDao extends \DataAccess_AbstractDao {
      * @return \DataAccess_IDaoStruct[]|MembershipStruct[]
      */
     public function getMemberListByTeamId( $id_team, $traverse = true ) {
-        $stmt             = $this->_getStatementForCache( self::$_query_member_list );
+        $stmt             = $this->_getStatementForQuery( self::$_query_member_list );
         $membershipStruct = new MembershipStruct();
 
         /**
@@ -174,7 +174,7 @@ class MembershipDao extends \DataAccess_AbstractDao {
      *
      */
     public function destroyCacheForListByTeamId( $id_team ) {
-        $stmt = $this->_getStatementForCache( self::$_query_member_list );
+        $stmt = $this->_getStatementForQuery( self::$_query_member_list );
 
         return $this->_destroyObjectCache( $stmt,
                 [

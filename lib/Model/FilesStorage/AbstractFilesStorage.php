@@ -167,8 +167,8 @@ abstract class AbstractFilesStorage implements IFilesStorage {
      * @param $linkFile
      */
     public function deleteHashFromUploadDir( $uploadDirPath, $linkFile ) {
-        @list( $shasum, $srcLang ) = explode( "|", $linkFile );
-        @list( $shasum, $segRule ) = explode( "_", $shasum ); // remove the segmentation rule from hash to clean all reverse index maps
+        list( $shasum, ) = explode( "|", $linkFile );
+        list( $shasum, ) = explode( "_", $shasum ); // remove the segmentation rule from hash to clean all reverse index maps
 
         $iterator = new DirectoryIterator( $uploadDirPath );
 
@@ -477,7 +477,7 @@ abstract class AbstractFilesStorage implements IFilesStorage {
 
     /**
      * @param string              $filePath
-     * @param Chunks_ChunkStruct $chunkStruct
+     * @param Chunks_ChunkStruct  $chunkStruct
      * @param                     $uid
      *
      * @return mixed

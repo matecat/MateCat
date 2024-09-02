@@ -103,7 +103,7 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
     public function getBySegmentId($idSegment, $ttl = 7200)
     {
         $sql = "SELECT * from comments WHERE id_segment = :id_segment and (message_type = :message_type_comment or message_type = :message_type_resolve) order by id asc";
-        $stmt = $this->_getStatementForCache($sql);
+        $stmt = $this->_getStatementForQuery($sql);
 
         return $this->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
                 'id_segment' => $idSegment,
@@ -120,7 +120,7 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
      */
     public function getById($id, $ttl = 86400)
     {
-        $stmt = $this->_getStatementForCache("SELECT * from comments WHERE id = :id");
+        $stmt = $this->_getStatementForQuery("SELECT * from comments WHERE id = :id");
 
         return @$this->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
                 'id' => $id

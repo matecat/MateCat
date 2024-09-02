@@ -9,9 +9,10 @@
 
 namespace API\V2;
 
+use API\Commons\KleinController;
+use API\Commons\Validators\LoginValidator;
+use API\Commons\Validators\TeamAccessValidator;
 use API\V2\Json\Membership;
-use API\V2\Validators\LoginValidator;
-use API\V2\Validators\TeamAccessValidator;
 use TeamModel;
 use Teams\PendingInvitations;
 use Teams\TeamDao;

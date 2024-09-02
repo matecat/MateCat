@@ -3,9 +3,9 @@
 
 namespace Features\SegmentFilter\Controller\API;
 
+use API\Commons\Exceptions\ValidationError;
+use API\Commons\Validators\ChunkPasswordValidator;
 use API\V2\BaseChunkController;
-use API\V2\Exceptions\ValidationError;
-use API\V2\Validators\ChunkPasswordValidator;
 use Chunks_ChunkStruct;
 use Exception;
 use Features\SegmentFilter\Model\FilterDefinition;

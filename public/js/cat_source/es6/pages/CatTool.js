@@ -1,4 +1,5 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react'
+import {useHotkeys} from 'react-hotkeys-hook'
 import {Header} from '../components/header/cattol/Header'
 import NotificationBox from '../components/notificationsComponent/NotificationBox'
 import SegmentsContainer from '../components/segments/SegmentsContainer'
@@ -28,12 +29,19 @@ import useProjectTemplates from '../hooks/useProjectTemplates'
 import {useGoogleLoginNotification} from '../hooks/useGoogleLoginNotification'
 import ModalsActions from '../actions/ModalsActions'
 import FatalErrorModal from '../components/modals/FatalErrorModal'
+import {Shortcuts} from '../utils/shortcuts'
+import CommonUtils from '../utils/commonUtils'
 import {CattoolFooter} from '../components/footer/CattoolFooter'
 
 const urlParams = new URLSearchParams(window.location.search)
 const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
 
 function CatTool() {
+  useHotkeys(
+    Shortcuts.cattol.events.openSettings.keystrokes[Shortcuts.shortCutsKeyType],
+    () => CatToolActions.openSettingsPanel(SETTINGS_PANEL_TABS.advancedOptions),
+    {enableOnContentEditable: true},
+  )
   const [options, setOptions] = useState({})
   const [wasInitSegments, setWasInitSegments] = useState(false)
   const [isFreezingSegments, setIsFreezingSegments] = useState(false)
@@ -103,6 +111,7 @@ function CatTool() {
           return modifiedTemplate
         })
       })
+      .catch(() => setTmKeys([]))
       .finally(() => getMTEngines(modifiedTemplate))
   }
 
@@ -218,7 +227,9 @@ function CatTool() {
           true,
         )
     }
-
+    window.onbeforeunload = function (e) {
+      return CommonUtils.goodbye(e)
+    }
     SegmentStore.addListener(
       SegmentConstants.FREEZING_SEGMENTS,
       freezingSegments,
@@ -409,7 +420,6 @@ function CatTool() {
             <div className="article-segments-container">
               <SegmentsContainer
                 isReview={config.isReview}
-                enableTagProjection={UI.enableTagProjection}
                 startSegmentId={UI.startSegmentId?.toString()}
                 firstJobSegment={config.first_job_segment}
                 guessTagActive={guessTagActive}

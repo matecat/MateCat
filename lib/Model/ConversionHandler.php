@@ -1,6 +1,6 @@
 <?php
 
-use API\V2\Exceptions\AuthenticationError;
+use API\Commons\Exceptions\AuthenticationError;
 use Constants\ConversionHandlerStatus;
 use Conversion\ConvertedFileModel;
 use Exceptions\NotFoundException;
@@ -31,6 +31,7 @@ class ConversionHandler {
     protected $uploadedFiles;
     public    $uploadError = false;
     protected $_userIsLogged;
+    protected $filters_extraction_parameters;
 
     /**
      * @var FeatureSet
@@ -134,15 +135,15 @@ class ConversionHandler {
                 $single_language = $this->target_lang;
             }
 
-            $convertResult = Filters::sourceToXliff( $file_path, $this->source_lang, $single_language, $this->segmentation_rule );
-            Filters::logConversionToXliff( $convertResult, $file_path, $this->source_lang, $this->target_lang, $this->segmentation_rule );
+            $convertResult = Filters::sourceToXliff( $file_path, $this->source_lang, $single_language, $this->segmentation_rule, $this->filters_extraction_parameters );
+            Filters::logConversionToXliff( $convertResult, $file_path, $this->source_lang, $this->target_lang, $this->segmentation_rule, $this->filters_extraction_parameters );
 
-            if ( $convertResult[ 'isSuccess' ] == 1 ) {
+            if ( $convertResult[ 'successful' ] == 1 ) {
 
                 //store converted content on a temporary path on disk (and off RAM)
                 $cachedXliffPath = tempnam( "/tmp", "MAT_XLF" );
-                file_put_contents( $cachedXliffPath, $convertResult[ 'xliffContent' ] );
-                unset( $convertResult[ 'xliffContent' ] );
+                file_put_contents( $cachedXliffPath, $convertResult[ 'xliff' ] );
+                unset( $convertResult[ 'xliff' ] );
 
                 /*
                    store the converted file in the cache
@@ -187,7 +188,7 @@ class ConversionHandler {
             } else {
 
                 $this->result->changeCode(ConversionHandlerStatus::GENERIC_ERROR);
-                $this->result->addError($convertResult[ 'errorMessage' ], AbstractFilesStorage::basename_fix( $this->file_name ));
+                $this->result->addError($this->formatConversionFailureMessage($convertResult[ 'errorMessage' ]), AbstractFilesStorage::basename_fix( $this->file_name ));
 
                 return false;
             }
@@ -216,6 +217,26 @@ class ConversionHandler {
         }
 
         return 0;
+    }
+
+    /**
+     * @param string $message
+     * @return string
+     */
+    private function formatConversionFailureMessage($message)
+    {
+        // WinConverter error
+        if (strpos($message, 'WinConverter') !== false) {
+
+            // file conversion error
+            if (strpos($message, 'WinConverter error 5') !== false) {
+                return 'Scanned file conversion issue, please convert it to editable format (e.g. docx) and retry upload';
+            }
+
+            return 'File conversion issue, please contact us at <a href="mailto:support@matecat.com">support@matecat.com</a>';
+        }
+
+        return $message;
     }
 
     /**
@@ -453,4 +474,11 @@ class ConversionHandler {
         return $this;
     }
 
+    /**
+     * @param mixed $filters_extraction_parameters
+     */
+    public function setFiltersExtractionParameters($filters_extraction_parameters)
+    {
+        $this->filters_extraction_parameters = $filters_extraction_parameters;
+    }
 }

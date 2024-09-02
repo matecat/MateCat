@@ -1,7 +1,8 @@
 import React from 'react'
 import {each} from 'lodash/collection'
 
-import Shortcuts from '../../utils/shortcuts'
+import {Shortcuts} from '../../utils/shortcuts'
+import {isMacOS} from '../../utils/Utils'
 
 class ShortCutsModal extends React.Component {
   constructor(props) {
@@ -23,7 +24,7 @@ class ShortCutsModal extends React.Component {
 
   getShortcutsHtml() {
     let html = []
-    let label = UI.isMac ? 'mac' : 'standard'
+    let label = isMacOS() ? 'mac' : 'standard'
     each(Shortcuts, function (elem, c) {
       let events = []
       each(elem.events, function (item, z) {

@@ -1,16 +1,12 @@
 <?php
 
-header("Cache-Control: no-store, no-cache, must-revalidate");  // HTTP/1.1
-header("Cache-Control: post-check=0, pre-check=0", false);
-header("Pragma: no-cache");
-
 class oauthResponseHandlerController extends viewController{
 
     private $code ;
     private $error ;
 
     /**
-     * @var Google_Service_Oauth2_Userinfoplus
+     * @var Google_Service_Oauth2_Userinfo
      */
     private $remoteUser ;
 
@@ -41,7 +37,6 @@ class oauthResponseHandlerController extends viewController{
 
     public function setTemplateVars()
     {
-        // TODO: Implement setTemplateVars() method.
         if ( isset( $_SESSION['wanted_url'] ) ) {
             $this->template->wanted_url = $_SESSION['wanted_url'] ;
         }
@@ -67,6 +62,7 @@ class oauthResponseHandlerController extends viewController{
 
         $plus = new Google_Service_Oauth2($this->client);
         $this->client->authenticate($this->code);
+        /** @var Google_Service_Oauth2_Userinfo $remoteUser */
         $this->remoteUser = $plus->userinfo->get();
     }
 

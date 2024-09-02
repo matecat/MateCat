@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:its="http://www.w3.org/2005/11/its" its:version="2.0" version="1.2">
+    <file datatype="x-xlf" original="Ebay-like-small-file-edited.xlf" source-language="hy-am" target-language="it-it" tool-id="matecat-converter">
+        <header>
+            <reference>
+
+            </reference>
+        </header>
+        <body/>
+    </file>
+
+    <file datatype="x-rkm" original="manifest.rkm" source-language="hy-am" target-language="it-it" tool-id="matecat-converter">
+        <header></header>
+        <body/>
+
+    </file>
+
+    <file datatype="x-plaintext" original="" source-language="hy-am" target-language="it-it">
+        <body>
+            <trans-unit id="191597217874">
+
+                <source xml:lang="en-us">Making a Raced Win replica diecast takes time, patience and expertise. And this is how it is done…</source>
+
+                <seg-source>
+                    <mrk mid="0" mtype="seg">
+                        Making a Raced Win replica diecast takes time, patience and expertise.
+                    </mrk>
+                    <mrk mid="1" mtype="seg">
+                        And this is how it is done…
+                    </mrk>
+                </seg-source>
+
+                <target xml:lang="it-it">
+                    <mrk mid="0" mtype="seg">
+                        Fare una Raced Win replica in metallo richiede tempo, pazienza ed esperienza.
+                    </mrk>
+                    <mrk mid="1" mtype="seg">
+                        E così è come si fa…
+                    </mrk>
+                </target>
+
+                <note>Test note</note>
+
+            </trans-unit>
+        </body>
+    </file>
+</xliff>

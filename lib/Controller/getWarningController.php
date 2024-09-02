@@ -157,7 +157,7 @@ class getWarningController extends ajaxController {
     }
 
     /**
-     * @throws \API\V2\Exceptions\AuthenticationError
+     * @throws \API\Commons\Exceptions\AuthenticationError
      * @throws \Exceptions\NotFoundException
      * @throws \Exceptions\ValidationError
      * @throws \TaskRunner\Exceptions\EndQueueException

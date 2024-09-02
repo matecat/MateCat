@@ -29,8 +29,8 @@ class Database implements IDatabase {
     public $affected_rows;
 
 
-    const SEQ_ID_SEGMENT     = 'id_segment';
-    const SEQ_ID_PROJECT     = 'id_project';
+    const SEQ_ID_SEGMENT = 'id_segment';
+    const SEQ_ID_PROJECT = 'id_project';
 
     protected static $SEQUENCES = [
             Database::SEQ_ID_SEGMENT,
@@ -219,7 +219,7 @@ class Database implements IDatabase {
      * {@inheritdoc}
      * @throws Exception
      */
-    public function insert( $table, array $data, &$mask = [], $ignore = false, $no_nulls = false, Array $onDuplicateKey = [] ) {
+    public function insert( $table, array $data, &$mask = [], $ignore = false, $no_nulls = false, array $onDuplicateKey = [] ) {
 
         $query = static::buildInsertStatement( $table, $data, $mask, $ignore, $no_nulls, $onDuplicateKey );
 
@@ -319,7 +319,7 @@ class Database implements IDatabase {
         $mask = array_combine( $mask, $mask );
 
         foreach ( $attrs as $key => $value ) {
-            if ( @$mask[ $key ] ) {
+            if ( array_key_exists( $key, $mask ) ) {
                 if ( $no_nulls && is_null( $value ) ) {
                     unset( $mask[ $key ] );
                     continue;
@@ -352,6 +352,7 @@ class Database implements IDatabase {
 
     /**
      * TODO this trim should be removed and ALL codebase migrated from $db->escape() to prepared Statements
+     * @deprecated
      * @Override
      * {@inheritdoc}
      */
