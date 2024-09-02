@@ -8,9 +8,9 @@
 
 namespace API\V3;
 
-use API\V2\Exceptions\ValidationError;
-use API\V2\KleinController;
-use API\V2\Validators\LoginValidator;
+use API\Commons\Exceptions\ValidationError;
+use API\Commons\Validators\LoginValidator;
+use API\Commons\KleinController;
 use CatUtils;
 use Langs_Languages;
 use LQA\SizeRestriction\SizeRestriction;

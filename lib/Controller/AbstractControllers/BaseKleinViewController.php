@@ -1,9 +1,8 @@
 <?php
 
 use AbstractControllers\IController;
-use API\App\AbstractStatefulKleinController;
+use API\Commons\AbstractStatefulKleinController;
 use ConnectedServices\GDrive;
-
 /**
  * Created by PhpStorm.
  * User: fregini

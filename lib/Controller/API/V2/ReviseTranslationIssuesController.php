@@ -9,10 +9,10 @@
 namespace API\V2;
 
 
+use API\Commons\Validators\JobPasswordValidator;
+use API\Commons\Validators\SegmentTranslation;
+use API\Commons\Validators\LoginValidator;
 use API\V2\Json\SegmentVersion;
-use API\V2\Validators\JobPasswordValidator;
-use API\V2\Validators\LoginValidator;
-use API\V2\Validators\SegmentTranslation;
 use Chunks_ChunkDao;
 use Features\TranslationVersions\Model\TranslationVersionDao;
 use Jobs_JobStruct;

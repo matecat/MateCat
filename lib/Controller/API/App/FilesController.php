@@ -2,8 +2,9 @@
 
 namespace API\App;
 
-use API\V2\Validators\ChunkPasswordValidator;
-use API\V2\Validators\LoginValidator;
+use API\Commons\AbstractStatefulKleinController;
+use API\Commons\Validators\ChunkPasswordValidator;
+use API\Commons\Validators\LoginValidator;
 use Chunks_ChunkStruct;
 use Files\FilesPartsDao;
 

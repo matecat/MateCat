@@ -7,9 +7,10 @@
  */
 
 namespace API\V2;
-use API\V2\Exceptions\NotFoundException;
-use API\V2\Validators\LoginValidator;
-use API\V2\Validators\ProjectPasswordValidator;
+use API\Commons\Exceptions\NotFoundException;
+use API\Commons\KleinController;
+use API\Commons\Validators\ProjectPasswordValidator;
+use API\Commons\Validators\LoginValidator;
 use Jobs_JobStruct;
 use ProjectManager;
 
@@ -52,7 +53,7 @@ class JobMergeController extends KleinController {
     }
 
     protected function afterConstruct() {
-        $this->validator = new Validators\ProjectPasswordValidator( $this );
+        $this->validator = new ProjectPasswordValidator( $this );
         $this->appendValidator( new LoginValidator( $this ) );
     }
 

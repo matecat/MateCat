@@ -2,9 +2,10 @@
 
 namespace API\V2 ;
 
-use API\V2\Validators\LoginValidator;
-use API\V2\Validators\ProjectPasswordValidator;
-use API\V2\Validators\ProjectValidator;
+use API\Commons\KleinController;
+use API\Commons\Validators\ProjectPasswordValidator;
+use API\Commons\Validators\ProjectValidator;
+use API\Commons\Validators\LoginValidator;
 use Features\ProjectCompletion\Model\ProjectCompletionStatusModel;
 use Projects_ProjectStruct;
 

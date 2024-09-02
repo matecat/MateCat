@@ -10,7 +10,7 @@
 namespace Analysis\Workers;
 
 use Analysis\Queue\RedisKeys;
-use API\V2\Exceptions\AuthenticationError;
+use API\Commons\Exceptions\AuthenticationError;
 use Constants\Ices;
 use Constants_ProjectStatus;
 use Constants_TranslationStatus;
@@ -278,6 +278,7 @@ class TMAnalysisWorker extends AbstractWorker {
             $message   = ( $updateRes == 0 ) ? "No row found: " . $tm_data[ 'id_segment' ] . "-" . $tm_data[ 'id_job' ] : "Row found: " . $tm_data[ 'id_segment' ] . "-" . $tm_data[ 'id_job' ] . " - UPDATED.";
             $this->_doLog( $message );
         } catch ( Exception $exception ) {
+            $this->_doLog( "**** " . $exception->getMessage() );
             $this->_doLog( "**** Error occurred during the storing (UPDATE) of the suggestions for the segment {$tm_data[ 'id_segment' ]}" );
             throw new ReQueueException( "**** Error occurred during the storing (UPDATE) of the suggestions for the segment {$tm_data[ 'id_segment' ]}", self::ERR_REQUEUE );
         }
@@ -359,11 +360,10 @@ class TMAnalysisWorker extends AbstractWorker {
     }
 
     /**
-     * @throws ReQueueException
-     * @throws ValidationError
-     * @throws NotFoundException
-     * @throws EndQueueException
-     * @throws AuthenticationError
+     * @param $tm_data
+     * @param $queueElementParams
+     *
+     * @return array
      */
     protected function _iceLockCheck( $tm_data, $queueElementParams ) {
 
@@ -381,15 +381,10 @@ class TMAnalysisWorker extends AbstractWorker {
                     $tm_data[ 'locked' ] = true;
                 }
 
-                $tm_data = $this->featureSet->filter( 'checkIceLocked', $tm_data, $queueElementParams );
-
             } elseif ( $queueElementParams->pretranslate_100 ) {
                 $tm_data[ 'status' ] = Constants_TranslationStatus::STATUS_TRANSLATED;
                 $tm_data[ 'locked' ] = false;
             }
-
-            //custom condition for 100% matches
-            $tm_data = $this->featureSet->filter( 'check100MatchLocked', $tm_data, $queueElementParams );
 
         }
 
@@ -420,7 +415,7 @@ class TMAnalysisWorker extends AbstractWorker {
             string $fast_exact_match_type,
             array  &$equivalentWordMapping,
             bool   $publicTM = false,
-            bool $isICE = false
+            bool   $isICE = false
     ): string {
         $fast_match_type = strtoupper( $fast_match_type );
         $fast_rate_paid  = $equivalentWordMapping[ $fast_match_type ];
@@ -908,7 +903,16 @@ class TMAnalysisWorker extends AbstractWorker {
                 throw new ReQueueException();
             }
 
-            //TODO use a simplest query to get job id and password
+            /*
+             * Remove this job from the project list
+             */
+            $this->_queueHandler->getRedisClient()->lrem( $this->_myContext->redis_key, 0, $_project_id );
+
+            $this->_doLog( "--- (Worker $this->_workerPid) : trying to initialize job total word count." );
+
+            $database = Database::obtain();
+            $database->begin();
+
             $_analyzed_report = $this->getProjectSegmentsTranslationSummary( $_project_id );
 
             array_pop( $_analyzed_report ); //remove Rollup
@@ -936,20 +940,12 @@ class TMAnalysisWorker extends AbstractWorker {
                 ] );
             }
 
-            /*
-             * Remove this job from the project list
-             */
-            $this->_queueHandler->getRedisClient()->lrem( $this->_myContext->redis_key, 0, $_project_id );
-
-            $this->_doLog( "--- (Worker $this->_workerPid) : trying to initialize job total word count." );
-
-            $database = Database::obtain();
             foreach ( $_analyzed_report as $job_info ) {
                 $counter = new CounterModel();
-                $database->begin();
                 $counter->initializeJobWordCount( $job_info[ 'id_job' ], $job_info[ 'password' ] );
-                $database->commit();
             }
+
+            $database->commit();
 
             try {
                 $this->featureSet->run( 'afterTMAnalysisCloseProject', $_project_id, $_analyzed_report );

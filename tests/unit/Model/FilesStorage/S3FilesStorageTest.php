@@ -21,7 +21,7 @@ class S3FilesStorageTest extends AbstractTest {
      * @throws ReflectionException
      * @throws ConnectionException
      */
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
 
         $this->fs       = new S3FilesStorage();

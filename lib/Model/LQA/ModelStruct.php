@@ -95,7 +95,7 @@ class ModelStruct extends DataAccess_AbstractDaoSilentStruct implements DataAcce
                 $categoriesArray[] = [
                     'id' => (int)$category['id'],
                     'label' => $category['label'],
-                    'code' => $category['options']['code'],
+                    'code' => ( $category['options']['code'] ?? null ),
                     'severities' => $category['severities'],
                 ];
             }

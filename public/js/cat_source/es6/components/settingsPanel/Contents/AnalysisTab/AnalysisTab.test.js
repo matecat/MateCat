@@ -56,9 +56,16 @@ beforeEach(() => {
   }
 
   mswServer.use(
-    http.get(`${config.basepath}api/v2/payable_rate`, () => {
-      return HttpResponse.json(payableRateTemplateMock)
-    }),
+    ...[
+      http.get(`${config.basepath}api/app/payable_rate/default`, () => {
+        return HttpResponse.json(payableRateTemplateMock.items[0])
+      }),
+      http.get(`${config.basepath}api/v2/payable_rate`, () => {
+        return HttpResponse.json({
+          items: payableRateTemplateMock.items.filter(({id}) => id !== 0),
+        })
+      }),
+    ],
   )
 })
 

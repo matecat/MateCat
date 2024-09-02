@@ -148,7 +148,6 @@
     }
   }
   #target-lang {
-
     .multiple-text {
       width: fit-content;
       display: inline-block;
@@ -429,7 +428,6 @@
 }
 
 @media only screen and (max-width: 1479px) and (min-width: 1280px) {
-
   .wrapper-upload {
     .translate-box {
       .select-with-label__wrapper,
@@ -440,7 +438,7 @@
   }
 }
 
-@media only screen and (max-width: 1279px)  {
+@media only screen and (max-width: 1279px) {
   .translation-row .translation-options {
     flex-wrap: wrap;
   }

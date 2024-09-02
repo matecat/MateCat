@@ -11,9 +11,9 @@ namespace API\App;
 
 use API\App\Json\PeeGraphData;
 use API\App\Json\PeeTableData;
-use API\V2\KleinController;
-use API\V2\Validators\LoginValidator;
-use API\V2\Validators\WhitelistAccessValidator;
+use API\Commons\KleinController;
+use API\Commons\Validators\LoginValidator;
+use API\Commons\Validators\WhitelistAccessValidator;
 use DataAccess\ShapelessConcreteStruct;
 use DateTime;
 use Exception;

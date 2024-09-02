@@ -113,7 +113,7 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
 
         $this->_translator = $this->cachable(__METHOD__, $this, function( Jobs_JobStruct $jobStruct ) {
             $jTranslatorsDao = new JobsTranslatorsDao();
-            return @$jTranslatorsDao->setCacheTTL( 60 * 60 )->findByJobsStruct( $jobStruct )[ 0 ];
+            return $jTranslatorsDao->setCacheTTL( 60 * 60 )->findByJobsStruct( $jobStruct )[ 0 ] ?? null;
         });
 
         return $this->_translator;

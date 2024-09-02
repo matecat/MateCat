@@ -29,7 +29,7 @@ class Tests_TagPositionTest extends AbstractTest {
     /**
      * @throws \Exception
      */
-    public function setUp() {
+    public function setUp(): void {
 
         parent::setUp();
 
@@ -37,7 +37,7 @@ class Tests_TagPositionTest extends AbstractTest {
         $this->featureSet->loadFromString( "translation_versions,review_extended,mmt,airbnb" );
         //$featureSet->loadFromString( "project_completion,translation_versions,qa_check_glossary,microsoft" );
 
-        $this->filter = MateCatFilter::getInstance( $this->featureSet, 'en-EN','it-IT', [] );
+        $this->filter = MateCatFilter::getInstance( $this->featureSet, 'en-EN', 'it-IT', [] );
 
     }
 

@@ -2,7 +2,7 @@
 
 namespace API\V2;
 
-use API\App\AbstractStatefulKleinController;
+use API\Commons\AbstractStatefulKleinController;
 use AuthCookie;
 use Bootstrap;
 use CookieManager;

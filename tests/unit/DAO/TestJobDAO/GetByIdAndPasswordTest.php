@@ -33,7 +33,7 @@ class GetByIdAndPasswordTest extends AbstractTest {
     protected $sql_delete_job;
     protected $flusher;
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
 
         /**
@@ -105,7 +105,7 @@ class GetByIdAndPasswordTest extends AbstractTest {
     }
 
 
-    public function tearDown() {
+    public function tearDown(): void {
 
         $this->database_instance->getConnection()->query( $this->sql_delete_job );
         $this->flusher = new Predis\Client( INIT::$REDIS_SERVERS );

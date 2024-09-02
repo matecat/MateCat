@@ -26,7 +26,7 @@ class GetByIdAndPasswordChunkTest extends AbstractTest {
     protected $database_instance;
 
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
 
         $this->database_instance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
@@ -49,7 +49,7 @@ class GetByIdAndPasswordChunkTest extends AbstractTest {
                     )"
         );
 
-        $jobId = $this->database_instance->getConnection()->lastInsertId();
+        $jobId     = $this->database_instance->getConnection()->lastInsertId();
         $this->job = $this->database_instance->getConnection()->query( "SELECT * FROM jobs WHERE id = $jobId LIMIT 1" )->fetch();
 
     }

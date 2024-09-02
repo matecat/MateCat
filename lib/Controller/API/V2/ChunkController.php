@@ -8,10 +8,10 @@
 
 namespace API\V2;
 
+use API\Commons\Validators\ChunkPasswordValidator;
+use API\Commons\Validators\ProjectAccessValidator;
+use API\Commons\Validators\LoginValidator;
 use API\V2\Json\Chunk;
-use API\V2\Validators\ChunkPasswordValidator;
-use API\V2\Validators\LoginValidator;
-use API\V2\Validators\ProjectAccessValidator;
 use Chunks_ChunkStruct;
 use Constants_JobStatus;
 use Exception;

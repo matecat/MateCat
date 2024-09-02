@@ -5,6 +5,7 @@
  * Date: 09/09/16
  * Time: 10:08
  */
+global $klein;
 
 $klein->with('/api/v2/projects/[:id_project]/[:password]', function() {
     route( '',                      'GET',  'API\V2\ProjectsController',    'get'     ); //this do not show some info like teams and translators
@@ -21,6 +22,7 @@ $klein->with('/api/v2/projects/[:id_project]/[:password]', function() {
     route( '/archive', 'POST', 'API\V2\ProjectsController', 'archive' );
     route( '/active', 'POST', 'API\V2\ProjectsController', 'active' );
     route( '/r2', 'POST', 'API\V2\ReviewsController', 'createReview' );
+    route( '/analysis/status', 'GET', '\API\V3\StatusController', 'index' );
 });
 
 route( '/api/v2/project-completion-status/[i:id_project]', 'GET', '\API\V2\ProjectCompletionStatus', 'status' );
@@ -38,8 +40,8 @@ $klein->with('/api/v2/jobs/[:id_job]/[:password]', function() {
     route( '',              'GET', 'API\V2\ChunkController', 'show' );
     route( '/comments',     'GET', 'API\V2\CommentsController', 'index' );
 
-    route( '/quality-report', 'GET', 'Features\SecondPassReview\Controller\API\QualityReportController', 'show' );
-    route( '/quality-report/general', 'GET', 'Features\SecondPassReview\Controller\API\QualityReportController', 'general' );
+    route( '/quality-report', 'GET', 'Features\ReviewExtended\Controller\API\QualityReportController', 'show' );
+    route( '/quality-report/general', 'GET', 'Features\ReviewExtended\Controller\API\QualityReportController', 'general' );
 
     route( '/translator', 'GET',  '\API\V2\JobsTranslatorsController', 'get' ) ;
     route( '/translator', 'POST',  '\API\V2\JobsTranslatorsController', 'add' ) ;
@@ -114,13 +116,13 @@ $klein->with('/api/v2/files', function() {
 });
 
 $klein->with( '/api/v2/payable_rate', function () {
-    route('/schema', 'GET', '\API\V2\PayableRateController', 'schema');
-    route('/validate', 'POST', '\API\V2\PayableRateController', 'validate');
-    route('', 'GET', '\API\V2\PayableRateController', 'index');
-    route('', 'POST', '\API\V2\PayableRateController', 'create');
-    route('/[:id]', 'GET', '\API\V2\PayableRateController', 'view');
-    route('/[:id]', 'DELETE', '\API\V2\PayableRateController', 'delete');
-    route('/[:id]', 'PUT', '\API\V2\PayableRateController', 'edit');
+    route('/schema', 'GET', '\API\V3\PayableRateController', 'schema');
+    route('/validate', 'POST', '\API\V3\PayableRateController', 'validate');
+    route('', 'GET', '\API\V3\PayableRateController', 'index');
+    route('', 'POST', '\API\V3\PayableRateController', 'create');
+    route('/[:id]', 'GET', '\API\V3\PayableRateController', 'view');
+    route('/[:id]', 'DELETE', '\API\V3\PayableRateController', 'delete');
+    route('/[:id]', 'PUT', '\API\V3\PayableRateController', 'edit');
 
 });
 

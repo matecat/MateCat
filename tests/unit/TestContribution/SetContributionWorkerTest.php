@@ -6,6 +6,7 @@ use Matecat\SubFiltering\MateCatFilter;
 use TaskRunner\Commons\ContextList;
 use TaskRunner\Commons\QueueElement;
 use TestHelpers\AbstractTest;
+use TestHelpers\InvocationInspector;
 
 
 /**
@@ -63,7 +64,7 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver {
      * @return void
      * @throws Exception
      */
-    public function setUp() {
+    public function setUp(): void {
 
         parent::setUp();
 
@@ -94,12 +95,13 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver {
 
     }
 
-    public function tearDown() {
+    public function tearDown(): void {
         parent::tearDown();
     }
 
 
     /**
+     * @test
      * @throws Exception
      */
     public function test_ExecContribution_WillCall_MemoryEngine_With_single_tm_key() {
@@ -160,13 +162,15 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver {
         $reflectedMethod->setAccessible( true );
         $reflectedMethod->invokeArgs( $_worker, [ $contributionMockQueueObject ] );
 
-        $invocations = $stubEngineParameterSpy->getInvocations();
-        $this->assertEquals( $this->contributionStruct->segment, $invocations[ 0 ]->parameters[ 0 ][ 'segment' ] );
-        $this->assertEquals( [ 'XXXXXXXXXXXXXXXX' ], $invocations[ 0 ]->parameters[ 0 ][ 'id_user' ] );
+        $inspector   = new InvocationInspector( $stubEngineParameterSpy );
+        $invocations = $inspector->getInvocations();
+        $this->assertEquals( $this->contributionStruct->segment, $invocations[ 0 ]->getParameters()[ 0 ][ 'segment' ] );
+        $this->assertEquals( [ 'XXXXXXXXXXXXXXXX' ], $invocations[ 0 ]->getParameters()[ 0 ][ 'id_user' ] );
 
     }
 
     /**
+     * @test
      * @throws Exception
      */
     public function test_ExecContribution_WillCall_MemoryEngine_With_multiple_tm_keys() {
@@ -226,13 +230,16 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver {
         $reflectedMethod->setAccessible( true );
         $reflectedMethod->invokeArgs( $_worker, [ $contributionMockQueueObject ] );
 
-        $invocations = $stubEngineParameterSpy->getInvocations();
-        $this->assertEquals( $this->contributionStruct->segment, $invocations[ 0 ]->parameters[ 0 ][ 'segment' ] );
-        $this->assertEquals( [ 'XXXXXXXXXXXXXXXXXXX', 'YYYYYYYYYYYYYYYYYYYY' ], $invocations[ 0 ]->parameters[ 0 ][ 'id_user' ] );
+        $inspector = new InvocationInspector( $stubEngineParameterSpy );
+
+        $invocations = $inspector->getInvocations();
+        $this->assertEquals( $this->contributionStruct->segment, $invocations[ 0 ]->getParameters()[ 0 ][ 'segment' ] );
+        $this->assertEquals( [ 'XXXXXXXXXXXXXXXXXXX', 'YYYYYYYYYYYYYYYYYYYY' ], $invocations[ 0 ]->getParameters()[ 0 ][ 'id_user' ] );
 
     }
 
     /**
+     * @test
      * @throws ReflectionException
      */
     public function testWorker_WillCall_Engine_NONE_With_No_TM_Engine_Configured() {
@@ -277,6 +284,7 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver {
     }
 
     /**
+     * @test
      * @throws ReflectionException
      */
     public function testExceptionForMyMemorySetFailure() {

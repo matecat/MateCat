@@ -31,7 +31,6 @@ use Segments_SegmentDao;
 use Stomp\Transport\Message;
 use TaskRunner\Commons\AbstractDaemon;
 use TaskRunner\Commons\Context;
-use TaskRunner\Commons\ContextList;
 use TaskRunner\Commons\QueueElement;
 use UnexpectedValueException;
 use Utils;
@@ -49,11 +48,6 @@ class FastAnalysis extends AbstractDaemon {
     use ProjectWordCount;
 
     /**
-     * @var AMQHandler|null
-     */
-    protected ?AMQHandler $queueHandler;
-
-    /**
      * @var array
      */
     protected array $segments;
@@ -69,11 +63,6 @@ class FastAnalysis extends AbstractDaemon {
     protected array $actual_project_row;
 
     /**
-     * @var string
-     */
-    protected string $_configFile;
-
-    /**
      * @var AbstractFilesStorage
      */
     protected $files_storage;
@@ -85,25 +74,16 @@ class FastAnalysis extends AbstractDaemon {
     const ERR_FILE_NOT_FOUND = 131;
 
     /**
-     * @var ContextList
-     */
-    protected $_queueContextList = [];
-
-    /**
      * Reload Configuration every cycle
      *
      * @throws Exception
      */
     protected function _updateConfiguration(): void {
 
-        $config = @parse_ini_file( $this->_configFile, true );
-
-        if ( empty( $this->_configFile ) || empty( $config[ 'context_definitions' ] ) ) {
-            throw new Exception( 'Wrong configuration file provided.' );
-        }
+        $configuration = $this->getConfiguration();
 
         //First Execution, load build object
-        $this->_queueContextList = ContextList::get( $config[ 'context_definitions' ] );
+        $this->_queueContextList = $configuration->getContextList();
 
     }
 
@@ -125,11 +105,13 @@ class FastAnalysis extends AbstractDaemon {
     /**
      * @throws Exception
      */
-    protected function __construct( string $configFile ) {
+    protected function __construct( string $configFile, ?string $contextIndex = null ) {
 
         parent::__construct();
 
-        $this->_configFile = $configFile;
+        $this->_configFile   = $configFile;
+        $this->_contextIndex = $contextIndex;
+
         Log::resetLogger();
         Log::$fileName = 'fastAnalysis.log';
 
@@ -159,6 +141,12 @@ class FastAnalysis extends AbstractDaemon {
     public function main( array $args = null ) {
 
         do {
+
+            if ( !$this->queueHandler->getRedisClient()->sismember( RedisKeys::FAST_PID_SET, $this->myProcessPid . ":" . gethostname() . ":" . INIT::$INSTANCE_ID ) ) {
+                // suicide gracefully
+                $this->RUNNING = false;
+                continue;
+            }
 
             try {
                 $this->_checkDatabaseConnection();
@@ -450,9 +438,9 @@ class FastAnalysis extends AbstractDaemon {
                                  ) VALUES "
                 . implode( ", ", $tuple_list ) .
                 " ON DUPLICATE KEY UPDATE
-                        match_type = VALUES( match_type ),
-                        eq_word_count = VALUES( eq_word_count ),
-                        standard_word_count = VALUES( standard_word_count )
+                        match_type          = IF( tm_analysis_status = 'SKIPPED', match_type, VALUES( match_type ) ),
+                        eq_word_count       = IF( tm_analysis_status = 'SKIPPED', eq_word_count, VALUES( eq_word_count ) ),
+                        standard_word_count = IF( tm_analysis_status = 'SKIPPED', standard_word_count, VALUES( standard_word_count ) )
                 ";
 
         $this->_logTimeStampedMsg( "Executed " . ( count( $tuple_list ) ) );
@@ -587,36 +575,43 @@ class FastAnalysis extends AbstractDaemon {
         unset( $chunks_bind_values );
         unset( $chunks_st );
 
-        /*
-         * IF NO TM ANALYSIS, update the jobs global word count
-         */
-        if ( !$perform_Tms_Analysis ) {
-
-            $_details = $this->getProjectSegmentsTranslationSummary( $pid );
-
-            $this->_logTimeStampedMsg( "--- trying to initialize job total word count." );
-
-            $project_details = array_pop( $_details ); //Don't remove, needed to remove rollup row
-
-            foreach ( $_details as $job_info ) {
-                $counter = new CounterModel();
-                $counter->initializeJobWordCount( $job_info[ 'id_job' ], $job_info[ 'password' ] );
-            }
-
-        }
-        /* IF NO TM ANALYSIS, upload the jobs global word count */
-
         //_TimeStampMsg( "Done." );
 
         $data2 = [ 'fast_analysis_wc' => $total_eq_wc ];
         $where = [ "id" => $pid ];
 
 
+        $db = Database::obtain();
+        $db->begin();
+
         try {
-            $db                       = Database::obtain();
+
+            /*
+             * IF NO TM ANALYSIS, update the jobs global word count
+            */
+            if ( !$perform_Tms_Analysis ) {
+
+                $_details = $this->getProjectSegmentsTranslationSummary( $pid );
+
+                $this->_logTimeStampedMsg( "--- trying to initialize job total word count." );
+
+                $project_details = array_pop( $_details ); //Don't remove, needed to remove rollup row
+
+                foreach ( $_details as $job_info ) {
+                    $counter = new CounterModel();
+                    $counter->initializeJobWordCount( $job_info[ 'id_job' ], $job_info[ 'password' ] );
+                }
+
+            }
+            /* IF NO TM ANALYSIS, upload the jobs global word count */
+
             $project_creation_success = $db->update( 'projects', $data2, $where );
+
+            $db->commit();
+
         } catch ( PDOException $e ) {
             $this->_logTimeStampedMsg( $e->getMessage() );
+            $db->rollback();
 
             return $e->getCode() * -1;
         }
@@ -734,11 +729,9 @@ class FastAnalysis extends AbstractDaemon {
                 break;
         }
 
-        //Set NO_MATCH word count multiplier for internal fuzzy matches on standard_words
+        //Set the industry word count equals to the equivalent word count, here we have no machine translation.
+        // - The word count for Industry is by definition equal to the word count for Equivalent, except for machine translation (next phase).
         $standard_words = $eq_word;
-        if ( $match_type == "INTERNAL" ) {
-            $standard_words = $segmentArray[ 'wc' ] * $equivalentWordMapping[ "NO_MATCH" ] / 100;
-        }
 
         return [ $eq_word, $standard_words, $match_type ];
 

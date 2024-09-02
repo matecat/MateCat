@@ -2,15 +2,22 @@
   "model": {
     "version": 1,
     "label": "testing",
-
     "categories": [
       {
         "label": "Accuracy",
         "subcategories": [
-          {"label": "Mistranslation"},
-          {"label": "Addition"},
-          {"label": "Omission"},
-          {"label": "Untranslated"}
+          {
+            "label": "Mistranslation"
+          },
+          {
+            "label": "Addition"
+          },
+          {
+            "label": "Omission"
+          },
+          {
+            "label": "Untranslated"
+          }
         ]
       },
       {
@@ -19,14 +26,24 @@
       {
         "label": "Fluency",
         "subcategories": [
-          {"label": "Spelling"},
-          {"label": "Grammar"},
-          {"label": "Punctuation"}
+          {
+            "label": "Spelling"
+          },
+          {
+            "label": "Grammar"
+          },
+          {
+            "label": "Punctuation"
+          }
         ]
       },
       {
         "label": "Style",
-        "subcategories": [{"label": "Company Style"}]
+        "subcategories": [
+          {
+            "label": "Company Style"
+          }
+        ]
       }
     ],
     "severities": [
@@ -43,7 +60,6 @@
         "penalty": 10
       }
     ],
-
     "passfail": {
       "type": "points_per_thousand",
       "options": {
