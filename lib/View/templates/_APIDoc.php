@@ -10,17 +10,23 @@ foreach ( INIT::$SUPPORTED_FILE_TYPES as $key => $value ) {
 $nr_supoported_files = $count;
 
 $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / ( 1024 * 1024 );
+
+$csp_nonce = Utils::uuid4();
+$csp = file_get_contents( INIT::$ROOT . "/" .INIT::$TRACKING_CODES_VIEW_PATH . "/CSP-HeaderMeta.html" );
+$csp = str_replace( '${x_nonce_unique_id}', $csp_nonce, $csp );
+
 ?>
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title>API - Matecat</title>
+    <?= $csp ?>
     <link rel="stylesheet" type="text/css" href="/public/api/dist/lib/swagger-ui.css">
     <link rel="icon" type="image/png" sizes="32x32" href="/public/img/meta/favicon-32x32.svg"/>
     <link rel="icon" type="image/png" sizes="16x16" href="/public/img/meta/favicon-16x16.svg"/>
 
-    <script>
+    <script nonce="<?=$csp_nonce ?>">
         /*<![CDATA[*/
         config = {};
         config.swagger_host = '<?php echo $_SERVER[ 'HTTP_HOST' ] ?>';
@@ -43,7 +49,7 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / ( 1024 * 1024 );
     echo implode( "\n", $appendJS );
 
     ?>
-    <script type="application/javascript">
+    <script nonce="<?=$csp_nonce ?>" type="application/javascript">
         /*<![CDATA[*/
 
         // add active class to menu

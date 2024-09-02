@@ -45,7 +45,7 @@ unitTest/xhGui/
 unitTest/coverage/*
 local_storage
 test_storage
-lib/Utils/fileupload/thumbnails/*
+lib/View/fileupload/thumbnails/*
 tmp/
 
 task_manager_config.ini

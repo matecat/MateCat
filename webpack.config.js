@@ -394,6 +394,46 @@ const matecatConfig = async ({env}, {mode}) => {
         xhtml: true,
       }),
       new HtmlWebPackPlugin({
+        filename: path.resolve(__dirname, './lib/View/activity_log_not_found.html'),
+        template: path.resolve(
+            __dirname,
+            './lib/View/templates/_activity_log_not_found.html',
+        ),
+        chunks: ['commonCss'],
+        publicPath: '/public/build/',
+        xhtml: true,
+      }),
+      new HtmlWebPackPlugin({
+        filename: path.resolve(__dirname, './lib/View/oauth_response_handler.html'),
+        template: path.resolve(
+            __dirname,
+            './lib/View/templates/_oauth_response_handler.html',
+        ),
+        chunks: [],
+        publicPath: '/public/build/',
+        xhtml: true,
+      }),
+      new HtmlWebPackPlugin({
+        filename: path.resolve(__dirname, './lib/View/redirectFailurePage.html'),
+        template: path.resolve(
+            __dirname,
+            './lib/View/templates/_redirectFailurePage.html',
+        ),
+        chunks: [],
+        publicPath: '/public/build/',
+        xhtml: true,
+      }),
+      new HtmlWebPackPlugin({
+        filename: path.resolve(__dirname, './lib/View/redirectSuccessPage.html'),
+        template: path.resolve(
+            __dirname,
+            './lib/View/templates/_redirectSuccessPage.html',
+        ),
+        chunks: [],
+        publicPath: '/public/build/',
+        xhtml: true,
+      }),
+      new HtmlWebPackPlugin({
         filename: path.resolve(__dirname, './lib/View/job_archived.html'),
         template: path.resolve(
           __dirname,
@@ -435,20 +475,7 @@ const matecatConfig = async ({env}, {mode}) => {
       }),
       new HtmlWebPackPlugin({
         filename: path.resolve(__dirname, './lib/View/badConfiguration.html'),
-        template: path.resolve(
-          __dirname,
-          './lib/View/templates/_badConfiguration.html',
-        ),
-        chunks: ['commonCss'],
-        publicPath: '/public/build/',
-        xhtml: true,
-      }),
-      new HtmlWebPackPlugin({
-        filename: path.resolve(__dirname, './lib/View/badConfiguration.html'),
-        template: path.resolve(
-          __dirname,
-          './lib/View/templates/_badConfiguration.html',
-        ),
+        template: path.resolve(__dirname, './lib/View/templates/_badConfiguration.html'),
         chunks: ['commonCss'],
         publicPath: '/public/build/',
         xhtml: true,

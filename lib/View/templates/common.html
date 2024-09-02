@@ -1,5 +1,5 @@
 <div metal:define-macro="footer_includes">
-    <script type="text/javascript">
+    <script tal:attributes="nonce x_nonce_unique_id" type="text/javascript">
         /*<![CDATA[*/
         if ( typeof config == 'undefined' ) {
             config = {} ;
@@ -10,32 +10,12 @@
         config.isLoggedIn = ${isLoggedIn|string:false};
         config.gdriveAuthURL = ${structure php:json_encode(gdriveAuthURL)} ;
         config.authURL = ${structure php:json_encode(authURL)} ;
-        config.dqf_enabled = ${dqf_enabled} ;
         config.googleDriveEnabled = ${googleDriveEnabled};
         /*]]>*/
 
     <tal:block tal:repeat="config_data config_js">
         /*<![CDATA[*/
         config.pluggable = ${structure php: json_encode( config_data )} ;
-        /*]]>*/
-    </tal:block>
-
-    <tal:block tal:condition="dqf_enabled">
-        /*<![CDATA[*/
-        config.dqf_content_types = ${structure php: json_encode( dqf_content_types )} ;
-        config.dqf_industry      = ${structure php: json_encode( dqf_industry )} ;
-        config.dqf_process       = ${structure php: json_encode( dqf_process )} ;
-        config.dqf_quality_level = ${structure php: json_encode( dqf_quality_level )} ;
-        /*]]>*/
-    </tal:block>
-
-    <tal:block tal:condition="exists: dqf_active_on_project">
-        /*<![CDATA[*/
-        config.dqf_selected_content_types = ${ dqf_selected_content_types } ;
-        config.dqf_selected_industry      = ${ dqf_selected_industry } ;
-        config.dqf_selected_process       = ${ dqf_selected_process } ;
-        config.dqf_selected_quality_level = ${ dqf_selected_quality_level } ;
-        config.dqf_active_on_project      = ${ php: json_encode( dqf_active_on_project ) } ;
         /*]]>*/
     </tal:block>
 
@@ -54,13 +34,12 @@
     </script>
 
     <tal:block  tal:repeat="js_source footer_js">
-        <script tal:attributes="src js_source"></script>
+        <script tal:attributes="src js_source; nonce x_nonce_unique_id"></script>
     </tal:block>
 
     <tal:block  tal:repeat="css_url css_resources">
-        <link rel="stylesheet" tal:attributes="href css_url"/>
+        <link rel="stylesheet" tal:attributes="href css_url; nonce x_nonce_unique_id"/>
     </tal:block>
-
 
     <div id="modal" style="z-index: 999999999"></div>
 </div>

@@ -2,6 +2,7 @@
 <html dir="ltr" lang="it-IT">
     <!-- MateCAT Server : Release 0.21a - 2012-10-22 -->
     <head>
+        <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/CSP-HeaderMeta.html/CSP_NONCE"/>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1"/>
         <meta property="og:title" content="Translate a file with Matecat" />
@@ -14,7 +15,7 @@
         <link rel="icon" type="image/png" sizes="16x16" href="${basepath}public/img/meta/favicon-16x16.svg"/>
 
         <tal:block metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/header_common"/>
-        <script type="text/javascript">
+        <script tal:attributes="nonce x_nonce_unique_id" type="text/javascript">
             /*<![CDATA[*/
 
             var getStackTrace = function() {
@@ -128,7 +129,7 @@
             /*]]>*/
         </script>
 
-        <script tal:condition="true:review_extended" type="text/javascript">
+        <script tal:attributes="nonce x_nonce_unique_id" tal:condition="true:review_extended" type="text/javascript">
 
           /*<![CDATA[*/
           // TODO: remove the nested one, should be nested on the client.
@@ -138,7 +139,7 @@
 
         </script>
 
-        <script type="text/javascript">
+        <script tal:attributes="nonce x_nonce_unique_id" type="text/javascript">
             /*<![CDATA[*/
             config.overall_quality_class = '${overall_quality_class}';
             config.quality_report_href = '${quality_report_href}';
@@ -146,14 +147,14 @@
 
         </script>
 
-        <script tal:condition="true:comments_enabled" type="text/javascript">
+        <script tal:attributes="nonce x_nonce_unique_id" tal:condition="true:comments_enabled" type="text/javascript">
           /*<![CDATA[*/
           config.comments_enabled = true;
           config.sse_base_url = '${sse_base_url}';
           /*]]>*/
         </script>
 
-        <script tal:condition="true:project_completion_feature_enabled" type="text/javascript">
+        <script tal:attributes="nonce x_nonce_unique_id" tal:condition="true:project_completion_feature_enabled" type="text/javascript">
             /*<![CDATA[*/
             config.job_marked_complete = ${job_marked_complete|false};
             config.job_completion_current_phase = '${job_completion_current_phase}' ;
@@ -162,7 +163,7 @@
             /*]]>*/
         </script>
 
-        <script tal:condition="true:brPlaceholdEnabled" type="text/javascript">
+        <script tal:attributes="nonce x_nonce_unique_id" tal:condition="true:brPlaceholdEnabled" type="text/javascript">
             /*<![CDATA[*/
             config.lfPlaceholder = '${lfPlaceholder | null}';
             config.crPlaceholder = '${crPlaceholder | null}';
@@ -190,16 +191,8 @@
 
     <body class="cattool ${job_archived}${source_rtl}${target_rtl}" tal:condition="php: !job_not_found && !job_cancelled && !job_archived">
         <div class="page-content"></div>
-        <tal:block metal:use-macro="common.html/footer_includes" />
+        <tal:block metal:use-macro="templates/common.html/footer_includes" />
         <tal:block metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/track_codes_translate"/>
     </body>
-
-<script tal:condition="exists:dqf_user_status">
-    <tal:block>
-        /*<![CDATA[*/
-        config.dqf_user_status = '${dqf_user_status}' ;
-        /*]]>*/
-    </tal:block>
-</script>
 
 </html>

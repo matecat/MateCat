@@ -95,7 +95,7 @@ abstract class viewController extends controller {
 
         ob_get_contents();
         ob_get_clean();
-        ob_start( "ob_gzhandler" ); // compress page before sending
+//        ob_start( "ob_gzhandler" ); // compress page before sending
         $this->nocache();
 
         header( 'Content-Type: text/html; charset=utf-8' );
@@ -249,6 +249,12 @@ abstract class viewController extends controller {
             $this->template->maxTMXFileSize      = INIT::$MAX_UPLOAD_TMX_FILE_SIZE;
             $this->template->dqf_enabled         = false;
             $this->template->isOpenAiEnabled     = !empty( INIT::$OPENAI_API_KEY );
+
+            /**
+             * This is a unique ID generated at runtime.
+             * It is injected into the nonce attribute of `< script >` tags to allow browsers to safely execute the contained CSS and JavaScript.
+             */
+            $this->template->x_nonce_unique_id = Utils::uuid4();
 
             ( INIT::$VOLUME_ANALYSIS_ENABLED ? $this->template->analysis_enabled = true : null );
             $this->template->setOutputMode( PHPTAL::HTML5 );

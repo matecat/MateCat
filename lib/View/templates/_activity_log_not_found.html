@@ -1,7 +1,7 @@
 <!doctype html>
 <html dir="ltr" lang="it-IT">
 <head>
-    <title>Not Found</title>
+    <title>No Activity Found</title>
     <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/CSP-HeaderMeta.html/CSP_NONCE"/>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="icon" type="image/png" sizes="32x32" href="${basepath}public/img/meta/favicon-32x32.svg"/>
@@ -11,12 +11,10 @@
 <div class="iepopup">
     <a href="${basepath}" class="logoblack"></a><br/>
 
-    <strong style="font-size:160%">Sorry, we can't find the project you're looking for.</strong>
+    <strong style="font-size:160%">No activity logged for the project ${projectID}</strong>
     <br/><br/>
-    <img src="${basepath}public/img/jobnotfound.png"/>
-    <br/>
-    <p>Double check the URL or contact your PM.<br/>
-        If you continue to get this page, email us at <a href="mailto:${support_mail}">${support_mail}</a>.</p>
+    <img src="/img/jobnotfound.png"/>
+
 </div>
 </body>
 </html>

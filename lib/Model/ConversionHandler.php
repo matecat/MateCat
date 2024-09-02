@@ -29,7 +29,7 @@ class ConversionHandler {
     protected $cookieDir;
     protected $stopOnFileException = true;
     protected $uploadedFiles;
-    public    $uploadError = false;
+    public    $uploadError         = false;
     protected $_userIsLogged;
     protected $filters_extraction_parameters;
 
@@ -42,7 +42,16 @@ class ConversionHandler {
      * ConversionHandler constructor.
      */
     public function __construct() {
-        $this->result = new ConvertedFileModel(ConversionHandlerStatus::OK);
+        $this->result = new ConvertedFileModel( ConversionHandlerStatus::OK );
+    }
+
+    public function fileMustBeConverted() {
+        return XliffProprietaryDetect::fileMustBeConverted( $this->getLocalFilePath(), true, INIT::$FILTERS_ADDRESS );
+    }
+
+    public function getLocalFilePath(): string {
+        $this->file_name = html_entity_decode( $this->file_name, ENT_QUOTES );
+        return $this->intDir . DIRECTORY_SEPARATOR . $this->file_name;
     }
 
     /**
@@ -56,38 +65,37 @@ class ConversionHandler {
     public function doAction() {
 
         $fs              = FilesStorageFactory::create();
-        $this->file_name = html_entity_decode( $this->file_name, ENT_QUOTES );
-        $file_path       = $this->intDir . DIRECTORY_SEPARATOR . $this->file_name;
+        $file_path       = $this->getLocalFilePath();
 
         if ( !file_exists( $file_path ) ) {
-            $this->result->changeCode(ConversionHandlerStatus::UPLOAD_ERROR);
-            $this->result->addError("Error during upload. Please retry.", AbstractFilesStorage::basename_fix( $this->file_name ));
+            $this->result->changeCode( ConversionHandlerStatus::UPLOAD_ERROR );
+            $this->result->addError( "Error during upload. Please retry.", AbstractFilesStorage::basename_fix( $this->file_name ) );
 
             return -1;
         }
 
-        $forceXliff = $this->features->filter( 'forceXLIFFConversion', INIT::$FORCE_XLIFF_CONVERSION, $this->_userIsLogged, $file_path );
-
         //XLIFF Conversion management
-        $fileMustBeConverted = XliffProprietaryDetect::fileMustBeConverted( $file_path, $forceXliff, INIT::$FILTERS_ADDRESS );
+        $fileMustBeConverted = $this->fileMustBeConverted();
 
-        if( $fileMustBeConverted === false ){
+        if ( $fileMustBeConverted === false ) {
             return 0;
-        } else if( $fileMustBeConverted === true ){
-            //Continue with conversion
-        }  else {
-            /**
-             * Application misconfiguration.
-             * upload should not be happened, but if we are here, raise an error.
-             * @see upload.class.php
-             */
-            unlink( $file_path );
+        } else {
+            if ( $fileMustBeConverted === true ) {
+                //Continue with conversion
+            } else {
+                /**
+                 * Application misconfiguration.
+                 * upload should not be happened, but if we are here, raise an error.
+                 * @see upload.class.php
+                 */
+                unlink( $file_path );
 
-            $this->result->changeCode(ConversionHandlerStatus::MISCONFIGURATION);
-            $this->result->addError('Matecat Open-Source does not support ' . ucwords( XliffProprietaryDetect::getInfo( $file_path )[ 'proprietary_name' ] ) . '. Use MatecatPro.',
-                    AbstractFilesStorage::basename_fix( $this->file_name ));
+                $this->result->changeCode( ConversionHandlerStatus::MISCONFIGURATION );
+                $this->result->addError( 'Matecat Open-Source does not support ' . ucwords( XliffProprietaryDetect::getInfo( $file_path )[ 'proprietary_name' ] ) . '. Use MatecatPro.',
+                        AbstractFilesStorage::basename_fix( $this->file_name ) );
 
-            return -1;
+                return -1;
+            }
         }
 
         //compute hash to locate the file in the cache, add the segmentation rule
@@ -118,14 +126,14 @@ class ConversionHandler {
 
             $ocrCheck = new OCRCheck( $this->source_lang );
             if ( $ocrCheck->thereIsError( $file_path ) ) {
-                $this->result->changeCode(ConversionHandlerStatus::OCR_ERROR);
-                $this->result->addError("File is not valid. OCR for RTL languages is not supported.");
+                $this->result->changeCode( ConversionHandlerStatus::OCR_ERROR );
+                $this->result->addError( "File is not valid. OCR for RTL languages is not supported." );
 
                 return false; //break project creation
             }
             if ( $ocrCheck->thereIsWarning( $file_path ) ) {
-                $this->result->changeCode(ConversionHandlerStatus::OCR_WARNING);
-                $this->result->addWarning("File uploaded successfully. Before translating, download the Preview to check the conversion. OCR support for non-latin scripts is experimental.");
+                $this->result->changeCode( ConversionHandlerStatus::OCR_WARNING );
+                $this->result->addWarning( "File uploaded successfully. Before translating, download the Preview to check the conversion. OCR support for non-latin scripts is experimental." );
             }
 
             if ( strpos( $this->target_lang, ',' ) !== false ) {
@@ -158,37 +166,37 @@ class ConversionHandler {
                         //custom error message passed directly to javascript client and displayed as is
                         $convertResult[ 'errorMessage' ] = "Error: File upload failed because you have MateCat running in multiple tabs. Please close all other MateCat tabs in your browser.";
 
-                        $this->result->changeCode(ConversionHandlerStatus::FILESYSTEM_ERROR);
-                        $this->result->addError($convertResult[ 'errorMessage' ], AbstractFilesStorage::basename_fix( $this->file_name ));
+                        $this->result->changeCode( ConversionHandlerStatus::FILESYSTEM_ERROR );
+                        $this->result->addError( $convertResult[ 'errorMessage' ], AbstractFilesStorage::basename_fix( $this->file_name ) );
 
                         unset( $cachedXliffPath );
 
                         return false;
                     }
 
-                } catch (FileSystemException $e){
+                } catch ( FileSystemException $e ) {
 
-                    Log::doJsonLog("FileSystem Exception: Message: " . $e->getMessage());
+                    Log::doJsonLog( "FileSystem Exception: Message: " . $e->getMessage() );
 
-                    $this->result->changeCode(ConversionHandlerStatus::FILESYSTEM_ERROR);
-                    $this->result->addError($e->getMessage());
+                    $this->result->changeCode( ConversionHandlerStatus::FILESYSTEM_ERROR );
+                    $this->result->addError( $e->getMessage() );
 
                     return false;
 
-                } catch ( Exception $e){
+                } catch ( Exception $e ) {
 
-                    Log::doJsonLog("S3 Exception: Message: " . $e->getMessage());
+                    Log::doJsonLog( "S3 Exception: Message: " . $e->getMessage() );
 
-                    $this->result->changeCode(ConversionHandlerStatus::S3_ERROR);
-                    $this->result->addError('Sorry, file name too long. Try shortening it and try again.');
+                    $this->result->changeCode( ConversionHandlerStatus::S3_ERROR );
+                    $this->result->addError( 'Sorry, file name too long. Try shortening it and try again.' );
 
                     return false;
                 }
 
             } else {
 
-                $this->result->changeCode(ConversionHandlerStatus::GENERIC_ERROR);
-                $this->result->addError($this->formatConversionFailureMessage($convertResult[ 'errorMessage' ]), AbstractFilesStorage::basename_fix( $this->file_name ));
+                $this->result->changeCode( ConversionHandlerStatus::GENERIC_ERROR );
+                $this->result->addError( $this->formatConversionFailureMessage( $convertResult[ 'errorMessage' ] ), AbstractFilesStorage::basename_fix( $this->file_name ) );
 
                 return false;
             }
@@ -202,7 +210,7 @@ class ConversionHandler {
             $uploadDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->cookieDir;
             $fs->deleteHashFromUploadDir( $uploadDir, $sha1 . "|" . $this->source_lang );
 
-            if( is_file( $file_path ) ){
+            if ( is_file( $file_path ) ) {
                 //put reference to cache in upload dir to link cache to session
                 $fs->linkSessionToCacheForOriginalFiles(
                         $sha1,
@@ -221,15 +229,15 @@ class ConversionHandler {
 
     /**
      * @param string $message
+     *
      * @return string
      */
-    private function formatConversionFailureMessage($message)
-    {
+    private function formatConversionFailureMessage( $message ) {
         // WinConverter error
-        if (strpos($message, 'WinConverter') !== false) {
+        if ( strpos( $message, 'WinConverter' ) !== false ) {
 
             // file conversion error
-            if (strpos($message, 'WinConverter error 5') !== false) {
+            if ( strpos( $message, 'WinConverter error 5' ) !== false ) {
                 return 'Scanned file conversion issue, please convert it to editable format (e.g. docx) and retry upload';
             }
 
@@ -284,8 +292,8 @@ class ConversionHandler {
 
             } catch ( Exception $e ) {
 
-                $this->result->changeCode(ConversionHandlerStatus::INVALID_FILE);
-                $this->result->addError($e->getMessage());
+                $this->result->changeCode( ConversionHandlerStatus::INVALID_FILE );
+                $this->result->addError( $e->getMessage() );
 
                 // ???
                 $this->api_output[ 'message' ] = $e->getMessage();
@@ -301,8 +309,8 @@ class ConversionHandler {
 
             Log::doJsonLog( "ExtendedZipArchive Exception: {$e->getCode()} : {$e->getMessage()}" );
 
-            $this->result->changeCode($e->getCode());
-            $this->result->addError("Zip error: " . $e->getMessage(), $this->file_name);
+            $this->result->changeCode( $e->getCode() );
+            $this->result->addError( "Zip error: " . $e->getMessage(), $this->file_name );
 
             return null;
         }
@@ -477,8 +485,7 @@ class ConversionHandler {
     /**
      * @param mixed $filters_extraction_parameters
      */
-    public function setFiltersExtractionParameters($filters_extraction_parameters)
-    {
+    public function setFiltersExtractionParameters( $filters_extraction_parameters ) {
         $this->filters_extraction_parameters = $filters_extraction_parameters;
     }
 }
