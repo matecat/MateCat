@@ -8,6 +8,7 @@ use Email\ForgotPasswordEmail;
 use Email\SignupEmail;
 use Email\WelcomeEmail;
 use Exceptions\ValidationError;
+use INIT;
 use Teams\TeamDao;
 use Users_UserDao;
 use Users_UserStruct;
@@ -41,7 +42,11 @@ class SignupModel {
                             return mb_substr( preg_replace( '/(?:https?|s?ftp)?\P{L}+/', '', $username ), 0, 50 );
                         }
                 ],
-                'wanted_url'            => FILTER_SANITIZE_URL
+                'wanted_url'            => [
+                        'filter' => FILTER_CALLBACK, 'options' => function ( $wanted_url ) {
+                            return parse_url( $wanted_url )[ 'host' ] != parse_url( INIT::$HTTPHOST )[ 'host' ] ? INIT::$HTTPHOST : $wanted_url;
+                        }
+                ]
         ] );
 
         $this->user = new Users_UserStruct( $this->params );
