@@ -1,7 +1,7 @@
 <meta metal:define-macro="CSP_NONCE"
       http-equiv="Content-Security-Policy" content="default-src 'self' 'nonce-${x_nonce_unique_id}' 'unsafe-eval';
       script-src-elem 'self' 'nonce-${x_nonce_unique_id}' *.googletagmanager.com;
-      connect-src 'self' *.google.com *.lexiqa.net *.doubleclick.net *.google-analytics.com;
+      connect-src 'self' ${x_self_ajax_location_hosts} *.google.com *.lexiqa.net *.doubleclick.net *.google-analytics.com;
       child-src 'self' *.google.com *.hubspot.com;
       font-src 'self' fonts.gstatic.com data:;
       img-src 'self' *.googleusercontent.com data: *.hubspot.com *.google.com *.google.ad *.google.ae *.google.com.af *.google.com.ag *.google.al

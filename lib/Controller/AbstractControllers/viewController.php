@@ -95,7 +95,7 @@ abstract class viewController extends controller {
 
         ob_get_contents();
         ob_get_clean();
-//        ob_start( "ob_gzhandler" ); // compress page before sending
+//        ob_start( "ob_gzhandler" ); // do not compress page before sending, when in tls possible BREACH attack (low risk)
         $this->nocache();
 
         header( 'Content-Type: text/html; charset=utf-8' );
@@ -254,7 +254,8 @@ abstract class viewController extends controller {
              * This is a unique ID generated at runtime.
              * It is injected into the nonce attribute of `< script >` tags to allow browsers to safely execute the contained CSS and JavaScript.
              */
-            $this->template->x_nonce_unique_id = Utils::uuid4();
+            $this->template->x_nonce_unique_id          = Utils::uuid4();
+            $this->template->x_self_ajax_location_hosts = INIT::$ENABLE_MULTI_DOMAIN_API ? " *.ajax." . parse_url( INIT::$HTTPHOST )[ 'host' ] : null;
 
             ( INIT::$VOLUME_ANALYSIS_ENABLED ? $this->template->analysis_enabled = true : null );
             $this->template->setOutputMode( PHPTAL::HTML5 );
