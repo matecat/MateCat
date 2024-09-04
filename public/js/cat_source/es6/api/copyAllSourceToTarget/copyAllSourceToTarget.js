@@ -18,12 +18,12 @@ export const copyAllSourceToTarget = async ({
     action: 'copyAllSource2Target',
     id_job: idJob,
     pass: password,
-    revision_number: revisionNumber,
+    revision_number: revisionNumber ? revisionNumber : undefined,
   }
   const formData = new FormData()
 
   Object.keys(paramsData).forEach((key) => {
-    formData.append(key, paramsData[key])
+    if (paramsData[key] !== undefined) formData.append(key, paramsData[key])
   })
   const response = await fetch(
     `${getMatecatApiDomain()}?action=copyAllSource2Target`,

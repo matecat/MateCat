@@ -5,7 +5,7 @@
     {
       "updateTypes": ["minor", "patch"],
       "automerge": false,
-      "minimumReleaseAge": "15 days"
+      "minimumReleaseAge": "20 days"
     }
   ],
   "branchConcurrentLimit": 3,
