@@ -95,7 +95,6 @@ abstract class viewController extends controller {
 
         ob_get_contents();
         ob_get_clean();
-//        ob_start( "ob_gzhandler" ); // do not compress page before sending, when in tls possible BREACH attack (low risk)
         $this->nocache();
 
         header( 'Content-Type: text/html; charset=utf-8' );

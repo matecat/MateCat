@@ -270,8 +270,8 @@ const matecatConfig = async ({env}, {mode}) => {
         bundles: [
           {
             src: [
-              './public/js/lib/jquery-3.3.1.min.js',
-              './public/js/lib/jquery-ui.min.js',
+              './public/js/lib/jquery-3.7.1.min.js',
+              './public/js/lib/jquery-ui-1.14.0.min.js',
               './public/js/lib/fileupload/tmpl.min.js',
               './public/js/lib/fileupload/load-image.min.js',
               './public/js/lib/fileupload/canvas-to-blob.min.js',
@@ -298,8 +298,8 @@ const matecatConfig = async ({env}, {mode}) => {
         bundles: [
           {
             src: [
-              './public/js/lib/jquery-3.3.1.min.js',
-              './public/js/lib/jquery-ui.min.js',
+              './public/js/lib/jquery-3.7.1.min.js',
+              './public/js/lib/jquery-ui-1.14.0.min.js',
               './public/js/lib/jquery-dateFormat.min.js',
               './public/js/lib/semantic.min.js',
             ],

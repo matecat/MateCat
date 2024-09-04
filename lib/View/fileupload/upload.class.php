@@ -15,7 +15,7 @@ class UploadHandler {
     function __construct() {
 
         $this->options = [
-                'script_url'              => $this->getFullUrl() . 'upload.class.php/',
+                'script_url'              => $this->getFullUrl() . '/index.php/',
                 'upload_token'            => $_COOKIE[ 'upload_session' ],
                 'upload_dir'              => Utils::uploadDirFromSessionCookie( $_COOKIE[ 'upload_session' ] ),
                 'upload_url'              => $this->getFullUrl() . '/files/',

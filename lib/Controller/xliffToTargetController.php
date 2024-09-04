@@ -48,7 +48,6 @@ class xliffToTargetController extends downloadController {
         } else {
             try {
                 $buffer = ob_get_clean();
-                ob_start( "ob_gzhandler" );  // compress page before sending
                 $this->nocache();
                 header( "Content-Type: application/force-download" );
                 header( "Content-Type: application/octet-stream" );
