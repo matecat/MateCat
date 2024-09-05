@@ -37,7 +37,7 @@
 
 .job-table-header {
   display: grid;
-  grid-template-columns: minmax(100px, 150px) repeat(11, 1fr) minmax(
+  grid-template-columns: minmax(100px, 150px) repeat(12, 1fr) minmax(
       80px,
       100px
     );
@@ -51,7 +51,7 @@
     height: 100%;
     text-align: right;
     border-left: 1px solid $grey3;
-    min-width: 66px;
+    min-width: 46px;
     font-size: 16px;
     &:first-child {
       border-left: none;
@@ -60,7 +60,7 @@
       }
     }
     :first-child {
-      height: 60px;
+      height: 80px;
       border-bottom: 1px solid $grey3;
       font-weight: bold;
     }
@@ -83,7 +83,7 @@
     padding-right: 6px;
     font-size: 16px;
     :first-child {
-      height: 60px;
+      height: 80px;
       font-weight: normal;
     }
     > div {
@@ -91,7 +91,7 @@
     }
   }
   .job-table-header-total {
-    width: 100px;
+    width: 80px;
     display: flex;
     justify-content: flex-end;
     font-weight: 700;
@@ -110,7 +110,7 @@
   padding: 0 !important;
   .chunk-analyze-info {
     display: grid;
-    grid-template-columns: minmax(100px, 150px) repeat(11, 1fr) minmax(
+    grid-template-columns: minmax(100px, 150px) repeat(12, 1fr) minmax(
         80px,
         100px
       );
@@ -198,7 +198,7 @@
 }
 
 .chunk-file-detail {
-  grid-template-columns: minmax(100px, 150px) repeat(11, 1fr) minmax(
+  grid-template-columns: minmax(100px, 150px) repeat(12, 1fr) minmax(
       80px,
       100px
     );

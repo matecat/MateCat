@@ -27,14 +27,19 @@ class CustomPayableRateStruct extends DataAccess_AbstractDaoSilentStruct impleme
      * @return string
      */
     public function breakdownsToJson(): string {
-        return json_encode( $this->breakdowns );
+        return json_encode( $this->getBreakdownsArray() );
     }
 
     /**
      * @return array
      */
-    public function getBreakdownsArray(): array {
-        return ( is_string( $this->breakdowns ) ? json_decode( $this->breakdowns, true ) : $this->breakdowns );
+    protected function getBreakdownsArray(): array {
+        $this->breakdowns = ( is_string( $this->breakdowns ) ? json_decode( $this->breakdowns, true ) : $this->breakdowns );
+        if ( !isset( $this->breakdowns[ 'ICE_MT' ] ) ) {
+            $this->breakdowns[ 'ICE_MT' ] = $this->breakdowns[ 'MT' ];
+        }
+
+        return $this->breakdowns;
     }
 
     /**

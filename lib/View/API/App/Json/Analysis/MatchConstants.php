@@ -26,6 +26,7 @@ class MatchConstants {
     const _100_PUBLIC   = "100_public";
     const _ICE          = "ice";
     const _MT           = "MT";
+    const _ICE_MT       = "ice_MT";
     const _REPETITIONS  = 'repetitions';
     const _INTERNAL     = 'internal';
     const _NUMBERS_ONLY = 'numbers_only';
@@ -40,6 +41,7 @@ class MatchConstants {
             self::_100_PUBLIC   => self::_100_PUBLIC,
             self::_ICE          => self::_ICE,
             self::_MT           => self::_MT,
+            self::_ICE_MT       => self::_ICE_MT,
             self::_REPETITIONS  => self::_REPETITIONS,
             self::_INTERNAL     => self::_INTERNAL,
             self::_NUMBERS_ONLY => self::_NUMBERS_ONLY,
@@ -72,6 +74,8 @@ class MatchConstants {
                 return '100%_PUBLIC';
             case self::_MT:
                 return 'MT';
+            case self::_ICE_MT:
+                return 'ICE_MT';
             case self::_ICE:
                 return "ICE";
             case "75_99": // no longer used

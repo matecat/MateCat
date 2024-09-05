@@ -237,7 +237,7 @@ class Mmt extends BaseFeature {
 
     }
 
-    public static function analysisBeforeMTGetContribution( $config, Engines_AbstractEngine $engine, QueueElement $queueElement ) {
+    public static function analysisBeforeMTGetContribution( $config, Engines_AbstractEngine $engine, QueueElement $queueElement, $mt_evaluation ) {
 
         if ( $engine instanceof Engines_MMT ) {
 
@@ -246,6 +246,10 @@ class Mmt extends BaseFeature {
 
             if ( !empty( $mt_context ) ) {
                 $config[ 'mt_context' ] = $mt_context->value;
+            }
+
+            if( $mt_evaluation ){
+                $config[ 'include_score' ] = true;
             }
 
             $config[ 'secret_key' ] = self::getG2FallbackSecretKey();

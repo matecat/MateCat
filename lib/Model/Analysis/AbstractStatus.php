@@ -241,6 +241,8 @@ abstract class AbstractStatus {
                 $matchType = MatchConstants::_NEW;
             } elseif ( $segInfo[ 'match_type' ] == "ICE" ) {
                 $matchType = MatchConstants::_ICE;
+            } elseif ( $segInfo[ 'match_type' ] == "ICE_MT" ) {
+                $matchType = MatchConstants::_ICE_MT;
             } elseif ( $segInfo[ 'match_type' ] == "REPETITIONS" ) {
                 $matchType = MatchConstants::_REPETITIONS;
             } else {
