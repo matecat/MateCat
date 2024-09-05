@@ -27,7 +27,7 @@ $klein->respond( '/utils/pee', function () {
 
 } );
 
-route( '/api/app/teams/[i:id_team]/members/public', 'GET', '\API\App\TeamPublicMembersController', 'publicList' );
+route( '/api/app/teams/[i:id_team]/[:team_name]/members/public', 'GET', '\API\App\TeamPublicMembersController', 'publicList' );
 
 route( '/api/app/user', 'GET', 'API\App\UserController', 'show' );
 route( '/api/app/user/password/change', 'POST', 'API\App\UserController', 'changePasswordAsLoggedUser' );
