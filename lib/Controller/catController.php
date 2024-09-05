@@ -344,6 +344,12 @@ class catController extends viewController {
 
         if ( !empty( $this->project->id_team ) ) {
             $this->template->id_team = $this->project->id_team;
+
+            if(!isset($team)){
+                $team = $this->project->getTeam();
+            }
+
+            $this->template->team_name = $team->name;
         }
 
         $this->template->owner_email        = $this->job_owner;
