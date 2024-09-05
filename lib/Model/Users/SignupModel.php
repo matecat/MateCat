@@ -45,7 +45,6 @@ class SignupModel {
                 'wanted_url'            => [
                         'filter' => FILTER_CALLBACK, 'options' => function ( $wanted_url ) {
                             $wanted_url = filter_var( $wanted_url, FILTER_SANITIZE_URL );
-
                             return parse_url( $wanted_url )[ 'host' ] != parse_url( INIT::$HTTPHOST )[ 'host' ] ? INIT::$HTTPHOST : $wanted_url;
                         }
                 ]
