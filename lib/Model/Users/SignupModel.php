@@ -44,6 +44,7 @@ class SignupModel {
                 ],
                 'wanted_url'            => [
                         'filter' => FILTER_CALLBACK, 'options' => function ( $wanted_url ) {
+                            $wanted_url = filter_var( $wanted_url, FILTER_SANITIZE_URL );
                             return parse_url( $wanted_url )[ 'host' ] != parse_url( INIT::$HTTPHOST )[ 'host' ] ? INIT::$HTTPHOST : $wanted_url;
                         }
                 ]
@@ -213,8 +214,16 @@ class SignupModel {
      */
     public static function forgotPassword( $email, $wanted_url ) {
 
-        $email                    = filter_var( $email, FILTER_SANITIZE_EMAIL );
-        $wanted_url               = filter_var( $wanted_url, FILTER_SANITIZE_URL );
+        $email      = filter_var( $email, FILTER_SANITIZE_EMAIL );
+        $wanted_url = filter_var( $wanted_url, FILTER_CALLBACK, [
+                        'options' => function ( $wanted_url ) {
+                            $wanted_url = filter_var( $wanted_url, FILTER_SANITIZE_URL );
+
+                            return parse_url( $wanted_url )[ 'host' ] != parse_url( INIT::$HTTPHOST )[ 'host' ] ? INIT::$HTTPHOST : $wanted_url;
+                        }
+                ]
+        );
+
         $_SESSION[ 'wanted_url' ] = $wanted_url;
 
         $dao  = new Users_UserDao();

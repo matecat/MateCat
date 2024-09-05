@@ -503,6 +503,10 @@ const CommonUtils = {
     const event = new CustomEvent('dataLayer-event', {detail: data})
     document.dispatchEvent(event)
   },
+  dispatchCustomEvent: (name, data) => {
+    const event = new CustomEvent(name, {detail: data})
+    document.dispatchEvent(event)
+  },
 }
 
 const ParsedHash = function (hash) {
@@ -584,16 +588,19 @@ class DetectTripleClick {
 
     if (this.count === 3) {
       const {focusNode} = window.getSelection()
-      const rect = focusNode?.parentNode?.getBoundingClientRect()
-      const selectionWidth = this.getSelectionWidth()
-      const limitLeft =
-        typeof selectionWidth === 'object' ? selectionWidth.x : rect.x
-      const limitRight =
-        typeof selectionWidth === 'object'
-          ? rect.x + (selectionWidth.width + (selectionWidth.x - rect.x))
-          : rect.x + rect.width
 
-      if (e.clientX >= limitLeft && e.clientX <= limitRight) this.callback()
+      if (focusNode?.parentNode) {
+        const rect = focusNode?.parentNode?.getBoundingClientRect()
+        const selectionWidth = this.getSelectionWidth()
+        const limitLeft =
+          typeof selectionWidth === 'object' ? selectionWidth.x : rect.x
+        const limitRight =
+          typeof selectionWidth === 'object'
+            ? rect.x + (selectionWidth.width + (selectionWidth.x - rect.x))
+            : rect.x + rect.width
+
+        if (e.clientX >= limitLeft && e.clientX <= limitRight) this.callback()
+      }
 
       this.reset()
       return
