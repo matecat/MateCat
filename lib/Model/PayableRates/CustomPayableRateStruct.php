@@ -35,8 +35,17 @@ class CustomPayableRateStruct extends DataAccess_AbstractDaoSilentStruct impleme
      */
     protected function getBreakdownsArray(): array {
         $this->breakdowns = ( is_string( $this->breakdowns ) ? json_decode( $this->breakdowns, true ) : $this->breakdowns );
-        if ( !isset( $this->breakdowns[ 'ICE_MT' ] ) ) {
-            $this->breakdowns[ 'ICE_MT' ] = $this->breakdowns[ 'MT' ];
+
+        // WARNING: backward compatibility for old data stored, they could not have ICE_MT
+        foreach ( $this->breakdowns as $sourceLang => $targetLanguages ) {
+            if ( $sourceLang == 'default' ) {
+                continue;
+            }
+            foreach ( $targetLanguages as $targetLanguage => $targetPayableRates ) {
+                if ( !isset( $targetPayableRates[ 'ICE_MT' ] ) ) {
+                    $this->breakdowns[ $sourceLang ][ $targetLanguage ][ 'ICE_MT' ] = $targetPayableRates[ 'MT' ];
+                }
+            }
         }
 
         return $this->breakdowns;
