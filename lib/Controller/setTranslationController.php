@@ -209,7 +209,7 @@ class setTranslationController extends ajaxController {
         }
 
 
-        list( $__translation, $this->split_chunk_lengths ) = CatUtils::parseSegmentSplit( $this->__postInput[ 'translation' ], '', $this->filter );
+        [ $__translation, $this->split_chunk_lengths ] = CatUtils::parseSegmentSplit( $this->__postInput[ 'translation' ], '', $this->filter );
 
         if ( is_null( $__translation ) || $__translation === '' ) {
             Log::doJsonLog( "Empty Translation \n\n" . var_export( $_POST, true ) );
@@ -265,7 +265,7 @@ class setTranslationController extends ajaxController {
     }
 
     /**
-     * @throws \API\V2\Exceptions\AuthenticationError
+     * @throws \API\Commons\Exceptions\AuthenticationError
      * @throws \Exceptions\ValidationError
      * @throws \TaskRunner\Exceptions\EndQueueException
      * @throws \TaskRunner\Exceptions\ReQueueException
@@ -392,8 +392,6 @@ class setTranslationController extends ajaxController {
             $new_translation->time_to_edit = $this->time_to_edit;
         }
 
-        $this->_validateSegmentTranslationChange( $new_translation, $old_translation );
-
         /**
          * Update Time to Edit and
          *
@@ -473,6 +471,7 @@ class setTranslationController extends ajaxController {
             $TPropagation[ 'locked' ]                 = $old_translation[ 'locked' ];
 
             try {
+
                 if ( $this->VersionsHandler !== null ) {
                     $propagationTotal = Translations_SegmentTranslationDao::propagateTranslation(
                             $TPropagation,
@@ -503,46 +502,48 @@ class setTranslationController extends ajaxController {
                     'len'      => $this->split_chunk_lengths,
                     'statuses' => $this->split_statuses
             ];
-            $translationDao                          = new TranslationsSplit_SplitDAO( Database::obtain() );
-            $result                                  = $translationDao->atomicUpdate( $translationStruct );
 
-        }
+            $translationDao = new TranslationsSplit_SplitDAO( Database::obtain() );
+            $translationDao->atomicUpdate( $translationStruct );
 
-
-        /*
-         * Hooked by TranslationVersions which manage translation versions
-         *
-         * This is also the init handler of all R1/R2 handling and Qr score calculation by
-         *  *** translationVersionSaved *** hook in TranslationEventsHandler.php hooked by AbstractRevisionFeature
-         */
-        if ( $this->VersionsHandler !== null ) {
-            $this->VersionsHandler->storeTranslationEvent( [
-                    'translation'      => $new_translation,
-                    'old_translation'  => $old_translation,
-                    'propagation'      => $propagationTotal,
-                    'chunk'            => $this->chunk,
-                    'segment'          => $this->segment,
-                    'user'             => $this->user,
-                    'source_page_code' => ReviewUtils::revisionNumberToSourcePage( $this->revisionNumber ),
-                    'features'         => $this->featureSet,
-                    'project'          => $this->project
-            ] );
         }
 
         //COMMIT THE TRANSACTION
         try {
+
+            /*
+             * Hooked by TranslationVersions which manage translation versions
+             *
+             * This is also the init handler of all R1/R2 handling and Qr score calculation by
+             * by TranslationEventsHandler and BatchReviewProcessor
+             */
+            if ( $this->VersionsHandler !== null ) {
+                $this->VersionsHandler->storeTranslationEvent( [
+                        'translation'      => $new_translation,
+                        'old_translation'  => $old_translation,
+                        'propagation'      => $propagationTotal,
+                        'chunk'            => $this->chunk,
+                        'segment'          => $this->segment,
+                        'user'             => $this->user,
+                        'source_page_code' => ReviewUtils::revisionNumberToSourcePage( $this->revisionNumber ),
+                        'features'         => $this->featureSet,
+                        'project'          => $this->project
+                ] );
+            }
+
             $db->commit();
+
         } catch ( Exception $e ) {
             $this->result[ 'errors' ][] = [ "code" => -101, "message" => $e->getMessage() ];
             Log::doJsonLog( "Lock: Transaction Aborted. " . $e->getMessage() );
             $db->rollback();
 
-            return $e->getCode();
+            throw $e;
         }
 
         $newTotals = WordCountStruct::loadFromJob( $this->chunk );
 
-        $job_stats = CatUtils::getFastStatsForJob( $newTotals );
+        $job_stats                        = CatUtils::getFastStatsForJob( $newTotals );
         $job_stats[ 'analysis_complete' ] = (
                 $this->project[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE ||
                 $this->project[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE
@@ -778,13 +779,12 @@ class setTranslationController extends ajaxController {
         return $old_wStruct;
     }
 
-    //TODO: put this method into Job model and use Segment object
     private function updateJobPEE( array $old_translation, array $new_translation ) {
 
         //update total time to edit
         $tte = $old_translation[ 'time_to_edit' ];
         if ( !self::isRevision() ) {
-            if ( false === Utils::stringsAreEqual( $new_translation[ 'translation' ], $old_translation[ 'translation' ] ) ) {
+            if ( !Utils::stringsAreEqual( $new_translation[ 'translation' ], $old_translation[ 'translation' ] ) ) {
                 $tte += $new_translation[ 'time_to_edit' ];
             }
         }
@@ -866,54 +866,12 @@ class setTranslationController extends ajaxController {
     }
 
     /**
-     * This method does consistency check on the input data comparing pervious version and current version.
-     * This method was introduced to prevent inconsistent reviewed_words_count.
-     *
-     * @param Translations_SegmentTranslationStruct $new_translation
-     * @param Translations_SegmentTranslationStruct $old_translation
-     *
-     * @throws ControllerReturnException
-     */
-    protected function _validateSegmentTranslationChange(
-            Translations_SegmentTranslationStruct $new_translation,
-            Translations_SegmentTranslationStruct $old_translation
-    ) {
-        /*
-         * Next condition checks for ICE being set to TRANSLATED status when no change to the ICE is made.
-         */
-        if (
-                $old_translation->isICE() &&
-                $new_translation->translation == $old_translation->translation &&
-                $new_translation->isTranslationStatus() && !$old_translation->isTranslationStatus() &&
-                !$old_translation->isRejected() // this handle the case of rejection/rebut behaviour. A status change already happened
-        ) {
-            Database::obtain()->rollback();
-            $msg                        = "Status change not allowed with identical translation on segment {$old_translation->id_segment}.";
-            $this->result[ 'errors' ][] = [ "code" => -2000, "message" => $msg ];
-            throw new ControllerReturnException( $msg, -1 );
-        }
-    }
-
-    /**
-     * @param $old_translation
-     *
-     * @return string
-     */
-    private function statusOrDefault( $old_translation ) {
-        if ( empty( $old_translation[ 'status' ] ) ) {
-            return Constants_TranslationStatus::STATUS_NEW;
-        } else {
-            return $old_translation[ 'status' ];
-        }
-    }
-
-    /**
      * @param $_Translation
      * @param $old_translation
      *
      * @throws Exception
      * @throws NotFoundException
-     * @throws \API\V2\Exceptions\AuthenticationError
+     * @throws \API\Commons\Exceptions\AuthenticationError
      * @throws \Exceptions\ValidationError
      */
     private function evalSetContribution( $_Translation, $old_translation ) {
@@ -947,7 +905,7 @@ class setTranslationController extends ajaxController {
         $contributionStruct->id_segment   = $this->id_segment;
         $contributionStruct->segment      = $this->filter->fromLayer0ToLayer1( $this->segment[ 'segment' ] );
         $contributionStruct->translation  = $this->filter->fromLayer0ToLayer1( $_Translation[ 'translation' ] );
-        $contributionStruct->api_key              = INIT::$MYMEMORY_API_KEY;
+        $contributionStruct->api_key      = INIT::$MYMEMORY_API_KEY;
         $contributionStruct->uid          = ( $ownerUid !== null ) ? $ownerUid : 0;;
         $contributionStruct->oldTranslationStatus = $old_translation[ 'status' ];
         $contributionStruct->oldSegment           = $this->filter->fromLayer0ToLayer1( $this->segment[ 'segment' ] ); //

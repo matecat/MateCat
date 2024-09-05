@@ -30,7 +30,7 @@ class GlossaryImportTest extends AbstractTest {
     protected $path_of_file_for_test;
     protected $key_param;
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
         $this->key_param   = "a6043e606ac9b5d7ff24";
         $engineDAO         = new EnginesModel_EngineDAO( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
@@ -46,7 +46,7 @@ class GlossaryImportTest extends AbstractTest {
         $this->engine_MyMemory = new Engines_MyMemory( $this->engine_struct_param );
     }
 
-    public function tearDown() {
+    public function tearDown(): void {
         unlink( $this->path_of_file_for_test );
         parent::tearDown();
     }

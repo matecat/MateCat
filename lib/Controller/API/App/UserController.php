@@ -3,7 +3,8 @@
 namespace API\App;
 
 use API\App\Json\UserProfile;
-use API\V2\Validators\LoginValidator;
+use API\Commons\AbstractStatefulKleinController;
+use API\Commons\Validators\LoginValidator;
 use ConnectedServices\ConnectedServiceDao;
 use ConnectedServices\ConnectedServiceStruct;
 use Exception;

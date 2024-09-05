@@ -8,8 +8,7 @@
 
 namespace API\V2;
 
-use AMQHandler;
-use API\V2\Validators\ChunkPasswordValidator;
+use API\Commons\Validators\ChunkPasswordValidator;
 use Constants_TranslationStatus;
 use Exception;
 use Features\ReviewExtended\ReviewUtils;

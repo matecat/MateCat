@@ -33,7 +33,7 @@ class GetByProjectIdTest extends AbstractTest {
     protected $sql_delete_job;
     protected $flusher;
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
 
         /**
@@ -97,7 +97,7 @@ class GetByProjectIdTest extends AbstractTest {
 
         $this->job_Dao->createFromStruct( $this->job_struct );
 
-        $this->id = $this->getTheLastInsertIdByQuery($this->database_instance);
+        $this->id = $this->getTheLastInsertIdByQuery( $this->database_instance );
 
         $this->sql_delete_job = "DELETE FROM " . INIT::$DB_DATABASE . ".`jobs` WHERE id='" . $this->id . "';";
 
@@ -105,7 +105,7 @@ class GetByProjectIdTest extends AbstractTest {
     }
 
 
-    public function tearDown() {
+    public function tearDown(): void {
 
         $this->database_instance->getConnection()->query( $this->sql_delete_job );
         $this->flusher = new Predis\Client( INIT::$REDIS_SERVERS );

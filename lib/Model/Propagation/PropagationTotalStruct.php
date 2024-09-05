@@ -1,6 +1,6 @@
 <?php
 
-class Propagation_PropagationTotalStruct implements DataAccess_IDaoStruct {
+class Propagation_PropagationTotalStruct extends DataAccess_AbstractDaoObjectStruct implements DataAccess_IDaoStruct {
 
     /**
      * @var array

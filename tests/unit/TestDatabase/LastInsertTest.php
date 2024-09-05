@@ -16,9 +16,9 @@ class LastInsertTest extends AbstractTest {
     protected $sql_insert_second_value;
     protected $sql_drop;
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
-        $this->databaseInstance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
+        $this->jobDao = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
 
         $this->sql_create              = "CREATE TABLE Persons( PersonID INT )";
         $this->sql_insert_first_value  = "INSERT INTO Persons VALUES (475144 )";
@@ -27,9 +27,9 @@ class LastInsertTest extends AbstractTest {
 
     }
 
-    public function tearDown() {
+    public function tearDown(): void {
         parent::tearDown();
-        $this->databaseInstance->getConnection()->query( $this->sql_drop );
+        $this->jobDao->getConnection()->query( $this->sql_drop );
     }
 
     /**
@@ -41,11 +41,11 @@ class LastInsertTest extends AbstractTest {
      * User: dinies
      */
     public function test_last_insert_simple_table() {
-        $this->databaseInstance->getConnection()->query( $this->sql_create );
-        $this->databaseInstance->getConnection()->query( $this->sql_insert_first_value );
-        $this->databaseInstance->getConnection()->query( $this->sql_insert_second_value );
+        $this->jobDao->getConnection()->query( $this->sql_create );
+        $this->jobDao->getConnection()->query( $this->sql_insert_first_value );
+        $this->jobDao->getConnection()->query( $this->sql_insert_second_value );
 
-        $result = $this->databaseInstance->last_insert();
+        $result = $this->jobDao->last_insert();
         $this->assertEquals( 0, $result );
     }
 

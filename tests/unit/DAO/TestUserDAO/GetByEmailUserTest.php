@@ -32,7 +32,7 @@ class GetByEmailUserTest extends AbstractTest {
     protected $email;
 
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
         $this->database_instance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
         $this->user_Dao          = new Users_UserDao( $this->database_instance );
@@ -43,14 +43,14 @@ class GetByEmailUserTest extends AbstractTest {
         $this->email           = "bar@foo.net";
         $this->sql_insert_user = "INSERT INTO " . INIT::$DB_DATABASE . ".`users` (`uid`, `email`, `salt`, `pass`, `create_date`, `first_name`, `last_name` ) VALUES (NULL, '" . $this->email . "', '12345', '987654321qwerty', '2016-04-11 13:41:54', 'Bar', 'Foo');";
         $this->database_instance->getConnection()->query( $this->sql_insert_user );
-        $this->uid = $this->getTheLastInsertIdByQuery($this->database_instance);
+        $this->uid = $this->getTheLastInsertIdByQuery( $this->database_instance );
 
         $this->sql_delete_user = "DELETE FROM " . INIT::$DB_DATABASE . ".`users` WHERE uid='" . $this->uid . "';";
 
     }
 
 
-    public function tearDown() {
+    public function tearDown(): void {
 
         $this->database_instance->getConnection()->query( $this->sql_delete_user );
         $this->flusher = new Predis\Client( INIT::$REDIS_SERVERS );

@@ -12,6 +12,8 @@
     },
  */
 
+import {SPACE_PLACEHOLDER_STORAGE_KEY} from '../../../../constants/Constants'
+
 const tagSignaturesMap = {
   ph: {
     type: 'ph',
@@ -28,13 +30,29 @@ const tagSignaturesMap = {
     showTooltip: true,
     replaceForLexiqa: false,
   },
+  gSc: {
+    type: 'g',
+    regex: /<g\b[^>]+?id="([^"]+)"[^>]*?\/>/g,
+    selfClosing: true,
+    isClosure: false,
+    placeholder: null,
+    placeholderRegex: /<g\b[^>]+?id="([^"]+)"[^>]*?\/>/,
+    decodeNeeded: false,
+    errorCheckAvailable: true,
+    lexiqaAvailable: false,
+    glossaryAvailable: false,
+    style: 'tag-selfclosed',
+    showTooltip: false,
+    replaceForLexiqa: false,
+  },
   g: {
     type: 'g',
-    regex: /<g\b[^>]+?id="([^"]+)"[^>]*?>/g,
+    // regex: /<g\b[^>]+?id="([^"]+)"[^>]*?>/g, // Changed after adding self closed g tag support
+    regex: /<g\b[^>]+?id="([^"]+)"(?![^>]*\/>)[^>]*>/g,
     selfClosing: false,
     isClosure: false,
     placeholder: null,
-    placeholderRegex: /<g\b[^>]+?id="([^"]+)"[^>]*?>/,
+    placeholderRegex: /<g\b[^>]+?id="([^"]+)"(?![^>]*\/>)[^>]*>/,
     decodeNeeded: false,
     errorCheckAvailable: true,
     lexiqaAvailable: false,
@@ -236,7 +254,11 @@ const tagSignaturesMiddleware = (() => {
 })()
 
 const setTagSignatureMiddleware = tagSignaturesMiddleware.set
-
+// check space placeholder is active on init
+setTagSignatureMiddleware(
+  'space',
+  () => window.localStorage.getItem(SPACE_PLACEHOLDER_STORAGE_KEY) === 'true',
+)
 const tagSignatures = new Proxy(tagSignaturesMap, {
   getOwnPropertyDescriptor(target, prop) {
     const value = tagSignaturesMiddleware.callbacks[prop]?.(target[prop])

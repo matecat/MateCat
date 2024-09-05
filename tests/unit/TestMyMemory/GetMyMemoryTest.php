@@ -33,7 +33,7 @@ class GetMyMemoryTest extends AbstractTest {
     protected $reflector;
 
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
 
         $engineDAO         = new EnginesModel_EngineDAO( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
@@ -162,12 +162,12 @@ class GetMyMemoryTest extends AbstractTest {
         $curl_mock_param = [
                 CURLOPT_POSTFIELDS  =>
                         [
-                                'q'        => 'Il Sistema genera un numero di serie per quella copia e lo stampa (anche sotto forma di codice a barre) su un’etichetta adesiva.',
-                                'langpair' => 'it-IT|en-US',
-                                'de'       => 'demo@matecat.com',
-                                'mt'       => true,
-                                'numres'   => 3,
-                                'key'      => 'a6043e606ac9b5d7ff24',
+                                'q'         => 'Il Sistema genera un numero di serie per quella copia e lo stampa (anche sotto forma di codice a barre) su un’etichetta adesiva.',
+                                'langpair'  => 'it-IT|en-US',
+                                'de'        => 'demo@matecat.com',
+                                'mt'        => true,
+                                'numres'    => 3,
+                                'key'       => 'a6043e606ac9b5d7ff24',
                                 'client_id' => 0
                         ],
                 CURLINFO_HEADER_OUT => true,
@@ -223,15 +223,15 @@ TAB;
     public function test_get_segment_with_mock_for__call_and_at_least_one_match_found_in_TM() {
 
         $this->config_param_of_get[ 'segment' ] = "Ciascuna copia è dotata di un numero di serie univoco.";
-        $curl_mock_param = [
+        $curl_mock_param                        = [
                 CURLOPT_POSTFIELDS  =>
                         [
-                                'q'        => 'Ciascuna copia è dotata di un numero di serie univoco.',
-                                'langpair' => 'it-IT|en-US',
-                                'de'       => 'demo@matecat.com',
-                                'mt'       => true,
-                                'numres'   => 3,
-                                'key'      => 'a6043e606ac9b5d7ff24',
+                                'q'         => 'Ciascuna copia è dotata di un numero di serie univoco.',
+                                'langpair'  => 'it-IT|en-US',
+                                'de'        => 'demo@matecat.com',
+                                'mt'        => true,
+                                'numres'    => 3,
+                                'key'       => 'a6043e606ac9b5d7ff24',
                                 'client_id' => 0
                         ],
                 CURLINFO_HEADER_OUT => true,
@@ -365,19 +365,19 @@ TAB;
         $curl_mock_param = [
                 CURLOPT_POSTFIELDS  =>
                         [
-                                'q'        => 'Il Sistema genera un numero di serie per quella copia e lo stampa (anche sotto forma di codice a barre) su un’etichetta adesiva.',
-                                'langpair' => 'it-IT|en-US',
-                                'de'       => 'demo@matecat.com',
-                                'mt'       => true,
-                                'numres'   => 3,
-                                'key'      => 'a6043e606ac9b5d7ff24',
+                                'q'         => 'Il Sistema genera un numero di serie per quella copia e lo stampa (anche sotto forma di codice a barre) su un’etichetta adesiva.',
+                                'langpair'  => 'it-IT|en-US',
+                                'de'        => 'demo@matecat.com',
+                                'mt'        => true,
+                                'numres'    => 3,
+                                'key'       => 'a6043e606ac9b5d7ff24',
                                 'client_id' => 0
                         ],
                 CURLINFO_HEADER_OUT => true,
                 CURLOPT_TIMEOUT     => 120
         ];
 
-        $url_mock_param  = "https://api.mymemory.translated.net/get";
+        $url_mock_param = "https://api.mymemory.translated.net/get";
 
         $rawValue_error = [
                 'error'          => [

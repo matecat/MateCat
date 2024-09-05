@@ -5,8 +5,6 @@
              processIsolation="false"
              stopOnError="false"
              stopOnFailure="false"
-             syntaxCheck="true"
-             reportUselessTests="true"
              beStrictAboutTestsThatDoNotTestAnything="true">
     <php>
         <includePath>tests/TestHelpers</includePath>
@@ -23,6 +21,14 @@
     <filter>
         <whitelist processUncoveredFilesFromWhitelist="true">
             <directory suffix=".php">./lib</directory>
+            <exclude>
+                <file>./lib/Utils/Analysis/FastAnalysis.php</file>
+                <file>./lib/Utils/Analysis/TmAnalysis.php</file>
+                <file>./lib/Utils/TaskRunner/Executor.php</file>
+                <file>./lib/Utils/fileupload/index.php</file>
+                <file>./lib/View/APIDoc.php</file>
+                <file>./lib/View/templates/_APIDoc.php</file>
+            </exclude>
         </whitelist>
     </filter>
 

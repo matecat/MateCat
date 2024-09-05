@@ -13,17 +13,17 @@ use Chunks_ChunkStruct;
 use Database;
 use Exception;
 use Features;
+use Features\ReviewExtended\BatchReviewProcessor;
 use Features\ReviewExtended\ReviewUtils;
-use Features\TranslationVersions\Handlers\TranslationEventsHandler;
-use Features\TranslationVersions\Model\TranslationEvent;
-use Stomp\Exception\StompException;
+use Features\TranslationEvents\Model\TranslationEvent;
+use Features\TranslationEvents\TranslationEventsHandler;
+use ReflectionException;
 use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\AbstractWorker;
 use TaskRunner\Commons\QueueElement;
 use TaskRunner\Exceptions\EndQueueException;
 use Translations_SegmentTranslationDao;
 use Users_UserDao;
-use WordCount\CounterModel;
 
 
 class BulkSegmentStatusChangeWorker extends AbstractWorker {
@@ -38,8 +38,7 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker {
      * @param AbstractElement $queueElement
      *
      * @return void
-     * @throws \ReflectionException
-     * @throws StompException
+     * @throws ReflectionException
      * @throws EndQueueException
      * @throws Exception
      */
@@ -88,12 +87,7 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker {
             }
         }
 
-        $batchEventCreator->save();
-
-        if ( !empty( $params[ 'segment_ids' ] ) ) {
-            $counter = new CounterModel();
-            $counter->initializeJobWordCount( $chunk->id, $chunk->password );
-        }
+        $batchEventCreator->save( new BatchReviewProcessor() );
 
         $this->_doLog( 'completed' );
 

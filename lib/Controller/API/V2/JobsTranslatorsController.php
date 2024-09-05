@@ -10,10 +10,11 @@
 namespace API\V2;
 
 
-use API\V2\Exceptions\NotFoundException;
+use API\Commons\Exceptions\NotFoundException;
+use API\Commons\KleinController;
+use API\Commons\Validators\JobPasswordValidator;
+use API\Commons\Validators\LoginValidator;
 use API\V2\Json\JobTranslator;
-use API\V2\Validators\JobPasswordValidator;
-use API\V2\Validators\LoginValidator;
 use InvalidArgumentException;
 use Jobs_JobStruct;
 use Outsource\ConfirmationDao;

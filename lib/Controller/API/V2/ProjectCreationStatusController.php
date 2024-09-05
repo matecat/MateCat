@@ -10,7 +10,8 @@
 namespace API\V2;
 
 
-use API\V2\Exceptions\AuthorizationError;
+use API\Commons\Exceptions\AuthorizationError;
+use API\Commons\KleinController;
 use API\V2\Json\CreationStatus;
 use API\V2\Json\WaitCreation;
 use Exception;
@@ -25,7 +26,7 @@ class ProjectCreationStatusController extends KleinController {
 
     /**
      * @throws AuthorizationError
-     * @throws Exceptions\AuthenticationError
+     * @throws \API\Commons\Exceptions\AuthenticationError
      * @throws NotFoundException
      * @throws ValidationError
      * @throws EndQueueException

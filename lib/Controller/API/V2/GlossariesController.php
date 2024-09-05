@@ -8,9 +8,9 @@
 
 namespace API\V2;
 
-use API\App\AbstractStatefulKleinController;
-use API\V2\Exceptions\ValidationError;
-use API\V2\Validators\LoginValidator;
+use API\Commons\AbstractStatefulKleinController;
+use API\Commons\Exceptions\ValidationError;
+use API\Commons\Validators\LoginValidator;
 use Bootstrap;
 use Exception;
 use InvalidArgumentException;
@@ -182,8 +182,8 @@ class GlossariesController extends AbstractStatefulKleinController {
         $validator            = new GlossaryCSVValidator();
         $validator->validate( $validatorObject );
 
-        if ( count( $validator->getErrors() ) > 0 ) {
-            throw new ValidationError( $validator->getErrors()[ 0 ] );
+        if ( count( $validator->getExceptions() ) > 0 ) {
+            throw new ValidationError( $validator->getExceptions()[ 0 ] );
         }
 
         return $validator;

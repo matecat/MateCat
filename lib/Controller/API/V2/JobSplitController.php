@@ -8,9 +8,10 @@
 
 namespace API\V2;
 
-use API\V2\Exceptions\NotFoundException;
-use API\V2\Exceptions\UnprocessableException;
-use API\V2\Validators\ProjectPasswordValidator;
+use API\Commons\Exceptions\NotFoundException;
+use API\Commons\Exceptions\UnprocessableException;
+use API\Commons\KleinController;
+use API\Commons\Validators\ProjectPasswordValidator;
 use Exception;
 use Jobs_JobStruct;
 use ProjectManager;

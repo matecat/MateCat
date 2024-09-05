@@ -344,6 +344,12 @@ class catController extends viewController {
 
         if ( !empty( $this->project->id_team ) ) {
             $this->template->id_team = $this->project->id_team;
+
+            if(!isset($team)){
+                $team = $this->project->getTeam();
+            }
+
+            $this->template->team_name = $team->name;
         }
 
         $this->template->owner_email        = $this->job_owner;
@@ -393,7 +399,6 @@ class catController extends viewController {
         $this->template->tagLockCustomizable  = ( INIT::$UNLOCKABLE_TAGS == true ) ? true : false;
         $this->template->maxNumSegments       = INIT::$MAX_NUM_SEGMENTS;
         $this->template->copySourceInterval   = INIT::$COPY_SOURCE_INTERVAL;
-        $this->template->time_to_edit_enabled = INIT::$TIME_TO_EDIT_ENABLED;
 
         /*
          * Line Feed PlaceHolding System

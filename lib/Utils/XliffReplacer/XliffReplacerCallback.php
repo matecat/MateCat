@@ -37,8 +37,8 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface {
      * XliffReplacerCallback constructor.
      *
      * @param FeatureSet $featureSet
-     * @param string      $sourceLang
-     * @param string      $targetLang
+     * @param string     $sourceLang
+     * @param string     $targetLang
      *
      * @throws Exception
      */
@@ -56,12 +56,12 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface {
     public function thereAreErrors( int $segmentId, string $segment, string $translation, ?array $dataRefMap = [], ?string $error = null ): bool {
 
         // if there are ERR_SIZE_RESTRICTION errors, return true
-        if($error !== null){
-            $errors = json_decode($error);
+        if ( $error !== null ) {
+            $errors = json_decode( $error );
 
-            if($errors){
-                foreach ($errors as $err){
-                    if(isset($err->outcome) and $err->outcome === QA::ERR_SIZE_RESTRICTION){
+            if ( $errors ) {
+                foreach ( $errors as $err ) {
+                    if ( isset( $err->outcome ) and $err->outcome === QA::ERR_SIZE_RESTRICTION ) {
                         return true;
                     }
                 }
@@ -82,10 +82,10 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface {
         //
         // To skip these characters QA class needs replaced version of segment and target for _addThisElementToDomMap() function
         //
-        if(!empty($dataRefMap)){
-            $dataRefReplacer     = new DataRefReplacer( $dataRefMap );
-            $segment     = $dataRefReplacer->replace( $segment );
-            $translation = $dataRefReplacer->replace( $translation );
+        if ( !empty( $dataRefMap ) ) {
+            $dataRefReplacer = new DataRefReplacer( $dataRefMap );
+            $segment         = $dataRefReplacer->replace( $segment );
+            $translation     = $dataRefReplacer->replace( $translation );
         }
 
         $check = new QA ( $segment, $translation );

@@ -40,7 +40,7 @@ class AbstractGetFromCacheJobTest extends AbstractTest {
     /**
      * @throws ReflectionException
      */
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
         $this->database_instance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
         $this->job_Dao           = new Jobs_JobDao( $this->database_instance );
@@ -50,7 +50,7 @@ class AbstractGetFromCacheJobTest extends AbstractTest {
         $this->method_getFromCache->setAccessible( true );
 
         $this->reflector                   = new ReflectionClass( $this->job_Dao );
-        $this->method_getStatementForCache = $this->reflector->getMethod( "_getStatementForCache" );
+        $this->method_getStatementForCache = $this->reflector->getMethod( "_getStatementForQuery" );
         $this->method_getStatementForCache->setAccessible( true );
 
 
@@ -134,7 +134,10 @@ class AbstractGetFromCacheJobTest extends AbstractTest {
          */
         $this->stmt_param = new PDOStatement();
 
-        $this->stmt_param = $this->method_getStatementForCache->invoke( $this->job_Dao, "SELECT * FROM " . INIT::$DB_DATABASE . ".`jobs` WHERE  id = :id_job AND password = :password " );
+        $propReflection = $this->reflector->getProperty( '_query_cache' );
+        $propReflection->setAccessible( true );
+
+        $this->stmt_param = $this->method_getStatementForCache->invoke( $this->job_Dao, $propReflection->getValue( $this->job_Dao ) );
 
         $this->bindParams_param = [
                 'id_job'   => $this->job_id,
@@ -146,7 +149,7 @@ class AbstractGetFromCacheJobTest extends AbstractTest {
 
     }
 
-    public function tearDown() {
+    public function tearDown(): void {
 
         $this->database_instance->getConnection()->query( $this->sql_delete_job );
 
