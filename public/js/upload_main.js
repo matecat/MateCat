@@ -16,6 +16,7 @@ import {convertFileRequest} from './cat_source/es6/api/convertFileRequest'
 import {clearNotCompletedUploads} from './cat_source/es6/api/clearNotCompletedUploads'
 import CreateProjectStore from './cat_source/es6/stores/CreateProjectStore'
 import CreateProjectActions from './cat_source/es6/actions/CreateProjectActions'
+import CommonUtils from './cat_source/es6/utils/commonUtils'
 
 window.UI = null
 
@@ -132,10 +133,6 @@ window.UI = {
     return checkAnalyzability()
   },
 
-  TMXloaded: function () {
-    this.createKeyByTMX()
-  },
-
   createKeyByTMX: function (extension, filename) {
     CreateProjectActions.createKeyFromTMXFile({extension, filename})
   },
@@ -168,21 +165,6 @@ window.UI = {
       $(currDeleteDiv)
         .html('')
         .append('<span class="label label-important">' + message + '</span>')
-    }
-  },
-  updateTMAddedMsg: function () {
-    var numTM = $('#activetm tr.mine').length
-    if (numTM) {
-      $('.tm-added .num').text(numTM)
-      if (numTM > 1) {
-        $('.tm-added .msg').text(' TMs added')
-      } else {
-        $('.tm-added .msg').text(' TM added')
-      }
-      $('.tm-added').show()
-    } else {
-      $('.tm-added').hide()
-      $('.tm-added .num').text('')
     }
   },
   uploadingTMX: function () {
@@ -419,6 +401,7 @@ window.UI = {
           } else {
             CreateProjectActions.enableAnalyzeButton(true)
           }
+          CommonUtils.dispatchCustomEvent('uploaded-file', fileSpecs)
         } else if (fileSpecs.error) {
           CreateProjectActions.enableAnalyzeButton(false)
           $('#fileupload').fileupload('option', 'dropZone', null)

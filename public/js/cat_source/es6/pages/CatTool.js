@@ -26,7 +26,6 @@ import {getTmKeysJob} from '../api/getTmKeysJob'
 import {getSupportedLanguages} from '../api/getSupportedLanguages'
 import ApplicationStore from '../stores/ApplicationStore'
 import useProjectTemplates from '../hooks/useProjectTemplates'
-import {useGoogleLoginNotification} from '../hooks/useGoogleLoginNotification'
 import ModalsActions from '../actions/ModalsActions'
 import FatalErrorModal from '../components/modals/FatalErrorModal'
 import {Shortcuts} from '../utils/shortcuts'
@@ -53,9 +52,6 @@ function CatTool() {
 
   const [supportedLanguages, setSupportedLanguages] = useState([])
   const [isAnalysisCompleted, setIsAnalysisCompleted] = useState(false)
-
-  // TODO: Remove temp notification warning login google (search in files this todo)
-  useGoogleLoginNotification()
 
   const startSegmentIdRef = useRef(UI.startSegmentId)
   const callbackAfterSegmentsResponseRef = useRef()
