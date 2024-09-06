@@ -942,25 +942,28 @@ const NewProject = ({
           }}
         />
       )}
-      <SettingsPanel
-        {...{
-          onClose: closeSettings,
-          isOpened: openSettings.isOpen,
-          tabOpen: openSettings.tab,
-          user,
-          tmKeys,
-          setTmKeys,
-          mtEngines,
-          setMtEngines,
-          sourceLang,
-          targetLangs,
-          projectTemplates,
-          setProjectTemplates,
-          modifyingCurrentTemplate,
-          currentProjectTemplate,
-          checkSpecificTemplatePropsAreModified,
-        }}
-      />
+      {projectTemplates.length && (
+        <SettingsPanel
+          {...{
+            onClose: closeSettings,
+            isOpened: openSettings.isOpen,
+            tabOpen: openSettings.tab,
+            user,
+            tmKeys,
+            setTmKeys,
+            mtEngines,
+            setMtEngines,
+            sourceLang,
+            targetLangs,
+            projectTemplates,
+            setProjectTemplates,
+            modifyingCurrentTemplate,
+            currentProjectTemplate,
+            checkSpecificTemplatePropsAreModified,
+          }}
+        />
+      )}
+
       <Footer />
     </CreateProjectContext.Provider>
   ) : (
