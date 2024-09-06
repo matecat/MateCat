@@ -1,5 +1,6 @@
 import SegmentActions from '../actions/SegmentActions'
 import SegmentStore from '../stores/SegmentStore'
+import CatToolActions from '../actions/CatToolActions'
 
 const Speech2Text = {
   enabled: function () {
@@ -49,23 +50,26 @@ const Speech2Text = {
   },
   enableMicrophone: function (segment) {
     Speech2Text.microphone = segment.find('.micSpeech')
-    const segmentObj = SegmentStore.getCurrentSegment()
     if (Speech2Text.recognition) {
-      Speech2Text.targetElement = segmentObj.translation
-      Speech2Text.sid = segmentObj.sid
+      const segmentObj = SegmentStore.getCurrentSegment()
+      if (segmentObj) {
+        Speech2Text.targetElement = segmentObj.translation
+        Speech2Text.sid = segmentObj.sid
 
-      Speech2Text.microphone.on('click', Speech2Text.clickMicrophone)
+        Speech2Text.microphone.on('click', Speech2Text.clickMicrophone)
 
-      if (Speech2Text.recognizing) {
-        Speech2Text.startSpeechRecognition(Speech2Text.microphone)
+        if (Speech2Text.recognizing) {
+          Speech2Text.startSpeechRecognition(Speech2Text.microphone)
+        }
       }
     } else {
       Speech2Text.microphone.hide()
-
-      //TODO: Display a user-friendly error message
-      console.error(
-        'Web Speech API is not supported by this browser. Upgrade to Chrome version 25 or later.',
-      )
+      const notification = {
+        title: 'Dictation not supported',
+        text: 'Web Speech API is not supported by this browser. Update Chrome to the latest version.',
+        type: 'error',
+      }
+      CatToolActions.addNotification(notification)
     }
   },
   clickMicrophone: function (event) {
