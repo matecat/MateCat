@@ -1,6 +1,5 @@
 import React, {useEffect, useState} from 'react'
 import {debounce} from 'lodash/function'
-import {TransitionGroup, CSSTransition} from 'react-transition-group'
 
 import AnalyzeHeader from './AnalyzeHeader'
 import AnalyzeChunksResume from './AnalyzeChunksResume'
@@ -53,7 +52,8 @@ const AnalyzeMain = ({volumeAnalysis, project, parentRef}) => {
   useEffect(() => {
     parentRef.current.addEventListener('scroll', debounce(handleScroll, 200))
     return () => {
-      parentRef.current.removeEventListener('scroll', handleScroll)
+      parentRef.current &&
+        parentRef.current.removeEventListener('scroll', handleScroll)
     }
   })
 
