@@ -167,10 +167,13 @@ const Speech2Text = {
     return s.replace(two_line, '<p/>').replace(one_line, '<br>')
   },
   shouldEmptyTargetElement: function (segment) {
-    return !(
-      (segment.autopropagated_from && segment.autopropagated_from != '0') ||
-      segment.suggestion_match === '100' ||
-      segment.status !== 'NEW'
+    return (
+      segment &&
+      !(
+        (segment.autopropagated_from && segment.autopropagated_from != '0') ||
+        segment.suggestion_match === '100' ||
+        segment.status !== 'NEW'
+      )
     )
   },
   enableContinuousRecognizing: function () {
