@@ -784,7 +784,9 @@ const NewProject = ({
                   }
                   activeOption={selectedTeam}
                   checkSpaceToReverse={false}
-                  isDisabled={!user || user.teams.length === 1}
+                  isDisabled={
+                    !user || user.teams.length === 1 || !projectTemplates.length
+                  }
                   onSelect={(option) => setSelectedTeam(option)}
                 />
               </div>
