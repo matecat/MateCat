@@ -236,35 +236,37 @@ let SegmentFilterUtils = {
       SegmentActions.scrollToSegment(UI.currentSegmentId)
     }, 600)
   },
-  goToNextRepetition: function (button, status) {
-    var hash = UI.currentSegment.data('hash')
-    var segmentFilterData = SegmentFilterUtils.getStoredState()
-    var groupArray = segmentFilterData.serverData.grouping[hash]
-    var index = groupArray.indexOf(UI.currentSegmentId)
-    var nextItem
+  goToNextRepetition: function (status) {
+    const segment = SegmentStore.getCurrentSegment()
+    const hash = segment.segment_hash
+    const segmentFilterData = SegmentFilterUtils.getStoredState()
+    const groupArray = segmentFilterData.serverData.grouping[hash]
+    const index = groupArray.indexOf(UI.currentSegmentId)
+    let nextItem
     if (index >= 0 && index < groupArray.length - 1) {
       nextItem = groupArray[index + 1]
     } else {
       nextItem = groupArray[0]
     }
-    UI.changeStatus(SegmentStore.getCurrentSegment(), status, function () {
+    UI.changeStatus(segment, status, function () {
       SegmentActions.openSegment(nextItem)
     })
   },
-  goToNextRepetitionGroup: function (button, status) {
-    var hash = UI.currentSegment.data('hash')
-    var segmentFilterData = SegmentFilterUtils.getStoredState()
-    var groupsArray = Object.keys(segmentFilterData.serverData.grouping)
-    var index = groupsArray.indexOf(hash)
-    var nextGroupHash
+  goToNextRepetitionGroup: function (status) {
+    const segment = SegmentStore.getCurrentSegment()
+    const hash = segment.segment_hash
+    const segmentFilterData = SegmentFilterUtils.getStoredState()
+    const groupsArray = Object.keys(segmentFilterData.serverData.grouping)
+    const index = groupsArray.indexOf(hash)
+    let nextGroupHash
     if (index >= 0 && index < groupsArray.length - 1) {
       nextGroupHash = groupsArray[index + 1]
     } else {
       nextGroupHash = groupsArray[0]
     }
-    var nextItem = segmentFilterData.serverData.grouping[nextGroupHash][0]
+    const nextItem = segmentFilterData.serverData.grouping[nextGroupHash][0]
 
-    UI.changeStatus(SegmentStore.getCurrentSegment(), status, function () {
+    UI.changeStatus(segment, status, function () {
       SegmentActions.openSegment(nextItem)
     })
   },
