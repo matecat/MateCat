@@ -1,6 +1,7 @@
 import SegmentActions from '../actions/SegmentActions'
 import SegmentStore from '../stores/SegmentStore'
 import CatToolActions from '../actions/CatToolActions'
+import $ from 'jquery'
 
 const Speech2Text = {
   enabled: function () {
