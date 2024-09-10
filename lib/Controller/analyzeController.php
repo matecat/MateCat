@@ -4,6 +4,7 @@ use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
 use Analysis\Health;
 use API\App\Json\Analysis\AnalysisProject;
+use ConnectedServices\GoogleClientFactory;
 use Model\Analysis\Status;
 
 class analyzeController extends viewController {
@@ -182,6 +183,9 @@ class analyzeController extends viewController {
         $this->template->json_jobs               = json_encode( $this->model );
         $this->template->split_enabled           = true;
         $this->template->enable_outsource        = INIT::$ENABLE_OUTSOURCE;
+
+        $this->template->authURL = ( !$this->isLoggedIn() ) ? GoogleClientFactory::getGoogleClient( INIT::$OAUTH_REDIRECT_URL )->createAuthUrl() : "";
+        $this->setGDriveAuthUrl( $this->template );
 
     }
 

@@ -1,5 +1,7 @@
 <?php
 
+use ConnectedServices\GoogleClientFactory;
+
 abstract class viewController extends controller {
 
     /**
@@ -113,14 +115,6 @@ abstract class viewController extends controller {
     }
 
     /**
-     * @return string
-     * @deprecated use getAuthUrl instead.
-     */
-    public function generateAuthURL() {
-        return $this->getAuthUrl();
-    }
-
-    /**
      * setInitialTemplateVars
      *
      * Initialize template variables that must be initialized to avoid templte errors.
@@ -142,11 +136,31 @@ abstract class viewController extends controller {
         $this->template->footer_js            = [];
         $this->template->config_js            = [];
         $this->template->css_resources        = [];
-        $this->template->authURL              = $this->getAuthUrl();
-        $this->template->gdriveAuthURL        = \ConnectedServices\GDrive::generateGDriveAuthUrl();
+
         $this->template->enableMultiDomainApi = INIT::$ENABLE_MULTI_DOMAIN_API;
         $this->template->ajaxDomainsNumber    = INIT::$AJAX_DOMAINS;
 
+    }
+
+    /**
+     * @throws Exception
+     */
+    protected function setGDriveAuthUrl( PHPTALWithAppend $template ){
+
+        if ( $this->isLoggedIn() ) {
+
+            if( !isset( $_SESSION[ 'google-' . INIT::$XSRF_TOKEN ] ) ){
+                $_SESSION[ 'google-' . INIT::$XSRF_TOKEN ] = Utils::uuid4();
+            }
+
+            $googleClientForDrive                      = GoogleClientFactory::getGoogleClient( INIT::$HTTPHOST . "/gdrive/oauth/response" );
+            $googleClientForDrive->setState( $_SESSION[ 'google-' . INIT::$XSRF_TOKEN ] ); // set a state to be checked in the return request from browser
+
+            $template->gdriveAuthURL = $googleClientForDrive->createAuthUrl();
+
+        } else {
+            $template->gdriveAuthURL = "";
+        }
 
     }
 
@@ -179,18 +193,6 @@ abstract class viewController extends controller {
      * @return mixed
      */
     abstract function setTemplateVars();
-
-    /**
-     * @return string
-     */
-    public function getAuthUrl() {
-        if ( is_null( $this->authURL ) ) {
-            $this->client  = OauthClient::getInstance()->getClient();
-            $this->authURL = $this->client->createAuthUrl();
-        }
-
-        return $this->authURL;
-    }
 
     /**
      * @return bool

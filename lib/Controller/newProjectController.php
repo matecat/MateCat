@@ -2,6 +2,7 @@
 
 
 use ConnectedServices\GDrive\GDriveController;
+use ConnectedServices\GoogleClientFactory;
 use Engines_Intento as Intento;
 use LexiQA\LexiQADecorator;
 
@@ -27,7 +28,7 @@ class newProjectController extends viewController {
         parent::makeTemplate( "upload.html" );
 
         $filterArgs = [
-            'project_name' => [ 'filter' => FILTER_SANITIZE_STRING ]
+                'project_name' => [ 'filter' => FILTER_SANITIZE_STRING ]
         ];
 
         $__postInput        = filter_input_array( INPUT_GET, $filterArgs );
@@ -66,7 +67,7 @@ class newProjectController extends viewController {
 
         $engineQuery->active = 1;
         $this->mt_engines    = $engine->read( $engineQuery );
-        $this->mt_engines    = $this->removeMMTFromEngines($this->mt_engines);
+        $this->mt_engines    = $this->removeMMTFromEngines( $this->mt_engines );
 
         if ( $this->isLoggedIn() ) {
             $this->featureSet->loadFromUserEmail( $this->user->email );
@@ -127,14 +128,14 @@ class newProjectController extends viewController {
 
         if ( !isset( $_COOKIE[ Constants::COOKIE_SOURCE_LANG ] ) ) {
             CookieManager::setCookie( Constants::COOKIE_SOURCE_LANG, Constants::EMPTY_VAL,
-                [
-                    'expires'  => time() + ( 86400 * 365 ),
-                    'path'     => '/',
-                    'domain'   => INIT::$COOKIE_DOMAIN,
-                    'secure'   => true,
-                    'httponly' => true,
-                    'samesite' => 'None',
-                ]
+                    [
+                            'expires'  => time() + ( 86400 * 365 ),
+                            'path'     => '/',
+                            'domain'   => INIT::$COOKIE_DOMAIN,
+                            'secure'   => true,
+                            'httponly' => true,
+                            'samesite' => 'None',
+                    ]
             );
         }
     }
@@ -142,7 +143,7 @@ class newProjectController extends viewController {
     private function setOrGetGuid() {
 
         // If isset the GDRIVE_LIST_COOKIE_NAME cookie, do nothing
-        if(!isset($_COOKIE[GDriveController::GDRIVE_LIST_COOKIE_NAME])){
+        if ( !isset( $_COOKIE[ GDriveController::GDRIVE_LIST_COOKIE_NAME ] ) ) {
 
             // Get the guid from the guid if it exists, otherwise set the guid into the cookie
             if ( !empty( $_COOKIE[ 'upload_session' ] ) && Utils::isTokenValid( $_COOKIE[ 'upload_session' ] ) ) {
@@ -151,14 +152,14 @@ class newProjectController extends viewController {
 
             $this->guid = Utils::uuid4();
             CookieManager::setCookie( "upload_session", $this->guid,
-                [
-                    'expires'  => time() + 86400,
-                    'path'     => '/',
-                    'domain'   => INIT::$COOKIE_DOMAIN,
-                    'secure'   => true,
-                    'httponly' => false,
-                    'samesite' => 'None',
-                ]
+                    [
+                            'expires'  => time() + 86400,
+                            'path'     => '/',
+                            'domain'   => INIT::$COOKIE_DOMAIN,
+                            'secure'   => true,
+                            'httponly' => false,
+                            'samesite' => 'None',
+                    ]
             );
         }
     }
@@ -221,14 +222,14 @@ class newProjectController extends viewController {
         $source_languages = $this->lang_handler->getEnabledLanguages( 'en' );
         $target_languages = $this->lang_handler->getEnabledLanguages( 'en' );
 
-        $this->template->subject_array       = $this->subjectArray;
+        $this->template->subject_array = $this->subjectArray;
 
         $this->template->project_name = $this->project_name;
 
         $this->template->page             = 'home';
         $this->template->source_languages = $source_languages;
         $this->template->target_languages = $target_languages;
-        $this->template->subjects         = json_encode($this->subjectArray);
+        $this->template->subjects         = json_encode( $this->subjectArray );
 
         $this->template->mt_engines         = $this->mt_engines;
         $this->template->conversion_enabled = !empty( INIT::$FILTERS_ADDRESS );
@@ -245,7 +246,7 @@ class newProjectController extends viewController {
         $this->template->logged_user                           = ( $this->isLoggedIn() !== false ) ? $this->user->shortName() : "";
         $this->template->userMail                              = $this->user->email;
         $this->template->translation_engines_intento_providers = Intento::getProviderList();
-        $this->template->translation_engines_intento_prov_json = str_replace("\\\"","\\\\\\\"", json_encode(Intento::getProviderList())); // needed by JSON.parse() function
+        $this->template->translation_engines_intento_prov_json = str_replace( "\\\"", "\\\\\\\"", json_encode( Intento::getProviderList() ) ); // needed by JSON.parse() function
 
         $this->template->build_number   = INIT::$BUILD_NUMBER;
         $this->template->maxFileSize    = INIT::$MAX_UPLOAD_FILE_SIZE;
@@ -273,12 +274,10 @@ class newProjectController extends viewController {
         $this->template->tag_projection_enabled = true;
         $this->template->tag_projection_default = true;
 
-        $this->featureSet->appendDecorators( 'NewProjectDecorator', $this, $this->template );
-
         $this->template->globalMessage = Utils::getGlobalMessage()[ 'messages' ];
-        if ( $this->isLoggedIn() ) {
-            $this->template->teams = ( new \Teams\MembershipDao() )->findUserTeams( $this->user );
-        }
+
+        $this->template->authURL = ( !$this->isLoggedIn() ) ? GoogleClientFactory::getGoogleClient( INIT::$OAUTH_REDIRECT_URL )->createAuthUrl() : "";
+        $this->setGDriveAuthUrl( $this->template );
 
     }
 
@@ -303,14 +302,14 @@ class newProjectController extends viewController {
 
         if ( !isset( $_COOKIE[ Constants::COOKIE_TARGET_LANG ] ) ) {
             CookieManager::setCookie( Constants::COOKIE_TARGET_LANG, Constants::EMPTY_VAL,
-                [
-                    'expires'  => time() + ( 86400 * 365 ),
-                    'path'     => '/',
-                    'domain'   => INIT::$COOKIE_DOMAIN,
-                    'secure'   => true,
-                    'httponly' => true,
-                    'samesite' => 'None',
-                ]
+                    [
+                            'expires'  => time() + ( 86400 * 365 ),
+                            'path'     => '/',
+                            'domain'   => INIT::$COOKIE_DOMAIN,
+                            'secure'   => true,
+                            'httponly' => true,
+                            'samesite' => 'None',
+                    ]
             );
         }
     }

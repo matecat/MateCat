@@ -2,6 +2,7 @@
 
 use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
+use ConnectedServices\GoogleClientFactory;
 use WordCount\WordCountStruct;
 
 /**
@@ -70,8 +71,16 @@ class reviseSummaryController extends viewController {
         Activity::save( $activity );
 
     }
-    
-	public function setTemplateVars() {
+
+    /**
+     * @throws \Exceptions\NotFoundException
+     * @throws \TaskRunner\Exceptions\EndQueueException
+     * @throws \API\Commons\Exceptions\AuthenticationError
+     * @throws \TaskRunner\Exceptions\ReQueueException
+     * @throws \Exceptions\ValidationError
+     * @throws Exception
+     */
+    public function setTemplateVars() {
 
         $this->template->job_archived = ( $this->job_archived ) ? 1 : '';
         $this->template->owner_email  = $this->job_owner_email;
@@ -136,6 +145,9 @@ class reviseSummaryController extends viewController {
 
         $this->template->searchable_statuses = $this->searchableStatuses();
         $this->template->first_job_segment   = $this->data->job_first_segment ;
+
+        $this->template->authURL = ( !$this->isLoggedIn() ) ? GoogleClientFactory::getGoogleClient( INIT::$OAUTH_REDIRECT_URL )->createAuthUrl() : "";
+        $this->setGDriveAuthUrl( $this->template );
 
     }
 

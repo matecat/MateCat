@@ -2,6 +2,7 @@
 
 use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
+use ConnectedServices\GoogleClientFactory;
 
 class manageController extends viewController {
 
@@ -36,9 +37,15 @@ class manageController extends viewController {
 
     }
 
+    /**
+     * @throws Exception
+     */
     public function setTemplateVars() {
 
         $this->template->outsource_service_login = $this->_outsource_login_API;
+        $this->template->authURL = "";
+        $this->setGDriveAuthUrl( $this->template );
+
         $this->decorator = new ManageDecorator( $this, $this->template );
         $this->decorator->decorate();
 

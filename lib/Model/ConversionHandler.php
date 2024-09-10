@@ -18,7 +18,7 @@ class ConversionHandler {
     /**
      * @var ConvertedFileModel
      */
-    protected $result;
+    protected ConvertedFileModel $result;
 
     protected $file_name;
     protected $source_lang;
@@ -351,7 +351,7 @@ class ConversionHandler {
     /**
      * @return ConvertedFileModel
      */
-    public function getResult() {
+    public function getResult(): ConvertedFileModel {
         return $this->result;
     }
 
