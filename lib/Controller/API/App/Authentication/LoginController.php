@@ -6,8 +6,9 @@
  * Time: 09:38
  */
 
-namespace API\App;
+namespace API\App\Authentication;
 
+use API\App\RateLimiterTrait;
 use API\Commons\AbstractStatefulKleinController;
 use AuthCookie;
 use CookieManager;
@@ -74,11 +75,11 @@ class LoginController extends AbstractStatefulKleinController {
         $dao  = new Users_UserDao();
         $user = $dao->getByEmail( $params[ 'email' ] );
 
-        if ( $user && ( !is_null( $user->email_confirmed_at ) || !is_null( $user->oauth_access_token ) ) && $user->passwordMatch( $params[ 'password' ] ) ) {
+        if ( $user && $user->passwordMatch( $params[ 'password' ] ) && !is_null( $user->email_confirmed_at ) && is_null( $user->confirmation_token ) ) {
+
             AuthCookie::setCredentials( $user->email, $user->uid );
 
-            $user->confirmation_token = null;
-            $user->oauth_access_token = null;
+            $user->clearAuthToken();
 
             $dao->updateUser( $user );
             $dao->destroyCacheByUid( $user->uid );
@@ -86,6 +87,7 @@ class LoginController extends AbstractStatefulKleinController {
             $project = new RedeemableProject( $user, $_SESSION );
             $project->tryToRedeem();
             $this->response->code( 200 );
+
         } else {
             $this->incrementRateLimitCounter( $params[ 'email' ], '/api/app/user/login' );
             $this->response->code( 404 );
