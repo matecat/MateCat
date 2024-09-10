@@ -106,9 +106,11 @@ export const CommentsButton = ({}) => {
   }
   useEffect(() => {
     if (config.id_team) {
-      getTeamUsers({teamId: config.id_team}).then((data) => {
-        CommentsActions.updateTeamUsers(data)
-      })
+      getTeamUsers({teamId: config.id_team, teamName: config.team_name}).then(
+        (data) => {
+          CommentsActions.updateTeamUsers(data)
+        },
+      )
     }
     const close = () => setShowComments(false)
     const openMenu = () => setShowComments(true)

@@ -11,6 +11,7 @@ namespace Teams;
 use Database;
 use Exception;
 use PDO;
+use ReflectionException;
 use Users\MetadataDao;
 use Users_UserDao;
 use Users_UserStruct;
@@ -27,6 +28,11 @@ class MembershipDao extends \DataAccess_AbstractDao {
     protected static $_query_team_from_uid_and_id = " SELECT teams.* FROM teams
               JOIN teams_users ON teams_users.id_team = teams.id
             WHERE teams_users.uid = ? AND teams.id = ?
+            ";
+
+    protected static $_query_team_from_id_and_name = " SELECT teams.* FROM teams
+              JOIN teams_users ON teams_users.id_team = teams.id
+            WHERE teams.id = ? AND teams.name = ?
             ";
 
     protected static $_query_user_teams = " 
@@ -61,6 +67,7 @@ class MembershipDao extends \DataAccess_AbstractDao {
      * @param Users_UserStruct $user
      *
      * @return null|TeamStruct[]
+     * @throws ReflectionException
      */
     public function findUserTeams( Users_UserStruct $user ) {
 
@@ -80,6 +87,7 @@ class MembershipDao extends \DataAccess_AbstractDao {
      * Cache deletion for @param Users_UserStruct $user
      *
      * @return bool|int
+     * @throws ReflectionException
      * @see MembershipDao::findUserTeams
      *
      */
@@ -96,10 +104,11 @@ class MembershipDao extends \DataAccess_AbstractDao {
     /**
      * Finds an team in user scope.
      *
-     * @param int               $id
+     * @param int $id
      * @param Users_UserStruct $user
      *
      * @return null|TeamStruct
+     * @throws ReflectionException
      */
     public function findTeamByIdAndUser( $id, Users_UserStruct $user ) {
         $stmt = $this->_getStatementForQuery( self::$_query_team_from_uid_and_id );
@@ -108,11 +117,25 @@ class MembershipDao extends \DataAccess_AbstractDao {
     }
 
     /**
+     * @param $id
+     * @param $name
+     * @param Users_UserStruct $user
+     * @return mixed|null
+     * @throws ReflectionException
+     */
+    public function findTeamByIdAndName($id, $name) {
+        $stmt = $this->_getStatementForQuery( self::$_query_team_from_id_and_name );
+
+        return static::resultOrNull( $this->_fetchObject( $stmt, ( new TeamStruct() ), [ $id, $name ] )[ 0 ] );
+    }
+
+    /**
      * Cache deletion for @param int $id
      *
      * @param Users_UserStruct $user
      *
      * @return bool|int
+     * @throws ReflectionException
      * @see MembershipDao::findTeamByIdAndUser
      *
      */
@@ -127,6 +150,7 @@ class MembershipDao extends \DataAccess_AbstractDao {
      * @param $traverse
      *
      * @return \DataAccess_IDaoStruct[]|MembershipStruct[]
+     * @throws ReflectionException
      */
     public function getMemberListByTeamId( $id_team, $traverse = true ) {
         $stmt             = $this->_getStatementForQuery( self::$_query_member_list );
