@@ -1,11 +1,17 @@
-// rewrite semantic CSS
+@import "colors";
 
+// rewrite semantic CSS
+html, body {
+  height: 100%;
+}
 body.manage {
   min-width: 1024px;
   font-family: Calibri, Arial, Helvetica, sans-serif;
   background-color: $grey5;
   overflow-y: hidden;
   overflow-x: auto;
+  font-size: 14px;
+  line-height: 1.4285em;
 }
 
 div#manage-container {
@@ -54,6 +60,7 @@ div#manage-container {
 
     .item.submenu .dropdown.icon {
       top: 2px;
+      margin-left: 8px;
     }
   }
 }
@@ -87,10 +94,10 @@ div#manage-container {
     }
     .ui.ribbon.label {
       z-index: 2;
-      left: -28px;
+      left: -33px;
       max-width: 535px;
       min-width: 0px;
-      line-height: 17px;
+      line-height: 16px;
       background-color: $grey2;
       color: $black;
       height: 30px;
@@ -747,6 +754,8 @@ div#manage-container {
                   }
                   .item {
                     padding: 10px 15px !important;
+                    text-decoration: none;
+                    min-height: unset;
                   }
                   &:hover {
                     background-color: #ececec;
@@ -944,7 +953,7 @@ div#manage-container {
 
 @media only screen and (min-width: 1200px) {
   .ui.container {
-    width: 1140px;
+    width: 1140px !important;
     margin-left: auto !important;
     margin-right: auto !important;
     transition: 0.3s ease;
@@ -953,7 +962,7 @@ div#manage-container {
 
 @media only screen and (min-width: 1380px) {
   .ui.container {
-    width: 1280px;
+    width: 1280px !important;
     margin-left: auto !important;
     margin-right: auto !important;
     transition: 0.3s ease;
@@ -962,7 +971,7 @@ div#manage-container {
 
 @media only screen and (max-width: 1199px) and (min-width: 992px) {
   .ui.container {
-    width: 991px;
+    width: 991px !important;
     margin-left: auto !important;
     margin-right: auto !important;
     transition: 0.3s ease;
@@ -977,7 +986,7 @@ div#manage-container {
 
 @media only screen and (max-width: 991px) and (min-width: 768px) {
   .ui.container {
-    min-width: 991px;
+    min-width: 991px !important;
     margin-left: auto !important;
     margin-right: auto !important;
     transition: 0.3s ease;

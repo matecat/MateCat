@@ -1430,6 +1430,11 @@ button.ui-button::-moz-focus-inner {
 }
 
 .translate-box {
+  h2 {
+    line-height: 24px;
+  }
+}
+.translate-box {
   h2,
   .select-with-label__wrapper label {
     color: $grey1;
@@ -2006,7 +2011,7 @@ body {
   -moz-border-radius: 2px;
   border-radius: 2px;
   border: 1px solid rgba(34, 36, 38, 0.15);
-  height: 37px;
+  height: 36px;
   box-shadow: inset 0 1px 3px #ddd;
 }
 
@@ -2110,7 +2115,7 @@ a {
   font-weight: bold;
   font-size: 16px;
   color: $grey1;
-  margin-top: 48px;
+  margin-top: 0;
   .supported-file-formats {
     cursor: pointer;
   }

@@ -132,39 +132,30 @@ class JobMenu extends React.Component {
       )
     }
     let menuHtml = (
-      <div className="menu">
-        <div className="item submenu">
-          <div
-            className="ui dropdown"
-            title="Job menu"
-            ref={(dropdown) => (this.dropdown = dropdown)}
-          >
-            <i className="icon-refresh icon" /> <a>Change Password</a>
-            <i className="dropdown icon" />
-            <div className="menu" data-testid="change-password-submenu">
+      <div className="menu" ref={(dropdown) => (this.dropdown = dropdown)}>
+        <div className="item" title="Job menu">
+          <i className="icon-refresh icon" /> <a>Change Password</a>
+          <i className="dropdown icon" />
+          <div className="menu" data-testid="change-password-submenu">
+            <a className={'item'} onClick={() => this.props.changePasswordFn()}>
+              Translate
+            </a>
+            <a
+              className={'item'}
+              onClick={() => this.props.changePasswordFn(1)}
+            >
+              Revise
+            </a>
+            {/*If second pass enabled*/}
+            {this.props.job.has('revise_passwords') &&
+            this.props.job.get('revise_passwords').size > 1 ? (
               <a
                 className={'item'}
-                onClick={() => this.props.changePasswordFn()}
+                onClick={() => this.props.changePasswordFn(2)}
               >
-                Translate
+                2nd Revise
               </a>
-              <a
-                className={'item'}
-                onClick={() => this.props.changePasswordFn(1)}
-              >
-                Revise
-              </a>
-              {/*If second pass enabled*/}
-              {this.props.job.has('revise_passwords') &&
-              this.props.job.get('revise_passwords').size > 1 ? (
-                <a
-                  className={'item'}
-                  onClick={() => this.props.changePasswordFn(2)}
-                >
-                  2nd Revise
-                </a>
-              ) : null}
-            </div>
+            ) : null}
           </div>
         </div>
         {splitButton}

@@ -251,7 +251,8 @@ const matecatConfig = async ({env}, {mode}) => {
         path.resolve(__dirname, 'public/css/sass/upload-main.scss'),
         path.resolve(__dirname, 'public/css/sass/main.scss'),
       ],
-      commonCss: [
+      commonCss: [path.resolve(__dirname, 'public/css/sass/main.scss')],
+      apiDoc: [
         path.resolve(__dirname, 'public/css/sass/main.scss'),
         path.resolve(__dirname, 'public/css/sass/legacy-misc.scss'),
       ],
@@ -379,7 +380,7 @@ const matecatConfig = async ({env}, {mode}) => {
       new HtmlWebPackPlugin({
         filename: path.resolve(__dirname, './lib/View/APIDoc.php'),
         template: path.resolve(__dirname, './lib/View/templates/_APIDoc.php'),
-        chunks: ['commonCss'],
+        chunks: ['apiDoc'],
         publicPath: '/public/build/',
         xhtml: true,
       }),

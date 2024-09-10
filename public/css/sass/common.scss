@@ -13,6 +13,10 @@ body {
   font-family: calibri, Arial, Helvetica, sans-serif;
   -webkit-transition: all 100ms ease-in;
   -moz-transition: all 100ms ease-in;
+  font-size: 14px;
+  line-height: 1.4285em;
+  background: $white;
+  color: $black;
   &.no-min-width {
     min-width: auto;
   }
