@@ -31,7 +31,7 @@ export const Accordion = ({
         className={`accordion-component-title ${expanded ? 'accordion-expanded' : ''}`}
         onClick={handleClick}
       >
-        {title} <ChevronDown />
+        {title} <ChevronDown size={10} />
       </div>
       <div ref={panelRef} className="accordion-component-content">
         {children}

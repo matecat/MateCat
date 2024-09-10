@@ -1,0 +1,15 @@
+@import '../../commons/colors';
+
+/* Filters params */
+.filters-params-accordion-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.filters-params-accordion {
+  .accordion-component-title {
+    font-size: 18px !important;
+    font-weight: bold;
+  }
+}

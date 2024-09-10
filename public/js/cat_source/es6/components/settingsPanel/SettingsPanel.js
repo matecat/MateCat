@@ -17,6 +17,8 @@ import {updateProjectTemplate} from '../../api/updateProjectTemplate'
 import {flushSync} from 'react-dom'
 import CreateProjectStore from '../../stores/CreateProjectStore'
 import NewProjectConstants from '../../constants/NewProjectConstants'
+import {FileImportTab} from './Contents/FileImportTab/FileImportTab'
+import {FILTERS_PARAMS_SCHEMA_KEYS} from './Contents/FileImportTab/FiltersParams'
 
 let tabOpenFromQueryString = new URLSearchParams(window.location.search).get(
   'openTab',
@@ -28,6 +30,7 @@ export const SETTINGS_PANEL_TABS = {
   advancedOptions: 'options',
   analysis: 'analysis',
   qualityFramework: 'qf',
+  fileImport: 'fileImport',
 }
 
 export const TEMPLATE_PROPS_BY_TAB = {
@@ -38,6 +41,10 @@ export const TEMPLATE_PROPS_BY_TAB = {
   ],
   [SETTINGS_PANEL_TABS.machineTranslation]: [SCHEMA_KEYS.mt],
   [SETTINGS_PANEL_TABS.qualityFramework]: [SCHEMA_KEYS.qaModelTemplateId],
+  [SETTINGS_PANEL_TABS.fileImport]: [
+    SCHEMA_KEYS.filtersTemplateId,
+    SCHEMA_KEYS.XliffConfigTemplateId,
+  ],
   [SETTINGS_PANEL_TABS.analysis]: [SCHEMA_KEYS.payableRateTemplateId],
   [SETTINGS_PANEL_TABS.advancedOptions]: [
     SCHEMA_KEYS.speech2text,
@@ -73,6 +80,13 @@ const DEFAULT_CONTENTS = (isCattool = config.is_cattool) => {
             description:
               'Manage your quality frameworks and select which should be used on your new project. <a href="#" target="_blank">More details</a>',
             component: <QualityFrameworkTab />,
+          },
+          {
+            id: SETTINGS_PANEL_TABS.fileImport,
+            label: 'File import',
+            description:
+              'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vulputate libero et velit interdum, ac aliquet odio mattis.',
+            component: <FileImportTab />,
           },
           {
             id: SETTINGS_PANEL_TABS.analysis,
@@ -142,6 +156,10 @@ export const SettingsPanel = ({
   // templates quality framework
   const qualityFrameworkTemplates = useTemplates(QF_SCHEMA_KEYS)
   const analysisTemplates = useTemplates(ANALYSIS_SCHEMA_KEYS)
+  const fileImportFiltersParamsTemplates = useTemplates(
+    FILTERS_PARAMS_SCHEMA_KEYS,
+  )
+  // const fileImportXliffConfigTemplates = useTemplates(FILTERS_PARAMS_SCHEMA_KEYS)
 
   const wrapperRef = useRef()
 
@@ -276,6 +294,7 @@ export const SettingsPanel = ({
         isEnabledProjectTemplateComponent,
         qualityFrameworkTemplates,
         analysisTemplates,
+        fileImportFiltersParamsTemplates,
       }}
     >
       <div

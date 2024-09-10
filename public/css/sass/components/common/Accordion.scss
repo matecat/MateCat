@@ -8,10 +8,14 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 24px;
+  padding: 14px 24px;
   font: 12px;
   background-color: $grey3;
-  border-radius: 10px 10px 0 0;
+  border-radius: 8px;
+
+  &.accordion-expanded {
+    border-radius: 8px 8px 0 0;
+  }
 
   &:not(.accordion-expanded) {
     cursor: pointer;
@@ -35,5 +39,6 @@
   transition-timing-function: 'ease-in-out';
   transform-origin: top center;
   padding: 0 48px 0 24px;
+  border-radius: 0 0 8px 8px;
   background-color: $grey4;
 }
