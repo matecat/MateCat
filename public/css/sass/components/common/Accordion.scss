@@ -1,0 +1,39 @@
+@import '../../commons/colors';
+
+.accordion-component {
+  overflow: hidden;
+}
+
+.accordion-component-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  font: 12px;
+  background-color: $grey3;
+  border-radius: 10px 10px 0 0;
+
+  &:not(.accordion-expanded) {
+    cursor: pointer;
+  }
+
+  > svg {
+    transition-property: transform;
+    transition-duration: 0.5s;
+    transition-timing-function: 'ease-in-out';
+  }
+
+  &.accordion-expanded > svg {
+    transform: rotateZ(180deg);
+  }
+}
+
+.accordion-component-content {
+  max-height: 0;
+  transition-property: max-height;
+  transition-duration: 0.5s;
+  transition-timing-function: 'ease-in-out';
+  transform-origin: top center;
+  padding: 0 48px 0 24px;
+  background-color: $grey4;
+}

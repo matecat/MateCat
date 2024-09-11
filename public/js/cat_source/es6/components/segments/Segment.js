@@ -760,7 +760,6 @@ class Segment extends React.Component {
             segment_classes.join(' ') +
             ` source-${config.source_code} target-${config.target_code}`
           }
-          data-hash={this.props.segment.segment_hash}
           data-autopropagated={this.state.autopropagated}
           data-propagable={autoPropagable}
           data-split-group={split_group}
