@@ -1,15 +1,75 @@
 @import '../../commons/colors';
 
+.file-import-tab {
+  &.settings-panel-contentwrapper-tab-background {
+    padding: 10px 20px 20px;
+  }
+
+  p {
+    display: block;
+    text-align: left;
+    color: #666666;
+    font-size: 16px;
+    line-height: 24px;
+  }
+
+  .settings-panel-subtemplates {
+    position: relative;
+    background-color: transparent;
+  }
+}
+
 /* Filters params */
 .filters-params-accordion-group {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  margin-top: 8px;
 }
 
 .filters-params-accordion {
   .accordion-component-title {
     font-size: 18px !important;
     font-weight: bold;
+  }
+}
+
+.filters-params-option {
+  display: flex;
+  gap: 40px;
+  align-items: center;
+  padding: 15px 0;
+  border: unset;
+
+  > :first-child {
+    width: 55%;
+  }
+
+  > :last-child {
+    width: 45%;
+  }
+
+  .keys-segmented-control {
+    .segmented-control {
+      background-color: $grey8;
+    }
+    .segmented-control__label {
+      line-height: 28px;
+    }
+    .segmented-control__cursor {
+      padding: 2px;
+    }
+    .segmented-control__cursor:before {
+      background-color: white;
+    }
+    .segmented-control input:checked + .segmented-control__label {
+      color: black;
+    }
+  }
+
+  .container-keys-controller {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
   }
 }

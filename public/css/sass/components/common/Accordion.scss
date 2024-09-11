@@ -23,7 +23,7 @@
 
   > svg {
     transition-property: transform;
-    transition-duration: 0.5s;
+    transition-duration: 0.3s;
     transition-timing-function: 'ease-in-out';
   }
 
@@ -35,10 +35,11 @@
 .accordion-component-content {
   max-height: 0;
   transition-property: max-height;
-  transition-duration: 0.5s;
+  transition-duration: 0.3s;
   transition-timing-function: 'ease-in-out';
   transform-origin: top center;
-  padding: 0 48px 0 24px;
+  padding: 0 24px;
   border-radius: 0 0 8px 8px;
   background-color: $grey4;
+  overflow: hidden;
 }

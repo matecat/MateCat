@@ -31,12 +31,15 @@ export const EmailsBadge = ({
   name,
   onChange,
   value = [],
+  validatePattern = EMAIL_PATTERN,
   placeholder,
   error,
 }) => {
   const areaRef = useRef()
   const inputRef = useRef()
   const highlightedEmailIndexRef = useRef(-1)
+  const validatePatternRef = useRef()
+  validatePatternRef.current = validatePattern
 
   const [inputValue, setInputValue] = useState('')
   const [emails, setEmails] = useState(() => [...value])
@@ -163,13 +166,13 @@ export const EmailsBadge = ({
 
   useEffect(() => {
     const isFirstEntryWritingValid =
-      !emails.length && EMAIL_PATTERN.test(inputRef.current.value)
+      !emails.length && validatePatternRef.current.test(inputRef.current.value)
     onChange(isFirstEntryWritingValid ? [inputRef.current.value] : emails)
   }, [emails, onChange])
 
   // RENDER
   const renderChip = (email, index) => {
-    const isValid = EMAIL_PATTERN.test(email)
+    const isValid = validatePatternRef.current.test(email)
     const isSelected = index === highlightedEmailIndex
     return (
       <div
@@ -204,7 +207,7 @@ export const EmailsBadge = ({
       >
         {emails.length === 0 && inputValue === '' ? (
           <span className="email-badge-placeholder">
-            {placeholder
+            {typeof placeholder === 'string'
               ? placeholder
               : 'john@email.com, federico@email.com, sara@email.com'}
           </span>
@@ -236,6 +239,7 @@ EmailsBadge.propTypes = {
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
   value: PropTypes.arrayOf(PropTypes.string),
+  validatePattern: PropTypes.object,
   placeholder: PropTypes.string,
   error: PropTypes.object,
 }

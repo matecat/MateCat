@@ -1,5 +1,6 @@
 import React, {useState} from 'react'
 import {Accordion} from '../../../common/Accordion/Accordion'
+import {Json} from './FiltersParamsForms/Json'
 
 const ACCORDION_GROUP = {
   json: 'Json',
@@ -17,6 +18,9 @@ export const AccordionGroupFiltersParams = () => {
 
   const handleAccordion = (id) => setCurrentSection(id)
 
+  const getSection = (section) =>
+    section === ACCORDION_GROUP.json ? <Json /> : <span>we</span>
+
   return (
     <div className="filters-params-accordion-group">
       {Object.entries(ACCORDION_GROUP).map(([id, section]) => (
@@ -28,7 +32,7 @@ export const AccordionGroupFiltersParams = () => {
           onShow={handleAccordion}
           className="filters-params-accordion"
         >
-          <span>we</span>
+          {getSection(section)}
         </Accordion>
       ))}
     </div>

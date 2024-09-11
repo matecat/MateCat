@@ -16,7 +16,7 @@ export const updateFiltersParamsTemplate = async ({id, template}) => {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({model: template}),
+      body: JSON.stringify(template),
     },
   )
 

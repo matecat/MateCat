@@ -46,8 +46,6 @@ const getFilteredSchemaToCompare = (template) => {
     ...filtered
   } = template
 
-  const {id: idPassfail, id_template, ...filteredPassfail} = filtered.passfail
-
   return filtered
   /* eslint-enable no-unused-vars */
 }
@@ -166,25 +164,30 @@ export const FiltersParams = () => {
     >
       {templates.length > 0 && (
         <div className="settings-panel-box">
-          <SubTemplates
-            {...{
-              templates,
-              setTemplates,
-              currentTemplate,
-              modifyingCurrentTemplate,
-              portalTarget,
-              schema: FILTERS_PARAMS_SCHEMA_KEYS,
-              propConnectProjectTemplate: SCHEMA_KEYS.filtersTemplateId,
-              getFilteredSchemaCreateUpdate,
-              getFilteredSchemaToCompare,
-              getModalTryingSaveIdenticalSettingsTemplate,
-              createApi: createFiltersParamsTemplate,
-              updateApi: updateFiltersParamsTemplate,
-              deleteApi: deleteFiltersParamsTemplate,
-              saveErrorCallback,
-            }}
-          />
-          <div className="quality-framework-tab settings-panel-contentwrapper-tab-background">
+          <div className="file-import-tab settings-panel-contentwrapper-tab-background">
+            <h2>Extraction parameters</h2>
+            <p>
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc
+              vulputate libero et velit interdum, ac aliquet odio mattis.
+            </p>
+            <SubTemplates
+              {...{
+                templates,
+                setTemplates,
+                currentTemplate,
+                modifyingCurrentTemplate,
+                portalTarget,
+                schema: FILTERS_PARAMS_SCHEMA_KEYS,
+                propConnectProjectTemplate: SCHEMA_KEYS.filtersTemplateId,
+                getFilteredSchemaCreateUpdate,
+                getFilteredSchemaToCompare,
+                getModalTryingSaveIdenticalSettingsTemplate,
+                createApi: createFiltersParamsTemplate,
+                updateApi: updateFiltersParamsTemplate,
+                deleteApi: deleteFiltersParamsTemplate,
+                saveErrorCallback,
+              }}
+            />
             <AccordionGroupFiltersParams />
           </div>
         </div>
