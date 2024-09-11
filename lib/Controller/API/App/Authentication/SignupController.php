@@ -69,13 +69,13 @@ class SignupController extends AbstractStatefulKleinController {
 
         $signup = new SignupModel( $user, $_SESSION );
         $this->incrementRateLimitCounter( $userIp, '/api/app/user' );
+        $this->incrementRateLimitCounter( $user[ 'email' ], '/api/app/user' );
 
         // email
         if ( $signup->valid() ) {
             $signup->processSignup();
             $this->response->code( 200 );
         } else {
-            $this->incrementRateLimitCounter( $user[ 'email' ], '/api/app/user' );
             $this->response->code( 400 );
             $this->response->json( [
                     'error' => [
