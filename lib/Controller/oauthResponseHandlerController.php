@@ -1,6 +1,7 @@
 <?php
 
 use ConnectedServices\GoogleClientFactory;
+use Exceptions\AuthorizationError;
 
 class oauthResponseHandlerController extends viewController {
 
@@ -11,6 +12,10 @@ class oauthResponseHandlerController extends viewController {
      * @var Google_Service_Oauth2_Userinfo
      */
     private $remoteUser;
+    /**
+     * @var mixed
+     */
+    private string $state;
 
     public function __construct() {
         parent::sessionStart();
@@ -19,20 +24,31 @@ class oauthResponseHandlerController extends viewController {
 
         $filterArgs = [
                 'code'  => [ 'filter' => FILTER_SANITIZE_STRING ],
+                'state' => [ 'filter' => FILTER_SANITIZE_STRING ],
                 'error' => [ 'filter' => FILTER_SANITIZE_STRING ]
         ];
 
         $__postInput = filter_input_array( INPUT_GET, $filterArgs );
 
         $this->code  = $__postInput[ 'code' ];
+        $this->state = $__postInput[ 'state' ];
         $this->error = $__postInput[ 'error' ];
     }
 
+    /**
+     * @throws AuthorizationError
+     * @throws Exception
+     */
     public function doAction() {
+
+        if ( empty( $this->state ) || $_SESSION[ 'google-' . INIT::$XSRF_TOKEN ] !== $this->state ) {
+            throw new AuthorizationError( "Forbidden" );
+        }
+
         if ( isset( $this->code ) && $this->code ) {
             $this->_processSuccessfulOAuth();
         } elseif ( $this->error ) {
-            $this->_respondWithError();
+            throw new AuthorizationError( "Forbidden" );
         }
     }
 
@@ -73,10 +89,6 @@ class oauthResponseHandlerController extends viewController {
         $this->client->fetchAccessTokenWithAuthCode( $this->code );
         /** @var Google_Service_Oauth2_Userinfo $remoteUser */
         $this->remoteUser = $plus->userinfo->get();
-    }
-
-    protected function _respondWithError() {
-        // TODO
     }
 
     protected function collectFlashMessages() {

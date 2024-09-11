@@ -143,24 +143,22 @@ abstract class viewController extends controller {
     }
 
     /**
+     * @param string $tokenName
+     * @param string $callbackUrl
+     *
+     * @return string
      * @throws Exception
      */
-    protected function setGDriveAuthUrl( PHPTALWithAppend $template ){
+    protected function setGoogleAuthUrl( string $tokenName, string $callbackUrl ): string {
 
-        if ( $this->isLoggedIn() ) {
-
-            if( !isset( $_SESSION[ 'google-' . INIT::$XSRF_TOKEN ] ) ){
-                $_SESSION[ 'google-' . INIT::$XSRF_TOKEN ] = Utils::uuid4();
-            }
-
-            $googleClientForDrive                      = GoogleClientFactory::getGoogleClient( INIT::$HTTPHOST . "/gdrive/oauth/response" );
-            $googleClientForDrive->setState( $_SESSION[ 'google-' . INIT::$XSRF_TOKEN ] ); // set a state to be checked in the return request from browser
-
-            $template->gdriveAuthURL = $googleClientForDrive->createAuthUrl();
-
-        } else {
-            $template->gdriveAuthURL = "";
+        if( !isset( $_SESSION[ $tokenName . INIT::$XSRF_TOKEN ] ) ){
+            $_SESSION[ $tokenName . INIT::$XSRF_TOKEN ] = Utils::uuid4();
         }
+
+        $googleClientForDrive                      = GoogleClientFactory::getGoogleClient( $callbackUrl );
+        $googleClientForDrive->setState( $_SESSION[ $tokenName . INIT::$XSRF_TOKEN ] ); // set a state to be checked in the return request from browser
+
+        return $googleClientForDrive->createAuthUrl();
 
     }
 

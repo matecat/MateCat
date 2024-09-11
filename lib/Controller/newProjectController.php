@@ -276,8 +276,9 @@ class newProjectController extends viewController {
 
         $this->template->globalMessage = Utils::getGlobalMessage()[ 'messages' ];
 
-        $this->template->authURL = ( !$this->isLoggedIn() ) ? GoogleClientFactory::getGoogleClient( INIT::$OAUTH_REDIRECT_URL )->createAuthUrl() : "";
-        $this->setGDriveAuthUrl( $this->template );
+        $this->template->authURL       = ( !$this->isLoggedIn() ) ? $this->setGoogleAuthUrl( 'google-', INIT::$OAUTH_REDIRECT_URL ) : "";
+        $this->template->gdriveAuthURL = ( $this->isLoggedIn() ) ? $this->setGoogleAuthUrl( 'google-drive-', INIT::$HTTPHOST . "/gdrive/oauth/response" ) : "";
+
 
     }
 
