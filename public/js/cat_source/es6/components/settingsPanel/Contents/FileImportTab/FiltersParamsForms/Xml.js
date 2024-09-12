@@ -6,36 +6,36 @@ import {FiltersParamsContext} from '../FiltersParams'
 import {Controller, useForm} from 'react-hook-form'
 import {isEqual} from 'lodash'
 
-export const Json = () => {
+export const Xml = () => {
   const {currentTemplate, modifyingCurrentTemplate} =
     useContext(FiltersParamsContext)
 
   const {control, watch, unregister} = useForm()
 
-  const {json} = currentTemplate
+  const {xml} = currentTemplate
 
   const data = watch()
-  const {keysType, ...propsValue} = data
+  const {elementsType, ...propsValue} = data
 
   useEffect(() => {
-    if (!isEqual(json, propsValue) && Object.keys(propsValue).length) {
+    if (!isEqual(xml, propsValue) && Object.keys(propsValue).length) {
       modifyingCurrentTemplate((prevTemplate) => ({
         ...prevTemplate,
-        json: propsValue,
+        xml: propsValue,
       }))
     }
-  }, [propsValue, json, modifyingCurrentTemplate])
+  }, [propsValue, xml, modifyingCurrentTemplate])
 
   useEffect(() => {
-    if (keysType === '1') unregister('translate_keys')
+    if (elementsType === '1') unregister('translate_keys')
     else unregister('do_not_translate_keys')
-  }, [keysType, unregister])
+  }, [elementsType, unregister])
 
   return (
     <div className="filters-params-accordion-content">
       <div className="filters-params-option">
         <div>
-          <h3>Extract arrays</h3>
+          <h3>Preserve whitespaces</h3>
           <p>
             Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
             pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
@@ -44,8 +44,8 @@ export const Json = () => {
         </div>
         <Controller
           control={control}
-          defaultValue={json.extract_arrays}
-          name="extract_arrays"
+          defaultValue={xml.preserve_whitespace}
+          name="preserve_whitespace"
           render={({field: {onChange, value, name}}) => (
             <Switch name={name} active={value} onChange={onChange} />
           )}
@@ -54,26 +54,7 @@ export const Json = () => {
 
       <div className="filters-params-option">
         <div>
-          <h3>Escape forward slashes</h3>
-          <p>
-            Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
-            pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
-            condimentum.
-          </p>
-        </div>
-        <Controller
-          control={control}
-          defaultValue={json.escape_forward_slashes}
-          name="escape_forward_slashes"
-          render={({field: {onChange, value, name}}) => (
-            <Switch name={name} active={value} onChange={onChange} />
-          )}
-        />
-      </div>
-
-      <div className="filters-params-option">
-        <div>
-          <h3>Keys</h3>
+          <h3>Elements</h3>
           <p>
             Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
             pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
@@ -83,7 +64,7 @@ export const Json = () => {
         <div className="container-keys-controller">
           <Controller
             control={control}
-            name="keysType"
+            name="elementsType"
             defaultValue={'0'}
             render={({field: {onChange, value, name}}) => (
               <SegmentedControl
@@ -101,11 +82,15 @@ export const Json = () => {
           <Controller
             control={control}
             defaultValue={
-              keysType === '1'
-                ? json.do_not_translate_keys
-                : json.translate_keys
+              elementsType === '1'
+                ? xml.do_not_translate_elements
+                : xml.translate_elements
             }
-            name={keysType === '1' ? 'do_not_translate_keys' : 'translate_keys'}
+            name={
+              elementsType === '1'
+                ? 'do_not_translate_elements'
+                : 'translate_elements'
+            }
             render={({field: {onChange, value, name}}) => (
               <WordsBadge
                 name={name}
@@ -120,7 +105,7 @@ export const Json = () => {
 
       <div className="filters-params-option">
         <div>
-          <h3>Context keys</h3>
+          <h3>Translatable attributes</h3>
           <p>
             Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
             pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
@@ -129,32 +114,8 @@ export const Json = () => {
         </div>
         <Controller
           control={control}
-          defaultValue={json.context_keys}
-          name="context_keys"
-          render={({field: {onChange, value, name}}) => (
-            <WordsBadge
-              name={name}
-              value={value}
-              onChange={onChange}
-              placeholder={''}
-            />
-          )}
-        />
-      </div>
-
-      <div className="filters-params-option">
-        <div>
-          <h3>Character limit keys</h3>
-          <p>
-            Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
-            pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
-            condimentum.
-          </p>
-        </div>
-        <Controller
-          control={control}
-          defaultValue={json.character_limit}
-          name="character_limit"
+          defaultValue={xml.translate_attributes}
+          name="translate_attributes"
           render={({field: {onChange, value, name}}) => (
             <WordsBadge
               name={name}

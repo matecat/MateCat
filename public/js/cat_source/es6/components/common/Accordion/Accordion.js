@@ -13,17 +13,19 @@ export const Accordion = ({
 }) => {
   const panelRef = useRef()
 
+  const {scrollHeight} = panelRef.current ?? {}
+
   const handleClick = () => {
     onShow(id)
   }
 
   useEffect(() => {
     if (expanded) {
-      panelRef.current.style.maxHeight = `${panelRef.current.scrollHeight}px`
+      panelRef.current.style.maxHeight = `${scrollHeight}px`
     } else {
       panelRef.current.style.maxHeight = 0
     }
-  }, [expanded])
+  }, [expanded, scrollHeight])
 
   return (
     <div className={`accordion-component ${className}`}>

@@ -1,41 +1,34 @@
 import React, {useContext, useEffect} from 'react'
 import Switch from '../../../../common/Switch'
-import {SegmentedControl} from '../../../../common/SegmentedControl'
 import {WordsBadge} from '../../../../common/WordsBadge/WordsBadge'
 import {FiltersParamsContext} from '../FiltersParams'
 import {Controller, useForm} from 'react-hook-form'
 import {isEqual} from 'lodash'
 
-export const Json = () => {
+export const MsWord = () => {
   const {currentTemplate, modifyingCurrentTemplate} =
     useContext(FiltersParamsContext)
 
-  const {control, watch, unregister} = useForm()
+  const {control, watch} = useForm()
 
-  const {json} = currentTemplate
+  const {msWord} = currentTemplate
 
-  const data = watch()
-  const {keysType, ...propsValue} = data
+  const propsValue = watch()
 
   useEffect(() => {
-    if (!isEqual(json, propsValue) && Object.keys(propsValue).length) {
+    if (!isEqual(msWord, propsValue) && Object.keys(propsValue).length) {
       modifyingCurrentTemplate((prevTemplate) => ({
         ...prevTemplate,
-        json: propsValue,
+        msWord: propsValue,
       }))
     }
-  }, [propsValue, json, modifyingCurrentTemplate])
-
-  useEffect(() => {
-    if (keysType === '1') unregister('translate_keys')
-    else unregister('do_not_translate_keys')
-  }, [keysType, unregister])
+  }, [propsValue, msWord, modifyingCurrentTemplate])
 
   return (
     <div className="filters-params-accordion-content">
       <div className="filters-params-option">
         <div>
-          <h3>Extract arrays</h3>
+          <h3>Extract headers and footers</h3>
           <p>
             Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
             pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
@@ -44,8 +37,8 @@ export const Json = () => {
         </div>
         <Controller
           control={control}
-          defaultValue={json.extract_arrays}
-          name="extract_arrays"
+          defaultValue={msWord.extract_headers_footers}
+          name="extract_headers_footers"
           render={({field: {onChange, value, name}}) => (
             <Switch name={name} active={value} onChange={onChange} />
           )}
@@ -54,7 +47,7 @@ export const Json = () => {
 
       <div className="filters-params-option">
         <div>
-          <h3>Escape forward slashes</h3>
+          <h3>Extract hidden text</h3>
           <p>
             Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
             pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
@@ -63,8 +56,8 @@ export const Json = () => {
         </div>
         <Controller
           control={control}
-          defaultValue={json.escape_forward_slashes}
-          name="escape_forward_slashes"
+          defaultValue={msWord.extract_hidden_text}
+          name="extract_hidden_text"
           render={({field: {onChange, value, name}}) => (
             <Switch name={name} active={value} onChange={onChange} />
           )}
@@ -73,54 +66,7 @@ export const Json = () => {
 
       <div className="filters-params-option">
         <div>
-          <h3>Keys</h3>
-          <p>
-            Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
-            pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
-            condimentum.
-          </p>
-        </div>
-        <div className="container-keys-controller">
-          <Controller
-            control={control}
-            name="keysType"
-            defaultValue={'0'}
-            render={({field: {onChange, value, name}}) => (
-              <SegmentedControl
-                name={name}
-                className="keys-segmented-control"
-                options={[
-                  {id: '0', name: 'Translatable'},
-                  {id: '1', name: 'Non-translatable'},
-                ]}
-                selectedId={value}
-                onChange={onChange}
-              />
-            )}
-          />
-          <Controller
-            control={control}
-            defaultValue={
-              keysType === '1'
-                ? json.do_not_translate_keys
-                : json.translate_keys
-            }
-            name={keysType === '1' ? 'do_not_translate_keys' : 'translate_keys'}
-            render={({field: {onChange, value, name}}) => (
-              <WordsBadge
-                name={name}
-                value={value}
-                onChange={onChange}
-                placeholder={''}
-              />
-            )}
-          />
-        </div>
-      </div>
-
-      <div className="filters-params-option">
-        <div>
-          <h3>Context keys</h3>
+          <h3>Extract comments</h3>
           <p>
             Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
             pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
@@ -129,22 +75,17 @@ export const Json = () => {
         </div>
         <Controller
           control={control}
-          defaultValue={json.context_keys}
-          name="context_keys"
+          defaultValue={msWord.extract_comments}
+          name="extract_comments"
           render={({field: {onChange, value, name}}) => (
-            <WordsBadge
-              name={name}
-              value={value}
-              onChange={onChange}
-              placeholder={''}
-            />
+            <Switch name={name} active={value} onChange={onChange} />
           )}
         />
       </div>
 
       <div className="filters-params-option">
         <div>
-          <h3>Character limit keys</h3>
+          <h3>Extract documents properties</h3>
           <p>
             Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
             pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
@@ -153,8 +94,46 @@ export const Json = () => {
         </div>
         <Controller
           control={control}
-          defaultValue={json.character_limit}
-          name="character_limit"
+          defaultValue={msWord.extract_doc_properties}
+          name="extract_doc_properties"
+          render={({field: {onChange, value, name}}) => (
+            <Switch name={name} active={value} onChange={onChange} />
+          )}
+        />
+      </div>
+
+      <div className="filters-params-option">
+        <div>
+          <h3>Accept revisions</h3>
+          <p>
+            Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
+            pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
+            condimentum.
+          </p>
+        </div>
+        <Controller
+          control={control}
+          defaultValue={msWord.accept_revisions}
+          name="accept_revisions"
+          render={({field: {onChange, value, name}}) => (
+            <Switch name={name} active={value} onChange={onChange} />
+          )}
+        />
+      </div>
+
+      <div className="filters-params-option">
+        <div>
+          <h3>Exclude styles</h3>
+          <p>
+            Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
+            pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
+            condimentum.
+          </p>
+        </div>
+        <Controller
+          control={control}
+          defaultValue={msWord.exclude_styles}
+          name="exclude_styles"
           render={({field: {onChange, value, name}}) => (
             <WordsBadge
               name={name}

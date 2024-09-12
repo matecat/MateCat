@@ -6,25 +6,25 @@ import {FiltersParamsContext} from '../FiltersParams'
 import {Controller, useForm} from 'react-hook-form'
 import {isEqual} from 'lodash'
 
-export const Json = () => {
+export const Yaml = () => {
   const {currentTemplate, modifyingCurrentTemplate} =
     useContext(FiltersParamsContext)
 
   const {control, watch, unregister} = useForm()
 
-  const {json} = currentTemplate
+  const {yaml} = currentTemplate
 
   const data = watch()
   const {keysType, ...propsValue} = data
 
   useEffect(() => {
-    if (!isEqual(json, propsValue) && Object.keys(propsValue).length) {
+    if (!isEqual(yaml, propsValue) && Object.keys(propsValue).length) {
       modifyingCurrentTemplate((prevTemplate) => ({
         ...prevTemplate,
-        json: propsValue,
+        yaml: propsValue,
       }))
     }
-  }, [propsValue, json, modifyingCurrentTemplate])
+  }, [propsValue, yaml, modifyingCurrentTemplate])
 
   useEffect(() => {
     if (keysType === '1') unregister('translate_keys')
@@ -44,27 +44,8 @@ export const Json = () => {
         </div>
         <Controller
           control={control}
-          defaultValue={json.extract_arrays}
+          defaultValue={yaml.extract_arrays}
           name="extract_arrays"
-          render={({field: {onChange, value, name}}) => (
-            <Switch name={name} active={value} onChange={onChange} />
-          )}
-        />
-      </div>
-
-      <div className="filters-params-option">
-        <div>
-          <h3>Escape forward slashes</h3>
-          <p>
-            Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
-            pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
-            condimentum.
-          </p>
-        </div>
-        <Controller
-          control={control}
-          defaultValue={json.escape_forward_slashes}
-          name="escape_forward_slashes"
           render={({field: {onChange, value, name}}) => (
             <Switch name={name} active={value} onChange={onChange} />
           )}
@@ -102,8 +83,8 @@ export const Json = () => {
             control={control}
             defaultValue={
               keysType === '1'
-                ? json.do_not_translate_keys
-                : json.translate_keys
+                ? yaml.do_not_translate_keys
+                : yaml.translate_keys
             }
             name={keysType === '1' ? 'do_not_translate_keys' : 'translate_keys'}
             render={({field: {onChange, value, name}}) => (
@@ -116,54 +97,6 @@ export const Json = () => {
             )}
           />
         </div>
-      </div>
-
-      <div className="filters-params-option">
-        <div>
-          <h3>Context keys</h3>
-          <p>
-            Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
-            pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
-            condimentum.
-          </p>
-        </div>
-        <Controller
-          control={control}
-          defaultValue={json.context_keys}
-          name="context_keys"
-          render={({field: {onChange, value, name}}) => (
-            <WordsBadge
-              name={name}
-              value={value}
-              onChange={onChange}
-              placeholder={''}
-            />
-          )}
-        />
-      </div>
-
-      <div className="filters-params-option">
-        <div>
-          <h3>Character limit keys</h3>
-          <p>
-            Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
-            pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
-            condimentum.
-          </p>
-        </div>
-        <Controller
-          control={control}
-          defaultValue={json.character_limit}
-          name="character_limit"
-          render={({field: {onChange, value, name}}) => (
-            <WordsBadge
-              name={name}
-              value={value}
-              onChange={onChange}
-              placeholder={''}
-            />
-          )}
-        />
       </div>
     </div>
   )
