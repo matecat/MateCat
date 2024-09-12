@@ -2,6 +2,7 @@
 
 use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
+use ConnectedServices\GoogleClientFactory;
 use WordCount\WordCountStruct;
 
 /**
@@ -72,8 +73,16 @@ class reviseSummaryController extends viewController {
         Activity::save( $activity );
 
     }
-    
-	public function setTemplateVars() {
+
+    /**
+     * @throws \Exceptions\NotFoundException
+     * @throws \TaskRunner\Exceptions\EndQueueException
+     * @throws \API\Commons\Exceptions\AuthenticationError
+     * @throws \TaskRunner\Exceptions\ReQueueException
+     * @throws \Exceptions\ValidationError
+     * @throws Exception
+     */
+    public function setTemplateVars() {
 
         $this->template->job_archived = ( $this->job_archived ) ? 1 : '';
         $this->template->owner_email  = $this->job_owner_email;
@@ -133,11 +142,14 @@ class reviseSummaryController extends viewController {
         }
 
         $lang_handler = Langs_Languages::getInstance();
-        $this->template->source_rtl = ( $lang_handler->isRTL( $this->data[ 'source' ] ) ) ? true : false ;
-        $this->template->target_rtl = ( $lang_handler->isRTL( $this->data[ 'target' ] ) ) ? true : false ;
+        $this->template->source_rtl = (bool)$lang_handler->isRTL( $this->data[ 'source' ] );
+        $this->template->target_rtl = (bool)$lang_handler->isRTL( $this->data[ 'target' ] );
 
         $this->template->searchable_statuses = $this->searchableStatuses();
         $this->template->first_job_segment   = $this->data->job_first_segment ;
+
+        $this->template->authURL       = ( !$this->isLoggedIn() ) ? $this->setGoogleAuthUrl( 'google-', INIT::$OAUTH_REDIRECT_URL ) : "";
+        $this->template->gdriveAuthURL = ( $this->isLoggedIn() ) ? $this->setGoogleAuthUrl( 'google-drive-', INIT::$HTTPHOST . "/gdrive/oauth/response" ) : "";
 
     }
 

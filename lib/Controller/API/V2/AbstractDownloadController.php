@@ -59,11 +59,9 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
 
     protected function setUserCredentials() {
 
-        $userCredentials = AuthCookie::getCredentials();
-
         $this->user        = new Users_UserStruct();
-        $this->user->uid   = ( isset( $userCredentials['user'] ) && !empty( $userCredentials['user']['uid'] ) ? $userCredentials['user']['uid'] : null );
-        $this->user->email = ( isset( $userCredentials['user'] ) && !empty( $userCredentials['user']['email'] ) ? $userCredentials['user']['email'] : null );
+        $this->user->uid   = ( !empty( $_SESSION[ 'uid' ] ) ? $_SESSION[ 'uid' ] : null );
+        $this->user->email = ( !empty( $_SESSION[ 'cid' ] ) ? $_SESSION[ 'cid' ] : null );
 
         try {
 

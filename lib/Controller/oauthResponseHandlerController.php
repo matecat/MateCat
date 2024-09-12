@@ -1,11 +1,8 @@
 <?php
 
+use API\Commons\Exceptions\AuthorizationError;
 use ConnectedServices\ConnectedServiceInterface;
 use ConnectedServices\ConnectedServiceUserModel;
-
-header("Cache-Control: no-store, no-cache, must-revalidate");  // HTTP/1.1
-header("Cache-Control: post-check=0, pre-check=0", false);
-header("Pragma: no-cache");
 
 class oauthResponseHandlerController extends BaseKleinViewController {
 
@@ -26,6 +23,10 @@ class oauthResponseHandlerController extends BaseKleinViewController {
 			'code'          => [ 'filter' => FILTER_SANITIZE_STRING ],
 			'error'         => [ 'filter' => FILTER_SANITIZE_STRING ]
         ] );
+
+        if ( empty( $this->state ) || $_SESSION[ 'google-' . INIT::$XSRF_TOKEN ] !== $this->state ) {
+            throw new AuthorizationError( "Forbidden" );
+        }
 
         if (isset($params['code']) && !empty($params['code'])) {
             $this->_processSuccessfulOAuth($params['code'], $params['provider']) ;

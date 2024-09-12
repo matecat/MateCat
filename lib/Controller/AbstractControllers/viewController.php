@@ -1,5 +1,7 @@
 <?php
 
+use ConnectedServices\GoogleClientFactory;
+
 use ConnectedServices\ConnectedServiceInterface;
 use ConnectedServices\GDrive;
 
@@ -121,7 +123,6 @@ abstract class viewController extends controller {
 
         ob_get_contents();
         ob_get_clean();
-        ob_start( "ob_gzhandler" ); // compress page before sending
         $this->nocache();
 
         header( 'Content-Type: text/html; charset=utf-8' );
@@ -137,15 +138,6 @@ abstract class viewController extends controller {
             throw $ignore;
         }
 
-    }
-
-    /**
-     * @return string
-     * @throws Exception
-     * @deprecated use getAuthUrl instead.
-     */
-    public function generateAuthURL() {
-        return $this->getGoogleAuthUrl();
     }
 
     /**
@@ -170,14 +162,30 @@ abstract class viewController extends controller {
         $this->template->footer_js            = [];
         $this->template->config_js            = [];
         $this->template->css_resources        = [];
-        $this->template->googleAuthURL        = $this->getGoogleAuthUrl();
-        $this->template->githubAuthUrl        = $this->getGithubAuthUrl();
-        $this->template->linkedInAuthUrl      = $this->getLinkedInAuthUrl();
-        $this->template->microsoftAuthUrl     = $this->getMicrosoftAuthUrl();
-        $this->template->facebookAuthUrl      = $this->getFacebookAuthUrl();
-        $this->template->gdriveAuthURL        = GDrive::generateGDriveAuthUrl();
+
         $this->template->enableMultiDomainApi = INIT::$ENABLE_MULTI_DOMAIN_API;
         $this->template->ajaxDomainsNumber    = INIT::$AJAX_DOMAINS;
+
+    }
+
+    /**
+     * @param string $tokenName
+     * @param string $callbackUrl
+     *
+     * @return string
+     * @throws Exception
+     */
+    protected function setGoogleAuthUrl( string $tokenName, string $callbackUrl ): string {
+
+        if( !isset( $_SESSION[ $tokenName . INIT::$XSRF_TOKEN ] ) ){
+            $_SESSION[ $tokenName . INIT::$XSRF_TOKEN ] = Utils::uuid4();
+        }
+
+        $googleClientForDrive                      = GoogleClientFactory::getGoogleClient( $callbackUrl );
+        $googleClientForDrive->setState( $_SESSION[ $tokenName . INIT::$XSRF_TOKEN ] ); // set a state to be checked in the return request from browser
+
+        return $googleClientForDrive->createAuthUrl();
+
     }
 
     /**
@@ -357,6 +365,13 @@ abstract class viewController extends controller {
             $this->template->maxTMXFileSize      = INIT::$MAX_UPLOAD_TMX_FILE_SIZE;
             $this->template->dqf_enabled         = false;
             $this->template->isOpenAiEnabled     = !empty( INIT::$OPENAI_API_KEY );
+
+            /**
+             * This is a unique ID generated at runtime.
+             * It is injected into the nonce attribute of `< script >` tags to allow browsers to safely execute the contained CSS and JavaScript.
+             */
+            $this->template->x_nonce_unique_id          = Utils::uuid4();
+            $this->template->x_self_ajax_location_hosts = INIT::$ENABLE_MULTI_DOMAIN_API ? " *.ajax." . parse_url( INIT::$HTTPHOST )[ 'host' ] : null;
 
             ( INIT::$VOLUME_ANALYSIS_ENABLED ? $this->template->analysis_enabled = true : null );
             $this->template->setOutputMode( PHPTAL::HTML5 );

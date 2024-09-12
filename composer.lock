@@ -1599,16 +1599,16 @@
         },
         {
             "name": "matecat/xliff-parser",
-            "version": "2.2.5",
+            "version": "v2.2.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/xliff-parser.git",
-                "reference": "f6929c3c2e34da5e04d67f07c265560cb9eb9eb0"
+                "reference": "80b17aea61c7d73559d3432b0f29c24b65241557"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/f6929c3c2e34da5e04d67f07c265560cb9eb9eb0",
-                "reference": "f6929c3c2e34da5e04d67f07c265560cb9eb9eb0",
+                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/80b17aea61c7d73559d3432b0f29c24b65241557",
+                "reference": "80b17aea61c7d73559d3432b0f29c24b65241557",
                 "shasum": ""
             },
             "require": {
@@ -1660,9 +1660,9 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/xliff-parser/issues",
-                "source": "https://github.com/matecat/xliff-parser/tree/2.2.5"
+                "source": "https://github.com/matecat/xliff-parser/tree/v2.2.7"
             },
-            "time": "2024-08-30T13:14:07+00:00"
+            "time": "2024-09-05T09:13:44+00:00"
         },
         {
             "name": "matecat/xml-dom-parser",
@@ -2243,16 +2243,16 @@
         },
         {
             "name": "phpoffice/phpspreadsheet",
-            "version": "1.29.0",
+            "version": "1.29.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPOffice/PhpSpreadsheet.git",
-                "reference": "fde2ccf55eaef7e86021ff1acce26479160a0fa0"
+                "reference": "59ee38f7480904cd6487e5cbdea4d80ff2758719"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHPOffice/PhpSpreadsheet/zipball/fde2ccf55eaef7e86021ff1acce26479160a0fa0",
-                "reference": "fde2ccf55eaef7e86021ff1acce26479160a0fa0",
+                "url": "https://api.github.com/repos/PHPOffice/PhpSpreadsheet/zipball/59ee38f7480904cd6487e5cbdea4d80ff2758719",
+                "reference": "59ee38f7480904cd6487e5cbdea4d80ff2758719",
                 "shasum": ""
             },
             "require": {
@@ -2287,7 +2287,7 @@
                 "phpcompatibility/php-compatibility": "^9.3",
                 "phpstan/phpstan": "^1.1",
                 "phpstan/phpstan-phpunit": "^1.0",
-                "phpunit/phpunit": "^8.5 || ^9.0 || ^10.0",
+                "phpunit/phpunit": "^8.5 || ^9.0",
                 "squizlabs/php_codesniffer": "^3.7",
                 "tecnickcom/tcpdf": "^6.5"
             },
@@ -2342,9 +2342,9 @@
             ],
             "support": {
                 "issues": "https://github.com/PHPOffice/PhpSpreadsheet/issues",
-                "source": "https://github.com/PHPOffice/PhpSpreadsheet/tree/1.29.0"
+                "source": "https://github.com/PHPOffice/PhpSpreadsheet/tree/1.29.1"
             },
-            "time": "2023-06-14T22:48:31+00:00"
+            "time": "2024-09-03T00:55:32+00:00"
         },
         {
             "name": "phpseclib/phpseclib",

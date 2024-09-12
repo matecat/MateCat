@@ -143,6 +143,9 @@ class analyzeController extends viewController {
 
     }
 
+    /**
+     * @throws Exception
+     */
     public function setTemplateVars() {
 
         if ( $this->project_not_found ) {
@@ -184,6 +187,9 @@ class analyzeController extends viewController {
         $this->template->json_jobs               = json_encode( $this->model );
         $this->template->split_enabled           = true;
         $this->template->enable_outsource        = INIT::$ENABLE_OUTSOURCE;
+
+        $this->template->authURL       = ( !$this->isLoggedIn() ) ? $this->setGoogleAuthUrl( 'google-', INIT::$OAUTH_REDIRECT_URL ) : "";
+        $this->template->gdriveAuthURL = ( $this->isLoggedIn() ) ? $this->setGoogleAuthUrl( 'google-drive-', INIT::$HTTPHOST . "/gdrive/oauth/response" ) : "";
 
     }
 
