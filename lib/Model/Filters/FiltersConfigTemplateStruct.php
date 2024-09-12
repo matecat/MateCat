@@ -13,7 +13,6 @@ use Filters\DTO\MSWord;
 use Filters\DTO\Xml;
 use Filters\DTO\Yaml;
 use JsonSerializable;
-use stdClass;
 
 class FiltersConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruct implements JsonSerializable {
 

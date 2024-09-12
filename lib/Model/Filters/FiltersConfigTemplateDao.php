@@ -12,7 +12,6 @@ use Pagination\PaginationParameters;
 use PDO;
 use Projects\ProjectTemplateStruct;
 use ReflectionException;
-use stdClass;
 use Utils;
 
 class FiltersConfigTemplateDao extends DataAccess_AbstractDao {
