@@ -42,15 +42,6 @@ class FiltersConfigTemplateDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param int $uid
-     *
-     * @return stdClass
-     */
-    public static function getDefaultTemplate( int $uid ): stdClass {
-        return FiltersConfigTemplateStruct::default( $uid );
-    }
-
-    /**
      * @param string $json
      * @param int    $uid
      *

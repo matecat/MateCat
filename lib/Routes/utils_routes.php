@@ -126,8 +126,3 @@ $klein->with( '/api/app/qa_model_template', function () {
 $klein->with( '/api/app/project-template', function () {
     route( '/default', 'GET', '\API\V3\ProjectTemplateController', 'default' );
 } );
-
-// FILTERS CONFIG
-$klein->with( '/api/app/filters-config-template', function () {
-    route( '/default', 'GET', '\API\V3\FiltersConfigTemplateController', 'default' );
-} );

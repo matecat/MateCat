@@ -7,8 +7,6 @@ use JsonSerializable;
 
 class MSExcel implements IDto, JsonSerializable, Countable {
 
-    use DefaultTrait;
-
     private bool  $extract_doc_properties = false;
     private bool  $extract_hidden_cells   = false;
     private bool  $extract_diagrams       = false;

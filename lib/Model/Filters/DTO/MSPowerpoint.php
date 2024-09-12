@@ -7,8 +7,6 @@ use JsonSerializable;
 
 class MSPowerpoint implements IDto, JsonSerializable, Countable {
 
-    use DefaultTrait;
-
     private bool  $extract_doc_properties = false;
     private bool  $extract_hidden_slides  = false;
     private bool  $extract_notes          = true;

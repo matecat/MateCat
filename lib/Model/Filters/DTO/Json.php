@@ -7,14 +7,14 @@ use JsonSerializable;
 
 class Json implements IDto, JsonSerializable, Countable {
 
-    use DefaultTrait;
-
     private bool  $extract_arrays         = false;
     private bool  $escape_forward_slashes = false;
     private array $translate_keys         = [];
     private array $do_not_translate_keys  = [];
     private array $context_keys           = [];
     private array $character_limit        = [];
+
+    private array $defaultExcludeMask = [];
 
     /**
      * @param bool|null $extract_arrays
