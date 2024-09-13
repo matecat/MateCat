@@ -619,7 +619,8 @@ var spec = {
         description: 'API to generate a second pass review',
         parameters: [
           {
-            name: 'id_job',
+            name: 'id_project',
+            in: 'path',
             description:
               'The id of the job you intend to generate the Revise 2 step for',
             required: true,
@@ -627,6 +628,7 @@ var spec = {
           },
           {
             name: 'password',
+            in: 'path',
             description:
               'The password of the job you intend to generate the Revise 2 step for',
             required: true,
