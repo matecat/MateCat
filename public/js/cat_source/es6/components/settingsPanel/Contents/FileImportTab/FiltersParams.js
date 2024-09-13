@@ -3,16 +3,14 @@ import {SettingsPanelContext} from '../../SettingsPanelContext'
 import CatToolActions from '../../../../actions/CatToolActions'
 import ModalsActions from '../../../../actions/ModalsActions'
 import {ConfirmDeleteResourceProjectTemplates} from '../../../modals/ConfirmDeleteResourceProjectTemplates'
-import {
-  getFiltersParamsTemplateDefault,
-  getFiltersParamsTemplates,
-} from '../../../../api/getFiltersParamsTemplates'
+import {getFiltersParamsTemplates} from '../../../../api/getFiltersParamsTemplates'
 import {SubTemplates} from '../SubTemplates'
 import {SCHEMA_KEYS} from '../../../../hooks/useProjectTemplates'
 import {createFiltersParamsTemplate} from '../../../../api/createFiltersParamsTemplate/createFiltersParamsTemplate'
 import {updateFiltersParamsTemplate} from '../../../../api/updateFiltersParamsTemplate/updateFiltersParamsTemplate'
 import {deleteFiltersParamsTemplate} from '../../../../api/deleteFiltersParamsTemplate/deleteFiltersParamsTemplate'
 import {AccordionGroupFiltersParams} from './AccordionGroupFiltersParams'
+import defaultFiltersParams from '../defaultTemplates/filterParams.json'
 
 export const FILTERS_PARAMS_SCHEMA_KEYS = {
   id: 'id',
@@ -102,11 +100,8 @@ export const FiltersParams = () => {
     let cleanup = false
 
     if (config.isLoggedIn === 1 && !config.is_cattool) {
-      Promise.all([
-        getFiltersParamsTemplateDefault(),
-        getFiltersParamsTemplates(),
-      ]).then(([templateDefault, templates]) => {
-        const items = [templateDefault, ...templates.items]
+      getFiltersParamsTemplates().then((templates) => {
+        const items = [defaultFiltersParams, ...templates.items]
         if (!cleanup) {
           const selectedTemplateId =
             items.find(({id}) => id === currentProjectTemplateFiltersId)?.id ??

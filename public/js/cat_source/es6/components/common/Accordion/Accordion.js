@@ -1,4 +1,4 @@
-import React, {useEffect, useRef} from 'react'
+import React, {useEffect, useLayoutEffect, useRef, useState} from 'react'
 
 import PropTypes from 'prop-types'
 import ChevronDown from '../../../../../../img/icons/ChevronDown'
@@ -11,17 +11,33 @@ export const Accordion = ({
   onShow = () => {},
   className = '',
 }) => {
+  const [isRenderingContent, setIsRenderingContent] = useState(expanded)
+
   const panelRef = useRef()
 
   const {scrollHeight} = panelRef.current ?? {}
 
   const handleClick = () => {
     onShow(id)
+    setIsRenderingContent(true)
   }
 
   useEffect(() => {
+    const transitionEndClose = () => setIsRenderingContent(false)
+
+    const {current} = panelRef
+    const maxHeight = window.getComputedStyle(panelRef.current).maxHeight
+
+    if (!expanded && maxHeight !== '0px')
+      current.addEventListener('transitionend', transitionEndClose)
+
+    return () =>
+      current.removeEventListener('transitionend', transitionEndClose)
+  }, [expanded, id])
+
+  useLayoutEffect(() => {
     if (expanded) {
-      panelRef.current.style.maxHeight = `${scrollHeight}px`
+      panelRef.current.style.maxHeight = `${scrollHeight > 0 ? scrollHeight : panelRef.current.scrollHeight}px`
     } else {
       panelRef.current.style.maxHeight = 0
     }
@@ -36,7 +52,7 @@ export const Accordion = ({
         {title} <ChevronDown size={10} />
       </div>
       <div ref={panelRef} className="accordion-component-content">
-        {children}
+        {isRenderingContent && children}
       </div>
     </div>
   )

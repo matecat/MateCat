@@ -27,8 +27,8 @@ export const Xml = () => {
   }, [propsValue, xml, modifyingCurrentTemplate])
 
   useEffect(() => {
-    if (elementsType === '1') unregister('translate_keys')
-    else unregister('do_not_translate_keys')
+    if (elementsType === '1') unregister('translate_elements')
+    else unregister('do_not_translate_elements')
   }, [elementsType, unregister])
 
   return (

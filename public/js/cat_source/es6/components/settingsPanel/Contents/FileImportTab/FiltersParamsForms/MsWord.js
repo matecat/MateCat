@@ -6,7 +6,7 @@ import {Controller, useForm} from 'react-hook-form'
 import {isEqual} from 'lodash'
 
 export const MsWord = () => {
-  const {currentTemplate, modifyingCurrentTemplate} =
+  const {currentTemplate, modifyingCurrentTemplate, templates} =
     useContext(FiltersParamsContext)
 
   const {control, watch} = useForm()
@@ -14,7 +14,7 @@ export const MsWord = () => {
   const {msWord} = currentTemplate
 
   const propsValue = watch()
-
+  console.log('#templates', templates)
   useEffect(() => {
     if (!isEqual(msWord, propsValue) && Object.keys(propsValue).length) {
       modifyingCurrentTemplate((prevTemplate) => ({

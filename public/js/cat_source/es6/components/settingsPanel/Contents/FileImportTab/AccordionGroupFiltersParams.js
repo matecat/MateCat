@@ -31,11 +31,11 @@ export const AccordionGroupFiltersParams = () => {
     ) : ACCORDION_GROUP.yaml === section ? (
       <Yaml />
     ) : ACCORDION_GROUP.msWord === section ? (
-      <MsWord />
-    ) : ACCORDION_GROUP.msExcel === section ? (
+      <MsWord /> /* : ACCORDION_GROUP.msExcel === section ? (
       <MsExcel />
     ) : ACCORDION_GROUP.msPowerpoint === section ? (
       <MsPowerpoint />
+    ) */
     ) : (
       <span>we</span>
     )

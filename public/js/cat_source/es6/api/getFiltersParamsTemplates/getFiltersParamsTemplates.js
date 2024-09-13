@@ -21,25 +21,3 @@ export const getFiltersParamsTemplates = async () => {
 
   return data
 }
-
-/**
- * Return default QA template
- *
- * @returns {Promise<object>}
- */
-export const getFiltersParamsTemplateDefault = async () => {
-  const response = await fetch(
-    `${getMatecatApiDomain()}api/app/filters-config-template/default`,
-    {
-      method: 'GET',
-      credentials: 'include',
-    },
-  )
-
-  if (!response.ok) return Promise.reject(response)
-
-  const {errors, ...data} = await response.json()
-  if (errors && errors.length > 0) return Promise.reject(errors)
-
-  return data
-}
