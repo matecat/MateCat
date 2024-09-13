@@ -612,7 +612,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/projects/{id_project}/{password}/reviews': {
+    '/api/v2/projects/{id_project}/{password}/r2': {
       post: {
         tags: ['Project'],
         summary: 'Generate second pass review 2',
