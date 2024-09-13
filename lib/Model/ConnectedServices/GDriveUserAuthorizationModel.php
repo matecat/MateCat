@@ -8,6 +8,7 @@
 
 namespace ConnectedServices;
 
+use ConnectedServices\Google\GoogleClient;
 use Exception;
 use Exceptions\ValidationError;
 use Google_Service_Oauth2;
@@ -108,7 +109,7 @@ class GDriveUserAuthorizationModel {
      * @throws Exception
      */
     private function __collectProperties( $code ) {
-        $gdriveClient = GoogleClientFactory::getGoogleClient( INIT::$HTTPHOST . "/gdrive/oauth/response" );
+        $gdriveClient = GoogleClient::getClient( INIT::$HTTPHOST . "/gdrive/oauth/response" );
         $gdriveClient->fetchAccessTokenWithAuthCode( $code );
         $this->token = $gdriveClient->getAccessToken();
 

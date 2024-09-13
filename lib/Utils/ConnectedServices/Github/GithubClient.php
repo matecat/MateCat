@@ -2,69 +2,87 @@
 
 namespace ConnectedServices\Github;
 
-use ConnectedServices\ConnectedServiceInterface;
+use ConnectedServices\AbstractClient;
 use ConnectedServices\ConnectedServiceUserModel;
-use Exception;
+use INIT;
+use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
+use League\OAuth2\Client\Provider\Github;
 use League\OAuth2\Client\Token\AccessToken;
-use OauthClient;
-use Utils;
 
-class GithubClient implements ConnectedServiceInterface
-{
+class GithubClient extends AbstractClient {
+
+    const PROVIDER_NAME = 'github';
+
     /**
+     * @param string|null $redirectUrl
+     *
+     * @return Github
+     */
+    public static function getClient( ?string $redirectUrl = null ): Github {
+        return new Github( [
+                'clientId'     => INIT::$GITHUB_OAUTH_CLIENT_ID,
+                'clientSecret' => INIT::$GITHUB_OAUTH_CLIENT_SECRET,
+                'redirectUri'  => $redirectUrl ?? INIT::$GITHUB_OAUTH_REDIRECT_URL,
+        ] );
+    }
+
+    /**
+     * @param string $csrfTokenState
+     *
      * @return string
      */
-    public function getAuthorizationUrl()
-    {
-        $options = [
-            'state' => Utils::randomString(20),
-            'scope' => [
-                'user',
-                'user:email'
-            ]
+    public function getAuthorizationUrl( string $csrfTokenState ): string {
+        $options      = [
+                'state' => $csrfTokenState,
+                'scope' => [
+                        'user',
+                        'user:email'
+                ]
         ];
-        $githubClient = GithubClientFactory::create();
+        $githubClient = static::getClient( $this->redirectUrl );
 
-        return $githubClient->getAuthorizationUrl($options);
+        return $githubClient->getAuthorizationUrl( $options );
     }
 
     /**
      * @param $code
-     * @return mixed|string
-     * @throws Exception
+     *
+     * @return AccessToken
+     * @throws IdentityProviderException
      */
-    public function getAuthToken($code)
-    {
-        $githubClient = GithubClientFactory::create();
+    public function getAccessTokenFromAuthCode( $code ): AccessToken {
+        $githubClient = static::getClient();
 
         /** @var AccessToken $token */
-        $token = $githubClient->getAccessToken('authorization_code', [
-            'code' => $code
-        ]);
+        $token = $githubClient->getAccessToken( 'authorization_code', [
+                'code' => $code
+        ] );
 
         return $token;
     }
 
     /**
      * @param $token
+     *
      * @return ConnectedServiceUserModel
      */
-    public function getResourceOwner($token): ConnectedServiceUserModel
-    {
-        $githubClient = GithubClientFactory::create();
-        $fetched = $githubClient->getResourceOwner($token);
+    public function getResourceOwner( $token ): ConnectedServiceUserModel {
+
+        $githubClient = static::getClient( $this->redirectUrl );
+
+        $fetched = $githubClient->getResourceOwner( $token );
         $fetched = $fetched->toArray();
 
-        // github only returns the full name
-        $name = explode(" ", $fetched['name']);
+        // GitHub only returns the full name
+        $name = explode( " ", $fetched[ 'name' ] );
 
-        $user = new ConnectedServiceUserModel();
-        $user->email = $fetched['email'];
-        $user->name = $name[0];
-        $user->lastName = $name[1];
-        $user->picture = $fetched['avatar_url'];
+        $user            = new ConnectedServiceUserModel();
+        $user->email     = $fetched[ 'email' ];
+        $user->name      = $name[ 0 ];
+        $user->lastName  = $name[ 1 ];
+        $user->picture   = $fetched[ 'avatar_url' ];
         $user->authToken = $token;
-        $user->provider = OauthClient::GITHUB_PROVIDER;
+        $user->provider  = self::PROVIDER_NAME;
 
         return $user;
     }

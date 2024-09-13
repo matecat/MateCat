@@ -6,7 +6,7 @@ use API\Commons\Exceptions\AuthenticationError;
 use ConnectedServices\ConnectedServiceDao;
 use ConnectedServices\GDrive;
 use ConnectedServices\GDriveTokenVerifyModel;
-use ConnectedServices\GoogleClientFactory;
+use ConnectedServices\Google\GoogleClient;
 use Exceptions\NotFoundException;
 use Exceptions\ValidationError;
 use FilesStorage\AbstractFilesStorage;
@@ -627,7 +627,7 @@ class downloadFileController extends downloadController {
         $verifier  = new GDriveTokenVerifyModel( $connectedService );
         $raw_token = $connectedService->getDecryptedOauthAccessToken();
 
-        $client = GoogleClientFactory::getGoogleClient( INIT::$HTTPHOST . "/gdrive/oauth/response" );
+        $client = GoogleClient::getClient( INIT::$HTTPHOST . "/gdrive/oauth/response" );
 
         if ( $verifier->validOrRefreshed( $client ) ) {
             $this->remoteFileService = new GDrive\RemoteFileService( $raw_token, $client );

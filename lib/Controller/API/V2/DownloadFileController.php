@@ -9,7 +9,7 @@ use CatUtils;
 use ConnectedServices\ConnectedServiceDao;
 use ConnectedServices\GDrive;
 use ConnectedServices\GDriveTokenVerifyModel;
-use ConnectedServices\GoogleClientFactory;
+use ConnectedServices\Google\GoogleClient;
 use DownloadOmegaTDecorator;
 use Exception;
 use Exceptions\NotFoundException;
@@ -703,7 +703,7 @@ class DownloadFileController extends AbstractDownloadController {
         $verifier  = new GDriveTokenVerifyModel( $connectedService );
         $raw_token = $connectedService->getDecryptedOauthAccessToken();
 
-        $client = GoogleClientFactory::getGoogleClient( INIT::$HTTPHOST . "/gdrive/oauth/response" );
+        $client = GoogleClient::getClient( INIT::$HTTPHOST . "/gdrive/oauth/response" );
 
         if ( $verifier->validOrRefreshed( $client ) ) {
             $this->remoteFileService = new GDrive\RemoteFileService( $raw_token, $client );

@@ -12,6 +12,7 @@ namespace ConnectedServices;
 use API\App\Json\ConnectedService;
 use API\Commons\AbstractStatefulKleinController;
 use Bootstrap;
+use ConnectedServices\Google\GoogleClient;
 use Exception;
 use Exceptions\NotFoundException;
 use INIT;
@@ -74,7 +75,7 @@ class ConnectedServicesController extends AbstractStatefulKleinController {
     private function __handleGDrive() {
         $verifier = new GDriveTokenVerifyModel( $this->service );
 
-        $client = GoogleClientFactory::getGoogleClient( INIT::$HTTPHOST . "/gdrive/oauth/response" );
+        $client = GoogleClient::getClient( INIT::$HTTPHOST . "/gdrive/oauth/response" );
 
         if ( $verifier->validOrRefreshed( $client ) ) {
             $this->response->code( 200 );

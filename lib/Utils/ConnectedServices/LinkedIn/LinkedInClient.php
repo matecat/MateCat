@@ -2,78 +2,104 @@
 
 namespace ConnectedServices\LinkedIn;
 
-use ConnectedServices\ConnectedServiceInterface;
+use ConnectedServices\AbstractClient;
 use ConnectedServices\ConnectedServiceUserModel;
+use Exception;
 use GuzzleHttp\Exception\GuzzleException;
+use INIT;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
+use League\OAuth2\Client\Provider\LinkedIn;
 use League\OAuth2\Client\Token\AccessToken;
-use OauthClient;
-use Utils;
 
-class LinkedInClient implements ConnectedServiceInterface
-{
+class LinkedInClient extends AbstractClient {
+
+    const PROVIDER_NAME = 'linkedin';
+
     /**
-     * @return string
+     * @param string|null $redirectUrl
+     *
+     * @return void
      */
-    public function getAuthorizationUrl()
-    {
-        $options = [
-            'state' => Utils::randomString(20),
-            'scope' => [
-                'email',
-                'profile',
-                'openid',
-            ]
-        ];
-        $linkedInClient = LinkedInClientFactory::create();
+    public static function getClient( ?string $redirectUrl = null ): LinkedIn {
+        return new LinkedIn( [
+                'clientId'     => INIT::$LINKEDIN_OAUTH_CLIENT_ID,
+                'clientSecret' => INIT::$LINKEDIN_OAUTH_CLIENT_SECRET,
+                'redirectUri'  => $redirectUrl ?? INIT::$LINKEDIN_OAUTH_REDIRECT_URL,
+        ] );
+    }
 
-        return $linkedInClient->getAuthorizationUrl($options);
+
+    /**
+     * @param string $csrfTokenState *
+     *
+     * @return string
+     * @throws Exception
+     */
+    public function getAuthorizationUrl( string $csrfTokenState ): string {
+        $options        = [
+                'state' => $csrfTokenState,
+                'scope' => [
+                        'email',
+                        'profile',
+                        'openid',
+                ]
+        ];
+        $linkedInClient = static::getClient();
+
+        return $linkedInClient->getAuthorizationUrl( $options );
     }
 
     /**
      * @param $code
-     * @return string
+     *
+     * @return AccessToken
      * @throws IdentityProviderException
+     * @throws Exception
      */
-    public function getAuthToken($code)
-    {
-        $linkedInClient = LinkedInClientFactory::create();
+    public function getAccessTokenFromAuthCode( $code ): AccessToken {
+
+        $linkedInClient = static::getClient( $this->redirectUrl );
 
         /** @var AccessToken $token */
-        $token = $linkedInClient->getAccessToken('authorization_code', [
-            'code' => $code
-        ]);
+        $token = $linkedInClient->getAccessToken( 'authorization_code', [
+                'code' => $code
+        ] );
 
         return $token->getToken();
     }
 
     /**
      * @param $token
+     *
      * @return mixed
      * @throws GuzzleException
      */
-    public function getResourceOwner($token): ConnectedServiceUserModel
-    {
-        $linkedInClient = LinkedInClientFactory::create();
-        $response = $linkedInClient->getHttpClient()->request(
-            'GET',
-            'https://api.linkedin.com/v2/userinfo',
-            ['headers' =>
+    public function getResourceOwner( $token ): ConnectedServiceUserModel {
+        $linkedInClient = static::getClient( $this->redirectUrl );
+        $response       = $linkedInClient->getHttpClient()->request(
+                'GET',
+                'https://api.linkedin.com/v2/userinfo',
                 [
-                    'Authorization' => "Bearer {$token}"
+                        'headers' =>
+                                [
+                                        'Authorization' => "Bearer $token"
+                                ]
                 ]
-            ]
         );
 
-        $fetched = json_decode($response->getBody()->getContents());
+        $fetched = json_decode( $response->getBody()->getContents() );
 
-        $user = new ConnectedServiceUserModel();
-        $user->email = $fetched->email;
-        $user->name = $fetched->given_name;
-        $user->lastName = $fetched->family_name;
-        $user->picture = $fetched->picture;
+        //TODO provare metodo di interfaccia
+//        $resourceOwner = $linkedInClient->getResourceOwner( $token );
+//        $fetched = $resourceOwner->toArray();
+
+        $user            = new ConnectedServiceUserModel();
+        $user->email     = $fetched->email;
+        $user->name      = $fetched->given_name;
+        $user->lastName  = $fetched->family_name;
+        $user->picture   = $fetched->picture;
         $user->authToken = $token;
-        $user->provider = OauthClient::LINKEDIN_PROVIDER;
+        $user->provider  = self::PROVIDER_NAME;
 
         return $user;
     }

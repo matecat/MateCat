@@ -1,6 +1,7 @@
 <?php
 
 namespace ConnectedServices;
+
 use Constants;
 use DefuseEncryption;
 use INIT;

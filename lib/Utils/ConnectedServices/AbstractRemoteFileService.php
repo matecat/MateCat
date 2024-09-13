@@ -9,7 +9,6 @@
 namespace ConnectedServices;
 
 
-class AbstractRemoteFileService
-{
+class AbstractRemoteFileService {
 
 }

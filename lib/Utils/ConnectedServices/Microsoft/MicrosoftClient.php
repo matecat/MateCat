@@ -2,60 +2,83 @@
 
 namespace ConnectedServices\Microsoft;
 
-use ConnectedServices\ConnectedServiceInterface;
+use ConnectedServices\AbstractClient;
 use ConnectedServices\ConnectedServiceUserModel;
+use Exception;
 use GuzzleHttp\Exception\GuzzleException;
+use INIT;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use League\OAuth2\Client\Token\AccessToken;
-use OauthClient;
+use Stevenmaguire\OAuth2\Client\Provider\Microsoft;
 
-class MicrosoftClient implements ConnectedServiceInterface
-{
+class MicrosoftClient extends AbstractClient {
+
+    const PROVIDER_NAME = 'microsoft';
+
     /**
+     * @param string|null $redirectUrl
+     *
+     * @return Microsoft
+     */
+    public static function getClient( ?string $redirectUrl = null ): Microsoft {
+        return new Microsoft( [
+                'clientId'     => INIT::$MICROSOFT_OAUTH_CLIENT_ID,
+                'clientSecret' => INIT::$MICROSOFT_OAUTH_CLIENT_SECRET,
+                'redirectUri'  => $redirectUrl ?? INIT::$MICROSOFT_OAUTH_REDIRECT_URL,
+        ] );
+    }
+
+    /**
+     * @param string $csrfTokenState *
+     *
      * @return string
      */
-    public function getAuthorizationUrl()
-    {
+    public function getAuthorizationUrl( string $csrfTokenState ): string {
 
-        $linkedInClient = MicrosoftClientFactory::create();
+        $options = [
+                'state' => $csrfTokenState
+        ];
 
-        return $linkedInClient->getAuthorizationUrl();
+        $microsoftClient = static::getClient( $this->redirectUrl );
+
+        return $microsoftClient->getAuthorizationUrl( $options );
     }
 
     /**
      * @param $code
+     *
      * @return AccessToken
      * @throws IdentityProviderException
+     * @throws Exception
      */
-    public function getAuthToken($code)
-    {
-        $microsoftClient = MicrosoftClientFactory::create();
+    public function getAccessTokenFromAuthCode( $code ): AccessToken {
+        $microsoftClient = static::getClient( $this->redirectUrl );
 
         /** @var AccessToken $token */
-        $token = $microsoftClient->getAccessToken('authorization_code', [
-            'code' => $code
-        ]);
+        $token = $microsoftClient->getAccessToken( 'authorization_code', [
+                'code' => $code
+        ] );
 
         return $token;
     }
 
     /**
      * @param $token
+     *
      * @return mixed
      * @throws GuzzleException
      */
-    public function getResourceOwner($token): ConnectedServiceUserModel
-    {
-        $microsoftClient = MicrosoftClientFactory::create();
-        $fetched = $microsoftClient->getResourceOwner($token);
+    public function getResourceOwner( $token ): ConnectedServiceUserModel {
+        $microsoftClient = static::getClient( $this->redirectUrl );
+        $fetched         = $microsoftClient->getResourceOwner( $token );
 
-        $user = new ConnectedServiceUserModel();
-        $user->email = $fetched->getEmail();
-        $user->name = $fetched->getFirstname();
-        $user->lastName = $fetched->getLastname();
-        $user->picture = $fetched->getUrls();
+        $user            = new ConnectedServiceUserModel();
+        $user->email     = $fetched->getEmail();
+        $user->name      = $fetched->getFirstname();
+        $user->lastName  = $fetched->getLastname();
+        $user->picture   = $fetched->getUrls();
         $user->authToken = $token;
-        $user->provider = OauthClient::MICROSOFT_PROVIDER;
+        $user->provider  = self::PROVIDER_NAME;
 
         return $user;
     }

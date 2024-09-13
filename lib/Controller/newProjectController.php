@@ -1,8 +1,13 @@
 <?php
 
 
+use ConnectedServices\Facebook\FacebookClient;
 use ConnectedServices\GDrive\GDriveController;
-use ConnectedServices\GoogleClientFactory;
+use ConnectedServices\Github\GithubClient;
+use ConnectedServices\Google\GoogleClient;
+use ConnectedServices\LinkedIn\LinkedInClient;
+use ConnectedServices\Microsoft\MicrosoftClient;
+use ConnectedServices\OauthClient;
 use Engines_Intento as Intento;
 use LexiQA\LexiQADecorator;
 
@@ -47,18 +52,17 @@ class newProjectController extends viewController {
      * If user is logged in and the cookie $_SESSION[ 'wanted_url' ] is set,
      * then redirect to requested url
      */
-    private function redirectToRequestUrlAfterLogin()
-    {
-        if($this->isLoggedIn()){
+    private function redirectToRequestUrlAfterLogin() {
+        if ( $this->isLoggedIn() ) {
             // handle redirect after login
-            if(isset($_SESSION[ 'wanted_url' ])){
-                header( "Location: " . INIT::$HTTPHOST . INIT::$BASEURL . $_SESSION[ 'wanted_url' ], false  );
-                unset($_SESSION[ 'wanted_url' ]);
+            if ( isset( $_SESSION[ 'wanted_url' ] ) ) {
+                header( "Location: " . INIT::$HTTPHOST . INIT::$BASEURL . $_SESSION[ 'wanted_url' ], false );
+                unset( $_SESSION[ 'wanted_url' ] );
                 exit;
             }
         } else {
             // we landed on homepage and we are not logged in, unset wanted_url
-            unset($_SESSION[ 'wanted_url' ]);
+            unset( $_SESSION[ 'wanted_url' ] );
         }
     }
 
@@ -298,9 +302,7 @@ class newProjectController extends viewController {
 
         $this->template->globalMessage = Utils::getGlobalMessage()[ 'messages' ];
 
-        $this->template->authURL       = ( !$this->isLoggedIn() ) ? $this->setGoogleAuthUrl( 'google-', INIT::$OAUTH_REDIRECT_URL ) : "";
-        $this->template->gdriveAuthURL = ( $this->isLoggedIn() ) ? $this->setGoogleAuthUrl( 'google-drive-', INIT::$HTTPHOST . "/gdrive/oauth/response" ) : "";
-
+        $this->intOauthClients();
 
     }
 

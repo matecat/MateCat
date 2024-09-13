@@ -292,7 +292,7 @@ class Session {
         if ( is_null( $this->token ) ) {
             $user = $this->__getUser();
 
-            if($user !== null){
+            if ( $user !== null ) {
                 $this->token = $this->getTokenByUser( $this->__getUser() );
             }
         }
@@ -307,9 +307,9 @@ class Session {
         if ( is_null( $this->user ) ) {
             $userCredentials = AuthCookie::getCredentials();
 
-            if(!empty($userCredentials)){
+            if ( !empty( $userCredentials ) ) {
                 $dao        = new Users_UserDao();
-                $this->user = $dao->getByUid( $userCredentials['user']['uid'] );
+                $this->user = $dao->getByUid( $userCredentials[ 'user' ][ 'uid' ] );
             }
         }
 

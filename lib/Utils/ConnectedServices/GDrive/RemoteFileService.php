@@ -9,10 +9,8 @@
 namespace ConnectedServices\GDrive;
 
 use ConnectedServices\AbstractRemoteFileService;
-use ConnectedServices\GoogleClientFactory;
 use Exception;
 use Google_Service_Drive;
-use INIT;
 use Log;
 
 class RemoteFileService extends AbstractRemoteFileService {
@@ -71,7 +69,7 @@ class RemoteFileService extends AbstractRemoteFileService {
         ];
 
         try {
-            $gdriveFile = $this->gdriveService->files->get( $remoteFile->remote_id, $optParams );
+            $gdriveFile   = $this->gdriveService->files->get( $remoteFile->remote_id, $optParams );
             $capabilities = $gdriveFile->getCapabilities();
             $parents      = $gdriveFile->getParents();
 
@@ -128,18 +126,18 @@ class RemoteFileService extends AbstractRemoteFileService {
         $newGDriveFileInstance->setKind( $gdriveFile->getKind() );
 
         $optParams = [
-                'mimeType'            => $gdriveFile->mimeType,
-                'data'                => $content,
-                'uploadType'          => 'media',
+                'mimeType'   => $gdriveFile->mimeType,
+                'data'       => $content,
+                'uploadType' => 'media',
         ];
 
         // According to:
         // https://developers.google.com/drive/api/v3/multi-parenting
         // call update() with the addParents field set to the new parent folder's ID
         // and the enforceSingleParent set to true, to add a parent folder for the file.
-        if(true === $canAddMyDriveParent and false === empty($parents)){
-            $optParams['enforceSingleParent'] = true;
-            $optParams['addParents'] = $parents[0]; // the ID of the first parent
+        if ( true === $canAddMyDriveParent and false === empty( $parents ) ) {
+            $optParams[ 'enforceSingleParent' ] = true;
+            $optParams[ 'addParents' ]          = $parents[ 0 ]; // the ID of the first parent
         }
 
         $this->gdriveService->files->update( $remoteId, $newGDriveFileInstance, $optParams );
@@ -159,7 +157,7 @@ class RemoteFileService extends AbstractRemoteFileService {
         // https://developers.google.com/drive/api/v3/multi-parenting
         // call copy() with 'enforceSingleParent' field set to true to create a file in a single parent
         $optParams = [
-            'enforceSingleParent' => true,
+                'enforceSingleParent' => true,
         ];
 
         try {

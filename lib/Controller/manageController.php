@@ -2,6 +2,8 @@
 
 use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
+use ConnectedServices\Google\GoogleClient;
+use ConnectedServices\OauthClient;
 
 class manageController extends viewController {
 
@@ -43,8 +45,14 @@ class manageController extends viewController {
 
         $this->template->outsource_service_login = $this->_outsource_login_API;
 
-        $this->template->authURL       = "";
-        $this->template->gdriveAuthURL = $this->setGoogleAuthUrl( 'google-drive-', INIT::$HTTPHOST . "/gdrive/oauth/response" );
+        $this->template->googleAuthURL    = "";
+        $this->template->githubAuthUrl    = "";
+        $this->template->linkedInAuthUrl  = "";
+        $this->template->microsoftAuthUrl = "";
+        $this->template->facebookAuthUrl  = "";
+
+        $this->template->googleDriveEnabled = Bootstrap::isGDriveConfigured();
+        $this->template->gdriveAuthURL      = Bootstrap::isGDriveConfigured() ? OauthClient::getInstance( GoogleClient::PROVIDER_NAME, INIT::$HTTPHOST . "/gdrive/oauth/response" )->getAuthorizationUrl( $_SESSION, 'drive' ) : "";
 
         $this->decorator = new ManageDecorator( $this, $this->template );
         $this->decorator->decorate();

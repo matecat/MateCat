@@ -11,7 +11,7 @@ use ActivityLog\ActivityLogStruct;
 use API\Commons\Exceptions\AuthenticationError;
 use ConnectedServices\GDrive as GDrive;
 use ConnectedServices\GDrive\Session;
-use ConnectedServices\GoogleClientFactory;
+use ConnectedServices\Google\GoogleClient;
 use Constants\XliffTranslationStatus;
 use Exceptions\NotFoundException;
 use Exceptions\ValidationError;
@@ -1399,7 +1399,7 @@ class ProjectManager {
                 Files_FileDao::insertFilesJob( $newJob->id, $fid );
 
                 if ( $this->gdriveSession && $this->gdriveSession->hasFiles() ) {
-                    $client = GoogleClientFactory::getGoogleClient( INIT::$HTTPHOST . "/gdrive/oauth/response" );
+                    $client = GoogleClient::getClient( INIT::$HTTPHOST . "/gdrive/oauth/response" );
                     $this->gdriveSession->createRemoteCopiesWhereToSaveTranslation( $fid, $newJob->id, $client );
                 }
             }

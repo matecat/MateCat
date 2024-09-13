@@ -2,7 +2,12 @@
 
 use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
-use ConnectedServices\GoogleClientFactory;
+use ConnectedServices\Facebook\FacebookClient;
+use ConnectedServices\Github\GithubClient;
+use ConnectedServices\Google\GoogleClient;
+use ConnectedServices\LinkedIn\LinkedInClient;
+use ConnectedServices\Microsoft\MicrosoftClient;
+use ConnectedServices\OauthClient;
 use Engines_Intento as Intento;
 use Exceptions\AuthorizationError;
 use Exceptions\NotFoundException;
@@ -104,7 +109,7 @@ class catController extends viewController {
     public function doAction() {
 
         $this->checkLoginRequiredAndRedirect();
-        $this->featureSet->run('beginDoAction', $this);
+        $this->featureSet->run( 'beginDoAction', $this );
 
         try {
             $this->findJobByIdPasswordAndSourcePage();
@@ -357,7 +362,7 @@ class catController extends viewController {
         if ( !empty( $this->project->id_team ) ) {
             $this->template->id_team = $this->project->id_team;
 
-            if(!isset($team)){
+            if ( !isset( $team ) ) {
                 $team = $this->project->getTeam();
             }
 
@@ -450,8 +455,7 @@ class catController extends viewController {
         //Maybe some plugin want to disable the Split from the config
         $this->template->splitSegmentEnabled = 'true';
 
-        $this->template->authURL       = ( !$this->isLoggedIn() ) ? $this->setGoogleAuthUrl( 'google-', INIT::$OAUTH_REDIRECT_URL ) : "";
-        $this->template->gdriveAuthURL = ( $this->isLoggedIn() ) ? $this->setGoogleAuthUrl( 'google-drive-', INIT::$HTTPHOST . "/gdrive/oauth/response" ) : "";
+        $this->intOauthClients();
 
         $this->decorator = new CatDecorator( $this, $this->template );
         $this->decorator->decorate();
