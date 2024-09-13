@@ -377,7 +377,9 @@ function CatTool() {
   const isFakeCurrentTemplateReady =
     projectTemplates.length &&
     typeof projectTemplates[1] !== 'undefined' &&
-    typeof projectTemplates[1].mt !== 'undefined' &&
+    (!config.active_engine?.id ||
+      (config.active_engine?.id &&
+        typeof projectTemplates[1].mt !== 'undefined')) &&
     Array.isArray(projectTemplates[1].tm)
 
   return (
