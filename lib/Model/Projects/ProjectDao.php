@@ -232,8 +232,9 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
      * @param int $ttl
      *
      * @return Projects_ProjectStruct
+     * @throws ReflectionException
      */
-    public static function findByJobId( $id_job, $ttl = 0 ) {
+    public static function findByJobId( int $id_job, int $ttl = 0 ): ?Projects_ProjectStruct {
         $thisDao = new self();
         $conn    = Database::obtain()->getConnection();
         $sql     = "SELECT projects.* FROM projects " .
@@ -242,7 +243,7 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
                 " LIMIT 1 ";
         $stmt    = $conn->prepare( $sql );
 
-        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Projects_ProjectStruct(), [ 'id_job' => $id_job ] )[ 0 ];
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Projects_ProjectStruct(), [ 'id_job' => $id_job ] )[ 0 ] ?? null;
     }
 
     /**

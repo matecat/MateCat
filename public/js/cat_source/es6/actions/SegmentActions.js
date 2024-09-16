@@ -325,7 +325,7 @@ const SegmentActions = {
             SegmentStore.nextUntranslatedFromServer ||
             nextApprovedSegmentInPrevious
         ) {
-          // find in not loaded segments or go to the next approved
+            // find in not loaded segments or go to the next approved
             SegmentActions.openSegment(
                 SegmentStore.nextUntranslatedFromServer
                     ? SegmentStore.nextUntranslatedFromServer

@@ -9,6 +9,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="${basepath}public/img/meta/favicon-32x32.svg"/>
     <link rel="icon" type="image/png" sizes="16x16" href="${basepath}public/img/meta/favicon-16x16.svg"/>
     <title>Sign-in | Matecat</title>
+    <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/CSP-HeaderMeta.html/CSP_NONCE"/>
     <meta name="description" content="Matecat allows you to get more matches than any other CAT tool."/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <meta property="og:title" content="Translate a file with Matecat" />
@@ -17,7 +18,7 @@
     <meta property="og:image" content="https://www.matecat.com/public/img/fbimg.png" />
     <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/header_common"/>
 
-    <script type="text/javascript" >
+    <script tal:attributes="nonce x_nonce_unique_id" type="text/javascript" >
         /*<![CDATA[*/
         var config = {
             basepath: '${basepath | string:/}',
@@ -29,6 +30,6 @@
 </head>
 <body>
     <div class="signin__page"/>
-    <div metal:use-macro="common.html/footer_includes" />
+    <div metal:use-macro="templates/common.html/footer_includes" />
 </body>
 </html>

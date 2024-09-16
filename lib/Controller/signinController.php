@@ -2,23 +2,21 @@
 
 class signinController extends viewController {
 
-    public function __construct()
-    {
+    public function __construct() {
         parent::__construct();
-        parent::makeTemplate("signin.html");
+        parent::makeTemplate( "signin.html" );
     }
 
     /**
      * @inheritDoc
      */
-    function doAction()
-    {
+    function doAction() {
     }
 
     /**
      * @inheritDoc
      */
-    function setTemplateVars()
-    {
+    function setTemplateVars() {
+        $this->intOauthClients();
     }
 }

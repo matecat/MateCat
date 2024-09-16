@@ -7,52 +7,26 @@ use ConnectedServices\Google\GoogleClient;
 use ConnectedServices\LinkedIn\LinkedInClient;
 use ConnectedServices\Microsoft\MicrosoftClient;
 use ConnectedServices\OauthClient;
+use Klein\HttpStatus;
 
 abstract class viewController extends controller {
 
     /**
      * Template Engine Instance
      *
-     * @var PHPTALWithAppend
+     * @var PHPTAL|null
      */
-    protected $template = null;
+    protected ?PHPTAL $template = null;
 
     /**
      * @var ConnectedServiceInterface
      */
-    protected $client;
-
-    /**
-     * Google auth URL
-     *
-     * @var string
-     */
-    protected $googleAuthURL;
-
-    /**
-     * @var string
-     */
-    protected $githubAuthURL;
-
-    /**
-     * @var string
-     */
-    protected $linkedInAuthURL;
-
-    /**
-     * @var string
-     */
-    protected $microsoftAuthURL;
-
-    /**
-     * @var string
-     */
-    protected $facebookAuthURL;
+    protected ConnectedServiceInterface $client;
 
     /**
      * @var bool
      */
-    protected $login_required = true;
+    protected bool $login_required = true;
 
     private ?Projects_ProjectStruct $project = null;
 
@@ -226,9 +200,8 @@ abstract class viewController extends controller {
     }
 
     protected function renderCustomHTTP( $customTemplate, $httpCode ) {
-        $status = new \Klein\HttpStatus( $httpCode );
+        $status = new HttpStatus( $httpCode );
         header( "HTTP/1.0 " . $status->getFormattedString() );
-        $this->makeTemplate( $customTemplate );
         $this->finalize();
         die();
     }
@@ -236,15 +209,12 @@ abstract class viewController extends controller {
     /**
      * Create an instance of skeleton PHPTAL template
      *
-     * @param PHPTAL|string $skeleton_file
+     * @param string $skeleton_file
      */
-    protected function makeTemplate( $skeleton_file ) {
+    protected function makeTemplate( string $skeleton_file ) {
         try {
 
-            $this->template = $skeleton_file;
-            if ( !$this->template instanceof PHPTAL ) {
-                $this->template = new PHPTALWithAppend( INIT::$TEMPLATE_ROOT . "/$skeleton_file" ); // create a new template object
-            }
+            $this->template = new PHPTALWithAppend( INIT::$TEMPLATE_ROOT . "/$skeleton_file" ); // create a new template object
 
             $this->template->basepath            = INIT::$BASEURL;
             $this->template->hostpath            = INIT::$HTTPHOST;
