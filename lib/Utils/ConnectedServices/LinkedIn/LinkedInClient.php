@@ -65,7 +65,7 @@ class LinkedInClient extends AbstractClient {
                 'code' => $code
         ] );
 
-        return $token->getToken();
+        return $token;
     }
 
     /**

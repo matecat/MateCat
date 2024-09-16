@@ -20,7 +20,7 @@ export const UserMenu = () => {
 
   const loggedRender = () => {
     const {metadata, user} = userInfo
-    const avatarImg = metadata[`${metadata.oauth_provider}_picture`]
+    const avatarImg = metadata[`${metadata.oauth_provider}_picture`] ?? null
 
     const openManage = () => {
       document.location.href = '/manage'

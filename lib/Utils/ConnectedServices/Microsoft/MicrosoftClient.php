@@ -76,7 +76,7 @@ class MicrosoftClient extends AbstractClient {
         $user->email     = $fetched->getEmail();
         $user->name      = $fetched->getFirstname();
         $user->lastName  = $fetched->getLastname();
-        $user->picture   = $fetched->getUrls();
+        $user->picture   = null; // profile picture is not publicly accessible
         $user->authToken = $token;
         $user->provider  = self::PROVIDER_NAME;
 
