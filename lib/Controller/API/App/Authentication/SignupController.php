@@ -117,10 +117,34 @@ class SignupController extends AbstractStatefulKleinController {
 
     /**
      * @return void
+     * @throws Exception
      */
     public function resendConfirmationEmail() {
+
+        $userIp = Utils::getRealIpAddr();
+
+        // rate limit on email
+        $checkRateLimitOnEmail = $this->checkRateLimitResponse( $this->response, 'BLANK_EMAIL', '/api/app/user', 3 );
+        if ( $checkRateLimitOnEmail instanceof Response ) {
+            $this->response = $checkRateLimitOnEmail;
+
+            return;
+        }
+
+        // rate limit on IP
+        $checkRateLimitOnIp = $this->checkRateLimitResponse( $this->response, $userIp, '/api/app/user', 3 );
+        if ( $checkRateLimitOnIp instanceof Response ) {
+            $this->response = $checkRateLimitOnIp;
+
+            return;
+        }
+
+        $this->incrementRateLimitCounter( $userIp, '/api/app/user' );
+        $this->incrementRateLimitCounter( 'BLANK_EMAIL', '/api/app/user' );
+
         SignupModel::resendConfirmationEmail( $this->request->param( 'email' ) );
         $this->response->code( 200 );
+
     }
 
 }
