@@ -795,7 +795,7 @@ const NewProject = () => {
                 }
                 activeOption={selectedTeam}
                 checkSpaceToReverse={false}
-                isDisabled={!isUserLogged || userInfo?.teams.length === 1}
+                isDisabled={!isUserLogged || userInfo?.teams.length === 1 || !projectTemplates.length}
                 onSelect={(option) => setSelectedTeam(option)}
               />
             </div>
@@ -963,25 +963,27 @@ const NewProject = () => {
           }}
         />
       )}
-      <SettingsPanel
-        {...{
-          onClose: closeSettings,
-          isOpened: openSettings.isOpen,
-          tabOpen: openSettings.tab,
-          user: userInfo,
-          tmKeys,
-          setTmKeys,
-          mtEngines,
-          setMtEngines,
-          sourceLang,
-          targetLangs,
-          projectTemplates,
-          setProjectTemplates,
-          modifyingCurrentTemplate,
-          currentProjectTemplate,
-          checkSpecificTemplatePropsAreModified,
-        }}
-      />
+      {projectTemplates.length && (
+        <SettingsPanel
+          {...{
+            onClose: closeSettings,
+            isOpened: openSettings.isOpen,
+            tabOpen: openSettings.tab,
+            user: userInfo,
+            tmKeys,
+            setTmKeys,
+            mtEngines,
+            setMtEngines,
+            sourceLang,
+            targetLangs,
+            projectTemplates,
+            setProjectTemplates,
+            modifyingCurrentTemplate,
+            currentProjectTemplate,
+            checkSpecificTemplatePropsAreModified,
+          }}
+        />
+      )}
       <HomePageSection />
       <Footer />
     </CreateProjectContext.Provider>

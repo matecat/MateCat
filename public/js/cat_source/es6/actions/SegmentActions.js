@@ -321,12 +321,17 @@ const SegmentActions = {
     if (nextApprovedSegment) {
       SegmentActions.openSegment(nextApprovedSegment.sid)
     } else {
-      // find in not loaded segments or go to the next approved
-      SegmentActions.openSegment(
-        SegmentStore.nextUntranslatedFromServer
-          ? SegmentStore.nextUntranslatedFromServer
-          : nextApprovedSegmentInPrevious.sid,
-      )
+        if (
+            SegmentStore.nextUntranslatedFromServer ||
+            nextApprovedSegmentInPrevious
+        ) {
+          // find in not loaded segments or go to the next approved
+            SegmentActions.openSegment(
+                SegmentStore.nextUntranslatedFromServer
+                    ? SegmentStore.nextUntranslatedFromServer
+                    : nextApprovedSegmentInPrevious.sid,
+            )
+        }
     }
   },
   /**
