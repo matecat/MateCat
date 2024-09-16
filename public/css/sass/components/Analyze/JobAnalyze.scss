@@ -37,7 +37,7 @@
 
 .job-table-header {
   display: grid;
-  grid-template-columns: minmax(100px, 150px) repeat(12, 1fr) minmax(
+  grid-template-columns: minmax(100px, 150px) repeat(11, 1fr) minmax(
       80px,
       100px
     );
@@ -110,7 +110,7 @@
   padding: 0 !important;
   .chunk-analyze-info {
     display: grid;
-    grid-template-columns: minmax(100px, 150px) repeat(12, 1fr) minmax(
+    grid-template-columns: minmax(100px, 150px) repeat(11, 1fr) minmax(
         80px,
         100px
       );
@@ -198,7 +198,7 @@
 }
 
 .chunk-file-detail {
-  grid-template-columns: minmax(100px, 150px) repeat(12, 1fr) minmax(
+  grid-template-columns: minmax(100px, 150px) repeat(11, 1fr) minmax(
       80px,
       100px
     );
@@ -260,4 +260,7 @@
     justify-content: center;
     border-right: none;
   }
+}
+.analyze-page .more-columns {
+  grid-template-columns: minmax(100px, 150px) repeat(12, 1fr) minmax(80px,100px) !important;
 }

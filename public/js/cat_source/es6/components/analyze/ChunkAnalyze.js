@@ -1,10 +1,9 @@
 import React, {useState} from 'react'
-import {TransitionGroup, CSSTransition} from 'react-transition-group'
 
 import ChunkAnalyzeHeader from './ChunkAnalyzeHeader'
 import ChunkAnalyzeFile from './ChunkAnalyzeFile'
 
-const ChunkAnalyze = ({files, chunkInfo, index, total, chunksSize}) => {
+const ChunkAnalyze = ({files, chunkInfo, index, total, chunksSize, rates}) => {
   const [showFilesInfo, setShowFilesInfo] = useState(false)
 
   const getFiles = () => {
@@ -15,6 +14,7 @@ const ChunkAnalyze = ({files, chunkInfo, index, total, chunksSize}) => {
           file={file}
           index={i + 1}
           size={files.length}
+          rates={rates}
         />
       )
     })
@@ -34,6 +34,7 @@ const ChunkAnalyze = ({files, chunkInfo, index, total, chunksSize}) => {
         showFilesFn={showFiles}
         showFiles={showFilesInfo}
         chunksSize={chunksSize}
+        rates={rates}
       />
       {showFilesInfo ? <div>{getFiles()}</div> : null}
     </div>

@@ -34,6 +34,7 @@ class JobAnalyze extends React.Component {
             index={index}
             chunkInfo={item}
             chunksSize={self.props.jobInfo.chunks.length}
+            rates={self.props.jobInfo.payable_rates}
           />
         )
       })
