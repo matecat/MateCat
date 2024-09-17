@@ -9,7 +9,10 @@
 namespace ConnectedServices\GDrive;
 
 use ConnectedServices\AbstractRemoteFileService;
+use ConnectedServices\GoogleClientFactory;
 use Exception;
+use Google_Service_Drive;
+use INIT;
 use Log;
 
 class RemoteFileService extends AbstractRemoteFileService {
@@ -33,27 +36,26 @@ class RemoteFileService extends AbstractRemoteFileService {
      *
      * @throws Exception
      */
-    public function __construct( $raw_token ) {
+    public function __construct( $raw_token, $client ) {
         $this->raw_token     = $raw_token;
-        $this->gdriveService = self::getService( $this->raw_token );
+        $this->gdriveService = self::getService( $this->raw_token, $client );
     }
 
     /**
      * @param string $token
      *
-     * @return \Google_Service_Drive
+     * @return Google_Service_Drive
      * @throws Exception
      */
-    public static function getService( $token ) {
+    public static function getService( $token, $client ): Google_Service_Drive {
 
         if ( is_array( $token ) ) {
             $token = json_encode( $token );
         }
 
-        $oauthClient = GoogleClientFactory::create();
-        $oauthClient->setAccessToken( $token );
+        $client->setAccessToken( $token );
 
-        return new \Google_Service_Drive( $oauthClient );
+        return new Google_Service_Drive( $client );
     }
 
     /**

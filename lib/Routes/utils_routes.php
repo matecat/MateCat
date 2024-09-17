@@ -9,43 +9,31 @@
 
 global $klein;
 
-$klein->respond( '/utils/pee', function () {
+route( '/api/app/teams/[i:id_team]/members/public', 'GET', '\API\App\TeamPublicMembersController', 'publicList' );
 
-    $reflect  = new ReflectionClass( 'peeViewController' );
-    $instance = $reflect->newInstanceArgs( func_get_args() );
+// Authentication
+$klein->with( '/api/app/user', function () {
 
-    try {
-        $instance->doAction();
-        $instance->finalize();
-    } catch ( Exception $e ) {
-        $controllerInstance = new CustomPage();
-        $controllerInstance->setTemplate( "404.html" );
-        $controllerInstance->setCode( 404 );
-        $controllerInstance->doAction();
-        die(); // do not complete klein response, set 404 header in render404 instead of 200
-    }
+    route( '', 'GET', 'API\App\Authentication\UserController', 'show' );
+    route( '/password/change', 'POST', 'API\App\Authentication\UserController', 'changePasswordAsLoggedUser' );
+
+    route( '/login', 'POST', 'API\App\Authentication\LoginController', 'login' );
+    route( '/logout', 'POST', 'API\App\Authentication\LoginController', 'logout' );
+    route( '/login/token', 'GET', 'API\App\Authentication\LoginController', 'token' );
+
+    route( '/metadata', 'POST', 'API\App\UserMetadataController', 'update' );
+
+    route( '', 'POST', 'API\App\Authentication\SignupController', 'create' );
+    route( '/confirm/[:token]', 'GET', 'API\App\Authentication\SignupController', 'confirm' );
+    route( '/resend_email_confirm', 'POST', 'API\App\Authentication\SignupController', 'resendConfirmationEmail' );
+
+    route( '/forgot_password', 'POST', 'API\App\Authentication\ForgotPasswordController', 'forgotPassword' );
+    route( '/password_reset/[:token]', 'GET', 'API\App\Authentication\ForgotPasswordController', 'authForPasswordReset' );
+    route( '/password', 'POST', 'API\App\Authentication\ForgotPasswordController', 'setNewPassword' );
+
+    route( '/redeem_project', 'POST', 'API\App\Authentication\UserController', 'redeemProject' );
 
 } );
-
-route( '/api/app/teams/[i:id_team]/[:team_name]/members/public', 'GET', '\API\App\TeamPublicMembersController', 'publicList' );
-
-route( '/api/app/user', 'GET', 'API\App\UserController', 'show' );
-route( '/api/app/user/password/change', 'POST', 'API\App\UserController', 'changePasswordAsLoggedUser' );
-
-
-route( '/api/app/user/login', 'POST', 'API\App\LoginController', 'login' );
-route( '/api/app/user/logout', 'POST', 'API\App\LoginController', 'logout' );
-route( '/api/app/user/login/token', 'GET', 'API\App\LoginController', 'token' );
-
-route( '/api/app/user', 'POST', 'API\App\SignupController', 'create' );
-route( '/api/app/user/metadata', 'POST', 'API\App\UserMetadataController', 'update' );
-
-route( '/api/app/user/confirm/[:token]', 'GET', 'API\App\SignupController', 'confirm' );
-route( '/api/app/user/resend_email_confirm', 'POST', 'API\App\SignupController', 'resendEmailConfirm' );
-route( '/api/app/user/forgot_password', 'POST', 'API\App\SignupController', 'forgotPassword' );
-route( '/api/app/user/password_reset/[:token]', 'GET', 'API\App\SignupController', 'authForPasswordReset' );
-route( '/api/app/user/password', 'POST', 'API\App\SignupController', 'setNewPassword' );
-route( '/api/app/user/redeem_project', 'POST', 'API\App\SignupController', 'redeemProject' );
 
 route( '/api/app/connected_services/[:id_service]/verify', 'GET', 'ConnectedServices\ConnectedServicesController', 'verify' );
 route( '/api/app/connected_services/[:id_service]', 'POST', 'ConnectedServices\ConnectedServicesController', 'update' );
@@ -54,8 +42,6 @@ route( '/api/app/teams/members/invite/[:jwt]', 'GET', '\API\App\TeamsInvitations
 
 route( '/api/app/outsource/confirm/[i:id_job]/[:password]', 'POST', '\API\App\OutsourceConfirmationController', 'confirm' );
 
-route( '/api/app/utils/pee/graph', 'POST', '\API\App\PeeData', 'getPeePlots' );
-route( '/api/app/utils/pee/table', 'POST', '\API\App\PeeData', 'getPeeTableData' );
 route( '/api/app/jobs/[i:id_job]/[:password]/completion-events/[:id_event]', 'DELETE', 'Features\ProjectCompletion\Controller\CompletionEventController', 'delete' );
 
 //Health check

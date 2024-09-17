@@ -17,6 +17,7 @@
     <!--[if IE]>
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><![endif]-->
     <meta charset="utf-8"/>
+    <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/CSP-HeaderMeta.html/CSP_NONCE"/>
     <link rel="apple-touch-icon" sizes="180x180" href="${basepath}public/img/meta/apple-touch-icon.png"/>
     <link rel="icon" type="image/png" sizes="32x32" href="${basepath}public/img/meta/favicon-32x32.svg"/>
     <link rel="icon" type="image/png" sizes="16x16" href="${basepath}public/img/meta/favicon-16x16.svg"/>
@@ -32,7 +33,7 @@
 
     <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/header_common"/>
 
-    <script type="text/javascript" >
+    <script tal:attributes="nonce x_nonce_unique_id" type="text/javascript">
       /*<![CDATA[*/
       var config = {
         basepath: '${basepath | string:/}',
@@ -459,7 +460,7 @@
                 "application/xml",
                 "application/x-xml"
 		    ].indexOf( o.files[i].type ) >= 0
-             
+
 		    ) {
 		    %}
                 {% if ( /resx/.test( o.files[i].name.split('.').pop() ) == false  ) { %}
@@ -601,7 +602,7 @@
 
 <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/track_codes_upload"/>
 
-<script type="text/javascript">
+<script tal:attributes="nonce x_nonce_unique_id" type="text/javascript">
 
   var developerKey = '${developerKey}';
   var clientId = '${clientId}';
@@ -618,9 +619,9 @@
   }
 
 </script>
-<script type="text/javascript" src="//apis.google.com/js/api.js?onload=onGDriveApiLoad"></script>
+<script tal:attributes="nonce x_nonce_unique_id" type="text/javascript" src="//apis.google.com/js/api.js?onload=onGDriveApiLoad"></script>
 
-<div metal:use-macro="common.html/footer_includes" />
+<div metal:use-macro="templates/common.html/footer_includes" />
 
 </body>
 

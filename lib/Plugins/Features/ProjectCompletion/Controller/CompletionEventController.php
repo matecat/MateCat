@@ -9,15 +9,15 @@
 
 namespace Features\ProjectCompletion\Controller;
 
+use API\Commons\KleinController;
 use API\Commons\Validators\ChunkPasswordValidator;
-use BaseKleinViewController;
 use Chunks_ChunkCompletionEventDao;
 use Chunks_ChunkCompletionEventStruct;
 use Chunks_ChunkStruct;
 use Database;
 use Exception;
 
-class CompletionEventController extends BaseKleinViewController {
+class CompletionEventController extends KleinController {
 
     /**
      * @var Chunks_ChunkStruct

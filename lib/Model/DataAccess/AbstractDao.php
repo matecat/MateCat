@@ -404,24 +404,24 @@ abstract class DataAccess_AbstractDao {
     }
 
     /**
-     * Inserts a struct into database.
+     * Inserts a struct into the database.
      *
      * If an `auto_increment_field` is defined for the table, the last inserted is returned.
-     * Otherwise it returns TRUE on success.
+     * Otherwise, it returns TRUE on success.
      *
      * Returns FALSE on failure.
      *
      * @param DataAccess_IDaoStruct $struct
-     * @param array                 $options
+     * @param array|null            $options
      *
      * @return bool|string
      * @throws Exception
      */
-    public static function insertStruct( DataAccess_IDaoStruct $struct, $options = [] ) {
+    public static function insertStruct( DataAccess_IDaoStruct $struct, ?array $options = [] ) {
 
         $ignore              = isset( $options[ 'ignore' ] ) && $options[ 'ignore' ] == true;
         $no_nulls            = isset( $options[ 'no_nulls' ] ) && $options[ 'no_nulls' ] == true;
-        $on_duplicate_fields = ( isset( $options[ 'on_duplicate_update' ] ) && !empty( $options[ 'on_duplicate_update' ] ) ? $options[ 'on_duplicate_update' ] : [] );
+        $on_duplicate_fields = ( !empty( $options[ 'on_duplicate_update' ] ) ? $options[ 'on_duplicate_update' ] : [] );
 
         // TODO: allow the mask to be passed as option.
         $mask = array_keys( $struct->toArray() );
