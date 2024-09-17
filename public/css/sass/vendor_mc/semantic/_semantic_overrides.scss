@@ -110,10 +110,15 @@
 
 /*--- Standard ---*/
 
+.ui.buttons .button,
+.ui.button {
+  align-items: center;
+}
 .ui.primary.buttons .button,
 .ui.primary.button {
   background-color: $translatedBlue;
   transition: 0.3s ease;
+  align-items: center;
 }
 
 .ui.primary.buttons .button:hover,
@@ -380,7 +385,8 @@ i.icon {
 .ui.dropdown .menu > .item {
     font-size: 14px;
     color: $black !important;
-  }
+    min-height: unset;
+}
 .ui.dropdown .menu > .item a {
   color: $black !important;
 }

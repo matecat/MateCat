@@ -4723,6 +4723,7 @@ header {
             padding: 8px !important;
             font-size: 16px;
             color: #000000;
+            text-decoration: none;
             &:not(.disabled):hover {
               background-color: $light-gray;
               color: $light-blue;
