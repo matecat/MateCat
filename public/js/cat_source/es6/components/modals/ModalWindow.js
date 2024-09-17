@@ -61,7 +61,7 @@ export class ModalWindow extends React.Component {
    */
   showModalComponent = (
     component,
-    props,
+    props = {},
     title,
     style,
     onCloseCallback,

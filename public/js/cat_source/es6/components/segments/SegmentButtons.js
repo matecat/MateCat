@@ -83,13 +83,11 @@ export const SegmentButton = ({segment, disabled, isReview}) => {
   }
 
   const goToNextRepetition = (event, status) => {
-    let target = event.currentTarget
-    setTimeout(() => SegmentFilter.goToNextRepetition(target, status))
+    setTimeout(() => SegmentFilter.goToNextRepetition(status))
   }
 
   const goToNextRepetitionGroup = (event, status) => {
-    let target = event.currentTarget
-    setTimeout(() => SegmentFilter.goToNextRepetitionGroup(target, status))
+    setTimeout(() => SegmentFilter.goToNextRepetitionGroup(status))
   }
 
   const clickOnGuessTags = (e) => {
