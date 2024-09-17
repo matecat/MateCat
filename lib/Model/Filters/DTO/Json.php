@@ -96,29 +96,17 @@ class Json implements IDto, JsonSerializable, Countable {
 
         $format = [];
 
-        if ( $this->extract_arrays ) {
-            $format[ 'extract_arrays' ] = $this->extract_arrays;
-        }
-
-        if ( $this->escape_forward_slashes ) {
-            $format[ 'escape_forward_slashes' ] = $this->escape_forward_slashes;
-        }
-
-        if ( !empty( $this->translate_keys ) ) {
-            $format[ 'translate_keys' ] = $this->translate_keys;
-        }
+        $format[ 'extract_arrays' ]         = $this->extract_arrays;
+        $format[ 'escape_forward_slashes' ] = $this->escape_forward_slashes;
+        $format[ 'translate_keys' ]         = $this->translate_keys;
 
         if ( !empty( $this->do_not_translate_keys ) ) {
             $format[ 'do_not_translate_keys' ] = $this->do_not_translate_keys;
+            unset( $format[ 'translate_keys' ] );
         }
 
-        if ( !empty( $this->context_keys ) ) {
-            $format[ 'context_keys' ] = $this->context_keys;
-        }
-
-        if ( !empty( $this->character_limit ) ) {
-            $format[ 'character_limit' ] = $this->character_limit;
-        }
+        $format[ 'context_keys' ]    = $this->context_keys;
+        $format[ 'character_limit' ] = $this->character_limit;
 
         return $format;
 

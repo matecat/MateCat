@@ -56,16 +56,12 @@ class Yaml implements IDto, JsonSerializable, Countable {
 
         $format = [];
 
-        if ( $this->extract_arrays ) {
-            $format[ 'extract_arrays' ] = $this->extract_arrays;
-        }
-
-        if ( !empty( $this->translate_keys ) ) {
-            $format[ 'translate_keys' ] = $this->translate_keys;
-        }
+        $format[ 'extract_arrays' ] = $this->extract_arrays;
+        $format[ 'translate_keys' ] = $this->translate_keys;
 
         if ( !empty( $this->do_not_translate_keys ) ) {
             $format[ 'do_not_translate_keys' ] = $this->do_not_translate_keys;
+            unset( $format[ 'translate_keys' ] );
         }
 
         return $format;
