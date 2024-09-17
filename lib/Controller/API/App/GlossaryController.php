@@ -40,7 +40,13 @@ class GlossaryController extends KleinController {
 
         // Don't use the keys sent by the FE
         $tmKeys = $json['tmKeys'];
-        $json['keys'] = $tmKeys;
+        $keys = [];
+
+        foreach($tmKeys as $tmKey){
+            $keys[] = $tmKey['key'];
+        }
+
+        $json['keys'] = $keys;
 
         $params = [
             'action' => 'check',
