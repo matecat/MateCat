@@ -60,7 +60,7 @@
       }
     }
     :first-child {
-      height: 80px;
+      height: 60px;
       border-bottom: 1px solid $grey3;
       font-weight: bold;
     }
@@ -83,7 +83,7 @@
     padding-right: 6px;
     font-size: 16px;
     :first-child {
-      height: 80px;
+      height: 60px;
       font-weight: normal;
     }
     > div {
@@ -91,7 +91,7 @@
     }
   }
   .job-table-header-total {
-    width: 80px;
+    width: 60px;
     display: flex;
     justify-content: flex-end;
     font-weight: 700;
