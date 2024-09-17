@@ -24,6 +24,8 @@ export const Accordion = ({
 
   useEffect(() => {
     const transitionEndClose = () => setIsRenderingContent(false)
+    const transitionEndOpen = () =>
+      (panelRef.current.style.maxHeight = `${panelRef.current.scrollHeight}px`)
 
     const {current} = panelRef
     const maxHeight = window.getComputedStyle(panelRef.current).maxHeight
@@ -31,16 +33,18 @@ export const Accordion = ({
     if (!expanded && maxHeight !== '0px')
       current.addEventListener('transitionend', transitionEndClose)
 
-    return () =>
+    if (expanded) current.addEventListener('transitionend', transitionEndOpen)
+
+    return () => {
       current.removeEventListener('transitionend', transitionEndClose)
+      current.removeEventListener('transitionend', transitionEndOpen)
+    }
   }, [expanded, id])
 
   useLayoutEffect(() => {
-    if (expanded) {
+    if (expanded)
       panelRef.current.style.maxHeight = `${scrollHeight > 0 ? scrollHeight : panelRef.current.scrollHeight}px`
-    } else {
-      panelRef.current.style.maxHeight = 0
-    }
+    else panelRef.current.style.maxHeight = 0
   }, [expanded, scrollHeight])
 
   return (

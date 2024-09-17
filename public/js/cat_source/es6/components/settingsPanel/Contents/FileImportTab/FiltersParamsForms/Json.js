@@ -15,7 +15,7 @@ export const Json = () => {
   const {currentTemplate, modifyingCurrentTemplate} =
     useContext(FiltersParamsContext)
 
-  const {control, watch, setValue, reset} = useForm()
+  const {control, watch, setValue} = useForm()
 
   const [formData, setFormData] = useState()
 
@@ -51,12 +51,6 @@ export const Json = () => {
       !isEqual(json.current, restPropsValue) &&
       Object.keys(restPropsValue).length
     ) {
-      /* console.log(
-        'json.current',
-        json.current,
-        'restPropsValue',
-        restPropsValue,
-      ) */
       modifyingCurrentTemplate((prevTemplate) => ({
         ...prevTemplate,
         json: restPropsValue,
@@ -66,7 +60,7 @@ export const Json = () => {
 
   // set default values for current template
   useEffect(() => {
-    reset()
+    SEGMENTED_CONTROL_OPTIONS.forEach(({id}) => setValue(id, undefined))
 
     Object.entries(json.current).forEach(([key, value]) => setValue(key, value))
 
@@ -76,42 +70,28 @@ export const Json = () => {
         ({id}) => typeof json.current[id] !== 'undefined',
       )?.id,
     )
-  }, [currentTemplate.id, setValue, reset])
+  }, [currentTemplate.id, setValue])
 
   const {segmentedControl} = formData ?? {}
 
-  console.log(currentTemplate)
-
   const renderActiveSegmentedController = (
     <>
-      {segmentedControl === 'translate_keys' && (
-        <Controller
-          control={control}
-          name={'translate_keys'}
-          render={({field: {onChange, value, name}}) => (
-            <WordsBadge
-              name={name}
-              value={value}
-              onChange={onChange}
-              placeholder={''}
-            />
-          )}
-        />
-      )}
-
-      {segmentedControl === 'do_not_translate_keys' && (
-        <Controller
-          control={control}
-          name={'do_not_translate_keys'}
-          render={({field: {onChange, value, name}}) => (
-            <WordsBadge
-              name={name}
-              value={value}
-              onChange={onChange}
-              placeholder={''}
-            />
-          )}
-        />
+      {SEGMENTED_CONTROL_OPTIONS.filter(({id}) => id === segmentedControl).map(
+        ({id}) => (
+          <Controller
+            key={id}
+            control={control}
+            name={id}
+            render={({field: {onChange, value, name}}) => (
+              <WordsBadge
+                name={name}
+                value={value}
+                onChange={onChange}
+                placeholder={''}
+              />
+            )}
+          />
+        ),
       )}
     </>
   )

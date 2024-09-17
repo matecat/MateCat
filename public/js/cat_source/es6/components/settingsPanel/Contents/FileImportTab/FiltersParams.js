@@ -11,22 +11,6 @@ import {updateFiltersParamsTemplate} from '../../../../api/updateFiltersParamsTe
 import {deleteFiltersParamsTemplate} from '../../../../api/deleteFiltersParamsTemplate/deleteFiltersParamsTemplate'
 import {AccordionGroupFiltersParams} from './AccordionGroupFiltersParams'
 import defaultFiltersParams from '../defaultTemplates/filterParams.json'
-import {cloneDeep, merge} from 'lodash'
-
-export const mergeWithDefault = (template) => {
-  const cleanProps = (props) =>
-    Object.entries(props)
-      .filter(
-        ([, value]) =>
-          !Array.isArray(value) || (Array.isArray(value) && value.length),
-      )
-      .reduce((acc, cur) => ({...acc, [cur[0]]: cur[1]}), {})
-
-  const copyDefault = cloneDeep(defaultFiltersParams)
-  const clean = cleanProps(template)
-
-  return merge(copyDefault, clean)
-}
 
 export const FILTERS_PARAMS_SCHEMA_KEYS = {
   id: 'id',
