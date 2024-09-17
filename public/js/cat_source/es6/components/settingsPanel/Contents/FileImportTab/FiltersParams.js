@@ -11,6 +11,22 @@ import {updateFiltersParamsTemplate} from '../../../../api/updateFiltersParamsTe
 import {deleteFiltersParamsTemplate} from '../../../../api/deleteFiltersParamsTemplate/deleteFiltersParamsTemplate'
 import {AccordionGroupFiltersParams} from './AccordionGroupFiltersParams'
 import defaultFiltersParams from '../defaultTemplates/filterParams.json'
+import {cloneDeep, merge} from 'lodash'
+
+export const mergeWithDefault = (template) => {
+  const cleanProps = (props) =>
+    Object.entries(props)
+      .filter(
+        ([, value]) =>
+          !Array.isArray(value) || (Array.isArray(value) && value.length),
+      )
+      .reduce((acc, cur) => ({...acc, [cur[0]]: cur[1]}), {})
+
+  const copyDefault = cloneDeep(defaultFiltersParams)
+  const clean = cleanProps(template)
+
+  return merge(copyDefault, clean)
+}
 
 export const FILTERS_PARAMS_SCHEMA_KEYS = {
   id: 'id',
@@ -27,7 +43,17 @@ export const FILTERS_PARAMS_SCHEMA_KEYS = {
 }
 
 const getFilteredSchemaCreateUpdate = (template) => {
-  const {id, uid, isTemporary, isSelected, ...filtered} = template // eslint-disable-line
+  /* eslint-disable no-unused-vars */
+  const {
+    id,
+    uid,
+    isTemporary,
+    isSelected,
+    created_at,
+    modified_at,
+    ...filtered
+  } = template
+  /* eslint-enable no-unused-vars */
   return filtered
 }
 const getFilteredSchemaToCompare = (template) => {
@@ -106,7 +132,7 @@ export const FiltersParams = () => {
           const selectedTemplateId =
             items.find(({id}) => id === currentProjectTemplateFiltersId)?.id ??
             0
-
+          console.log('@items', items)
           setTemplates(
             items.map((template) => ({
               ...template,
@@ -142,7 +168,7 @@ export const FiltersParams = () => {
     )
       modifyingCurrentProjectTemplate((prevTemplate) => ({
         ...prevTemplate,
-        qaModelTemplateId: currentTemplateId,
+        filtersTemplateId: currentTemplateId,
       }))
 
     prevCurrentProjectTemplateFiltersId.current =

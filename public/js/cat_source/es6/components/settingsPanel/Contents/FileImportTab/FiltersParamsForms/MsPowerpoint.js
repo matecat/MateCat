@@ -9,7 +9,7 @@ export const MsPowerpoint = () => {
   const {currentTemplate, modifyingCurrentTemplate} =
     useContext(FiltersParamsContext)
 
-  const {control, watch} = useForm()
+  const {control, watch, register, unregister} = useForm()
 
   const {msPowerpoint} = currentTemplate
 
@@ -23,6 +23,11 @@ export const MsPowerpoint = () => {
       }))
     }
   }, [propsValue, msPowerpoint, modifyingCurrentTemplate])
+
+  useEffect(() => {
+    if (propsValue?.extract_hidden_slides) register('translate_slides')
+    else unregister('translate_slides')
+  }, [propsValue?.extract_hidden_slides, register, unregister])
 
   return (
     <div className="filters-params-accordion-content">
@@ -83,29 +88,31 @@ export const MsPowerpoint = () => {
         />
       </div>
 
-      <div className="filters-params-option">
-        <div>
-          <h3>Translatable slides</h3>
-          <p>
-            Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
-            pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
-            condimentum.
-          </p>
+      {propsValue?.extract_hidden_slides && (
+        <div className="filters-params-option">
+          <div>
+            <h3>Translatable slides</h3>
+            <p>
+              Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
+              pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
+              condimentum.
+            </p>
+          </div>
+          <Controller
+            control={control}
+            defaultValue={msPowerpoint.translate_slides}
+            name="translate_slides"
+            render={({field: {onChange, value, name}}) => (
+              <WordsBadge
+                name={name}
+                value={value}
+                onChange={onChange}
+                placeholder={''}
+              />
+            )}
+          />
         </div>
-        <Controller
-          control={control}
-          defaultValue={msPowerpoint.translate_slides}
-          name="translate_slides"
-          render={({field: {onChange, value, name}}) => (
-            <WordsBadge
-              name={name}
-              value={value}
-              onChange={onChange}
-              placeholder={''}
-            />
-          )}
-        />
-      </div>
+      )}
     </div>
   )
 }

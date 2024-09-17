@@ -2,6 +2,7 @@ import React, {useEffect, useRef, useState, useCallback} from 'react'
 import PropTypes from 'prop-types'
 import {EMAIL_PATTERN} from '../../../constants/Constants'
 import {TAG_STATUS, Tag} from './Tag'
+import {isEqual} from 'lodash'
 
 const EMAIL_SEPARATORS = [',', ';', ' ']
 
@@ -42,7 +43,7 @@ export const EmailsBadge = ({
   validatePatternRef.current = validatePattern
 
   const [inputValue, setInputValue] = useState('')
-  const [emails, setEmails] = useState(() => [...value])
+  const [emails, setEmails] = useState(() => value)
   const [highlightedEmailIndex, setHighlightedEmailIndex] = useState(-1)
 
   // FUNCTIONS
@@ -143,8 +144,8 @@ export const EmailsBadge = ({
 
   // EFFECTS
   useEffect(() => {
-    if (!value.length) setEmails([])
-  }, [value.length])
+    setEmails((prevState) => (!isEqual(value, prevState) ? value : prevState))
+  }, [value])
 
   // click outside set value
   useEffect(() => {
@@ -165,9 +166,9 @@ export const EmailsBadge = ({
   }, [updateEmails])
 
   useEffect(() => {
-    const isFirstEntryWritingValid =
-      !emails.length && validatePatternRef.current.test(inputRef.current.value)
-    onChange(isFirstEntryWritingValid ? [inputRef.current.value] : emails)
+    // const isFirstEntryWritingValid =
+    //   !emails.length && validatePatternRef.current.test(inputRef.current.value)
+    onChange(emails)
   }, [emails, onChange])
 
   // RENDER

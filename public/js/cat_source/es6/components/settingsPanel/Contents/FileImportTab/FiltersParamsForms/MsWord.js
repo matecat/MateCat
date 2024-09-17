@@ -6,7 +6,7 @@ import {Controller, useForm} from 'react-hook-form'
 import {isEqual} from 'lodash'
 
 export const MsWord = () => {
-  const {currentTemplate, modifyingCurrentTemplate, templates} =
+  const {currentTemplate, modifyingCurrentTemplate} =
     useContext(FiltersParamsContext)
 
   const {control, watch} = useForm()
@@ -14,12 +14,15 @@ export const MsWord = () => {
   const {msWord} = currentTemplate
 
   const propsValue = watch()
-  console.log('#templates', templates)
+
   useEffect(() => {
     if (!isEqual(msWord, propsValue) && Object.keys(propsValue).length) {
       modifyingCurrentTemplate((prevTemplate) => ({
         ...prevTemplate,
-        msWord: propsValue,
+        msWord: {
+          exclude_highlight_colors: [],
+          ...propsValue,
+        },
       }))
     }
   }, [propsValue, msWord, modifyingCurrentTemplate])
@@ -134,6 +137,30 @@ export const MsWord = () => {
           control={control}
           defaultValue={msWord.exclude_styles}
           name="exclude_styles"
+          render={({field: {onChange, value, name}}) => (
+            <WordsBadge
+              name={name}
+              value={value}
+              onChange={onChange}
+              placeholder={''}
+            />
+          )}
+        />
+      </div>
+
+      <div className="filters-params-option">
+        <div>
+          <h3>Exclude highlight colors</h3>
+          <p>
+            Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
+            pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
+            condimentum.
+          </p>
+        </div>
+        <Controller
+          control={control}
+          defaultValue={msWord.exclude_highlight_colors}
+          name="exclude_highlight_colors"
           render={({field: {onChange, value, name}}) => (
             <WordsBadge
               name={name}

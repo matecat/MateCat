@@ -1,3 +1,4 @@
+import {mergeWithDefault} from '../../components/settingsPanel/Contents/FileImportTab/FiltersParams'
 import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
 
 /**
@@ -25,5 +26,5 @@ export const updateFiltersParamsTemplate = async ({id, template}) => {
   const {errors, ...data} = await response.json()
   if (errors && errors.length > 0) return Promise.reject(errors)
 
-  return data
+  return mergeWithDefault(data)
 }

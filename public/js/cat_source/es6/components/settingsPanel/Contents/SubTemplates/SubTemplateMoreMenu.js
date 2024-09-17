@@ -42,12 +42,22 @@ export const SubTemplateMoreMenu = ({portalTarget}) => {
     )
 
     if (templatesInvolved.length) {
+      const templateCategoryName = SCHEMA_KEYS.qaModelTemplateId
+        ? 'quality framework'
+        : SCHEMA_KEYS.payableRateTemplateId
+          ? 'analysis'
+          : SCHEMA_KEYS.filtersTemplateId
+            ? 'extraction parameters'
+            : SCHEMA_KEYS.XliffConfigTemplateId
+              ? 'Xliff import settings'
+              : ''
+
       ModalsActions.showModalComponent(
         ConfirmDeleteResourceProjectTemplates,
         {
           projectTemplatesInvolved: templatesInvolved,
           successCallback: deleteTemplate,
-          content: `The ${propConnectProjectTemplate === SCHEMA_KEYS.qaModelTemplateId ? 'quality framework' : 'analysis'} template you are about to delete is used in the following project creation template(s):`,
+          content: `The ${templateCategoryName} template you are about to delete is used in the following project creation template(s):`,
         },
         'Confirm deletion',
       )

@@ -1,4 +1,4 @@
-import React, {useContext, useEffect} from 'react'
+import React, {useContext, useEffect, useRef, useState} from 'react'
 import Switch from '../../../../common/Switch'
 import {SegmentedControl} from '../../../../common/SegmentedControl'
 import {WordsBadge} from '../../../../common/WordsBadge/WordsBadge'
@@ -6,30 +6,115 @@ import {FiltersParamsContext} from '../FiltersParams'
 import {Controller, useForm} from 'react-hook-form'
 import {isEqual} from 'lodash'
 
+const SEGMENTED_CONTROL_OPTIONS = [
+  {id: 'translate_keys', name: 'translate_keys'},
+  {id: 'do_not_translate_keys', name: 'do_not_translate_keys'},
+]
+
 export const Json = () => {
   const {currentTemplate, modifyingCurrentTemplate} =
     useContext(FiltersParamsContext)
 
-  const {control, watch, unregister} = useForm()
+  const {control, watch, setValue, reset} = useForm()
 
-  const {json} = currentTemplate
+  const [formData, setFormData] = useState()
 
-  const data = watch()
-  const {keysType, ...propsValue} = data
+  const json = useRef()
+  json.current = currentTemplate.json
+
+  const temporaryFormData = watch()
+  const previousData = useRef()
 
   useEffect(() => {
-    if (!isEqual(json, propsValue) && Object.keys(propsValue).length) {
+    if (!isEqual(temporaryFormData, previousData.current))
+      setFormData(temporaryFormData)
+
+    previousData.current = temporaryFormData
+  }, [temporaryFormData])
+
+  useEffect(() => {
+    if (typeof formData === 'undefined') return
+
+    const {segmentedControl, ...propsValue} = formData
+
+    const restPropsValue = Object.entries(propsValue).reduce(
+      (acc, [key, value]) => ({
+        ...acc,
+        ...(SEGMENTED_CONTROL_OPTIONS.every(
+          ({id}) => id !== key || id === segmentedControl,
+        ) && {[key]: value}),
+      }),
+      {},
+    )
+
+    if (
+      !isEqual(json.current, restPropsValue) &&
+      Object.keys(restPropsValue).length
+    ) {
+      /* console.log(
+        'json.current',
+        json.current,
+        'restPropsValue',
+        restPropsValue,
+      ) */
       modifyingCurrentTemplate((prevTemplate) => ({
         ...prevTemplate,
-        json: propsValue,
+        json: restPropsValue,
       }))
     }
-  }, [propsValue, json, modifyingCurrentTemplate])
+  }, [formData, modifyingCurrentTemplate])
 
+  // set default values for current template
   useEffect(() => {
-    if (keysType === '1') unregister('translate_keys')
-    else unregister('do_not_translate_keys')
-  }, [keysType, unregister])
+    reset()
+
+    Object.entries(json.current).forEach(([key, value]) => setValue(key, value))
+
+    setValue(
+      'segmentedControl',
+      SEGMENTED_CONTROL_OPTIONS.find(
+        ({id}) => typeof json.current[id] !== 'undefined',
+      )?.id,
+    )
+  }, [currentTemplate.id, setValue, reset])
+
+  const {segmentedControl} = formData ?? {}
+
+  console.log(currentTemplate)
+
+  const renderActiveSegmentedController = (
+    <>
+      {segmentedControl === 'translate_keys' && (
+        <Controller
+          control={control}
+          name={'translate_keys'}
+          render={({field: {onChange, value, name}}) => (
+            <WordsBadge
+              name={name}
+              value={value}
+              onChange={onChange}
+              placeholder={''}
+            />
+          )}
+        />
+      )}
+
+      {segmentedControl === 'do_not_translate_keys' && (
+        <Controller
+          control={control}
+          name={'do_not_translate_keys'}
+          render={({field: {onChange, value, name}}) => (
+            <WordsBadge
+              name={name}
+              value={value}
+              onChange={onChange}
+              placeholder={''}
+            />
+          )}
+        />
+      )}
+    </>
+  )
 
   return (
     <div className="filters-params-accordion-content">
@@ -44,7 +129,6 @@ export const Json = () => {
         </div>
         <Controller
           control={control}
-          defaultValue={json.extract_arrays}
           name="extract_arrays"
           render={({field: {onChange, value, name}}) => (
             <Switch name={name} active={value} onChange={onChange} />
@@ -63,7 +147,6 @@ export const Json = () => {
         </div>
         <Controller
           control={control}
-          defaultValue={json.escape_forward_slashes}
           name="escape_forward_slashes"
           render={({field: {onChange, value, name}}) => (
             <Switch name={name} active={value} onChange={onChange} />
@@ -83,38 +166,18 @@ export const Json = () => {
         <div className="container-keys-controller">
           <Controller
             control={control}
-            name="keysType"
-            defaultValue={'0'}
+            name="segmentedControl"
             render={({field: {onChange, value, name}}) => (
               <SegmentedControl
                 name={name}
-                className="keys-segmented-control"
-                options={[
-                  {id: '0', name: 'Translatable'},
-                  {id: '1', name: 'Non-translatable'},
-                ]}
+                className="custom-segmented-control"
+                options={SEGMENTED_CONTROL_OPTIONS}
                 selectedId={value}
                 onChange={onChange}
               />
             )}
           />
-          <Controller
-            control={control}
-            defaultValue={
-              keysType === '1'
-                ? json.do_not_translate_keys
-                : json.translate_keys
-            }
-            name={keysType === '1' ? 'do_not_translate_keys' : 'translate_keys'}
-            render={({field: {onChange, value, name}}) => (
-              <WordsBadge
-                name={name}
-                value={value}
-                onChange={onChange}
-                placeholder={''}
-              />
-            )}
-          />
+          {renderActiveSegmentedController}
         </div>
       </div>
 
@@ -129,7 +192,6 @@ export const Json = () => {
         </div>
         <Controller
           control={control}
-          defaultValue={json.context_keys}
           name="context_keys"
           render={({field: {onChange, value, name}}) => (
             <WordsBadge
@@ -153,7 +215,6 @@ export const Json = () => {
         </div>
         <Controller
           control={control}
-          defaultValue={json.character_limit}
           name="character_limit"
           render={({field: {onChange, value, name}}) => (
             <WordsBadge
