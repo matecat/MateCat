@@ -38,17 +38,9 @@ class GlossaryController extends KleinController {
         $json = $this->createThePayloadForWorker($jsonSchemaPath);
         $json['tmKeys'] = $this->keysBelongingToJobOwner($json['tmKeys']);
 
-        // filter the keys sent by the FE
+        // Don't use the keys sent by the FE
         $tmKeys = $json['tmKeys'];
-        $json['keys'] = array_filter($json['keys'], function($el) use($tmKeys) {
-            foreach($tmKeys as $tmKey){
-                if($tmKey['key'] === $el){
-                    return true;
-                }
-            }
-
-            return false;
-        });
+        $json['keys'] = $tmKeys;
 
         $params = [
             'action' => 'check',
