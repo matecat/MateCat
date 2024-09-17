@@ -1,6 +1,5 @@
 <?php
 
-use ConnectedServices\AbstractClient;
 use ConnectedServices\ConnectedServiceUserModel;
 use ConnectedServices\OauthClient;
 
@@ -83,9 +82,7 @@ class oauthResponseHandlerController extends BaseKleinViewController {
             $token            = $client->getAccessTokenFromAuthCode( $code );
             $this->remoteUser = $client->getResourceOwner( $token );
         } catch ( Exception $exception ) {
-            // in case of bad request, redirect to homepage
-            header( "Location: " . INIT::$HTTPHOST . INIT::$BASEURL );
-            die();
+            $this->close( $exception->getCode() >= 400 && $exception->getCode() < 500 ? $exception->getCode() : 400 );
         }
     }
 
