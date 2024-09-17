@@ -374,6 +374,12 @@ function CatTool() {
     crossLanguageMatches: multiMatchLangs,
   } = currentProjectTemplate ?? {}
 
+  const isFakeCurrentTemplateReady =
+    projectTemplates.length &&
+    typeof projectTemplates[1] !== 'undefined' &&
+    typeof projectTemplates[1].mt !== 'undefined' &&
+    Array.isArray(projectTemplates[1].tm)
+
   return (
     <>
       <Header
@@ -434,7 +440,7 @@ function CatTool() {
       <div className="notifications-wrapper">
         <NotificationBox />
       </div>
-      {openSettings.isOpen && (
+      {openSettings.isOpen && isFakeCurrentTemplateReady && (
         <SettingsPanel
           {...{
             onClose: closeSettings,

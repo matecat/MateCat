@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useRef, useState} from 'react'
+import React, {createRef, useContext, useEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import InfoIcon from '../../../../../../img/icons/InfoIcon'
 import Forbidden from '../../../../../../img/icons/Forbidden'
@@ -10,6 +10,7 @@ import {
 } from './SegmentFooterTabGlossary'
 import {TabGlossaryContext} from './TabGlossaryContext'
 import LabelWithTooltip from '../../common/LabelWithTooltip'
+import Tooltip, {TOOLTIP_POSITION} from '../../common/Tooltip'
 
 const DESCRIPTION_ELEMENTS_LINE_CLAMP = 3
 
@@ -69,6 +70,8 @@ export const GlossaryItem = ({
   const {metadata, source, target} = item
 
   const canModifyItem = isEnabledToModify && item.term_id && !isStatusDeleting
+
+  const refTest = useRef()
 
   return (
     <div className="glossary_item" id={item.term_id}>
@@ -155,13 +158,14 @@ export const GlossaryItem = ({
               } source_label`}
             >{`${source.term} `}</span>
             {source.sentence && (
-              <div
-                className="info-icon"
-                aria-label={source.sentence}
-                tooltip-position="right"
+              <Tooltip
+                content={source.sentence}
+                position={TOOLTIP_POSITION.RIGHT}
               >
-                <InfoIcon size={16} />
-              </div>
+                <div ref={createRef()} className="info-icon">
+                  <InfoIcon size={16} />
+                </div>
+              </Tooltip>
             )}
           </div>
           {source.note && (
@@ -196,13 +200,14 @@ export const GlossaryItem = ({
               </div>
             )}
             {target.sentence && (
-              <div
-                className="info-icon"
-                aria-label={target.sentence}
-                tooltip-position="right"
+              <Tooltip
+                content={target.sentence}
+                position={TOOLTIP_POSITION.RIGHT}
               >
-                <InfoIcon size={16} />
-              </div>
+                <div ref={createRef()} className="info-icon">
+                  <InfoIcon size={16} />
+                </div>
+              </Tooltip>
             )}
           </div>
           {target.note && (

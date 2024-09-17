@@ -1,5 +1,5 @@
 export const initFileUpload = async () => {
-  let url = `/lib/Utils/fileupload/`
+  let url = `/lib/View/fileupload/`
 
   const res = await fetch(url, {
     credentials: 'include',
