@@ -8,20 +8,37 @@
 
 namespace ConnectedServices\GDrive;
 
+use API\Commons\Exceptions\AuthenticationError;
 use ConnectedServices\ConnectedServiceDao;
 use ConnectedServices\ConnectedServiceStruct;
+use Constants;
 use ConversionHandler;
 use DirectoryIterator;
 use Exception;
+use Exceptions\NotFoundException;
+use Exceptions\ValidationError;
+use FeatureSet;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use FilesStorage\S3FilesStorage;
+use FilesystemIterator;
+use Google_Client;
+use Google_Service_Drive;
+use Google_Service_Drive_Permission;
 use GuzzleHttp\Psr7\Response;
 use INIT;
+use Jobs_JobDao;
 use Log;
+use Predis\Connection\ConnectionException;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use ReflectionException;
+use RemoteFiles_RemoteFileDao;
+use RuntimeException;
+use TaskRunner\Exceptions\EndQueueException;
+use TaskRunner\Exceptions\ReQueueException;
 use Users_UserDao;
+use Users_UserStruct;
 use Utils;
 
 /**
@@ -35,27 +52,27 @@ class Session {
     const FILE_HASH             = 'fileHash';
     const CONNNECTED_SERVICE_ID = 'connectedServiceId';
 
-    protected $guid;
-    protected $source_lang;
-    protected $target_lang;
-    protected $seg_rule;
+    protected string  $guid;
+    protected string  $source_lang;
+    protected string  $target_lang;
+    protected ?string $seg_rule = null;
 
-    protected $session;
-    protected $filters_extraction_parameters;
+    protected array $session = [];
+    protected       $filters_extraction_parameters;
 
     /**
-     * @var \Google_Service_Drive
+     * @var Google_Service_Drive|null
      */
-    protected $service;
-    protected $token;
+    protected ?Google_Service_Drive $service = null;
+    protected                       $token;
 
     /**
-     * @var ConnectedServiceStruct
+     * @var ?ConnectedServiceStruct
      */
-    protected $serviceStruct;
+    protected ?ConnectedServiceStruct $serviceStruct = null;
 
     /**
-     * @var \Users_UserStruct
+     * @var Users_UserStruct
      */
     protected $user;
 
@@ -65,7 +82,7 @@ class Session {
     protected $files_storage;
 
     /**
-     * @var \FeatureSet
+     * @var FeatureSet
      */
     protected $featureSet;
 
@@ -77,7 +94,7 @@ class Session {
      */
     public function __construct() {
         if ( !isset( $_SESSION[ 'uid' ] ) ) {
-            throw new \Exception( 'Cannot instantiate session for unlogged user' );
+            return;
         }
 
         $this->session = &$_SESSION;
@@ -93,9 +110,9 @@ class Session {
      * @return Session
      * @throws Exception
      */
-    public static function getInstanceForCLI( $session ) {
+    public static function getInstanceForCLI( $session ): Session {
         if ( PHP_SAPI != 'cli' ) {
-            throw new \RuntimeException( "This method MUST be called by CLI." );
+            throw new RuntimeException( "This method MUST be called by CLI." );
         }
         $_SESSION = $session;
 
@@ -107,9 +124,9 @@ class Session {
      * @param $originalSourceLang
      *
      * @return bool
-     * @throws \Exception
+     * @throws Exception
      */
-    public function changeSourceLanguage( $newSourceLang, $originalSourceLang ) {
+    public function changeSourceLanguage( $newSourceLang, $originalSourceLang ): bool {
         $fileList = $this->session[ self::FILE_LIST ];
         $success  = true;
 
@@ -126,29 +143,34 @@ class Session {
                     $originalCacheFileDir = $this->getCacheFileDir( $file, $originalSourceLang );
                     $newCacheFileDir      = $this->getCacheFileDir( $file, $newSourceLang );
 
+                    $renameDirSuccess     = false;
+                    $renameFileRefSuccess = false;
+
                     if ( AbstractFilesStorage::isOnS3() ) {
 
                         // copy orig and cache\INIT::$UPLOAD_REPOSITORY folder
                         $s3Client = S3FilesStorage::getStaticS3Client();
                         $copyOrig = $s3Client->copyFolder( [
-                            'source_bucket' => INIT::$AWS_STORAGE_BASE_BUCKET,
-                            'source_folder' => $originalCacheFileDir . '/orig',
-                            'target_folder' => $newCacheFileDir . '/orig',
-                            'delete_source' => false,
+                                'source_bucket' => INIT::$AWS_STORAGE_BASE_BUCKET,
+                                'source_folder' => $originalCacheFileDir . '/orig',
+                                'target_folder' => $newCacheFileDir . '/orig',
+                                'delete_source' => false,
                         ] );
 
                         $copyWork = $s3Client->copyFolder( [
-                            'source_bucket' => INIT::$AWS_STORAGE_BASE_BUCKET,
-                            'source_folder' => $originalCacheFileDir . '/work',
-                            'target_folder' => $newCacheFileDir . '/work',
-                            'delete_source' => false,
+                                'source_bucket' => INIT::$AWS_STORAGE_BASE_BUCKET,
+                                'source_folder' => $originalCacheFileDir . '/work',
+                                'target_folder' => $newCacheFileDir . '/work',
+                                'delete_source' => false,
                         ] );
 
                         if ( $copyOrig and $copyWork ) {
                             $renameDirSuccess     = true;
                             $renameFileRefSuccess = true;
                         }
+
                     } else {
+
                         $renameDirSuccess = rename( $originalCacheFileDir, $newCacheFileDir );
 
                         $uploadDir = $this->getUploadDir();
@@ -157,6 +179,7 @@ class Session {
                         $newUploadRefFile      = $uploadDir . DIRECTORY_SEPARATOR . $fileHash . '|' . $newSourceLang;
 
                         $renameFileRefSuccess = rename( $originalUploadRefFile, $newUploadRefFile );
+
                     }
 
                     if ( !$renameDirSuccess || !$renameFileRefSuccess ) {
@@ -179,17 +202,17 @@ class Session {
      *
      * 2344e5918dcff468b4362d79cb16b0039c77d608|af-ZA ---> 2344e5918dcff468b4362d79cb16b0039c77d608|it-IT
      *
-     * @param $originalSourceLang
-     * @param $newSourceLang
+     * @param string $newSourceLang
+     * @param string $originalSourceLang
      */
-    private function renameTheFileMap( $newSourceLang, $originalSourceLang ) {
+    private function renameTheFileMap( string $newSourceLang, string $originalSourceLang ) {
         $uploadDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->session[ 'upload_session' ];
 
         /** @var DirectoryIterator $item */
         foreach (
-            $iterator = new \RecursiveIteratorIterator(
-                new \RecursiveDirectoryIterator( $uploadDir, \RecursiveDirectoryIterator::SKIP_DOTS ),
-                \RecursiveIteratorIterator::SELF_FIRST ) as $item
+                new RecursiveIteratorIterator(
+                        new RecursiveDirectoryIterator( $uploadDir, FilesystemIterator::SKIP_DOTS ),
+                        RecursiveIteratorIterator::SELF_FIRST ) as $item
         ) {
             $originalSourceLangMarker = '|' . $originalSourceLang;
             $newSourceLangMarker      = '|' . $newSourceLang;
@@ -203,9 +226,9 @@ class Session {
 
     /**
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
-    public function getFileStructureForJsonOutput() {
+    public function getFileStructureForJsonOutput(): array {
         $response = [];
 
         foreach ( $this->session[ self::FILE_LIST ] as $fileId => $file ) {
@@ -216,17 +239,17 @@ class Session {
                 $path     = $this->getGDriveFilePathForS3( $file );
                 $s3Client = S3FilesStorage::getStaticS3Client();
                 $s3       = $s3Client->getItem( [
-                        'bucket' => S3FilesStorage::getFilesStorageBucket(),
-                        'key'    => $path
-                    ]
+                                'bucket' => S3FilesStorage::getFilesStorageBucket(),
+                                'key'    => $path
+                        ]
                 );
 
                 $mime                  = include __DIR__ . '/../../../Utils/Mime2Extension.php';
                 $response[ 'files' ][] = [
-                    'fileId'        => $fileId,
-                    'fileName'      => $fileName,
-                    'fileSize'      => $s3[ 'ContentLength' ],
-                    'fileExtension' => $mime[ $s3[ 'ContentType' ] ][ 0 ]
+                        'fileId'        => $fileId,
+                        'fileName'      => $fileName,
+                        'fileSize'      => $s3[ 'ContentLength' ],
+                        'fileExtension' => $mime[ $s3[ 'ContentType' ] ][ 0 ]
                 ];
 
             } else {
@@ -237,10 +260,10 @@ class Session {
                     $fileExtension = pathinfo( $fileName, PATHINFO_EXTENSION );
 
                     $response[ 'files' ][] = [
-                        'fileId'        => $fileId,
-                        'fileName'      => $fileName,
-                        'fileSize'      => $fileSize,
-                        'fileExtension' => $fileExtension
+                            'fileId'        => $fileId,
+                            'fileName'      => $fileName,
+                            'fileSize'      => $fileSize,
+                            'fileExtension' => $fileExtension
                     ];
                 } else {
                     unset( $this->session[ self::FILE_LIST ][ $fileId ] );
@@ -254,8 +277,9 @@ class Session {
     /**
      * MUST NOT TO BE CALLED FROM THE cli
      */
-    public static function cleanupSessionFiles() {
-        if ( self::sessionHasFiles( $_SESSION ) ) {
+    public function cleanupSessionFiles() {
+        if ( $this->sessionHasFiles() ) {
+            unset( $this->session[ self::FILE_LIST ] );
             unset( $_SESSION[ self::FILE_LIST ] );
         }
     }
@@ -273,9 +297,9 @@ class Session {
     }
 
     /**
-     * @return \Users_UserStruct
+     * @return Users_UserStruct
      */
-    private function __getUser() {
+    private function __getUser(): Users_UserStruct {
         if ( is_null( $this->user ) ) {
             $dao        = new Users_UserDao();
             $this->user = $dao->getByUid( $this->session[ 'uid' ] );
@@ -285,17 +309,17 @@ class Session {
     }
 
     /**
-     * @param \Users_UserStruct $user
+     * @param Users_UserStruct $user
      *
-     * @return bool|mixed
+     * @return array|null
      * @throws Exception
      */
-    public function getTokenByUser( \Users_UserStruct $user ) {
+    public function getTokenByUser( Users_UserStruct $user ): ?array {
         $serviceDao          = new ConnectedServiceDao();
         $this->serviceStruct = $serviceDao->findDefaultServiceByUserAndName( $user, 'gdrive' );
 
         if ( !$this->serviceStruct ) {
-            return false;
+            return null;
         } else {
             return $this->serviceStruct->getDecodedOauthAccessToken();
         }
@@ -304,46 +328,40 @@ class Session {
     /**
      * Adds files to the session variables.
      *
-     * @param $fileId
-     * @param $fileName
-     * @param $fileHash
-     *
+     * @param string $fileId
+     * @param string $fileName
+     * @param string $fileHash
      */
-    public function addFiles( $fileId, $fileName, $fileHash ) {
+    public function addFiles( string $fileId, string $fileName, string $fileHash ) {
 
         if ( !isset( $this->session[ self::FILE_LIST ] )
-            || !is_array( $this->session[ self::FILE_LIST ] ) ) {
+                || !is_array( $this->session[ self::FILE_LIST ] ) ) {
 
             $this->session[ self::FILE_LIST ] = [];
         }
 
         $this->session[ self::FILE_LIST ][ $fileId ] = [
-            self::FILE_NAME             => $fileName,
-            self::FILE_HASH             => $fileHash,
-            self::CONNNECTED_SERVICE_ID => $this->serviceStruct->id,
+                self::FILE_NAME             => $fileName,
+                self::FILE_HASH             => $fileHash,
+                self::CONNNECTED_SERVICE_ID => $this->serviceStruct->id,
         ];
     }
 
     /**
      * @return bool
      */
-    public function hasFiles() {
-        return (isset( $this->session[ self::FILE_LIST ] ) and count($this->session[ self::FILE_LIST ]) > 0);
-
-//        return
-//                isset( $this->session[ self::FILE_LIST ] )
-//                && !empty( $this->session[ self::FILE_LIST ] );
+    public function hasFiles(): bool {
+        return ( isset( $this->session[ self::FILE_LIST ] ) and count( $this->session[ self::FILE_LIST ] ) > 0 );
     }
 
     /**
      * @param $session
      *
      * @return bool
-     * @deprecated use the non static version
      */
-    public static function sessionHasFiles( $session ) {
-        if ( isset( $session[ self::FILE_LIST ] )
-            && !empty( $session[ self::FILE_LIST ] ) ) {
+    public function sessionHasFiles(): bool {
+        if ( isset( $this->session[ self::FILE_LIST ] )
+                && !empty( $this->session[ self::FILE_LIST ] ) ) {
             return true;
         }
 
@@ -355,7 +373,7 @@ class Session {
      *
      * @return int|string|null
      */
-    public function findFileIdByName( $fileName ) {
+    public function findFileIdByName( string $fileName ) {
         if ( $this->hasFiles() ) {
             foreach ( $this->session[ self::FILE_LIST ] as $singleFileId => $file ) {
                 if ( $file[ self::FILE_NAME ] === $fileName ) {
@@ -369,24 +387,24 @@ class Session {
 
     /**
      * Gets the service if token is available.
-     * If token is not found in database, then returns FALSE ;
+     * If the token is not found in the database, then returns FALSE ;
      *
-     * Memoizes the response.
+     * Memoize the response.
      *
-     * Returned token may still be expired.
+     * The Returned token may still be expired.
      *
-     * @return \Google_Service_Drive|FALSE
+     * @return Google_Service_Drive|null
      * @throws Exception
      */
-    public function getService() {
+    public function getService( Google_Client $gClient ): ?Google_Service_Drive {
         if ( is_null( $this->service ) ) {
 
             $token = $this->getToken();
 
             if ( $token ) {
-                $this->service = RemoteFileService::getService( $token );
+                $this->service = RemoteFileService::getService( $token, $gClient );
             } else {
-                $this->service = false;
+                $this->service = null;
             }
         }
 
@@ -395,14 +413,14 @@ class Session {
 
     /**
      * @return RemoteFileService
-     * @throws \Exception
+     * @throws Exception
      */
-    public function buildRemoteFile() {
+    public function buildRemoteFile( Google_Client $gClient ): RemoteFileService {
         if ( !$this->getToken() ) {
             throw  new Exception( 'Cannot build RemoteFile without a token' );
         }
 
-        return new RemoteFileService( $this->token );
+        return new RemoteFileService( $this->token, $gClient );
     }
 
     public function clearFileListFromSession() {
@@ -410,12 +428,13 @@ class Session {
     }
 
     /**
-     * @param $fileId
+     * @param string $fileId
      *
      * @return bool
-     * @throws \Exception
+     * @throws ConnectionException
+     * @throws ReflectionException
      */
-    public function removeFile( $fileId ) {
+    public function removeFile( string $fileId ): bool {
         $success = false;
 
         if ( isset( $this->session[ self::FILE_LIST ][ $fileId ] ) ) {
@@ -425,23 +444,23 @@ class Session {
             if ( S3FilesStorage::isOnS3() ) {
                 $s3Client = S3FilesStorage::getStaticS3Client();
                 $s3Client->deleteFolder( [
-                        'bucket' => S3FilesStorage::getFilesStorageBucket(),
-                        'key'    => $pathCache
-                    ]
+                                'bucket' => S3FilesStorage::getFilesStorageBucket(),
+                                'key'    => $pathCache
+                        ]
                 );
             } else {
                 $this->deleteDirectory( $pathCache );
             }
 
-            $tempUploadedFileDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->session['upload_session'];
+            $tempUploadedFileDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->session[ 'upload_session' ];
 
             /** @var DirectoryIterator $item */
-            foreach ($iterator = new \RecursiveIteratorIterator( new \RecursiveDirectoryIterator( $tempUploadedFileDir, \RecursiveDirectoryIterator::SKIP_DOTS ), \RecursiveIteratorIterator::SELF_FIRST ) as $item) {
-                $target = explode('__', $pathCache);
-                $hashFile = $file['fileHash']."|".end($target);
+            foreach ( $iterator = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $tempUploadedFileDir, RecursiveDirectoryIterator::SKIP_DOTS ), RecursiveIteratorIterator::SELF_FIRST ) as $item ) {
+                $target   = explode( '__', $pathCache );
+                $hashFile = $file[ 'fileHash' ] . "|" . end( $target );
 
-                if($item->getFilename() === $file['fileName'] or $item->getFilename() === $hashFile){
-                    unlink($item);
+                if ( $item->getFilename() === $file[ 'fileName' ] or $item->getFilename() === $hashFile ) {
+                    unlink( $item );
                 }
             }
 
@@ -456,7 +475,7 @@ class Session {
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function removeAllFiles() {
         foreach ( $this->session[ self::FILE_LIST ] as $singleFileId => $file ) {
@@ -467,12 +486,10 @@ class Session {
     }
 
     /**
-     * TODO: move to something generic and static
-     *
-     * @param $dir
+     * @param string $dir
      */
-    private function deleteDirectory( $dir ) {
-        $it    = new RecursiveDirectoryIterator( $dir, RecursiveDirectoryIterator::SKIP_DOTS );
+    private function deleteDirectory( string $dir ) {
+        $it    = new RecursiveDirectoryIterator( $dir, FilesystemIterator::SKIP_DOTS );
         $files = new RecursiveIteratorIterator( $it, RecursiveIteratorIterator::CHILD_FIRST );
 
         foreach ( $files as $file ) {
@@ -489,18 +506,18 @@ class Session {
     /**
      * @return string
      */
-    private function getUploadDir() {
+    private function getUploadDir(): string {
         return INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . filter_input( INPUT_COOKIE, 'upload_session' );
     }
 
     /**
-     * @param        $file
-     * @param string $lang
+     * @param array   $file
+     * @param ?string $lang
      *
      * @return string
      */
-    private function getCacheFileDir( $file, $lang = '' ) {
-        $sourceLang = $this->session[ \Constants::SESSION_ACTUAL_SOURCE_LANG ];
+    private function getCacheFileDir( array $file, ?string $lang = '' ): string {
+        $sourceLang = $this->session[ Constants::SESSION_ACTUAL_SOURCE_LANG ];
 
         if ( $lang !== '' ) {
             $sourceLang = $lang;
@@ -521,11 +538,11 @@ class Session {
     }
 
     /**
-     * @param $file
+     * @param array $file
      *
      * @return string
      */
-    private function getGDriveFilePath( $file ) {
+    private function getGDriveFilePath( array $file ): string {
 
         $fileName     = $file[ self::FILE_NAME ];
         $cacheFileDir = $this->getCacheFileDir( $file );
@@ -534,11 +551,11 @@ class Session {
     }
 
     /**
-     * @param $file
+     * @param array $file
      *
      * @return string
      */
-    private function getGDriveFilePathForS3( $file ) {
+    private function getGDriveFilePathForS3( array $file ): string {
 
         $fileName     = $file[ self::FILE_NAME ];
         $cacheFileDir = $this->getCacheFileDir( $file );
@@ -547,13 +564,13 @@ class Session {
     }
 
     /**
-     * @param $guid
-     * @param $source_lang
-     * @param $target_lang
-     * @param $seg_rule
-     * @param null $filters_extraction_parameters
+     * @param string      $guid
+     * @param string      $source_lang
+     * @param string      $target_lang
+     * @param string|null $seg_rule
+     * @param null        $filters_extraction_parameters
      */
-    public function setConversionParams( $guid, $source_lang, $target_lang, $seg_rule, $filters_extraction_parameters = null ) {
+    public function setConversionParams( string $guid, string $source_lang, string $target_lang, ?string $seg_rule = null, $filters_extraction_parameters = null ) {
         $this->guid                          = $guid;
         $this->source_lang                   = $source_lang;
         $this->target_lang                   = $target_lang;
@@ -562,83 +579,85 @@ class Session {
     }
 
     /**
-     * @param $fileId
-     * @param $remoteFileId
+     * @param int    $fileId
+     * @param string $remoteFileId
      *
      * @throws Exception
      */
-    public function createRemoteFile( $fileId, $remoteFileId ) {
+    public function createRemoteFile( int $fileId, string $remoteFileId ) {
         $this->getService();
-        \RemoteFiles_RemoteFileDao::insert( $fileId, 0, $remoteFileId, $this->serviceStruct->id, 1 );
+        RemoteFiles_RemoteFileDao::insert( $fileId, 0, $remoteFileId, $this->serviceStruct->id, 1 );
     }
 
     /**
      *
      * Creates copies of the original remote file there the translation will be saved.
      *
-     * @param $id_file
-     * @param $id_job
+     * @param int $id_file
+     * @param int $id_job
      *
      * @throws Exception
      */
-    public function createRemoteCopiesWhereToSaveTranslation( $id_file, $id_job ) {
+    public function createRemoteCopiesWhereToSaveTranslation( int $id_file, int $id_job, Google_Client $gClient ) {
 
         $service = $this->getService();
 
-        if(!$service){
+        if ( !$service ) {
             throw new Exception( 'Cannot instantiate service' );
         }
 
-        $listRemoteFiles = \RemoteFiles_RemoteFileDao::getByFileId( $id_file, 1 );
+        $listRemoteFiles = RemoteFiles_RemoteFileDao::getByFileId( $id_file, 1 );
         $remoteFile      = $listRemoteFiles[ 0 ];
 
         $gdriveFile = $service->files->get( $remoteFile->remote_id );
-        $fileTitle = $gdriveFile->getName();
+        $fileTitle  = $gdriveFile->getName();
 
-        $job                 = \Jobs_JobDao::getById( $id_job )[ 0 ];
+        $job                 = Jobs_JobDao::getById( $id_job )[ 0 ];
         $translatedFileTitle = $fileTitle . ' - ' . $job->target;
 
-        $remoteFileService = $this->buildRemoteFile();
+        $remoteFileService = $this->buildRemoteFile( $gClient );
         $copiedFile        = $remoteFileService->copyFile( $remoteFile->remote_id, $translatedFileTitle );
 
-        \RemoteFiles_RemoteFileDao::insert( $id_file, $id_job, $copiedFile->id, $this->serviceStruct->id );
+        RemoteFiles_RemoteFileDao::insert( $id_file, $id_job, $copiedFile->id, $this->serviceStruct->id );
 
         $this->grantFileAccessByUrl( $copiedFile->id );
     }
 
     /**
-     * @param $fileId
+     * @param string $googleFileId
      *
-     * @return \Google_Service_Drive_Permission
+     * @return Google_Service_Drive_Permission
      * @throws Exception
      */
-    public function grantFileAccessByUrl( $fileId ) {
+    public function grantFileAccessByUrl( string $googleFileId ): Google_Service_Drive_Permission {
         if ( !$this->__getUser() ) {
             throw new Exception( 'Cannot proceed without a User' );
         }
 
-        $urlPermission = new \Google_Service_Drive_Permission();
+        $urlPermission = new Google_Service_Drive_Permission();
         $urlPermission->setType( 'anyone' );
         $urlPermission->setRole( 'reader' );
-        //$urlPermission->setEmailAddress( $this->__getUser()->getEmail() );
-        //$urlPermission->setWithLink( true ); setWithLink() was removed
 
         $service = $this->getService();
 
-        if(!$service){
+        if ( !$service ) {
             throw new Exception( 'Cannot instantiate service' );
         }
 
-        return $service->permissions->create( $fileId, $urlPermission );
+        return $service->permissions->create( $googleFileId, $urlPermission );
     }
 
     /**
-     * @param $fileId
+     * @param string $googleFileId
      *
-     * @return bool
+     * @throws AuthenticationError
+     * @throws EndQueueException
+     * @throws NotFoundException
+     * @throws ReQueueException
+     * @throws ValidationError
      * @throws Exception
      */
-    public function importFile( $fileId ) {
+    public function importFile( string $googleFileId ) {
 
         if ( !isset( $this->guid ) ) {
             throw new Exception( 'conversion params not set' );
@@ -646,16 +665,16 @@ class Session {
 
         $service = $this->getService();
 
-        if(!$service){
+        if ( !$service ) {
             throw new Exception( 'Cannot instantiate service' );
         }
 
         // get meta and mimetype
-        $meta = $service->files->get( $fileId );
+        $meta = $service->files->get( $googleFileId );
         $mime = RemoteFileService::officeMimeFromGoogle( $meta->mimeType );
 
         // get filename
-        $fileName       = $this->sanetizeFileName( $meta->getName() );
+        $fileName       = $this->sanitizeFileName( $meta->getName() );
         $file_extension = RemoteFileService::officeExtensionFromMime( $mime );
 
         // add the extension to filename
@@ -665,10 +684,10 @@ class Session {
 
         // export the file
         $optParams = [
-            'alt' => 'media'
+                'alt' => 'media'
         ];
         /** @var Response $file */
-        $file = $service->files->export( $fileId, $mime, $optParams );
+        $file = $service->files->export( $googleFileId, $mime, $optParams );
 
         if ( $file->getStatusCode() === 200 ) {
             $directory = Utils::uploadDirFromSessionCookie( $this->guid );
@@ -686,7 +705,7 @@ class Session {
             if ( $saved !== false ) {
                 $fileHash = sha1_file( $filePath );
 
-                $this->addFiles( $fileId, $fileName, $fileHash );
+                $this->addFiles( $googleFileId, $fileName, $fileHash );
                 $this->doConversion( $fileName );
             } else {
                 throw new Exception( 'Error when saving file.' );
@@ -697,30 +716,35 @@ class Session {
     }
 
     /**
-     * @param $fileName
+     * @param string $fileName
      *
      * @return string|string[]
      */
-    private function sanetizeFileName( $fileName ) {
+    private function sanitizeFileName( string $fileName ) {
         return str_replace( '/', '_', $fileName );
     }
 
     /**
-     * @param $file_name
+     * @param string $file_name
      *
-     * @return mixed
-     * @throws Exception
+     * @return void
+     * @throws AuthenticationError
+     * @throws EndQueueException
+     * @throws NotFoundException
+     * @throws ReQueueException
+     * @throws ValidationError
      */
-    private function doConversion( $file_name ) {
+    private function doConversion( string $file_name ): void {
+
         $uploadDir = $this->guid;
 
         $intDir = INIT::$UPLOAD_REPOSITORY .
-            DIRECTORY_SEPARATOR . $uploadDir;
+                DIRECTORY_SEPARATOR . $uploadDir;
 
         $errDir = INIT::$STORAGE_DIR .
-            DIRECTORY_SEPARATOR .
-            'conversion_errors' .
-            DIRECTORY_SEPARATOR . $uploadDir;
+                DIRECTORY_SEPARATOR .
+                'conversion_errors' .
+                DIRECTORY_SEPARATOR . $uploadDir;
 
         $conversionHandler = new ConversionHandler();
         $conversionHandler->setFileName( $file_name );
@@ -731,13 +755,12 @@ class Session {
         $conversionHandler->setIntDir( $intDir );
         $conversionHandler->setErrDir( $errDir );
 
-        $this->featureSet = new \FeatureSet();
+        $this->featureSet = new FeatureSet();
         $this->featureSet->loadFromUserEmail( $this->__getUser()->email );
         $conversionHandler->setFeatures( $this->featureSet );
         $conversionHandler->setUserIsLogged( true );
 
         $conversionHandler->doAction();
 
-        return $conversionHandler->getResult();
     }
 }

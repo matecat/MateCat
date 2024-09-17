@@ -3,32 +3,21 @@
 
 namespace ConnectedServices;
 
-use ConnectedServices\GDrive\GoogleClientFactory;
 use Exception;
 
 class GDrive {
 
     /**
-     * Generate OAuth URL with GDrive Scopes added
-     * @throws Exception
-     */
-    public static function generateGDriveAuthUrl() {
-        $oauthClient = GoogleClientFactory::create();
-
-        return $oauthClient->createAuthUrl();
-    }
-
-    /**
      * This function returns a new token if the previous is expired.
-     * If not expired false is returned.
+     * If not expired, false is returned.
      *
+     * @param $client
      * @param $raw_token
      *
      * @return false|string
      * @throws Exception
      */
-    public static function getsNewToken( $raw_token ) {
-        $client = GoogleClientFactory::create();
+    public static function getsNewToken( $client, $raw_token ) {
         $client->setAccessToken( $raw_token );
 
         $json_token    = json_decode( $raw_token, true );
@@ -60,16 +49,14 @@ class GDrive {
     }
 
     /**
-     * Enforce token to be passed passed around as json_string, to favour encryption and storage.
+     * Enforce token to be passed around as json_string, to favor encryption and storage.
      * Prevent slash escape, see: http://stackoverflow.com/a/14419483/1297909
-     *
-     * TODO: verify this is
      *
      * @param $token
      *
      * @return string
      */
-    public static function accessTokenToJsonString( $token ) {
+    public static function accessTokenToJsonString( $token ): string {
         if ( !is_array( $token ) ) {
             $token = json_decode( $token );
         }

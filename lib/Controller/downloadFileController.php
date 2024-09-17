@@ -6,6 +6,7 @@ use API\Commons\Exceptions\AuthenticationError;
 use ConnectedServices\ConnectedServiceDao;
 use ConnectedServices\GDrive;
 use ConnectedServices\GDriveTokenVerifyModel;
+use ConnectedServices\GoogleClientFactory;
 use Exceptions\NotFoundException;
 use Exceptions\ValidationError;
 use FilesStorage\AbstractFilesStorage;
@@ -204,7 +205,7 @@ class downloadFileController extends downloadController {
                 $fileType = XliffProprietaryDetect::getInfo( $xliffFilePath );
 
                 // if data is empty copy the original file in the outputPath
-                if(empty($data)){
+                if ( empty( $data ) ) {
                     copy( $xliffFilePath, $outputPath );
                 } else {
                     // instantiate parser
@@ -252,8 +253,8 @@ class downloadFileController extends downloadController {
 
                 //if it is a not converted file ( sdlxliff ) we have originalFile equals to xliffFile (it has just been copied)
                 if ( AbstractFilesStorage::isOnS3() ) {
-                    $originalFilePath = $file[ 'originalFilePath' ];
-                    $s3Client            = S3FilesStorage::getStaticS3Client();
+                    $originalFilePath        = $file[ 'originalFilePath' ];
+                    $s3Client                = S3FilesStorage::getStaticS3Client();
                     $file[ 'original_file' ] = $s3Client->openItem( [
                             'bucket' => S3FilesStorage::getFilesStorageBucket(),
                             'key'    => $originalFilePath
@@ -289,10 +290,10 @@ class downloadFileController extends downloadController {
             $convertResult = Filters::xliffToTarget( $files_to_be_converted );
 
             // check for errors and log them on fatal_errors.txt
-            foreach ( $convertResult as $result ){
-                if($result['isSuccess'] === false and isset($result['errorMessage'])){
+            foreach ( $convertResult as $result ) {
+                if ( $result[ 'isSuccess' ] === false and isset( $result[ 'errorMessage' ] ) ) {
                     Log::$fileName = 'fatal_errors.txt';
-                    Log::doJsonLog( "FILE CONVERSION ERROR: " . $result['errorMessage'] );
+                    Log::doJsonLog( "FILE CONVERSION ERROR: " . $result[ 'errorMessage' ] );
                 }
             }
 
@@ -367,7 +368,7 @@ class downloadFileController extends downloadController {
 
                 if ( $this->anyRemoteFile() && !$this->forceXliff ) {
 
-                    $filename = $this->generateFilename($this->getDefaultFileName( $this->project ), $jobData[ 'target' ]);
+                    $filename = $this->generateFilename( $this->getDefaultFileName( $this->project ), $jobData[ 'target' ] );
 
                     $this->setFilename( $filename );
                     $this->startRemoteFileService( $output_content );
@@ -398,7 +399,7 @@ class downloadFileController extends downloadController {
                         }
 
                         $nFinfo = AbstractFilesStorage::pathinfo_fix( $_fName );
-                        $this->setFilename( ($nFinfo['extension'] === 'zip') ? $_fName : $_fName . ".zip" );
+                        $this->setFilename( ( $nFinfo[ 'extension' ] === 'zip' ) ? $_fName : $_fName . ".zip" );
                         $this->outputContent = self::composeZip( $output_content ); //add zip archive content here;
                         $this->setMimeType();
 
@@ -407,7 +408,7 @@ class downloadFileController extends downloadController {
                         // always an array with 1 element, pop it, Ex: array( array() )
                         $oContent = array_pop( $output_content );
 
-                        $filename = $this->generateFilename($oContent->output_filename);
+                        $filename = $this->generateFilename( $oContent->output_filename );
 
                         if ( $pathinfo[ 'extension' ] == 'zip' ) {
                             $this->setFilename( $filename );
@@ -451,27 +452,27 @@ class downloadFileController extends downloadController {
 
     /**
      * @param string $originalFilename
-     * @param null $target
+     * @param null   $target
      *
      * @return string
      */
-    private function generateFilename($originalFilename, $target = null) {
-        $pathInfo = AbstractFilesStorage::pathinfo_fix( $originalFilename );
-        $extension = ($this->isAnIWorkFile($pathInfo[ 'extension' ])) ? $this->overrideExtensionForIWorkFiles($pathInfo[ 'extension' ])  : $pathInfo[ 'extension' ];
+    private function generateFilename( $originalFilename, $target = null ) {
+        $pathInfo  = AbstractFilesStorage::pathinfo_fix( $originalFilename );
+        $extension = ( $this->isAnIWorkFile( $pathInfo[ 'extension' ] ) ) ? $this->overrideExtensionForIWorkFiles( $pathInfo[ 'extension' ] ) : $pathInfo[ 'extension' ];
 
         $filename = '';
 
-        if(isset($pathInfo['dirname']) and $pathInfo['dirname'] != ''){
-            $filename .= $pathInfo['dirname'] . DIRECTORY_SEPARATOR;
+        if ( isset( $pathInfo[ 'dirname' ] ) and $pathInfo[ 'dirname' ] != '' ) {
+            $filename .= $pathInfo[ 'dirname' ] . DIRECTORY_SEPARATOR;
         }
 
         $filename .= $pathInfo[ 'filename' ];
 
-        if($target){
+        if ( $target ) {
             $filename .= "_" . $target;
         }
 
-        $filename .= "." .$extension;
+        $filename .= "." . $extension;
 
         return $filename;
     }
@@ -481,8 +482,8 @@ class downloadFileController extends downloadController {
      *
      * @return bool
      */
-    private function isAnIWorkFile($extension) {
-        return in_array($extension, ['pages', 'numbers', 'key']);
+    private function isAnIWorkFile( $extension ) {
+        return in_array( $extension, [ 'pages', 'numbers', 'key' ] );
     }
 
     /**
@@ -494,9 +495,9 @@ class downloadFileController extends downloadController {
      *
      * @return string
      */
-    private function overrideExtensionForIWorkFiles($extension){
+    private function overrideExtensionForIWorkFiles( $extension ) {
 
-        switch ($extension){
+        switch ( $extension ) {
             case "key":
                 return "pptx";
 
@@ -626,8 +627,10 @@ class downloadFileController extends downloadController {
         $verifier  = new GDriveTokenVerifyModel( $connectedService );
         $raw_token = $connectedService->getDecryptedOauthAccessToken();
 
-        if ( $verifier->validOrRefreshed() ) {
-            $this->remoteFileService = new GDrive\RemoteFileService( $raw_token );
+        $client = GoogleClientFactory::getGoogleClient( INIT::$HTTPHOST . "/gdrive/oauth/response" );
+
+        if ( $verifier->validOrRefreshed( $client ) ) {
+            $this->remoteFileService = new GDrive\RemoteFileService( $raw_token, $client );
         } else {
             // TODO: check how this exception is handled
             throw new Exception( 'Unable to refresh token for service' );
@@ -724,8 +727,8 @@ class downloadFileController extends downloadController {
         //group files by zip archive
         foreach ( $output_content as $idFile => $fileInformations ) {
 
-            $fileInformations['output_filename'] = $this->generateFilename($fileInformations['output_filename']);
-            $output_content[ $idFile ]['output_filename'] = $fileInformations['output_filename'];
+            $fileInformations[ 'output_filename' ]          = $this->generateFilename( $fileInformations[ 'output_filename' ] );
+            $output_content[ $idFile ][ 'output_filename' ] = $fileInformations[ 'output_filename' ];
 
             // If this file comes from a ZIP, add it to $zipFiles
             if ( isset( $fileInformations[ 'zipfilename' ] ) ) {
@@ -830,15 +833,15 @@ class downloadFileController extends downloadController {
             //rebuild the real name of files in the zip archive
             foreach ( $zip->treeList as $filePath ) {
 
-                $realZipFilePath = str_replace(
+                $realZipFilePath    = str_replace(
                         [
                                 ZipArchiveExtended::INTERNAL_SEPARATOR,
                                 AbstractFilesStorage::pathinfo_fix( $tmpFName, PATHINFO_BASENAME )
                         ],
                         [ DIRECTORY_SEPARATOR, "" ],
                         $filePath );
-                $realZipFilePath = ltrim( $realZipFilePath, "/" );
-                $newRealZipFilePath = $this->generateFilename($realZipFilePath);
+                $realZipFilePath    = ltrim( $realZipFilePath, "/" );
+                $newRealZipFilePath = $this->generateFilename( $realZipFilePath );
 
                 //remove the tmx from the original zip ( we want not to be exported as preview )
                 if ( AbstractFilesStorage::pathinfo_fix( $newRealZipFilePath, PATHINFO_EXTENSION ) == 'tmx' ) {
