@@ -57,7 +57,7 @@ export const transformTagsToHtml = (text, isRtl = 0) => {
     }
     text = matchTag(text)
   } catch (e) {
-    console.error('Error parsing tag in transformTagsToHtml function')
+    console.error('Error parsing tag in transformTagsToHtml function', e)
   }
   return text
 }
