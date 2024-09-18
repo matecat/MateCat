@@ -94,7 +94,7 @@ class Bootstrap {
             Log::$uniqID = ( isset( $_COOKIE[ INIT::$PHP_SESSION_NAME ] ) ? substr( $_COOKIE[ INIT::$PHP_SESSION_NAME ], 0, 13 ) : uniqid() );
             WorkerClient::init();
             Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
-        } catch ( \Exception $e ) {
+        } catch ( Exception $e ) {
             Log::doJsonLog( $e->getMessage() );
         }
 
@@ -328,12 +328,15 @@ class Bootstrap {
         @session_write_close();
     }
 
+    /**
+     * @throws Exception
+     */
     public static function sessionStart() {
         $session_status = session_status();
         if ( $session_status == PHP_SESSION_NONE ) {
             session_start();
         } elseif ( $session_status == PHP_SESSION_DISABLED ) {
-            throw new \Exception( "MateCat needs to have sessions. Sessions must be enabled." );
+            throw new Exception( "MateCat needs to have sessions. Sessions must be enabled." );
         }
     }
 

@@ -533,7 +533,7 @@ class ProjectManager {
         $fs = FilesStorageFactory::create();
 
         if ( !empty( $this->projectStructure[ 'session' ][ 'uid' ] ) ) {
-            $this->gdriveSession = \ConnectedServices\Google\GDrive\Session::getInstanceForCLI( $this->projectStructure[ 'session' ]->getArrayCopy() );
+            $this->gdriveSession = Session::getInstanceForCLI( $this->projectStructure[ 'session' ]->getArrayCopy() );
         }
 
         $this->__checkForProjectAssignment();
@@ -2267,7 +2267,7 @@ class ProjectManager {
             if ( $this->gdriveSession ) {
                 $gdriveFileId = $this->gdriveSession->findFileIdByName( $originalFileName );
                 if ( $gdriveFileId ) {
-                    $client = GoogleClientFactory::getGoogleClient( INIT::$HTTPHOST . "/gdrive/oauth/response" );
+                    $client = GoogleProvider::getClient( INIT::$HTTPHOST . "/gdrive/oauth/response" );
                     $this->gdriveSession->createRemoteFile( $fid, $gdriveFileId, $client );
                 }
             }

@@ -14,6 +14,7 @@ use INIT;
 use Jobs_JobDao;
 use Jobs_JobStruct;
 use Log;
+use Projects_ProjectDao;
 use Projects_ProjectStruct;
 use Users_UserDao;
 use Users_UserStruct;
@@ -223,14 +224,14 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
             $this->unlockToken();
 
             if ( empty( $this->project ) ) {
-                $this->project = \Projects_ProjectDao::findByJobId( $this->id_job );
+                $this->project = Projects_ProjectDao::findByJobId( $this->id_job );
             }
 
             if ( empty( $this->_filename ) ) {
                 $this->_filename = $this->getDefaultFileName( $this->project );
             }
 
-            $isGDriveProject = \Projects_ProjectDao::isGDriveProject( $this->project->id );
+            $isGDriveProject = Projects_ProjectDao::isGDriveProject( $this->project->id );
 
             if ( !$isGDriveProject || $forceXliff === true ) {
                 $buffer = ob_get_contents();

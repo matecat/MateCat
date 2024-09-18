@@ -1,5 +1,6 @@
 <?php
 
+use ConnectedServices\Google\GDrive\Session;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use Matecat\XliffParser\Utils\Files as XliffFiles;
@@ -518,7 +519,7 @@ class createProjectController extends ajaxController {
     private function __clearSessionFiles() {
 
         if ( $this->userIsLogged ) {
-            $gdriveSession = new \ConnectedServices\Google\GDrive\Session();
+            $gdriveSession = new Session();
             $gdriveSession->clearFileListFromSession();
         }
     }

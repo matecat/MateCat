@@ -517,7 +517,7 @@ class catController extends viewController {
     }
 
     public function isCurrentProjectGDrive() {
-        return \Projects_ProjectDao::isGDriveProject( $this->chunk->id_project );
+        return Projects_ProjectDao::isGDriveProject( $this->chunk->id_project );
     }
 
 }
