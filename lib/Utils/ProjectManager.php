@@ -9,9 +9,8 @@
 
 use ActivityLog\ActivityLogStruct;
 use API\Commons\Exceptions\AuthenticationError;
-use ConnectedServices\GDrive as GDrive;
-use ConnectedServices\GDrive\Session;
-use ConnectedServices\Google\GoogleClient;
+use ConnectedServices\Google\GDrive\Session;
+use ConnectedServices\Google\GoogleProvider;
 use Constants\XliffTranslationStatus;
 use Exceptions\NotFoundException;
 use Exceptions\ValidationError;
@@ -534,7 +533,7 @@ class ProjectManager {
         $fs = FilesStorageFactory::create();
 
         if ( !empty( $this->projectStructure[ 'session' ][ 'uid' ] ) ) {
-            $this->gdriveSession = GDrive\Session::getInstanceForCLI( $this->projectStructure[ 'session' ]->getArrayCopy() );
+            $this->gdriveSession = \ConnectedServices\Google\GDrive\Session::getInstanceForCLI( $this->projectStructure[ 'session' ]->getArrayCopy() );
         }
 
         $this->__checkForProjectAssignment();
@@ -1399,7 +1398,7 @@ class ProjectManager {
                 Files_FileDao::insertFilesJob( $newJob->id, $fid );
 
                 if ( $this->gdriveSession && $this->gdriveSession->hasFiles() ) {
-                    $client = GoogleClient::getClient( INIT::$HTTPHOST . "/gdrive/oauth/response" );
+                    $client = GoogleProvider::getClient( INIT::$HTTPHOST . "/gdrive/oauth/response" );
                     $this->gdriveSession->createRemoteCopiesWhereToSaveTranslation( $fid, $newJob->id, $client );
                 }
             }

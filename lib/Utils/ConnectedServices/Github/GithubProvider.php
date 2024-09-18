@@ -2,14 +2,14 @@
 
 namespace ConnectedServices\Github;
 
-use ConnectedServices\AbstractClient;
+use ConnectedServices\AbstractProvider;
 use ConnectedServices\ConnectedServiceUserModel;
 use INIT;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use League\OAuth2\Client\Provider\Github;
 use League\OAuth2\Client\Token\AccessToken;
 
-class GithubClient extends AbstractClient {
+class GithubProvider extends AbstractProvider {
 
     const PROVIDER_NAME = 'github';
 

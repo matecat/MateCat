@@ -34,7 +34,7 @@ switch ( $_SERVER[ 'REQUEST_METHOD' ] ) {
         break;
     case 'HEAD':
     case 'GET':
-        if ( !( new ConnectedServices\GDrive\Session() )->sessionHasFiles() ) {
+        if ( !( new \ConnectedServices\Google\GDrive\Session() )->sessionHasFiles() ) {
             $upload_handler->get();
         } else {
             echo json_encode( [] );

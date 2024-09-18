@@ -2,7 +2,7 @@
 
 namespace ConnectedServices\Google;
 
-use ConnectedServices\AbstractClient;
+use ConnectedServices\AbstractProvider;
 use ConnectedServices\ConnectedServiceUserModel;
 use Exception;
 use Google_Client;
@@ -11,7 +11,7 @@ use INIT;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 
-class GoogleClient extends AbstractClient {
+class GoogleProvider extends AbstractProvider {
 
     const PROVIDER_NAME = 'google';
 

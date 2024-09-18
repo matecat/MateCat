@@ -6,15 +6,16 @@
  * Time: 15:28
  */
 
-namespace ConnectedServices\GDrive;
+namespace ConnectedServices\Google\GDrive;
 
-use ConnectedServices\AbstractRemoteFileService;
-use ConnectedServices\GoogleClientFactory;
 use Exception;
+use Google_Client;
 use Google_Service_Drive;
+use Google_Service_Drive_DriveFile;
 use Log;
+use RemoteFiles_RemoteFileStruct;
 
-class RemoteFileService extends AbstractRemoteFileService {
+class RemoteFileService {
 
     const MIME_DOCX = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
     const MIME_PPTX = 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
@@ -31,22 +32,21 @@ class RemoteFileService extends AbstractRemoteFileService {
     /**
      * RemoteFileService constructor.
      *
-     * @param $raw_token
-     *
-     * @throws Exception
+     * @param               $raw_token
+     * @param Google_Client $client
      */
-    public function __construct( $raw_token, $client ) {
+    public function __construct( $raw_token, Google_Client $client ) {
         $this->raw_token     = $raw_token;
         $this->gdriveService = self::getService( $this->raw_token, $client );
     }
 
     /**
-     * @param string $token
+     * @param mixed         $token
+     * @param Google_Client $client
      *
      * @return Google_Service_Drive
-     * @throws Exception
      */
-    public static function getService( $token, $client ): Google_Service_Drive {
+    public static function getService( $token, Google_Client $client ): Google_Service_Drive {
 
         if ( is_array( $token ) ) {
             $token = json_encode( $token );
@@ -58,18 +58,20 @@ class RemoteFileService extends AbstractRemoteFileService {
     }
 
     /**
-     * @param $remoteFile
-     * @param $content
+     * @param RemoteFiles_RemoteFileStruct $remoteFile
+     * @param string                       $content
      *
-     * @return \Google_Service_Drive_DriveFile
+     * @return Google_Service_Drive_DriveFile
+     * @throws Exception
      */
-    public function updateFile( $remoteFile, $content ) {
+    public function updateFile( RemoteFiles_RemoteFileStruct $remoteFile, string $content ): Google_Service_Drive_DriveFile {
 
         $optParams = [
                 'fields' => 'capabilities, webViewLink',
         ];
 
         try {
+
             $gdriveFile   = $this->gdriveService->files->get( $remoteFile->remote_id, $optParams );
             $capabilities = $gdriveFile->getCapabilities();
             $parents      = $gdriveFile->getParents();
@@ -77,18 +79,23 @@ class RemoteFileService extends AbstractRemoteFileService {
             $this->updateFileOnGDrive( $remoteFile->remote_id, $gdriveFile, $content, $capabilities->canAddMyDriveParent, $parents );
 
             return $gdriveFile;
+
         } catch ( Exception $e ) {
             // Exception Caught, check if the token is expired:
             $this->__checkTokenExpired();
 
             Log::doJsonLog( 'Failed to access file from Google Drive: ' . $e->getMessage() );
+
+            throw $e;
+
         }
+
     }
 
     /**
      * @param $remote_id
      *
-     * @return \Google_Service_Drive_DriveFile
+     * @return Google_Service_Drive_DriveFile
      */
     public function getFileLink( $remote_id ) {
 
@@ -111,15 +118,15 @@ class RemoteFileService extends AbstractRemoteFileService {
     }
 
     /**
-     * @param string                          $remoteId
-     * @param \Google_Service_Drive_DriveFile $gdriveFile
-     * @param string                          $content
-     * @param bool                            $canAddMyDriveParent
-     * @param array                           $parents
+     * @param string                         $remoteId
+     * @param Google_Service_Drive_DriveFile $gdriveFile
+     * @param string                         $content
+     * @param bool                           $canAddMyDriveParent
+     * @param array                          $parents
      */
-    private function updateFileOnGDrive( $remoteId, \Google_Service_Drive_DriveFile $gdriveFile, $content, $canAddMyDriveParent, $parents ) {
+    private function updateFileOnGDrive( $remoteId, Google_Service_Drive_DriveFile $gdriveFile, $content, $canAddMyDriveParent, $parents ) {
 
-        $newGDriveFileInstance = new \Google_Service_Drive_DriveFile();
+        $newGDriveFileInstance = new Google_Service_Drive_DriveFile();
         $newGDriveFileInstance->setDriveId( $remoteId );
         $newGDriveFileInstance->setMimeType( self::officeMimeFromGoogle( $gdriveFile->mimeType ) );
         $newGDriveFileInstance->setName( $gdriveFile->getName() );
@@ -148,10 +155,10 @@ class RemoteFileService extends AbstractRemoteFileService {
      * @param $originFileId
      * @param $copyTitle
      *
-     * @return \Google_Service_Drive_DriveFile|null
+     * @return Google_Service_Drive_DriveFile|null
      */
     public function copyFile( $originFileId, $copyTitle ) {
-        $copiedFile = new \Google_Service_Drive_DriveFile();
+        $copiedFile = new Google_Service_Drive_DriveFile();
         $copiedFile->setName( $copyTitle );
 
         // According to:
@@ -175,7 +182,7 @@ class RemoteFileService extends AbstractRemoteFileService {
      *
      * @return string
      */
-    public static function officeMimeFromGoogle( $googleMime ) {
+    public static function officeMimeFromGoogle( $googleMime ): string {
         switch ( $googleMime ) {
             case self::MIME_GOOGLE_DOCS:
                 return self::MIME_DOCX;
@@ -195,7 +202,7 @@ class RemoteFileService extends AbstractRemoteFileService {
      *
      * @return string|null
      */
-    public static function officeExtensionFromMime( $googleMime ) {
+    public static function officeExtensionFromMime( $googleMime ): ?string {
         switch ( $googleMime ) {
             case self::MIME_GOOGLE_DOCS:
             case self::MIME_DOCX:

@@ -2,7 +2,7 @@
 
 namespace ConnectedServices\Microsoft;
 
-use ConnectedServices\AbstractClient;
+use ConnectedServices\AbstractProvider;
 use ConnectedServices\ConnectedServiceUserModel;
 use Exception;
 use GuzzleHttp\Exception\GuzzleException;
@@ -11,7 +11,7 @@ use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use League\OAuth2\Client\Token\AccessToken;
 use Stevenmaguire\OAuth2\Client\Provider\Microsoft;
 
-class MicrosoftClient extends AbstractClient {
+class MicrosoftProvider extends AbstractProvider {
 
     const PROVIDER_NAME = 'microsoft';
 

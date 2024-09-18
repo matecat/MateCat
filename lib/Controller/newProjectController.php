@@ -1,12 +1,12 @@
 <?php
 
 
-use ConnectedServices\Facebook\FacebookClient;
+use ConnectedServices\Facebook\FacebookProvider;
 use ConnectedServices\GDrive\GDriveController;
-use ConnectedServices\Github\GithubClient;
-use ConnectedServices\Google\GoogleClient;
-use ConnectedServices\LinkedIn\LinkedInClient;
-use ConnectedServices\Microsoft\MicrosoftClient;
+use ConnectedServices\Github\GithubProvider;
+use ConnectedServices\Google\GoogleProvider;
+use ConnectedServices\LinkedIn\LinkedInProvider;
+use ConnectedServices\Microsoft\MicrosoftProvider;
 use ConnectedServices\OauthClient;
 use Engines_Intento as Intento;
 use LexiQA\LexiQADecorator;

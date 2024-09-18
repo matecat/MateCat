@@ -88,17 +88,18 @@ class RemoteFiles_RemoteFileDao extends DataAccess_AbstractDao {
      *
      * @return RemoteFiles_RemoteFileStruct
      */
-    public static function getByFileAndJob( $id_file, $id_job ) {
+    public static function getByFileAndJob( $id_file, $id_job ): RemoteFiles_RemoteFileStruct {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare(
-          "SELECT * FROM remote_files " .
-          " WHERE id_file = :id_file " .
-          "   AND id_job = :id_job" .
-          "   AND is_original = 0 "
+                "SELECT * FROM remote_files " .
+                " WHERE id_file = :id_file " .
+                "   AND id_job = :id_job" .
+                "   AND is_original = 0 "
         );
 
-        $stmt->execute( array( 'id_file' => $id_file, 'id_job' => $id_job ) );
-        $stmt->setFetchMode(PDO::FETCH_CLASS, 'RemoteFiles_RemoteFileStruct');
+        $stmt->execute( [ 'id_file' => $id_file, 'id_job' => $id_job ] );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, 'RemoteFiles_RemoteFileStruct' );
+
         return $stmt->fetch();
     }
 

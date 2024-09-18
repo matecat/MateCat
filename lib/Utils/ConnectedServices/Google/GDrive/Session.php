@@ -6,9 +6,10 @@
  * Time: 15:28
  */
 
-namespace ConnectedServices\GDrive;
+namespace ConnectedServices\Google\GDrive;
 
 use API\Commons\Exceptions\AuthenticationError;
+use AuthCookie;
 use ConnectedServices\ConnectedServiceDao;
 use ConnectedServices\ConnectedServiceStruct;
 use Constants;
@@ -285,10 +286,10 @@ class Session {
     }
 
     /**
-     * @return bool|mixed
+     * @return ?array
      * @throws Exception
      */
-    public function getToken() {
+    public function getToken(): ?array {
         if ( is_null( $this->token ) ) {
             $user = $this->__getUser();
 
@@ -301,9 +302,9 @@ class Session {
     }
 
     /**
-     * @return Users_UserStruct
+     * @return ?Users_UserStruct
      */
-    private function __getUser(): Users_UserStruct {
+    private function __getUser(): ?Users_UserStruct {
         if ( is_null( $this->user ) ) {
             $userCredentials = AuthCookie::getCredentials();
 
@@ -400,6 +401,8 @@ class Session {
      * Memoize the response.
      *
      * The Returned token may still be expired.
+     *
+     * @param Google_Client $gClient
      *
      * @return Google_Service_Drive|null
      * @throws Exception

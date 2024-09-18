@@ -7,9 +7,9 @@ use ActivityLog\ActivityLogStruct;
 use API\Commons\Exceptions\AuthenticationError;
 use CatUtils;
 use ConnectedServices\ConnectedServiceDao;
-use ConnectedServices\GDrive;
 use ConnectedServices\GDriveTokenVerifyModel;
-use ConnectedServices\Google\GoogleClient;
+use ConnectedServices\Google\GDrive\RemoteFileService;
+use ConnectedServices\Google\GoogleProvider;
 use DownloadOmegaTDecorator;
 use Exception;
 use Exceptions\NotFoundException;
@@ -52,7 +52,7 @@ class DownloadFileController extends AbstractDownloadController {
     protected $downloadToken;
 
     /**
-     * @var GDrive\RemoteFileService
+     * @var RemoteFileService
      */
     protected $remoteFileService;
 
@@ -703,10 +703,10 @@ class DownloadFileController extends AbstractDownloadController {
         $verifier  = new GDriveTokenVerifyModel( $connectedService );
         $raw_token = $connectedService->getDecryptedOauthAccessToken();
 
-        $client = GoogleClient::getClient( INIT::$HTTPHOST . "/gdrive/oauth/response" );
+        $client = GoogleProvider::getClient( INIT::$HTTPHOST . "/gdrive/oauth/response" );
 
         if ( $verifier->validOrRefreshed( $client ) ) {
-            $this->remoteFileService = new GDrive\RemoteFileService( $raw_token, $client );
+            $this->remoteFileService = new RemoteFileService( $raw_token, $client );
         } else {
             // TODO: check how this exception is handled
             throw new Exception( 'Unable to refresh token for service' );
@@ -758,7 +758,7 @@ class DownloadFileController extends AbstractDownloadController {
      *
      * @throws Exception
      */
-    private function updateRemoteFiles( $output_content ) {
+    private function updateRemoteFiles( array $output_content ) {
         foreach ( $output_content as $id_file => $output_file ) {
             $remoteFile                           = RemoteFiles_RemoteFileDao::getByFileAndJob( $id_file, $this->job->id );
             $this->remoteFiles[ $remoteFile->id ] = $this->remoteFileService->updateFile( $remoteFile, $output_file->getContent() );

@@ -1,11 +1,11 @@
 <?php
 
-use ConnectedServices\ConnectedServiceInterface;
-use ConnectedServices\Facebook\FacebookClient;
-use ConnectedServices\Github\GithubClient;
-use ConnectedServices\Google\GoogleClient;
-use ConnectedServices\LinkedIn\LinkedInClient;
-use ConnectedServices\Microsoft\MicrosoftClient;
+use ConnectedServices\ProviderInterface;
+use ConnectedServices\Facebook\FacebookProvider;
+use ConnectedServices\Github\GithubProvider;
+use ConnectedServices\Google\GoogleProvider;
+use ConnectedServices\LinkedIn\LinkedInProvider;
+use ConnectedServices\Microsoft\MicrosoftProvider;
 use ConnectedServices\OauthClient;
 use Klein\HttpStatus;
 
@@ -19,9 +19,9 @@ abstract class viewController extends controller {
     protected ?PHPTAL $template = null;
 
     /**
-     * @var ConnectedServiceInterface
+     * @var ProviderInterface
      */
-    protected ConnectedServiceInterface $client;
+    protected ProviderInterface $client;
 
     /**
      * @var bool
@@ -246,14 +246,14 @@ abstract class viewController extends controller {
     }
 
     protected function intOauthClients() {
-        $this->template->googleAuthURL    = ( !$this->isLoggedIn() && INIT::$GOOGLE_OAUTH_CLIENT_ID ) ? OauthClient::getInstance( GoogleClient::PROVIDER_NAME )->getAuthorizationUrl( $_SESSION ) : "";
-        $this->template->githubAuthUrl    = ( !$this->isLoggedIn() && INIT::$GITHUB_OAUTH_CLIENT_ID ) ? OauthClient::getInstance( GithubClient::PROVIDER_NAME )->getAuthorizationUrl( $_SESSION ) : "";
-        $this->template->linkedInAuthUrl  = ( !$this->isLoggedIn() && INIT::$LINKEDIN_OAUTH_CLIENT_ID ) ? OauthClient::getInstance( LinkedInClient::PROVIDER_NAME )->getAuthorizationUrl( $_SESSION ) : "";
-        $this->template->microsoftAuthUrl = ( !$this->isLoggedIn() && INIT::$LINKEDIN_OAUTH_CLIENT_ID ) ? OauthClient::getInstance( MicrosoftClient::PROVIDER_NAME )->getAuthorizationUrl( $_SESSION ) : "";
-        $this->template->facebookAuthUrl  = ( !$this->isLoggedIn() && INIT::$FACEBOOK_OAUTH_CLIENT_ID ) ? OauthClient::getInstance( FacebookClient::PROVIDER_NAME )->getAuthorizationUrl( $_SESSION ) : "";
+        $this->template->googleAuthURL    = ( !$this->isLoggedIn() && INIT::$GOOGLE_OAUTH_CLIENT_ID ) ? OauthClient::getInstance( GoogleProvider::PROVIDER_NAME )->getAuthorizationUrl( $_SESSION ) : "";
+        $this->template->githubAuthUrl    = ( !$this->isLoggedIn() && INIT::$GITHUB_OAUTH_CLIENT_ID ) ? OauthClient::getInstance( GithubProvider::PROVIDER_NAME )->getAuthorizationUrl( $_SESSION ) : "";
+        $this->template->linkedInAuthUrl  = ( !$this->isLoggedIn() && INIT::$LINKEDIN_OAUTH_CLIENT_ID ) ? OauthClient::getInstance( LinkedInProvider::PROVIDER_NAME )->getAuthorizationUrl( $_SESSION ) : "";
+        $this->template->microsoftAuthUrl = ( !$this->isLoggedIn() && INIT::$LINKEDIN_OAUTH_CLIENT_ID ) ? OauthClient::getInstance( MicrosoftProvider::PROVIDER_NAME )->getAuthorizationUrl( $_SESSION ) : "";
+        $this->template->facebookAuthUrl  = ( !$this->isLoggedIn() && INIT::$FACEBOOK_OAUTH_CLIENT_ID ) ? OauthClient::getInstance( FacebookProvider::PROVIDER_NAME )->getAuthorizationUrl( $_SESSION ) : "";
 
         $this->template->googleDriveEnabled = Bootstrap::isGDriveConfigured();
-        $this->template->gdriveAuthURL      = ( $this->isLoggedIn() && Bootstrap::isGDriveConfigured() ) ? OauthClient::getInstance( GoogleClient::PROVIDER_NAME, INIT::$HTTPHOST . "/gdrive/oauth/response" )->getAuthorizationUrl( $_SESSION, 'drive' ) : "";
+        $this->template->gdriveAuthURL      = ( $this->isLoggedIn() && Bootstrap::isGDriveConfigured() ) ? OauthClient::getInstance( GoogleProvider::PROVIDER_NAME, INIT::$HTTPHOST . "/gdrive/oauth/response" )->getAuthorizationUrl( $_SESSION, 'drive' ) : "";
     }
 
     protected function collectFlashMessages() {

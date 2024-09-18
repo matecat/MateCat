@@ -78,7 +78,7 @@ class oauthResponseHandlerController extends BaseKleinViewController {
     protected function _initRemoteUser( $code, $provider = null ) {
 
         try {
-            $client           = OauthClient::getInstance( $provider )->getClient();
+            $client           = OauthClient::getInstance( $provider )->getProvider();
             $token            = $client->getAccessTokenFromAuthCode( $code );
             $this->remoteUser = $client->getResourceOwner( $token );
         } catch ( Exception $exception ) {

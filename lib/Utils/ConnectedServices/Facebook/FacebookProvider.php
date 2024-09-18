@@ -2,7 +2,7 @@
 
 namespace ConnectedServices\Facebook;
 
-use ConnectedServices\AbstractClient;
+use ConnectedServices\AbstractProvider;
 use ConnectedServices\ConnectedServiceUserModel;
 use Exception;
 use INIT;
@@ -10,7 +10,7 @@ use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use League\OAuth2\Client\Provider\Facebook;
 use League\OAuth2\Client\Token\AccessToken;
 
-class FacebookClient extends AbstractClient {
+class FacebookProvider extends AbstractProvider {
 
     const PROVIDER_NAME = 'facebook';
 

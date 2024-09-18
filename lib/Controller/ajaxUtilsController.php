@@ -63,7 +63,7 @@ class ajaxUtilsController extends ajaxController {
                 break;
             case 'clearNotCompletedUploads':
                 try {
-                    ( new ConnectedServices\GDrive\Session() )->cleanupSessionFiles();
+                    ( new \ConnectedServices\Google\GDrive\Session() )->cleanupSessionFiles();
                 } catch ( Exception $e ) {
                     Log::doJsonLog( "ajaxUtils::clearNotCompletedUploads : " . $e->getMessage() );
                 }

@@ -9,11 +9,11 @@
 
 namespace ConnectedServices;
 
-use ConnectedServices\Facebook\FacebookClient;
-use ConnectedServices\Github\GithubClient;
-use ConnectedServices\Google\GoogleClient;
-use ConnectedServices\LinkedIn\LinkedInClient;
-use ConnectedServices\Microsoft\MicrosoftClient;
+use ConnectedServices\Facebook\FacebookProvider;
+use ConnectedServices\Github\GithubProvider;
+use ConnectedServices\Google\GoogleProvider;
+use ConnectedServices\LinkedIn\LinkedInProvider;
+use ConnectedServices\Microsoft\MicrosoftProvider;
 use Exception;
 use INIT;
 use Utils;
@@ -28,19 +28,19 @@ class OauthClient {
     /**
      * @var string
      */
-    private string $provider = 'Mock';
+    private string $provider_name = 'Mock';
 
     /**
-     * @var AbstractClient
+     * @var AbstractProvider
      */
-    private AbstractClient $client;
+    private AbstractProvider $provider;
 
     private static array $providers = [
-            GoogleClient::PROVIDER_NAME    => GoogleClient::class,
-            GithubClient::PROVIDER_NAME    => GithubClient::class,
-            LinkedInClient::PROVIDER_NAME  => LinkedInClient::class,
-            MicrosoftClient::PROVIDER_NAME => MicrosoftClient::class,
-            FacebookClient::PROVIDER_NAME  => FacebookClient::class,
+            GoogleProvider::PROVIDER_NAME    => GoogleProvider::class,
+            GithubProvider::PROVIDER_NAME    => GithubProvider::class,
+            LinkedInProvider::PROVIDER_NAME  => LinkedInProvider::class,
+            MicrosoftProvider::PROVIDER_NAME => MicrosoftProvider::class,
+            FacebookProvider::PROVIDER_NAME  => FacebookProvider::class,
     ];
 
     /**
@@ -50,11 +50,11 @@ class OauthClient {
      * @return OauthClient
      */
     public static function getInstance( ?string $provider = null, ?string $redirectUrl = null ): OauthClient {
-        if ( self::$instance == null or self::$instance->provider != $provider ) {
+        if ( self::$instance == null or self::$instance->provider_name != $provider ) {
             self::$instance = new OauthClient( $provider, $redirectUrl );
         }
 
-        self::$instance->provider = $provider;
+        self::$instance->provider_name = $provider;
 
         return self::$instance;
     }
@@ -66,15 +66,15 @@ class OauthClient {
      * @param string|null $redirectUrl
      */
     private function __construct( ?string $provider = null, ?string $redirectUrl = null ) {
-        $className = self::$providers[ $provider ] ?? GoogleClient::class;
-        $this->client = new $className( $redirectUrl );
+        $className      = self::$providers[ $provider ] ?? GoogleProvider::class;
+        $this->provider = new $className( $redirectUrl );
     }
 
     /**
-     * @return AbstractClient
+     * @return AbstractProvider
      */
-    public function getClient(): AbstractClient {
-        return $this->client;
+    public function getProvider(): AbstractProvider {
+        return $this->provider;
     }
 
     /**
@@ -86,11 +86,11 @@ class OauthClient {
      */
     public function getAuthorizationUrl( ?array &$_session = [], ?string $suffixKey = '' ): string {
         $session =& $_session;
-        if ( !isset( $session[ $this->client::PROVIDER_NAME . $suffixKey . '-' . INIT::$XSRF_TOKEN ] ) ) {
-            $session[ $this->client::PROVIDER_NAME . $suffixKey . '-' . INIT::$XSRF_TOKEN ] = Utils::uuid4();
+        if ( !isset( $session[ $this->provider::PROVIDER_NAME . $suffixKey . '-' . INIT::$XSRF_TOKEN ] ) ) {
+            $session[ $this->provider::PROVIDER_NAME . $suffixKey . '-' . INIT::$XSRF_TOKEN ] = Utils::uuid4();
         }
 
-        return $this->client->getAuthorizationUrl( $session[ $this->client::PROVIDER_NAME . $suffixKey . '-' . INIT::$XSRF_TOKEN ] );
+        return $this->provider->getAuthorizationUrl( $session[ $this->provider::PROVIDER_NAME . $suffixKey . '-' . INIT::$XSRF_TOKEN ] );
     }
 
 }

@@ -2,11 +2,11 @@
 
 use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
-use ConnectedServices\Facebook\FacebookClient;
-use ConnectedServices\Github\GithubClient;
-use ConnectedServices\Google\GoogleClient;
-use ConnectedServices\LinkedIn\LinkedInClient;
-use ConnectedServices\Microsoft\MicrosoftClient;
+use ConnectedServices\Facebook\FacebookProvider;
+use ConnectedServices\Github\GithubProvider;
+use ConnectedServices\Google\GoogleProvider;
+use ConnectedServices\LinkedIn\LinkedInProvider;
+use ConnectedServices\Microsoft\MicrosoftProvider;
 use ConnectedServices\OauthClient;
 use WordCount\WordCountStruct;
 

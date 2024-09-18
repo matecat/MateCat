@@ -2,7 +2,7 @@
 
 namespace ConnectedServices\LinkedIn;
 
-use ConnectedServices\AbstractClient;
+use ConnectedServices\AbstractProvider;
 use ConnectedServices\ConnectedServiceUserModel;
 use Exception;
 use GuzzleHttp\Exception\GuzzleException;
@@ -11,7 +11,7 @@ use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use League\OAuth2\Client\Provider\LinkedIn;
 use League\OAuth2\Client\Token\AccessToken;
 
-class LinkedInClient extends AbstractClient {
+class LinkedInProvider extends AbstractProvider {
 
     const PROVIDER_NAME = 'linkedin';
 

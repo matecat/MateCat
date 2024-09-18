@@ -10,7 +10,7 @@ use Exception;
  * Interface ConnectedServiceInterface
  * @package ConnectedServices
  */
-interface ConnectedServiceInterface {
+interface ProviderInterface {
     /**
      * Return the authorization URL to call
      * to get the Auth Token
@@ -39,5 +39,11 @@ interface ConnectedServiceInterface {
      * @return ConnectedServiceUserModel
      */
     public function getResourceOwner( $token ): ConnectedServiceUserModel;
+
+    /**
+     * Get the low level client (below the abstraction)
+     * @return mixed
+     */
+    public static function getClient( ?string $redirectUrl = null );
 
 }

@@ -1,11 +1,11 @@
 <?php
 
 
-namespace ConnectedServices;
+namespace ConnectedServices\Google\GDrive;
 
 use Exception;
 
-class GDrive {
+class GDriveTokenHandler {
 
     /**
      * This function returns a new token if the previous is expired.
@@ -17,7 +17,7 @@ class GDrive {
      * @return false|string
      * @throws Exception
      */
-    public static function getsNewToken( $client, $raw_token ) {
+    public static function getNewToken( $client, $raw_token ) {
         $client->setAccessToken( $raw_token );
 
         $json_token    = json_decode( $raw_token, true );
