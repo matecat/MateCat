@@ -401,7 +401,8 @@ const PreferencesModal = (props) => {
                   type={BUTTON_TYPE.PRIMARY}
                   size={BUTTON_SIZE.MEDIUM}
                   onClick={modifyUserDetails}
-                  tabIndex="0"
+                  tabIndex={0}
+                  disabled={!firstName || !lastName}
                 >
                   Confirm
                 </Button>

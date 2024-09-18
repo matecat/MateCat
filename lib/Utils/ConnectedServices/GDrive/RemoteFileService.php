@@ -9,6 +9,7 @@
 namespace ConnectedServices\GDrive;
 
 use ConnectedServices\AbstractRemoteFileService;
+use ConnectedServices\GoogleClientFactory;
 use Exception;
 use Google_Service_Drive;
 use Log;
