@@ -11,6 +11,7 @@ namespace ConnectedServices\GDrive;
 use API\Commons\Exceptions\AuthenticationError;
 use ConnectedServices\ConnectedServiceDao;
 use ConnectedServices\ConnectedServiceStruct;
+use ConnectedServices\GoogleClientFactory;
 use Constants;
 use ConversionHandler;
 use DirectoryIterator;
@@ -412,6 +413,8 @@ class Session {
     }
 
     /**
+     * @param Google_Client $gClient
+     *
      * @return RemoteFileService
      * @throws Exception
      */
@@ -455,7 +458,7 @@ class Session {
             $tempUploadedFileDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->session[ 'upload_session' ];
 
             /** @var DirectoryIterator $item */
-            foreach ( $iterator = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $tempUploadedFileDir, RecursiveDirectoryIterator::SKIP_DOTS ), RecursiveIteratorIterator::SELF_FIRST ) as $item ) {
+            foreach ( new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $tempUploadedFileDir, FilesystemIterator::SKIP_DOTS ), RecursiveIteratorIterator::SELF_FIRST ) as $item ) {
                 $target   = explode( '__', $pathCache );
                 $hashFile = $file[ 'fileHash' ] . "|" . end( $target );
 
@@ -579,13 +582,14 @@ class Session {
     }
 
     /**
-     * @param int    $fileId
-     * @param string $remoteFileId
+     * @param int           $fileId
+     * @param string        $remoteFileId
+     * @param Google_Client $gClient
      *
      * @throws Exception
      */
-    public function createRemoteFile( int $fileId, string $remoteFileId ) {
-        $this->getService();
+    public function createRemoteFile( int $fileId, string $remoteFileId, Google_Client $gClient ) {
+        $this->getService( $gClient );
         RemoteFiles_RemoteFileDao::insert( $fileId, 0, $remoteFileId, $this->serviceStruct->id, 1 );
     }
 
@@ -593,14 +597,15 @@ class Session {
      *
      * Creates copies of the original remote file there the translation will be saved.
      *
-     * @param int $id_file
-     * @param int $id_job
+     * @param int           $id_file
+     * @param int           $id_job
+     * @param Google_Client $gClient
      *
      * @throws Exception
      */
     public function createRemoteCopiesWhereToSaveTranslation( int $id_file, int $id_job, Google_Client $gClient ) {
 
-        $service = $this->getService();
+        $service = $this->getService( $gClient );
 
         if ( !$service ) {
             throw new Exception( 'Cannot instantiate service' );
@@ -620,16 +625,14 @@ class Session {
 
         RemoteFiles_RemoteFileDao::insert( $id_file, $id_job, $copiedFile->id, $this->serviceStruct->id );
 
-        $this->grantFileAccessByUrl( $copiedFile->id );
+        $this->grantFileAccessByUrl( $copiedFile->id, $gClient );
     }
 
     /**
-     * @param string $googleFileId
      *
-     * @return Google_Service_Drive_Permission
      * @throws Exception
      */
-    public function grantFileAccessByUrl( string $googleFileId ): Google_Service_Drive_Permission {
+    public function grantFileAccessByUrl( string $googleFileId, Google_Client $gClient ): Google_Service_Drive_Permission {
         if ( !$this->__getUser() ) {
             throw new Exception( 'Cannot proceed without a User' );
         }
@@ -638,7 +641,7 @@ class Session {
         $urlPermission->setType( 'anyone' );
         $urlPermission->setRole( 'reader' );
 
-        $service = $this->getService();
+        $service = $this->getService( $gClient );
 
         if ( !$service ) {
             throw new Exception( 'Cannot instantiate service' );
@@ -648,7 +651,8 @@ class Session {
     }
 
     /**
-     * @param string $googleFileId
+     * @param string        $googleFileId
+     * @param Google_Client $gClient
      *
      * @throws AuthenticationError
      * @throws EndQueueException
@@ -657,13 +661,13 @@ class Session {
      * @throws ValidationError
      * @throws Exception
      */
-    public function importFile( string $googleFileId ) {
+    public function importFile( string $googleFileId, Google_Client $gClient ) {
 
         if ( !isset( $this->guid ) ) {
             throw new Exception( 'conversion params not set' );
         }
 
-        $service = $this->getService();
+        $service = $this->getService( $gClient );
 
         if ( !$service ) {
             throw new Exception( 'Cannot instantiate service' );

@@ -60,6 +60,7 @@ class CatDecorator extends \AbstractDecorator {
             }, RemoteFiles_RemoteFileDao::getByJobId( $this->job->id ) );
 
             $this->template->remoteFilesInJob = $files;
+            $this->template->isGDriveProject = $this->isGDriveProject;
         }
 
         $this->template->support_mail               = INIT::$SUPPORT_MAIL;
