@@ -458,6 +458,7 @@ class Bootstrap {
             ini_set( 'session.name', INIT::$PHP_SESSION_NAME );
             ini_set( 'session.cookie_domain', '.' . INIT::$COOKIE_DOMAIN );
             ini_set( 'session.cookie_secure', true );
+            ini_set( 'session.cookie_httponly', true );
 
         }
 
