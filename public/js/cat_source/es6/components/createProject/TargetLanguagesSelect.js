@@ -4,13 +4,14 @@ import ChevronDown from '../../../../../img/icons/ChevronDown'
 import {useRef} from 'react'
 
 export const TargetLanguagesSelect = () => {
-  const {targetLangs, setIsOpenMultiselectLanguages} =
+  const {targetLangs, setIsOpenMultiselectLanguages, languages} =
     useContext(CreateProjectContext)
 
   const selectedItemRef = useRef()
 
   const getActiveLabel = () => targetLangs.map(({name}) => name).join(',')
-  const openModal = () => setIsOpenMultiselectLanguages(true)
+  const openModal = () =>
+    languages.length > 0 && setIsOpenMultiselectLanguages(true)
 
   return (
     <div
