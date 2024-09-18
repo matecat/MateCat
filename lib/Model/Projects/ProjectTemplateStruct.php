@@ -29,6 +29,14 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
     public bool    $get_public_matches       = true;
     public string  $created_at;
     public ?string $modified_at              = null;
+    public int     $dictation                = 0;
+    public int     $show_whitespace          = 0;
+    public int     $character_counter        = 0;
+    public int     $ai_assistant             = 0;
+    public int     $team_id                  = 0;
+    public ?string $subject                  = null;
+    public ?string $source_language          = null;
+    public ?string $target_language          = null;
 
     /**
      * @param string   $json
@@ -59,6 +67,14 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
         $this->qa_model_template_id     = $json->qa_model_template_id;
         $this->filters_template_id      = $json->filters_template_id;
         $this->xliff_config_template_id = $json->xliff_config_template_id;
+        $this->dictation                = $json->dictation;
+        $this->show_whitespace          = $json->show_whitespace;
+        $this->character_counter        = $json->character_counter;
+        $this->ai_assistant             = $json->ai_assistant;
+        $this->team_id                  = $json->team_id;
+        $this->subject                  = $json->subject;
+        $this->source_language          = $json->source_language;
+        $this->target_language          = (!empty($json->target_language)) ? serialize($json->target_language) : null;
 
         return $this;
     }
@@ -107,6 +123,10 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
         return [];
     }
 
+    public function getTargetLanguage(): array {
+        return unserialize($this->target_language);
+    }
+
     /**
      * @inheritDoc
      */
@@ -131,6 +151,14 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
                 'get_public_matches'       => $this->get_public_matches,
                 'pretranslate_100'         => $this->pretranslate_100,
                 'pretranslate_101'         => $this->pretranslate_101,
+                'dictation'                => $this->dictation,
+                'show_whitespace'          => $this->show_whitespace,
+                'character_counter'        => $this->character_counter,
+                'ai_assistant'             => $this->ai_assistant,
+                'team_id'                  => $this->team_id,
+                'subject'                  => $this->subject,
+                'source_language'          => $this->source_language,
+                'target_language'          => $this->getTargetLanguage(),
                 'created_at'               => date_create( $this->created_at )->format( DATE_RFC822 ),
                 'modified_at'              => date_create( $this->modified_at )->format( DATE_RFC822 ),
         ];
