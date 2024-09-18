@@ -7,12 +7,12 @@ import {Controller, useForm} from 'react-hook-form'
 import {isEqual} from 'lodash'
 
 const SEGMENTED_CONTROL_OPTIONS = [
-  {id: 'translate_keys', name: 'translate_keys'},
-  {id: 'do_not_translate_keys', name: 'do_not_translate_keys'},
+  {id: 'translate_keys', name: 'Translatable'},
+  {id: 'do_not_translate_keys', name: 'Non-translatable'},
 ]
 
 export const Json = () => {
-  const {currentTemplate, modifyingCurrentTemplate} =
+  const {currentTemplate, modifyingCurrentTemplate, templates} =
     useContext(FiltersParamsContext)
 
   const {control, watch, setValue} = useForm()
@@ -24,6 +24,10 @@ export const Json = () => {
 
   const temporaryFormData = watch()
   const previousData = useRef()
+
+  const originalCurrentTemplate = templates.find(
+    ({id, isTemporary}) => id === currentTemplate.id && !isTemporary,
+  )
 
   useEffect(() => {
     if (!isEqual(temporaryFormData, previousData.current))
@@ -56,7 +60,7 @@ export const Json = () => {
         json: restPropsValue,
       }))
     }
-  }, [formData, modifyingCurrentTemplate])
+  }, [formData, modifyingCurrentTemplate, setValue])
 
   // set default values for current template
   useEffect(() => {
@@ -73,6 +77,17 @@ export const Json = () => {
   }, [currentTemplate.id, setValue])
 
   const {segmentedControl} = formData ?? {}
+
+  useEffect(() => {
+    if (formData?.segmentedControl) {
+      setValue(
+        SEGMENTED_CONTROL_OPTIONS.find(
+          ({id}) => id !== formData.segmentedControl,
+        ).id,
+        formData[formData.segmentedControl],
+      )
+    }
+  }, [formData, setValue])
 
   const renderActiveSegmentedController = (
     <>
@@ -143,7 +158,7 @@ export const Json = () => {
             condimentum.
           </p>
         </div>
-        <div className="container-keys-controller">
+        <div className="container-segmented-control">
           <Controller
             control={control}
             name="segmentedControl"

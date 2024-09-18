@@ -1,4 +1,4 @@
-import React, {useContext, useEffect} from 'react'
+import React, {useContext, useEffect, useRef, useState} from 'react'
 import Switch from '../../../../common/Switch'
 import {SegmentedControl} from '../../../../common/SegmentedControl'
 import {WordsBadge} from '../../../../common/WordsBadge/WordsBadge'
@@ -6,30 +6,110 @@ import {FiltersParamsContext} from '../FiltersParams'
 import {Controller, useForm} from 'react-hook-form'
 import {isEqual} from 'lodash'
 
+const SEGMENTED_CONTROL_OPTIONS = [
+  {id: 'translate_elements', name: 'Translatable'},
+  {id: 'do_not_translate_elements', name: 'Non-translatable'},
+]
+
 export const Xml = () => {
-  const {currentTemplate, modifyingCurrentTemplate} =
+  const {currentTemplate, modifyingCurrentTemplate, templates} =
     useContext(FiltersParamsContext)
 
-  const {control, watch, unregister} = useForm()
+  const {control, watch, setValue} = useForm()
 
-  const {xml} = currentTemplate
+  const [formData, setFormData] = useState()
 
-  const data = watch()
-  const {elementsType, ...propsValue} = data
+  const xml = useRef()
+  xml.current = currentTemplate.xml
+
+  const temporaryFormData = watch()
+  const previousData = useRef()
+
+  const originalCurrentTemplate = templates.find(
+    ({id, isTemporary}) => id === currentTemplate.id && !isTemporary,
+  )
 
   useEffect(() => {
-    if (!isEqual(xml, propsValue) && Object.keys(propsValue).length) {
+    if (!isEqual(temporaryFormData, previousData.current))
+      setFormData(temporaryFormData)
+
+    previousData.current = temporaryFormData
+  }, [temporaryFormData])
+
+  useEffect(() => {
+    if (typeof formData === 'undefined') return
+
+    const {segmentedControl, ...propsValue} = formData
+
+    const restPropsValue = Object.entries(propsValue).reduce(
+      (acc, [key, value]) => ({
+        ...acc,
+        ...(SEGMENTED_CONTROL_OPTIONS.every(
+          ({id}) => id !== key || id === segmentedControl,
+        ) && {[key]: value}),
+      }),
+      {},
+    )
+
+    if (
+      !isEqual(xml.current, restPropsValue) &&
+      Object.keys(restPropsValue).length
+    ) {
       modifyingCurrentTemplate((prevTemplate) => ({
         ...prevTemplate,
-        xml: propsValue,
+        xml: restPropsValue,
       }))
     }
-  }, [propsValue, xml, modifyingCurrentTemplate])
+  }, [formData, modifyingCurrentTemplate, setValue])
+
+  // set default values for current template
+  useEffect(() => {
+    SEGMENTED_CONTROL_OPTIONS.forEach(({id}) => setValue(id, undefined))
+
+    Object.entries(xml.current).forEach(([key, value]) => setValue(key, value))
+
+    setValue(
+      'segmentedControl',
+      SEGMENTED_CONTROL_OPTIONS.find(
+        ({id}) => typeof xml.current[id] !== 'undefined',
+      )?.id,
+    )
+  }, [currentTemplate.id, setValue])
+
+  const {segmentedControl} = formData ?? {}
 
   useEffect(() => {
-    if (elementsType === '1') unregister('translate_elements')
-    else unregister('do_not_translate_elements')
-  }, [elementsType, unregister])
+    if (formData?.segmentedControl) {
+      setValue(
+        SEGMENTED_CONTROL_OPTIONS.find(
+          ({id}) => id !== formData.segmentedControl,
+        ).id,
+        formData[formData.segmentedControl],
+      )
+    }
+  }, [formData, setValue])
+
+  const renderActiveSegmentedController = (
+    <>
+      {SEGMENTED_CONTROL_OPTIONS.filter(({id}) => id === segmentedControl).map(
+        ({id}) => (
+          <Controller
+            key={id}
+            control={control}
+            name={id}
+            render={({field: {onChange, value, name}}) => (
+              <WordsBadge
+                name={name}
+                value={value}
+                onChange={onChange}
+                placeholder={''}
+              />
+            )}
+          />
+        ),
+      )}
+    </>
+  )
 
   return (
     <div className="filters-params-accordion-content">
@@ -44,7 +124,6 @@ export const Xml = () => {
         </div>
         <Controller
           control={control}
-          defaultValue={xml.preserve_whitespace}
           name="preserve_whitespace"
           render={({field: {onChange, value, name}}) => (
             <Switch name={name} active={value} onChange={onChange} />
@@ -61,45 +140,21 @@ export const Xml = () => {
             condimentum.
           </p>
         </div>
-        <div className="container-keys-controller">
+        <div className="container-segmented-control">
           <Controller
             control={control}
-            name="elementsType"
-            defaultValue={'0'}
+            name="segmentedControl"
             render={({field: {onChange, value, name}}) => (
               <SegmentedControl
                 name={name}
-                className="keys-segmented-control"
-                options={[
-                  {id: '0', name: 'Translatable'},
-                  {id: '1', name: 'Non-translatable'},
-                ]}
+                className="custom-segmented-control"
+                options={SEGMENTED_CONTROL_OPTIONS}
                 selectedId={value}
                 onChange={onChange}
               />
             )}
           />
-          <Controller
-            control={control}
-            defaultValue={
-              elementsType === '1'
-                ? xml.do_not_translate_elements
-                : xml.translate_elements
-            }
-            name={
-              elementsType === '1'
-                ? 'do_not_translate_elements'
-                : 'translate_elements'
-            }
-            render={({field: {onChange, value, name}}) => (
-              <WordsBadge
-                name={name}
-                value={value}
-                onChange={onChange}
-                placeholder={''}
-              />
-            )}
-          />
+          {renderActiveSegmentedController}
         </div>
       </div>
 
@@ -114,7 +169,6 @@ export const Xml = () => {
         </div>
         <Controller
           control={control}
-          defaultValue={xml.translate_attributes}
           name="translate_attributes"
           render={({field: {onChange, value, name}}) => (
             <WordsBadge
