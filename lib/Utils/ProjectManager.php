@@ -2268,7 +2268,8 @@ class ProjectManager {
             if ( $this->gdriveSession ) {
                 $gdriveFileId = $this->gdriveSession->findFileIdByName( $originalFileName );
                 if ( $gdriveFileId ) {
-                    $this->gdriveSession->createRemoteFile( $fid, $gdriveFileId );
+                    $client = GoogleClientFactory::getGoogleClient( INIT::$HTTPHOST . "/gdrive/oauth/response" );
+                    $this->gdriveSession->createRemoteFile( $fid, $gdriveFileId, $client );
                 }
             }
 
