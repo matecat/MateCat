@@ -47,6 +47,10 @@ h5:last-child {
 
 p {
   margin: 0 0 16px 0;
+  line-height: 1.4285em;
+  &:last-child {
+    margin-bottom: 0em;
+  }
 }
 
 /* Force Simple Scrollbars */
