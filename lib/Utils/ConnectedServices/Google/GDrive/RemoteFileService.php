@@ -180,9 +180,9 @@ class RemoteFileService {
     /**
      * @param $googleMime
      *
-     * @return string
+     * @return ?string
      */
-    public static function officeMimeFromGoogle( $googleMime ): string {
+    public static function officeMimeFromGoogle( $googleMime ): ?string {
         switch ( $googleMime ) {
             case self::MIME_GOOGLE_DOCS:
                 return self::MIME_DOCX;

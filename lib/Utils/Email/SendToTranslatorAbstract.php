@@ -31,15 +31,15 @@ abstract class SendToTranslatorAbstract extends AbstractEmail {
 
         $translator->delivery_date =
                 ( new Datetime( $translator->delivery_date ) )
-                ->setTimezone( new DateTimeZone( $this->_offsetToTimeZone( $translator->job_owner_timezone ) ) )
-                ->format( DateTime::RFC850 );
+                        ->setTimezone( new DateTimeZone( $this->_offsetToTimeZone( $translator->job_owner_timezone ) ) )
+                        ->format( DateTime::RFC850 );
 
         $this->_setLayout( 'skeleton.html' );
 
     }
 
     public function send() {
-        $recipient = array( $this->translator->email );
+        $recipient = [ $this->translator->email ];
 
         //we need to get the bodyHtmlMessage only once because JWT changes if called more than once
         // otherwise html message will differ from the alternative text message
@@ -54,7 +54,7 @@ abstract class SendToTranslatorAbstract extends AbstractEmail {
     protected function _getTemplateVariables() {
 
         $userRecipient = $this->translator->getUser()->getArrayCopy();
-        if( !empty( $userRecipient[ 'uid' ] ) ){
+        if ( !empty( $userRecipient[ 'uid' ] ) ) {
             $userRecipient[ '_name' ] = $userRecipient[ 'first_name' ] . " " . $userRecipient[ 'last_name' ];
         } else {
             $userRecipient[ '_name' ] = $this->translator->email;
@@ -78,7 +78,7 @@ abstract class SendToTranslatorAbstract extends AbstractEmail {
     }
 
     protected function _offsetToTimeZone( $offset ) {
-        $offset    = $offset * 60 * 60;
+        $offset             = $offset * 60 * 60;
         $abbreviations_list = array_reverse( timezone_abbreviations_list() );
         foreach ( $abbreviations_list as $zone => $abbreviation ) {
             foreach ( $abbreviation as $city ) {
@@ -87,6 +87,7 @@ abstract class SendToTranslatorAbstract extends AbstractEmail {
                 }
             }
         }
+
         return 'UTC';
     }
 

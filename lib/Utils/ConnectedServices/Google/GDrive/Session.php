@@ -9,7 +9,7 @@
 namespace ConnectedServices\Google\GDrive;
 
 use API\Commons\Exceptions\AuthenticationError;
-use AuthCookie;
+use ArrayObject;
 use ConnectedServices\ConnectedServiceDao;
 use ConnectedServices\ConnectedServiceStruct;
 use Constants;
@@ -38,7 +38,6 @@ use RemoteFiles_RemoteFileDao;
 use RuntimeException;
 use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\ReQueueException;
-use Users_UserDao;
 use Users_UserStruct;
 use Utils;
 
@@ -73,11 +72,6 @@ class Session {
     protected ?ConnectedServiceStruct $serviceStruct = null;
 
     /**
-     * @var Users_UserStruct
-     */
-    protected $user;
-
-    /**
      * @var AbstractFilesStorage
      */
     protected $files_storage;
@@ -85,7 +79,7 @@ class Session {
     /**
      * @var FeatureSet
      */
-    protected $featureSet;
+    protected FeatureSet $featureSet;
 
     /**
      * MUST NOT TO BE CALLED FROM THE cli
@@ -115,7 +109,7 @@ class Session {
         if ( PHP_SAPI != 'cli' ) {
             throw new RuntimeException( "This method MUST be called by CLI." );
         }
-        $_SESSION = $session;
+        $_SESSION =& $session;
 
         return new self();
     }
@@ -291,30 +285,15 @@ class Session {
      */
     public function getToken(): ?array {
         if ( is_null( $this->token ) ) {
-            $user = $this->__getUser();
-
-            if ( $user !== null ) {
-                $this->token = $this->getTokenByUser( $this->__getUser() );
+            if ( $this->session[ 'user' ] !== null ) {
+                if ( $this->session[ 'user' ] instanceof ArrayObject ) { // comes from CLI (ProjectManager)
+                    $this->session[ 'user' ] = new Users_UserStruct( $this->session[ 'user' ]->getArrayCopy() );
+                }
+                $this->token = $this->getTokenByUser( $this->session[ 'user' ] );
             }
         }
 
         return $this->token;
-    }
-
-    /**
-     * @return ?Users_UserStruct
-     */
-    private function __getUser(): ?Users_UserStruct {
-        if ( is_null( $this->user ) ) {
-            $userCredentials = AuthCookie::getCredentials();
-
-            if ( !empty( $userCredentials ) ) {
-                $dao        = new Users_UserDao();
-                $this->user = $dao->getByUid( $userCredentials[ 'user' ][ 'uid' ] );
-            }
-        }
-
-        return $this->user;
     }
 
     /**
@@ -639,14 +618,14 @@ class Session {
     }
 
     /**
-     * @param string $googleFileId
+     * @param string        $googleFileId
      * @param Google_Client $gClient
      *
      * @return Google_Service_Drive_Permission
      * @throws Exception
      */
     public function grantFileAccessByUrl( string $googleFileId, Google_Client $gClient ): Google_Service_Drive_Permission {
-        if ( !$this->__getUser() ) {
+        if ( !$this->session[ 'user' ] ) {
             throw new Exception( 'Cannot proceed without a User' );
         }
 
@@ -773,7 +752,7 @@ class Session {
         $conversionHandler->setErrDir( $errDir );
 
         $this->featureSet = new FeatureSet();
-        $this->featureSet->loadFromUserEmail( $this->__getUser()->email );
+        $this->featureSet->loadFromUserEmail( $this->session[ 'user' ]->email );
         $conversionHandler->setFeatures( $this->featureSet );
         $conversionHandler->setUserIsLogged( true );
 

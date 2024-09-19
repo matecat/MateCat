@@ -1,12 +1,12 @@
 <?php
 
-use ConnectedServices\ProviderInterface;
 use ConnectedServices\Facebook\FacebookProvider;
 use ConnectedServices\Github\GithubProvider;
 use ConnectedServices\Google\GoogleProvider;
 use ConnectedServices\LinkedIn\LinkedInProvider;
 use ConnectedServices\Microsoft\MicrosoftProvider;
 use ConnectedServices\OauthClient;
+use ConnectedServices\ProviderInterface;
 use Klein\HttpStatus;
 
 abstract class viewController extends controller {
@@ -33,6 +33,7 @@ abstract class viewController extends controller {
     /**
      * Class constructor
      *
+     * @throws ReflectionException
      */
     public function __construct() {
 
@@ -47,7 +48,7 @@ abstract class viewController extends controller {
         }
 
         //SESSION ENABLED
-        $this->readLoginInfo( false );
+        $this->identifyUser();
 
         $this->featureSet = new FeatureSet();
 
@@ -199,6 +200,9 @@ abstract class viewController extends controller {
         $this->renderCustomHTTP( $customTemplate, 404 );
     }
 
+    /**
+     * @throws Exception
+     */
     protected function renderCustomHTTP( $customTemplate, $httpCode ) {
         $status = new HttpStatus( $httpCode );
         header( "HTTP/1.0 " . $status->getFormattedString() );

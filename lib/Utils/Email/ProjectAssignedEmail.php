@@ -19,26 +19,25 @@ use WordCount\WordCountStruct;
 
 class ProjectAssignedEmail extends AbstractEmail {
 
-    protected $user ;
-    protected $project ;
-    protected $assignee ;
-    protected $title ;
+    protected $user;
+    protected $project;
+    protected $assignee;
+    protected $title;
 
-    public  function __construct( Users_UserStruct $user, Projects_ProjectStruct $project, Users_UserStruct $assignee) {
-        $this->user = $user ;
-        $this->project = $project ;
-        $this->assignee = $assignee ;
+    public function __construct( Users_UserStruct $user, Projects_ProjectStruct $project, Users_UserStruct $assignee ) {
+        $this->user     = $user;
+        $this->project  = $project;
+        $this->assignee = $assignee;
 
         $this->jobs = $project->getJobs();
 
-        $this->title = "You've been assigned a project" ;
+        $this->title = "You've been assigned a project";
 
-        $this->_setLayout('skeleton.html');
-        $this->_setTemplate('Project/project_assigned_content.html');
+        $this->_setLayout( 'skeleton.html' );
+        $this->_setTemplate( 'Project/project_assigned_content.html' );
     }
 
-    protected function _getTemplateVariables()
-    {
+    protected function _getTemplateVariables() {
         $words_count = [];
         foreach ( $this->jobs as $job ) {
             $jStruct  = new Chunks_ChunkStruct( $job->getArrayCopy() );
@@ -65,21 +64,19 @@ class ProjectAssignedEmail extends AbstractEmail {
         ];
     }
 
-    protected function _getLayoutVariables($messageBody = null)
-    {
-        $vars = parent::_getLayoutVariables();
-        $vars['title'] = $this->title ;
+    protected function _getLayoutVariables( $messageBody = null ) {
+        $vars            = parent::_getLayoutVariables();
+        $vars[ 'title' ] = $this->title;
 
-        return $vars ;
+        return $vars;
     }
 
-    public function send()
-    {
-        $recipient  = array( $this->assignee->email, $this->assignee->fullName() );
+    public function send() {
+        $recipient = [ $this->assignee->email, $this->assignee->fullName() ];
 
-        $this->doSend( $recipient, $this->title ,
-            $this->_buildHTMLMessage(),
-            $this->_buildTxtMessage( $this->_buildMessageContent() )
+        $this->doSend( $recipient, $this->title,
+                $this->_buildHTMLMessage(),
+                $this->_buildTxtMessage( $this->_buildMessageContent() )
         );
     }
 

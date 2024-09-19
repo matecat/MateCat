@@ -69,7 +69,7 @@ const DownloadFileUtils = {
 
       let winName
 
-      data.urls.forEach((index, item) => {
+      data.urls.forEach((item,index) => {
         winName = 'window' + item.localId
         if (CommonUtils.isSafari && windowReference) {
           windowReference.location = item.alternateLink

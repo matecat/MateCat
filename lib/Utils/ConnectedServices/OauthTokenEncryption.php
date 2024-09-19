@@ -13,7 +13,7 @@ use INIT;
 class OauthTokenEncryption extends DefuseEncryption {
 
     /**
-     * @var OauthTokenEncryption|null 
+     * @var OauthTokenEncryption|null
      */
     private static ?OauthTokenEncryption $instance = null;
 

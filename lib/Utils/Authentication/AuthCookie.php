@@ -1,5 +1,14 @@
 <?php
 
+namespace Authentication;
+
+use CookieManager;
+use DomainException;
+use INIT;
+use Log;
+use SimpleJWT;
+use Users_UserStruct;
+
 class AuthCookie {
 
     /**
@@ -15,13 +24,6 @@ class AuthCookie {
             return null;
         }
 
-        $dao  = new Users_UserDao();
-        $user = $dao->getByUid( $payload[ 'user' ][ 'uid' ] );
-
-        if ( $user !== null ) {
-            self::setCredentials( $user );
-        }
-
         return $payload;
     }
 
@@ -29,6 +31,7 @@ class AuthCookie {
      * Set a cookie with a username
      *
      * @param Users_UserStruct $user
+     *
      */
     public static function setCredentials( Users_UserStruct $user ) {
 
@@ -39,7 +42,7 @@ class AuthCookie {
                         'path'     => '/',
                         'domain'   => INIT::$COOKIE_DOMAIN,
                         'secure'   => true,
-                        'httponly' => false,
+                        'httponly' => false,  //TODO YYY [Security] set to true
                         'samesite' => 'None',
                 ]
         );
@@ -50,11 +53,10 @@ class AuthCookie {
      *
      * @return array
      */
-    public static function generateSignedAuthCookie( Users_UserStruct $user ) {
+    protected static function generateSignedAuthCookie( Users_UserStruct $user ): array {
 
         $JWT = new SimpleJWT( [
-                'metadata' => $user->getMetadataAsKeyValue(),
-                'user'     => [
+                'user' => [
                         'email'        => $user->email,
                         'first_name'   => $user->first_name,
                         'has_password' => !is_null( $user->pass ),
@@ -102,9 +104,9 @@ class AuthCookie {
      *  }
      * }
      *
-     * @return mixed
+     * @return ?array
      */
-    private static function getData() {
+    private static function getData(): ?array {
 
         if ( isset( $_COOKIE[ INIT::$AUTHCOOKIENAME ] ) and !empty( $_COOKIE[ INIT::$AUTHCOOKIENAME ] ) ) {
 
@@ -114,7 +116,10 @@ class AuthCookie {
                 Log::doJsonLog( $e->getMessage() . " " . $_COOKIE[ INIT::$AUTHCOOKIENAME ] );
                 self::destroyAuthentication();
             }
+
         }
+
+        return null;
     }
 
 }

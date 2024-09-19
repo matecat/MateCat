@@ -2,5 +2,5 @@
 
 route(
     '/webhooks/oauth/response/[:provider]', 'GET',
-    '\oauthResponseHandlerController', 'response'
+    [ '\oauthResponseHandlerController', 'response']
 );

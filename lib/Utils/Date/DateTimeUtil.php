@@ -20,6 +20,7 @@ class DateTimeUtil {
 
             return $date->format( DateTimeInterface::ATOM );
         }
+
         return null;
     }
 }

@@ -29,6 +29,7 @@ class ChangePasswordModel {
      * @param $old_password
      * @param $new_password
      * @param $new_password_confirmation
+     *
      * @throws ValidationError
      */
     public function changePassword( $old_password, $new_password, $new_password_confirmation ) {

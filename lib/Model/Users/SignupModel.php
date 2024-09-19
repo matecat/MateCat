@@ -2,7 +2,7 @@
 
 namespace Users;
 
-use AuthCookie;
+use Authentication\AuthCookie;
 use Database;
 use Email\ForgotPasswordEmail;
 use Email\SignupEmail;

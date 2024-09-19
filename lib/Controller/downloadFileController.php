@@ -356,8 +356,7 @@ class downloadFileController extends downloadController {
 
         if ( $this->download_type == 'omegat' ) {
 
-            $this->sessionStart();
-            $this->setUserCredentials();
+            $this->identifyUser();
             $OTdownloadDecorator = new DownloadOmegaTDecorator( $this );
             $output_content      = array_merge( $output_content, $OTdownloadDecorator->decorate() );
             $OTdownloadDecorator->createOmegaTZip( $output_content );
@@ -535,7 +534,7 @@ class downloadFileController extends downloadController {
         /**
          * Retrieve user information
          */
-        $this->readLoginInfo();
+        $this->identifyUser();
 
         $activity             = new ActivityLogStruct();
         $activity->id_job     = $this->id_job;

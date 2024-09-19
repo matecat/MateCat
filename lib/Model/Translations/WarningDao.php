@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Translations ;
+namespace Translations;
 
 use Constants_TranslationStatus;
 use DataAccess\ShapelessConcreteStruct;
@@ -9,8 +9,8 @@ use Jobs\WarningsCountStruct;
 
 class WarningDao extends \DataAccess_AbstractDao {
 
-    public static $primary_keys = array();
-    const TABLE = 'translation_warnings' ;
+    public static $primary_keys = [];
+    const TABLE = 'translation_warnings';
 
     protected $_query_warnings_by_chunk = "
           SELECT count(1) AS count, jobs.id AS id_job, jobs.password
@@ -19,16 +19,16 @@ class WarningDao extends \DataAccess_AbstractDao {
           WHERE ( st.warning & :level ) = :level
             AND id = :id AND password = :password
             AND st.status != :status
-        " ;
+        ";
 
     public function getWarningsByProjectIds( $projectIds ) {
 
         $statuses[] = Constants_TranslationStatus::STATUS_TRANSLATED;
         $statuses[] = Constants_TranslationStatus::STATUS_APPROVED;
 
-        $arrayCount = count( $projectIds );
-        $rowCount = ( $arrayCount  ? $arrayCount - 1 : 0);
-        $placeholders = sprintf( "?%s", str_repeat(",?", $rowCount ) );
+        $arrayCount   = count( $projectIds );
+        $rowCount     = ( $arrayCount ? $arrayCount - 1 : 0 );
+        $placeholders = sprintf( "?%s", str_repeat( ",?", $rowCount ) );
 
         $sql = "
         SELECT 	COUNT( jobs.id ) as count,
@@ -59,21 +59,20 @@ class WarningDao extends \DataAccess_AbstractDao {
      * @return int
      */
     public function getErrorsByChunk( \Chunks_ChunkStruct $chunk ) {
-        $con = $this->database->getConnection() ;
+        $con = $this->database->getConnection();
 
-        $stmt = $con->prepare( $this->_query_warnings_by_chunk ) ;
+        $stmt = $con->prepare( $this->_query_warnings_by_chunk );
         $stmt->execute( [
-                'id' => $chunk->id,
+                'id'       => $chunk->id,
                 'password' => $chunk->password,
-                'level' => WarningModel::ERROR,
-                'status' => Constants_TranslationStatus::STATUS_NEW
-        ] ) ;
+                'level'    => WarningModel::ERROR,
+                'status'   => Constants_TranslationStatus::STATUS_NEW
+        ] );
 
-        $result = $stmt->fetch() ;
+        $result = $stmt->fetch();
         if ( $result ) {
-            return $result['count'] ;
-        }
-        else {
+            return $result[ 'count' ];
+        } else {
             return 0;
         }
     }
@@ -82,7 +81,7 @@ class WarningDao extends \DataAccess_AbstractDao {
         $sql = "SELECT * FROM translation_warnings " .
                 " WHERE id_job = :id_job " .
                 " AND id_segment BETWEEN :job_first_segment AND :job_last_segment " .
-                " AND scope = :scope " ;
+                " AND scope = :scope ";
 
         $conn = \Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
@@ -92,41 +91,42 @@ class WarningDao extends \DataAccess_AbstractDao {
         );
 
         $stmt->execute(
-                array(
-                        'id_job' => $chunk->id,
-                        'scope'  => $scope,
+                [
+                        'id_job'            => $chunk->id,
+                        'scope'             => $scope,
                         'job_first_segment' => $chunk->job_first_segment,
-                        'job_last_segment' => $chunk->job_last_segment
-                )
+                        'job_last_segment'  => $chunk->job_last_segment
+                ]
         );
-        return $stmt->fetchAll() ;
+
+        return $stmt->fetchAll();
     }
 
     /**
      *
-     * Deletes all translation warnings related to a given scope. 
-     * 
+     * Deletes all translation warnings related to a given scope.
+     *
      * @param $id_job
      * @param $id_segment
      * @param $scope
      *
      * @return int
      */
-    public static function deleteByScope($id_job, $id_segment, $scope) {
+    public static function deleteByScope( $id_job, $id_segment, $scope ) {
         $sql = "DELETE FROM translation_warnings " .
                 " WHERE id_job = :id_job " .
                 " AND id_segment = :id_segment " .
-                " AND scope = :scope " ;
+                " AND scope = :scope ";
 
         $conn = \Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
 
         $stmt->execute(
-                array(
+                [
                         'id_job'     => $id_job,
                         'id_segment' => $id_segment,
                         'scope'      => $scope
-                )
+                ]
         );
 
         return $stmt->rowCount();
@@ -134,11 +134,11 @@ class WarningDao extends \DataAccess_AbstractDao {
 
     public static function insertWarning( WarningStruct $warning ) {
         $options = [];
-        $sql = self::buildInsertStatement( $warning->toArray(), $options ) ;
-        $conn = \Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
+        $sql     = self::buildInsertStatement( $warning->toArray(), $options );
+        $conn    = \Database::obtain()->getConnection();
+        $stmt    = $conn->prepare( $sql );
 
-        return $stmt->execute( $warning->toArray() )  ;
+        return $stmt->execute( $warning->toArray() );
     }
 
 
@@ -149,7 +149,7 @@ class WarningDao extends \DataAccess_AbstractDao {
     public static function getWarningsByJobIdAndPassword( $jid, $jpassword ) {
 
         $thisDao = new self();
-        $db = $thisDao->getDatabaseHandler();
+        $db      = $thisDao->getDatabaseHandler();
 
         $query = "SELECT id_segment, serialized_errors_list
 		FROM segment_translations
@@ -163,9 +163,9 @@ class WarningDao extends \DataAccess_AbstractDao {
         $stmt = $db->getConnection()->prepare( $query );
 
         return $thisDao->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
-                'id_job'             => $jid,
-                'password'           => $jpassword,
-                'segment_status'     => Constants_TranslationStatus::STATUS_NEW
+                'id_job'         => $jid,
+                'password'       => $jpassword,
+                'segment_status' => Constants_TranslationStatus::STATUS_NEW
         ] );
 
     }

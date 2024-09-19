@@ -81,9 +81,9 @@ class ProjectManager {
     protected $project;
 
     /**
-     * @var Session
+     * @var ?Session
      */
-    protected $gdriveSession;
+    protected ?Session $gdriveSession = null;
 
     /**
      * @var FeatureSet

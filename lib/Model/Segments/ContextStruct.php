@@ -26,7 +26,7 @@ class ContextStruct extends DataAccess_AbstractDaoSilentStruct implements DataAc
 
     public function __construct( array $array_params = [], $decode = true ) {
         parent::__construct( $array_params );
-        if( $decode ){
+        if ( $decode ) {
             $this->context_json = json_decode( $this->context_json );
         }
     }

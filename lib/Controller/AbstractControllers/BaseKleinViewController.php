@@ -29,7 +29,4 @@ class BaseKleinViewController extends AbstractStatefulKleinController implements
 
     }
 
-    private function isLoggedIn() {
-        return !is_null( $this->getUser() );
-    }
 }

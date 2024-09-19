@@ -18,11 +18,6 @@ use Users_UserStruct;
 class OAuthController extends AbstractStatefulKleinController {
 
     /**
-     * @var Users_UserStruct
-     */
-    protected $user;
-
-    /**
      * @throws ValidationError
      */
     public function response() {

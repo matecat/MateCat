@@ -1,5 +1,6 @@
 <?php
 
+use Authentication\AuthCookie;
 use ConnectedServices\OauthTokenEncryption;
 use Email\WelcomeEmail;
 use Teams\TeamDao;
@@ -14,8 +15,8 @@ use Users\RedeemableProject;
  */
 class OAuthSignInModel {
 
-    protected $user ;
-    protected $profilePictureUrl ;
+    protected $user;
+    protected $profilePictureUrl;
     protected $provider;
 
     public function __construct( $firstName, $lastName, $email ) {
@@ -62,25 +63,25 @@ class OAuthSignInModel {
             $this->_welcomeNewUser();
         }
 
-        $this->_authenticateUser();
-
         if ( !is_null( $this->profilePictureUrl ) ) {
             $this->_updateProfilePicture();
         }
 
         if ( !is_null( $this->provider ) ) {
-            $this->_updateProvider() ;
+            $this->_updateProvider();
         }
 
-        $project = new RedeemableProject($this->user, $_SESSION)  ;
-        $project->tryToRedeem()  ;
+        $this->_authenticateUser();
+
+        $project = new RedeemableProject( $this->user, $_SESSION );
+        $project->tryToRedeem();
 
         return true;
     }
 
     protected function _updateProfilePicture() {
         $dao = new MetadataDao();
-        $dao->set($this->user->uid, $this->provider.'_picture', $this->profilePictureUrl );
+        $dao->set( $this->user->uid, $this->provider . '_picture', $this->profilePictureUrl );
     }
 
     public function setProfilePicture( $pictureUrl ) {
@@ -89,10 +90,10 @@ class OAuthSignInModel {
 
     protected function _updateProvider() {
         $dao = new MetadataDao();
-        $dao->set($this->user->uid, 'oauth_provider', $this->provider );
+        $dao->set( $this->user->uid, 'oauth_provider', $this->provider );
     }
 
-    public function setProvider($provider) {
+    public function setProvider( $provider ) {
         $this->provider = $provider;
     }
 
@@ -115,9 +116,7 @@ class OAuthSignInModel {
     }
 
     protected function _authenticateUser() {
-        AuthCookie::setCredentials($this->user );
-        $_SESSION[ 'cid' ]  = $this->user->email ;
-        $_SESSION[ 'uid' ]  = $this->user->uid ;
+        AuthCookie::setCredentials( $this->user );
     }
 
     protected function _welcomeNewUser() {

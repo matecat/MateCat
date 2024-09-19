@@ -262,7 +262,7 @@ class ProjectOptionsSanitizer {
 
         $all_langs = array_merge( $this->target_lang, [ $this->source_lang ] );
         $all_langs = array_unique( $all_langs );
-        $found = count( array_intersect( $langs, $all_langs ) );
+        $found     = count( array_intersect( $langs, $all_langs ) );
 
         return $found >= 2;
     }
@@ -283,6 +283,7 @@ class ProjectOptionsSanitizer {
                 break;
             }
         }
+
         return $found;
     }
 

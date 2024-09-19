@@ -17,12 +17,12 @@ use stdClass;
 
 class FiltersConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruct implements JsonSerializable {
 
-    public ?int           $id            = null;
-    public string         $name;
-    public int            $uid;
-    public ?string        $created_at    = null;
-    public ?string        $modified_at   = null;
-    public ?string        $deleted_at    = null;
+    public ?int          $id            = null;
+    public string        $name;
+    public int           $uid;
+    public ?string       $created_at    = null;
+    public ?string       $modified_at   = null;
+    public ?string       $deleted_at    = null;
     public ?Yaml         $yaml          = null;
     public ?Xml          $xml           = null;
     public ?Json         $json          = null;

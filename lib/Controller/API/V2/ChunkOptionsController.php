@@ -24,10 +24,10 @@ class ChunkOptionsController extends BaseChunkController {
         $this->return404IfTheJobWasDeleted();
 
         $chunk_options_model = new \ChunkOptionsModel( $this->chunk ) ;
-        
+
         $chunk_options_model->setOptions( $this->filteredParams() ) ;
-        $chunk_options_model->save(); 
-        
+        $chunk_options_model->save();
+
         $this->response->json( array( 'options' => $chunk_options_model->toArray() ) ) ;
     }
 
@@ -52,6 +52,6 @@ class ChunkOptionsController extends BaseChunkController {
         $filtered = filter_var_array( $this->request->params(), $args);
 
         return $filtered;
-        
+
     }
 }

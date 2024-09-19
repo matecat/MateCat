@@ -10,7 +10,7 @@ namespace API\App\Authentication;
 
 use API\App\RateLimiterTrait;
 use API\Commons\AbstractStatefulKleinController;
-use AuthCookie;
+use Authentication\AuthCookie;
 use CookieManager;
 use Exception;
 use INIT;

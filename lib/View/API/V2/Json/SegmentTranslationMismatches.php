@@ -30,7 +30,7 @@ class SegmentTranslationMismatches {
     public function __construct( $Translation_mismatches, $thereArePropagations, \FeatureSet $featureSet = null ) {
         $this->data                 = $Translation_mismatches;
         $this->thereArePropagations = $thereArePropagations;
-        if( $featureSet == null ){
+        if ( $featureSet == null ) {
             $featureSet = new \FeatureSet();
         }
         $this->featureSet = $featureSet;
@@ -52,7 +52,7 @@ class SegmentTranslationMismatches {
 
         foreach ( $this->data as $position => $row ) {
 
-            $Filter = MateCatFilter::getInstance( $featureSet, $row['source'], $row['target'], [] );
+            $Filter = MateCatFilter::getInstance( $featureSet, $row[ 'source' ], $row[ 'target' ], [] );
 
             if ( $row[ 'editable' ] ) {
                 $result[ 'editable' ][] = [

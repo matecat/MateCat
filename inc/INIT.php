@@ -102,7 +102,6 @@ class INIT {
     public static $SEGMENT_QA_CHECK_INTERVAL    = 1; //seconds
     public static $SAVE_SHASUM_FOR_FILES_LOADED = true;
     public static $AUTHCOOKIENAME               = 'matecat_login_v6';
-    public static $REQUESTED_URL_COOKIENAME     = 'matecat_login_v6_requested_url';
     public static $SUPPORT_MAIL                 = 'the owner of this MateCat instance.';//default string is 'the owner of this Matecat instance'
     public static $ANALYSIS_WORDS_PER_DAYS      = 3000;
     public static $AUTHCOOKIEDURATION           = 86400;        // 24 hours

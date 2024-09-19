@@ -2,9 +2,8 @@
 
 namespace ConnectedServices\GDrive;
 
-use API\Commons\KleinController;
+use API\Commons\AbstractStatefulKleinController;
 use Aws\S3\Exception\S3Exception;
-use Bootstrap;
 use ConnectedServices\Google\GDrive\Session;
 use ConnectedServices\Google\GoogleProvider;
 use Constants;
@@ -15,7 +14,7 @@ use INIT;
 use Log;
 use Utils;
 
-class GDriveController extends KleinController {
+class GDriveController extends AbstractStatefulKleinController {
 
     const GDRIVE_LIST_COOKIE_NAME = 'gdrive_files_to_be_listed';
     const GDRIVE_OUTCOME_COOKIE_NAME = 'gdrive_files_outcome';
@@ -344,7 +343,6 @@ class GDriveController extends KleinController {
      * @throws Exception
      */
     protected function afterConstruct() {
-        Bootstrap::sessionStart();
         $this->initSessionService();
     }
 

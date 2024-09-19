@@ -69,7 +69,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
 
     public static function loadRoutes( Klein $klein ) {
         route( '/project/[:id_project]/[:password]/reviews', 'POST',
-                'Features\ReviewExtended\Controller\ReviewsController', 'createReview' );
+                [ 'Features\ReviewExtended\Controller\ReviewsController', 'createReview'] );
     }
 
     public static function projectUrls( $formatted ) {

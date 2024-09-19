@@ -15,15 +15,14 @@ class CustomPage extends viewController {
      */
     protected $httpCode;
 
+    /**
+     * @throws ReflectionException
+     * @noinspection PhpMissingParentConstructorInspection
+     */
     public function __construct() {
-
         //SESSION ENABLED
-        parent::sessionStart();
-        $this->_setUserFromAuthCookie();
-        $this->setUserCredentials();
-
+        $this->identifyUser();
         $this->featureSet = new FeatureSet();
-
     }
 
     /**

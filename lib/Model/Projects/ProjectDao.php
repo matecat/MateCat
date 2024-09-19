@@ -169,24 +169,24 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
         $query = self::$_sql_get_projects_for_team;
 
         $values = [
-            'id_team' => (int)$id_team,
+                'id_team' => (int)$id_team,
         ];
 
         if ( $searchId ) {
-            $query .= ' AND id = :id ';
-            $values['id'] = $searchId;
+            $query          .= ' AND id = :id ';
+            $values[ 'id' ] = $searchId;
         }
 
         if ( $searchName ) {
-            $query .= ' AND name = :name ';
-            $values['name'] = $searchName;
+            $query            .= ' AND name = :name ';
+            $values[ 'name' ] = $searchName;
         }
 
         if ( $limit and $offset ) {
             $query .= " LIMIT " . (int)$limit . " OFFSET " . (int)$offset;
         }
 
-        $stmt   = $conn->prepare( $query );
+        $stmt = $conn->prepare( $query );
 
         return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Projects_ProjectStruct(), $values );
     }
@@ -211,16 +211,16 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
         ];
 
         if ( $searchId ) {
-            $query .= ' AND id = :id ';
-            $values['id'] = $searchId;
+            $query          .= ' AND id = :id ';
+            $values[ 'id' ] = $searchId;
         }
 
         if ( $searchName ) {
-            $query .= ' AND name = :name ';
-            $values['name'] = $searchName;
+            $query            .= ' AND name = :name ';
+            $values[ 'name' ] = $searchName;
         }
 
-        $stmt  = $conn->prepare( $query );
+        $stmt = $conn->prepare( $query );
 
         $results = $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), $values );
 
@@ -602,10 +602,10 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
      * Get a password map (t, r1, r2)
      *
      * @param $pid
+     *
      * @return array
      */
-    public function getPasswordsMap($pid)
-    {
+    public function getPasswordsMap( $pid ) {
         $db = Database::obtain();
 
         $query = "select

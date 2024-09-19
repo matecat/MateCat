@@ -33,6 +33,7 @@ class AIAssistantWorker extends AbstractWorker {
      * AIAssistantWorker constructor.
      *
      * @param AMQHandler $queueHandler
+     *
      * @throws ReflectionException
      */
     public function __construct( AMQHandler $queueHandler ) {

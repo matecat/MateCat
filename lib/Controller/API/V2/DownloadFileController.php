@@ -406,12 +406,9 @@ class DownloadFileController extends AbstractDownloadController {
 
         if ( $this->download_type == 'omegat' ) {
 
-            $this->sessionStart();
-            $this->setUserCredentials();
             $OtDownloadDecorator = new DownloadOmegaTDecorator( $this );
             $output_content      = array_merge( $output_content, $OtDownloadDecorator->decorate() );
             $OtDownloadDecorator->createOmegaTZip( $output_content );
-            $this->disableSessions();
 
         } else {
             try {
@@ -518,11 +515,6 @@ class DownloadFileController extends AbstractDownloadController {
         } else {
             $action = ( $job_complete ? ActivityLogStruct::DOWNLOAD_TRANSLATION : ActivityLogStruct::DOWNLOAD_PREVIEW );
         }
-
-        /**
-         * Retrieve user information
-         */
-        $this->readLoginInfo();
 
         $activity             = new ActivityLogStruct();
         $activity->id_job     = $this->id_job;

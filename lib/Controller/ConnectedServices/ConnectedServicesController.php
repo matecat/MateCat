@@ -16,14 +16,8 @@ use ConnectedServices\Google\GoogleProvider;
 use Exception;
 use Exceptions\NotFoundException;
 use INIT;
-use Users_UserStruct;
 
 class ConnectedServicesController extends AbstractStatefulKleinController {
-
-    /**
-     * @var Users_UserStruct
-     */
-    protected $user;
 
     /**
      * @var ConnectedServiceStruct

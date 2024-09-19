@@ -161,7 +161,7 @@ class TMSService {
             case "400" :
                 throw new Exception( "Error uploading TMX file. Please, try again in 5 minutes.", -15 );
             case "403" :
-                throw new Exception( "Error: ". $this->formatErrorMessage($importStatus->responseDetails), -15 );
+                throw new Exception( "Error: " . $this->formatErrorMessage( $importStatus->responseDetails ), -15 );
             default:
         }
 
@@ -171,7 +171,9 @@ class TMSService {
 
     /**
      * Import TMX file in MyMemory
+     *
      * @param TMSFile $file
+     *
      * @throws Exception
      */
     public function addGlossaryInMyMemory( TMSFile $file ) {
@@ -216,6 +218,7 @@ class TMSService {
 
     /**
      * @param $uuid
+     *
      * @return mixed
      * @throws Exception
      */
@@ -275,7 +278,7 @@ class TMSService {
         if ( $allMemories->responseStatus >= 400 || $allMemories->responseData[ 'status' ] == 2 ) {
             Log::doJsonLog( "Error response from TMX status check: " . $allMemories->responseData[ 'log' ] );
             //what the hell? No memories although I've just loaded some? Eject!
-            throw new Exception( 'Error: '. $this->formatErrorMessage($allMemories->responseData[ 'log' ]), -15 );
+            throw new Exception( 'Error: ' . $this->formatErrorMessage( $allMemories->responseData[ 'log' ] ), -15 );
         }
 
         switch ( $allMemories->responseData[ 'status' ] ) {
@@ -303,11 +306,11 @@ class TMSService {
 
     /**
      * @param $message
+     *
      * @return mixed
      */
-    private function formatErrorMessage($message)
-    {
-        if($message === "THE CHARACTER SET PROVIDED IS INVALID."){
+    private function formatErrorMessage( $message ) {
+        if ( $message === "THE CHARACTER SET PROVIDED IS INVALID." ) {
             return "The encoding of the TMX file uploaded is not valid, please open it in a text editor, convert its encoding to UTF-8 (character corruption might happen) and retry upload";
         }
 
@@ -344,10 +347,10 @@ class TMSService {
     /**
      * Send a mail with link for direct prepared download
      *
-     * @param $userMail
-     * @param $userName
-     * @param $userSurname
-     * @param $tm_key
+     * @param      $userMail
+     * @param      $userName
+     * @param      $userSurname
+     * @param      $tm_key
      * @param bool $strip_tags
      *
      * @return Engines_Results_MyMemory_ExportResponse
@@ -456,8 +459,8 @@ class TMSService {
                 }
             }
 
-            $contextPre = (isset($result[($k-1)])) ? $result[($k-1)]['segment'] : '';
-            $contextPost = (isset($result[($k+1)])) ? $result[($k+1)]['segment'] : '';
+            $contextPre  = ( isset( $result[ ( $k - 1 ) ] ) ) ? $result[ ( $k - 1 ) ][ 'segment' ] : '';
+            $contextPost = ( isset( $result[ ( $k + 1 ) ] ) ) ? $result[ ( $k + 1 ) ][ 'segment' ] : '';
 
             $tmx = '
     <tu tuid="' . $row[ 'id_segment' ] . '" creationdate="' . $dateCreate->format( 'Ymd\THis\Z' ) . '" datatype="plaintext" srclang="' . $sourceLang . '">
@@ -465,8 +468,8 @@ class TMSService {
         <prop type="x-MateCAT-id_segment">' . $row[ 'id_segment' ] . '</prop>
         <prop type="x-MateCAT-filename">' . htmlspecialchars( $row[ 'filename' ], ENT_DISALLOWED, "UTF-8" ) . '</prop>
         <prop type="x-MateCAT-status">' . $row[ 'status' ] . '</prop>
-        <prop type="x-context-pre">'.$contextPre.'</prop>
-        <prop type="x-context-post">'.$contextPost.'</prop>
+        <prop type="x-context-pre">' . $contextPre . '</prop>
+        <prop type="x-context-post">' . $contextPost . '</prop>
         ' . $chunkPropString . '
         ' . $tmOrigin . '
         <tuv xml:lang="' . $sourceLang . '">

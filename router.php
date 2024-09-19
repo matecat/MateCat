@@ -16,13 +16,20 @@ Bootstrap::start();
 
 $klein = new Klein();
 
-function route( $path, $method, $controller, $action ) {
+/**
+ * @param string $path
+ * @param string $method
+ * @param array  $callback
+ *
+ * @return void
+ */
+function route( string $path, string $method, array $callback ) {
     global $klein;
 
-    $klein->respond( $method, $path, function () use ( $controller, $action ) {
-        $reflect  = new ReflectionClass( $controller );
+    $klein->respond( $method, $path, function () use ( $callback ) {
+        $reflect  = new ReflectionClass( $callback[ 0 ] );
         $instance = $reflect->newInstanceArgs( func_get_args() );
-        $instance->respond( $action );
+        $instance->respond( $callback[ 1 ] );
     } );
 }
 
