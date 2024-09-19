@@ -64,7 +64,6 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
         $default->show_whitespace          = 0;
         $default->character_counter        = 0;
         $default->ai_assistant             = 0;
-        $default->team_id                  = 0;
         $default->subject                  = null;
         $default->source_language          = null;
         $default->target_language          = json_encode( [] );
@@ -387,9 +386,9 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
     public
     static function save( ProjectTemplateStruct $projectTemplateStruct ): ProjectTemplateStruct {
         $sql = "INSERT INTO " . self::TABLE .
-                " ( `name`, `is_default`, `uid`, `id_team`, `speech2text`, `lexica`, `tag_projection`, `cross_language_matches`, `segmentation_rule`, `tm`, `mt`, `payable_rate_template_id`,`qa_model_template_id`, `filters_template_id`, `xliff_config_template_id`, `pretranslate_100`, `pretranslate_101`, `get_public_matches`, `dictation`, `show_whitespace`, `character_counter`, `ai_assistant`, `team_id`, `subject`, `source_language`, `target_language`, `created_at` ) " .
+                " ( `name`, `is_default`, `uid`, `id_team`, `speech2text`, `lexica`, `tag_projection`, `cross_language_matches`, `segmentation_rule`, `tm`, `mt`, `payable_rate_template_id`,`qa_model_template_id`, `filters_template_id`, `xliff_config_template_id`, `pretranslate_100`, `pretranslate_101`, `get_public_matches`, `dictation`, `show_whitespace`, `character_counter`, `ai_assistant`, `subject`, `source_language`, `target_language`, `created_at` ) " .
                 " VALUES " .
-                " ( :name, :is_default, :uid, :id_team, :speech2text, :lexica, :tag_projection, :cross_language_matches, :segmentation_rule, :tm, :mt, :payable_rate_template_id, :qa_model_template_id, :filters_template_id, :xliff_config_template_id, :pretranslate_100, :pretranslate_101, :get_public_matches, :dictation, :show_whitespace, :character_counter, :ai_assistant, :team_id, :subject, :source_language, :target_language, :now ); ";
+                " ( :name, :is_default, :uid, :id_team, :speech2text, :lexica, :tag_projection, :cross_language_matches, :segmentation_rule, :tm, :mt, :payable_rate_template_id, :qa_model_template_id, :filters_template_id, :xliff_config_template_id, :pretranslate_100, :pretranslate_101, :get_public_matches, :dictation, :show_whitespace, :character_counter, :ai_assistant, :subject, :source_language, :target_language, :now ); ";
 
         $now = ( new DateTime() )->format( 'Y-m-d H:i:s' );
 
@@ -418,7 +417,6 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
                 "show_whitespace"          => $projectTemplateStruct->show_whitespace,
                 "character_counter"        => $projectTemplateStruct->character_counter,
                 "ai_assistant"             => $projectTemplateStruct->ai_assistant,
-                "team_id"                  => $projectTemplateStruct->team_id,
                 "subject"                  => $projectTemplateStruct->subject,
                 "source_language"          => $projectTemplateStruct->source_language,
                 "target_language"          => $projectTemplateStruct->target_language,
@@ -472,7 +470,6 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
             `show_whitespace` = :show_whitespace,
             `character_counter` = :character_counter,
             `ai_assistant` = :ai_assistant,
-            `team_id` = :team_id,
             `subject` = :subject,
             `source_language` = :source_language,
             `target_language` = :target_language,
@@ -505,7 +502,6 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
                 "show_whitespace"          => $projectTemplateStruct->show_whitespace,
                 "character_counter"        => $projectTemplateStruct->character_counter,
                 "ai_assistant"             => $projectTemplateStruct->ai_assistant,
-                "team_id"                  => $projectTemplateStruct->team_id,
                 "subject"                  => $projectTemplateStruct->subject,
                 "source_language"          => $projectTemplateStruct->source_language,
                 "target_language"          => $projectTemplateStruct->target_language,

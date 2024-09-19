@@ -33,7 +33,6 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
     public ?bool   $show_whitespace          = false;
     public ?bool   $character_counter        = false;
     public ?bool   $ai_assistant             = false;
-    public ?int    $team_id                  = null;
     public ?string $subject                  = null;
     public ?string $source_language          = null;
     public ?string $target_language          = null;
@@ -71,7 +70,6 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
         $this->show_whitespace          = $json->show_whitespace;
         $this->character_counter        = $json->character_counter;
         $this->ai_assistant             = $json->ai_assistant;
-        $this->team_id                  = $json->team_id;
         $this->subject                  = $json->subject;
         $this->source_language          = $json->source_language;
         $this->target_language          = (!empty($json->target_language)) ? serialize($json->target_language) : null;
@@ -160,7 +158,6 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
                 'show_whitespace'          => $this->show_whitespace,
                 'character_counter'        => $this->character_counter,
                 'ai_assistant'             => $this->ai_assistant,
-                'team_id'                  => $this->team_id,
                 'subject'                  => $this->subject,
                 'source_language'          => $this->source_language,
                 'target_language'          => $this->getTargetLanguage(),
