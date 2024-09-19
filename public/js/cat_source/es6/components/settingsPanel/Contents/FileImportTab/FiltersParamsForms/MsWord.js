@@ -1,4 +1,4 @@
-import React, {useContext, useEffect} from 'react'
+import React, {useContext, useEffect, useRef, useState} from 'react'
 import Switch from '../../../../common/Switch'
 import {WordsBadge} from '../../../../common/WordsBadge/WordsBadge'
 import {FiltersParamsContext} from '../FiltersParams'
@@ -9,23 +9,40 @@ export const MsWord = () => {
   const {currentTemplate, modifyingCurrentTemplate} =
     useContext(FiltersParamsContext)
 
-  const {control, watch} = useForm()
+  const {control, watch, setValue} = useForm()
 
-  const {msWord} = currentTemplate
+  const [formData, setFormData] = useState()
 
-  const propsValue = watch()
+  const msWord = useRef()
+  msWord.current = currentTemplate.msWord
+
+  const temporaryFormData = watch()
+  const previousData = useRef()
 
   useEffect(() => {
-    if (!isEqual(msWord, propsValue) && Object.keys(propsValue).length) {
+    if (!isEqual(temporaryFormData, previousData.current))
+      setFormData(temporaryFormData)
+
+    previousData.current = temporaryFormData
+  }, [temporaryFormData])
+
+  useEffect(() => {
+    if (typeof formData === 'undefined') return
+
+    if (!isEqual(msWord.current, formData) && Object.keys(formData).length) {
       modifyingCurrentTemplate((prevTemplate) => ({
         ...prevTemplate,
-        msWord: {
-          exclude_highlight_colors: [],
-          ...propsValue,
-        },
+        msWord: formData,
       }))
     }
-  }, [propsValue, msWord, modifyingCurrentTemplate])
+  }, [formData, modifyingCurrentTemplate, setValue])
+
+  // set default values for current template
+  useEffect(() => {
+    Object.entries(msWord.current).forEach(([key, value]) =>
+      setValue(key, value),
+    )
+  }, [currentTemplate.id, setValue])
 
   return (
     <div className="filters-params-accordion-content">
@@ -40,7 +57,6 @@ export const MsWord = () => {
         </div>
         <Controller
           control={control}
-          defaultValue={msWord.extract_headers_footers}
           name="extract_headers_footers"
           render={({field: {onChange, value, name}}) => (
             <Switch name={name} active={value} onChange={onChange} />
@@ -59,7 +75,6 @@ export const MsWord = () => {
         </div>
         <Controller
           control={control}
-          defaultValue={msWord.extract_hidden_text}
           name="extract_hidden_text"
           render={({field: {onChange, value, name}}) => (
             <Switch name={name} active={value} onChange={onChange} />
@@ -78,7 +93,6 @@ export const MsWord = () => {
         </div>
         <Controller
           control={control}
-          defaultValue={msWord.extract_comments}
           name="extract_comments"
           render={({field: {onChange, value, name}}) => (
             <Switch name={name} active={value} onChange={onChange} />
@@ -97,7 +111,6 @@ export const MsWord = () => {
         </div>
         <Controller
           control={control}
-          defaultValue={msWord.extract_doc_properties}
           name="extract_doc_properties"
           render={({field: {onChange, value, name}}) => (
             <Switch name={name} active={value} onChange={onChange} />
@@ -116,7 +129,6 @@ export const MsWord = () => {
         </div>
         <Controller
           control={control}
-          defaultValue={msWord.accept_revisions}
           name="accept_revisions"
           render={({field: {onChange, value, name}}) => (
             <Switch name={name} active={value} onChange={onChange} />
@@ -135,7 +147,6 @@ export const MsWord = () => {
         </div>
         <Controller
           control={control}
-          defaultValue={msWord.exclude_styles}
           name="exclude_styles"
           render={({field: {onChange, value, name}}) => (
             <WordsBadge
@@ -159,7 +170,6 @@ export const MsWord = () => {
         </div>
         <Controller
           control={control}
-          defaultValue={msWord.exclude_highlight_colors}
           name="exclude_highlight_colors"
           render={({field: {onChange, value, name}}) => (
             <WordsBadge

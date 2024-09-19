@@ -19,6 +19,14 @@
   }
 }
 
+.file-import-tab-header {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  width: 100%;
+  background-color: $grey5;
+}
+
 /* Filters params */
 .filters-params-accordion-group {
   display: flex;

@@ -12,7 +12,7 @@ const SEGMENTED_CONTROL_OPTIONS = [
 ]
 
 export const Json = () => {
-  const {currentTemplate, modifyingCurrentTemplate, templates} =
+  const {currentTemplate, modifyingCurrentTemplate} =
     useContext(FiltersParamsContext)
 
   const {control, watch, setValue} = useForm()
@@ -24,10 +24,6 @@ export const Json = () => {
 
   const temporaryFormData = watch()
   const previousData = useRef()
-
-  const originalCurrentTemplate = templates.find(
-    ({id, isTemporary}) => id === currentTemplate.id && !isTemporary,
-  )
 
   useEffect(() => {
     if (!isEqual(temporaryFormData, previousData.current))

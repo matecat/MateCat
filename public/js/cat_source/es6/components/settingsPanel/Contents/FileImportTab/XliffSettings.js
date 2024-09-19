@@ -3,25 +3,19 @@ import {SettingsPanelContext} from '../../SettingsPanelContext'
 import CatToolActions from '../../../../actions/CatToolActions'
 import ModalsActions from '../../../../actions/ModalsActions'
 import {ConfirmDeleteResourceProjectTemplates} from '../../../modals/ConfirmDeleteResourceProjectTemplates'
-import {getFiltersParamsTemplates} from '../../../../api/getFiltersParamsTemplates'
 import {SubTemplates} from '../SubTemplates'
 import {SCHEMA_KEYS} from '../../../../hooks/useProjectTemplates'
-import {createFiltersParamsTemplate} from '../../../../api/createFiltersParamsTemplate/createFiltersParamsTemplate'
-import {updateFiltersParamsTemplate} from '../../../../api/updateFiltersParamsTemplate/updateFiltersParamsTemplate'
-import {deleteFiltersParamsTemplate} from '../../../../api/deleteFiltersParamsTemplate/deleteFiltersParamsTemplate'
-import {AccordionGroupFiltersParams} from './AccordionGroupFiltersParams'
-import defaultFiltersParams from '../defaultTemplates/filterParams.json'
+import {getXliffSettingsTemplates} from '../../../../api/getXliffSettingsTemplates/getXliffSettingsTemplates'
+import defaultXliffSettings from '../defaultTemplates/xliffSettings.json'
+import {createXliffSettingsTemplate} from '../../../../api/createXliffSettingsTemplate/createXliffSettingsTemplate'
+import {updateXliffSettingsTemplate} from '../../../../api/updateXliffSettingsTemplate/updateXliffSettingsTemplate'
+import {deleteXliffSettingsTemplate} from '../../../../api/deleteXliffSettingsTemplate/deleteXliffSettingsTemplate'
 
-export const FILTERS_PARAMS_SCHEMA_KEYS = {
+export const XLIFF_SETTINGS_SCHEMA_KEYS = {
   id: 'id',
   uid: 'uid',
   name: 'name',
-  xml: 'xml',
-  yaml: 'yaml',
-  json: 'json',
-  msWord: 'ms_word',
-  msExcel: 'ms_excel',
-  msPowerpoint: 'ms_powerpoint',
+  rules: 'xml',
   createdAt: 'created_at',
   modifiedAt: 'modified_at',
 }
@@ -57,22 +51,22 @@ const getFilteredSchemaToCompare = (template) => {
   /* eslint-enable no-unused-vars */
 }
 
-export const FiltersParamsContext = createContext({})
+export const XliffSettingsContext = createContext({})
 
-export const FiltersParams = () => {
+export const XliffSettings = () => {
   const {
     currentProjectTemplate,
     modifyingCurrentTemplate: modifyingCurrentProjectTemplate,
-    fileImportFiltersParamsTemplates,
+    fileImportXliffSettingsTemplates,
     portalTarget,
   } = useContext(SettingsPanelContext)
 
   const {templates, setTemplates, currentTemplate, modifyingCurrentTemplate} =
-    fileImportFiltersParamsTemplates
+    fileImportXliffSettingsTemplates
 
   const currentTemplateId = currentTemplate?.id
   const currentProjectTemplateFiltersId =
-    currentProjectTemplate.filtersTemplateId
+    currentProjectTemplate.XliffConfigTemplateId
   const prevCurrentProjectTemplateFiltersId = useRef()
 
   const saveErrorCallback = (error) => {
@@ -109,8 +103,8 @@ export const FiltersParams = () => {
     let cleanup = false
 
     if (config.isLoggedIn === 1 && !config.is_cattool) {
-      getFiltersParamsTemplates().then((templates) => {
-        const items = [defaultFiltersParams, ...templates.items]
+      getXliffSettingsTemplates().then((templates) => {
+        const items = [defaultXliffSettings, ...templates.items]
         if (!cleanup) {
           const selectedTemplateId =
             items.find(({id}) => id === currentProjectTemplateFiltersId)?.id ??
@@ -151,7 +145,7 @@ export const FiltersParams = () => {
     )
       modifyingCurrentProjectTemplate((prevTemplate) => ({
         ...prevTemplate,
-        filtersTemplateId: currentTemplateId,
+        XliffConfigTemplateId: currentTemplateId,
       }))
 
     prevCurrentProjectTemplateFiltersId.current =
@@ -163,17 +157,17 @@ export const FiltersParams = () => {
   ])
 
   return (
-    <FiltersParamsContext.Provider
+    <XliffSettingsContext.Provider
       value={{templates, currentTemplate, modifyingCurrentTemplate}}
     >
       {templates.length > 0 && (
         <div className="settings-panel-box">
           <div className="file-import-tab settings-panel-contentwrapper-tab-background">
             <div className="file-import-tab-header">
-              <h2>Extraction parameters</h2>
+              <h2>Xliff import settings</h2>
               <p>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc
-                vulputate libero et velit interdum, ac aliquet odio mattis.
+                Set rules for the import of Xliff 1.2 and 2.0 files to decide
+                Matecat’s behavior for segments with different states.
               </p>
               <SubTemplates
                 {...{
@@ -182,22 +176,21 @@ export const FiltersParams = () => {
                   currentTemplate,
                   modifyingCurrentTemplate,
                   portalTarget,
-                  schema: FILTERS_PARAMS_SCHEMA_KEYS,
-                  propConnectProjectTemplate: SCHEMA_KEYS.filtersTemplateId,
+                  schema: XLIFF_SETTINGS_SCHEMA_KEYS,
+                  propConnectProjectTemplate: SCHEMA_KEYS.XliffConfigTemplateId,
                   getFilteredSchemaCreateUpdate,
                   getFilteredSchemaToCompare,
                   getModalTryingSaveIdenticalSettingsTemplate,
-                  createApi: createFiltersParamsTemplate,
-                  updateApi: updateFiltersParamsTemplate,
-                  deleteApi: deleteFiltersParamsTemplate,
+                  createApi: createXliffSettingsTemplate,
+                  updateApi: updateXliffSettingsTemplate,
+                  deleteApi: deleteXliffSettingsTemplate,
                   saveErrorCallback,
                 }}
               />
             </div>
-            <AccordionGroupFiltersParams />
           </div>
         </div>
       )}
-    </FiltersParamsContext.Provider>
+    </XliffSettingsContext.Provider>
   )
 }

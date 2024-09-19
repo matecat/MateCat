@@ -34,6 +34,7 @@ export const EmailsBadge = ({
   value = [],
   validatePattern = EMAIL_PATTERN,
   placeholder,
+  disabled,
   error,
 }) => {
   const areaRef = useRef()
@@ -197,7 +198,7 @@ export const EmailsBadge = ({
     )
   }
   return (
-    <div className="email-badge">
+    <div className={`email-badge${disabled ? ' email-badge-disabled' : ''}`}>
       <div
         ref={areaRef}
         className="email-badge-fakeInput"
@@ -219,6 +220,7 @@ export const EmailsBadge = ({
           <input
             ref={inputRef}
             name={name}
+            disabled={disabled}
             data-testid="email-input"
             value={inputValue}
             autoComplete="off"
@@ -242,5 +244,6 @@ EmailsBadge.propTypes = {
   value: PropTypes.arrayOf(PropTypes.string),
   validatePattern: PropTypes.object,
   placeholder: PropTypes.string,
+  disabled: PropTypes.bool,
   error: PropTypes.object,
 }

@@ -116,3 +116,8 @@
   display: flex;
   cursor: pointer;
 }
+
+.email-badge-disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}

@@ -19,6 +19,7 @@ import CreateProjectStore from '../../stores/CreateProjectStore'
 import NewProjectConstants from '../../constants/NewProjectConstants'
 import {FileImportTab} from './Contents/FileImportTab/FileImportTab'
 import {FILTERS_PARAMS_SCHEMA_KEYS} from './Contents/FileImportTab/FiltersParams'
+import {XLIFF_SETTINGS_SCHEMA_KEYS} from './Contents/FileImportTab/XliffSettings'
 
 let tabOpenFromQueryString = new URLSearchParams(window.location.search).get(
   'openTab',
@@ -159,7 +160,9 @@ export const SettingsPanel = ({
   const fileImportFiltersParamsTemplates = useTemplates(
     FILTERS_PARAMS_SCHEMA_KEYS,
   )
-  // const fileImportXliffConfigTemplates = useTemplates(FILTERS_PARAMS_SCHEMA_KEYS)
+  const fileImportXliffSettingsTemplates = useTemplates(
+    XLIFF_SETTINGS_SCHEMA_KEYS,
+  )
 
   const wrapperRef = useRef()
 
@@ -295,6 +298,7 @@ export const SettingsPanel = ({
         qualityFrameworkTemplates,
         analysisTemplates,
         fileImportFiltersParamsTemplates,
+        fileImportXliffSettingsTemplates,
       }}
     >
       <div

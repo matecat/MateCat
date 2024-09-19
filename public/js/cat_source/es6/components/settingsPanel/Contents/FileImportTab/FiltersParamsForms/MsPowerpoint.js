@@ -1,4 +1,4 @@
-import React, {useContext, useEffect} from 'react'
+import React, {useContext, useEffect, useRef, useState} from 'react'
 import Switch from '../../../../common/Switch'
 import {WordsBadge} from '../../../../common/WordsBadge/WordsBadge'
 import {FiltersParamsContext} from '../FiltersParams'
@@ -9,25 +9,58 @@ export const MsPowerpoint = () => {
   const {currentTemplate, modifyingCurrentTemplate} =
     useContext(FiltersParamsContext)
 
-  const {control, watch, register, unregister} = useForm()
+  const {control, watch, setValue} = useForm()
 
-  const {msPowerpoint} = currentTemplate
+  const [formData, setFormData] = useState()
 
-  const propsValue = watch()
+  const msPowerpoint = useRef()
+  msPowerpoint.current = currentTemplate.msPowerpoint
+
+  const temporaryFormData = watch()
+  const previousData = useRef()
 
   useEffect(() => {
-    if (!isEqual(msPowerpoint, propsValue) && Object.keys(propsValue).length) {
+    if (!isEqual(temporaryFormData, previousData.current))
+      setFormData(temporaryFormData)
+
+    previousData.current = temporaryFormData
+  }, [temporaryFormData])
+
+  useEffect(() => {
+    if (typeof formData === 'undefined') return
+
+    const {translate_slides, extract_hidden_slides, ...propsValue} = formData
+
+    const restPropsValue = {
+      ...propsValue,
+      ...(extract_hidden_slides ? {translate_slides} : {extract_hidden_slides}),
+    }
+
+    if (
+      !isEqual(msPowerpoint.current, restPropsValue) &&
+      Object.keys(restPropsValue).length
+    ) {
       modifyingCurrentTemplate((prevTemplate) => ({
         ...prevTemplate,
-        msPowerpoint: propsValue,
+        msPowerpoint: restPropsValue,
       }))
     }
-  }, [propsValue, msPowerpoint, modifyingCurrentTemplate])
+  }, [formData, modifyingCurrentTemplate, setValue])
 
+  // set default values for current template
   useEffect(() => {
-    if (propsValue?.extract_hidden_slides) register('translate_slides')
-    else unregister('translate_slides')
-  }, [propsValue?.extract_hidden_slides, register, unregister])
+    Object.entries(msPowerpoint.current).forEach(([key, value]) =>
+      setValue(key, value),
+    )
+    if (Array.isArray(msPowerpoint.current.translate_slides))
+      setValue('extract_hidden_slides', true)
+
+    if (
+      typeof msPowerpoint.current.extract_hidden_slides === 'boolean' &&
+      !msPowerpoint.current.extract_hidden_slides
+    )
+      setValue('translate_slides', [])
+  }, [currentTemplate.id, setValue])
 
   return (
     <div className="filters-params-accordion-content">
@@ -42,7 +75,6 @@ export const MsPowerpoint = () => {
         </div>
         <Controller
           control={control}
-          defaultValue={msPowerpoint.extract_hidden_slides}
           name="extract_hidden_slides"
           render={({field: {onChange, value, name}}) => (
             <Switch name={name} active={value} onChange={onChange} />
@@ -61,7 +93,6 @@ export const MsPowerpoint = () => {
         </div>
         <Controller
           control={control}
-          defaultValue={msPowerpoint.extract_notes}
           name="extract_notes"
           render={({field: {onChange, value, name}}) => (
             <Switch name={name} active={value} onChange={onChange} />
@@ -80,7 +111,6 @@ export const MsPowerpoint = () => {
         </div>
         <Controller
           control={control}
-          defaultValue={msPowerpoint.extract_doc_properties}
           name="extract_doc_properties"
           render={({field: {onChange, value, name}}) => (
             <Switch name={name} active={value} onChange={onChange} />
@@ -88,31 +118,30 @@ export const MsPowerpoint = () => {
         />
       </div>
 
-      {propsValue?.extract_hidden_slides && (
-        <div className="filters-params-option">
-          <div>
-            <h3>Translatable slides</h3>
-            <p>
-              Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
-              pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
-              condimentum.
-            </p>
-          </div>
-          <Controller
-            control={control}
-            defaultValue={msPowerpoint.translate_slides}
-            name="translate_slides"
-            render={({field: {onChange, value, name}}) => (
-              <WordsBadge
-                name={name}
-                value={value}
-                onChange={onChange}
-                placeholder={''}
-              />
-            )}
-          />
+      <div className="filters-params-option">
+        <div>
+          <h3>Translatable slides</h3>
+          <p>
+            Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
+            pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
+            condimentum.
+          </p>
         </div>
-      )}
+        <Controller
+          control={control}
+          name="translate_slides"
+          disabled={!formData?.extract_hidden_slides}
+          render={({field: {onChange, value, name}}) => (
+            <WordsBadge
+              name={name}
+              value={value}
+              onChange={onChange}
+              placeholder={''}
+              disabled={!formData?.extract_hidden_slides}
+            />
+          )}
+        />
+      </div>
     </div>
   )
 }

@@ -1,4 +1,4 @@
-import React, {useContext, useEffect} from 'react'
+import React, {useContext, useEffect, useRef, useState} from 'react'
 import Switch from '../../../../common/Switch'
 import {FiltersParamsContext} from '../FiltersParams'
 import {Controller, useForm} from 'react-hook-form'
@@ -8,20 +8,40 @@ export const MsExcel = () => {
   const {currentTemplate, modifyingCurrentTemplate} =
     useContext(FiltersParamsContext)
 
-  const {control, watch} = useForm()
+  const {control, watch, setValue} = useForm()
 
-  const {msExcel} = currentTemplate
+  const [formData, setFormData] = useState()
 
-  const propsValue = watch()
+  const msExcel = useRef()
+  msExcel.current = currentTemplate.msExcel
+
+  const temporaryFormData = watch()
+  const previousData = useRef()
 
   useEffect(() => {
-    if (!isEqual(msExcel, propsValue) && Object.keys(propsValue).length) {
+    if (!isEqual(temporaryFormData, previousData.current))
+      setFormData(temporaryFormData)
+
+    previousData.current = temporaryFormData
+  }, [temporaryFormData])
+
+  useEffect(() => {
+    if (typeof formData === 'undefined') return
+
+    if (!isEqual(msExcel.current, formData) && Object.keys(formData).length) {
       modifyingCurrentTemplate((prevTemplate) => ({
         ...prevTemplate,
-        msExcel: propsValue,
+        msExcel: formData,
       }))
     }
-  }, [propsValue, msExcel, modifyingCurrentTemplate])
+  }, [formData, modifyingCurrentTemplate, setValue])
+
+  // set default values for current template
+  useEffect(() => {
+    Object.entries(msExcel.current).forEach(([key, value]) =>
+      setValue(key, value),
+    )
+  }, [currentTemplate.id, setValue])
 
   return (
     <div className="filters-params-accordion-content">
@@ -36,7 +56,6 @@ export const MsExcel = () => {
         </div>
         <Controller
           control={control}
-          defaultValue={msExcel.extract_hidden_cells}
           name="extract_hidden_cells"
           render={({field: {onChange, value, name}}) => (
             <Switch name={name} active={value} onChange={onChange} />
@@ -55,7 +74,6 @@ export const MsExcel = () => {
         </div>
         <Controller
           control={control}
-          defaultValue={msExcel.extract_drawings}
           name="extract_drawings"
           render={({field: {onChange, value, name}}) => (
             <Switch name={name} active={value} onChange={onChange} />
@@ -74,7 +92,6 @@ export const MsExcel = () => {
         </div>
         <Controller
           control={control}
-          defaultValue={msExcel.extract_sheet_names}
           name="extract_sheet_names"
           render={({field: {onChange, value, name}}) => (
             <Switch name={name} active={value} onChange={onChange} />
@@ -93,7 +110,6 @@ export const MsExcel = () => {
         </div>
         <Controller
           control={control}
-          defaultValue={msExcel.extract_doc_properties}
           name="extract_doc_properties"
           render={({field: {onChange, value, name}}) => (
             <Switch name={name} active={value} onChange={onChange} />

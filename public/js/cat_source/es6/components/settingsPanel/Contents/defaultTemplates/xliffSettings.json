@@ -1,0 +1,33 @@
+{
+  "id": 0,
+  "uid": 1,
+  "name": "default",
+  "rules": {
+    "xliff12": [
+      {
+        "states": ["new", "translated", "needs-translation"],
+        "analysis": "new"
+      },
+      {
+        "states": ["needs-review-adaptation", "needs-review-l10n"],
+        "analysis": "pre-translated",
+        "editor": "translated",
+        "match_category": "50_74"
+      },
+      {
+        "states": ["signed-off", "final"],
+        "analysis": "pre-translated",
+        "editor": "approved",
+        "match_category": "ice"
+      }
+    ],
+    "xliff20": [
+      {
+        "states": ["final"],
+        "analysis": "new"
+      }
+    ]
+  },
+  "createdAt": "2024-07-29T17:18:05+02:00",
+  "modifiedAt": "2024-08-08T15:44:45+02:00"
+}

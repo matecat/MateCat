@@ -7,11 +7,20 @@ export const WordsBadge = ({
   onChange,
   value = [],
   placeholder,
+  disabled,
   error,
 }) => {
   return (
     <EmailsBadge
-      {...{name, onChange, value, validatePattern: /./, placeholder, error}}
+      {...{
+        name,
+        onChange,
+        value,
+        validatePattern: /./,
+        placeholder,
+        disabled,
+        error,
+      }}
     />
   )
 }

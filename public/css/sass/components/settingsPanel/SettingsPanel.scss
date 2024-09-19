@@ -344,7 +344,7 @@
 .settings-panel-subtemplates {
   position: sticky;
   top: 0;
-  z-index: 1;
+  z-index: 2;
   background-color: $white;
   width: 100%;
   padding: 0 0 10px;
@@ -384,4 +384,11 @@
   .settings-panel-contentwrapper-tab-background {
     text-align: left;
   }
+}
+
+.settings-panel-file-import-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  background-color: $grey5;
 }
