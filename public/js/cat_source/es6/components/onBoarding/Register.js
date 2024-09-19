@@ -68,7 +68,8 @@ const Register = () => {
     <div className="register-component-confirm-registration">
       <h2>Confirm registration</h2>
       <p>
-        {`To complete your registration please follow the instructions in the email we sent you to ${(<strong>{getValues('email')}</strong>)}`}
+        To complete your registration please follow the instructions in the
+        email we sent you to <strong>{getValues('email')}</strong>
       </p>
       <div className="footer-buttons">
         <Button type={BUTTON_TYPE.PRIMARY} onClick={redirectAfterLogin}>
