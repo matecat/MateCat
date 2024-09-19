@@ -362,3 +362,11 @@ a.ui.basic.blue.label:hover {
 .ui.grid.border-box * {
   box-sizing: border-box;
 }
+
+//Old semantic style
+button, input, optgroup, select, textarea {
+  font-family: inherit;
+  font-size: 100%;
+  line-height: 1.15;
+  margin: 0;
+}

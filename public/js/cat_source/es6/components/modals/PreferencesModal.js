@@ -89,8 +89,10 @@ const PreferencesModal = (props) => {
           const connectedServices = UserStore.updateConnectedService(
             data.connected_service,
           )
-
-          setService(connectedServices)
+          const defaultService = connectedServices.find((item) => {
+            return item.is_default
+          })
+          setService(defaultService)
         })
       }
     }
@@ -331,7 +333,7 @@ const PreferencesModal = (props) => {
   }
 
   let services_label = 'Allow Matecat to access your files on Google Drive'
-  if (service && (!service.disabled_at || !service.expired_at)) {
+  if (service && !service.disabled_at && !service.expired_at) {
     services_label = `Connected to Google Drive (${service.email})`
   }
 
@@ -347,10 +349,13 @@ const PreferencesModal = (props) => {
   let avatar = (
     <div className="avatar-user pull-left">{config.userShortName}</div>
   )
-  if (metadata.gplus_picture) {
+  if (metadata && metadata[`${metadata.oauth_provider}_picture`]) {
     avatar = (
       <div className="avatar-user pull-left">
-        <img src={metadata.gplus_picture} style={{width: '48px'}} />
+        <img
+          src={metadata[`${metadata.oauth_provider}_picture`]}
+          style={{width: '48px'}}
+        />
       </div>
     )
   }
