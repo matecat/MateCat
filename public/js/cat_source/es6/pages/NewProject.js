@@ -795,7 +795,11 @@ const NewProject = () => {
                 }
                 activeOption={selectedTeam}
                 checkSpaceToReverse={false}
-                isDisabled={!isUserLogged || userInfo?.teams.length === 1 || !projectTemplates.length}
+                isDisabled={
+                  !isUserLogged ||
+                  userInfo?.teams.length === 1 ||
+                  !projectTemplates.length
+                }
                 onSelect={(option) => setSelectedTeam(option)}
               />
             </div>
@@ -963,7 +967,7 @@ const NewProject = () => {
           }}
         />
       )}
-      {projectTemplates.length && (
+      {projectTemplates.length > 0 && (
         <SettingsPanel
           {...{
             onClose: closeSettings,

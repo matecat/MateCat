@@ -89,8 +89,10 @@ const PreferencesModal = (props) => {
           const connectedServices = UserStore.updateConnectedService(
             data.connected_service,
           )
-
-          setService(connectedServices)
+          const defaultService = connectedServices.find((item) => {
+            return item.is_default
+          })
+          setService(defaultService)
         })
       }
     }
@@ -331,7 +333,7 @@ const PreferencesModal = (props) => {
   }
 
   let services_label = 'Allow Matecat to access your files on Google Drive'
-  if (service && (!service.disabled_at || !service.expired_at)) {
+  if (service && !service.disabled_at && !service.expired_at) {
     services_label = `Connected to Google Drive (${service.email})`
   }
 

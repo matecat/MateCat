@@ -91,10 +91,10 @@ const UserStore = assign({}, EventEmitter.prototype, {
       const selectable = this.userInfo.connected_services.filter((item) => {
         return !item.expired_at && !item.disabled_at
       })
-      const defaults = selectable.filter((item) => {
+      const defaultService = selectable.find((item) => {
         return item.is_default
       })
-      return defaults[0] || selectable[0]
+      return defaultService || selectable[0]
     }
   },
   updateConnectedService: function (input_service) {
