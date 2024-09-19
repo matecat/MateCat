@@ -160,6 +160,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
      * @throws Exception
      */
     private static function checkValues( ProjectTemplateStruct $projectTemplateStruct ) {
+
         // check id_team
         $teamDao      = new TeamDao();
         $personalTeam = $teamDao->getPersonalByUid( $projectTemplateStruct->uid );
@@ -172,6 +173,19 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
             }
 
             if ( !$team->hasUser( $projectTemplateStruct->uid ) ) {
+                throw new Exception( "This user does not belong to this group.", 403 );
+            }
+        }
+
+        if($projectTemplateStruct->id_team !== null and $projectTemplateStruct->id_team > 0){
+
+            $team = $teamDao->findById($projectTemplateStruct->id_team);
+
+            if ( $team === null ) {
+                throw new Exception( "Group with id ".$projectTemplateStruct->id_team." not found.", 404 );
+            }
+
+            if ( $team->type !== 'personal' and !$team->hasUser( $projectTemplateStruct->uid ) ) {
                 throw new Exception( "This user does not belong to this group.", 403 );
             }
         }
