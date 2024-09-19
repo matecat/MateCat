@@ -10,7 +10,7 @@ class AlterTemplateProjectTable extends AbstractMatecatMigration {
         'ALTER TABLE `project_templates` add column `team_id` INT(11) NULL DEFAULT NULL;',
         'ALTER TABLE `project_templates` add column `subject` VARCHAR(255) NULL DEFAULT NULL;',
         'ALTER TABLE `project_templates` add column `source_language` VARCHAR(45) NULL DEFAULT NULL;',
-        'ALTER TABLE `project_templates` add column `target_language` VARCHAR(45) NULL DEFAULT NULL;',
+        'ALTER TABLE `project_templates` add column `target_language` VARCHAR(255) NULL DEFAULT NULL;',
     ];
 
     public $sql_down = [

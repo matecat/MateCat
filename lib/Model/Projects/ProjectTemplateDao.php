@@ -8,6 +8,7 @@ use DateTime;
 use Engine;
 use Exception;
 use Filters\FiltersConfigTemplateDao;
+use Langs_Languages;
 use Pagination\Pager;
 use Pagination\PaginationParameters;
 use PayableRates\CustomPayableRateDao;
@@ -20,6 +21,7 @@ use Teams\TeamDao;
 use TmKeyManagement_MemoryKeyDao;
 use TmKeyManagement_MemoryKeyStruct;
 use TmKeyManagement_TmKeyStruct;
+use Utils;
 use Xliff\XliffConfigTemplateDao;
 
 class ProjectTemplateDao extends DataAccess_AbstractDao {
@@ -175,8 +177,33 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
             }
         }
 
-        // @TODO check source_language
-        // @TODO check target_language
+        if($projectTemplateStruct->source_language !== null){
+            $languages = Langs_Languages::getInstance();
+            $language  = Utils::trimAndLowerCase( $projectTemplateStruct->source_language );
+
+            if ( !in_array( $language, $languages->allowedLanguages() ) ) {
+                throw new Exception( $language . ' is not an allowed language', 403 );
+            }
+        }
+
+        if($projectTemplateStruct->target_language !== null){
+
+            $targetLanguages = unserialize($projectTemplateStruct->target_language);
+
+            if(!is_array($targetLanguages)){
+                throw new Exception("target language is not an array", 403);
+            }
+
+            $languages = Langs_Languages::getInstance();
+
+            foreach ($targetLanguages as $language){
+                $language  = Utils::trimAndLowerCase($language);
+
+                if ( !in_array( $language, $languages->allowedLanguages() ) ) {
+                    throw new Exception( $language . ' is not an allowed language', 403 );
+                }
+            }
+        }
 
         // check xliff_config_template_id
         if ( $projectTemplateStruct->xliff_config_template_id > 0 ) {
@@ -394,7 +421,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
                 "team_id"                  => $projectTemplateStruct->team_id,
                 "subject"                  => $projectTemplateStruct->subject,
                 "source_language"          => $projectTemplateStruct->source_language,
-                "target_language"          => implode(",", $projectTemplateStruct->target_language),
+                "target_language"          => $projectTemplateStruct->target_language,
                 'now'                      => ( new DateTime() )->format( 'Y-m-d H:i:s' ),
         ] );
 
@@ -481,7 +508,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
                 "team_id"                  => $projectTemplateStruct->team_id,
                 "subject"                  => $projectTemplateStruct->subject,
                 "source_language"          => $projectTemplateStruct->source_language,
-                "target_language"          => implode(",", $projectTemplateStruct->target_language),
+                "target_language"          => $projectTemplateStruct->target_language,
                 'now'                      => ( new DateTime() )->format( 'Y-m-d H:i:s' ),
         ] );
 

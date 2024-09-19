@@ -29,11 +29,11 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
     public bool    $get_public_matches       = true;
     public string  $created_at;
     public ?string $modified_at              = null;
-    public ?int    $dictation                = 0;
-    public ?int    $show_whitespace          = 0;
-    public ?int    $character_counter        = 0;
-    public ?int    $ai_assistant             = 0;
-    public ?int    $team_id                  = 0;
+    public ?bool   $dictation                = false;
+    public ?bool   $show_whitespace          = false;
+    public ?bool   $character_counter        = false;
+    public ?bool   $ai_assistant             = false;
+    public ?int    $team_id                  = null;
     public ?string $subject                  = null;
     public ?string $source_language          = null;
     public ?string $target_language          = null;
@@ -124,6 +124,11 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
     }
 
     public function getTargetLanguage(): array {
+
+        if(empty($this->target_language)){
+            return [];
+        }
+
         return unserialize($this->target_language);
     }
 
