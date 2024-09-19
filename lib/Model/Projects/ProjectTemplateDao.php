@@ -175,6 +175,9 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
             }
         }
 
+        // @TODO check source_language
+        // @TODO check target_language
+
         // check xliff_config_template_id
         if ( $projectTemplateStruct->xliff_config_template_id > 0 ) {
             $xliffConfigModel = XliffConfigTemplateDao::getByIdAndUser( $projectTemplateStruct->xliff_config_template_id, $projectTemplateStruct->uid );
