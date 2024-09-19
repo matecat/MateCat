@@ -20,7 +20,9 @@ export const UserMenu = () => {
 
   const loggedRender = () => {
     const {metadata, user} = userInfo
-    const avatarImg = metadata ? (metadata[`${metadata.oauth_provider}_picture`] ?? null) : null
+    const avatarImg = metadata
+      ? (metadata[`${metadata.oauth_provider}_picture`] ?? null)
+      : null
 
     const openManage = () => {
       document.location.href = '/manage'
@@ -62,12 +64,18 @@ export const UserMenu = () => {
       >
         <div className="user-menu-popover-content">
           <div className="user-info">
-            <img
-              className="user-avatar"
-              src={`${avatarImg}?sz=80`}
-              title="Personal settings"
-              alt="Profile picture"
-            />
+            {avatarImg ? (
+              <img
+                className="user-avatar"
+                src={`${avatarImg}?sz=80`}
+                title="Personal settings"
+                alt="Profile picture"
+              />
+            ) : (
+              <div className="ui user circular image ui-user-top-image user-avatar">
+                {CommonUtils.getUserShortName(userInfo.user)}
+              </div>
+            )}
             <div className="user-name-and-email">
               <div>{`${user.first_name} ${user.last_name}`}</div>
               <div>{user.email}</div>

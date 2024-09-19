@@ -6,6 +6,7 @@ import UserStore from '../stores/UserStore'
 import UserConstants from '../constants/UserConstants'
 import CommonUtils from '../utils/commonUtils'
 import {isEqual} from 'lodash'
+import {logoutUser} from '../api/logoutUser'
 
 export const USER_LOGIN_COOKIE = 'matecat_login_v6'
 
@@ -39,6 +40,7 @@ function useAuth() {
       return JSON.parse(atob(jwt.split('.')[1])).context
     } catch (e) {
       console.log('Errore parsing user Token', e)
+      return null
     }
   }
 

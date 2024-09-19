@@ -349,10 +349,13 @@ const PreferencesModal = (props) => {
   let avatar = (
     <div className="avatar-user pull-left">{config.userShortName}</div>
   )
-  if (metadata.gplus_picture) {
+  if (metadata && metadata[`${metadata.oauth_provider}_picture`]) {
     avatar = (
       <div className="avatar-user pull-left">
-        <img src={metadata.gplus_picture} style={{width: '48px'}} />
+        <img
+          src={metadata[`${metadata.oauth_provider}_picture`]}
+          style={{width: '48px'}}
+        />
       </div>
     )
   }
