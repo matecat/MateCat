@@ -1,6 +1,6 @@
 <?php
 
-namespace Authentication;
+namespace API\Commons\Authentication;
 
 use CookieManager;
 use DomainException;

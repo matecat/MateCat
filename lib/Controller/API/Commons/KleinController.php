@@ -4,9 +4,9 @@ namespace API\Commons;
 
 use AbstractControllers\IController;
 use AbstractControllers\TimeLogger;
+use API\Commons\Authentication\AuthenticationTrait;
 use API\Commons\Validators\Base;
 use ApiKeys_ApiKeyStruct;
-use Authentication\AuthenticationTrait;
 use Exception;
 use FeatureSet;
 use Klein\Request;

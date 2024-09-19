@@ -1,6 +1,6 @@
 <?php
 
-use Authentication\AuthCookie;
+use API\Commons\Authentication\AuthCookie;
 use ConnectedServices\OauthTokenEncryption;
 use Email\WelcomeEmail;
 use Teams\TeamDao;

@@ -1,5 +1,6 @@
 <?php
 
+use API\Commons\BaseKleinViewController;
 use ConnectedServices\ConnectedServiceUserModel;
 use ConnectedServices\OauthClient;
 

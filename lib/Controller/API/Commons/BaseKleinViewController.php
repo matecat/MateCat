@@ -1,7 +1,11 @@
 <?php
 
+namespace API\Commons;
+
 use AbstractControllers\IController;
-use API\Commons\AbstractStatefulKleinController;
+use INIT;
+use PHPTALWithAppend;
+use Utils;
 
 /**
  * Created by PhpStorm.
