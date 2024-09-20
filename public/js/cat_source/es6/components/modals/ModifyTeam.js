@@ -97,7 +97,7 @@ export const ModifyTeam = ({team}) => {
                   {userMetadata ? (
                     <img
                       className="member-avatar"
-                      src={userMetadata.get('gplus_picture') + '?sz=80'}
+                      src={userMetadata.get('gplus_picture')}
                     />
                   ) : (
                     <span>{CommonUtils.getUserShortName(user)}</span>

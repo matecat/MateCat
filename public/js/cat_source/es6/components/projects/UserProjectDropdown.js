@@ -75,7 +75,7 @@ export const UserProjectDropdown = ({
     return metadata ? (
       <img
         className="ui avatar image ui-user-dropdown-image"
-        src={metadata.gplus_picture + '?sz=80'}
+        src={metadata.gplus_picture}
       />
     ) : (
       <a className="ui circular label">{CommonUtils.getUserShortName(user)}</a>

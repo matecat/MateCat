@@ -34,6 +34,7 @@ export const ApplicationWrapper = ({children}) => {
     connectedServices,
     userDisconnected,
     setUserInfo,
+    logout,
   } = useAuth()
 
   const checkGlobalMassages = () => {
@@ -111,7 +112,7 @@ export const ApplicationWrapper = ({children}) => {
 
   return (
     <ApplicationWrapperContext.Provider
-      value={{isUserLogged, userInfo, connectedServices, setUserInfo}}
+      value={{isUserLogged, userInfo, connectedServices, setUserInfo, logout}}
     >
       {userDisconnected && <UserDisconnectedBox />}
       {children}

@@ -19,13 +19,10 @@ import UserStore from '../../stores/UserStore'
 import {getUserData} from '../../api/getUserData'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper'
 import ModalsActions from '../../actions/ModalsActions'
-import useAuth from "../../hooks/useAuth";
+import useAuth from '../../hooks/useAuth'
 
 const PreferencesModal = (props) => {
-
-  const {logout} = useAuth()
-
-  const {userInfo, setUserInfo} = useContext(ApplicationWrapperContext)
+  const {userInfo, setUserInfo, logout} = useContext(ApplicationWrapperContext)
 
   const {user, metadata} = userInfo
   const serviceInfo = UserStore.getDefaultConnectedService()

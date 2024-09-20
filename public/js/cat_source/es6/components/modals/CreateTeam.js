@@ -58,10 +58,7 @@ export const CreateTeam = () => {
       <div>
         <div className="member-item">
           {metadata ? (
-            <img
-              className="member-avatar"
-              src={metadata.gplus_picture + '?sz=80'}
-            />
+            <img className="member-avatar" src={metadata.gplus_picture} />
           ) : (
             <span>{CommonUtils.getUserShortName(user)}</span>
           )}
