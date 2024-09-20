@@ -390,22 +390,22 @@ class ProjectManager {
 
         // dictation
         if ( isset( $this->projectStructure[ 'dictation' ] ) and $this->projectStructure[ 'dictation' ]  !== null ) {
-            $options[ 'dictation' ] = $this->projectStructure[ 'dictation' ];
+            $options[ 'dictation' ] = $this->projectStructure[ 'dictation' ] == true ? 1 : 0;
         }
 
         // show_whitespace
         if ( isset( $this->projectStructure[ 'show_whitespace' ] ) and $this->projectStructure[ 'show_whitespace' ]  !== null ) {
-            $options[ 'show_whitespace' ] = $this->projectStructure[ 'show_whitespace' ];
+            $options[ 'show_whitespace' ] = $this->projectStructure[ 'show_whitespace' ] == true ? 1 : 0;
         }
 
         // character_counter
         if ( isset( $this->projectStructure[ 'character_counter' ] ) and $this->projectStructure[ 'character_counter' ]  !== null ) {
-            $options[ 'character_counter' ] = $this->projectStructure[ 'character_counter' ];
+            $options[ 'character_counter' ] = $this->projectStructure[ 'character_counter' ] == true ? 1 : 0;
         }
 
         // ai_assistant
         if ( isset( $this->projectStructure[ 'ai_assistant' ] ) and $this->projectStructure[ 'ai_assistant' ]  !== null ) {
-            $options[ 'ai_assistant' ] = $this->projectStructure[ 'ai_assistant' ];
+            $options[ 'ai_assistant' ] = $this->projectStructure[ 'ai_assistant' ] == true ? 1 : 0;
         }
 
         // xliff_parameters
