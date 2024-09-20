@@ -89,8 +89,6 @@ class LoginController extends AbstractStatefulKleinController {
 
         if ( $user && $user->passwordMatch( $params[ 'password' ] ) && !is_null( $user->email_confirmed_at ) && is_null( $user->confirmation_token ) ) {
 
-            AuthCookie::setCredentials( $user );
-
             $user->clearAuthToken();
 
             $dao->updateUser( $user );
@@ -98,9 +96,11 @@ class LoginController extends AbstractStatefulKleinController {
 
             $project = new RedeemableProject( $user, $_SESSION );
             $project->tryToRedeem();
-            $this->response->code( 200 );
 
+            AuthCookie::setCredentials( $user );
             AuthenticationHelper::getInstance( $_SESSION );
+
+            $this->response->code( 200 );
 
         } else {
             $this->incrementRateLimitCounter( $params[ 'email' ], '/api/app/user/login' );

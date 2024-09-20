@@ -85,6 +85,15 @@ class AuthenticationHelper {
     /**
      * @throws ReflectionException
      */
+    public static function refreshSession( array &$session ){
+        unset( $session[ 'user' ] );
+        unset( $session[ 'user_profile' ] );
+        self::$instance = new AuthenticationHelper( $_SESSION );
+    }
+
+    /**
+     * @throws ReflectionException
+     */
     protected function setUserSession() {
         $session_status = session_status();
         if ( $session_status == PHP_SESSION_ACTIVE ) {
@@ -102,7 +111,7 @@ class AuthenticationHelper {
 
         $metadata   = $user->getMetadataAsKeyValue();
         $membersDao = new MembershipDao();
-        $membersDao->setCacheTTL( 60 * 60 );
+        $membersDao->setCacheTTL( 60 * 5 );
         $userTeams = array_map(
                 function ( $team ) use ( $membersDao ) {
                     $teamModel = new TeamModel( $team );

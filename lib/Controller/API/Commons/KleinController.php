@@ -4,9 +4,11 @@ namespace API\Commons;
 
 use AbstractControllers\IController;
 use AbstractControllers\TimeLogger;
+use API\Commons\Authentication\AuthenticationHelper;
 use API\Commons\Authentication\AuthenticationTrait;
 use API\Commons\Validators\Base;
 use ApiKeys_ApiKeyStruct;
+use Bootstrap;
 use Exception;
 use FeatureSet;
 use Klein\Request;
@@ -116,6 +118,17 @@ abstract class KleinController implements IController {
     }
 
     /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    public function refreshClientSessionIfNotApi(){
+        if ( empty( $this->api_key ) ) {
+            Bootstrap::sessionStart();
+            AuthenticationHelper::refreshSession( $_SESSION );
+        }
+    }
+
+    /**
      * @throws Exception
      */
     public function performValidations() {
@@ -183,15 +196,7 @@ abstract class KleinController implements IController {
     }
 
     protected function _logWithTime() {
-
-        $log_object = [ "method" => $this->request->method(), "pathname" => $this->request->pathname() ];
-
-        if ( $this->api_key ) {
-            $log_object[ "key" ] = $this->api_key;
-        }
-
         $this->logPageCall();
-
     }
 
     protected function afterValidate() {

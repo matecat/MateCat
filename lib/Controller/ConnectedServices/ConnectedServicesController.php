@@ -11,7 +11,7 @@ namespace ConnectedServices;
 
 use API\App\Json\ConnectedService;
 use API\Commons\AbstractStatefulKleinController;
-use Bootstrap;
+use API\Commons\Authentication\AuthenticationHelper;
 use ConnectedServices\Google\GoogleProvider;
 use Exception;
 use Exceptions\NotFoundException;
@@ -55,12 +55,10 @@ class ConnectedServicesController extends AbstractStatefulKleinController {
 
         ConnectedServiceDao::updateStruct( $this->service, [ 'disabled_at' ] );
 
+        AuthenticationHelper::refreshSession( $_SESSION );
+
         $formatter = new ConnectedService( [] );
         $this->response->json( [ 'connected_service' => $formatter->renderItem( $this->service ) ] );
-    }
-
-    protected function afterConstruct() {
-        Bootstrap::sessionClose();
     }
 
     /**

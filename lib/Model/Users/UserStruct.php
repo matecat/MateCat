@@ -114,7 +114,6 @@ class Users_UserStruct extends DataAccess_AbstractDaoSilentStruct implements Dat
 
     public function getMetadataAsKeyValue() {
         $dao = new MetadataDao();
-        $dao->setCacheTTL( 60 * 60 );
         $collection = $dao->getAllByUid( $this->uid );
         $data       = [];
         foreach ( $collection as $record ) {

@@ -9,11 +9,12 @@
 namespace ConnectedServices\GDrive;
 
 use API\Commons\AbstractStatefulKleinController;
+use API\Commons\Authentication\AuthenticationHelper;
 use ConnectedServices\GDriveUserAuthorizationModel;
 use Exception;
 use Exceptions\ValidationError;
 use INIT;
-use Users_UserStruct;
+use ReflectionException;
 
 class OAuthController extends AbstractStatefulKleinController {
 
@@ -56,10 +57,12 @@ EOF;
 
     /**
      * @throws ValidationError
+     * @throws ReflectionException
      */
     private function __handleCode( $code ) {
         $model = new GDriveUserAuthorizationModel( $this->user );
         $model->updateOrCreateRecordByCode( $code );
+        AuthenticationHelper::refreshSession( $_SESSION );
     }
 
     /**
