@@ -85,3 +85,70 @@
     gap: 10px;
   }
 }
+
+.xliff-settings-container {
+  .use-custom-rules-switch {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    font-size: 18px;
+    font-weight: bold;
+  }
+
+  .accordion-component {
+    overflow: visible;
+
+    .accordion-component-content {
+      overflow: visible;
+    }
+  }
+
+  .select__dropdown-wrapper {
+    z-index: 5;
+  }
+
+  .select {
+    color: $black;
+    border-color: $grey8;
+  }
+
+  .select-with-label__wrapper .select {
+    padding: 9px 46px 9px 12px;
+  }
+
+  .select--is-disabled {
+    background-color: $grey9;
+  }
+}
+
+.xliff-settings-content {
+  display: flex;
+  gap: 30px;
+  padding: 25px 5px;
+  flex-direction: column;
+
+  .button-add-rule {
+    width: 120px;
+  }
+}
+
+.xliff-settings-table {
+  display: grid;
+  grid-template-columns: 4% repeat(3, minmax(0, 1fr)) 4%;
+  row-gap: 10px;
+  column-gap: 15px;
+  align-items: center;
+}
+
+.xliff-settings-column-name {
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.xliff-settings-column-name-state {
+  grid-column: 2;
+}
+
+.xliff-settings-column-name-editor {
+  grid-column: 4 / 6;
+}

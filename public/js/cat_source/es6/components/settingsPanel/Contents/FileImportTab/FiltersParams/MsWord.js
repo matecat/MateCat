@@ -1,10 +1,11 @@
 import React, {useContext, useEffect, useRef, useState} from 'react'
 import Switch from '../../../../common/Switch'
-import {FiltersParamsContext} from '../FiltersParams'
+import {WordsBadge} from '../../../../common/WordsBadge/WordsBadge'
+import {FiltersParamsContext} from './FiltersParams'
 import {Controller, useForm} from 'react-hook-form'
 import {isEqual} from 'lodash'
 
-export const MsExcel = () => {
+export const MsWord = () => {
   const {currentTemplate, modifyingCurrentTemplate} =
     useContext(FiltersParamsContext)
 
@@ -12,8 +13,8 @@ export const MsExcel = () => {
 
   const [formData, setFormData] = useState()
 
-  const msExcel = useRef()
-  msExcel.current = currentTemplate.msExcel
+  const msWord = useRef()
+  msWord.current = currentTemplate.msWord
 
   const temporaryFormData = watch()
   const previousData = useRef()
@@ -28,17 +29,17 @@ export const MsExcel = () => {
   useEffect(() => {
     if (typeof formData === 'undefined') return
 
-    if (!isEqual(msExcel.current, formData) && Object.keys(formData).length) {
+    if (!isEqual(msWord.current, formData) && Object.keys(formData).length) {
       modifyingCurrentTemplate((prevTemplate) => ({
         ...prevTemplate,
-        msExcel: formData,
+        msWord: formData,
       }))
     }
   }, [formData, modifyingCurrentTemplate, setValue])
 
   // set default values for current template
   useEffect(() => {
-    Object.entries(msExcel.current).forEach(([key, value]) =>
+    Object.entries(msWord.current).forEach(([key, value]) =>
       setValue(key, value),
     )
   }, [currentTemplate.id, setValue])
@@ -47,7 +48,7 @@ export const MsExcel = () => {
     <div className="filters-params-accordion-content">
       <div className="filters-params-option">
         <div>
-          <h3>Extract hidden cells</h3>
+          <h3>Extract headers and footers</h3>
           <p>
             Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
             pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
@@ -56,7 +57,7 @@ export const MsExcel = () => {
         </div>
         <Controller
           control={control}
-          name="extract_hidden_cells"
+          name="extract_headers_footers"
           render={({field: {onChange, value, name}}) => (
             <Switch name={name} active={value} onChange={onChange} />
           )}
@@ -65,7 +66,7 @@ export const MsExcel = () => {
 
       <div className="filters-params-option">
         <div>
-          <h3>Extract drawing texts</h3>
+          <h3>Extract hidden text</h3>
           <p>
             Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
             pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
@@ -74,7 +75,7 @@ export const MsExcel = () => {
         </div>
         <Controller
           control={control}
-          name="extract_drawings"
+          name="extract_hidden_text"
           render={({field: {onChange, value, name}}) => (
             <Switch name={name} active={value} onChange={onChange} />
           )}
@@ -83,7 +84,7 @@ export const MsExcel = () => {
 
       <div className="filters-params-option">
         <div>
-          <h3>Extract sheet names</h3>
+          <h3>Extract comments</h3>
           <p>
             Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
             pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
@@ -92,7 +93,7 @@ export const MsExcel = () => {
         </div>
         <Controller
           control={control}
-          name="extract_sheet_names"
+          name="extract_comments"
           render={({field: {onChange, value, name}}) => (
             <Switch name={name} active={value} onChange={onChange} />
           )}
@@ -101,7 +102,7 @@ export const MsExcel = () => {
 
       <div className="filters-params-option">
         <div>
-          <h3>Extract document properties</h3>
+          <h3>Extract documents properties</h3>
           <p>
             Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
             pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
@@ -113,6 +114,70 @@ export const MsExcel = () => {
           name="extract_doc_properties"
           render={({field: {onChange, value, name}}) => (
             <Switch name={name} active={value} onChange={onChange} />
+          )}
+        />
+      </div>
+
+      <div className="filters-params-option">
+        <div>
+          <h3>Accept revisions</h3>
+          <p>
+            Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
+            pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
+            condimentum.
+          </p>
+        </div>
+        <Controller
+          control={control}
+          name="accept_revisions"
+          render={({field: {onChange, value, name}}) => (
+            <Switch name={name} active={value} onChange={onChange} />
+          )}
+        />
+      </div>
+
+      <div className="filters-params-option">
+        <div>
+          <h3>Exclude styles</h3>
+          <p>
+            Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
+            pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
+            condimentum.
+          </p>
+        </div>
+        <Controller
+          control={control}
+          name="exclude_styles"
+          render={({field: {onChange, value, name}}) => (
+            <WordsBadge
+              name={name}
+              value={value}
+              onChange={onChange}
+              placeholder={''}
+            />
+          )}
+        />
+      </div>
+
+      <div className="filters-params-option">
+        <div>
+          <h3>Exclude highlight colors</h3>
+          <p>
+            Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
+            pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
+            condimentum.
+          </p>
+        </div>
+        <Controller
+          control={control}
+          name="exclude_highlight_colors"
+          render={({field: {onChange, value, name}}) => (
+            <WordsBadge
+              name={name}
+              value={value}
+              onChange={onChange}
+              placeholder={''}
+            />
           )}
         />
       </div>

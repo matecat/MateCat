@@ -116,7 +116,7 @@ export const Select = ({
       const wrapperTopPosition = wrapperNode.offsetTop
       const offsetParentElement = offsetParent
         ? offsetParent
-        : wrapperNode.offsetParent ?? document.body
+        : (wrapperNode.offsetParent ?? document.body)
       //console.log('Select offsetParent:', offsetParentElement);
       const parentHeight = offsetParentElement.getBoundingClientRect().height
       const parentScrollTop =

@@ -2,16 +2,16 @@ import React, {useContext, useEffect, useRef, useState} from 'react'
 import Switch from '../../../../common/Switch'
 import {SegmentedControl} from '../../../../common/SegmentedControl'
 import {WordsBadge} from '../../../../common/WordsBadge/WordsBadge'
-import {FiltersParamsContext} from '../FiltersParams'
+import {FiltersParamsContext} from './FiltersParams'
 import {Controller, useForm} from 'react-hook-form'
 import {isEqual} from 'lodash'
 
 const SEGMENTED_CONTROL_OPTIONS = [
-  {id: 'translate_elements', name: 'Translatable'},
-  {id: 'do_not_translate_elements', name: 'Non-translatable'},
+  {id: 'translate_keys', name: 'Translatable'},
+  {id: 'do_not_translate_keys', name: 'Non-translatable'},
 ]
 
-export const Xml = () => {
+export const Json = () => {
   const {currentTemplate, modifyingCurrentTemplate} =
     useContext(FiltersParamsContext)
 
@@ -19,8 +19,8 @@ export const Xml = () => {
 
   const [formData, setFormData] = useState()
 
-  const xml = useRef()
-  xml.current = currentTemplate.xml
+  const json = useRef()
+  json.current = currentTemplate.json
 
   const temporaryFormData = watch()
   const previousData = useRef()
@@ -48,12 +48,12 @@ export const Xml = () => {
     )
 
     if (
-      !isEqual(xml.current, restPropsValue) &&
+      !isEqual(json.current, restPropsValue) &&
       Object.keys(restPropsValue).length
     ) {
       modifyingCurrentTemplate((prevTemplate) => ({
         ...prevTemplate,
-        xml: restPropsValue,
+        json: restPropsValue,
       }))
     }
   }, [formData, modifyingCurrentTemplate, setValue])
@@ -62,12 +62,12 @@ export const Xml = () => {
   useEffect(() => {
     SEGMENTED_CONTROL_OPTIONS.forEach(({id}) => setValue(id, undefined))
 
-    Object.entries(xml.current).forEach(([key, value]) => setValue(key, value))
+    Object.entries(json.current).forEach(([key, value]) => setValue(key, value))
 
     setValue(
       'segmentedControl',
       SEGMENTED_CONTROL_OPTIONS.find(
-        ({id}) => typeof xml.current[id] !== 'undefined',
+        ({id}) => typeof json.current[id] !== 'undefined',
       )?.id,
     )
   }, [currentTemplate.id, setValue])
@@ -111,7 +111,7 @@ export const Xml = () => {
     <div className="filters-params-accordion-content">
       <div className="filters-params-option">
         <div>
-          <h3>Preserve whitespaces</h3>
+          <h3>Extract arrays</h3>
           <p>
             Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
             pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
@@ -120,7 +120,7 @@ export const Xml = () => {
         </div>
         <Controller
           control={control}
-          name="preserve_whitespace"
+          name="extract_arrays"
           render={({field: {onChange, value, name}}) => (
             <Switch name={name} active={value} onChange={onChange} />
           )}
@@ -129,7 +129,25 @@ export const Xml = () => {
 
       <div className="filters-params-option">
         <div>
-          <h3>Elements</h3>
+          <h3>Escape forward slashes</h3>
+          <p>
+            Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
+            pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
+            condimentum.
+          </p>
+        </div>
+        <Controller
+          control={control}
+          name="escape_forward_slashes"
+          render={({field: {onChange, value, name}}) => (
+            <Switch name={name} active={value} onChange={onChange} />
+          )}
+        />
+      </div>
+
+      <div className="filters-params-option">
+        <div>
+          <h3>Keys</h3>
           <p>
             Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
             pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
@@ -156,7 +174,7 @@ export const Xml = () => {
 
       <div className="filters-params-option">
         <div>
-          <h3>Translatable attributes</h3>
+          <h3>Context keys</h3>
           <p>
             Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
             pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
@@ -165,7 +183,30 @@ export const Xml = () => {
         </div>
         <Controller
           control={control}
-          name="translate_attributes"
+          name="context_keys"
+          render={({field: {onChange, value, name}}) => (
+            <WordsBadge
+              name={name}
+              value={value}
+              onChange={onChange}
+              placeholder={''}
+            />
+          )}
+        />
+      </div>
+
+      <div className="filters-params-option">
+        <div>
+          <h3>Character limit keys</h3>
+          <p>
+            Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
+            pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
+            condimentum.
+          </p>
+        </div>
+        <Controller
+          control={control}
+          name="character_limit"
           render={({field: {onChange, value, name}}) => (
             <WordsBadge
               name={name}

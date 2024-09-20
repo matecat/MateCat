@@ -1,21 +1,22 @@
 import React, {createContext, useContext, useEffect, useRef} from 'react'
-import {SettingsPanelContext} from '../../SettingsPanelContext'
-import CatToolActions from '../../../../actions/CatToolActions'
-import ModalsActions from '../../../../actions/ModalsActions'
-import {ConfirmDeleteResourceProjectTemplates} from '../../../modals/ConfirmDeleteResourceProjectTemplates'
-import {SubTemplates} from '../SubTemplates'
-import {SCHEMA_KEYS} from '../../../../hooks/useProjectTemplates'
-import {getXliffSettingsTemplates} from '../../../../api/getXliffSettingsTemplates/getXliffSettingsTemplates'
-import defaultXliffSettings from '../defaultTemplates/xliffSettings.json'
-import {createXliffSettingsTemplate} from '../../../../api/createXliffSettingsTemplate/createXliffSettingsTemplate'
-import {updateXliffSettingsTemplate} from '../../../../api/updateXliffSettingsTemplate/updateXliffSettingsTemplate'
-import {deleteXliffSettingsTemplate} from '../../../../api/deleteXliffSettingsTemplate/deleteXliffSettingsTemplate'
+import {SettingsPanelContext} from '../../../SettingsPanelContext'
+import CatToolActions from '../../../../../actions/CatToolActions'
+import ModalsActions from '../../../../../actions/ModalsActions'
+import {ConfirmDeleteResourceProjectTemplates} from '../../../../modals/ConfirmDeleteResourceProjectTemplates'
+import {SubTemplates} from '../../SubTemplates'
+import {SCHEMA_KEYS} from '../../../../../hooks/useProjectTemplates'
+import {getXliffSettingsTemplates} from '../../../../../api/getXliffSettingsTemplates/getXliffSettingsTemplates'
+import defaultXliffSettings from '../../defaultTemplates/xliffSettings.json'
+import {createXliffSettingsTemplate} from '../../../../../api/createXliffSettingsTemplate/createXliffSettingsTemplate'
+import {updateXliffSettingsTemplate} from '../../../../../api/updateXliffSettingsTemplate/updateXliffSettingsTemplate'
+import {deleteXliffSettingsTemplate} from '../../../../../api/deleteXliffSettingsTemplate/deleteXliffSettingsTemplate'
+import {Xliff12} from './Xliff12'
 
 export const XLIFF_SETTINGS_SCHEMA_KEYS = {
   id: 'id',
   uid: 'uid',
   name: 'name',
-  rules: 'xml',
+  rules: 'rules',
   createdAt: 'created_at',
   modifiedAt: 'modified_at',
 }
@@ -188,6 +189,7 @@ export const XliffSettings = () => {
                 }}
               />
             </div>
+            <Xliff12 />
           </div>
         </div>
       )}

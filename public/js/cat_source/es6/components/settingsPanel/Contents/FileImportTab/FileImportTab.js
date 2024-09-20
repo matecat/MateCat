@@ -1,6 +1,6 @@
 import React from 'react'
-import {FiltersParams} from './FiltersParams'
-import {XliffSettings} from './XliffSettings'
+import {FiltersParams} from './FiltersParams/FiltersParams'
+import {XliffSettings} from './XliffSettings/XliffSettings'
 
 export const FileImportTab = () => {
   return (

@@ -12,13 +12,10 @@
   font: 12px;
   background-color: $grey3;
   border-radius: 8px;
+  cursor: pointer;
 
   &.accordion-expanded {
     border-radius: 8px 8px 0 0;
-  }
-
-  &:not(.accordion-expanded) {
-    cursor: pointer;
   }
 
   > svg {
@@ -41,5 +38,4 @@
   padding: 0 24px;
   border-radius: 0 0 8px 8px;
   background-color: $grey4;
-  overflow: hidden;
 }

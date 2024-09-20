@@ -1,11 +1,11 @@
 import React, {useState} from 'react'
-import {Accordion} from '../../../common/Accordion/Accordion'
-import {Json} from './FiltersParamsForms/Json'
-import {Xml} from './FiltersParamsForms/Xml'
-import {Yaml} from './FiltersParamsForms/Yaml'
-import {MsWord} from './FiltersParamsForms/MsWord'
-import {MsPowerpoint} from './FiltersParamsForms/MsPowerpoint'
-import {MsExcel} from './FiltersParamsForms/MsExcel'
+import {Accordion} from '../../../../common/Accordion/Accordion'
+import {Json} from './Json'
+import {Xml} from './Xml'
+import {Yaml} from './Yaml'
+import {MsWord} from './MsWord'
+import {MsPowerpoint} from './MsPowerpoint'
+import {MsExcel} from './MsExcel'
 
 const ACCORDION_GROUP = {
   json: 'Json',
@@ -21,7 +21,8 @@ export const AccordionGroupFiltersParams = () => {
     Object.keys(ACCORDION_GROUP)[0],
   )
 
-  const handleAccordion = (id) => setCurrentSection(id)
+  const handleAccordion = (id) =>
+    setCurrentSection((prevState) => (prevState !== id ? id : undefined))
 
   const getSection = (section) =>
     section === ACCORDION_GROUP.json ? (

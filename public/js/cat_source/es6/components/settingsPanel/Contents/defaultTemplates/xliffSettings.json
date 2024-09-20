@@ -5,26 +5,18 @@
   "rules": {
     "xliff12": [
       {
-        "states": ["new", "translated", "needs-translation"],
-        "analysis": "new"
-      },
-      {
-        "states": ["needs-review-adaptation", "needs-review-l10n"],
+        "states": ["translated"],
         "analysis": "pre-translated",
-        "editor": "translated",
-        "match_category": "50_74"
-      },
-      {
-        "states": ["signed-off", "final"],
-        "analysis": "pre-translated",
-        "editor": "approved",
+        "editor": "draft",
         "match_category": "ice"
       }
     ],
     "xliff20": [
       {
-        "states": ["final"],
-        "analysis": "new"
+        "states": ["translated"],
+        "analysis": "pre-translated",
+        "editor": "approved",
+        "match_category": "ice"
       }
     ]
   },

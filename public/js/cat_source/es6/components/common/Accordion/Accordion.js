@@ -24,8 +24,10 @@ export const Accordion = ({
 
   useEffect(() => {
     const transitionEndClose = () => setIsRenderingContent(false)
-    const transitionEndOpen = () =>
-      (panelRef.current.style.maxHeight = `${panelRef.current.scrollHeight}px`)
+    const transitionEndOpen = () => {
+      panelRef.current.style.maxHeight = `${panelRef.current.scrollHeight}px`
+      panelRef.current.parentNode.style.overflow = 'visible'
+    }
 
     const {current} = panelRef
     const maxHeight = window.getComputedStyle(panelRef.current).maxHeight
@@ -34,6 +36,9 @@ export const Accordion = ({
       current.addEventListener('transitionend', transitionEndClose)
 
     if (expanded) current.addEventListener('transitionend', transitionEndOpen)
+    else {
+      panelRef.current.parentNode.style.overflow = 'hidden'
+    }
 
     return () => {
       current.removeEventListener('transitionend', transitionEndClose)
