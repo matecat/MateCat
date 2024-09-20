@@ -27,7 +27,7 @@ function useAuth() {
   const [userInfo, setStateUserInfo] = useState(false)
   const [connectedServices, setConnectedServices] = useState()
   const [userDisconnected, setUserDisconnected] = useState(false)
-  const [isUserLogged, setUserLogged ] = useState(false)
+  const [isUserLogged, setIsUserLogged ] = useState(false)
 
   const setUserInfo = useCallback((value) => {
     setStateUserInfo((prevState) => {
@@ -65,9 +65,9 @@ function useAuth() {
     })
   }, [])
 
-  // const checkUserCookie = useRef()
-  const checkUserCookie = () => {
-      if ( !isUserLogged ) {
+  // const checkUserLogin = useRef()
+  const checkUserLogin = () => {
+      if ( !isUserLogged || commonUtils.getFromStorage( localStorageUserIsLogged + userInfo.user.uid ) !== '1' ) {
           getUserData().then( function ( data ) {
               const event = {
                   event: 'user_data_ready',
@@ -75,21 +75,21 @@ function useAuth() {
                   userId: data.user.uid,
               }
               CommonUtils.dispatchAnalyticsEvents( event )
-              setUserLogged( true );
+              setIsUserLogged( true );
               setUserInfo( data )
               setConnectedServices( data.connected_services )
-              commonUtils.addInSessionStorage( localStorageUserIsLogged + data.user.uid, 1 )
+              commonUtils.addInStorage( localStorageUserIsLogged + data.user.uid, 1 )
           } ).catch( ( e ) => {
-                  if ( isUserLogged ) setTimeout( () => setUserDisconnected( true ), 500 )
-                  setConnectedServices()
                   const event = {
                       event: 'user_data_ready',
                       userStatus: 'notLoggedUser',
                   }
-                  commonUtils.removeFromSessionStorage( localStorageUserIsLogged + data.user.uid )
-                  setUserInfo()
-                  setUserLogged( false );
                   setTimeout( () => CommonUtils.dispatchAnalyticsEvents( event ), 500 )
+                  userInfo && commonUtils.removeFromStorage( localStorageUserIsLogged + userInfo.user.uid )
+                  setUserInfo()
+                  setIsUserLogged( false );
+                  setConnectedServices()
+                  userInfo && setTimeout( () => setUserDisconnected( true ), 500 )
               }
           );
       }
@@ -97,40 +97,31 @@ function useAuth() {
 
   const logout = () => {
       logoutUser().then(() => {
-          commonUtils.removeFromSessionStorage( localStorageUserIsLogged + userInfo.user.uid )
-          setUserLogged( false )
-          setUserInfo()
-          setUserDisconnected(true)
+          commonUtils.removeFromStorage( localStorageUserIsLogged + userInfo.user.uid )
           window.location.reload()
       })
   }
 
-    useEffect( () => {
-        checkUserCookie()
-    }, [] );
+  useEffect( () => {
+    checkUserLogin()
+  }, [] );
 
   // Check user cookie is already valid
   useEffect(() => {
 
     let interval
 
-    if ( userInfo ) {
+    if ( isUserLogged ) {
 
         interval = setInterval( () => {
-            if( commonUtils.getFromSessionStorage( localStorageUserIsLogged + userInfo.user.uid ) !== 1 ){
-                setUserLogged( false )
-                setUserInfo()
-            }
-            checkUserCookie()
-        }, 1000 )
+            checkUserLogin()
+        }, 5000 )
 
       setUserDisconnected( false )
-    } else if ( interval ) {
-      clearInterval( interval )
     }
 
     return () => clearInterval(interval)
-  }, [userInfo])
+  }, [isUserLogged])
 
   // Sync UserStore with state userInfo
   useEffect(() => {
