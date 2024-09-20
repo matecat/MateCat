@@ -11,6 +11,7 @@ namespace API\App\Authentication;
 use API\App\RateLimiterTrait;
 use API\Commons\AbstractStatefulKleinController;
 use API\Commons\Authentication\AuthCookie;
+use API\Commons\Authentication\AuthenticationHelper;
 use CookieManager;
 use Exception;
 use INIT;
@@ -87,6 +88,8 @@ class LoginController extends AbstractStatefulKleinController {
             $project = new RedeemableProject( $user, $_SESSION );
             $project->tryToRedeem();
             $this->response->code( 200 );
+
+            AuthenticationHelper::getInstance( $_SESSION );
 
         } else {
             $this->incrementRateLimitCounter( $params[ 'email' ], '/api/app/user/login' );

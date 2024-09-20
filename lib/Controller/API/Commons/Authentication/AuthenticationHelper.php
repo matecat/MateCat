@@ -26,9 +26,21 @@ class AuthenticationHelper {
     /**
      * @var true
      */
-    private bool                  $logged     = false;
-    private ?ApiKeys_ApiKeyStruct $api_record = null;
-    private array                 $session;
+    private bool                         $logged;
+    private ?ApiKeys_ApiKeyStruct        $api_record = null;
+    private array                        $session;
+    private static ?AuthenticationHelper $instance   = null;
+
+    /**
+     * @throws ReflectionException
+     */
+    public static function getInstance( array &$session, ?string $api_key = null, ?string $api_secret = null ): AuthenticationHelper {
+        if ( !self::$instance ) {
+            self::$instance = new AuthenticationHelper( $session, $api_key, $api_secret );
+        }
+
+        return self::$instance;
+    }
 
     /**
      * @param array       $session
@@ -37,7 +49,7 @@ class AuthenticationHelper {
      *
      * @throws ReflectionException
      */
-    public function __construct( array &$session, ?string $api_key = null, ?string $api_secret = null ) {
+    protected function __construct( array &$session, ?string $api_key = null, ?string $api_secret = null ) {
 
         $this->session =& $session;
         $this->user    = new Users_UserStruct();
@@ -86,7 +98,7 @@ class AuthenticationHelper {
     /**
      * @throws ReflectionException
      */
-    public static function getUserProfile( Users_UserStruct $user ): array {
+    protected static function getUserProfile( Users_UserStruct $user ): array {
 
         $metadata   = $user->getMetadataAsKeyValue();
         $membersDao = new MembershipDao();

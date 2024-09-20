@@ -1,6 +1,7 @@
 <?php
 
 use API\Commons\Authentication\AuthCookie;
+use API\Commons\Authentication\AuthenticationHelper;
 use ConnectedServices\OauthTokenEncryption;
 use Email\WelcomeEmail;
 use Teams\TeamDao;
@@ -115,8 +116,12 @@ class OAuthSignInModel {
         ] );
     }
 
+    /**
+     * @throws ReflectionException
+     */
     protected function _authenticateUser() {
         AuthCookie::setCredentials( $this->user );
+        AuthenticationHelper::getInstance( $_SESSION );
     }
 
     protected function _welcomeNewUser() {

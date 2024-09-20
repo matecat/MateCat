@@ -32,7 +32,7 @@ trait AuthenticationTrait {
             $_session =& $_SESSION;
         }
 
-        $auth               = new AuthenticationHelper( $_session, $api_key, $api_secret );
+        $auth               = AuthenticationHelper::getInstance( $_session, $api_key, $api_secret );
         $this->user         = $auth->getUser();
         $this->userIsLogged = $auth->isLogged();
 

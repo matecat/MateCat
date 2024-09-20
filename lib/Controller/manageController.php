@@ -20,14 +20,15 @@ class manageController extends viewController {
 
         $this->lang_handler = Langs_Languages::getInstance();
 
-        $this->featureSet->loadFromUserEmail( $this->user->email );
     }
 
     public function doAction() {
 
-        $this->featureSet->filter( 'beginDoAction', $this );
-
         $this->checkLoginRequiredAndRedirect();
+
+        $this->featureSet->loadFromUserEmail( $this->user->email );
+
+        $this->featureSet->filter( 'beginDoAction', $this );
 
         $activity             = new ActivityLogStruct();
         $activity->action     = ActivityLogStruct::ACCESS_MANAGE_PAGE;

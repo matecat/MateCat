@@ -2,7 +2,6 @@ import React, {useState, useEffect, useRef, useContext} from 'react'
 
 import Switch from '../common/Switch'
 import {getUserApiKey} from '../../api/getUserApiKey'
-import {logoutUser as logoutUserApi} from '../../api/logoutUser'
 import {createUserApiKey} from '../../api/createUserApiKey'
 import {connectedServicesGDrive} from '../../api/connectedServicesGDrive'
 import {deleteUserApiKey} from '../../api/deleteUserApiKey'
@@ -20,8 +19,12 @@ import UserStore from '../../stores/UserStore'
 import {getUserData} from '../../api/getUserData'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper'
 import ModalsActions from '../../actions/ModalsActions'
+import useAuth from "../../hooks/useAuth";
 
 const PreferencesModal = (props) => {
+
+  const {logout} = useAuth()
+
   const {userInfo, setUserInfo} = useContext(ApplicationWrapperContext)
 
   const {user, metadata} = userInfo
@@ -102,14 +105,8 @@ const PreferencesModal = (props) => {
     return connectedServicesGDrive(service.id)
   }
 
-  const logoutUser = () => {
-    logoutUserApi().then(() => {
-      if ($('body').hasClass('manage')) {
-        location.href = config.hostpath + config.basepath
-      } else {
-        window.location.reload()
-      }
-    })
+  const logoutFn = () => {
+    logout()
   }
 
   const generateKey = () => {
@@ -445,7 +442,7 @@ const PreferencesModal = (props) => {
         </div>
         <br />
         <div className="user-link">
-          <div id="logoutlink" className="pull-right" onClick={logoutUser}>
+          <div id="logoutlink" className="pull-right" onClick={logoutFn}>
             Logout
           </div>
           {resetPasswordHtml}

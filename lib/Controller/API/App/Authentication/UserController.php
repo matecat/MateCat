@@ -18,6 +18,9 @@ class UserController extends AbstractStatefulKleinController {
      * @return void
      */
     public function show() {
+        if( empty( $_SESSION[ 'user_profile' ] ) ){
+            $this->response->code( 401 );
+        }
         $this->response->json( $_SESSION[ 'user_profile' ] );
     }
 

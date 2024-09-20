@@ -1,14 +1,12 @@
 import {useCallback, useEffect, useRef, useState} from 'react'
-import Cookies from 'js-cookie'
 import {getUserData} from '../api/getUserData'
 import UserActions from '../actions/UserActions'
 import UserStore from '../stores/UserStore'
 import UserConstants from '../constants/UserConstants'
 import CommonUtils from '../utils/commonUtils'
+import commonUtils from '../utils/commonUtils'
 import {isEqual} from 'lodash'
-import {logoutUser} from '../api/logoutUser'
-
-export const USER_LOGIN_COOKIE = 'matecat_login_v6'
+import {logoutUser} from "../api/logoutUser";
 
 const USER_INFO_SCHEMA = {
   user: {
@@ -23,26 +21,13 @@ const USER_INFO_SCHEMA = {
   teams: 'teams',
 }
 
+const localStorageUserIsLogged = 'isUserLogged-'
+
 function useAuth() {
   const [userInfo, setStateUserInfo] = useState(false)
   const [connectedServices, setConnectedServices] = useState()
   const [userDisconnected, setUserDisconnected] = useState(false)
-
-  const isUserLogged =
-    typeof userInfo === 'boolean' && !userInfo
-      ? undefined
-      : typeof userInfo === 'object'
-
-  console.log('isUserLogged', isUserLogged)
-
-  const parseJWT = (jwt) => {
-    try {
-      return JSON.parse(atob(jwt.split('.')[1])).context
-    } catch (e) {
-      console.log('Errore parsing user Token', e)
-      return null
-    }
-  }
+  const [isUserLogged, setUserLogged ] = useState(false)
 
   const setUserInfo = useCallback((value) => {
     setStateUserInfo((prevState) => {
@@ -80,50 +65,68 @@ function useAuth() {
     })
   }, [])
 
-  const checkUserCookie = useRef()
-  checkUserCookie.current = () => {
-    const userCookie = Cookies.get(USER_LOGIN_COOKIE)
-
-    if (userCookie) {
-      const userToken = parseJWT(userCookie)
-      if (
-        userToken &&
-        (!userInfo || userInfo.user.uid !== userToken.user.uid)
-      ) {
-        getUserData().then(function (data) {
-          const event = {
-            event: 'user_data_ready',
-            userStatus: 'loggedUser',
-            userId: data.user.uid,
-          }
-          CommonUtils.dispatchAnalyticsEvents(event)
-          setUserInfo(data)
-          setConnectedServices(data.connected_services)
-        })
+  // const checkUserCookie = useRef()
+  const checkUserCookie = () => {
+      if ( !isUserLogged ) {
+          getUserData().then( function ( data ) {
+              const event = {
+                  event: 'user_data_ready',
+                  userStatus: 'loggedUser',
+                  userId: data.user.uid,
+              }
+              CommonUtils.dispatchAnalyticsEvents( event )
+              setUserLogged( true );
+              setUserInfo( data )
+              setConnectedServices( data.connected_services )
+              commonUtils.addInSessionStorage( localStorageUserIsLogged + data.user.uid, 1 )
+          } ).catch( ( e ) => {
+                  if ( isUserLogged ) setTimeout( () => setUserDisconnected( true ), 500 )
+                  setConnectedServices()
+                  const event = {
+                      event: 'user_data_ready',
+                      userStatus: 'notLoggedUser',
+                  }
+                  commonUtils.removeFromSessionStorage( localStorageUserIsLogged + data.user.uid )
+                  setUserInfo()
+                  setUserLogged( false );
+                  setTimeout( () => CommonUtils.dispatchAnalyticsEvents( event ), 500 )
+              }
+          );
       }
-    } else {
-      if (isUserLogged) setTimeout(() => setUserDisconnected(true), 500)
-      setUserInfo()
-      setConnectedServices()
-      const event = {
-        event: 'user_data_ready',
-        userStatus: 'notLoggedUser',
-      }
-      setTimeout(() => CommonUtils.dispatchAnalyticsEvents(event), 500)
-    }
   }
+
+  const logout = () => {
+      logoutUser().then(() => {
+          commonUtils.removeFromSessionStorage( localStorageUserIsLogged + userInfo.user.uid )
+          setUserLogged( false )
+          setUserInfo()
+          setUserDisconnected(true)
+          window.location.reload()
+      })
+  }
+
+    useEffect( () => {
+        checkUserCookie()
+    }, [] );
 
   // Check user cookie is already valid
   useEffect(() => {
-    checkUserCookie.current()
 
     let interval
 
-    if (userInfo) {
-      interval = setInterval(checkUserCookie.current, 1000)
-      setUserDisconnected(false)
-    } else if (interval) {
-      clearInterval(interval)
+    if ( userInfo ) {
+
+        interval = setInterval( () => {
+            if( commonUtils.getFromSessionStorage( localStorageUserIsLogged + userInfo.user.uid ) !== 1 ){
+                setUserLogged( false )
+                setUserInfo()
+            }
+            checkUserCookie()
+        }, 1000 )
+
+      setUserDisconnected( false )
+    } else if ( interval ) {
+      clearInterval( interval )
     }
 
     return () => clearInterval(interval)
@@ -205,6 +208,7 @@ function useAuth() {
     connectedServices,
     userDisconnected,
     setUserInfo,
+    logout,
   }
 }
 
