@@ -10,6 +10,7 @@ namespace Users;
 
 use Exception;
 use Exceptions\ValidationError;
+use Routes;
 use Users_UserDao;
 use Users_UserStruct;
 use Utils;
@@ -17,16 +18,20 @@ use Utils;
 
 class PasswordResetModel {
 
-    protected $token;
+    protected ?string $token;
     /**
-     * @var \Users_UserStruct
+     * @var ?Users_UserStruct
      */
-    protected $user;
-    protected $session;
+    protected ?Users_UserStruct $user = null;
+    protected array             $session;
 
-    public function __construct( $token, $session ) {
+    /**
+     * @param array       $session reference to global $_SESSSION var
+     * @param string|null $token
+     */
+    public function __construct( array &$session, ?string $token = null ) {
         $this->token   = $token;
-        $this->session = $session;
+        $this->session =& $session;
         if ( empty( $token ) ) {
             $this->token = $session[ 'password_reset_token' ];
         }
@@ -40,7 +45,7 @@ class PasswordResetModel {
      * @throws Exception If an error occurs while retrieving the user.
      *
      */
-    protected function getUserFromResetToken() {
+    protected function getUserFromResetToken(): Users_UserStruct {
         if ( !isset( $this->user ) ) {
             $dao        = new Users_UserDao();
             $this->user = $dao->getByConfirmationToken( $this->token );
@@ -70,15 +75,19 @@ class PasswordResetModel {
             throw new ValidationError( 'Auth token expired, repeat the operation.' );
         }
 
-        $_SESSION[ 'password_reset_token' ] = $this->user->confirmation_token;
+        $this->session[ 'password_reset_token' ] = $this->user->confirmation_token;
 
     }
 
     /**
+     * @param string $new_password
+     * @param string $password_confirmation
+     *
+     * @return void
      * @throws ValidationError
      * @throws Exception
      */
-    public function resetPassword( $new_password, $password_confirmation ) {
+    public function resetPassword( string $new_password, string $password_confirmation ) {
 
         $this->getUserFromResetToken();
 
@@ -110,4 +119,16 @@ class PasswordResetModel {
         ( new Users_UserDao )->destroyCacheByUid( $this->user->uid );
 
     }
+
+    /**
+     * @return string
+     * @throws Exception
+     */
+    public function flushWantedURL(): string {
+        $url = $this->session[ 'wanted_url' ] ?? Routes::appRoot();
+        unset( $this->session[ 'wanted_url' ] );
+
+        return $url;
+    }
+
 }

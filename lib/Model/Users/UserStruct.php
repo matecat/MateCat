@@ -1,5 +1,6 @@
 <?php
 
+use ConnectedServices\OauthTokenEncryption;
 use Teams\MembershipDao;
 use Teams\TeamDao;
 use Users\MetadataDao;

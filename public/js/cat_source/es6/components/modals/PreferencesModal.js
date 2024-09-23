@@ -127,11 +127,13 @@ const PreferencesModal = (props) => {
   }
 
   const modifyUserDetails = () => {
-    modifyUserInfo(firstName, lastName).then(() => {
-      console.log('saved')
-    })
-    setModifyUser(false)
-    TeamsActions.updateUserName({firstName, lastName})
+    if (firstName && lastName) {
+      modifyUserInfo(firstName, lastName).then(() => {
+        console.log('saved')
+      })
+      setModifyUser(false)
+      TeamsActions.updateUserName({firstName, lastName})
+    }
   }
 
   const getApiKeyHtml = () => {
@@ -384,6 +386,7 @@ const PreferencesModal = (props) => {
                   size={BUTTON_SIZE.MEDIUM}
                   onClick={modifyUserDetails}
                   tabIndex={0}
+                  disabled={!firstName || !lastName}
                 >
                   Confirm
                 </Button>

@@ -1,10 +1,15 @@
-#Options -Indexes
-#
-#<Files *.html>
-#    Order Deny,Allow
-#    Deny from all
-#</Files>
-#
-#<Files offline.html>
-#    Allow from all
-#</Files>
+Options -Indexes
+
+<Files *.html>
+    Order Deny,Allow
+    Deny from all
+</Files>
+
+<Files offline.html>
+    Allow from all
+</Files>
+
+<Files APIDoc.php>
+    Order Allow,Deny
+    Allow from all
+</Files>

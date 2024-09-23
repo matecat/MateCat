@@ -1,8 +1,9 @@
 <?php
 
-namespace API\App;
+namespace API\App\Authentication;
 
 use API\App\Json\UserProfile;
+use API\App\RateLimiterTrait;
 use API\Commons\AbstractStatefulKleinController;
 use API\Commons\Validators\LoginValidator;
 use ConnectedServices\ConnectedServiceDao;
@@ -10,6 +11,7 @@ use ConnectedServices\ConnectedServiceStruct;
 use Exception;
 use Exceptions\ValidationError;
 use Klein\Response;
+use ReflectionException;
 use TeamModel;
 use Teams\MembershipDao;
 use Teams\TeamStruct;
@@ -28,8 +30,12 @@ class UserController extends AbstractStatefulKleinController {
     /**
      * @var ConnectedServiceStruct[]
      */
-    protected $connectedServices;
+    protected array $connectedServices = [];
 
+    /**
+     * @return void
+     * @throws ReflectionException
+     */
     public function show() {
         $metadata = $this->user->getMetadataAsKeyValue();
 
@@ -95,6 +101,14 @@ class UserController extends AbstractStatefulKleinController {
 
         $this->response->code( 200 );
 
+    }
+
+    /**
+     * @return void
+     */
+    public function redeemProject() {
+        $_SESSION[ 'redeem_project' ] = true;
+        $this->response->code( 200 );
     }
 
     protected function afterConstruct() {

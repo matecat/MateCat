@@ -71,14 +71,14 @@ const DEFAULT_CONTENTS = (isCattool = config.is_cattool) => {
             id: SETTINGS_PANEL_TABS.qualityFramework,
             label: 'Quality framework',
             description:
-              'Manage your quality frameworks and select which should be used on your new project. <a href="#" target="_blank">More details</a>',
+              'Manage your quality frameworks and select which should be used on your new project. <a href="https://guides.matecat.com/quality-framework" target="_blank">More details</a>',
             component: <QualityFrameworkTab />,
           },
           {
             id: SETTINGS_PANEL_TABS.analysis,
             label: 'Analysis',
             description:
-              'Manage your billing models and select which should be used on your new project. <a href="#" target="_blank">More details</a>',
+              'Manage your billing models and select which should be used on your new project. <a href="https://guides.matecat.com/billing-model" target="_blank">More details</a>',
             component: <AnalysisTab />,
           },
         ]

@@ -780,7 +780,11 @@ class TMAnalysisWorker extends AbstractWorker {
 
             $this->_queueHandler->getRedisClient()->expire( RedisKeys::PROJECT_INIT_SEMAPHORE . $pid, 60 * 60 * 24 /* 24 hours TTL */ );
 
+            // Get those data from the master database to avoid delayed replication issues
+            $db = Database::obtain();
+            $db->begin();
             $total_segs = $this->getProjectSegmentsTranslationSummary( $pid );
+            $db->commit();
 
             $total_segs = array_pop( $total_segs ); // get the Rollup Value
             $this->_doLog( $total_segs );

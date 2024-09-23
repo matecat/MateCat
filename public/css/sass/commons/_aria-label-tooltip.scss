@@ -9,7 +9,8 @@
   z-index: 4;
   border-radius: 4px;
   padding: 4px 8px;
-  background-color: $grey4;
+  background-color: $white;
+  box-shadow: 0 0 16px rgba($black, 0.25);
   color: $grey6;
   pointer-events: none;
   white-space: pre;
@@ -20,7 +21,7 @@
 [aria-label]::before {
   content: '';
   position: absolute;
-  z-index: 4;
+  z-index: 5;
   pointer-events: none;
 }
 [aria-label]::after,
@@ -52,7 +53,7 @@
 [aria-label]:not([tooltip-position])::before,
 [aria-label][tooltip-position='top']::before {
   top: -6px;
-  border-top: 6px solid $grey4;
+  border-top: 6px solid white;
 }
 [aria-label][tooltip-position='bottom']::after {
   bottom: -6px;
