@@ -2,7 +2,7 @@
 
 class ApiKeys_ApiKeyStruct extends DataAccess_AbstractDaoObjectStruct implements DataAccess_IDaoStruct {
 
-    public int    $id;
+    public ?int    $id = null;
     public int    $uid;
     public string $api_key;
     public string $api_secret;
