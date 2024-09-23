@@ -42,7 +42,7 @@ class AuthCookie {
                         'path'     => '/',
                         'domain'   => INIT::$COOKIE_DOMAIN,
                         'secure'   => true,
-                        'httponly' => true,  //TODO YYY [Security] set to true
+                        'httponly' => true,
                         'samesite' => 'None',
                 ]
         );
