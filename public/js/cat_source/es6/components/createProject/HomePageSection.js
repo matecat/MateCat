@@ -9,29 +9,28 @@ export const HomePageSection = () => {
           <div className="content-box">
             <div className="content-box_header">
               <img src="/public/img/icons/home/home-aiDriven.svg" />
-              <h3>AI-Driven Precision and Speed</h3>
+              <h3>AI-driven precision and speed</h3>
             </div>
             <p>
-              Matecat leverages cutting-edge AI, including Large Language Models
-              (LLMs), to provide top-quality matches, simplify the process of
-              finding word meanings, ensure terminology consistency and conduct
-              locale-specific quality checks. The integration of advanced
-              technology empowers you to deliver high-quality translations more
-              quickly and efficiently.
+              Matecat leverages cutting-edge AI, including Large Language
+              Models, to provide top-quality matches, simplify the process of
+              finding word definitions, ensure consistent terminology, and carry
+              out locale-specific quality checks. Deliver high-quality
+              translations more quickly and efficiently thanks to advanced
+              technology.
             </p>
           </div>
           <div className="content-box">
             <div className="content-box_header">
               <img src="/public/img/icons/home/home-goFaster.svg" />
-              <h3>Go faster with Adaptive Machine Translation</h3>
+              <h3>Save time with adaptive Machine Translation</h3>
             </div>
             <p>
-              Matecat makes it very easy for you and your team to work together
-              on translation projects. It's like having a shared workspace where
-              you can leave comments and tag people, just like chatting and
-              editing documents in real-time. Plus, you can split urgent
-              projects among multiple translators without interfering with each
-              other. Translation teamwork has never been so effortless!
+              Go faster with top-quality matches in 200+ languages. Adaptive MT
+              is a smart assistant that adapts to your translation memories and
+              uses every correction to improve quality. Every time you confirm a
+              segment, Matecat gets better at providing you with accurate
+              translations for the upcoming ones, saving time.
             </p>
           </div>
           <div className="content-box">
@@ -40,52 +39,50 @@ export const HomePageSection = () => {
               <h3>Free to use</h3>
             </div>
             <p>
-              Matecat is all about you, the user. It's designed to be simple and
-              easy to use right from the start. Whether you're an expert or a
-              beginner, Matecat is user-friendly and hassle-free. Dive right in
-              and start working with no complicated instructions or steep
-              learning curves. Enjoy an experience that puts you first and helps
-              you complete tasks quickly and easily.
+              Matecat delivers a no-cost translation solution that’s accessible
+              to all, including companies, freelancers, language service
+              providers, and anyone else who needs it. Get unrestricted access
+              to its features, with no limitations on users or projects. It’s
+              translation made easy – and good for your budget, too!
             </p>
           </div>
           <div className="content-box">
             <div className="content-box_header">
               <img src="/public/img/icons/home/home-cloud.svg" />
-              <h3>Secure Cloud Storage</h3>
+              <h3>Keep your data secure</h3>
             </div>
             <p>
-              Matecat offers top-quality Machine Translation matches in over 200
-              languages, and it gets smarter as you use it. It checks your past
-              translations, adjusts based on your work, and even considers the
-              whole document's context. It's like having a clever assistant who
-              learns from you, saving you loads of time.
+              We guarantee secure cloud storage with advanced encryption and
+              built-in redundancy. Your data is stored safely and backed up in
+              multiple locations for extra security. With Matecat, you can focus
+              on your translations with peace of mind, safe in the knowledge
+              that your data is always protected yet accessible.
             </p>
           </div>
           <div className="content-box">
             <div className="content-box_header">
               <img src="/public/img/icons/home/home-liveSupport.svg" />
-              <h3>Live support</h3>
+              <h3>A user-friendly experience</h3>
             </div>
             <p>
-              Matecat is your free, user-friendly, and budget-friendly
-              translation solution for everyone. Whether you're a company, a
-              freelancer, or in need of translation services, Matecat is
-              designed for you. No limits on users or projects, making it
-              perfect for big projects and collaborations. It's the easy and
-              affordable way to streamline your translations, ensure
-              consistency, and save time and money.
+              Matecat was created with a focus on you. It's designed to be
+              user-friendly and easy to handle. It doesn't matter whether you're
+              an expert or a beginner: the tool lets you dive straight in and
+              get to work without any hassle. With Matecat, there's no need to
+              worry about complicated instructions or steep learning curves.
             </p>
           </div>
           <div className="content-box">
             <div className="content-box_header">
               <img src="/public/img/icons/home/home-collaboration.svg" />
-              <h3>Built for collaboration</h3>
+              <h3>Work from anywhere</h3>
             </div>
             <p>
-              Matecat takes your data security seriously. We use advanced
-              encryption and have multiple backups in different places to keep
-              your data safe. Focus on your translations with confidence,
-              knowing your data is secure and always accessible.
+              Matecat is entirely web-based, which means you can access it from
+              any computer with an internet connection. This gives you the
+              flexibility to work from anywhere and means you don’t need to
+              worry about installation, updates, or compatibility issues.
+              Matecat is updated constantly and works with any browser.
             </p>
           </div>
         </div>
