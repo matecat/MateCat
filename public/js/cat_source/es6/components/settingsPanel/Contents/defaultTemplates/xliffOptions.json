@@ -29,7 +29,7 @@
     "analysis": ["new", "pre-translated"],
     "editor": ["draft", "translated", "approved", "approved2"]
   },
-  "xliff2": {
+  "xliff20": {
     "states": ["initial", "translated", "reviewed", "final"],
     "analysis": ["new", "pre-translated"],
     "editor": ["draft", "translated", "approved", "approved2"]

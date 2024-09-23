@@ -11,19 +11,19 @@ import {
 } from '../../../../common/Button/Button'
 import IconAdd from '../../../../icons/IconAdd'
 
-export const Xliff12 = () => {
+export const Xliff20 = () => {
   const {currentTemplate, modifyingCurrentTemplate} =
     useContext(XliffSettingsContext)
 
   const [isUseCustomRules, setIsUseCustomRules] = useState(false)
 
-  const xliff12 = useMemo(
+  const xliff20 = useMemo(
     () =>
-      currentTemplate.rules.xliff12.map((item, index) => ({
+      currentTemplate.rules.xliff20.map((item, index) => ({
         ...item,
         id: index,
       })),
-    [currentTemplate.rules.xliff12],
+    [currentTemplate.rules.xliff20],
   )
 
   const onChange = useCallback(
@@ -33,7 +33,7 @@ export const Xliff12 = () => {
         ...prevTemplate,
         rules: {
           ...prevTemplate.rules,
-          xliff12: prevTemplate.rules.xliff12.map((row, index) =>
+          xliff20: prevTemplate.rules.xliff20.map((row, index) =>
             index === id ? restProps : row,
           ),
         },
@@ -47,8 +47,8 @@ export const Xliff12 = () => {
       ...prevTemplate,
       rules: {
         ...prevTemplate.rules,
-        xliff12: [
-          ...prevTemplate.rules.xliff12,
+        xliff20: [
+          ...prevTemplate.rules.xliff20,
           {
             id: prevTemplate.rules.length,
             states: ['translated'],
@@ -65,7 +65,7 @@ export const Xliff12 = () => {
         ...prevTemplate,
         rules: {
           ...prevTemplate.rules,
-          xliff12: prevTemplate.rules.xliff12.filter(
+          xliff20: prevTemplate.rules.xliff20.filter(
             (row, index) => index !== id,
           ),
         },
@@ -88,8 +88,8 @@ export const Xliff12 = () => {
 
   return (
     <div className="xliff-settings-container">
-      <h2>Xliff 1.2</h2>
-      <Accordion id="xliff12" title={renderSwitch} expanded={isUseCustomRules}>
+      <h2>Xliff 2.0</h2>
+      <Accordion id="xliff20" title={renderSwitch} expanded={isUseCustomRules}>
         <div className="xliff-settings-content">
           <div className="xliff-settings-table">
             <span className="xliff-settings-column-name xliff-settings-column-name-state">
@@ -99,13 +99,13 @@ export const Xliff12 = () => {
             <span className="xliff-settings-column-name xliff-settings-column-name-editor">
               Editor
             </span>
-            {xliff12.map((row, index) => (
+            {xliff20.map((row, index) => (
               <XliffRulesRow
                 key={index}
                 value={row}
                 onChange={onChange}
                 onDelete={onDelete}
-                xliffOptions={xliffOptions.xliff12}
+                xliffOptions={xliffOptions.xliff20}
               />
             ))}
           </div>

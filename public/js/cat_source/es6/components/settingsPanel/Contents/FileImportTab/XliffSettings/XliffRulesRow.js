@@ -44,12 +44,17 @@ export const XliffRulesRow = ({value, onChange, onDelete, xliffOptions}) => {
     ) {
       onChange(propsValue)
     }
-  }, [formData, setValue])
+  }, [formData, setValue, onChange])
 
   // set default values for current template
   useEffect(() => {
     Object.entries(value).forEach(([key, value]) => setValue(key, value))
-  }, [value, setValue])
+    if (
+      value.analysis === 'pre-translated' &&
+      typeof value.editor === 'undefined'
+    )
+      setValue('editor', xliffOptions.editor[0])
+  }, [value, setValue, xliffOptions.editor])
 
   const MAX_HEIGHT_DROPLIST = 320
 

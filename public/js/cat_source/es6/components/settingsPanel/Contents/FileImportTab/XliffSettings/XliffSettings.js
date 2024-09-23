@@ -11,6 +11,7 @@ import {createXliffSettingsTemplate} from '../../../../../api/createXliffSetting
 import {updateXliffSettingsTemplate} from '../../../../../api/updateXliffSettingsTemplate/updateXliffSettingsTemplate'
 import {deleteXliffSettingsTemplate} from '../../../../../api/deleteXliffSettingsTemplate/deleteXliffSettingsTemplate'
 import {Xliff12} from './Xliff12'
+import {Xliff20} from './Xliff20'
 
 export const XLIFF_SETTINGS_SCHEMA_KEYS = {
   id: 'id',
@@ -190,6 +191,7 @@ export const XliffSettings = () => {
               />
             </div>
             <Xliff12 />
+            <Xliff20 />
           </div>
         </div>
       )}
