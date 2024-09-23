@@ -87,7 +87,7 @@ class LoginController extends AbstractStatefulKleinController {
         $dao  = new Users_UserDao();
         $user = $dao->getByEmail( $params[ 'email' ] );
 
-        if ( $user && $user->passwordMatch( $params[ 'password' ] ) && !is_null( $user->email_confirmed_at ) && is_null( $user->confirmation_token ) ) {
+        if ( $user && $user->passwordMatch( $params[ 'password' ] ) && !is_null( $user->email_confirmed_at ) ) {
 
             $user->clearAuthToken();
 
