@@ -1,5 +1,10 @@
 <?php
 
+namespace ConnectedServices;
+use Constants;
+use DefuseEncryption;
+use INIT;
+
 /**
  * Class OauthTokenEncryption.
  * This class is a singleton for DefuseEncryption to encrypt the user's OAuth Token
@@ -13,9 +18,9 @@ class OauthTokenEncryption extends DefuseEncryption {
      * @return null|OauthTokenEncryption
      */
     public static function getInstance() {
-        if( self::$instance === null ){
+        if ( self::$instance === null ) {
             self::$instance = new OauthTokenEncryption(
-                INIT::$ROOT . Constants::OAUTH_TOKEN_KEY_FILE
+                    INIT::$ROOT . Constants::OAUTH_TOKEN_KEY_FILE
             );
         }
 
@@ -24,11 +29,13 @@ class OauthTokenEncryption extends DefuseEncryption {
 
     /**
      * Check if a token is encrypted
+     *
      * @param $token
+     *
      * @return bool
      */
     public function isTokenEncrypted( $token ) {
-        if( !empty( $token ) && !json_decode( $token ) && $this->decrypt( $token ) !== false ) {
+        if ( !empty( $token ) && !json_decode( $token ) && $this->decrypt( $token ) !== false ) {
             return true;
         }
 

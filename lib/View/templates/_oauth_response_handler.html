@@ -1,0 +1,21 @@
+<html>
+<head>
+    <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/CSP-HeaderMeta.html/CSP_NONCE"/>
+    <script tal:attributes="nonce x_nonce_unique_id" type="text/javascript" language="javascript">
+        /*<![CDATA[*/
+        var config = {
+            wanted_url: '${wanted_url | string: }'
+        };
+
+        if ( config.wanted_url ) {
+            window.localStorage.setItem( 'wanted_url', config.wanted_url );
+        }
+
+        window.close();
+
+        /*]]>*/
+    </script>
+</head>
+<body>
+</body>
+</html>

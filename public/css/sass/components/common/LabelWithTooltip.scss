@@ -10,7 +10,7 @@
     margin-left: -4px;
     border-left: 4px solid transparent;
     border-right: 4px solid transparent;
-    border-top: 6px solid #eaebee;
+    border-top: 6px solid white;
     content: '';
   }
 }
@@ -18,8 +18,9 @@
 .label-with-tooltip-content {
   border-radius: 4px;
   padding: 4px 8px;
-  background-color: #eaebee;
-  color: #666666;
+  background-color: $white;
+  box-shadow: 0 0 16px rgba($black, 0.25);
+  color: $grey6;
   white-space: normal;
   font-size: 14px;
   font-weight: normal;

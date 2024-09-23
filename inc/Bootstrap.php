@@ -51,7 +51,7 @@ class Bootstrap {
         INIT::$BASEURL                        = "/"; // Accessible by the browser
         INIT::$DEFAULT_NUM_RESULTS_FROM_TM    = 3;
         INIT::$THRESHOLD_MATCH_TM_NOT_TO_SHOW = 50;
-        INIT::$TRACKING_CODES_VIEW_PATH       = INIT::$ROOT . "/lib/View";
+        INIT::$TRACKING_CODES_VIEW_PATH       = INIT::$ROOT . "/lib/View/templates";
 
 
         //get the environment configuration
@@ -456,6 +456,7 @@ class Bootstrap {
             ini_set( 'session.name', INIT::$PHP_SESSION_NAME );
             ini_set( 'session.cookie_domain', '.' . INIT::$COOKIE_DOMAIN );
             ini_set( 'session.cookie_secure', true );
+            ini_set( 'session.cookie_httponly', true );
 
         }
 

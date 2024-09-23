@@ -8,24 +8,24 @@
  */
 class PHPTALWithAppend extends PHPTAL {
 
-    protected $internal_store = array();
+    protected array $internal_store = [];
 
     /**
      *
      * This method populates an array of arrays that can be used
      * to push values on the template so that plugins can append
-     * their own javascripts or assets.
+     * their own JavaScripts or assets.
      *
      * @param $name
      * @param $value
      */
-    public function append($name, $value) {
-        if (! array_key_exists($name, $this->internal_store) ) {
-            $this->internal_store[ $name ] = array() ;
+    public function append( $name, $value ) {
+        if ( !array_key_exists( $name, $this->internal_store ) ) {
+            $this->internal_store[ $name ] = [];
         }
 
-        array_push( $this->internal_store[ $name ], $value );
+        $this->internal_store[ $name ][] = $value;
 
-        $this->$name = $this->internal_store[ $name ] ;
+        $this->$name = $this->internal_store[ $name ];
     }
 }
