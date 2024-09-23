@@ -10,9 +10,10 @@ import {
   BUTTON_TYPE,
 } from '../../../../common/Button/Button'
 import IconAdd from '../../../../icons/IconAdd'
+import {isEqual} from 'lodash'
 
 export const Xliff20 = () => {
-  const {currentTemplate, modifyingCurrentTemplate} =
+  const {currentTemplate, modifyingCurrentTemplate, templates} =
     useContext(XliffSettingsContext)
 
   const [isUseCustomRules, setIsUseCustomRules] = useState(false)
@@ -94,9 +95,16 @@ export const Xliff20 = () => {
     </div>
   )
 
+  const isModified = !isEqual(
+    currentTemplate.rules.xliff20,
+    templates.find(
+      ({id, isTemporary}) => id === currentTemplate.id && !isTemporary,
+    ).rules.xliff20,
+  )
+
   return (
     <div className="xliff-settings-container">
-      <h2>Xliff 2.0</h2>
+      <h2 className={isModified ? 'unsaved' : ''}>Xliff 2.0</h2>
       <Accordion id="xliff20" title={renderSwitch} expanded={isUseCustomRules}>
         <div className="xliff-settings-content">
           <div className="xliff-settings-table">
