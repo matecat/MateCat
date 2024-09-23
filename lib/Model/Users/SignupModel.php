@@ -83,8 +83,9 @@ class SignupModel {
 
         $this->__saveWantedUrl();
 
-        // send confirmation email only if
-        // user is not active
+        // send a confirmation email only if
+        // the user is not active (with a user/password pair)
+        // AND do not own an active Oauth login
         if ( !$this->__userAlreadyExistsAndIsActive() ) {
             $this->__sendConfirmationRequestEmail();
         }
@@ -161,12 +162,16 @@ class SignupModel {
     }
 
     /**
-     * Check if a user already exists AND is active
+     * Check if a user already exists
+     * AND
+     * is active (with a user/password pair)
+     * OR do not own an active Oauth login
+     *
      *
      * @return bool
      */
     private function __userAlreadyExistsAndIsActive(): bool {
-        return ( isset( $this->user->uid ) and null !== $this->user->email_confirmed_at );
+        return ( isset( $this->user->uid ) && ( !empty( $this->user->email_confirmed_at ) || !empty( $this->user->oauth_access_token ) ) );
     }
 
 
