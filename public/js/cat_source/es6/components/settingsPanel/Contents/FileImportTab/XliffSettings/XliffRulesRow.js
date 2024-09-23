@@ -10,7 +10,13 @@ import {Select} from '../../../../common/Select'
 import {Controller, useForm} from 'react-hook-form'
 import {isEqual} from 'lodash'
 
-export const XliffRulesRow = ({value, onChange, onDelete, xliffOptions}) => {
+export const XliffRulesRow = ({
+  value,
+  onChange,
+  onDelete,
+  currentXliffData,
+  xliffOptions,
+}) => {
   const {control, watch, setValue} = useForm()
 
   const [formData, setFormData] = useState()
@@ -33,7 +39,10 @@ export const XliffRulesRow = ({value, onChange, onDelete, xliffOptions}) => {
     const propsValue = Object.entries(formData).reduce(
       (acc, [key, value]) => ({
         ...acc,
-        ...(typeof value !== 'undefined' && {[key]: value}),
+        ...(((typeof value !== 'undefined' && key !== 'editor') ||
+          (key === 'editor' && formData.analysis === 'pre-translated')) && {
+          [key]: value,
+        }),
       }),
       {},
     )
@@ -60,6 +69,19 @@ export const XliffRulesRow = ({value, onChange, onDelete, xliffOptions}) => {
 
   const deleteRow = () => onDelete(value.id)
 
+  const statesOptions = xliffOptions.states
+    .filter(
+      (state) =>
+        !currentXliffData
+          .reduce((acc, {states}) => [...acc, ...(states ?? [])], [])
+          .some(
+            (stateCompare) =>
+              state === stateCompare &&
+              value.states.every((v) => v !== stateCompare),
+          ),
+    )
+    .map((value) => ({id: value, name: value}))
+
   return (
     <>
       <span className="xliff-settings-column-content">{value.id + 1}.</span>
@@ -70,18 +92,16 @@ export const XliffRulesRow = ({value, onChange, onDelete, xliffOptions}) => {
           render={({field: {onChange, value, name}}) => (
             <Select
               name={name}
-              options={xliffOptions.states.map((value) => ({
-                id: value,
-                name: value,
-              }))}
+              placeholder="Select state"
+              options={statesOptions}
               multipleSelect="dropdown"
-              activeOptions={value?.map((v) => ({id: v, name: v}))}
+              activeOptions={value && value?.map((v) => ({id: v, name: v}))}
               onToggleOption={(option) => {
                 const updatedOptions = value.some((id) => id === option.id)
                   ? value.filter((id) => id !== option.id)
                   : value.concat([option.id])
 
-                onChange(updatedOptions)
+                if (updatedOptions.length) onChange(updatedOptions)
               }}
               maxHeightDroplist={MAX_HEIGHT_DROPLIST}
             />
@@ -100,7 +120,7 @@ export const XliffRulesRow = ({value, onChange, onDelete, xliffOptions}) => {
                 id: value,
                 name: value,
               }))}
-              activeOption={{id: value, name: value}}
+              activeOption={value && {id: value, name: value}}
               onSelect={(option) => onChange(option.id)}
               maxHeightDroplist={MAX_HEIGHT_DROPLIST}
             />
@@ -145,5 +165,6 @@ XliffRulesRow.propTypes = {
   value: PropTypes.object.isRequired,
   onChange: PropTypes.func.isRequired,
   onDelete: PropTypes.func.isRequired,
+  currentXliffData: PropTypes.array.isRequired,
   xliffOptions: PropTypes.object.isRequired,
 }

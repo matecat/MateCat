@@ -25,6 +25,10 @@
   z-index: 4;
   width: 100%;
   background-color: $grey5;
+
+  &:has(.select__dropdown-wrapper) {
+    z-index: 5;
+  }
 }
 
 /* Filters params */

@@ -161,8 +161,6 @@ export const EmailsBadge = ({
     }
     document.addEventListener('mousedown', handleClickOutside)
 
-    inputRef?.current.focus()
-
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [updateEmails])
 

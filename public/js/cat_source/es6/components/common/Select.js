@@ -241,15 +241,7 @@ export const Select = ({
             : ''
         }
       >
-        <div
-          ref={selectedItemRef}
-          className="select-with-icon__wrapper"
-          /* aria-label={
-          TEXT_UTILS.isContentTextEllipsis(selectedItemRef?.current)
-            ? selectedLabel
-            : null
-        } */
-        >
+        <div ref={selectedItemRef} className="select-with-icon__wrapper">
           <span className={inputClassName} onClick={toggleDropdown}>
             {renderSelection()}
           </span>

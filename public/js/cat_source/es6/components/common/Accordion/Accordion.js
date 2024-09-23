@@ -47,9 +47,9 @@ export const Accordion = ({
   }, [expanded, id])
 
   useLayoutEffect(() => {
-    if (expanded)
-      panelRef.current.style.maxHeight = `${scrollHeight > 0 ? scrollHeight : panelRef.current.scrollHeight}px`
-    else panelRef.current.style.maxHeight = 0
+    if (expanded && panelRef.current.scrollHeight > 0)
+      panelRef.current.style.maxHeight = `${panelRef.current.scrollHeight}px`
+    else if (!expanded) panelRef.current.style.maxHeight = 0
   }, [expanded, scrollHeight])
 
   return (

@@ -42,7 +42,15 @@ export const Xliff20 = () => {
     [modifyingCurrentTemplate],
   )
 
-  const onAdd = useCallback(() => {
+  const getFirstStateOfList = () =>
+    xliffOptions.xliff20.states.filter(
+      (state) =>
+        !xliff20
+          .reduce((acc, {states}) => [...acc, ...(states ?? [])], [])
+          .some((stateCompare) => state === stateCompare),
+    )[0]
+
+  const onAdd = () => {
     modifyingCurrentTemplate((prevTemplate) => ({
       ...prevTemplate,
       rules: {
@@ -51,13 +59,13 @@ export const Xliff20 = () => {
           ...prevTemplate.rules.xliff20,
           {
             id: prevTemplate.rules.length,
-            states: ['translated'],
+            states: [getFirstStateOfList()],
             analysis: 'new',
           },
         ],
       },
     }))
-  }, [modifyingCurrentTemplate])
+  }
 
   const onDelete = useCallback(
     (id) => {
@@ -105,18 +113,21 @@ export const Xliff20 = () => {
                 value={row}
                 onChange={onChange}
                 onDelete={onDelete}
+                currentXliffData={currentTemplate.rules.xliff20}
                 xliffOptions={xliffOptions.xliff20}
               />
             ))}
           </div>
-          <Button
-            className="button-add-rule"
-            type={BUTTON_TYPE.PRIMARY}
-            size={BUTTON_SIZE.MEDIUM}
-            onClick={onAdd}
-          >
-            <IconAdd size={22} /> Add rule
-          </Button>
+          {getFirstStateOfList() && (
+            <Button
+              className="button-add-rule"
+              type={BUTTON_TYPE.PRIMARY}
+              size={BUTTON_SIZE.MEDIUM}
+              onClick={onAdd}
+            >
+              <IconAdd size={22} /> Add rule
+            </Button>
+          )}
         </div>
       </Accordion>
     </div>
