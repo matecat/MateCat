@@ -3,6 +3,7 @@ import Switch from '../../../../common/Switch'
 import {FiltersParamsContext} from './FiltersParams'
 import {Controller, useForm} from 'react-hook-form'
 import {isEqual} from 'lodash'
+import {WordsBadge} from '../../../../common/WordsBadge/WordsBadge'
 
 export const MsExcel = () => {
   const {currentTemplate, modifyingCurrentTemplate} =
@@ -65,7 +66,25 @@ export const MsExcel = () => {
 
       <div className="filters-params-option">
         <div>
-          <h3>Extract drawing texts</h3>
+          <h3>Extract chart texts</h3>
+          <p>
+            Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
+            pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
+            condimentum.
+          </p>
+        </div>
+        <Controller
+          control={control}
+          name="extract_diagrams"
+          render={({field: {onChange, value, name}}) => (
+            <Switch name={name} active={value} onChange={onChange} />
+          )}
+        />
+      </div>
+
+      <div className="filters-params-option">
+        <div>
+          <h3>Extract text in text boxes</h3>
           <p>
             Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
             pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
@@ -113,6 +132,29 @@ export const MsExcel = () => {
           name="extract_doc_properties"
           render={({field: {onChange, value, name}}) => (
             <Switch name={name} active={value} onChange={onChange} />
+          )}
+        />
+      </div>
+
+      <div className="filters-params-option">
+        <div>
+          <h3>Exclude columns</h3>
+          <p>
+            Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
+            pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
+            condimentum.
+          </p>
+        </div>
+        <Controller
+          control={control}
+          name="exclude_columns"
+          render={({field: {onChange, value, name}}) => (
+            <WordsBadge
+              name={name}
+              value={value}
+              onChange={onChange}
+              placeholder={''}
+            />
           )}
         />
       </div>

@@ -2,6 +2,7 @@ import React, {useEffect, useLayoutEffect, useRef, useState} from 'react'
 
 import PropTypes from 'prop-types'
 import ChevronDown from '../../../../../../img/icons/ChevronDown'
+import useResizeObserver from '../../../hooks/useResizeObserver'
 
 export const Accordion = ({
   children,
@@ -14,8 +15,9 @@ export const Accordion = ({
   const [isRenderingContent, setIsRenderingContent] = useState(expanded)
 
   const panelRef = useRef()
+  const contentRef = useRef()
 
-  const {scrollHeight} = panelRef.current ?? {}
+  const {height: contentHeight} = useResizeObserver(contentRef)
 
   const handleClick = () => {
     onShow(id)
@@ -50,7 +52,7 @@ export const Accordion = ({
     if (expanded && panelRef.current.scrollHeight > 0)
       panelRef.current.style.maxHeight = `${panelRef.current.scrollHeight}px`
     else if (!expanded) panelRef.current.style.maxHeight = 0
-  }, [expanded, scrollHeight])
+  }, [expanded, contentHeight])
 
   return (
     <div className={`accordion-component ${className}`}>
@@ -61,7 +63,7 @@ export const Accordion = ({
         {title} <ChevronDown size={10} />
       </div>
       <div ref={panelRef} className="accordion-component-content">
-        {isRenderingContent && children}
+        <div ref={contentRef}>{isRenderingContent && children}</div>
       </div>
     </div>
   )

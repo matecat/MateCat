@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useRef, useState} from 'react'
+import React, {useEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import {
   Button,
@@ -35,7 +35,7 @@ export const XliffRulesRow = ({
 
   useEffect(() => {
     if (typeof formData === 'undefined') return
-    console.log('@formData', formData)
+
     const propsValue = Object.entries(formData).reduce(
       (acc, [key, value]) => ({
         ...acc,
@@ -65,7 +65,7 @@ export const XliffRulesRow = ({
       setValue('editor', xliffOptions.editor[0])
   }, [value, setValue, xliffOptions.editor])
 
-  const MAX_HEIGHT_DROPLIST = 320
+  const MAX_HEIGHT_DROPLIST = 260
 
   const deleteRow = () => onDelete(value.id)
 

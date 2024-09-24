@@ -42,15 +42,16 @@ export const SubTemplateMoreMenu = ({portalTarget}) => {
     )
 
     if (templatesInvolved.length) {
-      const templateCategoryName = SCHEMA_KEYS.qaModelTemplateId
-        ? 'quality framework'
-        : SCHEMA_KEYS.payableRateTemplateId
-          ? 'analysis'
-          : SCHEMA_KEYS.filtersTemplateId
-            ? 'extraction parameters'
-            : SCHEMA_KEYS.XliffConfigTemplateId
-              ? 'Xliff import settings'
-              : ''
+      const templateCategoryName =
+        propConnectProjectTemplate === SCHEMA_KEYS.qaModelTemplateId
+          ? 'quality framework'
+          : propConnectProjectTemplate === SCHEMA_KEYS.payableRateTemplateId
+            ? 'analysis'
+            : propConnectProjectTemplate === SCHEMA_KEYS.filtersTemplateId
+              ? 'extraction parameters'
+              : propConnectProjectTemplate === SCHEMA_KEYS.XliffConfigTemplateId
+                ? 'Xliff import settings'
+                : ''
 
       ModalsActions.showModalComponent(
         ConfirmDeleteResourceProjectTemplates,
@@ -88,12 +89,14 @@ export const SubTemplateMoreMenu = ({portalTarget}) => {
   const cleanProjectTemplateAfterDelete = (id) => {
     if (
       id !==
-      projectTemplates.find(({isSelected}) => isSelected).qaModelTemplateId
+      projectTemplates.find(({isSelected}) => isSelected)[
+        propConnectProjectTemplate
+      ]
     )
       return
 
     const projectTemplatesUpdated = projectTemplates
-      .filter(({qaModelTemplateId}) => qaModelTemplateId === id)
+      .filter((template) => template[propConnectProjectTemplate] === id)
       .map((template) => ({...template, [propConnectProjectTemplate]: 0}))
 
     if (projectTemplatesUpdated.length) {

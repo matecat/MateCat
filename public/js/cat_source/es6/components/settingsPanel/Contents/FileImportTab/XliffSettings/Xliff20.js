@@ -2,7 +2,6 @@ import React, {useCallback, useContext, useMemo, useState} from 'react'
 import {XliffSettingsContext} from './XliffSettings'
 import {XliffRulesRow} from './XliffRulesRow'
 import {Accordion} from '../../../../common/Accordion/Accordion'
-import Switch from '../../../../common/Switch'
 import xliffOptions from '../../defaultTemplates/xliffOptions.json'
 import {
   Button,
@@ -16,7 +15,7 @@ export const Xliff20 = () => {
   const {currentTemplate, modifyingCurrentTemplate, templates} =
     useContext(XliffSettingsContext)
 
-  const [isUseCustomRules, setIsUseCustomRules] = useState(false)
+  const [isExpanded, setIsExpanded] = useState(false)
 
   const xliff20 = useMemo(
     () =>
@@ -83,18 +82,6 @@ export const Xliff20 = () => {
     [modifyingCurrentTemplate],
   )
 
-  const renderSwitch = (
-    <div className="use-custom-rules-switch">
-      <Switch
-        active={isUseCustomRules}
-        onChange={(active) => setIsUseCustomRules(active)}
-        activeText={''}
-        inactiveText={''}
-      />
-      Use custom rules
-    </div>
-  )
-
   const isModified = !isEqual(
     currentTemplate.rules.xliff20,
     templates.find(
@@ -103,41 +90,43 @@ export const Xliff20 = () => {
   )
 
   return (
-    <div className="xliff-settings-container">
-      <h2 className={isModified ? 'unsaved' : ''}>Xliff 2.0</h2>
-      <Accordion id="xliff20" title={renderSwitch} expanded={isUseCustomRules}>
-        <div className="xliff-settings-content">
-          <div className="xliff-settings-table">
-            <span className="xliff-settings-column-name xliff-settings-column-name-state">
-              State / State qualifier
-            </span>
-            <span className="xliff-settings-column-name">Analysis</span>
-            <span className="xliff-settings-column-name xliff-settings-column-name-editor">
-              Editor
-            </span>
-            {xliff20.map((row, index) => (
-              <XliffRulesRow
-                key={index}
-                value={row}
-                onChange={onChange}
-                onDelete={onDelete}
-                currentXliffData={currentTemplate.rules.xliff20}
-                xliffOptions={xliffOptions.xliff20}
-              />
-            ))}
-          </div>
-          {getFirstStateOfList() && (
-            <Button
-              className="button-add-rule"
-              type={BUTTON_TYPE.PRIMARY}
-              size={BUTTON_SIZE.MEDIUM}
-              onClick={onAdd}
-            >
-              <IconAdd size={22} /> Add rule
-            </Button>
-          )}
+    <Accordion
+      id="xliff20"
+      title={<span className={isModified ? 'unsaved' : ''}>Xliff 2.0</span>}
+      expanded={isExpanded}
+      onShow={() => setIsExpanded((prevState) => !prevState)}
+    >
+      <div className="xliff-settings-content">
+        <div className="xliff-settings-table">
+          <span className="xliff-settings-column-name xliff-settings-column-name-state">
+            State / State qualifier
+          </span>
+          <span className="xliff-settings-column-name">Analysis</span>
+          <span className="xliff-settings-column-name xliff-settings-column-name-editor">
+            Editor
+          </span>
+          {xliff20.map((row, index) => (
+            <XliffRulesRow
+              key={index}
+              value={row}
+              onChange={onChange}
+              onDelete={onDelete}
+              currentXliffData={currentTemplate.rules.xliff20}
+              xliffOptions={xliffOptions.xliff20}
+            />
+          ))}
         </div>
-      </Accordion>
-    </div>
+        {getFirstStateOfList() && (
+          <Button
+            className="button-add-rule"
+            type={BUTTON_TYPE.PRIMARY}
+            size={BUTTON_SIZE.MEDIUM}
+            onClick={onAdd}
+          >
+            <IconAdd size={22} /> Add rule
+          </Button>
+        )}
+      </div>
+    </Accordion>
   )
 }

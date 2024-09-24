@@ -5,6 +5,9 @@ import {TAG_STATUS, Tag} from './Tag'
 import {isEqual} from 'lodash'
 
 const EMAIL_SEPARATORS = [',', ';', ' ']
+export const SPECIALS_SEPARATORS = {
+  EnterKey: 'EnterKey',
+}
 
 /**
  * Splits emails from string by separators ex. ',' or ';'
@@ -12,9 +15,9 @@ const EMAIL_SEPARATORS = [',', ';', ' ']
  * @param {string} value
  * @returns {Array}
  */
-const splitEmailsBySeparators = (value) => {
+const splitEmailsBySeparators = (value, separators) => {
   const cleanValue = value.replace(/[\n\r]+/g, ' ')
-  return EMAIL_SEPARATORS.reduce(
+  return separators.reduce(
     (acc, cur) =>
       acc
         .map((item) => item.split(cur))
@@ -23,16 +26,21 @@ const splitEmailsBySeparators = (value) => {
     [cleanValue],
   )
 }
-const stringIncludesSeparator = (text) => {
+const stringIncludesSeparator = (text, separators) => {
   const lastChar = text.slice(-1)
-  return EMAIL_SEPARATORS.some((separator) => lastChar === separator)
+  return separators.some((separator) => lastChar === separator)
 }
+const filterSeparators = (separators) =>
+  separators.filter((separator) =>
+    Object.values(SPECIALS_SEPARATORS).every((v) => v !== separator),
+  )
 
 export const EmailsBadge = ({
   name,
   onChange,
   value = [],
   validatePattern = EMAIL_PATTERN,
+  separators = EMAIL_SEPARATORS,
   placeholder,
   disabled,
   error,
@@ -63,20 +71,24 @@ export const EmailsBadge = ({
     )
     updateHighlightedEmail(-1)
   }
-  const updateEmails = useCallback((newValue) => {
-    const hasSeparator = stringIncludesSeparator(newValue)
-    const emails = splitEmailsBySeparators(newValue)
-    const lastEmail = emails.pop()
-    setEmails((prevState) => {
-      const updatedState = [
-        ...prevState,
-        ...emails,
-        ...(hasSeparator && lastEmail ? [lastEmail] : []),
-      ]
-      return hasSeparator ? removeDuplicates(updatedState) : updatedState
-    })
-    setInputValue(hasSeparator ? '' : lastEmail)
-  }, [])
+  const updateEmails = useCallback(
+    (newValue) => {
+      const filteredSeparators = filterSeparators(separators)
+      const hasSeparator = stringIncludesSeparator(newValue, filteredSeparators)
+      const emails = splitEmailsBySeparators(newValue, filteredSeparators)
+      const lastEmail = emails.pop()
+      setEmails((prevState) => {
+        const updatedState = [
+          ...prevState,
+          ...emails,
+          ...(hasSeparator && lastEmail ? [lastEmail] : []),
+        ]
+        return hasSeparator ? removeDuplicates(updatedState) : updatedState
+      })
+      setInputValue(hasSeparator ? '' : lastEmail)
+    },
+    [separators],
+  )
 
   const handleInputChange = (e) => {
     const newValue = e.target.value
@@ -111,6 +123,14 @@ export const EmailsBadge = ({
       areaRef?.current.focus()
     }
     if (e.code === 'Enter') {
+      if (
+        separators.some(
+          (separator) => separator === SPECIALS_SEPARATORS.EnterKey,
+        )
+      )
+        updateEmails(
+          `${inputRef.current.value}${filterSeparators(separators)[0]}`,
+        )
       e.preventDefault()
     }
   }
@@ -156,13 +176,15 @@ export const EmailsBadge = ({
         !areaRef.current.contains(e.target) &&
         inputRef.current.value
       ) {
-        updateEmails(`${inputRef.current.value}${EMAIL_SEPARATORS[0]}`)
+        updateEmails(
+          `${inputRef.current.value}${filterSeparators(separators)[0]}`,
+        )
       }
     }
     document.addEventListener('mousedown', handleClickOutside)
 
     return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [updateEmails])
+  }, [updateEmails, separators])
 
   useEffect(() => {
     // const isFirstEntryWritingValid =

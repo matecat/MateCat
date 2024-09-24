@@ -67,9 +67,9 @@ export const XliffSettings = () => {
     fileImportXliffSettingsTemplates
 
   const currentTemplateId = currentTemplate?.id
-  const currentProjectTemplateFiltersId =
+  const currentProjectTemplateXliffId =
     currentProjectTemplate.XliffConfigTemplateId
-  const prevCurrentProjectTemplateFiltersId = useRef()
+  const prevCurrentProjectTemplateXliffId = useRef()
 
   const saveErrorCallback = (error) => {
     let message = 'There was an error saving your data. Please retry!'
@@ -109,8 +109,7 @@ export const XliffSettings = () => {
         const items = [defaultXliffSettings, ...templates.items]
         if (!cleanup) {
           const selectedTemplateId =
-            items.find(({id}) => id === currentProjectTemplateFiltersId)?.id ??
-            0
+            items.find(({id}) => id === currentProjectTemplateXliffId)?.id ?? 0
 
           setTemplates(
             items.map((template) => ({
@@ -125,36 +124,35 @@ export const XliffSettings = () => {
     }
 
     return () => (cleanup = true)
-  }, [setTemplates, templates.length, currentProjectTemplateFiltersId])
+  }, [setTemplates, templates.length, currentProjectTemplateXliffId])
 
-  // Select QF template when curren project template change
+  // Select xliff settings template when curren project template change
   useEffect(() => {
     setTemplates((prevState) =>
       prevState.map((template) => ({
         ...template,
-        isSelected: template.id === currentProjectTemplateFiltersId,
+        isSelected: template.id === currentProjectTemplateXliffId,
       })),
     )
-  }, [currentProjectTemplateFiltersId, setTemplates])
+  }, [currentProjectTemplateXliffId, setTemplates])
 
-  // Modify current project template qa model template id when qf template id change
+  // Modify current project template xliff settings template id when template id change
   useEffect(() => {
     if (
       typeof currentTemplateId === 'number' &&
-      currentTemplateId !== prevCurrentProjectTemplateFiltersId.current &&
-      currentProjectTemplateFiltersId ===
-        prevCurrentProjectTemplateFiltersId.current
+      currentTemplateId !== prevCurrentProjectTemplateXliffId.current &&
+      currentProjectTemplateXliffId ===
+        prevCurrentProjectTemplateXliffId.current
     )
       modifyingCurrentProjectTemplate((prevTemplate) => ({
         ...prevTemplate,
         XliffConfigTemplateId: currentTemplateId,
       }))
 
-    prevCurrentProjectTemplateFiltersId.current =
-      currentProjectTemplateFiltersId
+    prevCurrentProjectTemplateXliffId.current = currentProjectTemplateXliffId
   }, [
     currentTemplateId,
-    currentProjectTemplateFiltersId,
+    currentProjectTemplateXliffId,
     modifyingCurrentProjectTemplate,
   ])
 
@@ -190,8 +188,10 @@ export const XliffSettings = () => {
                 }}
               />
             </div>
-            <Xliff12 />
-            <Xliff20 />
+            <div className="xliff-settings-container">
+              <Xliff12 />
+              <Xliff20 />
+            </div>
           </div>
         </div>
       )}

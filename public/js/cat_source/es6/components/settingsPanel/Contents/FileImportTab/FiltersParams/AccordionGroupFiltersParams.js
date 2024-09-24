@@ -17,9 +17,7 @@ const ACCORDION_GROUP = {
 }
 
 export const AccordionGroupFiltersParams = () => {
-  const [currentSection, setCurrentSection] = useState(
-    Object.keys(ACCORDION_GROUP)[0],
-  )
+  const [currentSection, setCurrentSection] = useState()
 
   const handleAccordion = (id) =>
     setCurrentSection((prevState) => (prevState !== id ? id : undefined))

@@ -32,14 +32,16 @@
 }
 
 /* Filters params */
-.filters-params-accordion-group {
+.filters-params-accordion-group,
+.xliff-settings-container {
   display: flex;
   flex-direction: column;
   gap: 10px;
   margin-top: 8px;
 }
 
-.filters-params-accordion {
+.filters-params-accordion,
+.xliff-settings-container {
   .accordion-component-title {
     font-size: 18px !important;
     font-weight: bold;
@@ -91,14 +93,6 @@
 }
 
 .xliff-settings-container {
-  .use-custom-rules-switch {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    font-size: 18px;
-    font-weight: bold;
-  }
-
   .accordion-component {
     overflow: visible;
 
