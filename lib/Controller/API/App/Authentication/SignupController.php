@@ -10,8 +10,8 @@ use FlashMessage;
 use INIT;
 use Klein\Response;
 use Teams\InvitedUser;
+use Users\Authentication\SignupModel;
 use Users\RedeemableProject;
-use Users\SignupModel;
 use Utils;
 
 class SignupController extends AbstractStatefulKleinController {

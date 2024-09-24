@@ -11,16 +11,17 @@ namespace API\App\Authentication;
 
 use API\App\RateLimiterTrait;
 use API\Commons\AbstractStatefulKleinController;
+use API\Commons\Exceptions\NotFoundException;
+use API\Commons\Exceptions\ValidationError;
 use Exception;
-use Exceptions\ValidationError;
 use FlashMessage;
 use INIT;
 use Klein\Response;
 use Log;
 use Predis\PredisException;
 use Routes;
-use Users\PasswordResetModel;
-use Users\SignupModel;
+use Users\Authentication\PasswordResetModel;
+use Users\Authentication\SignupModel;
 use Utils;
 
 class ForgotPasswordController extends AbstractStatefulKleinController {
@@ -155,12 +156,12 @@ class ForgotPasswordController extends AbstractStatefulKleinController {
         $code       = 200;
 
         if ( !$email ) {
-            $errors[] = 'email is a mandatary field.';
+            $errors[] = 'email is a mandatory field.';
             $code     = 400;
         }
 
         if ( !$wanted_url ) {
-            $errors[] = 'wanted_url is a mandatary field.';
+            $errors[] = 'wanted_url is a mandatory field.';
             $code     = 400;
         }
 

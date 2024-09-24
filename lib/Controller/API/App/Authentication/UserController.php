@@ -8,7 +8,7 @@ use API\Commons\Validators\LoginValidator;
 use Exception;
 use Exceptions\ValidationError;
 use Klein\Response;
-use Users\ChangePasswordModel;
+use Users\Authentication\ChangePasswordModel;
 
 class UserController extends AbstractStatefulKleinController {
 

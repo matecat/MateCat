@@ -7,9 +7,10 @@
  *
  */
 
-namespace Users;
+namespace Users\Authentication;
 
-use Exceptions\ValidationError;
+use API\Commons\Exceptions\ValidationError;
+use Exception;
 use Users_UserDao;
 use Users_UserStruct;
 use Utils;
@@ -31,6 +32,7 @@ class ChangePasswordModel {
      * @param $new_password_confirmation
      *
      * @throws ValidationError
+     * @throws Exception
      */
     public function changePassword( $old_password, $new_password, $new_password_confirmation ) {
 

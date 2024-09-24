@@ -6,10 +6,11 @@
  * Time: 13:19
  */
 
-namespace Users;
+namespace Users\Authentication;
 
+use API\Commons\Exceptions\NotFoundException;
+use API\Commons\Exceptions\ValidationError;
 use Exception;
-use Exceptions\ValidationError;
 use Routes;
 use Users_UserDao;
 use Users_UserStruct;
@@ -41,11 +42,11 @@ class PasswordResetModel {
     /**
      * Retrieves the user associated with the reset token.
      *
-     * @return Users_UserStruct The user associated with the reset token, or null if not found.
+     * @return ?Users_UserStruct The user associated with the reset token, or null if not found.
      * @throws Exception If an error occurs while retrieving the user.
      *
      */
-    protected function getUserFromResetToken(): Users_UserStruct {
+    protected function getUserFromResetToken(): ?Users_UserStruct {
         if ( !isset( $this->user ) ) {
             $dao        = new Users_UserDao();
             $this->user = $dao->getByConfirmationToken( $this->token );
@@ -65,7 +66,7 @@ class PasswordResetModel {
         $this->getUserFromResetToken();
 
         if ( !$this->user ) {
-            throw new ValidationError( 'Confirmation token not found' );
+            throw new ValidationError( 'Invalid authentication token' );
         }
 
         if ( strtotime( $this->user->confirmation_token_created_at ) < strtotime( '30 minutes ago' ) ) {
@@ -90,6 +91,10 @@ class PasswordResetModel {
     public function resetPassword( string $new_password, string $password_confirmation ) {
 
         $this->getUserFromResetToken();
+
+        if ( !$this->user ) {
+            throw new ValidationError( 'Invalid authentication token' );
+        }
 
         unset( $this->session[ 'password_reset_token' ] );
 

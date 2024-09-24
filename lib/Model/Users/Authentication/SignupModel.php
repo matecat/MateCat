@@ -1,15 +1,15 @@
 <?php
 
-namespace Users;
+namespace Users\Authentication;
 
 use API\Commons\Authentication\AuthCookie;
 use API\Commons\Authentication\AuthenticationHelper;
+use API\Commons\Exceptions\ValidationError;
 use Database;
 use Email\ForgotPasswordEmail;
 use Email\SignupEmail;
 use Email\WelcomeEmail;
 use Exception;
-use Exceptions\ValidationError;
 use Routes;
 use Teams\TeamDao;
 use Users_UserDao;

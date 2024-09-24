@@ -24,9 +24,10 @@ export const setNewUserPassword = async (password, passwordConfimation) => {
     credentials: 'include',
   })
 
-  // if (!response.ok) return Promise.reject(response)
+  if (!response.ok) {
+    const {errors} = await response.json()
+    return Promise.reject(errors)
+  }
 
-  const {errors, ...data} = await response.json()
-  if (errors && errors.length > 0) return Promise.reject(errors)
-  return data
+  return null;
 }

@@ -1,8 +1,8 @@
 <?php
 
-namespace Users;
+namespace Users\Authentication;
 
-use Exceptions\ValidationError;
+use API\Commons\Exceptions\ValidationError;
 
 class UserPasswordValidator {
 
@@ -27,7 +27,7 @@ class UserPasswordValidator {
             throw new ValidationError( 'Passwords must match' );
         }
 
-        if ( !preg_match( '/[ !"#$%&\'()*+,-.\/:;<=>?@\[\]^_`{|}~]/', $password ) ) {
+        if ( !preg_match( '/[ !"#$%&\'()*+,-./:;<=>?@\[\]^_`{|}~]/', $password ) ) {
             throw new ValidationError( 'Passwords must contain at least one special character: !"#\$%&\'()\*\+,-./:;<=>?@[]^_`{|}~' );
         }
 
