@@ -31,7 +31,11 @@ class JobMenu extends React.Component {
   getReviseMenuLink() {
     let reviseUrl = this.props.reviseUrl
     return (
-      <div className={'item'} onClick={() => window.open(reviseUrl, '_blank')}>
+      <div
+        className={'item'}
+        onClick={() => window.open(reviseUrl, '_blank')}
+        data-testid="revise-item"
+      >
         <i className="icon-edit icon" />
         Revise
       </div>
