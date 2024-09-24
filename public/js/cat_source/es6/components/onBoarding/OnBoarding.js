@@ -34,7 +34,6 @@ const OnBoarding = ({
 
   const backHandler = () =>
     setStep((prevState) =>
-      prevState === ONBOARDING_STEP.PASSWORD_RESET ||
       prevState === ONBOARDING_STEP.FORGOT_PASSWORD
         ? ONBOARDING_STEP.LOGIN
         : prevState,
@@ -42,9 +41,7 @@ const OnBoarding = ({
 
   const closeHandler = () => ModalsActions.onCloseModal()
 
-  const isBackButtonEnabled =
-    stepState === ONBOARDING_STEP.PASSWORD_RESET ||
-    stepState === ONBOARDING_STEP.FORGOT_PASSWORD
+  const isBackButtonEnabled = stepState === ONBOARDING_STEP.FORGOT_PASSWORD
 
   const redirectAfterLogin = () => {
     window.location.href = window.location.origin

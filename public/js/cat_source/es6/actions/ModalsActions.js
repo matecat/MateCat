@@ -72,11 +72,13 @@ let ModalsActions = {
   openSuccessModal: (props) => {
     ModalsActions.showModalComponent(SuccessModal, props, props.title)
   },
-  openResetPassword: () => {
+  openResetPassword: ({setNewPassword = false} = {}) => {
     ModalsActions.showModalComponent(
       OnBoarding,
       {
-        step: ONBOARDING_STEP.SET_NEW_PASSWORD,
+        step: setNewPassword
+          ? ONBOARDING_STEP.SET_NEW_PASSWORD
+          : ONBOARDING_STEP.PASSWORD_RESET,
         isCloseButtonEnabled: true,
       },
       null,

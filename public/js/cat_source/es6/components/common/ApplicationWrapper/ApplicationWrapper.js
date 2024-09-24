@@ -74,7 +74,7 @@ export const ApplicationWrapper = ({children}) => {
 
     switch (openFromFlash[0].value) {
       case 'passwordReset':
-        ModalsActions.openResetPassword()
+        ModalsActions.openResetPassword({setNewPassword: true})
         break
       case 'profile':
         // TODO: optimized this, establish a list of events to happen after user data is loaded
