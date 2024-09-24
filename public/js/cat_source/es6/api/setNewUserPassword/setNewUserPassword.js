@@ -1,18 +1,12 @@
 /**
  * Reset password user
  *
- * @param {string} old_password
  * @param {string} password
  * @param {string} passwordConfimation
  * @returns {Promise<object>}
  */
-export const resetPasswordUser = async (
-  old_password,
-  password,
-  passwordConfimation,
-) => {
+export const setNewUserPassword = async (password, passwordConfimation) => {
   const paramsData = {
-    old_password,
     password,
     password_confirmation: passwordConfimation,
   }
@@ -22,7 +16,7 @@ export const resetPasswordUser = async (
     formData.append(key, paramsData[key])
   })
 
-  let url = `/api/app/user/password/change`
+  let url = `/api/app/user/password`
 
   const response = await fetch(url, {
     method: 'POST',

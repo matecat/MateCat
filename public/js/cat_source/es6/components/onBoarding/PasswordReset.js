@@ -9,8 +9,9 @@ import {
 } from '../common/Button/Button'
 import {resetPasswordUser} from '../../api/resetPasswordUser'
 import {ONBOARDING_STEP, OnBoardingContext} from './OnBoarding'
+import {setNewUserPassword} from '../../api/setNewUserPassword'
 
-const PasswordReset = () => {
+const PasswordReset = ({newPassword = false}) => {
   const {handleSubmit, control} = useForm()
   const {setStep} = useContext(OnBoardingContext)
 
@@ -18,21 +19,35 @@ const PasswordReset = () => {
   const [showSuccess, setShowSuccess] = useState(false)
   const handleFormSubmit = (formData) => {
     setErrorMessage()
-    resetPasswordUser(
-      formData.password,
-      formData.newpassword,
-      formData.newpassword,
-    )
-      .then(() => {
-        setShowSuccess(true)
-      })
-      .catch((errors) => {
-        const text =
-          errors && errors.length && errors[0].code === 0
-            ? errors[0].message
-            : 'There was a problem saving the data, please try again later or contact support.'
-        setErrorMessage(text)
-      })
+    if (!newPassword) {
+      resetPasswordUser(
+        formData.password,
+        formData.newPassword,
+        formData.confirmNewPassword,
+      )
+        .then(() => {
+          setShowSuccess(true)
+        })
+        .catch((errors) => {
+          const text =
+            errors && errors.length && errors[0].code === 0
+              ? errors[0].message
+              : 'There was a problem saving the data, please try again later or contact support.'
+          setErrorMessage(text)
+        })
+    } else {
+      setNewUserPassword(formData.newPassword, formData.confirmNewPassword)
+        .then(() => {
+          setShowSuccess(true)
+        })
+        .catch((errors) => {
+          const text =
+            errors && errors.length && errors[0].code === 0
+              ? errors[0].message
+              : 'There was a problem saving the data, please try again later or contact support.'
+          setErrorMessage(text)
+        })
+    }
   }
 
   const passwordRules = {
@@ -74,26 +89,29 @@ const PasswordReset = () => {
             className="passwordreset-form"
             onSubmit={handleSubmit(handleFormSubmit)}
           >
-            <fieldset>
-              <Controller
-                control={control}
-                defaultValue=""
-                name="password"
-                rules={{
-                  required: 'This field is mandatory',
-                }}
-                render={({
-                  field: {name, onChange, value},
-                  fieldState: {error},
-                }) => (
-                  <Input
-                    type={INPUT_TYPE.PASSWORD}
-                    placeholder="Password"
-                    {...{name, value, onChange, error}}
-                  />
-                )}
-              />
-            </fieldset>
+            {!newPassword ? (
+              <fieldset>
+                <Controller
+                  control={control}
+                  defaultValue=""
+                  name="password"
+                  rules={{
+                    required: 'This field is mandatory',
+                  }}
+                  render={({
+                    field: {name, onChange, value},
+                    fieldState: {error},
+                  }) => (
+                    <Input
+                      type={INPUT_TYPE.PASSWORD}
+                      placeholder="Password"
+                      {...{name, value, onChange, error}}
+                    />
+                  )}
+                />
+              </fieldset>
+            ) : null}
+
             <fieldset>
               <Controller
                 control={control}

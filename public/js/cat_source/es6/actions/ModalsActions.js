@@ -76,7 +76,7 @@ let ModalsActions = {
     ModalsActions.showModalComponent(
       OnBoarding,
       {
-        step: ONBOARDING_STEP.PASSWORD_RESET,
+        step: ONBOARDING_STEP.SET_NEW_PASSWORD,
         isCloseButtonEnabled: true,
       },
       null,
