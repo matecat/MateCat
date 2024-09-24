@@ -114,6 +114,7 @@
 
 .ui.buttons .button,
 .ui.button {
+  font-family: "Lato", "Helvetica Neue", Arial, Helvetica, sans-serif;
   align-items: center;
 }
 .ui.primary.buttons .button,
@@ -373,9 +374,9 @@ a.ui.basic.blue.label:hover {
 
 
 /*     ICONS            */
-.ui.icon.buttons .button, .ui.icon.button:not(.animated):not(.compact):not(.labeled) {
-   padding: 0;
-}
+//.ui.icon.buttons .button, .ui.icon.button:not(.animated):not(.compact):not(.labeled) {
+//   padding: 0;
+//}
 i.icon {
   font-family: "Dropdown";
 }
@@ -384,10 +385,14 @@ i.icon {
 .ui.dropdown {
   font-size: unset;
 }
-.ui.dropdown .menu > .item {
+
+.ui.dropdown .menu {
+  font-family: "Calibri", "Helvetica Neue", Arial, Helvetica, sans-serif;
+  & > .item {
     font-size: 14px;
     color: $black !important;
     min-height: unset;
+  }
 }
 .ui.dropdown .menu > .item a {
   color: $black !important;
@@ -395,4 +400,10 @@ i.icon {
 
 .ui.header {
   font-family: "Lato", "Helvetica Neue", Arial, Helvetica, sans-serif;
+}
+.ui.attached.button {
+  box-shadow: 0 0 0 1px rgba(34, 36, 38, 0.15) !important;
+}
+.ui.tiny.buttons .button, .ui.tiny.button {
+  font-size: 12px !important;
 }

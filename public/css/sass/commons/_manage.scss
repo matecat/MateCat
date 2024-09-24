@@ -52,9 +52,11 @@ div#manage-container {
   .menu {
     .item.submenu {
       width: 180px;
+      i.icon-refresh.icon {
+        margin-right: 9px !important;
+      }
     }
     .item.submenu a {
-      padding-left: 6px;
       color: $black;
     }
 
