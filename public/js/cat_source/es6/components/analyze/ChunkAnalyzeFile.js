@@ -5,7 +5,7 @@ const ChunkAnalyzeFile = ({file, index, size, rates}) => {
   const matches = file.matches
   return (
     <div
-      className={`chunk-file-detail ${rates.ICE_MT && rates.ICE_MT !== rates.ICE_MT ? 'more-columns' : ''}`}
+      className={`chunk-file-detail ${rates.ICE_MT && rates.ICE_MT !== rates.MT ? 'more-columns' : ''}`}
     >
       <div
         className={`chunk-file-detail-background ${size === index ? 'last' : ''} `}
@@ -64,7 +64,7 @@ const ChunkAnalyzeFile = ({file, index, size, rates}) => {
           <div>{matches.find((item) => item.type === 'MT').equivalent}</div>
         )}
       </div>
-      {rates.ICE_MT && rates.ICE_MT !== rates.ICE_MT ? (
+      {rates.ICE_MT && rates.ICE_MT !== rates.MT ? (
         <div>
           <div>{matches.find((item) => item.type === 'ice_MT').equivalent}</div>
         </div>
