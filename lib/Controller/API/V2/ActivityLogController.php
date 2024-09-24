@@ -11,6 +11,9 @@ namespace API\V2;
 
 use ActivityLog\ActivityLogDao;
 use ActivityLog\ActivityLogStruct;
+use API\Commons\KleinController;
+use API\Commons\Validators\ChunkPasswordValidator;
+use API\Commons\Validators\ProjectPasswordValidator;
 use API\V2\Json\Activity;
 
 class ActivityLogController extends KleinController {
@@ -21,7 +24,7 @@ class ActivityLogController extends KleinController {
 
     public function allOnProject(){
 
-        $validator = new Validators\ProjectPasswordValidator( $this );
+        $validator = new ProjectPasswordValidator( $this );
         $validator->validate();
 
         $activityLogDao = new ActivityLogDao();
@@ -33,7 +36,7 @@ class ActivityLogController extends KleinController {
 
     public function lastOnProject(){
 
-        $validator = new Validators\ProjectPasswordValidator( $this );
+        $validator = new ProjectPasswordValidator( $this );
         $validator->validate();
 
         $activityLogDao = new ActivityLogDao();
@@ -46,7 +49,7 @@ class ActivityLogController extends KleinController {
 
     public function lastOnJob(){
 
-        $validator = new Validators\ChunkPasswordValidator( $this );
+        $validator = new ChunkPasswordValidator( $this );
         $validator->validate();
 
         $activityLogDao = new ActivityLogDao();

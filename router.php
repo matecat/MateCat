@@ -1,12 +1,12 @@
 <?php
 
-use API\V2\Exceptions\AuthenticationError;
-use API\V2\Exceptions\AuthorizationError;
-use API\V2\Exceptions\ExternalServiceException;
-use API\V2\Exceptions\NotFoundException;
-use API\V2\Exceptions\UnprocessableException;
-use API\V2\Exceptions\ValidationError;
-use API\V2\Json\Error;
+use API\Commons\Error;
+use API\Commons\Exceptions\AuthenticationError;
+use API\Commons\Exceptions\AuthorizationError;
+use API\Commons\Exceptions\ExternalServiceException;
+use API\Commons\Exceptions\NotFoundException;
+use API\Commons\Exceptions\UnprocessableException;
+use API\Commons\Exceptions\ValidationError;
 use Exceptions\ValidationError as Model_ValidationError;
 use Klein\Klein;
 
@@ -16,13 +16,20 @@ Bootstrap::start();
 
 $klein = new Klein();
 
-function route( $path, $method, $controller, $action ) {
+/**
+ * @param string $path
+ * @param string $method
+ * @param array  $callback
+ *
+ * @return void
+ */
+function route( string $path, string $method, array $callback ) {
     global $klein;
 
-    $klein->respond( $method, $path, function () use ( $controller, $action ) {
-        $reflect  = new ReflectionClass( $controller );
+    $klein->respond( $method, $path, function () use ( $callback ) {
+        $reflect  = new ReflectionClass( $callback[ 0 ] );
         $instance = $reflect->newInstanceArgs( func_get_args() );
-        $instance->respond( $action );
+        $instance->respond( $callback[ 1 ] );
     } );
 }
 

@@ -1,0 +1,27 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "rules",
+    "name"
+  ],
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "rules": {
+      "type": [
+        "object"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "xliff12": {
+          "$ref": "xliff_parameters_rules_content.json#/definitions/xliff12Rule"
+        },
+        "xliff20": {
+          "$ref": "xliff_parameters_rules_content.json#/definitions/xliff20Rule"
+        }
+      }
+    }
+  }
+}

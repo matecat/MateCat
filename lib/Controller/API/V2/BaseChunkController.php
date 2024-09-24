@@ -2,6 +2,7 @@
 
 namespace API\V2;
 
+use API\Commons\KleinController;
 use Chunks_ChunkStruct;
 use LQA\ChunkReviewDao;
 

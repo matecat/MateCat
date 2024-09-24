@@ -1,5 +1,6 @@
 <?php
 
+use DataAccess\DaoCacheTrait;
 use Exceptions\ValidationError;
 
 /**
@@ -10,17 +11,13 @@ use Exceptions\ValidationError;
  */
 abstract class DataAccess_AbstractDao {
 
+    use DaoCacheTrait;
+
     /**
      * The connection object
      * @var Database
      */
-    protected $database;
-
-    /**
-     * The cache connection object
-     * @var Predis\Client
-     */
-    protected static $cache_con;
+    protected Database $database;
 
     /**
      * @var string This property will be overridden in the sub-classes.
@@ -32,11 +29,6 @@ abstract class DataAccess_AbstractDao {
      * @var int The maximum number of tuples that can be inserted for a single query
      */
     const MAX_INSERT_NUMBER = 1;
-
-    /**
-     * @var int Cache expiry time, expressed in seconds
-     */
-    protected $cacheTTL = 0;
 
     /**
      * @var array
@@ -53,7 +45,7 @@ abstract class DataAccess_AbstractDao {
      */
     const TABLE = null;
 
-    public function __construct( $con = null ) {
+    public function __construct( Database $con = null ) {
         /**
          * @var $con Database
          */
@@ -66,21 +58,21 @@ abstract class DataAccess_AbstractDao {
     }
 
     /**
-     * @return \Database|IDatabase
+     * @return Database|IDatabase
      */
     public function getDatabaseHandler() {
         return $this->database;
     }
 
-    public function createList( Array $obj_arr ) {
+    public function createList( array $obj_arr ) {
         throw new Exception( "Abstract method " . __METHOD__ . " must be overridden " );
     }
 
-    public function updateList( Array $obj_arr ) {
+    public function updateList( array $obj_arr ) {
         throw new Exception( "Abstract method " . __METHOD__ . " must be overridden " );
     }
 
-    public function deleteList( Array $obj_arr ) {
+    public function deleteList( array $obj_arr ) {
         throw new Exception( "Abstract method " . __METHOD__ . " must be overridden " );
     }
 
@@ -121,7 +113,7 @@ abstract class DataAccess_AbstractDao {
      *                      <li>A $type object</li>
      *                  </ul>.
      */
-    protected static function _sanitizeInputArray( Array $input, $type ) {
+    protected static function _sanitizeInputArray( array $input, $type ) {
 
         foreach ( $input as $i => $elem ) {
             $input[ $i ] = self::_sanitizeInput( $elem, $type );
@@ -179,126 +171,11 @@ abstract class DataAccess_AbstractDao {
      *
      * @return PDOStatement
      */
-    protected function _getStatementForCache( $query ) {
+    protected function _getStatementForQuery( $query ): PDOStatement {
 
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $query );
 
-        return $stmt;
-    }
-
-    /**
-     * Cache Initialization
-     *
-     * @return void
-     * @throws ReflectionException
-     */
-    protected function _cacheSetConnection() {
-        if ( !isset( self::$cache_con ) || empty( self::$cache_con ) ) {
-
-            try {
-                self::$cache_con = ( new RedisHandler() )->getConnection();
-                self::$cache_con->get( 1 );
-            } catch ( Exception $e ) {
-                self::$cache_con = null;
-                Log::doJsonLog( $e->getMessage() );
-                Log::doJsonLog( "No Redis server(s) configured." );
-                throw $e;
-            }
-
-        }
-    }
-
-    /**
-     * @param $query string A query
-     *
-     * @return mixed
-     */
-    protected function _getFromCache( $query ) {
-        if ( INIT::$SKIP_SQL_CACHE || $this->cacheTTL == 0 ) {
-            return null;
-        }
-
-        $this->_cacheSetConnection();
-
-        $value = null;
-        if ( isset( self::$cache_con ) && !empty( self::$cache_con ) ) {
-            $key   = md5( $query );
-            $value = unserialize( self::$cache_con->get( $key ) );
-            $this->_logCache( "GET", $key, $value, $query );
-        }
-
-        return $value;
-    }
-
-    protected function _logCache( $type, $key, $value, $sqlQuery ) {
-        Log::doJsonLog( [
-                "type" => $type,
-                "key"  => $key,
-                "sql"  => preg_replace( "/[ ]+/", " ", str_replace( "\n", " ", $sqlQuery ) ),
-            //"result_set" => $value,
-        ], "query_cache.log" );
-    }
-
-    /**
-     * @param $query string
-     * @param $value array
-     *
-     * @return void|null
-     */
-    protected function _setInCache( $query, $value ) {
-        if ( $this->cacheTTL == 0 ) {
-            return null;
-        }
-
-        if ( isset( self::$cache_con ) && !empty( self::$cache_con ) ) {
-            $key = md5( $query );
-            self::$cache_con->setex( $key, $this->cacheTTL, serialize( $value ) );
-            $this->_logCache( "SET", $key, $value, $query );
-        }
-    }
-
-    /**
-     * @param int $cacheSecondsTTL
-     *
-     * @return $this
-     */
-    public function setCacheTTL( $cacheSecondsTTL ) {
-        if ( !INIT::$SKIP_SQL_CACHE ) {
-            $this->cacheTTL = $cacheSecondsTTL;
-        }
-
-        return $this;
-    }
-
-    /**
-     * @param $query
-     *
-     * @return bool
-     */
-    protected function _destroyCache( $query ) {
-        $this->_cacheSetConnection();
-        if ( isset( self::$cache_con ) && !empty( self::$cache_con ) ) {
-            return self::$cache_con->del( md5( $query ) );
-        }
-
-        return false;
-
-    }
-
-    /**
-     * Serialize params, ensuring values are always treated as strings.
-     *
-     * @param array $params
-     *
-     * @return string
-     */
-    protected function _serializeForCacheKey( Array $params ) {
-        foreach ( $params as $key => $value ) {
-            $params[ $key ] = (string)$value;
-        }
-
-        return serialize( $params );
+        return $conn->prepare( $query );
     }
 
     /**
@@ -307,12 +184,13 @@ abstract class DataAccess_AbstractDao {
      * @param array                 $bindParams
      *
      * @return DataAccess_IDaoStruct[]
+     * @throws ReflectionException
      */
-    protected function _fetchObject( PDOStatement $stmt, DataAccess_IDaoStruct $fetchClass, Array $bindParams ) {
+    protected function _fetchObject( PDOStatement $stmt, DataAccess_IDaoStruct $fetchClass, array $bindParams ): array {
 
         $_cacheResult = $this->_getFromCache( $stmt->queryString . $this->_serializeForCacheKey( $bindParams ) );
 
-        if ( $_cacheResult !== false && $_cacheResult !== null ) {
+        if ( !empty( $_cacheResult ) ) {
             return $_cacheResult;
         }
 
@@ -327,18 +205,29 @@ abstract class DataAccess_AbstractDao {
     }
 
     /**
+     * @param string       $keyMap
      * @param PDOStatement $stmt
+     * @param string       $fetchClass
      * @param array        $bindParams
      *
-     * @return bool|int
+     * @return DataAccess_IDaoStruct[]
+     * @throws ReflectionException
      */
-    protected function _destroyObjectCache( PDOStatement $stmt, Array $bindParams ) {
-        $this->_cacheSetConnection();
-        if ( isset( self::$cache_con ) && !empty( self::$cache_con ) ) {
-            return self::$cache_con->del( md5( $stmt->queryString . $this->_serializeForCacheKey( $bindParams ) ) );
+    protected function _fetchObjectMap( string $keyMap, PDOStatement $stmt, string $fetchClass, array $bindParams ): array {
+
+        $_cacheResult = $this->_getFromCacheMap( $keyMap, $stmt->queryString . $this->_serializeForCacheKey( $bindParams ) );
+
+        if ( !empty( $_cacheResult ) ) {
+            return $_cacheResult;
         }
 
-        return false;
+        $stmt->setFetchMode( PDO::FETCH_CLASS, $fetchClass );
+        $stmt->execute( $bindParams );
+        $result = $stmt->fetchAll();
+
+        $this->_setInCacheMap( $keyMap, $stmt->queryString . $this->_serializeForCacheKey( $bindParams ), $result );
+
+        return $result;
 
     }
 
@@ -375,13 +264,13 @@ abstract class DataAccess_AbstractDao {
      * Returns a string suitable for updates of the fields
      * provided by the attributes array.
      *
-     * @param $attrs array of full attributes to update
-     * @param $mask  array of attributes to include in the update
+     * @param            $attrs array of full attributes to update
+     * @param array|null $mask  array of attributes to include in the update
      *
      * @return string
      */
 
-    protected static function buildUpdateSet( $attrs, $mask ) {
+    protected static function buildUpdateSet( array $attrs, ?array $mask = [] ): string {
         $map = [];
         $pks = static::$primary_keys;
 
@@ -515,24 +404,24 @@ abstract class DataAccess_AbstractDao {
     }
 
     /**
-     * Inserts a struct into database.
+     * Inserts a struct into the database.
      *
      * If an `auto_increment_field` is defined for the table, the last inserted is returned.
-     * Otherwise it returns TRUE on success.
+     * Otherwise, it returns TRUE on success.
      *
      * Returns FALSE on failure.
      *
      * @param DataAccess_IDaoStruct $struct
-     * @param array                 $options
+     * @param array|null            $options
      *
      * @return bool|string
      * @throws Exception
      */
-    public static function insertStruct( DataAccess_IDaoStruct $struct, $options = [] ) {
+    public static function insertStruct( DataAccess_IDaoStruct $struct, ?array $options = [] ) {
 
         $ignore              = isset( $options[ 'ignore' ] ) && $options[ 'ignore' ] == true;
         $no_nulls            = isset( $options[ 'no_nulls' ] ) && $options[ 'no_nulls' ] == true;
-        $on_duplicate_fields = ( isset( $options[ 'on_duplicate_update' ] ) && !empty( $options[ 'on_duplicate_update' ] ) ? $options[ 'on_duplicate_update' ] : [] );
+        $on_duplicate_fields = ( !empty( $options[ 'on_duplicate_update' ] ) ? $options[ 'on_duplicate_update' ] : [] );
 
         // TODO: allow the mask to be passed as option.
         $mask = array_keys( $struct->toArray() );

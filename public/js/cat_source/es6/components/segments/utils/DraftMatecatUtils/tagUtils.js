@@ -57,7 +57,7 @@ export const transformTagsToHtml = (text, isRtl = 0) => {
     }
     text = matchTag(text)
   } catch (e) {
-    console.error('Error parsing tag in transformTagsToHtml function')
+    console.error('Error parsing tag in transformTagsToHtml function', e)
   }
   return text
 }
@@ -332,4 +332,11 @@ export const hasDataOriginalTags = (originalText) => {
 export const checkXliffTagsInText = (text) => {
   const reg = getXliffRegExpression()
   return reg.test(text)
+}
+
+export const removeZeroWidthSpace = (text) => {
+  return text.replace(
+    new RegExp(String.fromCharCode(parseInt('200B', 16)), 'gi'),
+    '',
+  )
 }

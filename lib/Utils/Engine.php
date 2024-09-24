@@ -30,7 +30,7 @@ class Engine {
         /**
          * @var $engineRecord EnginesModel_EngineStruct
          */
-        $engineRecord = isset( $eng[ 0 ] ) ? $eng[ 0 ] : null;
+        $engineRecord = $eng[ 0 ] ?? null;
 
         if ( empty( $engineRecord ) ) {
             throw new Exception( "Engine $id not found", -2 );

@@ -2,8 +2,9 @@
 
 namespace API\V2;
 
-use API\V2\Validators\JSONRequestValidator;
-use API\V2\Validators\LoginValidator;
+use API\Commons\KleinController;
+use API\Commons\Validators\JSONRequestValidator;
+use API\Commons\Validators\LoginValidator;
 use InvalidArgumentException;
 use Users_UserDao;
 

@@ -3,11 +3,11 @@
 namespace API\V3;
 
 use API\App\Json\Analysis\AnalysisProject;
-use API\V2\Exceptions\AuthenticationError;
-use API\V2\Exceptions\NotFoundException;
-use API\V2\KleinController;
-use API\V2\Validators\LoginValidator;
-use API\V2\Validators\ProjectPasswordValidator;
+use API\Commons\Exceptions\AuthenticationError;
+use API\Commons\Exceptions\NotFoundException;
+use API\Commons\KleinController;
+use API\Commons\Validators\LoginValidator;
+use API\Commons\Validators\ProjectPasswordValidator;
 use Constants_JobStatus;
 use Exceptions\ValidationError;
 use Model\Analysis\Status;

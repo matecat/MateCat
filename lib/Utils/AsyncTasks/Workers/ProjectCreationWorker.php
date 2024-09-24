@@ -10,6 +10,7 @@
 namespace AsyncTasks\Workers;
 
 
+use Exception;
 use PDOException;
 use ProjectManager;
 use ProjectQueue\Queue;
@@ -28,8 +29,9 @@ class ProjectCreationWorker extends AbstractWorker {
     /**
      * @param AbstractElement $queueElement
      *
-     * @return mixed|void
+     * @return void
      * @throws EndQueueException
+     * @throws Exception
      */
     public function process( AbstractElement $queueElement ) {
 
@@ -43,9 +45,9 @@ class ProjectCreationWorker extends AbstractWorker {
             $this->_createProject( $queueElement );
         } catch( PDOException $e ){
             throw new EndQueueException( $e );
+        } finally {
+            $this->_publishResults();
         }
-
-        $this->_publishResults();
 
     }
 

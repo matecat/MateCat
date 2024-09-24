@@ -32,7 +32,7 @@ class FindProjectTest extends AbstractTest {
     protected $database_instance;
 
 
-    public function setUp() {
+    public function setUp(): void {
         parent::setUp();
 
         $this->database_instance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
@@ -48,7 +48,7 @@ class FindProjectTest extends AbstractTest {
                     '127.0.0.1', '0', '0', '123', '3', NULL 
                     )"
         );
-        $pId = $this->database_instance->getConnection()->lastInsertId();
+        $pId           = $this->database_instance->getConnection()->lastInsertId();
         $this->project = new Projects_ProjectStruct( $this->database_instance->getConnection()->query( "SELECT * FROM projects WHERE id = $pId LIMIT 1" )->fetch() );
 
         $this->database_instance->getConnection()->query(
@@ -130,13 +130,13 @@ class FindProjectTest extends AbstractTest {
      */
     function test_findByIdCustomer() {
 
-        $result_array      = $this->projectDao->findByIdCustomer( $this->project[ 'id_customer' ] );
-        $found = false;
-        foreach( $result_array as $first_elem_result ){
+        $result_array = $this->projectDao->findByIdCustomer( $this->project[ 'id_customer' ] );
+        $found        = false;
+        foreach ( $result_array as $first_elem_result ) {
 
             $this->assertTrue( $first_elem_result instanceof Projects_ProjectStruct );
 
-            if( $this->project[ 'id' ] == $first_elem_result->id ){ // we found the right project
+            if ( $this->project[ 'id' ] == $first_elem_result->id ) { // we found the right project
 
                 $found = true;
 

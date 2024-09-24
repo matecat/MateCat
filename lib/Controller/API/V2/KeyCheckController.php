@@ -9,8 +9,9 @@
 namespace API\V2;
 
 
-use API\V2\Exceptions\AuthenticationError;
-use API\V2\Exceptions\NotFoundException;
+use API\Commons\Exceptions\AuthenticationError;
+use API\Commons\Exceptions\NotFoundException;
+use API\Commons\KleinController;
 
 class KeyCheckController extends KleinController {
 
@@ -28,7 +29,7 @@ class KeyCheckController extends KleinController {
             throw new AuthenticationError( 'Unauthorized', 401 ) ;
         }
 
-        list( $user_api_key, $user_api_secret ) = explode('-', $this->params[ 'user_api_key' ] ) ;
+        [ $user_api_key, $user_api_secret ] = explode('-', $this->params[ 'user_api_key' ] ) ;
 
         if ( $user_api_key && $user_api_secret ) {
 

@@ -9,7 +9,7 @@
 namespace Features\ProjectCompletion\Model;
 
 
-use API\V2\Exceptions\AuthenticationError;
+use API\Commons\Exceptions\AuthenticationError;
 use Chunks_ChunkCompletionEventDao;
 use Chunks_ChunkStruct;
 use Exception;

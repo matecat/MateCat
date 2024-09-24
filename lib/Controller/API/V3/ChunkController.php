@@ -8,8 +8,8 @@
 
 namespace API\V3;
 
+use API\Commons\Validators\ChunkPasswordValidator;
 use API\V2\BaseChunkController;
-use API\V2\Validators\ChunkPasswordValidator;
 use API\V3\Json\Chunk;
 use Chunks_ChunkStruct;
 use Exception;

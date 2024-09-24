@@ -9,7 +9,6 @@ use TMS\TMSService;
  * Time: 18.54
  * To change this template use File | Settings | File Templates.
  */
-
 class ajaxUtilsController extends ajaxController {
 
     private $__postInput = null;
@@ -64,7 +63,7 @@ class ajaxUtilsController extends ajaxController {
                 break;
             case 'clearNotCompletedUploads':
                 try {
-                    ConnectedServices\GDrive\Session::cleanupSessionFiles();
+                    ( new ConnectedServices\GDrive\Session() )->cleanupSessionFiles();
                 } catch ( Exception $e ) {
                     Log::doJsonLog( "ajaxUtils::clearNotCompletedUploads : " . $e->getMessage() );
                 }

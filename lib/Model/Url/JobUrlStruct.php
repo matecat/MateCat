@@ -3,6 +3,7 @@
 namespace Url;
 
 use Features\ReviewExtended\ReviewUtils;
+use INIT;
 
 class JobUrlStruct {
 
@@ -137,7 +138,7 @@ class JobUrlStruct {
      * @return mixed
      */
     private function httpHost( $httpHost = null ) {
-        $host = \INIT::$HTTPHOST;
+        $host = INIT::$HTTPHOST;
 
         if ( !empty( $httpHost ) ) {
             $host = $httpHost;

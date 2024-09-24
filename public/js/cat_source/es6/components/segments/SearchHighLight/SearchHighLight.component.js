@@ -2,7 +2,9 @@ import React from 'react'
 
 const SearchHighlight = (props) => {
   let occurrence = props.occurrences.find(
-    (occ) => occ.start === props.start && occ.key === props.blockKey,
+    (occ) =>
+      (occ.start === props.start && occ.key === props.blockKey) ||
+      (occ.end === props.end && occ.key === props.blockKey),
   )
   if (occurrence && occurrence.searchProgressiveIndex === props.currentIndex) {
     return (

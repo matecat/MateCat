@@ -2,8 +2,8 @@
 
 namespace API\App;
 
-use API\V2\KleinController;
-use API\V2\Validators\LoginValidator;
+use API\Commons\KleinController;
+use API\Commons\Validators\LoginValidator;
 use ApiKeys_ApiKeyStruct;
 use Utils;
 

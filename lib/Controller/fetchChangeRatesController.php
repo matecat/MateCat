@@ -13,7 +13,7 @@ class fetchChangeRatesController extends ajaxController
     /**
      * Perform Controller Action
      *
-     * @return json|null
+     * @return void
      */
     public function doAction() {
         $changeRatesFetcher = new currency_translatedChangeRatesFetcher();
