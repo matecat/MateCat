@@ -7,6 +7,7 @@ use API\Commons\Exceptions\NotFoundException;
 use API\Commons\KleinController;
 use ApiKeys_ApiKeyStruct;
 use Log;
+use Projects_ProjectStruct;
 
 /**
  * @daprecated this should extend Base
@@ -45,10 +46,17 @@ class ProjectValidator extends Base {
     }
 
     /**
-     * @var \Projects_ProjectStruct
+     * @var Projects_ProjectStruct
      */
     private $project;
     private $feature;
+
+    /**
+     * @param Projects_ProjectStruct $project
+     */
+    public function setProject(Projects_ProjectStruct $project) {
+        $this->project = $project;
+    }
 
     public function getProject() {
         return $this->project;
@@ -67,18 +75,20 @@ class ProjectValidator extends Base {
      */
     protected function _validate() {
 
-        $this->project = \Projects_ProjectDao::findById( $this->id_project );
+        if(!$this->project){
+            $this->project = \Projects_ProjectDao::findById( $this->id_project );
+        }
 
         if ( $this->project == false ) {
-            throw new NotFoundException( "Project Not Found.", 404 );
+            throw new NotFoundException( "Project not found.", 404 );
         }
 
         if ( !$this->validateFeatureEnabled() ) {
-            throw new NotFoundException( "Project Not Found.", 404 );
+            throw new NotFoundException( "Feature not enabled on this project.", 404 );
         }
 
         if( !$this->inProjectScope() ){
-            throw new NotFoundException( "Project Not Found.", 404 );
+            throw new NotFoundException( "You are not allowed to access to this project", 403 );
         }
 
     }

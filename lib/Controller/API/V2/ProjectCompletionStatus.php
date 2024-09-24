@@ -17,21 +17,27 @@ class ProjectCompletionStatus extends KleinController {
 
     public function afterConstruct() {
 
+        $projectValidator = new ProjectValidator( $this );
+
         if ( $this->request->paramsNamed()[ 'password' ] ) {
-            $validator = new ProjectPasswordValidator( $this );
-        } else {
-            $validator = new ProjectValidator( $this );
-            $validator->setApiRecord( $this->api_record );
-            $validator->setIdProject( $this->request->id_project );
-            $validator->setFeature( 'project_completion' );
+            $projectPasswordValidator = new ProjectPasswordValidator( $this );
+            $projectPasswordValidator->onSuccess( function () use ( $projectPasswordValidator, $projectValidator ) {
+                $this->project = $projectPasswordValidator->getProject();
+                $projectValidator->setProject($this->project);
+            } );
+
+            $this->appendValidator( $projectPasswordValidator );
         }
 
-        $validator->onSuccess( function () use ( $validator ) {
-            $this->project = $validator->getProject();
+        $projectValidator->setApiRecord( $this->api_record );
+        $projectValidator->setIdProject( $this->request->id_project );
+        $projectValidator->setFeature( 'project_completion' );
+
+        $projectValidator->onSuccess( function () use ( $projectValidator ) {
+            $this->project = $projectValidator->getProject();
         } );
 
-        $this->appendValidator( $validator );
-
+        $this->appendValidator( $projectValidator );
     }
 
     public function status() {
