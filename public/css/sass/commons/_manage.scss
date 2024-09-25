@@ -142,6 +142,7 @@ div#manage-container {
         gap: 10px;
         justify-content: end;
         font-family: Calibri, Arial, Helvetica, sans-serif;
+        position: relative;
         top: 4px;
 
         .ui.dropdown {
@@ -1059,4 +1060,18 @@ div#manage-container {
   &:hover {
     background-color: rgba($grey8, 1) !important;
   }
+}
+
+.project-activity-icon button.project-team-dropdown {
+  height: 30px;
+  font-size: 14px;
+  color: #000;
+  padding: 5px 15px;
+  background-color: #fff;
+}
+
+.user-project-dropdown-container button.user-project-dropdown {
+  height: 30px !important;
+  color: #000 !important;
+  font-size: 14px;
 }

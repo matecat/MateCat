@@ -13,7 +13,6 @@ import {
 } from '../common/Button/Button'
 import CommonUtils from '../../utils/commonUtils'
 import ModalsActions from '../../actions/ModalsActions'
-import useAuth from '../../hooks/useAuth'
 
 export const UserMenu = () => {
   const {isUserLogged, userInfo, logout} = useContext(ApplicationWrapperContext)
