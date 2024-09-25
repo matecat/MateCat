@@ -116,13 +116,22 @@ class UserController extends KleinController
 
         try {
             $userMetaDao = new MetadataDao();
-            $userMetaDao->set(
+            $metadata = $userMetaDao->set(
                 $this->user->uid,
                 $filtered['key'],
                 $filtered['value']
             );
+
+            return $this->response->json([
+                'id' => (int)$metadata->id,
+                'uid' => (int)$metadata->uid,
+                'key' => $metadata->key,
+                'value' => $metadata->value,
+            ]);
+
         } catch (\Exception $exception){
-            $this->response->code($exception->getCode());
+            $this->response->code($exception->getCode() > 0 ? $exception->getCode() : 500);
+
             return $this->response->json([
                 'error' => $exception->getMessage()
             ]);

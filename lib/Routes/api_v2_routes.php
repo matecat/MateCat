@@ -137,4 +137,4 @@ route( '/api/v2/TMX/[:id_job]/[:password]', 'GET',  'API\V2\ExportTMXController'
 
 // User
 route('/api/v2/user', 'PUT',  'API\V2\UserController', 'edit');
-route('/api/v2/user/set-metadata', 'PUT',  'API\V2\UserController', 'setMetadata');
+route('/api/v2/user/metadata', 'PUT',  'API\V2\UserController', 'setMetadata');
