@@ -944,7 +944,7 @@ const NewProject = ({
           }}
         />
       )}
-      {projectTemplates.length && (
+      {projectTemplates.length > 0 && (
         <SettingsPanel
           {...{
             onClose: closeSettings,
