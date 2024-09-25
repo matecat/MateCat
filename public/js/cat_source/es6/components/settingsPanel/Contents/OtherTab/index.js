@@ -1,1 +1,1 @@
-export * from './AdvancedOptionsTab'
+export * from './OtherTab'
