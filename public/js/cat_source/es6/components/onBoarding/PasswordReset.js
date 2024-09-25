@@ -10,6 +10,7 @@ import {
 import {resetPasswordUser} from '../../api/resetPasswordUser'
 import {ONBOARDING_STEP, OnBoardingContext} from './OnBoarding'
 import {setNewUserPassword} from '../../api/setNewUserPassword'
+import ModalsActions from '../../actions/ModalsActions'
 
 const PasswordReset = ({newPassword = false}) => {
   const {handleSubmit, control} = useForm()
@@ -73,14 +74,25 @@ const PasswordReset = ({newPassword = false}) => {
             log in.
           </p>
           <div className="passwordreset-form">
-            <Button
-              type={BUTTON_TYPE.PRIMARY}
-              size={BUTTON_SIZE.MEDIUM}
-              htmlType={BUTTON_HTML_TYPE.SUBMIT}
-              onClick={() => setStep(ONBOARDING_STEP.LOGIN)}
-            >
-              Back to sign in
-            </Button>
+            {newPassword ? (
+              <Button
+                type={BUTTON_TYPE.PRIMARY}
+                size={BUTTON_SIZE.MEDIUM}
+                htmlType={BUTTON_HTML_TYPE.SUBMIT}
+                onClick={() => setStep(ONBOARDING_STEP.LOGIN)}
+              >
+                Back to sign in
+              </Button>
+            ) : (
+              <Button
+                type={BUTTON_TYPE.PRIMARY}
+                size={BUTTON_SIZE.MEDIUM}
+                htmlType={BUTTON_HTML_TYPE.SUBMIT}
+                onClick={() => ModalsActions.onCloseModal()}
+              >
+                Close
+              </Button>
+            )}
           </div>
         </>
       ) : (
