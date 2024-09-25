@@ -21,6 +21,7 @@ RewriteCond %{QUERY_STRING} submit=Search
 RewriteRule ^$ /support [QSA,L]
 
 RewriteRule ^$ index.php?action=newProject [QSA,L]
+RewriteRule ^fileupload/$ lib/View/fileupload/index.php [QSA,L]
 
 RewriteRule ^signin[/]?$ index.php?action=signin [QSA,L]
 
