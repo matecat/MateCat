@@ -169,6 +169,10 @@ abstract class AbstractRevisionFeature extends BaseFeature {
         $chunk_review = ( new ChunkReviewDao() )->findChunkReviews( new Chunks_ChunkStruct( [ 'id' => $id_job, 'password' => $password ] ) )[ 0 ];
 
         if ( !$chunk_review ) {
+            $chunk_review = ChunkReviewDao::findByReviewPasswordAndJobId( $password, $id_job );
+        }
+
+        if ( !$chunk_review ) {
             throw new NotFoundException( 'Review record was not found' );
         }
 
