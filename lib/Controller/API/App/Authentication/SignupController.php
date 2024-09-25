@@ -4,8 +4,9 @@ namespace API\App\Authentication;
 
 use API\App\RateLimiterTrait;
 use API\Commons\AbstractStatefulKleinController;
+use API\Commons\Authentication\AuthCookie;
+use API\Commons\Authentication\AuthenticationHelper;
 use Exception;
-use Exceptions\ValidationError;
 use FlashMessage;
 use INIT;
 use Klein\Response;
@@ -89,10 +90,15 @@ class SignupController extends AbstractStatefulKleinController {
      * @throws Exception
      */
     public function confirm() {
+
+        $signupModel = new SignupModel( [ 'token' => $this->request->param( 'token' ) ], $_SESSION );
+
         try {
 
-            $signupModel = new SignupModel( [ 'token' => $this->request->param( 'token' ) ], $_SESSION );
-            $user        = $signupModel->confirm();
+            $user = $signupModel->confirm();
+
+            AuthCookie::setCredentials( $user );
+            AuthenticationHelper::getInstance( $_SESSION );
 
             if ( InvitedUser::hasPendingInvitations() ) {
                 InvitedUser::completeTeamSignUp( $user, $_SESSION[ 'invited_to_team' ] );
@@ -108,7 +114,7 @@ class SignupController extends AbstractStatefulKleinController {
             }
 
             FlashMessage::set( 'popup', 'profile', FlashMessage::SERVICE );
-        } catch ( ValidationError $e ) {
+        } catch ( Exception $e ) {
             FlashMessage::set( 'confirmToken', $e->getMessage(), FlashMessage::ERROR );
             $this->response->redirect( $signupModel->flushWantedURL() );
         }

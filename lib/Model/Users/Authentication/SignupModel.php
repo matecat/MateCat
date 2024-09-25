@@ -2,8 +2,6 @@
 
 namespace Users\Authentication;
 
-use API\Commons\Authentication\AuthCookie;
-use API\Commons\Authentication\AuthenticationHelper;
 use API\Commons\Exceptions\ValidationError;
 use Database;
 use Email\ForgotPasswordEmail;
@@ -216,9 +214,6 @@ class SignupModel {
             $email = new WelcomeEmail( $user );
             $email->send();
         }
-
-        AuthCookie::setCredentials( $user );
-        AuthenticationHelper::getInstance( $_SESSION );
 
         return $user;
 

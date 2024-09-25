@@ -59,6 +59,9 @@ class UserController extends AbstractStatefulKleinController {
         try {
             $cpModel = new ChangePasswordModel( $this->user );
             $cpModel->changePassword( $old_password, $new_password, $new_password_confirmation );
+
+            $this->broadcastLogout();
+
         } finally {
             $this->incrementRateLimitCounter( $this->user->email, '/api/app/user/password/change' );
         }
