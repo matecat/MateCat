@@ -374,9 +374,12 @@ a.ui.basic.blue.label:hover {
 
 
 /*     ICONS            */
-//.ui.icon.buttons .button, .ui.icon.button:not(.animated):not(.compact):not(.labeled) {
-//   padding: 0;
-//}
+//Manage
+.project {
+  .ui.icon.buttons .button, .ui.icon.button:not(.animated):not(.compact):not(.labeled) {
+    padding: 0;
+  }
+}
 i.icon {
   font-family: "Dropdown";
 }
