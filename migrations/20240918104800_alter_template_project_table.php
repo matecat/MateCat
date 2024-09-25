@@ -12,6 +12,7 @@ class AlterTemplateProjectTable extends AbstractMatecatMigration {
         'ALTER TABLE `project_templates` add column `target_language` VARCHAR(255) NULL DEFAULT NULL;',
     ];
 
+    
     public $sql_down = [
         'ALTER TABLE `project_templates` add column `speech2text` TINYINT(1) NOT NULL DEFAULT  0;',
         'ALTER TABLE `project_templates` add column `lexica` TINYINT(1) NOT NULL DEFAULT  0;',

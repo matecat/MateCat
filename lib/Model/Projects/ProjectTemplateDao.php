@@ -59,7 +59,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
         $default->filters_template_id      = 0;
         $default->subject                  = null;
         $default->source_language          = null;
-        $default->target_language          = json_encode( [] );
+        $default->target_language          = serialize( [] );
         $default->segmentation_rule        = json_encode( [
                 "name" => "General",
                 "id"   => "standard"
