@@ -29,7 +29,10 @@ class ProjectCompletionStatus extends KleinController {
             $this->appendValidator( $projectPasswordValidator );
         }
 
-        $projectValidator->setApiRecord( $this->api_record );
+        if($this->getUser()){
+            $projectValidator->setUser( $this->getUser() );
+        }
+
         $projectValidator->setIdProject( $this->request->id_project );
         $projectValidator->setFeature( 'project_completion' );
 

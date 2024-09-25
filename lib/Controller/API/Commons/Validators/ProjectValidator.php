@@ -8,6 +8,7 @@ use API\Commons\KleinController;
 use ApiKeys_ApiKeyStruct;
 use Log;
 use Projects_ProjectStruct;
+use Users_UserStruct;
 
 /**
  * @daprecated this should extend Base
@@ -18,18 +19,22 @@ use Projects_ProjectStruct;
 class ProjectValidator extends Base {
 
     /**
-     * @var ApiKeys_ApiKeyStruct
+     * @var Users_UserStruct
      */
-    private $api_record;
+    private $user;
+
+    /**
+     * @var int
+     */
     private $id_project;
 
     /**
-     * @param ApiKeys_ApiKeyStruct $api_record
+     * @param Users_UserStruct $user
      *
      * @return $this
      */
-    public function setApiRecord( $api_record ) {
-        $this->api_record = $api_record;
+    public function setUser( Users_UserStruct $user ) {
+        $this->user = $user;
 
         return $this;
     }
@@ -103,13 +108,13 @@ class ProjectValidator extends Base {
      */
     private function inProjectScope() {
 
-        if( !$this->api_record ){
+        if( !$this->user ){
             throw new AuthenticationError( "Invalid API key", 401 );
         }
 
-        Log::doJsonLog( $this->api_record->getUser()->email );
+        Log::doJsonLog( $this->user->email );
         Log::doJsonLog( $this->project->id_customer );
 
-        return $this->api_record->getUser()->email == $this->project->id_customer;
+        return $this->user->email == $this->project->id_customer;
     }
 }
