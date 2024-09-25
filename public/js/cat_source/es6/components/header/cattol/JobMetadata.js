@@ -8,7 +8,7 @@ import CatToolStore from '../../../stores/CatToolStore'
 import CattolConstants from '../../../constants/CatToolConstants'
 import CatToolActions from '../../../actions/CatToolActions'
 
-export const JobMetadata = ({idJob, password}) => {
+export const JobMetadata = ({metadata}) => {
   const [files, setFiles] = useState()
   const [projectInfo, setProjectInfo] = useState()
   const [showButton, setShowButton] = useState(false)
@@ -39,26 +39,17 @@ export const JobMetadata = ({idJob, password}) => {
   }
 
   useEffect(() => {
-    const getJobMetadata = ({jobMetadata}) => {
+    if (typeof metadata !== 'undefined') {
       const projectInfo =
-        jobMetadata.project && jobMetadata.project.project_info
-          ? jobMetadata.project.project_info
+        metadata.project && metadata.project.project_info
+          ? metadata.project.project_info
           : undefined
       if (projectInfo) {
         setProjectInfo(projectInfo)
         setShowButton(true)
       }
     }
-
-    CatToolStore.addListener(CattolConstants.GET_JOB_METADATA, getJobMetadata)
-    CatToolActions.getJobMetadata({idJob, password})
-
-    return () =>
-      CatToolStore.removeListener(
-        CattolConstants.GET_JOB_METADATA,
-        getJobMetadata,
-      )
-  }, [])
+  }, [metadata])
 
   useEffect(() => {
     // if (showButton && !closedPopupStorage) {

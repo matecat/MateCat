@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import {SettingsPanelContext} from './SettingsPanelContext'
 import {ContentWrapper} from './ContentWrapper'
 import {MachineTranslationTab} from './Contents/MachineTranslationTab'
-import {AdvancedOptionsTab} from './Contents/AdvancedOptionsTab'
+import {AdvancedOptionsTab} from './Contents/OtherTab'
 import {TranslationMemoryGlossaryTab} from './Contents/TranslationMemoryGlossaryTab'
 import {ProjectTemplate} from './ProjectTemplate/ProjectTemplate'
 import {SCHEMA_KEYS, isStandardTemplate} from '../../hooks/useProjectTemplates'
@@ -20,6 +20,7 @@ import NewProjectConstants from '../../constants/NewProjectConstants'
 import {FileImportTab} from './Contents/FileImportTab/FileImportTab'
 import {FILTERS_PARAMS_SCHEMA_KEYS} from './Contents/FileImportTab/FiltersParams/FiltersParams'
 import {XLIFF_SETTINGS_SCHEMA_KEYS} from './Contents/FileImportTab/XliffSettings/XliffSettings'
+import {EditorSettings} from './Contents/EditorSettings/EditorSettings'
 
 let tabOpenFromQueryString = new URLSearchParams(window.location.search).get(
   'openTab',
@@ -32,6 +33,7 @@ export const SETTINGS_PANEL_TABS = {
   analysis: 'analysis',
   qualityFramework: 'qf',
   fileImport: 'fileImport',
+  editorSettings: 'editorSettings',
 }
 
 export const TEMPLATE_PROPS_BY_TAB = {
@@ -55,6 +57,7 @@ export const TEMPLATE_PROPS_BY_TAB = {
     SCHEMA_KEYS.segmentationRule,
     SCHEMA_KEYS.idTeam,
   ],
+  [SETTINGS_PANEL_TABS.editorSettings]: [],
 }
 
 const DEFAULT_CONTENTS = (isCattool = config.is_cattool) => {
@@ -104,6 +107,17 @@ const DEFAULT_CONTENTS = (isCattool = config.is_cattool) => {
       description: 'Advanced settings for your project',
       component: <AdvancedOptionsTab />,
     },
+    ...(isCattool
+      ? [
+          {
+            id: SETTINGS_PANEL_TABS.editorSettings,
+            label: 'Editor settings',
+            description:
+              'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vulputate libero et velit interdum, ac aliquet odio mattis.',
+            component: <EditorSettings />,
+          },
+        ]
+      : []),
   ]
 }
 

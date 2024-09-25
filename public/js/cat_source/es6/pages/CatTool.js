@@ -53,6 +53,8 @@ function CatTool() {
   const [supportedLanguages, setSupportedLanguages] = useState([])
   const [isAnalysisCompleted, setIsAnalysisCompleted] = useState(false)
 
+  const [jobMetadata, setJobMetadata] = useState()
+
   const startSegmentIdRef = useRef(UI.startSegmentId)
   const callbackAfterSegmentsResponseRef = useRef()
 
@@ -70,7 +72,7 @@ function CatTool() {
 
   const closeSettings = useCallback(() => setOpenSettings({isOpen: false}), [])
   const openTmPanel = () =>
-    setOpenSettings({isOpen: true, tab: SETTINGS_PANEL_TABS.advancedOptions})
+    setOpenSettings({isOpen: true, tab: SETTINGS_PANEL_TABS.editorSettings})
 
   const getTmKeys = () => {
     const promises = [
@@ -136,19 +138,6 @@ function CatTool() {
       setMTCurrentFakeTemplate()
     }
   }
-
-  // parse advanced settings options
-  useEffect(() => {
-    if (typeof currentProjectTemplate?.id === 'undefined') return
-
-    modifyingCurrentTemplate((prevTemplate) => ({
-      ...prevTemplate,
-      speech2text: Speech2TextFeature.enabled(),
-      tagProjection: SegmentUtils.checkTPEnabled(),
-      lexica: config.lxq_enabled === 1,
-      crossLanguageMatches: SegmentUtils.checkCrossLanguageSettings(),
-    }))
-  }, [currentProjectTemplate?.id, modifyingCurrentTemplate])
 
   // actions listener
   useEffect(() => {
@@ -236,6 +225,14 @@ function CatTool() {
     )
     CatToolStore.addListener(CatToolConstants.SET_PROGRESS, checkAnalysisState)
 
+    const getJobMetadata = ({jobMetadata}) => setJobMetadata(jobMetadata)
+
+    CatToolStore.addListener(CatToolConstants.GET_JOB_METADATA, getJobMetadata)
+    CatToolActions.getJobMetadata({
+      idJob: config.id_job,
+      password: config.password,
+    })
+
     return () => {
       CatToolStore.removeListener(CatToolConstants.ON_RENDER, onRenderHandler)
       CatToolStore.removeListener(
@@ -253,6 +250,10 @@ function CatTool() {
       CatToolStore.removeListener(
         CatToolConstants.SET_PROGRESS,
         checkAnalysisState,
+      )
+      CatToolStore.removeListener(
+        CatToolConstants.GET_JOB_METADATA,
+        getJobMetadata,
       )
     }
   }, [])
@@ -369,10 +370,10 @@ function CatTool() {
   }, [wasInitSegments])
 
   const {
-    tagProjection: guessTagActive,
+    tag_projection: guessTagActive,
     speech2text: speechToTextActive,
-    crossLanguageMatches: multiMatchLangs,
-  } = currentProjectTemplate ?? {}
+    cross_language_matches: multiMatchLangs = [],
+  } = jobMetadata?.project ?? {}
 
   const isFakeCurrentTemplateReady =
     projectTemplates.length &&
@@ -402,6 +403,7 @@ function CatTool() {
         isGDriveProject={config.isGDriveProject}
         showReviseLink={config.footer_show_revise_link}
         openTmPanel={openTmPanel}
+        jobMetadata={jobMetadata}
       />
 
       <div className="main-container">
