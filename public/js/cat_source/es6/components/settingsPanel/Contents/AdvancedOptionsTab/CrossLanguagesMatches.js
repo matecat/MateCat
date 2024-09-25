@@ -47,7 +47,6 @@ export const CrossLanguagesMatches = ({
         SegmentActions.getContribution(UI.currentSegmentId, settings, true)
       } else {
         SegmentActions.modifyTabVisibility('multiMatches', false)
-        SegmentActions.activateTab(UI.currentSegmentId, 'matches')
         SegmentActions.updateAllSegments()
       }
     }

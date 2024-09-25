@@ -7,8 +7,9 @@ use Database;
 use Email\ForgotPasswordEmail;
 use Email\SignupEmail;
 use Email\WelcomeEmail;
+use Exception;
 use Exceptions\ValidationError;
-use INIT;
+use Routes;
 use Teams\TeamDao;
 use Users_UserDao;
 use Users_UserStruct;
@@ -19,49 +20,37 @@ class SignupModel {
     /**
      * @var Users_UserStruct
      */
-    protected $user;
+    protected Users_UserStruct $user;
 
-    protected $params;
+    protected array $params;
 
-    protected $error;
+    protected ?string $error = null;
+    private array     $session;
 
-    protected $mailer;
-
-    public function __construct( $params ) {
-        $this->params = filter_var_array( $params, [
-                'email'                 => FILTER_SANITIZE_EMAIL,
-                'password'              => [ 'filter' => FILTER_SANITIZE_STRING, 'options' => FILTER_FLAG_STRIP_LOW ],
-                'password_confirmation' => [ 'filter' => FILTER_SANITIZE_STRING, 'options' => FILTER_FLAG_STRIP_LOW ],
-                'first_name'            => [
-                        'filter' => FILTER_CALLBACK, 'options' => function ( $username ) {
-                            return mb_substr( preg_replace( '/(?:https?|s?ftp)?\P{L}+/', '', $username ), 0, 50 );
-                        }
-                ],
-                'last_name'             => [
-                        'filter' => FILTER_CALLBACK, 'options' => function ( $username ) {
-                            return mb_substr( preg_replace( '/(?:https?|s?ftp)?\P{L}+/', '', $username ), 0, 50 );
-                        }
-                ],
-                'wanted_url'            => [
-                        'filter' => FILTER_CALLBACK, 'options' => function ( $wanted_url ) {
-                            $wanted_url = filter_var( $wanted_url, FILTER_SANITIZE_URL );
-                            return parse_url( $wanted_url )[ 'host' ] != parse_url( INIT::$HTTPHOST )[ 'host' ] ? INIT::$HTTPHOST : $wanted_url;
-                        }
-                ]
-        ] );
-
-        $this->user = new Users_UserStruct( $this->params );
+    public function __construct( array $params, array &$session ) {
+        $this->params  = $params;
+        $this->session =& $session;
+        $this->user    = new Users_UserStruct( $this->params );
     }
 
+    /**
+     * @return array
+     */
+    public function getParams(): array {
+        return $this->params;
+    }
 
     /**
      * @return Users_UserStruct
      */
-    public function getUser() {
+    public function getUser(): Users_UserStruct {
         return $this->user;
     }
 
-    public function valid() {
+    /**
+     * @return bool
+     */
+    public function valid(): bool {
         try {
             $this->__doValidation();
         } catch ( ValidationError $e ) {
@@ -75,11 +64,9 @@ class SignupModel {
 
     /**
      * @throws ValidationError
+     * @throws Exception
      */
-    public function process() {
-        $this->error = null;
-
-        $this->__doValidation();
+    public function processSignup() {
 
         if ( $this->__userAlreadyExists() ) {
             $this->__updatePersistedUser();
@@ -100,9 +87,13 @@ class SignupModel {
         if ( !$this->__userAlreadyExistsAndIsActive() ) {
             $this->__sendConfirmationRequestEmail();
         }
+
     }
 
-    public function getError() {
+    /**
+     * @return string|null
+     */
+    public function getError(): ?string {
         return $this->error;
     }
 
@@ -112,23 +103,43 @@ class SignupModel {
     }
 
     private function __saveWantedUrl() {
-        $_SESSION[ 'wanted_url' ] = $this->params[ 'wanted_url' ];
+        $this->session[ 'wanted_url' ] = $this->params[ 'wanted_url' ];
+    }
+
+    /**
+     * @return string
+     * @throws Exception
+     */
+    public function flushWantedURL(): string {
+        $url = $this->session[ 'wanted_url' ] ?? Routes::appRoot();
+        unset( $this->session[ 'wanted_url' ] );
+
+        return $url;
     }
 
     private function __updatePersistedUser() {
+
+        /*
+         * salt is empty when a user exists, and it's first login happened through external service providers (OAuth)
+         * Check the salt before join the two accounts.
+         */
+        if ( empty( $this->user->salt ) ) {
+            $this->user->salt = Utils::randomString( 15, true );
+        }
+
         $this->user->pass = Utils::encryptPass( $this->params[ 'password' ], $this->user->salt );
 
-        $this->user->confirmation_token            = Utils::randomString( 50, true );
-        $this->user->confirmation_token_created_at = Utils::mysqlTimestamp( time() );
+        $this->user->initAuthToken();
     }
 
     private function __prepareNewUser() {
+
         $this->user->create_date = Utils::mysqlTimestamp( time() );
         $this->user->salt        = Utils::randomString( 15, true );
         $this->user->pass        = Utils::encryptPass( $this->params[ 'password' ], $this->user->salt );
 
-        $this->user->confirmation_token            = Utils::randomString( 50, true );
-        $this->user->confirmation_token_created_at = Utils::mysqlTimestamp( time() );
+        $this->user->initAuthToken();
+
     }
 
     /**
@@ -136,7 +147,7 @@ class SignupModel {
      *
      * @return bool
      */
-    private function __userAlreadyExists() {
+    private function __userAlreadyExists(): bool {
 
         $dao       = new Users_UserDao();
         $persisted = $dao->getByEmail( $this->user->email );
@@ -153,7 +164,7 @@ class SignupModel {
      *
      * @return bool
      */
-    private function __userAlreadyExistsAndIsActive() {
+    private function __userAlreadyExistsAndIsActive(): bool {
         return ( isset( $this->user->uid ) and null !== $this->user->email_confirmed_at );
     }
 
@@ -177,10 +188,11 @@ class SignupModel {
 
     /**
      * @throws ValidationError
+     * @throws Exception
      */
-    public static function confirm( $token ) {
+    public function confirm(): Users_UserStruct {
         $dao  = new Users_UserDao();
-        $user = $dao->getByConfirmationToken( $token );
+        $user = $dao->getByConfirmationToken( $this->params[ 'token' ] );
 
         if ( !$user ) {
             throw new ValidationError( 'Confirmation token not found' );
@@ -206,28 +218,15 @@ class SignupModel {
     }
 
     /**
-     * @param $email
-     * @param $wanted_url
-     *
      * @return bool
-     * @throws \Exception
+     * @throws Exception
      */
-    public static function forgotPassword( $email, $wanted_url ) {
+    public function forgotPassword(): bool {
 
-        $email      = filter_var( $email, FILTER_SANITIZE_EMAIL );
-        $wanted_url = filter_var( $wanted_url, FILTER_CALLBACK, [
-                        'options' => function ( $wanted_url ) {
-                            $wanted_url = filter_var( $wanted_url, FILTER_SANITIZE_URL );
-
-                            return parse_url( $wanted_url )[ 'host' ] != parse_url( INIT::$HTTPHOST )[ 'host' ] ? INIT::$HTTPHOST : $wanted_url;
-                        }
-                ]
-        );
-
-        $_SESSION[ 'wanted_url' ] = $wanted_url;
+        $this->__saveWantedUrl();
 
         $dao  = new Users_UserDao();
-        $user = $dao->getByEmail( $email );
+        $user = $dao->getByEmail( $this->params[ 'email' ] );
 
         if ( $user ) {
             $user->initAuthToken();
@@ -244,7 +243,7 @@ class SignupModel {
 
     }
 
-    public static function resendEmailConfirm( $email ) {
+    public static function resendConfirmationEmail( $email ) {
         $email = filter_var( $email, FILTER_SANITIZE_EMAIL );
 
         $dao  = new Users_UserDao();
@@ -261,11 +260,12 @@ class SignupModel {
      * @param Users_UserStruct $user
      *
      * @return Users_UserStruct
-     * @throws ValidationError
+     * @throws Exception
      */
-    private static function __updateUserFields( Users_UserStruct $user ) {
+    private static function __updateUserFields( Users_UserStruct $user ): Users_UserStruct {
+
         $user->email_confirmed_at = Utils::mysqlTimestamp( time() );
-        $user->confirmation_token = null;
+        $user->clearAuthToken();
 
         Users_UserDao::updateStruct( $user, [ 'fields' => [ 'confirmation_token', 'email_confirmed_at' ] ] );
         ( new Users_UserDao )->destroyCacheByEmail( $user->email );

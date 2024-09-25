@@ -38,17 +38,15 @@ class GlossaryController extends KleinController {
         $json = $this->createThePayloadForWorker($jsonSchemaPath);
         $json['tmKeys'] = $this->keysBelongingToJobOwner($json['tmKeys']);
 
-        // filter the keys sent by the FE
+        // Don't use the keys sent by the FE
         $tmKeys = $json['tmKeys'];
-        $json['keys'] = array_filter($json['keys'], function($el) use($tmKeys) {
-            foreach($tmKeys as $tmKey){
-                if($tmKey['key'] === $el){
-                    return true;
-                }
-            }
+        $keys = [];
 
-            return false;
-        });
+        foreach($tmKeys as $tmKey){
+            $keys[] = $tmKey['key'];
+        }
+
+        $json['keys'] = $keys;
 
         $params = [
             'action' => 'check',
@@ -303,18 +301,22 @@ class GlossaryController extends KleinController {
 
         foreach ($tmKeys as $tmKey){
 
-            // allowing only terms with read permission
+            // allowing only user terms with read permission
             if( isset($tmKey['r']) and $tmKey['r'] == 1 ){
 
                 // allowing only terms belonging to the owner of the job
                 if(isset($tmKey['owner']) and $tmKey['owner'] == true){
                     $return[] = $tmKey;
                 }
+            }
 
-                // additional terms are also visible for the other users (NOT the owner of the job) who added them
-                if( $this->userIsLogged() and ($this->user->uid == $tmKey['uid_transl'] or $this->user->uid == $tmKey['uid_rev'])){
-                    $return[] = $tmKey;
-                }
+            // additional terms are also visible for the other users (NOT the owner of the job) who added them
+            if(
+                $this->userIsLogged() and
+                ($this->user->uid == $tmKey['uid_transl'] and $tmKey['r_transl'] == true) or
+                ($this->user->uid == $tmKey['uid_rev'] and $tmKey['r_rev'] == true)
+            ){
+                $return[] = $tmKey;
             }
         }
 

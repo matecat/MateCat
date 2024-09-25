@@ -25,7 +25,7 @@
     "flux": "^4.0.1",
     "immutability-helper": "^3.1.1",
     "immutable": "^4.0.0-rc.12",
-    "jquery": "^3.4.1",
+    "jquery": "^3.7.1",
     "js-base64": "^3.6.1",
     "js-cookie": "^3.0.0",
     "keymirror": "^0.1.1",
@@ -52,7 +52,7 @@
     "@babel/plugin-transform-runtime": "^7.23.7",
     "@babel/preset-env": "^7.23.8",
     "@babel/preset-react": "^7.23.3",
-    "@sentry/webpack-plugin": "2.22.2",
+    "@sentry/webpack-plugin": "2.22.3",
     "@testing-library/dom": "^10.1.0",
     "@testing-library/jest-dom": "^6.2.0",
     "@testing-library/react": "^16.0.0",
@@ -90,5 +90,5 @@
   "resolutions": {
     "wrap-ansi": "^7.0.0"
   },
-  "version": "2.22.28"
+  "version": "2.22.32"
 }
