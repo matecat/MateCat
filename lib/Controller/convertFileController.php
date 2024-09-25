@@ -76,7 +76,7 @@ class convertFileController extends ajaxController {
         $this->intDir    = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->cookieDir;
         $this->errDir    = INIT::$STORAGE_DIR . DIRECTORY_SEPARATOR . 'conversion_errors' . DIRECTORY_SEPARATOR . $this->cookieDir;
 
-        $this->readLoginInfo();
+        $this->identifyUser();
 
         $this->files_storage = FilesStorageFactory::create();
     }

@@ -1715,6 +1715,8 @@ button.ui-button::-moz-focus-inner {
   position: relative;
   padding: 24px;
   height: 200px;
+  display: flex;
+  justify-content: space-between;
   max-width: 1600px;
 }
 
@@ -1739,7 +1741,6 @@ h2.payoff {
   padding: 8px 16px;
   width: auto !important;
   min-width: 200px;
-  margin: -10px 0px 8px 0px;
   -webkit-transition: all 100ms ease-in;
   -moz-transition: all 100ms ease-in;
   font-size: 26px !important;
@@ -1767,8 +1768,8 @@ h2.payoff {
 }
 
 .uploadbtn-box {
-  text-align: center;
-  float: right;
+  display: flex;
+  align-items: center;
 }
 
 .uploadbtn-box p {
@@ -2110,7 +2111,7 @@ a {
   font-weight: bold;
   font-size: 16px;
   color: $grey1;
-  margin-top: 48px;
+  margin-top: 0px;
   .supported-file-formats {
     cursor: pointer;
   }

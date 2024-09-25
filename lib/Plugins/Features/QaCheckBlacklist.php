@@ -152,5 +152,5 @@ class QaCheckBlacklist extends BaseFeature {
 
         return $data;
     }
-    
+
 }

@@ -1,7 +1,12 @@
-import React, {useCallback, useEffect, useRef, useState} from 'react'
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 import {useHotkeys} from 'react-hotkeys-hook'
 import {Header} from '../components/header/cattol/Header'
-import NotificationBox from '../components/notificationsComponent/NotificationBox'
 import SegmentsContainer from '../components/segments/SegmentsContainer'
 import CatToolStore from '../stores/CatToolStore'
 import CatToolConstants from '../constants/CatToolConstants'
@@ -31,6 +36,9 @@ import FatalErrorModal from '../components/modals/FatalErrorModal'
 import {Shortcuts} from '../utils/shortcuts'
 import CommonUtils from '../utils/commonUtils'
 import {CattoolFooter} from '../components/footer/CattoolFooter'
+import {mountPage} from './mountPage'
+import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper'
+import NotificationBox from '../components/notificationsComponent/NotificationBox'
 
 const urlParams = new URLSearchParams(window.location.search)
 const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
@@ -38,9 +46,11 @@ const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
 function CatTool() {
   useHotkeys(
     Shortcuts.cattol.events.openSettings.keystrokes[Shortcuts.shortCutsKeyType],
-    () => CatToolActions.openSettingsPanel(SETTINGS_PANEL_TABS.advancedOptions),
+    () => CatToolActions.openSettingsPanel(SETTINGS_PANEL_TABS.other),
     {enableOnContentEditable: true},
   )
+  const {isUserLogged} = useContext(ApplicationWrapperContext)
+
   const [options, setOptions] = useState({})
   const [wasInitSegments, setWasInitSegments] = useState(false)
   const [isFreezingSegments, setIsFreezingSegments] = useState(false)
@@ -75,13 +85,8 @@ function CatTool() {
     setOpenSettings({isOpen: true, tab: SETTINGS_PANEL_TABS.editorSettings})
 
   const getTmKeys = () => {
-    const promises = [
-      getTmKeysJob(),
-      ...(config.isLoggedIn ? [getTmKeysUser()] : []),
-    ]
-
+    const promises = [getTmKeysJob(), getTmKeysUser()]
     let modifiedTemplate = {}
-
     Promise.all(promises)
       .then((values) => {
         const uniqueKeys = values
@@ -129,7 +134,7 @@ function CatTool() {
       }
     }
 
-    if (config.isLoggedIn && config.ownerIsMe) {
+    if (config.ownerIsMe) {
       getMtEnginesApi().then((mtEngines) => {
         setMtEngines([DEFAULT_ENGINE_MEMORY, ...mtEngines])
         setMTCurrentFakeTemplate()
@@ -392,7 +397,7 @@ function CatTool() {
         target_code={config.target_rfc}
         isReview={config.isReview}
         revisionNumber={config.revisionNumber}
-        userLogged={config.isLoggedIn}
+        userLogged={isUserLogged}
         projectName={config.project_name}
         projectCompletionEnabled={config.project_completion_feature_enabled}
         secondRevisionsCount={config.secondRevisionsCount}
@@ -487,3 +492,9 @@ function CatTool() {
 }
 
 export default CatTool
+
+UI.start()
+mountPage({
+  Component: CatTool,
+  rootElement: document.getElementsByClassName('page-content')[0],
+})

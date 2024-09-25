@@ -22,6 +22,8 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
     /**
      * Returns a structure that lists open threads count
      *
+     * @param $projectIds
+     *
      * @return  array(
      *        'id_project' => 1,
      *        'password' => 'xxxx',
@@ -30,13 +32,11 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
      *        'count' => 42
      * );
      *
-     * @param $projectIds
-     *
      */
     public function getOpenThreadsForProjects( $projectIds ) {
 
-        $ids = implode(',', array_map(function( $id ) {
-            return (int) $id ;
+        $ids = implode( ',', array_map( function ( $id ) {
+            return (int)$id;
         }, $projectIds ) );
 
 
@@ -54,8 +54,8 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
         GROUP BY id_project, id_job, jobs.password
  ";
 
-        $con = $this->database->getConnection() ;
-        $stmt = $con->prepare( $sql ) ;
+        $con  = $this->database->getConnection();
+        $stmt = $con->prepare( $sql );
 
         return $this->_fetchObject( $stmt, new OpenThreadsStruct(), [] );
 
@@ -66,15 +66,14 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
      *
      * @return bool
      */
-    public function deleteComment($id)
-    {
-        $sql = "DELETE from comments WHERE id = :id";
-        $con = $this->database->getConnection() ;
-        $stmt = $con->prepare( $sql ) ;
+    public function deleteComment( $id ) {
+        $sql  = "DELETE from comments WHERE id = :id";
+        $con  = $this->database->getConnection();
+        $stmt = $con->prepare( $sql );
 
-        return $stmt->execute([
+        return $stmt->execute( [
                 'id' => $id
-        ]);
+        ] );
     }
 
     /**
@@ -82,15 +81,14 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
      *
      * @return bool|int
      */
-    public function destroySegmentIdCache($idSegment)
-    {
-        $con = $this->database->getConnection() ;
-        $stmt = $con->prepare( "SELECT * from comments WHERE id_segment = :id_segment and (message_type = :message_type_comment or message_type = :message_type_resolve) order by id asc" ) ;
+    public function destroySegmentIdCache( $idSegment ) {
+        $con  = $this->database->getConnection();
+        $stmt = $con->prepare( "SELECT * from comments WHERE id_segment = :id_segment and (message_type = :message_type_comment or message_type = :message_type_resolve) order by id asc" );
 
         return $this->_destroyObjectCache( $stmt, [
-            'id_segment' => $idSegment,
-            'message_type_comment' => Comments_CommentDao::TYPE_COMMENT,
-            'message_type_resolve' => Comments_CommentDao::TYPE_RESOLVE,
+                'id_segment'           => $idSegment,
+                'message_type_comment' => Comments_CommentDao::TYPE_COMMENT,
+                'message_type_resolve' => Comments_CommentDao::TYPE_RESOLVE,
         ] );
     }
 
@@ -100,13 +98,12 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
      *
      * @return DataAccess_IDaoStruct[]
      */
-    public function getBySegmentId($idSegment, $ttl = 7200)
-    {
-        $sql = "SELECT * from comments WHERE id_segment = :id_segment and (message_type = :message_type_comment or message_type = :message_type_resolve) order by id asc";
-        $stmt = $this->_getStatementForQuery($sql);
+    public function getBySegmentId( $idSegment, $ttl = 7200 ) {
+        $sql  = "SELECT * from comments WHERE id_segment = :id_segment and (message_type = :message_type_comment or message_type = :message_type_resolve) order by id asc";
+        $stmt = $this->_getStatementForQuery( $sql );
 
         return $this->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
-                'id_segment' => $idSegment,
+                'id_segment'           => $idSegment,
                 'message_type_comment' => Comments_CommentDao::TYPE_COMMENT,
                 'message_type_resolve' => Comments_CommentDao::TYPE_RESOLVE,
         ] );
@@ -118,13 +115,12 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
      *
      * @return DataAccess_IDaoStruct
      */
-    public function getById($id, $ttl = 86400)
-    {
-        $stmt = $this->_getStatementForQuery("SELECT * from comments WHERE id = :id");
+    public function getById( $id, $ttl = 86400 ) {
+        $stmt = $this->_getStatementForQuery( "SELECT * from comments WHERE id = :id" );
 
         return @$this->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
                 'id' => $id
-        ] )[0];
+        ] )[ 0 ];
     }
 
     /**
@@ -156,7 +152,7 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
                 'message'      => $obj->message
         ] );
 
-        $id = $this->database->last_insert();
+        $id      = $this->database->last_insert();
         $obj->id = (int)$id;
 
         return $obj;
@@ -200,7 +196,7 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
     public function getThreadContributorUids( Comments_CommentStruct $obj ) {
 
         $bind_values = [
-                'id_job' => $obj->id_job,
+                'id_job'     => $obj->id_job,
                 'id_segment' => $obj->id_segment
         ];
 
@@ -211,12 +207,13 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
 
         if ( $obj->uid ) {
             $bind_values[ 'uid' ] = $obj->uid;
-            $query .= " AND uid <> :uid ";
+            $query                .= " AND uid <> :uid ";
         }
 
         $stmt = $this->database->getConnection()->prepare( $query );
         $stmt->setFetchMode( PDO::FETCH_ASSOC );
         $stmt->execute( $bind_values );
+
         return $stmt->fetchAll();
 
     }
@@ -235,7 +232,7 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
 
         $stmt = $db->prepare( $comments_query );
         $stmt->setFetchMode( PDO::FETCH_CLASS, "\Comments_BaseCommentStruct" );
-        $stmt->execute( array_merge($segments_id, array($job_id)) );
+        $stmt->execute( array_merge( $segments_id, [ $job_id ] ) );
 
         return $stmt->fetchAll();
     }
@@ -247,7 +244,7 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
      * @return Comments_BaseCommentStruct[]
      */
 
-    public static function getCommentsForChunk( Jobs_JobStruct $chunk, $options = array() ) {
+    public static function getCommentsForChunk( Jobs_JobStruct $chunk, $options = [] ) {
 
         $sql = "SELECT 
                   id, 
@@ -270,9 +267,9 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
 
         $params = [ 'id_job' => $chunk->id ];
 
-        if ( array_key_exists( 'from_id', $options ) && $options['from_id'] != null ) {
-            $sql = $sql . " AND id >= :from_id " ;
-            $params['from_id'] = $options['from_id'] ;
+        if ( array_key_exists( 'from_id', $options ) && $options[ 'from_id' ] != null ) {
+            $sql                 = $sql . " AND id >= :from_id ";
+            $params[ 'from_id' ] = $options[ 'from_id' ];
         }
 
         $conn = Database::obtain()->getConnection();
@@ -287,7 +284,7 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
 
     private function validateComment( $obj ) {
 
-        if ( ( $obj->message === null or $obj->message === '' )  and $obj->message_type == self::TYPE_COMMENT ) {
+        if ( ( $obj->message === null or $obj->message === '' ) and $obj->message_type == self::TYPE_COMMENT ) {
             throw new Exception( "Comment message can't be blank." );
         }
 
@@ -325,25 +322,26 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
         return strftime( '%l:%M %p %e %b %Y UTC', strtotime( $time ) );
     }
 
-    public static function placeholdContent($content){
-        $users_ids = self::getUsersIdFromContent($content);
-        $userDao = new Users_UserDao( Database::obtain() );
-        $users = $userDao->getByUids( $users_ids );
-        foreach($users as $user){
-            $content = str_replace("{@".$user->uid."@}", "@".$user->first_name, $content);
+    public static function placeholdContent( $content ) {
+        $users_ids = self::getUsersIdFromContent( $content );
+        $userDao   = new Users_UserDao( Database::obtain() );
+        $users     = $userDao->getByUids( $users_ids );
+        foreach ( $users as $user ) {
+            $content = str_replace( "{@" . $user->uid . "@}", "@" . $user->first_name, $content );
         }
 
-        $content = str_replace("{@team@}", "@team", $content);
+        $content = str_replace( "{@team@}", "@team", $content );
+
         return $content;
     }
 
-    public static function getUsersIdFromContent($content){
+    public static function getUsersIdFromContent( $content ) {
 
         $users = [];
 
         preg_match_all( "/\{\@([\d]+)\@\}/", $content, $find_users );
         if ( isset( $find_users[ 1 ] ) ) {
-            $users = $find_users[1];
+            $users = $find_users[ 1 ];
         }
 
         return $users;

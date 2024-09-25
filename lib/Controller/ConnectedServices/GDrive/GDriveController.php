@@ -2,10 +2,10 @@
 
 namespace ConnectedServices\GDrive;
 
-use API\Commons\KleinController;
+use API\Commons\AbstractStatefulKleinController;
 use Aws\S3\Exception\S3Exception;
-use Bootstrap;
-use ConnectedServices\GoogleClientFactory;
+use ConnectedServices\Google\GDrive\Session;
+use ConnectedServices\Google\GoogleProvider;
 use Constants;
 use CookieManager;
 use Exception;
@@ -14,7 +14,7 @@ use INIT;
 use Log;
 use Utils;
 
-class GDriveController extends KleinController {
+class GDriveController extends AbstractStatefulKleinController {
 
     const GDRIVE_LIST_COOKIE_NAME = 'gdrive_files_to_be_listed';
     const GDRIVE_OUTCOME_COOKIE_NAME = 'gdrive_files_outcome';
@@ -138,7 +138,7 @@ class GDriveController extends KleinController {
 
         for ( $i = 0; $i < count( $listOfIds ) && $this->isImportingSuccessful === true; $i++ ) {
             try {
-                $client = GoogleClientFactory::getGoogleClient( INIT::$HTTPHOST . "/gdrive/oauth/response" );
+                $client = GoogleProvider::getClient( INIT::$HTTPHOST . "/gdrive/oauth/response" );
                 $this->gdriveUserSession->importFile( $listOfIds[ $i ], $client );
             } catch ( Exception $e){
                 $this->isImportingSuccessful = false;
@@ -157,7 +157,7 @@ class GDriveController extends KleinController {
      *
      * @return string
      */
-    private function getExceptionMessage( Exception $e){
+    private function getExceptionMessage( Exception $e): string {
         $rawMessage = $e->getMessage();
 
         // parse Google APIs errors
@@ -343,7 +343,6 @@ class GDriveController extends KleinController {
      * @throws Exception
      */
     protected function afterConstruct() {
-        Bootstrap::sessionStart();
         $this->initSessionService();
     }
 

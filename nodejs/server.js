@@ -12,6 +12,7 @@ const uuid = require( 'uuid' );
 const config = ini.parseSync( path.resolve( __dirname, 'config.ini' ) );
 
 const AI_ASSISTANT_EXPLAIN_MEANING = 'ai_assistant_explain_meaning';
+const LOGOUT_TYPE = 'logout';
 const COMMENTS_TYPE = 'comment';
 const GLOSSARY_TYPE_G = 'glossary_get';
 const GLOSSARY_TYPE_S = 'glossary_set';
@@ -121,6 +122,7 @@ http.createServer( ( req, res ) => {
             res._clientId = uuid.v4();
             res._matecatJobId = query.jid;
             res._matecatPw = query.pw;
+            res._userId = query.uid;
 
             browserChannel.addClient( req, res );
 
@@ -143,6 +145,9 @@ const checkCandidate = ( type, response, message ) => {
     switch ( type ) {
         case AI_ASSISTANT_EXPLAIN_MEANING:
             candidate = response._clientId === message.data.id_client;
+            break;
+        case LOGOUT_TYPE:
+            candidate = response._userId === message.data.uid;
             break;
         case COMMENTS_TYPE:
             candidate = response._matecatJobId === message.data.id_job &&

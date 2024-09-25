@@ -327,7 +327,7 @@ export const MachineTranslationTab = () => {
       <div data-testid="active-mt">
         <div className="machine-translation-tab-table-title">
           <h2>Active MT</h2>
-          {!config.is_cattool && config.isLoggedIn && !addMTVisible && (
+          {!config.is_cattool && !addMTVisible && (
             <button
               className="ui primary button settings-panel-button-icon"
               onClick={() => setAddMTVisible(true)}
@@ -364,25 +364,10 @@ export const MachineTranslationTab = () => {
           }
         />
       </div>
-      {config.isLoggedIn ? (
-        !config.is_cattool && (
-          <div className="inactive-mt" data-testid="inactive-mt">
-            <h2>Inactive MT</h2>
-            <SettingsPanelTable columns={COLUMNS_TABLE} rows={MTRows} />
-          </div>
-        )
-      ) : (
-        <div className="not-logged-user">
-          <button
-            className="ui primary button"
-            onClick={openLoginModal}
-            title="Login to see your custom MT engines"
-            data-testid="login-button"
-          >
-            Login to see your custom MT engines
-          </button>
-        </div>
-      )}
+      <div className="inactive-mt" data-testid="inactive-mt">
+        <h2>Inactive MT</h2>
+        <SettingsPanelTable columns={COLUMNS_TABLE} rows={MTRows} />
+      </div>
     </div>
   )
 }

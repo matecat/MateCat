@@ -95,7 +95,7 @@ class GlossaryModel {
 
         $engine = $this->_TMS->get( $config );
 
-        if($engine instanceof Engines_EngineInterface){
+        if ( $engine instanceof Engines_EngineInterface ) {
             return $engine->get_matches_as_array();
         }
 

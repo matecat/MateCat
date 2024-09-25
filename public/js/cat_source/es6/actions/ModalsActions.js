@@ -5,6 +5,9 @@ import {ModifyTeam} from '../components/modals/ModifyTeam'
 import {mergeJobChunks} from '../api/mergeJobChunks'
 import AppDispatcher from '../stores/AppDispatcher'
 import ModalsConstants from '../constants/ModalsConstants'
+import PreferencesModal from '../components/modals/PreferencesModal'
+import SuccessModal from '../components/modals/SuccessModal'
+import OnBoarding, {ONBOARDING_STEP} from '../components/onBoarding/OnBoarding'
 
 let ModalsActions = {
   showModalComponent: (
@@ -13,6 +16,8 @@ let ModalsActions = {
     title,
     style,
     onCloseCallback,
+    showHeader = true,
+    styleBody,
     isCloseButtonDisabled,
   ) => {
     AppDispatcher.dispatch({
@@ -22,8 +27,66 @@ let ModalsActions = {
       title,
       style,
       onCloseCallback,
+      showHeader,
+      styleBody,
       isCloseButtonDisabled,
     })
+  },
+  openLoginModal: function () {
+    ModalsActions.showModalComponent(
+      OnBoarding,
+      {isCloseButtonEnabled: true},
+      null,
+      {maxWidth: 'unset', width: 'auto'},
+      null,
+      false,
+      {borderRadius: 'unset', backgroundColor: 'unset'},
+    )
+  },
+  openRegisterModal: () => {
+    ModalsActions.showModalComponent(
+      OnBoarding,
+      {
+        step: ONBOARDING_STEP.REGISTER,
+        isCloseButtonEnabled: true,
+      },
+      null,
+      {maxWidth: 'unset', width: 'auto'},
+      null,
+      false,
+      {borderRadius: 'unset', backgroundColor: 'unset'},
+    )
+  },
+  openPreferencesModal: ({showGDriveMessage = false} = {}) => {
+    const style = {
+      width: '700px',
+      maxWidth: '700px',
+    }
+    ModalsActions.showModalComponent(
+      PreferencesModal,
+      {showGDriveMessage},
+      'Profile',
+      style,
+    )
+  },
+  openSuccessModal: (props) => {
+    ModalsActions.showModalComponent(SuccessModal, props, props.title)
+  },
+  openResetPassword: ({setNewPassword = false} = {}) => {
+    ModalsActions.showModalComponent(
+      OnBoarding,
+      {
+        step: setNewPassword
+          ? ONBOARDING_STEP.SET_NEW_PASSWORD
+          : ONBOARDING_STEP.PASSWORD_RESET,
+        isCloseButtonEnabled: true,
+      },
+      null,
+      {maxWidth: 'unset', width: 'auto'},
+      null,
+      false,
+      {borderRadius: 'unset', backgroundColor: 'unset'},
+    )
   },
   onCloseModal: function () {
     AppDispatcher.dispatch({
@@ -34,7 +97,7 @@ let ModalsActions = {
     this.showModalComponent(CreateTeam, {}, 'Create New Team')
   },
   openModifyTeamModal: function (team, hideChangeName) {
-    var props = {
+    const props = {
       team: team,
       hideChangeName: hideChangeName,
     }
@@ -42,12 +105,12 @@ let ModalsActions = {
   },
 
   openSplitJobModal: function (job, project, callback) {
-    var props = {
+    const props = {
       job: job,
       project: project,
       callback: callback,
     }
-    var style = {width: '670px', maxWidth: '670px'}
+    const style = {width: '670px', maxWidth: '670px'}
     this.showModalComponent(SplitJobModal, props, 'Split Job', style)
   },
   openMergeModal: function (project, job, successCallback) {

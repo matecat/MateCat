@@ -114,11 +114,11 @@ const SegmentUtils = {
     )
   },
   segmentHasNote: (segment) => {
-    return segment.notes ||
+    return !!(
+      segment.notes ||
       segment.context_groups?.context_json ||
       segment.metadata?.length > 0
-      ? true
-      : false
+    )
   },
   /**
    * Check Multi match languages
@@ -220,6 +220,13 @@ const SegmentUtils = {
         totalTranslation += UI.splittedTranslationPlaceholder
     })
     return totalTranslation
+  },
+  isReadonlySegment: function (segment) {
+    const projectCompletionCheck =
+      config.project_completion_feature_enabled &&
+      !config.isReview &&
+      config.job_completion_current_phase === 'revise'
+    return projectCompletionCheck || segment.readonly === 'true'
   },
 }
 

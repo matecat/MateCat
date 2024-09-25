@@ -28,7 +28,7 @@ class getVolumeAnalysisController extends ajaxController {
         /**
          * Retrieve user information
          */
-        $this->readLoginInfo();
+        $this->identifyUser();
 
     }
 

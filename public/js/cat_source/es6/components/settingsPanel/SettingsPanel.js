@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import {SettingsPanelContext} from './SettingsPanelContext'
 import {ContentWrapper} from './ContentWrapper'
 import {MachineTranslationTab} from './Contents/MachineTranslationTab'
-import {AdvancedOptionsTab} from './Contents/OtherTab'
+import {OtherTab} from './Contents/OtherTab'
 import {TranslationMemoryGlossaryTab} from './Contents/TranslationMemoryGlossaryTab'
 import {ProjectTemplate} from './ProjectTemplate/ProjectTemplate'
 import {SCHEMA_KEYS, isStandardTemplate} from '../../hooks/useProjectTemplates'
@@ -21,6 +21,7 @@ import {FileImportTab} from './Contents/FileImportTab/FileImportTab'
 import {FILTERS_PARAMS_SCHEMA_KEYS} from './Contents/FileImportTab/FiltersParams/FiltersParams'
 import {XLIFF_SETTINGS_SCHEMA_KEYS} from './Contents/FileImportTab/XliffSettings/XliffSettings'
 import {EditorSettings} from './Contents/EditorSettings/EditorSettings'
+import ModalsActions from '../../actions/ModalsActions'
 
 let tabOpenFromQueryString = new URLSearchParams(window.location.search).get(
   'openTab',
@@ -29,7 +30,7 @@ let tabOpenFromQueryString = new URLSearchParams(window.location.search).get(
 export const SETTINGS_PANEL_TABS = {
   translationMemoryGlossary: 'tm',
   machineTranslation: 'mt',
-  advancedOptions: 'options',
+  other: 'other',
   analysis: 'analysis',
   qualityFramework: 'qf',
   fileImport: 'fileImport',
@@ -49,7 +50,7 @@ export const TEMPLATE_PROPS_BY_TAB = {
     SCHEMA_KEYS.XliffConfigTemplateId,
   ],
   [SETTINGS_PANEL_TABS.analysis]: [SCHEMA_KEYS.payableRateTemplateId],
-  [SETTINGS_PANEL_TABS.advancedOptions]: [
+  [SETTINGS_PANEL_TABS.other]: [
     SCHEMA_KEYS.speech2text,
     SCHEMA_KEYS.tagProjection,
     SCHEMA_KEYS.lexica,
@@ -76,7 +77,7 @@ const DEFAULT_CONTENTS = (isCattool = config.is_cattool) => {
         'Manage your machine translation engines and select which should be used on your new project. <a href="https://guides.matecat.com/machine-translation-engines" target="_blank">More details</a>',
       component: <MachineTranslationTab />,
     },
-    ...(!isCattool && config.isLoggedIn
+    ...(!isCattool
       ? [
           {
             id: SETTINGS_PANEL_TABS.qualityFramework,
@@ -102,10 +103,10 @@ const DEFAULT_CONTENTS = (isCattool = config.is_cattool) => {
         ]
       : []),
     {
-      id: SETTINGS_PANEL_TABS.advancedOptions,
+      id: SETTINGS_PANEL_TABS.other,
       label: 'Advanced settings',
       description: 'Advanced settings for your project',
-      component: <AdvancedOptionsTab />,
+      component: <OtherTab />,
     },
     ...(isCattool
       ? [
@@ -283,11 +284,10 @@ export const SettingsPanel = ({
 
   const openLoginModal = () => {
     setIsVisible(false)
-    APP.openLoginModal()
+    ModalsActions.openLoginModal()
   }
 
-  const isEnabledProjectTemplateComponent =
-    config.isLoggedIn === 1 && !config.is_cattool
+  const isEnabledProjectTemplateComponent = !config.is_cattool
 
   return (
     <SettingsPanelContext.Provider

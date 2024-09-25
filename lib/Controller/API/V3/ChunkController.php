@@ -9,6 +9,7 @@
 namespace API\V3;
 
 use API\Commons\Validators\ChunkPasswordValidator;
+use API\Commons\Validators\LoginValidator;
 use API\V2\BaseChunkController;
 use API\V3\Json\Chunk;
 use Chunks_ChunkStruct;
@@ -71,6 +72,7 @@ class ChunkController extends BaseChunkController {
         } );
 
         $this->appendValidator( $Validator );
+        $this->appendValidator( new LoginValidator( $this ) );
     }
 
 }

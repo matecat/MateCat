@@ -670,7 +670,7 @@ function SegmentsContainer({
           id,
           height: rowsRenderedHeight.current.get(id)
             ? rowsRenderedHeight.current.get(id)
-            : cachedRowsHeightMap.current.get(id) ?? height,
+            : (cachedRowsHeightMap.current.get(id) ?? height),
           hasRendered,
         })),
       )
@@ -763,7 +763,6 @@ function SegmentsContainer({
     return {
       segment,
       segImmutable,
-      timeToEdit: config.time_to_edit_enabled,
       isReview,
       speech2textEnabledFn: Speech2Text.enabled,
       setLastSelectedSegment: (sid) => setLastSelectedSegment({sid}),
@@ -948,9 +947,6 @@ const getSegmentStructure = (segment, sideOpen) => {
               {' '}
             </a>
           </div>
-        </div>
-        <div className="timetoedit" data-raw-time-to-edit="0">
-          {' '}
         </div>
         <div className="edit-distance">Edit Distance:</div>
       </div>

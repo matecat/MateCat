@@ -19,17 +19,18 @@ class Error {
 
     /**
      * Error constructor.
+     *
      * @param Exception[] $exceptions
      */
-    public function __construct($exceptions = [] ) {
+    public function __construct( $exceptions = [] ) {
         $this->data = $exceptions;
     }
 
     public function render( $data = null ) {
 
         $row = [
-            "errors" => [],
-            "data"   => []
+                "errors" => [],
+                "data"   => []
         ];
 
         if ( empty( $data ) ) {
@@ -47,8 +48,8 @@ class Error {
             }
 
             $row[ 'errors' ][] = [
-                "code"    => $code,
-                "message" => $output
+                    "code"    => $code,
+                    "message" => $output
             ];
 
         }

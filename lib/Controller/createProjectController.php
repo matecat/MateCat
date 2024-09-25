@@ -1,6 +1,6 @@
 <?php
 
-use ConnectedServices\GDrive as GDrive;
+use ConnectedServices\Google\GDrive\Session;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use Matecat\XliffParser\Utils\Files as XliffFiles;
@@ -68,7 +68,6 @@ class createProjectController extends ajaxController {
     public function __construct() {
 
         //SESSION ENABLED
-        parent::sessionStart();
         parent::__construct();
 
         $filterArgs = [
@@ -103,7 +102,7 @@ class createProjectController extends ajaxController {
                 'payable_rate_template_id' => [ 'filter' => FILTER_VALIDATE_INT ],
         ];
 
-        $this->readLoginInfo( false );
+        $this->identifyUser();
         $this->setupUserFeatures();
 
         $filterArgs = $this->__addFilterForMetadataInput( $filterArgs );
@@ -538,7 +537,7 @@ class createProjectController extends ajaxController {
     private function __clearSessionFiles() {
 
         if ( $this->userIsLogged ) {
-            $gdriveSession = new GDrive\Session();
+            $gdriveSession = new Session();
             $gdriveSession->clearFileListFromSession();
         }
     }
