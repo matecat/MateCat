@@ -62,7 +62,7 @@ EOF;
     private function __handleCode( $code ) {
         $model = new GDriveUserAuthorizationModel( $this->user );
         $model->updateOrCreateRecordByCode( $code );
-        AuthenticationHelper::refreshSession( $_SESSION );
+        $this->refreshClientSessionIfNotApi();
     }
 
     /**
