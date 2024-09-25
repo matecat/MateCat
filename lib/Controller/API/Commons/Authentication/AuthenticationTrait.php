@@ -68,7 +68,10 @@ trait AuthenticationTrait {
         $message      = json_encode( [
                 '_type' => 'logout',
                 'data'  => [
-                        'uid' => $this->user->uid
+                        'uid'     => $this->user->uid,
+                        'payload' => [
+                                'uid'     => $this->user->uid,
+                        ]
                 ]
         ] );
         $queueHandler->publishToTopic( INIT::$SSE_NOTIFICATIONS_QUEUE_NAME, new Message( $message ) );

@@ -106,10 +106,7 @@ class reviseSummaryController extends viewController {
         $this->job_stats[ 'analysis_complete' ] = ( $this->project_status[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE ? true : false );
         $this->template->job_stats              = $this->job_stats;
 
-
         $this->template->build_number  = INIT::$BUILD_NUMBER;
-        $this->template->extended_user = ( $this->isLoggedIn() !== false ) ? trim( $this->user->fullName() ) : "";
-        $this->template->logged_user   = ( $this->isLoggedIn() !== false ) ? $this->user->shortName() : "";
 
         $projectMetaDataDao = new Projects_MetadataDao();
         $projectMetaData    = null;

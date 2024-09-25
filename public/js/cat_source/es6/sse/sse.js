@@ -4,6 +4,7 @@ import SegmentStore from '../stores/SegmentStore'
 import CommonUtils from '../utils/commonUtils'
 import CommentsActions from '../actions/CommentsActions'
 
+
 let SSE = {
   init: function () {
     // TODO configure this
@@ -21,7 +22,9 @@ let SSE = {
           '?jid=' +
           config.id_job +
           '&pw=' +
-          config.password
+          config.password +
+          '&uid=' + config.uid
+          console.error( 'SSE notification MUST send the user uid', source )
         break
 
       default:
@@ -209,6 +212,9 @@ let SSE = {
         hasError: Boolean(message.data?.has_error),
       })
     })
+    $(document).on('sse:logout', function (ev, message) {
+      console.log( 'Requested forced logout: ', message )
+    })
   },
 
   Message: function (data) {
@@ -230,6 +236,8 @@ let SSE = {
       'glossary_check',
       'glossary_keys',
       'ai_assistant_explain_meaning',
+      'logout'
+
     ]
     this.eventIdentifier = 'sse:' + this._type
 
