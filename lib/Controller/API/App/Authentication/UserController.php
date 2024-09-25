@@ -4,9 +4,9 @@ namespace API\App\Authentication;
 
 use API\App\RateLimiterTrait;
 use API\Commons\AbstractStatefulKleinController;
+use API\Commons\Exceptions\ValidationError;
 use API\Commons\Validators\LoginValidator;
 use Exception;
-use Exceptions\ValidationError;
 use Klein\Response;
 use Users\Authentication\ChangePasswordModel;
 
@@ -40,8 +40,8 @@ class UserController extends AbstractStatefulKleinController {
      * The HTTP response code is set to 200 upon successful password change.
      *
      * @return void
-     * @throws Exception
      * @throws ValidationError
+     * @throws Exception
      */
     public function changePasswordAsLoggedUser() {
 
