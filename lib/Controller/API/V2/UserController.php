@@ -6,6 +6,7 @@ use API\Commons\KleinController;
 use API\Commons\Validators\JSONRequestValidator;
 use API\Commons\Validators\LoginValidator;
 use InvalidArgumentException;
+use Users\MetadataDao;
 use Users_UserDao;
 
 class UserController extends KleinController
@@ -76,9 +77,55 @@ class UserController extends KleinController
                 'error' => $exception->getMessage()
             ]);
         }
+    }
 
+    /**
+     * @return \Klein\Response
+     */
+    public function setMetadata(){
+        $json = $this->request->body();
 
+        $filters = [
+            'key'   => FILTER_SANITIZE_STRING,
+            'value' => FILTER_SANITIZE_STRING,
+        ];
 
+        $options = [
+            'key' => [
+                'flags' => FILTER_NULL_ON_FAILURE
+            ],
+            'value' => [
+                'flags' => FILTER_NULL_ON_FAILURE
+            ],
+        ];
 
+        $json = json_decode($json, true);
+
+        $filtered = [];
+        foreach($json as $key => $value) {
+            $filtered[$key] = filter_var($value, $filters[$key], $options[$key]);
+        }
+
+        if(!isset($filtered['key'])){
+            throw new InvalidArgumentException('`key` required', 400);
+        }
+
+        if(!isset($filtered['value'])){
+            throw new InvalidArgumentException('`value` required', 400);
+        }
+
+        try {
+            $userMetaDao = new MetadataDao();
+            $userMetaDao->set(
+                $this->user->uid,
+                $filtered['key'],
+                $filtered['value']
+            );
+        } catch (\Exception $exception){
+            $this->response->code($exception->getCode());
+            return $this->response->json([
+                'error' => $exception->getMessage()
+            ]);
+        }
     }
 }

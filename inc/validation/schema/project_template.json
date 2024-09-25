@@ -11,15 +11,6 @@
     "id_team": {
       "type": ["integer", "string"]
     },
-    "speech2text": {
-      "type": "boolean"
-    },
-    "lexica": {
-      "type": "boolean"
-    },
-    "tag_projection": {
-      "type": "boolean"
-    },
     "pretranslate_100": {
       "type": "boolean"
     },
@@ -28,18 +19,6 @@
     },
     "get_public_matches": {
       "type": "boolean"
-    },
-    "dictation":  {
-      "type": ["null", "boolean"]
-    },
-    "show_whitespace": {
-      "type":  ["null", "boolean"]
-    },
-    "character_counter":  {
-      "type":  ["null", "boolean"]
-    },
-    "ai_assistant": {
-      "type":  ["null", "boolean"]
     },
     "team_id": {
       "type":  ["null", "integer", "string"]
@@ -52,10 +31,6 @@
     },
     "target_language": {
       "type":  ["null", "array"]
-    },
-    "cross_language_matches": {
-      "type": ["null", "object"],
-      "$ref": "#/definitions/cross_language_matches"
     },
     "segmentation_rule": {
       "type": ["null", "object"]
@@ -94,17 +69,6 @@
     "get_public_matches"
   ],
   "definitions": {
-    "cross_language_matches": {
-      "type": ["null", "object"],
-      "properties": {
-        "primary": {
-          "type": ["null", "string"]
-        },
-        "secondary": {
-          "type": ["null", "string"]
-        }
-      }
-    },
     "tm": {
       "type": "object",
       "properties": {

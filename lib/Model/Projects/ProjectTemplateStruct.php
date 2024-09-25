@@ -13,11 +13,7 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
     public bool    $is_default               = false;
     public int     $uid                      = 0;
     public int     $id_team                  = 0;
-    public bool    $speech2text              = false;
-    public bool    $lexica                   = true;
     public bool    $tag_projection           = true;
-    public ?string $cross_language_matches   = null;
-    public ?string $segmentation_rule        = null;
     public ?string $mt                       = null;
     public ?string $tm                       = null;
     public int     $payable_rate_template_id = 0;
@@ -29,10 +25,6 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
     public bool    $get_public_matches       = true;
     public string  $created_at;
     public ?string $modified_at              = null;
-    public ?bool   $dictation                = false;
-    public ?bool   $show_whitespace          = false;
-    public ?bool   $character_counter        = false;
-    public ?bool   $ai_assistant             = false;
     public ?string $subject                  = null;
     public ?string $source_language          = null;
     public ?string $target_language          = null;
@@ -52,10 +44,6 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
         $this->name                     = $json->name;
         $this->is_default               = ( isset( $json->is_default ) ) ? $json->is_default : false;
         $this->id_team                  = $json->id_team;
-        $this->speech2text              = $json->speech2text;
-        $this->lexica                   = $json->lexica;
-        $this->tag_projection           = $json->tag_projection;
-        $this->cross_language_matches   = (!empty($json->cross_language_matches)) ? json_encode( $json->cross_language_matches ) : null;
         $this->segmentation_rule        = (!empty($json->segmentation_rule)) ? json_encode( $json->segmentation_rule ) : null;
         $this->pretranslate_100         = $json->pretranslate_100;
         $this->pretranslate_101         = $json->pretranslate_101;
@@ -66,26 +54,11 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
         $this->qa_model_template_id     = $json->qa_model_template_id;
         $this->filters_template_id      = $json->filters_template_id;
         $this->xliff_config_template_id = $json->xliff_config_template_id;
-        $this->dictation                = $json->dictation;
-        $this->show_whitespace          = $json->show_whitespace;
-        $this->character_counter        = $json->character_counter;
-        $this->ai_assistant             = $json->ai_assistant;
         $this->subject                  = $json->subject;
         $this->source_language          = $json->source_language;
         $this->target_language          = (!empty($json->target_language)) ? serialize($json->target_language) : null;
 
         return $this;
-    }
-
-    /**
-     * @return ?object
-     */
-    public function getCrossLanguageMatches(): ?object {
-        if ( !empty( $this->cross_language_matches ) ) {
-            return json_decode( $this->cross_language_matches );
-        }
-
-        return new stdClass();
     }
 
     /**
@@ -140,10 +113,6 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
                 'is_default'               => $this->is_default,
                 'uid'                      => $this->uid,
                 'id_team'                  => $this->id_team,
-                'speech2text'              => $this->speech2text,
-                'lexica'                   => $this->lexica,
-                'tag_projection'           => $this->tag_projection,
-                'cross_language_matches'   => $this->getCrossLanguageMatches(),
                 'segmentation_rule'        => $this->getSegmentationRule(),
                 'mt'                       => $this->getMt(),
                 'tm'                       => $this->getTm(),
@@ -154,10 +123,6 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
                 'get_public_matches'       => $this->get_public_matches,
                 'pretranslate_100'         => $this->pretranslate_100,
                 'pretranslate_101'         => $this->pretranslate_101,
-                'dictation'                => $this->dictation,
-                'show_whitespace'          => $this->show_whitespace,
-                'character_counter'        => $this->character_counter,
-                'ai_assistant'             => $this->ai_assistant,
                 'subject'                  => $this->subject,
                 'source_language'          => $this->source_language,
                 'target_language'          => $this->getTargetLanguage(),
