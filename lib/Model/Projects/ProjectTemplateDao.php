@@ -8,6 +8,7 @@ use DateTime;
 use Engine;
 use Exception;
 use Filters\FiltersConfigTemplateDao;
+use Langs_Languages;
 use Pagination\Pager;
 use Pagination\PaginationParameters;
 use PayableRates\CustomPayableRateDao;
@@ -20,6 +21,7 @@ use Teams\TeamDao;
 use TmKeyManagement_MemoryKeyDao;
 use TmKeyManagement_MemoryKeyStruct;
 use TmKeyManagement_TmKeyStruct;
+use Utils;
 use Xliff\XliffConfigTemplateDao;
 
 class ProjectTemplateDao extends DataAccess_AbstractDao {
@@ -58,6 +60,13 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
         $default->qa_model_template_id     = 0;
         $default->xliff_config_template_id = 0;
         $default->filters_template_id      = 0;
+        $default->dictation                = 0;
+        $default->show_whitespace          = 0;
+        $default->character_counter        = 0;
+        $default->ai_assistant             = 0;
+        $default->subject                  = null;
+        $default->source_language          = null;
+        $default->target_language          = json_encode( [] );
         $default->segmentation_rule        = json_encode( [
                 "name" => "General",
                 "id"   => "standard"
@@ -151,6 +160,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
      * @throws Exception
      */
     private static function checkValues( ProjectTemplateStruct $projectTemplateStruct ) {
+
         // check id_team
         $teamDao      = new TeamDao();
         $personalTeam = $teamDao->getPersonalByUid( $projectTemplateStruct->uid );
@@ -164,6 +174,47 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
 
             if ( !$team->hasUser( $projectTemplateStruct->uid ) ) {
                 throw new Exception( "This user does not belong to this group.", 403 );
+            }
+        }
+
+        if($projectTemplateStruct->id_team !== null and $projectTemplateStruct->id_team > 0){
+
+            $team = $teamDao->findById($projectTemplateStruct->id_team);
+
+            if ( $team === null ) {
+                throw new Exception( "Group with id ".$projectTemplateStruct->id_team." not found.", 404 );
+            }
+
+            if ( $team->type !== 'personal' and !$team->hasUser( $projectTemplateStruct->uid ) ) {
+                throw new Exception( "This user does not belong to this group.", 403 );
+            }
+        }
+
+        if($projectTemplateStruct->source_language !== null){
+            $languages = Langs_Languages::getInstance();
+            $language  = Utils::trimAndLowerCase( $projectTemplateStruct->source_language );
+
+            if ( !in_array( $language, $languages->allowedLanguages() ) ) {
+                throw new Exception( $language . ' is not an allowed language', 403 );
+            }
+        }
+
+        if($projectTemplateStruct->target_language !== null){
+
+            $targetLanguages = unserialize($projectTemplateStruct->target_language);
+
+            if(!is_array($targetLanguages)){
+                throw new Exception("target language is not an array", 403);
+            }
+
+            $languages = Langs_Languages::getInstance();
+
+            foreach ($targetLanguages as $language){
+                $language  = Utils::trimAndLowerCase($language);
+
+                if ( !in_array( $language, $languages->allowedLanguages() ) ) {
+                    throw new Exception( $language . ' is not an allowed language', 403 );
+                }
             }
         }
 
@@ -349,9 +400,9 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
     public
     static function save( ProjectTemplateStruct $projectTemplateStruct ): ProjectTemplateStruct {
         $sql = "INSERT INTO " . self::TABLE .
-                " ( `name`, `is_default`, `uid`, `id_team`, `speech2text`, `lexica`, `tag_projection`, `cross_language_matches`, `segmentation_rule`, `tm`, `mt`, `payable_rate_template_id`,`qa_model_template_id`, `filters_template_id`, `xliff_config_template_id`, `pretranslate_100`, `pretranslate_101`, `get_public_matches`, `created_at` ) " .
+                " ( `name`, `is_default`, `uid`, `id_team`, `speech2text`, `lexica`, `tag_projection`, `cross_language_matches`, `segmentation_rule`, `tm`, `mt`, `payable_rate_template_id`,`qa_model_template_id`, `filters_template_id`, `xliff_config_template_id`, `pretranslate_100`, `pretranslate_101`, `get_public_matches`, `dictation`, `show_whitespace`, `character_counter`, `ai_assistant`, `subject`, `source_language`, `target_language`, `created_at` ) " .
                 " VALUES " .
-                " ( :name, :is_default, :uid, :id_team, :speech2text, :lexica, :tag_projection, :cross_language_matches, :segmentation_rule, :tm, :mt, :payable_rate_template_id, :qa_model_template_id, :filters_template_id, :xliff_config_template_id, :pretranslate_100, :pretranslate_101, :get_public_matches, :now ); ";
+                " ( :name, :is_default, :uid, :id_team, :speech2text, :lexica, :tag_projection, :cross_language_matches, :segmentation_rule, :tm, :mt, :payable_rate_template_id, :qa_model_template_id, :filters_template_id, :xliff_config_template_id, :pretranslate_100, :pretranslate_101, :get_public_matches, :dictation, :show_whitespace, :character_counter, :ai_assistant, :subject, :source_language, :target_language, :now ); ";
 
         $now = ( new DateTime() )->format( 'Y-m-d H:i:s' );
 
@@ -376,6 +427,13 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
                 "qa_model_template_id"     => $projectTemplateStruct->qa_model_template_id,
                 "filters_template_id"      => $projectTemplateStruct->filters_template_id,
                 "xliff_config_template_id" => $projectTemplateStruct->xliff_config_template_id,
+                "dictation"                => $projectTemplateStruct->dictation,
+                "show_whitespace"          => $projectTemplateStruct->show_whitespace,
+                "character_counter"        => $projectTemplateStruct->character_counter,
+                "ai_assistant"             => $projectTemplateStruct->ai_assistant,
+                "subject"                  => $projectTemplateStruct->subject,
+                "source_language"          => $projectTemplateStruct->source_language,
+                "target_language"          => $projectTemplateStruct->target_language,
                 'now'                      => ( new DateTime() )->format( 'Y-m-d H:i:s' ),
         ] );
 
@@ -422,6 +480,13 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
             `qa_model_template_id` = :qa_model_template_id, 
             `filters_template_id` = :filters_template_id, 
             `xliff_config_template_id` = :xliff_config_template_id, 
+            `dictation` = :dictation,
+            `show_whitespace` = :show_whitespace,
+            `character_counter` = :character_counter,
+            `ai_assistant` = :ai_assistant,
+            `subject` = :subject,
+            `source_language` = :source_language,
+            `target_language` = :target_language,
             `modified_at` = :now 
          WHERE id = :id;";
 
@@ -447,6 +512,13 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
                 "qa_model_template_id"     => $projectTemplateStruct->qa_model_template_id,
                 "xliff_config_template_id" => $projectTemplateStruct->xliff_config_template_id,
                 "filters_template_id"      => $projectTemplateStruct->filters_template_id,
+                "dictation"                => $projectTemplateStruct->dictation,
+                "show_whitespace"          => $projectTemplateStruct->show_whitespace,
+                "character_counter"        => $projectTemplateStruct->character_counter,
+                "ai_assistant"             => $projectTemplateStruct->ai_assistant,
+                "subject"                  => $projectTemplateStruct->subject,
+                "source_language"          => $projectTemplateStruct->source_language,
+                "target_language"          => $projectTemplateStruct->target_language,
                 'now'                      => ( new DateTime() )->format( 'Y-m-d H:i:s' ),
         ] );
 
