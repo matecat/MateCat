@@ -29,6 +29,13 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
     public bool    $get_public_matches       = true;
     public string  $created_at;
     public ?string $modified_at              = null;
+    public ?bool   $dictation                = false;
+    public ?bool   $show_whitespace          = false;
+    public ?bool   $character_counter        = false;
+    public ?bool   $ai_assistant             = false;
+    public ?string $subject                  = null;
+    public ?string $source_language          = null;
+    public ?string $target_language          = null;
 
     /**
      * @param string   $json
@@ -48,17 +55,24 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
         $this->speech2text              = $json->speech2text;
         $this->lexica                   = $json->lexica;
         $this->tag_projection           = $json->tag_projection;
-        $this->cross_language_matches   = json_encode( $json->cross_language_matches );
-        $this->segmentation_rule        = json_encode( $json->segmentation_rule );
+        $this->cross_language_matches   = (!empty($json->cross_language_matches)) ? json_encode( $json->cross_language_matches ) : null;
+        $this->segmentation_rule        = (!empty($json->segmentation_rule)) ? json_encode( $json->segmentation_rule ) : null;
         $this->pretranslate_100         = $json->pretranslate_100;
         $this->pretranslate_101         = $json->pretranslate_101;
         $this->get_public_matches       = $json->get_public_matches;
         $this->mt                       = json_encode( $json->mt );
-        $this->tm                       = json_encode( $json->tm );
+        $this->tm                       = (!empty($json->tm)) ? json_encode( $json->tm ) : null;
         $this->payable_rate_template_id = $json->payable_rate_template_id;
         $this->qa_model_template_id     = $json->qa_model_template_id;
         $this->filters_template_id      = $json->filters_template_id;
         $this->xliff_config_template_id = $json->xliff_config_template_id;
+        $this->dictation                = $json->dictation;
+        $this->show_whitespace          = $json->show_whitespace;
+        $this->character_counter        = $json->character_counter;
+        $this->ai_assistant             = $json->ai_assistant;
+        $this->subject                  = $json->subject;
+        $this->source_language          = $json->source_language;
+        $this->target_language          = (!empty($json->target_language)) ? serialize($json->target_language) : null;
 
         return $this;
     }
@@ -107,6 +121,15 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
         return [];
     }
 
+    public function getTargetLanguage(): array {
+
+        if(empty($this->target_language)){
+            return [];
+        }
+
+        return unserialize($this->target_language);
+    }
+
     /**
      * @inheritDoc
      */
@@ -131,6 +154,13 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
                 'get_public_matches'       => $this->get_public_matches,
                 'pretranslate_100'         => $this->pretranslate_100,
                 'pretranslate_101'         => $this->pretranslate_101,
+                'dictation'                => $this->dictation,
+                'show_whitespace'          => $this->show_whitespace,
+                'character_counter'        => $this->character_counter,
+                'ai_assistant'             => $this->ai_assistant,
+                'subject'                  => $this->subject,
+                'source_language'          => $this->source_language,
+                'target_language'          => $this->getTargetLanguage(),
                 'created_at'               => date_create( $this->created_at )->format( DATE_RFC822 ),
                 'modified_at'              => date_create( $this->modified_at )->format( DATE_RFC822 ),
         ];

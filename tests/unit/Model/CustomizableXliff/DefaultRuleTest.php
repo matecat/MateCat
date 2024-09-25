@@ -16,6 +16,52 @@ class DefaultRuleTest extends AbstractTest {
      * @test
      * @throws Exception
      */
+    public function testStateQualifiers() {
+
+        $stateQualifiers = [
+            'exact-match',
+            'id-match',
+            'leveraged-glossary',
+            'leveraged-repository',
+            'rejected-grammar',
+            'rejected-inaccurate',
+            'rejected-length',
+            'rejected-spelling',
+            'tm-suggestion',
+        ];
+
+        foreach ($stateQualifiers as $stateQualifier){
+            $rule = new DefaultRule( [ $stateQualifier ], 'pre-translated' );
+
+            $this->assertTrue( $rule->isTranslated( "testo", "traduzione" ) );
+            $this->assertEquals( 'APPROVED', $rule->asEditorStatus() );
+            $this->assertEquals( 'ICE', $rule->asMatchType() );
+            $this->assertEquals( 1, $rule->asStandardWordCount( 1, [ 'ICE' => 100 ] ) );
+            $this->assertEquals( 1, $rule->asEquivalentWordCount( 1, [ 'ICE' => 100 ] ) );
+        }
+
+        $stateQualifiers = [
+            'fuzzy-match',
+            'leveraged-inherited',
+            'leveraged-mt',
+            'leveraged-tm',
+            'mt-suggestion',
+        ];
+
+        foreach ($stateQualifiers as $stateQualifier){
+            $rule = new DefaultRule( [ $stateQualifier ], 'pre-translated' );
+
+            $this->assertEquals( 'NEW', $rule->asEditorStatus() );
+            $this->assertEquals( 'ICE', $rule->asMatchType() );
+            $this->assertEquals( 1, $rule->asStandardWordCount( 1, [ 'ICE' => 100 ] ) );
+            $this->assertEquals( 1, $rule->asEquivalentWordCount( 1, [ 'ICE' => 100 ] ) );
+        }
+    }
+
+    /**
+     * @test
+     * @throws Exception
+     */
     public function testTranslatedWithState() {
 
         // needs-review-adaptation is considered translated
