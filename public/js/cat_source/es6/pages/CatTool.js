@@ -25,8 +25,6 @@ import {
   SETTINGS_PANEL_TABS,
   SettingsPanel,
 } from '../components/settingsPanel'
-import Speech2TextFeature from '../utils/speech2text'
-import SegmentUtils from '../utils/segmentUtils'
 import {getTmKeysJob} from '../api/getTmKeysJob'
 import {getSupportedLanguages} from '../api/getSupportedLanguages'
 import ApplicationStore from '../stores/ApplicationStore'
@@ -378,7 +376,7 @@ function CatTool() {
     tag_projection: guessTagActive,
     speech2text: speechToTextActive,
     cross_language_matches: multiMatchLangs = [],
-  } = jobMetadata?.project ?? {}
+  } = {}
 
   const isFakeCurrentTemplateReady =
     projectTemplates.length &&

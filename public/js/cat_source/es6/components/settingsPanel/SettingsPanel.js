@@ -100,14 +100,15 @@ const DEFAULT_CONTENTS = (isCattool = config.is_cattool) => {
               'Manage your billing models and select which should be used on your new project. <a href="https://guides.matecat.com/billing-model" target="_blank">More details</a>',
             component: <AnalysisTab />,
           },
+          {
+            id: SETTINGS_PANEL_TABS.other,
+            label: 'Other',
+            description:
+              'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vulputate libero et velit interdum, ac aliquet odio mattis',
+            component: <OtherTab />,
+          },
         ]
       : []),
-    {
-      id: SETTINGS_PANEL_TABS.other,
-      label: 'Advanced settings',
-      description: 'Advanced settings for your project',
-      component: <OtherTab />,
-    },
     ...(isCattool
       ? [
           {
