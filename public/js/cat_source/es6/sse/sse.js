@@ -23,7 +23,7 @@ let SSE = {
           config.id_job +
           '&pw=' +
           config.password +
-          '&uid=' + config.uid
+          '&uid=' + 36
           console.error( 'SSE notification MUST send the user uid', source )
         break
 

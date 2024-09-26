@@ -1,15 +1,20 @@
 import {useEffect} from 'react'
 import useSse, {ConnectionStates} from './../hooks/useSse'
+import useAuth from "../hooks/useAuth";
 
 const SseListener = ({isAuthenticated, userId}) => {
+
+  const {forceLogout} = useAuth()
+
   const eventHandlers = {
-    myEvent: (data) => {
-      console.log('Handling myEvent:', data)
+    ack: (data) => {
+      console.log('Handling ack:', data)
       // Add your event handling logic here
     },
-    anotherEvent: (data) => {
-      console.log('Handling anotherEvent:', data)
+    logout: (data) => {
+      console.log('Handling logout:', data)
       // Add your event handling logic here
+      forceLogout() //XXX 
     },
   }
   const getSource = function () {

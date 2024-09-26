@@ -59,21 +59,21 @@ const useSse = (url, options, isAuthenticated, eventHandlers = {}) => {
     es.addEventListener('message', (event) => {
       try {
         const parsedData = JSON.parse(event.data) // Parse the incoming JSON message
-        const {eventIdentifier, data} = parsedData // Extract event identifier and data
+        const {_type: eventIdentifier} = parsedData // Extract event identifier and data
 
         // Update state with the received data
         setEventData((prevData) => ({
           ...prevData,
-          [eventIdentifier]: data, // Use the event identifier as the key
+          [eventIdentifier]: parsedData, // Use the event identifier as the key
         }))
 
         // Check if the eventIdentifier matches any of the provided event handlers
         if (eventHandlers[eventIdentifier]) {
-          eventHandlers[eventIdentifier](data) // Call the associated handler with the data
+          eventHandlers[eventIdentifier](parsedData) // Call the associated handler with the data
         }
-        dispatchEventNotification(eventIdentifier, data)
+        dispatchEventNotification(eventIdentifier, parsedData)
         // Log the raised event (optional)
-        console.log(`Event raised: ${eventIdentifier}`, data)
+        console.log(`Event raised: ${eventIdentifier}`, parsedData)
       } catch (error) {
         console.error('Error parsing message:', error) // Handle parsing errors
       }
