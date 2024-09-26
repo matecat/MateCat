@@ -39,6 +39,7 @@ import {CattoolFooter} from '../components/footer/CattoolFooter'
 import {mountPage} from './mountPage'
 import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper'
 import NotificationBox from '../components/notificationsComponent/NotificationBox'
+import SseListener from '../sse/SseListener'
 
 const urlParams = new URLSearchParams(window.location.search)
 const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
@@ -49,7 +50,7 @@ function CatTool() {
     () => CatToolActions.openSettingsPanel(SETTINGS_PANEL_TABS.advancedOptions),
     {enableOnContentEditable: true},
   )
-  const {isUserLogged} = useContext(ApplicationWrapperContext)
+  const {isUserLogged, userInfo} = useContext(ApplicationWrapperContext)
 
   const [options, setOptions] = useState({})
   const [wasInitSegments, setWasInitSegments] = useState(false)
@@ -408,7 +409,10 @@ function CatTool() {
         showReviseLink={config.footer_show_revise_link}
         openTmPanel={openTmPanel}
       />
-
+      <SseListener
+        isAuthenticated={isUserLogged}
+        userId={isUserLogged ? userInfo.user.uid : null}
+      />
       <div className="main-container">
         <div data-mount="review-side-panel"></div>
         <div

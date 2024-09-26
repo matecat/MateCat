@@ -6,7 +6,7 @@ import UserConstants from '../constants/UserConstants'
 import CommonUtils from '../utils/commonUtils'
 import commonUtils from '../utils/commonUtils'
 import {isEqual} from 'lodash'
-import {logoutUser} from "../api/logoutUser";
+import {logoutUser} from '../api/logoutUser'
 
 const USER_INFO_SCHEMA = {
   user: {
@@ -27,7 +27,7 @@ function useAuth() {
   const [userInfo, setStateUserInfo] = useState(false)
   const [connectedServices, setConnectedServices] = useState()
   const [userDisconnected, setUserDisconnected] = useState(false)
-  const [isUserLogged, setIsUserLogged ] = useState(false)
+  const [isUserLogged, setIsUserLogged] = useState()
 
   const setUserInfo = useCallback((value) => {
     setStateUserInfo((prevState) => {
@@ -67,57 +67,66 @@ function useAuth() {
 
   // const checkUserLogin = useRef()
   const checkUserLogin = () => {
-      if ( !isUserLogged || commonUtils.getFromStorage( localStorageUserIsLogged + userInfo.user.uid ) !== '1' ) {
-          getUserData().then( function ( data ) {
-              const event = {
-                  event: 'user_data_ready',
-                  userStatus: 'loggedUser',
-                  userId: data.user.uid,
-              }
-              CommonUtils.dispatchAnalyticsEvents( event )
-              setIsUserLogged( true );
-              setUserInfo( data )
-              setConnectedServices( data.connected_services )
-              commonUtils.addInStorage( localStorageUserIsLogged + data.user.uid, 1 )
-          } ).catch( ( e ) => {
-                  const event = {
-                      event: 'user_data_ready',
-                      userStatus: 'notLoggedUser',
-                  }
-                  setTimeout( () => CommonUtils.dispatchAnalyticsEvents( event ), 500 )
-                  userInfo && commonUtils.removeFromStorage( localStorageUserIsLogged + userInfo.user.uid )
-                  setUserInfo()
-                  setIsUserLogged( false );
-                  setConnectedServices()
-                  userInfo && setTimeout( () => setUserDisconnected( true ), 500 )
-              }
-          );
-      }
+    if (
+      !isUserLogged ||
+      commonUtils.getFromStorage(
+        localStorageUserIsLogged + userInfo.user.uid,
+      ) !== '1'
+    ) {
+      getUserData()
+        .then(function (data) {
+          const event = {
+            event: 'user_data_ready',
+            userStatus: 'loggedUser',
+            userId: data.user.uid,
+          }
+          CommonUtils.dispatchAnalyticsEvents(event)
+          setIsUserLogged(true)
+          setUserInfo(data)
+          setConnectedServices(data.connected_services)
+          commonUtils.addInStorage(localStorageUserIsLogged + data.user.uid, 1)
+        })
+        .catch((e) => {
+          const event = {
+            event: 'user_data_ready',
+            userStatus: 'notLoggedUser',
+          }
+          setTimeout(() => CommonUtils.dispatchAnalyticsEvents(event), 500)
+          userInfo &&
+            commonUtils.removeFromStorage(
+              localStorageUserIsLogged + userInfo.user.uid,
+            )
+          setUserInfo()
+          setIsUserLogged(false)
+          setConnectedServices()
+          userInfo && setTimeout(() => setUserDisconnected(true), 500)
+        })
+    }
   }
 
   const logout = () => {
-      logoutUser().then(() => {
-          commonUtils.removeFromStorage( localStorageUserIsLogged + userInfo.user.uid )
-          window.location.reload()
-      })
+    logoutUser().then(() => {
+      commonUtils.removeFromStorage(
+        localStorageUserIsLogged + userInfo.user.uid,
+      )
+      window.location.reload()
+    })
   }
 
-  useEffect( () => {
+  useEffect(() => {
     checkUserLogin()
-  }, [] );
+  }, [])
 
   // Check user cookie is already valid
   useEffect(() => {
-
     let interval
 
-    if ( isUserLogged ) {
+    if (isUserLogged) {
+      interval = setInterval(() => {
+        checkUserLogin()
+      }, 5000)
 
-        interval = setInterval( () => {
-            checkUserLogin()
-        }, 5000 )
-
-      setUserDisconnected( false )
+      setUserDisconnected(false)
     }
 
     return () => clearInterval(interval)
