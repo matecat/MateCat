@@ -47,11 +47,8 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
         $default                           = new ProjectTemplateStruct();
         $default->id                       = 0;
         $default->name                     = "Standard";
-        $default->speech2text              = false;
         $default->is_default               = empty( $defaultProject );
         $default->id_team                  = $team->id;
-        $default->lexica                   = true;
-        $default->tag_projection           = true;
         $default->uid                      = $uid;
         $default->pretranslate_100         = false;
         $default->pretranslate_101         = true;
@@ -60,13 +57,9 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
         $default->qa_model_template_id     = 0;
         $default->xliff_config_template_id = 0;
         $default->filters_template_id      = 0;
-        $default->dictation                = 0;
-        $default->show_whitespace          = 0;
-        $default->character_counter        = 0;
-        $default->ai_assistant             = 0;
         $default->subject                  = null;
         $default->source_language          = null;
-        $default->target_language          = json_encode( [] );
+        $default->target_language          = serialize( [] );
         $default->segmentation_rule        = json_encode( [
                 "name" => "General",
                 "id"   => "standard"
@@ -400,9 +393,9 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
     public
     static function save( ProjectTemplateStruct $projectTemplateStruct ): ProjectTemplateStruct {
         $sql = "INSERT INTO " . self::TABLE .
-                " ( `name`, `is_default`, `uid`, `id_team`, `speech2text`, `lexica`, `tag_projection`, `cross_language_matches`, `segmentation_rule`, `tm`, `mt`, `payable_rate_template_id`,`qa_model_template_id`, `filters_template_id`, `xliff_config_template_id`, `pretranslate_100`, `pretranslate_101`, `get_public_matches`, `dictation`, `show_whitespace`, `character_counter`, `ai_assistant`, `subject`, `source_language`, `target_language`, `created_at` ) " .
+                " ( `name`, `is_default`, `uid`, `id_team`, `segmentation_rule`, `tm`, `mt`, `payable_rate_template_id`,`qa_model_template_id`, `filters_template_id`, `xliff_config_template_id`, `pretranslate_100`, `pretranslate_101`, `get_public_matches`, `subject`, `source_language`, `target_language`, `created_at` ) " .
                 " VALUES " .
-                " ( :name, :is_default, :uid, :id_team, :speech2text, :lexica, :tag_projection, :cross_language_matches, :segmentation_rule, :tm, :mt, :payable_rate_template_id, :qa_model_template_id, :filters_template_id, :xliff_config_template_id, :pretranslate_100, :pretranslate_101, :get_public_matches, :dictation, :show_whitespace, :character_counter, :ai_assistant, :subject, :source_language, :target_language, :now ); ";
+                " ( :name, :is_default, :uid, :id_team, :segmentation_rule, :tm, :mt, :payable_rate_template_id, :qa_model_template_id, :filters_template_id, :xliff_config_template_id, :pretranslate_100, :pretranslate_101, :get_public_matches, :subject, :source_language, :target_language, :now ); ";
 
         $now = ( new DateTime() )->format( 'Y-m-d H:i:s' );
 
@@ -413,10 +406,6 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
                 "is_default"               => $projectTemplateStruct->is_default,
                 "uid"                      => $projectTemplateStruct->uid,
                 "id_team"                  => $projectTemplateStruct->id_team,
-                "speech2text"              => $projectTemplateStruct->speech2text,
-                "lexica"                   => $projectTemplateStruct->lexica,
-                "tag_projection"           => $projectTemplateStruct->tag_projection,
-                "cross_language_matches"   => $projectTemplateStruct->cross_language_matches,
                 "segmentation_rule"        => $projectTemplateStruct->segmentation_rule,
                 "mt"                       => $projectTemplateStruct->mt,
                 "tm"                       => $projectTemplateStruct->tm,
@@ -427,10 +416,6 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
                 "qa_model_template_id"     => $projectTemplateStruct->qa_model_template_id,
                 "filters_template_id"      => $projectTemplateStruct->filters_template_id,
                 "xliff_config_template_id" => $projectTemplateStruct->xliff_config_template_id,
-                "dictation"                => $projectTemplateStruct->dictation,
-                "show_whitespace"          => $projectTemplateStruct->show_whitespace,
-                "character_counter"        => $projectTemplateStruct->character_counter,
-                "ai_assistant"             => $projectTemplateStruct->ai_assistant,
                 "subject"                  => $projectTemplateStruct->subject,
                 "source_language"          => $projectTemplateStruct->source_language,
                 "target_language"          => $projectTemplateStruct->target_language,
@@ -466,10 +451,6 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
             `is_default` = :is_default, 
             `uid` = :uid, 
             `id_team` = :id_team, 
-            `speech2text` = :speech2text,
-            `lexica` = :lexica, 
-            `tag_projection` = :tag_projection, 
-            `cross_language_matches` = :cross_language_matches, 
             `segmentation_rule` = :segmentation_rule, 
             `tm` = :tm, 
             `mt` = :mt, 
@@ -480,10 +461,6 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
             `qa_model_template_id` = :qa_model_template_id, 
             `filters_template_id` = :filters_template_id, 
             `xliff_config_template_id` = :xliff_config_template_id, 
-            `dictation` = :dictation,
-            `show_whitespace` = :show_whitespace,
-            `character_counter` = :character_counter,
-            `ai_assistant` = :ai_assistant,
             `subject` = :subject,
             `source_language` = :source_language,
             `target_language` = :target_language,
@@ -498,10 +475,6 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
                 "is_default"               => $projectTemplateStruct->is_default,
                 "uid"                      => $projectTemplateStruct->uid,
                 "id_team"                  => $projectTemplateStruct->id_team,
-                "speech2text"              => $projectTemplateStruct->speech2text,
-                "lexica"                   => $projectTemplateStruct->lexica,
-                "tag_projection"           => $projectTemplateStruct->tag_projection,
-                "cross_language_matches"   => $projectTemplateStruct->cross_language_matches,
                 "segmentation_rule"        => $projectTemplateStruct->segmentation_rule,
                 "mt"                       => $projectTemplateStruct->mt,
                 "tm"                       => $projectTemplateStruct->tm,
@@ -512,10 +485,6 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
                 "qa_model_template_id"     => $projectTemplateStruct->qa_model_template_id,
                 "xliff_config_template_id" => $projectTemplateStruct->xliff_config_template_id,
                 "filters_template_id"      => $projectTemplateStruct->filters_template_id,
-                "dictation"                => $projectTemplateStruct->dictation,
-                "show_whitespace"          => $projectTemplateStruct->show_whitespace,
-                "character_counter"        => $projectTemplateStruct->character_counter,
-                "ai_assistant"             => $projectTemplateStruct->ai_assistant,
                 "subject"                  => $projectTemplateStruct->subject,
                 "source_language"          => $projectTemplateStruct->source_language,
                 "target_language"          => $projectTemplateStruct->target_language,
