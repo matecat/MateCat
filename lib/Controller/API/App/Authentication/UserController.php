@@ -38,7 +38,6 @@ class UserController extends AbstractStatefulKleinController {
      */
     public function show() {
         $metadata = $this->user->getMetadataAsKeyValue();
-
         $membersDao = new MembershipDao();
         $userTeams  = array_map(
                 function ( $team ) use ( $membersDao ) {
