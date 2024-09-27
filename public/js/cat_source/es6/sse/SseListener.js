@@ -11,11 +11,16 @@ const SseListener = ({isAuthenticated, userId}) => {
   const {forceLogout} = useAuth()
 
   const eventHandlers = {
+    disconnected: () => {
+      CatToolActions.clientConnected()
+    },
+    reconnected: () => {
+      CatToolActions.clientReconnect()
+    },
     ack: (data) => {
       config.id_client = data.clientId
       CatToolActions.clientConnected(data.clientId)
       console.log('Handling ack:', data)
-
       // Add your event handling logic here
     },
     concordance: (data) => {
@@ -56,10 +61,7 @@ const SseListener = ({isAuthenticated, userId}) => {
       if (data.error) {
         SegmentActions.errorDeleteGlossaryFromCache(data.id_segment, data.error)
       } else {
-        SegmentActions.deleteGlossaryFromCache(
-          data.id_segment,
-          data.payload.term,
-        )
+        SegmentActions.deleteGlossaryFromCache(data.id_segment, data.payload.term)
       }
     },
     glossary_update: (data) => {

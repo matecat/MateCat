@@ -1,4 +1,4 @@
-import {useEffect, useState, useCallback} from 'react'
+import {useCallback, useEffect, useState} from 'react'
 
 // Object to represent connection states
 export const ConnectionStates = {
@@ -16,12 +16,14 @@ const useSse = (url, options, isAuthenticated, eventHandlers = {}) => {
   const [connectionError, setConnectionError] = useState(null)
   const [eventSource, setEventSource] = useState(null)
   const [eventData, setEventData] = useState({})
-  const [retryTimeout, setRetryTimeout] = useState(null) // To manage the reconnection timeout
-  const [isRetrying, setIsRetrying] = useState(false) // Track if we are currently retrying the connection
+
   const dispatchEventNotification = (type, payload) => {
     const event = new CustomEvent(type, {detail: payload})
     document.dispatchEvent(event)
   }
+
+  let isRetryingInterval = 0;
+
   const connect = () => {
     const es = new EventSource(url, options)
     setEventSource(es) // Set the EventSource instance
@@ -29,10 +31,10 @@ const useSse = (url, options, isAuthenticated, eventHandlers = {}) => {
     es.onopen = () => {
       setConnectionState(ConnectionStates.OPEN) // Update state to OPEN when connection is established
       setConnectionError(null) // Reset the error on successful connection
-      if (retryTimeout) {
-        clearTimeout(retryTimeout) // Clear the timeout if it was active
-        setRetryTimeout(null)
-        setIsRetrying(false) // Reset the retry flag
+      if (isRetryingInterval) {
+        clearInterval(isRetryingInterval) // Clear the timeout if it was active
+        isRetryingInterval = 0;
+        eventHandlers[ 'reconnected' ] ? eventHandlers[ 'reconnected' ]() : null
       }
     }
 
@@ -43,14 +45,13 @@ const useSse = (url, options, isAuthenticated, eventHandlers = {}) => {
         setConnectionError(error) // Store the error
         console.error('SSE connection error:', error)
 
-        if (!isRetrying) {
-          setIsRetrying(true) // Set retry flag to true
-          // Attempt to reconnect after 5 seconds
-          const retry = setTimeout(() => {
-            console.log('Reconnecting...')
+        if (!isRetryingInterval) {
+          eventHandlers[ 'disconnected' ] ? eventHandlers[ 'disconnected' ]() : null
+          // Attempt to reconnect every 5 seconds
+          isRetryingInterval = setInterval( () => {
+            console.log( 'Reconnecting...' )
             connect() // Reconnect
-          }, 5000)
-          setRetryTimeout(retry) // Save the timeout to clear it if necessary
+          }, 5000 );
         }
       }
     }
@@ -97,8 +98,8 @@ const useSse = (url, options, isAuthenticated, eventHandlers = {}) => {
       if (eventSource) {
         eventSource.close() // Close the EventSource
       }
-      if (retryTimeout) {
-        clearTimeout(retryTimeout) // Clear the timeout
+      if (isRetryingInterval) {
+        clearInterval(isRetryingInterval) // Clear the timeout
       }
     }
   }, [isAuthenticated]) // Reconnect if authentication state changes
