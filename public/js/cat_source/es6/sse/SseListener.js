@@ -119,24 +119,26 @@ const SseListener = ({isAuthenticated, userId}) => {
       }
     },
     cross_language_matches: (data) => {
-      const segment = SegmentStore.getSegmentByIdToJS(data.id_segment)
-      if (segment && segment.splitted) {
-        const segments = SegmentStore.getSegmentsSplitGroup(data.id_segment)
-        segments.forEach(function (item) {
+      if (config.translation_matches_enabled) {
+        const segment = SegmentStore.getSegmentByIdToJS(data.id_segment)
+        if (segment && segment.splitted) {
+          const segments = SegmentStore.getSegmentsSplitGroup(data.id_segment)
+          segments.forEach(function (item) {
+            SegmentActions.setSegmentCrossLanguageContributions(
+              item.sid,
+              segment.id_file,
+              data.matches,
+              [],
+            )
+          })
+        } else if (segment) {
           SegmentActions.setSegmentCrossLanguageContributions(
-            item.sid,
+            data.id_segment,
             segment.id_file,
             data.matches,
             [],
           )
-        })
-      } else if (segment) {
-        SegmentActions.setSegmentCrossLanguageContributions(
-          data.id_segment,
-          segment.id_file,
-          data.matches,
-          [],
-        )
+        }
       }
     },
     ai_assistant_explain_meaning: (data) => {
