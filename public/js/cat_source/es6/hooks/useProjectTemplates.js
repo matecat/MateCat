@@ -32,6 +32,9 @@ const STANDARD_TEMPLATE = {
   modified_at: 'Fri, 02 Feb 24 16:48:34 +0100',
   filtersTemplateId: null,
   XliffConfigTemplateId: null,
+  source_language: null,
+  subject: null,
+  target_language: [],
 }
 
 const CATTOOL_TEMPLATE = {
@@ -57,6 +60,9 @@ export const SCHEMA_KEYS = {
   pretranslate101: 'pretranslate_101',
   filtersTemplateId: 'filters_template_id',
   XliffConfigTemplateId: 'xliff_config_template_id',
+  sourceLanguage: 'source_language',
+  subject: 'subject',
+  targetLanguage: 'target_language',
 }
 
 function useProjectTemplates(tmKeys, isCattool = config.is_cattool) {
