@@ -156,8 +156,9 @@ const SseListener = ({isAuthenticated, userId}) => {
     },
   }
   const getSource = function () {
-    let source = config.sse_base_url +
-        '/channel/updates' +
+    let source =
+      config.sse_base_url +
+      '/channel/updates' +
       '?jid=' +
       config.id_job +
       '&pw=' +
@@ -166,10 +167,11 @@ const SseListener = ({isAuthenticated, userId}) => {
       userId
 
     if (config.enableMultiDomainApi) {
-      source = '//' + Math.floor(Math.random() * config.ajaxDomainsNumber) + '.ajax.' + source
+      source =
+        Math.floor(Math.random() * config.ajaxDomainsNumber) + '.ajax.' + source
     }
 
-    return source
+    return '//' + source
   }
   const {connectionState, connectionError} = useSse(
     getSource(),
