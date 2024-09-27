@@ -1,14 +1,14 @@
-import {useEffect} from 'react'
+import {useContext, useEffect} from 'react'
 import useSse, {ConnectionStates} from './../hooks/useSse'
-import useAuth from '../hooks/useAuth'
 import CatToolActions from '../actions/CatToolActions'
 import SegmentActions from '../actions/SegmentActions'
 import SegmentStore from '../stores/SegmentStore'
 import CommonUtils from '../utils/commonUtils'
 import CommentsActions from '../actions/CommentsActions'
+import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper'
 
 const SseListener = ({isAuthenticated, userId}) => {
-  const {forceLogout} = useAuth()
+  const {forceLogout} = useContext(ApplicationWrapperContext)
 
   const eventHandlers = {
     ack: (data) => {

@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useRef, useState} from 'react'
+import {useCallback, useEffect, useState} from 'react'
 import {getUserData} from '../api/getUserData'
 import UserActions from '../actions/UserActions'
 import UserStore from '../stores/UserStore'
@@ -74,7 +74,7 @@ function useAuth() {
       ) !== '1'
     ) {
       getUserData()
-        .then(function (data) {
+        .then((data) => {
           const event = {
             event: 'user_data_ready',
             userStatus: 'loggedUser',
@@ -105,21 +105,11 @@ function useAuth() {
   }
 
   const forceLogout = () => {
-    commonUtils.removeFromStorage(
-        localStorageUserIsLogged + userInfo.user.uid,
-    )
+    commonUtils.removeFromStorage(localStorageUserIsLogged + userInfo.user.uid)
     setIsUserLogged(false)
     setUserDisconnected(true)
     setUserInfo()
     setConnectedServices()
-    /*
-    XXX Crash after this position
-        since CatTool.js line 412 receive isUserLogged==true BUT userInfo==null
-        <SseListener
-          isAuthenticated={isUserLogged}
-          userId={isUserLogged ? userInfo.user.uid : null}
-        />
-     */
   }
 
   const logout = () => {
@@ -227,7 +217,7 @@ function useAuth() {
     userDisconnected,
     setUserInfo,
     logout,
-    forceLogout
+    forceLogout,
   }
 }
 
