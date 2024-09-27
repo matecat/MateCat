@@ -46,8 +46,8 @@ let SSE = {
   initEvents: function () {
     $(document).on('sse:ack', function (ev, message) {
       SSE.clientConnected = true
-      config.id_client = message.data.clientId
-      CatToolActions.clientConnected(message.data.clientId)
+      // config.id_client = message.data.clientId
+      // CatToolActions.clientConnected(message.data.clientId)
       if (SSE.disconnect) {
         SSE.disconnect = false
         CatToolActions.clientReconnect()
@@ -249,10 +249,10 @@ let SSE = {
 
 const NOTIFICATIONS = {
   start: function () {
-    SSE.init()
-    this.source = SSE.getSource('notifications')
-
-    this.addEvents()
+    // SSE.init()
+    // this.source = SSE.getSource('notifications')
+    //
+    // this.addEvents()
   },
   restart: function () {
     this.source = SSE.getSource('notifications')
