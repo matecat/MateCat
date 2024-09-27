@@ -276,7 +276,6 @@ function CatTool() {
     CatToolActions.onRender()
     $('html').trigger('start')
     if (LXQ.enabled()) LXQ.initPopup()
-    CatToolActions.startNotifications()
     UI.splittedTranslationPlaceholder = '##$_SPLIT$##'
   }, [])
 

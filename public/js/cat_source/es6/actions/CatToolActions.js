@@ -86,9 +86,6 @@ let CatToolActions = {
     })
     setTimeout(() => window.dispatchEvent(new Event('resize')))
   },
-  startNotifications: function () {
-    Notifications.start()
-  },
   clientConnected: function (clientId) {
     AppDispatcher.dispatch({
       actionType: CatToolConstants.CLIENT_CONNECT,
