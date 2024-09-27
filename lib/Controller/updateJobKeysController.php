@@ -99,10 +99,10 @@ class updateJobKeysController extends ajaxController {
 
         // moved here because self::isRevision() in constructor
         // generates an infinite loop
-        if ( self::isRevision() ) {
-            $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
-        } elseif ( $this->user->email == $this->jobData[ 'owner' ] ) {
+        if ( $this->user->email == $this->jobData[ 'owner' ] ) {
             $this->userRole = TmKeyManagement_Filter::OWNER;
+        } elseif ( self::isRevision() ) {
+            $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
         }
 
         //if some error occured, stop execution.
