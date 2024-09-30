@@ -3,7 +3,6 @@ import React from 'react'
 import $ from 'jquery'
 
 import AppDispatcher from '../stores/AppDispatcher'
-import Notifications from '../sse/sse'
 import RevisionFeedbackModal from '../components/modals/RevisionFeedbackModal'
 import CommonUtils from '../utils/commonUtils'
 import CatToolStore from '../stores/CatToolStore'
