@@ -239,7 +239,8 @@ const matecatConfig = async ({env}, {mode}) => {
         path.resolve(__dirname, 'public/css/sass/upload-main.scss'),
         path.resolve(__dirname, 'public/css/sass/main.scss'),
       ],
-      commonCss: [
+      commonCss: [path.resolve(__dirname, 'public/css/sass/main.scss')],
+      apiDoc: [
         path.resolve(__dirname, 'public/css/sass/main.scss'),
         path.resolve(__dirname, 'public/css/sass/legacy-misc.scss'),
       ],
@@ -374,7 +375,7 @@ const matecatConfig = async ({env}, {mode}) => {
       new HtmlWebPackPlugin({
         filename: path.resolve(__dirname, './lib/View/APIDoc.php'),
         template: path.resolve(__dirname, './lib/View/templates/_APIDoc.php'),
-        chunks: ['commonCss'],
+        chunks: ['apiDoc'],
         publicPath: '/public/build/',
         xhtml: true,
       }),
@@ -389,40 +390,52 @@ const matecatConfig = async ({env}, {mode}) => {
         xhtml: true,
       }),
       new HtmlWebPackPlugin({
-        filename: path.resolve(__dirname, './lib/View/activity_log_not_found.html'),
+        filename: path.resolve(
+          __dirname,
+          './lib/View/activity_log_not_found.html',
+        ),
         template: path.resolve(
-            __dirname,
-            './lib/View/templates/_activity_log_not_found.html',
+          __dirname,
+          './lib/View/templates/_activity_log_not_found.html',
         ),
         chunks: ['commonCss'],
         publicPath: '/public/build/',
         xhtml: true,
       }),
       new HtmlWebPackPlugin({
-        filename: path.resolve(__dirname, './lib/View/oauth_response_handler.html'),
+        filename: path.resolve(
+          __dirname,
+          './lib/View/oauth_response_handler.html',
+        ),
         template: path.resolve(
-            __dirname,
-            './lib/View/templates/_oauth_response_handler.html',
+          __dirname,
+          './lib/View/templates/_oauth_response_handler.html',
         ),
         chunks: [],
         publicPath: '/public/build/',
         xhtml: true,
       }),
       new HtmlWebPackPlugin({
-        filename: path.resolve(__dirname, './lib/View/redirectFailurePage.html'),
+        filename: path.resolve(
+          __dirname,
+          './lib/View/redirectFailurePage.html',
+        ),
         template: path.resolve(
-            __dirname,
-            './lib/View/templates/_redirectFailurePage.html',
+          __dirname,
+          './lib/View/templates/_redirectFailurePage.html',
         ),
         chunks: [],
         publicPath: '/public/build/',
         xhtml: true,
       }),
       new HtmlWebPackPlugin({
-        filename: path.resolve(__dirname, './lib/View/redirectSuccessPage.html'),
+        filename: path.resolve(
+          __dirname,
+          './lib/View/redirectSuccessPage.html',
+        ),
         template: path.resolve(
-            __dirname,
-            './lib/View/templates/_redirectSuccessPage.html',
+          __dirname,
+          './lib/View/templates/_redirectSuccessPage.html',
         ),
         chunks: [],
         publicPath: '/public/build/',
@@ -470,7 +483,10 @@ const matecatConfig = async ({env}, {mode}) => {
       }),
       new HtmlWebPackPlugin({
         filename: path.resolve(__dirname, './lib/View/badConfiguration.html'),
-        template: path.resolve(__dirname, './lib/View/templates/_badConfiguration.html'),
+        template: path.resolve(
+          __dirname,
+          './lib/View/templates/_badConfiguration.html',
+        ),
         chunks: ['commonCss'],
         publicPath: '/public/build/',
         xhtml: true,

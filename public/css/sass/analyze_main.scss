@@ -1,7 +1,6 @@
 @import 'vendor_mc/semantic/matecat_semantic';
 
-@import 'commons/colors';
-@import 'commons/matecat_fonts';
+@import "common-main";
 @import 'commons/filter-teams';
 @import 'commons/nav-bar';
 @import 'commons/icons';
@@ -14,9 +13,7 @@
 @import 'components/signin/OnBoarding';
 @import 'popup';
 
-@import 'common-modals';
 @import 'modals/split_modal';
-@import 'notifications';
 
 @import 'commons/sub-header';
 @import 'commons/team-member';
