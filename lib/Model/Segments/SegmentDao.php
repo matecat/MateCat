@@ -739,6 +739,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
         return $this->_destroyObjectCache( $stmt, [
                 'id_job'        => $job->id,
                 'st_approved'   => Constants_TranslationStatus::STATUS_APPROVED,
+                'st_approved2' => Constants_TranslationStatus::STATUS_APPROVED2,
                 'st_translated' => Constants_TranslationStatus::STATUS_TRANSLATED,
         ] );
     }
@@ -814,6 +815,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
             $list = $this->_fetchObject( $stmt, new ShapelessConcreteStruct, [
                             'id_job'        => $currentJob->id,
                             'st_approved'   => Constants_TranslationStatus::STATUS_APPROVED,
+                            'st_approved2'  => Constants_TranslationStatus::STATUS_APPROVED2,
                             'st_translated' => Constants_TranslationStatus::STATUS_TRANSLATED,
                     ]
             );
