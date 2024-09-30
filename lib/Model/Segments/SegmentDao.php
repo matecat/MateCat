@@ -14,7 +14,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
     protected static $queryForGlobalMismatches = " SELECT id_segment, id_job , segment_hash, translation 
                          FROM segment_translations 
                          WHERE id_job = :id_job
-                         AND segment_translations.status IN( :st_translated, :st_approved )";
+                         AND segment_translations.status IN( :st_translated, :st_approved, :st_approved2 )";
 
     protected static $queryForLocalMismatches = "
                 SELECT
@@ -29,7 +29,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                     WHERE segment_hash = (
                         SELECT segment_hash FROM segments WHERE id = :id_segment
                     )
-                    AND segment_translations.status IN( :st_translated , :st_approved, :st_approved2 )
+                    AND segment_translations.status IN( :st_translated, :st_approved, :st_approved2 )
                     AND id_job = :id_job
                     AND id_segment != :id_segment
                     AND translation != (
