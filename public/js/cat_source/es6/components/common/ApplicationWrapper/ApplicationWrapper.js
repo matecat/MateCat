@@ -43,8 +43,9 @@ export const ApplicationWrapper = ({children}) => {
       const messages = JSON.parse(config.global_message)
       messages.forEach((elem) => {
         if (
-          typeof Cookies.get('msg-' + elem.token) == 'undefined' &&
-          new Date(elem.expire) > new Date()
+          !isUserLogged ||
+          (typeof Cookies.get('msg-' + elem.token) == 'undefined' &&
+            new Date(elem.expire) > new Date())
         ) {
           const notification = {
             title: 'Notice',
