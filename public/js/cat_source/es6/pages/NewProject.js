@@ -52,6 +52,7 @@ import {mountPage} from './mountPage'
 import {HomePageSection} from '../components/createProject/HomePageSection'
 import UserActions from '../actions/UserActions'
 import {getDeepLGlosssaries} from '../api/getDeepLGlosssaries/getDeepLGlosssaries'
+import SseListener from '../sse/SseListener'
 
 const SELECT_HEIGHT = 324
 
@@ -990,6 +991,10 @@ const NewProject = () => {
       )}
       <HomePageSection />
       <Footer />
+      <SseListener
+        isAuthenticated={isUserLogged}
+        userId={isUserLogged ? userInfo.user.uid : null}
+      />
     </CreateProjectContext.Provider>
   ) : (
     <div>

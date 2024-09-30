@@ -61,7 +61,10 @@ const SseListener = ({isAuthenticated, userId}) => {
       if (data.error) {
         SegmentActions.errorDeleteGlossaryFromCache(data.id_segment, data.error)
       } else {
-        SegmentActions.deleteGlossaryFromCache(data.id_segment, data.payload.term)
+        SegmentActions.deleteGlossaryFromCache(
+          data.id_segment,
+          data.payload.term,
+        )
       }
     },
     glossary_update: (data) => {
@@ -154,12 +157,13 @@ const SseListener = ({isAuthenticated, userId}) => {
     logout: (data) => {
       console.log('Handling logout:', data)
       // Add your event handling logic here
-      forceLogout() //XXX
+      forceLogout()
     },
   }
   const getSource = function () {
     let source =
-      config.sse_base_url +
+      window.location.host +
+      '/sse' +
       '/channel/updates' +
       '?jid=' +
       config.id_job +

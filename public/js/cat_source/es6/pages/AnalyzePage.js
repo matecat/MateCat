@@ -11,6 +11,7 @@ import Immutable from 'immutable'
 import {ANALYSIS_STATUS} from '../constants/Constants'
 import {mountPage} from './mountPage'
 import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper'
+import SseListener from '../sse/SseListener'
 
 let pollingTime = 1000
 const segmentsThreshold = 50000
@@ -19,7 +20,7 @@ const AnalyzePage = () => {
   const [project, setProject] = useState()
   const [volumeAnalysis, setVolumeAnalysis] = useState()
   const containerRef = useRef()
-  const {isUserLogged} = useContext(ApplicationWrapperContext)
+  const {isUserLogged, userInfo} = useContext(ApplicationWrapperContext)
 
   const getProjectVolumeAnalysisData = () => {
     if (config.jobAnalysis) {
@@ -107,6 +108,10 @@ const AnalyzePage = () => {
       <footer>
         <CookieConsent />
       </footer>
+      <SseListener
+        isAuthenticated={isUserLogged}
+        userId={isUserLogged ? userInfo.user.uid : null}
+      />
     </>
   )
 }
