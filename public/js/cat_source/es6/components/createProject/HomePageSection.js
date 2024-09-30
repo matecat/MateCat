@@ -15,9 +15,8 @@ export const HomePageSection = () => {
               Matecat leverages cutting-edge AI, including Large Language
               Models, to provide top-quality matches, simplify the process of
               finding word definitions, ensure consistent terminology, and carry
-              out locale-specific quality checks. Deliver high-quality
-              translations more quickly and efficiently thanks to advanced
-              technology.
+              out locale-specific quality checks. Deliver high-quality more
+              quickly thanks to advanced technology.
             </p>
           </div>
           <div className="content-box">
@@ -55,8 +54,8 @@ export const HomePageSection = () => {
               We guarantee secure cloud storage with advanced encryption and
               built-in redundancy. Your data is stored safely and backed up in
               multiple locations for extra security. With Matecat, you can focus
-              on your translations with peace of mind, safe in the knowledge
-              that your data is always protected yet accessible.
+              on your translations, safe in the knowledge that your data is
+              always protected yet accessible.
             </p>
           </div>
           <div className="content-box">
@@ -66,10 +65,10 @@ export const HomePageSection = () => {
             </div>
             <p>
               Matecat was created with a focus on you. It's designed to be
-              user-friendly and easy to handle. It doesn't matter whether you're
-              an expert or a beginner: the tool lets you dive straight in and
-              get to work without any hassle. With Matecat, there's no need to
-              worry about complicated instructions or steep learning curves.
+              user-friendly and easy to handle. No matter your level of
+              experience, Matecat lets you dive straight in and get to work
+              without any hassle. There's no need to worry about complicated
+              instructions or steep learning curves.
             </p>
           </div>
           <div className="content-box">
