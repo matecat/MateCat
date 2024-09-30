@@ -4473,10 +4473,6 @@ section .segment-side-buttons {
   /*top: 5px;*/
 }
 
-.user-nolog.sing-in-header {
-  margin-right: 11px;
-}
-
 .tmx-import-slider {
   width: 110px !important;
 }
@@ -4523,23 +4519,6 @@ $white: #fff;
   }
 
   header {
-    #user-menu-dropdown {
-      .organization-name {
-        display: none;
-      }
-    }
-
-    .sing-in-header {
-      padding: 0;
-      width: 40px !important;
-      height: 40px !important;
-      display: grid;
-      background-color: transparent;
-
-      svg {
-        width: 36px;
-      }
-    }
     .logo {
       margin-top: 0 !important;
     }
@@ -4585,12 +4564,6 @@ $white: #fff;
       .action-menu {
         grid-template-columns: auto auto;
         margin-right: 8px;
-      }
-
-      #user-menu-dropdown {
-        .organization-name {
-          display: none;
-        }
       }
     }
   }

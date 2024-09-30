@@ -48,7 +48,7 @@ export const Header = ({
 
   return (
     <header>
-      <div className="wrapper">
+      <div className="wrapper nav-bar">
         <div className="logo-menu">
           <a href="/" className="logo" />
         </div>
