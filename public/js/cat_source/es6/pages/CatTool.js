@@ -448,7 +448,7 @@ function CatTool() {
       <div className="notifications-wrapper">
         <NotificationBox />
       </div>
-      {openSettings.isOpen && isFakeCurrentTemplateReady && (
+      {isUserLogged && openSettings.isOpen && isFakeCurrentTemplateReady && (
         <SettingsPanel
           {...{
             onClose: closeSettings,

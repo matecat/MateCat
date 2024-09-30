@@ -968,7 +968,7 @@ const NewProject = () => {
           }}
         />
       )}
-      {projectTemplates.length > 0 && (
+      {isUserLogged && projectTemplates.length > 0 && (
         <SettingsPanel
           {...{
             onClose: closeSettings,
