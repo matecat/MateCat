@@ -24,7 +24,9 @@ export const XliffToTarget = () => {
           user={isUserLogged ? userInfo.user : undefined}
         />
       </HeaderPortal>
-      <UploadXliff />
+      <div className="wrapper-xliff-to-target">
+        <UploadXliff />
+      </div>
       <Footer />
       <SseListener
         isAuthenticated={isUserLogged}

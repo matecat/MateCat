@@ -415,6 +415,33 @@
   }
 }
 
+// wrapper container page xliff to target
+.wrapper-xliff-to-target {
+  height: calc(100vh - 150px);
+
+  .upload-xliff-box-not-logged {
+    margin: 18px 0;
+    min-height: 200px;
+    -moz-border-radius: 4px;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: stretch;
+    text-align: center;
+    gap: 12px;
+
+    h2 {
+      font-size: 35px;
+      line-height: 50px;
+    }
+
+    a {
+      cursor: pointer;
+    }
+  }
+}
+
 @media only screen and (min-width: 1600px) {
   .wrapper-upload {
     .translate-box {
