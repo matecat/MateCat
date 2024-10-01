@@ -11,7 +11,6 @@ namespace API\App\Authentication;
 
 use API\App\RateLimiterTrait;
 use API\Commons\AbstractStatefulKleinController;
-use API\Commons\Exceptions\NotFoundException;
 use API\Commons\Exceptions\ValidationError;
 use Exception;
 use FlashMessage;
@@ -136,6 +135,8 @@ class ForgotPasswordController extends AbstractStatefulKleinController {
         $new_password          = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_STRING );
         $password_confirmation = filter_var( $this->request->param( 'password_confirmation' ), FILTER_SANITIZE_STRING );
         $reset->resetPassword( $new_password, $password_confirmation );
+
+        $this->broadcastLogout();
 
         $this->response->code( 200 );
 

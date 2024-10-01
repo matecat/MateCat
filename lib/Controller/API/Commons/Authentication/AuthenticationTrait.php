@@ -2,9 +2,12 @@
 
 namespace API\Commons\Authentication;
 
+use AMQHandler;
 use Bootstrap;
 use Exception;
+use INIT;
 use ReflectionException;
+use Stomp\Transport\Message;
 use Users_UserStruct;
 
 /**
@@ -57,6 +60,21 @@ trait AuthenticationTrait {
      */
     public function getUser(): ?Users_UserStruct {
         return $this->user;
+    }
+
+    public function broadcastLogout() {
+        AuthenticationHelper::destroyAuthentication( $_SESSION );
+        $queueHandler = new AMQHandler();
+        $message      = json_encode( [
+                '_type' => 'logout',
+                'data'  => [
+                        'uid'     => $this->user->uid,
+                        'payload' => [
+                                'uid'     => $this->user->uid,
+                        ]
+                ]
+        ] );
+        $queueHandler->publishToTopic( INIT::$SSE_NOTIFICATIONS_QUEUE_NAME, new Message( $message ) );
     }
 
 }

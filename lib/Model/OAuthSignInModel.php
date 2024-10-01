@@ -47,7 +47,10 @@ class OAuthSignInModel {
         return $this->user;
     }
 
-    public function signIn() {
+    /**
+     * @throws ReflectionException
+     */
+    public function signIn(): bool {
         $userDao      = new Users_UserDao();
         $existingUser = $userDao->getByEmail( $this->user->email );
 

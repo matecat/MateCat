@@ -268,8 +268,6 @@ class newProjectController extends viewController {
         $this->template->unsupported_file_types                = $this->getExtensionsUnsupported();
         $this->template->formats_number                        = $this->countExtensions();
         $this->template->volume_analysis_enabled               = INIT::$VOLUME_ANALYSIS_ENABLED;
-        $this->template->extended_user                         = ( $this->isLoggedIn() !== false ) ? trim( $this->user->fullName() ) : "";
-        $this->template->logged_user                           = ( $this->isLoggedIn() !== false ) ? $this->user->shortName() : "";
         $this->template->userMail                              = $this->user->email;
         $this->template->translation_engines_intento_providers = Intento::getProviderList();
         $this->template->translation_engines_intento_prov_json = str_replace( "\\\"", "\\\\\\\"", json_encode( Intento::getProviderList() ) ); // needed by JSON.parse() function

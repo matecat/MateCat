@@ -346,8 +346,6 @@ class catController extends viewController {
             $this->template->job_not_found = $this->job_not_found;
             $this->template->job_archived  = ( $this->job_archived ) ? 1 : '';
             $this->template->job_cancelled = $this->job_cancelled;
-            $this->template->logged_user   = ( $this->isLoggedIn() !== false ) ? $this->user->shortName() : "";
-            $this->template->extended_user = ( $this->isLoggedIn() !== false ) ? trim( $this->user->fullName() ) : "";
             $this->template->password      = $this->password;
 
             return;

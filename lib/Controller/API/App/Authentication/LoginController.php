@@ -8,7 +8,6 @@
 
 namespace API\App\Authentication;
 
-use AMQHandler;
 use API\App\RateLimiterTrait;
 use API\Commons\AbstractStatefulKleinController;
 use API\Commons\Authentication\AuthCookie;
@@ -18,7 +17,6 @@ use Exception;
 use INIT;
 use Klein\Response;
 use SimpleJWT;
-use Stomp\Transport\Message;
 use Users\RedeemableProject;
 use Users_UserDao;
 use Utils;
@@ -28,17 +26,7 @@ class LoginController extends AbstractStatefulKleinController {
     use RateLimiterTrait;
 
     public function logout() {
-        $uid = $_SESSION[ 'uid' ];
-        unset( $_SESSION );
-        AuthCookie::destroyAuthentication();
-        $queueHandler = new AMQHandler();
-        $message      = json_encode( [
-                '_type' => 'logout',
-                'data'  => [
-                        'uid' => $uid
-                ]
-        ] );
-        $queueHandler->publishToTopic( INIT::$SSE_NOTIFICATIONS_QUEUE_NAME, new Message( $message ) );
+        $this->broadcastLogout();
         $this->response->code( 200 );
     }
 

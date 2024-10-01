@@ -3,7 +3,6 @@ import React from 'react'
 import $ from 'jquery'
 
 import AppDispatcher from '../stores/AppDispatcher'
-import Notifications from '../sse/sse'
 import RevisionFeedbackModal from '../components/modals/RevisionFeedbackModal'
 import CommonUtils from '../utils/commonUtils'
 import CatToolStore from '../stores/CatToolStore'
@@ -85,9 +84,6 @@ let CatToolActions = {
       actionType: CatToolConstants.CLOSE_SEARCH,
     })
     setTimeout(() => window.dispatchEvent(new Event('resize')))
-  },
-  startNotifications: function () {
-    Notifications.start()
   },
   clientConnected: function (clientId) {
     AppDispatcher.dispatch({

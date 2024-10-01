@@ -10,6 +10,7 @@ import Header from '../components/header/Header'
 import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper'
 import {CookieConsent} from '../components/common/CookieConsent'
 import {mountPage} from './mountPage'
+import SseListener from '../sse/SseListener'
 
 const getReviseUrlParameter = () => {
   const url = new URL(window.location.href)
@@ -250,6 +251,10 @@ export const QualityReport = () => {
         </div>
       </div>
       {ReactDOM.createPortal(<CookieConsent />, cookieBannerMountPoint)}
+      <SseListener
+        isAuthenticated={isUserLogged}
+        userId={isUserLogged ? userInfo.user.uid : null}
+      />
     </>
   )
 }

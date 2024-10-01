@@ -63,7 +63,7 @@ const Header = ({
   const selectedTeam = teams.find(({isSelected}) => isSelected)
 
   return (
-    <section className="nav-mc-bar ui grid">
+    <section className="nav-bar ui grid">
       <nav className="sixteen wide column navigation">
         <div className="ui grid">
           <div className="three wide column" data-testid="logo">

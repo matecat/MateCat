@@ -10,7 +10,7 @@ header {
     min-width: 992px;
     position: relative;
   }
-  .nav-mc-bar {
+  .nav-bar {
     margin: 0px !important;
     height: 100%;
     .navigation {
@@ -500,6 +500,7 @@ header {
   flex-direction: column;
   padding: 20px 0;
   gap: 15px;
+  min-width: 250px;
 
   > hr {
     margin: 0;
@@ -540,5 +541,15 @@ header {
     padding: 0;
     align-items: start;
     list-style: none;
+
+    > li {
+      width: 100%;
+      display: flex;
+
+      > button {
+        flex-grow: 1;
+        justify-content: left;
+      }
+    }
   }
 }

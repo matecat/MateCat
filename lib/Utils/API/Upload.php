@@ -122,6 +122,10 @@ class Upload {
         $fileError   = $fileUp[ 'error' ];
         $fileSize    = $fileUp[ 'size' ];
 
+        if($fileSize == 0){
+            throw new Exception ( __METHOD__ . " -> The file '$fileName' is empty." );
+        }
+
         $fileUp = (object)$fileUp;
 
 

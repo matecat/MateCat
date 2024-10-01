@@ -88,7 +88,13 @@ class AuthenticationHelper {
     public static function refreshSession( array &$session ){
         unset( $session[ 'user' ] );
         unset( $session[ 'user_profile' ] );
-        self::$instance = new AuthenticationHelper( $_SESSION );
+        self::$instance = new AuthenticationHelper( $session );
+    }
+
+    public static function destroyAuthentication( array &$session ){
+        unset( $session[ 'user' ] );
+        unset( $session[ 'user_profile' ] );
+        AuthCookie::destroyAuthentication();
     }
 
     /**

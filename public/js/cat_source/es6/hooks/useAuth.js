@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useRef, useState} from 'react'
+import {useCallback, useEffect, useState} from 'react'
 import {getUserData} from '../api/getUserData'
 import UserActions from '../actions/UserActions'
 import UserStore from '../stores/UserStore'
@@ -27,7 +27,7 @@ function useAuth() {
   const [userInfo, setStateUserInfo] = useState(false)
   const [connectedServices, setConnectedServices] = useState()
   const [userDisconnected, setUserDisconnected] = useState(false)
-  const [isUserLogged, setIsUserLogged] = useState(false)
+  const [isUserLogged, setIsUserLogged] = useState()
 
   const setUserInfo = useCallback((value) => {
     setStateUserInfo((prevState) => {
@@ -74,7 +74,7 @@ function useAuth() {
       ) !== '1'
     ) {
       getUserData()
-        .then(function (data) {
+        .then((data) => {
           const event = {
             event: 'user_data_ready',
             userStatus: 'loggedUser',
@@ -102,6 +102,18 @@ function useAuth() {
           userInfo && setTimeout(() => setUserDisconnected(true), 500)
         })
     }
+  }
+
+  const forceLogout = () => {
+    logoutUser().then(() => {
+      commonUtils.removeFromStorage(
+        localStorageUserIsLogged + userInfo.user.uid,
+      )
+      setIsUserLogged(false)
+      setUserDisconnected(true)
+      setUserInfo()
+      setConnectedServices()
+    })
   }
 
   const logout = () => {
@@ -209,6 +221,7 @@ function useAuth() {
     userDisconnected,
     setUserInfo,
     logout,
+    forceLogout,
   }
 }
 

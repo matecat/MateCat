@@ -12,6 +12,7 @@ class oauthResponseHandlerController extends BaseKleinViewController {
     private ConnectedServiceUserModel $remoteUser;
 
     /**
+     * @throws ReflectionException
      */
     public function response() {
 
@@ -50,6 +51,8 @@ class oauthResponseHandlerController extends BaseKleinViewController {
      *
      * @param      $code
      * @param null $provider
+     *
+     * @throws ReflectionException
      */
     protected function _processSuccessfulOAuth( $code, $provider = null ) {
 

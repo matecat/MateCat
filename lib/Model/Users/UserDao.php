@@ -87,9 +87,9 @@ class Users_UserDao extends DataAccess_AbstractDao {
     /**
      * @param $token
      *
-     * @return Users_UserStruct
+     * @return ?Users_UserStruct
      */
-    public function getByConfirmationToken( $token ): Users_UserStruct {
+    public function getByConfirmationToken( $token ): ?Users_UserStruct {
         $conn = $this->database->getConnection();
         $stmt = $conn->prepare( " SELECT * FROM users WHERE confirmation_token = ?" );
         $stmt->execute( [ $token ] );

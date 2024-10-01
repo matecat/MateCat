@@ -1,13 +1,19 @@
 // rewrite semantic CSS
-
+html, body {
+  height: 100%;
+}
 body.analyze {
   min-width: 1024px;
   font-family: Calibri, Arial, Helvetica, sans-serif;
   background-color: $grey5;
   overflow-x: auto;
   overflow-y: hidden;
+  font-size: 14px;
   header {
     z-index: 1001 !important;
+  }
+  h1 {
+    font-size: 28px;
   }
 }
 .analyze-page {
@@ -636,10 +642,11 @@ body.analyze {
         cursor: pointer;
         z-index: 1;
         > div {
-          width: 140px;
+          width: 160px;
           margin: 0 auto;
           position: relative;
           height: 48px;
+          display: flex;
         }
         h3 {
           margin-bottom: 10px;
@@ -946,8 +953,8 @@ body.analyze {
 }*/
 
 @media only screen and (min-width: 1200px) {
-  .ui.container {
-    width: 1140px;
+  .ui.container:not(.fluid) {
+    width: 1140px !important;;
     margin-left: auto !important;
     margin-right: auto !important;
     transition: 0.3s ease;
@@ -955,8 +962,8 @@ body.analyze {
 }
 
 @media only screen and (min-width: 1380px) {
-  .ui.container {
-    width: 1280px;
+  .ui.container:not(.fluid) {
+    width: 1280px !important;;
     margin-left: auto !important;
     margin-right: auto !important;
     transition: 0.3s ease;
@@ -964,8 +971,8 @@ body.analyze {
 }
 
 @media only screen and (max-width: 1199px) and (min-width: 992px) {
-  .ui.container {
-    width: 991px;
+  .ui.container:not(.fluid) {
+    width: 991px !important;
     margin-left: auto !important;
     margin-right: auto !important;
     transition: 0.3s ease;
@@ -973,8 +980,8 @@ body.analyze {
 }
 
 @media only screen and (max-width: 991px) and (min-width: 768px) {
-  .ui.container {
-    min-width: 991px;
+  .ui.container:not(.fluid) {
+    min-width: 991px !important;
     margin-left: auto !important;
     margin-right: auto !important;
     transition: 0.3s ease;
@@ -985,7 +992,7 @@ body.analyze {
 }
 
 @media only screen and (max-width: 767px) {
-  .ui.container {
+  .ui.container:not(.fluid) {
     margin-left: 1em !important;
     margin-right: 1em !important;
     min-width: 991px;

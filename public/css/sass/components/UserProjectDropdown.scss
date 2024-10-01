@@ -75,7 +75,7 @@
     &:disabled {
       box-shadow: unset !important;
       border: 1px solid $grey8;
-      color: $grey6 !important;
+      //color: $grey6 !important;
     }
 
     &:hover:not(:disabled):not(.not-assignee) {

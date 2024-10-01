@@ -87,26 +87,6 @@
                     }
                 });
 
-                var profile_drodown =  $('#user-menu-dropdown').dropdown();
-
-                var profile_modal = $('#profile-item').on('click', function (e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    $('#modal').trigger('openpreferences');
-                    return false;
-                });
-
-                var logout_action = $('.user-menu-container').on('click', '#logout-item', function (e) {
-                    e.preventDefault();
-                    $.post('/api/app/user/logout', function (data) {
-                        if ($('body').hasClass('manage')) {
-                            location.href = config.hostpath + config.basepath;
-                        } else {
-                            window.location.reload();
-                        }
-                    });
-                });
-
             }
     );
     $( window ).resize(function() {

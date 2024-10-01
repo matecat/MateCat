@@ -23,8 +23,9 @@ export const UserProjectDropdown = ({
   const wrapperRef = useRef()
 
   const selectedUser = users.find(({user}) => user.uid === idAssignee)
-  const isPersonalTeam =
-    userInfo.teams.find(({id}) => id === project.id_team).type === 'personal'
+  const isPersonalTeam = userInfo
+    ? userInfo.teams.find(({id}) => id === project.id_team).type === 'personal'
+    : undefined
 
   const onChangeSearch = useCallback(
     ({currentTarget: {value}}) => setFilterUsers(value),

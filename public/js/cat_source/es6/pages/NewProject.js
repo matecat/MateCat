@@ -52,6 +52,7 @@ import {mountPage} from './mountPage'
 import {HomePageSection} from '../components/createProject/HomePageSection'
 import UserActions from '../actions/UserActions'
 import {getDeepLGlosssaries} from '../api/getDeepLGlosssaries/getDeepLGlosssaries'
+import SseListener from '../sse/SseListener'
 
 const SELECT_HEIGHT = 324
 
@@ -75,6 +76,8 @@ const subjectsArray = config.subject_array.map((item) => {
 const conversionEnabled = Boolean(config.conversionEnabled)
 const formatsNumber = config.formats_number
 const googleDriveEnabled = Boolean(config.googleDriveEnabled)
+
+const headerMountPoint = document.querySelector('header.upload-page-header')
 
 const NewProject = () => {
   const [tmKeys, setTmKeys] = useState()
@@ -270,8 +273,8 @@ const NewProject = () => {
       idTeam: parseInt(id),
     }))
 
-  const headerMountPoint = document.querySelector('header.upload-page-header')
   const HeaderPortal = usePortal(headerMountPoint)
+
   const swapLanguages = () => {
     if (targetLangs.length > 1) {
       ModalsActions.showModalComponent(
@@ -877,16 +880,20 @@ const NewProject = () => {
             <p>{errors}</p>
           </div>
         )}
-        {isUserLogged ? (
-          <UploadFile />
+        {typeof isUserLogged === 'boolean' ? (
+          isUserLogged ? (
+            <UploadFile />
+          ) : (
+            <div className="upload-box-not-logged">
+              <h2>
+                <a onClick={ModalsActions.openLoginModal}>Sign in</a> to create
+                a project.
+              </h2>
+              <span>Start translating now!</span>
+            </div>
+          )
         ) : (
-          <div className="upload-box-not-logged">
-            <h2>
-              <a onClick={ModalsActions.openLoginModal}>Sign in</a> to create a
-              project.
-            </h2>
-            <span>Start translating now!</span>
-          </div>
+          <div className="upload-waiting-logged"></div>
         )}
       </div>
       <div className="wrapper-bottom">
@@ -967,7 +974,7 @@ const NewProject = () => {
           }}
         />
       )}
-      {projectTemplates.length > 0 && (
+      {isUserLogged && projectTemplates.length > 0 && (
         <SettingsPanel
           {...{
             onClose: closeSettings,
@@ -990,6 +997,10 @@ const NewProject = () => {
       )}
       <HomePageSection />
       <Footer />
+      <SseListener
+        isAuthenticated={isUserLogged}
+        userId={isUserLogged ? userInfo.user.uid : null}
+      />
     </CreateProjectContext.Provider>
   ) : (
     <div>
