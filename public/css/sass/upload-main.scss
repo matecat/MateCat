@@ -14,7 +14,7 @@
 @import 'commons/tooltip';
 @import 'modals/language-selector';
 @import 'commons/aria-label-tooltip';
-@import "components/common/HomePageSection";
+@import 'components/common/HomePageSection';
 @import 'common-components';
 @import 'upload-page';
 @import 'components/common/Select';
@@ -28,7 +28,6 @@
 @import 'components/common/LabelWithTooltip';
 @import 'components/common/Accordion';
 @import 'components/signin/OnBoarding';
-
 
 @import 'settingsPanel';
 
@@ -50,10 +49,12 @@
     }
     &.user-not-logged {
       opacity: 0.4;
-      h2, label {
+      h2,
+      label {
         color: $grey1;
       }
-      input, .select-with-icon__wrapper .select {
+      input,
+      .select-with-icon__wrapper .select {
         cursor: not-allowed;
         background-color: $grey9;
       }
@@ -90,9 +91,10 @@
   }
 }
 
-.wrapper-upload .upload-box-not-logged {
+.wrapper-upload .upload-box-not-logged,
+.upload-waiting-logged {
   border: 1px dashed #ccc;
-  margin: 18px 72px;
+  margin: 18px 0;
   min-height: 200px;
   -moz-border-radius: 4px;
   border-radius: 4px;
@@ -102,7 +104,7 @@
   justify-content: center;
   align-items: stretch;
   text-align: center;
-  gap:12px;
+  gap: 12px;
   h2 {
     font-size: 35px;
     line-height: 50px;

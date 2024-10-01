@@ -1,4 +1,4 @@
-import React, {createContext, useEffect, useRef} from 'react'
+import React, {createContext, useCallback, useEffect, useRef} from 'react'
 import useAuth from '../../../hooks/useAuth'
 import Cookies from 'js-cookie'
 import CatToolActions from '../../../actions/CatToolActions'
@@ -38,7 +38,7 @@ export const ApplicationWrapper = ({children}) => {
     forceLogout,
   } = useAuth()
 
-  const checkGlobalMassages = () => {
+  const checkGlobalMassages = useCallback(() => {
     if (config.global_message) {
       const messages = JSON.parse(config.global_message)
       messages.forEach((elem) => {
@@ -67,7 +67,7 @@ export const ApplicationWrapper = ({children}) => {
         }
       })
     }
-  }
+  }, [isUserLogged])
 
   const checkForPopupToOpen = useRef()
   checkForPopupToOpen.current = () => {
@@ -105,8 +105,8 @@ export const ApplicationWrapper = ({children}) => {
   }
 
   useEffect(() => {
-    setTimeout(checkGlobalMassages, 1000)
-  }, [])
+    if (typeof isUserLogged === 'boolean') checkGlobalMassages()
+  }, [isUserLogged, checkGlobalMassages])
 
   useEffect(() => {
     onModalWindowMounted().then(() => checkForPopupToOpen.current())

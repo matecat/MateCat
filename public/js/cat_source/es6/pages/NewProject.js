@@ -878,16 +878,20 @@ const NewProject = () => {
             <p>{errors}</p>
           </div>
         )}
-        {isUserLogged ? (
-          <UploadFile />
+        {typeof isUserLogged === 'boolean' ? (
+          isUserLogged ? (
+            <UploadFile />
+          ) : (
+            <div className="upload-box-not-logged">
+              <h2>
+                <a onClick={ModalsActions.openLoginModal}>Sign in</a> to create
+                a project.
+              </h2>
+              <span>Start translating now!</span>
+            </div>
+          )
         ) : (
-          <div className="upload-box-not-logged">
-            <h2>
-              <a onClick={ModalsActions.openLoginModal}>Sign in</a> to create a
-              project.
-            </h2>
-            <span>Start translating now!</span>
-          </div>
+          <div className="upload-waiting-logged"></div>
         )}
       </div>
       <div className="wrapper-bottom">

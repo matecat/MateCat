@@ -106,9 +106,11 @@ function useAuth() {
 
   const forceLogout = () => {
     logoutUser().then(() => {
-      commonUtils.removeFromStorage( localStorageUserIsLogged + userInfo.user.uid )
-      setIsUserLogged( false )
-      setUserDisconnected( true )
+      commonUtils.removeFromStorage(
+        localStorageUserIsLogged + userInfo.user.uid,
+      )
+      setIsUserLogged(false)
+      setUserDisconnected(true)
       setUserInfo()
       setConnectedServices()
     })
