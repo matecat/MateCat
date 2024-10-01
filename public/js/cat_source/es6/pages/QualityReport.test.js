@@ -38,6 +38,14 @@ global.config = {
   ],
 }
 test('renders properly', async () => {
+  Object.defineProperty(window, 'EventSource', {
+    writable: true,
+    value: jest.fn().mockImplementation(() => ({
+      close: jest.fn(() => {}),
+      addEventListener: jest.fn((event, callback) => {}),
+    })),
+  })
+
   mswServer.use(
     http.get(
       config.basepath +
