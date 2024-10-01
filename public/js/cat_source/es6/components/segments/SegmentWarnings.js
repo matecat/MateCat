@@ -37,7 +37,7 @@ class SegmentWarnings extends React.Component {
     }
     if (this.props.warnings) {
       if (this.props.warnings.ERROR) {
-        _.forOwn(this.props.warnings.ERROR.Categories, (value, key) => {
+        forOwn(this.props.warnings.ERROR.Categories, (value, key) => {
           value.map((el) => {
             fnMap(el, 'ERROR')
           })

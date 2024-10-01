@@ -16,6 +16,8 @@ const initialState = {
   title: '',
   styleContainer: '',
   onCloseCallback: false,
+  showHeader: true,
+  styleBody: '',
 }
 
 const componentStatus = (() => {
@@ -65,21 +67,25 @@ export class ModalWindow extends React.Component {
     title,
     style,
     onCloseCallback,
+    showHeader,
+    styleBody,
     isCloseButtonDisabled,
   ) => {
     this.setState({
       ...initialState,
       title,
       component,
+      showHeader,
       compProps: {
         ...initialState.compProps,
         ...props,
         onClose: this.onCloseModal,
-        closeOnSuccess: props.closeOnSuccess ? props.closeOnSuccess : true,
+        closeOnSuccess: props?.closeOnSuccess ? props.closeOnSuccess : true,
       },
       styleContainer: style,
       onCloseCallback: onCloseCallback,
       isShowingModal: true,
+      styleBody,
       isCloseButtonDisabled: isCloseButtonDisabled,
     })
   }
@@ -111,6 +117,8 @@ export class ModalWindow extends React.Component {
       styleContainer,
       compProps,
       isShowingModal,
+      showHeader,
+      styleBody,
       isCloseButtonDisabled,
     } = this.state
 
@@ -122,9 +130,11 @@ export class ModalWindow extends React.Component {
               compProps?.overlay ? ModalOverlay : ModalContainer,
               {
                 title,
+                showHeader,
                 styleContainer,
                 onClose: this.onCloseModal,
                 closeOnOutsideClick: compProps.closeOnOutsideClick,
+                styleBody,
                 isCloseButtonDisabled,
               },
               <InjectedComponent {...compProps} />,
@@ -133,11 +143,3 @@ export class ModalWindow extends React.Component {
     )
   }
 }
-
-document.addEventListener('DOMContentLoaded', () => {
-  const dom = document.getElementById('modal')
-  if (dom) {
-    const mountPoint = createRoot(document.getElementById('modal'))
-    mountPoint.render(React.createElement(ModalWindow, {}))
-  }
-})

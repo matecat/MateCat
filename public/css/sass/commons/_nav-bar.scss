@@ -10,7 +10,7 @@ header {
     min-width: 992px;
     position: relative;
   }
-  .nav-mc-bar {
+  .nav-bar {
     margin: 0px !important;
     height: 100%;
     .navigation {
@@ -131,6 +131,7 @@ header {
       font-size: 14px;
       height: 36px;
       width: 36px;
+      min-width: 35px;
       margin-left: 10px;
       margin-right: 10px;
       text-decoration: none;
@@ -373,7 +374,7 @@ header {
   }
   .ui-user-top-image {
     float: right;
-    margin: 0 10px;
+    margin: 0;
     cursor: pointer;
     min-width: 35px;
     @media only screen and (max-width: 1040px) {
@@ -413,6 +414,10 @@ header {
     margin-right: 14px;
     margin-left: 14px;
   }
+
+  .popover-component-container {
+    margin-left: 15px;
+  }
 }
 
 .logo {
@@ -428,14 +433,10 @@ header {
 }
 
 #menu-site {
-  /*margin-top: 8px !important;*/
-  /*float: right !important;*/
-  margin-right: 6px;
+  height: 40px;
+  display: flex;
+  align-items: center;
   text-align: right;
-  /*
-    border-right: 1px solid #8a8a8a;
-    */
-  /*height: 22px;*/
   .btn {
     background: #fff;
     color: #002b5c;
@@ -486,4 +487,69 @@ header {
 
 .ui.dropdown > .left.menu .menu {
   margin: 0 !important;
+}
+
+.user-menu-popover-avatar {
+  width: 35px;
+  height: 35px;
+  border-radius: 20px;
+}
+
+.user-menu-popover-content {
+  display: flex;
+  flex-direction: column;
+  padding: 20px 0;
+  gap: 15px;
+  min-width: 250px;
+
+  > hr {
+    margin: 0;
+    border: none;
+    height: 1px;
+    background-color: $grey9;
+  }
+
+  .user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .user-avatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 30px;
+  }
+
+  .user-name-and-email {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+
+    > :first-child {
+      font-size: 16px;
+      font-weight: bold;
+      color: black;
+    }
+  }
+
+  > ul {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin: 0;
+    padding: 0;
+    align-items: start;
+    list-style: none;
+
+    > li {
+      width: 100%;
+      display: flex;
+
+      > button {
+        flex-grow: 1;
+        justify-content: left;
+      }
+    }
+  }
 }

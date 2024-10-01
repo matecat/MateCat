@@ -26,8 +26,7 @@ class Chunks_ChunkDao extends DataAccess_AbstractDao {
      *
      * @return int
      */
-    public static function getSegmentsCount($id_job, $password, $ttl = 0)
-    {
+    public static function getSegmentsCount( $id_job, $password, $ttl = 0 ) {
         return Jobs_JobDao::getSegmentsCount( $id_job, $password, $ttl );
     }
 
@@ -74,13 +73,13 @@ class Chunks_ChunkDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param $id_job
-     * @param $password
+     * @param     $id_job
+     * @param     $password
      * @param int $ttl
+     *
      * @return float|null
      */
-    public static function getStandardWordCount($id_job, $password, $ttl = 86400)
-    {
-        return Jobs_JobDao::getStandardWordCount($id_job, $password, $ttl);
+    public static function getStandardWordCount( $id_job, $password, $ttl = 86400 ) {
+        return Jobs_JobDao::getStandardWordCount( $id_job, $password, $ttl );
     }
 }

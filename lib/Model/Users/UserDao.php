@@ -87,9 +87,9 @@ class Users_UserDao extends DataAccess_AbstractDao {
     /**
      * @param $token
      *
-     * @return Users_UserStruct
+     * @return ?Users_UserStruct
      */
-    public function getByConfirmationToken( $token ): Users_UserStruct {
+    public function getByConfirmationToken( $token ): ?Users_UserStruct {
         $conn = $this->database->getConnection();
         $stmt = $conn->prepare( " SELECT * FROM users WHERE confirmation_token = ?" );
         $stmt->execute( [ $token ] );
@@ -180,6 +180,7 @@ class Users_UserDao extends DataAccess_AbstractDao {
      * @param $id
      *
      * @return ?Users_UserStruct
+     * @throws ReflectionException
      */
     public function getByUid( $id ): ?Users_UserStruct {
         $stmt = $this->_getStatementForQuery( self::$_query_user_by_uid );
@@ -213,7 +214,7 @@ class Users_UserDao extends DataAccess_AbstractDao {
      * @return ?Users_UserStruct
      */
     public function getByEmail( $email ) {
-        $stmt             = $this->_getStatementForQuery( self::$_query_user_by_email );
+        $stmt = $this->_getStatementForQuery( self::$_query_user_by_email );
 
         /**
          * @var $res ?Users_UserStruct

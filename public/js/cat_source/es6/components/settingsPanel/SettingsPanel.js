@@ -20,6 +20,7 @@ import NewProjectConstants from '../../constants/NewProjectConstants'
 import {FileImportTab} from './Contents/FileImportTab/FileImportTab'
 import {FILTERS_PARAMS_SCHEMA_KEYS} from './Contents/FileImportTab/FiltersParams/FiltersParams'
 import {XLIFF_SETTINGS_SCHEMA_KEYS} from './Contents/FileImportTab/XliffSettings/XliffSettings'
+import ModalsActions from '../../actions/ModalsActions'
 
 let tabOpenFromQueryString = new URLSearchParams(window.location.search).get(
   'openTab',
@@ -73,7 +74,7 @@ const DEFAULT_CONTENTS = (isCattool = config.is_cattool) => {
         'Manage your machine translation engines and select which should be used on your new project. <a href="https://guides.matecat.com/machine-translation-engines" target="_blank">More details</a>',
       component: <MachineTranslationTab />,
     },
-    ...(!isCattool && config.isLoggedIn
+    ...(!isCattool
       ? [
           {
             id: SETTINGS_PANEL_TABS.qualityFramework,
@@ -269,11 +270,10 @@ export const SettingsPanel = ({
 
   const openLoginModal = () => {
     setIsVisible(false)
-    APP.openLoginModal()
+    ModalsActions.openLoginModal()
   }
 
-  const isEnabledProjectTemplateComponent =
-    config.isLoggedIn === 1 && !config.is_cattool
+  const isEnabledProjectTemplateComponent = !config.is_cattool
 
   return (
     <SettingsPanelContext.Provider

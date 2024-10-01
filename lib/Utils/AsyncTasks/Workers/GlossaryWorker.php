@@ -190,11 +190,11 @@ class GlossaryWorker extends AbstractWorker {
     private function get( $payload ) {
 
         if (
-            empty( $payload[ 'source' ] ) ||
-            empty( $payload[ 'id_segment' ] ) ||
-            empty( $payload[ 'source' ] ) ||
-            empty ( $payload[ 'source_language' ] ) ||
-            empty ( $payload[ 'target_language' ] )
+                empty( $payload[ 'source' ] ) ||
+                empty( $payload[ 'id_segment' ] ) ||
+                empty( $payload[ 'source' ] ) ||
+                empty ( $payload[ 'source_language' ] ) ||
+                empty ( $payload[ 'target_language' ] )
         ) {
             throw new EndQueueException( "Invalid Payload" );
         }
@@ -208,12 +208,12 @@ class GlossaryWorker extends AbstractWorker {
 
         /** @var Engines_Results_MyMemory_GetGlossaryResponse $response */
         $response = $client->glossaryGet(
-            $payload[ 'id_job' ],
-            $payload[ 'id_segment' ],
-            $payload[ 'source' ],
-            $payload[ 'source_language' ],
-            $payload[ 'target_language' ],
-            $keys
+                $payload[ 'id_job' ],
+                $payload[ 'id_segment' ],
+                $payload[ 'source' ],
+                $payload[ 'source_language' ],
+                $payload[ 'target_language' ],
+                $keys
         );
         $matches  = $response->matches;
         $matches  = $this->formatGetGlossaryMatches( $matches, $payload );

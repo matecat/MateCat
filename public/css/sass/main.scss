@@ -5,6 +5,7 @@
 @import 'commons/buttons';
 @import 'commons/aria-label-tooltip';
 @import 'common-main';
+@import "common";
 @import 'style';
 @import 'commons/progress-mc-bar';
 @import 'mbc-style';
@@ -32,13 +33,7 @@
 @import 'components/SegmentsContainer.scss';
 @import 'components/header/FilesMenu';
 @import 'components/common/FilenameLabel';
-@import 'components/common/Select';
-@import 'components/common/Dropdown';
 @import 'components/common/SegmentedControl';
-@import 'components/common/CookieConsent';
-@import 'components/common/Switch';
-@import 'components/common/MenuButton';
-@import 'components/common/Tooltip';
 @import 'components/segment/segmentFooterTabAiAssistant';
 @import 'components/common/Button';
 @import 'components/common/Popover';
@@ -46,6 +41,7 @@
 @import 'components/common/EmailsBadge';
 @import 'components/common/Accordion';
 @import 'components/CattolFooter';
+@import 'components/signin/OnBoarding';
 
 @import 'cattool';
 

@@ -132,9 +132,7 @@ export const AdvancedOptionsTab = () => {
         segmentationRule={segmentationRule}
         setSegmentationRule={setSegmentationRule}
       />
-      {config.isLoggedIn === 1 && !config.is_cattool && (
-        <Team {...{selectedTeam, setSelectedTeam}} />
-      )}
+      {!config.is_cattool && <Team {...{selectedTeam, setSelectedTeam}} />}
     </div>
   )
 }

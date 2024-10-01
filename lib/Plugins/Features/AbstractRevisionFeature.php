@@ -69,7 +69,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
 
     public static function loadRoutes( Klein $klein ) {
         route( '/project/[:id_project]/[:password]/reviews', 'POST',
-                'Features\ReviewExtended\Controller\ReviewsController', 'createReview' );
+                [ 'Features\ReviewExtended\Controller\ReviewsController', 'createReview'] );
     }
 
     public static function projectUrls( $formatted ) {
@@ -167,6 +167,10 @@ abstract class AbstractRevisionFeature extends BaseFeature {
     public function filter_job_password_to_review_password( $password, $id_job ) {
 
         $chunk_review = ( new ChunkReviewDao() )->findChunkReviews( new Chunks_ChunkStruct( [ 'id' => $id_job, 'password' => $password ] ) )[ 0 ];
+
+        if ( !$chunk_review ) {
+            $chunk_review = ChunkReviewDao::findByReviewPasswordAndJobId( $password, $id_job );
+        }
 
         if ( !$chunk_review ) {
             throw new NotFoundException( 'Review record was not found' );

@@ -1,0 +1,15 @@
+@import '../../commons/colors';
+.header-buttons {
+  display: flex;
+  gap: 20px;
+  border-left: 1px solid rgba(255, 255, 255, 0.24);
+  padding-left: 25px;
+  grid-column: 5;
+  margin-left: 22px;
+  .header-button-signin {
+    color: $white !important;
+  }
+  .header-button-signup {
+    color: $darkBlue !important;
+  }
+}

@@ -10,6 +10,7 @@ namespace API\V2;
 
 
 use API\Commons\Validators\ChunkPasswordValidator;
+use API\Commons\Validators\LoginValidator;
 use API\V2\Json\SegmentComment;
 use Chunks_ChunkStruct;
 use Comments_CommentDao;
@@ -51,6 +52,7 @@ class CommentsController extends BaseChunkController {
             $Controller->setChunk( $Validator->getChunk() );
         } );
         $this->appendValidator( $Validator );
+        $this->appendValidator( new LoginValidator( $this ) );
     }
 
 }

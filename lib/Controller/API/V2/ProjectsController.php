@@ -5,6 +5,7 @@ namespace API\V2;
 use API\Commons\KleinController;
 use API\Commons\Validators\ProjectAccessValidator;
 use API\Commons\Validators\ProjectPasswordValidator;
+use API\Commons\Validators\LoginValidator;
 use API\V2\Json\Project;
 use API\V2\Json\ProjectAnonymous;
 use Constants_JobStatus;
@@ -144,7 +145,7 @@ class ProjectsController extends KleinController {
         } );
 
         $this->appendValidator( $projectValidator );
-
+        $this->appendValidator( new LoginValidator( $this ) );
     }
 
 }

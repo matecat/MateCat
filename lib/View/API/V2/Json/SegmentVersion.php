@@ -146,7 +146,7 @@ class SegmentVersion {
     public function renderItem( $version ) {
 
         $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new \FeatureSet();
-        $Filter = MateCatFilter::getInstance( $featureSet, $this->chunk->source, $this->chunk->target, [] );
+        $Filter     = MateCatFilter::getInstance( $featureSet, $this->chunk->source, $this->chunk->target, [] );
 
         return [
                 'id'              => (int)$version->id,

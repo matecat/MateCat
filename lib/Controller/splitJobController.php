@@ -29,13 +29,15 @@ class splitJobController extends ajaxController {
      */
     private $project_struct;
 
+    /**
+     * @throws ReflectionException
+     */
     public function __construct() {
 
         //SESSION ENABLED
-        parent::sessionStart();
         parent::__construct();
 
-        $this->setUserCredentials();
+        $this->identifyUser();
 
         $filterArgs = array(
                 'exec'         => array(

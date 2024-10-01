@@ -1430,6 +1430,11 @@ button.ui-button::-moz-focus-inner {
 }
 
 .translate-box {
+  h2 {
+    line-height: 24px;
+  }
+}
+.translate-box {
   h2,
   .select-with-label__wrapper label {
     color: $grey1;
@@ -1713,9 +1718,11 @@ button.ui-button::-moz-focus-inner {
   width: 94%;
   min-width: 992px;
   position: relative;
-  padding: 24px;
-  height: 200px;
+  padding: 12px 0;
+  display: flex;
+  justify-content: space-between;
   max-width: 1600px;
+  align-items: center;
 }
 
 h2 {
@@ -1739,7 +1746,6 @@ h2.payoff {
   padding: 8px 16px;
   width: auto !important;
   min-width: 200px;
-  margin: -10px 0px 8px 0px;
   -webkit-transition: all 100ms ease-in;
   -moz-transition: all 100ms ease-in;
   font-size: 26px !important;
@@ -1767,8 +1773,8 @@ h2.payoff {
 }
 
 .uploadbtn-box {
-  text-align: center;
-  float: right;
+  display: flex;
+  align-items: center;
 }
 
 .uploadbtn-box p {
@@ -2006,7 +2012,7 @@ body {
   -moz-border-radius: 2px;
   border-radius: 2px;
   border: 1px solid rgba(34, 36, 38, 0.15);
-  height: 37px;
+  height: 36px;
   box-shadow: inset 0 1px 3px #ddd;
 }
 
@@ -2110,7 +2116,7 @@ a {
   font-weight: bold;
   font-size: 16px;
   color: $grey1;
-  margin-top: 48px;
+  margin: 0px;
   .supported-file-formats {
     cursor: pointer;
   }
@@ -2922,7 +2928,7 @@ div.continue-gdrive {
   //height: 35px;
 }
 
-header .nav-mc-bar .dropdown.select-org span.text {
+header .nav-bar .dropdown.select-org span.text {
   line-height: 32px;
 }
 
@@ -2930,7 +2936,7 @@ header .nav-mc-bar .dropdown.select-org span.text {
   top: 0px !important;
 }
 
-header .nav-mc-bar .dropdown.select-org span.text {
+header .nav-bar .dropdown.select-org span.text {
   text-align: right;
   line-height: 32px;
   text-decoration: underline;
@@ -2943,7 +2949,7 @@ header .nav-mc-bar .dropdown.select-org span.text {
   top: -1px;
 }
 
-header .nav-mc-bar .dropdown.select-org i.dropdown.icon {
+header .nav-bar .dropdown.select-org i.dropdown.icon {
   top: 12px;
   margin-left: -25px !important;
 }

@@ -558,8 +558,8 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
         /**
          * @var $chunkReview ChunkReviewStruct
          */
-        $chunkReview = $data[ 'chunkReview' ];
-        $data[ 'force_pass_at' ]        = ReviewUtils::filterLQAModelLimit( $chunkReview->getChunk()->getProject()->getLqaModel(), $chunkReview->source_page );
+        $chunkReview             = $data[ 'chunkReview' ];
+        $data[ 'force_pass_at' ] = ReviewUtils::filterLQAModelLimit( $chunkReview->getChunk()->getProject()->getLqaModel(), $chunkReview->source_page );
 
         // in MySQL a sum of a null value to an integer returns 0
         // in MySQL division by zero returns NULL, so we have to coalesce null values from is_pass division

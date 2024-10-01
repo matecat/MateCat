@@ -87,26 +87,6 @@
                     }
                 });
 
-                var profile_drodown =  $('#user-menu-dropdown').dropdown();
-
-                var profile_modal = $('#profile-item').on('click', function (e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    $('#modal').trigger('openpreferences');
-                    return false;
-                });
-
-                var logout_action = $('.user-menu-container').on('click', '#logout-item', function (e) {
-                    e.preventDefault();
-                    $.post('/api/app/user/logout', function (data) {
-                        if ($('body').hasClass('manage')) {
-                            location.href = config.hostpath + config.basepath;
-                        } else {
-                            window.location.reload();
-                        }
-                    });
-                });
-
             }
     );
     $( window ).resize(function() {
@@ -115,7 +95,5 @@
 </script>
 
 <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/track_codes_analyze"/>
-
-<div id="modal" style="z-index: 999999999"></div>
 </body>
 </html>

@@ -1,33 +1,39 @@
 <?php
 
-use ConnectedServices\GoogleClientFactory;
+use ConnectedServices\Facebook\FacebookProvider;
+use ConnectedServices\Github\GithubProvider;
+use ConnectedServices\Google\GoogleProvider;
+use ConnectedServices\LinkedIn\LinkedInProvider;
+use ConnectedServices\Microsoft\MicrosoftProvider;
+use ConnectedServices\OauthClient;
+use ConnectedServices\ProviderInterface;
+use Klein\HttpStatus;
 
 abstract class viewController extends controller {
 
     /**
      * Template Engine Instance
      *
-     * @var PHPTALWithAppend
+     * @var PHPTAL|null
      */
-    protected $template = null;
+    protected ?PHPTAL $template = null;
 
     /**
-     * @var Google_Client
+     * @var ProviderInterface
      */
-    protected $client;
+    protected ProviderInterface $client;
 
     /**
-     * @var string
+     * @var bool
      */
-    protected $authURL;
+    protected bool $login_required = true;
 
-    protected                       $login_required = false;
-    private ?Projects_ProjectStruct $project        = null;
-
+    private ?Projects_ProjectStruct $project = null;
 
     /**
      * Class constructor
      *
+     * @throws ReflectionException
      */
     public function __construct() {
 
@@ -42,7 +48,7 @@ abstract class viewController extends controller {
         }
 
         //SESSION ENABLED
-        $this->readLoginInfo( false );
+        $this->identifyUser();
 
         $this->featureSet = new FeatureSet();
 
@@ -52,6 +58,7 @@ abstract class viewController extends controller {
      * Perform Authentication Requests and set incoming url
      */
     public function checkLoginRequiredAndRedirect() {
+
         if ( !$this->login_required ) {
             return true;
         }
@@ -61,15 +68,12 @@ abstract class viewController extends controller {
 
         //if no login set and login is required
         if ( !$this->isLoggedIn() ) {
-            //take note of url we wanted to go after
-            $_SESSION[ 'wanted_url' ] = $_SERVER[ 'REQUEST_URI' ];
+            $_SESSION[ 'wanted_url' ] = ltrim( $_SERVER[ 'REQUEST_URI' ], '/' );
             $mustRedirectToLogin      = true;
         }
 
         if ( $mustRedirectToLogin ) {
-            FlashMessage::set( 'popup', 'login', FlashMessage::SERVICE );
-
-            header( 'Location: ' . Routes::appRoot() );
+            header( "Location: " . INIT::$HTTPHOST . INIT::$BASEURL . "signin", false );
             exit;
         }
 
@@ -133,32 +137,12 @@ abstract class viewController extends controller {
 
         $this->template->user_plugins = $this->featureSet->filter( 'appendInitialTemplateVars', $this->featureSet->getCodes() );
 
-        $this->template->footer_js            = [];
-        $this->template->config_js            = [];
-        $this->template->css_resources        = [];
+        $this->template->footer_js     = [];
+        $this->template->config_js     = [];
+        $this->template->css_resources = [];
 
         $this->template->enableMultiDomainApi = INIT::$ENABLE_MULTI_DOMAIN_API;
         $this->template->ajaxDomainsNumber    = INIT::$AJAX_DOMAINS;
-
-    }
-
-    /**
-     * @param string $tokenName
-     * @param string $callbackUrl
-     *
-     * @return string
-     * @throws Exception
-     */
-    protected function setGoogleAuthUrl( string $tokenName, string $callbackUrl ): string {
-
-        if( !isset( $_SESSION[ $tokenName . INIT::$XSRF_TOKEN ] ) ){
-            $_SESSION[ $tokenName . INIT::$XSRF_TOKEN ] = Utils::uuid4();
-        }
-
-        $googleClientForDrive                      = GoogleClientFactory::getGoogleClient( $callbackUrl );
-        $googleClientForDrive->setState( $_SESSION[ $tokenName . INIT::$XSRF_TOKEN ] ); // set a state to be checked in the return request from browser
-
-        return $googleClientForDrive->createAuthUrl();
 
     }
 
@@ -181,8 +165,6 @@ abstract class viewController extends controller {
         $this->template->isLoggedIn       = $this->userIsLogged;
         $this->template->userMail         = $this->user->email;
         $this->collectFlashMessages();
-
-        $this->template->googleDriveEnabled = Bootstrap::areOauthKeysPresent() && Bootstrap::isGDriveConfigured();
     }
 
     /**
@@ -218,10 +200,12 @@ abstract class viewController extends controller {
         $this->renderCustomHTTP( $customTemplate, 404 );
     }
 
+    /**
+     * @throws Exception
+     */
     protected function renderCustomHTTP( $customTemplate, $httpCode ) {
-        $status = new \Klein\HttpStatus( $httpCode );
+        $status = new HttpStatus( $httpCode );
         header( "HTTP/1.0 " . $status->getFormattedString() );
-        $this->makeTemplate( $customTemplate );
         $this->finalize();
         die();
     }
@@ -229,15 +213,12 @@ abstract class viewController extends controller {
     /**
      * Create an instance of skeleton PHPTAL template
      *
-     * @param PHPTAL|string $skeleton_file
+     * @param string $skeleton_file
      */
-    protected function makeTemplate( $skeleton_file ) {
+    protected function makeTemplate( string $skeleton_file ) {
         try {
 
-            $this->template = $skeleton_file;
-            if ( !$this->template instanceof PHPTAL ) {
-                $this->template = new PHPTALWithAppend( INIT::$TEMPLATE_ROOT . "/$skeleton_file" ); // create a new template object
-            }
+            $this->template = new PHPTALWithAppend( INIT::$TEMPLATE_ROOT . "/$skeleton_file" ); // create a new template object
 
             $this->template->basepath            = INIT::$BASEURL;
             $this->template->hostpath            = INIT::$HTTPHOST;
@@ -266,6 +247,17 @@ abstract class viewController extends controller {
             echo "</pre>";
             exit;
         }
+    }
+
+    protected function intOauthClients() {
+        $this->template->googleAuthURL    = ( !$this->isLoggedIn() && INIT::$GOOGLE_OAUTH_CLIENT_ID ) ? OauthClient::getInstance( GoogleProvider::PROVIDER_NAME )->getAuthorizationUrl( $_SESSION ) : "";
+        $this->template->githubAuthUrl    = ( !$this->isLoggedIn() && INIT::$GITHUB_OAUTH_CLIENT_ID ) ? OauthClient::getInstance( GithubProvider::PROVIDER_NAME )->getAuthorizationUrl( $_SESSION ) : "";
+        $this->template->linkedInAuthUrl  = ( !$this->isLoggedIn() && INIT::$LINKEDIN_OAUTH_CLIENT_ID ) ? OauthClient::getInstance( LinkedInProvider::PROVIDER_NAME )->getAuthorizationUrl( $_SESSION ) : "";
+        $this->template->microsoftAuthUrl = ( !$this->isLoggedIn() && INIT::$LINKEDIN_OAUTH_CLIENT_ID ) ? OauthClient::getInstance( MicrosoftProvider::PROVIDER_NAME )->getAuthorizationUrl( $_SESSION ) : "";
+        $this->template->facebookAuthUrl  = ( !$this->isLoggedIn() && INIT::$FACEBOOK_OAUTH_CLIENT_ID ) ? OauthClient::getInstance( FacebookProvider::PROVIDER_NAME )->getAuthorizationUrl( $_SESSION ) : "";
+
+        $this->template->googleDriveEnabled = Bootstrap::isGDriveConfigured();
+        $this->template->gdriveAuthURL      = ( $this->isLoggedIn() && Bootstrap::isGDriveConfigured() ) ? OauthClient::getInstance( GoogleProvider::PROVIDER_NAME, INIT::$HTTPHOST . "/gdrive/oauth/response" )->getAuthorizationUrl( $_SESSION, 'drive' ) : "";
     }
 
     protected function collectFlashMessages() {
