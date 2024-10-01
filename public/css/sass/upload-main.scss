@@ -26,6 +26,8 @@
 @import 'components/common/Button';
 @import 'components/common/Popover';
 @import 'components/common/LabelWithTooltip';
+@import 'components/common/EmailsBadge';
+@import 'components/common/SegmentedControl';
 @import 'components/common/Accordion';
 @import 'components/signin/OnBoarding';
 
@@ -33,7 +35,8 @@
 
 .new_project__page {
   overflow-y: auto;
-  height: calc(100% - 60px);
+  height: 100%;
+  padding-bottom: 60px;
 }
 
 .translation-row {
