@@ -25,7 +25,7 @@ export const OtherTab = () => {
   )
 
   return (
-    <div className="advanced-options-box settings-panel-contentwrapper-tab-background">
+    <div className="other-options-box settings-panel-contentwrapper-tab-background">
       {config.is_cattool && <SpacePlaceholder />}
 
       {config.is_cattool && <CharacterCounter />}

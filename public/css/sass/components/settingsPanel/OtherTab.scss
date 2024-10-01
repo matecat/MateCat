@@ -1,4 +1,4 @@
-.advanced-options-box {
+.other-options-box {
   float: left;
   width: 100%;
   padding: 20px;
@@ -132,8 +132,8 @@
   }
 }
 
-.cattool .advanced-options-box .seg_rule h3,
-.cattool .advanced-options-box .seg_rule p {
+.cattool .other-options-box .seg_rule h3,
+.cattool .other-options-box .seg_rule p {
   opacity: 0.6;
 }
 
@@ -145,22 +145,22 @@
   height: 60px;
 }
 
-.advanced-options-box .options-box:last-child {
+.other-options-box .options-box:last-child {
   border-bottom: 0;
 }
 
-.advanced-options-box h2 {
+.other-options-box h2 {
   font-size: 30px;
   text-align: left;
   margin-bottom: 15px;
   margin-top: 0px;
 }
 
-.advanced-options-box .options-box h3 {
+.other-options-box .options-box h3 {
   font-size: 19px;
 }
 
-.advanced-options-box .options-box .option-description {
+.other-options-box .options-box .option-description {
   width: 65%;
   display: flex;
   flex-direction: column;
@@ -170,12 +170,12 @@
   text-align: left;
 }
 
-.advanced-options-box .options-box.option-unavailable p,
-.advanced-options-box .options-box.option-unavailable h3 {
+.other-options-box .options-box.option-unavailable p,
+.other-options-box .options-box.option-unavailable h3 {
   opacity: 0.6;
 }
 
-.advanced-options-box .options-box.qa-box img {
+.other-options-box .options-box.qa-box img {
   width: 65px !important;
   margin-right: 10px !important;
   vertical-align: middle;

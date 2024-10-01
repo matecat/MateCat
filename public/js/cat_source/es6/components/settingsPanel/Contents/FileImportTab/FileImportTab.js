@@ -21,10 +21,14 @@ export const FileImportTab = () => {
 
   return (
     <div className="settings-panel-file-import-tab">
-      <SegmentationRule
-        segmentationRule={segmentationRule}
-        setSegmentationRule={setSegmentationRule}
-      />
+      <div className="settings-panel-box">
+        <div className="file-import-tab file-import-options-box settings-panel-contentwrapper-tab-background">
+          <SegmentationRule
+            segmentationRule={segmentationRule}
+            setSegmentationRule={setSegmentationRule}
+          />
+        </div>
+      </div>
       <FiltersParams />
       <XliffSettings />
     </div>

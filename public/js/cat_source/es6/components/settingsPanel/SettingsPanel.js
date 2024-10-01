@@ -46,6 +46,7 @@ export const TEMPLATE_PROPS_BY_TAB = {
   [SETTINGS_PANEL_TABS.machineTranslation]: [SCHEMA_KEYS.mt],
   [SETTINGS_PANEL_TABS.qualityFramework]: [SCHEMA_KEYS.qaModelTemplateId],
   [SETTINGS_PANEL_TABS.fileImport]: [
+    SCHEMA_KEYS.segmentationRule,
     SCHEMA_KEYS.filtersTemplateId,
     SCHEMA_KEYS.XliffConfigTemplateId,
   ],
@@ -55,7 +56,6 @@ export const TEMPLATE_PROPS_BY_TAB = {
     SCHEMA_KEYS.tagProjection,
     SCHEMA_KEYS.lexica,
     SCHEMA_KEYS.crossLanguageMatches,
-    SCHEMA_KEYS.segmentationRule,
     SCHEMA_KEYS.idTeam,
   ],
   [SETTINGS_PANEL_TABS.editorSettings]: [],
