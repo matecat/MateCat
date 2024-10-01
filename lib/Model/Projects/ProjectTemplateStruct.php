@@ -14,6 +14,7 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
     public int     $uid                      = 0;
     public int     $id_team                  = 0;
     public bool    $tag_projection           = true;
+    public ?string $segmentation_rule        = null;
     public ?string $mt                       = null;
     public ?string $tm                       = null;
     public int     $payable_rate_template_id = 0;
