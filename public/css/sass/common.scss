@@ -64,12 +64,7 @@ ul {
 .normal-foo {
   background-color: $grey4;
   min-width: 992px;
-
   width: 100%;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  z-index: 2;
   .footer-body {
     display: grid;
     position: relative;
