@@ -235,9 +235,11 @@ const matecatConfig = async ({env}, {mode}) => {
       ],
       xliffToTarget: [
         path.resolve(__dirname, 'public/js/upload_main.js'),
-        path.resolve(__dirname, 'public/js/xliffToTarget.js'),
+        path.resolve(
+          __dirname,
+          'public/js/cat_source/es6/pages/XliffToTarget.js',
+        ),
         path.resolve(__dirname, 'public/css/sass/upload-main.scss'),
-        path.resolve(__dirname, 'public/css/sass/main.scss'),
       ],
       commonCss: [path.resolve(__dirname, 'public/css/sass/main.scss')],
       apiDoc: [

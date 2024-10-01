@@ -77,6 +77,8 @@ const conversionEnabled = Boolean(config.conversionEnabled)
 const formatsNumber = config.formats_number
 const googleDriveEnabled = Boolean(config.googleDriveEnabled)
 
+const headerMountPoint = document.querySelector('header.upload-page-header')
+
 const NewProject = () => {
   const [tmKeys, setTmKeys] = useState()
   const [mtEngines, setMtEngines] = useState([DEFAULT_ENGINE_MEMORY])
@@ -271,8 +273,8 @@ const NewProject = () => {
       idTeam: parseInt(id),
     }))
 
-  const headerMountPoint = document.querySelector('header.upload-page-header')
   const HeaderPortal = usePortal(headerMountPoint)
+
   const swapLanguages = () => {
     if (targetLangs.length > 1) {
       ModalsActions.showModalComponent(
