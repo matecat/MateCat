@@ -62,9 +62,6 @@
   "required": [
     "name",
     "id_team",
-    "speech2text",
-    "lexica",
-    "tag_projection",
     "pretranslate_100",
     "get_public_matches"
   ],
