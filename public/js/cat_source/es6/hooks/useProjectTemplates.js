@@ -136,7 +136,8 @@ function useProjectTemplates(tmKeys, isCattool = config.is_cattool) {
 }
 
 useProjectTemplates.propTypes = {
-  canRetrieveTemplates: PropTypes.bool,
+  tmKeys: PropTypes.array,
+  isCattool: PropTypes.bool,
 }
 
 export default useProjectTemplates

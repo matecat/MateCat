@@ -688,7 +688,6 @@ const NewProject = () => {
       tmKeys?.length
     ) {
       modifyingCurrentTemplate((prevTemplate) => {
-        console.log(prevTemplate)
         const isMatched = prevTemplate.tm.some(
           ({key}) => key === tmKeyFromQueryString,
         )

@@ -77,7 +77,7 @@ function CatTool() {
     })
 
   const {projectTemplates, currentProjectTemplate, modifyingCurrentTemplate} =
-    useProjectTemplates(true)
+    useProjectTemplates()
 
   const closeSettings = useCallback(() => setOpenSettings({isOpen: false}), [])
   const openTmPanel = () =>
