@@ -105,9 +105,18 @@ function useAuth() {
   }
 
   const forceLogout = () => {
+    // This branch condition allows checking if the user logged out from another browser
+    // to avoid to call logout more than once.
+    // Logout MUST be invoked only once, otherwise XSFR token set in server side disappears, and the next login will fail.
+    // If the user logged out from THIS browser, the session storage is already clean since
+    // this is a reaction to a message dispatched (via SSE) from a previous logout event.
     if ( commonUtils.getFromStorage(
         localStorageUserIsLoggedInThisBrowser + userInfo.user.uid,
     ) === '1' ) {
+      // localStorage.removeItem(key) is atomic.
+      //
+      // Immediately clean the session and not in the .then() promise, this avoid race conditions
+      // between get/set storage value when the checkUserLogin() is called.
       commonUtils.removeFromStorage(
           localStorageUserIsLoggedInThisBrowser + userInfo.user.uid,
       )
@@ -120,6 +129,10 @@ function useAuth() {
   }
 
   const logout = () => {
+    // localStorage.removeItem(key) is atomic.
+    //
+    // Immediately clean the session and not in the .then() promise, this avoid race conditions
+    // between get/set storage value when the checkUserLogin() is called.
     commonUtils.removeFromStorage(
         localStorageUserIsLoggedInThisBrowser + userInfo.user.uid,
     )
