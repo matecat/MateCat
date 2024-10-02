@@ -511,7 +511,7 @@ class NewController extends ajaxController {
                     }
                 } else {
                     $errors = $conversionHandler->getResult();
-                    $errors = array_map( [ 'Upload', 'formatExceptionMessage' ], $errors[ 'errors' ] );
+                    $errors = array_map( [ 'Upload', 'formatExceptionMessage' ], $errors->getErrors() );
 
                     $this->result[ 'errors' ]      = array_merge( $this->result[ 'errors' ], $errors );
                     $this->api_output[ 'message' ] = "Zip Error";

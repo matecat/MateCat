@@ -268,6 +268,7 @@ class ZipArchiveExtended extends ZipArchive {
             fclose( $tmpFp );
 
             $filesArray[ $filePath ] = [
+                    'size'     => $fileSize,
                     'name'     => $filePath,
                     'tmp_name' => $tmp_folder . $filePath,
             ];
