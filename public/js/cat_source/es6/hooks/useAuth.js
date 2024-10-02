@@ -21,7 +21,7 @@ const USER_INFO_SCHEMA = {
   teams: 'teams',
 }
 
-const localStorageUserIsLogged = 'isUserLogged-'
+const localStorageUserIsLoggedInThisBrowser = 'isUserLogged-'
 
 function useAuth() {
   const [userInfo, setStateUserInfo] = useState(false)
@@ -70,7 +70,7 @@ function useAuth() {
     if (
       !isUserLogged ||
       commonUtils.getFromStorage(
-        localStorageUserIsLogged + userInfo.user.uid,
+        localStorageUserIsLoggedInThisBrowser + userInfo.user.uid,
       ) !== '1'
     ) {
       getUserData()
@@ -84,7 +84,7 @@ function useAuth() {
           setIsUserLogged(true)
           setUserInfo(data)
           setConnectedServices(data.connected_services)
-          commonUtils.addInStorage(localStorageUserIsLogged + data.user.uid, 1)
+          commonUtils.addInStorage(localStorageUserIsLoggedInThisBrowser + data.user.uid, 1)
         })
         .catch((e) => {
           const event = {
@@ -94,7 +94,7 @@ function useAuth() {
           setTimeout(() => CommonUtils.dispatchAnalyticsEvents(event), 500)
           userInfo &&
             commonUtils.removeFromStorage(
-              localStorageUserIsLogged + userInfo.user.uid,
+              localStorageUserIsLoggedInThisBrowser + userInfo.user.uid,
             )
           setUserInfo()
           setIsUserLogged(false)
@@ -106,25 +106,24 @@ function useAuth() {
 
   const forceLogout = () => {
     if ( commonUtils.getFromStorage(
-        localStorageUserIsLogged + userInfo.user.uid,
+        localStorageUserIsLoggedInThisBrowser + userInfo.user.uid,
     ) === '1' ) {
-      logoutUser().then( () => {
-        commonUtils.removeFromStorage(
-            localStorageUserIsLogged + userInfo.user.uid,
-        )
-        setIsUserLogged( false )
-        setUserDisconnected( true )
-        setUserInfo()
-        setConnectedServices()
-      } )
+      commonUtils.removeFromStorage(
+          localStorageUserIsLoggedInThisBrowser + userInfo.user.uid,
+      )
+      setIsUserLogged( false )
+      setUserDisconnected( true )
+      setUserInfo()
+      setConnectedServices()
+      logoutUser().then( () => {} )
     }
   }
 
   const logout = () => {
+    commonUtils.removeFromStorage(
+        localStorageUserIsLoggedInThisBrowser + userInfo.user.uid,
+    )
     logoutUser().then(() => {
-      commonUtils.removeFromStorage(
-        localStorageUserIsLogged + userInfo.user.uid,
-      )
       window.location.reload()
     })
   }
