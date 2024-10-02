@@ -3,7 +3,7 @@ import React from 'react'
 const JobTableHeader = ({rates, iceMTRawWords}) => {
   return (
     <div
-      className={`job-table-header ${rates.ICE_MT && rates.ICE_MT !== rates.MT ? 'more-columns' : ''}`}
+      className={`job-table-header ${rates.ICE_MT && rates.ICE_MT !== rates.MT && iceMTRawWords > 0 ? 'more-columns' : ''}`}
     >
       <div className="job-table-header-title">
         <div>Analysis bucket</div>

@@ -12,7 +12,13 @@ const ChunkAnalyzeHeader = ({
 }) => {
   return (
     <div
-      className={`chunk-analyze-info ${rates.ICE_MT && rates.ICE_MT !== rates.MT ? 'more-columns' : ''}`}
+      className={`chunk-analyze-info ${
+        rates.ICE_MT &&
+        rates.ICE_MT !== rates.MT &&
+        total.find((item) => item.type === 'ice_MT').raw > 0
+          ? 'more-columns'
+          : ''
+      }`}
     >
       {showFiles && <div className={`chunk-analyze-info-background`} />}
       <div>
