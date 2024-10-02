@@ -93,7 +93,9 @@ const ChunkAnalyzeHeader = ({
           </>
         )}
       </div>
-      {rates.ICE_MT && rates.ICE_MT !== rates.MT ? (
+      {rates.ICE_MT &&
+      rates.ICE_MT !== rates.MT &&
+      total.find((item) => item.type === 'ice_MT').raw > 0 ? (
         <div>
           <div>{total.find((item) => item.type === 'ice_MT').raw}</div>
           <div>{total.find((item) => item.type === 'ice_MT').equivalent}</div>

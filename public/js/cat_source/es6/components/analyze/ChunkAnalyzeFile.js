@@ -64,7 +64,9 @@ const ChunkAnalyzeFile = ({file, index, size, rates}) => {
           <div>{matches.find((item) => item.type === 'MT').equivalent}</div>
         )}
       </div>
-      {rates.ICE_MT && rates.ICE_MT !== rates.MT ? (
+      {rates.ICE_MT &&
+      rates.ICE_MT !== rates.MT &&
+      matches.find((item) => item.type === 'ice_MT').raw > 0 ? (
         <div>
           <div>{matches.find((item) => item.type === 'ice_MT').equivalent}</div>
         </div>

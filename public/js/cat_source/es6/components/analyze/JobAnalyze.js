@@ -81,6 +81,11 @@ class JobAnalyze extends React.Component {
     }
   }
   render() {
+    const iceMTRawWords = this.props.jobInfo.chunks.reduce((total, item) => {
+      const iceMT = item.summary.find((t) => t.type === 'ice_MT')
+      if (iceMT) return total + iceMT.raw
+      else total
+    }, 0)
     return (
       <div className="job ui grid">
         <div className="job-body sixteen wide column">
@@ -95,7 +100,10 @@ class JobAnalyze extends React.Component {
                   jobInfo={this.props.jobInfo}
                   status={this.props.status}
                 />
-                <JobTableHeader rates={this.props.jobInfo.payable_rates} />
+                <JobTableHeader
+                  rates={this.props.jobInfo.payable_rates}
+                  iceMTRawWords={iceMTRawWords}
+                />
                 <div className="chunks-analyze">{this.getChunks()}</div>
               </div>
             </div>
