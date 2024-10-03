@@ -72,14 +72,18 @@ const Register = () => {
         email we sent you to <strong>{getValues('email')}</strong>
       </p>
       <div className="footer-buttons">
-        <Button type={BUTTON_TYPE.PRIMARY} onClick={redirectAfterLogin}>
+        <Button
+          type={BUTTON_TYPE.PRIMARY}
+          size={BUTTON_SIZE.BIG}
+          onClick={redirectAfterLogin}
+        >
           OK
         </Button>
         <Button
           className="link-underline"
           type={BUTTON_TYPE.PRIMARY}
           mode={BUTTON_MODE.LINK}
-          size={BUTTON_SIZE.LINK_SMALL}
+          size={BUTTON_SIZE.LINK_MEDIUM}
           onClick={resendEmail}
         >
           Resend Email
@@ -264,7 +268,7 @@ const Register = () => {
                         className="link-underline"
                         type={BUTTON_TYPE.PRIMARY}
                         mode={BUTTON_MODE.LINK}
-                        size={BUTTON_SIZE.LINK_SMALL}
+                        size={BUTTON_SIZE.LINK_MEDIUM}
                         onClick={showTerms}
                       >
                         Terms and Conditions
@@ -283,7 +287,7 @@ const Register = () => {
           </fieldset>
           <Button
             type={BUTTON_TYPE.PRIMARY}
-            size={BUTTON_SIZE.MEDIUM}
+            size={BUTTON_SIZE.BIG}
             htmlType={BUTTON_HTML_TYPE.SUBMIT}
           >
             Create account
@@ -298,7 +302,7 @@ const Register = () => {
             className="link-underline"
             type={BUTTON_TYPE.PRIMARY}
             mode={BUTTON_MODE.LINK}
-            size={BUTTON_SIZE.LINK_SMALL}
+            size={BUTTON_SIZE.LINK_MEDIUM}
             onClick={gotoSignin}
           >
             Sign in
