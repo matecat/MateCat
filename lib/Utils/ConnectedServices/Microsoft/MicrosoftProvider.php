@@ -36,7 +36,8 @@ class MicrosoftProvider extends AbstractProvider {
     public function getAuthorizationUrl( string $csrfTokenState ): string {
 
         $options = [
-                'state' => $csrfTokenState
+                'state' => $csrfTokenState,
+                'prompt' => 'select_account'
         ];
 
         $microsoftClient = static::getClient( $this->redirectUrl );

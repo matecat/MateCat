@@ -37,7 +37,8 @@ class GithubProvider extends AbstractProvider {
                 'scope' => [
                         'user',
                         'user:email'
-                ]
+                ],
+                'prompt' => 'select_account'
         ];
         $githubClient = static::getClient( $this->redirectUrl );
 

@@ -42,7 +42,8 @@ class LinkedInProvider extends AbstractProvider {
                         'email',
                         'profile',
                         'openid',
-                ]
+                ],
+                'prompt' => 'select_account'
         ];
         $linkedInClient = static::getClient();
 
