@@ -12,16 +12,11 @@ namespace API\V2;
 use ActivityLog\ActivityLogDao;
 use ActivityLog\ActivityLogStruct;
 use API\Commons\KleinController;
-use API\Commons\Validators\ChunkPasswordValidator;
-use API\Commons\Validators\ProjectPasswordValidator;
 use API\V2\Json\Activity;
-<<<<<<< Updated upstream
 use Exception;
 use ReflectionException;
-=======
 use API\Commons\Validators\ChunkPasswordValidator;
 use API\Commons\Validators\ProjectPasswordValidator;
->>>>>>> Stashed changes
 
 class ActivityLogController extends KleinController {
 
@@ -29,15 +24,6 @@ class ActivityLogController extends KleinController {
      * @throws Exception
      */
     public function allOnProject() {
-
-<<<<<<< Updated upstream
-=======
-    protected $rawLogContent;
-    protected $project_data;
-
-    public function allOnProject(){
-
->>>>>>> Stashed changes
         $validator = new ProjectPasswordValidator( $this );
         $validator->validate();
 
