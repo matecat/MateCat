@@ -11,9 +11,13 @@ import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper
 import Footer from '../components/footer/Footer'
 import SseListener from '../sse/SseListener'
 import {mountPage} from './mountPage'
-import {ActivityLogTable} from '../components/activityLog/ActivityLogTable'
+import {
+  ACTIVITY_LOG_COLUMNS,
+  ActivityLogTable,
+} from '../components/activityLog/ActivityLogTable'
 import {getActivityLog} from '../api/getActivityLog/getActivityLog'
 import {getProject} from '../api/getProject/getProject'
+import {FilterColumn} from '../components/activityLog/FilterColumn'
 
 const headerMountPoint = document.querySelector('header.upload-page-header')
 
@@ -28,6 +32,11 @@ export const ActivityLog = () => {
 
   const [project, setProject] = useState({})
   const [activityLog, setActivityLog] = useState([])
+  const [filterByColumn, setFilterByColumn] = useState(
+    ACTIVITY_LOG_COLUMNS.map(({id, label}) => ({id, label, query: ''})).find(
+      ({id}) => id === 'email',
+    ),
+  )
 
   const activityLogWithoutOrdering = useRef()
 
@@ -40,14 +49,15 @@ export const ActivityLog = () => {
     ]).then(([{project}, activityLog]) => {
       setProject(project)
 
-      const mappedActivityLog = Object.values(activityLog).map((log, index) => {
+      const mappedActivityLog = Object.values(activityLog).map((log) => {
         const {id_job, first_name, last_name, ...restLog} = log
         const {sourceTxt, targetTxt} =
           project.jobs.find(({id}) => id === id_job) ?? {}
+
         return {
           ...restLog,
-          id_job: index,
-          languagePair: `${sourceTxt} - ${targetTxt}`,
+          id_job,
+          languagePair: `${sourceTxt ? sourceTxt : ''} - ${targetTxt ? targetTxt : ''}`,
           userName: `${first_name} ${last_name}`,
         }
       })
@@ -59,7 +69,13 @@ export const ActivityLog = () => {
 
   return (
     <ActivityLogContext.Provider
-      value={{activityLog, activityLogWithoutOrdering, setActivityLog}}
+      value={{
+        activityLog,
+        activityLogWithoutOrdering,
+        setActivityLog,
+        filterByColumn,
+        setFilterByColumn,
+      }}
     >
       <HeaderPortal>
         <Header
@@ -70,11 +86,10 @@ export const ActivityLog = () => {
         />
       </HeaderPortal>
       <div className="activity-log-content">
-        <h1>Activity Log</h1>
         <h1>
-          Project: {project.id} - {project.name}
+          Activity Log project: {project.id} - {project.name}
         </h1>
-        <h2>Project Related Activities:</h2>
+        <FilterColumn />
         <ActivityLogTable />
       </div>
       <Footer />
