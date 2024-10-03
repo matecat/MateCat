@@ -81,31 +81,19 @@ export const UserMenu = () => {
           <hr />
           <ul>
             <li>
-              <Button
-                mode={BUTTON_MODE.LINK}
-                size={BUTTON_SIZE.LINK_MEDIUM}
-                onClick={openManage}
-              >
+              <div className="item" onClick={openManage}>
                 My Projects
-              </Button>
+              </div>
             </li>
             <li>
-              <Button
-                mode={BUTTON_MODE.LINK}
-                size={BUTTON_SIZE.LINK_MEDIUM}
-                onClick={openPreferencesModal}
-              >
+              <div className="item" onClick={openPreferencesModal}>
                 Profile
-              </Button>
+              </div>
             </li>
             <li>
-              <Button
-                mode={BUTTON_MODE.LINK}
-                size={BUTTON_SIZE.LINK_MEDIUM}
-                onClick={logoutUserFn}
-              >
+              <div className="item" onClick={logoutUserFn}>
                 Logout
-              </Button>
+              </div>
             </li>
           </ul>
         </div>

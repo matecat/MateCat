@@ -1,0 +1,71 @@
+@import 'variables';
+@import 'upload-main';
+
+.activity-log-content {
+  display: flex;
+  flex-direction: column;
+  align-items: left;
+  text-align: left;
+  padding: 50px 25px;
+  gap: 15px;
+
+  h1,
+  h2 {
+    margin: 0;
+  }
+}
+
+.activity-log-table {
+  overflow-y: scroll;
+  height: calc(100vh - 372px);
+  border-bottom: 1px solid $grey8;
+
+  .activity-log-table-columns-name,
+  .activity-log-table-columns-content {
+    display: grid;
+    grid-template-columns: 10% 15% 8% 8% 12% 15% 16% 16%;
+    text-align: left;
+
+    > * {
+      display: flex;
+      align-items: center;
+    }
+  }
+
+  .activity-log-table-columns-name {
+    position: sticky;
+    top: 0;
+    font-weight: bold;
+  }
+
+  .activity-log-table-columns-content {
+    > * {
+      min-height: 60px;
+      border: 1px solid $grey8;
+      border-top: unset;
+      padding: 10px;
+    }
+
+    > *:not(:first-child) {
+      border-left: unset;
+    }
+
+    &:nth-child(odd) {
+      background-color: $grey5;
+    }
+  }
+
+  .activity-table-column-order {
+    background-color: $grey9;
+    border: 1px solid $grey8;
+    padding: 5px;
+    justify-content: space-between;
+    cursor: pointer;
+  }
+
+  .activity-table-column-order-desc {
+    svg {
+      transform: rotate(180deg);
+    }
+  }
+}

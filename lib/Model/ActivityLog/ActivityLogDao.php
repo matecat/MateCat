@@ -19,7 +19,19 @@ class ActivityLogDao extends DataAccess_AbstractDao {
     public $epilogueString  = "";
     public $whereConditions = " id_project = :id_project ";
 
-    public function getLastActionInProject( $id_project ) {
+    public function getAllForProject($id_project){
+        $conn = Database::obtain()->getConnection();
+        $sql = "SELECT users.uid, users.email, users.first_name, users.last_name, activity_log.* FROM activity_log
+          JOIN users on activity_log.uid = users.uid WHERE id_project = :id_project ORDER BY activity_log.event_date DESC " ;
+
+        $stmt = $conn->prepare( $sql ) ;
+        $stmt->setFetchMode( \PDO::FETCH_CLASS, '\ActivityLog\ActivityLogStruct' );
+
+        $stmt->execute( array( 'id_project' =>  $id_project ) ) ;
+        return $stmt->fetchAll() ;
+    }
+
+    public function getLastActionInProject( $id_project) {
         $conn = Database::obtain()->getConnection();
         $sql  = "SELECT users.uid, users.email, users.first_name, users.last_name, activity_log.* FROM activity_log
           JOIN (
