@@ -135,7 +135,7 @@ class ForgotPasswordController extends AbstractStatefulKleinController {
         $new_password          = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_STRING );
         $password_confirmation = filter_var( $this->request->param( 'password_confirmation' ), FILTER_SANITIZE_STRING );
         $reset->resetPassword( $new_password, $password_confirmation );
-
+        $this->user = $reset->getUser();
         $this->broadcastLogout();
 
         $this->response->code( 200 );
