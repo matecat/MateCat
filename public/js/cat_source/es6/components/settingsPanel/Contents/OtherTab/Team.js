@@ -1,11 +1,12 @@
 import React, {useContext, useEffect} from 'react'
-import PropTypes from 'prop-types'
 import {Select} from '../../../common/Select'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import UserActions from '../../../../actions/UserActions'
+import {CreateProjectContext} from '../../../createProject/CreateProjectContext'
 
-export const Team = ({selectedTeam, setSelectedTeam}) => {
-  const {user, modifyingCurrentTemplate} = useContext(SettingsPanelContext)
+export const Team = () => {
+  const {user} = useContext(SettingsPanelContext)
+  const {selectedTeam, setSelectedTeam} = useContext(CreateProjectContext)
 
   useEffect(() => {
     if (Array.isArray(user?.teams)) {
@@ -40,18 +41,9 @@ export const Team = ({selectedTeam, setSelectedTeam}) => {
           isDisabled={!user || user.teams.length === 1}
           onSelect={(option) => {
             setSelectedTeam(option)
-            modifyingCurrentTemplate((prevTemplate) => ({
-              ...prevTemplate,
-              idTeam: parseInt(option.id),
-            }))
           }}
         />
       </div>
     </div>
   )
-}
-
-Team.propTypes = {
-  selectedTeam: PropTypes.object,
-  setSelectedTeam: PropTypes.func,
 }

@@ -37,8 +37,8 @@ import ApplicationActions from '../actions/ApplicationActions'
 import useDeviceCompatibility from '../hooks/useDeviceCompatibility'
 import useProjectTemplates, {SCHEMA_KEYS} from '../hooks/useProjectTemplates'
 import {TemplateSelect} from '../components/settingsPanel/ProjectTemplate/TemplateSelect'
-import {checkLexiqaIsEnabled} from '../components/settingsPanel/Contents/OtherTab/Lexiqa'
-import {checkGuessTagIsEnabled} from '../components/settingsPanel/Contents/OtherTab/GuessTag'
+import {checkLexiqaIsEnabled} from '../components/settingsPanel/Contents/EditorSettings/Lexiqa'
+import {checkGuessTagIsEnabled} from '../components/settingsPanel/Contents/EditorSettings/GuessTag'
 import {getMMTKeys} from '../api/getMMTKeys/getMMTKeys'
 import {AlertDeleteResourceProjectTemplates} from '../components/modals/AlertDeleteResourceProjectTemplates'
 import {
@@ -56,20 +56,11 @@ import SseListener from '../sse/SseListener'
 
 const SELECT_HEIGHT = 324
 
-const historySourceTargets = {
-  // source: 'es-ES',
-  // targets: 'it-IT,es-ES,es-MX||',
-}
-
 const urlParams = new URLSearchParams(window.location.search)
 const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
 const tmKeyFromQueryString = urlParams.get('private_tm_key')
 let isTmKeyFromQueryStringAddedToTemplate = false
 
-const sourceLanguageSelected =
-  localStorage.getItem('currentSourceLang') ?? 'en-US'
-const targetLanguagesSelected =
-  localStorage.getItem('currentTargetLang') ?? 'fr-FR'
 const subjectsArray = config.subject_array.map((item) => {
   return {...item, id: item.key, name: item.display}
 })
@@ -82,9 +73,6 @@ const headerMountPoint = document.querySelector('header.upload-page-header')
 const NewProject = () => {
   const [tmKeys, setTmKeys] = useState()
   const [mtEngines, setMtEngines] = useState([DEFAULT_ENGINE_MEMORY])
-  const [sourceLang, setSourceLang] = useState({})
-  const [targetLangs, setTargetLangs] = useState([])
-  const [subject, setSubject] = useState(subjectsArray[0])
   const [projectSent, setProjectSent] = useState(false)
   const [errors, setErrors] = useState()
   const [warnings, setWarnings] = useState()
@@ -109,6 +97,64 @@ const NewProject = () => {
   const isDeviceCompatible = useDeviceCompatibility()
 
   const {isUserLogged, userInfo} = useContext(ApplicationWrapperContext)
+
+  const subject = useMemo(
+    () =>
+      currentProjectTemplate &&
+      subjectsArray.find(
+        ({id}) =>
+          id === (currentProjectTemplate.subject ?? subjectsArray[0].id),
+      ),
+    [currentProjectTemplate],
+  )
+  const setSubject = useCallback(
+    ({id}) =>
+      modifyingCurrentTemplate((prevTemplate) => ({
+        ...prevTemplate,
+        subject: id,
+      })),
+    [modifyingCurrentTemplate],
+  )
+
+  const sourceLang = useMemo(
+    () =>
+      supportedLanguages?.length && currentProjectTemplate
+        ? supportedLanguages.find(
+            ({id}) => id === (currentProjectTemplate.sourceLanguage ?? 'en-US'),
+          )
+        : {},
+    [currentProjectTemplate, supportedLanguages],
+  )
+  const setSourceLang = useCallback(
+    ({id}) => {
+      modifyingCurrentTemplate((prevTemplate) => ({
+        ...prevTemplate,
+        sourceLanguage: id,
+      }))
+    },
+    [modifyingCurrentTemplate],
+  )
+
+  const targetLangs = useMemo(() => {
+    if (supportedLanguages?.length && currentProjectTemplate) {
+      const targetLanguage = currentProjectTemplate.targetLanguage.length
+        ? currentProjectTemplate.targetLanguage
+        : ['fr-FR']
+      return supportedLanguages.filter(({id}) =>
+        targetLanguage.some((value) => value === id),
+      )
+    } else {
+      return []
+    }
+  }, [currentProjectTemplate, supportedLanguages])
+  const setTargetLangs = useCallback(
+    (value) =>
+      modifyingCurrentTemplate((prevTemplate) => ({
+        ...prevTemplate,
+        targetLanguage: value.map(({id}) => id),
+      })),
+    [modifyingCurrentTemplate],
+  )
 
   const projectNameRef = useRef()
   const prevSourceLang = useRef(sourceLang)
@@ -267,11 +313,14 @@ const NewProject = () => {
 
     return {...team, id: team.id?.toString()}
   }, [userInfo?.teams, currentProjectTemplate?.idTeam])
-  const setSelectedTeam = ({id}) =>
-    modifyingCurrentTemplate((prevTemplate) => ({
-      ...prevTemplate,
-      idTeam: parseInt(id),
-    }))
+  const setSelectedTeam = useCallback(
+    ({id}) =>
+      modifyingCurrentTemplate((prevTemplate) => ({
+        ...prevTemplate,
+        idTeam: parseInt(id),
+      })),
+    [modifyingCurrentTemplate],
+  )
 
   const HeaderPortal = usePortal(headerMountPoint)
 
@@ -286,8 +335,11 @@ const NewProject = () => {
       )
     } else {
       prevSourceLang.current = sourceLang
-      setSourceLang(targetLangs[0])
-      setTargetLangs([sourceLang])
+      modifyingCurrentTemplate((prevTemplate) => ({
+        ...prevTemplate,
+        sourceLanguage: targetLangs[0].id,
+        targetLanguage: [sourceLang.id],
+      }))
     }
   }
 
@@ -447,18 +499,6 @@ const NewProject = () => {
           return {...lang, id: lang.code}
         })
         setSupportedLanguages(languages)
-        setSourceLang(
-          sourceLanguageSelected
-            ? languages.find((lang) => lang.id === sourceLanguageSelected)
-            : languages[0],
-        )
-        setTargetLangs(
-          targetLanguagesSelected
-            ? languages.filter(
-                (lang) => targetLanguagesSelected.indexOf(lang.id) > -1,
-              )
-            : [languages[0]],
-        )
         ApplicationActions.setLanguages(data)
       })
       .catch((error) =>
@@ -616,18 +656,6 @@ const NewProject = () => {
   }, [tmKeys])
 
   useEffect(() => {
-    if (sourceLang) {
-      const lang = sourceLang.id
-      if (lang && localStorage.getItem('currentSourceLang') !== lang) {
-        localStorage.setItem('currentSourceLang', lang)
-      }
-    }
-    if (targetLangs) {
-      const lang = targetLangs.map((lang) => lang.id).join()
-      if (lang && localStorage.getItem('currentTargetLang') !== lang) {
-        localStorage.setItem('currentTargetLang', lang)
-      }
-    }
     if (sourceLang && targetLangs) {
       CreateProjectActions.updateProjectParams({
         sourceLang,
@@ -744,6 +772,10 @@ const NewProject = () => {
         isImportTMXInProgress,
         setIsImportTMXInProgress,
         modifyingCurrentTemplate,
+        selectedTeam,
+        setSelectedTeam,
+        subject,
+        setSubject,
       }}
     >
       <HeaderPortal>
@@ -807,13 +839,7 @@ const NewProject = () => {
             </div>
             {/*Source Language*/}
             <div className="translate-box source">
-              <SourceLanguageSelect
-                history={
-                  historySourceTargets?.source
-                    ? historySourceTargets.source.split(',')
-                    : []
-                }
-              />
+              <SourceLanguageSelect />
             </div>
             <a id="swaplang" title="Swap languages" onClick={swapLanguages}>
               <span>Swap languages</span>
