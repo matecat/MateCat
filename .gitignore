@@ -11,6 +11,7 @@ _dic_cache
 .num_processes
 inc/*.dat
 inc/oauth_config.ini
+/inc/oauth_config.*.ini
 
 inc/Error_Mail_List.ini
 inc/config.ini
