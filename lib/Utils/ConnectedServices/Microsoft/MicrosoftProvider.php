@@ -5,7 +5,6 @@ namespace ConnectedServices\Microsoft;
 use ConnectedServices\AbstractProvider;
 use ConnectedServices\ConnectedServiceUserModel;
 use Exception;
-use GuzzleHttp\Exception\GuzzleException;
 use INIT;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use League\OAuth2\Client\Token\AccessToken;
@@ -36,7 +35,7 @@ class MicrosoftProvider extends AbstractProvider {
     public function getAuthorizationUrl( string $csrfTokenState ): string {
 
         $options = [
-                'state' => $csrfTokenState,
+                'state'  => $csrfTokenState,
                 'prompt' => 'select_account'
         ];
 
@@ -46,13 +45,12 @@ class MicrosoftProvider extends AbstractProvider {
     }
 
     /**
-     * @param $code
+     * @param string $code
      *
      * @return AccessToken
      * @throws IdentityProviderException
-     * @throws Exception
      */
-    public function getAccessTokenFromAuthCode( $code ): AccessToken {
+    public function getAccessTokenFromAuthCode( string $code ): AccessToken {
         $microsoftClient = static::getClient( $this->redirectUrl );
 
         /** @var AccessToken $token */
@@ -64,12 +62,11 @@ class MicrosoftProvider extends AbstractProvider {
     }
 
     /**
-     * @param $token
+     * @param AccessToken $token
      *
      * @return mixed
-     * @throws GuzzleException
      */
-    public function getResourceOwner( $token ): ConnectedServiceUserModel {
+    public function getResourceOwner( AccessToken $token ): ConnectedServiceUserModel {
         $microsoftClient = static::getClient( $this->redirectUrl );
         $fetched         = $microsoftClient->getResourceOwner( $token );
 

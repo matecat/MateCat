@@ -87,20 +87,30 @@ class GoogleProvider extends AbstractProvider {
         return $googleClient->createAuthUrl();
     }
 
-    public function getAccessTokenFromAuthCode( $code ) {
+    /**
+     * @param string $code
+     *
+     * @return AccessToken
+     * @throws Exception
+     */
+    public function getAccessTokenFromAuthCode( string $code ): AccessToken {
         $googleClient = static::getClient();
 
-        return $googleClient->fetchAccessTokenWithAuthCode( $code );
+        return new AccessToken( $googleClient->fetchAccessTokenWithAuthCode( $code ) );
     }
 
     /**
+     * @param AccessToken $token
+     *
+     * @return ConnectedServiceUserModel
+     * @throws \Google\Service\Exception
      * @throws Exception
      */
-    public function getResourceOwner( $token ): ConnectedServiceUserModel {
+    public function getResourceOwner( \League\OAuth2\Client\Token\AccessToken $token ): ConnectedServiceUserModel {
 
         $googleClient = self::getClient( $this->redirectUrl );
         $googleClient->setAccessType( "offline" );
-        $googleClient->setAccessToken( $token );
+        $googleClient->setAccessToken( $token->__toArray() ); // __toArray defined in ConnectedServices\Google\AccessToken
 
         $plus    = new Google_Service_Oauth2( $googleClient );
         $fetched = $plus->userinfo->get();

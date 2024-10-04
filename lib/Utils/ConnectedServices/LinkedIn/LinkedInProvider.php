@@ -51,13 +51,12 @@ class LinkedInProvider extends AbstractProvider {
     }
 
     /**
-     * @param $code
+     * @param string $code
      *
      * @return AccessToken
      * @throws IdentityProviderException
-     * @throws Exception
      */
-    public function getAccessTokenFromAuthCode( $code ): AccessToken {
+    public function getAccessTokenFromAuthCode( string $code ): AccessToken {
 
         $linkedInClient = static::getClient( $this->redirectUrl );
 
@@ -70,12 +69,12 @@ class LinkedInProvider extends AbstractProvider {
     }
 
     /**
-     * @param $token
+     * @param AccessToken $token
      *
-     * @return mixed
+     * @return ConnectedServiceUserModel
      * @throws GuzzleException
      */
-    public function getResourceOwner( $token ): ConnectedServiceUserModel {
+    public function getResourceOwner( AccessToken $token ): ConnectedServiceUserModel {
         $linkedInClient = static::getClient( $this->redirectUrl );
         $response       = $linkedInClient->getHttpClient()->request(
                 'GET',
