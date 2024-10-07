@@ -44,8 +44,6 @@
     "react-transition-group": "^4.2.2",
     "react-virtual": "^2.10.4",
     "sprintf-js": "^1.1.2",
-    "@radix-ui/react-context-menu": "^2.1.5",
-    "@radix-ui/react-dropdown-menu": "^2.0.6",
     "file-saver": "^2.0.5"
   },
   "devDependencies": {
