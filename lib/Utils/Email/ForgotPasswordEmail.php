@@ -8,6 +8,7 @@
 
 namespace Email;
 
+use Exception;
 use INIT;
 
 class  ForgotPasswordEmail extends AbstractEmail
@@ -27,6 +28,9 @@ class  ForgotPasswordEmail extends AbstractEmail
         $this->_setTemplate('Signup/forgot_password_content.html');
     }
 
+    /**
+     * @throws Exception
+     */
     public function send() {
         $recipient  = array( $this->user->email, $this->user->fullName() );
 
@@ -36,6 +40,7 @@ class  ForgotPasswordEmail extends AbstractEmail
         );
     }
 
+<<<<<<< Updated upstream
     protected function _getTemplateVariables() {
         return array(
             'user'           => $this->user->toArray(),
@@ -47,6 +52,20 @@ class  ForgotPasswordEmail extends AbstractEmail
         $vars  = parent::_getLayoutVariables();
         $vars['title'] = $this->title ;
         return $vars ;
+=======
+    protected function _getTemplateVariables(): array {
+        return [
+                'user'               => $this->user->toArray(),
+                'password_reset_url' => \Routes::passwordReset( $this->user->confirmation_token )
+        ];
+    }
+
+    protected function _getLayoutVariables( $messageBody = null ): array {
+        $vars            = parent::_getLayoutVariables();
+        $vars[ 'title' ] = $this->title;
+
+        return $vars;
+>>>>>>> Stashed changes
     }
 
 

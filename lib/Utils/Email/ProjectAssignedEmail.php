@@ -11,6 +11,7 @@ namespace Email;
 
 use CatUtils;
 use Chunks_ChunkStruct;
+use Exception;
 use Projects_MetadataDao;
 use Projects_ProjectStruct;
 use Routes;
@@ -37,8 +38,12 @@ class ProjectAssignedEmail extends AbstractEmail {
         $this->_setTemplate('Project/project_assigned_content.html');
     }
 
+<<<<<<< Updated upstream
     protected function _getTemplateVariables()
     {
+=======
+    protected function _getTemplateVariables(): array {
+>>>>>>> Stashed changes
         $words_count = [];
         foreach ( $this->jobs as $job ) {
             $jStruct  = new Chunks_ChunkStruct( $job->getArrayCopy() );
@@ -65,17 +70,31 @@ class ProjectAssignedEmail extends AbstractEmail {
         ];
     }
 
+<<<<<<< Updated upstream
     protected function _getLayoutVariables($messageBody = null)
     {
         $vars = parent::_getLayoutVariables();
         $vars['title'] = $this->title ;
+=======
+    protected function _getLayoutVariables( $messageBody = null ): array {
+        $vars            = parent::_getLayoutVariables();
+        $vars[ 'title' ] = $this->title;
+>>>>>>> Stashed changes
 
         return $vars ;
     }
 
+<<<<<<< Updated upstream
     public function send()
     {
         $recipient  = array( $this->assignee->email, $this->assignee->fullName() );
+=======
+    /**
+     * @throws Exception
+     */
+    public function send() {
+        $recipient = [ $this->assignee->email, $this->assignee->fullName() ];
+>>>>>>> Stashed changes
 
         $this->doSend( $recipient, $this->title ,
             $this->_buildHTMLMessage(),

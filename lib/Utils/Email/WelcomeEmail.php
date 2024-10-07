@@ -28,6 +28,7 @@ class WelcomeEmail extends AbstractEmail
         $this->_setTemplate('Signup/welcome_content.html');
     }
 
+<<<<<<< Updated upstream
     protected function _getTemplateVariables()
     {
         return array(
@@ -40,6 +41,18 @@ class WelcomeEmail extends AbstractEmail
         $vars = parent::_getLayoutVariables() ;
         $vars['title'] = $this->title ;
         $vars['closingLine'] = 'Join the Evolution!';
+=======
+    protected function _getTemplateVariables(): array {
+        return [
+                'user' => $this->user->toArray()
+        ];
+    }
+
+    protected function _getLayoutVariables( $messageBody = null ): array {
+        $vars                  = parent::_getLayoutVariables();
+        $vars[ 'title' ]       = $this->title;
+        $vars[ 'closingLine' ] = 'Join the Evolution!';
+>>>>>>> Stashed changes
 
         return $vars ;
     }
@@ -54,7 +67,7 @@ class WelcomeEmail extends AbstractEmail
 
     }
 
-    protected function _getDefaultMailConf() {
+    protected function _getDefaultMailConf(): array {
         $mailConf = parent::_getDefaultMailConf();
 
         $mailConf[ 'from' ]       = 'noreply@matecat.com';

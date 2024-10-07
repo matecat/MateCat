@@ -28,8 +28,13 @@ class InvitedToTeamEmail extends AbstractEmail {
         $this->_setTemplate( 'Team/email_invited_to_team.html' );
     }
 
+<<<<<<< Updated upstream
     protected function _getTemplateVariables() {
         return array(
+=======
+    protected function _getTemplateVariables(): array {
+        return [
+>>>>>>> Stashed changes
                 'sender'     => $this->user->toArray(),
                 'email'      => $this->invited_email,
                 'team'       => $this->team->toArray(),

@@ -183,7 +183,7 @@ class Routes {
      * @throws Exception
      */
     public static function manage(): string {
-        $host = self::httpHost( null );
+        $host = self::httpHost();
 
         return "$host/manage";
     }

@@ -12,11 +12,20 @@ class CommentResolveEmail extends BaseCommentEmail {
 
     protected $title = "Thread resolved";
 
+<<<<<<< Updated upstream
     protected function _getTemplateVariables() {
         $vars = parent::_getTemplateVariables();
         $var['title'] = $this->title;
         $vars['action'] = "resolved a thread that you are following on";
         $vars['id_segment'] = $this->comment->id_segment;
+=======
+    protected function _getTemplateVariables(): array {
+        $vars                 = parent::_getTemplateVariables();
+        $vars[ 'title' ]       = $this->title;
+        $vars[ 'action' ]     = "resolved a thread that you are following on";
+        $vars[ 'id_segment' ] = $this->comment->id_segment;
+
+>>>>>>> Stashed changes
         return $vars;
     }
 

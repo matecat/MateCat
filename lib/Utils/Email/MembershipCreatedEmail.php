@@ -8,6 +8,8 @@
 
 namespace Email;
 
+use Exception;
+use Routes;
 use Teams\MembershipStruct;
 use Users_UserStruct;
 
@@ -46,6 +48,9 @@ class MembershipCreatedEmail extends AbstractEmail {
         $this->title  = "You've been added to team " . $this->membership->getTeam()->name;
     }
 
+    /**
+     * @throws Exception
+     */
     public function send() {
         $recipient = array( $this->user->email, $this->user->fullName() );
 
@@ -55,25 +60,37 @@ class MembershipCreatedEmail extends AbstractEmail {
         );
     }
 
-    public function _getDefaultMailConf() {
+    public function _getDefaultMailConf(): array {
         return parent::_getDefaultMailConf();
     }
 
+<<<<<<< Updated upstream
     public function _getLayoutVariables($messageBody = null) {
+=======
+    public function _getLayoutVariables( $messageBody = null ): array {
+>>>>>>> Stashed changes
         $vars            = parent::_getLayoutVariables();
         $vars[ 'title' ] = $this->title;
 
         return $vars;
     }
 
-    public function _getTemplateVariables() {
+    /**
+     * @throws Exception
+     */
+    public function _getTemplateVariables(): array {
 
         return array(
                 'user'      => $this->user->toArray(),
                 'sender'    => $this->sender->toArray(),
                 'team'      => $this->membership->getTeam()->toArray(),
+<<<<<<< Updated upstream
                 'manageUrl' => \Routes::manage()
         );
+=======
+                'manageUrl' => Routes::manage()
+        ];
+>>>>>>> Stashed changes
     }
 
 }

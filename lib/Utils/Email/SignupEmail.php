@@ -38,6 +38,7 @@ class SignupEmail extends AbstractEmail
         );
     }
 
+<<<<<<< Updated upstream
     protected function _getTemplateVariables() {
         return array(
             'user'           => $this->user->toArray(),
@@ -49,11 +50,24 @@ class SignupEmail extends AbstractEmail
     protected function _getLayoutVariables($messageBody = null) {
         $vars = parent::_getLayoutVariables();
         $vars['title'] = $this->title ;
+=======
+    protected function _getTemplateVariables(): array {
+        return [
+                'user'           => $this->user->toArray(),
+                'activation_url' => Routes::signupConfirmation( $this->user->confirmation_token ),
+                'signup_url'     => Routes::appRoot()
+        ];
+    }
+
+    protected function _getLayoutVariables( $messageBody = null ): array {
+        $vars            = parent::_getLayoutVariables();
+        $vars[ 'title' ] = $this->title;
+>>>>>>> Stashed changes
 
         return $vars ;
     }
 
-    protected function _getDefaultMailConf() {
+    protected function _getDefaultMailConf(): array {
         $mailConf = parent::_getDefaultMailConf();
 
         $mailConf[ 'from' ]       = INIT::$MAILER_RETURN_PATH;
