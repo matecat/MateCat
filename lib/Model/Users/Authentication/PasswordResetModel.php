@@ -37,6 +37,12 @@ class PasswordResetModel {
         }
     }
 
+    /**
+     * @return Users_UserStruct|null
+     */
+    public function getUser(): ?Users_UserStruct {
+        return $this->user;
+    }
 
     /**
      * Retrieves the user associated with the reset token.

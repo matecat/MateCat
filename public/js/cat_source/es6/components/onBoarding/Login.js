@@ -108,7 +108,7 @@ const Login = () => {
         </fieldset>
         <Button
           type={BUTTON_TYPE.PRIMARY}
-          size={BUTTON_SIZE.MEDIUM}
+          size={BUTTON_SIZE.BIG}
           htmlType={BUTTON_HTML_TYPE.SUBMIT}
         >
           Sign in
@@ -125,7 +125,7 @@ const Login = () => {
             className="link-underline"
             type={BUTTON_TYPE.PRIMARY}
             mode={BUTTON_MODE.LINK}
-            size={BUTTON_SIZE.LINK_SMALL}
+            size={BUTTON_SIZE.LINK_MEDIUM}
             onClick={goToSignup}
           >
             Sign up
@@ -135,7 +135,7 @@ const Login = () => {
           className="link-underline"
           type={BUTTON_TYPE.PRIMARY}
           mode={BUTTON_MODE.LINK}
-          size={BUTTON_SIZE.LINK_SMALL}
+          size={BUTTON_SIZE.LINK_MEDIUM}
           onClick={goToForgotPassword}
         >
           Forgot your password?

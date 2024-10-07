@@ -50,12 +50,12 @@ class FacebookProvider extends AbstractProvider {
     }
 
     /**
-     * @param $code
+     * @param string $code
      *
      * @return AccessToken
      * @throws IdentityProviderException
      */
-    public function getAccessTokenFromAuthCode( $code ): AccessToken {
+    public function getAccessTokenFromAuthCode( string $code ): AccessToken {
         $facebookClient = static::getClient( $this->redirectUrl );
 
         /** @var AccessToken $token */
@@ -67,11 +67,11 @@ class FacebookProvider extends AbstractProvider {
     }
 
     /**
-     * @param $token
+     * @param AccessToken $token
      *
      * @return ConnectedServiceUserModel
      */
-    public function getResourceOwner( $token ): ConnectedServiceUserModel {
+    public function getResourceOwner( AccessToken $token ): ConnectedServiceUserModel {
 
         $facebookClient = static::getClient( $this->redirectUrl );
 

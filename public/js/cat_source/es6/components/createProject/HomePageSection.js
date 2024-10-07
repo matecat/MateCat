@@ -4,7 +4,7 @@ export const HomePageSection = () => {
   return (
     <section className="home-page-section">
       <div className={'layout-container'}>
-        <h1>Why choose us</h1>
+        <h1>Why Choose Us</h1>
         <div className={'layout-grid'}>
           <div className="content-box">
             <div className="content-box_header">

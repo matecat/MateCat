@@ -241,6 +241,13 @@ const matecatConfig = async ({env}, {mode}) => {
         ),
         path.resolve(__dirname, 'public/css/sass/upload-main.scss'),
       ],
+      activityLog: [
+        path.resolve(
+          __dirname,
+          'public/js/cat_source/es6/pages/ActivityLog.js',
+        ),
+        path.resolve(__dirname, 'public/css/sass/activity-log-main.scss'),
+      ],
       commonCss: [path.resolve(__dirname, 'public/css/sass/main.scss')],
       apiDoc: [
         path.resolve(__dirname, 'public/css/sass/main.scss'),
@@ -387,7 +394,7 @@ const matecatConfig = async ({env}, {mode}) => {
           __dirname,
           './lib/View/templates/_activity_log.html',
         ),
-        chunks: ['cattool'],
+        chunks: ['activityLog', 'allPagesPlugins'],
         publicPath: '/public/build/',
         xhtml: true,
       }),

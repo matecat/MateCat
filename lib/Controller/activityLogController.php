@@ -129,7 +129,7 @@ class activityLogController extends viewController {
     public function setTemplateVars() {
         $this->decorator = new ActivityLogDecorator( $this, $this->template );
         $this->decorator->decorate();
-
+        $this->intOauthClients();
     }
 
     public function finalizeEmptyActivity() {

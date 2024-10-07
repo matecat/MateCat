@@ -37,7 +37,8 @@ class GithubProvider extends AbstractProvider {
                 'scope' => [
                         'user',
                         'user:email'
-                ]
+                ],
+                'prompt' => 'select_account'
         ];
         $githubClient = static::getClient( $this->redirectUrl );
 
@@ -45,12 +46,12 @@ class GithubProvider extends AbstractProvider {
     }
 
     /**
-     * @param $code
+     * @param string $code
      *
      * @return AccessToken
      * @throws IdentityProviderException
      */
-    public function getAccessTokenFromAuthCode( $code ): AccessToken {
+    public function getAccessTokenFromAuthCode( string $code ): AccessToken {
         $githubClient = static::getClient();
 
         /** @var AccessToken $token */
@@ -62,11 +63,11 @@ class GithubProvider extends AbstractProvider {
     }
 
     /**
-     * @param $token
+     * @param AccessToken $token
      *
      * @return ConnectedServiceUserModel
      */
-    public function getResourceOwner( $token ): ConnectedServiceUserModel {
+    public function getResourceOwner( AccessToken $token ): ConnectedServiceUserModel {
 
         $githubClient = static::getClient( $this->redirectUrl );
 

@@ -21,7 +21,7 @@ const USER_INFO_SCHEMA = {
   teams: 'teams',
 }
 
-const localStorageUserIsLogged = 'isUserLogged-'
+const localStorageUserIsLoggedInThisBrowser = 'isUserLogged-'
 
 function useAuth() {
   const [userInfo, setStateUserInfo] = useState(false)
@@ -70,7 +70,7 @@ function useAuth() {
     if (
       !isUserLogged ||
       commonUtils.getFromStorage(
-        localStorageUserIsLogged + userInfo.user.uid,
+        localStorageUserIsLoggedInThisBrowser + userInfo.user.uid,
       ) !== '1'
     ) {
       getUserData()
@@ -84,7 +84,7 @@ function useAuth() {
           setIsUserLogged(true)
           setUserInfo(data)
           setConnectedServices(data.connected_services)
-          commonUtils.addInStorage(localStorageUserIsLogged + data.user.uid, 1)
+          commonUtils.addInStorage(localStorageUserIsLoggedInThisBrowser + data.user.uid, 1)
         })
         .catch((e) => {
           const event = {
@@ -94,7 +94,7 @@ function useAuth() {
           setTimeout(() => CommonUtils.dispatchAnalyticsEvents(event), 500)
           userInfo &&
             commonUtils.removeFromStorage(
-              localStorageUserIsLogged + userInfo.user.uid,
+              localStorageUserIsLoggedInThisBrowser + userInfo.user.uid,
             )
           setUserInfo()
           setIsUserLogged(false)
@@ -105,22 +105,38 @@ function useAuth() {
   }
 
   const forceLogout = () => {
-    logoutUser().then(() => {
+    // This branch condition allows checking if the user logged out from another browser
+    // to avoid to call logout more than once.
+    // Logout MUST be invoked only once, otherwise XSFR token set in server side disappears, and the next login will fail.
+    // If the user logged out from THIS browser, the session storage is already clean since
+    // this is a reaction to a message dispatched (via SSE) from a previous logout event.
+    if ( commonUtils.getFromStorage(
+        localStorageUserIsLoggedInThisBrowser + userInfo.user.uid,
+    ) === '1' ) {
+      // localStorage.removeItem(key) is atomic.
+      //
+      // Immediately clean the session and not in the .then() promise, this avoid race conditions
+      // between get/set storage value when the checkUserLogin() is called.
       commonUtils.removeFromStorage(
-        localStorageUserIsLogged + userInfo.user.uid,
+          localStorageUserIsLoggedInThisBrowser + userInfo.user.uid,
       )
-      setIsUserLogged(false)
-      setUserDisconnected(true)
+      setIsUserLogged( false )
+      setUserDisconnected( true )
       setUserInfo()
       setConnectedServices()
-    })
+      logoutUser().then( () => {} )
+    }
   }
 
   const logout = () => {
+    // localStorage.removeItem(key) is atomic.
+    //
+    // Immediately clean the session and not in the .then() promise, this avoid race conditions
+    // between get/set storage value when the checkUserLogin() is called.
+    commonUtils.removeFromStorage(
+        localStorageUserIsLoggedInThisBrowser + userInfo.user.uid,
+    )
     logoutUser().then(() => {
-      commonUtils.removeFromStorage(
-        localStorageUserIsLogged + userInfo.user.uid,
-      )
       window.location.reload()
     })
   }
