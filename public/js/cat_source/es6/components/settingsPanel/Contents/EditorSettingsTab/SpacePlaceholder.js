@@ -1,20 +1,37 @@
-import React, {useState} from 'react'
+import React, {useContext, useState} from 'react'
 import Switch from '../../../common/Switch'
 import SegmentActions from '../../../../actions/SegmentActions'
 import {setTagSignatureMiddleware} from '../../../segments/utils/DraftMatecatUtils/tagModel'
 import {SPACE_PLACEHOLDER_STORAGE_KEY} from '../../../../constants/Constants'
+import {ApplicationWrapperContext} from '../../../common/ApplicationWrapper'
+import {updateUserMetadata} from '../../../../api/updateUserMetadata/updateUserMetadata'
+
+const METADATA_KEY = 'show_whitespace'
 
 export const SpacePlaceholder = () => {
-  const [active, setActive] = useState(
-    window.localStorage.getItem(SPACE_PLACEHOLDER_STORAGE_KEY) === 'true',
+  const {userInfo, setUserInfo} = useContext(ApplicationWrapperContext)
+
+  const [isActive, setIsActive] = useState(
+    userInfo.metadata[METADATA_KEY] === true,
   )
-  const onChange = (active) => {
-    setActive(active)
+
+  const onChange = (isActive) => {
+    setIsActive(isActive)
+
+    updateUserMetadata({key: METADATA_KEY, value: isActive ? 1 : 0}).then(
+      ({value}) => {
+        setUserInfo((prevState) => ({
+          ...prevState,
+          metadata: {...prevState.metadata, [METADATA_KEY]: value},
+        }))
+      },
+    )
+
     window.localStorage.setItem(
       SPACE_PLACEHOLDER_STORAGE_KEY,
-      active.toString(),
+      isActive.toString(),
     )
-    setTagSignatureMiddleware('space', () => active)
+    setTagSignatureMiddleware('space', () => isActive)
     SegmentActions.refreshTagMap()
   }
   return (
@@ -28,7 +45,7 @@ export const SpacePlaceholder = () => {
       </div>
       <div className="options-box-value">
         <Switch
-          active={active}
+          active={isActive}
           onChange={onChange}
           testId="switch-space-counter"
         />

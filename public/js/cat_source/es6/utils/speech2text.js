@@ -5,22 +5,13 @@ import $ from 'jquery'
 
 const Speech2Text = {
   enabled: function () {
-    return !!(
-      'webkitSpeechRecognition' in window && !!config.speech2text_enabled
-    )
+    return !!('webkitSpeechRecognition' in window)
   },
   disable: function () {
-    if (config.speech2text_enabled) {
-      config.speech2text_enabled = 0
-      Speech2Text.initialized = false
-      $(document).off('contribution:copied')
-    }
+    Speech2Text.initialized = false
+    $(document).off('contribution:copied')
   },
-  enable: function () {
-    if (!config.speech2text_enabled) {
-      config.speech2text_enabled = 1
-    }
-  },
+  enable: function () {},
   init: function () {
     Speech2Text.initialized = true
     Speech2Text.loadRecognition()

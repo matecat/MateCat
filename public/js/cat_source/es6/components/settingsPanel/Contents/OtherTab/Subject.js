@@ -1,14 +1,18 @@
-import React, {useContext} from 'react'
+import React, {useContext, useMemo} from 'react'
 import {Select} from '../../../common/Select'
 import {CreateProjectContext} from '../../../createProject/CreateProjectContext'
-
-const subjectsArray = config.subject_array.map((item) => {
-  return {...item, id: item.key, name: item.display}
-})
 
 export const Subject = () => {
   const {SELECT_HEIGHT} = useContext(CreateProjectContext)
   const {subject, setSubject} = useContext(CreateProjectContext)
+
+  const subjectsArray = useMemo(
+    () =>
+      config.subject_array.map((item) => {
+        return {...item, id: item.key, name: item.display}
+      }),
+    [],
+  )
 
   return (
     <div className="options-box">

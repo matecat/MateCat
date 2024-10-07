@@ -14,9 +14,9 @@ export const OtherTab = () => {
       {config.is_cattool && config.isOpenAiEnabled && <AiAssistant />} */}
 
       <Team />
-      <Subject />
       <SourceLanguage />
       <TargetLanguages />
+      <Subject />
     </div>
   )
 }

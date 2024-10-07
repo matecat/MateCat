@@ -1,10 +1,11 @@
 import React from 'react'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
-import {AdvancedOptionsTab} from './AdvancedOptionsTab'
+import {EditorSettingsTab} from './EditorSettingsTab'
 import {render, screen, within} from '@testing-library/react'
 import projectTemplatesMock from '../../../../../../../mocks/projectTemplateMock'
 import {SCHEMA_KEYS} from '../../../../hooks/useProjectTemplates'
 import mockLanguages from '../../../../../../../mocks/languagesMock'
+import {EditorSettingsTab} from './EditorSettingsTab'
 
 global.config = {
   basepath: 'http://localhost/',
@@ -215,7 +216,7 @@ test('Render properly', () => {
         },
       }}
     >
-      <AdvancedOptionsTab />
+      <EditorSettingsTab />
     </SettingsPanelContext.Provider>,
   )
 
@@ -234,7 +235,7 @@ test('Not showing guess tag', () => {
   config.show_tag_projection = 0
   render(
     <SettingsPanelContext.Provider value={contextValues}>
-      <AdvancedOptionsTab />
+      <EditorSettingsTab />
     </SettingsPanelContext.Provider>,
   )
 
@@ -254,7 +255,7 @@ test('Guess tag not available for...', () => {
         },
       }}
     >
-      <AdvancedOptionsTab />
+      <EditorSettingsTab />
     </SettingsPanelContext.Provider>,
   )
 
@@ -274,7 +275,7 @@ test('Lexiqa not available for...', () => {
         },
       }}
     >
-      <AdvancedOptionsTab />
+      <EditorSettingsTab />
     </SettingsPanelContext.Provider>,
   )
 
@@ -296,28 +297,9 @@ test('Lexiqa not available for... (target lang)', () => {
         ],
       }}
     >
-      <AdvancedOptionsTab />
+      <EditorSettingsTab />
     </SettingsPanelContext.Provider>,
   )
 
   expect(screen.getByTestId('switch-lexiqa')).not.toBeChecked()
-})
-
-test('Cattool page', () => {
-  config.is_cattool = true
-  config.isOpenAiEnabled = true
-
-  render(
-    <SettingsPanelContext.Provider
-      value={{
-        ...contextValues,
-      }}
-    >
-      <AdvancedOptionsTab />
-    </SettingsPanelContext.Provider>,
-  )
-
-  expect(screen.getByTestId('switch-chars-counter')).toBeInTheDocument()
-  expect(screen.getByTestId('switch-ai-assistant')).toBeInTheDocument()
-  expect(screen.queryByTestId('container-team')).not.toBeInTheDocument()
 })

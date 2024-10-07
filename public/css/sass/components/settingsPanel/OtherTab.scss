@@ -3,8 +3,47 @@
   width: 100%;
   padding: 20px;
 
+  .options-box:last-child {
+    border-bottom: 0;
+  }
+
+  h2 {
+    font-size: 30px;
+    text-align: left;
+    margin-bottom: 15px;
+    margin-top: 0px;
+  }
+
+  .options-box h3 {
+    font-size: 19px;
+  }
+
+  .options-box .option-description {
+    width: 65%;
+    display: flex;
+    flex-direction: column;
+    font-size: 15px;
+    line-height: 22px;
+    align-items: start;
+    text-align: left;
+  }
+
+  .options-box.option-unavailable p,
+  .options-box.option-unavailable h3 {
+    opacity: 0.6;
+  }
+
+  .options-box.qa-box img {
+    width: 65px !important;
+    margin-right: 10px !important;
+    vertical-align: middle;
+    margin-left: 5px;
+  }
+
   //**** SELECT ****//
   .select-with-label__wrapper {
+    width: 300px;
+
     .select {
       font-size: 16px;
       padding: 9px 46px 9px 12px;
@@ -132,68 +171,6 @@
   }
 }
 
-.cattool .other-options-box .seg_rule h3,
-.cattool .other-options-box .seg_rule p {
-  opacity: 0.6;
-}
-
-.options-box.dqf_options_box {
-  display: none;
-}
-
-.options-box.multi-match p {
-  height: 60px;
-}
-
-.other-options-box .options-box:last-child {
-  border-bottom: 0;
-}
-
-.other-options-box h2 {
-  font-size: 30px;
-  text-align: left;
-  margin-bottom: 15px;
-  margin-top: 0px;
-}
-
-.other-options-box .options-box h3 {
-  font-size: 19px;
-}
-
-.other-options-box .options-box .option-description {
-  width: 65%;
-  display: flex;
-  flex-direction: column;
-  font-size: 15px;
-  line-height: 22px;
-  align-items: start;
-  text-align: left;
-}
-
-.other-options-box .options-box.option-unavailable p,
-.other-options-box .options-box.option-unavailable h3 {
-  opacity: 0.6;
-}
-
-.other-options-box .options-box.qa-box img {
-  width: 65px !important;
-  margin-right: 10px !important;
-  vertical-align: middle;
-  margin-left: 5px;
-}
-
-.options-box p span.option-notsupported-languages,
-.options-box p span.option-tagp-revise,
-.options-box p span.option-qa-box-languages,
-.options-box p span.option-tagp-languages {
-  line-height: 25px;
-  font-weight: bold;
-}
-
-.options-box p span.option-notsupported-languages {
-  margin-left: 6px;
-}
-
 .tooltip-options {
   cursor: help;
   font-weight: bold;
@@ -208,7 +185,4 @@
   display: flex;
   flex-direction: column;
   flex-grow: 1;
-}
-.options-box.multi-match .dropdown__list {
-  max-height: 300px !important;
 }

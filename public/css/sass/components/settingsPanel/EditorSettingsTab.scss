@@ -1,0 +1,77 @@
+.editor-settings-options-box {
+  float: left;
+  width: 100%;
+  padding: 20px;
+
+  .options-box:last-child {
+    border-bottom: 0;
+  }
+
+  h2 {
+    font-size: 30px;
+    text-align: left;
+    margin-bottom: 15px;
+    margin-top: 0px;
+  }
+
+  .options-box h3 {
+    font-size: 19px;
+  }
+
+  .options-box .option-description {
+    width: 65%;
+    display: flex;
+    flex-direction: column;
+    font-size: 15px;
+    line-height: 22px;
+    align-items: start;
+    text-align: left;
+  }
+
+  .options-box.option-unavailable p,
+  .options-box.option-unavailable h3 {
+    opacity: 0.6;
+  }
+
+  .options-box.qa-box img {
+    width: 65px !important;
+    margin-right: 10px !important;
+    vertical-align: middle;
+    margin-left: 5px;
+  }
+}
+
+.options-box {
+  display: flex;
+  gap: 40px;
+  align-items: center;
+  padding: 30px 0;
+
+  &:first-child {
+    padding: 0 0 15px;
+  }
+}
+
+.options-box.dqf_options_box {
+  display: none;
+}
+
+.options-box.multi-match p {
+  height: 60px;
+}
+
+.options-box p span.option-notsupported-languages,
+.options-box p span.option-tagp-revise,
+.options-box p span.option-qa-box-languages,
+.options-box p span.option-tagp-languages {
+  line-height: 25px;
+  font-weight: bold;
+}
+
+.options-box p span.option-notsupported-languages {
+  margin-left: 6px;
+}
+
+.options-box.multi-match .dropdown__list {
+  max-height: 300px !important;
+}

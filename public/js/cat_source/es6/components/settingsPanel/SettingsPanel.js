@@ -20,7 +20,7 @@ import NewProjectConstants from '../../constants/NewProjectConstants'
 import {FileImportTab} from './Contents/FileImportTab/FileImportTab'
 import {FILTERS_PARAMS_SCHEMA_KEYS} from './Contents/FileImportTab/FiltersParams/FiltersParams'
 import {XLIFF_SETTINGS_SCHEMA_KEYS} from './Contents/FileImportTab/XliffSettings/XliffSettings'
-import {EditorSettings} from './Contents/EditorSettings/EditorSettings'
+import {EditorSettingsTab} from './Contents/EditorSettingsTab'
 import ModalsActions from '../../actions/ModalsActions'
 
 let tabOpenFromQueryString = new URLSearchParams(window.location.search).get(
@@ -116,7 +116,7 @@ const DEFAULT_CONTENTS = (isCattool = config.is_cattool) => {
             label: 'Editor settings',
             description:
               'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vulputate libero et velit interdum, ac aliquet odio mattis.',
-            component: <EditorSettings />,
+            component: <EditorSettingsTab />,
           },
         ]
       : []),
