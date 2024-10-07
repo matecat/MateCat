@@ -1,8 +1,7 @@
-import {isNull} from 'lodash'
-
 import CommonUtils from './commonUtils'
 import SegmentStore from '../stores/SegmentStore'
 import DraftMatecatUtils from '../components/segments/utils/DraftMatecatUtils'
+import {SEGMENTS_STATUS} from '../constants/Constants'
 
 const SegmentUtils = {
   /**
@@ -11,6 +10,8 @@ const SegmentUtils = {
    */
   tpCanActivate: undefined,
   TagProjectionCanActivate: undefined,
+  localStorageUnlockedSegments: 'unlocked-segments-' + config.id_job,
+
   /**
    * Tag Projection: check if is enable the Tag Projection
    */
@@ -45,10 +46,61 @@ const SegmentUtils = {
   isIceSegment: function (segment) {
     return segment.ice_locked === '1'
   },
-  isUnlockedSegment: function (segment) {
-    return !isNull(CommonUtils.getFromStorage('unlocked-' + segment.sid))
+  isSecondPassLockedSegment: function (segment) {
+    return (
+      segment.status?.toUpperCase() === SEGMENTS_STATUS.APPROVED2 &&
+      segment.revision_number === 2 &&
+      config.revisionNumber !== 2
+    )
   },
-
+  isUnlockedSegment: function (segment) {
+    // return !isNull(CommonUtils.getFromStorage('unlocked-' + segment.sid))
+    if (localStorage.getItem(this.localStorageUnlockedAllSegments)) return true
+    let segmentsUnlocked = localStorage.getItem(
+      this.localStorageUnlockedSegments,
+    )
+    let index = -1
+    if (segmentsUnlocked) {
+      segmentsUnlocked = segmentsUnlocked.split(',')
+      index = segmentsUnlocked.indexOf(segment.sid)
+    }
+    return index !== -1
+  },
+  addUnlockedSegment: function (sid) {
+    let segmentsUnlocked = localStorage.getItem(
+      this.localStorageUnlockedSegments,
+    )
+    if (segmentsUnlocked) {
+      segmentsUnlocked = segmentsUnlocked.split(',')
+      if (segmentsUnlocked.indexOf(sid) === -1) segmentsUnlocked.push(sid)
+    } else {
+      segmentsUnlocked = [sid]
+    }
+    localStorage.setItem(
+      this.localStorageUnlockedSegments,
+      segmentsUnlocked.join(),
+    )
+  },
+  removeUnlockedSegment(sid) {
+    let segmentsUnlocked = localStorage.getItem(
+      this.localStorageUnlockedSegments,
+    )
+    if (segmentsUnlocked) {
+      segmentsUnlocked = segmentsUnlocked.split(',')
+      const index = segmentsUnlocked.indexOf(sid)
+      if (index > -1) {
+        segmentsUnlocked.splice(index, 1)
+        localStorage.setItem(
+          this.localStorageUnlockedSegments,
+          segmentsUnlocked.join(),
+        )
+      }
+    }
+    localStorage.setItem(
+      this.localStorageUnlockedSegments,
+      segmentsUnlocked.join(),
+    )
+  },
   /**
    * Characters counter local storage
    */
