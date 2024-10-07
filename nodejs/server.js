@@ -1,7 +1,6 @@
 const SseChannel = require( 'sse-channel' );
 const http = require( 'http' );
 const stompit = require( 'stompit' );
-const url = require( 'url' );
 const qs = require( 'querystring' );
 const _ = require( 'lodash' );
 const winston = require( 'winston' );
@@ -26,6 +25,7 @@ const CONTRIBUTIONS_TYPE = 'contribution';
 const CONCORDANCE_TYPE = 'concordance';
 const CROSS_LANG_CONTRIBUTIONS = 'cross_language_matches';
 const BULK_STATUS_CHANGE_TYPE = 'bulk_segment_status_change';
+const DISCONNECT_UPGRADE = 'upgrade';
 
 // Init logger
 const logger = winston.createLogger( {
@@ -96,10 +96,11 @@ browserChannel.on( 'connect', ( context, req, res ) => {
     browserChannel.send( {
         data: {
             _type: 'ack',
-            clientId: res._clientId
+            clientId: res._clientId,
+            serverVersion: config.server.version.replace( /['"]+/g, '' )
         }
     }, [res] );
-    logger.debug( ['New client connection ' + res._clientId ] );
+    logger.debug( ['New client connection ' + res._clientId] );
 
 } );
 
@@ -110,14 +111,13 @@ browserChannel.on( 'connect', ( context, req, res ) => {
 http.createServer( ( req, res ) => {
 
     // find job id from requested path
-    const parsedUrl = url.parse( req.url );
-    const path = parsedUrl.path;
+    const parsedUrl = new URL( req.url, `https://${req.headers.host}/` );
 
     if ( corsAllow( req, res ) ) {
 
-        if ( path.indexOf( config.server.path ) === 0 ) {
+        if ( parsedUrl.pathname.indexOf( config.server.path ) === 0 ) {
 
-            const query = qs.parse( parsedUrl.query );
+            const query = qs.parse( parsedUrl.search );
 
             res._clientId = uuid.v4();
             res._matecatJobId = query.jid;
@@ -139,6 +139,42 @@ http.createServer( ( req, res ) => {
 } ).listen( config.server.port, config.server.address, () => {
     logger.info( 'Listening on http://' + config.server.address + ':' + config.server.port + '/' );
 } );
+
+['SIGINT', 'SIGTERM'].forEach(
+    signal => process.on( signal, ( sig ) => {
+        logger.debug( sig + ' received...' );
+        notifyUpgrade();
+    } )
+);
+
+const notifyUpgrade = () => {
+
+    new Promise( ( resolve, reject ) => {
+        if ( browserChannel.connections.length !== 0 ) {
+
+            logger.debug( 'Disconnecting clients...' );
+
+            const disconnectMessage = {
+                payload: {
+                    _type: DISCONNECT_UPGRADE
+                }
+            };
+
+            browserChannel.send( {
+                data: disconnectMessage.payload
+            } );
+
+        }
+
+        resolve();
+
+    } ).then( () => {
+        logger.debug( 'Exit...' );
+        browserChannel.close();
+        process.exit( 0 );
+    } );
+
+}
 
 const checkCandidate = ( type, response, message ) => {
     let candidate;
