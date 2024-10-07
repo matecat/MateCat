@@ -65,16 +65,6 @@ let SegmentFilterUtils = {
           SegmentFilterUtils.tryToFocusLastSegment()
         }
       })
-
-      $(document).on('click', 'header .filter', function (e) {
-        e.preventDefault()
-        if (!SegmentFilterUtils.open) {
-          SegmentFilterUtils.openFilter()
-        } else {
-          SegmentFilterUtils.closeFilter()
-          SegmentFilterUtils.open = false
-        }
-      })
     }
   },
 
@@ -90,7 +80,7 @@ let SegmentFilterUtils = {
    * @returns {*}
    */
   filtering: function () {
-    return SegmentFilterUtils.filteringSegments
+    return SegmentFilterUtils.filteringSegments && SegmentFilterUtils.open
   },
 
   /**
@@ -168,6 +158,7 @@ let SegmentFilterUtils = {
       SegmentFilterUtils.setStoredState({
         serverData: data,
         reactState: reactState,
+        open: true,
       })
 
       CatToolActions.setSegmentFilter(data)
@@ -205,7 +196,10 @@ let SegmentFilterUtils = {
   openFilter: () => {
     CatToolActions.openSegmentFilter()
     SegmentFilterUtils.open = true
-    var localStorageData = SegmentFilterUtils.getStoredState()
+    SegmentFilterUtils.setStoredState({
+      open: true,
+    })
+    const localStorageData = SegmentFilterUtils.getStoredState()
     if (localStorageData.serverData) {
       SegmentActions.setMutedSegments(
         SegmentFilterUtils.getStoredState().serverData.segment_ids,
@@ -231,6 +225,9 @@ let SegmentFilterUtils = {
   closeFilter: function () {
     CatToolActions.closeSubHeader()
     SegmentFilterUtils.open = false
+    SegmentFilterUtils.setStoredState({
+      open: false,
+    })
     SegmentActions.removeAllMutedSegments()
     setTimeout(function () {
       SegmentActions.scrollToSegment(UI.currentSegmentId)

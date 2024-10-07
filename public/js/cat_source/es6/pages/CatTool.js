@@ -360,8 +360,6 @@ function CatTool() {
   useEffect(() => {
     if (!wasInitSegments) return
     UI.init()
-    if (SegmentFilter.enabled() && SegmentFilter.getStoredState().reactState)
-      SegmentFilter.openFilter()
     setTimeout(function () {
       UI.checkWarnings(true)
     }, 1000)
