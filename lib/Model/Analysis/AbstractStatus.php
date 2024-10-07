@@ -221,33 +221,7 @@ abstract class AbstractStatus {
             }
             // Runtime Initialization Completed
 
-            if ( $segInfo[ 'match_type' ] == "INTERNAL" ) {
-                $matchType = MatchConstants::_INTERNAL;
-            } elseif ( $segInfo[ 'match_type' ] == "MT" ) {
-                $matchType = MatchConstants::_MT;
-            } elseif ( $segInfo[ 'match_type' ] == "100%" ) {
-                $matchType = MatchConstants::_100;
-            } elseif ( $segInfo[ 'match_type' ] == "100%_PUBLIC" ) {
-                $matchType = MatchConstants::_100_PUBLIC;
-            } elseif ( $segInfo[ 'match_type' ] == "75%-84%" ) {
-                $matchType = MatchConstants::_75_84;
-            } elseif ( $segInfo[ 'match_type' ] == "85%-94%" ) {
-                $matchType = MatchConstants::_85_94;
-            } elseif ( $segInfo[ 'match_type' ] == "95%-99%" ) {
-                $matchType = MatchConstants::_95_99;
-            } elseif ( $segInfo[ 'match_type' ] == "50%-74%" ) {
-                $matchType = MatchConstants::_50_74;
-            } elseif ( $segInfo[ 'match_type' ] == "NO_MATCH" or $segInfo[ 'match_type' ] == "NEW" ) {
-                $matchType = MatchConstants::_NEW;
-            } elseif ( $segInfo[ 'match_type' ] == "ICE" ) {
-                $matchType = MatchConstants::_ICE;
-            } elseif ( $segInfo[ 'match_type' ] == "ICE_MT" ) {
-                $matchType = MatchConstants::_ICE_MT;
-            } elseif ( $segInfo[ 'match_type' ] == "REPETITIONS" ) {
-                $matchType = MatchConstants::_REPETITIONS;
-            } else {
-                $matchType = MatchConstants::_NUMBERS_ONLY;
-            }
+            $matchType = MatchConstants::toExternalMatchTypeValue( $segInfo[ 'match_type' ] );
 
             // increment file totals
             $file->incrementRaw( $segInfo[ 'raw_word_count' ] );

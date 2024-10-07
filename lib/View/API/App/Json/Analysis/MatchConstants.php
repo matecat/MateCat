@@ -80,9 +80,46 @@ class MatchConstants {
                 return "ICE";
             case "75_99": // no longer used
                 return '75%-99%';
+            case self::_NUMBERS_ONLY:
+                return 'NUMBERS_ONLY';
             case self::_NEW:
             default:
                 return 'NEW';
+        }
+
+    }
+
+    public static function toExternalMatchTypeValue( string $match_type ): string {
+        switch ( $match_type ) {
+            case 'REPETITIONS':
+                return self::_REPETITIONS;
+            case 'INTERNAL':
+                return self::_INTERNAL;
+            case "50%-74%":
+                return self::_50_74;
+            case "75%-84%":
+                return self::_75_84;
+            case "85%-94%":
+                return self::_85_94;
+            case "95%-99%" :
+                return self::_95_99;
+            case '100%':
+                return self::_100;
+            case '100%_PUBLIC'  :
+                return self::_100_PUBLIC;
+            case  'MT':
+                return self::_MT;
+            case 'ICE_MT':
+                return self::_ICE_MT;
+            case "ICE":
+                return self::_ICE;
+            case '75%-99%': // no longer used
+                return "75_99";
+            case 'NUMBERS_ONLY':
+                return self::_NUMBERS_ONLY;
+            case 'NEW':
+            default:
+                return self::_NEW;
         }
 
     }
@@ -93,7 +130,7 @@ class MatchConstants {
      * @return string
      * @throws RuntimeException
      */
-    public static function validate( $name ): string {
+    public static function validate( string $name ): string {
 
         if ( !array_key_exists( $name, self::forValue ) ) {
             throw new RuntimeException( "Invalid match type: " . $name );
