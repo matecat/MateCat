@@ -36,7 +36,7 @@ class MembershipCreatedEmail extends AbstractEmail {
      * MembershipCreatedEmail constructor.
      *
      * @param Users_UserStruct $sender
-     * @param MembershipStruct  $membership
+     * @param MembershipStruct $membership
      */
     public function __construct( Users_UserStruct $sender, MembershipStruct $membership ) {
         $this->user = $membership->getUser();
@@ -52,7 +52,7 @@ class MembershipCreatedEmail extends AbstractEmail {
      * @throws Exception
      */
     public function send() {
-        $recipient = array( $this->user->email, $this->user->fullName() );
+        $recipient = [ $this->user->email, $this->user->fullName() ];
 
         $this->doSend( $recipient, $this->title,
                 $this->_buildHTMLMessage(),
@@ -64,11 +64,7 @@ class MembershipCreatedEmail extends AbstractEmail {
         return parent::_getDefaultMailConf();
     }
 
-<<<<<<< Updated upstream
-    public function _getLayoutVariables($messageBody = null) {
-=======
     public function _getLayoutVariables( $messageBody = null ): array {
->>>>>>> Stashed changes
         $vars            = parent::_getLayoutVariables();
         $vars[ 'title' ] = $this->title;
 
@@ -80,17 +76,13 @@ class MembershipCreatedEmail extends AbstractEmail {
      */
     public function _getTemplateVariables(): array {
 
-        return array(
+        return [
                 'user'      => $this->user->toArray(),
                 'sender'    => $this->sender->toArray(),
                 'team'      => $this->membership->getTeam()->toArray(),
-<<<<<<< Updated upstream
-                'manageUrl' => \Routes::manage()
-        );
-=======
                 'manageUrl' => Routes::manage()
         ];
->>>>>>> Stashed changes
+
     }
 
 }
