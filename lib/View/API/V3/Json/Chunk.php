@@ -14,10 +14,8 @@ use API\V2\Json\ProjectUrls;
 use Chunks_ChunkStruct;
 use Constants;
 use DataAccess\ShapelessConcreteStruct;
-use Features\QaCheckBlacklist\Utils\BlacklistUtils;
 use Features\ReviewExtended\ReviewUtils;
 use FeatureSet;
-use Glossary\Blacklist\BlacklistDao;
 use Langs_LanguageDomains;
 use Langs_Languages;
 use LQA\ChunkReviewDao;
@@ -83,19 +81,6 @@ class Chunk extends \API\V2\Json\Chunk {
 
         $warningsCount = $chunk->getWarningsCount();
 
-        // blacklistWordsCount
-        $blacklistWordsCount = null;
-
-        $dao = new BlacklistDao();
-        $dao->destroyGetByJobIdAndPasswordCache( $chunk->id, $chunk->password );
-        $model = $dao->getByJobIdAndPassword( $chunk->id, $chunk->password );
-
-        if ( !empty( $model ) ) {
-            $blacklistUtils      = new BlacklistUtils( ( new RedisHandler() )->getConnection() );
-            $abstractBlacklist   = $blacklistUtils->getAbstractBlacklist( $chunk );
-            $blacklistWordsCount = $abstractBlacklist->getWordsCount();
-        }
-
         $result = [
                 'id'                      => (int)$chunk->id,
                 'password'                => $chunk->password,
@@ -121,7 +106,6 @@ class Chunk extends \API\V2\Json\Chunk {
                 'translator'              => $translator,
                 'total_raw_wc'            => (int)$chunk->total_raw_wc,
                 'standard_wc'             => (float)$chunk->standard_analysis_wc,
-                'blacklist_word_count'    => $blacklistWordsCount,
         ];
 
 

@@ -69,10 +69,10 @@ class Engines_MMT extends Engines_AbstractEngine {
     protected function _getClient() {
 
         $extraParams = $this->engineRecord->getExtraParamsAsArray();
-        $license = $extraParams[ 'MMT-License' ];
+        $license     = $extraParams[ 'MMT-License' ];
 
         return Engines\MMT\MMTServiceApi::newInstance()
-                ->setIdentity( "1.1", "MateCat", INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER )
+                ->setIdentity( "Matecat", ltrim( INIT::$BUILD_NUMBER, 'v' ) )
                 ->setLicense( $license );
     }
 
@@ -90,6 +90,7 @@ class Engines_MMT extends Engines_AbstractEngine {
 
     /**
      * @param $_config
+     *
      * @return array|Engines_Results_AbstractResponse
      */
     public function get( $_config ) {
@@ -100,30 +101,39 @@ class Engines_MMT extends Engines_AbstractEngine {
         }
 
         $client = $this->_getClient();
-        $_keys = $this->_reMapKeyList( $_config[ 'keys' ] ?? [] );
+        $_keys  = $this->_reMapKeyList( $_config[ 'keys' ] ?? [] );
 
         try {
             $translation = $client->translate(
-                $_config[ 'source' ],
-                $_config[ 'target' ],
-                $_config[ 'segment' ],
-                $_config[ 'mt_context' ] ?? null,
-                $_keys,
-                $_config[ 'job_id' ] ?? null,
-                static::GET_REQUEST_TIMEOUT,
-                $_config[ 'priority' ] ?? null,
-                $_config[ 'session' ] ?? null,
-                $_config[ 'glossaries' ] ?? null,
-                $_config[ 'ignore_glossary_case' ] ?? null
+                    $_config[ 'source' ],
+                    $_config[ 'target' ],
+                    $_config[ 'segment' ],
+                    $_config[ 'mt_context' ] ?? null,
+                    $_keys,
+                    $_config[ 'job_id' ] ?? null,
+                    static::GET_REQUEST_TIMEOUT,
+                    $_config[ 'priority' ] ?? null,
+                    $_config[ 'session' ] ?? null,
+                    $_config[ 'glossaries' ] ?? null,
+                    $_config[ 'ignore_glossary_case' ] ?? null,
+                    $_config[ 'include_score' ] ?? null
             );
 
-            return ( new Engines_Results_MyMemory_Matches(
+            $matchAsArray = ( new Engines_Results_MyMemory_Matches(
                     $_config[ 'segment' ],
                     $translation[ 'translation' ],
                     100 - $this->getPenalty() . "%",
                     "MT-" . $this->getName(),
-                    date( "Y-m-d" )
-            ) )->getMatches(1, [], $_config[ 'source' ], $_config[ 'target' ]);
+                    date( "Y-m-d" ),
+                    $translation[ 'score' ] ?? null
+            ) )->getMatches( 1, [], $_config[ 'source' ], $_config[ 'target' ] );
+
+            if ( isset( $translation[ 'score' ] ) ) {
+                $matchAsArray[ 'score' ] = $translation[ 'score' ];
+            }
+
+            return $matchAsArray;
+
         } catch ( Exception $e ) {
             return $this->GoogleTranslateFallback( $_config );
         }
@@ -172,7 +182,7 @@ class Engines_MMT extends Engines_AbstractEngine {
         $_keys  = $this->_reMapKeyList( @$_config[ 'keys' ] );
 
         try {
-            $client->addToMemoryContent( $_keys, $_config[ 'source' ], $_config[ 'target' ], $_config[ 'segment' ], $_config[ 'translation' ], $_config['session'] );
+            $client->addToMemoryContent( $_keys, $_config[ 'source' ], $_config[ 'target' ], $_config[ 'segment' ], $_config[ 'translation' ], $_config[ 'session' ] );
         } catch ( MMTServiceApiRequestException $e ) {
             // MMT license expired/changed (401) or account deleted (403) or whatever HTTP exception
             Log::doJsonLog( $e->getMessage() );
@@ -198,13 +208,13 @@ class Engines_MMT extends Engines_AbstractEngine {
 
         try {
             $client->updateMemoryContent(
-                $_config[ 'tuid' ],
-                $_keys,
-                $_config[ 'source' ],
-                $_config[ 'target' ],
-                $_config[ 'segment' ],
-                $_config[ 'translation' ],
-                $_config[ 'session' ]
+                    $_config[ 'tuid' ],
+                    $_keys,
+                    $_config[ 'source' ],
+                    $_config[ 'target' ],
+                    $_config[ 'segment' ],
+                    $_config[ 'translation' ],
+                    $_config[ 'session' ]
             );
         } catch ( Exception $e ) {
             return false;
@@ -313,8 +323,8 @@ class Engines_MMT extends Engines_AbstractEngine {
             $this->result = $client->me();
 
             return $this->result;
-        } catch (\Exception $exception){
-            throw new Exception("MMT license not valid");
+        } catch ( \Exception $exception ) {
+            throw new Exception( "MMT license not valid" );
         }
     }
 
@@ -329,10 +339,10 @@ class Engines_MMT extends Engines_AbstractEngine {
     public function connectKeys( array $keyList ) {
 
         $keyList = $this->_reMapKeyStructsList( $keyList );
-        $client = $this->_getClient();
+        $client  = $this->_getClient();
 
         // Avoid calling MMT if $keyList is empty
-        if(!empty($keyList)){
+        if ( !empty( $keyList ) ) {
             $this->result = $client->connectMemories( $keyList );
         }
 
@@ -387,17 +397,17 @@ class Engines_MMT extends Engines_AbstractEngine {
     }
 
     /**
-     * @param $name
+     * @param      $name
      * @param null $description
      * @param null $externalId
+     *
      * @return mixed
      * @throws \Engines\MMT\MMTServiceApiException
      */
-    public function createMemory($name, $description = null, $externalId = null)
-    {
+    public function createMemory( $name, $description = null, $externalId = null ) {
         $client = $this->_getClient();
 
-        return $client->createMemory($name, $description, $externalId);
+        return $client->createMemory( $name, $description, $externalId );
     }
 
     /**
@@ -409,11 +419,10 @@ class Engines_MMT extends Engines_AbstractEngine {
      * @return mixed
      * @throws \Engines\MMT\MMTServiceApiException
      */
-    public function deleteMemory($id)
-    {
+    public function deleteMemory( $id ) {
         $client = $this->_getClient();
 
-        return $client->deleteMemory($id);
+        return $client->deleteMemory( $id );
     }
 
     /**
@@ -423,8 +432,7 @@ class Engines_MMT extends Engines_AbstractEngine {
      * @return mixed
      * @throws \Engines\MMT\MMTServiceApiException
      */
-    public function getAllMemories()
-    {
+    public function getAllMemories() {
         $client = $this->_getClient();
 
         return $client->getAllMemories();
@@ -439,61 +447,60 @@ class Engines_MMT extends Engines_AbstractEngine {
      * @return mixed
      * @throws \Engines\MMT\MMTServiceApiException
      */
-    public function getMemory($id)
-    {
+    public function getMemory( $id ) {
         $client = $this->_getClient();
 
-        return $client->getMemory($id);
+        return $client->getMemory( $id );
     }
 
     /**
      * @param $id
      * @param $name
+     *
      * @return mixed
      * @throws \Engines\MMT\MMTServiceApiException
      */
-    public function updateMemory($id, $name)
-    {
+    public function updateMemory( $id, $name ) {
         $client = $this->_getClient();
 
-        return $client->updateMemory($id, $name);
+        return $client->updateMemory( $id, $name );
     }
 
     /**
      * @param $id
      * @param $data
+     *
      * @return mixed
      * @throws \Engines\MMT\MMTServiceApiException
      */
-    public function importGlossary($id, $data)
-    {
+    public function importGlossary( $id, $data ) {
         $client = $this->_getClient();
 
-        return $client->importGlossary($id, $data);
+        return $client->importGlossary( $id, $data );
     }
 
     /**
      * @param $id
      * @param $data
+     *
      * @return mixed
      * @throws \Engines\MMT\MMTServiceApiException
      */
-    public function updateGlossary($id, $data)
-    {
+    public function updateGlossary( $id, $data ) {
         $client = $this->_getClient();
 
-        return $client->updateGlossary($id, $data);
+        return $client->updateGlossary( $id, $data );
     }
 
     /**
      * @param $uuid
+     *
      * @return mixed
      * @throws \Engines\MMT\MMTServiceApiException
      */
-    public function importJobStatus($uuid)
-    {
+    public function importJobStatus( $uuid ) {
         $client = $this->_getClient();
 
-        return $client->importJobStatus($uuid);
+        return $client->importJobStatus( $uuid );
     }
 }

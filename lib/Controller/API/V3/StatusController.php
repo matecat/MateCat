@@ -25,9 +25,7 @@ class StatusController extends KleinController {
 
     /**
      * @throws NotFoundException
-     * @throws AuthenticationError
      * @throws \Exceptions\NotFoundException
-     * @throws ValidationError
      */
     public function index() {
 

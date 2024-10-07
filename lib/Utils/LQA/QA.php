@@ -292,8 +292,6 @@ class QA {
 
     const ERR_SIZE_RESTRICTION = 3000;
 
-    const GLOSSARY_BLACKLIST_MATCH = 4000;
-
     /**
      * Human Readable error map.
      * Created accordingly with Error constants
@@ -401,7 +399,6 @@ class QA {
 
             3000 => 'Characters limit exceeded',
 
-            4000 => 'Glossary blacklist match detected',
     ];
 
     protected $_tipMap = [
@@ -414,8 +411,6 @@ class QA {
             29   => "Should be < g ... > ... < /g >",
             1000 => "Press 'alt + t' shortcut to add tags or delete extra tags.",
             3000 => 'Maximum characters limit exceeded.',
-            4000 => 'Glossary blacklist match detected',
-
     ];
 
     const SIZE_RESTRICTION = "sizeRestriction";
@@ -585,14 +580,6 @@ class QA {
                         'outcome' => $errCode,
                         'debug'   => $this->_errorMap[ self::ERR_SIZE_RESTRICTION ],
                         'tip'     => $this->_getTipValue( self::ERR_SIZE_RESTRICTION )
-                ] );
-                break;
-
-            case self::GLOSSARY_BLACKLIST_MATCH:
-                $this->exceptionList[ self::WARNING ][] = errObject::get( [
-                        'outcome' => $errCode,
-                        'debug'   => $this->_errorMap[ self::GLOSSARY_BLACKLIST_MATCH ],
-                        'tip'     => $this->_getTipValue( self::GLOSSARY_BLACKLIST_MATCH )
                 ] );
                 break;
 
@@ -1594,7 +1581,6 @@ class QA {
         $this->_checkNewLineConsistency();
         $this->_checkSymbolConsistency();
         $this->_checkSizeRestriction();
-        $this->_checkGlossaryBlacklist();
 
         // all checks completed
         return $this->getErrors();
@@ -2617,42 +2603,6 @@ class QA {
         }
 
         return true;
-    }
-
-    /**
-     * Check glossary blacklist
-     *
-     * @throws AuthenticationError
-     * @throws NotFoundException
-     * @throws ValidationError
-     * @throws EndQueueException
-     * @throws ReQueueException
-     */
-    protected
-    function _checkGlossaryBlacklist() {
-        if ( $this->chunk === null or $this->featureSet === null ) {
-            return;
-        }
-
-        // Add blacklist glossary warnings
-        $project = $this->chunk->getProject();
-
-        $dao           = new Projects_MetadataDao();
-        $has_blacklist = $dao->setCacheTTL( 60 * 60 * 24 )->get( $project->id, 'has_blacklist' );
-
-        if ( $has_blacklist ) {
-            $data = [];
-            $data = $this->featureSet->filter( 'filterSegmentWarnings', $data, [
-                    'src_content' => $this->source_seg,
-                    'trg_content' => $this->target_seg,
-                    'project'     => $this->chunk->getProject(),
-                    'chunk'       => $this->chunk
-            ] );
-
-            if ( isset( $data[ 'blacklist' ] ) and !empty( $data[ 'blacklist' ][ 'matches' ] ) ) {
-                $this->addError( QA::GLOSSARY_BLACKLIST_MATCH );
-            }
-        }
     }
 
     protected

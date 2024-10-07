@@ -1,10 +1,18 @@
-import React, {useRef} from 'react'
+import React from 'react'
 import FileIcon from '../../../../../img/icons/FileIcon'
 import LabelWithTooltip from '../common/LabelWithTooltip'
-const ChunkAnalyzeFile = ({file, index, size}) => {
+const ChunkAnalyzeFile = ({file, index, size, rates}) => {
   const matches = file.matches
   return (
-    <div className="chunk-file-detail">
+    <div
+      className={`chunk-file-detail ${
+        rates.ICE_MT &&
+        rates.ICE_MT !== rates.MT &&
+        matches.find((item) => item.type === 'ice_MT').raw > 0
+          ? 'more-columns'
+          : ''
+      }`}
+    >
       <div
         className={`chunk-file-detail-background ${size === index ? 'last' : ''} `}
       />
@@ -53,8 +61,22 @@ const ChunkAnalyzeFile = ({file, index, size}) => {
         <div>{matches.find((item) => item.type === 'ice').equivalent}</div>
       </div>
       <div>
-        <div>{matches.find((item) => item.type === 'MT').equivalent}</div>
+        {rates.ICE_MT && rates.ICE_MT === rates.MT ? (
+          <div>
+            {matches.find((item) => item.type === 'MT').equivalent +
+              matches.find((item) => item.type === 'ice_MT').equivalent}
+          </div>
+        ) : (
+          <div>{matches.find((item) => item.type === 'MT').equivalent}</div>
+        )}
       </div>
+      {rates.ICE_MT &&
+      rates.ICE_MT !== rates.MT &&
+      matches.find((item) => item.type === 'ice_MT').raw > 0 ? (
+        <div>
+          <div>{matches.find((item) => item.type === 'ice_MT').equivalent}</div>
+        </div>
+      ) : null}
       <div className={'chunk-file-detail-total'}>
         <div>{file.total_equivalent}</div>
       </div>

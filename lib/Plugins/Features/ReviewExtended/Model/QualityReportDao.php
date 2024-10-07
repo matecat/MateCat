@@ -197,11 +197,7 @@ SQL;
   issues.severity     as issue_severity,
   issues.comment      as issue_comment,
   issues.target_text  as target_text,
-  issues.uid          as issue_uid,
-
-  translation_warnings.scope as warning_scope,
-  translation_warnings.data as warning_data,
-  translation_warnings.severity as warning_severity
+  issues.uid          as issue_uid
 
 FROM  qa_entries issues
 
@@ -212,9 +208,6 @@ JOIN (
 
   LEFT JOIN qa_categories
     ON issues.id_category = qa_categories.id
-
-  LEFT JOIN translation_warnings
-    ON translation_warnings.id_segment = issues.id_segment
 
     WHERE issues.deleted_at IS NULL AND issues.id_job = ?
 
