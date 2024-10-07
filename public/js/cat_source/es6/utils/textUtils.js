@@ -128,7 +128,7 @@ const TEXT_UTILS = {
     return {tags, text}
   },
   restoreTempTags(tags, text) {
-    text = text.replace(/#_([a-zA-Z]*?)_#/gi, (match, id) => {
+    text = text.replace(/#_([a-zA-Z]+?)_#/gi, (match, id) => {
       try {
         const tag = tags.find((item) => {
           return item.id === id
