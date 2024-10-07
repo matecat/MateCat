@@ -17,7 +17,6 @@ export const Subject = () => {
       </div>
       <div className="options-select-container">
         <Select
-          label="Select subject"
           id="project-subject"
           name={'project-subject'}
           maxHeightDroplist={SELECT_HEIGHT}
