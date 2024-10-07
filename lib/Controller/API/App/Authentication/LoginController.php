@@ -35,10 +35,32 @@ class LoginController extends AbstractStatefulKleinController {
      */
     public function login() {
 
+        $params = filter_var_array( $this->request->params(), [
+                'email'    => FILTER_SANITIZE_EMAIL,
+                'password' => FILTER_SANITIZE_STRING
+        ] );
+
+        $checkRateLimitResponse = $this->checkRateLimitResponse( $this->response, $params[ 'email' ] ?? 'BLANK_EMAIL', '/api/app/user/login', 5 );
+        $checkRateLimitIp       = $this->checkRateLimitResponse( $this->response, Utils::getRealIpAddr() ?? "127.0.0.1", '/api/app/user/login', 5 );
+
+        if ( $checkRateLimitResponse instanceof Response ) {
+            $this->response = $checkRateLimitResponse;
+
+            return;
+        }
+
+        if ( $checkRateLimitIp instanceof Response ) {
+            $this->response = $checkRateLimitIp;
+
+            return;
+        }
+
         // XSRF-Token
         $xsrfToken = $this->request->headers()->get( INIT::$XSRF_TOKEN );
 
         if ( $xsrfToken === null ) {
+            $this->incrementRateLimitCounter( $params[ 'email' ] ?? 'BLANK_EMAIL', '/api/app/user/login' );
+            $this->incrementRateLimitCounter( Utils::getRealIpAddr() ?? "127.0.0.1", '/api/app/user/login' );
             $this->response->code( 403 );
 
             return;
@@ -47,6 +69,8 @@ class LoginController extends AbstractStatefulKleinController {
         try {
             SimpleJWT::getValidPayload( $xsrfToken );
         } catch ( Exception $exception ) {
+            $this->incrementRateLimitCounter( $params[ 'email' ] ?? 'BLANK_EMAIL', '/api/app/user/login' );
+            $this->incrementRateLimitCounter( Utils::getRealIpAddr() ?? "127.0.0.1", '/api/app/user/login' );
             $this->response->code( 403 );
 
             return;
@@ -59,18 +83,6 @@ class LoginController extends AbstractStatefulKleinController {
                         'domain'  => INIT::$COOKIE_DOMAIN
                 ]
         );
-
-        $params = filter_var_array( $this->request->params(), [
-                'email'    => FILTER_SANITIZE_EMAIL,
-                'password' => FILTER_SANITIZE_STRING
-        ] );
-
-        $checkRateLimitResponse = $this->checkRateLimitResponse( $this->response, $params[ 'email' ], '/api/app/user/login' );
-        if ( $checkRateLimitResponse instanceof Response ) {
-            $this->response = $checkRateLimitResponse;
-
-            return;
-        }
 
         $dao  = new Users_UserDao();
         $user = $dao->getByEmail( $params[ 'email' ] );
@@ -90,6 +102,7 @@ class LoginController extends AbstractStatefulKleinController {
 
         } else {
             $this->incrementRateLimitCounter( $params[ 'email' ], '/api/app/user/login' );
+            $this->incrementRateLimitCounter( Utils::getRealIpAddr(), '/api/app/user/login' );
             $this->response->code( 404 );
         }
 
