@@ -5,6 +5,7 @@ namespace API\V2;
 use API\Commons\KleinController;
 use API\Commons\Validators\JSONRequestValidator;
 use API\Commons\Validators\LoginValidator;
+use Bootstrap;
 use InvalidArgumentException;
 use Users\MetadataDao;
 use Users_UserDao;
@@ -121,6 +122,9 @@ class UserController extends KleinController
                 $filtered['key'],
                 $filtered['value']
             );
+
+            Bootstrap::sessionStart();
+            $_SESSION['user_profile']['metadata'] = $this->getUser()->getMetadataAsKeyValue();
 
             return $this->response->json([
                 'id' => (int)$metadata->id,
