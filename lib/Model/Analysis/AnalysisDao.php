@@ -76,12 +76,13 @@ class AnalysisDao extends DataAccess_AbstractDao {
         $db = Database::obtain();
         try {
             $thisDao = new self();
-            $stmt = $db->getConnection()->prepare( self::$_sql_get_project_Stats_volume_analysis );
+            $stmt    = $db->getConnection()->prepare( self::$_sql_get_project_Stats_volume_analysis );
             $results = $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [ 'pid' => $pid ] );
 
             $stmt->closeCursor();
         } catch ( \PDOException $e ) {
             Log::doJsonLog( $e->getMessage() );
+
             return $e->getCode() * -1;
         }
 
@@ -95,9 +96,10 @@ class AnalysisDao extends DataAccess_AbstractDao {
      * @return bool|int
      */
     public static function destroyCacheByProjectId( $project_id ) {
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( self::$_sql_get_project_Stats_volume_analysis );
+        $conn    = Database::obtain()->getConnection();
+        $stmt    = $conn->prepare( self::$_sql_get_project_Stats_volume_analysis );
         $thisDao = new static();
+
         return $thisDao->_destroyObjectCache( $stmt, [ 'pid' => $project_id ] );
     }
 

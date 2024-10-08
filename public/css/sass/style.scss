@@ -3116,15 +3116,6 @@ section.opened.editor .status {
   display: block !important;
 }
 
-.timetoedit {
-  font-size: 12px;
-  text-align: left;
-  margin: 15px -55px 0 0;
-  color: #666666;
-  position: absolute;
-  right: 0;
-}
-
 .editarea #placeHolder {
   display: none;
 }
@@ -4482,10 +4473,6 @@ section .segment-side-buttons {
   /*top: 5px;*/
 }
 
-.user-nolog.sing-in-header {
-  margin-right: 11px;
-}
-
 .tmx-import-slider {
   width: 110px !important;
 }
@@ -4532,23 +4519,6 @@ $white: #fff;
   }
 
   header {
-    #user-menu-dropdown {
-      .organization-name {
-        display: none;
-      }
-    }
-
-    .sing-in-header {
-      padding: 0;
-      width: 40px !important;
-      height: 40px !important;
-      display: grid;
-      background-color: transparent;
-
-      svg {
-        width: 36px;
-      }
-    }
     .logo {
       margin-top: 0 !important;
     }
@@ -4595,12 +4565,6 @@ $white: #fff;
         grid-template-columns: auto auto;
         margin-right: 8px;
       }
-
-      #user-menu-dropdown {
-        .organization-name {
-          display: none;
-        }
-      }
     }
   }
 }
@@ -4611,6 +4575,10 @@ header {
   .wrapper {
     grid-template-columns: 208px minmax(0, 48px) minmax(200px, max-content) auto max-content; /*208px minmax(0,48px) minmax(200px, max-content) auto 120px;*/
     align-items: center;
+
+    .popover-component-container {
+      margin-left: 15px;
+    }
   }
 
   .logo-menu {
@@ -4723,6 +4691,7 @@ header {
             padding: 8px !important;
             font-size: 16px;
             color: #000000;
+            text-decoration: none;
             &:not(.disabled):hover {
               background-color: $light-gray;
               color: $light-blue;

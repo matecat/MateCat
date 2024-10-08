@@ -12,8 +12,8 @@
  */
 class BasicFeatureStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct {
 
-    public $feature_code ;
-    public $options ;
+    public $feature_code;
+    public $options;
 
     public function getFullyQualifiedClassName() {
         return Features::getPluginClass( $this->feature_code );
@@ -24,7 +24,8 @@ class BasicFeatureStruct extends DataAccess_AbstractDaoSilentStruct implements D
      */
     public function toNewObject() {
         $name = Features::getPluginClass( $this->feature_code );
-        return new $name($this);
+
+        return new $name( $this );
     }
 
 }

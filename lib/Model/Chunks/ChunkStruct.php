@@ -14,9 +14,9 @@ class Chunks_ChunkStruct extends Jobs_JobStruct {
     }
 
     public function isMarkedComplete( $params ) {
-        $params = Utils::ensure_keys( $params, array( 'is_review' ) );
+        $params = Utils::ensure_keys( $params, [ 'is_review' ] );
 
-        return Chunks_ChunkCompletionEventDao::isCompleted( $this, array( 'is_review' => $params[ 'is_review' ] ) );
+        return Chunks_ChunkCompletionEventDao::isCompleted( $this, [ 'is_review' => $params[ 'is_review' ] ] );
     }
 
     /**
@@ -39,12 +39,13 @@ class Chunks_ChunkStruct extends Jobs_JobStruct {
         return new Jobs_JobStruct( $this->toArray() );
     }
 
-    public function getQualityOverall(array $chunkReviews = []) {
-        return CatUtils::getQualityOverallFromJobStruct( $this, $chunkReviews ) ;
+    public function getQualityOverall( array $chunkReviews = [] ) {
+        return CatUtils::getQualityOverallFromJobStruct( $this, $chunkReviews );
     }
 
     public function getErrorsCount() {
-        $dao = new WarningDao() ;
+        $dao = new WarningDao();
+
         return $dao->getErrorsByChunk( $this );
     }
 

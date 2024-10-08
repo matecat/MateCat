@@ -5,7 +5,7 @@ class Engines_Results_MT {
 
     public $translatedText = "";
     public $sentence_confidence;
-    public $error = "";
+    public $error          = "";
 
     public function __construct( $result ) {
         $this->error = new Engines_Results_ErrorMatches();
@@ -22,7 +22,10 @@ class Engines_Results_MT {
     }
 
     public function get_as_array() {
-        if( $this->error != "" ) $this->error = $this->error->get_as_array();
+        if ( $this->error != "" ) {
+            $this->error = $this->error->get_as_array();
+        }
+
         return (array)$this;
     }
 

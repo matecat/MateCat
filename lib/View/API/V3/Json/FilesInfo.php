@@ -21,10 +21,10 @@ class FilesInfo {
      */
     public function render( $filesStructList, $job_first_segment = null, $job_last_segment = null ) {
 
-        $result            = [];
-        $result[ 'files' ] = [];
-        $result[ 'first_segment' ] = ($job_first_segment) ? (int)$job_first_segment :(int) reset( $filesStructList )->first_segment;
-        $result[ 'last_segment' ]  = ($job_last_segment) ? (int)$job_last_segment : (int)end( $filesStructList )->last_segment;
+        $result                    = [];
+        $result[ 'files' ]         = [];
+        $result[ 'first_segment' ] = ( $job_first_segment ) ? (int)$job_first_segment : (int)reset( $filesStructList )->first_segment;
+        $result[ 'last_segment' ]  = ( $job_last_segment ) ? (int)$job_last_segment : (int)end( $filesStructList )->last_segment;
 
         foreach ( $filesStructList as $fileInfo ) {
             $result[ 'files' ][] = [
@@ -32,9 +32,9 @@ class FilesInfo {
                     'first_segment'  => (int)$fileInfo->first_segment,
                     'last_segment'   => (int)$fileInfo->last_segment,
                     'file_name'      => $fileInfo->file_name,
-                    'raw_words'      => floatval($fileInfo->raw_words),
-                    'weighted_words' => floatval($fileInfo->weighted_words),
-                    'standard_words' => floatval($fileInfo->standard_words),
+                    'raw_words'      => floatval( $fileInfo->raw_words ),
+                    'weighted_words' => floatval( $fileInfo->weighted_words ),
+                    'standard_words' => floatval( $fileInfo->standard_words ),
                     'metadata'       => $fileInfo->metadata,
             ];
         }

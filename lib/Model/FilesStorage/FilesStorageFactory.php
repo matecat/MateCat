@@ -5,17 +5,15 @@ namespace FilesStorage;
 use Exception;
 use INIT;
 
-class FilesStorageFactory
-{
+class FilesStorageFactory {
     /**
      * @return AbstractFilesStorage
      * @throws Exception
      */
-    public static function create()
-    {
+    public static function create() {
         $storageMethod = !empty( INIT::$FILE_STORAGE_METHOD ) ? INIT::$FILE_STORAGE_METHOD : 'fs';
 
-        if($storageMethod === 'fs'){
+        if ( $storageMethod === 'fs' ) {
             return new FsFilesStorage();
         }
 

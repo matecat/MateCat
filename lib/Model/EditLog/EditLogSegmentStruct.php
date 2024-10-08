@@ -1,5 +1,7 @@
 <?php
+
 namespace EditLog;
+
 use DataAccess_AbstractDaoObjectStruct;
 use DataAccess_IDaoStruct;
 use LQA\QA;
@@ -13,11 +15,11 @@ use MyMemory;
  */
 class EditLogSegmentStruct extends DataAccess_AbstractDaoObjectStruct implements DataAccess_IDaoStruct {
 
-    const PEE_THRESHOLD = 1;
-    const CACHETIME = 108000;
+    const PEE_THRESHOLD      = 1;
+    const CACHETIME          = 108000;
     const EDIT_TIME_SLOW_CUT = 30;
     const EDIT_TIME_FAST_CUT = 0.25;
-    
+
     /**
      * @var int
      */
@@ -128,18 +130,19 @@ class EditLogSegmentStruct extends DataAccess_AbstractDaoObjectStruct implements
     /**
      * @var string
      */
-    public $uid ;
+    public $uid;
 
     /**
      * @var string
      */
-    public $email ;
+    public $email;
 
     /**
      * @return float
      */
     public function getSecsPerWord() {
         $val = @round( ( $this->time_to_edit / 1000 ) / $this->raw_word_count, 1 );
+
         return ( $val != INF ? $val : 0 );
     }
 
@@ -150,25 +153,27 @@ class EditLogSegmentStruct extends DataAccess_AbstractDaoObjectStruct implements
     public function isValidForEditLog() {
         $secsPerWord = $this->getSecsPerWord();
 
-        return ( $secsPerWord  > self::EDIT_TIME_FAST_CUT ) &&
-                ( $secsPerWord  < self::EDIT_TIME_SLOW_CUT );
+        return ( $secsPerWord > self::EDIT_TIME_FAST_CUT ) &&
+                ( $secsPerWord < self::EDIT_TIME_SLOW_CUT );
     }
 
-    public function isValidForPeeTable(){
+    public function isValidForPeeTable() {
 
         //Do not consider ice matches
-        if( $this->match_type == 'ICE' ) return false;
+        if ( $this->match_type == 'ICE' ) {
+            return false;
+        }
 
         $secsPerWord = $this->getSecsPerWord();
 
-        return ( $secsPerWord  > self::EDIT_TIME_FAST_CUT );
+        return ( $secsPerWord > self::EDIT_TIME_FAST_CUT );
     }
 
     /**
      * @return array
      */
     public function getWarning() {
-        $result = array();
+        $result = [];
 
         $QA = new QA( $this->source, $this->translation );
         $QA->performConsistencyCheck();
@@ -225,8 +230,8 @@ class EditLogSegmentStruct extends DataAccess_AbstractDaoObjectStruct implements
 
     }
 
-    private static function cleanSegmentForPee( $segment ){
-        $segment = htmlspecialchars_decode( $segment, ENT_QUOTES);
+    private static function cleanSegmentForPee( $segment ) {
+        $segment = htmlspecialchars_decode( $segment, ENT_QUOTES );
 
         return $segment;
     }

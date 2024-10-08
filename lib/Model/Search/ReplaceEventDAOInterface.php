@@ -10,19 +10,19 @@ interface Search_ReplaceEventDAOInterface {
      *
      * @return ReplaceEventStruct[]
      */
-    public function getEvents($idJob, $version);
+    public function getEvents( $idJob, $version );
 
     /**
      * @param ReplaceEventStruct $eventStruct
      *
      * @return int
      */
-    public function save(ReplaceEventStruct $eventStruct);
+    public function save( ReplaceEventStruct $eventStruct );
 
     /**
      * @param $ttl
      *
      * @return mixed
      */
-    public function setTtl($ttl);
+    public function setTtl( $ttl );
 }

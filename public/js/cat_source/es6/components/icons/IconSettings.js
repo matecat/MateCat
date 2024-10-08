@@ -1,21 +1,15 @@
 import React from 'react'
 
-const IconSettings = ({
-  width = '42',
-  height = '42',
-  style,
-  color = '#000000',
-}) => {
+const IconSettings = ({size = 42}) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 20 20"
-      width={`${width}px`}
-      height={`${height}px`}
-      style={style}
+      width={`${size}px`}
+      height={`${size}px`}
     >
       <path
-        fill={color}
+        fill="currentColor"
         fillRule="evenodd"
         stroke="none"
         strokeWidth="1"

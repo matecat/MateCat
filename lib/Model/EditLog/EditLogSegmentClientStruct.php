@@ -1,4 +1,5 @@
 <?php
+
 namespace EditLog;
 
 /**
@@ -103,18 +104,18 @@ class EditLogSegmentClientStruct extends EditLogSegmentStruct {
             );
         }
 
-        if( $this->isICEModified() ){
+        if ( $this->isICEModified() ) {
             $this->ice_modified = true;
         }
 
         $this->warnings = implode( ", ", $this->warnings );
     }
 
-    public function isICEModified(){
+    public function isICEModified() {
         return ( $this->getPEE() != 0 && $this->isICE() );
     }
 
-    public function isICE(){
+    public function isICE() {
         return ( $this->match_type == 'ICE' && $this->locked );
     }
 

@@ -23,7 +23,7 @@ class getWarningController extends ajaxController {
     public function __construct() {
 
         parent::__construct();
-        $this->readLoginInfo();
+        $this->identifyUser();
 
         $filterArgs = [
 

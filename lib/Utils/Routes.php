@@ -10,7 +10,7 @@ class Routes {
      * @return string
      * @throws Exception
      */
-    public static function inviteToTeamConfirm( $requestInfo, Array $options = [] ) {
+    public static function inviteToTeamConfirm( $requestInfo, array $options = [] ) {
 
         $host = self::httpHost( $options );
 
@@ -33,7 +33,7 @@ class Routes {
      * @return string
      * @throws Exception
      */
-    public static function sendToTranslatorConfirm( $requestInfo, Array $options = [] ) {
+    public static function sendToTranslatorConfirm( $requestInfo, array $options = [] ) {
 
 //        $host = self::httpHost( $options );
 //        $jwtHandler = new SimpleJWT( [
@@ -68,7 +68,7 @@ class Routes {
      * @return string
      * @throws Exception
      */
-    public static function sendToTranslatorUpdate( $requestInfo, Array $options = [] ) {
+    public static function sendToTranslatorUpdate( $requestInfo, array $options = [] ) {
 
         return self::translate(
                 $requestInfo[ 'project_name' ],
@@ -201,20 +201,20 @@ class Routes {
      * @throws Exception
      */
     public static function revise( $project_name, $id_job, $password, $source, $target, $options = [] ) {
-        $host = self::httpHost( $options );
-        $revise = 'revise' ;
+        $host   = self::httpHost( $options );
+        $revise = 'revise';
 
-        if ( isset( $options['revision_number']) && $options['revision_number'] > 1 ) {
-            $revise .= $options['revision_number'] ;
+        if ( isset( $options[ 'revision_number' ] ) && $options[ 'revision_number' ] > 1 ) {
+            $revise .= $options[ 'revision_number' ];
         }
 
-        $url = "$host/$revise/$project_name/$source-$target/$id_job-$password" ;
+        $url = "$host/$revise/$project_name/$source-$target/$id_job-$password";
 
-        if ( isset( $options['id_segment']) ) {
-            $url .= '#' . $options['id_segment'] ;
+        if ( isset( $options[ 'id_segment' ] ) ) {
+            $url .= '#' . $options[ 'id_segment' ];
         }
 
-        return $url ;
+        return $url;
     }
 
     /**

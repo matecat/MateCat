@@ -35,7 +35,7 @@ class Engine {
     }
 
     public function render( $data = null ) {
-        $out = array();
+        $out = [];
 
         if ( empty( $data ) ) {
             $data = $this->data;

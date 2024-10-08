@@ -8,11 +8,11 @@
 
 namespace Users;
 
-class MetadataStruct extends \DataAccess_AbstractDaoObjectStruct  implements \DataAccess_IDaoStruct {
+class MetadataStruct extends \DataAccess_AbstractDaoObjectStruct implements \DataAccess_IDaoStruct {
 
-    public $id ;
-    public $uid ;
-    public $key ;
-    public $value ;
+    public $id;
+    public $uid;
+    public $key;
+    public $value;
 
 }

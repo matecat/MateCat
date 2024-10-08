@@ -299,7 +299,7 @@ class setTranslationController extends ajaxController {
      */
     public function doAction() {
         $this->checkData();
-        $this->readLoginInfo();
+        $this->identifyUser();
         $this->initVersionHandler();
         $this->_getContexts();
 

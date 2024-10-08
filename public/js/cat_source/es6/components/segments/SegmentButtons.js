@@ -13,6 +13,7 @@ import {
   removeTagsFromText,
 } from './utils/DraftMatecatUtils/tagUtils'
 import SegmentActions from '../../actions/SegmentActions'
+import UserStore from '../../stores/UserStore'
 import {isMacOS} from '../../utils/Utils'
 import {useHotkeys} from 'react-hotkeys-hook'
 import {Shortcuts} from '../../utils/shortcuts'
@@ -49,13 +50,11 @@ export const SegmentButton = ({segment, disabled, isReview}) => {
     const idProject = config.id_project
     const key = 'first_segment_confirm' + idProject
     if (!sessionStorage.getItem(key)) {
+      const userInfo = UserStore.getUser()
       const event = {
         event: 'first_segment_confirm',
-        userStatus: APP.USER.isUserLogged() ? 'loggedUser' : 'notLoggedUser',
-        userId:
-          APP.USER.isUserLogged() && APP.USER.STORE.user
-            ? APP.USER.STORE.user.uid
-            : null,
+        userStatus: 'loggedUser',
+        userId: userInfo.user.uid,
         idProject: parseInt(idProject),
       }
       CommonUtils.dispatchAnalyticsEvents(event)
@@ -110,7 +109,7 @@ export const SegmentButton = ({segment, disabled, isReview}) => {
     }
     e.preventDefault()
     $(e.target).addClass('disabled')
-    setTimeout(() => UI.startSegmentTagProjection(segment.sid))
+    setTimeout(() => SegmentActions.startSegmentTagProjection(segment.sid))
     return false
   }
 

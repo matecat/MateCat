@@ -7,9 +7,9 @@ use ActivityLog\ActivityLogStruct;
 use API\Commons\Exceptions\AuthenticationError;
 use CatUtils;
 use ConnectedServices\ConnectedServiceDao;
-use ConnectedServices\GDrive;
 use ConnectedServices\GDriveTokenVerifyModel;
-use ConnectedServices\GoogleClientFactory;
+use ConnectedServices\Google\GDrive\RemoteFileService;
+use ConnectedServices\Google\GoogleProvider;
 use DownloadOmegaTDecorator;
 use Exception;
 use Exceptions\NotFoundException;
@@ -52,7 +52,7 @@ class DownloadFileController extends AbstractDownloadController {
     protected $downloadToken;
 
     /**
-     * @var GDrive\RemoteFileService
+     * @var RemoteFileService
      */
     protected $remoteFileService;
 
@@ -406,12 +406,9 @@ class DownloadFileController extends AbstractDownloadController {
 
         if ( $this->download_type == 'omegat' ) {
 
-            $this->sessionStart();
-            $this->setUserCredentials();
             $OtDownloadDecorator = new DownloadOmegaTDecorator( $this );
             $output_content      = array_merge( $output_content, $OtDownloadDecorator->decorate() );
             $OtDownloadDecorator->createOmegaTZip( $output_content );
-            $this->disableSessions();
 
         } else {
             try {
@@ -518,11 +515,6 @@ class DownloadFileController extends AbstractDownloadController {
         } else {
             $action = ( $job_complete ? ActivityLogStruct::DOWNLOAD_TRANSLATION : ActivityLogStruct::DOWNLOAD_PREVIEW );
         }
-
-        /**
-         * Retrieve user information
-         */
-        $this->readLoginInfo();
 
         $activity             = new ActivityLogStruct();
         $activity->id_job     = $this->id_job;
@@ -703,10 +695,10 @@ class DownloadFileController extends AbstractDownloadController {
         $verifier  = new GDriveTokenVerifyModel( $connectedService );
         $raw_token = $connectedService->getDecryptedOauthAccessToken();
 
-        $client = GoogleClientFactory::getGoogleClient( INIT::$HTTPHOST . "/gdrive/oauth/response" );
+        $client = GoogleProvider::getClient( INIT::$HTTPHOST . "/gdrive/oauth/response" );
 
         if ( $verifier->validOrRefreshed( $client ) ) {
-            $this->remoteFileService = new GDrive\RemoteFileService( $raw_token, $client );
+            $this->remoteFileService = new RemoteFileService( $raw_token, $client );
         } else {
             // TODO: check how this exception is handled
             throw new Exception( 'Unable to refresh token for service' );
@@ -758,7 +750,7 @@ class DownloadFileController extends AbstractDownloadController {
      *
      * @throws Exception
      */
-    private function updateRemoteFiles( $output_content ) {
+    private function updateRemoteFiles( array $output_content ) {
         foreach ( $output_content as $id_file => $output_file ) {
             $remoteFile                           = RemoteFiles_RemoteFileDao::getByFileAndJob( $id_file, $this->job->id );
             $this->remoteFiles[ $remoteFile->id ] = $this->remoteFileService->updateFile( $remoteFile, $output_file->getContent() );

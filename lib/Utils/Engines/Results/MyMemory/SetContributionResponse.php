@@ -6,9 +6,9 @@
  * Time: 11.50
  */
 
-class Engines_Results_MyMemory_SetContributionResponse extends Engines_Results_AbstractResponse{
+class Engines_Results_MyMemory_SetContributionResponse extends Engines_Results_AbstractResponse {
 
-    public function __construct( $response ){
+    public function __construct( $response ) {
 
         $this->responseData    = isset( $response[ 'responseData' ] ) ? $response[ 'responseData' ] : '';
         $this->responseDetails = isset( $response[ 'responseDetails' ] ) ? $response[ 'responseDetails' ] : '';

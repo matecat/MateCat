@@ -6,8 +6,7 @@ use Exception;
 use JsonSerializable;
 use Swaggest\JsonSchema\Exception\Error;
 
-class JSONValidatorException extends Exception implements JsonSerializable, JsonValidatorExceptionInterface
-{
+class JSONValidatorException extends Exception implements JsonSerializable, JsonValidatorExceptionInterface {
     /**
      * @var Error
      */
@@ -18,63 +17,56 @@ class JSONValidatorException extends Exception implements JsonSerializable, Json
      *
      * @param Error $error
      */
-    public function __construct(Error $error)
-    {
-        parent::__construct("JSON Validation Error: " . $error->error);
+    public function __construct( Error $error ) {
+        parent::__construct( "JSON Validation Error: " . $error->error );
         $this->error = $error;
     }
 
     /**
      * @return string
      */
-    public function getError()
-    {
+    public function getError() {
         return $this->error->error;
     }
 
     /**
      * @return string[]
      */
-    public function getSchemaPointers()
-    {
+    public function getSchemaPointers() {
         return $this->error->schemaPointers;
     }
 
     /**
      * @return string
      */
-    public function getDataPointer()
-    {
+    public function getDataPointer() {
         return $this->error->dataPointer;
     }
 
     /**
      * @return string
      */
-    public function getProcessingPath()
-    {
+    public function getProcessingPath() {
         return $this->error->processingPath;
     }
 
     /**
      * @return Error[]
      */
-    public function getSubErrors()
-    {
+    public function getSubErrors() {
         return $this->error->subErrors;
     }
 
     /**
      * @inheritDoc
      */
-    public function jsonSerialize()
-    {
+    public function jsonSerialize() {
         return [
-            'error' => $this->getError(),
-            'schemaPointers' => $this->getSchemaPointers(),
-            'dataPointer' => $this->getDataPointer(),
-            'processingPath' => $this->getProcessingPath(),
-            'subErrors' => $this->getSubErrors(),
+                'error'          => $this->getError(),
+                'schemaPointers' => $this->getSchemaPointers(),
+                'dataPointer'    => $this->getDataPointer(),
+                'processingPath' => $this->getProcessingPath(),
+                'subErrors'      => $this->getSubErrors(),
         ];
     }
 }

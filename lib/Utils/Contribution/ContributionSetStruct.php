@@ -178,7 +178,7 @@ class ContributionSetStruct extends DataAccess_AbstractDaoObjectStruct implement
             $userCredentials->uid = $contributionStruct->uid;
             return $userDao->setCacheTTL( 60 * 60 * 24 * 30 )->read( $userCredentials );
         } );
-        
+
     }
 
     public function getProject(){

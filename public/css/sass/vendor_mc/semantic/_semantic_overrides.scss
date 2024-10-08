@@ -1,3 +1,6 @@
+@import "../../commons/colors";
+@import url('https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic&subset=latin');
+
 /******** Overwrite Semantic CSS  *********/
 
 .ui.basic.buttons .active.button,
@@ -109,10 +112,16 @@
 
 /*--- Standard ---*/
 
+.ui.buttons .button,
+.ui.button {
+  font-family: "Lato", "Helvetica Neue", Arial, Helvetica, sans-serif;
+  align-items: center;
+}
 .ui.primary.buttons .button,
 .ui.primary.button {
   background-color: $translatedBlue;
   transition: 0.3s ease;
+  align-items: center;
 }
 
 .ui.primary.buttons .button:hover,
@@ -361,4 +370,51 @@ a.ui.basic.blue.label:hover {
 
 .ui.grid.border-box * {
   box-sizing: border-box;
+}
+
+
+/*     ICONS            */
+//Manage
+.project {
+  .ui.icon.buttons .button, .ui.icon.button:not(.animated):not(.compact):not(.labeled) {
+    padding: 0;
+  }
+}
+i.icon {
+  font-family: "Dropdown";
+}
+
+/*   Dropdown      */
+.ui.dropdown {
+  font-size: unset;
+}
+
+.ui.dropdown .menu {
+  font-family: "Calibri", "Helvetica Neue", Arial, Helvetica, sans-serif;
+  & > .item {
+    font-size: 14px;
+    color: $black !important;
+    min-height: unset;
+  }
+}
+.ui.dropdown .menu > .item a {
+  color: $black !important;
+}
+
+.ui.header {
+  font-family: "Lato", "Helvetica Neue", Arial, Helvetica, sans-serif;
+}
+.ui.attached.button {
+  box-shadow: 0 0 0 1px rgba(34, 36, 38, 0.15) !important;
+}
+.ui.tiny.buttons .button, .ui.tiny.button {
+  font-size: 12px !important;
+}
+
+//Old semantic style
+button, input, optgroup, select, textarea {
+  font-family: inherit;
+  font-size: 100%;
+  line-height: 1.15;
+  margin: 0;
 }

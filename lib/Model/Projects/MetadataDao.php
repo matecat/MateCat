@@ -1,12 +1,12 @@
 <?php
 
 class Projects_MetadataDao extends DataAccess_AbstractDao {
-    const FEATURES_KEY = 'features' ;
-    const TABLE = 'project_metadata' ;
+    const FEATURES_KEY = 'features';
+    const TABLE        = 'project_metadata';
 
     const WORD_COUNT_TYPE_KEY = 'word_count_type';
 
-    const WORD_COUNT_RAW = 'raw';
+    const WORD_COUNT_RAW        = 'raw';
     const WORD_COUNT_EQUIVALENT = 'equivalent';
 
     const SPLIT_EQUIVALENT_WORD_TYPE = 'eq_word_count';
@@ -19,60 +19,62 @@ class Projects_MetadataDao extends DataAccess_AbstractDao {
      *
      * @return Projects_MetadataStruct[]
      */
-  public static function getByProjectId( $id ) {
-      $dao = new Projects_MetadataDao();
-      return $dao->setCacheTTL( 60 * 60 )->allByProjectId( $id );
-  }
+    public static function getByProjectId( $id ) {
+        $dao = new Projects_MetadataDao();
+
+        return $dao->setCacheTTL( 60 * 60 )->allByProjectId( $id );
+    }
 
     /**
      * @param $id
      *
      * @return null|Projects_MetadataStruct[]
      */
-  public function allByProjectId( $id ) {
+    public function allByProjectId( $id ) {
 
-      $conn = Database::obtain()->getConnection();
-      $stmt = $conn->prepare( self::$_query_get_metadata );
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( self::$_query_get_metadata );
 
-      /**
-       * @var $metadata Projects_MetadataStruct[]
-       */
-      $metadata = $this->_fetchObject( $stmt, new Projects_MetadataStruct(), [ 'id_project' => $id ] );
+        /**
+         * @var $metadata Projects_MetadataStruct[]
+         */
+        $metadata = $this->_fetchObject( $stmt, new Projects_MetadataStruct(), [ 'id_project' => $id ] );
 
-      return $metadata;
+        return $metadata;
 
-  }
+    }
 
-  public function destroyMetadataCache( $id ){
-      $stmt = $this->_getStatementForQuery( self::$_query_get_metadata );
-      return $this->_destroyObjectCache( $stmt, [ 'id_project' => $id ] );
-  }
+    public function destroyMetadataCache( $id ) {
+        $stmt = $this->_getStatementForQuery( self::$_query_get_metadata );
+
+        return $this->_destroyObjectCache( $stmt, [ 'id_project' => $id ] );
+    }
 
     /**
-     * @param $id_project
-     * @param $key
+     * @param     $id_project
+     * @param     $key
      * @param int $ttl
      *
      * @return Projects_MetadataStruct|null
      */
-  public function get( $id_project, $key, $ttl = 0 ) {
-      $stmt = $this->setCacheTTL( $ttl )->_getStatementForQuery(
-              "SELECT * FROM project_metadata WHERE " .
-              " id_project = :id_project " .
-              " AND `key` = :key "
-      );
+    public function get( $id_project, $key, $ttl = 0 ) {
+        $stmt = $this->setCacheTTL( $ttl )->_getStatementForQuery(
+                "SELECT * FROM project_metadata WHERE " .
+                " id_project = :id_project " .
+                " AND `key` = :key "
+        );
 
-      /**
-       * @var $result Projects_MetadataStruct[]
-       */
-      $result = $this->_fetchObject( $stmt, new Projects_MetadataStruct(), array(
-              'id_project' => $id_project,
-              'key' => $key
-      ) );
+        /**
+         * @var $result Projects_MetadataStruct[]
+         */
+        $result = $this->_fetchObject( $stmt, new Projects_MetadataStruct(), [
+                'id_project' => $id_project,
+                'key'        => $key
+        ] );
 
-      return !empty( $result) ? $result[0] : null;
+        return !empty( $result ) ? $result[ 0 ] : null;
 
-  }
+    }
 
     /**
      * @param $id_project
@@ -81,46 +83,46 @@ class Projects_MetadataDao extends DataAccess_AbstractDao {
      *
      * @return boolean
      */
-  public function set($id_project, $key, $value) {
-      $sql = "INSERT INTO project_metadata " .
-          " ( id_project, `key`, value ) " .
-          " VALUES " .
-          " ( :id_project, :key, :value ) " .
-          " ON DUPLICATE KEY UPDATE value = :value " ;
-      $conn = Database::obtain()->getConnection();
+    public function set( $id_project, $key, $value ) {
+        $sql  = "INSERT INTO project_metadata " .
+                " ( id_project, `key`, value ) " .
+                " VALUES " .
+                " ( :id_project, :key, :value ) " .
+                " ON DUPLICATE KEY UPDATE value = :value ";
+        $conn = Database::obtain()->getConnection();
 
-      $stmt = $conn->prepare(  $sql );
-      $stmt->execute( array(
-          'id_project' => $id_project,
-          'key' => $key,
-          'value' => $value
-      ) );
+        $stmt = $conn->prepare( $sql );
+        $stmt->execute( [
+                'id_project' => $id_project,
+                'key'        => $key,
+                'value'      => $value
+        ] );
 
-      $this->destroyMetadataCache( $id_project );
+        $this->destroyMetadataCache( $id_project );
 
-      return $conn->lastInsertId();
+        return $conn->lastInsertId();
 
-  }
+    }
 
 
-  public function delete($id_project, $key) {
-      $sql = "DELETE FROM project_metadata " .
-          " WHERE id_project = :id_project " .
-          " AND `key` = :key "  ;
+    public function delete( $id_project, $key ) {
+        $sql = "DELETE FROM project_metadata " .
+                " WHERE id_project = :id_project " .
+                " AND `key` = :key ";
 
-      $conn = Database::obtain()->getConnection();
-      $stmt = $conn->prepare(  $sql );
-      $stmt->execute( [
-              'id_project' => $id_project,
-              'key'        => $key,
-      ] );
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        $stmt->execute( [
+                'id_project' => $id_project,
+                'key'        => $key,
+        ] );
 
-      $this->destroyMetadataCache( $id_project );
+        $this->destroyMetadataCache( $id_project );
 
-  }
+    }
 
     public static function buildChunkKey( $key, Chunks_ChunkStruct $chunk ) {
-        return "{$key}_chunk_{$chunk->id}_{$chunk->password}" ;
+        return "{$key}_chunk_{$chunk->id}_{$chunk->password}";
     }
 
     /**
@@ -134,13 +136,13 @@ class Projects_MetadataDao extends DataAccess_AbstractDao {
 
             foreach ( ChunkOptionsModel::$valid_keys as $key ) {
                 $this->delete(
-                    $chunk->id_project,
-                    self::buildChunkKey( $key, $chunk )
+                        $chunk->id_project,
+                        self::buildChunkKey( $key, $chunk )
                 );
             }
         }
     }
 
-  protected function _buildResult( $array_result ) {
-  }
+    protected function _buildResult( $array_result ) {
+    }
 }

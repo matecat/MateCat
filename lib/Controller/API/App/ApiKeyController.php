@@ -77,7 +77,7 @@ class ApiKeyController extends KleinController {
 
         // hide api_secret
         $apiKey->api_secret = '***********';
-        
+
         $this->response->status()->setCode( 200 );
         $this->response->json( $apiKey );
     }
@@ -109,7 +109,7 @@ class ApiKeyController extends KleinController {
                             'success'
                     ]
             ] );
-            
+
         } catch ( \Exception $e ) {
             $this->response->status()->setCode( 500 );
             $this->response->json( [

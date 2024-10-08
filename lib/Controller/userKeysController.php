@@ -31,7 +31,7 @@ class userKeysController extends ajaxController {
         parent::__construct();
 
         //Session Enabled
-        $this->readLoginInfo();
+        $this->identifyUser();
         //Session Disabled
 
         //define input filters

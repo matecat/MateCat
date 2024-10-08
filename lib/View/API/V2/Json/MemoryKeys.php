@@ -24,7 +24,7 @@ class MemoryKeys {
      * @param TmKeyManagement_MemoryKeyStruct[] $data
      */
     public function __construct( array $data = [] ) {
-        $this->data      = $data;
+        $this->data = $data;
     }
 
     public static function renderItem( TmKeyManagement_MemoryKeyStruct $keyStruct ) {

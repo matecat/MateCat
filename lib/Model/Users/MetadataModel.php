@@ -16,32 +16,31 @@ class MetadataModel {
     /**
      * @var array
      */
-    protected $metadata ;
+    protected $metadata;
 
     /**
      * @var \Users_UserStruct
      */
-    protected $user ;
+    protected $user;
 
-    public function __construct($user, $metadata)
-    {
-        $this->user = $user ;
-        $this->metadata = $metadata ;
+    public function __construct( $user, $metadata ) {
+        $this->user     = $user;
+        $this->metadata = $metadata;
     }
 
     public function save() {
         // validate
-        $features = new FeatureSet() ;
-        $features->loadFromUserEmail( $this->user->email ) ;
+        $features = new FeatureSet();
+        $features->loadFromUserEmail( $this->user->email );
 
-        $metadataFilters = $features->filter('filterUserMetadataFilters', array(), $this->metadata ) ;
-        $this->metadata = filter_var_array($this->metadata, $metadataFilters) ;
+        $metadataFilters = $features->filter( 'filterUserMetadataFilters', [], $this->metadata );
+        $this->metadata  = filter_var_array( $this->metadata, $metadataFilters );
 
-        $this->metadata = $features->filter('filterValidateUserMetadata', $this->metadata, array('user' => $this->user ) ) ;
+        $this->metadata = $features->filter( 'filterValidateUserMetadata', $this->metadata, [ 'user' => $this->user ] );
 
-        $dao = new MetadataDao() ;
-        foreach( $this->metadata as $key => $value ) {
-            $dao->set($this->user->uid, $key, $value);
+        $dao = new MetadataDao();
+        foreach ( $this->metadata as $key => $value ) {
+            $dao->set( $this->user->uid, $key, $value );
         }
 
     }

@@ -25,10 +25,10 @@ class SegmentComment {
     }
 
     public function render() {
-        $out = array();
+        $out = [];
         foreach ( $this->data as $record ) {
 
-            $row   = array(
+            $row   = [
                     'id'           => (int)$record->id,
                     'id_job'       => (int)$record->id_job,
                     'id_segment'   => $record->id_segment,
@@ -36,18 +36,18 @@ class SegmentComment {
                     'email'        => $record->email,
                     'full_name'    => $record->full_name,
                     'uid'          => (int)$record->uid,
-                    'resolved_at' =>  $this->formatDate( $record->resolve_date ),
+                    'resolved_at'  => $this->formatDate( $record->resolve_date ),
                     'source_page'  => $record->source_page,
                     'message_type' => $record->message_type,
-                    'message'      => \Comments_CommentDao::placeholdContent($record->message)
-            );
+                    'message'      => \Comments_CommentDao::placeholdContent( $record->message )
+            ];
             $out[] = $row;
         }
 
         return $out;
     }
 
-    public function cleanDownloadResource(){
+    public function cleanDownloadResource() {
 
         $path = $this->csvHandler->getRealPath();
         unset( $this->csvHandler );
@@ -55,9 +55,9 @@ class SegmentComment {
 
     }
 
-    public function genCSVTmpFile(){
-        $filePath = tempnam("/tmp", "SegmentsComments_");
-        $csvHandler = new \SplFileObject($filePath, "w");
+    public function genCSVTmpFile() {
+        $filePath   = tempnam( "/tmp", "SegmentsComments_" );
+        $csvHandler = new \SplFileObject( $filePath, "w" );
         $csvHandler->setCsvControl( ';' );
 
         $this->csvHandler = $csvHandler; // set the handler to allow to clean resource
@@ -96,10 +96,11 @@ class SegmentComment {
 
     private function formatDate( $date ) {
         if ( $date == null ) {
-            return null ;
+            return null;
         }
-        
+
         $datetime = new \DateTime( $date );
+
         return $datetime->format( 'c' );
     }
 }

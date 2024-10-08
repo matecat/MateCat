@@ -71,7 +71,7 @@ class commentController extends ajaxController {
             return;
         }
 
-        $this->readLoginInfo();
+        $this->identifyUser();
         if ( $this->userIsLogged ) {
             $this->loadUser();
         }

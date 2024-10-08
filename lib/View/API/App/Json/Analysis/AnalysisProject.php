@@ -55,32 +55,28 @@ class AnalysisProject implements JsonSerializable {
     /**
      * @return mixed
      */
-    public function getStatus()
-    {
+    public function getStatus() {
         return $this->status;
     }
 
     /**
      * @param mixed $status
      */
-    public function setStatus($status)
-    {
+    public function setStatus( $status ) {
         $this->status = $status;
     }
 
     /**
      * @return string
      */
-    public function getAnalyzeLink()
-    {
+    public function getAnalyzeLink() {
         return $this->analyzeLink;
     }
 
     /**
      * @param string $analyzeLink
      */
-    public function setAnalyzeLink($analyzeLink)
-    {
+    public function setAnalyzeLink( $analyzeLink ) {
         $this->analyzeLink = $analyzeLink;
     }
 
@@ -144,13 +140,13 @@ class AnalysisProject implements JsonSerializable {
      */
     public function jsonSerialize() {
         return [
-            'name'        => $this->name,
-            'status'      => $this->status,
-            'create_date' => $this->createDate,
-            'subject'     => $this->subject,
-            'jobs'        => array_values( $this->jobs ),
-            'summary'     => $this->summary,
-            'analyze_url' => $this->analyzeLink
+                'name'        => $this->name,
+                'status'      => $this->status,
+                'create_date' => $this->createDate,
+                'subject'     => $this->subject,
+                'jobs'        => array_values( $this->jobs ),
+                'summary'     => $this->summary,
+                'analyze_url' => $this->analyzeLink
         ];
     }
 }

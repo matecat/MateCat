@@ -158,8 +158,8 @@ class ProjectManagerModel {
         foreach ( $notes as $internal_id => $v ) {
 
             $attributes = $v[ 'from' ];
-            $entries  = $v[ 'entries' ];
-            $segments = $v[ 'segment_ids' ];
+            $entries    = $v[ 'entries' ];
+            $segments   = $v[ 'segment_ids' ];
 
             $json_entries     = $v[ 'json' ];
             $json_segment_ids = $v[ 'json_segment_ids' ];
@@ -172,16 +172,16 @@ class ProjectManagerModel {
                     // to prevent possible xss attacks
                     // from the UI
 
-                    if(isset($attributes['entries'][$index])) {
+                    if ( isset( $attributes[ 'entries' ][ $index ] ) ) {
                         $metaKey = Utils::stripTagsPreservingHrefs( html_entity_decode( $attributes[ 'entries' ][ $index ] ) );
 
                         // check for metaKey is `notes`
-                        if(!self::isAMetadata($metaKey)){
-                            $insert_values[] = [ $id_segment, $internal_id, Utils::stripTagsPreservingHrefs(html_entity_decode($note)), null ];
+                        if ( !self::isAMetadata( $metaKey ) ) {
+                            $insert_values[] = [ $id_segment, $internal_id, Utils::stripTagsPreservingHrefs( html_entity_decode( $note ) ), null ];
                         }
 
                     } else {
-                        $insert_values[] = [ $id_segment, $internal_id, Utils::stripTagsPreservingHrefs(html_entity_decode($note)), null ];
+                        $insert_values[] = [ $id_segment, $internal_id, Utils::stripTagsPreservingHrefs( html_entity_decode( $note ) ), null ];
                     }
                 }
             }
@@ -189,10 +189,10 @@ class ProjectManagerModel {
             foreach ( $json_segment_ids as $id_segment ) {
                 foreach ( $json_entries as $index => $json ) {
 
-                    if(isset($attributes['json'][$index])) {
-                        $metaKey = $attributes['json'][$index];
+                    if ( isset( $attributes[ 'json' ][ $index ] ) ) {
+                        $metaKey = $attributes[ 'json' ][ $index ];
 
-                        if(!self::isAMetadata($metaKey)){
+                        if ( !self::isAMetadata( $metaKey ) ) {
                             $insert_values[] = [ $id_segment, $internal_id, null, $json ];
                         }
 
@@ -236,7 +236,7 @@ class ProjectManagerModel {
      *
      * @throws Exception
      */
-    public static function bulkInsertSegmentMetaDataFromAttributes ( $notes ) {
+    public static function bulkInsertSegmentMetaDataFromAttributes( $notes ) {
 
         $template = " INSERT INTO segment_metadata ( id_segment, meta_key, meta_value ) VALUES ";
 
@@ -246,8 +246,8 @@ class ProjectManagerModel {
         foreach ( $notes as $internal_id => $v ) {
 
             $attributes = $v[ 'from' ];
-            $entries  = $v[ 'entries' ];
-            $segments = $v[ 'segment_ids' ];
+            $entries    = $v[ 'entries' ];
+            $segments   = $v[ 'segment_ids' ];
 
             $json_entries     = $v[ 'json' ];
             $json_segment_ids = $v[ 'json_segment_ids' ];
@@ -255,11 +255,11 @@ class ProjectManagerModel {
             foreach ( $segments as $id_segment ) {
                 foreach ( $entries as $index => $note ) {
 
-                    if(isset($attributes['entries'][$index])){
-                        $metaKey = Utils::stripTagsPreservingHrefs(html_entity_decode($attributes['entries'][$index]));
-                        $metaValue = Utils::stripTagsPreservingHrefs(html_entity_decode($note));
+                    if ( isset( $attributes[ 'entries' ][ $index ] ) ) {
+                        $metaKey   = Utils::stripTagsPreservingHrefs( html_entity_decode( $attributes[ 'entries' ][ $index ] ) );
+                        $metaValue = Utils::stripTagsPreservingHrefs( html_entity_decode( $note ) );
 
-                        if(self::isAMetadata($metaKey)){
+                        if ( self::isAMetadata( $metaKey ) ) {
                             $insert_values[] = [ $id_segment, $metaKey, $metaValue ];
                         }
                     }
@@ -269,11 +269,11 @@ class ProjectManagerModel {
             foreach ( $json_segment_ids as $id_segment ) {
                 foreach ( $json_entries as $index => $json ) {
 
-                    if(isset($attributes['json'][$index])){
-                        $metaKey = $attributes['json'][$index];
+                    if ( isset( $attributes[ 'json' ][ $index ] ) ) {
+                        $metaKey   = $attributes[ 'json' ][ $index ];
                         $metaValue = $json;
 
-                        if(self::isAMetadata($metaKey)){
+                        if ( self::isAMetadata( $metaKey ) ) {
                             $insert_values[] = [ $id_segment, $metaKey, $metaValue ];
                         }
                     }
@@ -309,19 +309,19 @@ class ProjectManagerModel {
 
     /**
      * @param $metaKey
+     *
      * @return bool
      */
-    private static function isAMetadata($metaKey)
-    {
+    private static function isAMetadata( $metaKey ) {
         $metaDataKeys = [
-            'id_request',
-            'id_content',
-            'id_order',
-            'id_order_group',
-            'screenshot'
+                'id_request',
+                'id_content',
+                'id_order',
+                'id_order_group',
+                'screenshot'
         ];
 
-        return in_array($metaKey, $metaDataKeys);
+        return in_array( $metaKey, $metaDataKeys );
     }
 
     /**

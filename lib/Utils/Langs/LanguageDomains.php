@@ -49,7 +49,7 @@ class Langs_LanguageDomains {
     /**
      * @return array
      */
-    public static function getEnabledHashMap(){
+    public static function getEnabledHashMap() {
         return self::$subjectHashMap;
     }
 

@@ -19,7 +19,7 @@ class Shop_Cart {
      *
      * @var Shop_Cart[]
      */
-    protected static $_instance = array();
+    protected static $_instance = [];
 
     /**
      * The cart content storage
@@ -59,7 +59,7 @@ class Shop_Cart {
     protected function __construct( $cartName ) {
         $this->cartName = $cartName;
         if ( !isset ( $_SESSION[ $this->cartName ] ) ) {
-            $_SESSION[ $this->cartName ] = array();
+            $_SESSION[ $this->cartName ] = [];
         }
         $this->cart =& $_SESSION[ $this->cartName ];
     }
@@ -73,26 +73,26 @@ class Shop_Cart {
      */
     public function addItem( Shop_AbstractItem $item ) {
 
-        if( !isset( $item['id'] ) || $item['id'] == null ){
+        if ( !isset( $item[ 'id' ] ) || $item[ 'id' ] == null ) {
             throw new LogicException( "Field 'id' in object " . get_class( $item ) . " is mandatory." );
         }
 
-        if( !isset( $item['quantity'] ) || $item['quantity'] == null ){
+        if ( !isset( $item[ 'quantity' ] ) || $item[ 'quantity' ] == null ) {
             throw new LogicException( "Field 'quantity' in object " . get_class( $item ) . " is mandatory." );
         }
 
-        if( !isset( $item['price'] ) || $item['price'] == null ){
+        if ( !isset( $item[ 'price' ] ) || $item[ 'price' ] == null ) {
             throw new LogicException( "Field 'price' in object " . get_class( $item ) . " is mandatory." );
         }
 
-        $item_id   = $item['id'];
+        $item_id = $item[ 'id' ];
 
-        $Add  = true;
+        $Add = true;
         foreach ( $this->cart as $key => $_item ) {
             if ( $_item[ 'id' ] == $item_id ) {
-                $this->cart[ $key ][ 'quantity' ] += (int)$item['quantity'];
-                $this->cart[ $key ][ 'price' ] += floatval( $item['price'] );
-                $Add = false;
+                $this->cart[ $key ][ 'quantity' ] += (int)$item[ 'quantity' ];
+                $this->cart[ $key ][ 'price' ]    += floatval( $item[ 'price' ] );
+                $Add                              = false;
             }
         }
 
@@ -109,7 +109,7 @@ class Shop_Cart {
      *
      * @return bool
      */
-    public function itemExists( $item_id ){
+    public function itemExists( $item_id ) {
         return array_key_exists( $item_id, $this->cart );
     }
 
@@ -129,15 +129,15 @@ class Shop_Cart {
      *
      * @return mixed
      */
-    public function getItem( $item_id ){
-        if( array_key_exists( $item_id, $this->cart ) ){
+    public function getItem( $item_id ) {
+        if ( array_key_exists( $item_id, $this->cart ) ) {
 
             $classType = $this->cart[ $item_id ][ '_id_type_class' ];
 
             //for compatibility with php 5.2 ( lacks of late static bindings -> new static() in the abstract class )
             //we can't use Shop_AbstractItem::getInflate to get the right child object
             //return $classType::getInflate( $this->cart[ $item_id ] ); //not valid in php 5.2.x
-            return call_user_func_array( $classType . '::getInflate', array( $this->cart[ $item_id ] ) );
+            return call_user_func_array( $classType . '::getInflate', [ $this->cart[ $item_id ] ] );
 
         }
     }
@@ -171,7 +171,7 @@ class Shop_Cart {
     public function deleteCart() {
         unset ( $this->cart );
         unset ( $_SESSION[ $this->cartName ] );
-        unset( self::$_instance[ $this->cartName ]);
+        unset( self::$_instance[ $this->cartName ] );
     }
 
     /**
@@ -181,9 +181,10 @@ class Shop_Cart {
      */
     public function getCart() {
         $_cart = $this->cart;
-        foreach( $_cart as $k => $v ){
-            unset( $_cart[$k]['_id_type_class'] );
+        foreach ( $_cart as $k => $v ) {
+            unset( $_cart[ $k ][ '_id_type_class' ] );
         }
+
         return $_cart;
     }
 

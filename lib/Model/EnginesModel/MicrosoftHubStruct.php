@@ -33,9 +33,9 @@ class EnginesModel_MicrosoftHubStruct extends EnginesModel_EngineStruct {
     /**
      * @var array
      */
-    public $others = array(
+    public $others = [
             'oauth_url' => 'https://api.cognitive.microsoft.com/sts/v1.0/issueToken'
-    );
+    ];
 
     /**
      * @var string
@@ -46,13 +46,13 @@ class EnginesModel_MicrosoftHubStruct extends EnginesModel_EngineStruct {
     /**
      * @var array
      */
-    public $extra_parameters = array(
+    public $extra_parameters = [
             'token'         => null,
             'token_endlife' => 0,
             'client_id'     => "",
             'client_secret' => "",
             'category'      => "",
-    );
+    ];
 
     /**
      * @var int

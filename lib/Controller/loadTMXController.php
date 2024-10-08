@@ -42,7 +42,7 @@ class loadTMXController extends ajaxController {
     public function __construct() {
 
         parent::__construct();
-        parent::readLoginInfo();
+        parent::identifyUser();
 
         $filterArgs = [
                 'name'   => [

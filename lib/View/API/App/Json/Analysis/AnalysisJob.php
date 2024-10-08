@@ -178,9 +178,8 @@ class AnalysisJob implements JsonSerializable {
     /**
      * @return string
      */
-    public function getLangPair()
-    {
-        return $this->source."|".$this->target;
+    public function getLangPair() {
+        return $this->source . "|" . $this->target;
     }
 
     /**

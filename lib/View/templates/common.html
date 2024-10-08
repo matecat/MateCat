@@ -9,9 +9,35 @@
         config.userShortName = "${logged_user}";
         config.isLoggedIn = ${isLoggedIn|string:false};
         config.gdriveAuthURL = ${structure php:json_encode(gdriveAuthURL)} ;
-        config.authURL = ${structure php:json_encode(authURL)} ;
+        config.googleAuthURL = ${structure php:json_encode(googleAuthURL)} ;
         config.googleDriveEnabled = ${googleDriveEnabled};
+        config.build_number = '${build_number}';
         /*]]>*/
+
+    <tal:block tal:condition="php: !empty(githubAuthUrl)">
+        /*<![CDATA[*/
+            config.githubAuthUrl = ${structure php:json_encode(githubAuthUrl)} ;
+        /*]]>*/
+    </tal:block>
+
+    <tal:block tal:condition="php: !empty(linkedInAuthUrl)">
+        /*<![CDATA[*/
+            config.linkedInAuthUrl = ${structure php:json_encode(linkedInAuthUrl)} ;
+        /*]]>*/
+    </tal:block>
+
+    <tal:block tal:condition="php: !empty(microsoftAuthUrl)">
+        /*<![CDATA[*/
+            config.microsoftAuthUrl = ${structure php:json_encode(microsoftAuthUrl)} ;
+        /*]]>*/
+    </tal:block>
+
+    <tal:block tal:condition="php: !empty(facebookAuthUrl)">
+        /*<![CDATA[*/
+            config.facebookAuthUrl = ${structure php:json_encode(facebookAuthUrl)} ;
+        /*]]>*/
+    </tal:block>
+
     <tal:block tal:repeat="config_data config_js">
         /*<![CDATA[*/
         config.pluggable = ${structure php: json_encode( config_data )} ;

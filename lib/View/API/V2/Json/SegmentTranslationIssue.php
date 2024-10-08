@@ -1,6 +1,6 @@
 <?php
 
-namespace API\V2\Json  ;
+namespace API\V2\Json;
 
 use Features\ReviewExtended\ReviewUtils;
 use LQA\EntryCommentDao;
@@ -14,14 +14,14 @@ class SegmentTranslationIssue {
      */
     private $csvHandler;
 
-    public function __construct( ) {
+    public function __construct() {
     }
 
     public function renderItem( $record ) {
 
-        $dao = new EntryCommentDao();
+        $dao      = new EntryCommentDao();
         $comments = $dao->findByIssueId( $record->id );
-        $record = new EntryStruct( $record->getArrayCopy() );
+        $record   = new EntryStruct( $record->getArrayCopy() );
 
         return [
                 'comment'             => $record->comment,
@@ -93,9 +93,9 @@ class SegmentTranslationIssue {
     }
 
     public function render( $array ) {
-        $out = array();
+        $out = [];
 
-        foreach($array as $record) {
+        foreach ( $array as $record ) {
             $out[] = $this->renderItem( $record );
         }
 
@@ -103,14 +103,14 @@ class SegmentTranslationIssue {
     }
 
     private function getDateValue( $strDate ) {
-        if( $strDate != null ) {
+        if ( $strDate != null ) {
             return date( 'c', strtotime( $strDate ) );
         }
 
         return null;
     }
 
-    public function cleanDownloadResource(){
+    public function cleanDownloadResource() {
 
         $path = $this->csvHandler->getRealPath();
         unset( $this->csvHandler );

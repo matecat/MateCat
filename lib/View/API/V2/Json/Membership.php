@@ -20,10 +20,10 @@ class Membership {
     }
 
     public function renderItem( MembershipStruct $membership ) {
-        $out = array(
+        $out = [
                 'id'      => (int)$membership->id,
                 'id_team' => (int)$membership->id_team,
-        );
+        ];
 
         if ( !is_null( $membership->getUser() ) ) {
             $out[ 'user' ] = User::renderItem( $membership->getUser() );
@@ -52,7 +52,7 @@ class Membership {
         $out = [];
         foreach ( $this->data as $membership ) {
             $render = $this->renderItemPublic( $membership );
-            if($render){
+            if ( $render ) {
                 $out[] = $render;
             }
 
@@ -65,8 +65,7 @@ class Membership {
 
         if ( !is_null( $membership->getUser() ) ) {
             return User::renderItemPublic( $membership->getUser() );
-        }
-        else{
+        } else {
             return false;
         }
 

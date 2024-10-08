@@ -29,10 +29,10 @@ class Ping {
         }
 
         return [
-                'status'  => 'OK',
-                'message' => 'Pong...',
+                'status'      => 'OK',
+                'message'     => 'Pong...',
                 "client_ip"   => Utils::getRealIpAddr(),
-                "user"        => ( $this->controller->userIsLogged() ? [
+                "user"        => ( $this->controller->isLoggedIn() ? [
                         "uid"        => $this->controller->getUser()->getUid(),
                         "email"      => $this->controller->getUser()->getEmail(),
                         "first_name" => $this->controller->getUser()->getFirstName(),

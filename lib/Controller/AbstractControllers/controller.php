@@ -8,6 +8,7 @@
 
 use AbstractControllers\IController;
 use AbstractControllers\TimeLogger;
+use API\Commons\Authentication\AuthenticationTrait;
 
 /**
  * Abstract Class controller
@@ -15,51 +16,31 @@ use AbstractControllers\TimeLogger;
 abstract class controller implements IController {
 
     use TimeLogger;
+    use AuthenticationTrait;
 
-    protected $model;
-    protected $userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
-
-    /**
-     * @var Users_UserStruct
-     */
-    protected $user;
-
-    protected $uid;
-    protected $userIsLogged = false;
+    protected        $model;
+    protected string $userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
 
     /**
-     * @var FeatureSet
+     * @var FeatureSet|null
      */
-    protected $featureSet;
+    protected ?FeatureSet $featureSet = null;
 
     /**
      * @return FeatureSet
      * @throws Exception
      */
-    public function getFeatureSet() {
-        return ( $this->featureSet !== null ) ? $this->featureSet : new \FeatureSet();
+    public function getFeatureSet(): FeatureSet {
+        return ( $this->featureSet !== null ) ? $this->featureSet : new FeatureSet();
     }
 
     /**
-     * @param FeatureSet $featuresSet
+     * @param FeatureSet $featureSet
      *
-     * @return $this
+     * @return void
      */
-    public function setFeatureSet( FeatureSet $featuresSet ) {
-        $this->featureSet = $featuresSet;
-
-        return $this;
-    }
-
-    /**
-     * @return Users_UserStruct
-     */
-    public function getUser() {
-        return $this->user;
-    }
-
-    public function userIsLogged() {
-        return $this->userIsLogged;
+    public function setFeatureSet( FeatureSet $featureSet ) {
+        $this->featureSet = $featureSet;
     }
 
     /**
@@ -74,7 +55,7 @@ abstract class controller implements IController {
 
         if ( isset( $_REQUEST[ 'api' ] ) && filter_input( INPUT_GET, 'api', FILTER_VALIDATE_BOOLEAN ) ) {
 
-            if ( !isset( $_REQUEST[ 'action' ] ) || empty( $_REQUEST[ 'action' ] ) ) {
+            if ( empty( $_REQUEST[ 'action' ] ) ) {
                 header( "Location: " . INIT::$HTTPHOST . INIT::$BASEURL . "api/docs", true, 303 ); //Redirect 303 See Other
                 die();
             }
@@ -92,7 +73,7 @@ abstract class controller implements IController {
         }
 
         //Default :  catController
-        $action     = ( isset( $_POST[ 'action' ] ) ) ? $_POST[ 'action' ] : ( isset( $_GET[ 'action' ] ) ? $_GET[ 'action' ] : 'cat' );
+        $action     = ( isset( $_POST[ 'action' ] ) ) ? $_POST[ 'action' ] : ( $_GET[ 'action' ] ?? 'cat' );
         $actionList = explode( '\\', $action ); // do not accept namespaces ( Security issue: directory traversal )
         $action     = end( $actionList ); // do not accept namespaces ( Security issue: directory traversal )
         $className  = $action . "Controller";
@@ -129,84 +110,11 @@ abstract class controller implements IController {
         header( "Pragma: no-cache" );
     }
 
-    public function sessionStart() {
-        Bootstrap::sessionStart();
-    }
-
-    /**
-     * Explicitly disable sessions for ajax call
-     *
-     * Sessions enabled on INIT Class
-     *
-     */
-    public function disableSessions() {
-        Bootstrap::sessionClose();
-    }
-
     /**
      * @return mixed
      */
     public function getModel() {
         return $this->model;
-    }
-
-    public function setUserCredentials() {
-
-        $this->user        = new Users_UserStruct();
-        $this->user->uid   = ( isset( $_SESSION[ 'uid' ] ) && !empty( $_SESSION[ 'uid' ] ) ? $_SESSION[ 'uid' ] : null );
-        $this->user->email = ( isset( $_SESSION[ 'cid' ] ) && !empty( $_SESSION[ 'cid' ] ) ? $_SESSION[ 'cid' ] : null );
-
-        try {
-
-            $userDao            = new Users_UserDao( Database::obtain() );
-            $loggedUser         = $userDao->setCacheTTL( 3600 )->read( $this->user )[ 0 ]; // one hour cache
-            $this->userIsLogged = (
-                    !empty( $loggedUser->uid ) &&
-                    !empty( $loggedUser->email ) &&
-                    !empty( $loggedUser->first_name ) &&
-                    !empty( $loggedUser->last_name )
-            );
-
-        } catch ( Exception $e ) {
-            Log::doJsonLog( 'User not logged.' );
-        }
-        $this->user = ( $this->userIsLogged ? $loggedUser : $this->user );
-
-    }
-
-    /**
-     *  Try to get user name from cookie if it is not present and put it in session.
-     *
-     */
-    protected function _setUserFromAuthCookie() {
-        if ( empty( $_SESSION[ 'cid' ] ) ) {
-            $username_from_cookie = AuthCookie::getCredentials();
-            if ( $username_from_cookie ) {
-                $_SESSION[ 'cid' ] = $username_from_cookie[ 'username' ];
-                $_SESSION[ 'uid' ] = $username_from_cookie[ 'uid' ];
-            }
-        }
-    }
-
-    public function readLoginInfo( $close = true ) {
-        //Warning, sessions enabled, disable them after check, $_SESSION is in read only mode after disable
-        self::sessionStart();
-        $this->_setUserFromAuthCookie();
-        $this->setUserCredentials();
-
-        if ( $close ) {
-            self::disableSessions();
-        }
-
-    }
-
-    /**
-     * isLoggedIn
-     *
-     * @return bool
-     */
-    public function isLoggedIn() {
-        return $this->userIsLogged;
     }
 
 }

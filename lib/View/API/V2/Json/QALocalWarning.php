@@ -45,7 +45,7 @@ class QALocalWarning extends QAWarning {
                 'WARNING' => [
                         'Categories' => new \ArrayObject()
                 ],
-                'INFO'     => [
+                'INFO'    => [
                         'Categories' => new \ArrayObject()
                 ]
         ];
@@ -78,8 +78,8 @@ class QALocalWarning extends QAWarning {
             }
 
             $malformedStructs = $this->QA->getMalformedXmlStructs();
-            $Filter = MateCatFilter::getInstance( $this->QA->getFeatureSet(), $this->QA->getSourceSegLang(), $this->QA->getTargetSegLang(), \Segments_SegmentOriginalDataDao::getSegmentDataRefMap
-            ($this->id_segment) );
+            $Filter           = MateCatFilter::getInstance( $this->QA->getFeatureSet(), $this->QA->getSourceSegLang(), $this->QA->getTargetSegLang(), \Segments_SegmentOriginalDataDao::getSegmentDataRefMap
+            ( $this->id_segment ) );
 
             foreach ( $malformedStructs[ 'source' ] as $k => $rawSource ) {
                 $malformedStructs[ 'source' ][ $k ] = $Filter->fromLayer1ToLayer2( $rawSource );

@@ -1,5 +1,7 @@
 <?php
 
+use API\Commons\Authentication\AuthCookie;
+use API\Commons\Authentication\AuthenticationHelper;
 use ConnectedServices\OauthTokenEncryption;
 use Email\WelcomeEmail;
 use Teams\TeamDao;
@@ -16,6 +18,7 @@ class OAuthSignInModel {
 
     protected $user;
     protected $profilePictureUrl;
+    protected $provider;
 
     public function __construct( $firstName, $lastName, $email ) {
         if ( empty( $firstName ) ) {
@@ -44,7 +47,10 @@ class OAuthSignInModel {
         return $this->user;
     }
 
-    public function signIn() {
+    /**
+     * @throws ReflectionException
+     */
+    public function signIn(): bool {
         $userDao      = new Users_UserDao();
         $existingUser = $userDao->getByEmail( $this->user->email );
 
@@ -61,11 +67,15 @@ class OAuthSignInModel {
             $this->_welcomeNewUser();
         }
 
-        $this->_authenticateUser();
-
         if ( !is_null( $this->profilePictureUrl ) ) {
             $this->_updateProfilePicture();
         }
+
+        if ( !is_null( $this->provider ) ) {
+            $this->_updateProvider();
+        }
+
+        $this->_authenticateUser();
 
         $project = new RedeemableProject( $this->user, $_SESSION );
         $project->tryToRedeem();
@@ -75,11 +85,20 @@ class OAuthSignInModel {
 
     protected function _updateProfilePicture() {
         $dao = new MetadataDao();
-        $dao->set( $this->user->uid, 'gplus_picture', $this->profilePictureUrl );
+        $dao->set( $this->user->uid, $this->provider . '_picture', $this->profilePictureUrl );
     }
 
     public function setProfilePicture( $pictureUrl ) {
         $this->profilePictureUrl = $pictureUrl;
+    }
+
+    protected function _updateProvider() {
+        $dao = new MetadataDao();
+        $dao->set( $this->user->uid, 'oauth_provider', $this->provider );
+    }
+
+    public function setProvider( $provider ) {
+        $this->provider = $provider;
     }
 
     protected function _createNewUser() {
@@ -100,10 +119,12 @@ class OAuthSignInModel {
         ] );
     }
 
+    /**
+     * @throws ReflectionException
+     */
     protected function _authenticateUser() {
-        AuthCookie::setCredentials( $this->user->email, $this->user->uid );
-        $_SESSION[ 'cid' ] = $this->user->email;
-        $_SESSION[ 'uid' ] = $this->user->uid;
+        AuthCookie::setCredentials( $this->user );
+        AuthenticationHelper::getInstance( $_SESSION );
     }
 
     protected function _welcomeNewUser() {

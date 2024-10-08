@@ -10,13 +10,17 @@
 namespace API\V2;
 
 
+use API\Commons\Authentication\AuthenticationHelper;
 use API\Commons\Error;
 use API\Commons\Exceptions\AuthorizationError;
 use API\Commons\KleinController;
 use API\Commons\Validators\LoginValidator;
 use API\Commons\Validators\TeamAccessValidator;
 use API\V2\Json\Team;
+use Bootstrap;
+use Exception;
 use InvalidArgumentException;
+use ReflectionException;
 use Teams\MembershipDao;
 use Teams\TeamDao;
 use Teams\TeamStruct;
@@ -31,6 +35,10 @@ class TeamsController extends KleinController {
         $this->appendValidator( new TeamAccessValidator( $this ) );
     }
 
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
     public function create() {
 
         $params = $this->request->paramsPost()->getIterator()->getArrayCopy();
@@ -64,9 +72,15 @@ class TeamsController extends KleinController {
         $team      = $model->create();
         $formatted = new Team();
 
+        $this->refreshClientSessionIfNotApi();
+
         $this->response->json( [ 'team' => $formatted->renderItem( $team ) ] );
     }
 
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
     public function update() {
 
         $this->addValidatorAccess();
@@ -112,6 +126,9 @@ class TeamsController extends KleinController {
             }
 
             $formatted = new Team( [ $org ] );
+
+            $this->refreshClientSessionIfNotApi();
+
             $this->response->json( [ 'team' => $formatted->render() ] );
         } catch ( \PDOException $e ) {
             $this->response->code( 503 );

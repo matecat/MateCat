@@ -195,7 +195,7 @@ class Search extends React.Component {
     this.dropdownInit = false
     UI.body.removeClass('searchActive')
     this.handleClearClick()
-    if (UI.segmentIsLoaded(UI.currentSegmentId)) {
+    if (SegmentStore.getSegmentByIdToJS(UI.currentSegmentId)) {
       setTimeout(() => SegmentActions.scrollToSegment(UI.currentSegmentId))
     } else {
       CatToolActions.onRender({

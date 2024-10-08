@@ -54,6 +54,7 @@ class Health {
         try {
             $redisHandler = new RedisHandler();
             $redisHandler = $redisHandler->getConnection();
+
             return ( INIT::$VOLUME_ANALYSIS_ENABLED && !self::fastAnalysisIsRunning( $redisHandler ) && !self::tmAnalysisIsRunning( $redisHandler ) );
         } catch ( \Exception $ex ) {
             $msg = "****** No REDIS instances found. ******";

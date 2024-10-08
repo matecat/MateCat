@@ -1,98 +1,100 @@
 <?php
 
-use ConnectedServices\GoogleClientFactory;
-use Exceptions\AuthorizationError;
+use API\Commons\BaseKleinViewController;
+use ConnectedServices\ConnectedServiceUserModel;
+use ConnectedServices\OauthClient;
 
-class oauthResponseHandlerController extends viewController {
-
-    private $code;
-    private $error;
+class oauthResponseHandlerController extends BaseKleinViewController {
 
     /**
-     * @var Google_Service_Oauth2_Userinfo
+     * @var ConnectedServiceUserModel
      */
-    private $remoteUser;
-    /**
-     * @var mixed
-     */
-    private string $state;
-
-    public function __construct() {
-        parent::sessionStart();
-        parent::__construct();
-        parent::makeTemplate( "oauth_response_handler.html" );
-
-        $filterArgs = [
-                'code'  => [ 'filter' => FILTER_SANITIZE_STRING ],
-                'state' => [ 'filter' => FILTER_SANITIZE_STRING ],
-                'error' => [ 'filter' => FILTER_SANITIZE_STRING ]
-        ];
-
-        $__postInput = filter_input_array( INPUT_GET, $filterArgs );
-
-        $this->code  = $__postInput[ 'code' ];
-        $this->state = $__postInput[ 'state' ];
-        $this->error = $__postInput[ 'error' ];
-    }
+    private ConnectedServiceUserModel $remoteUser;
 
     /**
-     * @throws AuthorizationError
-     * @throws Exception
+     * @throws ReflectionException
      */
-    public function doAction() {
+    public function response() {
 
-        if ( empty( $this->state ) || $_SESSION[ 'google-' . INIT::$XSRF_TOKEN ] !== $this->state ) {
-            throw new AuthorizationError( "Forbidden" );
+        $params = filter_var_array( $this->request->params(), [
+                'provider' => [ 'filter' => FILTER_SANITIZE_STRING ],
+                'state'    => [ 'filter' => FILTER_SANITIZE_STRING ],
+                'code'     => [ 'filter' => FILTER_SANITIZE_STRING ],
+                'error'    => [ 'filter' => FILTER_SANITIZE_STRING ]
+        ] );
+
+        if ( empty( $params[ 'state' ] ) || $_SESSION[ $params[ 'provider' ] . '-' . INIT::$XSRF_TOKEN ] !== $params[ 'state' ] ) {
+            $this->close( 401 );
         }
 
-        if ( isset( $this->code ) && $this->code ) {
-            $this->_processSuccessfulOAuth();
-        } elseif ( $this->error ) {
-            throw new AuthorizationError( "Forbidden" );
+        if ( !empty( $params[ 'code' ] ) ) {
+            $this->_processSuccessfulOAuth( $params[ 'code' ], $params[ 'provider' ] );
         }
+
+        $this->close( 200 );
+
     }
 
     public function setTemplateVars() {
         if ( isset( $_SESSION[ 'wanted_url' ] ) ) {
-            $this->template->wanted_url = $_SESSION[ 'wanted_url' ];
+            $this->view->wanted_url = $_SESSION[ 'wanted_url' ]; //https://dev.matecat.com/translate/205-txt/en-GB-it-IT/25-8a4ee829fb52
         }
     }
 
-    /**
-     * @throws Exception
-     */
-    protected function _processSuccessfulOAuth() {
+    protected function afterConstruct() {
+        $this->setTemplateVars();
+        $this->setView( INIT::$TEMPLATE_ROOT . '/oauth_response_handler.html' );
+    }
 
-        $this->client = GoogleClientFactory::getGoogleClient( INIT::$OAUTH_REDIRECT_URL );
-        $this->_initRemoteUser();
+    /**
+     * Successful OAuth2 authentication handling
+     *
+     * @param      $code
+     * @param null $provider
+     *
+     * @throws ReflectionException
+     */
+    protected function _processSuccessfulOAuth( $code, $provider = null ) {
+
+        // OAuth2 authentication
+        $this->_initRemoteUser( $code, $provider );
 
         $model = new OAuthSignInModel(
-                $this->remoteUser->givenName,
-                $this->remoteUser->familyName, $this->remoteUser->email
+                $this->remoteUser->name,
+                $this->remoteUser->lastName,
+                $this->remoteUser->email
         );
 
+        $model->setProvider( $this->remoteUser->provider );
         $model->setProfilePicture( $this->remoteUser->picture );
-        $model->setAccessToken( $this->client->getAccessToken() );
+        $model->setAccessToken( $this->remoteUser->authToken );
 
         $model->signIn();
-
     }
 
     /**
-     * @throws Exception
+     * This method fetches the remote user
+     * from the OAuth2 provider
+     *
+     * @param      $code
+     * @param null $provider
      */
-    protected function _initRemoteUser() {
+    protected function _initRemoteUser( $code, $provider = null ) {
 
-        $this->client->setAccessType( "offline" );
-
-        $plus = new Google_Service_Oauth2( $this->client );
-        $this->client->fetchAccessTokenWithAuthCode( $this->code );
-        /** @var Google_Service_Oauth2_Userinfo $remoteUser */
-        $this->remoteUser = $plus->userinfo->get();
+        try {
+            $client           = OauthClient::getInstance( $provider )->getProvider();
+            $token            = $client->getAccessTokenFromAuthCode( $code );
+            $this->remoteUser = $client->getResourceOwner( $token );
+        } catch ( Exception $exception ) {
+            $this->close( $exception->getCode() >= 400 && $exception->getCode() < 500 ? $exception->getCode() : 400 );
+        }
     }
 
-    protected function collectFlashMessages() {
-        // prevent this controller to collect flash messages, leave
-        // them to the next rendering.
+    protected function close( int $code ) {
+        $this->response->code( $code );
+        $this->response->body( $this->view->execute() );
+        $this->response->send();
+        die();
     }
+
 }

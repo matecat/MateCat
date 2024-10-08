@@ -4,7 +4,7 @@
  * User: domenico
  * Date: 17/02/14
  * Time: 15.20
- * 
+ *
  */
 
 class ServerCheck {

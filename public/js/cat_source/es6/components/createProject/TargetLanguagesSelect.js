@@ -6,7 +6,6 @@ import {useRef} from 'react'
 export const TargetLanguagesSelect = () => {
   const {targetLangs, setIsOpenMultiselectLanguages, languages} =
     useContext(CreateProjectContext)
-
   const selectedItemRef = useRef()
 
   const getActiveLabel = () => targetLangs.map(({name}) => name).join(',')

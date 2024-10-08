@@ -7,6 +7,8 @@ import {SettingsPanelContext} from '../SettingsPanelContext'
 import {mswServer} from '../../../../../../mocks/mswServer'
 import {HttpResponse, http} from 'msw'
 import projectTemplatesMock from '../../../../../../mocks/projectTemplateMock'
+import userMock from '../../../../../../mocks/userMock'
+import {ApplicationWrapperContext} from '../../common/ApplicationWrapper'
 import tmKeysMock from '../../../../../../mocks/tmKeysMock'
 
 global.config = {
@@ -61,13 +63,17 @@ test('Render properly', async () => {
     result.current
 
   const {rerender} = render(
-    <WrapperComponent
-      {...{
-        projectTemplates,
-        setProjectTemplates,
-        currentProjectTemplate,
-      }}
-    />,
+    <ApplicationWrapperContext.Provider
+      value={{isUserLogged: true, userInfo: userMock}}
+    >
+      <WrapperComponent
+        {...{
+          projectTemplates,
+          setProjectTemplates,
+          currentProjectTemplate,
+        }}
+      />
+    </ApplicationWrapperContext.Provider>,
   )
 
   const selectLabel = screen.getByText('Standard')
@@ -166,13 +172,17 @@ test('Create, update and delete template', async () => {
     result.current
 
   const {rerender} = render(
-    <WrapperComponent
-      {...{
-        projectTemplates,
-        setProjectTemplates,
-        currentProjectTemplate,
-      }}
-    />,
+    <ApplicationWrapperContext.Provider
+      value={{isUserLogged: true, userInfo: userMock}}
+    >
+      <WrapperComponent
+        {...{
+          projectTemplates,
+          setProjectTemplates,
+          currentProjectTemplate,
+        }}
+      />
+    </ApplicationWrapperContext.Provider>,
   )
 
   expect(screen.getByText('Standard')).toBeInTheDocument()
@@ -311,13 +321,17 @@ test('Set template as default', async () => {
   } = result.current
 
   const {rerender} = render(
-    <WrapperComponent
-      {...{
-        projectTemplates,
-        setProjectTemplates,
-        currentProjectTemplate,
-      }}
-    />,
+    <ApplicationWrapperContext.Provider
+      value={{isUserLogged: true, userInfo: userMock}}
+    >
+      <WrapperComponent
+        {...{
+          projectTemplates,
+          setProjectTemplates,
+          currentProjectTemplate,
+        }}
+      />
+    </ApplicationWrapperContext.Provider>,
   )
 
   const selectLabel = screen.getByText('Standard')

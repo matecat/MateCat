@@ -96,13 +96,14 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
      *
      * @return array
      */
-    public function getTMProps(){
+    public function getTMProps() {
         $projectData = $this->getProject();
-        $result = [
+        $result      = [
                 'project_id'   => $projectData->id,
                 'project_name' => $projectData->name,
                 'job_id'       => $this->id,
         ];
+
         return $result;
     }
 
@@ -111,10 +112,11 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
      */
     public function getTranslator() {
 
-        $this->_translator = $this->cachable(__METHOD__, $this, function( Jobs_JobStruct $jobStruct ) {
+        $this->_translator = $this->cachable( __METHOD__, $this, function ( Jobs_JobStruct $jobStruct ) {
             $jTranslatorsDao = new JobsTranslatorsDao();
+
             return $jTranslatorsDao->setCacheTTL( 60 * 60 )->findByJobsStruct( $jobStruct )[ 0 ] ?? null;
-        });
+        } );
 
         return $this->_translator;
 
@@ -126,12 +128,15 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
      */
     public function getOutsource() {
 
-        $this->_outsource = $this->cachable(__METHOD__, $this, function( Jobs_JobStruct $jobStruct ) {
+        $this->_outsource = $this->cachable( __METHOD__, $this, function ( Jobs_JobStruct $jobStruct ) {
             $outsourceDao = new ConfirmationDao();
-            return $outsourceDao->setCacheTTL( 60 * 60 )->getConfirmation( $jobStruct );
-        });
 
-        if ( empty( $this->_outsource->id_vendor ) ) return null;
+            return $outsourceDao->setCacheTTL( 60 * 60 )->getConfirmation( $jobStruct );
+        } );
+
+        if ( empty( $this->_outsource->id_vendor ) ) {
+            return null;
+        }
 
         switch ( $this->_outsource->id_vendor ) {
             case TranslatedConfirmationStruct::VENDOR_ID:
@@ -142,11 +147,11 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
                 break;
         }
 
-        foreach( $this->_outsource as $k => &$value ){
-            if( is_numeric( $value ) ){
-                if( $value == (string)(int)$value ){
+        foreach ( $this->_outsource as $k => &$value ) {
+            if ( is_numeric( $value ) ) {
+                if ( $value == (string)(int)$value ) {
                     $value = (int)$value;
-                } elseif( $value == (string)(float)$value ){
+                } elseif ( $value == (string)(float)$value ) {
                     $value = (float)$value;
                 }
             }
@@ -156,7 +161,7 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
 
     }
 
-    public function getOpenThreadsCount(){
+    public function getOpenThreadsCount() {
 
         $this->_openThreads = $this->cachable( __METHOD__, $this, function ( Jobs_JobStruct $jobStruct ) {
 
@@ -167,6 +172,7 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
                     return (int)$openThread->count;
                 }
             }
+
             return 0;
 
         } );
@@ -178,28 +184,32 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
     /**
      * @return null|Projects_MetadataStruct[]
      */
-    public function getProjectMetadata(){
+    public function getProjectMetadata() {
 
         return $this->cachable( __function__, $this, function ( $job ) {
             $mDao = new Projects_MetadataDao();
+
             return $mDao->setCacheTTL( 60 * 60 * 24 * 30 )->allByProjectId( $job->id_project );
         } );
 
     }
 
-    public function getWarningsCount(){
+    public function getWarningsCount() {
 
         return $this->cachable( __function__, $this, function ( $jobStruct ) {
-            $dao = new WarningDao() ;
-            $warningsCount = @$dao->setCacheTTL( 60 * 10 )->getWarningsByProjectIds( [ $jobStruct->id_project ] ) ;
-            $ret = [];
+            $dao                     = new WarningDao();
+            $warningsCount           = @$dao->setCacheTTL( 60 * 10 )->getWarningsByProjectIds( [ $jobStruct->id_project ] );
+            $ret                     = [];
             $ret[ 'warnings_count' ] = 0;
-            foreach( $warningsCount as $count ) {
+            foreach ( $warningsCount as $count ) {
                 if ( $count->id_job == $jobStruct->id && $count->password == $jobStruct->password ) {
-                    $ret[ 'warnings_count' ] = (int) $count->count;
-                    $ret[ 'warning_segments' ] = array_map( function( $id_segment ){ return (int)$id_segment; }, explode( ",", $count->segment_list ) );
+                    $ret[ 'warnings_count' ]   = (int)$count->count;
+                    $ret[ 'warning_segments' ] = array_map( function ( $id_segment ) {
+                        return (int)$id_segment;
+                    }, explode( ",", $count->segment_list ) );
                 }
             }
+
             return (object)$ret;
         } );
 
@@ -223,7 +233,7 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
      * @return \Projects_ProjectStruct
      */
     public function getProject( $ttl = 86400 ) {
-        return $this->cachable( __function__, $this, function ( $job ) use ( $ttl ){
+        return $this->cachable( __function__, $this, function ( $job ) use ( $ttl ) {
             return Projects_ProjectDao::findById( $job->id_project, $ttl );
         } );
     }
@@ -232,9 +242,9 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
      * @return Chunks_ChunkStruct[]
      */
     public function getChunks() {
-        return $this->cachable(__METHOD__, $this, function($obj) {
-            return Chunks_ChunkDao::getByJobID( $obj->id ) ;
-        }) ;
+        return $this->cachable( __METHOD__, $this, function ( $obj ) {
+            return Chunks_ChunkDao::getByJobID( $obj->id );
+        } );
     }
 
     /**
@@ -242,7 +252,7 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
      */
     public function isSplitted() {
 
-        return count($this->getChunks()) > 1;
+        return count( $this->getChunks() ) > 1;
     }
 
     /**
@@ -251,16 +261,18 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
      *
      * @return array
      */
-    public function getClientKeys( Users_UserStruct $user, $role ){
+    public function getClientKeys( Users_UserStruct $user, $role ) {
         $uKModel = new UserKeysModel( $user, $role );
+
         return $uKModel->getKeys( $this->tm_keys, 60 * 10 );
     }
 
-    public function getPeeForTranslatedSegments(){
-        $pee = round( ( new Jobs_JobDao() )->setCacheTTL( 60 * 15 )->getPeeStats( $this->id, $this->password )->avg_pee , 2 );
-        if( $pee >= 100 ){
+    public function getPeeForTranslatedSegments() {
+        $pee = round( ( new Jobs_JobDao() )->setCacheTTL( 60 * 15 )->getPeeStats( $this->id, $this->password )->avg_pee, 2 );
+        if ( $pee >= 100 ) {
             $pee = null;
         }
+
         return $pee;
     }
 
@@ -276,14 +288,14 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
      * @return bool
      */
     public function isCanceled() {
-        return $this->status == Constants_JobStatus::STATUS_CANCELLED ;
+        return $this->status == Constants_JobStatus::STATUS_CANCELLED;
     }
 
     /**
      * @return bool
      */
     public function isArchived() {
-        return $this->status == Constants_JobStatus::STATUS_ARCHIVED ;
+        return $this->status == Constants_JobStatus::STATUS_ARCHIVED;
     }
 
     /**
@@ -291,37 +303,38 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
      *
      * @return $this
      */
-    public function setIsReview($is_review){
+    public function setIsReview( $is_review ) {
         $this->is_review = $is_review;
+
         return $this;
     }
 
     /**
      * @param $_revisionNumber
      */
-    public function setSourcePage( $_revisionNumber ){
+    public function setSourcePage( $_revisionNumber ) {
         $this->_sourcePage = $_revisionNumber;
     }
 
     /**
      * @return mixed
      */
-    public function getSourcePage(){
+    public function getSourcePage() {
         return $this->_sourcePage;
     }
 
     /**
      * @return mixed
      */
-    public function getIsReview(){
+    public function getIsReview() {
         return $this->is_review;
     }
 
     /**
      * @return bool
      */
-    public function isSecondPassReview(){
-        return $this->is_review  && $this->_sourcePage == 3;
+    public function isSecondPassReview() {
+        return $this->is_review && $this->_sourcePage == 3;
     }
 
     /**

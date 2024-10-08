@@ -43,7 +43,7 @@ class ProjectCreationWorker extends AbstractWorker {
 
         try {
             $this->_createProject( $queueElement );
-        } catch( PDOException $e ){
+        } catch ( PDOException $e ) {
             throw new EndQueueException( $e );
         } finally {
             $this->_publishResults();
@@ -75,9 +75,9 @@ class ProjectCreationWorker extends AbstractWorker {
      *
      * @throws \Exception
      */
-    protected function _createProject( QueueElement $queueElement ){
+    protected function _createProject( QueueElement $queueElement ) {
 
-        if( empty( $queueElement->params ) ){
+        if ( empty( $queueElement->params ) ) {
             $msg = "\n\n Error Project Creation  \n\n " . var_export( $queueElement, true );
             \Utils::sendErrMailReport( $msg );
             $this->_doLog( "--- (Worker " . $this->_workerPid . ") :  empty params found." );
@@ -85,12 +85,12 @@ class ProjectCreationWorker extends AbstractWorker {
         }
 
         $this->projectStructure = new RecursiveArrayObject( json_decode( $queueElement->params, true ) );
-        $projectManager = new ProjectManager( $this->projectStructure );
+        $projectManager         = new ProjectManager( $this->projectStructure );
         $projectManager->createProject();
 
     }
 
-    protected function _publishResults(){
+    protected function _publishResults() {
         Queue::publishResults( $this->projectStructure );
         $this->_doLog( "Project creation completed: " . $this->projectStructure[ 'id_project' ] );
         $this->projectStructure = new RecursiveArrayObject();

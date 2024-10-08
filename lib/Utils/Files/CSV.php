@@ -5,17 +5,16 @@ namespace Files;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use stdClass;
 
-class CSV
-{
+class CSV {
     /**
      * @param stdClass $file
-     * @param string $prefix
+     * @param string   $prefix
+     *
      * @return false|string
      * @throws \PhpOffice\PhpSpreadsheet\Reader\Exception
      */
-    public static function extract($file, $prefix = '')
-    {
-        if(!isset($file->file_path)){
+    public static function extract( $file, $prefix = '' ) {
+        if ( !isset( $file->file_path ) ) {
             return false;
         }
 
@@ -27,8 +26,8 @@ class CSV
         $objWriter   = new \PhpOffice\PhpSpreadsheet\Writer\Csv( $objPHPExcel );
         $objWriter->save( $tmpFileName );
 
-        $oldPath             = $file->file_path;
-        $file->file_path     = $tmpFileName;
+        $oldPath         = $file->file_path;
+        $file->file_path = $tmpFileName;
 
         unlink( $oldPath );
 
@@ -40,11 +39,10 @@ class CSV
      *
      * @return mixed
      */
-    public static function headers($filepath)
-    {
-        $csv = array_map("str_getcsv", file($filepath,FILE_SKIP_EMPTY_LINES));
+    public static function headers( $filepath ) {
+        $csv = array_map( "str_getcsv", file( $filepath, FILE_SKIP_EMPTY_LINES ) );
 
-        return array_shift($csv);
+        return array_shift( $csv );
     }
 
     /**
@@ -53,7 +51,7 @@ class CSV
      *
      * @return array
      */
-    public static function parseToArray($filepath, $delimiter = ',' ) {
+    public static function parseToArray( $filepath, $delimiter = ',' ) {
 
         $output = [];
 
@@ -68,24 +66,24 @@ class CSV
     }
 
     /**
-     * @param $filepath
+     * @param        $filepath
      * @param string $delimiter
+     *
      * @return string|null
      */
-    public static function withoutHeaders($filepath, $delimiter = ',')
-    {
-        $csv = self::parseToArray($filepath);
+    public static function withoutHeaders( $filepath, $delimiter = ',' ) {
+        $csv = self::parseToArray( $filepath );
 
-        if(!is_array($csv)){
+        if ( !is_array( $csv ) ) {
             return null;
         }
 
-        unset($csv[0]);
+        unset( $csv[ 0 ] );
 
         $out = "";
 
-        foreach($csv as $arr) {
-            $out .= implode($delimiter, $arr) . PHP_EOL;
+        foreach ( $csv as $arr ) {
+            $out .= implode( $delimiter, $arr ) . PHP_EOL;
         }
 
         return $out;
@@ -98,7 +96,7 @@ class CSV
      * @return bool
      */
     public static function save( $filepath, array $data = [] ) {
-        File::create($filepath);
+        File::create( $filepath );
 
         $fp = fopen( $filepath, 'w' );
         foreach ( $data as $fields ) {

@@ -93,7 +93,7 @@ class ProjectUrls {
         if ( !array_key_exists( $record[ 'jpassword' ], $this->chunks ) ) {
             $this->chunks[ $record[ 'jpassword' ] ] = 1;
 
-            $this->jobs[ $record[ 'jid' ] ][ 'chunks' ][ $record[ 'jpassword' ] ][ 'translate_url' ]    = $this->translateUrl( $record );
+            $this->jobs[ $record[ 'jid' ] ][ 'chunks' ][ $record[ 'jpassword' ] ][ 'translate_url' ]  = $this->translateUrl( $record );
             $this->jobs[ $record[ 'jid' ] ][ 'chunks' ][ $record[ 'jpassword' ] ][ 'revise_urls' ] [] = [
                     'revision_number' => 1,
                     'url'             => $this->reviseUrl( $record )

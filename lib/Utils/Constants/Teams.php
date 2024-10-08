@@ -19,7 +19,7 @@ class Constants_Teams {
     ];
 
 
-    public static function isAllowedType( $type ){
+    public static function isAllowedType( $type ) {
         return in_array( strtolower( $type ), self::$TYPES );
     }
 

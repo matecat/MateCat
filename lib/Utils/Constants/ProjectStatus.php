@@ -1,10 +1,11 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
  * Date: 12/05/14
  * Time: 17.30
- * 
+ *
  */
 class Constants_ProjectStatus {
 
@@ -16,7 +17,7 @@ class Constants_ProjectStatus {
     const STATUS_FAST_OK                = 'FAST_OK';
     const STATUS_DONE                   = 'DONE';
 
-    const PROJECT_QUEUE_HASH            = 'project_completed:%u';
+    const PROJECT_QUEUE_HASH = 'project_completed:%u';
 
     public static $ALLOWED_STATUSES = [
             self::STATUS_DONE,
@@ -28,7 +29,7 @@ class Constants_ProjectStatus {
             self::STATUS_NOT_READY_FOR_ANALYSIS,
     ];
 
-    public static function isAllowedStatus( $status ){
+    public static function isAllowedStatus( $status ) {
         return in_array( strtoupper( $status ), self::$ALLOWED_STATUSES );
     }
 

@@ -9,7 +9,7 @@
  * @author domenico domenico@translated.net / ostico@gmail.com
  * Date: 17/04/14
  * Time: 16.44
- * 
+ *
  */
 abstract class Shop_AbstractItem extends ArrayObject implements Shop_ItemInterface {
 
@@ -29,18 +29,18 @@ abstract class Shop_AbstractItem extends ArrayObject implements Shop_ItemInterfa
      *
      * @var array
      */
-    protected $__storage = array(
+    protected $__storage = [
             '_id_type_class' => null,
             'id'             => null,
             'quantity'       => null,
             'price'          => null,
-    );
+    ];
 
     /**
      * Class Constructor
      *
      */
-    public function __construct(){
+    public function __construct() {
         parent::__construct();
 
         $value = get_class( $this );
@@ -55,7 +55,7 @@ abstract class Shop_AbstractItem extends ArrayObject implements Shop_ItemInterfa
         /*
          * Prepare the storage object by using self::$__storage keys definitions
          */
-        foreach( $this->__storage as $key => $value ){
+        foreach ( $this->__storage as $key => $value ) {
             $this->offsetSet( $key, $value );
         }
 
@@ -66,7 +66,7 @@ abstract class Shop_AbstractItem extends ArrayObject implements Shop_ItemInterfa
      *
      * @return array
      */
-    public function getStorage(){
+    public function getStorage() {
         return $this->getArrayCopy();
     }
 
@@ -74,10 +74,6 @@ abstract class Shop_AbstractItem extends ArrayObject implements Shop_ItemInterfa
      * Offset to set (PHP 5 >= 5.0.0)
      *
      * Only items defined in the concrete Item class will be added and/or permitted
-     *
-     * @see $__storage
-     *
-     * @link http://php.net/manual/en/arrayaccess.offsetset.php
      *
      * @param mixed $offset <p>
      *                      The offset to assign the value to.
@@ -89,6 +85,10 @@ abstract class Shop_AbstractItem extends ArrayObject implements Shop_ItemInterfa
      * @return void
      *
      * @throws LogicException/DomainException
+     * @see  $__storage
+     *
+     * @link http://php.net/manual/en/arrayaccess.offsetset.php
+     *
      */
     public function offsetSet( $offset, $value ) {
 
@@ -109,9 +109,6 @@ abstract class Shop_AbstractItem extends ArrayObject implements Shop_ItemInterfa
      * Offset to unset (PHP 5 &gt;= 5.0.0)
      *
      * Only items defined in the concrete Item class will be accepted
-     * @see $__storage
-     *
-     * @link http://php.net/manual/en/arrayaccess.offsetunset.php
      *
      * @param mixed $offset <p>
      *                      The offset to unset.
@@ -120,6 +117,10 @@ abstract class Shop_AbstractItem extends ArrayObject implements Shop_ItemInterfa
      * @return void
      *
      * @throws DomainException
+     * @link http://php.net/manual/en/arrayaccess.offsetunset.php
+     *
+     * @see  $__storage
+     *
      */
     public function offsetUnset( $offset ) {
         if ( array_key_exists( $offset, $this->__storage ) ) {

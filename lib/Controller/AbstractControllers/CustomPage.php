@@ -15,28 +15,27 @@ class CustomPage extends viewController {
      */
     protected $httpCode;
 
+    /**
+     * @throws ReflectionException
+     * @noinspection PhpMissingParentConstructorInspection
+     */
     public function __construct() {
-
         //SESSION ENABLED
-        parent::sessionStart();
-        $this->_setUserFromAuthCookie();
-        $this->setUserCredentials();
-
+        $this->identifyUser();
         $this->featureSet = new FeatureSet();
-
     }
 
     /**
-     * @param             $skeletonFile string
+     * @param string $skeletonFile
      */
-    public function setTemplate( $skeletonFile ){
-        $this->template = $skeletonFile;
+    public function setTemplate( string $skeletonFile ) {
+        $this->makeTemplate( $skeletonFile );
     }
 
     /**
      * @param $httpCode integer
      */
-    public function setCode( $httpCode ){
+    public function setCode( $httpCode ) {
         $this->httpCode = $httpCode;
     }
 
@@ -51,7 +50,7 @@ class CustomPage extends viewController {
      */
     public function setTemplateVars( $customVars = [] ) {
 
-        foreach( $customVars as $varName => $value ){
+        foreach ( $customVars as $varName => $value ) {
             $this->template->{$varName} = $value;
         }
 

@@ -8,6 +8,9 @@ use LQA\ChunkReviewDao;
 
 set_time_limit( 180 );
 
+/**
+ * @deprecated
+ */
 class downloadOriginalController extends downloadController {
 
     public function __construct() {
@@ -126,7 +129,7 @@ class downloadOriginalController extends downloadController {
         /**
          * Retrieve user information
          */
-        $this->readLoginInfo();
+        $this->identifyUser();
 
         $activity             = new ActivityLogStruct();
         $activity->id_job     = $this->id_job;

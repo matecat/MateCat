@@ -5,8 +5,7 @@ namespace EnginesModel;
 use Constants_Engines;
 use EnginesModel_EngineStruct;
 
-class DeepLStruct extends EnginesModel_EngineStruct
-{
+class DeepLStruct extends EnginesModel_EngineStruct {
     /**
      * @var string
      */
@@ -31,14 +30,14 @@ class DeepLStruct extends EnginesModel_EngineStruct
      * @var array
      */
     public $others = [
-        "relative_glossaries_url" => "glossaries",
+            "relative_glossaries_url" => "glossaries",
     ];
 
     /**
      * @var array
      */
     public $extra_parameters = [
-        'DeepL-Auth-Key' => "",
+            'DeepL-Auth-Key' => "",
     ];
 
     /**
