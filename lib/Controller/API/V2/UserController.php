@@ -130,7 +130,7 @@ class UserController extends KleinController
                 'id' => (int)$metadata->id,
                 'uid' => (int)$metadata->uid,
                 'key' => $metadata->key,
-                'value' => $metadata->value,
+                'value' => (is_numeric($metadata->value)) ? (int)$metadata->value : $metadata->value,
             ]);
 
         } catch (\Exception $exception){
