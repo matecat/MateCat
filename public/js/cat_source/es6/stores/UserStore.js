@@ -180,6 +180,10 @@ AppDispatcher.register(function (action) {
       break
     case ManageConstants.SELECTED_TEAM:
       UserStore.selectedTeam = action.selectedTeam
+      break
+    case UserConstants.FORCE_RELOAD:
+      UserStore.emitChange(UserConstants.FORCE_RELOAD)
+      break
   }
 })
 export default UserStore

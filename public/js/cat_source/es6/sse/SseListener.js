@@ -6,6 +6,7 @@ import SegmentStore from '../stores/SegmentStore'
 import CommonUtils from '../utils/commonUtils'
 import CommentsActions from '../actions/CommentsActions'
 import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper'
+import UserActions from '../actions/UserActions'
 
 const SseListener = ({isAuthenticated, userId}) => {
   const {forceLogout} = useContext(ApplicationWrapperContext)
@@ -17,11 +18,26 @@ const SseListener = ({isAuthenticated, userId}) => {
     reconnected: () => {
       CatToolActions.clientReconnect()
     },
-    ack: (data) => {
-      config.id_client = data.clientId
-      CatToolActions.clientConnected(data.clientId)
-      console.log('Handling ack:', data)
+    ack: ({clientId, serverVersion}) => {
+      config.id_client = clientId
+      CatToolActions.clientConnected(clientId)
+      if (serverVersion !== config.build_number) {
+        const notification = {
+          title: 'New update available!',
+          text:
+            'We’ve just released an update with improvements and bug fixes.<br/>' +
+            'To ensure all changes are applied correctly, we recommend refreshing the page.<br/><br/>' +
+            'Click Refresh or press <strong>Ctrl+R</strong> (Windows) / <strong>Cmd+R</strong> (Mac).<br/><br/>' +
+            'Thank you for continuing to use Matecat!',
+          type: 'warning',
+          allowHtml: true,
+        }
+        CatToolActions.addNotification(notification)
+      }
       // Add your event handling logic here
+    },
+    force_reload: () => {
+      UserActions.forceReload()
     },
     concordance: (data) => {
       SegmentActions.setConcordanceResult(data.id_segment, data)

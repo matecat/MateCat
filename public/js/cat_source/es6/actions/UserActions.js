@@ -1,6 +1,5 @@
 import AppDispatcher from '../stores/AppDispatcher'
 import UserConstants from '../constants/UserConstants'
-import {getUserData} from '../api/getUserData'
 import {getTeamMembers} from '../api/getTeamMembers'
 import UserStore from '../stores/UserStore'
 
@@ -95,6 +94,11 @@ let UserActions = {
 
   setTeamInStorage(teamId) {
     localStorage.setItem(this.teamStorageName, teamId)
+  },
+  forceReload: function () {
+    AppDispatcher.dispatch({
+      actionType: UserConstants.FORCE_RELOAD,
+    })
   },
 }
 
