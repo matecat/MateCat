@@ -9,6 +9,7 @@ const ini = require( 'node-ini' );
 const uuid = require( 'uuid' );
 
 const config = ini.parseSync( path.resolve( __dirname, 'config.ini' ) );
+const SERVER_VERSION = config.server.version.replace( /['"]+/g, '' );
 
 const AI_ASSISTANT_EXPLAIN_MEANING = 'ai_assistant_explain_meaning';
 const LOGOUT_TYPE = 'logout';
@@ -26,6 +27,7 @@ const CONCORDANCE_TYPE = 'concordance';
 const CROSS_LANG_CONTRIBUTIONS = 'cross_language_matches';
 const BULK_STATUS_CHANGE_TYPE = 'bulk_segment_status_change';
 const DISCONNECT_UPGRADE = 'upgrade';
+const RELOAD = 'force_reload';
 
 // Init logger
 const logger = winston.createLogger( {
@@ -97,7 +99,7 @@ browserChannel.on( 'connect', ( context, req, res ) => {
         data: {
             _type: 'ack',
             clientId: res._clientId,
-            serverVersion: config.server.version.replace( /['"]+/g, '' )
+            serverVersion: SERVER_VERSION
         }
     }, [res] );
     logger.debug( ['New client connection ' + res._clientId] );
@@ -137,7 +139,8 @@ http.createServer( ( req, res ) => {
     }
 
 } ).listen( config.server.port, config.server.address, () => {
-    logger.info( 'Listening on http://' + config.server.address + ':' + config.server.port + '/' );
+    logger.info( 'Server version ' + SERVER_VERSION );
+    logger.info( 'Listening on //' + config.server.address + ':' + config.server.port + '/', 'Server version ' + SERVER_VERSION );
 } );
 
 ['SIGINT', 'SIGTERM'].forEach(
@@ -147,7 +150,7 @@ http.createServer( ( req, res ) => {
     } )
 );
 
-const notifyUpgrade = () => {
+const notifyUpgrade = ( isReboot = true ) => {
 
     new Promise( ( resolve, reject ) => {
         if ( browserChannel.connections.length !== 0 ) {
@@ -156,7 +159,7 @@ const notifyUpgrade = () => {
 
             const disconnectMessage = {
                 payload: {
-                    _type: DISCONNECT_UPGRADE
+                    _type: isReboot ? DISCONNECT_UPGRADE : RELOAD
                 }
             };
 
@@ -166,12 +169,14 @@ const notifyUpgrade = () => {
 
         }
 
-        resolve();
+        resolve( isReboot );
 
-    } ).then( () => {
-        logger.debug( 'Exit...' );
-        browserChannel.close();
-        process.exit( 0 );
+    } ).then( ( isReboot ) => {
+        if( isReboot ){
+            logger.debug( 'Exit...' );
+            browserChannel.close();
+            process.exit( 0 );
+        }
     } );
 
 }
@@ -240,7 +245,12 @@ const stompMessageReceived = ( body ) => {
     }
 
     let dest = null;
-    if ( browserChannel.connections.length !== 0 ) {
+
+    if ( message._type === RELOAD ) {
+        logger.debug( 'RELOAD: ' + RELOAD + ' message received...' );
+        notifyUpgrade( false );
+        return;
+    } else if ( browserChannel.connections.length !== 0 ) {
         dest = _.filter( browserChannel.connections, ( serverResponse ) => {
             if ( typeof serverResponse._clientId === 'undefined' ) {
                 logger.error( ["No valid clientId found in message", message] );
