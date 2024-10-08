@@ -53,7 +53,7 @@
     "@babel/plugin-transform-runtime": "^7.23.7",
     "@babel/preset-env": "^7.23.8",
     "@babel/preset-react": "^7.23.3",
-    "@sentry/webpack-plugin": "2.22.3",
+    "@sentry/webpack-plugin": "2.22.4",
     "@testing-library/dom": "^10.1.0",
     "@testing-library/jest-dom": "^6.2.0",
     "@testing-library/react": "^16.0.0",
@@ -91,5 +91,5 @@
   "resolutions": {
     "wrap-ansi": "^7.0.0"
   },
-  "version": "2.22.32"
+  "version": "2.22.42"
 }
