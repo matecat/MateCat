@@ -125,8 +125,7 @@ class ProjectUrls {
     protected function downloadXliffUrl( $record ) {
         return Routes::downloadXliff(
                 $record[ 'jid' ],
-                $record[ 'jpassword' ],
-                $record[ 'id_file' ]
+                $record[ 'jpassword' ]
         );
     }
 
@@ -136,8 +135,7 @@ class ProjectUrls {
     protected function downloadFileTranslationUrl( $record ) {
         return Routes::downloadTranslation(
                 $record[ 'jid' ],
-                $record[ 'jpassword' ],
-                $record[ 'id_file' ]
+                $record[ 'jpassword' ]
         );
     }
 
@@ -147,8 +145,7 @@ class ProjectUrls {
     protected function downloadTranslationUrl( $record ) {
         return Routes::downloadTranslation(
                 $record[ 'jid' ],
-                $record[ 'jpassword' ],
-                ''
+                $record[ 'jpassword' ]
         );
     }
 
