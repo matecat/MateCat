@@ -130,12 +130,7 @@ class UserController extends KleinController
             Bootstrap::sessionStart();
             $_SESSION['user_profile']['metadata'] = $this->getUser()->getMetadataAsKeyValue();
 
-            return $this->response->json([
-                'id' => (int)$metadata->id,
-                'uid' => (int)$metadata->uid,
-                'key' => $metadata->key,
-                'value' => (is_numeric($metadata->value)) ? (int)$metadata->value : $metadata->value,
-            ]);
+            return $this->response->json($metadata);
 
         } catch (\Exception $exception){
             $this->response->code($exception->getCode() > 0 ? $exception->getCode() : 500);
