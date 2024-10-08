@@ -36,6 +36,7 @@ export const ApplicationWrapper = ({children}) => {
     setUserInfo,
     logout,
     forceLogout,
+    setUserMetadataKey,
   } = useAuth()
 
   const checkGlobalMassages = useCallback(() => {
@@ -121,6 +122,7 @@ export const ApplicationWrapper = ({children}) => {
         setUserInfo,
         logout,
         forceLogout,
+        setUserMetadataKey,
       }}
     >
       {userDisconnected && <UserDisconnectedBox />}

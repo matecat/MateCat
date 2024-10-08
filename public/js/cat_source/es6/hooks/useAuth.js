@@ -7,6 +7,7 @@ import CommonUtils from '../utils/commonUtils'
 import commonUtils from '../utils/commonUtils'
 import {isEqual} from 'lodash'
 import {logoutUser} from '../api/logoutUser'
+import {updateUserMetadata} from '../api/updateUserMetadata'
 
 const USER_INFO_SCHEMA = {
   user: {
@@ -84,7 +85,10 @@ function useAuth() {
           setIsUserLogged(true)
           setUserInfo(data)
           setConnectedServices(data.connected_services)
-          commonUtils.addInStorage(localStorageUserIsLoggedInThisBrowser + data.user.uid, 1)
+          commonUtils.addInStorage(
+            localStorageUserIsLoggedInThisBrowser + data.user.uid,
+            1,
+          )
         })
         .catch((e) => {
           const event = {
@@ -110,21 +114,23 @@ function useAuth() {
     // Logout MUST be invoked only once, otherwise XSFR token set in server side disappears, and the next login will fail.
     // If the user logged out from THIS browser, the session storage is already clean since
     // this is a reaction to a message dispatched (via SSE) from a previous logout event.
-    if ( commonUtils.getFromStorage(
+    if (
+      commonUtils.getFromStorage(
         localStorageUserIsLoggedInThisBrowser + userInfo.user.uid,
-    ) === '1' ) {
+      ) === '1'
+    ) {
       // localStorage.removeItem(key) is atomic.
       //
       // Immediately clean the session and not in the .then() promise, this avoid race conditions
       // between get/set storage value when the checkUserLogin() is called.
       commonUtils.removeFromStorage(
-          localStorageUserIsLoggedInThisBrowser + userInfo.user.uid,
+        localStorageUserIsLoggedInThisBrowser + userInfo.user.uid,
       )
-      setIsUserLogged( false )
-      setUserDisconnected( true )
+      setIsUserLogged(false)
+      setUserDisconnected(true)
       setUserInfo()
       setConnectedServices()
-      logoutUser().then( () => {} )
+      logoutUser().then(() => {})
     }
   }
 
@@ -134,12 +140,29 @@ function useAuth() {
     // Immediately clean the session and not in the .then() promise, this avoid race conditions
     // between get/set storage value when the checkUserLogin() is called.
     commonUtils.removeFromStorage(
-        localStorageUserIsLoggedInThisBrowser + userInfo.user.uid,
+      localStorageUserIsLoggedInThisBrowser + userInfo.user.uid,
     )
     logoutUser().then(() => {
       window.location.reload()
     })
   }
+
+  const setUserMetadataKey = useCallback(
+    async (key, value) =>
+      new Promise((resolve, reject) => {
+        updateUserMetadata(key, value)
+          .then((data) => {
+            setUserInfo((prevState) => ({
+              ...prevState,
+              metadata: {...prevState.metadata, [key]: value},
+            }))
+
+            resolve(data)
+          })
+          .catch(() => reject())
+      }),
+    [setUserInfo],
+  )
 
   useEffect(() => {
     checkUserLogin()
@@ -238,6 +261,7 @@ function useAuth() {
     setUserInfo,
     logout,
     forceLogout,
+    setUserMetadataKey,
   }
 }
 

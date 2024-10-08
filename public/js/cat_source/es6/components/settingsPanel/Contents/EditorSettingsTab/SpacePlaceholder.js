@@ -2,35 +2,22 @@ import React, {useContext, useState} from 'react'
 import Switch from '../../../common/Switch'
 import SegmentActions from '../../../../actions/SegmentActions'
 import {setTagSignatureMiddleware} from '../../../segments/utils/DraftMatecatUtils/tagModel'
-import {SPACE_PLACEHOLDER_STORAGE_KEY} from '../../../../constants/Constants'
 import {ApplicationWrapperContext} from '../../../common/ApplicationWrapper'
-import {updateUserMetadata} from '../../../../api/updateUserMetadata/updateUserMetadata'
 
 const METADATA_KEY = 'show_whitespace'
 
 export const SpacePlaceholder = () => {
-  const {userInfo, setUserInfo} = useContext(ApplicationWrapperContext)
+  const {userInfo, setUserMetadataKey} = useContext(ApplicationWrapperContext)
 
   const [isActive, setIsActive] = useState(
-    userInfo.metadata[METADATA_KEY] === true,
+    userInfo.metadata[METADATA_KEY] === 1,
   )
 
   const onChange = (isActive) => {
     setIsActive(isActive)
 
-    updateUserMetadata({key: METADATA_KEY, value: isActive ? 1 : 0}).then(
-      ({value}) => {
-        setUserInfo((prevState) => ({
-          ...prevState,
-          metadata: {...prevState.metadata, [METADATA_KEY]: value},
-        }))
-      },
-    )
+    setUserMetadataKey(METADATA_KEY, isActive ? 1 : 0)
 
-    window.localStorage.setItem(
-      SPACE_PLACEHOLDER_STORAGE_KEY,
-      isActive.toString(),
-    )
     setTagSignatureMiddleware('space', () => isActive)
     SegmentActions.refreshTagMap()
   }

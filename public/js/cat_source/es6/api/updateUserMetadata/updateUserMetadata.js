@@ -7,7 +7,7 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  * @param {any} value
  * @returns {Promise<object>}
  */
-export const updateUserMetadata = async ({key, value}) => {
+export const updateUserMetadata = async (key, value) => {
   const response = await fetch(`${getMatecatApiDomain()}api/v2/user/metadata`, {
     method: 'PUT',
     credentials: 'include',

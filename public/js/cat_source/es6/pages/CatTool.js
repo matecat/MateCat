@@ -38,6 +38,8 @@ import {mountPage} from './mountPage'
 import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper'
 import NotificationBox from '../components/notificationsComponent/NotificationBox'
 import SseListener from '../sse/SseListener'
+import Speech2Text from '../utils/speech2text'
+import {initTagSignature} from '../components/segments/utils/DraftMatecatUtils/tagModel'
 
 const urlParams = new URLSearchParams(window.location.search)
 const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
@@ -372,11 +374,20 @@ function CatTool() {
     UI.registerFooterTabs()
   }, [wasInitSegments])
 
+  // user metadata options initialization
+  useEffect(() => {
+    const metadata = userInfo?.metadata
+    if (metadata) {
+      if (Speech2Text.enabled(metadata)) Speech2Text.init()
+      initTagSignature(metadata)
+    }
+  }, [userInfo?.metadata])
+
   const {
-    tag_projection: guessTagActive,
-    speech2text: speechToTextActive,
+    guess_tags: guessTagActive,
+    dictation: speechToTextActive,
     cross_language_matches: multiMatchLangs = [],
-  } = {}
+  } = userInfo?.metadata ?? {}
 
   const isFakeCurrentTemplateReady =
     projectTemplates.length &&

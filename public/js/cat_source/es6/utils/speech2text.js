@@ -2,10 +2,14 @@ import SegmentActions from '../actions/SegmentActions'
 import SegmentStore from '../stores/SegmentStore'
 import CatToolActions from '../actions/CatToolActions'
 import $ from 'jquery'
+import UserStore from '../stores/UserStore'
 
 const Speech2Text = {
-  enabled: function () {
-    return !!('webkitSpeechRecognition' in window)
+  enabled: function ({dictation} = {}) {
+    return (
+      'webkitSpeechRecognition' in window &&
+      (dictation === 1 || UserStore.getUserMetadata()?.dictation === 1)
+    )
   },
   disable: function () {
     Speech2Text.initialized = false
@@ -195,10 +199,5 @@ const Speech2Text = {
     return !Speech2Text.recognizing || match == '100%'
   },
 }
-document.addEventListener('DOMContentLoaded', function (event) {
-  if (Speech2Text.enabled()) {
-    Speech2Text.init()
-  }
-})
 
 export default Speech2Text

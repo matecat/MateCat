@@ -5,15 +5,14 @@ import Speech2TextFeature from '../../../../utils/speech2text'
 
 import AlertModal from '../../../modals/AlertModal'
 import {ApplicationWrapperContext} from '../../../common/ApplicationWrapper'
-import {updateUserMetadata} from '../../../../api/updateUserMetadata/updateUserMetadata'
 
 const METADATA_KEY = 'dictation'
 
 export const SpeechToText = () => {
-  const {userInfo, setUserInfo} = useContext(ApplicationWrapperContext)
+  const {userInfo, setUserMetadataKey} = useContext(ApplicationWrapperContext)
 
   const [isActive, setIsActive] = useState(
-    userInfo.metadata[METADATA_KEY] === true,
+    userInfo.metadata[METADATA_KEY] === 1,
   )
 
   const disabled = !('webkitSpeechRecognition' in window)
@@ -32,22 +31,15 @@ export const SpeechToText = () => {
   }
   const onChange = (isActive) => {
     setIsActive(isActive)
-
-    updateUserMetadata({key: METADATA_KEY, value: isActive ? 1 : 0}).then(
-      ({value}) => {
-        if (isActive) {
-          Speech2TextFeature.enable()
-          Speech2TextFeature.init()
-          Speech2TextFeature.loadRecognition()
-        } else {
-          Speech2TextFeature.disable()
-        }
-        setUserInfo((prevState) => ({
-          ...prevState,
-          metadata: {...prevState.metadata, [METADATA_KEY]: value},
-        }))
-      },
-    )
+    setUserMetadataKey(METADATA_KEY, isActive ? 1 : 0).then(() => {
+      if (isActive) {
+        Speech2TextFeature.enable()
+        Speech2TextFeature.init()
+        Speech2TextFeature.loadRecognition()
+      } else {
+        Speech2TextFeature.disable()
+      }
+    })
   }
   return (
     <div className="options-box s2t-box">
