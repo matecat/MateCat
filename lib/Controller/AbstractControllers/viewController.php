@@ -227,7 +227,6 @@ abstract class viewController extends controller {
             $this->template->enabledBrowsers     = INIT::$ENABLED_BROWSERS;
             $this->template->maxFileSize         = INIT::$MAX_UPLOAD_FILE_SIZE;
             $this->template->maxTMXFileSize      = INIT::$MAX_UPLOAD_TMX_FILE_SIZE;
-            $this->template->dqf_enabled         = false;
             $this->template->isOpenAiEnabled     = !empty( INIT::$OPENAI_API_KEY );
 
             /**
