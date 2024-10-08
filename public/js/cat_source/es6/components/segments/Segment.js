@@ -25,8 +25,11 @@ import CatToolStore from '../../stores/CatToolStore'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
 import CommentsStore from '../../stores/CommentsStore'
 import {SEGMENTS_STATUS} from '../../constants/Constants'
+import {ApplicationWrapperContext} from '../common/ApplicationWrapper'
 
 class Segment extends React.Component {
+  static contextType = ApplicationWrapperContext
+
   constructor(props) {
     super(props)
 
@@ -724,6 +727,7 @@ class Segment extends React.Component {
         clientConnected: this.props.clientConnected,
         clientId: this.props.clientId,
         multiMatchLangs,
+        userInfo: this.context.userInfo,
       }
     }
 

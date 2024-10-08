@@ -1,7 +1,8 @@
-import React, {useEffect, useState} from 'react'
+import React, {useContext, useEffect, useState} from 'react'
 import Switch from '../../../common/Switch'
 import LXQ from '../../../../utils/lxq.main'
 import ApplicationStore from '../../../../stores/ApplicationStore'
+import {ApplicationWrapperContext} from '../../../common/ApplicationWrapper'
 
 export const checkLexiqaIsEnabled = ({
   sourceLang,
@@ -31,24 +32,27 @@ export const checkLexiqaIsEnabled = ({
   return {disableLexiQA, notAcceptedLanguages}
 }
 
-export const Lexiqa = ({
-  lexiqaActive,
-  setLexiqaActive,
-  sourceLang,
-  targetLangs,
-}) => {
+const METADATA_KEY = 'lexiqa'
+
+export const Lexiqa = ({sourceLang, targetLangs}) => {
+  const {userInfo, setUserMetadataKey} = useContext(ApplicationWrapperContext)
+
+  const [isActive, setIsActive] = useState(
+    userInfo.metadata[METADATA_KEY] === 1,
+  )
   const [disabled, setDisable] = useState(false)
   const [notSupportedLangs, setNotSupportedLangs] = useState([])
   const lexiqaLicense = config.lxq_license
 
-  const onChange = (selected) => {
-    setLexiqaActive(selected)
-    if (config.is_cattool) {
-      if (selected) {
-        LXQ.enable()
-      } else {
-        LXQ.disable()
-      }
+  const onChange = (isActive) => {
+    setIsActive(isActive)
+
+    setUserMetadataKey(METADATA_KEY, isActive ? 1 : 0)
+
+    if (isActive) {
+      LXQ.enable()
+    } else {
+      LXQ.disable()
     }
   }
   useEffect(() => {
@@ -62,9 +66,9 @@ export const Lexiqa = ({
     }
     if (disableLexiQA) {
       setDisable(true)
-      setLexiqaActive(false)
+      setIsActive(false)
     }
-  }, [sourceLang, targetLangs, setLexiqaActive])
+  }, [sourceLang, targetLangs])
 
   return (
     <div className="options-box qa-box">
@@ -106,7 +110,7 @@ export const Lexiqa = ({
       </div>
       <div className="options-box-value">
         <Switch
-          active={lexiqaActive}
+          active={isActive}
           onChange={onChange}
           disabled={disabled}
           testId="switch-lexiqa"

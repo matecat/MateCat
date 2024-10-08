@@ -1,12 +1,19 @@
-import React, {useEffect, useState} from 'react'
+import React, {useContext, useEffect, useState} from 'react'
 import {Select} from '../../../common/Select'
 import SegmentActions from '../../../../actions/SegmentActions'
 import ApplicationStore from '../../../../stores/ApplicationStore'
+import {ApplicationWrapperContext} from '../../../common/ApplicationWrapper'
+import {isEqual} from 'lodash'
 
-export const CrossLanguagesMatches = ({
-  multiMatchLangs,
-  setMultiMatchLangs,
-}) => {
+const METADATA_KEY = 'cross_language_matches'
+
+export const CrossLanguagesMatches = () => {
+  const {userInfo, setUserMetadataKey} = useContext(ApplicationWrapperContext)
+
+  const [multiMatchLangs, setMultiMatchLangs] = useState(
+    userInfo.metadata[METADATA_KEY],
+  )
+
   const languages = ApplicationStore.getLanguages().map((lang) => {
     return {name: lang.name, id: lang.code}
   })
@@ -22,12 +29,22 @@ export const CrossLanguagesMatches = ({
       return {name: lang.name, id: lang.code}
     })
 
-    setActiveLang1(
-      languages.find((lang) => lang.id === multiMatchLangs?.primary),
+    const newValueActiveLang1 = languages.find(
+      (lang) => lang.id === multiMatchLangs?.primary,
+    )
+    setActiveLang1((prevState) =>
+      !isEqual(prevState, newValueActiveLang1)
+        ? newValueActiveLang1
+        : prevState,
     )
 
-    setActiveLang2(
-      languages.find((lang) => lang.id === multiMatchLangs?.secondary),
+    const newValueActiveLang2 = languages.find(
+      (lang) => lang.id === multiMatchLangs?.secondary,
+    )
+    setActiveLang2((prevState) =>
+      !isEqual(prevState, newValueActiveLang2)
+        ? newValueActiveLang2
+        : prevState,
     )
   }, [multiMatchLangs?.primary, multiMatchLangs?.secondary])
 
@@ -40,8 +57,12 @@ export const CrossLanguagesMatches = ({
     setMultiMatchLangs(
       typeof activeLang1?.id !== 'undefined' ? settings : undefined,
     )
-    localStorage.setItem('multiMatchLangs', JSON.stringify(settings))
-    if (SegmentActions.getContribution && config.is_cattool) {
+    setUserMetadataKey(
+      METADATA_KEY,
+      typeof activeLang1?.id !== 'undefined' ? settings : {},
+    )
+
+    if (SegmentActions.getContribution) {
       if (settings.primary) {
         SegmentActions.modifyTabVisibility('multiMatches', true)
         SegmentActions.getContribution(UI.currentSegmentId, settings, true)
@@ -50,13 +71,14 @@ export const CrossLanguagesMatches = ({
         SegmentActions.updateAllSegments()
       }
     }
-  }, [activeLang1, activeLang2, setMultiMatchLangs])
+  }, [activeLang1, activeLang2, setUserMetadataKey])
 
   useEffect(() => {
     if (!activeLang1) {
       setActiveLang2()
     }
   }, [activeLang1])
+
   return (
     <div className="options-box multi-match">
       <div className="option-description">
@@ -95,7 +117,7 @@ export const CrossLanguagesMatches = ({
           options={languages}
           activeOption={activeLang2}
           showSearchBar={true}
-          isDisabled={!!!activeLang1}
+          isDisabled={!activeLang1}
           onToggleOption={(option) => {
             if (activeLang2 && activeLang2.id === option.id) {
               setActiveLang2()

@@ -1,22 +1,31 @@
-import React, {useState} from 'react'
+import React, {useContext, useState} from 'react'
 import Switch from '../../../common/Switch'
-import SegmentUtils from '../../../../utils/segmentUtils'
 import CommonUtils from '../../../../utils/commonUtils'
+import {ApplicationWrapperContext} from '../../../common/ApplicationWrapper'
+import UserStore from '../../../../stores/UserStore'
+
+const METADATA_KEY = 'ai_assistant'
 
 export const AiAssistant = () => {
-  const [active, setActive] = useState(SegmentUtils.isAiAssistantAuto())
-  const onChange = (selected) => {
-    setActive(selected)
+  const {userInfo, setUserMetadataKey} = useContext(ApplicationWrapperContext)
+
+  const [isActive, setIsActive] = useState(
+    userInfo.metadata[METADATA_KEY] === 1,
+  )
+
+  const onChange = (isActive) => {
+    setIsActive(isActive)
+
+    setUserMetadataKey(METADATA_KEY, isActive ? 1 : 0)
+
     //Track Event
     const userInfo = UserStore.getUser()
     const message = {
       user: userInfo.user.uid,
       page: location.href,
-      onHighlight: selected,
+      onHighlight: isActive,
     }
     CommonUtils.dispatchTrackingEvents('AiAssistantSwitch', message)
-
-    SegmentUtils.setAiAssistantOptionValue(selected)
   }
   return (
     <div className="options-box ai-assistant">
@@ -33,7 +42,7 @@ export const AiAssistant = () => {
       <div className="options-box-value">
         <Switch
           onChange={onChange}
-          active={active}
+          active={isActive}
           testId="switch-ai-assistant"
         />
       </div>

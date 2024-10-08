@@ -1,13 +1,20 @@
-import React, {useState} from 'react'
+import React, {useContext, useState} from 'react'
 import Switch from '../../../common/Switch'
-import SegmentUtils from '../../../../utils/segmentUtils'
-import SegmentActions from '../../../../actions/SegmentActions'
+import {ApplicationWrapperContext} from '../../../common/ApplicationWrapper'
+
+const METADATA_KEY = 'character_counter'
 
 export const CharacterCounter = () => {
-  const [active, setActive] = useState(SegmentUtils.isCharacterCounterEnable())
-  const onChange = (selected) => {
-    SegmentActions.toggleCharacterCounter()
-    setActive(selected)
+  const {userInfo, setUserMetadataKey} = useContext(ApplicationWrapperContext)
+
+  const [isActive, setIsActive] = useState(
+    userInfo.metadata[METADATA_KEY] === 1,
+  )
+
+  const onChange = (isActive) => {
+    setUserMetadataKey(METADATA_KEY, isActive ? 1 : 0)
+
+    setIsActive(isActive)
   }
   return (
     <div className="options-box charscounter">
@@ -20,7 +27,7 @@ export const CharacterCounter = () => {
       </div>
       <div className="options-box-value">
         <Switch
-          active={active}
+          active={isActive}
           onChange={onChange}
           testId="switch-chars-counter"
         />

@@ -1568,11 +1568,6 @@ const SegmentActions = {
       isTarget,
     })
   },
-  toggleCharacterCounter: () => {
-    AppDispatcher.dispatch({
-      actionType: SegmentConstants.TOGGLE_CHARACTER_COUNTER,
-    })
-  },
   hideAiAssistant: () => {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.HIDE_AI_ASSISTANT,

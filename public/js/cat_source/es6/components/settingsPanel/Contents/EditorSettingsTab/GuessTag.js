@@ -1,7 +1,8 @@
 import Switch from '../../../common/Switch'
-import React, {useEffect, useState} from 'react'
+import React, {useContext, useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
 import SegmentActions from '../../../../actions/SegmentActions'
+import {ApplicationWrapperContext} from '../../../common/ApplicationWrapper'
 
 export const checkGuessTagIsEnabled = ({
   sourceLang,
@@ -45,19 +46,23 @@ export const checkGuessTagIsEnabled = ({
   }
 }
 
-export const GuessTag = ({
-  guessTagActive,
-  setGuessTagActive,
-  sourceLang,
-  targetLangs,
-}) => {
+const METADATA_KEY = 'guess_tags'
+
+export const GuessTag = ({sourceLang, targetLangs}) => {
+  const {userInfo, setUserMetadataKey} = useContext(ApplicationWrapperContext)
+
+  const [isActive, setIsActive] = useState(
+    userInfo.metadata[METADATA_KEY] === 1,
+  )
   const [disabled, setDisable] = useState(!!config.isReview)
   const [notSupportedLangs, setNotSupportedLangs] = useState([])
-  const onChange = (selected) => {
-    setGuessTagActive(selected)
-    if (config.is_cattool) {
-      SegmentActions.changeTagProjectionStatus(selected)
-    }
+
+  const onChange = (isActive) => {
+    setIsActive(isActive)
+
+    setUserMetadataKey(METADATA_KEY, isActive ? 1 : 0)
+
+    SegmentActions.changeTagProjectionStatus(isActive)
   }
 
   useEffect(() => {
@@ -72,10 +77,11 @@ export const GuessTag = ({
 
     //disable Tag Projection
     if (arrayIntersection.length == 0) {
-      setGuessTagActive(false)
+      setIsActive(false)
       setDisable(true)
     }
-  }, [sourceLang, targetLangs, setGuessTagActive])
+  }, [sourceLang, targetLangs])
+
   return (
     <div className="options-box tagp">
       {/*TODO Check tag porojection active, check tm.html show_tag_projection*/}
@@ -112,7 +118,7 @@ export const GuessTag = ({
       <div className="options-box-value">
         <Switch
           onChange={onChange}
-          active={guessTagActive}
+          active={isActive}
           disabled={disabled}
           testId="switch-guesstag"
         />
