@@ -104,7 +104,11 @@ class UserController extends KleinController
 
         $filtered = [];
         foreach($json as $key => $value) {
-            $filtered[$key] = filter_var($value, $filters[$key], $options[$key]);
+            if(is_array($value)){
+                $filtered[$key] = filter_var($value, FILTER_UNSAFE_RAW, FILTER_REQUIRE_ARRAY);
+            } else {
+                $filtered[$key] = filter_var($value, $filters[$key], $options[$key]);
+            }
         }
 
         if(!isset($filtered['key'])){

@@ -4,6 +4,7 @@ use ConnectedServices\OauthTokenEncryption;
 use Teams\MembershipDao;
 use Teams\TeamDao;
 use Users\MetadataDao;
+use Users\MetadataStruct;
 
 /**
  * Created by PhpStorm.
@@ -121,8 +122,9 @@ class Users_UserStruct extends DataAccess_AbstractDaoSilentStruct implements Dat
         $collection = $dao->getAllByUid($this->uid) ;
         $data  = array();
 
+        /** @var MetadataStruct $record */
         foreach ($collection as $record ) {
-            $data[ $record->key ] = is_numeric($record->value) ? (int)$record->value : $record->value;
+            $data[ $record->key ] = $record->getValue();
         }
 
         $mandatory = [
@@ -132,7 +134,7 @@ class Users_UserStruct extends DataAccess_AbstractDaoSilentStruct implements Dat
             'lexiqa' => 1,
             'character_counter' => 0,
             'ai_assistant' => 0,
-            'cross_language_matches' => null,
+            'cross_language_matches' => new stdClass(),
         ];
 
         foreach ($mandatory as $key => $value){

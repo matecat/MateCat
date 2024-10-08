@@ -8,11 +8,42 @@
 
 namespace Users;
 
-class MetadataStruct extends \DataAccess_AbstractDaoObjectStruct implements \DataAccess_IDaoStruct {
+use DataAccess_IDaoStruct;
+use JsonSerializable;
 
+class MetadataStruct extends \DataAccess_AbstractDaoObjectStruct implements DataAccess_IDaoStruct, JsonSerializable
+{
     public $id;
     public $uid;
     public $key;
     public $value;
 
+    /**
+     * @inheritDoc
+     */
+    public function jsonSerialize()
+    {
+        return [
+            'id' => (int)$this->id,
+            'uid' => (int)$this->uid,
+            'key' => (string)$this->key,
+            'value' => $this->getValue()
+        ];
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getValue()
+    {
+        if(is_numeric($this->value)){
+            return (int)$this->value;
+        }
+
+        if (@unserialize($this->value) !== false) {
+            return (object)unserialize($this->value);
+        }
+
+        return $this->value;
+    }
 }
