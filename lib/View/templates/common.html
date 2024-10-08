@@ -11,6 +11,7 @@
         config.gdriveAuthURL = ${structure php:json_encode(gdriveAuthURL)} ;
         config.googleAuthURL = ${structure php:json_encode(googleAuthURL)} ;
         config.googleDriveEnabled = ${googleDriveEnabled};
+        config.build_number = '${build_number}';
         /*]]>*/
 
     <tal:block tal:condition="php: !empty(githubAuthUrl)">
