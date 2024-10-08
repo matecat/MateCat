@@ -36,14 +36,17 @@ class MetadataStruct extends \DataAccess_AbstractDaoObjectStruct implements Data
      */
     public function getValue()
     {
+        // in case of numeric value, return a integer
         if(is_numeric($this->value)){
             return (int)$this->value;
         }
 
+        // in case of serialized data, return an object
         if (@unserialize($this->value) !== false) {
             return (object)unserialize($this->value);
         }
 
+        // return a string
         return $this->value;
     }
 }
