@@ -8,4 +8,5 @@ export default keyMirror({
   CHOOSE_TEAM: null,
   UPDATE_USER: null,
   UPDATE_USER_NAME: null,
+  FORCE_RELOAD: null,
 })
