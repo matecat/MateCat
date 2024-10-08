@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useState} from 'react'
+import {useCallback, useEffect, useRef, useState} from 'react'
 import {getUserData} from '../api/getUserData'
 import UserActions from '../actions/UserActions'
 import UserStore from '../stores/UserStore'
@@ -65,8 +65,8 @@ function useAuth() {
     })
   }, [])
 
-  // const checkUserLogin = useRef()
-  const checkUserLogin = () => {
+  const checkUserLogin = useRef()
+  checkUserLogin.current = () => {
     if (
       !isUserLogged ||
       commonUtils.getFromStorage(
@@ -84,7 +84,10 @@ function useAuth() {
           setIsUserLogged(true)
           setUserInfo(data)
           setConnectedServices(data.connected_services)
-          commonUtils.addInStorage(localStorageUserIsLoggedInThisBrowser + data.user.uid, 1)
+          commonUtils.addInStorage(
+            localStorageUserIsLoggedInThisBrowser + data.user.uid,
+            1,
+          )
         })
         .catch((e) => {
           const event = {
@@ -104,29 +107,31 @@ function useAuth() {
     }
   }
 
-  const forceLogout = () => {
+  const forceLogout = useCallback(() => {
     // This branch condition allows checking if the user logged out from another browser
     // to avoid to call logout more than once.
     // Logout MUST be invoked only once, otherwise XSFR token set in server side disappears, and the next login will fail.
     // If the user logged out from THIS browser, the session storage is already clean since
     // this is a reaction to a message dispatched (via SSE) from a previous logout event.
-    if ( commonUtils.getFromStorage(
-        localStorageUserIsLoggedInThisBrowser + userInfo.user.uid,
-    ) === '1' ) {
+    if (
+      commonUtils.getFromStorage(
+        localStorageUserIsLoggedInThisBrowser + userInfo?.user?.uid,
+      ) === '1'
+    ) {
       // localStorage.removeItem(key) is atomic.
       //
       // Immediately clean the session and not in the .then() promise, this avoid race conditions
       // between get/set storage value when the checkUserLogin() is called.
       commonUtils.removeFromStorage(
-          localStorageUserIsLoggedInThisBrowser + userInfo.user.uid,
+        localStorageUserIsLoggedInThisBrowser + userInfo.user.uid,
       )
-      setIsUserLogged( false )
-      setUserDisconnected( true )
+      setIsUserLogged(false)
+      setUserDisconnected(true)
       setUserInfo()
       setConnectedServices()
-      logoutUser().then( () => {} )
+      logoutUser().then(() => {})
     }
-  }
+  }, [setUserInfo, userInfo?.user?.uid])
 
   const logout = () => {
     // localStorage.removeItem(key) is atomic.
@@ -134,7 +139,7 @@ function useAuth() {
     // Immediately clean the session and not in the .then() promise, this avoid race conditions
     // between get/set storage value when the checkUserLogin() is called.
     commonUtils.removeFromStorage(
-        localStorageUserIsLoggedInThisBrowser + userInfo.user.uid,
+      localStorageUserIsLoggedInThisBrowser + userInfo.user.uid,
     )
     logoutUser().then(() => {
       window.location.reload()
@@ -142,7 +147,7 @@ function useAuth() {
   }
 
   useEffect(() => {
-    checkUserLogin()
+    checkUserLogin.current()
   }, [])
 
   // Check user cookie is already valid
@@ -151,7 +156,7 @@ function useAuth() {
 
     if (isUserLogged) {
       interval = setInterval(() => {
-        checkUserLogin()
+        checkUserLogin.current()
       }, 5000)
 
       setUserDisconnected(false)
