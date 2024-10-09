@@ -5,7 +5,6 @@ import {render, screen, within} from '@testing-library/react'
 import projectTemplatesMock from '../../../../../../../mocks/projectTemplateMock'
 import {SCHEMA_KEYS} from '../../../../hooks/useProjectTemplates'
 import mockLanguages from '../../../../../../../mocks/languagesMock'
-import {EditorSettingsTab} from './EditorSettingsTab'
 
 global.config = {
   basepath: 'http://localhost/',

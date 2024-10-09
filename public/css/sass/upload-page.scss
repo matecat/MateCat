@@ -3064,30 +3064,6 @@ a.pull-right.confirmDelete {
   }
 }
 
-.language-dropdown-item-container {
-  display: grid;
-  grid-template-columns: 70px auto;
-  gap: 10px;
-  align-items: center;
-  overflow: hidden;
-
-  .code-badge {
-    min-width: 60px;
-    font-weight: normal;
-
-    > span {
-      display: block;
-      text-align: center;
-      background-color: $grey7;
-      border-radius: 4px;
-      padding: 2px 4px;
-      color: $white;
-      font-size: 14px;
-      white-space: nowrap;
-    }
-  }
-}
-
 .project-template-select {
   .select-item-default {
     display: flex;

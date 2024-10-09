@@ -100,15 +100,26 @@ export const CrossLanguagesMatches = () => {
           options={languages}
           activeOption={activeLang1}
           showSearchBar={true}
-          onToggleOption={(option) => {
-            if (activeLang1 && activeLang1.id === option.id) {
-              setActiveLang1()
-            } else {
-              setActiveLang1(option)
-            }
-          }}
-          multipleSelect="dropdown"
-        />
+          onSelect={(option) =>
+            setActiveLang1(
+              !(activeLang1 && activeLang1.id === option.id)
+                ? option
+                : undefined,
+            )
+          }
+        >
+          {({name, id}) => ({
+            row: (
+              <div className="language-dropdown-item-container">
+                <div className="code-badge">
+                  <span>{id}</span>
+                </div>
+
+                <span>{name}</span>
+              </div>
+            ),
+          })}
+        </Select>
         <Select
           name="multi-match-1"
           id="multi-match-1"
@@ -118,15 +129,26 @@ export const CrossLanguagesMatches = () => {
           activeOption={activeLang2}
           showSearchBar={true}
           isDisabled={!activeLang1}
-          onToggleOption={(option) => {
-            if (activeLang2 && activeLang2.id === option.id) {
-              setActiveLang2()
-            } else {
-              setActiveLang2(option)
-            }
-          }}
-          multipleSelect="dropdown"
-        />
+          onSelect={(option) =>
+            setActiveLang2(
+              !(activeLang2 && activeLang2.id === option.id)
+                ? option
+                : undefined,
+            )
+          }
+        >
+          {({name, id}) => ({
+            row: (
+              <div className="language-dropdown-item-container">
+                <div className="code-badge">
+                  <span>{id}</span>
+                </div>
+
+                <span>{name}</span>
+              </div>
+            ),
+          })}
+        </Select>
       </div>
     </div>
   )
