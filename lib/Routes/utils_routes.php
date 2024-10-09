@@ -117,3 +117,6 @@ $klein->with( '/api/app/project-template', function () {
 $klein->with( '/api/app/filters-config-template', function () {
     route( '/default', 'GET', [ '\API\V3\FiltersConfigTemplateController', 'default' ] );
 } );
+
+// MISC
+route( '/api/app/fetch-change-rates', 'POST', [ 'API\App\FetchChangeRatesController', 'fetch' ] );
