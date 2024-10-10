@@ -12,7 +12,6 @@ use Pagination\PaginationParameters;
 use PDO;
 use Projects\ProjectTemplateStruct;
 use ReflectionException;
-use stdClass;
 use Utils;
 
 class FiltersConfigTemplateDao extends DataAccess_AbstractDao {
@@ -39,15 +38,6 @@ class FiltersConfigTemplateDao extends DataAccess_AbstractDao {
         }
 
         return self::$instance;
-    }
-
-    /**
-     * @param int $uid
-     *
-     * @return stdClass
-     */
-    public static function getDefaultTemplate( int $uid ): stdClass {
-        return FiltersConfigTemplateStruct::default( $uid );
     }
 
     /**

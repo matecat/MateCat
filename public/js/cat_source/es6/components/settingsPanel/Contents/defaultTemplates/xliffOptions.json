@@ -1,0 +1,37 @@
+{
+  "xliff12": {
+    "states": [
+      "final",
+      "needs-adaptation",
+      "needs-l10n",
+      "needs-review-adaptation",
+      "needs-review-l10n",
+      "needs-review-translation",
+      "needs-translation",
+      "new",
+      "signed-off",
+      "translated",
+      "exact-match",
+      "fuzzy-match",
+      "id-match",
+      "leveraged-glossary",
+      "leveraged-inherited",
+      "leveraged-mt",
+      "leveraged-repository",
+      "leveraged-tm",
+      "mt-suggestion",
+      "rejected-grammar",
+      "rejected-inaccurate",
+      "rejected-length",
+      "rejected-spelling",
+      "tm-suggestion"
+    ],
+    "analysis": ["new", "pre-translated"],
+    "editor": ["draft", "translated", "approved", "approved2"]
+  },
+  "xliff20": {
+    "states": ["initial", "translated", "reviewed", "final"],
+    "analysis": ["new", "pre-translated"],
+    "editor": ["draft", "translated", "approved", "approved2"]
+  }
+}

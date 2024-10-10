@@ -4,6 +4,7 @@ import PropTypes from 'prop-types'
 import {Dropdown} from './Dropdown'
 import TEXT_UTILS from '../../utils/textUtils'
 import ChevronDown from '../../../../../img/icons/ChevronDown'
+import Tooltip from './Tooltip'
 
 const mergeClassNames = (...args) => {
   return (
@@ -116,7 +117,7 @@ export const Select = ({
       const wrapperTopPosition = wrapperNode.offsetTop
       const offsetParentElement = offsetParent
         ? offsetParent
-        : wrapperNode.offsetParent ?? document.body
+        : (wrapperNode.offsetParent ?? document.body)
       //console.log('Select offsetParent:', offsetParentElement);
       const parentHeight = offsetParentElement.getBoundingClientRect().height
       const parentScrollTop =
@@ -233,32 +234,29 @@ export const Select = ({
           {label}
         </label>
       )}
-      <div
-        className="select-with-icon__wrapper"
-        aria-label={
-          TEXT_UTILS.isContentTextEllipsis(selectedItemRef?.current)
+      <Tooltip
+        content={
+          TEXT_UTILS.isContentTextEllipsis(selectedItemRef?.current?.firstChild)
             ? selectedLabel
-            : null
+            : ''
         }
       >
-        <span
-          ref={selectedItemRef}
-          className={inputClassName}
-          onClick={toggleDropdown}
-        >
-          {renderSelection()}
-        </span>
-        <input
-          name={name}
-          readOnly={true}
-          type="text"
-          className="input--invisible"
-          placeholder={placeholder}
-          onFocus={handleFocus}
-          value={value}
-        />
-        <ChevronDown />
-      </div>
+        <div ref={selectedItemRef} className="select-with-icon__wrapper">
+          <span className={inputClassName} onClick={toggleDropdown}>
+            {renderSelection()}
+          </span>
+          <input
+            name={name}
+            readOnly={true}
+            type="text"
+            className="input--invisible"
+            placeholder={placeholder}
+            onFocus={handleFocus}
+            value={value}
+          />
+          <ChevronDown />
+        </div>
+      </Tooltip>
       {isDropdownVisible && (
         <div
           className={`select__dropdown-wrapper ${

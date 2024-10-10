@@ -74,14 +74,15 @@
 
 .email-badge-tag {
   display: inline-flex;
+  gap: 5px;
   align-items: center;
-  border-radius: 4px;
-  padding: 2px 4px;
+  border-radius: 14px;
+  padding: 2px 6px;
   cursor: default;
 
   &.default {
-    background-color: $grey4;
-    color: $grey6;
+    background-color: $grey7;
+    color: white;
   }
   &.selected {
     background-color: $translatedBlue;
@@ -114,4 +115,9 @@
 .email-badge-tag-button-close {
   display: flex;
   cursor: pointer;
+}
+
+.email-badge-disabled {
+  opacity: 0.6;
+  pointer-events: none;
 }

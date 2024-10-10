@@ -1,0 +1,156 @@
+@import '../../commons/colors';
+
+.file-import-tab {
+  &.settings-panel-contentwrapper-tab-background {
+    padding: 10px 20px 20px;
+  }
+
+  p {
+    display: block;
+    text-align: left;
+    color: #666666;
+    font-size: 16px;
+    line-height: 24px;
+  }
+
+  .settings-panel-subtemplates {
+    position: relative;
+    background-color: transparent;
+  }
+}
+
+.file-import-tab-header {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  width: 100%;
+  background-color: $grey5;
+
+  &:has(.select__dropdown-wrapper) {
+    z-index: 5;
+  }
+}
+
+/* Filters params */
+.filters-params-accordion-group,
+.xliff-settings-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.filters-params-accordion,
+.xliff-settings-container {
+  .accordion-component-title {
+    font-size: 18px !important;
+    font-weight: bold;
+  }
+}
+
+.filters-params-accordion-content {
+  padding: 10px 0;
+}
+
+.filters-params-option {
+  display: flex;
+  gap: 40px;
+  align-items: center;
+  padding: 15px 0;
+  border: unset;
+
+  > :first-child {
+    width: 55%;
+  }
+
+  > :last-child {
+    width: 45%;
+  }
+
+  .custom-segmented-control {
+    .segmented-control {
+      background-color: $grey8;
+    }
+    .segmented-control__label {
+      line-height: 28px;
+    }
+    .segmented-control__cursor {
+      padding: 2px;
+    }
+    .segmented-control__cursor:before {
+      background-color: white;
+    }
+    .segmented-control input:checked + .segmented-control__label {
+      color: black;
+    }
+  }
+
+  .container-segmented-control {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+
+.xliff-settings-container {
+  .accordion-component {
+    overflow: visible;
+
+    .accordion-component-content {
+      overflow: visible;
+    }
+  }
+
+  .select__dropdown-wrapper {
+    z-index: 5;
+  }
+
+  .select {
+    color: $black;
+    border-color: $grey8;
+  }
+
+  .select-with-label__wrapper .select {
+    padding: 9px 46px 9px 12px;
+  }
+
+  .select--is-disabled {
+    background-color: $grey9;
+  }
+
+  .unsaved {
+    color: $translatedBlue;
+  }
+}
+
+.xliff-settings-content {
+  display: flex;
+  gap: 30px;
+  padding: 25px 5px;
+  flex-direction: column;
+
+  .button-add-rule {
+    width: 120px;
+  }
+}
+
+.xliff-settings-table {
+  display: grid;
+  grid-template-columns: 4% repeat(3, minmax(0, 1fr)) 4%;
+  row-gap: 10px;
+  column-gap: 15px;
+  align-items: center;
+}
+
+.xliff-settings-column-name {
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.xliff-settings-column-name-state {
+  grid-column: 2;
+}
+
+.xliff-settings-column-name-editor {
+  grid-column: 4 / 6;
+}

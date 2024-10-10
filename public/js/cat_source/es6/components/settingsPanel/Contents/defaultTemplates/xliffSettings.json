@@ -1,0 +1,25 @@
+{
+  "id": 0,
+  "uid": 1,
+  "name": "default",
+  "rules": {
+    "xliff12": [
+      {
+        "states": ["translated"],
+        "analysis": "pre-translated",
+        "editor": "draft",
+        "match_category": "ice"
+      }
+    ],
+    "xliff20": [
+      {
+        "states": ["translated"],
+        "analysis": "pre-translated",
+        "editor": "approved",
+        "match_category": "ice"
+      }
+    ]
+  },
+  "createdAt": "2024-07-29T17:18:05+02:00",
+  "modifiedAt": "2024-08-08T15:44:45+02:00"
+}

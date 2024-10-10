@@ -7,8 +7,6 @@ use JsonSerializable;
 
 class Xml implements IDto, JsonSerializable, Countable {
 
-    use DefaultTrait;
-
     private bool  $preserve_whitespace       = false;
     private array $translate_elements        = [];
     private array $do_not_translate_elements = [];
@@ -70,21 +68,15 @@ class Xml implements IDto, JsonSerializable, Countable {
 
         $format = [];
 
-        if ( $this->preserve_whitespace ) {
-            $format[ 'preserve_whitespace' ] = $this->preserve_whitespace;
-        }
-
-        if ( !empty( $this->translate_elements ) ) {
-            $format[ 'translate_elements' ] = $this->translate_elements;
-        }
+        $format[ 'preserve_whitespace' ] = $this->preserve_whitespace;
+        $format[ 'translate_elements' ]  = $this->translate_elements;
 
         if ( !empty( $this->do_not_translate_elements ) ) {
             $format[ 'do_not_translate_elements' ] = $this->do_not_translate_elements;
+            unset( $format[ 'translate_elements' ] );
         }
 
-        if ( !empty( $this->translate_attributes ) ) {
-            $format[ 'translate_attributes' ] = $this->translate_attributes;
-        }
+        $format[ 'translate_attributes' ] = $this->translate_attributes;
 
         return $format;
 
