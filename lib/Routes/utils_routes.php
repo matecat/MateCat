@@ -124,3 +124,10 @@ route( '/api/app/outsource-to', 'POST', [ 'API\App\OutsourceToController', 'outs
 route( '/api/app/get-volume-analysis', 'POST', [ 'API\App\GetVolumeAnalysisController', 'analysis' ] );
 route( '/api/app/get-projects', 'POST', [ 'API\App\GetProjectsController', 'fetch' ] );
 route( '/api/app/delete-contribution', 'POST', [ 'API\App\DeleteContributionController', 'delete' ] );
+route( '/api/app/comment/resolve', 'POST', [ 'API\App\CommentController', 'resolve' ] );
+route( '/api/app/comment/delete', 'POST', [ 'API\App\CommentController', 'delete' ] );
+route( '/api/app/comment/create', 'POST', [ 'API\App\CommentController', 'create' ] );
+route( '/api/app/comment/get-range', 'POST', [ 'API\App\CommentController', 'getRange' ] );
+
+
+
