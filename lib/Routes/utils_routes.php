@@ -118,5 +118,6 @@ $klein->with( '/api/app/filters-config-template', function () {
     route( '/default', 'GET', [ '\API\V3\FiltersConfigTemplateController', 'default' ] );
 } );
 
-// MISC
+// MISC (OLD AJAX ROUTES)
 route( '/api/app/fetch-change-rates', 'POST', [ 'API\App\FetchChangeRatesController', 'fetch' ] );
+route( '/api/app/outsource-to', 'POST', [ 'API\App\OutsourceToController', 'outsource' ] );
