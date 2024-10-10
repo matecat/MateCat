@@ -123,3 +123,4 @@ route( '/api/app/fetch-change-rates', 'POST', [ 'API\App\FetchChangeRatesControl
 route( '/api/app/outsource-to', 'POST', [ 'API\App\OutsourceToController', 'outsource' ] );
 route( '/api/app/get-volume-analysis', 'POST', [ 'API\App\GetVolumeAnalysisController', 'analysis' ] );
 route( '/api/app/get-projects', 'POST', [ 'API\App\GetProjectsController', 'fetch' ] );
+route( '/api/app/delete-contribution', 'POST', [ 'API\App\DeleteContributionController', 'delete' ] );

@@ -8,6 +8,7 @@ use API\Commons\Exceptions\AuthenticationError;
 use API\Commons\Validators\Base;
 use ApiKeys_ApiKeyStruct;
 use AuthCookie;
+use CatUtils;
 use CookieManager;
 use Exception;
 use FeatureSet;
@@ -313,5 +314,21 @@ abstract class KleinController implements IController {
     protected function isJsonRequest()
     {
         return preg_match( '~^application/json~', $this->request->headers()->get( 'Content-Type' ) ) ;
+    }
+
+    /**
+     * @param $id_job
+     * @param $password
+     * @return bool|null
+     */
+    protected function isRevision($id_job, $password) {
+
+        $isRevision = CatUtils::getIsRevisionFromIdJobAndPassword( $id_job, $password );
+
+        if ( null === $isRevision ) {
+            $isRevision = CatUtils::getIsRevisionFromReferer();
+        }
+
+        return $isRevision;
     }
 }
