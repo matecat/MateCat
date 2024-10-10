@@ -9,7 +9,8 @@ export const TargetLanguages = () => {
   return (
     <div className="options-box">
       <div className="option-description">
-        <h3>Target languages</h3>Select targets.
+        <h3>Target language(s)</h3>Select one or more target languages for your
+        project
       </div>
       <div className="options-select-container">
         <Select

@@ -37,8 +37,6 @@ import ApplicationActions from '../actions/ApplicationActions'
 import useDeviceCompatibility from '../hooks/useDeviceCompatibility'
 import useProjectTemplates, {SCHEMA_KEYS} from '../hooks/useProjectTemplates'
 import {TemplateSelect} from '../components/settingsPanel/ProjectTemplate/TemplateSelect'
-import {checkLexiqaIsEnabled} from '../components/settingsPanel/Contents/EditorSettingsTab/Lexiqa'
-import {checkGuessTagIsEnabled} from '../components/settingsPanel/Contents/EditorSettingsTab/GuessTag'
 import {getMMTKeys} from '../api/getMMTKeys/getMMTKeys'
 import {AlertDeleteResourceProjectTemplates} from '../components/modals/AlertDeleteResourceProjectTemplates'
 import {

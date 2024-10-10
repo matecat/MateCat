@@ -5,7 +5,7 @@ export const SourceLanguage = () => {
   return (
     <div className="options-box">
       <div className="option-description">
-        <h3>Source language</h3>Select source.
+        <h3>Source language</h3>Select the source language for your project
       </div>
       <div className="options-select-container">
         <SourceLanguageSelect shouldHideLabel={true} />
