@@ -162,6 +162,10 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
         return $obj;
     }
 
+    /**
+     * @param Comments_CommentStruct $obj
+     * @return Comments_CommentStruct
+     */
     public function resolveThread( Comments_CommentStruct $obj ) {
 
         $obj->message_type = self::TYPE_RESOLVE;

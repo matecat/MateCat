@@ -2,12 +2,22 @@
 
 namespace API\App;
 
+use AMQHandler;
 use API\Commons\KleinController;
 use API\Commons\Validators\LoginValidator;
 use Comments_CommentDao;
 use Comments_CommentStruct;
 use Database;
+use Email\CommentEmail;
+use Email\CommentMentionEmail;
+use Email\CommentResolveEmail;
+use INIT;
 use Jobs_JobDao;
+use Jobs_JobStruct;
+use Log;
+use Stomp\Transport\Message;
+use Teams\MembershipDao;
+use Url\JobUrlBuilder;
 use Users_UserDao;
 
 class CommentController extends KleinController {
@@ -43,23 +53,24 @@ class CommentController extends KleinController {
 
     public function resolve()
     {
-        $this->prepareCommentData();
+        $request = $this->validateTheRequest();
+        $prepareCommandData = $this->prepareCommentData($request);
+        $comment_struct = $prepareCommandData['struct'];
+        $users_mentioned_id = $prepareCommandData['users_mentioned_id'];
+        $users_mentioned = $prepareCommandData['users_mentioned'];
 
-        $commentDao = new Comments_CommentDao( Database::obtain() );
-        $new_record = $commentDao->saveComment( $this->struct );
+        $commentDao       = new Comments_CommentDao( Database::obtain() );
+        $new_record = $commentDao->resolveThread( $comment_struct );
 
-        foreach ( $this->users_mentioned as $user_mentioned ) {
-            $mentioned_comment = $this->prepareMentionCommentData( $user_mentioned );
-            $commentDao->saveComment( $mentioned_comment );
-        }
+        $payload = $this->enqueueComment($new_record, $request['job']->id_project, $request['id_job'], $request['id_client']);
+        $users = $this->resolveUsers($comment_struct, $request['job'], $users_mentioned_id);
+        $this->sendEmail($comment_struct, $request['job'], $users, $users_mentioned);
 
-        $commentDao->destroySegmentIdCache($this->__postInput[ 'id_segment' ]);
-
-        $this->enqueueComment();
-        $this->users = $this->resolveUsers();
-        $this->sendEmail();
-        $this->result[ 'data' ][ 'entries' ] = [ $this->payload ];
-        $this->appendUser();
+        return $this->response->json([
+            "data" => [
+                'entries' => $payload
+            ]
+        ]);
     }
 
     public function create()
@@ -114,6 +125,11 @@ class CommentController extends KleinController {
         ];
     }
 
+    /**
+     * @param $request
+     * @return array
+     * @throws \ReflectionException
+     */
     private function prepareCommentData($request)
     {
         $struct = new Comments_CommentStruct();
@@ -127,10 +143,208 @@ class CommentController extends KleinController {
         $struct->email           = $this->user->getEmail();
         $struct->uid             = $this->user->getUid();
 
-        $user_mentions           = $this->resolveUserMentions();
-        $user_team_mentions      = $this->resolveTeamMentions();
+        $user_mentions           = $this->resolveUserMentions($struct->message);
+        $user_team_mentions      = $this->resolveTeamMentions($request['job'], $struct->message);
         $userDao                 = new Users_UserDao( Database::obtain() );
         $users_mentioned_id      = array_unique( array_merge( $user_mentions, $user_team_mentions ) );
-        $users_mentioned         = $this->filterUsers( $userDao->getByUids( $this->users_mentioned_id ) );
+        $users_mentioned         = $this->filterUsers( $userDao->getByUids( $users_mentioned_id ) );
+
+        return [
+            'struct' => $struct,
+            'users_mentioned_id' => $users_mentioned_id,
+            'users_mentioned' => $users_mentioned,
+        ];
+    }
+
+    /**
+     * @param $message
+     * @return array|mixed
+     */
+    private function resolveUserMentions($message) {
+        return Comments_CommentDao::getUsersIdFromContent( $message );
+    }
+
+    /**
+     * @param Jobs_JobStruct $job
+     * @param $message
+     * @return array
+     * @throws \ReflectionException
+     */
+    private function resolveTeamMentions(Jobs_JobStruct $job, $message) {
+        $users = [];
+
+        if ( strstr( $message, "{@team@}" ) ) {
+            $project     = $job->getProject();
+            $memberships = ( new MembershipDao() )->setCacheTTL( 60 * 60 * 24 )->getMemberListByTeamId( $project->id_team, false );
+            foreach ( $memberships as $membership ) {
+                $users[] = $membership->uid;
+            }
+        }
+
+        return $users;
+    }
+
+    /**
+     * @param $users
+     * @param array $uidSentList
+     * @return array
+     */
+    private function filterUsers( $users, $uidSentList = [] ) {
+        $userIsLogged = $this->userIsLogged;
+        $current_uid  = $this->user->uid;
+
+        // find deep duplicates
+        $users = array_filter( $users, function ( $item ) use ( $userIsLogged, $current_uid, &$uidSentList ) {
+            if ( $userIsLogged && $current_uid == $item->uid ) {
+                return false;
+            }
+
+            // find deep duplicates
+            if ( array_search( $item->uid, $uidSentList ) !== false ) {
+                return false;
+            }
+            $uidSentList[] = $item->uid;
+
+            return true;
+
+        } );
+
+        return $users;
+    }
+
+    /**
+     * @param Comments_CommentStruct $comment
+     * @param Jobs_JobStruct $job
+     * @param $users_mentioned_id
+     * @return array
+     */
+    private function resolveUsers(Comments_CommentStruct $comment, Jobs_JobStruct $job, $users_mentioned_id)
+    {
+        $commentDao = new Comments_CommentDao( Database::obtain() );
+        $result     = $commentDao->getThreadContributorUids( $comment );
+
+        $userDao = new Users_UserDao( Database::obtain() );
+        $users   = $userDao->getByUids( $result );
+        $userDao->setCacheTTL( 60 * 60 * 24 );
+        $owner = $userDao->getProjectOwner( $job->id );
+
+        if ( !empty( $owner->uid ) && !empty( $owner->email ) ) {
+            array_push( $users, $owner );
+        }
+
+        $userDao->setCacheTTL( 60 * 10 );
+        $assignee = $userDao->getProjectAssignee( $job->id_project );
+        if ( !empty( $assignee->uid ) && !empty( $assignee->email ) ) {
+            array_push( $users, $assignee );
+        }
+
+        return $this->filterUsers( $users, $users_mentioned_id );
+
+    }
+
+    /**
+     * @param Comments_CommentStruct $comment
+     * @param $id_project
+     * @param $id_job
+     * @param $id_client
+     * @return false|string
+     * @throws \Stomp\Exception\ConnectionException
+     */
+    private function enqueueComment(Comments_CommentStruct $comment, $id_project, $id_job, $id_client) {
+
+        $payload = [
+            'message_type'   => $comment->message_type,
+            'message'        => $comment->message,
+            'id'             => $comment->id,
+            'id_segment'     => $comment->id_segment,
+            'full_name'      => $comment->full_name,
+            'email'          => $comment->email,
+            'source_page'    => $comment->source_page,
+            'formatted_date' => $comment->getFormattedDate(),
+            'thread_id'      => $comment->thread_id,
+            'timestamp'      => (int)$comment->timestamp,
+        ];
+
+        $message = json_encode( [
+            '_type' => 'comment',
+            'data'  => [
+                'id_job'    => $id_job,
+                'passwords' => $this->getProjectPasswords($id_project),
+                'id_client' => $id_client,
+                'payload'   => $payload
+            ]
+        ] );
+
+        $queueHandler = new AMQHandler();
+        $queueHandler->publishToTopic( INIT::$SSE_NOTIFICATIONS_QUEUE_NAME, new Message( $message ) );
+
+        return $message;
+    }
+
+    /**
+     * @param $id_project
+     * @return \DataAccess\ShapelessConcreteStruct[]
+     */
+    private function projectData($id_project) {
+        return ( new \Projects_ProjectDao() )->setCacheTTL( 60 * 60 )->getProjectData( $id_project );
+    }
+
+    /**
+     * @param $id_project
+     * @return array
+     */
+    private function getProjectPasswords($id_project) {
+        $pws = [];
+
+        foreach ( $this->projectData($id_project) as $chunk ) {
+            $pws[] = $chunk[ 'jpassword' ];
+        }
+
+        return $pws;
+    }
+
+
+    /**
+     * @param Comments_CommentStruct $comment
+     * @param Jobs_JobStruct $job
+     * @param array $users
+     * @param array $users_mentioned
+     * @return \Klein\Response
+     */
+    private function sendEmail(Comments_CommentStruct $comment, Jobs_JobStruct $job, array $users, array $users_mentioned) {
+
+        $jobUrlStruct = JobUrlBuilder::createFromJobStruct($job, [
+            'id_segment'         => $comment->id_segment,
+            'skip_check_segment' => true
+        ]);
+
+        $url = $jobUrlStruct->getUrlByRevisionNumber($comment->revision_number);
+
+        if(!$url){
+            $this->response->code(404);
+
+            return $this->response->json([
+                "code" => -10,
+                "message" => "No valid url was found for this project."
+            ]);
+        }
+
+        Log::doJsonLog( $url );
+        $project_data = $this->projectData($job->id_project);
+
+        foreach ( $users_mentioned as $user_mentioned ) {
+            $email = new CommentMentionEmail( $user_mentioned, $comment, $url, $project_data[ 0 ], $job );
+            $email->send();
+        }
+
+        foreach ( $users as $user ) {
+            if ( $comment->message_type == Comments_CommentDao::TYPE_RESOLVE ) {
+                $email = new CommentResolveEmail( $user, $comment, $url, $project_data[ 0 ], $job );
+            } else {
+                $email = new CommentEmail( $user, $comment, $url, $project_data[ 0 ], $job );
+            }
+
+            $email->send();
+        }
     }
 }
