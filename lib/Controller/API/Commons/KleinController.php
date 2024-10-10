@@ -331,4 +331,19 @@ abstract class KleinController implements IController {
 
         return $isRevision;
     }
+
+    /**
+     * @param $code
+     * @param $message
+     * @return \Klein\Response
+     */
+    protected function return400Error($code, $message)
+    {
+        $this->response->code(400);
+
+        return $this->response->json([
+            "code" => $code,
+            "message" => $message
+        ]);
+    }
 }

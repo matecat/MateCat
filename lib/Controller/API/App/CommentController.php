@@ -20,6 +20,7 @@ use Teams\MembershipDao;
 use Url\JobUrlBuilder;
 use Users_UserDao;
 use Users_UserStruct;
+use Utils;
 
 class CommentController extends KleinController {
 
@@ -27,6 +28,10 @@ class CommentController extends KleinController {
         $this->appendValidator( new LoginValidator( $this ) );
     }
 
+    /**
+     * @return \Klein\Response
+     * @throws \ReflectionException
+     */
     public function getRange()
     {
         $data = [];
@@ -52,6 +57,11 @@ class CommentController extends KleinController {
         ]);
     }
 
+    /**
+     * @return \Klein\Response
+     * @throws \ReflectionException
+     * @throws \Stomp\Exception\ConnectionException
+     */
     public function resolve()
     {
         $request = $this->validateTheRequest();
@@ -77,6 +87,11 @@ class CommentController extends KleinController {
         ]);
     }
 
+    /**
+     * @return \Klein\Response
+     * @throws \ReflectionException
+     * @throws \Stomp\Exception\ConnectionException
+     */
     public function create()
     {
         $request = $this->validateTheRequest();
@@ -109,8 +124,84 @@ class CommentController extends KleinController {
         ]);
     }
 
+    /**
+     * @return \Klein\Response
+     * @throws \ReflectionException
+     */
     public function delete()
-    {}
+    {
+        $request = $this->validateTheRequest();
+
+        if(!isset($request['id_comment'])){
+            return $this->return400Error(-200,  "Id comment not provided.");
+        }
+
+        $user = $this->user;
+        $idComment = $request['id_comment'];
+        $commentDao = new Comments_CommentDao( Database::obtain() );
+        $comment = $commentDao->getById($idComment);
+
+        if(null === $comment){
+            return $this->return400Error(-202,  "Comment not found.");
+        }
+
+        if($comment->uid === null){
+            return $this->return400Error(-203,  "You are not the author of the comment.");
+        }
+
+        if((int)$comment->uid !== (int)$user->uid){
+            return $this->return400Error(-203,  "You are not the author of the comment.");
+        }
+
+        if((int)$comment->id_segment !== (int)$request['id_segment']){
+            return $this->return400Error(-204, "Not corresponding id segment.");
+        }
+
+        $segments = $commentDao->getBySegmentId($comment->id_segment);
+        $lastSegment = end($segments);
+
+        if((int)$lastSegment->id !== (int)$request['id_comment']){
+            return $this->return400Error(-205, "Only the last element comment can be deleted.");
+        }
+
+        if((int)$comment->id_job !== (int)$request['id_job']){
+            return $this->return400Error(-206, "Not corresponding id job.");
+        }
+
+        // Fix for R2
+        // The comments from R2 phase are wrongly saved with source_page = 2
+        $sourcePage = Utils::getSourcePageFromReferer();
+
+        $allowedSourcePages = [];
+        $allowedSourcePages[] = (int)$request['source_page'];
+
+        if($sourcePage == 3){
+            $allowedSourcePages[] = 2;
+        }
+
+        if(!in_array((int)$comment->source_page, $allowedSourcePages)){
+            return $this->return400Error(-207, "Not corresponding source_page.");
+        }
+
+        if($commentDao->deleteComment($comment->id)){
+
+            $commentDao->destroySegmentIdCache($comment->id_segment);
+            $this->enqueueDeleteCommentMessage($comment->id, $comment->id_segment, $this->user->email, $request['source_page']);
+
+            return $this->response->json([
+                "data" => [
+                    [
+                        "id" => (int)$comment->id
+                    ],
+                    'user' => [
+                        'full_name' => $this->user->fullName()
+                    ]
+                ]
+            ]);
+        }
+
+        return $this->return400Error(-220, "Error when deleting a comment.");
+    }
 
     /**
      * @return array|\Klein\Response
@@ -134,12 +225,7 @@ class CommentController extends KleinController {
         $job = Jobs_JobDao::getByIdAndPassword( $id_job, $password, 60 * 60 * 24 );
 
         if ( empty( $job ) ) {
-            $this->response->code(400);
-
-            return $this->response->json([
-                "code" => -10,
-                "message" => "wrong password"
-            ]);
+            return $this->return400Error(-10, "wrong password");
         }
 
         return [
