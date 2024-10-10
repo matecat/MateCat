@@ -401,9 +401,6 @@ const NewProject = () => {
     const {
       mt,
       tm,
-      lexica,
-      speech2text,
-      tagProjection,
       pretranslate100,
       pretranslate101,
       segmentationRule,
@@ -413,11 +410,6 @@ const NewProject = () => {
       payableRateTemplateId,
     } = currentProjectTemplate
 
-    const isLexiqaEnabled = !checkLexiqaIsEnabled({sourceLang, targetLangs})
-      .disableLexiQA
-    const isGuessTagEnabled =
-      checkGuessTagIsEnabled({sourceLang, targetLangs}).arrayIntersection
-        .length > 0
     // update store recently used target languages
     setRecentlyUsedLanguages(targetLangs)
     const getParams = () => ({
@@ -436,9 +428,6 @@ const NewProject = () => {
       lang_detect_files: '',
       pretranslate_100: pretranslate100 ? 1 : 0,
       pretranslate_101: pretranslate101 ? 1 : 0,
-      lexiqa: isLexiqaEnabled && lexica,
-      speech2text: speech2text,
-      tag_projection: isGuessTagEnabled && tagProjection,
       segmentation_rule: segmentationRule.id === '1' ? '' : segmentationRule.id,
       id_team: idTeam,
       qa_model_template_id: qaModelTemplateId,
