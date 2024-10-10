@@ -36,16 +36,12 @@ export const XliffRulesRow = ({
   useEffect(() => {
     if (typeof formData === 'undefined') return
 
-    const propsValue = Object.entries(formData).reduce(
-      (acc, [key, value]) => ({
-        ...acc,
-        ...(((typeof value !== 'undefined' && key !== 'editor') ||
-          (key === 'editor' && formData.analysis === 'pre-translated')) && {
-          [key]: value,
-        }),
-      }),
-      {},
-    )
+    const {editor, match_category, ...restProps} = formData
+
+    const propsValue = {
+      ...restProps,
+      ...(formData.analysis === 'pre-translated' && {editor, match_category}),
+    }
 
     if (
       !isEqual(valueRef.current, propsValue) &&
@@ -139,7 +135,11 @@ export const XliffRulesRow = ({
                 id: value,
                 name: value,
               }))}
-              activeOption={value && {id: value, name: value}}
+              activeOption={
+                formData?.analysis === 'new'
+                  ? {id: 'na', name: 'N.A.'}
+                  : value && {id: value, name: value}
+              }
               onSelect={(option) => onChange(option.id)}
               isDisabled={
                 typeof value === 'undefined' || formData.analysis === 'new'

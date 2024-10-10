@@ -8,11 +8,11 @@
     "translate_attributes": []
   },
   "yaml": {
-    "extract_arrays": false,
+    "extract_arrays": true,
     "translate_keys": []
   },
   "json": {
-    "extract_arrays": false,
+    "extract_arrays": true,
     "escape_forward_slashes": false,
     "translate_keys": [],
     "context_keys": [],
@@ -21,7 +21,7 @@
   "ms_word": {
     "extract_doc_properties": false,
     "extract_comments": false,
-    "extract_headers_footers": false,
+    "extract_headers_footers": true,
     "extract_hidden_text": false,
     "accept_revisions": false,
     "exclude_styles": [],
