@@ -19,6 +19,7 @@ use Stomp\Transport\Message;
 use Teams\MembershipDao;
 use Url\JobUrlBuilder;
 use Users_UserDao;
+use Users_UserStruct;
 
 class CommentController extends KleinController {
 
@@ -68,13 +69,45 @@ class CommentController extends KleinController {
 
         return $this->response->json([
             "data" => [
-                'entries' => $payload
+                'entries' => $payload,
+                'user' => [
+                    'full_name' => $this->user->fullName()
+                ]
             ]
         ]);
     }
 
     public function create()
-    {}
+    {
+        $request = $this->validateTheRequest();
+        $prepareCommandData = $this->prepareCommentData($request);
+        $comment_struct = $prepareCommandData['struct'];
+        $users_mentioned_id = $prepareCommandData['users_mentioned_id'];
+        $users_mentioned = $prepareCommandData['users_mentioned'];
+
+        $commentDao = new Comments_CommentDao( Database::obtain() );
+        $new_record = $commentDao->saveComment( $comment_struct );
+
+        foreach ( $users_mentioned as $user_mentioned ) {
+            $mentioned_comment = $this->prepareMentionCommentData($request, $user_mentioned);
+            $commentDao->saveComment( $mentioned_comment );
+        }
+
+        $commentDao->destroySegmentIdCache($request[ 'id_segment' ]);
+
+        $payload = $this->enqueueComment($new_record, $request['job']->id_project, $request['id_job'], $request['id_client']);
+        $users = $this->resolveUsers($comment_struct, $request['job'], $users_mentioned_id);
+        $this->sendEmail($comment_struct, $request['job'], $users, $users_mentioned);
+
+        return $this->response->json([
+            "data" => [
+                'entries' => $payload,
+                'user' => [
+                    'full_name' => $this->user->fullName()
+                ]
+            ]
+        ]);
+    }
 
     public function delete()
     {}
@@ -154,6 +187,26 @@ class CommentController extends KleinController {
             'users_mentioned_id' => $users_mentioned_id,
             'users_mentioned' => $users_mentioned,
         ];
+    }
+
+    /**
+     * @param $request
+     * @param Users_UserStruct $user
+     * @return Comments_CommentStruct
+     */
+    private function prepareMentionCommentData( $request, Users_UserStruct $user ) {
+        $struct = new Comments_CommentStruct();
+
+        $struct->id_segment   = $request[ 'id_segment' ];
+        $struct->id_job       = $request[ 'id_job' ];
+        $struct->full_name    = $user->fullName();
+        $struct->source_page  = $request[ 'source_page' ];
+        $struct->message      = "";
+        $struct->message_type = Comments_CommentDao::TYPE_MENTION;
+        $struct->email        = $user->getEmail();
+        $struct->uid          = $user->getUid();
+
+        return $struct;
     }
 
     /**
@@ -303,6 +356,36 @@ class CommentController extends KleinController {
         return $pws;
     }
 
+    /**
+     * @param $id
+     * @param $idSegment
+     * @param $email
+     * @param $sourcePage
+     *
+     * @throws StompException
+     */
+    private function enqueueDeleteCommentMessage($id, $idSegment, $email, $sourcePage)
+    {
+        $message = json_encode( [
+            '_type' => 'comment',
+            'data'  => [
+                'id_job'    => $this->__postInput[ 'id_job' ],
+                'passwords' => $this->getProjectPasswords(),
+                'id_client' => $this->__postInput[ 'id_client' ],
+                'payload'   => [
+                    'message_type'   => "2",
+                    'id'             => (int)$id,
+                    'id_segment'     => $idSegment,
+                    'email'          => $email,
+                    'source_page'    => $sourcePage,
+                ]
+            ]
+        ] );
+
+        $queueHandler = new AMQHandler();
+        $queueHandler->publishToTopic( INIT::$SSE_NOTIFICATIONS_QUEUE_NAME, new Message( $message ) );
+
+    }
 
     /**
      * @param Comments_CommentStruct $comment
