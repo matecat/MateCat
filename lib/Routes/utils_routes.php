@@ -117,3 +117,18 @@ $klein->with( '/api/app/project-template', function () {
 $klein->with( '/api/app/filters-config-template', function () {
     route( '/default', 'GET', [ '\API\V3\FiltersConfigTemplateController', 'default' ] );
 } );
+
+// MISC (OLD AJAX ROUTES)
+route( '/api/app/fetch-change-rates', 'POST', [ 'API\App\FetchChangeRatesController', 'fetch' ] );
+route( '/api/app/outsource-to', 'POST', [ 'API\App\OutsourceToController', 'outsource' ] );
+route( '/api/app/get-volume-analysis', 'POST', [ 'API\App\GetVolumeAnalysisController', 'analysis' ] );
+route( '/api/app/get-projects', 'POST', [ 'API\App\GetProjectsController', 'fetch' ] );
+route( '/api/app/delete-contribution', 'POST', [ 'API\App\DeleteContributionController', 'delete' ] );
+route( '/api/app/comment/resolve', 'POST', [ 'API\App\CommentController', 'resolve' ] );
+route( '/api/app/comment/delete', 'POST', [ 'API\App\CommentController', 'delete' ] );
+route( '/api/app/comment/create', 'POST', [ 'API\App\CommentController', 'create' ] );
+route( '/api/app/comment/get-range', 'POST', [ 'API\App\CommentController', 'getRange' ] );
+route( '/api/app/copy-all-source-to-target', 'POST', [ 'API\App\CopyAllSourceToTargetController', 'copy' ] );
+
+
+

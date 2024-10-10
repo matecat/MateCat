@@ -15,7 +15,6 @@ export const copyAllSourceToTarget = async ({
   revisionNumber = config.revisionNumber,
 } = {}) => {
   const paramsData = {
-    action: 'copyAllSource2Target',
     id_job: idJob,
     pass: password,
     revision_number: revisionNumber ? revisionNumber : undefined,
@@ -26,7 +25,7 @@ export const copyAllSourceToTarget = async ({
     if (paramsData[key] !== undefined) formData.append(key, paramsData[key])
   })
   const response = await fetch(
-    `${getMatecatApiDomain()}?action=copyAllSource2Target`,
+    `${getMatecatApiDomain()}api/app/copy-all-source-to-target`,
     {
       method: 'POST',
       body: formData,
