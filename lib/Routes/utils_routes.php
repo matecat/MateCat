@@ -122,3 +122,4 @@ $klein->with( '/api/app/filters-config-template', function () {
 route( '/api/app/fetch-change-rates', 'POST', [ 'API\App\FetchChangeRatesController', 'fetch' ] );
 route( '/api/app/outsource-to', 'POST', [ 'API\App\OutsourceToController', 'outsource' ] );
 route( '/api/app/get-volume-analysis', 'POST', [ 'API\App\GetVolumeAnalysisController', 'analysis' ] );
+route( '/api/app/get-projects', 'POST', [ 'API\App\GetProjectsController', 'fetch' ] );
