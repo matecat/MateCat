@@ -22,22 +22,20 @@ class OutsourceToController extends KleinController {
         $typeOfService = filter_var( $this->request->param( 'typeOfService' ), FILTER_SANITIZE_STRING );
         $jobList = filter_var( $this->request->param( 'jobs' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_REQUIRE_ARRAY  | FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
 
-        if( empty( $pid ) ){
-            $this->response->code(400);
+        $errors = [];
 
-            return $this->response->json([
+        if( empty( $pid ) ){
+            $errors[] = [
                 "code" => -1,
                 "message" => "No id project provided"
-            ]);
+            ];
         }
 
         if( empty( $ppassword ) ){
-            $this->response->code(400);
-
-            return $this->response->json([
+            $errors[] = [
                 "code" => -2,
                 "message" => "No project Password Provided"
-            ]);
+            ];
         }
 
         /**
@@ -54,12 +52,16 @@ class OutsourceToController extends KleinController {
          * </pre>
          */
         if( empty( $jobList ) ){
-            $this->response->code(400);
-
-            return $this->response->json([
+            $errors[] = [
                 "code" => -3,
                 "message" => "No job list Provided"
-            ]);
+            ];
+        }
+
+        if(!empty($errors)){
+            $this->response->code(400);
+
+            return $this->response->json($errors);
         }
 
         if ( empty( $currency ) ) {
@@ -70,7 +72,7 @@ class OutsourceToController extends KleinController {
             $timezone = @$_COOKIE[ "matecat_timezone" ];
         }
 
-        if ( !in_array( $typeOfService, array( "premium" , "professional") ) ) {
+        if ( !in_array( $typeOfService, ["premium" , "professional"] ) ) {
             $typeOfService = "professional";
         }
 
@@ -106,6 +108,7 @@ class OutsourceToController extends KleinController {
         $client_output = $outsourceTo->getQuotesResult();
 
         $this->response->json( [
+            'errors' => [],
             'data' => array_values( $client_output ),
             'return_url' => [
                 'url_ok'          => $outsourceTo->getOutsourceLoginUrlOk(),

@@ -20,11 +20,11 @@ class OutsourceConfirmationController extends AbstractStatefulKleinController {
 
     public function confirm() {
 
-        $params = filter_var_array( $this->request->params(), array(
-                'id_job'   => FILTER_SANITIZE_STRING,
-                'password' => FILTER_SANITIZE_STRING,
-                'payload'  => FILTER_SANITIZE_STRING,
-        ) );
+        $params = filter_var_array( $this->request->params(), [
+            'id_job'   => FILTER_SANITIZE_STRING,
+            'password' => FILTER_SANITIZE_STRING,
+            'payload'  => FILTER_SANITIZE_STRING,
+        ] );
 
         $payload = \SimpleJWT::getValidPayload( $params[ 'payload' ] );
 
@@ -50,8 +50,11 @@ class OutsourceConfirmationController extends AbstractStatefulKleinController {
 
         $confirmationArray = $confirmationStruct->toArray();
         unset( $confirmationArray['id'] );
-        $this->response->json( [ 'confirm' => $confirmationArray ] );
 
+        $this->response->json( [
+            'errors' => [],
+            'confirm' => $confirmationArray
+        ] );
     }
 
 }
