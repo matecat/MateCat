@@ -186,7 +186,16 @@ class CommentController extends KleinController {
         if($commentDao->deleteComment($comment->id)){
 
             $commentDao->destroySegmentIdCache($comment->id_segment);
-            $this->enqueueDeleteCommentMessage($comment->id, $comment->id_segment, $this->user->email, $request['source_page']);
+
+            $this->enqueueDeleteCommentMessage(
+                $request['id_job'],
+                $request['id_client'],
+                $request['job']->id_project,
+                $comment->id,
+                $comment->id_segment,
+                $this->user->email,
+                $request['source_page']
+            );
 
             return $this->response->json([
                 "data" => [
@@ -443,21 +452,31 @@ class CommentController extends KleinController {
     }
 
     /**
+     * @param $id_job
+     * @param $id_client
+     * @param $id_project
      * @param $id
      * @param $idSegment
      * @param $email
      * @param $sourcePage
-     *
-     * @throws StompException
+     * @throws \Stomp\Exception\ConnectionException
      */
-    private function enqueueDeleteCommentMessage($id, $idSegment, $email, $sourcePage)
+    private function enqueueDeleteCommentMessage(
+        $id_job,
+        $id_client,
+        $id_project,
+        $id,
+        $idSegment,
+        $email,
+        $sourcePage
+    )
     {
         $message = json_encode( [
             '_type' => 'comment',
             'data'  => [
-                'id_job'    => $this->__postInput[ 'id_job' ],
-                'passwords' => $this->getProjectPasswords(),
-                'id_client' => $this->__postInput[ 'id_client' ],
+                'id_job'    => $id_job,
+                'passwords' => $this->getProjectPasswords($id_project),
+                'id_client' => $id_client,
                 'payload'   => [
                     'message_type'   => "2",
                     'id'             => (int)$id,
