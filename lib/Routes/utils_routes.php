@@ -131,6 +131,9 @@ route( '/api/app/comment/get-range', 'POST', [ 'API\App\CommentController', 'get
 route( '/api/app/copy-all-source-to-target', 'POST', [ 'API\App\CopyAllSourceToTargetController', 'copy' ] );
 route( '/api/app/get-global-warning', 'POST', [ 'API\App\GetWarningController', 'global' ] );
 route( '/api/app/get-local-warning', 'POST', [ 'API\App\GetWarningController', 'local' ] );
+route( '/api/app/split-job-apply', 'POST', [ 'API\App\SplitJobController', 'apply' ] );
+route( '/api/app/split-job-check', 'POST', [ 'API\App\SplitJobController', 'check' ] );
+route( '/api/app/split-job-merge', 'POST', [ 'API\App\SplitJobController', 'merge' ] );
 
 
 
