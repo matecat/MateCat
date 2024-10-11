@@ -139,3 +139,4 @@ route( '/api/app/user-keys-update', 'POST', [ 'API\App\UserKeysController', 'upd
 route( '/api/app/user-keys-new-key', 'POST', [ 'API\App\UserKeysController', 'newKey' ] );
 route( '/api/app/user-keys-info', 'POST', [ 'API\App\UserKeysController', 'info' ] );
 route( '/api/app/user-keys-share', 'POST', [ 'API\App\UserKeysController', 'share' ] );
+route( '/api/app/create-random-user', 'POST', [ 'API\App\CreateRandUserController', 'create' ] );
