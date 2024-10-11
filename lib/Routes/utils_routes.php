@@ -129,6 +129,8 @@ route( '/api/app/comment/delete', 'POST', [ 'API\App\CommentController', 'delete
 route( '/api/app/comment/create', 'POST', [ 'API\App\CommentController', 'create' ] );
 route( '/api/app/comment/get-range', 'POST', [ 'API\App\CommentController', 'getRange' ] );
 route( '/api/app/copy-all-source-to-target', 'POST', [ 'API\App\CopyAllSourceToTargetController', 'copy' ] );
+route( '/api/app/get-global-warning', 'POST', [ 'API\App\GetWarningController', 'global' ] );
+route( '/api/app/get-local-warning', 'POST', [ 'API\App\GetWarningController', 'local' ] );
 
 
 
