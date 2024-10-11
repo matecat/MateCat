@@ -140,3 +140,4 @@ route( '/api/app/user-keys-new-key', 'POST', [ 'API\App\UserKeysController', 'ne
 route( '/api/app/user-keys-info', 'POST', [ 'API\App\UserKeysController', 'info' ] );
 route( '/api/app/user-keys-share', 'POST', [ 'API\App\UserKeysController', 'share' ] );
 route( '/api/app/create-random-user', 'POST', [ 'API\App\CreateRandUserController', 'create' ] );
+route( '/api/app/get-tag-projection', 'POST', [ 'API\App\GetTagProjectionController', 'call' ] );
