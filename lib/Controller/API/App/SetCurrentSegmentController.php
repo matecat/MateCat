@@ -1,0 +1,101 @@
+<?php
+
+namespace API\App;
+
+use API\Commons\KleinController;
+use API\Commons\Validators\LoginValidator;
+use CatUtils;
+use Chunks_ChunkDao;
+use Constants_TranslationStatus;
+use Database;
+use Engine;
+use Exception;
+use INIT;
+use Jobs_JobDao;
+use Matecat\SubFiltering\MateCatFilter;
+use Segments_SegmentDao;
+use TmKeyManagement_Filter;
+use TmKeyManagement_TmKeyManagement;
+use TmKeyManagement_TmKeyStruct;
+use Translations_SegmentTranslationDao;
+use TranslationsSplit_SplitDAO;
+use TranslationsSplit_SplitStruct;
+
+class SetCurrentSegmentController extends KleinController {
+
+    protected function afterConstruct() {
+        $this->appendValidator( new LoginValidator( $this ) );
+    }
+
+    public function set()
+    {
+        $revision_number = filter_var( $this->request->param( 'revision_number' ), FILTER_SANITIZE_NUMBER_INT );
+        $id_segment = filter_var( $this->request->param( 'id_segment' ), FILTER_SANITIZE_NUMBER_INT );
+        $id_job = filter_var( $this->request->param( 'id_job' ), FILTER_SANITIZE_NUMBER_INT );
+        $password = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
+
+        $segment = explode( "-", $id_segment );
+        $id_segment = $segment[0];
+        $split_num = $segment[1];
+
+        //get Job Info, we need only a row of jobs ( split )
+        $job_data = Jobs_JobDao::getByIdAndPassword( $id_job, $password );
+
+        if ( empty( $job_data ) ) {
+            return $this->return400Error(-10, "wrong password");
+        }
+
+        if ( empty( $id_segment ) ) {
+            return $this->return400Error(-1, "missing segment id");
+        }
+
+        $segmentStruct             = new TranslationsSplit_SplitStruct();
+        $segmentStruct->id_segment = (int)$id_segment;
+        $segmentStruct->id_job     = $id_job;
+
+        $translationDao  = new TranslationsSplit_SplitDAO( Database::obtain() );
+        $currSegmentInfo = $translationDao->read( $segmentStruct );
+
+        /**
+         * Split check control
+         */
+        $isASplittedSegment = false;
+        $isLastSegmentChunk = true;
+
+        if ( count( $currSegmentInfo ) > 0 ) {
+
+            $isASplittedSegment = true;
+            $currSegmentInfo    = array_shift( $currSegmentInfo );
+
+            //get the chunk number and check whether it is the last one or not
+            $isLastSegmentChunk = ( $split_num == count( $currSegmentInfo->source_chunk_lengths ) - 1 );
+
+            if ( !$isLastSegmentChunk ) {
+                $nextSegmentId = $id_segment . "-" . ( $split_num + 1 );
+            }
+        }
+
+        /**
+         * End Split check control
+         */
+        if ( !$isASplittedSegment or $isLastSegmentChunk ) {
+
+            $segmentList = Segments_SegmentDao::getNextSegment( $id_segment, $id_job, $password, $revision_number );
+
+            if ( !$revision_number ) {
+                $nextSegmentId = CatUtils::fetchStatus( $id_segment, $segmentList );
+            } else {
+                $nextSegmentId = CatUtils::fetchStatus( $id_segment, $segmentList, Constants_TranslationStatus::STATUS_TRANSLATED );
+                if ( !$nextSegmentId ) {
+                    $nextSegmentId = CatUtils::fetchStatus( $id_segment, $segmentList, Constants_TranslationStatus::STATUS_APPROVED );
+                }
+            }
+        }
+
+        return $this->response->json([
+            'code' => 1,
+            'data' => [],
+            'nextSegmentId' => $nextSegmentId ?? null,
+        ]);
+    }
+}
