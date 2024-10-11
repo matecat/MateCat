@@ -105,7 +105,7 @@ abstract class AbstractDaemon {
      */
     protected function _logTimeStampedMsg( $msg ) {
         if ( INIT::$DEBUG ) {
-            echo "[" . date( DATE_RFC822 ) . "] " . $msg . "\n";
+            echo "[" . date( DATE_RFC822 ) . "] " . json_encode( $msg ) . "\n";
         }
         Log::doJsonLog( $msg );
     }
