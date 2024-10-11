@@ -346,4 +346,20 @@ abstract class KleinController implements IController {
             "message" => $message
         ]);
     }
+
+    /**
+     * @param Exception $exception
+     * @return \Klein\Response
+     */
+    protected function returnException(Exception $exception)
+    {
+        $this->response->code($exception->getCode());
+
+        return $this->response->json([
+            'errors' => [
+                "code" => $exception->getCode(),
+                "message" => $exception->getMessage()
+            ]
+        ]);
+    }
 }

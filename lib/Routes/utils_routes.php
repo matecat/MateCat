@@ -134,6 +134,8 @@ route( '/api/app/get-local-warning', 'POST', [ 'API\App\GetWarningController', '
 route( '/api/app/split-job-apply', 'POST', [ 'API\App\SplitJobController', 'apply' ] );
 route( '/api/app/split-job-check', 'POST', [ 'API\App\SplitJobController', 'check' ] );
 route( '/api/app/split-job-merge', 'POST', [ 'API\App\SplitJobController', 'merge' ] );
-
-
-
+route( '/api/app/user-keys-delete', 'POST', [ 'API\App\UserKeysController', 'delete' ] );
+route( '/api/app/user-keys-update', 'POST', [ 'API\App\UserKeysController', 'update' ] );
+route( '/api/app/user-keys-new-key', 'POST', [ 'API\App\UserKeysController', 'newKey' ] );
+route( '/api/app/user-keys-info', 'POST', [ 'API\App\UserKeysController', 'info' ] );
+route( '/api/app/user-keys-share', 'POST', [ 'API\App\UserKeysController', 'share' ] );

@@ -10,8 +10,6 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  */
 export const shareTmKey = async ({key, emails}) => {
   const paramsData = {
-    action: 'userKeys',
-    exec: 'share',
     key,
     emails,
   }
@@ -21,7 +19,7 @@ export const shareTmKey = async ({key, emails}) => {
     formData.append(key, paramsData[key])
   })
   const response = await fetch(
-    `${getMatecatApiDomain()}?action=${paramsData.action}`,
+    `${getMatecatApiDomain()}api/app/user-keys-share`,
     {
       method: 'POST',
       body: formData,

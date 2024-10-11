@@ -116,22 +116,6 @@ class SplitJobController extends KleinController {
     }
 
     /**
-     * @param Exception $exception
-     * @return \Klein\Response
-     */
-    private function returnException(Exception $exception)
-    {
-        $this->response->code($exception->getCode());
-
-        return $this->response->json([
-            'errors' => [
-                "code" => $exception->getCode(),
-                "message" => $exception->getMessage()
-            ]
-        ]);
-    }
-
-    /**
      * @return array
      */
     private function validateTheRequest()
