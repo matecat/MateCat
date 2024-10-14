@@ -12,7 +12,6 @@ namespace AsyncTasks\Workers;
 use Contribution\ContributionSetStruct;
 use Engine;
 use Engines_EngineInterface;
-use Engines_NONE;
 use Exception;
 use Exceptions\ValidationError;
 use Jobs_JobStruct;
@@ -114,7 +113,7 @@ class SetContributionWorker extends AbstractWorker {
      */
     protected function _loadEngine( Jobs_JobStruct $jobStruct ) {
 
-        if ( empty( $this->_engine ) ) {
+        if ( empty( $this->_engine ) || $jobStruct->id_tms != $this->_engine->getEngineRow()->id ) {
             $this->_engine = Engine::getInstance( $jobStruct->id_tms ); //Load MyMemory
         }
 
