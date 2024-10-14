@@ -35,7 +35,6 @@ class Comments_BaseCommentStruct extends DataAccess_AbstractDaoSilentStruct impl
                 'id_job'       => (int)$this->id_job,
                 'id_segment'   => (int)$this->id_segment,
                 'create_date'  => $this->create_date,
-                'email'        => $this->email,
                 'full_name'    => $this->full_name,
                 'uid'          => (int)$this->uid,
                 'resolve_date' => $this->resolve_date,
