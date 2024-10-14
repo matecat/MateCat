@@ -39,6 +39,7 @@ import {getSegmentsIssues} from '../api/getSegmentsIssues'
 import {sendSegmentVersionIssue} from '../api/sendSegmentVersionIssue'
 import {getSegmentVersionsIssues} from '../api/getSegmentVersionsIssues'
 import {sendSegmentVersionIssueComment} from '../api/sendSegmentVersionIssueComment'
+import SegmentFilter from '../components/header/cattol/segment_filter/segment_filter'
 
 const SegmentActions = {
   localStorageCommentsClosed:
@@ -1401,7 +1402,11 @@ const SegmentActions = {
     localStorage.setItem(this.localStorageCommentsClosed, true)
   },
   gotoNextSegment() {
-    if (SegmentsFilterUtil.enabled() && SegmentsFilterUtil.filtering()) {
+    if (
+      SegmentsFilterUtil.enabled() &&
+      SegmentsFilterUtil.filtering() &&
+      SegmentsFilterUtil.open
+    ) {
       SegmentsFilterUtil.gotoNextSegment(SegmentStore.getCurrentSegmentId())
     } else {
       let next = SegmentStore.getNextSegment()
@@ -1424,7 +1429,11 @@ const SegmentActions = {
     // this is expected behaviour in review
     // change this if we are filtering, go to the next
     // segment, assuming the sample is what we want to revise.
-    if (SegmentsFilterUtil.enabled() && SegmentsFilterUtil.filtering()) {
+    if (
+      SegmentsFilterUtil.enabled() &&
+      SegmentsFilterUtil.filtering() &&
+      SegmentsFilterUtil.open
+    ) {
       SegmentsFilterUtil.gotoNextTranslatedSegment(sid)
     } else {
       const nextTranslatedSegment = SegmentStore.getNextSegment({
