@@ -362,4 +362,18 @@ abstract class KleinController implements IController {
             ]
         ]);
     }
+
+    /**
+     * @param $id_segment
+     * @return array
+     */
+    protected function parseIdSegment($id_segment)
+    {
+        $parsedSegment = explode( "-", $id_segment );
+
+        return [
+            'id_segment' => $parsedSegment[0],
+            'split_num' => $parsedSegment[1],
+        ];
+    }
 }

@@ -156,20 +156,6 @@ class GetSegmentsController extends KleinController {
     }
 
     /**
-     * @param $id_segment
-     * @return array
-     */
-    private function parseIdSegment($id_segment)
-    {
-        $parsedSegment = explode( "-", $id_segment );
-
-        return [
-            'id_segment' => $parsedSegment[0],
-            'split_num' => $parsedSegment[1],
-        ];
-    }
-
-    /**
      * @param $segments
      * @return array|mixed
      * @throws \API\Commons\Exceptions\AuthenticationError
