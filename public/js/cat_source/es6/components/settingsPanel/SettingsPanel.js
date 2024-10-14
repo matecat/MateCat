@@ -115,7 +115,7 @@ const DEFAULT_CONTENTS = (isCattool = config.is_cattool) => {
             id: SETTINGS_PANEL_TABS.editorSettings,
             label: 'Editor settings',
             description:
-              'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vulputate libero et velit interdum, ac aliquet odio mattis.',
+              'Customize the settings for Matecat\'s editor page to better suit your personal workflow and preferences. <a href="https://guides.matecat.com/" target="_blank">Learn more</a>',
             component: <EditorSettingsTab />,
           },
         ]

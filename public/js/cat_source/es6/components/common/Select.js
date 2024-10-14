@@ -183,8 +183,17 @@ export const Select = ({
 
   useLayoutEffect(() => {
     if (isDropdownVisible && isPortalDropdown) {
-      const {x, y, width, height} = wrapperRef.current.getBoundingClientRect()
-      setPortalCoords({x, y, width, height})
+      const getPortalCoords = () => {
+        const {x, y, width, height} = wrapperRef.current.getBoundingClientRect()
+        setPortalCoords({x, y, width, height})
+      }
+      window.addEventListener('resize', getPortalCoords)
+
+      getPortalCoords()
+
+      return () => {
+        window.removeEventListener('resize', getPortalCoords)
+      }
     }
   }, [isDropdownVisible, isPortalDropdown])
 
@@ -261,7 +270,7 @@ export const Select = ({
           ? 'select__dropdown-wrapper--is-multiselect'
           : ''
       } ${isDropdownReversed ? 'select__dropdown--is-reversed' : ''} ${
-        isPortalDropdown && dropdownClassName ? dropdownClassName : ''
+        dropdownClassName ? dropdownClassName : ''
       } ${isPortalDropdown ? 'select-with-label__wrapper-is-portal' : ''}`}
       {...(portalCoords && {
         style: {

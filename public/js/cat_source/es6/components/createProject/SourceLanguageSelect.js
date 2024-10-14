@@ -4,21 +4,26 @@ import {Select} from '../common/Select'
 import {CreateProjectContext} from './CreateProjectContext'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper'
 
-export const SourceLanguageSelect = ({shouldHideLabel = false}) => {
+export const SourceLanguageSelect = ({
+  isRenderedInsideTab = false,
+  dropdownClassName,
+}) => {
   const {SELECT_HEIGHT, languages, sourceLang, changeSourceLanguage} =
     useContext(CreateProjectContext)
   const {isUserLogged} = useContext(ApplicationWrapperContext)
 
   return (
     <Select
-      {...(!shouldHideLabel && {label: 'From'})}
+      {...(!isRenderedInsideTab
+        ? {label: 'From'}
+        : {isPortalDropdown: true, dropdownClassName})}
       id="source-lang"
       name="source-lang"
       maxHeightDroplist={SELECT_HEIGHT}
       showSearchBar={true}
       options={languages}
       activeOption={sourceLang}
-      checkSpaceToReverse={false}
+      checkSpaceToReverse={isRenderedInsideTab}
       onSelect={(option) => changeSourceLanguage(option)}
       isDisabled={!isUserLogged}
     >
@@ -38,5 +43,6 @@ export const SourceLanguageSelect = ({shouldHideLabel = false}) => {
 }
 
 SourceLanguageSelect.propTypes = {
-  shouldHideLabel: PropTypes.bool,
+  isRenderedInsideTab: PropTypes.bool,
+  dropdownClassName: PropTypes.string,
 }
