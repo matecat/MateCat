@@ -143,3 +143,6 @@ route( '/api/app/create-random-user', 'POST', [ 'API\App\CreateRandUserControlle
 route( '/api/app/get-tag-projection', 'POST', [ 'API\App\GetTagProjectionController', 'call' ] );
 route( '/api/app/set-current-segment', 'POST', [ 'API\App\SetCurrentSegmentController', 'set' ] );
 route( '/api/app/get-segments', 'POST', [ 'API\App\GetSegmentsController', 'segments' ] );
+route( '/api/app/ping', 'POST', [ 'API\App\AjaxUtilsController', 'ping' ] );
+route( '/api/app/check-tm-key', 'POST', [ 'API\App\AjaxUtilsController', 'checkTMKey' ] );
+route( '/api/app/clear-not-completed-uploads', 'POST', [ 'API\App\AjaxUtilsController', 'clearNotCompletedUploads' ] );
