@@ -142,3 +142,4 @@ route( '/api/app/user-keys-share', 'POST', [ 'API\App\UserKeysController', 'shar
 route( '/api/app/create-random-user', 'POST', [ 'API\App\CreateRandUserController', 'create' ] );
 route( '/api/app/get-tag-projection', 'POST', [ 'API\App\GetTagProjectionController', 'call' ] );
 route( '/api/app/set-current-segment', 'POST', [ 'API\App\SetCurrentSegmentController', 'set' ] );
+route( '/api/app/get-segments', 'POST', [ 'API\App\GetSegmentsController', 'segments' ] );
