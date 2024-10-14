@@ -732,6 +732,7 @@ const NewProject = ({
         setOpenSettings,
         isImportTMXInProgress,
         setIsImportTMXInProgress,
+        projectTemplates,
         modifyingCurrentTemplate,
       }}
     >
