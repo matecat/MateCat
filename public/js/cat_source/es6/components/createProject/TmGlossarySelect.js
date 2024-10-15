@@ -5,8 +5,13 @@ import {CreateProjectContext} from './CreateProjectContext'
 import {orderTmKeys} from '../settingsPanel/Contents/TranslationMemoryGlossaryTab'
 
 export const TmGlossarySelect = () => {
-  const {SELECT_HEIGHT, tmKeys, setOpenSettings, modifyingCurrentTemplate} =
-    useContext(CreateProjectContext)
+  const {
+    SELECT_HEIGHT,
+    tmKeys,
+    setOpenSettings,
+    modifyingCurrentTemplate,
+    projectTemplates,
+  } = useContext(CreateProjectContext)
 
   const tmKeyActive = Array.isArray(tmKeys)
     ? tmKeys.filter(({isActive}) => isActive)
@@ -34,7 +39,7 @@ export const TmGlossarySelect = () => {
       className={`${hasNoPrivateKeys ? 'select-without-private-keys' : ''}`}
       maxHeightDroplist={SELECT_HEIGHT}
       showSearchBar={true}
-      isDisabled={!tmKeys}
+      isDisabled={!tmKeys || !projectTemplates?.length}
       options={tmKeys}
       multipleSelect={'dropdown'}
       activeOptions={tmKeyActive}

@@ -88,7 +88,7 @@ const Speech2Text = {
   },
   startSpeechRecognition: function (microphone) {
     const segment = SegmentStore.getCurrentSegment()
-
+    if (!segment) return
     if (!microphone.hasClass('micSpeechActive')) {
       microphone.addClass('micSpeechActive')
       Speech2Text.animateSpeechActive()
