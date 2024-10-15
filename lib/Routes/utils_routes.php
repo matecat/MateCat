@@ -149,3 +149,4 @@ route( '/api/app/clear-not-completed-uploads', 'POST', [ 'API\App\AjaxUtilsContr
 route( '/api/app/get-translation-mismatches', 'POST', [ 'API\App\GetTranslationMismatchesController', 'get' ] );
 route( '/api/app/add-engine', 'POST', [ 'API\App\EngineController', 'add' ] );
 route( '/api/app/disable-engine', 'POST', [ 'API\App\EngineController', 'disable' ] );
+route( '/api/app/get-contribution', 'POST', [ 'API\App\GetContributionController', 'get' ] );

@@ -1,0 +1,237 @@
+<?php
+
+namespace API\App;
+
+use AMQHandler;
+use API\Commons\KleinController;
+use API\Commons\Validators\LoginValidator;
+use Chunks_ChunkDao;
+use Comments_CommentDao;
+use Comments_CommentStruct;
+use Contribution\ContributionRequestStruct;
+use Contribution\Request;
+use Database;
+use Email\CommentEmail;
+use Email\CommentMentionEmail;
+use Email\CommentResolveEmail;
+use Exception;
+use Files\FilesPartsDao;
+use INIT;
+use InvalidArgumentException;
+use Jobs_JobDao;
+use Jobs_JobStruct;
+use Log;
+use Matecat\SubFiltering\MateCatFilter;
+use Segments_SegmentDao;
+use Segments_SegmentOriginalDataDao;
+use Stomp\Transport\Message;
+use Teams\MembershipDao;
+use TmKeyManagement_Filter;
+use Url\JobUrlBuilder;
+use Users_UserDao;
+use Users_UserStruct;
+use Utils;
+
+class GetContributionController extends KleinController {
+
+    protected function afterConstruct() {
+        $this->appendValidator( new LoginValidator( $this ) );
+    }
+
+    public function get()
+    {
+        try {
+            $request = $this->validateTheRequest();
+
+            $id_client = $request['id_client'];
+            $id_job = $request['id_job'];
+            $id_segment = $request['id_segment'];
+            $num_results = $request['num_results'];
+            $text = $request['text'];
+            $id_translator = $request['id_translator'];
+            $password = $request['password'];
+            $received_password = $request['received_password'];
+            $concordance_search = $request['concordance_search'];
+            $switch_languages = $request['switch_languages'];
+            $context_before = $request['context_before'];
+            $context_after = $request['context_after'];
+            $id_before = $request['id_before'];
+            $id_after = $request['id_after'];
+            $cross_language = $request['cross_language'];
+
+            if ( $id_translator == 'unknown_translator' ) {
+                $id_translator = "";
+            }
+
+            if ( empty( $num_results ) ) {
+                $num_results = INIT::$DEFAULT_NUM_RESULTS_FROM_TM;
+            }
+
+            $jobStruct = Chunks_ChunkDao::getByIdAndPassword( $id_job, $password );
+            $dataRefMap = Segments_SegmentOriginalDataDao::getSegmentDataRefMap( $id_segment );
+
+            $projectStruct = $jobStruct->getProject();
+            $this->featureSet->loadForProject( $projectStruct );
+
+            if ( !$concordance_search ) {
+                $this->rewriteContributionContexts( $jobStruct->source, $jobStruct->target, $request );
+            }
+
+            $file = (new FilesPartsDao())->getBySegmentId($id_segment);
+            $owner = (new Users_UserDao())->getProjectOwner( $id_job );
+
+            $contributionRequest                    = new ContributionRequestStruct();
+            $contributionRequest->id_file           = $file->id_file;
+            $contributionRequest->id_job            = $this->id_job;
+            $contributionRequest->password          = $received_password;
+            $contributionRequest->user              = $owner;
+            $contributionRequest->dataRefMap        = $dataRefMap;
+            $contributionRequest->contexts          = [
+                'context_before' => $request['context_before'],
+                'segment'        => $request['text'],
+                'context_after'  => $request['context_after']
+            ];
+            $contributionRequest->jobStruct         = $jobStruct;
+            $contributionRequest->projectStruct     = $projectStruct;
+            $contributionRequest->segmentId         = $id_segment;
+            $contributionRequest->id_client         = $id_client;
+            $contributionRequest->concordanceSearch = $concordance_search;
+            $contributionRequest->fromTarget        = $switch_languages;
+            $contributionRequest->resultNum         = $num_results;
+            $contributionRequest->crossLangTargets  = $this->getCrossLanguages($cross_language);
+
+            if ( $this->isRevision($id_job, $password) ) {
+                $contributionRequest->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
+            } else {
+                $contributionRequest->userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
+            }
+
+            Request::contribution( $contributionRequest );
+
+            return $this->response->json([
+                'errors' => [],
+                'data' => [
+                    "message" => "OK",
+                    "id_client" => $id_client
+                ]
+            ]);
+
+        } catch (Exception $exception){
+            return $this->returnException($exception);
+        }
+    }
+
+    /**
+     * @return array
+     */
+    private function validateTheRequest()
+    {
+        $id_client = filter_var( $this->request->param( 'id_client' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW  ] );
+        $id_job = filter_var( $this->request->param( 'id_job' ), FILTER_SANITIZE_NUMBER_INT );
+        $id_segment = filter_var( $this->request->param( 'id_segment' ), FILTER_SANITIZE_NUMBER_INT );
+        $num_results = filter_var( $this->request->param( 'num_results' ), FILTER_SANITIZE_NUMBER_INT );
+        $text = filter_var( $this->request->param( 'text' ), FILTER_UNSAFE_RAW );
+        $id_translator = filter_var( $this->request->param( 'id_translator' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW  ] );
+        $password = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW  ] );
+        $received_password = filter_var( $this->request->param( 'current_password' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW  ] );
+        $concordance_search = filter_var( $this->request->param( 'is_concordance' ), FILTER_VALIDATE_BOOLEAN );
+        $switch_languages = filter_var( $this->request->param( 'from_target' ), FILTER_VALIDATE_BOOLEAN );
+        $context_before = filter_var( $this->request->param( 'context_before' ), FILTER_UNSAFE_RAW );
+        $context_after = filter_var( $this->request->param( 'context_after' ), FILTER_UNSAFE_RAW );
+        $id_before = filter_var( $this->request->param( 'id_before' ), FILTER_SANITIZE_NUMBER_INT );
+        $id_after = filter_var( $this->request->param( 'id_after' ), FILTER_SANITIZE_NUMBER_INT );
+        $cross_language = filter_var( $this->request->param( 'cross_language' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FORCE_ARRAY ] );
+        $text = trim( $text );
+
+        if ( !$concordance_search ) {
+            //execute these lines only in segment contribution search,
+            //in case of user concordance search skip these lines
+            //because segment can be optional
+            if ( empty( $id_segment ) ) {
+                throw new InvalidArgumentException("missing id_segment", -1);
+            }
+        }
+
+        if ( is_null( $text ) or $text === '' ) {
+            throw new InvalidArgumentException("missing text", -2);
+        }
+
+        if ( empty( $id_job ) ) {
+            throw new InvalidArgumentException("missing id_job", -3);
+        }
+
+        if ( empty( $id_client ) ) {
+            throw new InvalidArgumentException("missing id_client", -4);
+        }
+
+        return [
+            'id_client' => $id_client,
+            'id_job' => $id_job,
+            'id_segment' => $id_segment,
+            'num_results' => $num_results,
+            'text' => $text,
+            'id_translator' => $id_translator,
+            'password' => $password,
+            'received_password' => $received_password,
+            'concordance_search' => $concordance_search,
+            'switch_languages' => $switch_languages,
+            'context_before' => $context_before,
+            'context_after' => $context_after,
+            'id_before' => $id_before,
+            'id_after' => $id_after,
+            'cross_language' => $cross_language,
+        ];
+    }
+
+    /**
+     * @param $source
+     * @param $target
+     * @param $request
+     * @throws \API\Commons\Exceptions\AuthenticationError
+     * @throws \Exceptions\NotFoundException
+     * @throws \Exceptions\ValidationError
+     * @throws \TaskRunner\Exceptions\EndQueueException
+     * @throws \TaskRunner\Exceptions\ReQueueException
+     */
+    private function rewriteContributionContexts( $source, $target, &$request )
+    {
+        $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new \FeatureSet();
+
+        //Get contexts
+        $segmentsList = ( new Segments_SegmentDao )->setCacheTTL( 60 * 60 * 24 )->getContextAndSegmentByIDs(
+            [
+                'id_before'  => $request['id_before'],
+                'id_segment' => $request['id_segment'],
+                'id_after'   => $request['id_after']
+            ]
+        );
+
+        $featureSet->filter( 'rewriteContributionContexts', $segmentsList, $request );
+
+        $Filter = MateCatFilter::getInstance( $featureSet, $source, $target, [] );
+
+        if ( $segmentsList->id_before ) {
+            $request['context_before'] = $Filter->fromLayer0ToLayer1( $segmentsList->id_before->segment );
+        }
+
+        if ( $segmentsList->id_segment ) {
+            $request['text'] = $Filter->fromLayer0ToLayer1( $segmentsList->id_segment->segment );
+        }
+
+        if ( $segmentsList->id_after ) {
+            $request['context_after'] = $Filter->fromLayer0ToLayer1( $segmentsList->id_after->segment );
+        }
+    }
+
+    /**
+     * Remove voids
+     * ("en-GB," => [0 => 'en-GB'])
+     *
+     * @param $cross_language
+     * @return array
+     */
+    private function getCrossLanguages($cross_language)
+    {
+        return !empty( $cross_language ) ? explode( ",", rtrim( $cross_language[ 0 ], ',' ) ) : [];
+    }
+}

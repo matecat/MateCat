@@ -29,7 +29,6 @@ export const getContributions = async ({
   const txt = target
 
   const obj = {
-    action: 'getContribution',
     password: password,
     is_concordance: 0,
     id_segment: idSegment,
@@ -54,7 +53,7 @@ export const getContributions = async ({
     if (dataParams[key] !== undefined) formData.append(key, dataParams[key])
   })
   const response = await fetch(
-    `${getMatecatApiDomain()}?action=getContribution`,
+    `${getMatecatApiDomain()}api/app/get-contribution`,
     {
       method: 'POST',
       credentials: 'include',

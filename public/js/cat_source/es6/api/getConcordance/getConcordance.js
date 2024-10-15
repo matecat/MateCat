@@ -21,7 +21,6 @@ export const getConcordance = async (
   currentPassword = config.currentPassword,
 ) => {
   const dataParams = {
-    action: 'getContribution',
     is_concordance: 1,
     from_target: type,
     id_segment: UI.currentSegmentId,
@@ -38,7 +37,7 @@ export const getConcordance = async (
     formData.append(key, dataParams[key])
   })
   const response = await fetch(
-    `${getMatecatApiDomain()}?action=getContribution`,
+    `${getMatecatApiDomain()}api/app/get-contribution`,
     {
       method: 'POST',
       credentials: 'include',

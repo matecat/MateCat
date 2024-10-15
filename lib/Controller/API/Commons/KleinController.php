@@ -353,6 +353,10 @@ abstract class KleinController implements IController {
      */
     protected function returnException(Exception $exception)
     {
+        // InvalidArgumentException --> 400
+
+
+
         $this->response->code($exception->getCode() >= 400 ? $exception->getCode() : 500);
 
         return $this->response->json([
