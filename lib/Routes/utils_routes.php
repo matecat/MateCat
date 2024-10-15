@@ -147,3 +147,5 @@ route( '/api/app/ping', 'POST', [ 'API\App\AjaxUtilsController', 'ping' ] );
 route( '/api/app/check-tm-key', 'POST', [ 'API\App\AjaxUtilsController', 'checkTMKey' ] );
 route( '/api/app/clear-not-completed-uploads', 'POST', [ 'API\App\AjaxUtilsController', 'clearNotCompletedUploads' ] );
 route( '/api/app/get-translation-mismatches', 'POST', [ 'API\App\GetTranslationMismatchesController', 'get' ] );
+route( '/api/app/add-engine', 'POST', [ 'API\App\EngineController', 'add' ] );
+route( '/api/app/disable-engine', 'POST', [ 'API\App\EngineController', 'disable' ] );

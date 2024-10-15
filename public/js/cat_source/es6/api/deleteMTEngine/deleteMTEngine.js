@@ -9,8 +9,6 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  */
 export const deleteMTEngine = async ({id}) => {
   const paramsData = {
-    action: 'engine',
-    exec: 'delete',
     id,
   }
   const formData = new FormData()
@@ -19,7 +17,7 @@ export const deleteMTEngine = async ({id}) => {
     formData.append(key, paramsData[key])
   })
   const response = await fetch(
-    `${getMatecatApiDomain()}?action=${paramsData.action}`,
+    `${getMatecatApiDomain()}api/app/disable-engine`,
     {
       method: 'POST',
       body: formData,
