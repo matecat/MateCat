@@ -28,9 +28,9 @@ class EditLogSegmentStruct extends DataAccess_AbstractDaoObjectStruct implements
     public string $suggestion;
 
     /**
-     * @var string
+     * @var ?string
      */
-    public string $translation;
+    public ?string $translation = null;
 
     /**
      * @var int
