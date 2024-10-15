@@ -150,3 +150,7 @@ route( '/api/app/get-translation-mismatches', 'POST', [ 'API\App\GetTranslationM
 route( '/api/app/add-engine', 'POST', [ 'API\App\EngineController', 'add' ] );
 route( '/api/app/disable-engine', 'POST', [ 'API\App\EngineController', 'disable' ] );
 route( '/api/app/get-contribution', 'POST', [ 'API\App\GetContributionController', 'get' ] );
+route( '/api/app/search', 'POST', [ 'API\App\GetSearchController', 'search' ] );
+route( '/api/app/replace-all', 'POST', [ 'API\App\GetSearchController', 'replaceAll' ] );
+route( '/api/app/redo-replace-all', 'POST', [ 'API\App\GetSearchController', 'redoReplaceAll' ] );
+route( '/api/app/undo-replace-all', 'POST', [ 'API\App\GetSearchController', 'undoReplaceAll' ] );

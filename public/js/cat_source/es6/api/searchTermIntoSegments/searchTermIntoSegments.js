@@ -30,8 +30,6 @@ export const searchTermIntoSegments = async ({
   revisionNumber,
 }) => {
   const paramsData = {
-    action: 'getSearch',
-    function: 'find',
     job: idJob,
     password,
     token,
@@ -49,7 +47,7 @@ export const searchTermIntoSegments = async ({
   Object.keys(paramsData).forEach((key) => {
     formData.append(key, paramsData[key])
   })
-  const response = await fetch(`${getMatecatApiDomain()}?action=getSearch`, {
+  const response = await fetch(`${getMatecatApiDomain()}api/app/search`, {
     method: 'POST',
     body: formData,
     credentials: 'include',
