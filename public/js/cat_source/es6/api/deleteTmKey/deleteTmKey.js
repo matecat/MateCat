@@ -9,8 +9,6 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  */
 export const deleteTmKey = async ({key}) => {
   const paramsData = {
-    action: 'userKeys',
-    exec: 'delete',
     key,
   }
   const formData = new FormData()
@@ -19,7 +17,7 @@ export const deleteTmKey = async ({key}) => {
     formData.append(key, paramsData[key])
   })
   const response = await fetch(
-    `${getMatecatApiDomain()}?action=${paramsData.action}`,
+    `${getMatecatApiDomain()}api/app/user-keys-delete`,
     {
       method: 'POST',
       body: formData,

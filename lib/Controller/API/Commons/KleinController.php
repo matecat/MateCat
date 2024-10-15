@@ -8,6 +8,7 @@ use API\Commons\Exceptions\AuthenticationError;
 use API\Commons\Validators\Base;
 use ApiKeys_ApiKeyStruct;
 use AuthCookie;
+use CatUtils;
 use CookieManager;
 use Exception;
 use FeatureSet;
@@ -313,5 +314,70 @@ abstract class KleinController implements IController {
     protected function isJsonRequest()
     {
         return preg_match( '~^application/json~', $this->request->headers()->get( 'Content-Type' ) ) ;
+    }
+
+    /**
+     * @param $id_job
+     * @param $password
+     * @return bool|null
+     */
+    protected function isRevision($id_job, $password) {
+
+        $isRevision = CatUtils::getIsRevisionFromIdJobAndPassword( $id_job, $password );
+
+        if ( null === $isRevision ) {
+            $isRevision = CatUtils::getIsRevisionFromReferer();
+        }
+
+        return $isRevision;
+    }
+
+    /**
+     * @param $code
+     * @param $message
+     * @return \Klein\Response
+     */
+    protected function return400Error($code, $message)
+    {
+        $this->response->code(400);
+
+        return $this->response->json([
+            "code" => $code,
+            "message" => $message
+        ]);
+    }
+
+    /**
+     * @param Exception $exception
+     * @return \Klein\Response
+     */
+    protected function returnException(Exception $exception)
+    {
+        // InvalidArgumentException --> 400
+
+
+
+        $this->response->code($exception->getCode() >= 400 ? $exception->getCode() : 500);
+
+        return $this->response->json([
+            'errors' => [
+                "code" => $exception->getCode(),
+                "message" => $exception->getMessage()
+            ]
+        ]);
+    }
+
+    /**
+     * @param $id_segment
+     * @return array
+     */
+    protected function parseIdSegment($id_segment)
+    {
+        $parsedSegment = explode( "-", $id_segment );
+
+        return [
+            'id_segment' => $parsedSegment[0],
+            'split_num' => $parsedSegment[1],
+        ];
     }
 }

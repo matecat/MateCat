@@ -11,8 +11,6 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  */
 export const addMTEngine = async ({name, provider, dataMt}) => {
   const paramsData = {
-    action: 'engine',
-    exec: 'add',
     name,
     provider,
     data: JSON.stringify(dataMt),
@@ -23,7 +21,7 @@ export const addMTEngine = async ({name, provider, dataMt}) => {
     formData.append(key, paramsData[key])
   })
   const response = await fetch(
-    `${getMatecatApiDomain()}?action=${paramsData.action}`,
+    `${getMatecatApiDomain()}api/app/add-engine`,
     {
       method: 'POST',
       body: formData,

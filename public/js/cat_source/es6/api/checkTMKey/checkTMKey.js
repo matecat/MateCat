@@ -9,8 +9,6 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  */
 export const checkTMKey = async ({tmKey}) => {
   const paramsData = {
-    action: 'ajaxUtils',
-    exec: 'checkTMKey',
     tm_key: tmKey,
   }
   const formData = new FormData()
@@ -19,7 +17,7 @@ export const checkTMKey = async ({tmKey}) => {
     formData.append(key, paramsData[key])
   })
   const response = await fetch(
-    `${getMatecatApiDomain()}?action=${paramsData.action}`,
+    `${getMatecatApiDomain()}?api/app/check-tm-key`,
     {
       method: 'POST',
       body: formData,
