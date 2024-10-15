@@ -19,7 +19,6 @@ export const updateJobKeys = async ({
   dataTm,
 }) => {
   const paramsData = {
-    action: 'updateJobKeys',
     job_id: idJob,
     job_pass: password,
     get_public_matches: getPublicMatches,
@@ -32,7 +31,7 @@ export const updateJobKeys = async ({
     formData.append(key, paramsData[key])
   })
   const response = await fetch(
-    `${getMatecatApiDomain()}?action=${paramsData.action}`,
+    `${getMatecatApiDomain()}api/app/update-job-keys`,
     {
       method: 'POST',
       body: formData,

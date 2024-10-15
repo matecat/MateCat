@@ -154,3 +154,4 @@ route( '/api/app/search', 'POST', [ 'API\App\GetSearchController', 'search' ] );
 route( '/api/app/replace-all', 'POST', [ 'API\App\GetSearchController', 'replaceAll' ] );
 route( '/api/app/redo-replace-all', 'POST', [ 'API\App\GetSearchController', 'redoReplaceAll' ] );
 route( '/api/app/undo-replace-all', 'POST', [ 'API\App\GetSearchController', 'undoReplaceAll' ] );
+route( '/api/app/update-job-keys', 'POST', [ 'API\App\UpdateJobKeysController', 'update' ] );
