@@ -21,7 +21,6 @@ use Files\MetadataDao;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use FilesStorage\S3FilesStorage;
-use Jobs\SplitQueue;
 use LQA\QA;
 use Matecat\SubFiltering\MateCatFilter;
 use Matecat\SubFiltering\Utils\DataRefReplacer;
@@ -1635,7 +1634,15 @@ class ProjectManager {
             /**
              * Async worker to re-count avg-PEE and total-TTE for split jobs
              */
-            SplitQueue::recount( $jobToSplit );
+            try {
+                WorkerClient::enqueue( 'JOBS', '\AsyncTasks\Workers\JobsWorker', $jobToSplit, [ 'persistent' => WorkerClient::$_HANDLER->persistent ] );
+            } catch ( Exception $e ) {
+                # Handle the error, logging, ...
+                $output = "**** Job Split PEE recount request failed. AMQ Connection Error. ****\n\t";
+                $output .= "{$e->getMessage()}";
+                $output .= var_export( $jobToSplit, true );
+                $this->_log( $output );
+            }
 
             //add here job id to list
             $projectStructure[ 'array_jobs' ][ 'job_list' ]->append( $projectStructure[ 'job_to_split' ] );
