@@ -19,7 +19,6 @@ class MMTServiceApi {
     private $baseUrl;
     private $license;
     private $client = 0;
-    private $pluginVersion;
     private $platform;
     private $platformVersion;
 
@@ -44,16 +43,14 @@ class MMTServiceApi {
     }
 
     /**
-     * @param string $pluginVersion   the plugin version (i.e. "2.4")
      * @param string $platform        the platform name (i.e. "Matecat")
      * @param string $platformVersion the platform version (i.e. "1.10.7")
      *
      * @return MMTServiceApi
      */
-    public function setIdentity( $pluginVersion = null, $platform = null, $platformVersion = null ) {
-        $this->pluginVersion   = $pluginVersion;
-        $this->platform        = $platform;
-        $this->platformVersion = $platformVersion;
+    public function setIdentity( string $platform, string $platformVersion ): MMTServiceApi {
+        $this->platform        = $platform; // 'Matecat'
+        $this->platformVersion = $platformVersion; //Ex: 2.22.24
 
         return $this;
     }
@@ -366,11 +363,12 @@ class MMTServiceApi {
      * @param null $session
      * @param null $glossaries
      * @param null $ignoreGlossaryCase
+     * @param null $include_score
      *
      * @return mixed
      * @throws MMTServiceApiException
      */
-    public function translate( $source, $target, $text, $contextVector = null, $hints = null, $projectId = null, $timeout = null, $priority = null, $session = null, $glossaries = null, $ignoreGlossaryCase = null ) {
+    public function translate( $source, $target, $text, $contextVector = null, $hints = null, $projectId = null, $timeout = null, $priority = null, $session = null, $glossaries = null, $ignoreGlossaryCase = null, $include_score = null ) {
 
         $params = [
                 'source'         => $source,
@@ -393,6 +391,10 @@ class MMTServiceApi {
 
         if ( $ignoreGlossaryCase ) {
             $params[ 'ignore_glossary_case' ] = ( $ignoreGlossaryCase == 1 ) ? 'true' : 'false';
+        }
+
+        if ( $include_score ) {
+            $params[ 'include_score' ] = true;
         }
 
         return $this->send( 'GET', "$this->baseUrl/translate", $params, false, $timeout );
@@ -451,9 +453,6 @@ class MMTServiceApi {
         }
         if ( $this->client > 0 ) {
             $headers[] = "MMT-ApiClient: $this->client";
-        }
-        if ( $this->pluginVersion ) {
-            $headers[] = "MMT-PluginVersion: $this->pluginVersion";
         }
         if ( $this->platform ) {
             $headers[] = "MMT-Platform: $this->platform";

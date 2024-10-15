@@ -193,7 +193,8 @@ class ProjectManager {
                             'deepl_formality'                         => null,
                             'deepl_id_glossary'                       => null,
                             'filters_extraction_parameters'           => new RecursiveArrayObject(),
-                            'xliff_parameters'                        => new RecursiveArrayObject()
+                            'xliff_parameters'                        => new RecursiveArrayObject(),
+                            'mt_evaluation'                           => false
                     ] );
         }
 
@@ -1362,9 +1363,9 @@ class ProjectManager {
             $projectStructure[ 'array_jobs' ][ 'job_languages' ]->offsetSet( $newJob->id, $newJob->id . ":" . $target );
             $projectStructure[ 'array_jobs' ][ 'payable_rates' ]->offsetSet( $newJob->id, $payableRates );
 
+            $jobsMetadataDao  = new Jobs\MetadataDao();
             // dialect_strict
             if ( isset( $projectStructure[ 'dialect_strict' ] ) ) {
-                $jobsMetadataDao  = new \Jobs\MetadataDao();
                 $dialectStrictObj = json_decode( $projectStructure[ 'dialect_strict' ], true );
 
                 foreach ( $dialectStrictObj as $lang => $value ) {
@@ -1372,6 +1373,11 @@ class ProjectManager {
                         $jobsMetadataDao->set( $newJob->id, $newJob->password, 'dialect_strict', $value );
                     }
                 }
+            }
+
+            // mt evaluation => ice_mt
+            if ( $this->projectStructure[ 'mt_evaluation' ] ) {
+                $jobsMetadataDao->set( $newJob->id, $newJob->password, 'mt_evaluation', true );
             }
 
             try {

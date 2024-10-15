@@ -3,16 +3,15 @@
 
 namespace Translations;
 
+use Chunks_ChunkStruct;
 use Constants_TranslationStatus;
 use DataAccess\ShapelessConcreteStruct;
 use Jobs\WarningsCountStruct;
+use ReflectionException;
 
 class WarningDao extends \DataAccess_AbstractDao {
 
-    public static $primary_keys = [];
-    const TABLE = 'translation_warnings';
-
-    protected $_query_warnings_by_chunk = "
+    protected string $_query_warnings_by_chunk = "
           SELECT count(1) AS count, jobs.id AS id_job, jobs.password
             FROM jobs
               JOIN segment_translations st ON st.id_job = jobs.id AND id_segment BETWEEN jobs.job_first_segment AND jobs.job_last_segment
@@ -21,7 +20,10 @@ class WarningDao extends \DataAccess_AbstractDao {
             AND st.status != :status
         ";
 
-    public function getWarningsByProjectIds( $projectIds ) {
+    /**
+     * @throws ReflectionException
+     */
+    public function getWarningsByProjectIds( $projectIds ): array {
 
         $statuses[] = Constants_TranslationStatus::STATUS_TRANSLATED;
         $statuses[] = Constants_TranslationStatus::STATUS_APPROVED;
@@ -54,11 +56,11 @@ class WarningDao extends \DataAccess_AbstractDao {
     }
 
     /**
-     * @param \Chunks_ChunkStruct $chunk
+     * @param Chunks_ChunkStruct $chunk
      *
      * @return int
      */
-    public function getErrorsByChunk( \Chunks_ChunkStruct $chunk ) {
+    public function getErrorsByChunk( Chunks_ChunkStruct $chunk ): int {
         $con = $this->database->getConnection();
 
         $stmt = $con->prepare( $this->_query_warnings_by_chunk );
@@ -77,76 +79,14 @@ class WarningDao extends \DataAccess_AbstractDao {
         }
     }
 
-    public static function findByChunkAndScope( \Chunks_ChunkStruct $chunk, $scope ) {
-        $sql = "SELECT * FROM translation_warnings " .
-                " WHERE id_job = :id_job " .
-                " AND id_segment BETWEEN :job_first_segment AND :job_last_segment " .
-                " AND scope = :scope ";
-
-        $conn = \Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
-        $stmt->setFetchMode(
-                \PDO::FETCH_CLASS,
-                '\Translations\WarningStruct'
-        );
-
-        $stmt->execute(
-                [
-                        'id_job'            => $chunk->id,
-                        'scope'             => $scope,
-                        'job_first_segment' => $chunk->job_first_segment,
-                        'job_last_segment'  => $chunk->job_last_segment
-                ]
-        );
-
-        return $stmt->fetchAll();
-    }
-
-    /**
-     *
-     * Deletes all translation warnings related to a given scope.
-     *
-     * @param $id_job
-     * @param $id_segment
-     * @param $scope
-     *
-     * @return int
-     */
-    public static function deleteByScope( $id_job, $id_segment, $scope ) {
-        $sql = "DELETE FROM translation_warnings " .
-                " WHERE id_job = :id_job " .
-                " AND id_segment = :id_segment " .
-                " AND scope = :scope ";
-
-        $conn = \Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
-
-        $stmt->execute(
-                [
-                        'id_job'     => $id_job,
-                        'id_segment' => $id_segment,
-                        'scope'      => $scope
-                ]
-        );
-
-        return $stmt->rowCount();
-    }
-
-    public static function insertWarning( WarningStruct $warning ) {
-        $options = [];
-        $sql     = self::buildInsertStatement( $warning->toArray(), $options );
-        $conn    = \Database::obtain()->getConnection();
-        $stmt    = $conn->prepare( $sql );
-
-        return $stmt->execute( $warning->toArray() );
-    }
-
-
     protected function _buildResult( $array_result ) {
         // TODO: Implement _buildResult() method.
     }
 
-    public static function getWarningsByJobIdAndPassword( $jid, $jpassword ) {
+    /**
+     * @throws ReflectionException
+     */
+    public static function getWarningsByJobIdAndPassword( $jid, $jpassword ): array {
 
         $thisDao = new self();
         $db      = $thisDao->getDatabaseHandler();

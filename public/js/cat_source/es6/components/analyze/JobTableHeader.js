@@ -1,8 +1,10 @@
 import React from 'react'
 
-const JobTableHeader = ({rates}) => {
+const JobTableHeader = ({rates, iceMTRawWords}) => {
   return (
-    <div className="job-table-header">
+    <div
+      className={`job-table-header ${rates.ICE_MT && rates.ICE_MT !== rates.MT && iceMTRawWords > 0 ? 'more-columns' : ''}`}
+    >
       <div className="job-table-header-title">
         <div>Analysis bucket</div>
         <div>Payable rate</div>
@@ -83,6 +85,12 @@ const JobTableHeader = ({rates}) => {
         <div>Machine Translation</div>
         <div>{rates.MT}%</div>
       </div>
+      {rates.ICE_MT && rates.ICE_MT !== rates.MT && iceMTRawWords > 0 ? (
+        <div>
+          <div>Top Quality Machine Translation</div>
+          <div>{rates.ICE_MT ? rates.ICE_MT : rates.MT}%</div>
+        </div>
+      ) : null}
       <div className="job-table-header-total">
         <div>Total</div>
       </div>

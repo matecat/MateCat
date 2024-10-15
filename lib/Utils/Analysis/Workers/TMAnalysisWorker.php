@@ -137,9 +137,9 @@ class TMAnalysisWorker extends AbstractWorker {
     /**
      * @param QueueElement $queueElement
      *
-     * @throws ConnectionException
      * @throws EndQueueException
      * @throws ReQueueException
+     * @throws ReflectionException
      */
     protected function _endQueueCallback( QueueElement $queueElement ) {
         $this->_forceSetSegmentAnalyzed( $queueElement );
@@ -156,24 +156,16 @@ class TMAnalysisWorker extends AbstractWorker {
      */
     protected function _updateRecord( QueueElement $queueElement ) {
 
-        $firstAvailableNotMTMatch = $this->getFirstAvailableNotMTMatch();
-        $featureSet               = ( $this->featureSet !== null ) ? $this->featureSet : new FeatureSet();
-        $filter                   = MateCatFilter::getInstance( $featureSet, $queueElement->params->source, $queueElement->params->target );
-        $suggestion               = $firstAvailableNotMTMatch[ 'raw_translation' ]; //No layering needed
-
-        $suggestion_match  = $firstAvailableNotMTMatch[ 'match' ];
-        $suggestion_source = $firstAvailableNotMTMatch[ 'created_by' ];
+        $bestMatch  = $this->getHighestNotMT_OrPickTheFirstOne();
+        $filter     = MateCatFilter::getInstance( $this->featureSet, $queueElement->params->source, $queueElement->params->target );
+        $suggestion = $bestMatch[ 'raw_translation' ]; //No layering needed
 
         $equivalentWordMapping = json_decode( $queueElement->params->payable_rates, true );
 
         $new_match_type = $this->_getNewMatchType(
-                ( stripos( $firstAvailableNotMTMatch[ 'created_by' ], "MT" ) !== false ? "MT" : $suggestion_match ),
-                $queueElement->params->match_type,
-                $queueElement->params->fast_exact_match_type,
-                $equivalentWordMapping,
-                /* is Public TM */
-                empty( $firstAvailableNotMTMatch[ 'memory_key' ] ),
-                isset( $firstAvailableNotMTMatch[ 'ICE' ] ) && $firstAvailableNotMTMatch[ 'ICE' ]
+                $bestMatch,
+                $queueElement,
+                $equivalentWordMapping
         );
 
         $eqWordMapping = ( isset( $equivalentWordMapping[ $new_match_type ] ) ) ? $equivalentWordMapping[ $new_match_type ] : null;
@@ -192,7 +184,7 @@ class TMAnalysisWorker extends AbstractWorker {
 
             // realign MT Spaces
             $check = $this->initPostProcess(
-                    $firstAvailableNotMTMatch[ 'raw_segment' ],
+                    $bestMatch[ 'raw_segment' ],
                     $suggestion,
                     $queueElement->params->source,
                     $queueElement->params->target
@@ -215,13 +207,8 @@ class TMAnalysisWorker extends AbstractWorker {
 
         }
 
-        ( !empty( $firstAvailableNotMTMatch[ 'sentence_confidence' ] ) ?
-                $mt_qe = floatval( $firstAvailableNotMTMatch[ 'sentence_confidence' ] ) :
-                $mt_qe = null
-        );
-
         // perform a consistency check as setTranslation does
-        // in order to add spaces to translation if needed
+        //  to add spaces to translation if needed
         $check = $this->initPostProcess(
                 $queueElement->params->segment,
                 $suggestion,
@@ -257,10 +244,10 @@ class TMAnalysisWorker extends AbstractWorker {
         $tm_data[ 'tm_analysis_status' ]     = "DONE";
         $tm_data[ 'warning' ]                = (int)$check->thereAreErrors();
         $tm_data[ 'serialized_errors_list' ] = $this->mergeJsonErrors( $err_json, $err_json2 );
-        $tm_data[ 'mt_qe' ]                  = $mt_qe;
+        $tm_data[ 'mt_qe' ]                  = $bestMatch[ 'score' ] ?? null;
 
 
-        $tm_data[ 'suggestion_source' ] = $suggestion_source;
+        $tm_data[ 'suggestion_source' ] = $bestMatch[ 'created_by' ];
         if ( !empty( $tm_data[ 'suggestion_source' ] ) ) {
             if ( strpos( $tm_data[ 'suggestion_source' ], "MT" ) === false ) {
                 $tm_data[ 'suggestion_source' ] = 'TM';
@@ -270,7 +257,7 @@ class TMAnalysisWorker extends AbstractWorker {
         }
 
         //check the value of suggestion_match
-        $tm_data[ 'suggestion_match' ] = $suggestion_match;
+        $tm_data[ 'suggestion_match' ] = $bestMatch[ 'match' ];
         $tm_data                       = $this->_iceLockCheck( $tm_data, $queueElement->params );
 
         try {
@@ -287,20 +274,14 @@ class TMAnalysisWorker extends AbstractWorker {
         $this->_incrementAnalyzedCount( $queueElement->params->pid, $eq_words, $standard_words );
         $this->_decSegmentsToAnalyzeOfWaitingProjects( $queueElement->params->pid );
         $this->_tryToCloseProject( $queueElement->params );
-
-
-        $this->featureSet->run( 'postTMSegmentAnalyzed', [
-                'tm_data'       => $tm_data,
-                'queue_element' => $queueElement
-        ] );
-
+        
     }
 
     /**
      * Get the first available not MT match
      * @return mixed
      */
-    private function getFirstAvailableNotMTMatch() {
+    private function getHighestNotMT_OrPickTheFirstOne() {
         foreach ( $this->_matches as $match ) {
             // return $match if not MT and quality >= 75
             if (
@@ -393,30 +374,32 @@ class TMAnalysisWorker extends AbstractWorker {
     }
 
     /**
-     * Calculate the new score match by the Equivalent word mapping ( the value is inside the queue element )
+     * Calculate the new score match by the Equivalent word mapping (the value is inside the queue element)
      *
-     * RATIO : I change the value only if the new match is strictly better
-     * ( in terms of percent paid per word ) than the actual one
+     * RATIO: I change the value only if the new match is strictly better
+     * (in terms of percent paid per word) than the actual one
      *
      *
-     * @param string $tm_match_type
-     * @param string $fast_match_type
-     * @param string $fast_exact_match_type
-     * @param array  $equivalentWordMapping
-     * @param bool   $publicTM
-     * @param bool   $isICE
+     * @param array        $bestMatch
+     * @param QueueElement $queueElement
+     * @param array        $equivalentWordMapping
      *
      * @return string
-     * @throws Exception
      */
     protected function _getNewMatchType(
-            string $tm_match_type,
-            string $fast_match_type,
-            string $fast_exact_match_type,
-            array  &$equivalentWordMapping,
-            bool   $publicTM = false,
-            bool   $isICE = false
+            array        $bestMatch,
+            QueueElement $queueElement,
+            array        $equivalentWordMapping
     ): string {
+
+        $tm_match_type         = ( stripos( $bestMatch[ 'created_by' ], "MT" ) !== false ? "MT" : $bestMatch[ 'match' ] );
+        $fast_match_type       = strtoupper( $queueElement->params->match_type );
+        $fast_exact_match_type = $queueElement->params->fast_exact_match_type;
+
+        /* is Public TM */
+        $publicTM = empty( $bestMatch[ 'memory_key' ] );
+        $isICE    = isset( $bestMatch[ 'ICE' ] ) && $bestMatch[ 'ICE' ];
+
         $fast_match_type = strtoupper( $fast_match_type );
         $fast_rate_paid  = $equivalentWordMapping[ $fast_match_type ];
 
@@ -424,12 +407,15 @@ class TMAnalysisWorker extends AbstractWorker {
         $tm_rate_paid        = 0;
         $ind                 = null;
 
-        $tm_match_type = $this->featureSet->filter( 'customizeTMMatches', $tm_match_type );
-
         if ( stripos( $tm_match_type, "MT" ) !== false ) {
 
-            $tm_match_fuzzy_band = "MT";
-            $tm_rate_paid        = $equivalentWordMapping[ "MT" ];
+            if ( !empty( $bestMatch[ 'score' ] ) && $bestMatch[ 'score' ] >= 0.9 ) {
+                $tm_match_fuzzy_band = "ICE_MT";
+                $tm_rate_paid        = $equivalentWordMapping[ "ICE_MT" ];
+            } else {
+                $tm_match_fuzzy_band = "MT";
+                $tm_rate_paid        = $equivalentWordMapping[ "MT" ];
+            }
 
         } else {
 
@@ -440,7 +426,6 @@ class TMAnalysisWorker extends AbstractWorker {
                 if ( $isICE ) {
                     $tm_match_fuzzy_band = "ICE";
                     $tm_rate_paid        = ( isset( $equivalentWordMapping[ $tm_match_fuzzy_band ] ) ) ? $equivalentWordMapping[ $tm_match_fuzzy_band ] : null;
-//                    $equivalentWordMapping[ "ICE" ] = 0;
                 } else {
                     $tm_match_fuzzy_band = ( $publicTM ) ? "100%_PUBLIC" : "100%";
                     $tm_rate_paid        = $equivalentWordMapping[ $tm_match_fuzzy_band ];
@@ -544,7 +529,7 @@ class TMAnalysisWorker extends AbstractWorker {
         $_config[ 'additional_params' ] = @$queueElement->params->additional_params;
 
         $jobsMetadataDao = new MetadataDao();
-        $dialect_strict  = $jobsMetadataDao->get( $queueElement->params->id_job, $queueElement->params->password, 'dialect_strict' );
+        $dialect_strict  = $jobsMetadataDao->get( $queueElement->params->id_job, $queueElement->params->password, 'dialect_strict', 10 * 60 );
 
         if ( $dialect_strict !== null ) {
             $_config[ 'dialect_strict' ] = $dialect_strict->value == 1;
@@ -568,8 +553,7 @@ class TMAnalysisWorker extends AbstractWorker {
         if ( $mtEngine instanceof Engines_MyMemory ) {
 
             $_config[ 'get_mt' ] = true;
-//            $_config[ 'mt_only' ] = true;
-            $mtEngine = Engine::getInstance( 0 );  //Do Not Call MyMemory with this instance, use $tmsEngine instance
+            $mtEngine            = Engine::getInstance( 0 );  //Do Not Call MyMemory with this instance, use $tmsEngine instance
 
         } else {
             $_config[ 'get_mt' ] = false;
@@ -608,7 +592,11 @@ class TMAnalysisWorker extends AbstractWorker {
             // Do nothing, skip frame
         }
 
-        $mt_result = $this->_getMT( $mtEngine, $_config, $queueElement );
+
+        // mt evaluation => ice_mt
+        $mt_evaluation = $jobsMetadataDao->get( $queueElement->params->id_job, $queueElement->params->password, 'mt_evaluation', 10 * 60 )->value ?? null;
+
+        $mt_result = $this->_getMT( $mtEngine, $_config, $queueElement, $mt_evaluation );
         if ( !empty( $mt_result ) ) {
             $matches[] = $mt_result;
             usort( $matches, "self::_compareScore" );
@@ -623,21 +611,22 @@ class TMAnalysisWorker extends AbstractWorker {
             throw new EmptyElementException( "--- (Worker " . $this->_workerPid . ") : No contribution found for this segment.", self::ERR_EMPTY_ELEMENT );
         }
 
-        return $this->featureSet->filter( 'modifyMatches', $matches );
+        return $matches;
 
     }
 
     /**
-     * Call External MT engine if it is a custom one ( mt not requested from MyMemory )
+     * Call External MT engine if it is custom (mt not requested from MyMemory)
      *
      * @param Engines_AbstractEngine  $mtEngine
      * @param                         $_config
      *
      * @param QueueElement            $queueElement
+     * @param ?bool                   $mt_evaluation
      *
      * @return bool|Engines_Results_AbstractResponse
      */
-    protected function _getMT( Engines_AbstractEngine $mtEngine, $_config, QueueElement $queueElement ) {
+    protected function _getMT( Engines_AbstractEngine $mtEngine, $_config, QueueElement $queueElement, bool $mt_evaluation = null ) {
 
         $mt_result = false;
 
@@ -652,7 +641,7 @@ class TMAnalysisWorker extends AbstractWorker {
             $config = array_merge( $config, $_config );
 
             //if a callback is not set only the first argument is returned, get the config params from the callback
-            $config = $this->featureSet->filter( 'analysisBeforeMTGetContribution', $config, $mtEngine, $queueElement );
+            $config = $this->featureSet->filter( 'analysisBeforeMTGetContribution', $config, $mtEngine, $queueElement, $mt_evaluation );
 
             $mt_result = $mtEngine->get( $config );
 
@@ -899,14 +888,6 @@ class TMAnalysisWorker extends AbstractWorker {
 
             $this->_queueHandler->getRedisClient()->expire( RedisKeys::PROJECT_ENDING_SEMAPHORE . $_project_id, 60 * 60 * 24 /* 24 hours TTL */ );
 
-            try {
-                $this->featureSet->run( 'beforeTMAnalysisCloseProject', $_project_id );
-            } catch ( Exception $e ) {
-                $this->_queueHandler->getRedisClient()->del( RedisKeys::PROJECT_ENDING_SEMAPHORE . $_project_id );
-                $this->_doLog( "Re-queueing project_id $_project_id because of error {$e->getMessage()}" );
-                throw new ReQueueException();
-            }
-
             /*
              * Remove this job from the project list
              */
@@ -974,10 +955,11 @@ class TMAnalysisWorker extends AbstractWorker {
      *
      * @throws ReQueueException
      * @throws ReflectionException
+     * @throws Exception
      */
     protected function _forceSetSegmentAnalyzed( QueueElement $elementQueue ) {
 
-        $data[ 'tm_analysis_status' ] = "DONE"; // DONE . I don't want it remains in an inconsistent state
+        $data[ 'tm_analysis_status' ] = "DONE"; // DONE. I don't want it to remain in an inconsistent state
         $where                        = [
                 "id_segment" => $elementQueue->params->id_segment,
                 "id_job"     => $elementQueue->params->id_job
