@@ -51,7 +51,7 @@
     height: 100%;
     text-align: right;
     border-left: 1px solid $grey3;
-    min-width: 66px;
+    min-width: 46px;
     font-size: 16px;
     &:first-child {
       border-left: none;
@@ -91,7 +91,7 @@
     }
   }
   .job-table-header-total {
-    width: 100px;
+    min-width: 60px;
     display: flex;
     justify-content: flex-end;
     font-weight: 700;
@@ -260,4 +260,7 @@
     justify-content: center;
     border-right: none;
   }
+}
+.analyze-page .more-columns {
+  grid-template-columns: minmax(100px, 150px) repeat(12, 1fr) minmax(80px,100px) !important;
 }
