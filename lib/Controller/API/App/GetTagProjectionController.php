@@ -9,6 +9,7 @@ use Engine;
 use Engines_MyMemory;
 use Exception;
 use INIT;
+use InvalidArgumentException;
 use Log;
 use Matecat\SubFiltering\MateCatFilter;
 use Segments_SegmentOriginalDataDao;
@@ -79,19 +80,19 @@ class GetTagProjectionController extends KleinController {
         $target_lang = filter_var( $this->request->param( 'target_lang' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
 
         if ( is_null( $source ) || $source === '' ) {
-            throw new Exception("missing source segment" , -1);
+            throw new InvalidArgumentException("missing source segment" , -1);
         }
 
         if ( is_null( $target ) || $target === '' ) {
-            throw new Exception("missing target segment" , -2);
+            throw new InvalidArgumentException("missing target segment" , -2);
         }
 
         if ( empty( $source_lang ) ) {
-            throw new Exception("missing source lang" , -3);
+            throw new InvalidArgumentException("missing source lang" , -3);
         }
 
         if ( empty( $target_lang ) ) {
-            throw new Exception("missing target lang" , -2);
+            throw new InvalidArgumentException("missing target lang" , -2);
         }
 
         if ( empty( $id_job ) ) {
@@ -99,7 +100,7 @@ class GetTagProjectionController extends KleinController {
             Log::doJsonLog( $msg );
             Utils::sendErrMailReport( $msg );
 
-            throw new Exception("id_job not valid" , -4);
+            throw new InvalidArgumentException("id_job not valid" , -4);
         }
 
         return [

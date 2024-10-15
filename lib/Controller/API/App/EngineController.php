@@ -6,6 +6,7 @@ use API\Commons\KleinController;
 use API\Commons\Validators\LoginValidator;
 use Constants_Engines;
 use Database;
+use DomainException;
 use Engine;
 use EnginesModel\DeepLStruct;
 use EnginesModel_AltlangStruct;
@@ -18,6 +19,8 @@ use EnginesModel_MicrosoftHubStruct;
 use EnginesModel_SmartMATEStruct;
 use EnginesModel_YandexTranslateStruct;
 use Exception;
+use InvalidArgumentException;
+use RuntimeException;
 use Validator\DeepLValidator;
 
 class EngineController extends KleinController {
@@ -165,7 +168,7 @@ class EngineController extends KleinController {
             }
 
             if ( !$validEngine ) {
-                throw new Exception("Engine not allowed", -4);
+                throw new DomainException("Engine not allowed", -4);
             }
 
             $engineList = $this->featureSet->filter( 'getAvailableEnginesListForUser', Constants_Engines::getAvailableEnginesList(), $this->user );
@@ -187,9 +190,8 @@ class EngineController extends KleinController {
                     $newEngineStruct->class_load
                 );
 
-                throw new Exception($error['message'], $error['code']);
+                throw new DomainException($error['message'], $error['code']);
             }
-
 
             if ( $newEngineStruct instanceof EnginesModel_MicrosoftHubStruct ) {
 
@@ -205,7 +207,7 @@ class EngineController extends KleinController {
                     $engineDAO->delete( $newCreatedDbRowStruct );
                     $this->destroyUserEnginesCache();
 
-                    throw new Exception($mt_result[ 'error' ]);
+                    throw new DomainException($mt_result[ 'error' ]);
                 }
 
             } elseif ( $newEngineStruct instanceof EnginesModel_GoogleTranslateStruct ) {
@@ -222,7 +224,7 @@ class EngineController extends KleinController {
                     $engineDAO->delete( $newCreatedDbRowStruct );
                     $this->destroyUserEnginesCache();
 
-                    throw new Exception($mt_result[ 'error' ]);
+                    throw new DomainException($mt_result[ 'error' ]);
                 }
             } else {
                 try {
@@ -231,7 +233,7 @@ class EngineController extends KleinController {
                     $engineDAO->delete( $newCreatedDbRowStruct );
                     $this->destroyUserEnginesCache();
 
-                    throw new Exception($e->getMessage(), $e->getCode());
+                    throw new DomainException($e->getMessage(), $e->getCode());
                 }
             }
 
@@ -258,7 +260,7 @@ class EngineController extends KleinController {
             $id = $request['id'];
 
             if ( empty( $id ) ) {
-                throw new Exception("Engine id required", -5);
+                throw new InvalidArgumentException("Engine id required", -5);
             }
 
             $engineToBeDeleted      = EnginesModel_EngineStruct::getStruct();
@@ -270,7 +272,7 @@ class EngineController extends KleinController {
             $this->destroyUserEnginesCache();
 
             if ( !$result instanceof EnginesModel_EngineStruct ) {
-                throw new Exception("Deletion failed. Generic error", -9);
+                throw new RuntimeException("Deletion failed. Generic error", -9);
             }
 
             $this->featureSet->run( 'postEngineDeletion', $result );

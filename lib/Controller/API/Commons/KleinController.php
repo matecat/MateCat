@@ -10,9 +10,13 @@ use ApiKeys_ApiKeyStruct;
 use AuthCookie;
 use CatUtils;
 use CookieManager;
+use DomainException;
 use Exception;
+use Exceptions\NotFoundException;
 use FeatureSet;
 use INIT;
+use InvalidArgumentException;
+use RuntimeException;
 use Users_UserDao;
 
 /**
@@ -333,31 +337,37 @@ abstract class KleinController implements IController {
     }
 
     /**
-     * @param $code
-     * @param $message
-     * @return \Klein\Response
-     */
-    protected function return400Error($code, $message)
-    {
-        $this->response->code(400);
-
-        return $this->response->json([
-            "code" => $code,
-            "message" => $message
-        ]);
-    }
-
-    /**
      * @param Exception $exception
      * @return \Klein\Response
      */
     protected function returnException(Exception $exception)
     {
-        // InvalidArgumentException --> 400
+        // determine http code
+        switch (get_class($exception)){
 
+            case InvalidArgumentException::class:
+            case DomainException::class:
+                $httpCode = 400;
+                break;
 
+            case AuthenticationError::class:
+                $httpCode = 401;
+                break;
 
-        $this->response->code($exception->getCode() >= 400 ? $exception->getCode() : 500);
+            case NotFoundException::class:
+                $httpCode = 404;
+                break;
+
+            case RuntimeException::class:
+                $httpCode = 500;
+                break;
+
+            default:
+                $httpCode = $exception->getCode() >= 400 ? $exception->getCode() : 500;
+                break;
+        }
+
+        $this->response->code($httpCode);
 
         return $this->response->json([
             'errors' => [

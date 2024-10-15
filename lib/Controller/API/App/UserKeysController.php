@@ -8,7 +8,9 @@ use Chunks_ChunkDao;
 use Database;
 use Engine;
 use Exception;
+use Exceptions\NotFoundException;
 use INIT;
+use InvalidArgumentException;
 use Log;
 use Matecat\SubFiltering\MateCatFilter;
 use TmKeyManagement_Filter;
@@ -110,7 +112,7 @@ class UserKeysController extends KleinController {
             $userMemoryKeys = $mkDao->read( $memoryKeyToUpdate );
 
             if(empty($userMemoryKeys)){
-                throw new Exception("No user memory keys found");
+                throw new NotFoundException("No user memory keys found");
             }
 
             (new TmKeyManagement_TmKeyManagement())->shareKey($emailList, $userMemoryKeys[0], $this->user);
@@ -156,7 +158,7 @@ class UserKeysController extends KleinController {
 
         // check for eventual errors on the input passed
         if ( empty( $key ) ) {
-            throw new Exception("Key missing", -2);
+            throw new InvalidArgumentException("Key missing", -2);
         }
 
         // Prevent XSS attack
@@ -165,7 +167,7 @@ class UserKeysController extends KleinController {
         // <details x=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx:2 open ontoggle="prompt(document.cookie);">
         // in this case, an error MUST be thrown
         if($_POST['description'] and $_POST['description'] !== $description){
-            throw new Exception("Invalid key description", -3);
+            throw new InvalidArgumentException("Invalid key description", -3);
         }
 
         return [
@@ -202,7 +204,7 @@ class UserKeysController extends KleinController {
 
         if ( !isset( $keyExists ) || $keyExists === false ) {
             Log::doJsonLog( __METHOD__ . " -> TM key is not valid." );
-            throw new Exception( "TM key is not valid.", -4 );
+            throw new InvalidArgumentException( "TM key is not valid.", -4 );
         }
 
         $tmKeyStruct       = new TmKeyManagement_TmKeyStruct();

@@ -11,10 +11,13 @@ use Database;
 use Email\CommentEmail;
 use Email\CommentMentionEmail;
 use Email\CommentResolveEmail;
+use Exception;
 use INIT;
+use InvalidArgumentException;
 use Jobs_JobDao;
 use Jobs_JobStruct;
 use Log;
+use RuntimeException;
 use Stomp\Transport\Message;
 use Teams\MembershipDao;
 use Url\JobUrlBuilder;
@@ -130,86 +133,91 @@ class CommentController extends KleinController {
      */
     public function delete()
     {
-        $request = $this->validateTheRequest();
+        try {
+            $request = $this->validateTheRequest();
 
-        if(!isset($request['id_comment'])){
-            return $this->return400Error(-200,  "Id comment not provided.");
-        }
+            if(!isset($request['id_comment'])){
+                throw new InvalidArgumentException(  "Id comment not provided.", -200);
+            }
 
-        $user = $this->user;
-        $idComment = $request['id_comment'];
-        $commentDao = new Comments_CommentDao( Database::obtain() );
-        $comment = $commentDao->getById($idComment);
+            $user = $this->user;
+            $idComment = $request['id_comment'];
+            $commentDao = new Comments_CommentDao( Database::obtain() );
+            $comment = $commentDao->getById($idComment);
 
-        if(null === $comment){
-            return $this->return400Error(-202,  "Comment not found.");
-        }
+            if(null === $comment){
+                throw new InvalidArgumentException( "Comment not found.", -202);
+            }
 
-        if($comment->uid === null){
-            return $this->return400Error(-203,  "You are not the author of the comment.");
-        }
+            if($comment->uid === null){
+                throw new InvalidArgumentException( "You are not the author of the comment.", -203);
+            }
 
-        if((int)$comment->uid !== (int)$user->uid){
-            return $this->return400Error(-203,  "You are not the author of the comment.");
-        }
+            if((int)$comment->uid !== (int)$user->uid){
+                throw new InvalidArgumentException( "You are not the author of the comment.", -203);
+            }
 
-        if((int)$comment->id_segment !== (int)$request['id_segment']){
-            return $this->return400Error(-204, "Not corresponding id segment.");
-        }
+            if((int)$comment->id_segment !== (int)$request['id_segment']){
+                throw new InvalidArgumentException( "Not corresponding id segment.", -204);
+            }
 
-        $segments = $commentDao->getBySegmentId($comment->id_segment);
-        $lastSegment = end($segments);
+            $segments = $commentDao->getBySegmentId($comment->id_segment);
+            $lastSegment = end($segments);
 
-        if((int)$lastSegment->id !== (int)$request['id_comment']){
-            return $this->return400Error(-205, "Only the last element comment can be deleted.");
-        }
+            if((int)$lastSegment->id !== (int)$request['id_comment']){
+                throw new InvalidArgumentException("Only the last element comment can be deleted.", -205);
+            }
 
-        if((int)$comment->id_job !== (int)$request['id_job']){
-            return $this->return400Error(-206, "Not corresponding id job.");
-        }
+            if((int)$comment->id_job !== (int)$request['id_job']){
+                throw new InvalidArgumentException("Not corresponding id job.", -206);
+            }
 
-        // Fix for R2
-        // The comments from R2 phase are wrongly saved with source_page = 2
-        $sourcePage = Utils::getSourcePageFromReferer();
+            // Fix for R2
+            // The comments from R2 phase are wrongly saved with source_page = 2
+            $sourcePage = Utils::getSourcePageFromReferer();
 
-        $allowedSourcePages = [];
-        $allowedSourcePages[] = (int)$request['source_page'];
+            $allowedSourcePages = [];
+            $allowedSourcePages[] = (int)$request['source_page'];
 
-        if($sourcePage == 3){
-            $allowedSourcePages[] = 2;
-        }
+            if($sourcePage == 3){
+                $allowedSourcePages[] = 2;
+            }
 
-        if(!in_array((int)$comment->source_page, $allowedSourcePages)){
-            return $this->return400Error(-207, "Not corresponding source_page.");
-        }
+            if(!in_array((int)$comment->source_page, $allowedSourcePages)){
+                throw new InvalidArgumentException("Not corresponding source_page.", -207);
+            }
 
-        if($commentDao->deleteComment($comment->id)){
+            if($commentDao->deleteComment($comment->id)){
 
-            $commentDao->destroySegmentIdCache($comment->id_segment);
+                $commentDao->destroySegmentIdCache($comment->id_segment);
 
-            $this->enqueueDeleteCommentMessage(
-                $request['id_job'],
-                $request['id_client'],
-                $request['job']->id_project,
-                $comment->id,
-                $comment->id_segment,
-                $this->user->email,
-                $request['source_page']
-            );
+                $this->enqueueDeleteCommentMessage(
+                    $request['id_job'],
+                    $request['id_client'],
+                    $request['job']->id_project,
+                    $comment->id,
+                    $comment->id_segment,
+                    $this->user->email,
+                    $request['source_page']
+                );
 
-            return $this->response->json([
-                "data" => [
-                    [
-                        "id" => (int)$comment->id
-                    ],
-                    'user' => [
-                        'full_name' => $this->user->fullName()
+                return $this->response->json([
+                    "data" => [
+                        [
+                            "id" => (int)$comment->id
+                        ],
+                        'user' => [
+                            'full_name' => $this->user->fullName()
+                        ]
                     ]
-                ]
-            ]);
-        }
+                ]);
+            }
 
-        return $this->return400Error(-220, "Error when deleting a comment.");
+            throw new RuntimeException( "Error when deleting a comment.", -220);
+            
+        } catch (Exception $exception){
+            return $this->returnException($exception);
+        }
     }
 
     /**
@@ -234,7 +242,7 @@ class CommentController extends KleinController {
         $job = Jobs_JobDao::getByIdAndPassword( $id_job, $password, 60 * 60 * 24 );
 
         if ( empty( $job ) ) {
-            return $this->return400Error(-10, "wrong password");
+            throw new InvalidArgumentException(-10, "wrong password");
         }
 
         return [

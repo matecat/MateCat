@@ -22,71 +22,76 @@ class GetProjectsController extends KleinController {
 
     public function fetch()
     {
-        $page = filter_var( $this->request->param( 'page' ), FILTER_SANITIZE_NUMBER_INT );
-        $step = filter_var( $this->request->param( 'step' ), FILTER_SANITIZE_NUMBER_INT );
-        $project_id = filter_var( $this->request->param( 'project' ), FILTER_SANITIZE_NUMBER_INT );
-        $search_in_pname = filter_var( $this->request->param( 'pn' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
-        $source = filter_var( $this->request->param( 'source' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW ] );
-        $target = filter_var( $this->request->param( 'target' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW ] );
-        $status = filter_var( $this->request->param( 'status' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW ] );
-        $only_completed = filter_var( $this->request->param( 'onlycompleted' ), FILTER_VALIDATE_BOOLEAN, [ 'flags' => FILTER_NULL_ON_FAILURE ] );
-        $id_team = filter_var( $this->request->param( 'id_team' ), FILTER_SANITIZE_NUMBER_INT );
-        $id_assignee = filter_var( $this->request->param( 'id_assignee' ), FILTER_SANITIZE_NUMBER_INT );
-        $no_assignee = filter_var( $this->request->param( 'no_assignee' ), FILTER_VALIDATE_BOOLEAN );
-
-        $search_status = (!empty( $status ) and Constants_JobStatus::isAllowedStatus( $status)) ? $status : Constants_JobStatus::STATUS_ACTIVE;
-        $page = (!empty( $page )) ? (int)$page : 1;
-        $step = (!empty( $step )) ? (int)$step : 10;
-        $start  = ( $page - 1 ) * $step;
-
-        $this->featureSet->loadFromUserEmail( $this->user->email ) ;
-
         try {
-            $team = $this->filterTeam($id_team);
-        } catch( NotFoundException $e ){
-            throw new $e;
+            $page = filter_var( $this->request->param( 'page' ), FILTER_SANITIZE_NUMBER_INT );
+            $step = filter_var( $this->request->param( 'step' ), FILTER_SANITIZE_NUMBER_INT );
+            $project_id = filter_var( $this->request->param( 'project' ), FILTER_SANITIZE_NUMBER_INT );
+            $search_in_pname = filter_var( $this->request->param( 'pn' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+            $source = filter_var( $this->request->param( 'source' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW ] );
+            $target = filter_var( $this->request->param( 'target' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW ] );
+            $status = filter_var( $this->request->param( 'status' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW ] );
+            $only_completed = filter_var( $this->request->param( 'onlycompleted' ), FILTER_VALIDATE_BOOLEAN, [ 'flags' => FILTER_NULL_ON_FAILURE ] );
+            $id_team = filter_var( $this->request->param( 'id_team' ), FILTER_SANITIZE_NUMBER_INT );
+            $id_assignee = filter_var( $this->request->param( 'id_assignee' ), FILTER_SANITIZE_NUMBER_INT );
+            $no_assignee = filter_var( $this->request->param( 'no_assignee' ), FILTER_VALIDATE_BOOLEAN );
+
+            $search_status = (!empty( $status ) and Constants_JobStatus::isAllowedStatus( $status)) ? $status : Constants_JobStatus::STATUS_ACTIVE;
+            $page = (!empty( $page )) ? (int)$page : 1;
+            $step = (!empty( $step )) ? (int)$step : 10;
+            $start  = ( $page - 1 ) * $step;
+
+            $this->featureSet->loadFromUserEmail( $this->user->email ) ;
+
+            try {
+                $team = $this->filterTeam($id_team);
+            } catch( NotFoundException $e ){
+                throw new $e;
+            }
+
+            if( $team->type == Constants_Teams::PERSONAL ){
+                $assignee = $this->user;
+                $team = null;
+            } else {
+                $assignee = $this->filterAssignee( $team, $id_assignee );
+            }
+
+            $projects = ManageUtils::getProjects(
+                $this->user,
+                $start,
+                $step,
+                $search_in_pname,
+                $source,
+                $target,
+                $search_status,
+                $only_completed,
+                $project_id,
+                $team,
+                $assignee,
+                $no_assignee
+            );
+
+            $projnum = ManageUtils::getProjectsNumber(
+                $this->user,
+                $search_in_pname,
+                $source,
+                $target,
+                $search_status,
+                $only_completed,
+                $team,
+                $assignee,
+                $no_assignee
+            );
+
+            return $this->response->json([
+                'data' => $projects,
+                'page' => $page,
+                'pnumber' => $projnum[ 0 ][ 'c' ],
+                'pageStep' => $step,
+            ]);
+
+        } catch (Exception $exception){
+            return $this->returnException($exception);
         }
-
-        if( $team->type == Constants_Teams::PERSONAL ){
-            $assignee = $this->user;
-            $team = null;
-        } else {
-            $assignee = $this->filterAssignee( $team, $id_assignee );
-        }
-
-        $projects = ManageUtils::getProjects(
-            $this->user,
-            $start,
-            $step,
-            $search_in_pname,
-            $source,
-            $target,
-            $search_status,
-            $only_completed,
-            $project_id,
-            $team,
-            $assignee,
-            $no_assignee
-        );
-
-        $projnum = ManageUtils::getProjectsNumber(
-            $this->user,
-            $search_in_pname,
-            $source,
-            $target,
-            $search_status,
-            $only_completed,
-            $team,
-            $assignee,
-            $no_assignee
-        );
-
-        return $this->response->json([
-            'data' => $projects,
-            'page' => $page,
-            'pnumber' => $projnum[ 0 ][ 'c' ],
-            'pageStep' => $step,
-        ]);
     }
 
     /**
@@ -113,7 +118,7 @@ class GetProjectsController extends KleinController {
         } ) );
 
         if ( empty( $users ) ) {
-            throw new Exception( 'Assignee not found in team' );
+            throw new NotFoundException( 'Assignee not found in team' );
         }
 
         return $users[ 0 ]->getUser();

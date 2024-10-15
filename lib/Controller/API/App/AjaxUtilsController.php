@@ -7,6 +7,7 @@ use API\Commons\Validators\LoginValidator;
 use ConnectedServices\GDrive\Session;
 use Database;
 use Exception;
+use InvalidArgumentException;
 use TMS\TMSService;
 
 class AjaxUtilsController extends KleinController {
@@ -36,7 +37,7 @@ class AjaxUtilsController extends KleinController {
             $keyExists = $tmxHandler->checkCorrectKey( $tm_key );
 
             if ( !isset( $keyExists ) || $keyExists === false ) {
-                throw new Exception("TM key is not valid.", -9);
+                throw new InvalidArgumentException("TM key is not valid.", -9);
             }
 
             return $this->response->json([

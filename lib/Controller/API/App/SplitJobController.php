@@ -2,22 +2,16 @@
 
 namespace API\App;
 
+use API\Commons\Exceptions\AuthenticationError;
 use API\Commons\KleinController;
 use API\Commons\Validators\LoginValidator;
-use Chunks_ChunkDao;
-use Engine;
 use Exception;
-use INIT;
+use InvalidArgumentException;
 use Jobs_JobStruct;
-use Matecat\SubFiltering\MateCatFilter;
 use ProjectManager;
 use Projects_MetadataDao;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
-use TmKeyManagement_Filter;
-use TmKeyManagement_TmKeyManagement;
-use TmKeyManagement_TmKeyStruct;
-use Translations_SegmentTranslationDao;
 
 class SplitJobController extends KleinController {
 
@@ -191,7 +185,7 @@ class SplitJobController extends KleinController {
         $jobToSplit = $this->filterJobsById( $jid, $jobList );
 
         if ( array_shift( $jobToSplit )->password != $job_pass ) {
-            throw new Exception( "Wrong Password. Access denied", -10 );
+            throw new InvalidArgumentException( "Wrong Password. Access denied", -10 );
         }
 
         $project_struct->getFeaturesSet()->run('checkSplitAccess', $jobList ) ;
@@ -211,7 +205,7 @@ class SplitJobController extends KleinController {
         } ) );
 
         if ( empty( $filteredJobs ) ) {
-            throw new Exception( "Access denied", -10 );
+            throw new AuthenticationError( "Access denied", -10 );
         }
 
         return $filteredJobs;

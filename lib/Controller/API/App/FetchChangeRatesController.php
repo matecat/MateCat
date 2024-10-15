@@ -5,6 +5,7 @@ namespace API\App;
 use API\Commons\KleinController;
 use API\Commons\Validators\LoginValidator;
 use currency_translatedChangeRatesFetcher;
+use Exception;
 
 class FetchChangeRatesController extends KleinController {
 
@@ -14,13 +15,17 @@ class FetchChangeRatesController extends KleinController {
 
     public function fetch()
     {
-        $changeRatesFetcher = new currency_translatedChangeRatesFetcher();
-        $changeRatesFetcher->fetchChangeRates();
+        try {
+            $changeRatesFetcher = new currency_translatedChangeRatesFetcher();
+            $changeRatesFetcher->fetchChangeRates();
 
-        $this->response->status()->setCode( 200 );
+            $this->response->status()->setCode( 200 );
 
-        return $this->response->json( [
-            'data' => $changeRatesFetcher->getChangeRates()
-        ] );
+            return $this->response->json( [
+                'data' => $changeRatesFetcher->getChangeRates()
+            ] );
+        } catch (Exception $exception){
+            return $this->returnException($exception);
+        }
     }
 }
