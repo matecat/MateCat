@@ -28,7 +28,7 @@ class Engines_DeepL extends Engines_AbstractEngine
      * @param $rawValue
      * @param array $parameters
      * @param null $function
-     * @return array|Engines_Results_MT
+     * @return Engines_Results_MT[]
      * @throws Exception
      */
     protected function _decode($rawValue, array $parameters = [], $function = null)
@@ -64,8 +64,8 @@ class Engines_DeepL extends Engines_AbstractEngine
                 ],
                 'source_lang' => $source[0],
                 'target_lang' => $target[0],
-                'formality' => ($_config['formality'] ? $_config['formality'] : null),
-                'glossary_id' => ($_config['idGlossary'] ? $_config['idGlossary'] : null)
+                'formality' => ($_config['formality'] ?: null),
+                'glossary_id' => ($_config['idGlossary'] ?: null)
             ];
 
             $headers = [
@@ -120,7 +120,7 @@ class Engines_DeepL extends Engines_AbstractEngine
 
     /**
      * @return mixed
-     * @throws \Engines\DeepL\DeepLApiException
+     * @throws DeepLApiException
      * @throws Exception
      */
     public function glossaries()
@@ -131,7 +131,7 @@ class Engines_DeepL extends Engines_AbstractEngine
     /**
      * @param $id
      * @return mixed
-     * @throws \Engines\DeepL\DeepLApiException
+     * @throws DeepLApiException
      * @throws Exception
      */
     public function getGlossary($id)
@@ -142,7 +142,7 @@ class Engines_DeepL extends Engines_AbstractEngine
     /**
      * @param $id
      * @return mixed
-     * @throws \Engines\DeepL\DeepLApiException
+     * @throws DeepLApiException
      * @throws Exception
      */
     public function deleteGlossary($id)
@@ -153,7 +153,7 @@ class Engines_DeepL extends Engines_AbstractEngine
     /**
      * @param $data
      * @return mixed
-     * @throws \Engines\DeepL\DeepLApiException
+     * @throws DeepLApiException
      */
     public function createGlossary($data)
     {
@@ -163,7 +163,7 @@ class Engines_DeepL extends Engines_AbstractEngine
     /**
      * @param $id
      * @return mixed
-     * @throws \Engines\DeepL\DeepLApiException
+     * @throws DeepLApiException
      */
     public function getGlossaryEntries($id)
     {

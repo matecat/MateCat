@@ -218,9 +218,9 @@ class NewController extends ajaxController {
 
                 'filters_extraction_parameters_template_id' => [ 'filter' => FILTER_VALIDATE_INT ],
                 'xliff_parameters_template_id'              => [ 'filter' => FILTER_VALIDATE_INT ],
-        ];
 
-        $filterArgs = $this->featureSet->filter( 'filterNewProjectInputFilters', $filterArgs, $this->userIsLogged );
+                'mt_evaluation' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ]
+        ];
 
         $this->postInput = filter_input_array( INPUT_POST, $filterArgs );
 
@@ -703,6 +703,10 @@ class NewController extends ajaxController {
 
         if ( $this->xliff_parameters ) {
             $projectStructure[ 'xliff_parameters' ] = $this->xliff_parameters;
+        }
+
+        if ( $this->postInput[ 'mt_evaluation' ] ) {
+            $projectStructure[ 'mt_evaluation' ] = true;
         }
 
         //set features override

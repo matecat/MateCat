@@ -51,12 +51,6 @@ CONTRIBUTION_GET[queue_name]    = "get_contribution"
 CONTRIBUTION_GET[max_executors] = 5
 
 ;;##############################
-;;##### Key Name QAChecks  #####
-;;##############################
-QA_CHECKS[queue_name] = "qa_checks"
-QA_CHECKS[max_executors] = 1
-
-;;##############################
 ;;##### Key Name activity_log #####
 ;;##############################
 ACTIVITYLOG[queue_name]    = "activity_log"

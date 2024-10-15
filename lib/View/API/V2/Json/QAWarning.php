@@ -22,9 +22,6 @@ class QAWarning {
     protected function pushErrorSegment( $error_type, $error_category, $content ) {
 
         switch ( $error_category ) {
-            case QA::GLOSSARY_BLACKLIST_MATCH:
-                $category = self::GLOSSARY_CATEGORY;
-                break;
 
             case QA::ERR_SIZE_RESTRICTION:
                 $category = self::SIZE_CATEGORY;
