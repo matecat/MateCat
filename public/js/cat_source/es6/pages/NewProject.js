@@ -411,8 +411,6 @@ const NewProject = () => {
       getPublicMatches,
       qaModelTemplateId,
       payableRateTemplateId,
-      filtersTemplateId,
-      XliffConfigTemplateId,
     } = currentProjectTemplate
 
     // update store recently used target languages
@@ -450,8 +448,6 @@ const NewProject = () => {
       ...(mt?.extra?.deepl_formality && {
         deepl_formality: mt.extra.deepl_formality,
       }),
-      filters_extraction_parameters_template_id: filtersTemplateId,
-      xliff_parameters_template_id: XliffConfigTemplateId,
     })
 
     if (!projectSent) {

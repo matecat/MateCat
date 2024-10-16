@@ -22,6 +22,13 @@ import {FILTERS_PARAMS_SCHEMA_KEYS} from './Contents/FileImportTab/FiltersParams
 import {XLIFF_SETTINGS_SCHEMA_KEYS} from './Contents/FileImportTab/XliffSettings/XliffSettings'
 import {EditorSettingsTab} from './Contents/EditorSettingsTab'
 import ModalsActions from '../../actions/ModalsActions'
+import {getFiltersParamsTemplates} from '../../api/getFiltersParamsTemplates'
+import defaultFiltersParams from './Contents/defaultTemplates/filterParams.json'
+import defaultXliffSettings from './Contents/defaultTemplates/xliffSettings.json'
+import {debounce, isEqual} from 'lodash'
+import {getXliffSettingsTemplates} from '../../api/getXliffSettingsTemplates/getXliffSettingsTemplates'
+import useSyncTemplateWithConvertFile from './useSyncTemplateWithConvertFile'
+import {restartConversions} from '../../utils/newProjectUtils'
 
 let tabOpenFromQueryString = new URLSearchParams(window.location.search).get(
   'openTab',
@@ -115,7 +122,7 @@ const DEFAULT_CONTENTS = (isCattool = config.is_cattool) => {
             id: SETTINGS_PANEL_TABS.editorSettings,
             label: 'Editor settings',
             description:
-              'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vulputate libero et velit interdum, ac aliquet odio mattis.',
+              'Customize the settings for Matecat\'s editor page to better suit your personal workflow and preferences. <a href="https://guides.matecat.com/" target="_blank">Learn more</a>',
             component: <EditorSettingsTab />,
           },
         ]
@@ -179,6 +186,42 @@ export const SettingsPanel = ({
   const fileImportXliffSettingsTemplates = useTemplates(
     XLIFF_SETTINGS_SCHEMA_KEYS,
   )
+
+  const debounceRestartConversions =
+    restartConversions && debounce(restartConversions, 500)
+
+  // Sync filters template with conversion file
+  useSyncTemplateWithConvertFile({
+    ...fileImportFiltersParamsTemplates,
+    defaultTemplate: defaultFiltersParams,
+    idTemplate: currentProjectTemplate?.filtersTemplateId,
+    getTemplates: getFiltersParamsTemplates,
+    checkIfUpdate: (filtersTemplate) => {
+      if (!isEqual(filtersTemplate, CreateProjectStore.getFiltersTemplate())) {
+        CreateProjectStore.updateProject({filtersTemplate})
+        if (debounceRestartConversions) debounceRestartConversions()
+      }
+    },
+  })
+
+  // Sync xliff template with conversion file
+  useSyncTemplateWithConvertFile({
+    ...fileImportXliffSettingsTemplates,
+    defaultTemplate: defaultXliffSettings,
+    idTemplate: currentProjectTemplate?.XliffConfigTemplateId,
+    getTemplates: getXliffSettingsTemplates,
+    checkIfUpdate: (xliffConfigTemplate) => {
+      if (
+        !isEqual(
+          xliffConfigTemplate,
+          CreateProjectStore.getXliffConfigTemplate(),
+        )
+      ) {
+        CreateProjectStore.updateProject({xliffConfigTemplate})
+        if (debounceRestartConversions) debounceRestartConversions()
+      }
+    },
+  })
 
   const wrapperRef = useRef()
 

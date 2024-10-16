@@ -3,8 +3,7 @@ import {Select} from '../../../common/Select'
 import {CreateProjectContext} from '../../../createProject/CreateProjectContext'
 
 export const Subject = () => {
-  const {SELECT_HEIGHT} = useContext(CreateProjectContext)
-  const {subject, setSubject} = useContext(CreateProjectContext)
+  const {SELECT_HEIGHT, subject, setSubject} = useContext(CreateProjectContext)
 
   const subjectsArray = useMemo(
     () =>
@@ -17,17 +16,19 @@ export const Subject = () => {
   return (
     <div className="options-box">
       <div className="option-description">
-        <h3>Subject</h3>Select your project's subject
+        <h3>Subject</h3>Select your project's subject.
       </div>
       <div className="options-select-container">
         <Select
           id="project-subject"
           name={'project-subject'}
+          isPortalDropdown={true}
+          dropdownClassName="select-dropdown__wrapper-other-tab"
           maxHeightDroplist={SELECT_HEIGHT}
           showSearchBar={true}
           options={subjectsArray}
           activeOption={subject}
-          checkSpaceToReverse={false}
+          checkSpaceToReverse={true}
           onSelect={(option) => setSubject(option)}
         />
       </div>

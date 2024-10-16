@@ -3,14 +3,12 @@ import {SettingsPanelContext} from '../../../SettingsPanelContext'
 import CatToolActions from '../../../../../actions/CatToolActions'
 import ModalsActions from '../../../../../actions/ModalsActions'
 import {ConfirmDeleteResourceProjectTemplates} from '../../../../modals/ConfirmDeleteResourceProjectTemplates'
-import {getFiltersParamsTemplates} from '../../../../../api/getFiltersParamsTemplates'
 import {SubTemplates} from '../../SubTemplates'
 import {SCHEMA_KEYS} from '../../../../../hooks/useProjectTemplates'
 import {createFiltersParamsTemplate} from '../../../../../api/createFiltersParamsTemplate/createFiltersParamsTemplate'
 import {updateFiltersParamsTemplate} from '../../../../../api/updateFiltersParamsTemplate/updateFiltersParamsTemplate'
 import {deleteFiltersParamsTemplate} from '../../../../../api/deleteFiltersParamsTemplate/deleteFiltersParamsTemplate'
 import {AccordionGroupFiltersParams} from './AccordionGroupFiltersParams'
-import defaultFiltersParams from '../../defaultTemplates/filterParams.json'
 
 export const FILTERS_PARAMS_SCHEMA_KEYS = {
   id: 'id',
@@ -102,46 +100,7 @@ export const FiltersParams = () => {
       )
     })
 
-  // retrieve filters params templates
-  useEffect(() => {
-    if (templates.length) return
-
-    let cleanup = false
-
-    if (config.isLoggedIn === 1 && !config.is_cattool) {
-      getFiltersParamsTemplates().then((templates) => {
-        const items = [defaultFiltersParams, ...templates.items]
-        if (!cleanup) {
-          const selectedTemplateId =
-            items.find(({id}) => id === currentProjectTemplateFiltersId)?.id ??
-            0
-
-          setTemplates(
-            items.map((template) => ({
-              ...template,
-              isSelected: template.id === selectedTemplateId,
-            })),
-          )
-        }
-      })
-    } else {
-      // not logged in
-    }
-
-    return () => (cleanup = true)
-  }, [setTemplates, templates.length, currentProjectTemplateFiltersId])
-
-  // Select QF template when curren project template change
-  useEffect(() => {
-    setTemplates((prevState) =>
-      prevState.map((template) => ({
-        ...template,
-        isSelected: template.id === currentProjectTemplateFiltersId,
-      })),
-    )
-  }, [currentProjectTemplateFiltersId, setTemplates])
-
-  // Modify current project template qa model template id when qf template id change
+  // Modify current project template filters template id when filters template id change
   useEffect(() => {
     if (
       typeof currentTemplateId === 'number' &&

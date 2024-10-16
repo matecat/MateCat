@@ -17,7 +17,10 @@ use QAModelTemplate\QAModelTemplateDao;
 use ReflectionException;
 use stdClass;
 use Swaggest\JsonSchema\InvalidValue;
+use TeamModel;
+use Teams\MembershipDao;
 use Teams\TeamDao;
+use Teams\TeamStruct;
 use TmKeyManagement_MemoryKeyDao;
 use TmKeyManagement_MemoryKeyStruct;
 use TmKeyManagement_TmKeyStruct;
@@ -154,35 +157,35 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
      */
     private static function checkValues( ProjectTemplateStruct $projectTemplateStruct ) {
 
+        $user = (new \Users_UserDao())->getByUid($projectTemplateStruct->uid);
+
+        if ( empty($user)) {
+            throw new Exception( "User not found.", 404 );
+        }
+
         // check id_team
-        $teamDao      = new TeamDao();
-        $personalTeam = $teamDao->getPersonalByUid( $projectTemplateStruct->uid );
+        $membersDao = new MembershipDao();
+        $membersDao->setCacheTTL( 60 * 5 );
+        $userTeamIds = array_map(
+            function ( $team ) use ( $membersDao ) {
+                $teamModel = new TeamModel( $team );
+                $teamModel->updateMembersProjectsCount();
 
-        if ( $personalTeam === null ) {
-            $team = $teamDao->findById( $projectTemplateStruct->id_team );
+                /** @var $team TeamStruct */
+                return (int)$team->id;
+            },
+            $membersDao->findUserTeams( $user )
+        );
 
-            if ( $team === null ) {
-                throw new Exception( "User group not found.", 404 );
-            }
-
-            if ( !$team->hasUser( $projectTemplateStruct->uid ) ) {
-                throw new Exception( "This user does not belong to this group.", 403 );
-            }
+        if ( empty($userTeamIds)) {
+            throw new Exception( "User group not found.", 404 );
         }
 
-        if($projectTemplateStruct->id_team !== null and $projectTemplateStruct->id_team > 0){
-
-            $team = $teamDao->findById($projectTemplateStruct->id_team);
-
-            if ( $team === null ) {
-                throw new Exception( "Group with id ".$projectTemplateStruct->id_team." not found.", 404 );
-            }
-
-            if ( $team->type !== 'personal' and !$team->hasUser( $projectTemplateStruct->uid ) ) {
-                throw new Exception( "This user does not belong to this group.", 403 );
-            }
+        if ( !in_array( $projectTemplateStruct->uid, $userTeamIds ) ) {
+            throw new Exception( "This user does not belong to this group.", 403 );
         }
 
+        // source_language
         if($projectTemplateStruct->source_language !== null){
             $languages = Langs_Languages::getInstance();
             $language  = Utils::trimAndLowerCase( $projectTemplateStruct->source_language );
@@ -192,6 +195,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
             }
         }
 
+        // target_language
         if($projectTemplateStruct->target_language !== null){
 
             $targetLanguages = unserialize($projectTemplateStruct->target_language);

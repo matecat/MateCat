@@ -10,18 +10,20 @@ export const TargetLanguages = () => {
     <div className="options-box">
       <div className="option-description">
         <h3>Target language(s)</h3>Select one or more target languages for your
-        project
+        project.
       </div>
       <div className="options-select-container">
         <Select
           id="target-langs"
           name="target-langs"
+          isPortalDropdown={true}
+          dropdownClassName="select-dropdown__wrapper-other-tab"
           maxHeightDroplist={SELECT_HEIGHT}
           showSearchBar={true}
           multipleSelect="dropdown"
           options={languages}
           activeOptions={targetLangs}
-          checkSpaceToReverse={false}
+          checkSpaceToReverse={true}
           onToggleOption={(option) =>
             setTargetLangs(
               targetLangs.some(({id}) => id === option.id)

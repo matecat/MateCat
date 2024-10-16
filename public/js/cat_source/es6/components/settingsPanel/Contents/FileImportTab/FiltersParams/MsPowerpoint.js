@@ -33,7 +33,9 @@ export const MsPowerpoint = () => {
 
     const restPropsValue = {
       ...propsValue,
-      ...(extract_hidden_slides ? {translate_slides} : {extract_hidden_slides}),
+      ...(!extract_hidden_slides
+        ? {translate_slides}
+        : {extract_hidden_slides}),
     }
 
     if (
@@ -53,11 +55,12 @@ export const MsPowerpoint = () => {
       setValue(key, value),
     )
     if (Array.isArray(msPowerpoint.current.translate_slides))
-      setValue('extract_hidden_slides', true)
+      setValue('extract_hidden_slides', false)
 
     if (
       typeof msPowerpoint.current.extract_hidden_slides === 'boolean' &&
-      !msPowerpoint.current.extract_hidden_slides
+      (msPowerpoint.current.extract_hidden_slides ||
+        typeof msPowerpoint.current.translate_slides === 'undefined')
     )
       setValue('translate_slides', [])
   }, [currentTemplate.id, setValue])
@@ -130,14 +133,14 @@ export const MsPowerpoint = () => {
         <Controller
           control={control}
           name="translate_slides"
-          disabled={!formData?.extract_hidden_slides}
+          disabled={formData?.extract_hidden_slides}
           render={({field: {onChange, value, name}}) => (
             <WordsBadge
               name={name}
               value={value}
               onChange={onChange}
               placeholder={''}
-              disabled={!formData?.extract_hidden_slides}
+              disabled={formData?.extract_hidden_slides}
             />
           )}
         />

@@ -6,7 +6,8 @@ import {CreateProjectContext} from '../../../createProject/CreateProjectContext'
 
 export const Team = () => {
   const {user} = useContext(SettingsPanelContext)
-  const {selectedTeam, setSelectedTeam} = useContext(CreateProjectContext)
+  const {SELECT_HEIGHT, selectedTeam, setSelectedTeam} =
+    useContext(CreateProjectContext)
 
   useEffect(() => {
     if (Array.isArray(user?.teams)) {
@@ -27,7 +28,10 @@ export const Team = () => {
         <Select
           id="project-team"
           name={'project-team'}
+          isPortalDropdown={true}
+          dropdownClassName="select-dropdown__wrapper-other-tab"
           showSearchBar={true}
+          maxHeightDroplist={SELECT_HEIGHT}
           options={
             user?.teams
               ? user.teams.map((team) => ({
@@ -37,7 +41,7 @@ export const Team = () => {
               : []
           }
           activeOption={selectedTeam}
-          checkSpaceToReverse={false}
+          checkSpaceToReverse={true}
           isDisabled={!user || user.teams.length === 1}
           onSelect={(option) => {
             setSelectedTeam(option)

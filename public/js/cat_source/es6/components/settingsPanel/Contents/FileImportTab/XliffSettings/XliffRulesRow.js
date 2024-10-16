@@ -10,6 +10,9 @@ import {Select} from '../../../../common/Select'
 import {Controller, useForm} from 'react-hook-form'
 import {isEqual} from 'lodash'
 
+const getMatchCategoryShortId = (id) => id.replace(/_match_category/, '')
+const getMatchCategoryExtendedId = (id) => `${id}_match_category`
+
 export const XliffRulesRow = ({
   value,
   onChange,
@@ -40,7 +43,7 @@ export const XliffRulesRow = ({
 
     const propsValue = {
       ...restProps,
-      ...(formData.analysis === 'pre-translated' && {editor, match_category}),
+      ...(formData.analysis !== 'new' && {editor, match_category}),
     }
 
     if (
@@ -54,10 +57,8 @@ export const XliffRulesRow = ({
   // set default values for current template
   useEffect(() => {
     Object.entries(value).forEach(([key, value]) => setValue(key, value))
-    if (
-      value.analysis === 'pre-translated' &&
-      typeof value.editor === 'undefined'
-    )
+
+    if (value.analysis !== 'new' && typeof value.editor === 'undefined')
       setValue('editor', xliffOptions.editor[0])
   }, [value, setValue, xliffOptions.editor])
 
@@ -77,6 +78,29 @@ export const XliffRulesRow = ({
           ),
     )
     .map((value) => ({id: value, name: value}))
+
+  const optionsAnalysis = xliffOptions.analysis.reduce(
+    (acc, value) =>
+      value === 'pre-translated'
+        ? [
+            ...acc,
+            ...xliffOptions.match_category.map((value) => ({
+              ...value,
+              id: getMatchCategoryExtendedId(value.id),
+            })),
+          ]
+        : [...acc, {id: value, name: value === 'new' ? 'N.A.' : value}],
+    [],
+  )
+
+  const getAnalysisActiveOption = (id) =>
+    optionsAnalysis.find(
+      (option) =>
+        option.id ===
+        (id !== 'new'
+          ? getMatchCategoryExtendedId(formData.match_category)
+          : id),
+    )
 
   return (
     <>
@@ -112,12 +136,13 @@ export const XliffRulesRow = ({
             <Select
               name={name}
               placeholder="Select analysis"
-              options={xliffOptions.analysis.map((value) => ({
-                id: value,
-                name: value,
-              }))}
-              activeOption={value && {id: value, name: value}}
-              onSelect={(option) => onChange(option.id)}
+              options={optionsAnalysis}
+              activeOption={value && getAnalysisActiveOption(value)}
+              onSelect={(option) => {
+                onChange(option.id !== 'new' ? 'pre-translated' : option.id)
+                if (option.id !== 'new')
+                  setValue('match_category', getMatchCategoryShortId(option.id))
+              }}
               maxHeightDroplist={MAX_HEIGHT_DROPLIST}
             />
           )}
