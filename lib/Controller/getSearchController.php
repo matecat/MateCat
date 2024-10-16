@@ -11,7 +11,7 @@ use Search\SearchQueryParamsStruct;
 
 class getSearchController extends ajaxController {
 
-    private int $job;
+    private int    $job;
     private string $token;
     private string $password;
     private string $source;
@@ -19,10 +19,10 @@ class getSearchController extends ajaxController {
     private string $status;
     private string $replace;
     private string $function; //can be search, replace
-    private bool $isMatchCaseRequested;
-    private bool $isExactMatchRequested;
-    private bool $strictMode;
-    private int $revisionNumber;
+    private bool   $isMatchCaseRequested;
+    private bool   $isExactMatchRequested;
+    private bool   $strictMode;
+    private int    $revisionNumber;
 
     /**
      * @var SearchQueryParamsStruct
@@ -84,9 +84,9 @@ class getSearchController extends ajaxController {
         $this->status                = strtolower( $__postInput[ 'status' ] );
         $this->replace               = $__postInput[ 'replace' ];
         $this->password              = $__postInput[ 'password' ];
-        $this->isMatchCaseRequested  = $__postInput[ 'matchcase' ];
-        $this->isExactMatchRequested = $__postInput[ 'exactmatch' ];
-        $this->strictMode            = $__postInput[ 'strict_mode' ];
+        $this->isMatchCaseRequested  = (bool)$__postInput[ 'matchcase' ];
+        $this->isExactMatchRequested = (bool)$__postInput[ 'exactmatch' ];
+        $this->strictMode            = (bool)$__postInput[ 'strict_mode' ];
         $this->revisionNumber        = (int)$__postInput[ 'revision_number' ];
 
         switch ( $this->status ) {
@@ -401,10 +401,10 @@ class getSearchController extends ajaxController {
             $replacedTranslation = Utils::stripBOM( $replacedTranslation );
 
             // Setup $new_translation
-            $new_translation                         = clone $old_translation;
-            $new_translation->status                 = $this->_getNewStatus( $old_translation );
-            $new_translation->translation            = $replacedTranslation;
-            $new_translation->translation_date       = date( "Y-m-d H:i:s" );
+            $new_translation                   = clone $old_translation;
+            $new_translation->status           = $this->_getNewStatus( $old_translation );
+            $new_translation->translation      = $replacedTranslation;
+            $new_translation->translation_date = date( "Y-m-d H:i:s" );
 
             // Save version
             $versionsHandler->saveVersionAndIncrement( $new_translation, $old_translation );
