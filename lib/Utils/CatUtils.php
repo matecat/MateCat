@@ -5,6 +5,7 @@ use LQA\ChunkReviewDao;
 use LQA\ChunkReviewStruct;
 use Matecat\SubFiltering\Enum\CTypeEnum;
 use Matecat\SubFiltering\MateCatFilter;
+use Validator\IsJobRevisionValidator;
 use Validator\IsJobRevisionValidatorObject;
 use WordCount\CounterModel;
 use WordCount\WordCountStruct;
@@ -204,12 +205,12 @@ class CatUtils {
 
     /**
      * @param Translations_SegmentTranslationStruct $translation
-     * @param                                       $is_revision
+     * @param bool                                  $is_revision
      *
      * @return void
      * @throws ControllerReturnException
      */
-    public static function addSegmentTranslation( Translations_SegmentTranslationStruct $translation, $is_revision ) {
+    public static function addSegmentTranslation( Translations_SegmentTranslationStruct $translation, bool $is_revision ) {
 
         try {
             Translations_SegmentTranslationDao::addTranslation( $translation, $is_revision );
@@ -851,9 +852,9 @@ class CatUtils {
      *
      * @return bool|null
      */
-    public static function getIsRevisionFromIdJobAndPassword( $jid, $password ) {
+    public static function getIsRevisionFromIdJobAndPassword( $jid, $password ): ?bool {
 
-        $jobValidator = new \Validator\IsJobRevisionValidator();
+        $jobValidator = new IsJobRevisionValidator();
 
         try {
 
@@ -863,8 +864,7 @@ class CatUtils {
 
             return $jobValidator->validate( $jobValidatorObject );
 
-        } catch ( \Exception $exception ) {
-            return null;
+        } catch ( Exception $ignore ) {
         }
 
         return null;
@@ -873,7 +873,7 @@ class CatUtils {
     /**
      * @return bool
      */
-    public static function getIsRevisionFromRequestUri() {
+    public static function getIsRevisionFromRequestUri(): bool {
 
         if ( !isset( $_SERVER[ 'REQUEST_URI' ] ) ) {
             return false;
@@ -887,7 +887,7 @@ class CatUtils {
     /**
      * @return bool
      */
-    public static function getIsRevisionFromReferer() {
+    public static function getIsRevisionFromReferer(): bool {
 
         if ( !isset( $_SERVER[ 'HTTP_REFERER' ] ) ) {
             return false;
@@ -903,7 +903,7 @@ class CatUtils {
      *
      * @return bool
      */
-    private static function isARevisePath( $path ) {
+    private static function isARevisePath( string $path ): bool {
         return strpos( $path, "/revise" ) === 0;
     }
 
@@ -913,10 +913,11 @@ class CatUtils {
      * @param $jobId
      * @param $jobPassword
      *
-     * @return \DataAccess_IDaoStruct|Jobs_JobStruct
+     * @return DataAccess_IDaoStruct|Jobs_JobStruct
+     * @throws ReflectionException
      */
     public static function getJobFromIdAndAnyPassword( $jobId, $jobPassword ) {
-        $job = \Jobs_JobDao::getByIdAndPassword( $jobId, $jobPassword );
+        $job = Jobs_JobDao::getByIdAndPassword( $jobId, $jobPassword );
 
         if ( !$job ) {
 

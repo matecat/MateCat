@@ -98,7 +98,7 @@ abstract class ajaxController extends controller {
     /**
      * @return bool
      */
-    public static function isRevision() {
+    public static function isRevision(): bool {
 
         $controller = static::getInstance();
 
