@@ -157,3 +157,6 @@ route( '/api/app/undo-replace-all', 'POST', [ 'API\App\GetSearchController', 'un
 route( '/api/app/update-job-keys', 'POST', [ 'API\App\UpdateJobKeysController', 'update' ] );
 route( '/api/app/set-translation', 'POST', [ 'API\App\SetTranslationController', 'translate' ] );
 route( '/api/app/split-segment', 'POST', ['API\App\SplitSegmentController', 'split' ] );
+route( '/api/app/new-tmx', 'POST', ['API\App\LoadTMXController', 'newTM' ] );
+route( '/api/app/upload-tmx-status', 'POST', ['API\App\LoadTMXController', 'uploadStatus' ] );
+route( '/api/app/change-job-status', 'POST', ['API\App\ChangeJobsStatusController', 'changeStatus' ] );
