@@ -188,7 +188,7 @@ abstract class DataAccess_AbstractDao {
      */
     protected function _fetchObject( PDOStatement $stmt, DataAccess_IDaoStruct $fetchClass, array $bindParams ): array {
 
-        $_cacheResult = $this->_getFromCache( $stmt->queryString . $this->_serializeForCacheKey( $bindParams ) . get_class( $fetchClass )  );
+        $_cacheResult = $this->_getFromCache( $stmt->queryString . $this->_serializeForCacheKey( $bindParams ) . get_class( $fetchClass ) );
 
         if ( !empty( $_cacheResult ) ) {
             return $_cacheResult;
@@ -360,7 +360,7 @@ abstract class DataAccess_AbstractDao {
      * @return int
      * @throws Exception
      */
-    public static function updateStruct( DataAccess_IDaoStruct $struct, $options = [] ) {
+    public static function updateStruct( DataAccess_IDaoStruct $struct, array $options = [] ): int {
 
         $attrs = $struct->toArray();
 
@@ -435,20 +435,14 @@ abstract class DataAccess_AbstractDao {
 
         Log::doJsonLog( [ "SQL" => $sql, "values" => $data ] );
 
-        if ( $stmt->execute( $data ) ) {
-            if ( count( static::$auto_increment_field ) ) {
-                return $conn->lastInsertId();
-            } else {
-                return $stmt->rowCount();
-            }
+        $stmt->execute( $data );
+
+        if ( count( static::$auto_increment_field ) ) {
+            return $conn->lastInsertId();
         } else {
-
-            if ( $options[ 'raise' ] ) {
-                throw new Exception( $stmt->errorInfo() );
-            }
-
-            return false;
+            return $stmt->rowCount();
         }
+
     }
 
     /**

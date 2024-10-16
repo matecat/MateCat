@@ -34,7 +34,6 @@ trait HotSwap {
      *
      * @param int            $newTM
      *
-     * @throws ConnectionException
      * @throws ReflectionException
      */
     protected function swapOn( Jobs_JobStruct $jobStruct, $newMT = 1, $newTM = 1 ) { // 1 == MyMemory
@@ -64,7 +63,6 @@ trait HotSwap {
      *
      * @param $project_id
      *
-     * @throws ConnectionException
      * @throws ReflectionException
      * @throws Exception
      */
@@ -92,7 +90,12 @@ trait HotSwap {
             }
 
             if ( $update ) {
-                $jobDao->updateStruct( $jobStruct );
+                $jobDao->updateStruct( $jobStruct, [
+                        'fields' => [
+                                'id_tms',
+                                'id_mt_engine'
+                        ]
+                ] );
             }
 
         }
