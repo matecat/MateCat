@@ -77,7 +77,7 @@ class getSearchController extends ajaxController {
         $__postInput = filter_input_array( INPUT_POST, $filterArgs );
 
         $this->function              = $__postInput[ 'function' ]; //can be: search / replace
-        $this->job                   = $__postInput[ 'job' ];
+        $this->job                   = (int)$__postInput[ 'job' ];
         $this->token                 = $__postInput[ 'token' ];
         $this->source                = $__postInput[ 'source' ];
         $this->target                = $__postInput[ 'target' ];
@@ -87,7 +87,7 @@ class getSearchController extends ajaxController {
         $this->isMatchCaseRequested  = $__postInput[ 'matchcase' ];
         $this->isExactMatchRequested = $__postInput[ 'exactmatch' ];
         $this->strictMode            = $__postInput[ 'strict_mode' ];
-        $this->revisionNumber        = $__postInput[ 'revision_number' ];
+        $this->revisionNumber        = (int)$__postInput[ 'revision_number' ];
 
         switch ( $this->status ) {
             case 'translated':
