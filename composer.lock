@@ -2203,23 +2203,23 @@
         },
         {
             "name": "phptal/phptal",
-            "version": "1.6.0",
+            "version": "1.10.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phptal/PHPTAL.git",
-                "reference": "efddaab551f76a7db3a7ae52d9ad25a8a6fef751"
+                "reference": "83359dffa90c2009ac317938665471f6cc08802d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phptal/PHPTAL/zipball/efddaab551f76a7db3a7ae52d9ad25a8a6fef751",
-                "reference": "efddaab551f76a7db3a7ae52d9ad25a8a6fef751",
+                "url": "https://api.github.com/repos/phptal/PHPTAL/zipball/83359dffa90c2009ac317938665471f6cc08802d",
+                "reference": "83359dffa90c2009ac317938665471f6cc08802d",
                 "shasum": ""
             },
             "require": {
-                "php": "~7.4.0 || ~8.0.0 || ~8.1.0"
+                "php": "~8.2.0 || ~8.3.0 || ~8.4.0"
             },
             "require-dev": {
-                "phpunit/phpunit": "^9.5.10"
+                "phpunit/phpunit": "^11.3.6"
             },
             "bin": [
                 "tools/phptal_lint.php"
@@ -2247,7 +2247,7 @@
                 }
             ],
             "description": "PHPTAL is a templating engine for PHP5 that implements Zope Page Templates syntax",
-            "homepage": "http://phptal.org/",
+            "homepage": "https://phptal.org/",
             "keywords": [
                 "phptal",
                 "template engine",
@@ -2255,9 +2255,9 @@
             ],
             "support": {
                 "issues": "https://github.com/phptal/PHPTAL/issues",
-                "source": "https://github.com/phptal/PHPTAL/tree/1.6.0"
+                "source": "https://github.com/phptal/PHPTAL/tree/1.10.0"
             },
-            "time": "2021-12-17T11:02:10+00:00"
+            "time": "2024-09-24T13:20:30+00:00"
         },
         {
             "name": "predis/predis",
@@ -5170,7 +5170,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {},
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
@@ -5190,6 +5190,6 @@
         "ext-gd": "*",
         "ext-openssl": "*"
     },
-    "platform-dev": [],
+    "platform-dev": {},
     "plugin-api-version": "2.6.0"
 }
