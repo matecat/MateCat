@@ -216,7 +216,7 @@ $(document).ready(function () {
         conversionEnabled={!!config.conversionEnabled}
         formatsNumber={config.formats_number}
         googleDriveEnabled={!!config.googleDriveEnabled}
-        restartConversions={UPLOAD_PAGE.restartConversions}
+        restartConversionsFunc={UPLOAD_PAGE.restartConversions}
       />,
     )
 

@@ -59,7 +59,7 @@ const NewProject = ({
   conversionEnabled,
   formatsNumber,
   googleDriveEnabled,
-  restartConversions,
+  restartConversionsFunc,
 }) => {
   const [user, setUser] = useState()
   const [tmKeys, setTmKeys] = useState()
@@ -93,6 +93,8 @@ const NewProject = ({
   const projectNameRef = useRef()
   const prevSourceLang = useRef(sourceLang)
   const createProject = useRef()
+  const restartConversions = useRef()
+  restartConversions.current = restartConversionsFunc
 
   const checkMMTGlossariesWasCancelledIntoTemplates = useRef(
     (() => {
@@ -518,6 +520,7 @@ const NewProject = ({
     if (projectNameFromQuerystring)
       projectNameRef.current.value = projectNameFromQuerystring
     APP.checkGDriveEvents()
+
     return () => {
       TeamsStore.removeListener(TeamConstants.UPDATE_USER, updateUser)
       CreateProjectStore.removeListener(
@@ -624,7 +627,7 @@ const NewProject = ({
       })
       if (prevSourceLang.current.id !== sourceLang.id) {
         prevSourceLang.current = sourceLang
-        restartConversions()
+        restartConversions.current()
       }
     }
   }, [sourceLang, targetLangs, selectedTeam])
@@ -635,7 +638,7 @@ const NewProject = ({
       const {segmentationRule} = currentProjectTemplate
       if (UI.segmentationRule !== segmentationRule.id) {
         UI.segmentationRule = segmentationRule.id
-        restartConversions()
+        restartConversions.current()
       }
     }
   }, [currentProjectTemplate?.segmentationRule])
@@ -962,6 +965,7 @@ const NewProject = ({
             modifyingCurrentTemplate,
             currentProjectTemplate,
             checkSpecificTemplatePropsAreModified,
+            restartConversions: restartConversions.current,
           }}
         />
       )}

@@ -515,6 +515,12 @@ var convertFile = function (fname, filerow, filesize, enforceConversion) {
 
   filerow.removeClass('ready').addClass('converting').data('session', session)
 
+  const filtersTemplate = CreateProjectStore.getFiltersTemplate()
+  const xliffConfigTemplate = CreateProjectStore.getXliffConfigTemplate()
+
+  console.log('filtersTemplate', filtersTemplate)
+  console.log('xliffConfigTemplate', xliffConfigTemplate)
+
   const controller = new AbortController()
   const signal = controller.signal
   convertFileRequest({
