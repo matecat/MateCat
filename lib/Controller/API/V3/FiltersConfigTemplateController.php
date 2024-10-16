@@ -234,18 +234,6 @@ class FiltersConfigTemplateController extends KleinController {
     }
 
     /**
-     * @return void
-     */
-    public function default() {
-
-        $this->response->status()->setCode( 200 );
-        $this->response->json(
-                FiltersConfigTemplateDao::getDefaultTemplate( $this->getUser()->uid )
-        );
-
-    }
-
-    /**
      * @return object|mixed
      */
     private function getModelSchema(): object {

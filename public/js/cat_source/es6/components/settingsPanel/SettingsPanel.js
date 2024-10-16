@@ -17,6 +17,15 @@ import {updateProjectTemplate} from '../../api/updateProjectTemplate'
 import {flushSync} from 'react-dom'
 import CreateProjectStore from '../../stores/CreateProjectStore'
 import NewProjectConstants from '../../constants/NewProjectConstants'
+import {FileImportTab} from './Contents/FileImportTab/FileImportTab'
+import {FILTERS_PARAMS_SCHEMA_KEYS} from './Contents/FileImportTab/FiltersParams/FiltersParams'
+import {XLIFF_SETTINGS_SCHEMA_KEYS} from './Contents/FileImportTab/XliffSettings/XliffSettings'
+import {getFiltersParamsTemplates} from '../../api/getFiltersParamsTemplates'
+import defaultFiltersParams from './Contents/defaultTemplates/filterParams.json'
+import defaultXliffSettings from './Contents/defaultTemplates/xliffSettings.json'
+import {debounce, isEqual} from 'lodash'
+import {getXliffSettingsTemplates} from '../../api/getXliffSettingsTemplates/getXliffSettingsTemplates'
+import useSyncTemplateWithConvertFile from './useSyncTemplateWithConvertFile'
 
 let tabOpenFromQueryString = new URLSearchParams(window.location.search).get(
   'openTab',
@@ -28,6 +37,7 @@ export const SETTINGS_PANEL_TABS = {
   advancedOptions: 'options',
   analysis: 'analysis',
   qualityFramework: 'qf',
+  fileImport: 'fileImport',
 }
 
 export const TEMPLATE_PROPS_BY_TAB = {
@@ -38,6 +48,10 @@ export const TEMPLATE_PROPS_BY_TAB = {
   ],
   [SETTINGS_PANEL_TABS.machineTranslation]: [SCHEMA_KEYS.mt],
   [SETTINGS_PANEL_TABS.qualityFramework]: [SCHEMA_KEYS.qaModelTemplateId],
+  [SETTINGS_PANEL_TABS.fileImport]: [
+    SCHEMA_KEYS.filtersTemplateId,
+    SCHEMA_KEYS.XliffConfigTemplateId,
+  ],
   [SETTINGS_PANEL_TABS.analysis]: [SCHEMA_KEYS.payableRateTemplateId],
   [SETTINGS_PANEL_TABS.advancedOptions]: [
     SCHEMA_KEYS.speech2text,
@@ -73,6 +87,13 @@ const DEFAULT_CONTENTS = (isCattool = config.is_cattool) => {
             description:
               'Manage your quality frameworks and select which should be used on your new project. <a href="https://guides.matecat.com/quality-framework" target="_blank">More details</a>',
             component: <QualityFrameworkTab />,
+          },
+          {
+            id: SETTINGS_PANEL_TABS.fileImport,
+            label: 'File import',
+            description:
+              'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vulputate libero et velit interdum, ac aliquet odio mattis.',
+            component: <FileImportTab />,
           },
           {
             id: SETTINGS_PANEL_TABS.analysis,
@@ -123,6 +144,7 @@ export const SettingsPanel = ({
   setProjectTemplates,
   modifyingCurrentTemplate,
   checkSpecificTemplatePropsAreModified,
+  restartConversions,
 }) => {
   const [isVisible, setIsVisible] = useState(false)
   const [tabs, setTabs] = useState(() => {
@@ -142,6 +164,48 @@ export const SettingsPanel = ({
   // templates quality framework
   const qualityFrameworkTemplates = useTemplates(QF_SCHEMA_KEYS)
   const analysisTemplates = useTemplates(ANALYSIS_SCHEMA_KEYS)
+  const fileImportFiltersParamsTemplates = useTemplates(
+    FILTERS_PARAMS_SCHEMA_KEYS,
+  )
+  const fileImportXliffSettingsTemplates = useTemplates(
+    XLIFF_SETTINGS_SCHEMA_KEYS,
+  )
+
+  const debounceRestartConversions =
+    restartConversions && debounce(restartConversions, 500)
+
+  // Sync filters template with conversion file
+  useSyncTemplateWithConvertFile({
+    ...fileImportFiltersParamsTemplates,
+    defaultTemplate: defaultFiltersParams,
+    idTemplate: currentProjectTemplate?.filtersTemplateId,
+    getTemplates: getFiltersParamsTemplates,
+    checkIfUpdate: (filtersTemplate) => {
+      if (!isEqual(filtersTemplate, CreateProjectStore.getFiltersTemplate())) {
+        CreateProjectStore.updateProject({filtersTemplate})
+        if (debounceRestartConversions) debounceRestartConversions()
+      }
+    },
+  })
+
+  // Sync xliff template with conversion file
+  useSyncTemplateWithConvertFile({
+    ...fileImportXliffSettingsTemplates,
+    defaultTemplate: defaultXliffSettings,
+    idTemplate: currentProjectTemplate?.XliffConfigTemplateId,
+    getTemplates: getXliffSettingsTemplates,
+    checkIfUpdate: (xliffConfigTemplate) => {
+      if (
+        !isEqual(
+          xliffConfigTemplate,
+          CreateProjectStore.getXliffConfigTemplate(),
+        )
+      ) {
+        CreateProjectStore.updateProject({xliffConfigTemplate})
+        if (debounceRestartConversions) debounceRestartConversions()
+      }
+    },
+  })
 
   const wrapperRef = useRef()
 
@@ -276,6 +340,8 @@ export const SettingsPanel = ({
         isEnabledProjectTemplateComponent,
         qualityFrameworkTemplates,
         analysisTemplates,
+        fileImportFiltersParamsTemplates,
+        fileImportXliffSettingsTemplates,
       }}
     >
       <div
@@ -332,4 +398,5 @@ SettingsPanel.propTypes = {
   setProjectTemplates: PropTypes.func,
   modifyingCurrentTemplate: PropTypes.func,
   checkSpecificTemplatePropsAreModified: PropTypes.func,
+  restartConversions: PropTypes.func,
 }
