@@ -188,7 +188,7 @@ abstract class DataAccess_AbstractDao {
      */
     protected function _fetchObject( PDOStatement $stmt, DataAccess_IDaoStruct $fetchClass, array $bindParams ): array {
 
-        $_cacheResult = $this->_getFromCache( $stmt->queryString . $this->_serializeForCacheKey( $bindParams ) );
+        $_cacheResult = $this->_getFromCache( $stmt->queryString . $this->_serializeForCacheKey( $bindParams ) . get_class( $fetchClass )  );
 
         if ( !empty( $_cacheResult ) ) {
             return $_cacheResult;
@@ -198,7 +198,7 @@ abstract class DataAccess_AbstractDao {
         $stmt->execute( $bindParams );
         $result = $stmt->fetchAll();
 
-        $this->_setInCache( $stmt->queryString . $this->_serializeForCacheKey( $bindParams ), $result );
+        $this->_setInCache( $stmt->queryString . $this->_serializeForCacheKey( $bindParams ) . get_class( $fetchClass ), $result );
 
         return $result;
 
@@ -215,7 +215,7 @@ abstract class DataAccess_AbstractDao {
      */
     protected function _fetchObjectMap( string $keyMap, PDOStatement $stmt, string $fetchClass, array $bindParams ): array {
 
-        $_cacheResult = $this->_getFromCacheMap( $keyMap, $stmt->queryString . $this->_serializeForCacheKey( $bindParams ) );
+        $_cacheResult = $this->_getFromCacheMap( $keyMap, $stmt->queryString . $this->_serializeForCacheKey( $bindParams ) . $fetchClass );
 
         if ( !empty( $_cacheResult ) ) {
             return $_cacheResult;
@@ -225,7 +225,7 @@ abstract class DataAccess_AbstractDao {
         $stmt->execute( $bindParams );
         $result = $stmt->fetchAll();
 
-        $this->_setInCacheMap( $keyMap, $stmt->queryString . $this->_serializeForCacheKey( $bindParams ), $result );
+        $this->_setInCacheMap( $keyMap, $stmt->queryString . $this->_serializeForCacheKey( $bindParams ) . $fetchClass, $result );
 
         return $result;
 
