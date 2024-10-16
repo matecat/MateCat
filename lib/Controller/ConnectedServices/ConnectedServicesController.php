@@ -58,7 +58,7 @@ class ConnectedServicesController extends AbstractStatefulKleinController {
             $this->service->disabled_at = null;
         }
 
-        ConnectedServiceDao::updateStruct( $this->service, [ 'disabled_at' ] );
+        ConnectedServiceDao::updateStruct( $this->service, [ 'fields'=> [ 'disabled_at' ] ] );
 
         $formatter = new ConnectedService( [] );
         $this->response->json( [ 'connected_service' => $formatter->renderItem( $this->service ) ] );

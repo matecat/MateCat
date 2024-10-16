@@ -70,10 +70,17 @@ class SignupModel {
 
         if ( $this->__userAlreadyExists() ) {
             $this->__updatePersistedUser();
-            Users_UserDao::updateStruct( $this->user, [ 'raise' => true ] );
+            Users_UserDao::updateStruct( $this->user, [
+                    'fields' => [
+                            'salt',
+                            'pass',
+                            'confirmation_token',
+                            'confirmation_token_created_at'
+                    ]
+            ] );
         } else {
             $this->__prepareNewUser();
-            $this->user->uid = Users_UserDao::insertStruct( $this->user, [ 'raise' => true ] );
+            $this->user->uid = Users_UserDao::insertStruct( $this->user );
 
             Database::obtain()->begin();
             ( new TeamDao() )->createPersonalTeam( $this->user );
