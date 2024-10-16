@@ -188,7 +188,7 @@ class AbstractGetFromCacheJobTest extends AbstractTest {
         $job_param_for_read_method->password = $this->job_password;
         $this->job_Dao->read( $job_param_for_read_method );
 
-        $this->cache_key = $this->stmt_param->queryString . serialize( $this->bindParams_param ); // update $this->cache_key
+        $this->cache_key = $this->stmt_param->queryString . serialize( $this->bindParams_param ) . Jobs_JobStruct::class; // update $this->cache_key
 
         $expected_return = $this->method_getFromCache->invoke( $this->job_Dao, $this->cache_key );
 

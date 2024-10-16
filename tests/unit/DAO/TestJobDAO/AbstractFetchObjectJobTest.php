@@ -152,7 +152,7 @@ class AbstractFetchObjectJobTest extends AbstractTest {
                 '0' => $this->job_struct
         ];
 
-        $cache_key = $this->stmt_param->queryString . serialize( $this->bindParams_param );
+        $cache_key = $this->stmt_param->queryString . serialize( $this->bindParams_param ) . Jobs_JobStruct::class;
 
 
         $cache_TTL = ( new ReflectionClass( $this->job_Dao ) )->getProperty( "cacheTTL" );
