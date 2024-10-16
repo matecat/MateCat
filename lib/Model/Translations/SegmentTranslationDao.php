@@ -19,13 +19,14 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
     ];
 
     /**
-     * @param     $id_segment
-     * @param     $id_job
+     * @param int $id_segment
+     * @param int $id_job
      * @param int $ttl
      *
      * @return Translations_SegmentTranslationStruct
+     * @throws ReflectionException
      */
-    public static function findBySegmentAndJob( $id_segment, $id_job, $ttl = 0 ) {
+    public static function findBySegmentAndJob( int $id_segment, int $id_job, int $ttl = 0 ): ?Translations_SegmentTranslationStruct {
 
         $conn = Database::obtain()->getConnection();
 
@@ -104,33 +105,6 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
     }
 
     protected function _buildResult( $array_result ) {
-    }
-
-    /**
-     * @param Translations_SegmentTranslationStruct $struct
-     * @param                                       $severity
-     *
-     * @return int
-     */
-    public static function updateSeverity( Translations_SegmentTranslationStruct $struct, $severity ) {
-
-        $sql = "UPDATE segment_translations
-            SET warning = :warning
-              WHERE id_segment = :id_segment
-              AND id_job = :id_job
-              AND segment_hash = :segment_hash";
-
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
-
-        $stmt->execute( [
-                'id_segment'   => $struct->id_segment,
-                'id_job'       => $struct->id_job,
-                'segment_hash' => $struct->segment_hash,
-                'warning'      => $severity
-        ] );
-
-        return $stmt->rowCount();
     }
 
     /**
@@ -240,13 +214,11 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
 
     /**
      * @param Translations_SegmentTranslationStruct $translation_struct
-     * @param                                       $is_revision
+     * @param bool                                  $is_revision
      *
      * @return int
-     * @throws ReflectionException
-     * @throws PDOException
      */
-    public static function addTranslation( Translations_SegmentTranslationStruct $translation_struct, $is_revision ) {
+    public static function addTranslation( Translations_SegmentTranslationStruct $translation_struct, bool $is_revision ): int {
 
         // avoid version_number null error
         if ( $translation_struct->version_number === null ) {

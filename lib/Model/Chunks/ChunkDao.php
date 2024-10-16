@@ -1,5 +1,7 @@
 <?php
 
+use Exceptions\NotFoundException;
+
 class Chunks_ChunkDao extends DataAccess_AbstractDao {
 
     /**
@@ -7,13 +9,17 @@ class Chunks_ChunkDao extends DataAccess_AbstractDao {
      * @param     $password
      * @param int $ttl
      *
-     * @return Chunks_ChunkStruct|DataAccess_IDaoStruct
-     * @throws \Exceptions\NotFoundException
+     * @return Chunks_ChunkStruct
+     * @throws NotFoundException
+     * @throws ReflectionException
      */
-    public static function getByIdAndPassword( $id_job, $password, $ttl = 0 ) {
+    public static function getByIdAndPassword( $id_job, $password, int $ttl = 0 ): Chunks_ChunkStruct {
+        /**
+         * @var $fetched Chunks_ChunkStruct
+         */
         $fetched = Jobs_JobDao::getByIdAndPassword( $id_job, $password, $ttl, new Chunks_ChunkStruct );
         if ( empty( $fetched ) ) {
-            throw new Exceptions\NotFoundException( 'Record not found' );
+            throw new NotFoundException( 'Record not found' );
         } else {
             return $fetched;
         }
