@@ -111,24 +111,6 @@ export const Yaml = () => {
     <div className="filters-params-accordion-content">
       <div className="filters-params-option">
         <div>
-          <h3>Extract arrays</h3>
-          <p>
-            Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
-            pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
-            condimentum.
-          </p>
-        </div>
-        <Controller
-          control={control}
-          name="extract_arrays"
-          render={({field: {onChange, value, name}}) => (
-            <Switch name={name} active={value} onChange={onChange} />
-          )}
-        />
-      </div>
-
-      <div className="filters-params-option">
-        <div>
           <h3>Keys</h3>
           <p>
             Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras

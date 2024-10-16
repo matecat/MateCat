@@ -5,8 +5,6 @@ import ModalsActions from '../../../../../actions/ModalsActions'
 import {ConfirmDeleteResourceProjectTemplates} from '../../../../modals/ConfirmDeleteResourceProjectTemplates'
 import {SubTemplates} from '../../SubTemplates'
 import {SCHEMA_KEYS} from '../../../../../hooks/useProjectTemplates'
-import {getXliffSettingsTemplates} from '../../../../../api/getXliffSettingsTemplates/getXliffSettingsTemplates'
-import defaultXliffSettings from '../../defaultTemplates/xliffSettings.json'
 import {createXliffSettingsTemplate} from '../../../../../api/createXliffSettingsTemplate/createXliffSettingsTemplate'
 import {updateXliffSettingsTemplate} from '../../../../../api/updateXliffSettingsTemplate/updateXliffSettingsTemplate'
 import {deleteXliffSettingsTemplate} from '../../../../../api/deleteXliffSettingsTemplate/deleteXliffSettingsTemplate'
@@ -97,44 +95,6 @@ export const XliffSettings = () => {
         'Extraction parameters',
       )
     })
-
-  // retrieve filters params templates
-  useEffect(() => {
-    if (templates.length) return
-
-    let cleanup = false
-
-    if (config.isLoggedIn === 1 && !config.is_cattool) {
-      getXliffSettingsTemplates().then((templates) => {
-        const items = [defaultXliffSettings, ...templates.items]
-        if (!cleanup) {
-          const selectedTemplateId =
-            items.find(({id}) => id === currentProjectTemplateXliffId)?.id ?? 0
-
-          setTemplates(
-            items.map((template) => ({
-              ...template,
-              isSelected: template.id === selectedTemplateId,
-            })),
-          )
-        }
-      })
-    } else {
-      // not logged in
-    }
-
-    return () => (cleanup = true)
-  }, [setTemplates, templates.length, currentProjectTemplateXliffId])
-
-  // Select xliff settings template when curren project template change
-  useEffect(() => {
-    setTemplates((prevState) =>
-      prevState.map((template) => ({
-        ...template,
-        isSelected: template.id === currentProjectTemplateXliffId,
-      })),
-    )
-  }, [currentProjectTemplateXliffId, setTemplates])
 
   // Modify current project template xliff settings template id when template id change
   useEffect(() => {

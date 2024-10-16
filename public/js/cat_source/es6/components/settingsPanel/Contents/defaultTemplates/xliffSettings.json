@@ -1,22 +1,66 @@
 {
   "id": 0,
   "uid": 1,
-  "name": "default",
+  "name": "Default",
   "rules": {
     "xliff12": [
       {
-        "states": ["translated"],
+        "states": [
+          "new",
+          "needs-adaptation",
+          "needs-l10n",
+          "needs-translation",
+          "mt-suggestion",
+          "fuzzy-match"
+        ],
+        "analysis": "new"
+      },
+      {
+        "states": [
+          "translated",
+          "needs-review-adaptation",
+          "needs-review-l10n",
+          "needs-review-translation"
+        ],
         "analysis": "pre-translated",
-        "editor": "draft",
-        "match_category": "ice"
+        "match_category": "ice",
+        "editor": "translated"
+      },
+      {
+        "states": ["signed-off"],
+        "analysis": "pre-translated",
+        "match_category": "ice",
+        "editor": "approved"
+      },
+      {
+        "states": ["final"],
+        "analysis": "pre-translated",
+        "match_category": "ice",
+        "editor": "approved2"
       }
     ],
     "xliff20": [
       {
+        "states": ["initial"],
+        "analysis": "new"
+      },
+      {
         "states": ["translated"],
         "analysis": "pre-translated",
-        "editor": "approved",
-        "match_category": "ice"
+        "match_category": "ice",
+        "editor": "translated"
+      },
+      {
+        "states": ["reviewed"],
+        "analysis": "pre-translated",
+        "match_category": "ice",
+        "editor": "approved"
+      },
+      {
+        "states": ["final"],
+        "analysis": "pre-translated",
+        "match_category": "ice",
+        "editor": "approved2"
       }
     ]
   },

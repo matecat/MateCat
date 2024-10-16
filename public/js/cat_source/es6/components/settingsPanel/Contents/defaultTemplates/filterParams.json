@@ -1,14 +1,13 @@
 {
   "id": 0,
   "uid": 1,
-  "name": "default",
+  "name": "Default",
   "xml": {
     "preserve_whitespace": false,
     "translate_elements": [],
     "translate_attributes": []
   },
   "yaml": {
-    "extract_arrays": true,
     "translate_keys": []
   },
   "json": {
@@ -37,8 +36,8 @@
   },
   "ms_powerpoint": {
     "extract_doc_properties": false,
-    "extract_hidden_slides": false,
-    "extract_notes": true
+    "extract_notes": true,
+    "translate_slides": []
   },
   "created_at": "2024-09-12 14:55:59",
   "modified_at": "2024-09-12 14:55:59"

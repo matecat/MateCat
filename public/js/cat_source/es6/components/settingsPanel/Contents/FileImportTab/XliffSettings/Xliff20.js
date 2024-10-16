@@ -99,7 +99,7 @@ export const Xliff20 = () => {
       <div className="xliff-settings-content">
         <div className="xliff-settings-table">
           <span className="xliff-settings-column-name xliff-settings-column-name-state">
-            State / State qualifier
+            State
           </span>
           <span className="xliff-settings-column-name">Analysis</span>
           <span className="xliff-settings-column-name xliff-settings-column-name-editor">
