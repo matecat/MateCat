@@ -97,6 +97,9 @@ class QualityReportModel {
         return $this->chunk_review_model;
     }
 
+    /**
+     * @throws Exception
+     */
     public function resetScore( $event_id ) {
         $chunkReview            = $this->getChunkReview();
         $chunkReview->undo_data = json_encode( [
@@ -110,7 +113,14 @@ class QualityReportModel {
         $chunkReview->reviewed_words_count = 0;
         $chunkReview->is_pass              = 1;
 
-        ChunkReviewDao::updateStruct( $chunkReview );
+        ChunkReviewDao::updateStruct( $chunkReview, [
+                'fields' => [
+                        'undo_data',
+                        'penalty_points',
+                        'reviewed_words_count',
+                        'is_pass'
+                ]
+        ] );
     }
 
     /**
