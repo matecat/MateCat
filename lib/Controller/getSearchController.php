@@ -5,52 +5,53 @@ use Features\ReviewExtended\ReviewUtils;
 use Features\TranslationVersions;
 use Matecat\Finder\WholeTextFinder;
 use Matecat\SubFiltering\MateCatFilter;
-use Predis\Connection\ConnectionException;
 use Search\ReplaceEventStruct;
 use Search\SearchModel;
 use Search\SearchQueryParamsStruct;
 
 class getSearchController extends ajaxController {
 
-    private $job;
-    private $token;
-    private $password;
-    private $source;
-    private $target;
-    private $status;
-    private $replace;
-    private $function; //can be search, replace
-    private $isMatchCaseRequested;
-    private $isExactMatchRequested;
-    private $strictMode;
-    private $revisionNumber;
+    private int $job;
+    private string $token;
+    private string $password;
+    private string $source;
+    private string $target;
+    private string $status;
+    private string $replace;
+    private string $function; //can be search, replace
+    private bool $isMatchCaseRequested;
+    private bool $isExactMatchRequested;
+    private bool $strictMode;
+    private int $revisionNumber;
 
-    private $queryParams;
+    /**
+     * @var SearchQueryParamsStruct
+     */
+    private SearchQueryParamsStruct $queryParams;
 
     /**
      * @var Chunks_ChunkStruct
      */
-    protected $job_data;
+    protected Chunks_ChunkStruct $job_data;
 
     /**
      * @var Database|IDatabase
      */
-    private $db;
+    private Database $db;
 
     /**
      * @var SearchModel
      */
-    private $searchModel;
+    private SearchModel $searchModel;
 
     /**
      * @var Search_ReplaceHistory
      */
-    private $srh;
+    private Search_ReplaceHistory $srh;
 
     /**
      * getSearchController constructor.
-     * @throws ReflectionException
-     * @throws \Predis\Connection\ConnectionException
+     * @throws NotFoundException
      * @throws Exception
      */
     public function __construct() {
@@ -70,7 +71,7 @@ class getSearchController extends ajaxController {
                 'matchcase'       => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
                 'exactmatch'      => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
                 'strict_mode'     => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
-                'revision_number' => [ 'filter' => FILTER_VALIDATE_INT ]
+                'revision_number' => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ]
         ];
 
         $__postInput = filter_input_array( INPUT_POST, $filterArgs );
@@ -209,7 +210,7 @@ class getSearchController extends ajaxController {
 
         // and then hydrate the $search_results array
         foreach ( $this->result[ 'segments' ] as $segmentId ) {
-            $search_results[] = Translations_SegmentTranslationDao::findBySegmentAndJob( $segmentId, $this->queryParams[ 'job' ] )->toArray();
+            $search_results[] = Translations_SegmentTranslationDao::findBySegmentAndJob( $segmentId, $this->queryParams[ 'job' ], 10 )->toArray();
         }
 
         // set the replacement in queryParams
@@ -280,7 +281,7 @@ class getSearchController extends ajaxController {
     /**
      * @return array
      */
-    private function _getSegmentForUndoReplaceAll() {
+    private function _getSegmentForUndoReplaceAll(): array {
         $results = [];
         $cursor  = $this->srh->getCursor();
 
@@ -319,7 +320,7 @@ class getSearchController extends ajaxController {
     /**
      * @return array
      */
-    private function _getSegmentForRedoReplaceAll() {
+    private function _getSegmentForRedoReplaceAll(): array {
         $results = [];
 
         $versionToMove = $this->srh->getCursor() + 1;
@@ -340,16 +341,16 @@ class getSearchController extends ajaxController {
     /**
      * @param $search_results
      *
-     * @return int|void
+     * @return void
      * @throws Exception
      */
-    private function _updateSegments( $search_results ) {
+    private function _updateSegments( $search_results ): void {
         $chunk           = Chunks_ChunkDao::getByIdAndPassword( (int)$this->job, $this->password );
         $project         = Projects_ProjectDao::findByJobId( (int)$this->job );
         $versionsHandler = TranslationVersions::getVersionHandlerNewInstance( $chunk, $this->id_segment, $this->user, $project );
 
         // loop all segments to replace
-        foreach ( $search_results as $key => $tRow ) {
+        foreach ( $search_results as $tRow ) {
 
             // start the transaction
             $this->db->begin();
@@ -369,16 +370,14 @@ class getSearchController extends ajaxController {
                             Constants_TranslationStatus::STATUS_REJECTED
                     ] )
             ) {
-                $TPropagation                             = new Translations_SegmentTranslationStruct();
-                $TPropagation[ 'status' ]                 = $tRow[ 'status' ];
-                $TPropagation[ 'id_job' ]                 = $this->job;
-                $TPropagation[ 'translation' ]            = $tRow[ 'translation' ];
-                $TPropagation[ 'autopropagated_from' ]    = $this->id_segment;
-                $TPropagation[ 'serialized_errors_list' ] = $old_translation->serialized_errors_list;
-                $TPropagation[ 'warning' ]                = $old_translation->warning;
-                $TPropagation[ 'segment_hash' ]           = $old_translation[ 'segment_hash' ];
+
+                $TPropagation                          = clone $old_translation;
+                $TPropagation[ 'status' ]              = $tRow[ 'status' ];
+                $TPropagation[ 'translation' ]         = $tRow[ 'translation' ];
+                $TPropagation[ 'autopropagated_from' ] = $this->id_segment;
 
                 try {
+
                     $propagationTotal = Translations_SegmentTranslationDao::propagateTranslation(
                             $TPropagation,
                             $this->job_data,
@@ -393,33 +392,19 @@ class getSearchController extends ajaxController {
                     Utils::sendErrMailReport( $msg );
                     $this->db->rollback();
 
-                    return $e->getCode();
+                    return;
                 }
             }
 
-            $filter              = MateCatFilter::getInstance( $this->getFeatureSet(), $this->job_data->source, $this->job_data->target, [] );
+            $filter              = MateCatFilter::getInstance( $this->getFeatureSet(), $this->job_data->source, $this->job_data->target );
             $replacedTranslation = $filter->fromLayer1ToLayer0( $this->_getReplacedSegmentTranslation( $tRow[ 'translation' ] ) );
             $replacedTranslation = Utils::stripBOM( $replacedTranslation );
 
             // Setup $new_translation
-            $new_translation                         = new Translations_SegmentTranslationStruct();
-            $new_translation->id_segment             = $tRow[ 'id_segment' ];
-            $new_translation->id_job                 = $this->job;
+            $new_translation                         = clone $old_translation;
             $new_translation->status                 = $this->_getNewStatus( $old_translation );
-            $new_translation->time_to_edit           = $old_translation->time_to_edit;
-            $new_translation->segment_hash           = $segment->segment_hash;
             $new_translation->translation            = $replacedTranslation;
-            $new_translation->serialized_errors_list = $old_translation->serialized_errors_list;
-            $new_translation->suggestion_position    = $old_translation->suggestion_position;
-            $new_translation->warning                = $old_translation->warning;
             $new_translation->translation_date       = date( "Y-m-d H:i:s" );
-
-            $version_number = $old_translation->version_number;
-            if ( false === Utils::stringsAreEqual( $new_translation->translation, $old_translation->translation ) ) {
-                $version_number++;
-            }
-
-            $new_translation->version_number = $version_number;
 
             // Save version
             $versionsHandler->saveVersionAndIncrement( $new_translation, $old_translation );
@@ -447,7 +432,7 @@ class getSearchController extends ajaxController {
                 Log::doJsonLog( "Lock: Transaction Aborted. " . $e->getMessage() );
                 $this->db->rollback();
 
-                return $e->getCode();
+                return;
             }
 
             // setTranslationCommitted
@@ -472,17 +457,13 @@ class getSearchController extends ajaxController {
      *
      * @return string
      */
-    private function _getNewStatus( Translations_SegmentTranslationStruct $translationStruct ) {
+    private function _getNewStatus( Translations_SegmentTranslationStruct $translationStruct ): string {
 
         if ( false === $this->revisionNumber ) {
             return Constants_TranslationStatus::STATUS_TRANSLATED;
         }
 
-        if ( $translationStruct->status === Constants_TranslationStatus::STATUS_TRANSLATED ) {
-            return Constants_TranslationStatus::STATUS_TRANSLATED;
-        }
-
-        return Constants_TranslationStatus::STATUS_APPROVED;
+        return $translationStruct->status;
     }
 
 }
