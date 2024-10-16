@@ -51,9 +51,11 @@ export const ActionMenu = ({
   const getQualityReportMenu = () => {
     return (
       <ul className="menu">
-        <li className="item" title="Revise" data-value="revise">
-          <a href={jobUrls.revise_urls[0].url}>Revise</a>
-        </li>
+        {jobUrls.revise_urls ? (
+          <li className="item" title="Revise" data-value="revise">
+            <a href={jobUrls.revise_urls[0].url}>Revise</a>
+          </li>
+        ) : null}
         <li className="item" title="Translate" data-value="translate">
           <a href={jobUrls.translate_url}>Translate</a>
         </li>

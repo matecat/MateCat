@@ -116,45 +116,38 @@ browserChannel.on('connect', (context, req, res) => {
  * We create an HTTP server listening the address in config.path
  * and add new clients to the browserChannel
  */
-http
-  .createServer((req, res) => {
+http.createServer( ( req, res ) => {
     // find job id from requested path
-    const parsedUrl = new URL(req.url, `https://${req.headers.host}/`)
+    const parsedUrl = new URL( req.url, `https://${req.headers.host}/` )
 
-    if (corsAllow(req, res)) {
-      if (parsedUrl.pathname.indexOf(config.server.path) === 0) {
-        const params = parsedUrl.searchParams
-        res._clientId = uuid.v4()
-        res._matecatJobId = params.get('jid')
-        res._matecatPw = params.get('pw')
-        res._userId = params.get('uid')
-        browserChannel.addClient(req, res)
-      } else {
-        res.writeHead(404)
-        res.end()
-      }
+    if ( corsAllow( req, res ) ) {
+        if ( parsedUrl.pathname.indexOf( config.server.path ) === 0 ) {
+            const params = parsedUrl.searchParams
+            res._clientId = uuid.v4()
+            res._matecatJobId = params.get( 'jid' )
+            res._matecatPw = params.get( 'pw' )
+            res._userId = params.get( 'uid' )
+            browserChannel.addClient( req, res )
+        } else {
+            res.writeHead( 404 )
+            res.end()
+        }
     } else {
-      res.writeHead(401)
-      res.end()
+        res.writeHead( 401 )
+        res.end()
     }
-  })
-  .listen(config.server.port, config.server.address, () => {
-    logger.info('Server version ' + SERVER_VERSION)
-    logger.info(
-      'Listening on //' +
-        config.server.address +
-        ':' +
-        config.server.port +
-        '/',
-      'Server version ' + SERVER_VERSION,
-    )
-  })
-;['SIGINT', 'SIGTERM'].forEach((signal) =>
-  process.on(signal, (sig) => {
-    logger.debug(sig + ' received...')
-    notifyUpgrade()
-  }),
-)
+
+} ).listen( config.server.port, config.server.address, () => {
+    logger.info( 'Server version ' + SERVER_VERSION )
+    logger.info( 'Listening on //' + config.server.address + ':' + config.server.port + '/' )
+} );
+
+['SIGINT', 'SIGTERM'].forEach(
+    signal => process.on( signal, ( sig ) => {
+        logger.debug( sig + ' received...' );
+        notifyUpgrade();
+    } )
+);
 
 const notifyUpgrade = (isReboot = true) => {
   new Promise((resolve, reject) => {
@@ -172,14 +165,16 @@ const notifyUpgrade = (isReboot = true) => {
       })
     }
 
-    resolve(isReboot)
-  }).then((isReboot) => {
-    if (isReboot) {
-      logger.debug('Exit...')
-      browserChannel.close()
-      process.exit(0)
-    }
-  })
+        resolve( isReboot );
+
+    } ).then( ( isReboot ) => {
+        if ( isReboot ) {
+            logger.debug( 'Exit...' );
+            browserChannel.close();
+            process.exit( 0 );
+        }
+    } );
+
 }
 
 const checkCandidate = (type, response, message) => {

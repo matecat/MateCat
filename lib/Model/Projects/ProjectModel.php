@@ -26,8 +26,8 @@ class ProjectModel {
      */
     protected $project_struct;
 
-    protected $willChange    = [];
-    protected $changedFields = [];
+    protected $willChange = array();
+    protected $changedFields = array();
 
     protected $cacheTeamsToClean = [];
 

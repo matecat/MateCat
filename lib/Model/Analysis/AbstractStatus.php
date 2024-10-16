@@ -221,7 +221,7 @@ abstract class AbstractStatus {
             }
             // Runtime Initialization Completed
 
-            $matchType = MatchConstants::toExternalMatchTypeValue( $segInfo[ 'match_type' ] );
+            $matchType = MatchConstants::toExternalMatchTypeValue( $segInfo[ 'match_type' ] ?? 'NEW' );
 
             // increment file totals
             $file->incrementRaw( $segInfo[ 'raw_word_count' ] );

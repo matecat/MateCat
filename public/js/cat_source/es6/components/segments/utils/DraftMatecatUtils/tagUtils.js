@@ -11,53 +11,55 @@ import matchTagStructure from '../../../segments/utils/DraftMatecatUtils/matchTa
 
 export const transformTagsToHtml = (text, isRtl = 0) => {
   isRtl = !!isRtl
-  try {
-    for (let key in tagSignatures) {
-      const {
-        placeholderRegex,
-        decodeNeeded,
-        style,
-        placeholder,
-        regex,
-        styleRTL,
-        selfClosing,
-      } = tagSignatures[key]
-      if (placeholderRegex) {
-        let globalRegex = new RegExp(
-          placeholderRegex.source,
-          placeholderRegex.flags + 'g',
-        )
-        text = text.replace(globalRegex, (match, text) => {
-          let tagText = decodeNeeded
-            ? Base64.decode(text).replace(/</g, '&lt').replace(/>/g, '&gt') // Forza conversione angolari in &lt o &gt [XLIFF 2.0] Tag senza dataref
-            : selfClosing
-              ? text
-              : match
-          return (
-            '<span contenteditable="false" class="tag small ' +
-            (isRtl && styleRTL ? styleRTL : style) +
-            '">' +
-            tagText +
-            '</span>'
+  if (text) {
+    try {
+      for (let key in tagSignatures) {
+        const {
+          placeholderRegex,
+          decodeNeeded,
+          style,
+          placeholder,
+          regex,
+          styleRTL,
+          selfClosing,
+        } = tagSignatures[key]
+        if (placeholderRegex) {
+          let globalRegex = new RegExp(
+            placeholderRegex.source,
+            placeholderRegex.flags + 'g',
           )
-        })
-      } else if (regex) {
-        let globalRegex = new RegExp(regex)
-        text = text.replace(globalRegex, (match) => {
-          let tagText = placeholder ? placeholder : match
-          return (
-            '<span contenteditable="false" class="tag small ' +
-            (isRtl && styleRTL ? styleRTL : style) +
-            '">' +
-            tagText +
-            '</span>'
-          )
-        })
+          text = text.replace(globalRegex, (match, text) => {
+            let tagText = decodeNeeded
+              ? Base64.decode(text).replace(/</g, '&lt').replace(/>/g, '&gt') // Forza conversione angolari in &lt o &gt [XLIFF 2.0] Tag senza dataref
+              : selfClosing
+                ? text
+                : match
+            return (
+              '<span contenteditable="false" class="tag small ' +
+              (isRtl && styleRTL ? styleRTL : style) +
+              '">' +
+              tagText +
+              '</span>'
+            )
+          })
+        } else if (regex) {
+          let globalRegex = new RegExp(regex)
+          text = text.replace(globalRegex, (match) => {
+            let tagText = placeholder ? placeholder : match
+            return (
+              '<span contenteditable="false" class="tag small ' +
+              (isRtl && styleRTL ? styleRTL : style) +
+              '">' +
+              tagText +
+              '</span>'
+            )
+          })
+        }
       }
+      text = matchTag(text)
+    } catch (e) {
+      console.error('Error parsing tag in transformTagsToHtml function', e)
     }
-    text = matchTag(text)
-  } catch (e) {
-    console.error('Error parsing tag in transformTagsToHtml function', e)
   }
   return text
 }

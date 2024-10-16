@@ -768,6 +768,7 @@ const NewProject = () => {
         setOpenSettings,
         isImportTMXInProgress,
         setIsImportTMXInProgress,
+        projectTemplates,
         modifyingCurrentTemplate,
         selectedTeam,
         setSelectedTeam,

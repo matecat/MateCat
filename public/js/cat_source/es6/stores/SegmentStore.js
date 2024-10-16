@@ -279,21 +279,19 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     let selectedSegment = this._segments.find((segment) => {
       return segment.get('selected') === true
     })
-    if (!selectedSegment) {
-      selectedSegment = this.getCurrentSegment()
-    } else if (selectedSegment) {
-      selectedSegment = selectedSegment.toJS()
-    } else {
-      return
-    }
-    let prev = this.getPrevSegment(selectedSegment.sid)
-    if (prev) {
-      var index = this.getSegmentIndex(prev.sid)
-      this._segments = this._segments.map((segment) =>
-        segment.set('selected', false),
-      )
-      this._segments = this._segments.setIn([index, 'selected'], true)
-      return prev.sid
+    selectedSegment = !selectedSegment
+      ? this.getCurrentSegment()
+      : selectedSegment.toJS()
+    if (selectedSegment) {
+      let prev = this.getPrevSegment(selectedSegment.sid)
+      if (prev) {
+        var index = this.getSegmentIndex(prev.sid)
+        this._segments = this._segments.map((segment) =>
+          segment.set('selected', false),
+        )
+        this._segments = this._segments.setIn([index, 'selected'], true)
+        return prev.sid
+      }
     }
   },
   getSelectedSegmentId() {

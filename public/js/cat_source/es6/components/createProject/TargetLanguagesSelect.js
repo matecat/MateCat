@@ -10,7 +10,7 @@ export const TargetLanguagesSelect = () => {
 
   const getActiveLabel = () => targetLangs.map(({name}) => name).join(',')
   const openModal = () =>
-    languages.length > 0 && setIsOpenMultiselectLanguages(true)
+    languages?.length > 0 && setIsOpenMultiselectLanguages(true)
 
   return (
     <div
