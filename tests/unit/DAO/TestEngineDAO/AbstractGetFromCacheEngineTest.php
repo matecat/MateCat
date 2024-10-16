@@ -138,7 +138,7 @@ class AbstractGetFromCacheEngineTest extends AbstractTest {
         $serializedValues = $this->method_serializeForCacheKey->invoke( $this->engine_Dao, $this->_filteredQueryParams );
 
         /** @var EnginesModel_EngineStruct[] $function_return */
-        $function_return      = $this->_getFromCacheReflected->invoke( $this->engine_Dao, $this->cache_key . $serializedValues );
+        $function_return      = $this->_getFromCacheReflected->invoke( $this->engine_Dao, $this->cache_key . $serializedValues . EnginesModel_EngineStruct::class );
         $function_return[ 0 ] = $function_return[ 0 ]->toArray();
         $this->assertEquals( $this->cache_value, $function_return );
     }

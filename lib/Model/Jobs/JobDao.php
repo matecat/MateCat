@@ -79,11 +79,12 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
     /**
      * @param Translations_SegmentTranslationStruct $translation
      * @param int                                   $ttl
-     * @param Chunks_ChunkStruct                    $fetchObject
+     * @param Chunks_ChunkStruct|null               $fetchObject
      *
      * @return Jobs_JobStruct|Chunks_ChunkStruct
+     * @throws ReflectionException
      */
-    public static function getBySegmentTranslation( Translations_SegmentTranslationStruct $translation, $ttl = 0, Chunks_ChunkStruct $fetchObject = null ) {
+    public static function getBySegmentTranslation( Translations_SegmentTranslationStruct $translation, int $ttl = 0, Chunks_ChunkStruct $fetchObject = null ) {
 
         $thisDao = new self();
         $conn    = Database::obtain()->getConnection();

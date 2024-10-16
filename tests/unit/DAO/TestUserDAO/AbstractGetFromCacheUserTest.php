@@ -102,7 +102,7 @@ class AbstractGetFromCacheUserTest extends AbstractTest {
                 'uid' => $this->uid
         ];
 
-        $this->cache_key = $this->stmt_param->queryString . serialize( $this->bindParams_param );
+        $this->cache_key = $this->stmt_param->queryString . serialize( $this->bindParams_param ) . Users_UserStruct::class;
 
 
     }
