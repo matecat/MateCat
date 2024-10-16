@@ -155,3 +155,4 @@ route( '/api/app/replace-all', 'POST', [ 'API\App\GetSearchController', 'replace
 route( '/api/app/redo-replace-all', 'POST', [ 'API\App\GetSearchController', 'redoReplaceAll' ] );
 route( '/api/app/undo-replace-all', 'POST', [ 'API\App\GetSearchController', 'undoReplaceAll' ] );
 route( '/api/app/update-job-keys', 'POST', [ 'API\App\UpdateJobKeysController', 'update' ] );
+route( '/api/app/set-translation', 'POST', [ 'API\App\SetTranslationController', 'translate' ] );

@@ -16,7 +16,7 @@ export const setTranslation = async (objRequest) => {
     formData.append(key, dataParams[key])
   })
   const response = await fetch(
-    `${getMatecatApiDomain()}?action=setTranslation`,
+    `${getMatecatApiDomain()}api/app/set-translation`,
     {
       method: 'POST',
       credentials: 'include',
