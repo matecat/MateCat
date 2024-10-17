@@ -201,6 +201,7 @@ class Users_UserDao extends DataAccess_AbstractDao {
         $stmt = $this->_getStatementForQuery( self::$_query_user_by_uid );
 
         return $this->_destroyObjectCache( $stmt,
+                Users_UserStruct::class,
                 [
                         'uid' => $uid,
                 ]
@@ -236,7 +237,7 @@ class Users_UserDao extends DataAccess_AbstractDao {
         $userQuery        = new Users_UserStruct();
         $userQuery->email = $email;
 
-        return $this->_destroyObjectCache( $stmt, [ 'email' => $userQuery->email ] );
+        return $this->_destroyObjectCache( $stmt, Users_UserStruct::class, [ 'email' => $userQuery->email ] );
     }
 
 

@@ -28,7 +28,6 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
     const query_by_id         = "SELECT * FROM " . self::TABLE . " WHERE id = :id";
     const query_by_id_and_uid = "SELECT * FROM " . self::TABLE . " WHERE id = :id AND uid = :uid";
     const query_default       = "SELECT * FROM " . self::TABLE . " WHERE is_default = :is_default AND uid = :uid";
-    const query_by_uid_name   = "SELECT * FROM " . self::TABLE . " WHERE uid = :uid AND name = :name";
     const query_paginated     = "SELECT * FROM " . self::TABLE . " WHERE uid = :uid ORDER BY id LIMIT %u OFFSET %u ";
     const paginated_map_key   = __CLASS__ . "::getAllPaginated";
 
@@ -389,7 +388,6 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
 
         self::destroyQueryByIdCache( $conn, $projectTemplateStruct->id );
         self::destroyQueryByIdAndUserCache( $conn, $projectTemplateStruct->id, $projectTemplateStruct->uid );
-        self::destroyQueryByUidAndNameCache( $conn, $projectTemplateStruct->uid, $projectTemplateStruct->name );
         self::destroyQueryPaginated( $projectTemplateStruct->uid );
 
         return $projectTemplateStruct;
@@ -452,7 +450,6 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
 
         self::destroyQueryByIdCache( $conn, $projectTemplateStruct->id );
         self::destroyQueryByIdAndUserCache( $conn, $projectTemplateStruct->id, $projectTemplateStruct->uid );
-        self::destroyQueryByUidAndNameCache( $conn, $projectTemplateStruct->uid, $projectTemplateStruct->name );
         self::destroyQueryPaginated( $projectTemplateStruct->uid );
 
         if ( $projectTemplateStruct->is_default === true ) {
@@ -519,19 +516,6 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param PDO    $conn
-     * @param int    $uid
-     * @param string $name
-     *
-     * @throws ReflectionException
-     */
-    private
-    static function destroyQueryByUidAndNameCache( PDO $conn, int $uid, string $name ) {
-        $stmt = $conn->prepare( self::query_by_uid_name );
-        self::getInstance()->_destroyObjectCache( $stmt, [ 'uid' => $uid, 'name' => $name, ] );
-    }
-
-    /**
      * @param PDO $conn
      * @param int $id
      *
@@ -540,7 +524,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
     private
     static function destroyQueryByIdCache( PDO $conn, int $id ) {
         $stmt = $conn->prepare( self::query_by_id );
-        self::getInstance()->_destroyObjectCache( $stmt, [ 'id' => $id, ] );
+        self::getInstance()->_destroyObjectCache( $stmt, ProjectTemplateStruct::class, [ 'id' => $id, ] );
     }
 
     /**
@@ -553,7 +537,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
     private
     static function destroyQueryByIdAndUserCache( PDO $conn, int $id, int $uid ) {
         $stmt = $conn->prepare( self::query_by_id_and_uid );
-        self::getInstance()->_destroyObjectCache( $stmt, [ 'id' => $id, 'uid' => $uid ] );
+        self::getInstance()->_destroyObjectCache( $stmt, ProjectTemplateStruct::class, [ 'id' => $id, 'uid' => $uid ] );
     }
 
     /**
@@ -571,7 +555,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
      */
     public static function destroyDefaultTemplateCache( PDO $conn, int $uid ) {
         $stmt = $conn->prepare( self::query_default );
-        self::getInstance()->_destroyObjectCache( $stmt, [ 'uid' => $uid, ] );
+        self::getInstance()->_destroyObjectCache( $stmt, ProjectTemplateStruct::class, [ 'uid' => $uid, ] );
     }
 
 }

@@ -69,6 +69,7 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
         $stmt = $this->_getStatementForQuery( self::$_query_cache );
 
         return $this->_destroyObjectCache( $stmt,
+                Jobs_JobStruct::class,
                 [
                         'id_job'   => $jobQuery->id,
                         'password' => $jobQuery->password
@@ -205,7 +206,9 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( self::$_sql_get_jobs_by_project );
 
-        return $this->_destroyObjectCache( $stmt, [ $project_id, \Constants_JobStatus::STATUS_DELETED ] );
+        $this->_destroyObjectCache( $stmt, Jobs_JobStruct::class, [ $project_id, Constants_JobStatus::STATUS_DELETED ] );
+
+        return $this->_destroyObjectCache( $stmt, Chunks_ChunkStruct::class, [ $project_id, Constants_JobStatus::STATUS_DELETED ] );
     }
 
     /**
@@ -301,7 +304,7 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
         $conn    = Database::obtain()->getConnection();
         $stmt    = $conn->prepare( "SELECT * FROM jobs WHERE id = ? AND status_owner != ? ORDER BY job_first_segment" );
 
-        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, $fetchObject, [ $id_job, \Constants_JobStatus::STATUS_DELETED ] );
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, $fetchObject, [ $id_job, Constants_JobStatus::STATUS_DELETED ] );
 
     }
 
