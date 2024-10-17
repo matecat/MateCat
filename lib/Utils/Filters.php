@@ -1,6 +1,7 @@
 <?php
 
 use FilesStorage\AbstractFilesStorage;
+use Filters\FiltersConfigTemplateStruct;
 
 class Filters {
 
@@ -162,7 +163,10 @@ class Filters {
             'utf8FileName'    => $filename
         ];
 
-        if($extractionParams !== null){
+        /**
+         * @var $extractionParams FiltersConfigTemplateStruct
+         */
+        if ( $extractionParams !== null ) {
 
             $params = null;
 
