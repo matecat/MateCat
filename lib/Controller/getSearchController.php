@@ -388,8 +388,8 @@ class getSearchController extends ajaxController {
 
                 } catch ( Exception $e ) {
                     $msg = $e->getMessage() . "\n\n" . $e->getTraceAsString();
+                    $this->result[ 'errors' ][] = [ "code" => -102, "message" => $e->getMessage() ];
                     Log::doJsonLog( $msg );
-                    Utils::sendErrMailReport( $msg );
                     $this->db->rollback();
 
                     return;
@@ -406,25 +406,26 @@ class getSearchController extends ajaxController {
             $new_translation->translation      = $replacedTranslation;
             $new_translation->translation_date = date( "Y-m-d H:i:s" );
 
-            // Save version
-            $versionsHandler->saveVersionAndIncrement( $new_translation, $old_translation );
-
-            // preSetTranslationCommitted
-            $versionsHandler->storeTranslationEvent( [
-                    'translation'       => $new_translation,
-                    'old_translation'   => $old_translation,
-                    'propagation'       => $propagationTotal,
-                    'chunk'             => $chunk,
-                    'segment'           => $segment,
-                    'user'              => $this->user,
-                    'source_page_code'  => ReviewUtils::revisionNumberToSourcePage( $this->revisionNumber ),
-                    'controller_result' => & $this->result,
-                    'features'          => $this->featureSet,
-                    'project'           => $project
-            ] );
-
             // commit the transaction
             try {
+
+                // Save version
+                $versionsHandler->saveVersionAndIncrement( $new_translation, $old_translation );
+
+                // preSetTranslationCommitted
+                $versionsHandler->storeTranslationEvent( [
+                        'translation'       => $new_translation,
+                        'old_translation'   => $old_translation,
+                        'propagation'       => $propagationTotal,
+                        'chunk'             => $chunk,
+                        'segment'           => $segment,
+                        'user'              => $this->user,
+                        'source_page_code'  => ReviewUtils::revisionNumberToSourcePage( $this->revisionNumber ),
+                        'controller_result' => & $this->result,
+                        'features'          => $this->featureSet,
+                        'project'           => $project
+                ] );
+
                 Translations_SegmentTranslationDao::updateTranslationAndStatusAndDate( $new_translation );
                 $this->db->commit();
             } catch ( Exception $e ) {
