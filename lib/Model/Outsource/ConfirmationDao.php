@@ -62,6 +62,7 @@ class ConfirmationDao extends \DataAccess_AbstractDao {
         $stmt  = $this->_getStatementForQuery( $query );
 
         return $this->_destroyObjectCache( $stmt,
+                TranslatedConfirmationStruct::class,
                 [
                         'id_job'   => $jobStruct->id,
                         'password' => $jobStruct->password

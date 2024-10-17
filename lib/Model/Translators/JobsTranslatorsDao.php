@@ -79,7 +79,7 @@ class JobsTranslatorsDao extends \DataAccess_AbstractDao {
 
         $stmt = $this->_getStatementForQuery( $query );
 
-        return $this->_destroyObjectCache( $stmt, $data );
+        return $this->_destroyObjectCache( $stmt, JobsTranslatorsStruct::class, $data );
 
     }
 

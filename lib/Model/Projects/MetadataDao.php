@@ -44,11 +44,10 @@ class Projects_MetadataDao extends DataAccess_AbstractDao {
 
     }
 
-    public function destroyMetadataCache( $id ) {
-        $stmt = $this->_getStatementForQuery( self::$_query_get_metadata );
-
-        return $this->_destroyObjectCache( $stmt, [ 'id_project' => $id ] );
-    }
+  public function destroyMetadataCache( $id ){
+      $stmt = $this->_getStatementForQuery( self::$_query_get_metadata );
+      return $this->_destroyObjectCache( $stmt, Projects_MetadataStruct::class, [ 'id_project' => $id ] );
+  }
 
     /**
      * @param     $id_project

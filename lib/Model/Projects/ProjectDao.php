@@ -304,7 +304,7 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
         $conn    = Database::obtain()->getConnection();
         $stmt    = $conn->prepare( " SELECT * FROM projects WHERE id = :id " );
 
-        return $thisDao->_destroyObjectCache( $stmt, [ 'id' => $id ] );
+        return $thisDao->_destroyObjectCache( $stmt, Projects_ProjectStruct::class, [ 'id' => $id ] );
     }
 
     /**
@@ -351,7 +351,7 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
         $conn    = Database::obtain()->getConnection();
         $stmt    = $conn->prepare( self::$_sql_get_by_id_and_password );
 
-        return $thisDao->_destroyObjectCache( $stmt, [ 'id' => $id, 'password' => $password ] );
+        return $thisDao->_destroyObjectCache( $stmt, Projects_ProjectStruct::class, [ 'id' => $id, 'password' => $password ] );
     }
 
     /**
@@ -503,7 +503,7 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
 
         $stmt = $this->_getStatementForQuery( $query );
 
-        return $this->_destroyObjectCache( $stmt, $values );
+        return $this->_destroyObjectCache( $stmt, ShapelessConcreteStruct::class, $values );
 
     }
 

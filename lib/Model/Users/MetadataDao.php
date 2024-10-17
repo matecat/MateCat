@@ -68,11 +68,10 @@ class MetadataDao extends \DataAccess_AbstractDao {
         return @$result[ 0 ];
     }
 
-    public function destroyCacheKey( $uid, $key ) {
-        $stmt = $this->_getStatementForQuery( self::_query_metadata_by_uid_key );
-
-        return $this->_destroyObjectCache( $stmt, [ 'uid' => $uid, 'key' => $key ] );
-    }
+  public function destroyCacheKey( $uid, $key ){
+      $stmt = $this->_getStatementForQuery( self::_query_metadata_by_uid_key );
+      return $this->_destroyObjectCache( $stmt, MetadataStruct::class, [ 'uid' => $uid, 'key' => $key ] );
+  }
 
     /**
      * @param $uid

@@ -180,32 +180,20 @@ trait DaoCacheTrait {
     /**
      * Destroy a single element in the hash set
      *
-     * @param              $keyMap
-     * @param PDOStatement $stmt
-     * @param array        $bindParams
+     * @param string $keyMap
+     * @param string $keyElementName
      *
      * @return bool|int
      * @throws ReflectionException
      */
-    protected function _destroyObjectCacheMapElement( $keyMap, PDOStatement $stmt, array $bindParams ) {
+    protected function _destroyObjectCacheMapElement( string $keyMap, string $keyElementName ) {
         $this->_cacheSetConnection();
         if ( isset( self::$cache_con ) && !empty( self::$cache_con ) ) {
-            return self::$cache_con->hdel( $keyMap, [ md5( $stmt->queryString . $this->_serializeForCacheKey( $bindParams ) ) ] );
+            return self::$cache_con->hdel( $keyMap, [ md5( $keyElementName ) ] );
         }
 
         return false;
 
-    }
-
-    /**
-     * @param PDOStatement $stmt
-     * @param array        $bindParams
-     *
-     * @return bool|int
-     * @throws ReflectionException
-     */
-    protected function _destroyObjectCache( PDOStatement $stmt, array $bindParams ) {
-        return $this->_destroyCache( $stmt->queryString . $this->_serializeForCacheKey( $bindParams ) );
     }
 
     /**
