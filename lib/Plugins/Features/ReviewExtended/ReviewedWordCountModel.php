@@ -346,11 +346,30 @@ class ReviewedWordCountModel implements IReviewedWordCountModel {
         }
 
         $emails = $this->_chunk->getProject()->getFeaturesSet()->filter( 'filterRevisionChangeNotificationList', $emails );
-        $url    = Routes::revise( $this->_chunk->getProject()->name, $revision->id_job, $revision->review_password,
-                $this->_chunk->source, $this->_chunk->target, [
-                        'revision_number' => ReviewUtils::sourcePageToRevisionNumber( $revision->source_page ),
-                        'id_segment'      => $this->_event->getSegmentStruct()->id
-                ] );
+
+        if( !empty( $revision ) ){
+            $url = Routes::revise(
+                    $this->_chunk->getProject()->name,
+                    $revision->id_job,
+                    $revision->review_password,
+                    $this->_chunk->source,
+                    $this->_chunk->target,
+                    [
+                            'revision_number' => ReviewUtils::sourcePageToRevisionNumber( $revision->source_page ),
+                            'id_segment'      => $this->_event->getSegmentStruct()->id
+                    ]
+            );
+        } else {
+            // handle the case when an ICE OR a pre-translated segment (no previous events) changes its status to a lower status
+            // use the event chunk to generate the link.
+            $url = Routes::translate(
+                    $this->_chunk->getProject()->name,
+                    $this->_chunk->id,
+                    $this->_chunk->password,
+                    $this->_chunk->source,
+                    $this->_chunk->target
+            );
+        }
 
 
         $notifiedEmails = [];

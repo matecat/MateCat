@@ -9,17 +9,18 @@
 namespace Features\ReviewExtended\Email ;
 
 use Email\AbstractEmail;
+use Exception;
 use Users_UserStruct;
 
 class RevisionChangedNotificationEmail extends AbstractEmail {
 
     /**
-     * @var \Users_UserStruct
+     * @var Users_UserStruct
      */
     protected $changeAuthor ;
     protected $segmentUrl ;
     /**
-     * @var \Users_UserStruct
+     * @var Users_UserStruct
      */
     protected $recipientUser ;
 
@@ -38,7 +39,7 @@ class RevisionChangedNotificationEmail extends AbstractEmail {
         $this->_settemplate( 'Revise/second_pass_segment_changed_notice.html' );
     }
 
-    protected function _getTemplateVariables() {
+    protected function _getTemplateVariables(): array {
         return [
                 'changeAuthor'  => ( $this->changeAuthor ? $this->changeAuthor->toArray() : null ),
                 'recipientUser' => $this->data['recipient']->toArray(),
@@ -48,6 +49,9 @@ class RevisionChangedNotificationEmail extends AbstractEmail {
         ] ;
     }
 
+    /**
+     * @throws Exception
+     */
     public function send()
     {
         if(false === $this->isRecipientTheChangeAuthor($this->recipientUser->email, $this->changeAuthor)){
@@ -61,7 +65,7 @@ class RevisionChangedNotificationEmail extends AbstractEmail {
      *
      * @return bool
      */
-    private function isRecipientTheChangeAuthor( $email, Users_UserStruct $user = null ) {
+    private function isRecipientTheChangeAuthor( $email, Users_UserStruct $user = null ): bool {
         if ( null === $user ) {
             return false;
         }

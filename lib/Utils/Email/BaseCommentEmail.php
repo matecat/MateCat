@@ -36,7 +36,7 @@ class BaseCommentEmail extends AbstractEmail {
         );
     }
 
-    protected function _getTemplateVariables() {
+    protected function _getTemplateVariables(): array {
         $content = \Comments_CommentDao::placeholdContent( $this->comment->message );
 
         return [
