@@ -8,11 +8,9 @@ export const AiAssistant = () => {
   const onChange = (selected) => {
     setActive(selected)
     //Track Event
+    const userInfo = UserStore.getUser()
     const message = {
-      user:
-        config.isLoggedIn && APP.USER.STORE.user
-          ? APP.USER.STORE.user.uid
-          : undefined,
+      user: userInfo.user.uid,
       page: location.href,
       onHighlight: selected,
     }

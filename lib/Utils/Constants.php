@@ -46,5 +46,5 @@ class Constants {
         return $segmentation_rule;
 
     }
-    
+
 }

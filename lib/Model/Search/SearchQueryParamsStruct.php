@@ -77,6 +77,6 @@ class SearchQueryParamsStruct extends ShapelessConcreteStruct {
     /**
      * @var integer
      */
-    public $sourcePage ;
-    
+    public $sourcePage;
+
 }

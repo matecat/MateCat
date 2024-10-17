@@ -29,7 +29,7 @@ class InvitedToTeamEmail extends AbstractEmail {
     }
 
     protected function _getTemplateVariables() {
-        return array(
+        return [
                 'sender'     => $this->user->toArray(),
                 'email'      => $this->invited_email,
                 'team'       => $this->team->toArray(),
@@ -38,11 +38,11 @@ class InvitedToTeamEmail extends AbstractEmail {
                         'email'          => $this->invited_email,
                         'team_id'        => $this->team->id
                 ] )
-        );
+        ];
     }
 
     public function send() {
-        $recipient = array( $this->invited_email );
+        $recipient = [ $this->invited_email ];
 
         //we need to get the bodyHtmlMessage only once because JWT changes if called more than once
         // otherwise html message will differ from the alternative text message

@@ -1,8 +1,13 @@
 <?php
 
 
+use ConnectedServices\Facebook\FacebookProvider;
 use ConnectedServices\GDrive\GDriveController;
-use ConnectedServices\GoogleClientFactory;
+use ConnectedServices\Github\GithubProvider;
+use ConnectedServices\Google\GoogleProvider;
+use ConnectedServices\LinkedIn\LinkedInProvider;
+use ConnectedServices\Microsoft\MicrosoftProvider;
+use ConnectedServices\OauthClient;
 use Engines_Intento as Intento;
 use LexiQA\LexiQADecorator;
 
@@ -41,8 +46,29 @@ class newProjectController extends viewController {
 
     }
 
+    /**
+     * Redirect to requested url after login
+     *
+     * If user is logged in and the cookie $_SESSION[ 'wanted_url' ] is set,
+     * then redirect to requested url
+     */
+    private function redirectToRequestUrlAfterLogin() {
+        if ( $this->isLoggedIn() ) {
+            // handle redirect after login
+            if ( isset( $_SESSION[ 'wanted_url' ] ) ) {
+                header( "Location: " . INIT::$HTTPHOST . INIT::$BASEURL . $_SESSION[ 'wanted_url' ], false );
+                unset( $_SESSION[ 'wanted_url' ] );
+                exit;
+            }
+        } else {
+            // we landed on homepage and we are not logged in, unset wanted_url
+            unset( $_SESSION[ 'wanted_url' ] );
+        }
+    }
+
     public function doAction() {
 
+        $this->redirectToRequestUrlAfterLogin();
         $this->setOrGetGuid();
 
         try {
@@ -242,8 +268,6 @@ class newProjectController extends viewController {
         $this->template->unsupported_file_types                = $this->getExtensionsUnsupported();
         $this->template->formats_number                        = $this->countExtensions();
         $this->template->volume_analysis_enabled               = INIT::$VOLUME_ANALYSIS_ENABLED;
-        $this->template->extended_user                         = ( $this->isLoggedIn() !== false ) ? trim( $this->user->fullName() ) : "";
-        $this->template->logged_user                           = ( $this->isLoggedIn() !== false ) ? $this->user->shortName() : "";
         $this->template->userMail                              = $this->user->email;
         $this->template->translation_engines_intento_providers = Intento::getProviderList();
         $this->template->translation_engines_intento_prov_json = str_replace( "\\\"", "\\\\\\\"", json_encode( Intento::getProviderList() ) ); // needed by JSON.parse() function
@@ -261,8 +285,8 @@ class newProjectController extends viewController {
             return [ 'name' => $tmKeyStruct->name, 'key' => $tmKeyStruct->key ];
         }, $this->keyList ) );
 
-        $this->template->developerKey = INIT::$OAUTH_BROWSER_API_KEY;
-        $this->template->clientId     = INIT::$OAUTH_CLIENT_ID;
+        $this->template->developerKey = INIT::$GOOGLE_OAUTH_BROWSER_API_KEY;
+        $this->template->clientId     = INIT::$GOOGLE_OAUTH_CLIENT_ID;
 
         $this->template->tag_projection_languages = json_encode( ProjectOptionsSanitizer::$tag_projection_allowed_languages );
         LexiQADecorator::getInstance( $this->template )->featureEnabled( $this->featureSet )->decorateViewLexiQA();
@@ -276,9 +300,7 @@ class newProjectController extends viewController {
 
         $this->template->globalMessage = Utils::getGlobalMessage()[ 'messages' ];
 
-        $this->template->authURL       = ( !$this->isLoggedIn() ) ? $this->setGoogleAuthUrl( 'google-', INIT::$OAUTH_REDIRECT_URL ) : "";
-        $this->template->gdriveAuthURL = ( $this->isLoggedIn() ) ? $this->setGoogleAuthUrl( 'google-drive-', INIT::$HTTPHOST . "/gdrive/oauth/response" ) : "";
-
+        $this->intOauthClients();
 
     }
 

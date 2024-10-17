@@ -129,7 +129,7 @@ class Job {
         $subject_handler = Langs_LanguageDomains::getInstance();
         $subjectsHashMap = $subject_handler->getEnabledHashMap();
 
-        $warningsCount   = $chunk->getWarningsCount();
+        $warningsCount = $chunk->getWarningsCount();
 
         // Added 5 minutes cache here
         $chunkReviews = ( new ChunkReviewDao() )->findChunkReviews( $chunk, 60 * 5 );
