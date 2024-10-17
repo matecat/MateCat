@@ -160,6 +160,7 @@ class TeamDao extends \DataAccess_AbstractDao {
         $stmt = $this->_getStatementForQuery( self::$_query_get_assignee_with_projects );
 
         return $this->_destroyObjectCache( $stmt,
+                MembershipStruct::class,
                 [
                         'id_team' => $team->id,
                 ]
@@ -172,6 +173,7 @@ class TeamDao extends \DataAccess_AbstractDao {
         $teamQuery->id = $id;
 
         return $this->_destroyObjectCache( $stmt,
+                TeamStruct::class,
                 [
                         'id' => $teamQuery->id,
                 ]
@@ -217,6 +219,7 @@ class TeamDao extends \DataAccess_AbstractDao {
         $teamQuery->created_by = $uid;
 
         return $this->_destroyObjectCache( $stmt,
+                TeamStruct::class,
                 [
                         'created_by' => $teamQuery->created_by,
                         'type'       => Constants_Teams::PERSONAL
@@ -247,6 +250,7 @@ class TeamDao extends \DataAccess_AbstractDao {
         $teamQuery->created_by = $user->uid;
 
         return $this->_destroyObjectCache( $stmt,
+                TeamStruct::class,
                 [
                         'created_by' => $teamQuery->created_by,
                 ]

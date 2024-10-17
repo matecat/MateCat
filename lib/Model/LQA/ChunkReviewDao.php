@@ -270,7 +270,7 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
         $findChunkReviewsStatement = $this->_findChunkReviewsStatement( [ $chunkStruct ], null );
         $stmt                      = $this->_getStatementForQuery( $findChunkReviewsStatement[ 'sql' ] );
 
-        return $this->_destroyObjectCache( $stmt, $findChunkReviewsStatement[ 'parameters' ] );
+        return $this->_destroyObjectCache( $stmt, ChunkReviewStruct::class, $findChunkReviewsStatement[ 'parameters' ] );
 
     }
 

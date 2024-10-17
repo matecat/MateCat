@@ -171,7 +171,7 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
         [ $query, $bind_values ] = $query_and_bindValues;
         $stmt = $this->database->getConnection()->prepare( $query );
 
-        return $this->_destroyObjectCache( $stmt, $bind_values );
+        return $this->_destroyObjectCache( $stmt, EnginesModel_EngineStruct::class, $bind_values );
 
     }
 
