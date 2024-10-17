@@ -6,6 +6,7 @@
 nbproject/
 webgrind/
 _dic_cache
+.phpunit.result.cache
 
 # Configuration files
 .num_processes
