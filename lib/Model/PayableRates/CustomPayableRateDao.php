@@ -62,10 +62,11 @@ class CustomPayableRateDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param int $uid
-     * @param int $current
-     * @param int $pagination
-     * @param int $ttl
+     * @param int    $uid
+     * @param string $baseRoute
+     * @param int    $current
+     * @param int    $pagination
+     * @param int    $ttl
      *
      * @return array
      * @throws ReflectionException
@@ -290,7 +291,7 @@ class CustomPayableRateDao extends DataAccess_AbstractDao {
      */
     private static function destroyQueryByIdCache( PDO $conn, int $id ) {
         $stmt = $conn->prepare( self::query_by_id );
-        self::getInstance()->_destroyObjectCache( $stmt, [ 'id' => $id, ] );
+        self::getInstance()->_destroyObjectCache( $stmt, CustomPayableRateStruct::class, [ 'id' => $id, ] );
     }
 
     /**
@@ -302,7 +303,7 @@ class CustomPayableRateDao extends DataAccess_AbstractDao {
      */
     private static function destroyQueryByUidAndNameCache( PDO $conn, int $uid, string $name ) {
         $stmt = $conn->prepare( self::query_by_uid_name );
-        self::getInstance()->_destroyObjectCache( $stmt, [ 'uid' => $uid, 'name' => $name, ] );
+        self::getInstance()->_destroyObjectCache( $stmt, CustomPayableRateStruct::class, [ 'uid' => $uid, 'name' => $name, ] );
     }
 
     /**
@@ -315,7 +316,7 @@ class CustomPayableRateDao extends DataAccess_AbstractDao {
     private
     static function destroyQueryByIdAndUserCache( PDO $conn, int $id, int $uid ) {
         $stmt = $conn->prepare( self::query_by_id_and_user );
-        self::getInstance()->_destroyObjectCache( $stmt, [ 'id' => $id, 'uid' => $uid ] );
+        self::getInstance()->_destroyObjectCache( $stmt, CustomPayableRateStruct::class, [ 'id' => $id, 'uid' => $uid ] );
     }
 
     /**

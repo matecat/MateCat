@@ -95,6 +95,7 @@ class MembershipDao extends \DataAccess_AbstractDao {
         $stmt = $this->_getStatementForQuery( self::$_query_user_teams );
 
         return $this->_destroyObjectCache( $stmt,
+                TeamStruct::class,
                 [
                         'uid' => $user->uid,
                 ]
@@ -142,7 +143,7 @@ class MembershipDao extends \DataAccess_AbstractDao {
     public function destroyCacheTeamByIdAndUser( $id, Users_UserStruct $user ) {
         $stmt = $this->_getStatementForQuery( self::$_query_team_from_uid_and_id );
 
-        return $this->_destroyObjectCache( $stmt, [ $user->uid, $id ] );
+        return $this->_destroyObjectCache( $stmt, TeamStruct::class, [ $user->uid, $id ] );
     }
 
     /**
@@ -201,6 +202,7 @@ class MembershipDao extends \DataAccess_AbstractDao {
         $stmt = $this->_getStatementForQuery( self::$_query_member_list );
 
         return $this->_destroyObjectCache( $stmt,
+                MembershipStruct::class,
                 [
                         'id_team' => $id_team,
                 ]

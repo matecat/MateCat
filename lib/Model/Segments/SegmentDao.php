@@ -736,7 +736,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
     public function destroyCacheForGlobalTranslationMismatches( Jobs_JobStruct $job ) {
         $stmt = $this->_getStatementForQuery( self::$queryForGlobalMismatches );
 
-        return $this->_destroyObjectCache( $stmt, [
+        return $this->_destroyObjectCache( $stmt, ShapelessConcreteStruct::class, [
                 'id_job'        => $job->id,
                 'st_approved'   => Constants_TranslationStatus::STATUS_APPROVED,
                 'st_translated' => Constants_TranslationStatus::STATUS_TRANSLATED,
