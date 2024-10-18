@@ -15,14 +15,14 @@ class UploadHandler {
     function __construct() {
 
         $this->options = [
-                'script_url'              => $this->getFullUrl() . '/index.php/',
+                'script_url'              => $this->getFullUrl() . '/',
                 'upload_token'            => $_COOKIE[ 'upload_token' ],
                 'upload_dir'              => Utils::uploadDirFromSessionCookie( $_COOKIE[ 'upload_token' ] ),
                 'upload_url'              => $this->getFullUrl() . '/files/',
                 'param_name'              => 'files',
             // Set the following option to 'POST', if your server does not support
             // DELETE requests. This is a parameter sent to the client:
-                'delete_type'             => "", //'DELETE',
+                'delete_type'             => 'DELETE',
             // The php.ini settings upload_max_filesize and post_max_size
             // take precedence over the following max_file_size setting:
                 'max_tmx_file_size'       => INIT::$MAX_UPLOAD_TMX_FILE_SIZE,
@@ -44,7 +44,7 @@ class UploadHandler {
                 ( isset( $_SERVER[ 'HTTP_HOST' ] ) ? $_SERVER[ 'HTTP_HOST' ] : ( $_SERVER[ 'SERVER_NAME' ] .
                         ( $https && $_SERVER[ 'SERVER_PORT' ] === 443 ||
                         $_SERVER[ 'SERVER_PORT' ] === 80 ? '' : ':' . $_SERVER[ 'SERVER_PORT' ] ) ) ) .
-                substr( $_SERVER[ 'SCRIPT_NAME' ], 0, strrpos( $_SERVER[ 'SCRIPT_NAME' ], '/' ) );
+                rtrim( $_SERVER[ 'REQUEST_URI' ], '/' );
     }
 
     protected function set_file_delete_url( $file ) {
@@ -559,7 +559,7 @@ class UploadHandler {
 
         //can be present more than one file with the same sha
         //so in the sha1 file there could be more than one row
-        $file_sha = glob( $this->options[ 'upload_dir' ] . $sha1 . "*" ); //delete sha1 also
+        $file_sha = glob( $file_path . "*" ); //delete sha1 also
 
         $fp = fopen( $file_sha[ 0 ], "r+" );
 

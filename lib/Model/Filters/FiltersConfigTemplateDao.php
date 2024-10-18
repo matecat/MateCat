@@ -10,6 +10,7 @@ use Exception;
 use Pagination\Pager;
 use Pagination\PaginationParameters;
 use PDO;
+use Projects\ProjectTemplateDao;
 use Projects\ProjectTemplateStruct;
 use ReflectionException;
 use Utils;
@@ -191,6 +192,8 @@ class FiltersConfigTemplateDao extends DataAccess_AbstractDao {
         self::destroyQueryByIdCache( $conn, $id );
         self::destroyQueryByIdAndUserCache( $conn, $id, $uid );
         self::destroyQueryPaginated( $uid );
+
+        ProjectTemplateDao::removeSubTemplateByIdAndUser( $id, $uid, 'filters_template_id' );
 
         return $stmt->rowCount();
     }

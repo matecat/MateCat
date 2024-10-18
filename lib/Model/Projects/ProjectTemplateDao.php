@@ -540,6 +540,27 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
     }
 
     /**
+     * @throws ReflectionException
+     */
+    public static function removeSubTemplateByIdAndUser( int $id, int $uid, string $subTemplateField ): int {
+
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( "UPDATE " . self::TABLE . " SET `$subTemplateField` = :zero WHERE uid = :uid and `$subTemplateField` = :id " );
+        $stmt->execute( [
+                'zero' => 0,
+                'id'   => $id,
+                'uid'  => $uid,
+        ] );
+
+        self::destroyQueryByIdCache( $conn, $id );
+        self::destroyQueryByIdAndUserCache( $conn, $id, $uid );
+        self::destroyQueryPaginated( $uid );
+
+        return $stmt->rowCount();
+
+    }
+
+    /**
      * @param PDO $conn
      * @param int $id
      *

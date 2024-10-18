@@ -11,19 +11,14 @@ use Conversion\ConvertedFileModel;
  */
 class ConvertFileWrapper extends convertFileController {
 
-    public $file_name;
-    public $source_lang;
-    public $target_lang;
     public $intDir;
     public $errDir;
-    public $cookieDir;
-
     protected $fileStruct;
     protected $resultStack = [];
 
     public function __construct( $stdResult, $convertZipFile = true ) {
         $this->fileStruct     = $stdResult;
-        $this->convertZipFile = $convertZipFile;
+        $this->convertZipFile = (bool)$convertZipFile;
         $this->identifyUser();
     }
 

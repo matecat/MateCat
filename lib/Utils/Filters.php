@@ -1,6 +1,7 @@
 <?php
 
 use FilesStorage\AbstractFilesStorage;
+use Filters\DTO\IDto;
 
 class Filters {
 
@@ -39,14 +40,6 @@ class Filters {
                         'X-RapidAPI-Host: ' . parse_url( INIT::$FILTERS_ADDRESS )[ 'host' ],
                         'X-RapidAPI-Key: ' . INIT::$FILTERS_RAPIDAPI_KEY,
                 ];
-            }
-
-            if ( version_compare( PHP_VERSION, '5.5.0' ) >= 0 ) {
-                /**
-                 * Added in PHP 5.5.0 with FALSE as the default value.
-                 * PHP 5.6.0 changes the default value to TRUE.
-                 */
-                $options[ CURLOPT_SAFE_UPLOAD ] = false;
             }
 
             $url = rtrim( INIT::$FILTERS_ADDRESS, '/' ) . $endpoint;
@@ -141,17 +134,17 @@ class Filters {
     }
 
     /**
-     * Convert source file to XLIFF
+     * Convert the source file to XLIFF
      *
-     * @param      $filePath
-     * @param      $sourceLang
-     * @param      $targetLang
-     * @param      $segmentation
-     * @param null $extractionParams
+     * @param string    $filePath
+     * @param string    $sourceLang
+     * @param string    $targetLang
+     * @param ?string   $segmentation
+     * @param IDto|null $extractionParams
      *
      * @return mixed
      */
-    public static function sourceToXliff( $filePath, $sourceLang, $targetLang, $segmentation, $extractionParams = null ) {
+    public static function sourceToXliff( string $filePath, string $sourceLang, string $targetLang, ?string $segmentation = null, IDto $extractionParams = null ) {
         $basename  = AbstractFilesStorage::pathinfo_fix( $filePath, PATHINFO_FILENAME );
         $extension = AbstractFilesStorage::pathinfo_fix( $filePath, PATHINFO_EXTENSION );
         $filename  = "$basename.$extension";
@@ -165,60 +158,7 @@ class Filters {
         ];
 
         if ( $extractionParams !== null ) {
-
-            $params = null;
-
-            // send extraction params based on file extension
-            switch ( $extension ) {
-                case "json":
-                    if ( isset( $extractionParams->json ) ) {
-                        $params = $extractionParams->json;
-                    }
-
-                    break;
-
-                case "xml":
-                    if ( isset( $extractionParams->xml ) ) {
-                        $params = $extractionParams->xml;
-                    }
-
-                    break;
-
-                case "yaml":
-                    if ( isset( $extractionParams->yaml ) ) {
-                        $params = $extractionParams->yaml;
-                    }
-
-                    break;
-
-                case "doc":
-                case "docx":
-                    if ( isset( $extractionParams->ms_word ) ) {
-                        $params = $extractionParams->ms_word;
-                    }
-
-                    break;
-
-                case "xls":
-                case "xlsx":
-                    if ( isset( $extractionParams->ms_excel ) ) {
-                        $params = $extractionParams->ms_excel;
-                    }
-
-                    break;
-
-                case "ppt":
-                case "pptx":
-                    if ( isset( $extractionParams->ms_powerpoint ) ) {
-                        $params = $extractionParams->ms_powerpoint;
-                    }
-
-                    break;
-            }
-
-            if ( $params !== null ) {
-                $data[ 'extractionParams' ] = json_encode( $params );
-            }
+            $data[ 'extractionParams' ] = json_encode( $extractionParams );
         }
 
         $filtersResponse = self::sendToFilters( [ $data ], self::SOURCE_TO_XLIFF_ENDPOINT );

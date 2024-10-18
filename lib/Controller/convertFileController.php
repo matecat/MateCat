@@ -4,6 +4,8 @@ use Constants\ConversionHandlerStatus;
 use Conversion\ConvertedFileModel;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
+use Filters\FiltersConfigTemplateDao;
+use Filters\FiltersConfigTemplateStruct;
 
 set_time_limit( 0 );
 
@@ -14,21 +16,22 @@ class convertFileController extends ajaxController {
      */
     protected $result;
 
-    protected $file_name;
-    protected $source_lang;
-    protected $target_lang;
-    protected $segmentation_rule;
+    protected string $file_name;
+    protected string $source_lang;
+    protected string $target_lang;
+    protected ?string $segmentation_rule = null;
 
     protected $intDir;
     protected $errDir;
 
-    protected $cookieDir;
+    protected string $cookieDir;
 
     //this will prevent recursion loop when ConvertFileWrapper will call the doAction()
-    protected $convertZipFile = true;
-    protected $lang_handler;
+    protected bool $convertZipFile = true;
+    protected Langs_Languages $lang_handler;
 
-    protected $filters_extraction_parameters;
+    protected int $filters_extraction_parameters_template_id;
+    protected ?FiltersConfigTemplateStruct $filters_extraction_parameters = null;
 
     /**
      * @var AbstractFilesStorage
@@ -42,35 +45,34 @@ class convertFileController extends ajaxController {
         parent::__construct();
 
         $filterArgs = [
-                'file_name'         => [
+                'file_name'                                 => [
                         'filter' => FILTER_SANITIZE_STRING,
                         'flags'  => FILTER_FLAG_STRIP_LOW // | FILTER_FLAG_STRIP_HIGH
                 ],
-                'source_lang'       => [
+                'source_lang'                               => [
                         'filter' => FILTER_SANITIZE_STRING,
                         'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ],
-                'target_lang'       => [
+                'target_lang'                               => [
                         'filter' => FILTER_SANITIZE_STRING,
                         'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ],
-                'segmentation_rule' => [
+                'segmentation_rule'                         => [
                         'filter' => FILTER_SANITIZE_STRING,
                         'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ],
-                'filters_extraction_parameters' => [
-                        'filter' => FILTER_SANITIZE_STRING,
-                        'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                'filters_extraction_parameters_template_id' => [
+                        'filter' => FILTER_SANITIZE_NUMBER_INT
                 ]
         ];
 
         $postInput = filter_input_array( INPUT_POST, $filterArgs );
 
-        $this->file_name                     = $postInput[ 'file_name' ];
-        $this->source_lang                   = $postInput[ "source_lang" ];
-        $this->target_lang                   = $postInput[ "target_lang" ];
-        $this->segmentation_rule             = $postInput[ "segmentation_rule" ];
-        $this->filters_extraction_parameters = $postInput[ "filters_extraction_parameters" ];
+        $this->file_name                                 = $postInput[ 'file_name' ];
+        $this->source_lang                               = $postInput[ "source_lang" ];
+        $this->target_lang                               = $postInput[ "target_lang" ];
+        $this->segmentation_rule                         = $postInput[ "segmentation_rule" ];
+        $this->filters_extraction_parameters_template_id = (int)$postInput[ "filters_extraction_parameters_template_id" ];
 
         $this->cookieDir = $_COOKIE[ 'upload_token' ];
         $this->intDir    = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->cookieDir;
@@ -81,6 +83,10 @@ class convertFileController extends ajaxController {
         $this->files_storage = FilesStorageFactory::create();
     }
 
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
     public function doAction() {
 
         $this->result = new ConvertedFileModel();
@@ -88,10 +94,11 @@ class convertFileController extends ajaxController {
         $this->lang_handler = Langs_Languages::getInstance();
         $this->validateSourceLang();
         $this->validateTargetLangs();
+        $this->validateFiltersExtractionParametersTemplateId();
 
         try {
             $this->segmentation_rule = Constants::validateSegmentationRules( $this->segmentation_rule );
-        } catch ( Exception $e ){
+        } catch ( Exception $e ) {
             $this->result->changeCode( ConversionHandlerStatus::INVALID_SEGMENTATION_RULE );
             $this->result->addError( $e->getMessage() );
 
@@ -99,15 +106,15 @@ class convertFileController extends ajaxController {
         }
 
         if ( !Utils::isTokenValid( $this->cookieDir ) ) {
-            $this->result->changeCode(ConversionHandlerStatus::INVALID_TOKEN);
-            $this->result->addError( "Invalid Upload Token.");
+            $this->result->changeCode( ConversionHandlerStatus::INVALID_TOKEN );
+            $this->result->addError( "Invalid Upload Token." );
 
             return false;
         }
 
         if ( !Utils::isValidFileName( $this->file_name ) || empty( $this->file_name ) ) {
-            $this->result->changeCode(ConversionHandlerStatus::INVALID_FILE);
-            $this->result->addError("Invalid File.");
+            $this->result->changeCode( ConversionHandlerStatus::INVALID_FILE );
+            $this->result->addError( "Invalid File." );
 
             return false;
         }
@@ -138,8 +145,8 @@ class convertFileController extends ajaxController {
             if ( $this->convertZipFile ) {
                 $this->handleZip( $conversionHandler );
             } else {
-                $this->result->changeCode(ConversionHandlerStatus::NESTED_ZIP_FILES_NOT_ALLOWED);
-                $this->result->addError("Nested zip files are not allowed.");
+                $this->result->changeCode( ConversionHandlerStatus::NESTED_ZIP_FILES_NOT_ALLOWED );
+                $this->result->addError( "Nested zip files are not allowed." );
 
                 return false;
             }
@@ -153,8 +160,25 @@ class convertFileController extends ajaxController {
         try {
             $this->lang_handler->validateLanguage( $this->source_lang );
         } catch ( Exception $e ) {
-            $this->result->changeCode(ConversionHandlerStatus::SOURCE_ERROR);
-            $this->result->addError($e->getMessage());
+            $this->result->changeCode( ConversionHandlerStatus::SOURCE_ERROR );
+            $this->result->addError( $e->getMessage() );
+        }
+    }
+
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    private function validateFiltersExtractionParametersTemplateId() {
+        if ( !empty( $this->filters_extraction_parameters_template_id ) ) {
+
+            $filtersTemplate = FiltersConfigTemplateDao::getByIdAndUser( $this->filters_extraction_parameters_template_id, $this->getUser()->uid );
+
+            if ( $filtersTemplate === null ) {
+                throw new Exception( "filters_extraction_parameters_template_id not valid" );
+            }
+
+            $this->filters_extraction_parameters = $filtersTemplate;
         }
     }
 
@@ -164,8 +188,8 @@ class convertFileController extends ajaxController {
         $targets = array_unique( $targets );
 
         if ( empty( $targets ) ) {
-            $this->result->changeCode(ConversionHandlerStatus::TARGET_ERROR);
-            $this->result->addError("Missing target language.");
+            $this->result->changeCode( ConversionHandlerStatus::TARGET_ERROR );
+            $this->result->addError( "Missing target language." );
         }
 
         try {
@@ -174,8 +198,8 @@ class convertFileController extends ajaxController {
             }
 
         } catch ( Exception $e ) {
-            $this->result->changeCode(ConversionHandlerStatus::TARGET_ERROR);
-            $this->result->addError($e->getMessage());
+            $this->result->changeCode( ConversionHandlerStatus::TARGET_ERROR );
+            $this->result->addError( $e->getMessage() );
         }
 
         $this->target_lang = implode( ',', $targets );
@@ -204,8 +228,8 @@ class convertFileController extends ajaxController {
 
                 $brokenFileName = ZipArchiveExtended::getFileName( $fileError->name );
 
-                $this->result->changeCode($fileError->error[ 'code' ]);
-                $this->result->addError($fileError->error[ 'message' ], $brokenFileName);
+                $this->result->changeCode( $fileError->error[ 'code' ] );
+                $this->result->addError( $fileError->error[ 'message' ], $brokenFileName );
             }
 
         }
@@ -222,7 +246,7 @@ class convertFileController extends ajaxController {
             ];
         }
 
-        $this->result->addData('zipFiles', json_encode( $realFileNames ));
+        $this->result->addData( 'zipFiles', json_encode( $realFileNames ) );
 
         $stdFileObjects = [];
 
@@ -236,9 +260,9 @@ class convertFileController extends ajaxController {
             }
         } else {
             $errors = $conversionHandler->getResult();
-            $errors = array_map( [ 'Upload', 'formatExceptionMessage' ], $errors[ 'errors' ] );
+            $errors = array_map( [ 'Upload', 'formatExceptionMessage' ], $errors->getErrors() );
 
-            foreach ($errors as $error){
+            foreach ( $errors as $error ) {
                 $this->result->addError( $error );
             }
 
@@ -257,16 +281,16 @@ class convertFileController extends ajaxController {
 
         $error = $converter->checkResult();
 
-        $this->result->changeCode(ConversionHandlerStatus::ZIP_HANDLING);
+        $this->result->changeCode( ConversionHandlerStatus::ZIP_HANDLING );
 
         // Upload errors handling
-        if($error !== null and !empty($error->getErrors())){
-            $this->result->changeCode($error->getCode());
-            $savedErrors = $this->result->getErrors();
-            $brokenFileName = ZipArchiveExtended::getFileName( array_keys($error->getErrors())[0] );
+        if ( $error !== null and !empty( $error->getErrors() ) ) {
+            $this->result->changeCode( $error->getCode() );
+            $savedErrors    = $this->result->getErrors();
+            $brokenFileName = ZipArchiveExtended::getFileName( array_keys( $error->getErrors() )[ 0 ] );
 
-            if( !isset( $savedErrors[$brokenFileName] ) ){
-                $this->result->addError($error->getErrors()[0]['message'], $brokenFileName);
+            if ( !isset( $savedErrors[ $brokenFileName ] ) ) {
+                $this->result->addError( $error->getErrors()[ 0 ][ 'message' ], $brokenFileName );
             }
         }
     }
