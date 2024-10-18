@@ -19,7 +19,6 @@ class FiltersConfigTemplateDao extends DataAccess_AbstractDao {
 
     const query_by_id         = "SELECT * FROM " . self::TABLE . " WHERE id = :id AND deleted_at IS NULL";
     const query_by_id_and_uid = "SELECT * FROM " . self::TABLE . " WHERE id = :id AND uid = :uid AND deleted_at IS NULL";
-    const query_by_uid        = "SELECT * FROM " . self::TABLE . " WHERE uid = :uid AND deleted_at IS NULL";
     const query_by_uid_name   = "SELECT * FROM " . self::TABLE . " WHERE uid = :uid AND name = :name AND deleted_at IS NULL";
     const query_paginated     = "SELECT * FROM " . self::TABLE . " WHERE deleted_at IS NULL AND uid = :uid ORDER BY id LIMIT %u OFFSET %u ";
     const paginated_map_key   = __CLASS__ . "::getAllPaginated";
@@ -190,7 +189,6 @@ class FiltersConfigTemplateDao extends DataAccess_AbstractDao {
         ] );
 
         self::destroyQueryByIdCache( $conn, $id );
-        self::destroyQueryByUidCache( $conn, $uid );
         self::destroyQueryByIdAndUserCache( $conn, $id, $uid );
         self::destroyQueryPaginated( $uid );
 
@@ -205,7 +203,7 @@ class FiltersConfigTemplateDao extends DataAccess_AbstractDao {
      */
     private static function destroyQueryByIdCache( PDO $conn, int $id ) {
         $stmt = $conn->prepare( self::query_by_id );
-        self::getInstance()->_destroyObjectCache( $stmt, [ 'id' => $id, ] );
+        self::getInstance()->_destroyObjectCache( $stmt, ShapelessConcreteStruct::class, [ 'id' => $id, ] );
     }
 
     /**
@@ -217,18 +215,7 @@ class FiltersConfigTemplateDao extends DataAccess_AbstractDao {
      */
     private static function destroyQueryByIdAndUserCache( PDO $conn, int $id, int $uid ) {
         $stmt = $conn->prepare( self::query_by_id_and_uid );
-        self::getInstance()->_destroyObjectCache( $stmt, [ 'id' => $id, 'uid' => $uid ] );
-    }
-
-    /**
-     * @param PDO $conn
-     * @param int $uid
-     *
-     * @throws ReflectionException
-     */
-    private static function destroyQueryByUidCache( PDO $conn, int $uid ) {
-        $stmt = $conn->prepare( self::query_by_uid );
-        self::getInstance()->_destroyObjectCache( $stmt, [ 'uid' => $uid ] );
+        self::getInstance()->_destroyObjectCache( $stmt, ShapelessConcreteStruct::class, [ 'id' => $id, 'uid' => $uid ] );
     }
 
     /**
@@ -240,7 +227,7 @@ class FiltersConfigTemplateDao extends DataAccess_AbstractDao {
      */
     private static function destroyQueryByUidAndNameCache( PDO $conn, int $uid, string $name ) {
         $stmt = $conn->prepare( self::query_by_uid_name );
-        self::getInstance()->_destroyObjectCache( $stmt, [ 'uid' => $uid, 'name' => $name, ] );
+        self::getInstance()->_destroyObjectCache( $stmt, ProjectTemplateStruct::class, [ 'uid' => $uid, 'name' => $name, ] );
     }
 
     /**
@@ -312,7 +299,6 @@ class FiltersConfigTemplateDao extends DataAccess_AbstractDao {
 
         self::destroyQueryByIdCache( $conn, $templateStruct->id );
         self::destroyQueryByIdAndUserCache( $conn, $templateStruct->id, $templateStruct->uid );
-        self::destroyQueryByUidCache( $conn, $templateStruct->uid );
         self::destroyQueryByUidAndNameCache( $conn, $templateStruct->uid, $templateStruct->name );
         self::destroyQueryPaginated( $templateStruct->uid );
 
@@ -354,7 +340,6 @@ class FiltersConfigTemplateDao extends DataAccess_AbstractDao {
         ] );
 
         self::destroyQueryByIdCache( $conn, $templateStruct->id );
-        self::destroyQueryByUidCache( $conn, $templateStruct->uid );
         self::destroyQueryByUidAndNameCache( $conn, $templateStruct->uid, $templateStruct->name );
         self::destroyQueryByIdAndUserCache( $conn, $templateStruct->id, $templateStruct->uid );
         self::destroyQueryPaginated( $templateStruct->uid );

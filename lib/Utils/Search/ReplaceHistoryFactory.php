@@ -9,7 +9,7 @@ class Search_ReplaceHistoryFactory {
      *
      * @return Search_ReplaceHistory
      */
-    public static function create( $id_job, $driver, $ttl ) {
+    public static function create( $id_job, $driver, $ttl ): Search_ReplaceHistory {
         self::_checkDriver( $driver );
 
         if ( $driver === 'redis' ) {

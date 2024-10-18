@@ -85,11 +85,13 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
         $con  = $this->database->getConnection();
         $stmt = $con->prepare( "SELECT * from comments WHERE id_segment = :id_segment and (message_type = :message_type_comment or message_type = :message_type_resolve) order by id asc" );
 
-        return $this->_destroyObjectCache( $stmt, [
-                'id_segment'           => $idSegment,
-                'message_type_comment' => Comments_CommentDao::TYPE_COMMENT,
-                'message_type_resolve' => Comments_CommentDao::TYPE_RESOLVE,
-        ] );
+        return $this->_destroyObjectCache( $stmt,
+                ShapelessConcreteStruct::class,
+                [
+                        'id_segment'           => $idSegment,
+                        'message_type_comment' => Comments_CommentDao::TYPE_COMMENT,
+                        'message_type_resolve' => Comments_CommentDao::TYPE_RESOLVE,
+                ] );
     }
 
     /**

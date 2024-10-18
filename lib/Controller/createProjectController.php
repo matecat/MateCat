@@ -279,7 +279,7 @@ class createProjectController extends ajaxController {
 
         //search in fileNames if there's a zip file. If it's present, get filenames and add the instead of the zip file.
 
-        $uploadDir  = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $_COOKIE[ 'upload_session' ];
+        $uploadDir  = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $_COOKIE[ 'upload_token' ];
         $newArFiles = [];
         $fs         = FilesStorageFactory::create();
 
@@ -324,7 +324,7 @@ class createProjectController extends ajaxController {
 
         $projectStructure[ 'project_name' ]                 = $this->project_name;
         $projectStructure[ 'private_tm_key' ]               = $this->private_tm_key;
-        $projectStructure[ 'uploadToken' ]                  = $_COOKIE[ 'upload_session' ];
+        $projectStructure[ 'uploadToken' ]                  = $_COOKIE[ 'upload_token' ];
         $projectStructure[ 'array_files' ]                  = $arFiles; //list of file name
         $projectStructure[ 'array_files_meta' ]             = $arMeta; //list of file metadata
         $projectStructure[ 'source_language' ]              = $this->source_lang;
@@ -410,7 +410,7 @@ class createProjectController extends ajaxController {
         }
 
         try {
-            $fs::moveFileFromUploadSessionToQueuePath( $_COOKIE[ 'upload_session' ] );
+            $fs::moveFileFromUploadSessionToQueuePath( $_COOKIE[ 'upload_token' ] );
         } catch ( Exception $e ) {
             $this->result[ 'errors' ][] = [
                     "code"    => -235, // Error during moving file from upload session folder to queue path

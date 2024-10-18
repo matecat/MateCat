@@ -406,6 +406,7 @@ const NewProject = () => {
       getPublicMatches,
       qaModelTemplateId,
       payableRateTemplateId,
+      XliffConfigTemplateId,
     } = currentProjectTemplate
 
     // update store recently used target languages
@@ -443,6 +444,7 @@ const NewProject = () => {
       ...(mt?.extra?.deepl_formality && {
         deepl_formality: mt.extra.deepl_formality,
       }),
+      xliff_parameters_template_id: XliffConfigTemplateId,
     })
 
     if (!projectSent) {
@@ -688,6 +690,7 @@ const NewProject = () => {
               w: false,
               isActive: false,
               ...(tmFromTemplate && {...tmFromTemplate, isActive: true}),
+              name: tmItem.name,
             }
           })
         : prevState,
@@ -758,6 +761,7 @@ const NewProject = () => {
         setOpenSettings,
         isImportTMXInProgress,
         setIsImportTMXInProgress,
+        projectTemplates,
         modifyingCurrentTemplate,
         selectedTeam,
         setSelectedTeam,

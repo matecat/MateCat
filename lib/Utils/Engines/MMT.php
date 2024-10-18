@@ -72,7 +72,7 @@ class Engines_MMT extends Engines_AbstractEngine {
         $license     = $extraParams[ 'MMT-License' ];
 
         return Engines\MMT\MMTServiceApi::newInstance()
-                ->setIdentity( "1.1", "MateCat", INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER )
+                ->setIdentity( "Matecat", ltrim( INIT::$BUILD_NUMBER, 'v' ) )
                 ->setLicense( $license );
     }
 
@@ -115,16 +115,25 @@ class Engines_MMT extends Engines_AbstractEngine {
                     $_config[ 'priority' ] ?? null,
                     $_config[ 'session' ] ?? null,
                     $_config[ 'glossaries' ] ?? null,
-                    $_config[ 'ignore_glossary_case' ] ?? null
+                    $_config[ 'ignore_glossary_case' ] ?? null,
+                    $_config[ 'include_score' ] ?? null
             );
 
-            return ( new Engines_Results_MyMemory_Matches(
+            $matchAsArray = ( new Engines_Results_MyMemory_Matches(
                     $_config[ 'segment' ],
                     $translation[ 'translation' ],
                     100 - $this->getPenalty() . "%",
                     "MT-" . $this->getName(),
-                    date( "Y-m-d" )
+                    date( "Y-m-d" ),
+                    $translation[ 'score' ] ?? null
             ) )->getMatches( 1, [], $_config[ 'source' ], $_config[ 'target' ] );
+
+            if ( isset( $translation[ 'score' ] ) ) {
+                $matchAsArray[ 'score' ] = $translation[ 'score' ];
+            }
+
+            return $matchAsArray;
+
         } catch ( Exception $e ) {
             return $this->GoogleTranslateFallback( $_config );
         }

@@ -86,7 +86,7 @@ class OwnerFeatures_OwnerFeatureDao extends DataAccess_AbstractDao {
         $thisDao = new self();
         $stmt    = $thisDao->_getStatementForQuery( self::query_by_user_email );
 
-        return $thisDao->_destroyObjectCache( $stmt, [ 'id_customer' => $id_customer ] );
+        return $thisDao->_destroyObjectCache( $stmt, OwnerFeatures_OwnerFeatureStruct::class, [ 'id_customer' => $id_customer ] );
     }
 
     public static function getById( $id ) {

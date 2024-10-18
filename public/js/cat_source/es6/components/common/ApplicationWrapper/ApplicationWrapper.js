@@ -1,11 +1,20 @@
-import React, {createContext, useCallback, useEffect, useRef} from 'react'
+import React, {
+  createContext,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 import useAuth from '../../../hooks/useAuth'
 import Cookies from 'js-cookie'
 import CatToolActions from '../../../actions/CatToolActions'
 import {onModalWindowMounted} from '../../modals/ModalWindow'
 import CommonUtils from '../../../utils/commonUtils'
-import {UserDisconnectedBox} from './UserDisconnectedBox'
+import {FORCE_ACTIONS, ForcedActionModal} from './ForcedActionModal'
 import ModalsActions from '../../../actions/ModalsActions'
+import UserConstants from '../../../constants/UserConstants'
+import ApplicationStore from '../../../stores/ApplicationStore'
+import UserStore from '../../../stores/UserStore'
 
 // Custom event handler class: allows namespaced events
 class EventHandlerClass {
@@ -38,6 +47,8 @@ export const ApplicationWrapper = ({children}) => {
     forceLogout,
     setUserMetadataKey,
   } = useAuth()
+
+  const [forceReload, setForceReload] = useState(false)
 
   const checkGlobalMassages = useCallback(() => {
     if (config.global_message) {
@@ -110,7 +121,14 @@ export const ApplicationWrapper = ({children}) => {
   }, [isUserLogged, checkGlobalMassages])
 
   useEffect(() => {
+    const forceReloadFn = () => {
+      setForceReload(true)
+    }
     onModalWindowMounted().then(() => checkForPopupToOpen.current())
+    UserStore.addListener(UserConstants.FORCE_RELOAD, forceReloadFn)
+    return () => {
+      UserStore.removeListener(UserConstants.FORCE_RELOAD, forceReloadFn)
+    }
   }, [])
 
   return (
@@ -125,7 +143,12 @@ export const ApplicationWrapper = ({children}) => {
         setUserMetadataKey,
       }}
     >
-      {userDisconnected && <UserDisconnectedBox />}
+      {userDisconnected && (
+        <ForcedActionModal action={FORCE_ACTIONS.DISCONNECT} />
+      )}
+      {forceReload && !userDisconnected && (
+        <ForcedActionModal action={FORCE_ACTIONS.RELOAD} />
+      )}
       {children}
     </ApplicationWrapperContext.Provider>
   )

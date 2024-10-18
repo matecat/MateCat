@@ -224,25 +224,4 @@ interface IFilesStorage {
      */
     public function transferFiles( $source, $destination );
 
-    /**
-     **********************************************************************************************
-     * 7. BLACKLIST FILE
-     **********************************************************************************************
-     */
-
-    /** $filePath/**
-     * @param /** $filePath
-     *
-     * @return mixed
-     */
-    public function deleteBlacklistFile( $filePath );
-
-    /**
-     * @param string              $filePath
-     * @param Chunks_ChunkStruct  $chunkStruct
-     * @param                     $uid
-     *
-     * @return mixed
-     */
-    public function saveBlacklistFile( $filePath, Chunks_ChunkStruct $chunkStruct, $uid );
 }

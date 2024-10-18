@@ -5,7 +5,6 @@ namespace Projects;
 use API\Commons\Exceptions\AuthorizationError;
 use Constants_Teams;
 use Exceptions\ValidationError;
-use Features\QaCheckBlacklist\Utils\BlacklistUtils;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
 use RedisHandler;
@@ -27,10 +26,8 @@ class ProjectModel {
      */
     protected $project_struct;
 
-    protected $blacklist;
-
-    protected $willChange    = [];
-    protected $changedFields = [];
+    protected $willChange = array();
+    protected $changedFields = array();
 
     protected $cacheTeamsToClean = [];
 
@@ -41,35 +38,6 @@ class ProjectModel {
 
     public function __construct( Projects_ProjectStruct $project ) {
         $this->project_struct = $project;
-    }
-
-    /**
-     * @return bool
-     * @throws \Exception
-     */
-    public function hasBlacklist() {
-
-        $blacklistUtils = new BlacklistUtils( ( new RedisHandler() )->getConnection() );
-
-        foreach ( $this->project_struct->getJobs() as $job ) {
-            if ( $blacklistUtils->checkIfExists( $job->id, $job->password ) ) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Caches the information of blacklist file presence to project metadata.
-     * @throws \Exception
-     */
-    public function saveBlacklistPresence() {
-        $this->project_struct->setMetadata( 'has_blacklist', '1' );
-    }
-
-    public function resetUpdateList() {
-        $this->willChange = [];
     }
 
     public function prepareUpdate( $field, $value ) {

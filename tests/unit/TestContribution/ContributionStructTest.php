@@ -149,7 +149,7 @@ class ContributionStructTest extends AbstractTest {
                                         'id_job'   => (string)$this->expected->id, // convert to string for serialization
                                         'password' => $this->expected->password
                                 ]
-                        ) ) )
+                        ) . Jobs_JobStruct::class ) )
         ) );
 
         //fill the cache
@@ -162,7 +162,7 @@ class ContributionStructTest extends AbstractTest {
                                         'id_job'   => (string)$this->expected->id, // convert to string for serialization
                                         'password' => $this->expected->password
                                 ]
-                        ) ) )
+                        ) . Jobs_JobStruct::class ) )
         )[ 0 ];
 
         $this->assertEquals( $JobStruct, $this->contributionStruct->getJobStruct() );

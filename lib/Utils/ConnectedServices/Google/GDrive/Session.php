@@ -201,7 +201,7 @@ class Session {
      * @param string $originalSourceLang
      */
     private function renameTheFileMap( string $newSourceLang, string $originalSourceLang ) {
-        $uploadDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->session[ 'upload_session' ];
+        $uploadDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->session[ 'upload_token' ];
 
         /** @var DirectoryIterator $item */
         foreach (
@@ -444,7 +444,7 @@ class Session {
                 $this->deleteDirectory( $pathCache );
             }
 
-            $tempUploadedFileDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->session[ 'upload_session' ];
+            $tempUploadedFileDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->session[ 'upload_token' ];
 
             /** @var DirectoryIterator $item */
             foreach ( $iterator = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $tempUploadedFileDir, RecursiveDirectoryIterator::SKIP_DOTS ), RecursiveIteratorIterator::SELF_FIRST ) as $item ) {
@@ -499,7 +499,7 @@ class Session {
      * @return string
      */
     private function getUploadDir(): string {
-        return INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . filter_input( INPUT_COOKIE, 'upload_session' );
+        return INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . filter_input( INPUT_COOKIE, 'upload_token' );
     }
 
     /**
