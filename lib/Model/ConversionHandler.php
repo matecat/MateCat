@@ -99,8 +99,13 @@ class ConversionHandler {
             }
         }
 
-        //compute hash to locate the file in the cache, add the segmentation rule
-        $sha1 = sha1_file( $file_path ) . ( isset( $this->segmentation_rule ) ? "_" . $this->segmentation_rule : '' );
+        //compute hash to locate the file in the cache, add the segmentation rule and extraction parameters
+        $extraction_parameters = $this->getRightExtractionParameter( $file_path );
+
+        $sha1 = sha1_file( $file_path
+                . ( $this->segmentation_rule ?? '' )
+                . ( !empty( $extraction_parameters ) ? json_encode( $extraction_parameters ) : '' )
+        );
 
         //initialize path variable
         $cachedXliffPath = false;
@@ -144,8 +149,14 @@ class ConversionHandler {
                 $single_language = $this->target_lang;
             }
 
-            $convertResult = Filters::sourceToXliff( $file_path, $this->source_lang, $single_language, $this->segmentation_rule, $this->filters_extraction_parameters );
-            Filters::logConversionToXliff( $convertResult, $file_path, $this->source_lang, $this->target_lang, $this->segmentation_rule, $this->filters_extraction_parameters );
+            $convertResult = Filters::sourceToXliff(
+                    $file_path,
+                    $this->source_lang,
+                    $single_language,
+                    $this->segmentation_rule,
+                    $extraction_parameters
+            );
+            Filters::logConversionToXliff( $convertResult, $file_path, $this->source_lang, $this->target_lang, $this->segmentation_rule, $extraction_parameters );
 
             if ( $convertResult[ 'successful' ] == 1 ) {
 
@@ -226,6 +237,56 @@ class ConversionHandler {
         }
 
         return 0;
+    }
+
+    private function getRightExtractionParameter( string $filePath ) {
+
+        $extension = AbstractFilesStorage::pathinfo_fix( $filePath, PATHINFO_EXTENSION );
+
+        $params = null;
+
+        if ( $this->filters_extraction_parameters !== null ) {
+
+            // send extraction params based on the file extension
+            switch ( $extension ) {
+                case "json":
+                    if ( isset( $this->filters_extraction_parameters->json ) ) {
+                        $params = $this->filters_extraction_parameters->json;
+                    }
+                    break;
+                case "xml":
+                    if ( isset( $this->filters_extraction_parameters->xml ) ) {
+                        $params = $this->filters_extraction_parameters->xml;
+                    }
+                    break;
+                case "yaml":
+                    if ( isset( $this->filters_extraction_parameters->yaml ) ) {
+                        $params = $this->filters_extraction_parameters->yaml;
+                    }
+                    break;
+                case "doc":
+                case "docx":
+                    if ( isset( $this->filters_extraction_parameters->ms_word ) ) {
+                        $params = $this->filters_extraction_parameters->ms_word;
+                    }
+                    break;
+                case "xls":
+                case "xlsx":
+                    if ( isset( $this->filters_extraction_parameters->ms_excel ) ) {
+                        $params = $this->filters_extraction_parameters->ms_excel;
+                    }
+                    break;
+                case "ppt":
+                case "pptx":
+                    if ( isset( $this->filters_extraction_parameters->ms_powerpoint ) ) {
+                        $params = $this->filters_extraction_parameters->ms_powerpoint;
+                    }
+                    break;
+            }
+        }
+
+        return $params;
+
     }
 
     /**
