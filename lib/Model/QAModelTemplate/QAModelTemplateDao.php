@@ -12,6 +12,7 @@ use INIT;
 use Pagination\Pager;
 use Pagination\PaginationParameters;
 use PDO;
+use Projects\ProjectTemplateDao;
 use ReflectionException;
 use Swaggest\JsonSchema\InvalidValue;
 use Validator\JSONValidator;
@@ -141,12 +142,7 @@ class QAModelTemplateDao extends DataAccess_AbstractDao {
                     'id_template' => $id
             ] );
 
-            $stmt = $conn->prepare( "UPDATE project_templates SET qa_model_template_id = :zero WHERE uid = :uid and qa_model_template_id = :id " );
-            $stmt->execute( [
-                    'zero' => 0,
-                    'id'   => $id,
-                    'uid'  => $uid,
-            ] );
+            ProjectTemplateDao::removeSubTemplateByIdAndUser( $id, $uid, 'qa_model_template_id' );
 
             $conn->commit();
 
