@@ -10,6 +10,8 @@ import {updateXliffSettingsTemplate} from '../../../../../api/updateXliffSetting
 import {deleteXliffSettingsTemplate} from '../../../../../api/deleteXliffSettingsTemplate/deleteXliffSettingsTemplate'
 import {Xliff12} from './Xliff12'
 import {Xliff20} from './Xliff20'
+import {getXliffSettingsTemplates} from '../../../../../api/getXliffSettingsTemplates/getXliffSettingsTemplates'
+import defaultXliffSettings from '../../defaultTemplates/xliffSettings.json'
 
 export const XLIFF_SETTINGS_SCHEMA_KEYS = {
   id: 'id',
@@ -95,6 +97,47 @@ export const XliffSettings = () => {
         'Extraction parameters',
       )
     })
+
+  // retrieve filters params templates
+  useEffect(() => {
+    if (templates.length) return
+
+    let cleanup = false
+
+    if (!config.is_cattool) {
+      getXliffSettingsTemplates().then((templates) => {
+        const items = [defaultXliffSettings, ...templates.items]
+        if (!cleanup) {
+          const selectedTemplateId =
+            items.find(({id}) => id === currentProjectTemplateXliffId)?.id ?? 0
+
+          setTemplates(
+            items.map((template) => ({
+              ...template,
+              isSelected: template.id === selectedTemplateId,
+            })),
+          )
+        }
+      })
+    } else {
+      // not logged in
+    }
+
+    return () => (cleanup = true)
+  }, [setTemplates, templates.length, currentProjectTemplateXliffId])
+
+  // Select xliff settings template when curren project template change
+  useEffect(() => {
+    setTemplates((prevState) => {
+      const selectedTemplateId =
+        prevState.find(({id}) => id === currentProjectTemplateXliffId)?.id ?? 0
+
+      return prevState.map((template) => ({
+        ...template,
+        isSelected: template.id === selectedTemplateId,
+      }))
+    })
+  }, [currentProjectTemplateXliffId, setTemplates])
 
   // Modify current project template xliff settings template id when template id change
   useEffect(() => {

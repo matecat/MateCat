@@ -106,20 +106,20 @@ class GDriveController extends AbstractStatefulKleinController {
 
         // TODO: check why this is necessary here.
         if ( $this->isAsyncReq && $this->gdriveUserSession->hasFiles() ) {
-            $this->guid = $_SESSION[ "upload_session" ];
+            $this->guid = $_SESSION[ "upload_token" ];
         } else {
             $this->guid = Utils::uuid4();
-            CookieManager::setCookie( "upload_session", $this->guid,
+            CookieManager::setCookie( "upload_token", $this->guid,
                 [
                     'expires'  => time() + 86400,
                     'path'     => '/',
                     'domain'   => INIT::$COOKIE_DOMAIN,
                     'secure'   => true,
-                    'httponly' => false,
-                    'samesite' => 'None',
+                    'httponly' => true,
+                    'samesite' => 'Strict',
                 ]
             );
-            $_SESSION[ "upload_session" ] = $this->guid;
+            $_SESSION[ "upload_token" ] = $this->guid;
 
             $this->gdriveUserSession->clearFileListFromSession();
         }
@@ -212,14 +212,14 @@ class GDriveController extends AbstractStatefulKleinController {
         );
 
         // set a cookie to allow the frontend to call list endpoint
-        CookieManager::setCookie( self::GDRIVE_LIST_COOKIE_NAME, $_SESSION[ "upload_session" ],
+        CookieManager::setCookie( self::GDRIVE_LIST_COOKIE_NAME, $_SESSION[ "upload_token" ],
             [
                 'expires'  => time() + 86400,
                 'path'     => '/',
                 'domain'   => INIT::$COOKIE_DOMAIN,
                 'secure'   => true,
-                'httponly' => false,
-                'samesite' => 'None',
+                'httponly' => true,
+                'samesite' => 'Strict',
             ]
         );
 

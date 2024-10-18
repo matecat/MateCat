@@ -72,7 +72,7 @@ class convertFileController extends ajaxController {
         $this->segmentation_rule             = $postInput[ "segmentation_rule" ];
         $this->filters_extraction_parameters = $postInput[ "filters_extraction_parameters" ];
 
-        $this->cookieDir = $_COOKIE[ 'upload_session' ];
+        $this->cookieDir = $_COOKIE[ 'upload_token' ];
         $this->intDir    = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->cookieDir;
         $this->errDir    = INIT::$STORAGE_DIR . DIRECTORY_SEPARATOR . 'conversion_errors' . DIRECTORY_SEPARATOR . $this->cookieDir;
 

@@ -24,9 +24,7 @@ import {EditorSettingsTab} from './Contents/EditorSettingsTab'
 import ModalsActions from '../../actions/ModalsActions'
 import {getFiltersParamsTemplates} from '../../api/getFiltersParamsTemplates'
 import defaultFiltersParams from './Contents/defaultTemplates/filterParams.json'
-import defaultXliffSettings from './Contents/defaultTemplates/xliffSettings.json'
 import {debounce, isEqual} from 'lodash'
-import {getXliffSettingsTemplates} from '../../api/getXliffSettingsTemplates/getXliffSettingsTemplates'
 import useSyncTemplateWithConvertFile from './useSyncTemplateWithConvertFile'
 import {restartConversions} from '../../utils/newProjectUtils'
 
@@ -198,26 +196,9 @@ export const SettingsPanel = ({
     getTemplates: getFiltersParamsTemplates,
     checkIfUpdate: (filtersTemplate) => {
       if (!isEqual(filtersTemplate, CreateProjectStore.getFiltersTemplate())) {
-        CreateProjectStore.updateProject({filtersTemplate})
-        if (debounceRestartConversions) debounceRestartConversions()
-      }
-    },
-  })
-
-  // Sync xliff template with conversion file
-  useSyncTemplateWithConvertFile({
-    ...fileImportXliffSettingsTemplates,
-    defaultTemplate: defaultXliffSettings,
-    idTemplate: currentProjectTemplate?.XliffConfigTemplateId,
-    getTemplates: getXliffSettingsTemplates,
-    checkIfUpdate: (xliffConfigTemplate) => {
-      if (
-        !isEqual(
-          xliffConfigTemplate,
-          CreateProjectStore.getXliffConfigTemplate(),
-        )
-      ) {
-        CreateProjectStore.updateProject({xliffConfigTemplate})
+        CreateProjectStore.updateProject({
+          filtersTemplate,
+        })
         if (debounceRestartConversions) debounceRestartConversions()
       }
     },

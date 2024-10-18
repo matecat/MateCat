@@ -151,16 +151,16 @@ class TeamModel {
         return $this->struct;
     }
 
-    public function _sendEmailsToInvited() {
-        foreach ( $this->getInvitedEmails() as $email ) {
+    protected function _sendEmailsToInvited() {
+        foreach ( $this->_getInvitedEmails() as $email ) {
             $email = new InvitedToTeamEmail( $this->user, $email, $this->struct );
             $email->send();
         }
     }
 
-    public function _setPendingStatuses() {
+    protected function _setPendingStatuses() {
         $redis = ( new \RedisHandler() )->getConnection();
-        foreach ( $this->getInvitedEmails() as $email ) {
+        foreach ( $this->_getInvitedEmails() as $email ) {
             $pendingInvitation = new PendingInvitations( $redis, [
                     'team_id' => $this->struct->id,
                     'email'   => $email
@@ -169,7 +169,7 @@ class TeamModel {
         }
     }
 
-    public function getInvitedEmails() {
+    protected function _getInvitedEmails() {
 
         $emails_of_existing_members = array_map( function ( MembershipStruct $membership ) {
             return $membership->getUser()->email;
@@ -182,7 +182,7 @@ class TeamModel {
     /**
      * @return \Teams\MembershipStruct[]
      */
-    public function getNewMembershipEmailList() {
+    protected function _getNewMembershipEmailList() {
         $notify_list = [];
         foreach ( $this->new_memberships as $membership ) {
             if ( $membership->getUser()->uid != $this->user->uid ) {
@@ -193,7 +193,7 @@ class TeamModel {
         return $notify_list;
     }
 
-    public function getRemovedMembersEmailList() {
+    protected function _getRemovedMembersEmailList() {
         $notify_list = [];
 
         foreach ( $this->removed_users as $user ) {
@@ -246,14 +246,14 @@ class TeamModel {
     }
 
     protected function _sendEmailsToNewMemberships() {
-        foreach ( $this->getNewMembershipEmailList() as $membership ) {
+        foreach ( $this->_getNewMembershipEmailList() as $membership ) {
             $email = new MembershipCreatedEmail( $this->user, $membership );
             $email->send();
         }
     }
 
     protected function _sendEmailsForRemovedMemberships() {
-        foreach ( $this->getRemovedMembersEmailList() as $user ) {
+        foreach ( $this->_getRemovedMembersEmailList() as $user ) {
             $email = new MembershipDeletedEmail( $this->user, $user, $this->struct );
             $email->send();
         }

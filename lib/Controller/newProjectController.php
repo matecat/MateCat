@@ -172,19 +172,19 @@ class newProjectController extends viewController {
         if ( !isset( $_COOKIE[ GDriveController::GDRIVE_LIST_COOKIE_NAME ] ) ) {
 
             // Get the guid from the guid if it exists, otherwise set the guid into the cookie
-            if ( !empty( $_COOKIE[ 'upload_session' ] ) && Utils::isTokenValid( $_COOKIE[ 'upload_session' ] ) ) {
-                Utils::deleteDir( INIT::$UPLOAD_REPOSITORY . '/' . $_COOKIE[ 'upload_session' ] . '/' );
+            if ( !empty( $_COOKIE[ 'upload_token' ] ) && Utils::isTokenValid( $_COOKIE[ 'upload_token' ] ) ) {
+                Utils::deleteDir( INIT::$UPLOAD_REPOSITORY . '/' . $_COOKIE[ 'upload_token' ] . '/' );
             }
 
             $this->guid = Utils::uuid4();
-            CookieManager::setCookie( "upload_session", $this->guid,
+            CookieManager::setCookie( "upload_token", $this->guid,
                     [
                             'expires'  => time() + 86400,
                             'path'     => '/',
                             'domain'   => INIT::$COOKIE_DOMAIN,
                             'secure'   => true,
-                            'httponly' => false,
-                            'samesite' => 'None',
+                            'httponly' => true,
+                            'samesite' => 'Strict',
                     ]
             );
         }

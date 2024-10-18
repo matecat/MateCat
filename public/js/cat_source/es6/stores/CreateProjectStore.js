@@ -15,7 +15,6 @@ const CreateProjectStore = assign({}, EventEmitter.prototype, {
     targetLang: undefined,
     selectedTeam: undefined,
     filtersTemplate: undefined,
-    xliffConfigTemplate: undefined,
   },
   updateProject: function (data) {
     this.projectData = {
@@ -48,9 +47,6 @@ const CreateProjectStore = assign({}, EventEmitter.prototype, {
   },
   getFiltersTemplate: function () {
     return this.projectData.filtersTemplate
-  },
-  getXliffConfigTemplate: function () {
-    return this.projectData.xliffConfigTemplate
   },
 })
 

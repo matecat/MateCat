@@ -15,6 +15,7 @@ export const convertFileRequest = async ({
   source_lang,
   target_lang,
   segmentation_rule,
+  filters_extraction_parameters_template_id,
   signal,
 }) => {
   const dataParams = {
@@ -23,6 +24,7 @@ export const convertFileRequest = async ({
     source_lang,
     target_lang,
     segmentation_rule,
+    filters_extraction_parameters_template_id,
   }
   const formData = new FormData()
 
