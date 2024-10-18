@@ -3,8 +3,6 @@
 use Features\BaseFeature;
 use Features\Mmt;
 use Features\ProjectCompletion;
-use Features\QaCheckBlacklist;
-use Features\QaCheckGlossary;
 use Features\ReviewExtended;
 use Features\SecondPassReview;
 use Features\TranslationVersions;
@@ -33,8 +31,6 @@ class Features {
 
     const PROJECT_COMPLETION   = ProjectCompletion::FEATURE_CODE;
     const TRANSLATION_VERSIONS = TranslationVersions::FEATURE_CODE;
-    const QACHECK_GLOSSARY     = QaCheckGlossary::FEATURE_CODE;
-    const QACHECK_BLACKLIST    = QaCheckBlacklist::FEATURE_CODE;
     const REVIEW_EXTENDED      = ReviewExtended::FEATURE_CODE;
     const MMT                  = Mmt::FEATURE_CODE;
     const SECOND_PASS_REVIEW   = SecondPassReview::FEATURE_CODE;
@@ -42,8 +38,6 @@ class Features {
     protected $VALID_CODES = [
             Features::PROJECT_COMPLETION,
             Features::TRANSLATION_VERSIONS,
-            Features::QACHECK_GLOSSARY,
-            Features::QACHECK_BLACKLIST,
             Features::REVIEW_EXTENDED,
             Features::MMT,
             Features::SECOND_PASS_REVIEW
@@ -77,8 +71,8 @@ class Features {
                         if ( array_key_exists( 'FEATURE_CODE', $manifest ) ) {
                             static::populateVars( $manifest, $fileInfo->getPathname() );
                         } else {
-                            foreach ( $manifest as $key => $manifest ) {
-                                static::populateVars( $manifest, $fileInfo->getPathname() );
+                            foreach ( $manifest as $key => $_manifest ) {
+                                static::populateVars( $_manifest, $fileInfo->getPathname() );
                             }
                         }
                     }

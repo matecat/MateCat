@@ -31,7 +31,7 @@ class MetadataDao extends \DataAccess_AbstractDao {
     public function destroyCacheByJobId( $id_job, $key ) {
         $stmt = $this->_getStatementForQuery( self::_query_metadata_by_job_id_key );
 
-        return $this->_destroyObjectCache( $stmt, [ 'id_job' => $id_job, 'key' => $key ] );
+        return $this->_destroyObjectCache( $stmt, MetadataStruct::class, [ 'id_job' => $id_job, 'key' => $key ] );
     }
 
     /**

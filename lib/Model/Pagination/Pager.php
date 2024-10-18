@@ -51,7 +51,7 @@ class Pager {
 
             $_cacheResult = $this->_getFromCacheMap(
                     $paginationParameters->getCacheKeyMap(),
-                    $paginationStatement->queryString . $this->_serializeForCacheKey( $paginationParameters->getBindParams() )
+                    $paginationStatement->queryString . $this->_serializeForCacheKey( $paginationParameters->getBindParams() ) . $paginationParameters->getFetchClass()
             );
 
             if ( !empty( $_cacheResult ) ) {
@@ -76,7 +76,7 @@ class Pager {
 
             $this->_setInCacheMap(
                     $paginationParameters->getCacheKeyMap(),
-                    $paginationStatement->queryString . $this->_serializeForCacheKey( $paginationParameters->getBindParams() ),
+                    $paginationStatement->queryString . $this->_serializeForCacheKey( $paginationParameters->getBindParams() ). $paginationParameters->getFetchClass(),
                     $result
             );
 

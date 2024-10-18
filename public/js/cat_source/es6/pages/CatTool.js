@@ -191,7 +191,7 @@ function CatTool() {
     const checkAnalysisState = ({analysis_complete}) => {
       setIsAnalysisCompleted(analysis_complete)
 
-      if (!analysis_complete)
+      /*if (!analysis_complete)
         ModalsActions.showModalComponent(
           FatalErrorModal,
           {
@@ -216,7 +216,7 @@ function CatTool() {
           undefined,
           undefined,
           true,
-        )
+        )*/
     }
     window.onbeforeunload = function (e) {
       return CommonUtils.goodbye(e)
@@ -392,7 +392,9 @@ function CatTool() {
   const isFakeCurrentTemplateReady =
     projectTemplates.length &&
     typeof projectTemplates[1] !== 'undefined' &&
-    typeof projectTemplates[1].mt !== 'undefined' &&
+    (!config.active_engine?.id ||
+      (config.active_engine?.id &&
+        typeof projectTemplates[1].mt !== 'undefined')) &&
     Array.isArray(projectTemplates[1].tm)
 
   return (

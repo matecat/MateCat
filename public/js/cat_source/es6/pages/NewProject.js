@@ -690,6 +690,7 @@ const NewProject = () => {
               w: false,
               isActive: false,
               ...(tmFromTemplate && {...tmFromTemplate, isActive: true}),
+              name: tmItem.name,
             }
           })
         : prevState,
@@ -760,6 +761,7 @@ const NewProject = () => {
         setOpenSettings,
         isImportTMXInProgress,
         setIsImportTMXInProgress,
+        projectTemplates,
         modifyingCurrentTemplate,
         selectedTeam,
         setSelectedTeam,

@@ -1,5 +1,7 @@
 <?php
 
+use TmKeyManagement\UserKeysModel;
+
 /**
  * Created by PhpStorm.
  * User: roberto
@@ -99,10 +101,10 @@ class updateJobKeysController extends ajaxController {
 
         // moved here because self::isRevision() in constructor
         // generates an infinite loop
-        if ( self::isRevision() ) {
-            $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
-        } elseif ( $this->user->email == $this->jobData[ 'owner' ] ) {
+        if ( $this->user->email == $this->jobData[ 'owner' ] ) {
             $this->userRole = TmKeyManagement_Filter::OWNER;
+        } elseif ( self::isRevision() ) {
+            $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
         }
 
         //if some error occured, stop execution.
@@ -165,11 +167,23 @@ class updateJobKeysController extends ajaxController {
          */
         $tm_keys = json_decode( $this->tm_keys, true );
 
+        $clientKeys =  $this->jobData->getClientKeys($this->user, $this->userRole);
+
         /*
          * sanitize owner role key type
          */
         foreach ( $tm_keys[ 'mine' ] as $k => $val ) {
-            $tm_keys[ 'mine' ][ $k ][ 'owner' ] = ( $this->userRole == TmKeyManagement_Filter::OWNER );
+
+            // check if logged user is owner of $val['key']
+            $check = array_filter($clientKeys['job_keys'], function (TmKeyManagement_ClientTmKeyStruct $element) use ($val){
+                if($element->isEncryptedKey()){
+                    return false;
+                }
+
+                return $val['key'] === $element->key;
+            });
+
+            $tm_keys[ 'mine' ][ $k ][ 'owner' ] = !empty($check);
         }
 
         $tm_keys       = array_merge( $tm_keys[ 'ownergroup' ], $tm_keys[ 'mine' ], $tm_keys[ 'anonymous' ] );

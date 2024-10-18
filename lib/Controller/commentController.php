@@ -517,7 +517,6 @@ class commentController extends ajaxController {
                 'id'             => $this->new_record->id,
                 'id_segment'     => $this->new_record->id_segment,
                 'full_name'      => $this->new_record->full_name,
-                'email'          => $this->new_record->email,
                 'source_page'    => $this->new_record->source_page,
                 'formatted_date' => $this->new_record->getFormattedDate(),
                 'thread_id'      => $this->new_record->thread_id,
