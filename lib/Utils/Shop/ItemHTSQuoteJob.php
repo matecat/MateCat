@@ -22,45 +22,45 @@ class Shop_ItemHTSQuoteJob extends Shop_AbstractItem {
      *
      * @var array
      */
-    protected $__storage = array(
-            'id'                  => null,
-            'quantity'            => 1,
-            'project_name'        => null,
-            'name'                => null,
-            'source'              => null,
-            'target'              => null,
-            'words'               => 0,
-            'subject'             => 'general',
-            'subject_printable'   => null,
-            'currency'            => 'EUR',
-            'timezone'            => '0',
-            'quote_result'        => null,
-            'outsourced'          => null,
-            'quote_available'     => null,
-            'typeOfService'       => "",
-            'price'               => 0,
-            'delivery'            => null,
-            'r_price'             => 0,
-            'r_delivery'          => null,
-            'quote_pid'           => null,
-            'show_info'           => null,
-            'show_translator_data'=> null,
-            'price_currency'      => 0,
-            't_name'              => null,
-            't_native_lang'       => null,
-            't_words_specific'    => null,
-            't_words_total'       => null,
-            't_vote'              => null,
-            't_positive_feedbacks'=> null,
-            't_total_feedbacks'   => null,
-            't_experience_years'  => null,
-            't_education'         => null,
-            't_chosen_subject'    => null,
-            't_subjects'          => null,
-            'show_revisor_data'   => null,
-            'r_vote'              => null,
-            'link_to_status'      => null
-    );
+    protected $__storage = [
+            'id'                   => null,
+            'quantity'             => 1,
+            'project_name'         => null,
+            'name'                 => null,
+            'source'               => null,
+            'target'               => null,
+            'words'                => 0,
+            'subject'              => 'general',
+            'subject_printable'    => null,
+            'currency'             => 'EUR',
+            'timezone'             => '0',
+            'quote_result'         => null,
+            'outsourced'           => null,
+            'quote_available'      => null,
+            'typeOfService'        => "",
+            'price'                => 0,
+            'delivery'             => null,
+            'r_price'              => 0,
+            'r_delivery'           => null,
+            'quote_pid'            => null,
+            'show_info'            => null,
+            'show_translator_data' => null,
+            'price_currency'       => 0,
+            't_name'               => null,
+            't_native_lang'        => null,
+            't_words_specific'     => null,
+            't_words_total'        => null,
+            't_vote'               => null,
+            't_positive_feedbacks' => null,
+            't_total_feedbacks'    => null,
+            't_experience_years'   => null,
+            't_education'          => null,
+            't_chosen_subject'     => null,
+            't_subjects'           => null,
+            'show_revisor_data'    => null,
+            'r_vote'               => null,
+            'link_to_status'       => null
+    ];
 
     /**
      *
@@ -77,11 +77,12 @@ class Shop_ItemHTSQuoteJob extends Shop_AbstractItem {
      *
      * @throws LogicException/DomainException
      */
-    public static function getInflate( $storage ){
+    public static function getInflate( $storage ) {
         $obj = new self();
-        foreach( $storage as $key => $value ){
+        foreach ( $storage as $key => $value ) {
             $obj->offsetSet( $key, $value );
         }
+
         return $obj;
     }
 

@@ -21,18 +21,18 @@
  */
 trait TransactionalTrait {
 
-    private static bool $__transactionStarted = false ;
+    private static bool $__transactionStarted = false;
 
     protected function openTransaction() {
-        if ( ! Database::obtain()->getConnection()->inTransaction() ) {
+        if ( !Database::obtain()->getConnection()->inTransaction() ) {
             Database::obtain()->begin();
-            static::$__transactionStarted = true ;
+            static::$__transactionStarted = true;
         }
     }
 
     protected function commitTransaction() {
         if ( static::$__transactionStarted ) {
-            Database::obtain()->commit() ;
+            Database::obtain()->commit();
             static::$__transactionStarted = false;
         }
     }

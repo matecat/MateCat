@@ -210,9 +210,6 @@ class SegmentPlaceholderLite extends React.Component {
               </a>
             </div>
           </div>
-          <div className="timetoedit" data-raw-time-to-edit="0">
-            {' '}
-          </div>
           <div className="edit-distance">Edit Distance:</div>
         </div>
         <div className="segment-side-buttons">

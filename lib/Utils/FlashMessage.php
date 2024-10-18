@@ -9,7 +9,11 @@ class FlashMessage {
     const INFO    = 'info';
     const SERVICE = 'service';
 
+    /**
+     * @throws Exception
+     */
     public static function set( $key, $value, $type = self::WARNING ) {
+
         Bootstrap::sessionStart();
 
         if ( !isset( $_SESSION[ self::KEY ] ) ) {

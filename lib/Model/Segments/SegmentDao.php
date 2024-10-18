@@ -95,9 +95,9 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param $id_job
-     * @param $password
-     * @param $id_segment
+     * @param     $id_job
+     * @param     $password
+     * @param     $id_segment
      * @param int $ttl (default 86400 = 24 hours)
      *
      * @return Segments_SegmentStruct|null

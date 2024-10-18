@@ -103,6 +103,7 @@ class XliffConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruct imple
      */
     public function hydrateRulesFromJson( string $jsonRules ): XliffConfigTemplateStruct {
         $rules = json_decode( $jsonRules, true );
+
         return $this->hydrateRulesFromDataArray( $rules );
     }
 
@@ -113,12 +114,12 @@ class XliffConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruct imple
     public function jsonSerialize(): array {
 
         return [
-                'id'         => $this->id,
-                'uid'        => $this->uid,
-                'name'       => $this->name,
-                'rules'      => $this->rules ?? new stdClass(),
-                'createdAt'  => DateTimeUtil::formatIsoDate( $this->created_at ),
-                'modifiedAt' => DateTimeUtil::formatIsoDate( $this->modified_at )
+                'id'          => $this->id,
+                'uid'         => $this->uid,
+                'name'        => $this->name,
+                'rules'       => $this->rules ?? new stdClass(),
+                'created_at'  => DateTimeUtil::formatIsoDate( $this->created_at ),
+                'modified_at' => DateTimeUtil::formatIsoDate( $this->modified_at )
         ];
     }
 }

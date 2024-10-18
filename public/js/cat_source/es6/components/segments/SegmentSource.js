@@ -552,7 +552,8 @@ class SegmentSource extends React.Component {
     if (this.delayAiAssistant) clearTimeout(this.delayAiAssistant)
 
     const isOpenAiEnabled =
-      Boolean(config.isOpenAiEnabled) && SegmentUtils.isAiAssistantAuto()
+      Boolean(config.isOpenAiEnabled) &&
+      this.context.userInfo.metadata.ai_assistant === 1
 
     if (isOpenAiEnabled) {
       this.delayAiAssistant = setTimeout(() => {
@@ -632,7 +633,7 @@ class SegmentSource extends React.Component {
     const optionsToolbar = this.state.isShowingOptionsToolbar && (
       <ul className="optionsToolbar">
         {Boolean(config.isOpenAiEnabled) &&
-          !SegmentUtils.isAiAssistantAuto() && (
+          !this.context.userInfo.metadata.ai_assistant === 1 && (
             <li
               title={
                 isEnabledAiAssistantButton

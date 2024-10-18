@@ -15,7 +15,7 @@ class Constants_Engines {
     const MY_MEMORY        = 'MyMemory';
     const MICROSOFT_HUB    = 'MicrosoftHub';
     const APERTIUM         = 'Apertium';
-    const ALTLANG	       = 'Altlang';
+    const ALTLANG          = 'Altlang';
     const SMART_MATE       = 'SmartMATE';
     const YANDEX_TRANSLATE = 'YandexTranslate';
     const MMT              = 'MMT';
@@ -39,12 +39,12 @@ class Constants_Engines {
     /**
      * @return array
      */
-    public static function getAvailableEnginesList(){
+    public static function getAvailableEnginesList() {
         return self::$ENGINES_LIST;
     }
 
-    public static function setInEnginesList( $engine ){
-        if( defined( 'self::' . $engine ) ){
+    public static function setInEnginesList( $engine ) {
+        if ( defined( 'self::' . $engine ) ) {
             self::$ENGINES_LIST[ $engine ] = $engine;
         }
     }

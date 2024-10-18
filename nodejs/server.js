@@ -1,7 +1,6 @@
 const SseChannel = require( 'sse-channel' );
 const http = require( 'http' );
 const stompit = require( 'stompit' );
-const url = require( 'url' );
 const qs = require( 'querystring' );
 const _ = require( 'lodash' );
 const winston = require( 'winston' );
@@ -10,8 +9,10 @@ const ini = require( 'node-ini' );
 const uuid = require( 'uuid' );
 
 const config = ini.parseSync( path.resolve( __dirname, 'config.ini' ) );
+const SERVER_VERSION = config.server.version.replace( /['"]+/g, '' );
 
 const AI_ASSISTANT_EXPLAIN_MEANING = 'ai_assistant_explain_meaning';
+const LOGOUT_TYPE = 'logout';
 const COMMENTS_TYPE = 'comment';
 const GLOSSARY_TYPE_G = 'glossary_get';
 const GLOSSARY_TYPE_S = 'glossary_set';
@@ -25,6 +26,8 @@ const CONTRIBUTIONS_TYPE = 'contribution';
 const CONCORDANCE_TYPE = 'concordance';
 const CROSS_LANG_CONTRIBUTIONS = 'cross_language_matches';
 const BULK_STATUS_CHANGE_TYPE = 'bulk_segment_status_change';
+const DISCONNECT_UPGRADE = 'upgrade';
+const RELOAD = 'force_reload';
 
 // Init logger
 const logger = winston.createLogger( {
@@ -95,10 +98,11 @@ browserChannel.on( 'connect', ( context, req, res ) => {
     browserChannel.send( {
         data: {
             _type: 'ack',
-            clientId: res._clientId
+            clientId: res._clientId,
+            serverVersion: SERVER_VERSION
         }
     }, [res] );
-    logger.debug( ['New client connection ' + res._clientId ] );
+    logger.debug( ['New client connection ' + res._clientId] );
 
 } );
 
@@ -107,42 +111,77 @@ browserChannel.on( 'connect', ( context, req, res ) => {
  * and add new clients to the browserChannel
  */
 http.createServer( ( req, res ) => {
-
     // find job id from requested path
-    const parsedUrl = url.parse( req.url );
-    const path = parsedUrl.path;
+    const parsedUrl = new URL( req.url, `https://${req.headers.host}/` )
 
     if ( corsAllow( req, res ) ) {
-
-        if ( path.indexOf( config.server.path ) === 0 ) {
-
-            const query = qs.parse( parsedUrl.query );
-
-            res._clientId = uuid.v4();
-            res._matecatJobId = query.jid;
-            res._matecatPw = query.pw;
-
-            browserChannel.addClient( req, res );
-
+        if ( parsedUrl.pathname.indexOf( config.server.path ) === 0 ) {
+            const params = parsedUrl.searchParams
+            res._clientId = uuid.v4()
+            res._matecatJobId = params.get( 'jid' )
+            res._matecatPw = params.get( 'pw' )
+            res._userId = params.get( 'uid' )
+            browserChannel.addClient( req, res )
         } else {
-            res.writeHead( 404 );
-            res.end();
+            res.writeHead( 404 )
+            res.end()
         }
-
     } else {
-        res.writeHead( 401 );
-        res.end();
+        res.writeHead( 401 )
+        res.end()
     }
 
 } ).listen( config.server.port, config.server.address, () => {
-    logger.info( 'Listening on http://' + config.server.address + ':' + config.server.port + '/' );
+    logger.info( 'Server version ' + SERVER_VERSION )
+    logger.info( 'Listening on //' + config.server.address + ':' + config.server.port + '/' )
 } );
+
+['SIGINT', 'SIGTERM'].forEach(
+    signal => process.on( signal, ( sig ) => {
+        logger.debug( sig + ' received...' );
+        notifyUpgrade();
+    } )
+);
+
+const notifyUpgrade = ( isReboot = true ) => {
+
+    new Promise( ( resolve, reject ) => {
+        if ( browserChannel.connections.length !== 0 ) {
+
+            logger.debug( 'Disconnecting clients...' );
+
+            const disconnectMessage = {
+                payload: {
+                    _type: isReboot ? DISCONNECT_UPGRADE : RELOAD
+                }
+            };
+
+            browserChannel.send( {
+                data: disconnectMessage.payload
+            } );
+
+        }
+
+        resolve( isReboot );
+
+    } ).then( ( isReboot ) => {
+        if ( isReboot ) {
+            logger.debug( 'Exit...' );
+            browserChannel.close();
+            process.exit( 0 );
+        }
+    } );
+
+}
 
 const checkCandidate = ( type, response, message ) => {
     let candidate;
     switch ( type ) {
         case AI_ASSISTANT_EXPLAIN_MEANING:
             candidate = response._clientId === message.data.id_client;
+            break;
+        case LOGOUT_TYPE:
+            candidate = response._userId === message.data.uid;
             break;
         case COMMENTS_TYPE:
             candidate = response._matecatJobId === message.data.id_job &&
@@ -199,7 +238,12 @@ const stompMessageReceived = ( body ) => {
     }
 
     let dest = null;
-    if ( browserChannel.connections.length !== 0 ) {
+
+    if ( message._type === RELOAD ) {
+        logger.debug( 'RELOAD: ' + RELOAD + ' message received...' );
+        notifyUpgrade( false );
+        return;
+    } else if ( browserChannel.connections.length !== 0 ) {
         dest = _.filter( browserChannel.connections, ( serverResponse ) => {
             if ( typeof serverResponse._clientId === 'undefined' ) {
                 logger.error( ["No valid clientId found in message", message] );
