@@ -66,13 +66,6 @@ class downloadTMXController extends ajaxController {
      */
     protected $tmxHandler;
 
-    /**
-     * User
-     *
-     * @var Users_UserStruct
-     */
-    protected $user;
-
     public function __construct() {
 
         parent::__construct();
@@ -80,7 +73,7 @@ class downloadTMXController extends ajaxController {
         /**
          * Retrieve user information
          */
-        $this->readLoginInfo();
+        $this->identifyUser();
 
         $filterArgs = array(
                 'id_job'        => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),

@@ -21,7 +21,6 @@ const formatDate = (context, fn) => {
 }
 $.format.date = formatDate($.format, $.format.date)
 
-require('../../../../common')
 window.config = {enable_outsource: 1}
 
 const fakeProjectsData = {

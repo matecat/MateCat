@@ -15,8 +15,8 @@ class QAWarning {
     protected $structure;
 
     const GLOSSARY_CATEGORY = "GLOSSARY";
-    const TAGS_CATEGORY = "TAGS";
-    const SIZE_CATEGORY = "SIZE";
+    const TAGS_CATEGORY     = "TAGS";
+    const SIZE_CATEGORY     = "SIZE";
     const MISMATCH_CATEGORY = "MISMATCH";
 
     protected function pushErrorSegment( $error_type, $error_category, $content ) {

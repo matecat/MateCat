@@ -11,24 +11,23 @@ namespace API\V2\Json;
 
 use Users_UserStruct;
 
-class User
-{
+class User {
     public static function renderItem( Users_UserStruct $user ) {
-        return array(
-            'uid'           => (int) $user->uid,
-            'first_name'    => $user->first_name,
-            'last_name'     => $user->last_name,
-            'email'         => $user->email,
-            'has_password'  => !is_null($user->pass)
-        );
+        return [
+                'uid'          => (int)$user->uid,
+                'first_name'   => $user->first_name,
+                'last_name'    => $user->last_name,
+                'email'        => $user->email,
+                'has_password' => !is_null( $user->pass )
+        ];
     }
 
-    public static function renderItemPublic( Users_UserStruct $user ){
-        return array(
-                'uid'           => (int) $user->uid,
-                'first_name'    => $user->first_name,
-                'last_name'     => $user->last_name,
-        );
+    public static function renderItemPublic( Users_UserStruct $user ) {
+        return [
+                'uid'        => (int)$user->uid,
+                'first_name' => $user->first_name,
+                'last_name'  => $user->last_name,
+        ];
     }
 
 }

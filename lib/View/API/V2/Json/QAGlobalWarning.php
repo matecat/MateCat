@@ -10,7 +10,6 @@
 namespace API\V2\Json;
 
 
-
 use LQA\QA;
 
 class QAGlobalWarning extends QAWarning {
@@ -25,11 +24,11 @@ class QAGlobalWarning extends QAWarning {
      *
      * from query: getWarning( id_job, password )
      *
-     * @param array $tagIssues [ [ total_sources, translations_available, first_of_my_job ] ]
+     * @param array $tagIssues             [ [ total_sources, translations_available, first_of_my_job ] ]
      * @param array $translationMismatches [ [ total_sources, translations_available, first_of_my_job ] ]
      */
     public function __construct( $tagIssues, $translationMismatches ) {
-        $this->tagIssues = $tagIssues;
+        $this->tagIssues             = $tagIssues;
         $this->translationMismatches = $translationMismatches;
     }
 
@@ -45,7 +44,7 @@ class QAGlobalWarning extends QAWarning {
                 'WARNING' => [
                         'Categories' => new \ArrayObject()
                 ],
-                'INFO'     => [
+                'INFO'    => [
                         'Categories' => new \ArrayObject()
                 ]
         ];
@@ -83,7 +82,7 @@ class QAGlobalWarning extends QAWarning {
 
         }
 
-        $out['details'] = $this->structure;
+        $out[ 'details' ] = $this->structure;
 
         return $out;
 

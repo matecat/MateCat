@@ -17,6 +17,7 @@ class JobAnonymous extends Job {
 
     /**
      * @param Users_UserStruct|null $user
+     *
      * @return $this|Job
      */
     public function setUser( Users_UserStruct $user = null ) {

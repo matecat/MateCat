@@ -8,7 +8,7 @@
  */
 
 
-class Engines_NONE  extends Engines_AbstractEngine {
+class Engines_NONE extends Engines_AbstractEngine {
 
     public function get( $_config ) {
         return new Engines_Results_MyMemory_TMS( [ 'responseStatus' => 200, 'responseData' => [] ] );
@@ -26,6 +26,7 @@ class Engines_NONE  extends Engines_AbstractEngine {
         return new Engines_Results_MyMemory_TMS( [ 'responseStatus' => 200, 'responseData' => [] ] );
     }
 
-    protected function _decode( $rawValue, array $parameters = [], $function = null ) {}
+    protected function _decode( $rawValue, array $parameters = [], $function = null ) {
+    }
 
 }

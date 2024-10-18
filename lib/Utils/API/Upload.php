@@ -118,7 +118,7 @@ class Upload {
 
         $fileName    = $fileUp[ 'name' ];
         $fileTmpName = $fileUp[ 'tmp_name' ];
-        $fileType    = $fileUp[ 'type' ] = (new MimeTypes())->guessMimeType( $fileUp[ 'tmp_name' ] );
+        $fileType    = $fileUp[ 'type' ] = ( new MimeTypes() )->guessMimeType( $fileUp[ 'tmp_name' ] );
         $fileError   = $fileUp[ 'error' ];
         $fileSize    = $fileUp[ 'size' ];
 

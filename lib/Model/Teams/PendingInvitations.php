@@ -28,20 +28,20 @@ class PendingInvitations {
         $this->payload     = $payload;
     }
 
-    public function set(){
+    public function set() {
 
         $this->redisClient->sadd( sprintf( self::REDIS_INVITATIONS_SET, $this->payload[ 'team_id' ] ), $this->payload[ 'email' ] );
         $this->redisClient->expire( sprintf( self::REDIS_INVITATIONS_SET, $this->payload[ 'team_id' ] ), 60 * 60 * 24 * 3 ); //3 days renew
 
     }
 
-    public function remove(){
+    public function remove() {
 
         return $this->redisClient->srem( sprintf( self::REDIS_INVITATIONS_SET, $this->payload[ 'team_id' ] ), $this->payload[ 'email' ] );
 
     }
 
-    public function hasPengingInvitation( $id_team ){
+    public function hasPengingInvitation( $id_team ) {
 
         return $this->redisClient->smembers( sprintf( self::REDIS_INVITATIONS_SET, $id_team ) );
 

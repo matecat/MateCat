@@ -16,8 +16,8 @@ class UploadHandler {
 
         $this->options = [
                 'script_url'              => $this->getFullUrl() . '/index.php/',
-                'upload_token'            => $_COOKIE[ 'upload_session' ],
-                'upload_dir'              => Utils::uploadDirFromSessionCookie( $_COOKIE[ 'upload_session' ] ),
+                'upload_token'            => $_COOKIE[ 'upload_token' ],
+                'upload_dir'              => Utils::uploadDirFromSessionCookie( $_COOKIE[ 'upload_token' ] ),
                 'upload_url'              => $this->getFullUrl() . '/files/',
                 'param_name'              => 'files',
             // Set the following option to 'POST', if your server does not support
@@ -126,8 +126,8 @@ class UploadHandler {
 
         // check if is a TMX
         // for TMX the limit is different (300Mb vs 100Mb)
-        $file_pathinfo = pathinfo($file->name);
-        $max_file_size = ($file_pathinfo['extension'] === 'tmx') ? $this->options[ 'max_tmx_file_size' ] : $this->options[ 'max_file_size' ] ;
+        $file_pathinfo = pathinfo( $file->name );
+        $max_file_size = ( $file_pathinfo[ 'extension' ] === 'tmx' ) ? $this->options[ 'max_tmx_file_size' ] : $this->options[ 'max_file_size' ];
 
         if ( $max_file_size && (
                 $file_size > $max_file_size ||
@@ -242,7 +242,7 @@ class UploadHandler {
 
         $file->type = $this->getMimeContentType( $file->tmp_name );
 
-        if(false === $file->type){
+        if ( false === $file->type ) {
             $file->error = "Mime type was not recognized";
         }
 
@@ -331,7 +331,7 @@ class UploadHandler {
      */
     private function getMimeContentType( $filename ) {
         if ( function_exists( 'mime_content_type' ) ) {
-            return (new MimeTypes())->guessMimeType( $filename );
+            return ( new MimeTypes() )->guessMimeType( $filename );
         }
 
         if ( function_exists( 'finfo_open' ) ) {
@@ -363,7 +363,7 @@ class UploadHandler {
             return $this->delete();
         }
 
-        if ( !Utils::isTokenValid( $_COOKIE[ 'upload_session' ] ) ) {
+        if ( !Utils::isTokenValid( $_COOKIE[ 'upload_token' ] ) ) {
             $info             = [ new stdClass() ];
             $info[ 0 ]->error = "Invalid Upload Token. Check your browser, cookies must be enabled for this domain.";
             $this->flush( $info );
@@ -404,7 +404,7 @@ class UploadHandler {
 
             $fp = fopen( "php://input", "r" );
 
-            list( $trash, $boundary ) = explode( 'boundary=', $_SERVER[ 'CONTENT_TYPE' ] );
+            [ $trash, $boundary ] = explode( 'boundary=', $_SERVER[ 'CONTENT_TYPE' ] );
 
             $regexp = '/' . $boundary . '.*?filename="(.*)".*?Content-Type:(.*)\x{0D}\x{0A}\x{0D}\x{0A}/sm';
 

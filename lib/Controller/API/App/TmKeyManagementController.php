@@ -31,7 +31,7 @@ class TmKeyManagementController extends AbstractStatefulKleinController {
             exit();
         }
 
-        if(!$this->userIsLogged()){
+        if(!$this->isLoggedIn()){
 
             $tmKeys = [];
             $job_keyList = json_decode( $chunk->tm_keys, true );

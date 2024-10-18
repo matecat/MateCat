@@ -14,7 +14,7 @@ use Outsource\TranslatedConfirmationStruct;
  * @author domenico domenico@translated.net / ostico@gmail.com
  * Date: 29/04/14
  * Time: 12.23
- * 
+ *
  */
 class OutsourceTo_TranslatedSuccessController extends OutsourceTo_AbstractSuccessController {
 

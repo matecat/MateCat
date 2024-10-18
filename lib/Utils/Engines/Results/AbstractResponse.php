@@ -8,9 +8,9 @@
 
 abstract class Engines_Results_AbstractResponse {
 
-    public $responseStatus = "";
+    public $responseStatus  = "";
     public $responseDetails = "";
-    public $responseData = [];
+    public $responseData    = [];
     public $mtLangSupported = true;
 
     /**
@@ -25,7 +25,7 @@ abstract class Engines_Results_AbstractResponse {
      */
     protected $featureSet;
 
-    public static function getInstance( $result, FeatureSet $featureSet = null, array $dataRefMap = []){
+    public static function getInstance( $result, FeatureSet $featureSet = null, array $dataRefMap = [] ) {
 
         $class = get_called_class(); // late static binding, note: php >= 5.3
 
@@ -38,7 +38,7 @@ abstract class Engines_Results_AbstractResponse {
             $instance->error = new Engines_Results_ErrorMatches( $result[ 'error' ] );
         }
 
-        if( $featureSet !== null ){
+        if ( $featureSet !== null ) {
             $instance->featureSet( $featureSet );
         }
 
@@ -46,7 +46,7 @@ abstract class Engines_Results_AbstractResponse {
 
     }
 
-    public function featureSet( FeatureSet $featureSet ){
+    public function featureSet( FeatureSet $featureSet ) {
         $this->featureSet = $featureSet;
     }
 
@@ -63,19 +63,20 @@ abstract class Engines_Results_AbstractResponse {
      * @return array
      * @throws ReflectionException
      */
-    public function toArray( $mask = null ){
+    public function toArray( $mask = null ) {
 
-        $attributes = array();
-        $reflectionClass = new ReflectionClass( $this );
-        $publicProperties = $reflectionClass->getProperties( ReflectionProperty::IS_PUBLIC ) ;
-        foreach( $publicProperties as $property ) {
-            if ( !empty($mask) ) {
+        $attributes       = [];
+        $reflectionClass  = new ReflectionClass( $this );
+        $publicProperties = $reflectionClass->getProperties( ReflectionProperty::IS_PUBLIC );
+        foreach ( $publicProperties as $property ) {
+            if ( !empty( $mask ) ) {
                 if ( !in_array( $property->getName(), $mask ) ) {
                     continue;
                 }
             }
             $attributes[ $property->getName() ] = $property->getValue( $this );
         }
+
         return $attributes;
 
     }

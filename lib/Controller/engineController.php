@@ -29,7 +29,7 @@ class engineController extends ajaxController {
         parent::__construct();
 
         //Session Enabled
-        $this->readLoginInfo();
+        $this->identifyUser();
         //Session Disabled
 
         $filterArgs = [

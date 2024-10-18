@@ -16,7 +16,7 @@
 class EnginesModel_MMTStruct extends EnginesModel_EngineStruct {
 
     /**
-     * @var string 
+     * @var string
      */
     public $name = 'ModernMT Full';
 
@@ -50,9 +50,9 @@ class EnginesModel_MMTStruct extends EnginesModel_EngineStruct {
      */
     public $others = [
             "tmx_import_relative_url" => "memories/content",
-            "api_key_check_auth_url" => "users/me",
-            "user_update_activate" => "memories/connect",
-            "context_get" => "context-vector",
+            "api_key_check_auth_url"  => "users/me",
+            "user_update_activate"    => "memories/connect",
+            "context_get"             => "context-vector",
     ];
 
     /**
@@ -65,9 +65,9 @@ class EnginesModel_MMTStruct extends EnginesModel_EngineStruct {
      * @var array
      */
     public $extra_parameters = [
-        'MMT-License' => "",
-        'MMT-pretranslate' => "",
-        'MMT-preimport' => "",
+            'MMT-License'      => "",
+            'MMT-pretranslate' => "",
+            'MMT-preimport'    => "",
     ];
 
     /**

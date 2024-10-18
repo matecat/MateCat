@@ -378,15 +378,13 @@ export const TranslationMemoryGlossaryTab = () => {
           <div className="translation-memory-glossary-tab-table-title">
             <h2>Active Resources</h2>
             <div className="translation-memory-glossary-tab-buttons-group">
-              {config.isLoggedIn && (
-                <button
-                  className="ui primary button settings-panel-button-icon"
-                  onClick={onAddSharedResource}
-                  data-testid="add-shared-resource-tm"
-                >
-                  <Users size={18} /> Add shared resource
-                </button>
-              )}
+              <button
+                className="ui primary button settings-panel-button-icon"
+                onClick={onAddSharedResource}
+                data-testid="add-shared-resource-tm"
+              >
+                <Users size={18} /> Add shared resource
+              </button>
 
               <button
                 className="ui primary button settings-panel-button-icon"
@@ -414,17 +412,11 @@ export const TranslationMemoryGlossaryTab = () => {
               data-testid="search-inactive-tmkeys"
             />
           </div>
-          {config.isLoggedIn ? (
-            <SettingsPanelTable
-              className="translation-memory-glossary-tab-inactive-table"
-              columns={COLUMNS_TABLE_INACTIVE}
-              rows={inactiveKeys}
-            />
-          ) : (
-            <button className="ui primary button" onClick={openLoginModal}>
-              Login to see your TM
-            </button>
-          )}
+          <SettingsPanelTable
+            className="translation-memory-glossary-tab-inactive-table"
+            columns={COLUMNS_TABLE_INACTIVE}
+            rows={inactiveKeys}
+          />
         </div>
       </div>
     </TranslationMemoryGlossaryTabContext.Provider>
