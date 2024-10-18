@@ -69,12 +69,12 @@ class MSPowerpoint implements IDto, JsonSerializable, Countable {
         $format = [];
 
         $format[ 'extract_doc_properties' ] = $this->extract_doc_properties;
-        $format[ 'extract_hidden_slides' ]  = $this->extract_hidden_slides;
+        $format[ 'translate_slides' ]       = $this->translate_slides;
         $format[ 'extract_notes' ]          = $this->extract_notes;
 
-        if ( !empty( $this->translate_slides ) ) {
-            $format[ 'translate_slides' ] = $this->translate_slides;
-            unset( $format[ 'extract_hidden_slides' ] );
+        if ( !empty( $this->extract_hidden_slides ) ) {
+            $format[ 'extract_hidden_slides' ] = $this->extract_hidden_slides;
+            unset( $format[ 'translate_slides' ] );
         }
 
         return $format;
