@@ -36,12 +36,15 @@ function useSyncTemplateWithConvertFile({
   // Select template when curren project template change
   useEffect(() => {
     if (!isCattool) {
-      setTemplates((prevState) =>
-        prevState.map((template) => ({
+      setTemplates((prevState) => {
+        const selectedTemplateId =
+          prevState.find(({id}) => id === idTemplate)?.id ?? 0
+
+        return prevState.map((template) => ({
           ...template,
-          isSelected: template.id === idTemplate,
-        })),
-      )
+          isSelected: template.id === selectedTemplateId,
+        }))
+      })
     }
   }, [idTemplate, setTemplates, isCattool])
 
@@ -51,7 +54,6 @@ function useSyncTemplateWithConvertFile({
       /* eslint-disable no-unused-vars */
       const {
         name,
-        id,
         uid,
         isTemporary,
         isSelected,
