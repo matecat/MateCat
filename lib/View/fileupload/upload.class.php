@@ -16,8 +16,8 @@ class UploadHandler {
 
         $this->options = [
                 'script_url'              => $this->getFullUrl() . '/index.php/',
-                'upload_token'            => $_COOKIE[ 'upload_session' ],
-                'upload_dir'              => Utils::uploadDirFromSessionCookie( $_COOKIE[ 'upload_session' ] ),
+                'upload_token'            => $_COOKIE[ 'upload_token' ],
+                'upload_dir'              => Utils::uploadDirFromSessionCookie( $_COOKIE[ 'upload_token' ] ),
                 'upload_url'              => $this->getFullUrl() . '/files/',
                 'param_name'              => 'files',
             // Set the following option to 'POST', if your server does not support
@@ -363,7 +363,7 @@ class UploadHandler {
             return $this->delete();
         }
 
-        if ( !Utils::isTokenValid( $_COOKIE[ 'upload_session' ] ) ) {
+        if ( !Utils::isTokenValid( $_COOKIE[ 'upload_token' ] ) ) {
             $info             = [ new stdClass() ];
             $info[ 0 ]->error = "Invalid Upload Token. Check your browser, cookies must be enabled for this domain.";
             $this->flush( $info );
