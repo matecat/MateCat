@@ -105,6 +105,7 @@ const matecatConfig = async ({env}, {mode}) => {
     pluginConfig.sentryWebpackPlugin.release = JSON.stringify(
       config.BUILD_NUMBER,
     )
+    console.log('Sentry release', pluginConfig.sentryWebpackPlugin.release)
   }
   return {
     target: 'web',
@@ -394,40 +395,52 @@ const matecatConfig = async ({env}, {mode}) => {
         xhtml: true,
       }),
       new HtmlWebPackPlugin({
-        filename: path.resolve(__dirname, './lib/View/activity_log_not_found.html'),
+        filename: path.resolve(
+          __dirname,
+          './lib/View/activity_log_not_found.html',
+        ),
         template: path.resolve(
-            __dirname,
-            './lib/View/templates/_activity_log_not_found.html',
+          __dirname,
+          './lib/View/templates/_activity_log_not_found.html',
         ),
         chunks: ['commonCss'],
         publicPath: '/public/build/',
         xhtml: true,
       }),
       new HtmlWebPackPlugin({
-        filename: path.resolve(__dirname, './lib/View/oauth_response_handler.html'),
+        filename: path.resolve(
+          __dirname,
+          './lib/View/oauth_response_handler.html',
+        ),
         template: path.resolve(
-            __dirname,
-            './lib/View/templates/_oauth_response_handler.html',
+          __dirname,
+          './lib/View/templates/_oauth_response_handler.html',
         ),
         chunks: [],
         publicPath: '/public/build/',
         xhtml: true,
       }),
       new HtmlWebPackPlugin({
-        filename: path.resolve(__dirname, './lib/View/redirectFailurePage.html'),
+        filename: path.resolve(
+          __dirname,
+          './lib/View/redirectFailurePage.html',
+        ),
         template: path.resolve(
-            __dirname,
-            './lib/View/templates/_redirectFailurePage.html',
+          __dirname,
+          './lib/View/templates/_redirectFailurePage.html',
         ),
         chunks: [],
         publicPath: '/public/build/',
         xhtml: true,
       }),
       new HtmlWebPackPlugin({
-        filename: path.resolve(__dirname, './lib/View/redirectSuccessPage.html'),
+        filename: path.resolve(
+          __dirname,
+          './lib/View/redirectSuccessPage.html',
+        ),
         template: path.resolve(
-            __dirname,
-            './lib/View/templates/_redirectSuccessPage.html',
+          __dirname,
+          './lib/View/templates/_redirectSuccessPage.html',
         ),
         chunks: [],
         publicPath: '/public/build/',
@@ -475,7 +488,10 @@ const matecatConfig = async ({env}, {mode}) => {
       }),
       new HtmlWebPackPlugin({
         filename: path.resolve(__dirname, './lib/View/badConfiguration.html'),
-        template: path.resolve(__dirname, './lib/View/templates/_badConfiguration.html'),
+        template: path.resolve(
+          __dirname,
+          './lib/View/templates/_badConfiguration.html',
+        ),
         chunks: ['commonCss'],
         publicPath: '/public/build/',
         xhtml: true,
