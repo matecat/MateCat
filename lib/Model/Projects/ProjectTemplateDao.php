@@ -16,14 +16,12 @@ use PDO;
 use QAModelTemplate\QAModelTemplateDao;
 use ReflectionException;
 use stdClass;
-use Swaggest\JsonSchema\InvalidValue;
-use TeamModel;
 use Teams\MembershipDao;
 use Teams\TeamDao;
-use Teams\TeamStruct;
 use TmKeyManagement_MemoryKeyDao;
 use TmKeyManagement_MemoryKeyStruct;
 use TmKeyManagement_TmKeyStruct;
+use Users_UserStruct;
 use Utils;
 use Xliff\XliffConfigTemplateDao;
 
@@ -62,7 +60,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
         $default->filters_template_id      = 0;
         $default->subject                  = "general";
         $default->source_language          = "en-US";
-        $default->target_language          = serialize( ["fr-FR"] );
+        $default->target_language          = serialize( [ "fr-FR" ] );
         $default->segmentation_rule        = json_encode( [
                 "name" => "General",
                 "id"   => "standard"
@@ -105,19 +103,18 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param string $json
-     * @param int    $uid
+     * @param string           $json
+     * @param Users_UserStruct $user
      *
      * @return ProjectTemplateStruct
-     * @throws InvalidValue
      * @throws Exception
      */
-    public static function createFromJSON( string $json, int $uid ): ProjectTemplateStruct {
+    public static function createFromJSON( string $json, Users_UserStruct $user ): ProjectTemplateStruct {
 
         $projectTemplateStruct = new ProjectTemplateStruct();
-        $projectTemplateStruct->hydrateFromJSON( $json, $uid );
+        $projectTemplateStruct->hydrateFromJSON( $json, $user->uid );
 
-        self::checkValues( $projectTemplateStruct );
+        self::checkValues( $projectTemplateStruct, $user );
 
         return self::save( $projectTemplateStruct );
     }
@@ -126,16 +123,16 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
      * @param ProjectTemplateStruct $projectTemplateStruct
      * @param string                $json
      * @param int                   $id
-     * @param int                   $uid
+     * @param Users_UserStruct      $user
      *
      * @return ProjectTemplateStruct
      * @throws Exception
      */
-    public static function editFromJSON( ProjectTemplateStruct $projectTemplateStruct, string $json, int $id, int $uid ): ProjectTemplateStruct {
+    public static function editFromJSON( ProjectTemplateStruct $projectTemplateStruct, string $json, int $id, Users_UserStruct $user ): ProjectTemplateStruct {
 
-        $projectTemplateStruct->hydrateFromJSON( $json, $uid, $id );
+        $projectTemplateStruct->hydrateFromJSON( $json, $user->uid, $id );
 
-        self::checkValues( $projectTemplateStruct );
+        self::checkValues( $projectTemplateStruct, $user );
 
         return self::update( $projectTemplateStruct );
     }
@@ -155,38 +152,20 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
      *
      * @throws Exception
      */
-    private static function checkValues( ProjectTemplateStruct $projectTemplateStruct ) {
-
-        $user = (new \Users_UserDao())->getByUid($projectTemplateStruct->uid);
-
-        if ( empty($user)) {
-            throw new Exception( "User not found.", 404 );
-        }
+    private static function checkValues( ProjectTemplateStruct $projectTemplateStruct, Users_UserStruct $user ) {
 
         // check id_team
-        $membersDao = new MembershipDao();
-        $membersDao->setCacheTTL( 60 * 5 );
-        $userTeamIds = array_map(
-            function ( $team ) use ( $membersDao ) {
-                $teamModel = new TeamModel( $team );
-                $teamModel->updateMembersProjectsCount();
-
-                /** @var $team TeamStruct */
-                return (int)$team->id;
-            },
-            $membersDao->findUserTeams( $user )
+        $team = ( new MembershipDao() )->setCacheTTL( 60 * 5 )->findTeamByIdAndUser(
+                $projectTemplateStruct->id_team,
+                $user
         );
 
-        if ( empty($userTeamIds)) {
-            throw new Exception( "User group not found.", 404 );
-        }
-
-        if ( !in_array( $projectTemplateStruct->uid, $userTeamIds ) ) {
+        if ( empty( $team ) ) {
             throw new Exception( "This user does not belong to this group.", 403 );
         }
 
         // source_language
-        if($projectTemplateStruct->source_language !== null){
+        if ( $projectTemplateStruct->source_language !== null ) {
             $languages = Langs_Languages::getInstance();
             $language  = Utils::trimAndLowerCase( $projectTemplateStruct->source_language );
 
@@ -196,18 +175,18 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
         }
 
         // target_language
-        if($projectTemplateStruct->target_language !== null){
+        if ( $projectTemplateStruct->target_language !== null ) {
 
-            $targetLanguages = unserialize($projectTemplateStruct->target_language);
+            $targetLanguages = unserialize( $projectTemplateStruct->target_language );
 
-            if(!is_array($targetLanguages)){
-                throw new Exception("target language is not an array", 403);
+            if ( !is_array( $targetLanguages ) ) {
+                throw new Exception( "target language is not an array", 403 );
             }
 
             $languages = Langs_Languages::getInstance();
 
-            foreach ($targetLanguages as $language){
-                $language  = Utils::trimAndLowerCase($language);
+            foreach ( $targetLanguages as $language ) {
+                $language = Utils::trimAndLowerCase( $language );
 
                 if ( !in_array( $language, $languages->allowedLanguages() ) ) {
                     throw new Exception( $language . ' is not an allowed language', 403 );
