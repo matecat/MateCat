@@ -38,6 +38,10 @@
         "ext-zlib": "*",
         "ext-gd": "*",
         "orhanerday/open-ai": "^4.7",
-        "ext-openssl": "*"
+        "ext-openssl": "*",
+        "league/oauth2-linkedin": "^5.1",
+        "stevenmaguire/oauth2-microsoft": "^2.2",
+        "league/oauth2-github": "^3.1",
+        "league/oauth2-facebook": "^2.2"
     }
 }

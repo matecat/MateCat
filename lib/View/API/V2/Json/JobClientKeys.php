@@ -24,7 +24,7 @@ class JobClientKeys {
      * @param TmKeyManagement_ClientTmKeyStruct[] $data
      */
     public function __construct( array $data = [] ) {
-        $this->data      = $data;
+        $this->data = $data;
     }
 
     public static function renderItem( TmKeyManagement_ClientTmKeyStruct $keyStruct ) {
@@ -46,6 +46,7 @@ class JobClientKeys {
         foreach ( $this->data as $keyStruct ) {
             $out[] = $this->renderItem( $keyStruct );
         }
+
         return $out;
     }
 

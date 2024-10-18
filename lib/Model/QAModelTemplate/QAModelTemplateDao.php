@@ -99,7 +99,7 @@ class QAModelTemplateDao extends DataAccess_AbstractDao {
 
             $deleted = $stmt->rowCount();
 
-            if( !$deleted ){
+            if ( !$deleted ) {
                 return 0;
             }
 
@@ -257,7 +257,7 @@ class QAModelTemplateDao extends DataAccess_AbstractDao {
 
         $result = $pager->getPagination( $totals, $paginationParameters );
 
-        $models   = [];
+        $models = [];
         foreach ( $result[ 'items' ] as $model ) {
             $models[] = self::get( [
                     'id'  => $model[ 'id' ],

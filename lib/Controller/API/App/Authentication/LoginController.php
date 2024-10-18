@@ -10,7 +10,8 @@ namespace API\App\Authentication;
 
 use API\App\RateLimiterTrait;
 use API\Commons\AbstractStatefulKleinController;
-use AuthCookie;
+use API\Commons\Authentication\AuthCookie;
+use API\Commons\Authentication\AuthenticationHelper;
 use CookieManager;
 use Exception;
 use INIT;
@@ -25,8 +26,7 @@ class LoginController extends AbstractStatefulKleinController {
     use RateLimiterTrait;
 
     public function logout() {
-        unset( $_SESSION[ 'cid' ] );
-        AuthCookie::destroyAuthentication();
+        $this->broadcastLogout();
         $this->response->code( 200 );
     }
 
@@ -75,9 +75,7 @@ class LoginController extends AbstractStatefulKleinController {
         $dao  = new Users_UserDao();
         $user = $dao->getByEmail( $params[ 'email' ] );
 
-        if ( $user && $user->passwordMatch( $params[ 'password' ] ) && !is_null( $user->email_confirmed_at ) && is_null( $user->confirmation_token ) ) {
-
-            AuthCookie::setCredentials( $user->email, $user->uid );
+        if ( $user && $user->passwordMatch( $params[ 'password' ] ) && !is_null( $user->email_confirmed_at ) ) {
 
             $user->clearAuthToken();
 
@@ -86,6 +84,10 @@ class LoginController extends AbstractStatefulKleinController {
 
             $project = new RedeemableProject( $user, $_SESSION );
             $project->tryToRedeem();
+
+            AuthCookie::setCredentials( $user );
+            AuthenticationHelper::getInstance( $_SESSION );
+
             $this->response->code( 200 );
 
         } else {

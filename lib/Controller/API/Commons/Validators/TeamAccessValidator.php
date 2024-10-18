@@ -27,17 +27,17 @@ class TeamAccessValidator extends Base {
     public function _validate() {
 
         $id_team = $this->request->id_team;
-        $name = (!empty($this->request->team_name)) ? base64_decode($this->request->team_name) : null;
+        $name    = ( !empty( $this->request->team_name ) ) ? base64_decode( $this->request->team_name ) : null;
 
-        if($name !== null and $name !== 'Personal'){
+        if ( $name !== null and $name !== 'Personal' ) {
             $this->team = ( new MembershipDao() )->setCacheTTL( 60 * 10 )->findTeamByIdAndName(
-                $id_team,
-                $name
+                    $id_team,
+                    $name
             );
         } else {
             $this->team = ( new MembershipDao() )->setCacheTTL( 60 * 10 )->findTeamByIdAndUser(
-                $id_team,
-                $this->controller->getUser()
+                    $id_team,
+                    $this->controller->getUser()
             );
         }
 
@@ -45,7 +45,7 @@ class TeamAccessValidator extends Base {
             throw new AuthorizationError( "Not Authorized", 401 );
         }
 
-        if ( method_exists($this->controller, 'setTeam') ) {
+        if ( method_exists( $this->controller, 'setTeam' ) ) {
             $this->controller->setTeam( $this->team );
         }
 

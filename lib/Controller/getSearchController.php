@@ -57,7 +57,7 @@ class getSearchController extends ajaxController {
     public function __construct() {
 
         parent::__construct();
-        $this->readLoginInfo();
+        $this->identifyUser();
 
         $filterArgs = [
                 'function'        => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],

@@ -2,10 +2,10 @@
 
 class Engines_Results_ErrorMatches {
 
-    public $code = 0;
+    public $code    = 0;
     public $message = "";
 
-    public function __construct( $result = array() ) {
+    public function __construct( $result = [] ) {
         if ( !empty( $result ) ) {
             $this->http_code = $result[ 'message' ];
             $this->code      = $result[ 'code' ];

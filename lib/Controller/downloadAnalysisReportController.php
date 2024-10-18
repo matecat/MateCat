@@ -8,7 +8,7 @@ use Model\Analysis\XTRFStatus;
  * User: gremorian
  * Date: 11/05/15
  * Time: 20.37
- * 
+ *
  */
 
 class downloadAnalysisReportController extends downloadController {
@@ -72,7 +72,7 @@ class downloadAnalysisReportController extends downloadController {
         /**
          * Retrieve user information
          */
-        $this->readLoginInfo();
+        $this->identifyUser();
 
         $activity             = new ActivityLogStruct();
         $activity->id_job     = $_project_data[ 0 ][ 'jid' ];

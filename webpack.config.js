@@ -198,61 +198,59 @@ const matecatConfig = async ({env}, {mode}) => {
     },
     entry: {
       'qa-report': [
-        path.resolve(__dirname, 'public/js/common.js'),
-        path.resolve(__dirname, 'public/js/user_store.js'),
         path.resolve(
           __dirname,
-          'public/js/cat_source/es6/components/quality_report/QualityReport.js',
+          'public/js/cat_source/es6/pages/QualityReport.js',
         ),
         path.resolve(__dirname, 'public/css/sass/quality-report.scss'),
       ],
       upload: [
         path.resolve(__dirname, 'public/js/upload_main.js'),
-        path.resolve(__dirname, 'public/js/common.js'),
-        path.resolve(__dirname, 'public/js/user_store.js'),
         path.resolve(__dirname, 'public/js/gdrive.upload.js'),
         path.resolve(__dirname, 'public/js/gdrive.picker.js'),
-        path.resolve(__dirname, 'public/js/new-project.js'),
+        path.resolve(__dirname, 'public/js/cat_source/es6/pages/NewProject.js'),
         path.resolve(__dirname, 'public/css/sass/upload-main.scss'),
       ],
       ...entryPoints,
       cattool: [
         path.resolve(__dirname, lxqDownload + 'lxqlicense.js'),
-        path.resolve(__dirname, 'public/js/common.js'),
-        path.resolve(__dirname, 'public/js/user_store.js'),
         path.resolve(__dirname, 'public/js/cat_source/ui.core.js'),
-        path.resolve(__dirname, 'public/js/cat_source/ui.init.js'),
-        path.resolve(__dirname, 'public/js/cat_source/ui.segment.js'),
         path.resolve(__dirname, 'public/js/cat_source/ui.headerTooltips.js'),
+        path.resolve(__dirname, 'public/js/cat_source/es6/pages/CatTool.js'),
         path.resolve(__dirname, 'public/css/sass/main.scss'),
       ],
       dashboard: [
-        path.resolve(__dirname, 'public/js/common.js'),
-        path.resolve(__dirname, 'public/js/user_store.js'),
-        path.resolve(
-          __dirname,
-          'public/js/cat_source/es6/components/projects/Dashboard.js',
-        ),
+        path.resolve(__dirname, 'public/js/cat_source/es6/pages/Dashboard.js'),
         path.resolve(__dirname, 'public/css/sass/manage_main.scss'),
       ],
       analyze: [
-        path.resolve(__dirname, 'public/js/common.js'),
-        path.resolve(__dirname, 'public/js/user_store.js'),
         path.resolve(
           __dirname,
           'public/js/cat_source/es6/pages/AnalyzePage.js',
         ),
         path.resolve(__dirname, 'public/css/sass/analyze_main.scss'),
       ],
+      signin: [
+        path.resolve(__dirname, 'public/js/cat_source/es6/pages/SignIn.js'),
+        path.resolve(__dirname, 'public/css/sass/signin_page.scss'),
+      ],
       xliffToTarget: [
         path.resolve(__dirname, 'public/js/upload_main.js'),
-        path.resolve(__dirname, 'public/js/common.js'),
-        path.resolve(__dirname, 'public/js/user_store.js'),
-        path.resolve(__dirname, 'public/js/xliffToTarget.js'),
+        path.resolve(
+          __dirname,
+          'public/js/cat_source/es6/pages/XliffToTarget.js',
+        ),
         path.resolve(__dirname, 'public/css/sass/upload-main.scss'),
-        path.resolve(__dirname, 'public/css/sass/main.scss'),
       ],
-      commonCss: [
+      activityLog: [
+        path.resolve(
+          __dirname,
+          'public/js/cat_source/es6/pages/ActivityLog.js',
+        ),
+        path.resolve(__dirname, 'public/css/sass/activity-log-main.scss'),
+      ],
+      commonCss: [path.resolve(__dirname, 'public/css/sass/main.scss')],
+      apiDoc: [
         path.resolve(__dirname, 'public/css/sass/main.scss'),
         path.resolve(__dirname, 'public/css/sass/legacy-misc.scss'),
       ],
@@ -358,6 +356,13 @@ const matecatConfig = async ({env}, {mode}) => {
         xhtml: true,
       }),
       new HtmlWebPackPlugin({
+        filename: path.resolve(__dirname, './lib/View/signin.html'),
+        template: path.resolve(__dirname, './lib/View/templates/_signin.html'),
+        chunks: ['signin', 'uploadPlugins', 'allPagesPlugins'],
+        publicPath: '/public/build/',
+        xhtml: true,
+      }),
+      new HtmlWebPackPlugin({
         filename: path.resolve(__dirname, './lib/View/jobAnalysis.html'),
         template: path.resolve(
           __dirname,
@@ -380,7 +385,7 @@ const matecatConfig = async ({env}, {mode}) => {
       new HtmlWebPackPlugin({
         filename: path.resolve(__dirname, './lib/View/APIDoc.php'),
         template: path.resolve(__dirname, './lib/View/templates/_APIDoc.php'),
-        chunks: ['commonCss'],
+        chunks: ['apiDoc'],
         publicPath: '/public/build/',
         xhtml: true,
       }),
@@ -390,7 +395,7 @@ const matecatConfig = async ({env}, {mode}) => {
           __dirname,
           './lib/View/templates/_activity_log.html',
         ),
-        chunks: ['cattool'],
+        chunks: ['activityLog', 'allPagesPlugins'],
         publicPath: '/public/build/',
         xhtml: true,
       }),

@@ -44,7 +44,7 @@ export const Popover = ({
   const closePopover = (e) => {
     e.stopPropagation()
     if (containerRef.current && !containerRef.current.contains(e.target)) {
-      window.removeEventListener('mousedown.popover', closePopover)
+      window.eventHandler.removeEventListener('mousedown.popover', closePopover)
       onClose()
       setIsOpen(false)
     }
@@ -53,11 +53,11 @@ export const Popover = ({
     e.stopPropagation()
     e.preventDefault()
     if (isOpen) {
-      window.removeEventListener('mousedown.popover', closePopover)
+      window.eventHandler.removeEventListener('mousedown.popover', closePopover)
       onClose()
     } else {
       document.dispatchEvent(new Event('mousedown.popover')) // close other popovers
-      window.addEventListener('mousedown.popover', closePopover)
+      window.eventHandler.addEventListener('mousedown.popover', closePopover)
     }
     setIsOpen(!isOpen)
   }

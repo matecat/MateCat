@@ -9,13 +9,13 @@ use Exception;
 use LQA\QAModelInterface;
 
 class QAModelTemplateStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct, \JsonSerializable, QAModelInterface {
-    public int $id = 0;
-    public int $uid = 0;
-    public string $label = "";
-    public int $version = 0;
-    public ?string $created_at = null;
+    public int     $id          = 0;
+    public int     $uid         = 0;
+    public string  $label       = "";
+    public int     $version     = 0;
+    public ?string $created_at  = null;
     public ?string $modified_at = null;
-    public ?string $deleted_at = null;
+    public ?string $deleted_at  = null;
 
     /**
      * @var ?QAModelTemplatePassfailStruct

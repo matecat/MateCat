@@ -6,8 +6,7 @@
  * Date: 22/09/15
  * Time: 16.42
  */
-class LanguageStats_LanguageStatsStruct extends DataAccess_AbstractDaoObjectStruct implements DataAccess_IDaoStruct
-{
+class LanguageStats_LanguageStatsStruct extends DataAccess_AbstractDaoObjectStruct implements DataAccess_IDaoStruct {
     /**
      * @var string The date of this entry
      */
@@ -29,7 +28,7 @@ class LanguageStats_LanguageStatsStruct extends DataAccess_AbstractDaoObjectStru
      * @see Analysis_PayableRates::$DEFAULT_PAYABLE_RATES
      */
     public $fuzzy_band;
-    
+
     /**
      * @var float The wordcount sum of all jobs having this language couple
      */

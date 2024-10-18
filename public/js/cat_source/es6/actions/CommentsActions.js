@@ -2,7 +2,7 @@ import AppDispatcher from '../stores/AppDispatcher'
 import CommentsConstants from '../constants/CommentsConstants'
 import {deleteComment} from '../api/deleteComment/deleteComment'
 import {submitComment as submitCommentApi} from '../api/submitComment'
-import TeamsStore from '../stores/TeamsStore'
+import UserStore from '../stores/UserStore'
 import {markAsResolvedThread} from '../api/markAsResolvedThread'
 
 const CommentsActions = {
@@ -16,7 +16,7 @@ const CommentsActions = {
   sendComment: function (text, sid) {
     return submitCommentApi({
       idSegment: sid,
-      username: TeamsStore.getUserName(),
+      username: UserStore.getUserName(),
       sourcePage: config.revisionNumber ? config.revisionNumber + 1 : 1,
       message: text,
     }).then((resp) => {
@@ -31,7 +31,7 @@ const CommentsActions = {
   resolveThread: function (sid) {
     markAsResolvedThread({
       idSegment: sid,
-      username: TeamsStore.getUserName(),
+      username: UserStore.getUserName(),
       sourcePage: config.revisionNumber ? config.revisionNumber + 1 : 1,
     })
       .then((resp) => {

@@ -169,24 +169,24 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
         $query = self::$_sql_get_projects_for_team;
 
         $values = [
-            'id_team' => (int)$id_team,
+                'id_team' => (int)$id_team,
         ];
 
         if ( $searchId ) {
-            $query .= ' AND id = :id ';
-            $values['id'] = $searchId;
+            $query          .= ' AND id = :id ';
+            $values[ 'id' ] = $searchId;
         }
 
         if ( $searchName ) {
-            $query .= ' AND name = :name ';
-            $values['name'] = $searchName;
+            $query            .= ' AND name = :name ';
+            $values[ 'name' ] = $searchName;
         }
 
         if ( $limit and $offset ) {
             $query .= " LIMIT " . (int)$limit . " OFFSET " . (int)$offset;
         }
 
-        $stmt   = $conn->prepare( $query );
+        $stmt = $conn->prepare( $query );
 
         return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Projects_ProjectStruct(), $values );
     }
@@ -211,16 +211,16 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
         ];
 
         if ( $searchId ) {
-            $query .= ' AND id = :id ';
-            $values['id'] = $searchId;
+            $query          .= ' AND id = :id ';
+            $values[ 'id' ] = $searchId;
         }
 
         if ( $searchName ) {
-            $query .= ' AND name = :name ';
-            $values['name'] = $searchName;
+            $query            .= ' AND name = :name ';
+            $values[ 'name' ] = $searchName;
         }
 
-        $stmt  = $conn->prepare( $query );
+        $stmt = $conn->prepare( $query );
 
         $results = $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), $values );
 
@@ -232,8 +232,9 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
      * @param int $ttl
      *
      * @return Projects_ProjectStruct
+     * @throws ReflectionException
      */
-    public static function findByJobId( $id_job, $ttl = 0 ) {
+    public static function findByJobId( int $id_job, int $ttl = 0 ): ?Projects_ProjectStruct {
         $thisDao = new self();
         $conn    = Database::obtain()->getConnection();
         $sql     = "SELECT projects.* FROM projects " .
@@ -242,7 +243,7 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
                 " LIMIT 1 ";
         $stmt    = $conn->prepare( $sql );
 
-        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Projects_ProjectStruct(), [ 'id_job' => $id_job ] )[ 0 ];
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Projects_ProjectStruct(), [ 'id_job' => $id_job ] )[ 0 ] ?? null;
     }
 
     /**
@@ -601,10 +602,10 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
      * Get a password map (t, r1, r2)
      *
      * @param $pid
+     *
      * @return array
      */
-    public function getPasswordsMap($pid)
-    {
+    public function getPasswordsMap( $pid ) {
         $db = Database::obtain();
 
         $query = "select

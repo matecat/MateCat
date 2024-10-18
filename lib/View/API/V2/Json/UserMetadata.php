@@ -22,12 +22,12 @@ class UserMetadata {
 
         $out = [];
 
-        $returnable = array('gplus_picture');
+        $returnable = [ 'gplus_picture' ];
 
-        if(is_array($collection) and !empty($collection)){
-            foreach( $collection as $metadata ) {
-                if ( in_array($metadata->key, $returnable ) ) {
-                    $out[ $metadata->key ] = $metadata->value ;
+        if ( is_array( $collection ) and !empty( $collection ) ) {
+            foreach ( $collection as $metadata ) {
+                if ( in_array( $metadata->key, $returnable ) ) {
+                    $out[ $metadata->key ] = $metadata->value;
                 }
             }
         }

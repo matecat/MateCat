@@ -1,6 +1,10 @@
 <?php
 require_once '../../inc/Bootstrap.php';
-Bootstrap::start();
+try {
+    Bootstrap::start();
+    Bootstrap::sessionStart();
+} catch ( Exception $e ) {
+}
 
 $count = 0;
 foreach ( INIT::$SUPPORTED_FILE_TYPES as $key => $value ) {

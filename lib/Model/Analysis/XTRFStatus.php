@@ -44,14 +44,14 @@ class XTRFStatus extends AbstractStatus {
 
                     foreach ( $chunk->getFiles() as $file ) {
 
-                        $vector[ 'firstLine' ] = str_pad( "File: ", 23 ) . $file->getId() . "_" . $file->getName();
+                        $vector[ 'firstLine' ]                                      = str_pad( "File: ", 23 ) . $file->getId() . "_" . $file->getName();
                         $outputContent[ $j->getId() . "-" . $chunk->getPassword() ] .= $this->formatFile( $file, $vector );
 
                     }
 
                     $outputContent[ $j->getId() . "-" . $chunk->getPassword() ] .= str_repeat( "-", 80 ) . PHP_EOL . PHP_EOL;
 
-                    $vector[ 'firstLine' ] = str_pad( "Total: ", 23 ) . count( $chunk->getFiles() ) . " files";
+                    $vector[ 'firstLine' ]                                      = str_pad( "Total: ", 23 ) . count( $chunk->getFiles() ) . " files";
                     $outputContent[ $j->getId() . "-" . $chunk->getPassword() ] .= $this->formatFile( $chunk->getSummary(), $vector );
 
                 }

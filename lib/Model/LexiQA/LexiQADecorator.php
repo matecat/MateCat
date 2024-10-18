@@ -39,7 +39,7 @@ class LexiQADecorator {
         $this->lexiqa_server = INIT::$LXQ_SERVER;
     }
 
-    public static function getInstance( PHPTAL $template ){
+    public static function getInstance( PHPTAL $template ) {
         return new static( $template );
     }
 
@@ -47,12 +47,12 @@ class LexiQADecorator {
      * Decorate the controllers with the lexiqa template vars
      *
      */
-    public function decorateViewLexiQA(){
+    public function decorateViewLexiQA() {
 
-        if( INIT::$LXQ_LICENSE ){
+        if ( INIT::$LXQ_LICENSE ) {
             //LEXIQA license key
-            $this->template->lxq_license = INIT::$LXQ_LICENSE;
-            $this->template->lxq_partnerid = INIT::$LXQ_PARTNERID;
+            $this->template->lxq_license      = INIT::$LXQ_LICENSE;
+            $this->template->lxq_partnerid    = INIT::$LXQ_PARTNERID;
             $this->template->lexiqa_languages = json_encode( ProjectOptionsSanitizer::$lexiQA_allowed_languages );
         }
 
@@ -63,12 +63,14 @@ class LexiQADecorator {
 
     /**
      * Called to check if the JOb has this feature enabled from creation project
+     *
      * @param \ChunkOptionsModel $model
      *
      * @return $this
      */
-    public function checkJobHasLexiQAEnabled( \ChunkOptionsModel $model ){
+    public function checkJobHasLexiQAEnabled( \ChunkOptionsModel $model ) {
         $this->lexiqa_enabled = $model->isEnabled( 'lexiqa' );
+
         return $this;
     }
 
@@ -82,8 +84,9 @@ class LexiQADecorator {
      */
     public function featureEnabled( \FeatureSet $featureSet ) {
 
-        if ( !INIT::$LXQ_LICENSE ){
+        if ( !INIT::$LXQ_LICENSE ) {
             $this->lexiqa_enabled = false;
+
             return $this;
         }
         $this->lexiqa_enabled = true;
