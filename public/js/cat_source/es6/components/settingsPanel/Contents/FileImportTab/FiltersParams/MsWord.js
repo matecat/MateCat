@@ -48,12 +48,8 @@ export const MsWord = () => {
     <div className="filters-params-accordion-content">
       <div className="filters-params-option">
         <div>
-          <h3>Extract headers and footers</h3>
-          <p>
-            Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
-            pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
-            condimentum.
-          </p>
+          <h3>Translate headers and footers</h3>
+          <p>Choose whether to translate the heades and footers of the file.</p>
         </div>
         <Controller
           control={control}
@@ -66,12 +62,8 @@ export const MsWord = () => {
 
       <div className="filters-params-option">
         <div>
-          <h3>Extract hidden text</h3>
-          <p>
-            Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
-            pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
-            condimentum.
-          </p>
+          <h3>Translate hidden text</h3>
+          <p>Choose whether to translate hidden text.</p>
         </div>
         <Controller
           control={control}
@@ -84,11 +76,10 @@ export const MsWord = () => {
 
       <div className="filters-params-option">
         <div>
-          <h3>Extract comments</h3>
+          <h3>Translate comments</h3>
           <p>
-            Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
-            pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
-            condimentum.
+            Choose whether to translate the text in comments made in the
+            document.
           </p>
         </div>
         <Controller
@@ -102,11 +93,10 @@ export const MsWord = () => {
 
       <div className="filters-params-option">
         <div>
-          <h3>Extract documents properties</h3>
+          <h3>Translate documents properties</h3>
           <p>
-            Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
-            pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
-            condimentum.
+            Choose whether to translate document properties (e.g. the author's
+            name).
           </p>
         </div>
         <Controller
@@ -120,11 +110,13 @@ export const MsWord = () => {
 
       <div className="filters-params-option">
         <div>
-          <h3>Accept revisions</h3>
+          <h3>Automatically accept revisions</h3>
           <p>
-            Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
-            pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
-            condimentum.
+            Choose whether to automatically accept revisions upon upload of the
+            file.
+            <br />
+            If the document contains revisions and this option is set to
+            inactive, an error will be shown.
           </p>
         </div>
         <Controller
@@ -140,9 +132,12 @@ export const MsWord = () => {
         <div>
           <h3>Exclude styles</h3>
           <p>
-            Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
-            pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
-            condimentum.
+            Enter the names of styles applied to text that should not be
+            translated.
+            <br />
+            Style names are case sensitive, for styles whose names are comprised
+            of multiple words, remove the whitespaces: if a style's name is
+            "test Style", the relevant parameter value will be testStyle.
           </p>
         </div>
         <Controller
@@ -163,9 +158,11 @@ export const MsWord = () => {
         <div>
           <h3>Exclude highlight colors</h3>
           <p>
-            Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
-            pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
-            condimentum.
+            Enter the name of highlighting colors applied to text that should
+            not be translated.
+            <br />
+            Color names are case sensitive. Common color names are available
+            here.
           </p>
         </div>
         <Controller

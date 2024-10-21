@@ -169,8 +169,12 @@ export const XliffSettings = () => {
             <div className="file-import-tab-header">
               <h2>Xliff import settings</h2>
               <p>
-                Set rules for the import of Xliff 1.2 and 2.0 files to decide
-                Matecat’s behavior for segments with different states.
+                Customize how Matecat handles segments in XLIFF files based on
+                their states.{' '}
+                <a href="#" target="_blank">
+                  More details
+                </a>
+                .
               </p>
               <SubTemplates
                 {...{

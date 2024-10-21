@@ -69,11 +69,11 @@ export const MsPowerpoint = () => {
     <div className="filters-params-accordion-content">
       <div className="filters-params-option">
         <div>
-          <h3>Extract hidden slides</h3>
+          <h3>Translate hidden slides</h3>
           <p>
-            Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
-            pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
-            condimentum.
+            Choose whether to translate text in hidden slides
+            <br />
+            Mutually exclusive with "Translatable slides"
           </p>
         </div>
         <Controller
@@ -87,11 +87,15 @@ export const MsPowerpoint = () => {
 
       <div className="filters-params-option">
         <div>
-          <h3>Extract speaker notes</h3>
+          <h3>Translate speaker notes</h3>
           <p>
-            Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
-            pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
-            condimentum.
+            Choose whether to translate speaker notes.
+            <br />
+            If activated, speaker notes will be extracted for all slides,
+            including hidden slides not being extracted for translation.
+            <br />
+            However, if activated in combination with the "Translatable slides"
+            option, only the notes for the slides listed will be extraced.
           </p>
         </div>
         <Controller
@@ -105,11 +109,10 @@ export const MsPowerpoint = () => {
 
       <div className="filters-params-option">
         <div>
-          <h3>Extract document properties</h3>
+          <h3>Translate document properties</h3>
           <p>
-            Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
-            pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
-            condimentum.
+            Choose whether to translate document properties (e.g. the author's
+            name).
           </p>
         </div>
         <Controller
@@ -125,9 +128,11 @@ export const MsPowerpoint = () => {
         <div>
           <h3>Translatable slides</h3>
           <p>
-            Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
-            pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
-            condimentum.
+            Choose which slides should be translated.
+            <br />
+            If left empty, all the slides in the file will be extracted as
+            translatable except for hidden slides unless otherwise specified
+            through the dedicated option.
           </p>
         </div>
         <Controller
