@@ -161,3 +161,4 @@ route( '/api/app/new-tmx', 'POST', ['API\App\LoadTMXController', 'newTM' ] );
 route( '/api/app/upload-tmx-status', 'POST', ['API\App\LoadTMXController', 'uploadStatus' ] );
 route( '/api/app/change-job-status', 'POST', ['API\App\ChangeJobsStatusController', 'changeStatus' ] );
 route( '/api/app/download-tmx', 'POST', ['API\App\DownloadTMXController', 'download' ] );
+route( '/api/app/new-project', 'POST', ['API\App\CreateProjectController', 'create' ] );

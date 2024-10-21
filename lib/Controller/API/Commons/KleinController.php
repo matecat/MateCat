@@ -16,8 +16,12 @@ use Exceptions\NotFoundException;
 use FeatureSet;
 use INIT;
 use InvalidArgumentException;
+use Klein\Response;
 use RuntimeException;
+use Swaggest\JsonSchema\InvalidValue;
 use Users_UserDao;
+use Validator\Errors\JSONValidatorException;
+use Validator\Errors\JsonValidatorGenericException;
 
 /**
  * @property  int revision_number
@@ -325,8 +329,8 @@ abstract class KleinController implements IController {
      * @param $password
      * @return bool|null
      */
-    protected function isRevision($id_job, $password) {
-
+    protected function isRevision($id_job, $password): ?bool
+    {
         $isRevision = CatUtils::getIsRevisionFromIdJobAndPassword( $id_job, $password );
 
         if ( null === $isRevision ) {
@@ -338,13 +342,16 @@ abstract class KleinController implements IController {
 
     /**
      * @param Exception $exception
-     * @return \Klein\Response
+     * @return Response
      */
-    protected function returnException(Exception $exception)
+    protected function returnException(Exception $exception): Response
     {
         // determine http code
         switch (get_class($exception)){
 
+            case InvalidValue::class:
+            case JSONValidatorException::class:
+            case JsonValidatorGenericException::class:
             case InvalidArgumentException::class:
             case DomainException::class:
                 $httpCode = 400;
@@ -381,7 +388,7 @@ abstract class KleinController implements IController {
      * @param $id_segment
      * @return array
      */
-    protected function parseIdSegment($id_segment)
+    protected function parseIdSegment($id_segment): array
     {
         $parsedSegment = explode( "-", $id_segment );
 

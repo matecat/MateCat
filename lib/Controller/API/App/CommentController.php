@@ -16,6 +16,7 @@ use INIT;
 use InvalidArgumentException;
 use Jobs_JobDao;
 use Jobs_JobStruct;
+use Klein\Response;
 use Log;
 use RuntimeException;
 use Stomp\Transport\Message;
@@ -32,10 +33,10 @@ class CommentController extends KleinController {
     }
 
     /**
-     * @return \Klein\Response
+     * @return Response
      * @throws \ReflectionException
      */
-    public function getRange()
+    public function getRange(): Response
     {
         $data = [];
         $request = $this->validateTheRequest();
@@ -61,70 +62,78 @@ class CommentController extends KleinController {
     }
 
     /**
-     * @return \Klein\Response
+     * @return Response
      * @throws \ReflectionException
      * @throws \Stomp\Exception\ConnectionException
      */
-    public function resolve()
+    public function resolve(): Response
     {
-        $request = $this->validateTheRequest();
-        $prepareCommandData = $this->prepareCommentData($request);
-        $comment_struct = $prepareCommandData['struct'];
-        $users_mentioned_id = $prepareCommandData['users_mentioned_id'];
-        $users_mentioned = $prepareCommandData['users_mentioned'];
+        try {
+            $request = $this->validateTheRequest();
+            $prepareCommandData = $this->prepareCommentData($request);
+            $comment_struct = $prepareCommandData['struct'];
+            $users_mentioned_id = $prepareCommandData['users_mentioned_id'];
+            $users_mentioned = $prepareCommandData['users_mentioned'];
 
-        $commentDao       = new Comments_CommentDao( Database::obtain() );
-        $new_record = $commentDao->resolveThread( $comment_struct );
+            $commentDao       = new Comments_CommentDao( Database::obtain() );
+            $new_record = $commentDao->resolveThread( $comment_struct );
 
-        $payload = $this->enqueueComment($new_record, $request['job']->id_project, $request['id_job'], $request['id_client']);
-        $users = $this->resolveUsers($comment_struct, $request['job'], $users_mentioned_id);
-        $this->sendEmail($comment_struct, $request['job'], $users, $users_mentioned);
+            $payload = $this->enqueueComment($new_record, $request['job']->id_project, $request['id_job'], $request['id_client']);
+            $users = $this->resolveUsers($comment_struct, $request['job'], $users_mentioned_id);
+            $this->sendEmail($comment_struct, $request['job'], $users, $users_mentioned);
 
-        return $this->response->json([
-            "data" => [
-                'entries' => $payload,
-                'user' => [
-                    'full_name' => $this->user->fullName()
+            return $this->response->json([
+                "data" => [
+                    'entries' => $payload,
+                    'user' => [
+                        'full_name' => $this->user->fullName()
+                    ]
                 ]
-            ]
-        ]);
+            ]);
+        } catch (Exception $exception){
+            return $this->returnException($exception);
+        }
     }
 
     /**
-     * @return \Klein\Response
+     * @return Response
      * @throws \ReflectionException
      * @throws \Stomp\Exception\ConnectionException
      */
-    public function create()
+    public function create(): Response
     {
-        $request = $this->validateTheRequest();
-        $prepareCommandData = $this->prepareCommentData($request);
-        $comment_struct = $prepareCommandData['struct'];
-        $users_mentioned_id = $prepareCommandData['users_mentioned_id'];
-        $users_mentioned = $prepareCommandData['users_mentioned'];
+        try {
+            $request = $this->validateTheRequest();
+            $prepareCommandData = $this->prepareCommentData($request);
+            $comment_struct = $prepareCommandData['struct'];
+            $users_mentioned_id = $prepareCommandData['users_mentioned_id'];
+            $users_mentioned = $prepareCommandData['users_mentioned'];
 
-        $commentDao = new Comments_CommentDao( Database::obtain() );
-        $new_record = $commentDao->saveComment( $comment_struct );
+            $commentDao = new Comments_CommentDao( Database::obtain() );
+            $new_record = $commentDao->saveComment( $comment_struct );
 
-        foreach ( $users_mentioned as $user_mentioned ) {
-            $mentioned_comment = $this->prepareMentionCommentData($request, $user_mentioned);
-            $commentDao->saveComment( $mentioned_comment );
-        }
+            foreach ( $users_mentioned as $user_mentioned ) {
+                $mentioned_comment = $this->prepareMentionCommentData($request, $user_mentioned);
+                $commentDao->saveComment( $mentioned_comment );
+            }
 
-        $commentDao->destroySegmentIdCache($request[ 'id_segment' ]);
+            $commentDao->destroySegmentIdCache($request[ 'id_segment' ]);
 
-        $payload = $this->enqueueComment($new_record, $request['job']->id_project, $request['id_job'], $request['id_client']);
-        $users = $this->resolveUsers($comment_struct, $request['job'], $users_mentioned_id);
-        $this->sendEmail($comment_struct, $request['job'], $users, $users_mentioned);
+            $payload = $this->enqueueComment($new_record, $request['job']->id_project, $request['id_job'], $request['id_client']);
+            $users = $this->resolveUsers($comment_struct, $request['job'], $users_mentioned_id);
+            $this->sendEmail($comment_struct, $request['job'], $users, $users_mentioned);
 
-        return $this->response->json([
-            "data" => [
-                'entries' => $payload,
-                'user' => [
-                    'full_name' => $this->user->fullName()
+            return $this->response->json([
+                "data" => [
+                    'entries' => $payload,
+                    'user' => [
+                        'full_name' => $this->user->fullName()
+                    ]
                 ]
-            ]
-        ]);
+            ]);
+        } catch (Exception $exception){
+            return $this->returnException($exception);
+        }
     }
 
     /**
@@ -224,7 +233,7 @@ class CommentController extends KleinController {
      * @return array|\Klein\Response
      * @throws \ReflectionException
      */
-    private function validateTheRequest()
+    private function validateTheRequest(): array
     {
         $id_client = filter_var( $this->request->param( 'id_client' ), FILTER_SANITIZE_STRING );
         $username = filter_var( $this->request->param( 'username' ), FILTER_SANITIZE_STRING );
@@ -266,7 +275,7 @@ class CommentController extends KleinController {
      * @return array
      * @throws \ReflectionException
      */
-    private function prepareCommentData($request)
+    private function prepareCommentData($request): array
     {
         $struct = new Comments_CommentStruct();
 
@@ -297,7 +306,8 @@ class CommentController extends KleinController {
      * @param Users_UserStruct $user
      * @return Comments_CommentStruct
      */
-    private function prepareMentionCommentData( $request, Users_UserStruct $user ) {
+    private function prepareMentionCommentData( $request, Users_UserStruct $user ): Comments_CommentStruct
+    {
         $struct = new Comments_CommentStruct();
 
         $struct->id_segment   = $request[ 'id_segment' ];
@@ -316,7 +326,8 @@ class CommentController extends KleinController {
      * @param $message
      * @return array|mixed
      */
-    private function resolveUserMentions($message) {
+    private function resolveUserMentions($message)
+    {
         return Comments_CommentDao::getUsersIdFromContent( $message );
     }
 
@@ -326,7 +337,8 @@ class CommentController extends KleinController {
      * @return array
      * @throws \ReflectionException
      */
-    private function resolveTeamMentions(Jobs_JobStruct $job, $message) {
+    private function resolveTeamMentions(Jobs_JobStruct $job, $message): array
+    {
         $users = [];
 
         if ( strstr( $message, "{@team@}" ) ) {
@@ -345,7 +357,8 @@ class CommentController extends KleinController {
      * @param array $uidSentList
      * @return array
      */
-    private function filterUsers( $users, $uidSentList = [] ) {
+    private function filterUsers( $users, $uidSentList = [] ): array
+    {
         $userIsLogged = $this->userIsLogged;
         $current_uid  = $this->user->uid;
 
@@ -374,7 +387,7 @@ class CommentController extends KleinController {
      * @param $users_mentioned_id
      * @return array
      */
-    private function resolveUsers(Comments_CommentStruct $comment, Jobs_JobStruct $job, $users_mentioned_id)
+    private function resolveUsers(Comments_CommentStruct $comment, Jobs_JobStruct $job, $users_mentioned_id): array
     {
         $commentDao = new Comments_CommentDao( Database::obtain() );
         $result     = $commentDao->getThreadContributorUids( $comment );
@@ -414,7 +427,6 @@ class CommentController extends KleinController {
             'id'             => $comment->id,
             'id_segment'     => $comment->id_segment,
             'full_name'      => $comment->full_name,
-            'email'          => $comment->email,
             'source_page'    => $comment->source_page,
             'formatted_date' => $comment->getFormattedDate(),
             'thread_id'      => $comment->thread_id,
