@@ -205,6 +205,13 @@ abstract class DataAccess_AbstractDao {
     }
 
     /**
+     * @throws ReflectionException
+     */
+    protected function _destroyObjectCache( PDOStatement $stmt, string $fetchClass, array $bindParams ): bool {
+        return $this->_destroyCache( $stmt->queryString . $this->_serializeForCacheKey( $bindParams ) . $fetchClass );
+    }
+
+    /**
      * @param string       $keyMap
      * @param PDOStatement $stmt
      * @param string       $fetchClass
