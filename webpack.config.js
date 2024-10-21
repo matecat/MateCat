@@ -104,9 +104,9 @@ const matecatConfig = async ({env}, {mode}) => {
     pluginConfig = {...pluginConfig, ...pluginWebpackConfig}
   })
   if (pluginConfig.sentryWebpackPlugin) {
-    pluginConfig.sentryWebpackPlugin.release = JSON.stringify(
-      config.BUILD_NUMBER,
-    )
+    pluginConfig.sentryWebpackPlugin.release = {
+      name: JSON.stringify(config.BUILD_NUMBER),
+    }
     console.log('Sentry release', pluginConfig.sentryWebpackPlugin.release)
   }
   return {
