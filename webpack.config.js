@@ -9,6 +9,8 @@ const {sentryWebpackPlugin} = require('@sentry/webpack-plugin')
 const https = require('https')
 const fs = require('fs')
 const ini = require('ini')
+// const BundleAnalyzerPlugin =
+//   require('webpack-bundle-analyzer').BundleAnalyzerPlugin
 
 const buildPath = './public/build/'
 const lxqDownload = './public/buildResources/'
@@ -127,6 +129,9 @@ const matecatConfig = async ({env}, {mode}) => {
     optimization: {
       moduleIds: 'deterministic',
       runtimeChunk: 'single',
+      splitChunks: {
+        chunks: 'all',
+      },
     },
     module: {
       rules: [
@@ -257,14 +262,12 @@ const matecatConfig = async ({env}, {mode}) => {
       errorPage: [path.resolve(__dirname, 'public/css/sass/upload-main.scss')],
     },
     plugins: [
+      // new BundleAnalyzerPlugin({analyzerMode: 'static'}),
       new webpack.DefinePlugin({
         'process.env._ENV': JSON.stringify(config.ENV),
         'process.env.version': JSON.stringify(config.BUILD_NUMBER),
         'process.env.MODE': JSON.stringify(mode),
       }),
-      !isDev &&
-        pluginConfig.sentryWebpackPlugin &&
-        sentryWebpackPlugin(pluginConfig.sentryWebpackPlugin),
       new WebpackConcatPlugin({
         bundles: [
           {
@@ -567,6 +570,9 @@ const matecatConfig = async ({env}, {mode}) => {
         publicPath: '/public/build/',
         xhtml: true,
       }),
+      !isDev &&
+        pluginConfig.sentryWebpackPlugin &&
+        sentryWebpackPlugin(pluginConfig.sentryWebpackPlugin),
     ],
     devtool: isDev ? 'inline-source-map' : 'source-map',
   }
