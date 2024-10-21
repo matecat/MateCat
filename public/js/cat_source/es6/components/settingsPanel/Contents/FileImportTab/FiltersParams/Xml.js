@@ -112,11 +112,7 @@ export const Xml = () => {
       <div className="filters-params-option">
         <div>
           <h3>Preserve whitespaces</h3>
-          <p>
-            Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
-            pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
-            condimentum.
-          </p>
+          <p>Choose whether to preserve whitespace in all elements.</p>
         </div>
         <Controller
           control={control}
@@ -129,11 +125,18 @@ export const Xml = () => {
 
       <div className="filters-params-option">
         <div>
-          <h3>Elements</h3>
+          <h3>Translatable elements</h3>
           <p>
-            Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
-            pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
-            condimentum.
+            Choose which elements should be translated. If left empty, all keys
+            in the file will be extracted as translatable.
+            <br />
+            Element names are case sensitive.
+            <br />
+            If the toggle is set to "Translatable", only the elements entered
+            will be extracted as translatable.
+            <br />
+            If the toggle is set to "Non-translatable", all the element in the
+            file <b>except</b> those entered will be extracted as translatable.
           </p>
         </div>
         <div className="container-segmented-control">
@@ -158,9 +161,13 @@ export const Xml = () => {
         <div>
           <h3>Translatable attributes</h3>
           <p>
-            Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
-            pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
-            condimentum.
+            Enter the attributes whose content should be extracted as
+            translatable.
+            <br />
+            If left empty, no attributesd will be extracted.
+            <br />
+            The structure of each elements inside the array should be as
+            follows: elementname@attributename.
           </p>
         </div>
         <Controller

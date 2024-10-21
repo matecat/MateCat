@@ -62,7 +62,7 @@ export const Select = ({
   const wrapperDropDownRef = useRef()
   const selectedItemRef = useRef()
 
-  const [value, setValue] = useState(activeOption ? activeOption.id : '')
+  const [value, setValue] = useState(activeOption?.id ? activeOption.id : '')
   const [isDropdownVisible, setDropdownVisibility] = useState(false)
   const [isDropdownReversed, setDropdownReversed] = useState(false)
   const [selectedLabel, setSelectedLabel] = useState('')

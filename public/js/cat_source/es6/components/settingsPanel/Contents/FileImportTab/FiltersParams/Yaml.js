@@ -111,11 +111,18 @@ export const Yaml = () => {
     <div className="filters-params-accordion-content">
       <div className="filters-params-option">
         <div>
-          <h3>Keys</h3>
+          <h3>Translatable keys </h3>
           <p>
-            Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
-            pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
-            condimentum.
+            Choose which keys should be translated. If left empty, all keys in
+            the file will be extracted as translatable.
+            <br />
+            Key names are case sensitive.
+            <br />
+            If the toggle is set to "Translatable", only the keys entered will
+            be extracted as translatable.
+            <br />
+            If the toggle is set to "Non-translatable", all the keys in the file{' '}
+            <b>except</b> those entered will be extracted as translatable.
           </p>
         </div>
         <div className="container-segmented-control">

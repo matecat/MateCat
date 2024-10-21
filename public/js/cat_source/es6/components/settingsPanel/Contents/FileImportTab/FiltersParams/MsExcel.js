@@ -48,12 +48,8 @@ export const MsExcel = () => {
     <div className="filters-params-accordion-content">
       <div className="filters-params-option">
         <div>
-          <h3>Extract hidden cells</h3>
-          <p>
-            Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
-            pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
-            condimentum.
-          </p>
+          <h3>Translate hidden cells</h3>
+          <p>Choose whether to translate text in hidden cells.</p>
         </div>
         <Controller
           control={control}
@@ -66,12 +62,8 @@ export const MsExcel = () => {
 
       <div className="filters-params-option">
         <div>
-          <h3>Extract chart texts</h3>
-          <p>
-            Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
-            pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
-            condimentum.
-          </p>
+          <h3>Translate chart texts</h3>
+          <p>Choose whether to translate text in charts.</p>
         </div>
         <Controller
           control={control}
@@ -84,12 +76,8 @@ export const MsExcel = () => {
 
       <div className="filters-params-option">
         <div>
-          <h3>Extract text in text boxes</h3>
-          <p>
-            Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
-            pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
-            condimentum.
-          </p>
+          <h3>Translate text boxes</h3>
+          <p>Choose whether to translate text in text boxes.</p>
         </div>
         <Controller
           control={control}
@@ -102,12 +90,8 @@ export const MsExcel = () => {
 
       <div className="filters-params-option">
         <div>
-          <h3>Extract sheet names</h3>
-          <p>
-            Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
-            pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
-            condimentum.
-          </p>
+          <h3>Translate sheet names</h3>
+          <p>Choose whether to translate sheet names.</p>
         </div>
         <Controller
           control={control}
@@ -120,11 +104,10 @@ export const MsExcel = () => {
 
       <div className="filters-params-option">
         <div>
-          <h3>Extract document properties</h3>
+          <h3>Translate document properties</h3>
           <p>
-            Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
-            pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
-            condimentum.
+            Choose whether to translate document properties (e.g. the author's
+            name).
           </p>
         </div>
         <Controller
@@ -140,9 +123,13 @@ export const MsExcel = () => {
         <div>
           <h3>Exclude columns</h3>
           <p>
-            Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
-            pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
-            condimentum.
+            Choose which columns should not be translated.
+            <br />
+            The format for the entered items should be sheet number + column
+            letter.
+            <br />
+            E.g.: enter 1C to exclude from translation column C of the first
+            sheet in the file.
           </p>
         </div>
         <Controller
