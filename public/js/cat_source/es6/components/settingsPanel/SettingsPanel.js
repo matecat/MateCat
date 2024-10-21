@@ -109,7 +109,7 @@ const DEFAULT_CONTENTS = (isCattool = config.is_cattool) => {
             id: SETTINGS_PANEL_TABS.other,
             label: 'Other',
             description:
-              'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vulputate libero et velit interdum, ac aliquet odio mattis',
+              'Adjust general settings for project creation. <a href="#" target="_blank">More details</a>',
             component: <OtherTab />,
           },
         ]
