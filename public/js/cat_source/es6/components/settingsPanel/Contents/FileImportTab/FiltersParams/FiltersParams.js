@@ -131,8 +131,12 @@ export const FiltersParams = () => {
             <div className="file-import-tab-header">
               <h2>Extraction parameters</h2>
               <p>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc
-                vulputate libero et velit interdum, ac aliquet odio mattis.
+                Set specific import preferences for JSON, XML, Word, Excel,
+                YAML, and PowerPoint files.{' '}
+                <a href="#" target="_blank">
+                  More details
+                </a>
+                .
               </p>
               <SubTemplates
                 {...{
