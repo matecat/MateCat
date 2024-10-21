@@ -111,12 +111,8 @@ export const Json = () => {
     <div className="filters-params-accordion-content">
       <div className="filters-params-option">
         <div>
-          <h3>Extract arrays</h3>
-          <p>
-            Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
-            pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
-            condimentum.
-          </p>
+          <h3>Translate arrays</h3>
+          <p>Choose whether to translate text contained within arrays.</p>
         </div>
         <Controller
           control={control}
@@ -131,9 +127,8 @@ export const Json = () => {
         <div>
           <h3>Escape forward slashes</h3>
           <p>
-            Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
-            pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
-            condimentum.
+            Choose whether to escape forward slashes in the translated file
+            (i.e. \\/ in place of /).
           </p>
         </div>
         <Controller
@@ -147,11 +142,18 @@ export const Json = () => {
 
       <div className="filters-params-option">
         <div>
-          <h3>Keys</h3>
+          <h3>Translatable keys</h3>
           <p>
-            Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
-            pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
-            condimentum.
+            Choose which keys should be translated. If left empty, all keys in
+            the file will be extracted as translatable.
+            <br />
+            Key names are case sensitive.
+            <br />
+            If the toggle is set to "Translatable", only the keys entered will
+            be extracted as translatable.
+            <br />
+            If the toggle is set to "Non-translatable", all the keys in the file{' '}
+            <b>except</b> those entered will be extracted as translatable.
           </p>
         </div>
         <div className="container-segmented-control">
@@ -176,9 +178,13 @@ export const Json = () => {
         <div>
           <h3>Context keys</h3>
           <p>
-            Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
-            pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
-            condimentum.
+            Choose which keys should be extracted as context for translatable
+            keys.
+            <br />
+            Key names are case sensitive.
+            <br />
+            The extracted notes will be applied to translatable keys in the same
+            object scope.
           </p>
         </div>
         <Controller
@@ -199,9 +205,15 @@ export const Json = () => {
         <div>
           <h3>Character limit keys</h3>
           <p>
-            Lorem ipsum dolor sit amet consectetur. Nullam a vitae augue cras
-            pharetra. Proin mauris velit nisi feugiat ultricies tortor velit
-            condimentum.
+            Choose which keys should be extracted as the character limit for
+            translatable keys.
+            <br />
+            Key names are case sensitive.
+            <br />
+            Character limits will be applied to translatable keys in the same
+            object.
+            <br />
+            Keys with a character limit won't be segmented.
           </p>
         </div>
         <Controller
