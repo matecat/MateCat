@@ -232,8 +232,6 @@ a.ui.primary.right.floated.button.tiny.register-ok {
   color: $linkBlue;
 }
 
-.preferences-modal input[type='text'],
-.preferences-modal input[type='password'],
 .dqf-modal input[type='text'],
 .dqf-modal input[type='password'],
 .login-container-left input,
@@ -300,15 +298,6 @@ a.ui.primary.right.floated.button.tiny.register-ok {
   padding: 20px 0;
 }
 
-.preferences-modal input:disabled {
-  color: #999;
-  cursor: not-allowed;
-  background: $grey2;
-}
-
-.preferences-modal .reset-password {
-  margin-right: 20px;
-}
 
 .forgot-password-modal {
   background: url(/public/img/matecat_watch-left-border.png) no-repeat -34px 136px;
@@ -325,19 +314,6 @@ a.ui.primary.right.floated.button.tiny.register-ok {
 .reset-password-modal {
   padding: 5% 10%;
   width: 80%;
-}
-
-.register-modal {
-  padding: 25px 15%;
-  text-align: center;
-}
-
-.register-modal h2 {
-  padding: 10px 0 10px 0;
-}
-
-.register-modal .google-login-button {
-  margin-bottom: 0;
 }
 
 .preference-modal-message {
@@ -560,17 +536,6 @@ a.ui.primary.right.floated.button.tiny.register-ok {
   }
 }
 
-.preferences-modal {
-  text-align: left;
-}
-
-.preferences-modal h2 {
-  margin: 0;
-  padding: 0 0 0 15px;
-  font-size: 20px;
-  font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
-}
-
 .user-link {
   float: left;
   clear: both;
@@ -605,16 +570,6 @@ a.ui.primary.right.floated.button.tiny.register-ok {
   -moz-box-shadow: none;
   -webkit-box-shadow: none;
   border: 1px solid #666;
-}
-
-.matecat-modal-content .btn-confirm-medium:hover,
-.matecat-modal-content .btn-confirm-small:hover {
-  cursor: pointer;
-  box-shadow:
-    0 0 0 #e0e0e0,
-    0 0 2px rgba(0, 0, 0, 0.12),
-    0 2px 4px rgba(0, 0, 0, 0.24) !important;
-  color: #ffffff;
 }
 
 .matecat-modal-content .btn-confirm-medium:active {
@@ -962,17 +917,6 @@ a.ui.primary.right.floated.button.tiny.register-ok {
 .login-form-container {
   .form-divider {
     margin-bottom: 15px;
-  }
-}
-
-.register-modal {
-  .form-divider {
-    margin-top: 25px;
-    margin-bottom: 10px;
-  }
-
-  .condition-google {
-    font-size: 12px;
   }
 }
 

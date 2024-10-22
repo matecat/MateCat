@@ -7,15 +7,13 @@
 @import 'commons/icons';
 @import 'commons/nav-bar';
 @import 'commons/team-member';
+@import 'commons/aria-label-tooltip';
+@import 'commons/tooltip';
 
 @import 'common-main';
 @import 'common';
-@import 'popup';
-@import 'commons/tooltip';
 @import 'modals/language-selector';
-@import 'commons/aria-label-tooltip';
 @import 'components/common/HomePageSection';
-@import 'common-components';
 @import 'upload-page';
 @import 'components/common/Select';
 @import 'components/common/Dropdown';
@@ -30,6 +28,7 @@
 @import 'components/common/SegmentedControl';
 @import 'components/common/Accordion';
 @import 'components/signin/OnBoarding';
+@import 'components/Footer';
 
 @import 'settingsPanel';
 
@@ -166,25 +165,6 @@
     .multiple-text {
       width: fit-content;
       display: inline-block;
-    }
-  }
-  div#add-tmx-option:hover,
-  div#add-multiple-lang:hover {
-    background: rgba(0, 0, 0, 0.05);
-  }
-  div#add-tmx-option,
-  div#add-multiple-lang {
-    cursor: pointer;
-    color: #39699a;
-    font-size: 14px;
-    margin: 0;
-    padding: 15px;
-    .icon {
-      float: right;
-      font-size: 24px;
-      margin-top: -3px;
-      margin-right: 1px;
-      color: #39699a;
     }
   }
   div.item {
@@ -326,25 +306,6 @@
         width: 150px;
       }
     }
-    div#add-tmx-option:hover,
-    div#add-multiple-lang:hover {
-      background: rgba(0, 0, 0, 0.05);
-    }
-    div#add-tmx-option,
-    div#add-multiple-lang {
-      cursor: pointer;
-      color: #39699a;
-      font-size: 14px;
-      margin: 0;
-      padding: 15px;
-      .icon {
-        float: right;
-        font-size: 24px;
-        margin-top: -3px;
-        margin-right: 1px;
-        color: #39699a;
-      }
-    }
     div.item {
       width: 100%;
       min-width: 128px;
@@ -392,11 +353,6 @@
       width: 140px;
     }
   }
-  .translate-box.settings {
-    .more-options {
-      margin: 0;
-    }
-  }
   .translate-box.tmx-select {
     margin-right: 0;
   }
@@ -424,10 +380,10 @@
     min-height: 200px;
     -moz-border-radius: 4px;
     background: #fff;
-    display: flex;
-    flex-direction: column;
     justify-content: center;
     align-items: stretch;
+    display: flex;
+    flex-direction: column;
     text-align: center;
     gap: 12px;
 
@@ -440,6 +396,17 @@
       cursor: pointer;
     }
   }
+}
+
+.uploadloader {
+  background: url(../../img/loader.gif) center center no-repeat;
+  width: 20px;
+  height: 20px;
+  float: right;
+  margin-top: 3px;
+  position: absolute;
+  right: 233px;
+  background-size: 20px 20px;
 }
 
 @media only screen and (min-width: 1600px) {
