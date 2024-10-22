@@ -249,6 +249,10 @@ class Langs_Languages {
         return $acc;
     }
 
+    /**
+     * @param null $code
+     * @throws Lang_InvalidLanguageException
+     */
     public function validateLanguage( $code = null ){
         if ( empty( $code ) ) {
             throw new Lang_InvalidLanguageException( "Missing language.", -3 );

@@ -30,7 +30,7 @@ export const convertFileRequest = async ({
     if (dataParams[key] !== undefined) formData.append(key, dataParams[key])
   })
 
-  const response = await fetch(`action/convertFile/`, {
+  const response = await fetch(`api/app/convert-file`, {
     method: 'POST',
     credentials: 'include',
     signal: signal,
