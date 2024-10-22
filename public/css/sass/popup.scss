@@ -61,7 +61,7 @@
     overflow: visible;
     max-height: inherit;
     font-size: 24px;
-    //background: #002b5c url(../../img/logo-onlycat-white.svg) 12px 12px no-repeat;
+    //background: #002b5c url(/public/img/logo-onlycat-white.svg) 12px 12px no-repeat;
     padding: 10px 10px 7px 64px;
     background-size: 40px;
     /* border-bottom: 1px solid #000; */
@@ -295,18 +295,18 @@
   }
 
   &.outsource.loading .delivery {
-    background: url(../../img/loader.gif) #f6f6f6 center center no-repeat;
+    background: url(/public/img/loader.gif) #f6f6f6 center center no-repeat;
     background-size: 20px;
   }
 
   &.outsource.loading .tprice {
-    background: url(../../img/loader.gif) #f6f6f6 center 30px no-repeat;
+    background: url(/public/img/loader.gif) #f6f6f6 center 30px no-repeat;
     background-size: 20px;
     padding-top: 47px;
   }
 
   &.outsource.loading .translator_info_box {
-    background: url(../../img/loader.gif) center 20px no-repeat;
+    background: url(/public/img/loader.gif) center 20px no-repeat;
     background-size: 20px;
     padding-top: 45px;
     border-left: none;

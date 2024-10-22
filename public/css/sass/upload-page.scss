@@ -992,7 +992,7 @@ button.ui-button::-moz-focus-inner {
 }
 
 .converting .ui-progressbar-value {
-  background: url(../../img/progressbar-green.gif) !important;
+  background: url(/public/img/progressbar-green.gif) !important;
 }
 
 /*jquery.image-gallery.min.css*/
@@ -1003,7 +1003,7 @@ button.ui-button::-moz-focus-inner {
   width: 128px;
   height: 128px;
   margin: -64px 0 0 -64px;
-  background: url(../../img/loading.gif);
+  background: url(/public/img/loading.gif);
   z-index: 9999;
 }
 
@@ -1195,7 +1195,7 @@ button.ui-button::-moz-focus-inner {
 
 .files .ui-progressbar-value,
 .fileupload-buttonbar .ui-progressbar-value {
-  background: url(../../img/progressbar.gif);
+  background: url(/public/img/progressbar.gif);
 }
 
 .fileupload-buttonbar .fade,
@@ -1208,7 +1208,7 @@ button.ui-button::-moz-focus-inner {
   left: 50%;
   width: 128px;
   height: 128px;
-  background: url(../../img/loading.gif) center no-repeat;
+  background: url(/public/img/loading.gif) center no-repeat;
   display: none;
 }
 
@@ -2142,7 +2142,7 @@ a {
 }
 
 span.gdrive-icon {
-  background: url(../../img/logo-drive-16.png);
+  background: url(/public/img/logo-drive-16.png);
   background-size: 100%;
   width: 16px;
   height: 14px;
@@ -2449,7 +2449,7 @@ header {
 }
 
 .close {
-  background: url(../../img/x.png) center 1px no-repeat;
+  background: url(/public/img/x.png) center 1px no-repeat;
   width: 22px;
   height: 20px;
   display: block;
@@ -2460,7 +2460,7 @@ header {
 
 .close:hover,
 .close:focus {
-  background: url(../../img/x.png) center -30px no-repeat;
+  background: url(/public/img/x.png) center -30px no-repeat;
 }
 
 .listlang {
@@ -2824,7 +2824,7 @@ span.load-gdrive {
   margin: 0;
   padding: 0.6rem 0.25rem 0.4rem 2.2rem;
   border: 0.1rem solid #b7b9bc;
-  background: url(../../img/logo-drive-16.png) 1.3rem 0.85rem no-repeat;
+  background: url(/public/img/logo-drive-16.png) 1.3rem 0.85rem no-repeat;
   background-color: #f5f5f5;
   cursor: pointer;
 }
@@ -2866,7 +2866,7 @@ div.continue-gdrive {
 .continue-gdrive span.load-gdrive {
   width: auto;
   padding: 0.5rem 0.7rem 0rem 2.3rem;
-  background: url(../../img/logo-drive-16.png) 0.7rem 0.55rem no-repeat;
+  background: url(/public/img/logo-drive-16.png) 0.7rem 0.55rem no-repeat;
   margin-right: 10px;
   background-size: 20px;
   height: 36px;
@@ -3012,7 +3012,7 @@ a.pull-right.confirmDelete {
   background-color: rgba(255, 255, 255, 0.9);
 
   .project-template-select-loading-icon {
-    background: url(../../img/loading.gif) 47% 6px no-repeat !important;
+    background: url(/public/img/loading.gif) 47% 6px no-repeat !important;
     background-size: 24px !important;
     height: 100%;
   }
@@ -3096,7 +3096,7 @@ a.pull-right.confirmDelete {
   background-color: rgba(255, 255, 255, 0.9);
 
   .project-template-select-loading-icon {
-    background: url(../../img/loading.gif) 47% 6px no-repeat !important;
+    background: url(/public/img/loading.gif) 47% 6px no-repeat !important;
     background-size: 24px !important;
     height: 100%;
   }

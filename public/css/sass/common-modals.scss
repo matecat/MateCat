@@ -204,7 +204,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
 }
 
 .google-login-button {
-  background: url('../../img/btn_gg_sprite.png') no-repeat;
+  background: url('/public/img/btn_gg_sprite.png') no-repeat;
   background-position: 0 0;
 }
 
@@ -328,7 +328,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
 }
 
 .button-loader {
-  background: url(../../img/loader.gif) center center no-repeat;
+  background: url(/public/img/loader.gif) center center no-repeat;
   width: 20px;
   height: 20px;
   visibility: hidden;
@@ -397,7 +397,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
 
   .modal-logo {
     background-size: inherit;
-    background: url(../../img/logo_matecat_small_white.svg) no-repeat;
+    background: url(/public/img/logo_matecat_small_white.svg) no-repeat;
     background-position-y: center;
     background-size: contain;
     width: 35px;
@@ -592,7 +592,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
 }
 
 .matecat-modal-content .btn-confirm-medium.google-login-button {
-  background: url(../../img/btn_gg_sprite.png) no-repeat;
+  background: url(/public/img/btn_gg_sprite.png) no-repeat;
   background-position: 0 0;
   background-size: cover;
   border: none;
@@ -612,7 +612,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
 }
 
 .matecat-modal-content .btn-confirm-medium.google-login-button:hover {
-  background: url(../../img/btn_gg_sprite.png) no-repeat;
+  background: url(/public/img/btn_gg_sprite.png) no-repeat;
   background-position: 0 -101px;
   background-size: cover;
   box-shadow: none !important;

@@ -597,17 +597,17 @@ p.split-shortcut {
 }
 
 .splitStart .sid {
-  background: url(../../img/split-bg.png) no-repeat;
+  background: url(/public/img/split-bg.png) no-repeat;
   background-position: 48.5% 23px;
 }
 
 .splitInner .sid {
-  background: url(../../img/split-bg.png) no-repeat;
+  background: url(/public/img/split-bg.png) no-repeat;
   background-position: 48.5% 16px;
 }
 
 .splitEnd .sid {
-  background: url(../../img/split-bg.png) no-repeat;
+  background: url(/public/img/split-bg.png) no-repeat;
   background-position: 49% bottom;
 }
 
@@ -758,7 +758,7 @@ strong:first-child {
 }
 
 .tools .wrapper {
-  background: url(../../img/tools.gif) 5px 3px no-repeat;
+  background: url(/public/img/tools.gif) 5px 3px no-repeat;
   height: 27px;
 }
 
@@ -1024,7 +1024,7 @@ article .approved:active {
   float: left;
   margin-left: 47%;
   margin-top: 5px;
-  background: url(../../img/outercopy.png) center 1px no-repeat;
+  background: url(/public/img/outercopy.png) center 1px no-repeat;
   width: 50px !important;
   z-index: 1;
   background-size: 42px;
@@ -1032,7 +1032,7 @@ article .approved:active {
 }
 
 .outersource .copy:hover {
-  background: url(../../img/outercopy.png) 4px -69px no-repeat;
+  background: url(/public/img/outercopy.png) 4px -69px no-repeat;
   background-size: 42px;
 }
 
@@ -1088,7 +1088,7 @@ body .main-container {
   #loader-getMoreSegments {
     display: none;
     position: fixed;
-    background: url(../../img/loading.gif) 48% top no-repeat !important;
+    background: url(/public/img/loading.gif) 48% top no-repeat !important;
     background-size: 30px 30px !important;
     width: 30px;
     height: 30px;
@@ -1111,7 +1111,7 @@ body .main-container {
 
 #outer.loading {
   display: block;
-  background: url(../../img/loading.gif) 48% center no-repeat;
+  background: url(/public/img/loading.gif) 48% center no-repeat;
   background-size: 30px 30px !important;
   float: left;
   position: relative;
@@ -1443,7 +1443,7 @@ body .footer.showMatches .sub-editor.open {
 
 .sub-editor .cc-search.loading,
 .sub-editor .gl-search.loading {
-  background: url(../../img/loading.gif) 50% 22px no-repeat;
+  background: url(/public/img/loading.gif) 50% 22px no-repeat;
   float: left;
   width: 100%;
   background-size: 20px 20px;
@@ -1531,7 +1531,7 @@ body .footer.showMatches .sub-editor.open {
   left: auto !important;
   right: 100px;
   top: 12px;
-  background: url(../../img/loading-black.gif) 0 0 no-repeat !important;
+  background: url(/public/img/loading-black.gif) 0 0 no-repeat !important;
 }
 
 .filtering .filter,
@@ -1739,7 +1739,7 @@ body .footer.showMatches .sub-editor.open {
 .loader:not(.ui) {
   width: 20px;
   height: 20px;
-  background: url(../../img/loading.gif) 0 0 no-repeat !important;
+  background: url(/public/img/loading.gif) 0 0 no-repeat !important;
   position: absolute;
   bottom: 11px;
   display: none;
@@ -2323,7 +2323,7 @@ body.rtl-target .editor .editarea span {
 }
 
 .message li {
-  background: url(../../img/bad.png) 22px center no-repeat;
+  background: url(/public/img/bad.png) 22px center no-repeat;
   padding-left: 40px !important;
   background-size: 12px 12px;
 }
@@ -2544,7 +2544,7 @@ body.rtl-target .editor .editarea span {
 }
 
 .error-img {
-  background: #c5351c url(../../img/warning.png) no-repeat center;
+  background: #c5351c url(/public/img/warning.png) no-repeat center;
   background-size: 17px;
   width: 22px;
   height: 22px;
@@ -2557,7 +2557,7 @@ body.rtl-target .editor .editarea span {
 }
 
 .warning-img {
-  background: #ff9900 url(../../img/warning.png) no-repeat center;
+  background: #ff9900 url(/public/img/warning.png) no-repeat center;
   background-size: 17px;
   width: 22px;
   height: 22px;
@@ -2671,7 +2671,7 @@ section.status-rejected .status {
 
 body[data-offline-mode='light-off'] section.setTranslationPending .status,
 section.setTranslationError .status {
-  background-image: url(../../img/offline-bg.png) !important;
+  background-image: url(/public/img/offline-bg.png) !important;
   background-color: #0798bc !important;
   background-repeat: no-repeat !important;
   background-position: center center;
@@ -2696,7 +2696,7 @@ section.editor.status-rejected .status {
 }
 
 section.modified .status {
-  background-image: url(../../img/stripes.png) !important;
+  background-image: url(/public/img/stripes.png) !important;
   background-repeat: repeat !important;
   background-size: 140% !important;
 }
@@ -2753,7 +2753,7 @@ section.opened.editor .status {
   display: block;
   width: 20px;
   height: 20px;
-  background: url(../../img/arrow-menucolor.png) 0 0 no-repeat;
+  background: url(/public/img/arrow-menucolor.png) 0 0 no-repeat;
   position: absolute;
   margin: -8px 0 0 123px;
   background-size: 10px 8px;
@@ -2766,7 +2766,7 @@ section.opened.editor .status {
   display: block;
   width: 20px;
   height: 20px;
-  background: url(../../img/arrow-menucolor.png) 0 0 no-repeat;
+  background: url(/public/img/arrow-menucolor.png) 0 0 no-repeat;
   position: absolute;
   margin: -8px 0 0 123px;
   background-size: 10px 8px;
@@ -2925,10 +2925,10 @@ section.opened.editor .status {
   font-family: Calibri;
   src:
     local(Calibri),
-    url('../fonts/calibri-webfont.woff') format('woff'),
-    url('../fonts/calibri-webfont.ttf') format('truetype'),
-    url('../fonts/calibri-webfont.eot'),
-    url('../fonts/calibri-webfont.eot?#iefix') format('embedded-opentype');
+    url('/public/css/fonts/calibri-webfont.woff') format('woff'),
+    url('/public/css/fonts/calibri-webfont.ttf') format('truetype'),
+    url('/public/css/fonts/calibri-webfont.eot'),
+    url('/public/css/fonts/calibri-webfont.eot?#iefix') format('embedded-opentype');
 }
 
 @font-face {
@@ -2936,10 +2936,10 @@ section.opened.editor .status {
   font-weight: bold;
   src:
     local('Calibri Bold'),
-    url('../fonts/calibri_bold-webfont.woff') format('woff'),
-    url('../fonts/calibri_bold-webfont.ttf') format('truetype'),
-    url('../fonts/calibri_bold-webfont.eot'),
-    url('../fonts/calibri_bold-webfont.eot?#iefix') format('embedded-opentype');
+    url('/public/css/fonts/calibri_bold-webfont.woff') format('woff'),
+    url('/public/css/fonts/calibri_bold-webfont.ttf') format('truetype'),
+    url('/public/css/fonts/calibri_bold-webfont.eot'),
+    url('/public/css/fonts/calibri_bold-webfont.eot?#iefix') format('embedded-opentype');
 }
 
 .sendbox {
@@ -3478,7 +3478,7 @@ del.diff {
   /*width: 20px !important;*/
   top: 3px;
   font-size: 15px;
-  background: url(../../img/dot.png) 0px 0px no-repeat;
+  background: url(/public/img/dot.png) 0px 0px no-repeat;
   background-size: 6px;
   /*
 	color: $grey2;
@@ -3566,7 +3566,7 @@ section .toolbar .autofillTag {
   display: inline !important;
   margin-left: 6px;
   padding: 1px 2px 3px 40px;
-  background-image: url(../../img/soft-return1.png);
+  background-image: url(/public/img/soft-return1.png);
   background-size: 16px;
   background-repeat: no-repeat;
   background-position: center left;
@@ -3584,7 +3584,7 @@ section .toolbar .autofillTag {
   display: inline !important;
   margin-left: 6px;
   padding: 1px 2px 3px 40px;
-  background-image: url(../../img/hard-return.png);
+  background-image: url(/public/img/hard-return.png);
   background-size: 16px;
   background-repeat: no-repeat;
   background-position: center left;
@@ -3896,12 +3896,12 @@ body.tagmode-default-extended .textarea-container .tagMode li.extended,
   only screen and (min-resolution: 2dppx) {
   .outersource .copy {
     top: 7px;
-    background: url(../../img/outercopy@2x.png) center 1px no-repeat;
+    background: url(/public/img/outercopy@2x.png) center 1px no-repeat;
     background-size: 12px 11px;
   }
 
   .outersource .copy:hover {
-    background: url(../../img/outercopy@2x.png) 4px -69px no-repeat;
+    background: url(/public/img/outercopy@2x.png) 4px -69px no-repeat;
     background-size: 42px;
   }
 
@@ -4207,21 +4207,6 @@ $gray-2: #bbbbbb;
 $light-blue: #0055b8;
 $white: #fff;
 
-/* Edit Log */
-
-.editlog {
-  padding-top: 88px;
-
-  .wrapper {
-    margin: 0 auto 64px auto;
-  }
-
-  header {
-    .logo {
-      margin-top: 0 !important;
-    }
-  }
-}
 
 /* XLIFF to Target page */
 
@@ -4443,28 +4428,28 @@ header {
       border: none;
 
       &.isMarkedComplete {
-        background-image: url('../../img/icons/icon-mark-active.svg');
+        background-image: url('/public/img/icons/icon-mark-active.svg');
         background-size: cover;
       }
       &.isMarkableAsComplete {
         opacity: 1;
         padding: 0 !important;
         border-radius: 0;
-        background: transparent url('../../img/icons/icon-mark.svg');
+        background: transparent url('/public/img/icons/icon-mark.svg');
         background-size: cover;
       }
       &.notMarkedComplete {
-        background: transparent url('../../img/icons/icon-mark.svg');
+        background: transparent url('/public/img/icons/icon-mark.svg');
         opacity: 0.7;
         background-size: cover;
         cursor: not-allowed;
       }
     }
     #action-download {
-      background-image: url('../../img/icons/icon-download.svg');
+      background-image: url('/public/img/icons/icon-download.svg');
       background-size: 30px;
       &.job-completed {
-        background-image: url('../../img/icons/icon-download-complete.svg');
+        background-image: url('/public/img/icons/icon-download-complete.svg');
       }
     }
     #action-QR,
