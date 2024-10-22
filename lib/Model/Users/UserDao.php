@@ -41,11 +41,12 @@ class Users_UserDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param $uids_array
+     * @param array $uids_array
      *
      * @return Users_UserStruct[]
+     * @throws ReflectionException
      */
-    public function getByUids( $uids_array ): array {
+    public function getByUids( array $uids_array ): array {
 
         $sanitized_array = [];
 

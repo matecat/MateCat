@@ -79,9 +79,10 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
     /**
      * @param $idSegment
      *
-     * @return bool|int
+     * @return bool
+     * @throws ReflectionException
      */
-    public function destroySegmentIdCache( $idSegment ) {
+    public function destroySegmentIdCache( $idSegment ): bool {
         $con  = $this->database->getConnection();
         $stmt = $con->prepare( "SELECT * from comments WHERE id_segment = :id_segment and (message_type = :message_type_comment or message_type = :message_type_resolve) order by id asc" );
 
@@ -95,16 +96,17 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param     $idSegment
+     * @param int $idSegment
      * @param int $ttl
      *
-     * @return DataAccess_IDaoStruct[]
+     * @return Comments_BaseCommentStruct[]
+     * @throws ReflectionException
      */
-    public function getBySegmentId( $idSegment, $ttl = 7200 ) {
+    public function getBySegmentId( int $idSegment, int $ttl = 7200 ): array {
         $sql  = "SELECT * from comments WHERE id_segment = :id_segment and (message_type = :message_type_comment or message_type = :message_type_resolve) order by id asc";
         $stmt = $this->_getStatementForQuery( $sql );
 
-        return $this->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
+        return $this->setCacheTTL( $ttl )->_fetchObject( $stmt, new Comments_BaseCommentStruct(), [
                 'id_segment'           => $idSegment,
                 'message_type_comment' => Comments_CommentDao::TYPE_COMMENT,
                 'message_type_resolve' => Comments_CommentDao::TYPE_RESOLVE,
@@ -115,14 +117,18 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
      * @param     $id
      * @param int $ttl
      *
-     * @return DataAccess_IDaoStruct
+     * @return Comments_BaseCommentStruct|null
+     * @throws ReflectionException
      */
-    public function getById( $id, $ttl = 86400 ) {
+    public function getById( $id, int $ttl = 86400 ): ?Comments_BaseCommentStruct {
         $stmt = $this->_getStatementForQuery( "SELECT * from comments WHERE id = :id" );
 
-        return @$this->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
+        /** @var $res Comments_BaseCommentStruct */
+        $res = $this->setCacheTTL( $ttl )->_fetchObject( $stmt, new Comments_BaseCommentStruct(), [
                 'id' => $id
-        ] )[ 0 ];
+        ] )[ 0 ] ?? null;
+
+        return $res;
     }
 
     /**
@@ -284,6 +290,9 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
         return $stmt->fetchAll();
     }
 
+    /**
+     * @throws Exception
+     */
     private function validateComment( $obj ) {
 
         if ( ( $obj->message === null or $obj->message === '' ) and $obj->message_type == self::TYPE_COMMENT ) {
@@ -337,11 +346,11 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
         return $content;
     }
 
-    public static function getUsersIdFromContent( $content ) {
+    public static function getUsersIdFromContent( $content ): array {
 
         $users = [];
 
-        preg_match_all( "/\{\@([\d]+)\@\}/", $content, $find_users );
+        preg_match_all( "/\{@(\d+)@}/", $content, $find_users );
         if ( isset( $find_users[ 1 ] ) ) {
             $users = $find_users[ 1 ];
         }
