@@ -521,7 +521,7 @@ class NewController extends ajaxController {
                 }
 
                 /* Do conversions here */
-                $converter              = new ConvertFileWrapper( $stdFileObjects, false );
+                $converter              = new ConvertFileWrapper( $stdFileObjects, false ); // @TODO cambiare con ConvertFile
                 $converter->intDir      = $intDir;
                 $converter->errDir      = $errDir;
                 $converter->cookieDir   = $cookieDir;
