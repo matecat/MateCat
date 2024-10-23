@@ -357,22 +357,25 @@ class FsFilesStorage extends AbstractFilesStorage {
      */
     public static function moveFileFromUploadSessionToQueuePath( $uploadSession ) {
 
+        $uploadDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession;
         $destination = INIT::$QUEUE_PROJECT_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession;
         mkdir( $destination, 0755 );
-        foreach (
+
+        if(is_dir($uploadDir)){
+            foreach (
                 $iterator = new RecursiveIteratorIterator(
-                        new RecursiveDirectoryIterator( INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession, FilesystemIterator::SKIP_DOTS ),
-                        RecursiveIteratorIterator::SELF_FIRST ) as $item
-        ) {
-            if ( $item->isDir() ) {
-                mkdir( $destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName() );
-            } else {
-                copy( $item, $destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName() );
+                    new RecursiveDirectoryIterator( $uploadDir, FilesystemIterator::SKIP_DOTS ),
+                    RecursiveIteratorIterator::SELF_FIRST ) as $item
+            ) {
+                if ( $item->isDir() ) {
+                    mkdir( $destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName() );
+                } else {
+                    copy( $item, $destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName() );
+                }
             }
+
+            Utils::deleteDir( $uploadDir );
         }
-
-        Utils::deleteDir( INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession );
-
     }
 
     /**

@@ -36,6 +36,10 @@ class ConvertFile
      * @var bool
      */
     private bool $convertZipFile;
+    /**
+     * @var Users_UserStruct
+     */
+    private ?Users_UserStruct $user = null;
 
     /**
      * ConvertFile constructor.
@@ -74,6 +78,14 @@ class ConvertFile
         $this->segmentation_rule = $segmentation_rule;
         $this->featureSet = $featureSet;
         $this->filters_extraction_parameters = $filters_extraction_parameters;
+    }
+
+    /**
+     * @param Users_UserStruct $user
+     */
+    public function setUser( Users_UserStruct $user )
+    {
+        $this->user = $user;
     }
 
     /**

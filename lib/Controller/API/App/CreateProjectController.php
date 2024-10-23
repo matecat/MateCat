@@ -52,16 +52,17 @@ class CreateProjectController extends KleinController {
 
             $arFiles = explode( '@@SEP@@', html_entity_decode( $this->data['file_name'], ENT_QUOTES, 'UTF-8' ) );
             $default_project_name = $arFiles[ 0 ];
+
             if ( count( $arFiles ) > 1 ) {
                 $default_project_name = "MATECAT_PROJ-" . date( "Ymdhi" );
             }
 
-            if ( empty( $data['project_name'] ) ) {
-                $data['project_name'] = $default_project_name;
+            if ( empty( $this->data['project_name'] ) ) {
+                $this->data['project_name'] = $default_project_name;
             }
 
             // SET SOURCE COOKIE
-            CookieManager::setCookie( Constants::COOKIE_SOURCE_LANG, $data['source_lang'],
+            CookieManager::setCookie( Constants::COOKIE_SOURCE_LANG, $this->data['source_lang'],
                 [
                     'expires'  => time() + ( 86400 * 365 ),
                     'path'     => '/',
@@ -73,7 +74,7 @@ class CreateProjectController extends KleinController {
             );
 
             // SET TARGET COOKIE
-            CookieManager::setCookie( Constants::COOKIE_TARGET_LANG, $data['target_lang'],
+            CookieManager::setCookie( Constants::COOKIE_TARGET_LANG, $this->data['target_lang'],
                 [
                     'expires'  => time() + ( 86400 * 365 ),
                     'path'     => '/',
@@ -127,57 +128,57 @@ class CreateProjectController extends KleinController {
             $projectManager = new ProjectManager();
             $projectStructure = $projectManager->getProjectStructure();
 
-            $projectStructure[ 'project_name' ]                 = $data['project_name'];
-            $projectStructure[ 'private_tm_key' ]               = $data['private_tm_key'];
+            $projectStructure[ 'project_name' ]                 = $this->data['project_name'];
+            $projectStructure[ 'private_tm_key' ]               = $this->data['private_tm_key'];
             $projectStructure[ 'uploadToken' ]                  = $_COOKIE[ 'upload_session' ];
             $projectStructure[ 'array_files' ]                  = $arFiles; //list of file name
             $projectStructure[ 'array_files_meta' ]             = $arMeta; //list of file metadata
-            $projectStructure[ 'source_language' ]              = $data['source_lang'];
-            $projectStructure[ 'target_language' ]              = explode( ',', $data['target_lang'] );
-            $projectStructure[ 'job_subject' ]                  = $data['job_subject'];
-            $projectStructure[ 'mt_engine' ]                    = $data['mt_engine'];
-            $projectStructure[ 'tms_engine' ]                   = $data['tms_engine'];
+            $projectStructure[ 'source_language' ]              = $this->data['source_lang'];
+            $projectStructure[ 'target_language' ]              = explode( ',', $this->data['target_lang'] );
+            $projectStructure[ 'job_subject' ]                  = $this->data['job_subject'];
+            $projectStructure[ 'mt_engine' ]                    = $this->data['mt_engine'];
+            $projectStructure[ 'tms_engine' ]                   = $this->data['tms_engine'];
             $projectStructure[ 'status' ]                       = Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
-            $projectStructure[ 'pretranslate_100' ]             = $data['pretranslate_100'];
-            $projectStructure[ 'pretranslate_101' ]             = $data['pretranslate_101'];
-            $projectStructure[ 'dialect_strict' ]               = $data['dialect_strict'];
-            $projectStructure[ 'only_private' ]                 = $data['only_private'];
-            $projectStructure[ 'due_date' ]                     = $data['due_date'];
-            $projectStructure[ 'target_language_mt_engine_id' ] = $data[ 'target_language_mt_engine_id' ];
+            $projectStructure[ 'pretranslate_100' ]             = $this->data['pretranslate_100'];
+            $projectStructure[ 'pretranslate_101' ]             = $this->data['pretranslate_101'];
+            $projectStructure[ 'dialect_strict' ]               = $this->data['dialect_strict'];
+            $projectStructure[ 'only_private' ]                 = $this->data['only_private'];
+            $projectStructure[ 'due_date' ]                     = $this->data['due_date'];
+            $projectStructure[ 'target_language_mt_engine_id' ] = $this->data[ 'target_language_mt_engine_id' ];
             $projectStructure[ 'user_ip' ]                      = Utils::getRealIpAddr();
             $projectStructure[ 'HTTP_HOST' ]                    = INIT::$HTTPHOST;
 
             // MMT Glossaries
             // (if $engine is not an MMT instance, ignore 'mmt_glossaries')
-            $engine = Engine::getInstance( $data['mt_engine'] );
-            if ( $engine instanceof Engines_MMT and $data['mmt_glossaries'] !== null ) {
-                $projectStructure[ 'mmt_glossaries' ] = $data['mmt_glossaries'];
+            $engine = Engine::getInstance( $this->data['mt_engine'] );
+            if ( $engine instanceof Engines_MMT and $this->data['mmt_glossaries'] !== null ) {
+                $projectStructure[ 'mmt_glossaries' ] = $this->data['mmt_glossaries'];
             }
 
             // DeepL
-            if ( $engine instanceof Engines_DeepL and $data['deepl_formality'] !== null ) {
-                $projectStructure[ 'deepl_formality' ] = $data['deepl_formality'];
+            if ( $engine instanceof Engines_DeepL and $this->data['deepl_formality'] !== null ) {
+                $projectStructure[ 'deepl_formality' ] = $this->data['deepl_formality'];
             }
 
-            if ( $engine instanceof Engines_DeepL and $data['deepl_id_glossary'] !== null ) {
-                $projectStructure[ 'deepl_id_glossary' ] = $data['deepl_id_glossary'];
+            if ( $engine instanceof Engines_DeepL and $this->data['deepl_id_glossary'] !== null ) {
+                $projectStructure[ 'deepl_id_glossary' ] = $this->data['deepl_id_glossary'];
             }
 
-            if ( !empty($data['filters_extraction_parameters']) ) {
-                $projectStructure[ 'filters_extraction_parameters' ] = $data['filters_extraction_parameters'];
+            if ( !empty($this->data['filters_extraction_parameters']) ) {
+                $projectStructure[ 'filters_extraction_parameters' ] = $this->data['filters_extraction_parameters'];
             }
 
-            if ( !empty($data['xliff_parameters']) ) {
-                $projectStructure[ 'xliff_parameters' ] = $data['xliff_parameters'];
+            if ( !empty($this->data['xliff_parameters']) ) {
+                $projectStructure[ 'xliff_parameters' ] = $this->data['xliff_parameters'];
             }
 
             // with the qa template id
-            if ( !empty($data['qaModelTemplate']) ) {
-                $projectStructure[ 'qa_model_template' ] = $data['qaModelTemplate']->getDecodedModel();
+            if ( !empty($this->data['qaModelTemplate']) ) {
+                $projectStructure[ 'qa_model_template' ] = $this->data['qaModelTemplate']->getDecodedModel();
             }
 
-            if ( !empty($data['payableRateModelTemplate']) ) {
-                $projectStructure[ 'payable_rate_model_id' ] = $data['payableRateModelTemplate']->id;
+            if ( !empty($this->data['payableRateModelTemplate']) ) {
+                $projectStructure[ 'payable_rate_model_id' ] = $this->data['payableRateModelTemplate']->id;
             }
 
             //TODO enable from CONFIG
@@ -187,10 +188,10 @@ class CreateProjectController extends KleinController {
             $projectStructure[ 'uid' ]          = $this->user->uid;
             $projectStructure[ 'id_customer' ]  = $this->user->email;
             $projectStructure[ 'owner' ]        = $this->user->email;
-            $projectManager->setTeam( $data['team'] ); // set the team object to avoid useless query
+            $projectManager->setTeam( $this->data['team'] ); // set the team object to avoid useless query
 
             //set features override
-            $projectStructure[ 'project_features' ] = $data['project_features'];
+            $projectStructure[ 'project_features' ] = $this->data['project_features'];
 
             //reserve a project id from the sequence
             $projectStructure[ 'id_project' ] = Database::obtain()->nextSequence( Database::SEQ_ID_PROJECT )[ 0 ];
@@ -205,8 +206,11 @@ class CreateProjectController extends KleinController {
             $this->assignLastCreatedPid( $projectStructure[ 'id_project' ] );
 
             return $this->response->json([
-                'id_project' => $projectStructure[ 'id_project' ],
-                'password'   => $projectStructure[ 'ppassword' ]
+                'data' => [
+                    'id_project' => $projectStructure[ 'id_project' ],
+                    'password'   => $projectStructure[ 'ppassword' ]
+                ],
+                'errors' => [],
             ]);
 
         } catch (Exception $exception){
@@ -247,8 +251,7 @@ class CreateProjectController extends KleinController {
         $array_keys = json_decode( $_POST[ 'private_keys_list' ], true );
         $array_keys = array_merge( $array_keys[ 'ownergroup' ], $array_keys[ 'mine' ], $array_keys[ 'anonymous' ] );
 
-        //if a string is sent by the client, transform it into a valid array
-        $private_tm_key = [];
+        // if a string is sent by the client, transform it into a valid array
         if ( !empty( $private_tm_key ) ) {
             $private_tm_key = [
                 [
@@ -258,6 +261,8 @@ class CreateProjectController extends KleinController {
                     'w'    => true
                 ]
             ];
+        } else {
+            $private_tm_key = [];
         }
 
         if ( $array_keys ) { // some keys are selected from panel
@@ -331,15 +336,15 @@ class CreateProjectController extends KleinController {
             throw new InvalidArgumentException("Missing file name.", -1);
         }
 
-        if ( empty( $this->job_subject ) ) {
+        if ( empty( $job_subject ) ) {
             throw new InvalidArgumentException("Missing job subject.", -5);
         }
 
-        if ( $pretranslate_100 !== 1 and $pretranslate_100 !== 0 ) {
+        if ( $pretranslate_100 != 1 and $pretranslate_100 != 0 ) {
             throw new InvalidArgumentException("Invalid pretranslate_100 value", -6);
         }
 
-        if ( $pretranslate_101 !== null and $pretranslate_101 !== 1 && $pretranslate_101 !== 0 ) {
+        if ( $pretranslate_101 !== null and $pretranslate_101 != 1 && $pretranslate_101 != 0 ) {
             throw new InvalidArgumentException("Invalid pretranslate_101 value", -6);
         }
 

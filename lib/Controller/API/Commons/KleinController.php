@@ -18,6 +18,7 @@ use INIT;
 use InvalidArgumentException;
 use Klein\Response;
 use RuntimeException;
+use SebastianBergmann\Invoker\TimeoutException;
 use Swaggest\JsonSchema\InvalidValue;
 use Users_UserDao;
 use Validator\Errors\JSONValidatorException;
@@ -367,6 +368,10 @@ abstract class KleinController implements IController {
 
             case RuntimeException::class:
                 $httpCode = 500;
+                break;
+
+            case TimeoutException::class:
+                $httpCode = 504;
                 break;
 
             default:

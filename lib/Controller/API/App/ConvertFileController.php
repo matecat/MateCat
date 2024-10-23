@@ -2,31 +2,12 @@
 
 namespace API\App;
 
-use AMQHandler;
 use API\Commons\KleinController;
 use API\Commons\Validators\LoginValidator;
-use Comments_CommentDao;
-use Comments_CommentStruct;
 use ConvertFile;
-use Database;
-use Email\CommentEmail;
-use Email\CommentMentionEmail;
-use Email\CommentResolveEmail;
 use Exception;
-use FilesStorage\FilesStorageFactory;
 use INIT;
 use InvalidArgumentException;
-use Jobs_JobDao;
-use Jobs_JobStruct;
-use Klein\Response;
-use Log;
-use RuntimeException;
-use Stomp\Transport\Message;
-use Teams\MembershipDao;
-use Url\JobUrlBuilder;
-use Users_UserDao;
-use Users_UserStruct;
-use Utils;
 
 class ConvertFileController extends KleinController {
 
@@ -50,7 +31,7 @@ class ConvertFileController extends KleinController {
                 $data['target_lang'],
                 $intDir,
                 $errDir,
-                $cookieDir,
+                $cookieDir, 
                 $data['segmentation_rule'],
                 $this->featureSet,
                 $data['filters_extraction_parameters'],
