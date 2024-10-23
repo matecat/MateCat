@@ -20,7 +20,7 @@ class JobStructTest extends AbstractTest {
     /**
      * @var Jobs_JobStruct
      */
-    public $originalJobStruct;
+    public Jobs_JobStruct $originalJobStruct;
 
     public function setUp(): void {
 

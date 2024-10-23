@@ -24,7 +24,7 @@ class getSegmentsController extends ajaxController {
     private $create_date = "";
 
     /**
-     * @var Chunks_ChunkStruct
+     * @var Jobs_JobStruct
      */
     private $job;
 

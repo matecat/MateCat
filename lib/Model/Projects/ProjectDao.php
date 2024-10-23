@@ -268,15 +268,18 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
      * @param     $id
      * @param int $ttl
      *
-     * @return DataAccess_IDaoStruct|Projects_ProjectStruct
+     * @return Projects_ProjectStruct
+     * @throws ReflectionException
      */
-    public static function findById( $id, $ttl = 0 ) {
+    public static function findById( $id, int $ttl = 0 ): Projects_ProjectStruct {
 
         $thisDao = new self();
         $conn    = Database::obtain()->getConnection();
         $stmt    = $conn->prepare( " SELECT * FROM projects WHERE id = :id " );
 
-        return @$thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Projects_ProjectStruct(), [ 'id' => $id ] )[ 0 ];
+        $res = $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Projects_ProjectStruct(), [ 'id' => $id ] )[ 0 ] ?? null;
+        /** @var Projects_ProjectStruct */
+        return $res;
     }
 
     /**
@@ -358,7 +361,7 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
      * Returns uncompleted chunks by project ID. Requires 'is_review' to be passed
      * as a param to filter the query.
      *
-     * @return Chunks_ChunkStruct[]
+     * @return Jobs_JobStruct[]
      *
      * @throws Exception
      */
@@ -393,7 +396,7 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
                 'id_project' => $id_project
         ] );
 
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'Chunks_ChunkStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, 'Jobs_JobStruct' );
 
         return $stmt->fetchAll();
 

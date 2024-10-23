@@ -8,7 +8,7 @@
 
 namespace Features\ReviewExtended;
 
-use Chunks_ChunkStruct;
+use Jobs_JobStruct;
 use Exception;
 use Features\ReviewExtended\Email\RevisionChangedNotificationEmail;
 use Features\TranslationEvents\Model\TranslationEvent;
@@ -35,9 +35,9 @@ class ReviewedWordCountModel implements IReviewedWordCountModel {
     protected TranslationEvent $_event;
 
     /**
-     * @var ?Chunks_ChunkStruct
+     * @var ?Jobs_JobStruct
      */
-    protected ?Chunks_ChunkStruct $_chunk;
+    protected ?Jobs_JobStruct $_chunk;
 
     /**
      * @var Projects_ProjectStruct

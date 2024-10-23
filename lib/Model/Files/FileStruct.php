@@ -25,11 +25,11 @@ class Files_FileStruct extends DataAccess_AbstractDaoSilentStruct implements Dat
     }
 
     /**
-     * @param Chunks_ChunkStruct $chunk
+     * @param Jobs_JobStruct $chunk
      *
      * @return array
      */
-    public function getMaxMinSegmentBoundariesForChunk( Chunks_ChunkStruct $chunk ) {
+    public function getMaxMinSegmentBoundariesForChunk( Jobs_JobStruct $chunk ) {
         return ( new FilesJobDao() )->getSegmentBoundariesForChunk( $this, $chunk );
     }
 

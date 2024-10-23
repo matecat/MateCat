@@ -5,16 +5,16 @@ use Features\ReviewExtended\ReviewUtils as ReviewUtils;
 
 class Utils {
 
-    public static function getSourcePageFromReferer() {
-        return self::returnSourcePageAsInt( parse_url( @$_SERVER[ 'HTTP_REFERER' ] ) );
+    public static function getSourcePageFromReferer(): int {
+        return self::returnSourcePageAsInt( parse_url( $_SERVER[ 'HTTP_REFERER' ] ?? null ) );
     }
 
 
     /**
      * @return int
      */
-    public static function getSourcePage() {
-        return self::returnSourcePageAsInt( parse_url( @$_SERVER[ 'REQUEST_URI' ] ) );
+    public static function getSourcePage(): int {
+        return self::returnSourcePageAsInt( parse_url( $_SERVER[ 'REQUEST_URI' ] ?? null ) );
     }
 
     /**
@@ -22,7 +22,7 @@ class Utils {
      *
      * @return int
      */
-    private static function returnSourcePageAsInt( $url ) {
+    private static function returnSourcePageAsInt( array $url ): int {
         $sourcePage = Constants::SOURCE_PAGE_TRANSLATE;
 
         if ( !isset( $url[ 'path' ] ) ) {
@@ -44,9 +44,11 @@ class Utils {
     }
 
     /**
+     * @param string|null $agent
+     *
      * @return array
      */
-    static public function getBrowser( $agent = null ) {
+    static public function getBrowser( ?string $agent = null ): array {
 
         // handle Undefined index: HTTP_USER_AGENT
         if ( !isset( $_SERVER[ 'HTTP_USER_AGENT' ] ) && empty( $agent ) ) {
@@ -151,7 +153,12 @@ class Utils {
         ];
     }
 
-    public static function friendly_slug( $string ) {
+    /**
+     * @param $string
+     *
+     * @return string
+     */
+    public static function friendly_slug( $string ): string {
         // everything to lower and no spaces begin or end
         $string = strtolower( trim( $string ) );
 
@@ -166,14 +173,14 @@ class Utils {
         $string = Transliterator::transliterate( $string );
 
         //delete and replace rest of special chars
-        $find = [ '/[^a-z0-9\-<>]/', '/[\-]+/', '/<[^>]*>/' ];
+        $find = [ '/[^a-z0-9\-<>]/', '/-+/', '/<[^>]*>/' ];
         $repl = [ '', '-', '' ];
 
         //return the friendly url
         return preg_replace( $find, $repl, $string );
     }
 
-    public static function replace_accents( $var ) { //replace for accents catalan spanish and more
+    public static function replace_accents( $var ): string { //replace it for accents catalan spanish and more
         $a = [
                 'À', 'Á', 'Â', 'Ã', 'Ä', 'Å', 'Æ', 'Ç', 'È', 'É', 'Ê', 'Ë', 'Ì', 'Í', 'Î', 'Ï', 'Ð', 'Ñ', 'Ò', 'Ó', 'Ô', 'Õ', 'Ö', 'Ø', 'Ù', 'Ú', 'Û', 'Ü', 'Ý', 'ß', 'à', 'á', 'â', 'ã', 'ä', 'å', 'æ',
                 'ç', 'è', 'é', 'ê', 'ë', 'ì', 'í', 'î', 'ï', 'ñ', 'ò', 'ó', 'ô', 'õ', 'ö', 'ø', 'ù', 'ú', 'û', 'ü', 'ý', 'ÿ', 'Ā', 'ā', 'Ă', 'ă', 'Ą', 'ą', 'Ć', 'ć', 'Ĉ', 'ĉ', 'Ċ', 'ċ', 'Č', 'č', 'Ď',
@@ -197,7 +204,7 @@ class Utils {
     /**
      * @throws Exception
      */
-    public static function getGlobalMessage() {
+    public static function getGlobalMessage(): array {
 
         // pull messages from redis
         $redis      = ( new RedisHandler() )->getConnection();
@@ -214,7 +221,7 @@ class Utils {
                         'msg'    => $element[ 'message' ],
                         'level'  => $element[ 'level' ],
                         'token'  => md5( $element[ 'message' ] ),
-                        'expire' => ( new DateTime( $element[ 'expire' ] ) )->format( DateTime::W3C )
+                        'expire' => ( new DateTime( $element[ 'expire' ] ) )->format( DateTimeInterface::W3C )
                 ];
 
                 $retStrings[] = $resObject;
@@ -226,13 +233,13 @@ class Utils {
         return [ 'messages' => json_encode( $retStrings ) ];
     }
 
-    public static function encryptPass( $clear_pass, $salt ) {
+    public static function encryptPass( $clear_pass, $salt ): string {
         $pepperedPass = hash_hmac( "sha256", $clear_pass . $salt, INIT::$AUTHSECRET );
 
         return password_hash( $pepperedPass, PASSWORD_DEFAULT );
     }
 
-    public static function verifyPass( $clear_pass, $salt, $db_hashed_pass ) {
+    public static function verifyPass( $clear_pass, $salt, $db_hashed_pass ): bool {
         $pepperedPass = hash_hmac( "sha256", $clear_pass . $salt, INIT::$AUTHSECRET );
 
         return password_verify( $pepperedPass, $db_hashed_pass );
@@ -242,16 +249,16 @@ class Utils {
      * Generate 128bit password with real uniqueness over single process instance
      *   N.B. Concurrent requests can collide ( Ex: fork )
      *
-     * Minimum Password Length 12 Characters
+     * Minimum Password Length of 12 Characters
      *
-     * WARNING: the obtained random string MUST NOT be used for security purposes
+     * WARNING: the obtained random string MUST NOT be used for security.
      *
      * @param int  $maxlength
      * @param bool $more_entropy
      *
      * @return bool|string
      */
-    public static function randomString( $maxlength = 12, $more_entropy = false ) {
+    public static function randomString( int $maxlength = 12, bool $more_entropy = false ): string {
 
         $_pwd = md5( uniqid( '', true ) );
 
@@ -277,20 +284,25 @@ class Utils {
      *
      * @return bool
      */
-    public static function isJson( $string ) {
+    public static function isJson( $string ): bool {
         json_decode( $string );
 
         return json_last_error() === JSON_ERROR_NONE;
     }
 
-    public static function mysqlTimestamp( $time ) {
-        return date( 'Y-m-d H:i:s', $time );
+    public static function mysqlTimestamp( $time ): string {
+        $date = date( 'Y-m-d H:i:s', $time );
+        if ( !$date ) {
+            $date = date( 'Y-m-d H:i:s', time() );
+        }
+
+        return $date;
     }
 
     /**
      * @throws Exception
      */
-    public static function api_timestamp( $date_string ) {
+    public static function api_timestamp( $date_string ): ?string {
         if ( $date_string == null ) {
             return null;
         } else {
@@ -300,7 +312,7 @@ class Utils {
         }
     }
 
-    public static function underscoreToCamelCase( $string ) {
+    public static function underscoreToCamelCase( $string ): string {
         return str_replace( ' ', '', ucwords( str_replace( '_', ' ', $string ) ) );
     }
 
@@ -309,7 +321,7 @@ class Utils {
      *
      * @return string
      */
-    public static function trimAndLowerCase( $string ) {
+    public static function trimAndLowerCase( $string ): string {
         return trim( strtolower( $string ) );
     }
 
@@ -320,24 +332,20 @@ class Utils {
      *
      * @return array
      */
-    public static function popArray( array $array ) {
-        if ( end( $array ) === '' ) {
-            array_pop( $array );
-
-            return self::popArray( $array );
-        }
-
-        return $array;
+    public static function cleanEmptyStringFromArray( array $array ): array {
+        return array_filter( $array, function ( $element ) {
+            return $element !== '';
+        } );
     }
 
     /**
-     * @param $params
-     * @param $required_keys
+     * @param array $params
+     * @param array $required_keys
      *
-     * @return mixed
+     * @return array
      * @throws Exception
      */
-    public static function ensure_keys( $params, $required_keys ) {
+    public static function ensure_keys( array $params, array $required_keys ): array {
         $missing = [];
 
         foreach ( $required_keys as $key ) {
@@ -353,24 +361,10 @@ class Utils {
         return $params;
     }
 
-    public static function is_assoc( $array ) {
-        return is_array( $array ) and count( array_filter( array_keys( $array ), 'is_string' ) );
-    }
-
-    public static function curlFile( $filePath ) {
-        $curlFile = "@$filePath";
-        // CURLfile is available with PHP 5.5 and higher versions
-        if ( version_compare( PHP_VERSION, '5.5.0' ) >= 0 ) {
-            $curlFile = new CURLFile( $filePath );
-        }
-
-        return $curlFile;
-    }
-
     /**
-     * @return string|void
+     * @return string|null
      */
-    public static function getRealIpAddr() {
+    public static function getRealIpAddr(): ?string {
 
         foreach ( [
                           'HTTP_CLIENT_IP',
@@ -390,15 +384,17 @@ class Utils {
             }
         }
 
+        return null;
+
     }
 
     /**
      * @throws Exception
      */
-    public static function sendErrMailReport( $htmlContent, $subject = null ) {
+    public static function sendErrMailReport( string $htmlContent, string $subject = null ): void {
 
         if ( !INIT::$SEND_ERR_MAIL_REPORT ) {
-            return true;
+            return;
         }
 
         $mailConf = @parse_ini_file( INIT::$ROOT . '/inc/Error_Mail_List.ini', true );
@@ -417,11 +413,9 @@ class Utils {
 
         Log::doJsonLog( 'Message has been sent' );
 
-        return true;
-
     }
 
-    protected static function _getBackTrace() {
+    protected static function _getBackTrace(): string {
 
         $trace = debug_backtrace();
         $now   = date( 'Y-m-d H:i:s' );
@@ -473,11 +467,11 @@ class Utils {
     }
 
     /**
-     * @param $token
+     * @param string|null $token
      *
      * @return bool
      */
-    public static function isTokenValid( $token = null ) {
+    public static function isTokenValid( ?string $token = null ): bool {
         if ( empty( $token ) || !preg_match( '|^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$|', $token ) ) {
             return false;
         }
@@ -495,7 +489,7 @@ class Utils {
      *
      * @return string The fixed file name.
      */
-    public static function fixFileName( $stringName, $directory = null, $upCount = true ) {
+    public static function fixFileName( string $stringName, string $directory = null, bool $upCount = true ): string {
         $string = filter_var( $stringName, FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES ] );
         while ( is_file( $directory . DIRECTORY_SEPARATOR . $string ) && $upCount ) {
             $string = static::upCountName( $string );
@@ -512,9 +506,9 @@ class Utils {
      *
      * @return string The updated name with the incremented count number.
      */
-    protected function upCountNameCallback( $matches ) {
+    protected function upCountNameCallback( array $matches ): string {
         $index = isset( $matches[ 1 ] ) ? intval( $matches[ 1 ] ) + 1 : 1;
-        $ext   = isset( $matches[ 2 ] ) ? $matches[ 2 ] : '';
+        $ext   = $matches[ 2 ] ?? '';
 
         return '_(' . $index . ')' . $ext;
     }
@@ -526,7 +520,7 @@ class Utils {
      *
      * @return string The updated name with the incremented count number.
      */
-    protected static function upCountName( $name ) {
+    protected static function upCountName( string $name ): string {
         return preg_replace_callback(
                 '/(?:(?:_\((\d+)\))?(\.[^.]+))?$/', [ '\Utils', 'upCountNameCallback' ], $name, 1
         );
@@ -540,7 +534,7 @@ class Utils {
      *
      * @return bool Returns true if the file name is valid, false otherwise.
      */
-    public static function isValidFileName( $fileUpName ) {
+    public static function isValidFileName( string $fileUpName ): bool {
 
         if (
                 stripos( $fileUpName, '../' ) !== false ||
@@ -597,7 +591,7 @@ class Utils {
      * @return void|string
      * @throws Exception
      */
-    public static function raiseJsonExceptionError( $raise = true ) {
+    public static function raiseJsonExceptionError( bool $raise = true ) {
 
         if ( function_exists( "json_last_error" ) ) {
 
@@ -637,24 +631,9 @@ class Utils {
 
     }
 
-    //Array_column() is not supported on PHP 5.4, so I'll rewrite it
-    public static function array_column( array $input, $column_key, $index_key = null ) {
-
-        if ( function_exists( 'array_column' ) ) {
-            return array_column( $input, $column_key, $index_key );
-        }
-
-        $result = [];
-        foreach ( $input as $k => $v ) {
-            $result[ $index_key ? $v[ $index_key ] : $k ] = $v[ $column_key ];
-        }
-
-        return $result;
-    }
-
     // Previously in FileFormatConverter
     //remove UTF-8 BOM
-    public static function stripFileBOM( $string, $utf = 8 ) {
+    public static function stripFileBOM( $string, $utf = 8 ): string {
         //depending on encoding, different slices are to be cut
         switch ( $utf ) {
             case 16:
@@ -681,26 +660,26 @@ class Utils {
      * uploadDirFromSessionCookie
      *
      * @oaram $guid string
-     * @param $file_name string optional file name to append to the upload path
+     * @param $guid
+     * @param $file_name string|null optional file name to append to the upload path
      *
      * @return string
      */
-    public static function uploadDirFromSessionCookie( $guid, $file_name = null ) {
+    public static function uploadDirFromSessionCookie( $guid, string $file_name = null ): string {
         return INIT::$UPLOAD_REPOSITORY . "/" .
                 $guid . '/' .
                 $file_name;
     }
 
     /**
-     * @param       $match
-     * @param       $job_tm_keys
-     * @param       $job_owner
-     * @param       $uid
+     * @param array  $match
+     * @param string $job_tm_keys
+     * @param int    $uid
      *
      * @return null|string
      * @throws Exception
      */
-    public static function changeMemorySuggestionSource( $match, $job_tm_keys, $job_owner, $uid ) {
+    public static function changeMemorySuggestionSource( array $match, string $job_tm_keys, int $uid ): string {
         $sug_source = $match[ 'created_by' ];
         $key        = $match[ 'memory_key' ];
 
@@ -732,7 +711,7 @@ class Utils {
     /**
      * @throws Exception
      */
-    public static function keyNameFromUserKeyring( $uid, $key ) {
+    public static function keyNameFromUserKeyring( $uid, $key ): ?string {
         if ( $uid === null ) {
             return null;
         }
@@ -762,18 +741,17 @@ class Utils {
     /**
      * Returns description for a key. If not found then default to "Private TM".
      *
-     * @param $key
-     * @param $job_tm_keys
+     * @param string $key
+     * @param string $job_tm_keys
      *
      * @return null|string
      * @throws Exception
      */
-    public static function getDefaultKeyDescription( $key, $job_tm_keys ) {
+    public static function getDefaultKeyDescription( string $key, string $job_tm_keys ): string {
         $ownerKeys   = TmKeyManagement_TmKeyManagement::getOwnerKeys( [ $job_tm_keys ] );
         $description = Constants::NO_DESCRIPTION_TM;
 
         //search the current key
-        $currentKey = null;
         for ( $i = 0; $i < count( $ownerKeys ); $i++ ) {
             $name = trim( $ownerKeys[ $i ]->name );
 
@@ -793,12 +771,12 @@ class Utils {
     /**
      * stringsAreEqual
      *
-     * @param $stringA
-     * @param $stringB
+     * @param string $stringA
+     * @param string $stringB
      *
      * @return bool
      */
-    public static function stringsAreEqual( $stringA, $stringB ) {
+    public static function stringsAreEqual( string $stringA, string $stringB ): bool {
         return $stringA == $stringB;
     }
 
@@ -810,7 +788,7 @@ class Utils {
      *
      * @return string
      */
-    public static function htmlentitiesToUft8WithoutDoubleEncoding( $string ) {
+    public static function htmlentitiesToUft8WithoutDoubleEncoding( $string ): string {
         return htmlentities( $string, ENT_QUOTES, 'UTF-8', false );
     }
 
@@ -820,7 +798,7 @@ class Utils {
      *
      * @return string
      */
-    public static function truncatePhrase( $phrase, $max_words ) {
+    public static function truncatePhrase( string $phrase, int $max_words ): string {
 
         $phrase_array = explode( ' ', $phrase );
         if ( count( $phrase_array ) > $max_words && $max_words > 0 ) {
@@ -838,7 +816,7 @@ class Utils {
      *
      * @return string
      */
-    public static function escapeJsonEncode( $data ) {
+    public static function escapeJsonEncode( array $data ): string {
         return str_replace( "\\\"", "\\\\\\\"", json_encode( $data ) );
     }
 
@@ -853,7 +831,7 @@ class Utils {
      *
      * @return string
      */
-    public static function stripTagsPreservingHrefs( $html ) {
+    public static function stripTagsPreservingHrefs( string $html ): string {
         $htmlDom               = new DOMDocument( '1.0', 'UTF-8' );
         $htmlDom->formatOutput = false;
 
@@ -873,22 +851,8 @@ class Utils {
 
         $strippedHtml = strip_tags( $html );
         $strippedHtml = ltrim( $strippedHtml );
-        $strippedHtml = rtrim( $strippedHtml );
 
-        return $strippedHtml;
-    }
-
-    /**
-     * @param $email
-     *
-     * @throws Exception
-     */
-    public static function validateEmailAddress( $email ) {
-        $clean_email = filter_var( $email, FILTER_SANITIZE_EMAIL );
-
-        if ( $email !== $clean_email or !filter_var( $email, FILTER_VALIDATE_EMAIL ) ) {
-            throw new Exception( $email . " is not a valid email address" );
-        }
+        return rtrim( $strippedHtml );
     }
 
     /**
@@ -896,7 +860,7 @@ class Utils {
      *
      * @return array
      */
-    public static function validateEmailList( $list ) {
+    public static function validateEmailList( $list ): array {
 
         $aValid = [];
         foreach ( explode( ',', $list ) as $sEmailAddress ) {

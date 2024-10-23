@@ -9,15 +9,15 @@ class Chunks_ChunkDao extends DataAccess_AbstractDao {
      * @param     $password
      * @param int $ttl
      *
-     * @return Chunks_ChunkStruct
+     * @return Jobs_JobStruct
      * @throws NotFoundException
      * @throws ReflectionException
      */
-    public static function getByIdAndPassword( $id_job, $password, int $ttl = 0 ): Chunks_ChunkStruct {
+    public static function getByIdAndPassword( $id_job, $password, int $ttl = 0 ): Jobs_JobStruct {
         /**
-         * @var $fetched Chunks_ChunkStruct
+         * @var $fetched Jobs_JobStruct
          */
-        $fetched = Jobs_JobDao::getByIdAndPassword( $id_job, $password, $ttl, new Chunks_ChunkStruct );
+        $fetched = Jobs_JobDao::getByIdAndPassword( $id_job, $password, $ttl, new Jobs_JobStruct );
         if ( empty( $fetched ) ) {
             throw new NotFoundException( 'Record not found' );
         } else {
@@ -40,10 +40,10 @@ class Chunks_ChunkDao extends DataAccess_AbstractDao {
      * @param Translations_SegmentTranslationStruct $translation
      * @param int                                   $ttl
      *
-     * @return Chunks_ChunkStruct|DataAccess_IDaoStruct
+     * @return Jobs_JobStruct|DataAccess_IDaoStruct
      */
     public static function getBySegmentTranslation( Translations_SegmentTranslationStruct $translation, $ttl = 0 ) {
-        return Jobs_JobDao::getBySegmentTranslation( $translation, $ttl, new Chunks_ChunkStruct() );
+        return Jobs_JobDao::getBySegmentTranslation( $translation, $ttl, new Jobs_JobStruct() );
     }
 
     /**
@@ -51,20 +51,20 @@ class Chunks_ChunkDao extends DataAccess_AbstractDao {
      *
      * @param int $ttl
      *
-     * @return Chunks_ChunkStruct[]|DataAccess_IDaoStruct[]
+     * @return Jobs_JobStruct[]|DataAccess_IDaoStruct[]
      */
     public static function getByJobID( $id_job, $ttl = 0 ) {
-        return Jobs_JobDao::getById( $id_job, $ttl, new Chunks_ChunkStruct() );
+        return Jobs_JobDao::getById( $id_job, $ttl, new Jobs_JobStruct() );
     }
 
     /**
      * @param     $id_project
      * @param int $ttl
      *
-     * @return Chunks_ChunkStruct[]|DataAccess_IDaoStruct[]
+     * @return Jobs_JobStruct[]|DataAccess_IDaoStruct[]
      */
     public function getByProjectID( $id_project, $ttl = 0 ) {
-        return Jobs_JobDao::getByProjectId( $id_project, $ttl, new Chunks_ChunkStruct() );
+        return Jobs_JobDao::getByProjectId( $id_project, $ttl, new Jobs_JobStruct() );
     }
 
     /**
@@ -72,10 +72,10 @@ class Chunks_ChunkDao extends DataAccess_AbstractDao {
      * @param $id_job
      * @param $ttl
      *
-     * @return Chunks_ChunkStruct[]|DataAccess_IDaoStruct[]
+     * @return Jobs_JobStruct[]|DataAccess_IDaoStruct[]
      */
     public static function getByIdProjectAndIdJob( $id_project, $id_job, $ttl = 0 ) {
-        return Jobs_JobDao::getByIdProjectAndIdJob( $id_project, $id_job, $ttl, new Chunks_ChunkStruct() );
+        return Jobs_JobDao::getByIdProjectAndIdJob( $id_project, $id_job, $ttl, new Jobs_JobStruct() );
     }
 
     /**

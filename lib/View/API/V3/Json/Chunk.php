@@ -11,7 +11,7 @@ namespace API\V3\Json;
 use API\App\Json\OutsourceConfirmation;
 use API\V2\Json\JobTranslator;
 use API\V2\Json\ProjectUrls;
-use Chunks_ChunkStruct;
+use Jobs_JobStruct;
 use Constants;
 use DataAccess\ShapelessConcreteStruct;
 use Features\ReviewExtended\ReviewUtils;
@@ -32,13 +32,13 @@ class Chunk extends \API\V2\Json\Chunk {
     protected $chunk;
 
     /**
-     * @param \Chunks_ChunkStruct $chunk
+     * @param \Jobs_JobStruct $chunk
      *
      * @return array
      * @throws \Exception
      * @throws \Exceptions\NotFoundException
      */
-    public function renderOne( Chunks_ChunkStruct $chunk ) {
+    public function renderOne( Jobs_JobStruct $chunk ) {
         $project    = $chunk->getProject();
         $featureSet = $project->getFeaturesSet();
 
@@ -51,7 +51,7 @@ class Chunk extends \API\V2\Json\Chunk {
     }
 
     /**
-     * @param                         $chunk Chunks_ChunkStruct
+     * @param                         $chunk Jobs_JobStruct
      *
      * @param Projects_ProjectStruct  $project
      * @param FeatureSet              $featureSet
@@ -59,7 +59,7 @@ class Chunk extends \API\V2\Json\Chunk {
      * @return array
      * @throws \Exception
      */
-    public function renderItem( Chunks_ChunkStruct $chunk, Projects_ProjectStruct $project, FeatureSet $featureSet ) {
+    public function renderItem( Jobs_JobStruct $chunk, Projects_ProjectStruct $project, FeatureSet $featureSet ) {
 
         $this->chunk   = $chunk;
         $outsourceInfo = $chunk->getOutsource();

@@ -11,6 +11,7 @@ namespace Translators;
 
 
 use Jobs_JobStruct;
+use ReflectionException;
 
 class JobsTranslatorsDao extends \DataAccess_AbstractDao {
 
@@ -45,9 +46,10 @@ class JobsTranslatorsDao extends \DataAccess_AbstractDao {
     /**
      * @param Jobs_JobStruct $jobStruct
      *
-     * @return \DataAccess_IDaoStruct[]|JobsTranslatorsStruct[]
+     * @return JobsTranslatorsStruct[]
+     * @throws ReflectionException
      */
-    public function findByJobsStruct( Jobs_JobStruct $jobStruct ) {
+    public function findByJobsStruct( Jobs_JobStruct $jobStruct ): ?array {
 
         if ( !empty( $jobStruct->password ) ) {
             $query = self::$_query_by_id_and_password;

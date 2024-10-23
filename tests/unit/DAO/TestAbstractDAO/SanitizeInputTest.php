@@ -48,7 +48,7 @@ LABEL;
 
 
     /**
-     * @param Chunks_ChunkStruct
+     * @param Jobs_JobStruct
      * It trows an exception because the struct isn't an instnce of  'EnginesModel_EngineStruct' .
      *
      * @group  regression
@@ -57,7 +57,7 @@ LABEL;
     public function test__sanitizeInput_with_wrong_param_not_instance_of_type() {
 
 
-        $this->struct_input = new Chunks_ChunkStruct();
+        $this->struct_input = new Jobs_JobStruct();
 
         $this->struct_input->owner = <<<LABEL
 ba""r/foo'

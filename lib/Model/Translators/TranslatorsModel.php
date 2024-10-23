@@ -152,7 +152,7 @@ class TranslatorsModel {
 
         $jTranslatorsDao = new JobsTranslatorsDao();
 
-        return $this->jobTranslator = @$jTranslatorsDao->setCacheTTL( $cache )->findByJobsStruct( $this->jStruct )[ 0 ];
+        return $this->jobTranslator = $jTranslatorsDao->setCacheTTL( $cache )->findByJobsStruct( $this->jStruct )[ 0 ] ?? null;
 
     }
 

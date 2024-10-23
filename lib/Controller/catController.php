@@ -49,7 +49,7 @@ class catController extends viewController {
     private $revision;
 
     /**
-     * @var Chunks_ChunkStruct
+     * @var Jobs_JobStruct
      */
     private $chunk;
 
@@ -122,19 +122,19 @@ class catController extends viewController {
         //retrieve job owner. It will be useful also if the job is archived or cancelled
         $this->job_owner = ( $this->chunk->owner != "" ) ? $this->chunk->owner : INIT::$MAILER_RETURN_PATH;
 
-        if ( $this->chunk->status_owner == Constants_JobStatus::STATUS_CANCELLED ) {
+        if ( $this->chunk->isCanceled() ) {
             $this->job_cancelled = true;
 
             return;
         }
 
-        if ( $this->chunk->status_owner == Constants_JobStatus::STATUS_ARCHIVED ) {
+        if ( $this->chunk->isArchived() ) {
             $this->job_archived = true;
 
             return;
         }
 
-        if ( $this->chunk->status_owner == Constants_JobStatus::STATUS_DELETED ) {
+        if ( $this->chunk->isDeleted() ) {
             $this->job_not_found = true;
 
             return;
@@ -470,7 +470,7 @@ class catController extends viewController {
     }
 
     /**
-     * @return Chunks_ChunkStruct
+     * @return Jobs_JobStruct
      */
     public function getChunk() {
         return $this->chunk;

@@ -14,11 +14,11 @@ class EngineValidator {
      * @return \Engines_AbstractEngine
      * @throws Exception
      */
-    public static function engineBelongsToUser( $engineId, $uid, $engineClass = null ) {
+    public static function engineBelongsToUser( $engineId, int $uid, $engineClass = null ) {
         $engine       = Engine::getInstance( $engineId );
         $engineRecord = $engine->getEngineRecord();
 
-        if ( $engineRecord->uid !== $uid ) {
+        if ( $engineRecord->uid != $uid ) {
             throw new Exception( "Engine doesn't belong to the user" );
         }
 

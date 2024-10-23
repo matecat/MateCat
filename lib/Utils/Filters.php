@@ -150,7 +150,7 @@ class Filters {
         $filename  = "$basename.$extension";
 
         $data = [
-                'document'     => Utils::curlFile( $filePath ),
+                'document'     => new CURLFile( $filePath ),
                 'sourceLocale' => Langs_Languages::getInstance()->getLangRegionCode( $sourceLang ),
                 'targetLocale' => Langs_Languages::getInstance()->getLangRegionCode( $targetLang ),
                 'segmentation' => $segmentation,
@@ -185,7 +185,7 @@ class Filters {
             $tmpFiles[ $id ] = $tmpXliffFile;
             file_put_contents( $tmpXliffFile, $xliffData[ 'document_content' ] );
 
-            $dataGroups[ $id ] = [ 'xliff' => Utils::curlFile( $tmpXliffFile ) ];
+            $dataGroups[ $id ] = [ 'xliff' => new CURLFile( $tmpXliffFile ) ];
         }
 
         $responses = self::sendToFilters( $dataGroups, self::XLIFF_TO_TARGET_ENDPOINT );
@@ -258,24 +258,24 @@ class Filters {
         }
 
         $info = [
-                'filters_address'  => @$response[ 'instanceAddress' ],
-                'filters_version'  => @$response[ 'instanceVersion' ],
+                'filters_address'  => $response[ 'instanceAddress' ] ?? null,
+                'filters_version'  => $response[ 'instanceVersion' ] ?? null,
                 'client_ip'        => Utils::getRealIpAddr(),
                 'to_xliff'         => $toXliff,
                 'success'          => ( $response[ 'successful' ] === true ),
-                'error_message'    => @$response[ 'errorMessage' ],
+                'error_message'    => $response[ 'errorMessage' ] ?? null,
                 'conversion_time'  => $response[ 'time' ],
                 'sent_file_size'   => filesize( $sentFile ),
                 'source_lang'      => $jobData[ 'source' ],
                 'target_lang'      => $jobData[ 'target' ],
-                'job_id'           => isset( $jobData[ 'id' ] ) ? $jobData[ 'id' ] : null,
-                'job_pwd'          => isset( $jobData[ 'password' ] ) ? $jobData[ 'password' ] : null,
-                'job_owner'        => isset( $jobData[ 'owner' ] ) ? $jobData[ 'owner' ] : null,
+                'job_id'           => $jobData[ 'id' ] ?? null,
+                'job_pwd'          => $jobData[ 'password' ] ?? null,
+                'job_owner'        => $jobData[ 'owner' ] ?? null,
                 'source_file_id'   => ( $toXliff ? null : $sourceFileData[ 'id_file' ] ),
                 'source_file_name' => ( $toXliff ? AbstractFilesStorage::basename_fix( $sentFile ) : $sourceFileData[ 'filename' ] ),
                 'source_file_ext'  => ( $toXliff ? AbstractFilesStorage::pathinfo_fix( $sentFile, PATHINFO_EXTENSION ) : $sourceFileData[ 'mime_type' ] ),
                 'source_file_sha1' => ( $toXliff ? sha1_file( $sentFile ) : $sourceFileData[ 'sha1_original_file' ] ),
-                'segmentation'     => isset( $sourceFileData[ 'segmentation_rule' ] ) ? $sourceFileData[ 'segmentation_rule' ] : null,
+                'segmentation'     => $sourceFileData[ 'segmentation_rule' ] ?? null,
         ];
 
         $query = 'INSERT INTO conversions_log ('

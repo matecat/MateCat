@@ -11,7 +11,7 @@ class ChunkOptionsModel {
 
     private $received_options = [];
 
-    public function __construct( Chunks_ChunkStruct $chunk ) {
+    public function __construct( Jobs_JobStruct $chunk ) {
         $this->chunk            = $chunk;
         $this->project_metadata = $chunk->getProject()->getMetadataAsKeyValue();
     }

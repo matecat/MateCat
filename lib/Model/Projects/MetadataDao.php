@@ -29,8 +29,9 @@ class Projects_MetadataDao extends DataAccess_AbstractDao {
      * @param $id
      *
      * @return null|Projects_MetadataStruct[]
+     * @throws ReflectionException
      */
-    public function allByProjectId( $id ) {
+    public function allByProjectId( $id ): ?array {
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( self::$_query_get_metadata );
@@ -120,7 +121,7 @@ class Projects_MetadataDao extends DataAccess_AbstractDao {
 
     }
 
-    public static function buildChunkKey( $key, Chunks_ChunkStruct $chunk ) {
+    public static function buildChunkKey( $key, Jobs_JobStruct $chunk ) {
         return "{$key}_chunk_{$chunk->id}_{$chunk->password}";
     }
 

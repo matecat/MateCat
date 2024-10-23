@@ -13,7 +13,7 @@ use API\Commons\Exceptions\NotFoundException;
 use API\Commons\Validators\ChunkPasswordValidator;
 use API\Commons\Validators\LoginValidator;
 use API\V2\BaseChunkController;
-use Chunks_ChunkStruct;
+use Jobs_JobStruct;
 use Exceptions\ValidationError;
 use Files\FilesInfoUtility;
 use Projects_ProjectStruct;
@@ -40,7 +40,7 @@ class FileInfoController extends BaseChunkController {
         $this->appendValidator( new LoginValidator( $this ) );
     }
 
-    private function setChunk( Chunks_ChunkStruct $chunk ) {
+    private function setChunk( Jobs_JobStruct $chunk ) {
         $this->chunk = $chunk;
     }
 

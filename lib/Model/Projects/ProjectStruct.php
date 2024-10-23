@@ -198,7 +198,7 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
     /**
      * @param int $ttl
      *
-     * @return Chunks_ChunkStruct[]
+     * @return Jobs_JobStruct[]
      */
     public function getChunks( $ttl = 0 ) {
         return $this->cachable( __METHOD__, $this, function () use ( $ttl ) {

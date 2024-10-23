@@ -74,11 +74,11 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param Chunks_ChunkStruct $chunk
+     * @param Jobs_JobStruct $chunk
      *
      * @return mixed
      */
-    function countByChunk( Chunks_ChunkStruct $chunk ) {
+    function countByChunk( Jobs_JobStruct $chunk ) {
         $conn  = $this->database->getConnection();
         $query = "SELECT COUNT(1) FROM segments s
             JOIN segment_translations st ON s.id = st.id_segment
@@ -199,7 +199,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param Chunks_ChunkStruct $chunk
+     * @param Jobs_JobStruct $chunk
      * @param int                $step
      * @param                    $ref_segment
      * @param string             $where
@@ -211,7 +211,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
      * @internal param $jid
      * @internal param $password
      */
-    public function getSegmentsIdForQR( Chunks_ChunkStruct $chunk, $step, $ref_segment, $where = "after", $options = [] ) {
+    public function getSegmentsIdForQR( Jobs_JobStruct $chunk, $step, $ref_segment, $where = "after", $options = [] ) {
 
         $db = Database::obtain()->getConnection();
 

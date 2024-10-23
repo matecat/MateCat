@@ -26,10 +26,10 @@ class JobUrlBuilderTest extends AbstractTest {
 
         $this->database_instance->getConnection()->query(
                 "INSERT INTO jobs
-                    ( password, id_project, job_first_segment, job_last_segment, tm_keys, disabled, create_date )
-                    VALUES ( '92c5e0ce9316', " . $this->project[ 'id' ] . ", '4564373', '4564383', '[]', 0, '2019-06-21 15:22:14' )"
+                    ( password, id_project, job_first_segment, job_last_segment, tm_keys, disabled, create_date, standard_analysis_wc, source, target, owner )
+                    VALUES ( '92c5e0ce9316', " . $this->project[ 'id' ] . ", '4564373', '4564383', '[]', 0, '2019-06-21 15:22:14', 0, 'it-IT', 'fr-FR', 'translated_user' )"
         );
-        $this->job = new Jobs_JobStruct( $this->database_instance->getConnection()->query( "SELECT * FROM jobs LIMIT 1" )->fetch() );
+        $this->job = new Jobs_JobStruct( $this->database_instance->getConnection()->query( "SELECT * FROM jobs ORDER BY id DESC LIMIT 1" )->fetch() );
 
     }
 

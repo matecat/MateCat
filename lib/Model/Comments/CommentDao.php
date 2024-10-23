@@ -137,7 +137,7 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
      * @return Comments_CommentStruct
      * @throws Exception
      */
-    public function saveComment( Comments_CommentStruct $obj ) {
+    public function saveComment( Comments_CommentStruct $obj ): Comments_CommentStruct {
 
         if ( $obj->message_type == null ) {
             $obj->message_type = self::TYPE_COMMENT;
@@ -166,7 +166,7 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
         return $obj;
     }
 
-    public function resolveThread( Comments_CommentStruct $obj ) {
+    public function resolveThread( Comments_CommentStruct $obj ): Comments_CommentStruct {
 
         $obj->message_type = self::TYPE_RESOLVE;
         $obj->resolve_date = date( 'Y-m-d H:i:s' );
@@ -247,7 +247,7 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
 
     /**
      *
-     * @param Chunks_ChunkStruct $chunk
+     * @param Jobs_JobStruct $chunk
      *
      * @return Comments_BaseCommentStruct[]
      */
@@ -333,6 +333,9 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
         return strftime( '%l:%M %p %e %b %Y UTC', strtotime( $time ) );
     }
 
+    /**
+     * @throws ReflectionException
+     */
     public static function placeholdContent( $content ) {
         $users_ids = self::getUsersIdFromContent( $content );
         $userDao   = new Users_UserDao( Database::obtain() );

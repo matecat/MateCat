@@ -5,12 +5,12 @@ namespace API\V2;
 
 use API\Commons\Validators\ChunkPasswordValidator;
 use API\Commons\Validators\LoginValidator;
-use Chunks_ChunkStruct;
+use Jobs_JobStruct;
 
 class ChunkOptionsController extends BaseChunkController {
 
     /**
-     * @param Chunks_ChunkStruct $chunk
+     * @param Jobs_JobStruct $chunk
      *
      * @return $this
      */

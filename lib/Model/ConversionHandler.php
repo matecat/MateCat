@@ -102,9 +102,10 @@ class ConversionHandler {
         //compute hash to locate the file in the cache, add the segmentation rule and extraction parameters
         $extraction_parameters = $this->getRightExtractionParameter( $file_path );
 
-        $sha1 = sha1_file( $file_path
-                . ( $this->segmentation_rule ?? '' )
-                . ( !empty( $extraction_parameters ) ? json_encode( $extraction_parameters ) : '' )
+        $sha1 = sha1(
+                sha1_file( $file_path )
+                . "_"
+                . ( $this->segmentation_rule ?? '' ) . ( $extraction_parameters ? json_encode( $extraction_parameters ) : '' )
         );
 
         //initialize path variable

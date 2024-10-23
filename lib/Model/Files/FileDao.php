@@ -10,9 +10,10 @@ class Files_FileDao extends DataAccess_AbstractDao {
      *
      * @param int $ttl
      *
-     * @return DataAccess_IDaoStruct[]|Files_FileStruct[]
+     * @return Files_FileStruct[]
+     * @throws ReflectionException
      */
-    public static function getByJobId( $id_job, $ttl = 60 ) {
+    public static function getByJobId( $id_job, int $ttl = 60 ): array {
 
         $thisDao = new self();
         $conn    = Database::obtain()->getConnection();
@@ -22,6 +23,7 @@ class Files_FileDao extends DataAccess_AbstractDao {
                 " AND id_job = :id_job "
         );
 
+        /** @var Files_FileStruct[] */
         return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Files_FileStruct, [ 'id_job' => $id_job ] );
 
     }

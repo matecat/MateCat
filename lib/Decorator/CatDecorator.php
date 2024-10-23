@@ -15,7 +15,7 @@ class CatDecorator extends \AbstractDecorator {
     protected $template;
 
     /**
-     * @var Chunks_ChunkStruct
+     * @var Jobs_JobStruct
      */
     private $job;
 

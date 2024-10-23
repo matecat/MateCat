@@ -65,6 +65,9 @@ class createProjectController extends ajaxController {
 
     public $postInput;
 
+    /**
+     * @throws Exception
+     */
     public function __construct() {
 
         //SESSION ENABLED
@@ -236,6 +239,9 @@ class createProjectController extends ajaxController {
 
     }
 
+    /**
+     * @throws Exception
+     */
     public function doAction() {
         //check for errors. If there are, stop execution and return errors.
         if ( count( @$this->result[ 'errors' ] ) ) {
@@ -435,7 +441,7 @@ class createProjectController extends ajaxController {
     /**
      * @param $filename
      *
-     * @return ArrayObject
+     * @return array
      * @throws \API\Commons\Exceptions\AuthenticationError
      * @throws \Exceptions\NotFoundException
      * @throws \Exceptions\ValidationError

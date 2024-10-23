@@ -8,7 +8,7 @@
 
 namespace Features\SegmentFilter\Model;
 
-use Chunks_ChunkStruct;
+use Jobs_JobStruct;
 use Constants_SegmentTranslationsMatchType;
 use Constants_TranslationStatus;
 use DataAccess\ShapelessConcreteStruct;
@@ -20,12 +20,12 @@ use Exception;
 class SegmentFilterDao extends DataAccess_AbstractDao {
 
     /**
-     * @param Chunks_ChunkStruct $chunk
+     * @param Jobs_JobStruct $chunk
      * @param FilterDefinition   $filter
      *
      * @return array
      */
-    public static function findSegmentIdsBySimpleFilter( Chunks_ChunkStruct $chunk, FilterDefinition $filter ) {
+    public static function findSegmentIdsBySimpleFilter( Jobs_JobStruct $chunk, FilterDefinition $filter ) {
 
         $sql = "SELECT st.id_segment AS id
             FROM
@@ -71,7 +71,7 @@ class SegmentFilterDao extends DataAccess_AbstractDao {
     }
 
 
-    private static function __getData( Chunks_ChunkStruct $chunk, FilterDefinition $filter ) {
+    private static function __getData( Jobs_JobStruct $chunk, FilterDefinition $filter ) {
         $data = [
                 'id_job'            => $chunk->id,
                 'job_first_segment' => $chunk->job_first_segment,
@@ -152,12 +152,12 @@ class SegmentFilterDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param Chunks_ChunkStruct $chunk
+     * @param Jobs_JobStruct $chunk
      * @param FilterDefinition   $filter
      *
      * @return object
      */
-    private static function __getLimit( Chunks_ChunkStruct $chunk, FilterDefinition $filter ) {
+    private static function __getLimit( Jobs_JobStruct $chunk, FilterDefinition $filter ) {
 
         $where = self::__getWhereFromFilter( $filter );
 
@@ -198,13 +198,13 @@ class SegmentFilterDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param Chunks_ChunkStruct $chunk
+     * @param Jobs_JobStruct $chunk
      * @param FilterDefinition   $filter
      *
      * @return DataAccess_IDaoStruct[]
      * @throws Exception
      */
-    public static function findSegmentIdsForSample( Chunks_ChunkStruct $chunk, FilterDefinition $filter ) {
+    public static function findSegmentIdsForSample( Jobs_JobStruct $chunk, FilterDefinition $filter ) {
 
         if ( $filter->sampleSize() > 0 ) {
             $limit = self::__getLimit( $chunk, $filter );

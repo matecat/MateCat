@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * This is NOT a database Entity, this is a utility vector to transport info.
+ */
 class Comments_CommentStruct extends DataAccess_AbstractDaoObjectStruct implements DataAccess_IDaoStruct {
 
     // database fields
@@ -25,7 +28,7 @@ class Comments_CommentStruct extends DataAccess_AbstractDaoObjectStruct implemen
     public ?int $first_segment = null;
     public ?int $last_segment  = null;
 
-    public static function getStruct() {
+    public static function getStruct(): Comments_CommentStruct {
         return new Comments_CommentStruct();
     }
 

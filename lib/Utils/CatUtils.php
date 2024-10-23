@@ -767,7 +767,7 @@ class CatUtils {
      * @internal   param Projects_ProjectStruct $project
      */
     public static function getChunkReviewStructFromJobStruct( Jobs_JobStruct $job, array $chunkReviews = [] ) {
-        return ( !empty( $chunkReviews ) ) ? $chunkReviews[ 0 ] : ( new ChunkReviewDao() )->findChunkReviews( new Chunks_ChunkStruct( $job->toArray() ) )[ 0 ];
+        return ( !empty( $chunkReviews ) ) ? $chunkReviews[ 0 ] : ( new ChunkReviewDao() )->findChunkReviews( new Jobs_JobStruct( $job->toArray() ) )[ 0 ];
     }
 
     /**

@@ -1778,7 +1778,7 @@ class ProjectManager {
         $wCountManager = new CounterModel();
         $wCountManager->initializeJobWordCount( $first_job[ 'id' ], $first_job[ 'password' ] );
 
-        $chunk = new Chunks_ChunkStruct( $first_job->toArray() );
+        $chunk = new Jobs_JobStruct( $first_job->toArray() );
         $this->features->run( 'postJobMerged', $projectStructure, $chunk );
 
         $jobDao = new Jobs_JobDao();

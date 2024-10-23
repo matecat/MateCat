@@ -30,9 +30,9 @@ class getSearchController extends ajaxController {
     private SearchQueryParamsStruct $queryParams;
 
     /**
-     * @var Chunks_ChunkStruct
+     * @var Jobs_JobStruct
      */
-    protected Chunks_ChunkStruct $job_data;
+    protected Jobs_JobStruct $job_data;
 
     /**
      * @var Database|IDatabase

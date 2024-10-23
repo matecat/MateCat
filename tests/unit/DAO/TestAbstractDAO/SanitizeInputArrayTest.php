@@ -50,7 +50,7 @@ class SanitizeInputArrayTest extends AbstractTest {
 
 
     /**
-     * @param array(EnginesModel_EngineStruct,Chunks_ChunkStruct,EnginesModel_EngineStruct).
+     * @param array(EnginesModel_EngineStruct,Jobs_JobStruct,EnginesModel_EngineStruct).
      * It throws an exception because the second element is of the wrong instance type.
      *
      * @group  regression
@@ -58,7 +58,7 @@ class SanitizeInputArrayTest extends AbstractTest {
      */
     public function test__sanitizeInputArray_with_wrong_struct_that_dont_match_with_the_given_type() {
         $first_struct  = new EnginesModel_EngineStruct();
-        $second_struct = new Chunks_ChunkStruct();
+        $second_struct = new Jobs_JobStruct();
         $third_struct  = new EnginesModel_EngineStruct();
 
         $first_struct->name   = "bar";

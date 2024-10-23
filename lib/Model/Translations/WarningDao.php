@@ -3,7 +3,7 @@
 
 namespace Translations;
 
-use Chunks_ChunkStruct;
+use Jobs_JobStruct;
 use Constants_TranslationStatus;
 use DataAccess\ShapelessConcreteStruct;
 use Jobs\WarningsCountStruct;
@@ -56,11 +56,11 @@ class WarningDao extends \DataAccess_AbstractDao {
     }
 
     /**
-     * @param Chunks_ChunkStruct $chunk
+     * @param Jobs_JobStruct $chunk
      *
      * @return int
      */
-    public function getErrorsByChunk( Chunks_ChunkStruct $chunk ): int {
+    public function getErrorsByChunk( Jobs_JobStruct $chunk ): int {
         $con = $this->database->getConnection();
 
         $stmt = $con->prepare( $this->_query_warnings_by_chunk );

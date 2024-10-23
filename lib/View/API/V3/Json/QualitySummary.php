@@ -10,11 +10,10 @@
 namespace API\V3\Json;
 
 
-use Chunks_ChunkStruct;
+use Jobs_JobStruct;
 use Exception;
 use Features\ReviewExtended\Model\QualityReportDao;
 use Features\ReviewExtended\ReviewUtils;
-use Jobs_JobStruct;
 use LQA\ChunkReviewStruct;
 use LQA\EntryDao;
 use Projects_ProjectStruct;
@@ -24,7 +23,7 @@ use RevisionFactory;
 class QualitySummary {
 
     /**
-     * @var Chunks_ChunkStruct
+     * @var Jobs_JobStruct
      */
     protected $chunk;
     /**
@@ -35,10 +34,10 @@ class QualitySummary {
     /**
      * QualitySummary constructor.
      *
-     * @param Chunks_ChunkStruct     $chunk
+     * @param Jobs_JobStruct     $chunk
      * @param Projects_ProjectStruct $project
      */
-    public function __construct( Chunks_ChunkStruct $chunk, Projects_ProjectStruct $project ) {
+    public function __construct( Jobs_JobStruct $chunk, Projects_ProjectStruct $project ) {
         $this->chunk   = $chunk;
         $this->project = $project;
     }
@@ -174,7 +173,7 @@ class QualitySummary {
     }
 
     /**
-     * @param Chunks_ChunkStruct     $jStruct
+     * @param Jobs_JobStruct     $jStruct
      * @param Projects_ProjectStruct $project
      * @param                        $chunkReview
      *
@@ -182,7 +181,7 @@ class QualitySummary {
      * @throws Exception
      * @internal param $reviseIssues
      */
-    protected static function revisionQualityVars( Chunks_ChunkStruct $jStruct, Projects_ProjectStruct $project, $chunkReview ) {
+    protected static function revisionQualityVars( Jobs_JobStruct $jStruct, Projects_ProjectStruct $project, $chunkReview ) {
 
         $reviseIssues = [];
 
