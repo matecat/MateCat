@@ -155,6 +155,10 @@ const SegmentActions = {
         return
       }
       AppDispatcher.dispatch({
+        actionType: SegmentConstants.SCROLL_TO_SEGMENT,
+        sid: sid,
+      })
+      AppDispatcher.dispatch({
         actionType: SegmentConstants.OPEN_SEGMENT,
         sid: sid,
         wasOriginatedFromBrowserHistory,

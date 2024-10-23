@@ -1312,6 +1312,10 @@ AppDispatcher.register(function (action) {
     case SegmentConstants.OPEN_SEGMENT:
       SegmentStore.openSegment(action.sid)
       SegmentStore.emitChange(
+        SegmentConstants.RENDER_SEGMENTS,
+        SegmentStore._segments,
+      )
+      SegmentStore.emitChange(
         SegmentConstants.OPEN_SEGMENT,
         action.sid,
         action.wasOriginatedFromBrowserHistory,
