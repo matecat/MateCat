@@ -1,8 +1,9 @@
 <?php
+
 namespace EditLog;
+
 use DataAccess_AbstractDaoObjectStruct;
 use DataAccess_IDaoStruct;
-use LQA\QA;
 use MyMemory;
 
 /**
@@ -13,133 +14,45 @@ use MyMemory;
  */
 class EditLogSegmentStruct extends DataAccess_AbstractDaoObjectStruct implements DataAccess_IDaoStruct {
 
-    const PEE_THRESHOLD = 1;
-    const CACHETIME = 108000;
     const EDIT_TIME_SLOW_CUT = 30;
     const EDIT_TIME_FAST_CUT = 0.25;
-    
-    /**
-     * @var int
-     */
-    public $id;
-
-    /**
-     * @var string
-     */
-    public $source;
-
-    /**
-     * @var string
-     */
-    public $internal_id;
-
-    /**
-     * @var string
-     */
-    public $translation;
 
     /**
      * @var int
      */
-    public $time_to_edit;
+    public int $id;
 
     /**
-     * @var string
+     * @var ?string
      */
-    public $suggestion;
+    public ?string $suggestion = null;
 
     /**
-     * @var string
+     * @var ?string
      */
-    public $suggestions_array;
-
-    /**
-     * @var string
-     */
-    public $suggestion_source;
+    public ?string $translation = null;
 
     /**
      * @var int
      */
-    public $suggestion_match;
+    public int $raw_word_count;
 
     /**
      * @var int
      */
-    public $suggestion_position;
+    public int $time_to_edit;
 
     /**
-     * @var string
+     * @var ?string
      */
-    public $segment_hash;
-
-    /**
-     * @var float
-     */
-    public $mt_qe;
-
-    public $id_translator;
-
-    /**
-     * @var int
-     */
-    public $job_id;
-
-    /**
-     * @var string
-     */
-    public $job_source;
-
-    /**
-     * @var string
-     */
-    public $job_target;
-
-    /**
-     * @var int
-     */
-    public $raw_word_count;
-
-    /**
-     * @var string
-     */
-    public $proj_name;
-
-    /**
-     * @var float
-     */
-    public $secs_per_word;
-
-    /**
-     * @var string
-     */
-    public $warnings;
-
-    /**
-     * @var string
-     */
-    public $match_type;
-
-    /**
-     * @var bool
-     */
-    public $locked;
-
-    /**
-     * @var string
-     */
-    public $uid ;
-
-    /**
-     * @var string
-     */
-    public $email ;
+    public ?string $target_language_code = null;
 
     /**
      * @return float
      */
-    public function getSecsPerWord() {
+    public function getSecsPerWord(): float {
         $val = @round( ( $this->time_to_edit / 1000 ) / $this->raw_word_count, 1 );
+
         return ( $val != INF ? $val : 0 );
     }
 
@@ -147,70 +60,23 @@ class EditLogSegmentStruct extends DataAccess_AbstractDaoObjectStruct implements
      * Returns true if the number of seconds per word
      * @return bool
      */
-    public function isValidForEditLog() {
+    public function isValidForEditLog(): bool {
         $secsPerWord = $this->getSecsPerWord();
 
-        return ( $secsPerWord  > self::EDIT_TIME_FAST_CUT ) &&
-                ( $secsPerWord  < self::EDIT_TIME_SLOW_CUT );
-    }
-
-    public function isValidForPeeTable(){
-
-        //Do not consider ice matches
-        if( $this->match_type == 'ICE' ) return false;
-
-        $secsPerWord = $this->getSecsPerWord();
-
-        return ( $secsPerWord  > self::EDIT_TIME_FAST_CUT );
+        return ( $secsPerWord > self::EDIT_TIME_FAST_CUT ) &&
+                ( $secsPerWord < self::EDIT_TIME_SLOW_CUT );
     }
 
     /**
-     * @return array
+     * @return float
      */
-    public function getWarning() {
-        $result = array();
-
-        $QA = new QA( $this->source, $this->translation );
-        $QA->performConsistencyCheck();
-
-        if ( $QA->thereAreNotices() ) {
-            $notices = $QA->getNoticesJSON();
-            $notices = json_decode( $notices, true );
-
-            //the outer if it's here because $notices can be
-            //an empty string and json_decode will fail into null value
-            if ( !empty( $notices ) ) {
-                $result = array_merge( $result, Utils::array_column( $notices, 'debug' ) );
-            }
-
-            $tag_mismatch       = $QA->getMalformedXmlStructs();
-            $tag_order_mismatch = $QA->getTargetTagPositionError();
-            if ( count( $tag_mismatch ) > 0 ) {
-                $result[] = sprintf(
-                        "Tag Mismatch ( %d )",
-                        count( $tag_mismatch )
-                );
-            }
-            if ( count( $tag_order_mismatch ) > 0 ) {
-                $result[] = sprintf(
-                        "Tag order mismatch ( %d )",
-                        count( $tag_order_mismatch )
-                );
-            }
-        }
-        $this->warnings = $result;
-    }
-
-    /**
-     * @return float|int
-     */
-    public function getPEE() {
+    public function getPEE(): float {
 
         $post_editing_effort = round(
                 ( 1 - MyMemory::TMS_MATCH(
                                 self::cleanSegmentForPee( $this->suggestion ),
                                 self::cleanSegmentForPee( $this->translation ),
-                                $this->job_target
+                                $this->target_language_code
                         )
                 ) * 100
         );
@@ -225,9 +91,7 @@ class EditLogSegmentStruct extends DataAccess_AbstractDaoObjectStruct implements
 
     }
 
-    private static function cleanSegmentForPee( $segment ){
-        $segment = htmlspecialchars_decode( $segment, ENT_QUOTES);
-
-        return $segment;
+    private static function cleanSegmentForPee( $segment ): string {
+        return htmlspecialchars_decode( $segment, ENT_QUOTES );
     }
 }

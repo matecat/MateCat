@@ -188,7 +188,7 @@ abstract class DataAccess_AbstractDao {
      */
     protected function _fetchObject( PDOStatement $stmt, DataAccess_IDaoStruct $fetchClass, array $bindParams ): array {
 
-        $_cacheResult = $this->_getFromCache( $stmt->queryString . $this->_serializeForCacheKey( $bindParams ) );
+        $_cacheResult = $this->_getFromCache( $stmt->queryString . $this->_serializeForCacheKey( $bindParams ) . get_class( $fetchClass ) );
 
         if ( !empty( $_cacheResult ) ) {
             return $_cacheResult;
@@ -198,10 +198,17 @@ abstract class DataAccess_AbstractDao {
         $stmt->execute( $bindParams );
         $result = $stmt->fetchAll();
 
-        $this->_setInCache( $stmt->queryString . $this->_serializeForCacheKey( $bindParams ), $result );
+        $this->_setInCache( $stmt->queryString . $this->_serializeForCacheKey( $bindParams ) . get_class( $fetchClass ), $result );
 
         return $result;
 
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    protected function _destroyObjectCache( PDOStatement $stmt, string $fetchClass, array $bindParams ): bool {
+        return $this->_destroyCache( $stmt->queryString . $this->_serializeForCacheKey( $bindParams ) . $fetchClass );
     }
 
     /**
@@ -215,7 +222,7 @@ abstract class DataAccess_AbstractDao {
      */
     protected function _fetchObjectMap( string $keyMap, PDOStatement $stmt, string $fetchClass, array $bindParams ): array {
 
-        $_cacheResult = $this->_getFromCacheMap( $keyMap, $stmt->queryString . $this->_serializeForCacheKey( $bindParams ) );
+        $_cacheResult = $this->_getFromCacheMap( $keyMap, $stmt->queryString . $this->_serializeForCacheKey( $bindParams ) . $fetchClass );
 
         if ( !empty( $_cacheResult ) ) {
             return $_cacheResult;
@@ -225,7 +232,7 @@ abstract class DataAccess_AbstractDao {
         $stmt->execute( $bindParams );
         $result = $stmt->fetchAll();
 
-        $this->_setInCacheMap( $keyMap, $stmt->queryString . $this->_serializeForCacheKey( $bindParams ), $result );
+        $this->_setInCacheMap( $keyMap, $stmt->queryString . $this->_serializeForCacheKey( $bindParams ) . $fetchClass, $result );
 
         return $result;
 
@@ -360,7 +367,7 @@ abstract class DataAccess_AbstractDao {
      * @return int
      * @throws Exception
      */
-    public static function updateStruct( DataAccess_IDaoStruct $struct, $options = [] ) {
+    public static function updateStruct( DataAccess_IDaoStruct $struct, array $options = [] ): int {
 
         $attrs = $struct->toArray();
 
@@ -435,20 +442,14 @@ abstract class DataAccess_AbstractDao {
 
         Log::doJsonLog( [ "SQL" => $sql, "values" => $data ] );
 
-        if ( $stmt->execute( $data ) ) {
-            if ( count( static::$auto_increment_field ) ) {
-                return $conn->lastInsertId();
-            } else {
-                return $stmt->rowCount();
-            }
+        $stmt->execute( $data );
+
+        if ( count( static::$auto_increment_field ) ) {
+            return $conn->lastInsertId();
         } else {
-
-            if ( $options[ 'raise' ] ) {
-                throw new Exception( $stmt->errorInfo() );
-            }
-
-            return false;
+            return $stmt->rowCount();
         }
+
     }
 
     /**

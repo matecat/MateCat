@@ -4,6 +4,7 @@ namespace API\App;
 
 use API\Commons\AbstractStatefulKleinController;
 use API\Commons\Validators\ChunkPasswordValidator;
+use API\Commons\Validators\LoginValidator;
 use Chunks_ChunkStruct;
 use Files\FilesPartsDao;
 
@@ -111,5 +112,6 @@ class FilesController extends AbstractStatefulKleinController {
         } );
 
         $this->appendValidator( $Validator );
+        $this->appendValidator( new LoginValidator( $this ) );
     }
 }

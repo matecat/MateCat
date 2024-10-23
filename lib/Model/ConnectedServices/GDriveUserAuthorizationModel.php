@@ -8,6 +8,8 @@
 
 namespace ConnectedServices;
 
+use ConnectedServices\Google\GDrive\GDriveTokenHandler;
+use ConnectedServices\Google\GoogleProvider;
 use Exception;
 use Exceptions\ValidationError;
 use Google_Service_Oauth2;
@@ -108,14 +110,14 @@ class GDriveUserAuthorizationModel {
      * @throws Exception
      */
     private function __collectProperties( $code ) {
-        $gdriveClient = GoogleClientFactory::getGoogleClient( INIT::$HTTPHOST . "/gdrive/oauth/response" );
+        $gdriveClient = GoogleProvider::getClient( INIT::$HTTPHOST . "/gdrive/oauth/response" );
         $gdriveClient->fetchAccessTokenWithAuthCode( $code );
         $this->token = $gdriveClient->getAccessToken();
 
         if ( is_array( $this->token ) ) {
             // Enforce token to be passed passed around as json_string, to favour encryption and storage.
             // Prevent slash escape, see: http://stackoverflow.com/a/14419483/1297909
-            $this->token = GDrive::accessTokenToJsonString( $this->token );
+            $this->token = GDriveTokenHandler::accessTokenToJsonString( $this->token );
         }
 
         $infoService    = new Google_Service_Oauth2( $gdriveClient );

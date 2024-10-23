@@ -195,7 +195,7 @@ class Search extends React.Component {
     this.dropdownInit = false
     UI.body.removeClass('searchActive')
     this.handleClearClick()
-    if (UI.segmentIsLoaded(UI.currentSegmentId)) {
+    if (SegmentStore.getSegmentByIdToJS(UI.currentSegmentId)) {
       setTimeout(() => SegmentActions.scrollToSegment(UI.currentSegmentId))
     } else {
       CatToolActions.onRender({
@@ -246,7 +246,7 @@ class Search extends React.Component {
     let self = this
     let props = {
       modalName: 'confirmReplace',
-      text: 'Do you really want to replace this text in all search results? <br>(The page will be refreshed after confirm)',
+      text: 'Do you really want to replace this text in all search results?',
       successText: 'Continue',
       successCallback: function () {
         SearchUtils.execReplaceAll(self.state.search)

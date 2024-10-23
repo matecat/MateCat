@@ -80,9 +80,6 @@ export const CommentsButton = ({}) => {
             <span className="mbc-comment-label mbc-comment-username mbc-comment-username-label mbc-truncate">
               {comment.full_name}
             </span>
-            <span className="mbc-comment-label mbc-comment-email-label mbc-truncate">
-              {comment.email ? comment.email : ''}
-            </span>
             <div className="mbc-comment-info-wrap mbc-clearfix">
               <span className="mbc-comment-info mbc-comment-time pull-left"></span>
             </div>

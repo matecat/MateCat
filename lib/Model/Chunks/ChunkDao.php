@@ -1,5 +1,7 @@
 <?php
 
+use Exceptions\NotFoundException;
+
 class Chunks_ChunkDao extends DataAccess_AbstractDao {
 
     /**
@@ -7,13 +9,17 @@ class Chunks_ChunkDao extends DataAccess_AbstractDao {
      * @param     $password
      * @param int $ttl
      *
-     * @return Chunks_ChunkStruct|DataAccess_IDaoStruct
-     * @throws \Exceptions\NotFoundException
+     * @return Chunks_ChunkStruct
+     * @throws NotFoundException
+     * @throws ReflectionException
      */
-    public static function getByIdAndPassword( $id_job, $password, $ttl = 0 ) {
+    public static function getByIdAndPassword( $id_job, $password, int $ttl = 0 ): Chunks_ChunkStruct {
+        /**
+         * @var $fetched Chunks_ChunkStruct
+         */
         $fetched = Jobs_JobDao::getByIdAndPassword( $id_job, $password, $ttl, new Chunks_ChunkStruct );
         if ( empty( $fetched ) ) {
-            throw new Exceptions\NotFoundException( 'Record not found' );
+            throw new NotFoundException( 'Record not found' );
         } else {
             return $fetched;
         }
@@ -26,8 +32,7 @@ class Chunks_ChunkDao extends DataAccess_AbstractDao {
      *
      * @return int
      */
-    public static function getSegmentsCount($id_job, $password, $ttl = 0)
-    {
+    public static function getSegmentsCount( $id_job, $password, $ttl = 0 ) {
         return Jobs_JobDao::getSegmentsCount( $id_job, $password, $ttl );
     }
 
@@ -74,13 +79,13 @@ class Chunks_ChunkDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param $id_job
-     * @param $password
+     * @param     $id_job
+     * @param     $password
      * @param int $ttl
+     *
      * @return float|null
      */
-    public static function getStandardWordCount($id_job, $password, $ttl = 86400)
-    {
-        return Jobs_JobDao::getStandardWordCount($id_job, $password, $ttl);
+    public static function getStandardWordCount( $id_job, $password, $ttl = 86400 ) {
+        return Jobs_JobDao::getStandardWordCount( $id_job, $password, $ttl );
     }
 }

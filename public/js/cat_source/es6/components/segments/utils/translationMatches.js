@@ -107,10 +107,9 @@ let TranslationMatches = {
     if (!config.translation_matches_enabled) {
       SegmentActions.addClassToSegment(segment.sid, 'loaded')
       SegmentActions.getSegmentsQa(segment)
-      var deferred = new jQuery.Deferred()
-      return deferred.resolve()
+      return Promise.resolve()
     }
-    var currentSegment =
+    const currentSegment =
       next === 0
         ? segment
         : next == 1
@@ -124,24 +123,27 @@ let TranslationMatches = {
 
     if (SegmentUtils.isIceSegment(currentSegment) && !currentSegment.unlocked) {
       SegmentActions.addClassToSegment(currentSegment.sid, 'loaded')
-      const deferred = new jQuery.Deferred()
-      return deferred.resolve()
+      return Promise.resolve()
     }
+    let callNewContributions = force
+    if (SegmentStore.lastTranslatedSegmentId) {
+      /* If the segment just translated is equal or similar (Levenshtein distance) to the
+       * current segment force to reload the matches
+       **/
+      const lastTranslatedSegment = SegmentStore.getSegmentByIdToJS(
+        SegmentStore.lastTranslatedSegmentId,
+      )
+      const s1 = lastTranslatedSegment.segment
+      const s2 = currentSegment.segment
+      const areSimilar =
+        (CommonUtils.levenshteinDistance(s1, s2) /
+          Math.max(s1.length, s2.length)) *
+          100 <
+        50
+      const isEqual = s1 === s2 && s1 !== ''
 
-    /* If the segment just translated is equal or similar (Levenshtein distance) to the
-     * current segment force to reload the matches
-     **/
-    var s1 = $('#segment-' + UI.lastTranslatedSegmentId + ' .source').text()
-    var s2 = currentSegment.segment
-    var areSimilar =
-      (CommonUtils.levenshteinDistance(s1, s2) /
-        Math.max(s1.length, s2.length)) *
-        100 <
-      50
-    var isEqual = s1 == s2 && s1 !== ''
-
-    var callNewContributions = areSimilar || isEqual || force
-
+      callNewContributions = areSimilar || isEqual || force
+    }
     if (
       currentSegment.contributions &&
       currentSegment.contributions.matches.length > 0 &&
@@ -154,17 +156,30 @@ let TranslationMatches = {
       ) {
         setTimeout(() => this.useSuggestionInEditArea(currentSegment.sid))
       }
-      return $.Deferred().resolve()
+      return Promise.resolve()
     }
     if (!currentSegment && next) {
-      return $.Deferred().resolve()
+      return Promise.resolve()
     }
-    var id = currentSegment.original_sid
-    var id_segment_original = id.split('-')[0]
-
+    const id_segment_original = currentSegment.original_sid
+    const nextUntranslated = SegmentStore.getNextSegment(
+      id_segment_original,
+      null,
+      8,
+    )
+    const nextSegment = SegmentStore.getNextSegment(
+      id_segment_original,
+      null,
+      null,
+    )
     // `next` and `untranslated next` are the same
-    if (next === 2 && UI.nextSegmentId === UI.nextUntranslatedSegmentId) {
-      return $.Deferred().resolve()
+    if (
+      next === 2 &&
+      nextUntranslated &&
+      nextSegment &&
+      nextUntranslated === nextSegment
+    ) {
+      return Promise.resolve()
     }
 
     if (isUndefined(config.id_client)) {
@@ -172,7 +187,7 @@ let TranslationMatches = {
         TranslationMatches.getContribution(segmentSid, next)
       }, 3000)
       console.log('SSE: ID_CLIENT not found')
-      return $.Deferred().resolve()
+      return Promise.resolve()
     }
 
     return getContributions({
@@ -183,7 +198,7 @@ let TranslationMatches = {
         : [],
     }).catch((errors) => {
       UI.processErrors(errors, 'getContribution')
-      TranslationMatches.renderContributionErrors(errors, $('#segment-' + id))
+      TranslationMatches.renderContributionErrors(errors, id_segment_original)
     })
   },
 
@@ -201,8 +216,8 @@ let TranslationMatches = {
     return !!config.translation_matches_enabled
   },
 
-  renderContributionErrors: function (errors, segment) {
-    SegmentActions.setSegmentContributions(UI.getSegmentId(segment), [], errors)
+  renderContributionErrors: function (errors, segmentId) {
+    SegmentActions.setSegmentContributions(segmentId, [], errors)
   },
 
   setDeleteSuggestion: function (source, target, id, sid) {
@@ -214,9 +229,6 @@ let TranslationMatches = {
     }).catch(() => {
       OfflineUtils.failedConnection(0, 'deleteContribution')
     })
-  },
-  setDeleteSuggestion_success: function (d) {
-    if (d.errors.length) UI.processErrors(d.errors, 'setDeleteSuggestion')
   },
   getPercentuageClass: function (match) {
     var percentageClass = ''

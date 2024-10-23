@@ -7,7 +7,7 @@ use ActivityLog\ActivityLogStruct;
  * User: gremorian
  * Date: 11/05/15
  * Time: 20.37
- * 
+ *
  */
 
 class activityLogController extends viewController {
@@ -93,6 +93,8 @@ class activityLogController extends viewController {
      * @return mixed
      */
     function doAction() {
+
+        $this->checkLoginRequiredAndRedirect();
         $this->project_data = Projects_ProjectDao::getProjectAndJobData( $this->id_project );
 
         $pCheck = new AjaxPasswordCheck();
@@ -127,7 +129,7 @@ class activityLogController extends viewController {
     public function setTemplateVars() {
         $this->decorator = new ActivityLogDecorator( $this, $this->template );
         $this->decorator->decorate();
-
+        $this->intOauthClients();
     }
 
     public function finalizeEmptyActivity() {

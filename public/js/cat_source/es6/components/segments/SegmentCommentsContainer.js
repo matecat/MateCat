@@ -10,6 +10,7 @@ import CommentsActions from '../../actions/CommentsActions'
 import CommentsConstants from '../../constants/CommentsConstants'
 import SegmentActions from '../../actions/SegmentActions'
 import {SegmentContext} from './SegmentContext'
+import ModalsActions from '../../actions/ModalsActions'
 import {MentionsInput} from 'react-mentions'
 import Mention from '../common/Mention'
 
@@ -222,9 +223,6 @@ class SegmentCommentsContainer extends React.Component {
               <span className="mbc-comment-label mbc-comment-username mbc-comment-username-label mbc-truncate">
                 {comment.full_name}
               </span>
-              <span className="mbc-comment-label mbc-comment-email-label mbc-truncate">
-                {comment.email}
-              </span>
               <div className="mbc-comment-info-wrap mbc-clearfix">
                 <span className="mbc-comment-info mbc-comment-time pull-left">
                   {formattedDate}
@@ -315,7 +313,7 @@ class SegmentCommentsContainer extends React.Component {
             <a
               className="mbc-comment-link-btn mbc-login-link"
               onClick={() => {
-                APP.openLoginModal()
+                ModalsActions.openLoginModal()
               }}
             >
               Login to receive comments

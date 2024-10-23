@@ -284,9 +284,11 @@ let SegmentFilterUtils = {
   gotoNextTranslatedSegment: (sid) => {
     const filteredData = SegmentFilterUtils.getLastFilterData()['segment_ids']
     if (filteredData) {
-      const list = filteredData['segment_ids']
-      const index = list.indexOf('' + sid)
-      const nextFiltered = index !== list.length - 1 ? list[index + 1] : list[0]
+      const index = filteredData.indexOf('' + sid)
+      const nextFiltered =
+        index !== filteredData.length - 1
+          ? filteredData[index + 1]
+          : filteredData[0]
       let segment = SegmentStore.getSegmentByIdToJS(nextFiltered)
       if (segment && segment.status !== 'DRAFT' && segment.status !== 'NEW') {
         SegmentActions.openSegment(nextFiltered)

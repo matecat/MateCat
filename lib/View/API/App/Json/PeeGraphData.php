@@ -30,24 +30,24 @@ class PeeGraphData {
 
         $returnValue = [
                 'dataSet' => [],
-                'lines'    => []
+                'lines'   => []
         ];
 
-        foreach( $this->data as $set ){
+        foreach ( $this->data as $set ) {
 
-            if( !isset( $returnValue['dataSet'][ $set->date ] ) ){
-                $returnValue['dataSet'][ $set->date ][ $set->date ] = [];
+            if ( !isset( $returnValue[ 'dataSet' ][ $set->date ] ) ) {
+                $returnValue[ 'dataSet' ][ $set->date ][ $set->date ] = [];
             }
 
-            $returnValue['dataSet'][ $set->date ][ $set->date ][] = (int)$set->total_post_editing_effort;
+            $returnValue[ 'dataSet' ][ $set->date ][ $set->date ][] = (int)$set->total_post_editing_effort;
 
-            if( array_search( [ $set->source, $set->target, $set->fuzzy_band ], $returnValue[ 'lines' ] ) === false ){
+            if ( array_search( [ $set->source, $set->target, $set->fuzzy_band ], $returnValue[ 'lines' ] ) === false ) {
                 $returnValue[ 'lines' ][] = [ $set->source, $set->target, $set->fuzzy_band ];
             }
 
         }
 
-        $returnValue['dataSet'] = array_values( $returnValue['dataSet'] );
+        $returnValue[ 'dataSet' ] = array_values( $returnValue[ 'dataSet' ] );
 
         return $returnValue;
 

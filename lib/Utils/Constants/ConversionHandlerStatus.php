@@ -4,9 +4,9 @@ namespace Constants;
 
 class ConversionHandlerStatus {
 
-    const ZIP_HANDLING                 = 2;
-    const OK                           = 1;
-    const NOT_CONVERTED                = 0;
+    const ZIP_HANDLING  = 2;
+    const OK            = 1;
+    const NOT_CONVERTED = 0;
 
     // ERRORS
     const INVALID_FILE                 = -1;

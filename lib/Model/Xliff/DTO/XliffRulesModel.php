@@ -134,12 +134,13 @@ class XliffRulesModel implements JsonSerializable {
 
     public function getArrayCopy(): array {
         $copy = [];
-        foreach( $this->ruleSets as $ruleType => $rules ){
-            foreach( $rules as $rule ){
-                /** @var $rule AbstractXliffRule **/
+        foreach ( $this->ruleSets as $ruleType => $rules ) {
+            foreach ( $rules as $rule ) {
+                /** @var $rule AbstractXliffRule * */
                 $copy[ $ruleType ][] = $rule->getArrayCopy();
             }
         }
+
         return $copy;
     }
 

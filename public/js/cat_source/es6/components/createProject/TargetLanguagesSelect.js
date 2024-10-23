@@ -6,12 +6,11 @@ import {useRef} from 'react'
 export const TargetLanguagesSelect = () => {
   const {targetLangs, setIsOpenMultiselectLanguages, languages} =
     useContext(CreateProjectContext)
-
   const selectedItemRef = useRef()
 
   const getActiveLabel = () => targetLangs.map(({name}) => name).join(',')
   const openModal = () =>
-    languages.length > 0 && setIsOpenMultiselectLanguages(true)
+    languages?.length > 0 && setIsOpenMultiselectLanguages(true)
 
   return (
     <div

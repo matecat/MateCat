@@ -19,13 +19,14 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
     ];
 
     /**
-     * @param     $id_segment
-     * @param     $id_job
+     * @param int $id_segment
+     * @param int $id_job
      * @param int $ttl
      *
      * @return Translations_SegmentTranslationStruct
+     * @throws ReflectionException
      */
-    public static function findBySegmentAndJob( $id_segment, $id_job, $ttl = 0 ) {
+    public static function findBySegmentAndJob( int $id_segment, int $id_job, int $ttl = 0 ): ?Translations_SegmentTranslationStruct {
 
         $conn = Database::obtain()->getConnection();
 
@@ -104,33 +105,6 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
     }
 
     protected function _buildResult( $array_result ) {
-    }
-
-    /**
-     * @param Translations_SegmentTranslationStruct $struct
-     * @param                                       $severity
-     *
-     * @return int
-     */
-    public static function updateSeverity( Translations_SegmentTranslationStruct $struct, $severity ) {
-
-        $sql = "UPDATE segment_translations
-            SET warning = :warning
-              WHERE id_segment = :id_segment
-              AND id_job = :id_job
-              AND segment_hash = :segment_hash";
-
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
-
-        $stmt->execute( [
-                'id_segment'   => $struct->id_segment,
-                'id_job'       => $struct->id_job,
-                'segment_hash' => $struct->segment_hash,
-                'warning'      => $severity
-        ] );
-
-        return $stmt->rowCount();
     }
 
     /**
@@ -240,13 +214,11 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
 
     /**
      * @param Translations_SegmentTranslationStruct $translation_struct
-     * @param                                       $is_revision
+     * @param bool                                  $is_revision
      *
      * @return int
-     * @throws ReflectionException
-     * @throws PDOException
      */
-    public static function addTranslation( Translations_SegmentTranslationStruct $translation_struct, $is_revision ) {
+    public static function addTranslation( Translations_SegmentTranslationStruct $translation_struct, bool $is_revision ): int {
 
         // avoid version_number null error
         if ( $translation_struct->version_number === null ) {
@@ -344,17 +316,19 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
      * @return int
      * @throws Exception
      */
-    public static function updateTranslationAndStatusAndDate( Translations_SegmentTranslationStruct $translation_struct ) {
+    public static function updateTranslationAndStatusAndDate( Translations_SegmentTranslationStruct $translation_struct ): int {
 
         $values = [
-                'translation',
-                'status',
-                'translation_date',
+                'fields' => [
+                        'translation',
+                        'status',
+                        'translation_date',
+                ]
         ];
 
         // persist the version_number in case $translation_struct has already the property hydrated
         if ( null !== $translation_struct->version_number ) {
-            $values[] = 'version_number';
+            $values[ 'fields' ][] = 'version_number';
         }
 
         return Translations_SegmentTranslationDao::updateStruct( $translation_struct, $values );
@@ -368,7 +342,8 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
      *
      * @return DataAccess_IDaoStruct[]
      */
-    public function getSegmentTranslationsModifiedByRevisorWithIssueCount( $id_job, $password, $source_page ) {
+    public
+    function getSegmentTranslationsModifiedByRevisorWithIssueCount( $id_job, $password, $source_page ) {
 
         $query = "
             select ste.id_segment, j.id, count(distinct qa.id) as q_count
@@ -422,7 +397,8 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
      *
      * @return array
      */
-    public static function getMaxSegmentIdsFromJob( Jobs_JobStruct $jStruct ) {
+    public
+    static function getMaxSegmentIdsFromJob( Jobs_JobStruct $jStruct ) {
 
         $conn = Database::obtain()->getConnection();
 
@@ -453,7 +429,8 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
      * @param $data
      * @param $where
      */
-    public static function updateFirstTimeOpenedContribution( $data, $where ) {
+    public
+    static function updateFirstTimeOpenedContribution( $data, $where ) {
         self::updateFields( $data, $where );
     }
 
@@ -484,7 +461,8 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
      * @return array
      * @throws Exception
      */
-    public static function propagateTranslation(
+    public
+    static function propagateTranslation(
             Translations_SegmentTranslationStruct $segmentTranslationStruct,
             Chunks_ChunkStruct                    $chunkStruct,
                                                   $_idSegment,
@@ -694,7 +672,8 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
      *
      * @return array|null
      */
-    public static function getLast10TranslatedSegmentIDsInLastHour( $id_job ) {
+    public
+    static function getLast10TranslatedSegmentIDsInLastHour( $id_job ) {
 
         // temporal interval of 1 hour
         $now   = new DateTime();
@@ -740,7 +719,8 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
      *
      * @return array
      */
-    public static function getWordsPerSecond( $id_job, $estimation_seg_ids ) {
+    public
+    static function getWordsPerSecond( $id_job, $estimation_seg_ids ) {
 
         /**
          * If the translator translated the last ten segments in less than 1 hour
@@ -773,7 +753,8 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
      *
      * @return int
      */
-    public static function rebuildFromReplaceEvents( $events ) {
+    public
+    static function rebuildFromReplaceEvents( $events ) {
 
         $conn          = Database::obtain()->getConnection();
         $affected_rows = 0;
@@ -810,7 +791,8 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
      * @param $id_segment
      * @param $suggestions
      */
-    public static function updateSuggestionsArray( $id_segment, $suggestions ) {
+    public
+    static function updateSuggestionsArray( $id_segment, $suggestions ) {
 
         if ( empty( $suggestions ) ) {
             return;

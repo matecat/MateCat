@@ -103,6 +103,7 @@ class XliffConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruct imple
      */
     public function hydrateRulesFromJson( string $jsonRules ): XliffConfigTemplateStruct {
         $rules = json_decode( $jsonRules, true );
+
         return $this->hydrateRulesFromDataArray( $rules );
     }
 

@@ -279,21 +279,19 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     let selectedSegment = this._segments.find((segment) => {
       return segment.get('selected') === true
     })
-    if (!selectedSegment) {
-      selectedSegment = this.getCurrentSegment()
-    } else if (selectedSegment) {
-      selectedSegment = selectedSegment.toJS()
-    } else {
-      return
-    }
-    let prev = this.getPrevSegment(selectedSegment.sid)
-    if (prev) {
-      var index = this.getSegmentIndex(prev.sid)
-      this._segments = this._segments.map((segment) =>
-        segment.set('selected', false),
-      )
-      this._segments = this._segments.setIn([index, 'selected'], true)
-      return prev.sid
+    selectedSegment = !selectedSegment
+      ? this.getCurrentSegment()
+      : selectedSegment.toJS()
+    if (selectedSegment) {
+      let prev = this.getPrevSegment(selectedSegment.sid)
+      if (prev) {
+        var index = this.getSegmentIndex(prev.sid)
+        this._segments = this._segments.map((segment) =>
+          segment.set('selected', false),
+        )
+        this._segments = this._segments.setIn([index, 'selected'], true)
+        return prev.sid
+      }
     }
   },
   getSelectedSegmentId() {
@@ -726,6 +724,9 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
       errors: errors,
     })
   },
+  setLastTranslatedSegmentId: function (id) {
+    SegmentStore.lastTranslatedSegmentId = id
+  },
   closeSide: function () {
     this.sideOpen = false
   },
@@ -1137,15 +1138,9 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
   },
   getSegmentByIdToJS(sid) {
     let segment = this._segments.find(function (seg) {
-      return seg.get('sid') == sid || seg.get('original_sid') === sid
+      return seg.get('sid') == sid || seg.get('original_sid') == sid
     })
     return segment ? segment.toJS() : null
-  },
-
-  segmentScrollableToCenter(sid) {
-    //If a segment is in the last 5 segment loaded in the UI is scrollable
-    let index = this.getSegmentIndex(sid)
-    return index !== -1 && this._segments.size - 5 > index
   },
 
   getSegmentsSplitGroup(sid) {
@@ -1316,6 +1311,10 @@ AppDispatcher.register(function (action) {
       break
     case SegmentConstants.OPEN_SEGMENT:
       SegmentStore.openSegment(action.sid)
+      SegmentStore.emitChange(
+        SegmentConstants.RENDER_SEGMENTS,
+        SegmentStore._segments,
+      )
       SegmentStore.emitChange(
         SegmentConstants.OPEN_SEGMENT,
         action.sid,

@@ -6,6 +6,8 @@ export const ModalContainer = ({
   children,
   onClose,
   closeOnOutsideClick,
+  showHeader,
+  styleBody,
   isCloseButtonDisabled,
 }) => {
   const ref = useRef(null)
@@ -14,7 +16,7 @@ export const ModalContainer = ({
     onClose()
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     document.activeElement.blur()
   }, [])
 
@@ -62,13 +64,14 @@ export const ModalContainer = ({
         }}
       />
       <div className="matecat-modal-content" style={styleContainer}>
-        <div className="matecat-modal-header">
-          <div className="modal-logo" />
+        {showHeader && (
+          <div className="matecat-modal-header">
+            <div className="modal-logo" />
 
-          <div>
-            <h2>{title}</h2>
-          </div>
-          {!isCloseButtonDisabled && (
+            <div>
+              <h2>{title}</h2>
+            </div>
+            {!isCloseButtonDisabled && (
             <div>
               <span
                 className="close-matecat-modal x-popup"
@@ -76,10 +79,13 @@ export const ModalContainer = ({
                 onClick={handleClose}
               />
             </div>
-          )}
-        </div>
+            )}
+          </div>
+        )}
 
-        <div className="matecat-modal-body">{children}</div>
+        <div className="matecat-modal-body" style={styleBody}>
+          {children}
+        </div>
       </div>
     </div>
   )

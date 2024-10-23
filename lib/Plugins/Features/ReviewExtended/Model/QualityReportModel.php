@@ -97,6 +97,9 @@ class QualityReportModel {
         return $this->chunk_review_model;
     }
 
+    /**
+     * @throws Exception
+     */
     public function resetScore( $event_id ) {
         $chunkReview            = $this->getChunkReview();
         $chunkReview->undo_data = json_encode( [
@@ -110,7 +113,14 @@ class QualityReportModel {
         $chunkReview->reviewed_words_count = 0;
         $chunkReview->is_pass              = 1;
 
-        ChunkReviewDao::updateStruct( $chunkReview );
+        ChunkReviewDao::updateStruct( $chunkReview, [
+                'fields' => [
+                        'undo_data',
+                        'penalty_points',
+                        'reviewed_words_count',
+                        'is_pass'
+                ]
+        ] );
     }
 
     /**
@@ -231,10 +241,6 @@ class QualityReportModel {
                 $this->structureNestComment( $record );
             }
 
-            if ( isset( $record[ 'warning_scope' ] ) && $record[ 'warning_scope' ] != null ) {
-                $this->structureNestQaChecks( $record ); // ache serve sto coso?
-            }
-
             $current_file_id    = $record[ 'file_id' ];
             $current_segment_id = $record[ 'segment_id' ];
             $current_issue_id   = $record[ 'issue_id' ];
@@ -292,19 +298,6 @@ class QualityReportModel {
                 $this->current_issue
         );
 
-    }
-
-    private function structureNestQaChecks( $record ) {
-        $qa_check = new ArrayObject( [
-                'severity' => $record[ 'warning_severity' ],
-                'scope'    => $record[ 'warning_scope' ],
-                'data'     => $record[ 'warning_data' ]
-        ] );
-
-        array_push(
-                $this->current_segment[ 'qa_checks' ],
-                $qa_check
-        );
     }
 
     private function structureNestComment( $record ) {

@@ -271,7 +271,7 @@ class GlossaryController extends KleinController {
         $json[ 'userKeys' ]   = [];
 
         // Add user keys
-        if ( $this->userIsLogged() ) {
+        if ( $this->isLoggedIn() ) {
 
             $isRevision = \CatUtils::getIsRevisionFromIdJobAndPassword( $json[ 'id_job' ], $json[ 'password' ] );
 
@@ -312,7 +312,7 @@ class GlossaryController extends KleinController {
 
             // additional terms are also visible for the other users (NOT the owner of the job) who added them
             if(
-                $this->userIsLogged() and
+                $this->isLoggedIn() and
                 ($this->user->uid == $tmKey['uid_transl'] and $tmKey['r_transl'] == true) or
                 ($this->user->uid == $tmKey['uid_rev'] and $tmKey['r_rev'] == true)
             ){

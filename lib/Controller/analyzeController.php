@@ -4,6 +4,12 @@ use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
 use Analysis\Health;
 use API\App\Json\Analysis\AnalysisProject;
+use ConnectedServices\Facebook\FacebookProvider;
+use ConnectedServices\Github\GithubProvider;
+use ConnectedServices\Google\GoogleProvider;
+use ConnectedServices\LinkedIn\LinkedInProvider;
+use ConnectedServices\Microsoft\MicrosoftProvider;
+use ConnectedServices\OauthClient;
 use Model\Analysis\Status;
 
 class analyzeController extends viewController {
@@ -57,8 +63,7 @@ class analyzeController extends viewController {
 
     public function __construct() {
 
-        parent::sessionStart();
-        parent::__construct( false );
+        parent::__construct();
 
         $filterArgs = [
                 'pid'      => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
@@ -116,6 +121,8 @@ class analyzeController extends viewController {
 
 
     public function doAction() {
+
+        $this->checkLoginRequiredAndRedirect();
 
         if ( $this->project_not_found ) {
             $this->render404();
@@ -186,8 +193,7 @@ class analyzeController extends viewController {
         $this->template->split_enabled           = true;
         $this->template->enable_outsource        = INIT::$ENABLE_OUTSOURCE;
 
-        $this->template->authURL       = ( !$this->isLoggedIn() ) ? $this->setGoogleAuthUrl( 'google-', INIT::$OAUTH_REDIRECT_URL ) : "";
-        $this->template->gdriveAuthURL = ( $this->isLoggedIn() ) ? $this->setGoogleAuthUrl( 'google-drive-', INIT::$HTTPHOST . "/gdrive/oauth/response" ) : "";
+        $this->intOauthClients();
 
     }
 
