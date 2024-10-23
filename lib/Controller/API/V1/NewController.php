@@ -216,9 +216,14 @@ class NewController extends KleinController
 
                 } else {
                     $conversionHandler->doAction();
-                    $result = $conversionHandler->getResult();
-                    if ( $result->getCode() < 0 ) {
-                        $status[] = $result;
+                    $res = $conversionHandler->getResult();
+                    if ( $res->getCode() < 0 ) {
+                        $status[] = [
+                            'code'   => $res->getCode(),
+                            'data'   => $res->getData(), // Is it correct????
+                            'errors' => $res->getErrors(),
+                            'warnings' => $res->getWarnings(),
+                        ];
                     }
                 }
             }
@@ -738,13 +743,13 @@ class NewController extends KleinController
      */
     private function generateTargetEngineAssociation($target_lang, $mt_engine, $target_language_mt_engine_id = null): array
     {
-        if ( !is_null($target_language_mt_engine_id) ) { // this could be already set by MMT engine if enabled ( so check and do not override )
+        if ( !empty($target_language_mt_engine_id) ) { // this could be already set by MMT engine if enabled ( so check and do not override )
             foreach ( explode( ",", $target_lang ) as $_matecatTarget ) {
                 $target_language_mt_engine_id[ $_matecatTarget ] = $mt_engine;
             }
         }
 
-        return $target_language_mt_engine_id;
+        return [];
     }
 
     /**
@@ -922,6 +927,8 @@ class NewController extends KleinController
 
             return $qaModelTemplate;
         }
+
+        return null;
     }
 
     /**
