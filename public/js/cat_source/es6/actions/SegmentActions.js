@@ -152,6 +152,10 @@ const SegmentActions = {
         return
       }
       AppDispatcher.dispatch({
+        actionType: SegmentConstants.SCROLL_TO_SEGMENT,
+        sid: sid,
+      })
+      AppDispatcher.dispatch({
         actionType: SegmentConstants.OPEN_SEGMENT,
         sid: sid,
         wasOriginatedFromBrowserHistory,
@@ -321,17 +325,17 @@ const SegmentActions = {
     if (nextApprovedSegment) {
       SegmentActions.openSegment(nextApprovedSegment.sid)
     } else {
-        if (
-            SegmentStore.nextUntranslatedFromServer ||
-            nextApprovedSegmentInPrevious
-        ) {
-            // find in not loaded segments or go to the next approved
-            SegmentActions.openSegment(
-                SegmentStore.nextUntranslatedFromServer
-                    ? SegmentStore.nextUntranslatedFromServer
-                    : nextApprovedSegmentInPrevious.sid,
-            )
-        }
+      if (
+        SegmentStore.nextUntranslatedFromServer ||
+        nextApprovedSegmentInPrevious
+      ) {
+        // find in not loaded segments or go to the next approved
+        SegmentActions.openSegment(
+          SegmentStore.nextUntranslatedFromServer
+            ? SegmentStore.nextUntranslatedFromServer
+            : nextApprovedSegmentInPrevious.sid,
+        )
+      }
     }
   },
   /**
