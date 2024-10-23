@@ -116,7 +116,7 @@ const PasswordReset = ({newPassword = false}) => {
                   }) => (
                     <Input
                       type={INPUT_TYPE.PASSWORD}
-                      placeholder="Password"
+                      placeholder="Current password"
                       {...{name, value, onChange, error}}
                     />
                   )}
