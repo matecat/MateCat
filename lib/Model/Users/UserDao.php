@@ -252,7 +252,7 @@ class Users_UserDao extends DataAccess_AbstractDao {
      *
      * This method is not static and used also to cache at Redis level the values for this Job
      *
-     * Use when only the metadata are needed
+     * Use when only the metadata is necessary
      *
      * @param Users_UserStruct $UserQuery
      *

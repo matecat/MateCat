@@ -132,7 +132,7 @@ class Projects_MetadataDao extends DataAccess_AbstractDao {
     }
 
     public static function buildChunkKey( $key, Jobs_JobStruct $chunk ): string {
-        return "{$key}_chunk_{$chunk->id}_{$chunk->password}";
+        return "{$key}_chunk_{$chunk->id}_$chunk->password";
     }
 
     /**

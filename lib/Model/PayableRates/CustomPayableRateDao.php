@@ -20,7 +20,6 @@ class CustomPayableRateDao extends DataAccess_AbstractDao {
     const TABLE           = 'payable_rate_templates';
     const TABLE_JOB_PIVOT = 'job_custom_payable_rates';
 
-    const query_by_uid_name    = "SELECT * FROM " . self::TABLE . " WHERE deleted_at IS NULL AND uid = :uid AND name = :name";
     const query_by_id_and_user = "SELECT * FROM " . self::TABLE . " WHERE deleted_at IS NULL AND id = :id AND uid = :uid";
     const query_by_id          = "SELECT * FROM " . self::TABLE . " WHERE deleted_at IS NULL AND id = :id";
     const query_paginated      = "SELECT * FROM " . self::TABLE . " WHERE deleted_at IS NULL AND uid = :uid LIMIT %u OFFSET %u ";
@@ -129,27 +128,6 @@ class CustomPayableRateDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param int    $uid
-     * @param string $name
-     * @param int    $ttl
-     *
-     * @return CustomPayableRateStruct
-     * @throws ReflectionException
-     */
-    public static function getByUidAndName( int $uid, string $name, int $ttl = 60 ) {
-        $stmt   = self::getInstance()->_getStatementForQuery( self::query_by_uid_name );
-        $result = self::getInstance()->setCacheTTL( $ttl )->_fetchObject( $stmt, new CustomPayableRateStruct(), [
-                'uid'  => $uid,
-                'name' => $name,
-        ] );
-
-        /**
-         * @var $result CustomPayableRateStruct[]
-         */
-        return $result[ 0 ] ?? null;
-    }
-
-    /**
      * @param CustomPayableRateStruct $customPayableRateStruct
      *
      * @return CustomPayableRateStruct
@@ -206,7 +184,6 @@ class CustomPayableRateDao extends DataAccess_AbstractDao {
         ] );
 
         self::destroyQueryByIdCache( $conn, $customPayableRateStruct->id );
-        self::destroyQueryByUidAndNameCache( $conn, $customPayableRateStruct->uid, $customPayableRateStruct->name );
         self::destroyQueryByIdAndUserCache( $conn, $customPayableRateStruct->id, $customPayableRateStruct->uid );
         self::destroyQueryPaginated( $customPayableRateStruct->uid );
 
@@ -243,7 +220,7 @@ class CustomPayableRateDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * validate a json against schema and then
+     * validate a JSON against schema and then
      * create a Payable Rate model template from it
      *
      * @param string   $json
@@ -287,18 +264,6 @@ class CustomPayableRateDao extends DataAccess_AbstractDao {
     private static function destroyQueryByIdCache( PDO $conn, int $id ) {
         $stmt = $conn->prepare( self::query_by_id );
         self::getInstance()->_destroyObjectCache( $stmt, CustomPayableRateStruct::class, [ 'id' => $id, ] );
-    }
-
-    /**
-     * @param PDO    $conn
-     * @param int    $uid
-     * @param string $name
-     *
-     * @throws ReflectionException
-     */
-    private static function destroyQueryByUidAndNameCache( PDO $conn, int $uid, string $name ) {
-        $stmt = $conn->prepare( self::query_by_uid_name );
-        self::getInstance()->_destroyObjectCache( $stmt, CustomPayableRateStruct::class, [ 'uid' => $uid, 'name' => $name, ] );
     }
 
     /**
