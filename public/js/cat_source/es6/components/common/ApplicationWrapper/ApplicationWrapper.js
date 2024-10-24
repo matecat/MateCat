@@ -45,6 +45,7 @@ export const ApplicationWrapper = ({children}) => {
     setUserInfo,
     logout,
     forceLogout,
+    setUserMetadataKey,
   } = useAuth()
 
   const [forceReload, setForceReload] = useState(false)
@@ -139,6 +140,7 @@ export const ApplicationWrapper = ({children}) => {
         setUserInfo,
         logout,
         forceLogout,
+        setUserMetadataKey,
       }}
     >
       {userDisconnected && (

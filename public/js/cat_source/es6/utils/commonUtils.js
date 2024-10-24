@@ -659,3 +659,13 @@ export function switchArrayIndex(arr, targetIndex, newIndex) {
     return [...acc, cur]
   }, [])
 }
+
+export const executeOnce = () => {
+  let wasAlreadyExecuted = false
+
+  return (callback) => {
+    if (wasAlreadyExecuted) return
+    callback()
+    wasAlreadyExecuted = true
+  }
+}

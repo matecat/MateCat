@@ -25,8 +25,6 @@ import {
   SETTINGS_PANEL_TABS,
   SettingsPanel,
 } from '../components/settingsPanel'
-import Speech2TextFeature from '../utils/speech2text'
-import SegmentUtils from '../utils/segmentUtils'
 import {getTmKeysJob} from '../api/getTmKeysJob'
 import {getSupportedLanguages} from '../api/getSupportedLanguages'
 import ApplicationStore from '../stores/ApplicationStore'
@@ -40,6 +38,8 @@ import {mountPage} from './mountPage'
 import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper'
 import NotificationBox from '../components/notificationsComponent/NotificationBox'
 import SseListener from '../sse/SseListener'
+import Speech2Text from '../utils/speech2text'
+import {initTagSignature} from '../components/segments/utils/DraftMatecatUtils/tagModel'
 
 const urlParams = new URLSearchParams(window.location.search)
 const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
@@ -47,7 +47,7 @@ const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
 function CatTool() {
   useHotkeys(
     Shortcuts.cattol.events.openSettings.keystrokes[Shortcuts.shortCutsKeyType],
-    () => CatToolActions.openSettingsPanel(SETTINGS_PANEL_TABS.advancedOptions),
+    () => CatToolActions.openSettingsPanel(SETTINGS_PANEL_TABS.other),
     {enableOnContentEditable: true},
   )
   const {isUserLogged, userInfo} = useContext(ApplicationWrapperContext)
@@ -64,6 +64,8 @@ function CatTool() {
   const [supportedLanguages, setSupportedLanguages] = useState([])
   const [isAnalysisCompleted, setIsAnalysisCompleted] = useState(false)
 
+  const [jobMetadata, setJobMetadata] = useState()
+
   const startSegmentIdRef = useRef(UI.startSegmentId)
   const callbackAfterSegmentsResponseRef = useRef()
 
@@ -77,11 +79,11 @@ function CatTool() {
     })
 
   const {projectTemplates, currentProjectTemplate, modifyingCurrentTemplate} =
-    useProjectTemplates(true)
+    useProjectTemplates()
 
   const closeSettings = useCallback(() => setOpenSettings({isOpen: false}), [])
   const openTmPanel = () =>
-    setOpenSettings({isOpen: true, tab: SETTINGS_PANEL_TABS.advancedOptions})
+    setOpenSettings({isOpen: true, tab: SETTINGS_PANEL_TABS.editorSettings})
 
   const getTmKeys = () => {
     const promises = [getTmKeysJob(), getTmKeysUser()]
@@ -142,19 +144,6 @@ function CatTool() {
       setMTCurrentFakeTemplate()
     }
   }
-
-  // parse advanced settings options
-  useEffect(() => {
-    if (typeof currentProjectTemplate?.id === 'undefined') return
-
-    modifyingCurrentTemplate((prevTemplate) => ({
-      ...prevTemplate,
-      speech2text: Speech2TextFeature.enabled(),
-      tagProjection: SegmentUtils.checkTPEnabled(),
-      lexica: config.lxq_enabled === 1,
-      crossLanguageMatches: SegmentUtils.checkCrossLanguageSettings(),
-    }))
-  }, [currentProjectTemplate?.id, modifyingCurrentTemplate])
 
   // actions listener
   useEffect(() => {
@@ -242,6 +231,14 @@ function CatTool() {
     )
     CatToolStore.addListener(CatToolConstants.SET_PROGRESS, checkAnalysisState)
 
+    const getJobMetadata = ({jobMetadata}) => setJobMetadata(jobMetadata)
+
+    CatToolStore.addListener(CatToolConstants.GET_JOB_METADATA, getJobMetadata)
+    CatToolActions.getJobMetadata({
+      idJob: config.id_job,
+      password: config.password,
+    })
+
     return () => {
       CatToolStore.removeListener(CatToolConstants.ON_RENDER, onRenderHandler)
       CatToolStore.removeListener(
@@ -259,6 +256,10 @@ function CatTool() {
       CatToolStore.removeListener(
         CatToolConstants.SET_PROGRESS,
         checkAnalysisState,
+      )
+      CatToolStore.removeListener(
+        CatToolConstants.GET_JOB_METADATA,
+        getJobMetadata,
       )
     }
   }, [])
@@ -373,11 +374,20 @@ function CatTool() {
     UI.registerFooterTabs()
   }, [wasInitSegments])
 
+  // user metadata options initialization
+  useEffect(() => {
+    const metadata = userInfo?.metadata
+    if (metadata) {
+      if (Speech2Text.enabled(metadata)) Speech2Text.init()
+      initTagSignature(metadata)
+    }
+  }, [userInfo?.metadata])
+
   const {
-    tagProjection: guessTagActive,
-    speech2text: speechToTextActive,
-    crossLanguageMatches: multiMatchLangs,
-  } = currentProjectTemplate ?? {}
+    guess_tags: guessTagActive,
+    dictation: speechToTextActive,
+    cross_language_matches: multiMatchLangs = [],
+  } = userInfo?.metadata ?? {}
 
   const isFakeCurrentTemplateReady =
     projectTemplates.length &&
@@ -409,6 +419,7 @@ function CatTool() {
         isGDriveProject={config.isGDriveProject}
         showReviseLink={config.footer_show_revise_link}
         openTmPanel={openTmPanel}
+        jobMetadata={jobMetadata}
       />
       <SseListener
         isAuthenticated={isUserLogged}

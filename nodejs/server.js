@@ -118,9 +118,9 @@ http.createServer( ( req, res ) => {
         if ( parsedUrl.pathname.indexOf( config.server.path ) === 0 ) {
             const params = parsedUrl.searchParams
             res._clientId = uuid.v4()
-            res._matecatJobId = params.get( 'jid' )
+            res._matecatJobId = params.get( 'jid' );
             res._matecatPw = params.get( 'pw' )
-            res._userId = params.get( 'uid' )
+            res._userId = parseInt( params.get( 'uid' ) );
             browserChannel.addClient( req, res )
         } else {
             res.writeHead( 404 )
@@ -174,39 +174,39 @@ const notifyUpgrade = ( isReboot = true ) => {
 
 }
 
-const checkCandidate = ( type, response, message ) => {
+const checkCandidate = ( type, connection, message ) => {
     let candidate;
     switch ( type ) {
         case AI_ASSISTANT_EXPLAIN_MEANING:
-            candidate = response._clientId === message.data.id_client;
+            candidate = connection._clientId === message.data.id_client;
             break;
         case LOGOUT_TYPE:
-            candidate = response._userId === message.data.uid;
+            candidate = connection._userId === message.data.uid;
             break;
         case COMMENTS_TYPE:
-            candidate = response._matecatJobId === message.data.id_job &&
-                message.data.passwords.indexOf( response._matecatPw ) !== -1 &&
-                response._clientId !== message.data.id_client;
+            candidate = parseInt( connection._matecatJobId ) === message.data.id_job &&
+                message.data.passwords.indexOf( connection._matecatPw ) !== -1 &&
+                connection._clientId !== message.data.id_client;
             break;
         case CONTRIBUTIONS_TYPE:
-            candidate = response._matecatJobId === message.data.id_job &&
-                message.data.passwords.indexOf( response._matecatPw ) !== -1 &&
-                response._clientId === message.data.id_client;
+            candidate = connection._matecatJobId === message.data.id_job &&
+                message.data.passwords.indexOf( connection._matecatPw ) !== -1 &&
+                connection._clientId === message.data.id_client;
             break;
         case CONCORDANCE_TYPE:
-            candidate = response._matecatJobId === message.data.id_job &&
-                message.data.passwords.indexOf( response._matecatPw ) !== -1 &&
-                response._clientId === message.data.id_client;
+            candidate = connection._matecatJobId === message.data.id_job &&
+                message.data.passwords.indexOf( connection._matecatPw ) !== -1 &&
+                connection._clientId === message.data.id_client;
             break;
         case BULK_STATUS_CHANGE_TYPE:
-            candidate = response._matecatJobId === message.data.id_job &&
-                message.data.passwords.indexOf( response._matecatPw ) !== -1 &&
-                response._clientId === message.data.id_client;
+            candidate = connection._matecatJobId === message.data.id_job &&
+                message.data.passwords.indexOf( connection._matecatPw ) !== -1 &&
+                connection._clientId === message.data.id_client;
             break;
         case CROSS_LANG_CONTRIBUTIONS:
-            candidate = response._matecatJobId === message.data.id_job &&
-                message.data.passwords.indexOf( response._matecatPw ) !== -1 &&
-                response._clientId === message.data.id_client;
+            candidate = connection._matecatJobId === message.data.id_job &&
+                message.data.passwords.indexOf( connection._matecatPw ) !== -1 &&
+                connection._clientId === message.data.id_client;
             break;
         case GLOSSARY_TYPE_G:
         case GLOSSARY_TYPE_S:
@@ -216,9 +216,9 @@ const checkCandidate = ( type, response, message ) => {
         case GLOSSARY_TYPE_SE:
         case GLOSSARY_TYPE_CH:
         case GLOSSARY_TYPE_K:
-            candidate = response._matecatJobId === message.data.id_job &&
-                message.data.passwords.indexOf( response._matecatPw ) !== -1 &&
-                response._clientId === message.data.id_client;
+            candidate = connection._matecatJobId === message.data.id_job &&
+                message.data.passwords.indexOf( connection._matecatPw ) !== -1 &&
+                connection._clientId === message.data.id_client;
             break;
         default:
             candidate = false;
@@ -244,12 +244,12 @@ const stompMessageReceived = ( body ) => {
         notifyUpgrade( false );
         return;
     } else if ( browserChannel.connections.length !== 0 ) {
-        dest = _.filter( browserChannel.connections, ( serverResponse ) => {
-            if ( typeof serverResponse._clientId === 'undefined' ) {
+        dest = _.filter( browserChannel.connections, ( connection ) => {
+            if ( typeof connection._clientId === 'undefined' ) {
                 logger.error( ["No valid clientId found in message", message] );
                 return false;
             }
-            return checkCandidate( message._type, serverResponse, message );
+            return checkCandidate( message._type, connection, message );
         } );
     }
 

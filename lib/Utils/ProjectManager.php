@@ -192,6 +192,10 @@ class ProjectManager {
                             'mmt_glossaries'                          => null,
                             'deepl_formality'                         => null,
                             'deepl_id_glossary'                       => null,
+                            'dictation'                               => null,
+                            'show_whitespace'                         => null,
+                            'character_counter'                       => null,
+                            'ai_assistant'                            => null,
                             'filters_extraction_parameters'           => new RecursiveArrayObject(),
                             'xliff_parameters'                        => new RecursiveArrayObject(),
                             'mt_evaluation'                           => false
@@ -384,6 +388,26 @@ class ProjectManager {
             $options[ 'from_api' ] = 1;
         }
 
+        // dictation
+        if ( isset( $this->projectStructure[ 'dictation' ] ) and $this->projectStructure[ 'dictation' ]  !== null ) {
+            $options[ 'dictation' ] = $this->projectStructure[ 'dictation' ] == true ? 1 : 0;
+        }
+
+        // show_whitespace
+        if ( isset( $this->projectStructure[ 'show_whitespace' ] ) and $this->projectStructure[ 'show_whitespace' ]  !== null ) {
+            $options[ 'show_whitespace' ] = $this->projectStructure[ 'show_whitespace' ] == true ? 1 : 0;
+        }
+
+        // character_counter
+        if ( isset( $this->projectStructure[ 'character_counter' ] ) and $this->projectStructure[ 'character_counter' ]  !== null ) {
+            $options[ 'character_counter' ] = $this->projectStructure[ 'character_counter' ] == true ? 1 : 0;
+        }
+
+        // ai_assistant
+        if ( isset( $this->projectStructure[ 'ai_assistant' ] ) and $this->projectStructure[ 'ai_assistant' ]  !== null ) {
+            $options[ 'ai_assistant' ] = $this->projectStructure[ 'ai_assistant' ] == true ? 1 : 0;
+        }
+
         // xliff_parameters
         if ( isset( $this->projectStructure[ 'xliff_parameters' ] ) and $this->projectStructure[ 'xliff_parameters' ] instanceof XliffConfigTemplateStruct ) {
             $configModel                   = $this->projectStructure[ 'xliff_parameters' ];
@@ -394,6 +418,7 @@ class ProjectManager {
         if ( isset( $this->projectStructure[ 'pretranslate_101' ] ) ) {
             $options[ 'pretranslate_101' ] = $this->projectStructure[ 'pretranslate_101' ];
         }
+
         /**
          * Here we have the opportunity to add other features as dependencies of the ones
          * which are already explicitly set.

@@ -4,6 +4,7 @@ use ConnectedServices\OauthTokenEncryption;
 use Teams\MembershipDao;
 use Teams\TeamDao;
 use Users\MetadataDao;
+use Users\MetadataStruct;
 
 /**
  * Created by PhpStorm.
@@ -104,6 +105,7 @@ class Users_UserStruct extends DataAccess_AbstractDaoSilentStruct implements Dat
 
     /**
      * @return \Teams\TeamStruct[]|null
+     * @throws ReflectionException
      */
     public function getUserTeams() {
         $mDao = new MembershipDao();
@@ -112,12 +114,33 @@ class Users_UserStruct extends DataAccess_AbstractDaoSilentStruct implements Dat
         return $mDao->findUserTeams( $this );
     }
 
+    /**
+     * @return array
+     */
     public function getMetadataAsKeyValue() {
-        $dao = new MetadataDao();
-        $collection = $dao->getAllByUid( $this->uid );
-        $data       = [];
-        foreach ( $collection as $record ) {
-            $data[ $record->key ] = $record->value;
+        $dao = new MetadataDao() ;
+        $collection = $dao->getAllByUid($this->uid) ;
+        $data  = array();
+
+        /** @var MetadataStruct $record */
+        foreach ($collection as $record ) {
+            $data[ $record->key ] = $record->getValue();
+        }
+
+        $mandatory = [
+            'dictation' => 0,
+            'show_whitespace' => 0,
+            'guess_tags' => 1,
+            'lexiqa' => 1,
+            'character_counter' => 0,
+            'ai_assistant' => 0,
+            'cross_language_matches' => new stdClass(),
+        ];
+
+        foreach ($mandatory as $key => $value){
+            if(!isset($data[$key])){
+                $data[$key] = is_numeric($value) ? (int)$value : $value;
+            }
         }
 
         return $data;

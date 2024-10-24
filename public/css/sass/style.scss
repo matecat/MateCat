@@ -94,24 +94,8 @@ header .wrapper {
   text-decoration: none;
 }
 
-#filterSwitch,
-#advancedOptions {
-  text-align: center;
-  width: 45px;
-  height: 27px;
-  padding-top: 11px;
-  color: #eee;
-  font-size: 23px;
-  cursor: pointer;
-}
-
 #point2seg {
   color: #fff;
-}
-
-#filterSwitch:hover,
-#point2seg:hover {
-  color: #ccc;
 }
 
 body.search-open header .action-menu #action-search {
@@ -3370,8 +3354,7 @@ section.opened.editor .status {
     width: 43%;
   }
 
-  #notifbox,
-  #filterSwitch {
+  #notifbox {
     width: 45px;
   }
 
@@ -3419,8 +3402,7 @@ section.opened.editor .status {
 }
 
 @media screen and (max-width: 1100px) {
-  #notifbox,
-  #filterSwitch {
+  #notifbox {
     width: 45px;
   }
 
@@ -3542,28 +3524,16 @@ section.modified .save-warning {
   display: none;
 }
 
-#advancedOptions .more-options {
-  font-size: 25px;
-}
-
-#advancedOptions .more-options:hover {
-  color: $grey2;
-}
-
-#advancedOptions .more-options:before {
-  margin-right: 0;
-}
-
-#filterSwitch .numbererror {
+.numbererror {
   display: none;
   margin: -28px 0 0 30px !important;
 }
 
-body.searchActive #filterSwitch .numbererror {
+body.searchActive .numbererror {
   display: block;
 }
 
-body.searchActive #filterSwitch .numbererror:empty {
+body.searchActive .numbererror:empty {
   display: none;
 }
 

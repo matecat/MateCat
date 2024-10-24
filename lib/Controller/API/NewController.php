@@ -128,6 +128,11 @@ class NewController extends ajaxController {
 
     private $xliff_parameters;
 
+    private $dictation;
+    private $show_whitespace;
+    private $character_counter;
+    private $ai_assistant;
+
     private function setBadRequestHeader() {
         $this->httpHeader = 'HTTP/1.0 400 Bad Request';
     }
@@ -203,6 +208,10 @@ class NewController extends ajaxController {
                 'tag_projection'             => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
                 'project_completion'         => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
                 'get_public_matches'         => [ 'filter' => FILTER_VALIDATE_BOOLEAN ], // disable public TM matches
+                'dictation'                  => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'show_whitespace'            => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'character_counter'          => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'ai_assistant'               => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
                 'instructions'               => [
                         'filter' => FILTER_SANITIZE_STRING,
                         'flags'  => FILTER_REQUIRE_ARRAY,
@@ -649,6 +658,11 @@ class NewController extends ajaxController {
         $projectStructure[ 'metadata' ]         = $this->metadata;
         $projectStructure[ 'pretranslate_100' ] = (int)!!$this->postInput[ 'pretranslate_100' ]; // Force pretranslate_100 to be 0 or 1
         $projectStructure[ 'pretranslate_101' ] = isset( $this->postInput[ 'pretranslate_101' ] ) ? (int)$this->postInput[ 'pretranslate_101' ] : 1;
+
+        $projectStructure['dictation']          = $this->postInput['dictation'] ?? null;
+        $projectStructure['show_whitespace']    = $this->postInput['show_whitespace'] ?? null;
+        $projectStructure['character_counter']  = $this->postInput['character_counter'] ?? null;
+        $projectStructure['ai_assistant']       = $this->postInput['ai_assistant'] ?? null;
 
         //default get all public matches from TM
         $projectStructure[ 'only_private' ] = ( !isset( $this->postInput[ 'get_public_matches' ] ) ? false : !$this->postInput[ 'get_public_matches' ] );

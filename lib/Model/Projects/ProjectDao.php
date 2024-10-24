@@ -478,23 +478,27 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param             $pid
+     * @param int         $pid
      * @param string|null $project_password
-     * @param string|null $jid
+     * @param int|null    $jid
      * @param string|null $jpassword
      *
      * @return ShapelessConcreteStruct[]
+     * @throws ReflectionException
      */
-    public function getProjectData( $pid, $project_password = null, $jid = null, $jpassword = null ) {
+    public function getProjectData( int $pid, ?string $project_password = null, ?int $jid = null, ?string $jpassword = null ): array {
 
         [ $query, $values ] = $this->_getProjectDataSQLAndValues( $pid, $project_password, $jid, $jpassword );
 
         $stmt = $this->_getStatementForQuery( $query );
 
-        return $this->_fetchObject( $stmt,
+        /** @var ShapelessConcreteStruct[] $res */
+        $res = $this->_fetchObject( $stmt,
                 new ShapelessConcreteStruct(),
                 $values
         );
+
+        return $res;
 
     }
 

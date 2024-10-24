@@ -35,6 +35,7 @@ export const Header = ({
   isGDriveProject,
   showReviseLink,
   openTmPanel,
+  jobMetadata,
 }) => {
   const {isUserLogged} = useContext(ApplicationWrapperContext)
 
@@ -80,7 +81,7 @@ export const Header = ({
               )}
 
               {/*Files instructions*/}
-              <JobMetadata idJob={jid} password={password} />
+              <JobMetadata metadata={jobMetadata} />
 
               {/*Download Menu*/}
               <DownloadMenu

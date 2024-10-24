@@ -3443,7 +3443,6 @@ a.resume-project:after,
 #swaplang:after,
 .more:before,
 .currSegment a:before,
-#filterSwitch:before,
 .more.minus:before,
 .close:before,
   /* mbc chat */
@@ -3618,10 +3617,6 @@ header .filter:before {
 #point2seg:after {
   content: '\e903';
   font-size: 24px;
-}
-
-#filterSwitch:before {
-  content: '\f002';
 }
 
 #clear-all-gdrive:before,
@@ -4399,4 +4394,28 @@ table.activitylog th .th-inner:after {
 
 body svg {
   padding: 0 !important;
+}
+
+.language-dropdown-item-container {
+  display: grid;
+  grid-template-columns: 70px auto;
+  gap: 10px;
+  align-items: center;
+  overflow: hidden;
+
+  .code-badge {
+    min-width: 60px;
+    font-weight: normal;
+
+    > span {
+      display: block;
+      text-align: center;
+      background-color: $grey7;
+      border-radius: 4px;
+      padding: 2px 4px;
+      color: $white;
+      font-size: 14px;
+      white-space: nowrap;
+    }
+  }
 }

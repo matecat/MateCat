@@ -48,40 +48,6 @@ const SegmentUtils = {
   isUnlockedSegment: function (segment) {
     return !isNull(CommonUtils.getFromStorage('unlocked-' + segment.sid))
   },
-
-  /**
-   * Characters counter local storage
-   */
-  isCharacterCounterEnable: () =>
-    !!JSON.parse(window.localStorage.getItem('characterCounter'))?.find(
-      (item) => Object.keys(item)[0] === config.id_job,
-    ),
-  setCharacterCounterOptionValue: (isActive) => {
-    const MAX_ITEMS = 2000
-
-    const cachedItems =
-      JSON.parse(window.localStorage.getItem('characterCounter')) ?? []
-    if (cachedItems.length > MAX_ITEMS) cachedItems.shift()
-    const prevValue = cachedItems.filter(
-      (item) => Object.keys(item)[0] !== config.id_job,
-    )
-
-    window.localStorage.setItem(
-      'characterCounter',
-      JSON.stringify([
-        ...prevValue,
-        ...(isActive ? [{[config.id_job]: true}] : []),
-      ]),
-    )
-  },
-  /**
-   * AI assistant
-   */
-  isAiAssistantAuto: () =>
-    JSON.parse(window.localStorage.getItem('aiAssistant')) == true,
-  setAiAssistantOptionValue: (isActive) => {
-    window.localStorage.setItem('aiAssistant', isActive)
-  },
   /**
    * Selected keys glossary job local storage
    */
@@ -119,15 +85,6 @@ const SegmentUtils = {
       segment.context_groups?.context_json ||
       segment.metadata?.length > 0
     )
-  },
-  /**
-   * Check Multi match languages
-   */
-  checkCrossLanguageSettings: function () {
-    const settings = localStorage.getItem('multiMatchLangs')
-    if (settings && Object.keys(JSON.parse(settings)).length)
-      return JSON.parse(settings)
-    return undefined
   },
   /**
    * Retrieve the file id of a segment

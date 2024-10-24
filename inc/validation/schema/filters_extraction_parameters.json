@@ -95,11 +95,6 @@
     "yaml": {
       "type": "object",
       "properties": {
-        "extract_arrays": {
-          "type": "boolean",
-          "nullable": true,
-          "default": false
-        },
         "translate_keys": {
           "type": "array",
           "nullable": true
