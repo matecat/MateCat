@@ -23,11 +23,6 @@ abstract class viewController extends controller {
      */
     protected ProviderInterface $client;
 
-    /**
-     * @var bool
-     */
-    protected bool $login_required = true;
-
     private ?Projects_ProjectStruct $project = null;
 
     /**
@@ -57,31 +52,24 @@ abstract class viewController extends controller {
     /**
      * Perform Authentication Requests and set incoming url
      */
-    public function checkLoginRequiredAndRedirect() {
-
-        if ( !$this->login_required ) {
-            return true;
-        }
-
-        //prepare redirect flag
-        $mustRedirectToLogin = false;
+    protected function checkLoginRequiredAndRedirect() {
 
         //if no login set and login is required
         if ( !$this->isLoggedIn() ) {
             $_SESSION[ 'wanted_url' ] = ltrim( $_SERVER[ 'REQUEST_URI' ], '/' );
-            $mustRedirectToLogin      = true;
-        }
-
-        if ( $mustRedirectToLogin ) {
             header( "Location: " . INIT::$HTTPHOST . INIT::$BASEURL . "signin", false );
             exit;
+        } elseif ( isset( $_SESSION[ 'wanted_url' ] ) ) {
+            // handle redirect after login
+            $this->redirectToWantedUrl();
         }
 
-        return true;
     }
 
-    public function setLoginRequired( $value ) {
-        $this->login_required = $value;
+    protected function redirectToWantedUrl() {
+        header( "Location: " . INIT::$HTTPHOST . INIT::$BASEURL . $_SESSION[ 'wanted_url' ], false );
+        unset( $_SESSION[ 'wanted_url' ] );
+        exit;
     }
 
     /**

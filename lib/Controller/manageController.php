@@ -15,6 +15,7 @@ class manageController extends viewController {
 
     public function __construct() {
         parent::__construct();
+        $this->checkLoginRequiredAndRedirect();
 
         parent::makeTemplate( "manage.html" );
 
@@ -23,8 +24,6 @@ class manageController extends viewController {
     }
 
     public function doAction() {
-
-        $this->checkLoginRequiredAndRedirect();
 
         $this->featureSet->loadFromUserEmail( $this->user->email );
 

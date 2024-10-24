@@ -73,6 +73,7 @@ class catController extends viewController {
         $this->start_time = microtime( 1 ) * 1000;
 
         parent::__construct();
+        $this->checkLoginRequiredAndRedirect();
 
         parent::makeTemplate( $this->templateName );
 
@@ -108,7 +109,6 @@ class catController extends viewController {
      */
     public function doAction() {
 
-        $this->checkLoginRequiredAndRedirect();
         $this->featureSet->run( 'beginDoAction', $this );
 
         try {

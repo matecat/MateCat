@@ -64,6 +64,7 @@ class analyzeController extends viewController {
     public function __construct() {
 
         parent::__construct();
+        $this->checkLoginRequiredAndRedirect();
 
         $filterArgs = [
                 'pid'      => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
@@ -121,8 +122,6 @@ class analyzeController extends viewController {
 
 
     public function doAction() {
-
-        $this->checkLoginRequiredAndRedirect();
 
         if ( $this->project_not_found ) {
             $this->render404();
