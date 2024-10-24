@@ -8,7 +8,7 @@
 
 namespace Features\ReviewExtended;
 
-use Chunks_ChunkStruct;
+use Jobs_JobStruct;
 use Exception;
 use Features\ReviewExtended\Email\BatchReviewProcessorAlertEmail;
 use Features\TranslationEvents\Model\TranslationEvent;
@@ -29,7 +29,7 @@ class BatchReviewProcessor {
     /**
      * @var mixed
      */
-    private Chunks_ChunkStruct $chunk;
+    private Jobs_JobStruct $chunk;
 
     /**
      * @var TranslationEvent[]
@@ -40,11 +40,11 @@ class BatchReviewProcessor {
     }
 
     /**
-     * @param Chunks_ChunkStruct $chunk
+     * @param Jobs_JobStruct $chunk
      *
      * @return $this
      */
-    public function setChunk( Chunks_ChunkStruct $chunk ): BatchReviewProcessor {
+    public function setChunk( Jobs_JobStruct $chunk ): BatchReviewProcessor {
         $this->chunk          = $chunk;
         $old_wStruct          = WordCountStruct::loadFromJob( $chunk );
         $this->jobWordCounter = new CounterModel( $old_wStruct );

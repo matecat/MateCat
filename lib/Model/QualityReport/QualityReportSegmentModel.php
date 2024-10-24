@@ -9,7 +9,6 @@
 namespace QualityReport;
 
 use CatUtils;
-use Chunks_ChunkStruct;
 use Comments_CommentDao;
 use Constants;
 use Constants_TranslationStatus;
@@ -18,6 +17,7 @@ use Features\ReviewExtended\Model\QualityReportDao;
 use Features\ReviewExtended\ReviewUtils;
 use Features\TranslationVersions\Model\TranslationVersionDao;
 use FeatureSet;
+use Jobs_JobStruct;
 use LQA\CategoryDao;
 use LQA\CategoryStruct;
 use LQA\ChunkReviewDao;
@@ -34,7 +34,7 @@ class QualityReportSegmentModel {
 
     protected $_chunkReviews;
 
-    public function __construct( Chunks_ChunkStruct $chunk ) {
+    public function __construct( Jobs_JobStruct $chunk ) {
         $this->chunk = $chunk;
     }
 
@@ -89,17 +89,17 @@ class QualityReportSegmentModel {
      * @param QualityReport_QualityReportSegmentStruct $seg
      * @param MateCatFilter                            $Filter
      * @param FeatureSet                               $featureSet
-     * @param Chunks_ChunkStruct                       $chunk
+     * @param Jobs_JobStruct                           $chunk
      * @param bool                                     $isForUI
      *
      * @throws Exception
      */
-    protected function _commonSegmentAssignments( QualityReport_QualityReportSegmentStruct $seg, MateCatFilter $Filter, FeatureSet $featureSet, Chunks_ChunkStruct $chunk, $isForUI = false ) {
+    protected function _commonSegmentAssignments( QualityReport_QualityReportSegmentStruct $seg, MateCatFilter $Filter, FeatureSet $featureSet, Jobs_JobStruct $chunk, $isForUI = false ) {
         $seg->warnings            = $seg->getLocalWarning( $featureSet, $chunk );
         $seg->pee                 = $seg->getPEE();
         $seg->ice_modified        = $seg->isICEModified();
         $seg->secs_per_word       = $seg->getSecsPerWord();
-        $seg->parsed_time_to_edit = CatUtils::parse_time_to_edit( $seg->time_to_edit );
+        $seg->parsed_time_to_edit = CatUtils::parse_time_to_edit( min( $seg->time_to_edit, PHP_INT_MAX ) );
 
         if ( $isForUI ) {
             $seg->segment     = $Filter->fromLayer0ToLayer2( $seg->segment );
@@ -129,10 +129,10 @@ class QualityReportSegmentModel {
     }
 
     /**
-     * @param $seg
-     * @param $comments
+     * @param                               $seg
+     * @param \Comments_BaseCommentStruct[] $comments
      */
-    protected function _assignComments( $seg, $comments ) {
+    protected function _assignComments( $seg, array $comments ) {
         foreach ( $comments as $comment ) {
             $comment->templateMessage();
             if ( $comment->id_segment == $seg->sid ) {
@@ -175,18 +175,7 @@ class QualityReportSegmentModel {
         $all_events = [];
 
         $translationVersionDao = new TranslationVersionDao;
-//        $last_translations     = $translationVersionDao->getLastRevisionsBySegmentsAndSourcePage(
-//                $segment_ids, $this->chunk->id, Constants::SOURCE_PAGE_TRANSLATE
-//        );
-
-//        foreach ( $this->_getChunkReviews() as $chunkReview ) {
-//            $last_revisions [ $chunkReview->source_page ] = $revs = $translationVersionDao->getLastRevisionsBySegmentsAndSourcePage(
-//                    $segment_ids, $this->chunk->id, $chunkReview->source_page
-//            );
-////            $all_versions_flattened                       = array_merge( $all_versions_flattened, $revs );
-//        }
-//        $all_versions_flattened = array_merge( $last_translations, $all_versions_flattened );
-        $all_events = $translationVersionDao->getAllRelevantEvents( $segment_ids, $this->chunk->id );
+        $all_events            = $translationVersionDao->getAllRelevantEvents( $segment_ids, $this->chunk->id );
 
         $segments = [];
 

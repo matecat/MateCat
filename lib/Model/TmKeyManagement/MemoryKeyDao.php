@@ -335,10 +335,11 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
      * @param array $input
      *
      * @return array
+     * @throws Exception
      * @see DataAccess_AbstractDao::sanitizeArray
      *
      */
-    public static function sanitizeArray( array $input ) {
+    public static function sanitizeArray( array $input ): array {
         return parent::_sanitizeInputArray( $input, self::STRUCT_TYPE );
     }
 
@@ -398,7 +399,7 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
      *
      * @return TmKeyManagement_MemoryKeyStruct[] An array containing TmKeyManagement_MemoryKeyStruct objects
      */
-    protected function _buildResult( $array_result ) {
+    protected function _buildResult( array $array_result ) {
         $result = [];
 
         foreach ( $array_result as $item ) {

@@ -16,7 +16,7 @@ class getWarningController extends ajaxController {
     private $project;
 
     /**
-     * @var Chunks_ChunkStruct
+     * @var Jobs_JobStruct
      */
     private $chunk;
 

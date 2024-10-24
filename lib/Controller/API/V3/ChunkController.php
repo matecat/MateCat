@@ -12,7 +12,7 @@ use API\Commons\Validators\ChunkPasswordValidator;
 use API\Commons\Validators\LoginValidator;
 use API\V2\BaseChunkController;
 use API\V3\Json\Chunk;
-use Chunks_ChunkStruct;
+use Jobs_JobStruct;
 use Exception;
 use Exceptions\NotFoundException;
 use Projects_ProjectStruct;
@@ -25,7 +25,7 @@ class ChunkController extends BaseChunkController {
     protected $project;
 
     /**
-     * @param Chunks_ChunkStruct $chunk
+     * @param Jobs_JobStruct $chunk
      *
      * @return $this
      */

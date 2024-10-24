@@ -16,21 +16,21 @@ class convertFileController extends ajaxController {
      */
     protected $result;
 
-    protected string $file_name;
-    protected string $source_lang;
-    protected string $target_lang;
+    protected string  $file_name;
+    public string     $source_lang;
+    public string     $target_lang;
     protected ?string $segmentation_rule = null;
 
     protected $intDir;
     protected $errDir;
 
-    protected string $cookieDir;
+    public string $cookieDir;
 
     //this will prevent recursion loop when ConvertFileWrapper will call the doAction()
-    protected bool $convertZipFile = true;
+    protected bool            $convertZipFile = true;
     protected Langs_Languages $lang_handler;
 
-    protected int $filters_extraction_parameters_template_id;
+    protected int                          $filters_extraction_parameters_template_id;
     protected ?FiltersConfigTemplateStruct $filters_extraction_parameters = null;
 
     /**
@@ -209,8 +209,10 @@ class convertFileController extends ajaxController {
      * @param ConversionHandler $conversionHandler
      *
      * @return bool
+     * @throws ReflectionException
+     * @throws Exception
      */
-    private function handleZip( ConversionHandler $conversionHandler ) {
+    private function handleZip( ConversionHandler $conversionHandler ): bool {
 
         // this makes the conversionhandler accumulate eventual errors on files and continue
         $conversionHandler->setStopOnFileException( false );
@@ -293,5 +295,8 @@ class convertFileController extends ajaxController {
                 $this->result->addError( $error->getErrors()[ 0 ][ 'message' ], $brokenFileName );
             }
         }
+
+        return true;
+
     }
 }

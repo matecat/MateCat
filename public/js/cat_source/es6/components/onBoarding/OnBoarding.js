@@ -44,7 +44,7 @@ const OnBoarding = ({
   const isBackButtonEnabled = stepState === ONBOARDING_STEP.FORGOT_PASSWORD
 
   const redirectAfterLogin = () => {
-    window.location.href = window.location.origin
+    location.reload()
   }
 
   const socialLogin = (url) => {

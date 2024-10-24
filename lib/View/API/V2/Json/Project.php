@@ -9,8 +9,8 @@
 
 namespace API\V2\Json;
 
-use Chunks_ChunkStruct;
 use Constants_JobStatus;
+use Jobs_JobStruct;
 use Model\Analysis\Status;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
@@ -121,19 +121,13 @@ class Project {
 
                 // if status is set, then filter off the jobs by owner_status
                 if ( $this->status ) {
-                    if ( $job->status_owner === $this->status and !$job->wasDeleted() ) {
-                        /**
-                         * @var $jobJSON Job
-                         */
-                        $jobJSONs[]    = $jobJSON->renderItem( new Chunks_ChunkStruct( $job->getArrayCopy() ), $project, $featureSet );
+                    if ( $job->status_owner === $this->status and !$job->isDeleted() ) {
+                        $jobJSONs[]    = $jobJSON->renderItem( new Jobs_JobStruct( $job->getArrayCopy() ), $project, $featureSet );
                         $jobStatuses[] = $job->status_owner;
                     }
                 } else {
-                    if ( !$job->wasDeleted() ) {
-                        /**
-                         * @var $jobJSON Job
-                         */
-                        $jobJSONs[]    = $jobJSON->renderItem( new Chunks_ChunkStruct( $job->getArrayCopy() ), $project, $featureSet );
+                    if ( !$job->isDeleted() ) {
+                        $jobJSONs[]    = $jobJSON->renderItem( new Jobs_JobStruct( $job->getArrayCopy() ), $project, $featureSet );
                         $jobStatuses[] = $job->status_owner;
                     }
                 }

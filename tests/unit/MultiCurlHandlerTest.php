@@ -92,11 +92,11 @@ class MultiCurlHandlerTest extends AbstractTest {
         $this->assertNotEmpty( $tokenHash2 );
         $hashes[] = $tokenHash2;
 
-        $tokenHash3 = $mh->createResource( 'http://www.bing.com/', $options );
+        $tokenHash3 = $mh->createResource( 'https://www.bing.com/', $options );
         $this->assertNotEmpty( $tokenHash3 );
         $hashes[] = $tokenHash3;
 
-        $tokenHash4 = $mh->createResource( 'http://www.translated.net/', $options );
+        $tokenHash4 = $mh->createResource( 'https://www.translated.net/', $options );
         $this->assertNotEmpty( $tokenHash4 );
         $hashes[] = $tokenHash4;
 

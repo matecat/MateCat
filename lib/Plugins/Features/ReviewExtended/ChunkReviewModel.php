@@ -9,7 +9,7 @@
 
 namespace Features\ReviewExtended;
 
-use Chunks_ChunkStruct;
+use Jobs_JobStruct;
 use Exception;
 use LQA\ChunkReviewDao;
 use LQA\ChunkReviewStruct;
@@ -26,12 +26,12 @@ class ChunkReviewModel implements IChunkReviewModel {
     protected $penalty_points;
 
     /**
-     * @var Chunks_ChunkStruct
+     * @var Jobs_JobStruct
      */
     protected $chunk;
 
     /**
-     * @return Chunks_ChunkStruct
+     * @return Jobs_JobStruct
      */
     public function getChunk() {
         return $this->chunk;

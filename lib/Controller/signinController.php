@@ -11,6 +11,9 @@ class signinController extends viewController {
      * @inheritDoc
      */
     function doAction() {
+        if( $this->isLoggedIn() && isset( $_SESSION[ 'wanted_url' ] ) ){
+            $this->redirectToWantedUrl();
+        }
     }
 
     /**

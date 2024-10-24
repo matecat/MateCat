@@ -10,8 +10,7 @@ namespace Email;
 
 
 use CatUtils;
-use Chunks_ChunkStruct;
-use Exception;
+use Jobs_JobStruct;
 use Projects_MetadataDao;
 use Projects_ProjectStruct;
 use Routes;
@@ -41,7 +40,7 @@ class ProjectAssignedEmail extends AbstractEmail {
     protected function _getTemplateVariables(): array {
         $words_count = [];
         foreach ( $this->jobs as $job ) {
-            $jStruct  = new Chunks_ChunkStruct( $job->getArrayCopy() );
+            $jStruct  = new Jobs_JobStruct( $job->getArrayCopy() );
             $jobStats = new WordCountStruct();
             $jobStats->setIdJob( $jStruct->id );
             $jobStats->setDraftWords( $jStruct->draft_words + $jStruct->new_words ); // (draft_words + new_words) AS DRAFT

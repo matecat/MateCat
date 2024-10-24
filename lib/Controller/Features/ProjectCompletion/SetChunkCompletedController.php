@@ -10,7 +10,7 @@ class Features_ProjectCompletion_SetChunkCompletedController extends ajaxControl
     protected $password;
 
     /**
-     * @var Chunks_ChunkStruct
+     * @var Jobs_JobStruct
      */
     private $chunk;
 

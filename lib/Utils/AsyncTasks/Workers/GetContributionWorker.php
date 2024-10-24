@@ -268,7 +268,6 @@ class GetContributionWorker extends AbstractWorker {
                 $match[ 'created_by' ] = Utils::changeMemorySuggestionSource(
                         $match,
                         $contributionStruct->getJobStruct()->tm_keys,
-                        $contributionStruct->getJobStruct()->owner,
                         $user->uid
                 );
             }
@@ -641,7 +640,6 @@ class GetContributionWorker extends AbstractWorker {
                         $matches[ $k ][ 'created_by' ] = Utils::changeMemorySuggestionSource(
                                 $m,
                                 $contributionStruct->getJobStruct()->tm_keys,
-                                $contributionStruct->getJobStruct()->owner,
                                 $user->uid
                         );
                     }

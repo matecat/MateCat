@@ -24,23 +24,23 @@ class SetInCacheTest extends AbstractTest {
 
     public function setUp(): void {
         parent::setUp();
-        $this->jobDao    = new EnginesModel_EngineDAO( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
-        $this->reflector = new ReflectionClass( $this->jobDao );
-        $this->method    = $this->reflector->getMethod( "_setInCache" );
+        $this->databaseInstance = new EnginesModel_EngineDAO( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
+        $this->reflector        = new ReflectionClass( $this->databaseInstance );
+        $this->method           = $this->reflector->getMethod( "_setInCache" );
         $this->method->setAccessible( true );
         $this->cache_con = $this->reflector->getProperty( "cache_con" );
         $this->cache_con->setAccessible( true );
 
-        $this->cache_con->setValue( $this->jobDao, new Client( INIT::$REDIS_SERVERS ) );
+        $this->cache_con->setValue( $this->databaseInstance, new Client( INIT::$REDIS_SERVERS ) );
 
         $this->cache_TTL = $this->reflector->getProperty( "cacheTTL" );
         $this->cache_TTL->setAccessible( true );
-        $this->cache_TTL->setValue( $this->jobDao, 30 );
+        $this->cache_TTL->setValue( $this->databaseInstance, 30 );
 
     }
 
     public function tearDown(): void {
-        $this->cache_con->getValue( $this->jobDao )->flushdb();
+        $this->cache_con->getValue( $this->databaseInstance )->flushdb();
         parent::tearDown();
     }
 
@@ -52,8 +52,8 @@ class SetInCacheTest extends AbstractTest {
     public function test__setInCache_basic_key_value() {
         $this->cache_key               = "key";
         $this->cache_value_for_the_key = [ "foo_bar" ];
-        $this->method->invoke( $this->jobDao, $this->cache_key, $this->cache_value_for_the_key );
-        $this->assertEquals( $this->cache_value_for_the_key, unserialize( $this->cache_con->getValue( $this->jobDao )->get( md5( $this->cache_key ) ) ) );
+        $this->method->invoke( $this->databaseInstance, $this->cache_key, $this->cache_value_for_the_key );
+        $this->assertEquals( $this->cache_value_for_the_key, unserialize( $this->cache_con->getValue( $this->databaseInstance )->get( md5( $this->cache_key ) ) ) );
     }
 
     /**
@@ -85,8 +85,8 @@ class SetInCacheTest extends AbstractTest {
                         ]
         ];
 
-        $this->method->invoke( $this->jobDao, $this->cache_key, $this->cache_value_for_the_key );
-        $this->assertEquals( $this->cache_value_for_the_key, unserialize( $this->cache_con->getValue( $this->jobDao )->get( md5( $this->cache_key ) ) ) );
+        $this->method->invoke( $this->databaseInstance, $this->cache_key, $this->cache_value_for_the_key );
+        $this->assertEquals( $this->cache_value_for_the_key, unserialize( $this->cache_con->getValue( $this->databaseInstance )->get( md5( $this->cache_key ) ) ) );
     }
 
     /**
@@ -143,8 +143,8 @@ class SetInCacheTest extends AbstractTest {
         $this->cache_key = $stmt_param->queryString . serialize( $bindParams_param );
 
 
-        $this->method->invoke( $this->jobDao, $this->cache_key, $this->cache_value_for_the_key );
-        $this->assertEquals( $this->cache_value_for_the_key, unserialize( $this->cache_con->getValue( $this->jobDao )->get( md5( $this->cache_key ) ) ) );
+        $this->method->invoke( $this->databaseInstance, $this->cache_key, $this->cache_value_for_the_key );
+        $this->assertEquals( $this->cache_value_for_the_key, unserialize( $this->cache_con->getValue( $this->databaseInstance )->get( md5( $this->cache_key ) ) ) );
 
 
     }

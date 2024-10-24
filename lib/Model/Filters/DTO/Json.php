@@ -2,10 +2,9 @@
 
 namespace Filters\DTO;
 
-use Countable;
 use JsonSerializable;
 
-class Json implements IDto, JsonSerializable, Countable {
+class Json implements IDto, JsonSerializable {
 
     private bool  $extract_arrays         = false;
     private bool  $escape_forward_slashes = false;
@@ -13,8 +12,6 @@ class Json implements IDto, JsonSerializable, Countable {
     private array $do_not_translate_keys  = [];
     private array $context_keys           = [];
     private array $character_limit        = [];
-
-    private array $defaultExcludeMask = [];
 
     /**
      * @param bool|null $extract_arrays
@@ -110,13 +107,6 @@ class Json implements IDto, JsonSerializable, Countable {
 
         return $format;
 
-    }
-
-    /**
-     * @return int
-     */
-    public function count(): int {
-        return count( $this->jsonSerialize() );
     }
 
 }

@@ -1,7 +1,10 @@
 <?php
 
+use API\Commons\Exceptions\AuthenticationError;
 use Constants\ConversionHandlerStatus;
 use Conversion\ConvertedFileModel;
+use Exceptions\NotFoundException;
+use Exceptions\ValidationError;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use Filters\FiltersConfigTemplateDao;
@@ -14,6 +17,8 @@ use PayableRates\CustomPayableRateStruct;
 use ProjectQueue\Queue;
 use QAModelTemplate\QAModelTemplateDao;
 use QAModelTemplate\QAModelTemplateStruct;
+use TaskRunner\Exceptions\EndQueueException;
+use TaskRunner\Exceptions\ReQueueException;
 use Teams\MembershipDao;
 use TMS\TMSService;
 use Validator\EngineValidator;
@@ -379,6 +384,15 @@ class NewController extends ajaxController {
         echo $toJson;
     }
 
+    /**
+     * @throws ReQueueException
+     * @throws AuthenticationError
+     * @throws ValidationError
+     * @throws NotFoundException
+     * @throws EndQueueException
+     * @throws ReflectionException
+     * @throws Exception
+     */
     public function doAction() {
 
         $fs = FilesStorageFactory::create();
@@ -587,9 +601,7 @@ class NewController extends ajaxController {
         if ( isset( $this->result[ 'data' ] ) && !empty( $this->result[ 'data' ] ) ) {
             foreach ( $this->result[ 'data' ] as $zipFileName => $zipFiles ) {
                 $zipFiles = json_decode( $zipFiles, true );
-
-
-                $fileNames = Utils::array_column( $zipFiles, 'name' );
+                $fileNames = array_column( $zipFiles, 'name' );
                 $arFiles   = array_merge( $arFiles, $fileNames );
             }
         }
@@ -760,11 +772,11 @@ class NewController extends ajaxController {
      * @param $filename
      *
      * @return array
-     * @throws \API\Commons\Exceptions\AuthenticationError
-     * @throws \Exceptions\NotFoundException
-     * @throws \Exceptions\ValidationError
-     * @throws \TaskRunner\Exceptions\EndQueueException
-     * @throws \TaskRunner\Exceptions\ReQueueException
+     * @throws AuthenticationError
+     * @throws NotFoundException
+     * @throws ValidationError
+     * @throws EndQueueException
+     * @throws ReQueueException
      */
     private function getFileMetadata( $filename ) {
         $info          = XliffProprietaryDetect::getInfo( $filename );

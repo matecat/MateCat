@@ -2,12 +2,6 @@
 
 use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
-use ConnectedServices\Facebook\FacebookProvider;
-use ConnectedServices\Github\GithubProvider;
-use ConnectedServices\Google\GoogleProvider;
-use ConnectedServices\LinkedIn\LinkedInProvider;
-use ConnectedServices\Microsoft\MicrosoftProvider;
-use ConnectedServices\OauthClient;
 use WordCount\WordCountStruct;
 
 /**
@@ -30,6 +24,7 @@ class reviseSummaryController extends viewController {
 
     public function __construct() {
         parent::__construct();
+        $this->checkLoginRequiredAndRedirect();
         parent::makeTemplate( "revise_summary.html" );
 
         $filterArgs = [
@@ -47,14 +42,12 @@ class reviseSummaryController extends viewController {
 
     public function doAction() {
 
-        $this->checkLoginRequiredAndRedirect();
-
         //pay a little query to avoid to fetch 5000 rows
-        $this->data = $jobStruct = Jobs_JobDao::getByIdAndPassword( $this->jid, $this->password );
+        $this->data = $jobStruct = Chunks_ChunkDao::getByIdAndPassword( $this->jid, $this->password );
 
         $wStruct = WordCountStruct::loadFromJob( $jobStruct );
 
-        if ( $jobStruct[ 'status' ] == Constants_JobStatus::STATUS_ARCHIVED || $jobStruct[ 'status' ] == Constants_JobStatus::STATUS_CANCELLED ) {
+        if ( $jobStruct->isArchived() || $jobStruct->isCanceled() ) {
             //this job has been archived
             $this->job_archived    = true;
             $this->job_owner_email = $jobStruct[ 'job_owner' ];
@@ -106,7 +99,7 @@ class reviseSummaryController extends viewController {
         $this->job_stats[ 'analysis_complete' ] = ( $this->project_status[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE ? true : false );
         $this->template->job_stats              = $this->job_stats;
 
-        $this->template->build_number  = INIT::$BUILD_NUMBER;
+        $this->template->build_number = INIT::$BUILD_NUMBER;
 
         $projectMetaDataDao = new Projects_MetadataDao();
         $projectMetaData    = null;

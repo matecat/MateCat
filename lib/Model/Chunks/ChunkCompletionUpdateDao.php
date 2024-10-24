@@ -2,7 +2,7 @@
 
 class Chunks_ChunkCompletionUpdateDao extends DataAccess_AbstractDao {
 
-    protected function _buildResult( $array_result ) {
+    protected function _buildResult( array $array_result ) {
     }
 
     public function updatePassword( $id_job, $password, $old_password ) {
@@ -27,7 +27,7 @@ class Chunks_ChunkCompletionUpdateDao extends DataAccess_AbstractDao {
         ];
     }
 
-    public static function findByChunk( Chunks_ChunkStruct $chunk, array $params = [] ) {
+    public static function findByChunk( Jobs_JobStruct $chunk, array $params = [] ) {
 
         $sql = "SELECT * FROM chunk_completion_updates " .
                 " WHERE id_project = :id_project AND id_job = :id_job " .

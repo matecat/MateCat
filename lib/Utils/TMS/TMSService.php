@@ -4,7 +4,7 @@ namespace TMS;
 
 use API\Commons\Exceptions\UnprocessableException;
 use Chunks_ChunkDao;
-use Chunks_ChunkStruct;
+use Jobs_JobStruct;
 use Constants_TranslationStatus;
 use DateTime;
 use DateTimeZone;
@@ -424,7 +424,7 @@ class TMSService {
         }
 
         /**
-         * @var $chunks Chunks_ChunkStruct[]
+         * @var $chunks Jobs_JobStruct[]
          */
         $chunks = Chunks_ChunkDao::getByJobID( $jid );
 
@@ -452,7 +452,7 @@ class TMSService {
             $tmOrigin = "";
             if ( strpos( $this->output_type, 'tm' ) !== false ) {
                 $suggestionsArray = json_decode( $row[ 'suggestions_array' ], true );
-                $suggestionOrigin = Utils::changeMemorySuggestionSource( $suggestionsArray[ 0 ], $row[ 'tm_keys' ], $row[ 'id_customer' ], $uid );
+                $suggestionOrigin = Utils::changeMemorySuggestionSource( $suggestionsArray[ 0 ], $row[ 'tm_keys' ], $uid );
                 $tmOrigin         = '<prop type="x-MateCAT-suggestion-origin">' . $suggestionOrigin . "</prop>";
                 if ( preg_match( "/[a-f0-9]{8,}/", $suggestionsArray[ 0 ][ 'memory_key' ] ) ) {
                     $tmOrigin .= "\n        <prop type=\"x-MateCAT-suggestion-private-key\">" . $suggestionsArray[ 0 ][ 'memory_key' ] . "</prop>";

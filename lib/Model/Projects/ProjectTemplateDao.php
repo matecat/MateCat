@@ -148,7 +148,9 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
      * - tm
      *
      * @param ProjectTemplateStruct $projectTemplateStruct
+     * @param Users_UserStruct      $user
      *
+     * @throws ReflectionException
      * @throws Exception
      */
     private static function checkValues( ProjectTemplateStruct $projectTemplateStruct, Users_UserStruct $user ) {

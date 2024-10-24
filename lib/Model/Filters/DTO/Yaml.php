@@ -2,10 +2,9 @@
 
 namespace Filters\DTO;
 
-use Countable;
 use JsonSerializable;
 
-class Yaml implements IDto, JsonSerializable, Countable {
+class Yaml implements IDto, JsonSerializable {
 
     private array $translate_keys        = [];
     private array $do_not_translate_keys = [];
@@ -53,13 +52,6 @@ class Yaml implements IDto, JsonSerializable, Countable {
 
         return $format;
 
-    }
-
-    /**
-     * @return int
-     */
-    public function count(): int {
-        return count( $this->jsonSerialize() );
     }
 
 }

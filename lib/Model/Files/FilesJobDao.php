@@ -2,7 +2,7 @@
 
 namespace Files;
 
-use Chunks_ChunkStruct;
+use Jobs_JobStruct;
 use DataAccess_AbstractDao;
 use Database;
 use Files_FileStruct;
@@ -13,11 +13,11 @@ class FilesJobDao extends DataAccess_AbstractDao {
 
     /**
      * @param Files_FileStruct   $file
-     * @param Chunks_ChunkStruct $chunk
+     * @param Jobs_JobStruct $chunk
      *
      * @return array
      */
-    public function getSegmentBoundariesForChunk( Files_FileStruct $file, Chunks_ChunkStruct $chunk ) {
+    public function getSegmentBoundariesForChunk( Files_FileStruct $file, Jobs_JobStruct $chunk ) {
         $sql = "SELECT MIN(st.id_segment) AS MIN, MAX(st.id_segment) as MAX
           FROM files_job
             JOIN jobs

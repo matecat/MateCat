@@ -102,7 +102,7 @@ class ReadJobTest extends AbstractTest {
      * @covers Jobs_JobDao::read
      */
     public function test_read_job_without_params() {
-        $this->job_struct_param = new Jobs_JobStruct( [] );
+        $this->job_struct_param = new Jobs_JobStruct( [ 'password' => '' ] );
         $result                 = $this->job_Dao->read( $this->job_struct_param );
         $this->assertEmpty( $result );
 

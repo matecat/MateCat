@@ -5,17 +5,17 @@ namespace API\App;
 use API\Commons\AbstractStatefulKleinController;
 use API\Commons\Validators\ChunkPasswordValidator;
 use API\Commons\Validators\LoginValidator;
-use Chunks_ChunkStruct;
+use Jobs_JobStruct;
 use Files\FilesPartsDao;
 
 class FilesController extends AbstractStatefulKleinController {
 
     /**
-     * @var Chunks_ChunkStruct
+     * @var Jobs_JobStruct
      */
     protected $chunk ;
 
-    public function setChunk( Chunks_ChunkStruct $chunk ){
+    public function setChunk( Jobs_JobStruct $chunk ){
         $this->chunk = $chunk;
     }
 

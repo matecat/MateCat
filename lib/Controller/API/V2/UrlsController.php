@@ -28,7 +28,7 @@ class UrlsController extends KleinController {
         // @TODO is correct here?
         $jobCheck = 0;
         foreach ($this->validator->getProject()->getJobs() as $job){
-            if (!$job->wasDeleted()) {
+            if (!$job->isDeleted()) {
                 $jobCheck++;
             }
         }

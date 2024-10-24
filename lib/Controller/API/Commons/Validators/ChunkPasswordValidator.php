@@ -14,15 +14,16 @@
 namespace API\Commons\Validators;
 
 use API\Commons\KleinController;
-use Chunks_ChunkStruct;
+use Jobs_JobStruct;
 use Exceptions\NotFoundException;
 use Jobs_JobDao;
 use LQA\ChunkReviewDao;
 use LQA\ChunkReviewStruct;
+use ReflectionException;
 
 class ChunkPasswordValidator extends Base {
     /**
-     * @var \Chunks_ChunkStruct
+     * @var \Jobs_JobStruct
      */
     protected $chunk;
 
@@ -95,12 +96,12 @@ class ChunkPasswordValidator extends Base {
     }
 
     /**
-     * @throws NotFoundException
+     * @throws ReflectionException
      */
     protected function getChunkFromTranslatePassword() {
-        $this->chunk = Jobs_JobDao::getByIdAndPassword( $this->request->id_job, $this->request->password, 0, new Chunks_ChunkStruct );
+        $this->chunk = Jobs_JobDao::getByIdAndPassword( $this->request->id_job, $this->request->password, 0, new Jobs_JobStruct );
         if ( !empty( $this->chunk ) ) {
-            $this->chunkReview = @( new ChunkReviewDao() )->findChunkReviews( $this->chunk )[ 0 ];
+            $this->chunkReview = ( new ChunkReviewDao() )->findChunkReviews( $this->chunk )[ 0 ] ?? null;
         }
     }
 

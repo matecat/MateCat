@@ -8,7 +8,7 @@
 
 namespace Features\ReviewExtended;
 
-use Chunks_ChunkStruct;
+use Jobs_JobStruct;
 use Exception;
 use Exceptions\ValidationError;
 use Features\TranslationEvents\Model\TranslationEventDao;
@@ -41,7 +41,7 @@ class TranslationIssueModel {
     protected $chunk_review;
 
     /**
-     * @var Chunks_ChunkStruct
+     * @var Jobs_JobStruct
      */
     protected $chunk;
 

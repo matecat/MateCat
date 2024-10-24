@@ -12,8 +12,8 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
 
     const STRUCT_TYPE = "EnginesModel_EngineStruct";
 
-    protected static $auto_increment_field = [ 'id' ];
-    protected static $primary_keys         = [ 'id' ];
+    protected static array $auto_increment_field = [ 'id' ];
+    protected static array $primary_keys         = [ 'id' ];
 
     /**
      * Build the query,
@@ -286,7 +286,7 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
      *
      * @return array|EnginesModel_EngineStruct|EnginesModel_EngineStruct[]
      */
-    protected function _buildResult( $array_result ) {
+    protected function _buildResult( array $array_result ) {
         $result = [];
 
         foreach ( $array_result as $item ) {

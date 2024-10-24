@@ -6,19 +6,14 @@ use API\Commons\Exceptions\NotFoundException;
 use API\Commons\Validators\ChunkPasswordValidator;
 use API\Commons\Validators\LoginValidator;
 use API\V2\BaseChunkController;
-use Chunks_ChunkStruct;
+use Jobs_JobStruct;
 use Revise\FeedbackDAO;
 use Revise\FeedbackStruct;
 
 class RevisionFeedbackController extends BaseChunkController {
 
     /**
-     * @var Chunks_ChunkStruct
-     */
-    protected $chunk;
-
-    /**
-     * @param Chunks_ChunkStruct $chunk
+     * @param Jobs_JobStruct $chunk
      *
      * @return $this
      */

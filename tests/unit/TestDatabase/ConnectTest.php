@@ -17,7 +17,7 @@ class ConnectTest extends AbstractTest {
     /**
      * @var Database|IDatabase
      */
-    protected $jobDao;
+    protected $databaseInstance;
 
     /**
      * @throws ReflectionException
@@ -26,14 +26,14 @@ class ConnectTest extends AbstractTest {
         parent::setUp();
 
         // get the singleton and close the connection
-        $this->jobDao = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
-        $this->jobDao->close();
+        $this->databaseInstance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
+        $this->databaseInstance->close();
 
         // reset the singleton static field instance
-        $this->reflector = new ReflectionClass( $this->jobDao );
+        $this->reflector = new ReflectionClass( $this->databaseInstance );
         $this->property  = $this->reflector->getProperty( 'instance' );
         $this->property->setAccessible( true );
-        $this->property->setValue( $this->jobDao, null );
+        $this->property->setValue( $this->databaseInstance, null );
 
     }
 
@@ -44,7 +44,7 @@ class ConnectTest extends AbstractTest {
         // verify that the setup method has reset the connection
         $connection = $this->reflector->getProperty( 'connection' );
         $connection->setAccessible( true );
-        $current_value = $connection->getValue( $this->jobDao );
+        $current_value = $connection->getValue( $this->databaseInstance );
         $this->assertNull( $current_value );
     }
 
@@ -107,7 +107,7 @@ class ConnectTest extends AbstractTest {
         $this->checkInstanceReset();
 
         // ensure connection
-        $instance_after_first_reset = $this->jobDao->obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
+        $instance_after_first_reset = $this->databaseInstance->obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
         $instance_after_first_reset->connect();
 
         // get the PDO internal resource

@@ -124,7 +124,7 @@ class ProjectsController extends KleinController {
         foreach ( $chunks as $chunk ) {
 
             // update a job only if it is NOT deleted
-            if ( !$chunk->wasDeleted() ) {
+            if ( !$chunk->isDeleted() ) {
                 Jobs_JobDao::updateJobStatus( $chunk, $status );
 
                 $lastSegmentsList = Translations_SegmentTranslationDao::getMaxSegmentIdsFromJob( $chunk );

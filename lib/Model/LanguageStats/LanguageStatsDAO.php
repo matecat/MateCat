@@ -306,7 +306,7 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
      * @see DataAccess_AbstractDao::sanitizeArray
      *
      */
-    public static function sanitizeArray( array $input ) {
+    public static function sanitizeArray( array $input ): array {
         return parent::_sanitizeInputArray( $input, self::STRUCT_TYPE );
     }
 

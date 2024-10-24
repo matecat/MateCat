@@ -13,9 +13,9 @@ use Jobs_JobStruct;
 
 class JobPasswordValidator extends Base {
     /**
-     * @var \Jobs_JobStruct
+     * @var Jobs_JobStruct
      */
-    private $jStruct;
+    private Jobs_JobStruct $jStruct;
 
     /**
      * @var KleinController

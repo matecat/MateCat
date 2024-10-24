@@ -633,7 +633,7 @@ class SegmentSource extends React.Component {
     const optionsToolbar = this.state.isShowingOptionsToolbar && (
       <ul className="optionsToolbar">
         {Boolean(config.isOpenAiEnabled) &&
-          !this.context.userInfo.metadata.ai_assistant === 1 && (
+          this.context.userInfo.metadata.ai_assistant === 0 && (
             <li
               title={
                 isEnabledAiAssistantButton

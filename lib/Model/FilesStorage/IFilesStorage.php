@@ -2,7 +2,7 @@
 
 namespace FilesStorage;
 
-use Chunks_ChunkStruct;
+use Jobs_JobStruct;
 use Exception;
 use FilesStorage\Exceptions\FileSystemException;
 

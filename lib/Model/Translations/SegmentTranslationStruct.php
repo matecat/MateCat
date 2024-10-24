@@ -68,11 +68,11 @@ class Translations_SegmentTranslationStruct extends DataAccess_AbstractDaoSilent
     }
 
     /**
-     * @return Chunks_ChunkStruct[]|null
+     * @return Jobs_JobStruct[]|null
      */
-    public function getChunk(): ?Chunks_ChunkStruct {
+    public function getChunk(): ?Jobs_JobStruct {
         return $this->cachable( __FUNCTION__, $this->id_job, function ( $id_job ) {
-            return Jobs_JobDao::getById( $id_job, 0, new Chunks_ChunkStruct() )[ 0 ] ?? null;
+            return Jobs_JobDao::getById( $id_job, 0 )[ 0 ] ?? null;
         } );
     }
 
