@@ -6,6 +6,7 @@ import React from 'react'
 import {ModalWindow} from './ModalWindow'
 import AppDispatcher from '../../stores/AppDispatcher'
 import ModalsConstants from '../../constants/ModalsConstants'
+import ModalsActions from '../../actions/ModalsActions'
 
 const DummyComponent = () => {
   return <div>something</div>
@@ -26,13 +27,13 @@ test('works properly', () => {
   const onClose = jest.fn()
   const onCloseCallback = jest.fn()
   act(() => {
-    AppDispatcher.dispatch({
-      actionType: ModalsConstants.SHOW_MODAL,
-      component: DummyComponent,
-      props: {onCloseCallback},
-      title: 'Random title',
-      onCloseCallback: onClose,
-    })
+    ModalsActions.showModalComponent(
+      DummyComponent,
+      {onCloseCallback},
+      'Random title',
+      undefined,
+      onClose,
+    )
   })
 
   const elTitle = screen.getByRole('heading', {name: 'Random title'})

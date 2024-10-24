@@ -31,15 +31,14 @@ class JobMenu extends React.Component {
   getReviseMenuLink() {
     let reviseUrl = this.props.reviseUrl
     return (
-      <a
-        className="item"
-        target="_blank"
-        href={reviseUrl}
-        rel="noreferrer"
+      <div
+        className={'item'}
+        onClick={() => window.open(reviseUrl, '_blank')}
         data-testid="revise-item"
       >
-        <i className="icon-edit icon" /> Revise
-      </a>
+        <i className="icon-edit icon" />
+        Revise
+      </div>
     )
   }
 
@@ -64,21 +63,20 @@ class JobMenu extends React.Component {
           '-' +
           this.props.job.get('revise_passwords').get(1).get('password')
         return (
-          <a className="item" target="_blank" href={url} rel="noreferrer">
+          <div className="item" onClick={() => window.open(url, '_blank')}>
             <i className="icon-edit icon" />
             Revise 2
-          </a>
+          </div>
         )
       } else {
         return (
-          <a
+          <div
             className="item"
-            target="_blank"
             onClick={() => this.retrieveSecondPassReviewLink()}
           >
             <i className="icon-edit icon" />
             Generate Revise 2
-          </a>
+          </div>
         )
       }
     }
@@ -98,9 +96,7 @@ class JobMenu extends React.Component {
   }
 
   componentDidMount() {
-    $(this.dropdown).dropdown({
-      belowOrigin: true,
-    })
+    $(this.dropdown).dropdown()
   }
 
   render() {
@@ -114,57 +110,49 @@ class JobMenu extends React.Component {
     let splitButton
     if (!this.props.isChunkOutsourced && config.splitEnabled) {
       splitButton = !this.props.isChunk ? (
-        <a
-          className="item"
-          target="_blank"
-          onClick={this.props.openSplitModalFn}
-        >
-          <i className="icon-expand icon" /> Split
-        </a>
+        <div className="item" onClick={this.props.openSplitModalFn}>
+          <i className="icon-expand icon" />
+          Split
+        </div>
       ) : (
-        <a
-          className="item"
-          target="_blank"
-          onClick={this.props.openMergeModalFn}
-        >
-          <i className="icon-compress icon" /> Merge
-        </a>
+        <div className="item" onClick={this.props.openMergeModalFn}>
+          <i className="icon-compress icon" />
+          Merge
+        </div>
       )
     }
     let menuHtml = (
-      <div className="menu">
+      <div
+        className="menu"
+        ref={(dropdown) => (this.dropdown = dropdown)}
+        title="Job menu"
+      >
         <div className="item submenu">
-          <div
-            className="ui dropdown"
-            title="Job menu"
-            ref={(dropdown) => (this.dropdown = dropdown)}
-          >
-            <i className="icon-refresh icon" /> <a>Change Password</a>
-            <i className="dropdown icon" />
-            <div className="menu" data-testid="change-password-submenu">
-              <a
-                className={'item'}
-                onClick={() => this.props.changePasswordFn()}
-              >
-                Translate
-              </a>
-              <a
-                className={'item'}
-                onClick={() => this.props.changePasswordFn(1)}
-              >
-                Revise
-              </a>
-              {/*If second pass enabled*/}
-              {this.props.job.has('revise_passwords') &&
-              this.props.job.get('revise_passwords').size > 1 ? (
-                <a
-                  className={'item'}
-                  onClick={() => this.props.changePasswordFn(2)}
-                >
-                  2nd Revise
-                </a>
-              ) : null}
+          <i className="icon-refresh icon" /> <a>Change Password</a>
+          <i className="dropdown icon" />
+          <div className="menu" data-testid="change-password-submenu">
+            <div
+              className={'item'}
+              onClick={() => this.props.changePasswordFn()}
+            >
+              Translate
             </div>
+            <div
+              className={'item'}
+              onClick={() => this.props.changePasswordFn(1)}
+            >
+              Revise
+            </div>
+            {/*If second pass enabled*/}
+            {this.props.job.has('revise_passwords') &&
+            this.props.job.get('revise_passwords').size > 1 ? (
+              <div
+                className={'item'}
+                onClick={() => this.props.changePasswordFn(2)}
+              >
+                2nd Revise
+              </div>
+            ) : null}
           </div>
         </div>
         {splitButton}
@@ -172,32 +160,36 @@ class JobMenu extends React.Component {
         {this.getSecondPassReviewMenuLink()}
         {this.getMoreLinks()}
         <div className="divider" />
-        <a className="item" target="_blank" href={qaReportUrl} rel="noreferrer">
+        <div
+          className="item"
+          onClick={() => window.open(qaReportUrl, '_blank')}
+        >
           <i className="icon-qr-matecat icon" /> QA Report
-        </a>
+        </div>
         {downloadButton}
         <div className="divider" />
-        <a className="item" target="_blank" href={originalUrl} rel="noreferrer">
-          <i className="icon-download icon" /> Download Original
-        </a>
-        <a
+        <div
           className="item"
-          target="_blank"
-          href={exportXliffUrl}
-          rel="noreferrer"
+          onClick={() => window.open(originalUrl, '_blank')}
+        >
+          <i className="icon-download icon" /> Download Original
+        </div>
+        <div
+          className="item"
+          onClick={() => window.open(exportXliffUrl, '_blank')}
         >
           <i className="icon-download icon" /> Export XLIFF
-        </a>
-        <a className="item" target="_blank" href={jobTMXUrl} rel="noreferrer">
+        </div>
+        <div className="item" onClick={() => window.open(jobTMXUrl, '_blank')}>
           <i className="icon-download icon" /> Export TMX
-        </a>
+        </div>
         <div className="divider" />
-        <a className="item" onClick={this.props.archiveJobFn}>
+        <div className="item" onClick={this.props.archiveJobFn}>
           <i className="icon-drawer icon" /> Archive job
-        </a>
-        <a className="item" onClick={this.props.cancelJobFn}>
+        </div>
+        <div className="item" onClick={this.props.cancelJobFn}>
           <i className="icon-trash-o icon" /> Cancel job
-        </a>
+        </div>
       </div>
     )
     if (this.props.status === 'archived') {
@@ -206,42 +198,39 @@ class JobMenu extends React.Component {
           {splitButton}
           {this.getReviseMenuLink()}
           {this.getMoreLinks()}
-          <a
+          <div
             className="item"
-            target="_blank"
-            href={qaReportUrl}
-            rel="noreferrer"
+            onClick={() => window.open(qaReportUrl, '_blank')}
           >
             <i className="icon-qr-matecat icon" /> QA Report
-          </a>
+          </div>
           {downloadButton}
           <div className="divider" />
-          <a
+          <div
             className="item"
-            target="_blank"
-            href={originalUrl}
-            rel="noreferrer"
+            onClick={() => window.open(originalUrl, '_blank')}
           >
             <i className="icon-download icon" /> Download Original
-          </a>
-          <a
+          </div>
+          <div
             className="item"
-            target="_blank"
-            href={exportXliffUrl}
-            rel="noreferrer"
+            onClick={() => window.open(exportXliffUrl, '_blank')}
           >
             <i className="icon-download icon" /> Export XLIFF
-          </a>
-          <a className="item" target="_blank" href={jobTMXUrl} rel="noreferrer">
+          </div>
+          <div
+            className="item"
+            onClick={() => window.open(jobTMXUrl, '_blank')}
+          >
             <i className="icon-download icon" /> Export TMX
-          </a>
+          </div>
           <div className="divider" />
-          <a className="item" onClick={this.props.activateJobFn}>
+          <div className="item" onClick={this.props.activateJobFn}>
             <i className="icon-drawer unarchive-project icon" /> Unarchive job
-          </a>
-          <a className="item" onClick={this.props.cancelJobFn}>
+          </div>
+          <div className="item" onClick={this.props.cancelJobFn}>
             <i className="icon-trash-o icon" /> Cancel job
-          </a>
+          </div>
         </div>
       )
     } else if (this.props.status === 'cancelled') {
@@ -250,43 +239,40 @@ class JobMenu extends React.Component {
           {splitButton}
           {this.getReviseMenuLink()}
           {this.getMoreLinks()}
-          <a
+          <div
             className="item"
-            target="_blank"
-            href={qaReportUrl}
-            rel="noreferrer"
+            onClick={() => window.open(qaReportUrl, '_blank')}
           >
             <i className="icon-qr-matecat icon" /> QA Report
-          </a>
+          </div>
           {downloadButton}
           <div className="divider" />
-          <a
+          <div
             className="item"
-            target="_blank"
-            href={originalUrl}
-            rel="noreferrer"
+            onClick={() => window.open(originalUrl, '_blank')}
           >
             <i className="icon-download icon" /> Download Original
-          </a>
-          <a
+          </div>
+          <div
             className="item"
-            target="_blank"
-            href={exportXliffUrl}
-            rel="noreferrer"
+            onClick={() => window.open(exportXliffUrl, '_blank')}
           >
             <i className="icon-download icon" /> Export XLIFF
-          </a>
-          <a className="item" target="_blank" href={jobTMXUrl} rel="noreferrer">
+          </div>
+          <div
+            className="item"
+            onClick={() => window.open(jobTMXUrl, '_blank')}
+          >
             <i className="icon-download icon" /> Export TMX
-          </a>
+          </div>
           <div className="divider" />
-          <a className="item" onClick={this.props.activateJobFn}>
+          <div className="item" onClick={this.props.activateJobFn}>
             <i className="icon-drawer unarchive-project icon" /> Resume job
-          </a>
-          <a className="item" onClick={this.props.deleteJobFn}>
+          </div>
+          <div className="item" onClick={this.props.deleteJobFn}>
             <i className="icon-drawer delete-project icon" /> Delete job
             permanently
-          </a>
+          </div>
         </div>
       )
     }

@@ -10,6 +10,7 @@ namespace API\V2;
 
 use API\Commons\Validators\ChunkPasswordValidator;
 use API\Commons\Validators\ProjectAccessValidator;
+use API\Commons\Validators\LoginValidator;
 use API\V2\Json\Chunk;
 use Chunks_ChunkStruct;
 use Constants_JobStatus;
@@ -130,6 +131,7 @@ class ChunkController extends BaseChunkController {
             $this->project = $Validator->getChunk()->getProject( 60 * 10 );
         } );
         $this->appendValidator( $Validator );
+        $this->appendValidator( new LoginValidator( $this ) );
     }
 
 }

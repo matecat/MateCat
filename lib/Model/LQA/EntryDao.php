@@ -18,11 +18,11 @@ class EntryDao extends DataAccess_AbstractDao {
 
     /**
      * @param array $ids
+     *
      * @return array
      */
-    public static function getBySegmentIds(array $ids = [])
-    {
-        $sql = "SELECT 
+    public static function getBySegmentIds( array $ids = [] ) {
+        $sql  = "SELECT 
             q.id_job,
             q.id_segment,
             q.source_page,
@@ -38,7 +38,7 @@ class EntryDao extends DataAccess_AbstractDao {
             qa_categories cat ON q.id_category = cat.id
         WHERE
             q.deleted_at IS NULL
-                AND q.id_segment IN ( " . implode(', ' , $ids ) . " ) ";
+                AND q.id_segment IN ( " . implode( ', ', $ids ) . " ) ";
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->execute();
@@ -204,7 +204,7 @@ class EntryDao extends DataAccess_AbstractDao {
                 " FROM qa_entries " .
                 " WHERE id_job = :id_job " .
                 " AND qa_entries.deleted_at IS NULL " .
-                " AND source_page = :source_page " ;
+                " AND source_page = :source_page ";
 
         $opts = [
                 'id_job'      => $id_job,
@@ -364,7 +364,7 @@ class EntryDao extends DataAccess_AbstractDao {
      *
      * @return DataAccess_IDaoStruct[]
      */
-    public function getIssuesGroupedByIdFilePart( $id_job, $password, $revisionNumber, $idFilePart = null, $ttl = 0) {
+    public function getIssuesGroupedByIdFilePart( $id_job, $password, $revisionNumber, $idFilePart = null, $ttl = 0 ) {
 
         $thisDao = new self();
         $conn    = Database::obtain()->getConnection();
@@ -392,14 +392,14 @@ class EntryDao extends DataAccess_AbstractDao {
                     AND e.deleted_at IS NULL";
 
         $params = [
-            'id_job'   => $id_job,
-            'password' => $password,
-            'revisionNumber' => $revisionNumber
+                'id_job'         => $id_job,
+                'password'       => $password,
+                'revisionNumber' => $revisionNumber
         ];
 
-        if($idFilePart){
-            $sql .= " AND id_file_part = :id_file_part";
-            $params['id_file_part'] = $idFilePart;
+        if ( $idFilePart ) {
+            $sql                      .= " AND id_file_part = :id_file_part";
+            $params[ 'id_file_part' ] = $idFilePart;
         }
 
         $stmt = $conn->prepare( $sql );

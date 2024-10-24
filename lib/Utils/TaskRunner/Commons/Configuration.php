@@ -40,8 +40,8 @@ class Configuration {
             $this->_contextList = ContextList::get( $config[ 'context_definitions' ][ $contextIndex ] );
         }
 
-        $this->_loggerName               = $config[ 'loggerName' ];
-        $this->__raw                     = $config;
+        $this->_loggerName = $config[ 'loggerName' ];
+        $this->__raw       = $config;
 
     }
 

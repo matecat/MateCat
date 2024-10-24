@@ -15,12 +15,55 @@ import AlertModal from './es6/components/modals/AlertModal'
 import ModalsActions from './es6/actions/ModalsActions'
 import {SEGMENTS_STATUS} from './es6/constants/Constants'
 import SegmentUtils from './es6/utils/segmentUtils'
+import CommentsActions from './es6/actions/CommentsActions'
 
 window.UI = {
+  start: function () {
+    UI.firstLoad = true
+    UI.body = $('body')
+    CommonUtils.setBrowserHistoryBehavior()
+  },
+
+  init: function () {
+    this.isMac = navigator.platform == 'MacIntel' ? true : false
+    this.displayedMessages = []
+    this.unsavedSegmentsToRecover = []
+    this.recoverUnsavedSegmentsTimer = false
+    this.setTranslationTail = []
+    this.executingSetTranslation = []
+
+    this.checkQueryParams()
+
+    UI.firstLoad = false
+  },
+
+  checkQueryParams: function () {
+    var action = CommonUtils.getParameterByName('action')
+    var interval
+    if (action) {
+      switch (action) {
+        case 'openComments':
+          interval = setTimeout(function () {
+            CommentsActions.openCommentsMenu()
+          }, 500)
+          CommonUtils.removeParam('action')
+          break
+        case 'warnings':
+          interval = setTimeout(function () {
+            if ($('#notifbox.warningbox')) {
+              CatToolActions.toggleQaIssues()
+              clearInterval(interval)
+            }
+          }, 500)
+          CommonUtils.removeParam('action')
+          break
+      }
+    }
+  },
+
   cacheObjects: function (editarea_or_segment) {
     var segment, $segment
 
-    this.editarea = $('.targetarea', $(editarea_or_segment).closest('section'))
     $segment = $(editarea_or_segment).closest('section')
     segment = SegmentStore.getSegmentByIdToJS(UI.getSegmentId($segment))
 
@@ -33,7 +76,6 @@ window.UI = {
   },
 
   removeCacheObjects: function () {
-    this.editarea = ''
     this.currentSegmentId = undefined
     this.currentSegment = undefined
   },
@@ -219,24 +261,9 @@ window.UI = {
     }
   },
 
-  setTimeToEdit: function (sid) {
-    let $segment = UI.getSegmentById(sid)
+  setTimeToEdit: function () {
     this.editStop = new Date()
-    var tte = $('.timetoedit', $segment)
     this.editTime = this.editStop - this.editStart
-    this.totalTime = this.editTime + tte.data('raw-time-to-edit')
-    var editedTime = CommonUtils.millisecondsToTime(this.totalTime)
-    if (config.time_to_edit_enabled) {
-      var editSec = $('.timetoedit .edit-sec', $segment)
-      var editMin = $('.timetoedit .edit-min', $segment)
-      editMin.text(
-        editedTime[0].length > 1 ? editedTime[0] : '0' + editedTime[0],
-      )
-      editSec.text(
-        editedTime[1].length > 1 ? editedTime[1] : '0' + editedTime[1],
-      )
-    }
-    tte.data('raw-time-to-edit', this.totalTime)
   },
   startWarning: function () {
     clearTimeout(UI.startWarningTimeout)
@@ -290,7 +317,6 @@ window.UI = {
         $(document).trigger('getWarning:global:success', {resp: data})
       })
       .catch((errors) => {
-        UI.warningStopped = true
         OfflineUtils.failedConnection(0, 'getWarning')
       })
   },
@@ -440,7 +466,7 @@ window.UI = {
     this.executingSetTranslation.push(id_segment)
     let segment = SegmentStore.getSegmentByIdToJS(id_segment)
     if (!segment) return
-    this.lastTranslatedSegmentId = id_segment
+    SegmentStore.setLastTranslatedSegmentId(id_segment)
 
     const translateRequest = SegmentUtils.createSetTranslationRequest(
       segment,
@@ -712,8 +738,87 @@ window.UI = {
       'The owner of the project will be notified of any edits.'
     )
   },
-}
+  /***
+   * Overridden by  plugin
+   */
+  getContextBefore: function (segmentId) {
+    const segmentBefore = SegmentStore.getPrevSegment(segmentId)
+    if (!segmentBefore) {
+      return null
+    }
+    var segmentBeforeId = segmentBefore.splitted
+    var isSplitted = segmentBefore.splitted
+    if (isSplitted) {
+      if (segmentBefore.original_sid !== segmentId.split('-')[0]) {
+        return this.collectSplittedTranslations(
+          segmentBefore.original_sid,
+          '.source',
+        )
+      } else {
+        return this.getContextBefore(segmentBeforeId)
+      }
+    } else {
+      return segmentBefore.segment
+    }
+  },
+  /***
+   * Overridden by  plugin
+   */
+  getContextAfter: function (segmentId) {
+    const segmentAfter = SegmentStore.getNextSegment(segmentId)
+    if (!segmentAfter) {
+      return null
+    }
+    var segmentAfterId = segmentAfter.sid
+    var isSplitted = segmentAfter.splitted
+    if (isSplitted) {
+      if (segmentAfter.firstOfSplit) {
+        return this.collectSplittedTranslations(
+          segmentAfter.original_sid,
+          '.source',
+        )
+      } else {
+        return this.getContextAfter(segmentAfterId)
+      }
+    } else {
+      return segmentAfter.segment
+    }
+  },
+  /***
+   * Overridden by  plugin
+   */
+  getIdBefore: function (segmentId) {
+    const segmentBefore = SegmentStore.getPrevSegment(segmentId)
+    // var segmentBefore = findSegmentBefore();
+    if (!segmentBefore) {
+      return null
+    }
+    return segmentBefore.original_sid
+  },
+  /***
+   * Overridden by  plugin
+   */
+  getIdAfter: function (segmentId) {
+    const segmentAfter = SegmentStore.getNextSegment(segmentId)
+    if (!segmentAfter) {
+      return null
+    }
+    return segmentAfter.original_sid
+  },
 
-$(document).ready(function () {
-  UI.start()
-})
+  /**
+   * Register tabs in segment footer
+   *
+   * Overridden by  plugin
+   */
+  registerFooterTabs: function () {
+    SegmentActions.registerTab('concordances', true, false)
+
+    if (config.translation_matches_enabled) {
+      SegmentActions.registerTab('matches', true, true)
+    }
+
+    SegmentActions.registerTab('glossary', true, false)
+    SegmentActions.registerTab('alternatives', false, false)
+  },
+}

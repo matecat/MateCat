@@ -1,3 +1,4 @@
+import {NUM_CONTRIBUTION_RESULTS} from '../../constants/Constants'
 import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
 /**
  * Get contributions
@@ -29,13 +30,12 @@ export const getContributions = async ({
   const txt = target
 
   const obj = {
-    action: 'getContribution',
     password: password,
     is_concordance: 0,
     id_segment: idSegment,
     text: txt,
     id_job: idJob,
-    num_results: UI.numContributionMatchesResults,
+    num_results: NUM_CONTRIBUTION_RESULTS,
     context_before: contextBefore ? contextBefore : '',
     id_before: idBefore ? idBefore : '',
     context_after: contextAfter,
@@ -54,7 +54,7 @@ export const getContributions = async ({
     if (dataParams[key] !== undefined) formData.append(key, dataParams[key])
   })
   const response = await fetch(
-    `${getMatecatApiDomain()}?action=getContribution`,
+    `${getMatecatApiDomain()}api/app/get-contribution`,
     {
       method: 'POST',
       credentials: 'include',

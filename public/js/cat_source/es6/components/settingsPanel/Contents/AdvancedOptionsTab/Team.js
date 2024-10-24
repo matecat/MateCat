@@ -2,6 +2,7 @@ import React, {useContext, useEffect} from 'react'
 import PropTypes from 'prop-types'
 import {Select} from '../../../common/Select'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
+import UserActions from '../../../../actions/UserActions'
 
 export const Team = ({selectedTeam, setSelectedTeam}) => {
   const {user, modifyingCurrentTemplate} = useContext(SettingsPanelContext)
@@ -9,7 +10,7 @@ export const Team = ({selectedTeam, setSelectedTeam}) => {
   useEffect(() => {
     if (Array.isArray(user?.teams)) {
       setSelectedTeam(
-        APP.getLastTeamSelected(
+        UserActions.getLastTeamSelected(
           user.teams.map((team) => ({...team, id: team.id.toString()})),
         ),
       )

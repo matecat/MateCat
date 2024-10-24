@@ -16,8 +16,6 @@ export const getComments = async ({
   password = config.password,
 }) => {
   const dataParams = {
-    action: 'comment',
-    _sub: 'getRange',
     first_seg: firstSegment,
     last_seg: lastSegment,
     id_job: idJob,
@@ -28,7 +26,7 @@ export const getComments = async ({
   Object.keys(dataParams).forEach((key) => {
     if (dataParams[key] !== undefined) formData.append(key, dataParams[key])
   })
-  const response = await fetch(`${getMatecatApiDomain()}?action=comment`, {
+  const response = await fetch(`${getMatecatApiDomain()}api/app/comment/get-range`, {
     method: 'POST',
     credentials: 'include',
     body: formData,

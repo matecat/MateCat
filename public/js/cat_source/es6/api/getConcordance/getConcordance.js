@@ -1,3 +1,4 @@
+import {NUM_CONCORDANCE_RESULTS} from '../../constants/Constants'
 import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
 
 /**
@@ -21,13 +22,12 @@ export const getConcordance = async (
   currentPassword = config.currentPassword,
 ) => {
   const dataParams = {
-    action: 'getContribution',
     is_concordance: 1,
     from_target: type,
     id_segment: UI.currentSegmentId,
     text: query,
     id_job: idJob,
-    num_results: UI.numMatchesResults,
+    num_results: NUM_CONCORDANCE_RESULTS,
     password: password,
     id_client: idClient,
     current_password: currentPassword,
@@ -38,7 +38,7 @@ export const getConcordance = async (
     formData.append(key, dataParams[key])
   })
   const response = await fetch(
-    `${getMatecatApiDomain()}?action=getContribution`,
+    `${getMatecatApiDomain()}api/app/get-contribution`,
     {
       method: 'POST',
       credentials: 'include',

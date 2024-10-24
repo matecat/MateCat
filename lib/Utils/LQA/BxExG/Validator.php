@@ -40,7 +40,7 @@ class Validator {
         $targetMap = Mapper::extract( $qa->getTargetSeg() );
 
         // if no <bx> or <ex> are found in source and target no errors are returned
-        if(!$this->doesAMapHaveOneBxOrEx($sourceMap) and !$this->doesAMapHaveOneBxOrEx($targetMap)){
+        if ( !$this->doesAMapHaveOneBxOrEx( $sourceMap ) and !$this->doesAMapHaveOneBxOrEx( $targetMap ) ) {
             return [];
         }
 
@@ -95,15 +95,14 @@ class Validator {
      *
      * @return bool
      */
-    private function doesAMapHaveOneBxOrEx(array $map = [])
-    {
-        if (empty($map)){
+    private function doesAMapHaveOneBxOrEx( array $map = [] ) {
+        if ( empty( $map ) ) {
             return false;
         }
 
         /** @var Element $element */
-        foreach ($map as $element){
-            if($element->isExOrBx() or $element->hasNestedBxOrEx()){
+        foreach ( $map as $element ) {
+            if ( $element->isExOrBx() or $element->hasNestedBxOrEx() ) {
                 return true;
             }
         }

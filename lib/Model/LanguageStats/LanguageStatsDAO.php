@@ -223,7 +223,7 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
      * @return array|null The input array on success, null otherwise
      * @throws Exception
      */
-    public function createList( Array $obj_arr ) {
+    public function createList( array $obj_arr ) {
 
         $obj_arr = $this->sanitizeArray( $obj_arr );
 
@@ -271,7 +271,7 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
                 break;
             }
 
-            $values = [];
+            $values     = [];
             $tuple_list = [];
         }
 
@@ -284,12 +284,13 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
 
     /**
      * See parent definition
-     * @see DataAccess_AbstractDao::sanitize
      *
      * @param LanguageStats_LanguageStatsStruct $input
      *
      * @return DataAccess_IDaoStruct|LanguageStats_LanguageStatsStruct
      * @throws Exception
+     * @see DataAccess_AbstractDao::sanitize
+     *
      */
     public function sanitize( DataAccess_IDaoStruct $input ) {
         return parent::_sanitizeInput( $input, self::STRUCT_TYPE );
@@ -297,12 +298,13 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
 
     /**
      * See parent definition.
-     * @see DataAccess_AbstractDao::sanitizeArray
      *
      * @param array $input
      *
      * @return array
      * @throws Exception
+     * @see DataAccess_AbstractDao::sanitizeArray
+     *
      */
     public static function sanitizeArray( array $input ) {
         return parent::_sanitizeInputArray( $input, self::STRUCT_TYPE );
@@ -311,12 +313,13 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
 
     /**
      * See in DataAccess_AbstractDao::validateNotNullFields
-     * @see DataAccess_AbstractDao::_validateNotNullFields
      *
      * @param DataAccess_IDaoStruct $obj
      *
      * @return void
      * @throws Exception
+     * @see DataAccess_AbstractDao::_validateNotNullFields
+     *
      */
     protected function _validateNotNullFields( DataAccess_IDaoStruct $obj ) {
 

@@ -7,7 +7,6 @@ export const setCurrentSegment = async ({
   id_job,
 }) => {
   const paramsData = {
-    action: 'setCurrentSegment',
     password,
     revision_number,
     id_segment,
@@ -20,7 +19,7 @@ export const setCurrentSegment = async ({
   })
 
   const response = await fetch(
-    `${getMatecatApiDomain()}?action=${paramsData.action}`,
+    `${getMatecatApiDomain()}api/app/set-current-segment`,
     {
       method: 'POST',
       credentials: 'include',

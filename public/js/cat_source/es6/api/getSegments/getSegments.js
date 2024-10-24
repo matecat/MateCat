@@ -2,7 +2,6 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
 
 export const getSegments = async ({jid, password, step, segment, where}) => {
   const paramsData = {
-    action: 'getSegments',
     jid,
     password,
     step,
@@ -16,7 +15,7 @@ export const getSegments = async ({jid, password, step, segment, where}) => {
   })
 
   const response = await fetch(
-    `${getMatecatApiDomain()}?action=${paramsData.action}`,
+    `${getMatecatApiDomain()}api/app/get-segments`,
     {
       method: 'POST',
       credentials: 'include',

@@ -14,24 +14,25 @@ use DataAccess_IDaoStruct;
 
 class TeamStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct {
 
-    public $id ;
+    public $id;
     public $name;
     public $created_by;
-    public $created_at ;
+    public $created_at;
     public $type = Constants_Teams::PERSONAL;
 
     /**
      * @var MembershipStruct[]
      */
-    protected $members ;
+    protected $members;
 
     /**
      * @param MembershipStruct[] $list
      *
      * @return $this
      */
-    public function setMembers($list) {
-        $this->members = $list ;
+    public function setMembers( $list ) {
+        $this->members = $list;
+
         return $this;
     }
 
@@ -39,16 +40,17 @@ class TeamStruct extends DataAccess_AbstractDaoSilentStruct implements DataAcces
      * @return null|MembershipStruct[]
      */
     public function getMembers() {
-        return $this->members ;
+        return $this->members;
     }
 
     /**
      * @param $uid
+     *
      * @return bool
      */
-    public function hasUser($uid) {
-        foreach ($this->getMembers() as $member){
-            if($member->uid === $uid){
+    public function hasUser( $uid ) {
+        foreach ( $this->getMembers() as $member ) {
+            if ( $member->uid === $uid ) {
                 return true;
             }
         }

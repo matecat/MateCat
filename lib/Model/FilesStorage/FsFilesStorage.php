@@ -67,7 +67,7 @@ class FsFilesStorage extends AbstractFilesStorage {
             // detect which type of xliff
             //check also for the extension, if already present do not force
             $force_extension = "";
-            $fileType = XliffProprietaryDetect::getInfo( $xliffPath );
+            $fileType        = XliffProprietaryDetect::getInfo( $xliffPath );
             if ( !$fileType[ 'proprietary' ] && $fileType[ 'info' ][ 'extension' ] != 'sdlxliff' ) {
                 $force_extension = '.sdlxliff';
             }
@@ -189,7 +189,7 @@ class FsFilesStorage extends AbstractFilesStorage {
      */
     public function moveFromCacheToFileDir( $dateHashPath, $lang, $idFile, $newFileName = null ) {
 
-        list( $datePath, $hash ) = explode( DIRECTORY_SEPARATOR, $dateHashPath );
+        [ $datePath, $hash ] = explode( DIRECTORY_SEPARATOR, $dateHashPath );
         $cacheTree = implode( DIRECTORY_SEPARATOR, static::composeCachePath( $hash ) );
 
         //destination dir
@@ -275,7 +275,7 @@ class FsFilesStorage extends AbstractFilesStorage {
      */
     public function getOriginalFromFileDir( $id, $dateHashPath ) {
 
-        list( $datePath, ) = explode( DIRECTORY_SEPARATOR, $dateHashPath );
+        [ $datePath, ] = explode( DIRECTORY_SEPARATOR, $dateHashPath );
 
         //compose path
         $path = $this->filesDir . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $id . DIRECTORY_SEPARATOR . "orig";
@@ -299,7 +299,7 @@ class FsFilesStorage extends AbstractFilesStorage {
      */
     public function getXliffFromFileDir( $id, $dateHashPath ) {
 
-        list( $datePath, ) = explode( DIRECTORY_SEPARATOR, $dateHashPath );
+        [ $datePath, ] = explode( DIRECTORY_SEPARATOR, $dateHashPath );
 
         //compose path
         $path = $this->filesDir . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $id . DIRECTORY_SEPARATOR . "xliff";
@@ -357,22 +357,25 @@ class FsFilesStorage extends AbstractFilesStorage {
      */
     public static function moveFileFromUploadSessionToQueuePath( $uploadSession ) {
 
+        $uploadDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession;
         $destination = INIT::$QUEUE_PROJECT_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession;
         mkdir( $destination, 0755 );
-        foreach (
+
+        if(is_dir($uploadDir)){
+            foreach (
                 $iterator = new RecursiveIteratorIterator(
-                        new RecursiveDirectoryIterator( INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession, FilesystemIterator::SKIP_DOTS ),
-                        RecursiveIteratorIterator::SELF_FIRST ) as $item
-        ) {
-            if ( $item->isDir() ) {
-                mkdir( $destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName() );
-            } else {
-                copy( $item, $destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName() );
+                    new RecursiveDirectoryIterator( $uploadDir, FilesystemIterator::SKIP_DOTS ),
+                    RecursiveIteratorIterator::SELF_FIRST ) as $item
+            ) {
+                if ( $item->isDir() ) {
+                    mkdir( $destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName() );
+                } else {
+                    copy( $item, $destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName() );
+                }
             }
+
+            Utils::deleteDir( $uploadDir );
         }
-
-        Utils::deleteDir( INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession );
-
     }
 
     /**

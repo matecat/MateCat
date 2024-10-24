@@ -11,9 +11,7 @@ use Users\MetadataDao;
  * Date: 01/04/15
  * Time: 12.54
  */
-
-
-class Users_UserStruct extends DataAccess_AbstractDaoSilentStruct   implements DataAccess_IDaoStruct {
+class Users_UserStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct {
 
     public $uid;
     public $email;
@@ -22,11 +20,11 @@ class Users_UserStruct extends DataAccess_AbstractDaoSilentStruct   implements D
     public $last_name;
     public $salt;
     public $pass;
-    public $oauth_access_token ;
+    public $oauth_access_token;
 
-    public $email_confirmed_at ;
-    public $confirmation_token ;
-    public $confirmation_token_created_at ;
+    public $email_confirmed_at;
+    public $confirmation_token;
+    public $confirmation_token_created_at;
 
     /**
      * Sometimes we send around empty UserStruct to signify Anonymous user.
@@ -44,12 +42,12 @@ class Users_UserStruct extends DataAccess_AbstractDaoSilentStruct   implements D
     }
 
     public function clearAuthToken() {
-        $this->confirmation_token = null ;
-        $this->confirmation_token_created_at = null ;
+        $this->confirmation_token            = null;
+        $this->confirmation_token_created_at = null;
     }
 
     public function initAuthToken() {
-        $this->confirmation_token = Utils::randomString( 50, true ) ;
+        $this->confirmation_token            = Utils::randomString( 50, true );
         $this->confirmation_token_created_at = Utils::mysqlTimestamp( time() );
     }
 
@@ -58,11 +56,11 @@ class Users_UserStruct extends DataAccess_AbstractDaoSilentStruct   implements D
     }
 
     public function everSignedIn() {
-        return ! ( is_null( $this->email_confirmed_at ) && is_null( $this->oauth_access_token ) );
+        return !( is_null( $this->email_confirmed_at ) && is_null( $this->oauth_access_token ) );
     }
 
     public function fullName() {
-        return trim($this->first_name . ' ' . $this->last_name);
+        return trim( $this->first_name . ' ' . $this->last_name );
     }
 
     public function shortName() {
@@ -70,7 +68,7 @@ class Users_UserStruct extends DataAccess_AbstractDaoSilentStruct   implements D
     }
 
     public function getEmail() {
-        return $this->email ;
+        return $this->email;
     }
 
     /**
@@ -100,25 +98,28 @@ class Users_UserStruct extends DataAccess_AbstractDaoSilentStruct   implements D
     public function getPersonalTeam() {
         $oDao = new TeamDao();
         $oDao->setCacheTTL( 60 * 60 * 24 );
+
         return $oDao->getPersonalByUser( $this );
     }
 
     /**
      * @return \Teams\TeamStruct[]|null
      */
-    public function getUserTeams(){
+    public function getUserTeams() {
         $mDao = new MembershipDao();
         $mDao->setCacheTTL( 60 * 60 * 24 );
+
         return $mDao->findUserTeams( $this );
     }
 
     public function getMetadataAsKeyValue() {
-        $dao = new MetadataDao() ;
-        $collection = $dao->getAllByUid($this->uid) ;
-        $data  = array();
-        foreach ($collection as $record ) {
+        $dao = new MetadataDao();
+        $collection = $dao->getAllByUid( $this->uid );
+        $data       = [];
+        foreach ( $collection as $record ) {
             $data[ $record->key ] = $record->value;
         }
+
         return $data;
     }
 
@@ -126,6 +127,7 @@ class Users_UserStruct extends DataAccess_AbstractDaoSilentStruct   implements D
      * Returns true if password matches
      *
      * @param $password
+     *
      * @return bool
      */
     public function passwordMatch( $password ) {
@@ -141,27 +143,28 @@ class Users_UserStruct extends DataAccess_AbstractDaoSilentStruct   implements D
      */
     public function getDecryptedOauthAccessToken() {
         $oauthTokenEncryption = OauthTokenEncryption::getInstance();
+
         return $oauthTokenEncryption->decrypt( $this->oauth_access_token );
     }
 
     /**
      * @param null $field
+     *
      * @return mixed
      * @throws \Exception
      */
-    public function getDecodedOauthAccessToken($field=null) {
-        $decoded = json_decode( $this->getDecryptedOauthAccessToken(), TRUE );
+    public function getDecodedOauthAccessToken( $field = null ) {
+        $decoded = json_decode( $this->getDecryptedOauthAccessToken(), true );
 
         if ( $field ) {
             if ( array_key_exists( $field, $decoded ) ) {
-                return $decoded[ $field ] ;
-            }
-            else {
-                throw new \Exception('key not found on token: ' . $field ) ;
+                return $decoded[ $field ];
+            } else {
+                throw new \Exception( 'key not found on token: ' . $field );
             }
         }
 
-        return $decoded  ;
+        return $decoded;
     }
 
 

@@ -2,5 +2,5 @@
 
 namespace Validator\Exception;
 
-class WrongParamsException extends \Exception
-{}
+class WrongParamsException extends \Exception {
+}

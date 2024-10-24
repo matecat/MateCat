@@ -51,6 +51,7 @@ class ConversionHandler {
 
     public function getLocalFilePath(): string {
         $this->file_name = html_entity_decode( $this->file_name, ENT_QUOTES );
+
         return $this->intDir . DIRECTORY_SEPARATOR . $this->file_name;
     }
 
@@ -64,8 +65,8 @@ class ConversionHandler {
      */
     public function doAction() {
 
-        $fs              = FilesStorageFactory::create();
-        $file_path       = $this->getLocalFilePath();
+        $fs        = FilesStorageFactory::create();
+        $file_path = $this->getLocalFilePath();
 
         if ( !file_exists( $file_path ) ) {
             $this->result->changeCode( ConversionHandlerStatus::UPLOAD_ERROR );

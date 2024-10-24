@@ -17,6 +17,7 @@ import {updateProjectTemplate} from '../../api/updateProjectTemplate'
 import {flushSync} from 'react-dom'
 import CreateProjectStore from '../../stores/CreateProjectStore'
 import NewProjectConstants from '../../constants/NewProjectConstants'
+import ModalsActions from '../../actions/ModalsActions'
 
 let tabOpenFromQueryString = new URLSearchParams(window.location.search).get(
   'openTab',
@@ -65,7 +66,7 @@ const DEFAULT_CONTENTS = (isCattool = config.is_cattool) => {
         'Manage your machine translation engines and select which should be used on your new project. <a href="https://guides.matecat.com/machine-translation-engines" target="_blank">More details</a>',
       component: <MachineTranslationTab />,
     },
-    ...(!isCattool && config.isLoggedIn
+    ...(!isCattool
       ? [
           {
             id: SETTINGS_PANEL_TABS.qualityFramework,
@@ -248,11 +249,10 @@ export const SettingsPanel = ({
 
   const openLoginModal = () => {
     setIsVisible(false)
-    APP.openLoginModal()
+    ModalsActions.openLoginModal()
   }
 
-  const isEnabledProjectTemplateComponent =
-    config.isLoggedIn === 1 && !config.is_cattool
+  const isEnabledProjectTemplateComponent = !config.is_cattool
 
   return (
     <SettingsPanelContext.Provider
