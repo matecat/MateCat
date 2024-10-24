@@ -536,7 +536,7 @@ class SegmentFilterDao extends DataAccess_AbstractDao {
         return $sql;
     }
 
-    protected function _buildResult( $data ) {
+    protected function _buildResult( array $array_result ) {
     }
 
 }

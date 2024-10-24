@@ -2,7 +2,7 @@
 
 class Chunks_ChunkCompletionUpdateDao extends DataAccess_AbstractDao {
 
-    protected function _buildResult( $array_result ) {
+    protected function _buildResult( array $array_result ) {
     }
 
     public function updatePassword( $id_job, $password, $old_password ) {

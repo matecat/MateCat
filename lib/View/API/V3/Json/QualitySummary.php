@@ -10,6 +10,7 @@
 namespace API\V3\Json;
 
 
+use Jobs_JobDao;
 use Jobs_JobStruct;
 use Exception;
 use Features\ReviewExtended\Model\QualityReportDao;
@@ -251,7 +252,7 @@ class QualitySummary {
 
         $details = [];
 
-        $fileParts = \Jobs_JobDao::getReviewedWordsCountGroupedByFileParts( $idJob, $password, $revisionNumber );
+        $fileParts = Jobs_JobDao::getReviewedWordsCountGroupedByFileParts( $idJob, $password, $revisionNumber );
 
         foreach ( $fileParts as $filePart ) {
 

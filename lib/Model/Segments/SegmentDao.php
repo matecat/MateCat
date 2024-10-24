@@ -6,7 +6,7 @@ use Segments\SegmentUIStruct;
 
 class Segments_SegmentDao extends DataAccess_AbstractDao {
     const TABLE = 'segments';
-    protected static $auto_increment_field = [ 'id' ];
+    protected static array $auto_increment_field = [ 'id' ];
 
 
     const ISSUE_CATEGORY_ALL = 'all';

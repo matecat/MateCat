@@ -24,9 +24,9 @@ class ValidatePrimaryKeyTest extends AbstractTest {
 
     public function setUp(): void {
         parent::setUp();
-        $this->jobDao    = new EnginesModel_EngineDAO( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
-        $this->reflector = new ReflectionClass( $this->jobDao );
-        $this->method    = $this->reflector->getMethod( "_validatePrimaryKey" );
+        $this->databaseInstance = new EnginesModel_EngineDAO( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
+        $this->reflector        = new ReflectionClass( $this->databaseInstance );
+        $this->method           = $this->reflector->getMethod( "_validatePrimaryKey" );
         $this->method->setAccessible( true );
         $this->engine_struct_param = new EnginesModel_EngineStruct();
 
@@ -44,7 +44,7 @@ class ValidatePrimaryKeyTest extends AbstractTest {
         $this->engine_struct_param->id  = 33;
         $this->engine_struct_param->uid = 1;
 
-        $this->method->invoke( $this->jobDao, $this->engine_struct_param );
+        $this->method->invoke( $this->databaseInstance, $this->engine_struct_param );
     }
 
 
@@ -58,7 +58,7 @@ class ValidatePrimaryKeyTest extends AbstractTest {
         $this->engine_struct_param->id  = null;
         $this->engine_struct_param->uid = 1;
         $this->expectException( "Exception" );
-        $this->method->invoke( $this->jobDao, $this->engine_struct_param );
+        $this->method->invoke( $this->databaseInstance, $this->engine_struct_param );
     }
 
 
@@ -72,6 +72,6 @@ class ValidatePrimaryKeyTest extends AbstractTest {
         $this->engine_struct_param->id  = 33;
         $this->engine_struct_param->uid = null;
         $this->expectException( "Exception" );
-        $this->method->invoke( $this->jobDao, $this->engine_struct_param );
+        $this->method->invoke( $this->databaseInstance, $this->engine_struct_param );
     }
 }

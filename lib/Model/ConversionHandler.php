@@ -8,6 +8,7 @@ use Exceptions\ValidationError;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\Exceptions\FileSystemException;
 use FilesStorage\FilesStorageFactory;
+use Filters\DTO\IDto;
 use Filters\OCRCheck;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use TaskRunner\Exceptions\EndQueueException;
@@ -240,7 +241,12 @@ class ConversionHandler {
         return 0;
     }
 
-    private function getRightExtractionParameter( string $filePath ) {
+    /**
+     * @param string $filePath
+     *
+     * @return IDto|null
+     */
+    private function getRightExtractionParameter( string $filePath ): ?IDto {
 
         $extension = AbstractFilesStorage::pathinfo_fix( $filePath, PATHINFO_EXTENSION );
 

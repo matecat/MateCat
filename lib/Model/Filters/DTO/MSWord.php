@@ -2,10 +2,9 @@
 
 namespace Filters\DTO;
 
-use Countable;
 use JsonSerializable;
 
-class MSWord implements IDto, JsonSerializable, Countable {
+class MSWord implements IDto, JsonSerializable {
 
     private bool  $extract_doc_properties   = false;
     private bool  $extract_comments         = false;
@@ -114,13 +113,6 @@ class MSWord implements IDto, JsonSerializable, Countable {
 
         return $format;
 
-    }
-
-    /**
-     * @return int
-     */
-    public function count(): int {
-        return count( $this->jsonSerialize() );
     }
 
 }

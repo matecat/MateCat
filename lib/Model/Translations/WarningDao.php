@@ -79,7 +79,7 @@ class WarningDao extends \DataAccess_AbstractDao {
         }
     }
 
-    protected function _buildResult( $array_result ) {
+    protected function _buildResult( array $array_result ) {
         // TODO: Implement _buildResult() method.
     }
 

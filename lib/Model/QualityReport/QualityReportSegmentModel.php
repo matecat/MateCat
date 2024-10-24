@@ -9,7 +9,6 @@
 namespace QualityReport;
 
 use CatUtils;
-use Jobs_JobStruct;
 use Comments_CommentDao;
 use Constants;
 use Constants_TranslationStatus;
@@ -18,6 +17,7 @@ use Features\ReviewExtended\Model\QualityReportDao;
 use Features\ReviewExtended\ReviewUtils;
 use Features\TranslationVersions\Model\TranslationVersionDao;
 use FeatureSet;
+use Jobs_JobStruct;
 use LQA\CategoryDao;
 use LQA\CategoryStruct;
 use LQA\ChunkReviewDao;
@@ -89,7 +89,7 @@ class QualityReportSegmentModel {
      * @param QualityReport_QualityReportSegmentStruct $seg
      * @param MateCatFilter                            $Filter
      * @param FeatureSet                               $featureSet
-     * @param Jobs_JobStruct                       $chunk
+     * @param Jobs_JobStruct                           $chunk
      * @param bool                                     $isForUI
      *
      * @throws Exception
@@ -99,7 +99,7 @@ class QualityReportSegmentModel {
         $seg->pee                 = $seg->getPEE();
         $seg->ice_modified        = $seg->isICEModified();
         $seg->secs_per_word       = $seg->getSecsPerWord();
-        $seg->parsed_time_to_edit = CatUtils::parse_time_to_edit( $seg->time_to_edit );
+        $seg->parsed_time_to_edit = CatUtils::parse_time_to_edit( min( $seg->time_to_edit, PHP_INT_MAX ) );
 
         if ( $isForUI ) {
             $seg->segment     = $Filter->fromLayer0ToLayer2( $seg->segment );

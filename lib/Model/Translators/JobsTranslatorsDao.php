@@ -18,8 +18,8 @@ class JobsTranslatorsDao extends \DataAccess_AbstractDao {
     const TABLE       = "jobs_translators";
     const STRUCT_TYPE = "JobsTranslatorsStruct";
 
-    protected static $auto_increment_field = [];
-    protected static $primary_keys         = [ 'id_job', 'job_password' ];
+    protected static array $auto_increment_field = [];
+    protected static array $primary_keys         = [ 'id_job', 'job_password' ];
 
     protected static $_query_all_by_id          = "SELECT * FROM jobs_translators WHERE id_job = :id_job ;";
     protected static $_query_by_id_and_password = "SELECT * FROM jobs_translators WHERE id_job = :id_job and job_password = :password ;";

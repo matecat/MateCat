@@ -10,20 +10,21 @@ use ReflectionException;
 class ModelDao extends DataAccess_AbstractDao {
     const TABLE = "qa_models";
 
-    protected static $auto_increment_field = [ 'id' ];
+    protected static array $auto_increment_field = [ 'id' ];
 
-    protected static $_sql_get_model_by_id = "SELECT * FROM qa_models WHERE id = :id LIMIT 1";
+    protected static string $_sql_get_model_by_id = "SELECT * FROM qa_models WHERE id = :id LIMIT 1";
 
-    protected function _buildResult( $array_result ) {
+    protected function _buildResult( array $array_result ) {
     }
 
     /**
-     * @param           $id
+     * @param int       $id
      * @param float|int $ttl
      *
      * @return ModelStruct
+     * @throws ReflectionException
      */
-    public static function findById( $id, $ttl = 0 ) {
+    public static function findById( int $id, int $ttl = 0 ): ?ModelStruct {
 
         $thisDao = new self();
         $conn    = Database::obtain()->getConnection();

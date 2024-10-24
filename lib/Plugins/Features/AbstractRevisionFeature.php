@@ -239,10 +239,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
         $project = Projects_ProjectDao::findById( $projectStructure[ 'id_project' ], 86400 );
         foreach ( $projectStructure[ 'array_jobs' ][ 'job_list' ] as $id_job ) {
 
-            /**
-             * @var $chunkStruct Jobs_JobStruct[]
-             */
-            $chunkStruct = Jobs_JobDao::getById( $id_job, 0, new Jobs_JobStruct() );
+            $chunkStruct = Jobs_JobDao::getById( $id_job, 0 );
 
             $iMax = 3;
 
@@ -284,11 +281,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
 
         ChunkReviewDao::deleteByJobId( $id_job );
 
-        /**
-         * @var $chunksStructArray Jobs_JobStruct[]
-         */
-        $chunksStructArray = Jobs_JobDao::getById( $id_job, 0, new Jobs_JobStruct() );
-
+        $chunksStructArray = Jobs_JobDao::getById( $id_job, 0 );
 
         $reviews = [];
         foreach ( $previousRevisionRecords as $review ) {
@@ -343,8 +336,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
 
         ChunkReviewDao::deleteByJobId( $id_job );
 
-        /** @var $chunksStructArray Jobs_JobStruct[] */
-        $chunksStructArray = Jobs_JobDao::getById( $id_job, 0, new Jobs_JobStruct() );
+        $chunksStructArray = Jobs_JobDao::getById( $id_job, 0 );
 
         $reviews = [];
         foreach ( $reviewGroupedData as $source_page => $data ) {

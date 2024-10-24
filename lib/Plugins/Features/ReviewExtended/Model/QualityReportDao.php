@@ -14,7 +14,7 @@ use Database;
 
 class QualityReportDao extends DataAccess_AbstractDao {
 
-    protected function _buildResult( $result_array ) {
+    protected function _buildResult( array $array_result ) {
 
     }
 

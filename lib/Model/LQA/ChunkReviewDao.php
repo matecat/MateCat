@@ -10,16 +10,17 @@ use Database;
 use Exception;
 use Features\ReviewExtended\ReviewUtils;
 use PDO;
+use ReflectionException;
 
 class ChunkReviewDao extends \DataAccess_AbstractDao {
 
     const TABLE = "qa_chunk_reviews";
 
-    public static $primary_keys = [
+    public static array $primary_keys = [
             'id'
     ];
 
-    protected function _buildResult( $array_result ) {
+    protected function _buildResult( array $array_result ) {
     }
 
     public function updatePassword( $id_job, $old_password, $new_password ) {
@@ -213,11 +214,12 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
 
     /**
      * @param Jobs_JobStruct $chunkStruct
-     * @param int|null           $ttl
+     * @param int|null       $ttl
      *
      * @return ChunkReviewStruct[]
+     * @throws ReflectionException
      */
-    public function findChunkReviews( Jobs_JobStruct $chunkStruct, ?int $ttl = null ) {
+    public function findChunkReviews( Jobs_JobStruct $chunkStruct, ?int $ttl = 0 ): array {
         return $this->_findChunkReviews( [ $chunkStruct ], null, $ttl );
     }
 
@@ -244,10 +246,11 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
 
     /**
      * @param Jobs_JobStruct[] $chunksArray
-     * @param string|null          $default_condition
-     * @param int|null             $ttl
+     * @param string|null      $default_condition
+     * @param int|null         $ttl
      *
      * @return ChunkReviewStruct[]
+     * @throws ReflectionException
      */
     protected function _findChunkReviews( array $chunksArray, ?string $default_condition = ' WHERE 1 = 1 ', ?int $ttl = 1 /* 1 second, only to avoid multiple queries to mysql during the same script execution */ ): array {
 
@@ -463,7 +466,7 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
      * @param      $data array of data to use
      *
      * @return ChunkReviewStruct
-     * @throws \ReflectionException
+     * @throws ReflectionException
      * @internal param bool $setDefaults
      */
     public static function createRecord( $data ) {

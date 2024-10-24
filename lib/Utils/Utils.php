@@ -332,10 +332,16 @@ class Utils {
      *
      * @return array
      */
-    public static function cleanEmptyStringFromArray( array $array ): array {
-        return array_filter( $array, function ( $element ) {
-            return $element !== '';
-        } );
+    public static function removeEmptyStringFromTail( array $array ): array {
+
+        if ( end( $array ) === '' ) {
+            array_pop( $array );
+
+            return self::removeEmptyStringFromTail( $array );
+        }
+
+        return $array;
+
     }
 
     /**

@@ -13,7 +13,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
     /**
      * @var array
      */
-    public static $primary_keys = [
+    public static array $primary_keys = [
             'id_job',
             'id_segment'
     ];
@@ -104,7 +104,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
         return $stmt->fetchAll();
     }
 
-    protected function _buildResult( $array_result ) {
+    protected function _buildResult( array $array_result ) {
     }
 
     /**

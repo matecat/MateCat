@@ -1,22 +1,34 @@
 <?php
 
 
+namespace Projects;
+
+use Exception;
+use Jobs_JobStruct;
+use ProjectOptionsSanitizer;
+use Projects_MetadataDao;
+use ReflectionException;
+
 class ChunkOptionsModel {
 
-    private $chunk;
+    private Jobs_JobStruct $chunk;
 
-    public static $valid_keys = [
+    public static array $valid_keys = [
             'speech2text', 'tag_projection', 'lexiqa'
     ];
 
-    private $received_options = [];
+    private array $received_options = [];
+    public array  $project_metadata = [];
 
     public function __construct( Jobs_JobStruct $chunk ) {
         $this->chunk            = $chunk;
         $this->project_metadata = $chunk->getProject()->getMetadataAsKeyValue();
     }
 
-    public function isEnabled( $key ) {
+    /**
+     * @throws Exception
+     */
+    public function isEnabled( string $key ): int {
         $value = $this->getByChunkOrProjectOption( $key );
 
         $sanitizer = new ProjectOptionsSanitizer( [ $key => $value ] );
@@ -28,6 +40,9 @@ class ChunkOptionsModel {
 
     }
 
+    /**
+     * @throws Exception
+     */
     public function setOptions( $options ) {
         $filtered = array_intersect_key( $options, array_flip( self::$valid_keys ) );
 
@@ -42,6 +57,9 @@ class ChunkOptionsModel {
         );
     }
 
+    /**
+     * @throws ReflectionException
+     */
     public function save() {
         if ( empty( $this->received_options ) ) {
             return;
@@ -56,7 +74,10 @@ class ChunkOptionsModel {
         $this->project_metadata = $this->chunk->getProject()->getMetadataAsKeyValue();
     }
 
-    public function toArray() {
+    /**
+     * @throws Exception
+     */
+    public function toArray(): array {
         $out = [];
 
         foreach ( static::$valid_keys as $name ) {
@@ -71,7 +92,7 @@ class ChunkOptionsModel {
      *
      * @return bool
      */
-    private function getByChunkOrProjectOption( $key ) {
+    private function getByChunkOrProjectOption( $key ): bool {
         $chunk_key = Projects_MetadataDao::buildChunkKey( $key, $this->chunk );
 
         if ( isset( $this->project_metadata[ $chunk_key ] ) ) {

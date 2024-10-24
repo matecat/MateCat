@@ -131,7 +131,7 @@ class TranslationsSplit_SplitDAO extends DataAccess_AbstractDao {
      *
      * @return DataAccess_IDaoStruct[]|TranslationsSplit_SplitStruct[]
      */
-    protected function _buildResult( $array_result ) {
+    protected function _buildResult( array $array_result ) {
         foreach ( $array_result as $item ) {
             $item->source_chunk_lengths = json_decode( $item->source_chunk_lengths, true );
             $item->target_chunk_lengths = json_decode( $item->target_chunk_lengths, true );

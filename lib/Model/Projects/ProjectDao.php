@@ -7,8 +7,8 @@ use Teams\TeamStruct;
 class Projects_ProjectDao extends DataAccess_AbstractDao {
     const TABLE = "projects";
 
-    protected static $auto_increment_field = [ 'id' ];
-    protected static $primary_keys         = [ 'id' ];
+    protected static array $auto_increment_field = [ 'id' ];
+    protected static array $primary_keys         = [ 'id' ];
 
     protected static $_sql_project_data = "
             SELECT p.name, j.id AS jid, j.password AS jpassword, j.source, j.target, j.payable_rates, f.id, f.id AS id_file,f.filename, p.status_analysis, j.subject, j.status_owner,
@@ -259,7 +259,7 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
 
         $stmt = $conn->prepare( $sql );
         $stmt->execute( [ 'id_customer' => $id_customer ] );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'Projects_ProjectStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, Projects_ProjectStruct::class );
 
         return $stmt->fetchAll();
     }

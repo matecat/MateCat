@@ -54,7 +54,7 @@ class GlossaryCSVValidator extends AbstractValidator {
         $headers = CSV::headers( $filePath );
         $headers = array_map( 'Utils::trimAndLowerCase', $headers );
 
-        return Utils::cleanEmptyStringFromArray( $headers );
+        return Utils::removeEmptyStringFromTail( $headers );
     }
 
     /**
