@@ -63,14 +63,23 @@ abstract class DataAccess_AbstractDao {
         return $this->database;
     }
 
+    /**
+     * @throws Exception
+     */
     public function createList( array $obj_arr ) {
         throw new Exception( "Abstract method " . __METHOD__ . " must be overridden " );
     }
 
+    /**
+     * @throws Exception
+     */
     public function updateList( array $obj_arr ) {
         throw new Exception( "Abstract method " . __METHOD__ . " must be overridden " );
     }
 
+    /**
+     * @throws Exception
+     */
     public function deleteList( array $obj_arr ) {
         throw new Exception( "Abstract method " . __METHOD__ . " must be overridden " );
     }
