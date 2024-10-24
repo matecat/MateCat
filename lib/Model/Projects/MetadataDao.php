@@ -1,5 +1,8 @@
 <?php
 
+use Exceptions\NotFoundException;
+use Projects\ChunkOptionsModel;
+
 class Projects_MetadataDao extends DataAccess_AbstractDao {
     const FEATURES_KEY = 'features';
     const TABLE        = 'project_metadata';
@@ -12,14 +15,15 @@ class Projects_MetadataDao extends DataAccess_AbstractDao {
     const SPLIT_EQUIVALENT_WORD_TYPE = 'eq_word_count';
     const SPLIT_RAW_WORD_TYPE        = 'raw_word_count';
 
-    protected static $_query_get_metadata = "SELECT * FROM project_metadata WHERE id_project = :id_project ";
+    protected static string $_query_get_metadata = "SELECT * FROM project_metadata WHERE id_project = :id_project ";
 
     /**
      * @param $id
      *
      * @return Projects_MetadataStruct[]
+     * @throws ReflectionException
      */
-    public static function getByProjectId( $id ) {
+    public static function getByProjectId( $id ): array {
         $dao = new Projects_MetadataDao();
 
         return $dao->setCacheTTL( 60 * 60 )->allByProjectId( $id );
@@ -28,35 +32,38 @@ class Projects_MetadataDao extends DataAccess_AbstractDao {
     /**
      * @param $id
      *
-     * @return null|Projects_MetadataStruct[]
+     * @return Projects_MetadataStruct[]
+     * @throws ReflectionException
      */
-    public function allByProjectId( $id ) {
+    public function allByProjectId( $id ): array {
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( self::$_query_get_metadata );
 
         /**
-         * @var $metadata Projects_MetadataStruct[]
+         * @var Projects_MetadataStruct[]
          */
-        $metadata = $this->_fetchObject( $stmt, new Projects_MetadataStruct(), [ 'id_project' => $id ] );
-
-        return $metadata;
+        return $this->_fetchObject( $stmt, new Projects_MetadataStruct(), [ 'id_project' => $id ] );
 
     }
 
-  public function destroyMetadataCache( $id ){
+    /**
+     * @throws ReflectionException
+     */
+    public function destroyMetadataCache( $id ): bool {
       $stmt = $this->_getStatementForQuery( self::$_query_get_metadata );
       return $this->_destroyObjectCache( $stmt, Projects_MetadataStruct::class, [ 'id_project' => $id ] );
   }
 
     /**
-     * @param     $id_project
-     * @param     $key
-     * @param int $ttl
+     * @param int    $id_project
+     * @param string $key
+     * @param int    $ttl
      *
      * @return Projects_MetadataStruct|null
+     * @throws ReflectionException
      */
-    public function get( $id_project, $key, $ttl = 0 ) {
+    public function get( int $id_project, string $key, int $ttl = 0 ): ?Projects_MetadataStruct {
         $stmt = $this->setCacheTTL( $ttl )->_getStatementForQuery(
                 "SELECT * FROM project_metadata WHERE " .
                 " id_project = :id_project " .
@@ -76,13 +83,14 @@ class Projects_MetadataDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param $id_project
-     * @param $key
-     * @param $value
+     * @param int    $id_project
+     * @param string $key
+     * @param string $value
      *
      * @return boolean
+     * @throws ReflectionException
      */
-    public function set( $id_project, $key, $value ) {
+    public function set( int $id_project, string $key, string $value ): bool {
         $sql  = "INSERT INTO project_metadata " .
                 " ( id_project, `key`, value ) " .
                 " VALUES " .
@@ -104,6 +112,9 @@ class Projects_MetadataDao extends DataAccess_AbstractDao {
     }
 
 
+    /**
+     * @throws ReflectionException
+     */
     public function delete( $id_project, $key ) {
         $sql = "DELETE FROM project_metadata " .
                 " WHERE id_project = :id_project " .
@@ -120,7 +131,7 @@ class Projects_MetadataDao extends DataAccess_AbstractDao {
 
     }
 
-    public static function buildChunkKey( $key, Chunks_ChunkStruct $chunk ) {
+    public static function buildChunkKey( $key, Jobs_JobStruct $chunk ): string {
         return "{$key}_chunk_{$chunk->id}_{$chunk->password}";
     }
 
@@ -128,8 +139,11 @@ class Projects_MetadataDao extends DataAccess_AbstractDao {
      * Clean up the chunks options before the job merging
      *
      * @param $jobs array Associative array with the Jobs
+     *
+     * @throws ReflectionException
+     * @throws NotFoundException
      */
-    public function cleanupChunksOptions( $jobs ) {
+    public function cleanupChunksOptions( array $jobs ) {
         foreach ( $jobs as $job ) {
             $chunk = Chunks_ChunkDao::getByIdAndPassword( $job[ 'id' ], $job[ 'password' ] );
 
@@ -142,6 +156,6 @@ class Projects_MetadataDao extends DataAccess_AbstractDao {
         }
     }
 
-    protected function _buildResult( $array_result ) {
+    protected function _buildResult( array $array_result ) {
     }
 }

@@ -125,7 +125,7 @@ class MetadataDao extends \DataAccess_AbstractDao {
         $this->destroyCacheKey( $uid, $key );
     }
 
-    protected function _buildResult( $array_result ) {
+    protected function _buildResult( array $array_result ) {
         // TODO: Implement _buildResult() method.
     }
 

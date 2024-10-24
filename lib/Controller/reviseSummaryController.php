@@ -54,7 +54,7 @@ class reviseSummaryController extends viewController {
 
         $wStruct = WordCountStruct::loadFromJob( $jobStruct );
 
-        if ( $jobStruct[ 'status' ] == Constants_JobStatus::STATUS_ARCHIVED || $jobStruct[ 'status' ] == Constants_JobStatus::STATUS_CANCELLED ) {
+        if ( $jobStruct->isArchived() || $jobStruct->isCanceled() ) {
             //this job has been archived
             $this->job_archived    = true;
             $this->job_owner_email = $jobStruct[ 'job_owner' ];

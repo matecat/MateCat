@@ -22,7 +22,7 @@ class commentController extends ajaxController {
     /**
      * @var Comments_CommentStruct
      */
-    private Comments_CommentStruct $struct;
+    private Comments_CommentStruct $comment_struct;
     private Comments_CommentStruct $new_record;
     /**
      * @var ShapelessConcreteStruct[]
@@ -56,6 +56,7 @@ class commentController extends ajaxController {
         $this->__postInput              = filter_input_array( INPUT_POST, $filterArgs );
         $this->__postInput[ 'message' ] = htmlspecialchars( $this->__postInput[ 'message' ] );
 
+        $this->__postInput[ 'id_comment' ]      = (int)$this->__postInput[ 'id_comment' ];
         $this->__postInput[ 'id_segment' ]      = (int)$this->__postInput[ 'id_segment' ];
         $this->__postInput[ 'id_job' ]          = (int)$this->__postInput[ 'id_job' ];
         $this->__postInput[ 'source_page' ]     = (int)$this->__postInput[ 'source_page' ];
@@ -108,10 +109,10 @@ class commentController extends ajaxController {
     }
 
     private function getRange(): void {
-        $this->struct                = new Comments_CommentStruct();
-        $this->struct->id_job        = $this->__postInput[ 'id_job' ];
-        $this->struct->first_segment = $this->__postInput[ 'first_seg' ];
-        $this->struct->last_segment  = $this->__postInput[ 'last_seg' ];
+        $this->comment_struct                = new Comments_CommentStruct();
+        $this->comment_struct->id_job        = $this->__postInput[ 'id_job' ];
+        $this->comment_struct->first_segment = $this->__postInput[ 'first_seg' ];
+        $this->comment_struct->last_segment  = $this->__postInput[ 'last_seg' ];
 
         $commentDao = new Comments_CommentDao( Database::obtain() );
 
@@ -129,7 +130,7 @@ class commentController extends ajaxController {
         $this->prepareCommentData();
 
         $commentDao       = new Comments_CommentDao( Database::obtain() );
-        $this->new_record = $commentDao->resolveThread( $this->struct );
+        $this->new_record = $commentDao->resolveThread( $this->comment_struct );
 
         $this->enqueueComment();
         $this->users = $this->resolveUsers();
@@ -153,7 +154,7 @@ class commentController extends ajaxController {
         $this->prepareCommentData();
 
         $commentDao       = new Comments_CommentDao( Database::obtain() );
-        $this->new_record = $commentDao->saveComment( $this->struct );
+        $this->new_record = $commentDao->saveComment( $this->comment_struct );
 
         foreach ( $this->users_mentioned as $user_mentioned ) {
             $mentioned_comment = $this->prepareMentionCommentData( $user_mentioned );
@@ -173,16 +174,16 @@ class commentController extends ajaxController {
      * @throws ReflectionException
      */
     private function prepareCommentData(): void {
-        $this->struct = new Comments_CommentStruct();
+        $this->comment_struct = new Comments_CommentStruct();
 
-        $this->struct->id_segment      = $this->__postInput[ 'id_segment' ];
-        $this->struct->id_job          = $this->__postInput[ 'id_job' ];
-        $this->struct->full_name       = $this->__postInput[ 'username' ];
-        $this->struct->source_page     = $this->__postInput[ 'source_page' ];
-        $this->struct->message         = $this->__postInput[ 'message' ];
-        $this->struct->revision_number = $this->__postInput[ 'revision_number' ];
-        $this->struct->email           = $this->getEmail();
-        $this->struct->uid             = $this->getUid();
+        $this->comment_struct->id_segment      = $this->__postInput[ 'id_segment' ];
+        $this->comment_struct->id_job          = $this->__postInput[ 'id_job' ];
+        $this->comment_struct->full_name       = $this->__postInput[ 'username' ];
+        $this->comment_struct->source_page     = $this->__postInput[ 'source_page' ];
+        $this->comment_struct->message         = $this->__postInput[ 'message' ];
+        $this->comment_struct->revision_number = $this->__postInput[ 'revision_number' ];
+        $this->comment_struct->email           = $this->getEmail();
+        $this->comment_struct->uid             = $this->getUid();
 
         $user_mentions            = $this->resolveUserMentions();
         $user_team_mentions       = $this->resolveTeamMentions();
@@ -337,11 +338,11 @@ class commentController extends ajaxController {
     private function sendEmail() {
 
         $jobUrlStruct = JobUrlBuilder::createFromJobStruct( $this->job, [
-                'id_segment'         => $this->struct->id_segment,
+                'id_segment'         => $this->comment_struct->id_segment,
                 'skip_check_segment' => true
         ] );
 
-        $url = $jobUrlStruct->getUrlByRevisionNumber( $this->struct->revision_number );
+        $url = $jobUrlStruct->getUrlByRevisionNumber( $this->comment_struct->revision_number );
 
         if ( !$url ) {
             $this->result[ 'errors' ][] = [ "code" => -10, "message" => "No valid url was found for this project." ];
@@ -353,21 +354,24 @@ class commentController extends ajaxController {
         $project_data = $this->projectData();
 
         foreach ( $this->users_mentioned as $user_mentioned ) {
-            $email = new CommentMentionEmail( $user_mentioned, $this->struct, $url, $project_data[ 0 ], $this->job );
+            $email = new CommentMentionEmail( $user_mentioned, $this->comment_struct, $url, $project_data[ 0 ], $this->job );
             $email->send();
         }
 
         foreach ( $this->users as $user ) {
-            if ( $this->struct->message_type == Comments_CommentDao::TYPE_RESOLVE ) {
-                $email = new CommentResolveEmail( $user, $this->struct, $url, $project_data[ 0 ], $this->job );
+            if ( $this->comment_struct->message_type == Comments_CommentDao::TYPE_RESOLVE ) {
+                $email = new CommentResolveEmail( $user, $this->comment_struct, $url, $project_data[ 0 ], $this->job );
             } else {
-                $email = new CommentEmail( $user, $this->struct, $url, $project_data[ 0 ], $this->job );
+                $email = new CommentEmail( $user, $this->comment_struct, $url, $project_data[ 0 ], $this->job );
             }
 
             $email->send();
         }
     }
 
+    /**
+     * @throws ReflectionException
+     */
     private function projectData(): array {
         if ( $this->project_data == null ) {
 
@@ -387,7 +391,7 @@ class commentController extends ajaxController {
      */
     private function resolveUsers(): array {
         $commentDao = new Comments_CommentDao( Database::obtain() );
-        $result     = $commentDao->getThreadContributorUids( $this->struct );
+        $result     = $commentDao->getThreadContributorUids( $this->comment_struct );
 
         $userDao = new Users_UserDao( Database::obtain() );
         $users   = $userDao->getByUids( $result );
@@ -412,7 +416,7 @@ class commentController extends ajaxController {
      * @return int[]
      */
     private function resolveUserMentions(): array {
-        return Comments_CommentDao::getUsersIdFromContent( $this->struct->message );
+        return Comments_CommentDao::getUsersIdFromContent( $this->comment_struct->message );
     }
 
     /**
@@ -422,7 +426,7 @@ class commentController extends ajaxController {
     private function resolveTeamMentions(): array {
         $users = [];
 
-        if ( strstr( $this->struct->message, "{@team@}" ) ) {
+        if ( strstr( $this->comment_struct->message, "{@team@}" ) ) {
             $project     = $this->job->getProject();
             $memberships = ( new MembershipDao() )->setCacheTTL( 60 * 60 * 24 )->getMemberListByTeamId( $project->id_team, false );
             foreach ( $memberships as $membership ) {
@@ -460,7 +464,7 @@ class commentController extends ajaxController {
         } );
     }
 
-    private function getEmail() {
+    private function getEmail(): ?string {
         if ( $this->userIsLogged ) {
             return $this->user->email;
         } else {
@@ -468,7 +472,7 @@ class commentController extends ajaxController {
         }
     }
 
-    private function getUid() {
+    private function getUid(): ?int {
         if ( $this->userIsLogged ) {
             return $this->user->uid;
         } else {
@@ -480,6 +484,8 @@ class commentController extends ajaxController {
      * @param int $id
      * @param int $idSegment
      * @param int $sourcePage
+     *
+     * @throws ReflectionException
      */
     private function enqueueDeleteCommentMessage( int $id, int $idSegment, int $sourcePage ) {
         $message = json_encode( [
@@ -503,20 +509,21 @@ class commentController extends ajaxController {
     }
 
     /**
+     * @throws ReflectionException
      */
     private function enqueueComment() {
 
         $this->payload = [
                 'message_type' => $this->new_record->message_type,
                 'message'      => $this->new_record->message,
-                'id'           => (int)$this->new_record->id,
-                'uid'          => (int)$this->new_record->uid,
-                'id_segment'   => (int)$this->new_record->id_segment,
+                'id'           => $this->new_record->id,
+                'uid'          => $this->new_record->uid,
+                'id_segment'   => $this->new_record->id_segment,
                 'full_name'    => $this->new_record->full_name,
-                'source_page'  => (int)$this->new_record->source_page,
+                'source_page'  => $this->new_record->source_page,
                 'create_date'  => $this->new_record->getFormattedDate(),
                 'thread_id'    => $this->new_record->thread_id,
-                'timestamp'    => (int)$this->new_record->timestamp,
+                'timestamp'    => $this->new_record->timestamp,
         ];
 
         $message = json_encode( [
@@ -536,6 +543,7 @@ class commentController extends ajaxController {
 
     /**
      * @return string[]
+     * @throws ReflectionException
      */
     private function getProjectPasswords(): array {
         $pws = [];

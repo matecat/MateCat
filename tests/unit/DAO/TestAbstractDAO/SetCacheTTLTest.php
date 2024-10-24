@@ -16,9 +16,9 @@ class SetCacheTTLTest extends AbstractTest {
 
     public function setUp(): void {
         parent::setUp();
-        $this->jobDao    = new EnginesModel_EngineDAO( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
-        $this->reflector = new ReflectionClass( $this->jobDao );
-        $this->cache_TTL = $this->reflector->getProperty( "cacheTTL" );
+        $this->databaseInstance = new EnginesModel_EngineDAO( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
+        $this->reflector        = new ReflectionClass( $this->databaseInstance );
+        $this->cache_TTL        = $this->reflector->getProperty( "cacheTTL" );
         $this->cache_TTL->setAccessible( true );
 
     }
@@ -29,10 +29,10 @@ class SetCacheTTLTest extends AbstractTest {
      * @covers DataAccess_AbstractDao::setCacheTTL
      */
     public function test_setCacheTTL_to_value_not_zero() {
-        $previous_TTL_value = $this->cache_TTL->getValue( $this->jobDao );
-        $this->jobDao->setCacheTTL( 55 );
-        $this->assertEquals( 55, $this->cache_TTL->getValue( $this->jobDao ) );
-        $this->cache_TTL->setValue( $this->jobDao, $previous_TTL_value );
+        $previous_TTL_value = $this->cache_TTL->getValue( $this->databaseInstance );
+        $this->databaseInstance->setCacheTTL( 55 );
+        $this->assertEquals( 55, $this->cache_TTL->getValue( $this->databaseInstance ) );
+        $this->cache_TTL->setValue( $this->databaseInstance, $previous_TTL_value );
     }
 }
 

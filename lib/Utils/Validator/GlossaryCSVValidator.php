@@ -50,11 +50,11 @@ class GlossaryCSVValidator extends AbstractValidator {
      *
      * @return array
      */
-    private function getHeaders( $filePath ) {
+    private function getHeaders( $filePath ): array {
         $headers = CSV::headers( $filePath );
         $headers = array_map( 'Utils::trimAndLowerCase', $headers );
 
-        return Utils::popArray( $headers );
+        return Utils::removeEmptyStringFromTail( $headers );
     }
 
     /**

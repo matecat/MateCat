@@ -2,7 +2,7 @@
 
 namespace LQA;
 
-use Chunks_ChunkStruct;
+use Jobs_JobStruct;
 use DataAccess\ShapelessConcreteStruct;
 use DataAccess_AbstractDao;
 use DataAccess_IDaoStruct;
@@ -13,7 +13,7 @@ use PDO;
 use Utils;
 
 class EntryDao extends DataAccess_AbstractDao {
-    protected function _buildResult( $array_result ) {
+    protected function _buildResult( array $array_result ) {
     }
 
     /**
@@ -102,11 +102,11 @@ class EntryDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param Chunks_ChunkStruct $chunk
+     * @param Jobs_JobStruct $chunk
      *
      * @return EntryStruct[]
      */
-    public static function findAllByChunk( Chunks_ChunkStruct $chunk ) {
+    public static function findAllByChunk( Jobs_JobStruct $chunk ) {
         $sql = "SELECT qa_entries.*, qa_categories.label as category_label FROM qa_entries
           JOIN segment_translations
             ON segment_translations.id_segment = qa_entries.id_segment

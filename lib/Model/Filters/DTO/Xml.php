@@ -2,10 +2,9 @@
 
 namespace Filters\DTO;
 
-use Countable;
 use JsonSerializable;
 
-class Xml implements IDto, JsonSerializable, Countable {
+class Xml implements IDto, JsonSerializable {
 
     private bool  $preserve_whitespace       = false;
     private array $translate_elements        = [];
@@ -80,13 +79,6 @@ class Xml implements IDto, JsonSerializable, Countable {
 
         return $format;
 
-    }
-
-    /**
-     * @return int
-     */
-    public function count(): int {
-        return count( $this->jsonSerialize() );
     }
 
 }

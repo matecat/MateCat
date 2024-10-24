@@ -12,7 +12,7 @@ use API\Commons\Validators\ChunkPasswordValidator;
 use API\Commons\Validators\ProjectAccessValidator;
 use API\Commons\Validators\LoginValidator;
 use API\V2\Json\Chunk;
-use Chunks_ChunkStruct;
+use Jobs_JobStruct;
 use Constants_JobStatus;
 use Exception;
 use Exceptions\NotFoundException;
@@ -22,11 +22,6 @@ use Translations_SegmentTranslationDao;
 use Utils;
 
 class ChunkController extends BaseChunkController {
-
-    /**
-     * @var Chunks_ChunkStruct
-     */
-    protected $chunk;
 
     /**
      * @var Projects_ProjectStruct
@@ -41,7 +36,7 @@ class ChunkController extends BaseChunkController {
     }
 
     /**
-     * @param Chunks_ChunkStruct $chunk
+     * @param Jobs_JobStruct $chunk
      *
      * @return $this
      */

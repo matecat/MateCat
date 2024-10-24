@@ -132,7 +132,7 @@ class RemoteFiles_RemoteFileDao extends DataAccess_AbstractDao {
         return false;
     }
 
-    protected function _buildResult( $array_result ) {
+    protected function _buildResult( array $array_result ) {
         return null;
     }
 }

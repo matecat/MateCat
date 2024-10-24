@@ -11,17 +11,17 @@ class Users_UserDao extends DataAccess_AbstractDao {
     const TABLE       = "users";
     const STRUCT_TYPE = "Users_UserStruct";
 
-    protected static $auto_increment_field = [ 'uid' ];
-    protected static $primary_keys         = [ 'uid' ];
+    protected static array $auto_increment_field = [ 'uid' ];
+    protected static array $primary_keys         = [ 'uid' ];
 
-    protected static $_query_user_by_uid            = " SELECT * FROM users WHERE uid = :uid ";
-    protected static $_query_user_by_email          = " SELECT * FROM users WHERE email = :email ";
-    protected static $_query_assignee_by_project_id = "SELECT * FROM users 
+    protected static string $_query_user_by_uid            = " SELECT * FROM users WHERE uid = :uid ";
+    protected static string $_query_user_by_email          = " SELECT * FROM users WHERE email = :email ";
+    protected static string $_query_assignee_by_project_id = "SELECT * FROM users 
         INNER JOIN projects ON projects.id_assignee = users.uid 
         WHERE projects.id = :id_project
         LIMIT 1 ";
 
-    protected static $_query_owner_by_job_id = "SELECT * FROM users 
+    protected static string $_query_owner_by_job_id = "SELECT * FROM users 
         INNER JOIN jobs ON jobs.owner = users.email
         WHERE jobs.id = :job_id
         LIMIT 1 ";
@@ -377,7 +377,7 @@ class Users_UserDao extends DataAccess_AbstractDao {
      *
      * @return Users_UserStruct[]
      */
-    protected function _buildResult( $array_result ) {
+    protected function _buildResult( array $array_result ) {
         $result = [];
 
         foreach ( $array_result as $item ) {

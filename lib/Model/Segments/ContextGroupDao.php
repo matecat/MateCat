@@ -17,8 +17,8 @@ class ContextGroupDao extends DataAccess_AbstractDao {
 
     const TABLE       = 'context_groups';
     const STRUCT_TYPE = "ContextStruct";
-    protected static $auto_increment_field = [ 'id' ];
-    protected static $primary_keys         = [ 'id', 'id_project' ];
+    protected static array $auto_increment_field = [ 'id' ];
+    protected static array $primary_keys         = [ 'id', 'id_project' ];
 
     protected static $query_get_all_by_project   = "SELECT * FROM context_groups WHERE id_project = :id_project";
     protected static $query_get_all_by_file_id   = "SELECT * FROM context_groups WHERE id_file = :id_file";

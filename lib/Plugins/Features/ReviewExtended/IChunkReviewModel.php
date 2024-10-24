@@ -8,13 +8,13 @@
 
 namespace Features\ReviewExtended;
 
-use Chunks_ChunkStruct;
+use Jobs_JobStruct;
 use LQA\ModelStruct;
 
 interface IChunkReviewModel {
 
     /**
-     * @return Chunks_ChunkStruct
+     * @return Jobs_JobStruct
      */
     public function getChunk();
 

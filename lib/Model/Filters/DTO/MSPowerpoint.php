@@ -2,10 +2,9 @@
 
 namespace Filters\DTO;
 
-use Countable;
 use JsonSerializable;
 
-class MSPowerpoint implements IDto, JsonSerializable, Countable {
+class MSPowerpoint implements IDto, JsonSerializable {
 
     private bool  $extract_doc_properties = false;
     private bool  $extract_hidden_slides  = false;
@@ -79,13 +78,6 @@ class MSPowerpoint implements IDto, JsonSerializable, Countable {
 
         return $format;
 
-    }
-
-    /**
-     * @return int
-     */
-    public function count(): int {
-        return count( $this->jsonSerialize() );
     }
 
 }

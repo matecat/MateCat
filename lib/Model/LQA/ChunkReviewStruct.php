@@ -3,6 +3,7 @@
 namespace LQA;
 
 use Chunks_ChunkDao;
+use Jobs_JobStruct;
 use Utils;
 
 class ChunkReviewStruct extends \DataAccess_AbstractDaoSilentStruct implements \DataAccess_IDaoStruct {
@@ -32,9 +33,9 @@ class ChunkReviewStruct extends \DataAccess_AbstractDaoSilentStruct implements \
     }
 
     /**
-     * @return \Chunks_ChunkStruct
+     * @return Jobs_JobStruct
      */
-    public function getChunk() {
+    public function getChunk(): Jobs_JobStruct {
         $review = clone $this;
 
         return $this->cachable( __FUNCTION__, $review, function ( $review ) {

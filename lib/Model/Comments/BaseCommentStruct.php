@@ -14,10 +14,13 @@ class Comments_BaseCommentStruct extends DataAccess_AbstractDaoSilentStruct impl
     public int     $message_type;
     public ?string $message      = "";
 
-    public function getThreadId(): string {
-        return md5( $this->id_job . '-' . $this->id_segment . '-' . $this->resolve_date );
+    public function getThreadId(): ?string {
+        return $this->resolve_date ? md5( $this->id_job . '-' . $this->id_segment . '-' . $this->resolve_date ) : null;
     }
 
+    /**
+     * @throws ReflectionException
+     */
     public function templateMessage() {
         $this->message = Comments_CommentDao::placeholdContent( $this->message );
     }
@@ -25,19 +28,20 @@ class Comments_BaseCommentStruct extends DataAccess_AbstractDaoSilentStruct impl
     /**
      * @inheritDoc
      */
-    public function jsonSerialize() {
+    public function jsonSerialize(): array {
         return [
                 'id'           => $this->id,
                 'id_job'       => $this->id_job,
                 'id_segment'   => $this->id_segment,
-                'create_date'  => date_format( date_create( $this->create_date ), DATE_ATOM ) ?: date_format( date_create(), DATE_ATOM ),
+                'create_at'    => date_format( date_create( $this->create_date ?: 'now' ), DATE_ATOM ),
                 'full_name'    => $this->full_name,
                 'uid'          => $this->uid,
+                'resolved_at'  => !empty( $this->resolve_date ) ? date_format( date_create( $this->resolve_date ), DATE_ATOM ) : null,
                 'source_page'  => $this->source_page,
                 'message_type' => $this->message_type,
                 'message'      => $this->message,
                 'thread_id'    => $this->getThreadId(),
-                'timestamp'    => strtotime( $this->create_date )
+                'timestamp'    => strtotime( $this->create_date ?: 'now' ),
         ];
     }
 }

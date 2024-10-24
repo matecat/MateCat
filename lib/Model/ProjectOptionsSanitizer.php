@@ -167,6 +167,8 @@ class ProjectOptionsSanitizer {
     /**
      * @param $source
      * @param $target
+     *
+     * @throws Exception
      */
     public function setLanguages( $source, $target ) {
         if ( is_string( $target ) ) {
@@ -189,7 +191,7 @@ class ProjectOptionsSanitizer {
      *
      * @return array
      */
-    public function sanitize() {
+    public function sanitize(): array {
         $this->sanitized = $this->options;
 
         if ( isset( $this->options[ 'speech2text' ] ) ) {
