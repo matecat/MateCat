@@ -17,6 +17,7 @@ use Features\TranslationEvents\Model\TranslationEvent;
 use Features\TranslationEvents\TranslationEventsHandler;
 use InvalidArgumentException;
 use Jobs_JobDao;
+use Klein\Response;
 use Log;
 use Matecat\SubFiltering\MateCatFilter;
 use RuntimeException;
@@ -31,20 +32,20 @@ class SplitSegmentController extends KleinController {
         $this->appendValidator( new LoginValidator( $this ) );
     }
 
-    public function split()
+    public function split(): Response
     {
         try {
-            $data = $this->validateTheRequest();
+            $request = $this->validateTheRequest();
 
             $translationStruct = TranslationsSplit_SplitStruct::getStruct();
-            $translationStruct->id_segment = $data['id_segment'];
-            $translationStruct->id_job     = $data['id_job'];
+            $translationStruct->id_segment = $request['id_segment'];
+            $translationStruct->id_job     = $request['id_job'];
 
             $featureSet = $this->getFeatureSet();
 
             /** @var MateCatFilter $Filter */
-            $Filter = MateCatFilter::getInstance( $featureSet, $data['jobStruct']->source, $data['jobStruct']->target, [] );
-            list( $data['segment'], $translationStruct->source_chunk_lengths ) = CatUtils::parseSegmentSplit( $data['segment'], '', $Filter );
+            $Filter = MateCatFilter::getInstance( $featureSet, $request['jobStruct']->source, $request['jobStruct']->target, [] );
+            list( $request['segment'], $translationStruct->source_chunk_lengths ) = CatUtils::parseSegmentSplit( $request['segment'], '', $Filter );
 
             /* Fill the statuses with DEFAULT DRAFT VALUES */
             $pieces                                  = ( count( $translationStruct->source_chunk_lengths ) > 1 ? count( $translationStruct->source_chunk_lengths ) - 1 : 1 );
@@ -63,8 +64,8 @@ class SplitSegmentController extends KleinController {
                 ]);
             }
 
-            Log::doJsonLog( "Failed while splitting/merging segment." );
-            Log::doJsonLog( $translationStruct );
+            $this->log( "Failed while splitting/merging segment." );
+            $this->log( $translationStruct );
             throw new RuntimeException("Failed while splitting/merging segment.");
 
         } catch (Exception $exception){
@@ -74,9 +75,9 @@ class SplitSegmentController extends KleinController {
 
     /**
      * @return array
-     * @throws \Exceptions\NotFoundException
+     * @throws Exception
      */
-    private function validateTheRequest()
+    private function validateTheRequest(): array
     {
         $id_job = filter_var( $this->request->param( 'id_job' ), FILTER_SANITIZE_NUMBER_INT );
         $id_segment = filter_var( $this->request->param( 'id_segment' ), FILTER_SANITIZE_NUMBER_INT );

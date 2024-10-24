@@ -4,22 +4,17 @@ namespace API\App;
 
 use API\Commons\KleinController;
 use API\Commons\Validators\LoginValidator;
-use Chunks_ChunkDao;
 use Database;
-use Engine;
 use Exception;
 use Exceptions\NotFoundException;
-use INIT;
 use InvalidArgumentException;
+use Klein\Response;
 use Log;
-use Matecat\SubFiltering\MateCatFilter;
-use TmKeyManagement_Filter;
 use TmKeyManagement_MemoryKeyDao;
 use TmKeyManagement_MemoryKeyStruct;
 use TmKeyManagement_TmKeyManagement;
 use TmKeyManagement_TmKeyStruct;
 use TMS\TMSService;
-use Translations_SegmentTranslationDao;
 use Users_ClientUserFacade;
 use Utils;
 
@@ -29,7 +24,7 @@ class UserKeysController extends KleinController {
         $this->appendValidator( new LoginValidator( $this ) );
     }
 
-    public function delete()
+    public function delete(): Response
     {
         try {
             $request = $this->validateTheRequest();
@@ -49,7 +44,7 @@ class UserKeysController extends KleinController {
         }
     }
 
-    public function update()
+    public function update(): Response
     {
         try {
             $request = $this->validateTheRequest();
@@ -68,7 +63,7 @@ class UserKeysController extends KleinController {
         }
     }
 
-    public function newKey()
+    public function newKey(): Response
     {
         try {
             $request = $this->validateTheRequest();
@@ -88,7 +83,7 @@ class UserKeysController extends KleinController {
         }
     }
 
-    public function info()
+    public function info(): Response
     {
         try {
             $request = $this->validateTheRequest();
@@ -102,7 +97,7 @@ class UserKeysController extends KleinController {
         }
     }
 
-    public function share()
+    public function share(): Response
     {
         try {
             $request = $this->validateTheRequest();
@@ -132,7 +127,8 @@ class UserKeysController extends KleinController {
      * @param array $userMemoryKeys
      * @return array
      */
-    protected function getKeyUsersInfo( array $userMemoryKeys ){
+    protected function getKeyUsersInfo( array $userMemoryKeys ): array
+    {
 
         $_userStructs = [];
         foreach( $userMemoryKeys[0]->tm_key->getInUsers() as $userStruct ){
@@ -150,7 +146,7 @@ class UserKeysController extends KleinController {
      * @return array
      * @throws Exception
      */
-    private function validateTheRequest()
+    private function validateTheRequest(): array
     {
         $key = filter_var( $this->request->param( 'key' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
         $emails = filter_var( $this->request->param( 'emails' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );

@@ -5,7 +5,8 @@ namespace API\App;
 use API\Commons\KleinController;
 use API\Commons\Validators\LoginValidator;
 use BasicFeatureStruct;
-use ConnectedServices\GDrive\Session;
+
+use ConnectedServices\Google\GDrive\Session;
 use Constants;
 use Constants_ProjectStatus;
 use CookieManager;
@@ -18,6 +19,7 @@ use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use INIT;
 use InvalidArgumentException;
+use Klein\Response;
 use Langs_Languages;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use Matecat\XliffParser\Utils\Files as XliffFiles;
@@ -44,7 +46,7 @@ class CreateProjectController extends KleinController {
         $this->appendValidator( new LoginValidator( $this ) );
     }
 
-    public function create()
+    public function create(): Response
     {
         try {
             $this->featureSet->loadFromUserEmail( $this->user->email );

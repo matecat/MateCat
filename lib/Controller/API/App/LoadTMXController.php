@@ -10,6 +10,7 @@ use Exception;
 use FilesStorage\AbstractFilesStorage;
 use INIT;
 use InvalidArgumentException;
+use Klein\Response;
 use TmKeyManagement_MemoryKeyDao;
 use TmKeyManagement_MemoryKeyStruct;
 use TmKeyManagement_TmKeyStruct;
@@ -22,7 +23,7 @@ class LoadTMXController extends KleinController {
         $this->appendValidator( new LoginValidator( $this ) );
     }
 
-    public function newTM()
+    public function newTM(): Response
     {
         try {
             $data = $this->validateTheRequest();
@@ -86,7 +87,7 @@ class LoadTMXController extends KleinController {
         }
     }
 
-    public function uploadStatus()
+    public function uploadStatus(): Response
     {
         try {
             $data = $this->validateTheRequest();
@@ -107,7 +108,7 @@ class LoadTMXController extends KleinController {
      * @return array
      * @throws Exception
      */
-    private function validateTheRequest()
+    private function validateTheRequest(): array
     {
         $id = filter_var( $this->request->param( 'res' ), FILTER_SANITIZE_NUMBER_INT);
         $res = filter_var( $this->request->param( 'res' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW  ] );

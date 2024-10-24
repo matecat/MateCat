@@ -6,24 +6,23 @@ use AbstractControllers\IController;
 use AbstractControllers\TimeLogger;
 use API\Commons\Authentication\AuthenticationHelper;
 use API\Commons\Authentication\AuthenticationTrait;
+use API\Commons\Exceptions\AuthenticationError;
 use API\Commons\Validators\Base;
 use ApiKeys_ApiKeyStruct;
 use Bootstrap;
 use CatUtils;
-use CookieManager;
 use DomainException;
 use Exception;
 use Exceptions\NotFoundException;
 use FeatureSet;
+use InvalidArgumentException;
 use Klein\Request;
 use Klein\Response;
+use Log;
 use ReflectionException;
-use INIT;
-use InvalidArgumentException;
 use RuntimeException;
 use SebastianBergmann\Invoker\TimeoutException;
 use Swaggest\JsonSchema\InvalidValue;
-use Users_UserDao;
 use Validator\Errors\JSONValidatorException;
 use Validator\Errors\JsonValidatorGenericException;
 
@@ -281,7 +280,12 @@ abstract class KleinController implements IController {
         return $this->response->json([
             'errors' => [
                 "code" => $exception->getCode(),
-                "message" => $exception->getMessage()
+                "message" => $exception->getMessage(),
+                "debug" => [
+                    "trace" => $exception->getTrace(),
+                    "file" => $exception->getFile(),
+                    "line" => $exception->getLine(),
+                ]
             ]
         ]);
     }
@@ -298,5 +302,14 @@ abstract class KleinController implements IController {
             'id_segment' => $parsedSegment[0],
             'split_num' => $parsedSegment[1],
         ];
+    }
+
+    /**
+     * @param $message
+     * @param null $filename
+     */
+    protected function log($message, $filename = null ): void
+    {
+        Log::doJsonLog( $message, $filename );
     }
 }

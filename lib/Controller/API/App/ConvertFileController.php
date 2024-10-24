@@ -8,6 +8,7 @@ use ConvertFile;
 use Exception;
 use INIT;
 use InvalidArgumentException;
+use Klein\Response;
 
 class ConvertFileController extends KleinController {
 
@@ -15,7 +16,7 @@ class ConvertFileController extends KleinController {
         $this->appendValidator( new LoginValidator( $this ) );
     }
 
-    public function handle()
+    public function handle(): Response
     {
         try {
             $data = $this->validateTheRequest();

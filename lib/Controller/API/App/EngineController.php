@@ -20,6 +20,7 @@ use EnginesModel_SmartMATEStruct;
 use EnginesModel_YandexTranslateStruct;
 use Exception;
 use InvalidArgumentException;
+use Klein\Response;
 use RuntimeException;
 use Validator\DeepLValidator;
 
@@ -29,12 +30,25 @@ class EngineController extends KleinController {
         $this->appendValidator( new LoginValidator( $this ) );
     }
 
-    public function add()
+    public function add(): Response
     {
         $request = $this->validateTheRequest();
+
         $name = $request['name'];
         $engineData = $request['data'];
         $provider = $request['provider'];
+
+        if ( empty( $name ) ) {
+            throw new InvalidArgumentException("Engine name required", -6);
+        }
+
+        if ( empty( $engineData ) ) {
+            throw new InvalidArgumentException("Engine data required", -7);
+        }
+
+        if ( empty( $provider ) ) {
+            throw new InvalidArgumentException("Engine provider required", -8);
+        }
 
         $newEngineStruct = null;
         $validEngine     = true;
@@ -253,7 +267,7 @@ class EngineController extends KleinController {
         }
     }
 
-    public function disable()
+    public function disable(): Response
     {
         try {
             $request = $this->validateTheRequest();
@@ -292,7 +306,7 @@ class EngineController extends KleinController {
     /**
      * @return array
      */
-    private function validateTheRequest()
+    private function validateTheRequest(): array
     {
         $id = filter_var( $this->request->param( 'id' ), FILTER_SANITIZE_STRING );
         $name = filter_var( $this->request->param( 'name' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW  ] );

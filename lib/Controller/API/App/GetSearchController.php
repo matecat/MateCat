@@ -5,11 +5,13 @@ namespace API\App;
 use API\Commons\KleinController;
 use API\Commons\Validators\LoginValidator;
 use Chunks_ChunkDao;
+use Chunks_ChunkStruct;
 use Constants_TranslationStatus;
 use Database;
 use Exception;
 use Features\ReviewExtended\ReviewUtils;
 use Features\TranslationVersions;
+use Klein\Response;
 use Log;
 use Matecat\Finder\WholeTextFinder;
 use Projects_ProjectDao;
@@ -34,7 +36,7 @@ class GetSearchController extends KleinController {
         $this->appendValidator( new LoginValidator( $this ) );
     }
 
-    public function search()
+    public function search(): Response
     {
         try {
             $request = $this->validateTheRequest();
@@ -53,7 +55,7 @@ class GetSearchController extends KleinController {
         }
     }
 
-    public function replaceAll()
+    public function replaceAll(): Response
     {
         try {
             $request = $this->validateTheRequest();
@@ -88,7 +90,8 @@ class GetSearchController extends KleinController {
         }
     }
 
-    public function redoReplaceAll()
+    // not is use
+    public function redoReplaceAll(): Response
     {
         try {
             $request = $this->validateTheRequest();
@@ -106,7 +109,8 @@ class GetSearchController extends KleinController {
         }
     }
 
-    public function undoReplaceAll()
+    // not is use
+    public function undoReplaceAll(): Response
     {
         try {
             $request = $this->validateTheRequest();
@@ -194,10 +198,10 @@ class GetSearchController extends KleinController {
     /**
      * @param $job_id
      * @param $password
-     * @return \Chunks_ChunkStruct|\DataAccess_IDaoStruct
-     * @throws \Exceptions\NotFoundException
+     * @return Chunks_ChunkStruct|null
+     * @throws Exception
      */
-    private function getJobData($job_id, $password)
+    private function getJobData($job_id, $password): ?Chunks_ChunkStruct
     {
         return Chunks_ChunkDao::getByIdAndPassword( (int)$job_id, $password );
     }
@@ -206,7 +210,7 @@ class GetSearchController extends KleinController {
      * @param $job_id
      * @return Search_ReplaceHistory
      */
-    private function getReplaceHistory($job_id)
+    private function getReplaceHistory($job_id): Search_ReplaceHistory
     {
         // Search_ReplaceHistory init
         $srh_driver = ( isset( INIT::$REPLACE_HISTORY_DRIVER ) and '' !== INIT::$REPLACE_HISTORY_DRIVER ) ? INIT::$REPLACE_HISTORY_DRIVER : 'redis';
@@ -221,7 +225,7 @@ class GetSearchController extends KleinController {
      * @return SearchModel
      * @throws Exception
      */
-    private function getSearchModel(SearchQueryParamsStruct $queryParams, Jobs_JobStruct $jobStruct)
+    private function getSearchModel(SearchQueryParamsStruct $queryParams, Jobs_JobStruct $jobStruct): SearchModel
     {
         /** @var MateCatFilter $filter */
         $filter = MateCatFilter::getInstance( $this->getFeatureSet(), $jobStruct->source, $jobStruct->target );
@@ -233,7 +237,8 @@ class GetSearchController extends KleinController {
      * @param Search_ReplaceHistory $srh
      * @return array
      */
-    private function getSegmentForRedoReplaceAll(Search_ReplaceHistory $srh) {
+    private function getSegmentForRedoReplaceAll(Search_ReplaceHistory $srh): array
+    {
         $results = [];
 
         $versionToMove = $srh->getCursor() + 1;
@@ -255,7 +260,8 @@ class GetSearchController extends KleinController {
      * @param Search_ReplaceHistory $srh
      * @return array
      */
-    private function getSegmentForUndoReplaceAll(Search_ReplaceHistory $srh) {
+    private function getSegmentForUndoReplaceAll(Search_ReplaceHistory $srh): array
+    {
         $results = [];
         $cursor  = $srh->getCursor();
 
@@ -285,7 +291,7 @@ class GetSearchController extends KleinController {
      * @param $request
      * @return array
      */
-    private function doSearch($request)
+    private function doSearch($request): array
     {
         $queryParams = $request['queryParams'];
 
@@ -321,11 +327,9 @@ class GetSearchController extends KleinController {
      * @param $id_segment
      * @param SearchQueryParamsStruct $queryParams
      * @param bool $revisionNumber
-     * @throws \Exceptions\ControllerReturnException
-     * @throws \Exceptions\NotFoundException
-     * @throws \ReflectionException
+     * @throws Exception
      */
-    private function updateSegments( $search_results, $id_job, $password, $id_segment, SearchQueryParamsStruct $queryParams, $revisionNumber = false )
+    private function updateSegments( $search_results, $id_job, $password, $id_segment, SearchQueryParamsStruct $queryParams, $revisionNumber = false ): void
     {
         $db = Database::obtain();
 
@@ -457,8 +461,8 @@ class GetSearchController extends KleinController {
      * @param bool $revisionNumber
      * @return string
      */
-    private function getNewStatus( Translations_SegmentTranslationStruct $translationStruct, $revisionNumber = false ) {
-
+    private function getNewStatus( Translations_SegmentTranslationStruct $translationStruct, $revisionNumber = false ): string
+    {
         if ( false === $revisionNumber ) {
             return Constants_TranslationStatus::STATUS_TRANSLATED;
         }
@@ -497,7 +501,8 @@ class GetSearchController extends KleinController {
      * @param Search_ReplaceHistory $srh
      * @param SearchQueryParamsStruct $queryParams
      */
-    private function saveReplacementEvent( $replace_version, $tRow, Search_ReplaceHistory $srh, SearchQueryParamsStruct $queryParams ) {
+    private function saveReplacementEvent( $replace_version, $tRow, Search_ReplaceHistory $srh, SearchQueryParamsStruct $queryParams ): void
+    {
         $event                                 = new ReplaceEventStruct();
         $event->replace_version                = $replace_version;
         $event->id_segment                     = $tRow[ 'id_segment' ];
@@ -513,6 +518,6 @@ class GetSearchController extends KleinController {
         $srh->save( $event );
         $srh->updateIndex( $replace_version );
 
-        Log::doJsonLog( 'Replacement event for segment #' . $tRow[ 'id_segment' ] . ' correctly saved.' );
+        $this->log('Replacement event for segment #' . $tRow[ 'id_segment' ] . ' correctly saved.');
     }
 }

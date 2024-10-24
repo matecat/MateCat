@@ -9,6 +9,7 @@ use Engine;
 use Exception;
 use INIT;
 use InvalidArgumentException;
+use Klein\Response;
 use Matecat\SubFiltering\MateCatFilter;
 use TmKeyManagement_Filter;
 use TmKeyManagement_TmKeyManagement;
@@ -21,40 +22,20 @@ class DeleteContributionController extends KleinController {
         $this->appendValidator( new LoginValidator( $this ) );
     }
 
-    public function delete()
+    public function delete(): Response
     {
         try {
-            $id_segment = filter_var( $this->request->param( 'id_segment' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW ] );
-            $source_lang = filter_var( $this->request->param( 'source_lang' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW ] );
-            $target_lang = filter_var( $this->request->param( 'target_lang' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW ] );
-            $source = filter_var( $this->request->param( 'seg' ), FILTER_UNSAFE_RAW );
-            $target = filter_var( $this->request->param( 'tra' ), FILTER_UNSAFE_RAW );
-            $id_job = filter_var( $this->request->param( 'id_job' ), FILTER_SANITIZE_NUMBER_INT );
-            $id_translator = filter_var( $this->request->param( 'id_translator' ), FILTER_SANITIZE_NUMBER_INT );
-            $id_match = filter_var( $this->request->param( 'id_match' ), FILTER_SANITIZE_NUMBER_INT );
-            $password = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
-            $received_password = filter_var( $this->request->param( 'current_password' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
-
-            $source = trim($source);
-            $target = trim($target);
-            $password = trim($password);
-            $received_password = trim($received_password);
-
-            if ( empty( $source_lang ) ) {
-                throw new InvalidArgumentException( "missing source_lang", -1);
-            }
-
-            if ( empty( $target_lang ) ) {
-                throw new InvalidArgumentException( "missing target_lang", -2);
-            }
-
-            if ( empty( $source ) ) {
-                throw new InvalidArgumentException( "missing source", -3);
-            }
-
-            if ( empty( $target ) ) {
-                throw new InvalidArgumentException( "missing target", -4);
-            }
+            $request = $this->validateTheRequest();
+            $id_segment = $request['id_segment'];
+            $source_lang = $request['source_lang'];
+            $target_lang = $request['target_lang'];
+            $source = $request['source'];
+            $target = $request['target'];
+            $id_job = $request['id_job'];
+            $id_translator = $request['id_translator'];
+            $id_match = $request['id_match'];
+            $password = $request['password'];
+            $received_password = $request['received_password'];
 
             //check Job password
             $jobStruct = Chunks_ChunkDao::getByIdAndPassword( $id_job, $password );
@@ -121,7 +102,7 @@ class DeleteContributionController extends KleinController {
                         $this->updateSuggestionsArray($id_segment, $id_job, $id_match);
                     }
 
-                    $set_code[]          = $TMS_RESULT;
+                    $set_code[] = $TMS_RESULT;
                 }
             }
 
@@ -142,14 +123,66 @@ class DeleteContributionController extends KleinController {
     }
 
     /**
+     * @return array
+     */
+    private function validateTheRequest(): array
+    {
+        $id_segment = filter_var( $this->request->param( 'id_segment' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW ] );
+        $source_lang = filter_var( $this->request->param( 'source_lang' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW ] );
+        $target_lang = filter_var( $this->request->param( 'target_lang' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW ] );
+        $source = filter_var( $this->request->param( 'seg' ), FILTER_UNSAFE_RAW );
+        $target = filter_var( $this->request->param( 'tra' ), FILTER_UNSAFE_RAW );
+        $id_job = filter_var( $this->request->param( 'id_job' ), FILTER_SANITIZE_NUMBER_INT );
+        $id_translator = filter_var( $this->request->param( 'id_translator' ), FILTER_SANITIZE_NUMBER_INT );
+        $id_match = filter_var( $this->request->param( 'id_match' ), FILTER_SANITIZE_NUMBER_INT );
+        $password = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $received_password = filter_var( $this->request->param( 'current_password' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+
+        $source = trim($source);
+        $target = trim($target);
+        $password = trim($password);
+        $received_password = trim($received_password);
+
+        if ( empty( $source_lang ) ) {
+            throw new InvalidArgumentException( "missing source_lang", -1);
+        }
+
+        if ( empty( $target_lang ) ) {
+            throw new InvalidArgumentException( "missing target_lang", -2);
+        }
+
+        if ( empty( $source ) ) {
+            throw new InvalidArgumentException( "missing source", -3);
+        }
+
+        if ( empty( $target ) ) {
+            throw new InvalidArgumentException( "missing target", -4);
+        }
+
+        return [
+            'id_segment' => $id_segment ,
+            'source_lang' =>  $source_lang ,
+            'target_lang' =>  $target_lang ,
+            'source' =>  $source ,
+            'target' =>  $target ,
+            'id_job' =>  $id_job ,
+            'id_translator' => $id_translator ,
+            'id_match' => $id_match ,
+            'password' => $password ,
+            'received_password' => $received_password ,
+        ];
+    }
+
+    /**
      * Update suggestions array
      *
      * @param $id_segment
      * @param $id_job
      * @param $id_match
+     * @throws  Exception
      */
-    private function updateSuggestionsArray($id_segment, $id_job, $id_match) {
-
+    private function updateSuggestionsArray($id_segment, $id_job, $id_match): void
+    {
         $segmentTranslation = Translations_SegmentTranslationDao::findBySegmentAndJob($id_segment, $id_job);
         $oldSuggestionsArray = json_decode($segmentTranslation->suggestions_array);
 
