@@ -1,17 +1,17 @@
 @font-face {
   font-family: Calibri;
-  src: local(Calibri), url('../fonts/calibri-webfont.woff') format('woff'),
-    url('../fonts/calibri-webfont.ttf') format('truetype'),
-    url('../fonts/calibri-webfont.eot'),
-    url('../fonts/calibri-webfont.eot?#iefix') format('embedded-opentype');
+  src: local(Calibri), url('/public/css/fonts/calibri-webfont.woff') format('woff'),
+    url('/public/css/fonts/calibri-webfont.ttf') format('truetype'),
+    url('/public/css/fonts/calibri-webfont.eot'),
+    url('/public/css/fonts/calibri-webfont.eot?#iefix') format('embedded-opentype');
 }
 
 @font-face {
   font-family: Calibri;
   font-weight: bold;
   src: local('Calibri Bold'),
-    url('../fonts/calibri_bold-webfont.woff') format('woff'),
-    url('../fonts/calibri_bold-webfont.ttf') format('truetype'),
-    url('../fonts/calibri_bold-webfont.eot'),
-    url('../fonts/calibri_bold-webfont.eot?#iefix') format('embedded-opentype');
+    url('/public/css/fonts/calibri_bold-webfont.woff') format('woff'),
+    url('/public/css/fonts/calibri_bold-webfont.ttf') format('truetype'),
+    url('/public/css/fonts/calibri_bold-webfont.eot'),
+    url('/public/css/fonts/calibri_bold-webfont.eot?#iefix') format('embedded-opentype');
 }

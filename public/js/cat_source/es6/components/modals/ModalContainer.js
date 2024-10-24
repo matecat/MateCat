@@ -72,13 +72,13 @@ export const ModalContainer = ({
               <h2>{title}</h2>
             </div>
             {!isCloseButtonDisabled && (
-            <div>
-              <span
-                className="close-matecat-modal x-popup"
-                data-testid="close-button"
-                onClick={handleClose}
-              />
-            </div>
+              <div>
+                <span
+                  className="close-matecat-modal x-popup"
+                  data-testid="close-button"
+                  onClick={handleClose}
+                />
+              </div>
             )}
           </div>
         )}

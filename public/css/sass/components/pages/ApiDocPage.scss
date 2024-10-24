@@ -69,14 +69,6 @@ h3 {
   margin-bottom: 4px !important;
 }
 
-.error-symbol {
-  position: absolute;
-  margin: 42px 0 0 -30px;
-  display: block;
-  width: 23px;
-  height: 23px;
-}
-
 .field {
   float: left;
   width: 35%;
@@ -91,25 +83,6 @@ h3 {
   font-family: Calibri, Arial, Helvetica, sans-serif;
   font-size: 18px;
   color: #000 !important;
-}
-
-table .btn {
-  width: auto !important;
-  padding: 0px 20px 0 20px !important;
-}
-
-th.header {
-  background: #efefef url(../../img/bg.gif) right center no-repeat !important;
-}
-
-th.headerSortUp,
-th.tablesorter-headerAsc {
-  background: #efefef url(../../img/asc.gif) right center no-repeat !important;
-}
-
-th.headerSortDown,
-th.tablesorter-headerDesc {
-  background: #efefef url(../../img/desc.gif) right center no-repeat !important;
 }
 
 .searchbox {
@@ -289,7 +262,7 @@ table {
 }
 
 .logosmall {
-  background: url(../../img/logo_matecat_small.svg) no-repeat;
+  background: url(/public/img/logo_matecat_small.svg) no-repeat;
   padding-top: 30px;
   background-size: 45px;
 }
@@ -348,7 +321,7 @@ code {
 }
 
 .missing-outsource-data {
-  background: url(../../img/loading-black.gif) 40px 10px no-repeat;
+  background: url(/public/img/loading-black.gif) 40px 10px no-repeat;
   background-size: 20px;
   background-position: center;
 }
@@ -691,44 +664,6 @@ blockquote {
   text-overflow: ellipsis;
   overflow: hidden;
 }
-.pee-page .tablesorter-filter-row input {
-  width: 100%;
-}
-.pee-page tr.tablesorter-headerRow th {
-  padding: 15px 0 !important;
-}
-.pee-page th.tablesorter-headerUnSorted {
-  background: #efefef url(https://www.matecat.com/public/img/bg.gif) right
-    center no-repeat !important;
-}
-
-.pee-page .tablesorter-filter-row {
-  background: #f4f4f4;
-}
-
-.pee-page select {
-  width: 100%;
-  height: 23px;
-  background: #fff;
-}
-
-.pee-page div.selectContainer {
-  width: 92%;
-  margin: 0 auto;
-}
-
-.pee-page div.selectContainer .dropdown {
-  width: 200px !important;
-}
-
-.pee-page .notfound {
-  width: 100%;
-  margin: 20px auto;
-  font-size: 26px;
-  font-style: italic;
-  color: #999;
-}
-
 .chart-container {
   width: 1200px;
   margin: 0 auto;

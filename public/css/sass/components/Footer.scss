@@ -1,0 +1,78 @@
+.normal-foo {
+  background-color: $grey4;
+  min-width: 992px;
+  width: 100%;
+  .footer-body {
+    display: grid;
+    position: relative;
+    grid-column-gap: 24px;
+    padding: 12px 64px;
+    //grid-template-columns: minmax(auto,440px) auto;
+    grid-template-columns: minmax(auto, 440px) auto minmax(auto, 440px);
+    align-items: center;
+    .info {
+      display: grid;
+      align-items: center;
+      grid-template-columns: 40px auto;
+      grid-column-gap: 8px;
+      .image {
+        display: flex;
+        align-items: center;
+      }
+      .logo {
+        background-position: center;
+        background-size: cover;
+      }
+      .description {
+        color: $grey1;
+        font-weight: 100;
+        font-size: 12px;
+        text-align: left;
+        line-height: 14px;
+        .link {
+          color: #00aee4;
+          text-decoration: underline;
+        }
+      }
+    }
+  }
+  .side-info {
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    box-shadow: none;
+    justify-content: center;
+    .item {
+      padding: 0 20px;
+      display: flex;
+      gap: 5px;
+      a {
+        margin: 0;
+        color: $grey1;
+        text-align: left;
+        font-size: 16px;
+        font-weight: bold;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        &.email-link {
+          color: #fff;
+          background-color: $grey1;
+          padding: 6px 24px;
+          border-radius: 2px;
+          &:hover {
+            background-color: $grey6;
+          }
+        }
+      }
+    }
+  }
+  .footer-logo {
+    display: flex;
+    justify-content: end;
+    a {
+      display: flex;
+      align-items: center;
+    }
+  }
+}

@@ -204,7 +204,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
 }
 
 .google-login-button {
-  background: url('../../img/btn_gg_sprite.png') no-repeat;
+  background: url('/public/img/btn_gg_sprite.png') no-repeat;
   background-position: 0 0;
 }
 
@@ -232,8 +232,6 @@ a.ui.primary.right.floated.button.tiny.register-ok {
   color: $linkBlue;
 }
 
-.preferences-modal input[type='text'],
-.preferences-modal input[type='password'],
 .dqf-modal input[type='text'],
 .dqf-modal input[type='password'],
 .login-container-left input,
@@ -300,15 +298,6 @@ a.ui.primary.right.floated.button.tiny.register-ok {
   padding: 20px 0;
 }
 
-.preferences-modal input:disabled {
-  color: #999;
-  cursor: not-allowed;
-  background: $grey2;
-}
-
-.preferences-modal .reset-password {
-  margin-right: 20px;
-}
 
 .forgot-password-modal {
   background: url(/public/img/matecat_watch-left-border.png) no-repeat -34px 136px;
@@ -327,19 +316,6 @@ a.ui.primary.right.floated.button.tiny.register-ok {
   width: 80%;
 }
 
-.register-modal {
-  padding: 25px 15%;
-  text-align: center;
-}
-
-.register-modal h2 {
-  padding: 10px 0 10px 0;
-}
-
-.register-modal .google-login-button {
-  margin-bottom: 0;
-}
-
 .preference-modal-message {
   box-shadow: 0 2px 2px #e2e2e2;
   border-radius: 2px;
@@ -352,7 +328,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
 }
 
 .button-loader {
-  background: url(../../img/loader.gif) center center no-repeat;
+  background: url(/public/img/loader.gif) center center no-repeat;
   width: 20px;
   height: 20px;
   visibility: hidden;
@@ -421,7 +397,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
 
   .modal-logo {
     background-size: inherit;
-    background: url(../../img/logo_matecat_small_white.svg) no-repeat;
+    background: url(/public/img/logo_matecat_small_white.svg) no-repeat;
     background-position-y: center;
     background-size: contain;
     width: 35px;
@@ -560,17 +536,6 @@ a.ui.primary.right.floated.button.tiny.register-ok {
   }
 }
 
-.preferences-modal {
-  text-align: left;
-}
-
-.preferences-modal h2 {
-  margin: 0;
-  padding: 0 0 0 15px;
-  font-size: 20px;
-  font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
-}
-
 .user-link {
   float: left;
   clear: both;
@@ -607,16 +572,6 @@ a.ui.primary.right.floated.button.tiny.register-ok {
   border: 1px solid #666;
 }
 
-.matecat-modal-content .btn-confirm-medium:hover,
-.matecat-modal-content .btn-confirm-small:hover {
-  cursor: pointer;
-  box-shadow:
-    0 0 0 #e0e0e0,
-    0 0 2px rgba(0, 0, 0, 0.12),
-    0 2px 4px rgba(0, 0, 0, 0.24) !important;
-  color: #ffffff;
-}
-
 .matecat-modal-content .btn-confirm-medium:active {
   box-shadow: none !important;
 }
@@ -637,7 +592,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
 }
 
 .matecat-modal-content .btn-confirm-medium.google-login-button {
-  background: url(../../img/btn_gg_sprite.png) no-repeat;
+  background: url(/public/img/btn_gg_sprite.png) no-repeat;
   background-position: 0 0;
   background-size: cover;
   border: none;
@@ -657,7 +612,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
 }
 
 .matecat-modal-content .btn-confirm-medium.google-login-button:hover {
-  background: url(../../img/btn_gg_sprite.png) no-repeat;
+  background: url(/public/img/btn_gg_sprite.png) no-repeat;
   background-position: 0 -101px;
   background-size: cover;
   box-shadow: none !important;
@@ -962,17 +917,6 @@ a.ui.primary.right.floated.button.tiny.register-ok {
 .login-form-container {
   .form-divider {
     margin-bottom: 15px;
-  }
-}
-
-.register-modal {
-  .form-divider {
-    margin-top: 25px;
-    margin-bottom: 10px;
-  }
-
-  .condition-google {
-    font-size: 12px;
   }
 }
 

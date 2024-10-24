@@ -35,5 +35,5 @@ export const resetPasswordUser = async (
     return Promise.reject(errors)
   }
 
-  return null;
+  return null
 }
