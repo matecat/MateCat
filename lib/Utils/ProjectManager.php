@@ -480,9 +480,12 @@ class ProjectManager {
     private function sanitizeProjectOptions( ArrayObject $options ): array {
         $sanitizer = new ProjectOptionsSanitizer( $options->getArrayCopy() );
 
+        /** @var $langs RecursiveArrayObject */
+        $langs = $this->projectStructure[ 'target_language' ];
+
         $sanitizer->setLanguages(
                 $this->projectStructure[ 'source_language' ],
-                $this->projectStructure[ 'target_language' ]
+                $langs->getArrayCopy()
         );
 
         return $sanitizer->sanitize();

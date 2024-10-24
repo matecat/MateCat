@@ -4,7 +4,6 @@ namespace LQA;
 
 use DataAccess_AbstractDao;
 use Database;
-use Exceptions\ValidationError;
 use ReflectionException;
 
 class ModelDao extends DataAccess_AbstractDao {
@@ -38,13 +37,11 @@ class ModelDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param $data
+     * @param array $data
      *
      * @return ModelStruct
-     * @throws ValidationError
-     * @throws ReflectionException
      */
-    public static function createRecord( $data ) {
+    public static function createRecord( array $data ): ModelStruct {
 
         $model_hash = static::_getModelHash( $data );
 
@@ -52,7 +49,7 @@ class ModelDao extends DataAccess_AbstractDao {
                 " VALUES ( :label, :pass_type, :pass_options, :hash, :qa_model_template_id ) ";
 
         $struct = new ModelStruct( [
-                'label'                => @$data[ 'label' ],
+                'label'                => $data[ 'label' ] ?? null,
                 'pass_type'            => $data[ 'passfail' ][ 'type' ],
                 'pass_options'         => json_encode( $data[ 'passfail' ][ 'options' ] ),
                 'hash'                 => $model_hash,
@@ -71,7 +68,7 @@ class ModelDao extends DataAccess_AbstractDao {
         return $struct;
     }
 
-    protected static function _getModelHash( $model_root ) {
+    protected static function _getModelHash( array $model_root ): int {
         $h_string = '';
 
         $h_string .= $model_root[ 'version' ];
@@ -95,27 +92,29 @@ class ModelDao extends DataAccess_AbstractDao {
      * Recursively create categories and subcategories based on the
      * QA model definition.
      *
-     * @param       $json
+     * @param array $json
      *
      * @return ModelStruct
-     * @throws ValidationError
      * @throws ReflectionException
      */
-    public static function createModelFromJsonDefinition( $json ) {
+    public static function createModelFromJsonDefinition( array $json ): ModelStruct {
         $model_root = $json[ 'model' ];
         $model      = ModelDao::createRecord( $model_root );
 
-        $default_severities = isset( $model_root[ 'severities' ] ) ? $model_root[ 'severities' ] : [];
+        $default_severities = $model_root[ 'severities' ] ?? [];
         $categories         = $model_root[ 'categories' ];
 
         foreach ( $categories as $category ) {
-            self::insertCategory( $category, $model->id, null, $default_severities );
+            self::insertCategory( $category, $model->id, $default_severities, null );
         }
 
         return $model;
     }
 
-    private static function insertCategory( $category, $model_id, $parent_id, $default_severities ) {
+    /**
+     * @throws ReflectionException
+     */
+    private static function insertCategory( array $category, int $model_id, array $default_severities, ?int $parent_id ) {
         if ( !array_key_exists( 'severities', $category ) ) {
             $category[ 'severities' ] = $default_severities;
         }
@@ -141,7 +140,7 @@ class ModelDao extends DataAccess_AbstractDao {
 
         if ( array_key_exists( 'subcategories', $category ) && !empty( $category[ 'subcategories' ] ) ) {
             foreach ( $category[ 'subcategories' ] as $sub ) {
-                self::insertCategory( $sub, $model_id, $category_record->id, $default_severities );
+                self::insertCategory( $sub, $model_id, $default_severities, $category_record->id );
             }
         }
     }

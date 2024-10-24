@@ -231,7 +231,7 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
         WHERE message_type IN (1,2) AND id_job = ? ";
 
         $stmt = $db->prepare( $comments_query );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, "\Comments_BaseCommentStruct" );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, Comments_BaseCommentStruct::class );
         $stmt->execute( array_merge( $segments_id, [ $job_id ] ) );
 
         return $stmt->fetchAll();
@@ -277,7 +277,7 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
         $stmt = $conn->prepare( $sql );
         $stmt->execute( $params );
 
-        $stmt->setFetchMode( PDO::FETCH_CLASS, '\Comments_BaseCommentStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, Comments_BaseCommentStruct::class );
         $stmt->execute();
 
         return $stmt->fetchAll();

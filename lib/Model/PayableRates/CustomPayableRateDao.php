@@ -27,14 +27,14 @@ class CustomPayableRateDao extends DataAccess_AbstractDao {
     const paginated_map_key    = __CLASS__ . "::getAllPaginated";
 
     /**
-     * @var null
+     * @var ?CustomPayableRateDao
      */
-    private static $instance = null;
+    private static ?CustomPayableRateDao $instance = null;
 
     /**
      * @return CustomPayableRateDao|null
      */
-    private static function getInstance() {
+    private static function getInstance(): ?CustomPayableRateDao {
         if ( !isset( self::$instance ) ) {
             self::$instance = new self();
         }

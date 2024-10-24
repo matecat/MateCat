@@ -32,7 +32,7 @@ class ChunkOptionsModel {
         $value = $this->getByChunkOrProjectOption( $key );
 
         $sanitizer = new ProjectOptionsSanitizer( [ $key => $value ] );
-        $sanitizer->setLanguages( $this->chunk->source, $this->chunk->target );
+        $sanitizer->setLanguages( $this->chunk->source, [ $this->chunk->target] );
 
         $sanitized = $sanitizer->sanitize();
 
@@ -47,7 +47,7 @@ class ChunkOptionsModel {
         $filtered = array_intersect_key( $options, array_flip( self::$valid_keys ) );
 
         $sanitizer = new ProjectOptionsSanitizer( $filtered );
-        $sanitizer->setLanguages( $this->chunk->source, $this->chunk->target );
+        $sanitizer->setLanguages( $this->chunk->source, [ $this->chunk->target] );
 
         $sanitized = $sanitizer->sanitize();
 
