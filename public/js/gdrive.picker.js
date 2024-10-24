@@ -1,4 +1,6 @@
 import {getUserConnectedService} from './cat_source/es6/api/getUserConnectedService'
+import UserStore from './cat_source/es6/stores/UserStore'
+import ModalsActions from './cat_source/es6/actions/ModalsActions'
 
 var GDrive = function () {
   'use strict'
@@ -33,7 +35,7 @@ var GDrive = function () {
     try {
       picker.setVisible(true)
     } catch (e) {
-      APP.USER.STORE.connected_services = null
+      UserStore.updateConnectedService({service, is_default: false})
       throw new Error('Picker Error')
     }
   }
@@ -78,22 +80,23 @@ var gdrive = new GDrive()
   }
 
   function showPreferencesWithMessage() {
-    APP.openPreferencesModal({showGDriveMessage: true})
+    ModalsActions.openPreferencesModal({showGDriveMessage: true})
   }
 
   function openGoogleDrivePickerIntent() {
+    const userInfo = UserStore.getUser()
     if (!gdriveInitComplete()) {
       console.log('gdriveInitComplete not complete')
       return
     }
 
     // TODO: is this enough to know if the user is logged in?
-    if (!APP.USER.STORE.user) {
-      APP.openLoginModal()
+    if (!userInfo) {
+      ModalsActions.openLoginModal()
       return
     }
 
-    var default_service = APP.USER.getDefaultConnectedService()
+    var default_service = UserStore.getDefaultConnectedService()
 
     if (!default_service) {
       showPreferencesWithMessage()
@@ -102,11 +105,11 @@ var gdrive = new GDrive()
 
     tryToRefreshToken(default_service)
       .then(function (data) {
-        APP.USER.upsertConnectedService(data.connected_service)
-        gdrive.createPicker(data.connected_service)
+        UserStore.updateConnectedService(data.connected_service)
+        gdrive.createPicker(UserStore.getDefaultConnectedService())
       })
       .catch(function () {
-        APP.USER.STORE.connected_services = null
+        UserStore.updateConnectedService({default_service, is_default: false})
         showPreferencesWithMessage()
       })
   }

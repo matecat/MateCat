@@ -15,11 +15,11 @@ class PingTest extends AbstractTest {
     /**
      * @var Database|IDatabase
      */
-    protected $jobDao;
+    protected $databaseInstance;
 
     public function setUp(): void {
         parent::setUp();
-        $this->jobDao = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
+        $this->databaseInstance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
     }
 
     public function tearDown(): void {
@@ -31,6 +31,6 @@ class PingTest extends AbstractTest {
      * @covers Database::ping
      */
     public function test_ping() {
-        $this->assertTrue( $this->jobDao->ping() );
+        $this->assertTrue( $this->databaseInstance->ping() );
     }
 }

@@ -30,9 +30,9 @@ class getSearchController extends ajaxController {
     private SearchQueryParamsStruct $queryParams;
 
     /**
-     * @var Chunks_ChunkStruct
+     * @var Jobs_JobStruct
      */
-    protected Chunks_ChunkStruct $job_data;
+    protected Jobs_JobStruct $job_data;
 
     /**
      * @var Database|IDatabase
@@ -57,7 +57,7 @@ class getSearchController extends ajaxController {
     public function __construct() {
 
         parent::__construct();
-        $this->readLoginInfo();
+        $this->identifyUser();
 
         $filterArgs = [
                 'function'        => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],

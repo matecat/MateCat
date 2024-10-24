@@ -16,14 +16,14 @@ class getWarningController extends ajaxController {
     private $project;
 
     /**
-     * @var Chunks_ChunkStruct
+     * @var Jobs_JobStruct
      */
     private $chunk;
 
     public function __construct() {
 
         parent::__construct();
-        $this->readLoginInfo();
+        $this->identifyUser();
 
         $filterArgs = [
 

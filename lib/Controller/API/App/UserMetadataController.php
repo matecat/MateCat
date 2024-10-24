@@ -10,6 +10,7 @@ namespace API\App;
 
 
 use API\Commons\AbstractStatefulKleinController;
+use API\Commons\Validators\LoginValidator;
 use Bootstrap;
 use Exceptions\NotFoundException;
 use Users\MetadataModel;
@@ -35,6 +36,7 @@ class UserMetadataController extends AbstractStatefulKleinController {
     }
 
     protected function afterConstruct() {
+        $this->appendValidator( new LoginValidator( $this ) );
         Bootstrap::sessionClose();
     }
 

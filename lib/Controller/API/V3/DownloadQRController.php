@@ -90,12 +90,12 @@ class DownloadQRController extends BaseChunkController {
     }
 
     /**
-     * @param \Chunks_ChunkStruct $chunk
+     * @param \Jobs_JobStruct $chunk
      *
      * @return array
      * @throws \Exception
      */
-    private function composeFilesContentArray( \Chunks_ChunkStruct $chunk) {
+    private function composeFilesContentArray( \Jobs_JobStruct $chunk) {
 
         $data = [];
 

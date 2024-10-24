@@ -14,12 +14,12 @@ use Database;
 
 class QualityReportDao extends DataAccess_AbstractDao {
 
-    protected function _buildResult( $result_array ) {
+    protected function _buildResult( array $array_result ) {
 
     }
 
 
-    public function getAverages( \Chunks_ChunkStruct $chunk ) {
+    public function getAverages( \Jobs_JobStruct $chunk ) {
         $sql = <<<SQL
 
       SELECT
@@ -60,11 +60,11 @@ SQL;
 
     }
     /**
-     * @param \Chunks_ChunkStruct $chunk
+     * @param \Jobs_JobStruct $chunk
      *
      * @return array
      */
-    public static function getSegmentsForQualityReport( \Chunks_ChunkStruct $chunk ) {
+    public static function getSegmentsForQualityReport( \Jobs_JobStruct $chunk ) {
 
         $sql = <<<SQL
 

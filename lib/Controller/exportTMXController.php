@@ -113,7 +113,7 @@ class exportTMXController extends downloadController {
         /**
          * Retrieve user information
          */
-        $this->readLoginInfo();
+        $this->identifyUser();
 
         $activity             = new ActivityLogStruct();
         $activity->id_job     = $this->jobID;

@@ -9,7 +9,7 @@
 namespace AsyncTasks\Workers;
 
 
-use Chunks_ChunkStruct;
+use Jobs_JobStruct;
 use Database;
 use Exception;
 use Features;
@@ -52,7 +52,7 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker {
 
         $params = $queueElement->params->toArray();
 
-        $chunk       = new Chunks_ChunkStruct( $params[ 'chunk' ]->toArray() );
+        $chunk       = new Jobs_JobStruct( $params[ 'chunk' ]->toArray() );
         $status      = $params[ 'destination_status' ];
         $client_id   = $params[ 'client_id' ];
         $user        = ( new Users_UserDao() )->getByUid( $params[ 'id_user' ] );

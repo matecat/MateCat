@@ -6,10 +6,6 @@ export default {
       is_default: true,
       uid: 1,
       id_team: 1,
-      speech2text: true,
-      lexica: true,
-      tag_projection: true,
-      cross_language_matches: null,
       segmentation_rule: {
         name: 'General',
         id: 'standard',
@@ -33,10 +29,6 @@ export default {
       is_default: false,
       qa_model_template_id: 6,
       payable_rate_template_id: 2,
-      speech2text: true,
-      lexica: true,
-      tag_projection: true,
-      cross_language_matches: [],
       segmentation_rule: {
         name: 'General',
         id: 'standard',

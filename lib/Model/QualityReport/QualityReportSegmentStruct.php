@@ -75,7 +75,7 @@ class QualityReport_QualityReportSegmentStruct extends DataAccess_AbstractDaoObj
 
     public $version_number;
 
-    public $source_page ;
+    public $source_page;
 
     public $is_pre_translated = false;
 
@@ -95,14 +95,15 @@ class QualityReport_QualityReportSegmentStruct extends DataAccess_AbstractDaoObj
      */
     public function getSecsPerWord() {
         $val = @round( ( $this->time_to_edit / 1000 ) / $this->raw_word_count, 1 );
+
         return ( $val != INF ? $val : 0 );
     }
 
-    public function isICEModified(){
+    public function isICEModified() {
         return ( $this->version_number != 0 && $this->isICE() );
     }
 
-    public function isICE(){
+    public function isICE() {
         return ( $this->match_type == 'ICE' && $this->locked );
     }
 
@@ -110,33 +111,34 @@ class QualityReport_QualityReportSegmentStruct extends DataAccess_AbstractDaoObj
      * @return float|int
      */
     public function getPEE() {
-        if(empty($this->translation) || empty($this->suggestion) ){
+        if ( empty( $this->translation ) || empty( $this->suggestion ) ) {
             return 0;
         }
-        return self::calculatePEE($this->suggestion, $this->translation, $this->target);
+
+        return self::calculatePEE( $this->suggestion, $this->translation, $this->target );
     }
 
     public function getPEEBwtTranslationSuggestion() {
-        if(empty($this->last_translation)){
+        if ( empty( $this->last_translation ) ) {
             return 0;
         }
 
-        return self::calculatePEE($this->suggestion, $this->last_translation, $this->target);
+        return self::calculatePEE( $this->suggestion, $this->last_translation, $this->target );
     }
 
     public function getPEEBwtTranslationRevise() {
-        if(empty($this->last_translation) OR empty($this->last_revisions)){
+        if ( empty( $this->last_translation ) or empty( $this->last_revisions ) ) {
             return 0;
         }
 
         // TODO refactor
-        $last_revision_record = end( $this->last_revisions);
-        $last_revision = $last_revision_record['translation'];
+        $last_revision_record = end( $this->last_revisions );
+        $last_revision        = $last_revision_record[ 'translation' ];
 
-        return self::calculatePEE($this->last_translation, $last_revision, $this->target);
+        return self::calculatePEE( $this->last_translation, $last_revision, $this->target );
     }
 
-    static function calculatePEE($str_1, $str_2, $target){
+    static function calculatePEE( $str_1, $str_2, $target ) {
         $post_editing_effort = round(
                 ( 1 - \MyMemory::TMS_MATCH(
                                 self::cleanSegmentForPee( $str_1 ),
@@ -153,27 +155,26 @@ class QualityReport_QualityReportSegmentStruct extends DataAccess_AbstractDaoObj
         }
 
         return $post_editing_effort;
-        
+
     }
 
 
-
-    private static function cleanSegmentForPee( $segment ){
-        $segment = htmlspecialchars_decode( $segment, ENT_QUOTES);
+    private static function cleanSegmentForPee( $segment ) {
+        $segment = htmlspecialchars_decode( $segment, ENT_QUOTES );
 
         return $segment;
     }
 
-    public function getLocalWarning(FeatureSet $featureSet, Chunks_ChunkStruct $chunk){
+    public function getLocalWarning( FeatureSet $featureSet, Jobs_JobStruct $chunk ) {
 
         $QA = new QA( $this->segment, $this->translation );
-        $QA->setSourceSegLang($chunk->source);
-        $QA->setTargetSegLang($chunk->target);
-        $QA->setChunk($chunk);
-        $QA->setFeatureSet($featureSet);
+        $QA->setSourceSegLang( $chunk->source );
+        $QA->setTargetSegLang( $chunk->target );
+        $QA->setChunk( $chunk );
+        $QA->setFeatureSet( $featureSet );
         $QA->performConsistencyCheck();
 
-        $local_warning = new QALocalWarning($QA, $this->sid);
+        $local_warning = new QALocalWarning( $QA, $this->sid );
 
         return $local_warning->render();
     }

@@ -11,7 +11,7 @@ use Teams\TeamStruct;
 
 class TeamModel {
 
-    protected $member_emails = array();
+    protected $member_emails = [];
 
     /**
      * @var \Teams\TeamStruct
@@ -31,12 +31,12 @@ class TeamModel {
     /**
      * @var array
      */
-    protected $uids_to_remove = array();
+    protected $uids_to_remove = [];
 
     /**
      * @var Users_UserStruct[]
      */
-    protected $removed_users = array();
+    protected $removed_users = [];
 
     protected $emails_to_invite;
 
@@ -73,7 +73,7 @@ class TeamModel {
      * @return \Teams\MembershipStruct[] the full list of members after the update.
      */
     public function updateMembers() {
-        $this->removed_users = array();
+        $this->removed_users = [];
 
         Database::obtain()->begin();
 
@@ -102,8 +102,8 @@ class TeamModel {
                 //check if this is the last user of the team
                 // if it is, move all projects of the team to the personal team and assign them to himself
                 // moreover, delete the old team
-                if( count( $memberList ) == 1 ){
-                    $teamDao = new TeamDao();
+                if ( count( $memberList ) == 1 ) {
+                    $teamDao      = new TeamDao();
                     $personalTeam = $teamDao->setCacheTTL( 60 * 60 * 24 )->getPersonalByUser( $user );
                     $projectDao->massiveSelfAssignment( $this->struct, $user, $personalTeam );
                     $teamDao->deleteTeam( $this->struct );
@@ -151,16 +151,16 @@ class TeamModel {
         return $this->struct;
     }
 
-    public function _sendEmailsToInvited() {
-        foreach ( $this->getInvitedEmails() as $email ) {
+    protected function _sendEmailsToInvited() {
+        foreach ( $this->_getInvitedEmails() as $email ) {
             $email = new InvitedToTeamEmail( $this->user, $email, $this->struct );
             $email->send();
         }
     }
 
-    public function _setPendingStatuses() {
+    protected function _setPendingStatuses() {
         $redis = ( new \RedisHandler() )->getConnection();
-        foreach ( $this->getInvitedEmails() as $email ) {
+        foreach ( $this->_getInvitedEmails() as $email ) {
             $pendingInvitation = new PendingInvitations( $redis, [
                     'team_id' => $this->struct->id,
                     'email'   => $email
@@ -169,7 +169,7 @@ class TeamModel {
         }
     }
 
-    public function getInvitedEmails() {
+    protected function _getInvitedEmails() {
 
         $emails_of_existing_members = array_map( function ( MembershipStruct $membership ) {
             return $membership->getUser()->email;
@@ -182,7 +182,7 @@ class TeamModel {
     /**
      * @return \Teams\MembershipStruct[]
      */
-    public function getNewMembershipEmailList() {
+    protected function _getNewMembershipEmailList() {
         $notify_list = [];
         foreach ( $this->new_memberships as $membership ) {
             if ( $membership->getUser()->uid != $this->user->uid ) {
@@ -193,7 +193,7 @@ class TeamModel {
         return $notify_list;
     }
 
-    public function getRemovedMembersEmailList() {
+    protected function _getRemovedMembersEmailList() {
         $notify_list = [];
 
         foreach ( $this->removed_users as $user ) {
@@ -246,14 +246,14 @@ class TeamModel {
     }
 
     protected function _sendEmailsToNewMemberships() {
-        foreach ( $this->getNewMembershipEmailList() as $membership ) {
+        foreach ( $this->_getNewMembershipEmailList() as $membership ) {
             $email = new MembershipCreatedEmail( $this->user, $membership );
             $email->send();
         }
     }
 
     protected function _sendEmailsForRemovedMemberships() {
-        foreach ( $this->getRemovedMembersEmailList() as $user ) {
+        foreach ( $this->_getRemovedMembersEmailList() as $user ) {
             $email = new MembershipDeletedEmail( $this->user, $user, $this->struct );
             $email->send();
         }
@@ -262,22 +262,22 @@ class TeamModel {
     /**
      * @return $this
      */
-    public function updateMembersProjectsCount(){
+    public function updateMembersProjectsCount() {
 
         $this->all_memberships = ( new MembershipDao() )->setCacheTTL( 60 * 60 * 24 )->getMemberListByTeamId( $this->struct->id );
 
-        if( !empty( $this->all_memberships ) ){
+        if ( !empty( $this->all_memberships ) ) {
 
             $membersWithProjects = ( new TeamDao() )->setCacheTTL( 60 * 60 )->getAssigneeWithProjectsByTeam( $this->struct );
 
             $assigneeIds = [];
-            foreach( $membersWithProjects as $assignee ){
+            foreach ( $membersWithProjects as $assignee ) {
                 $assigneeIds[ $assignee->uid ] = $assignee->getAssignedProjects();
             }
 
-            foreach ( $this->all_memberships as $member ){
+            foreach ( $this->all_memberships as $member ) {
                 $memberWithAssignment = array_key_exists( $member->uid, $assigneeIds );
-                if( $memberWithAssignment !== false ){
+                if ( $memberWithAssignment !== false ) {
                     $member->setAssignedProjects( $assigneeIds[ $member->uid ] );
                 }
             }

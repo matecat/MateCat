@@ -89,7 +89,7 @@ class updateJobKeysController extends ajaxController {
             $this->result[ 'errors' ][] = [ "code" => -10, "message" => "Wrong password" ];
         }
 
-        $this->readLoginInfo();
+        $this->identifyUser();
     }
 
     /**

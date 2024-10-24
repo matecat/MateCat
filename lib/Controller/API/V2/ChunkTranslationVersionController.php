@@ -9,20 +9,16 @@
 namespace API\V2;
 
 use API\Commons\Validators\ChunkPasswordValidator;
+use API\Commons\Validators\LoginValidator;
 use API\V2\Json\SegmentVersion as JsonFormatter;
-use Chunks_ChunkStruct;
+use Jobs_JobStruct;
 use Features\TranslationVersions\Model\TranslationVersionDao;
 
 
 class ChunkTranslationVersionController extends BaseChunkController {
 
     /**
-     * @var Chunks_ChunkStruct
-     */
-    protected $chunk;
-
-    /**
-     * @param Chunks_ChunkStruct $chunk
+     * @param Jobs_JobStruct $chunk
      *
      * @return $this
      */
@@ -55,6 +51,7 @@ class ChunkTranslationVersionController extends BaseChunkController {
             $Controller->setChunk( $Validator->getChunk() );
         } );
         $this->appendValidator( $Validator );
+        $this->appendValidator( new LoginValidator( $this ) );
     }
 
 }

@@ -66,7 +66,7 @@ class MetadataDao extends DataAccess_AbstractDao {
             $params[ 'files_parts_id' ] = $filePartsId;
         }
 
-        $stmt           = $this->_getStatementForQuery( $query );
+        $stmt = $this->_getStatementForQuery( $query );
 
         /** @var $metadataStruct MetadataStruct[] */
         $metadataStruct = $this->setCacheTTL( $ttl )->_fetchObject( $stmt, new MetadataStruct(), $params );

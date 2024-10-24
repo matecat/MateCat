@@ -22,8 +22,8 @@ class MembershipDao extends \DataAccess_AbstractDao {
     const TABLE       = "teams_users";
     const STRUCT_TYPE = "\\Teams\\MembershipStruct";
 
-    protected static $auto_increment_field = [ 'id' ];
-    protected static $primary_keys         = [ 'id' ];
+    protected static array $auto_increment_field = [ 'id' ];
+    protected static array $primary_keys         = [ 'id' ];
 
     protected static $_query_team_from_uid_and_id = " SELECT teams.* FROM teams
               JOIN teams_users ON teams_users.id_team = teams.id
@@ -69,7 +69,7 @@ class MembershipDao extends \DataAccess_AbstractDao {
      * @return null|TeamStruct[]
      * @throws ReflectionException
      */
-    public function findUserTeams( Users_UserStruct $user ) {
+    public function findUserTeams( Users_UserStruct $user ): ?array {
 
         $stmt      = $this->_getStatementForQuery( self::$_query_user_teams );
         $teamQuery = new TeamStruct();
@@ -86,12 +86,12 @@ class MembershipDao extends \DataAccess_AbstractDao {
     /**
      * Cache deletion for @param Users_UserStruct $user
      *
-     * @return bool|int
+     * @return bool
      * @throws ReflectionException
      * @see MembershipDao::findUserTeams
      *
      */
-    public function destroyCacheUserTeams( Users_UserStruct $user ) {
+    public function destroyCacheUserTeams( Users_UserStruct $user ): bool {
         $stmt = $this->_getStatementForQuery( self::$_query_user_teams );
 
         return $this->_destroyObjectCache( $stmt,
@@ -105,26 +105,26 @@ class MembershipDao extends \DataAccess_AbstractDao {
     /**
      * Finds an team in user scope.
      *
-     * @param int $id
+     * @param int              $id
      * @param Users_UserStruct $user
      *
      * @return null|TeamStruct
      * @throws ReflectionException
      */
-    public function findTeamByIdAndUser( $id, Users_UserStruct $user ) {
+    public function findTeamByIdAndUser( $id, Users_UserStruct $user ): ?TeamStruct {
         $stmt = $this->_getStatementForQuery( self::$_query_team_from_uid_and_id );
 
         return static::resultOrNull( $this->_fetchObject( $stmt, ( new TeamStruct() ), [ $user->uid, $id ] )[ 0 ] );
     }
 
     /**
-     * @param $id
-     * @param $name
-     * @param Users_UserStruct $user
-     * @return mixed|null
+     * @param                  $id
+     * @param                  $name
+     *
+     * @return TeamStruct|null
      * @throws ReflectionException
      */
-    public function findTeamByIdAndName($id, $name) {
+    public function findTeamByIdAndName( $id, $name ): ?TeamStruct {
         $stmt = $this->_getStatementForQuery( self::$_query_team_from_id_and_name );
 
         return static::resultOrNull( $this->_fetchObject( $stmt, ( new TeamStruct() ), [ $id, $name ] )[ 0 ] );

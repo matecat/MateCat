@@ -113,7 +113,7 @@ class ProjectTemplateController extends KleinController {
             $json = $this->request->body();
             $this->validateJSON( $json );
 
-            $struct = ProjectTemplateDao::createFromJSON( $json, $this->getUser()->uid );
+            $struct = ProjectTemplateDao::createFromJSON( $json, $this->getUser() );
 
             $this->response->code( 201 );
 
@@ -183,7 +183,7 @@ class ProjectTemplateController extends KleinController {
                 throw new Exception( 'Model not found', 404 );
             }
 
-            $struct = ProjectTemplateDao::editFromJSON( $model, $json, $id, $uid );
+            $struct = ProjectTemplateDao::editFromJSON( $model, $json, $id, $this->getUser() );
 
             $this->response->code( 200 );
 

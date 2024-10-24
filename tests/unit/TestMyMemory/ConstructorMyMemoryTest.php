@@ -43,22 +43,22 @@ class ConstructorMyMemoryTest extends AbstractTest {
      * @covers  Engines_Moses::__construct
      */
     public function test___construct_of_sub_engine_of_moses() {
-        $this->jobDao    = new Engines_MyMemory( $this->engine_struct_param );
-        $this->reflector = new ReflectionClass( $this->jobDao );
-        $this->property  = $this->reflector->getProperty( "engineRecord" );
+        $this->databaseInstance = new Engines_MyMemory( $this->engine_struct_param );
+        $this->reflector        = new ReflectionClass( $this->databaseInstance );
+        $this->property         = $this->reflector->getProperty( "engineRecord" );
         $this->property->setAccessible( true );
 
-        $this->assertEquals( $this->engine_struct_param, $this->property->getValue( $this->jobDao ) );
+        $this->assertEquals( $this->engine_struct_param, $this->property->getValue( $this->databaseInstance ) );
 
         $this->property = $this->reflector->getProperty( "className" );
         $this->property->setAccessible( true );
 
-        $this->assertEquals( "Engines_MyMemory", $this->property->getValue( $this->jobDao ) );
+        $this->assertEquals( "Engines_MyMemory", $this->property->getValue( $this->databaseInstance ) );
 
         $this->property = $this->reflector->getProperty( "curl_additional_params" );
         $this->property->setAccessible( true );
 
-        $this->assertEquals( 6, count( $this->property->getValue( $this->jobDao ) ) );
+        $this->assertEquals( 6, count( $this->property->getValue( $this->databaseInstance ) ) );
 
     }
 

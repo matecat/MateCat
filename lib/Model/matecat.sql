@@ -259,51 +259,6 @@ CREATE TABLE `context_groups`
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `dqf_projects_map`
---
-
-DROP TABLE IF EXISTS `dqf_projects_map`;
-/*!40101 SET @saved_cs_client = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `dqf_projects_map`
-(
-    `id`               int(11)      NOT NULL AUTO_INCREMENT,
-    `id_job`           bigint(20)   NOT NULL,
-    `password`         varchar(50)  NOT NULL,
-    `first_segment`    int(11)      NOT NULL,
-    `last_segment`     int(11)      NOT NULL,
-    `dqf_project_id`   int(11)      NOT NULL,
-    `dqf_project_uuid` varchar(255) NOT NULL,
-    `dqf_parent_uuid`  varchar(255)          DEFAULT NULL,
-    `archive_date`     datetime              DEFAULT NULL,
-    `create_date`      timestamp    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `project_type`     varchar(50)           DEFAULT NULL,
-    `uid`              bigint(20)            DEFAULT NULL,
-    PRIMARY KEY (`id`),
-    KEY `id_job` (`id_job`) USING BTREE,
-    KEY `first_last_segment` (`first_segment`, `last_segment`) USING BTREE
-) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8mb4;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `dqf_segments`
---
-
-DROP TABLE IF EXISTS `dqf_segments`;
-/*!40101 SET @saved_cs_client = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `dqf_segments`
-(
-    `id_segment`         bigint(20) NOT NULL,
-    `dqf_segment_id`     bigint(20) DEFAULT NULL,
-    `dqf_translation_id` bigint(20) DEFAULT NULL,
-    UNIQUE KEY `dqf_segment_key` (`id_segment`)
-) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8mb4;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
 -- Table structure for table `engines`
 --
 
@@ -514,7 +469,6 @@ CREATE TABLE `jobs`
     `revision_stats_terminology_maj`      int(11)             NOT NULL DEFAULT '0',
     `revision_stats_language_quality_maj` int(11)             NOT NULL DEFAULT '0',
     `revision_stats_style_maj`            int(11)             NOT NULL DEFAULT '0',
-    `dqf_key`                             varchar(255)                 DEFAULT NULL,
     `avg_post_editing_effort`             float                        DEFAULT '0',
     `total_raw_wc`                        bigint(20)                   DEFAULT '1',
     `standard_analysis_wc`                double(20, 2)                DEFAULT '0.00',
@@ -1007,7 +961,6 @@ CREATE TABLE `qa_model_template_severities`
     `penalty`        float(10, 2) NOT NULL,
     `sort`           int(11) DEFAULT NULL,
     `severity_code`  varchar(45)  NOT NULL,
-    `dqf_id`         int(11) DEFAULT NULL,
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4;
@@ -1332,8 +1285,7 @@ DROP TABLE IF EXISTS `sequences`;
 CREATE TABLE `sequences`
 (
     `id_segment`     bigint(20) unsigned NOT NULL,
-    `id_project`     bigint(20) unsigned NOT NULL,
-    `id_dqf_project` bigint(20) unsigned NOT NULL
+    `id_project`     bigint(20) unsigned NOT NULL
 ) ENGINE = InnoDB
   DEFAULT CHARSET = latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -1550,8 +1502,8 @@ WHERE id = 11;
 
 
 -- populate sequences
-INSERT INTO sequences (id_segment, id_project, id_dqf_project)
-VALUES (IFNULL((SELECT MAX(id) + 1 FROM segments), 1), IFNULL((SELECT MAX(id) + 1 FROM projects), 1), 1);
+INSERT INTO sequences (id_segment, id_project)
+VALUES (IFNULL((SELECT MAX(id) + 1 FROM segments), 1), IFNULL((SELECT MAX(id) + 1 FROM projects), 1));
 
 #Create the user 'matecat'@'%' IF NOT EXISTS
 -- CREATE USER 'matecat'@'%' IDENTIFIED BY 'matecat01';

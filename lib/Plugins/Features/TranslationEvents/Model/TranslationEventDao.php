@@ -18,8 +18,8 @@ class TranslationEventDao extends \DataAccess_AbstractDao {
     const TABLE       = "segment_translation_events";
     const STRUCT_TYPE = "\Features\TranslationVersions\Model\TranslationEventStruct";
 
-    protected static $auto_increment_field = [ 'id' ];
-    protected static $primary_keys         = [ 'id' ];
+    protected static array $auto_increment_field = [ 'id' ];
+    protected static array $primary_keys         = [ 'id' ];
 
     public function unsetFinalRevisionFlag( int $id_job, array $id_segments, array $source_pages ): int {
 

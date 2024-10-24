@@ -19,7 +19,19 @@ class ActivityLogDao extends DataAccess_AbstractDao {
     public $epilogueString  = "";
     public $whereConditions = " id_project = :id_project ";
 
-    public function getLastActionInProject( $id_project ) {
+    public function getAllForProject($id_project){
+        $conn = Database::obtain()->getConnection();
+        $sql = "SELECT users.uid, users.email, users.first_name, users.last_name, activity_log.* FROM activity_log
+          JOIN users on activity_log.uid = users.uid WHERE id_project = :id_project ORDER BY activity_log.event_date DESC " ;
+
+        $stmt = $conn->prepare( $sql ) ;
+        $stmt->setFetchMode( PDO::FETCH_CLASS, '\ActivityLog\ActivityLogStruct' );
+
+        $stmt->execute( array( 'id_project' =>  $id_project ) ) ;
+        return $stmt->fetchAll() ;
+    }
+
+    public function getLastActionInProject( $id_project) {
         $conn = Database::obtain()->getConnection();
         $sql  = "SELECT users.uid, users.email, users.first_name, users.last_name, activity_log.* FROM activity_log
           JOIN (
@@ -27,7 +39,7 @@ class ActivityLogDao extends DataAccess_AbstractDao {
           ) t ON t.id = activity_log.id JOIN users on activity_log.uid = users.uid ORDER BY activity_log.event_date DESC ";
 
         $stmt = $conn->prepare( $sql );
-        $stmt->setFetchMode( \PDO::FETCH_CLASS, '\ActivityLog\ActivityLogStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, '\ActivityLog\ActivityLogStruct' );
 
         $stmt->execute( [ 'id_project' => $id_project ] );
 
@@ -68,7 +80,6 @@ class ActivityLogDao extends DataAccess_AbstractDao {
      *
      * Use when counters of the job value are not important but only the metadata are needed
      *
-     * @param DataAccess_IDaoStruct $activityQuery
      * @param array                 $whereKeys
      *
      * @return DataAccess_IDaoStruct[]
@@ -99,9 +110,14 @@ class ActivityLogDao extends DataAccess_AbstractDao {
      *
      * @return DataAccess_IDaoStruct|DataAccess_IDaoStruct[]|void
      */
-    protected function _buildResult( $array_result ) {
+    protected function _buildResult( array $array_result ) {
     }
 
+    /**
+     * @param $activity_id
+     *
+     * @return ActivityLogStruct|null
+     */
     public static function getByID( $activity_id ) {
 
         $conn = Database::obtain()->getConnection();

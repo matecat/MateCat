@@ -11,7 +11,7 @@ use API\App\Json\Analysis\AnalysisProjectSummary;
 use API\App\Json\Analysis\MatchConstants;
 use API\Commons\Exceptions\AuthenticationError;
 use Chunks_ChunkDao;
-use Chunks_ChunkStruct;
+use Jobs_JobStruct;
 use Constants_ProjectStatus;
 use Exception;
 use Exceptions\NotFoundException;
@@ -279,7 +279,7 @@ abstract class AbstractStatus {
                 $job->incrementEquivalent( round( $_job_fallback[ 'standard_analysis_wc' ] ) );
                 $job->incrementRaw( round( $_job_fallback[ 'standard_analysis_wc' ] ) );
 
-                $chunkStruct                = new Chunks_ChunkStruct();
+                $chunkStruct                = new Jobs_JobStruct();
                 $chunkStruct->id            = $_job_fallback[ 'jid' ];
                 $chunkStruct->password      = $_job_fallback[ 'jpassword' ];
                 $chunkStruct->source        = $lang_pair[ 0 ];

@@ -2,7 +2,7 @@
 
 namespace Features\TranslationVersions\Model;
 
-use Chunks_ChunkStruct;
+use Jobs_JobStruct;
 use Constants;
 use DataAccess\ShapelessConcreteStruct;
 use DataAccess_AbstractDao;
@@ -17,9 +17,9 @@ class TranslationVersionDao extends DataAccess_AbstractDao {
 
     const TABLE = 'segment_translation_versions';
 
-    protected static $primary_keys = [ 'id_job', 'id_segment', 'version_number' ];
+    protected static array $primary_keys = [ 'id_job', 'id_segment', 'version_number' ];
 
-    protected function _buildResult( $array_result ) {
+    protected function _buildResult( array $array_result ) {
     }
 
     /**
@@ -47,7 +47,7 @@ class TranslationVersionDao extends DataAccess_AbstractDao {
         return $stmt->fetchAll();
     }
 
-    public static function getVersionsForChunk( Chunks_ChunkStruct $chunk ) {
+    public static function getVersionsForChunk( Jobs_JobStruct $chunk ) {
         $sql = "SELECT * FROM segment_translation_versions " .
                 " WHERE id_job = :id_job " .
                 " ORDER BY creation_date DESC ";
@@ -345,7 +345,7 @@ class TranslationVersionDao extends DataAccess_AbstractDao {
 
     }
 
-    public function savePropagationVersions( Translations_SegmentTranslationStruct $propagation, $id_segment, Chunks_ChunkStruct $job_data, $propagated_ids ) {
+    public function savePropagationVersions( Translations_SegmentTranslationStruct $propagation, $id_segment, Jobs_JobStruct $job_data, $propagated_ids ) {
 
         $status_condition           = '';
         $propagated_ids_placeholder = [];

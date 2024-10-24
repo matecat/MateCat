@@ -2,12 +2,9 @@
 
 namespace Filters\DTO;
 
-use Countable;
 use JsonSerializable;
 
-class Xml implements IDto, JsonSerializable, Countable {
-
-    use DefaultTrait;
+class Xml implements IDto, JsonSerializable {
 
     private bool  $preserve_whitespace       = false;
     private array $translate_elements        = [];
@@ -70,31 +67,18 @@ class Xml implements IDto, JsonSerializable, Countable {
 
         $format = [];
 
-        if ( $this->preserve_whitespace ) {
-            $format[ 'preserve_whitespace' ] = $this->preserve_whitespace;
-        }
-
-        if ( !empty( $this->translate_elements ) ) {
-            $format[ 'translate_elements' ] = $this->translate_elements;
-        }
+        $format[ 'preserve_whitespace' ] = $this->preserve_whitespace;
+        $format[ 'translate_elements' ]  = $this->translate_elements;
 
         if ( !empty( $this->do_not_translate_elements ) ) {
             $format[ 'do_not_translate_elements' ] = $this->do_not_translate_elements;
+            unset( $format[ 'translate_elements' ] );
         }
 
-        if ( !empty( $this->translate_attributes ) ) {
-            $format[ 'translate_attributes' ] = $this->translate_attributes;
-        }
+        $format[ 'translate_attributes' ] = $this->translate_attributes;
 
         return $format;
 
-    }
-
-    /**
-     * @return int
-     */
-    public function count(): int {
-        return count( $this->jsonSerialize() );
     }
 
 }

@@ -4,7 +4,7 @@ namespace LQA;
 
 use API\Commons\Exceptions\AuthenticationError;
 use CatUtils;
-use Chunks_ChunkStruct;
+use Jobs_JobStruct;
 use DOMDocument;
 use DOMElement;
 use DOMException;
@@ -138,7 +138,7 @@ class errObject {
 class QA {
 
     /**
-     * @var Chunks_ChunkStruct
+     * @var Jobs_JobStruct
      */
     protected $chunk;
 
@@ -1075,7 +1075,7 @@ class QA {
     }
 
     /**
-     * @return Chunks_ChunkStruct
+     * @return Jobs_JobStruct
      */
     public function getChunk() {
         return $this->chunk;

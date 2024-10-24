@@ -13,6 +13,8 @@ use Exception;
 
 abstract class AbstractStatefulKleinController extends KleinController {
 
+    protected bool $useSession = true;
+
     /**
      * AbstractStatefulKleinController constructor.
      *
@@ -24,7 +26,6 @@ abstract class AbstractStatefulKleinController extends KleinController {
      * @throws Exception
      */
     public function __construct( $request, $response, $service, $app ) {
-        Bootstrap::sessionStart();
         parent::__construct( $request, $response, $service, $app );
     }
 

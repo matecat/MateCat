@@ -5,7 +5,7 @@ namespace Revise;
 use DataAccess_AbstractDaoObjectStruct;
 use DataAccess_IDaoStruct;
 
-class FeedbackStruct extends DataAccess_AbstractDaoObjectStruct implements DataAccess_IDaoStruct{
+class FeedbackStruct extends DataAccess_AbstractDaoObjectStruct implements DataAccess_IDaoStruct {
 
     /**
      * @var int

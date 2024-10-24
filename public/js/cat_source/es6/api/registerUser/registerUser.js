@@ -41,11 +41,11 @@ export const registerUser = async ({
     credentials: 'include',
   })
 
-  if (!response.ok) return Promise.reject(response)
+  // if (!response.ok) return Promise.reject(response)
 
   try {
-    const {errors, ...data} = await response.json()
-    if (errors && errors.length > 0) return Promise.reject(errors)
+    const {error, ...data} = await response.json()
+    if (error) return Promise.reject(error)
     return data
   } catch (error) {
     return response
