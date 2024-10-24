@@ -2,62 +2,26 @@
 
 namespace API\App\Authentication;
 
-use API\App\Json\UserProfile;
 use API\App\RateLimiterTrait;
 use API\Commons\AbstractStatefulKleinController;
+use API\Commons\Exceptions\ValidationError;
 use API\Commons\Validators\LoginValidator;
-use ConnectedServices\ConnectedServiceDao;
-use ConnectedServices\ConnectedServiceStruct;
 use Exception;
-use Exceptions\ValidationError;
 use Klein\Response;
-use ReflectionException;
-use TeamModel;
-use Teams\MembershipDao;
-use Teams\TeamStruct;
-use Users\ChangePasswordModel;
-use Users_UserStruct;
+use Users\Authentication\ChangePasswordModel;
 
 class UserController extends AbstractStatefulKleinController {
 
     use RateLimiterTrait;
 
     /**
-     * @var Users_UserStruct
-     */
-    protected $user;
-
-    /**
-     * @var ConnectedServiceStruct[]
-     */
-    protected array $connectedServices = [];
-
-    /**
      * @return void
-     * @throws ReflectionException
      */
     public function show() {
-        $metadata = $this->user->getMetadataAsKeyValue();
-
-        $membersDao = new MembershipDao();
-        $userTeams  = array_map(
-                function ( $team ) use ( $membersDao ) {
-                    $teamModel = new TeamModel( $team );
-                    $teamModel->updateMembersProjectsCount();
-
-                    /** @var $team TeamStruct */
-                    return $team;
-                },
-                $membersDao->findUserTeams( $this->user )
-        );
-
-        $this->response->json( ( new UserProfile() )->renderItem(
-                $this->user,
-                $userTeams,
-                $this->connectedServices,
-                $metadata
-        ) );
-
+        if( empty( $_SESSION[ 'user_profile' ] ) ){
+            $this->response->code( 401 );
+        }
+        $this->response->json( $_SESSION[ 'user_profile' ] );
     }
 
     /**
@@ -76,8 +40,8 @@ class UserController extends AbstractStatefulKleinController {
      * The HTTP response code is set to 200 upon successful password change.
      *
      * @return void
-     * @throws Exception
      * @throws ValidationError
+     * @throws Exception
      */
     public function changePasswordAsLoggedUser() {
 
@@ -95,6 +59,9 @@ class UserController extends AbstractStatefulKleinController {
         try {
             $cpModel = new ChangePasswordModel( $this->user );
             $cpModel->changePassword( $old_password, $new_password, $new_password_confirmation );
+
+            $this->broadcastLogout();
+
         } finally {
             $this->incrementRateLimitCounter( $this->user->email, '/api/app/user/password/change' );
         }
@@ -113,19 +80,7 @@ class UserController extends AbstractStatefulKleinController {
 
     protected function afterConstruct() {
         $loginValidator = new LoginValidator( $this );
-        $loginValidator->onSuccess( function () {
-            $this->__findConnectedServices();
-        } );
         $this->appendValidator( $loginValidator );
-    }
-
-    private function __findConnectedServices() {
-        $dao      = new ConnectedServiceDao();
-        $services = $dao->findServicesByUser( $this->user );
-        if ( !empty( $services ) ) {
-            $this->connectedServices = $services;
-        }
-
     }
 
 }

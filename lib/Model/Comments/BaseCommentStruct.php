@@ -2,24 +2,20 @@
 
 class Comments_BaseCommentStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct, JsonSerializable {
 
-    public $id;
-    public $id_job;
-    public $id_segment;
-    public $create_date;
-    public $email;
-    public $full_name;
-    public $uid;
-    public $resolve_date;
-    public $source_page;
-    public $message_type;
-    public $message;
+    public int     $id;
+    public int     $id_job;
+    public int     $id_segment;
+    public string  $create_date;
+    public string  $email;
+    public string  $full_name;
+    public ?int    $uid          = null;
+    public ?string $resolve_date = null;
+    public int     $source_page;
+    public int     $message_type;
+    public ?string $message      = "";
 
-    public function getThreadId() {
+    public function getThreadId(): string {
         return md5( $this->id_job . '-' . $this->id_segment . '-' . $this->resolve_date );
-    }
-
-    public function isComment() {
-        return ( (int)$this->message_type == Comments_CommentDao::TYPE_COMMENT );
     }
 
     public function templateMessage() {
@@ -31,16 +27,17 @@ class Comments_BaseCommentStruct extends DataAccess_AbstractDaoSilentStruct impl
      */
     public function jsonSerialize() {
         return [
-                'id'           => (int)$this->id,
-                'id_job'       => (int)$this->id_job,
-                'id_segment'   => (int)$this->id_segment,
-                'create_date'  => $this->create_date,
+                'id'           => $this->id,
+                'id_job'       => $this->id_job,
+                'id_segment'   => $this->id_segment,
+                'create_date'  => date_format( date_create( $this->create_date ), DATE_ATOM ) ?: date_format( date_create(), DATE_ATOM ),
                 'full_name'    => $this->full_name,
-                'uid'          => (int)$this->uid,
-                'resolve_date' => $this->resolve_date,
-                'source_page'  => (int)$this->source_page,
+                'uid'          => $this->uid,
+                'source_page'  => $this->source_page,
                 'message_type' => $this->message_type,
                 'message'      => $this->message,
+                'thread_id'    => $this->getThreadId(),
+                'timestamp'    => strtotime( $this->create_date )
         ];
     }
 }

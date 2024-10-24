@@ -47,38 +47,40 @@ class GlossaryCSVValidator extends AbstractValidator {
 
     /**
      * @param $filePath
+     *
      * @return array
      */
     private function getHeaders( $filePath ) {
         $headers = CSV::headers( $filePath );
         $headers = array_map( 'Utils::trimAndLowerCase', $headers );
 
-        return Utils::popArray($headers);
+        return Utils::popArray( $headers );
     }
 
     /**
      * @param $filePath
+     *
      * @return int
      */
-    public function getNumberOfLanguage( $filePath ){
+    public function getNumberOfLanguage( $filePath ) {
 
-        $headers = $this->getHeaders($filePath);
+        $headers  = $this->getHeaders( $filePath );
         $skipKeys = [
-            "forbidden",
-            "domain",
-            "subdomain",
-            "definition",
-            "notes",
-            "example of use"
+                "forbidden",
+                "domain",
+                "subdomain",
+                "definition",
+                "notes",
+                "example of use"
         ];
 
         $languages = array_diff( $headers, $skipKeys );
 
-        if(empty($languages)){
+        if ( empty( $languages ) ) {
             return 0;
         }
 
-        return count($languages);
+        return count( $languages );
     }
 
     /**
@@ -108,7 +110,7 @@ class GlossaryCSVValidator extends AbstractValidator {
 
         foreach ( $languages as $language ) {
 
-            if( empty($language) ){
+            if ( empty( $language ) ) {
                 $error          = 'The file contains and empty column header, you can find the correct column headers <a href="https://guides.matecat.com/glossary-file-format" target="_blank">here</a>.';
                 $this->errors[] = $error;
 

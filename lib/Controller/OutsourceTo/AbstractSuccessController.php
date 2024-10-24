@@ -97,8 +97,7 @@ abstract class OutsourceTo_AbstractSuccessController extends viewController {
         }
 
         //SESSION ENABLED
-        $this->sessionStart();
-        parent::__construct(false);
+        parent::__construct();
 
 
         $filterArgs = array(

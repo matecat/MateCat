@@ -167,7 +167,7 @@ class FilterProjects extends React.Component {
           userIcon = (
             <img
               className="ui avatar image ui-user-dropdown-image"
-              src={member.get('user_metadata').get('gplus_picture') + '?sz=80'}
+              src={member.get('user_metadata').get('gplus_picture')}
             />
           )
         }

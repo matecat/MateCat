@@ -5,7 +5,7 @@ import {deleteGDriveUploadedFile} from './cat_source/es6/api/deleteGdriveUploade
 import {openGDriveFiles} from './cat_source/es6/api/openGDriveFiles'
 import CreateProjectStore from './cat_source/es6/stores/CreateProjectStore'
 import CreateProjectActions from './cat_source/es6/actions/CreateProjectActions'
-
+window.APP = {}
 APP.tryListGDriveFiles = function () {
   getGoogleDriveUploadedFiles()
     .then((listFiles) => {

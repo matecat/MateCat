@@ -10,6 +10,7 @@ import CommentsActions from '../../actions/CommentsActions'
 import CommentsConstants from '../../constants/CommentsConstants'
 import SegmentActions from '../../actions/SegmentActions'
 import {SegmentContext} from './SegmentContext'
+import ModalsActions from '../../actions/ModalsActions'
 import {MentionsInput} from 'react-mentions'
 import Mention from '../common/Mention'
 
@@ -190,13 +191,8 @@ class SegmentCommentsContainer extends React.Component {
         if (Number(comment.message_type) === this.types.comment) {
           count++
         }
-        if (comment.thread_id == null) {
-          threadClass = 'mbc-thread-wrap-active'
-        } else {
-          threadClass = 'mbc-thread-wrap-resolved'
-        }
-
         if (Number(comment.message_type) === this.types.resolve) {
+          threadClass = 'mbc-thread-wrap-resolved'
           thread_wrap.push(
             <div className="mbc-resolved-comment" key={'comment-' + i}>
               <span className="mbc-comment-resolved-label">
@@ -208,6 +204,7 @@ class SegmentCommentsContainer extends React.Component {
             </div>,
           )
         } else {
+          threadClass = 'mbc-thread-wrap-active'
           let text = nl2br(comment.message)
           text = parseCommentHtml(text)
           const formattedDate = new Date(
@@ -254,7 +251,7 @@ class SegmentCommentsContainer extends React.Component {
           </a>
         )
         const isAuthorOfLastComment =
-          comments[comments.length - 1].email === config.userMail
+          comments[comments.length - 1].uid === this.context.userInfo.user.uid
         deleteButton = isAuthorOfLastComment ? (
           <a
             className="ui button mbc-comment-label mbc-comment-btn mbc-comment-resolve-btn mbc-comment-delete-btn pull-right"
@@ -312,7 +309,7 @@ class SegmentCommentsContainer extends React.Component {
             <a
               className="mbc-comment-link-btn mbc-login-link"
               onClick={() => {
-                APP.openLoginModal()
+                ModalsActions.openLoginModal()
               }}
             >
               Login to receive comments

@@ -103,6 +103,7 @@ class AnalysisProjectSummary implements JsonSerializable {
         if ( empty( $this->total_raw ) ) {
             return 0;
         }
+
         return round( ( ( $this->total_raw - round( $this->total_equivalent ) ) / $this->total_raw ) * 100 );
     }
 

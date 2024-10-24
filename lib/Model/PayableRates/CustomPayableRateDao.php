@@ -11,6 +11,7 @@ use Exception;
 use Pagination\Pager;
 use Pagination\PaginationParameters;
 use PDO;
+use Projects\ProjectTemplateDao;
 use ReflectionException;
 use Swaggest\JsonSchema\InvalidValue;
 use Utils;
@@ -236,13 +237,7 @@ class CustomPayableRateDao extends DataAccess_AbstractDao {
         self::destroyQueryPaginated( $uid );
 
         $queryAffected = $stmt->rowCount();
-
-        $stmt = $conn->prepare( "UPDATE project_templates SET payable_rate_template_id = :zero WHERE uid = :uid AND payable_rate_template_id = :id " );
-        $stmt->execute( [
-                'zero' => 0,
-                'id'   => $id,
-                'uid'  => $uid,
-        ] );
+        ProjectTemplateDao::removeSubTemplateByIdAndUser( $id, $uid, 'payable_rate_template_id' );
 
         return $queryAffected;
     }

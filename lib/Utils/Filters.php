@@ -1,6 +1,7 @@
 <?php
 
 use FilesStorage\AbstractFilesStorage;
+use Filters\DTO\IDto;
 
 class Filters {
 
@@ -41,14 +42,6 @@ class Filters {
                 ];
             }
 
-            if ( version_compare( PHP_VERSION, '5.5.0' ) >= 0 ) {
-                /**
-                 * Added in PHP 5.5.0 with FALSE as the default value.
-                 * PHP 5.6.0 changes the default value to TRUE.
-                 */
-                $options[ CURLOPT_SAFE_UPLOAD ] = false;
-            }
-
             $url = rtrim( INIT::$FILTERS_ADDRESS, '/' ) . $endpoint;
             Log::doJsonLog( "Calling: " . $url );
             $multiCurl->createResource( $url, $options, $id );
@@ -63,16 +56,16 @@ class Filters {
 
         // Compute results
         foreach ( $responses as $id => &$response ) {
-            $info = $infos[ $id ];
-            $originalResponse = json_decode($response);
+            $info             = $infos[ $id ];
+            $originalResponse = json_decode( $response );
 
             // Compute response
             if ( $info[ 'http_code' ] != 200 || $response === false ) {
                 $errResponse = [ "isSuccess" => false, "curlInfo" => $info ];
                 if ( $response === '{"message":"Invalid RapidAPI Key"}' ) {
                     $errResponse[ 'errorMessage' ] = "Failed RapidAPI authentication. Check FILTERS_RAPIDAPI_KEY in config.ini";
-                } elseif (isset($originalResponse->errorMessage)) {
-                    $errResponse[ 'errorMessage' ] = self::formatErrorMessage($originalResponse->errorMessage);
+                } elseif ( isset( $originalResponse->errorMessage ) ) {
+                    $errResponse[ 'errorMessage' ] = self::formatErrorMessage( $originalResponse->errorMessage );
                 } else {
                     if ( $info[ 'errno' ] ) {
                         $errResponse[ 'errorMessage' ] = "Curl error $info[errno]: $info[error]";
@@ -108,12 +101,13 @@ class Filters {
 
     /**
      * @param string $error
+     *
      * @return string
      */
-    private static function formatErrorMessage($error){
+    private static function formatErrorMessage( $error ) {
 
         // Error from Excel files
-        $error = str_replace("net.translated.matecat.filters.ExtendedExcelException: ", "", $error);
+        $error = str_replace( "net.translated.matecat.filters.ExtendedExcelException: ", "", $error );
 
         return $error;
     }
@@ -140,83 +134,31 @@ class Filters {
     }
 
     /**
-     * Convert source file to XLIFF
+     * Convert the source file to XLIFF
      *
-     * @param $filePath
-     * @param $sourceLang
-     * @param $targetLang
-     * @param $segmentation
-     * @param null $extractionParams
+     * @param string    $filePath
+     * @param string    $sourceLang
+     * @param string    $targetLang
+     * @param ?string   $segmentation
+     * @param IDto|null $extractionParams
+     *
      * @return mixed
      */
-    public static function sourceToXliff( $filePath, $sourceLang, $targetLang, $segmentation, $extractionParams = null ) {
+    public static function sourceToXliff( string $filePath, string $sourceLang, string $targetLang, ?string $segmentation = null, IDto $extractionParams = null ) {
         $basename  = AbstractFilesStorage::pathinfo_fix( $filePath, PATHINFO_FILENAME );
         $extension = AbstractFilesStorage::pathinfo_fix( $filePath, PATHINFO_EXTENSION );
         $filename  = "$basename.$extension";
 
         $data = [
-            'document'        => Utils::curlFile( $filePath ),
-            'sourceLocale'    => Langs_Languages::getInstance()->getLangRegionCode( $sourceLang ),
-            'targetLocale'    => Langs_Languages::getInstance()->getLangRegionCode( $targetLang ),
-            'segmentation'    => $segmentation,
-            'utf8FileName'    => $filename
+                'document'     => Utils::curlFile( $filePath ),
+                'sourceLocale' => Langs_Languages::getInstance()->getLangRegionCode( $sourceLang ),
+                'targetLocale' => Langs_Languages::getInstance()->getLangRegionCode( $targetLang ),
+                'segmentation' => $segmentation,
+                'utf8FileName' => $filename
         ];
 
-        if($extractionParams !== null){
-
-            $params = null;
-
-            // send extraction params based on file extension
-            switch ($extension){
-                case "json":
-                    if(isset($extractionParams->json)){
-                        $params = $extractionParams->json;
-                    }
-
-                    break;
-
-                case "xml":
-                    if(isset($extractionParams->xml)){
-                        $params = $extractionParams->xml;
-                    }
-
-                    break;
-
-                case "yaml":
-                    if(isset($extractionParams->yaml)){
-                        $params = $extractionParams->yaml;
-                    }
-
-                    break;
-
-                case "doc":
-                case "docx":
-                    if(isset($extractionParams->ms_word)){
-                        $params = $extractionParams->ms_word;
-                    }
-
-                    break;
-
-                case "xls":
-                case "xlsx":
-                    if(isset($extractionParams->ms_excel)){
-                        $params = $extractionParams->ms_excel;
-                    }
-
-                    break;
-
-                case "ppt":
-                case "pptx":
-                    if(isset($extractionParams->ms_powerpoint)){
-                        $params = $extractionParams->ms_powerpoint;
-                    }
-
-                    break;
-            }
-
-            if($params !== null){
-                $data['extractionParams'] = json_encode($params);
-            }
+        if ( $extractionParams !== null ) {
+            $data[ 'extractionParams' ] = json_encode( $extractionParams );
         }
 
         $filtersResponse = self::sendToFilters( [ $data ], self::SOURCE_TO_XLIFF_ENDPOINT );
@@ -226,6 +168,7 @@ class Filters {
 
     /**
      * @param $xliffsData
+     *
      * @return array
      */
     public static function xliffToTarget( $xliffsData ) {
@@ -332,7 +275,7 @@ class Filters {
                 'source_file_name' => ( $toXliff ? AbstractFilesStorage::basename_fix( $sentFile ) : $sourceFileData[ 'filename' ] ),
                 'source_file_ext'  => ( $toXliff ? AbstractFilesStorage::pathinfo_fix( $sentFile, PATHINFO_EXTENSION ) : $sourceFileData[ 'mime_type' ] ),
                 'source_file_sha1' => ( $toXliff ? sha1_file( $sentFile ) : $sourceFileData[ 'sha1_original_file' ] ),
-                'segmentation'     => isset($sourceFileData['segmentation_rule']) ? $sourceFileData['segmentation_rule'] : null,
+                'segmentation'     => isset( $sourceFileData[ 'segmentation_rule' ] ) ? $sourceFileData[ 'segmentation_rule' ] : null,
         ];
 
         $query = 'INSERT INTO conversions_log ('

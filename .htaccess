@@ -21,6 +21,9 @@ RewriteCond %{QUERY_STRING} submit=Search
 RewriteRule ^$ /support [QSA,L]
 
 RewriteRule ^$ index.php?action=newProject [QSA,L]
+RewriteRule ^fileupload/$ lib/View/fileupload/index.php [QSA,L]
+
+RewriteRule ^signin[/]?$ index.php?action=signin [QSA,L]
 
 RewriteRule ^action/convertFile[/]?$ index.php?action=convertFile [QSA,L]
 
@@ -34,8 +37,6 @@ RewriteRule ^(analyze)/([^/]*)/([^/]*)-([^/]*)$ index.php?action=analyze&pid=$3&
 RewriteRule ^(jobanalysis)/([^/]*)-([^/]*)-([^/]*)/?$ index.php?action=analyze&pid=$2&jid=$3&password=$4 [L]
 
 RewriteRule ^(login)[/]?$ index.php?action=loginPage [L,QSA]
-
-RewriteRule ^(oauth)/(response)[/]?$ index.php?action=oauthResponseHandler [L,QSA]
 
 RewriteRule ^(manage)[/]?$ index.php?action=manage [QSA,L]
 

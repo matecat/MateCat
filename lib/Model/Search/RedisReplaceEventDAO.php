@@ -78,7 +78,7 @@ class Search_RedisReplaceEventDAO extends DataAccess_AbstractDao implements Sear
      * @return string
      */
     private function getRedisKey( $idJob, $version ) {
-        return md5( self::TABLE. '::' . $idJob . '::' . $version );
+        return md5( self::TABLE . '::' . $idJob . '::' . $version );
     }
 
     /**

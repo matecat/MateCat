@@ -1,6 +1,6 @@
 <?php
 
-use ConnectedServices\GDrive as GDrive;
+use ConnectedServices\Google\GDrive\Session;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use Matecat\XliffParser\Utils\Files as XliffFiles;
@@ -38,6 +38,11 @@ class createProjectController extends ajaxController {
     private $filters_extraction_parameters;
     private $xliff_parameters;
 
+    private $dictation;
+    private $show_whitespace;
+    private $character_counter;
+    private $ai_assistant;
+
     /**
      * @var QAModelTemplateStruct
      */
@@ -63,7 +68,6 @@ class createProjectController extends ajaxController {
     public function __construct() {
 
         //SESSION ENABLED
-        parent::sessionStart();
         parent::__construct();
 
         $filterArgs = [
@@ -86,6 +90,10 @@ class createProjectController extends ajaxController {
                 'deepl_formality'               => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
                 'project_completion'            => [ 'filter' => FILTER_VALIDATE_BOOLEAN ], // features customization
                 'get_public_matches'            => [ 'filter' => FILTER_VALIDATE_BOOLEAN ], // disable public TM matches
+                'dictation'                     => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'show_whitespace'               => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'character_counter'             => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'ai_assistant'                  => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
                 'dialect_strict'                => [ 'filter' => FILTER_SANITIZE_STRING ],
                 'filters_extraction_parameters' => [ 'filter' => FILTER_SANITIZE_STRING ],
                 'xliff_parameters'              => [ 'filter' => FILTER_SANITIZE_STRING ],
@@ -94,7 +102,7 @@ class createProjectController extends ajaxController {
                 'payable_rate_template_id' => [ 'filter' => FILTER_VALIDATE_INT ],
         ];
 
-        $this->readLoginInfo( false );
+        $this->identifyUser();
         $this->setupUserFeatures();
 
         $filterArgs = $this->__addFilterForMetadataInput( $filterArgs );
@@ -157,6 +165,11 @@ class createProjectController extends ajaxController {
         $this->pretranslate_101        = $this->postInput[ 'pretranslate_101' ];
         $this->only_private            = ( is_null( $this->postInput[ 'get_public_matches' ] ) ? false : !$this->postInput[ 'get_public_matches' ] );
         $this->due_date                = ( empty( $this->postInput[ 'due_date' ] ) ? null : Utils::mysqlTimestamp( $this->postInput[ 'due_date' ] ) );
+
+        $this->dictation = $this->postInput['dictation'] ?? null;
+        $this->show_whitespace = $this->postInput['show_whitespace'] ?? null;
+        $this->character_counter = $this->postInput['character_counter'] ?? null;
+        $this->ai_assistant = $this->postInput['ai_assistant'] ?? null;
 
         $this->__setMetadataFromPostInput();
 
@@ -266,7 +279,7 @@ class createProjectController extends ajaxController {
 
         //search in fileNames if there's a zip file. If it's present, get filenames and add the instead of the zip file.
 
-        $uploadDir  = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $_COOKIE[ 'upload_session' ];
+        $uploadDir  = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $_COOKIE[ 'upload_token' ];
         $newArFiles = [];
         $fs         = FilesStorageFactory::create();
 
@@ -311,7 +324,7 @@ class createProjectController extends ajaxController {
 
         $projectStructure[ 'project_name' ]                 = $this->project_name;
         $projectStructure[ 'private_tm_key' ]               = $this->private_tm_key;
-        $projectStructure[ 'uploadToken' ]                  = $_COOKIE[ 'upload_session' ];
+        $projectStructure[ 'uploadToken' ]                  = $_COOKIE[ 'upload_token' ];
         $projectStructure[ 'array_files' ]                  = $arFiles; //list of file name
         $projectStructure[ 'array_files_meta' ]             = $arMeta; //list of file metadata
         $projectStructure[ 'source_language' ]              = $this->source_lang;
@@ -328,6 +341,11 @@ class createProjectController extends ajaxController {
         $projectStructure[ 'target_language_mt_engine_id' ] = $this->postInput[ 'target_language_mt_engine_id' ];
         $projectStructure[ 'user_ip' ]                      = Utils::getRealIpAddr();
         $projectStructure[ 'HTTP_HOST' ]                    = INIT::$HTTPHOST;
+
+        $projectStructure['dictation']                      = $this->dictation;
+        $projectStructure['show_whitespace']                = $this->show_whitespace;
+        $projectStructure['character_counter']              = $this->character_counter;
+        $projectStructure['ai_assistant']                   = $this->ai_assistant;
 
         // MMT Glossaries
         // (if $engine is not an MMT instance, ignore 'mmt_glossaries')
@@ -392,7 +410,7 @@ class createProjectController extends ajaxController {
         }
 
         try {
-            $fs::moveFileFromUploadSessionToQueuePath( $_COOKIE[ 'upload_session' ] );
+            $fs::moveFileFromUploadSessionToQueuePath( $_COOKIE[ 'upload_token' ] );
         } catch ( Exception $e ) {
             $this->result[ 'errors' ][] = [
                     "code"    => -235, // Error during moving file from upload session folder to queue path
@@ -519,7 +537,7 @@ class createProjectController extends ajaxController {
     private function __clearSessionFiles() {
 
         if ( $this->userIsLogged ) {
-            $gdriveSession = new GDrive\Session();
+            $gdriveSession = new Session();
             $gdriveSession->clearFileListFromSession();
         }
     }

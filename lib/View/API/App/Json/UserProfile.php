@@ -19,7 +19,7 @@ class UserProfile {
 
     /**
      * @param Users_UserStruct              $user
-     * @param TeamStruct[]                         $teams
+     * @param TeamStruct[]                  $teams
      * @param ConnectedServiceStruct[]|null $servicesStruct
      * @param array                         $userMetadata
      *

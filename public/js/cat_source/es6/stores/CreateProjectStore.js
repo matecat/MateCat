@@ -14,6 +14,7 @@ const CreateProjectStore = assign({}, EventEmitter.prototype, {
     sourceLang: undefined,
     targetLang: undefined,
     selectedTeam: undefined,
+    filtersTemplate: undefined,
   },
   updateProject: function (data) {
     this.projectData = {
@@ -43,6 +44,9 @@ const CreateProjectStore = assign({}, EventEmitter.prototype, {
     return this.projectData.targetLangs
       ? this.projectData.targetLangs.map((item) => item.name).join()
       : undefined
+  },
+  getFiltersTemplate: function () {
+    return this.projectData.filtersTemplate
   },
 })
 
