@@ -105,7 +105,7 @@ var spec = {
             name: 'mt_engine',
             in: 'formData',
             description:
-              'Identifier for Machine Translation Service 0 means disabled, 1 means get MT from MyMemory).',
+              'Identifier for Machine Translation Engine. 0 deactivates MT, 1 uses ModernMT Lite, other values correspond to the user\'s personal MT engines (available engines are retrieved via the /api/v2/engines/list endpoint).',
             required: false,
             type: 'integer',
             default: 1,
