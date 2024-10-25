@@ -11,6 +11,7 @@ use Database;
 use Exception;
 use InvalidArgumentException;
 use Jobs_JobDao;
+use Klein\Response;
 use Log;
 use RuntimeException;
 use TmKeyManagement_ClientTmKeyStruct;
@@ -24,7 +25,7 @@ class UpdateJobKeysController extends KleinController {
         $this->appendValidator( new LoginValidator( $this ) );
     }
 
-    public function update()
+    public function update(): Response
     {
         try {
             $request = $this->validateTheRequest();
@@ -38,8 +39,7 @@ class UpdateJobKeysController extends KleinController {
             } else {
                 $userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
             }
-
-
+            
             /*
              * The client send data as structured json, for now take it as a plain structure
              *
@@ -119,8 +119,8 @@ class UpdateJobKeysController extends KleinController {
             try {
                 $totalTmKeys = TmKeyManagement_TmKeyManagement::mergeJsonKeys( $tm_keys, $request['jobData'][ 'tm_keys' ], $userRole, $this->user->uid );
 
-                Log::doJsonLog( 'Before: ' . $request['jobData'][ 'tm_keys' ] );
-                Log::doJsonLog( 'After: ' . json_encode( $totalTmKeys ) );
+                $this->log( 'Before: ' . $request['jobData'][ 'tm_keys' ] );
+                $this->log( 'After: ' . json_encode( $totalTmKeys ) );
 
                 if ( $this->jobOwnerIsMe($request['jobData'][ 'owner' ]) ) {
                     $request['jobData'][ 'only_private_tm' ] = $request['only_private'];
@@ -155,7 +155,7 @@ class UpdateJobKeysController extends KleinController {
      * @throws AuthenticationError
      * @throws \ReflectionException
      */
-    private function validateTheRequest()
+    private function validateTheRequest(): array
     {
         $job_id = filter_var( $this->request->param( 'job_id' ), FILTER_SANITIZE_NUMBER_INT );
         $job_pass = filter_var( $this->request->param( 'job_pass' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH  ] );
@@ -198,7 +198,8 @@ class UpdateJobKeysController extends KleinController {
      * @param $owner
      * @return bool
      */
-    private function jobOwnerIsMe($owner) {
+    private function jobOwnerIsMe($owner): bool
+    {
         return $this->userIsLogged && $owner == $this->user->email;
     }
 }

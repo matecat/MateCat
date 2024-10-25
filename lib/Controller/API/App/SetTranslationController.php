@@ -12,17 +12,18 @@ use Constants_TranslationStatus;
 use Contribution\ContributionSetStruct;
 use Contribution\Set;
 use Database;
-use EditLog\EditLogSegmentClientStruct;
+use EditLog\EditLogSegmentStruct;
 use Exception;
 use Exceptions\ControllerReturnException;
 use Exceptions\NotFoundException;
 use Features\ReviewExtended\ReviewUtils;
 use Features\TranslationVersions;
+use Features\TranslationVersions\Handlers\TranslationVersionsHandler;
 use Files\FilesPartsDao;
 use INIT;
 use InvalidArgumentException;
 use Jobs_JobDao;
-use Log;
+use Klein\Response;
 use LQA\QA;
 use Matecat\SubFiltering\MateCatFilter;
 use Projects_MetadataDao;
@@ -50,7 +51,7 @@ class SetTranslationController extends KleinController {
     protected $filter;
 
     /**
-     * @var TranslationVersions\Handlers\TranslationVersionsHandler|TranslationVersions\Handlers\DummyTranslationVersionHandler
+     * @var TranslationVersionsHandler
      */
     private $VersionsHandler;
 
@@ -58,7 +59,7 @@ class SetTranslationController extends KleinController {
         $this->appendValidator( new LoginValidator( $this ) );
     }
 
-    public function translate()
+    public function translate(): Response
     {
         try {
             $this->data = $this->validateTheRequest();
@@ -247,7 +248,7 @@ class SetTranslationController extends KleinController {
 
                 } catch ( Exception $e ) {
                     $msg = $e->getMessage() . "\n\n" . $e->getTraceAsString();
-                    Log::doJsonLog( $msg );
+                    $this->log( $msg );
                     Utils::sendErrMailReport( $msg );
                     $db->rollback();
                     throw new RuntimeException( $e->getMessage(), $e->getCode() );
@@ -295,7 +296,7 @@ class SetTranslationController extends KleinController {
                 $db->commit();
 
             } catch ( Exception $e ) {
-                Log::doJsonLog( "Lock: Transaction Aborted. " . $e->getMessage() );
+                $this->log( "Lock: Transaction Aborted. " . $e->getMessage() );
                 $db->rollback();
 
                 throw new RuntimeException($e->getMessage());
@@ -343,7 +344,7 @@ class SetTranslationController extends KleinController {
                 ] );
 
             } catch ( Exception $e ) {
-                Log::doJsonLog( "Exception in setTranslationCommitted callback . " . $e->getMessage() . "\n" . $e->getTraceAsString() );
+                $this->log( "Exception in setTranslationCommitted callback . " . $e->getMessage() . "\n" . $e->getTraceAsString() );
                 throw new RuntimeException($e->getMessage());
             }
 
@@ -356,7 +357,7 @@ class SetTranslationController extends KleinController {
                     'segment'         => $this->data['segment']
                 ] );
             } catch ( Exception $e ) {
-                Log::doJsonLog( "Exception in filterSetTranslationResult callback . " . $e->getMessage() . "\n" . $e->getTraceAsString() );
+                $this->log( "Exception in filterSetTranslationResult callback . " . $e->getMessage() . "\n" . $e->getTraceAsString() );
                 throw new RuntimeException($e->getMessage());
             }
 
@@ -384,7 +385,7 @@ class SetTranslationController extends KleinController {
                 if ( empty( $update_completed ) ) {
                     $msg = "\n\n Error setJobCompleteness \n\n " . var_export( $_POST, true );
                     $redisHandler->getConnection()->del( 'job_completeness:' . $this->id_job );
-                    Log::doJsonLog( $msg );
+                    $this->log( $msg );
                     Utils::sendErrMailReport( $msg );
                 }
             }
@@ -483,7 +484,7 @@ class SetTranslationController extends KleinController {
             'chunk' => $chunk ,
         ];
 
-        Log::doJsonLog( $data );
+        $this->log( $data );
 
         return $data;
     }
@@ -491,7 +492,7 @@ class SetTranslationController extends KleinController {
     /**
      * @return bool
      */
-    private function isSplittedSegment()
+    private function isSplittedSegment(): bool
     {
         return !empty( $this->data['split_statuses'][ 0 ] ) && !empty( $this->data['split_num'] );
     }
@@ -502,7 +503,7 @@ class SetTranslationController extends KleinController {
      * If splitted segments have different statuses, we reset status
      * to draft.
      */
-    private function setStatusForSplittedSegment()
+    private function setStatusForSplittedSegment(): void
     {
         if ( count( array_unique( $this->data['split_statuses'] ) ) == 1 ) {
             // IF ALL translation chunks are in the same status,
@@ -516,7 +517,7 @@ class SetTranslationController extends KleinController {
     /**
      * @throws Exception
      */
-    protected function checkData()
+    protected function checkData(): void
     {
         $this->data['project'] = $this->data['chunk']->getProject();
 
@@ -529,7 +530,7 @@ class SetTranslationController extends KleinController {
         [ $__translation, $this->data['split_chunk_lengths'] ] = CatUtils::parseSegmentSplit( $this->data[ 'translation' ], '', $this->filter );
 
         if ( is_null( $__translation ) || $__translation === '' ) {
-            Log::doJsonLog( "Empty Translation \n\n" . var_export( $_POST, true ) );
+            $this->log( "Empty Translation \n\n" . var_export( $_POST, true ) );
             throw new RuntimeException( "Empty Translation \n\n" . var_export( $_POST, true ), 0 );
         }
 
@@ -555,7 +556,7 @@ class SetTranslationController extends KleinController {
      *
      * @throws Exception
      */
-    private function checkStatus( $status )
+    private function checkStatus( $status ): void
     {
         switch ( $status ) {
             case Constants_TranslationStatus::STATUS_TRANSLATED:
@@ -576,13 +577,9 @@ class SetTranslationController extends KleinController {
     }
 
     /**
-     * @throws \API\Commons\Exceptions\AuthenticationError
-     * @throws \Exceptions\ValidationError
-     * @throws \TaskRunner\Exceptions\EndQueueException
-     * @throws \TaskRunner\Exceptions\ReQueueException
-     * @throws \Exceptions\NotFoundException
+     * @throws Exception
      */
-    private function getContexts()
+    private function getContexts(): void
     {
         //Get contexts
         $segmentsList = ( new Segments_SegmentDao )->setCacheTTL( 60 * 60 * 24 )->getContextAndSegmentByIDs(
@@ -607,7 +604,7 @@ class SetTranslationController extends KleinController {
     /**
      * init VersionHandler
      */
-    private function initVersionHandler()
+    private function initVersionHandler(): void
     {
         // fix null pointer error
         if (
@@ -622,9 +619,9 @@ class SetTranslationController extends KleinController {
 
     /**
      * @return Translations_SegmentTranslationStruct
-     * @throws ControllerReturnException
+     * @throws Exception
      */
-    private function getOldTranslation()
+    private function getOldTranslation(): ?Translations_SegmentTranslationStruct
     {
         $old_translation = Translations_SegmentTranslationDao::findBySegmentAndJob( $this->data['id_segment'], $this->data['id_job'] );
 
@@ -680,7 +677,10 @@ class SetTranslationController extends KleinController {
      *
      * @return bool
      */
-    private function canUpdateSuggestion( Translations_SegmentTranslationStruct $new_translation, Translations_SegmentTranslationStruct $old_translation, $old_suggestion = null )
+    private function canUpdateSuggestion(
+        Translations_SegmentTranslationStruct $new_translation,
+        Translations_SegmentTranslationStruct $old_translation,
+        $old_suggestion = null ): bool
     {
         if ( $old_suggestion === null ) {
             return false;
@@ -716,7 +716,7 @@ class SetTranslationController extends KleinController {
      * @param array $old_translation
      * @param array $new_translation
      */
-    private function updateJobPEE( array $old_translation, array $new_translation )
+    private function updateJobPEE( array $old_translation, array $new_translation ): void
     {
         //update total time to edit
         $tte = $old_translation[ 'time_to_edit' ];
@@ -727,7 +727,7 @@ class SetTranslationController extends KleinController {
         }
 
         $segmentRawWordCount  = $this->data['segment']->raw_word_count;
-        $editLogSegmentStruct = new EditLogSegmentClientStruct(
+        $editLogSegmentStruct = new EditLogSegmentStruct(
             [
                 'suggestion'     => $old_translation[ 'suggestion' ],
                 'translation'    => $old_translation[ 'translation' ],
@@ -794,7 +794,7 @@ class SetTranslationController extends KleinController {
      * @return array
      * @throws Exception
      */
-    private function getTranslationObject( $saved_translation )
+    private function getTranslationObject( $saved_translation ): array
     {
         return [
             'version_number' => @$saved_translation[ 'version_number' ],
@@ -810,11 +810,8 @@ class SetTranslationController extends KleinController {
      * @param $old_translation
      *
      * @throws Exception
-     * @throws NotFoundException
-     * @throws \API\Commons\Exceptions\AuthenticationError
-     * @throws \Exceptions\ValidationError
      */
-    private function evalSetContribution( $_Translation, $old_translation )
+    private function evalSetContribution( $_Translation, $old_translation ): void
     {
         if ( in_array( $this->data['status'], [
             Constants_TranslationStatus::STATUS_DRAFT,

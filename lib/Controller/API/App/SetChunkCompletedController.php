@@ -35,7 +35,7 @@ class SetChunkCompletedController extends KleinController {
         $this->appendValidator( new LoginValidator( $this ) );
     }
 
-    public function complete()
+    public function complete(): Response
     {
         try {
             $request = $this->validateTheRequest();

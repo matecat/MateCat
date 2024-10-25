@@ -20,6 +20,7 @@ use INIT;
 use InvalidArgumentException;
 use Jobs_JobDao;
 use Jobs_JobStruct;
+use Klein\Response;
 use Log;
 use Matecat\SubFiltering\MateCatFilter;
 use Segments_SegmentDao;
@@ -38,7 +39,7 @@ class GetContributionController extends KleinController {
         $this->appendValidator( new LoginValidator( $this ) );
     }
 
-    public function get()
+    public function get(): Response
     {
         try {
             $request = $this->validateTheRequest();
@@ -187,13 +188,9 @@ class GetContributionController extends KleinController {
      * @param $source
      * @param $target
      * @param $request
-     * @throws \API\Commons\Exceptions\AuthenticationError
-     * @throws \Exceptions\NotFoundException
-     * @throws \Exceptions\ValidationError
-     * @throws \TaskRunner\Exceptions\EndQueueException
-     * @throws \TaskRunner\Exceptions\ReQueueException
+     * @throws Exception
      */
-    private function rewriteContributionContexts( $source, $target, &$request )
+    private function rewriteContributionContexts( $source, $target, &$request ): void
     {
         $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new \FeatureSet();
 
@@ -230,7 +227,7 @@ class GetContributionController extends KleinController {
      * @param $cross_language
      * @return array
      */
-    private function getCrossLanguages($cross_language)
+    private function getCrossLanguages($cross_language): array
     {
         return !empty( $cross_language ) ? explode( ",", rtrim( $cross_language[ 0 ], ',' ) ) : [];
     }

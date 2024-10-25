@@ -9,8 +9,10 @@ use Engine;
 use Exception;
 use INIT;
 use InvalidArgumentException;
+use Klein\Response;
 use Log;
 use Matecat\SubFiltering\MateCatFilter;
+use RuntimeException;
 use TmKeyManagement_Filter;
 use TmKeyManagement_TmKeyManagement;
 use TmKeyManagement_TmKeyStruct;
@@ -24,7 +26,7 @@ class DownloadTMXController extends KleinController {
         $this->appendValidator( new LoginValidator( $this ) );
     }
 
-    public function download()
+    public function download(): Response
     {
         try {
             $data = $this->validateTheRequest();
@@ -61,9 +63,13 @@ class DownloadTMXController extends KleinController {
             $r .= "</pre>";
 
             Log::$fileName = 'php_errors.txt';
-            Log::doJsonLog( $r );
+            $this->log( $r );
 
-            Utils::sendErrMailReport( $r, "Download TMX Error: " . $e->getMessage() );
+            try {
+                Utils::sendErrMailReport( $r, "Download TMX Error: " . $e->getMessage() );
+            } catch (Exception $exception){
+                throw new RuntimeException("Error during sending the email");
+            }
 
             return $this->returnException($exception);
         }

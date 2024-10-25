@@ -10,6 +10,7 @@ use Exceptions\NotFoundException;
 use INIT;
 use InvalidArgumentException;
 use Jobs_JobDao;
+use Klein\Response;
 use Log;
 use Projects_ProjectDao;
 use Translations_SegmentTranslationDao;
@@ -21,7 +22,7 @@ class ChangeJobsStatusController extends KleinController {
         $this->appendValidator( new LoginValidator( $this ) );
     }
 
-    public function changeStatus()
+    public function changeStatus(): Response
     {
         try {
             $data = $this->validateTheRequest();
@@ -32,7 +33,7 @@ class ChangeJobsStatusController extends KleinController {
                     $project = Projects_ProjectDao::findByIdAndPassword( $data['res_id'], $data['password'] );
                 } catch( Exception $e ){
                     $msg = "Error : wrong password provided for Change Project Status \n\n " . var_export( $_POST, true ) . "\n";
-                    Log::doJsonLog( $msg );
+                    $this->log( $msg );
                     Utils::sendErrMailReport( $msg );
                     throw new NotFoundException("Job not found");
                 }
@@ -52,7 +53,7 @@ class ChangeJobsStatusController extends KleinController {
                     $firstChunk = Chunks_ChunkDao::getByIdAndPassword( $data['res_id'], $data['password'] );
                 } catch( Exception $e ){
                     $msg = "Error : wrong password provided for Change Job Status \n\n " . var_export( $_POST, true ) . "\n";
-                    Log::doJsonLog( $msg );
+                    $this->log( $msg );
                     Utils::sendErrMailReport( $msg );
                     throw new NotFoundException("Job not found");
                 }
@@ -77,7 +78,7 @@ class ChangeJobsStatusController extends KleinController {
     /**
      * @return array
      */
-    private function validateTheRequest()
+    private function validateTheRequest(): array
     {
         $name = filter_var( $this->request->param( 'name' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW  ] );
         $tm_key = filter_var( $this->request->param( 'tm_key' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW  ] );
