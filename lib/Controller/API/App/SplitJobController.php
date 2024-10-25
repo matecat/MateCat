@@ -8,6 +8,7 @@ use API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
 use Jobs_JobStruct;
+use Klein\Response;
 use ProjectManager;
 use Projects_MetadataDao;
 use Projects_ProjectDao;
@@ -19,7 +20,7 @@ class SplitJobController extends KleinController {
         $this->appendValidator( new LoginValidator( $this ) );
     }
 
-    public function merge()
+    public function merge(): Response
     {
         try {
             $request = $this->validateTheRequest();
@@ -46,7 +47,7 @@ class SplitJobController extends KleinController {
         }
     }
 
-    public function check()
+    public function check(): Response
     {
         try {
             $request = $this->validateTheRequest();
@@ -77,7 +78,7 @@ class SplitJobController extends KleinController {
         }
     }
 
-    public function apply()
+    public function apply(): Response
     {
         try {
             $request = $this->validateTheRequest();
@@ -138,11 +139,9 @@ class SplitJobController extends KleinController {
      * @param $project_pass
      * @param bool $split_raw_words
      * @return array
-     * @throws \API\Commons\Exceptions\AuthenticationError
-     * @throws \Exceptions\NotFoundException
-     * @throws \Exceptions\ValidationError
+     * @throws Exception
      */
-    private function getProjectStructure($project_id, $project_pass, $split_raw_words = false)
+    private function getProjectStructure($project_id, $project_pass, $split_raw_words = false): array
     {
         $count_type = ($split_raw_words == true) ? Projects_MetadataDao::SPLIT_RAW_WORD_TYPE : Projects_MetadataDao::SPLIT_EQUIVALENT_WORD_TYPE;
         $project_struct = Projects_ProjectDao::findByIdAndPassword( $project_id, $project_pass, 60 * 60 );
@@ -167,10 +166,9 @@ class SplitJobController extends KleinController {
      * @return Jobs_JobStruct[]
      * @throws Exception
      */
-    private function checkMergeAccess( $jid, array $jobList ) {
-
+    private function checkMergeAccess( $jid, array $jobList ): array
+    {
         return $this->filterJobsById( $jid, $jobList );
-
     }
 
     /**
@@ -197,8 +195,8 @@ class SplitJobController extends KleinController {
      * @return array
      * @throws Exception
      */
-    private function filterJobsById( $jid, array $jobList  ){
-
+    private function filterJobsById( $jid, array $jobList ): array
+    {
         $found = false;
         $filteredJobs = array_values( array_filter( $jobList, function ( Jobs_JobStruct $jobStruct ) use ( &$found, $jid ) {
             return $jobStruct->id == $jid and !$jobStruct->wasDeleted();
@@ -215,7 +213,8 @@ class SplitJobController extends KleinController {
      * @param $float_val
      * @return int
      */
-    protected function valuesToInt( $float_val ) {
+    protected function valuesToInt( $float_val ): int
+    {
         return (int)$float_val;
     }
 }

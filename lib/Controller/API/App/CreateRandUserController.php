@@ -7,6 +7,7 @@ use API\Commons\Validators\LoginValidator;
 use Engine;
 use Engines_MyMemory;
 use Exception;
+use Klein\Response;
 
 class CreateRandUserController extends KleinController {
 
@@ -14,7 +15,7 @@ class CreateRandUserController extends KleinController {
         $this->appendValidator( new LoginValidator( $this ) );
     }
 
-    public function create()
+    public function create(): Response
     {
         try {
             /**
