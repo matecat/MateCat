@@ -10,6 +10,7 @@ namespace Features\ReviewExtended;
 
 use Jobs_JobStruct;
 use LQA\ModelStruct;
+use Projects_ProjectStruct;
 
 interface IChunkReviewModel {
 
@@ -53,8 +54,8 @@ interface IChunkReviewModel {
      * This method invokes the recount of reviewed_words_count and
      * penalty_points for the chunk and updates the passfail result.
      *
-     * @param \Projects_ProjectStruct $project
+     * @param Projects_ProjectStruct $project
      *
      */
-    public function recountAndUpdatePassFailResult( \Projects_ProjectStruct $project );
+    public function recountAndUpdatePassFailResult( Projects_ProjectStruct $project );
 }

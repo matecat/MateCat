@@ -179,6 +179,7 @@ class ChunkReviewModel implements IChunkReviewModel {
                 ]
         );
 
+        // External call by Plugins
         $project->getFeaturesSet()->run(
                 'chunkReviewUpdated', $this->chunk_review, $update_result, $this, $project
         );

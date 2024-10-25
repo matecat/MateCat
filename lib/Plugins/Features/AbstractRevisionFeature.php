@@ -3,6 +3,7 @@
 namespace Features;
 
 use API\Commons\Exceptions\ValidationError;
+use ArrayObject;
 use BasicFeatureStruct;
 use Chunks_ChunkCompletionEventStruct;
 use Jobs_JobStruct;
@@ -116,17 +117,6 @@ abstract class AbstractRevisionFeature extends BaseFeature {
     }
 
     /**
-     * @param ChunkReviewStruct      $chunkReview
-     * @param Projects_ProjectStruct $projectStruct
-     *
-     * @throws Exception
-     */
-    public function chunkReviewRecordCreated( ChunkReviewStruct $chunkReview, Projects_ProjectStruct $projectStruct ) {
-        // This is needed to properly populate advancement wc for ICE matches
-        ( new ChunkReviewModel( $chunkReview ) )->recountAndUpdatePassFailResult( $projectStruct );
-    }
-
-    /**
      * filter_review_password_to_job_password
      *
      * If this method is reached it means that the project we are
@@ -222,9 +212,8 @@ abstract class AbstractRevisionFeature extends BaseFeature {
             }
 
             $chunkReview = ChunkReviewDao::createRecord( $data );
-            $project->getFeaturesSet()->run( 'chunkReviewRecordCreated', $chunkReview, $project );
-
             $createdRecords[] = $chunkReview;
+
         }
 
         return $createdRecords;
@@ -259,12 +248,12 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      *
      * Deletes the previously created record and creates the new records matching the new chunks.
      *
-     * @param \ArrayObject $projectStructure
+     * @param ArrayObject $projectStructure
      *
      * @throws Exception
      *
      */
-    public function postJobSplitted( \ArrayObject $projectStructure ) {
+    public function postJobSplitted( ArrayObject $projectStructure ) {
 
         /**
          * By definition, when running postJobSplitted callback the job is not splitted.
@@ -276,8 +265,6 @@ abstract class AbstractRevisionFeature extends BaseFeature {
         $id_job                  = $projectStructure[ 'job_to_split' ];
         $previousRevisionRecords = ChunkReviewDao::findByIdJob( $id_job );
         $project                 = Projects_ProjectDao::findById( $projectStructure[ 'id_project' ], 86400 );
-
-        $revisionFactory = RevisionFactory::initFromProject( $project );
 
         ChunkReviewDao::deleteByJobId( $id_job );
 
@@ -301,7 +288,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
         }
 
         foreach ( $reviews as $review ) {
-            $model = $revisionFactory->getChunkReviewModel( $review );
+            $model = new ChunkReviewModel( $review );
             $model->recountAndUpdatePassFailResult( $project );
         }
 
@@ -321,8 +308,6 @@ abstract class AbstractRevisionFeature extends BaseFeature {
         $id_job      = $projectStructure[ 'job_to_merge' ];
         $old_reviews = ChunkReviewDao::findByIdJob( $id_job );
         $project     = Projects_ProjectDao::findById( $projectStructure[ 'id_project' ], 86400 );
-
-        $revisionFactory = RevisionFactory::initFromProject( $project );
 
         $reviewGroupedData = [];
 
@@ -352,7 +337,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
         }
 
         foreach ( $reviews as $review ) {
-            $model = $revisionFactory->getChunkReviewModel( $review );
+            $model = new ChunkReviewModel( $review );
             $model->recountAndUpdatePassFailResult( $project );
         }
     }
