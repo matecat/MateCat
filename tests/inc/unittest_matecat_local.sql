@@ -212,7 +212,7 @@ CREATE TABLE `comments`
     `uid`          bigint(20)  DEFAULT NULL,
     `resolve_date` datetime    DEFAULT NULL,
     `source_page`  tinyint(4)  DEFAULT NULL,
-    `is_owner`     tinyint(4)   NOT NULL,
+    `is_anonymous` tinyint(4)  NOT NULL DEFAULT 0,
     `message_type` tinyint(4)  DEFAULT NULL,
     `message`      text,
     PRIMARY KEY (`id`),

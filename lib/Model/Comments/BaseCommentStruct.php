@@ -6,11 +6,12 @@ class Comments_BaseCommentStruct extends DataAccess_AbstractDaoSilentStruct impl
     public int     $id_job;
     public int     $id_segment;
     public string  $create_date;
-    public string  $email;
+    public ?string $email        = null;
     public string  $full_name;
     public ?int    $uid          = null;
     public ?string $resolve_date = null;
     public int     $source_page;
+    public int     $is_anonymous = 0;
     public int     $message_type;
     public ?string $message      = "";
 
@@ -34,9 +35,10 @@ class Comments_BaseCommentStruct extends DataAccess_AbstractDaoSilentStruct impl
                 'id_job'       => $this->id_job,
                 'id_segment'   => $this->id_segment,
                 'create_at'    => date_format( date_create( $this->create_date ?: 'now' ), DATE_ATOM ),
-                'full_name'    => $this->full_name,
+                'full_name'    => !$this->is_anonymous ? $this->full_name : 'Anonymous',
                 'uid'          => $this->uid,
                 'resolved_at'  => !empty( $this->resolve_date ) ? date_format( date_create( $this->resolve_date ), DATE_ATOM ) : null,
+                'is_anonymous' => $this->is_anonymous,
                 'source_page'  => $this->source_page,
                 'message_type' => $this->message_type,
                 'message'      => $this->message,

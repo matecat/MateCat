@@ -42,10 +42,9 @@ class commentController extends ajaxController {
                 'id_segment'      => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
                 'username'        => [ 'filter' => FILTER_SANITIZE_STRING ],
                 'source_page'     => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'is_anonymous'    => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
                 'revision_number' => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
                 'message'         => [ 'filter' => FILTER_UNSAFE_RAW ],
-                'first_seg'       => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
-                'last_seg'        => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
                 'id_comment'      => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
                 'password'        => [
                         'filter' => FILTER_SANITIZE_STRING,
@@ -61,8 +60,6 @@ class commentController extends ajaxController {
         $this->__postInput[ 'id_job' ]          = (int)$this->__postInput[ 'id_job' ];
         $this->__postInput[ 'source_page' ]     = (int)$this->__postInput[ 'source_page' ];
         $this->__postInput[ 'revision_number' ] = (int)$this->__postInput[ 'revision_number' ];
-        $this->__postInput[ 'first_seg' ]       = (int)$this->__postInput[ 'first_seg' ];
-        $this->__postInput[ 'last_seg' ]        = (int)$this->__postInput[ 'last_seg' ];
         $this->__postInput[ 'source_page' ]     = (int)$this->__postInput[ 'source_page' ];
 
     }
@@ -109,10 +106,8 @@ class commentController extends ajaxController {
     }
 
     private function getRange(): void {
-        $this->comment_struct                = new Comments_CommentStruct();
-        $this->comment_struct->id_job        = $this->__postInput[ 'id_job' ];
-        $this->comment_struct->first_segment = $this->__postInput[ 'first_seg' ];
-        $this->comment_struct->last_segment  = $this->__postInput[ 'last_seg' ];
+        $this->comment_struct         = new Comments_CommentStruct();
+        $this->comment_struct->id_job = $this->__postInput[ 'id_job' ];
 
         $commentDao = new Comments_CommentDao( Database::obtain() );
 

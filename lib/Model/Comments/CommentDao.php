@@ -147,6 +147,7 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
                 'full_name'    => $obj->full_name,
                 'uid'          => $obj->uid,
                 'source_page'  => $obj->source_page,
+                'is_anonymous' => $obj->is_anonymous ?: 0,
                 'message_type' => $obj->message_type,
                 'message'      => $obj->message
         ] );
@@ -254,8 +255,9 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
                   id_job, 
                   id_segment, 
                   create_date, 
-                  full_name, 
+                  IF( is_anonymous = 0, full_name, 'Anonymous' ) as full_name, 
                   source_page, 
+                  is_anonymous,
                   message_type, 
                   message, 
                   email, 
