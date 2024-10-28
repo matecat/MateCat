@@ -22,13 +22,14 @@ import {
 import {Checkbox, CHECKBOX_STATE} from '../common/Checkbox'
 import Trash from '../../../../../img/icons/Trash'
 import Check from '../../../../../img/icons/Check'
+import commonUtils from '../../utils/commonUtils'
 
 class SegmentCommentsContainer extends React.Component {
   static contextType = SegmentContext
 
   constructor(props, context) {
     super(props)
-
+    this.localStorageKey = 'anonymous-comments' + context.userInfo.user.uid
     this.state = {
       comments: CommentsStore.getCommentsBySegment(
         context.segment.original_sid,
@@ -38,7 +39,8 @@ class SegmentCommentsContainer extends React.Component {
       sendCommentError: false,
       showTagging: false,
       mentionsInputValue: '',
-      anonymousComments: false,
+      anonymousComments:
+        commonUtils.getFromStorage(this.localStorageKey) === 'true',
     }
     this.types = {sticky: 3, resolve: 2, comment: 1}
     this.updateComments = this.updateComments.bind(this)
@@ -268,7 +270,7 @@ class SegmentCommentsContainer extends React.Component {
           <Button
             type={BUTTON_TYPE.DEFAULT}
             mode={BUTTON_MODE.OUTLINE}
-            size={BUTTON_SIZE.STANDARD}
+            size={BUTTON_SIZE.SMALL}
             onClick={() => this.resolveThread()}
           >
             <Check size={16} /> Resolve
@@ -280,7 +282,7 @@ class SegmentCommentsContainer extends React.Component {
           <Button
             type={BUTTON_TYPE.DEFAULT}
             mode={BUTTON_MODE.OUTLINE}
-            size={BUTTON_SIZE.ICON_STANDARD}
+            size={BUTTON_SIZE.SMALL}
             onClick={this.deleteComment}
           >
             <Trash size={16} />
@@ -366,6 +368,7 @@ class SegmentCommentsContainer extends React.Component {
               <Checkbox
                 onChange={(value) => {
                   this.setState({anonymousComments: value})
+                  commonUtils.addInStorage(this.localStorageKey, value)
                 }}
                 label={'Post your comment anonymously'}
                 value={
