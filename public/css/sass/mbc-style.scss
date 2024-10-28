@@ -53,7 +53,7 @@
  ******
  */
 .mbc-thread-wrap {
-  padding: 0 10px 10px 10px;
+  padding: 10px;
   border-top: 1px solid #f2f4f7;
 }
 
@@ -86,7 +86,13 @@
 }
 
 .mbc-comments-wrap .mbc-show-comment:not(:last-of-type) {
-  border-bottom: 1px solid #dadada;
+  background-color: $grey5;
+  border-radius: 4px;
+  padding: 8px;
+}
+.mbc-comments-wrap .mbc-thread-wrap-resolved .mbc-show-comment:not(:last-of-type) {
+  background-color: rgba($greenDefaultTransparent, 0.2);
+  border-radius: 4px;
 }
 
 /*
@@ -292,6 +298,9 @@ a.mbc-new-message-link:hover {
   font-weight: bold;
   margin-bottom: 4px;
   padding: 5px 5px 2px 0;
+  span {
+    color: $grey7;
+  }
 }
 /*
  Anonymous label
@@ -982,4 +991,24 @@ section:hover .mbc-comment-icon-button,
 .segment-side-buttons:hover .mbc-comment-icon-button,
 .mbc-comment-icon-button:hover {
   visibility: visible;
+}
+
+.mbc-comment-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  .input-checkbox > span {
+    color: $grey7;
+  }
+
+}
+.mbc-thread-wrap-bottom {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 20px;
+  button {
+    color: $black !important;
+  }
 }

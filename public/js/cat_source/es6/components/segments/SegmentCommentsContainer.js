@@ -10,9 +10,18 @@ import CommentsActions from '../../actions/CommentsActions'
 import CommentsConstants from '../../constants/CommentsConstants'
 import SegmentActions from '../../actions/SegmentActions'
 import {SegmentContext} from './SegmentContext'
-import ModalsActions from '../../actions/ModalsActions'
 import {MentionsInput} from 'react-mentions'
 import Mention from '../common/Mention'
+import UserStore from '../../stores/UserStore'
+import {
+  Button,
+  BUTTON_MODE,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+} from '../common/Button/Button'
+import {Checkbox, CHECKBOX_STATE} from '../common/Checkbox'
+import Trash from '../../../../../img/icons/Trash'
+import Check from '../../../../../img/icons/Check'
 
 class SegmentCommentsContainer extends React.Component {
   static contextType = SegmentContext
@@ -24,11 +33,12 @@ class SegmentCommentsContainer extends React.Component {
       comments: CommentsStore.getCommentsBySegment(
         context.segment.original_sid,
       ),
-      user: CommentsStore.getUser(),
+      user: UserStore.getUser(),
       teamUsers: CommentsStore.getTeamUsers(),
       sendCommentError: false,
       showTagging: false,
       mentionsInputValue: '',
+      anonymousComments: false,
     }
     this.types = {sticky: 3, resolve: 2, comment: 1}
     this.updateComments = this.updateComments.bind(this)
@@ -53,6 +63,7 @@ class SegmentCommentsContainer extends React.Component {
     if (mentionsMarkup?.length > 0) {
       CommentsActions.sendComment(
         mentionsMarkup,
+        this.state.anonymousComments,
         this.context.segment.original_sid,
       )
         .catch(() => {
@@ -197,9 +208,9 @@ class SegmentCommentsContainer extends React.Component {
             <div className="mbc-resolved-comment" key={'comment-' + i}>
               <span className="mbc-comment-resolved-label">
                 <span className="mbc-comment-username mbc-comment-resolvedby">
-                  {`${comment.full_name} `}
+                  {comment.full_name}
                 </span>
-                <span className="">marked as resolved</span>
+                <span className=""> marked as resolved</span>
               </span>
             </div>,
           )
@@ -216,9 +227,20 @@ class SegmentCommentsContainer extends React.Component {
 
           thread_wrap.push(
             <div className="mbc-show-comment mbc-clearfix" key={'comment-' + i}>
-              <span className="mbc-comment-label mbc-comment-username mbc-comment-username-label mbc-truncate">
-                {comment.full_name}
-              </span>
+              {comment.is_anonymous === 1 ? (
+                <div className="mbc-comment-label mbc-comment-username mbc-comment-username-label mbc-truncate">
+                  {comment.source_page === 1 ? 'Translator' : 'Reviewer'}
+                </div>
+              ) : (
+                <div className="mbc-comment-label mbc-comment-username mbc-comment-username-label mbc-truncate">
+                  {comment.full_name}
+                  <span>
+                    {' '}
+                    {comment.source_page === 1 ? '(translator)' : '(reviewer)'}
+                  </span>
+                </div>
+              )}
+
               <div className="mbc-comment-info-wrap mbc-clearfix">
                 <span className="mbc-comment-info mbc-comment-time pull-left">
                   {formattedDate}
@@ -243,22 +265,26 @@ class SegmentCommentsContainer extends React.Component {
         )
       ) {
         resolveButton = (
-          <a
-            className="ui button mbc-comment-label mbc-comment-btn mbc-comment-resolve-btn pull-right"
+          <Button
+            type={BUTTON_TYPE.DEFAULT}
+            mode={BUTTON_MODE.OUTLINE}
+            size={BUTTON_SIZE.STANDARD}
             onClick={() => this.resolveThread()}
           >
-            Resolve
-          </a>
+            <Check size={16} /> Resolve
+          </Button>
         )
         const isAuthorOfLastComment =
           comments[comments.length - 1].uid === this.context.userInfo.user.uid
         deleteButton = isAuthorOfLastComment ? (
-          <a
-            className="ui button mbc-comment-label mbc-comment-btn mbc-comment-resolve-btn mbc-comment-delete-btn pull-right"
+          <Button
+            type={BUTTON_TYPE.DEFAULT}
+            mode={BUTTON_MODE.OUTLINE}
+            size={BUTTON_SIZE.ICON_STANDARD}
             onClick={this.deleteComment}
           >
-            Delete
-          </a>
+            <Trash size={16} />
+          </Button>
         ) : (
           ''
         )
@@ -271,8 +297,10 @@ class SegmentCommentsContainer extends React.Component {
             data-count={count}
           >
             {thread_wrap}
-            {resolveButton}
-            {deleteButton}
+            <div className={'mbc-thread-wrap-bottom'}>
+              {deleteButton}
+              {resolveButton}
+            </div>
           </div>,
         )
       }
@@ -294,8 +322,6 @@ class SegmentCommentsContainer extends React.Component {
       }, 200)
     }
 
-    let loggedUser = !!this.state.user
-    // Se utente anonimo aggiungere mbc-comment-anonymous-label a mbc-comment-username
     htmlInsert = (
       <div
         className="mbc-thread-wrap mbc-post-comment-wrap mbc-clearfix mbc-first-input"
@@ -303,18 +329,14 @@ class SegmentCommentsContainer extends React.Component {
       >
         <div className="mbc-post-comment">
           <span className="mbc-comment-label mbc-comment-username mbc-comment-username-label mbc-truncate mbc-comment-anonymous-label">
-            {this.state.user ? this.state.user.full_name : 'Anonymous'}
+            {!this.state.anonymousComments
+              ? this.context.userInfo.user.first_name +
+                ' ' +
+                this.context.userInfo.user.last_name
+              : config.isReview
+                ? 'Reviewer'
+                : 'Translator'}
           </span>
-          {!loggedUser ? (
-            <a
-              className="mbc-comment-link-btn mbc-login-link"
-              onClick={() => {
-                ModalsActions.openLoginModal()
-              }}
-            >
-              Login to receive comments
-            </a>
-          ) : null}
           <MentionsInput
             inputRef={(input) => (this.commentInput = input)}
             value={this.state.mentionsInputValue}
@@ -339,13 +361,27 @@ class SegmentCommentsContainer extends React.Component {
               appendSpaceOnAdd={false}
             />
           </MentionsInput>
-          <div>
-            <a
-              className="ui primary tiny button mbc-comment-btn mbc-comment-send-btn hide"
+          <div className="mbc-comment-bottom">
+            <div>
+              <Checkbox
+                onChange={(value) => {
+                  this.setState({anonymousComments: value})
+                }}
+                label={'Post your comment anonymously'}
+                value={
+                  this.state.anonymousComments
+                    ? CHECKBOX_STATE.CHECKED
+                    : CHECKBOX_STATE.UNCHECKED
+                }
+              />
+            </div>
+            <Button
+              type={BUTTON_TYPE.PRIMARY}
+              size={BUTTON_SIZE.STANDARD}
               onClick={() => this.sendComment()}
             >
               Comment
-            </a>
+            </Button>
           </div>
           {this.state.sendCommentError ? (
             <div className="mbc-ajax-message-wrap">
