@@ -226,23 +226,41 @@ class SegmentCommentsContainer extends React.Component {
             .toString()
             .split('(')[0]
             .trim()
-
+          const isAuthorOfLastComment =
+            comments[comments.length - 1].id === comment.id &&
+            comment.uid === this.context.userInfo.user.uid
+          deleteButton = isAuthorOfLastComment ? (
+            <Button
+              type={BUTTON_TYPE.DEFAULT}
+              mode={BUTTON_MODE.GHOST}
+              size={BUTTON_SIZE.ICON_SMALL}
+              onClick={this.deleteComment}
+            >
+              <Trash size={16} />
+            </Button>
+          ) : (
+            ''
+          )
           thread_wrap.push(
             <div className="mbc-show-comment mbc-clearfix" key={'comment-' + i}>
-              {comment.is_anonymous === 1 ? (
-                <div className="mbc-comment-label mbc-comment-username mbc-comment-username-label mbc-truncate">
-                  {comment.source_page === 1 ? 'Translator' : 'Reviewer'}
-                </div>
-              ) : (
-                <div className="mbc-comment-label mbc-comment-username mbc-comment-username-label mbc-truncate">
-                  {comment.full_name}
-                  <span>
-                    {' '}
-                    {comment.source_page === 1 ? '(translator)' : '(reviewer)'}
-                  </span>
-                </div>
-              )}
-
+              <div className="bc-show-comment-top">
+                {comment.is_anonymous === 1 ? (
+                  <div className="mbc-comment-label mbc-comment-username mbc-comment-username-label mbc-truncate">
+                    {comment.source_page === 1 ? 'Translator' : 'Reviewer'}
+                  </div>
+                ) : (
+                  <div className="mbc-comment-label mbc-comment-username mbc-comment-username-label mbc-truncate">
+                    {comment.full_name}
+                    <span>
+                      {' '}
+                      {comment.source_page === 1
+                        ? '(translator)'
+                        : '(reviewer)'}
+                    </span>
+                  </div>
+                )}
+                {deleteButton}
+              </div>
               <div className="mbc-comment-info-wrap mbc-clearfix">
                 <span className="mbc-comment-info mbc-comment-time pull-left">
                   {formattedDate}
@@ -276,20 +294,6 @@ class SegmentCommentsContainer extends React.Component {
             <Check size={16} /> Resolve
           </Button>
         )
-        const isAuthorOfLastComment =
-          comments[comments.length - 1].uid === this.context.userInfo.user.uid
-        deleteButton = isAuthorOfLastComment ? (
-          <Button
-            type={BUTTON_TYPE.DEFAULT}
-            mode={BUTTON_MODE.OUTLINE}
-            size={BUTTON_SIZE.SMALL}
-            onClick={this.deleteComment}
-          >
-            <Trash size={16} />
-          </Button>
-        ) : (
-          ''
-        )
       }
       if (thread_wrap.length > 0) {
         commentsHtml.push(
@@ -299,10 +303,7 @@ class SegmentCommentsContainer extends React.Component {
             data-count={count}
           >
             {thread_wrap}
-            <div className={'mbc-thread-wrap-bottom'}>
-              {deleteButton}
-              {resolveButton}
-            </div>
+            <div className={'mbc-thread-wrap-bottom'}>{resolveButton}</div>
           </div>,
         )
       }

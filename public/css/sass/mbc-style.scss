@@ -89,6 +89,10 @@
   background-color: $grey5;
   border-radius: 4px;
   padding: 8px;
+  > .bc-show-comment-top {
+    display: flex;
+    justify-content: space-between;
+  }
 }
 .mbc-comments-wrap .mbc-thread-wrap-resolved .mbc-show-comment:not(:last-of-type) {
   background-color: rgba($greenDefaultTransparent, 0.2);
