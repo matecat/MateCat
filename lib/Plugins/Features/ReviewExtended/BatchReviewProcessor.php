@@ -89,7 +89,7 @@ class BatchReviewProcessor {
             ];
 
             $chunkReview = ChunkReviewDao::createRecord( $data );
-            $project->getFeaturesSet()->run( 'chunkReviewRecordCreated', $chunkReview, $project );
+            ( new ChunkReviewModel( $chunkReview ) )->recountAndUpdatePassFailResult( $project );
             $chunkReviews[] = $chunkReview;
 
             Log::doJsonLog( 'Batch review processor created a new chunkReview (id ' . $chunkReview->id . ') for chunk with id ' . $this->chunk->id );

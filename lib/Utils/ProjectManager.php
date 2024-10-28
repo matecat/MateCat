@@ -1602,56 +1602,63 @@ class ProjectManager {
         // update the first chunk of the job to split
         $jobDao->updateStdWcAndTotalWc( $jobToSplit->id, $chunks[ 0 ][ 'standard_word_count' ], $chunks[ 0 ][ 'raw_word_count' ] );
 
+        $newJobList = [];
+
         // create the other chunks of the job to split
         foreach ( $chunks as $contents ) {
+
+            $newJob = clone $jobToSplit;
 
             //IF THIS IS NOT the original job, UPDATE relevant fields
             if ( $contents[ 'segment_start' ] != $projectStructure[ 'split_result' ][ 'job_first_segment' ] ) {
                 //next insert
-                $jobToSplit[ 'password' ]                = $this->generatePassword();
-                $jobToSplit[ 'create_date' ]             = date( 'Y-m-d H:i:s' );
-                $jobToSplit[ 'avg_post_editing_effort' ] = 0;
-                $jobToSplit[ 'total_time_to_edit' ]      = 0;
+                $newJob[ 'password' ]                = $this->generatePassword();
+                $newJob[ 'create_date' ]             = date( 'Y-m-d H:i:s' );
+                $newJob[ 'avg_post_editing_effort' ] = 0;
+                $newJob[ 'total_time_to_edit' ]      = 0;
             }
 
-            $jobToSplit[ 'last_opened_segment' ]  = $contents[ 'last_opened_segment' ];
-            $jobToSplit[ 'job_first_segment' ]    = $contents[ 'segment_start' ];
-            $jobToSplit[ 'job_last_segment' ]     = $contents[ 'segment_end' ];
-            $jobToSplit[ 'standard_analysis_wc' ] = $contents[ 'standard_word_count' ];
-            $jobToSplit[ 'total_raw_wc' ]         = $contents[ 'raw_word_count' ];
+            $newJob[ 'last_opened_segment' ]  = $contents[ 'last_opened_segment' ];
+            $newJob[ 'job_first_segment' ]    = $contents[ 'segment_start' ];
+            $newJob[ 'job_last_segment' ]     = $contents[ 'segment_end' ];
+            $newJob[ 'standard_analysis_wc' ] = $contents[ 'standard_word_count' ];
+            $newJob[ 'total_raw_wc' ]         = $contents[ 'raw_word_count' ];
 
-            $stmt = $jobDao->getSplitJobPreparedStatement( $jobToSplit );
+            $stmt = $jobDao->getSplitJobPreparedStatement( $newJob );
             $stmt->execute();
 
             $wCountManager = new CounterModel();
-            $wCountManager->initializeJobWordCount( $jobToSplit->id, $jobToSplit->password );
+            $wCountManager->initializeJobWordCount( $newJob->id, $newJob->password );
 
             if ( $this->dbHandler->affected_rows == 0 ) {
                 $msg = "Failed to split job into " . count( $projectStructure[ 'split_result' ][ 'chunks' ] ) . " chunks\n";
                 $msg .= "Tried to perform SQL: \n" . print_r( $stmt->queryString, true ) . " \n\n";
-                $msg .= "Failed Statement is: \n" . print_r( $jobToSplit, true ) . "\n";
-//                Utils::sendErrMailReport( $msg );
+                $msg .= "Failed Statement is: \n" . print_r( $newJob, true ) . "\n";
                 $this->_log( $msg );
                 throw new Exception( 'Failed to insert job chunk, project damaged.', -8 );
             }
 
+            $newJobList[] = $newJob;
+
             $stmt->closeCursor();
             unset( $stmt );
-
-            /**
-             * Async worker to re-count avg-PEE and total-TTE for split jobs
-             */
-            SplitQueue::recount( $jobToSplit );
 
             //add here job id to list
             $projectStructure[ 'array_jobs' ][ 'job_list' ]->append( $projectStructure[ 'job_to_split' ] );
             //add here passwords to list
-            $projectStructure[ 'array_jobs' ][ 'job_pass' ]->append( $jobToSplit[ 'password' ] );
+            $projectStructure[ 'array_jobs' ][ 'job_pass' ]->append( $newJob[ 'password' ] );
 
-            $projectStructure[ 'array_jobs' ][ 'job_segments' ]->offsetSet( $projectStructure[ 'job_to_split' ] . "-" . $jobToSplit[ 'password' ], new ArrayObject( [
+            $projectStructure[ 'array_jobs' ][ 'job_segments' ]->offsetSet( $projectStructure[ 'job_to_split' ] . "-" . $newJob[ 'password' ], new ArrayObject( [
                     $contents[ 'segment_start' ], $contents[ 'segment_end' ]
             ] ) );
 
+        }
+
+        foreach( $newJobList as $job ){
+            /**
+             * Async worker to re-count avg-PEE and total-TTE for split jobs
+             */
+            SplitQueue::recount( $job );
         }
 
         ( new Jobs_JobDao() )->destroyCacheByProjectId( $projectStructure[ 'id_project' ] );
