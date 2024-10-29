@@ -84,18 +84,17 @@ class SplitSegmentController extends KleinController {
         $password = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
         $segment = filter_var( $this->request->param( 'segment' ), FILTER_UNSAFE_RAW );
         $target = filter_var( $this->request->param( 'target' ), FILTER_UNSAFE_RAW );
-        $exec = filter_var( $this->request->param( 'exec' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
 
         if ( empty( $id_job ) ) {
-            throw new InvalidArgumentException("Missing id_job", -3);
+            throw new InvalidArgumentException("Missing id job", -3);
         }
 
         if ( empty( $id_segment ) ) {
-            throw new InvalidArgumentException("Missing id_segment", -4);
+            throw new InvalidArgumentException("Missing id segment", -4);
         }
 
         if ( empty( $password ) ) {
-            throw new InvalidArgumentException("Missing jobp password", -5);
+            throw new InvalidArgumentException("Missing job password", -5);
         }
 
         // this checks that the json is valid, but not its content
@@ -118,7 +117,6 @@ class SplitSegmentController extends KleinController {
             'job_pass' => $password,
             'segment' => $segment,
             'target' => $target,
-            'exec' => $exec,
         ];
     }
 }

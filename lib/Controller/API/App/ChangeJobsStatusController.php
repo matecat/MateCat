@@ -25,12 +25,12 @@ class ChangeJobsStatusController extends KleinController {
     public function changeStatus(): Response
     {
         try {
-            $data = $this->validateTheRequest();
+            $request = $this->validateTheRequest();
 
-            if ( $data['res_type'] == "prj" ) {
+            if ( $request['res_type'] == "prj" ) {
 
                 try {
-                    $project = Projects_ProjectDao::findByIdAndPassword( $data['res_id'], $data['password'] );
+                    $project = Projects_ProjectDao::findByIdAndPassword( $request['res_id'], $request['password'] );
                 } catch( Exception $e ){
                     $msg = "Error : wrong password provided for Change Project Status \n\n " . var_export( $_POST, true ) . "\n";
                     $this->log( $msg );
@@ -40,7 +40,7 @@ class ChangeJobsStatusController extends KleinController {
 
                 $chunks = $project->getJobs();
 
-                Jobs_JobDao::updateAllJobsStatusesByProjectId( $project->id, $data['new_status'] );
+                Jobs_JobDao::updateAllJobsStatusesByProjectId( $project->id, $request['new_status'] );
 
                 foreach( $chunks as $chunk ){
                     $lastSegmentsList = Translations_SegmentTranslationDao::getMaxSegmentIdsFromJob( $chunk );
@@ -50,7 +50,7 @@ class ChangeJobsStatusController extends KleinController {
             } else {
 
                 try {
-                    $firstChunk = Chunks_ChunkDao::getByIdAndPassword( $data['res_id'], $data['password'] );
+                    $firstChunk = Chunks_ChunkDao::getByIdAndPassword( $request['res_id'], $request['password'] );
                 } catch( Exception $e ){
                     $msg = "Error : wrong password provided for Change Job Status \n\n " . var_export( $_POST, true ) . "\n";
                     $this->log( $msg );
@@ -58,7 +58,7 @@ class ChangeJobsStatusController extends KleinController {
                     throw new NotFoundException("Job not found");
                 }
 
-                Jobs_JobDao::updateJobStatus( $firstChunk, $data['new_status'] );
+                Jobs_JobDao::updateJobStatus( $firstChunk, $request['new_status'] );
                 $lastSegmentsList = Translations_SegmentTranslationDao::getMaxSegmentIdsFromJob( $firstChunk );
                 Translations_SegmentTranslationDao::updateLastTranslationDateByIdList( $lastSegmentsList, Utils::mysqlTimestamp( time() ) );
             }
@@ -67,7 +67,7 @@ class ChangeJobsStatusController extends KleinController {
                 'errors' => [],
                 'code' => 1,
                 'data' => 'OK',
-                'status' => $data['new_status']
+                'status' => $request['new_status']
             ]);
 
         } catch (Exception $exception){
@@ -83,6 +83,9 @@ class ChangeJobsStatusController extends KleinController {
         $name = filter_var( $this->request->param( 'name' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW  ] );
         $tm_key = filter_var( $this->request->param( 'tm_key' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW  ] );
         $uuid = filter_var( $this->request->param( 'uuid' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW  ] );
+        $res_id = filter_var( $this->request->param( 'res_id' ), FILTER_VALIDATE_INT );
+        $password = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW  ] );
+        $new_status = filter_var( $this->request->param( 'new_status' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW  ] );
 
         if ( empty( $tm_key ) ) {
 
@@ -97,10 +100,25 @@ class ChangeJobsStatusController extends KleinController {
             $tm_key = INIT::$DEFAULT_TM_KEY;
         }
 
+        if ( empty( $res_id) ) {
+            throw new InvalidArgumentException("No id job provided", -1);
+        }
+
+        if ( empty( $password ) ) {
+            throw new InvalidArgumentException("No job password provided", -2);
+        }
+
+        if ( empty( $new_status ) ) {
+            throw new InvalidArgumentException("No new status provided", -3);
+        }
+
         return [
             'name' => $name,
             'tm_key' => $tm_key,
             'uuid' => $uuid,
+            'res_id' => $res_id,
+            'password' => $password,
+            'new_status' => $new_status,
         ];
     }
 }

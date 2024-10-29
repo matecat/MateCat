@@ -73,10 +73,18 @@ class SetChunkCompletedController extends KleinController {
         $password = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
         $received_password = filter_var( $this->request->param( 'current_password' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
 
+        if ( empty( $id_job ) ) {
+            throw new InvalidArgumentException("Missing id job", -1);
+        }
+
+        if ( empty( $password ) ) {
+            throw new InvalidArgumentException( "Missing id password", -2);
+        }
+
         $job = Jobs_JobDao::getByIdAndPassword( $id_job, $password, 60 * 60 * 24 );
 
         if ( empty( $job ) ) {
-            throw new InvalidArgumentException(-10, "wrong password");
+            throw new InvalidArgumentException( "wrong password", -10);
         }
 
         return [

@@ -113,7 +113,7 @@ class SplitJobController extends KleinController {
     /**
      * @return array
      */
-    private function validateTheRequest()
+    private function validateTheRequest(): array
     {
         $project_id = filter_var( $this->request->param( 'project_id' ), FILTER_SANITIZE_NUMBER_INT );
         $project_pass = filter_var( $this->request->param( 'project_pass' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );

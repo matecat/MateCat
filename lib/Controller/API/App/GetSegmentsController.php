@@ -7,6 +7,7 @@ use API\Commons\Validators\LoginValidator;
 use CatUtils;
 use Chunks_ChunkDao;
 use Exception;
+use InvalidArgumentException;
 use Langs_Languages;
 use Matecat\SubFiltering\MateCatFilter;
 use Segments\ContextGroupDao;
@@ -26,17 +27,14 @@ class GetSegmentsController extends KleinController {
 
     public function segments()
     {
-        $jid = filter_var( $this->request->param( 'jid' ), FILTER_SANITIZE_NUMBER_INT );
-        $step = filter_var( $this->request->param( 'step' ), FILTER_SANITIZE_NUMBER_INT );
-        $id_segment = filter_var( $this->request->param( 'segment' ), FILTER_SANITIZE_NUMBER_INT );
-        $password = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW ] );
-        $where = filter_var( $this->request->param( 'where' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW ] );
-
-        if( $step > self::MAX_PER_PAGE ) {
-            $step = self::MAX_PER_PAGE;
-        }
-
         try {
+            $request = $this->validateTheRequest();
+            $jid = $request['jid'];
+            $step = $request['step'];
+            $id_segment = $request['id_segment'];
+            $password = $request['password'];
+            $where = $request['where'];
+
             $job = Chunks_ChunkDao::getByIdAndPassword( $jid, $password );
 
             if($job === null){
@@ -137,6 +135,42 @@ class GetSegmentsController extends KleinController {
         } catch (Exception $exception){
             return $this->returnException($exception);
         }
+    }
+
+    /**
+     * @return array
+     */
+    private function validateTheRequest(): array
+    {
+        $jid = filter_var( $this->request->param( 'jid' ), FILTER_SANITIZE_NUMBER_INT );
+        $step = filter_var( $this->request->param( 'step' ), FILTER_SANITIZE_NUMBER_INT );
+        $id_segment = filter_var( $this->request->param( 'segment' ), FILTER_SANITIZE_NUMBER_INT );
+        $password = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW ] );
+        $where = filter_var( $this->request->param( 'where' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW ] );
+
+        if ( empty( $jid) ) {
+            throw new InvalidArgumentException("No id job provided", -1);
+        }
+
+        if ( empty( $password ) ) {
+            throw new InvalidArgumentException("No job password provided", -2);
+        }
+
+        if( empty($id_segment) ){
+            throw new InvalidArgumentException("No is segment provided", -3);
+        }
+
+        if( $step > self::MAX_PER_PAGE ) {
+            $step = self::MAX_PER_PAGE;
+        }
+
+        return [
+            'jid' => $jid,
+            'id_segment' => $id_segment,
+            'password' => $password,
+            'where' => $where,
+            'step' => $step,
+        ];
     }
 
     /**
