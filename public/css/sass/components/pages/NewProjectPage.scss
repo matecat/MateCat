@@ -1,32 +1,16 @@
-@import '../../vendor_mc/semantic/matecat_semantic';
-
-@import '../../variables';
+@import '../../common-main';
 
 @import '../../commons/buttons';
 @import '../../commons/filter-teams';
 @import '../../commons/icons';
-@import '../../commons/nav-bar';
 @import '../../commons/team-member';
 @import '../../commons/aria-label-tooltip';
 @import '../../commons/tooltip';
 
-@import '../../common-main';
 @import '../../common';
 @import '../../modals/language-selector';
 @import '../common/HomePageSection';
 @import '../../upload-page';
-@import '../common/Select';
-@import '../common/Dropdown';
-@import '../common/CookieConsent';
-@import '../common/Switch';
-@import '../common/MenuButton';
-@import '../common/Tooltip';
-@import '../common/Button';
-@import '../common/Popover';
-@import '../common/LabelWithTooltip';
-@import '../common/EmailsBadge';
-@import '../common/SegmentedControl';
-@import '../common/Accordion';
 @import '../signin/OnBoarding';
 @import '../Footer';
 

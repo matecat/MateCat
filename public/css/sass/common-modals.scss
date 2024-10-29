@@ -2,11 +2,6 @@
 @import 'modals/tmShareModal';
 @import 'modals/PreferenceModal';
 
-body.side-popup {
-  overflow: hidden !important;
-  font-family: Calibri, Arial, Helvetica, sans-serif;
-}
-
 h1,
 h2,
 h3,
@@ -24,18 +19,6 @@ a {
   font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
 }
 
-//ul,
-//li,
-//ol,
-//p,
-//button,
-//.button,
-//.primary,
-//input,
-//input[type='text'] input[type='email'] .input {
-//  font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
-//}
-
 ::-webkit-input-placeholder {
   /* Chrome/Opera/Safari */
   font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
@@ -45,8 +28,7 @@ a {
 /***** Login Footer ****/
 
 #logoutlink,
-.reset-password,
-#resendlink {
+.reset-password {
   margin-bottom: 10px;
   text-decoration: underline;
   float: left;
@@ -57,70 +39,6 @@ a {
     text-decoration: none;
     color: $linkBlueHover;
   }
-}
-
-#resendlink {
-  float: none;
-}
-
-a.ui.primary.right.floated.button.tiny.register-ok {
-  border: 1px solid black;
-  font-family: Calibri, Arial, Helvetica, sans-serif;
-  font-size: 16px;
-  padding: 6px 19px;
-}
-
-#welcomebox {
-  float: right;
-  cursor: pointer;
-  position: relative;
-  text-decoration: underline;
-  margin-left: 8px;
-}
-
-.manage #welcomebox {
-  margin-top: 0;
-}
-
-#welcomebox .icon-sort-up {
-  font-size: 22px;
-  float: right;
-  margin-left: 9px;
-}
-
-.user-menu {
-  position: absolute;
-  top: -92px;
-  background-color: white;
-  color: black;
-  text-align: left;
-  font-size: 19px;
-  left: -60px;
-  box-shadow: 0px 0px 16px 0px rgba(0, 0, 0, 0.4);
-  visibility: hidden;
-  transform: translateY(1em);
-  transition:
-    all 0.3s ease-in-out 0s,
-    visibility 0s linear 0.3s,
-    z-index 0s linear 0.01s;
-  z-index: -1;
-  opacity: 0;
-}
-
-.user-menu li {
-  width: 120px;
-  height: 20px;
-  padding: 10px;
-  line-height: 20px;
-  border-bottom: 1px solid black;
-}
-
-#welcomebox:hover .user-menu {
-  visibility: visible;
-  opacity: 1;
-  z-index: 1;
-  transform: translateY(0%);
-  transition-delay: 0s, 0s, 0.3s;
 }
 
 .success-modal,
@@ -134,16 +52,6 @@ a.ui.primary.right.floated.button.tiny.register-ok {
   color: red;
 }
 
-.validation-error.email-translator-error {
-  position: relative;
-  top: -25px;
-  left: 18px;
-  padding: 0px;
-  margin-bottom: 0px;
-  height: 0px;
-  display: none;
-}
-
 .user-info-form,
 .user-reset-password,
 .user-gdrive {
@@ -155,75 +63,6 @@ a.ui.primary.right.floated.button.tiny.register-ok {
 
 .user-reset-password {
   width: 100%;
-}
-
-.login-container-right {
-  width: 41%;
-  padding: 3% 1% 3% 25px;
-  font-size: 17px;
-  display: inline-block;
-  float: left;
-  box-sizing: border-box;
-  //background: url(https://www.matecat.com/wp-content/themes/stanleywp/images/bgfeat5.png) no-repeat;
-  //background-size: 84%;
-  //background-position: 370% center;
-  padding-top: 30px;
-}
-
-.login-container-left {
-  width: 59%;
-  display: inline-block;
-  padding: 20px 0;
-  background: #f8f8f8;
-  border-left: 1px solid #ccc;
-  box-sizing: border-box;
-  text-align: center;
-}
-
-.login-container-right h2,
-.login-container-right p,
-.login-container-right ul {
-  text-align: left;
-}
-
-.add-project-manage {
-  padding-left: 0px !important;
-  margin-left: 20px !important;
-}
-
-.login-container-right ul {
-  margin-left: 30px;
-  margin-top: 25px;
-  margin-bottom: 60px;
-}
-
-.login-container-right .register-button {
-  margin-top: 30px;
-  float: left;
-  margin-left: 50px;
-}
-
-.google-login-button {
-  background: url('/public/img/btn_gg_sprite.png') no-repeat;
-  background-position: 0 0;
-}
-
-.google-login-button:hover {
-  background-position: 0 -101px;
-  box-shadow: none !important;
-}
-
-.google-login-button:focus {
-  background-position: 0 -50px;
-}
-
-.google-login-button,
-.google-login-button:hover,
-.google-login-button:focus {
-  background-size: 100%;
-  border: none;
-  height: 30px;
-  box-shadow: none !important;
 }
 
 .forgot-password {
@@ -267,12 +106,6 @@ a.ui.primary.right.floated.button.tiny.register-ok {
   color: #000;
 }
 
-.login-container-right li {
-  margin-bottom: 15px;
-  margin-right: 42px;
-}
-
-.google-login-button,
 .login-button,
 .register-button,
 .register-submit,
@@ -570,64 +403,6 @@ a.ui.primary.right.floated.button.tiny.register-ok {
   -moz-box-shadow: none;
   -webkit-box-shadow: none;
   border: 1px solid #666;
-}
-
-.matecat-modal-content .btn-confirm-medium:active {
-  box-shadow: none !important;
-}
-
-.matecat-modal-content .btn-confirm-medium {
-  color: #fff;
-  background: $translatedBlue;
-  border: 1px solid #848689;
-  font-weight: bold;
-  text-decoration: none;
-  padding: 8px 18px;
-  border-radius: 2px;
-  font-size: 18px;
-  margin: 16px 0 16px 0px;
-  display: inline-block;
-  text-align: center;
-  position: relative;
-}
-
-.matecat-modal-content .btn-confirm-medium.google-login-button {
-  background: url(/public/img/btn_gg_sprite.png) no-repeat;
-  background-position: 0 0;
-  background-size: cover;
-  border: none;
-}
-
-.matecat-modal-content .btn-confirm-medium.google-login-button,
-.matecat-modal-content .btn-confirm-medium.google-login-button:hover,
-.matecat-modal-content .btn-confirm-medium.google-login-button:focus {
-  background-size: cover;
-  border: none;
-  height: 30px;
-  width: 160px;
-  margin-left: 0;
-  margin-top: 5px;
-  margin-bottom: 0;
-  box-sizing: content-box;
-}
-
-.matecat-modal-content .btn-confirm-medium.google-login-button:hover {
-  background: url(/public/img/btn_gg_sprite.png) no-repeat;
-  background-position: 0 -101px;
-  background-size: cover;
-  box-shadow: none !important;
-}
-
-.matecat-modal-content .btn-confirm-medium.sing-in {
-  margin-left: 0px;
-}
-
-.matecat-modal-content .btn-confirm-medium.sing-up {
-  //margin-left: 0px;
-}
-
-.matecat-modal-content .btn-confirm-medium.register-now {
-  margin-left: 0px;
 }
 
 .matecat-modal-content .disabled,
@@ -1124,19 +899,8 @@ a.ui.primary.right.floated.button.tiny.register-ok {
   }
 }
 
-a.login-button.btn-confirm-medium.sing-in.disabled:hover {
-  border: 1px solid #848689;
-}
-
 .dropdown > .menu {
   z-index: 100000000;
-}
-
-.popup.popup-confirm.confirm_checkbox {
-  .boxed {
-    padding-right: 20px;
-    padding-bottom: 15px;
-  }
 }
 
 .shortcuts-modal {

@@ -1,22 +1,15 @@
-@import '../../vendor_mc/semantic/matecat_semantic';
+@import '../../common-main';
 @import '../../commons/icons';
 @import '../../commons/shadows';
 @import '../../commons/divider';
 @import '../../commons/progress-mc-bar';
 @import '../../commons/buttons';
-@import '../../commons/nav-bar';
-@import '../../common-main';
-@import '../../common-components';
 @import '../signin/OnBoarding';
 @import '../../common';
 @import '../segment/tagsMenu';
 @import '../segment/Tag';
 @import '../header/header';
 @import '../segment/Tag';
-@import '../common/Switch';
-@import '../common/Button';
-@import '../common/LabelWithTooltip';
-@import '../common/Accordion';
 @import '../../style';
 
 $color-red: #fb2a0d;

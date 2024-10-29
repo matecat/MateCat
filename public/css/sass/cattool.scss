@@ -1,4 +1,4 @@
-@import '_mixins';
+@import 'commons/mixins';
 @import 'commons/_colors';
 body.cattool {
   //display: flex;
@@ -64,14 +64,6 @@ body.cattool {
   }
 }
 
-/*
-This file contains styles that are specific to the Cattool page.
-Styles from other css files should be ported over time.
-*/
-.statusmenu li a {
-  text-transform: uppercase;
-  cursor: pointer;
-}
 
 .segment-side-buttons {
   /* styles based on .sid line 376 style.css */
@@ -88,7 +80,6 @@ Styles from other css files should be ported over time.
   height: 100%;
 }
 
-.segmentButton,
 .toolbar a {
   height: 20px;
   zoom: 0.8;
@@ -107,26 +98,6 @@ Styles from other css files should be ported over time.
   &:active {
     background-color: #fff;
   }
-}
-
-.position-sing-in {
-  position: relative;
-  top: 5px;
-}
-
-.btn-confirm-medium {
-  color: #fff;
-  background: $translatedBlue;
-  border: 1px solid #848689;
-  font-weight: bold;
-  text-decoration: none;
-  padding: 8px 18px;
-  border-radius: 2px;
-  font-size: 18px;
-  margin: 0px 0px 0px 0px;
-  display: inline-block;
-  text-align: center;
-  position: relative;
 }
 
 //ICE MATCH

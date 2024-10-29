@@ -638,9 +638,6 @@ a.unarchive-project:after,
 .more:before,
 .more.minus:before,
 .close:before,
-  /* mbc chat */
-.mbc-close-icon:before,
-  /* mbc chat */
 .notific.error:before,
 .breadcrumbs #pname:before,
 .delete button:before,
@@ -1151,11 +1148,6 @@ a.unarchive-project:after {
 
 .icon-go-to-first:before {
   content: '\ea8e';
-}
-
-/* side-popup adjustments */
-body.side-popup {
-  overflow: hidden !important;
 }
 
 @font-face {

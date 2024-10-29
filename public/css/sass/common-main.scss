@@ -1,4 +1,7 @@
+@import './variables';
 @import 'commons/colors';
+@import './vendor_mc/semantic/matecat_semantic';
+
 @import "commons/typography";
 @import 'commons/matecat_fonts';
 
@@ -6,3 +9,4 @@
 @import 'common-modals';
 @import 'notifications';
 @import 'common-components';
+@import './commons/nav-bar';

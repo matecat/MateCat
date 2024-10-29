@@ -1,21 +1,17 @@
-@import '../../vendor_mc/semantic/matecat_semantic';
-@import '../../commons/colors';
-@import '../../commons/matecat_fonts';
+@import '../../common-main';
 @import '../../commons/icons';
 @import '../../commons/buttons';
 @import '../../commons/aria-label-tooltip';
-@import '../../common-main';
 @import "../../common";
 @import '../../style';
 @import '../../commons/progress-mc-bar';
 @import '../../mbc-style';
 @import '../../lexiqa';
 @import '../../segment-notes';
-@import '../../project-completion-feature';
+@import '../MarkAsCompleteButton';
 @import '../header/segmentsFilter';
 @import '../../review_extended';
 //components
-@import '../../commons/nav-bar';
 @import '../segment/segment';
 @import '../segment/segmentFooter';
 @import '../segment/segmentFooterTabGlossary';
@@ -31,13 +27,7 @@
 @import '../header/header';
 @import '../SegmentsContainer';
 @import '../header/FilesMenu';
-@import '../common/FilenameLabel';
-@import '../common/SegmentedControl';
 @import '../segment/segmentFooterTabAiAssistant';
-@import '../common/Button';
-@import '../common/Popover';
-@import '../common/LabelWithTooltip';
-@import '../common/Accordion';
 @import '../CattolFooter';
 @import '../signin/OnBoarding';
 
@@ -48,3 +38,11 @@
 @import '../../commons/tooltip';
 
 @import '../../settingsPanel';
+
+
+
+
+
+
+
+

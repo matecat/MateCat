@@ -1,8 +1,5 @@
-@import '../../vendor_mc/semantic/matecat_semantic';
-
 @import "../../common-main";
 @import '../../commons/filter-teams';
-@import '../../commons/nav-bar';
 @import '../../commons/icons';
 @import '../../commons/project';
 @import '../../commons/shadows';
@@ -10,8 +7,6 @@
 @import '../../commons/progress-mc-bar';
 @import '../../commons/buttons';
 
-@import '../../common-modals';
-@import '../../common-components';
 @import '../../modals/split_modal';
 @import '../../commons/sub-header';
 @import '../../commons/team-member';
@@ -19,7 +14,6 @@
 @import '../../commons/outsource';
 @import '../../commons/date-picker-translator';
 @import '../common/TeamModal';
-@import '../common/Accordion';
 @import '../header/TeamDropdown';
 @import '../UserProjectDropdown';
 @import '../signin/OnBoarding';
