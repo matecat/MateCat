@@ -2,11 +2,10 @@
 .input-checkbox {
     position: relative;
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     gap: 8px;
     cursor: default;
     user-select: none;
-
     &::before {
         content: '';
         position: absolute;
@@ -33,7 +32,6 @@
         position: relative;
         z-index: 1;
         flex-shrink: 0;
-        margin-top: 4px;
         color: $grey6;
     }
 

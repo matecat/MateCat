@@ -67,7 +67,7 @@ export const Checkbox = ({
           disabled={disabled}
           data-testid={testId}
         />
-        <svg width="12" height="12" viewBox="0 0 16 16">
+        <svg width="14" height="14" viewBox="0 0 16 16">
           {value == CHECKBOX_STATE.CHECKED ? (
             <path
               d="M14 0a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h12Zm-1.685 4.9a1 1 0 0 0-1.414-.015L6.69 9 5.099 7.445a1 1 0 0 0-1.398 1.43l2.29 2.24a1 1 0 0 0 1.399 0l4.91-4.8a1 1 0 0 0 .015-1.414Z"

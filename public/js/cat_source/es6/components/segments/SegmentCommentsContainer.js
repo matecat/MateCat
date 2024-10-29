@@ -228,7 +228,8 @@ class SegmentCommentsContainer extends React.Component {
             .trim()
           const isAuthorOfLastComment =
             comments[comments.length - 1].id === comment.id &&
-            comment.uid === this.context.userInfo.user.uid
+            comment.uid === this.context.userInfo.user.uid &&
+            comment.source_page == config.revisionNumber + 1
           deleteButton = isAuthorOfLastComment ? (
             <Button
               type={BUTTON_TYPE.DEFAULT}

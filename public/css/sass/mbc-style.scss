@@ -92,6 +92,7 @@
   > .bc-show-comment-top {
     display: flex;
     justify-content: space-between;
+    align-items: center;
   }
 }
 .mbc-comments-wrap .mbc-thread-wrap-resolved .mbc-show-comment:not(:last-of-type) {
@@ -106,7 +107,7 @@
  */
 .mbc-comment-info-wrap {
   clear: both;
-  margin: 4px 0;
+  margin-top: -6px;
 }
 
 .mbc-comment-info {
@@ -1001,9 +1002,10 @@ section:hover .mbc-comment-icon-button,
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 0;
+  padding: 8px 4px;
   .input-checkbox > span {
     color: $grey7;
+    font-size: 14px;
   }
 
 }
