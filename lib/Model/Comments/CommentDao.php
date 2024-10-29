@@ -53,17 +53,20 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param int $id
+     * @param Comments_CommentStruct $comment
      *
      * @return bool
+     * @throws ReflectionException
      */
-    public function deleteComment( int $id ): bool {
+    public function deleteComment( Comments_CommentStruct $comment ): bool {
         $sql  = "DELETE from comments WHERE id = :id";
         $con  = $this->database->getConnection();
         $stmt = $con->prepare( $sql );
 
+        $this->destroySegmentIdSegmentCache( $comment->id_segment );
+
         return $stmt->execute( [
-                'id' => $id
+                'id' => $comment->id
         ] );
     }
 
@@ -73,12 +76,12 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
      * @return bool
      * @throws ReflectionException
      */
-    public function destroySegmentIdCache( int $idSegment ): bool {
+    public function destroySegmentIdSegmentCache( int $idSegment ): bool {
         $con  = $this->database->getConnection();
         $stmt = $con->prepare( "SELECT * from comments WHERE id_segment = :id_segment and (message_type = :message_type_comment or message_type = :message_type_resolve) order by id" );
 
         return $this->_destroyObjectCache( $stmt,
-                ShapelessConcreteStruct::class,
+                Comments_BaseCommentStruct::class,
                 [
                         'id_segment'           => $idSegment,
                         'message_type_comment' => Comments_CommentDao::TYPE_COMMENT,
@@ -155,6 +158,8 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
         $id      = $this->database->last_insert();
         $obj->id = (int)$id;
 
+        $this->destroySegmentIdSegmentCache( $obj->id_segment );
+
         return $obj;
     }
 
@@ -183,6 +188,8 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
             $obj->thread_id   = $obj->getThreadId();
             $obj->create_date = $comment->create_date;
             $obj->timestamp   = $comment->timestamp;
+
+            $this->destroySegmentIdSegmentCache( $obj->id_segment );
 
         } catch ( Exception $e ) {
             $err = $e->getMessage();
