@@ -14,6 +14,7 @@ use Validator\EngineValidator;
 use Validator\JSONValidator;
 use Validator\JSONValidatorObject;
 use Validator\MMTValidator;
+use Xliff\XliffConfigTemplateDao;
 
 class createProjectController extends ajaxController {
 
@@ -100,6 +101,7 @@ class createProjectController extends ajaxController {
                 'dialect_strict'                => [ 'filter' => FILTER_SANITIZE_STRING ],
                 'filters_extraction_parameters' => [ 'filter' => FILTER_SANITIZE_STRING ],
                 'xliff_parameters'              => [ 'filter' => FILTER_SANITIZE_STRING ],
+                'xliff_parameters_template_id'  => [ 'filter' => FILTER_VALIDATE_INT ],
 
                 'qa_model_template_id'     => [ 'filter' => FILTER_VALIDATE_INT ],
                 'payable_rate_template_id' => [ 'filter' => FILTER_VALIDATE_INT ],
@@ -169,10 +171,10 @@ class createProjectController extends ajaxController {
         $this->only_private            = ( is_null( $this->postInput[ 'get_public_matches' ] ) ? false : !$this->postInput[ 'get_public_matches' ] );
         $this->due_date                = ( empty( $this->postInput[ 'due_date' ] ) ? null : Utils::mysqlTimestamp( $this->postInput[ 'due_date' ] ) );
 
-        $this->dictation = $this->postInput['dictation'] ?? null;
-        $this->show_whitespace = $this->postInput['show_whitespace'] ?? null;
-        $this->character_counter = $this->postInput['character_counter'] ?? null;
-        $this->ai_assistant = $this->postInput['ai_assistant'] ?? null;
+        $this->dictation         = $this->postInput[ 'dictation' ] ?? null;
+        $this->show_whitespace   = $this->postInput[ 'show_whitespace' ] ?? null;
+        $this->character_counter = $this->postInput[ 'character_counter' ] ?? null;
+        $this->ai_assistant      = $this->postInput[ 'ai_assistant' ] ?? null;
 
         $this->__setMetadataFromPostInput();
 
@@ -348,10 +350,10 @@ class createProjectController extends ajaxController {
         $projectStructure[ 'user_ip' ]                      = Utils::getRealIpAddr();
         $projectStructure[ 'HTTP_HOST' ]                    = INIT::$HTTPHOST;
 
-        $projectStructure['dictation']                      = $this->dictation;
-        $projectStructure['show_whitespace']                = $this->show_whitespace;
-        $projectStructure['character_counter']              = $this->character_counter;
-        $projectStructure['ai_assistant']                   = $this->ai_assistant;
+        $projectStructure[ 'dictation' ]         = $this->dictation;
+        $projectStructure[ 'show_whitespace' ]   = $this->show_whitespace;
+        $projectStructure[ 'character_counter' ] = $this->character_counter;
+        $projectStructure[ 'ai_assistant' ]      = $this->ai_assistant;
 
         // MMT Glossaries
         // (if $engine is not an MMT instance, ignore 'mmt_glossaries')
@@ -760,9 +762,16 @@ class createProjectController extends ajaxController {
      * @throws Exception
      */
     private function __validateXliffParameters() {
+
         if ( !empty( $this->postInput[ 'xliff_parameters' ] ) ) {
 
             $json   = html_entity_decode( $this->postInput[ 'xliff_parameters' ] );
+
+            // first check if `xliff_parameters` is a valid JSON
+            if ( !Utils::isJson( $json ) ) {
+                throw new Exception( "xliff_parameters is not a valid JSON" );
+            }
+
             $schema = file_get_contents( INIT::$ROOT . '/inc/validation/schema/xliff_parameters_rules_content.json' );
 
             $validatorObject       = new JSONValidatorObject();
@@ -770,8 +779,20 @@ class createProjectController extends ajaxController {
 
             $validator = new JSONValidator( $schema, true );
             $validator->validate( $validatorObject );
-            $this->xliff_parameters = $validatorObject->decoded;
+            $this->xliff_parameters = json_decode( $json, true ); // decode again because we need an associative array and not stdClass
+
+        } elseif ( !empty( $this->postInput[ 'xliff_parameters_template_id' ] ) ) {
+
+            $xliffConfigTemplate = XliffConfigTemplateDao::getByIdAndUser( $this->postInput[ 'xliff_parameters_template_id' ], $this->getUser()->uid );
+
+            if ( $xliffConfigTemplate === null ) {
+                throw new Exception( "xliff_parameters_template_id not valid" );
+            }
+
+            $this->xliff_parameters = $xliffConfigTemplate->rules->getArrayCopy();
+
         }
+
     }
 
     /**
