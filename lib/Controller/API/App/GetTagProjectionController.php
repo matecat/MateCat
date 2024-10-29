@@ -92,12 +92,20 @@ class GetTagProjectionController extends KleinController {
         }
 
         if ( empty( $target_lang ) ) {
-            throw new InvalidArgumentException("missing target lang" , -2);
+            throw new InvalidArgumentException("missing target lang" , -4);
+        }
+
+        if ( empty( $password ) ) {
+            throw new InvalidArgumentException("missing job password" , -5);
+        }
+
+        if ( empty( $id_segment ) ) {
+            throw new InvalidArgumentException("missing id segment" , -6);
         }
 
         if ( empty( $id_job ) ) {
             $msg = "\n\n Critical. Quit. \n\n " . var_export( $_POST, true );
-            Log::doJsonLog( $msg );
+            $this->log( $msg );
             Utils::sendErrMailReport( $msg );
 
             throw new InvalidArgumentException("id_job not valid" , -4);

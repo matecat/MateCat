@@ -123,6 +123,22 @@ class SplitJobController extends KleinController {
         $num_split = filter_var( $this->request->param( 'num_split' ), FILTER_SANITIZE_NUMBER_INT );
         $split_values = filter_var( $this->request->param( 'split_values' ), FILTER_CALLBACK, [ 'options' => ['self', 'valuesToInt'] ] );
 
+        if ( empty( $project_id) ) {
+            throw new InvalidArgumentException("No id project provided", -1);
+        }
+
+        if ( empty( $project_pass ) ) {
+            throw new InvalidArgumentException("No project password provided", -2);
+        }
+
+        if ( empty( $job_id) ) {
+            throw new InvalidArgumentException("No id job provided", -3);
+        }
+
+        if ( empty( $job_pass ) ) {
+            throw new InvalidArgumentException("No job password provided", -4);
+        }
+
         return [
             'project_id' => (int)$project_id,
             'project_pass' => $project_pass,

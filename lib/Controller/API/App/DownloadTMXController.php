@@ -29,13 +29,13 @@ class DownloadTMXController extends KleinController {
     public function download(): Response
     {
         try {
-            $data = $this->validateTheRequest();
-            $res = $data['tmxHandler']->requestTMXEmailDownload(
-                ( $data['download_to_email'] != false ? $data['download_to_email'] : $this->user->email ),
+            $request = $this->validateTheRequest();
+            $res = $request['tmxHandler']->requestTMXEmailDownload(
+                ( $request['download_to_email'] != false ? $request['download_to_email'] : $this->user->email ),
                 $this->user->first_name,
                 $this->user->last_name,
-                $data['tm_key'],
-                $data['strip_tags']
+                $request['tm_key'],
+                $request['strip_tags']
             );
 
             return $this->response->json([
@@ -53,8 +53,8 @@ class DownloadTMXController extends KleinController {
             }
 
             $r .= print_r( "User ID: " . $this->user->uid, true ) . "\n";
-            $r .= print_r( $e->getMessage(), true ) . "\n";
-            $r .= print_r( $e->getTraceAsString(), true ) . "\n";
+            $r .= print_r( $exception->getMessage(), true ) . "\n";
+            $r .= print_r( $exception->getTraceAsString(), true ) . "\n";
 
             $r .= "\n\n";
             $r .= " - REQUEST URI: " . print_r( @$_SERVER[ 'REQUEST_URI' ], true ) . "\n";
@@ -93,6 +93,10 @@ class DownloadTMXController extends KleinController {
 
         if ( $download_to_email === false ) {
             throw new InvalidArgumentException("Invalid email provided for download.", -1);
+        }
+
+        if ( $tm_name === false ) {
+            throw new InvalidArgumentException("Invalid TM name provided.", -2);
         }
 
         $tmxHandler = new TMSService();

@@ -8,6 +8,7 @@ use Constants_JobStatus;
 use Constants_Teams;
 use Exception;
 use Exceptions\NotFoundException;
+use InvalidArgumentException;
 use Klein\Response;
 use ManageUtils;
 use Teams\MembershipDao;
@@ -111,6 +112,10 @@ class GetProjectsController extends KleinController {
         $page = (!empty( $page )) ? (int)$page : 1;
         $step = (!empty( $step )) ? (int)$step : 10;
         $start  = ( $page - 1 ) * $step;
+
+        if ( empty( $id_team ) ) {
+            throw new InvalidArgumentException("No id team provided", -1);
+        }
 
         return [
             'page' => $page,

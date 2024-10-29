@@ -25,9 +25,10 @@ class GetWarningController extends KleinController {
     public function global(): Response
     {
         try {
-            $id_job = filter_var( $this->request->param( 'id_job' ), FILTER_SANITIZE_NUMBER_INT );
-            $password = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
-            $token = filter_var( $this->request->param( 'token' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW ] );
+            $request = $this->validateTheGlobalRequest();
+            $id_job = $request['id_job'];
+            $password = $request['password'];
+            $token = $request['token'];
 
             try {
                 $chunk = $this->getChunk($id_job, $password);
@@ -62,20 +63,46 @@ class GetWarningController extends KleinController {
     }
 
     /**
+     * @return array
+     * @throws Exception
+     */
+    private function validateTheGlobalRequest(): array
+    {
+        $id_job = filter_var( $this->request->param( 'id_job' ), FILTER_SANITIZE_NUMBER_INT );
+        $password = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
+        $token = filter_var( $this->request->param( 'token' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW ] );
+
+        if ( empty( $id_job ) ) {
+            throw new \InvalidArgumentException("Empty id job", -1);
+        }
+
+        if ( empty( $password ) ) {
+            throw new \InvalidArgumentException("Empty job password", -2);
+        }
+
+        return [
+            'id_job' => $id_job,
+            'password' => $password,
+            'token' => $token,
+        ];
+    }
+
+    /**
      * @return Response
      */
     public function local(): Response
     {
         try {
-            $id = filter_var( $this->request->param( 'id' ), FILTER_SANITIZE_NUMBER_INT );
-            $id_job = filter_var( $this->request->param( 'id_job' ), FILTER_SANITIZE_NUMBER_INT );
-            $src_content = filter_var( $this->request->param( 'src_content' ), FILTER_UNSAFE_RAW );
-            $trg_content = filter_var( $this->request->param( 'trg_content' ), FILTER_UNSAFE_RAW );
-            $password = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
-            $token = filter_var( $this->request->param( 'token' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW ] );
-            $logs = filter_var( $this->request->param( 'logs' ), FILTER_UNSAFE_RAW );
-            $segment_status = filter_var( $this->request->param( 'segment_status' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW ] );
-            $characters_counter = filter_var( $this->request->param( 'characters_counter' ), FILTER_SANITIZE_NUMBER_INT );
+            $request = $this->validateTheLocalRequest();
+            $id = $request['id'];
+            $id_job = $request['id_job'];
+            $src_content = $request['src_content'];
+            $trg_content = $request['trg_content'];
+            $password = $request['password'];
+            $token = $request['token'];
+            $logs = $request['logs'];
+            $segment_status = $request['segment_status'];
+            $characters_counter = $request['characters_counter'];
 
             if(empty($segment_status)){
                 $segment_status = 'draft';
@@ -129,6 +156,43 @@ class GetWarningController extends KleinController {
         } catch (Exception $exception){
             return $this->returnException($exception);
         }
+    }
+
+    /**
+     * @return array
+     * @throws Exception
+     */
+    private function validateTheLocalRequest(): array
+    {
+        $id = filter_var( $this->request->param( 'id' ), FILTER_SANITIZE_NUMBER_INT );
+        $id_job = filter_var( $this->request->param( 'id_job' ), FILTER_SANITIZE_NUMBER_INT );
+        $src_content = filter_var( $this->request->param( 'src_content' ), FILTER_UNSAFE_RAW );
+        $trg_content = filter_var( $this->request->param( 'trg_content' ), FILTER_UNSAFE_RAW );
+        $password = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
+        $token = filter_var( $this->request->param( 'token' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW ] );
+        $logs = filter_var( $this->request->param( 'logs' ), FILTER_UNSAFE_RAW );
+        $segment_status = filter_var( $this->request->param( 'segment_status' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW ] );
+        $characters_counter = filter_var( $this->request->param( 'characters_counter' ), FILTER_SANITIZE_NUMBER_INT );
+
+        if ( empty( $id_job ) ) {
+            throw new \InvalidArgumentException("Empty id job", -1);
+        }
+
+        if ( empty( $password ) ) {
+            throw new \InvalidArgumentException("Empty job password", -2);
+        }
+
+        return [
+            'id' => $id,
+            'id_job' => $id_job,
+            'src_content' => $src_content,
+            'trg_content' => $trg_content,
+            'password' => $password,
+            'token' => $token,
+            'logs' => $logs,
+            'segment_status' => $segment_status,
+            'characters_counter' => $characters_counter,
+        ];
     }
 
     /**

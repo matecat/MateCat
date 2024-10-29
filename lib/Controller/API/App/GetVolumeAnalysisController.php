@@ -52,6 +52,14 @@ class GetVolumeAnalysisController extends KleinController {
             throw new InvalidArgumentException("No id project provided", -1);
         }
 
+        if ( empty( $ppassword ) ) {
+            throw new InvalidArgumentException("No project password provided", -2);
+        }
+
+        if ( empty( $jpassword ) ) {
+            throw new InvalidArgumentException("No job password provided", -3);
+        }
+
         return [
             'pid' => $pid,
             'ppassword' => $ppassword,

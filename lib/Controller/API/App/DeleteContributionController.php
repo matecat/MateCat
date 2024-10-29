@@ -159,6 +159,14 @@ class DeleteContributionController extends KleinController {
             throw new InvalidArgumentException( "missing target", -4);
         }
 
+        if ( empty( $id_job ) ) {
+            throw new InvalidArgumentException( "missing id job", -5);
+        }
+
+        if ( empty( $password ) ) {
+            throw new InvalidArgumentException( "missing job password", -6);
+        }
+
         return [
             'id_segment' => $id_segment ,
             'source_lang' =>  $source_lang ,

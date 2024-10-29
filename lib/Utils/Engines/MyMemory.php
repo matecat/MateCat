@@ -751,8 +751,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
      * MyMemory private endpoint
      *
      * @param $config
-     *
-     * @return array|Engines_Results_MyMemory_TagProjectionResponse
+     * @return array
      */
     public function getTagProjection( $config ) {
 
