@@ -158,11 +158,15 @@ class GetContributionController extends KleinController {
         }
 
         if ( empty( $id_job ) ) {
-            throw new InvalidArgumentException("missing id_job", -3);
+            throw new InvalidArgumentException("missing id job", -3);
+        }
+
+        if ( empty( $password ) ) {
+            throw new InvalidArgumentException("missing job password", -4);
         }
 
         if ( empty( $id_client ) ) {
-            throw new InvalidArgumentException("missing id_client", -4);
+            throw new InvalidArgumentException("missing id_client", -5);
         }
 
         return [

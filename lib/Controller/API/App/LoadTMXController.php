@@ -26,7 +26,7 @@ class LoadTMXController extends KleinController {
     public function newTM(): Response
     {
         try {
-            $data = $this->validateTheRequest();
+            $request = $this->validateTheRequest();
             $TMService = new TMSService();
             $file = $TMService->uploadFile();
 
@@ -40,7 +40,7 @@ class LoadTMXController extends KleinController {
 
                 $file = new TMSFile(
                     $fileInfo->file_path,
-                    $data['tm_key'],
+                    $request['tm_key'],
                     $fileInfo->name
                 );
 
@@ -54,7 +54,7 @@ class LoadTMXController extends KleinController {
                  *
                  * If it is NOT the default the key belongs to the user, so it's correct to update the user keyring.
                  */
-                if ( $data['tm_key'] != INIT::$DEFAULT_TM_KEY ) {
+                if ( $request['tm_key'] != INIT::$DEFAULT_TM_KEY ) {
 
                     /*
                      * Update a memory key with the name of th TMX if the key name is empty
@@ -90,9 +90,9 @@ class LoadTMXController extends KleinController {
     public function uploadStatus(): Response
     {
         try {
-            $data = $this->validateTheRequest();
+            $request = $this->validateTheRequest();
             $TMService = new TMSService();
-            $status    = $TMService->tmxUploadStatus( $data['uuid'] );
+            $status    = $TMService->tmxUploadStatus( $request['uuid'] );
 
             return $this->response->json([
                 'errors' => [],
@@ -110,22 +110,28 @@ class LoadTMXController extends KleinController {
      */
     private function validateTheRequest(): array
     {
-        $id = filter_var( $this->request->param( 'res' ), FILTER_SANITIZE_NUMBER_INT);
-        $res = filter_var( $this->request->param( 'res' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW  ] );
-        $password = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW  ] );
-        $new_status = filter_var( $this->request->param( 'new_status' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW  ] );
-        $pn = filter_var( $this->request->param( 'pn' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW  ] );
+        $name = filter_var( $this->request->param( 'name' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW  ] );
+        $tm_key = filter_var( $this->request->param( 'tm_key' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW  ] );
+        $uuid = filter_var( $this->request->param( 'uuid' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW  ] );
 
-        if ( !Constants_JobStatus::isAllowedStatus( $new_status ) ) {
-            throw new Exception( "Invalid Status" );
+        if ( empty( $tm_key ) ) {
+
+            if ( empty( INIT::$DEFAULT_TM_KEY ) ) {
+                throw new InvalidArgumentException("Please specify a TM key.", -2);
+            }
+
+            /*
+             * Added the default Key.
+             * This means if no private key are provided the TMX will be loaded in the default MyMemory key
+             */
+            $tm_key = INIT::$DEFAULT_TM_KEY;
+
         }
 
         return [
-            'res_id' => $id,
-            'res_type' => $res,
-            'password' => $password,
-            'new_status' => $new_status,
-            'pn' => $pn,
+            'name' => $name,
+            'tm_key' => $tm_key,
+            'uuid' => $uuid,
         ];
     }
 }

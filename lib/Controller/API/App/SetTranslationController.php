@@ -438,23 +438,23 @@ class SetTranslationController extends KleinController {
         $split_statuses        = explode( ",", strtoupper( $splitStatuses ) ); //strtoupper transforms null to ""
 
         if ( empty( $id_job ) ) {
-            throw new InvalidArgumentException("missing id_job", -2);
+            throw new InvalidArgumentException("Missing id job", -2);
         }
 
         if ( empty( $password ) ) {
-            throw new InvalidArgumentException("missing password", -3);
+            throw new InvalidArgumentException("Missing password", -3);
         }
 
         //get Job Info, we need only a row of jobs ( split )
         $chunk = Chunks_ChunkDao::getByIdAndPassword( (int)$id_job, $password );
 
         if ( empty( $chunk ) ) {
-            throw new NotFoundException("missing password", -3);
+            throw new NotFoundException("Wrong password", -3);
         }
 
         //add check for job status archived.
         if ( strtolower( $chunk[ 'status' ] ) == Constants_JobStatus::STATUS_ARCHIVED ) {
-            throw new NotFoundException("job archived", -3);
+            throw new NotFoundException("Job archived", -3);
         }
 
         $data = [

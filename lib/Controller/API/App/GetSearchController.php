@@ -378,7 +378,7 @@ class GetSearchController extends KleinController {
 
                 } catch ( Exception $e ) {
                     $msg = $e->getMessage() . "\n\n" . $e->getTraceAsString();
-                    Log::doJsonLog( $msg );
+                    $this->log( $msg );
                     Utils::sendErrMailReport( $msg );
                     $db->rollback();
 
@@ -431,7 +431,7 @@ class GetSearchController extends KleinController {
                 Translations_SegmentTranslationDao::updateTranslationAndStatusAndDate( $new_translation );
                 $db->commit();
             } catch ( Exception $e ) {
-                Log::doJsonLog( "Lock: Transaction Aborted. " . $e->getMessage() );
+                $this->log( "Lock: Transaction Aborted. " . $e->getMessage() );
                 $db->rollback();
 
                 throw new RuntimeException("A fatal error occurred during saving of segments");
@@ -449,7 +449,7 @@ class GetSearchController extends KleinController {
                     'source_page_code' => ReviewUtils::revisionNumberToSourcePage( $revisionNumber )
                 ] );
             } catch ( Exception $e ) {
-                Log::doJsonLog( "Exception in setTranslationCommitted callback . " . $e->getMessage() . "\n" . $e->getTraceAsString() );
+                $this->log( "Exception in setTranslationCommitted callback . " . $e->getMessage() . "\n" . $e->getTraceAsString() );
 
                 throw new RuntimeException("Exception in setTranslationCommitted callback");
             }
