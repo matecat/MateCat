@@ -2,12 +2,9 @@
 
 namespace Filters\DTO;
 
-use Countable;
 use JsonSerializable;
 
-class MSWord implements IDto, JsonSerializable, Countable {
-
-    use DefaultTrait;
+class MSWord implements IDto, JsonSerializable {
 
     private bool  $extract_doc_properties   = false;
     private bool  $extract_comments         = false;
@@ -106,43 +103,16 @@ class MSWord implements IDto, JsonSerializable, Countable {
 
         $format = [];
 
-        if ( $this->extract_doc_properties ) {
-            $format[ 'extract_doc_properties' ] = $this->extract_doc_properties;
-        }
-
-        if ( $this->extract_comments ) {
-            $format[ 'extract_comments' ] = $this->extract_comments;
-        }
-
-        if ( $this->extract_headers_footers ) {
-            $format[ 'extract_headers_footers' ] = $this->extract_headers_footers;
-        }
-
-        if ( $this->extract_hidden_text ) {
-            $format[ 'extract_hidden_text' ] = $this->extract_hidden_text;
-        }
-
-        if ( $this->accept_revisions ) {
-            $format[ 'accept_revisions' ] = $this->accept_revisions;
-        }
-
-        if ( !empty( $this->exclude_styles ) ) {
-            $format[ 'exclude_styles' ] = $this->exclude_styles;
-        }
-
-        if ( !empty( $this->exclude_highlight_colors ) ) {
-            $format[ 'exclude_highlight_colors' ] = $this->exclude_highlight_colors;
-        }
+        $format[ 'extract_doc_properties' ]   = $this->extract_doc_properties;
+        $format[ 'extract_comments' ]         = $this->extract_comments;
+        $format[ 'extract_headers_footers' ]  = $this->extract_headers_footers;
+        $format[ 'extract_hidden_text' ]      = $this->extract_hidden_text;
+        $format[ 'accept_revisions' ]         = $this->accept_revisions;
+        $format[ 'exclude_styles' ]           = $this->exclude_styles;
+        $format[ 'exclude_highlight_colors' ] = $this->exclude_highlight_colors;
 
         return $format;
 
-    }
-
-    /**
-     * @return int
-     */
-    public function count(): int {
-        return count( $this->jsonSerialize() );
     }
 
 }

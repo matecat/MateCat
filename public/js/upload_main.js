@@ -515,6 +515,10 @@ var convertFile = function (fname, filerow, filesize, enforceConversion) {
 
   filerow.removeClass('ready').addClass('converting').data('session', session)
 
+  const filtersTemplate = CreateProjectStore.getFiltersTemplate()
+
+  console.log('filtersTemplate', filtersTemplate)
+
   const controller = new AbortController()
   const signal = controller.signal
   convertFileRequest({
@@ -523,6 +527,7 @@ var convertFile = function (fname, filerow, filesize, enforceConversion) {
     source_lang: CreateProjectStore.getSourceLang(),
     target_lang: CreateProjectStore.getTargetLangs(),
     segmentation_rule: UI.segmentationRule,
+    filters_extraction_parameters_template_id: filtersTemplate?.id,
     signal,
   })
     .then(function ({data, errors}) {

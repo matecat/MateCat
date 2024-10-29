@@ -123,10 +123,6 @@ test('Create, update and delete template', async () => {
           id_team: 45,
           qa_model_template_id: 4456,
           payable_rate_template_id: 434,
-          speech2text: true,
-          lexica: true,
-          tag_projection: true,
-          cross_language_matches: ['it-IT', 'fr-FR'],
           segmentation_rule: 'General',
           mt: {
             id: 9,
@@ -146,10 +142,6 @@ test('Create, update and delete template', async () => {
           id_team: 45,
           qa_model_template_id: 4456,
           payable_rate_template_id: 434,
-          speech2text: true,
-          lexica: true,
-          tag_projection: true,
-          cross_language_matches: ['it-IT', 'fr-FR'],
           segmentation_rule: 'General',
           mt: {
             id: 9,

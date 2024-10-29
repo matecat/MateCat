@@ -63,7 +63,7 @@ abstract class DataAccess_AbstractDaoObjectStruct extends stdClass implements Da
      * @return mixed
      *
      */
-    protected function cachable( $method_name, $params, $function ) {
+    protected function cachable( string $method_name, $params, callable $function ) {
         $resultset = $this->cached_results[ $method_name ] ?? null;
         if ( $resultset == null ) {
             $resultset = $this->cached_results[ $method_name ] = call_user_func( $function, $params );

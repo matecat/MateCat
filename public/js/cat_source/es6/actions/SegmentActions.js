@@ -152,6 +152,10 @@ const SegmentActions = {
         return
       }
       AppDispatcher.dispatch({
+        actionType: SegmentConstants.SCROLL_TO_SEGMENT,
+        sid: sid,
+      })
+      AppDispatcher.dispatch({
         actionType: SegmentConstants.OPEN_SEGMENT,
         sid: sid,
         wasOriginatedFromBrowserHistory,
@@ -1574,11 +1578,6 @@ const SegmentActions = {
       tagPlaceholder,
       entityKey,
       isTarget,
-    })
-  },
-  toggleCharacterCounter: () => {
-    AppDispatcher.dispatch({
-      actionType: SegmentConstants.TOGGLE_CHARACTER_COUNTER,
     })
   },
   hideAiAssistant: () => {

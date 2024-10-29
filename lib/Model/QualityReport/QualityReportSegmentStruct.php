@@ -165,7 +165,7 @@ class QualityReport_QualityReportSegmentStruct extends DataAccess_AbstractDaoObj
         return $segment;
     }
 
-    public function getLocalWarning( FeatureSet $featureSet, Chunks_ChunkStruct $chunk ) {
+    public function getLocalWarning( FeatureSet $featureSet, Jobs_JobStruct $chunk ) {
 
         $QA = new QA( $this->segment, $this->translation );
         $QA->setSourceSegLang( $chunk->source );

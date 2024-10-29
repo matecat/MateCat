@@ -25,28 +25,28 @@ class ProjectOptionSanitizerTest extends AbstractTest {
 
     function testLexiQaIsLeftTrueForValidLanguageCombinations() {
         $sanitizer = new ProjectOptionsSanitizer( [ 'lexiqa' => true ] );
-        $sanitizer->setLanguages( 'en-US', 'en-GB' );
+        $sanitizer->setLanguages( 'en-US', [ 'en-GB' ] );
         $result = $sanitizer->sanitize();
         $this->assertEquals( [ 'lexiqa' => 1 ], $result );
     }
 
     function testLexiQaIsSanitizedForOddLanguages() {
         $sanitizer = new ProjectOptionsSanitizer( [ 'lexiqa' => true ] );
-        $sanitizer->setLanguages( 'en-US', 'es-MX' );
+        $sanitizer->setLanguages( 'en-US', [ 'es-MX' ] );
         $result = $sanitizer->sanitize();
         $this->assertEquals( [ 'lexiqa' => 1 ], $result );
     }
 
     function testTagProjecttionIsTrueForValidLanguages() {
         $sanitizer = new ProjectOptionsSanitizer( [ 'tag_projection' => true ] );
-        $sanitizer->setLanguages( 'en-US', 'es-MX' );
+        $sanitizer->setLanguages( 'en-US', [ 'es-MX' ] );
         $result = $sanitizer->sanitize();
         $this->assertEquals( [ 'tag_projection' => 1 ], $result );
     }
 
     function testTagProjecttionIsSanitizedForOddLanguages() {
         $sanitizer = new ProjectOptionsSanitizer( [ 'tag_projection' => true ] );
-        $sanitizer->setLanguages( 'en-US', 'ru-RU' );
+        $sanitizer->setLanguages( 'en-US', [ 'ru-RU' ] );
         $result = $sanitizer->sanitize();
         $this->assertEquals( [ 'tag_projection' => 1 ], $result );
     }
@@ -69,7 +69,7 @@ class ProjectOptionSanitizerTest extends AbstractTest {
                 'lexiqa'                    => false,
                 'another_key_set_by_plugin' => 42
         ] );
-        $sanitizer->setLanguages( 'en-US', 'es-MX' );
+        $sanitizer->setLanguages( 'en-US', [ 'es-MX' ] );
 
         $this->assertEquals( [
                 'tag_projection'            => 1,
@@ -80,7 +80,7 @@ class ProjectOptionSanitizerTest extends AbstractTest {
 
     function testLexiQaWorksWithRecursiveArrayObject() {
         $sanitizer = new ProjectOptionsSanitizer( [ 'lexiqa' => true ] );
-        $sanitizer->setLanguages( 'en-US', new RecursiveArrayObject( [ 'en-GB' ] ) );
+        $sanitizer->setLanguages( 'en-US', [ 'en-GB' ] );
         $result = $sanitizer->sanitize();
         $this->assertEquals( [ 'lexiqa' => 1 ], $result );
     }

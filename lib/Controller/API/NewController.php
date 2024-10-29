@@ -1,7 +1,10 @@
 <?php
 
+use API\Commons\Exceptions\AuthenticationError;
 use Constants\ConversionHandlerStatus;
 use Conversion\ConvertedFileModel;
+use Exceptions\NotFoundException;
+use Exceptions\ValidationError;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use Filters\FiltersConfigTemplateDao;
@@ -14,6 +17,8 @@ use PayableRates\CustomPayableRateStruct;
 use ProjectQueue\Queue;
 use QAModelTemplate\QAModelTemplateDao;
 use QAModelTemplate\QAModelTemplateStruct;
+use TaskRunner\Exceptions\EndQueueException;
+use TaskRunner\Exceptions\ReQueueException;
 use Teams\MembershipDao;
 use TMS\TMSService;
 use Validator\EngineValidator;
@@ -128,6 +133,11 @@ class NewController extends ajaxController {
 
     private $xliff_parameters;
 
+    private $dictation;
+    private $show_whitespace;
+    private $character_counter;
+    private $ai_assistant;
+
     private function setBadRequestHeader() {
         $this->httpHeader = 'HTTP/1.0 400 Bad Request';
     }
@@ -203,6 +213,10 @@ class NewController extends ajaxController {
                 'tag_projection'             => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
                 'project_completion'         => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
                 'get_public_matches'         => [ 'filter' => FILTER_VALIDATE_BOOLEAN ], // disable public TM matches
+                'dictation'                  => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'show_whitespace'            => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'character_counter'          => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'ai_assistant'               => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
                 'instructions'               => [
                         'filter' => FILTER_SANITIZE_STRING,
                         'flags'  => FILTER_REQUIRE_ARRAY,
@@ -370,6 +384,15 @@ class NewController extends ajaxController {
         echo $toJson;
     }
 
+    /**
+     * @throws ReQueueException
+     * @throws AuthenticationError
+     * @throws ValidationError
+     * @throws NotFoundException
+     * @throws EndQueueException
+     * @throws ReflectionException
+     * @throws Exception
+     */
     public function doAction() {
 
         $fs = FilesStorageFactory::create();
@@ -578,9 +601,7 @@ class NewController extends ajaxController {
         if ( isset( $this->result[ 'data' ] ) && !empty( $this->result[ 'data' ] ) ) {
             foreach ( $this->result[ 'data' ] as $zipFileName => $zipFiles ) {
                 $zipFiles = json_decode( $zipFiles, true );
-
-
-                $fileNames = Utils::array_column( $zipFiles, 'name' );
+                $fileNames = array_column( $zipFiles, 'name' );
                 $arFiles   = array_merge( $arFiles, $fileNames );
             }
         }
@@ -649,6 +670,11 @@ class NewController extends ajaxController {
         $projectStructure[ 'metadata' ]         = $this->metadata;
         $projectStructure[ 'pretranslate_100' ] = (int)!!$this->postInput[ 'pretranslate_100' ]; // Force pretranslate_100 to be 0 or 1
         $projectStructure[ 'pretranslate_101' ] = isset( $this->postInput[ 'pretranslate_101' ] ) ? (int)$this->postInput[ 'pretranslate_101' ] : 1;
+
+        $projectStructure['dictation']          = $this->postInput['dictation'] ?? null;
+        $projectStructure['show_whitespace']    = $this->postInput['show_whitespace'] ?? null;
+        $projectStructure['character_counter']  = $this->postInput['character_counter'] ?? null;
+        $projectStructure['ai_assistant']       = $this->postInput['ai_assistant'] ?? null;
 
         //default get all public matches from TM
         $projectStructure[ 'only_private' ] = ( !isset( $this->postInput[ 'get_public_matches' ] ) ? false : !$this->postInput[ 'get_public_matches' ] );
@@ -746,11 +772,11 @@ class NewController extends ajaxController {
      * @param $filename
      *
      * @return array
-     * @throws \API\Commons\Exceptions\AuthenticationError
-     * @throws \Exceptions\NotFoundException
-     * @throws \Exceptions\ValidationError
-     * @throws \TaskRunner\Exceptions\EndQueueException
-     * @throws \TaskRunner\Exceptions\ReQueueException
+     * @throws AuthenticationError
+     * @throws NotFoundException
+     * @throws ValidationError
+     * @throws EndQueueException
+     * @throws ReQueueException
      */
     private function getFileMetadata( $filename ) {
         $info          = XliffProprietaryDetect::getInfo( $filename );

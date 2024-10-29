@@ -9,7 +9,7 @@ use LQA\ChunkReviewStruct;
 class BatchReviewProcessorAlertEmail extends AbstractEmail {
 
     /**
-     * @var \Chunks_ChunkStruct
+     * @var \Jobs_JobStruct
      */
     private $chunk;
 
@@ -26,10 +26,10 @@ class BatchReviewProcessorAlertEmail extends AbstractEmail {
     /**
      * BatchEventCreatorAlertEmail constructor.
      *
-     * @param \Chunks_ChunkStruct $chunk
+     * @param \Jobs_JobStruct $chunk
      * @param ChunkReviewStruct   $chunkReview
      */
-    public function __construct( \Chunks_ChunkStruct $chunk, ChunkReviewStruct $chunkReview ) {
+    public function __construct( \Jobs_JobStruct $chunk, ChunkReviewStruct $chunkReview ) {
         $this->chunk       = $chunk;
         $this->chunkReview = $chunkReview;
         $this->_setlayout( 'empty_skeleton.html' );

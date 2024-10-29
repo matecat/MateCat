@@ -137,4 +137,5 @@ route( '/api/v2/SDLXLIFF/[:id_job]/[:password]/[:filename]', 'GET', [ 'API\V2\Do
 route( '/api/v2/TMX/[:id_job]/[:password]', 'GET', [ 'API\V2\ExportTMXController', 'index' ] );
 
 // User
-route( '/api/v2/user', 'PUT', [ 'API\V2\UserController', 'edit' ] );
+route('/api/v2/user', 'PUT',  ['API\V2\UserController', 'edit']);
+route('/api/v2/user/metadata', 'PUT',  ['API\V2\UserController', 'setMetadata']);

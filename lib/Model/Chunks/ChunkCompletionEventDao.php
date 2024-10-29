@@ -23,7 +23,7 @@ class Chunks_ChunkCompletionEventDao extends DataAccess_AbstractDao {
         return $stmt->rowCount();
     }
 
-    public function getByIdAndChunk( $id_event, Chunks_ChunkStruct $chunk ) {
+    public function getByIdAndChunk( $id_event, Jobs_JobStruct $chunk ) {
         $sql = "SELECT * FROM chunk_completion_events WHERE id = :id_event
                AND id_job = :id_job AND password = :password ";
 
@@ -91,7 +91,7 @@ class Chunks_ChunkCompletionEventDao extends DataAccess_AbstractDao {
     }
 
 
-    public function currentPhase( Chunks_ChunkStruct $chunk ) {
+    public function currentPhase( Jobs_JobStruct $chunk ) {
         $lastTranslate = $this->lastCompletionRecord( $chunk, [ 'is_review' => false ] );
         if ( $lastTranslate ) {
             $lastRevise = $this->lastCompletionRecord( $chunk, [ 'is_review' => true ] );
@@ -126,7 +126,7 @@ class Chunks_ChunkCompletionEventDao extends DataAccess_AbstractDao {
      *
      * @throws Exception
      */
-    public static function lastCompletionRecord( Chunks_ChunkStruct $chunk, array $params = [] ) {
+    public static function lastCompletionRecord( Jobs_JobStruct $chunk, array $params = [] ) {
         $params    = Utils::ensure_keys( $params, [ 'is_review' ] );
         $is_review = $params[ 'is_review' ];
 
@@ -162,7 +162,7 @@ class Chunks_ChunkCompletionEventDao extends DataAccess_AbstractDao {
         return $stmt->fetch();
     }
 
-    public static function isChunkCompleted( Chunks_ChunkStruct $chunk, array $params = [] ) {
+    public static function isChunkCompleted( Jobs_JobStruct $chunk, array $params = [] ) {
         $fetched = self::lastCompletionRecord( $chunk, $params );
 
         return $fetched != false;
@@ -175,7 +175,7 @@ class Chunks_ChunkCompletionEventDao extends DataAccess_AbstractDao {
     }
 
     public static function isCompleted( $obj, array $params = [] ) {
-        if ( $obj instanceof Chunks_ChunkStruct ) {
+        if ( $obj instanceof Jobs_JobStruct ) {
             return self::isChunkCompleted( $obj, $params );
         } elseif ( $obj instanceof Projects_ProjectStruct ) {
             return self::isProjectCompleted( $obj );
@@ -184,6 +184,6 @@ class Chunks_ChunkCompletionEventDao extends DataAccess_AbstractDao {
         }
     }
 
-    protected function _buildResult( $array_result ) {
+    protected function _buildResult( array $array_result ) {
     }
 }

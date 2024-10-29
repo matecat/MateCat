@@ -8,9 +8,6 @@ use Exception;
 
 class ModelStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct, QAModelInterface {
 
-    protected static $auto_increment_fields = [ 'id' ];
-    protected static $primary_keys          = [ 'id' ];
-
     public $id;
     public $label;
     public $create_date;

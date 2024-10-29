@@ -5,14 +5,14 @@ interface IDatabase {
     /**
      * Obtain an instance of the database
      *
-     * @param string $server
-     * @param string $user
-     * @param string $password
-     * @param string $database
+     * @param string|null $server
+     * @param string|null $user
+     * @param string|null $password
+     * @param string|null $database
      *
      * @return IDatabase
      */
-    public static function obtain( $server = null, $user = null, $password = null, $database = null );
+    public static function obtain( string $server = null, string $user = null, string $password = null, string $database = null ): IDatabase;
 
 
     /**
@@ -60,7 +60,7 @@ interface IDatabase {
      *
      * @return integer Number of affected rows
      */
-    public function update( $table, $data, array $where = [ '1' => '0' ] );
+    public function update( string $table, array $data, array $where = [ '1' => '0' ] ): int;
 
 
     /**
@@ -71,7 +71,7 @@ interface IDatabase {
      *
      * @return string
      */
-    public function insert( $table, array $data );
+    public function insert( string $table, array $data ): string;
 
 
     /**

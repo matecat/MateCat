@@ -84,6 +84,8 @@ class activityLogController extends viewController {
         $this->password      = $__postInput[ 'password' ];
         $this->download      = ( $__postInput[ 'download' ] == 'download' );
 
+        $this->checkLoginRequiredAndRedirect();
+
     }
 
 
@@ -94,7 +96,6 @@ class activityLogController extends viewController {
      */
     function doAction() {
 
-        $this->checkLoginRequiredAndRedirect();
         $this->project_data = Projects_ProjectDao::getProjectAndJobData( $this->id_project );
 
         $pCheck = new AjaxPasswordCheck();

@@ -47,7 +47,7 @@ class analyzeController extends viewController {
     public $project;
 
     /**
-     * @var Chunks_ChunkStruct
+     * @var Jobs_JobStruct
      */
     private $chunk;
 
@@ -64,6 +64,7 @@ class analyzeController extends viewController {
     public function __construct() {
 
         parent::__construct();
+        $this->checkLoginRequiredAndRedirect();
 
         $filterArgs = [
                 'pid'      => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
@@ -87,7 +88,7 @@ class analyzeController extends viewController {
             // we are looking for a chunk
             $this->chunk = Chunks_ChunkDao::getByIdAndPassword( $this->jid, $pass );
 
-            if ( $this->chunk->status_owner === Constants_JobStatus::STATUS_DELETED ) {
+            if ( $this->chunk->isDeleted() ) {
                 $this->project_not_found = true;
             }
 
@@ -101,7 +102,7 @@ class analyzeController extends viewController {
             $chunks = ( new Chunks_ChunkDao )->getByProjectID( $this->project->id );
 
             $notDeleted = array_filter( $chunks, function ( $element ) {
-                return $element->status_owner != Constants_JobStatus::STATUS_DELETED;
+                return !$element->isDeleted();
             } );
 
             $this->project_not_found = $this->project->password != $pass || empty( $notDeleted );
@@ -121,8 +122,6 @@ class analyzeController extends viewController {
 
 
     public function doAction() {
-
-        $this->checkLoginRequiredAndRedirect();
 
         if ( $this->project_not_found ) {
             $this->render404();

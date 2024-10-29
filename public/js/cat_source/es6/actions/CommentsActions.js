@@ -13,12 +13,13 @@ const CommentsActions = {
       user: user,
     })
   },
-  sendComment: function (text, sid) {
+  sendComment: function (text, isAnonymous, sid) {
     return submitCommentApi({
       idSegment: sid,
       username: UserStore.getUserName(),
       sourcePage: config.revisionNumber ? config.revisionNumber + 1 : 1,
       message: text,
+      isAnonymous,
     }).then((resp) => {
       AppDispatcher.dispatch({
         actionType: CommentsConstants.ADD_COMMENT,

@@ -11,7 +11,7 @@ namespace Features\ProjectCompletion\Model;
 
 use API\Commons\Exceptions\AuthenticationError;
 use Chunks_ChunkCompletionEventDao;
-use Chunks_ChunkStruct;
+use Jobs_JobStruct;
 use Exception;
 use Exceptions\NotFoundException;
 use Exceptions\ValidationError;
@@ -92,7 +92,7 @@ class ProjectCompletionStatusModel {
     /**
      * @throws Exception
      */
-    private function dataForChunkStatus ( Chunks_ChunkStruct $chunk, $is_review ) {
+    private function dataForChunkStatus ( Jobs_JobStruct $chunk, $is_review ) {
         $record = Chunks_ChunkCompletionEventDao::lastCompletionRecord( $chunk, array(
                 'is_review' => $is_review
         ) );

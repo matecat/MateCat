@@ -37,6 +37,7 @@
         "ext-mbstring": "*",
         "ext-zlib": "*",
         "ext-gd": "*",
+        "ext-iconv": "*",
         "orhanerday/open-ai": "^4.7",
         "ext-openssl": "*",
         "league/oauth2-linkedin": "^5.1",

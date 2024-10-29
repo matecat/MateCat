@@ -1509,7 +1509,7 @@ button.ui-button::-moz-focus-inner {
       min-width: 350px;
       border: solid 1px #96c8da;
       border-top: unset;
-      z-index: 1;
+      z-index: 3;
       margin-top: 1px;
 
       input:not([type='radio']),
@@ -3015,30 +3015,6 @@ a.pull-right.confirmDelete {
     background: url(/public/img/loading.gif) 47% 6px no-repeat !important;
     background-size: 24px !important;
     height: 100%;
-  }
-}
-
-.language-dropdown-item-container {
-  display: grid;
-  grid-template-columns: 70px auto;
-  gap: 10px;
-  align-items: center;
-  overflow: hidden;
-
-  .code-badge {
-    min-width: 60px;
-    font-weight: normal;
-
-    > span {
-      display: block;
-      text-align: center;
-      background-color: $grey7;
-      border-radius: 4px;
-      padding: 2px 4px;
-      color: $white;
-      font-size: 14px;
-      white-space: nowrap;
-    }
   }
 }
 
