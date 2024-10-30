@@ -143,11 +143,16 @@ APP.addGDriveFile = function (exportIds) {
     '</div>' +
     '</div>'
   $(html).appendTo($('body'))
-  openGDriveFiles(
+
+  const filtersTemplate = CreateProjectStore.getFiltersTemplate()
+
+  openGDriveFiles({
     encodedJson,
-    CreateProjectStore.getSourceLang(),
-    CreateProjectStore.getTargetLangs(),
-  ).then((response) => {
+    sourceLang: CreateProjectStore.getSourceLang(),
+    targetLang: CreateProjectStore.getTargetLangs(),
+    segmentation_rule: UI.segmentationRule,
+    filters_extraction_parameters_template_id: filtersTemplate?.id,
+  }).then((response) => {
     $('.modal-gdrive').remove()
     CreateProjectActions.hideErrors()
     if (response.success) {

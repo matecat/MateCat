@@ -98,7 +98,10 @@ class SegmentCommentsContainer extends React.Component {
   }
 
   updateComments(sid) {
-    if (isUndefined(sid) || sid === this.context.segment.original_sid) {
+    if (
+      isUndefined(sid) ||
+      parseInt(sid) === parseInt(this.context.segment.original_sid)
+    ) {
       const comments = CommentsStore.getCommentsBySegment(
         this.context.segment.original_sid,
       )
@@ -384,6 +387,7 @@ class SegmentCommentsContainer extends React.Component {
               type={BUTTON_TYPE.PRIMARY}
               size={BUTTON_SIZE.STANDARD}
               onClick={() => this.sendComment()}
+              disabled={!this.state.mentionsInputValue}
             >
               Comment
             </Button>
@@ -434,7 +438,7 @@ class SegmentCommentsContainer extends React.Component {
   onKeyDown(e) {
     if (e.key === 'Enter' && !e.shiftKey && !this.state.showTagging) {
       e.preventDefault()
-      this.sendComment()
+      if (this.state.mentionsInputValue) this.sendComment()
     } else {
       this.saveDraft()
     }
