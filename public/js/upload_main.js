@@ -517,8 +517,6 @@ var convertFile = function (fname, filerow, filesize, enforceConversion) {
 
   const filtersTemplate = CreateProjectStore.getFiltersTemplate()
 
-  console.log('filtersTemplate', filtersTemplate)
-
   const controller = new AbortController()
   const signal = controller.signal
   convertFileRequest({
