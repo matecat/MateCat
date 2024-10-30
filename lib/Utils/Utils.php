@@ -889,6 +889,27 @@ class Utils {
     }
 
     /**
+     * @param $string
+     * @return mixed
+     */
+    public static function duplicateNewLines($string)
+    {
+        $newLinePlaceholder = "###PHP_EOL###";
+        $doubleNewLinePlaceholder = "###DOUBLE_PHP_EOL###";
+
+        $string = str_replace(PHP_EOL, $newLinePlaceholder, $string);
+        $string = preg_replace('/\s+/', ' ', $string);
+        $string = str_replace([
+            $newLinePlaceholder.$newLinePlaceholder,
+            $newLinePlaceholder . " " .$newLinePlaceholder ,
+        ], $doubleNewLinePlaceholder, $string);
+        $string = str_replace($newLinePlaceholder, PHP_EOL . PHP_EOL, $string);
+        $string = str_replace($doubleNewLinePlaceholder, PHP_EOL . PHP_EOL, $string);
+
+        return $string;
+    }
+
+    /**
      * @param $email
      *
      * @throws Exception

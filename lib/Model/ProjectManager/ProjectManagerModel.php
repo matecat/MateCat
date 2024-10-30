@@ -177,11 +177,15 @@ class ProjectManagerModel {
 
                         // check for metaKey is `notes`
                         if(!self::isAMetadata($metaKey)){
-                            $insert_values[] = [ $id_segment, $internal_id, Utils::stripTagsPreservingHrefs(html_entity_decode($note)), null ];
+                            $note = Utils::stripTagsPreservingHrefs(html_entity_decode($note));
+                            $note = Utils::duplicateNewLines($note);
+                            $insert_values[] = [ $id_segment, $internal_id, $note, null ];
                         }
 
                     } else {
-                        $insert_values[] = [ $id_segment, $internal_id, Utils::stripTagsPreservingHrefs(html_entity_decode($note)), null ];
+                        $note = Utils::stripTagsPreservingHrefs(html_entity_decode($note));
+                        $note = Utils::duplicateNewLines($note);
+                        $insert_values[] = [ $id_segment, $internal_id, $note, null ];
                     }
                 }
             }

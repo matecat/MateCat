@@ -8,6 +8,7 @@ use Files_FileDao;
 use Jobs_JobDao;
 use Jobs_JobStruct;
 use Projects_ProjectStruct;
+use Utils;
 
 class FilesInfoUtility {
 
@@ -141,9 +142,9 @@ class FilesInfoUtility {
         if ( Files_FileDao::isFileInProject( $id_file, $this->project->id ) ) {
             $metadataDao = new Files_MetadataDao;
             if ( $metadataDao->get( $this->project->id, $id_file, 'instructions', 60 * 5 ) ) {
-                $metadataDao->update( $this->project->id, $id_file, 'instructions', $instructions );
+                $metadataDao->update( $this->project->id, $id_file, 'instructions', Utils::stripTagsPreservingHrefs($instructions) );
             } else {
-                $metadataDao->insert( $this->project->id, $id_file, 'instructions', $instructions );
+                $metadataDao->insert( $this->project->id, $id_file, 'instructions', Utils::stripTagsPreservingHrefs($instructions) );
             }
 
             return true;
