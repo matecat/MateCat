@@ -339,7 +339,7 @@ class GDriveController extends AbstractStatefulKleinController {
 
         try {
             $languageHandler = Langs_Languages::getInstance();
-            $languageHandler->validateLanguage( $newSourceLang );
+            $newSourceLang = $languageHandler->validateLanguage( $newSourceLang );
         } catch ( Exception $e ) {
 
             $this->isImportingSuccessful = false;
