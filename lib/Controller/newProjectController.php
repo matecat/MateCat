@@ -215,16 +215,16 @@ class newProjectController extends viewController {
     }
 
     public function setTemplateVars() {
-        $source_languages = $this->lang_handler->getEnabledLanguages( 'en' );
-        $target_languages = $this->lang_handler->getEnabledLanguages( 'en' );
+        $source_languages = $this->lang_handler->getEnabledLanguages();
+        $target_languages = $this->lang_handler->getEnabledLanguages();
 
         $this->template->subject_array = $this->subjectArray;
 
         $this->template->project_name = $this->project_name;
 
         $this->template->page             = 'home';
-        $this->template->source_languages = $source_languages;
-        $this->template->target_languages = $target_languages;
+        $this->template->source_languages = array_values( $source_languages );
+        $this->template->target_languages = array_values( $target_languages );
         $this->template->subjects         = json_encode( $this->subjectArray );
 
         $this->template->mt_engines         = $this->mt_engines;

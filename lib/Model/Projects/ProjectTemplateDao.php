@@ -170,9 +170,12 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
             $languages = Langs_Languages::getInstance();
             $language  = Utils::trimAndLowerCase( $projectTemplateStruct->source_language );
 
-            if ( !in_array( $language, $languages->allowedLanguages() ) ) {
-                throw new Exception( $language . ' is not an allowed language', 403 );
+            try {
+                $languages->validateLanguage( $language );
+            } catch( Exception $e ){
+                throw new $e( $e->getMessage(), 403 );
             }
+
         }
 
         // target_language
@@ -186,13 +189,12 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
 
             $languages = Langs_Languages::getInstance();
 
-            foreach ( $targetLanguages as $language ) {
-                $language = Utils::trimAndLowerCase( $language );
-
-                if ( !in_array( $language, $languages->allowedLanguages() ) ) {
-                    throw new Exception( $language . ' is not an allowed language', 403 );
-                }
+            try {
+                $languages->validateLanguageList( $targetLanguages );
+            } catch( Exception $e ){
+                throw new $e( $e->getMessage(), 403 );
             }
+
         }
 
         // check xliff_config_template_id

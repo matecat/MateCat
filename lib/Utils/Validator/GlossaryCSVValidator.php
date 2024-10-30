@@ -4,7 +4,6 @@ namespace Validator;
 
 use Exception;
 use Files\CSV;
-use INIT;
 use Langs_Languages;
 use Utils;
 use Validator\Contracts\AbstractValidator;
@@ -22,15 +21,14 @@ class GlossaryCSVValidator extends AbstractValidator {
         }
 
         $headers          = $this->getHeaders( $object->csv );
-        $languages        = Langs_Languages::getInstance();
-        $allowedLanguages = $languages->allowedLanguages();
+        $languagesHandler = Langs_Languages::getInstance();
 
         // 1. Validate languages
-        if ( $this->validateLanguages( $headers, $allowedLanguages ) === false ) {
+        if ( !$this->validateLanguages( $headers, $languagesHandler ) ) {
             return false;
         }
 
-        $allowedLanguagesRegex = implode( "|", $allowedLanguages );
+        $allowedLanguagesRegex = strtolower( implode( "|", array_keys( $languagesHandler->getEnabledLanguages() ) ) );
 
         // 2. Validate structure
         preg_match_all( '/^(forbidden)?(domain)?(subdomain)?(definition)?(((' . $allowedLanguagesRegex . ')((notes)?(example of use)?){2,})+$)/', implode( "", $headers ), $headerMatches );
@@ -84,12 +82,12 @@ class GlossaryCSVValidator extends AbstractValidator {
     }
 
     /**
-     * @param $headers
-     * @param $allowedLanguages
+     * @param array           $headers
+     * @param Langs_Languages $languagesHandler
      *
      * @return bool
      */
-    private function validateLanguages( $headers, $allowedLanguages ) {
+    private function validateLanguages( array $headers, Langs_Languages $languagesHandler ): bool {
 
         $skipKeys = [
                 "forbidden",
@@ -117,7 +115,7 @@ class GlossaryCSVValidator extends AbstractValidator {
                 return false;
             }
 
-            if ( !in_array( $language, $allowedLanguages ) ) {
+            if ( !$languagesHandler->isValidLanguage( $language ) ) {
 
                 $error          = ( strpos( $language, '_' ) !== false ) ? 'The column header <b>' . $language . '</b> contains an underscore, please replace it with a dash for the file to be valid for import. Ex: it_IT -> it-iT' : '<b>' . $language . '</b> is not a valid column header, you can find the correct column headers <a href="https://guides.matecat.com/glossary-file-format" target="_blank">here</a>.';
                 $this->errors[] = $error;
@@ -125,5 +123,8 @@ class GlossaryCSVValidator extends AbstractValidator {
                 return false;
             }
         }
+
+        return true;
+
     }
 }

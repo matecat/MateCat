@@ -23,6 +23,7 @@ use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use FilesStorage\S3FilesStorage;
 use FilesystemIterator;
+use Filters\FiltersConfigTemplateStruct;
 use Google_Client;
 use Google_Service_Drive;
 use Google_Service_Drive_Permission;
@@ -52,19 +53,14 @@ class Session {
     const FILE_HASH             = 'fileHash';
     const CONNNECTED_SERVICE_ID = 'connectedServiceId';
 
-    protected string  $guid;
-    protected string  $source_lang;
-    protected string  $target_lang;
-    protected ?string $seg_rule = null;
-
-    protected array $session = [];
-    protected       $filters_extraction_parameters;
-
-    /**
-     * @var Google_Service_Drive|null
-     */
-    protected ?Google_Service_Drive $service = null;
-    protected                       $token;
+    protected string                       $guid;
+    protected string                       $source_lang;
+    protected string                       $target_lang;
+    protected ?string                      $seg_rule                      = null;
+    protected array                        $session                       = [];
+    protected ?FiltersConfigTemplateStruct $filters_extraction_parameters = null;
+    protected ?Google_Service_Drive        $service                       = null;
+    protected ?array                       $token                         = null;
 
     /**
      * @var ?ConnectedServiceStruct
@@ -127,7 +123,7 @@ class Session {
 
         $this->renameTheFileMap( $newSourceLang, $originalSourceLang );
 
-        foreach ( $fileList as $fileId => $file ) {
+        foreach ( $fileList as $file ) {
 
             if ( $success ) {
 
@@ -226,6 +222,10 @@ class Session {
     public function getFileStructureForJsonOutput(): array {
         $response = [];
 
+        if ( empty( $this->session[ self::FILE_LIST ] ) ) {
+            return $response;
+        }
+
         foreach ( $this->session[ self::FILE_LIST ] as $fileId => $file ) {
 
             $fileName = $file[ self::FILE_NAME ];
@@ -239,12 +239,11 @@ class Session {
                         ]
                 );
 
-                $mime                  = include __DIR__ . '/../../../Utils/Mime2Extension.php';
                 $response[ 'files' ][] = [
                         'fileId'        => $fileId,
                         'fileName'      => $fileName,
                         'fileSize'      => $s3[ 'ContentLength' ],
-                        'fileExtension' => $mime[ $s3[ 'ContentType' ] ][ 0 ]
+                        'fileExtension' => INIT::$MIME_TYPES[ $s3[ 'ContentType' ] ][ 0 ]
                 ];
 
             } else {
@@ -343,8 +342,6 @@ class Session {
     }
 
     /**
-     * @param $session
-     *
      * @return bool
      */
     public function sessionHasFiles(): bool {
@@ -357,11 +354,11 @@ class Session {
     }
 
     /**
-     * @param $fileName
+     * @param string $fileName
      *
      * @return int|string|null
      */
-    public function findFileIdByName( string $fileName ) {
+    public function findFileIdByName( string $fileName ): ?string {
         if ( $this->hasFiles() ) {
             foreach ( $this->session[ self::FILE_LIST ] as $singleFileId => $file ) {
                 if ( $file[ self::FILE_NAME ] === $fileName ) {
@@ -447,7 +444,12 @@ class Session {
             $tempUploadedFileDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->session[ 'upload_token' ];
 
             /** @var DirectoryIterator $item */
-            foreach ( $iterator = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $tempUploadedFileDir, RecursiveDirectoryIterator::SKIP_DOTS ), RecursiveIteratorIterator::SELF_FIRST ) as $item ) {
+            foreach (
+                    new RecursiveIteratorIterator(
+                            new RecursiveDirectoryIterator( $tempUploadedFileDir, FilesystemIterator::SKIP_DOTS ),
+                            RecursiveIteratorIterator::SELF_FIRST
+                    ) as $item
+            ) {
                 $target   = explode( '__', $pathCache );
                 $hashFile = $file[ 'fileHash' ] . "|" . end( $target );
 
@@ -556,13 +558,13 @@ class Session {
     }
 
     /**
-     * @param string      $guid
-     * @param string      $source_lang
-     * @param string      $target_lang
-     * @param string|null $seg_rule
-     * @param null        $filters_extraction_parameters
+     * @param string                           $guid
+     * @param string                           $source_lang
+     * @param string                           $target_lang
+     * @param string|null                      $seg_rule
+     * @param FiltersConfigTemplateStruct|null $filters_extraction_parameters
      */
-    public function setConversionParams( string $guid, string $source_lang, string $target_lang, ?string $seg_rule = null, $filters_extraction_parameters = null ) {
+    public function setConversionParams( string $guid, string $source_lang, string $target_lang, ?string $seg_rule = null, ?FiltersConfigTemplateStruct $filters_extraction_parameters = null ) {
         $this->guid                          = $guid;
         $this->source_lang                   = $source_lang;
         $this->target_lang                   = $target_lang;
@@ -699,10 +701,8 @@ class Session {
             $saved   = file_put_contents( $filePath, $content );
 
             if ( $saved !== false ) {
-                $fileHash = sha1_file( $filePath );
-
-                $this->addFiles( $googleFileId, $fileName, $fileHash );
-                $this->doConversion( $fileName );
+                $generatedSha = $this->doConversion( $fileName );
+                $this->addFiles( $googleFileId, $fileName, $generatedSha );
             } else {
                 throw new Exception( 'Error when saving file.' );
             }
@@ -723,14 +723,15 @@ class Session {
     /**
      * @param string $file_name
      *
-     * @return void
+     * @return string|null
      * @throws AuthenticationError
      * @throws EndQueueException
      * @throws NotFoundException
      * @throws ReQueueException
      * @throws ValidationError
+     * @throws Exception
      */
-    private function doConversion( string $file_name ): void {
+    private function doConversion( string $file_name ): ?string {
 
         $uploadDir = $this->guid;
 
@@ -750,13 +751,14 @@ class Session {
         $conversionHandler->setCookieDir( $uploadDir );
         $conversionHandler->setIntDir( $intDir );
         $conversionHandler->setErrDir( $errDir );
+        $conversionHandler->setFiltersExtractionParameters( $this->filters_extraction_parameters );
 
         $this->featureSet = new FeatureSet();
         $this->featureSet->loadFromUserEmail( $this->session[ 'user' ]->email );
         $conversionHandler->setFeatures( $this->featureSet );
         $conversionHandler->setUserIsLogged( true );
 
-        $conversionHandler->doAction();
+        return $conversionHandler->doAction();
 
     }
 }

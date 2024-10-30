@@ -182,27 +182,16 @@ class convertFileController extends ajaxController {
         }
     }
 
+    /**
+     * @throws Exception
+     */
     private function validateTargetLangs() {
-        $targets = explode( ',', $this->target_lang );
-        $targets = array_map( 'trim', $targets );
-        $targets = array_unique( $targets );
-
-        if ( empty( $targets ) ) {
-            $this->result->changeCode( ConversionHandlerStatus::TARGET_ERROR );
-            $this->result->addError( "Missing target language." );
-        }
-
         try {
-            foreach ( $targets as $target ) {
-                $this->lang_handler->validateLanguage( $target );
-            }
-
+            $this->target_lang = $this->lang_handler->validateLanguageListAsString( $this->target_lang );
         } catch ( Exception $e ) {
             $this->result->changeCode( ConversionHandlerStatus::TARGET_ERROR );
             $this->result->addError( $e->getMessage() );
         }
-
-        $this->target_lang = implode( ',', $targets );
     }
 
     /**

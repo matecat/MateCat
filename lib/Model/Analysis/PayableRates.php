@@ -494,23 +494,29 @@ class Analysis_PayableRates {
      * @return array
      */
     public static function getPayableRates( string $source, string $target ): array {
-
-        $resolveBreakdowns = self::resolveBreakdowns( static::$langPair2MTpayableRates, $source, $target );
-
-        return ( !empty( $resolveBreakdowns ) ) ? $resolveBreakdowns : static::$DEFAULT_PAYABLE_RATES;
+        return self::resolveBreakdowns( static::$langPair2MTpayableRates, $source, $target );
     }
 
     /**
-     * @param array $breakdowns
+     * @param array  $breakdowns
      * @param string $source
      * @param string $target
      *
      * @return array
      */
-    public static function resolveBreakdowns( array $breakdowns, string $source, string $target ): array {
+    public static function resolveBreakdowns( array $breakdowns, string $source, string $target, ?array $default = null ): array {
         $languages = Langs_Languages::getInstance();
         $isoSource = $languages->convertLanguageToIsoCode( $source );
         $isoTarget = $languages->convertLanguageToIsoCode( $target );
+
+        return array_merge(
+                self::getBreakDown( $breakdowns, $source, $target, $isoSource, $isoTarget ),
+                self::getBreakDown( $breakdowns, $target, $source, $isoTarget, $isoSource )
+        )[ 0 ] ?? ( $default ?? static::$DEFAULT_PAYABLE_RATES );
+
+    }
+
+    protected static function getBreakDown( array $breakdowns, string $source, string $target, string $isoSource, string $isoTarget ): array {
 
         if ( isset( $breakdowns[ $source ] ) ) {
             if ( isset( $breakdowns[ $source ][ $target ] ) ) {
@@ -532,27 +538,8 @@ class Analysis_PayableRates {
             }
         }
 
-        if ( isset( $breakdowns[ $target ] ) ) {
-            if ( isset( $breakdowns[ $target ][ $source ] ) ) {
-                return $breakdowns[ $target ][ $source ];
-            }
-
-            if ( isset( $breakdowns[ $target ][ $isoSource ] ) ) {
-                return $breakdowns[ $target ][ $isoSource ];
-            }
-        }
-
-        if ( isset( $breakdowns[ $isoTarget ] ) ) {
-            if ( isset( $breakdowns[ $isoTarget ][ $source ] ) ) {
-                return $breakdowns[ $isoTarget ][ $source ];
-            }
-
-            if ( isset( $breakdowns[ $isoTarget ][ $isoSource ] ) ) {
-                return $breakdowns[ $isoTarget ][ $isoSource ];
-            }
-        }
-
         return [];
+
     }
 
     /**

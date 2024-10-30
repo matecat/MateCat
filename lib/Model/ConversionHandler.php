@@ -9,6 +9,7 @@ use FilesStorage\AbstractFilesStorage;
 use FilesStorage\Exceptions\FileSystemException;
 use FilesStorage\FilesStorageFactory;
 use Filters\DTO\IDto;
+use Filters\FiltersConfigTemplateStruct;
 use Filters\OCRCheck;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use TaskRunner\Exceptions\EndQueueException;
@@ -21,18 +22,18 @@ class ConversionHandler {
      */
     protected ConvertedFileModel $result;
 
-    protected $file_name;
-    protected $source_lang;
-    protected $target_lang;
-    protected $segmentation_rule;
-    protected $intDir;
-    protected $errDir;
-    protected $cookieDir;
-    protected $stopOnFileException = true;
-    protected $uploadedFiles;
-    public    $uploadError         = false;
-    protected $_userIsLogged;
-    protected $filters_extraction_parameters;
+    protected string                       $file_name;
+    protected string                       $source_lang;
+    protected string                       $target_lang;
+    protected ?string                      $segmentation_rule             = null;
+    protected string                       $intDir;
+    protected string                       $errDir;
+    protected string                       $cookieDir;
+    protected bool                         $stopOnFileException           = true;
+    protected array                        $uploadedFiles                 = [];
+    public bool                            $uploadError                   = false;
+    protected bool                         $_userIsLogged;
+    protected ?FiltersConfigTemplateStruct $filters_extraction_parameters = null;
 
     /**
      * @var FeatureSet
@@ -64,7 +65,7 @@ class ConversionHandler {
      * @throws AuthenticationError
      * @throws Exception
      */
-    public function doAction() {
+    public function doAction(): ?string {
 
         $fs        = FilesStorageFactory::create();
         $file_path = $this->getLocalFilePath();
@@ -73,14 +74,14 @@ class ConversionHandler {
             $this->result->changeCode( ConversionHandlerStatus::UPLOAD_ERROR );
             $this->result->addError( "Error during upload. Please retry.", AbstractFilesStorage::basename_fix( $this->file_name ) );
 
-            return -1;
+            return null;
         }
 
         //XLIFF Conversion management
         $fileMustBeConverted = $this->fileMustBeConverted();
 
         if ( $fileMustBeConverted === false ) {
-            return 0;
+            return null;
         } else {
             if ( $fileMustBeConverted === true ) {
                 //Continue with conversion
@@ -96,7 +97,7 @@ class ConversionHandler {
                 $this->result->addError( 'Matecat Open-Source does not support ' . ucwords( XliffProprietaryDetect::getInfo( $file_path )[ 'proprietary_name' ] ) . '. Use MatecatPro.',
                         AbstractFilesStorage::basename_fix( $this->file_name ) );
 
-                return -1;
+                return null;
             }
         }
 
@@ -137,7 +138,7 @@ class ConversionHandler {
                 $this->result->changeCode( ConversionHandlerStatus::OCR_ERROR );
                 $this->result->addError( "File is not valid. OCR for RTL languages is not supported." );
 
-                return false; //break project creation
+                return null; //break project creation
             }
             if ( $ocrCheck->thereIsWarning( $file_path ) ) {
                 $this->result->changeCode( ConversionHandlerStatus::OCR_WARNING );
@@ -185,7 +186,7 @@ class ConversionHandler {
 
                         unset( $cachedXliffPath );
 
-                        return false;
+                        return null;
                     }
 
                 } catch ( FileSystemException $e ) {
@@ -195,7 +196,7 @@ class ConversionHandler {
                     $this->result->changeCode( ConversionHandlerStatus::FILESYSTEM_ERROR );
                     $this->result->addError( $e->getMessage() );
 
-                    return false;
+                    return null;
 
                 } catch ( Exception $e ) {
 
@@ -204,7 +205,7 @@ class ConversionHandler {
                     $this->result->changeCode( ConversionHandlerStatus::S3_ERROR );
                     $this->result->addError( 'Sorry, file name too long. Try shortening it and try again.' );
 
-                    return false;
+                    return null;
                 }
 
             } else {
@@ -212,7 +213,7 @@ class ConversionHandler {
                 $this->result->changeCode( ConversionHandlerStatus::GENERIC_ERROR );
                 $this->result->addError( $this->formatConversionFailureMessage( $convertResult[ 'errorMessage' ] ), AbstractFilesStorage::basename_fix( $this->file_name ) );
 
-                return false;
+                return null;
             }
 
         }
@@ -238,7 +239,7 @@ class ConversionHandler {
 
         }
 
-        return 0;
+        return $sha1;
     }
 
     /**
@@ -554,7 +555,7 @@ class ConversionHandler {
     /**
      * @param mixed $filters_extraction_parameters
      */
-    public function setFiltersExtractionParameters( $filters_extraction_parameters ) {
+    public function setFiltersExtractionParameters( ?FiltersConfigTemplateStruct $filters_extraction_parameters = null ) {
         $this->filters_extraction_parameters = $filters_extraction_parameters;
     }
 }

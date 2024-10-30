@@ -247,11 +247,11 @@ class Utils {
 
     /**
      * Generate 128bit password with real uniqueness over single process instance
-     *   N.B. Concurrent requests can collide ( Ex: fork )
+     *   N.B. Concurrent requests can collide (Ex: fork)
      *
      * Minimum Password Length of 12 Characters
      *
-     * WARNING: the obtained random string MUST NOT be used for security.
+     * WARNING: the obtained random string MUST NOT be used for security, @use self::uuid4 instead.
      *
      * @param int  $maxlength
      * @param bool $more_entropy
