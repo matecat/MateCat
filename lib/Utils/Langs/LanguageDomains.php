@@ -11,7 +11,7 @@ use Utils;
 
 class LanguageDomains {
 
-    private static LanguageDomains $instance; //singleton instance
+    private static ?LanguageDomains $instance = null; //singleton instance
     private static array           $subjectMap;
     private static array           $subjectHashMap = [];
 
