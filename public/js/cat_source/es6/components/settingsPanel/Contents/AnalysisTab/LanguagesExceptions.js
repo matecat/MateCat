@@ -34,7 +34,7 @@ export const LanguagesExceptions = ({breakdowns, updateExceptions}) => {
   const evaluateExceptions = useCallback(() => {
     let exceptions = []
     for (const [source, value] of Object.entries(breakdowns)) {
-      if (source !== 'default' && source.indexOf('-') > -1) {
+      if (source !== 'default') {
         for (const [target, data] of Object.entries(value)) {
           exceptions.push({
             source: source,
@@ -140,6 +140,9 @@ LanguagesExceptions.propTypes = {
   breakdowns: PropTypes.object,
   updateExceptions: PropTypes.func,
 }
+
+const getLanguageCode = (code) => code.split('-')[0]
+
 const LanguageException = ({
   exception,
   confirmed = false,
@@ -147,12 +150,45 @@ const LanguageException = ({
   removeException,
   isExceptionSaved,
 }) => {
-  const {languages} = useContext(CreateProjectContext)
+  const {languages: originalLanguages} = useContext(CreateProjectContext)
+
+  const languages = originalLanguages.reduce((acc, cur) => {
+    const code = getLanguageCode(cur.code)
+
+    if (acc.some((lang) => lang.code === code)) return acc
+
+    const regions = acc.filter((lang) => getLanguageCode(lang.code) === code)
+    const accFiltered = acc.filter(
+      (lang) => !regions.some(({code}) => lang.code === code),
+    )
+
+    const result =
+      regions.length > 1
+        ? [
+            {
+              ...cur,
+              code,
+              name: `${cur.name.split('(')[0]} (All variants)`,
+              id: code,
+            },
+            ...regions,
+          ]
+        : [cur]
+
+    return [...accFiltered, ...result]
+  }, originalLanguages)
+
   const [source, setSource] = useState(
-    exception ? languages.find((l) => exception.source === l.id) : undefined,
+    exception
+      ? (languages.find((l) => exception.source === l.id) ??
+          languages.find((l) => exception.source === getLanguageCode(l.id)))
+      : undefined,
   )
   const [target, setTarget] = useState(
-    exception ? languages.find((l) => exception.target === l.id) : undefined,
+    exception
+      ? (languages.find((l) => exception.target === l.id) ??
+          languages.find((l) => exception.target === getLanguageCode(l.id)))
+      : undefined,
   )
   const [value, setValue] = useState(exception ? exception.data.MT : undefined)
   const [modified, setModified] = useState(false)
@@ -161,6 +197,7 @@ const LanguageException = ({
     setTarget(source)
     setModified(true)
   }
+
   return (
     <div
       className={`analysis-tab-exceptionsRow ${exception && !isExceptionSaved(exception) ? 'analysis-value-not-saved' : ''}`}
@@ -168,6 +205,8 @@ const LanguageException = ({
       <div className="analysis-tab-languages">
         <Select
           name={'lang'}
+          isPortalDropdown={true}
+          dropdownClassName="select-dropdown__wrapper-portal"
           showSearchBar={true}
           options={languages}
           onSelect={(option) => {
@@ -176,11 +215,25 @@ const LanguageException = ({
           }}
           placeholder={'Please select language'}
           activeOption={source}
-        />
+        >
+          {({name, code}) => ({
+            row: (
+              <div className="language-dropdown-item-container">
+                <div className="code-badge">
+                  <span>{code}</span>
+                </div>
+
+                <span>{name}</span>
+              </div>
+            ),
+          })}
+        </Select>
         {/*TODO swap lingue*/}
         <div id="swaplang" title="Swap languages" onClick={swapLanguages} />
         <Select
           name={'lang'}
+          isPortalDropdown={true}
+          dropdownClassName="select-dropdown__wrapper-portal"
           showSearchBar={true}
           options={languages}
           onSelect={(option) => {
@@ -189,7 +242,19 @@ const LanguageException = ({
           }}
           placeholder={'Please select language'}
           activeOption={target}
-        />
+        >
+          {({name, code}) => ({
+            row: (
+              <div className="language-dropdown-item-container">
+                <div className="code-badge">
+                  <span>{code}</span>
+                </div>
+
+                <span>{name}</span>
+              </div>
+            ),
+          })}
+        </Select>
       </div>
       <InputPercentage
         value={value}

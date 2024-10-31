@@ -23,7 +23,7 @@ export const Subject = () => {
           id="project-subject"
           name={'project-subject'}
           isPortalDropdown={true}
-          dropdownClassName="select-dropdown__wrapper-other-tab"
+          dropdownClassName="select-dropdown__wrapper-portal"
           maxHeightDroplist={SELECT_HEIGHT}
           showSearchBar={true}
           options={subjectsArray}
