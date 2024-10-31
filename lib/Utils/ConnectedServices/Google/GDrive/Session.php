@@ -111,77 +111,37 @@ class Session {
     }
 
     /**
-     * @param $newSourceLang
-     * @param $originalSourceLang
+     * @param string                           $newSourceLang
+     * @param string|null                      $newSegmentationRule
+     * @param FiltersConfigTemplateStruct|null $filtersExtractionParameters
      *
      * @return bool
-     * @throws Exception
      */
-    public function changeSourceLanguage( $newSourceLang, $originalSourceLang ): bool {
+    public function reConvert( string $newSourceLang, ?string $newSegmentationRule = null, ?FiltersConfigTemplateStruct $filtersExtractionParameters = null ): bool {
+
+        $this->setConversionParams( $this->session[ "upload_token" ], $newSourceLang, 'en-US', $newSegmentationRule, $filtersExtractionParameters );
+
         $fileList = $this->session[ self::FILE_LIST ];
-        $success  = true;
 
-        $this->renameTheFileMap( $newSourceLang, $originalSourceLang );
+        foreach ( $fileList as $fileId => $file ) {
 
-        foreach ( $fileList as $file ) {
+            try {
 
-            if ( $success ) {
+                $generatedSha = $this->doConversion( $file[ self::FILE_NAME ] );
 
-                $fileHash = $file[ self::FILE_HASH ];
-
-                if ( $newSourceLang !== $originalSourceLang ) {
-
-                    $originalCacheFileDir = $this->getCacheFileDir( $file, $originalSourceLang );
-                    $newCacheFileDir      = $this->getCacheFileDir( $file, $newSourceLang );
-
-                    $renameDirSuccess     = false;
-                    $renameFileRefSuccess = false;
-
-                    if ( AbstractFilesStorage::isOnS3() ) {
-
-                        // copy orig and cache\INIT::$UPLOAD_REPOSITORY folder
-                        $s3Client = S3FilesStorage::getStaticS3Client();
-                        $copyOrig = $s3Client->copyFolder( [
-                                'source_bucket' => INIT::$AWS_STORAGE_BASE_BUCKET,
-                                'source_folder' => $originalCacheFileDir . '/orig',
-                                'target_folder' => $newCacheFileDir . '/orig',
-                                'delete_source' => false,
-                        ] );
-
-                        $copyWork = $s3Client->copyFolder( [
-                                'source_bucket' => INIT::$AWS_STORAGE_BASE_BUCKET,
-                                'source_folder' => $originalCacheFileDir . '/work',
-                                'target_folder' => $newCacheFileDir . '/work',
-                                'delete_source' => false,
-                        ] );
-
-                        if ( $copyOrig and $copyWork ) {
-                            $renameDirSuccess     = true;
-                            $renameFileRefSuccess = true;
-                        }
-
-                    } else {
-
-                        $renameDirSuccess = rename( $originalCacheFileDir, $newCacheFileDir );
-
-                        $uploadDir = $this->getUploadDir();
-
-                        $originalUploadRefFile = $uploadDir . DIRECTORY_SEPARATOR . $fileHash . '|' . $originalSourceLang;
-                        $newUploadRefFile      = $uploadDir . DIRECTORY_SEPARATOR . $fileHash . '|' . $newSourceLang;
-
-                        $renameFileRefSuccess = rename( $originalUploadRefFile, $newUploadRefFile );
-
-                    }
-
-                    if ( !$renameDirSuccess || !$renameFileRefSuccess ) {
-                        Log::doJsonLog( 'Error when moving cache file dir to ' . $newCacheFileDir );
-                        $success = false;
-                    }
+                if ( empty( $generatedSha ) ) {
+                    throw new Exception( 'Error when converting file.' );
                 }
+
+                $this->session[ self::FILE_LIST ][ $fileId ][ self::FILE_HASH ] = $generatedSha;
+
+            } catch ( Exception $e ) {
+                return false;
             }
+
         }
 
-        return $success;
+        return true;
     }
 
     /**
@@ -193,10 +153,9 @@ class Session {
      *
      * 2344e5918dcff468b4362d79cb16b0039c77d608|af-ZA ---> 2344e5918dcff468b4362d79cb16b0039c77d608|it-IT
      *
-     * @param string $newSourceLang
-     * @param string $originalSourceLang
+     * @param array $file
      */
-    private function renameTheFileMap( string $newSourceLang, string $originalSourceLang ) {
+    private function renameTheFileMap( array $file ) {
         $uploadDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->session[ 'upload_token' ];
 
         /** @var DirectoryIterator $item */
@@ -205,13 +164,13 @@ class Session {
                         new RecursiveDirectoryIterator( $uploadDir, FilesystemIterator::SKIP_DOTS ),
                         RecursiveIteratorIterator::SELF_FIRST ) as $item
         ) {
-            $originalSourceLangMarker = '|' . $originalSourceLang;
-            $newSourceLangMarker      = '|' . $newSourceLang;
 
-            if ( AbstractFilesStorage::fileEndsWith( $item->getBasename(), $originalSourceLangMarker ) ) {
-                $newSourceLangFileMap = str_replace( $originalSourceLangMarker, $newSourceLangMarker, $item->getBasename() );
-                rename( $item->getBasename(), $newSourceLangFileMap );
+            $diskHash = explode( "_", $file[ self::FILE_HASH ][ 'diskHash' ] );
+
+            if ( Utils::stringStartsWith( $item->getBasename(), $diskHash[ 0 ] ) ) {
+                rename( $item->getBasename(), $file[ self::FILE_HASH ][ 'diskHash' ] );
             }
+
         }
     }
 
@@ -319,7 +278,7 @@ class Session {
      * @param string $fileName
      * @param string $fileHash
      */
-    public function addFiles( string $fileId, string $fileName, string $fileHash ) {
+    public function addFiles( string $fileId, string $fileName, array $fileHash ) {
 
         if ( !isset( $this->session[ self::FILE_LIST ] )
                 || !is_array( $this->session[ self::FILE_LIST ] ) ) {
@@ -517,7 +476,7 @@ class Session {
             $sourceLang = $lang;
         }
 
-        $fileHash = $file[ self::FILE_HASH ];
+        $fileHash = $file[ self::FILE_HASH ][ 'cacheHash' ];
 
         $fs          = $this->files_storage;
         $cacheTreeAr = $fs::composeCachePath( $fileHash );
@@ -702,6 +661,9 @@ class Session {
 
             if ( $saved !== false ) {
                 $generatedSha = $this->doConversion( $fileName );
+                if ( empty( $generatedSha ) ) {
+                    throw new Exception( 'Error when converting file.' );
+                }
                 $this->addFiles( $googleFileId, $fileName, $generatedSha );
             } else {
                 throw new Exception( 'Error when saving file.' );
@@ -723,15 +685,14 @@ class Session {
     /**
      * @param string $file_name
      *
-     * @return string|null
+     * @return array|null
      * @throws AuthenticationError
      * @throws EndQueueException
      * @throws NotFoundException
      * @throws ReQueueException
      * @throws ValidationError
-     * @throws Exception
      */
-    private function doConversion( string $file_name ): ?string {
+    public function doConversion( string $file_name ): ?array {
 
         $uploadDir = $this->guid;
 
@@ -758,7 +719,7 @@ class Session {
         $conversionHandler->setFeatures( $this->featureSet );
         $conversionHandler->setUserIsLogged( true );
 
-        return $conversionHandler->doAction();
+        return $conversionHandler->processConversion();
 
     }
 }

@@ -2,6 +2,7 @@
 
 namespace FilesStorage;
 
+use DirectoryIterator;
 use FilesStorage\Exceptions\FileSystemException;
 use FilesystemIterator;
 use INIT;
@@ -359,6 +360,9 @@ class FsFilesStorage extends AbstractFilesStorage {
 
         $destination = INIT::$QUEUE_PROJECT_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession;
         mkdir( $destination, 0755 );
+
+        /** @var DirectoryIterator $item */
+        /** @var RecursiveDirectoryIterator $iterator */
         foreach (
                 $iterator = new RecursiveIteratorIterator(
                         new RecursiveDirectoryIterator( INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession, FilesystemIterator::SKIP_DOTS ),

@@ -576,7 +576,7 @@ class NewController extends ajaxController {
                 }
             } else {
 
-                $conversionHandler->doAction();
+                $conversionHandler->processConversion();
 
                 $result = $conversionHandler->getResult();
                 if ( $result->getCode() < 0 ) {

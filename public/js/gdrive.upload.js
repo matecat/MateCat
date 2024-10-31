@@ -104,8 +104,12 @@ APP.tryListGDriveFiles = function () {
 }
 
 APP.restartGDriveConversions = function () {
-  var sourceLang = CreateProjectStore.getSourceLang()
-  changeGDriveSourceLang(sourceLang).then((response) => {
+  const filtersTemplate = CreateProjectStore.getFiltersTemplate()
+  changeGDriveSourceLang({
+      sourceLang: CreateProjectStore.getSourceLang(),
+      segmentation_rule: UI.segmentationRule,
+      filters_extraction_parameters_template_id: filtersTemplate?.id,
+  }).then((response) => {
     if (response.success) {
       console.log('Source language changed.')
     }

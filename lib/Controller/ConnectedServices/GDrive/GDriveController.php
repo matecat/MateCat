@@ -135,9 +135,7 @@ class GDriveController extends AbstractStatefulKleinController {
         Log::doJsonLog( $state );
 
         // set the upload directory name if there are files from gDrive
-        if ( $this->isAsyncReq && $this->gdriveUserSession->hasFiles() ) {
-            $guid = $_SESSION[ "upload_token" ];
-        } else {
+        if ( !$this->isAsyncReq ) {
             $guid = Utils::uuid4();
             CookieManager::setCookie( "upload_token", $guid,
                     [
@@ -149,10 +147,11 @@ class GDriveController extends AbstractStatefulKleinController {
                             'samesite' => 'Strict',
                     ]
             );
-            $_SESSION[ "upload_token" ] = $guid;
-
+            $_SESSION[ "upload_token" ] = $_COOKIE[ "upload_token" ] = $guid;
             $this->gdriveUserSession->clearFileListFromSession();
         }
+
+        $guid = $_SESSION[ "upload_token" ] = $_COOKIE[ "upload_token" ];
 
         if ( array_key_exists( 'ids', $state ) ) {
             $listOfIds = $state[ 'ids' ];
@@ -333,13 +332,30 @@ class GDriveController extends AbstractStatefulKleinController {
     /**
      * @throws Exception
      */
-    public function changeSourceLanguage() {
-        $originalSourceLang = $_SESSION[ Constants::SESSION_ACTUAL_SOURCE_LANG ];
-        $newSourceLang      = $this->request->param( 'sourceLanguage' );
+    public function changeConversionParameters() {
+        $originalSourceLang             = $_SESSION[ Constants::SESSION_ACTUAL_SOURCE_LANG ];
+        $newSourceLang                  = $this->request->param( 'source' );
+        $newSegmentationRule            = $this->request->param( 'segmentation_rule' );
+        $newFiltersExtractionTemplateId = $this->request->param( 'filters_extraction_parameters_template_id' );
+        $filtersExtractionParameters    = null;
 
         try {
+
             $languageHandler = Languages::getInstance();
-            $newSourceLang = $languageHandler->validateLanguage( $newSourceLang );
+            $newSourceLang   = $languageHandler->validateLanguage( $newSourceLang );
+
+            if ( !empty( $newFiltersExtractionTemplateId ) ) {
+
+                $filtersExtractionParameters = FiltersConfigTemplateDao::getByIdAndUser( $newFiltersExtractionTemplateId, $this->getUser()->uid );
+
+                if ( $filtersExtractionParameters === null ) {
+                    throw new Exception( "filters_extraction_parameters_template_id not valid" );
+                }
+
+            }
+
+            $newSegmentationRule = Constants::validateSegmentationRules( $newSegmentationRule );
+
         } catch ( Exception $e ) {
 
             $this->isImportingSuccessful = false;
@@ -352,7 +368,7 @@ class GDriveController extends AbstractStatefulKleinController {
             return;
         }
 
-        $success = $this->gdriveUserSession->changeSourceLanguage( $newSourceLang, $originalSourceLang );
+        $success = $this->gdriveUserSession->reConvert( $newSourceLang, $newSegmentationRule, $filtersExtractionParameters );
 
         if ( $success ) {
             $_SESSION[ Constants::SESSION_ACTUAL_SOURCE_LANG ] = $newSourceLang;

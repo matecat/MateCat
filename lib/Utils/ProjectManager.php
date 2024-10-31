@@ -709,7 +709,6 @@ class ProjectManager {
                 // put reference to cache in upload dir to link cache to session
                 $fs->linkSessionToCacheForAlreadyConvertedFiles(
                         $sha1,
-                        $this->projectStructure[ 'source_language' ],
                         $this->projectStructure[ 'uploadToken' ],
                         $fileName
                 );

@@ -30,7 +30,7 @@ class ConversionHandler {
     protected string                       $errDir;
     protected string                       $cookieDir;
     protected bool                         $stopOnFileException           = true;
-    protected array                        $uploadedFiles                 = [];
+    protected ?object                      $uploadedFiles                 = null;
     public bool                            $uploadError                   = false;
     protected bool                         $_userIsLogged;
     protected ?FiltersConfigTemplateStruct $filters_extraction_parameters = null;
@@ -65,7 +65,7 @@ class ConversionHandler {
      * @throws AuthenticationError
      * @throws Exception
      */
-    public function doAction(): ?string {
+    public function processConversion(): ?array {
 
         $fs        = FilesStorageFactory::create();
         $file_path = $this->getLocalFilePath();
@@ -104,14 +104,17 @@ class ConversionHandler {
         //compute hash to locate the file in the cache, add the segmentation rule and extraction parameters
         $extraction_parameters = $this->getRightExtractionParameter( $file_path );
 
-        $sha1 = sha1(
+        $hash_name_for_disk =
                 sha1_file( $file_path )
-                . "_"
-                . ( $this->segmentation_rule ?? '' ) . ( $extraction_parameters ? json_encode( $extraction_parameters ) : '' )
-        );
+                . "_" .
+                sha1( ( $this->segmentation_rule ?? '' ) . ( $extraction_parameters ? json_encode( $extraction_parameters ) : '' ) )
+                . "|" .
+                $this->source_lang;
+
+        $short_hash = sha1( $hash_name_for_disk );
 
         //initialize path variable
-        $cachedXliffPath = false;
+        $cachedXliffPath = null;
 
         //don't load from cache when a specified filter version is forced
         if ( INIT::$FILTERS_SOURCE_TO_XLIFF_FORCE_VERSION !== false ) {
@@ -122,15 +125,15 @@ class ConversionHandler {
         if ( INIT::$SAVE_SHASUM_FOR_FILES_LOADED ) {
 
             //move the file in the right directory from the packages to the file dir
-            $cachedXliffPath = $fs->getXliffFromCache( $sha1, $this->source_lang );
+            $cachedXliffPath = $fs->getXliffFromCache( $short_hash, $this->source_lang );
 
             if ( !$cachedXliffPath ) {
-                Log::doJsonLog( "Failed to fetch xliff for $sha1 from disk cache (is file there?)" );
+                Log::doJsonLog( "Failed to fetch xliff for $short_hash from disk cache (is file there?)" );
             }
         }
 
         //if invalid or no cached version
-        if ( !isset( $cachedXliffPath ) or empty( $cachedXliffPath ) ) {
+        if ( empty( $cachedXliffPath ) ) {
             //we have to convert it
 
             $ocrCheck = new OCRCheck( $this->source_lang );
@@ -175,10 +178,10 @@ class ConversionHandler {
                  */
                 //save in cache
                 try {
-                    $res_insert = $fs->makeCachePackage( $sha1, $this->source_lang, $file_path, $cachedXliffPath );
+                    $res_insert = $fs->makeCachePackage( $short_hash, $this->source_lang, $file_path, $cachedXliffPath );
 
                     if ( !$res_insert ) {
-                        //custom error message passed directly to javascript client and displayed as is
+                        //custom error message passed directly to JavaScript client and displayed as is
                         $convertResult[ 'errorMessage' ] = "Error: File upload failed because you have MateCat running in multiple tabs. Please close all other MateCat tabs in your browser.";
 
                         $this->result->changeCode( ConversionHandlerStatus::FILESYSTEM_ERROR );
@@ -218,18 +221,17 @@ class ConversionHandler {
 
         }
 
-        //if everything went well, and we've obtained a path toward a valid package (original+xliff), either via cache or conversion
-        if ( isset( $cachedXliffPath ) and !empty( $cachedXliffPath ) ) {
+        //if everything went well, and we've got a path toward a valid package (original+xliff), either via cache or conversion
+        if ( !empty( $cachedXliffPath ) ) {
 
             //FILE Found in cache, destroy the already present shasum for other languages ( if user swapped languages )
             $uploadDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->cookieDir;
-            $fs->deleteHashFromUploadDir( $uploadDir, $sha1 . "|" . $this->source_lang );
+            $fs->deleteHashFromUploadDir( $uploadDir, $hash_name_for_disk );
 
             if ( is_file( $file_path ) ) {
                 //put reference to cache in upload dir to link cache to session
                 $fs->linkSessionToCacheForOriginalFiles(
-                        $sha1,
-                        $this->source_lang,
+                        $hash_name_for_disk,
                         $this->cookieDir,
                         AbstractFilesStorage::basename_fix( $file_path )
                 );
@@ -239,7 +241,7 @@ class ConversionHandler {
 
         }
 
-        return $sha1;
+        return [ 'cacheHash' => $short_hash, 'diskHash' => $hash_name_for_disk ];
     }
 
     /**

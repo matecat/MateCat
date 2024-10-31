@@ -152,7 +152,7 @@ class convertFileController extends ajaxController {
                 return false;
             }
         } else {
-            $conversionHandler->doAction();
+            $conversionHandler->processConversion();
             $this->result = $conversionHandler->getResult();
         }
     }
