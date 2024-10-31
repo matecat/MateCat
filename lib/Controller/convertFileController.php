@@ -6,6 +6,7 @@ use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use Filters\FiltersConfigTemplateDao;
 use Filters\FiltersConfigTemplateStruct;
+use Langs\Languages;
 
 set_time_limit( 0 );
 
@@ -28,7 +29,7 @@ class convertFileController extends ajaxController {
 
     //this will prevent recursion loop when ConvertFileWrapper will call the doAction()
     protected bool            $convertZipFile = true;
-    protected Langs_Languages $lang_handler;
+    protected Languages $lang_handler;
 
     protected int                          $filters_extraction_parameters_template_id;
     protected ?FiltersConfigTemplateStruct $filters_extraction_parameters = null;
@@ -91,7 +92,7 @@ class convertFileController extends ajaxController {
 
         $this->result = new ConvertedFileModel();
 
-        $this->lang_handler = Langs_Languages::getInstance();
+        $this->lang_handler = Languages::getInstance();
         $this->validateSourceLang();
         $this->validateTargetLangs();
         $this->validateFiltersExtractionParametersTemplateId();

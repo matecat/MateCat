@@ -9,6 +9,8 @@ use ConnectedServices\LinkedIn\LinkedInProvider;
 use ConnectedServices\Microsoft\MicrosoftProvider;
 use ConnectedServices\OauthClient;
 use Engines_Intento as Intento;
+use Langs\LanguageDomains;
+use Langs\Languages;
 use LexiQA\LexiQADecorator;
 
 class newProjectController extends viewController {
@@ -39,8 +41,8 @@ class newProjectController extends viewController {
         $__postInput        = filter_input_array( INPUT_GET, $filterArgs );
         $this->project_name = $__postInput[ "project_name" ];
 
-        $this->lang_handler    = Langs_Languages::getInstance();
-        $this->subject_handler = Langs_LanguageDomains::getInstance();
+        $this->lang_handler    = Languages::getInstance();
+        $this->subject_handler = LanguageDomains::getInstance();
 
         $this->subjectArray = $this->subject_handler->getEnabledDomains();
 

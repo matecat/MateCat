@@ -13,8 +13,8 @@ use Filters\FiltersConfigTemplateDao;
 use Filters\FiltersConfigTemplateStruct;
 use Google_Service_Exception;
 use INIT;
-use Lang_InvalidLanguageException;
-use Langs_Languages;
+use Langs\InvalidLanguageException;
+use Langs\Languages;
 use Log;
 use Utils;
 
@@ -84,12 +84,12 @@ class GDriveController extends AbstractStatefulKleinController {
 
     /**
      * @return string
-     * @throws Lang_InvalidLanguageException
+     * @throws InvalidLanguageException
      */
     private function getValidSourceLanguage(): string {
 
         $sLang           = null;
-        $languageHandler = Langs_Languages::getInstance();
+        $languageHandler = Languages::getInstance();
 
         if ( !empty( $this->request->param( 'target' ) ) ) {
             $sLang = $languageHandler->validateLanguageListAsString( $this->request->param( 'source' ) );
@@ -103,12 +103,12 @@ class GDriveController extends AbstractStatefulKleinController {
 
     /**
      * @return string
-     * @throws Lang_InvalidLanguageException
+     * @throws InvalidLanguageException
      */
     private function getValidTargetLanguages(): string {
 
         $tLang           = null;
-        $languageHandler = Langs_Languages::getInstance();
+        $languageHandler = Languages::getInstance();
 
         if ( !empty( $this->request->param( 'target' ) ) ) {
             $tLang = $languageHandler->validateLanguageListAsString( $this->request->param( 'target' ) );
@@ -338,7 +338,7 @@ class GDriveController extends AbstractStatefulKleinController {
         $newSourceLang      = $this->request->param( 'sourceLanguage' );
 
         try {
-            $languageHandler = Langs_Languages::getInstance();
+            $languageHandler = Languages::getInstance();
             $newSourceLang = $languageHandler->validateLanguage( $newSourceLang );
         } catch ( Exception $e ) {
 

@@ -12,12 +12,12 @@ namespace API\V2\Json;
 
 use API\App\Json\OutsourceConfirmation;
 use CatUtils;
-use Jobs_JobStruct;
 use Exception;
 use Features\ReviewExtended\ReviewUtils as ReviewUtils;
 use FeatureSet;
-use Langs_LanguageDomains;
-use Langs_Languages;
+use Jobs_JobStruct;
+use Langs\LanguageDomains;
+use Langs\Languages;
 use LQA\ChunkReviewDao;
 use ManageUtils;
 use OutsourceTo_OutsourceAvailable;
@@ -124,9 +124,9 @@ class Job {
 
         $jobStats = WordCountStruct::loadFromJob( $chunk );
 
-        $lang_handler = Langs_Languages::getInstance();
+        $lang_handler = Languages::getInstance();
 
-        $subject_handler = Langs_LanguageDomains::getInstance();
+        $subject_handler = LanguageDomains::getInstance();
         $subjectsHashMap = $subject_handler->getEnabledHashMap();
 
         $warningsCount = $chunk->getWarningsCount();

@@ -1,5 +1,6 @@
 <?php
 
+use Langs\Languages;
 use LexiQA\LexiQADecorator;
 use Projects\ChunkOptionsModel;
 
@@ -24,7 +25,7 @@ class CatDecorator extends \AbstractDecorator {
 
     private $isGDriveProject;
 
-    private $lang_handler;
+    private Languages $lang_handler;
 
     public function __construct( catController $controller, PHPTAL $template ) {
 
@@ -34,7 +35,7 @@ class CatDecorator extends \AbstractDecorator {
 
         $this->isGDriveProject = $controller->isCurrentProjectGDrive();
 
-        $this->lang_handler = Langs_Languages::getInstance();
+        $this->lang_handler = Languages::getInstance();
     }
 
     public function decorate() {
@@ -132,7 +133,7 @@ class CatDecorator extends \AbstractDecorator {
     private function decorateForCJK() {
 
         //check if language belongs to supported right-to-left languages ( decorate the HTML )
-        $lang_handler                = Langs_Languages::getInstance();
+        $lang_handler                = Languages::getInstance();
         $isSourceRTL                 = $lang_handler->isRTL( $this->controller->source_code );
         $isTargetRTL                 = $lang_handler->isRTL( $this->controller->target_code );
         $this->template->isTargetRTL = $isTargetRTL ?: 0;

@@ -4,7 +4,7 @@ namespace Validator;
 
 use Exception;
 use Files\CSV;
-use Langs_Languages;
+use Langs\Languages;
 use Utils;
 use Validator\Contracts\AbstractValidator;
 use Validator\Contracts\ValidatorObject;
@@ -21,7 +21,7 @@ class GlossaryCSVValidator extends AbstractValidator {
         }
 
         $headers          = $this->getHeaders( $object->csv );
-        $languagesHandler = Langs_Languages::getInstance();
+        $languagesHandler = Languages::getInstance();
 
         // 1. Validate languages
         if ( !$this->validateLanguages( $headers, $languagesHandler ) ) {
@@ -82,12 +82,12 @@ class GlossaryCSVValidator extends AbstractValidator {
     }
 
     /**
-     * @param array           $headers
-     * @param Langs_Languages $languagesHandler
+     * @param array     $headers
+     * @param Languages $languagesHandler
      *
      * @return bool
      */
-    private function validateLanguages( array $headers, Langs_Languages $languagesHandler ): bool {
+    private function validateLanguages( array $headers, Languages $languagesHandler ): bool {
 
         $skipKeys = [
                 "forbidden",

@@ -23,7 +23,7 @@ use Filters;
 use Google_Service_Drive_DriveFile;
 use INIT;
 use Jobs_JobDao;
-use Langs_Languages;
+use Langs\Languages;
 use Log;
 use LQA\ChunkReviewDao;
 use Matecat\XliffParser\Exception\NotSupportedVersionException;
@@ -370,7 +370,7 @@ class DownloadFileController extends AbstractDownloadController {
                  */
                 $output_content[ $fileID ][ 'document_content' ] = $this->featureSet->filter( 'overrideConversionResult',
                         $output_content[ $fileID ][ 'document_content' ],
-                        Langs_Languages::getInstance()->getLangRegionCode( $jobData[ 'target' ] )
+                        Languages::getInstance()->getLangRegionCode( $jobData[ 'target' ] )
                 );
 
                 //in case of .strings, they are required to be in UTF-16

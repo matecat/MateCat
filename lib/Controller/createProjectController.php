@@ -3,6 +3,7 @@
 use ConnectedServices\Google\GDrive\Session;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
+use Langs\Languages;
 use Matecat\XliffParser\Utils\Files as XliffFiles;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use PayableRates\CustomPayableRateDao;
@@ -199,8 +200,8 @@ class createProjectController extends ajaxController {
         }
 
 
-        $this->__validateSourceLang( Langs_Languages::getInstance() );
-        $this->__validateTargetLangs( Langs_Languages::getInstance() );
+        $this->__validateSourceLang( Languages::getInstance() );
+        $this->__validateTargetLangs( Languages::getInstance() );
         $this->__validateUserMTEngine();
         $this->__validateMMTGlossaries();
         $this->__validateDeepLGlossaryParams();
@@ -514,7 +515,7 @@ class createProjectController extends ajaxController {
         $_SESSION[ 'last_created_pid' ] = $pid;
     }
 
-    private function __validateTargetLangs( Langs_Languages $lang_handler ) {
+    private function __validateTargetLangs( Languages $lang_handler ) {
         $targets = explode( ',', $this->target_lang );
         $targets = array_map( 'trim', $targets );
         $targets = array_unique( $targets );
@@ -534,7 +535,7 @@ class createProjectController extends ajaxController {
         $this->target_lang = implode( ',', $targets );
     }
 
-    private function __validateSourceLang( Langs_Languages $lang_handler ) {
+    private function __validateSourceLang( Languages $lang_handler ) {
         try {
             $lang_handler->validateLanguage( $this->source_lang );
         } catch ( Exception $e ) {

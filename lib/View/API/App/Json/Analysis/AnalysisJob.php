@@ -12,7 +12,7 @@ namespace API\App\Json\Analysis;
 use CatUtils;
 use Exception;
 use JsonSerializable;
-use Langs_Languages;
+use Langs\Languages;
 
 class AnalysisJob implements JsonSerializable {
 
@@ -95,7 +95,7 @@ class AnalysisJob implements JsonSerializable {
         $this->id         = (int)$id;
         $this->source     = $source;
         $this->target     = $target;
-        $lang_handler     = Langs_Languages::getInstance();
+        $lang_handler     = Languages::getInstance();
         $this->sourceName = $lang_handler->getLocalizedName( $source );
         $this->targetName = $lang_handler->getLocalizedName( $target );
     }

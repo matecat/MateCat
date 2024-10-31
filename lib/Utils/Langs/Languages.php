@@ -1,28 +1,35 @@
 <?php
 
-/*
-   this class manages supported languages in the CAT tool
- */
+namespace Langs;
 
+use INIT;
+use Log;
 
-class Lang_InvalidLanguageException extends Exception {
-}
+class Languages {
 
-;
+    private static ?Languages $instance       = null; //singleton instance
+    private static array      $map_string2rfc = []; //associative map on language names -> codes
+    private static array      $map_rfc2obj    = []; //internal support map rfc -> language data
 
-class Langs_Languages {
-
-    private static ?Langs_Languages $instance              = null; //singleton instance
-    private static array            $map_string2rfc        = []; //associative map on language names -> codes
-    private static array            $map_rfc2obj           = []; //internal support map rfc -> language data
-    private static array            $map_iso2rfc           = []; //associative map iso -> rfc codes
-    private static array            $languages_definition  = []; // the complete json struct
-    private static array            $ocr_supported         = [];
-    private static array            $ocr_notSupported      = [];
-    private static array            $enabled_language_list = [];
+    /*
+     * Associative map iso → rfc codes.
+     *
+     * IMPORTANT:
+     *
+     * This map is an approximation and should not be used to resolve specific language variants.
+     * For example, the english has more than 6 variants (ex: en -> en-??)
+     *
+     * This map should be used only to allow internal code to work even for general language codes.
+     *
+     */
+    private static array $map_iso2rfc           = [];
+    private static array $languages_definition  = []; // the complete json struct
+    private static array $ocr_supported         = [];
+    private static array $ocr_notSupported      = [];
+    private static array $enabled_language_list = [];
 
     /**
-     * Langs_Languages constructor.
+     * Languages constructor.
      */
     private function __construct() {
         //get languages file
@@ -89,11 +96,15 @@ class Langs_Languages {
             //set support for ISO by indirect reference through RFC pointers
             self::$map_iso2rfc[ $lang[ 'isocode' ] ] = $lang[ 'rfc3066code' ];
 
-            //manage ambiguities
+            //manage ambiguities (approximation)
             self::$map_iso2rfc[ 'en' ] = 'en-US';
+            self::$map_iso2rfc[ 'sp' ] = 'sp-SP';
             self::$map_iso2rfc[ 'pt' ] = 'pt-PT';
-            self::$map_iso2rfc[ 'ar' ] = 'ar-SA';
             self::$map_iso2rfc[ 'fr' ] = 'fr-FR';
+            self::$map_iso2rfc[ 'ar' ] = 'ar-SA';
+            self::$map_iso2rfc[ 'zh' ] = 'zh-CN';
+            self::$map_iso2rfc[ 'it' ] = 'it-IT';
+
         }
 
         foreach ( self::$map_rfc2obj as $rfc => $lang ) {
@@ -114,11 +125,11 @@ class Langs_Languages {
     }
 
     /**
-     * @return Langs_Languages
+     * @return Languages
      */
-    public static function getInstance(): Langs_Languages {
+    public static function getInstance(): Languages {
         if ( !self::$instance ) {
-            self::$instance = new Langs_Languages();
+            self::$instance = new Languages();
         }
 
         return self::$instance;
@@ -133,7 +144,7 @@ class Langs_Languages {
      */
     public static function isRTL( string $code ): bool {
         //convert ISO code in RFC
-        $code = self::normalizeLanguageCode( $code );
+        $code = ( new Languages )->normalizeLanguageCode( $code );
 
         return self::$map_rfc2obj[ $code ][ 'rtl' ];
     }
@@ -147,7 +158,7 @@ class Langs_Languages {
      */
     public function isEnabled( string $code ) {
         //convert ISO code in RFC
-        $code = self::normalizeLanguageCode( $code );
+        $code = $this->normalizeLanguageCode( $code );
 
         return self::$map_rfc2obj[ $code ][ 'enabled' ];
     }
@@ -207,7 +218,7 @@ class Langs_Languages {
      * @return mixed
      */
     public function getLocalizedName( $code, ?string $lang = 'en' ) {
-        $code = self::normalizeLanguageCode( $code );
+        $code = $this->normalizeLanguageCode( $code );
 
         return self::$map_rfc2obj[ $code ][ 'localized' ][ $lang ];
     }
@@ -220,11 +231,11 @@ class Langs_Languages {
      * @param string|null $lang
      *
      * @return mixed
-     * @throws Lang_InvalidLanguageException
+     * @throws InvalidLanguageException
      */
     public function getLocalizedNameRFC( $code, ?string $lang = 'en' ) {
         if ( !array_key_exists( $code, self::$map_rfc2obj ) ) {
-            throw new Lang_InvalidLanguageException( 'Invalid language code: ' . $code );
+            throw new InvalidLanguageException( 'Invalid language code: ' . $code );
         }
 
         return self::$map_rfc2obj[ $code ][ 'localized' ][ $lang ];
@@ -247,19 +258,19 @@ class Langs_Languages {
     }
 
     /**
-     * @throws Lang_InvalidLanguageException
+     * @throws InvalidLanguageException
      */
     public function validateLanguage( ?string $code = null ): string {
 
         if ( empty( $code ) ) {
-            throw new Lang_InvalidLanguageException( "Missing language.", -3 );
+            throw new InvalidLanguageException( "Missing language.", -3 );
         }
 
-        $code = self::normalizeLanguageCode( $code );
+        $code = $this->normalizeLanguageCode( $code );
 
         $this->getLocalizedNameRFC( $code );
         if ( !$this->isEnabled( $code ) ) {
-            throw new Lang_InvalidLanguageException( 'Language not enabled: ' . $code );
+            throw new InvalidLanguageException( 'Language not enabled: ' . $code );
         }
 
         return $code;
@@ -267,12 +278,12 @@ class Langs_Languages {
     }
 
     /**
-     * @throws Lang_InvalidLanguageException
+     * @throws InvalidLanguageException
      */
     public function validateLanguageList( array $languageList ): array {
 
         if ( empty( $languageList ) ) {
-            throw new Lang_InvalidLanguageException( "Empty language list.", -3 );
+            throw new InvalidLanguageException( "Empty language list.", -3 );
         }
 
         $langList = [];
@@ -285,7 +296,7 @@ class Langs_Languages {
     }
 
     /**
-     * @throws Lang_InvalidLanguageException
+     * @throws InvalidLanguageException
      */
     public function validateLanguageListAsString( string $languageList, ?string $separator = ',' ): string {
 
@@ -301,13 +312,16 @@ class Langs_Languages {
      *
      * @return string|null
      */
-    public static function normalizeLanguageCode( string $languageCode ): ?string {
+    protected function normalizeLanguageCode( string $languageCode ): ?string {
 
         $langParts = explode( '-', $languageCode );
 
         $langParts[ 0 ] = trim( strtolower( $langParts[ 0 ] ) );
 
         if ( sizeof( $langParts ) == 1 ) {
+            /*
+             *  IMPORTANT: Pick the first language region. This is an approximation. Use this only to normalize the language code.
+             */
             return self::$map_iso2rfc[ $langParts[ 0 ] ] ?? null;
         } elseif ( sizeof( $langParts ) == 2 ) {
             $langParts[ 1 ] = trim( strtoupper( $langParts[ 1 ] ) );
@@ -328,17 +342,17 @@ class Langs_Languages {
      * @return bool
      */
     public static function isValidLanguage( string $language ): bool {
-        $language = self::normalizeLanguageCode( $language );
+        $language = ( new Languages )->normalizeLanguageCode( $language );
 
         return array_key_exists( $language, self::$map_rfc2obj );
     }
 
     /**
-     * @param $rfc3066code
+     * @param string $rfc3066code
      *
      * @return string|null
      */
-    public static function getLocalizedLanguage( $rfc3066code ): ?string {
+    public static function getLocalizedLanguage( string $rfc3066code ): ?string {
         foreach ( self::$languages_definition as $lang ) {
             if ( $lang[ 'rfc3066code' ] === $rfc3066code ) {
                 return $lang[ 'localized' ][ 'en' ] ?? null;
@@ -355,12 +369,14 @@ class Langs_Languages {
      * es-419 ---> es
      * to-TO ----> ton
      *
-     * @param $rfc3066code
+     * @param string $code
      *
      * @return string|null
      */
-    public static function convertLanguageToIsoCode( $rfc3066code ): ?string {
-        return self::$map_rfc2obj[ $rfc3066code ][ 'isocode' ] ?? null;
+    public static function convertLanguageToIsoCode( string $code ): ?string {
+        $code = ( new Languages )->normalizeLanguageCode( $code );
+
+        return self::$map_rfc2obj[ $code ][ 'isocode' ] ?? null;
     }
 
     /**

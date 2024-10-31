@@ -4,12 +4,11 @@ namespace API\App;
 
 use API\Commons\KleinController;
 use INIT;
-use Langs_Languages;
+use Langs\Languages;
 use ReflectionException;
 use Swaggest\JsonSchema\InvalidValue;
 use TmKeyManagement\UserKeysModel;
 use TmKeyManagement_Filter;
-use Utils;
 use Validator\JSONValidatorObject;
 
 class GlossaryController extends KleinController {
@@ -397,7 +396,7 @@ class GlossaryController extends KleinController {
      * @param $language
      */
     private function validateLanguage( $language ) {
-        $languages = Langs_Languages::getInstance();
+        $languages = Languages::getInstance();
         if ( !$languages->isValidLanguage( $language ) ) {
             $this->response->code( 500 );
             $this->response->json( [

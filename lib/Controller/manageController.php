@@ -4,6 +4,7 @@ use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
 use ConnectedServices\Google\GoogleProvider;
 use ConnectedServices\OauthClient;
+use Langs\Languages;
 
 class manageController extends viewController {
 
@@ -19,7 +20,7 @@ class manageController extends viewController {
 
         parent::makeTemplate( "manage.html" );
 
-        $this->lang_handler = Langs_Languages::getInstance();
+        $this->lang_handler = Languages::getInstance();
 
     }
 

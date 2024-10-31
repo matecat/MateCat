@@ -1,4 +1,6 @@
 <?php
+namespace Analysis;
+use Langs\Languages;
 
 /**
  * Created by PhpStorm.
@@ -7,7 +9,7 @@
  * Time: 15.04
  *
  */
-class Analysis_PayableRates {
+class PayableRates {
 
     public static array $DEFAULT_PAYABLE_RATES = [
             'NO_MATCH'    => 100,
@@ -498,21 +500,22 @@ class Analysis_PayableRates {
     }
 
     /**
-     * @param array  $breakdowns
-     * @param string $source
-     * @param string $target
+     * @param array      $breakdowns
+     * @param string     $source
+     * @param string     $target
+     * @param array|null $default
      *
      * @return array
      */
     public static function resolveBreakdowns( array $breakdowns, string $source, string $target, ?array $default = null ): array {
-        $languages = Langs_Languages::getInstance();
+        $languages = Languages::getInstance();
         $isoSource = $languages->convertLanguageToIsoCode( $source );
         $isoTarget = $languages->convertLanguageToIsoCode( $target );
 
         return array_merge(
                 self::getBreakDown( $breakdowns, $source, $target, $isoSource, $isoTarget ),
                 self::getBreakDown( $breakdowns, $target, $source, $isoTarget, $isoSource )
-        )[ 0 ] ?? ( $default ?? static::$DEFAULT_PAYABLE_RATES );
+        ) ?: ( $default ?: static::$DEFAULT_PAYABLE_RATES );
 
     }
 
@@ -540,32 +543,6 @@ class Analysis_PayableRates {
 
         return [];
 
-    }
-
-    /**
-     * This function returns the dynamic payable rate given a post-editing effort
-     *
-     * @param $pee float
-     *
-     * @return float
-     */
-    public static function pee2payable( $pee ) {
-        $pee = floatval( $pee );
-
-        // payable = ( aX^2 + bX + c ) * 100
-        return round( ( -0.00032 * ( pow( $pee, 2 ) ) + 0.034 * $pee + 0.1 ) * 100, 1 );
-    }
-
-    public static function proposalPee( $payable ) {
-        return min( 95, max( 75, $payable ) );
-    }
-
-    public static function wordsSavingDiff( $actual_payable, $proposal_payable, $word_count ) {
-        return round( ( $actual_payable - $proposal_payable ) * $word_count );
-    }
-
-    private static function roundUpToAny( $n, $x = 5 ) {
-        return ( round( $n ) % $x === 0 ) ? round( $n ) : round( ( $n + $x / 2 ) / $x ) * $x;
     }
 
 }

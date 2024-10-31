@@ -8,6 +8,8 @@ use Exceptions\ValidationError;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use Filters\FiltersConfigTemplateDao;
+use Langs\LanguageDomains;
+use Langs\Languages;
 use LQA\ModelDao;
 use LQA\ModelStruct;
 use Matecat\XliffParser\Utils\Files as XliffFiles;
@@ -311,7 +313,7 @@ class NewController extends ajaxController {
      */
     private function __validateSubjects() {
 
-        $langDomains = Langs_LanguageDomains::getInstance();
+        $langDomains = LanguageDomains::getInstance();
         $subjectMap  = $langDomains::getEnabledHashMap();
 
         $this->postInput[ 'subject' ] = ( !empty( $this->postInput[ 'subject' ] ) ) ? $this->postInput[ 'subject' ] : 'general';
@@ -434,8 +436,8 @@ class NewController extends ajaxController {
             $this->postInput[ 'project_name' ] = $default_project_name; //'NO_NAME'.$this->create_project_name();
         }
 
-        $this->__validateSourceLang( Langs_Languages::getInstance() );
-        $this->__validateTargetLangs( Langs_Languages::getInstance() );
+        $this->__validateSourceLang( Languages::getInstance() );
+        $this->__validateTargetLangs( Languages::getInstance() );
 
         //ONE OR MORE ERRORS OCCURRED : EXITING
         //for now we sent to api output only the LAST error message, but we log all
@@ -843,7 +845,7 @@ class NewController extends ajaxController {
         $this->result[ 'errors' ] = $this->projectStructure[ 'result' ][ 'errors' ]->getArrayCopy();
     }
 
-    private function __validateSourceLang( Langs_Languages $lang_handler ) {
+    private function __validateSourceLang( Languages $lang_handler ) {
         try {
             $lang_handler->validateLanguage( $this->postInput[ 'source_lang' ] );
         } catch ( Exception $e ) {
@@ -852,7 +854,7 @@ class NewController extends ajaxController {
         }
     }
 
-    private function __validateTargetLangs( Langs_Languages $lang_handler ) {
+    private function __validateTargetLangs( Languages $lang_handler ) {
         try {
             $this->postInput[ 'target_lang' ] = $lang_handler->validateLanguageListAsString( $this->postInput[ 'target_lang' ] );
         } catch ( Exception $e ) {

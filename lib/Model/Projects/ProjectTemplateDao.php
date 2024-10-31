@@ -8,7 +8,7 @@ use DateTime;
 use Engine;
 use Exception;
 use Filters\FiltersConfigTemplateDao;
-use Langs_Languages;
+use Langs\Languages;
 use Pagination\Pager;
 use Pagination\PaginationParameters;
 use PayableRates\CustomPayableRateDao;
@@ -167,7 +167,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
 
         // source_language
         if ( $projectTemplateStruct->source_language !== null ) {
-            $languages = Langs_Languages::getInstance();
+            $languages = Languages::getInstance();
             $language  = Utils::trimAndLowerCase( $projectTemplateStruct->source_language );
 
             try {
@@ -187,7 +187,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
                 throw new Exception( "target language is not an array", 403 );
             }
 
-            $languages = Langs_Languages::getInstance();
+            $languages = Languages::getInstance();
 
             try {
                 $languages->validateLanguageList( $targetLanguages );

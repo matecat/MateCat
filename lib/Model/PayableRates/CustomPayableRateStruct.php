@@ -2,14 +2,14 @@
 
 namespace PayableRates;
 
-use Analysis_PayableRates;
+use Analysis\PayableRates;
 use DataAccess_AbstractDaoSilentStruct;
 use DataAccess_IDaoStruct;
 use Date\DateTimeUtil;
 use DomainException;
 use Exception;
 use JsonSerializable;
-use Langs_Languages;
+use Langs\Languages;
 
 class CustomPayableRateStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct, JsonSerializable {
     const MAX_BREAKDOWN_SIZE = 65535;
@@ -64,7 +64,7 @@ class CustomPayableRateStruct extends DataAccess_AbstractDaoSilentStruct impleme
         $this->validateLanguage( $source );
         $this->validateLanguage( $target );
 
-        return Analysis_PayableRates::resolveBreakdowns( $breakdowns, $source, $target, $breakdowns[ 'default' ] );
+        return PayableRates::resolveBreakdowns( $breakdowns, $source, $target, $breakdowns[ 'default' ] );
 
     }
 
@@ -130,7 +130,7 @@ class CustomPayableRateStruct extends DataAccess_AbstractDaoSilentStruct impleme
     private function validateLanguage( $lang ) {
         // rfc3066code --->  es-ES
         // isocode     --->  es
-        $languages = Langs_Languages::getInstance();
+        $languages = Languages::getInstance();
         if ( !$languages->isValidLanguage( $lang ) ) {
             throw new DomainException( $lang . ' is not a supported language', 403 );
         }

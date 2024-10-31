@@ -2,7 +2,7 @@
 
 namespace PayableRates;
 
-use Analysis_PayableRates;
+use Analysis\PayableRates;
 use DataAccess_AbstractDao;
 use Database;
 use Date\DateTimeUtil;
@@ -54,7 +54,7 @@ class CustomPayableRateDao extends DataAccess_AbstractDao {
                 'payable_rate_template_name' => 'Default',
                 'version'                    => 1,
                 'breakdowns'                 => [
-                        'default' => Analysis_PayableRates::$DEFAULT_PAYABLE_RATES
+                        'default' => PayableRates::$DEFAULT_PAYABLE_RATES
                 ],
                 'createdAt'                  => DateTimeUtil::formatIsoDate( date( "Y-m-d H:i:s" ) ),
                 'modifiedAt'                 => DateTimeUtil::formatIsoDate( date( "Y-m-d H:i:s" ) ),

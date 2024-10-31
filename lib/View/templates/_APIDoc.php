@@ -1,4 +1,8 @@
 <?php
+
+use Langs\LanguageDomains;
+use Langs\Languages;
+
 require_once '../../inc/Bootstrap.php';
 try {
     Bootstrap::start();
@@ -327,7 +331,7 @@ $csp       = str_replace( '${x_nonce_unique_id}', $csp_nonce, $csp );
                 <tr>
                     <td>
                         <ul class="lang-list">
-                            <?php foreach ( Langs_Languages::getInstance()->getEnabledLanguages() as $lang ): ?>
+                            <?php foreach ( Languages::getInstance()->getEnabledLanguages() as $lang ): ?>
                                 <li><?= $lang[ 'name' ] . " (" . $lang[ 'code' ] . ")" ?></li>
                             <?php endforeach; ?>
                         </ul>
@@ -348,7 +352,7 @@ $csp       = str_replace( '${x_nonce_unique_id}', $csp_nonce, $csp );
                 </tr>
                 </thead>
                 <tbody>
-                <?php foreach ( Langs_LanguageDomains::getInstance()->getEnabledDomains() as $domains ): ?>
+                <?php foreach ( LanguageDomains::getInstance()->getEnabledDomains() as $domains ): ?>
                     <tr>
                         <td><?= $domains[ 'display' ] ?></td>
                         <td><?= $domains[ 'key' ] ?></td>

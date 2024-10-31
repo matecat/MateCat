@@ -17,6 +17,7 @@
  */
 
 
+use Langs\Languages;
 use TestHelpers\AbstractTest;
 
 error_reporting( ~E_DEPRECATED );
@@ -59,7 +60,7 @@ class TmxImportMyMemoryTest extends AbstractTest {
 
         $engine_MyMemory = new Engines_MyMemory( $engine_struct_param );
 
-        Langs_Languages::getInstance();
+        Languages::getInstance();
 
 
         /**

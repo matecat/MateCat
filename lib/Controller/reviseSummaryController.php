@@ -2,6 +2,7 @@
 
 use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
+use Langs\Languages;
 use WordCount\WordCountStruct;
 
 /**
@@ -136,7 +137,7 @@ class reviseSummaryController extends viewController {
             $this->template->nbspPlaceholderRegex = CatUtils::nbspPlaceholderRegex;
         }
 
-        $lang_handler               = Langs_Languages::getInstance();
+        $lang_handler               = Languages::getInstance();
         $this->template->source_rtl = (bool)$lang_handler->isRTL( $this->data[ 'source' ] );
         $this->template->target_rtl = (bool)$lang_handler->isRTL( $this->data[ 'target' ] );
 
