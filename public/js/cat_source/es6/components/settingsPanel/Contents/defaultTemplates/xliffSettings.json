@@ -11,7 +11,15 @@
           "needs-l10n",
           "needs-translation",
           "mt-suggestion",
-          "fuzzy-match"
+          "fuzzy-match",
+          "exact-match",
+          "leveraged-glossary",
+          "leveraged-inherited",
+          "leveraged-mt",
+          "leveraged-repository",
+          "leveraged-tm",
+          "rejected-grammar",
+          "rejected-spelling"
         ],
         "analysis": "new"
       },

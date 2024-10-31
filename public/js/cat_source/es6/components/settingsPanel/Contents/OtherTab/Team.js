@@ -29,7 +29,7 @@ export const Team = () => {
           id="project-team"
           name={'project-team'}
           isPortalDropdown={true}
-          dropdownClassName="select-dropdown__wrapper-other-tab"
+          dropdownClassName="select-dropdown__wrapper-portal"
           showSearchBar={true}
           maxHeightDroplist={SELECT_HEIGHT}
           options={

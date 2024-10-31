@@ -17,7 +17,7 @@ export const TargetLanguages = () => {
           id="target-langs"
           name="target-langs"
           isPortalDropdown={true}
-          dropdownClassName="select-dropdown__wrapper-other-tab"
+          dropdownClassName="select-dropdown__wrapper-portal"
           maxHeightDroplist={SELECT_HEIGHT}
           showSearchBar={true}
           multipleSelect="dropdown"
