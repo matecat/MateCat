@@ -4145,6 +4145,21 @@ $gray-2: #bbbbbb;
 $light-blue: #0055b8;
 $white: #fff;
 
+/* Edit Log */
+
+.editlog {
+  padding-top: 88px;
+
+  .wrapper {
+    margin: 0 auto 64px auto;
+  }
+
+  header {
+    .logo {
+      margin-top: 0 !important;
+    }
+  }
+}
 
 /* XLIFF to Target page */
 

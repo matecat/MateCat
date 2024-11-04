@@ -257,6 +257,10 @@ const matecatConfig = async ({env}, {mode}) => {
           'public/css/sass/components/pages/SignInPage.scss',
         ),
       ],
+      signin: [
+        path.resolve(__dirname, 'public/js/cat_source/es6/pages/SignIn.js'),
+        path.resolve(__dirname, 'public/css/sass/signin_page.scss'),
+      ],
       xliffToTarget: [
         path.resolve(__dirname, 'public/js/upload_main.js'),
         path.resolve(

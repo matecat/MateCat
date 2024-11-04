@@ -44,7 +44,8 @@
     "react-tagsinput": "^3.19.0",
     "react-transition-group": "^4.2.2",
     "react-virtual": "^2.10.4",
-    "sprintf-js": "^1.1.2"
+    "sprintf-js": "^1.1.2",
+    "file-saver": "^2.0.5"
   },
   "devDependencies": {
     "@babel/core": "7.25.2",
@@ -92,5 +93,5 @@
   "resolutions": {
     "wrap-ansi": "^7.0.0"
   },
-  "version": "2.22.48"
+  "version": "2.22.49"
 }

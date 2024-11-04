@@ -364,10 +364,10 @@
     min-height: 200px;
     -moz-border-radius: 4px;
     background: #fff;
-    justify-content: center;
-    align-items: stretch;
     display: flex;
     flex-direction: column;
+    justify-content: center;
+    align-items: stretch;
     text-align: center;
     gap: 12px;
 
@@ -380,17 +380,6 @@
       cursor: pointer;
     }
   }
-}
-
-.uploadloader {
-  background: url(/public/img/loader.gif) center center no-repeat;
-  width: 20px;
-  height: 20px;
-  float: right;
-  margin-top: 3px;
-  position: absolute;
-  right: 233px;
-  background-size: 20px 20px;
 }
 
 @media only screen and (min-width: 1600px) {
