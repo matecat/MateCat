@@ -5,7 +5,6 @@
 import React from 'react'
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentConstants from '../../constants/SegmentConstants'
-import SegmentUtils from '../../utils/segmentUtils'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper'
 
 class SegmentHeader extends React.PureComponent {
@@ -82,6 +81,7 @@ class SegmentHeader extends React.PureComponent {
   componentDidUpdate() {
     this.setState({
       isActiveCharactersCounter:
+        this.context.userInfo &&
         this.context.userInfo.metadata.character_counter,
     })
   }

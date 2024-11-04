@@ -231,7 +231,7 @@ class SegmentCommentsContainer extends React.Component {
             .trim()
           const isAuthorOfLastComment =
             comments[comments.length - 1].id === comment.id &&
-            comment.uid === this.context.userInfo.user.uid &&
+            comment.uid === this.context.userInfo?.user.uid &&
             comment.source_page == config.revisionNumber + 1
           deleteButton = isAuthorOfLastComment ? (
             <Button
@@ -425,10 +425,12 @@ class SegmentCommentsContainer extends React.Component {
   }
 
   scrollToBottom() {
-    const scrollHeight = this.wrap.scrollHeight
-    const height = this.wrap.clientHeight
-    const maxScrollTop = scrollHeight - height
-    this.wrap.scrollTop = maxScrollTop > 0 ? maxScrollTop : 0
+    if (this.wrap) {
+      const scrollHeight = this.wrap.scrollHeight
+      const height = this.wrap.clientHeight
+      const maxScrollTop = scrollHeight - height
+      this.wrap.scrollTop = maxScrollTop > 0 ? maxScrollTop : 0
+    }
   }
 
   setFocusOnInput() {
@@ -445,7 +447,6 @@ class SegmentCommentsContainer extends React.Component {
   }
 
   componentDidUpdate() {
-    // const comments = CommentsStore.getCommentsBySegment(this.context.segment.sid);
     this.scrollToBottom()
   }
 
@@ -507,7 +508,7 @@ class SegmentCommentsContainer extends React.Component {
         this.context.segment.sid.split('-')[1] === '1') &&
       this.state.comments
     ) {
-      if (this.context.segment.openComments) {
+      if (this.context.segment.openComments && this.context.userInfo) {
         return this.getComments()
       }
     } else {
