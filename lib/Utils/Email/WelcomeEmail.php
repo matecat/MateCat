@@ -18,7 +18,7 @@ class WelcomeEmail extends AbstractEmail {
      */
     protected $user;
 
-    protected $title = 'Welcome to MateCat!';
+    protected $title = 'Welcome to Matecat! Get Started with Your First Project Today';
 
     public function __construct( Users_UserStruct $user ) {
         $this->user = $user;
