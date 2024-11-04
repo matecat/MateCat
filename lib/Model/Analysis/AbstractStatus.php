@@ -11,14 +11,14 @@ use API\App\Json\Analysis\AnalysisProjectSummary;
 use API\App\Json\Analysis\MatchConstants;
 use API\Commons\Exceptions\AuthenticationError;
 use Chunks_ChunkDao;
-use Chunks_ChunkStruct;
 use Constants_ProjectStatus;
 use Exception;
 use Exceptions\NotFoundException;
 use Exceptions\ValidationError;
 use FeatureSet;
 use INIT;
-use Langs_LanguageDomains;
+use Jobs_JobStruct;
+use Langs\LanguageDomains;
 use OutsourceTo_OutsourceAvailable;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
@@ -122,7 +122,7 @@ abstract class AbstractStatus {
         //get status of project
         $this->status_project = $this->_project_data[ 0 ][ 'status_analysis' ];
 
-        $subject_handler = Langs_LanguageDomains::getInstance();
+        $subject_handler = LanguageDomains::getInstance();
         $subjects        = $subject_handler->getEnabledHashMap();
         $this->subject   = $subjects[ $this->_project_data[ 0 ][ 'subject' ] ];
 
@@ -279,7 +279,7 @@ abstract class AbstractStatus {
                 $job->incrementEquivalent( round( $_job_fallback[ 'standard_analysis_wc' ] ) );
                 $job->incrementRaw( round( $_job_fallback[ 'standard_analysis_wc' ] ) );
 
-                $chunkStruct                = new Chunks_ChunkStruct();
+                $chunkStruct                = new Jobs_JobStruct();
                 $chunkStruct->id            = $_job_fallback[ 'jid' ];
                 $chunkStruct->password      = $_job_fallback[ 'jpassword' ];
                 $chunkStruct->source        = $lang_pair[ 0 ];

@@ -3,8 +3,8 @@
 namespace Analysis\Workers;
 
 use AMQHandler;
+use Analysis\PayableRates as PayableRates;
 use Analysis\Queue\RedisKeys;
-use Analysis_PayableRates as PayableRates;
 use Constants_ProjectStatus;
 use Constants_ProjectStatus as ProjectStatus;
 use Database;

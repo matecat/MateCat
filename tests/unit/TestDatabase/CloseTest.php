@@ -12,11 +12,11 @@ use TestHelpers\AbstractTest;
  */
 class CloseTest extends AbstractTest {
 
-    protected $jobDao;
+    protected $databaseInstance;
 
     public function setUp(): void {
         parent::setUp();
-        $this->jobDao = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
+        $this->databaseInstance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
     }
 
     public function tearDown(): void {
@@ -31,12 +31,12 @@ class CloseTest extends AbstractTest {
      */
     public function test_close() {
 
-        $this->jobDao->close();
+        $this->databaseInstance->close();
 
-        $reflector  = new ReflectionClass( $this->jobDao );
+        $reflector  = new ReflectionClass( $this->databaseInstance );
         $connection = $reflector->getProperty( 'connection' );
         $connection->setAccessible( true );
-        $current_value = $connection->getValue( $this->jobDao );
+        $current_value = $connection->getValue( $this->databaseInstance );
         $this->assertNull( $current_value );
 
     }

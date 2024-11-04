@@ -24,7 +24,7 @@ class ModernMTController extends BaseChunkController {
      * Get all the customer's MMT memories
      */
     public function keys() {
-        if ( !$this->userIsLogged() ) {
+        if ( !$this->isLoggedIn() ) {
             $this->response->status()->setCode( 401 );
             $this->response->json( [] );
             exit();

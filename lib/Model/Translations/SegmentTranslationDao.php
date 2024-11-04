@@ -13,7 +13,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
     /**
      * @var array
      */
-    public static $primary_keys = [
+    public static array $primary_keys = [
             'id_job',
             'id_segment'
     ];
@@ -104,7 +104,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
         return $stmt->fetchAll();
     }
 
-    protected function _buildResult( $array_result ) {
+    protected function _buildResult( array $array_result ) {
     }
 
     /**
@@ -134,7 +134,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
 
     }
 
-    public static function getUnchangeableStatus( Chunks_ChunkStruct $chunk, $segments_ids, $status, $source_page ) {
+    public static function getUnchangeableStatus( Jobs_JobStruct $chunk, $segments_ids, $status, $source_page ) {
 
         $where_values = [];
         $conn         = Database::obtain()->getConnection();
@@ -438,7 +438,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
      * This function propagates the translation to every identical sources in the chunk/job
      *
      * @param Translations_SegmentTranslationStruct $segmentTranslationStruct
-     * @param Chunks_ChunkStruct                    $chunkStruct
+     * @param Jobs_JobStruct                    $chunkStruct
      * @param                                       $_idSegment
      * @param Projects_ProjectStruct                $project
      *
@@ -464,7 +464,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
     public
     static function propagateTranslation(
             Translations_SegmentTranslationStruct $segmentTranslationStruct,
-            Chunks_ChunkStruct                    $chunkStruct,
+            Jobs_JobStruct                    $chunkStruct,
                                                   $_idSegment,
             Projects_ProjectStruct                $project,
             VersionHandlerInterface               $versionHandler,

@@ -37,7 +37,7 @@ abstract class AbstractEmail {
     }
 
     protected function _setLayoutByPath( $path ) {
-        $this->_layout_path = $path ;
+        $this->_layout_path = $path;
     }
 
     protected function _setTemplate( $template ) {

@@ -29,13 +29,15 @@ class splitJobController extends ajaxController {
      */
     private $project_struct;
 
+    /**
+     * @throws ReflectionException
+     */
     public function __construct() {
 
         //SESSION ENABLED
-        parent::sessionStart();
         parent::__construct();
 
-        $this->setUserCredentials();
+        $this->identifyUser();
 
         $filterArgs = array(
                 'exec'         => array(
@@ -154,7 +156,7 @@ class splitJobController extends ajaxController {
         $found = false;
         $jid   = $this->job_id;
         $filteredJobs = array_values( array_filter( $jobList, function ( Jobs_JobStruct $jobStruct ) use ( &$found, $jid ) {
-            return $jobStruct->id == $jid and !$jobStruct->wasDeleted();
+            return $jobStruct->id == $jid and !$jobStruct->isDeleted();
         } ) );
 
         if ( empty( $filteredJobs ) ) {

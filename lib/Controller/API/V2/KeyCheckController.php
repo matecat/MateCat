@@ -12,9 +12,13 @@ namespace API\V2;
 use API\Commons\Exceptions\AuthenticationError;
 use API\Commons\Exceptions\NotFoundException;
 use API\Commons\KleinController;
+use ApiKeys_ApiKeyDao;
 
 class KeyCheckController extends KleinController {
 
+    /**
+     * @throws AuthenticationError
+     */
     public function ping() {
         if ( !$this->api_record ) {
             throw new AuthenticationError() ;
@@ -23,6 +27,10 @@ class KeyCheckController extends KleinController {
         $this->response->code(200) ;
     }
 
+    /**
+     * @throws NotFoundException
+     * @throws AuthenticationError
+     */
     public function getUID(){
 
         if ( !$this->api_record ) {
@@ -33,7 +41,7 @@ class KeyCheckController extends KleinController {
 
         if ( $user_api_key && $user_api_secret ) {
 
-            $api_record = \ApiKeys_ApiKeyDao::findByKey( $user_api_key );
+            $api_record = ApiKeys_ApiKeyDao::findByKey( $user_api_key );
 
             if( $api_record && $api_record->validSecret( $user_api_secret ) ){
 

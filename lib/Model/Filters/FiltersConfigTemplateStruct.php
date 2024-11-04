@@ -13,16 +13,15 @@ use Filters\DTO\MSWord;
 use Filters\DTO\Xml;
 use Filters\DTO\Yaml;
 use JsonSerializable;
-use stdClass;
 
 class FiltersConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruct implements JsonSerializable {
 
-    public ?int           $id            = null;
-    public string         $name;
-    public int            $uid;
-    public ?string        $created_at    = null;
-    public ?string        $modified_at   = null;
-    public ?string        $deleted_at    = null;
+    public ?int          $id            = null;
+    public string        $name;
+    public int           $uid;
+    public ?string       $created_at    = null;
+    public ?string       $modified_at   = null;
+    public ?string       $deleted_at    = null;
     public ?Yaml         $yaml          = null;
     public ?Xml          $xml           = null;
     public ?Json         $json          = null;
@@ -244,29 +243,9 @@ class FiltersConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruct imp
                 'ms_word'       => $this->ms_word,
                 'ms_excel'      => $this->ms_excel,
                 'ms_powerpoint' => $this->ms_powerpoint,
-                'createdAt'     => DateTimeUtil::formatIsoDate( $this->created_at ),
-                'modifiedAt'    => DateTimeUtil::formatIsoDate( $this->modified_at )
+                'created_at'    => DateTimeUtil::formatIsoDate( $this->created_at ),
+                'modified_at'   => DateTimeUtil::formatIsoDate( $this->modified_at )
         ];
-    }
-
-    public static function default( int $uid ): stdClass {
-
-        $default       = new stdClass();
-        $default->id   = 0;
-        $default->uid  = $uid;
-        $default->name = "default";
-
-        $default->xml           = Xml::default();
-        $default->yaml          = Yaml::default();
-        $default->json          = Json::default();
-        $default->ms_word       = MSWord::default();
-        $default->ms_excel      = MSExcel::default();
-        $default->ms_powerpoint = MSPowerpoint::default();
-        $default->created_at    = date( "Y-m-d H:i:s" );
-        $default->modified_at   = date( "Y-m-d H:i:s" );
-
-        return $default;
-
     }
 
 }

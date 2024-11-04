@@ -35,7 +35,7 @@ class MembershipDeletedEmail extends AbstractEmail {
      *
      * @param Users_UserStruct $sender
      * @param Users_UserStruct $removed_user
-     * @param TeamStruct        $team
+     * @param TeamStruct       $team
      */
     public function __construct( Users_UserStruct $sender, Users_UserStruct $removed_user, TeamStruct $team ) {
         $this->user   = $removed_user;
@@ -48,14 +48,14 @@ class MembershipDeletedEmail extends AbstractEmail {
     }
 
     protected function _getTemplateVariables() {
-        return array(
+        return [
                 'user'   => $this->user->toArray(),
                 'sender' => $this->sender->toArray(),
                 'team'   => $this->team->toArray()
-        );
+        ];
     }
 
-    protected function _getLayoutVariables($messageBody = null) {
+    protected function _getLayoutVariables( $messageBody = null ) {
         $vars            = parent::_getLayoutVariables();
         $vars[ 'title' ] = $this->title;
 
@@ -68,7 +68,7 @@ class MembershipDeletedEmail extends AbstractEmail {
 
 
     public function send() {
-        $recipient = array( $this->user->email, $this->user->fullName() );
+        $recipient = [ $this->user->email, $this->user->fullName() ];
 
         $this->doSend( $recipient, $this->title,
                 $this->_buildHTMLMessage(),

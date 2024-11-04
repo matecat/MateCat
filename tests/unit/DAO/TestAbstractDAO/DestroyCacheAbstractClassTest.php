@@ -26,24 +26,24 @@ class DestroyCacheAbstractClassTest extends AbstractTest {
 
     public function setUp(): void {
         parent::setUp();
-        $this->jobDao    = new EnginesModel_EngineDAO( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
-        $this->reflector = new ReflectionClass( $this->jobDao );
-        $this->method    = $this->reflector->getMethod( "_destroyCache" );
+        $this->databaseInstance = new EnginesModel_EngineDAO( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
+        $this->reflector        = new ReflectionClass( $this->databaseInstance );
+        $this->method           = $this->reflector->getMethod( "_destroyCache" );
         $this->method->setAccessible( true );
 
         $this->cache_con = $this->reflector->getProperty( "cache_con" );
         $this->cache_con->setAccessible( true );
-        $this->cache_con->setValue( $this->jobDao, new Client( INIT::$REDIS_SERVERS ) );
+        $this->cache_con->setValue( $this->databaseInstance, new Client( INIT::$REDIS_SERVERS ) );
 
         $this->cache_TTL = $this->reflector->getProperty( "cacheTTL" );
         $this->cache_TTL->setAccessible( true );
-        $this->cache_TTL->setValue( $this->jobDao, 30 );
+        $this->cache_TTL->setValue( $this->databaseInstance, 30 );
 
 
     }
 
     public function tearDown(): void {
-        $this->cache_con->getValue( $this->jobDao )->flushdb();
+        $this->cache_con->getValue( $this->databaseInstance )->flushdb();
         parent::tearDown();
     }
 
@@ -58,12 +58,12 @@ class DestroyCacheAbstractClassTest extends AbstractTest {
         $this->cache_key               = "key";
         $this->cache_value_for_the_key = "foo_bar";
         $key                           = md5( $this->cache_key );
-        $TTL                           = $this->cache_TTL->getValue( $this->jobDao );
+        $TTL                           = $this->cache_TTL->getValue( $this->databaseInstance );
         $value                         = serialize( $this->cache_value_for_the_key );
-        $this->cache_con->getValue( $this->jobDao )->setex( $key, $TTL, $value );
+        $this->cache_con->getValue( $this->databaseInstance )->setex( $key, $TTL, $value );
 
-        $this->number_of_keys_removed = $this->method->invoke( $this->jobDao, $this->cache_key );
-        $this->bool_cache_hit         = $this->cache_con->getValue( $this->jobDao )->get( $this->cache_key );
+        $this->number_of_keys_removed = $this->method->invoke( $this->databaseInstance, $this->cache_key );
+        $this->bool_cache_hit         = $this->cache_con->getValue( $this->databaseInstance )->get( $this->cache_key );
         $this->assertNull( $this->bool_cache_hit );
         $this->assertEquals( 1, $this->number_of_keys_removed );
 
@@ -79,8 +79,8 @@ class DestroyCacheAbstractClassTest extends AbstractTest {
     public function test__destroyCache_not_cached_key_value() {
         $this->cache_key               = "key";
         $this->cache_value_for_the_key = "foo_bar";
-        $this->number_of_keys_removed  = $this->method->invoke( $this->jobDao, $this->cache_key );
-        $this->bool_cache_hit          = $this->cache_con->getValue( $this->jobDao )->get( $this->cache_key );
+        $this->number_of_keys_removed  = $this->method->invoke( $this->databaseInstance, $this->cache_key );
+        $this->bool_cache_hit          = $this->cache_con->getValue( $this->databaseInstance )->get( $this->cache_key );
         $this->assertNull( $this->bool_cache_hit );
         $this->assertEquals( 0, $this->number_of_keys_removed );
 
@@ -117,12 +117,12 @@ class DestroyCacheAbstractClassTest extends AbstractTest {
                         ]
         ];
         $key                           = md5( $this->cache_key );
-        $TTL                           = $this->cache_TTL->getValue( $this->jobDao );
+        $TTL                           = $this->cache_TTL->getValue( $this->databaseInstance );
         $value                         = serialize( $this->cache_value_for_the_key );
-        $this->cache_con->getValue( $this->jobDao )->setex( $key, $TTL, $value );
+        $this->cache_con->getValue( $this->databaseInstance )->setex( $key, $TTL, $value );
 
-        $this->number_of_keys_removed = $this->method->invoke( $this->jobDao, $this->cache_key );
-        $this->bool_cache_hit         = $this->cache_con->getValue( $this->jobDao )->get( $this->cache_key );
+        $this->number_of_keys_removed = $this->method->invoke( $this->databaseInstance, $this->cache_key );
+        $this->bool_cache_hit         = $this->cache_con->getValue( $this->databaseInstance )->get( $this->cache_key );
         $this->assertNull( $this->bool_cache_hit );
         $this->assertEquals( 1, $this->number_of_keys_removed );
 

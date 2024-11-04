@@ -58,20 +58,21 @@ class OwnerFeatures_OwnerFeatureDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param     $id_customer
+     * @param string $id_customer
      *
-     * @param int $ttl
+     * @param int    $ttl
      *
      * @return DataAccess_IDaoStruct[]|OwnerFeatures_OwnerFeatureStruct[]
+     * @throws ReflectionException
      */
-    public static function getByIdCustomer( $id_customer, $ttl = 3600 ) {
+    public static function getByIdCustomer( string $id_customer, int $ttl = 3600 ): array {
         $conn    = Database::obtain()->getConnection();
         $thisDao = new self();
         $stmt    = $conn->prepare( self::query_by_user_email );
 
         return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new OwnerFeatures_OwnerFeatureStruct(), [
                 'id_customer' => $id_customer
-        ] );
+        ] ) ?? [];
     }
 
     /**

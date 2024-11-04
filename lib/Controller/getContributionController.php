@@ -114,7 +114,7 @@ class getContributionController extends ajaxController {
         $projectStruct = $jobStruct->getProject();
         $this->featureSet->loadForProject( $projectStruct );
 
-        $this->readLoginInfo();
+        $this->identifyUser();
         if ( !$this->concordance_search ) {
             $this->_getContexts( $jobStruct->source, $jobStruct->target );
         }

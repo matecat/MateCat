@@ -53,7 +53,7 @@ class setTranslationController extends ajaxController {
     protected $split_statuses;
 
     /**
-     * @var Chunks_ChunkStruct
+     * @var Jobs_JobStruct
      */
     protected $chunk;
 
@@ -189,7 +189,7 @@ class setTranslationController extends ajaxController {
             }
 
             //add check for job status archived.
-            if ( strtolower( $this->chunk[ 'status' ] ) == Constants_JobStatus::STATUS_ARCHIVED ) {
+            if ( $this->chunk->isArchived() ) {
                 $this->result[ 'errors' ][] = [ "code" => -3, "message" => "job archived" ];
             }
 
@@ -299,7 +299,7 @@ class setTranslationController extends ajaxController {
      */
     public function doAction() {
         $this->checkData();
-        $this->readLoginInfo();
+        $this->identifyUser();
         $this->initVersionHandler();
         $this->_getContexts();
 

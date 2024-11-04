@@ -7,7 +7,7 @@ class PostProcess extends QA {
 
     /**
      * Perform all integrity check and comparisons on source and target string
-     * 
+     *
      */
     public function realignMTSpaces() {
 

@@ -39,7 +39,7 @@ class SearchModel {
      * SearchModel constructor.
      *
      * @param SearchQueryParamsStruct $queryParams
-     * @param MateCatFilter          $filters
+     * @param MateCatFilter           $filters
      */
     public function __construct( SearchQueryParamsStruct $queryParams, MateCatFilter $filters ) {
         $this->queryParams = $queryParams;
@@ -54,17 +54,17 @@ class SearchModel {
      * @return array
      * @throws Exception
      */
-    public function search($strictMode = true) {
+    public function search( $strictMode = true ) {
 
         switch ( $this->queryParams->key ) {
             case 'source':
-                $results = $this->_getQuery( $this->_loadSearchInSourceQuery($strictMode) );
+                $results = $this->_getQuery( $this->_loadSearchInSourceQuery( $strictMode ) );
                 break;
             case 'target':
-                $results = $this->_getQuery( $this->_loadSearchInTargetQuery($strictMode) );
+                $results = $this->_getQuery( $this->_loadSearchInTargetQuery( $strictMode ) );
                 break;
             case 'coupled':
-                $rawResults = array_merge_recursive( $this->_getQuery( $this->_loadSearchInSourceQuery($strictMode) ), $this->_getQuery( $this->_loadSearchInTargetQuery($strictMode) ) );
+                $rawResults = array_merge_recursive( $this->_getQuery( $this->_loadSearchInSourceQuery( $strictMode ) ), $this->_getQuery( $this->_loadSearchInTargetQuery( $strictMode ) ) );
                 $results    = [];
 
                 // in this case, $results is the merge of two queries results,
@@ -120,7 +120,7 @@ class SearchModel {
                     $matchesTargetCount = count( $matchesTarget );
 
                     if ( $this->hasMatches( $matchesSource ) and $this->hasMatches( $matchesTarget ) ) {
-                        $vector[ 'sid_list' ][] = strval($id);
+                        $vector[ 'sid_list' ][] = strval( $id );
                         $vector[ 'count' ]      = $vector[ 'count' ] + $matchesTargetCount + $matchesSourceCount;
                     }
                 }
@@ -163,15 +163,16 @@ class SearchModel {
     private function find( $haystack, $needle, $originalMap = null ) {
 
         $this->filters->fromLayer0ToLayer2( $haystack );
+
 //        $haystack = StringTransformer::transform($haystack, $originalMap);
 
         return WholeTextFinder::find(
-            $haystack,
-            $needle,
-            true,
-            $this->queryParams->isExactMatchRequested,
-            $this->queryParams->isMatchCaseRequested,
-            true
+                $haystack,
+                $needle,
+                true,
+                $this->queryParams->isExactMatchRequested,
+                $this->queryParams->isMatchCaseRequested,
+                true
         );
     }
 
@@ -269,10 +270,10 @@ class SearchModel {
      *
      * @return string
      */
-    protected function _loadSearchInTargetQuery($strictMode = false) {
+    protected function _loadSearchInTargetQuery( $strictMode = false ) {
 
         $this->_loadParams();
-        $password_where = ($strictMode) ? ' AND st.id_segment between j.job_first_segment and j.job_last_segment AND j.password = "'.$this->queryParams->password.'"' : '';
+        $password_where = ( $strictMode ) ? ' AND st.id_segment between j.job_first_segment and j.job_last_segment AND j.password = "' . $this->queryParams->password . '"' : '';
 
         $query = "
         SELECT  st.id_segment as id, st.translation as text, od.map as original_map
@@ -294,10 +295,10 @@ class SearchModel {
      *
      * @return string
      */
-    protected function _loadSearchInSourceQuery($strictMode = false) {
+    protected function _loadSearchInSourceQuery( $strictMode = false ) {
 
         $this->_loadParams();
-        $password_where = ($strictMode) ? ' AND s.id between j.job_first_segment and j.job_last_segment AND j.password = "'.$this->queryParams->password.'"' : '';
+        $password_where = ( $strictMode ) ? ' AND s.id between j.job_first_segment and j.job_last_segment AND j.password = "' . $this->queryParams->password . '"' : '';
 
         $query = "
         SELECT s.id, s.segment as text, od.map as original_map

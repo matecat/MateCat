@@ -87,7 +87,7 @@ class GetContributionWorker extends AbstractWorker {
         $featureSet = new FeatureSet();
         $featureSet->loadForProject( $contributionStruct->getProjectStruct() );
 
-        list( $mt_result, $matches ) = $this->_getMatches( $contributionStruct, $jobStruct, $jobStruct->target, $featureSet );
+        [ $mt_result, $matches ] = $this->_getMatches( $contributionStruct, $jobStruct, $jobStruct->target, $featureSet );
 
         $filter  = MateCatFilter::getInstance( $featureSet, $jobStruct->source, $jobStruct->target );
         $matches = $this->_sortMatches( $mt_result, $matches );
@@ -111,7 +111,7 @@ class GetContributionWorker extends AbstractWorker {
 
                 // double check for not black lang
                 if ( $lang !== '' ) {
-                    list( , $matches ) = $this->_getMatches( $contributionStruct, $jobStruct, $lang, $featureSet, true );
+                    [ , $matches ] = $this->_getMatches( $contributionStruct, $jobStruct, $lang, $featureSet, true );
 
                     $matches = array_slice( $matches, 0, $contributionStruct->resultNum );
                     $this->normalizeTMMatches( $matches, $contributionStruct, $featureSet, $lang );
@@ -268,7 +268,6 @@ class GetContributionWorker extends AbstractWorker {
                 $match[ 'created_by' ] = Utils::changeMemorySuggestionSource(
                         $match,
                         $contributionStruct->getJobStruct()->tm_keys,
-                        $contributionStruct->getJobStruct()->owner,
                         $user->uid
                 );
             }
@@ -280,9 +279,9 @@ class GetContributionWorker extends AbstractWorker {
                 $regularExpressions = $this->tokenizeSourceSearch( $contributionStruct->getContexts()->segment );
 
                 if ( !$contributionStruct->fromTarget ) {
-                    list( $match[ 'segment' ], $match[ 'translation' ] ) = $this->_formatConcordanceValues( $match[ 'segment' ], $match[ 'translation' ], $regularExpressions );
+                    [ $match[ 'segment' ], $match[ 'translation' ] ] = $this->_formatConcordanceValues( $match[ 'segment' ], $match[ 'translation' ], $regularExpressions );
                 } else {
-                    list( $match[ 'translation' ], $match[ 'segment' ] ) = $this->_formatConcordanceValues( $match[ 'segment' ], $match[ 'translation' ], $regularExpressions );
+                    [ $match[ 'translation' ], $match[ 'segment' ] ] = $this->_formatConcordanceValues( $match[ 'segment' ], $match[ 'translation' ], $regularExpressions );
                 }
 
             }
@@ -316,7 +315,7 @@ class GetContributionWorker extends AbstractWorker {
 
         //Rewrite ICE matches as 101%
         if ( $match[ 'match' ] == '100%' ) {
-            list( $lang, ) = explode( '-', $contributionStruct->getJobStruct()->target );
+            [ $lang, ] = explode( '-', $contributionStruct->getJobStruct()->target );
             if ( isset( $match[ 'ICE' ] ) && $match[ 'ICE' ] && !in_array( $lang, ICES::$iceLockDisabledForTargetLangs ) ) {
                 $match[ 'match' ] = '101%';
             }
@@ -641,7 +640,6 @@ class GetContributionWorker extends AbstractWorker {
                         $matches[ $k ][ 'created_by' ] = Utils::changeMemorySuggestionSource(
                                 $m,
                                 $contributionStruct->getJobStruct()->tm_keys,
-                                $contributionStruct->getJobStruct()->owner,
                                 $user->uid
                         );
                     }

@@ -120,7 +120,7 @@ class Pager {
      *
      * @return array
      */
-    protected function format( int $current, int $pagination, int $pages, int $total,  array $items, ?string $prev, ?string $next ): array {
+    protected function format( int $current, int $pagination, int $pages, int $total, array $items, ?string $prev, ?string $next ): array {
 
         return [
                 'current_page' => $current,

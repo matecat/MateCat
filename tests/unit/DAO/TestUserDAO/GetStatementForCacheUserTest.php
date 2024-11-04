@@ -19,9 +19,9 @@ class GetStatementForCacheUserTest extends AbstractTest {
     public function setUp(): void {
         parent::setUp();
 
-        $this->jobDao    = new Users_UserDao( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
-        $this->reflector = new ReflectionClass( $this->jobDao );
-        $this->method    = $this->reflector->getMethod( "_getStatementForQuery" );
+        $this->databaseInstance = new Users_UserDao( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
+        $this->reflector        = new ReflectionClass( $this->databaseInstance );
+        $this->method           = $this->reflector->getMethod( "_getStatementForQuery" );
         $this->method->setAccessible( true );
 
 
@@ -29,7 +29,7 @@ class GetStatementForCacheUserTest extends AbstractTest {
 
     public function test__getStatementForCache() {
         $query  = "SELECT email FROM " . INIT::$DB_DATABASE . ".`users` WHERE uid='barandfoo';";
-        $result = $this->method->invoke( $this->jobDao, $query );
+        $result = $this->method->invoke( $this->databaseInstance, $query );
         $this->assertTrue( $result instanceof PDOStatement );
         $this->assertEquals( "SELECT email FROM " . INIT::$DB_DATABASE . ".`users` WHERE uid='barandfoo';", $result->queryString );
 

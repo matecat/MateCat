@@ -31,10 +31,16 @@ class ParseTimeToEditTest extends AbstractTest {
      * @group  regression
      * @covers CatUtils::parse_time_to_edit
      */
-    public function test_parse_time_to_edit_bigger_than_maxInt_input() {
-        $this->source_time   = 346543847623214134341343498008990;
-        $this->expected_time = [ '-39', '-34', '-31', -392 ];
+    public function test_parse_time_to_edit_bigger_than_maxInt_input_truncate_to_max_int() {
+
+        $this->source_time = PHP_INT_MAX;
+        $this->expected_time = [ 55, 12, 56, 807 ];
         $this->assertEquals( $this->expected_time, CatUtils::parse_time_to_edit( $this->source_time ) );
+
+        $this->source_time   = 346543847623214134341343498008990;
+        $this->expectException( TypeError::class );
+        CatUtils::parse_time_to_edit( $this->source_time );
+
     }
 
     /**
@@ -76,7 +82,9 @@ class ParseTimeToEditTest extends AbstractTest {
     public function test_parse_time_to_edit_unexpected_string_input() {
         $this->source_time   = "hello what's time is it ?";
         $this->expected_time = [ "00", "00", "00", "00" ];
-        $this->assertEquals( $this->expected_time, CatUtils::parse_time_to_edit( $this->source_time ) );
+
+        $this->expectException( TypeError::class );
+        CatUtils::parse_time_to_edit( $this->source_time );
     }
 
     /**
@@ -85,7 +93,7 @@ class ParseTimeToEditTest extends AbstractTest {
      */
     public function test_parse_time_to_edit_unexpected_array_input() {
         $this->source_time = [ "00", "00", "00", "00" ];
-        $this->expectException( '\InvalidArgumentException' );
+        $this->expectException( TypeError::class );
         CatUtils::parse_time_to_edit( $this->source_time );
     }
 }

@@ -5,6 +5,7 @@ namespace API\App;
 use API\Commons\KleinController;
 use AsyncTasks\Workers\AIAssistantWorker;
 use INIT;
+use Langs\Languages;
 
 class AIAssistantController extends KleinController {
 
@@ -31,7 +32,7 @@ class AIAssistantController extends KleinController {
             die();
         }
 
-        $languages = \Langs_Languages::getInstance();
+        $languages = Languages::getInstance();
         $localizedLanguage = $languages->getLocalizedLanguage($json['target']);
 
         if(empty($localizedLanguage)){

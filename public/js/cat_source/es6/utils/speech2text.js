@@ -2,25 +2,20 @@ import SegmentActions from '../actions/SegmentActions'
 import SegmentStore from '../stores/SegmentStore'
 import CatToolActions from '../actions/CatToolActions'
 import $ from 'jquery'
+import UserStore from '../stores/UserStore'
 
 const Speech2Text = {
-  enabled: function () {
-    return !!(
-      'webkitSpeechRecognition' in window && !!config.speech2text_enabled
+  enabled: function ({dictation} = {}) {
+    return (
+      'webkitSpeechRecognition' in window &&
+      (dictation === 1 || UserStore.getUserMetadata()?.dictation === 1)
     )
   },
   disable: function () {
-    if (config.speech2text_enabled) {
-      config.speech2text_enabled = 0
-      Speech2Text.initialized = false
-      $(document).off('contribution:copied')
-    }
+    Speech2Text.initialized = false
+    $(document).off('contribution:copied')
   },
-  enable: function () {
-    if (!config.speech2text_enabled) {
-      config.speech2text_enabled = 1
-    }
-  },
+  enable: function () {},
   init: function () {
     Speech2Text.initialized = true
     Speech2Text.loadRecognition()
@@ -204,10 +199,5 @@ const Speech2Text = {
     return !Speech2Text.recognizing || match == '100%'
   },
 }
-document.addEventListener('DOMContentLoaded', function (event) {
-  if (Speech2Text.enabled()) {
-    Speech2Text.init()
-  }
-})
 
 export default Speech2Text

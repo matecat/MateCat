@@ -69,7 +69,7 @@ class deleteContributionController extends ajaxController {
         $this->featureSet->loadForProject( $jobStruct->getProject() );
 
         $this->tm_keys = $jobStruct[ 'tm_keys' ];
-        $this->readLoginInfo();
+        $this->identifyUser();
 
         $tms    = Engine::getInstance( $jobStruct[ 'id_tms' ] );
         $config = $tms->getConfigStruct();
