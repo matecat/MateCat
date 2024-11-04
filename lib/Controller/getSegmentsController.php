@@ -4,6 +4,7 @@
  * and open the template in the editor.
  */
 
+use Langs\Languages;
 use Matecat\SubFiltering\MateCatFilter;
 use Segments\ContextGroupDao;
 
@@ -74,7 +75,7 @@ class getSegmentsController extends ajaxController {
 
         $featureSet->loadForProject( $this->project );
 
-        $lang_handler = Langs_Languages::getInstance();
+        $lang_handler = Languages::getInstance();
 
         $this->parseIDSegment();
 

@@ -6,6 +6,7 @@ use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use Filters\FiltersConfigTemplateDao;
 use Filters\FiltersConfigTemplateStruct;
+use Langs\Languages;
 
 set_time_limit( 0 );
 
@@ -28,7 +29,7 @@ class convertFileController extends ajaxController {
 
     //this will prevent recursion loop when ConvertFileWrapper will call the doAction()
     protected bool            $convertZipFile = true;
-    protected Langs_Languages $lang_handler;
+    protected Languages $lang_handler;
 
     protected int                          $filters_extraction_parameters_template_id;
     protected ?FiltersConfigTemplateStruct $filters_extraction_parameters = null;
@@ -91,7 +92,7 @@ class convertFileController extends ajaxController {
 
         $this->result = new ConvertedFileModel();
 
-        $this->lang_handler = Langs_Languages::getInstance();
+        $this->lang_handler = Languages::getInstance();
         $this->validateSourceLang();
         $this->validateTargetLangs();
         $this->validateFiltersExtractionParametersTemplateId();
@@ -151,7 +152,7 @@ class convertFileController extends ajaxController {
                 return false;
             }
         } else {
-            $conversionHandler->doAction();
+            $conversionHandler->processConversion();
             $this->result = $conversionHandler->getResult();
         }
     }
@@ -182,27 +183,16 @@ class convertFileController extends ajaxController {
         }
     }
 
+    /**
+     * @throws Exception
+     */
     private function validateTargetLangs() {
-        $targets = explode( ',', $this->target_lang );
-        $targets = array_map( 'trim', $targets );
-        $targets = array_unique( $targets );
-
-        if ( empty( $targets ) ) {
-            $this->result->changeCode( ConversionHandlerStatus::TARGET_ERROR );
-            $this->result->addError( "Missing target language." );
-        }
-
         try {
-            foreach ( $targets as $target ) {
-                $this->lang_handler->validateLanguage( $target );
-            }
-
+            $this->target_lang = $this->lang_handler->validateLanguageListAsString( $this->target_lang );
         } catch ( Exception $e ) {
             $this->result->changeCode( ConversionHandlerStatus::TARGET_ERROR );
             $this->result->addError( $e->getMessage() );
         }
-
-        $this->target_lang = implode( ',', $targets );
     }
 
     /**

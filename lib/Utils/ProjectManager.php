@@ -8,6 +8,7 @@
  */
 
 use ActivityLog\ActivityLogStruct;
+use Analysis\PayableRates;
 use API\Commons\Exceptions\AuthenticationError;
 use ConnectedServices\Google\GDrive\Session;
 use ConnectedServices\Google\GoogleProvider;
@@ -21,6 +22,7 @@ use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use FilesStorage\S3FilesStorage;
 use Jobs\SplitQueue;
+use Langs\Languages;
 use LQA\QA;
 use Matecat\SubFiltering\MateCatFilter;
 use Matecat\SubFiltering\Utils\DataRefReplacer;
@@ -207,7 +209,7 @@ class ProjectManager {
         //get the TMX management component from the factory
         $this->tmxServiceWrapper = new TMSService();
 
-        $this->langService = Langs_Languages::getInstance();
+        $this->langService = Languages::getInstance();
 
         $this->dbHandler = Database::obtain();
 
@@ -707,7 +709,6 @@ class ProjectManager {
                 // put reference to cache in upload dir to link cache to session
                 $fs->linkSessionToCacheForAlreadyConvertedFiles(
                         $sha1,
-                        $this->projectStructure[ 'source_language' ],
                         $this->projectStructure[ 'uploadToken' ],
                         $fileName
                 );
@@ -1329,7 +1330,7 @@ class ProjectManager {
                 $payableRates         = json_encode( $payableRates );
             } else {
                 $payableRatesTemplate = null;
-                $payableRates         = Analysis_PayableRates::getPayableRates( $projectStructure[ 'source_language' ], $target );
+                $payableRates         = PayableRates::getPayableRates( $projectStructure[ 'source_language' ], $target );
                 $payableRates         = json_encode( $this->features->filter( "filterPayableRates", $payableRates, $projectStructure[ 'source_language' ], $target ) );
             }
 

@@ -110,9 +110,9 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
     }
 
     /**
-     * @return ?RemoteFileServiceNameStruct[]
+     * @return ?RemoteFileServiceNameStruct
      */
-    public function getRemoteFileServiceName(): ?array {
+    public function getRemoteFileServiceName(): ?RemoteFileServiceNameStruct {
 
         return $this->cachable( __function__, $this, function () {
 

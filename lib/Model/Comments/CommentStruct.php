@@ -15,7 +15,7 @@ class Comments_CommentStruct extends DataAccess_AbstractDaoObjectStruct implemen
     public ?int    $uid          = null;
     public ?string $resolve_date = null;
     public int     $source_page;
-    public int     $is_anonymous = 0;
+    public ?int     $is_anonymous = 0;
     public ?int    $message_type = null;
     public ?string $message      = "";
     public int     $timestamp;

@@ -76,3 +76,4 @@ certs
 /public/buildResources/
 /lib/View/*.html
 /lib/View/APIDoc.php
+/.phpunit.result.cache

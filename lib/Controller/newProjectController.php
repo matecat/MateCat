@@ -9,6 +9,8 @@ use ConnectedServices\LinkedIn\LinkedInProvider;
 use ConnectedServices\Microsoft\MicrosoftProvider;
 use ConnectedServices\OauthClient;
 use Engines_Intento as Intento;
+use Langs\LanguageDomains;
+use Langs\Languages;
 use LexiQA\LexiQADecorator;
 
 class newProjectController extends viewController {
@@ -39,8 +41,8 @@ class newProjectController extends viewController {
         $__postInput        = filter_input_array( INPUT_GET, $filterArgs );
         $this->project_name = $__postInput[ "project_name" ];
 
-        $this->lang_handler    = Langs_Languages::getInstance();
-        $this->subject_handler = Langs_LanguageDomains::getInstance();
+        $this->lang_handler    = Languages::getInstance();
+        $this->subject_handler = LanguageDomains::getInstance();
 
         $this->subjectArray = $this->subject_handler->getEnabledDomains();
 
@@ -215,16 +217,16 @@ class newProjectController extends viewController {
     }
 
     public function setTemplateVars() {
-        $source_languages = $this->lang_handler->getEnabledLanguages( 'en' );
-        $target_languages = $this->lang_handler->getEnabledLanguages( 'en' );
+        $source_languages = $this->lang_handler->getEnabledLanguages();
+        $target_languages = $this->lang_handler->getEnabledLanguages();
 
         $this->template->subject_array = $this->subjectArray;
 
         $this->template->project_name = $this->project_name;
 
         $this->template->page             = 'home';
-        $this->template->source_languages = $source_languages;
-        $this->template->target_languages = $target_languages;
+        $this->template->source_languages = array_values( $source_languages );
+        $this->template->target_languages = array_values( $target_languages );
         $this->template->subjects         = json_encode( $this->subjectArray );
 
         $this->template->mt_engines         = $this->mt_engines;

@@ -10,7 +10,7 @@ export const SourceLanguage = () => {
       <div className="options-select-container">
         <SourceLanguageSelect
           isRenderedInsideTab={true}
-          dropdownClassName="select-dropdown__wrapper-other-tab"
+          dropdownClassName="select-dropdown__wrapper-portal"
         />
       </div>
     </div>

@@ -11,7 +11,7 @@ class Comments_BaseCommentStruct extends DataAccess_AbstractDaoSilentStruct impl
     public ?int    $uid          = null;
     public ?string $resolve_date = null;
     public int     $source_page;
-    public int     $is_anonymous = 0;
+    public ?int     $is_anonymous = 0;
     public int     $message_type;
     public ?string $message      = "";
 
@@ -46,4 +46,9 @@ class Comments_BaseCommentStruct extends DataAccess_AbstractDaoSilentStruct impl
                 'timestamp'    => strtotime( $this->create_date ?: 'now' ),
         ];
     }
+
+    public function toCommentStruct(): Comments_CommentStruct {
+        return new Comments_CommentStruct( $this->toArray() );
+    }
+
 }

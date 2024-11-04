@@ -11,18 +11,17 @@ namespace API\V3\Json;
 use API\App\Json\OutsourceConfirmation;
 use API\V2\Json\JobTranslator;
 use API\V2\Json\ProjectUrls;
-use Jobs_JobStruct;
 use Constants;
 use DataAccess\ShapelessConcreteStruct;
 use Features\ReviewExtended\ReviewUtils;
 use FeatureSet;
-use Langs_LanguageDomains;
-use Langs_Languages;
+use Jobs_JobStruct;
+use Langs\LanguageDomains;
+use Langs\Languages;
 use LQA\ChunkReviewDao;
 use LQA\ChunkReviewStruct;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
-use RedisHandler;
 use Utils;
 use WordCount\WordCountStruct;
 
@@ -74,9 +73,9 @@ class Chunk extends \API\V2\Json\Chunk {
 
         $jobStats = WordCountStruct::loadFromJob( $chunk );
 
-        $lang_handler = Langs_Languages::getInstance();
+        $lang_handler = Languages::getInstance();
 
-        $subject_handler = Langs_LanguageDomains::getInstance();
+        $subject_handler = LanguageDomains::getInstance();
         $subjectsHashMap = $subject_handler->getEnabledHashMap();
 
         $warningsCount = $chunk->getWarningsCount();

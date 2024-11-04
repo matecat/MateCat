@@ -11,8 +11,7 @@ namespace Users;
 use DataAccess_IDaoStruct;
 use JsonSerializable;
 
-class MetadataStruct extends \DataAccess_AbstractDaoObjectStruct implements DataAccess_IDaoStruct, JsonSerializable
-{
+class MetadataStruct extends \DataAccess_AbstractDaoObjectStruct implements DataAccess_IDaoStruct, JsonSerializable {
     public $id;
     public $uid;
     public $key;
@@ -21,29 +20,27 @@ class MetadataStruct extends \DataAccess_AbstractDaoObjectStruct implements Data
     /**
      * @inheritDoc
      */
-    public function jsonSerialize()
-    {
+    public function jsonSerialize() {
         return [
-            'id' => (int)$this->id,
-            'uid' => (int)$this->uid,
-            'key' => (string)$this->key,
-            'value' => $this->getValue()
+                'id'    => (int)$this->id,
+                'uid'   => (int)$this->uid,
+                'key'   => (string)$this->key,
+                'value' => $this->getValue()
         ];
     }
 
     /**
      * @return mixed
      */
-    public function getValue()
-    {
+    public function getValue() {
         // in case of numeric value, return a integer
-        if(is_numeric($this->value)){
+        if ( is_numeric( $this->value ) ) {
             return (int)$this->value;
         }
 
         // in case of serialized data, return an object
-        if (@unserialize($this->value) !== false) {
-            return (object)unserialize($this->value);
+        if ( ( unserialize( $this->value ) ?? false ) !== false ) {
+            return (object)unserialize( $this->value );
         }
 
         // return a string

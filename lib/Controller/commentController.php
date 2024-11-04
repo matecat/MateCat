@@ -130,7 +130,7 @@ class commentController extends ajaxController {
         $this->enqueueComment();
         $this->users = $this->resolveUsers();
         $this->sendEmail();
-        $this->result[ 'data' ][ 'entries' ] = [ $this->payload ];
+        $this->result[ 'data' ][ 'entries' ][ 'comments' ][] = $this->payload;
     }
 
     private function appendUser() {
@@ -156,12 +156,10 @@ class commentController extends ajaxController {
             $commentDao->saveComment( $mentioned_comment );
         }
 
-        $commentDao->destroySegmentIdCache( $this->__postInput[ 'id_segment' ] );
-
         $this->enqueueComment();
         $this->users = $this->resolveUsers();
         $this->sendEmail();
-        $this->result[ 'data' ][ 'entries' ] = [ $this->payload ];
+        $this->result[ 'data' ][ 'entries' ][ 'comments' ][] = $this->new_record;
         $this->appendUser();
     }
 
@@ -177,6 +175,7 @@ class commentController extends ajaxController {
         $this->comment_struct->source_page     = $this->__postInput[ 'source_page' ];
         $this->comment_struct->message         = $this->__postInput[ 'message' ];
         $this->comment_struct->revision_number = $this->__postInput[ 'revision_number' ];
+        $this->comment_struct->is_anonymous    = $this->__postInput[ 'is_anonymous' ];
         $this->comment_struct->email           = $this->getEmail();
         $this->comment_struct->uid             = $this->getUid();
 
@@ -308,9 +307,8 @@ class commentController extends ajaxController {
             return;
         }
 
-        if ( $commentDao->deleteComment( $comment->id ) ) {
+        if ( $commentDao->deleteComment( $comment->toCommentStruct() ) ) {
 
-            $commentDao->destroySegmentIdCache( $comment->id_segment );
             $this->enqueueDeleteCommentMessage( $comment->id, $comment->id_segment, $this->__postInput[ 'source_page' ] );
 
             $this->result[ 'data' ][] = [
@@ -508,26 +506,13 @@ class commentController extends ajaxController {
      */
     private function enqueueComment() {
 
-        $this->payload = [
-                'message_type' => $this->new_record->message_type,
-                'message'      => $this->new_record->message,
-                'id'           => $this->new_record->id,
-                'uid'          => $this->new_record->uid,
-                'id_segment'   => $this->new_record->id_segment,
-                'full_name'    => $this->new_record->full_name,
-                'source_page'  => $this->new_record->source_page,
-                'create_date'  => $this->new_record->getFormattedDate(),
-                'thread_id'    => $this->new_record->thread_id,
-                'timestamp'    => $this->new_record->timestamp,
-        ];
-
         $message = json_encode( [
                 '_type' => 'comment',
                 'data'  => [
                         'id_job'    => $this->__postInput[ 'id_job' ],
                         'passwords' => $this->getProjectPasswords(),
                         'id_client' => $this->__postInput[ 'id_client' ],
-                        'payload'   => $this->payload
+                        'payload'   => $this->new_record
                 ]
         ] );
 

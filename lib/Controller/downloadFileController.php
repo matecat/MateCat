@@ -12,6 +12,7 @@ use Exceptions\ValidationError;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use FilesStorage\S3FilesStorage;
+use Langs\Languages;
 use LQA\ChunkReviewDao;
 use Matecat\XliffParser\Exception\NotSupportedVersionException;
 use Matecat\XliffParser\Exception\NotValidFileException;
@@ -316,7 +317,7 @@ class downloadFileController extends downloadController {
                  */
                 $output_content[ $fileID ][ 'document_content' ] = $this->featureSet->filter( 'overrideConversionResult',
                         $output_content[ $fileID ][ 'document_content' ],
-                        Langs_Languages::getInstance()->getLangRegionCode( $jobData[ 'target' ] )
+                        Languages::getInstance()->getLangRegionCode( $jobData[ 'target' ] )
                 );
 
 

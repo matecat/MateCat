@@ -8,7 +8,7 @@ use DateTime;
 use Engine;
 use Exception;
 use Filters\FiltersConfigTemplateDao;
-use Langs_Languages;
+use Langs\Languages;
 use Pagination\Pager;
 use Pagination\PaginationParameters;
 use PayableRates\CustomPayableRateDao;
@@ -167,12 +167,15 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
 
         // source_language
         if ( $projectTemplateStruct->source_language !== null ) {
-            $languages = Langs_Languages::getInstance();
+            $languages = Languages::getInstance();
             $language  = Utils::trimAndLowerCase( $projectTemplateStruct->source_language );
 
-            if ( !in_array( $language, $languages->allowedLanguages() ) ) {
-                throw new Exception( $language . ' is not an allowed language', 403 );
+            try {
+                $languages->validateLanguage( $language );
+            } catch( Exception $e ){
+                throw new $e( $e->getMessage(), 403 );
             }
+
         }
 
         // target_language
@@ -184,15 +187,14 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
                 throw new Exception( "target language is not an array", 403 );
             }
 
-            $languages = Langs_Languages::getInstance();
+            $languages = Languages::getInstance();
 
-            foreach ( $targetLanguages as $language ) {
-                $language = Utils::trimAndLowerCase( $language );
-
-                if ( !in_array( $language, $languages->allowedLanguages() ) ) {
-                    throw new Exception( $language . ' is not an allowed language', 403 );
-                }
+            try {
+                $languages->validateLanguageList( $targetLanguages );
+            } catch( Exception $e ){
+                throw new $e( $e->getMessage(), 403 );
             }
+
         }
 
         // check xliff_config_template_id

@@ -110,12 +110,11 @@ class CatUtils {
         return [ $hours, $minutes, $seconds, $usec ];
     }
 
-    public static function dos2unix( $dosString ) {
+    public static function dos2unix( string $dosString ): string {
         $dosString = str_replace( "\r\n", "\r", $dosString );
         $dosString = str_replace( "\n", "\r", $dosString );
-        $dosString = str_replace( "\r", "\n", $dosString );
 
-        return $dosString;
+        return str_replace( "\r", "\n", $dosString );
     }
 
     /**
@@ -825,7 +824,7 @@ class CatUtils {
      *
      * @return string
      */
-    public static function upCountName( $string ) {
+    public static function upCountName( string $string ): string {
 
         if ( empty( $string ) ) {
             return Utils::randomString();
@@ -851,7 +850,7 @@ class CatUtils {
      *
      * @return false|string
      */
-    public static function sanitizeJSON( $json ) {
+    public static function sanitizeJSON( $json ): string {
         $json = json_decode( $json, true );
         array_walk_recursive( $json, function ( &$item ) {
             $item = filter_var( $item, FILTER_SANITIZE_STRING );

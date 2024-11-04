@@ -247,11 +247,11 @@ class Utils {
 
     /**
      * Generate 128bit password with real uniqueness over single process instance
-     *   N.B. Concurrent requests can collide ( Ex: fork )
+     *   N.B. Concurrent requests can collide (Ex: fork)
      *
      * Minimum Password Length of 12 Characters
      *
-     * WARNING: the obtained random string MUST NOT be used for security.
+     * WARNING: the obtained random string MUST NOT be used for security, @use self::uuid4 instead.
      *
      * @param int  $maxlength
      * @param bool $more_entropy
@@ -886,4 +886,31 @@ class Utils {
         return array_keys( $aValid );
 
     }
+
+    /**
+     * @param string $haystack
+     * @param string $needle
+     *
+     * @return bool
+     */
+    public static function stringEndsWith( string $haystack, string $needle ): bool {
+        $length = strlen( $needle );
+        if ( $length == 0 ) {
+            return true;
+        }
+
+        return ( substr( $haystack, -$length ) === $needle );
+    }
+
+    /**
+     * @param string    $haystack
+     * @param string    $needle
+     * @param bool|null $caseSensitive
+     *
+     * @return bool
+     */
+    public static function stringStartsWith( string $haystack, string $needle, ?bool $caseSensitive = true ): bool {
+        return ( $caseSensitive ) ? strpos( $haystack, $needle ) === 0 : stripos( $haystack, $needle ) === 0;
+    }
+
 }

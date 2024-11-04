@@ -8,6 +8,8 @@ use Exceptions\ValidationError;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use Filters\FiltersConfigTemplateDao;
+use Langs\LanguageDomains;
+use Langs\Languages;
 use LQA\ModelDao;
 use LQA\ModelStruct;
 use Matecat\XliffParser\Utils\Files as XliffFiles;
@@ -311,7 +313,7 @@ class NewController extends ajaxController {
      */
     private function __validateSubjects() {
 
-        $langDomains = Langs_LanguageDomains::getInstance();
+        $langDomains = LanguageDomains::getInstance();
         $subjectMap  = $langDomains::getEnabledHashMap();
 
         $this->postInput[ 'subject' ] = ( !empty( $this->postInput[ 'subject' ] ) ) ? $this->postInput[ 'subject' ] : 'general';
@@ -425,7 +427,7 @@ class NewController extends ajaxController {
         }
 
         //if fileupload was failed this index ( 0 = does not exists )
-        $default_project_name = @$arFiles[ 0 ];
+        $default_project_name = $arFiles[ 0 ] ?? null;
         if ( count( $arFiles ) > 1 ) {
             $default_project_name = "MATECAT_PROJ-" . date( "Ymdhi" );
         }
@@ -434,8 +436,8 @@ class NewController extends ajaxController {
             $this->postInput[ 'project_name' ] = $default_project_name; //'NO_NAME'.$this->create_project_name();
         }
 
-        $this->__validateSourceLang( Langs_Languages::getInstance() );
-        $this->__validateTargetLangs( Langs_Languages::getInstance() );
+        $this->__validateSourceLang( Languages::getInstance() );
+        $this->__validateTargetLangs( Languages::getInstance() );
 
         //ONE OR MORE ERRORS OCCURRED : EXITING
         //for now we sent to api output only the LAST error message, but we log all
@@ -574,7 +576,7 @@ class NewController extends ajaxController {
                 }
             } else {
 
-                $conversionHandler->doAction();
+                $conversionHandler->processConversion();
 
                 $result = $conversionHandler->getResult();
                 if ( $result->getCode() < 0 ) {
@@ -600,7 +602,7 @@ class NewController extends ajaxController {
 
         if ( isset( $this->result[ 'data' ] ) && !empty( $this->result[ 'data' ] ) ) {
             foreach ( $this->result[ 'data' ] as $zipFileName => $zipFiles ) {
-                $zipFiles = json_decode( $zipFiles, true );
+                $zipFiles  = json_decode( $zipFiles, true );
                 $fileNames = array_column( $zipFiles, 'name' );
                 $arFiles   = array_merge( $arFiles, $fileNames );
             }
@@ -671,10 +673,10 @@ class NewController extends ajaxController {
         $projectStructure[ 'pretranslate_100' ] = (int)!!$this->postInput[ 'pretranslate_100' ]; // Force pretranslate_100 to be 0 or 1
         $projectStructure[ 'pretranslate_101' ] = isset( $this->postInput[ 'pretranslate_101' ] ) ? (int)$this->postInput[ 'pretranslate_101' ] : 1;
 
-        $projectStructure['dictation']          = $this->postInput['dictation'] ?? null;
-        $projectStructure['show_whitespace']    = $this->postInput['show_whitespace'] ?? null;
-        $projectStructure['character_counter']  = $this->postInput['character_counter'] ?? null;
-        $projectStructure['ai_assistant']       = $this->postInput['ai_assistant'] ?? null;
+        $projectStructure[ 'dictation' ]         = $this->postInput[ 'dictation' ] ?? null;
+        $projectStructure[ 'show_whitespace' ]   = $this->postInput[ 'show_whitespace' ] ?? null;
+        $projectStructure[ 'character_counter' ] = $this->postInput[ 'character_counter' ] ?? null;
+        $projectStructure[ 'ai_assistant' ]      = $this->postInput[ 'ai_assistant' ] ?? null;
 
         //default get all public matches from TM
         $projectStructure[ 'only_private' ] = ( !isset( $this->postInput[ 'get_public_matches' ] ) ? false : !$this->postInput[ 'get_public_matches' ] );
@@ -843,7 +845,7 @@ class NewController extends ajaxController {
         $this->result[ 'errors' ] = $this->projectStructure[ 'result' ][ 'errors' ]->getArrayCopy();
     }
 
-    private function __validateSourceLang( Langs_Languages $lang_handler ) {
+    private function __validateSourceLang( Languages $lang_handler ) {
         try {
             $lang_handler->validateLanguage( $this->postInput[ 'source_lang' ] );
         } catch ( Exception $e ) {
@@ -852,50 +854,36 @@ class NewController extends ajaxController {
         }
     }
 
-    private function __validateTargetLangs( Langs_Languages $lang_handler ) {
-        $targets = explode( ',', $this->postInput[ 'target_lang' ] );
-        $targets = array_map( 'trim', $targets );
-        $targets = array_unique( $targets );
-
-        if ( empty( $targets ) ) {
-            $this->api_output[ 'message' ] = "Missing target language.";
-            $this->result[ 'errors' ][]    = [ "code" => -4, "message" => "Missing target language." ];
-        }
-
+    private function __validateTargetLangs( Languages $lang_handler ) {
         try {
-
-            foreach ( $targets as $target ) {
-                $lang_handler->validateLanguage( $target );
-            }
-
+            $this->postInput[ 'target_lang' ] = $lang_handler->validateLanguageListAsString( $this->postInput[ 'target_lang' ] );
         } catch ( Exception $e ) {
             $this->api_output[ 'message' ] = $e->getMessage();
             $this->result[ 'errors' ][]    = [ "code" => -4, "message" => $e->getMessage() ];
         }
-
-        $this->postInput[ 'target_lang' ] = implode( ',', $targets );
     }
 
     /**
      * Tries to find authentication credentials in header. Returns false if credentials are provided and invalid. True otherwise.
      *
      * @return bool
+     * @throws ReflectionException
      */
-    private function __validateAuthHeader() {
+    private function __validateAuthHeader(): bool {
 
-        $api_key    = @$_SERVER[ 'HTTP_X_MATECAT_KEY' ];
+        $api_key    = $_SERVER[ 'HTTP_X_MATECAT_KEY' ] ?? null;
         $api_secret = ( !empty( $_SERVER[ 'HTTP_X_MATECAT_SECRET' ] ) ? $_SERVER[ 'HTTP_X_MATECAT_SECRET' ] : "wrong" );
 
         if ( empty( $api_key ) ) {
             return false;
         }
 
-        if ( false !== strpos( @$_SERVER[ 'HTTP_X_MATECAT_KEY' ], '-' ) ) {
+        if ( false !== strpos( $_SERVER[ 'HTTP_X_MATECAT_KEY' ] ?? null, '-' ) ) {
             [ $api_key, $api_secret ] = explode( '-', $_SERVER[ 'HTTP_X_MATECAT_KEY' ] );
         }
 
         if ( $api_key && $api_secret ) {
-            $key = \ApiKeys_ApiKeyDao::findByKey( $api_key );
+            $key = ApiKeys_ApiKeyDao::findByKey( $api_key );
 
             if ( !$key || !$key->validSecret( $api_secret ) ) {
                 return false;

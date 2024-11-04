@@ -2,6 +2,7 @@
 
 use FilesStorage\AbstractFilesStorage;
 use Filters\DTO\IDto;
+use Langs\Languages;
 
 class Filters {
 
@@ -149,8 +150,8 @@ class Filters {
 
         $data = [
                 'document'     => new CURLFile( $filePath ),
-                'sourceLocale' => Langs_Languages::getInstance()->getLangRegionCode( $sourceLang ),
-                'targetLocale' => Langs_Languages::getInstance()->getLangRegionCode( $targetLang ),
+                'sourceLocale' => Languages::getInstance()->getLangRegionCode( $sourceLang ),
+                'targetLocale' => Languages::getInstance()->getLangRegionCode( $targetLang ),
                 'segmentation' => $segmentation,
                 'utf8FileName' => $filename
         ];
