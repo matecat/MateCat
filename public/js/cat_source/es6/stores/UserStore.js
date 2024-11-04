@@ -84,7 +84,7 @@ const UserStore = assign({}, EventEmitter.prototype, {
       : 'Anonymous'
   },
   getUserMetadata: function () {
-    return this.userInfo.metadata
+    return this.userInfo ? this.userInfo.metadata : undefined
   },
   isUserLogged: function () {
     return !!this.userInfo
