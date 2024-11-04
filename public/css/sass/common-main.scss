@@ -1,4 +1,4 @@
-@import './variables';
+@import 'commons/variables';
 @import 'commons/colors';
 @import './vendor_mc/semantic/matecat_semantic';
 
@@ -7,6 +7,6 @@
 
 @import 'popup';
 @import 'common-modals';
-@import 'notifications';
+@import 'components/NotificationBox';
 @import 'common-components';
 @import './commons/nav-bar';
