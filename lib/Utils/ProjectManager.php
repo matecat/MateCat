@@ -713,9 +713,9 @@ class ProjectManager {
                 );
 
                 //add newly created link to list
-                $linkFiles[ 'conversionHashes' ][ 'sha' ][] = $sha1 . $this->__getStorageFilesDelimiter() . $this->projectStructure[ 'source_language' ];
+                $linkFiles[ 'conversionHashes' ][ 'sha' ][] = $sha1 . AbstractFilesStorage::OBJECTS_SAFE_DELIMITER . $this->projectStructure[ 'source_language' ];
 
-                $linkFiles[ 'conversionHashes' ][ 'fileName' ][ $sha1 . $this->__getStorageFilesDelimiter() . $this->projectStructure[ 'source_language' ] ][] = $fileName;
+                $linkFiles[ 'conversionHashes' ][ 'fileName' ][ $sha1 . AbstractFilesStorage::OBJECTS_SAFE_DELIMITER . $this->projectStructure[ 'source_language' ] ][] = $fileName;
 
                 //when the same sdlxliff is uploaded more than once with different names
                 $linkFiles[ 'conversionHashes' ][ 'sha' ] = array_unique( $linkFiles[ 'conversionHashes' ][ 'sha' ] );
@@ -743,7 +743,7 @@ class ProjectManager {
                 //converted file is inside cache directory
                 //get hash from file name inside UUID dir
                 $hashFile = AbstractFilesStorage::basename_fix( $linkFile );
-                $hashFile = explode( $this->__getStorageFilesDelimiter(), $hashFile );
+                $hashFile = explode( AbstractFilesStorage::OBJECTS_SAFE_DELIMITER, $hashFile );
 
                 // Example:
                 // $hashFile[ 0 ] = 917f7b03c8f54350fb65387bda25fbada43ff7d8
@@ -1062,17 +1062,6 @@ class ProjectManager {
         $params[ 'key' ]     = $fs::QUEUE_FOLDER . DIRECTORY_SEPARATOR . $fs::getUploadSessionSafeName( $fs->getTheLastPartOfKey( $this->uploadDir ) ) . DIRECTORY_SEPARATOR . $fileName;
         $params[ 'save_as' ] = "$this->uploadDir/$fileName";
         $client->downloadItem( $params );
-    }
-
-    /**
-     * @return string
-     */
-    private function __getStorageFilesDelimiter() {
-        if ( AbstractFilesStorage::isOnS3() ) {
-            return S3FilesStorage::OBJECTS_SAFE_DELIMITER;
-        }
-
-        return '|';
     }
 
     private function __clearFailedProject( Exception $e ) {

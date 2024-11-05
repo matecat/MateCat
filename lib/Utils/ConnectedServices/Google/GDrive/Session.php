@@ -483,11 +483,7 @@ class Session {
 
         $cacheTree = implode( DIRECTORY_SEPARATOR, $cacheTreeAr );
 
-        if ( AbstractFilesStorage::isOnS3() ) {
-            return S3FilesStorage::CACHE_PACKAGE_FOLDER . DIRECTORY_SEPARATOR . $cacheTree . S3FilesStorage::OBJECTS_SAFE_DELIMITER . $sourceLang;
-        }
-
-        return INIT::$CACHE_REPOSITORY . DIRECTORY_SEPARATOR . $cacheTree . "|" . $sourceLang;
+        return AbstractFilesStorage::getStorageCachePath() . DIRECTORY_SEPARATOR . $cacheTree . AbstractFilesStorage::OBJECTS_SAFE_DELIMITER . $sourceLang;
     }
 
     /**

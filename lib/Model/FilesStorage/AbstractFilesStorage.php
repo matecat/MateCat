@@ -27,6 +27,7 @@ use ReflectionException;
 abstract class AbstractFilesStorage implements IFilesStorage {
 
     const ORIGINAL_ZIP_PLACEHOLDER = "__##originalZip##";
+    const OBJECTS_SAFE_DELIMITER = '__';
 
     protected $filesDir;
     protected $cacheDir;
@@ -155,6 +156,18 @@ abstract class AbstractFilesStorage implements IFilesStorage {
         }
 
         return $filePath;
+    }
+
+    /**
+     * // XXX use constructor parameters to define the cache dir and remove the condition
+     * @return string
+     */
+    public static function getStorageCachePath(): string {
+        if( AbstractFilesStorage::isOnS3() ){
+            return S3FilesStorage::CACHE_PACKAGE_FOLDER;
+        }
+
+        return INIT::$CACHE_REPOSITORY;
     }
 
     /**

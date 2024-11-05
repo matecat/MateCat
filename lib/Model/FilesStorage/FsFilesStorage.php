@@ -2,7 +2,6 @@
 
 namespace FilesStorage;
 
-use DirectoryIterator;
 use FilesStorage\Exceptions\FileSystemException;
 use FilesystemIterator;
 use INIT;
@@ -29,6 +28,9 @@ use Utils;
  * @package FilesStorage
  */
 class FsFilesStorage extends AbstractFilesStorage {
+
+    const CACHE_PACKAGE_FOLDER = 'cache';
+
     /**
      **********************************************************************************************
      * 1. CACHE PACKAGE
@@ -54,8 +56,8 @@ class FsFilesStorage extends AbstractFilesStorage {
         }
 
         //create cache dir structure
-        mkdir( $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang, 0755, true );
-        $cacheDir = $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang . DIRECTORY_SEPARATOR . "package";
+        mkdir( $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . self::OBJECTS_SAFE_DELIMITER . $lang, 0755, true );
+        $cacheDir = $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . self::OBJECTS_SAFE_DELIMITER . $lang . DIRECTORY_SEPARATOR . "package";
         mkdir( $cacheDir, 0755, true );
         mkdir( $cacheDir . DIRECTORY_SEPARATOR . "orig" );
         mkdir( $cacheDir . DIRECTORY_SEPARATOR . "work" );
@@ -87,7 +89,7 @@ class FsFilesStorage extends AbstractFilesStorage {
                 // Original directory deleted!!!
                 // CLEAR ALL CACHE
 
-                $cacheDirToDelete = $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang;
+                $cacheDirToDelete = $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . self::OBJECTS_SAFE_DELIMITER . $lang;
 
                 // check if cache dir exists
                 if ( !file_exists( $cacheDirToDelete ) ) {
@@ -114,14 +116,14 @@ class FsFilesStorage extends AbstractFilesStorage {
             //Original directory deleted!!!
             //CLEAR ALL CACHE - FATAL
 
-            $cacheDirToDelete = $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang;
+            $cacheDirToDelete = $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . self::OBJECTS_SAFE_DELIMITER . $lang;
 
             // check if cache dir exists
             if ( !file_exists( $cacheDirToDelete ) ) {
                 throw new FileSystemException( $cacheDirToDelete . ' directory does not exists. Maybe there is a problem with folder permissions.' );
             }
 
-            Utils::deleteDir( $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang );
+            Utils::deleteDir( $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . self::OBJECTS_SAFE_DELIMITER . $lang );
 
             return false;
         }
@@ -144,7 +146,7 @@ class FsFilesStorage extends AbstractFilesStorage {
         //compose path
         $cacheTree = implode( DIRECTORY_SEPARATOR, static::composeCachePath( $hash ) );
 
-        $path = $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "orig";
+        $path = $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . self::OBJECTS_SAFE_DELIMITER . $lang . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "orig";
 
         //return file
         $filePath = $this->getSingleFileInPath( $path );
@@ -168,7 +170,7 @@ class FsFilesStorage extends AbstractFilesStorage {
         $cacheTree = implode( DIRECTORY_SEPARATOR, static::composeCachePath( $hash ) );
 
         //compose path
-        $path = $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "work";
+        $path = $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . self::OBJECTS_SAFE_DELIMITER . $lang . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "work";
 
         //return file
         return $this->getSingleFileInPath( $path );
@@ -195,7 +197,7 @@ class FsFilesStorage extends AbstractFilesStorage {
 
         //destination dir
         $fileDir  = $this->filesDir . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $idFile;
-        $cacheDir = $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang . DIRECTORY_SEPARATOR . "package";
+        $cacheDir = $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . self::OBJECTS_SAFE_DELIMITER . $lang . DIRECTORY_SEPARATOR . "package";
 
         Log::doJsonLog( $fileDir );
         Log::doJsonLog( $cacheDir );
@@ -326,7 +328,7 @@ class FsFilesStorage extends AbstractFilesStorage {
             if ( strpos( $linkFile, self::ORIGINAL_ZIP_PLACEHOLDER ) !== false ) {
                 $zipFilesHash[] = $linkFile;
                 unset( $linkFiles[ $k ] );
-            } elseif ( strpos( $linkFile, '.' ) !== false or strpos( $linkFile, '|' ) === false ) {
+            } elseif ( strpos( $linkFile, '.' ) !== false or strpos( $linkFile, self::OBJECTS_SAFE_DELIMITER ) === false ) {
                 unset( $linkFiles[ $k ] );
             } else {
                 $filesHashInfo[ 'sha' ][]                 = $linkFile;
@@ -361,17 +363,37 @@ class FsFilesStorage extends AbstractFilesStorage {
         $destination = INIT::$QUEUE_PROJECT_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession;
         mkdir( $destination, 0755 );
 
-        /** @var DirectoryIterator $item */
         /** @var RecursiveDirectoryIterator $iterator */
         foreach (
                 $iterator = new RecursiveIteratorIterator(
                         new RecursiveDirectoryIterator( INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession, FilesystemIterator::SKIP_DOTS ),
                         RecursiveIteratorIterator::SELF_FIRST ) as $item
         ) {
+
+
+            // XXX we have here two different variables:
+            //  \FilesStorage\S3FilesStorage::QUEUE_FOLDER and INIT::$QUEUE_PROJECT_REPOSITORY
+//            $destination = INIT::$QUEUE_PROJECT_REPOSITORY . DIRECTORY_SEPARATOR . $subPathName;
+
             if ( $item->isDir() ) {
                 mkdir( $destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName() );
             } else {
-                copy( $item, $destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName() );
+
+                $subPathName = $iterator->getSubPathName();
+
+                if ( stripos( $subPathName, "|" ) !== false ) {
+
+                    // Example: aad03b600_3dc4bf3a2d|it-IT → abc12de006__it-IT - where abc12de006 == sha1(aad03b600_3dc4bf3a2d|it-IT)
+                    $short_hash = sha1( $subPathName );
+
+                    //XXX check this separator: could be the same for S3 and FS ?
+                    $pathParts   = explode( "|", $iterator->getSubPathName() );
+                    $lang        = array_pop( $pathParts );
+                    $subPathName = $short_hash . self::OBJECTS_SAFE_DELIMITER . $lang;
+                }
+
+                copy( $item, $destination . DIRECTORY_SEPARATOR . $subPathName );
+
             }
         }
 
