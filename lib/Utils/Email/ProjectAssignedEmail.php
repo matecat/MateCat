@@ -10,8 +10,8 @@ namespace Email;
 
 
 use CatUtils;
-use Chunks_ChunkStruct;
 use Exception;
+use Jobs_JobStruct;
 use Projects_MetadataDao;
 use Projects_ProjectStruct;
 use Routes;
@@ -20,28 +20,28 @@ use WordCount\WordCountStruct;
 
 class ProjectAssignedEmail extends AbstractEmail {
 
-    protected $user ;
-    protected $project ;
-    protected $assignee ;
-    protected $title ;
+    protected $user;
+    protected $project;
+    protected $assignee;
+    protected $title;
 
-    public  function __construct( Users_UserStruct $user, Projects_ProjectStruct $project, Users_UserStruct $assignee) {
-        $this->user = $user ;
-        $this->project = $project ;
-        $this->assignee = $assignee ;
+    public function __construct( Users_UserStruct $user, Projects_ProjectStruct $project, Users_UserStruct $assignee ) {
+        $this->user     = $user;
+        $this->project  = $project;
+        $this->assignee = $assignee;
 
         $this->jobs = $project->getJobs();
 
-        $this->title = "You've been assigned a project" ;
+        $this->title = "You've been assigned a project";
 
-        $this->_setLayout('skeleton.html');
-        $this->_setTemplate('Project/project_assigned_content.html');
+        $this->_setLayout( 'skeleton.html' );
+        $this->_setTemplate( 'Project/project_assigned_content.html' );
     }
 
     protected function _getTemplateVariables(): array {
         $words_count = [];
         foreach ( $this->jobs as $job ) {
-            $jStruct  = new Chunks_ChunkStruct( $job->getArrayCopy() );
+            $jStruct  = new Jobs_JobStruct( $job->getArrayCopy() );
             $jobStats = new WordCountStruct();
             $jobStats->setIdJob( $jStruct->id );
             $jobStats->setDraftWords( $jStruct->draft_words + $jStruct->new_words ); // (draft_words + new_words) AS DRAFT
@@ -69,7 +69,7 @@ class ProjectAssignedEmail extends AbstractEmail {
         $vars            = parent::_getLayoutVariables();
         $vars[ 'title' ] = $this->title;
 
-        return $vars ;
+        return $vars;
     }
 
     /**
@@ -78,9 +78,9 @@ class ProjectAssignedEmail extends AbstractEmail {
     public function send() {
         $recipient = [ $this->assignee->email, $this->assignee->fullName() ];
 
-        $this->doSend( $recipient, $this->title ,
-            $this->_buildHTMLMessage(),
-            $this->_buildTxtMessage( $this->_buildMessageContent() )
+        $this->doSend( $recipient, $this->title,
+                $this->_buildHTMLMessage(),
+                $this->_buildTxtMessage( $this->_buildMessageContent() )
         );
     }
 
