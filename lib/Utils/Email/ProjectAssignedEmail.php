@@ -10,6 +10,7 @@ namespace Email;
 
 
 use CatUtils;
+use Exception;
 use Jobs_JobStruct;
 use Projects_MetadataDao;
 use Projects_ProjectStruct;
@@ -37,7 +38,7 @@ class ProjectAssignedEmail extends AbstractEmail {
         $this->_setTemplate( 'Project/project_assigned_content.html' );
     }
 
-    protected function _getTemplateVariables() {
+    protected function _getTemplateVariables(): array {
         $words_count = [];
         foreach ( $this->jobs as $job ) {
             $jStruct  = new Jobs_JobStruct( $job->getArrayCopy() );
@@ -64,13 +65,16 @@ class ProjectAssignedEmail extends AbstractEmail {
         ];
     }
 
-    protected function _getLayoutVariables( $messageBody = null ) {
+    protected function _getLayoutVariables( $messageBody = null ): array {
         $vars            = parent::_getLayoutVariables();
         $vars[ 'title' ] = $this->title;
 
         return $vars;
     }
 
+    /**
+     * @throws Exception
+     */
     public function send() {
         $recipient = [ $this->assignee->email, $this->assignee->fullName() ];
 

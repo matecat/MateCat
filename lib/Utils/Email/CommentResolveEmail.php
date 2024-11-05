@@ -12,9 +12,9 @@ class CommentResolveEmail extends BaseCommentEmail {
 
     protected $title = "Thread resolved";
 
-    protected function _getTemplateVariables() {
+    protected function _getTemplateVariables(): array {
         $vars                 = parent::_getTemplateVariables();
-        $var[ 'title' ]       = $this->title;
+        $vars[ 'title' ]       = $this->title;
         $vars[ 'action' ]     = "resolved a thread that you are following on";
         $vars[ 'id_segment' ] = $this->comment->id_segment;
 

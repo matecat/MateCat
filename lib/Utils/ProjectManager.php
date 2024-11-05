@@ -21,7 +21,6 @@ use Files\MetadataDao;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use FilesStorage\S3FilesStorage;
-use Jobs\SplitQueue;
 use Langs\Languages;
 use LQA\QA;
 use Matecat\SubFiltering\MateCatFilter;
@@ -1685,11 +1684,19 @@ class ProjectManager {
 
         }
 
-        foreach( $newJobList as $job ){
+        foreach ( $newJobList as $job ) {
             /**
              * Async worker to re-count avg-PEE and total-TTE for split jobs
              */
-            SplitQueue::recount( $job );
+            try {
+                WorkerClient::enqueue( 'JOBS', '\AsyncTasks\Workers\JobsWorker', $job, [ 'persistent' => WorkerClient::$_HANDLER->persistent ] );
+            } catch ( Exception $e ) {
+                # Handle the error, logging, ...
+                $output = "**** Job Split PEE recount request failed. AMQ Connection Error. ****\n\t";
+                $output .= "{$e->getMessage()}";
+                $output .= var_export( $job, true );
+                $this->_log( $output );
+            }
         }
 
         ( new Jobs_JobDao() )->destroyCacheByProjectId( $projectStructure[ 'id_project' ] );
@@ -2306,8 +2313,9 @@ class ProjectManager {
             // get metadata
             $meta = isset( $this->projectStructure[ 'array_files_meta' ][ $pos ] ) ? $this->projectStructure[ 'array_files_meta' ][ $pos ] : null;
 
-            $mimeType = AbstractFilesStorage::pathinfo_fix( $originalFileName, PATHINFO_EXTENSION );
-            $fid      = ProjectManagerModel::insertFile( $this->projectStructure, $originalFileName, $mimeType, $fileDateSha1Path, $meta );
+            $cachedXliffFileName = AbstractFilesStorage::pathinfo_fix($cachedXliffFilePathName, PATHINFO_FILENAME);
+            $mimeType            = AbstractFilesStorage::pathinfo_fix( $originalFileName, PATHINFO_EXTENSION );
+            $fid                 = ProjectManagerModel::insertFile( $this->projectStructure, $originalFileName, $mimeType, $fileDateSha1Path, $meta );
 
             if ( $this->gdriveSession ) {
                 $gdriveFileId = $this->gdriveSession->findFileIdByName( $originalFileName );
@@ -2331,7 +2339,26 @@ class ProjectManager {
 
             $this->projectStructure[ 'file_id_list' ]->append( $fid );
 
-            $fileStructures[ $fid ] = [ 'fid' => $fid, 'original_filename' => $originalFileName, 'path_cached_xliff' => $cachedXliffFilePathName, 'mime_type' => $mimeType ];
+            //
+            // ===============================
+            // NOTE 2024-10-07
+            // ===============================
+            //
+            // This check is needed when we have several files
+            // with same hash (= same content) in $_originalFileNames array.
+            //
+            // By default, $cachedXliffFilePathName returns the first file inside xliff cache folder, but in this case this may be not true.
+            //
+            if ($originalFileName !== $cachedXliffFileName) {
+                $cachedXliffFilePathName = str_replace($cachedXliffFileName, $originalFileName, $cachedXliffFilePathName);
+            }
+
+            $fileStructures[ $fid ] = [
+                'fid' => $fid,
+                'original_filename' => $originalFileName,
+                'path_cached_xliff' => $cachedXliffFilePathName,
+                'mime_type' => $mimeType
+            ];
         }
 
         return $fileStructures;

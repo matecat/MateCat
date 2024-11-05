@@ -51,7 +51,7 @@ class ConfirmedQuotationEmail extends AbstractEmail {
         $this->project_words_count = $count;
     }
 
-    protected function _getTemplateVariables() {
+    protected function _getTemplateVariables(): array {
         return [
                 'internal_project_id' => $this->internal_project_id,
                 'internal_job_id'     => $this->internal_job_id,
@@ -60,7 +60,7 @@ class ConfirmedQuotationEmail extends AbstractEmail {
         ];
     }
 
-    protected function _getLayoutVariables($messageBody = null) {
+    protected function _getLayoutVariables($messageBody = null): array {
         $vars            = parent::_getLayoutVariables();
         $vars[ 'title' ] = $this->title;
 
@@ -68,7 +68,7 @@ class ConfirmedQuotationEmail extends AbstractEmail {
     }
 
 
-    protected function _getDefaultMailConf() {
+    protected function _getDefaultMailConf(): array {
         $mailConf = parent::_getDefaultMailConf();
 
         $mailConf[ 'from' ]       = INIT::$MAILER_RETURN_PATH;

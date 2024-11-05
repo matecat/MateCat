@@ -9,6 +9,7 @@
 namespace Email;
 
 
+use Exception;
 use INIT;
 use Routes;
 
@@ -28,6 +29,9 @@ class SignupEmail extends AbstractEmail {
         $this->_setTemplate( 'Signup/signup_content.html' );
     }
 
+    /**
+     * @throws Exception
+     */
     public function send() {
         $recipient = [ $this->user->email, $this->user->fullName() ];
 
@@ -37,7 +41,10 @@ class SignupEmail extends AbstractEmail {
         );
     }
 
-    protected function _getTemplateVariables() {
+    /**
+     * @throws Exception
+     */
+    protected function _getTemplateVariables(): array {
         return [
                 'user'           => $this->user->toArray(),
                 'activation_url' => Routes::signupConfirmation( $this->user->confirmation_token ),
@@ -45,14 +52,14 @@ class SignupEmail extends AbstractEmail {
         ];
     }
 
-    protected function _getLayoutVariables( $messageBody = null ) {
+    protected function _getLayoutVariables( $messageBody = null ): array {
         $vars            = parent::_getLayoutVariables();
         $vars[ 'title' ] = $this->title;
 
         return $vars;
     }
 
-    protected function _getDefaultMailConf() {
+    protected function _getDefaultMailConf(): array {
         $mailConf = parent::_getDefaultMailConf();
 
         $mailConf[ 'from' ]       = INIT::$MAILER_RETURN_PATH;

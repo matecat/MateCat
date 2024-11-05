@@ -27,13 +27,13 @@ class WelcomeEmail extends AbstractEmail {
         $this->_setTemplate( 'Signup/welcome_content.html' );
     }
 
-    protected function _getTemplateVariables() {
+    protected function _getTemplateVariables(): array {
         return [
                 'user' => $this->user->toArray()
         ];
     }
 
-    protected function _getLayoutVariables( $messageBody = null ) {
+    protected function _getLayoutVariables( $messageBody = null ): array {
         $vars                  = parent::_getLayoutVariables();
         $vars[ 'title' ]       = $this->title;
         $vars[ 'closingLine' ] = 'Join the Evolution!';
@@ -51,7 +51,7 @@ class WelcomeEmail extends AbstractEmail {
 
     }
 
-    protected function _getDefaultMailConf() {
+    protected function _getDefaultMailConf(): array {
         $mailConf = parent::_getDefaultMailConf();
 
         $mailConf[ 'from' ]       = 'noreply@matecat.com';
@@ -60,6 +60,5 @@ class WelcomeEmail extends AbstractEmail {
 
         return $mailConf;
     }
-
 
 }

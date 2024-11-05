@@ -9,6 +9,8 @@
 namespace Email;
 
 
+use Exception;
+use Routes;
 use Teams\TeamStruct;
 
 class InvitedToTeamEmail extends AbstractEmail {
@@ -28,12 +30,15 @@ class InvitedToTeamEmail extends AbstractEmail {
         $this->_setTemplate( 'Team/email_invited_to_team.html' );
     }
 
-    protected function _getTemplateVariables() {
+    /**
+     * @throws Exception
+     */
+    protected function _getTemplateVariables(): array {
         return [
                 'sender'     => $this->user->toArray(),
                 'email'      => $this->invited_email,
                 'team'       => $this->team->toArray(),
-                'signup_url' => \Routes::inviteToTeamConfirm( [
+                'signup_url' => Routes::inviteToTeamConfirm( [
                         'invited_by_uid' => $this->user->uid,
                         'email'          => $this->invited_email,
                         'team_id'        => $this->team->id
