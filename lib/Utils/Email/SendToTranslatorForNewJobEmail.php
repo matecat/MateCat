@@ -18,7 +18,7 @@ class SendToTranslatorForNewJobEmail extends SendToTranslatorAbstract {
         parent::__construct( $user, $translator, $projectName );
         $this->title = "MateCat - Translation Job.";
         $this->_setTemplate( 'Translator/job_new_send_to_translator_content.html' );
-        $this->_RoutesMethod = '\Routes::sendToTranslatorConfirm';
+        $this->_RoutesMethod = '\Routes::translate';
     }
 
 }

@@ -51,7 +51,7 @@ abstract class SendToTranslatorAbstract extends AbstractEmail {
         );
     }
 
-    protected function _getTemplateVariables() {
+    protected function _getTemplateVariables(): array {
 
         $userRecipient = $this->translator->getUser()->getArrayCopy();
         if ( !empty( $userRecipient[ 'uid' ] ) ) {
