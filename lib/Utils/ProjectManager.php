@@ -2328,20 +2328,6 @@ class ProjectManager {
 
             $this->projectStructure[ 'file_id_list' ]->append( $fid );
 
-            //
-            // ===============================
-            // NOTE 2024-10-07
-            // ===============================
-            //
-            // This check is needed when we have several files
-            // with same hash (= same content) in $_originalFileNames array.
-            //
-            // By default, $cachedXliffFilePathName returns the first file inside xliff cache folder, but in this case this may be not true.
-            //
-            if ($originalFileName !== $cachedXliffFileName) {
-                $cachedXliffFilePathName = str_replace($cachedXliffFileName, $originalFileName, $cachedXliffFilePathName);
-            }
-
             $fileStructures[ $fid ] = [
                 'fid' => $fid,
                 'original_filename' => $originalFileName,
