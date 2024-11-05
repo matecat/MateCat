@@ -707,7 +707,7 @@ var spec = {
             name: 'id_project',
             in: 'path',
             description:
-              'The id of the job you intend to generate the Revise 2 step for',
+                'The id of the parent project of the job you intend to generate the Revise 2 step for',
             required: true,
             type: 'string',
           },
@@ -715,8 +715,24 @@ var spec = {
             name: 'password',
             in: 'path',
             description:
-              'The password of the job you intend to generate the Revise 2 step for',
+                'The password of parent project of the job you intend to generate the Revise 2 step for',
             required: true,
+            type: 'string',
+          },
+          {
+            name: 'id_job',
+            in: 'formData',
+            description:
+                'The id of the job you intend to generate the Revise 2 step for',
+            required: false,
+            type: 'string',
+          },
+          {
+            name: 'password',
+            in: 'formData',
+            description:
+                'The password of the job you intend to generate the Revise 2 step for',
+            required: false,
             type: 'string',
           },
         ],
