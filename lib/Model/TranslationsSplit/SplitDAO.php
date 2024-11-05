@@ -24,14 +24,14 @@ class TranslationsSplit_SplitDAO extends DataAccess_AbstractDao {
         $where_conditions = [];
         $values           = [];
 
-        $query            = "SELECT id_segment,
+        $query = "SELECT id_segment,
                                     id_job,
                                     source_chunk_lengths,
                                     target_chunk_lengths
                              FROM " . self::TABLE . " WHERE ";
 
         if ( $obj->id_segment !== null ) {
-            $where_conditions[] = "id_segment = :id_segment";
+            $where_conditions[]     = "id_segment = :id_segment";
             $values[ 'id_segment' ] = $obj->id_segment;
         }
 
@@ -81,6 +81,7 @@ class TranslationsSplit_SplitDAO extends DataAccess_AbstractDao {
         if ( $res > 0 ) {
             return $obj;
         }
+
         return null;
 
     }
@@ -130,11 +131,12 @@ class TranslationsSplit_SplitDAO extends DataAccess_AbstractDao {
      *
      * @return DataAccess_IDaoStruct[]|TranslationsSplit_SplitStruct[]
      */
-    protected function _buildResult( $array_result ) {
+    protected function _buildResult( array $array_result ) {
         foreach ( $array_result as $item ) {
             $item->source_chunk_lengths = json_decode( $item->source_chunk_lengths, true );
             $item->target_chunk_lengths = json_decode( $item->target_chunk_lengths, true );
         }
+
         return $array_result;
     }
 

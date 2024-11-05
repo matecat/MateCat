@@ -6,6 +6,7 @@ import SegmentActions from '../../actions/SegmentActions'
 import CommentsConstants from '../../constants/CommentsConstants'
 import {Shortcuts} from '../../utils/shortcuts'
 import {SegmentContext} from './SegmentContext'
+import SegmentUtils from '../../utils/segmentUtils'
 
 class SegmentsCommentsIcon extends React.Component {
   static contextType = SegmentContext
@@ -34,7 +35,7 @@ class SegmentsCommentsIcon extends React.Component {
   openComments(event) {
     event.stopPropagation()
     SegmentActions.openSegmentComment(this.context.segment.sid)
-    if (!UI.isReadonlySegment(this.context.segment))
+    if (!SegmentUtils.isReadonlySegment(this.context.segment))
       SegmentActions.openSegment(this.context.segment.sid)
   }
 

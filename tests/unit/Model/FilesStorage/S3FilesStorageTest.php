@@ -137,7 +137,7 @@ class S3FilesStorageTest extends AbstractTest {
         $this->assertArrayHasKey( 'conversionHashes', $hashes );
         $this->assertArrayHasKey( 'zipHashes', $hashes );
 
-        $originalFileNames = $hashes[ 'conversionHashes' ][ 'fileName' ][ 'queue-projects/cad1b6e1-b312-8713-e8c3-97145410fd37/aad03b600bc4792b3dc4bf3a2d7191327a482d4a__it-IT' ];
+        $originalFileNames = $hashes[ 'conversionHashes' ][ 'fileName' ][ 'queue-projects/cad1b6e1-b312-8713-e8c3-97145410fd37/61d1a18ea9eb9e6c63de278388abd39410b5911c__it-IT' ];
 
         $this->assertEquals( 'test.txt', $originalFileNames[ 0 ] );
     }

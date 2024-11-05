@@ -29,12 +29,12 @@ class Team {
                 'created_by' => (int)$team->created_by
         ];
 
-        $members = $team->getMembers();
+        $members     = $team->getMembers();
         $invitations = ( new PendingInvitations( ( new \RedisHandler() )->getConnection(), [] ) )->hasPengingInvitation( (int)$team->id );
 
         if ( !empty( $members ) ) {
             $memberShipFormatter = new Membership( $members );
-            $row[ 'members' ] = $memberShipFormatter->render();
+            $row[ 'members' ]    = $memberShipFormatter->render();
         }
 
         $row[ 'pending_invitations' ] = $invitations;
@@ -43,7 +43,7 @@ class Team {
     }
 
     public function render( $data = null ) {
-        $out = array();
+        $out = [];
 
         if ( empty( $data ) ) {
             $data = $this->data;

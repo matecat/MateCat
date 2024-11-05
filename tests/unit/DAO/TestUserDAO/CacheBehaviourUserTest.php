@@ -93,7 +93,7 @@ class CacheBehaviourUserTest extends AbstractTest {
         /**
          * Cache miss
          */
-        $cache_query = md5( $stmt->queryString . $serializedParams );
+        $cache_query = md5( $stmt->queryString . $serializedParams . Users_UserStruct::class );
 
         $cache_result = unserialize( $this->cache->get( $cache_query ) );
 

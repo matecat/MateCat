@@ -9,6 +9,7 @@
 namespace API\V2;
 
 use API\Commons\Validators\ChunkPasswordValidator;
+use API\Commons\Validators\LoginValidator;
 use Constants_TranslationStatus;
 use Exception;
 use Features\ReviewExtended\ReviewUtils;
@@ -26,6 +27,7 @@ class JobStatusController extends BaseChunkController {
         } );
 
         $this->appendValidator( $chunkValidator );
+        $this->appendValidator( new LoginValidator( $this ) );
     }
 
     /**
@@ -70,7 +72,7 @@ class JobStatusController extends BaseChunkController {
                                     'client_id'          => $this->request->client_id,
                                     'chunk'              => $this->chunk,
                                     'destination_status' => $status,
-                                    'id_user'            => ( $this->userIsLogged() ? $this->getUser()->uid : null ),
+                                    'id_user'            => ( $this->isLoggedIn() ? $this->getUser()->uid : null ),
                                     'is_review'          => ( $status == Constants_TranslationStatus::STATUS_APPROVED ),
                                     'revision_number'    => $this->request->revision_number
                             ], [ 'persistent' => true ]

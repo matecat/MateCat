@@ -1,5 +1,6 @@
 <?php
 
+use Langs\Languages;
 use PayableRates\CustomPayableRateStruct;
 use TestHelpers\AbstractTest;
 
@@ -15,7 +16,7 @@ class CustomPayableRateStructTest extends AbstractTest {
      * @test
      */
     public function convertLanguageToIsoCode() {
-        $languages = Langs_Languages::getInstance();
+        $languages = Languages::getInstance();
         $langs     = [
                 'es-419' => 'es',
                 'es-ES'  => 'es',

@@ -147,7 +147,7 @@ class CacheBehaviourJobTest extends AbstractTest {
                                         'id_job'   => $this->id,
                                         'password' => $this->str_password
                                 ]
-                        ) ) )
+                        ). Jobs_JobStruct::class ) )
         ) );
         $this->cache->flushdb();
 

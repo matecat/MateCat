@@ -66,7 +66,7 @@ class getProjectsController extends ajaxController {
 
         //SESSION ENABLED
         parent::__construct();
-        parent::readLoginInfo();
+        parent::identifyUser();
 
         $filterArgs = [
                 'page'          => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],

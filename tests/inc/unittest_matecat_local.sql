@@ -212,7 +212,7 @@ CREATE TABLE `comments`
     `uid`          bigint(20)  DEFAULT NULL,
     `resolve_date` datetime    DEFAULT NULL,
     `source_page`  tinyint(4)  DEFAULT NULL,
-    `is_owner`     tinyint(4)   NOT NULL,
+    `is_anonymous` tinyint(4)  NOT NULL DEFAULT 0,
     `message_type` tinyint(4)  DEFAULT NULL,
     `message`      text,
     PRIMARY KEY (`id`),
@@ -722,7 +722,7 @@ CREATE TABLE `jobs`
 INSERT INTO `jobs`
 VALUES (1886428338, 'a90acf203402', 1886428330, 1, 4, NULL, '[{"tm":true,"glos":true,"owner":true,"uid_transl":null,"uid_rev":null,"name":"","key":"XXXXXXXXXXXXXXXX","r":true,"w":true,"r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"source":null,"target":null}]', NULL, 'en-GB', 'es-ES', 157967, 9700, 0, 34, 1, 1, '2024-01-01 00:00:00', '2024-01-01 00:00:01', 0, 'foo@example.org',
         'active', NULL, 'active', _binary '\0', 0.00, 0.00, 21751.00, 407.00, 147.00, 'general', '{\"NO_MATCH\":100,\"50%-74%\":100,\"75%-84%\":60,\"85%-94%\":60,\"95%-99%\":60,\"100%\":30,\"100%_PUBLIC\":30,\"REPETITIONS\":30,
-\"INTERNAL\":60,\"MT\":80}', 1, NULL, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00);
+\"INTERNAL\":60,\"MT\":80}', 1, 0, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00);
 /*!40000 ALTER TABLE `jobs`
     ENABLE KEYS */;
 

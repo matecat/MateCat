@@ -53,7 +53,7 @@ class setTranslationController extends ajaxController {
     protected $split_statuses;
 
     /**
-     * @var Chunks_ChunkStruct
+     * @var Jobs_JobStruct
      */
     protected $chunk;
 
@@ -189,7 +189,7 @@ class setTranslationController extends ajaxController {
             }
 
             //add check for job status archived.
-            if ( strtolower( $this->chunk[ 'status' ] ) == Constants_JobStatus::STATUS_ARCHIVED ) {
+            if ( $this->chunk->isArchived() ) {
                 $this->result[ 'errors' ][] = [ "code" => -3, "message" => "job archived" ];
             }
 
@@ -299,7 +299,7 @@ class setTranslationController extends ajaxController {
      */
     public function doAction() {
         $this->checkData();
-        $this->readLoginInfo();
+        $this->identifyUser();
         $this->initVersionHandler();
         $this->_getContexts();
 
@@ -905,7 +905,7 @@ class setTranslationController extends ajaxController {
         $contributionStruct->segment      = $this->filter->fromLayer0ToLayer1( $this->segment[ 'segment' ] );
         $contributionStruct->translation  = $this->filter->fromLayer0ToLayer1( $_Translation[ 'translation' ] );
         $contributionStruct->api_key      = INIT::$MYMEMORY_API_KEY;
-        $contributionStruct->uid          = ( $ownerUid !== null ) ? $ownerUid : 0;;
+        $contributionStruct->uid          = ( $ownerUid !== null ) ? $ownerUid : 0;
         $contributionStruct->oldTranslationStatus = $old_translation[ 'status' ];
         $contributionStruct->oldSegment           = $this->filter->fromLayer0ToLayer1( $this->segment[ 'segment' ] ); //
         $contributionStruct->oldTranslation       = $this->filter->fromLayer0ToLayer1( $old_translation[ 'translation' ] );

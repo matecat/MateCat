@@ -29,6 +29,7 @@ class ShapelessConcreteStruct extends DataAccess_AbstractDaoObjectStruct impleme
         if ( !property_exists( $this, $name ) ) {
             return null;
         }
+
         return $this->$name;
     }
 

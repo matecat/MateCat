@@ -1,4 +1,5 @@
 <?php
+
 namespace AsyncTasks\Workers;
 
 use ActivityLog\ActivityLogDao;
@@ -33,7 +34,7 @@ class ActivityLogWorker extends AbstractWorker {
 
     }
 
-    protected function _writeLog( ActivityLogStruct $logEvent ){
+    protected function _writeLog( ActivityLogStruct $logEvent ) {
 
         $logActivityDao = new ActivityLogDao();
         $logActivityDao->create( $logEvent );

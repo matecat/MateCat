@@ -66,30 +66,20 @@ export const TMKeyRow = ({row, onExpandRow}) => {
   const onChangeIsLookup = (e) => {
     const isLookup = e.currentTarget.checked
 
-    const notUpdateRow = !config.isLoggedIn && !isLookup && !isUpdating
-    if (notUpdateRow) {
-      showModalLostPrivateTmKeyNotLoggedIn(setIsLookup)
-    } else {
-      updateRow({isLookup, isUpdating})
-      if (isMMSharedKey) {
-        modifyingCurrentTemplate((prevTemplate) => ({
-          ...prevTemplate,
-          getPublicMatches: isLookup,
-        }))
-      }
+    updateRow({isLookup, isUpdating})
+    if (isMMSharedKey) {
+      modifyingCurrentTemplate((prevTemplate) => ({
+        ...prevTemplate,
+        getPublicMatches: isLookup,
+      }))
     }
+
     setIsLookup(isLookup)
   }
 
   const onChangeIsUpdating = (e) => {
     const isUpdating = e.currentTarget.checked
-
-    const notUpdateRow = !config.isLoggedIn && !isLookup && !isUpdating
-    if (notUpdateRow) {
-      showModalLostPrivateTmKeyNotLoggedIn(setIsUpdating)
-    } else {
-      updateRow({isLookup, isUpdating})
-    }
+    updateRow({isLookup, isUpdating})
     setIsUpdating(isUpdating)
   }
 
@@ -174,24 +164,6 @@ export const TMKeyRow = ({row, onExpandRow}) => {
     }
   }
 
-  const showModalLostPrivateTmKeyNotLoggedIn = (restoreState) => {
-    ModalsActions.showModalComponent(
-      ConfirmMessageModal,
-      {
-        text: 'If you confirm this action, your Private TM key will be lost. <br />If you want to avoid this, please, log in with your account now.',
-        successText: 'Continue',
-        cancelText: 'Cancel',
-        successCallback: () =>
-          setTmKeys((prevState) =>
-            prevState.filter(({key}) => row.key !== key),
-          ),
-        cancelCallback: () => restoreState(true),
-        closeOnSuccess: true,
-      },
-      'Confirmation required',
-    )
-  }
-
   const handleExpandeRow = (Component) => {
     const onClose = () => onExpandRow({row, shouldExpand: false})
     const onConfirm = onConfirmDeleteTmKey
@@ -224,55 +196,47 @@ export const TMKeyRow = ({row, onExpandRow}) => {
         }
 
   const onConfirmDeleteTmKey = () => {
-    if (config.isLoggedIn === 1) {
-      deleteTmKey({key: row.key})
-        .then(() => {
-          setTmKeys((prevState) => prevState.filter(({key}) => key !== row.key))
-          if (config.is_cattool) {
-            CatToolActions.onTMKeysChangeStatus()
-          } else {
-            const templatesInvolved = projectTemplates
-              .filter((template) =>
-                template.tm.some(({key}) => key === row.key),
-              )
-              .map((template) => ({
-                ...template,
-                [SCHEMA_KEYS.tm]: template.tm.filter(
-                  ({key}) => key !== row.key,
-                ),
-              }))
+    deleteTmKey({key: row.key})
+      .then(() => {
+        setTmKeys((prevState) => prevState.filter(({key}) => key !== row.key))
+        if (config.is_cattool) {
+          CatToolActions.onTMKeysChangeStatus()
+        } else {
+          const templatesInvolved = projectTemplates
+            .filter((template) => template.tm.some(({key}) => key === row.key))
+            .map((template) => ({
+              ...template,
+              [SCHEMA_KEYS.tm]: template.tm.filter(({key}) => key !== row.key),
+            }))
 
-            CreateProjectActions.updateProjectTemplates({
-              templates: templatesInvolved,
-              modifiedPropsCurrentProjectTemplate: {
-                tm: templatesInvolved.find(({isTemporary}) => isTemporary)?.tm,
-              },
-            })
-          }
-          const notification = {
-            title: 'Resource deleted',
-            text: `The resource (<b>${row.name}</b>) has been successfully deleted`,
-            type: 'success',
-            position: 'br',
-            allowHtml: true,
-            timer: 5000,
-          }
-          CatToolActions.addNotification(notification)
-        })
-        .catch(() => {
-          CatToolActions.addNotification({
-            title: 'Error deleting resource',
-            type: 'error',
-            text: 'There was an error saving your data. Please retry!',
-            position: 'br',
-            allowHtml: true,
-            timer: 5000,
+          CreateProjectActions.updateProjectTemplates({
+            templates: templatesInvolved,
+            modifiedPropsCurrentProjectTemplate: {
+              tm: templatesInvolved.find(({isTemporary}) => isTemporary)?.tm,
+            },
           })
-          onExpandRow({row, shouldExpand: false})
+        }
+        const notification = {
+          title: 'Resource deleted',
+          text: `The resource (<b>${row.name}</b>) has been successfully deleted`,
+          type: 'success',
+          position: 'br',
+          allowHtml: true,
+          timer: 5000,
+        }
+        CatToolActions.addNotification(notification)
+      })
+      .catch(() => {
+        CatToolActions.addNotification({
+          title: 'Error deleting resource',
+          type: 'error',
+          text: 'There was an error saving your data. Please retry!',
+          position: 'br',
+          allowHtml: true,
+          timer: 5000,
         })
-    } else {
-      setTmKeys((prevState) => prevState.filter(({key}) => key !== row.key))
-    }
+        onExpandRow({row, shouldExpand: false})
+      })
   }
 
   const showConfirmDelete = () => {

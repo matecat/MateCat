@@ -36,20 +36,20 @@ class GetConnection extends AbstractTest {
                 ] );
 
 
-        $this->jobDao    = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
-        $this->reflector = new ReflectionClass( $this->jobDao );
-        $this->property  = $this->reflector->getProperty( 'instance' );
-        $this->jobDao->close();
+        $this->databaseInstance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
+        $this->reflector        = new ReflectionClass( $this->databaseInstance );
+        $this->property         = $this->reflector->getProperty( 'instance' );
+        $this->databaseInstance->close();
         $this->property->setAccessible( true );
-        $this->property->setValue( $this->jobDao, null );
-        $this->instance_after_reset = $this->jobDao->obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
+        $this->property->setValue( $this->databaseInstance, null );
+        $this->instance_after_reset = $this->databaseInstance->obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
 
 
     }
 
     public function tearDown(): void {
-        $this->jobDao = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
-        $this->jobDao->close();
+        $this->databaseInstance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
+        $this->databaseInstance->close();
         startConnection();
         parent::tearDown();
     }

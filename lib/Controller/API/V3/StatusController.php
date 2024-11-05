@@ -42,7 +42,7 @@ class StatusController extends KleinController {
         if ( !empty( $result->getJobs() ) ) {
             foreach ( $result->getJobs() as $j ) {
                 foreach ( $j->getChunks() as $chunk ) {
-                    if ( $chunk->getChunkStruct()->status_owner !== Constants_JobStatus::STATUS_DELETED ) {
+                    if ( !$chunk->getChunkStruct()->isDeleted() ) {
                         $chunksCount++;
                     }
                 }

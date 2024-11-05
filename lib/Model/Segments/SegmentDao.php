@@ -6,7 +6,7 @@ use Segments\SegmentUIStruct;
 
 class Segments_SegmentDao extends DataAccess_AbstractDao {
     const TABLE = 'segments';
-    protected static $auto_increment_field = [ 'id' ];
+    protected static array $auto_increment_field = [ 'id' ];
 
 
     const ISSUE_CATEGORY_ALL = 'all';
@@ -14,7 +14,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
     protected static $queryForGlobalMismatches = " SELECT id_segment, id_job , segment_hash, translation 
                          FROM segment_translations 
                          WHERE id_job = :id_job
-                         AND segment_translations.status IN( :st_translated, :st_approved )";
+                         AND segment_translations.status IN( :st_translated, :st_approved, :st_approved2 )";
 
     protected static $queryForLocalMismatches = "
                 SELECT
@@ -29,7 +29,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                     WHERE segment_hash = (
                         SELECT segment_hash FROM segments WHERE id = :id_segment
                     )
-                    AND segment_translations.status IN( :st_translated , :st_approved )
+                    AND segment_translations.status IN( :st_translated, :st_approved, :st_approved2 )
                     AND id_job = :id_job
                     AND id_segment != :id_segment
                     AND translation != (
@@ -74,11 +74,11 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param Chunks_ChunkStruct $chunk
+     * @param Jobs_JobStruct $chunk
      *
      * @return mixed
      */
-    function countByChunk( Chunks_ChunkStruct $chunk ) {
+    function countByChunk( Jobs_JobStruct $chunk ) {
         $conn  = $this->database->getConnection();
         $query = "SELECT COUNT(1) FROM segments s
             JOIN segment_translations st ON s.id = st.id_segment
@@ -95,9 +95,9 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param $id_job
-     * @param $password
-     * @param $id_segment
+     * @param     $id_job
+     * @param     $password
+     * @param     $id_segment
      * @param int $ttl (default 86400 = 24 hours)
      *
      * @return Segments_SegmentStruct|null
@@ -199,7 +199,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param Chunks_ChunkStruct $chunk
+     * @param Jobs_JobStruct $chunk
      * @param int                $step
      * @param                    $ref_segment
      * @param string             $where
@@ -211,7 +211,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
      * @internal param $jid
      * @internal param $password
      */
-    public function getSegmentsIdForQR( Chunks_ChunkStruct $chunk, $step, $ref_segment, $where = "after", $options = [] ) {
+    public function getSegmentsIdForQR( Jobs_JobStruct $chunk, $step, $ref_segment, $where = "after", $options = [] ) {
 
         $db = Database::obtain()->getConnection();
 
@@ -736,9 +736,10 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
     public function destroyCacheForGlobalTranslationMismatches( Jobs_JobStruct $job ) {
         $stmt = $this->_getStatementForQuery( self::$queryForGlobalMismatches );
 
-        return $this->_destroyObjectCache( $stmt, [
+        return $this->_destroyObjectCache( $stmt, ShapelessConcreteStruct::class, [
                 'id_job'        => $job->id,
                 'st_approved'   => Constants_TranslationStatus::STATUS_APPROVED,
+                'st_approved2' => Constants_TranslationStatus::STATUS_APPROVED2,
                 'st_translated' => Constants_TranslationStatus::STATUS_TRANSLATED,
         ] );
     }
@@ -784,6 +785,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                             'job_last_segment'  => end( $jStructs )->job_last_segment,
                             'job_password'      => $currentJob->password,
                             'st_approved'       => Constants_TranslationStatus::STATUS_APPROVED,
+                            'st_approved2'      => Constants_TranslationStatus::STATUS_APPROVED2,
                             'st_translated'     => Constants_TranslationStatus::STATUS_TRANSLATED,
                             'id_job'            => $jStructs[ 0 ]->id,
                             'id_segment'        => $sid
@@ -813,6 +815,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
             $list = $this->_fetchObject( $stmt, new ShapelessConcreteStruct, [
                             'id_job'        => $currentJob->id,
                             'st_approved'   => Constants_TranslationStatus::STATUS_APPROVED,
+                            'st_approved2'  => Constants_TranslationStatus::STATUS_APPROVED2,
                             'st_translated' => Constants_TranslationStatus::STATUS_TRANSLATED,
                     ]
             );

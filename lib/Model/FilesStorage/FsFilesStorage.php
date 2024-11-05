@@ -2,6 +2,7 @@
 
 namespace FilesStorage;
 
+use DirectoryIterator;
 use FilesStorage\Exceptions\FileSystemException;
 use FilesystemIterator;
 use INIT;
@@ -67,7 +68,7 @@ class FsFilesStorage extends AbstractFilesStorage {
             // detect which type of xliff
             //check also for the extension, if already present do not force
             $force_extension = "";
-            $fileType = XliffProprietaryDetect::getInfo( $xliffPath );
+            $fileType        = XliffProprietaryDetect::getInfo( $xliffPath );
             if ( !$fileType[ 'proprietary' ] && $fileType[ 'info' ][ 'extension' ] != 'sdlxliff' ) {
                 $force_extension = '.sdlxliff';
             }
@@ -189,7 +190,7 @@ class FsFilesStorage extends AbstractFilesStorage {
      */
     public function moveFromCacheToFileDir( $dateHashPath, $lang, $idFile, $newFileName = null ) {
 
-        list( $datePath, $hash ) = explode( DIRECTORY_SEPARATOR, $dateHashPath );
+        [ $datePath, $hash ] = explode( DIRECTORY_SEPARATOR, $dateHashPath );
         $cacheTree = implode( DIRECTORY_SEPARATOR, static::composeCachePath( $hash ) );
 
         //destination dir
@@ -275,7 +276,7 @@ class FsFilesStorage extends AbstractFilesStorage {
      */
     public function getOriginalFromFileDir( $id, $dateHashPath ) {
 
-        list( $datePath, ) = explode( DIRECTORY_SEPARATOR, $dateHashPath );
+        [ $datePath, ] = explode( DIRECTORY_SEPARATOR, $dateHashPath );
 
         //compose path
         $path = $this->filesDir . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $id . DIRECTORY_SEPARATOR . "orig";
@@ -299,7 +300,7 @@ class FsFilesStorage extends AbstractFilesStorage {
      */
     public function getXliffFromFileDir( $id, $dateHashPath ) {
 
-        list( $datePath, ) = explode( DIRECTORY_SEPARATOR, $dateHashPath );
+        [ $datePath, ] = explode( DIRECTORY_SEPARATOR, $dateHashPath );
 
         //compose path
         $path = $this->filesDir . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $id . DIRECTORY_SEPARATOR . "xliff";
@@ -359,6 +360,9 @@ class FsFilesStorage extends AbstractFilesStorage {
 
         $destination = INIT::$QUEUE_PROJECT_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession;
         mkdir( $destination, 0755 );
+
+        /** @var DirectoryIterator $item */
+        /** @var RecursiveDirectoryIterator $iterator */
         foreach (
                 $iterator = new RecursiveIteratorIterator(
                         new RecursiveDirectoryIterator( INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession, FilesystemIterator::SKIP_DOTS ),

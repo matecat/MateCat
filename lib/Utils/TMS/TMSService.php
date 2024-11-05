@@ -4,7 +4,7 @@ namespace TMS;
 
 use API\Commons\Exceptions\UnprocessableException;
 use Chunks_ChunkDao;
-use Chunks_ChunkStruct;
+use Jobs_JobStruct;
 use Constants_TranslationStatus;
 use DateTime;
 use DateTimeZone;
@@ -161,7 +161,7 @@ class TMSService {
             case "400" :
                 throw new Exception( "Error uploading TMX file. Please, try again in 5 minutes.", -15 );
             case "403" :
-                throw new Exception( "Error: ". $this->formatErrorMessage($importStatus->responseDetails), -15 );
+                throw new Exception( "Error: " . $this->formatErrorMessage( $importStatus->responseDetails ), -15 );
             default:
         }
 
@@ -171,7 +171,9 @@ class TMSService {
 
     /**
      * Import TMX file in MyMemory
+     *
      * @param TMSFile $file
+     *
      * @throws Exception
      */
     public function addGlossaryInMyMemory( TMSFile $file ) {
@@ -216,6 +218,7 @@ class TMSService {
 
     /**
      * @param $uuid
+     *
      * @return mixed
      * @throws Exception
      */
@@ -275,7 +278,7 @@ class TMSService {
         if ( $allMemories->responseStatus >= 400 || $allMemories->responseData[ 'status' ] == 2 ) {
             Log::doJsonLog( "Error response from TMX status check: " . $allMemories->responseData[ 'log' ] );
             //what the hell? No memories although I've just loaded some? Eject!
-            throw new Exception( 'Error: '. $this->formatErrorMessage($allMemories->responseData[ 'log' ]), -15 );
+            throw new Exception( 'Error: ' . $this->formatErrorMessage( $allMemories->responseData[ 'log' ] ), -15 );
         }
 
         switch ( $allMemories->responseData[ 'status' ] ) {
@@ -303,11 +306,11 @@ class TMSService {
 
     /**
      * @param $message
+     *
      * @return mixed
      */
-    private function formatErrorMessage($message)
-    {
-        if($message === "THE CHARACTER SET PROVIDED IS INVALID."){
+    private function formatErrorMessage( $message ) {
+        if ( $message === "THE CHARACTER SET PROVIDED IS INVALID." ) {
             return "The encoding of the TMX file uploaded is not valid, please open it in a text editor, convert its encoding to UTF-8 (character corruption might happen) and retry upload";
         }
 
@@ -344,10 +347,10 @@ class TMSService {
     /**
      * Send a mail with link for direct prepared download
      *
-     * @param $userMail
-     * @param $userName
-     * @param $userSurname
-     * @param $tm_key
+     * @param      $userMail
+     * @param      $userName
+     * @param      $userSurname
+     * @param      $tm_key
      * @param bool $strip_tags
      *
      * @return Engines_Results_MyMemory_ExportResponse
@@ -421,7 +424,7 @@ class TMSService {
         }
 
         /**
-         * @var $chunks Chunks_ChunkStruct[]
+         * @var $chunks Jobs_JobStruct[]
          */
         $chunks = Chunks_ChunkDao::getByJobID( $jid );
 
@@ -449,15 +452,15 @@ class TMSService {
             $tmOrigin = "";
             if ( strpos( $this->output_type, 'tm' ) !== false ) {
                 $suggestionsArray = json_decode( $row[ 'suggestions_array' ], true );
-                $suggestionOrigin = Utils::changeMemorySuggestionSource( $suggestionsArray[ 0 ], $row[ 'tm_keys' ], $row[ 'id_customer' ], $uid );
+                $suggestionOrigin = Utils::changeMemorySuggestionSource( $suggestionsArray[ 0 ], $row[ 'tm_keys' ], $uid );
                 $tmOrigin         = '<prop type="x-MateCAT-suggestion-origin">' . $suggestionOrigin . "</prop>";
                 if ( preg_match( "/[a-f0-9]{8,}/", $suggestionsArray[ 0 ][ 'memory_key' ] ) ) {
                     $tmOrigin .= "\n        <prop type=\"x-MateCAT-suggestion-private-key\">" . $suggestionsArray[ 0 ][ 'memory_key' ] . "</prop>";
                 }
             }
 
-            $contextPre = (isset($result[($k-1)])) ? $result[($k-1)]['segment'] : '';
-            $contextPost = (isset($result[($k+1)])) ? $result[($k+1)]['segment'] : '';
+            $contextPre  = ( isset( $result[ ( $k - 1 ) ] ) ) ? $result[ ( $k - 1 ) ][ 'segment' ] : '';
+            $contextPost = ( isset( $result[ ( $k + 1 ) ] ) ) ? $result[ ( $k + 1 ) ][ 'segment' ] : '';
 
             $tmx = '
     <tu tuid="' . $row[ 'id_segment' ] . '" creationdate="' . $dateCreate->format( 'Ymd\THis\Z' ) . '" datatype="plaintext" srclang="' . $sourceLang . '">
@@ -465,8 +468,8 @@ class TMSService {
         <prop type="x-MateCAT-id_segment">' . $row[ 'id_segment' ] . '</prop>
         <prop type="x-MateCAT-filename">' . htmlspecialchars( $row[ 'filename' ], ENT_DISALLOWED, "UTF-8" ) . '</prop>
         <prop type="x-MateCAT-status">' . $row[ 'status' ] . '</prop>
-        <prop type="x-context-pre">'.$contextPre.'</prop>
-        <prop type="x-context-post">'.$contextPost.'</prop>
+        <prop type="x-context-pre">' . $contextPre . '</prop>
+        <prop type="x-context-post">' . $contextPost . '</prop>
         ' . $chunkPropString . '
         ' . $tmOrigin . '
         <tuv xml:lang="' . $sourceLang . '">

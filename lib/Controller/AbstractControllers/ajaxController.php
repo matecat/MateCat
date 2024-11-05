@@ -40,9 +40,11 @@ abstract class ajaxController extends controller {
 
     /**
      * Class constructor, initialize the header content type.
+     * @throws ReflectionException
      */
     protected function __construct() {
 
+        $this->identifyUser();
         $this->startTimer();
 
         $buffer = ob_get_contents();
@@ -96,7 +98,7 @@ abstract class ajaxController extends controller {
     /**
      * @return bool
      */
-    public static function isRevision() {
+    public static function isRevision(): bool {
 
         $controller = static::getInstance();
 

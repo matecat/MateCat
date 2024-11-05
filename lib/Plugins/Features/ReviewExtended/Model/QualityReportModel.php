@@ -10,7 +10,7 @@ namespace Features\ReviewExtended\Model;
 
 use ArrayObject;
 use Chunks_ChunkCompletionEventDao;
-use Chunks_ChunkStruct;
+use Jobs_JobStruct;
 use Database;
 use Exception;
 use Features\ReviewExtended\IChunkReviewModel;
@@ -24,7 +24,7 @@ use Users_UserDao;
 class QualityReportModel {
 
     /**
-     * @var Chunks_ChunkStruct
+     * @var Jobs_JobStruct
      */
     protected $chunk;
 
@@ -53,9 +53,9 @@ class QualityReportModel {
     private $version;
 
     /**
-     * @param Chunks_ChunkStruct $chunk
+     * @param Jobs_JobStruct $chunk
      */
-    public function __construct( Chunks_ChunkStruct $chunk ) {
+    public function __construct( Jobs_JobStruct $chunk ) {
         $this->chunk = $chunk;
     }
 
@@ -97,6 +97,9 @@ class QualityReportModel {
         return $this->chunk_review_model;
     }
 
+    /**
+     * @throws Exception
+     */
     public function resetScore( $event_id ) {
         $chunkReview            = $this->getChunkReview();
         $chunkReview->undo_data = json_encode( [
@@ -110,7 +113,14 @@ class QualityReportModel {
         $chunkReview->reviewed_words_count = 0;
         $chunkReview->is_pass              = 1;
 
-        ChunkReviewDao::updateStruct( $chunkReview );
+        ChunkReviewDao::updateStruct( $chunkReview, [
+                'fields' => [
+                        'undo_data',
+                        'penalty_points',
+                        'reviewed_words_count',
+                        'is_pass'
+                ]
+        ] );
     }
 
     /**
@@ -142,8 +152,8 @@ class QualityReportModel {
                         'avg_edit_distance' => $this->avg_edit_distance
                 ],
                 'job'     => [
-                        'source' => $this->chunk->getJob()->source,
-                        'target' => $this->chunk->getJob()->target,
+                        'source' => $this->chunk->source,
+                        'target' => $this->chunk->target,
                 ],
                 'project' => [
                         'metadata'   => $this->getProject()->getMetadataAsKeyValue(),

@@ -19,9 +19,9 @@ class BuildResultEngineTest extends AbstractTest {
 
     public function setUp(): void {
         parent::setUp();
-        $this->jobDao    = new EnginesModel_EngineDAO( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
-        $this->reflector = new ReflectionClass( $this->jobDao );
-        $this->method    = $this->reflector->getMethod( "_buildResult" );
+        $this->databaseInstance = new EnginesModel_EngineDAO( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
+        $this->reflector        = new ReflectionClass( $this->databaseInstance );
+        $this->method           = $this->reflector->getMethod( "_buildResult" );
         $this->method->setAccessible( true );
 
 
@@ -56,7 +56,7 @@ class BuildResultEngineTest extends AbstractTest {
                         ]
         ];
 
-        $actual_array_of_engine_structures = $this->method->invoke( $this->jobDao, $this->array_param );
+        $actual_array_of_engine_structures = $this->method->invoke( $this->databaseInstance, $this->array_param );
         $actual_engine_struct              = $actual_array_of_engine_structures[ '0' ];
         $this->assertTrue( $actual_engine_struct instanceof EnginesModel_EngineStruct );
 

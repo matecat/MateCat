@@ -9,8 +9,8 @@
 
 namespace API\V2\Json;
 
-use Chunks_ChunkStruct;
 use Constants_JobStatus;
+use Jobs_JobStruct;
 use Model\Analysis\Status;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
@@ -73,12 +73,12 @@ class Project {
      */
     public function __construct( array $data = [], $search_status = null ) {
 
-        $this->data = $data;
+        $this->data   = $data;
         $this->status = $search_status;
-        $jRendered = new Job();
+        $jRendered    = new Job();
 
-        if($search_status){
-            $jRendered->setStatus($search_status);
+        if ( $search_status ) {
+            $jRendered->setStatus( $search_status );
         }
 
         $this->jRenderer = $jRendered;
@@ -120,20 +120,14 @@ class Project {
             foreach ( $jobs as $job ) {
 
                 // if status is set, then filter off the jobs by owner_status
-                if($this->status){
-                    if($job->status_owner === $this->status and !$job->wasDeleted()){
-                        /**
-                         * @var $jobJSON Job
-                         */
-                        $jobJSONs[]    = $jobJSON->renderItem( new Chunks_ChunkStruct( $job->getArrayCopy() ), $project, $featureSet );
+                if ( $this->status ) {
+                    if ( $job->status_owner === $this->status and !$job->isDeleted() ) {
+                        $jobJSONs[]    = $jobJSON->renderItem( new Jobs_JobStruct( $job->getArrayCopy() ), $project, $featureSet );
                         $jobStatuses[] = $job->status_owner;
                     }
                 } else {
-                    if(!$job->wasDeleted()){
-                        /**
-                         * @var $jobJSON Job
-                         */
-                        $jobJSONs[]    = $jobJSON->renderItem( new Chunks_ChunkStruct( $job->getArrayCopy() ), $project, $featureSet );
+                    if ( !$job->isDeleted() ) {
+                        $jobJSONs[]    = $jobJSON->renderItem( new Jobs_JobStruct( $job->getArrayCopy() ), $project, $featureSet );
                         $jobStatuses[] = $job->status_owner;
                     }
                 }
@@ -141,8 +135,8 @@ class Project {
         }
 
         $metadataDao = new \Projects_MetadataDao();
-        $projectInfo = $metadataDao->get((int)$project->id,'project_info');
-        $fromApi = $metadataDao->get((int)$project->id,'from_api');
+        $projectInfo = $metadataDao->get( (int)$project->id, 'project_info' );
+        $fromApi     = $metadataDao->get( (int)$project->id, 'from_api' );
 
         $_project_data  = Projects_ProjectDao::getProjectAndJobData( $project->id );
         $analysisStatus = new Status( $_project_data, $featureSet, $this->user );
@@ -153,7 +147,7 @@ class Project {
                 'name'                 => $project->name,
                 'id_team'              => (int)$project->id_team,
                 'id_assignee'          => (int)$project->id_assignee,
-                'from_api'             => ($fromApi !== null && $fromApi->value == 1 ? true : false),
+                'from_api'             => ( $fromApi !== null && $fromApi->value == 1 ? true : false ),
                 'analysis'             => $analysisStatus->fetchData()->getResult(),
                 'create_date'          => $project->create_date,
                 'fast_analysis_wc'     => (int)$project->fast_analysis_wc,
@@ -166,7 +160,7 @@ class Project {
                 'is_archived'          => ( in_array( Constants_JobStatus::STATUS_ARCHIVED, $jobStatuses ) ),
                 'remote_file_service'  => $project->getRemoteFileServiceName(),
                 'due_date'             => Utils::api_timestamp( $project->due_date ),
-                'project_info'         => (null !== $projectInfo) ? $projectInfo->value : null,
+                'project_info'         => ( null !== $projectInfo ) ? $projectInfo->value : null,
         ];
     }
 

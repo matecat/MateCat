@@ -31,6 +31,7 @@ export const BUTTON_MODE = {
   BASIC: 'basic',
   OUTLINE: 'outline',
   GHOST: 'ghost',
+  LINK: 'link',
 }
 export const BUTTON_SIZE = {
   SMALL: 'small',
@@ -40,6 +41,9 @@ export const BUTTON_SIZE = {
   ICON_SMALL: 'iconSmall',
   ICON_STANDARD: 'iconStandard',
   ICON_BIG: 'iconBig',
+  LINK_SMALL: 'linkSmall',
+  LINK_MEDIUM: 'linkMedium',
+  LINK_BIG: 'linkBig',
 }
 export const BUTTON_HTML_TYPE = {
   BUTTON: 'button',

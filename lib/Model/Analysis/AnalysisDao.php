@@ -14,6 +14,7 @@ use DataAccess\ShapelessConcreteStruct;
 use DataAccess_AbstractDao;
 use Database;
 use Log;
+use ReflectionException;
 
 class AnalysisDao extends DataAccess_AbstractDao {
 
@@ -67,21 +68,24 @@ class AnalysisDao extends DataAccess_AbstractDao {
      *
      * REALLY HEAVY
      *
-     * @param $pid
+     * @param     $pid
+     * @param int $ttl
      *
      * @return array|int|mixed
+     * @throws ReflectionException
      */
-    public static function getProjectStatsVolumeAnalysis( $pid, $ttl = 0 ) {
+    public static function getProjectStatsVolumeAnalysis( $pid, int $ttl = 0 ) {
 
         $db = Database::obtain();
         try {
             $thisDao = new self();
-            $stmt = $db->getConnection()->prepare( self::$_sql_get_project_Stats_volume_analysis );
+            $stmt    = $db->getConnection()->prepare( self::$_sql_get_project_Stats_volume_analysis );
             $results = $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [ 'pid' => $pid ] );
 
             $stmt->closeCursor();
         } catch ( \PDOException $e ) {
             Log::doJsonLog( $e->getMessage() );
+
             return $e->getCode() * -1;
         }
 
@@ -93,12 +97,13 @@ class AnalysisDao extends DataAccess_AbstractDao {
      * @param $project_id
      *
      * @return bool|int
+     * @throws ReflectionException
      */
     public static function destroyCacheByProjectId( $project_id ) {
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( self::$_sql_get_project_Stats_volume_analysis );
+        $conn    = Database::obtain()->getConnection();
+        $stmt    = $conn->prepare( self::$_sql_get_project_Stats_volume_analysis );
         $thisDao = new static();
-        return $thisDao->_destroyObjectCache( $stmt, [ 'pid' => $project_id ] );
+        return $thisDao->_destroyObjectCache( $stmt, ShapelessConcreteStruct::class, [ 'pid' => $project_id ] );
     }
 
 }

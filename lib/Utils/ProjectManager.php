@@ -8,10 +8,10 @@
  */
 
 use ActivityLog\ActivityLogStruct;
+use Analysis\PayableRates;
 use API\Commons\Exceptions\AuthenticationError;
-use ConnectedServices\GDrive as GDrive;
-use ConnectedServices\GDrive\Session;
-use ConnectedServices\GoogleClientFactory;
+use ConnectedServices\Google\GDrive\Session;
+use ConnectedServices\Google\GoogleProvider;
 use Constants\XliffTranslationStatus;
 use Exceptions\NotFoundException;
 use Exceptions\ValidationError;
@@ -21,6 +21,7 @@ use Files\MetadataDao;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use FilesStorage\S3FilesStorage;
+use Langs\Languages;
 use LQA\QA;
 use Matecat\SubFiltering\MateCatFilter;
 use Matecat\SubFiltering\Utils\DataRefReplacer;
@@ -81,9 +82,9 @@ class ProjectManager {
     protected $project;
 
     /**
-     * @var Session
+     * @var ?Session
      */
-    protected $gdriveSession;
+    protected ?Session $gdriveSession = null;
 
     /**
      * @var FeatureSet
@@ -192,6 +193,10 @@ class ProjectManager {
                             'mmt_glossaries'                          => null,
                             'deepl_formality'                         => null,
                             'deepl_id_glossary'                       => null,
+                            'dictation'                               => null,
+                            'show_whitespace'                         => null,
+                            'character_counter'                       => null,
+                            'ai_assistant'                            => null,
                             'filters_extraction_parameters'           => new RecursiveArrayObject(),
                             'xliff_parameters'                        => new RecursiveArrayObject(),
                             'mt_evaluation'                           => false
@@ -203,7 +208,7 @@ class ProjectManager {
         //get the TMX management component from the factory
         $this->tmxServiceWrapper = new TMSService();
 
-        $this->langService = Langs_Languages::getInstance();
+        $this->langService = Languages::getInstance();
 
         $this->dbHandler = Database::obtain();
 
@@ -384,6 +389,26 @@ class ProjectManager {
             $options[ 'from_api' ] = 1;
         }
 
+        // dictation
+        if ( isset( $this->projectStructure[ 'dictation' ] ) and $this->projectStructure[ 'dictation' ] !== null ) {
+            $options[ 'dictation' ] = $this->projectStructure[ 'dictation' ] == true ? 1 : 0;
+        }
+
+        // show_whitespace
+        if ( isset( $this->projectStructure[ 'show_whitespace' ] ) and $this->projectStructure[ 'show_whitespace' ] !== null ) {
+            $options[ 'show_whitespace' ] = $this->projectStructure[ 'show_whitespace' ] == true ? 1 : 0;
+        }
+
+        // character_counter
+        if ( isset( $this->projectStructure[ 'character_counter' ] ) and $this->projectStructure[ 'character_counter' ] !== null ) {
+            $options[ 'character_counter' ] = $this->projectStructure[ 'character_counter' ] == true ? 1 : 0;
+        }
+
+        // ai_assistant
+        if ( isset( $this->projectStructure[ 'ai_assistant' ] ) and $this->projectStructure[ 'ai_assistant' ] !== null ) {
+            $options[ 'ai_assistant' ] = $this->projectStructure[ 'ai_assistant' ] == true ? 1 : 0;
+        }
+
         // xliff_parameters
         if ( isset( $this->projectStructure[ 'xliff_parameters' ] ) and $this->projectStructure[ 'xliff_parameters' ] instanceof XliffConfigTemplateStruct ) {
             $configModel                   = $this->projectStructure[ 'xliff_parameters' ];
@@ -394,6 +419,7 @@ class ProjectManager {
         if ( isset( $this->projectStructure[ 'pretranslate_101' ] ) ) {
             $options[ 'pretranslate_101' ] = $this->projectStructure[ 'pretranslate_101' ];
         }
+
         /**
          * Here we have the opportunity to add other features as dependencies of the ones
          * which are already explicitly set.
@@ -447,14 +473,20 @@ class ProjectManager {
     }
 
     /**
+     * @param ArrayObject $options
+     *
+     * @return array
      * @throws Exception
      */
-    private function sanitizeProjectOptions( $options ) {
-        $sanitizer = new ProjectOptionsSanitizer( $options );
+    private function sanitizeProjectOptions( ArrayObject $options ): array {
+        $sanitizer = new ProjectOptionsSanitizer( $options->getArrayCopy() );
+
+        /** @var $langs RecursiveArrayObject */
+        $langs = $this->projectStructure[ 'target_language' ];
 
         $sanitizer->setLanguages(
                 $this->projectStructure[ 'source_language' ],
-                $this->projectStructure[ 'target_language' ]
+                $langs->getArrayCopy()
         );
 
         return $sanitizer->sanitize();
@@ -534,7 +566,7 @@ class ProjectManager {
         $fs = FilesStorageFactory::create();
 
         if ( !empty( $this->projectStructure[ 'session' ][ 'uid' ] ) ) {
-            $this->gdriveSession = GDrive\Session::getInstanceForCLI( $this->projectStructure[ 'session' ]->getArrayCopy() );
+            $this->gdriveSession = Session::getInstanceForCLI( $this->projectStructure[ 'session' ]->getArrayCopy() );
         }
 
         $this->__checkForProjectAssignment();
@@ -676,7 +708,6 @@ class ProjectManager {
                 // put reference to cache in upload dir to link cache to session
                 $fs->linkSessionToCacheForAlreadyConvertedFiles(
                         $sha1,
-                        $this->projectStructure[ 'source_language' ],
                         $this->projectStructure[ 'uploadToken' ],
                         $fileName
                 );
@@ -1298,7 +1329,7 @@ class ProjectManager {
                 $payableRates         = json_encode( $payableRates );
             } else {
                 $payableRatesTemplate = null;
-                $payableRates         = Analysis_PayableRates::getPayableRates( $projectStructure[ 'source_language' ], $target );
+                $payableRates         = PayableRates::getPayableRates( $projectStructure[ 'source_language' ], $target );
                 $payableRates         = json_encode( $this->features->filter( "filterPayableRates", $payableRates, $projectStructure[ 'source_language' ], $target ) );
             }
 
@@ -1363,7 +1394,7 @@ class ProjectManager {
             $projectStructure[ 'array_jobs' ][ 'job_languages' ]->offsetSet( $newJob->id, $newJob->id . ":" . $target );
             $projectStructure[ 'array_jobs' ][ 'payable_rates' ]->offsetSet( $newJob->id, $payableRates );
 
-            $jobsMetadataDao  = new Jobs\MetadataDao();
+            $jobsMetadataDao = new Jobs\MetadataDao();
             // dialect_strict
             if ( isset( $projectStructure[ 'dialect_strict' ] ) ) {
                 $dialectStrictObj = json_decode( $projectStructure[ 'dialect_strict' ], true );
@@ -1404,7 +1435,7 @@ class ProjectManager {
                 Files_FileDao::insertFilesJob( $newJob->id, $fid );
 
                 if ( $this->gdriveSession && $this->gdriveSession->hasFiles() ) {
-                    $client = GoogleClientFactory::getGoogleClient( INIT::$HTTPHOST . "/gdrive/oauth/response" );
+                    $client = GoogleProvider::getClient( INIT::$HTTPHOST . "/gdrive/oauth/response" );
                     $this->gdriveSession->createRemoteCopiesWhereToSaveTranslation( $fid, $newJob->id, $client );
                 }
             }
@@ -1601,64 +1632,71 @@ class ProjectManager {
         // update the first chunk of the job to split
         $jobDao->updateStdWcAndTotalWc( $jobToSplit->id, $chunks[ 0 ][ 'standard_word_count' ], $chunks[ 0 ][ 'raw_word_count' ] );
 
+        $newJobList = [];
+
         // create the other chunks of the job to split
         foreach ( $chunks as $contents ) {
+
+            $newJob = clone $jobToSplit;
 
             //IF THIS IS NOT the original job, UPDATE relevant fields
             if ( $contents[ 'segment_start' ] != $projectStructure[ 'split_result' ][ 'job_first_segment' ] ) {
                 //next insert
-                $jobToSplit[ 'password' ]                = $this->generatePassword();
-                $jobToSplit[ 'create_date' ]             = date( 'Y-m-d H:i:s' );
-                $jobToSplit[ 'avg_post_editing_effort' ] = 0;
-                $jobToSplit[ 'total_time_to_edit' ]      = 0;
+                $newJob[ 'password' ]                = $this->generatePassword();
+                $newJob[ 'create_date' ]             = date( 'Y-m-d H:i:s' );
+                $newJob[ 'avg_post_editing_effort' ] = 0;
+                $newJob[ 'total_time_to_edit' ]      = 0;
             }
 
-            $jobToSplit[ 'last_opened_segment' ]  = $contents[ 'last_opened_segment' ];
-            $jobToSplit[ 'job_first_segment' ]    = $contents[ 'segment_start' ];
-            $jobToSplit[ 'job_last_segment' ]     = $contents[ 'segment_end' ];
-            $jobToSplit[ 'standard_analysis_wc' ] = $contents[ 'standard_word_count' ];
-            $jobToSplit[ 'total_raw_wc' ]         = $contents[ 'raw_word_count' ];
+            $newJob[ 'last_opened_segment' ]  = $contents[ 'last_opened_segment' ];
+            $newJob[ 'job_first_segment' ]    = $contents[ 'segment_start' ];
+            $newJob[ 'job_last_segment' ]     = $contents[ 'segment_end' ];
+            $newJob[ 'standard_analysis_wc' ] = $contents[ 'standard_word_count' ];
+            $newJob[ 'total_raw_wc' ]         = $contents[ 'raw_word_count' ];
 
-            $stmt = $jobDao->getSplitJobPreparedStatement( $jobToSplit );
+            $stmt = $jobDao->getSplitJobPreparedStatement( $newJob );
             $stmt->execute();
 
             $wCountManager = new CounterModel();
-            $wCountManager->initializeJobWordCount( $jobToSplit->id, $jobToSplit->password );
+            $wCountManager->initializeJobWordCount( $newJob->id, $newJob->password );
 
             if ( $this->dbHandler->affected_rows == 0 ) {
                 $msg = "Failed to split job into " . count( $projectStructure[ 'split_result' ][ 'chunks' ] ) . " chunks\n";
                 $msg .= "Tried to perform SQL: \n" . print_r( $stmt->queryString, true ) . " \n\n";
-                $msg .= "Failed Statement is: \n" . print_r( $jobToSplit, true ) . "\n";
-//                Utils::sendErrMailReport( $msg );
+                $msg .= "Failed Statement is: \n" . print_r( $newJob, true ) . "\n";
                 $this->_log( $msg );
                 throw new Exception( 'Failed to insert job chunk, project damaged.', -8 );
             }
 
+            $newJobList[] = $newJob;
+
             $stmt->closeCursor();
             unset( $stmt );
-
-            /**
-             * Async worker to re-count avg-PEE and total-TTE for split jobs
-             */
-            try {
-                WorkerClient::enqueue( 'JOBS', '\AsyncTasks\Workers\JobsWorker', $jobToSplit, [ 'persistent' => WorkerClient::$_HANDLER->persistent ] );
-            } catch ( Exception $e ) {
-                # Handle the error, logging, ...
-                $output = "**** Job Split PEE recount request failed. AMQ Connection Error. ****\n\t";
-                $output .= "{$e->getMessage()}";
-                $output .= var_export( $jobToSplit, true );
-                $this->_log( $output );
-            }
 
             //add here job id to list
             $projectStructure[ 'array_jobs' ][ 'job_list' ]->append( $projectStructure[ 'job_to_split' ] );
             //add here passwords to list
-            $projectStructure[ 'array_jobs' ][ 'job_pass' ]->append( $jobToSplit[ 'password' ] );
+            $projectStructure[ 'array_jobs' ][ 'job_pass' ]->append( $newJob[ 'password' ] );
 
-            $projectStructure[ 'array_jobs' ][ 'job_segments' ]->offsetSet( $projectStructure[ 'job_to_split' ] . "-" . $jobToSplit[ 'password' ], new ArrayObject( [
+            $projectStructure[ 'array_jobs' ][ 'job_segments' ]->offsetSet( $projectStructure[ 'job_to_split' ] . "-" . $newJob[ 'password' ], new ArrayObject( [
                     $contents[ 'segment_start' ], $contents[ 'segment_end' ]
             ] ) );
 
+        }
+
+        foreach ( $newJobList as $job ) {
+            /**
+             * Async worker to re-count avg-PEE and total-TTE for split jobs
+             */
+            try {
+                WorkerClient::enqueue( 'JOBS', '\AsyncTasks\Workers\JobsWorker', $job, [ 'persistent' => WorkerClient::$_HANDLER->persistent ] );
+            } catch ( Exception $e ) {
+                # Handle the error, logging, ...
+                $output = "**** Job Split PEE recount request failed. AMQ Connection Error. ****\n\t";
+                $output .= "{$e->getMessage()}";
+                $output .= var_export( $job, true );
+                $this->_log( $output );
+            }
         }
 
         ( new Jobs_JobDao() )->destroyCacheByProjectId( $projectStructure[ 'id_project' ] );
@@ -1761,7 +1799,7 @@ class ProjectManager {
         $wCountManager = new CounterModel();
         $wCountManager->initializeJobWordCount( $first_job[ 'id' ], $first_job[ 'password' ] );
 
-        $chunk = new Chunks_ChunkStruct( $first_job->toArray() );
+        $chunk = new Jobs_JobStruct( $first_job->toArray() );
         $this->features->run( 'postJobMerged', $projectStructure, $chunk );
 
         $jobDao = new Jobs_JobDao();
@@ -1925,8 +1963,8 @@ class ProjectManager {
                                         // before calling html_entity_decode function we convert
                                         // all unicode entities with no corresponding HTML entity
                                         //
-                                        $extract_external[ 'seg' ]        = CatUtils::restoreUnicodeEntitesToOriginalValues( $extract_external[ 'seg' ] );
-                                        $target_extract_external[ 'seg' ] = CatUtils::restoreUnicodeEntitesToOriginalValues( $target_extract_external[ 'seg' ] );
+                                        $extract_external[ 'seg' ]        = CatUtils::restoreUnicodeEntitiesToOriginalValues( $extract_external[ 'seg' ] );
+                                        $target_extract_external[ 'seg' ] = CatUtils::restoreUnicodeEntitiesToOriginalValues( $target_extract_external[ 'seg' ] );
 
                                         // we don't want THE CONTENT OF TARGET TAG IF PRESENT and EQUAL TO SOURCE???
                                         // AND IF IT IS ONLY A CHAR? like "*" ?
@@ -2281,7 +2319,7 @@ class ProjectManager {
             if ( $this->gdriveSession ) {
                 $gdriveFileId = $this->gdriveSession->findFileIdByName( $originalFileName );
                 if ( $gdriveFileId ) {
-                    $client = GoogleClientFactory::getGoogleClient( INIT::$HTTPHOST . "/gdrive/oauth/response" );
+                    $client = GoogleProvider::getClient( INIT::$HTTPHOST . "/gdrive/oauth/response" );
                     $this->gdriveSession->createRemoteFile( $fid, $gdriveFileId, $client );
                 }
             }

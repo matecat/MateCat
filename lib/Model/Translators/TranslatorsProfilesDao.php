@@ -15,8 +15,8 @@ class TranslatorsProfilesDao extends \DataAccess_AbstractDao {
     const TABLE       = "translator_profiles";
     const STRUCT_TYPE = "TranslatorProfilesStruct";
 
-    protected static $auto_increment_field = array( 'id' );
-    protected static $primary_keys         = array( 'id' );
+    protected static array $auto_increment_field = [ 'id' ];
+    protected static array $primary_keys         = [ 'id' ];
 
     protected static $_query_by_uid_src_trg_rev = "
         SELECT * FROM translator_profiles 

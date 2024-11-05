@@ -51,7 +51,7 @@ class Pager {
 
             $_cacheResult = $this->_getFromCacheMap(
                     $paginationParameters->getCacheKeyMap(),
-                    $paginationStatement->queryString . $this->_serializeForCacheKey( $paginationParameters->getBindParams() )
+                    $paginationStatement->queryString . $this->_serializeForCacheKey( $paginationParameters->getBindParams() ) . $paginationParameters->getFetchClass()
             );
 
             if ( !empty( $_cacheResult ) ) {
@@ -76,7 +76,7 @@ class Pager {
 
             $this->_setInCacheMap(
                     $paginationParameters->getCacheKeyMap(),
-                    $paginationStatement->queryString . $this->_serializeForCacheKey( $paginationParameters->getBindParams() ),
+                    $paginationStatement->queryString . $this->_serializeForCacheKey( $paginationParameters->getBindParams() ). $paginationParameters->getFetchClass(),
                     $result
             );
 
@@ -120,7 +120,7 @@ class Pager {
      *
      * @return array
      */
-    protected function format( int $current, int $pagination, int $pages, int $total,  array $items, ?string $prev, ?string $next ): array {
+    protected function format( int $current, int $pagination, int $pages, int $total, array $items, ?string $prev, ?string $next ): array {
 
         return [
                 'current_page' => $current,

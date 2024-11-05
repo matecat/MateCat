@@ -5,9 +5,11 @@
 import React from 'react'
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentConstants from '../../constants/SegmentConstants'
-import SegmentUtils from '../../utils/segmentUtils'
+import {ApplicationWrapperContext} from '../common/ApplicationWrapper'
 
 class SegmentHeader extends React.PureComponent {
+  static contextType = ApplicationWrapperContext
+
   constructor(props) {
     super(props)
     this.state = {
@@ -16,7 +18,6 @@ class SegmentHeader extends React.PureComponent {
       classname: '',
       createdBy: '',
       visible: false,
-      isActiveCharactersCounter: SegmentUtils.isCharacterCounterEnable(),
       charactersCounter: {},
     }
     this.changePercentuage = this.changePercentuage.bind(this)
@@ -54,10 +55,6 @@ class SegmentHeader extends React.PureComponent {
       this.hideHeader,
     )
     SegmentStore.addListener(
-      SegmentConstants.TOGGLE_CHARACTER_COUNTER,
-      this.onToggleCharacterCounter,
-    )
-    SegmentStore.addListener(
       SegmentConstants.CHARACTER_COUNTER,
       this.onCharacterCounter,
     )
@@ -73,10 +70,6 @@ class SegmentHeader extends React.PureComponent {
       this.hideHeader,
     )
     SegmentStore.removeListener(
-      SegmentConstants.TOGGLE_CHARACTER_COUNTER,
-      this.onToggleCharacterCounter,
-    )
-    SegmentStore.removeListener(
       SegmentConstants.CHARACTER_COUNTER,
       this.onCharacterCounter,
     )
@@ -85,12 +78,12 @@ class SegmentHeader extends React.PureComponent {
     })
   }
 
-  onToggleCharacterCounter = () => {
-    const isActiveCharactersCounter = !this.state.isActiveCharactersCounter
+  componentDidUpdate() {
     this.setState({
-      isActiveCharactersCounter,
+      isActiveCharactersCounter:
+        this.context.userInfo &&
+        this.context.userInfo.metadata.character_counter,
     })
-    SegmentUtils.setCharacterCounterOptionValue(isActiveCharactersCounter)
   }
 
   onCharacterCounter = (charactersCounter) => {
@@ -154,8 +147,8 @@ class SegmentHeader extends React.PureComponent {
               charactersCounter.counter > charactersCounter.limit
                 ? `segment-counter-limit-error`
                 : charactersCounter > charactersCounter.limit - 20
-                ? 'segment-counter-limit-warning'
-                : ''
+                  ? 'segment-counter-limit-warning'
+                  : ''
             }`}
           >
             <span>Character count: </span>
