@@ -501,90 +501,6 @@ button.ui-button::-moz-focus-inner {
   padding: 0;
 }
 
-/* reset extra padding in Firefox */
-/*!
- * jQuery UI Dialog 1.8.20
- *
- * Copyright 2012, AUTHORS.txt (http://jqueryui.com/about)
- * Dual licensed under the MIT or GPL Version 2 licenses.
- * http://jquery.org/license
- *
- * http://docs.jquery.com/UI/Dialog#theming
- */
-.ui-dialog {
-  position: absolute;
-  padding: 0.2em;
-  width: 300px;
-  overflow: hidden;
-}
-
-.ui-dialog .ui-dialog-titlebar {
-  padding: 0.4em 1em;
-  position: relative;
-}
-
-.ui-dialog .ui-dialog-title {
-  float: left;
-  margin: 0.1em 16px 0.1em 0;
-}
-
-.ui-dialog .ui-dialog-titlebar-close {
-  position: absolute;
-  right: 0.3em;
-  top: 50%;
-  width: 19px;
-  margin: -10px 0 0 0;
-  padding: 1px;
-  height: 18px;
-}
-
-.ui-dialog .ui-dialog-titlebar-close span {
-  display: block;
-  margin: 1px;
-}
-
-.ui-dialog .ui-dialog-titlebar-close:hover,
-.ui-dialog .ui-dialog-titlebar-close:focus {
-  padding: 0;
-}
-
-.ui-dialog .ui-dialog-content {
-  position: relative;
-  border: 0;
-  padding: 0.5em 1em;
-  background: none;
-  overflow: auto;
-  zoom: 1;
-}
-
-.ui-dialog .ui-dialog-buttonpane {
-  text-align: left;
-  border-width: 1px 0 0 0;
-  background-image: none;
-  margin: 0.5em 0 0 0;
-  padding: 0.3em 1em 0.5em 0.4em;
-}
-
-.ui-dialog .ui-dialog-buttonpane .ui-dialog-buttonset {
-  float: right;
-}
-
-.ui-dialog .ui-dialog-buttonpane button {
-  margin: 0.5em 0.4em 0.5em 0;
-  cursor: pointer;
-}
-
-.ui-dialog .ui-resizable-se {
-  width: 14px;
-  height: 14px;
-  right: 3px;
-  bottom: 3px;
-}
-
-.ui-draggable .ui-dialog-titlebar {
-  cursor: move;
-}
-
 /*!
  * jQuery UI Slider 1.8.20
  *
@@ -1009,80 +925,6 @@ button.ui-button::-moz-focus-inner {
 
 * html #gallery-loader {
   position: absolute;
-}
-
-.gallery-dialog .ui-dialog-content {
-  cursor: pointer;
-  text-align: center;
-}
-
-.gallery-dialog .ui-dialog-content:hover:before,
-.gallery-dialog .ui-dialog-content:hover:after {
-  content: '‹';
-  position: absolute;
-  top: 50%;
-  left: 25px;
-  width: 40px;
-  height: 40px;
-  margin-top: -20px;
-  font-size: 60px;
-  font-weight: 100;
-  line-height: 30px;
-  color: #ffffff;
-  text-align: center;
-  background: #222222;
-  border: 3px solid #ffffff;
-  -webkit-border-radius: 23px;
-  -moz-border-radius: 23px;
-  border-radius: 23px;
-  opacity: 0.5;
-  filter: alpha(opacity=50);
-  z-index: 1;
-}
-
-.gallery-dialog .ui-dialog-content:hover:after {
-  content: '›';
-  left: auto;
-  right: 25px;
-}
-
-.gallery-dialog-single .ui-dialog-content:hover:before,
-.gallery-dialog-single .ui-dialog-content:hover:after {
-  display: none;
-}
-
-.gallery-dialog .ui-dialog-content img {
-  border: 0;
-}
-
-.gallery-dialog-fullscreen {
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  -webkit-box-shadow: 0 0 20px #000;
-  -moz-box-shadow: 0 0 20px #000;
-  box-shadow: 0 0 20px #000;
-}
-
-.gallery-dialog-fullscreen .ui-dialog-titlebar {
-  display: none;
-}
-
-.gallery-dialog-fullscreen .ui-dialog-content {
-  padding: 0;
-  border: 0;
-  cursor: pointer;
-  text-align: center;
-}
-
-.gallery-dialog-fullscreen .ui-dialog-content img,
-.gallery-dialog-fullscreen .ui-dialog-content canvas {
-  float: left;
-  border: 0;
-}
-
-* html .gallery-dialog-fullscreen .ui-dialog-content img {
-  float: none;
 }
 
 .gallery-body-fullscreen .ui-widget-overlay {
@@ -2583,21 +2425,6 @@ ul.test li {
   background: yellow;
 }
 
-.fb-like.fb_iframe_widget {
-  float: left;
-  margin-top: -1px;
-}
-
-#authentication {
-  float: right;
-  margin-left: 50px;
-}
-
-/*#mt_engine
-	{
-	width: 240px;
-	}
-*/
 #create_private_tm_btn {
   background-image: none;
   width: 70px;

@@ -186,8 +186,7 @@ section mark.searchMarker {
   /*	background: #9ef5f5; */
 }
 
-section mark.searchMarker.currSearchItem,
-section.currSearchSegment mark.searchMarker {
+section mark.searchMarker.currSearchItem {
   background: #f7d315;
   /*	background: #00c1e6; */
 }
@@ -610,7 +609,6 @@ section.currSearchSegment mark.searchMarker {
 /* mbc extend iconmoon set with icons for matecat chat
 */
 icon-iconmoon:before,
-.tagLockCustomize,
 #logoutlink:before,
 .btn-confirm-small .text:before,
 .btn-orange-small .text:before,
@@ -625,7 +623,6 @@ icon-iconmoon:before,
 .popup .x-popup:before,
 .mgmt-panel .x-popup:before,
 .popup-tm .x-popup:before,
-.sub-editor .gl-search .set-glossary:before,
 td.actions a:before,
 a.archive-project:before,
 a.unarchive-project:before,
@@ -693,12 +690,6 @@ header .filter:before {
   font-size: 16px;
   padding: 3px 2px 1px 2px;
   display: block;
-}
-
-.sub-editor .gl-search .set-glossary:before {
-  content: '\f055';
-  transform: rotate(180deg);
-  display: inline-block;
 }
 
 .fileupload-buttonbar .fileinput-button:before,

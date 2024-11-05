@@ -170,7 +170,6 @@ class SegmentTarget extends React.Component {
         )
       }
 
-      // Todo: aggiungere la classe 'hasTagsAutofill' alla <section> del segmento permetteva al tasto di mostrarsi riga 3844 del file style.scss
       if (
         segment.missingTagsInTarget &&
         segment.missingTagsInTarget.length > 0 &&
