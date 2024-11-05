@@ -69,23 +69,10 @@ ul {
   float: right !important;
 }
 
-.iepopup.nobrowser {
-  width: 1200px;
-  margin: 0 auto;
-  overflow: hidden;
-  box-shadow: none;
-  border: none;
-}
-
 .iepopup .logoblack {
   background-size: 200px auto;
   width: 200px;
   height: 50px;
-}
-
-.iepopup.nobrowser ul li {
-  display: inline-block;
-  margin: 20px;
 }
 
 .iepopup {
@@ -124,13 +111,6 @@ ul {
   background-size: 130px 28px;
   clear: both;
   margin: 0 auto 10px auto;
-}
-
-.nobrowser #outer,
-.nobrowser header,
-.nobrowser footer,
-.nobrowser .wrapper {
-  display: none !important;
 }
 
 .iepopup p {

@@ -158,10 +158,6 @@
     overflow: hidden;
     text-overflow: ellipsis;
     padding-right: 10px !important;
-    span.item-key-id {
-      color: #757575;
-      clear: both;
-    }
     span {
       line-height: 17px;
     }
@@ -178,16 +174,6 @@
     overflow: hidden;
     text-overflow: ellipsis;
     font-size: 16px;
-    .item-key-id {
-      margin-top: 0px;
-      float: none;
-    }
-    .item-key-name {
-      color: initial;
-      margin-top: 0px;
-      margin-right: 5px;
-      float: none;
-    }
   }
   .divider {
     margin: 0 !important;
@@ -218,16 +204,6 @@
         display: block;
       }
     }
-  }
-  .item-key-id {
-    color: #757575;
-  }
-  .item-key-name {
-    color: initial;
-    max-width: 145px !important;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
   .text .multiple-tm {
     display: block;
@@ -297,10 +273,6 @@
       overflow: hidden;
       text-overflow: ellipsis;
       padding-right: 10px !important;
-      span.item-key-id {
-        color: #757575;
-        clear: both;
-      }
       span {
         line-height: 17px;
       }
@@ -316,16 +288,6 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      .item-key-id {
-        margin-top: 0px;
-        float: none;
-      }
-      .item-key-name {
-        color: initial;
-        margin-top: 0px;
-        margin-right: 5px;
-        float: none;
-      }
     }
     .divider {
       margin: 0 !important;
