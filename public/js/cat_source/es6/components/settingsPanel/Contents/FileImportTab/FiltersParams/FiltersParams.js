@@ -133,7 +133,10 @@ export const FiltersParams = () => {
               <p>
                 Set specific import preferences for JSON, XML, Word, Excel,
                 YAML, and PowerPoint files.{' '}
-                <a href="#" target="_blank">
+                <a
+                  href="https://guides.matecat.com/file-import#:~:text=and%20bullet%20points.-,Extraction%20parameters,-For%20some%20file"
+                  target="_blank"
+                >
                   More details
                 </a>
                 .
