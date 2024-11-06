@@ -118,7 +118,7 @@ class TranslationVersionsHandler implements VersionHandlerInterface {
             Translations_SegmentTranslationStruct $old_translation
     ) {
 
-        if ( Utils::stringsAreEqual( $new_translation->translation, $old_translation->translation ) ) {
+        if ( Utils::stringsAreEqual( $new_translation->translation, $old_translation->translation ?? '' ) ) {
             return false;
         }
 

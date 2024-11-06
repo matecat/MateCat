@@ -76,7 +76,7 @@ class PropagationAnalyser {
 
                     if ( false === \Utils::stringsAreEqual(
                             $parentSegmentTranslation->translation,
-                            $segmentTranslation->translation
+                            $segmentTranslation->translation ?? ''
                     ) ) {
                         $propagation->addPropagatedIdToUpdateVersion( $segmentTranslation->id_segment );
                     }
@@ -95,7 +95,7 @@ class PropagationAnalyser {
 
                     if ( false === \Utils::stringsAreEqual(
                             $parentSegmentTranslation->translation,
-                            $segmentTranslation->translation
+                            $segmentTranslation->translation ?? ''
                     ) ) {
                         $propagation->addPropagatedIdToUpdateVersion( $segmentTranslation->id_segment );
                     }

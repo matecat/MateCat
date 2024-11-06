@@ -268,17 +268,17 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
      * @param     $id
      * @param int $ttl
      *
-     * @return Projects_ProjectStruct
+     * @return ?Projects_ProjectStruct
      * @throws ReflectionException
      */
-    public static function findById( $id, int $ttl = 0 ): Projects_ProjectStruct {
+    public static function findById( $id, int $ttl = 0 ): ?Projects_ProjectStruct {
 
         $thisDao = new self();
         $conn    = Database::obtain()->getConnection();
         $stmt    = $conn->prepare( " SELECT * FROM projects WHERE id = :id " );
 
+        /** @var ?Projects_ProjectStruct $res */
         $res = $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Projects_ProjectStruct(), [ 'id' => $id ] )[ 0 ] ?? null;
-        /** @var Projects_ProjectStruct */
         return $res;
     }
 
