@@ -36,6 +36,7 @@ use NewController;
 use Predis\Connection\ConnectionException;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
+use RecursiveArrayObject;
 use ReflectionException;
 use Revise\FeedbackDAO;
 use RevisionFactory;
@@ -178,6 +179,11 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      * @throws Exception
      */
     public function postProjectCreate( $projectStructure ) {
+
+        if( $this instanceof ReviewExtended ){
+            return;
+        }
+
         $this->setQaModelFromJsonFile( $projectStructure );
         $this->createChunkReviewRecords( $projectStructure );
     }
@@ -456,13 +462,13 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      *
      * @return void
      * @throws ReflectionException
-     * @throws \Exceptions\ValidationError
      */
     private function setQaModelFromJsonFile( $projectStructure ) {
 
+        /** @var RecursiveArrayObject $model_json */
         $model_json = $projectStructure[ 'features' ][ 'review_extended' ][ '__meta' ][ 'qa_model' ];
 
-        $model_record = ModelDao::createModelFromJsonDefinition( $model_json );
+        $model_record = ModelDao::createModelFromJsonDefinition( $model_json->toArray() );
 
         $project = Projects_ProjectDao::findById(
                 $projectStructure[ 'id_project' ]
