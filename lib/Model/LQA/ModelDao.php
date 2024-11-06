@@ -2,6 +2,7 @@
 
 namespace LQA;
 
+use ArrayObject;
 use DataAccess_AbstractDao;
 use Database;
 use ReflectionException;
