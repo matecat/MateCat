@@ -22,6 +22,7 @@
     "classnames": "^2.2.6",
     "diff-match-patch": "^1.0.5",
     "draft-js": "^0.11.4",
+    "file-saver": "^2.0.5",
     "flux": "^4.0.1",
     "immutability-helper": "^3.1.1",
     "immutable": "^4.0.0-rc.12",
@@ -43,8 +44,7 @@
     "react-tagsinput": "^3.19.0",
     "react-transition-group": "^4.2.2",
     "react-virtual": "^2.10.4",
-    "sprintf-js": "^1.1.2",
-    "file-saver": "^2.0.5"
+    "sprintf-js": "^1.1.2"
   },
   "devDependencies": {
     "@babel/core": "7.25.2",
@@ -91,5 +91,5 @@
   "resolutions": {
     "wrap-ansi": "^7.0.0"
   },
-  "version": "2.22.49"
+  "version": "2.22.50"
 }

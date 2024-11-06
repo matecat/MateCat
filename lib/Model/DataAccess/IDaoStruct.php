@@ -16,6 +16,6 @@ interface DataAccess_IDaoStruct {
 
     public function count();
 
-    public function toArray( $mask = null );
+    public function toArray( array $mask = null ): array;
 
 }
