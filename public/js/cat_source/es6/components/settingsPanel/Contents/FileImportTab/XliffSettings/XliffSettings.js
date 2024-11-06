@@ -171,7 +171,10 @@ export const XliffSettings = () => {
               <p>
                 Customize how Matecat handles segments in XLIFF files based on
                 their states.{' '}
-                <a href="#" target="_blank">
+                <a
+                  href="https://guides.matecat.com/file-import#:~:text=Xliff%20import%20settings"
+                  target="_blank"
+                >
                   More details
                 </a>
                 .

@@ -95,7 +95,7 @@ const DEFAULT_CONTENTS = (isCattool = config.is_cattool) => {
             id: SETTINGS_PANEL_TABS.fileImport,
             label: 'File import',
             description:
-              'Set up your file import preferences for new projects.  <a href="#" target="_blank">More details</a>',
+              'Set up your file import preferences for new projects.  <a href="https://guides.matecat.com/file-import" target="_blank">More details</a>',
             component: <FileImportTab />,
           },
           {
@@ -108,8 +108,7 @@ const DEFAULT_CONTENTS = (isCattool = config.is_cattool) => {
           {
             id: SETTINGS_PANEL_TABS.other,
             label: 'Other',
-            description:
-              'Adjust general settings for project creation. <a href="#" target="_blank">More details</a>',
+            description: 'Adjust general settings for project creation.',
             component: <OtherTab />,
           },
         ]
@@ -120,7 +119,7 @@ const DEFAULT_CONTENTS = (isCattool = config.is_cattool) => {
             id: SETTINGS_PANEL_TABS.editorSettings,
             label: 'Editor settings',
             description:
-              'Customize the settings for Matecat\'s editor page to better suit your personal workflow and preferences. <a href="https://guides.matecat.com/" target="_blank">Learn more</a>',
+              'Customize the settings for Matecat\'s editor page to better suit your personal workflow and preferences. <a href="https://guides.matecat.com/editor-settings" target="_blank">Learn more</a>',
             component: <EditorSettingsTab />,
           },
         ]

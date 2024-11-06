@@ -13,7 +13,7 @@ const ACCORDION_GROUP = {
   yaml: 'YAML',
   msWord: 'MS Word',
   msExcel: 'MS Excel',
-  msPowerpoint: 'MS Powerpoint',
+  msPowerpoint: 'MS PowerPoint',
 }
 
 export const AccordionGroupFiltersParams = () => {

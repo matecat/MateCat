@@ -128,7 +128,7 @@ export const Json = () => {
           <h3>Escape forward slashes</h3>
           <p>
             Choose whether to escape forward slashes in the translated file
-            (i.e. \\/ in place of /).
+            (i.e. \/ in place of /).
           </p>
         </div>
         <Controller

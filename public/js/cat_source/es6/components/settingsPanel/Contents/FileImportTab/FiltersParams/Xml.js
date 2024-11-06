@@ -164,7 +164,7 @@ export const Xml = () => {
             Enter the attributes whose content should be extracted as
             translatable.
             <br />
-            If left empty, no attributesd will be extracted.
+            If left empty, no attributes will be extracted.
             <br />
             The structure of each elements inside the array should be as
             follows: elementname@attributename.
