@@ -685,7 +685,7 @@ class Utils {
      * @return null|string
      * @throws Exception
      */
-    public static function changeMemorySuggestionSource( array $match, string $job_tm_keys, int $uid ): string {
+    public static function changeMemorySuggestionSource( array $match, string $job_tm_keys, ?int $uid = null ): string {
         $sug_source = $match[ 'created_by' ];
         $key        = $match[ 'memory_key' ];
 

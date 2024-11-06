@@ -388,7 +388,7 @@ class setTranslationController extends ajaxController {
 
         // time_to_edit should be increased only if the translation was changed
         $new_translation->time_to_edit = 0;
-        if ( false === Utils::stringsAreEqual( $new_translation->translation, $old_translation->translation ) ) {
+        if ( false === Utils::stringsAreEqual( $new_translation->translation, $old_translation->translation ?? '' ) ) {
             $new_translation->time_to_edit = $this->time_to_edit;
         }
 
@@ -784,7 +784,7 @@ class setTranslationController extends ajaxController {
         //update total time to edit
         $tte = $old_translation[ 'time_to_edit' ];
         if ( !self::isRevision() ) {
-            if ( !Utils::stringsAreEqual( $new_translation[ 'translation' ], $old_translation[ 'translation' ] ) ) {
+            if ( !Utils::stringsAreEqual( $new_translation[ 'translation' ], $old_translation[ 'translation' ] ?? '' ) ) {
                 $tte += $new_translation[ 'time_to_edit' ];
             }
         }
