@@ -1428,7 +1428,9 @@ a.login-button.btn-confirm-medium.sing-in.disabled:hover {
   .buttons-popup-container {
     padding: 25px 0 30px;
     border-bottom: 1px solid #f2f4f7;
-
+    display: flex;
+    gap: 20px;
+    align-items: center;
     label {
       font-size: 18px;
       margin-right: 10px;
