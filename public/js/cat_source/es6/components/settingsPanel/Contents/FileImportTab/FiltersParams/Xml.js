@@ -135,7 +135,7 @@ export const Xml = () => {
             If the toggle is set to "Translatable", only the elements entered
             will be extracted as translatable.
             <br />
-            If the toggle is set to "Non-translatable", all the element in the
+            If the toggle is set to "Non-translatable", all the elements in the
             file <b>except</b> those entered will be extracted as translatable.
           </p>
         </div>
@@ -166,8 +166,8 @@ export const Xml = () => {
             <br />
             If left empty, no attributes will be extracted.
             <br />
-            The structure of each elements inside the array should be as
-            follows: elementname@attributename.
+            The structure of each element inside the array should be as follows:
+            elementname@attributename.
           </p>
         </div>
         <Controller

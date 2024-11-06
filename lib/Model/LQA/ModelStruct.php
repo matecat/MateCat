@@ -17,6 +17,7 @@ class ModelStruct extends DataAccess_AbstractDaoSilentStruct implements DataAcce
     public $hash;
 
     public $qa_model_template_id;
+    public $uid;
 
     /**
      * Returns the serialized representation of categires and subcategories.
@@ -102,6 +103,7 @@ class ModelStruct extends DataAccess_AbstractDaoSilentStruct implements DataAcce
         return [
                 'model' => [
                         "id"                => (int)$this->id,
+                        "uid"               => (int)$this->uid,
                         "template_model_id" => $this->qa_model_template_id ? (int)$this->qa_model_template_id : null,
                         "version"           => 1,
                         "label"             => $this->label,

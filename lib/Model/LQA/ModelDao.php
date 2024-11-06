@@ -2,7 +2,6 @@
 
 namespace LQA;
 
-use ArrayObject;
 use DataAccess_AbstractDao;
 use Database;
 use ReflectionException;
@@ -12,7 +11,8 @@ class ModelDao extends DataAccess_AbstractDao {
 
     protected static array $auto_increment_field = [ 'id' ];
 
-    protected static string $_sql_get_model_by_id = "SELECT * FROM qa_models WHERE id = :id LIMIT 1";
+    protected static string $_sql_get_model_by_id          = "SELECT * FROM qa_models WHERE id = :id LIMIT 1";
+    protected static string $_sql_get_model_by_id_and_user = "SELECT * FROM qa_models WHERE id = :id and uid = :uid LIMIT 1";
 
     protected function _buildResult( array $array_result ) {
     }
@@ -38,6 +38,27 @@ class ModelDao extends DataAccess_AbstractDao {
     }
 
     /**
+     * @param int       $id
+     * @param int       $uid
+     * @param float|int $ttl
+     *
+     * @return ModelStruct
+     * @throws ReflectionException
+     */
+    public static function findByIdAndUser( int $id, int $uid, int $ttl = 0 ): ?ModelStruct {
+
+        $thisDao = new self();
+        $conn    = Database::obtain()->getConnection();
+        $stmt    = $conn->prepare( self::$_sql_get_model_by_id_and_user );
+
+        /** @var ModelStruct $result */
+        $result = $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ModelStruct(), [ 'id' => $id, 'uid' => $uid ] );
+
+        return $result[ 0 ] ?? null;
+
+    }
+
+    /**
      * @param array $data
      *
      * @return ModelStruct
@@ -46,10 +67,11 @@ class ModelDao extends DataAccess_AbstractDao {
 
         $model_hash = static::_getModelHash( $data );
 
-        $sql = "INSERT INTO qa_models ( label, pass_type, pass_options, `hash`, `qa_model_template_id` ) " .
-                " VALUES ( :label, :pass_type, :pass_options, :hash, :qa_model_template_id ) ";
+        $sql = "INSERT INTO qa_models ( uid, label, pass_type, pass_options, `hash`, `qa_model_template_id` ) " .
+                " VALUES ( :uid, :label, :pass_type, :pass_options, :hash, :qa_model_template_id ) ";
 
         $struct = new ModelStruct( [
+                'uid'                  => $data[ 'uid' ],
                 'label'                => $data[ 'label' ] ?? null,
                 'pass_type'            => $data[ 'passfail' ][ 'type' ],
                 'pass_options'         => json_encode( $data[ 'passfail' ][ 'options' ] ),
@@ -61,7 +83,7 @@ class ModelDao extends DataAccess_AbstractDao {
 
         $stmt = $conn->prepare( $sql );
         $stmt->execute( $struct->toArray(
-                [ 'label', 'pass_type', 'pass_options', 'hash', 'qa_model_template_id' ]
+                [ 'uid', 'label', 'pass_type', 'pass_options', 'hash', 'qa_model_template_id' ]
         ) );
 
         $struct->id = $conn->lastInsertId();

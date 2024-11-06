@@ -1211,18 +1211,22 @@ class NewController extends ajaxController {
     private function __validateQaModel() {
         if ( !empty( $this->postInput[ 'id_qa_model' ] ) ) {
 
-            $qaModel = ModelDao::findById( $this->postInput[ 'id_qa_model' ] );
+            $qaModel = ModelDao::findByIdAndUser( $this->postInput[ 'id_qa_model' ], $this->getUser()->uid );
+
+            //XXX FALLBACK for models created before "required-login" feature (on these models there is no ownership check)
+            if ( empty( $qaModel ) ) {
+                $qaModel = ModelDao::findById( $this->postInput[ 'id_qa_model' ] );
+                $qaModel->uid = $this->getUser()->uid;
+            }
 
             // check if qa_model exists
-            if ( null === $qaModel ) {
+            if ( empty( $qaModel ) ) {
                 throw new Exception( 'This QA Model does not exists' );
             }
 
             // check featureSet
             $qaModelLabel    = strtolower( $qaModel->label );
-            $featureSetCodes = $this->getFeatureSet()->getCodes();
-
-            if ( $qaModelLabel !== 'default' and !in_array( $qaModelLabel, $featureSetCodes ) ) {
+            if ( $qaModelLabel !== 'default' and $qaModel->uid != $this->getUser()->uid ) {
                 throw new Exception( 'This QA Model does not belong to the authenticated user' );
             }
 

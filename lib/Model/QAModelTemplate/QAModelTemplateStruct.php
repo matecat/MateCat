@@ -133,6 +133,7 @@ class QAModelTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
 
         return [
                 'model' => [
+                        "uid"         => (int)$this->uid,
                         "id_template" => (int)$this->id,
                         "version"     => (int)$this->version,
                         "label"       => $this->label,
