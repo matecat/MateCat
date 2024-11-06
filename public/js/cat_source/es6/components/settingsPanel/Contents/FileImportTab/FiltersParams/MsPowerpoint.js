@@ -71,7 +71,7 @@ export const MsPowerpoint = () => {
         <div>
           <h3>Translate hidden slides</h3>
           <p>
-            Choose whether to translate text in hidden slides
+            Choose whether to translate text in hidden slides.
             <br />
             Mutually exclusive with "Translatable slides"
           </p>
