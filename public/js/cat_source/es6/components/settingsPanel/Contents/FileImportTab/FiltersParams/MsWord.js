@@ -49,7 +49,9 @@ export const MsWord = () => {
       <div className="filters-params-option">
         <div>
           <h3>Translate headers and footers</h3>
-          <p>Choose whether to translate the heades and footers of the file.</p>
+          <p>
+            Choose whether to translate the headers and footers of the file.
+          </p>
         </div>
         <Controller
           control={control}
