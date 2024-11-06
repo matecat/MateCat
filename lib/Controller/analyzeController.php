@@ -4,12 +4,6 @@ use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
 use Analysis\Health;
 use API\App\Json\Analysis\AnalysisProject;
-use ConnectedServices\Facebook\FacebookProvider;
-use ConnectedServices\Github\GithubProvider;
-use ConnectedServices\Google\GoogleProvider;
-use ConnectedServices\LinkedIn\LinkedInProvider;
-use ConnectedServices\Microsoft\MicrosoftProvider;
-use ConnectedServices\OauthClient;
 use Model\Analysis\Status;
 
 class analyzeController extends viewController {
@@ -82,6 +76,12 @@ class analyzeController extends viewController {
         $pass      = $postInput[ 'password' ];
 
         $this->project = Projects_ProjectDao::findById( $this->pid, 60 * 60 );
+
+        if ( empty( $this->project ) ) {
+            $this->project_not_found = true;
+            parent::makeTemplate( $this->analyze_html );
+            return;
+        }
 
         if ( !empty( $this->jid ) ) {
 

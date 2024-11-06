@@ -116,7 +116,7 @@ abstract class viewController extends controller {
     private function setInitialTemplateVars() {
 
         if ( is_null( $this->template ) ) {
-            throw new Exception( 'Tamplate is not defined' );
+            throw new Exception( 'Template is not defined' );
         }
 
         if ( $this->userIsLogged ) {
