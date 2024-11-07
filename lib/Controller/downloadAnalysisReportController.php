@@ -32,8 +32,18 @@ class downloadAnalysisReportController extends downloadController {
 
         $__postInput = filter_var_array( $_REQUEST, $filterArgs );
 
-        $this->id_project    = $__postInput[ 'id_project' ];
-        $this->password      = $__postInput[ 'password' ];
+        $this->id_project = $__postInput[ 'id_project' ];
+        $this->password   = $__postInput[ 'password' ];
+
+        if(empty($this->id_project)){
+            throw new InvalidArgumentException("Id project not provided");
+        }
+
+        $this->project = Projects_ProjectDao::findById($this->id_project);
+
+        if($this->project === null){
+            throw new InvalidArgumentException("Wrong Id project provided");
+        }
 
         $this->featureSet = new FeatureSet();
 
