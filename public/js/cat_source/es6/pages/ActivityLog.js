@@ -93,10 +93,10 @@ export const ActivityLog = () => {
         <ActivityLogTable />
       </div>
       <Footer />
-      <SseListener
+      {/* <SseListener
         isAuthenticated={isUserLogged}
         userId={isUserLogged ? userInfo.user.uid : null}
-      />
+      />*/}
     </ActivityLogContext.Provider>
   )
 }
