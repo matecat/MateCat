@@ -251,10 +251,10 @@ export const QualityReport = () => {
         </div>
       </div>
       {ReactDOM.createPortal(<CookieConsent />, cookieBannerMountPoint)}
-      <SseListener
+      {/* <SseListener
         isAuthenticated={isUserLogged}
         userId={isUserLogged ? userInfo.user.uid : null}
-      />
+      />*/}
     </>
   )
 }
