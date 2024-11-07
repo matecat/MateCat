@@ -44,6 +44,7 @@ import {
 } from '../components/modals/UnlockAllSegmentsModal'
 import {getTagProjection} from '../api/getTagProjection'
 import {setCurrentSegment} from '../api/setCurrentSegment'
+import CommonUtils from '../utils/commonUtils'
 
 const SegmentActions = {
   localStorageCommentsClosed:

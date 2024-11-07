@@ -1,7 +1,6 @@
 const SseChannel = require( 'sse-channel' );
 const http = require( 'http' );
 const stompit = require( 'stompit' );
-const qs = require( 'querystring' );
 const _ = require( 'lodash' );
 const winston = require( 'winston' );
 const path = require( 'path' );
@@ -62,7 +61,7 @@ const subscribeHeaders = {
 const browserChannel = new SseChannel( {
     retryTimeout: 250,
     historySize: 300,
-    pingInterval: 15000,
+    pingInterval: 1000,
     jsonEncode: true
 } );
 
@@ -72,28 +71,53 @@ const corsAllow = ( req, res ) => {
         if ( element === '*' || req.headers['origin'] && req.headers['origin'] === element ) {
             res.setHeader( 'Access-Control-Allow-Origin', element );
             res.setHeader( 'Access-Control-Allow-Methods', 'OPTIONS, GET' );
-            logger.silly( "Allowed domain " + req.headers['origin'] );
+            logger.debug( ["Allowed domain " + req.headers['origin']] );
             return true;
         } else if ( !req.headers['origin'] ) {
-            logger.silly( "Allowed Request from same origin " + req.headers['host'] );
+            logger.debug( ["Allowed Request from same origin " + req.headers['host']] );
             return true;
         }
     } );
 }
 
+const v8 = require( 'v8' );
+// enabling trace-gc
+v8.setFlagsFromString( '--trace-gc' );
+const {PerformanceObserver} = require( 'node:perf_hooks' );
+// Create a performance observer
+const obs = new PerformanceObserver( list => {
+    const entry = list.getEntries()[0];
+    /*
+    The entry is an instance of PerformanceEntry containing
+    metrics of a single garbage collection event.
+    For example:
+    PerformanceEntry {
+      name: 'gc',
+      entryType: 'gc',
+      startTime: 2820.567669,
+      duration: 1.315709,
+      kind: 1
+    }
+    */
+    logger.verbose( ['GC: ', entry] );
+} );
+
+obs.observe( {entryTypes: ['gc']} );
+setInterval( () => { logger.verbose( ['Memory: ', process.memoryUsage()] ); }, 5000 );
+
 //Event triggered when a message is sent to the client
 browserChannel.on( 'message', function ( message ) {
-    logger.silly( 'browserChannel message', message );
+    logger.silly( ['browserChannel message', message] );
 } );
 
 //Event triggered when a client disconnect
 browserChannel.on( 'disconnect', ( context, res ) => {
-    logger.debug( 'browserChannel disconnect', res._clientId );
+    logger.verbose( ['browserChannel disconnect', res._clientId] );
 } );
 
 //Event triggered when a client connect
 browserChannel.on( 'connect', ( context, req, res ) => {
-    // logger.debug('browserChannel connect ', res._clientId, res._matecatJobId);
+    // logger.verbose('browserChannel connect ', res._clientId, res._matecatJobId);
     //Send a message to the client to communicate the clientId
     browserChannel.send( {
         data: {
@@ -132,13 +156,13 @@ http.createServer( ( req, res ) => {
     }
 
 } ).listen( config.server.port, config.server.address, () => {
-    logger.info( 'Server version ' + SERVER_VERSION )
-    logger.info( 'Listening on //' + config.server.address + ':' + config.server.port + '/' )
+    logger.info( ['Server version ' + SERVER_VERSION] )
+    logger.info( ['Listening on //' + config.server.address + ':' + config.server.port + '/'] )
 } );
 
 ['SIGINT', 'SIGTERM'].forEach(
     signal => process.on( signal, ( sig ) => {
-        logger.info( sig + ' received...' );
+        logger.info( [sig + ' received...'] );
         notifyUpgrade();
     } )
 );
@@ -245,7 +269,7 @@ const stompMessageReceived = ( body ) => {
         notifyUpgrade( false );
         return;
     } else if ( browserChannel.connections.length !== 0 ) {
-        dest = _.filter( browserChannel.connections, ( connection ) => {
+        dest = browserChannel.connections.filter( ( connection ) => {
 
             if ( typeof connection._clientId === 'undefined' ) {
                 logger.warn( ["No valid _clientId found in connection list"] ); // invalid client registered or bug ?!?
@@ -264,16 +288,16 @@ const stompMessageReceived = ( body ) => {
 
             return checkCandidate( message._type, connection, message );
         } );
-    } else if( browserChannel.connections.length === 0 ) {
+    } else if ( browserChannel.connections.length === 0 ) {
         logger.warn( ["Got a message but there are no registered clients on this instance."] );
         return;
     }
 
     if ( dest.length === 0 ) {
-        logger.verbose( ["Skip message, no available recipient found ", message.data.id_client] );
+        logger.debug( ["Skip message, no available recipient found ", message.data.id_client] );
         return;
     } else {
-        logger.verbose( ['Candidate found for ' + message._type, dest[0]._clientId] );
+        logger.debug( ['Candidate found for ' + message._type, dest[0]._clientId] );
     }
 
     message.data.payload._type = message._type;
@@ -304,7 +328,7 @@ const startStompConnection = () => {
 
         client.subscribe( subscribeHeaders, ( error, message ) => {
 
-            // logger.debug( '** event received in client subscription' );
+            // logger.verbose( '** event received in client subscription' );
 
             if ( error ) {
                 logger.error( '!! subscribe error ' + error.message );

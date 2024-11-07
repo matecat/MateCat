@@ -81,26 +81,22 @@ const SegmentUtils = {
       segmentsUnlocked.join(),
     )
   },
-    removeUnlockedSegment(sid) {
-        let segmentsUnlocked = localStorage.getItem(
-            this.localStorageUnlockedSegments,
-        )
-        if (segmentsUnlocked) {
-            segmentsUnlocked = segmentsUnlocked.split(',')
-            const index = segmentsUnlocked.indexOf(sid)
-            if (index > -1) {
-                segmentsUnlocked.splice(index, 1)
-                localStorage.setItem(
-                    this.localStorageUnlockedSegments,
-                    segmentsUnlocked.join(),
-                )
-            }
-        }
+  removeUnlockedSegment(sid) {
+    let segmentsUnlocked = localStorage.getItem(
+      this.localStorageUnlockedSegments,
+    )
+    if (segmentsUnlocked) {
+      segmentsUnlocked = segmentsUnlocked.split(',')
+      const index = segmentsUnlocked.indexOf(sid)
+      if (index > -1) {
+        segmentsUnlocked.splice(index, 1)
         localStorage.setItem(
-            this.localStorageUnlockedSegments,
-            segmentsUnlocked.join(),
+          this.localStorageUnlockedSegments,
+          segmentsUnlocked.join(),
         )
-    },
+      }
+    }
+  },
   /**
    * Selected keys glossary job local storage
    */
