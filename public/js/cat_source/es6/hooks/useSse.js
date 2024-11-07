@@ -32,7 +32,7 @@ const useSse = (url, options, isAuthenticated, eventHandlers = {}) => {
       setConnectionState(ConnectionStates.OPEN) // Update state to OPEN when connection is established
       setConnectionError(null) // Reset the error on successful connection
       if (retryingInterval.current) {
-        clearInterval(retryingInterval.current) // Clear the timeout if it was active
+        clearTimeout(retryingInterval.current) // Clear the timeout if it was active
         retryingInterval.current = 0
         eventHandlers['reconnected'] ? eventHandlers['reconnected']() : null
       }
@@ -45,14 +45,13 @@ const useSse = (url, options, isAuthenticated, eventHandlers = {}) => {
         setConnectionError(error) // Store the error
         console.error('SSE connection error:', error)
 
-        if (!retryingInterval.current) {
-          eventHandlers['disconnected'] ? eventHandlers['disconnected']() : null
-          // Attempt to reconnect every 5 seconds
-          retryingInterval.current = setInterval(() => {
-            console.log('Reconnecting...')
-            connect() // Reconnect
-          }, 5000)
-        }
+        eventHandlers['disconnected'] ? eventHandlers['disconnected']() : null
+        // Attempt to reconnect every 5 seconds
+        clearTimeout(retryingInterval.current)
+        retryingInterval.current = setTimeout(() => {
+          console.log('Reconnecting...')
+          connect() // Reconnect
+        }, 5000)
       }
     }
 
@@ -99,7 +98,7 @@ const useSse = (url, options, isAuthenticated, eventHandlers = {}) => {
         eventSource.close() // Close the EventSource
       }
       if (retryingInterval.current) {
-        clearInterval(retryingInterval.current) // Clear the timeout
+        clearTimeout(retryingInterval.current) // Clear the timeout
       }
     }
   }, [isAuthenticated]) // Reconnect if authentication state changes
