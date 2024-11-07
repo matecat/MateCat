@@ -1,7 +1,6 @@
 const SseChannel = require( 'sse-channel' );
 const http = require( 'http' );
 const stompit = require( 'stompit' );
-const _ = require( 'lodash' );
 const winston = require( 'winston' );
 const path = require( 'path' );
 const ini = require( 'node-ini' );
@@ -61,7 +60,7 @@ const subscribeHeaders = {
 const browserChannel = new SseChannel( {
     retryTimeout: 250,
     historySize: 300,
-    pingInterval: 1000,
+    pingInterval: 10000,
     jsonEncode: true
 } );
 
@@ -294,7 +293,7 @@ const stompMessageReceived = ( body ) => {
     }
 
     if ( dest.length === 0 ) {
-        logger.debug( ["Skip message, no available recipient found ", message.data.id_client] );
+        logger.silly( ["Skip message, no available recipient found ", message.data.id_client] );
         return;
     } else {
         logger.debug( ['Candidate found for ' + message._type, dest[0]._clientId] );

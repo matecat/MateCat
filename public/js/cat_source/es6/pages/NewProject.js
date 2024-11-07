@@ -1013,10 +1013,10 @@ const NewProject = () => {
       )}
       <HomePageSection />
       <Footer />
-      {/*<SseListener*/}
-      {/*  isAuthenticated={isUserLogged}*/}
-      {/*  userId={isUserLogged ? userInfo.user.uid : null}*/}
-      {/*/>*/}
+      <SseListener
+        isAuthenticated={isUserLogged}
+        userId={isUserLogged ? userInfo.user.uid : null}
+      />
     </CreateProjectContext.Provider>
   ) : (
     <div>
