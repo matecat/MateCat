@@ -481,12 +481,12 @@ class Dashboard extends React.Component {
           </div>
         )}
         {ReactDOM.createPortal(<CookieConsent />, cookieBannerMountPoint)}
-        {/*<SseListener
+        <SseListener
           isAuthenticated={this.context.isUserLogged}
           userId={
             this.context.isUserLogged ? this.context.userInfo.user.uid : null
           }
-        />*/}
+        />
       </React.Fragment>
     )
   }
