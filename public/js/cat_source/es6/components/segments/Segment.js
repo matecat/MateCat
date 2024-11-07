@@ -25,8 +25,11 @@ import CatToolStore from '../../stores/CatToolStore'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
 import CommentsStore from '../../stores/CommentsStore'
 import {SEGMENTS_STATUS} from '../../constants/Constants'
+import {ApplicationWrapperContext} from '../common/ApplicationWrapper'
 
 class Segment extends React.Component {
+  static contextType = ApplicationWrapperContext
+
   constructor(props) {
     super(props)
 
@@ -45,10 +48,10 @@ class Segment extends React.Component {
     this.clientReconnection = this.clientReconnection.bind(this)
 
     let readonly = SegmentUtils.isReadonlySegment(this.props.segment)
-    this.secondPassLocked =
-      this.props.segment.status?.toUpperCase() === SEGMENTS_STATUS.APPROVED2 &&
-      this.props.segment.revision_number === 2 &&
-      config.revisionNumber !== 2
+    this.secondPassLocked = SegmentUtils.isSecondPassLockedSegment(
+      this.props.segment,
+    )
+
     this.state = {
       segment_classes: [],
       autopropagated: this.props.segment.autopropagated_from != 0,
@@ -110,7 +113,7 @@ class Segment extends React.Component {
       setTimeout(() => {
         const segmentId = this.props.segment.original_sid
         //Segment Filter
-        if (SegmentFilterUtils.enabled() && SegmentFilterUtils.filtering()) {
+        if (SegmentFilterUtils.enabled()) {
           SegmentFilterUtils.setStoredState({
             lastSegmentId: segmentId,
           })
@@ -405,8 +408,7 @@ class Segment extends React.Component {
     event.stopPropagation()
     if (
       !this.props.segment.unlocked &&
-      config.revisionNumber !== 2 &&
-      this.props.segment.revision_number === 2
+      SegmentUtils.isSecondPassLockedSegment(this.props.segment)
     ) {
       var props = {
         text: 'You are about to edit a segment that has been approved in the 2nd pass review. The project owner and 2nd pass reviser will be notified.',
@@ -724,6 +726,7 @@ class Segment extends React.Component {
         clientConnected: this.props.clientConnected,
         clientId: this.props.clientId,
         multiMatchLangs,
+        userInfo: this.context.userInfo,
       }
     }
 

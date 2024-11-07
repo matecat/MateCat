@@ -10,7 +10,7 @@
 namespace Contribution;
 
 
-use Chunks_ChunkStruct;
+use Jobs_JobStruct;
 use DataAccess\ShapelessConcreteStruct;
 use DataAccess_IDaoStruct;
 use Projects_ProjectStruct;
@@ -75,7 +75,7 @@ class ContributionRequestStruct extends ShapelessConcreteStruct implements DataA
 
     # Private members
     /**
-     * @var \Jobs_JobStruct|\Chunks_ChunkStruct
+     * @var \Jobs_JobStruct|\Jobs_JobStruct
      */
     private $__jobStruct = null;
 
@@ -100,11 +100,11 @@ class ContributionRequestStruct extends ShapelessConcreteStruct implements DataA
     private $__mt_engine = null;
 
     /**
-     * @return Chunks_ChunkStruct|\Jobs_JobStruct
+     * @return Jobs_JobStruct|\Jobs_JobStruct
      */
     public function getJobStruct(){
         if( $this->__jobStruct == null ){
-            $this->__jobStruct = new Chunks_ChunkStruct( (array)$this->jobStruct );
+            $this->__jobStruct = new Jobs_JobStruct( (array)$this->jobStruct );
         }
         return $this->__jobStruct;
     }

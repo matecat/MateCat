@@ -1,8 +1,7 @@
-import {isNull} from 'lodash'
-
 import CommonUtils from './commonUtils'
 import SegmentStore from '../stores/SegmentStore'
 import DraftMatecatUtils from '../components/segments/utils/DraftMatecatUtils'
+import {SEGMENTS_STATUS} from '../constants/Constants'
 
 const SegmentUtils = {
   /**
@@ -11,6 +10,8 @@ const SegmentUtils = {
    */
   tpCanActivate: undefined,
   TagProjectionCanActivate: undefined,
+  localStorageUnlockedSegments: 'unlocked-segments-' + config.id_job,
+
   /**
    * Tag Projection: check if is enable the Tag Projection
    */
@@ -45,42 +46,56 @@ const SegmentUtils = {
   isIceSegment: function (segment) {
     return segment.ice_locked === '1'
   },
+  isSecondPassLockedSegment: function (segment) {
+    return (
+      segment.status?.toUpperCase() === SEGMENTS_STATUS.APPROVED2 &&
+      segment.revision_number === 2 &&
+      config.revisionNumber !== 2
+    )
+  },
   isUnlockedSegment: function (segment) {
-    return !isNull(CommonUtils.getFromStorage('unlocked-' + segment.sid))
-  },
-
-  /**
-   * Characters counter local storage
-   */
-  isCharacterCounterEnable: () =>
-    !!JSON.parse(window.localStorage.getItem('characterCounter'))?.find(
-      (item) => Object.keys(item)[0] === config.id_job,
-    ),
-  setCharacterCounterOptionValue: (isActive) => {
-    const MAX_ITEMS = 2000
-
-    const cachedItems =
-      JSON.parse(window.localStorage.getItem('characterCounter')) ?? []
-    if (cachedItems.length > MAX_ITEMS) cachedItems.shift()
-    const prevValue = cachedItems.filter(
-      (item) => Object.keys(item)[0] !== config.id_job,
+    // return !isNull(CommonUtils.getFromStorage('unlocked-' + segment.sid))
+    if (localStorage.getItem(this.localStorageUnlockedAllSegments)) return true
+    let segmentsUnlocked = localStorage.getItem(
+      this.localStorageUnlockedSegments,
     )
-
-    window.localStorage.setItem(
-      'characterCounter',
-      JSON.stringify([
-        ...prevValue,
-        ...(isActive ? [{[config.id_job]: true}] : []),
-      ]),
+    let index = -1
+    if (segmentsUnlocked) {
+      segmentsUnlocked = segmentsUnlocked.split(',')
+      index = segmentsUnlocked.indexOf(segment.sid)
+    }
+    return index !== -1
+  },
+  addUnlockedSegment: function (sid) {
+    let segmentsUnlocked = localStorage.getItem(
+      this.localStorageUnlockedSegments,
+    )
+    if (segmentsUnlocked) {
+      segmentsUnlocked = segmentsUnlocked.split(',')
+      if (segmentsUnlocked.indexOf(sid) === -1) segmentsUnlocked.push(sid)
+    } else {
+      segmentsUnlocked = [sid]
+    }
+    localStorage.setItem(
+      this.localStorageUnlockedSegments,
+      segmentsUnlocked.join(),
     )
   },
-  /**
-   * AI assistant
-   */
-  isAiAssistantAuto: () =>
-    JSON.parse(window.localStorage.getItem('aiAssistant')) == true,
-  setAiAssistantOptionValue: (isActive) => {
-    window.localStorage.setItem('aiAssistant', isActive)
+  removeUnlockedSegment(sid) {
+    let segmentsUnlocked = localStorage.getItem(
+      this.localStorageUnlockedSegments,
+    )
+    if (segmentsUnlocked) {
+      segmentsUnlocked = segmentsUnlocked.split(',')
+      const index = segmentsUnlocked.indexOf(sid)
+      if (index > -1) {
+        segmentsUnlocked.splice(index, 1)
+        localStorage.setItem(
+          this.localStorageUnlockedSegments,
+          segmentsUnlocked.join(),
+        )
+      }
+    }
   },
   /**
    * Selected keys glossary job local storage
@@ -119,15 +134,6 @@ const SegmentUtils = {
       segment.context_groups?.context_json ||
       segment.metadata?.length > 0
     )
-  },
-  /**
-   * Check Multi match languages
-   */
-  checkCrossLanguageSettings: function () {
-    const settings = localStorage.getItem('multiMatchLangs')
-    if (settings && Object.keys(JSON.parse(settings)).length)
-      return JSON.parse(settings)
-    return undefined
   },
   /**
    * Retrieve the file id of a segment

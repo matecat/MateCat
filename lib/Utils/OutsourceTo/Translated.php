@@ -1,5 +1,7 @@
 <?php
 
+use Langs\LanguageDomains;
+
 /**
  * Concrete Class to negotiate a Quote/Login/Review/Confirm communication
  *
@@ -450,7 +452,7 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
     private function __prepareQuotedJobCart( $jpid, $volAnalysis, $subject, $apiCallResult ) {
         // $jpid is always in the form "JOBID-JOBPASSWORD-outsourced". Get job id and password from it
         [ $jid, $jpsw, ] = explode( "-", $jpid );
-        $subject_handler = Langs_LanguageDomains::getInstance();
+        $subject_handler = LanguageDomains::getInstance();
         $subjectsHashMap = $subject_handler->getEnabledHashMap();
 
         $langPairs = $this->getLangPairs( $jid, $jpsw, $volAnalysis );

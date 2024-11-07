@@ -2,9 +2,8 @@
 
 namespace Filters;
 
-use finfo;
 use INIT;
-use Langs_Languages;
+use Langs\Languages;
 use MimeTypes\MimeTypes;
 
 /**
@@ -62,7 +61,7 @@ class OCRCheck {
             return false;
         }
 
-        $languages = Langs_Languages::getInstance();
+        $languages = Languages::getInstance();
 
         if ( array_search( $this->source_lang, $languages::getLanguagesWithOcrSupported() ) === false ) {
 
@@ -87,7 +86,7 @@ class OCRCheck {
             return false;
         }
 
-        $languages = Langs_Languages::getInstance();
+        $languages = Languages::getInstance();
 
         if ( array_search( $this->source_lang, $languages::getLanguagesWithOcrNotSupported() ) !== false ) {
 

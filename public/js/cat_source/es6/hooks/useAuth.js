@@ -7,6 +7,7 @@ import CommonUtils from '../utils/commonUtils'
 import commonUtils from '../utils/commonUtils'
 import {isEqual} from 'lodash'
 import {logoutUser} from '../api/logoutUser'
+import {updateUserMetadata} from '../api/updateUserMetadata'
 
 const USER_INFO_SCHEMA = {
   user: {
@@ -146,6 +147,23 @@ function useAuth() {
     })
   }
 
+  const setUserMetadataKey = useCallback(
+    async (key, value) =>
+      new Promise((resolve, reject) => {
+        updateUserMetadata(key, value)
+          .then((data) => {
+            setUserInfo((prevState) => ({
+              ...prevState,
+              metadata: {...prevState.metadata, [key]: value},
+            }))
+
+            resolve(data)
+          })
+          .catch(() => reject())
+      }),
+    [setUserInfo],
+  )
+
   useEffect(() => {
     checkUserLogin.current()
   }, [])
@@ -243,6 +261,7 @@ function useAuth() {
     setUserInfo,
     logout,
     forceLogout,
+    setUserMetadataKey,
   }
 }
 

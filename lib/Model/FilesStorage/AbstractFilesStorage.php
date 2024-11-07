@@ -27,6 +27,7 @@ use ReflectionException;
 abstract class AbstractFilesStorage implements IFilesStorage {
 
     const ORIGINAL_ZIP_PLACEHOLDER = "__##originalZip##";
+    const OBJECTS_SAFE_DELIMITER = '__';
 
     protected $filesDir;
     protected $cacheDir;
@@ -158,14 +159,26 @@ abstract class AbstractFilesStorage implements IFilesStorage {
     }
 
     /**
+     * // XXX use constructor parameters to define the cache dir and remove the condition
+     * @return string
+     */
+    public static function getStorageCachePath(): string {
+        if( AbstractFilesStorage::isOnS3() ){
+            return S3FilesStorage::CACHE_PACKAGE_FOLDER;
+        }
+
+        return INIT::$CACHE_REPOSITORY;
+    }
+
+    /**
      * Delete a hash from upload directory
      *
      * @param $uploadDirPath
      * @param $linkFile
      */
     public function deleteHashFromUploadDir( $uploadDirPath, $linkFile ) {
-        [ $shasum, ] = explode( "|", $linkFile );
-        [ $shasum, ] = explode( "_", $shasum ); // remove the segmentation rule from hash to clean all reverse index maps
+        [ $shaSum, ] = explode( "|", $linkFile );
+        [ $shaSum, ] = explode( "_", $shaSum ); // remove the segmentation rule from hash to clean all reverse index maps
 
         $iterator = new DirectoryIterator( $uploadDirPath );
 
@@ -177,28 +190,13 @@ abstract class AbstractFilesStorage implements IFilesStorage {
             // remove only the wrong languages, the same code|language must be
             // retained because of the file name append
             if ( $fileInfo->getFilename() != $linkFile &&
-                    stripos( $fileInfo->getFilename(), $shasum ) !== false ) {
+                    stripos( $fileInfo->getFilename(), $shaSum ) !== false ) {
 
                 unlink( $fileInfo->getPathname() );
                 Log::doJsonLog( "Deleted Hash " . $fileInfo->getPathname() );
 
             }
         }
-    }
-
-    /**
-     * @param string $haystack
-     * @param string $needle
-     *
-     * @return bool
-     */
-    public static function fileEndsWith( $haystack, $needle ) {
-        $length = strlen( $needle );
-        if ( $length == 0 ) {
-            return true;
-        }
-
-        return ( substr( $haystack, -$length ) === $needle );
     }
 
     /**
@@ -241,28 +239,27 @@ abstract class AbstractFilesStorage implements IFilesStorage {
      *
      * @return int
      */
-    public function linkSessionToCacheForAlreadyConvertedFiles( $hash, $lang, $uid, $realFileName ) {
+    public function linkSessionToCacheForAlreadyConvertedFiles( $hash, $uid, $realFileName ) {
         //get upload dir
         $dir = INIT::$QUEUE_PROJECT_REPOSITORY . DIRECTORY_SEPARATOR . $uid;
 
         //create a file in it, which is called as the hash that indicates the location of the cache for storage
-        return $this->_linkToCache( $dir, $hash, $lang, $realFileName );
+        return $this->_linkToCache( $dir, $hash, $realFileName );
     }
 
     /**
      * @param $hash
-     * @param $lang
      * @param $uid
      * @param $realFileName
      *
      * @return int
      */
-    public function linkSessionToCacheForOriginalFiles( $hash, $lang, $uid, $realFileName ) {
+    public function linkSessionToCacheForOriginalFiles( $hash, $uid, $realFileName ): int {
         //get upload dir
         $dir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uid;
 
         //create a file in it, which is called as the hash that indicates the location of the cache for storage
-        return $this->_linkToCache( $dir, $hash, $lang, $realFileName );
+        return $this->_linkToCache( $dir, $hash, $realFileName );
     }
 
     /**
@@ -271,13 +268,12 @@ abstract class AbstractFilesStorage implements IFilesStorage {
      *
      * @param $dir
      * @param $hash
-     * @param $lang
      * @param $realFileName
      *
      * @return int
      */
-    protected function _linkToCache( $dir, $hash, $lang, $realFileName ) {
-        return file_put_contents( $dir . DIRECTORY_SEPARATOR . $hash . "|" . $lang, $realFileName . "\n", FILE_APPEND | LOCK_EX );
+    protected function _linkToCache( $dir, $hash, $realFileName ): int {
+        return file_put_contents( $dir . DIRECTORY_SEPARATOR . $hash, $realFileName . "\n", FILE_APPEND | LOCK_EX );
     }
 
     /**

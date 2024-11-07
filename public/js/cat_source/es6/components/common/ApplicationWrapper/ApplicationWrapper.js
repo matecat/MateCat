@@ -45,6 +45,7 @@ export const ApplicationWrapper = ({children}) => {
     setUserInfo,
     logout,
     forceLogout,
+    setUserMetadataKey,
   } = useAuth()
 
   const [forceReload, setForceReload] = useState(false)
@@ -96,12 +97,12 @@ export const ApplicationWrapper = ({children}) => {
           text: 'You are now logged in and ready to use Matecat.',
         })
         //After confirm email or google register
-        CommonUtils.dispatchAnalyticsEvents({
-          event: !userInfo.user.has_password
-            ? 'new_signup_google'
-            : 'new_signup_email',
-          userId: userInfo.user.uid,
-        })
+        // CommonUtils.dispatchAnalyticsEvents({
+        //   event: !userInfo.user.has_password
+        //     ? 'new_signup_google'
+        //     : 'new_signup_email',
+        //   userId: userInfo.user.uid,
+        // })
 
         break
       case 'login':
@@ -139,6 +140,7 @@ export const ApplicationWrapper = ({children}) => {
         setUserInfo,
         logout,
         forceLogout,
+        setUserMetadataKey,
       }}
     >
       {userDisconnected && (

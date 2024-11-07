@@ -2,7 +2,7 @@
 
 namespace Features\TranslationVersions\Handlers;
 
-use Chunks_ChunkStruct;
+use Jobs_JobStruct;
 use Constants_TranslationStatus;
 use Exception;
 use Exceptions\ControllerReturnException;
@@ -37,7 +37,7 @@ class TranslationVersionsHandler implements VersionHandlerInterface {
     private $id_job;
 
     /**
-     * @var Chunks_ChunkStruct
+     * @var Jobs_JobStruct
      */
     private $chunkStruct;
 
@@ -54,12 +54,12 @@ class TranslationVersionsHandler implements VersionHandlerInterface {
     /**
      * TranslationVersionsHandler constructor.
      *
-     * @param Chunks_ChunkStruct     $chunkStruct
+     * @param Jobs_JobStruct     $chunkStruct
      * @param                        $id_segment
      * @param Users_UserStruct       $userStruct
      * @param Projects_ProjectStruct $projectStruct
      */
-    public function __construct( Chunks_ChunkStruct $chunkStruct, $id_segment, Users_UserStruct $userStruct, Projects_ProjectStruct $projectStruct ) {
+    public function __construct( Jobs_JobStruct $chunkStruct, $id_segment, Users_UserStruct $userStruct, Projects_ProjectStruct $projectStruct ) {
 
         $this->chunkStruct = $chunkStruct;
         $this->id_job      = $chunkStruct->id;
@@ -118,7 +118,7 @@ class TranslationVersionsHandler implements VersionHandlerInterface {
             Translations_SegmentTranslationStruct $old_translation
     ) {
 
-        if ( Utils::stringsAreEqual( $new_translation->translation, $old_translation->translation ) ) {
+        if ( Utils::stringsAreEqual( $new_translation->translation, $old_translation->translation ?? '' ) ) {
             return false;
         }
 
@@ -180,7 +180,7 @@ class TranslationVersionsHandler implements VersionHandlerInterface {
 
         $source_page_code = $params[ 'source_page_code' ];
 
-        /** @var Chunks_ChunkStruct $chunk */
+        /** @var Jobs_JobStruct $chunk */
         $chunk = $params[ 'chunk' ];
 
         /** @var FeatureSet $features */

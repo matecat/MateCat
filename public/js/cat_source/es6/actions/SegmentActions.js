@@ -8,7 +8,6 @@ import CatToolConstants from '../constants/CatToolConstants'
 import SegmentStore from '../stores/SegmentStore'
 import TranslationMatches from '../components/segments/utils/translationMatches'
 import OfflineUtils from '../utils/offlineUtils'
-import CommonUtils from '../utils/commonUtils'
 import SegmentUtils from '../utils/segmentUtils'
 import CopySourceModal, {
   COPY_SOURCE_COOKIE,
@@ -39,8 +38,13 @@ import {getSegmentsIssues} from '../api/getSegmentsIssues'
 import {sendSegmentVersionIssue} from '../api/sendSegmentVersionIssue'
 import {getSegmentVersionsIssues} from '../api/getSegmentVersionsIssues'
 import {sendSegmentVersionIssueComment} from '../api/sendSegmentVersionIssueComment'
+import {
+  HIDE_UNLOCK_ALL_SEGMENTS_MODAL_STORAGE,
+  UnlockAllSegmentsModal,
+} from '../components/modals/UnlockAllSegmentsModal'
 import {getTagProjection} from '../api/getTagProjection'
 import {setCurrentSegment} from '../api/setCurrentSegment'
+import CommonUtils from '../utils/commonUtils'
 
 const SegmentActions = {
   localStorageCommentsClosed:
@@ -304,7 +308,7 @@ const SegmentActions = {
 
     // Lock the segment if it's approved in a second pass but was previously approved in first revision
     if (config.revisionNumber > 1) {
-      CommonUtils.removeFromStorage('unlocked-' + sid)
+      SegmentUtils.removeUnlockedSegment(sid)
     }
   },
   openNextApproved: function (sid) {
@@ -1419,14 +1423,30 @@ const SegmentActions = {
     })
 
     if (!unlocked) {
-      //TODO: move this to SegmentActions
-      CommonUtils.removeFromStorage('unlocked-' + segment.sid)
+      SegmentUtils.removeUnlockedSegment(segment.sid)
       if (segment.inBulk) {
         this.toggleSegmentOnBulk(segment.sid, fid)
       }
     } else {
-      CommonUtils.addInStorage('unlocked-' + segment.sid, true)
+      SegmentUtils.addUnlockedSegment(segment.sid)
+      SegmentActions.checkUnlockAllSegmentsModal(segment)
       SegmentActions.openSegment(segment.sid)
+    }
+  },
+
+  checkUnlockAllSegmentsModal(segment) {
+    if (!SegmentUtils.isSecondPassLockedSegment(segment)) {
+      SegmentStore.consecutiveUnlockSegments.push(segment.sid)
+      if (
+        SegmentStore.consecutiveUnlockSegments.length >= 3 &&
+        !localStorage.getItem(HIDE_UNLOCK_ALL_SEGMENTS_MODAL_STORAGE)
+      ) {
+        ModalsActions.showModalComponent(
+          UnlockAllSegmentsModal,
+          {},
+          'Unlock all ICE segments',
+        )
+      }
     }
   },
 
@@ -1436,7 +1456,7 @@ const SegmentActions = {
       segments,
     })
     segments.forEach((segmentSid) => {
-      CommonUtils.addInStorage('unlocked-' + segmentSid, true)
+      SegmentUtils.addUnlockedSegment(segmentSid)
     })
   },
 
@@ -1578,11 +1598,6 @@ const SegmentActions = {
       tagPlaceholder,
       entityKey,
       isTarget,
-    })
-  },
-  toggleCharacterCounter: () => {
-    AppDispatcher.dispatch({
-      actionType: SegmentConstants.TOGGLE_CHARACTER_COUNTER,
     })
   },
   hideAiAssistant: () => {

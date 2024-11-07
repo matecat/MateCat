@@ -1,9 +1,17 @@
-import React, {useState, useRef, useEffect, useCallback} from 'react'
+import React, {
+  useState,
+  useRef,
+  useEffect,
+  useCallback,
+  useLayoutEffect,
+} from 'react'
 import PropTypes from 'prop-types'
 
 import {Dropdown} from './Dropdown'
 import TEXT_UTILS from '../../utils/textUtils'
 import ChevronDown from '../../../../../img/icons/ChevronDown'
+import Tooltip from './Tooltip'
+import usePortal from '../../hooks/usePortal'
 
 const mergeClassNames = (...args) => {
   return (
@@ -45,16 +53,22 @@ export const Select = ({
   resetSelectedOptions = () => {},
   checkSpaceToReverse = true,
   maxHeightDroplist = 128,
+  isPortalDropdown,
+  dropdownClassName,
   children,
 }) => {
   const dropDownRef = useRef()
   const wrapperRef = useRef()
+  const wrapperDropDownRef = useRef()
   const selectedItemRef = useRef()
 
-  const [value, setValue] = useState(activeOption ? activeOption.id : '')
+  const [value, setValue] = useState(activeOption?.id ? activeOption.id : '')
   const [isDropdownVisible, setDropdownVisibility] = useState(false)
   const [isDropdownReversed, setDropdownReversed] = useState(false)
   const [selectedLabel, setSelectedLabel] = useState('')
+  const [portalCoords, setPortalCoords] = useState()
+
+  const Portal = usePortal(document.body)
 
   const renderSelection = useCallback(() => {
     if (multipleSelect !== 'off' && activeOptions && activeOptions.length > 0) {
@@ -89,6 +103,7 @@ export const Select = ({
 
     setDropdownVisibility(false)
     setDropdownReversed(false)
+    setPortalCoords()
   }
   const toggleDropdown = () => {
     if (!isDisabled) {
@@ -105,7 +120,8 @@ export const Select = ({
       isDropdownVisible &&
       multipleSelect !== 'modal' &&
       wrapperRef.current &&
-      dropDownRef.current
+      dropDownRef.current &&
+      (!isPortalDropdown || (isPortalDropdown && portalCoords))
     ) {
       const {getListRef, setListMaxHeight} = dropDownRef.current
       const listNode = getListRef()
@@ -113,10 +129,11 @@ export const Select = ({
       const listTopPosition =
         listNode.getBoundingClientRect().top -
         wrapperNode.getBoundingClientRect().top
+
       const wrapperTopPosition = wrapperNode.offsetTop
       const offsetParentElement = offsetParent
         ? offsetParent
-        : wrapperNode.offsetParent ?? document.body
+        : (wrapperNode.offsetParent ?? document.body)
       //console.log('Select offsetParent:', offsetParentElement);
       const parentHeight = offsetParentElement.getBoundingClientRect().height
       const parentScrollTop =
@@ -155,22 +172,46 @@ export const Select = ({
     showSearchBar,
     offsetParent,
     maxHeightDroplist,
+    checkSpaceToReverse,
+    isPortalDropdown,
+    portalCoords,
   ])
 
   useEffect(() => {
     setSelectedLabel(renderSelection())
   }, [renderSelection])
 
+  useLayoutEffect(() => {
+    if (isDropdownVisible && isPortalDropdown) {
+      const getPortalCoords = () => {
+        const {x, y, width, height} = wrapperRef.current.getBoundingClientRect()
+        setPortalCoords({x, y, width, height})
+      }
+      window.addEventListener('resize', getPortalCoords)
+
+      getPortalCoords()
+
+      return () => {
+        window.removeEventListener('resize', getPortalCoords)
+      }
+    }
+  }, [isDropdownVisible, isPortalDropdown])
+
   const checkIfShouldHideDropdown = (event) => {
     const isTabPressed = event.keyCode === 9
     const isEscPressed = event.keyCode === 27
 
+    const containsTarget = isPortalDropdown
+      ? wrapperDropDownRef.current &&
+        !wrapperDropDownRef.current.contains(event.target) &&
+        wrapperRef.current &&
+        !wrapperRef.current.contains(event.target)
+      : wrapperRef.current && !wrapperRef.current.contains(event.target)
+
     if (
       (multipleSelect === 'modal' && (isTabPressed || isEscPressed)) ||
       (multipleSelect !== 'modal' &&
-        (isTabPressed ||
-          isEscPressed ||
-          (wrapperRef.current && !wrapperRef.current.contains(event.target))))
+        (isTabPressed || isEscPressed || containsTarget))
     ) {
       hideDropdown()
     }
@@ -221,6 +262,52 @@ export const Select = ({
   const inputValue =
     (activeOptions && activeOptions.map((v) => v.id).join(',')) || value
 
+  const dropdownRender = isDropdownVisible && (
+    <div
+      ref={wrapperDropDownRef}
+      className={`select__dropdown-wrapper ${
+        multipleSelect === 'modal'
+          ? 'select__dropdown-wrapper--is-multiselect'
+          : ''
+      } ${isDropdownReversed ? 'select__dropdown--is-reversed' : ''} ${
+        dropdownClassName ? dropdownClassName : ''
+      } ${isPortalDropdown ? 'select-with-label__wrapper-is-portal' : ''}`}
+      {...(portalCoords && {
+        style: {
+          transform: `translate(${portalCoords.x}px,${!isDropdownReversed ? portalCoords.y + portalCoords.height : portalCoords.y}px)`,
+          width: `${portalCoords.width}px`,
+        },
+      })}
+    >
+      <Dropdown
+        {...{
+          ref: dropDownRef,
+          className: 'select__dropdown',
+          wrapper: wrapperRef,
+          showSearchBar,
+          searchPlaceholder,
+          activeOption,
+          activeOptions,
+          options,
+          onSelect: handleSelect,
+          onToggleOption,
+          multipleSelect,
+          tooltipPosition,
+          optionsSelectedCopySingular,
+          optionsSelectedCopyPlural,
+          resetSelectedOptions,
+          onClose: hideDropdown,
+        }}
+      >
+        {children}
+      </Dropdown>
+    </div>
+  )
+
+  const portalDropdownRender = (
+    <Portal id="portal-root">{dropdownRender}</Portal>
+  )
+
   return (
     <div
       className={`select-with-label__wrapper ${className ? className : ''}`}
@@ -233,64 +320,30 @@ export const Select = ({
           {label}
         </label>
       )}
-      <div
-        className="select-with-icon__wrapper"
-        aria-label={
-          TEXT_UTILS.isContentTextEllipsis(selectedItemRef?.current)
+      <Tooltip
+        content={
+          TEXT_UTILS.isContentTextEllipsis(selectedItemRef?.current?.firstChild)
             ? selectedLabel
-            : null
+            : ''
         }
       >
-        <span
-          ref={selectedItemRef}
-          className={inputClassName}
-          onClick={toggleDropdown}
-        >
-          {renderSelection()}
-        </span>
-        <input
-          name={name}
-          readOnly={true}
-          type="text"
-          className="input--invisible"
-          placeholder={placeholder}
-          onFocus={handleFocus}
-          value={value}
-        />
-        <ChevronDown />
-      </div>
-      {isDropdownVisible && (
-        <div
-          className={`select__dropdown-wrapper ${
-            multipleSelect === 'modal'
-              ? 'select__dropdown-wrapper--is-multiselect'
-              : ''
-          } ${isDropdownReversed ? 'select__dropdown--is-reversed' : ''}`}
-        >
-          <Dropdown
-            {...{
-              ref: dropDownRef,
-              className: 'select__dropdown',
-              wrapper: wrapperRef,
-              showSearchBar,
-              searchPlaceholder,
-              activeOption,
-              activeOptions,
-              options,
-              onSelect: handleSelect,
-              onToggleOption,
-              multipleSelect,
-              tooltipPosition,
-              optionsSelectedCopySingular,
-              optionsSelectedCopyPlural,
-              resetSelectedOptions,
-              onClose: hideDropdown,
-            }}
-          >
-            {children}
-          </Dropdown>
+        <div ref={selectedItemRef} className="select-with-icon__wrapper">
+          <span className={inputClassName} onClick={toggleDropdown}>
+            {renderSelection()}
+          </span>
+          <input
+            name={name}
+            readOnly={true}
+            type="text"
+            className="input--invisible"
+            placeholder={placeholder}
+            onFocus={handleFocus}
+            value={value}
+          />
+          <ChevronDown />
         </div>
-      )}
+      </Tooltip>
+      {isPortalDropdown ? portalDropdownRender : dropdownRender}
     </div>
   )
 }
@@ -332,5 +385,7 @@ Select.propTypes = {
   resetSelectedOptions: PropTypes.func,
   checkSpaceToReverse: PropTypes.bool,
   maxHeightDroplist: PropTypes.number,
+  isPortalDropdown: PropTypes.bool,
+  dropdownClassName: PropTypes.string,
   children: PropTypes.func,
 }

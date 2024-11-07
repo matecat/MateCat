@@ -4,26 +4,27 @@ namespace LQA;
 
 use DataAccess_AbstractDao;
 use Database;
-use Exceptions\ValidationError;
 use ReflectionException;
 
 class ModelDao extends DataAccess_AbstractDao {
     const TABLE = "qa_models";
 
-    protected static $auto_increment_field = [ 'id' ];
+    protected static array $auto_increment_field = [ 'id' ];
 
-    protected static $_sql_get_model_by_id = "SELECT * FROM qa_models WHERE id = :id LIMIT 1";
+    protected static string $_sql_get_model_by_id          = "SELECT * FROM qa_models WHERE id = :id LIMIT 1";
+    protected static string $_sql_get_model_by_id_and_user = "SELECT * FROM qa_models WHERE id = :id and uid = :uid LIMIT 1";
 
-    protected function _buildResult( $array_result ) {
+    protected function _buildResult( array $array_result ) {
     }
 
     /**
-     * @param           $id
+     * @param int       $id
      * @param float|int $ttl
      *
      * @return ModelStruct
+     * @throws ReflectionException
      */
-    public static function findById( $id, $ttl = 0 ) {
+    public static function findById( int $id, int $ttl = 0 ): ?ModelStruct {
 
         $thisDao = new self();
         $conn    = Database::obtain()->getConnection();
@@ -37,21 +38,41 @@ class ModelDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param $data
+     * @param int       $id
+     * @param int       $uid
+     * @param float|int $ttl
      *
      * @return ModelStruct
-     * @throws ValidationError
      * @throws ReflectionException
      */
-    public static function createRecord( $data ) {
+    public static function findByIdAndUser( int $id, int $uid, int $ttl = 0 ): ?ModelStruct {
+
+        $thisDao = new self();
+        $conn    = Database::obtain()->getConnection();
+        $stmt    = $conn->prepare( self::$_sql_get_model_by_id_and_user );
+
+        /** @var ModelStruct $result */
+        $result = $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ModelStruct(), [ 'id' => $id, 'uid' => $uid ] );
+
+        return $result[ 0 ] ?? null;
+
+    }
+
+    /**
+     * @param array $data
+     *
+     * @return ModelStruct
+     */
+    public static function createRecord( array $data ): ModelStruct {
 
         $model_hash = static::_getModelHash( $data );
 
-        $sql = "INSERT INTO qa_models ( label, pass_type, pass_options, `hash`, `qa_model_template_id` ) " .
-                " VALUES ( :label, :pass_type, :pass_options, :hash, :qa_model_template_id ) ";
+        $sql = "INSERT INTO qa_models ( uid, label, pass_type, pass_options, `hash`, `qa_model_template_id` ) " .
+                " VALUES ( :uid, :label, :pass_type, :pass_options, :hash, :qa_model_template_id ) ";
 
         $struct = new ModelStruct( [
-                'label'                => @$data[ 'label' ],
+                'uid'                  => $data[ 'uid' ],
+                'label'                => $data[ 'label' ] ?? null,
                 'pass_type'            => $data[ 'passfail' ][ 'type' ],
                 'pass_options'         => json_encode( $data[ 'passfail' ][ 'options' ] ),
                 'hash'                 => $model_hash,
@@ -62,7 +83,7 @@ class ModelDao extends DataAccess_AbstractDao {
 
         $stmt = $conn->prepare( $sql );
         $stmt->execute( $struct->toArray(
-                [ 'label', 'pass_type', 'pass_options', 'hash', 'qa_model_template_id' ]
+                [ 'uid', 'label', 'pass_type', 'pass_options', 'hash', 'qa_model_template_id' ]
         ) );
 
         $struct->id = $conn->lastInsertId();
@@ -70,7 +91,7 @@ class ModelDao extends DataAccess_AbstractDao {
         return $struct;
     }
 
-    protected static function _getModelHash( $model_root ) {
+    protected static function _getModelHash( array $model_root ): int {
         $h_string = '';
 
         $h_string .= $model_root[ 'version' ];
@@ -94,27 +115,29 @@ class ModelDao extends DataAccess_AbstractDao {
      * Recursively create categories and subcategories based on the
      * QA model definition.
      *
-     * @param       $json
+     * @param array $json
      *
      * @return ModelStruct
-     * @throws ValidationError
      * @throws ReflectionException
      */
-    public static function createModelFromJsonDefinition( $json ) {
+    public static function createModelFromJsonDefinition( array $json ): ModelStruct {
         $model_root = $json[ 'model' ];
         $model      = ModelDao::createRecord( $model_root );
 
-        $default_severities = isset( $model_root[ 'severities' ] ) ? $model_root[ 'severities' ] : [];
+        $default_severities = $model_root[ 'severities' ] ?? [];
         $categories         = $model_root[ 'categories' ];
 
         foreach ( $categories as $category ) {
-            self::insertCategory( $category, $model->id, null, $default_severities );
+            self::insertCategory( $category, $model->id, $default_severities, null );
         }
 
         return $model;
     }
 
-    private static function insertCategory( $category, $model_id, $parent_id, $default_severities ) {
+    /**
+     * @throws ReflectionException
+     */
+    private static function insertCategory( array $category, int $model_id, array $default_severities, ?int $parent_id ) {
         if ( !array_key_exists( 'severities', $category ) ) {
             $category[ 'severities' ] = $default_severities;
         }
@@ -140,7 +163,7 @@ class ModelDao extends DataAccess_AbstractDao {
 
         if ( array_key_exists( 'subcategories', $category ) && !empty( $category[ 'subcategories' ] ) ) {
             foreach ( $category[ 'subcategories' ] as $sub ) {
-                self::insertCategory( $sub, $model_id, $category_record->id, $default_severities );
+                self::insertCategory( $sub, $model_id, $default_severities, $category_record->id );
             }
         }
     }

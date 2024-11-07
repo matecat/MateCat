@@ -2,7 +2,7 @@
 
 namespace Features\TranslationEvents\Model;
 
-use Chunks_ChunkStruct;
+use Jobs_JobStruct;
 use Constants;
 use Constants_TranslationStatus;
 use Database;
@@ -50,9 +50,9 @@ class TranslationEvent {
     protected bool $_isPropagationSource = true;
 
     /**
-     * @var Chunks_ChunkStruct
+     * @var Jobs_JobStruct
      */
-    private Chunks_ChunkStruct $chunk;
+    private Jobs_JobStruct $chunk;
 
     /**
      * @var bool
@@ -159,9 +159,9 @@ class TranslationEvent {
     }
 
     /**
-     * @return Chunks_ChunkStruct
+     * @return Jobs_JobStruct
      */
-    public function getChunk(): ?Chunks_ChunkStruct {
+    public function getChunk(): ?Jobs_JobStruct {
         return $this->chunk;
     }
 

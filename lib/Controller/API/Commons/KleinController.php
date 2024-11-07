@@ -66,17 +66,17 @@ abstract class KleinController implements IController {
     /**
      * @var array
      */
-    public $params;
+    public array $params = [];
 
     /**
-     * @var FeatureSet
+     * @var ?FeatureSet
      */
-    protected $featureSet;
+    protected ?FeatureSet $featureSet = null;
 
     /**
      * @return FeatureSet
      */
-    public function getFeatureSet() {
+    public function getFeatureSet(): FeatureSet {
         return $this->featureSet;
     }
 
@@ -85,7 +85,7 @@ abstract class KleinController implements IController {
      *
      * @return $this
      */
-    public function setFeatureSet( FeatureSet $featureSet ) {
+    public function setFeatureSet( FeatureSet $featureSet ): KleinController {
         $this->featureSet = $featureSet;
 
         return $this;
@@ -132,7 +132,7 @@ abstract class KleinController implements IController {
      * @throws ReflectionException
      * @throws Exception
      */
-    public function refreshClientSessionIfNotApi(){
+    public function refreshClientSessionIfNotApi() {
         if ( empty( $this->api_key ) ) {
             Bootstrap::sessionStart();
             AuthenticationHelper::refreshSession( $_SESSION );

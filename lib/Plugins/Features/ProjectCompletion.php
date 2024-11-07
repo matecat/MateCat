@@ -5,7 +5,6 @@ namespace Features;
 use Chunks_ChunkCompletionEventDao;
 use Chunks_ChunkCompletionUpdateDao;
 use Chunks_ChunkCompletionUpdateStruct;
-use Chunks_ChunkStruct;
 use Jobs_JobStruct;
 use Utils;
 
@@ -20,7 +19,7 @@ class ProjectCompletion extends BaseFeature {
         // to register the event of the segment translation being updated
         // from a review page or a translate page.
 
-        /** @var Chunks_ChunkStruct $chunk */
+        /** @var Jobs_JobStruct $chunk */
         $chunk                                     = $params[ 'chunk' ];
         $chunk_completion_update_struct            = new Chunks_ChunkCompletionUpdateStruct( $chunk->toArray() );
         $chunk_completion_update_struct->is_review = $params[ 'is_review' ];

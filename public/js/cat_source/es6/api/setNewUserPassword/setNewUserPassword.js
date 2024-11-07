@@ -29,5 +29,5 @@ export const setNewUserPassword = async (password, passwordConfimation) => {
     return Promise.reject(errors)
   }
 
-  return null;
+  return null
 }

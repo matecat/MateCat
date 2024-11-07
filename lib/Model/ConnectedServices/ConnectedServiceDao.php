@@ -13,8 +13,8 @@ class ConnectedServiceDao extends \DataAccess_AbstractDao {
     const TABLE          = 'connected_services';
     const GDRIVE_SERVICE = 'gdrive';
 
-    protected static $primary_keys         = [ 'id' ];
-    protected static $auto_increment_field = [ 'id' ];
+    protected static array $primary_keys         = [ 'id' ];
+    protected static array $auto_increment_field = [ 'id' ];
 
     /**
      * @param $id
@@ -212,7 +212,7 @@ class ConnectedServiceDao extends \DataAccess_AbstractDao {
         return $stmt->fetch();
     }
 
-    protected function _buildResult( $array_result ) {
+    protected function _buildResult( array $array_result ) {
         // TODO: Implement _buildResult() method.
     }
 }

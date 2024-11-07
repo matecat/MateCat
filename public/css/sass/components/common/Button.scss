@@ -128,12 +128,14 @@ a.button-component-container {
     height: 28px;
     padding: 0 10px;
     font-size: 12px;
+    font-weight: 500;
   }
   &.standard {
     height: 40px;
     padding: 0 16px;
     line-height: 40px;
     font-size: 14px;
+    font-weight: bold;
   }
   &.medium {
     height: 40px;

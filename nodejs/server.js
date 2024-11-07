@@ -72,10 +72,10 @@ const corsAllow = ( req, res ) => {
         if ( element === '*' || req.headers['origin'] && req.headers['origin'] === element ) {
             res.setHeader( 'Access-Control-Allow-Origin', element );
             res.setHeader( 'Access-Control-Allow-Methods', 'OPTIONS, GET' );
-            logger.debug( "Allowed domain " + req.headers['origin'] );
+            logger.silly( "Allowed domain " + req.headers['origin'] );
             return true;
         } else if ( !req.headers['origin'] ) {
-            logger.debug( "Allowed Request from same origin " + req.headers['host'] );
+            logger.silly( "Allowed Request from same origin " + req.headers['host'] );
             return true;
         }
     } );
@@ -83,7 +83,7 @@ const corsAllow = ( req, res ) => {
 
 //Event triggered when a message is sent to the client
 browserChannel.on( 'message', function ( message ) {
-    //logger.debug('browserChannel message', message);
+    logger.silly( 'browserChannel message', message );
 } );
 
 //Event triggered when a client disconnect
@@ -102,7 +102,7 @@ browserChannel.on( 'connect', ( context, req, res ) => {
             serverVersion: SERVER_VERSION
         }
     }, [res] );
-    logger.debug( ['New client connection ' + res._clientId] );
+    logger.verbose( ['New client connection ' + res._clientId] );
 
 } );
 
@@ -118,9 +118,9 @@ http.createServer( ( req, res ) => {
         if ( parsedUrl.pathname.indexOf( config.server.path ) === 0 ) {
             const params = parsedUrl.searchParams
             res._clientId = uuid.v4()
-            res._matecatJobId = params.get( 'jid' )
+            res._matecatJobId = parseInt( params.get( 'jid' ) );
             res._matecatPw = params.get( 'pw' )
-            res._userId = params.get( 'uid' )
+            res._userId = parseInt( params.get( 'uid' ) );
             browserChannel.addClient( req, res )
         } else {
             res.writeHead( 404 )
@@ -138,7 +138,7 @@ http.createServer( ( req, res ) => {
 
 ['SIGINT', 'SIGTERM'].forEach(
     signal => process.on( signal, ( sig ) => {
-        logger.debug( sig + ' received...' );
+        logger.info( sig + ' received...' );
         notifyUpgrade();
     } )
 );
@@ -148,7 +148,7 @@ const notifyUpgrade = ( isReboot = true ) => {
     new Promise( ( resolve, reject ) => {
         if ( browserChannel.connections.length !== 0 ) {
 
-            logger.debug( 'Disconnecting clients...' );
+            logger.info( 'Disconnecting clients...' );
 
             const disconnectMessage = {
                 payload: {
@@ -166,7 +166,7 @@ const notifyUpgrade = ( isReboot = true ) => {
 
     } ).then( ( isReboot ) => {
         if ( isReboot ) {
-            logger.debug( 'Exit...' );
+            logger.info( 'Exit...' );
             browserChannel.close();
             process.exit( 0 );
         }
@@ -174,39 +174,40 @@ const notifyUpgrade = ( isReboot = true ) => {
 
 }
 
-const checkCandidate = ( type, response, message ) => {
+const checkCandidate = ( type, connection, message ) => {
     let candidate;
+
     switch ( type ) {
         case AI_ASSISTANT_EXPLAIN_MEANING:
-            candidate = response._clientId === message.data.id_client;
+            candidate = connection._clientId === message.data.id_client;
             break;
         case LOGOUT_TYPE:
-            candidate = response._userId === message.data.uid;
+            candidate = connection._userId === message.data.uid;
             break;
         case COMMENTS_TYPE:
-            candidate = response._matecatJobId === message.data.id_job &&
-                message.data.passwords.indexOf( response._matecatPw ) !== -1 &&
-                response._clientId !== message.data.id_client;
+            candidate = connection._matecatJobId === message.data.id_job &&
+                message.data.passwords.indexOf( connection._matecatPw ) !== -1 &&
+                connection._clientId !== message.data.id_client;
             break;
         case CONTRIBUTIONS_TYPE:
-            candidate = response._matecatJobId === message.data.id_job &&
-                message.data.passwords.indexOf( response._matecatPw ) !== -1 &&
-                response._clientId === message.data.id_client;
+            candidate = connection._matecatJobId === message.data.id_job &&
+                message.data.passwords.indexOf( connection._matecatPw ) !== -1 &&
+                connection._clientId === message.data.id_client;
             break;
         case CONCORDANCE_TYPE:
-            candidate = response._matecatJobId === message.data.id_job &&
-                message.data.passwords.indexOf( response._matecatPw ) !== -1 &&
-                response._clientId === message.data.id_client;
+            candidate = connection._matecatJobId === message.data.id_job &&
+                message.data.passwords.indexOf( connection._matecatPw ) !== -1 &&
+                connection._clientId === message.data.id_client;
             break;
         case BULK_STATUS_CHANGE_TYPE:
-            candidate = response._matecatJobId === message.data.id_job &&
-                message.data.passwords.indexOf( response._matecatPw ) !== -1 &&
-                response._clientId === message.data.id_client;
+            candidate = connection._matecatJobId === message.data.id_job &&
+                message.data.passwords.indexOf( connection._matecatPw ) !== -1 &&
+                connection._clientId === message.data.id_client;
             break;
         case CROSS_LANG_CONTRIBUTIONS:
-            candidate = response._matecatJobId === message.data.id_job &&
-                message.data.passwords.indexOf( response._matecatPw ) !== -1 &&
-                response._clientId === message.data.id_client;
+            candidate = connection._matecatJobId === message.data.id_job &&
+                message.data.passwords.indexOf( connection._matecatPw ) !== -1 &&
+                connection._clientId === message.data.id_client;
             break;
         case GLOSSARY_TYPE_G:
         case GLOSSARY_TYPE_S:
@@ -216,9 +217,9 @@ const checkCandidate = ( type, response, message ) => {
         case GLOSSARY_TYPE_SE:
         case GLOSSARY_TYPE_CH:
         case GLOSSARY_TYPE_K:
-            candidate = response._matecatJobId === message.data.id_job &&
-                message.data.passwords.indexOf( response._matecatPw ) !== -1 &&
-                response._clientId === message.data.id_client;
+            candidate = connection._matecatJobId === message.data.id_job &&
+                message.data.passwords.indexOf( connection._matecatPw ) !== -1 &&
+                connection._clientId === message.data.id_client;
             break;
         default:
             candidate = false;
@@ -237,29 +238,42 @@ const stompMessageReceived = ( body ) => {
         return;
     }
 
-    let dest = null;
+    let dest = [];
 
     if ( message._type === RELOAD ) {
-        logger.debug( 'RELOAD: ' + RELOAD + ' message received...' );
+        logger.info( 'RELOAD: ' + RELOAD + ' message received...' );
         notifyUpgrade( false );
         return;
     } else if ( browserChannel.connections.length !== 0 ) {
-        dest = _.filter( browserChannel.connections, ( serverResponse ) => {
-            if ( typeof serverResponse._clientId === 'undefined' ) {
-                logger.error( ["No valid clientId found in message", message] );
-                return false;
+        dest = _.filter( browserChannel.connections, ( connection ) => {
+
+            if ( typeof connection._clientId === 'undefined' ) {
+                logger.warn( ["No valid _clientId found in connection list"] ); // invalid client registered or bug ?!?
+                return;
             }
-            return checkCandidate( message._type, serverResponse, message );
+
+            logger.debug( {
+                'type': message._type,
+                'jid_srv': connection._matecatJobId,
+                'jid_msg': message.data.id_job,
+                'pw_srv': connection._matecatPw,
+                'pw_msg': message.data.passwords,
+                'client_id_srv': connection._clientId,
+                'client_id_msg': message.data.id_client,
+            } );
+
+            return checkCandidate( message._type, connection, message );
         } );
+    } else if( browserChannel.connections.length === 0 ) {
+        logger.warn( ["Got a message but there are no registered clients on this instance."] );
+        return;
     }
 
-    if ( !dest ) {
-        logger.debug( ["No registered clients on this instance."] );
-    } else if ( dest && dest.length === 0 ) {
-        logger.debug( ["Skip message, no available recipient found ", message.data.id_client] );
+    if ( dest.length === 0 ) {
+        logger.verbose( ["Skip message, no available recipient found ", message.data.id_client] );
         return;
     } else {
-        logger.debug( ['candidate for ' + message._type, dest[0]._clientId] );
+        logger.verbose( ['Candidate found for ' + message._type, dest[0]._clientId] );
     }
 
     message.data.payload._type = message._type;

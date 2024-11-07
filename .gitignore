@@ -6,6 +6,7 @@
 nbproject/
 webgrind/
 _dic_cache
+.phpunit.result.cache
 
 # Configuration files
 .num_processes
@@ -76,3 +77,4 @@ certs
 /public/buildResources/
 /lib/View/*.html
 /lib/View/APIDoc.php
+/.phpunit.result.cache

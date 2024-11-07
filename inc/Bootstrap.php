@@ -163,7 +163,7 @@ class Bootstrap {
         $this->autoLoadedFeatureSet->run( 'bootstrapCompleted' );
     }
 
-    public static function exceptionHandler( $exception ) {
+    public static function exceptionHandler( Throwable $exception ) {
 
         Log::$fileName = 'fatal_errors.txt';
 
@@ -190,7 +190,7 @@ class Bootstrap {
             $message          = "Conflict";
             $response_message = $exception->getMessage();
             Log::doJsonLog( [ "error" => 'The request could not be completed due to a conflict with the current state of the resource. - ' . "{$exception->getMessage()} ", "trace" => $exception->getTrace() ] );
-        } catch ( \PDOException $e ) {
+        } catch ( PDOException $e ) {
             $code    = 503;
             $message = "Service Unavailable";
 //            \Utils::sendErrMailReport( $exception->getMessage() . "" . $exception->getTraceAsString(), 'Generic error' );
@@ -199,7 +199,7 @@ class Bootstrap {
             $code    = 500;
             $message = "Internal Server Error";
 //            \Utils::sendErrMailReport( $exception->getMessage() . "" . $exception->getTraceAsString(), 'Generic error' );
-            Log::doJsonLog( [ "error" => $exception->getMessage(), "trace" => $exception->getTrace() ] );
+            Log::doJsonLog( [ "ExceptionType" => get_class( $e ), "error" => $exception->getMessage(), "trace" => $exception->getTrace() ] );
         }
 
         if ( stripos( PHP_SAPI, 'cli' ) === false ) {

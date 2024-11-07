@@ -110,7 +110,7 @@ class ActivityLogDao extends DataAccess_AbstractDao {
      *
      * @return DataAccess_IDaoStruct|DataAccess_IDaoStruct[]|void
      */
-    protected function _buildResult( $array_result ) {
+    protected function _buildResult( array $array_result ) {
     }
 
     /**

@@ -151,8 +151,7 @@ export const SegmentButton = ({segment, disabled, isReview}) => {
         (SegmentUtils.isIceSegment(nextSegment) && !nextSegment.unlocked) || //Ice
         nextSegment.status === 'NEW' ||
         nextSegment.status === 'DRAFT')
-    const filtering =
-      SegmentFilter.enabled() && SegmentFilter.filtering() && SegmentFilter.open
+    const filtering = SegmentFilter.enabled() && SegmentFilter.filtering()
     const className = config.isReview
       ? 'revise-button-' + config.revisionNumber
       : ''
