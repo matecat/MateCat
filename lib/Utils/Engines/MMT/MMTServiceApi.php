@@ -352,9 +352,9 @@ class MMTServiceApi {
     }
 
     /**
-     * @param      $source
-     * @param      $target
-     * @param      $text
+     * @param $source
+     * @param $target
+     * @param $text
      * @param null $contextVector
      * @param null $hints
      * @param null $projectId
@@ -364,11 +364,14 @@ class MMTServiceApi {
      * @param null $glossaries
      * @param null $ignoreGlossaryCase
      * @param null $include_score
-     *
-     * @return mixed
+     * @return mixed|void
      * @throws MMTServiceApiException
      */
     public function translate( $source, $target, $text, $contextVector = null, $hints = null, $projectId = null, $timeout = null, $priority = null, $session = null, $glossaries = null, $ignoreGlossaryCase = null, $include_score = null ) {
+
+        if(empty($text)){
+            return;
+        }
 
         $params = [
                 'source'         => $source,
@@ -376,7 +379,7 @@ class MMTServiceApi {
                 'q'              => $text,
                 'context_vector' => $contextVector,
                 'hints'          => ( $hints ? implode( ',', $hints ) : null ),
-                'project_id'     => $projectId,
+                'project_id'     => (string)$projectId,
                 'timeout'        => ( $timeout ? ( $timeout * 1000 ) : null ),
                 'priority'       => ( $priority ?: 'normal' ),
         ];
