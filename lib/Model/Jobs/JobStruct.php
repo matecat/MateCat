@@ -84,7 +84,7 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
      */
     protected int $_openThreads = 0;
 
-    protected bool $is_review;
+    protected bool $is_review = false;
 
 
     protected int $_sourcePage;
