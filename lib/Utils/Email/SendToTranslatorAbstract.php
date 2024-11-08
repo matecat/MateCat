@@ -65,15 +65,14 @@ abstract class SendToTranslatorAbstract extends AbstractEmail {
                 'user'          => $userRecipient,
                 'email'         => $this->translator->email,
                 'delivery_date' => $this->translator->delivery_date,
-                'project_url'   => call_user_func( $this->_RoutesMethod, [
-                        'invited_by_uid' => $this->user->uid,
-                        'email'          => $this->translator->email,
-                        'project_name'   => $this->projectName,
-                        'id_job'         => $this->translator->id_job,
-                        'password'       => $this->translator->job_password,
-                        'source'         => $this->translator->source,
-                        'target'         => $this->translator->target
-                ] )
+                'project_url'   => call_user_func(
+                    $this->_RoutesMethod,
+                    $this->projectName,
+                    $this->translator->id_job,
+                    $this->translator->job_password,
+                    $this->translator->source,
+                    $this->translator->target
+                 )
         ];
     }
 
