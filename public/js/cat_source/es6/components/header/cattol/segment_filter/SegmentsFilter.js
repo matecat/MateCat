@@ -243,6 +243,12 @@ class SegmentsFilter extends React.Component {
     }
   }
 
+  filterSegmentsError = () => {
+    this.setState({
+      filterSubmitted: false,
+    })
+  }
+
   initDropDown() {
     let self = this
     if (this.props.active && !this.dropdownInitialized) {
@@ -320,6 +326,10 @@ class SegmentsFilter extends React.Component {
       this.setFilter,
     )
     CatToolStore.addListener(
+      CatToolConstants.SEGMENT_FILTER_ERROR,
+      this.filterSegmentsError,
+    )
+    CatToolStore.addListener(
       CatToolConstants.RELOAD_SEGMENT_FILTER,
       this.doSubmitFilter,
     )
@@ -339,6 +349,10 @@ class SegmentsFilter extends React.Component {
     CatToolStore.removeListener(
       CatToolConstants.SET_SEGMENT_FILTER,
       this.setFilter,
+    )
+    CatToolStore.removeListener(
+      CatToolConstants.SEGMENT_FILTER_ERROR,
+      this.filterSegmentsError,
     )
     CatToolStore.removeListener(
       CatToolConstants.RELOAD_SEGMENT_FILTER,
