@@ -13,9 +13,9 @@ use API\Commons\KleinController;
 use API\Commons\Validators\ChunkPasswordValidator;
 use Chunks_ChunkCompletionEventDao;
 use Chunks_ChunkCompletionEventStruct;
-use Jobs_JobStruct;
 use Database;
 use Exception;
+use Jobs_JobStruct;
 
 class CompletionEventController extends KleinController {
 

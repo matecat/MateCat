@@ -31,7 +31,6 @@ use FeatureSet;
 use FilesStorage\AbstractFilesStorage;
 use INIT;
 use Jobs_JobStruct;
-use Klein\Klein;
 use Log;
 use NewController;
 use Projects_MetadataDao;

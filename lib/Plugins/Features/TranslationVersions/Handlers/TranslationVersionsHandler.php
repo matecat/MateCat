@@ -2,7 +2,6 @@
 
 namespace Features\TranslationVersions\Handlers;
 
-use Jobs_JobStruct;
 use Constants_TranslationStatus;
 use Exception;
 use Exceptions\ControllerReturnException;
@@ -14,6 +13,7 @@ use Features\TranslationVersions\Model\TranslationVersionStruct;
 use Features\TranslationVersions\VersionHandlerInterface;
 use FeatureSet;
 use Jobs_JobDao;
+use Jobs_JobStruct;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
 use Translations_SegmentTranslationStruct;
