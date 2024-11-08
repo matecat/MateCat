@@ -274,6 +274,11 @@ AppDispatcher.register(function (action) {
         ...action,
       })
       break
+    case CatToolConstants.SEGMENT_FILTER_ERROR:
+      CatToolStore.emitChange(CatToolConstants.SEGMENT_FILTER_ERROR, {
+        ...action,
+      })
+      break
   }
 })
 
