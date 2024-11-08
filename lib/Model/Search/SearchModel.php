@@ -16,7 +16,6 @@ use Matecat\Finder\WholeTextFinder;
 use Matecat\SubFiltering\MateCatFilter;
 use PDO;
 use PDOException;
-use Utils;
 
 class SearchModel {
 

@@ -2,7 +2,6 @@
 
 namespace FilesStorage;
 
-use Jobs_JobStruct;
 use Exception;
 use FilesStorage\Exceptions\FileSystemException;
 

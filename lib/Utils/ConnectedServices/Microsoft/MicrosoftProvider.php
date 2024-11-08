@@ -4,7 +4,6 @@ namespace ConnectedServices\Microsoft;
 
 use ConnectedServices\AbstractProvider;
 use ConnectedServices\ConnectedServiceUserModel;
-use Exception;
 use INIT;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use League\OAuth2\Client\Token\AccessToken;

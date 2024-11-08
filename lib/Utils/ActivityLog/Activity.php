@@ -4,7 +4,6 @@ namespace ActivityLog;
 
 use Exception;
 use Log;
-use Utils;
 use WorkerClient;
 
 /**

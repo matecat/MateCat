@@ -8,8 +8,8 @@
 
 namespace Features\SegmentFilter\Model;
 
-use Jobs_JobStruct;
 use Exception;
+use Jobs_JobStruct;
 use Translations_SegmentTranslationStruct;
 
 class SegmentFilterModel {
