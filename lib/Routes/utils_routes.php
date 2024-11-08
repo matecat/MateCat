@@ -164,3 +164,4 @@ route( '/api/app/download-tmx', 'POST', ['API\App\DownloadTMXController', 'downl
 route( '/api/app/new-project', 'POST', ['API\App\CreateProjectController', 'create' ] );
 route( '/api/app/convert-file', 'POST', ['API\App\ConvertFileController', 'handle' ] );
 route( '/api/app/set-chunk-completed', 'POST', ['API\App\SetChunkCompletedController', 'complete' ] );
+route( '/api/app/download-analysis-report', 'POST', ['API\App\DownloadAnalysisReportController', 'download' ] );
