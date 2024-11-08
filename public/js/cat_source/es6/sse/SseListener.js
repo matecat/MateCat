@@ -13,7 +13,7 @@ const SseListener = ({isAuthenticated, userId}) => {
 
   const eventHandlers = {
     disconnected: () => {
-      CatToolActions.clientConnected()
+      CatToolActions.clientConnected(false)
     },
     reconnected: () => {
       CatToolActions.clientReconnect()
