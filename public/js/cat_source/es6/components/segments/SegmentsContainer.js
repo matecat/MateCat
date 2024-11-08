@@ -165,7 +165,7 @@ function SegmentsContainer({
   const [addedComment, setAddedComment] = useState(undefined)
   const [scrollTopVisible, setScrollTopVisible] = useState(undefined)
   const [isSearchBarOpen, setIsSearchBarOpen] = useState(false)
-  const [clientConnected, setClientConnected] = useState(false)
+  const [clientConnected, setClientConnected] = useState()
   const [clientId, setClientId] = useState()
 
   const persistenceVariables = useRef({

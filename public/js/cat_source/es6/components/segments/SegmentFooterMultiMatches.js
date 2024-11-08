@@ -255,7 +255,7 @@ class SegmentFooterMultiMatches extends React.Component {
             )}
           </div>
         ) : (
-          <SegmentFooterTabError />
+          clientConnected === false && <SegmentFooterTabError />
         )}
       </div>
     )
