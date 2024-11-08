@@ -577,6 +577,8 @@ class ProjectManager {
          * Validations should populate the projectStructure with errors and codes.
          */
         $featureSet = ( $this->features !== null ) ? $this->features : new FeatureSet();
+        \Features\SecondPassReview::loadAndValidateQualityFramework( $this->projectStructure );
+        $featureSet->run( 'loadCustomQualityFramework', $this->projectStructure );
         $featureSet->run( 'validateProjectCreation', $this->projectStructure );
 
         $this->filter = MateCatFilter::getInstance( $featureSet, $this->projectStructure[ 'source_language' ], $this->projectStructure[ 'target_language' ] );
@@ -585,6 +587,7 @@ class ProjectManager {
          * @var ArrayObject $this ->projectStructure['result']['errors']
          */
         if ( $this->projectStructure[ 'result' ][ 'errors' ]->count() ) {
+            $this->_log( $this->projectStructure[ 'result' ][ 'errors' ] );
             return false;
         }
 
