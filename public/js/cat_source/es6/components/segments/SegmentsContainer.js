@@ -496,7 +496,7 @@ function SegmentsContainer({
       document.removeEventListener('mouseup', mouseupHandler)
     }
   }, [])
-  console.log('clientConnected', clientConnected)
+
   // set list rows
   useEffect(() => {
     const haveSegmentsChanges = !!segments.find((segment, index) => {
