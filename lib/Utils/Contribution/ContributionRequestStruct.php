@@ -10,9 +10,9 @@
 namespace Contribution;
 
 
-use Jobs_JobStruct;
 use DataAccess\ShapelessConcreteStruct;
 use DataAccess_IDaoStruct;
+use Jobs_JobStruct;
 use Projects_ProjectStruct;
 
 class ContributionRequestStruct extends ShapelessConcreteStruct implements DataAccess_IDaoStruct {

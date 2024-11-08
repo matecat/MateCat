@@ -9,8 +9,8 @@
 namespace API\V3;
 
 use API\Commons\Exceptions\ValidationError;
-use API\Commons\Validators\LoginValidator;
 use API\Commons\KleinController;
+use API\Commons\Validators\LoginValidator;
 use CatUtils;
 use Langs\Languages;
 use LQA\SizeRestriction\SizeRestriction;

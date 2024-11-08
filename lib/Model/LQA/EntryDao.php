@@ -2,12 +2,12 @@
 
 namespace LQA;
 
-use Jobs_JobStruct;
 use DataAccess\ShapelessConcreteStruct;
 use DataAccess_AbstractDao;
 use DataAccess_IDaoStruct;
 use Database;
 use Exceptions\ValidationError;
+use Jobs_JobStruct;
 use Log;
 use PDO;
 use Utils;
