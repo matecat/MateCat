@@ -1,25 +1,25 @@
 const stompit = require( 'stompit' );
-const { logger } = require( '../utils' );
+const {logger} = require( '../utils' );
 
 module.exports.ConnectionPool = class {
 
     constructor( parameters ) {
 
-        const { read_queue, write_queue, connectOptions } = parameters;
+        const {read_queue, write_queue, connectOptions} = parameters;
 
         // Connections Options for stompit
         this.connectOptions = connectOptions;
         this.read_queue = read_queue;
         this.write_queue = write_queue;
 
-        this.connectionManager = new stompit.ConnectFailover( [ this.connectOptions ] );
+        this.connectionManager = new stompit.ConnectFailover( [this.connectOptions] );
 
         this.connectionManager.on( 'error', ( error ) => {
             logger.error( 'ConnectionManager Error', error );
         } );
 
         this.connectionManager.on( 'connect', ( msg ) => {
-            // logger.info( 'Connection Manager connected', msg );
+            logger.info( 'Connection Manager connected', msg );
         } );
 
         this.channelFactory = new stompit.ChannelFactory( this.connectionManager );

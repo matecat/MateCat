@@ -4,11 +4,12 @@ const {ConnectionPool} = require( './amq/AMQconnector' );
 const {logger} = require( './utils' );
 const ini = require( "node-ini" );
 const path = require( "path" );
-const uuid = require( 'uuid' );
+const fs = require( 'node:fs' );
 
-const config = ini.parseSync( path.resolve( __dirname, 'config.ini' ) );
+const config = ini.parseSync( path.resolve( __dirname, '../config.ini' ) );
 const SERVER_VERSION = config.server.version.replace( /['"]+/g, '' );
 const allowedOrigins = config.cors.allowedOrigins;
+const auth_secret_key = fs.readFileSync( '../../inc/login_secret.dat', 'utf8' );
 
 // Connections Options for stompit
 const parameters = {
@@ -38,27 +39,27 @@ server.listen( config.server.port, config.server.address, () => {
     logger.info( ['Listening on //' + config.server.address + ':' + config.server.port + '/'] )
 } );
 
-new Application( server, amqConnector, logger, {allowedOrigins: allowedOrigins} ).start();
+new Application( server, amqConnector, {serverVersion: SERVER_VERSION, allowedOrigins: allowedOrigins, authSecretKey: auth_secret_key} ).start();
 
-( req, res ) => {
-    // find job id from the requested path
-    const parsedUrl = new URL( req.url, `https://${req.headers.host}/` )
-
-    if ( corsAllow( req, res ) ) {
-        if ( parsedUrl.pathname.indexOf( config.server.path ) === 0 ) {
-            const params = parsedUrl.searchParams
-            res._clientId = uuid.v4()
-            res._matecatJobId = parseInt( params.get( 'jid' ) );
-            res._matecatPw = params.get( 'pw' )
-            res._userId = parseInt( params.get( 'uid' ) );
-            browserChannel.addClient( req, res )
-        } else {
-            res.writeHead( 404 )
-            res.end()
-        }
-    } else {
-        res.writeHead( 401 )
-        res.end()
-    }
-
-}
+// ( req, res ) => {
+//     // find job id from the requested path
+//     const parsedUrl = new URL( req.url, `https://${req.headers.host}/` )
+//
+//     if ( corsAllow( req, res ) ) {
+//         if ( parsedUrl.pathname.indexOf( config.server.path ) === 0 ) {
+//             const params = parsedUrl.searchParams
+//             res._clientId = uuid.v4()
+//             res._matecatJobId = parseInt( params.get( 'jid' ) );
+//             res._matecatPw = params.get( 'pw' )
+//             res._userId = parseInt( params.get( 'uid' ) );
+//             browserChannel.addClient( req, res )
+//         } else {
+//             res.writeHead( 404 )
+//             res.end()
+//         }
+//     } else {
+//         res.writeHead( 401 )
+//         res.end()
+//     }
+//
+// }
