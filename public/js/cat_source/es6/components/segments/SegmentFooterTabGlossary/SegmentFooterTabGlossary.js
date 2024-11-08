@@ -384,8 +384,8 @@ export const SegmentFooterTabGlossary = ({
         keys.length > 1
           ? SegmentUtils.getSelectedKeysGlossary(keys)
           : keys.length === 1
-          ? [keys[0]]
-          : [],
+            ? [keys[0]]
+            : [],
     }))
   }, [keys])
 
@@ -517,7 +517,7 @@ export const SegmentFooterTabGlossary = ({
         className={`tab sub-editor glossary ${active_class}`}
         tabIndex="0"
       >
-        {!clientConnected ? (
+        {clientConnected === false ? (
           <SegmentFooterTabError />
         ) : haveKeysGlossary ? (
           <>
