@@ -1,7 +1,6 @@
 <?php
 
 use DataAccess\ShapelessConcreteStruct;
-use Features\ReviewExtended\ReviewUtils;
 use Segments\SegmentUIStruct;
 
 class Segments_SegmentDao extends DataAccess_AbstractDao {

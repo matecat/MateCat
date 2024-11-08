@@ -8,10 +8,10 @@
 
 namespace Features\ReviewExtended;
 
-use Jobs_JobStruct;
 use Constants;
 use Constants_TranslationStatus;
 use Exception;
+use Jobs_JobStruct;
 use LQA\ChunkReviewDao;
 use LQA\ModelStruct;
 

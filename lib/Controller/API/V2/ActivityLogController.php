@@ -12,11 +12,11 @@ namespace API\V2;
 use ActivityLog\ActivityLogDao;
 use ActivityLog\ActivityLogStruct;
 use API\Commons\KleinController;
+use API\Commons\Validators\ChunkPasswordValidator;
+use API\Commons\Validators\ProjectPasswordValidator;
 use API\V2\Json\Activity;
 use Exception;
 use ReflectionException;
-use API\Commons\Validators\ChunkPasswordValidator;
-use API\Commons\Validators\ProjectPasswordValidator;
 
 class ActivityLogController extends KleinController {
 

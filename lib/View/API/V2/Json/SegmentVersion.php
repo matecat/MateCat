@@ -2,8 +2,8 @@
 
 namespace API\V2\Json;
 
-use Jobs_JobStruct;
 use FeatureSet;
+use Jobs_JobStruct;
 use LQA\EntryStruct;
 use Matecat\SubFiltering\MateCatFilter;
 

@@ -4,7 +4,6 @@ namespace TMS;
 
 use API\Commons\Exceptions\UnprocessableException;
 use Chunks_ChunkDao;
-use Jobs_JobStruct;
 use Constants_TranslationStatus;
 use DateTime;
 use DateTimeZone;
@@ -16,6 +15,7 @@ use Exception;
 use FeatureSet;
 use INIT;
 use InvalidArgumentException;
+use Jobs_JobStruct;
 use Log;
 use Matecat\SubFiltering\MateCatFilter;
 use SplTempFileObject;

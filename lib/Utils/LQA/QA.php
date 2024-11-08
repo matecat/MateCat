@@ -2,9 +2,7 @@
 
 namespace LQA;
 
-use API\Commons\Exceptions\AuthenticationError;
 use CatUtils;
-use Jobs_JobStruct;
 use DOMDocument;
 use DOMElement;
 use DOMException;
@@ -12,16 +10,12 @@ use DOMNode;
 use DOMNodeList;
 use DOMXPath;
 use Exception;
-use Exceptions\NotFoundException;
-use Exceptions\ValidationError;
 use FeatureSet;
+use Jobs_JobStruct;
 use Log;
 use LogicException;
 use LQA\BxExG\Validator;
-use Projects_MetadataDao;
 use Segments_SegmentMetadataDao;
-use TaskRunner\Exceptions\EndQueueException;
-use TaskRunner\Exceptions\ReQueueException;
 
 /**
  * Class errObject
