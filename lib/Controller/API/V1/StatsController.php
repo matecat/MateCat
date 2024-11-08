@@ -5,8 +5,8 @@ namespace API\V1;
 
 use API\Commons\KleinController;
 use API\Commons\Validators\ChunkPasswordValidator;
-use CatUtils;
 use API\V2\Validators\LoginValidator;
+use CatUtils;
 use Jobs_JobStruct;
 use WordCount\WordCountStruct;
 

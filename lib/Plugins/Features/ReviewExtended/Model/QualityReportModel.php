@@ -10,11 +10,11 @@ namespace Features\ReviewExtended\Model;
 
 use ArrayObject;
 use Chunks_ChunkCompletionEventDao;
-use Jobs_JobStruct;
 use Database;
 use Exception;
 use Features\ReviewExtended\IChunkReviewModel;
 use Features\ReviewExtended\ReviewUtils;
+use Jobs_JobStruct;
 use LQA\ChunkReviewDao;
 use Revise\FeedbackDAO;
 use RevisionFactory;

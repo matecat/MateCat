@@ -8,7 +8,6 @@
 
 namespace Features\SegmentFilter\Model;
 
-use Jobs_JobStruct;
 use Constants_SegmentTranslationsMatchType;
 use Constants_TranslationStatus;
 use DataAccess\ShapelessConcreteStruct;
@@ -16,6 +15,7 @@ use DataAccess_AbstractDao;
 use DataAccess_IDaoStruct;
 use Database;
 use Exception;
+use Jobs_JobStruct;
 
 class SegmentFilterDao extends DataAccess_AbstractDao {
 

@@ -2,12 +2,12 @@
 
 namespace Features\TranslationVersions\Model;
 
-use Jobs_JobStruct;
 use Constants;
 use DataAccess\ShapelessConcreteStruct;
 use DataAccess_AbstractDao;
 use DataAccess_IDaoStruct;
 use Database;
+use Jobs_JobStruct;
 use PDO;
 use QualityReport\SegmentEventsStruct;
 use Translations_SegmentTranslationStruct;

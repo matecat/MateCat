@@ -2,10 +2,10 @@
 
 namespace Files;
 
-use Jobs_JobStruct;
 use DataAccess_AbstractDao;
 use Database;
 use Files_FileStruct;
+use Jobs_JobStruct;
 use PDO;
 
 class FilesJobDao extends DataAccess_AbstractDao {

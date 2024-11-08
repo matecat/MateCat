@@ -9,7 +9,6 @@
 namespace API\V2;
 
 
-use API\Commons\Authentication\AuthenticationHelper;
 use API\Commons\Exceptions\AuthorizationError;
 use API\Commons\Exceptions\NotFoundException;
 use API\Commons\KleinController;
@@ -18,7 +17,6 @@ use API\Commons\Validators\ProjectExistsInTeamValidator;
 use API\Commons\Validators\TeamAccessValidator;
 use API\Commons\Validators\TeamProjectValidator;
 use API\V2\Json\Project;
-use Bootstrap;
 use Exception;
 use Exceptions\ValidationError;
 use ManageUtils;

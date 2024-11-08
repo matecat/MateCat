@@ -9,12 +9,10 @@
 
 namespace API\V2;
 
-use API\Commons\Authentication\AuthenticationHelper;
 use API\Commons\KleinController;
 use API\Commons\Validators\LoginValidator;
 use API\Commons\Validators\TeamAccessValidator;
 use API\V2\Json\Membership;
-use Bootstrap;
 use Exception;
 use ReflectionException;
 use TeamModel;

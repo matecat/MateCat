@@ -11,8 +11,8 @@ namespace API\V2;
 use API\Commons\Validators\ChunkPasswordValidator;
 use API\Commons\Validators\LoginValidator;
 use API\V2\Json\SegmentVersion as JsonFormatter;
-use Jobs_JobStruct;
 use Features\TranslationVersions\Model\TranslationVersionDao;
+use Jobs_JobStruct;
 
 
 class ChunkTranslationVersionController extends BaseChunkController {

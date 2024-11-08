@@ -15,7 +15,6 @@ use INIT;
 use PDOException;
 use SplObserver;
 use SplSubject;
-use Stomp\Exception\StompException;
 use Stomp\Transport\Message;
 use TaskRunner\Exceptions\EndQueueException;
 

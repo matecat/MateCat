@@ -8,7 +8,6 @@
 
 namespace Email;
 
-use AMQHandler;
 use Exception;
 use INIT;
 use Log;

@@ -40,7 +40,7 @@ class ManageUtils {
                              $no_assignee = false
     ) {
 
-        list( $conditions, $data ) = static::conditionsForProjectsQuery(
+        [ $conditions, $data ] = static::conditionsForProjectsQuery(
                 $search_in_pname,
                 $search_source,
                 $search_target,
@@ -214,7 +214,7 @@ class ManageUtils {
                                                                 $no_assignee = false
     ) {
 
-        list( $conditions, $data ) = static::conditionsForProjectsQuery(
+        [ $conditions, $data ] = static::conditionsForProjectsQuery(
                 $search_in_pname, $search_source, $search_target,
                 $search_status, $search_only_completed
         );

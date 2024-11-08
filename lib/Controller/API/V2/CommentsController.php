@@ -11,9 +11,9 @@ namespace API\V2;
 
 use API\Commons\Validators\ChunkPasswordValidator;
 use API\Commons\Validators\LoginValidator;
-use Jobs_JobStruct;
 use Comments_CommentDao;
 use Exception;
+use Jobs_JobStruct;
 
 class CommentsController extends BaseChunkController {
 

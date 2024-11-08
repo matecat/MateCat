@@ -12,9 +12,9 @@ use API\Commons\Validators\ChunkPasswordValidator;
 use API\Commons\Validators\LoginValidator;
 use API\V2\BaseChunkController;
 use API\V3\Json\Chunk;
-use Jobs_JobStruct;
 use Exception;
 use Exceptions\NotFoundException;
+use Jobs_JobStruct;
 use Projects_ProjectStruct;
 
 class ChunkController extends BaseChunkController {

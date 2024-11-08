@@ -8,12 +8,12 @@
 
 namespace Features\ReviewExtended;
 
-use Jobs_JobStruct;
 use Exception;
 use Features\ReviewExtended\Email\RevisionChangedNotificationEmail;
 use Features\TranslationEvents\Model\TranslationEvent;
 use Features\TranslationEvents\Model\TranslationEventDao;
 use Features\TranslationEvents\Model\TranslationEventStruct;
+use Jobs_JobStruct;
 use LQA\ChunkReviewStruct;
 use LQA\EntryCommentStruct;
 use LQA\EntryDao;

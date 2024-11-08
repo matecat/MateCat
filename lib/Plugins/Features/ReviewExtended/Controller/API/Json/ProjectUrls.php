@@ -8,8 +8,8 @@
 
 namespace Features\ReviewExtended\Controller\API\Json;
 
-use Jobs_JobStruct;
 use Features\ReviewExtended\ReviewUtils;
+use Jobs_JobStruct;
 use LQA\ChunkReviewDao;
 use Routes;
 

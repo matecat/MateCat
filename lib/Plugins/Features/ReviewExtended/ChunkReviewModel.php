@@ -9,8 +9,8 @@
 
 namespace Features\ReviewExtended;
 
-use Jobs_JobStruct;
 use Exception;
+use Jobs_JobStruct;
 use LQA\ChunkReviewDao;
 use LQA\ChunkReviewStruct;
 use LQA\ModelStruct;

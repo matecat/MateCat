@@ -349,25 +349,14 @@ abstract class AbstractRevisionFeature extends BaseFeature {
     }
 
     /**
-     * Entry point for project data validation for this feature.
-     *
-     * @param $projectStructure
-     *
-     * @throws ConnectionException
-     * @throws \Exceptions\ValidationError
-     * @throws ReflectionException
-     */
-    public function validateProjectCreation( $projectStructure ) {
-        self::loadAndValidateModelFromJsonFile( $projectStructure );
-    }
-
-    /**
      *
      * project_completion_event_saved
      *
      * @param Jobs_JobStruct        $chunk
      * @param CompletionEventStruct $event
      * @param                       $completion_event_id
+     *
+     * @throws Exception
      */
     public function project_completion_event_saved( Jobs_JobStruct $chunk, CompletionEventStruct $event, $completion_event_id ) {
         $model = new QualityReportModel( $chunk );
@@ -466,7 +455,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
     private function setQaModelFromJsonFile( $projectStructure ) {
 
         /** @var RecursiveArrayObject $model_json */
-        $model_json = $projectStructure[ 'features' ][ 'review_extended' ][ '__meta' ][ 'qa_model' ];
+        $model_json = $projectStructure[ 'features' ][ 'quality_framework' ];
 
         $model_record = ModelDao::createModelFromJsonDefinition( $model_json->toArray() );
 
@@ -479,95 +468,106 @@ abstract class AbstractRevisionFeature extends BaseFeature {
     }
 
     /**
-     * Validate the project is valid in the scope of ReviewExtended feature.
-     * A project is valid if we area able to find a qa_model.json file inside
-     * a __meta folder. The qa_model.json file must be valid too.
+     * Validate the project is valid in the scope of the ReviewExtended feature.
+     * A project is valid if we can find a qa_model.json file inside a `__meta` folder.
+     * The qa_model.json file must also be valid.
      *
-     * If validation fails, adds errors to the projectStructure.
+     * If validation fails, add errors to the projectStructure.
      *
-     * @param             $projectStructure
+     * @param ArrayObject $projectStructure
      * @param string|null $jsonPath
      *
      * @throws ConnectionException
      * @throws ReflectionException
+     * @throws Exception
      */
-
-    public static function loadAndValidateModelFromJsonFile( &$projectStructure, ?string $jsonPath = null ) {
-
+    public static function loadAndValidateQualityFramework( ArrayObject &$projectStructure, ?string $jsonPath = null ) {
+        
         if ( get_called_class() instanceof ReviewExtended || get_called_class() == ReviewExtended::class ) {
             return;
         }
 
-        // CASE 1 there is an injected QA template id from API or UI
-        /** RecursiveArrayObject */
-        if ( !empty( $projectStructure[ 'qa_model_template' ] ) ) {
-            $decoded_model = $projectStructure[ 'qa_model_template' ];
-        } // CASE 2 there a is an injected qa_model, from api by passing an explicit qa_model_id
-        elseif ( !empty( $projectStructure[ 'qa_model' ] ) ) {
-            $decoded_model = $projectStructure[ 'qa_model' ];
-        } // CASE3 otherwise, load default or from zip file
-        else {
-            // detect if the project created was a zip file, in which case try to detect
-            // id_qa_model from json file.
-            // otherwise assign the default model
+        // Use Null Coalescing Operator to simplify checks for template or model
+        $decoded_model = $projectStructure[ 'qa_model_template' ] ?? $projectStructure[ 'qa_model' ];
 
-            $qa_model = false;
-            $fs       = FilesStorageFactory::create();
-            $zip_file = $fs->getTemporaryUploadedZipFile( $projectStructure[ 'uploadToken' ] );
-
-            Log::doJsonLog( $zip_file );
-
-            if ( $zip_file !== false ) {
-                $zip = new ZipArchive();
-                $zip->open( $zip_file );
-                $qa_model = $zip->getFromName( '__meta/qa_model.json' );
-
-                if ( AbstractFilesStorage::isOnS3() ) {
-                    unlink( $zip_file );
-                }
-
-            }
-
-            // File is not a zip OR model was not found in zip
-            Log::doJsonLog( "QA model is : " . var_export( $qa_model, true ) );
-
-            if ( empty( $qa_model ) ) {
-                if ( $jsonPath == null ) {
-                    $qa_model = file_get_contents( INIT::$ROOT . '/inc/qa_model.json' );
-                } else {
-                    $qa_model = file_get_contents( $jsonPath );
-                }
-            }
-
-            $decoded_model = new RecursiveArrayObject( json_decode( $qa_model, true ) );
-
-            // set the user id to allow having ownership in qa_models table
-            $decoded_model[ 'model' ][ 'uid' ] = $projectStructure[ 'uid' ];
-
+        // Try to load from ZIP file if no model is injected
+        if ( empty( $decoded_model ) ) {
+            $decoded_model = self::extractQaModelFromZip( $projectStructure[ 'uploadToken' ] );
         }
 
+        // Still empty?
+        if ( empty( $decoded_model ) ) {
+            $decoded_model = self::loadModelFromPathOrDefault( $projectStructure, $jsonPath );
+        }
+
+        // If decoding the model failed, register the error
         if ( empty( $decoded_model ) ) {
             $projectStructure[ 'result' ][ 'errors' ][] = [
-                    'code'    => '-900',  // TODO: decide how to assign such errors
+                    'code'    => '-900',
                     'message' => 'QA model failed to decode'
             ];
         }
 
-        /**
-         * Append the qa model to the project structure for later use.
-         */
+        // Initialize features if not already set
         if ( !isset( $projectStructure[ 'features' ] ) ) {
             $projectStructure[ 'features' ] = [];
         }
 
-        $projectStructure[ 'features' ] = [
-                'review_extended' => [
-                        '__meta' => [
-                                'qa_model' => $decoded_model
-                        ]
-                ]
-        ];
+        // Append the QA model to the project structure
+        $projectStructure[ 'features' ][ 'quality_framework' ] = $decoded_model;
 
+    }
+
+    /**
+     * Get a model from path or default
+     *
+     * @param ArrayObject $projectStructure
+     * @param string|null $jsonPath
+     *
+     * @return array|RecursiveArrayObject
+     */
+    private static function loadModelFromPathOrDefault( ArrayObject $projectStructure, ?string $jsonPath ) {
+
+        if ( empty( $qa_model ) ) {
+            // Use null coalescing to simplify fallback logic
+            $path     = $jsonPath ?? INIT::$ROOT . '/inc/qa_model.json';
+            $qa_model = file_get_contents( $path );
+        }
+
+        $decoded_model = new RecursiveArrayObject( json_decode( $qa_model, true ) );
+        // Set the user ID to allow ownership in the QA models table
+        $decoded_model[ 'model' ][ 'uid' ] = $projectStructure[ 'uid' ];
+
+        return $decoded_model;
+    }
+
+    /**
+     * Extract QA model from ZIP file
+     *
+     * @throws ReflectionException
+     * @throws ConnectionException
+     * @throws Exception
+     */
+    private static function extractQaModelFromZip( $uploadToken ) {
+        $fs       = FilesStorageFactory::create();
+        $zip_file = $fs->getTemporaryUploadedZipFile( $uploadToken );
+
+        if ( $zip_file === false ) {
+            return null;
+        }
+
+        $zip      = new ZipArchive();
+        $qa_model = null;
+        if ( $zip->open( $zip_file ) === true ) {
+            $qa_model = $zip->getFromName( '__meta/qa_model.json' );
+            $zip->close();
+        }
+
+        if ( AbstractFilesStorage::isOnS3() ) {
+            unlink( $zip_file );
+        }
+
+        return $qa_model;
     }
 
     /**

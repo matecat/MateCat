@@ -2,9 +2,9 @@
 
 namespace Features;
 
-use Jobs_JobStruct;
 use Features\TranslationVersions\Handlers\DummyTranslationVersionHandler;
 use Features\TranslationVersions\Handlers\TranslationVersionsHandler;
+use Jobs_JobStruct;
 use Projects_ProjectStruct;
 use Users_UserStruct;
 

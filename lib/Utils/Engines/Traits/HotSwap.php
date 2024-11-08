@@ -13,7 +13,6 @@ namespace Engines\Traits;
 use Exception;
 use Jobs_JobDao;
 use Jobs_JobStruct;
-use Predis\Connection\ConnectionException;
 use RedisHandler;
 use ReflectionException;
 

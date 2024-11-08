@@ -18,7 +18,7 @@ $klein->with( '/api/app/user', function () {
     route( '/password/change', 'POST', [ 'API\App\Authentication\UserController', 'changePasswordAsLoggedUser' ] );
 
     route( '/login', 'POST', [ 'API\App\Authentication\LoginController', 'login' ] );
-    route( '/logout', 'POST', [ 'API\App\Authentication\LoginController', 'logout' ] );
+    route( '/logout', 'POST', [ 'API\App\Authentication\LoginController', 'directLogout' ] );
     route( '/login/token', 'GET', [ 'API\App\Authentication\LoginController', 'token' ] );
 
     route( '/metadata', 'POST', [ 'API\App\UserMetadataController', 'update' ] );

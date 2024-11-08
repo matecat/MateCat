@@ -9,7 +9,6 @@
 namespace AsyncTasks\Workers;
 
 
-use Jobs_JobStruct;
 use Database;
 use Exception;
 use Features;
@@ -17,6 +16,7 @@ use Features\ReviewExtended\BatchReviewProcessor;
 use Features\ReviewExtended\ReviewUtils;
 use Features\TranslationEvents\Model\TranslationEvent;
 use Features\TranslationEvents\TranslationEventsHandler;
+use Jobs_JobStruct;
 use ReflectionException;
 use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\AbstractWorker;

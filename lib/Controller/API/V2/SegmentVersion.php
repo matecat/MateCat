@@ -3,8 +3,8 @@
 namespace API\V2;
 
 use API\Commons\Validators\JobPasswordValidator;
-use API\Commons\Validators\SegmentValidator;
 use API\Commons\Validators\LoginValidator;
+use API\Commons\Validators\SegmentValidator;
 use API\V2\Json\SegmentVersion as JsonFormatter;
 use Features\TranslationVersions\Model\TranslationVersionDao;
 

@@ -6,10 +6,10 @@ namespace Features\SegmentFilter\Controller\API;
 use API\Commons\Exceptions\ValidationError;
 use API\Commons\Validators\ChunkPasswordValidator;
 use API\V2\BaseChunkController;
-use Jobs_JobStruct;
 use Exception;
 use Features\SegmentFilter\Model\FilterDefinition;
 use Features\SegmentFilter\Model\SegmentFilterModel;
+use Jobs_JobStruct;
 
 
 class FilterController extends BaseChunkController {

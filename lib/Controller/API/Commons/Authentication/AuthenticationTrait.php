@@ -63,7 +63,7 @@ trait AuthenticationTrait {
     }
 
     public function broadcastLogout() {
-        AuthenticationHelper::destroyAuthentication( $_SESSION );
+        $this->logout();
         $queueHandler = new AMQHandler();
         $message      = json_encode( [
                 '_type' => 'logout',
@@ -75,6 +75,10 @@ trait AuthenticationTrait {
                 ]
         ] );
         $queueHandler->publishToTopic( INIT::$SSE_NOTIFICATIONS_QUEUE_NAME, new Message( $message ) );
+    }
+
+    public function logout(){
+        AuthenticationHelper::destroyAuthentication( $_SESSION );
     }
 
 }

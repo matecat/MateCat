@@ -7,7 +7,6 @@ use Constants_Teams;
 use Exceptions\ValidationError;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
-use RedisHandler;
 use Teams\MembershipDao;
 use Teams\MembershipStruct;
 use Teams\TeamDao;

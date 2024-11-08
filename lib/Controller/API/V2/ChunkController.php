@@ -9,14 +9,14 @@
 namespace API\V2;
 
 use API\Commons\Validators\ChunkPasswordValidator;
-use API\Commons\Validators\ProjectAccessValidator;
 use API\Commons\Validators\LoginValidator;
+use API\Commons\Validators\ProjectAccessValidator;
 use API\V2\Json\Chunk;
-use Jobs_JobStruct;
 use Constants_JobStatus;
 use Exception;
 use Exceptions\NotFoundException;
 use Jobs_JobDao;
+use Jobs_JobStruct;
 use Projects_ProjectStruct;
 use Translations_SegmentTranslationDao;
 use Utils;
