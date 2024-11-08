@@ -396,7 +396,7 @@ class SegmentFooterTabMatches extends React.Component {
             {errors.length > 0 && <div className="engine-errors">{errors}</div>}
           </>
         ) : (
-          <SegmentFooterTabError />
+          clientConnected === false && <SegmentFooterTabError />
         )}
       </div>
     )

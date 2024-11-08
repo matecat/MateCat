@@ -9,8 +9,8 @@
 namespace API\V2;
 
 use API\Commons\KleinController;
-use API\Commons\Validators\ProjectPasswordValidator;
 use API\Commons\Validators\LoginValidator;
+use API\Commons\Validators\ProjectPasswordValidator;
 use API\V2\Json\ProjectUrls;
 use DataAccess\ShapelessConcreteStruct;
 

@@ -2,17 +2,16 @@
 
 namespace Features\TranslationEvents\Model;
 
-use Jobs_JobStruct;
 use Constants;
 use Constants_TranslationStatus;
 use Database;
 use Exception;
+use Jobs_JobStruct;
 use LQA\ChunkReviewStruct;
 use LQA\EntryWithCategoryStruct;
 use Segments_SegmentDao;
 use Segments_SegmentStruct;
 use Translations_SegmentTranslationStruct;
-use Users_UserDao;
 use Users_UserStruct;
 
 class TranslationEvent {

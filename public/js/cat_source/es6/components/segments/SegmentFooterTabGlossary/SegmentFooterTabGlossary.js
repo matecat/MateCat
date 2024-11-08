@@ -384,8 +384,8 @@ export const SegmentFooterTabGlossary = ({
         keys.length > 1
           ? SegmentUtils.getSelectedKeysGlossary(keys)
           : keys.length === 1
-          ? [keys[0]]
-          : [],
+            ? [keys[0]]
+            : [],
     }))
   }, [keys])
 
@@ -518,7 +518,7 @@ export const SegmentFooterTabGlossary = ({
         tabIndex="0"
       >
         {!clientConnected ? (
-          <SegmentFooterTabError />
+          clientConnected === false && <SegmentFooterTabError />
         ) : haveKeysGlossary ? (
           <>
             <SearchTerms />
