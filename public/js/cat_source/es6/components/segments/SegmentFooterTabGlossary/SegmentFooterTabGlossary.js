@@ -517,8 +517,8 @@ export const SegmentFooterTabGlossary = ({
         className={`tab sub-editor glossary ${active_class}`}
         tabIndex="0"
       >
-        {clientConnected === false ? (
-          <SegmentFooterTabError />
+        {!clientConnected ? (
+          clientConnected === false && <SegmentFooterTabError />
         ) : haveKeysGlossary ? (
           <>
             <SearchTerms />
