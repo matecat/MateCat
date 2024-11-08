@@ -25,8 +25,8 @@ class LoginController extends AbstractStatefulKleinController {
 
     use RateLimiterTrait;
 
-    public function logout() {
-        $this->broadcastLogout();
+    public function directLogout() {
+        $this->logout();
         $this->response->code( 200 );
     }
 
