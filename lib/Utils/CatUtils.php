@@ -381,7 +381,7 @@ class CatUtils {
      */
     public static function segment_raw_word_count( ?string $string = null, string $source_lang = 'en-US', MateCatFilter $filter = null ): int {
 
-        if ( empty( $string ) ) {
+        if ( empty( $string ) && strlen( trim( $string ) ) === 0 ) {
             return 0;
         }
 
