@@ -29,7 +29,7 @@ module.exports.Application = class {
                 socket.handshake.headers['x-userid'] &&
                 socket.handshake.headers['x-uuid']
             ) {
-                const content = verify(
+                verify(
                     socket.handshake.headers['x-token'],
                     this.options.authSecretKey,
                     {
@@ -94,6 +94,8 @@ module.exports.Application = class {
             } );
 
         } );
+
+        return this;
 
     }
 

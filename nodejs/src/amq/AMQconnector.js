@@ -19,7 +19,7 @@ module.exports.ConnectionPool = class {
         } );
 
         this.connectionManager.on( 'connect', ( msg ) => {
-            logger.info( 'Connection Manager connected', msg );
+            logger.debug( 'Connection Manager connected' );
         } );
 
         this.channelFactory = new stompit.ChannelFactory( this.connectionManager );

@@ -28,6 +28,6 @@
     "tsx": "^4.19.2"
   },
   "scripts": {
-    "start": "node --max-semi-space-size=256 ./src/socketServer.js"
+    "start": "node --max-semi-space-size=256 socketServer.js"
   }
 }
