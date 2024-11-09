@@ -84,7 +84,7 @@ module.exports.Reader = class {
 
                     try {
                         const obj = JSON.parse( body );
-                        logger.debug( 'Received message ' + obj.messageType );
+                        logger.debug( [ 'Received message', obj._type ] );
                         this.messageHandler( obj );
                     } catch ( e ) {
                         logger.error( 'Fail parsing message', e );

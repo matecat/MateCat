@@ -29,7 +29,7 @@ module.exports.Application = class {
                 socket.handshake.headers['x-userid'] &&
                 socket.handshake.headers['x-uuid']
             ) {
-                verify(
+                const content = verify(
                     socket.handshake.headers['x-token'],
                     this.options.authSecretKey,
                     {
@@ -88,6 +88,7 @@ module.exports.Application = class {
                 data: {
                     _type: 'ack',
                     clientId: socket.uuid,
+                    user_id: socket.user_id,
                     serverVersion: this.options.serverVersion
                 }
             } );
@@ -119,16 +120,7 @@ module.exports.Application = class {
      * @param message
      */
     sendRoomNotifications = ( room, type, message ) => {
-        this.getSocketGroup( room ).emit( type, message );
-    };
-
-    /**
-     *
-     * @param room
-     * @returns {*}
-     */
-    getSocketGroup = ( room ) => {
-        return this._socketIOServer.to( room );
+        this._socketIOServer.to( room ).emit( type, message );
     };
 
 }

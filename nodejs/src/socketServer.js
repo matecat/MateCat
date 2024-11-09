@@ -40,26 +40,3 @@ server.listen( config.server.port, config.server.address, () => {
 } );
 
 new Application( server, amqConnector, {serverVersion: SERVER_VERSION, allowedOrigins: allowedOrigins, authSecretKey: auth_secret_key} ).start();
-
-// ( req, res ) => {
-//     // find job id from the requested path
-//     const parsedUrl = new URL( req.url, `https://${req.headers.host}/` )
-//
-//     if ( corsAllow( req, res ) ) {
-//         if ( parsedUrl.pathname.indexOf( config.server.path ) === 0 ) {
-//             const params = parsedUrl.searchParams
-//             res._clientId = uuid.v4()
-//             res._matecatJobId = parseInt( params.get( 'jid' ) );
-//             res._matecatPw = params.get( 'pw' )
-//             res._userId = parseInt( params.get( 'uid' ) );
-//             browserChannel.addClient( req, res )
-//         } else {
-//             res.writeHead( 404 )
-//             res.end()
-//         }
-//     } else {
-//         res.writeHead( 401 )
-//         res.end()
-//     }
-//
-// }
