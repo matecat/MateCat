@@ -1,4 +1,8 @@
 import {useCallback, useEffect, useRef, useState} from 'react'
+import {getAuthToken} from "../api/loginUser/";
+import {v4 as uuidV4} from "uuid";
+
+const {io} = require("socket.io-client");
 
 // Object to represent connection states
 export const ConnectionStates = {
@@ -8,7 +12,7 @@ export const ConnectionStates = {
   ERROR: 'ERROR',
 }
 
-const useSse = (url, options, isAuthenticated, eventHandlers = {}) => {
+const useSse = (connectionParams, options, isAuthenticated, eventHandlers = {}) => {
   // State variables to manage connection status, error, event source, and received event data
   const [connectionState, setConnectionState] = useState(
     ConnectionStates.CONNECTING,
@@ -25,40 +29,61 @@ const useSse = (url, options, isAuthenticated, eventHandlers = {}) => {
   }
 
   const connect = () => {
-    const es = new EventSource(url, options)
-    setEventSource(es) // Set the EventSource instance
+    getAuthToken().then(response => {
+      connectUnderlyingSocket(
+        {
+          "x-token": response.token,
+          "x-uuid": uuidV4(),
+          "x-userid": options.userId
+        }
+      )
+    }).catch(error => {
+      console.log("Token error", error)
+    });
+  }
 
-    es.onopen = () => {
-      setConnectionState(ConnectionStates.OPEN) // Update state to OPEN when connection is established
-      setConnectionError(null) // Reset the error on successful connection
-      if (retryingInterval.current) {
-        clearTimeout(retryingInterval.current) // Clear the timeout if it was active
-        retryingInterval.current = 0
-        eventHandlers['reconnected'] ? eventHandlers['reconnected']() : null
+  const connectUnderlyingSocket = (extraHeaders) => {
+
+    const socket = io(connectionParams.source,
+      {
+        path: connectionParams.path,
+        reconnectionDelay: 1000,
+        reconnectionDelayMax: 5000,
+        extraHeaders: extraHeaders
       }
-    }
+    );
 
-    es.onerror = (error) => {
-      if (es.readyState === 2) {
-        // Only handle reconnection if the connection is closed
-        setConnectionState(ConnectionStates.CLOSED) // Update state to CLOSED on error
-        setConnectionError(error) // Store the error
-        console.error('SSE connection error:', error)
-
-        eventHandlers['disconnected'] ? eventHandlers['disconnected']() : null
-        // Attempt to reconnect every 5 seconds
-        clearTimeout(retryingInterval.current)
-        retryingInterval.current = setTimeout(() => {
-          console.log('Reconnecting...')
-          connect() // Reconnect
-        }, 5000)
+    setEventSource(socket) // Set the EventSource instance
+    socket.on('connect', () => {
+        setConnectionState(ConnectionStates.OPEN) // Update state to OPEN when connection is established
+        setConnectionError(null) // Reset the error on successful connection
+        if (retryingInterval.current) {
+          clearTimeout(retryingInterval.current) // Clear the timeout if it was active
+          retryingInterval.current = 0
+          eventHandlers['reconnected'] ? eventHandlers['reconnected']() : null
+        }
       }
-    }
+    );
+
+    socket.on('connect_error', (error) => {
+      // Only handle reconnection if the connection is closed
+      setConnectionState(ConnectionStates.CLOSED) // Update state to CLOSED on error
+      setConnectionError(error) // Store the error
+      console.error('SSE connection error:', error)
+
+      eventHandlers['disconnected'] ? eventHandlers['disconnected']() : null
+      // Attempt to reconnect every 5 seconds
+      clearTimeout(retryingInterval.current)
+      retryingInterval.current = setTimeout(() => {
+        console.log('Reconnecting...')
+        connect() // Reconnect
+      }, 5000)
+    });
 
     // Add listener for the message event
-    es.addEventListener('message', (event) => {
+    socket.on('message', (event) => {
       try {
-        const parsedData = JSON.parse(event.data) // Parse the incoming JSON message
+        const parsedData = event.data // Parse the incoming JSON message
         const {_type: eventIdentifier} = parsedData // Extract event identifier and data
 
         // Update state with the received data

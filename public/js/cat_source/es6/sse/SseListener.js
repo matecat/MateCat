@@ -176,28 +176,21 @@ const SseListener = ({isAuthenticated, userId}) => {
       forceLogout()
     },
   }
+
   const getSource = function () {
-    let source =
-      window.location.host +
-      '/sse' +
-      '/channel/updates' +
-      '?jid=' +
-      config.id_job +
-      '&pw=' +
-      config.password +
-      '&uid=' +
-      userId
+    let source = window.location.host
 
     if (config.enableMultiDomainApi) {
-      source =
-        Math.floor(Math.random() * config.ajaxDomainsNumber) + '.ajax.' + source
+      source = Math.floor(Math.random() * config.ajaxDomainsNumber) + '.ajax.' + source
     }
 
-    return '//' + source
+    return {source: '//' + source, path: '/sse/channel/updates/socket.io'}
+
   }
+
   const {connectionState, connectionError} = useSse(
     getSource(),
-    {},
+    {userId: userId},
     isAuthenticated,
     eventHandlers,
   )

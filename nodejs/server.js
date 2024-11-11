@@ -13,6 +13,8 @@ const config = ini.parseSync( path.resolve( __dirname, './config.ini' ) );
 const SERVER_VERSION = config.server.version.replace( /['"]+/g, '' );
 const allowedOrigins = config.cors.allowedOrigins;
 const auth_secret_key = fs.readFileSync( '../inc/login_secret.dat', 'utf8' );
+// const serverPath = config.server.path.charAt(0) === '/' ? config.server.path.substring(1) : config.server.path;
+const serverPath = config.server.path;
 
 // Connections Options for stompit
 const parameters = {
@@ -50,7 +52,7 @@ if ( cluster.isPrimary ) {
 
     // setMonitoring();
     logger.info( ['Server version ' + SERVER_VERSION] );
-    logger.info( ['Listening on //' + config.server.address + ':' + config.server.port + '/'] );
+    logger.info( ['Listening on //' + config.server.address + ':' + config.server.port + '/' + serverPath] );
 
 } else {
 
@@ -65,7 +67,13 @@ if ( cluster.isPrimary ) {
         logger.info( ['Worker started', cluster.worker.id] )
     } );
 
-    let app = new Application( server, amqConnector, {workerId: cluster.worker.id, serverVersion: SERVER_VERSION, allowedOrigins: allowedOrigins, authSecretKey: auth_secret_key} ).start();
+    let app = new Application( server, amqConnector, {
+        path: serverPath,
+        workerId: cluster.worker.id,
+        serverVersion: SERVER_VERSION,
+        allowedOrigins: allowedOrigins,
+        authSecretKey: auth_secret_key
+    } ).start();
 
     ['SIGINT', 'SIGTERM'].forEach(
         signal => process.on( signal, ( sig ) => {

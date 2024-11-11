@@ -13,14 +13,14 @@ module.exports.Application = class {
         this.options = options;
 
         this._socketIOServer = io( server, {
-            pingTimeout: 60000,
+            path: this.options.path,
+            pingTimeout: 5000,
             //Set cors origin
             cors: {
-                methods: ["GET", "OPTIONS"],
+                methods: ["GET", "POST", "OPTIONS"],
                 origin: this.options.allowedOrigins,
                 credentials: true,
             },
-            allowEIO3: true,
         } ).use( ( socket, next ) => {
 
             if (
