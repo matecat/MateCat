@@ -1,6 +1,8 @@
 import React from 'react'
 import ReviewExtendedCategorySelector from './ReviewExtendedCategorySelector'
-import CommonUtils from '../../utils/commonUtils'
+import CommonUtils, {
+  trackErrorStatusUndefinedSentry,
+} from '../../utils/commonUtils'
 import SegmentActions from '../../actions/SegmentActions'
 import {setTranslation} from '../../api/setTranslation'
 import {orderBy} from 'lodash'
@@ -63,6 +65,13 @@ class ReviewExtendedIssuePanel extends React.Component {
     }
 
     const deferredSubmit = () => {
+      // Temp track status undefined;
+      trackErrorStatusUndefinedSentry({
+        caller: 'ReviewExtendedIssuePanel -> deferredSubmit (row: 70)',
+        idSegment: segment.sid,
+        status: segment.status,
+      })
+      // End temp track status undefined;
       SegmentActions.setStatus(segment.sid, segment.fid, segment.status)
       SegmentActions.submitIssue(this.context.segment.sid, issue)
         .then((data) => {
@@ -93,6 +102,13 @@ class ReviewExtendedIssuePanel extends React.Component {
       setTranslation(requestObject)
         .then((response) => {
           issue.version = response.translation.version_number
+          // Temp track status undefined;
+          trackErrorStatusUndefinedSentry({
+            caller: 'ReviewExtendedIssuePanel -> (row 107)',
+            idSegment: segment.sid,
+            status: segment.status,
+          })
+          // End temp track status undefined;
           SegmentActions.setStatus(segment.sid, segment.id_file, segment.status)
           SegmentActions.addClassToSegment(segment.sid, 'modified')
           deferredSubmit()
