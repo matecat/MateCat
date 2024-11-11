@@ -171,7 +171,7 @@ class AuthenticationHelper {
         return $this->logged;
     }
 
-    public function getApiRecord(): ApiKeys_ApiKeyStruct {
+    public function getApiRecord(): ?ApiKeys_ApiKeyStruct {
         return $this->api_record;
     }
 
