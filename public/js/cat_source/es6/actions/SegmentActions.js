@@ -78,7 +78,9 @@ const SegmentActions = {
       .catch((errors) => {
         var notification = {
           title: 'Error',
-          text: errors[0].message,
+          text: errors?.length
+            ? errors[0].message
+            : 'We got an error, please contact support',
           type: 'error',
         }
         CatToolActions.addNotification(notification)
