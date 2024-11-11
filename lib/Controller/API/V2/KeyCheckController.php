@@ -26,7 +26,7 @@ class KeyCheckController extends KleinController {
      * @throws AuthenticationError
      */
     public function ping() {
-        if ( !$this->api_record ) {
+        if ( !$this->getApiRecord() ) {
             throw new AuthenticationError();
         }
 
