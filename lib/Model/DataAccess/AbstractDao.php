@@ -37,7 +37,7 @@ abstract class DataAccess_AbstractDao {
     /**
      * @var array
      */
-    protected static array $auto_increment_field;
+    protected static array $auto_increment_field = [];
 
     /**
      * @var string
@@ -54,6 +54,7 @@ abstract class DataAccess_AbstractDao {
         }
 
         $this->database = $con;
+        self::$auto_increment_field = [];
     }
 
     /**
