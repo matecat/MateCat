@@ -4,6 +4,7 @@ import SegmentActions from '../actions/SegmentActions'
 import SegmentStore from '../stores/SegmentStore'
 import AlertModal from '../components/modals/AlertModal'
 import ModalsActions from '../actions/ModalsActions'
+import * as Sentry from '@sentry/browser'
 
 const CommonUtils = {
   millisecondsToTime(milli) {
@@ -667,5 +668,22 @@ export const executeOnce = () => {
     if (wasAlreadyExecuted) return
     callback()
     wasAlreadyExecuted = true
+  }
+}
+
+export const trackErrorStatusUndefinedSentry = ({
+  caller,
+  idSegment,
+  status,
+}) => {
+  if (typeof status === 'undefined' || !status) {
+    const errorMessage = `Segment (${idSegment}) status undefined! (Caller: ${caller})`
+    Sentry.captureException(errorMessage, {
+      tags: {
+        id_segment: idSegment,
+        status: status,
+        caller,
+      },
+    })
   }
 }
