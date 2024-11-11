@@ -126,7 +126,10 @@ let TranslationMatches = {
       return Promise.resolve()
     }
     let callNewContributions = force
-    if (SegmentStore.lastTranslatedSegmentId) {
+    if (
+      SegmentStore.lastTranslatedSegmentId &&
+      SegmentStore.getSegmentByIdToJS(SegmentStore.lastTranslatedSegmentId)
+    ) {
       /* If the segment just translated is equal or similar (Levenshtein distance) to the
        * current segment force to reload the matches
        **/
