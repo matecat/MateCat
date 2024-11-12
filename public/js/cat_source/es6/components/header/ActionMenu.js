@@ -131,9 +131,6 @@ export const ActionMenu = ({
         >
           <a>Shortcuts</a>
         </li>
-        {/*<li class="item" title="Edit log" data-value="editlog" >*/}
-        {/*    <a id="edit_log_link" target="_blank" href={`editlog/${jid}-${password}`}>Editing Log</a>*/}
-        {/*</li>*/}
       </ul>
     )
   }
