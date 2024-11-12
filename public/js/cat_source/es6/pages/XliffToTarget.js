@@ -28,10 +28,10 @@ export const XliffToTarget = () => {
         <UploadXliff />
       </div>
       <Footer />
-      {/*<SocketListener
+      <SocketListener
         isAuthenticated={isUserLogged}
         userId={isUserLogged ? userInfo.user.uid : null}
-      />*/}
+      />
     </>
   )
 }

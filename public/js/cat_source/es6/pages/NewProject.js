@@ -1017,10 +1017,10 @@ const NewProject = () => {
       )}
       <HomePageSection />
       <Footer />
-      {/*<SocketListener
+      <SocketListener
         isAuthenticated={isUserLogged}
         userId={isUserLogged ? userInfo.user.uid : null}
-      />*/}
+      />
     </CreateProjectContext.Provider>
   ) : (
     <div>

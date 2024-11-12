@@ -93,10 +93,10 @@ export const ActivityLog = () => {
         <ActivityLogTable />
       </div>
       <Footer />
-      {/* <SocketListener
+      <SocketListener
         isAuthenticated={isUserLogged}
         userId={isUserLogged ? userInfo.user.uid : null}
-      />*/}
+      />
     </ActivityLogContext.Provider>
   )
 }
