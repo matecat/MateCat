@@ -9,7 +9,7 @@ import usePortal from '../hooks/usePortal'
 import Header from '../components/header/Header'
 import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper'
 import Footer from '../components/footer/Footer'
-import SseListener from '../sse/SseListener'
+import SocketListener from '../sse/SocketListener'
 import {mountPage} from './mountPage'
 import {
   ACTIVITY_LOG_COLUMNS,
@@ -93,7 +93,7 @@ export const ActivityLog = () => {
         <ActivityLogTable />
       </div>
       <Footer />
-      {/* <SseListener
+      {/* <SocketListener
         isAuthenticated={isUserLogged}
         userId={isUserLogged ? userInfo.user.uid : null}
       />*/}
