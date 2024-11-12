@@ -1,7 +1,6 @@
 <?php
 
 use Comments\OpenThreadsStruct;
-use DataAccess\ShapelessConcreteStruct;
 
 class Comments_CommentDao extends DataAccess_AbstractDao {
 

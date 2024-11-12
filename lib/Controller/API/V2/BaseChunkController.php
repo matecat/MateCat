@@ -3,8 +3,8 @@
 namespace API\V2;
 
 use API\Commons\KleinController;
-use Jobs_JobStruct;
 use Jobs_JobDao;
+use Jobs_JobStruct;
 use LQA\ChunkReviewDao;
 use ReflectionException;
 

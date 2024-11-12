@@ -309,6 +309,11 @@ let CatToolActions = {
       })
     }
   },
+  setSegmentFilterError: function () {
+    AppDispatcher.dispatch({
+      actionType: CatToolConstants.SEGMENT_FILTER_ERROR,
+    })
+  },
 }
 
 export default CatToolActions

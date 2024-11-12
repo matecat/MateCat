@@ -9,10 +9,10 @@
 namespace Features\ProjectCompletion\Model ;
 
 use Chunks_ChunkCompletionEventDao;
-use Jobs_JobStruct;
 use Exception;
 use Features\ProjectCompletion\CompletionEventStruct;
 use FeatureSet;
+use Jobs_JobStruct;
 use Projects_ProjectDao;
 
 

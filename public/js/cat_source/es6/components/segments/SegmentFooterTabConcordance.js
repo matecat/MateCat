@@ -198,7 +198,7 @@ class SegmentFooterTabConcordance extends React.Component {
       >
         {' '}
         {!clientConnected ? (
-          <SegmentFooterTabError />
+          clientConnected === false && <SegmentFooterTabError />
         ) : (
           <>
             <div className="overflow">

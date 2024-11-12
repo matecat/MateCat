@@ -28,10 +28,8 @@ class LoginValidator extends Base {
     }
 
     public function _validate() {
-
-        $user = $this->controller->getUser();
-        if( empty( $user ) ){
-            throw new AuthenticationError( "Invalid Login.", 401 );
-        }
+//        if( !$this->controller->isLoggedIn() ){
+//            throw new AuthenticationError( "Invalid Login.", 401 );
+//        }
     }
 }

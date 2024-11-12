@@ -8,10 +8,10 @@
 
 namespace Features\ReviewExtended;
 
-use Jobs_JobStruct;
 use Exception;
 use Features\ReviewExtended\Email\BatchReviewProcessorAlertEmail;
 use Features\TranslationEvents\Model\TranslationEvent;
+use Jobs_JobStruct;
 use Log;
 use LQA\ChunkReviewDao;
 use Projects_ProjectStruct;
