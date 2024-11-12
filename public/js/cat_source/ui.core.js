@@ -2,9 +2,7 @@ import {isUndefined} from 'lodash'
 import Cookies from 'js-cookie'
 
 import CatToolActions from './es6/actions/CatToolActions'
-import CommonUtils, {
-  trackErrorStatusUndefinedSentry,
-} from './es6/utils/commonUtils'
+import CommonUtils from './es6/utils/commonUtils'
 import ConfirmMessageModal from './es6/components/modals/ConfirmMessageModal'
 import TextUtils from './es6/utils/textUtils'
 import OfflineUtils from './es6/utils/offlineUtils'
@@ -575,13 +573,6 @@ window.UI = {
     var segment = $('#segment-' + id_segment)
 
     if (response.data == 'OK') {
-      // Temp track status undefined;
-      trackErrorStatusUndefinedSentry({
-        caller: 'Ui.core -> setTranslation_success',
-        idSegment: id_segment,
-        status,
-      })
-      // End temp track status undefined;
       SegmentActions.setStatus(id_segment, null, status)
       CatToolActions.setProgress(response)
       SegmentActions.removeClassToSegment(id_segment, 'setTranslationPending')
