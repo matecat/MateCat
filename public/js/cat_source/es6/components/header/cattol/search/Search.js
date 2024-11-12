@@ -262,7 +262,9 @@ class Search extends React.Component {
             ModalsActions.showModalComponent(
               AlertModal,
               {
-                text: errors[0].message,
+                text: errors?.length
+                  ? errors[0].message
+                  : 'We got an error, please contact support',
               },
               'Replace All Alert',
             )

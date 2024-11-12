@@ -44,7 +44,9 @@ import {
 } from '../components/modals/UnlockAllSegmentsModal'
 import {getTagProjection} from '../api/getTagProjection'
 import {setCurrentSegment} from '../api/setCurrentSegment'
-import CommonUtils from '../utils/commonUtils'
+import CommonUtils, {
+  trackErrorStatusUndefinedSentry,
+} from '../utils/commonUtils'
 
 const SegmentActions = {
   localStorageCommentsClosed:
@@ -78,7 +80,9 @@ const SegmentActions = {
       .catch((errors) => {
         var notification = {
           title: 'Error',
-          text: errors[0].message,
+          text: errors?.length
+            ? errors[0].message
+            : 'We got an error, please contact support',
           type: 'error',
         }
         CatToolActions.addNotification(notification)
@@ -400,6 +404,13 @@ const SegmentActions = {
         SegmentActions.replaceEditAreaTextContent(sid, segment.translation)
         //Tag Projection: disable it if enable
         SegmentActions.setSegmentAsTagged(sid)
+        // Temp track status undefined;
+        trackErrorStatusUndefinedSentry({
+          caller: 'SegmentActions -> propagateTranslation',
+          idSegment: segmentId,
+          status,
+        })
+        // End temp track status undefined;
         SegmentActions.setStatus(sid, null, status) // now the status, too, is propagated
         SegmentActions.setSegmentPropagation(sid, null, true, segment.sid)
         SegmentActions.modifiedTranslation(sid, false)
@@ -1392,6 +1403,13 @@ const SegmentActions = {
       segmentsArray.forEach((item) => {
         var segment = SegmentStore.getSegmentByIdToJS(item)
         if (segment) {
+          // Temp track status undefined;
+          trackErrorStatusUndefinedSentry({
+            caller: 'SegmentActions -> bulkChangeStatusCallback',
+            idSegment: segment.sid,
+            status,
+          })
+          // End temp track status undefined;
           SegmentActions.setStatus(item, segment.id_file, status)
           SegmentActions.modifiedTranslation(item, false)
           SegmentActions.disableTPOnSegment(segment)
