@@ -97,9 +97,9 @@ class ChunkReviewModel implements IChunkReviewModel {
     public function getScore() {
         if ( $this->chunk_review->reviewed_words_count == 0 ) {
             return 0;
-        } else {
-            return $this->chunk_review->penalty_points / $this->chunk_review->reviewed_words_count * 1000;
         }
+
+        return $this->chunk_review->penalty_points / $this->chunk_review->reviewed_words_count * 1000;
     }
 
     public function getPenaltyPoints() {
