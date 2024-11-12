@@ -251,10 +251,10 @@ export const QualityReport = () => {
         </div>
       </div>
       {ReactDOM.createPortal(<CookieConsent />, cookieBannerMountPoint)}
-      {/* <SocketListener
+      <SocketListener
         isAuthenticated={isUserLogged}
         userId={isUserLogged ? userInfo.user.uid : null}
-      />*/}
+      />
     </>
   )
 }
