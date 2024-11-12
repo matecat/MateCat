@@ -19,7 +19,7 @@ const {notifyUpgrade} = require("./src/amq/MessageHandler");
 const config = ini.parseSync(path.resolve(__dirname, './config.ini'));
 const SERVER_VERSION = config.server.version.replace(/['"]+/g, '');
 const allowedOrigins = config.cors.allowedOrigins;
-const auth_secret_key = fs.readFileSync('../inc/login_secret.dat', 'utf8');
+const auth_secret_key = fs.readFileSync(path.resolve(__dirname, '../inc/login_secret.dat'), 'utf8');
 // const serverPath = config.server.path.charAt(0) === '/' ? config.server.path.substring(1) : config.server.path;
 const serverPath = config.server.path;
 
