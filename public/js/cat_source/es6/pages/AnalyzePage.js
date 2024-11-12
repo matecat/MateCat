@@ -108,10 +108,10 @@ const AnalyzePage = () => {
       <footer>
         <CookieConsent />
       </footer>
-      {/*<SocketListener
+      <SocketListener
         isAuthenticated={isUserLogged}
         userId={isUserLogged ? userInfo.user.uid : null}
-      />*/}
+      />
     </>
   )
 }
