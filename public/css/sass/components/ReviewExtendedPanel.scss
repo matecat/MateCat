@@ -1,5 +1,5 @@
-@import 'commons/divider';
-@import 'commons/shadows';
+@import '../commons/divider';
+@import '../commons/shadows';
 
 h1,
 h2,
@@ -239,35 +239,6 @@ article {
     margin-top: 110px;
   }
 }
-//article:first-child {
-//    section {
-//        &:nth-child(-n+3) {
-//            .segment-side-container {
-//                position: absolute;
-//                text-align: left;
-//                width: 29%;
-//                left: 106%;
-//                display: flex;
-//                flex-direction: column;
-//                .mbc-comment-balloon-outer {
-//                    position: relative;
-//                    bottom: -11px !important;
-//                    margin-bottom: -30px;
-//                    .mbc-open-view.mbc-re-messages {
-//                        top: 1px;
-//                        border-top: 12px solid #ffffff;
-//                        border-left: 14px solid transparent;
-//                        border-bottom: unset;
-//                    }
-//                }
-//                .review-balloon-container {
-//                    position: relative;
-//                    margin-top: 25px;
-//                }
-//            }
-//        }
-//    }
-//}
 
 .re-abb-issue {
   background: #e5e9f1;
@@ -360,7 +331,7 @@ section {
       margin-right: 10px;
       color: $grey1 !important;
 
-      background: #fff url(../../img/highlighter_icon.png) center center
+      background: #fff url(/public/img/highlighter_icon.png) center center
         no-repeat;
       background-color: white;
       width: 20px;

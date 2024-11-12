@@ -33,8 +33,6 @@ let SearchUtils = {
    * @returns {boolean}
    */
   execFind: function (params) {
-    $('section.currSearchSegment').removeClass('currSearchSegment')
-
     let nbspRegexp = new RegExp(tagSignatures.nbsp.placeholder, 'g')
     let spaceRegexp = tagSignatures.space
       ? new RegExp(tagSignatures.space.placeholder, 'g')

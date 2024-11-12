@@ -832,7 +832,11 @@ const NewProject = () => {
             <div className="translate-box source">
               <SourceLanguageSelect />
             </div>
-            <a id="swaplang" title="Swap languages" onClick={swapLanguages}>
+            <a
+              id="swaplang"
+              title="Swap languages"
+              {...(isUserLogged && {onClick: swapLanguages})}
+            >
               <span>Swap languages</span>
             </a>
             {/*Target Language*/}
