@@ -1,3 +1,8 @@
+/**
+ * Created by PhpStorm.
+ * @author: Domenico <ostico@gmail.com>, <domenico@translated.net>
+ * Date: 11/11/2024
+ */
 const {logger} = require("../utils");
 
 const AI_ASSISTANT_EXPLAIN_MEANING = 'ai_assistant_explain_meaning';
@@ -14,13 +19,13 @@ const CONTRIBUTIONS_TYPE = 'contribution';
 const CONCORDANCE_TYPE = 'concordance';
 const CROSS_LANG_CONTRIBUTIONS = 'cross_language_matches';
 const BULK_STATUS_CHANGE_TYPE = 'bulk_segment_status_change';
-
 const LOGOUT = 'logout';
+
 const UPGRADE = 'upgrade';
 const RELOAD = 'force_reload';
 
-const MESSAGE = 'message';
-module.exports.MESSAGE_NAME = MESSAGE;
+const MESSAGE_NAME = 'message';
+module.exports.MESSAGE_NAME = MESSAGE_NAME;
 
 module.exports.MessageHandler = class {
 
@@ -41,40 +46,45 @@ module.exports.MessageHandler = class {
 
     logger.debug([
       "Sending message",
-      MESSAGE,
+      MESSAGE_NAME,
       message.data.id_client,
       {data: message.data.payload}
     ]);
 
     this.application.sendRoomNotifications(
       message.data.id_client,
-      MESSAGE,
+      MESSAGE_NAME,
       {data: message.data.payload}
     );
 
   }
 }
 
-module.exports.notifyUpgrade = notifyUpgrade = (application, isReboot = true) => {
-
-  logger.info('Disconnecting clients...');
+module.exports.notifyUpgrade = notifyUpgrade = (application, isRebooting = true) => {
 
   const disconnectMessage = {
     payload: {
-      _type: isReboot ? UPGRADE : RELOAD
+      _type: isRebooting ? UPGRADE : RELOAD
     }
   };
 
-  application.sendBroadcastServiceMessage("message", {
-    _type: (isReboot ? UPGRADE : RELOAD),
-    data: disconnectMessage.payload
-  });
+  logger.info(['Disconnecting clients...', disconnectMessage]);
 
-  if (isReboot) {
-    logger.info('Exit...');
-    application._socketIOServer.disconnectSockets(true);
+  application.sendBroadcastServiceMessage(
+    MESSAGE_NAME,
+    {
+      _type: (isRebooting ? UPGRADE : RELOAD),
+      data: disconnectMessage.payload
+    }
+  );
+
+  if (isRebooting) {
     setTimeout(() => {
-      process.exit(0);
+      logger.info('Exit...');
+      application._socketIOServer.disconnectSockets(true);
+      setTimeout(() => {
+        process.exit(0);
+      }, 500);
     }, 1000);
   }
 

@@ -1,6 +1,5 @@
 import {useCallback, useEffect, useRef, useState} from 'react'
 import {getAuthToken} from "../api/loginUser/";
-import {v4 as uuidV4} from "uuid";
 
 const {io} = require("socket.io-client");
 
@@ -12,7 +11,7 @@ export const ConnectionStates = {
   ERROR: 'ERROR',
 }
 
-const useSse = (connectionParams, options, isAuthenticated, eventHandlers = {}) => {
+const useSocketLayer = (connectionParams, options, isAuthenticated, eventHandlers = {}) => {
   // State variables to manage connection status, error, event source, and received event data
   const [connectionState, setConnectionState] = useState(
     ConnectionStates.CONNECTING,
@@ -33,13 +32,28 @@ const useSse = (connectionParams, options, isAuthenticated, eventHandlers = {}) 
       connectUnderlyingSocket(
         {
           "x-token": response.token,
-          "x-uuid": uuidV4(),
+          "x-uuid": options.uuidV4,
           "x-userid": options.userId
         }
       )
     }).catch(error => {
       console.log("Token error", error)
+      reconnect();
     });
+  }
+
+  const reconnect = () => {
+    eventHandlers['disconnected'] ? eventHandlers['disconnected']() : null
+    // Attempt to reconnect every 5 seconds
+    if (!retryingInterval.current) {
+      retryingInterval.current = setTimeout(() => {
+        console.log('Reconnecting...')
+        clearTimeout(retryingInterval.current)
+        retryingInterval.current = null
+        connect() // Reconnect
+      }, 2000)
+    }
+
   }
 
   const connectUnderlyingSocket = (extraHeaders) => {
@@ -47,8 +61,7 @@ const useSse = (connectionParams, options, isAuthenticated, eventHandlers = {}) 
     const socket = io(connectionParams.source,
       {
         path: connectionParams.path,
-        reconnectionDelay: 1000,
-        reconnectionDelayMax: 5000,
+        reconnection: false, // manually handle reconnections
         extraHeaders: extraHeaders
       }
     );
@@ -59,25 +72,37 @@ const useSse = (connectionParams, options, isAuthenticated, eventHandlers = {}) 
         setConnectionError(null) // Reset the error on successful connection
         if (retryingInterval.current) {
           clearTimeout(retryingInterval.current) // Clear the timeout if it was active
-          retryingInterval.current = 0
+          retryingInterval.current = null
           eventHandlers['reconnected'] ? eventHandlers['reconnected']() : null
         }
       }
     );
 
+    // CLIENT CODE: The server has forcefully disconnected the socket with socket.disconnect(),
+    // the client will not try to reconnect and, you need to manually call socket.connect().
+    socket.on('disconnect', function () {
+      reconnect();
+    });
+
     socket.on('connect_error', (error) => {
-      // Only handle reconnection if the connection is closed
+
+      /*
+       * connect_error
+       * This event is fired when:
+       *
+       *  - the low-level connection cannot be established
+       *  - the connection is denied by the server in a middleware function
+       *
+       * In the first case, the Socket will automatically try to reconnect, after a given delay.
+       * In the latter case, you need to manually reconnect. You might need to update the credentials.
+       *
+       * Since we cannot distinguish between the two cases, we manually handle the reconnections
+       *
+       */
       setConnectionState(ConnectionStates.CLOSED) // Update state to CLOSED on error
       setConnectionError(error) // Store the error
-      console.error('SSE connection error:', error)
-
-      eventHandlers['disconnected'] ? eventHandlers['disconnected']() : null
-      // Attempt to reconnect every 5 seconds
-      clearTimeout(retryingInterval.current)
-      retryingInterval.current = setTimeout(() => {
-        console.log('Reconnecting...')
-        connect() // Reconnect
-      }, 5000)
+      console.error('Socket connection error:', error)
+      reconnect();
     });
 
     // Add listener for the message event
@@ -145,4 +170,4 @@ const useSse = (connectionParams, options, isAuthenticated, eventHandlers = {}) 
   }
 }
 
-export default useSse
+export default useSocketLayer

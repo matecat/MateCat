@@ -50,7 +50,7 @@ import {mountPage} from './mountPage'
 import {HomePageSection} from '../components/createProject/HomePageSection'
 import UserActions from '../actions/UserActions'
 import {getDeepLGlosssaries} from '../api/getDeepLGlosssaries/getDeepLGlosssaries'
-import SseListener from '../sse/SseListener'
+import SocketListener from '../sse/SocketListener'
 
 const SELECT_HEIGHT = 324
 
@@ -1013,7 +1013,7 @@ const NewProject = () => {
       )}
       <HomePageSection />
       <Footer />
-      {/*<SseListener
+      {/*<SocketListener
         isAuthenticated={isUserLogged}
         userId={isUserLogged ? userInfo.user.uid : null}
       />*/}

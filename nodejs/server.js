@@ -1,3 +1,9 @@
+/**
+ * Created by PhpStorm.
+ * @author: Domenico <ostico@gmail.com>, <domenico@translated.net>
+ * Date: 11/11/2024
+ * Time: 11:38
+ */
 const cluster = require('cluster');
 const http = require('http');
 const {setupMaster} = require("@socket.io/sticky");
@@ -62,7 +68,7 @@ if (cluster.isPrimary) {
   }
 
   cluster.on('exit', (worker, code, signal) => {
-    logger.debug(`Worker ${worker.process.pid} died`);
+    logger.debug(`Worker ${worker.id} : ${worker.process.pid} died`);
     if (code !== null && code !== 0) {
       logger.debug(`Starting a replacement: exit code ${signal || code}`);
       cluster.fork(); // Restart worker
@@ -72,6 +78,15 @@ if (cluster.isPrimary) {
   // setMonitoring();
   logger.info(['Server version ' + SERVER_VERSION]);
   logger.info(['Listening on //' + config.server.address + ':' + config.server.port + '/' + serverPath]);
+
+  ['SIGINT', 'SIGTERM'].forEach(
+    signal => process.on(signal, (sig) => {
+      logger.info(['*** Master: ' + sig + ' received ***']);
+      setTimeout(() => {
+        process.exit(0);
+      }, 3000);
+    })
+  );
 
 } else {
 

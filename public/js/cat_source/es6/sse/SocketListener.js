@@ -1,5 +1,5 @@
 import {useContext, useEffect} from 'react'
-import useSse, {ConnectionStates} from './../hooks/useSse'
+import useSocketLayer, {ConnectionStates} from '../hooks/useSocketLayer'
 import CatToolActions from '../actions/CatToolActions'
 import SegmentActions from '../actions/SegmentActions'
 import SegmentStore from '../stores/SegmentStore'
@@ -7,8 +7,9 @@ import CommonUtils from '../utils/commonUtils'
 import CommentsActions from '../actions/CommentsActions'
 import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper'
 import UserActions from '../actions/UserActions'
+import {v4 as uuidV4} from "uuid";
 
-const SseListener = ({isAuthenticated, userId}) => {
+const SocketListener = ({isAuthenticated, userId}) => {
   const {forceLogout} = useContext(ApplicationWrapperContext)
 
   const eventHandlers = {
@@ -108,12 +109,12 @@ const SseListener = ({isAuthenticated, userId}) => {
       // swap source and target props of terms if user searching in target
       const terms = SegmentStore.isSearchingGlossaryInTarget
         ? mergedTerms.map((term) => ({
-            ...term,
-            source: term.target,
-            target: term.source,
-            source_language: term.target_language,
-            target_language: term.source_language,
-          }))
+          ...term,
+          source: term.target,
+          target: term.source,
+          source_language: term.target_language,
+          target_language: term.source_language,
+        }))
         : mergedTerms
       SegmentActions.setGlossaryForSegmentBySearch(data.id_segment, terms)
     },
@@ -188,9 +189,9 @@ const SseListener = ({isAuthenticated, userId}) => {
 
   }
 
-  const {connectionState, connectionError} = useSse(
+  const {connectionState, connectionError} = useSocketLayer(
     getSource(),
-    {userId: userId},
+    {userId: userId, uuidV4: uuidV4()},
     isAuthenticated,
     eventHandlers,
   )
@@ -208,4 +209,4 @@ const SseListener = ({isAuthenticated, userId}) => {
   return null // No rendering needed
 }
 
-export default SseListener
+export default SocketListener

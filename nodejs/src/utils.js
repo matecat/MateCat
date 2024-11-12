@@ -1,3 +1,8 @@
+/**
+ * Created by PhpStorm.
+ * @author: Domenico <ostico@gmail.com>, <domenico@translated.net>
+ * Date: 11/11/2024
+ */
 const winston = require('winston');
 require('winston-daily-rotate-file');
 const path = require("path");

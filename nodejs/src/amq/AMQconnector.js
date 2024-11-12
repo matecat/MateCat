@@ -1,3 +1,8 @@
+/**
+ * Created by PhpStorm.
+ * @author: Domenico <ostico@gmail.com>, <domenico@translated.net>
+ * Date: 11/11/2024
+ */
 const stompit = require('stompit');
 const {logger} = require('../utils');
 

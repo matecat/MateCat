@@ -1,3 +1,8 @@
+/**
+ * Created by PhpStorm.
+ * @author: Domenico <ostico@gmail.com>, <domenico@translated.net>
+ * Date: 11/11/2024
+ */
 const io = require("socket.io");
 const {createAdapter} = require("@socket.io/cluster-adapter");
 const {setupWorker} = require("@socket.io/sticky");
@@ -47,6 +52,11 @@ module.exports.Application = class {
           },
           function (err, decoded) {
             if (err) {
+              logger.error( [ 'Authentication error', err ] )
+              return next(new Error('Authentication error'));
+            }
+            if( parseInt( socket.handshake.headers['x-userid'].toString() ) !== decoded.context.uid ){
+              logger.error( [ 'Authentication error', socket.handshake.headers['x-userid'], decoded.context.uid ] );
               return next(new Error('Authentication error'));
             }
             socket.user_id = socket.handshake.headers['x-userid'];
