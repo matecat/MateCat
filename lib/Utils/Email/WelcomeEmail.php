@@ -36,7 +36,7 @@ class WelcomeEmail extends AbstractEmail {
     protected function _getLayoutVariables( $messageBody = null ) {
         $vars                  = parent::_getLayoutVariables();
         $vars[ 'title' ]       = $this->title;
-        $vars[ 'closingLine' ] = 'Join the Evolution!';
+        $vars[ 'closingLine' ] = 'Happy translating!';
 
         return $vars;
     }
