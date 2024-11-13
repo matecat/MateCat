@@ -4,13 +4,11 @@
  * Date: 11/11/2024
  */
 const io = require("socket.io");
-const {createAdapter} = require("@socket.io/cluster-adapter");
 const {setupWorker} = require("@socket.io/sticky");
 const {Reader} = require('./amq/AMQconnector');
 const {MessageHandler, MESSAGE_NAME} = require('./amq/MessageHandler');
 const {logger, getWebSocketClientAddress} = require('./utils');
 const {verify} = require('jsonwebtoken');
-const cluster = require("cluster");
 module.exports.Application = class {
 
   constructor(server, amqConnector, options) {
@@ -31,7 +29,6 @@ module.exports.Application = class {
       },
     });
 
-    this._socketIOServer.adapter(createAdapter());
     // setup connection with the primary process
     setupWorker(this._socketIOServer);
     logger.info(['Worker started', this.options.workerId])
@@ -52,15 +49,18 @@ module.exports.Application = class {
           },
           function (err, decoded) {
             if (err) {
-              logger.error( [ 'Authentication error', err ] )
+              logger.error(['Authentication error', err])
               return next(new Error('Authentication error'));
             }
-            if( parseInt( socket.handshake.headers['x-userid'].toString() ) !== decoded.context.uid ){
-              logger.error( [ 'Authentication error', socket.handshake.headers['x-userid'], decoded.context.uid ] );
+            if (parseInt(socket.handshake.headers['x-userid'].toString()) !== decoded.context.uid) {
+              logger.error(['Authentication error', socket.handshake.headers['x-userid'], decoded.context.uid]);
               return next(new Error('Authentication error'));
             }
             socket.user_id = socket.handshake.headers['x-userid'];
             socket.uuid = socket.handshake.headers['x-uuid'];
+            if (socket.handshake.headers['x-jobid']) {
+              socket.jobId = socket.handshake.headers['x-jobid'];
+            }
             next();
           }
         );
@@ -86,8 +86,10 @@ module.exports.Application = class {
        */
       this.setClientIpAddressOnSocket(socket);
 
-      socket.join(socket.user_id);
-      socket.join(socket.uuid);
+      socket.join([socket.user_id, socket.uuid]);
+      if (socket.jobId) {
+        socket.join(socket.jobId);
+      }
 
       this.logger.debug({
         message: 'Client connected ' + socket.id,
@@ -145,5 +147,7 @@ module.exports.Application = class {
   sendRoomNotifications = (room, type, message) => {
     this._socketIOServer.to(room).emit(type, message);
   };
+
+
 
 }

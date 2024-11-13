@@ -9,7 +9,7 @@ const http = require('http');
 const {setupMaster} = require("@socket.io/sticky");
 const {setupPrimary} = require("@socket.io/cluster-adapter");
 const {Application} = require("./src/Application");
-const {ConnectionPool} = require('./src/amq/AMQconnector');
+const {AmqConnectionManager} = require('./src/amq/AMQconnector');
 const {logger} = require('./src/utils');
 const ini = require("node-ini");
 const path = require("path");
@@ -20,7 +20,6 @@ const config = ini.parseSync(path.resolve(__dirname, './config.ini'));
 const SERVER_VERSION = config.server.version.replace(/['"]+/g, '');
 const allowedOrigins = config.cors.allowedOrigins;
 const auth_secret_key = fs.readFileSync(path.resolve(__dirname, '../inc/login_secret.dat'), 'utf8');
-// const serverPath = config.server.path.charAt(0) === '/' ? config.server.path.substring(1) : config.server.path;
 const serverPath = config.server.path;
 
 // Connections Options for stompit
@@ -37,9 +36,6 @@ const parameters = {
     'heart-beat': '5000,5000'
   }
 };
-
-//Initialize AMQ Connection pool
-const amqConnector = new ConnectionPool(parameters);
 
 const numCPUs = config.server.parallelization || 1;
 
@@ -58,10 +54,6 @@ if (cluster.isPrimary) {
 
   // setup connections between the workers
   setupPrimary();
-
-  server.listen(config.server.port, config.server.address, () => {
-    logger.info(['Master started'])
-  });
 
   for (let i = 0; i < numCPUs; i++) {
     cluster.fork();
@@ -88,6 +80,10 @@ if (cluster.isPrimary) {
     })
   );
 
+  server.listen(config.server.port, config.server.address, () => {
+    logger.info(['Master started'])
+  });
+
 } else {
 
   process.env.worker_id = cluster.worker.id;
@@ -97,6 +93,9 @@ if (cluster.isPrimary) {
    * and add new clients to the browserChannel
    */
   const server = http.createServer();
+
+  //Initialize AMQ Connection pool
+  const amqConnector = new AmqConnectionManager(parameters);
 
   let app = new Application(server, amqConnector, {
     path: serverPath,
