@@ -1,5 +1,5 @@
 import {useCallback, useEffect, useRef, useState} from 'react'
-import {getAuthToken} from "../api/loginUser/";
+import {getSocketAuthToken} from "../api/loginUser/";
 
 const {io} = require("socket.io-client");
 
@@ -28,12 +28,13 @@ const useSocketLayer = (connectionParams, options, isAuthenticated, eventHandler
   }
 
   const connect = () => {
-    getAuthToken().then(response => {
+    getSocketAuthToken().then(response => {
       connectUnderlyingSocket(
         {
           "x-token": response.token,
           "x-uuid": options.uuidV4,
-          "x-userid": options.userId
+          "x-userid": options.userId,
+          "x-jobid": options.jobId
         }
       )
     }).catch(error => {

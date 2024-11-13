@@ -36,10 +36,18 @@ module.exports.MessageHandler = class {
 
   onReceive = (message) => {
 
-    if (message._type === RELOAD) {
-      logger.info('RELOAD: ' + RELOAD + ' message received...');
-      notifyUpgrade(this.application, false);
-      return;
+    let room = message.data.id_client;
+
+    switch ( message._type ){
+      case RELOAD:
+        logger.info('RELOAD: ' + RELOAD + ' message received...');
+        notifyUpgrade(this.application, false);
+        return;
+      case COMMENTS_TYPE:
+        room = message.data.id_job.toString();
+        break;
+      default:
+        break;
     }
 
     message.data.payload._type = message._type;
@@ -47,12 +55,12 @@ module.exports.MessageHandler = class {
     logger.debug([
       "Sending message",
       MESSAGE_NAME,
-      message.data.id_client,
+      room,
       {data: message.data.payload}
     ]);
 
     this.application.sendRoomNotifications(
-      message.data.id_client,
+      room,
       MESSAGE_NAME,
       {data: message.data.payload}
     );
