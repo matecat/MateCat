@@ -6,7 +6,7 @@
 const stompit = require('stompit');
 const {logger} = require('../utils');
 
-module.exports.ConnectionPool = class {
+module.exports.AmqConnectionManager = class {
 
   constructor(parameters) {
 
