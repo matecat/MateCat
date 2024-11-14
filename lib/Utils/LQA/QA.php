@@ -1885,7 +1885,7 @@ class QA {
         if ( ( count( $source_tags[ 0 ] ) != count( $target_tags[ 0 ] ) ) && !empty( $source_tags[ 0 ] ) || $source_tags[ 1 ] != $target_tags[ 1 ] ) {
 
             // check if source has a trailing space at the end
-            $sourceHasTrailingSpace = (strlen($this->source_seg) !== strlen(trim($this->source_seg)));
+            $sourceHasTrailingSpace = (strlen($this->source_seg) !== strlen(rtrim($this->source_seg)));
 
             if ( $sourceHasTrailingSpace ) {
 
