@@ -499,13 +499,13 @@ const NewProject = () => {
     switch (param) {
       case 'signin':
         if (!config.isLoggedIn) {
-          APP.openLoginModal()
+          ModalsActions.openLoginModal()
         }
         CommonUtils.removeParam('open')
         break
       case 'signup':
         if (!config.isLoggedIn) {
-          APP.openRegisterModal()
+          ModalsActions.openRegisterModal()
         }
         CommonUtils.removeParam('open')
         break
