@@ -750,7 +750,7 @@ window.UI = {
     var isSplitted = segmentBefore.splitted
     if (isSplitted) {
       if (segmentBefore.original_sid !== segmentId.split('-')[0]) {
-        return this.collectSplittedTranslations(
+        return SegmentUtils.collectSplittedTranslations(
           segmentBefore.original_sid,
           '.source',
         )
@@ -773,7 +773,7 @@ window.UI = {
     var isSplitted = segmentAfter.splitted
     if (isSplitted) {
       if (segmentAfter.firstOfSplit) {
-        return this.collectSplittedTranslations(
+        return SegmentUtils.collectSplittedTranslations(
           segmentAfter.original_sid,
           '.source',
         )
