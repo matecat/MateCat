@@ -53,8 +53,8 @@ export const SegmentButton = ({segment, disabled, isReview}) => {
       const userInfo = UserStore.getUser()
       const event = {
         event: 'first_segment_confirm',
-        userStatus: 'loggedUser',
-        userId: userInfo.user.uid,
+        userStatus: userInfo ? 'loggedUser' : 'notLoggedUser',
+        userId: userInfo ? userInfo.user.uid : undefined,
         idProject: parseInt(idProject),
       }
       CommonUtils.dispatchAnalyticsEvents(event)
