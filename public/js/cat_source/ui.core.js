@@ -765,7 +765,7 @@ window.UI = {
    * Overridden by  plugin
    */
   getContextAfter: function (segmentId) {
-    const segmentAfter = SegmentStore.getNextSegment(segmentId)
+    const segmentAfter = SegmentStore.getNextSegment({current_sid: egmentId})
     if (!segmentAfter) {
       return null
     }
@@ -799,7 +799,7 @@ window.UI = {
    * Overridden by  plugin
    */
   getIdAfter: function (segmentId) {
-    const segmentAfter = SegmentStore.getNextSegment(segmentId)
+    const segmentAfter = SegmentStore.getNextSegment({current_sid: segmentId})
     if (!segmentAfter) {
       return null
     }
