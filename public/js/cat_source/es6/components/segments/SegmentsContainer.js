@@ -769,7 +769,7 @@ function SegmentsContainer({
       setBulkSelection,
       sideOpen: isSideOpen,
       files: files,
-      currentFileId: currentFileId.toString(),
+      currentFileId: currentFileId ? currentFileId.toString() : '0',
       collectionTypeSeparator,
       guessTagActive,
       speechToTextActive,
