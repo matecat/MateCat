@@ -67,7 +67,7 @@ class Editarea extends React.Component {
 
   constructor(props) {
     super(props)
-    const {onEntityClick, updateTagsInEditor, getUpdatedSegmentInfo} = this
+    const {onEntityClick, getUpdatedSegmentInfo} = this
 
     this.decoratorsStructure = [
       {
@@ -138,9 +138,7 @@ class Editarea extends React.Component {
       this.updateTranslationInStore,
       100,
     )
-    this.updateTagsInEditorDebounced = debounce(updateTagsInEditor, 500)
     this.onCompositionStopDebounced = debounce(this.onCompositionStop, 1000)
-    this.focusEditorDebounced = debounce(this.focusEditor, 500)
   }
 
   getSearchParams = () => {
@@ -1050,32 +1048,6 @@ class Editarea extends React.Component {
 
   onFocus = () => {
     editorSync.editorFocused = true
-  }
-
-  updateTagsInEditor = () => {
-    const {editorState, tagRange} = this.state
-    let newEditorState = editorState
-    let newTagRange = tagRange
-    // Cerco i tag attualmente presenti nell'editor
-    // Todo: Se ci sono altre entità oltre i tag nell'editor, aggiungere l'entityName alla chiamata
-    const entities = DraftMatecatUtils.getEntities(editorState)
-    if (tagRange.length !== entities.length) {
-      const lastSelection = editorState.getSelection()
-      // Aggiorna i tag presenti
-      const {decodedSegment} = DraftMatecatUtils.decodeSegment(editorState)
-      newTagRange = DraftMatecatUtils.matchTag(decodedSegment) // range update
-      // Aggiornamento live dei collegamenti tra i tag non self-closed
-      newEditorState = updateEntityData(
-        editorState,
-        newTagRange,
-        lastSelection,
-        entities,
-      )
-    }
-    this.setState({
-      editorState: newEditorState,
-      tagRange: newTagRange,
-    })
   }
 
   onCompositionStop = () => {
