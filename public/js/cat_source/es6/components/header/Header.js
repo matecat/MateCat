@@ -1,7 +1,6 @@
 import React, {useContext, useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper'
-import CatToolActions from '../../actions/CatToolActions'
 import QualityReportStore from '../../stores/QualityReportStore'
 import QualityReportConstants from '../../constants/QualityReportConstants'
 import FilterProjects from './manage/FilterProjects'
@@ -22,25 +21,12 @@ const Header = ({
   showFilterProjects,
   showLinks,
   showModals,
-  showTeams,
   changeTeam,
   showUserMenu = true,
 }) => {
-  const {isUserLogged, userInfo} = useContext(ApplicationWrapperContext)
+  const {userInfo} = useContext(ApplicationWrapperContext)
 
   const [jobUrls, setJobUrls] = useState()
-
-  useEffect(() => {
-    let tmOut
-
-    if (isUserLogged) {
-      tmOut = setTimeout(function () {
-        CatToolActions.showHeaderTooltip()
-      }, 2000)
-    }
-
-    return () => clearTimeout(tmOut)
-  }, [isUserLogged])
 
   useEffect(() => {
     const storeJobUrls = (jobInfo) => setJobUrls(jobInfo.get('urls'))
@@ -125,7 +111,6 @@ Header.propTypes = {
   showFilterProjects: PropTypes.bool,
   showLinks: PropTypes.bool,
   showModals: PropTypes.bool,
-  showTeams: PropTypes.bool,
   changeTeam: PropTypes.func,
   showUserMenu: PropTypes.bool,
 }

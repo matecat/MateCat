@@ -23,10 +23,6 @@ export const UserMenu = () => {
       ? (metadata[`${metadata.oauth_provider}_picture`] ?? null)
       : null
 
-    const openManage = () => {
-      document.location.href = '/manage'
-    }
-
     const openPreferencesModal = () => ModalsActions.openPreferencesModal()
 
     const logoutUserFn = () => {
@@ -81,9 +77,9 @@ export const UserMenu = () => {
           <hr />
           <ul>
             <li>
-              <div className="item" onClick={openManage}>
+              <a className="item" href="/manage">
                 My Projects
-              </div>
+              </a>
             </li>
             <li>
               <div className="item" onClick={openPreferencesModal}>

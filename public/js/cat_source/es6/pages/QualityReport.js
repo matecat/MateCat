@@ -143,7 +143,6 @@ export const QualityReport = () => {
       <HeaderPortal>
         <Header
           showModals={true}
-          showTeams={false}
           isQualityReport={true}
           loggedUser={isUserLogged}
           user={isUserLogged ? userInfo.user : undefined}
