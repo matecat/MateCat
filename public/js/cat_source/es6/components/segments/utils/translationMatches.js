@@ -165,16 +165,13 @@ let TranslationMatches = {
       return Promise.resolve()
     }
     const id_segment_original = currentSegment.original_sid
-    const nextUntranslated = SegmentStore.getNextSegment(
-      id_segment_original,
-      null,
-      8,
-    )
-    const nextSegment = SegmentStore.getNextSegment(
-      id_segment_original,
-      null,
-      null,
-    )
+    const nextUntranslated = SegmentStore.getNextSegment({
+      current_sid: id_segment_original,
+      status: SEGMENTS_STATUS.UNTRANSLATED,
+    })
+    const nextSegment = SegmentStore.getNextSegment({
+      current_sid: id_segment_original,
+    })
     // `next` and `untranslated next` are the same
     if (
       next === 2 &&
