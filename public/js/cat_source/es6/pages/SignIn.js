@@ -23,9 +23,6 @@ const SignIn = () => {
           </div>
         </div>
       </div>
-      <div className="notifications-wrapper">
-        <NotificationBox />
-      </div>
     </>
   )
 }
