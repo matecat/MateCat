@@ -13,7 +13,7 @@ export const downloadFile = async ({
   password = config.password,
 }) => {
   const response = await fetch(
-    `${config.basepath}api/v2/transation/${idJob}/${password}?downlod_type=all`,
+    `${config.basepath}api/v2/translation/${idJob}/${password}?download_type=all`,
     {
       credentials: 'include',
     },
