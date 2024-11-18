@@ -269,8 +269,8 @@ class ConversionHandler {
                         $params = $this->filters_extraction_parameters->xml;
                     }
                     break;
-                case "yaml":
                 case "yml":
+                case "yaml":
                     if ( isset( $this->filters_extraction_parameters->yaml ) ) {
                         $params = $this->filters_extraction_parameters->yaml;
                     }
