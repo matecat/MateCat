@@ -670,20 +670,3 @@ export const executeOnce = () => {
     wasAlreadyExecuted = true
   }
 }
-
-export const trackErrorStatusUndefinedSentry = ({
-  caller,
-  idSegment,
-  status,
-}) => {
-  if (typeof status === 'undefined' || !status) {
-    const errorMessage = `Segment (${idSegment}) status undefined! (Caller: ${caller})`
-    Sentry.captureException(errorMessage, {
-      tags: {
-        id_segment: idSegment,
-        status: status,
-        caller,
-      },
-    })
-  }
-}

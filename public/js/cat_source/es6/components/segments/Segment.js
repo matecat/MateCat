@@ -61,6 +61,7 @@ class Segment extends React.Component {
       tagProjectionEnabled:
         this.props.guessTagActive &&
         this.props.segment &&
+        this.props.segment.status &&
         (this.props.segment.status.toLowerCase() === 'draft' ||
           this.props.segment.status.toLowerCase() === 'new') &&
         !DraftMatecatUtils.checkXliffTagsInText(
