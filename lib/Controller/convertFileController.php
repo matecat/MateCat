@@ -28,7 +28,7 @@ class convertFileController extends ajaxController {
     public string $cookieDir;
 
     //this will prevent recursion loop when ConvertFileWrapper will call the doAction()
-    protected bool            $convertZipFile = true;
+    protected bool      $convertZipFile = true;
     protected Languages $lang_handler;
 
     protected int                          $filters_extraction_parameters_template_id;
@@ -38,6 +38,10 @@ class convertFileController extends ajaxController {
      * @var AbstractFilesStorage
      */
     protected $files_storage;
+    /**
+     * @var mixed
+     */
+    protected bool $restarted_conversion = false;
 
     /**
      * @throws Exception
@@ -64,6 +68,9 @@ class convertFileController extends ajaxController {
                 ],
                 'filters_extraction_parameters_template_id' => [
                         'filter' => FILTER_SANITIZE_NUMBER_INT
+                ],
+                'restarted_conversion'                      => [
+                        'filter' => FILTER_VALIDATE_BOOLEAN
                 ]
         ];
 
@@ -74,6 +81,7 @@ class convertFileController extends ajaxController {
         $this->target_lang                               = $postInput[ "target_lang" ];
         $this->segmentation_rule                         = $postInput[ "segmentation_rule" ];
         $this->filters_extraction_parameters_template_id = (int)$postInput[ "filters_extraction_parameters_template_id" ];
+        $this->restarted_conversion                      = $postInput[ "restarted_conversion" ] ?? false;
 
         $this->cookieDir = $_COOKIE[ 'upload_token' ];
         $this->intDir    = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->cookieDir;
@@ -141,6 +149,7 @@ class convertFileController extends ajaxController {
         $conversionHandler->setFeatures( $this->featureSet );
         $conversionHandler->setUserIsLogged( $this->userIsLogged );
         $conversionHandler->setFiltersExtractionParameters( $this->filters_extraction_parameters );
+        $conversionHandler->setReconversion( $this->restarted_conversion );
 
         if ( $ext == "zip" ) {
             if ( $this->convertZipFile ) {
