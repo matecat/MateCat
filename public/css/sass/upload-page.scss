@@ -598,35 +598,24 @@ h2 {
 /*button*/
 
 .uploadbtn {
-  background: $translatedBlue;
-  font-weight: 100;
+  font-weight: 500 !important;
   padding: 8px 16px;
   width: auto !important;
   min-width: 200px;
-  -webkit-transition: all 100ms ease-in;
-  -moz-transition: all 100ms ease-in;
   font-size: 26px !important;
-  cursor: pointer;
-  color: #fff;
-  border: none;
-  border-radius: 2px;
-}
-
-.uploadbtn:hover {
-  background: $translatedBlueHover;
-  color: #ffffff;
-  box-shadow:
-    0 0 0 #e0e0e0,
-    0 0 2px rgba(0, 0, 0, 0.12),
-    0 2px 4px rgba(0, 0, 0, 0.24) !important;
-}
-
-.uploadbtn:focus {
-  outline-color: $translatedBlueActive;
-}
-
-.uploadbtn:active {
-  box-shadow: none;
+  &.disabled {
+    background: $grey2 !important;
+  }
+  .uploadloader {
+    background: url(/public/build/images/loader.gif) center center no-repeat;
+    width: 20px;
+    height: 20px;
+    float: right;
+    margin-top: 3px;
+    position: absolute;
+    right: 233px;
+    background-size: 20px 20px;
+  }
 }
 
 .uploadbtn-box {
