@@ -124,7 +124,7 @@ window.UI = {
         $('.operation', filerow).remove()
         $('.progress', filerow).remove()
         console.log('ACTION: restartConversions')
-        convertFile(filename, filerow, filesize, true)
+        convertFile(filename, filerow, filesize, true, true)
       }
     })
   },
@@ -396,6 +396,7 @@ window.UI = {
                 fileSpecs.filerow,
                 fileSpecs.filesize,
                 fileSpecs.enforceConversion,
+                false
               )
             }
           } else {
@@ -494,10 +495,14 @@ var progressBar = function (filerow, start, filesize) {
   }
 }
 
-var convertFile = function (fname, filerow, filesize, enforceConversion) {
+var convertFile = function (fname, filerow, filesize, enforceConversion, restartedConversion) {
+  console.log('Restarted conversion: ' + restartedConversion)
   console.log('Enforce conversion: ' + enforceConversion)
   enforceConversion =
     typeof enforceConversion === 'undefined' ? false : enforceConversion
+
+  restartedConversion =
+    typeof restartedConversion === 'undefined' ? false : restartedConversion
 
   if (enforceConversion === false) {
     filerow.addClass('ready')
@@ -527,6 +532,7 @@ var convertFile = function (fname, filerow, filesize, enforceConversion) {
     segmentation_rule: UI.segmentationRule,
     filters_extraction_parameters_template_id: filtersTemplate?.id,
     signal,
+    restarted_conversion: restartedConversion
   })
     .then(function ({data, errors}) {
       filerow.removeClass('converting')
