@@ -50,7 +50,11 @@ import {mountPage} from './mountPage'
 import {HomePageSection} from '../components/createProject/HomePageSection'
 import UserActions from '../actions/UserActions'
 import {getDeepLGlosssaries} from '../api/getDeepLGlosssaries/getDeepLGlosssaries'
-import SseListener from '../sse/SseListener'
+import {
+  Button,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+} from '../components/common/Button/Button'
 
 const SELECT_HEIGHT = 324
 
@@ -947,14 +951,14 @@ const NewProject = () => {
         )}
         <div className="uploadbtn-box">
           {!projectSent ? (
-            <input
+            <Button
+              size={BUTTON_SIZE.BIG}
+              type={BUTTON_TYPE.PRIMARY}
               disabled={
                 !isFormReadyToSubmit ||
                 isImportTMXInProgress ||
                 projectTemplates.length === 0
               }
-              name=""
-              type="button"
               className={`uploadbtn${
                 !isFormReadyToSubmit ||
                 isImportTMXInProgress ||
@@ -962,19 +966,22 @@ const NewProject = () => {
                   ? ' disabled'
                   : ''
               }`}
-              value="Analyze"
               onClick={createProject.current}
-            />
+            >
+              {' '}
+              Analyze
+            </Button>
           ) : (
             <>
-              <span className="uploadloader" />
-              <input
-                name=""
-                type="button"
-                className="uploadbtn disabled"
-                value="Analyzing..."
-                disabled="disabled"
-              />
+              <Button
+                size={BUTTON_SIZE.BIG}
+                type={BUTTON_TYPE.PRIMARY}
+                className={'uploadbtn disabled'}
+                disabled={true}
+              >
+                <span className="uploadloader" />
+                Analyzing...
+              </Button>
             </>
           )}
         </div>
