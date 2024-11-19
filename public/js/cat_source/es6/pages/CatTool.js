@@ -454,9 +454,6 @@ function CatTool() {
         {isFreezingSegments && <div className="freezing-overlay"></div>}
       </div>
 
-      <div className="notifications-wrapper">
-        <NotificationBox />
-      </div>
       {isUserLogged && openSettings.isOpen && isFakeCurrentTemplateReady && (
         <SettingsPanel
           {...{
