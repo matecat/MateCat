@@ -60,9 +60,9 @@ export const GuessTag = ({sourceLang, targetLangs}) => {
   const onChange = (isActive) => {
     setIsActive(isActive)
 
-    setUserMetadataKey(METADATA_KEY, isActive ? 1 : 0)
-
-    SegmentActions.changeTagProjectionStatus(isActive)
+    setUserMetadataKey(METADATA_KEY, isActive ? 1 : 0).then(() =>
+      SegmentActions.changeTagProjectionStatus(isActive),
+    )
   }
 
   useEffect(() => {
