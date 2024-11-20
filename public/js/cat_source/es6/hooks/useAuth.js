@@ -8,6 +8,7 @@ import commonUtils from '../utils/commonUtils'
 import {isEqual} from 'lodash'
 import {logoutUser} from '../api/logoutUser'
 import {updateUserMetadata} from '../api/updateUserMetadata'
+import {flushSync} from 'react-dom'
 
 const USER_INFO_SCHEMA = {
   user: {
@@ -152,10 +153,12 @@ function useAuth() {
       new Promise((resolve, reject) => {
         updateUserMetadata(key, value)
           .then((data) => {
-            setUserInfo((prevState) => ({
-              ...prevState,
-              metadata: {...prevState.metadata, [key]: value},
-            }))
+            flushSync(() =>
+              setUserInfo((prevState) => ({
+                ...prevState,
+                metadata: {...prevState.metadata, [key]: value},
+              })),
+            )
 
             resolve(data)
           })

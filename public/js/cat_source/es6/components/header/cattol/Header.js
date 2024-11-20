@@ -36,7 +36,7 @@ export const Header = ({
   openTmPanel,
   jobMetadata,
 }) => {
-  const {isUserLogged} = useContext(ApplicationWrapperContext)
+  const {isUserLogged, userInfo} = useContext(ApplicationWrapperContext)
 
   return (
     <header>
@@ -127,7 +127,10 @@ export const Header = ({
         <UserMenu />
       </div>
       <div id="header-bars-wrapper">
-        <SubHeaderContainer filtersEnabled={SegmentFilter.enabled()} />
+        <SubHeaderContainer
+          userInfo={userInfo}
+          filtersEnabled={SegmentFilter.enabled()}
+        />
       </div>
     </header>
   )
