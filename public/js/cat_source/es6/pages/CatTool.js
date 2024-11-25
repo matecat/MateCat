@@ -13,7 +13,6 @@ import CatToolConstants from '../constants/CatToolConstants'
 import OfflineUtils from '../utils/offlineUtils'
 import SegmentActions from '../actions/SegmentActions'
 import CatToolActions from '../actions/CatToolActions'
-import SegmentFilter from '../components/header/cattol/segment_filter/segment_filter'
 import SegmentStore from '../stores/SegmentStore'
 import SegmentConstants from '../constants/SegmentConstants'
 import useSegmentsLoader from '../hooks/useSegmentsLoader'
@@ -34,7 +33,6 @@ import CommonUtils from '../utils/commonUtils'
 import {CattoolFooter} from '../components/footer/CattoolFooter'
 import {mountPage} from './mountPage'
 import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper'
-import NotificationBox from '../components/notificationsComponent/NotificationBox'
 import SseListener from '../sse/SseListener'
 import Speech2Text from '../utils/speech2text'
 import {initTagSignature} from '../components/segments/utils/DraftMatecatUtils/tagModel'
@@ -274,7 +272,6 @@ function CatTool() {
       )
     CatToolActions.onRender()
     $('html').trigger('start')
-    if (LXQ.enabled()) LXQ.initPopup()
     UI.splittedTranslationPlaceholder = '##$_SPLIT$##'
   }, [])
 
@@ -376,14 +373,9 @@ function CatTool() {
     if (metadata) {
       if (Speech2Text.enabled(metadata)) Speech2Text.init()
       initTagSignature(metadata)
+      if (LXQ.enabled(metadata)) LXQ.init()
     }
   }, [userInfo?.metadata])
-
-  const {
-    guess_tags: guessTagActive,
-    dictation: speechToTextActive,
-    cross_language_matches: multiMatchLangs = [],
-  } = userInfo?.metadata ?? {}
 
   const isFakeCurrentTemplateReady =
     projectTemplates.length &&
@@ -441,9 +433,6 @@ function CatTool() {
                 isReview={config.isReview}
                 startSegmentId={UI.startSegmentId?.toString()}
                 firstJobSegment={config.first_job_segment}
-                guessTagActive={guessTagActive}
-                speechToTextActive={speechToTextActive}
-                multiMatchLangs={multiMatchLangs}
                 languages={supportedLanguages}
               />
             </div>

@@ -1,7 +1,6 @@
 import React, {useContext, useEffect} from 'react'
 import {mountPage} from './mountPage'
 import Header from '../components/header/Header'
-import NotificationBox from '../components/notificationsComponent/NotificationBox'
 import OnBoarding from '../components/onBoarding/OnBoarding'
 import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper'
 

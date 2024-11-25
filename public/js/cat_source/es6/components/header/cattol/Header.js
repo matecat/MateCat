@@ -1,7 +1,6 @@
-import React, {useContext, useEffect} from 'react'
+import React, {useContext} from 'react'
 import SubHeaderContainer from './SubHeaderContainer'
 import SegmentFilter from './segment_filter/segment_filter'
-import CatToolActions from '../../../actions/CatToolActions'
 import {FilesMenu} from './FilesMenu'
 import {MarkAsCompleteButton} from './MarkAsCompleteButton'
 import JobMetadata from './JobMetadata'
@@ -37,15 +36,7 @@ export const Header = ({
   openTmPanel,
   jobMetadata,
 }) => {
-  const {isUserLogged} = useContext(ApplicationWrapperContext)
-
-  useEffect(() => {
-    if (isUserLogged) {
-      setTimeout(function () {
-        CatToolActions.showHeaderTooltip()
-      }, 3000)
-    }
-  }, [isUserLogged])
+  const {isUserLogged, userInfo} = useContext(ApplicationWrapperContext)
 
   return (
     <header>
@@ -136,7 +127,10 @@ export const Header = ({
         <UserMenu />
       </div>
       <div id="header-bars-wrapper">
-        <SubHeaderContainer filtersEnabled={SegmentFilter.enabled()} />
+        <SubHeaderContainer
+          userInfo={userInfo}
+          filtersEnabled={SegmentFilter.enabled()}
+        />
       </div>
     </header>
   )

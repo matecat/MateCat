@@ -788,7 +788,7 @@ window.UI = {
    * Overridden by  plugin
    */
   getIdBefore: function (segmentId) {
-    const segmentBefore = SegmentStore.getPrevSegment(segmentId)
+    const segmentBefore = SegmentStore.getPrevSegment(segmentId, true)
     // var segmentBefore = findSegmentBefore();
     if (!segmentBefore) {
       return null
@@ -799,7 +799,10 @@ window.UI = {
    * Overridden by  plugin
    */
   getIdAfter: function (segmentId) {
-    const segmentAfter = SegmentStore.getNextSegment({current_sid: segmentId})
+    const segmentAfter = SegmentStore.getNextSegment({
+      current_sid: segmentId,
+      alsoMutedSegment: true,
+    })
     if (!segmentAfter) {
       return null
     }
