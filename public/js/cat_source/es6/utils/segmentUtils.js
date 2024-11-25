@@ -2,6 +2,7 @@ import CommonUtils from './commonUtils'
 import SegmentStore from '../stores/SegmentStore'
 import DraftMatecatUtils from '../components/segments/utils/DraftMatecatUtils'
 import {SEGMENTS_STATUS} from '../constants/Constants'
+import UserStore from '../stores/UserStore'
 
 const SegmentUtils = {
   /**
@@ -16,7 +17,7 @@ const SegmentUtils = {
    * Tag Projection: check if is enable the Tag Projection
    */
   checkTPEnabled: function () {
-    return !!config.tag_projection_enabled && !!!config.isReview
+    return UserStore.getUserMetadata()?.guess_tags === 1 && !!!config.isReview
   },
   /**
    * Check if the  the Tag Projection in the current segment is enabled and still not tagged
