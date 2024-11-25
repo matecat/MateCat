@@ -267,7 +267,6 @@ class newProjectController extends viewController {
 
         //Enable tag projection at instance level
         $this->template->show_tag_projection    = true;
-        $this->template->tag_projection_enabled = true;
         $this->template->tag_projection_default = true;
 
         $this->template->globalMessage = Utils::getGlobalMessage()[ 'messages' ];

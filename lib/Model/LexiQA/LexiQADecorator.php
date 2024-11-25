@@ -57,7 +57,6 @@ class LexiQADecorator {
             $this->template->lexiqa_languages = json_encode( ProjectOptionsSanitizer::$lexiQA_allowed_languages );
         }
 
-        $this->template->lxq_enabled  = $this->lexiqa_enabled;
         $this->template->lexiqaServer = $this->lexiqa_server;
 
     }
