@@ -1,7 +1,6 @@
-import React, {useContext, useEffect} from 'react'
+import React, {useContext} from 'react'
 import SubHeaderContainer from './SubHeaderContainer'
 import SegmentFilter from './segment_filter/segment_filter'
-import CatToolActions from '../../../actions/CatToolActions'
 import {FilesMenu} from './FilesMenu'
 import {MarkAsCompleteButton} from './MarkAsCompleteButton'
 import JobMetadata from './JobMetadata'
@@ -38,14 +37,6 @@ export const Header = ({
   jobMetadata,
 }) => {
   const {isUserLogged, userInfo} = useContext(ApplicationWrapperContext)
-
-  useEffect(() => {
-    if (isUserLogged) {
-      setTimeout(function () {
-        CatToolActions.showHeaderTooltip()
-      }, 3000)
-    }
-  }, [isUserLogged])
 
   return (
     <header>
