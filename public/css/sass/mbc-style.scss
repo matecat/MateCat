@@ -166,6 +166,25 @@
   pointer-events: none;
 }
 
+.mbc-comment-input__suggestions {
+  z-index: 2 !important;
+}
+
+.mbc-comment-input__suggestions__list {
+  background-color: $white;
+  border: 1px solid $grey8;
+}
+
+.mbc-comment-input__suggestions__item {
+  padding: 5px 15px;
+  border-bottom: 1px solid $grey9;
+}
+
+.mbc-comment-input__suggestions__item--focused {
+  background-color: rgba($grey9, 0.6);
+  color: $translatedBlue;
+}
+
 .tagging-item {
   color: $translatedBlue;
 }
