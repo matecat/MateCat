@@ -67,6 +67,8 @@ class createProjectController extends ajaxController {
 
     public $postInput;
 
+    private $tm_prioritization;
+
     /**
      * @throws Exception
      */
@@ -176,6 +178,7 @@ class createProjectController extends ajaxController {
         $this->show_whitespace   = $this->postInput[ 'show_whitespace' ] ?? null;
         $this->character_counter = $this->postInput[ 'character_counter' ] ?? null;
         $this->ai_assistant      = $this->postInput[ 'ai_assistant' ] ?? null;
+        $this->tm_prioritization = $this->postInput[ 'tm_prioritization' ] ?? null;
 
         $this->__setMetadataFromPostInput();
 
@@ -355,6 +358,7 @@ class createProjectController extends ajaxController {
         $projectStructure[ 'show_whitespace' ]   = $this->show_whitespace;
         $projectStructure[ 'character_counter' ] = $this->character_counter;
         $projectStructure[ 'ai_assistant' ]      = $this->ai_assistant;
+        $projectStructure[ 'tm_prioritization' ] = $this->tm_prioritization ?? null;
 
         // MMT Glossaries
         // (if $engine is not an MMT instance, ignore 'mmt_glossaries')

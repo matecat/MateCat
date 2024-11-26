@@ -248,6 +248,10 @@ class TmKeyManagement_TmKeyManagement {
             $obj->target = filter_var( $obj->target, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH );
         }
 
+        if( !is_null( $obj->penalty) ){
+            $obj->penalty = filter_var( $obj->penalty, FILTER_SANITIZE_NUMBER_INT );
+        }
+
         return $obj;
 
     }
