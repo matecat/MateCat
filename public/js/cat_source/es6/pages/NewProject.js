@@ -525,14 +525,14 @@ const NewProject = () => {
 
   useEffect(() => {
     checkQueryStringParameter()
-    if (!isUserLogged) return
-
-    retrieveSupportedLanguages()
     getSupportedFiles()
       .then((data) => {
         setSupportedFiles(data)
       })
       .catch((error) => console.log('Error retrieving supported files', error))
+    if (!isUserLogged) return
+
+    retrieveSupportedLanguages()
 
     UI.addEvents()
 
