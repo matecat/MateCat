@@ -249,7 +249,12 @@ class TmKeyManagement_TmKeyManagement {
         }
 
         if( !is_null( $obj->penalty) ){
+
             $obj->penalty = filter_var( $obj->penalty, FILTER_SANITIZE_NUMBER_INT );
+
+            if(is_numeric($obj->penalty) and ($obj->penalty < 0 or $obj->penalty > 100)){
+                throw new DomainException("Penalty value must be included in the interval [0-100]");
+            }
         }
 
         return $obj;
