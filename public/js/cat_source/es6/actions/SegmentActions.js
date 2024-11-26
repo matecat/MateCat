@@ -491,7 +491,6 @@ const SegmentActions = {
   },
   changeTagProjectionStatus: function (enabled) {
     //TODO: transform paremeter to bool
-    config.tag_projection_enabled = enabled ? 1 : 0
     toggleTagProjectionJob({enabled}).then(() => {
       AppDispatcher.dispatch({
         actionType: SegmentConstants.SET_GUESS_TAGS,

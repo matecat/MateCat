@@ -115,6 +115,7 @@ class SubHeaderContainer extends React.Component {
           active={this.state.search}
           isReview={config.isReview}
           searchable_statuses={config.searchable_statuses}
+          userInfo={this.props.userInfo}
         />
         {this.props.filtersEnabled ? (
           <SegmentsFilter

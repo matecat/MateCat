@@ -28,7 +28,7 @@ const SseListener = ({isAuthenticated, userId}) => {
             'We’ve just released an update with improvements and bug fixes.<br/>' +
             'To ensure all changes are applied correctly, we recommend refreshing the page.<br/><br/>' +
             'Click Refresh or press <strong>Ctrl+R</strong> (Windows) / <strong>Cmd+R</strong> (Mac).<br/><br/>' +
-            'Thank you for continuing to use Matecat!',
+            'Thank you for using Matecat!',
           type: 'warning',
           allowHtml: true,
         }
