@@ -49,21 +49,13 @@ abstract class AbstractElement extends stdClass implements ArrayAccess {
     }
 
     /**
-     * Object to Array conversion method
-     * @return array
-     */
-    public function toArray() {
-        return (array)$this;
-    }
-
-    /**
      * ArrayAccess interface implementation
      *
      * @param mixed $offset
      *
      * @return bool
      */
-    public function offsetExists( $offset ) {
+    public function offsetExists( $offset ): bool {
         return property_exists( $this, $offset );
     }
 
@@ -103,6 +95,22 @@ abstract class AbstractElement extends stdClass implements ArrayAccess {
         if ( $this->offsetExists( $offset ) ) {
             $this->$offset = null;
         }
+    }
+
+    /**
+     * Recursive Object to Array conversion method
+     */
+    public function toArray(): array {
+        $nestedParamsObject = [];
+        foreach ( $this as $key => $item ) {
+            if ( $item instanceof AbstractElement ) {
+                $nestedParamsObject[ $key ] = $item->toArray();
+            } else {
+                $nestedParamsObject[ $key ] = $item;
+            }
+        }
+
+        return $nestedParamsObject;
     }
 
 }
