@@ -126,6 +126,11 @@ class TmKeyManagement_TmKeyStruct extends stdClass implements JsonSerializable {
     public $complete_format = false;
 
     /**
+     * @var null
+     */
+    public $penalty = null;
+
+    /**
      * When a key return back from the client we have to know if it is hashed
      *
      * @return bool
@@ -205,7 +210,8 @@ class TmKeyManagement_TmKeyStruct extends stdClass implements JsonSerializable {
     }
 
     /**
-     * @return Users_UserStruct[]
+     * @return array|Users_UserStruct[]
+     * @throws ReflectionException
      */
     public function getInUsers() {
 
@@ -240,6 +246,7 @@ class TmKeyManagement_TmKeyStruct extends stdClass implements JsonSerializable {
                 'w_transl' => $this->w_transl,
                 'r_rev' => $this->r_rev,
                 'w_rev' => $this->w_rev,
+                'penalty' => $this->penalty ?? null,
                 'is_shared' => $this->is_shared,
                 'is_private' => $this->isEncryptedKey()
             ];
@@ -251,6 +258,7 @@ class TmKeyManagement_TmKeyStruct extends stdClass implements JsonSerializable {
             'owner' => $this->owner,
             'name' => $this->name,
             'key' => $this->key,
+            'penalty' => $this->penalty ?? null,
             'is_shared' => $this->is_shared,
         ];
     }
