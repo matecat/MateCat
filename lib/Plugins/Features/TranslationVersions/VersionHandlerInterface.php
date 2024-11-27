@@ -15,12 +15,6 @@ use Translations_SegmentTranslationStruct;
 interface VersionHandlerInterface {
 
     /**
-     * @param Translations_SegmentTranslationStruct $propagation
-     * @param                                       $propagated_ids
-     */
-    public function savePropagationVersions( Translations_SegmentTranslationStruct $propagation, $propagated_ids );
-
-    /**
      * Evaluates the need to save a new translation version to database.
      * If so, sets the new version number on $new_translation.
      *
