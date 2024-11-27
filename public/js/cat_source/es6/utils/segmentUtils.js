@@ -15,8 +15,9 @@ const SegmentUtils = {
 
   checkTPSupportedLanguage: function () {
     const languagesKey = `${config.source_code.split('-')[0]}-${config.target_code.split('-')[0]}`
+    const languagesKeyRev = `${config.target_code.split('-')[0]}-${config.source_code.split('-')[0]}`
     return Object.keys(config.tag_projection_languages).some(
-      (key) => key === languagesKey,
+      (key) => key === languagesKey || languagesKeyRev,
     )
   },
   /**
