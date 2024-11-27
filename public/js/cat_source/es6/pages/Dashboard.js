@@ -66,9 +66,6 @@ class Dashboard extends React.Component {
             this.getProjectsErrorHandler(err)
           })
       })
-      setTimeout(function () {
-        CatToolActions.showHeaderTooltip()
-      }, 2000)
     })
   }
 
