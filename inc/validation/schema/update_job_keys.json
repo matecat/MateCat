@@ -5,7 +5,23 @@
     "tm_prioritization": {
       "type": "boolean"
     },
-    "keys": {
+    "mine": {
+      "type": "array",
+      "nullable": true,
+      "items": {
+        "type": "object",
+        "$ref": "#/definitions/key"
+      }
+    },
+    "ownergroup": {
+      "type": "array",
+      "nullable": true,
+      "items": {
+        "type": "object",
+        "$ref": "#/definitions/key"
+      }
+    },
+    "anonymous": {
       "type": "array",
       "nullable": true,
       "items": {
@@ -15,20 +31,31 @@
     }
   },
   "required": [
-    "tm_prioritization",
-    "keys"
+    "mine",
+    "ownergroup",
+    "anonymous"
   ],
   "definitions": {
     "key": {
       "type": "object",
+      "additionalProperties": false,
       "properties": {
+        "name": {
+          "type": "string"
+        },
         "key": {
           "type": "string"
         },
-        "read": {
+        "glos": {
           "type": "boolean"
         },
-        "write": {
+        "tm": {
+          "type": "boolean"
+        },
+        "r": {
+          "type": "boolean"
+        },
+        "w": {
           "type": "boolean"
         },
         "penalty": {
@@ -38,11 +65,13 @@
           "minimum": 0
         }
       },
-      "additionalProperties": false,
       "required": [
+        "name",
         "key",
-        "read",
-        "write"
+        "glos",
+        "tm",
+        "r",
+        "w",
       ]
     }
   }
