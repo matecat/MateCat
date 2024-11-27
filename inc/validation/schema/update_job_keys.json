@@ -49,6 +49,9 @@
         "glos": {
           "type": "boolean"
         },
+        "owner": {
+          "type": "boolean"
+        },
         "tm": {
           "type": "boolean"
         },
