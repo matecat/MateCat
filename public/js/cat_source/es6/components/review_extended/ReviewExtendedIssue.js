@@ -44,7 +44,7 @@ class ReviewExtendedIssue extends React.Component {
     let notification = {
       title: 'Issue deleted',
       text:
-        'The issue has been deleted. <a class="undo-issue-deleted undo-issue-deleted-' +
+        'The selected issue has been deleted. <a class="undo-issue-deleted undo-issue-deleted-' +
         self.props.issue.id +
         '">Undo</a>',
       type: 'warning',
