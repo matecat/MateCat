@@ -114,12 +114,11 @@ class PropagationWorker extends AbstractWorker {
                     // update related versions only if the parent translation has changed
                     if ( !empty( $propagationTotalStruct->getPropagatedIdsToUpdateVersion() ) ) {
 
-                        $segmentIdsForVersionIncrementMap = $propagationTotalStruct->getPropagatedIdsToUpdateVersion();
                         $filteredIds                      = [];
+                        $segmentIdsForVersionIncrementMap = $propagationTotalStruct->getPropagatedIdsToUpdateVersion();
                         $segmentsToIncrementMap           = array_filter( $segments, function ( $segment ) use ( $segmentIdsForVersionIncrementMap, &$filteredIds ) {
                             if ( array_key_exists( $segment[ 'id_segment' ], $segmentIdsForVersionIncrementMap ) ) {
                                 $filteredIds[] = $segment[ 'id_segment' ];
-
                                 return true;
                             }
 
