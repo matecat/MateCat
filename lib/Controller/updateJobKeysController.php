@@ -251,7 +251,7 @@ class updateJobKeysController extends ajaxController {
      */
     private function validateTMKeysArray()
     {
-        $schema = file_get_contents( INIT::$ROOT . '/inc/validation/schema/update_job_keys.json' );
+        $schema = file_get_contents( INIT::$ROOT . '/inc/validation/schema/job_keys.json' );
 
         $validatorObject       = new JSONValidatorObject();
         $validatorObject->json = $this->tm_keys;

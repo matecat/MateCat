@@ -118,6 +118,9 @@ class createProjectController extends ajaxController {
         $this->postInput = filter_input_array( INPUT_POST, $filterArgs );
 
         //first we check the presence of a list from tm management panel
+
+        $this->__validateTMKeysArray($_POST[ 'private_keys_list' ]);
+
         $array_keys = json_decode( $_POST[ 'private_keys_list' ], true );
         $array_keys = array_merge( $array_keys[ 'ownergroup' ], $array_keys[ 'mine' ], $array_keys[ 'anonymous' ] );
 
@@ -517,6 +520,25 @@ class createProjectController extends ajaxController {
     private function __assignLastCreatedPid( $pid ) {
         $_SESSION[ 'redeem_project' ]   = false;
         $_SESSION[ 'last_created_pid' ] = $pid;
+    }
+
+    /**
+     * @param $tm_keys
+     * @throws \Exception
+     */
+    private function __validateTMKeysArray($tm_keys)
+    {
+        try {
+            $schema = file_get_contents( INIT::$ROOT . '/inc/validation/schema/job_keys.json' );
+
+            $validatorObject       = new JSONValidatorObject();
+            $validatorObject->json = $tm_keys;
+
+            $validator = new JSONValidator( $schema );
+            $validator->validate( $validatorObject );
+        } catch ( Exception $e ) {
+            $this->result[ 'errors' ][] = [ "code" => -12, "message" => $e->getMessage() ];
+        }
     }
 
     private function __validateTargetLangs( Languages $lang_handler ) {
