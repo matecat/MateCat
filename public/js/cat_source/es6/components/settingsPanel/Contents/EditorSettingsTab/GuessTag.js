@@ -4,7 +4,7 @@ import PropTypes from 'prop-types'
 import SegmentActions from '../../../../actions/SegmentActions'
 import {ApplicationWrapperContext} from '../../../common/ApplicationWrapper'
 
-export const checkGuessTagIsEnabled = ({
+const checkGuessTagIsEnabled = ({
   sourceLang,
   targetLangs,
   acceptedLanguages = config.tag_projection_languages,
@@ -39,8 +39,6 @@ export const checkGuessTagIsEnabled = ({
   })
 
   return {
-    isEnabled:
-      arrayIntersection.length > 0 && config.defaults?.tag_projection === 1,
     arrayIntersection,
     notSupportedCouples,
   }
