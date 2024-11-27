@@ -2,9 +2,6 @@
   "type": "object",
   "additionalProperties": false,
   "properties": {
-    "tm_prioritization": {
-      "type": "boolean"
-    },
     "mine": {
       "type": "array",
       "nullable": true,
@@ -47,19 +44,19 @@
           "type": "string"
         },
         "glos": {
-          "type": "boolean"
+          "type": ["boolean", "integer", "string"]
         },
         "owner": {
-          "type": "boolean"
+          "type": ["boolean", "integer", "string"]
         },
         "tm": {
-          "type": "boolean"
+          "type": ["boolean", "integer", "string"]
         },
         "r": {
-          "type": "boolean"
+          "type": ["boolean", "integer", "string"]
         },
         "w": {
-          "type": "boolean"
+          "type": ["boolean", "integer", "string"]
         },
         "penalty": {
           "type": "integer",
@@ -74,7 +71,7 @@
         "glos",
         "tm",
         "r",
-        "w",
+        "w"
       ]
     }
   }
