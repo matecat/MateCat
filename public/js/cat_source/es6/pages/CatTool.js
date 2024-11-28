@@ -427,16 +427,20 @@ function CatTool() {
               : ''
           }
         >
-          <article id="file" className="loading mbc-commenting-closed">
-            <div className="article-segments-container">
-              <SegmentsContainer
-                isReview={config.isReview}
-                startSegmentId={UI.startSegmentId?.toString()}
-                firstJobSegment={config.first_job_segment}
-                languages={supportedLanguages}
-              />
-            </div>
-          </article>
+          {isUserLogged ? (
+            <article id="file" className="loading mbc-commenting-closed">
+              <div className="article-segments-container">
+                <SegmentsContainer
+                  isReview={config.isReview}
+                  startSegmentId={UI.startSegmentId?.toString()}
+                  firstJobSegment={config.first_job_segment}
+                  languages={supportedLanguages}
+                />
+              </div>
+            </article>
+          ) : (
+            <div className="signin-bg" />
+          )}
           <div id="loader-getMoreSegments" />
         </div>
         <div id="plugin-mount-point"></div>
@@ -473,16 +477,18 @@ function CatTool() {
           }}
         />
       )}
-      <CattoolFooter
-        idProject={config.id_project}
-        idJob={config.id_job}
-        password={config.password}
-        source={config.source_rfc}
-        target={config.target_rfc}
-        isReview={config.isReview}
-        isCJK={config.isCJK}
-        languagesArray={supportedLanguages}
-      />
+      {isUserLogged && (
+        <CattoolFooter
+          idProject={config.id_project}
+          idJob={config.id_job}
+          password={config.password}
+          source={config.source_rfc}
+          target={config.target_rfc}
+          isReview={config.isReview}
+          isCJK={config.isCJK}
+          languagesArray={supportedLanguages}
+        />
+      )}
     </>
   )
 }
