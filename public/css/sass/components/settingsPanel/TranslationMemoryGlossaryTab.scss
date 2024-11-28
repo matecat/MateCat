@@ -89,6 +89,7 @@
   }
 
   .settings-panel-row-active {
+    padding: 10px;
     background-color: $transparentBlue;
   }
 
@@ -311,4 +312,58 @@
 .translation-memory-glossary-tab-delete {
   border-top: 3px solid #ffcc01;
   background-color: $orangeDefaultTransparent2;
+}
+
+.translation-memory-glossary-tab-active-table {
+  .settings-panel-table-rows-container {
+    background-color: white;
+  }
+
+  .settings-panel-row {
+    padding: 0 10px;
+
+    &:first-child {
+      padding: 10px !important;
+    }
+
+    &:last-child {
+      padding: 0 10px 10px;
+
+      .settings-panel-row-active {
+        border-bottom-left-radius: 8px;
+        border-bottom-right-radius: 8px;
+      }
+    }
+  }
+
+  .tm-prioritization-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    padding: 20px;
+    background-color: $grey3;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+  }
+
+  .tm-prioritization-text-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+
+    h4 {
+      margin: 0;
+      font-size: 16px;
+    }
+
+    span {
+      color: $grey6;
+    }
+  }
+
+  .switch-container-outer {
+    width: 120px;
+    margin-right: 45px;
+  }
 }

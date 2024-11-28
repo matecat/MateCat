@@ -396,6 +396,7 @@ export const TranslationMemoryGlossaryTab = () => {
             </div>
           </div>
           <SettingsPanelTable
+            className="translation-memory-glossary-tab-active-table"
             columns={COLUMNS_TABLE_ACTIVE}
             rows={keyRows.filter(({isActive}) => isActive)}
             onChangeRowsOrder={onOrderActiveRows}
@@ -413,7 +414,6 @@ export const TranslationMemoryGlossaryTab = () => {
             />
           </div>
           <SettingsPanelTable
-            className="translation-memory-glossary-tab-inactive-table"
             columns={COLUMNS_TABLE_INACTIVE}
             rows={inactiveKeys}
           />
