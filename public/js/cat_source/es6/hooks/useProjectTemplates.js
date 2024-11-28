@@ -86,7 +86,6 @@ function useProjectTemplates(tmKeys, isCattool = config.is_cattool) {
     let cleanup = false
 
     if (!config.is_cattool) {
-      return
       Promise.all([getProjectTemplateDefault(), getProjectTemplates()]).then(
         ([templateDefault, {items}]) => {
           if (!cleanup) {
