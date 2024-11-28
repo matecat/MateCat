@@ -8,8 +8,13 @@ export const SourceLanguageSelect = ({
   isRenderedInsideTab = false,
   dropdownClassName,
 }) => {
-  const {SELECT_HEIGHT, languages, sourceLang, changeSourceLanguage} =
-    useContext(CreateProjectContext)
+  const {
+    SELECT_HEIGHT,
+    languages,
+    sourceLang,
+    changeSourceLanguage,
+    projectTemplates,
+  } = useContext(CreateProjectContext)
   const {isUserLogged} = useContext(ApplicationWrapperContext)
 
   return (
@@ -22,10 +27,10 @@ export const SourceLanguageSelect = ({
       maxHeightDroplist={SELECT_HEIGHT}
       showSearchBar={true}
       options={languages}
-      activeOption={sourceLang}
+      activeOption={Object.keys(sourceLang).length ? sourceLang : undefined}
       checkSpaceToReverse={isRenderedInsideTab}
       onSelect={(option) => changeSourceLanguage(option)}
-      isDisabled={!isUserLogged}
+      isDisabled={!isUserLogged || !projectTemplates.length}
     >
       {({name, code}) => ({
         row: (
