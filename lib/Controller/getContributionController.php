@@ -150,13 +150,13 @@ class getContributionController extends ajaxController {
         }
 
         $jobsMetadataDao = new MetadataDao();
-        $dialect_strict  = $jobsMetadataDao->get( $jobStruct->id, $jobStruct->password, 'dialect_strict' );
+        $dialect_strict  = $jobsMetadataDao->get( $jobStruct->id, $jobStruct->password, 'dialect_strict', 10 * 60 );
 
         if ( $dialect_strict !== null ) {
             $contributionRequest->dialect_strict = $dialect_strict->value == 1;
         }
 
-        $tm_prioritization  = $jobsMetadataDao->get( $jobStruct->id, $jobStruct->password, 'tm_prioritization' );
+        $tm_prioritization  = $jobsMetadataDao->get( $jobStruct->id, $jobStruct->password, 'tm_prioritization', 10 * 60 );
 
         if ( $tm_prioritization !== null ) {
             $contributionRequest->tm_prioritization = $tm_prioritization->value == 1;
