@@ -3,6 +3,7 @@
 use Contribution\ContributionRequestStruct;
 use Contribution\Request;
 use Files\FilesPartsDao;
+use Jobs\MetadataDao;
 use Matecat\SubFiltering\MateCatFilter;
 
 class getContributionController extends ajaxController {
@@ -146,6 +147,19 @@ class getContributionController extends ajaxController {
             $contributionRequest->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
         } else {
             $contributionRequest->userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
+        }
+
+        $jobsMetadataDao = new MetadataDao();
+        $dialect_strict  = $jobsMetadataDao->get( $jobStruct->id, $jobStruct->password, 'dialect_strict' );
+
+        if ( $dialect_strict !== null ) {
+            $contributionRequest->dialect_strict = $dialect_strict->value == 1;
+        }
+
+        $tm_prioritization  = $jobsMetadataDao->get( $jobStruct->id, $jobStruct->password, 'tm_prioritization' );
+
+        if ( $tm_prioritization !== null ) {
+            $contributionRequest->tm_prioritization = $tm_prioritization->value == 1;
         }
 
         Request::contribution( $contributionRequest );
