@@ -418,7 +418,7 @@ function CatTool() {
         <div
           id="outer"
           className={
-            isLoadingSegments
+            isLoadingSegments || !isUserLogged
               ? options?.where === 'before'
                 ? 'loadingBefore'
                 : options?.where === 'after'
@@ -439,7 +439,8 @@ function CatTool() {
               </div>
             </article>
           ) : (
-            <div className="signin-bg" />
+            !isUserLogged &&
+            typeof userInfo === 'undefined' && <div className="signin-bg" />
           )}
           <div id="loader-getMoreSegments" />
         </div>
