@@ -18,7 +18,7 @@ class WelcomeEmail extends AbstractEmail {
      */
     protected $user;
 
-    protected $title = 'Welcome to MateCat!';
+    protected $title = 'Welcome to Matecat! Get Started with Your First Project Today';
 
     public function __construct( Users_UserStruct $user ) {
         $this->user = $user;
@@ -36,7 +36,7 @@ class WelcomeEmail extends AbstractEmail {
     protected function _getLayoutVariables( $messageBody = null ): array {
         $vars                  = parent::_getLayoutVariables();
         $vars[ 'title' ]       = $this->title;
-        $vars[ 'closingLine' ] = 'Join the Evolution!';
+        $vars[ 'closingLine' ] = 'Happy translating!';
 
         return $vars;
     }

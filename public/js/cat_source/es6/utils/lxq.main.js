@@ -14,7 +14,10 @@ import UserStore from '../stores/UserStore'
 
 const LXQ = {
   enabled: function ({lexiqa} = {}) {
-    return (lexiqa ? lexiqa : UserStore.getUserMetadata()?.lexiqa) === 1
+    return (
+      LXQ.checkCanActivate() &&
+      (lexiqa ? lexiqa : UserStore.getUserMetadata()?.lexiqa) === 1
+    )
   },
   enable: function () {
     toggleTagLexica({enabled: true}).then(() => {
