@@ -21,6 +21,7 @@ const COLUMNS_TABLE_ACTIVE = [
   {name: ''},
   {name: ''},
   {name: ''},
+  {name: ''},
 ]
 
 const COLUMNS_TABLE_INACTIVE = [

@@ -60,16 +60,26 @@
 }
 
 .translation-memory-glossary-tab {
+  .settings-panel-table {
+    .settings-panel-table-rows-container {
+      background-color: white;
+    }
+  }
+
+  .settings-panel-table-rowHeading {
+    padding: 0 20px;
+  }
+
   .settings-panel-table-rowHeading,
   .settings-panel-row-content {
-    grid-template-columns: 8% 5% minmax(0, 1fr) 20% 5% 22%;
+    grid-template-columns: 8% 5% minmax(0, 1fr) 20% 5% 18%;
   }
 
   .settings-panel-row {
     border-top: unset;
 
     .row-content-default-memory {
-      grid-template-columns: 8% 5% minmax(0, 1fr) 0 5% 22%;
+      grid-template-columns: 8% 5% minmax(0, 1fr) 0 5% 18%;
     }
     .row-content-create-resource {
       grid-template-columns: 100%;
@@ -146,10 +156,8 @@
 
 .tm-key-row-menu-button {
   .menu-button-wrapper {
-    gap: 8px;
-
     > :first-child {
-      min-width: 170px;
+      min-width: 140px;
       border-radius: 2px;
     }
 
@@ -161,7 +169,7 @@
   }
 
   .just-button-import-tmx {
-    min-width: 170px;
+    min-width: 140px;
     border-radius: 2px;
     font-size: 16px;
     color: #000;
@@ -174,6 +182,10 @@
       background-color: $grey5;
     }
   }
+}
+
+.tm-key-row-menu-button-dropdown {
+  margin-left: -10px;
 }
 
 .tm-key-row-icons {
@@ -315,20 +327,23 @@
 }
 
 .translation-memory-glossary-tab-active-table {
-  .settings-panel-table-rows-container {
-    background-color: white;
+  .settings-panel-table-rowHeading,
+  .settings-panel-row-content {
+    grid-template-columns: 8% 5% minmax(0, 1fr) 20% 5% 14% 18%;
   }
 
   .settings-panel-row {
     padding: 0 10px;
 
     &:first-child {
-      padding: 10px !important;
+      padding: 10px 20px !important;
     }
 
     &:last-child {
       padding: 0 10px 10px;
+    }
 
+    &:last-child:not(:nth-child(2)) {
       .settings-panel-row-active {
         border-bottom-left-radius: 8px;
         border-bottom-right-radius: 8px;
@@ -364,6 +379,29 @@
 
   .switch-container-outer {
     width: 120px;
-    margin-right: 45px;
+    margin-right: 20px;
+  }
+}
+
+.tm-row-penalty {
+  button {
+    border-radius: 2px;
+    font-size: 16px;
+    color: #000 !important;
+    background: $grey4 !important;
+    padding: 4px 8px;
+    text-align: center;
+    border: 1px solid $grey7 !important;
+    font-size: 16px !important;
+
+    &:hover {
+      background-color: $grey5 !important;
+    }
+  }
+}
+
+.settings-panel-table:not(.translation-memory-glossary-tab-active-table) {
+  .settings-panel-row {
+    padding: 0 20px;
   }
 }

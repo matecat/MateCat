@@ -1,4 +1,11 @@
-import React, {Fragment, useContext, useEffect, useRef, useState} from 'react'
+import React, {
+  Fragment,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 import PropTypes from 'prop-types'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {
@@ -35,6 +42,8 @@ import {ConfirmDeleteResourceProjectTemplates} from '../../../modals/ConfirmDele
 import CreateProjectActions from '../../../../actions/CreateProjectActions'
 import {deleteTmKey} from '../../../../api/deleteTmKey'
 import {SCHEMA_KEYS} from '../../../../hooks/useProjectTemplates'
+import {Button, BUTTON_SIZE} from '../../../common/Button/Button'
+import {NumericStepper} from '../../../common/NumericStepper/NumericStepper'
 
 export const TMKeyRow = ({row, onExpandRow}) => {
   const {isImportTMXInProgress} = useContext(CreateProjectContext)
@@ -51,8 +60,12 @@ export const TMKeyRow = ({row, onExpandRow}) => {
   const [isLookup, setIsLookup] = useState(row.r ?? false)
   const [isUpdating, setIsUpdating] = useState(row.w ?? false)
   const [name, setName] = useState(row.name)
+  const [addPenalty, setAddPenalty] = useState(false)
+  const [penalty, setPenalty] = useState(0)
 
   const valueChange = useRef(false)
+
+  const onChangePenalty = useCallback((value) => setPenalty(value), [])
 
   const isMMSharedKey = row.id === SPECIAL_ROWS_ID.defaultTranslationMemory
   const isOwner = isOwnerOfKey(row.key)
@@ -260,6 +273,21 @@ export const TMKeyRow = ({row, onExpandRow}) => {
     }
   }
 
+  const renderPenalty = addPenalty ? (
+    <NumericStepper
+      value={penalty}
+      label={`${penalty}%`}
+      onChange={onChangePenalty}
+      minimumValue={0}
+      maximumValue={100}
+      stepValue={5}
+    />
+  ) : (
+    <Button size={BUTTON_SIZE.SMALL} onClick={() => setAddPenalty(true)}>
+      Add penalty
+    </Button>
+  )
+
   return (
     <Fragment>
       <div className="tm-key-lookup align-center">
@@ -304,6 +332,9 @@ export const TMKeyRow = ({row, onExpandRow}) => {
       <div title={iconDetails.title} className="align-center tm-key-row-icons">
         {iconDetails.icon}
       </div>
+      {!isMMSharedKey && row.isActive && (
+        <div className="align-center tm-row-penalty">{renderPenalty}</div>
+      )}
       {!isMMSharedKey && isOwner ? (
         <div className="align-center">
           <MenuButton
@@ -311,6 +342,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
             onClick={() => handleExpandeRow(ImportTMX)}
             icon={<DotsHorizontal />}
             className="tm-key-row-menu-button"
+            dropdownClassName="tm-key-row-menu-button-dropdown"
             disabled={isImportTMXInProgress}
             itemsTarget={portalTarget}
           >
