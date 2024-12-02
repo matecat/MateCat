@@ -273,7 +273,40 @@ abstract class AbstractFilesStorage implements IFilesStorage {
      * @return int
      */
     protected function _linkToCache( $dir, $hash, $realFileName ): int {
-        return file_put_contents( $dir . DIRECTORY_SEPARATOR . $hash, $realFileName . "\n", FILE_APPEND | LOCK_EX );
+        $filePath     = $dir . DIRECTORY_SEPARATOR . $hash;
+        $content      = [];
+        $bytesWritten = 0;
+
+        $fp = fopen( $filePath, "c+" );
+
+        if ( flock( $fp, LOCK_EX ) ) {
+
+            $fileRawContent = "";
+            while ( ( $buffer = fgets( $fp, 4096 ) ) !== false ) {
+                $fileRawContent .= $buffer;
+            }
+
+            if ( !empty( $fileRawContent ) ) {
+                $content = explode( "\n", $fileRawContent );
+            }
+
+            ftruncate( $fp, 0 );
+            rewind($fp); // Move the pointer to the beginning
+
+            if ( !in_array( $realFileName, $content ) ) {
+                $content[] = $realFileName;
+            }
+
+            $contentString = implode( "\n", $content ) . "\n";
+
+            $bytesWritten = fwrite( $fp, $contentString );
+            fflush( $fp );
+            flock( $fp, LOCK_UN );
+            fclose( $fp );
+
+        }
+
+        return $bytesWritten;
     }
 
     /**
