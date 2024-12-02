@@ -482,16 +482,18 @@ function CatTool() {
           }}
         />
       )}
-      <CattoolFooter
-        idProject={config.id_project}
-        idJob={config.id_job}
-        password={config.password}
-        source={config.source_rfc}
-        target={config.target_rfc}
-        isReview={config.isReview}
-        isCJK={config.isCJK}
-        languagesArray={supportedLanguages}
-      />
+      {isUserLogged && (
+        <CattoolFooter
+          idProject={config.id_project}
+          idJob={config.id_job}
+          password={config.password}
+          source={config.source_rfc}
+          target={config.target_rfc}
+          isReview={config.isReview}
+          isCJK={config.isCJK}
+          languagesArray={supportedLanguages}
+        />
+      )}
       <OnboardingTooltips
         show={isUserLogged && userInfo.user}
         continous={true}
