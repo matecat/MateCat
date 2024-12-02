@@ -296,6 +296,7 @@ abstract class AbstractFilesStorage implements IFilesStorage {
             }
 
             ftruncate( $fp, 0 );
+            rewind($fp); // Move the pointer to the beginning
 
             if ( !in_array( $realFileName, $content ) ) {
                 $content[] = $realFileName;
