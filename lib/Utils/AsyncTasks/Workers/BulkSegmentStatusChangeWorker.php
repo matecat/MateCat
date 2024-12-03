@@ -52,7 +52,7 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker {
 
         $params = $queueElement->params->toArray();
 
-        $chunk       = new Jobs_JobStruct( $params[ 'chunk' ]->toArray() );
+        $chunk       = new Jobs_JobStruct( $params[ 'chunk' ] );
         $status      = $params[ 'destination_status' ];
         $client_id   = $params[ 'client_id' ];
         $user        = ( new Users_UserDao() )->getByUid( $params[ 'id_user' ] );
@@ -94,7 +94,7 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker {
         $database->commit();
 
         if ( $client_id ) {
-            $segment_ids = $params[ 'segment_ids' ]->toArray();
+            $segment_ids = $params[ 'segment_ids' ];
             $payload     = [
                     'segment_ids' => array_values( $segment_ids ),
                     'status'      => $status
