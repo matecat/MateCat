@@ -16,14 +16,11 @@ export const checkTMKey = async ({tmKey}) => {
   Object.keys(paramsData).forEach((key) => {
     formData.append(key, paramsData[key])
   })
-  const response = await fetch(
-    `${getMatecatApiDomain()}?api/app/check-tm-key`,
-    {
-      method: 'POST',
-      body: formData,
-      credentials: 'include',
-    },
-  )
+  const response = await fetch(`${getMatecatApiDomain()}api/app/check-tm-key`, {
+    method: 'POST',
+    body: formData,
+    credentials: 'include',
+  })
 
   if (!response.ok) return Promise.reject(response)
 
