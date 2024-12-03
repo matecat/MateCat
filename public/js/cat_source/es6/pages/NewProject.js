@@ -445,7 +445,7 @@ const NewProject = () => {
         deepl_formality: mt.extra.deepl_formality,
       }),
       xliff_parameters_template_id: XliffConfigTemplateId,
-      tm_prioritization: tmPrioritization,
+      tm_prioritization: tmPrioritization ? 1 : 0,
     })
 
     if (!projectSent) {
