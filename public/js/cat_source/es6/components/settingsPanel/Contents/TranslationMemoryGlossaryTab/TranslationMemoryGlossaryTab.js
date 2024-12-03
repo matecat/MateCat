@@ -88,7 +88,15 @@ export const orderTmKeys = (tmKeys, keysOrdered) => {
 export const getTmDataStructureToSendServer = ({tmKeys = [], keysOrdered}) => {
   const mine = tmKeys
     .filter(({key, isActive}) => isOwnerOfKey(key) && isActive)
-    .map(({tm, glos, key, name, r, w}) => ({tm, glos, key, name, r, w}))
+    .map(({tm, glos, key, name, r, w, penalty}) => ({
+      tm,
+      glos,
+      key,
+      name,
+      r,
+      w,
+      penalty,
+    }))
 
   return JSON.stringify({
     ownergroup: [],
@@ -100,13 +108,8 @@ export const getTmDataStructureToSendServer = ({tmKeys = [], keysOrdered}) => {
 export const TranslationMemoryGlossaryTabContext = createContext({})
 
 export const TranslationMemoryGlossaryTab = () => {
-  const {
-    tmKeys,
-    setTmKeys,
-    openLoginModal,
-    modifyingCurrentTemplate,
-    currentProjectTemplate,
-  } = useContext(SettingsPanelContext)
+  const {tmKeys, setTmKeys, modifyingCurrentTemplate, currentProjectTemplate} =
+    useContext(SettingsPanelContext)
 
   const getPublicMatches = currentProjectTemplate.getPublicMatches
   const isPretranslate100Active = currentProjectTemplate.pretranslate100
@@ -147,6 +150,7 @@ export const TranslationMemoryGlossaryTab = () => {
           r: false,
           w: false,
           isActive: false,
+          penalty: 0,
           ...(tmFromTemplate && {...tmFromTemplate, isActive: true}),
           name: tmItem.name,
         }
@@ -320,9 +324,12 @@ export const TranslationMemoryGlossaryTab = () => {
         tmKeysActive.length !== prevTmKeysActive.length ||
         tmKeysActive
           .filter(({key}) => isOwnerOfKey(key))
-          .some(({key, r, w}) => {
+          .some(({key, r, w, penalty}) => {
             const prevTm = prevTmKeysActive.find((prev) => prev.key === key)
-            return prevTm && (r !== prevTm.r || w !== prevTm.w)
+            return (
+              prevTm &&
+              (r !== prevTm.r || w !== prevTm.w || penalty !== prevTm.penalty)
+            )
           })
 
       if (shouldUpdateTmKeysJob) {

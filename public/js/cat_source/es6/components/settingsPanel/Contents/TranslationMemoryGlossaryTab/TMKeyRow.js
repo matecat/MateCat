@@ -279,7 +279,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
           onChange={onChangePenalty}
           minimumValue={1}
           maximumValue={100}
-          stepValue={5}
+          stepValue={1}
         />
         <Button
           className="penalty-numeric-stepper-close-button"

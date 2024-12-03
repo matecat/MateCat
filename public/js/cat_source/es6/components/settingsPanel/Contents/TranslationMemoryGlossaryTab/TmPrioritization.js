@@ -1,8 +1,20 @@
-import React, {useState} from 'react'
+import React, {useCallback, useContext, useState} from 'react'
 import Switch from '../../../common/Switch'
+import {SettingsPanelContext} from '../../SettingsPanelContext'
 
 export const TmPrioritization = () => {
-  const [isActive, setIsActive] = useState(false)
+  const {currentProjectTemplate, modifyingCurrentTemplate} =
+    useContext(SettingsPanelContext)
+
+  const isActive = currentProjectTemplate.tmPrioritization
+  const setIsActive = useCallback(
+    (value) =>
+      modifyingCurrentTemplate((prevTemplate) => ({
+        ...prevTemplate,
+        tmPrioritization: value,
+      })),
+    [modifyingCurrentTemplate],
+  )
 
   const onChange = (isActive) => {
     setIsActive(isActive)

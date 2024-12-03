@@ -1,4 +1,4 @@
-import React, {useRef, useState} from 'react'
+import React, {useEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import {Button, BUTTON_SIZE} from '../Button/Button'
 import {debounce} from 'lodash'
@@ -14,9 +14,20 @@ export const NumericStepper = ({
   disabled,
   stepValue = 1,
 }) => {
+  const [valueInput, setValueInput] = useState('')
   const [isInFocus, setIsInFocus] = useState(false)
 
   const ref = useRef()
+
+  useEffect(() => {
+    const label = isInFocus
+      ? value
+      : !isInFocus && valuePlaceholder
+        ? valuePlaceholder
+        : value
+
+    setValueInput(label)
+  }, [isInFocus, value, valuePlaceholder])
 
   const increase = () => {
     const newValue = value + stepValue
@@ -28,6 +39,8 @@ export const NumericStepper = ({
   }
   const onChageInput = ({currentTarget: {value}}) => {
     if (/^\d+$/g.test(value)) {
+      setValueInput(value)
+
       const newValue = parseInt(value)
       onChange(
         newValue > maximumValue
@@ -36,16 +49,10 @@ export const NumericStepper = ({
             ? minimumValue
             : newValue,
       )
-    }
+    } else if (value === '') setValueInput(value)
   }
 
   const debounceSelectAll = debounce((event) => event.target.select(), 100)
-
-  const label = isInFocus
-    ? value
-    : !isInFocus && valuePlaceholder
-      ? valuePlaceholder
-      : value
 
   return (
     <div className="numeric-stepper-component">
@@ -53,7 +60,7 @@ export const NumericStepper = ({
         ref={ref}
         type="string"
         name={name}
-        value={label}
+        value={valueInput}
         disabled={disabled}
         onChange={onChageInput}
         onFocus={(event) => {
@@ -61,6 +68,7 @@ export const NumericStepper = ({
           setIsInFocus(true)
         }}
         onBlur={() => setIsInFocus(false)}
+        onKeyUp={({key}) => key === 'Enter' && ref.current.blur()}
       />
       <div className="container-controls">
         <Button size={BUTTON_SIZE.ICON_SMALL} onClick={decrease}>
