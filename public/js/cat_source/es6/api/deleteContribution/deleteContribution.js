@@ -28,7 +28,6 @@ export const deleteContribution = async ({
   sid,
 }) => {
   const dataParams = {
-    action: 'deleteContribution',
     source_lang: sourceLanguage,
     target_lang: targetLanguage,
     id_job: idJob,
