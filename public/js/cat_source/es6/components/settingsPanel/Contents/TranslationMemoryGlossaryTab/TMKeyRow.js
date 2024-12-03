@@ -1,11 +1,4 @@
-import React, {
-  Fragment,
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from 'react'
+import React, {Fragment, useContext, useEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {
@@ -25,7 +18,6 @@ import {ShareResource} from './ShareResource'
 import {DeleteResource} from './DeleteResource'
 import {updateTmKey} from '../../../../api/updateTmKey'
 import ModalsActions from '../../../../actions/ModalsActions'
-import ConfirmMessageModal from '../../../modals/ConfirmMessageModal'
 import {CreateProjectContext} from '../../../createProject/CreateProjectContext'
 
 import Earth from '../../../../../../../img/icons/Earth'
@@ -44,6 +36,7 @@ import {deleteTmKey} from '../../../../api/deleteTmKey'
 import {SCHEMA_KEYS} from '../../../../hooks/useProjectTemplates'
 import {Button, BUTTON_SIZE} from '../../../common/Button/Button'
 import {NumericStepper} from '../../../common/NumericStepper/NumericStepper'
+import IconClose from '../../../icons/IconClose'
 
 export const TMKeyRow = ({row, onExpandRow}) => {
   const {isImportTMXInProgress} = useContext(CreateProjectContext)
@@ -60,12 +53,14 @@ export const TMKeyRow = ({row, onExpandRow}) => {
   const [isLookup, setIsLookup] = useState(row.r ?? false)
   const [isUpdating, setIsUpdating] = useState(row.w ?? false)
   const [name, setName] = useState(row.name)
-  const [addPenalty, setAddPenalty] = useState(false)
-  const [penalty, setPenalty] = useState(0)
 
   const valueChange = useRef(false)
 
-  const onChangePenalty = useCallback((value) => setPenalty(value), [])
+  const penalty = row.penalty ?? 0
+
+  const onChangePenalty = (value) => {
+    updateRow({isLookup, isUpdating, penalty: value})
+  }
 
   const isMMSharedKey = row.id === SPECIAL_ROWS_ID.defaultTranslationMemory
   const isOwner = isOwnerOfKey(row.key)
@@ -96,7 +91,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
     setIsUpdating(isUpdating)
   }
 
-  const updateRow = ({isLookup, isUpdating}) => {
+  const updateRow = ({isLookup, isUpdating, penalty}) => {
     if (!isMMSharedKey) {
       const updatedKeys = tmKeys.map((tm) =>
         tm.id === row.id
@@ -109,6 +104,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
                   : true,
               r: isLookup,
               w: !tm.isActive ? isLookup : isUpdating,
+              penalty: typeof penalty === 'number' ? penalty : tm.penalty,
             }
           : tm,
       )
@@ -151,6 +147,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
       if (name) {
         updateTmKey({
           key: row.key,
+          penalty: row.penalty,
           description: name,
         }).catch(() => {
           CatToolActions.addNotification({
@@ -273,20 +270,34 @@ export const TMKeyRow = ({row, onExpandRow}) => {
     }
   }
 
-  const renderPenalty = addPenalty ? (
-    <NumericStepper
-      value={penalty}
-      label={`${penalty}%`}
-      onChange={onChangePenalty}
-      minimumValue={0}
-      maximumValue={100}
-      stepValue={5}
-    />
-  ) : (
-    <Button size={BUTTON_SIZE.SMALL} onClick={() => setAddPenalty(true)}>
-      Add penalty
-    </Button>
-  )
+  const renderPenalty =
+    penalty > 0 ? (
+      <div className="tm-row-penalty-numeric-stepper">
+        <NumericStepper
+          value={penalty}
+          valuePlaceholder={`${penalty}%`}
+          onChange={onChangePenalty}
+          minimumValue={1}
+          maximumValue={100}
+          stepValue={5}
+        />
+        <Button
+          className="penalty-numeric-stepper-close-button"
+          size={BUTTON_SIZE.ICON_SMALL}
+          onClick={() => onChangePenalty(0)}
+        >
+          <IconClose />
+        </Button>
+      </div>
+    ) : (
+      <Button
+        className="tm-row-penalty-button"
+        size={BUTTON_SIZE.SMALL}
+        onClick={() => onChangePenalty(1)}
+      >
+        Add penalty
+      </Button>
+    )
 
   return (
     <Fragment>
@@ -328,7 +339,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
           data-testid={`tmkey-row-name-${row.id}`}
         ></input>
       </div>
-      <div className="tm-key-row-key">{row.key}</div>
+      {!isMMSharedKey && <div className="tm-key-row-key">{row.key}</div>}
       <div title={iconDetails.title} className="align-center tm-key-row-icons">
         {iconDetails.icon}
       </div>

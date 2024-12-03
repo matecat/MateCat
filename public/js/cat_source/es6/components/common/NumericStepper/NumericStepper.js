@@ -1,7 +1,8 @@
 import React, {useRef, useState} from 'react'
 import PropTypes from 'prop-types'
-import {Button} from '../Button/Button'
+import {Button, BUTTON_SIZE} from '../Button/Button'
 import {debounce} from 'lodash'
+import ArrowDown from '../../../../../../img/icons/ArrowDown'
 
 export const NumericStepper = ({
   value,
@@ -9,7 +10,7 @@ export const NumericStepper = ({
   minimumValue,
   maximumValue,
   name,
-  label,
+  valuePlaceholder,
   disabled,
   stepValue = 1,
 }) => {
@@ -40,7 +41,11 @@ export const NumericStepper = ({
 
   const debounceSelectAll = debounce((event) => event.target.select(), 100)
 
-  const labelInput = isInFocus ? value : !isInFocus && label ? label : value
+  const label = isInFocus
+    ? value
+    : !isInFocus && valuePlaceholder
+      ? valuePlaceholder
+      : value
 
   return (
     <div className="numeric-stepper-component">
@@ -48,7 +53,7 @@ export const NumericStepper = ({
         ref={ref}
         type="string"
         name={name}
-        value={labelInput}
+        value={label}
         disabled={disabled}
         onChange={onChageInput}
         onFocus={(event) => {
@@ -58,8 +63,12 @@ export const NumericStepper = ({
         onBlur={() => setIsInFocus(false)}
       />
       <div className="container-controls">
-        <Button onClick={decrease}>up</Button>
-        <Button onClick={increase}>down</Button>
+        <Button size={BUTTON_SIZE.ICON_SMALL} onClick={decrease}>
+          <ArrowDown />
+        </Button>
+        <Button size={BUTTON_SIZE.ICON_SMALL} onClick={increase}>
+          <ArrowDown />
+        </Button>
       </div>
     </div>
   )
@@ -71,7 +80,7 @@ NumericStepper.propTypes = {
   minimumValue: PropTypes.number.isRequired,
   maximumValue: PropTypes.number.isRequired,
   name: PropTypes.string,
-  label: PropTypes.string,
+  valuePlaceholder: PropTypes.string,
   disabled: PropTypes.bool,
   stepValue: PropTypes.number,
 }

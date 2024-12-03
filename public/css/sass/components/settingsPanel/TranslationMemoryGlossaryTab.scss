@@ -72,20 +72,28 @@
 
   .settings-panel-table-rowHeading,
   .settings-panel-row-content {
-    grid-template-columns: 8% 5% minmax(0, 1fr) 20% 5% 18%;
+    grid-template-columns: 8% 5% minmax(0, 1fr) 20% 5% 14% 18%;
   }
 
   .settings-panel-row {
     border-top: unset;
 
     .row-content-default-memory {
-      grid-template-columns: 8% 5% minmax(0, 1fr) 0 5% 18%;
+      grid-template-columns: 8% 5% minmax(0, 1fr) 5% 14% 18%;
+
+      > :last-child {
+        grid-column: 6;
+      }
     }
     .row-content-create-resource {
       grid-template-columns: 100%;
 
       > form {
         padding: 0 !important;
+
+        > :last-child {
+          grid-column: 7;
+        }
       }
     }
   }
@@ -109,6 +117,12 @@
   }
 }
 
+.settings-panel-table:not(.translation-memory-glossary-tab-active-table) {
+  .settings-panel-row-content > :last-child {
+    grid-column: 7;
+  }
+}
+
 .translation-memory-glossary-tab-inactive-resources {
   margin-top: 20px;
 }
@@ -117,6 +131,12 @@
 .tm-key-update {
   display: flex;
   justify-content: center;
+}
+
+.tm-key-add-shared-resource {
+  input {
+    width: 90%;
+  }
 }
 
 .tm-key-row-name {
@@ -327,11 +347,6 @@
 }
 
 .translation-memory-glossary-tab-active-table {
-  .settings-panel-table-rowHeading,
-  .settings-panel-row-content {
-    grid-template-columns: 8% 5% minmax(0, 1fr) 20% 5% 14% 18%;
-  }
-
   .settings-panel-row {
     padding: 0 10px;
 
@@ -384,7 +399,8 @@
 }
 
 .tm-row-penalty {
-  button {
+  .tm-row-penalty-button,
+  .penalty-numeric-stepper-close-button {
     border-radius: 2px;
     font-size: 16px;
     color: #000 !important;
@@ -397,6 +413,17 @@
     &:hover {
       background-color: $grey5 !important;
     }
+  }
+
+  .tm-row-penalty-numeric-stepper {
+    display: flex;
+    gap: 5px;
+  }
+
+  .penalty-numeric-stepper-close-button {
+    width: 28px !important;
+    height: 28px !important;
+    color: $grey6 !important;
   }
 }
 
