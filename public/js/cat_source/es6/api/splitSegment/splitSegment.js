@@ -27,7 +27,7 @@ export const splitSegment = async (
     formData.append(key, dataParams[key])
   })
   const response = await fetch(
-    `${getMatecatApiDomain()}?action=setSegmentSplit`,
+    `${getMatecatApiDomain()}api/app/split-segment`,
     {
       method: 'POST',
       credentials: 'include',

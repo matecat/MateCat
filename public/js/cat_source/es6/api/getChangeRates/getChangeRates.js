@@ -2,7 +2,7 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
 
 export const getChangeRates = async () => {
   const response = await fetch(
-    `${getMatecatApiDomain()}?action=fetchChangeRates`,
+    `${getMatecatApiDomain()}api/app/fetch-change-rates`,
     {
       method: 'POST',
       credentials: 'include',

@@ -12,3 +12,5 @@ route( '/api/v1/jobs/[:id_job]/[:password]/stats', 'GET', [ 'API\V1\StatsControl
 $klein->with( '/api/v1/projects/[:id_project]/[:password]', function () {
     route( '/creation_status', 'GET', [ 'API\V2\ProjectCreationStatusController', 'get' ] );
 } );
+
+route( '/api/v1/new', 'POST', ['API\V1\NewController', 'create' ] );

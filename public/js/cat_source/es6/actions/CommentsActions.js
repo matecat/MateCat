@@ -20,14 +20,18 @@ const CommentsActions = {
       sourcePage: config.revisionNumber ? config.revisionNumber + 1 : 1,
       message: text,
       isAnonymous,
-    }).then((resp) => {
-      AppDispatcher.dispatch({
-        actionType: CommentsConstants.ADD_COMMENT,
-        comment: resp.data.entries.comment[0],
-        sid: sid,
-      })
-      return resp
     })
+      .then((resp) => {
+        AppDispatcher.dispatch({
+          actionType: CommentsConstants.ADD_COMMENT,
+          comment: resp.data.entries.comment[0],
+          sid: sid,
+        })
+        return resp
+      })
+      .catch(() => {
+        // showGenericWarning();
+      })
   },
   resolveThread: function (sid) {
     markAsResolvedThread({

@@ -11,7 +11,7 @@ test('works properly with empty filter', async () => {
   const payload = {errors: [], data: {fake: 'data'}}
 
   mswServer.use(
-    http.post(config.basepath, () => {
+    http.post(config.basepath + 'api/app/get-projects', () => {
       return HttpResponse.json(payload)
     }),
   )
@@ -25,7 +25,7 @@ test('works properly with full filter', async () => {
   const payload = {errors: [], data: {fake: 'data'}}
 
   mswServer.use(
-    http.post(config.basepath, () => {
+    http.post(config.basepath + 'api/app/get-projects', () => {
       return HttpResponse.json(payload)
     }),
   )
@@ -43,7 +43,7 @@ test('throws on non empty errors', async () => {
   const payload = {errors: [500, 'VERY_BAD_ERROR'], data: {fake: 'data'}}
 
   mswServer.use(
-    http.post(config.basepath, () => {
+    http.post(config.basepath + 'api/app/get-projects', () => {
       return HttpResponse.json(payload)
     }),
   )

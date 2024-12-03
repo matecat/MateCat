@@ -87,7 +87,93 @@ const ROW_COLUMNS_TESTID = {
 }
 const getRowElementById = ({id, column}) =>
   screen.queryByTestId(`${column}-${id}`)
+const executeMswServer = () => {
+  mswServer.use(
+    http.post(config.basepath + 'api/app/create-random-user', ({request}) => {
+      const response = {
+        errors: [],
+        data: {
+          key: '6f03df0307c7a161afa9',
+          id: 'MyMemory_5007d86025f58b50f29c',
+          pass: 'f22815f87d',
+          mtLangSupported: true,
+          error: {
+            code: 0,
+            message: '',
+          },
+        },
+      }
 
+      return HttpResponse.json(response)
+    }),
+  )
+
+  mswServer.use(
+    http.post(config.basepath + 'api/app/user-keys-new-key', ({request}) => {
+      const response = {
+        errors: [],
+        data: {
+          key: '6f03df0307c7a161afa9',
+          id: 'MyMemory_5007d86025f58b50f29c',
+          pass: 'f22815f87d',
+          mtLangSupported: true,
+          error: {
+            code: 0,
+            message: '',
+          },
+        },
+      }
+
+      return HttpResponse.json(response)
+    }),
+  )
+
+  mswServer.use(
+    http.post(config.basepath + 'api/app/user-keys-delete', ({request}) => {
+      const response = {
+        errors: [],
+        data: {
+          key: '6f03df0307c7a161afa9',
+          id: 'MyMemory_5007d86025f58b50f29c',
+          pass: 'f22815f87d',
+          mtLangSupported: true,
+          error: {
+            code: 0,
+            message: '',
+          },
+        },
+      }
+
+      return HttpResponse.json(response)
+    }),
+  )
+  mswServer.use(
+    http.post(config.basepath + 'api/app/check-tm-key', ({request}) => {
+      const response = {errors: [], data: [], success: true}
+
+      return HttpResponse.json(response)
+    }),
+  )
+  mswServer.use(
+    http.post(config.basepath + 'api/app/user-keys-info', ({request}) => {
+      const response = {
+        errors: [],
+        data: {
+          key: '6f03df0307c7a161afa9',
+          id: 'MyMemory_5007d86025f58b50f29c',
+          pass: 'f22815f87d',
+          mtLangSupported: true,
+          error: {
+            code: 0,
+            message: '',
+          },
+        },
+      }
+
+      return HttpResponse.json(response)
+    }),
+  )
+}
 test('Operation about MyMemory row', async () => {
   const user = userEvent.setup()
   const contextValues = contextMockValues()
@@ -188,31 +274,7 @@ test('Enabled/disable key', async () => {
 })
 
 test('Create and delete new resource', async () => {
-  mswServer.use(
-    http.post(config.basepath, ({request}) => {
-      const url = new URL(request.url)
-      const action = url.searchParams.get('action')
-      const response =
-        action === 'createRandUser'
-          ? {
-              errors: [],
-              data: {
-                key: '6f03df0307c7a161afa9',
-                id: 'MyMemory_5007d86025f58b50f29c',
-                pass: 'f22815f87d',
-                mtLangSupported: true,
-                error: {
-                  code: 0,
-                  message: '',
-                },
-              },
-            }
-          : {errors: [], data: []}
-
-      return HttpResponse.json(response)
-    }),
-  )
-
+  executeMswServer()
   const user = userEvent.setup()
   const contextValues = contextMockValues({noTmKeys: true})
 
@@ -275,19 +337,7 @@ test('Create and delete new resource', async () => {
 })
 
 test('Create shared resource', async () => {
-  mswServer.use(
-    http.post(config.basepath, ({request}) => {
-      const url = new URL(request.url)
-      const action = url.searchParams.get('action')
-      const response =
-        action === 'ajaxUtils'
-          ? {errors: [], data: [], success: true}
-          : {errors: [], data: []}
-
-      return HttpResponse.json(response)
-    }),
-  )
-
+  executeMswServer()
   const user = userEvent.setup()
   const contextValues = contextMockValues({noTmKeys: true})
 
@@ -338,30 +388,7 @@ test('Create shared resource', async () => {
 })
 
 test('Row Menu items', async () => {
-  mswServer.use(
-    http.post(config.basepath, ({request}) => {
-      const url = new URL(request.url)
-      const action = url.searchParams.get('action')
-      const response =
-        action === 'createRandUser'
-          ? {
-              errors: [],
-              data: {
-                key: '6f03df0307c7a161afa9',
-                id: 'MyMemory_5007d86025f58b50f29c',
-                pass: 'f22815f87d',
-                mtLangSupported: true,
-                error: {
-                  code: 0,
-                  message: '',
-                },
-              },
-            }
-          : {errors: [], data: []}
-
-      return HttpResponse.json(response)
-    }),
-  )
+  executeMswServer()
 
   const user = userEvent.setup()
   const contextValues = contextMockValues({noTmKeys: true})

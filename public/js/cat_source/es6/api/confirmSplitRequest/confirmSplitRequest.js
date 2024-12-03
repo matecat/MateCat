@@ -9,7 +9,6 @@ export const confirmSplitRequest = async (
   splitRawWords,
 ) => {
   const params = flattenObject({
-    exec: 'apply',
     project_id: project.id,
     project_pass: project.password,
     job_id: job.id,
@@ -23,7 +22,7 @@ export const confirmSplitRequest = async (
   Object.keys(params).forEach((key) => {
     formData.append(key, params[key])
   })
-  const response = await fetch(`${getMatecatApiDomain()}?action=splitJob`, {
+  const response = await fetch(`${getMatecatApiDomain()}api/app/split-job-apply`, {
     method: 'POST',
     credentials: 'include',
     body: formData,
