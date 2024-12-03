@@ -49,7 +49,7 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
         $this->segmentation_rule        = (!empty($json->segmentation_rule)) ? json_encode( $json->segmentation_rule ) : null;
         $this->pretranslate_100         = $json->pretranslate_100;
         $this->pretranslate_101         = $json->pretranslate_101;
-        $this->pretranslate_101         = $json->tm_prioritization;
+        $this->tm_prioritization        = $json->tm_prioritization;
         $this->get_public_matches       = $json->get_public_matches;
         $this->mt                       = json_encode( $json->mt );
         $this->tm                       = (!empty($json->tm)) ? json_encode( $json->tm ) : null;
