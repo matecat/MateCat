@@ -498,13 +498,13 @@ const NewProject = () => {
     switch (param) {
       case 'signin':
         if (!config.isLoggedIn) {
-          APP.openLoginModal()
+          ModalsActions.openLoginModal()
         }
         CommonUtils.removeParam('open')
         break
       case 'signup':
         if (!config.isLoggedIn) {
-          APP.openRegisterModal()
+          ModalsActions.openRegisterModal()
         }
         CommonUtils.removeParam('open')
         break
@@ -831,7 +831,11 @@ const NewProject = () => {
             <div className="translate-box source">
               <SourceLanguageSelect />
             </div>
-            <a id="swaplang" title="Swap languages" onClick={swapLanguages}>
+            <a
+              id="swaplang"
+              title="Swap languages"
+              {...(isUserLogged && {onClick: swapLanguages})}
+            >
               <span>Swap languages</span>
             </a>
             {/*Target Language*/}

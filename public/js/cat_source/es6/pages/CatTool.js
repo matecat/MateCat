@@ -13,7 +13,6 @@ import CatToolConstants from '../constants/CatToolConstants'
 import OfflineUtils from '../utils/offlineUtils'
 import SegmentActions from '../actions/SegmentActions'
 import CatToolActions from '../actions/CatToolActions'
-import SegmentFilter from '../components/header/cattol/segment_filter/segment_filter'
 import SegmentStore from '../stores/SegmentStore'
 import SegmentConstants from '../constants/SegmentConstants'
 import useSegmentsLoader from '../hooks/useSegmentsLoader'
@@ -29,14 +28,11 @@ import {getTmKeysJob} from '../api/getTmKeysJob'
 import {getSupportedLanguages} from '../api/getSupportedLanguages'
 import ApplicationStore from '../stores/ApplicationStore'
 import useProjectTemplates from '../hooks/useProjectTemplates'
-import ModalsActions from '../actions/ModalsActions'
-import FatalErrorModal from '../components/modals/FatalErrorModal'
 import {Shortcuts} from '../utils/shortcuts'
 import CommonUtils from '../utils/commonUtils'
 import {CattoolFooter} from '../components/footer/CattoolFooter'
 import {mountPage} from './mountPage'
 import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper'
-import NotificationBox from '../components/notificationsComponent/NotificationBox'
 import SseListener from '../sse/SseListener'
 import Speech2Text from '../utils/speech2text'
 import {initTagSignature} from '../components/segments/utils/DraftMatecatUtils/tagModel'
@@ -47,7 +43,7 @@ const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
 function CatTool() {
   useHotkeys(
     Shortcuts.cattol.events.openSettings.keystrokes[Shortcuts.shortCutsKeyType],
-    () => CatToolActions.openSettingsPanel(SETTINGS_PANEL_TABS.other),
+    () => CatToolActions.openSettingsPanel(SETTINGS_PANEL_TABS.editorSettings),
     {enableOnContentEditable: true},
   )
   const {isUserLogged, userInfo} = useContext(ApplicationWrapperContext)
@@ -276,7 +272,6 @@ function CatTool() {
       )
     CatToolActions.onRender()
     $('html').trigger('start')
-    if (LXQ.enabled()) LXQ.initPopup()
     UI.splittedTranslationPlaceholder = '##$_SPLIT$##'
   }, [])
 
@@ -378,14 +373,9 @@ function CatTool() {
     if (metadata) {
       if (Speech2Text.enabled(metadata)) Speech2Text.init()
       initTagSignature(metadata)
+      if (LXQ.enabled(metadata)) LXQ.init()
     }
   }, [userInfo?.metadata])
-
-  const {
-    guess_tags: guessTagActive,
-    dictation: speechToTextActive,
-    cross_language_matches: multiMatchLangs = [],
-  } = userInfo?.metadata ?? {}
 
   const isFakeCurrentTemplateReady =
     projectTemplates.length &&
@@ -428,7 +418,7 @@ function CatTool() {
         <div
           id="outer"
           className={
-            isLoadingSegments
+            isLoadingSegments || !isUserLogged
               ? options?.where === 'before'
                 ? 'loadingBefore'
                 : options?.where === 'after'
@@ -437,28 +427,27 @@ function CatTool() {
               : ''
           }
         >
-          <article id="file" className="loading mbc-commenting-closed">
-            <div className="article-segments-container">
-              <SegmentsContainer
-                isReview={config.isReview}
-                startSegmentId={UI.startSegmentId?.toString()}
-                firstJobSegment={config.first_job_segment}
-                guessTagActive={guessTagActive}
-                speechToTextActive={speechToTextActive}
-                multiMatchLangs={multiMatchLangs}
-                languages={supportedLanguages}
-              />
-            </div>
-          </article>
+          {isUserLogged ? (
+            <article id="file" className="loading mbc-commenting-closed">
+              <div className="article-segments-container">
+                <SegmentsContainer
+                  isReview={config.isReview}
+                  startSegmentId={UI.startSegmentId?.toString()}
+                  firstJobSegment={config.first_job_segment}
+                  languages={supportedLanguages}
+                />
+              </div>
+            </article>
+          ) : (
+            !isUserLogged &&
+            typeof userInfo === 'undefined' && <div className="signin-bg" />
+          )}
           <div id="loader-getMoreSegments" />
         </div>
         <div id="plugin-mount-point"></div>
         {isFreezingSegments && <div className="freezing-overlay"></div>}
       </div>
 
-      <div className="notifications-wrapper">
-        <NotificationBox />
-      </div>
       {isUserLogged && openSettings.isOpen && isFakeCurrentTemplateReady && (
         <SettingsPanel
           {...{
@@ -489,16 +478,18 @@ function CatTool() {
           }}
         />
       )}
-      <CattoolFooter
-        idProject={config.id_project}
-        idJob={config.id_job}
-        password={config.password}
-        source={config.source_rfc}
-        target={config.target_rfc}
-        isReview={config.isReview}
-        isCJK={config.isCJK}
-        languagesArray={supportedLanguages}
-      />
+      {isUserLogged && (
+        <CattoolFooter
+          idProject={config.id_project}
+          idJob={config.id_job}
+          password={config.password}
+          source={config.source_rfc}
+          target={config.target_rfc}
+          isReview={config.isReview}
+          isCJK={config.isCJK}
+          languagesArray={supportedLanguages}
+        />
+      )}
     </>
   )
 }

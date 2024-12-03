@@ -78,7 +78,9 @@ const SegmentActions = {
       .catch((errors) => {
         var notification = {
           title: 'Error',
-          text: errors[0].message,
+          text: errors?.length
+            ? errors[0].message
+            : 'We got an error, please contact support',
           type: 'error',
         }
         CatToolActions.addNotification(notification)
@@ -489,7 +491,6 @@ const SegmentActions = {
   },
   changeTagProjectionStatus: function (enabled) {
     //TODO: transform paremeter to bool
-    config.tag_projection_enabled = enabled ? 1 : 0
     toggleTagProjectionJob({enabled}).then(() => {
       AppDispatcher.dispatch({
         actionType: SegmentConstants.SET_GUESS_TAGS,

@@ -1,6 +1,7 @@
 import React, {
   createRef,
   useCallback,
+  useContext,
   useEffect,
   useLayoutEffect,
   useMemo,
@@ -25,6 +26,7 @@ import {isUndefined} from 'lodash'
 import SegmentUtils from '../../utils/segmentUtils'
 import CommentsStore from '../../stores/CommentsStore'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
+import {ApplicationWrapperContext} from '../common/ApplicationWrapper'
 
 const ROW_HEIGHT = 90
 const OVERSCAN = 5
@@ -37,14 +39,7 @@ const SEARCH_BAR_OPENED_PADDING_TOP = 80
 
 const listRef = createRef()
 
-function SegmentsContainer({
-  isReview,
-  startSegmentId,
-  firstJobSegment,
-  guessTagActive,
-  speechToTextActive,
-  multiMatchLangs,
-}) {
+function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
   useHotkeys(
     Shortcuts.cattol.events.copySource.keystrokes[Shortcuts.shortCutsKeyType],
     (e) => {
@@ -149,6 +144,8 @@ function SegmentsContainer({
     {enableOnContentEditable: true, preventDefault: true},
   )
 
+  const {userInfo} = useContext(ApplicationWrapperContext)
+
   const [segments, setSegments] = useState(Immutable.fromJS([]))
   const [rows, setRows] = useState([])
   const [essentialRows, setEssentialRows] = useState([])
@@ -180,10 +177,18 @@ function SegmentsContainer({
   const cachedRowsHeightMap = useRef(new Map())
   const cachedSegmentsToJS = useRef(new Map())
 
+  const {guess_tags: guessTagActive, dictation: speechToTextActive} =
+    userInfo?.metadata ?? {}
+
   const onChangeRowHeight = useCallback((id, newHeight) => {
     rowsRenderedHeight.current.set(id, newHeight)
     setOnUpdateRow(Symbol())
   }, [])
+
+  const multiMatchLangs = useMemo(
+    () => userInfo?.metadata?.cross_language_matches ?? [],
+    [userInfo?.metadata],
+  )
 
   const scrollToParams = useMemo(() => {
     const position = scrollToSelected ? 'auto' : 'start'
@@ -769,7 +774,7 @@ function SegmentsContainer({
       setBulkSelection,
       sideOpen: isSideOpen,
       files: files,
-      currentFileId: currentFileId.toString(),
+      currentFileId: currentFileId ? currentFileId.toString() : '0',
       collectionTypeSeparator,
       guessTagActive,
       speechToTextActive,

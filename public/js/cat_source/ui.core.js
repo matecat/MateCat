@@ -750,7 +750,7 @@ window.UI = {
     var isSplitted = segmentBefore.splitted
     if (isSplitted) {
       if (segmentBefore.original_sid !== segmentId.split('-')[0]) {
-        return this.collectSplittedTranslations(
+        return SegmentUtils.collectSplittedTranslations(
           segmentBefore.original_sid,
           '.source',
         )
@@ -765,7 +765,7 @@ window.UI = {
    * Overridden by  plugin
    */
   getContextAfter: function (segmentId) {
-    const segmentAfter = SegmentStore.getNextSegment(segmentId)
+    const segmentAfter = SegmentStore.getNextSegment({current_sid: segmentId})
     if (!segmentAfter) {
       return null
     }
@@ -773,7 +773,7 @@ window.UI = {
     var isSplitted = segmentAfter.splitted
     if (isSplitted) {
       if (segmentAfter.firstOfSplit) {
-        return this.collectSplittedTranslations(
+        return SegmentUtils.collectSplittedTranslations(
           segmentAfter.original_sid,
           '.source',
         )
@@ -788,7 +788,7 @@ window.UI = {
    * Overridden by  plugin
    */
   getIdBefore: function (segmentId) {
-    const segmentBefore = SegmentStore.getPrevSegment(segmentId)
+    const segmentBefore = SegmentStore.getPrevSegment(segmentId, true)
     // var segmentBefore = findSegmentBefore();
     if (!segmentBefore) {
       return null
@@ -799,7 +799,10 @@ window.UI = {
    * Overridden by  plugin
    */
   getIdAfter: function (segmentId) {
-    const segmentAfter = SegmentStore.getNextSegment(segmentId)
+    const segmentAfter = SegmentStore.getNextSegment({
+      current_sid: segmentId,
+      alsoMutedSegment: true,
+    })
     if (!segmentAfter) {
       return null
     }
