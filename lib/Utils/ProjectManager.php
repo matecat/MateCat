@@ -1394,7 +1394,7 @@ class ProjectManager {
 
             // tm_prioritization
             if ( isset( $projectStructure[ 'tm_prioritization' ] ) ) {
-                $jobsMetadataDao->set( $newJob->id, $newJob->password, 'tm_prioritization', ($projectStructure[ 'tm_prioritization' ] === true ? "1" : "0") );
+                $jobsMetadataDao->set( $newJob->id, $newJob->password, 'tm_prioritization', ($projectStructure[ 'tm_prioritization' ] == true ? "1" : "0") );
             }
 
             // dialect_strict
