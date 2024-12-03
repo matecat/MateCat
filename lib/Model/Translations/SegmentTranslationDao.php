@@ -18,6 +18,89 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
     ];
 
     /**
+     * @param array $id_list
+     * @param int   $jobId
+     * @param int   $ttl
+     *
+     * @return array
+     * @throws ReflectionException
+     */
+    public static function getAllSegmentsByIdListAndJobId( array $id_list, int $jobId, int $ttl = 0 ): array {
+
+        $chunked_id_list = array_chunk( $id_list, 20, true );
+        $resultSet       = [];
+
+        foreach ( $chunked_id_list as $list ) {
+
+            $sql = "SELECT * FROM " . static::TABLE . " WHERE id_segment IN( " . implode( ',', array_fill( 0, count( $list ), '?' ) ) . " ) AND id_job = ? ;";
+
+            $conn = Database::obtain()->getConnection();
+            $stmt = $conn->prepare( $sql );
+
+            $thisDao = new self();
+
+            /**
+             * @var $result Translations_SegmentTranslationStruct[]
+             */
+            $result = $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt,
+                    new Translations_SegmentTranslationStruct(),
+                    array_merge( $list, [ $jobId ] )
+            );
+
+            $resultSet = array_merge( !empty( $result ) ? $result : [], $resultSet );
+
+        }
+
+        return $resultSet;
+
+    }
+
+    /**
+     * @param Translations_SegmentTranslationStruct[] $translation_struct
+     *
+     * @return int
+     * @throws Exception
+     */
+    public static function updateTranslationAndStatusAndDateByList( array $translation_struct ): int {
+
+        $chunked_id_list = array_chunk( $translation_struct, 20, true );
+        $tuple_list      = "( ?, ?, ?, ?, ?, ? )"; // the first 2 quotation marks are id_segment and id_job
+        $rowCount        = 0;
+        $conn            = Database::obtain()->getConnection();
+
+        foreach ( $chunked_id_list as $list ) {
+
+            $tuple_marks = array_fill( 0, count( $list ), $tuple_list );
+
+            $sql = "INSERT INTO " . static::TABLE . " (id_segment, id_job, translation, status, translation_date, version_number) VALUES " . implode( ", ", $tuple_marks )
+                    . " ON DUPLICATE KEY UPDATE "
+                    . "translation = VALUES(translation), status = VALUES(status), translation_date = VALUES(translation_date), version_number = VALUES(version_number) ;";
+
+            $stmt = $conn->prepare( $sql );
+
+            $values = [];
+
+            foreach ( $list as $row ) {
+                $values[] = $row->id_segment;
+                $values[] = $row->id_job;
+                $values[] = $row->translation;
+                $values[] = $row->status;
+                $values[] = $row->translation_date;
+                $values[] = $row->version_number;
+            }
+
+            $stmt->execute( $values );
+            $stmt->closeCursor();
+
+            $rowCount += $stmt->rowCount();
+
+        }
+
+        return $rowCount;
+
+    }
+
+    /**
      * @param int $id_segment
      * @param int $id_job
      * @param int $ttl
