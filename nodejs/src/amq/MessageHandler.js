@@ -19,6 +19,7 @@ const CONTRIBUTIONS_TYPE = 'contribution';
 const CONCORDANCE_TYPE = 'concordance';
 const CROSS_LANG_CONTRIBUTIONS = 'cross_language_matches';
 const BULK_STATUS_CHANGE_TYPE = 'bulk_segment_status_change';
+
 const LOGOUT = 'logout';
 
 const UPGRADE = 'upgrade';
@@ -43,6 +44,10 @@ module.exports.MessageHandler = class {
         logger.info('RELOAD: ' + RELOAD + ' message received...');
         notifyUpgrade(this.application, false);
         return;
+      case LOGOUT:
+        logger.info('Forced logout: ' + LOGOUT + ' message received for user ' + message.data.uid + '...');
+        room = message.data.uid.toString();
+        break;
       case COMMENTS_TYPE:
         room = message.data.id_job.toString();
         break;
