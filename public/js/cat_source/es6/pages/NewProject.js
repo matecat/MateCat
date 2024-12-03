@@ -377,7 +377,6 @@ const NewProject = () => {
         const isMatchingKeyFromQuery = tm_keys.some(
           ({key}) => tmKeyFromQueryString === key,
         )
-
         setTmKeys([
           ...tm_keys.map((key) => ({
             ...key,
@@ -416,6 +415,7 @@ const NewProject = () => {
       qaModelTemplateId,
       payableRateTemplateId,
       XliffConfigTemplateId,
+      tmPrioritization,
     } = currentProjectTemplate
 
     // update store recently used target languages
@@ -454,6 +454,7 @@ const NewProject = () => {
         deepl_formality: mt.extra.deepl_formality,
       }),
       xliff_parameters_template_id: XliffConfigTemplateId,
+      tm_prioritization: tmPrioritization ? 1 : 0,
     })
 
     if (!projectSent) {
@@ -700,6 +701,9 @@ const NewProject = () => {
               isActive: false,
               ...(tmFromTemplate && {...tmFromTemplate, isActive: true}),
               name: tmItem.name,
+              ...(typeof tmFromTemplate?.penalty === 'number' && {
+                penalty: tmFromTemplate?.penalty,
+              }),
             }
           })
         : prevState,

@@ -419,11 +419,12 @@ class GetContributionWorker extends AbstractWorker {
         $_config[ 'num_result' ]     = $contributionStruct->resultNum;
         $_config[ 'isConcordance' ]  = $contributionStruct->concordanceSearch;
 
-        $jobsMetadataDao = new MetadataDao();
-        $dialect_strict  = $jobsMetadataDao->get( $jobStruct->id, $jobStruct->password, 'dialect_strict' );
+        if ( $contributionStruct->dialect_strict !== null ) {
+            $_config[ 'dialect_strict' ] = $contributionStruct->dialect_strict;
+        }
 
-        if ( $dialect_strict !== null ) {
-            $_config[ 'dialect_strict' ] = $dialect_strict->value == 1;
+        if ( $contributionStruct->tm_prioritization !== null ) {
+            $_config[ 'tm_prioritization' ] = $contributionStruct->tm_prioritization;
         }
 
         if ( $contributionStruct->concordanceSearch && $contributionStruct->fromTarget ) {
