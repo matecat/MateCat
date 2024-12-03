@@ -66,26 +66,31 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker {
         $batchEventCreator->setFeatureSet( $chunk->getProject()->getFeaturesSet() );
         $batchEventCreator->setProject( $chunk->getProject() );
 
-        foreach ( $params[ 'segment_ids' ] as $segment_id ) {
+        $old_translations = Translations_SegmentTranslationDao::getAllSegmentsByIdListAndJobId( $params[ 'segment_ids' ], $chunk->id );
 
-            $old_translation = Translations_SegmentTranslationDao::findBySegmentAndJob( $segment_id, $chunk->id );
+        $new_translations = [];
 
-            if ( empty( $old_translation ) ) {
-                //no segment found
-                continue;
-            }
+        if ( empty( $old_translations ) ) {
+            //no segment found
+            return;
+        }
+
+        foreach ( $old_translations as $old_translation ) {
 
             $new_translation                   = clone $old_translation;
             $new_translation->status           = $status;
             $new_translation->translation_date = date( "Y-m-d H:i:s" );
 
-            Translations_SegmentTranslationDao::updateTranslationAndStatusAndDate( $new_translation );
+            $new_translations[] = $new_translation;
 
             if ( $chunk->getProject()->hasFeature( Features::TRANSLATION_VERSIONS ) ) {
                 $segmentTranslationEvent = new TranslationEvent( $old_translation, $new_translation, $user, $source_page );
                 $batchEventCreator->addEvent( $segmentTranslationEvent );
             }
+
         }
+
+        Translations_SegmentTranslationDao::updateTranslationAndStatusAndDateByList( $new_translations );
 
         $batchEventCreator->save( new BatchReviewProcessor() );
 
@@ -113,6 +118,10 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker {
             $this->publishToSseTopic( $message );
 
         }
+    }
+
+    private function getAllSegmentsByJobAndIdList( array $id_list, int $jobId ) {
+        $sql = "";
     }
 
 }
