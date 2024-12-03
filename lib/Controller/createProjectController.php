@@ -89,6 +89,7 @@ class createProjectController extends ajaxController {
                 'private_tm_key'     => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
                 'pretranslate_100'   => [ 'filter' => FILTER_VALIDATE_INT ],
                 'pretranslate_101'   => [ 'filter' => FILTER_VALIDATE_INT ],
+                'tm_prioritization'  => [ 'filter' => FILTER_VALIDATE_INT ],
                 'id_team'            => [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR ],
 
                 'mmt_glossaries' => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
