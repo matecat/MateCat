@@ -150,9 +150,11 @@ export const TranslationMemoryGlossaryTab = () => {
           r: false,
           w: false,
           isActive: false,
-          penalty: 0,
           ...(tmFromTemplate && {...tmFromTemplate, isActive: true}),
           name: tmItem.name,
+          ...(typeof tmFromTemplate?.penalty === 'number' && {
+            penalty: tmFromTemplate?.penalty,
+          }),
         }
       }),
     )
