@@ -63,7 +63,7 @@ export const MsExcel = () => {
       <div className="filters-params-option">
         <div>
           <h3>Translate chart texts</h3>
-          <p>Choose whether to translate text in charts.</p>
+          <p>Choose whether to translate chart titles and axis names.</p>
         </div>
         <Controller
           control={control}
