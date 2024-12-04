@@ -57,7 +57,7 @@ H;
                         '​你叫什么名字%2'                           => 7,
                         '​你叫什么名字'                             => 6,
                         '​你叫什么名字<a href="#">你叫什么名字</a>' => 12,
-//                        $links                                      => 56,  // disabled for now until new regexp will be better tested
+//                        $links                                      => 133,  // disabled for now until new regexp will be better tested
                 ],
                 'it-IT' => [
                         '​La casa è <object_color>​​<object> bianca'                                                                         => 4,
@@ -104,7 +104,7 @@ H;
                 'en-US' => [
                         'Hyphenated words count as one, like pippo-dash and pippo_underscore, but isolated - -- and _ __ count as zero' => 15,
                         "The header's list"                                                                                             => 3,
-//                        $links                                                                                                          => 56, // disabled for now until new regexp will be better tested
+//                        $links                                                                                                          => 74, // disabled for now until new regexp will be better tested
                         "dev-docs-servicenow.zoominsoftware.io"                                                                         => 1
                 ]
         ];
