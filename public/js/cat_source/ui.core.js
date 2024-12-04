@@ -2,9 +2,7 @@ import {isUndefined} from 'lodash'
 import Cookies from 'js-cookie'
 
 import CatToolActions from './es6/actions/CatToolActions'
-import CommonUtils, {
-  trackErrorStatusUndefinedSentry,
-} from './es6/utils/commonUtils'
+import CommonUtils from './es6/utils/commonUtils'
 import ConfirmMessageModal from './es6/components/modals/ConfirmMessageModal'
 import TextUtils from './es6/utils/textUtils'
 import OfflineUtils from './es6/utils/offlineUtils'
@@ -575,13 +573,6 @@ window.UI = {
     var segment = $('#segment-' + id_segment)
 
     if (response.data == 'OK') {
-      // Temp track status undefined;
-      trackErrorStatusUndefinedSentry({
-        caller: 'Ui.core -> setTranslation_success',
-        idSegment: id_segment,
-        status,
-      })
-      // End temp track status undefined;
       SegmentActions.setStatus(id_segment, null, status)
       CatToolActions.setProgress(response)
       SegmentActions.removeClassToSegment(id_segment, 'setTranslationPending')
@@ -759,7 +750,7 @@ window.UI = {
     var isSplitted = segmentBefore.splitted
     if (isSplitted) {
       if (segmentBefore.original_sid !== segmentId.split('-')[0]) {
-        return this.collectSplittedTranslations(
+        return SegmentUtils.collectSplittedTranslations(
           segmentBefore.original_sid,
           '.source',
         )
@@ -774,7 +765,7 @@ window.UI = {
    * Overridden by  plugin
    */
   getContextAfter: function (segmentId) {
-    const segmentAfter = SegmentStore.getNextSegment(segmentId)
+    const segmentAfter = SegmentStore.getNextSegment({current_sid: segmentId})
     if (!segmentAfter) {
       return null
     }
@@ -782,7 +773,7 @@ window.UI = {
     var isSplitted = segmentAfter.splitted
     if (isSplitted) {
       if (segmentAfter.firstOfSplit) {
-        return this.collectSplittedTranslations(
+        return SegmentUtils.collectSplittedTranslations(
           segmentAfter.original_sid,
           '.source',
         )
@@ -797,7 +788,7 @@ window.UI = {
    * Overridden by  plugin
    */
   getIdBefore: function (segmentId) {
-    const segmentBefore = SegmentStore.getPrevSegment(segmentId)
+    const segmentBefore = SegmentStore.getPrevSegment(segmentId, true)
     // var segmentBefore = findSegmentBefore();
     if (!segmentBefore) {
       return null
@@ -808,7 +799,10 @@ window.UI = {
    * Overridden by  plugin
    */
   getIdAfter: function (segmentId) {
-    const segmentAfter = SegmentStore.getNextSegment(segmentId)
+    const segmentAfter = SegmentStore.getNextSegment({
+      current_sid: segmentId,
+      alsoMutedSegment: true,
+    })
     if (!segmentAfter) {
       return null
     }

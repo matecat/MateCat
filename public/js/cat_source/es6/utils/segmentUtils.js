@@ -2,6 +2,7 @@ import CommonUtils from './commonUtils'
 import SegmentStore from '../stores/SegmentStore'
 import DraftMatecatUtils from '../components/segments/utils/DraftMatecatUtils'
 import {SEGMENTS_STATUS} from '../constants/Constants'
+import UserStore from '../stores/UserStore'
 
 const SegmentUtils = {
   /**
@@ -12,11 +13,22 @@ const SegmentUtils = {
   TagProjectionCanActivate: undefined,
   localStorageUnlockedSegments: 'unlocked-segments-' + config.id_job,
 
+  checkTPSupportedLanguage: function () {
+    const languagesKey = `${config.source_code.split('-')[0]}-${config.target_code.split('-')[0]}`
+    const languagesKeyRev = `${config.target_code.split('-')[0]}-${config.source_code.split('-')[0]}`
+    return Object.keys(config.tag_projection_languages).some(
+      (key) => key === languagesKey || key === languagesKeyRev,
+    )
+  },
   /**
    * Tag Projection: check if is enable the Tag Projection
    */
   checkTPEnabled: function () {
-    return !!config.tag_projection_enabled && !!!config.isReview
+    return (
+      this.checkTPSupportedLanguage() &&
+      UserStore.getUserMetadata()?.guess_tags === 1 &&
+      !!!config.isReview
+    )
   },
   /**
    * Check if the  the Tag Projection in the current segment is enabled and still not tagged

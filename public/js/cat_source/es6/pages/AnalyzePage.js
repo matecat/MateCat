@@ -101,10 +101,6 @@ const AnalyzePage = () => {
           parentRef={containerRef}
         />
       </div>
-
-      <div className="notifications-wrapper">
-        <NotificationBox />
-      </div>
       <footer>
         <CookieConsent />
       </footer>

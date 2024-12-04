@@ -7,7 +7,7 @@ import CommonUtils from '../utils/commonUtils'
 import CommentsActions from '../actions/CommentsActions'
 import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper'
 import UserActions from '../actions/UserActions'
-import {v4 as uuidV4} from "uuid";
+import {v4 as uuidV4} from 'uuid'
 
 const SocketListener = ({isAuthenticated, userId}) => {
   const {forceLogout} = useContext(ApplicationWrapperContext)
@@ -29,7 +29,7 @@ const SocketListener = ({isAuthenticated, userId}) => {
             'We’ve just released an update with improvements and bug fixes.<br/>' +
             'To ensure all changes are applied correctly, we recommend refreshing the page.<br/><br/>' +
             'Click Refresh or press <strong>Ctrl+R</strong> (Windows) / <strong>Cmd+R</strong> (Mac).<br/><br/>' +
-            'Thank you for continuing to use Matecat!',
+            'Thank you for using Matecat!',
           type: 'warning',
           allowHtml: true,
         }
@@ -109,12 +109,12 @@ const SocketListener = ({isAuthenticated, userId}) => {
       // swap source and target props of terms if user searching in target
       const terms = SegmentStore.isSearchingGlossaryInTarget
         ? mergedTerms.map((term) => ({
-          ...term,
-          source: term.target,
-          target: term.source,
-          source_language: term.target_language,
-          target_language: term.source_language,
-        }))
+            ...term,
+            source: term.target,
+            target: term.source,
+            source_language: term.target_language,
+            target_language: term.source_language,
+          }))
         : mergedTerms
       SegmentActions.setGlossaryForSegmentBySearch(data.id_segment, terms)
     },
@@ -182,11 +182,11 @@ const SocketListener = ({isAuthenticated, userId}) => {
     let source = window.location.host
 
     if (config.enableMultiDomainApi) {
-      source = Math.floor(Math.random() * config.ajaxDomainsNumber) + '.ajax.' + source
+      source =
+        Math.floor(Math.random() * config.ajaxDomainsNumber) + '.ajax.' + source
     }
 
     return {source: '//' + source, path: '/sse/channel/updates/socket.io'}
-
   }
 
   const {connectionState, connectionError} = useSocketLayer(
