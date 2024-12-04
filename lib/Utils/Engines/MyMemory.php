@@ -198,12 +198,16 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         // TM prioritization
         $parameters[ 'priority_key' ] = (isset( $_config[ 'priority_key' ] ) and $_config[ 'priority_key' ] == true) ? 1 : 0;
 
-        if(isset($_config[ 'penalty_key' ] ) and !empty($_config[ 'penalty_key' ]) and is_array($_config[ 'penalty_key' ])){
+        if(isset($_config[ 'penalty_key' ] ) and !empty($_config[ 'penalty_key' ]) ){
 
+            $penalty_key = json_decode($_config[ 'penalty_key' ], true);
             $penalties = [];
-            foreach ($_config[ 'penalty_key' ] as $penalty){
-                if(is_numeric($penalty)){
-                    $penalties[] = $penalty / 100;
+
+            if(!empty($penalty_key)){
+                foreach ($penalty_key as $penalty){
+                    if(is_numeric($penalty)){
+                        $penalties[] = $penalty / 100;
+                    }
                 }
             }
 
