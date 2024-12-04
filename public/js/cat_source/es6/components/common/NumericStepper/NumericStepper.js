@@ -71,10 +71,10 @@ export const NumericStepper = ({
         onKeyUp={({key}) => key === 'Enter' && ref.current.blur()}
       />
       <div className="container-controls">
-        <Button size={BUTTON_SIZE.ICON_SMALL} onClick={decrease}>
+        <Button size={BUTTON_SIZE.ICON_SMALL} onClick={increase}>
           <ArrowDown />
         </Button>
-        <Button size={BUTTON_SIZE.ICON_SMALL} onClick={increase}>
+        <Button size={BUTTON_SIZE.ICON_SMALL} onClick={decrease}>
           <ArrowDown />
         </Button>
       </div>

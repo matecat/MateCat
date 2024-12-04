@@ -56,7 +56,7 @@ class GetMyMemoryTest extends AbstractTest {
                 'prop'          => null,
                 'get_mt'        => true,
                 'id_user'       => [ 0 => "a6043e606ac9b5d7ff24" ],
-                'num_result'    => 3,
+                'num_result'    => 10,
                 'mt_only'       => false,
                 'isConcordance' => false,
                 'isGlossary'    => false,
@@ -166,7 +166,7 @@ class GetMyMemoryTest extends AbstractTest {
                                 'langpair'  => 'it-IT|en-US',
                                 'de'        => 'demo@matecat.com',
                                 'mt'        => true,
-                                'numres'    => 3,
+                                'numres'    => 10,
                                 'key'       => 'a6043e606ac9b5d7ff24',
                                 'client_id' => 0
                         ],
@@ -230,7 +230,7 @@ TAB;
                                 'langpair'  => 'it-IT|en-US',
                                 'de'        => 'demo@matecat.com',
                                 'mt'        => true,
-                                'numres'    => 3,
+                                'numres'    => 10,
                                 'key'       => 'a6043e606ac9b5d7ff24',
                                 'client_id' => 0
                         ],
@@ -369,7 +369,7 @@ TAB;
                                 'langpair'  => 'it-IT|en-US',
                                 'de'        => 'demo@matecat.com',
                                 'mt'        => true,
-                                'numres'    => 3,
+                                'numres'    => 10,
                                 'key'       => 'a6043e606ac9b5d7ff24',
                                 'client_id' => 0
                         ],
