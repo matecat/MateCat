@@ -34,7 +34,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
             'prop'          => null,
             'get_mt'        => 1,
             'id_user'       => null,
-            'num_result'    => 3,
+            'num_result'    => 10,
             'mt_only'       => false,
             'isConcordance' => false,
             'isGlossary'    => false,
@@ -194,6 +194,27 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         $parameters[ 'mt' ]        = $_config[ 'get_mt' ];
         $parameters[ 'numres' ]    = $_config[ 'num_result' ];
         $parameters[ 'client_id' ] = isset( $_config[ 'uid' ] ) ? $_config[ 'uid' ] : 0;
+
+        // TM prioritization
+        $parameters[ 'priority_key' ] = (isset( $_config[ 'priority_key' ] ) and $_config[ 'priority_key' ] == true) ? 1 : 0;
+
+        if(isset($_config[ 'penalty_key' ] ) and !empty($_config[ 'penalty_key' ]) ){
+
+            $penalty_key = json_decode($_config[ 'penalty_key' ], true);
+            $penalties = [];
+
+            if(!empty($penalty_key)){
+                foreach ($penalty_key as $penalty){
+                    if(is_numeric($penalty)){
+                        $penalties[] = $penalty / 100;
+                    }
+                }
+            }
+
+            if(!empty($penalties)){
+                $parameters[ 'penalty_key' ] = implode(",", $penalties);
+            }
+        }
 
         if ( isset( $_config[ 'dialect_strict' ] ) ) {
             $parameters[ 'dialect_strict' ] = $_config[ 'dialect_strict' ];
