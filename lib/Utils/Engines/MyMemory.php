@@ -34,7 +34,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
             'prop'          => null,
             'get_mt'        => 1,
             'id_user'       => null,
-            'num_result'    => 3,
+            'num_result'    => 10,
             'mt_only'       => false,
             'isConcordance' => false,
             'isGlossary'    => false,
