@@ -31,7 +31,7 @@ export const UNIT_COUNT = {
   CHARACTERS: 'characters',
 }
 
-export const NUM_CONTRIBUTION_RESULTS = 3
+export const NUM_CONTRIBUTION_RESULTS = 10
 export const NUM_CONCORDANCE_RESULTS = 10
 
 export const EMAIL_PATTERN =

@@ -776,7 +776,7 @@ article .approved:active {
   color: #fff !important;
 }
 
-.draft{
+.draft {
   background: -webkit-gradient(
     linear,
     left top,
@@ -984,6 +984,55 @@ ul.suggestion-item.graysmall:last-child {
 
 .tab.concordances .overflow {
   overflow: auto;
+}
+
+.tab {
+  .segment-footer-tab-more-button {
+    margin-left: auto;
+    margin-right: auto;
+    background-color: $grey4 !important;
+    color: $grey6 !important;
+    gap: 0;
+    padding-right: 16px !important;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+    transition: height 0.2s ease-in-out;
+
+    &:hover {
+      background-color: $grey9 !important;
+      height: 35px !important;
+    }
+
+    svg {
+      transition: transform 0.2s ease-in-out;
+    }
+
+    &.segment-footer-tab-more-button-extended-mode {
+      &:hover {
+        height: 28px !important;
+
+        svg {
+          transform: rotate(180deg) translateY(2px);
+        }
+      }
+
+      svg {
+        transform: rotate(180deg);
+      }
+    }
+  }
+
+  .segment-footer-tab-concordance-results {
+    overflow: hidden;
+  }
+}
+
+.graygreen {
+  color: #fff !important;
+  border-top: 1px solid #ccc;
+  border-left: 1px solid #ccc;
+  width: 25px !important;
+  text-align: center !important;
 }
 
 /*submenu*/
@@ -1737,7 +1786,6 @@ body.rtl-target .editor .editarea span {
   cursor: auto;
 }
 
-
 .engine-error {
   padding-left: 40px !important;
 }
@@ -1950,7 +1998,8 @@ section.opened.editor .status {
     url('/public/css/fonts/calibri-webfont.woff') format('woff'),
     url('/public/css/fonts/calibri-webfont.ttf') format('truetype'),
     url('/public/css/fonts/calibri-webfont.eot'),
-    url('/public/css/fonts/calibri-webfont.eot?#iefix') format('embedded-opentype');
+    url('/public/css/fonts/calibri-webfont.eot?#iefix')
+      format('embedded-opentype');
 }
 
 @font-face {
@@ -1961,9 +2010,9 @@ section.opened.editor .status {
     url('/public/css/fonts/calibri_bold-webfont.woff') format('woff'),
     url('/public/css/fonts/calibri_bold-webfont.ttf') format('truetype'),
     url('/public/css/fonts/calibri_bold-webfont.eot'),
-    url('/public/css/fonts/calibri_bold-webfont.eot?#iefix') format('embedded-opentype');
+    url('/public/css/fonts/calibri_bold-webfont.eot?#iefix')
+      format('embedded-opentype');
 }
-
 
 @media screen and (min-width: 1600px) {
   .text .source.item,
@@ -2001,7 +2050,6 @@ section.opened.editor .status {
 }
 
 @media screen and (max-width: 1280px) {
-
   .text .source.item,
   .text .target.item,
   .white li {
@@ -2037,7 +2085,6 @@ section.opened.editor .status {
 }
 
 @media screen and (max-width: 1180px) {
-
   .second {
     width: 30%;
   }
@@ -2263,7 +2310,6 @@ section .toolbar .autofillTag {
   background: $translatedBlue;
 }
 
-
 .autofillTag {
   padding: 4px 2px 0px 2px;
   border: 1px solid #fff;
@@ -2458,7 +2504,6 @@ section.editor .toolbar {
     background: url(/public/img/outercopy@2x.png) 4px -69px no-repeat;
     background-size: 42px;
   }
-
 }
 
 .addtmx-tr.white-tx .open-popup-addtm-tr {
@@ -2500,7 +2545,6 @@ section.editor .toolbar {
   background: #b0ffb3;
   text-decoration: none;
 }
-
 
 .splitContainer {
   position: relative;
@@ -2660,7 +2704,6 @@ $gray-2: #bbbbbb;
 
 $light-blue: #0055b8;
 $white: #fff;
-
 
 /* XLIFF to Target page */
 
