@@ -292,10 +292,13 @@ class CatUtils {
          * This regular expression is intentionally imperfect; its purpose is not to validate URLs but to match as many forms as possible.
          * False positives are acceptable in favor of simplifying it and reducing computational cost (for example, the part related to IPs).
          *
-         * @see https://regex101.com/r/oQFKn8/3
+         * Disabled for now until better tests
+         *
+         * @see https://regex101.com/r/oQFKn8/5
          *
          */
-        $linkRegexp = '%(?:[a-z]+:)?//(?:\S+(?::\S*)?@)?(?:\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|(?:(?:\S\S{0,62})?\S\.)+\S{2,}\.?)(?::\d{2,5})?(?:[/?#]\S*)?\b%ui';
+        $linkRegexp = '%(?:[a-z]+://|//)?(?:\S+(?::\S*)?@)?(?:\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|(?:(?:\S\S{0,62})?\S\.)+\S{2,}\.?)(?::\d{2,5})?(?:[/?#]\S*)?\b%ui';
+        $linkRegexp = '%(?:[a-z]+://|//)?(?:[\p{Latin}\d\-_]+)?[\p{Latin}\d\-_]+\.[\p{Latin}\d\-_]+\.[\p{Latin}\d#?=.\-_]+%ui';
 
         $link_placeholder      = ' L ';
         $word_placeholder      = ' W ';
