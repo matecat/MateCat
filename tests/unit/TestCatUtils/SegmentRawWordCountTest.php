@@ -3,6 +3,7 @@
 namespace unit\TestCatUtils;
 
 use CatUtils;
+use Exception;
 use TestHelpers\AbstractTest;
 
 class SegmentRawWordCountTest extends AbstractTest {
@@ -30,33 +31,34 @@ H;
 
         $data = [
                 'zh-CN' => [
-                        '​你叫什么名字%%placeholder%%'              => 7,
-                        '​你叫什么名字%{placeholder}'               => 7,
-                        '​你叫什么名字{{placeholder}}'              => 7,
-                        '​你叫什么名字{{ placeholder }}'            => 7,
-                        '​你叫什么名字@@placeholder@@'              => 7,
-                        '​你叫什么名字{%placeholder%}'              => 7,
-                        '​你叫什么名字%s'                           => 7,
-                        '​你叫什么名字%u'                           => 7,
-                        '​你叫什么名字%d'                           => 7,
-                        '​你叫什么名字%@'                           => 7,
-                        '​你叫什么名字%1$i'                         => 7,
-                        '​你叫什么名字%1$.2f'                       => 7,
-                        '​你叫什么名字%.0f'                         => 7,
-                        '​你叫什么名字%c'                           => 7,
-                        '​你叫什么名字%2$@'                         => 7,
-                        '​你叫什么名字%x'                           => 7,
-                        '​你叫什么名字 %1%@'                        => 8, //the first part of sprintf group is invalid, so it remains a string %1
+                        '​你叫什么名字%%placeholder%%'                                         => 7,
+                        '​你叫什么名字%{placeholder}'                                          => 7,
+                        '​你叫什么名字{{placeholder}}'                                         => 7,
+                        '​你叫什么名字{{ placeholder }}'                                       => 7,
+                        '​你叫什么名字@@placeholder@@'                                         => 7,
+                        '​你叫什么名字{%placeholder%}'                                         => 7,
+                        '​你叫什么名字%s'                                                      => 7,
+                        '​你叫什么名字%u'                                                      => 7,
+                        '​你叫什么名字%d'                                                      => 7,
+                        '​你叫什么名字%@'                                                      => 7,
+                        '​你叫什么名字%1$i'                                                    => 7,
+                        '​你叫什么名字%1$.2f'                                                  => 7,
+                        '​你叫什么名字%.0f'                                                    => 7,
+                        '​你叫什么名字%c'                                                      => 7,
+                        '​你叫什么名字%2$@'                                                    => 7,
+                        '​你叫什么名字%x'                                                      => 7,
+                        '​你叫什么名字 %1%@'                                                   => 8, //the first part of sprintf group is invalid, so it remains a string %1
                     // '​你叫什么名字%#@file@' => 7,
-                        '​你叫什么名字$%1$.2f'                      => 8,
-                        '​你叫什么名字%.0f%'                        => 7,
-                        '​你叫什么名字%ld'                          => 7,
-                        '​你叫什么名字%hi'                          => 7,
-                        '​你叫什么名字%lu'                          => 7,
-                        '​你叫什么名字%1'                           => 7,
-                        '​你叫什么名字%2'                           => 7,
-                        '​你叫什么名字'                             => 6,
-                        '​你叫什么名字<a href="#">你叫什么名字</a>' => 12,
+                        '​你叫什么名字$%1$.2f'                                                 => 8,
+                        '​你叫什么名字%.0f%'                                                   => 7,
+                        '​你叫什么名字%ld'                                                     => 7,
+                        '​你叫什么名字%hi'                                                     => 7,
+                        '​你叫什么名字%lu'                                                     => 7,
+                        '​你叫什么名字%1'                                                      => 7,
+                        '​你叫什么名字%2'                                                      => 7,
+                        '​你叫什么名字'                                                        => 6,
+                        '​你叫什么名字<a href="#">你叫什么名字</a>'                            => 12,
+                        "dev-docs-servicenow-it.okservice.io 你叫什mm-xx么名　字 la casa-matta" => 6,
 //                        $links                                      => 133,  // disabled for now until new regexp will be better tested
                 ],
                 'it-IT' => [
@@ -105,7 +107,9 @@ H;
                         'Hyphenated words count as one, like pippo-dash and pippo_underscore, but isolated - -- and _ __ count as zero' => 15,
                         "The header's list"                                                                                             => 3,
 //                        $links                                                                                                          => 74, // disabled for now until new regexp will be better tested
-                        "dev-docs-servicenow.zoominsoftware.io"                                                                         => 1
+                        "dev-docs-servicenow.zoominsoftware.io"                                                                         => 1,
+                        "dev-docs-servicenow-it.okservice.io 你叫什mm-xx么名　字 la casa-matta"                                          => 5,
+                        "e pippo-ciccio foo-bar"                                                                                        => 3
                 ]
         ];
 

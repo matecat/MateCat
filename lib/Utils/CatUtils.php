@@ -338,8 +338,11 @@ class CatUtils {
 
         /**
          * Lock Hyphenated Words and underscore composed word; count them as one word
+         *
+         * https://regex101.com/r/t5AG6a/2
+         *
          */
-        $string = preg_replace( '#\p{L}+[-_]\p{L}+#u', $word_placeholder, $string ); // W count as one
+        $string = preg_replace( '#(?![.\s])\p{L}+[-_]\p{L}+(?:[-_]\p{L}+)*\S+#u', $word_placeholder, $string ); // W count as one
 
         /**
          * Remove Unicode:
