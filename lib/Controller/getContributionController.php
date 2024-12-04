@@ -162,6 +162,22 @@ class getContributionController extends ajaxController {
             $contributionRequest->tm_prioritization = $tm_prioritization->value == 1;
         }
 
+        //penalty_key
+        $penalty_key = [];
+        $tmKeys = json_decode( $jobStruct->tm_keys, true );
+
+        foreach ($tmKeys as $tmKey){
+            if(isset($tmKey['penalty']) and is_numeric($tmKey['penalty'])){
+                $penalty_key[] = $tmKey['penalty'];
+            } else {
+                $penalty_key[] = 0;
+            }
+        }
+
+        if(!empty($penalty_key)){
+            $contributionRequest->penalty_key = $penalty_key;
+        }
+
         Request::contribution( $contributionRequest );
 
         $this->result = [ "errors" => [], "data" => [ "message" => "OK", "id_client" => $this->id_client ] ];

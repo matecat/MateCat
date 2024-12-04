@@ -424,7 +424,11 @@ class GetContributionWorker extends AbstractWorker {
         }
 
         if ( $contributionStruct->tm_prioritization !== null ) {
-            $_config[ 'tm_prioritization' ] = $contributionStruct->tm_prioritization;
+            $_config[ 'priority_key' ] = $contributionStruct->tm_prioritization;
+        }
+
+        if ( !empty($contributionStruct->penalty_key) ) {
+            $_config[ 'penalty_key' ] = $contributionStruct->penalty_key;
         }
 
         if ( $contributionStruct->concordanceSearch && $contributionStruct->fromTarget ) {
