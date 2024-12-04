@@ -13,6 +13,9 @@ import {SegmentContext} from './SegmentContext'
 import {SegmentFooterTabError} from './SegmentFooterTabError'
 import ApplicationStore from '../../stores/ApplicationStore'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
+import {Button, BUTTON_SIZE, BUTTON_TYPE} from '../common/Button/Button'
+import {NUM_CONTRIBUTION_RESULTS} from '../../constants/Constants'
+import ArrowDown from '../../../../../img/icons/ArrowDown'
 
 class SegmentFooterTabMatches extends React.Component {
   static contextType = SegmentContext
@@ -26,6 +29,7 @@ class SegmentFooterTabMatches extends React.Component {
 
     this.state = {
       tmKeys: CatToolStore.getJobTmKeys(),
+      numContributionsToShow: 3,
     }
   }
 
@@ -235,12 +239,22 @@ class SegmentFooterTabMatches extends React.Component {
       this.props.active_class !== nextProps.active_class ||
       this.props.tab_class !== nextProps.tab_class ||
       this.props.segment.unlocked !== nextProps.segment.unlocked ||
-      this.state.tmKeys !== nextState.tmKeys
+      this.state.tmKeys !== nextState.tmKeys ||
+      this.state.numContributionsToShow !== nextState.numContributionsToShow
     )
   }
 
   allowHTML(string) {
     return {__html: string}
+  }
+
+  toggleExtendend = () => {
+    this.setState({
+      numContributionsToShow:
+        this.state.numContributionsToShow < NUM_CONTRIBUTION_RESULTS
+          ? NUM_CONTRIBUTION_RESULTS
+          : 3,
+    })
   }
 
   render() {
@@ -254,8 +268,11 @@ class SegmentFooterTabMatches extends React.Component {
       this.props.segment.contributions.matches.length > 0
     ) {
       let tpmMatches = this.processContributions(
-        this.props.segment.contributions.matches,
+        this.props.segment.contributions.matches.filter(
+          (contribution, index) => index < this.state.numContributionsToShow,
+        ),
       )
+
       tpmMatches.forEach((match, index) => {
         const {memoryKey} = match
         const isOwnedKey = memoryKey ? this.isOwnerKey(memoryKey) : false
@@ -373,6 +390,21 @@ class SegmentFooterTabMatches extends React.Component {
       })
     }
 
+    const isExtended =
+      this.state.numContributionsToShow === NUM_CONTRIBUTION_RESULTS
+
+    const moreButton = (
+      <Button
+        className={`segment-footer-tab-more-button ${isExtended ? 'segment-footer-tab-more-button-extended-mode' : ''}`}
+        type={BUTTON_TYPE.DEFAULT}
+        size={BUTTON_SIZE.SMALL}
+        onClick={this.toggleExtendend}
+      >
+        <ArrowDown />
+        {isExtended ? 'Fewer' : 'More'}
+      </Button>
+    )
+
     return (
       <div
         key={'container_' + this.props.code}
@@ -388,7 +420,10 @@ class SegmentFooterTabMatches extends React.Component {
           <>
             <div className="overflow">
               {!isUndefined(matchesHtml) && matchesHtml.length > 0 ? (
-                matchesHtml
+                <>
+                  {matchesHtml}
+                  {moreButton}
+                </>
               ) : (
                 <span className="loader loader_on" />
               )}

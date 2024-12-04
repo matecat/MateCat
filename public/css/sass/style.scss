@@ -1326,6 +1326,47 @@ ul.suggestion-item.graysmall:last-child {
   overflow: auto;
 }
 
+.tab {
+  .segment-footer-tab-more-button {
+    margin-left: auto;
+    margin-right: auto;
+    background-color: $grey4 !important;
+    color: $grey6 !important;
+    gap: 0;
+    padding-right: 16px !important;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+    transition: height 0.2s ease-in-out;
+
+    &:hover {
+      background-color: $grey9 !important;
+      height: 35px !important;
+    }
+
+    svg {
+      transition: transform 0.2s ease-in-out;
+    }
+
+    &.segment-footer-tab-more-button-extended-mode {
+      &:hover {
+        height: 28px !important;
+
+        svg {
+          transform: rotate(180deg) translateY(2px);
+        }
+      }
+
+      svg {
+        transform: rotate(180deg);
+      }
+    }
+  }
+
+  .segment-footer-tab-concordance-results {
+    overflow: hidden;
+  }
+}
+
 .graygreen {
   color: #fff !important;
   border-top: 1px solid #ccc;
