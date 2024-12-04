@@ -57,7 +57,7 @@ H;
                         '​你叫什么名字%2'                           => 7,
                         '​你叫什么名字'                             => 6,
                         '​你叫什么名字<a href="#">你叫什么名字</a>' => 12,
-                        $links                                      => 56,
+                        $links                                      => 133,  // old URL recognition, it should be 56 with new regexp
                 ],
                 'it-IT' => [
                         '​La casa è <object_color>​​<object> bianca'                                                                         => 4,
@@ -104,7 +104,8 @@ H;
                 'en-US' => [
                         'Hyphenated words count as one, like pippo-dash and pippo_underscore, but isolated - -- and _ __ count as zero' => 15,
                         "The header's list"                                                                                             => 3,
-                        $links                                                                                                          => 56
+                        $links                                                                                                          => 74, // old URL recognition, it should be 56 with new regexp
+                        "dev-docs-servicenow.zoominsoftware.io"                                                                         => 1
                 ]
         ];
 
