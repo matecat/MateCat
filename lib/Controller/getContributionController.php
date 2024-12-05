@@ -180,8 +180,14 @@ class getContributionController extends ajaxController {
 
         Request::contribution( $contributionRequest );
 
-        $this->result = [ "errors" => [], "data" => [ "message" => "OK", "id_client" => $this->id_client ] ];
-
+        $this->result = [
+            "errors" => [],
+            "data" => [
+                "message" => "OK",
+                "id_client" => $this->id_client,
+                "request" => $contributionRequest
+            ]
+        ];
     }
 
     /**
