@@ -1,4 +1,4 @@
-import React, {useCallback, useContext, useState} from 'react'
+import React, {useCallback, useContext} from 'react'
 import Switch from '../../../common/Switch'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 
@@ -26,7 +26,11 @@ export const TmPrioritization = () => {
         <h4>Activate prioritization</h4>
         <span>Lorem ipsum bla bla</span>
       </div>
-      <Switch onChange={onChange} active={isActive} />
+      <Switch
+        onChange={onChange}
+        active={isActive}
+        disabled={config.ownerIsMe === 0}
+      />
     </div>
   )
 }

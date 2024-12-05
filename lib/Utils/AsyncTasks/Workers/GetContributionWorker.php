@@ -169,7 +169,7 @@ class GetContributionWorker extends AbstractWorker {
                 'id_job'    => $contributionStruct->getJobStruct()->id,
                 'passwords' => $contributionStruct->getJobStruct()->password,
                 'payload'   => [
-                    'id_segment' => $contributionStruct->segmentId,
+                    'id_segment' => (string)$contributionStruct->segmentId,
                     'matches'    => $content,
                 ],
                 'id_client' => $contributionStruct->id_client,

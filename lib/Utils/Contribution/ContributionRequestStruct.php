@@ -15,7 +15,7 @@ use DataAccess_IDaoStruct;
 use Jobs_JobStruct;
 use Projects_ProjectStruct;
 
-class ContributionRequestStruct extends ShapelessConcreteStruct implements DataAccess_IDaoStruct, \JsonSerializable {
+class ContributionRequestStruct extends ShapelessConcreteStruct implements DataAccess_IDaoStruct {
 
     // Needed by getSessionId()
     public $id_file;
@@ -168,34 +168,5 @@ class ContributionRequestStruct extends ShapelessConcreteStruct implements DataA
     public function getSessionId()
     {
         return md5($this->id_file. '-' . $this->id_job . '-' . $this->password);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function jsonSerialize()
-    {
-        return [
-            'session_id' => $this->getSessionId(),
-            'id_file' => (int)$this->id_file,
-            'id_job' => (int)$this->id_job,
-            'password' => $this->password,
-            'contexts' => $this->contexts,
-            'id_client' => $this->id_client,
-            'userRole' => $this->userRole,
-            'tm_prioritization' => $this->tm_prioritization,
-            'penalty_key' => $this->penalty_key,
-            'crossLangTargets' => $this->crossLangTargets,
-            'fromTarget' => $this->fromTarget,
-            'dialect_strict' => $this->dialect_strict,
-            'segmentId' => $this->segmentId ? (int)$this->segmentId : null,
-            'resultNum' => (int)$this->resultNum,
-            'concordanceSearch' => $this->concordanceSearch,
-            'tm' => $this->__tms,
-            'mt' => $this->__mt_engine,
-            'user' => $this->user,
-            'jobStruct' => $this->jobStruct,
-            'projectStruct' => $this->projectStruct,
-        ];
     }
 }
