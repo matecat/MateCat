@@ -193,6 +193,9 @@ class ContributionRequestStruct extends ShapelessConcreteStruct implements DataA
             'concordanceSearch' => $this->concordanceSearch,
             'tm' => $this->__tms,
             'mt' => $this->__mt_engine,
+            'user' => $this->user,
+            'jobStruct' => $this->jobStruct,
+            'projectStruct' => $this->projectStruct,
         ];
     }
 }
