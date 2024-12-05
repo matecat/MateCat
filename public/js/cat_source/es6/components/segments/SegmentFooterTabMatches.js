@@ -17,6 +17,8 @@ import {Button, BUTTON_SIZE, BUTTON_TYPE} from '../common/Button/Button'
 import {NUM_CONTRIBUTION_RESULTS} from '../../constants/Constants'
 import ArrowDown from '../../../../../img/icons/ArrowDown'
 
+const MAX_ITEMS_TO_DISPLAY_NOT_EXTENDED = 5
+
 class SegmentFooterTabMatches extends React.Component {
   static contextType = SegmentContext
 
@@ -29,7 +31,7 @@ class SegmentFooterTabMatches extends React.Component {
 
     this.state = {
       tmKeys: CatToolStore.getJobTmKeys(),
-      numContributionsToShow: 3,
+      numContributionsToShow: MAX_ITEMS_TO_DISPLAY_NOT_EXTENDED,
     }
   }
 
@@ -253,7 +255,7 @@ class SegmentFooterTabMatches extends React.Component {
       numContributionsToShow:
         this.state.numContributionsToShow < NUM_CONTRIBUTION_RESULTS
           ? NUM_CONTRIBUTION_RESULTS
-          : 3,
+          : MAX_ITEMS_TO_DISPLAY_NOT_EXTENDED,
     })
   }
 
@@ -422,7 +424,8 @@ class SegmentFooterTabMatches extends React.Component {
               {!isUndefined(matchesHtml) && matchesHtml.length > 0 ? (
                 <>
                   {matchesHtml}
-                  {moreButton}
+                  {this.props.segment.contributions.matches.length >=
+                    MAX_ITEMS_TO_DISPLAY_NOT_EXTENDED && moreButton}
                 </>
               ) : (
                 <span className="loader loader_on" />

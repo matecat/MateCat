@@ -1336,26 +1336,12 @@ ul.suggestion-item.graysmall:last-child {
     padding-right: 16px !important;
     border-bottom-right-radius: 0;
     border-bottom-left-radius: 0;
-    transition: height 0.2s ease-in-out;
 
     &:hover {
       background-color: $grey9 !important;
-      height: 35px !important;
-    }
-
-    svg {
-      transition: transform 0.2s ease-in-out;
     }
 
     &.segment-footer-tab-more-button-extended-mode {
-      &:hover {
-        height: 28px !important;
-
-        svg {
-          transform: rotate(180deg) translateY(2px);
-        }
-      }
-
       svg {
         transform: rotate(180deg);
       }
@@ -1513,6 +1499,8 @@ body .footer.showMatches .sub-editor.open {
 
 .sub-editor.matches .overflow {
   min-height: 50px;
+  max-height: 424px;
+  overflow-y: auto;
 }
 .sub-editor.matches .overflow span.loader {
   bottom: 20px;
