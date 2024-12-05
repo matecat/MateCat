@@ -396,7 +396,11 @@ class Segment extends React.Component {
     ) {
       return (
         <TranslationIssuesSideButton
-          sid={this.props.segment.sid.split('-')[0]}
+          sid={
+            this.props.segment.splitted
+              ? this.props.segment.sid.split('-')[0]
+              : this.props.segment.sid
+          }
           segment={this.props.segment}
           open={this.props.segment.openIssues}
         />
