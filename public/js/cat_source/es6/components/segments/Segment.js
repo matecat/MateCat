@@ -287,7 +287,8 @@ class Segment extends React.Component {
     if (
       this.props.segment.sid == sid ||
       sid === -1 ||
-      sid.split('-')[0] == this.props.segment.sid
+      (this.props.segment.splitted &&
+        sid.split('-')[0] == this.props.segment.sid)
     ) {
       let classes = this.state.segment_classes.slice()
       if (newClass.indexOf(' ') > 0) {
