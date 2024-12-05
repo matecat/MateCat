@@ -224,7 +224,7 @@ class GetContributionWorker extends AbstractWorker {
                 $featureSet,
                 $contributionStruct->getJobStruct()->source,
                 $targetLang,
-                json_decode( $contributionStruct->dataRefMap, true )
+                $contributionStruct->dataRefMap
         );
 
         foreach ( $matches as &$match ) {
@@ -493,7 +493,7 @@ class GetContributionWorker extends AbstractWorker {
 
             if ( !empty( $temp_matches ) ) {
 
-                $dataRefMap = ( isset( $contributionStruct->dataRefMap ) and $contributionStruct->dataRefMap !== '' ) ? json_decode( $contributionStruct->dataRefMap, true ) : [];
+                $dataRefMap = $contributionStruct->dataRefMap ?: [];
                 $tms_match  = $temp_matches->get_matches_as_array( 2, $dataRefMap, $_config[ 'source' ], $_config[ 'target' ] );
             }
         }

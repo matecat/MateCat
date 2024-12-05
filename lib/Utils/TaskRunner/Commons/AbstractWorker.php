@@ -243,4 +243,5 @@ abstract class AbstractWorker implements SplSubject {
         $this->_doLog( $message );
 
     }
+
 }

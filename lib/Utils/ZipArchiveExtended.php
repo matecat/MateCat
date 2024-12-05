@@ -276,7 +276,7 @@ class ZipArchiveExtended extends ZipArchive {
         }
 
         foreach ( $filesArray as $filePath => &$objectFile ) {
-            $objectFile[ 'error' ] = $fileErrors[ $filePath ];
+            $objectFile[ 'error' ] = $fileErrors[ $filePath ] ?? null;
             $objectFile[ 'type' ]  = (new MimeTypes())->guessMimeType( $tmp_folder . $filePath );
         }
 

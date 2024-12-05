@@ -2,7 +2,9 @@
 
 namespace Autopropagation;
 
+use Propagation_PropagationTotalStruct;
 use Translations_SegmentTranslationStruct;
+use Utils;
 
 class PropagationAnalyser {
 
@@ -58,11 +60,11 @@ class PropagationAnalyser {
      * @param Translations_SegmentTranslationStruct   $parentSegmentTranslation
      * @param Translations_SegmentTranslationStruct[] $arrayOfSegmentTranslationToPropagate
      *
-     * @return \Propagation_PropagationTotalStruct
+     * @return Propagation_PropagationTotalStruct
      */
     public function analyse( Translations_SegmentTranslationStruct $parentSegmentTranslation, $arrayOfSegmentTranslationToPropagate ) {
 
-        $propagation = new \Propagation_PropagationTotalStruct();
+        $propagation = new Propagation_PropagationTotalStruct();
 
         if ( $parentSegmentTranslation->match_type !== 'ICE' || $parentSegmentTranslation->locked != 1 ) { // check IF the parent segment is ICE
             foreach ( $arrayOfSegmentTranslationToPropagate as $segmentTranslation ) {
@@ -74,7 +76,7 @@ class PropagationAnalyser {
                     $propagation->addPropagatedNotIce( $segmentTranslation );
                     $propagation->addPropagatedId( $segmentTranslation->id_segment );
 
-                    if ( false === \Utils::stringsAreEqual(
+                    if ( false === Utils::stringsAreEqual(
                             $parentSegmentTranslation->translation,
                             $segmentTranslation->translation ?? ''
                     ) ) {
@@ -93,7 +95,7 @@ class PropagationAnalyser {
                     $propagation->addPropagatedIce( $segmentTranslation );
                     $propagation->addPropagatedId( $segmentTranslation->id_segment );
 
-                    if ( false === \Utils::stringsAreEqual(
+                    if ( false === Utils::stringsAreEqual(
                             $parentSegmentTranslation->translation,
                             $segmentTranslation->translation ?? ''
                     ) ) {
