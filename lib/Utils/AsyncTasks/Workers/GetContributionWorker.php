@@ -164,16 +164,16 @@ class GetContributionWorker extends AbstractWorker {
         }
 
         $_object = [
-                '_type' => $type,
-                'data'  => [
-                        'id_job'    => $contributionStruct->getJobStruct()->id,
-                        'passwords' => $contributionStruct->getJobStruct()->password,
-                        'payload'   => [
-                                'id_segment' => $contributionStruct->segmentId,
-                                'matches'    => $content,
-                        ],
-                        'id_client' => $contributionStruct->id_client,
-                ]
+            '_type' => $type,
+            'data'  => [
+                'id_job'    => $contributionStruct->getJobStruct()->id,
+                'passwords' => $contributionStruct->getJobStruct()->password,
+                'payload'   => [
+                    'id_segment' => $contributionStruct->segmentId,
+                    'matches'    => $content,
+                ],
+                'id_client' => $contributionStruct->id_client,
+            ]
         ];
 
         $this->publishToSseTopic( $_object );
@@ -221,10 +221,10 @@ class GetContributionWorker extends AbstractWorker {
     public function normalizeTMMatches( array &$matches, ContributionRequestStruct $contributionStruct, FeatureSet $featureSet, $targetLang ) {
 
         $Filter = MateCatFilter::getInstance(
-                $featureSet,
-                $contributionStruct->getJobStruct()->source,
-                $targetLang,
-                json_decode( $contributionStruct->dataRefMap, true )
+            $featureSet,
+            $contributionStruct->getJobStruct()->source,
+            $targetLang,
+            $contributionStruct->dataRefMap
         );
 
         foreach ( $matches as &$match ) {
@@ -266,9 +266,9 @@ class GetContributionWorker extends AbstractWorker {
                 }
 
                 $match[ 'created_by' ] = Utils::changeMemorySuggestionSource(
-                        $match,
-                        $contributionStruct->getJobStruct()->tm_keys,
-                        $user->uid
+                    $match,
+                    $contributionStruct->getJobStruct()->tm_keys,
+                    $user->uid
                 );
             }
 
@@ -498,7 +498,7 @@ class GetContributionWorker extends AbstractWorker {
 
             if ( !empty( $temp_matches ) ) {
 
-                $dataRefMap = ( isset( $contributionStruct->dataRefMap ) and $contributionStruct->dataRefMap !== '' ) ? json_decode( $contributionStruct->dataRefMap, true ) : [];
+                $dataRefMap = $contributionStruct->dataRefMap ?: [];
                 $tms_match  = $temp_matches->get_matches_as_array( 2, $dataRefMap, $_config[ 'source' ], $_config[ 'target' ] );
             }
         }
@@ -616,7 +616,13 @@ class GetContributionWorker extends AbstractWorker {
      */
     private function updateAnalysisSuggestion( $matches, ContributionRequestStruct $contributionStruct, FeatureSet $featureSet ) {
 
-        if ( is_array( $matches ) and count( $matches ) > 0 ) {
+        if (
+            is_array( $matches ) and
+            count( $matches ) > 0 and
+            $contributionStruct->segmentId !== null and
+            $contributionStruct->getJobStruct() !== null and
+            !empty($contributionStruct->getJobStruct()->id)
+        ) {
 
             $segmentTranslation = Translations_SegmentTranslationDao::findBySegmentAndJob( $contributionStruct->segmentId, $contributionStruct->getJobStruct()->id );
 
@@ -643,9 +649,9 @@ class GetContributionWorker extends AbstractWorker {
                         }
 
                         $matches[ $k ][ 'created_by' ] = Utils::changeMemorySuggestionSource(
-                                $m,
-                                $contributionStruct->getJobStruct()->tm_keys,
-                                $user->uid
+                            $m,
+                            $contributionStruct->getJobStruct()->tm_keys,
+                            $user->uid
                         );
                     }
                 }
@@ -660,9 +666,9 @@ class GetContributionWorker extends AbstractWorker {
                 $data[ 'suggestion_match' ]  = str_replace( '%', '', $match[ 'match' ] );
 
                 $where = [
-                        'id_segment' => $contributionStruct->segmentId,
-                        'id_job'     => $contributionStruct->getJobStruct()->id,
-                        'status'     => Constants_TranslationStatus::STATUS_NEW
+                    'id_segment' => $contributionStruct->segmentId,
+                    'id_job'     => $contributionStruct->getJobStruct()->id,
+                    'status'     => Constants_TranslationStatus::STATUS_NEW
                 ];
 
                 Translations_SegmentTranslationDao::updateFirstTimeOpenedContribution( $data, $where );
