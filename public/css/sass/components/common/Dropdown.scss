@@ -138,9 +138,13 @@
   z-index: 2;
   margin-top: 14px;
 
-  &::after,
-  &::before {
-    opacity: 1;
+  &[aria-label] {
+    position: absolute;
+
+    &::after,
+    &::before {
+      opacity: 1;
+    }
   }
 }
 
