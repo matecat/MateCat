@@ -7,13 +7,18 @@
  * Time: 14.54
  */
 
+namespace EnginesModel;
+
+use EnginesModel_EngineStruct;
+use Utils\Engines\Lara;
+
 /**
- * Class EnginesModel_LaraStruct
+ * Class LaraStruct
  *
  * This class contains the default parameters for a Lara Engine CREATION
  *
  */
-class EnginesModel_LaraStruct extends EnginesModel_EngineStruct {
+class LaraStruct extends EnginesModel_EngineStruct {
 
     /**
      * @var string
@@ -23,7 +28,7 @@ class EnginesModel_LaraStruct extends EnginesModel_EngineStruct {
     /**
      * @var string
      */
-    public $description = "Lara for subscribers, includes adaptive suggestions for entire documents, integrated glossary support and TM usage optimization.";
+    public $description = "Lara for subscribers, includes adaptive suggestions for entire documents, with TM usage optimization.";
 
     /**
      * @var string
@@ -50,24 +55,22 @@ class EnginesModel_LaraStruct extends EnginesModel_EngineStruct {
      */
     public $others = [
             "tmx_import_relative_url" => "memories/content",
-            "api_key_check_auth_url"  => "users/me",
             "user_update_activate"    => "memories/connect",
-            "context_get"             => "context-vector",
     ];
 
     /**
      * @var string
      */
-    public $class_load = Constants_Engines::MMT;
+    public $class_load = Lara::class;
 
 
     /**
      * @var array
      */
     public $extra_parameters = [
-            'MMT-License'      => "",
-            'MMT-pretranslate' => "",
-            'MMT-preimport'    => "",
+            'Lara-AccessKeyId'     => "",
+            'Lara-AccessKeySecret' => "",
+            'MMT-License'          => ""
     ];
 
     /**
@@ -82,9 +85,9 @@ class EnginesModel_LaraStruct extends EnginesModel_EngineStruct {
 
     /**
      * An empty struct
-     * @return EnginesModel_EngineStruct
+     * @return LaraStruct
      */
-    public static function getStruct() {
-        return new EnginesModel_MMTStruct();
+    public static function getStruct(): LaraStruct {
+        return new LaraStruct();
     }
 }

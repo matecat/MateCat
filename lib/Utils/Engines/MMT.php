@@ -45,7 +45,7 @@ class Engines_MMT extends Engines_AbstractEngine {
             throw new Exception( "Engine {$this->engineRecord->id} is not a MT engine, found {$this->engineRecord->type} -> {$this->engineRecord->class_load}" );
         }
 
-        if ( isset( $this->engineRecord->extra_parameters[ 'MMT-pretranslate' ] ) && $this->engineRecord->extra_parameters[ 'MMT-pretranslate' ] == true ) {
+        if ( isset( $this->engineRecord->extra_parameters[ 'MMT-pretranslate' ] ) && $this->engineRecord->extra_parameters[ 'MMT-pretranslate' ] ) {
             $this->_skipAnalysis = false;
         }
 
