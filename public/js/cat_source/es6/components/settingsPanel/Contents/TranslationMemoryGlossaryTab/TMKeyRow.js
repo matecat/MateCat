@@ -299,9 +299,6 @@ export const TMKeyRow = ({row, onExpandRow}) => {
       </Button>
     )
 
-  const areActiveMinimumTwoKeys =
-    tmKeys.filter(({isActive}) => isActive).length > 1
-
   return (
     <Fragment>
       <div className="tm-key-lookup align-center">
@@ -346,7 +343,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
       <div title={iconDetails.title} className="align-center tm-key-row-icons">
         {iconDetails.icon}
       </div>
-      {!isMMSharedKey && isOwner && row.isActive && areActiveMinimumTwoKeys && (
+      {!isMMSharedKey && isOwner && row.isActive && (
         <div className="align-center tm-row-penalty">{renderPenalty}</div>
       )}
       {!isMMSharedKey && isOwner ? (
