@@ -427,7 +427,7 @@ class SegmentFooterTabMatches extends React.Component {
                 <span className="loader loader_on" />
               )}
             </div>
-            {this.props.segment.contributions?.matches.length >=
+            {this.props.segment.contributions?.matches.length >
               MAX_ITEMS_TO_DISPLAY_NOT_EXTENDED && moreButton}
             {errors.length > 0 && <div className="engine-errors">{errors}</div>}
           </>
