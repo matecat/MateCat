@@ -17,7 +17,7 @@ import {Button, BUTTON_SIZE, BUTTON_TYPE} from '../common/Button/Button'
 import {NUM_CONTRIBUTION_RESULTS} from '../../constants/Constants'
 import ArrowDown from '../../../../../img/icons/ArrowDown'
 
-const MAX_ITEMS_TO_DISPLAY_NOT_EXTENDED = 5
+const MAX_ITEMS_TO_DISPLAY_NOT_EXTENDED = 3
 
 class SegmentFooterTabMatches extends React.Component {
   static contextType = SegmentContext
@@ -422,15 +422,13 @@ class SegmentFooterTabMatches extends React.Component {
           <>
             <div className="overflow">
               {!isUndefined(matchesHtml) && matchesHtml.length > 0 ? (
-                <>
-                  {matchesHtml}
-                  {this.props.segment.contributions.matches.length >=
-                    MAX_ITEMS_TO_DISPLAY_NOT_EXTENDED && moreButton}
-                </>
+                matchesHtml
               ) : (
                 <span className="loader loader_on" />
               )}
             </div>
+            {this.props.segment.contributions?.matches.length >=
+              MAX_ITEMS_TO_DISPLAY_NOT_EXTENDED && moreButton}
             {errors.length > 0 && <div className="engine-errors">{errors}</div>}
           </>
         ) : (
