@@ -510,14 +510,15 @@ class GetContributionWorker extends AbstractWorker {
                 //if a callback is not set only the first argument is returned, get the config params from the callback
                 $config = $featureSet->filter( 'beforeGetContribution', $config, $mt_engine, $jobStruct );
 
-                $config[ 'segment' ]      = $contributionStruct->getContexts()->segment;
-                $config[ 'source' ]       = $jobStruct->source;
-                $config[ 'target' ]       = $jobStruct->target;
-                $config[ 'email' ]        = INIT::$MYMEMORY_API_KEY;
-                $config[ 'segid' ]        = $contributionStruct->segmentId;
-                $config[ 'job_id' ]       = $jobStruct->id;
-                $config[ 'job_password' ] = $jobStruct->password;
-                $config[ 'session' ]      = $contributionStruct->getSessionId();
+                $config[ 'segment' ]         = $contributionStruct->getContexts()->segment;
+                $config[ 'source' ]          = $jobStruct->source;
+                $config[ 'target' ]          = $jobStruct->target;
+                $config[ 'email' ]           = INIT::$MYMEMORY_API_KEY;
+                $config[ 'segid' ]           = $contributionStruct->segmentId;
+                $config[ 'job_id' ]          = $jobStruct->id;
+                $config[ 'job_password' ]    = $jobStruct->password;
+                $config[ 'session' ]         = $contributionStruct->getSessionId();
+                $config[ 'all_job_tm_keys' ] = $jobStruct->tm_keys;
 
                 if ( $mt_engine instanceof Engines_MMT ) {
                     $metadataDao = new Projects_MetadataDao();
