@@ -3,6 +3,7 @@
 use Contribution\ContributionRequestStruct;
 use Contribution\Request;
 use Files\FilesPartsDao;
+use Jobs\MetadataDao;
 use Matecat\SubFiltering\MateCatFilter;
 
 class getContributionController extends ajaxController {
@@ -148,10 +149,61 @@ class getContributionController extends ajaxController {
             $contributionRequest->userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
         }
 
+        $jobsMetadataDao = new MetadataDao();
+        $dialect_strict  = $jobsMetadataDao->get( $jobStruct->id, $jobStruct->password, 'dialect_strict', 10 * 60 );
+
+        if ( $dialect_strict !== null ) {
+            $contributionRequest->dialect_strict = $dialect_strict->value == 1;
+        }
+
+        $tm_prioritization  = $jobsMetadataDao->get( $jobStruct->id, $jobStruct->password, 'tm_prioritization', 10 * 60 );
+
+        if ( $tm_prioritization !== null ) {
+            $contributionRequest->tm_prioritization = $tm_prioritization->value == 1;
+        }
+
+        //penalty_key
+        $penalty_key = [];
+        $tmKeys = json_decode( $jobStruct->tm_keys, true );
+
+        foreach ($tmKeys as $tmKey){
+            if(isset($tmKey['penalty']) and is_numeric($tmKey['penalty'])){
+                $penalty_key[] = $tmKey['penalty'];
+            } else {
+                $penalty_key[] = 0;
+            }
+        }
+
+        if(!empty($penalty_key)){
+            $contributionRequest->penalty_key = $penalty_key;
+        }
+
         Request::contribution( $contributionRequest );
 
-        $this->result = [ "errors" => [], "data" => [ "message" => "OK", "id_client" => $this->id_client ] ];
-
+        $this->result = [
+            "errors" => [],
+            "data" => [
+                "message" => "OK",
+                "id_client" => $this->id_client,
+                "request" => [
+                    'session_id' => $contributionRequest->getSessionId(),
+                    'id_file' => (int)$contributionRequest->id_file,
+                    'id_job' => (int)$contributionRequest->id_job,
+                    'password' => $contributionRequest->password,
+                    'contexts' => $contributionRequest->contexts,
+                    'id_client' => $contributionRequest->id_client,
+                    'userRole' => $contributionRequest->userRole,
+                    'tm_prioritization' => $contributionRequest->tm_prioritization,
+                    'penalty_key' => $contributionRequest->penalty_key,
+                    'crossLangTargets' => $contributionRequest->crossLangTargets,
+                    'fromTarget' => $contributionRequest->fromTarget,
+                    'dialect_strict' => $contributionRequest->dialect_strict,
+                    'segmentId' => $contributionRequest->segmentId ? (string)$contributionRequest->segmentId : null,
+                    'resultNum' => (int)$contributionRequest->resultNum,
+                    'concordanceSearch' => $contributionRequest->concordanceSearch,
+                ]
+            ]
+        ];
     }
 
     /**
