@@ -66,4 +66,15 @@
       color: $black !important;
     }
   }
+  .stats-foo {
+    //height: 44px;
+    background-color: $white;
+    width: 100%;
+    //position: fixed;
+    bottom: 0;
+    left: 0;
+    z-index: 2;
+    display: grid;
+    min-width: 1024px;
+  }
 }

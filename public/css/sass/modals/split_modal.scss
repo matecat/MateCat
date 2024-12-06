@@ -155,10 +155,6 @@
     background: #ccc;
   }
 
-  .uploadbtn {
-    float: right;
-  }
-
   .split-box2 {
     display: none;
     width: 670px;
@@ -330,17 +326,6 @@
     -webkit-box-shadow: none;
     border: 1px solid $grey1;
     background: #ccc !important;
-  }
-
-  .uploadloader {
-    background: url(../../img/loader.gif) center center no-repeat;
-    width: 20px;
-    height: 20px;
-    float: right;
-    margin-top: 11px;
-    position: absolute;
-    right: 86px;
-    background-size: 20px 20px;
   }
 
   .btn-cancel {

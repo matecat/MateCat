@@ -412,10 +412,6 @@ div#manage-container {
               transition: 0.3s ease;
               background-color: #ffffff;
               padding: 8px 15px;
-
-              .outsource.modal .popup {
-                box-shadow: none;
-              }
               .job-id {
                 float: left;
                 min-width: 70px;
@@ -877,73 +873,6 @@ div#manage-container {
         border: 1px solid #797979;
         border-radius: 2px;
         margin: 10px;
-      }
-    }
-  }
-}
-
-.normal-foo {
-  background-color: $grey4;
-  min-width: 992px;
-  width: 100%;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  z-index: 2;
-  .footer-body {
-    display: grid;
-    position: relative;
-    grid-column-gap: 24px;
-    grid-template-columns: 0.6fr 0.6fr 1fr;
-    align-items: center;
-    padding: 16px 64px;
-    height: 77px;
-    .info {
-      display: grid;
-      align-items: center;
-      grid-template-columns: 40px auto;
-      grid-column-gap: 8px;
-      .logo {
-        background-position: center;
-        background-size: cover;
-      }
-      .description {
-        color: $grey1;
-        font-weight: 100;
-        font-size: 12px;
-        text-align: left;
-        line-height: 14px;
-        .link {
-          color: #00aee4;
-          text-decoration: underline;
-        }
-      }
-    }
-  }
-  .side-info {
-    padding: 0 16px;
-    position: absolute;
-    display: grid;
-    align-items: center;
-    bottom: 0;
-    right: 0;
-    width: 419px;
-    height: 35px;
-    box-shadow: -2px -2px 12px 0 rgba(198, 198, 198, 0.5);
-    background-color: #ffffff;
-    .side-info-body {
-      display: grid;
-      grid-template-columns: 80px 80px 80px;
-      align-items: center;
-      .item {
-        a {
-          margin: 0;
-          padding: 0;
-          color: $grey1;
-          display: block;
-          text-decoration: underline;
-          text-align: left;
-        }
       }
     }
   }
