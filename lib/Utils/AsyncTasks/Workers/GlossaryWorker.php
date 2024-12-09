@@ -503,13 +503,14 @@ class GlossaryWorker extends AbstractWorker {
     /**
      * @param FeatureSet $featureSet
      *
-     * @return Engines_AbstractEngine
+     * @return Engines_MyMemory
      * @throws Exception
      */
     private function getEngine( FeatureSet $featureSet ) {
         $_TMS = Engine::getInstance( 1 );
         $_TMS->setFeatureSet( $featureSet );
 
+        /** @var Engines_MyMemory $_TMS */
         return $_TMS;
     }
 
@@ -532,17 +533,6 @@ class GlossaryWorker extends AbstractWorker {
      * @throws Exception
      */
     private function getMyMemoryClient() {
-        $engineDAO        = new EnginesModel_EngineDAO( Database::obtain() );
-        $engineStruct     = EnginesModel_EngineStruct::getStruct();
-        $engineStruct->id = 1;
-
-        $eng = $engineDAO->setCacheTTL( 60 * 5 )->read( $engineStruct );
-
-        /**
-         * @var $engineRecord EnginesModel_EngineStruct
-         */
-        $engineRecord = @$eng[ 0 ];
-
-        return new Engines_MyMemory( $engineRecord );
+       return $this->getEngine( new FeatureSet() );
     }
 }
