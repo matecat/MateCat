@@ -79,7 +79,7 @@ class BaseCommentEmail extends AbstractEmail {
      */
     private function getCommentFullName()
     {
-        if($this->comment->is_anonymous){
+        if($this->comment->is_anonymous == true){
 
             $revision_number = (int)$this->comment->revision_number;
 
