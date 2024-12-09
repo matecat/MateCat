@@ -309,10 +309,12 @@ class ReviewedWordCountModel implements IReviewedWordCountModel {
         }
 
         $segmentInfo = [
-                'segment_source'  => Utils::htmlentitiesToUft8WithoutDoubleEncoding( $this->_event->getSegmentStruct()->segment ),
-                'old_translation' => Utils::htmlentitiesToUft8WithoutDoubleEncoding( $this->_event->getOldTranslation()->translation ),
-                'new_translation' => Utils::htmlentitiesToUft8WithoutDoubleEncoding( $this->_event->getWantedTranslation()->translation ),
-                'issues'          => $serialized_issues
+            'segment_source'  => Utils::htmlentitiesToUft8WithoutDoubleEncoding( $this->_event->getSegmentStruct()->segment ),
+            'old_translation' => Utils::htmlentitiesToUft8WithoutDoubleEncoding( $this->_event->getOldTranslation()->translation ),
+            'new_translation' => Utils::htmlentitiesToUft8WithoutDoubleEncoding( $this->_event->getWantedTranslation()->translation ),
+            'old_status'      => $this->_event->getOldTranslation()->status,
+            'new_status'      => $this->_event->getWantedTranslation()->status,
+            'issues'          => $serialized_issues
         ];
 
         foreach ( $finalRevisions as $finalRevision ) {
