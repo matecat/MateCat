@@ -284,7 +284,7 @@ export const UploadXliff = () => {
   const {isUserLogged} = useContext(ApplicationWrapperContext)
 
   useEffect(() => {
-    init()
+    setTimeout(() => init(), 200)
   }, [])
 
   return (

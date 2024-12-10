@@ -33,7 +33,7 @@ import CommonUtils from '../utils/commonUtils'
 import {CattoolFooter} from '../components/footer/CattoolFooter'
 import {mountPage} from './mountPage'
 import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper'
-import SseListener from '../sse/SseListener'
+import SocketListener from '../sse/SocketListener'
 import Speech2Text from '../utils/speech2text'
 import {initTagSignature} from '../components/segments/utils/DraftMatecatUtils/tagModel'
 import {
@@ -413,7 +413,7 @@ function CatTool() {
         openTmPanel={openTmPanel}
         jobMetadata={jobMetadata}
       />
-      <SseListener
+      <SocketListener
         isAuthenticated={isUserLogged}
         userId={isUserLogged ? userInfo.user.uid : null}
       />
@@ -422,7 +422,7 @@ function CatTool() {
         <div
           id="outer"
           className={
-            isLoadingSegments
+            isLoadingSegments || !isUserLogged
               ? options?.where === 'before'
                 ? 'loadingBefore'
                 : options?.where === 'after'
@@ -431,16 +431,21 @@ function CatTool() {
               : ''
           }
         >
-          <article id="file" className="loading mbc-commenting-closed">
-            <div className="article-segments-container">
-              <SegmentsContainer
-                isReview={config.isReview}
-                startSegmentId={UI.startSegmentId?.toString()}
-                firstJobSegment={config.first_job_segment}
-                languages={supportedLanguages}
-              />
-            </div>
-          </article>
+          {isUserLogged ? (
+            <article id="file" className="loading mbc-commenting-closed">
+              <div className="article-segments-container">
+                <SegmentsContainer
+                  isReview={config.isReview}
+                  startSegmentId={UI.startSegmentId?.toString()}
+                  firstJobSegment={config.first_job_segment}
+                  languages={supportedLanguages}
+                />
+              </div>
+            </article>
+          ) : (
+            !isUserLogged &&
+            typeof userInfo === 'undefined' && <div className="signin-bg" />
+          )}
           <div id="loader-getMoreSegments" />
         </div>
         <div id="plugin-mount-point"></div>
@@ -477,16 +482,18 @@ function CatTool() {
           }}
         />
       )}
-      <CattoolFooter
-        idProject={config.id_project}
-        idJob={config.id_job}
-        password={config.password}
-        source={config.source_rfc}
-        target={config.target_rfc}
-        isReview={config.isReview}
-        isCJK={config.isCJK}
-        languagesArray={supportedLanguages}
-      />
+      {isUserLogged && (
+        <CattoolFooter
+          idProject={config.id_project}
+          idJob={config.id_job}
+          password={config.password}
+          source={config.source_rfc}
+          target={config.target_rfc}
+          isReview={config.isReview}
+          isCJK={config.isCJK}
+          languagesArray={supportedLanguages}
+        />
+      )}
       <OnboardingTooltips
         show={isUserLogged && userInfo.user}
         continous={true}

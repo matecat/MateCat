@@ -22,7 +22,7 @@ import {CookieConsent} from '../components/common/CookieConsent'
 import {mountPage} from './mountPage'
 import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper'
 import DownloadFileUtils from '../utils/downloadFileUtils'
-import SseListener from '../sse/SseListener'
+import SocketListener from '../sse/SocketListener'
 
 class Dashboard extends React.Component {
   constructor() {
@@ -478,12 +478,12 @@ class Dashboard extends React.Component {
           </div>
         )}
         {ReactDOM.createPortal(<CookieConsent />, cookieBannerMountPoint)}
-        {/*<SseListener
+        <SocketListener
           isAuthenticated={this.context.isUserLogged}
           userId={
             this.context.isUserLogged ? this.context.userInfo.user.uid : null
           }
-        />*/}
+        />
       </React.Fragment>
     )
   }

@@ -352,6 +352,11 @@
     }
   }
 
+  .tag-space-placeholder {
+    color: transparent;
+    font-size: 12px;
+  }
+
   &.tag-lf {
     &:before {
       border: none;

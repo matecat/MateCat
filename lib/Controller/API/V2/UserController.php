@@ -2,15 +2,15 @@
 
 namespace API\V2;
 
-use API\Commons\KleinController;
+use API\Commons\AbstractStatefulKleinController;
+use API\Commons\Authentication\AuthenticationHelper;
 use API\Commons\Validators\JSONRequestValidator;
 use API\Commons\Validators\LoginValidator;
-use Bootstrap;
 use InvalidArgumentException;
 use Users\MetadataDao;
 use Users_UserDao;
 
-class UserController extends KleinController
+class UserController extends AbstractStatefulKleinController
 {
     public function afterConstruct() {
         $this->appendValidator( new LoginValidator( $this ) );
@@ -127,8 +127,7 @@ class UserController extends KleinController
                 $filtered['value']
             );
 
-            Bootstrap::sessionStart();
-            $_SESSION['user_profile']['metadata'] = $this->getUser()->getMetadataAsKeyValue();
+            AuthenticationHelper::refreshSession($_SESSION);
 
             return $this->response->json($metadata);
 

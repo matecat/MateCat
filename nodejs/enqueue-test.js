@@ -20,7 +20,7 @@ stompit.connect(connectOptions, function(error, client) {
     }
 
     var sendHeaders = {
-        'destination': '/queue/matecat_sse_comments',
+        'destination': '/topic/matecat_sse_notifications',
         'content-type': 'text/plain'
     };
 
@@ -28,11 +28,11 @@ stompit.connect(connectOptions, function(error, client) {
     var response = {
         _type : 'comment',
         data : {
-            id_job : '2',
+            id_job : '638',
             password : '3494ab77e7d7',
             payload: {
                 _type: 'comment',
-                id_segment : Math.random(),
+                id_segment : 377916,
                 message : _.sample(['hello', 'hi', 'help', 'sorry'])
             }
         }

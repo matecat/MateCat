@@ -603,14 +603,24 @@ class CatUtils {
         $values = self::getChunkReviewStructFromJobStruct( $job, $chunkReviews );
 
         if ( !isset( $values ) ) {
-            $result = null;
-        } elseif ( !empty( $values->is_pass ) ) {
-            $result = 'excellent';
-        } else {
-            $result = 'fail';
+            return null;
         }
 
-        return $result;
+        if ( !isset( $values->is_pass ) ) {
+            return null;
+        }
+
+        $is_pass = $values->is_pass;
+
+        if($is_pass == true){
+            return 'excellent';
+        }
+
+        if($is_pass == false){
+            return 'fail';
+        }
+
+        return null;
     }
 
     /**
