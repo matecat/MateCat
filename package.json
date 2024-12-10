@@ -44,7 +44,9 @@
     "react-tagsinput": "^3.19.0",
     "react-transition-group": "^4.2.2",
     "react-virtual": "^2.10.4",
-    "sprintf-js": "^1.1.2"
+    "sprintf-js": "^1.1.2",
+    "uuid": "^11.0.2",
+    "socket.io-client": "^4.8.1"
   },
   "devDependencies": {
     "@babel/core": "7.26.0",
@@ -66,7 +68,7 @@
     "eslint-plugin-jest-dom": "^5.0.0",
     "eslint-plugin-react": "^7.23.2",
     "eslint-plugin-react-hooks": "^5.0.0",
-    "eslint-plugin-testing-library": "^6.0.0",
+    "eslint-plugin-testing-library": "^7.0.0",
     "fs-extra": "^11.1.1",
     "glob": "^11.0.0",
     "html-webpack-plugin": "5.6.3",
@@ -83,7 +85,7 @@
     "sass-loader": "16.0.3",
     "style-loader": "4.0.0",
     "undici": "^5.28.2",
-    "webpack": "5.95.0",
+    "webpack": "5.96.1",
     "webpack-cli": "5.1.4",
     "webpack-concat-files-plugin": "^0.5.2",
     "whatwg-fetch": "^3.6.20"
