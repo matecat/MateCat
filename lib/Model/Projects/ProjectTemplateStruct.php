@@ -23,6 +23,7 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
     public int     $xliff_config_template_id = 0;
     public bool    $pretranslate_100         = false;
     public bool    $pretranslate_101         = false;
+    public bool    $tm_prioritization        = false;
     public bool    $get_public_matches       = true;
     public string  $created_at;
     public ?string $modified_at              = null;
@@ -48,6 +49,7 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
         $this->segmentation_rule        = (!empty($json->segmentation_rule)) ? json_encode( $json->segmentation_rule ) : null;
         $this->pretranslate_100         = $json->pretranslate_100;
         $this->pretranslate_101         = $json->pretranslate_101;
+        $this->tm_prioritization        = $json->tm_prioritization;
         $this->get_public_matches       = $json->get_public_matches;
         $this->mt                       = json_encode( $json->mt );
         $this->tm                       = (!empty($json->tm)) ? json_encode( $json->tm ) : null;
@@ -124,6 +126,7 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
                 'get_public_matches'       => $this->get_public_matches,
                 'pretranslate_100'         => $this->pretranslate_100,
                 'pretranslate_101'         => $this->pretranslate_101,
+                'tm_prioritization'        => $this->tm_prioritization,
                 'subject'                  => $this->subject,
                 'source_language'          => $this->source_language,
                 'target_language'          => $this->getTargetLanguage(),

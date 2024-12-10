@@ -292,7 +292,7 @@ export const TMCreateResourceRow = ({row}) => {
           data-testid={row.id}
         />
       </div>
-      <div>
+      <div className="tm-key-add-shared-resource align-center">
         {row.id === SPECIAL_ROWS_ID.addSharedResource && (
           <input
             placeholder="Add the shared key here"

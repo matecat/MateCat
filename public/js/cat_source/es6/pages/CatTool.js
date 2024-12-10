@@ -385,6 +385,18 @@ function CatTool() {
         typeof projectTemplates[1].mt !== 'undefined')) &&
     Array.isArray(projectTemplates[1].tm)
 
+  useEffect(() => {
+    if (
+      isFakeCurrentTemplateReady &&
+      typeof jobMetadata?.job?.tm_prioritization !== 'undefined'
+    ) {
+      modifyingCurrentTemplate((prevTemplate) => ({
+        ...prevTemplate,
+        tmPrioritization: jobMetadata?.job?.tm_prioritization === 1,
+      }))
+    }
+  }, [jobMetadata?.job, isFakeCurrentTemplateReady, modifyingCurrentTemplate])
+
   return (
     <>
       <Header

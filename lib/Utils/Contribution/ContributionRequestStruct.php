@@ -24,14 +24,14 @@ class ContributionRequestStruct extends ShapelessConcreteStruct implements DataA
 
     public $jobStruct;
 
-    public $dataRefMap;
+    public $dataRefMap = [];
 
     public $projectStruct;
 
     public $contexts = [
-            'context_before' => null,
-            'segment'        => null,
-            'context_after'  => null
+        'context_before' => null,
+        'segment'        => null,
+        'context_after'  => null
     ];
 
     /**
@@ -57,7 +57,7 @@ class ContributionRequestStruct extends ShapelessConcreteStruct implements DataA
     /**
      * @var int
      */
-    public $resultNum = 3;
+    public $resultNum = 10;
 
     /**
      * @var bool
@@ -69,9 +69,13 @@ class ContributionRequestStruct extends ShapelessConcreteStruct implements DataA
      */
     public $fromTarget = false;
 
-
     public $crossLangTargets = [] ;
 
+    public $dialect_strict = null;
+
+    public $tm_prioritization = null;
+
+    public $penalty_key = [];
 
     # Private members
     /**

@@ -46,7 +46,7 @@ class MetaDataController extends BaseChunkController {
 
         foreach ( $project->getMetadata() as $metadatum ) {
             $key            = $metadatum->key;
-            $metadata->$key = $metadatum->getValue();
+            $metadata->$key = is_numeric($metadatum->getValue()) ? (int)$metadatum->getValue() : $metadatum->getValue();
         }
 
         return $metadata;
@@ -64,7 +64,7 @@ class MetaDataController extends BaseChunkController {
 
         foreach ( $jobMetaDataDao->getByJobIdAndPassword( $job->id, $job->password, 60 * 5 ) as $metadatum ) {
             $key            = $metadatum->key;
-            $metadata->$key = $metadatum->value;
+            $metadata->$key = is_numeric($metadatum->value) ? (int)$metadatum->value : $metadatum->value;
         }
 
         return $metadata;
@@ -72,8 +72,8 @@ class MetaDataController extends BaseChunkController {
 
     /**
      * @param Jobs_JobStruct $job
-     *
      * @return array
+     * @throws \ReflectionException
      */
     private function getJobFilesMetaData( Jobs_JobStruct $job ) {
 
@@ -84,7 +84,7 @@ class MetaDataController extends BaseChunkController {
             $metadatum = new stdClass();
             foreach ( $filesMetaDataDao->getByJobIdProjectAndIdFile( $job->getProject()->id, $file->id, 60 * 5 ) as $meta ) {
                 $key             = $meta->key;
-                $metadatum->$key = $meta->value;
+                $metadatum->$key = is_numeric($meta->value) ? (int)$meta->value : $meta->value;
             }
 
             $metadataObject           = new \stdClass();

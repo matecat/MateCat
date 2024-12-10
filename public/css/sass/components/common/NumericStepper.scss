@@ -1,0 +1,36 @@
+@import '../../commons/colors';
+
+.numeric-stepper-component {
+  display: flex;
+  max-width: 70px;
+  height: 28px;
+
+  input {
+    width: 100%;
+    height: 100%;
+    outline: none;
+    border: 1px solid $grey8;
+  }
+
+  .container-controls {
+    display: flex;
+    flex-direction: column;
+
+    button {
+      height: 14px !important;
+      line-height: 1 !important;
+      padding: 0 !important;
+      background: $grey4 !important;
+      border: 1px solid $grey7 !important;
+      border-radius: 0 !important;
+
+      &:hover {
+        background-color: $grey5 !important;
+      }
+    }
+
+    button:first-child {
+      transform: rotate(180deg);
+    }
+  }
+}
