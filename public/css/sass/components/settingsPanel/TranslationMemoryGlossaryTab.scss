@@ -76,7 +76,7 @@
   }
 
   .settings-panel-row {
-    border-top: unset;
+    border: unset;
 
     .row-content-default-memory {
       grid-template-columns: 8% 5% minmax(0, 1fr) 5% 14% 18%;
