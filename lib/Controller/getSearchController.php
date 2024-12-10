@@ -381,9 +381,8 @@ class getSearchController extends ajaxController {
                     $propagationTotal = Translations_SegmentTranslationDao::propagateTranslation(
                             $TPropagation,
                             $this->job_data,
-                            $this->id_segment,
+                            (int)$this->id_segment,
                             $project,
-                            $versionsHandler
                     );
 
                 } catch ( Exception $e ) {
