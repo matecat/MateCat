@@ -51,6 +51,10 @@ import {HomePageSection} from '../components/createProject/HomePageSection'
 import UserActions from '../actions/UserActions'
 import {getDeepLGlosssaries} from '../api/getDeepLGlosssaries/getDeepLGlosssaries'
 import SocketListener from '../sse/SocketListener'
+import {
+  ONBOARDING_PAGE,
+  OnboardingTooltips,
+} from '../components/header/OnboardingTooltips'
 
 const SELECT_HEIGHT = 324
 
@@ -1020,6 +1024,11 @@ const NewProject = () => {
       <SocketListener
         isAuthenticated={isUserLogged}
         userId={isUserLogged ? userInfo.user.uid : null}
+      />
+      <OnboardingTooltips
+        show={isUserLogged && userInfo.user}
+        continous={true}
+        page={ONBOARDING_PAGE.HOME}
       />
     </CreateProjectContext.Provider>
   ) : (
