@@ -942,7 +942,6 @@ class setTranslationController extends ajaxController {
         Set::contribution( $contributionStruct );
 
         if ( $contributionStruct->id_mt > 1 ) {
-            $contributionStruct = $this->featureSet->filter( 'filterSetContributionMT', null, $contributionStruct, $this->project );
             Set::contributionMT( $contributionStruct );
         }
 

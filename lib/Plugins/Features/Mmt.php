@@ -482,52 +482,6 @@ class Mmt extends BaseFeature {
 
     /**
      *
-     * Called in @param                        $response
-     *
-     * @param ContributionSetStruct  $contributionStruct
-     * @param Projects_ProjectStruct $projectStruct
-     *
-     * @return ContributionSetStruct|null
-     * @see \setTranslationController::evalSetContribution()
-     *
-     */
-    public function filterSetContributionMT( $response, ContributionSetStruct $contributionStruct, Projects_ProjectStruct $projectStruct ) {
-
-        /**
-         * When a project is created, it's features and used plugins are stored in project_metadata,
-         * When MMT is disabled at global level, old projects will have this feature enabled in meta_data, but the plugin is not Bootstrapped with the hook @see Mmt::bootstrapCompleted()
-         *
-         * So, the MMT engine is not in the list of available plugins, check and exclude if the Plugin is not enables at global level
-         */
-        if ( !array_key_exists( Constants_Engines::MMT, Constants_Engines::getAvailableEnginesList() ) ) {
-            return $response;
-        }
-
-        //Project is not anonymous
-        if ( !$projectStruct->isAnonymous() ) {
-
-            try {
-
-                $features = FeatureSet::splitString( $projectStruct->getMetadataValue( Projects_MetadataDao::FEATURES_KEY ) );
-
-                if ( in_array( self::FEATURE_CODE, $features ) ) {
-                    $response = $contributionStruct;
-                } else {
-                    $response = null;
-                }
-
-            } catch ( Exception $e ) {
-                //DO Nothing
-            }
-
-        }
-
-        return $response;
-
-    }
-
-    /**
-     *
      * @param TMSFile  $file
      * @param          $user
      *

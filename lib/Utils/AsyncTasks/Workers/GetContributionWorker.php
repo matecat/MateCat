@@ -519,43 +519,7 @@ class GetContributionWorker extends AbstractWorker {
                 $config[ 'job_password' ]    = $jobStruct->password;
                 $config[ 'session' ]         = $contributionStruct->getSessionId();
                 $config[ 'all_job_tm_keys' ] = $jobStruct->tm_keys;
-
-                if ( $mt_engine instanceof Engines_MMT ) {
-                    $metadataDao = new Projects_MetadataDao();
-                    $metadata    = $metadataDao->setCacheTTL( 86400 )->get( $contributionStruct->getProjectStruct()->id, 'mmt_glossaries' );
-
-                    if ( $metadata !== null ) {
-                        $metadata           = html_entity_decode( $metadata->value );
-                        $mmtGlossariesArray = json_decode( $metadata, true );
-
-                        $config[ 'glossaries' ]           = implode( ",", $mmtGlossariesArray[ 'glossaries' ] );
-                        $config[ 'ignore_glossary_case' ] = $mmtGlossariesArray[ 'ignore_glossary_case' ];
-                    }
-                }
-
-                // glossaries (only for DeepL)
-                if ( $mt_engine instanceof Engines_DeepL ) {
-
-                    $extraParams = $mt_engine->getEngineRecord()->extra_parameters;
-
-                    if ( !isset( $extraParams[ 'DeepL-Auth-Key' ] ) ) {
-                        throw new Exception( "DeepL API key not set" );
-                    }
-
-                    $metadataDao     = new Projects_MetadataDao();
-                    $deepLFormality  = $metadataDao->get( $contributionStruct->getProjectStruct()->id, 'deepl_formality', 86400 );
-                    $deepLIdGlossary = $metadataDao->get( $contributionStruct->getProjectStruct()->id, 'deepl_id_glossary', 86400 );
-
-                    if ( $deepLFormality !== null ) {
-                        $config[ 'formality' ] = $deepLFormality->value;
-                    }
-
-                    if ( $deepLIdGlossary !== null ) {
-                        $config[ 'idGlossary' ] = $deepLIdGlossary->value;
-                    }
-
-                    $mt_engine->setApiKey( $extraParams[ 'DeepL-Auth-Key' ] );
-                }
+                $config[ 'project_id' ]      = $contributionStruct->getProjectStruct()->id;
 
                 $mt_result = $mt_engine->get( $config );
             }

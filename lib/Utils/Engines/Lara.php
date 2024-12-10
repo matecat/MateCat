@@ -11,10 +11,13 @@ use Engines_Results_MyMemory_Matches;
 use EnginesModel_MMTStruct;
 use Exception;
 use Features\Mmt;
+use INIT;
+use Lara\LaraApiException;
 use Lara\LaraCredentials;
 use Lara\LaraException;
 use Lara\TranslateOptions;
 use Lara\Translator;
+use Log;
 use RedisHandler;
 use ReflectionException;
 use Throwable;
@@ -29,6 +32,13 @@ use TmKeyManagement_TmKeyManagement;
  *
  */
 class Lara extends Engines_AbstractEngine {
+
+    /**
+     * @inheritdoc
+     * @see Engines_AbstractEngine::$_isAdaptive
+     * @var bool
+     */
+    protected bool $_isAdaptive = true;
 
     private ?Translator $clientLoaded = null;
 
@@ -58,7 +68,7 @@ class Lara extends Engines_AbstractEngine {
      */
     protected function _getClient(): Translator {
 
-        if( !empty( $this->clientLoaded ) ){
+        if ( !empty( $this->clientLoaded ) ) {
             return $this->clientLoaded;
         }
 
@@ -68,7 +78,7 @@ class Lara extends Engines_AbstractEngine {
         $mmtStruct                   = EnginesModel_MMTStruct::getStruct();
         $mmtStruct->type             = Constants_Engines::MT;
         $mmtStruct->extra_parameters = [
-                'MMT-License'      => $extraParams[ 'MMT-License' ],
+                'MMT-License'      => $extraParams[ 'MMT-License' ] ?? INIT::$DEFAULT_MMT_KEY,
                 'MMT-pretranslate' => true,
                 'MMT-preimport'    => false,
         ];
@@ -111,7 +121,7 @@ class Lara extends Engines_AbstractEngine {
     }
 
     protected function _decode( $rawValue, array $parameters = [], $function = null ) {
-        // TODO: Implement _decode() method.
+        // Not used since Lara works with an external client (through composer)
     }
 
     /**
@@ -122,7 +132,7 @@ class Lara extends Engines_AbstractEngine {
      */
     public function get( $_config ) {
 
-        $tm_keys          = TmKeyManagement_TmKeyManagement::getOwnerKeys( [ $_config[ 'all_job_tm_keys' ] ] );
+        $tm_keys           = TmKeyManagement_TmKeyManagement::getOwnerKeys( [ $_config[ 'all_job_tm_keys' ] ] );
         $_config[ 'keys' ] = array_map( function ( $tm_key ) {
             /**
              * @var $tm_key TmKeyManagement_MemoryKeyStruct
@@ -136,6 +146,7 @@ class Lara extends Engines_AbstractEngine {
             // for MMT
             $_config[ 'include_score' ] = true;
             $_config[ 'priority' ]      = 'background';
+
             // analysis on Lara is disabled, fallback on MMT
 
             return $this->mmtUserFallback->get( $_config );
@@ -180,7 +191,40 @@ class Lara extends Engines_AbstractEngine {
      * @inheritDoc
      */
     public function update( $_config ) {
-        // TODO: Implement update() method.
+
+        $client = $this->_getClient();
+        $_keys  = $this->_reMapKeyList( $_config[ 'keys' ] ?? [] );
+        try {
+
+            $languagesList = $this->getAvailableLanguages();
+            if ( in_array( $_config[ 'source' ], $languagesList ) && in_array( $_config[ 'target' ], $languagesList ) ) {
+                // call lara
+                $client->memories->addTranslation(
+                        $_keys,
+                        $_config[ 'source' ],
+                        $_config[ 'target' ],
+                        $_config[ 'segment' ],
+                        $_config[ 'translation' ],
+                        $_config[ 'tuid' ],
+                        $_config[ 'context_before' ],
+                        $_config[ 'context_after' ],
+                );
+            }
+
+        } catch ( LaraApiException $e ) {
+            // Lara license expired/changed (401) or account deleted (403)
+            Log::doJsonLog( $e->getMessage() );
+
+            // DO NOT REQUEUE FOR LARA FAILURE ONLY
+
+        } catch ( Exception $e ) {
+            // for any other exception (HTTP connection or timeout) requeue
+            return false;
+        }
+
+        // let MMT to have the last word on requeue
+        return $this->mmtUserFallback->update( $_config );
+
     }
 
     /**

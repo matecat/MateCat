@@ -52,4 +52,6 @@ interface Engines_EngineInterface {
      */
     public function getEngineRow();
 
+    public function isAdaptive(): bool;
+
 }

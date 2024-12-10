@@ -13,6 +13,13 @@ use Engines\MMT\MMTServiceApiRequestException;
  */
 class Engines_MMT extends Engines_AbstractEngine {
 
+    /**
+     * @inheritdoc
+     * @see Engines_AbstractEngine::$_isAdaptive
+     * @var bool
+     */
+    protected bool $_isAdaptive = true;
+
     protected $_config = [
             'segment'        => null,
             'translation'    => null,
@@ -92,6 +99,7 @@ class Engines_MMT extends Engines_AbstractEngine {
      * @param $_config
      *
      * @return array|Engines_Results_AbstractResponse
+     * @throws ReflectionException
      */
     public function get( $_config ) {
 
@@ -102,6 +110,17 @@ class Engines_MMT extends Engines_AbstractEngine {
 
         $client = $this->_getClient();
         $_keys  = $this->_reMapKeyList( $_config[ 'keys' ] ?? [] );
+
+        $metadataDao = new Projects_MetadataDao();
+        $metadata    = $metadataDao->setCacheTTL( 86400 )->get( $_config[ 'project_id' ], 'mmt_glossaries' );
+
+        if ( $metadata !== null ) {
+            $metadata           = html_entity_decode( $metadata->value );
+            $mmtGlossariesArray = json_decode( $metadata, true );
+
+            $_config[ 'glossaries' ]           = implode( ",", $mmtGlossariesArray[ 'glossaries' ] );
+            $_config[ 'ignore_glossary_case' ] = $mmtGlossariesArray[ 'ignore_glossary_case' ];
+        }
 
         try {
             $translation = $client->translate(
@@ -141,11 +160,11 @@ class Engines_MMT extends Engines_AbstractEngine {
     }
 
     /**
-     * @param $_keys
+     * @param array $_keys
      *
      * @return array
      */
-    protected function _reMapKeyList( $_keys = [] ) {
+    protected function _reMapKeyList( array $_keys = [] ): array {
 
         if ( !empty( $_keys ) ) {
 
@@ -204,7 +223,7 @@ class Engines_MMT extends Engines_AbstractEngine {
     public function update( $_config ) {
 
         $client = $this->_getClient();
-        $_keys  = $this->_reMapKeyList( @$_config[ 'keys' ] );
+        $_keys  = $this->_reMapKeyList( $_config[ 'keys' ] ?? [] );
 
         try {
             $client->updateMemoryContent(
@@ -217,7 +236,7 @@ class Engines_MMT extends Engines_AbstractEngine {
                     $_config[ 'session' ]
             );
         } catch ( Exception $e ) {
-            return false;
+            return false; // requeue
         }
 
         return true;
