@@ -196,6 +196,18 @@
   .add-mt-provider .select-with-label__wrapper {
     margin-right: 30px;
   }
+
+  .provider-license-label-with-icon {
+    display: flex;
+    gap: 5px;
+    margin-top: 15px;
+  }
+
+  .provider-data-lara {
+    .button {
+      margin-top: 135px !important;
+    }
+  }
 }
 .machine-translation-tab {
   .settings-panel-table-rowHeading,
