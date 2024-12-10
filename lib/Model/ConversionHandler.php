@@ -38,7 +38,8 @@ class ConversionHandler {
     /**
      * @var FeatureSet
      */
-    public $features;
+    public         $features;
+    protected bool $isReconversion = false;
 
     /**
      * ConversionHandler constructor.
@@ -225,7 +226,7 @@ class ConversionHandler {
         if ( !empty( $cachedXliffPath ) ) {
 
             //FILE Found in cache, destroy the already present shasum for other languages ( if user swapped languages )
-            $uploadDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->cookieDir;
+            $uploadDir    = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->cookieDir;
             $fs->deleteHashFromUploadDir( $uploadDir, $hash_name_for_disk );
 
             if ( is_file( $file_path ) ) {
@@ -561,4 +562,9 @@ class ConversionHandler {
     public function setFiltersExtractionParameters( ?FiltersConfigTemplateStruct $filters_extraction_parameters = null ) {
         $this->filters_extraction_parameters = $filters_extraction_parameters;
     }
+
+    public function setReconversion( bool $isReconversion ) {
+        $this->isReconversion = $isReconversion;
+    }
+
 }
