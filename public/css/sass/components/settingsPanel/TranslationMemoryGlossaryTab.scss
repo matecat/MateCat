@@ -118,12 +118,24 @@
   }
 }
 
-.settings-panel-table {
-  .settings-panel-row-content:not(.row-content-create-resource):not(
-      .row-content-default-memory
-    )
-    > :last-child {
-    grid-column: 7;
+.translation-memory-glossary-tab {
+  .settings-panel-table {
+    .settings-panel-row-content:not(.row-content-create-resource):not(
+        .row-content-default-memory
+      )
+      > :last-child {
+      grid-column: 7;
+    }
+  }
+
+  .settings-panel-table:not(.translation-memory-glossary-tab-active-table) {
+    .settings-panel-row-content {
+      padding: 0 20px;
+    }
+  }
+
+  .settings-panel-row-content > *:not(.settings-panel-row-drag-handle) {
+    padding: 0;
   }
 }
 
@@ -427,11 +439,5 @@
     width: 28px !important;
     height: 28px !important;
     color: $grey6 !important;
-  }
-}
-
-.settings-panel-table:not(.translation-memory-glossary-tab-active-table) {
-  .settings-panel-row-content {
-    padding: 0 20px;
   }
 }
