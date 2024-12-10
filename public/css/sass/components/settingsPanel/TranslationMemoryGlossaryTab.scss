@@ -80,6 +80,7 @@
 
     .row-content-default-memory {
       grid-template-columns: 8% 5% minmax(0, 1fr) 5% 14% 18%;
+      padding: 0 10px !important;
 
       > :last-child {
         grid-column: 6;
@@ -129,8 +130,11 @@
   }
 
   .settings-panel-table:not(.translation-memory-glossary-tab-active-table) {
+    .settings-panel-row {
+      padding: 0 10px;
+    }
     .settings-panel-row-content {
-      padding: 0 20px;
+      padding: 0 10px;
     }
   }
 
@@ -367,7 +371,7 @@
     padding: 0 10px;
 
     &:first-child {
-      padding: 10px 20px !important;
+      padding: 10px !important;
     }
 
     &:last-child {
