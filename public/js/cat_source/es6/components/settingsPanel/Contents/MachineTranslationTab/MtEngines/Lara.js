@@ -13,6 +13,7 @@ export const Lara = ({addMTEngine, error, isRequestInProgress}) => {
     formState: {errors},
   } = useForm()
 
+  const laraAccessKeyID = watch('lara-access-key-id')
   const laraLicense = watch('secret')
 
   const onSubmit = (data) => {
@@ -23,36 +24,52 @@ export const Lara = ({addMTEngine, error, isRequestInProgress}) => {
       <div className="add-provider-fields">
         <div className="provider-data provider-data-lara">
           <div className="provider-field">
-            <label>
-              Lara License<sup>*</sup>
-            </label>
-            <input
-              className="required"
-              type="text"
-              placeholder="Enter your license"
-              {...register('secret', {required: true})}
-            />
-            <div className="provider-license-label-with-icon">
-              <label>ModernMT License</label>
-              <Tooltip
-                content={
-                  <div>
-                    (Optional) Enter your ModernMT license to use your personal
-                    engine for language combinations not supported by Lara
-                  </div>
-                }
-              >
-                <div ref={infoIcon1}>
-                  <InfoIcon />
-                </div>
-              </Tooltip>
+            <div className="provider-field-row">
+              <label>
+                Lara Access key ID<sup>*</sup>
+              </label>
+              <input
+                className="required"
+                type="text"
+                placeholder="Enter your access key ID"
+                {...register('lara-access-key-id', {required: true})}
+              />
             </div>
-            <input
-              className="required"
-              type="text"
-              placeholder="Enter your license"
-              {...register('secretMt')}
-            />
+            <div className="provider-field-row">
+              <label>
+                Lara License<sup>*</sup>
+              </label>
+              <input
+                className="required"
+                type="text"
+                placeholder="Enter your license"
+                {...register('secret', {required: true})}
+              />
+            </div>
+            <div className="provider-field-row">
+              <div className="provider-license-label-with-icon">
+                <label>ModernMT License</label>
+                <Tooltip
+                  content={
+                    <div>
+                      (Optional) Enter your ModernMT license to use your
+                      personal engine for language combinations not supported by
+                      Lara
+                    </div>
+                  }
+                >
+                  <div ref={infoIcon1}>
+                    <InfoIcon />
+                  </div>
+                </Tooltip>
+              </div>
+              <input
+                className="required"
+                type="text"
+                placeholder="Enter your license"
+                {...register('mmt-license')}
+              />
+            </div>
             {errors.secret && (
               <span className="field-error">Required field</span>
             )}
@@ -61,7 +78,7 @@ export const Lara = ({addMTEngine, error, isRequestInProgress}) => {
             {error && <span className={'mt-error'}>{error.message}</span>}
             <button
               className="ui primary button"
-              disabled={isRequestInProgress || !laraLicense}
+              disabled={isRequestInProgress || !laraLicense || !laraAccessKeyID}
               onClick={handleSubmit(onSubmit)}
             >
               Confirm
