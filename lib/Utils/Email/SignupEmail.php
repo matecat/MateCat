@@ -20,7 +20,7 @@ class SignupEmail extends AbstractEmail {
      */
     private $user;
 
-    protected $title = 'Confirm your registration with MateCat';
+    protected $title = 'Confirm your registration with Matecat';
 
     public function __construct( \Users_UserStruct $user ) {
 

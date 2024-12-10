@@ -343,7 +343,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
       <div title={iconDetails.title} className="align-center tm-key-row-icons">
         {iconDetails.icon}
       </div>
-      {!isMMSharedKey && row.isActive && (
+      {!isMMSharedKey && isOwner && row.isActive && (
         <div className="align-center tm-row-penalty">{renderPenalty}</div>
       )}
       {!isMMSharedKey && isOwner ? (

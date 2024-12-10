@@ -439,10 +439,10 @@ const PreferencesModal = (props) => {
         </div>
         <br />
         <div className="user-link">
+          {resetPasswordHtml}
           <div id="logoutlink" className="pull-right" onClick={logoutFn}>
             Logout
           </div>
-          {resetPasswordHtml}
         </div>
       </div>
       <div className="user-info-attributes">

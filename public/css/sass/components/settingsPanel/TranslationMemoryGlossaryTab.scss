@@ -118,8 +118,11 @@
   }
 }
 
-.settings-panel-table:not(.translation-memory-glossary-tab-active-table) {
-  .settings-panel-row-content > :last-child {
+.settings-panel-table {
+  .settings-panel-row-content:not(.row-content-create-resource):not(
+      .row-content-default-memory
+    )
+    > :last-child {
     grid-column: 7;
   }
 }
@@ -394,8 +397,7 @@
   }
 
   .switch-container-outer {
-    width: 120px;
-    margin-right: 20px;
+    width: 155px;
   }
 }
 
