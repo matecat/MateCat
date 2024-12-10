@@ -303,7 +303,7 @@ export const TranslationMemoryGlossaryTab = () => {
               ? 'row-content-default-memory'
               : id === SPECIAL_ROWS_ID.addSharedResource ||
                   id === SPECIAL_ROWS_ID.newResource
-                ? 'row-content-create-resource'
+                ? 'settings-panel-row-active row-content-create-resource'
                 : '',
           node: !isCreateResourceRow ? (
             <TMKeyRow key={row.id} {...{row, onExpandRow}} />
