@@ -195,7 +195,7 @@ class catController extends viewController {
             ];
         }
 
-        $this->template->active_engine = Utils::escapeJsonEncode( $active_mt_engine_array );
+        $this->template->active_engine = $active_mt_engine_array;
 
         /*
          * array_unique cast EnginesModel_EngineStruct to string
@@ -380,7 +380,6 @@ class catController extends viewController {
 
         $this->template->mt_engines                            = $this->translation_engines;
         $this->template->translation_engines_intento_providers = Intento::getProviderList();
-        $this->template->translation_engines_intento_prov_json = Utils::escapeJsonEncode( Intento::getProviderList() );
 
         $this->template->not_empty_default_tm_key = !empty( INIT::$DEFAULT_TM_KEY );
 
@@ -412,7 +411,6 @@ class catController extends viewController {
         $this->template->maxTMXFileSize = INIT::$MAX_UPLOAD_TMX_FILE_SIZE;
 
         $this->template->tagLockCustomizable = ( INIT::$UNLOCKABLE_TAGS == true ) ? true : false;
-        $this->template->maxNumSegments      = INIT::$MAX_NUM_SEGMENTS;
         $this->template->copySourceInterval  = INIT::$COPY_SOURCE_INTERVAL;
 
         /*

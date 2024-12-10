@@ -1,6 +1,9 @@
 <?php
 
 use EnginesModel\DeepLStruct;
+use EnginesModel\LaraStruct;
+use Lara\LaraException;
+use Utils\Engines\Lara;
 use Validator\DeepLValidator;
 
 /**
@@ -21,7 +24,7 @@ class engineController extends ajaxController {
             'add', 'delete', 'execute'
     ];
     private static $allowed_execute_functions = [
-            // 'letsmt' => [ 'getTermList' ] // letsmt no longer requires this function. it's left as an example
+        // 'letsmt' => [ 'getTermList' ] // letsmt no longer requires this function. it's left as an example
     ];
 
     public function __construct() {
@@ -126,7 +129,7 @@ class engineController extends ajaxController {
                 $newEngineStruct->extra_parameters[ 'DeepL-Auth-Key' ] = $this->engineData[ 'client_id' ];
 
                 try {
-                    DeepLValidator::validate($newEngineStruct);
+                    DeepLValidator::validate( $newEngineStruct );
                 } catch ( Exception $e ) {
                     $this->result[ 'errors' ][] = [ 'code' => $e->getCode(), 'message' => $e->getMessage() ];
 
@@ -143,11 +146,11 @@ class engineController extends ajaxController {
                  */
                 $newEngineStruct = EnginesModel_MicrosoftHubStruct::getStruct();
 
-                $newEngineStruct->name                                = $this->name;
-                $newEngineStruct->uid                                 = $this->user->uid;
-                $newEngineStruct->type                                = Constants_Engines::MT;
-                $newEngineStruct->extra_parameters[ 'client_id' ]     = $this->engineData[ 'client_id' ];
-                $newEngineStruct->extra_parameters[ 'category' ]      = $this->engineData[ 'category' ];
+                $newEngineStruct->name                            = $this->name;
+                $newEngineStruct->uid                             = $this->user->uid;
+                $newEngineStruct->type                            = Constants_Engines::MT;
+                $newEngineStruct->extra_parameters[ 'client_id' ] = $this->engineData[ 'client_id' ];
+                $newEngineStruct->extra_parameters[ 'category' ]  = $this->engineData[ 'category' ];
                 break;
 
             case strtolower( Constants_Engines::APERTIUM ):
@@ -221,28 +224,43 @@ class engineController extends ajaxController {
 
                 break;
 
-            case strtolower(Constants_Engines::INTENTO):
+            case strtolower( Constants_Engines::INTENTO ):
                 /**
                  * Create a record of type Intento
                  */
-                $newEngineStruct = EnginesModel_IntentoStruct::getStruct();
-                $newEngineStruct->name                                 = $this->name;
-                $newEngineStruct->uid                                  = $this->user->uid;
-                $newEngineStruct->type                                 = Constants_Engines::MT;
-                $newEngineStruct->extra_parameters['apikey']           = $this->engineData['secret'];
-                $newEngineStruct->extra_parameters['provider']         = $this->engineData['provider'];
-                $newEngineStruct->extra_parameters['providerkey']      = $this->engineData['providerkey'];
-                $newEngineStruct->extra_parameters['providercategory'] = $this->engineData['providercategory'];
+                $newEngineStruct                                         = EnginesModel_IntentoStruct::getStruct();
+                $newEngineStruct->name                                   = $this->name;
+                $newEngineStruct->uid                                    = $this->user->uid;
+                $newEngineStruct->type                                   = Constants_Engines::MT;
+                $newEngineStruct->extra_parameters[ 'apikey' ]           = $this->engineData[ 'secret' ];
+                $newEngineStruct->extra_parameters[ 'provider' ]         = $this->engineData[ 'provider' ];
+                $newEngineStruct->extra_parameters[ 'providerkey' ]      = $this->engineData[ 'providerkey' ];
+                $newEngineStruct->extra_parameters[ 'providercategory' ] = $this->engineData[ 'providercategory' ];
+                break;
+
+            case strtolower( Constants_Engines::LARA ):
+                /**
+                 * Create a record of type Lara
+                 */
+                $newEngineStruct = LaraStruct::getStruct();
+
+                $newEngineStruct->name                                       = $this->name;
+                $newEngineStruct->uid                                        = $this->user->uid;
+                $newEngineStruct->type                                       = Constants_Engines::MT;
+                $newEngineStruct->extra_parameters[ 'Lara-AccessKeyId' ]     = $this->engineData[ 'lara-access-key-id' ];
+                $newEngineStruct->extra_parameters[ 'Lara-AccessKeySecret' ] = $this->engineData[ 'secret' ];
+                $newEngineStruct->extra_parameters[ 'MMT-License' ]          = $this->engineData[ 'mmt-license' ];
+
                 break;
 
             default:
 
                 // MMT
                 $validEngine = $newEngineStruct = $this->featureSet->filter( 'buildNewEngineStruct', false, (object)[
-                    'featureSet'   => $this->featureSet,
-                    'providerName' => $this->provider,
-                    'logged_user'  => $this->user,
-                    'engineData'   => $this->engineData
+                        'featureSet'   => $this->featureSet,
+                        'providerName' => $this->provider,
+                        'logged_user'  => $this->user,
+                        'engineData'   => $this->engineData
                 ] );
                 break;
 
@@ -261,7 +279,7 @@ class engineController extends ajaxController {
 
         if ( array_search( $newEngineStruct->class_load, $engineList ) ) {
             $newEngineStruct->active = true;
-            $newCreatedDbRowStruct = $engineDAO->create( $newEngineStruct );
+            $newCreatedDbRowStruct   = $engineDAO->create( $newEngineStruct );
             $this->destroyUserEnginesCache();
         }
 
@@ -311,6 +329,23 @@ class engineController extends ajaxController {
 
                 return;
             }
+        } elseif ( $newEngineStruct instanceof LaraStruct ) {
+
+            /**
+             * @var $newTestCreatedMT Lara
+             */
+            $newTestCreatedMT = Engine::createTempInstance( $newCreatedDbRowStruct );
+
+            try {
+                $newTestCreatedMT->getAvailableLanguages();
+            } catch ( LaraException $e ) {
+                $this->result[ 'errors' ][] = $e->getMessage();
+                $engineDAO->delete( $newCreatedDbRowStruct );
+                $this->destroyUserEnginesCache();
+
+                return;
+            }
+
         } else {
 
             try {
