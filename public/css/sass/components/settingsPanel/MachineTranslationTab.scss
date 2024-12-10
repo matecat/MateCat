@@ -125,6 +125,12 @@
       }
     }
   }
+
+  .provider-field-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
 }
 .machine-translation-tab-table-title {
   display: flex;
@@ -200,12 +206,15 @@
   .provider-license-label-with-icon {
     display: flex;
     gap: 5px;
-    margin-top: 15px;
   }
 
   .provider-data-lara {
     .button {
-      margin-top: 135px !important;
+      margin-top: 62px !important;
+    }
+
+    .provider-field {
+      gap: 15px !important;
     }
   }
 }

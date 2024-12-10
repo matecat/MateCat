@@ -34,7 +34,6 @@ export const MachineTranslationTab = () => {
   const {
     mtEngines,
     setMtEngines,
-    openLoginModal,
     modifyingCurrentTemplate,
     currentProjectTemplate,
     projectTemplates,
