@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4879d1c070ae9d3f12f01f7c31efd172",
+    "content-hash": "c107c1842a725b53940e15bd728aa088",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -3978,6 +3978,50 @@
                 }
             ],
             "time": "2024-11-10T20:33:58+00:00"
+        },
+        {
+            "name": "translated/lara-sdk",
+            "version": "1.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/translated/lara-php.git",
+                "reference": "acd4a794550f25b65dc5dd33e75444d347a4c3b4"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/translated/lara-php/zipball/acd4a794550f25b65dc5dd33e75444d347a4c3b4",
+                "reference": "acd4a794550f25b65dc5dd33e75444d347a4c3b4",
+                "shasum": ""
+            },
+            "require": {
+                "ext-curl": "*",
+                "ext-json": "*",
+                "php": ">=5.6.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Lara\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Translated",
+                    "email": "info@translated.com",
+                    "homepage": "https://translated.com/"
+                }
+            ],
+            "description": "Official Lara SDK for PHP",
+            "homepage": "https://github.com/translated/lara-php",
+            "support": {
+                "issues": "https://github.com/translated/lara-php/issues",
+                "source": "https://github.com/translated/lara-php/tree/v1.0.1"
+            },
+            "time": "2024-12-03T21:47:29+00:00"
         }
     ],
     "packages-dev": [
@@ -6319,7 +6363,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {},
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
@@ -6340,6 +6384,6 @@
         "ext-iconv": "*",
         "ext-openssl": "*"
     },
-    "platform-dev": [],
+    "platform-dev": {},
     "plugin-api-version": "2.6.0"
 }
