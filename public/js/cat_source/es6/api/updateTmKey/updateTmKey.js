@@ -8,12 +8,13 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  * @param {string} options.description
  * @returns {Promise<object>}
  */
-export const updateTmKey = async ({key, description}) => {
+export const updateTmKey = async ({key, description, penalty}) => {
   const paramsData = {
     action: 'userKeys',
     exec: 'update',
     key,
     description,
+    penalty,
   }
   const formData = new FormData()
 

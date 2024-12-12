@@ -63,6 +63,7 @@ export const SCHEMA_KEYS = {
   sourceLanguage: 'source_language',
   subject: 'subject',
   targetLanguage: 'target_language',
+  tmPrioritization: 'tm_prioritization',
 }
 
 function useProjectTemplates(tmKeys, isCattool = config.is_cattool) {

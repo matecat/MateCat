@@ -63,7 +63,6 @@
 
   &.align-center {
     text-align: center;
-    padding: 0;
   }
 }
 
@@ -77,7 +76,7 @@
 
 .settings-panel-row-drag-handle {
   position: absolute;
-  margin-left: 8px;
+  margin-left: 15px;
   margin-top: 8px;
   cursor: move;
   border: 2px dotted #ccc;
