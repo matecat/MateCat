@@ -181,8 +181,8 @@ const SegmentUtils = {
     const afterElements = segments.slice(segmentIndex + 1, afterEndIndex)
 
     return {
-      contextListBefore: beforeElements.map((segment) => segment.translation),
-      contextListAfter: afterElements.map((segment) => segment.translation),
+      contextListBefore: beforeElements.map((segment) => segment.segment),
+      contextListAfter: afterElements.map((segment) => segment.segment),
     }
   },
   createSetTranslationRequest: (segment, status, propagate = false) => {
@@ -195,8 +195,6 @@ const SegmentUtils = {
       translation = SegmentUtils.collectSplittedTranslations(sid)
       segmentSource = SegmentUtils.collectSplittedTranslations(sid, '.source')
     }
-    const {contextListBefore, contextListAfter} =
-      SegmentUtils.getSegmentContext(sid)
     if (
       !idBefore &&
       !idAfter &&
@@ -243,12 +241,6 @@ const SegmentUtils = {
         segment.contributions && !config.isReview
           ? JSON.stringify(segment.contributions.matches)
           : undefined,
-      contextListBefore: contextListBefore
-        ? JSON.stringify(contextListBefore)
-        : '[]',
-      contextListAfter: contextListAfter
-        ? JSON.stringify(contextListAfter)
-        : '[]',
     }
   },
   /**

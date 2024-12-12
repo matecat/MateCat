@@ -22,6 +22,8 @@ export const getContributions = async ({
   password = config.password,
   idClient = config.id_client,
   currentPassword = config.currentPassword,
+  contextListBefore,
+  contextListAfter,
 }) => {
   const contextBefore = UI.getContextBefore(idSegment)
   const idBefore = UI.getIdBefore(idSegment)
@@ -44,6 +46,8 @@ export const getContributions = async ({
     id_client: idClient,
     cross_language: crossLanguages,
     current_password: currentPassword,
+    contextListBefore,
+    contextListAfter,
   }
   const dataParams = Object.fromEntries(
     Object.entries(obj).filter(([_, v]) => v != null),
