@@ -167,6 +167,24 @@ const SegmentUtils = {
     })
     return statuses
   },
+  getSegmentContext: (sid) => {
+    const segments = SegmentStore.getAllSegments()
+    const segmentIndex = SegmentStore.getSegmentIndex(sid)
+    if (segmentIndex === -1) {
+      throw new Error('Segment not found.')
+    }
+
+    const beforeStartIndex = Math.max(0, segmentIndex - 5)
+    const beforeElements = segments.slice(beforeStartIndex, segmentIndex)
+
+    const afterEndIndex = Math.min(segments.length, segmentIndex + 3)
+    const afterElements = segments.slice(segmentIndex + 1, afterEndIndex)
+
+    return {
+      contextListBefore: beforeElements.map((segment) => segment.translation),
+      contextListAfter: afterElements.map((segment) => segment.translation),
+    }
+  },
   createSetTranslationRequest: (segment, status, propagate = false) => {
     let {translation, segment: segmentSource, original_sid: sid} = segment
     const contextBefore = UI.getContextBefore(sid)
@@ -177,6 +195,8 @@ const SegmentUtils = {
       translation = SegmentUtils.collectSplittedTranslations(sid)
       segmentSource = SegmentUtils.collectSplittedTranslations(sid, '.source')
     }
+    const {contextListBefore, contextListAfter} =
+      SegmentUtils.getSegmentContext(sid)
     if (
       !idBefore &&
       !idAfter &&
@@ -223,6 +243,12 @@ const SegmentUtils = {
         segment.contributions && !config.isReview
           ? JSON.stringify(segment.contributions.matches)
           : undefined,
+      contextListBefore: contextListBefore
+        ? JSON.stringify(contextListBefore)
+        : '[]',
+      contextListAfter: contextListAfter
+        ? JSON.stringify(contextListAfter)
+        : '[]',
     }
   },
   /**
