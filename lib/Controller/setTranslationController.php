@@ -476,9 +476,8 @@ class setTranslationController extends ajaxController {
                     $propagationTotal = Translations_SegmentTranslationDao::propagateTranslation(
                             $TPropagation,
                             $this->chunk,
-                            $this->id_segment,
+                            (int)$this->id_segment,
                             $this->project,
-                            $this->VersionsHandler
                     );
                 }
 
