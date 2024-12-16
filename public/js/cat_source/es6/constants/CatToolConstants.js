@@ -7,7 +7,6 @@ const CatToolConstants = keyMirror({
   SET_SEGMENT_FILTER: null,
   CLOSE_SEARCH: null,
   RELOAD_SEGMENT_FILTER: null,
-  SHOW_PROFILE_MESSAGE_TOOLTIP: null,
   STORE_FILES_INFO: null,
   SET_PROGRESS: null,
   UPDATE_QR: null,
