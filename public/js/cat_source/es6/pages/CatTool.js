@@ -36,6 +36,10 @@ import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper
 import SseListener from '../sse/SseListener'
 import Speech2Text from '../utils/speech2text'
 import {initTagSignature} from '../components/segments/utils/DraftMatecatUtils/tagModel'
+import {
+  ONBOARDING_PAGE,
+  OnboardingTooltips,
+} from '../components/header/OnboardingTooltips'
 
 const urlParams = new URLSearchParams(window.location.search)
 const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
@@ -490,6 +494,11 @@ function CatTool() {
           languagesArray={supportedLanguages}
         />
       )}
+      <OnboardingTooltips
+        show={isUserLogged && userInfo.user}
+        continous={true}
+        page={ONBOARDING_PAGE.CATTOOL}
+      />
     </>
   )
 }
