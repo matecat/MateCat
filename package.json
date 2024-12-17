@@ -86,7 +86,7 @@
     "sass-loader": "16.0.3",
     "style-loader": "4.0.0",
     "undici": "^5.28.2",
-    "webpack": "5.96.1",
+    "webpack": "5.97.1",
     "webpack-bundle-analyzer": "^4.10.2",
     "webpack-cli": "5.1.4",
     "webpack-concat-files-plugin": "^0.5.2",
@@ -95,5 +95,5 @@
   "resolutions": {
     "wrap-ansi": "^7.0.0"
   },
-  "version": "3.0.27"
+  "version": "3.0.31"
 }

@@ -49,7 +49,7 @@ class XliffConfigTemplateDao extends DataAccess_AbstractDao {
         $default              = new XliffConfigTemplateStruct();
         $default->id          = 0;
         $default->uid         = $uid;
-        $default->name        = "default";
+        $default->name        = "Matecat original settings";
         $default->created_at  = date( "Y-m-d H:i:s" );
         $default->modified_at = date( "Y-m-d H:i:s" );
 
