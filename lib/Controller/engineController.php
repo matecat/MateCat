@@ -244,7 +244,6 @@ class engineController extends ajaxController {
                  */
                 $newEngineStruct = LaraStruct::getStruct();
 
-                $newEngineStruct->name                                       = $this->name;
                 $newEngineStruct->uid                                        = $this->user->uid;
                 $newEngineStruct->type                                       = Constants_Engines::MT;
                 $newEngineStruct->extra_parameters[ 'Lara-AccessKeyId' ]     = $this->engineData[ 'lara-access-key-id' ];
@@ -360,11 +359,12 @@ class engineController extends ajaxController {
 
         }
 
-        $this->result[ 'data' ][ 'id' ]          = $newCreatedDbRowStruct->id;
-        $this->result[ 'data' ][ 'name' ]        = $newCreatedDbRowStruct->name;
-        $this->result[ 'data' ][ 'description' ] = $newCreatedDbRowStruct->description;
-        $this->result[ 'data' ][ 'type' ]        = $newCreatedDbRowStruct->type;
-        $this->result[ 'data' ][ 'engine_type' ] = $newCreatedDbRowStruct->class_load;
+        $engine_type = explode("\\", $newCreatedDbRowStruct->class_load);
+        $this->result['data']['id'] = $newCreatedDbRowStruct->id;
+        $this->result['data']['name'] = $newCreatedDbRowStruct->name;
+        $this->result['data']['description'] = $newCreatedDbRowStruct->description;
+        $this->result['data']['type'] = $newCreatedDbRowStruct->type;
+        $this->result['data']['engine_type'] = array_pop($engine_type);
     }
 
     /**

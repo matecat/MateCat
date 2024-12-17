@@ -186,12 +186,13 @@ class catController extends viewController {
 
         $active_mt_engine_array = [];
         if ( !empty( $active_mt_engine ) ) {
+            $engine_type = explode("\\", $active_mt_engine[ 0 ]->class_load);
             $active_mt_engine_array = [
                     "id"          => $active_mt_engine[ 0 ]->id,
                     "name"        => $active_mt_engine[ 0 ]->name,
                     "type"        => $active_mt_engine[ 0 ]->type,
                     "description" => $active_mt_engine[ 0 ]->description,
-                    'engine_type' => ( $active_mt_engine[ 0 ]->class_load === 'MyMemory' ? 'MMTLite' : $active_mt_engine[ 0 ]->class_load ),
+                    'engine_type' => ( $active_mt_engine[ 0 ]->class_load === 'MyMemory' ? 'MMTLite' : array_pop($engine_type) ),
             ];
         }
 
