@@ -53,6 +53,26 @@ class Engines_DeepL extends Engines_AbstractEngine {
             $source = explode( "-", $_config[ 'source' ] );
             $target = explode( "-", $_config[ 'target' ] );
 
+            $extraParams = $this->getEngineRecord()->extra_parameters;
+
+            if ( !isset( $extraParams[ 'DeepL-Auth-Key' ] ) ) {
+                throw new Exception( "DeepL API key not set" );
+            }
+
+            // glossaries (only for DeepL)
+            $metadataDao     = new Projects_MetadataDao();
+            $deepLFormality  = $metadataDao->get( $_config[ 'project_id' ], 'deepl_formality', 86400 );
+            $deepLIdGlossary = $metadataDao->get( $_config[ 'project_id' ], 'deepl_id_glossary', 86400 );
+
+            if ( $deepLFormality !== null ) {
+                $_config[ 'formality' ] = $deepLFormality->value;
+            }
+
+            if ( $deepLIdGlossary !== null ) {
+                $_config[ 'idGlossary' ] = $deepLIdGlossary->value;
+            }
+            // glossaries (only for DeepL)
+
             $parameters = [
                 'text' => [
                     $_config['segment'],
@@ -64,7 +84,7 @@ class Engines_DeepL extends Engines_AbstractEngine {
             ];
 
             $headers = [
-                    'Authorization: DeepL-Auth-Key ' . $this->apiKey,
+                    'Authorization: DeepL-Auth-Key ' . $extraParams[ 'DeepL-Auth-Key' ],
                     'Content-Type: application/json'
             ];
 

@@ -27,6 +27,11 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
     protected $_skipAnalysis = false;
 
     /**
+     * @var bool True if the engine can receive contributions through a `set/update` method.
+     */
+    protected bool $_isAdaptive = false;
+
+    /**
      * @var bool
      */
     protected $logging      = true;
@@ -281,6 +286,10 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
      */
     public function getEngineRow() {
         return clone $this->engineRecord;
+    }
+
+    public function isAdaptive(): bool {
+        return $this->_isAdaptive;
     }
 
     /**

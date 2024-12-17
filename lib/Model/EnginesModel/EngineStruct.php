@@ -69,7 +69,7 @@ class EnginesModel_EngineStruct
 
 
     /**
-     * @var array
+     * @var array|string
      */
     public $extra_parameters;
 
@@ -186,7 +186,7 @@ class EnginesModel_EngineStruct
             return $this->extra_parameters;
         }
 
-        if ( empty( $this->extra_parameters ) or $this->extra_parameters === null ) {
+        if ( empty( $this->extra_parameters ) ) {
             return [];
         }
 
