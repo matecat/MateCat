@@ -46,8 +46,8 @@ export const getContributions = async ({
     id_client: idClient,
     cross_language: crossLanguages,
     current_password: currentPassword,
-    contextListBefore,
-    contextListAfter,
+    context_list_before: contextListBefore,
+    context_list_after: contextListAfter,
   }
   const dataParams = Object.fromEntries(
     Object.entries(obj).filter(([_, v]) => v != null),

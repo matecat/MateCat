@@ -40,6 +40,7 @@
     "react-dom": "^18.0.0",
     "react-hook-form": "^7.45.4",
     "react-hotkeys-hook": "^4.5.0",
+    "react-joyride": "^2.9.3",
     "react-mentions": "^4.4.10",
     "react-tagsinput": "^3.19.0",
     "react-transition-group": "^4.2.2",
@@ -83,7 +84,7 @@
     "sass-loader": "16.0.3",
     "style-loader": "4.0.0",
     "undici": "^5.28.2",
-    "webpack": "5.96.1",
+    "webpack": "5.97.1",
     "webpack-cli": "5.1.4",
     "webpack-concat-files-plugin": "^0.5.2",
     "whatwg-fetch": "^3.6.20"
@@ -91,5 +92,5 @@
   "resolutions": {
     "wrap-ansi": "^7.0.0"
   },
-  "version": "3.0.29"
+  "version": "3.0.31"
 }

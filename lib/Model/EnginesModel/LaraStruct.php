@@ -28,7 +28,7 @@ class LaraStruct extends EnginesModel_EngineStruct {
     /**
      * @var string
      */
-    public $description = "Lara for subscribers, includes adaptive suggestions for entire documents, with TM usage optimization.";
+    public $description = "LLM-based machine translation that understands context and learns from previously translated content, delivering high-quality, nuanced translations.";
 
     /**
      * @var string
