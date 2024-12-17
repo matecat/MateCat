@@ -277,6 +277,7 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver {
          */
         $contributionMockQueueObject = @$this
             ->getMockBuilder( '\Contribution\ContributionSetStruct' )
+            ->onlyMethods(['getProp', 'getJobStruct'])
             ->getMock();
 
         $contributionMockQueueObject->expects( $this->once() )->method( 'getProp' );
