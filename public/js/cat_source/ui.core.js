@@ -489,7 +489,6 @@ window.UI = {
         if (typeof callback == 'function') {
           callback(data)
         }
-        UI.execSetTranslationTail()
         UI.setTranslation_success(data, options)
         //Review
         SegmentActions.setSegmentSaving(id_segment, false)
@@ -503,6 +502,7 @@ window.UI = {
         if (config.alternativesEnabled) {
           UI.getTranslationMismatches(id_segment)
         }
+        UI.execSetTranslationTail()
       })
       .catch(({errors}) => {
         const idSegment = options.id_segment

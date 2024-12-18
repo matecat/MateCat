@@ -8,33 +8,34 @@ const OfflineUtils = {
   offlineCacheRemaining: 20,
   checkingConnection: false,
   currentConnectionCountdown: null,
-  _backupEvents: null,
   abortedOperations: [],
 
   startOfflineMode: function () {
     if (!this.offline) {
-      this.offline = true
-      UI.body.attr('data-offline-mode', 'light-off')
+      checkConnectionPing().catch(() => {
+        this.offline = true
+        UI.body.attr('data-offline-mode', 'light-off')
 
-      const notification = {
-        uid: 'offline-counter',
-        title:
-          '<div class="message-offline-icons"><span class="icon-power-cord"/><span class="icon-power-cord2"/></div>No connection available',
-        text:
-          'You can still translate <span class="remainingSegments">' +
-          this.offlineCacheSize +
-          '</span> segments in offline mode. Do not refresh or you lose the segments!',
-        type: 'warning',
-        position: 'bl',
-        autoDismiss: false,
-        allowHtml: true,
-        timer: 7000,
-      }
-      CatToolActions.addNotification(notification)
+        const notification = {
+          uid: 'offline-counter',
+          title:
+            '<div class="message-offline-icons"><span class="icon-power-cord"/><span class="icon-power-cord2"/></div>No connection available',
+          text:
+            'You can still translate <span class="remainingSegments">' +
+            this.offlineCacheSize +
+            '</span> segments in offline mode. Do not refresh or you lose the segments!',
+          type: 'warning',
+          position: 'bl',
+          autoDismiss: false,
+          allowHtml: true,
+          timer: 7000,
+        }
+        CatToolActions.addNotification(notification)
 
-      this.checkingConnection = setInterval(() => {
-        this.checkConnection('Recursive Check authorized')
-      }, 5000)
+        this.checkingConnection = setInterval(() => {
+          this.checkConnection('Recursive Check authorized')
+        }, 5000)
+      })
     }
   },
 
@@ -60,21 +61,6 @@ const OfflineUtils = {
       this.currentConnectionCountdown = null
       this.checkingConnection = false
       UI.body.removeAttr('data-offline-mode')
-
-      $('.noConnectionMsg').text(
-        'The connection is back. Your last, interrupted operation has now been done.',
-      )
-
-      setTimeout(function () {
-        $('.noConnection').addClass('reConnection')
-        setTimeout(() => {
-          $('.noConnection, .noConnectionMsg').remove()
-          if (this._backupEvents) {
-            $._data($('body')[0]).events = this._backupEvents
-            this._backupEvents = null
-          }
-        }, 500)
-      }, 3000)
     }
   },
   failedConnection: function (reqArguments, operation) {
@@ -87,48 +73,6 @@ const OfflineUtils = {
       }
       this.abortedOperations.push(pendingConnection)
     }
-  },
-
-  activateOfflineCountdown: function (message) {
-    if (!this.offline) {
-      UI.body.find('.noConnection').remove()
-      return
-    }
-    if (UI.body.find('.noConnection').length === 0) {
-      UI.body.append('<div class="noConnection"></div>')
-    }
-    $('.noConnection').html(
-      '<div class="noConnectionMsg">' +
-        message +
-        '<br />' +
-        '<span class="reconnect">Trying to reconnect in <span class="countdown">30 seconds</span>.</span><br /><br />' +
-        '<input type="button" id="checkConnection" value="Try to reconnect now" /></div>',
-    )
-
-    //remove focus from the edit area
-    setTimeout(() => {
-      $('#checkConnection').focus()
-      this._backupEvents = $._data($('body')[0]).events
-      $._data($('body')[0]).events = {}
-    }, 300)
-
-    $('.noConnection #checkConnection').on('click', function () {
-      OfflineUtils.checkConnection('Click from Human Authorized')
-    })
-
-    CatToolActions.removeAllNotifications()
-    let timeleft = 30
-    let countdown = setInterval(() => {
-      if (timeleft === 0) {
-        this.checkConnection('Clear countdown authorized')
-        this.activateOfflineCountdown('Still no connection.')
-        clearInterval(countdown)
-        $('.noConnection #checkConnection').off('click')
-      } else {
-        timeleft--
-        $('.noConnectionMsg .countdown').text(timeleft + ' seconds')
-      }
-    }, 1000)
   },
   checkConnection: function (message) {
     console.log(message)
@@ -189,11 +133,6 @@ const OfflineUtils = {
     this.abortedOperations = []
   },
 
-  checkOfflineCacheSize: function () {
-    if (this.offlineCacheRemaining <= 0) {
-      this.activateOfflineCountdown('No connection available.')
-    }
-  },
   decrementOfflineCacheRemaining: function () {
     var notification = {
       uid: 'offline-counter',
@@ -210,13 +149,10 @@ const OfflineUtils = {
       timer: 7000,
     }
     CatToolActions.addNotification(notification)
-
-    this.checkOfflineCacheSize()
   },
   incrementOfflineCacheRemaining: function () {
     // reset counter by 1
     this.offlineCacheRemaining += 1
-    //$('#messageBar .remainingSegments').text( this.offlineCacheRemaining );
   },
 
   changeStatusOffline: function (sid) {
@@ -227,7 +163,6 @@ const OfflineUtils = {
       SegmentActions.removeClassToSegment(sid, 'status-rejected')
       SegmentActions.removeClassToSegment(sid, 'status-fixed')
       SegmentActions.removeClassToSegment(sid, 'status-rebutted')
-
       SegmentActions.addClassToSegment(sid, 'status-translated')
     }
   },
