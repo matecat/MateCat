@@ -527,7 +527,7 @@ class TMAnalysisWorker extends AbstractWorker {
         $_config[ 'context_before' ]    = $queueElement->params->context_before;
         $_config[ 'context_after' ]     = $queueElement->params->context_after;
         $_config[ 'additional_params' ] = @$queueElement->params->additional_params;
-        $_config[ 'tm_prioritization' ] = $queueElement->params->tm_prioritization ?? null;
+        $_config[ 'priority_key' ] = $queueElement->params->tm_prioritization ?? null;
 
         $jobsMetadataDao = new MetadataDao();
         $dialect_strict  = $jobsMetadataDao->get( $queueElement->params->id_job, $queueElement->params->password, 'dialect_strict', 10 * 60 );
@@ -556,7 +556,7 @@ class TMAnalysisWorker extends AbstractWorker {
             $_config['penalty_key'] = $penalty_key;
         }
 
-        $_config[ 'num_result' ] = 10;
+        $_config[ 'num_result' ] = 3;
 
         $id_mt_engine = $queueElement->params->id_mt_engine;
         $id_tms       = $queueElement->params->id_tms;
