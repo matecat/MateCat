@@ -66,7 +66,7 @@ class TmKeyManagement_ShareKeyEmail extends AbstractEmail {
     protected function _getLayoutVariables($messageBody = null): array {
         $vars = parent::_getLayoutVariables();
         $vars['showTitle'] = TRUE ;
-        $vars['title'] = "MateCat - Resource shared" ;
+        $vars['title'] = "Matecat - Resource shared" ;
 
         return $vars ;
     }
