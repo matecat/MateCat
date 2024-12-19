@@ -16,6 +16,13 @@ use TaskRunner\Exceptions\ReQueueException;
 class Engines_MyMemory extends Engines_AbstractEngine {
 
     /**
+     * @inheritdoc
+     * @see Engines_AbstractEngine::$_isAdaptive
+     * @var bool
+     */
+    protected bool $_isAdaptive = true;
+
+    /**
      * @var string
      */
     protected $content_type = 'json';

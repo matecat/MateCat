@@ -396,7 +396,7 @@ window.UI = {
                 fileSpecs.filerow,
                 fileSpecs.filesize,
                 fileSpecs.enforceConversion,
-                false
+                false,
               )
             }
           } else {
@@ -495,7 +495,13 @@ var progressBar = function (filerow, start, filesize) {
   }
 }
 
-var convertFile = function (fname, filerow, filesize, enforceConversion, restartedConversion) {
+var convertFile = function (
+  fname,
+  filerow,
+  filesize,
+  enforceConversion,
+  restartedConversion,
+) {
   console.log('Restarted conversion: ' + restartedConversion)
   console.log('Enforce conversion: ' + enforceConversion)
   enforceConversion =
@@ -532,7 +538,7 @@ var convertFile = function (fname, filerow, filesize, enforceConversion, restart
     segmentation_rule: UI.segmentationRule,
     filters_extraction_parameters_template_id: filtersTemplate?.id,
     signal,
-    restarted_conversion: restartedConversion
+    restarted_conversion: restartedConversion,
   })
     .then(function ({data, errors}) {
       filerow.removeClass('converting')

@@ -44,6 +44,7 @@ import {
   REVISE_STEP_NUMBER,
   SEGMENTS_STATUS,
 } from '../constants/Constants'
+import segment from '../components/segments/Segment'
 
 EventEmitter.prototype.setMaxListeners(0)
 
@@ -1135,11 +1136,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
   },
 
   getAllSegments: function () {
-    var result = []
-    $.each(this._segments, function (key, value) {
-      result = result.concat(value.toJS())
-    })
-    return result
+    return this._segments.toJS()
   },
   getSegmentById(sid) {
     return this._segments.find(function (seg) {
