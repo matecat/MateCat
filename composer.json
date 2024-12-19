@@ -20,7 +20,7 @@
         "defuse/php-encryption": "^2.4",
         "behat/transliterator": "^1.3",
         "swaggest/json-schema": "^0.12.42",
-        "symfony/console": "^5",
+        "symfony/console": "^7",
         "orhanerday/open-ai": "^4.7",
         "league/oauth2-linkedin": "^5.1",
         "stevenmaguire/oauth2-microsoft": "^2.2",
