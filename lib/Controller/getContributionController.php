@@ -162,7 +162,7 @@ class getContributionController extends ajaxController {
             $contributionRequest->tm_prioritization = $tm_prioritization->value == 1;
         }
 
-        //penalty_key
+        // penalty_key
         $penalty_key = [];
         $tmKeys = json_decode( $jobStruct->tm_keys, true );
 
