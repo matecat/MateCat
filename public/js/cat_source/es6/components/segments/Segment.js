@@ -1,5 +1,5 @@
 import {forEach, isUndefined} from 'lodash'
-import Immutable from 'immutable'
+import {fromJS} from 'immutable'
 import React from 'react'
 import {union} from 'lodash/array'
 
@@ -636,8 +636,8 @@ class Segment extends React.Component {
   shouldComponentUpdate(nextProps, nextState) {
     return (
       !nextProps.segImmutable.equals(this.props.segImmutable) ||
-      !Immutable.fromJS(nextState.segment_classes).equals(
-        Immutable.fromJS(this.state.segment_classes),
+      !fromJS(nextState.segment_classes).equals(
+        fromJS(this.state.segment_classes),
       ) ||
       nextState.autopropagated !== this.state.autopropagated ||
       nextState.readonly !== this.state.readonly ||

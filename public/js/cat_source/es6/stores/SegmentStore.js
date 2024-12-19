@@ -31,7 +31,7 @@
  */
 import {isUndefined, uniq, each} from 'lodash'
 import {EventEmitter} from 'events'
-import Immutable from 'immutable'
+import {fromJS} from 'immutable'
 import assign from 'object-assign'
 
 import AppDispatcher from './AppDispatcher'
@@ -73,7 +73,7 @@ const normalizeSetUpdateGlossary = (terms) => {
 }
 
 const SegmentStore = assign({}, EventEmitter.prototype, {
-  _segments: Immutable.fromJS([]),
+  _segments: fromJS([]),
   _globalWarnings: {
     lexiqa: [],
     matecat: {
@@ -92,7 +92,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     },
   },
   segmentsInBulk: [],
-  _footerTabsConfig: Immutable.fromJS({}),
+  _footerTabsConfig: fromJS({}),
   searchOccurrences: [],
   searchResultsDictionary: {},
   currentInSearch: 0,
@@ -112,16 +112,14 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
   updateAll: function (segments, where) {
     if (this._segments.size > 0 && where === 'before') {
       this._segments = this._segments.unshift(
-        ...Immutable.fromJS(this.normalizeSplittedSegments(segments)),
+        ...fromJS(this.normalizeSplittedSegments(segments)),
       )
     } else if (this._segments.size > 0 && where === 'after') {
       this._segments = this._segments.push(
-        ...Immutable.fromJS(this.normalizeSplittedSegments(segments)),
+        ...fromJS(this.normalizeSplittedSegments(segments)),
       )
     } else {
-      this._segments = Immutable.fromJS(
-        this.normalizeSplittedSegments(segments),
-      )
+      this._segments = fromJS(this.normalizeSplittedSegments(segments))
     }
 
     if (this.segmentsInBulk.length > 0) {
@@ -129,7 +127,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     }
   },
   removeAllSegments: function () {
-    this._segments = Immutable.fromJS([])
+    this._segments = fromJS([])
   },
   normalizeSplittedSegments: function (segments) {
     let newSegments = []
@@ -443,16 +441,10 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
       versions[0].translation == ''
     ) {
       // TODO Remove this if
-      this._segments = this._segments.setIn(
-        [index, 'versions'],
-        Immutable.fromJS([]),
-      )
+      this._segments = this._segments.setIn([index, 'versions'], fromJS([]))
       return this._segments.get(index)
     }
-    this._segments = this._segments.setIn(
-      [index, 'versions'],
-      Immutable.fromJS(versions),
-    )
+    this._segments = this._segments.setIn([index, 'versions'], fromJS(versions))
     return this._segments.get(index)
   },
   addSegmentPreloadedIssues(sid, issues) {
@@ -463,10 +455,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     versions.push({
       issues: issues,
     })
-    this._segments = this._segments.setIn(
-      [index, 'versions'],
-      Immutable.fromJS(versions),
-    )
+    this._segments = this._segments.setIn([index, 'versions'], fromJS(versions))
     return this._segments.get(index)
   },
   lockUnlockEditArea(sid) {
@@ -568,7 +557,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     if (index === -1) return
     this._segments = this._segments.setIn(
       [index, 'concordance'],
-      Immutable.fromJS(matches),
+      fromJS(matches),
     )
   },
   setContributionsToCache: function (sid, contributions, errors) {
@@ -576,7 +565,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     if (index === -1) return
     this._segments = this._segments.setIn(
       [index, 'contributions'],
-      Immutable.fromJS({
+      fromJS({
         matches: contributions,
         errors: errors,
       }),
@@ -590,7 +579,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     } else {
       this._segments = this._segments.setIn(
         [index, 'alternatives'],
-        Immutable.fromJS(alternatives),
+        fromJS(alternatives),
       )
     }
   },
@@ -629,7 +618,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
 
     this._segments = this._segments.setIn(
       [index, 'glossary'],
-      Immutable.fromJS(
+      fromJS(
         adaptedTerms.map((term) => ({
           ...term,
           missingTerm: glossary.find(({term_id}) => term_id === term.term_id)
@@ -651,7 +640,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
 
     this._segments = this._segments.setIn(
       [index, 'glossary_search_results'],
-      Immutable.fromJS(terms ? terms : segment.get('glossary')),
+      fromJS(terms ? terms : segment.get('glossary')),
     )
   },
   deleteFromGlossary: function (sid, term) {
@@ -665,7 +654,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     )
     this._segments = this._segments.setIn(
       [index, 'glossary'],
-      Immutable.fromJS(updatedGlossary),
+      fromJS(updatedGlossary),
     )
     this.setGlossarySearchToCache(sid)
   },
@@ -708,7 +697,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
 
     this._segments = this._segments.setIn(
       [index, isGlossaryAlreadyExist ? 'glossary' : 'pendingGlossaryUpdates'],
-      Immutable.fromJS(updatedGlossary),
+      fromJS(updatedGlossary),
     )
     this.setGlossarySearchToCache(sid, updatedGlossary)
   },
@@ -820,13 +809,10 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
   setSegmentWarnings(sid, warning, tagMismatch) {
     let index = this.getSegmentIndex(sid)
     if (index === -1) return
-    this._segments = this._segments.setIn(
-      [index, 'warnings'],
-      Immutable.fromJS(warning),
-    )
+    this._segments = this._segments.setIn([index, 'warnings'], fromJS(warning))
     this._segments = this._segments.setIn(
       [index, 'tagMismatch'],
-      Immutable.fromJS(tagMismatch),
+      fromJS(tagMismatch),
     )
   },
   setQACheck(sid, data) {
@@ -865,18 +851,15 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     if (type === 1) {
       this._segments = this._segments.setIn(
         [index, 'lexiqa', 'source'],
-        Immutable.fromJS(matches),
+        fromJS(matches),
       )
     } else if (type === 2) {
       this._segments = this._segments.setIn(
         [index, 'lexiqa', 'target'],
-        Immutable.fromJS(matches),
+        fromJS(matches),
       )
     } else {
-      this._segments = this._segments.setIn(
-        [index, 'lexiqa'],
-        Immutable.fromJS(matches),
-      )
+      this._segments = this._segments.setIn([index, 'lexiqa'], fromJS(matches))
     }
   },
   updateGlobalWarnings: function (warnings) {

@@ -1,5 +1,5 @@
 import React from 'react'
-import Immutable from 'immutable'
+import {fromJS} from 'immutable'
 import {isEmpty} from 'lodash'
 import {debounce} from 'lodash/function'
 import ReactDOM, {flushSync} from 'react-dom'
@@ -467,8 +467,8 @@ class Dashboard extends React.Component {
         {this.state.selectedTeam && this.state.teams ? (
           <ProjectsContainer
             downloadTranslationFn={this.downloadTranslation}
-            teams={Immutable.fromJS(this.state.teams)}
-            team={Immutable.fromJS(this.state.selectedTeam)}
+            teams={fromJS(this.state.teams)}
+            team={fromJS(this.state.selectedTeam)}
             selectedUser={this.state.selectedUser}
             fetchingProjects={this.state.fetchingProjects}
           />
