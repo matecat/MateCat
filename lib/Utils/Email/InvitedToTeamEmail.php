@@ -24,7 +24,7 @@ class InvitedToTeamEmail extends AbstractEmail {
         $this->user          = $user;
         $this->invited_email = $invited_email;
         $this->team          = $team;
-        $this->title         = "You've been invited to MateCat";
+        $this->title         = "You've been invited to Matecat";
 
         $this->_setLayout( 'skeleton.html' );
         $this->_setTemplate( 'Team/email_invited_to_team.html' );

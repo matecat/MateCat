@@ -97,7 +97,7 @@ class ActivityLogDecorator {
         foreach( $rawContent as $k => $value ){
 
             // This filter allows our support team at matecat.com to have their email addresses
-            // replaced by a "MateCat Support Team" tag.
+            // replaced by a "Matecat Support Team" tag.
             $value = $this->featureSet->filter('filterActivityLogEntry', $value);
 
             if( empty( $value->email ) ) {
