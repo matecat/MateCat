@@ -10,7 +10,7 @@
     "node-ini": "^1.0.0",
     "sse-channel": "^4.0.0",
     "stompit": "^1.0.0",
-    "uuid": "^10.0.0",
+    "uuid": "^11.0.0",
     "winston": "^3.3.3"
   },
   "devDependencies": {},
