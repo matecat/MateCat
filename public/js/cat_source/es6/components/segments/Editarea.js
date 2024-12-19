@@ -1,5 +1,5 @@
 import React, {createRef} from 'react'
-import Immutable from 'immutable'
+import {fromJS} from 'immutable'
 import {
   Modifier,
   Editor,
@@ -380,9 +380,7 @@ class Editarea extends React.Component {
       const lexiqaChanged =
         prevLexiqaTarget &&
         currentLexiqaTarget &&
-        !Immutable.fromJS(prevLexiqa.target).equals(
-          Immutable.fromJS(lexiqa.target),
-        )
+        !fromJS(prevLexiqa.target).equals(fromJS(lexiqa.target))
 
       if (
         //Condition to understand if the job has tm keys or if the check glossary request has been made (blacklist must take precedence over lexiqa)
@@ -414,8 +412,8 @@ class Editarea extends React.Component {
         (!prevProps ||
           !prevProps.segment.inSearch || //Before was not active
           (prevProps.segment.inSearch &&
-            !Immutable.fromJS(prevProps.segment.searchParams).equals(
-              Immutable.fromJS(this.props.segment.searchParams),
+            !fromJS(prevProps.segment.searchParams).equals(
+              fromJS(this.props.segment.searchParams),
             )) || //Before was active but some params change
           (prevProps.segment.inSearch &&
             prevProps.segment.currentInSearch !==

@@ -7,7 +7,7 @@ import FilterProjects from './manage/FilterProjects'
 import {ActionMenu} from './ActionMenu'
 import {UserMenu} from './UserMenu'
 import {ComponentExtendInterface} from '../../utils/ComponentExtendInterface'
-import Immutable from 'immutable'
+import {fromJS} from 'immutable'
 import {TeamDropdown} from './TeamDropdown'
 
 export class HeaderInterface extends ComponentExtendInterface {
@@ -57,7 +57,7 @@ const Header = ({
           </div>
           {showFilterProjects && (
             <div className="nine wide column">
-              <FilterProjects selectedTeam={Immutable.fromJS(selectedTeam)} />
+              <FilterProjects selectedTeam={fromJS(selectedTeam)} />
             </div>
           )}
 
