@@ -182,7 +182,7 @@ class ConversionHandler {
 
                     if ( !$res_insert ) {
                         //custom error message passed directly to JavaScript client and displayed as is
-                        $convertResult[ 'errorMessage' ] = "Error: File upload failed because you have MateCat running in multiple tabs. Please close all other MateCat tabs in your browser.";
+                        $convertResult[ 'errorMessage' ] = "Error: File upload failed because you have Matecat running in multiple tabs. Please close all other Matecat tabs in your browser.";
 
                         $this->result->changeCode( ConversionHandlerStatus::FILESYSTEM_ERROR );
                         $this->result->addError( $convertResult[ 'errorMessage' ], AbstractFilesStorage::basename_fix( $this->file_name ) );
