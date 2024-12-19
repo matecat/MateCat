@@ -4610,6 +4610,9 @@ header {
       &:hover,
       &.active {
         opacity: 1;
+        .menu {
+          visibility: visible;
+        }
       }
 
       /* Bug fix for Semantic UI Dropdown hover */
@@ -4642,11 +4645,11 @@ header {
         margin: 0 0 0 -1px;
         background: white;
         padding: 12px 8px;
-        top: 50px;
+        top: 50px !important;
         font-size: 16px;
         border-radius: 2px;
         border: solid 1px #cdd4de;
-
+        visibility: hidden;
         .item {
           padding: 0 !important;
           border-radius: 3px;
