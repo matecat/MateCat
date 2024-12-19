@@ -228,9 +228,11 @@ class updateJobKeysController extends ajaxController {
 
             // update tm_prioritization job metadata
             if($this->tm_prioritization !== null){
+                $tm_prioritization = $this->tm_prioritization == true ? "1" : "0";
                 $jobsMetadataDao = new Jobs\MetadataDao();
-                $jobsMetadataDao->set( $this->id_job, $this->job_pass, 'tm_prioritization', ($this->tm_prioritization == true ? "1" : "0") );
-
+                $jobsMetadataDao->set( $this->id_job, $this->job_pass, 'tm_prioritization', $tm_prioritization );
+                $jobsMetadataDao->destroyCacheByJobId( $this->id_job, 'tm_prioritization' );
+                $jobsMetadataDao->destroyCacheByJobAndPassword( $this->id_job, $this->job_pass );
             }
 
             $this->result[ 'data' ] = 'OK';
