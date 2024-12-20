@@ -15,6 +15,7 @@ use INIT;
 use Lara\LaraApiException;
 use Lara\LaraCredentials;
 use Lara\LaraException;
+use Lara\TextBlock;
 use Lara\TranslateOptions;
 use Lara\Translator;
 use Log;
@@ -170,7 +171,20 @@ class Lara extends Engines_AbstractEngine {
             $translateOptions = new TranslateOptions();
             $translateOptions->setAdaptTo( $_lara_keys );
             $translateOptions->setPriority( $_config[ 'priority' ] );
-            $translation = $client->translate( $_config[ 'segment' ], $_config[ 'source' ], $_config[ 'target' ], $translateOptions );
+
+            $request_translation = [];
+
+            foreach ( $_config[ 'context_list_before' ] as $c ) {
+                $request_translation[] = new TextBlock( $c, false );
+            }
+
+            $request_translation[] = new TextBlock( $_config[ 'segment' ] );
+
+            foreach ( $_config[ 'context_list_after' ] as $c ) {
+                $request_translation[] = new TextBlock( $c, false );
+            }
+
+            $translation = $client->translate( $request_translation, $_config[ 'source' ], $_config[ 'target' ], $translateOptions );
         } else {
             // mmt fallback
             return $this->mmtUserFallback->get( $_config );
@@ -178,7 +192,7 @@ class Lara extends Engines_AbstractEngine {
 
         return ( new Engines_Results_MyMemory_Matches(
                 $_config[ 'segment' ],
-                $translation->getTranslation(),
+                $translation->getTranslation()[ 0 ]->getText(),
                 100 - $this->getPenalty() . "%",
                 "MT-" . $this->getName(),
                 date( "Y-m-d" )
