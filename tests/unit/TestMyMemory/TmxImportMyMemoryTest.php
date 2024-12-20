@@ -77,7 +77,7 @@ class TmxImportMyMemoryTest extends AbstractTest {
         /**
          * Importing
          */
-        $result = $engine_MyMemory->importMemory( $file_param, $key_param, $name_param );
+        $result = $engine_MyMemory->importMemory( $file_param, $key_param, new Users_UserStruct() );
 
 
         $this->assertTrue( $result instanceof Engines_Results_MyMemory_TmxResponse );
