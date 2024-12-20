@@ -424,6 +424,7 @@ class GetContributionWorker extends AbstractWorker {
         }
 
         if ( $contributionStruct->tm_prioritization !== null ) {
+
             $_config[ 'priority_key' ] = $contributionStruct->tm_prioritization;
         }
 
