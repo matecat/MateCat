@@ -198,7 +198,7 @@ const SocketListener = ({isAuthenticated, userId}) => {
 
   useEffect(() => {
     if (connectionState === ConnectionStates.OPEN) {
-      console.log('Connection opened')
+      // console.log('Connection opened')
     }
 
     if (connectionError) {

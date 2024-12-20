@@ -238,7 +238,7 @@ class downloadFileController extends downloadController {
 
                     if ( $fileType[ 'proprietary_short_name' ] === 'matecat_converter' ) {
                         // Set the XLIFF extension to .xlf
-                        // Internally, MateCat continues using .sdlxliff as default
+                        // Internally, Matecat continues using .sdlxliff as default
                         // extension for the XLIFF behind the projects.
                         // Changing this behavior requires a huge refactoring that
                         // it's scheduled for future versions.

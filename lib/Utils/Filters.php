@@ -295,7 +295,7 @@ class Filters {
         if ( $response[ 'successful' ] !== true ) {
 
             if ( INIT::$FILTERS_EMAIL_FAILURES ) {
-                Utils::sendErrMailReport( "MateCat: conversion failed.\n\n" . print_r( $info, true ) );
+                Utils::sendErrMailReport( "Matecat: conversion failed.\n\n" . print_r( $info, true ) );
             }
 
             self::backupFailedConversion( $sentFile );

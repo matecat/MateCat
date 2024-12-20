@@ -62,7 +62,7 @@ class Log {
         $fileHandler   = new StreamHandler( self::getFileNamePath() );
         $fileFormatter = new LineFormatter( "%message%\n", "", true, true );
         $fileHandler->setFormatter( $fileFormatter );
-        self::$logger = new Logger( 'MateCat', [ $fileHandler ] );
+        self::$logger = new Logger( 'Matecat', [ $fileHandler ] );
     }
 
     protected static function getFileNamePath() {

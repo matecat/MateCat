@@ -9,7 +9,7 @@ import React, {
   useState,
 } from 'react'
 import PropTypes from 'prop-types'
-import Immutable from 'immutable'
+import {fromJS} from 'immutable'
 import ReactDOMServer from 'react-dom/server'
 import {useHotkeys} from 'react-hotkeys-hook'
 import {Shortcuts} from '../../utils/shortcuts'
@@ -146,7 +146,7 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
 
   const {userInfo} = useContext(ApplicationWrapperContext)
 
-  const [segments, setSegments] = useState(Immutable.fromJS([]))
+  const [segments, setSegments] = useState(fromJS([]))
   const [rows, setRows] = useState([])
   const [essentialRows, setEssentialRows] = useState([])
   const [hasCachedRows, setHasCachedRows] = useState(false)

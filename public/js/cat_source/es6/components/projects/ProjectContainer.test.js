@@ -1,8 +1,8 @@
-import {render, screen, waitFor} from '@testing-library/react'
+import {render, screen} from '@testing-library/react'
 import React from 'react'
 import {createRoot} from 'react-dom/client'
 import ProjectContainer from './ProjectContainer'
-import Immutable from 'immutable'
+import {fromJS} from 'immutable'
 import {http, HttpResponse} from 'msw'
 
 import {mswServer} from '../../../../../mocks/mswServer'
@@ -349,9 +349,9 @@ const fakeProjectsData = {
 
 const getFakeProperties = (fakeProperties) => {
   const {data, dataTeam, dataTeams, props} = fakeProperties
-  const project = Immutable.fromJS(data)
-  const team = Immutable.fromJS(dataTeam)
-  const teams = Immutable.fromJS(dataTeams)
+  const project = fromJS(data)
+  const team = fromJS(dataTeam)
+  const teams = fromJS(dataTeams)
 
   return {
     project,

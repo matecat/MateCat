@@ -102,7 +102,7 @@ class ErrMailWorker extends AbstractWorker {
 
         }
 
-        $mail->XMailer = 'MateCat Mailer';
+        $mail->XMailer = 'Matecat Mailer';
         $mail->CharSet = 'UTF-8';
         $mail->isHTML();
 

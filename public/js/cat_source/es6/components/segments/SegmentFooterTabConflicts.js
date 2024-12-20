@@ -1,6 +1,6 @@
 import React from 'react'
 import {isUndefined, size} from 'lodash'
-import Immutable from 'immutable'
+import {fromJS} from 'immutable'
 
 import TextUtils from '../../utils/textUtils'
 import SegmentActions from '../../actions/SegmentActions'
@@ -143,8 +143,8 @@ class SegmentFooterTabConflicts extends React.Component {
         !isUndefined(this.props.segment.alternatives)) &&
         ((!isUndefined(nextProps.segment.alternatives) &&
           isUndefined(this.props.segment.alternatives)) ||
-          !Immutable.fromJS(this.props.segment.alternatives).equals(
-            Immutable.fromJS(nextProps.segment.alternatives),
+          !fromJS(this.props.segment.alternatives).equals(
+            fromJS(nextProps.segment.alternatives),
           )))
     )
   }

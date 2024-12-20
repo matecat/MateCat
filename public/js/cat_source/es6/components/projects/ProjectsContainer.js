@@ -6,12 +6,12 @@ import ManageConstants from '../../constants/ManageConstants'
 import ProjectsStore from '../../stores/ProjectsStore'
 import UserStore from '../../stores/UserStore'
 import ManageActions from '../../actions/ManageActions'
-import Immutable from 'immutable'
+import {fromJS} from 'immutable'
 class ProjectsContainer extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      projects: Immutable.fromJS([]),
+      projects: fromJS([]),
       more_projects: false,
       reloading_projects: false,
       team: this.props.team,
