@@ -62,36 +62,6 @@ class Mmt extends BaseFeature {
     }
 
     /**
-     * Called in @param                  $enginesList
-     *
-     * @param Users_UserStruct $userStruct
-     *
-     * @return mixed
-     * @throws Exception
-     * @see engineController::add()
-     *
-     * Only one MMT engine per user can be registered
-     *
-     */
-    public static function getAvailableEnginesListForUser( $enginesList, Users_UserStruct $userStruct ) {
-
-        $UserMetadataDao = new MetadataDao();
-        $engineEnabled   = $UserMetadataDao->get( $userStruct->uid, self::FEATURE_CODE );
-
-        if ( !empty( $engineEnabled ) ) {
-
-            $engine       = Engine::getInstance( $engineEnabled->value );
-            $engineRecord = $engine->getEngineRecord();
-
-            if ( $engineRecord->active == 1 ) {
-                unset( $enginesList[ Constants_Engines::MMT ] ); // remove the engine from the list of available engines like it was disabled, so it will not be created
-            }
-        }
-
-        return $enginesList;
-    }
-
-    /**
      * Called in @param EnginesModel_EngineStruct $newCreatedDbRowStruct
      *
      * @param Users_UserStruct $userStruct
@@ -170,25 +140,6 @@ class Mmt extends BaseFeature {
         }
 
         return $errorObject;
-    }
-
-    /**
-     * Called in @param EnginesModel_EngineStruct $engineStruct
-     * @throws Exception
-     * @see engineController::disable()
-     */
-    public static function postEngineDeletion( EnginesModel_EngineStruct $engineStruct ) {
-
-        $UserMetadataDao = new MetadataDao();
-        $engineEnabled   = $UserMetadataDao->setCacheTTL( 60 * 60 * 24 * 30 )->get( $engineStruct->uid, self::FEATURE_CODE );
-
-        if ( $engineStruct->class_load == Constants_Engines::MMT ) {
-
-            if ( !empty( $engineEnabled ) && $engineEnabled->value == $engineStruct->id /* redundant */ ) {
-                $UserMetadataDao->delete( $engineStruct->uid, self::FEATURE_CODE ); // delete the engine from user
-            }
-
-        }
     }
 
     /**
@@ -476,64 +427,6 @@ class Mmt extends BaseFeature {
                 Log::doJsonLog( $e->getTraceAsString() );
             }
 
-        }
-
-    }
-
-    /**
-     *
-     * @param TMSFile  $file
-     * @param          $user
-     *
-     * Called in @see \ProjectManager::_pushTMXToMyMemory()
-     * Called in @see \loadTMXController::doAction()
-     *
-     */
-    public function postPushTMX( TMSFile $file, $user ) {
-
-        //Project is not anonymous
-        if ( !empty( $user ) ) {
-
-            $uStruct = $user;
-            if ( !$uStruct instanceof Users_UserStruct ) {
-                $uStruct = ( new Users_UserDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->getByEmail( $user );
-            }
-
-            //retrieve OWNER MMT License
-            $ownerMmtEngineMetaData = ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->get( $uStruct->uid, self::FEATURE_CODE ); // engine_id
-            try {
-
-                if ( !empty( $ownerMmtEngineMetaData ) ) {
-
-                    /**
-                     * @var Engines_MMT $MMTEngine
-                     */
-                    $MMTEngine = Engine::getInstance( $ownerMmtEngineMetaData->value );
-
-                    //
-                    // ==============================================
-                    // Call MMT only if the tmx is already imported
-                    // over an existing key in MMT
-                    // ==============================================
-                    //
-
-                    $associatedMemories = $MMTEngine->getAllMemories();
-                    foreach ( $associatedMemories as $memory ) {
-
-                        if ( 'x_mm-' . trim( $file->getTmKey() ) === $memory[ 'externalId' ] ) {
-                            $fileName = AbstractFilesStorage::pathinfo_fix( $file->getFilePath(), PATHINFO_FILENAME );
-                            $result   = $MMTEngine->import( $file->getFilePath(), $file->getTmKey(), $fileName );
-
-                            if ( $result->responseStatus >= 400 ) {
-                                throw new Exception( $result->error->message );
-                            }
-                        }
-                    }
-                }
-
-            } catch ( Exception $e ) {
-                Log::doJsonLog( $e->getMessage() );
-            }
         }
 
     }

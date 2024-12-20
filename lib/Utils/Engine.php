@@ -51,9 +51,10 @@ class Engine {
     /**
      * @param EnginesModel_EngineStruct $engineRecord
      *
-     * @return Engines_AbstractEngine
+     * @return Engines_EngineInterface
+     * @throws Exception
      */
-    public static function createTempInstance( EnginesModel_EngineStruct $engineRecord ) {
+    public static function createTempInstance( EnginesModel_EngineStruct $engineRecord ): Engines_EngineInterface {
 
         $className = 'Engines_' . $engineRecord->class_load;
         if ( !class_exists( $className ) ) {

@@ -836,7 +836,7 @@ class setTranslationController extends ajaxController {
                             'id'       => $this->id_job,
                             'password' => $this->password
                     ] );
-        } else {
+        } elseif( $tte != 0 ) {
             Jobs_JobDao::updateFields(
                     [ 'total_time_to_edit' => $tte ],
                     [
