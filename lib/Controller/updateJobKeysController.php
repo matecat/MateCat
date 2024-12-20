@@ -233,6 +233,7 @@ class updateJobKeysController extends ajaxController {
                 $jobsMetadataDao->set( $this->id_job, $this->job_pass, 'tm_prioritization', $tm_prioritization );
                 $jobsMetadataDao->destroyCacheByJobId( $this->id_job, 'tm_prioritization' );
                 $jobsMetadataDao->destroyCacheByJobAndPassword( $this->id_job, $this->job_pass );
+                $jobsMetadataDao->destroyCacheByJobAndPasswordAndKey( $this->id_job, $this->job_pass, 'tm_prioritization'  );
             }
 
             $this->result[ 'data' ] = 'OK';
