@@ -309,11 +309,11 @@ const NewProject = () => {
   const closeSettings = useCallback(() => setOpenSettings({isOpen: false}), [])
 
   const selectedTeam = useMemo(() => {
-    const team =
-      userInfo?.teams?.find(({id}) => id === currentProjectTemplate?.idTeam) ??
-      {}
+    const team = userInfo?.teams?.find(
+      ({id}) => id === currentProjectTemplate?.idTeam,
+    )
 
-    return {...team, id: team.id?.toString()}
+    return team && {...team, id: team.id?.toString()}
   }, [userInfo?.teams, currentProjectTemplate?.idTeam])
   const setSelectedTeam = useCallback(
     ({id}) =>
@@ -827,7 +827,7 @@ const NewProject = () => {
                 isDisabled={
                   !isUserLogged ||
                   userInfo?.teams.length === 1 ||
-                  !projectTemplates.length
+                  isLoadingTemplates
                 }
                 onSelect={(option) => setSelectedTeam(option)}
               />
@@ -839,7 +839,8 @@ const NewProject = () => {
             <a
               id="swaplang"
               title="Swap languages"
-              {...(isUserLogged && {onClick: swapLanguages})}
+              {...(isUserLogged &&
+                !isLoadingTemplates && {onClick: swapLanguages})}
             >
               <span>Swap languages</span>
             </a>
@@ -859,7 +860,7 @@ const NewProject = () => {
                 activeOption={subject}
                 checkSpaceToReverse={false}
                 onSelect={(option) => setSubject(option)}
-                isDisabled={!isUserLogged}
+                isDisabled={!isUserLogged || isLoadingTemplates}
               />
             </div>
             {/*TM and glossary*/}
