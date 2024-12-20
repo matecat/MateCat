@@ -194,7 +194,6 @@ function useAuth() {
       // Trick for hubspot
       if (userInfo) CommonUtils.dispatchCustomEvent('userDataLoaded', userInfo)
     }
-    console.log('[ useAuth ] -> userInfo', userInfo)
   }, [userInfo])
 
   // Sync state userInfo with UserStore
