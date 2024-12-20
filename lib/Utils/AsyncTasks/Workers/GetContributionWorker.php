@@ -409,7 +409,7 @@ class GetContributionWorker extends AbstractWorker {
         $_config[ 'segment' ] = $contributionStruct->getContexts()->segment;
         $_config[ 'source' ]  = $jobStruct->source;
         $_config[ 'target' ]  = $targetLang;
-        $_config[ 'uid' ]     = ( $contributionStruct->user !== null ? $contributionStruct->user->uid : 0 );
+        $_config[ 'uid' ]     = $contributionStruct->getUser()->uid ?? 0;
 
         $_config[ 'email' ] = INIT::$MYMEMORY_API_KEY;
 
@@ -510,51 +510,18 @@ class GetContributionWorker extends AbstractWorker {
                 //if a callback is not set only the first argument is returned, get the config params from the callback
                 $config = $featureSet->filter( 'beforeGetContribution', $config, $mt_engine, $jobStruct );
 
-                $config[ 'segment' ]      = $contributionStruct->getContexts()->segment;
-                $config[ 'source' ]       = $jobStruct->source;
-                $config[ 'target' ]       = $jobStruct->target;
-                $config[ 'email' ]        = INIT::$MYMEMORY_API_KEY;
-                $config[ 'segid' ]        = $contributionStruct->segmentId;
-                $config[ 'job_id' ]       = $jobStruct->id;
-                $config[ 'job_password' ] = $jobStruct->password;
-                $config[ 'session' ]      = $contributionStruct->getSessionId();
-
-                if ( $mt_engine instanceof Engines_MMT ) {
-                    $metadataDao = new Projects_MetadataDao();
-                    $metadata    = $metadataDao->setCacheTTL( 86400 )->get( $contributionStruct->getProjectStruct()->id, 'mmt_glossaries' );
-
-                    if ( $metadata !== null ) {
-                        $metadata           = html_entity_decode( $metadata->value );
-                        $mmtGlossariesArray = json_decode( $metadata, true );
-
-                        $config[ 'glossaries' ]           = implode( ",", $mmtGlossariesArray[ 'glossaries' ] );
-                        $config[ 'ignore_glossary_case' ] = $mmtGlossariesArray[ 'ignore_glossary_case' ];
-                    }
-                }
-
-                // glossaries (only for DeepL)
-                if ( $mt_engine instanceof Engines_DeepL ) {
-
-                    $extraParams = $mt_engine->getEngineRecord()->extra_parameters;
-
-                    if ( !isset( $extraParams[ 'DeepL-Auth-Key' ] ) ) {
-                        throw new Exception( "DeepL API key not set" );
-                    }
-
-                    $metadataDao     = new Projects_MetadataDao();
-                    $deepLFormality  = $metadataDao->get( $contributionStruct->getProjectStruct()->id, 'deepl_formality', 86400 );
-                    $deepLIdGlossary = $metadataDao->get( $contributionStruct->getProjectStruct()->id, 'deepl_id_glossary', 86400 );
-
-                    if ( $deepLFormality !== null ) {
-                        $config[ 'formality' ] = $deepLFormality->value;
-                    }
-
-                    if ( $deepLIdGlossary !== null ) {
-                        $config[ 'idGlossary' ] = $deepLIdGlossary->value;
-                    }
-
-                    $mt_engine->setApiKey( $extraParams[ 'DeepL-Auth-Key' ] );
-                }
+                $config[ 'segment' ]             = $contributionStruct->getContexts()->segment;
+                $config[ 'source' ]              = $jobStruct->source;
+                $config[ 'target' ]              = $jobStruct->target;
+                $config[ 'email' ]               = INIT::$MYMEMORY_API_KEY;
+                $config[ 'segid' ]               = $contributionStruct->segmentId;
+                $config[ 'job_id' ]              = $jobStruct->id;
+                $config[ 'job_password' ]        = $jobStruct->password;
+                $config[ 'session' ]             = $contributionStruct->getSessionId();
+                $config[ 'all_job_tm_keys' ]     = $jobStruct->tm_keys;
+                $config[ 'project_id' ]          = $contributionStruct->getProjectStruct()->id;
+                $config[ 'context_list_before' ] = $contributionStruct->context_list_before;
+                $config[ 'context_list_after' ]  = $contributionStruct->context_list_after;
 
                 $mt_result = $mt_engine->get( $config );
             }

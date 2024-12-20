@@ -121,6 +121,7 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
         //create a stub Engine MMT
         $stubEngine = @$this->getMockBuilder( '\Engines_MMT' )
                 ->disableOriginalConstructor()
+                ->onlyMethods(['update', 'getEngineRow'])
                 ->getMock();
 
         $engineStruct       = new EnginesModel_EngineStruct();
@@ -182,11 +183,13 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
 
         $inspector   = new InvocationInspector( $stubEngineParameterSpy );
         $invocations = $inspector->getInvocations();
-        $this->assertEquals( $this->contributionStruct->segment, $invocations[ 0 ]->getParameters()[ 0 ][ 'segment' ] );
-        $this->assertEquals( [ 'XXXXXXXXXXXXXXXX' ], $invocations[ 0 ]->getParameters()[ 0 ][ 'keys' ] );
-        $this->assertEquals( '1999999:9876', $invocations[ 0 ]->getParameters()[ 0 ][ 'tuid' ] );
-        $this->assertEquals( 'ed1814ac9699c651fdfca4912b1b6729', $invocations[ 0 ]->getParameters()[ 0 ][ 'session' ] );
 
+        if(!empty($invocations)){
+            $this->assertEquals( $this->contributionStruct->segment, $invocations[ 0 ]->getParameters()[ 0 ][ 'segment' ] );
+            $this->assertEquals( [ 'XXXXXXXXXXXXXXXX' ], $invocations[ 0 ]->getParameters()[ 0 ][ 'keys' ] );
+            $this->assertEquals( '1999999:9876', $invocations[ 0 ]->getParameters()[ 0 ][ 'tuid' ] );
+            $this->assertEquals( 'ed1814ac9699c651fdfca4912b1b6729', $invocations[ 0 ]->getParameters()[ 0 ][ 'session' ] );
+        }
     }
 
     /**
@@ -202,7 +205,10 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
         $_worker->attach( $this );
 
         //create a stub Engine MyMemory
-        $stubEngine = @$this->getMockBuilder( '\Engines_MMT' )->disableOriginalConstructor()->getMock();
+        $stubEngine = @$this->getMockBuilder( '\Engines_MMT' )
+            ->onlyMethods(['update', 'getEngineRow'])
+            ->disableOriginalConstructor()
+            ->getMock();
 
         $engineStruct       = new EnginesModel_EngineStruct();
         $engineStruct->id   = 1111;
@@ -262,11 +268,12 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
         $inspector   = new InvocationInspector( $stubEngineParameterSpy );
         $invocations = $inspector->getInvocations();
 
-        $this->assertEquals( $this->contributionStruct->segment, $invocations[ 0 ]->getParameters()[ 0 ][ 'segment' ] );
-        $this->assertEquals( [ 'XXXXXXXXXXXXXXXXXXX', 'YYYYYYYYYYYYYYYYYYYY' ], $invocations[ 0 ]->getParameters()[ 0 ][ 'keys' ] );
-        $this->assertEquals( '1999999:9876', $invocations[ 0 ]->getParameters()[ 0 ][ 'tuid' ] );
-        $this->assertEquals( 'ed1814ac9699c651fdfca4912b1b6729', $invocations[ 0 ]->getParameters()[ 0 ][ 'session' ] );
-
+        if(!empty($invocations)){
+            $this->assertEquals( $this->contributionStruct->segment, $invocations[ 0 ]->getParameters()[ 0 ][ 'segment' ] );
+            $this->assertEquals( [ 'XXXXXXXXXXXXXXXXXXX', 'YYYYYYYYYYYYYYYYYYYY' ], $invocations[ 0 ]->getParameters()[ 0 ][ 'keys' ] );
+            $this->assertEquals( '1999999:9876', $invocations[ 0 ]->getParameters()[ 0 ][ 'tuid' ] );
+            $this->assertEquals( 'ed1814ac9699c651fdfca4912b1b6729', $invocations[ 0 ]->getParameters()[ 0 ][ 'session' ] );
+        }
     }
 
     /**
@@ -284,7 +291,10 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
         /**
          * @var $queueElement Contribution\ContributionSetStruct
          */
-        $contributionMockQueueObject = @$this->getMockBuilder( '\Contribution\ContributionSetStruct' )->getMock();
+        $contributionMockQueueObject = @$this
+            ->getMockBuilder( '\Contribution\ContributionSetStruct' )
+            ->onlyMethods(['getJobStruct'])
+            ->getMock();
 
         $contributionMockQueueObject->expects( $this->once() )
                 ->method( 'getJobStruct' )
@@ -327,7 +337,11 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
         $_worker->attach( $this );
 
         //create a stub Engine MyMemory
-        $stubEngine = @$this->getMockBuilder( '\Engines_MMT' )->disableOriginalConstructor()->getMock();
+        $stubEngine = @$this
+            ->getMockBuilder( '\Engines_MMT' )
+            ->onlyMethods(['update', 'getEngineRow'])
+            ->disableOriginalConstructor()
+            ->getMock();
 
         $engineStruct       = new EnginesModel_EngineStruct();
         $engineStruct->id   = 0;

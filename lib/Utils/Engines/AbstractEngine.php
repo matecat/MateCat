@@ -27,6 +27,11 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
     protected $_skipAnalysis = false;
 
     /**
+     * @var bool True if the engine can receive contributions through a `set/update` method.
+     */
+    protected bool $_isAdaptive = false;
+
+    /**
      * @var bool
      */
     protected $logging      = true;
@@ -204,7 +209,6 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
 
         $this->error = []; // reset last error
         if ( !$this->$function ) {
-            //Log::doJsonLog( 'Requested method ' . $function . ' not Found.' );
             $this->result = [
                     'error' => [
                             'code'    => -43,
@@ -283,6 +287,10 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
         return clone $this->engineRecord;
     }
 
+    public function isAdaptive(): bool {
+        return $this->_isAdaptive;
+    }
+
     /**
      * This function is PHP7 compatible
      *
@@ -334,4 +342,9 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
         return $gtEngine->get( $_config );
 
     }
+
+    public function importMemory( string $filePath, string $memoryKey, Users_UserStruct $user ){
+
+    }
+
 }

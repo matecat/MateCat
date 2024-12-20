@@ -24,27 +24,37 @@ class getContributionController extends ajaxController {
 
     private $__postInput;
     private $cross_language;
+    /**
+     * @var ?array
+     */
+    private ?array $context_list_before;
+    /**
+     * @var ?array
+     */
+    private ?array $context_list_after;
 
     public function __construct() {
 
         parent::__construct();
 
         $filterArgs = [
-            'id_segment'       => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
-            'id_job'           => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
-            'num_results'      => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
-            'text'             => [ 'filter' => FILTER_UNSAFE_RAW ],
-            'id_translator'    => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
-            'password'         => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
-            'current_password' => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
-            'is_concordance'   => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
-            'from_target'      => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
-            'context_before'   => [ 'filter' => FILTER_UNSAFE_RAW ],
-            'context_after'    => [ 'filter' => FILTER_UNSAFE_RAW ],
-            'id_before'        => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
-            'id_after'         => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
-            'id_client'        => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
-            'cross_language'   => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FORCE_ARRAY ]
+                'id_segment'          => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'id_job'              => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'num_results'         => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'text'                => [ 'filter' => FILTER_UNSAFE_RAW ],
+                'id_translator'       => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'password'            => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'current_password'    => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'is_concordance'      => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'from_target'         => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'context_before'      => [ 'filter' => FILTER_UNSAFE_RAW ],
+                'context_after'       => [ 'filter' => FILTER_UNSAFE_RAW ],
+                'id_before'           => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'id_after'            => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'id_client'           => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'cross_language'      => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FORCE_ARRAY ],
+                'context_list_before' => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'context_list_after'  => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
         ];
 
         $this->__postInput = filter_input_array( INPUT_POST, $filterArgs );
@@ -57,16 +67,18 @@ class getContributionController extends ajaxController {
         $this->id_before  = $this->__postInput[ 'id_before' ];
         $this->id_after   = $this->__postInput[ 'id_after' ];
 
-        $this->id_job             = $this->__postInput[ 'id_job' ];
-        $this->num_results        = $this->__postInput[ 'num_results' ];
-        $this->text               = trim( $this->__postInput[ 'text' ] );
-        $this->id_translator      = $this->__postInput[ 'id_translator' ];
-        $this->concordance_search = $this->__postInput[ 'is_concordance' ];
-        $this->switch_languages   = $this->__postInput[ 'from_target' ];
-        $this->password           = $this->__postInput[ 'password' ];
-        $this->received_password  = $this->__postInput[ 'current_password' ];
-        $this->id_client          = $this->__postInput[ 'id_client' ];
-        $this->cross_language     = $this->__postInput[ 'cross_language' ];
+        $this->id_job              = $this->__postInput[ 'id_job' ];
+        $this->num_results         = $this->__postInput[ 'num_results' ];
+        $this->text                = trim( $this->__postInput[ 'text' ] );
+        $this->id_translator       = $this->__postInput[ 'id_translator' ];
+        $this->concordance_search  = $this->__postInput[ 'is_concordance' ];
+        $this->switch_languages    = $this->__postInput[ 'from_target' ];
+        $this->password            = $this->__postInput[ 'password' ];
+        $this->received_password   = $this->__postInput[ 'current_password' ];
+        $this->id_client           = $this->__postInput[ 'id_client' ];
+        $this->cross_language      = $this->__postInput[ 'cross_language' ];
+        $this->context_list_before = json_decode( $this->__postInput[ 'context_list_after' ], true );
+        $this->context_list_after  = json_decode( $this->__postInput[ 'context_list_before' ], true );
 
         if ( $this->id_translator == 'unknown_translator' ) {
             $this->id_translator = "";
@@ -119,20 +131,24 @@ class getContributionController extends ajaxController {
             $this->_getContexts( $jobStruct->source, $jobStruct->target );
         }
 
-        $file = (new FilesPartsDao())->getBySegmentId($this->id_segment);
-        $owner = (new Users_UserDao())->getProjectOwner( $this->id_job );
+        $file  = ( new FilesPartsDao() )->getBySegmentId( $this->id_segment );
+        $owner = ( new Users_UserDao() )->getProjectOwner( $this->id_job );
 
-        $contributionRequest                    = new ContributionRequestStruct();
-        $contributionRequest->id_file           = $file->id_file;
-        $contributionRequest->id_job            = $this->id_job;
-        $contributionRequest->password          = $this->received_password;
-        $contributionRequest->user              = $owner;
-        $contributionRequest->dataRefMap        = $dataRefMap;
-        $contributionRequest->contexts          = [
-            'context_before' => $this->context_before,
-            'segment'        => $this->text,
-            'context_after'  => $this->context_after
+        $contributionRequest             = new ContributionRequestStruct();
+        $contributionRequest->id_file    = $file->id_file;
+        $contributionRequest->id_job     = $this->id_job;
+        $contributionRequest->password   = $this->received_password;
+        $contributionRequest->user       = $owner;
+        $contributionRequest->dataRefMap = $dataRefMap;
+        $contributionRequest->contexts   = [
+                'context_before' => $this->context_before,
+                'segment'        => $this->text,
+                'context_after'  => $this->context_after
         ];
+
+        $contributionRequest->context_list_before = $this->context_list_before;
+        $contributionRequest->context_list_after  = $this->context_list_after;
+
         $contributionRequest->jobStruct         = $jobStruct;
         $contributionRequest->projectStruct     = $projectStruct;
         $contributionRequest->segmentId         = $this->id_segment;

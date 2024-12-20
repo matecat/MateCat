@@ -1195,8 +1195,8 @@ class ProjectManager {
                         $this->getSingleS3QueueFile( $fileName );
                     }
 
-                    $this->tmxServiceWrapper->addTmxInMyMemory( $file );
-                    $this->features->run( 'postPushTMX', $file, $this->projectStructure[ 'id_customer' ] );
+                    $userStruct = ( new Users_UserDao() )->setCacheTTL( 60 * 60 )->getByUid( $this->projectStructure[ 'uid' ] );
+                    $this->tmxServiceWrapper->addTmxInMyMemory( $file, $userStruct );
 
                 } else {
                     //don't call the postPushTMX for normal files
