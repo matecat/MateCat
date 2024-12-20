@@ -91,7 +91,7 @@ class TmKeyManagementController extends AbstractStatefulKleinController {
         $sortedKeys = [];
 
         foreach ($jobKeyList as $jobKey){
-            $aaa = array_filter($keys, function ($key) use($jobKey){
+            $filter = array_filter($keys, function ($key) use($jobKey){
 
                 if($jobKey['key'] === $key->key){
                     return true;
@@ -101,8 +101,8 @@ class TmKeyManagementController extends AbstractStatefulKleinController {
                 return substr($jobKey['key'], -5) === substr($key->key, -5);
             });
 
-            if(!empty($aaa)){
-                $sortedKeys[] = array_values($aaa)[0];
+            if(!empty($filter)){
+                $sortedKeys[] = array_values($filter)[0];
             }
         }
 
