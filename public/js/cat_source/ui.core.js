@@ -226,7 +226,7 @@ window.UI = {
         if (errors.length) {
           UI.processErrors(errors, 'setTranslation')
         } else {
-          OfflineUtils.failedConnection(id_segment, 'getTranslationMismatches')
+          OfflineUtils.failedConnection()
         }
       })
   },
@@ -317,7 +317,7 @@ window.UI = {
         $(document).trigger('getWarning:global:success', {resp: data})
       })
       .catch((errors) => {
-        OfflineUtils.failedConnection(0, 'getWarning')
+        OfflineUtils.failedConnection()
       })
   },
   displayMessage: function (messages) {
@@ -415,10 +415,10 @@ window.UI = {
       if (saveTranslation) {
         OfflineUtils.decrementOfflineCacheRemaining()
         options.callback = OfflineUtils.incrementOfflineCacheRemaining
-        OfflineUtils.failedConnection(options, 'setTranslation')
+        OfflineUtils.failedConnection()
       }
       OfflineUtils.changeStatusOffline(id_segment)
-      OfflineUtils.checkConnection('Set Translation check Authorized')
+      OfflineUtils.checkConnection()
       if (callback) {
         callback.call(this)
       }
@@ -515,56 +515,57 @@ window.UI = {
         } else {
           UI.addToSetTranslationTail(options)
           OfflineUtils.changeStatusOffline(idSegment)
-          OfflineUtils.failedConnection(translateRequest, 'setTranslation')
-          OfflineUtils.decrementOfflineCacheRemaining()
+          OfflineUtils.startOfflineMode()
         }
-        SegmentActions.setSegmentSaving(id_segment, false)
+        SegmentActions.setSegmentSaving(id_segment, true)
       })
   },
 
-  processErrors: function (err, operation) {
-    $.each(err, function () {
-      var codeInt = parseInt(this.code)
+  processErrors: function (errors, operation) {
+    if (Array.isArray(errors)) {
+      errors.forEach((error) => {
+        const codeInt = parseInt(error.code)
 
-      if (operation === 'setTranslation') {
-        if (codeInt !== -10) {
+        if (operation === 'setTranslation') {
+          if (codeInt !== -10) {
+            ModalsActions.showModalComponent(
+              AlertModal,
+              {
+                text: 'Error in saving the translation. Try the following: <br />1) Refresh the page (Ctrl+F5 twice) <br />2) Clear the cache in the browser <br />If the solutions above does not resolve the issue, please stop the translation and report the problem to <b>support@matecat.com</b>',
+              },
+              'Error',
+            )
+          }
+        }
+
+        if (codeInt === -10 && operation !== 'getSegments') {
           ModalsActions.showModalComponent(
             AlertModal,
             {
-              text: 'Error in saving the translation. Try the following: <br />1) Refresh the page (Ctrl+F5 twice) <br />2) Clear the cache in the browser <br />If the solutions above does not resolve the issue, please stop the translation and report the problem to <b>support@matecat.com</b>',
+              text: 'Job canceled or assigned to another translator',
+              successCallback: () => location.reload,
             },
             'Error',
           )
         }
-      }
+        if (codeInt === -1000 || codeInt === -101) {
+          console.log('ERROR ' + codeInt)
+          OfflineUtils.startOfflineMode()
+        }
 
-      if (codeInt === -10 && operation !== 'getSegments') {
-        ModalsActions.showModalComponent(
-          AlertModal,
-          {
-            text: 'Job canceled or assigned to another translator',
-            successCallback: () => location.reload,
-          },
-          'Error',
-        )
-      }
-      if (codeInt === -1000 || codeInt === -101) {
-        console.log('ERROR ' + codeInt)
-        OfflineUtils.startOfflineMode()
-      }
-
-      if (codeInt === -2000 && !isUndefined(this.message)) {
-        ModalsActions.showModalComponent(
-          AlertModal,
-          {
-            text:
-              'You cannot change the status of an ICE segment to "Translated" without editing it first.</br>' +
-              'Please edit the segment first if you want to change its status to "Translated".',
-          },
-          'Error',
-        )
-      }
-    })
+        if (codeInt === -2000 && !isUndefined(error.message)) {
+          ModalsActions.showModalComponent(
+            AlertModal,
+            {
+              text:
+                'You cannot change the status of an ICE segment to "Translated" without editing it first.</br>' +
+                'Please edit the segment first if you want to change its status to "Translated".',
+            },
+            'Error',
+          )
+        }
+      })
+    }
   },
   setTranslation_success: function (response, options) {
     var id_segment = options.id_segment
