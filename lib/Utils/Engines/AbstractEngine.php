@@ -209,7 +209,6 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
 
         $this->error = []; // reset last error
         if ( !$this->$function ) {
-            //Log::doJsonLog( 'Requested method ' . $function . ' not Found.' );
             $this->result = [
                     'error' => [
                             'code'    => -43,
@@ -343,4 +342,9 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
         return $gtEngine->get( $_config );
 
     }
+
+    public function importMemory( string $filePath, string $memoryKey, Users_UserStruct $user ){
+
+    }
+
 }

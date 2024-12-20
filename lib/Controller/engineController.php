@@ -3,6 +3,7 @@
 use EnginesModel\DeepLStruct;
 use EnginesModel\LaraStruct;
 use Lara\LaraException;
+use Users\MetadataDao;
 use Utils\Engines\Lara;
 use Validator\DeepLValidator;
 
@@ -271,7 +272,13 @@ class engineController extends ajaxController {
             return;
         }
 
-        $engineList = $this->featureSet->filter( 'getAvailableEnginesListForUser', Constants_Engines::getAvailableEnginesList(), $this->user );
+        $engineList      = Constants_Engines::getAvailableEnginesList();
+        $UserMetadataDao = new MetadataDao();
+        $engineEnabled   = $UserMetadataDao->get( $this->user->uid, $newEngineStruct->class_load );
+
+        if ( !empty( $engineEnabled ) ) {
+            unset( $engineList[ $newEngineStruct->class_load ] );
+        }
 
         $engineDAO             = new EnginesModel_EngineDAO( Database::obtain() );
         $newCreatedDbRowStruct = null;
@@ -345,6 +352,9 @@ class engineController extends ajaxController {
                 return;
             }
 
+            $UserMetadataDao = new MetadataDao();
+            $UserMetadataDao->set( $this->user->uid, $newCreatedDbRowStruct->class_load, $newCreatedDbRowStruct->id );
+
         } else {
 
             try {
@@ -359,12 +369,12 @@ class engineController extends ajaxController {
 
         }
 
-        $engine_type = explode("\\", $newCreatedDbRowStruct->class_load);
-        $this->result['data']['id'] = $newCreatedDbRowStruct->id;
-        $this->result['data']['name'] = $newCreatedDbRowStruct->name;
-        $this->result['data']['description'] = $newCreatedDbRowStruct->description;
-        $this->result['data']['type'] = $newCreatedDbRowStruct->type;
-        $this->result['data']['engine_type'] = array_pop($engine_type);
+        $engine_type                             = explode( "\\", $newCreatedDbRowStruct->class_load );
+        $this->result[ 'data' ][ 'id' ]          = $newCreatedDbRowStruct->id;
+        $this->result[ 'data' ][ 'name' ]        = $newCreatedDbRowStruct->name;
+        $this->result[ 'data' ][ 'description' ] = $newCreatedDbRowStruct->description;
+        $this->result[ 'data' ][ 'type' ]        = $newCreatedDbRowStruct->type;
+        $this->result[ 'data' ][ 'engine_type' ] = array_pop( $engine_type );
     }
 
     /**
@@ -394,7 +404,12 @@ class engineController extends ajaxController {
             return;
         }
 
-        $this->featureSet->run( 'postEngineDeletion', $result );
+        $engine = Engine::createTempInstance( $result );
+
+        if ( $engine->isAdaptive() ) {
+            //retrieve OWNER Engine License
+            ( new MetadataDao() )->delete( $this->user->uid, $result->class_load ); // engine_id
+        }
 
         $this->result[ 'data' ][ 'id' ] = $result->id;
 

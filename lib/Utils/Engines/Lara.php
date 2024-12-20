@@ -20,9 +20,12 @@ use Lara\Translator;
 use Log;
 use RedisHandler;
 use ReflectionException;
+use RuntimeException;
+use SplFileObject;
 use Throwable;
 use TmKeyManagement_MemoryKeyStruct;
 use TmKeyManagement_TmKeyManagement;
+use Users_UserStruct;
 
 /**
  * Created by PhpStorm.
@@ -140,6 +143,10 @@ class Lara extends Engines_AbstractEngine {
             return $tm_key->key;
         }, $tm_keys );
 
+
+        // init lara client and mmt fallback
+        $client = $this->_getClient();
+
         // configuration for mmt fallback
         $_config[ 'secret_key' ] = Mmt::getG2FallbackSecretKey();
         if ( $this->_isAnalysis && $this->_skipAnalysis ) {
@@ -154,7 +161,6 @@ class Lara extends Engines_AbstractEngine {
             $_config[ 'priority' ] = 'normal';
         }
 
-        $client     = $this->_getClient();
         $_lara_keys = $this->_reMapKeyList( $_config[ 'keys' ] );
 
         $languagesList = $this->getAvailableLanguages();
@@ -224,6 +230,48 @@ class Lara extends Engines_AbstractEngine {
 
         // let MMT to have the last word on requeue
         return $this->mmtUserFallback->update( $_config );
+
+    }
+
+    /**
+     * @throws LaraException
+     */
+    public function importMemory( string $filePath, string $memoryKey, Users_UserStruct $user ) {
+
+        $clientMemories     = $this->_getClient()->memories;
+        $associatedMemories = $clientMemories->getAll();
+        $memoryFound        = false;
+
+        foreach ( $associatedMemories as $memory ) {
+            if ( 'ext_my_' . trim( $memoryKey ) === $memory->getExternalId() ) {
+                $memoryFound = true;
+                break;
+            }
+        }
+
+        if ( !$memoryFound ) {
+            return null;
+        }
+
+        $fp_out = gzopen( "$filePath.gz", 'wb9' );
+
+        if ( !$fp_out ) {
+            $fp_out = null;
+            throw new RuntimeException( 'IOException. Unable to create temporary file.' );
+        }
+
+        $tmpFileObject = new SplFileObject( $filePath, 'r' );
+
+        while ( !$tmpFileObject->eof() ) {
+            gzwrite( $fp_out, $tmpFileObject->fgets() );
+        }
+
+        $tmpFileObject = null;
+        gzclose( $fp_out );
+
+        $clientMemories->importTmx( 'ext_my_' . $memoryKey, "$filePath.gz", true );
+
+        $fp_out = null;
 
     }
 
