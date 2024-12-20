@@ -409,7 +409,7 @@ class GetContributionWorker extends AbstractWorker {
         $_config[ 'segment' ] = $contributionStruct->getContexts()->segment;
         $_config[ 'source' ]  = $jobStruct->source;
         $_config[ 'target' ]  = $targetLang;
-        $_config[ 'uid' ]     = ( $contributionStruct->user !== null ? $contributionStruct->user->uid : 0 );
+        $_config[ 'uid' ]     = $contributionStruct->getUser()->uid ?? 0;
 
         $_config[ 'email' ] = INIT::$MYMEMORY_API_KEY;
 
@@ -510,16 +510,18 @@ class GetContributionWorker extends AbstractWorker {
                 //if a callback is not set only the first argument is returned, get the config params from the callback
                 $config = $featureSet->filter( 'beforeGetContribution', $config, $mt_engine, $jobStruct );
 
-                $config[ 'segment' ]         = $contributionStruct->getContexts()->segment;
-                $config[ 'source' ]          = $jobStruct->source;
-                $config[ 'target' ]          = $jobStruct->target;
-                $config[ 'email' ]           = INIT::$MYMEMORY_API_KEY;
-                $config[ 'segid' ]           = $contributionStruct->segmentId;
-                $config[ 'job_id' ]          = $jobStruct->id;
-                $config[ 'job_password' ]    = $jobStruct->password;
-                $config[ 'session' ]         = $contributionStruct->getSessionId();
-                $config[ 'all_job_tm_keys' ] = $jobStruct->tm_keys;
-                $config[ 'project_id' ]      = $contributionStruct->getProjectStruct()->id;
+                $config[ 'segment' ]             = $contributionStruct->getContexts()->segment;
+                $config[ 'source' ]              = $jobStruct->source;
+                $config[ 'target' ]              = $jobStruct->target;
+                $config[ 'email' ]               = INIT::$MYMEMORY_API_KEY;
+                $config[ 'segid' ]               = $contributionStruct->segmentId;
+                $config[ 'job_id' ]              = $jobStruct->id;
+                $config[ 'job_password' ]        = $jobStruct->password;
+                $config[ 'session' ]             = $contributionStruct->getSessionId();
+                $config[ 'all_job_tm_keys' ]     = $jobStruct->tm_keys;
+                $config[ 'project_id' ]          = $contributionStruct->getProjectStruct()->id;
+                $config[ 'context_list_before' ] = $contributionStruct->context_list_before;
+                $config[ 'context_list_after' ]  = $contributionStruct->context_list_after;
 
                 $mt_result = $mt_engine->get( $config );
             }
