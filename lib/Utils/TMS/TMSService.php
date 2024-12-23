@@ -191,6 +191,7 @@ class TMSService {
                         if ( !empty( $ownerMmtEngineMetaData ) ) {
                             $engine = Engine::getInstance( $ownerMmtEngineMetaData->value );
 
+                            Log::doJsonLog( "User [$user->uid, '$user->email'] start importing memory: {$engine->getEngineRow()->class_load} -> " . $file->getFilePath() . " -> " . $file->getTmKey() );
                             $engine->importMemory( $file->getFilePath(), $file->getTmKey(), $user );
 
                         }

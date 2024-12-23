@@ -171,6 +171,7 @@ class Lara extends Engines_AbstractEngine {
             $translateOptions = new TranslateOptions();
             $translateOptions->setAdaptTo( $_lara_keys );
             $translateOptions->setPriority( $_config[ 'priority' ] );
+            $translateOptions->setMultiline( true );
 
             $request_translation = [];
 
@@ -184,7 +185,17 @@ class Lara extends Engines_AbstractEngine {
                 $request_translation[] = new TextBlock( $c, false );
             }
 
-            $translation = $client->translate( $request_translation, $_config[ 'source' ], $_config[ 'target' ], $translateOptions );
+            $translationResponse = $client->translate( $request_translation, $_config[ 'source' ], $_config[ 'target' ], $translateOptions );
+
+            $translation = "";
+            $tList       = $translationResponse->getTranslation();
+            foreach ( $tList as $t ) {
+                if ( $t->isTranslatable() ) {
+                    $translation = $t->getText();
+                    break;
+                }
+            }
+
         } else {
             // mmt fallback
             return $this->mmtUserFallback->get( $_config );
@@ -192,7 +203,7 @@ class Lara extends Engines_AbstractEngine {
 
         return ( new Engines_Results_MyMemory_Matches(
                 $_config[ 'segment' ],
-                $translation->getTranslation()[ 0 ]->getText(),
+                $translation,
                 100 - $this->getPenalty() . "%",
                 "MT-" . $this->getName(),
                 date( "Y-m-d" )
