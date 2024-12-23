@@ -53,8 +53,8 @@ class getContributionController extends ajaxController {
                 'id_after'            => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
                 'id_client'           => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
                 'cross_language'      => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FORCE_ARRAY ],
-                'context_list_before' => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
-                'context_list_after'  => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'context_list_before' => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES ],
+                'context_list_after'  => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES ],
         ];
 
         $this->__postInput = filter_input_array( INPUT_POST, $filterArgs );
@@ -77,8 +77,8 @@ class getContributionController extends ajaxController {
         $this->received_password   = $this->__postInput[ 'current_password' ];
         $this->id_client           = $this->__postInput[ 'id_client' ];
         $this->cross_language      = $this->__postInput[ 'cross_language' ];
-        $this->context_list_before = json_decode( $this->__postInput[ 'context_list_after' ], true );
-        $this->context_list_after  = json_decode( $this->__postInput[ 'context_list_before' ], true );
+        $this->context_list_after = json_decode( $this->__postInput[ 'context_list_after' ], true );
+        $this->context_list_before  = json_decode( $this->__postInput[ 'context_list_before' ], true );
 
         if ( $this->id_translator == 'unknown_translator' ) {
             $this->id_translator = "";
