@@ -122,6 +122,8 @@ class MetadataDao extends \DataAccess_AbstractDao {
         ] );
 
         $this->destroyCacheByJobId( $id_job, $key );
+        $this->destroyCacheByJobAndPassword( $id_job, $password );
+        $this->destroyCacheByJobAndPasswordAndKey( $id_job, $password, $key );
 
         return $this->get( $id_job, $password, $key );
     }
