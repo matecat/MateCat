@@ -21,7 +21,6 @@ use Lara\Translator;
 use Log;
 use RedisHandler;
 use ReflectionException;
-use ReflectionProperty;
 use RuntimeException;
 use SplFileObject;
 use Throwable;
@@ -233,6 +232,8 @@ class Lara extends Engines_AbstractEngine {
 
             $languagesList = $this->getAvailableLanguages();
             if ( in_array( $_config[ 'source' ], $languagesList ) && in_array( $_config[ 'target' ], $languagesList ) ) {
+
+                $time_start = microtime( true );
                 // call lara
                 $client->memories->addTranslation(
                         $_keys,
@@ -244,14 +245,22 @@ class Lara extends Engines_AbstractEngine {
                         $_config[ 'context_before' ],
                         $_config[ 'context_after' ],
                 );
-                $rfProp = new ReflectionProperty( $client, 'client' );
-                $rfProp->setAccessible( true );
-                $httpClient = $rfProp->getValue( $client );
-                $httpRfProp = new ReflectionProperty( $httpClient, 'baseUrl' );
+                $time_end = microtime( true );
+                $time     = $time_end - $time_start;
+                
+                Log::doJsonLog( [
+                        'url'             => 'https://api.laratranslate.com/translate',
+                        'timing'          => [ 'Total Time' => $time ],
+                        'keys'            => $_keys,
+                        'source'          => $_config[ 'source' ],
+                        'target'          => $_config[ 'target' ],
+                        'sentence'        => $_config[ 'segment' ],
+                        'translation'     => $_config[ 'translation' ],
+                        'tuid'            => $_config[ 'tuid' ],
+                        'sentence_before' => $_config[ 'context_before' ],
+                        'sentence_after'  => $_config[ 'context_after' ],
+                ] );
 
-                //$httpRfProp
-
-                Log::doJsonLog( "" );
             }
 
         } catch ( LaraApiException $e ) {
