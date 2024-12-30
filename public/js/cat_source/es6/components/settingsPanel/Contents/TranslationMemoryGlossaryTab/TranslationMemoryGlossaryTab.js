@@ -194,7 +194,7 @@ export const TranslationMemoryGlossaryTab = () => {
       updateJobKeys({
         getPublicMatches,
         dataTm: getTmDataStructureToSendServer({tmKeys, keysOrdered}),
-        tm_prioritization: tmPrioritization,
+        tmPrioritization,
       }).then(() => CatToolActions.onTMKeysChangeStatus())
     }
   }
