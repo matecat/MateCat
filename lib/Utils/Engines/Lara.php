@@ -21,6 +21,7 @@ use Lara\Translator;
 use Log;
 use RedisHandler;
 use ReflectionException;
+use ReflectionProperty;
 use RuntimeException;
 use SplFileObject;
 use Throwable;
@@ -69,6 +70,7 @@ class Lara extends Engines_AbstractEngine {
      * Get MMTServiceApi client
      *
      * @return Translator
+     * @throws Exception
      */
     protected function _getClient(): Translator {
 
@@ -82,7 +84,7 @@ class Lara extends Engines_AbstractEngine {
         $mmtStruct                   = EnginesModel_MMTStruct::getStruct();
         $mmtStruct->type             = Constants_Engines::MT;
         $mmtStruct->extra_parameters = [
-                'MMT-License'      => $extraParams[ 'MMT-License' ] ?? INIT::$DEFAULT_MMT_KEY,
+                'MMT-License'      => $extraParams[ 'MMT-License' ] ?: INIT::$DEFAULT_MMT_KEY,
                 'MMT-pretranslate' => true,
                 'MMT-preimport'    => false,
         ];
@@ -100,6 +102,7 @@ class Lara extends Engines_AbstractEngine {
      * @return array
      * @throws LaraException
      * @throws ReflectionException
+     * @throws Exception
      */
     public function getAvailableLanguages(): array {
 
@@ -220,6 +223,7 @@ class Lara extends Engines_AbstractEngine {
 
     /**
      * @inheritDoc
+     * @throws Exception
      */
     public function update( $_config ) {
 
@@ -240,6 +244,14 @@ class Lara extends Engines_AbstractEngine {
                         $_config[ 'context_before' ],
                         $_config[ 'context_after' ],
                 );
+                $rfProp = new ReflectionProperty( $client, 'client' );
+                $rfProp->setAccessible( true );
+                $httpClient = $rfProp->getValue( $client );
+                $httpRfProp = new ReflectionProperty( $httpClient, 'baseUrl' );
+
+                //$httpRfProp
+
+                Log::doJsonLog( "" );
             }
 
         } catch ( LaraApiException $e ) {
