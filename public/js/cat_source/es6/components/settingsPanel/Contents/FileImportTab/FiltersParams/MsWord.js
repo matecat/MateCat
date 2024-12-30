@@ -164,7 +164,10 @@ export const MsWord = () => {
             not be translated.
             <br />
             Color names are case sensitive. Common color names are available{' '}
-            <a href="https://guides.matecat.com/file-import" target="_blank">
+            <a
+              href="https://guides.matecat.com/file-import#:~:text=MS%20Word%202007,97%2D2003%20(DOC)"
+              target="_blank"
+            >
               here
             </a>
             .
