@@ -941,7 +941,7 @@ const getSegmentStructure = (segment, sideOpen) => {
                       {' '}
                       Translated{' '}
                     </a>
-                    <p>CTRL + ENTER</p>
+                    <p>CTRL+ENTER</p>
                   </li>
                 </ul>
               </div>
