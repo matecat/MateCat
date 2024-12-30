@@ -1,6 +1,6 @@
 import React from 'react'
 import {isUndefined} from 'lodash'
-import Immutable from 'immutable'
+import {fromJS} from 'immutable'
 
 import SegmentConstants from '../../constants/SegmentConstants'
 import SegmentStore from '../../stores/SegmentStore'
@@ -229,8 +229,8 @@ class SegmentFooterTabMatches extends React.Component {
         !isUndefined(this.props.segment.contributions)) &&
         ((!isUndefined(nextProps.segment.contributions) &&
           isUndefined(this.props.segment.contributions)) ||
-          !Immutable.fromJS(this.props.segment.contributions).equals(
-            Immutable.fromJS(nextProps.segment.contributions),
+          !fromJS(this.props.segment.contributions).equals(
+            fromJS(nextProps.segment.contributions),
           ))) ||
       this.props.active_class !== nextProps.active_class ||
       this.props.tab_class !== nextProps.tab_class ||
