@@ -23,8 +23,13 @@ export const TmPrioritization = () => {
   return (
     <div className="tm-prioritization-container">
       <div className="tm-prioritization-text-content">
-        <h4>Activate prioritization</h4>
-        <span>Lorem ipsum bla bla</span>
+        <h4>TM prioritization</h4>
+        <span>
+          Activate to prioritize translation memories based on their order.{' '}
+          <a href="https://guides.matecat.com/activ" target="_blank">
+            More details
+          </a>
+        </span>
       </div>
       <Switch
         onChange={onChange}
