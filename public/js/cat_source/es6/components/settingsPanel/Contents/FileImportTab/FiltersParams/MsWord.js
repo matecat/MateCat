@@ -163,8 +163,11 @@ export const MsWord = () => {
             Enter the name of highlighting colors applied to text that should
             not be translated.
             <br />
-            Color names are case sensitive. Common color names are available
-            here.
+            Color names are case sensitive. Common color names are available{' '}
+            <a href="https://guides.matecat.com/file-import" target="_blank">
+              here
+            </a>
+            .
           </p>
         </div>
         <Controller
