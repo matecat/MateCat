@@ -230,9 +230,6 @@ class Lara extends Engines_AbstractEngine {
         $_keys  = $this->_reMapKeyList( $_config[ 'keys' ] ?? [] );
         try {
 
-            $languagesList = $this->getAvailableLanguages();
-            if ( in_array( $_config[ 'source' ], $languagesList ) && in_array( $_config[ 'target' ], $languagesList ) ) {
-
                 $time_start = microtime( true );
                 // call lara
                 $client->memories->addTranslation(
@@ -260,8 +257,6 @@ class Lara extends Engines_AbstractEngine {
                         'sentence_before' => $_config[ 'context_before' ],
                         'sentence_after'  => $_config[ 'context_after' ],
                 ] );
-
-            }
 
         } catch ( LaraApiException $e ) {
             // Lara license expired/changed (401) or account deleted (403)
