@@ -249,7 +249,7 @@ class Lara extends Engines_AbstractEngine {
                 $time     = $time_end - $time_start;
                 
                 Log::doJsonLog( [
-                        'url'             => 'https://api.laratranslate.com/translate',
+                        'url'             => 'PUT https://api.laratranslate.com/memories/content',
                         'timing'          => [ 'Total Time' => $time ],
                         'keys'            => $_keys,
                         'source'          => $_config[ 'source' ],
