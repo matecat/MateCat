@@ -340,9 +340,14 @@ export const TranslationMemoryGlossaryTab = () => {
         tmPrioritization !== current.tmPrioritization
 
       if (shouldUpdateTmKeysJob) {
+        const tmCurrentProjectTemplate =
+          previousStatesRef.current.currentProjectTemplate.tm
+
+        const keysOrdered = tmCurrentProjectTemplate.map(({key}) => key)
+
         updateJobKeys({
           getPublicMatches,
-          dataTm: getTmDataStructureToSendServer({tmKeys}),
+          dataTm: getTmDataStructureToSendServer({tmKeys, keysOrdered}),
           tmPrioritization,
         }).then(() => CatToolActions.onTMKeysChangeStatus())
       }
