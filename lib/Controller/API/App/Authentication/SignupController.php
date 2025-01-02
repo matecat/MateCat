@@ -6,6 +6,7 @@ use API\App\RateLimiterTrait;
 use API\Commons\AbstractStatefulKleinController;
 use API\Commons\Authentication\AuthCookie;
 use API\Commons\Authentication\AuthenticationHelper;
+use CatUtils;
 use Exception;
 use FlashMessage;
 use INIT;
@@ -31,14 +32,14 @@ class SignupController extends AbstractStatefulKleinController {
                         'password'              => [ 'filter' => FILTER_SANITIZE_STRING, 'options' => FILTER_FLAG_STRIP_LOW ],
                         'password_confirmation' => [ 'filter' => FILTER_SANITIZE_STRING, 'options' => FILTER_FLAG_STRIP_LOW ],
                         'first_name'            => [
-                                'filter' => FILTER_CALLBACK, 'options' => function ( $username ) {
-                                    return mb_substr( preg_replace( '/(?:https?|s?ftp)?\P{L}+/', '', $username ), 0, 50 );
-                                }
+                            'filter' => FILTER_CALLBACK, 'options' => function ( $firstName ) {
+                                return CatUtils::stripMaliciousContentFromAName($firstName);
+                            }
                         ],
                         'last_name'             => [
-                                'filter' => FILTER_CALLBACK, 'options' => function ( $username ) {
-                                    return mb_substr( preg_replace( '/(?:https?|s?ftp)?\P{L}+/', '', $username ), 0, 50 );
-                                }
+                            'filter' => FILTER_CALLBACK, 'options' => function ( $lastName ) {
+                                return CatUtils::stripMaliciousContentFromAName($lastName);
+                            }
                         ],
                         'wanted_url'            => [
                                 'filter' => FILTER_CALLBACK, 'options' => function ( $wanted_url ) {
@@ -50,14 +51,11 @@ class SignupController extends AbstractStatefulKleinController {
                 ]
         );
 
-        $user['first_name'] = trim($user['first_name']);
-        $user['last_name'] = trim($user['last_name']);
-
         if(empty($user['first_name'])){
             $this->response->code( 400 );
             $this->response->json( [
                 'error' => [
-                    'message' => "`first_name` cannot be empty"
+                    'message' => "First name must contain at least one letter"
                 ]
             ] );
             exit();
@@ -67,7 +65,7 @@ class SignupController extends AbstractStatefulKleinController {
             $this->response->code( 400 );
             $this->response->json( [
                 'error' => [
-                    'message' => "`last_name` cannot be empty"
+                    'message' => "Last name must contain at least one letter"
                 ]
             ] );
             exit();
