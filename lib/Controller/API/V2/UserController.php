@@ -25,39 +25,36 @@ class UserController extends AbstractStatefulKleinController
     public function edit(){
 
         $json = $this->request->body();
-
-        $filters = [
-            'first_name' => FILTER_CALLBACK,
-            'last_name' => FILTER_CALLBACK,
-        ];
-
-        $options = [
-            'first_name' => function ( $first_name ) {
-                return mb_substr( preg_replace( '/(?:https?|s?ftp)?\P{L}+/', '', $first_name ), 0, 50 );
-            },
-            'last_name' => function ( $last_name ) {
-                return mb_substr( preg_replace( '/(?:https?|s?ftp)?\P{L}+/', '', $last_name ), 0, 50 );
-            },
-        ];
-
         $json = json_decode($json, true);
 
-        $filtered = [];
-        foreach($json as $key => $value) {
-            $filtered[$key] = filter_var($value, $filters[$key], $options[$key]);
-        }
+        $user = filter_var_array(
+            $json,
+            [
+                'first_name' => [
+                    'filter' => FILTER_CALLBACK, 'options' => function ( $username ) {
+                        return mb_substr( preg_replace( '/(?:https?|s?ftp)?\P{L}+/', '', $username ), 0, 50 );
+                    }
+                ],
+                'last_name'  => [
+                    'filter' => FILTER_CALLBACK, 'options' => function ( $username ) {
+                        return mb_substr( preg_replace( '/(?:https?|s?ftp)?\P{L}+/', '', $username ), 0, 50 );
+                    }
+                ],
+            ]
+        );
+
 
         try {
-            if(!isset($filtered['first_name'])){
+            if(!isset($user['first_name'])){
                 throw new InvalidArgumentException('`first_name` required', 400);
             }
 
-            if(!isset($filtered['last_name'])){
+            if(!isset($user['last_name'])){
                 throw new InvalidArgumentException('`last_name` required', 400);
             }
 
-            $first_name = trim($filtered['first_name']);
-            $last_name = trim($filtered['last_name']);
+            $first_name = trim($user['first_name']);
+            $last_name = trim($user['last_name']);
 
             if(empty($first_name)){
                 throw new InvalidArgumentException('`first_name` cannot be empty', 400);
