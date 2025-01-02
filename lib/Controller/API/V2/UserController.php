@@ -27,17 +27,17 @@ class UserController extends AbstractStatefulKleinController
         $json = $this->request->body();
 
         $filters = [
-            'first_name'      => FILTER_SANITIZE_STRING,
-            'last_name' => FILTER_SANITIZE_STRING,
+            'first_name' => FILTER_CALLBACK,
+            'last_name' => FILTER_CALLBACK,
         ];
 
         $options = [
-            'first_name' => [
-                'flags' => FILTER_NULL_ON_FAILURE
-            ],
-            'last_name' => [
-                'flags' => FILTER_NULL_ON_FAILURE
-            ],
+            'first_name' => function ( $first_name ) {
+                return mb_substr( preg_replace( '/(?:https?|s?ftp)?\P{L}+/', '', $first_name ), 0, 50 );
+            },
+            'last_name' => function ( $last_name ) {
+                return mb_substr( preg_replace( '/(?:https?|s?ftp)?\P{L}+/', '', $last_name ), 0, 50 );
+            },
         ];
 
         $json = json_decode($json, true);
@@ -56,9 +56,20 @@ class UserController extends AbstractStatefulKleinController
                 throw new InvalidArgumentException('`last_name` required', 400);
             }
 
+            $first_name = trim($filtered['first_name']);
+            $last_name = trim($filtered['last_name']);
+
+            if(empty($first_name)){
+                throw new InvalidArgumentException('`first_name` cannot be empty', 400);
+            }
+
+            if(empty($last_name)){
+                throw new InvalidArgumentException('`last_name` cannot be empty', 400);
+            }
+
             $user = $this->user;
-            $user->first_name = $filtered['first_name'];
-            $user->last_name = $filtered['last_name'];
+            $user->first_name = $first_name;
+            $user->last_name = $last_name;
 
             $userDao = new Users_UserDao();
             $userDao->updateUser($user);

@@ -50,6 +50,29 @@ class SignupController extends AbstractStatefulKleinController {
                 ]
         );
 
+        $user['first_name'] = trim($user['first_name']);
+        $user['last_name'] = trim($user['last_name']);
+
+        if(empty($user['first_name'])){
+            $this->response->code( 400 );
+            $this->response->json( [
+                'error' => [
+                    'message' => "`first_name` cannot be empty"
+                ]
+            ] );
+            exit();
+        }
+
+        if(empty($user['last_name'])){
+            $this->response->code( 400 );
+            $this->response->json( [
+                'error' => [
+                    'message' => "`last_name` cannot be empty"
+                ]
+            ] );
+            exit();
+        }
+
         $userIp = Utils::getRealIpAddr();
 
         // rate limit on email
