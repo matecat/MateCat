@@ -104,12 +104,21 @@ class Users_UserDao extends DataAccess_AbstractDao {
      *
      * @return Users_UserStruct
      * @throws ReflectionException
+     * @throws Exception
      */
     public function createUser( Users_UserStruct $obj ): ?Users_UserStruct {
         $conn = $this->database->getConnection();
         Database::obtain()->begin();
 
         $obj->create_date = date( 'Y-m-d H:i:s' );
+
+        if(empty($obj->first_name)){
+            throw new Exception('`first_name` cannot be empty');
+        }
+
+        if(empty($obj->last_name)){
+            throw new Exception('`last_name` cannot be empty');
+        }
 
         $stmt = $conn->prepare( "INSERT INTO users " .
                 " ( uid, email, salt, pass, create_date, first_name, last_name, confirmation_token ) " .
@@ -143,6 +152,14 @@ class Users_UserDao extends DataAccess_AbstractDao {
     public function updateUser( Users_UserStruct $obj ): Users_UserStruct {
         $conn = $this->database->getConnection();
         Database::obtain()->begin();
+
+        if(empty($obj->first_name)){
+            throw new Exception('`first_name` cannot be empty');
+        }
+
+        if(empty($obj->last_name)){
+            throw new Exception('`last_name` cannot be empty');
+        }
 
         $stmt = $conn->prepare( "UPDATE users
             SET 

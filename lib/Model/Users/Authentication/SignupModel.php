@@ -67,6 +67,14 @@ class SignupModel {
      */
     public function processSignup() {
 
+        if(empty($this->user->first_name)){
+            throw new ValidationError('`first_name` cannot be empty');
+        }
+
+        if(empty($this->user->last_name)){
+            throw new ValidationError('`last_name` cannot be empty');
+        }
+
         if ( $this->__userAlreadyExists() ) {
             $this->__updatePersistedUser();
             Users_UserDao::updateStruct( $this->user, [

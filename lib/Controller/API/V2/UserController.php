@@ -25,40 +25,48 @@ class UserController extends AbstractStatefulKleinController
     public function edit(){
 
         $json = $this->request->body();
-
-        $filters = [
-            'first_name'      => FILTER_SANITIZE_STRING,
-            'last_name' => FILTER_SANITIZE_STRING,
-        ];
-
-        $options = [
-            'first_name' => [
-                'flags' => FILTER_NULL_ON_FAILURE
-            ],
-            'last_name' => [
-                'flags' => FILTER_NULL_ON_FAILURE
-            ],
-        ];
-
         $json = json_decode($json, true);
 
-        $filtered = [];
-        foreach($json as $key => $value) {
-            $filtered[$key] = filter_var($value, $filters[$key], $options[$key]);
-        }
+        $user = filter_var_array(
+            $json,
+            [
+                'first_name' => [
+                    'filter' => FILTER_CALLBACK, 'options' => function ( $username ) {
+                        return mb_substr( preg_replace( '/(?:https?|s?ftp)?\P{L}+/', '', $username ), 0, 50 );
+                    }
+                ],
+                'last_name'  => [
+                    'filter' => FILTER_CALLBACK, 'options' => function ( $username ) {
+                        return mb_substr( preg_replace( '/(?:https?|s?ftp)?\P{L}+/', '', $username ), 0, 50 );
+                    }
+                ],
+            ]
+        );
+
 
         try {
-            if(!isset($filtered['first_name'])){
+            if(!isset($user['first_name'])){
                 throw new InvalidArgumentException('`first_name` required', 400);
             }
 
-            if(!isset($filtered['last_name'])){
+            if(!isset($user['last_name'])){
                 throw new InvalidArgumentException('`last_name` required', 400);
             }
 
+            $first_name = trim($user['first_name']);
+            $last_name = trim($user['last_name']);
+
+            if(empty($first_name)){
+                throw new InvalidArgumentException('`first_name` cannot be empty', 400);
+            }
+
+            if(empty($last_name)){
+                throw new InvalidArgumentException('`last_name` cannot be empty', 400);
+            }
+
             $user = $this->user;
-            $user->first_name = $filtered['first_name'];
-            $user->last_name = $filtered['last_name'];
+            $user->first_name = $first_name;
+            $user->last_name = $last_name;
 
             $userDao = new Users_UserDao();
             $userDao->updateUser($user);
