@@ -6,6 +6,7 @@ use API\Commons\AbstractStatefulKleinController;
 use API\Commons\Authentication\AuthenticationHelper;
 use API\Commons\Validators\JSONRequestValidator;
 use API\Commons\Validators\LoginValidator;
+use CatUtils;
 use InvalidArgumentException;
 use Users\MetadataDao;
 use Users_UserDao;
@@ -27,17 +28,17 @@ class UserController extends AbstractStatefulKleinController
         $json = $this->request->body();
         $json = json_decode($json, true);
 
-        $user = filter_var_array(
+        $data = filter_var_array(
             $json,
             [
                 'first_name' => [
-                    'filter' => FILTER_CALLBACK, 'options' => function ( $username ) {
-                        return mb_substr( preg_replace( '/(?:https?|s?ftp)?\P{L}+/', '', $username ), 0, 50 );
+                    'filter' => FILTER_CALLBACK, 'options' => function ( $firstName ) {
+                        return CatUtils::stripMaliciousContentFromAName($firstName);
                     }
                 ],
                 'last_name'  => [
-                    'filter' => FILTER_CALLBACK, 'options' => function ( $username ) {
-                        return mb_substr( preg_replace( '/(?:https?|s?ftp)?\P{L}+/', '', $username ), 0, 50 );
+                    'filter' => FILTER_CALLBACK, 'options' => function ( $lastName ) {
+                        return CatUtils::stripMaliciousContentFromAName($lastName);
                     }
                 ],
             ]
@@ -45,28 +46,17 @@ class UserController extends AbstractStatefulKleinController
 
 
         try {
-            if(!isset($user['first_name'])){
-                throw new InvalidArgumentException('`first_name` required', 400);
+            if(empty($data['first_name'])){
+                throw new InvalidArgumentException('First name must contain at least one letter', 400);
             }
 
-            if(!isset($user['last_name'])){
-                throw new InvalidArgumentException('`last_name` required', 400);
-            }
-
-            $first_name = trim($user['first_name']);
-            $last_name = trim($user['last_name']);
-
-            if(empty($first_name)){
-                throw new InvalidArgumentException('`first_name` cannot be empty', 400);
-            }
-
-            if(empty($last_name)){
-                throw new InvalidArgumentException('`last_name` cannot be empty', 400);
+            if(empty($data['last_name'])){
+                throw new InvalidArgumentException('Last name must contain at least one letter', 400);
             }
 
             $user = $this->user;
-            $user->first_name = $first_name;
-            $user->last_name = $last_name;
+            $user->first_name = $data['first_name'];
+            $user->last_name = $data['last_name'];
 
             $userDao = new Users_UserDao();
             $userDao->updateUser($user);
