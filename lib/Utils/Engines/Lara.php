@@ -187,8 +187,21 @@ class Lara extends Engines_AbstractEngine {
                 $request_translation[] = new TextBlock( $c, false );
             }
 
-            Log::doJsonLog( "LARA REQUEST: " . json_encode( [ $request_translation, $_config[ 'source' ], $_config[ 'target' ], $translateOptions ] ) );
+            $time_start          = microtime( true );
             $translationResponse = $client->translate( $request_translation, $_config[ 'source' ], $_config[ 'target' ], $translateOptions );
+            $time_end            = microtime( true );
+            $time                = $time_end - $time_start;
+
+            Log::doJsonLog( [
+                    'LARA REQUEST' => 'GET https://api.laratranslate.com/translate',
+                    'timing'       => [ 'Total Time' => $time, 'Request Start Time' => $time_start, 'Request End Time' => $time_end ],
+                    'q'            => $request_translation,
+                    'adapt_to'     => $_lara_keys,
+                    'source'       => $_config[ 'source' ],
+                    'target'       => $_config[ 'target' ],
+                    'priority'     => $_config[ 'priority' ],
+                    'multiline'    => true,
+            ] );
 
             $translation = "";
             $tList       = $translationResponse->getTranslation();
@@ -231,33 +244,33 @@ class Lara extends Engines_AbstractEngine {
         $_keys  = $this->_reMapKeyList( $_config[ 'keys' ] ?? [] );
         try {
 
-                $time_start = microtime( true );
-                // call lara
-                $client->memories->addTranslation(
-                        $_keys,
-                        $_config[ 'source' ],
-                        $_config[ 'target' ],
-                        $_config[ 'segment' ],
-                        $_config[ 'translation' ],
-                        $_config[ 'tuid' ],
-                        $_config[ 'context_before' ],
-                        $_config[ 'context_after' ],
-                );
-                $time_end = microtime( true );
-                $time     = $time_end - $time_start;
-                
-                Log::doJsonLog( [
-                        'url'             => 'PUT https://api.laratranslate.com/memories/content',
-                        'timing'          => [ 'Total Time' => $time ],
-                        'keys'            => $_keys,
-                        'source'          => $_config[ 'source' ],
-                        'target'          => $_config[ 'target' ],
-                        'sentence'        => $_config[ 'segment' ],
-                        'translation'     => $_config[ 'translation' ],
-                        'tuid'            => $_config[ 'tuid' ],
-                        'sentence_before' => $_config[ 'context_before' ],
-                        'sentence_after'  => $_config[ 'context_after' ],
-                ] );
+            $time_start = microtime( true );
+            // call lara
+            $client->memories->addTranslation(
+                    $_keys,
+                    $_config[ 'source' ],
+                    $_config[ 'target' ],
+                    $_config[ 'segment' ],
+                    $_config[ 'translation' ],
+                    $_config[ 'tuid' ],
+                    $_config[ 'context_before' ],
+                    $_config[ 'context_after' ],
+            );
+            $time_end = microtime( true );
+            $time     = $time_end - $time_start;
+
+            Log::doJsonLog( [
+                    'LARA REQUEST'    => 'PUT https://api.laratranslate.com/memories/content',
+                    'timing'          => [ 'Total Time' => $time, 'Request Start Time' => $time_start, 'Request End Time' => $time_end ],
+                    'keys'            => $_keys,
+                    'source'          => $_config[ 'source' ],
+                    'target'          => $_config[ 'target' ],
+                    'sentence'        => $_config[ 'segment' ],
+                    'translation'     => $_config[ 'translation' ],
+                    'tuid'            => $_config[ 'tuid' ],
+                    'sentence_before' => $_config[ 'context_before' ],
+                    'sentence_after'  => $_config[ 'context_after' ],
+            ] );
 
         } catch ( LaraApiException $e ) {
             // Lara license expired/changed (401) or account deleted (403)
