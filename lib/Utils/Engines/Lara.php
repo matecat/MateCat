@@ -187,6 +187,7 @@ class Lara extends Engines_AbstractEngine {
                 $request_translation[] = new TextBlock( $c, false );
             }
 
+            Log::doJsonLog( "LARA REQUEST: " . json_encode( [ $request_translation, $_config[ 'source' ], $_config[ 'target' ], $translateOptions ] ) );
             $translationResponse = $client->translate( $request_translation, $_config[ 'source' ], $_config[ 'target' ], $translateOptions );
 
             $translation = "";
