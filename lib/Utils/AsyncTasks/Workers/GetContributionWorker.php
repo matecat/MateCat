@@ -9,12 +9,15 @@
 
 namespace AsyncTasks\Workers;
 
+use API\Commons\Exceptions\AuthenticationError;
 use Constants\Ices;
 use Constants_TranslationStatus;
 use Contribution\ContributionRequestStruct;
 use Engines_DeepL;
 use Engines_MMT;
 use Exception;
+use Exceptions\NotFoundException;
+use Exceptions\ValidationError;
 use FeatureSet;
 use INIT;
 use Jobs\MetadataDao;
@@ -28,6 +31,7 @@ use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\AbstractWorker;
 use TaskRunner\Commons\QueueElement;
 use TaskRunner\Exceptions\EndQueueException;
+use TaskRunner\Exceptions\ReQueueException;
 use TmKeyManagement_TmKeyManagement;
 use Translations_SegmentTranslationDao;
 use Users_UserStruct;
@@ -396,14 +400,16 @@ class GetContributionWorker extends AbstractWorker {
     /**
      * @param ContributionRequestStruct $contributionStruct
      * @param Jobs_JobStruct            $jobStruct
-     * @param                           $targetLang
-     * @param                           $featureSet
+     * @param string                    $targetLang
+     * @param FeatureSet                $featureSet
      * @param bool                      $isCrossLang
      *
      * @return array
+     * @throws EndQueueException
+     * @throws ReQueueException
      * @throws Exception
      */
-    protected function _getMatches( ContributionRequestStruct $contributionStruct, $jobStruct, $targetLang, $featureSet, $isCrossLang = false ) {
+    protected function _getMatches( ContributionRequestStruct $contributionStruct, Jobs_JobStruct $jobStruct, string $targetLang, FeatureSet $featureSet, bool $isCrossLang = false ): array {
 
         $_config              = [];
         $_config[ 'segment' ] = $contributionStruct->getContexts()->segment;
@@ -500,7 +506,11 @@ class GetContributionWorker extends AbstractWorker {
 
         $mt_result = [];
 
-        if ( $jobStruct->id_mt_engine > 1 /* Request MT Directly */ && !$contributionStruct->concordanceSearch ) {
+        if (
+                $jobStruct->id_mt_engine > 1 /* Request MT Directly */ &&
+                !$contributionStruct->concordanceSearch &&
+                !$isCrossLang
+        ) {
 
             if ( empty( $tms_match ) || (int)str_replace( "%", "", $tms_match[ 0 ][ 'match' ] ) < 100 ) {
 

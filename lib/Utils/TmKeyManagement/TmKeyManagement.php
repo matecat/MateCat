@@ -159,7 +159,7 @@ class TmKeyManagement_TmKeyManagement {
         //convert tm keys into TmKeyManagement_TmKeyStruct objects
         $result_arr = array_map( array( 'self', 'getTmKeyStructure' ), $result_arr );
 
-        return $result_arr;
+        return array_values( $result_arr );
     }
 
     /**
