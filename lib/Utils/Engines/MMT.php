@@ -3,7 +3,6 @@
 use Engines\MMT\MMTServiceApi;
 use Engines\MMT\MMTServiceApiException;
 use Engines\MMT\MMTServiceApiRequestException;
-use Users\MetadataDao;
 
 /**
  * Created by PhpStorm.
@@ -374,33 +373,27 @@ class Engines_MMT extends Engines_AbstractEngine {
 
             if ( $preImportIsDisabled and $userIsLogged ) {
 
-                // retrieve OWNER MMT License
-                $ownerMmtEngineMetaData = ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->get( $user->uid, 'mmt' );
-                if ( !empty( $ownerMmtEngineMetaData ) ) {
+                // get jobs keys
+                $project = Projects_ProjectDao::findById( $pid );
 
-                    // get jobs keys
-                    $project = Projects_ProjectDao::findById( $pid );
+                foreach ( $project->getJobs() as $job ) {
 
-                    foreach ( $project->getJobs() as $job ) {
+                    $memoryKeyStructs = [];
+                    $jobKeyList       = TmKeyManagement_TmKeyManagement::getJobTmKeys( $job->tm_keys, 'r', 'tm', $user->uid );
 
-                        $memoryKeyStructs = [];
-                        $jobKeyList       = TmKeyManagement_TmKeyManagement::getJobTmKeys( $job->tm_keys, 'r', 'tm', $user->uid );
-
-                        foreach ( $jobKeyList as $memKey ) {
-                            $memoryKeyStructs[] = new TmKeyManagement_MemoryKeyStruct(
-                                    [
-                                            'uid'    => $user->uid,
-                                            'tm_key' => $memKey
-                                    ]
-                            );
-                        }
-                        /**
-                         * @var Engines_MMT $MMTEngine
-                         */
-                        $MMTEngine = Engine::getInstance( $ownerMmtEngineMetaData->value );
-                        $MMTEngine->connectKeys( $memoryKeyStructs );
+                    foreach ( $jobKeyList as $memKey ) {
+                        $memoryKeyStructs[] = new TmKeyManagement_MemoryKeyStruct(
+                                [
+                                        'uid'    => $user->uid,
+                                        'tm_key' => $memKey
+                                ]
+                        );
                     }
+
+                    $engine->connectKeys( $memoryKeyStructs );
+
                 }
+
             }
         } catch ( Exception $e ) {
             Log::doJsonLog( $e->getMessage() );
