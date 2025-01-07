@@ -84,13 +84,14 @@ class BaseCommentEmail extends AbstractEmail {
             $revision_number = (int)$this->comment->revision_number;
 
             switch ($revision_number){
-                case 1:
+                default:
+                case 0:
                     return "translator";
 
-                case 2:
+                case 1:
                     return "the revisor";
 
-                case 3:
+                case 2:
                     return "the 2nd pass revisor";
             }
         }
