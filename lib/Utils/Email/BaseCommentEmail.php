@@ -86,7 +86,7 @@ class BaseCommentEmail extends AbstractEmail {
             switch ($revision_number){
                 default:
                 case 0:
-                    return "translator";
+                    return "the translator";
 
                 case 1:
                     return "the revisor";
