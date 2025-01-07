@@ -19,6 +19,7 @@ use Lara\TextBlock;
 use Lara\TranslateOptions;
 use Lara\Translator;
 use Log;
+use Projects_ProjectDao;
 use RedisHandler;
 use ReflectionException;
 use RuntimeException;
@@ -26,6 +27,7 @@ use SplFileObject;
 use Throwable;
 use TmKeyManagement_MemoryKeyStruct;
 use TmKeyManagement_TmKeyManagement;
+use Users_UserDao;
 use Users_UserStruct;
 
 /**
@@ -327,6 +329,41 @@ class Lara extends Engines_AbstractEngine {
         $clientMemories->importTmx( 'ext_my_' . $memoryKey, "$filePath.gz", true );
 
         $fp_out = null;
+
+    }
+
+    /**
+     * @param array      $projectRow
+     * @param array|null $segments
+     *
+     * @return void
+     */
+    public function syncMemories( array $projectRow, ?array $segments = [] ) {
+
+        try {
+
+            // get jobs keys
+            $project = Projects_ProjectDao::findById( $projectRow[ 'id' ] );
+            $user    = ( new Users_UserDao )->getByEmail( $projectRow[ 'id_customer' ] );
+
+            foreach ( $project->getJobs() as $job ) {
+
+                $keyIds     = [];
+                $jobKeyList = TmKeyManagement_TmKeyManagement::getJobTmKeys( $job->tm_keys, 'r', 'tm', $user->uid );
+
+                foreach ( $jobKeyList as $memKey ) {
+                    $keyIds[] = $memKey->key_ids;
+                }
+
+                $client = $this->_getClient();
+                $client->memories->connect( $keyIds );
+
+            }
+
+        } catch ( Exception $e ) {
+            Log::doJsonLog( $e->getMessage() );
+            Log::doJsonLog( $e->getTraceAsString() );
+        }
 
     }
 

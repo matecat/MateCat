@@ -616,7 +616,10 @@ class FastAnalysis extends AbstractDaemon {
             return $e->getCode() * -1;
         }
 
-        $featureSet->run( 'beforeSendSegmentsToTheQueue', array_values( $this->segments ), $this->actual_project_row );
+        $engine = Engine::getInstance( $this->actual_project_row[ 'id_mt_engine' ] );
+        if( $engine->isAdaptive() ){
+            $engine->syncMemories( $this->actual_project_row );
+        }
 
         /*
          * The $fastResultData[0]['id_mt_engine'] is the index of the MT engine we must use.

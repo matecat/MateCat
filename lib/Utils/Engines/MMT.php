@@ -3,6 +3,7 @@
 use Engines\MMT\MMTServiceApi;
 use Engines\MMT\MMTServiceApiException;
 use Engines\MMT\MMTServiceApiRequestException;
+use Users\MetadataDao;
 
 /**
  * Created by PhpStorm.
@@ -301,6 +302,114 @@ class Engines_MMT extends Engines_AbstractEngine {
     }
 
     /**
+     * @throws Exception
+     */
+    public function syncMemories( array $projectRow, ?array $segments = [] ) {
+
+        $pid    = $projectRow[ 'id' ];
+        $engine = Engine::getInstance( $projectRow[ 'id_mt_engine' ] );
+
+        if ( !empty( $engine->getEngineRecord()->getExtraParamsAsArray()[ 'MMT-context-analyzer' ] ) ) {
+
+            $source       = $segments[ 0 ][ 'source' ];
+            $targets      = [];
+            $jobLanguages = [];
+            foreach ( explode( ',', $segments[ 0 ][ 'target' ] ) as $jid_Lang ) {
+                [ $jobId, $target ] = explode( ":", $jid_Lang );
+                $jobLanguages[ $jobId ] = $source . "|" . $target;
+                $targets[]              = $target;
+            }
+
+            $tmp_name      = tempnam( sys_get_temp_dir(), 'mmt_cont_req-' );
+            $tmpFileObject = new SplFileObject( tempnam( sys_get_temp_dir(), 'mmt_cont_req-' ), 'w+' );
+            foreach ( $segments as $segment ) {
+                $tmpFileObject->fwrite( $segment[ 'segment' ] . "\n" );
+            }
+
+            try {
+
+                /*
+                    $result = Array
+                    (
+                        [en-US|es-ES] => 1:0.14934476,2:0.08131008,3:0.047170084
+                        [en-US|it-IT] =>
+                    )
+                */
+                $result = $engine->getContext( $tmpFileObject, $source, $targets );
+
+                $jMetadataDao = new \Jobs\MetadataDao();
+
+                Database::obtain()->begin();
+                foreach ( $result as $langPair => $context ) {
+                    $jMetadataDao->setCacheTTL( 60 * 60 * 24 * 30 )->set( array_search( $langPair, $jobLanguages ), "", 'mt_context', $context );
+                }
+                Database::obtain()->commit();
+
+            } catch ( Exception $e ) {
+                Log::doJsonLog( $e->getMessage() );
+                Log::doJsonLog( $e->getTraceAsString() );
+            } finally {
+                unset( $tmpFileObject );
+                @unlink( $tmp_name );
+            }
+
+        }
+
+        try {
+
+            //
+            // ==============================================
+            // If the MMT-preimport flag is disabled
+            // and user is logged in
+            // send user keys on a project basis
+            // ==============================================
+            //
+            $preImportIsDisabled = empty( $engine->getEngineRecord()->getExtraParamsAsArray()[ 'MMT-preimport' ] );
+            $userIsLogged        = !empty( $projectRows[ 'id_customer' ] ) && $projectRows[ 'id_customer' ] != 'translated_user';
+
+            $user = null;
+            if ( $userIsLogged ) {
+                $user = ( new Users_UserDao )->getByEmail( $projectRows[ 'id_customer' ] );
+            }
+
+            if ( $preImportIsDisabled and $userIsLogged ) {
+
+                // retrieve OWNER MMT License
+                $ownerMmtEngineMetaData = ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->get( $user->uid, 'mmt' );
+                if ( !empty( $ownerMmtEngineMetaData ) ) {
+
+                    // get jobs keys
+                    $project = Projects_ProjectDao::findById( $pid );
+
+                    foreach ( $project->getJobs() as $job ) {
+
+                        $memoryKeyStructs = [];
+                        $jobKeyList       = TmKeyManagement_TmKeyManagement::getJobTmKeys( $job->tm_keys, 'r', 'tm', $user->uid );
+
+                        foreach ( $jobKeyList as $memKey ) {
+                            $memoryKeyStructs[] = new TmKeyManagement_MemoryKeyStruct(
+                                    [
+                                            'uid'    => $user->uid,
+                                            'tm_key' => $memKey
+                                    ]
+                            );
+                        }
+                        /**
+                         * @var Engines_MMT $MMTEngine
+                         */
+                        $MMTEngine = Engine::getInstance( $ownerMmtEngineMetaData->value );
+                        $MMTEngine->connectKeys( $memoryKeyStructs );
+                    }
+                }
+            }
+        } catch ( Exception $e ) {
+            Log::doJsonLog( $e->getMessage() );
+            Log::doJsonLog( $e->getTraceAsString() );
+        }
+
+    }
+
+    /**
      *
      * @param $file    SplFileObject
      * @param $source  string
@@ -311,7 +420,7 @@ class Engines_MMT extends Engines_AbstractEngine {
      * @internal param array $langPairs
      *
      */
-    public function getContext( SplFileObject $file, $source, $targets ) {
+    protected function getContext( SplFileObject $file, $source, $targets ) {
 
         $fileName = $file->getRealPath();
         $file->rewind();
