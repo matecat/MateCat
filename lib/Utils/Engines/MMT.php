@@ -3,6 +3,7 @@
 use Engines\MMT\MMTServiceApi;
 use Engines\MMT\MMTServiceApiException;
 use Engines\MMT\MMTServiceApiRequestException;
+use Jobs\MetadataDao;
 
 /**
  * Created by PhpStorm.
@@ -306,9 +307,8 @@ class Engines_MMT extends Engines_AbstractEngine {
     public function syncMemories( array $projectRow, ?array $segments = [] ) {
 
         $pid    = $projectRow[ 'id' ];
-        $engine = Engine::getInstance( $projectRow[ 'id_mt_engine' ] );
 
-        if ( !empty( $engine->getEngineRecord()->getExtraParamsAsArray()[ 'MMT-context-analyzer' ] ) ) {
+        if ( !empty( $this->getEngineRecord()->getExtraParamsAsArray()[ 'MMT-context-analyzer' ] ) ) {
 
             $source       = $segments[ 0 ][ 'source' ];
             $targets      = [];
@@ -334,9 +334,9 @@ class Engines_MMT extends Engines_AbstractEngine {
                         [en-US|it-IT] =>
                     )
                 */
-                $result = $engine->getContext( $tmpFileObject, $source, $targets );
+                $result = $this->getContext( $tmpFileObject, $source, $targets );
 
-                $jMetadataDao = new \Jobs\MetadataDao();
+                $jMetadataDao = new MetadataDao();
 
                 Database::obtain()->begin();
                 foreach ( $result as $langPair => $context ) {
@@ -363,7 +363,7 @@ class Engines_MMT extends Engines_AbstractEngine {
             // send user keys on a project basis
             // ==============================================
             //
-            $preImportIsDisabled = empty( $engine->getEngineRecord()->getExtraParamsAsArray()[ 'MMT-preimport' ] );
+            $preImportIsDisabled = empty( $this->getEngineRecord()->getExtraParamsAsArray()[ 'MMT-preimport' ] );
             $user                = ( new Users_UserDao )->getByEmail( $projectRow[ 'id_customer' ] );
 
             if ( $preImportIsDisabled ) {
@@ -385,7 +385,7 @@ class Engines_MMT extends Engines_AbstractEngine {
                         );
                     }
 
-                    $engine->connectKeys( $memoryKeyStructs );
+                    $this->connectKeys( $memoryKeyStructs );
 
                 }
 
