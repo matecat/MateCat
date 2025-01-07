@@ -364,14 +364,9 @@ class Engines_MMT extends Engines_AbstractEngine {
             // ==============================================
             //
             $preImportIsDisabled = empty( $engine->getEngineRecord()->getExtraParamsAsArray()[ 'MMT-preimport' ] );
-            $userIsLogged        = !empty( $projectRow[ 'id_customer' ] ) && $projectRow[ 'id_customer' ] != 'translated_user';
+            $user                = ( new Users_UserDao )->getByEmail( $projectRow[ 'id_customer' ] );
 
-            $user = null;
-            if ( $userIsLogged ) {
-                $user = ( new Users_UserDao )->getByEmail( $projectRow[ 'id_customer' ] );
-            }
-
-            if ( $preImportIsDisabled and $userIsLogged ) {
+            if ( $preImportIsDisabled ) {
 
                 // get jobs keys
                 $project = Projects_ProjectDao::findById( $pid );
