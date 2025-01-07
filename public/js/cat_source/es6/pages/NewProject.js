@@ -55,6 +55,10 @@ import {
   BUTTON_SIZE,
   BUTTON_TYPE,
 } from '../components/common/Button/Button'
+import {
+  ONBOARDING_PAGE,
+  OnboardingTooltips,
+} from '../components/header/OnboardingTooltips'
 
 const SELECT_HEIGHT = 324
 
@@ -1028,6 +1032,11 @@ const NewProject = () => {
         isAuthenticated={isUserLogged}
         userId={isUserLogged ? userInfo.user.uid : null}
       />*/}
+      <OnboardingTooltips
+        show={isUserLogged && userInfo.user}
+        continous={true}
+        page={ONBOARDING_PAGE.HOME}
+      />
     </CreateProjectContext.Provider>
   ) : (
     <div>

@@ -1,6 +1,6 @@
 import {EventEmitter} from 'events'
 import assign from 'object-assign'
-import Immutable from 'immutable'
+import {fromJS} from 'immutable'
 import {forEach} from 'lodash'
 
 import AppDispatcher from './AppDispatcher'
@@ -9,9 +9,9 @@ import QRConstants from '../constants/QualityReportConstants'
 EventEmitter.prototype.setMaxListeners(0)
 
 let QualityReportStore = assign({}, EventEmitter.prototype, {
-  _segmentsFiles: Immutable.fromJS({}),
-  _files: Immutable.fromJS({}),
-  _jobInfo: Immutable.fromJS({}),
+  _segmentsFiles: fromJS({}),
+  _files: fromJS({}),
+  _jobInfo: fromJS({}),
   _lastSegment: null,
   storeSegments: function (segmentsData) {
     const files = {}
@@ -22,8 +22,8 @@ let QualityReportStore = assign({}, EventEmitter.prototype, {
         : (segmentsFiles[segment.file.id] = [segment])
       files[segment.file.id] = segment.file
     })
-    this._segmentsFiles = Immutable.fromJS(segmentsFiles)
-    this._files = Immutable.fromJS(files)
+    this._segmentsFiles = fromJS(segmentsFiles)
+    this._files = fromJS(files)
     this._lastSegment =
       segmentsData.segments.length > 0
         ? segmentsData._links.last_segment_id
@@ -31,24 +31,21 @@ let QualityReportStore = assign({}, EventEmitter.prototype, {
   },
 
   storeJobInfo: function (job) {
-    this._jobInfo = Immutable.fromJS(job)
+    this._jobInfo = fromJS(job)
   },
 
   addSegments: function (segmentsData) {
     forEach(segmentsData.segments, (segment) => {
       const fileId = segment.file.id.toString()
       if (this._segmentsFiles.get(fileId)) {
-        let immFiles = Immutable.fromJS(segment)
+        let immFiles = fromJS(segment)
         this._segmentsFiles = this._segmentsFiles.set(
           fileId,
           this._segmentsFiles.get(fileId).push(immFiles),
         )
       } else {
-        this._segmentsFiles = this._segmentsFiles.set(
-          fileId,
-          Immutable.fromJS([segment]),
-        )
-        this._files = this._files.set(fileId, Immutable.fromJS(segment.file))
+        this._segmentsFiles = this._segmentsFiles.set(fileId, fromJS([segment]))
+        this._files = this._files.set(fileId, fromJS(segment.file))
       }
     })
     this._lastSegment = segmentsData._links.last_segment_id
