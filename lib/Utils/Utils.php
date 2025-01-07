@@ -406,7 +406,7 @@ class Utils {
         $mailConf = @parse_ini_file( INIT::$ROOT . '/inc/Error_Mail_List.ini', true );
 
         if ( empty( $subject ) ) {
-            $subject = 'Alert from MateCat: ' . php_uname( 'n' );
+            $subject = 'Alert from Matecat: ' . php_uname( 'n' );
         } else {
             $subject .= ' ' . php_uname( 'n' );
         }

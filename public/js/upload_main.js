@@ -641,7 +641,6 @@ var convertFile = function (
             var extension =
               file['name'].split('.')[file['name'].split('.').length - 1]
             var thisIsATMXFile = extension.toLowerCase() == 'tmx'
-            var thereIsAKeyInTmPanel = $('#activetm').find('tr.mine').length
 
             /* c'è almeno un file tmx e non ho già generato la chiave => genera la chiave */
             if (thisIsATMXFile && !thereIsAKeyInTmPanel) {

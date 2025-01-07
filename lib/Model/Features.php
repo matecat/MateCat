@@ -13,7 +13,7 @@ use Klein\Request;
 /**
  * Class Features
  *
- * This class is an autoloader for MateCat Features, load external plugins classes
+ * This class is an autoloader for Matecat Features, load external plugins classes
  * defined in the
  *      <matecat_root>/plugins/<plugin>/manifest.php
  *
@@ -177,9 +177,9 @@ class Features {
              * Try to load external plugins classes and fallback to internal plugin code in case of failure
              *
              * If external plugin class is not defined ( no manifest or no plugin installed )
-             * Try to load MateCat core plugins, so they can install it's own routes
+             * Try to load Matecat core plugins, so they can install it's own routes
              *
-             * @deprecated because all MateCat internal route should not have a "plugins" namespace in the route, but they should have it's own controllers defined
+             * @deprecated because all Matecat internal route should not have a "plugins" namespace in the route, but they should have it's own controllers defined
              *             Ex: http://xxxx/plugins/review_extended/quality_report/xxx/xxxxxxx
              *             should be something like
              *             http://xxxx/review_extended/quality_report/xxx/xxxxxxx

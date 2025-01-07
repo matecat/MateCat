@@ -907,15 +907,6 @@ const getSegmentStructure = (segment, sideOpen) => {
                     </a>
                     <a
                       href="#"
-                      className="tagModeToggle "
-                      title="Display full/short tags"
-                    >
-                      <span className="icon-chevron-left"> </span>
-                      <span className="icon-tag-expand"> </span>
-                      <span className="icon-chevron-right"> </span>
-                    </a>
-                    <a
-                      href="#"
                       className="autofillTag"
                       title="Copy missing tags from source to target"
                     >
@@ -941,7 +932,7 @@ const getSegmentStructure = (segment, sideOpen) => {
                       {' '}
                       Translated{' '}
                     </a>
-                    <p>CTRL ENTER</p>
+                    <p>CTRL+ENTER</p>
                   </li>
                 </ul>
               </div>
