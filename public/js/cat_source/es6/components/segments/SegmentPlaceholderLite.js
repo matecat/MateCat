@@ -198,7 +198,7 @@ class SegmentPlaceholderLite extends React.Component {
                         {' '}
                         Translated{' '}
                       </a>
-                      <p>CTRL ENTER</p>
+                      <p>CTRL+ENTER</p>
                     </li>
                   </ul>
                 </div>
