@@ -1774,6 +1774,7 @@ body.rtl-target .editor .editarea span {
   cursor: auto;
 }
 
+
 .engine-error {
   padding-left: 40px !important;
 }
@@ -1986,8 +1987,7 @@ section.opened.editor .status {
     url('/public/css/fonts/calibri-webfont.woff') format('woff'),
     url('/public/css/fonts/calibri-webfont.ttf') format('truetype'),
     url('/public/css/fonts/calibri-webfont.eot'),
-    url('/public/css/fonts/calibri-webfont.eot?#iefix')
-      format('embedded-opentype');
+    url('/public/css/fonts/calibri-webfont.eot?#iefix') format('embedded-opentype');
 }
 
 @font-face {
@@ -2038,6 +2038,7 @@ section.opened.editor .status {
 }
 
 @media screen and (max-width: 1280px) {
+
   .text .source.item,
   .text .target.item,
   .white li {
