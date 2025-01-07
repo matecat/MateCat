@@ -292,6 +292,7 @@ class Lara extends Engines_AbstractEngine {
 
     /**
      * @throws LaraException
+     * @throws Exception
      */
     public function importMemory( string $filePath, string $memoryKey, Users_UserStruct $user ) {
 
