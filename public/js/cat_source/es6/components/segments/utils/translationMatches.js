@@ -189,13 +189,16 @@ let TranslationMatches = {
       console.log('SSE: ID_CLIENT not found')
       return Promise.resolve()
     }
-
+    const {contextListBefore, contextListAfter} =
+      SegmentUtils.getSegmentContext(id_segment_original)
     return getContributions({
       idSegment: id_segment_original,
       target: currentSegment.segment,
       crossLanguages: crossLanguageSettings
         ? [crossLanguageSettings.primary, crossLanguageSettings.secondary]
         : [],
+      contextListBefore,
+      contextListAfter,
     }).catch((errors) => {
       UI.processErrors(errors, 'getContribution')
       TranslationMatches.renderContributionErrors(errors, id_segment_original)
