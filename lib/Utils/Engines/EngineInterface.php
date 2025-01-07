@@ -52,4 +52,14 @@ interface Engines_EngineInterface {
      */
     public function getEngineRow();
 
+    /**
+     * @return bool
+     */
+    public function isAdaptive(): bool;
+
+    /**
+     * @return mixed
+     */
+    public function importMemory( string $filePath, string $memoryKey, Users_UserStruct $user );
+
 }

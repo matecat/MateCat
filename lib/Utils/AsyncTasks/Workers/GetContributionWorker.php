@@ -9,12 +9,15 @@
 
 namespace AsyncTasks\Workers;
 
+use API\Commons\Exceptions\AuthenticationError;
 use Constants\Ices;
 use Constants_TranslationStatus;
 use Contribution\ContributionRequestStruct;
 use Engines_DeepL;
 use Engines_MMT;
 use Exception;
+use Exceptions\NotFoundException;
+use Exceptions\ValidationError;
 use FeatureSet;
 use INIT;
 use Jobs\MetadataDao;
@@ -28,6 +31,7 @@ use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\AbstractWorker;
 use TaskRunner\Commons\QueueElement;
 use TaskRunner\Exceptions\EndQueueException;
+use TaskRunner\Exceptions\ReQueueException;
 use TmKeyManagement_TmKeyManagement;
 use Translations_SegmentTranslationDao;
 use Users_UserStruct;
@@ -188,7 +192,7 @@ class GetContributionWorker extends AbstractWorker {
     protected function _extractAvailableKeysForUser( ContributionRequestStruct $contributionStruct ) {
 
         //find all the job's TMs with write grants and make a contribution to them
-        $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $contributionStruct->getJobStruct()->tm_keys, 'r', 'tm', $contributionStruct->user->uid, $contributionStruct->userRole );
+        $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $contributionStruct->getJobStruct()->tm_keys, 'r', 'tm', $contributionStruct->getUser()->uid, $contributionStruct->userRole );
 
         $keyList = [];
         if ( !empty( $tm_keys ) ) {
@@ -396,20 +400,22 @@ class GetContributionWorker extends AbstractWorker {
     /**
      * @param ContributionRequestStruct $contributionStruct
      * @param Jobs_JobStruct            $jobStruct
-     * @param                           $targetLang
-     * @param                           $featureSet
+     * @param string                    $targetLang
+     * @param FeatureSet                $featureSet
      * @param bool                      $isCrossLang
      *
      * @return array
+     * @throws EndQueueException
+     * @throws ReQueueException
      * @throws Exception
      */
-    protected function _getMatches( ContributionRequestStruct $contributionStruct, $jobStruct, $targetLang, $featureSet, $isCrossLang = false ) {
+    protected function _getMatches( ContributionRequestStruct $contributionStruct, Jobs_JobStruct $jobStruct, string $targetLang, FeatureSet $featureSet, bool $isCrossLang = false ): array {
 
         $_config              = [];
         $_config[ 'segment' ] = $contributionStruct->getContexts()->segment;
         $_config[ 'source' ]  = $jobStruct->source;
         $_config[ 'target' ]  = $targetLang;
-        $_config[ 'uid' ]     = ( $contributionStruct->user !== null ? $contributionStruct->user->uid : 0 );
+        $_config[ 'uid' ]     = $contributionStruct->getUser()->uid ?? 0;
 
         $_config[ 'email' ] = INIT::$MYMEMORY_API_KEY;
 
@@ -500,7 +506,11 @@ class GetContributionWorker extends AbstractWorker {
 
         $mt_result = [];
 
-        if ( $jobStruct->id_mt_engine > 1 /* Request MT Directly */ && !$contributionStruct->concordanceSearch ) {
+        if (
+                $jobStruct->id_mt_engine > 1 /* Request MT Directly */ &&
+                !$contributionStruct->concordanceSearch &&
+                !$isCrossLang
+        ) {
 
             if ( empty( $tms_match ) || (int)str_replace( "%", "", $tms_match[ 0 ][ 'match' ] ) < 100 ) {
 
@@ -510,51 +520,18 @@ class GetContributionWorker extends AbstractWorker {
                 //if a callback is not set only the first argument is returned, get the config params from the callback
                 $config = $featureSet->filter( 'beforeGetContribution', $config, $mt_engine, $jobStruct );
 
-                $config[ 'segment' ]      = $contributionStruct->getContexts()->segment;
-                $config[ 'source' ]       = $jobStruct->source;
-                $config[ 'target' ]       = $jobStruct->target;
-                $config[ 'email' ]        = INIT::$MYMEMORY_API_KEY;
-                $config[ 'segid' ]        = $contributionStruct->segmentId;
-                $config[ 'job_id' ]       = $jobStruct->id;
-                $config[ 'job_password' ] = $jobStruct->password;
-                $config[ 'session' ]      = $contributionStruct->getSessionId();
-
-                if ( $mt_engine instanceof Engines_MMT ) {
-                    $metadataDao = new Projects_MetadataDao();
-                    $metadata    = $metadataDao->setCacheTTL( 86400 )->get( $contributionStruct->getProjectStruct()->id, 'mmt_glossaries' );
-
-                    if ( $metadata !== null ) {
-                        $metadata           = html_entity_decode( $metadata->value );
-                        $mmtGlossariesArray = json_decode( $metadata, true );
-
-                        $config[ 'glossaries' ]           = implode( ",", $mmtGlossariesArray[ 'glossaries' ] );
-                        $config[ 'ignore_glossary_case' ] = $mmtGlossariesArray[ 'ignore_glossary_case' ];
-                    }
-                }
-
-                // glossaries (only for DeepL)
-                if ( $mt_engine instanceof Engines_DeepL ) {
-
-                    $extraParams = $mt_engine->getEngineRecord()->extra_parameters;
-
-                    if ( !isset( $extraParams[ 'DeepL-Auth-Key' ] ) ) {
-                        throw new Exception( "DeepL API key not set" );
-                    }
-
-                    $metadataDao     = new Projects_MetadataDao();
-                    $deepLFormality  = $metadataDao->get( $contributionStruct->getProjectStruct()->id, 'deepl_formality', 86400 );
-                    $deepLIdGlossary = $metadataDao->get( $contributionStruct->getProjectStruct()->id, 'deepl_id_glossary', 86400 );
-
-                    if ( $deepLFormality !== null ) {
-                        $config[ 'formality' ] = $deepLFormality->value;
-                    }
-
-                    if ( $deepLIdGlossary !== null ) {
-                        $config[ 'idGlossary' ] = $deepLIdGlossary->value;
-                    }
-
-                    $mt_engine->setApiKey( $extraParams[ 'DeepL-Auth-Key' ] );
-                }
+                $config[ 'segment' ]             = $contributionStruct->getContexts()->segment;
+                $config[ 'source' ]              = $jobStruct->source;
+                $config[ 'target' ]              = $jobStruct->target;
+                $config[ 'email' ]               = INIT::$MYMEMORY_API_KEY;
+                $config[ 'segid' ]               = $contributionStruct->segmentId;
+                $config[ 'job_id' ]              = $jobStruct->id;
+                $config[ 'job_password' ]        = $jobStruct->password;
+                $config[ 'session' ]             = $contributionStruct->getSessionId();
+                $config[ 'all_job_tm_keys' ]     = $jobStruct->tm_keys;
+                $config[ 'project_id' ]          = $contributionStruct->getProjectStruct()->id;
+                $config[ 'context_list_before' ] = $contributionStruct->context_list_before;
+                $config[ 'context_list_after' ]  = $contributionStruct->context_list_after;
 
                 $mt_result = $mt_engine->get( $config );
             }
