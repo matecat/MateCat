@@ -618,7 +618,7 @@ class FastAnalysis extends AbstractDaemon {
 
         $engine = Engine::getInstance( $this->actual_project_row[ 'id_mt_engine' ] );
         if( $engine->isAdaptive() ){
-            $engine->syncMemories( $this->actual_project_row );
+            $engine->syncMemories( $this->actual_project_row, array_values( $this->segments ) );
         }
 
         /*
