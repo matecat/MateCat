@@ -1,3 +1,5 @@
+@import "commons/colors";
+
 body {
   margin: 0;
   padding: 0;
@@ -1080,6 +1082,10 @@ span.gdrive-icon {
 
 tr.ready .size span {
   visibility: visible;
+}
+
+.file_upload_error {
+  color: $redDefault;
 }
 
 .more {
