@@ -648,6 +648,7 @@ class FastAnalysis extends AbstractDaemon {
 
             foreach ( $this->segments as $k => $queue_element ) {
 
+                $queue_element[ 'project_id' ]       = $pid;
                 $queue_element[ 'id_segment' ]       = $queue_element[ 'id' ];
                 $queue_element[ 'pretranslate_100' ] = $this->actual_project_row[ 'pretranslate_100' ];
                 $queue_element[ 'tm_keys' ]          = $this->actual_project_row[ 'tm_keys' ];
