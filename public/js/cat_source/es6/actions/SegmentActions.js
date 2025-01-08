@@ -1129,10 +1129,10 @@ const SegmentActions = {
     })
   },
 
-  getContributions: function (sid, multiMatchLangs) {
-    TranslationMatches.getContribution(sid, 0, multiMatchLangs)
-    TranslationMatches.getContribution(sid, 1, multiMatchLangs)
-    TranslationMatches.getContribution(sid, 2, multiMatchLangs)
+  getContributions: function (sid, multiMatchLangs, force) {
+    TranslationMatches.getContribution(sid, 0, multiMatchLangs, force)
+    TranslationMatches.getContribution(sid, 1, multiMatchLangs, force)
+    TranslationMatches.getContribution(sid, 2, multiMatchLangs, force)
   },
 
   getContribution: function (sid, multiMatchLangs, force) {
