@@ -658,8 +658,8 @@ class FastAnalysis extends AbstractDaemon {
                 $queue_element[ 'id_mt_engine' ]     = $this->actual_project_row[ 'id_mt_engine' ];
                 $queue_element[ 'features' ]         = $projectFeaturesString;
                 $queue_element[ 'only_private' ]     = $this->actual_project_row[ 'only_private_tm' ];
-                $queue_element[ 'context_before' ]   = @$this->segments[ $k - 1 ][ 'segment' ];
-                $queue_element[ 'context_after' ]    = @$this->segments[ $k + 1 ][ 'segment' ];
+                $queue_element[ 'context_before' ]   = $this->segments[ $k - 1 ][ 'segment' ] ?? null;
+                $queue_element[ 'context_after' ]    = $this->segments[ $k + 1 ][ 'segment' ] ?? null;
 
                 $jsid        = explode( "-", $queue_element[ 'jsid' ] ); // 749-49:7acfb82b8168,50:47c70434fe78,51:f3f5551e9c4f
                 $passwordMap = explode( ",", $jsid[ 1 ] );
@@ -854,7 +854,7 @@ HD;
 
         //use this kind of construct to easily add/remove queues and to disable feature by: comment rows or change the switch flag to false
         switch ( true ) {
-            case ( $mtEngine instanceof Engines_MMT ):
+            case ( $mtEngine instanceof Engines_MMT || $mtEngine instanceof Utils\Engines\Lara ):
                 $context = $contextList[ 'P4' ];
                 break;
             case ( !$mtEngine instanceof Engines_MyMemory && !$mtEngine instanceof Engines_NONE ):

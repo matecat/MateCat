@@ -353,9 +353,10 @@ class Lara extends Engines_AbstractEngine {
                 $jobKeyList = TmKeyManagement_TmKeyManagement::getJobTmKeys( $job->tm_keys, 'r', 'tm', $user->uid );
 
                 foreach ( $jobKeyList as $memKey ) {
-                    $keyIds[] = $memKey->key_ids;
+                    $keyIds[] = $memKey->key;
                 }
 
+                $keyIds = $this->_reMapKeyList( $keyIds );
                 $client = $this->_getClient();
                 $client->memories->connect( $keyIds );
 
