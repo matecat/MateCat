@@ -51,7 +51,7 @@ class CustomPayableRateDao extends DataAccess_AbstractDao {
         return [
                 'id'                         => 0,
                 'uid'                        => $uid,
-                'payable_rate_template_name' => 'Default',
+                'payable_rate_template_name' => 'Matecat original settings',
                 'version'                    => 1,
                 'breakdowns'                 => [
                         'default' => PayableRates::$DEFAULT_PAYABLE_RATES

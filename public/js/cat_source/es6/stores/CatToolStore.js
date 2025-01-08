@@ -151,9 +151,6 @@ AppDispatcher.register(function (action) {
     case CatToolConstants.RELOAD_SEGMENT_FILTER:
       CatToolStore.emitChange(CatToolConstants.RELOAD_SEGMENT_FILTER)
       break
-    case CatToolConstants.SHOW_PROFILE_MESSAGE_TOOLTIP:
-      CatToolStore.emitChange(CatToolConstants.SHOW_PROFILE_MESSAGE_TOOLTIP)
-      break
     case CatToolConstants.STORE_FILES_INFO:
       CatToolStore.storeFilesInfo(action.files)
       CatToolStore.emitChange(CatToolConstants.STORE_FILES_INFO, action.files)

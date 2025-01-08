@@ -2,12 +2,11 @@ import React, {useContext, useEffect, useRef, useState} from 'react'
 import UserStore from '../stores/UserStore'
 import Header from '../components/header/Header'
 import AnalyzeMain from '../components/analyze/AnalyzeMain'
-import NotificationBox from '../components/notificationsComponent/NotificationBox'
 import {CookieConsent} from '../components/common/CookieConsent'
 import {getJobVolumeAnalysis} from '../api/getJobVolumeAnalysis'
 import {getProject} from '../api/getProject'
 import {getVolumeAnalysis} from '../api/getVolumeAnalysis'
-import Immutable from 'immutable'
+import {fromJS} from 'immutable'
 import {ANALYSIS_STATUS} from '../constants/Constants'
 import {mountPage} from './mountPage'
 import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper'
@@ -96,8 +95,8 @@ const AnalyzePage = () => {
       </header>
       <div className="project-list" id="analyze-container" ref={containerRef}>
         <AnalyzeMain
-          project={Immutable.fromJS(project)}
-          volumeAnalysis={Immutable.fromJS(volumeAnalysis)}
+          project={fromJS(project)}
+          volumeAnalysis={fromJS(volumeAnalysis)}
           parentRef={containerRef}
         />
       </div>

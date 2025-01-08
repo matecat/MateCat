@@ -890,7 +890,7 @@ class ProjectManager {
 
             //Allow projects with less than 250.000 words or characters ( for cjk languages )
             if ( $this->files_word_count > INIT::$MAX_SOURCE_WORDS ) {
-                throw new Exception( "MateCat is unable to create your project. Please contact us at " . INIT::$SUPPORT_MAIL . ", we will be happy to help you!", 128 );
+                throw new Exception( "Matecat is unable to create your project. Please contact us at " . INIT::$SUPPORT_MAIL . ", we will be happy to help you!", 128 );
             }
 
             $featureSet->run( "beforeInsertSegments", $this->projectStructure,
@@ -1195,8 +1195,8 @@ class ProjectManager {
                         $this->getSingleS3QueueFile( $fileName );
                     }
 
-                    $this->tmxServiceWrapper->addTmxInMyMemory( $file );
-                    $this->features->run( 'postPushTMX', $file, $this->projectStructure[ 'id_customer' ] );
+                    $userStruct = ( new Users_UserDao() )->setCacheTTL( 60 * 60 )->getByUid( $this->projectStructure[ 'uid' ] );
+                    $this->tmxServiceWrapper->addTmxInMyMemory( $file, $userStruct );
 
                 } else {
                     //don't call the postPushTMX for normal files
@@ -2391,8 +2391,8 @@ class ProjectManager {
              */
             $this->projectStructure[ 'segments' ][ $fid ][ $position ]->id = $id_segment;
 
-            /** @var Segments_SegmentOriginalDataStruct $segmentOriginalDataStruct */
-            $segmentOriginalDataStruct = @$this->projectStructure[ 'segments-original-data' ][ $fid ][ $position ];
+            /** @var ?Segments_SegmentOriginalDataStruct $segmentOriginalDataStruct */
+            $segmentOriginalDataStruct = $this->projectStructure[ 'segments-original-data' ][ $fid ][ $position ] ?? null;
 
             if ( isset( $segmentOriginalDataStruct->map ) ) {
 
@@ -2896,7 +2896,7 @@ class ProjectManager {
      * setSegmentIdForNotes
      *
      * Adds notes to segment, taking into account that a same note may be assigned to
-     * more than one MateCat segment, due to the <mrk> tags.
+     * more than one Matecat segment, due to the <mrk> tags.
      *
      * Example:
      * ['notes'][ $internal_id] => array( 'aaa' );

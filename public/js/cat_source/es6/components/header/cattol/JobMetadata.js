@@ -78,12 +78,12 @@ export const JobMetadata = ({metadata}) => {
   }, [])
 
   return (
-    <div
-      className="action-submenu"
-      id="files-instructions"
-      title="Instructions"
-    >
-      {showButton && (
+    showButton && (
+      <div
+        className="action-submenu"
+        id="files-instructions"
+        title="Instructions"
+      >
         <div onClick={openModal}>
           <svg
             width="28"
@@ -104,8 +104,8 @@ export const JobMetadata = ({metadata}) => {
             />
           </svg>
         </div>
-      )}
-    </div>
+      </div>
+    )
   )
 }
 

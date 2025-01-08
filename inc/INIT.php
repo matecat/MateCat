@@ -69,7 +69,7 @@ class INIT {
     public static $SMTP_HOSTNAME;
 
     public static $MAILER_FROM        = 'cattool@matecat.com';
-    public static $MAILER_FROM_NAME   = 'MateCat';
+    public static $MAILER_FROM_NAME   = 'Matecat';
     public static $MAILER_RETURN_PATH = 'no-reply@matecat.com';
 
     public static $LOG_REPOSITORY;
@@ -155,7 +155,6 @@ class INIT {
      * @var int Interval in seconds
      */
     public static $COPY_SOURCE_INTERVAL = 300;
-    public static $MAX_NUM_SEGMENTS     = 500;
 
     /**
      * Default Matecat user agent string
@@ -204,6 +203,11 @@ class INIT {
      * @var string
      */
     public static $DEFAULT_TM_KEY = '';
+
+    /**
+     * @var string The default MMT license is applied when Lara falls back for unsupported languages and the user does not add their personal MMT license.
+     */
+    public static $DEFAULT_MMT_KEY = '';
 
     public static $ENABLED_BROWSERS = [ 'applewebkit', 'chrome', 'safari', 'edge', 'firefox' ]; 
 
