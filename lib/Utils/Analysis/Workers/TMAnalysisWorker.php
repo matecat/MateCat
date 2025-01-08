@@ -519,7 +519,6 @@ class TMAnalysisWorker extends AbstractWorker {
     protected function _getMatches( QueueElement $queueElement ): array {
 
         $_config                 = [];
-        $_config[ 'project_id' ] = $queueElement->params->project_id;
         $_config[ 'segment' ]    = $queueElement->params->segment;
         $_config[ 'source' ]     = $queueElement->params->source;
         $_config[ 'target' ]     = $queueElement->params->target;
