@@ -61,8 +61,8 @@ class Engines_DeepL extends Engines_AbstractEngine {
 
             // glossaries (only for DeepL)
             $metadataDao     = new Projects_MetadataDao();
-            $deepLFormality  = $metadataDao->get( $_config[ 'project_id' ], 'deepl_formality', 86400 );
-            $deepLIdGlossary = $metadataDao->get( $_config[ 'project_id' ], 'deepl_id_glossary', 86400 );
+            $deepLFormality  = (isset($_config['pid'])) ? $metadataDao->get( $_config[ 'pid' ], 'deepl_formality', 86400 ) : null;
+            $deepLIdGlossary = (isset($_config['pid'])) ? $metadataDao->get( $_config[ 'pid' ], 'deepl_id_glossary', 86400 ) : null;
 
             if ( $deepLFormality !== null ) {
                 $_config[ 'formality' ] = $deepLFormality->value;
