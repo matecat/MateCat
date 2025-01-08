@@ -59,6 +59,10 @@ class Engines_DeepL extends Engines_AbstractEngine {
                 throw new Exception( "DeepL API key not set" );
             }
 
+            if ( !isset( $_config[ 'project_id' ] ) ) {
+                throw new Exception( "Missing project ID" );
+            }
+
             // glossaries (only for DeepL)
             $metadataDao     = new Projects_MetadataDao();
             $deepLFormality  = $metadataDao->get( $_config[ 'project_id' ], 'deepl_formality', 86400 );
