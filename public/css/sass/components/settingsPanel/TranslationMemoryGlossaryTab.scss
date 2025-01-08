@@ -369,17 +369,20 @@
 
 .translation-memory-glossary-tab-active-table {
   .settings-panel-row {
-    padding: 0 10px;
+    padding-left: 10px;
+    padding-right: 10px;
 
     &:first-child {
       padding: 10px !important;
     }
 
-    &:last-child {
-      padding: 0 10px 10px;
+    &:last-child:not(.settings-panel-row-dragover-half-bottom) {
+      padding-bottom: 10px;
     }
 
-    &:last-child:not(:nth-child(2)) {
+    &:last-child:not(:nth-child(2)):not(
+        .settings-panel-row-dragover-half-bottom
+      ) {
       .settings-panel-row-active {
         border-bottom-left-radius: 8px;
         border-bottom-right-radius: 8px;
