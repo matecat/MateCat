@@ -49,6 +49,7 @@ class Engines_DeepL extends Engines_AbstractEngine {
      * @inheritDoc
      */
     public function get( $_config ) {
+
         try {
             $source = explode( "-", $_config[ 'source' ] );
             $target = explode( "-", $_config[ 'target' ] );
