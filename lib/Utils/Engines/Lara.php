@@ -327,7 +327,8 @@ class Lara extends Engines_AbstractEngine {
         $tmpFileObject = null;
         gzclose( $fp_out );
 
-        $clientMemories->importTmx( 'ext_my_' . $memoryKey, "$filePath.gz", true );
+        $res = $clientMemories->importTmx( 'ext_my_' . $memoryKey, "$filePath.gz", true );
+        Log::doJsonLog( $res );
 
         $fp_out = null;
 
