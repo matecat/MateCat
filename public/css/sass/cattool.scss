@@ -1,4 +1,4 @@
-@import '_mixins';
+@import 'commons/mixins';
 @import 'commons/_colors';
 body.cattool {
   //display: flex;
@@ -45,194 +45,10 @@ body.cattool {
     }
   }
 
-  .stats-foo {
-    //height: 44px;
-    background-color: $white;
-    width: 100%;
-    //position: fixed;
-    bottom: 0;
-    left: 0;
-    z-index: 2;
-    display: grid;
-    min-width: 1024px;
-
-    /* .footer-body {
-      display: grid;
-      position: relative;
-      grid-column-gap: 10px;
-      grid-template-columns:
-        minmax(80px, 120px) minmax(80px, 420px) minmax(140px, 350px)
-        minmax(172px, 0.2fr) minmax(116px, 0.2fr) minmax(316px, 0.4fr);
-      align-items: center;
-      padding: 0 12px 0 14px;
-      height: 44px;
-
-      .item {
-        position: relative;
-        font-size: 14px;
-        font-weight: bold;
-        font-style: normal;
-        font-stretch: normal;
-        line-height: 1.5;
-        color: black;
-
-        .common-tooltip {
-          font-weight: normal;
-          span {
-            max-width: none;
-          }
-        }
-
-        p {
-          margin: 0;
-          float: none;
-
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
-
-        #job_id {
-          text-align: left;
-        }
-
-        &.language {
-          display: grid;
-          justify-self: end;
-        }
-
-        .to-arrow {
-          font-size: 14px;
-          font-weight: bold;
-          color: #999999;
-        }
-
-        #stat-todo {
-          font-weight: bold;
-          font-size: 14px;
-
-          span {
-            color: black;
-            text-decoration: underline;
-            &:hover {
-              text-decoration: none;
-            }
-          }
-        }
-
-        #job_id {
-          font-weight: 200;
-          font-size: 14px;
-        }
-
-        .statistics-core {
-          font-size: 14px;
-          font-weight: 200;
-
-          a {
-            span {
-              color: black;
-              text-decoration: underline;
-              &:hover {
-                text-decoration: none;
-              }
-            }
-          }
-        }
-      }
-
-      .progress-bar .progr {
-        position: relative;
-        display: grid;
-        grid-template-columns: 1fr 44px;
-        grid-column-gap: 8px;
-
-        .percent {
-          font-weight: 600;
-        }
-
-        .common-tooltip {
-          left: calc(50% - 22px);
-          span {
-            max-width: none;
-          }
-        }
-
-        .meter {
-          margin: 0 !important;
-          height: auto;
-
-          @-webkit-keyframes move-bg {
-            from {
-              -webkit-transform: translateX(0);
-            }
-            to {
-              -webkit-transform: translateX(46px);
-            }
-          }
-
-          @keyframes move-bg {
-            from {
-              transform: translateX(0);
-            }
-            to {
-              transform: translateX(46px);
-            }
-          }
-
-          .bg-loader {
-            position: absolute;
-            left: -46px;
-            right: 0;
-            top: 0;
-            bottom: 0;
-            z-index: 1;
-
-            background: -webkit-repeating-linear-gradient(
-              110deg,
-              #e8e8e8 0px,
-              #e8e8e8 10px,
-              #d8d8d8 0px,
-              #d8d8d8 20px
-            );
-            background: repeating-linear-gradient(
-              110deg,
-              #e8e8e8 0px,
-              #e8e8e8 10px,
-              #d8d8d8 0px,
-              #d8d8d8 20px
-            );
-
-            -webkit-animation-name: move-bg;
-            -webkit-animation-duration: 0.8s;
-            -webkit-animation-timing-function: linear;
-            -webkit-animation-iteration-count: infinite;
-
-            animation-name: move-bg;
-            animation-duration: 0.8s;
-            animation-timing-function: linear;
-            animation-iteration-count: infinite;
-          }
-
-          a {
-            &:after {
-              background-image: none;
-            }
-          }
-        }
-      }
-      .statistics-details {
-        display: grid;
-        grid-template-columns: minmax(144px, 0.4fr) minmax(168px, 0.6fr);
-        grid-column-gap: 4px;
-        justify-self: end;
-      }
-    } */
-  }
   .pointer-first-segment {
     height: 36px;
     width: 36px;
-    background: $darkBlue url('../../img/icons/arrow-up.svg') no-repeat center
+    background: $darkBlue url('/public/img/icons/arrow-up.svg') no-repeat center
       center;
     background-size: 24px;
     border-radius: 50%;
@@ -248,14 +64,6 @@ body.cattool {
   }
 }
 
-/*
-This file contains styles that are specific to the Cattool page.
-Styles from other css files should be ported over time.
-*/
-.statusmenu li a {
-  text-transform: uppercase;
-  cursor: pointer;
-}
 
 .segment-side-buttons {
   /* styles based on .sid line 376 style.css */
@@ -272,7 +80,6 @@ Styles from other css files should be ported over time.
   height: 100%;
 }
 
-.segmentButton,
 .toolbar a {
   height: 20px;
   zoom: 0.8;
@@ -293,26 +100,6 @@ Styles from other css files should be ported over time.
   }
 }
 
-.position-sing-in {
-  position: relative;
-  top: 5px;
-}
-
-.btn-confirm-medium {
-  color: #fff;
-  background: $translatedBlue;
-  border: 1px solid #848689;
-  font-weight: bold;
-  text-decoration: none;
-  padding: 8px 18px;
-  border-radius: 2px;
-  font-size: 18px;
-  margin: 0px 0px 0px 0px;
-  display: inline-block;
-  text-align: center;
-  position: relative;
-}
-
 //ICE MATCH
 .ice-locked,
 .readonly {
@@ -323,48 +110,5 @@ Styles from other css files should be ported over time.
   .warnings,
   .toolbar {
     display: none !important;
-  }
-}
-
-//Remove
-.ui.popup {
-  &.user-menu-tooltip {
-    right: 42px !important;
-  }
-  &.three-dots-menu-tooltip {
-    min-width: 300px;
-  }
-  &.user-menu-tooltip,
-  &.three-dots-menu-tooltip,
-  &.files-instructions-tooltip {
-    h4.header {
-      box-shadow: none !important;
-      background: transparent !important;
-      text-decoration: none;
-      border-bottom: none;
-      color: black;
-    }
-    .content {
-      width: 100%;
-      background-color: transparent !important;
-      border: none;
-      padding: unset;
-    }
-    .content p {
-      font-size: 15px;
-      text-align: left !important;
-      background-color: transparent !important;
-      padding-top: 10px;
-      min-width: 180px;
-    }
-
-    a.close-popup-teams {
-      float: right;
-      cursor: pointer;
-      text-decoration: underline;
-      &:hover {
-        text-decoration: none;
-      }
-    }
   }
 }

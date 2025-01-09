@@ -125,6 +125,12 @@
       }
     }
   }
+
+  .provider-field-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
 }
 .machine-translation-tab-table-title {
   display: flex;
@@ -195,6 +201,21 @@
 
   .add-mt-provider .select-with-label__wrapper {
     margin-right: 30px;
+  }
+
+  .provider-license-label-with-icon {
+    display: flex;
+    gap: 5px;
+  }
+
+  .provider-data-lara {
+    .button {
+      margin-top: 62px !important;
+    }
+
+    .provider-field {
+      gap: 15px !important;
+    }
   }
 }
 .machine-translation-tab {
@@ -439,7 +460,7 @@
 
 .spinner {
   position: absolute;
-  background: url(../../img/loading.gif) 48% top no-repeat !important;
+  background: url(/public/img/loading.gif) 48% top no-repeat !important;
   background-size: 26px 26px !important;
   width: 26px;
   height: 26px;

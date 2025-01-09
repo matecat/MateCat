@@ -274,7 +274,7 @@ class TMAnalysisWorker extends AbstractWorker {
         $this->_incrementAnalyzedCount( $queueElement->params->pid, $eq_words, $standard_words );
         $this->_decSegmentsToAnalyzeOfWaitingProjects( $queueElement->params->pid );
         $this->_tryToCloseProject( $queueElement->params );
-        
+
     }
 
     /**
@@ -518,11 +518,11 @@ class TMAnalysisWorker extends AbstractWorker {
      */
     protected function _getMatches( QueueElement $queueElement ): array {
 
-        $_config              = [];
-        $_config[ 'segment' ] = $queueElement->params->segment;
-        $_config[ 'source' ]  = $queueElement->params->source;
-        $_config[ 'target' ]  = $queueElement->params->target;
-        $_config[ 'email' ]   = INIT::$MYMEMORY_TM_API_KEY;
+        $_config                 = [];
+        $_config[ 'segment' ]    = $queueElement->params->segment;
+        $_config[ 'source' ]     = $queueElement->params->source;
+        $_config[ 'target' ]     = $queueElement->params->target;
+        $_config[ 'email' ]      = INIT::$MYMEMORY_TM_API_KEY;
 
         $_config[ 'context_before' ]    = $queueElement->params->context_before;
         $_config[ 'context_after' ]     = $queueElement->params->context_after;
@@ -639,6 +639,9 @@ class TMAnalysisWorker extends AbstractWorker {
 
             $config = $mtEngine->getConfigStruct();
             $config = array_merge( $config, $_config );
+
+            // set for lara engine in case, this is needed to catch all owner keys
+            $config[ 'all_job_tm_keys' ] = $queueElement->params->tm_keys;
 
             //if a callback is not set only the first argument is returned, get the config params from the callback
             $config = $this->featureSet->filter( 'analysisBeforeMTGetContribution', $config, $mtEngine, $queueElement, $mt_evaluation );
