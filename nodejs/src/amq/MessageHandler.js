@@ -58,7 +58,7 @@ module.exports.MessageHandler = class {
     message.data.payload._type = message._type;
 
     logger.debug([
-      "Sending message",
+      "Sending message to room",
       MESSAGE_NAME,
       room,
       {data: message.data.payload}
