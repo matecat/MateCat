@@ -123,7 +123,7 @@ sudo -u $MATECAT_USER -H sh -c "cp /home/$MATECAT_USER/cattool/inc/config.ini.sa
 sudo sed -i "s|STORAGE_DIR = \"/home/matecat/cattool/storage\"|STORAGE_DIR = \"$MATECAT_STORAGE_DIR\"|g" /home/$MATECAT_USER/cattool/inc/config.ini
 sudo sed -i "s|CLI_HTTP_HOST = \"http://localhost\"|CLI_HTTP_HOST = \"http://$MATECAT_SERVERNAME\"|g" /home/$MATECAT_USER/cattool/inc/config.ini
 sudo sed -i "s|COOKIE_DOMAIN = \"localhost\"|COOKIE_DOMAIN = \"$MATECAT_SERVERNAME\"|g" /home/$MATECAT_USER/cattool/inc/config.ini
-sudo sed -i "s|SSE_BASE_URL      = \"localhost/sse\"|SSE_BASE_URL = \"$MATECAT_SERVERNAME/sse\"|g" /home/$MATECAT_USER/cattool/inc/config.ini
+sudo sed -i "s|SOCKET_BASE_URL      = \"localhost/sse\"|SOCKET_BASE_URL = \"$MATECAT_SERVERNAME/sse\"|g" /home/$MATECAT_USER/cattool/inc/config.ini
 sudo sed -i "s|FILE_STORAGE_METHOD = 's3'|FILE_STORAGE_METHOD = 'fs'|g" /home/$MATECAT_USER/cattool/inc/config.ini
 
 # Set up login_secret.dat file

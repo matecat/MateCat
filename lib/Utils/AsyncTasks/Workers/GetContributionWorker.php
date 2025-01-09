@@ -180,7 +180,7 @@ class GetContributionWorker extends AbstractWorker {
                 ]
         ];
 
-        $this->publishToSseTopic( $_object );
+        $this->publishToNodeJsClients( $_object );
         $this->_doLog( json_encode( $_object ) );
 
     }

@@ -77,7 +77,7 @@ trait AuthenticationTrait {
                         ]
                 ]
         ] );
-        $queueHandler->publishToTopic( INIT::$SSE_NOTIFICATIONS_QUEUE_NAME, new Message( $message ) );
+        $queueHandler->publishToNodeJsClients( INIT::$SOCKET_NOTIFICATIONS_QUEUE_NAME, new Message( $message ) );
     }
 
     public function logout() {
