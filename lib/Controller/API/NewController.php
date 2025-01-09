@@ -1042,7 +1042,7 @@ class NewController extends ajaxController {
 
                 // first check if `filters_extraction_parameters` is a valid JSON
                 if ( !Utils::isJson( $json ) ) {
-                    throw new Exception( "filters_extraction_parameters is not a valid JSON" );
+                    throw new Exception( "private_tm_key_json is not a valid JSON" );
                 }
 
                 $schema = file_get_contents( INIT::$ROOT . '/inc/validation/schema/private_tm_key_json.json' );
