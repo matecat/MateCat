@@ -327,7 +327,8 @@ class Lara extends Engines_AbstractEngine {
         $tmpFileObject = null;
         gzclose( $fp_out );
 
-        $clientMemories->importTmx( 'ext_my_' . $memoryKey, "$filePath.gz", true );
+        $res = $clientMemories->importTmx( 'ext_my_' . $memoryKey, "$filePath.gz", true );
+        Log::doJsonLog( $res );
 
         $fp_out = null;
 
@@ -358,8 +359,8 @@ class Lara extends Engines_AbstractEngine {
 
                 $keyIds = $this->_reMapKeyList( $keyIds );
                 $client = $this->_getClient();
-                $client->memories->connect( $keyIds );
-                Log::doJsonLog( "Keys connected: " . implode( ',', $keyIds ) );
+                $res = $client->memories->connect( $keyIds );
+                Log::doJsonLog( "Keys connected: " . implode( ',', $keyIds ) . " -> " . json_encode( $res ) );
 
             }
 
