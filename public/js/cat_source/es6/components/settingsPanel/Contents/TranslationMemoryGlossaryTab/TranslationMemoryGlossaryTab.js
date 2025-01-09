@@ -7,13 +7,16 @@ import React, {
 } from 'react'
 import {SettingsPanelTable} from '../../SettingsPanelTable/SettingsPanelTable'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
+import {ApplicationWrapperContext} from '../../../common/ApplicationWrapper'
 import {TMKeyRow} from './TMKeyRow'
 import {TMCreateResourceRow} from './TMCreateResourceRow'
+import CatToolActions from '../../../../actions/CatToolActions'
+import SegmentActions from '../../../../actions/SegmentActions'
+import SegmentStore from '../../../../stores/SegmentStore'
 import {updateJobKeys} from '../../../../api/updateJobKeys'
-
 import Users from '../../../../../../../img/icons/Users'
 import AddWide from '../../../../../../../img/icons/AddWide'
-import CatToolActions from '../../../../actions/CatToolActions'
+import {METADATA_KEY} from '../../../../constants/Constants'
 
 const COLUMNS_TABLE_ACTIVE = [
   {name: 'Lookup'},
@@ -99,14 +102,9 @@ export const getTmDataStructureToSendServer = ({tmKeys = [], keysOrdered}) => {
 export const TranslationMemoryGlossaryTabContext = createContext({})
 
 export const TranslationMemoryGlossaryTab = () => {
-  const {
-    tmKeys,
-    setTmKeys,
-    openLoginModal,
-    modifyingCurrentTemplate,
-    currentProjectTemplate,
-  } = useContext(SettingsPanelContext)
-
+  const {tmKeys, setTmKeys, modifyingCurrentTemplate, currentProjectTemplate} =
+    useContext(SettingsPanelContext)
+  const {userInfo} = useContext(ApplicationWrapperContext)
   const getPublicMatches = currentProjectTemplate.getPublicMatches
   const isPretranslate100Active = currentProjectTemplate.pretranslate100
   const setIsPretranslate100Active = (value) =>
@@ -184,7 +182,14 @@ export const TranslationMemoryGlossaryTab = () => {
       updateJobKeys({
         getPublicMatches,
         dataTm: getTmDataStructureToSendServer({tmKeys, keysOrdered}),
-      }).then(() => CatToolActions.onTMKeysChangeStatus())
+      }).then(() => {
+        CatToolActions.onTMKeysChangeStatus()
+        SegmentActions.getContributions(
+          SegmentStore.getCurrentSegmentId(),
+          userInfo.metadata[METADATA_KEY],
+          true,
+        )
+      })
     }
   }
 
@@ -328,7 +333,14 @@ export const TranslationMemoryGlossaryTab = () => {
         updateJobKeys({
           getPublicMatches,
           dataTm: getTmDataStructureToSendServer({tmKeys}),
-        }).then(() => CatToolActions.onTMKeysChangeStatus())
+        }).then(() => {
+          CatToolActions.onTMKeysChangeStatus()
+          SegmentActions.getContributions(
+            SegmentStore.getCurrentSegmentId(),
+            userInfo.metadata[METADATA_KEY],
+            true,
+          )
+        })
       }
     }
 
