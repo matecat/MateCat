@@ -5,10 +5,12 @@
  */
 const io = require("socket.io");
 const {setupWorker} = require("@socket.io/sticky");
+const {createAdapter} = require("@socket.io/redis-adapter");
 const {Reader} = require('./amq/AMQconnector');
 const {MessageHandler, MESSAGE_NAME} = require('./amq/MessageHandler');
 const {logger, getWebSocketClientAddress} = require('./utils');
 const {verify} = require('jsonwebtoken');
+const Redis = require("ioredis");
 module.exports.Application = class {
 
   constructor(server, amqConnector, options) {
@@ -17,6 +19,16 @@ module.exports.Application = class {
     };
     this.logger = logger;
     this.options = options;
+
+    // setup redis adapter
+    logger.info(['Connecting redis for adapter started', this.options.redis])
+    const pubClient = new Redis(this.options.redis);
+
+    pubClient.on("error", (err) => {
+      logger.error(err);
+    });
+
+    const subClient = pubClient.duplicate();
 
     this._socketIOServer = io(server, {
       path: this.options.path,
@@ -27,6 +39,7 @@ module.exports.Application = class {
         origin: this.options.allowedOrigins,
         credentials: true,
       },
+      adapter: createAdapter(pubClient, subClient),
     });
 
     // setup connection with the primary process
@@ -147,7 +160,6 @@ module.exports.Application = class {
   sendRoomNotifications = (room, type, message) => {
     this._socketIOServer.to(room).emit(type, message);
   };
-
 
 
 }

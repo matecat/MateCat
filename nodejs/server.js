@@ -23,7 +23,7 @@ const auth_secret_key = fs.readFileSync(path.resolve(__dirname, '../inc/login_se
 const serverPath = config.server.path;
 
 // Connections Options for stompit
-const parameters = {
+const amqParameters = {
   read_queue: config.queue.name,
   connectOptions: {
     host: config.queue.host,
@@ -95,14 +95,15 @@ if (cluster.isPrimary) {
   const server = http.createServer();
 
   //Initialize AMQ Connection pool
-  const amqConnector = new AmqConnectionManager(parameters);
+  const amqConnector = new AmqConnectionManager(amqParameters);
 
   let app = new Application(server, amqConnector, {
     path: serverPath,
     workerId: cluster.worker.id,
     serverVersion: SERVER_VERSION,
     allowedOrigins: allowedOrigins,
-    authSecretKey: auth_secret_key
+    authSecretKey: auth_secret_key,
+    redis: config.redis
   }).start();
 
   ['SIGINT', 'SIGTERM'].forEach(

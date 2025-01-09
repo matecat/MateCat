@@ -236,10 +236,10 @@ abstract class AbstractWorker implements SplSubject {
      * @param $_object
      *
      */
-    protected function publishToSseTopic( $_object ) {
+    protected function publishToNodeJsClients( $_object ) {
 
         $message = json_encode( $_object );
-        AMQHandler::getNewInstanceForDaemons()->publishToTopic( INIT::$SSE_NOTIFICATIONS_QUEUE_NAME, new Message( $message, [ 'persistent' => 'false' ] ) );
+        AMQHandler::getNewInstanceForDaemons()->publishToNodeJsClients( INIT::$SOCKET_NOTIFICATIONS_QUEUE_NAME, new Message( $message, [ 'persistent' => 'false' ] ) );
         $this->_doLog( $message );
 
     }

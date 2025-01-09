@@ -76,23 +76,23 @@ module.exports.Reader = class {
       (error, message) => {
 
         if (error) {
-          logger.error('!! subscribe error ' + error.message);
+          logger.error('!! Topic: !! subscribe error ' + error.message);
           return;
         }
 
         message.readString('utf-8', (error, body) => {
 
           if (error) {
-            logger.error('!! read message error ' + error.message);
+            logger.error('!! Topic: !! read message error ' + error.message);
             return;
           }
 
           try {
             const obj = JSON.parse(body);
-            logger.debug(['Received message', obj._type]);
+            logger.debug(['Topic: Received message', obj._type]);
             this.messageHandler(obj);
           } catch (e) {
-            logger.error('Fail parsing message', e);
+            logger.error('!! Topic: !! Fail parsing message', e);
           }
 
           channel.ack(message);
