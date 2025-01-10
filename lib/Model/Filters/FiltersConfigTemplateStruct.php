@@ -6,6 +6,7 @@ use DataAccess_AbstractDaoSilentStruct;
 use Date\DateTimeUtil;
 use DomainException;
 use Exception;
+use Filters\DTO\Dita;
 use Filters\DTO\Json;
 use Filters\DTO\MSExcel;
 use Filters\DTO\MSPowerpoint;
@@ -28,6 +29,7 @@ class FiltersConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruct imp
     public ?MSWord       $ms_word       = null;
     public ?MSExcel      $ms_excel      = null;
     public ?MSPowerpoint $ms_powerpoint = null;
+    public ?Dita         $dita          = null;
 
     /**
      * @return null
@@ -72,6 +74,13 @@ class FiltersConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruct imp
     }
 
     /**
+     * @return null
+     */
+    public function getDita(): ?Dita {
+        return $this->dita;
+    }
+
+    /**
      * @param Yaml|null $yaml
      */
     public function setYaml( ?Yaml $yaml ): void {
@@ -113,6 +122,13 @@ class FiltersConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruct imp
         $this->ms_powerpoint = $ms_powerpoint;
     }
 
+    /**
+     * @param Dita|null $dita
+     */
+    public function setDita( ?Dita $dita ): void {
+        $this->dita = $dita;
+    }
+
     protected function hydrateDtoFromArray( string $dtoClass, array $data ) {
 
         $dto = new $dtoClass();
@@ -136,6 +152,9 @@ class FiltersConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruct imp
                 break;
             case MSPowerpoint::class:
                 $this->setMsPowerpoint( $dto );
+                break;
+            case Dita::class:
+                $this->setDita( $dto );
                 break;
         }
 
@@ -175,6 +194,11 @@ class FiltersConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruct imp
         // ms powerpoint
         if ( isset( $json[ 'ms_powerpoint' ] ) ) {
             is_array( $json[ 'ms_powerpoint' ] ) ? $this->hydrateDtoFromArray( MSPowerpoint::class, $json[ 'ms_powerpoint' ] ) : $this->hydrateDtoFromArray( MSPowerpoint::class, json_decode( $json[ 'ms_powerpoint' ], true ) );
+        }
+
+        // dita
+        if ( isset( $json[ 'dita' ] ) ) {
+            is_array( $json[ 'dita' ] ) ? $this->hydrateDtoFromArray( Dita::class, $json[ 'dita' ] ) : $this->hydrateDtoFromArray( Dita::class, json_decode( $json[ 'dita' ], true ) );
         }
 
     }
@@ -222,6 +246,7 @@ class FiltersConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruct imp
         $this->setMsExcel( new MSExcel() );
         $this->setMsWord( new MSWord() );
         $this->setMsPowerpoint( new MSPowerpoint() );
+        $this->setDita( new Dita() );
 
         $this->hydrateAllDto( $json );
 
@@ -243,6 +268,7 @@ class FiltersConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruct imp
                 'ms_word'       => $this->ms_word,
                 'ms_excel'      => $this->ms_excel,
                 'ms_powerpoint' => $this->ms_powerpoint,
+                'dita'          => $this->dita,
                 'created_at'    => DateTimeUtil::formatIsoDate( $this->created_at ),
                 'modified_at'   => DateTimeUtil::formatIsoDate( $this->modified_at )
         ];

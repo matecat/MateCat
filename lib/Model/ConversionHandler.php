@@ -294,6 +294,12 @@ class ConversionHandler {
                         $params = $this->filters_extraction_parameters->ms_powerpoint;
                     }
                     break;
+                case "dita":
+                case "ditamap":
+                    if ( isset( $this->filters_extraction_parameters->dita ) ) {
+                        $params = $this->filters_extraction_parameters->dita;
+                    }
+                    break;
             }
         }
 
