@@ -139,6 +139,9 @@ class Editarea extends React.Component {
       100,
     )
     this.onCompositionStopDebounced = debounce(this.onCompositionStop, 1000)
+
+    // insertTagAtSelection debouced function avoids broken insert for languages with oncomposition event ex. Korean
+    this.insertTagAtSelectionDebounced = debounce(this.insertTagAtSelection, 1)
   }
 
   getSearchParams = () => {
@@ -909,7 +912,7 @@ class Editarea extends React.Component {
       moveDownTagMenuSelection,
       moveUpTagMenuSelection,
       acceptTagMenuSelection,
-      insertTagAtSelection,
+      insertTagAtSelectionDebounced,
     } = this
     const {
       segment: {sourceTagMap, missingTagsInTarget},
@@ -943,23 +946,23 @@ class Editarea extends React.Component {
       case 'right-nav':
         return 'handled'
       case 'insert-tab-tag':
-        insertTagAtSelection('tab')
+        insertTagAtSelectionDebounced('tab')
         return 'handled'
       case 'insert-space-tag':
         if (tagSignatures.space) {
-          insertTagAtSelection('space')
+          insertTagAtSelectionDebounced('space')
           return 'handled'
         } else {
           return 'not-handled'
         }
 
       case 'insert-nbsp-tag':
-        insertTagAtSelection('nbsp')
+        insertTagAtSelectionDebounced('nbsp')
         return 'handled'
       case 'add-issue':
         return 'handled'
       case 'insert-word-joiner-tag':
-        insertTagAtSelection('wordJoiner')
+        insertTagAtSelectionDebounced('wordJoiner')
         return 'handled'
       case 'delete-entity':
         return 'handled'
