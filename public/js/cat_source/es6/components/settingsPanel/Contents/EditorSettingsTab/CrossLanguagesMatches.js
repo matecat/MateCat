@@ -5,8 +5,7 @@ import ApplicationStore from '../../../../stores/ApplicationStore'
 import {ApplicationWrapperContext} from '../../../common/ApplicationWrapper'
 import {isEqual} from 'lodash'
 import SegmentStore from '../../../../stores/SegmentStore'
-
-const METADATA_KEY = 'cross_language_matches'
+import {METADATA_KEY} from '../../../../constants/Constants'
 
 export const CrossLanguagesMatches = () => {
   const {userInfo, setUserMetadataKey} = useContext(ApplicationWrapperContext)

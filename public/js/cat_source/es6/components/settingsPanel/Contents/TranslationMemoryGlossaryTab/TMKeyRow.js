@@ -210,7 +210,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
       .then(() => {
         setTmKeys((prevState) => prevState.filter(({key}) => key !== row.key))
         if (config.is_cattool) {
-          CatToolActions.onTMKeysChangeStatus()
+          !row.isActive && CatToolActions.onTMKeysChangeStatus()
         } else {
           const templatesInvolved = projectTemplates
             .filter((template) => template.tm.some(({key}) => key === row.key))
