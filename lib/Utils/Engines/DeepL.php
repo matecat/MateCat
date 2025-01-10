@@ -49,6 +49,7 @@ class Engines_DeepL extends Engines_AbstractEngine {
      * @inheritDoc
      */
     public function get( $_config ) {
+
         try {
             $source = explode( "-", $_config[ 'source' ] );
             $target = explode( "-", $_config[ 'target' ] );
@@ -61,8 +62,8 @@ class Engines_DeepL extends Engines_AbstractEngine {
 
             // glossaries (only for DeepL)
             $metadataDao     = new Projects_MetadataDao();
-            $deepLFormality  = $metadataDao->get( $_config[ 'project_id' ], 'deepl_formality', 86400 );
-            $deepLIdGlossary = $metadataDao->get( $_config[ 'project_id' ], 'deepl_id_glossary', 86400 );
+            $deepLFormality  = $metadataDao->get( $_config[ 'pid' ], 'deepl_formality', 86400 );
+            $deepLIdGlossary = $metadataDao->get( $_config[ 'pid' ], 'deepl_id_glossary', 86400 );
 
             if ( $deepLFormality !== null ) {
                 $_config[ 'formality' ] = $deepLFormality->value;
