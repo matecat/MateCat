@@ -77,7 +77,7 @@ class FiltersConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruct imp
      * @return null
      */
     public function getDita(): ?Dita {
-        return $this->dota;
+        return $this->dita;
     }
 
     /**
