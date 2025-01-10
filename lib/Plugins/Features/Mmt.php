@@ -159,7 +159,7 @@ class Mmt extends BaseFeature {
         if ( $engine instanceof Engines_MMT ) {
 
             //get the Owner Keys from the Job
-            $tm_keys          = TmKeyManagement_TmKeyManagement::getOwnerKeys( [ $jobStruct->tm_keys ] );
+            $tm_keys          = TmKeyManagement_TmKeyManagement::getOwnerKeys( [ $jobStruct->tm_keys ], 'r' );
             $config[ 'keys' ] = array_map( function ( $tm_key ) {
                 /**
                  * @var $tm_key TmKeyManagement_MemoryKeyStruct
