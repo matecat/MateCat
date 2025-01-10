@@ -291,10 +291,7 @@ function CatTool() {
           errors,
           where === 'center' ? 'getSegments' : 'getMoreSegments',
         )
-      OfflineUtils.failedConnection(
-        where,
-        where === 'center' ? 'getSegments' : 'getMoreSegments',
-      )
+      OfflineUtils.failedConnection()
       return
     }
 

@@ -10,6 +10,7 @@ import SegmentWarnings from './SegmentWarnings'
 import SegmentActions from '../../actions/SegmentActions'
 import {SegmentContext} from './SegmentContext'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
+import OfflineUtils from '../../utils/offlineUtils'
 
 class SegmentTarget extends React.Component {
   static contextType = SegmentContext
@@ -325,7 +326,10 @@ class SegmentTarget extends React.Component {
     let buttonsDisabled = false
     let translation = this.props.segment.translation
 
-    if (translation.trim().length === 0) {
+    if (
+      translation.trim().length === 0 ||
+      OfflineUtils.offlineCacheRemaining <= 0
+    ) {
       buttonsDisabled = true
     }
 

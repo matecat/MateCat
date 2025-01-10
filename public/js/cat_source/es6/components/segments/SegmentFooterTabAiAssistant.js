@@ -72,7 +72,7 @@ export const SegmentFooterTabAiAssistant = ({
         if (!hasAlreadyRequested) {
           // request tm matches
           getConcordance(requestedWord.current, 0).catch(() => {
-            OfflineUtils.failedConnection(this, 'getConcordance')
+            OfflineUtils.failedConnection()
           })
           hasAlreadyRequested = true
           setIsLoadingTmMatches(true)
