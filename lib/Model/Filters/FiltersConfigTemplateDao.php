@@ -277,9 +277,9 @@ class FiltersConfigTemplateDao extends DataAccess_AbstractDao {
      */
     public static function save( FiltersConfigTemplateStruct $templateStruct ): FiltersConfigTemplateStruct {
         $sql = "INSERT INTO " . self::TABLE .
-                " ( `uid`, `name`, `json`, `xml`, `yaml`, `ms_excel`, `ms_word`, `ms_powerpoint`, `created_at` ) " .
+                " ( `uid`, `name`, `json`, `xml`, `yaml`, `ms_excel`, `ms_word`, `ms_powerpoint`, `dita`, `created_at` ) " .
                 " VALUES " .
-                " ( :uid, :name, :json, :xml, :yaml, :ms_excel, :ms_word, :ms_powerpoint, :now ); ";
+                " ( :uid, :name, :json, :xml, :yaml, :ms_excel, :ms_word, :ms_powerpoint, :dita, :now ); ";
 
         $now = ( new DateTime() )->format( 'Y-m-d H:i:s' );
 
@@ -294,6 +294,7 @@ class FiltersConfigTemplateDao extends DataAccess_AbstractDao {
                 "ms_excel"      => json_encode( $templateStruct->getMsExcel() ),
                 "ms_word"       => json_encode( $templateStruct->getMsWord() ),
                 "ms_powerpoint" => json_encode( $templateStruct->getMsPowerpoint() ),
+                "dita"          => json_encode( $templateStruct->getDita() ),
                 'now'           => ( new DateTime() )->format( 'Y-m-d H:i:s' ),
         ] );
 
@@ -324,6 +325,7 @@ class FiltersConfigTemplateDao extends DataAccess_AbstractDao {
             `ms_excel` = :ms_excel, 
             `ms_word` = :ms_word, 
             `ms_powerpoint` = :ms_powerpoint, 
+            `dita` = :dita, 
             `modified_at` = :now 
          WHERE id = :id;";
 
@@ -339,6 +341,7 @@ class FiltersConfigTemplateDao extends DataAccess_AbstractDao {
                 "ms_excel"      => json_encode( $templateStruct->getMsExcel() ),
                 "ms_word"       => json_encode( $templateStruct->getMsWord() ),
                 "ms_powerpoint" => json_encode( $templateStruct->getMsPowerpoint() ),
+                "dita"          => json_encode( $templateStruct->getDita() ),
                 'now'           => ( new DateTime() )->format( 'Y-m-d H:i:s' ),
         ] );
 
