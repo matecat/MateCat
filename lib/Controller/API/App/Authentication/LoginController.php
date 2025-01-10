@@ -1,8 +1,8 @@
 <?php
 /**
  * Created by PhpStorm.
- * User: fregini
- * Date: 22/11/2016
+ * User: Domenico <ostico@gmail.com>, <domenico@translated.net>
+ * Date: 19/09/2024
  * Time: 09:38
  */
 
@@ -116,6 +116,34 @@ class LoginController extends AbstractStatefulKleinController {
      */
     public function token() {
         $jwt = new SimpleJWT( [ "csrf" => Utils::uuid4() ] );
+        $jwt->setTimeToLive( 60 );
+
+        CookieManager::setCookie( INIT::$XSRF_TOKEN, $jwt->jsonSerialize(),
+                [
+                        'expires'  => time() + 60, /* now + 60 seconds */
+                        'path'     => '/',
+                        'domain'   => INIT::$COOKIE_DOMAIN,
+                        'secure'   => true,
+                        'httponly' => false,
+                        'samesite' => 'Strict',
+                ]
+        );
+
+        $this->response->code( 200 );
+    }
+
+    /**
+     * Signed Double-Submit Cookie
+     * @throws Exception
+     */
+    public function socketToken() {
+
+        if ( empty( $_SESSION[ 'user' ] ) ) {
+            $this->response->code( 406 );
+            return;
+        }
+
+        $jwt = new SimpleJWT( [ "uid" => $_SESSION[ 'user' ]->uid ] );
         $jwt->setTimeToLive( 60 );
 
         CookieManager::setCookie( INIT::$XSRF_TOKEN, $jwt->jsonSerialize(),

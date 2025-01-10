@@ -50,6 +50,7 @@ import {mountPage} from './mountPage'
 import {HomePageSection} from '../components/createProject/HomePageSection'
 import UserActions from '../actions/UserActions'
 import {getDeepLGlosssaries} from '../api/getDeepLGlosssaries/getDeepLGlosssaries'
+import SocketListener from '../sse/SocketListener'
 import {
   Button,
   BUTTON_SIZE,
@@ -1029,10 +1030,10 @@ const NewProject = () => {
       )}
       <HomePageSection />
       <Footer />
-      {/*<SseListener
+      <SocketListener
         isAuthenticated={isUserLogged}
         userId={isUserLogged ? userInfo.user.uid : null}
-      />*/}
+      />
       <OnboardingTooltips
         show={isUserLogged && userInfo.user}
         continous={true}

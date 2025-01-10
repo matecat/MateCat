@@ -115,7 +115,7 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker {
                     ]
             ];
 
-            $this->publishToSseTopic( $message );
+            $this->publishToNodeJsClients( $message );
 
         }
     }
