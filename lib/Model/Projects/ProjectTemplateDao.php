@@ -46,7 +46,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
 
         $default                           = new ProjectTemplateStruct();
         $default->id                       = 0;
-        $default->name                     = "Standard";
+        $default->name                     = "Matecat original settings";
         $default->is_default               = empty( $defaultProject );
         $default->id_team                  = $team->id;
         $default->uid                      = $uid;

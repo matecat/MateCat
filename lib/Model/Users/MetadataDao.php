@@ -4,6 +4,7 @@ namespace Users;
 
 use Database;
 use PDO;
+use ReflectionException;
 
 class MetadataDao extends \DataAccess_AbstractDao {
 
@@ -57,15 +58,16 @@ class MetadataDao extends \DataAccess_AbstractDao {
      * @param $key
      *
      * @return MetadataStruct
+     * @throws ReflectionException
      */
-    public function get( $uid, $key ) {
+    public function get( $uid, $key ): ?MetadataStruct {
         $stmt   = $this->_getStatementForQuery( self::_query_metadata_by_uid_key );
+        /** @var $result MetadataStruct */
         $result = $this->_fetchObject( $stmt, new MetadataStruct(), [
             'uid' => $uid,
             'key' => $key
         ] );
-
-        return @$result[ 0 ];
+        return $result[ 0 ] ?? null;
     }
 
   public function destroyCacheKey( $uid, $key ){

@@ -815,18 +815,6 @@ class Utils {
     }
 
     /**
-     * This escape is need by
-     * javascript JSON.parse() function
-     *
-     * @param array $data
-     *
-     * @return string
-     */
-    public static function escapeJsonEncode( array $data ): string {
-        return str_replace( "\\\"", "\\\\\\\"", json_encode( $data ) );
-    }
-
-    /**
      * This function strips html tag, but preserves hrefs.
      *
      * Example:

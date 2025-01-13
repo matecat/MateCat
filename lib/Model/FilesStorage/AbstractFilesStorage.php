@@ -27,7 +27,7 @@ use ReflectionException;
 abstract class AbstractFilesStorage implements IFilesStorage {
 
     const ORIGINAL_ZIP_PLACEHOLDER = "__##originalZip##";
-    const OBJECTS_SAFE_DELIMITER = '__';
+    const OBJECTS_SAFE_DELIMITER   = '__';
 
     protected $filesDir;
     protected $cacheDir;
@@ -163,7 +163,7 @@ abstract class AbstractFilesStorage implements IFilesStorage {
      * @return string
      */
     public static function getStorageCachePath(): string {
-        if( AbstractFilesStorage::isOnS3() ){
+        if ( AbstractFilesStorage::isOnS3() ) {
             return S3FilesStorage::CACHE_PACKAGE_FOLDER;
         }
 
@@ -171,12 +171,14 @@ abstract class AbstractFilesStorage implements IFilesStorage {
     }
 
     /**
-     * Delete a hash from upload directory
+     * Delete a hash from upload directory if the hash is changed
      *
      * @param $uploadDirPath
      * @param $linkFile
+     *
+     * @return bool
      */
-    public function deleteHashFromUploadDir( $uploadDirPath, $linkFile ) {
+    public function deleteHashFromUploadDir( $uploadDirPath, $linkFile ): bool {
         [ $shaSum, ] = explode( "|", $linkFile );
         [ $shaSum, ] = explode( "_", $shaSum ); // remove the segmentation rule from hash to clean all reverse index maps
 
@@ -195,8 +197,11 @@ abstract class AbstractFilesStorage implements IFilesStorage {
                 unlink( $fileInfo->getPathname() );
                 Log::doJsonLog( "Deleted Hash " . $fileInfo->getPathname() );
 
+                return true;
             }
         }
+
+        return false;
     }
 
     /**
@@ -273,7 +278,40 @@ abstract class AbstractFilesStorage implements IFilesStorage {
      * @return int
      */
     protected function _linkToCache( $dir, $hash, $realFileName ): int {
-        return file_put_contents( $dir . DIRECTORY_SEPARATOR . $hash, $realFileName . "\n", FILE_APPEND | LOCK_EX );
+        $filePath     = $dir . DIRECTORY_SEPARATOR . $hash;
+        $content      = [];
+        $bytesWritten = 0;
+
+        $fp = fopen( $filePath, "c+" );
+
+        if ( flock( $fp, LOCK_EX ) ) {
+
+            $fileRawContent = "";
+            while ( ( $buffer = fgets( $fp, 4096 ) ) !== false ) {
+                $fileRawContent .= $buffer;
+            }
+
+            if ( !empty( $fileRawContent ) ) {
+                $content = explode( "\n", $fileRawContent );
+            }
+
+            ftruncate( $fp, 0 );
+            rewind($fp); // Move the pointer to the beginning
+
+            if ( !in_array( $realFileName, $content ) ) {
+                $content[] = $realFileName;
+            }
+
+            $contentString = implode( "\n", $content ) . "\n";
+
+            $bytesWritten = fwrite( $fp, $contentString );
+            fflush( $fp );
+            flock( $fp, LOCK_UN );
+            fclose( $fp );
+
+        }
+
+        return $bytesWritten;
     }
 
     /**
