@@ -9,6 +9,8 @@ const {sentryWebpackPlugin} = require('@sentry/webpack-plugin')
 const https = require('https')
 const fs = require('fs')
 const ini = require('ini')
+// const BundleAnalyzerPlugin =
+//   require('webpack-bundle-analyzer').BundleAnalyzerPlugin
 
 const buildPath = './public/build/'
 const lxqDownload = './public/buildResources/'
@@ -102,9 +104,10 @@ const matecatConfig = async ({env}, {mode}) => {
     pluginConfig = {...pluginConfig, ...pluginWebpackConfig}
   })
   if (pluginConfig.sentryWebpackPlugin) {
-    pluginConfig.sentryWebpackPlugin.release = JSON.stringify(
-      config.BUILD_NUMBER,
-    )
+    pluginConfig.sentryWebpackPlugin.release = {
+      name: JSON.stringify(config.BUILD_NUMBER),
+    }
+    console.log('Sentry release', pluginConfig.sentryWebpackPlugin.release)
   }
   return {
     target: 'web',
@@ -126,6 +129,9 @@ const matecatConfig = async ({env}, {mode}) => {
     optimization: {
       moduleIds: 'deterministic',
       runtimeChunk: 'single',
+      splitChunks: {
+        chunks: 'all',
+      },
     },
     module: {
       rules: [
@@ -163,7 +169,7 @@ const matecatConfig = async ({env}, {mode}) => {
         {
           test: /\.s[ac]ss$/i,
           include: [
-            path.resolve(__dirname, 'public/css/sass'),
+            path.resolve(__dirname, 'public/css/sass/'),
             path.resolve(__dirname, 'plugins'),
           ],
           use: [
@@ -201,37 +207,54 @@ const matecatConfig = async ({env}, {mode}) => {
           __dirname,
           'public/js/cat_source/es6/pages/QualityReport.js',
         ),
-        path.resolve(__dirname, 'public/css/sass/quality-report.scss'),
+        path.resolve(
+          __dirname,
+          'public/css/sass/components/pages/QualityReportPage.scss',
+        ),
       ],
       upload: [
         path.resolve(__dirname, 'public/js/upload_main.js'),
         path.resolve(__dirname, 'public/js/gdrive.upload.js'),
         path.resolve(__dirname, 'public/js/gdrive.picker.js'),
         path.resolve(__dirname, 'public/js/cat_source/es6/pages/NewProject.js'),
-        path.resolve(__dirname, 'public/css/sass/upload-main.scss'),
+        path.resolve(
+          __dirname,
+          'public/css/sass/components/pages/NewProjectPage.scss',
+        ),
       ],
       ...entryPoints,
       cattool: [
         path.resolve(__dirname, lxqDownload + 'lxqlicense.js'),
         path.resolve(__dirname, 'public/js/cat_source/ui.core.js'),
-        path.resolve(__dirname, 'public/js/cat_source/ui.headerTooltips.js'),
         path.resolve(__dirname, 'public/js/cat_source/es6/pages/CatTool.js'),
-        path.resolve(__dirname, 'public/css/sass/main.scss'),
+        path.resolve(
+          __dirname,
+          'public/css/sass/components/pages/CattoolPage.scss',
+        ),
       ],
       dashboard: [
         path.resolve(__dirname, 'public/js/cat_source/es6/pages/Dashboard.js'),
-        path.resolve(__dirname, 'public/css/sass/manage_main.scss'),
+        path.resolve(
+          __dirname,
+          'public/css/sass/components/pages/DashboardPage.scss',
+        ),
       ],
       analyze: [
         path.resolve(
           __dirname,
           'public/js/cat_source/es6/pages/AnalyzePage.js',
         ),
-        path.resolve(__dirname, 'public/css/sass/analyze_main.scss'),
+        path.resolve(
+          __dirname,
+          'public/css/sass/components/pages/AnalyzePage.scss',
+        ),
       ],
       signin: [
         path.resolve(__dirname, 'public/js/cat_source/es6/pages/SignIn.js'),
-        path.resolve(__dirname, 'public/css/sass/signin_page.scss'),
+        path.resolve(
+          __dirname,
+          'public/css/sass/components/pages/SignInPage.scss',
+        ),
       ],
       xliffToTarget: [
         path.resolve(__dirname, 'public/js/upload_main.js'),
@@ -239,31 +262,51 @@ const matecatConfig = async ({env}, {mode}) => {
           __dirname,
           'public/js/cat_source/es6/pages/XliffToTarget.js',
         ),
-        path.resolve(__dirname, 'public/css/sass/upload-main.scss'),
+        path.resolve(
+          __dirname,
+          'public/css/sass/components/pages/NewProjectPage.scss',
+        ),
       ],
       activityLog: [
         path.resolve(
           __dirname,
           'public/js/cat_source/es6/pages/ActivityLog.js',
         ),
-        path.resolve(__dirname, 'public/css/sass/activity-log-main.scss'),
+        path.resolve(
+          __dirname,
+          'public/css/sass/components/pages/ActivityLogPage.scss',
+        ),
       ],
-      commonCss: [path.resolve(__dirname, 'public/css/sass/main.scss')],
+      commonCss: [
+        path.resolve(
+          __dirname,
+          'public/css/sass/components/pages/CattoolPage.scss',
+        ),
+      ],
       apiDoc: [
-        path.resolve(__dirname, 'public/css/sass/main.scss'),
-        path.resolve(__dirname, 'public/css/sass/legacy-misc.scss'),
+        path.resolve(
+          __dirname,
+          'public/css/sass/components/pages/CattoolPage.scss',
+        ),
+        path.resolve(
+          __dirname,
+          'public/css/sass/components/pages/ApiDocPage.scss',
+        ),
       ],
-      errorPage: [path.resolve(__dirname, 'public/css/sass/upload-main.scss')],
+      errorPage: [
+        path.resolve(
+          __dirname,
+          'public/css/sass/components/pages/NewProjectPage.scss',
+        ),
+      ],
     },
     plugins: [
+      // new BundleAnalyzerPlugin({analyzerMode: 'static'}),
       new webpack.DefinePlugin({
         'process.env._ENV': JSON.stringify(config.ENV),
         'process.env.version': JSON.stringify(config.BUILD_NUMBER),
         'process.env.MODE': JSON.stringify(mode),
       }),
-      !isDev &&
-        pluginConfig.sentryWebpackPlugin &&
-        sentryWebpackPlugin(pluginConfig.sentryWebpackPlugin),
       new WebpackConcatPlugin({
         bundles: [
           {
@@ -357,7 +400,7 @@ const matecatConfig = async ({env}, {mode}) => {
       new HtmlWebPackPlugin({
         filename: path.resolve(__dirname, './lib/View/signin.html'),
         template: path.resolve(__dirname, './lib/View/templates/_signin.html'),
-        chunks: ['signin', 'uploadPlugins', 'allPagesPlugins'],
+        chunks: ['signin', 'allPagesPlugins'],
         publicPath: '/public/build/',
         xhtml: true,
       }),
@@ -566,6 +609,9 @@ const matecatConfig = async ({env}, {mode}) => {
         publicPath: '/public/build/',
         xhtml: true,
       }),
+      !isDev &&
+        pluginConfig.sentryWebpackPlugin &&
+        sentryWebpackPlugin(pluginConfig.sentryWebpackPlugin),
     ],
     devtool: isDev ? 'inline-source-map' : 'source-map',
   }

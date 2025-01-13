@@ -1,5 +1,7 @@
 <?php
 
+use Utils\Engines\Lara;
+
 /**
  * Created by PhpStorm.
  * User: roberto
@@ -19,6 +21,7 @@ class Constants_Engines {
     const SMART_MATE       = 'SmartMATE';
     const YANDEX_TRANSLATE = 'YandexTranslate';
     const MMT              = 'MMT';
+    const LARA             = 'Lara';
     const DEEPL            = 'DeepL';
     const GOOGLE_TRANSLATE = 'GoogleTranslate';
     const INTENTO          = 'Intento';
@@ -34,6 +37,7 @@ class Constants_Engines {
             self::INTENTO          => self::INTENTO,
             self::MMT              => self::MMT,
             self::DEEPL            => self::DEEPL,
+            Lara::class            => Lara::class, // new namespaced engine classes must be loaded by fully qualified class name
     ];
 
     /**

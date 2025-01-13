@@ -9,7 +9,7 @@ import React, {
   useState,
 } from 'react'
 import PropTypes from 'prop-types'
-import Immutable from 'immutable'
+import {fromJS} from 'immutable'
 import ReactDOMServer from 'react-dom/server'
 import {useHotkeys} from 'react-hotkeys-hook'
 import {Shortcuts} from '../../utils/shortcuts'
@@ -146,7 +146,7 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
 
   const {userInfo} = useContext(ApplicationWrapperContext)
 
-  const [segments, setSegments] = useState(Immutable.fromJS([]))
+  const [segments, setSegments] = useState(fromJS([]))
   const [rows, setRows] = useState([])
   const [essentialRows, setEssentialRows] = useState([])
   const [hasCachedRows, setHasCachedRows] = useState(false)
@@ -907,15 +907,6 @@ const getSegmentStructure = (segment, sideOpen) => {
                     </a>
                     <a
                       href="#"
-                      className="tagModeToggle "
-                      title="Display full/short tags"
-                    >
-                      <span className="icon-chevron-left"> </span>
-                      <span className="icon-tag-expand"> </span>
-                      <span className="icon-chevron-right"> </span>
-                    </a>
-                    <a
-                      href="#"
                       className="autofillTag"
                       title="Copy missing tags from source to target"
                     >
@@ -941,7 +932,7 @@ const getSegmentStructure = (segment, sideOpen) => {
                       {' '}
                       Translated{' '}
                     </a>
-                    <p>CTRL ENTER</p>
+                    <p>CTRL+ENTER</p>
                   </li>
                 </ul>
               </div>

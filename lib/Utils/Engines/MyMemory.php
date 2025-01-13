@@ -16,6 +16,13 @@ use TaskRunner\Exceptions\ReQueueException;
 class Engines_MyMemory extends Engines_AbstractEngine {
 
     /**
+     * @inheritdoc
+     * @see Engines_AbstractEngine::$_isAdaptive
+     * @var bool
+     */
+    protected bool $_isAdaptive = true;
+
+    /**
      * @var string
      */
     protected $content_type = 'json';
@@ -623,12 +630,19 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         return $this->result;
     }
 
-    public function import( $file, $key, $name = false ) {
+    /**
+     *
+     * @param string           $filePath
+     * @param string           $memoryKey
+     * @param Users_UserStruct $user * Not used
+     *
+* @return array|mixed
+     */
+    public function importMemory( string $filePath, string $memoryKey, Users_UserStruct $user) {
 
         $postFields = [
-                'tmx'  => $this->getCurlFile( $file ),
-                'name' => $name,
-                'key'  => trim( $key )
+                'tmx'  => $this->getCurlFile( $filePath ),
+                'key'  => trim( $memoryKey )
         ];
 
         $this->call( "tmx_import_relative_url", $postFields, true );

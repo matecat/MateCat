@@ -34,6 +34,9 @@ class ContributionRequestStruct extends ShapelessConcreteStruct implements DataA
         'context_after'  => null
     ];
 
+    public ?array $context_list_before = null;
+    public ?array $context_list_after  = null;
+
     /**
      * @var string
      */
