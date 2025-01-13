@@ -110,7 +110,8 @@ class TmKeyManagement_TmKeyManagement {
         $jobDao->destroyCache( $jStruct );
 
         $jStruct->tm_keys = json_encode( $tm_keys );
-        return $jobDao->updateStruct( $jStruct, [ 'fields' => [ 'tm_keys' ] ] );
+        $jStruct->last_update = date( "Y-m-d H:i:s" );
+        return $jobDao->updateStruct( $jStruct, [ 'fields' => [ 'tm_keys', 'last_update' ] ] );
 
     }
 
