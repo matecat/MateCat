@@ -265,9 +265,7 @@ let CatToolActions = {
     })
   },
   onTMKeysChangeStatus: () => {
-    AppDispatcher.dispatch({
-      actionType: CatToolConstants.ON_TM_KEYS_CHANGE_STATUS,
-    })
+    CatToolActions.retrieveJobKeys(true)
   },
   setHaveKeysGlossary: (value) => {
     AppDispatcher.dispatch({

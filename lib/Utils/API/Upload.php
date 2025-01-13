@@ -191,7 +191,7 @@ class Upload {
                 if ( !$this->_isRightMime( $fileUp ) ) {
                     $this->setObjectErrorOrThrowException(
                             $fileUp,
-                            new Exception ( __METHOD__ . " -> Mime type Not Allowed. '" . $out_filename . "'" )
+                            new Exception ( __METHOD__ . " -> File format not supported. '" . $out_filename . "'" )
                     );
                 }
 

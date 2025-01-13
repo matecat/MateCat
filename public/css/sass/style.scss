@@ -2753,7 +2753,7 @@ header {
       }
 
       /* Bug fix for Semantic UI Dropdown hover */
-      .dropdown-menu-overlay {
+      &:hover .dropdown-menu-overlay {
         width: 30px;
         height: 80px;
       }
@@ -2778,7 +2778,7 @@ header {
         position: absolute;
         z-index: 1;
         width: 200px !important;
-        left: -80px !important;
+        left: -85px !important;
         margin: 0 0 0 -1px;
         background: white;
         padding: 12px 8px;

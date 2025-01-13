@@ -400,7 +400,7 @@ const matecatConfig = async ({env}, {mode}) => {
       new HtmlWebPackPlugin({
         filename: path.resolve(__dirname, './lib/View/signin.html'),
         template: path.resolve(__dirname, './lib/View/templates/_signin.html'),
-        chunks: ['signin', 'uploadPlugins', 'allPagesPlugins'],
+        chunks: ['signin', 'allPagesPlugins'],
         publicPath: '/public/build/',
         xhtml: true,
       }),
