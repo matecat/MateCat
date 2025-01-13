@@ -410,11 +410,12 @@ class INIT {
                     'xlf'      => [ 'default', '', 'extxlf' ],
             ],
             "Desktop Publishing"  => [
-                    'mif'  => [ '', '', 'extmif' ],
-                    'idml' => [ '', '', 'extidd' ],
-                    'icml' => [ '', '', 'exticml' ],
-                    'xml'  => [ '', '', 'extxml' ],
-                    'dita' => [ '', '', 'extdit' ]
+                    'mif'     => [ '', '', 'extmif' ],
+                    'idml'    => [ '', '', 'extidd' ],
+                    'icml'    => [ '', '', 'exticml' ],
+                    'xml'     => [ '', '', 'extxml' ],
+                    'dita'    => [ '', '', 'extdit' ],
+                    'ditamap' => [ '', '', 'extdit' ]
             ],
             "Localization"        => [
                     'properties'  => [ '', '', 'extpro' ],
@@ -423,6 +424,7 @@ class INIT {
                     'sxml'        => [ '', '', 'extxml' ],
                     'txml'        => [ '', '', 'extxml' ],
                     'dita'        => [ '', '', 'extdit' ],
+                    'ditamap'     => [ '', '', 'extdit' ],
                     'Android xml' => [ '', '', 'extxml' ],
                     'strings'     => [ '', '', 'extstr' ],
                     'sbv'         => [ '', '', 'extsbv' ],

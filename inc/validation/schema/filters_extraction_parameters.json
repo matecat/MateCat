@@ -235,6 +235,17 @@
         }
       },
       "additionalProperties": false
+    },
+    "dita": {
+      "type": "object",
+      "properties": {
+        "do_not_translate_elements": {
+          "type": "array",
+          "nullable": true
+        }
+      },
+      "required": ["do_not_translate_elements"],
+      "additionalProperties": false
     }
   }
 }
