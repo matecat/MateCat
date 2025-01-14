@@ -12,7 +12,7 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
     protected static array $auto_increment_field = [ 'id' ];
     protected static array $primary_keys         = [ 'id', 'password' ];
 
-    protected static string $_sql_update_password = "UPDATE jobs SET password = :new_password WHERE id = :id AND password = :old_password ";
+    protected static string $_sql_update_password = "UPDATE jobs SET password = :new_password, last_update = :last_update WHERE id = :id AND password = :old_password ";
 
     protected static string $_sql_get_jobs_by_project = "SELECT * FROM jobs WHERE id_project = ? AND status_owner != ? ORDER BY id, job_first_segment;";
 
@@ -407,7 +407,8 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
         $stmt->execute( [
                 'id'           => $jStruct->id,
                 'new_password' => $new_password,
-                'old_password' => $jStruct->password
+                'old_password' => $jStruct->password,
+                'last_update'  => date( "Y-m-d H:i:s" ),
         ] );
 
         $jStruct->password = $new_password;
