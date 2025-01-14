@@ -88,26 +88,6 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
     }
 
     /**
-     *
-     *
-     * @param string $_string
-     *
-     * @return string
-     */
-    public function _preserveSpecialStrings( string $_string ): string {
-        return $_string;
-    }
-
-    /**
-     * @param string $_string
-     *
-     * @return string
-     */
-    public function _resetSpecialStrings( string $_string ): string {
-        return $_string;
-    }
-
-    /**
      * @return EnginesModel_EngineStruct
      */
     public function getEngineRecord(): EnginesModel_EngineStruct {

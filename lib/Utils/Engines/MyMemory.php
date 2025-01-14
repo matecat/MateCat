@@ -135,8 +135,8 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 
                 if ( !empty( $decoded[ 'matches' ] ) ) {
                     foreach ( $decoded[ 'matches' ] as $pos => $match ) {
-                        $decoded[ 'matches' ][ $pos ][ 'segment' ]     = $this->_resetSpecialStrings( $match[ 'segment' ] );
-                        $decoded[ 'matches' ][ $pos ][ 'translation' ] = $this->_resetSpecialStrings( $match[ 'translation' ] );
+                        $decoded[ 'matches' ][ $pos ][ 'segment' ]     = $match[ 'segment' ];
+                        $decoded[ 'matches' ][ $pos ][ 'translation' ] = $match[ 'translation' ];
                     }
                 }
 
@@ -189,7 +189,6 @@ class Engines_MyMemory extends Engines_AbstractEngine {
      */
     public function get( $_config ) {
 
-        $_config[ 'segment' ] = $this->_preserveSpecialStrings( $_config[ 'segment' ] );
         if ( preg_match( "/^(-?@-?)/", $_config[ 'segment' ], $segment_file_chr ) ) {
             $_config[ 'segment' ] = preg_replace( "/^(-?@-?)/", "", $_config[ 'segment' ] );
         }

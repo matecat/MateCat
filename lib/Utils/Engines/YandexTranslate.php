@@ -44,7 +44,7 @@ class Engines_YandexTranslate extends Engines_AbstractEngine {
                 $decoded = [
                         'data' => [
                                 'translations' => [
-                                        [ 'translatedText' => $this->_resetSpecialStrings( $decoded[ "text" ][ 0 ] ) ]
+                                        [ 'translatedText' => $decoded[ "text" ][ 0 ] ]
                                 ]
                         ]
                 ];
@@ -75,7 +75,7 @@ class Engines_YandexTranslate extends Engines_AbstractEngine {
         }
 
         $mt_match_res = new Engines_Results_MyMemory_Matches(
-                $this->_preserveSpecialStrings( $all_args[ 1 ][ "text" ] ),
+                $all_args[ 1 ][ "text" ],
                 $mt_result->translatedText,
                 100 - $this->getPenalty() . "%",
                 "MT-" . $this->getName(),
@@ -89,7 +89,7 @@ class Engines_YandexTranslate extends Engines_AbstractEngine {
     }
 
     public function get( $_config ) {
-        $_config[ 'segment' ] = $this->_preserveSpecialStrings( $_config[ 'segment' ] );
+
         $_config[ 'source' ]  = $this->_fixLangCode( $_config[ 'source' ] );
         $_config[ 'target' ]  = $this->_fixLangCode( $_config[ 'target' ] );
 
