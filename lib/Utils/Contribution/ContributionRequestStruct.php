@@ -60,7 +60,7 @@ class ContributionRequestStruct extends ShapelessConcreteStruct implements DataA
     /**
      * @var int
      */
-    public $resultNum = 10;
+    public $resultNum = 3;
 
     /**
      * @var bool
