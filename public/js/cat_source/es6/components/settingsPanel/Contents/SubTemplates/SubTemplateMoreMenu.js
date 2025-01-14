@@ -50,7 +50,7 @@ export const SubTemplateMoreMenu = ({portalTarget}) => {
             : propConnectProjectTemplate === SCHEMA_KEYS.filtersTemplateId
               ? 'extraction parameters'
               : propConnectProjectTemplate === SCHEMA_KEYS.XliffConfigTemplateId
-                ? 'Xliff import settings'
+                ? 'XLIFF import settings'
                 : ''
 
       ModalsActions.showModalComponent(

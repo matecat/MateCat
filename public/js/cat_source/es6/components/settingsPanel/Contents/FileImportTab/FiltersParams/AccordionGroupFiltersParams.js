@@ -9,13 +9,13 @@ import {MsExcel} from './MsExcel'
 import {Dita} from './Dita'
 
 const ACCORDION_GROUP = {
-  json: 'Json',
+  json: 'JSON',
   xml: 'XML',
   yaml: 'YAML',
   msWord: 'MS Word',
   msExcel: 'MS Excel',
   msPowerpoint: 'MS PowerPoint',
-  dita: 'Dita',
+  dita: 'DITA/DITAMAP',
 }
 
 export const AccordionGroupFiltersParams = () => {
