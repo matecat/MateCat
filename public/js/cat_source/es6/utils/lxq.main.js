@@ -733,9 +733,9 @@ LXQ.init = function () {
     }
     var notCheckedSegments //store the unchecked segments at startup
     var doQAallSegments = function () {
-      var segments = SegmentStore.getAllSegments
+      var segments = SegmentStore.getAllSegments()
       var notChecked = []
-      $.each(segments, function (keys, segment) {
+      segments.forEach((segment) => {
         var segId = segment.sid
         if (LXQ.lexiqaData.segments.indexOf(segId) < 0) {
           notChecked.push(segment)

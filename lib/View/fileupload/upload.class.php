@@ -156,7 +156,7 @@ class UploadHandler {
 
         if ( $file->type !== null ) {
             if ( !$this->_isRightMime( $file ) && ( !isset( $file->error ) || empty( $file->error ) ) ) {
-                $file->error = "Mime type Not Allowed";
+                $file->error = "File format not supported";
 
                 return false;
             }

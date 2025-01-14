@@ -20,7 +20,6 @@ const CatToolConstants = keyMirror({
   ON_RENDER: null,
   UPDATE_TM_KEYS: null,
   UPDATE_DOMAINS: null,
-  ON_TM_KEYS_CHANGE_STATUS: null,
   HAVE_KEYS_GLOSSARY: null,
   OPEN_SETTINGS_PANEL: null,
   GET_JOB_METADATA: null,

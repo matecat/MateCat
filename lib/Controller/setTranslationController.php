@@ -836,7 +836,7 @@ class setTranslationController extends ajaxController {
                             'id'       => $this->id_job,
                             'password' => $this->password
                     ] );
-        } else {
+        } elseif( $tte != 0 ) {
             Jobs_JobDao::updateFields(
                     [ 'total_time_to_edit' => $tte ],
                     [
@@ -941,7 +941,6 @@ class setTranslationController extends ajaxController {
         Set::contribution( $contributionStruct );
 
         if ( $contributionStruct->id_mt > 1 ) {
-            $contributionStruct = $this->featureSet->filter( 'filterSetContributionMT', null, $contributionStruct, $this->project );
             Set::contributionMT( $contributionStruct );
         }
 
