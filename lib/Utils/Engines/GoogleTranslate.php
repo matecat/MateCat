@@ -69,7 +69,7 @@ class Engines_GoogleTranslate extends Engines_AbstractEngine {
         }
         $parameters[ 'target' ] = $this->_fixLangCode( $_config[ 'target' ] );
         $parameters[ 'source' ] = $this->_fixLangCode( $_config[ 'source' ] );
-        $parameters[ 'q' ]      = $this->_preserveSpecialStrings( $_config[ 'segment' ] );
+        $parameters[ 'q' ]      = $_config[ 'segment' ];
 
         $this->_setAdditionalCurlParams(
                 [
