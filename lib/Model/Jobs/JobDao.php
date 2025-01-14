@@ -370,10 +370,14 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
      * @return int the number of rows affected by the statement
      */
     public function updateOwner( Projects_ProjectStruct $project, Users_UserStruct $user ): int {
-        $sql = " UPDATE jobs SET owner = :email WHERE id_project = :id_project ";
+        $sql = " UPDATE jobs SET owner = :email, last_update = :last_update WHERE id_project = :id_project ";
 
         $stmt = $this->database->getConnection()->prepare( $sql );
-        $stmt->execute( [ 'email' => $user->email, 'id_project' => $project->id ] );
+        $stmt->execute( [
+            'email' => $user->email,
+            'id_project' => $project->id,
+            'last_update' => date( "Y-m-d H:i:s" ),
+        ] );
 
         return $stmt->rowCount();
     }
@@ -467,7 +471,8 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
 
         $sql = " UPDATE jobs 
                     SET avg_post_editing_effort = :avg_post_editing_effort, 
-                        total_time_to_edit = :total_time_to_edit 
+                        total_time_to_edit = :total_time_to_edit,
+                        last_update = :last_update 
                     WHERE id = :id 
                     AND password = :password ";
 
@@ -475,6 +480,7 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
         $stmt->execute( [
                 'avg_post_editing_effort' => $jStruct->avg_post_editing_effort,
                 'total_time_to_edit'      => $jStruct->total_time_to_edit,
+                'last_update'             => date( "Y-m-d H:i:s" ),
                 'id'                      => $jStruct->id,
                 'password'                => $jStruct->password
         ] );
@@ -532,14 +538,18 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
         $values       = array_values( $jobCopy );
         $placeHolders = implode( ',', array_fill( 0, count( $values ), '?' ) );
 
+        $jobStruct->last_update = date( "Y-m-d H:i:s" );
+
         $values[] = $jobStruct->last_opened_segment;
         $values[] = $jobStruct->job_first_segment;
         $values[] = $jobStruct->job_last_segment;
         $values[] = $jobStruct->avg_post_editing_effort;
+        $values[] = $jobStruct->last_update;
 
         /** @noinspection SqlInsertValues */
         $query = "INSERT INTO jobs ( $columns ) VALUES ( $placeHolders )
                         ON DUPLICATE KEY UPDATE
+                        last_update = ?,
                         last_opened_segment = ?,
                         job_first_segment = ?,
                         job_last_segment = ?,
@@ -592,13 +602,17 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
      */
     public function updateStdWcAndTotalWc( int $jobId, int $standard_analysis_wc, int $total_raw_wc ): int {
         $query = "UPDATE jobs 
-                    SET total_raw_wc = :total_raw_wc, standard_analysis_wc = :standard_analysis_wc
+                    SET 
+                        last_update = :last_update,
+                        total_raw_wc = :total_raw_wc, 
+                        standard_analysis_wc = :standard_analysis_wc
                     WHERE id= :id
                 ";
 
         $values = [
                 'id'                   => $jobId,
                 'standard_analysis_wc' => $standard_analysis_wc,
+                'last_update'          => date( "Y-m-d H:i:s" ),
                 'total_raw_wc'         => $total_raw_wc,
         ];
 
@@ -623,7 +637,16 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
         static::updateStruct( $first_job );
 
         if ( $newPass ) {
-            self::updateFields( [ 'password' => $newPass ], [ 'id' => $first_job->id, 'password' => $first_job->password ] );
+            self::updateFields(
+                [
+                    'password' => $newPass,
+                    'last_update' => date( "Y-m-d H:i:s" ),
+                ],
+                [
+                    'id' => $first_job->id,
+                    'password' => $first_job->password
+                ]
+            );
             $first_job->password = $newPass;
         }
 
@@ -694,7 +717,14 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
      * @throws ReflectionException
      */
     public static function updateAllJobsStatusesByProjectId( $id_project, $new_status ) {
-        self::updateFields( [ 'status_owner' => $new_status ], [ 'id_project' => $id_project ] );
+        self::updateFields( [
+                'status_owner' => $new_status,
+                'last_update' => date( "Y-m-d H:i:s" ),
+            ],
+            [
+                'id_project' => $id_project
+            ]
+        );
         ( new Jobs_JobDao )->destroyCacheByProjectId( $id_project );
 
     }
@@ -705,7 +735,13 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
      * @return int
      */
     public static function setJobComplete( Jobs_JobStruct $jStruct ): int {
-        return self::updateFields( [ 'completed' => 1 ], [ 'id' => $jStruct->id ] );
+        return self::updateFields( [
+            'completed' => 1,
+            'last_update' => date( "Y-m-d H:i:s" ),
+        ],
+        [
+            'id' => $jStruct->id
+        ] );
     }
 
     /**
@@ -715,7 +751,13 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
      * @throws ReflectionException
      */
     public static function updateJobStatus( Jobs_JobStruct $jStruct, string $new_status ) {
-        self::updateFields( [ 'status_owner' => $new_status ], [ 'id' => $jStruct->id ] );
+        self::updateFields( [
+            'status_owner' => $new_status,
+            'last_update' => date( "Y-m-d H:i:s" ),
+        ],
+        [
+            'id' => $jStruct->id
+        ] );
         ( new Jobs_JobDao )->destroyCacheByProjectId( $jStruct->id_project );
     }
 
