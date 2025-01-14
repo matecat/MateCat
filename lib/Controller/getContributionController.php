@@ -14,7 +14,6 @@ class getContributionController extends ajaxController {
     protected $id_client;
     private   $concordance_search;
     private   $switch_languages;
-    private   $num_results;
     private   $text;
     private   $id_translator;
 
@@ -41,7 +40,6 @@ class getContributionController extends ajaxController {
         $filterArgs = [
                 'id_segment'          => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
                 'id_job'              => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
-                'num_results'         => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
                 'text'                => [ 'filter' => FILTER_UNSAFE_RAW ],
                 'id_translator'       => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
                 'password'            => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
@@ -69,7 +67,6 @@ class getContributionController extends ajaxController {
         $this->id_after   = $this->__postInput[ 'id_after' ];
 
         $this->id_job              = $this->__postInput[ 'id_job' ];
-        $this->num_results         = $this->__postInput[ 'num_results' ];
         $this->text                = trim( $this->__postInput[ 'text' ] );
         $this->id_translator       = $this->__postInput[ 'id_translator' ];
         $this->concordance_search  = $this->__postInput[ 'is_concordance' ];
@@ -108,10 +105,6 @@ class getContributionController extends ajaxController {
 
         if ( empty( $this->id_client ) ) {
             $this->result[ 'errors' ][] = [ "code" => -4, "message" => "missing id_client" ];
-        }
-
-        if ( empty( $this->num_results ) ) {
-            $this->num_results = INIT::$DEFAULT_NUM_RESULTS_FROM_TM;
         }
 
         if ( !empty( $this->result[ 'errors' ] ) ) {
@@ -156,7 +149,6 @@ class getContributionController extends ajaxController {
         $contributionRequest->id_client         = $this->id_client;
         $contributionRequest->concordanceSearch = $this->concordance_search;
         $contributionRequest->fromTarget        = $this->switch_languages;
-        $contributionRequest->resultNum         = $this->num_results;
         $contributionRequest->crossLangTargets  = $this->getCrossLanguages();
 
         if ( self::isRevision() ) {
@@ -176,6 +168,10 @@ class getContributionController extends ajaxController {
 
         if ( $tm_prioritization !== null ) {
             $contributionRequest->tm_prioritization = $tm_prioritization->value == 1;
+        }
+
+        if($contributionRequest->concordanceSearch){
+            $contributionRequest->resultNum = 10;
         }
 
         // penalty_key
