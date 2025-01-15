@@ -54,7 +54,7 @@ class Engines_Altlang extends Engines_AbstractEngine {
             $decoded = [
                     'data' => [
                             "translations" => [
-                                    [ 'translatedText' => $this->_resetSpecialStrings( $decoded[ "text" ] ) ]
+                                    [ 'translatedText' => $decoded[ "text" ] ]
                             ]
                     ]
             ];
@@ -72,7 +72,7 @@ class Engines_Altlang extends Engines_AbstractEngine {
         }
 
         $mt_match_res = new Engines_Results_MyMemory_Matches(
-                $this->_preserveSpecialStrings( $original[ "text" ] ),
+                $original[ "text" ],
                 $mt_result->translatedText,
                 100 - $this->getPenalty() . "%",
                 "MT-" . $this->getName(),
@@ -114,7 +114,7 @@ class Engines_Altlang extends Engines_AbstractEngine {
                 "context"  => "altlang",
                 "src"      => $this->convertLanguageCode( $_config[ 'source' ] ),
                 "trg"      => $this->convertLanguageCode( $_config[ 'target' ] ),
-                "text"     => $this->_preserveSpecialStrings( $_config[ 'segment' ] )
+                "text"     => $_config[ 'segment' ]
         ];
 
         if ( $this->client_secret != '' && $this->client_secret != null ) {

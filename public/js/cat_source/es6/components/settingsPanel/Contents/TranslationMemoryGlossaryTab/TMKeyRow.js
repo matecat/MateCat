@@ -18,7 +18,6 @@ import {ShareResource} from './ShareResource'
 import {DeleteResource} from './DeleteResource'
 import {updateTmKey} from '../../../../api/updateTmKey'
 import ModalsActions from '../../../../actions/ModalsActions'
-import ConfirmMessageModal from '../../../modals/ConfirmMessageModal'
 import {CreateProjectContext} from '../../../createProject/CreateProjectContext'
 
 import Earth from '../../../../../../../img/icons/Earth'
@@ -200,7 +199,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
       .then(() => {
         setTmKeys((prevState) => prevState.filter(({key}) => key !== row.key))
         if (config.is_cattool) {
-          CatToolActions.onTMKeysChangeStatus()
+          !row.isActive && CatToolActions.onTMKeysChangeStatus()
         } else {
           const templatesInvolved = projectTemplates
             .filter((template) => template.tm.some(({key}) => key === row.key))

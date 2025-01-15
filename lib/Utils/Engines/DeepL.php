@@ -31,7 +31,7 @@ class Engines_DeepL extends Engines_AbstractEngine {
     protected function _decode( $rawValue, array $parameters = [], $function = null ) {
         $rawValue    = json_decode( $rawValue, true );
         $translation = $rawValue[ 'translations' ][ 0 ][ 'text' ];
-        $translation = $this->_resetSpecialStrings( html_entity_decode( $translation, ENT_QUOTES | 16 ) );
+        $translation = html_entity_decode( $translation, ENT_QUOTES | 16 );
         $source      = $parameters[ 'source_lang' ];
         $target      = $parameters[ 'target_lang' ];
         $segment     = $parameters[ 'text' ][ 0 ];
@@ -49,6 +49,7 @@ class Engines_DeepL extends Engines_AbstractEngine {
      * @inheritDoc
      */
     public function get( $_config ) {
+
         try {
             $source = explode( "-", $_config[ 'source' ] );
             $target = explode( "-", $_config[ 'target' ] );
