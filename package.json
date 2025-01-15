@@ -45,9 +45,9 @@
     "react-tagsinput": "^3.19.0",
     "react-transition-group": "^4.2.2",
     "react-virtual": "^2.10.4",
+    "socket.io-client": "^4.8.1",
     "sprintf-js": "^1.1.2",
-    "uuid": "^11.0.2",
-    "socket.io-client": "^4.8.1"
+    "uuid": "^11.0.2"
   },
   "devDependencies": {
     "@babel/core": "7.26.0",
@@ -95,5 +95,5 @@
   "resolutions": {
     "wrap-ansi": "^7.0.0"
   },
-  "version": "3.0.39"
+  "version": "3.0.40"
 }
