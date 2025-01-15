@@ -34,8 +34,6 @@ class SegmentFooterTabMatches extends React.Component {
       tmKeys: CatToolStore.getJobTmKeys(),
       numContributionsToShow: MAX_ITEMS_TO_DISPLAY_NOT_EXTENDED,
     }
-
-    this.penaltyPercRef = createRef()
   }
 
   processContributions(matches) {
@@ -168,6 +166,8 @@ class SegmentFooterTabMatches extends React.Component {
   }
 
   getMatchInfo(match) {
+    const penaltyPercRef = createRef()
+
     return (
       <ul className="graysmall-details">
         {match.penalty > 0 && (
@@ -181,13 +181,14 @@ class SegmentFooterTabMatches extends React.Component {
               >
                 <span>Applied penalty:</span>
                 <span style={{whiteSpace: 'nowrap'}}>
-                  matching percentage reduced by <b>{match.penalty * 100}%</b>
+                  matching percentage reduced by{' '}
+                  <b>{(match.penalty * 100) >> 0}%</b>
                 </span>
               </div>
             }
           >
             <li
-              ref={this.penaltyPercRef}
+              ref={penaltyPercRef}
               className={`percent ${match.percentClass} per-red-outline`}
             >
               -{match.penalty * 100}%
