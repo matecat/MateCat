@@ -48,38 +48,45 @@ module.exports.Application = class {
 
     this._socketIOServer.use((socket, next) => {
 
+      let auth = [];
+
       if (
         socket.handshake.headers &&
         socket.handshake.headers['x-token'] &&
         socket.handshake.headers['x-userid'] &&
         socket.handshake.headers['x-uuid']
       ) {
-        verify(
-          socket.handshake.headers['x-token'],
-          this.options.authSecretKey,
-          {
-            algorithms: ['HS256'],
-          },
-          function (err, decoded) {
-            if (err) {
-              logger.error(['Authentication error', err])
-              return next(new Error('Authentication error'));
-            }
-            if (parseInt(socket.handshake.headers['x-userid'].toString()) !== decoded.context.uid) {
-              logger.error(['Authentication error', socket.handshake.headers['x-userid'], decoded.context.uid]);
-              return next(new Error('Authentication error'));
-            }
-            socket.user_id = socket.handshake.headers['x-userid'];
-            socket.uuid = socket.handshake.headers['x-uuid'];
-            if (socket.handshake.headers['x-jobid']) {
-              socket.jobId = socket.handshake.headers['x-jobid'];
-            }
-            next();
-          }
-        );
+        auth = socket.handshake.headers;
+      } else if (socket.handshake.auth) {
+        auth = socket.handshake.auth;
       } else {
-        next(new Error('Authentication error'));
+        next(new Error('Authentication not provided'));
       }
+
+      verify(
+        auth["x-token"],
+        this.options.authSecretKey,
+        {
+          algorithms: ['HS256'],
+        },
+        function (err, decoded) {
+          if (err) {
+            logger.error(['Authentication error invalid JWT', err])
+            return next(new Error('Authentication error invalid JWT'));
+          }
+          if (parseInt(auth['x-userid']) !== decoded.context.uid) {
+            logger.error(['Authentication error invalid user id', auth['x-userid'], decoded.context.uid]);
+            return next(new Error('Authentication error invalid user id'));
+          }
+          socket.user_id = auth['x-userid'];
+          socket.uuid = auth['x-uuid'];
+          if (auth['x-jobid']) {
+            socket.jobId = auth['x-jobid'];
+          }
+          next();
+        }
+      );
+
     });
 
     this._amqConnector = amqConnector;
