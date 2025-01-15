@@ -174,7 +174,6 @@ class Lara extends Engines_AbstractEngine {
             // call lara
             $translateOptions = new TranslateOptions();
             $translateOptions->setAdaptTo( $_lara_keys );
-            $translateOptions->setPriority( $_config[ 'priority' ] );
             $translateOptions->setMultiline( true );
 
             $request_translation = [];
@@ -201,8 +200,7 @@ class Lara extends Engines_AbstractEngine {
                     'adapt_to'     => $_lara_keys,
                     'source'       => $_config[ 'source' ],
                     'target'       => $_config[ 'target' ],
-                    'priority'     => $_config[ 'priority' ],
-                    'multiline'    => true,
+                    'multiline'    => false,
             ] );
 
             $translation = "";
@@ -350,8 +348,10 @@ class Lara extends Engines_AbstractEngine {
 
             foreach ( $project->getJobs() as $job ) {
 
-                $keyIds     = [];
-                $jobKeyList = TmKeyManagement_TmKeyManagement::getJobTmKeys( $job->tm_keys, 'r', 'tm', $user->uid );
+                $keyIds          = [];
+                $jobKeyListRead  = TmKeyManagement_TmKeyManagement::getJobTmKeys( $job->tm_keys, 'r', 'tm', $user->uid );
+                $jobKeyListWrite = TmKeyManagement_TmKeyManagement::getJobTmKeys( $job->tm_keys, 'w', 'tm', $user->uid );
+                $jobKeyList      = array_merge( $jobKeyListRead, $jobKeyListWrite );
 
                 foreach ( $jobKeyList as $memKey ) {
                     $keyIds[] = $memKey->key;
@@ -359,7 +359,7 @@ class Lara extends Engines_AbstractEngine {
 
                 $keyIds = $this->_reMapKeyList( $keyIds );
                 $client = $this->_getClient();
-                $res = $client->memories->connect( $keyIds );
+                $res    = $client->memories->connect( $keyIds );
                 Log::doJsonLog( "Keys connected: " . implode( ',', $keyIds ) . " -> " . json_encode( $res ) );
 
             }
