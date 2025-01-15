@@ -165,7 +165,21 @@ class SegmentFooterTabMatches extends React.Component {
     return (
       <ul className="graysmall-details">
         {match.penalty > 0 && (
-          <Tooltip content={'Penalty'}>
+          <Tooltip
+            content={
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}
+              >
+                <span>Applied penalty:</span>
+                <span style={{whiteSpace: 'nowrap'}}>
+                  matching percentage reduced by <b>{match.penalty * 100}%</b>
+                </span>
+              </div>
+            }
+          >
             <li
               ref={this.penaltyPercRef}
               className={`percent ${match.percentClass} per-red-outline`}
