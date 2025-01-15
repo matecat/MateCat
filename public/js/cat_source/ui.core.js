@@ -743,7 +743,7 @@ window.UI = {
    * Overridden by  plugin
    */
   getContextBefore: function (segmentId) {
-    const segmentBefore = SegmentStore.getPrevSegment(segmentId)
+    const segmentBefore = SegmentStore.getPrevSegment(segmentId, true)
     if (!segmentBefore) {
       return null
     }
@@ -766,7 +766,10 @@ window.UI = {
    * Overridden by  plugin
    */
   getContextAfter: function (segmentId) {
-    const segmentAfter = SegmentStore.getNextSegment({current_sid: segmentId})
+    const segmentAfter = SegmentStore.getNextSegment({
+      current_sid: segmentId,
+      alsoMutedSegment: true,
+    })
     if (!segmentAfter) {
       return null
     }
