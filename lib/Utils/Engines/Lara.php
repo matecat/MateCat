@@ -175,6 +175,7 @@ class Lara extends Engines_AbstractEngine {
             $translateOptions = new TranslateOptions();
             $translateOptions->setAdaptTo( $_lara_keys );
             $translateOptions->setMultiline( true );
+            $translateOptions->setContentType( 'text/xliff' );
 
             $request_translation = [];
 
@@ -200,6 +201,7 @@ class Lara extends Engines_AbstractEngine {
                     'adapt_to'     => $_lara_keys,
                     'source'       => $_config[ 'source' ],
                     'target'       => $_config[ 'target' ],
+                    'content_type' => 'text/xliff',
                     'multiline'    => false,
             ] );
 
@@ -294,18 +296,9 @@ class Lara extends Engines_AbstractEngine {
      */
     public function importMemory( string $filePath, string $memoryKey, Users_UserStruct $user ) {
 
-        $clientMemories     = $this->_getClient()->memories;
-        $associatedMemories = $clientMemories->getAll();
-        $memoryFound        = false;
+        $clientMemories = $this->_getClient()->memories;
 
-        foreach ( $associatedMemories as $memory ) {
-            if ( 'ext_my_' . trim( $memoryKey ) === $memory->getExternalId() ) {
-                $memoryFound = true;
-                break;
-            }
-        }
-
-        if ( !$memoryFound ) {
+        if ( !$clientMemories->get( 'ext_my_' . trim( $memoryKey ) ) ) {
             return null;
         }
 
