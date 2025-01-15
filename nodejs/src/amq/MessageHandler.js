@@ -37,9 +37,8 @@ module.exports.MessageHandler = class {
 
   onReceive = (message) => {
 
-    let room = message.data.id_client;
-
-    switch ( message._type ){
+    let room;
+    switch (message._type) {
       case RELOAD:
         logger.info('RELOAD: ' + RELOAD + ' message received...');
         notifyUpgrade(this.application, false);
@@ -52,6 +51,7 @@ module.exports.MessageHandler = class {
         room = message.data.id_job.toString();
         break;
       default:
+        room = message.data.id_client;
         break;
     }
 
