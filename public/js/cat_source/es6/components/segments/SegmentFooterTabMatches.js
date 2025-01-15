@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {createRef} from 'react'
 import {isUndefined} from 'lodash'
 import {fromJS} from 'immutable'
 
@@ -13,6 +13,7 @@ import {SegmentContext} from './SegmentContext'
 import {SegmentFooterTabError} from './SegmentFooterTabError'
 import ApplicationStore from '../../stores/ApplicationStore'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
+import Tooltip from '../common/Tooltip'
 
 class SegmentFooterTabMatches extends React.Component {
   static contextType = SegmentContext
@@ -27,6 +28,8 @@ class SegmentFooterTabMatches extends React.Component {
     this.state = {
       tmKeys: CatToolStore.getJobTmKeys(),
     }
+
+    this.penaltyPercRef = createRef()
   }
 
   processContributions(matches) {
@@ -60,6 +63,7 @@ class SegmentFooterTabMatches extends React.Component {
 
       item.percentClass = TranslationMatches.getPercentuageClass(this.match)
       item.percentText = this.match
+      item.penalty = this.penalty
 
       // Attention Bug: We are mixing the view mode and the raw data mode.
       // before doing a enhanced  view you will need to add a data-original tag
@@ -160,6 +164,16 @@ class SegmentFooterTabMatches extends React.Component {
   getMatchInfo(match) {
     return (
       <ul className="graysmall-details">
+        {match.penalty > 0 && (
+          <Tooltip content={'Penalty'}>
+            <li
+              ref={this.penaltyPercRef}
+              className={`percent ${match.percentClass} per-red-outline`}
+            >
+              -{match.penalty * 100}%
+            </li>
+          </Tooltip>
+        )}
         <li className={'percent ' + match.percentClass}>{match.percentText}</li>
         <li>{match.suggestion_info}</li>
         <li className={'graydesc'}>
