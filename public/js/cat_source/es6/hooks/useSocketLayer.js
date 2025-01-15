@@ -63,7 +63,9 @@ const useSocketLayer = (connectionParams, options, isAuthenticated, eventHandler
       {
         path: connectionParams.path,
         reconnection: false, // manually handle reconnections
-        extraHeaders: extraHeaders
+        extraHeaders: extraHeaders,
+        transports: ['websocket', 'polling'],
+        auth: extraHeaders
       }
     );
 
