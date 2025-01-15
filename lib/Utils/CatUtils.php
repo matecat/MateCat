@@ -880,7 +880,7 @@ class CatUtils {
      */
     public static function stripMaliciousContentFromAName($string)
     {
-        $string = mb_substr( preg_replace( '/(?:https?|s?ftp)?\P{L}+/u', '', $string ), 0, 50 );
+        $string = mb_substr( preg_replace( '/(?:https?|s?ftp)\P{L}+/u', '', $string ), 0, 50 );
 
         return trim($string);
     }
