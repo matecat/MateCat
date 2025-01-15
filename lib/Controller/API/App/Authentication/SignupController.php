@@ -28,7 +28,7 @@ class SignupController extends AbstractStatefulKleinController {
         $user = filter_var_array(
                 (array)$this->request->param( 'user' ),
                 [
-                        'email'                 => FILTER_SANITIZE_EMAIL,
+                        'email'                 => [ 'filter' => FILTER_SANITIZE_EMAIL, 'options' => [] ],
                         'password'              => [ 'filter' => FILTER_SANITIZE_STRING, 'options' => FILTER_FLAG_STRIP_LOW ],
                         'password_confirmation' => [ 'filter' => FILTER_SANITIZE_STRING, 'options' => FILTER_FLAG_STRIP_LOW ],
                         'first_name'            => [
@@ -50,6 +50,16 @@ class SignupController extends AbstractStatefulKleinController {
                         ]
                 ]
         );
+
+        if(empty($user['email'])){
+            $this->response->code( 400 );
+            $this->response->json( [
+                'error' => [
+                    'message' => "Missing email"
+                ]
+            ] );
+            exit();
+        }
 
         if(empty($user['first_name'])){
             $this->response->code( 400 );

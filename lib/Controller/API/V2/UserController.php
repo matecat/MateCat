@@ -62,6 +62,8 @@ class UserController extends AbstractStatefulKleinController
             $userDao->updateUser($user);
             $userDao->destroyCacheByUid($user->uid);
 
+            AuthenticationHelper::refreshSession($_SESSION);
+
             return $this->response->json([
                 'uid' => $user->uid,
                 'email' => $user->email,
