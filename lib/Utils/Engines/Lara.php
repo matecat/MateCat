@@ -350,7 +350,7 @@ class Lara extends Engines_AbstractEngine {
                     $keyIds[] = $memKey->key;
                 }
 
-                $keyIds = $this->_reMapKeyList( $keyIds );
+                $keyIds = $this->_reMapKeyList( array_unique( $keyIds ) );
                 $client = $this->_getClient();
                 $res    = $client->memories->connect( $keyIds );
                 Log::doJsonLog( "Keys connected: " . implode( ',', $keyIds ) . " -> " . json_encode( $res ) );
