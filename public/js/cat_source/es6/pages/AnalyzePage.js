@@ -10,7 +10,7 @@ import {fromJS} from 'immutable'
 import {ANALYSIS_STATUS} from '../constants/Constants'
 import {mountPage} from './mountPage'
 import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper'
-import SseListener from '../sse/SseListener'
+import SocketListener from '../sse/SocketListener'
 
 let pollingTime = 1000
 const segmentsThreshold = 50000
@@ -103,10 +103,10 @@ const AnalyzePage = () => {
       <footer>
         <CookieConsent />
       </footer>
-      {/*<SseListener
+      <SocketListener
         isAuthenticated={isUserLogged}
         userId={isUserLogged ? userInfo.user.uid : null}
-      />*/}
+      />
     </>
   )
 }

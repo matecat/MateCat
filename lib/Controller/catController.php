@@ -442,7 +442,7 @@ class catController extends viewController {
 
         if ( INIT::$COMMENTS_ENABLED ) {
             $this->template->comments_enabled = true;
-            $this->template->sse_base_url     = INIT::$SSE_BASE_URL;
+            $this->template->socket_base_url     = INIT::$SOCKET_BASE_URL;
         }
 
         $projectMetaDataDao              = new Projects_MetadataDao();

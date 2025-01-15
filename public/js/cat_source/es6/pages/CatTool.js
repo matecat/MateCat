@@ -33,7 +33,7 @@ import CommonUtils from '../utils/commonUtils'
 import {CattoolFooter} from '../components/footer/CattoolFooter'
 import {mountPage} from './mountPage'
 import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper'
-import SseListener from '../sse/SseListener'
+import SocketListener from '../sse/SocketListener'
 import Speech2Text from '../utils/speech2text'
 import {initTagSignature} from '../components/segments/utils/DraftMatecatUtils/tagModel'
 import {
@@ -413,7 +413,7 @@ function CatTool() {
         openTmPanel={openTmPanel}
         jobMetadata={jobMetadata}
       />
-      <SseListener
+      <SocketListener
         isAuthenticated={isUserLogged}
         userId={isUserLogged ? userInfo.user.uid : null}
       />
