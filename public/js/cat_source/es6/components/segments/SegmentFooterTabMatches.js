@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {createRef} from 'react'
 import {isUndefined} from 'lodash'
 import {fromJS} from 'immutable'
 
@@ -16,6 +16,7 @@ import DraftMatecatUtils from './utils/DraftMatecatUtils'
 import {Button, BUTTON_SIZE, BUTTON_TYPE} from '../common/Button/Button'
 import {NUM_CONTRIBUTION_RESULTS} from '../../constants/Constants'
 import ArrowDown from '../../../../../img/icons/ArrowDown'
+import Tooltip from '../common/Tooltip'
 
 const MAX_ITEMS_TO_DISPLAY_NOT_EXTENDED = 3
 
@@ -33,6 +34,8 @@ class SegmentFooterTabMatches extends React.Component {
       tmKeys: CatToolStore.getJobTmKeys(),
       numContributionsToShow: MAX_ITEMS_TO_DISPLAY_NOT_EXTENDED,
     }
+
+    this.penaltyPercRef = createRef()
   }
 
   processContributions(matches) {
@@ -66,6 +69,7 @@ class SegmentFooterTabMatches extends React.Component {
 
       item.percentClass = TranslationMatches.getPercentuageClass(this.match)
       item.percentText = this.match
+      item.penalty = this.penalty
 
       // Attention Bug: We are mixing the view mode and the raw data mode.
       // before doing a enhanced  view you will need to add a data-original tag
@@ -166,6 +170,30 @@ class SegmentFooterTabMatches extends React.Component {
   getMatchInfo(match) {
     return (
       <ul className="graysmall-details">
+        {match.penalty > 0 && (
+          <Tooltip
+            content={
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}
+              >
+                <span>Applied penalty:</span>
+                <span style={{whiteSpace: 'nowrap'}}>
+                  matching percentage reduced by <b>{match.penalty * 100}%</b>
+                </span>
+              </div>
+            }
+          >
+            <li
+              ref={this.penaltyPercRef}
+              className={`percent ${match.percentClass} per-red-outline`}
+            >
+              -{match.penalty * 100}%
+            </li>
+          </Tooltip>
+        )}
         <li className={'percent ' + match.percentClass}>{match.percentText}</li>
         <li>{match.suggestion_info}</li>
         <li className={'graydesc'}>
