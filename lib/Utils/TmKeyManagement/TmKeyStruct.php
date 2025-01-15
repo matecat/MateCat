@@ -165,7 +165,9 @@ class TmKeyManagement_TmKeyStruct extends stdClass implements JsonSerializable {
     public function __construct( $params = null ) {
         if ( $params != null ) {
             foreach ( $params as $property => $value ) {
-                $this->$property = $value;
+                if ( property_exists( $this, $property ) ) {
+                    $this->$property = $value;
+                }
             }
         }
     }
