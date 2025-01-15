@@ -1,5 +1,6 @@
 import {isUndefined} from 'lodash'
 import Cookies from 'js-cookie'
+import $ from 'jquery'
 
 import CatToolActions from './es6/actions/CatToolActions'
 import CommonUtils from './es6/utils/commonUtils'
