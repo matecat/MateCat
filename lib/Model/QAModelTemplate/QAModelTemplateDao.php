@@ -218,7 +218,7 @@ class QAModelTemplateDao extends DataAccess_AbstractDao {
         return [
                 'id'         => 0,
                 'uid'        => (int)$uid,
-                'label'      => 'Default',
+                'label'      => 'Matecat original settings',
                 'version'    => 1,
                 'categories' => $categories,
                 'passfail'   => $passFail,

@@ -50,7 +50,15 @@ import {mountPage} from './mountPage'
 import {HomePageSection} from '../components/createProject/HomePageSection'
 import UserActions from '../actions/UserActions'
 import {getDeepLGlosssaries} from '../api/getDeepLGlosssaries/getDeepLGlosssaries'
-import SseListener from '../sse/SseListener'
+import {
+  Button,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+} from '../components/common/Button/Button'
+import {
+  ONBOARDING_PAGE,
+  OnboardingTooltips,
+} from '../components/header/OnboardingTooltips'
 
 const SELECT_HEIGHT = 324
 
@@ -305,11 +313,11 @@ const NewProject = () => {
   const closeSettings = useCallback(() => setOpenSettings({isOpen: false}), [])
 
   const selectedTeam = useMemo(() => {
-    const team =
-      userInfo?.teams?.find(({id}) => id === currentProjectTemplate?.idTeam) ??
-      {}
+    const team = userInfo?.teams?.find(
+      ({id}) => id === currentProjectTemplate?.idTeam,
+    )
 
-    return {...team, id: team.id?.toString()}
+    return team && {...team, id: team.id?.toString()}
   }, [userInfo?.teams, currentProjectTemplate?.idTeam])
   const setSelectedTeam = useCallback(
     ({id}) =>
@@ -522,14 +530,14 @@ const NewProject = () => {
 
   useEffect(() => {
     checkQueryStringParameter()
-    if (!isUserLogged) return
-
-    retrieveSupportedLanguages()
     getSupportedFiles()
       .then((data) => {
         setSupportedFiles(data)
       })
       .catch((error) => console.log('Error retrieving supported files', error))
+    if (!isUserLogged) return
+
+    retrieveSupportedLanguages()
 
     UI.addEvents()
 
@@ -828,7 +836,7 @@ const NewProject = () => {
                 isDisabled={
                   !isUserLogged ||
                   userInfo?.teams.length === 1 ||
-                  !projectTemplates.length
+                  isLoadingTemplates
                 }
                 onSelect={(option) => setSelectedTeam(option)}
               />
@@ -840,7 +848,8 @@ const NewProject = () => {
             <a
               id="swaplang"
               title="Swap languages"
-              {...(isUserLogged && {onClick: swapLanguages})}
+              {...(isUserLogged &&
+                !isLoadingTemplates && {onClick: swapLanguages})}
             >
               <span>Swap languages</span>
             </a>
@@ -860,7 +869,7 @@ const NewProject = () => {
                 activeOption={subject}
                 checkSpaceToReverse={false}
                 onSelect={(option) => setSubject(option)}
-                isDisabled={!isUserLogged}
+                isDisabled={!isUserLogged || isLoadingTemplates}
               />
             </div>
             {/*TM and glossary*/}
@@ -952,14 +961,14 @@ const NewProject = () => {
         )}
         <div className="uploadbtn-box">
           {!projectSent ? (
-            <input
+            <Button
+              size={BUTTON_SIZE.BIG}
+              type={BUTTON_TYPE.PRIMARY}
               disabled={
                 !isFormReadyToSubmit ||
                 isImportTMXInProgress ||
                 projectTemplates.length === 0
               }
-              name=""
-              type="button"
               className={`uploadbtn${
                 !isFormReadyToSubmit ||
                 isImportTMXInProgress ||
@@ -967,19 +976,22 @@ const NewProject = () => {
                   ? ' disabled'
                   : ''
               }`}
-              value="Analyze"
               onClick={createProject.current}
-            />
+            >
+              {' '}
+              Analyze
+            </Button>
           ) : (
             <>
-              <span className="uploadloader" />
-              <input
-                name=""
-                type="button"
-                className="uploadbtn disabled"
-                value="Analyzing..."
-                disabled="disabled"
-              />
+              <Button
+                size={BUTTON_SIZE.BIG}
+                type={BUTTON_TYPE.PRIMARY}
+                className={'uploadbtn disabled'}
+                disabled={true}
+              >
+                <span className="uploadloader" />
+                Analyzing...
+              </Button>
             </>
           )}
         </div>
@@ -1026,6 +1038,11 @@ const NewProject = () => {
         isAuthenticated={isUserLogged}
         userId={isUserLogged ? userInfo.user.uid : null}
       />*/}
+      <OnboardingTooltips
+        show={isUserLogged && userInfo.user}
+        continous={true}
+        page={ONBOARDING_PAGE.HOME}
+      />
     </CreateProjectContext.Provider>
   ) : (
     <div>

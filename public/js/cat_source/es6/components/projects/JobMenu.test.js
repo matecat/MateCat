@@ -2,7 +2,7 @@ import {render, screen, waitFor} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import React from 'react'
 import JobMenu from './JobMenu'
-import Immutable from 'immutable'
+import {fromJS} from 'immutable'
 import {http, HttpResponse} from 'msw'
 import {mswServer} from '../../../../../mocks/mswServer'
 import ProjectsStore from '../../stores/ProjectsStore'
@@ -100,7 +100,7 @@ const fakeProjectsData = {
 
 const getFakeProperties = (fakeProperties) => {
   const {data, props} = fakeProperties
-  const project = Immutable.fromJS(data)
+  const project = fromJS(data)
   const jobs = project.get('jobs')
   const job = jobs.first()
 

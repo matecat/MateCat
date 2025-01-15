@@ -14,7 +14,10 @@ import UserStore from '../stores/UserStore'
 
 const LXQ = {
   enabled: function ({lexiqa} = {}) {
-    return (lexiqa ? lexiqa : UserStore.getUserMetadata()?.lexiqa) === 1
+    return (
+      LXQ.checkCanActivate() &&
+      (lexiqa ? lexiqa : UserStore.getUserMetadata()?.lexiqa) === 1
+    )
   },
   enable: function () {
     toggleTagLexica({enabled: true}).then(() => {
@@ -730,9 +733,9 @@ LXQ.init = function () {
     }
     var notCheckedSegments //store the unchecked segments at startup
     var doQAallSegments = function () {
-      var segments = SegmentStore.getAllSegments
+      var segments = SegmentStore.getAllSegments()
       var notChecked = []
-      $.each(segments, function (keys, segment) {
+      segments.forEach((segment) => {
         var segId = segment.sid
         if (LXQ.lexiqaData.segments.indexOf(segId) < 0) {
           notChecked.push(segment)

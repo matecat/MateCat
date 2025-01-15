@@ -31,7 +31,7 @@ class Engines_DeepL extends Engines_AbstractEngine {
     protected function _decode( $rawValue, array $parameters = [], $function = null ) {
         $rawValue    = json_decode( $rawValue, true );
         $translation = $rawValue[ 'translations' ][ 0 ][ 'text' ];
-        $translation = $this->_resetSpecialStrings( html_entity_decode( $translation, ENT_QUOTES | 16 ) );
+        $translation = html_entity_decode( $translation, ENT_QUOTES | 16 );
         $source      = $parameters[ 'source_lang' ];
         $target      = $parameters[ 'target_lang' ];
         $segment     = $parameters[ 'text' ][ 0 ];
@@ -49,9 +49,30 @@ class Engines_DeepL extends Engines_AbstractEngine {
      * @inheritDoc
      */
     public function get( $_config ) {
+
         try {
             $source = explode( "-", $_config[ 'source' ] );
             $target = explode( "-", $_config[ 'target' ] );
+
+            $extraParams = $this->getEngineRecord()->extra_parameters;
+
+            if ( !isset( $extraParams[ 'DeepL-Auth-Key' ] ) ) {
+                throw new Exception( "DeepL API key not set" );
+            }
+
+            // glossaries (only for DeepL)
+            $metadataDao     = new Projects_MetadataDao();
+            $deepLFormality  = $metadataDao->get( $_config[ 'pid' ], 'deepl_formality', 86400 );
+            $deepLIdGlossary = $metadataDao->get( $_config[ 'pid' ], 'deepl_id_glossary', 86400 );
+
+            if ( $deepLFormality !== null ) {
+                $_config[ 'formality' ] = $deepLFormality->value;
+            }
+
+            if ( $deepLIdGlossary !== null ) {
+                $_config[ 'idGlossary' ] = $deepLIdGlossary->value;
+            }
+            // glossaries (only for DeepL)
 
             $parameters = [
                 'text' => [
@@ -64,7 +85,7 @@ class Engines_DeepL extends Engines_AbstractEngine {
             ];
 
             $headers = [
-                    'Authorization: DeepL-Auth-Key ' . $this->apiKey,
+                    'Authorization: DeepL-Auth-Key ' . $extraParams[ 'DeepL-Auth-Key' ],
                     'Content-Type: application/json'
             ];
 

@@ -25,12 +25,13 @@ class Engine {
      * @return array
      */
     public function renderItem( EnginesModel_EngineStruct $engine ) {
+        $engine_type = explode( "\\", $engine->class_load );
         return [
                 'id'          => $engine->id,
                 'name'        => $engine->name,
                 'type'        => $engine->type,
                 'description' => $engine->description,
-                'engine_type' => $engine->class_load,
+                'engine_type' => array_pop( $engine_type )
         ];
     }
 
