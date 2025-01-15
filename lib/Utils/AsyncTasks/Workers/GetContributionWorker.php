@@ -225,10 +225,10 @@ class GetContributionWorker extends AbstractWorker {
     public function normalizeTMMatches( array &$matches, ContributionRequestStruct $contributionStruct, FeatureSet $featureSet, $targetLang ) {
 
         $Filter = MateCatFilter::getInstance(
-                $featureSet,
-                $contributionStruct->getJobStruct()->source,
-                $targetLang,
-                $contributionStruct->dataRefMap
+            $featureSet,
+            $contributionStruct->getJobStruct()->source,
+            $targetLang,
+            $contributionStruct->dataRefMap
         );
 
         foreach ( $matches as &$match ) {
