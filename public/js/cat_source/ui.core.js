@@ -1,5 +1,6 @@
 import {isUndefined} from 'lodash'
 import Cookies from 'js-cookie'
+import $ from 'jquery'
 
 import CatToolActions from './es6/actions/CatToolActions'
 import CommonUtils from './es6/utils/commonUtils'
@@ -743,7 +744,7 @@ window.UI = {
    * Overridden by  plugin
    */
   getContextBefore: function (segmentId) {
-    const segmentBefore = SegmentStore.getPrevSegment(segmentId)
+    const segmentBefore = SegmentStore.getPrevSegment(segmentId, true)
     if (!segmentBefore) {
       return null
     }
@@ -766,7 +767,10 @@ window.UI = {
    * Overridden by  plugin
    */
   getContextAfter: function (segmentId) {
-    const segmentAfter = SegmentStore.getNextSegment({current_sid: segmentId})
+    const segmentAfter = SegmentStore.getNextSegment({
+      current_sid: segmentId,
+      alsoMutedSegment: true,
+    })
     if (!segmentAfter) {
       return null
     }

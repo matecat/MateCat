@@ -17,14 +17,13 @@ const Footer = () => {
         <div className="side-info">
           <div className="item">
             <a
-              href="https://site.matecat.com/terms"
+              href="https://laratranslate.com/translate"
               target="_blank"
               rel="noreferrer"
             >
-              Terms of service
+              Translate
             </a>
           </div>
-
           <div className="item">
             <a
               href="https://site.matecat.com/open-source"
@@ -37,6 +36,15 @@ const Footer = () => {
           <div className="item">
             <a href="/api/docs" target="_blank">
               API
+            </a>
+          </div>
+          <div className="item">
+            <a
+              href="https://site.matecat.com/terms"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Terms of service
             </a>
           </div>
           <div className="item">
