@@ -25,7 +25,7 @@ export const XliffToTarget = () => {
         />
       </HeaderPortal>
       <div className="wrapper-xliff-to-target">
-        <UploadXliff />
+        {typeof isUserLogged !== 'undefined' && <UploadXliff />}
       </div>
       <Footer />
       <SocketListener
