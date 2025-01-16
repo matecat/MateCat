@@ -1,0 +1,49 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "tm_prioritization": {
+      "type": "boolean"
+    },
+    "keys": {
+      "type": "array",
+      "nullable": true,
+      "items": {
+        "type": "object",
+        "$ref": "#/definitions/key"
+      }
+    }
+  },
+  "required": [
+    "tm_prioritization",
+    "keys"
+  ],
+  "definitions": {
+    "key": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "read": {
+          "type": "boolean"
+        },
+        "write": {
+          "type": "boolean"
+        },
+        "penalty": {
+          "type": "integer",
+          "nullable": true,
+          "maximum": 100,
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "key",
+        "read",
+        "write"
+      ]
+    }
+  }
+}

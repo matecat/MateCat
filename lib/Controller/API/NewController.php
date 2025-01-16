@@ -53,6 +53,11 @@ class NewController extends ajaxController {
      */
     private $private_tm_key;
 
+    /**
+     * @var array
+     */
+    private $tm_prioritization = false;
+
     private $private_tm_user = null;
     private $private_tm_pass = null;
 
@@ -189,6 +194,7 @@ class NewController extends ajaxController {
                         'options' => [ 'default' => 1, 'min_range' => 0 ]
                 ],
                 'private_tm_key'             => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'private_tm_key_json'        => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
                 'subject'                    => [
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ],
@@ -246,7 +252,7 @@ class NewController extends ajaxController {
          * Note 2022-10-13
          * ----------------------------------
          *
-         * We trim every space private_tm_key
+         * We trim every space in instructions
          * in order to avoid mispelling errors
          *
          */
@@ -657,21 +663,22 @@ class NewController extends ajaxController {
         $projectStructure[ 'project_name' ] = $this->postInput[ 'project_name' ];
         $projectStructure[ 'job_subject' ]  = $this->postInput[ 'subject' ];
 
-        $projectStructure[ 'private_tm_key' ]   = $this->private_tm_key;
-        $projectStructure[ 'private_tm_user' ]  = $this->private_tm_user;
-        $projectStructure[ 'private_tm_pass' ]  = $this->private_tm_pass;
-        $projectStructure[ 'uploadToken' ]      = $uploadFile->getDirUploadToken();
-        $projectStructure[ 'array_files' ]      = $arFiles; //list of file name
-        $projectStructure[ 'array_files_meta' ] = $arMeta; //list of file metadata
-        $projectStructure[ 'source_language' ]  = $this->postInput[ 'source_lang' ];
-        $projectStructure[ 'target_language' ]  = explode( ',', $this->postInput[ 'target_lang' ] );
-        $projectStructure[ 'mt_engine' ]        = $this->postInput[ 'mt_engine' ];
-        $projectStructure[ 'tms_engine' ]       = $this->postInput[ 'tms_engine' ];
-        $projectStructure[ 'status' ]           = Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
-        $projectStructure[ 'owner' ]            = $this->user->email;
-        $projectStructure[ 'metadata' ]         = $this->metadata;
-        $projectStructure[ 'pretranslate_100' ] = (int)!!$this->postInput[ 'pretranslate_100' ]; // Force pretranslate_100 to be 0 or 1
-        $projectStructure[ 'pretranslate_101' ] = isset( $this->postInput[ 'pretranslate_101' ] ) ? (int)$this->postInput[ 'pretranslate_101' ] : 1;
+        $projectStructure[ 'private_tm_key' ]    = $this->private_tm_key;
+        $projectStructure[ 'private_tm_user' ]   = $this->private_tm_user;
+        $projectStructure[ 'private_tm_pass' ]   = $this->private_tm_pass;
+        $projectStructure[ 'uploadToken' ]       = $uploadFile->getDirUploadToken();
+        $projectStructure[ 'array_files' ]       = $arFiles; //list of file name
+        $projectStructure[ 'array_files_meta' ]  = $arMeta; //list of file metadata
+        $projectStructure[ 'source_language' ]   = $this->postInput[ 'source_lang' ];
+        $projectStructure[ 'target_language' ]   = explode( ',', $this->postInput[ 'target_lang' ] );
+        $projectStructure[ 'mt_engine' ]         = $this->postInput[ 'mt_engine' ];
+        $projectStructure[ 'tms_engine' ]        = $this->postInput[ 'tms_engine' ];
+        $projectStructure[ 'tm_prioritization' ] = $this->tm_prioritization;
+        $projectStructure[ 'status' ]            = Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
+        $projectStructure[ 'owner' ]             = $this->user->email;
+        $projectStructure[ 'metadata' ]          = $this->metadata;
+        $projectStructure[ 'pretranslate_100' ]  = (int)!!$this->postInput[ 'pretranslate_100' ]; // Force pretranslate_100 to be 0 or 1
+        $projectStructure[ 'pretranslate_101' ]  = isset( $this->postInput[ 'pretranslate_101' ] ) ? (int)$this->postInput[ 'pretranslate_101' ] : 1;
 
         $projectStructure[ 'dictation' ]         = $this->postInput[ 'dictation' ] ?? null;
         $projectStructure[ 'show_whitespace' ]   = $this->postInput[ 'show_whitespace' ] ?? null;
@@ -1030,10 +1037,44 @@ class NewController extends ajaxController {
     protected function __validateTmAndKeys() {
 
         try {
-            $this->private_tm_key = array_map(
+            if(!empty($this->postInput[ 'private_tm_key_json' ])){
+                $json = html_entity_decode( $this->postInput[ 'private_tm_key_json' ] );
+
+                // first check if `filters_extraction_parameters` is a valid JSON
+                if ( !Utils::isJson( $json ) ) {
+                    throw new Exception( "private_tm_key_json is not a valid JSON" );
+                }
+
+                $schema = file_get_contents( INIT::$ROOT . '/inc/validation/schema/private_tm_key_json.json' );
+
+                $validatorObject       = new JSONValidatorObject();
+                $validatorObject->json = $json;
+
+                $validator = new JSONValidator( $schema );
+                $validator->validate( $validatorObject );
+
+                $privateTmKeyJsonObject = json_decode($json);
+
+                $this->tm_prioritization = $privateTmKeyJsonObject->tm_prioritization;
+
+                $this->private_tm_key = array_map(
+                    function ($item){
+                        return [
+                            'key' => $item->key,
+                            'r' => $item->read,
+                            'w' => $item->write,
+                            'penalty' => $item->penalty,
+                        ];
+                    },
+                    $privateTmKeyJsonObject->keys
+                );
+
+            } else {
+                $this->private_tm_key = array_map(
                     [ 'NewController', '__parseTmKeyInput' ],
                     explode( ",", $this->postInput[ 'private_tm_key' ] )
-            );
+                );
+            }
         } catch ( Exception $e ) {
             throw new Exception( $e->getMessage(), -6 );
         }
@@ -1071,10 +1112,11 @@ class NewController extends ajaxController {
 
                     $this->private_tm_key[ $__key_idx ] =
                             [
-                                    'key'  => $newUser->key,
-                                    'name' => null,
-                                    'r'    => $tm_key[ 'r' ],
-                                    'w'    => $tm_key[ 'w' ]
+                                    'key'     => $newUser->key,
+                                    'name'    => null,
+                                    'penalty' => $tm_key[ 'penalty' ] ?? null,
+                                    'r'       => $tm_key[ 'r' ],
+                                    'w'       => $tm_key[ 'w' ],
 
                             ];
                     $this->new_keys[]                   = $newUser->key;
@@ -1089,10 +1131,11 @@ class NewController extends ajaxController {
                 $uid = $this->user->uid;
 
                 $this_tm_key = [
-                        'key'  => $tm_key[ 'key' ],
-                        'name' => null,
-                        'r'    => $tm_key[ 'r' ],
-                        'w'    => $tm_key[ 'w' ]
+                        'key'     => $tm_key[ 'key' ],
+                        'name'    => null,
+                        'penalty' => $tm_key[ 'penalty' ] ?? null,
+                        'r'       => $tm_key[ 'r' ],
+                        'w'       => $tm_key[ 'w' ]
                 ];
 
                 /**

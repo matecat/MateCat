@@ -528,6 +528,7 @@ class TMAnalysisWorker extends AbstractWorker {
         $_config[ 'context_before' ]    = $queueElement->params->context_before;
         $_config[ 'context_after' ]     = $queueElement->params->context_after;
         $_config[ 'additional_params' ] = @$queueElement->params->additional_params;
+        $_config[ 'priority_key' ] = $queueElement->params->tm_prioritization ?? null;
 
         $jobsMetadataDao = new MetadataDao();
         $dialect_strict  = $jobsMetadataDao->get( $queueElement->params->id_job, $queueElement->params->password, 'dialect_strict', 10 * 60 );
@@ -536,11 +537,24 @@ class TMAnalysisWorker extends AbstractWorker {
             $_config[ 'dialect_strict' ] = $dialect_strict->value == 1;
         }
 
+        // penalty_key
+        $penalty_key = [];
         $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $queueElement->params->tm_keys, 'r', 'tm' );
+
         if ( is_array( $tm_keys ) && !empty( $tm_keys ) ) {
             foreach ( $tm_keys as $tm_key ) {
                 $_config[ 'id_user' ][] = $tm_key->key;
+
+                if(isset($tm_key->penalty) and is_numeric($tm_key->penalty)){
+                    $penalty_key[] = $tm_key->penalty;
+                } else {
+                    $penalty_key[] = 0;
+                }
             }
+        }
+
+        if(!empty($penalty_key)){
+            $_config['penalty_key'] = $penalty_key;
         }
 
         $_config[ 'num_result' ] = 3;

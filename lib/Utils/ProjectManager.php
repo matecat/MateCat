@@ -113,6 +113,8 @@ class ProjectManager {
      */
     protected $metadataDao;
 
+    protected $tm_prioritization;
+
     /**
      * ProjectManager constructor.
      *
@@ -199,7 +201,8 @@ class ProjectManager {
                             'ai_assistant'                            => null,
                             'filters_extraction_parameters'           => new RecursiveArrayObject(),
                             'xliff_parameters'                        => new RecursiveArrayObject(),
-                            'mt_evaluation'                           => false
+                            'mt_evaluation'                           => false,
+                            'tm_prioritization'                       => null
                     ] );
         }
 
@@ -1336,6 +1339,7 @@ class ProjectManager {
                     $newTmKey->tm              = true;
                     $newTmKey->glos            = true;
                     $newTmKey->owner           = true;
+                    $newTmKey->penalty         = $tmKeyObj[ 'penalty' ] ?? null;
                     $newTmKey->name            = $tmKeyObj[ 'name' ];
                     $newTmKey->key             = $tmKeyObj[ 'key' ];
                     $newTmKey->r               = $tmKeyObj[ 'r' ];
@@ -1387,6 +1391,12 @@ class ProjectManager {
             $projectStructure[ 'array_jobs' ][ 'payable_rates' ]->offsetSet( $newJob->id, $payableRates );
 
             $jobsMetadataDao = new Jobs\MetadataDao();
+
+            // tm_prioritization
+            if ( isset( $projectStructure[ 'tm_prioritization' ] ) ) {
+                $jobsMetadataDao->set( $newJob->id, $newJob->password, 'tm_prioritization', ($projectStructure[ 'tm_prioritization' ] == true ? "1" : "0") );
+            }
+
             // dialect_strict
             if ( isset( $projectStructure[ 'dialect_strict' ] ) ) {
                 $dialectStrictObj = json_decode( $projectStructure[ 'dialect_strict' ], true );

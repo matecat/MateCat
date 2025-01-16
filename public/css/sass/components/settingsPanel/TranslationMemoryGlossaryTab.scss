@@ -60,22 +60,43 @@
 }
 
 .translation-memory-glossary-tab {
+  .settings-panel-table {
+    .settings-panel-table-rows-container {
+      background-color: white;
+    }
+  }
+
+  .settings-panel-table-rowHeading {
+    padding: 0 20px;
+  }
+
   .settings-panel-table-rowHeading,
   .settings-panel-row-content {
-    grid-template-columns: 8% 5% minmax(0, 1fr) 20% 5% 22%;
+    grid-template-columns: 8% 5% minmax(0, 1fr) 20% 5% 14% 18%;
   }
 
   .settings-panel-row {
-    border-top: unset;
+    border: unset;
 
     .row-content-default-memory {
-      grid-template-columns: 8% 5% minmax(0, 1fr) 0 5% 22%;
+      grid-template-columns: 8% 5% minmax(0, 1fr) 5% 14% 18%;
+      padding: 0 10px !important;
+
+      > :last-child {
+        grid-column: 6;
+      }
     }
     .row-content-create-resource {
       grid-template-columns: 100%;
+      padding: 0 10px;
 
       > form {
         padding: 0 !important;
+        background-color: unset;
+
+        > :last-child {
+          grid-column: 7;
+        }
       }
     }
   }
@@ -89,11 +110,36 @@
   }
 
   .settings-panel-row-active {
+    padding: 10px;
     background-color: $transparentBlue;
   }
 
   .settings-panel-table-rowHeading-column {
     text-align: center;
+    padding: 0;
+  }
+}
+
+.translation-memory-glossary-tab {
+  .settings-panel-table {
+    .settings-panel-row-content:not(.row-content-create-resource):not(
+        .row-content-default-memory
+      )
+      > :last-child {
+      grid-column: 7;
+    }
+  }
+
+  .settings-panel-table:not(.translation-memory-glossary-tab-active-table) {
+    .settings-panel-row {
+      padding: 0 10px;
+    }
+    .settings-panel-row-content {
+      padding: 0 10px;
+    }
+  }
+
+  .settings-panel-row-content > *:not(.settings-panel-row-drag-handle) {
     padding: 0;
   }
 }
@@ -106,6 +152,12 @@
 .tm-key-update {
   display: flex;
   justify-content: center;
+}
+
+.tm-key-add-shared-resource {
+  input {
+    width: 90%;
+  }
 }
 
 .tm-key-row-name {
@@ -145,10 +197,8 @@
 
 .tm-key-row-menu-button {
   .menu-button-wrapper {
-    gap: 8px;
-
     > :first-child {
-      min-width: 170px;
+      min-width: 140px;
       border-radius: 2px;
     }
 
@@ -160,7 +210,7 @@
   }
 
   .just-button-import-tmx {
-    min-width: 170px;
+    min-width: 140px;
     border-radius: 2px;
     font-size: 16px;
     color: #000;
@@ -173,6 +223,10 @@
       background-color: $grey5;
     }
   }
+}
+
+.tm-key-row-menu-button-dropdown {
+  margin-left: -10px;
 }
 
 .tm-key-row-icons {
@@ -311,4 +365,87 @@
 .translation-memory-glossary-tab-delete {
   border-top: 3px solid #ffcc01;
   background-color: $orangeDefaultTransparent2;
+}
+
+.translation-memory-glossary-tab-active-table {
+  .settings-panel-row {
+    padding-left: 10px;
+    padding-right: 10px;
+
+    &:first-child {
+      padding: 10px !important;
+    }
+
+    &:last-child:not(.settings-panel-row-dragover-half-bottom) {
+      padding-bottom: 10px;
+    }
+
+    &:last-child:not(:nth-child(2)):not(
+        .settings-panel-row-dragover-half-bottom
+      ) {
+      .settings-panel-row-active {
+        border-bottom-left-radius: 8px;
+        border-bottom-right-radius: 8px;
+      }
+    }
+  }
+
+  .tm-prioritization-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    padding: 20px;
+    background-color: $grey3;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+  }
+
+  .tm-prioritization-text-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+
+    h4 {
+      margin: 0;
+      font-size: 16px;
+    }
+
+    span {
+      color: $grey6;
+    }
+  }
+
+  .switch-container-outer {
+    width: 155px;
+  }
+}
+
+.tm-row-penalty {
+  .tm-row-penalty-button,
+  .penalty-numeric-stepper-close-button {
+    border-radius: 2px;
+    font-size: 16px;
+    color: #000 !important;
+    background: $grey4 !important;
+    padding: 4px 8px;
+    text-align: center;
+    border: 1px solid $grey7 !important;
+    font-size: 16px !important;
+
+    &:hover {
+      background-color: $grey5 !important;
+    }
+  }
+
+  .tm-row-penalty-numeric-stepper {
+    display: flex;
+    gap: 5px;
+  }
+
+  .penalty-numeric-stepper-close-button {
+    width: 28px !important;
+    height: 28px !important;
+    color: $grey6 !important;
+  }
 }

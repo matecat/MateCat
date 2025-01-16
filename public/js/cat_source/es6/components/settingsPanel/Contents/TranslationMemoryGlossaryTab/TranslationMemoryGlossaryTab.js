@@ -24,6 +24,7 @@ const COLUMNS_TABLE_ACTIVE = [
   {name: ''},
   {name: ''},
   {name: ''},
+  {name: ''},
 ]
 
 const COLUMNS_TABLE_INACTIVE = [
@@ -90,7 +91,15 @@ export const orderTmKeys = (tmKeys, keysOrdered) => {
 export const getTmDataStructureToSendServer = ({tmKeys = [], keysOrdered}) => {
   const mine = tmKeys
     .filter(({key, isActive}) => isOwnerOfKey(key) && isActive)
-    .map(({tm, glos, key, name, r, w}) => ({tm, glos, key, name, r, w}))
+    .map(({tm, glos, key, name, r, w, penalty}) => ({
+      tm,
+      glos,
+      key,
+      name,
+      r,
+      w,
+      penalty,
+    }))
 
   return JSON.stringify({
     ownergroup: [],
@@ -112,6 +121,7 @@ export const TranslationMemoryGlossaryTab = () => {
       ...prevTemplate,
       pretranslate100: value,
     }))
+  const tmPrioritization = currentProjectTemplate.tmPrioritization
   const [specialRows, setSpecialRows] = useState([
     {
       ...DEFAULT_TRANSLATION_MEMORY,
@@ -126,6 +136,7 @@ export const TranslationMemoryGlossaryTab = () => {
     tmKeys: undefined,
     getPublicMatches: undefined,
     currentProjectTemplate: undefined,
+    tmPrioritization: undefined,
   })
 
   previousStatesRef.current.currentProjectTemplate = currentProjectTemplate
@@ -144,7 +155,11 @@ export const TranslationMemoryGlossaryTab = () => {
           r: false,
           w: false,
           isActive: false,
-          ...(tmFromTemplate && {...tmFromTemplate, isActive: true}),
+          penalty: 0,
+          ...(tmFromTemplate && {
+            ...tmFromTemplate,
+            isActive: true,
+          }),
           name: tmItem.name,
         }
       }),
@@ -182,6 +197,7 @@ export const TranslationMemoryGlossaryTab = () => {
       updateJobKeys({
         getPublicMatches,
         dataTm: getTmDataStructureToSendServer({tmKeys, keysOrdered}),
+        tmPrioritization,
       }).then(() => {
         CatToolActions.onTMKeysChangeStatus()
         SegmentActions.getContributions(
@@ -297,7 +313,7 @@ export const TranslationMemoryGlossaryTab = () => {
               ? 'row-content-default-memory'
               : id === SPECIAL_ROWS_ID.addSharedResource ||
                   id === SPECIAL_ROWS_ID.newResource
-                ? 'row-content-create-resource'
+                ? 'settings-panel-row-active row-content-create-resource'
                 : '',
           node: !isCreateResourceRow ? (
             <TMKeyRow key={row.id} {...{row, onExpandRow}} />
@@ -324,15 +340,25 @@ export const TranslationMemoryGlossaryTab = () => {
         tmKeysActive.length !== prevTmKeysActive.length ||
         tmKeysActive
           .filter(({key}) => isOwnerOfKey(key))
-          .some(({key, r, w}) => {
+          .some(({key, r, w, penalty}) => {
             const prevTm = prevTmKeysActive.find((prev) => prev.key === key)
-            return prevTm && (r !== prevTm.r || w !== prevTm.w)
-          })
+            return (
+              prevTm &&
+              (r !== prevTm.r || w !== prevTm.w || penalty !== prevTm.penalty)
+            )
+          }) ||
+        tmPrioritization !== current.tmPrioritization
 
       if (shouldUpdateTmKeysJob) {
+        const tmCurrentProjectTemplate =
+          previousStatesRef.current.currentProjectTemplate.tm
+
+        const keysOrdered = tmCurrentProjectTemplate.map(({key}) => key)
+
         updateJobKeys({
           getPublicMatches,
-          dataTm: getTmDataStructureToSendServer({tmKeys}),
+          dataTm: getTmDataStructureToSendServer({tmKeys, keysOrdered}),
+          tmPrioritization,
         }).then(() => {
           CatToolActions.onTMKeysChangeStatus()
           SegmentActions.getContributions(
@@ -346,7 +372,8 @@ export const TranslationMemoryGlossaryTab = () => {
 
     current.tmKeys = tmKeys
     current.getPublicMatches = getPublicMatches
-  }, [tmKeys, getPublicMatches])
+    current.tmPrioritization = tmPrioritization
+  }, [tmKeys, getPublicMatches, tmPrioritization])
 
   const onAddSharedResource = () =>
     setSpecialRows([
@@ -408,6 +435,7 @@ export const TranslationMemoryGlossaryTab = () => {
             </div>
           </div>
           <SettingsPanelTable
+            className="translation-memory-glossary-tab-active-table"
             columns={COLUMNS_TABLE_ACTIVE}
             rows={keyRows.filter(({isActive}) => isActive)}
             onChangeRowsOrder={onOrderActiveRows}
@@ -425,7 +453,6 @@ export const TranslationMemoryGlossaryTab = () => {
             />
           </div>
           <SettingsPanelTable
-            className="translation-memory-glossary-tab-inactive-table"
             columns={COLUMNS_TABLE_INACTIVE}
             rows={inactiveKeys}
           />
