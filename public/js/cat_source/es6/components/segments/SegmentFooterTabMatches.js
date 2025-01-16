@@ -176,7 +176,7 @@ class SegmentFooterTabMatches extends React.Component {
                 <span>Applied penalty:</span>
                 <span style={{whiteSpace: 'nowrap'}}>
                   matching percentage reduced by{' '}
-                  <b>{(match.penalty * 100) >> 0}%</b>
+                  <b>{Math.round(match.penalty * 100)}%</b>
                 </span>
               </div>
             }
@@ -185,7 +185,7 @@ class SegmentFooterTabMatches extends React.Component {
               ref={penaltyPercRef}
               className={`percent ${match.percentClass} per-red-outline`}
             >
-              -{match.penalty * 100}%
+              -{Math.round(match.penalty * 100)}%
             </li>
           </Tooltip>
         )}
