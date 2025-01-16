@@ -776,7 +776,7 @@ article .approved:active {
   color: #fff !important;
 }
 
-.draft{
+.draft {
   background: -webkit-gradient(
     linear,
     left top,
@@ -928,7 +928,7 @@ section .body > .text {
 body #file section:not(.editor) {
   background: $grey3;
   cursor: pointer;
-  border: 1px solid $grey2 !important;
+  border: 1px solid $grey2;
   .body {
     height: 100%;
   }
@@ -1350,10 +1350,9 @@ section.status-new.opened .editarea {
 section.editor {
   z-index: 2;
   position: relative;
-  //height: 100%;
-  width: 89%;
-  margin-left: 4.5%;
-  //height: 100%;
+  width: 88%;
+  // width: 89%;
+  // margin-left: 4.5%;
 }
 
 section.editor .sid {
@@ -1737,7 +1736,6 @@ body.rtl-target .editor .editarea span {
   cursor: auto;
 }
 
-
 .engine-error {
   padding-left: 40px !important;
 }
@@ -1950,7 +1948,8 @@ section.opened.editor .status {
     url('/public/css/fonts/calibri-webfont.woff') format('woff'),
     url('/public/css/fonts/calibri-webfont.ttf') format('truetype'),
     url('/public/css/fonts/calibri-webfont.eot'),
-    url('/public/css/fonts/calibri-webfont.eot?#iefix') format('embedded-opentype');
+    url('/public/css/fonts/calibri-webfont.eot?#iefix')
+      format('embedded-opentype');
 }
 
 @font-face {
@@ -1961,9 +1960,9 @@ section.opened.editor .status {
     url('/public/css/fonts/calibri_bold-webfont.woff') format('woff'),
     url('/public/css/fonts/calibri_bold-webfont.ttf') format('truetype'),
     url('/public/css/fonts/calibri_bold-webfont.eot'),
-    url('/public/css/fonts/calibri_bold-webfont.eot?#iefix') format('embedded-opentype');
+    url('/public/css/fonts/calibri_bold-webfont.eot?#iefix')
+      format('embedded-opentype');
 }
-
 
 @media screen and (min-width: 1600px) {
   .text .source.item,
@@ -2001,7 +2000,6 @@ section.opened.editor .status {
 }
 
 @media screen and (max-width: 1280px) {
-
   .text .source.item,
   .text .target.item,
   .white li {
@@ -2037,7 +2035,6 @@ section.opened.editor .status {
 }
 
 @media screen and (max-width: 1180px) {
-
   .second {
     width: 30%;
   }
@@ -2263,7 +2260,6 @@ section .toolbar .autofillTag {
   background: $translatedBlue;
 }
 
-
 .autofillTag {
   padding: 4px 2px 0px 2px;
   border: 1px solid #fff;
@@ -2458,7 +2454,6 @@ section.editor .toolbar {
     background: url(/public/img/outercopy@2x.png) 4px -69px no-repeat;
     background-size: 42px;
   }
-
 }
 
 .addtmx-tr.white-tx .open-popup-addtm-tr {
@@ -2500,7 +2495,6 @@ section.editor .toolbar {
   background: #b0ffb3;
   text-decoration: none;
 }
-
 
 .splitContainer {
   position: relative;
@@ -2639,7 +2633,6 @@ section .segment-side-buttons {
   margin-right: 0;
   z-index: 0;
   position: relative;
-  margin-top: -2px;
 }
 
 .buttons li {
@@ -2661,7 +2654,6 @@ $gray-2: #bbbbbb;
 $light-blue: #0055b8;
 $white: #fff;
 
-
 /* XLIFF to Target page */
 
 .xliff-to-target-page {
@@ -2676,7 +2668,9 @@ $white: #fff;
 
 header {
   .wrapper {
-    grid-template-columns: 208px minmax(0, 48px) minmax(200px, max-content) auto max-content; /*208px minmax(0,48px) minmax(200px, max-content) auto 120px;*/
+    grid-template-columns:
+      208px minmax(0, 48px) minmax(200px, max-content)
+      auto max-content; /*208px minmax(0,48px) minmax(200px, max-content) auto 120px;*/
     align-items: center;
 
     .popover-component-container {

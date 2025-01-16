@@ -28,6 +28,7 @@ import CommentsStore from '../../stores/CommentsStore'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper'
 
+const ROW_MARGIN = 5
 const ROW_HEIGHT = 90
 const OVERSCAN = 5
 const COMMENTS_PADDING_TOP = [
@@ -180,10 +181,19 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
   const {guess_tags: guessTagActive, dictation: speechToTextActive} =
     userInfo?.metadata ?? {}
 
-  const onChangeRowHeight = useCallback((id, newHeight) => {
-    rowsRenderedHeight.current.set(id, newHeight)
-    setOnUpdateRow(Symbol())
-  }, [])
+  const onChangeRowHeight = useCallback(
+    (id, newHeight) => {
+      rowsRenderedHeight.current.set(
+        id,
+        getRowHeightWithMargin({
+          id,
+          height: newHeight,
+        }),
+      )
+      setOnUpdateRow(Symbol())
+    },
+    [getRowHeightWithMargin],
+  )
 
   const multiMatchLangs = useMemo(
     () => userInfo?.metadata?.cross_language_matches ?? [],
@@ -342,7 +352,12 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
           ? cached.segment
           : segImmutable.toJS()
 
-      cachedSegmentsToJS.current.set(segment.sid, {segImmutable, segment})
+      cachedSegmentsToJS.current.set(segment.sid, {
+        segImmutable,
+        segment,
+        previousSegmentId: segments.get(index - 1)?.get('sid'),
+        nextSegmentId: segments.get(index + 1)?.get('sid'),
+      })
 
       const collectionType = getCollectionType(segment)
       let collectionTypeSeparator
@@ -378,6 +393,17 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
       return props
     })
   }, [files, isSideOpen, segments])
+
+  // return row height and checks if it have margin
+  const getRowHeightWithMargin = useCallback(({id, height}) => {
+    const {segment, nextSegmentId} = cachedSegmentsToJS.current.get(id)
+    const {segment: nextSegment} =
+      cachedSegmentsToJS.current.get(nextSegmentId) ?? {}
+
+    return segment.internal_id !== nextSegment?.internal_id
+      ? height + ROW_MARGIN
+      : height
+  }, [])
 
   // set width and height of area
   useEffect(() => {
@@ -521,7 +547,13 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
           : cachedRowsHeightMap.current.get(newestSid)
         const prevStateRow = cachedHeight
           ? {height: cachedHeight, hasRendered}
-          : {height: ROW_HEIGHT, hasRendered: false}
+          : {
+              height: getRowHeightWithMargin({
+                id: newestSid,
+                height: ROW_HEIGHT,
+              }),
+              hasRendered: false,
+            }
         return {
           id: newestSid,
           height: prevStateRow?.height,
@@ -530,7 +562,7 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
         }
       }),
     )
-  }, [segments, rows])
+  }, [segments, rows, getRowHeightWithMargin])
 
   // cache rows before start index
   useEffect(() => {
@@ -561,11 +593,15 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
       )
       .forEach((row, index) => {
         const cached = cachedRowsHeightMap.current.get(row.id)
+        const previousSegment =
+          index > 0 ? rows[index - 1].segImmutable : undefined
         const newHeight = !cached
-          ? getSegmentRealHeight({
-              segment: row.segImmutable,
-              previousSegment:
-                index > 0 ? rows[index - 1].segImmutable : undefined,
+          ? getRowHeightWithMargin({
+              id: row.id,
+              height: getSegmentRealHeight({
+                segment: row.segImmutable,
+                previousSegment,
+              }),
             })
           : cached
         cachedRowsHeightMap.current.set(row.id, newHeight)
@@ -579,6 +615,7 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
     hasCachedRows,
     startIndex,
     getSegmentRealHeight,
+    getRowHeightWithMargin,
   ])
 
   // adapt scroll when was added more segments before
@@ -603,9 +640,14 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
       contentElement.offsetHeight + additionalHeight
     }px`
 
-    cachedRowsHeightMap.current.set(essentialRows[0].id, ROW_HEIGHT)
+    const defaultRowHeight = getRowHeightWithMargin({
+      id: essentialRows[0].id,
+      height: ROW_HEIGHT,
+    })
 
-    const difference = essentialRows[0].height - ROW_HEIGHT
+    cachedRowsHeightMap.current.set(essentialRows[0].id, defaultRowHeight)
+
+    const difference = essentialRows[0].height - defaultRowHeight
 
     for (let i = 0; i < contentElement.children.length; i++) {
       const rowElement = contentElement.children[i]
@@ -624,7 +666,7 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
     listRef.current.scrollTop = scrollTop
 
     current.haveBeenAddedSegmentsBefore = true
-  }, [rows, essentialRows, hasCachedRows])
+  }, [rows, essentialRows, hasCachedRows, getRowHeightWithMargin])
 
   // updating rows height
   useEffect(() => {
@@ -764,7 +806,13 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
     )
     if (!details) return
     const {currentFileId, collectionTypeSeparator} = details
-    const {segment, segImmutable} = cachedSegmentsToJS.current.get(sid)
+    const {segment, segImmutable, previousSegmentId, nextSegmentId} =
+      cachedSegmentsToJS.current.get(sid)
+    const {segment: previousSegment} =
+      cachedSegmentsToJS.current.get(previousSegmentId) ?? {}
+    const {segment: nextSegment} =
+      cachedSegmentsToJS.current.get(nextSegmentId) ?? {}
+
     return {
       segment,
       segImmutable,
@@ -779,6 +827,8 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
       guessTagActive,
       speechToTextActive,
       multiMatchLangs,
+      previousSegment,
+      nextSegment,
     }
   }
 
@@ -802,7 +852,6 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
             props && (
               <RowSegment
                 {...{
-                  minRowHeight: ROW_HEIGHT,
                   onChangeRowHeight,
                   ...essentialRows[index],
                   ...props,
