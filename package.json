@@ -45,7 +45,9 @@
     "react-tagsinput": "^3.19.0",
     "react-transition-group": "^4.2.2",
     "react-virtual": "^2.10.4",
-    "sprintf-js": "^1.1.2"
+    "socket.io-client": "^4.8.1",
+    "sprintf-js": "^1.1.2",
+    "uuid": "^11.0.2"
   },
   "devDependencies": {
     "@babel/core": "7.26.0",
@@ -54,7 +56,7 @@
     "@babel/plugin-transform-runtime": "^7.23.7",
     "@babel/preset-env": "^7.23.8",
     "@babel/preset-react": "^7.23.3",
-    "@sentry/webpack-plugin": "2.22.6",
+    "@sentry/webpack-plugin": "2.22.7",
     "@testing-library/dom": "^10.1.0",
     "@testing-library/jest-dom": "^6.2.0",
     "@testing-library/react": "^16.0.0",
@@ -93,5 +95,5 @@
   "resolutions": {
     "wrap-ansi": "^7.0.0"
   },
-  "version": "3.0.36"
+  "version": "3.0.44"
 }
