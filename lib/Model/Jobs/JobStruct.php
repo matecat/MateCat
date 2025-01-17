@@ -22,8 +22,8 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
     public int $job_first_segment;
     public int $job_last_segment;
 
-    public string  $source = 'es-US';
-    public string  $target = 'fr-FR';
+    public string  $source;
+    public string  $target;
     public string  $tm_keys                 = '[]';
     public ?string $id_translator           = null;
     public ?string $job_type                = null;
