@@ -541,11 +541,11 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
 
         $jobStruct->last_update = date( "Y-m-d H:i:s" );
 
+        $values[] = $jobStruct->last_update;
         $values[] = $jobStruct->last_opened_segment;
         $values[] = $jobStruct->job_first_segment;
         $values[] = $jobStruct->job_last_segment;
         $values[] = $jobStruct->avg_post_editing_effort;
-        $values[] = $jobStruct->last_update;
 
         /** @noinspection SqlInsertValues */
         $query = "INSERT INTO jobs ( $columns ) VALUES ( $placeHolders )
