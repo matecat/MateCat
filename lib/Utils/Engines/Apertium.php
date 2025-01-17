@@ -52,7 +52,7 @@ class Engines_Apertium extends Engines_AbstractEngine {
             $decoded  = [
                     'data' => [
                             "translations" => [
-                                    [ 'translatedText' => $this->_resetSpecialStrings( $decoded[ "text" ] ) ]
+                                    [ 'translatedText' => $decoded[ "text" ] ]
                             ]
                     ]
             ];
@@ -70,7 +70,7 @@ class Engines_Apertium extends Engines_AbstractEngine {
         }
 
         $mt_match_res = new Engines_Results_MyMemory_Matches(
-                $this->_preserveSpecialStrings( $original[ "text" ] ),
+                $original[ "text" ],
                 $mt_result->translatedText,
                 100 - $this->getPenalty() . "%",
                 "MT-" . $this->getName(),
@@ -84,7 +84,6 @@ class Engines_Apertium extends Engines_AbstractEngine {
     }
 
     public function get( $_config ) {
-        $_config[ 'segment' ] = $this->_preserveSpecialStrings( $_config[ 'segment' ] );
 
         $param_data = json_encode( [
                 "mtsystem" => "apertium",

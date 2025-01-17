@@ -60,7 +60,7 @@ class Engines_SmartMATE extends Engines_AbstractEngine {
             $decoded = [
                     'data' => [
                             "translations" => [
-                                    [ 'translatedText' => $this->_resetSpecialStrings( $decoded[ "translation" ] ) ]
+                                    [ 'translatedText' => $decoded[ "translation" ] ]
                             ]
                     ]
             ];

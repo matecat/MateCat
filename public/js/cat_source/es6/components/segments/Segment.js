@@ -392,11 +392,16 @@ class Segment extends React.Component {
         (!this.props.segment.opened || !this.props.segment.openIssues)) ||
         !this.props.sideOpen) &&
       !(this.props.segment.readonly === 'true') &&
-      (!this.isSplitted() || (this.isSplitted() && this.isFirstOfSplit()))
+      (!this.isSplitted() || (this.isSplitted() && this.isFirstOfSplit())) &&
+      this.props.segment.sid
     ) {
       return (
         <TranslationIssuesSideButton
-          sid={this.props.segment.sid.split('-')[0]}
+          sid={
+            this.props.segment.splitted
+              ? this.props.segment.sid.split('-')[0]
+              : this.props.segment.sid
+          }
           segment={this.props.segment}
           open={this.props.segment.openIssues}
         />

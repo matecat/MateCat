@@ -18,6 +18,7 @@ use FeatureSet;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use INIT;
+use Jobs\MetadataDao;
 use Jobs_JobDao;
 use Log;
 use Model\Analysis\AnalysisDao;
@@ -616,7 +617,10 @@ class FastAnalysis extends AbstractDaemon {
             return $e->getCode() * -1;
         }
 
-        $featureSet->run( 'beforeSendSegmentsToTheQueue', array_values( $this->segments ), $this->actual_project_row );
+        $engine = Engine::getInstance( $this->actual_project_row[ 'id_mt_engine' ] );
+        if( $engine->isAdaptive() ){
+            $engine->syncMemories( $this->actual_project_row, array_values( $this->segments ) );
+        }
 
         /*
          * The $fastResultData[0]['id_mt_engine'] is the index of the MT engine we must use.
@@ -656,8 +660,8 @@ class FastAnalysis extends AbstractDaemon {
                 $queue_element[ 'id_mt_engine' ]     = $this->actual_project_row[ 'id_mt_engine' ];
                 $queue_element[ 'features' ]         = $projectFeaturesString;
                 $queue_element[ 'only_private' ]     = $this->actual_project_row[ 'only_private_tm' ];
-                $queue_element[ 'context_before' ]   = @$this->segments[ $k - 1 ][ 'segment' ];
-                $queue_element[ 'context_after' ]    = @$this->segments[ $k + 1 ][ 'segment' ];
+                $queue_element[ 'context_before' ]   = $this->segments[ $k - 1 ][ 'segment' ] ?? null;
+                $queue_element[ 'context_after' ]    = $this->segments[ $k + 1 ][ 'segment' ] ?? null;
 
                 $jsid        = explode( "-", $queue_element[ 'jsid' ] ); // 749-49:7acfb82b8168,50:47c70434fe78,51:f3f5551e9c4f
                 $passwordMap = explode( ",", $jsid[ 1 ] );
@@ -685,6 +689,13 @@ class FastAnalysis extends AbstractDaemon {
                         $queue_element[ 'target' ]        = $language;
                         $queue_element[ 'id_job' ]        = $id_job;
                         $queue_element[ 'payable_rates' ] = $jobs_payable_rates[ $id_job ]; // assign the right payable rate for the current job
+
+                        $jobsMetadataDao = new MetadataDao();
+                        $tm_prioritization  = $jobsMetadataDao->get($id_job, $password, 'tm_prioritization', 10 * 60 );
+
+                        if ( $tm_prioritization !== null ) {
+                            $queue_element['tm_prioritization'] = $tm_prioritization->value == 1;
+                        }
 
                         $element            = new QueueElement();
                         $element->params    = $queue_element;
@@ -852,7 +863,7 @@ HD;
 
         //use this kind of construct to easily add/remove queues and to disable feature by: comment rows or change the switch flag to false
         switch ( true ) {
-            case ( $mtEngine instanceof Engines_MMT ):
+            case ( $mtEngine instanceof Engines_MMT || $mtEngine instanceof Utils\Engines\Lara ):
                 $context = $contextList[ 'P4' ];
                 break;
             case ( !$mtEngine instanceof Engines_MyMemory && !$mtEngine instanceof Engines_NONE ):

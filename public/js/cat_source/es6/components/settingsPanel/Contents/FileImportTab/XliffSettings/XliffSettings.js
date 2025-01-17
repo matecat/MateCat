@@ -167,7 +167,7 @@ export const XliffSettings = () => {
         <div className="settings-panel-box">
           <div className="file-import-tab settings-panel-contentwrapper-tab-background">
             <div className="file-import-tab-header">
-              <h2>Xliff import settings</h2>
+              <h2>XLIFF import settings</h2>
               <p>
                 Customize how Matecat handles segments in XLIFF files based on
                 their states.{' '}

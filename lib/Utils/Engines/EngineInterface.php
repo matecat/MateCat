@@ -58,8 +58,16 @@ interface Engines_EngineInterface {
     public function isAdaptive(): bool;
 
     /**
-     * @return mixed
+     * @return void
      */
     public function importMemory( string $filePath, string $memoryKey, Users_UserStruct $user );
+
+    /**
+     * @param array      $projectRow
+     * @param array|null $segments
+     *
+     * @return void
+     */
+    public function syncMemories( array $projectRow, ?array $segments = [] );
 
 }

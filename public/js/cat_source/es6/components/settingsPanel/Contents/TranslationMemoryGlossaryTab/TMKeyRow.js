@@ -34,6 +34,9 @@ import {ConfirmDeleteResourceProjectTemplates} from '../../../modals/ConfirmDele
 import CreateProjectActions from '../../../../actions/CreateProjectActions'
 import {deleteTmKey} from '../../../../api/deleteTmKey'
 import {SCHEMA_KEYS} from '../../../../hooks/useProjectTemplates'
+import {Button, BUTTON_SIZE} from '../../../common/Button/Button'
+import {NumericStepper} from '../../../common/NumericStepper/NumericStepper'
+import IconClose from '../../../icons/IconClose'
 
 export const TMKeyRow = ({row, onExpandRow}) => {
   const {isImportTMXInProgress} = useContext(CreateProjectContext)
@@ -52,6 +55,12 @@ export const TMKeyRow = ({row, onExpandRow}) => {
   const [name, setName] = useState(row.name)
 
   const valueChange = useRef(false)
+
+  const penalty = row.penalty ?? 0
+
+  const onChangePenalty = (value) => {
+    updateRow({isLookup, isUpdating, penalty: value})
+  }
 
   const isMMSharedKey = row.id === SPECIAL_ROWS_ID.defaultTranslationMemory
   const isOwner = isOwnerOfKey(row.key)
@@ -82,7 +91,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
     setIsUpdating(isUpdating)
   }
 
-  const updateRow = ({isLookup, isUpdating}) => {
+  const updateRow = ({isLookup, isUpdating, penalty}) => {
     if (!isMMSharedKey) {
       const updatedKeys = tmKeys.map((tm) =>
         tm.id === row.id
@@ -95,6 +104,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
                   : true,
               r: isLookup,
               w: !tm.isActive ? isLookup : isUpdating,
+              penalty: typeof penalty === 'number' ? penalty : tm.penalty,
             }
           : tm,
       )
@@ -137,6 +147,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
       if (name) {
         updateTmKey({
           key: row.key,
+          penalty: row.penalty,
           description: name,
         }).catch(() => {
           CatToolActions.addNotification({
@@ -259,6 +270,35 @@ export const TMKeyRow = ({row, onExpandRow}) => {
     }
   }
 
+  const renderPenalty =
+    penalty > 0 ? (
+      <div className="tm-row-penalty-numeric-stepper">
+        <NumericStepper
+          value={penalty}
+          valuePlaceholder={`${penalty}%`}
+          onChange={onChangePenalty}
+          minimumValue={1}
+          maximumValue={100}
+          stepValue={1}
+        />
+        <Button
+          className="penalty-numeric-stepper-close-button"
+          size={BUTTON_SIZE.ICON_SMALL}
+          onClick={() => onChangePenalty(0)}
+        >
+          <IconClose />
+        </Button>
+      </div>
+    ) : (
+      <Button
+        className="tm-row-penalty-button"
+        size={BUTTON_SIZE.SMALL}
+        onClick={() => onChangePenalty(1)}
+      >
+        Add penalty
+      </Button>
+    )
+
   return (
     <Fragment>
       <div className="tm-key-lookup align-center">
@@ -299,10 +339,13 @@ export const TMKeyRow = ({row, onExpandRow}) => {
           data-testid={`tmkey-row-name-${row.id}`}
         ></input>
       </div>
-      <div className="tm-key-row-key">{row.key}</div>
+      {!isMMSharedKey && <div className="tm-key-row-key">{row.key}</div>}
       <div title={iconDetails.title} className="align-center tm-key-row-icons">
         {iconDetails.icon}
       </div>
+      {!isMMSharedKey && isOwner && row.isActive && (
+        <div className="align-center tm-row-penalty">{renderPenalty}</div>
+      )}
       {!isMMSharedKey && isOwner ? (
         <div className="align-center">
           <MenuButton
@@ -310,6 +353,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
             onClick={() => handleExpandeRow(ImportTMX)}
             icon={<DotsHorizontal />}
             className="tm-key-row-menu-button"
+            dropdownClassName="tm-key-row-menu-button-dropdown"
             disabled={isImportTMXInProgress}
             itemsTarget={portalTarget}
           >

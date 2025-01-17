@@ -27,7 +27,7 @@ trait FormatResponse {
         }
 
         $mt_match_res = new Engines_Results_MyMemory_Matches(
-                $this->_resetSpecialStrings( $all_args[ 1 ][ 'text' ] ),
+                $all_args[ 1 ][ 'text' ],
                 $mt_result->translatedText,
                 100 - $this->getPenalty() . "%",
                 "MT-" . $this->getName(),
