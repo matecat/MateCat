@@ -22,8 +22,8 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
     public int $job_first_segment;
     public int $job_last_segment;
 
-    public string  $source;
-    public string  $target;
+    public string  $source = 'es-US';
+    public string  $target = 'fr-FR';
     public string  $tm_keys                 = '[]';
     public ?string $id_translator           = null;
     public ?string $job_type                = null;
@@ -97,9 +97,9 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
         $projectData = $this->getProject();
 
         return [
-                'project_id'   => $projectData->id,
-                'project_name' => $projectData->name,
-                'job_id'       => $this->id,
+            'project_id'   => $projectData->id,
+            'project_name' => $projectData->name,
+            'job_id'       => $this->id,
         ];
     }
 

@@ -2,6 +2,8 @@ import React, {useRef, useState, forwardRef, useContext} from 'react'
 import PropTypes from 'prop-types'
 import {SettingsPanelTableContext} from './SettingsPanelTable'
 
+const ROW_HEIGHT = 50
+
 export const SettingsPanelRow = forwardRef(
   ({index, row, isDragOver, wasDragged}, ref) => {
     const {
@@ -43,15 +45,14 @@ export const SettingsPanelRow = forwardRef(
       const point = {x: event.clientX - rect.x, y: event.clientY - rect.y}
 
       const relativeY = event.clientY - ref.current.getBoundingClientRect().y
-      const rowHeight = ref.current.offsetHeight
       const halfPoint = relativeY
-        ? relativeY > rowHeight / 2
+        ? relativeY > ROW_HEIGHT / 2
           ? 'bottom'
           : 'top'
         : 'bottom'
 
       if (relativeY)
-        setHalfDragPoint(relativeY > rowHeight / 2 ? 'bottom' : 'top')
+        setHalfDragPoint(relativeY > ROW_HEIGHT / 2 ? 'bottom' : 'top')
 
       if (onDragOver) onDragOver({...point, halfPoint, row})
     }

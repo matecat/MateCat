@@ -1042,7 +1042,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     this._segments.forEach((segment) => {
       if (isUndefined(result)) {
         if (currentFind || current_sid === -1) {
-          if (segment.get('readonly') === 'true') {
+          if (segment.get('readonly') === 'true' && !alsoMutedSegment) {
             return false
           } else if (
             status === SEGMENTS_STATUS.UNTRANSLATED &&

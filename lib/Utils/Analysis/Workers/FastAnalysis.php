@@ -18,6 +18,7 @@ use FeatureSet;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use INIT;
+use Jobs\MetadataDao;
 use Jobs_JobDao;
 use Log;
 use Model\Analysis\AnalysisDao;
@@ -688,6 +689,13 @@ class FastAnalysis extends AbstractDaemon {
                         $queue_element[ 'target' ]        = $language;
                         $queue_element[ 'id_job' ]        = $id_job;
                         $queue_element[ 'payable_rates' ] = $jobs_payable_rates[ $id_job ]; // assign the right payable rate for the current job
+
+                        $jobsMetadataDao = new MetadataDao();
+                        $tm_prioritization  = $jobsMetadataDao->get($id_job, $password, 'tm_prioritization', 10 * 60 );
+
+                        if ( $tm_prioritization !== null ) {
+                            $queue_element['tm_prioritization'] = $tm_prioritization->value == 1;
+                        }
 
                         $element            = new QueueElement();
                         $element->params    = $queue_element;

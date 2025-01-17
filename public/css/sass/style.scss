@@ -1932,6 +1932,15 @@ section.opened.editor .status {
   color: #333 !important;
 }
 
+.per-red-outline {
+  margin-left: 5px !important;
+  background-color: transparent !important;
+  color: $redDefault !important;
+  box-shadow: inset 0px 0px 0px 1px $redDefault;
+  -moz-box-shadow: inset 0px 0px 0px 1px $redDefault;
+  -webkit-box-shadow: inset 0px 0px 0px 1px $redDefault;
+}
+
 .graysmall-details .per-yellow,
 .graysmall-details .per-blue,
 .graysmall-details .per-orange,

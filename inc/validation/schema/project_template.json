@@ -11,6 +11,9 @@
     "id_team": {
       "type": ["integer", "string"]
     },
+    "tm_prioritization": {
+      "type": "boolean"
+    },
     "pretranslate_100": {
       "type": "boolean"
     },
@@ -92,6 +95,12 @@
         },
         "w": {
           "type": "boolean"
+        },
+        "penalty": {
+          "type": "integer",
+          "nullable": true,
+          "maximum": 100,
+          "minimum": 0
         }
       }
     },
