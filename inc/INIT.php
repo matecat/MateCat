@@ -61,7 +61,7 @@ class INIT {
 
     public static        $COMMENTS_ENABLED                = true;
     public static string $SOCKET_NOTIFICATIONS_QUEUE_NAME = "/queue/matecat_socket_notifications";
-    public static string $SOCKET_BASE_URL;
+    public static string $SOCKET_BASE_URL = '';
 
     public static $SMTP_HOST;
     public static $SMTP_PORT;
