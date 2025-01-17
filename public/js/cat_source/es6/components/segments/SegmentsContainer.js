@@ -313,8 +313,15 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
     persistence.scrollDirectionTop = scrollValue < persistence.lastScrollTop
     if (scrollBottomValue < 700 && !persistence.scrollDirectionTop) {
       SegmentActions.getMoreSegments('after')
-    } else if (scrollValue < 500 && persistence.scrollDirectionTop) {
+    } else if (
+      scrollValue < 500 &&
+      persistence.scrollDirectionTop &&
+      essentialRows.length !==
+        persistence.currentSegmentsNumberBeforeGetMoreSegments
+    ) {
       SegmentActions.getMoreSegments('before')
+      persistence.currentSegmentsNumberBeforeGetMoreSegments =
+        essentialRows.length
     }
     persistence.lastScrollTop = scrollValue
     setScrollTopVisible(scrollValue > 400)

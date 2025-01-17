@@ -129,7 +129,8 @@ function RowSegment({
     restProps.segment.internal_id === previousSegment?.internal_id
 
   const borderRadiusCssClasses =
-    isFirstSegmentOfGroup && isLastSegmentOfGroup
+    previousSegment?.internal_id !== restProps.segment.internal_id &&
+    nextSegment?.internal_id !== restProps.segment.internal_id
       ? 'row-border-radius-top row-border-radius-bottom'
       : isFirstSegmentOfGroup && !isLastSegmentOfGroup
         ? 'row-border-radius-top'
