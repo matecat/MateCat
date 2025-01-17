@@ -131,7 +131,7 @@ export const FilesMenu = ({projectName}) => {
                   className={`file-list-item ${
                     currentFile === file.id ? 'current' : ''
                   }`}
-                  title={'Click to go to the first segment'}
+                  title={`${file.file_name} - Click to go to the first segment`}
                 >
                   <span
                     className={
