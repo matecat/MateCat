@@ -1003,6 +1003,14 @@ ul.suggestion-item.graysmall:last-child {
 
 section.loaded .submenu {
   display: block;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+  overflow: hidden;
+
+  &:has(.active) {
+    border-bottom-left-radius: unset;
+    border-bottom-right-radius: unset;
+  }
 }
 
 .loaded {
@@ -1351,8 +1359,6 @@ section.editor {
   z-index: 2;
   position: relative;
   width: 88%;
-  // width: 89%;
-  // margin-left: 4.5%;
 }
 
 section.editor .sid {
