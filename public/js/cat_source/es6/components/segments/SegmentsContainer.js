@@ -28,7 +28,7 @@ import CommentsStore from '../../stores/CommentsStore'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper'
 
-const ROW_MARGIN = 5
+const ROW_MARGIN = 3
 const ROW_HEIGHT = 90
 const OVERSCAN = 5
 const COMMENTS_PADDING_TOP = [
