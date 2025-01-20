@@ -928,7 +928,7 @@ section .body > .text {
 body #file section:not(.editor) {
   background: $grey3;
   cursor: pointer;
-  border: 1px solid $grey2 !important;
+  border: 1px solid $grey2;
   .body {
     height: 100%;
   }
@@ -1038,6 +1038,14 @@ ul.suggestion-item.graysmall:last-child {
 
 section.loaded .submenu {
   display: block;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+  overflow: hidden;
+
+  &:has(.active) {
+    border-bottom-left-radius: unset;
+    border-bottom-right-radius: unset;
+  }
 }
 
 .loaded {
@@ -1387,10 +1395,7 @@ section.status-new.opened .editarea {
 section.editor {
   z-index: 2;
   position: relative;
-  //height: 100%;
-  width: 89%;
-  margin-left: 4.5%;
-  //height: 100%;
+  width: 88%;
 }
 
 section.editor .sid {
@@ -2663,7 +2668,6 @@ section .segment-side-buttons {
   margin-right: 0;
   z-index: 0;
   position: relative;
-  margin-top: -2px;
 }
 
 .buttons li {

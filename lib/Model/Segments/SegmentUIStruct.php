@@ -42,5 +42,6 @@ class SegmentUIStruct extends DataAccess_AbstractDaoSilentStruct implements Data
     public $data_ref_map;
     public $context_groups;
     public $metadata;
+    public $internal_id;
 
 }

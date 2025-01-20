@@ -30,12 +30,13 @@ const LinkIcon = () => {
 function RowSegment({
   id,
   height,
-  minRowHeight,
   onChangeRowHeight,
   hasRendered,
   isLastRow = false,
   currentFileId,
   collectionTypeSeparator,
+  previousSegment,
+  nextSegment,
   ...restProps
 }) {
   const ref = useRef()
@@ -43,8 +44,8 @@ function RowSegment({
 
   useEffect(() => {
     if (!newHeight || (newHeight === height && hasRendered)) return
-    onChangeRowHeight(id, newHeight > minRowHeight ? newHeight : minRowHeight)
-  }, [id, newHeight, height, hasRendered, minRowHeight, onChangeRowHeight])
+    onChangeRowHeight(id, newHeight)
+  }, [id, newHeight, height, hasRendered, onChangeRowHeight])
 
   const getProjectBar = () => {
     const openInstructionsModal = (id_file) => {
@@ -119,8 +120,29 @@ function RowSegment({
     }
   }
 
+  const isFirstSegmentOfGroup =
+    previousSegment?.internal_id !== restProps.segment.internal_id &&
+    restProps.segment.internal_id === nextSegment?.internal_id
+
+  const isLastSegmentOfGroup =
+    nextSegment?.internal_id !== restProps.segment.internal_id &&
+    restProps.segment.internal_id === previousSegment?.internal_id
+
+  const borderRadiusCssClasses =
+    previousSegment?.internal_id !== restProps.segment.internal_id &&
+    nextSegment?.internal_id !== restProps.segment.internal_id
+      ? 'row-border-radius-top row-border-radius-bottom'
+      : isFirstSegmentOfGroup && !isLastSegmentOfGroup
+        ? 'row-border-radius-top'
+        : isLastSegmentOfGroup && !isFirstSegmentOfGroup
+          ? 'row-border-radius-bottom'
+          : ''
+
   return (
-    <div ref={ref} className={`row${isLastRow ? ' last-row' : ''}`}>
+    <div
+      ref={ref}
+      className={`row${isLastRow ? ' last-row' : ''} ${borderRadiusCssClasses}`}
+    >
       {getProjectBar()}
       {collectionTypeSeparator}
       <Segment {...restProps} />
@@ -131,7 +153,6 @@ function RowSegment({
 RowSegment.propTypes = {
   id: PropTypes.string.isRequired,
   height: PropTypes.number.isRequired,
-  minRowHeight: PropTypes.number.isRequired,
   onChangeRowHeight: PropTypes.func.isRequired,
   hasRendered: PropTypes.bool,
   isLastRow: PropTypes.bool,
