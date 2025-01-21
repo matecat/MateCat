@@ -4,16 +4,9 @@ import PropTypes from 'prop-types'
 const UpperCaseIcon = ({size = 16}) => {
   return (
     <svg width={size} height={size} fill="none">
-      <path fill="#fff" d="M0 0h16v16H0z" />
       <path
         fill="#000"
-        d="M5.214 4h1.56L10 12H8.428l-.786-2.118H4.3L3.513 12H2l3.214-8Zm-.516 4.818h2.557L6 5.378h-.035l-1.267 3.44Z"
-      />
-      <path
-        stroke="#000"
-        strokeLinecap="round"
-        strokeWidth="1.2"
-        d="M12 5v6M10 7l2-2M14 7l-2-2"
+        d="M7.616 3H9.37L13 13h-1.768l-.884-2.647H6.587L5.702 13H4L7.616 3Zm-.58 6.022h2.876L8.5 4.722h-.04l-1.425 4.3Z"
       />
     </svg>
   )
