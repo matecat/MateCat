@@ -14,6 +14,11 @@ import {removeTagsFromText} from './utils/DraftMatecatUtils/tagUtils'
 import {Button, BUTTON_MODE, BUTTON_SIZE} from '../common/Button/Button'
 import RemoveTagsIcon from '../../../../../img/icons/RemoveTagsIcon'
 import AddTagsIcon from '../../../../../img/icons/AddTagsIcon'
+import UpperCaseIcon from '../../../../../img/icons/UpperCaseIcon'
+import LowerCaseIcon from '../../../../../img/icons/LowerCaseIcon'
+import CapitalizeIcon from '../../../../../img/icons/CapitalizeIcon'
+import QualityReportIcon from '../../../../../img/icons/QualityReportIcon'
+import ReviseLockIcon from '../../../../../img/icons/ReviseLockIcon'
 
 class SegmentTarget extends React.Component {
   static contextType = SegmentContext
@@ -238,7 +243,9 @@ class SegmentTarget extends React.Component {
                 mode={BUTTON_MODE.OUTLINE}
                 onClick={this.lockEditArea.bind(this)}
                 title="Highlight text and assign an issue to the selected text."
-              />
+              >
+                <ReviseLockIcon />
+              </Button>
             ) : null}
             {issues.length > 0 || config.isReview ? (
               <Button
@@ -248,7 +255,7 @@ class SegmentTarget extends React.Component {
                 target="_blank"
                 onClick={() => window.open(qrLink, '_blank')}
               >
-                QR
+                <QualityReportIcon />
               </Button>
             ) : null}
             {removeTagsButton}
@@ -265,17 +272,23 @@ class SegmentTarget extends React.Component {
                 size={BUTTON_SIZE.ICON_SMALL}
                 mode={BUTTON_MODE.OUTLINE}
                 onMouseDown={() => this.editArea.formatSelection('uppercase')}
-              />
+              >
+                <UpperCaseIcon />
+              </Button>
               <Button
                 size={BUTTON_SIZE.ICON_SMALL}
                 mode={BUTTON_MODE.OUTLINE}
                 onMouseDown={() => this.editArea.formatSelection('lowercase')}
-              />
+              >
+                <LowerCaseIcon />
+              </Button>
               <Button
                 size={BUTTON_SIZE.ICON_SMALL}
                 mode={BUTTON_MODE.OUTLINE}
                 onMouseDown={() => this.editArea.formatSelection('capitalize')}
-              />
+              >
+                <CapitalizeIcon />
+              </Button>
             </div>
           </div>
         </div>
