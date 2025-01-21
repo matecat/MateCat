@@ -273,6 +273,7 @@ class SegmentTarget extends React.Component {
                 size={BUTTON_SIZE.ICON_SMALL}
                 mode={BUTTON_MODE.OUTLINE}
                 onMouseDown={() => this.editArea.formatSelection('uppercase')}
+                title="Uppercase"
               >
                 <UpperCaseIcon />
               </Button>
@@ -280,6 +281,7 @@ class SegmentTarget extends React.Component {
                 size={BUTTON_SIZE.ICON_SMALL}
                 mode={BUTTON_MODE.OUTLINE}
                 onMouseDown={() => this.editArea.formatSelection('lowercase')}
+                title="Lowercase"
               >
                 <LowerCaseIcon />
               </Button>
@@ -287,6 +289,7 @@ class SegmentTarget extends React.Component {
                 size={BUTTON_SIZE.ICON_SMALL}
                 mode={BUTTON_MODE.OUTLINE}
                 onMouseDown={() => this.editArea.formatSelection('capitalize')}
+                title="Capitalize"
               >
                 <CapitalizeIcon />
               </Button>
