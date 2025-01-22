@@ -9,7 +9,7 @@
     width: 100%;
     height: auto;
 
-    section.editor:not(.opened) {
+    section.editor {
       border: 1px solid $grey2;
     }
   }
@@ -33,6 +33,10 @@
         overflow: hidden;
       }
     }
+
+    section.opened {
+      margin-top: 8px;
+    }
   }
 
   .row-border-radius-bottom {
@@ -48,6 +52,10 @@
           }
         }
       }
+    }
+
+    section.opened {
+      margin-bottom: 8px;
     }
 
     section:not(.editor) {
