@@ -186,7 +186,7 @@ class QAModelTemplateDao extends DataAccess_AbstractDao {
                 $severity[ 'id_category' ] = ( $cindex + 1 );
                 $severity[ 'code' ]        = strtoupper( substr( $severity[ 'label' ], 0, 3 ) );
                 $severity[ 'penalty' ]     = floatval( $severity[ 'penalty' ] );
-                $severity[ 'sort' ]        = ( $cindex + 1 );
+                $severity[ 'sort' ]        = ( $sindex + 1 );
                 $severities[]              = $severity;
             }
 
