@@ -247,6 +247,7 @@ class Segment extends React.Component {
     if (this.props.segment.opened && this.checkIfCanOpenSegment()) {
       classes.push('editor')
       classes.push('opened')
+      classes.push('shadow-1')
     }
     if (
       this.props.segment.modified ||

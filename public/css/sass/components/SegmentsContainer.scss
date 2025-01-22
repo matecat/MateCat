@@ -9,7 +9,7 @@
     width: 100%;
     height: auto;
 
-    section.editor {
+    section.editor:not(.opened) {
       border: 1px solid $grey2;
     }
   }
