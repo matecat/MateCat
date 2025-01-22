@@ -4,15 +4,25 @@ import PropTypes from 'prop-types'
 import IconAdd from '../../../icons/IconAdd'
 import {QualityFrameworkTabContext} from './QualityFrameworkTab'
 
-export const AddSeverityCell = ({severity}) => {
+export const AddSeverityCell = ({idCategory, severityColumn}) => {
   const {modifyingCurrentTemplate} = useContext(QualityFrameworkTabContext)
 
   const addSeverity = () => {
     modifyingCurrentTemplate((prevTemplate) => {
       const {categories} = prevTemplate
 
+      const lastSeverityId = categories.reduce(
+        (acc, cur) =>
+          [...acc, ...cur.severities.map(({id}) => id)].sort((a, b) =>
+            a < b ? 1 : -1,
+          ),
+        [],
+      )[0]
+
       const newSeverity = {
-        ...severity,
+        ...severityColumn,
+        id: lastSeverityId + 1,
+        id_category: idCategory,
         penalty: 0,
       }
 
@@ -20,9 +30,9 @@ export const AddSeverityCell = ({severity}) => {
         ...prevTemplate,
         categories: categories.map((category) => ({
           ...category,
-          ...(category.id === severity.id_category && {
-            severities: category.severities.map((severity) =>
-              severity.id === newSeverity.id ? newSeverity : severity,
+          ...(category.id === idCategory && {
+            severities: [...category.severities, newSeverity].sort((a, b) =>
+              a.sort > b.sort ? 1 : -1,
             ),
           }),
         })),
@@ -41,5 +51,6 @@ export const AddSeverityCell = ({severity}) => {
 }
 
 AddSeverityCell.propTypes = {
-  severity: PropTypes.object.isRequired,
+  idCategory: PropTypes.number.isRequired,
+  severityColumn: PropTypes.object.isRequired,
 }

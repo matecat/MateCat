@@ -44,10 +44,21 @@ export const CategoriesSeveritiesTable = () => {
   previousState.current.categories = categories
   previousState.current.severities = categories[0].severities
 
-  const severitiesColumns = categories[0].severities.map(({code, label}) => ({
-    code,
-    label,
-  }))
+  const severitiesColumns = categories
+    .reduce((acc, cur) => {
+      const {severities} = cur
+      const filtered = severities.filter(
+        (severity) =>
+          !acc.some(
+            ({code, label}) =>
+              severity.code === code && severity.label === label,
+          ),
+      )
+
+      return [...acc, ...filtered]
+    }, [])
+    .map(({code, label, sort}) => ({code, label, sort}))
+    .sort((a, b) => (a.sort > b.sort ? 1 : -1))
 
   return (
     <div className="quality-framework-categories-severities">
@@ -78,12 +89,15 @@ export const CategoriesSeveritiesTable = () => {
             <div className="header">
               <span>Severities</span>
               <div className="row row-columns">
-                {severitiesColumns.map(({label}, index) => (
+                {severitiesColumns.map(({label, code, sort}, index) => (
                   <SeverityColumn
                     key={index}
                     {...{
                       label,
+                      code,
                       index,
+                      sort,
+                      numbersOfColumns: severitiesColumns.length,
                       ...(wasAddedSeverity &&
                         index === categories[0].severities.length - 1 && {
                           shouldScrollIntoView: true,
@@ -95,18 +109,19 @@ export const CategoriesSeveritiesTable = () => {
             </div>
             {categories.map(({id, severities}, index) => (
               <div key={index} className="row">
-                {severitiesColumns.map((severityColumn, indexColumn) => {
+                {severitiesColumns.map((severityColumn) => {
                   const severity = severities.find(
                     (severity) =>
                       severity.code === severityColumn.code &&
                       severity.label === severityColumn.label,
                   )
-                  return typeof severity.penalty === 'number' ? (
+                  return severity ? (
                     <SeveritiyRow key={severity.id} {...{severity}} />
                   ) : (
                     <AddSeverityCell
-                      key={`${index}-${indexColumn}`}
-                      severity={severity}
+                      key={`${index}-${severityColumn.sort}`}
+                      idCategory={id}
+                      severityColumn={{...severityColumn}}
                     />
                   )
                 })}
@@ -114,7 +129,7 @@ export const CategoriesSeveritiesTable = () => {
             ))}
           </div>
         </div>
-        <AddSeverity />
+        <AddSeverity numbersOfColumns={severitiesColumns.length} />
       </div>
       <AddCategory />
     </div>

@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import {QualityFrameworkTabContext} from './QualityFrameworkTab'
 import {Button, BUTTON_SIZE} from '../../../common/Button/Button'
 import IconClose from '../../../icons/IconClose'
+import Tooltip from '../../../common/Tooltip'
 
 export const SeveritiyRow = ({severity}) => {
   const {modifyingCurrentTemplate, templates, currentTemplate} = useContext(
@@ -10,6 +11,7 @@ export const SeveritiyRow = ({severity}) => {
   )
 
   const ref = useRef()
+  const removeSeverityRef = useRef()
 
   const [penalty, setPenalty] = useState(severity.penalty)
 
@@ -91,10 +93,8 @@ export const SeveritiyRow = ({severity}) => {
         categories: categories.map((category) => ({
           ...category,
           ...(idCategory === category.id && {
-            severities: category.severities.map((severityItem) =>
-              id === severityItem.id
-                ? {...severityItem, penalty: null}
-                : severityItem,
+            severities: category.severities.filter(
+              (severityItem) => id !== severityItem.id,
             ),
           }),
         })),
@@ -118,9 +118,15 @@ export const SeveritiyRow = ({severity}) => {
           onFocus={selectAll}
           onBlur={onBlur}
         />
-        <Button size={BUTTON_SIZE.ICON_SMALL} onClick={removeSeverity}>
-          <IconClose size={9} />
-        </Button>
+        <Tooltip style={{position: 'absolute'}} content="Remove severity">
+          <Button
+            ref={removeSeverityRef}
+            size={BUTTON_SIZE.ICON_SMALL}
+            onClick={removeSeverity}
+          >
+            <IconClose size={9} />
+          </Button>
+        </Tooltip>
       </div>
     </div>
   )
