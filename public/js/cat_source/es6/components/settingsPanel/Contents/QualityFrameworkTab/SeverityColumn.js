@@ -195,7 +195,9 @@ export const SeverityColumn = ({
           {...{
             target: ref.current,
             label,
+            code,
             index,
+            sort,
             setIsEditingName,
           }}
         />
