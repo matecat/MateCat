@@ -1390,6 +1390,9 @@ section.opened {
     float: left;
     margin-top: 16px;
     width: 40%;
+    button {
+      padding: 0;
+    }
   }
 }
 
@@ -2179,59 +2182,15 @@ del.diff {
   background: #ffcfcf;
 }
 
-section .toolbar .autofillTag {
-  float: left;
-  font-size: 60%;
-  text-decoration: none;
-  display: none;
-}
-
-section .toolbar span {
-  font-size: 120%;
-  padding-top: 5px;
-  margin-left: 1px;
-}
-
-.autofillTag {
-  display: block;
-  float: left;
-  cursor: pointer;
-  color: #444 !important;
-}
-
-.autofillTag:before {
-  content: '\e23a';
-  font-size: 19px;
-  display: block;
-}
-
-section .toolbar .autofillTag {
-  float: left;
-  font-size: 60%;
-  text-decoration: none;
-  display: block;
-}
-
 .editToolbar {
-  /*float: left;*/
   position: relative;
-  display: block;
+  display: flex;
+  gap: 8px;
   visibility: hidden;
-  margin-top: -6px;
-  padding-top: 4px;
-  color: $grey1;
 }
 
 .editToolbar.visible {
   visibility: visible;
-}
-
-.editToolbar li {
-  float: left;
-  width: 16px;
-  height: 16px;
-  margin-right: 10px;
-  cursor: pointer;
 }
 
 .split {
@@ -2270,36 +2229,14 @@ section .toolbar .autofillTag {
   background: $translatedBlue;
 }
 
-.autofillTag {
-  padding: 4px 2px 0px 2px;
-  border: 1px solid #fff;
-  color: $grey1 !important;
-}
-
-.autofillTag {
-  padding-top: 0;
-}
-
-.autofillTag:hover,
-.autofillTag.active {
-  color: #333 !important;
-}
-
 section .toolbar {
   display: none;
   margin-left: -10px;
 }
 
 section.editor .toolbar {
-  display: block;
-}
-
-.autofillTag span {
-  float: left;
-}
-
-.autofillTag {
-  margin-right: 10px;
+  display: flex;
+  gap: 8px;
 }
 
 @keyframes fadein {
