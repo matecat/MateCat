@@ -325,6 +325,7 @@ class engineController extends ajaxController {
             $config[ 'segment' ] = "Hello World";
             $config[ 'source' ]  = "en-US";
             $config[ 'target' ]  = "fr-FR";
+            $config[ 'key' ]     = $this->engineData['secret'] ?? null;
 
             $mt_result = $newTestCreatedMT->get( $config );
 
