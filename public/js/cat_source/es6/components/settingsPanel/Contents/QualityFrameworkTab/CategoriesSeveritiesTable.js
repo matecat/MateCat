@@ -1,10 +1,11 @@
 import React, {useContext, useRef} from 'react'
 import {QualityFrameworkTabContext} from './QualityFrameworkTab'
 import {CategoryRow} from './CategoryRow'
-import {SeveritiyRow} from './SeveritiyRow'
+import {SeveritiyRow} from './SeverityRow'
 import {SeverityColumn} from './SeverityColumn'
 import {AddCategory} from './AddCategory'
 import {AddSeverity} from './AddSeverity'
+import {AddSeverityCell} from './AddSeverityCell'
 
 export const getCategoryLabelAndDescription = (category) => {
   const [line1, line2] = category.label.split('(')
@@ -43,6 +44,11 @@ export const CategoriesSeveritiesTable = () => {
   previousState.current.categories = categories
   previousState.current.severities = categories[0].severities
 
+  const severitiesColumns = categories[0].severities.map(({code, label}) => ({
+    code,
+    label,
+  }))
+
   return (
     <div className="quality-framework-categories-severities">
       <h2>Evaluation grid</h2>
@@ -72,7 +78,7 @@ export const CategoriesSeveritiesTable = () => {
             <div className="header">
               <span>Severities</span>
               <div className="row row-columns">
-                {categories[0]?.severities.map(({label}, index) => (
+                {severitiesColumns.map(({label}, index) => (
                   <SeverityColumn
                     key={index}
                     {...{
@@ -87,11 +93,23 @@ export const CategoriesSeveritiesTable = () => {
                 ))}
               </div>
             </div>
-            {categories.map(({severities}, index) => (
+            {categories.map(({id, severities}, index) => (
               <div key={index} className="row">
-                {severities.map((severity, index) => (
-                  <SeveritiyRow key={index} {...{severity}} />
-                ))}
+                {severitiesColumns.map((severityColumn, indexColumn) => {
+                  const severity = severities.find(
+                    (severity) =>
+                      severity.code === severityColumn.code &&
+                      severity.label === severityColumn.label,
+                  )
+                  return typeof severity.penalty === 'number' ? (
+                    <SeveritiyRow key={severity.id} {...{severity}} />
+                  ) : (
+                    <AddSeverityCell
+                      key={`${index}-${indexColumn}`}
+                      severity={severity}
+                    />
+                  )
+                })}
               </div>
             ))}
           </div>

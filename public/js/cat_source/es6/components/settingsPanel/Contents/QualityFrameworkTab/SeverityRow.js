@@ -1,7 +1,8 @@
 import React, {useContext, useEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import {QualityFrameworkTabContext} from './QualityFrameworkTab'
-import {isEqual} from 'lodash'
+import {Button, BUTTON_SIZE} from '../../../common/Button/Button'
+import IconClose from '../../../icons/IconClose'
 
 export const SeveritiyRow = ({severity}) => {
   const {modifyingCurrentTemplate, templates, currentTemplate} = useContext(
@@ -79,6 +80,28 @@ export const SeveritiyRow = ({severity}) => {
     return isModified
   }
 
+  const removeSeverity = () => {
+    const {id, id_category: idCategory} = severity
+
+    modifyingCurrentTemplate((prevTemplate) => {
+      const {categories} = prevTemplate
+
+      return {
+        ...prevTemplate,
+        categories: categories.map((category) => ({
+          ...category,
+          ...(idCategory === category.id && {
+            severities: category.severities.map((severityItem) =>
+              id === severityItem.id
+                ? {...severityItem, penalty: null}
+                : severityItem,
+            ),
+          }),
+        })),
+      }
+    })
+  }
+
   const isNotSaved = checkIsNotSaved()
 
   return (
@@ -86,15 +109,19 @@ export const SeveritiyRow = ({severity}) => {
       className={`cell${isNotSaved ? ' cell-not-saved' : ''}`}
       data-testid={`qf-severity-cell-${severity.id_category}-${severity.id}`}
     >
-      <input
-        ref={ref}
-        className="quality-framework-input"
-        type="text"
-        value={penalty}
-        onChange={onChange}
-        onFocus={selectAll}
-        onBlur={onBlur}
-      />
+      <div className="quality-framework-severity-input-container">
+        <input
+          ref={ref}
+          type="text"
+          value={penalty}
+          onChange={onChange}
+          onFocus={selectAll}
+          onBlur={onBlur}
+        />
+        <Button size={BUTTON_SIZE.ICON_SMALL} onClick={removeSeverity}>
+          <IconClose size={9} />
+        </Button>
+      </div>
     </div>
   )
 }
