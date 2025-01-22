@@ -91,7 +91,7 @@ export const TemplateSelect = ({
           }
         }}
       </Select>
-      {isLoadingTemplates && !config.is_cattool && (
+      {isLoadingTemplates && !config.is_cattool && isUserLogged && (
         <div className="project-template-select-loading">
           <div className="project-template-select-loading-icon"></div>
         </div>
