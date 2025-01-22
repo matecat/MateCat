@@ -1,4 +1,5 @@
 import React, {useContext, useRef, useState} from 'react'
+import PropTypes from 'prop-types'
 import {
   POPOVER_ALIGN,
   POPOVER_VERTICAL_ALIGN,
@@ -17,7 +18,7 @@ import {TOOLTIP_POSITION} from '../../../common/Tooltip'
 
 const MAX_ENTRY = 50
 
-export const AddSeverity = () => {
+export const AddSeverity = ({numbersOfColumns}) => {
   const {modifyingCurrentTemplate, currentTemplate} = useContext(
     QualityFrameworkTabContext,
   )
@@ -47,6 +48,7 @@ export const AddSeverity = () => {
         {
           ...cur.severities.slice(-1)[0],
           id: ++lastId,
+          sort: numbersOfColumns + 1,
           label: name,
           code: getCodeFromLabel(name),
           penalty: 0,
@@ -142,4 +144,8 @@ export const AddSeverity = () => {
       </Popover>
     </div>
   )
+}
+
+AddSeverity.propTypes = {
+  numbersOfColumns: PropTypes.number.isRequired,
 }
