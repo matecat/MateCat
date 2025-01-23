@@ -51,7 +51,7 @@ export const CategoriesSeveritiesTable = () => {
         (severity) =>
           !acc.some(
             ({code, label}) =>
-              severity.code === code && severity.label === label,
+              severity?.code === code && severity?.label === label,
           ),
       )
 

@@ -77,7 +77,7 @@ export const SeveritiyRow = ({severity}) => {
       .find(({id}) => id === severity.id_category)
       .severities.find(({id}) => id === severity.id)
 
-    const isModified = originalSeverity.penalty !== currentSeverity.penalty
+    const isModified = originalSeverity?.penalty !== currentSeverity.penalty
 
     return isModified
   }
