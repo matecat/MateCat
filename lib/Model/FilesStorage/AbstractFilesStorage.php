@@ -302,6 +302,11 @@ abstract class AbstractFilesStorage implements IFilesStorage {
                 $content[] = $realFileName;
             }
 
+            // remove empty lines
+            $content = array_filter($content, function ($filename){
+                return !empty($filename);
+            });
+
             $contentString = implode( "\n", $content ) . "\n";
 
             $bytesWritten = fwrite( $fp, $contentString );
