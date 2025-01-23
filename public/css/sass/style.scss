@@ -2437,23 +2437,6 @@ section.editor .toolbar {
   }
 }
 
-.noConnectionMsg {
-  position: absolute;
-  left: 43%;
-  bottom: 50%;
-  z-index: 10001;
-  background: #434c56;
-  border: 1px solid #1a232e;
-  color: #dde4ea;
-  border-left: 0px;
-  border-bottom: 0px;
-  padding: 14px;
-  padding-bottom: 30px;
-  border-radius: 0px 3px 0px 0px;
-  -webkit-border-radius: 0px 3px 0px 0px;
-  z-index: 999999999999999;
-}
-
 /* retina display query */
 @media only screen and (-webkit-min-device-pixel-ratio: 2),
   only screen and (min--moz-device-pixel-ratio: 2),

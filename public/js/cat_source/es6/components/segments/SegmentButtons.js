@@ -23,22 +23,28 @@ export const SegmentButton = ({segment, disabled, isReview}) => {
     Shortcuts.cattol.events.translate_nextUntranslated.keystrokes[
       Shortcuts.shortCutsKeyType
     ],
-    (e) =>
-      setTimeout(() => {
-        config.isReview
-          ? clickOnApprovedButton(e, true)
-          : clickOnTranslatedButton(e, true)
-      }, 150),
+    (e) => {
+      if (!disabled) {
+        setTimeout(() => {
+          config.isReview
+            ? clickOnApprovedButton(e, true)
+            : clickOnTranslatedButton(e, true)
+        }, 150)
+      }
+    },
     {enableOnContentEditable: true},
   )
   useHotkeys(
     Shortcuts.cattol.events.translate.keystrokes[Shortcuts.shortCutsKeyType],
-    (e) =>
-      setTimeout(() => {
-        config.isReview
-          ? clickOnApprovedButton(e, false)
-          : clickOnTranslatedButton(e, false)
-      }, 150),
+    (e) => {
+      if (!disabled) {
+        setTimeout(() => {
+          config.isReview
+            ? clickOnApprovedButton(e, false)
+            : clickOnTranslatedButton(e, false)
+        }, 150)
+      }
+    },
     {enableOnContentEditable: true},
   )
 

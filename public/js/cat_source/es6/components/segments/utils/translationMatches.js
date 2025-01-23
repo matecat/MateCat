@@ -184,7 +184,7 @@ let TranslationMatches = {
       setTimeout(function () {
         TranslationMatches.getContribution(segmentSid, next)
       }, 3000)
-      console.log('SSE: ID_CLIENT not found')
+      // console.log('SSE: ID_CLIENT not found')
       return Promise.resolve()
     }
     const {contextListBefore, contextListAfter} =
@@ -228,7 +228,7 @@ let TranslationMatches = {
       id,
       sid,
     }).catch(() => {
-      OfflineUtils.failedConnection(0, 'deleteContribution')
+      OfflineUtils.failedConnection()
     })
   },
   getPercentuageClass: function (match) {
