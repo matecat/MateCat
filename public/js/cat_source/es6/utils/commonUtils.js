@@ -491,8 +491,10 @@ const CommonUtils = {
     file && file.metadata && file.metadata.instructions,
 
   isAllowedLinkRedirect: () => false,
-  dispatchTrackingError: (message) => {
-    const event = new CustomEvent('track-error', {detail: message})
+  dispatchTrackingError: (message, attachment) => {
+    const event = new CustomEvent('track-error', {
+      detail: {message, attachment},
+    })
     document.dispatchEvent(event)
   },
   dispatchCustomEvent: (eventName, data = {}) => {
