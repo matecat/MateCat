@@ -41,12 +41,19 @@ export const AddSeverity = ({numbersOfColumns}) => {
   const addSeverity = () => {
     const {categories = []} = currentTemplate ?? {}
 
-    let lastId = categories.slice(-1)[0].severities.slice(-1)[0].id
+    let lastId = categories
+      .reduce((acc, cur) => {
+        return [...acc, ...cur.severities.map(({id}) => id)]
+      }, [])
+      .sort((a, b) => (a < b ? 1 : -1))[0]
+
     const newColum = categories.reduce(
       (acc, cur) => [
         ...acc,
         {
-          ...cur.severities.slice(-1)[0],
+          ...(cur.severities.length
+            ? cur.severities.slice(-1)[0]
+            : {id_category: cur.id}),
           id: ++lastId,
           sort: numbersOfColumns + 1,
           label: name,
