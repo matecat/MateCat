@@ -21,7 +21,7 @@
     "@socket.io/redis-adapter": "^8.3.0",
     "stompit": "1.0.0",
     "uuid": "^10.0.0",
-    "websocket": "1.0.34",
+    "websocket": "1.0.35",
     "winston": "^3",
     "winston-daily-rotate-file": "^4"
   },
