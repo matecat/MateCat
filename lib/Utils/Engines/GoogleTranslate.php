@@ -64,9 +64,15 @@ class Engines_GoogleTranslate extends Engines_AbstractEngine {
     public function get( $_config ) {
 
         $parameters = [];
+
         if ( $this->client_secret != '' && $this->client_secret != null ) {
             $parameters[ 'key' ] = $this->client_secret;
         }
+
+        if ( isset($_config['key']) and !empty($_config['key']) ) {
+            $parameters[ 'key' ] = $_config['key'];
+        }
+
         $parameters[ 'target' ] = $this->_fixLangCode( $_config[ 'target' ] );
         $parameters[ 'source' ] = $this->_fixLangCode( $_config[ 'source' ] );
         $parameters[ 'q' ]      = $_config[ 'segment' ];

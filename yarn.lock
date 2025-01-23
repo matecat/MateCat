@@ -6916,9 +6916,9 @@ postcss@^8.4.33:
     source-map-js "^1.0.2"
 
 posthog-js@^1.57.2:
-  version "1.205.1"
-  resolved "https://registry.yarnpkg.com/posthog-js/-/posthog-js-1.205.1.tgz#90cccbea753725df394908bc7e2fc99c9a0ba53c"
-  integrity sha512-eFzQsula3zbBeg4XV1MOiYsjrfMx/DHHFIQEvyswv4rx+4ZYOFmA5SHhiATKrzr4uOUN+jdSjl+EHZjURGVVMA==
+  version "1.207.2"
+  resolved "https://registry.yarnpkg.com/posthog-js/-/posthog-js-1.207.2.tgz#0a729b15d5697d74c92b704903e65312715a1434"
+  integrity sha512-MaraHxYsuLjTFecD9LxT36ooiqpp6v/NOCjwpbhYaA5BTHJ1GE9m1xK0+Dwa4ZMA3p/QkN66PuHvFr558re7wA==
   dependencies:
     core-js "^3.38.1"
     fflate "^0.4.8"
@@ -8141,9 +8141,9 @@ undici-types@~6.19.2:
   integrity sha512-ve2KP6f/JnbPBFyobGHuerC9g1FYGn/F8n1LWTwNxCEzd6IfqTwUQcNXgEtmmQ6DlRrC1hrSrBnCZPokRrDHjw==
 
 undici@^5.28.2:
-  version "5.28.4"
-  resolved "https://registry.yarnpkg.com/undici/-/undici-5.28.4.tgz#6b280408edb6a1a604a9b20340f45b422e373068"
-  integrity sha512-72RFADWFqKmUb2hmmvNODKL3p9hcB6Gt2DOQMis1SEBaV6a4MH8soBvzg+95CYhCKPFedut2JY9bMfrDl9D23g==
+  version "5.28.5"
+  resolved "https://registry.yarnpkg.com/undici/-/undici-5.28.5.tgz#b2b94b6bf8f1d919bc5a6f31f2c01deb02e54d4b"
+  integrity sha512-zICwjrDrcrUE0pyyJc1I2QzBkLM8FINsgOrt6WjA+BgajVq9Nxu2PbFFXUrAggLfDXlZGZBVZYw7WNV5KiBiBA==
   dependencies:
     "@fastify/busboy" "^2.0.0"
 
