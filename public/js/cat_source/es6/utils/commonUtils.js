@@ -4,7 +4,6 @@ import SegmentActions from '../actions/SegmentActions'
 import SegmentStore from '../stores/SegmentStore'
 import AlertModal from '../components/modals/AlertModal'
 import ModalsActions from '../actions/ModalsActions'
-import * as Sentry from '@sentry/browser'
 
 const CommonUtils = {
   millisecondsToTime(milli) {

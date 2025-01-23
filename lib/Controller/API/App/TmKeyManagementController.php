@@ -31,10 +31,11 @@ class TmKeyManagementController extends AbstractStatefulKleinController {
             exit();
         }
 
+        $job_keyList = json_decode( $chunk->tm_keys, true );
+
         if(!$this->isLoggedIn()){
 
             $tmKeys = [];
-            $job_keyList = json_decode( $chunk->tm_keys, true );
 
             foreach ( $job_keyList as $jobKey ) {
                 $jobKey = new TmKeyManagement_ClientTmKeyStruct( $jobKey );
@@ -63,7 +64,7 @@ class TmKeyManagementController extends AbstractStatefulKleinController {
         $keys = $userKeys->getKeys( $chunk->tm_keys );
 
         $this->response->json( [
-            'tm_keys' => $keys['job_keys']
+            'tm_keys' => $this->sortKeysInTheRightOrder($keys['job_keys'], $job_keyList)
         ] );
     }
 
@@ -75,5 +76,36 @@ class TmKeyManagementController extends AbstractStatefulKleinController {
      */
     private function isJobRevision($idJob, $password) {
         return CatUtils::getIsRevisionFromIdJobAndPassword( $idJob, $password );
+    }
+
+    /**
+     * This function sorts the $keys array based on $job_keyList.
+     * $keys can contain shared and/or hidden keys
+     *
+     * @param $keys
+     * @param $jobKeyList
+     * @return mixed
+     */
+    private function sortKeysInTheRightOrder($keys, $jobKeyList)
+    {
+        $sortedKeys = [];
+
+        foreach ($jobKeyList as $jobKey){
+            $filter = array_filter($keys, function ($key) use($jobKey){
+
+                if($jobKey['key'] === $key->key){
+                    return true;
+                }
+
+                // compare only last 5 chars (hidden keys)
+                return substr($jobKey['key'], -5) === substr($key->key, -5);
+            });
+
+            if(!empty($filter)){
+                $sortedKeys[] = array_values($filter)[0];
+            }
+        }
+
+        return $sortedKeys;
     }
 }

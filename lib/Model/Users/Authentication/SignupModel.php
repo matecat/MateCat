@@ -62,8 +62,7 @@ class SignupModel {
     }
 
     /**
-     * @throws ValidationError
-     * @throws Exception
+     * @throws \ReflectionException
      */
     public function processSignup() {
 

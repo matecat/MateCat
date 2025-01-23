@@ -1,11 +1,11 @@
-import React, {useContext, useEffect, useState} from 'react'
+import React, {useContext, useEffect, useRef, useState} from 'react'
 import {Select} from '../../../common/Select'
 import SegmentActions from '../../../../actions/SegmentActions'
 import ApplicationStore from '../../../../stores/ApplicationStore'
 import {ApplicationWrapperContext} from '../../../common/ApplicationWrapper'
 import {isEqual} from 'lodash'
-
-const METADATA_KEY = 'cross_language_matches'
+import SegmentStore from '../../../../stores/SegmentStore'
+import {METADATA_KEY} from '../../../../constants/Constants'
 
 export const CrossLanguagesMatches = () => {
   const {userInfo, setUserMetadataKey} = useContext(ApplicationWrapperContext)
@@ -23,6 +23,8 @@ export const CrossLanguagesMatches = () => {
   const [activeLang2, setActiveLang2] = useState(
     languages.find((lang) => lang.id === multiMatchLangs?.secondary),
   )
+
+  const isFirstRender = useRef(true)
 
   useEffect(() => {
     const languages = ApplicationStore.getLanguages().map((lang) => {
@@ -49,6 +51,10 @@ export const CrossLanguagesMatches = () => {
   }, [multiMatchLangs?.primary, multiMatchLangs?.secondary])
 
   useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false
+      return
+    }
     const settings = {
       primary: activeLang1?.id,
       secondary: activeLang2?.id,
@@ -65,19 +71,17 @@ export const CrossLanguagesMatches = () => {
     if (SegmentActions.getContribution) {
       if (settings.primary) {
         SegmentActions.modifyTabVisibility('multiMatches', true)
-        SegmentActions.getContribution(UI.currentSegmentId, settings, true)
+        SegmentActions.getContributions(
+          SegmentStore.getCurrentSegmentId(),
+          settings,
+          true,
+        )
       } else {
         SegmentActions.modifyTabVisibility('multiMatches', false)
         SegmentActions.updateAllSegments()
       }
     }
   }, [activeLang1, activeLang2, setUserMetadataKey])
-
-  useEffect(() => {
-    if (!activeLang1) {
-      setActiveLang2()
-    }
-  }, [activeLang1])
 
   return (
     <div className="options-box multi-match">
@@ -100,13 +104,13 @@ export const CrossLanguagesMatches = () => {
           options={languages}
           activeOption={activeLang1}
           showSearchBar={true}
-          onSelect={(option) =>
-            setActiveLang1(
-              !(activeLang1 && activeLang1.id === option.id)
-                ? option
-                : undefined,
-            )
-          }
+          onSelect={(option) => {
+            const lang = !(activeLang1 && activeLang1.id === option.id)
+              ? option
+              : undefined
+            setActiveLang1(lang)
+            if (!lang) setActiveLang2()
+          }}
         >
           {({name, id}) => ({
             row: (

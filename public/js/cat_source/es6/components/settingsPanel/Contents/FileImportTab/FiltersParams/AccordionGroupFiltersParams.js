@@ -6,14 +6,16 @@ import {Yaml} from './Yaml'
 import {MsWord} from './MsWord'
 import {MsPowerpoint} from './MsPowerpoint'
 import {MsExcel} from './MsExcel'
+import {Dita} from './Dita'
 
 const ACCORDION_GROUP = {
-  json: 'Json',
+  json: 'JSON',
   xml: 'XML',
   yaml: 'YAML',
   msWord: 'MS Word',
   msExcel: 'MS Excel',
   msPowerpoint: 'MS PowerPoint',
+  dita: 'DITA/DITAMAP',
 }
 
 export const AccordionGroupFiltersParams = () => {
@@ -33,8 +35,10 @@ export const AccordionGroupFiltersParams = () => {
       <MsWord />
     ) : ACCORDION_GROUP.msExcel === section ? (
       <MsExcel />
-    ) : (
+    ) : ACCORDION_GROUP.msPowerpoint === section ? (
       <MsPowerpoint />
+    ) : (
+      <Dita />
     )
 
   return (

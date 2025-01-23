@@ -120,12 +120,13 @@ let TranslationMatches = {
             })
 
     if (!currentSegment) return
-
+    //If segment locked or ICE
     if (SegmentUtils.isIceSegment(currentSegment) && !currentSegment.unlocked) {
       SegmentActions.addClassToSegment(currentSegment.sid, 'loaded')
       return Promise.resolve()
     }
     let callNewContributions = force
+    //Check similar segments
     if (
       SegmentStore.lastTranslatedSegmentId &&
       SegmentStore.getSegmentByIdToJS(SegmentStore.lastTranslatedSegmentId)
@@ -147,6 +148,7 @@ let TranslationMatches = {
 
       callNewContributions = areSimilar || isEqual || force
     }
+    //If the segment already has contributions and is not similar to the last translated
     if (
       currentSegment.contributions &&
       currentSegment.contributions.matches.length > 0 &&
@@ -165,19 +167,15 @@ let TranslationMatches = {
       return Promise.resolve()
     }
     const id_segment_original = currentSegment.original_sid
-    const nextUntranslated = SegmentStore.getNextSegment({
-      current_sid: id_segment_original,
-      status: SEGMENTS_STATUS.UNTRANSLATED,
-    })
     const nextSegment = SegmentStore.getNextSegment({
-      current_sid: id_segment_original,
+      current_sid: segmentSid,
     })
     // `next` and `untranslated next` are the same
     if (
       next === 2 &&
-      nextUntranslated &&
+      currentSegment &&
       nextSegment &&
-      nextUntranslated === nextSegment
+      id_segment_original === nextSegment.sid
     ) {
       return Promise.resolve()
     }
@@ -189,13 +187,16 @@ let TranslationMatches = {
       // console.log('SSE: ID_CLIENT not found')
       return Promise.resolve()
     }
-
+    const {contextListBefore, contextListAfter} =
+      SegmentUtils.getSegmentContext(id_segment_original)
     return getContributions({
       idSegment: id_segment_original,
       target: currentSegment.segment,
       crossLanguages: crossLanguageSettings
         ? [crossLanguageSettings.primary, crossLanguageSettings.secondary]
         : [],
+      contextListBefore,
+      contextListAfter,
     }).catch((errors) => {
       UI.processErrors(errors, 'getContribution')
       TranslationMatches.renderContributionErrors(errors, id_segment_original)

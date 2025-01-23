@@ -4,6 +4,7 @@ namespace TMS;
 
 use API\Commons\Exceptions\UnprocessableException;
 use Chunks_ChunkDao;
+use Constants_Engines;
 use Constants_TranslationStatus;
 use DateTime;
 use DateTimeZone;
@@ -11,6 +12,7 @@ use Engine;
 use Engines_MyMemory;
 use Engines_Results_MyMemory_ExportResponse;
 use Engines_Results_MyMemory_TmxResponse;
+use EnginesModel_EngineStruct;
 use Exception;
 use FeatureSet;
 use INIT;
@@ -22,6 +24,8 @@ use SplTempFileObject;
 use stdClass;
 use TMSService\TMSServiceDao;
 use Upload;
+use Users\MetadataDao;
+use Users_UserStruct;
 use Utils;
 
 class TMSService {
@@ -143,29 +147,68 @@ class TMSService {
      * Import TMX file in MyMemory
      * @throws Exception
      */
-    public function addTmxInMyMemory( TMSFile $file ) {
+    public function addTmxInMyMemory( TMSFile $file, Users_UserStruct $user ) {
 
-        $this->checkCorrectKey( $file->getTmKey() );
+        try {
 
-        Log::doJsonLog( $this->file );
+            $this->checkCorrectKey( $file->getTmKey() );
 
-        $importStatus = $this->mymemory_engine->import(
-                $file->getFilePath(),
-                $file->getTmKey(),
-                $file->getName()
-        );
+            Log::doJsonLog( $this->file );
 
-        //check for errors during the import
-        switch ( $importStatus->responseStatus ) {
-            case "503" :
-            case "400" :
-                throw new Exception( "Error uploading TMX file. Please, try again in 5 minutes.", -15 );
-            case "403" :
-                throw new Exception( "Error: " . $this->formatErrorMessage( $importStatus->responseDetails ), -15 );
-            default:
+            $importStatus = $this->mymemory_engine->importMemory(
+                    $file->getFilePath(),
+                    $file->getTmKey(),
+                    $user
+            );
+
+            //check for errors during the import
+            switch ( $importStatus->responseStatus ) {
+                case "503" :
+                case "400" :
+                    throw new Exception( "Error uploading TMX file. Please, try again in 5 minutes.", -15 );
+                case "403" :
+                    throw new Exception( "Error: " . $this->formatErrorMessage( $importStatus->responseDetails ), -15 );
+                default:
+            }
+
+            $file->setUuid( $importStatus->id );
+
+            // load tmx in engines with adaptivity
+            $engineList = Constants_Engines::getAvailableEnginesList();
+
+            foreach ( $engineList as $engineName ) {
+
+                try {
+
+                    $struct             = EnginesModel_EngineStruct::getStruct();
+                    $struct->class_load = $engineName;
+                    $struct->type       = Constants_Engines::MT;
+                    $engine             = Engine::createTempInstance( $struct );
+
+                    if ( $engine->isAdaptive() ) {
+                        //retrieve OWNER Engine License
+                        $ownerMmtEngineMetaData = ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->get( $user->uid, $engine->getEngineRow()->class_load ); // engine_id
+                        if ( !empty( $ownerMmtEngineMetaData ) ) {
+                            $engine = Engine::getInstance( $ownerMmtEngineMetaData->value );
+
+                            Log::doJsonLog( "User [$user->uid, '$user->email'] start importing memory: {$engine->getEngineRow()->class_load} -> " . $file->getFilePath() . " -> " . $file->getTmKey() );
+                            $engine->importMemory( $file->getFilePath(), $file->getTmKey(), $user );
+
+                        }
+                    }
+
+                } catch ( Exception $e ) {
+                    if ( $engineName != Constants_Engines::MY_MEMORY ) {
+                        Log::doJsonLog( $e->getMessage() );
+                    }
+                }
+
+            }
+
+        } finally {
+            @unlink( $file->getFilePath() );
+            @unlink( $file->getFilePath() . ".gz" );
         }
-
-        $file->setUuid( $importStatus->id );
 
     }
 

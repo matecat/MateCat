@@ -1,37 +1,20 @@
-@import 'vendor_mc/semantic/matecat_semantic';
+@import '../../common-main';
 
-@import 'variables';
+@import '../../commons/buttons';
+@import '../../commons/filter-teams';
+@import '../../commons/icons';
+@import '../../commons/team-member';
+@import '../../commons/aria-label-tooltip';
+@import '../../commons/tooltip';
 
-@import 'commons/buttons';
-@import 'commons/filter-teams';
-@import 'commons/icons';
-@import 'commons/nav-bar';
-@import 'commons/team-member';
+@import '../../common';
+@import '../../modals/language-selector';
+@import '../common/HomePageSection';
+@import '../../upload-page';
+@import '../signin/OnBoarding';
+@import '../Footer';
 
-@import 'common-main';
-@import 'common';
-@import 'popup';
-@import 'commons/tooltip';
-@import 'modals/language-selector';
-@import 'commons/aria-label-tooltip';
-@import 'components/common/HomePageSection';
-@import 'common-components';
-@import 'upload-page';
-@import 'components/common/Select';
-@import 'components/common/Dropdown';
-@import 'components/common/CookieConsent';
-@import 'components/common/Switch';
-@import 'components/common/MenuButton';
-@import 'components/common/Tooltip';
-@import 'components/common/Button';
-@import 'components/common/Popover';
-@import 'components/common/LabelWithTooltip';
-@import 'components/common/EmailsBadge';
-@import 'components/common/SegmentedControl';
-@import 'components/common/Accordion';
-@import 'components/signin/OnBoarding';
-
-@import 'settingsPanel';
+@import '../SettingsPanel';
 
 .new_project__page {
   overflow-y: auto;
@@ -168,25 +151,6 @@
       display: inline-block;
     }
   }
-  div#add-tmx-option:hover,
-  div#add-multiple-lang:hover {
-    background: rgba(0, 0, 0, 0.05);
-  }
-  div#add-tmx-option,
-  div#add-multiple-lang {
-    cursor: pointer;
-    color: #39699a;
-    font-size: 14px;
-    margin: 0;
-    padding: 15px;
-    .icon {
-      float: right;
-      font-size: 24px;
-      margin-top: -3px;
-      margin-right: 1px;
-      color: #39699a;
-    }
-  }
   div.item {
     width: 100%;
     min-width: 128px;
@@ -194,10 +158,6 @@
     overflow: hidden;
     text-overflow: ellipsis;
     padding-right: 10px !important;
-    span.item-key-id {
-      color: #757575;
-      clear: both;
-    }
     span {
       line-height: 17px;
     }
@@ -214,16 +174,6 @@
     overflow: hidden;
     text-overflow: ellipsis;
     font-size: 16px;
-    .item-key-id {
-      margin-top: 0px;
-      float: none;
-    }
-    .item-key-name {
-      color: initial;
-      margin-top: 0px;
-      margin-right: 5px;
-      float: none;
-    }
   }
   .divider {
     margin: 0 !important;
@@ -254,16 +204,6 @@
         display: block;
       }
     }
-  }
-  .item-key-id {
-    color: #757575;
-  }
-  .item-key-name {
-    color: initial;
-    max-width: 145px !important;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
   .text .multiple-tm {
     display: block;
@@ -326,25 +266,6 @@
         width: 150px;
       }
     }
-    div#add-tmx-option:hover,
-    div#add-multiple-lang:hover {
-      background: rgba(0, 0, 0, 0.05);
-    }
-    div#add-tmx-option,
-    div#add-multiple-lang {
-      cursor: pointer;
-      color: #39699a;
-      font-size: 14px;
-      margin: 0;
-      padding: 15px;
-      .icon {
-        float: right;
-        font-size: 24px;
-        margin-top: -3px;
-        margin-right: 1px;
-        color: #39699a;
-      }
-    }
     div.item {
       width: 100%;
       min-width: 128px;
@@ -352,10 +273,6 @@
       overflow: hidden;
       text-overflow: ellipsis;
       padding-right: 10px !important;
-      span.item-key-id {
-        color: #757575;
-        clear: both;
-      }
       span {
         line-height: 17px;
       }
@@ -371,16 +288,6 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      .item-key-id {
-        margin-top: 0px;
-        float: none;
-      }
-      .item-key-name {
-        color: initial;
-        margin-top: 0px;
-        margin-right: 5px;
-        float: none;
-      }
     }
     .divider {
       margin: 0 !important;
@@ -390,11 +297,6 @@
     /*width: 140px;*/
     .upload-input {
       width: 140px;
-    }
-  }
-  .translate-box.settings {
-    .more-options {
-      margin: 0;
     }
   }
   .translate-box.tmx-select {

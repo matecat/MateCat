@@ -67,6 +67,8 @@ class createProjectController extends ajaxController {
 
     public $postInput;
 
+    private $tm_prioritization;
+
     /**
      * @throws Exception
      */
@@ -87,6 +89,7 @@ class createProjectController extends ajaxController {
                 'private_tm_key'     => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
                 'pretranslate_100'   => [ 'filter' => FILTER_VALIDATE_INT ],
                 'pretranslate_101'   => [ 'filter' => FILTER_VALIDATE_INT ],
+                'tm_prioritization'  => [ 'filter' => FILTER_VALIDATE_INT ],
                 'id_team'            => [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR ],
 
                 'mmt_glossaries' => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
@@ -116,6 +119,9 @@ class createProjectController extends ajaxController {
         $this->postInput = filter_input_array( INPUT_POST, $filterArgs );
 
         //first we check the presence of a list from tm management panel
+
+        $this->__validateTMKeysArray($_POST[ 'private_keys_list' ]);
+
         $array_keys = json_decode( $_POST[ 'private_keys_list' ], true );
         $array_keys = array_merge( $array_keys[ 'ownergroup' ], $array_keys[ 'mine' ], $array_keys[ 'anonymous' ] );
 
@@ -176,6 +182,7 @@ class createProjectController extends ajaxController {
         $this->show_whitespace   = $this->postInput[ 'show_whitespace' ] ?? null;
         $this->character_counter = $this->postInput[ 'character_counter' ] ?? null;
         $this->ai_assistant      = $this->postInput[ 'ai_assistant' ] ?? null;
+        $this->tm_prioritization = $this->postInput[ 'tm_prioritization' ] ?? null;
 
         $this->__setMetadataFromPostInput();
 
@@ -355,6 +362,7 @@ class createProjectController extends ajaxController {
         $projectStructure[ 'show_whitespace' ]   = $this->show_whitespace;
         $projectStructure[ 'character_counter' ] = $this->character_counter;
         $projectStructure[ 'ai_assistant' ]      = $this->ai_assistant;
+        $projectStructure[ 'tm_prioritization' ] = $this->tm_prioritization ?? null;
 
         // MMT Glossaries
         // (if $engine is not an MMT instance, ignore 'mmt_glossaries')
@@ -513,6 +521,25 @@ class createProjectController extends ajaxController {
     private function __assignLastCreatedPid( $pid ) {
         $_SESSION[ 'redeem_project' ]   = false;
         $_SESSION[ 'last_created_pid' ] = $pid;
+    }
+
+    /**
+     * @param $tm_keys
+     * @throws \Exception
+     */
+    private function __validateTMKeysArray($tm_keys)
+    {
+        try {
+            $schema = file_get_contents( INIT::$ROOT . '/inc/validation/schema/job_keys.json' );
+
+            $validatorObject       = new JSONValidatorObject();
+            $validatorObject->json = $tm_keys;
+
+            $validator = new JSONValidator( $schema );
+            $validator->validate( $validatorObject );
+        } catch ( Exception $e ) {
+            $this->result[ 'errors' ][] = [ "code" => -12, "message" => $e->getMessage() ];
+        }
     }
 
     private function __validateTargetLangs( Languages $lang_handler ) {

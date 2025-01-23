@@ -83,6 +83,13 @@ class SetContributionWorker extends AbstractWorker {
 
         $this->_loadEngine( $jobStruct );
 
+        /**
+         * @see Engines_AbstractEngine::$_isAdaptive
+         */
+        if( !$this->_engine->isAdaptive() ){
+            return;
+        }
+
         $config             = $this->_engine->getConfigStruct();
         $config[ 'source' ] = $jobStruct->source;
         $config[ 'target' ] = $jobStruct->target;

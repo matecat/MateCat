@@ -1,5 +1,5 @@
 import {useContext, useEffect} from 'react'
-import useSse, {ConnectionStates} from './../hooks/useSse'
+import useSocketLayer, {ConnectionStates} from '../hooks/useSocketLayer'
 import CatToolActions from '../actions/CatToolActions'
 import SegmentActions from '../actions/SegmentActions'
 import SegmentStore from '../stores/SegmentStore'
@@ -7,8 +7,9 @@ import CommonUtils from '../utils/commonUtils'
 import CommentsActions from '../actions/CommentsActions'
 import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper'
 import UserActions from '../actions/UserActions'
+import {v4 as uuidV4} from 'uuid'
 
-const SseListener = ({isAuthenticated, userId}) => {
+const SocketListener = ({isAuthenticated, userId}) => {
   const {forceLogout} = useContext(ApplicationWrapperContext)
 
   const eventHandlers = {
@@ -176,28 +177,21 @@ const SseListener = ({isAuthenticated, userId}) => {
       forceLogout()
     },
   }
+
   const getSource = function () {
-    let source =
-      window.location.host +
-      '/sse' +
-      '/channel/updates' +
-      '?jid=' +
-      config.id_job +
-      '&pw=' +
-      config.password +
-      '&uid=' +
-      userId
+    let source = window.location.host
 
     if (config.enableMultiDomainApi) {
       source =
         Math.floor(Math.random() * config.ajaxDomainsNumber) + '.ajax.' + source
     }
 
-    return '//' + source
+    return {source: '//' + source, path: '/sse/channel/updates/socket.io'}
   }
-  const {connectionState, connectionError} = useSse(
+
+  const {connectionState, connectionError} = useSocketLayer(
     getSource(),
-    {},
+    {userId: userId, uuidV4: uuidV4(), jobId: config.id_job},
     isAuthenticated,
     eventHandlers,
   )
@@ -215,4 +209,4 @@ const SseListener = ({isAuthenticated, userId}) => {
   return null // No rendering needed
 }
 
-export default SseListener
+export default SocketListener

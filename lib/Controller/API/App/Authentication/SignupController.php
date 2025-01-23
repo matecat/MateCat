@@ -6,6 +6,7 @@ use API\App\RateLimiterTrait;
 use API\Commons\AbstractStatefulKleinController;
 use API\Commons\Authentication\AuthCookie;
 use API\Commons\Authentication\AuthenticationHelper;
+use CatUtils;
 use Exception;
 use FlashMessage;
 use INIT;
@@ -27,18 +28,18 @@ class SignupController extends AbstractStatefulKleinController {
         $user = filter_var_array(
                 (array)$this->request->param( 'user' ),
                 [
-                        'email'                 => FILTER_SANITIZE_EMAIL,
+                        'email'                 => [ 'filter' => FILTER_SANITIZE_EMAIL, 'options' => [] ],
                         'password'              => [ 'filter' => FILTER_SANITIZE_STRING, 'options' => FILTER_FLAG_STRIP_LOW ],
                         'password_confirmation' => [ 'filter' => FILTER_SANITIZE_STRING, 'options' => FILTER_FLAG_STRIP_LOW ],
                         'first_name'            => [
-                                'filter' => FILTER_CALLBACK, 'options' => function ( $username ) {
-                                    return mb_substr( preg_replace( '/(?:https?|s?ftp)?\P{L}+/', '', $username ), 0, 50 );
-                                }
+                            'filter' => FILTER_CALLBACK, 'options' => function ( $firstName ) {
+                                return CatUtils::stripMaliciousContentFromAName($firstName);
+                            }
                         ],
                         'last_name'             => [
-                                'filter' => FILTER_CALLBACK, 'options' => function ( $username ) {
-                                    return mb_substr( preg_replace( '/(?:https?|s?ftp)?\P{L}+/', '', $username ), 0, 50 );
-                                }
+                            'filter' => FILTER_CALLBACK, 'options' => function ( $lastName ) {
+                                return CatUtils::stripMaliciousContentFromAName($lastName);
+                            }
                         ],
                         'wanted_url'            => [
                                 'filter' => FILTER_CALLBACK, 'options' => function ( $wanted_url ) {
@@ -49,6 +50,36 @@ class SignupController extends AbstractStatefulKleinController {
                         ]
                 ]
         );
+
+        if(empty($user['email'])){
+            $this->response->code( 400 );
+            $this->response->json( [
+                'error' => [
+                    'message' => "Missing email"
+                ]
+            ] );
+            exit();
+        }
+
+        if(empty($user['first_name'])){
+            $this->response->code( 400 );
+            $this->response->json( [
+                'error' => [
+                    'message' => "First name must contain at least one letter"
+                ]
+            ] );
+            exit();
+        }
+
+        if(empty($user['last_name'])){
+            $this->response->code( 400 );
+            $this->response->json( [
+                'error' => [
+                    'message' => "Last name must contain at least one letter"
+                ]
+            ] );
+            exit();
+        }
 
         $userIp = Utils::getRealIpAddr();
 

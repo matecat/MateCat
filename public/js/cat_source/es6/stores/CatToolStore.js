@@ -248,12 +248,6 @@ AppDispatcher.register(function (action) {
         ...action,
       })
       break
-    case CatToolConstants.ON_TM_KEYS_CHANGE_STATUS:
-      CatToolActions.retrieveJobKeys(true)
-      CatToolStore.emitChange(CatToolConstants.ON_TM_KEYS_CHANGE_STATUS, {
-        ...action,
-      })
-      break
     case CatToolConstants.HAVE_KEYS_GLOSSARY:
       CatToolStore.setHaveKeysGlossary(action.value)
       CatToolStore.emitChange(CatToolConstants.HAVE_KEYS_GLOSSARY, {

@@ -33,7 +33,7 @@ import CommonUtils from '../utils/commonUtils'
 import {CattoolFooter} from '../components/footer/CattoolFooter'
 import {mountPage} from './mountPage'
 import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper'
-import SseListener from '../sse/SseListener'
+import SocketListener from '../sse/SocketListener'
 import Speech2Text from '../utils/speech2text'
 import {initTagSignature} from '../components/segments/utils/DraftMatecatUtils/tagModel'
 import {
@@ -386,6 +386,18 @@ function CatTool() {
         typeof projectTemplates[1].mt !== 'undefined')) &&
     Array.isArray(projectTemplates[1].tm)
 
+  useEffect(() => {
+    if (
+      isFakeCurrentTemplateReady &&
+      typeof jobMetadata?.job?.tm_prioritization !== 'undefined'
+    ) {
+      modifyingCurrentTemplate((prevTemplate) => ({
+        ...prevTemplate,
+        tmPrioritization: jobMetadata?.job?.tm_prioritization === 1,
+      }))
+    }
+  }, [jobMetadata?.job, isFakeCurrentTemplateReady, modifyingCurrentTemplate])
+
   return (
     <>
       <Header
@@ -410,7 +422,7 @@ function CatTool() {
         openTmPanel={openTmPanel}
         jobMetadata={jobMetadata}
       />
-      <SseListener
+      <SocketListener
         isAuthenticated={isUserLogged}
         userId={isUserLogged ? userInfo.user.uid : null}
       />

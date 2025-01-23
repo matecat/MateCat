@@ -83,6 +83,7 @@ function useAuth() {
             userId: data.user.uid,
           }
           CommonUtils.dispatchAnalyticsEvents(event)
+          CommonUtils.dispatchCustomEvent('user-logged-event', data.user)
           setIsUserLogged(true)
           setUserInfo(data)
           setConnectedServices(data.connected_services)

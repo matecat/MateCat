@@ -1,0 +1,121 @@
+@import 'NewProjectPage';
+
+.activity-log-content {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  padding: 50px 25px;
+  gap: 15px;
+  height: calc(100vh - 120px);
+
+  h1,
+  h2 {
+    margin: 0;
+  }
+}
+
+.activity-log-table {
+  height: 100%;
+  overflow-y: auto;
+  border: 1px solid $grey8;
+
+  .activity-log-table-columns-name,
+  .activity-log-table-columns-content {
+    display: grid;
+    grid-template-columns: 10% 15% 8% 8% 12% 15% 16% 16%;
+    text-align: left;
+
+    > * {
+      display: flex;
+      align-items: center;
+
+      > span {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+  }
+
+  .activity-log-table-columns-name {
+    position: sticky;
+    top: 0;
+    font-weight: bold;
+  }
+
+  .activity-log-table-columns-content {
+    > * {
+      height: 40px;
+      border: 1px solid $grey8;
+      border-top: unset;
+      padding: 10px;
+      border-left: unset;
+    }
+
+    > *:last-child {
+      border-right: unset;
+    }
+
+    &:nth-child(odd) {
+      background-color: $grey5;
+    }
+  }
+
+  .activity-table-column-order {
+    background-color: $grey9;
+    border: 1px solid $grey8;
+    padding: 5px;
+    justify-content: space-between;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .activity-table-column-order-asc {
+    svg {
+      transform: rotate(180deg);
+    }
+  }
+
+  .activity-table-column-empty-state {
+    padding: 20px;
+    text-align: center;
+  }
+}
+
+.activity-log-filter-column {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+
+  .activity-log-filter-column-container {
+    display: flex;
+    align-items: end;
+    gap: 5px;
+
+    .select-with-label__wrapper {
+      width: 160px;
+
+      label {
+        color: $grey6;
+      }
+
+      .select {
+        font-size: 14px;
+        padding: 5px;
+
+        &:hover {
+          border-color: rgba($grey8, 0.8);
+          box-shadow: none;
+        }
+      }
+    }
+
+    .activity-log-filter-column-input {
+      width: 250px;
+      font-size: 14px;
+      border-radius: 2px;
+      border: 1px solid $grey2;
+      padding: 7px;
+    }
+  }
+}

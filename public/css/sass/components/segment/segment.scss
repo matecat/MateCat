@@ -110,7 +110,7 @@ section {
       .header-segment-saving-loader {
         width: 16px;
         height: 16px;
-        background: url(../../img/loading.gif);
+        background: url(/public/img/loading.gif);
         background-size: cover;
       }
     }
@@ -218,9 +218,6 @@ section {
   &.slide-right {
     width: 70%;
   }
-  &.editor.slide-right {
-    width: 71%;
-  }
 }
 
 .segment-side-container {
@@ -228,6 +225,7 @@ section {
   text-align: left;
   width: 31%;
   left: 102%;
+  top: 0;
   display: flex;
   flex-direction: column;
 }

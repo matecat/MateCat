@@ -140,7 +140,7 @@ TAG;
             $decoded = [
                     'data' => [
                             "translations" => [
-                                    [ 'translatedText' => $this->_resetSpecialStrings( html_entity_decode( $tmpTag, ENT_QUOTES | 16 ) ) ]
+                                    [ 'translatedText' => html_entity_decode( $tmpTag, ENT_QUOTES | 16 ) ]
                             ]
                     ]
             ];
@@ -219,7 +219,7 @@ TAG;
         $parameters[ 'appId' ]    = 'Bearer ' . $this->token;
         $parameters[ 'to' ]       = $this->_fixLangCode( $_config[ 'target' ] );
         $parameters[ 'from' ]     = $this->_fixLangCode( $_config[ 'source' ] );
-        $parameters[ 'text' ]     = $this->_preserveSpecialStrings( $_config[ 'segment' ] );
+        $parameters[ 'text' ]     = $_config[ 'segment' ];
         $parameters[ 'category' ] = $this->engineRecord->extra_parameters[ 'category' ];
 
         return $parameters;

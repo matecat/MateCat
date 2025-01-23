@@ -10,7 +10,7 @@ import Header from '../components/header/Header'
 import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper'
 import {CookieConsent} from '../components/common/CookieConsent'
 import {mountPage} from './mountPage'
-import SseListener from '../sse/SseListener'
+import SocketListener from '../sse/SocketListener'
 
 const getReviseUrlParameter = () => {
   const url = new URL(window.location.href)
@@ -30,6 +30,7 @@ export const QualityReport = () => {
     getReviseUrlParameter(),
   )
   const [idSegment, setIdSegment] = useState()
+  const [qualitySummary, setQualitySummary] = useState()
 
   const reviewDropdownRef = useRef()
   const wasInitReviewDropDown = useRef(false)
@@ -52,7 +53,14 @@ export const QualityReport = () => {
       setLastSegment(lastSegment)
       setMoreSegments(true)
     }
-    const renderJobInfo = (jobInfo) => setJobInfo(jobInfo)
+    const renderJobInfo = (jobInfo) => {
+      setJobInfo(jobInfo)
+      setQualitySummary(
+        jobInfo.get('quality_summary').find((value) => {
+          return value.get('revision_number') === parseInt(revisionToShow)
+        }),
+      )
+    }
     const noMoreSegments = () => setMoreSegments(false)
 
     QualityReportStore.addListener(
@@ -102,22 +110,38 @@ export const QualityReport = () => {
     history.pushState(null, '', url)
   }
 
-  // init review dropdown
-  if (
-    secondPassReviewEnabled &&
-    reviewDropdownRef.current &&
-    !wasInitReviewDropDown.current
-  ) {
-    $(reviewDropdownRef.current).dropdown({
-      onChange: function (value) {
-        if (value && value !== '') {
-          updateUrlParameter(value)
-          setRevisionToShow(value)
-        }
-      },
-    })
-    wasInitReviewDropDown.current = true
-  }
+  useEffect(() => {
+    // init review dropdown
+    if (
+      secondPassReviewEnabled &&
+      reviewDropdownRef.current &&
+      !wasInitReviewDropDown.current
+    ) {
+      $(reviewDropdownRef.current).dropdown({
+        onChange: function (value) {
+          if (value && value !== '') {
+            updateUrlParameter(value)
+            setRevisionToShow(value)
+            setQualitySummary(
+              jobInfo.get('quality_summary').find((item) => {
+                return item.get('revision_number') === parseInt(value)
+              }),
+            )
+          }
+        },
+      })
+      wasInitReviewDropDown.current = true
+    }
+  }, [jobInfo])
+
+  /*useEffect(() => {
+    let quality_summary
+    if (jobInfo) {
+      quality_summary = jobInfo.get('quality_summary').find((value) => {
+        return value.get('revision_number') === parseInt(revisionToShow)
+      })
+    }
+  }, [revisionToShow])*/
 
   const spinnerContainer = {
     position: 'absolute',
@@ -127,13 +151,6 @@ export const QualityReport = () => {
     top: document.getElementById('qr-root').scrollTop,
     left: 0,
     zIndex: 3,
-  }
-
-  let quality_summary
-  if (jobInfo) {
-    quality_summary = jobInfo.get('quality_summary').find((value) => {
-      return value.get('revision_number') === parseInt(revisionToShow)
-    })
   }
 
   const cookieBannerMountPoint = document.getElementsByTagName('footer')[0]
@@ -222,7 +239,7 @@ export const QualityReport = () => {
 
                 <JobSummary
                   jobInfo={jobInfo}
-                  qualitySummary={quality_summary}
+                  qualitySummary={qualitySummary}
                   secondPassReviewEnabled={secondPassReviewEnabled}
                 />
 
@@ -234,7 +251,7 @@ export const QualityReport = () => {
                   segmentToFilter={idSegment}
                   updateSegmentToFilter={updateUrlIdSegment}
                   urls={jobInfo.get('urls')}
-                  categories={quality_summary.get('categories')}
+                  categories={qualitySummary.get('categories')}
                   moreSegments={moreSegments}
                   secondPassReviewEnabled={secondPassReviewEnabled}
                 />
@@ -250,10 +267,10 @@ export const QualityReport = () => {
         </div>
       </div>
       {ReactDOM.createPortal(<CookieConsent />, cookieBannerMountPoint)}
-      {/* <SseListener
+      <SocketListener
         isAuthenticated={isUserLogged}
         userId={isUserLogged ? userInfo.user.uid : null}
-      />*/}
+      />
     </>
   )
 }

@@ -144,7 +144,7 @@ class Languages {
      */
     public static function isRTL( string $code ): bool {
         //convert ISO code in RFC
-        $code = ( new Languages )->normalizeLanguageCode( $code );
+        $code = self::getInstance()->normalizeLanguageCode( $code );
 
         return self::$map_rfc2obj[ $code ][ 'rtl' ];
     }
@@ -342,7 +342,7 @@ class Languages {
      * @return bool
      */
     public static function isValidLanguage( string $language ): bool {
-        $language = ( new Languages )->normalizeLanguageCode( $language );
+        $language = self::getInstance()->normalizeLanguageCode( $language );
 
         return array_key_exists( $language, self::$map_rfc2obj );
     }
@@ -374,7 +374,7 @@ class Languages {
      * @return string|null
      */
     public static function convertLanguageToIsoCode( string $code ): ?string {
-        $code = ( new Languages )->normalizeLanguageCode( $code );
+        $code = self::getInstance()->normalizeLanguageCode( $code );
 
         return self::$map_rfc2obj[ $code ][ 'isocode' ] ?? null;
     }

@@ -41,7 +41,7 @@
   flex-direction: column;
   border: 1px solid $grey8;
   border-bottom: unset;
-  transition: margin 0.2s ease-out 0.15s;
+  transition: padding 0.2s ease-out 0.15s;
   .settings-panel-cell-center {
     align-self: center;
     justify-content: center;
@@ -63,7 +63,6 @@
 
   &.align-center {
     text-align: center;
-    padding: 0;
   }
 }
 
@@ -77,7 +76,7 @@
 
 .settings-panel-row-drag-handle {
   position: absolute;
-  margin-left: 8px;
+  margin-left: 15px;
   margin-top: 8px;
   cursor: move;
   border: 2px dotted #ccc;
@@ -115,11 +114,11 @@
 }
 
 .settings-panel-row-dragover-half-top {
-  margin-top: 50px;
+  padding-top: 50px;
 }
 
 .settings-panel-row-dragover-half-bottom {
-  margin-bottom: 50px;
+  padding-bottom: 50px;
 }
 
 .settings-panel-row-extra-content {

@@ -1,23 +1,16 @@
-@import 'vendor_mc/semantic/matecat_semantic';
-@import 'commons/icons';
-@import 'commons/shadows';
-@import 'commons/divider';
-@import 'commons/progress-mc-bar';
-@import 'commons/buttons';
-@import 'commons/nav-bar';
-@import 'common-main';
-@import 'common-components';
-@import 'components/signin/OnBoarding';
-@import 'common';
-@import 'components/segment/tagsMenu';
-@import 'components/segment/Tag';
-@import 'components/header/header';
-@import 'components/segment/Tag';
-@import 'components/common/Switch';
-@import 'components/common/Button';
-@import 'components/common/LabelWithTooltip';
-@import 'components/common/Accordion';
-@import 'style';
+@import '../../common-main';
+@import '../../commons/icons';
+@import '../../commons/shadows';
+@import '../../commons/divider';
+@import '../../commons/progress-mc-bar';
+@import '../../commons/buttons';
+@import '../signin/OnBoarding';
+@import '../../common';
+@import '../segment/tagsMenu';
+@import '../segment/Tag';
+@import '../header/header';
+@import '../segment/Tag';
+@import '../../style';
 
 $color-red: #fb2a0d;
 $color-orange: #fbaa0d;
@@ -741,54 +734,6 @@ header {
   }
 }
 
-/*Placeholder*/
-
-.softReturn {
-  display: inline;
-  margin-left: 6px;
-  padding: 1px 2px 3px 40px;
-  background-image: url(../../img/soft-return1.png);
-  background-size: 16px;
-  background-repeat: no-repeat;
-  background-position: center left;
-  width: 20px;
-  position: relative;
-}
-.hardReturn {
-  display: inline;
-  margin-left: 6px;
-  padding: 1px 2px 3px 40px;
-  background-image: url(../../img/hard-return.png);
-  background-size: 16px;
-  background-repeat: no-repeat;
-  background-position: center left;
-  width: 20px;
-  position: relative;
-}
-
-.tab-marker {
-  color: #999;
-  margin-left: 4px;
-  margin-right: 4px;
-  position: relative;
-  top: 2px;
-}
-
-.space-marker,
-.nbsp-marker {
-  color: #ccc;
-  position: relative;
-  left: 4px;
-  padding-right: 12px;
-  opacity: 0.2;
-  top: 3px;
-  font-size: 15px;
-  background: url(../../img/dot.png) 0 0 no-repeat;
-  background-size: 6px;
-}
-
-/*End Placehoder*/
-
 .qr-filter-list {
   display: flex;
   align-items: center;
@@ -1004,12 +949,6 @@ header {
         }
       }
     }
-  }
-}
-
-footer {
-  #statistics {
-    display: none;
   }
 }
 

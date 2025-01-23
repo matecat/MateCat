@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {createRef} from 'react'
 import {isUndefined} from 'lodash'
 import {fromJS} from 'immutable'
 
@@ -13,6 +13,7 @@ import {SegmentContext} from './SegmentContext'
 import {SegmentFooterTabError} from './SegmentFooterTabError'
 import ApplicationStore from '../../stores/ApplicationStore'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
+import Tooltip from '../common/Tooltip'
 
 class SegmentFooterTabMatches extends React.Component {
   static contextType = SegmentContext
@@ -37,7 +38,7 @@ class SegmentFooterTabMatches extends React.Component {
       var item = {}
       item.id = this.id
       item.disabled = this.id == '0' ? true : false
-      item.cb = this.created_by
+      item.cb = this.created_by === 'MT-Lara' ? 'Lara' : this.created_by
       item.segment = this.segment
       item.translation = this.translation
       item.target = this.target
@@ -60,6 +61,7 @@ class SegmentFooterTabMatches extends React.Component {
 
       item.percentClass = TranslationMatches.getPercentuageClass(this.match)
       item.percentText = this.match
+      item.penalty = this.penalty
 
       // Attention Bug: We are mixing the view mode and the raw data mode.
       // before doing a enhanced  view you will need to add a data-original tag
@@ -158,8 +160,35 @@ class SegmentFooterTabMatches extends React.Component {
   }
 
   getMatchInfo(match) {
+    const penaltyPercRef = createRef()
+
     return (
       <ul className="graysmall-details">
+        {match.penalty > 0 && (
+          <Tooltip
+            content={
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}
+              >
+                <span>Applied penalty:</span>
+                <span style={{whiteSpace: 'nowrap'}}>
+                  matching percentage reduced by{' '}
+                  <b>{Math.round(match.penalty * 100)}%</b>
+                </span>
+              </div>
+            }
+          >
+            <li
+              ref={penaltyPercRef}
+              className={`percent ${match.percentClass} per-red-outline`}
+            >
+              -{Math.round(match.penalty * 100)}%
+            </li>
+          </Tooltip>
+        )}
         <li className={'percent ' + match.percentClass}>{match.percentText}</li>
         <li>{match.suggestion_info}</li>
         <li className={'graydesc'}>

@@ -6,6 +6,7 @@ use API\Commons\AbstractStatefulKleinController;
 use API\Commons\Authentication\AuthenticationHelper;
 use API\Commons\Validators\JSONRequestValidator;
 use API\Commons\Validators\LoginValidator;
+use CatUtils;
 use InvalidArgumentException;
 use Users\MetadataDao;
 use Users_UserDao;
@@ -25,44 +26,43 @@ class UserController extends AbstractStatefulKleinController
     public function edit(){
 
         $json = $this->request->body();
-
-        $filters = [
-            'first_name'      => FILTER_SANITIZE_STRING,
-            'last_name' => FILTER_SANITIZE_STRING,
-        ];
-
-        $options = [
-            'first_name' => [
-                'flags' => FILTER_NULL_ON_FAILURE
-            ],
-            'last_name' => [
-                'flags' => FILTER_NULL_ON_FAILURE
-            ],
-        ];
-
         $json = json_decode($json, true);
 
-        $filtered = [];
-        foreach($json as $key => $value) {
-            $filtered[$key] = filter_var($value, $filters[$key], $options[$key]);
-        }
+        $data = filter_var_array(
+            $json,
+            [
+                'first_name' => [
+                    'filter' => FILTER_CALLBACK, 'options' => function ( $firstName ) {
+                        return CatUtils::stripMaliciousContentFromAName($firstName);
+                    }
+                ],
+                'last_name'  => [
+                    'filter' => FILTER_CALLBACK, 'options' => function ( $lastName ) {
+                        return CatUtils::stripMaliciousContentFromAName($lastName);
+                    }
+                ],
+            ]
+        );
+
 
         try {
-            if(!isset($filtered['first_name'])){
-                throw new InvalidArgumentException('`first_name` required', 400);
+            if(empty($data['first_name'])){
+                throw new InvalidArgumentException('First name must contain at least one letter', 400);
             }
 
-            if(!isset($filtered['last_name'])){
-                throw new InvalidArgumentException('`last_name` required', 400);
+            if(empty($data['last_name'])){
+                throw new InvalidArgumentException('Last name must contain at least one letter', 400);
             }
 
             $user = $this->user;
-            $user->first_name = $filtered['first_name'];
-            $user->last_name = $filtered['last_name'];
+            $user->first_name = $data['first_name'];
+            $user->last_name = $data['last_name'];
 
             $userDao = new Users_UserDao();
             $userDao->updateUser($user);
             $userDao->destroyCacheByUid($user->uid);
+
+            AuthenticationHelper::refreshSession($_SESSION);
 
             return $this->response->json([
                 'uid' => $user->uid,

@@ -8,14 +8,39 @@
 
 namespace Email;
 
+use Comments_CommentStruct;
+use Users_UserStruct;
+
 class BaseCommentEmail extends AbstractEmail {
 
+    /**
+     * @var Users_UserStruct
+     */
     protected $user;
-    protected $comment;
+
+    /**
+     * @var Comments_CommentStruct
+     */
+    protected Comments_CommentStruct $comment;
+
+    /**
+     * @var string
+     */
     protected $url;
+
     protected $project;
 
-    public function __construct( $user, $comment, $url, $project, $job ) {
+    protected $job;
+
+    /**
+     * BaseCommentEmail constructor.
+     * @param Users_UserStruct $user
+     * @param Comments_CommentStruct $comment
+     * @param $url
+     * @param $project
+     * @param $job
+     */
+    public function __construct( Users_UserStruct $user, Comments_CommentStruct $comment, $url, $project, $job ) {
 
         $this->project = $project;
         $this->user    = $user;
@@ -40,13 +65,37 @@ class BaseCommentEmail extends AbstractEmail {
         $content = \Comments_CommentDao::placeholdContent( $this->comment->message );
 
         return [
-                'user'    => $this->user->toArray(),
-                'project' => $this->project,
-                'job'     => $this->job,
-                'comment' => $this->comment->toArray(),
-                'url'     => $this->url . ",comment",
-                'content' => $content
+                'user'      => $this->user->toArray(),
+                'project'   => $this->project,
+                'job'       => $this->job,
+                'commenter' => $this->getCommentFullName(),
+                'url'       => $this->url . ",comment",
+                'content'   => $content
         ];
     }
 
+    /**
+     * @return string
+     */
+    private function getCommentFullName()
+    {
+        if($this->comment->is_anonymous == true){
+
+            $revision_number = (int)$this->comment->revision_number;
+
+            switch ($revision_number){
+                default:
+                case 0:
+                    return "the translator";
+
+                case 1:
+                    return "the revisor";
+
+                case 2:
+                    return "the 2nd pass revisor";
+            }
+        }
+
+        return $this->comment->full_name;
+    }
 }

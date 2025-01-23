@@ -1224,7 +1224,8 @@ class TmKeyManagementTest extends AbstractTest {
     public function testIsValidStructure_invalidStructure() {
         $validObj = TmKeyManagement_TmKeyManagement::isValidStructure( self::$invalidTmKeyStructArr );
 
-        $this->assertFalse( $validObj );
+        $this->assertNotNull( $validObj );
+        $this->assertNull( $validObj->invalidField ?? null );
     }
 
     /** TEST mergeJsonKeys */

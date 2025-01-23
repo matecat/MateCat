@@ -186,16 +186,17 @@ class catController extends viewController {
 
         $active_mt_engine_array = [];
         if ( !empty( $active_mt_engine ) ) {
+            $engine_type = explode("\\", $active_mt_engine[ 0 ]->class_load);
             $active_mt_engine_array = [
                     "id"          => $active_mt_engine[ 0 ]->id,
                     "name"        => $active_mt_engine[ 0 ]->name,
                     "type"        => $active_mt_engine[ 0 ]->type,
                     "description" => $active_mt_engine[ 0 ]->description,
-                    'engine_type' => ( $active_mt_engine[ 0 ]->class_load === 'MyMemory' ? 'MMTLite' : $active_mt_engine[ 0 ]->class_load ),
+                    'engine_type' => ( $active_mt_engine[ 0 ]->class_load === 'MyMemory' ? 'MMTLite' : array_pop($engine_type) ),
             ];
         }
 
-        $this->template->active_engine = Utils::escapeJsonEncode( $active_mt_engine_array );
+        $this->template->active_engine = $active_mt_engine_array;
 
         /*
          * array_unique cast EnginesModel_EngineStruct to string
@@ -380,7 +381,6 @@ class catController extends viewController {
 
         $this->template->mt_engines                            = $this->translation_engines;
         $this->template->translation_engines_intento_providers = Intento::getProviderList();
-        $this->template->translation_engines_intento_prov_json = Utils::escapeJsonEncode( Intento::getProviderList() );
 
         $this->template->not_empty_default_tm_key = !empty( INIT::$DEFAULT_TM_KEY );
 
@@ -412,7 +412,6 @@ class catController extends viewController {
         $this->template->maxTMXFileSize = INIT::$MAX_UPLOAD_TMX_FILE_SIZE;
 
         $this->template->tagLockCustomizable = ( INIT::$UNLOCKABLE_TAGS == true ) ? true : false;
-        $this->template->maxNumSegments      = INIT::$MAX_NUM_SEGMENTS;
         $this->template->copySourceInterval  = INIT::$COPY_SOURCE_INTERVAL;
 
         /*
@@ -443,7 +442,7 @@ class catController extends viewController {
 
         if ( INIT::$COMMENTS_ENABLED ) {
             $this->template->comments_enabled = true;
-            $this->template->sse_base_url     = INIT::$SSE_BASE_URL;
+            $this->template->socket_base_url     = INIT::$SOCKET_BASE_URL;
         }
 
         $projectMetaDataDao              = new Projects_MetadataDao();

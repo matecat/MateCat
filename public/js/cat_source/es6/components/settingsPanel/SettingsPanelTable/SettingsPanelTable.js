@@ -4,9 +4,12 @@ import React, {
   createRef,
   useState,
   createContext,
+  Fragment,
 } from 'react'
 import PropTypes from 'prop-types'
 import {SettingsPanelRow} from './SettingsPanelRow'
+import {SPECIAL_ROWS_ID} from '../Contents/TranslationMemoryGlossaryTab/TranslationMemoryGlossaryTab'
+import {TmPrioritization} from '../Contents/TranslationMemoryGlossaryTab/TmPrioritization'
 
 export const SettingsPanelTableContext = createContext({})
 
@@ -105,16 +108,23 @@ export const SettingsPanelTable = ({
     rowsRef.current[index] = ref
 
     return (
-      <SettingsPanelRow
-        ref={ref}
-        key={index}
-        {...{
-          index,
-          row,
-          isDragOver: dragOverIndex === index,
-          wasDragged: dragEndRow.current === row,
-        }}
-      />
+      <Fragment key={index}>
+        <SettingsPanelRow
+          ref={ref}
+          {...{
+            index,
+            row,
+            isDragOver: dragOverIndex === index,
+            wasDragged: dragEndRow.current === row,
+          }}
+        />
+        {row.id === SPECIAL_ROWS_ID.defaultTranslationMemory &&
+          rows.length > 2 && (
+            <div className="settings-panel-row">
+              <TmPrioritization />
+            </div>
+          )}
+      </Fragment>
     )
   }
 

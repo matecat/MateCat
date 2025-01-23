@@ -1,6 +1,8 @@
 <?php
 
 use TmKeyManagement\UserKeysModel;
+use Validator\JSONValidator;
+use Validator\JSONValidatorObject;
 
 /**
  * Created by PhpStorm.
@@ -25,6 +27,8 @@ class updateJobKeysController extends ajaxController {
 
     private $jobData = [];
 
+    protected $tm_prioritization = null;
+
     public function __construct() {
 
         parent::__construct();
@@ -33,6 +37,9 @@ class updateJobKeysController extends ajaxController {
 
         //define input filters
         $filterArgs = [
+                'tm_prioritization'             => [
+                        'filter' => FILTER_VALIDATE_BOOLEAN
+                ],
                 'job_id'             => [
                         'filter' => FILTER_SANITIZE_NUMBER_INT
                 ],
@@ -59,6 +66,7 @@ class updateJobKeysController extends ajaxController {
         $this->received_password = $_postInput[ 'current_password' ];
         $this->job_id            = $_postInput[ 'job_id' ];
         $this->job_pass          = $_postInput[ 'job_pass' ];
+        $this->tm_prioritization = $_postInput[ 'tm_prioritization' ];
         $this->tm_keys           = CatUtils::sanitizeJSON($_postInput[ 'data' ]); // this will be filtered inside the TmKeyManagement class
         $this->only_private      = !$_postInput[ 'get_public_matches' ];
 
@@ -87,6 +95,13 @@ class updateJobKeysController extends ajaxController {
         //check for Password correctness
         if ( empty( $this->jobData ) || !$pCheck->grantJobAccessByJobData( $this->jobData, $this->job_pass ) ) {
             $this->result[ 'errors' ][] = [ "code" => -10, "message" => "Wrong password" ];
+        }
+
+        // validate $this->tm_keys
+        try {
+            $this->validateTMKeysArray();
+        } catch (Exception $exception){
+            $this->result[ 'errors' ][] = [ "code" => -12, "message" => $exception->getMessage() ];
         }
 
         $this->identifyUser();
@@ -166,6 +181,7 @@ class updateJobKeysController extends ajaxController {
          *
          */
         $tm_keys = json_decode( $this->tm_keys, true );
+        // validate $tm_keys
 
         $clientKeys =  $this->jobData->getClientKeys($this->user, $this->userRole);
 
@@ -205,10 +221,18 @@ class updateJobKeysController extends ajaxController {
             }
 
             $this->jobData->tm_keys = json_encode( $totalTmKeys );
+            $this->jobData->last_update = date( "Y-m-d H:i:s" );
 
             $jobDao = new \Jobs_JobDao( Database::obtain() );
-            $jobDao->updateStruct( $this->jobData, [ 'fields' => [ 'only_private_tm', 'tm_keys' ] ] );
+            $jobDao->updateStruct( $this->jobData, [ 'fields' => [ 'only_private_tm', 'tm_keys', 'last_update' ] ] );
             $jobDao->destroyCache( $this->jobData );
+
+            // update tm_prioritization job metadata
+            if($this->tm_prioritization !== null){
+                $tm_prioritization = $this->tm_prioritization == true ? "1" : "0";
+                $jobsMetadataDao = new Jobs\MetadataDao();
+                $jobsMetadataDao->set( $this->id_job, $this->job_pass, 'tm_prioritization', $tm_prioritization );
+            }
 
             $this->result[ 'data' ] = 'OK';
 
@@ -221,6 +245,20 @@ class updateJobKeysController extends ajaxController {
 
     private function jobOwnerIsMe() {
         return $this->userIsLogged && $this->jobData[ 'owner' ] == $this->user->email;
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function validateTMKeysArray()
+    {
+        $schema = file_get_contents( INIT::$ROOT . '/inc/validation/schema/job_keys.json' );
+
+        $validatorObject       = new JSONValidatorObject();
+        $validatorObject->json = $this->tm_keys;
+
+        $validator = new JSONValidator( $schema );
+        $validator->validate( $validatorObject );
     }
 
 } 

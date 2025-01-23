@@ -48,7 +48,7 @@ class INIT {
     public static $QUEUE_CREDENTIALS;
     public static $USE_COMPILED_ASSETS     = false;
     public static $ENABLE_MULTI_DOMAIN_API = false;
-    public static $XSRF_TOKEN = 'xsrf-token';
+    public static $XSRF_TOKEN              = 'xsrf-token';
 
     /**
      * Use or not the js tracking codes macro import ( Ex: google analytics code injection )
@@ -59,9 +59,9 @@ class INIT {
      */
     public static $TRACKING_CODES_VIEW_PATH = "";
 
-    public static $COMMENTS_ENABLED             = true;
-    public static $SSE_NOTIFICATIONS_QUEUE_NAME = "/topic/matecat_sse_notifications";
-    public static $SSE_BASE_URL;
+    public static        $COMMENTS_ENABLED                = true;
+    public static string $SOCKET_NOTIFICATIONS_QUEUE_NAME = "/queue/matecat_socket_notifications";
+    public static string $SOCKET_BASE_URL = '';
 
     public static $SMTP_HOST;
     public static $SMTP_PORT;
@@ -69,7 +69,7 @@ class INIT {
     public static $SMTP_HOSTNAME;
 
     public static $MAILER_FROM        = 'cattool@matecat.com';
-    public static $MAILER_FROM_NAME   = 'MateCat';
+    public static $MAILER_FROM_NAME   = 'Matecat';
     public static $MAILER_RETURN_PATH = 'no-reply@matecat.com';
 
     public static $LOG_REPOSITORY;
@@ -155,7 +155,6 @@ class INIT {
      * @var int Interval in seconds
      */
     public static $COPY_SOURCE_INTERVAL = 300;
-    public static $MAX_NUM_SEGMENTS     = 500;
 
     /**
      * Default Matecat user agent string
@@ -205,7 +204,12 @@ class INIT {
      */
     public static $DEFAULT_TM_KEY = '';
 
-    public static $ENABLED_BROWSERS = [ 'applewebkit', 'chrome', 'safari', 'edge', 'firefox' ]; 
+    /**
+     * @var string The default MMT license is applied when Lara falls back for unsupported languages and the user does not add their personal MMT license.
+     */
+    public static $DEFAULT_MMT_KEY = '';
+
+    public static $ENABLED_BROWSERS = [ 'applewebkit', 'chrome', 'safari', 'edge', 'firefox' ];
 
     /**
      * If you don't have a client id and client secret, please visit
@@ -281,7 +285,7 @@ class INIT {
     public static $FACEBOOK_OAUTH_CLIENT_SECRET;
     public static $FACEBOOK_OAUTH_REDIRECT_URL;
 
-    public static $UNLOCKABLE_TAGS        = false;
+    public static $UNLOCKABLE_TAGS = false;
 
     public static $SKIP_SQL_CACHE = false;
 
@@ -306,35 +310,35 @@ class INIT {
 
     public function __construct() {
 
-        self::$GITHUB_OAUTH_CLIENT_ID     = INIT::$OAUTH_CONFIG['GITHUB_OAUTH_CONFIG']['GITHUB_OAUTH_CLIENT_ID'] ?? null;
-        self::$GITHUB_OAUTH_CLIENT_SECRET = INIT::$OAUTH_CONFIG['GITHUB_OAUTH_CONFIG']['GITHUB_OAUTH_CLIENT_SECRET'] ?? null;
-        self::$GITHUB_OAUTH_REDIRECT_URL  = INIT::$OAUTH_CONFIG['GITHUB_OAUTH_CONFIG']['GITHUB_OAUTH_REDIRECT_URL'] ?? null;
+        self::$GITHUB_OAUTH_CLIENT_ID     = INIT::$OAUTH_CONFIG[ 'GITHUB_OAUTH_CONFIG' ][ 'GITHUB_OAUTH_CLIENT_ID' ] ?? null;
+        self::$GITHUB_OAUTH_CLIENT_SECRET = INIT::$OAUTH_CONFIG[ 'GITHUB_OAUTH_CONFIG' ][ 'GITHUB_OAUTH_CLIENT_SECRET' ] ?? null;
+        self::$GITHUB_OAUTH_REDIRECT_URL  = INIT::$OAUTH_CONFIG[ 'GITHUB_OAUTH_CONFIG' ][ 'GITHUB_OAUTH_REDIRECT_URL' ] ?? null;
 
-        self::$LINKEDIN_OAUTH_CLIENT_ID     = INIT::$OAUTH_CONFIG['LINKEDIN_OAUTH_CONFIG']['LINKEDIN_OAUTH_CLIENT_ID'] ?? null;
-        self::$LINKEDIN_OAUTH_CLIENT_SECRET = INIT::$OAUTH_CONFIG['LINKEDIN_OAUTH_CONFIG']['LINKEDIN_OAUTH_CLIENT_SECRET'] ?? null;
-        self::$LINKEDIN_OAUTH_REDIRECT_URL  = INIT::$OAUTH_CONFIG['LINKEDIN_OAUTH_CONFIG']['LINKEDIN_OAUTH_REDIRECT_URL'] ?? null;
+        self::$LINKEDIN_OAUTH_CLIENT_ID     = INIT::$OAUTH_CONFIG[ 'LINKEDIN_OAUTH_CONFIG' ][ 'LINKEDIN_OAUTH_CLIENT_ID' ] ?? null;
+        self::$LINKEDIN_OAUTH_CLIENT_SECRET = INIT::$OAUTH_CONFIG[ 'LINKEDIN_OAUTH_CONFIG' ][ 'LINKEDIN_OAUTH_CLIENT_SECRET' ] ?? null;
+        self::$LINKEDIN_OAUTH_REDIRECT_URL  = INIT::$OAUTH_CONFIG[ 'LINKEDIN_OAUTH_CONFIG' ][ 'LINKEDIN_OAUTH_REDIRECT_URL' ] ?? null;
 
-        self::$MICROSOFT_OAUTH_CLIENT_ID     = INIT::$OAUTH_CONFIG['MICROSOFT_OAUTH_CONFIG']['MICROSOFT_OAUTH_CLIENT_ID'] ?? null;
-        self::$MICROSOFT_OAUTH_CLIENT_SECRET = INIT::$OAUTH_CONFIG['MICROSOFT_OAUTH_CONFIG']['MICROSOFT_OAUTH_CLIENT_SECRET'] ?? null;
-        self::$MICROSOFT_OAUTH_REDIRECT_URL  = INIT::$OAUTH_CONFIG['MICROSOFT_OAUTH_CONFIG']['MICROSOFT_OAUTH_REDIRECT_URL'] ?? null;
+        self::$MICROSOFT_OAUTH_CLIENT_ID     = INIT::$OAUTH_CONFIG[ 'MICROSOFT_OAUTH_CONFIG' ][ 'MICROSOFT_OAUTH_CLIENT_ID' ] ?? null;
+        self::$MICROSOFT_OAUTH_CLIENT_SECRET = INIT::$OAUTH_CONFIG[ 'MICROSOFT_OAUTH_CONFIG' ][ 'MICROSOFT_OAUTH_CLIENT_SECRET' ] ?? null;
+        self::$MICROSOFT_OAUTH_REDIRECT_URL  = INIT::$OAUTH_CONFIG[ 'MICROSOFT_OAUTH_CONFIG' ][ 'MICROSOFT_OAUTH_REDIRECT_URL' ] ?? null;
 
-        self::$FACEBOOK_OAUTH_CLIENT_ID     = INIT::$OAUTH_CONFIG['FACEBOOK_OAUTH_CONFIG']['FACEBOOK_OAUTH_CLIENT_ID'] ?? null;
-        self::$FACEBOOK_OAUTH_CLIENT_SECRET = INIT::$OAUTH_CONFIG['FACEBOOK_OAUTH_CONFIG']['FACEBOOK_OAUTH_CLIENT_SECRET'] ?? null;
-        self::$FACEBOOK_OAUTH_REDIRECT_URL  = INIT::$OAUTH_CONFIG['FACEBOOK_OAUTH_CONFIG']['FACEBOOK_OAUTH_REDIRECT_URL'] ?? null;
+        self::$FACEBOOK_OAUTH_CLIENT_ID     = INIT::$OAUTH_CONFIG[ 'FACEBOOK_OAUTH_CONFIG' ][ 'FACEBOOK_OAUTH_CLIENT_ID' ] ?? null;
+        self::$FACEBOOK_OAUTH_CLIENT_SECRET = INIT::$OAUTH_CONFIG[ 'FACEBOOK_OAUTH_CONFIG' ][ 'FACEBOOK_OAUTH_CLIENT_SECRET' ] ?? null;
+        self::$FACEBOOK_OAUTH_REDIRECT_URL  = INIT::$OAUTH_CONFIG[ 'FACEBOOK_OAUTH_CONFIG' ][ 'FACEBOOK_OAUTH_REDIRECT_URL' ] ?? null;
 
-        self::$GOOGLE_OAUTH_CLIENT_ID       = INIT::$OAUTH_CONFIG['GOOGLE_OAUTH_CONFIG'][ 'GOOGLE_OAUTH_CLIENT_ID' ] ?? null;
-        self::$GOOGLE_OAUTH_CLIENT_SECRET   = INIT::$OAUTH_CONFIG['GOOGLE_OAUTH_CONFIG'][ 'GOOGLE_OAUTH_CLIENT_SECRET' ] ?? null;
-        self::$GOOGLE_OAUTH_REDIRECT_URL    = INIT::$OAUTH_CONFIG['GOOGLE_OAUTH_CONFIG'][ 'GOOGLE_OAUTH_REDIRECT_URL' ] ?? null;
+        self::$GOOGLE_OAUTH_CLIENT_ID     = INIT::$OAUTH_CONFIG[ 'GOOGLE_OAUTH_CONFIG' ][ 'GOOGLE_OAUTH_CLIENT_ID' ] ?? null;
+        self::$GOOGLE_OAUTH_CLIENT_SECRET = INIT::$OAUTH_CONFIG[ 'GOOGLE_OAUTH_CONFIG' ][ 'GOOGLE_OAUTH_CLIENT_SECRET' ] ?? null;
+        self::$GOOGLE_OAUTH_REDIRECT_URL  = INIT::$OAUTH_CONFIG[ 'GOOGLE_OAUTH_CONFIG' ][ 'GOOGLE_OAUTH_REDIRECT_URL' ] ?? null;
 
         # Drive
-        self::$GOOGLE_OAUTH_CLIENT_APP_NAME = INIT::$OAUTH_CONFIG['GOOGLE_OAUTH_CONFIG'][ 'GOOGLE_OAUTH_CLIENT_APP_NAME' ] ?? null;
-        self::$GOOGLE_OAUTH_BROWSER_API_KEY = INIT::$OAUTH_CONFIG['GOOGLE_OAUTH_CONFIG'][ 'GOOGLE_OAUTH_BROWSER_API_KEY' ] ?? null;
+        self::$GOOGLE_OAUTH_CLIENT_APP_NAME = INIT::$OAUTH_CONFIG[ 'GOOGLE_OAUTH_CONFIG' ][ 'GOOGLE_OAUTH_CLIENT_APP_NAME' ] ?? null;
+        self::$GOOGLE_OAUTH_BROWSER_API_KEY = INIT::$OAUTH_CONFIG[ 'GOOGLE_OAUTH_CONFIG' ][ 'GOOGLE_OAUTH_BROWSER_API_KEY' ] ?? null;
 
         self::$MIME_TYPES = include( 'Mime2Extension.php' );
 
     }
 
-    public static $SUPPORTED_FILE_TYPES       = [
+    public static $SUPPORTED_FILE_TYPES = [
             'Office'              => [
                     'pages'   => [ '', '', 'extdoc' ],
                     'doc'     => [ '', '', 'extdoc' ],
@@ -375,18 +379,18 @@ class INIT {
                     'zip'     => [ '', '', 'extzip' ],
             ],
             'Web'                 => [
-                    'htm'   => [ '', '', 'exthtm' ],
-                    'html'  => [ '', '', 'exthtm' ],
-                    'xhtml' => [ '', '', 'exthtm' ],
-                    'xml'   => [ '', '', 'extxml' ],
-                    'dtd'   => [ '', '', 'extxml' ],
+                    'htm'    => [ '', '', 'exthtm' ],
+                    'html'   => [ '', '', 'exthtm' ],
+                    'xhtml'  => [ '', '', 'exthtm' ],
+                    'xml'    => [ '', '', 'extxml' ],
+                    'dtd'    => [ '', '', 'extxml' ],
 //                    'php'   => array( '', '', 'extxml' ),
-                    'json'  => [ '', '', 'extxml' ],
-                    'jsont' => [ '', '', 'extxml' ],
+                    'json'   => [ '', '', 'extxml' ],
+                    'jsont'  => [ '', '', 'extxml' ],
                     'jsont2' => [ '', '', 'extxml' ],
-                    'yaml'  => [ '', '', 'extxml' ],
-                    'yml'   => [ '', '', 'extxml' ],
-                    'md'    => [ '', '', 'extxml' ],
+                    'yaml'   => [ '', '', 'extxml' ],
+                    'yml'    => [ '', '', 'extxml' ],
+                    'md'     => [ '', '', 'extxml' ],
             ],
             'Scanned Files'       => [
                     'pdf'  => [ '', '', 'extpdf' ],
@@ -406,11 +410,12 @@ class INIT {
                     'xlf'      => [ 'default', '', 'extxlf' ],
             ],
             "Desktop Publishing"  => [
-                    'mif'  => [ '', '', 'extmif' ],
-                    'idml' => [ '', '', 'extidd' ],
-                    'icml' => [ '', '', 'exticml' ],
-                    'xml'  => [ '', '', 'extxml' ],
-                    'dita' => [ '', '', 'extdit' ]
+                    'mif'     => [ '', '', 'extmif' ],
+                    'idml'    => [ '', '', 'extidd' ],
+                    'icml'    => [ '', '', 'exticml' ],
+                    'xml'     => [ '', '', 'extxml' ],
+                    'dita'    => [ '', '', 'extdit' ],
+                    'ditamap' => [ '', '', 'extdit' ]
             ],
             "Localization"        => [
                     'properties'  => [ '', '', 'extpro' ],
@@ -419,6 +424,7 @@ class INIT {
                     'sxml'        => [ '', '', 'extxml' ],
                     'txml'        => [ '', '', 'extxml' ],
                     'dita'        => [ '', '', 'extdit' ],
+                    'ditamap'     => [ '', '', 'extdit' ],
                     'Android xml' => [ '', '', 'extxml' ],
                     'strings'     => [ '', '', 'extstr' ],
                     'sbv'         => [ '', '', 'extsbv' ],

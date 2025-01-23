@@ -364,7 +364,7 @@ export const SegmentButton = ({segment, disabled, isReview}) => {
           {' '}
           {config.status_labels.TRANSLATED}{' '}
         </a>
-        <p>{isMac ? 'CMD' : 'CTRL'} ENTER</p>
+        <p>{isMac ? 'CMD' : 'CTRL'}+ENTER</p>
       </li>
     )
   }
@@ -386,7 +386,7 @@ export const SegmentButton = ({segment, disabled, isReview}) => {
           {' '}
           {config.status_labels.APPROVED}{' '}
         </a>
-        <p>{isMac ? 'CMD' : 'CTRL'} ENTER</p>
+        <p>{isMac ? 'CMD' : 'CTRL'}+ENTER</p>
       </li>
     )
   }

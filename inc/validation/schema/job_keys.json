@@ -1,0 +1,78 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "mine": {
+      "type": "array",
+      "nullable": true,
+      "items": {
+        "type": "object",
+        "$ref": "#/definitions/key"
+      }
+    },
+    "ownergroup": {
+      "type": "array",
+      "nullable": true,
+      "items": {
+        "type": "object",
+        "$ref": "#/definitions/key"
+      }
+    },
+    "anonymous": {
+      "type": "array",
+      "nullable": true,
+      "items": {
+        "type": "object",
+        "$ref": "#/definitions/key"
+      }
+    }
+  },
+  "required": [
+    "mine",
+    "ownergroup",
+    "anonymous"
+  ],
+  "definitions": {
+    "key": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "key": {
+          "type": "string"
+        },
+        "glos": {
+          "type": ["boolean", "integer", "string"]
+        },
+        "owner": {
+          "type": ["boolean", "integer", "string"]
+        },
+        "tm": {
+          "type": ["boolean", "integer", "string"]
+        },
+        "r": {
+          "type": ["boolean", "integer", "string"]
+        },
+        "w": {
+          "type": ["boolean", "integer", "string"]
+        },
+        "penalty": {
+          "type": "integer",
+          "nullable": true,
+          "maximum": 100,
+          "minimum": 0
+        }
+      },
+      "required": [
+        "name",
+        "key",
+        "glos",
+        "tm",
+        "r",
+        "w"
+      ]
+    }
+  }
+}

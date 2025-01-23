@@ -870,5 +870,19 @@ class CatUtils {
 
         return json_encode( $json );
     }
+
+    /**
+     * This function is used to strip malicious content from
+     * user's first_name and last_name
+     *
+     * @param $string
+     * @return string
+     */
+    public static function stripMaliciousContentFromAName($string)
+    {
+        $string = mb_substr( preg_replace( '/(?:https?|s?ftp)\P{L}+/u', '', $string ), 0, 50 );
+
+        return trim($string);
+    }
 }
 

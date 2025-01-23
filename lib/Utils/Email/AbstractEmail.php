@@ -98,7 +98,7 @@ abstract class AbstractEmail {
         if ( isset( $this->title ) ) {
             $title = $this->title;
         } else {
-            $title = 'MateCat';
+            $title = 'Matecat';
         }
 
         return [
