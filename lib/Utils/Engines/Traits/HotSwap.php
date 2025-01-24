@@ -13,6 +13,7 @@ namespace Engines\Traits;
 use Exception;
 use Jobs_JobDao;
 use Jobs_JobStruct;
+use Predis\Client;
 use RedisHandler;
 use ReflectionException;
 
@@ -27,17 +28,15 @@ trait HotSwap {
      *     }
      *</code>
      *
+     * @param Client         $redisConn
      * @param Jobs_JobStruct $jobStruct
      *
      * @param int            $newMT
      *
      * @param int            $newTM
      *
-     * @throws ReflectionException
      */
-    protected function swapOn( Jobs_JobStruct $jobStruct, $newMT = 1, $newTM = 1 ) { // 1 == MyMemory
-
-        $redisConn = ( new RedisHandler() )->getConnection();
+    protected function swapOn( Client $redisConn, Jobs_JobStruct $jobStruct, int $newMT = 1, int $newTM = 1 ) { // 1 == MyMemory
 
         if ( $redisConn->setnx( "_old_mt_engine:" . $jobStruct->id_project . ":" . $jobStruct->password, $jobStruct->id_mt_engine ) ) {
             $redisConn->expire( "_old_mt_engine:" . $jobStruct->id_project . ":" . $jobStruct->password, 60 * 60 * 24 );

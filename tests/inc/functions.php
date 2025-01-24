@@ -1,6 +1,7 @@
 <?php
 
 use Klein\Klein;
+use PHPUnit\Framework\MockObject\MockObject;
 
 function sig_handler( $signo ) {
 
@@ -33,7 +34,6 @@ function setupSignalHandler() {
  * We have to manually instantiate a MockObject Generator
  *
  * @return void
- * @throws ReflectionException
  */
 function disableAmqWorkerClientHelper() {
     WorkerClient::$_HANDLER = @( new PHPUnit\Framework\MockObject\Generator() )->getMock(
@@ -46,9 +46,32 @@ function route() {
     // fake function for router command in Matecat
 }
 
-function mockKleinFramework() {
+/**
+ * We are not inside a TestUnit, we can't simply invoke
+ *
+ * <code>
+ *     $this->getMockBuilder(Klein::class)->getMock()
+ * </code>
+ *
+ * We have to manually instantiate a MockObject Generator
+ *
+ * @return MockObject
+ */
+function mockKleinFramework(): MockObject {
     return @( new PHPUnit\Framework\MockObject\Generator() )->getMock(
             Klein::class,
             [], [], '', false
     );
+}
+
+/**
+ * @throws Exception
+ */
+function getResourcePath( string $relativePath, string $pluginName = null ): string {
+    if ( file_exists( realpath( TEST_DIR . '/resources/' . $relativePath ) ) ) {
+        return realpath( TEST_DIR . '/resources/' . $relativePath );
+    } elseif ( file_exists( realpath( TEST_DIR . "/../plugins/$pluginName/tests/resources/" . $relativePath ) ) ) {
+        return realpath( TEST_DIR . "/../plugins/$pluginName/tests/resources/" . $relativePath );
+    }
+    throw new Exception( "Resource not found: $relativePath " . ( $pluginName ? "in plugin $pluginName" : "" ) );
 }
