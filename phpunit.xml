@@ -11,6 +11,7 @@
       <file>./lib/Utils/fileupload/index.php</file>
       <file>./lib/View/APIDoc.php</file>
       <file>./lib/View/templates/_APIDoc.php</file>
+      <file>./lib/View/fileupload/upload.class.php</file>
     </exclude>
   </coverage>
   <php>
@@ -21,7 +22,10 @@
     <!--<directory>test/integration</directory>-->
     <!--</testsuite>-->
     <testsuite name="Unit tests">
-      <directory>tests/unit/</directory>
+      <directory>tests/unit</directory>
+    </testsuite>
+    <testsuite name="Plugins Unit tests">
+      <directory>plugins/*/tests/unit</directory>
     </testsuite>
   </testsuites>
 </phpunit>

@@ -267,7 +267,6 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
     /**
      * @param $obj_arr TmKeyManagement_MemoryKeyStruct[] An array of TmKeyManagement_MemoryKeyStruct objects
      *
-     * @return array|null The input array on success, null otherwise
      * @throws Exception
      */
     public function createList( array $obj_arr ) {
@@ -308,11 +307,6 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
 
         }
 
-        if ( $this->database->affected_rows > 0 ) {
-            return $obj_arr;
-        }
-
-        return null;
     }
 
     /**
