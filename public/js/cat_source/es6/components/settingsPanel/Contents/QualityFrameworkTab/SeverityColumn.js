@@ -11,6 +11,9 @@ import LabelWithTooltip from '../../../common/LabelWithTooltip'
 import ChevronDown from '../../../../../../../img/icons/ChevronDown'
 import {ModifySeverity} from './ModifySeverity'
 
+export const orderSeverityBySort = (severities) =>
+  severities.sort((a, b) => (a.sort > b.sort ? 1 : -1))
+
 export const SeverityColumn = ({
   label,
   code,
@@ -63,8 +66,8 @@ export const SeverityColumn = ({
   const isNotSaved = checkIsNotSaved()
 
   const switchSort = ({severities, sort, newSort}) =>
-    severities
-      .map((severity) => {
+    orderSeverityBySort(
+      severities.map((severity) => {
         const modifiedSort =
           severity.sort === sort
             ? newSort
@@ -77,8 +80,8 @@ export const SeverityColumn = ({
                 : severity.sort
 
         return {...severity, sort: modifiedSort}
-      })
-      .sort((a, b) => (a.sort > b.sort ? 1 : -1))
+      }),
+    )
 
   const moveLeft = () => {
     const newSort = sort - 1
@@ -123,7 +126,10 @@ export const SeverityColumn = ({
           .filter(
             (severity) => !(severity.label === label && severity.code === code),
           )
-          .map((severity, index) => ({...severity, sort: index + 1})),
+          .map((severity) => ({
+            ...severity,
+            sort: severity.sort > sort ? severity.sort - 1 : severity.sort,
+          })),
       })),
     }))
   }
