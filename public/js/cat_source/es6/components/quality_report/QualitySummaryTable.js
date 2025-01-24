@@ -1,6 +1,6 @@
 import React from 'react'
 
-import {isUndefined, orderBy} from 'lodash'
+import {isUndefined} from 'lodash'
 import {isEqual} from 'lodash/lang'
 
 class QualitySummaryTable extends React.Component {
@@ -51,8 +51,15 @@ class QualitySummaryTable extends React.Component {
         })
       }
     })
+
+    const isSortProperyDefined = severities.every(
+      ({sort}) => typeof sort === 'number',
+    )
+
     return {
-      severities,
+      severities: isSortProperyDefined
+        ? severities.sort((a, b) => (a.sort > b.sort ? 1 : -1))
+        : severities,
       thereAreSubCategories,
       categoriesGroups,
     }
