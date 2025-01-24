@@ -125,6 +125,7 @@ class QAModelTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
             $category[ 'id' ]         = (int)$categoryStruct->id;
             $category[ 'label' ]      = $categoryStruct->category_label;
             $category[ 'code' ]       = $categoryStruct->code;
+            $category[ 'sort' ]       = $categoryStruct->sort ? (int)$categoryStruct->sort : null;
             $category[ 'severities' ] = [];
 
             foreach ( $categoryStruct->severities as $severityStruct ) {
@@ -133,6 +134,7 @@ class QAModelTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
                         'label'   => $severityStruct->severity_label,
                         'code'    => $severityStruct->severity_code,
                         'penalty' => floatval( $severityStruct->penalty ),
+                        'sort'    => $severityStruct->sort ? (int)$severityStruct->sort : null,
                 ];
             }
 
