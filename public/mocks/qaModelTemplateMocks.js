@@ -22,6 +22,7 @@ export default {
               id: 1,
               id_category: 1,
               code: 'NEU',
+              sort: 1,
             },
             {
               label: 'Minor',
@@ -29,6 +30,7 @@ export default {
               id: 2,
               id_category: 1,
               code: 'MIN',
+              sort: 2,
             },
             {
               label: 'Major',
@@ -36,6 +38,7 @@ export default {
               id: 3,
               id_category: 1,
               code: 'MAJ',
+              sort: 3,
             },
           ],
         },
@@ -50,6 +53,7 @@ export default {
               id: 4,
               id_category: 2,
               code: 'NEU',
+              sort: 1,
             },
             {
               label: 'Minor',
@@ -57,6 +61,7 @@ export default {
               id: 5,
               id_category: 2,
               code: 'MIN',
+              sort: 2,
             },
             {
               label: 'Major',
@@ -64,6 +69,7 @@ export default {
               id: 6,
               id_category: 2,
               code: 'MAJ',
+              sort: 3,
             },
           ],
         },
@@ -78,6 +84,7 @@ export default {
               id: 7,
               id_category: 3,
               code: 'NEU',
+              sort: 1,
             },
             {
               label: 'Minor',
@@ -85,6 +92,7 @@ export default {
               id: 8,
               id_category: 3,
               code: 'MIN',
+              sort: 2,
             },
             {
               label: 'Major',
@@ -92,6 +100,7 @@ export default {
               id: 9,
               id_category: 3,
               code: 'MAJ',
+              sort: 3,
             },
           ],
         },
@@ -106,6 +115,7 @@ export default {
               id: 10,
               id_category: 4,
               code: 'NEU',
+              sort: 1,
             },
             {
               label: 'Minor',
@@ -113,6 +123,7 @@ export default {
               id: 11,
               id_category: 4,
               code: 'MIN',
+              sort: 2,
             },
             {
               label: 'Major',
@@ -120,6 +131,7 @@ export default {
               id: 12,
               id_category: 4,
               code: 'MAJ',
+              sort: 3,
             },
           ],
         },
@@ -134,6 +146,7 @@ export default {
               id: 13,
               id_category: 5,
               code: 'NEU',
+              sort: 1,
             },
             {
               label: 'Minor',
@@ -141,6 +154,7 @@ export default {
               id: 14,
               id_category: 5,
               code: 'MIN',
+              sort: 2,
             },
             {
               label: 'Major',
@@ -148,6 +162,7 @@ export default {
               id: 15,
               id_category: 5,
               code: 'MAJ',
+              sort: 3,
             },
           ],
         },
@@ -190,6 +205,7 @@ export default {
               code: 'NEU',
               label: 'Neutral',
               penalty: 1,
+              sort: 1,
             },
             {
               id: 872,
@@ -197,6 +213,7 @@ export default {
               code: 'MIN',
               label: 'Minor',
               penalty: 0.5,
+              sort: 2,
             },
             {
               id: 873,
@@ -204,6 +221,7 @@ export default {
               code: 'MAJ',
               label: 'Major',
               penalty: 2,
+              sort: 3,
             },
             {
               id: 874,
@@ -211,6 +229,7 @@ export default {
               code: 'SEV',
               label: 'Severity 1',
               penalty: 0,
+              sort: 4,
             },
           ],
         },
@@ -227,6 +246,7 @@ export default {
               code: 'NEU',
               label: 'Neutral',
               penalty: 0,
+              sort: 1,
             },
             {
               id: 876,
@@ -234,6 +254,7 @@ export default {
               code: 'MIN',
               label: 'Minor',
               penalty: 0.5,
+              sort: 2,
             },
             {
               id: 877,
@@ -241,6 +262,7 @@ export default {
               code: 'MAJ',
               label: 'Major',
               penalty: 2,
+              sort: 3,
             },
             {
               id: 878,
@@ -248,6 +270,7 @@ export default {
               code: 'SEV',
               label: 'Severity 1',
               penalty: 0,
+              sort: 4,
             },
           ],
         },
@@ -264,6 +287,7 @@ export default {
               code: 'NEU',
               label: 'Neutral',
               penalty: 0,
+              sort: 1,
             },
             {
               id: 880,
@@ -271,6 +295,7 @@ export default {
               code: 'MIN',
               label: 'Minor',
               penalty: 0.5,
+              sort: 2,
             },
             {
               id: 881,
@@ -278,6 +303,7 @@ export default {
               code: 'MAJ',
               label: 'Major',
               penalty: 2,
+              sort: 3,
             },
             {
               id: 882,
@@ -285,6 +311,7 @@ export default {
               code: 'SEV',
               label: 'Severity 1',
               penalty: 0,
+              sort: 4,
             },
           ],
         },
@@ -301,6 +328,7 @@ export default {
               code: 'NEU',
               label: 'Neutral',
               penalty: 1,
+              sort: 1,
             },
             {
               id: 884,
@@ -308,6 +336,7 @@ export default {
               code: 'MIN',
               label: 'Minor',
               penalty: 0.5,
+              sort: 2,
             },
             {
               id: 885,
@@ -315,6 +344,7 @@ export default {
               code: 'MAJ',
               label: 'Major',
               penalty: 2,
+              sort: 3,
             },
             {
               id: 886,
@@ -322,6 +352,7 @@ export default {
               code: 'SEV',
               label: 'Severity 1',
               penalty: 0,
+              sort: 4,
             },
           ],
         },
@@ -338,6 +369,7 @@ export default {
               code: 'NEU',
               label: 'Neutral',
               penalty: 1,
+              sort: 1,
             },
             {
               id: 888,
@@ -345,6 +377,7 @@ export default {
               code: 'MIN',
               label: 'Minor',
               penalty: 0.5,
+              sort: 2,
             },
             {
               id: 889,
@@ -352,6 +385,7 @@ export default {
               code: 'MAJ',
               label: 'Major',
               penalty: 2,
+              sort: 3,
             },
             {
               id: 890,
@@ -359,6 +393,7 @@ export default {
               code: 'SEV',
               label: 'Severity 1',
               penalty: 0,
+              sort: 4,
             },
           ],
         },
@@ -375,6 +410,7 @@ export default {
               code: 'NEU',
               label: 'Neutral',
               penalty: 1,
+              sort: 1,
             },
             {
               id: 892,
@@ -382,6 +418,7 @@ export default {
               code: 'MIN',
               label: 'Minor',
               penalty: 2,
+              sort: 2,
             },
             {
               id: 893,
@@ -389,6 +426,7 @@ export default {
               code: 'MAJ',
               label: 'Major',
               penalty: 0,
+              sort: 3,
             },
             {
               id: 894,
@@ -396,6 +434,7 @@ export default {
               code: 'SEV',
               label: 'Severity 1',
               penalty: 0,
+              sort: 4,
             },
           ],
         },
