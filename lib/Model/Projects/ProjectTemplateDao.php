@@ -53,6 +53,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
         $default->pretranslate_100         = false;
         $default->pretranslate_101         = true;
         $default->tm_prioritization        = false;
+        $default->dialect_strict           = false;
         $default->get_public_matches       = true;
         $default->payable_rate_template_id = 0;
         $default->qa_model_template_id     = 0;
@@ -380,9 +381,9 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
     public
     static function save( ProjectTemplateStruct $projectTemplateStruct ): ProjectTemplateStruct {
         $sql = "INSERT INTO " . self::TABLE .
-                " ( `name`, `is_default`, `uid`, `id_team`, `segmentation_rule`, `tm`, `mt`, `payable_rate_template_id`,`qa_model_template_id`, `filters_template_id`, `xliff_config_template_id`, `pretranslate_100`, `pretranslate_101`, `tm_prioritization`, `get_public_matches`, `subject`, `source_language`, `target_language`, `created_at` ) " .
+                " ( `name`, `is_default`, `uid`, `id_team`, `segmentation_rule`, `tm`, `mt`, `payable_rate_template_id`,`qa_model_template_id`, `filters_template_id`, `xliff_config_template_id`, `pretranslate_100`, `pretranslate_101`, `tm_prioritization`, `dialect_strict`, `get_public_matches`, `subject`, `source_language`, `target_language`, `created_at` ) " .
                 " VALUES " .
-                " ( :name, :is_default, :uid, :id_team, :segmentation_rule, :tm, :mt, :payable_rate_template_id, :qa_model_template_id, :filters_template_id, :xliff_config_template_id, :pretranslate_100, :pretranslate_101, :tm_prioritization, :get_public_matches, :subject, :source_language, :target_language, :now ); ";
+                " ( :name, :is_default, :uid, :id_team, :segmentation_rule, :tm, :mt, :payable_rate_template_id, :qa_model_template_id, :filters_template_id, :xliff_config_template_id, :pretranslate_100, :pretranslate_101, :tm_prioritization, :dialect_strict, :get_public_matches, :subject, :source_language, :target_language, :now ); ";
 
         $now = ( new DateTime() )->format( 'Y-m-d H:i:s' );
 
@@ -399,6 +400,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
                 "pretranslate_100"         => $projectTemplateStruct->pretranslate_100,
                 "pretranslate_101"         => $projectTemplateStruct->pretranslate_101,
                 "tm_prioritization"        => $projectTemplateStruct->tm_prioritization,
+                "dialect_strict"           => $projectTemplateStruct->dialect_strict,
                 "get_public_matches"       => $projectTemplateStruct->get_public_matches,
                 "payable_rate_template_id" => $projectTemplateStruct->payable_rate_template_id,
                 "qa_model_template_id"     => $projectTemplateStruct->qa_model_template_id,
@@ -444,6 +446,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
             `pretranslate_100` = :pretranslate_100,
             `pretranslate_101` = :pretranslate_101,
             `tm_prioritization` = :tm_prioritization,
+            `dialect_strict` = :dialect_strict,
             `get_public_matches` = :get_public_matches,
             `payable_rate_template_id` = :payable_rate_template_id, 
             `qa_model_template_id` = :qa_model_template_id, 
@@ -469,6 +472,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
                 "pretranslate_100"         => $projectTemplateStruct->pretranslate_100,
                 "pretranslate_101"         => $projectTemplateStruct->pretranslate_101,
                 "tm_prioritization"        => $projectTemplateStruct->tm_prioritization,
+                "dialect_strict"           => $projectTemplateStruct->dialect_strict,
                 "get_public_matches"       => $projectTemplateStruct->get_public_matches,
                 "payable_rate_template_id" => $projectTemplateStruct->payable_rate_template_id,
                 "qa_model_template_id"     => $projectTemplateStruct->qa_model_template_id,
