@@ -372,17 +372,17 @@ class setTranslationController extends ajaxController {
             $new_translation->suggestion = $old_suggestion->translation;
 
             // update suggestion match
-            if ( $old_suggestion->match == "MT" ) {
+            if ( $old_suggestion->match == Constants_Engines::MT ) {
                 // case 1. is MT
                 $new_translation->suggestion_match  = 85;
-                $new_translation->suggestion_source = 'MT';
+                $new_translation->suggestion_source = Constants_Engines::MT;
             } elseif ( $old_suggestion->match == 'NO_MATCH' ) {
                 // case 2. no match
                 $new_translation->suggestion_source = 'NO_MATCH';
             } else {
                 // case 3. otherwise is TM
                 $new_translation->suggestion_match  = $old_suggestion->match;
-                $new_translation->suggestion_source = 'TM';
+                $new_translation->suggestion_source = Constants_Engines::TM;
             }
         }
 

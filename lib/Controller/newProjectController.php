@@ -59,7 +59,7 @@ class newProjectController extends viewController {
 
         $engine            = new EnginesModel_EngineDAO( Database::obtain() );
         $engineQuery       = new EnginesModel_EngineStruct();
-        $engineQuery->type = 'MT';
+        $engineQuery->type = Constants_Engines::MT;
 
         $engineQuery->uid = ( $this->user->uid == null ? -1 : $this->user->uid );
 

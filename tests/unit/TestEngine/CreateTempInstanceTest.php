@@ -27,7 +27,7 @@ class CreateTempInstanceTest extends AbstractTest {
 
         $this->engine_struct_param = new EnginesModel_EngineStruct();
 
-        $this->engine_struct_param->type       = "MT";
+        $this->engine_struct_param->type       = Constants_Engines::MT;
         $this->engine_struct_param->class_load = "DeepL";
 
 

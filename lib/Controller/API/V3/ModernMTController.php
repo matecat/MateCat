@@ -60,7 +60,7 @@ class ModernMTController extends BaseChunkController {
     /**
      * Import job status
      */
-    public function jobStatus() {
+    public function importStatus() {
         try {
             $uuid      = filter_var( $this->request->uuid, FILTER_SANITIZE_STRING, FILTER_FLAG_ENCODE_LOW | FILTER_FLAG_STRIP_HIGH );
             $engineId  = filter_var( $this->request->engineId, FILTER_SANITIZE_NUMBER_INT );
@@ -436,19 +436,6 @@ class ModernMTController extends BaseChunkController {
                 return false;
             }
         }
-
-        if ( isset( $params[ 'has_glossary' ] ) and $params[ 'has_glossary' ] == 1 ) {
-            if ( !$memory[ 'hasGlossary' ] ) {
-                return false;
-            }
-        }
-
-        if ( isset( $params[ 'has_glossary' ] ) and $params[ 'has_glossary' ] == 0 ) {
-            if ( $memory[ 'hasGlossary' ] ) {
-                return false;
-            }
-        }
-
         return true;
     }
 

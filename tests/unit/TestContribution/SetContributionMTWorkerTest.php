@@ -121,14 +121,14 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
         //create a stub Engine MMT
         $stubEngine = @$this->getMockBuilder( '\Engines_MMT' )
                 ->disableOriginalConstructor()
-                ->onlyMethods(['update', 'getEngineRow'])
+                ->onlyMethods(['update', 'getEngineRecord' ])
                 ->getMock();
 
         $engineStruct       = new EnginesModel_EngineStruct();
         $engineStruct->id   = 1111;
-        $engineStruct->type = 'MT';
+        $engineStruct->type = Constants_Engines::MT;
         $stubEngine->expects( $this->once() )
-                ->method( 'getEngineRow' )
+                ->method( 'getEngineRecord' )
                 ->willReturn( $engineStruct );
 
         $stubEngine->expects( $stubEngineParameterSpy = $this->once() )
@@ -206,15 +206,15 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
 
         //create a stub Engine MyMemory
         $stubEngine = @$this->getMockBuilder( '\Engines_MMT' )
-            ->onlyMethods(['update', 'getEngineRow'])
+            ->onlyMethods(['update', 'getEngineRecord' ])
             ->disableOriginalConstructor()
             ->getMock();
 
         $engineStruct       = new EnginesModel_EngineStruct();
         $engineStruct->id   = 1111;
-        $engineStruct->type = 'MT';
+        $engineStruct->type = Constants_Engines::MT;
         $stubEngine->expects( $this->once() )
-                ->method( 'getEngineRow' )
+                ->method( 'getEngineRecord' )
                 ->willReturn( $engineStruct );
 
         $stubEngine->expects( $stubEngineParameterSpy = $this->once() )
@@ -339,15 +339,15 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
         //create a stub Engine MyMemory
         $stubEngine = @$this
             ->getMockBuilder( '\Engines_MMT' )
-            ->onlyMethods(['update', 'getEngineRow'])
+            ->onlyMethods(['update', 'getEngineRecord' ])
             ->disableOriginalConstructor()
             ->getMock();
 
         $engineStruct       = new EnginesModel_EngineStruct();
         $engineStruct->id   = 0;
-        $engineStruct->type = 'MT';
+        $engineStruct->type = Constants_Engines::MT;
         $stubEngine->expects( $this->once() )
-                ->method( 'getEngineRow' )
+                ->method( 'getEngineRecord' )
                 ->willReturn( $engineStruct );
 
         $stubEngine->expects( $this->once() )

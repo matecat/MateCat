@@ -12,7 +12,7 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
     /**
      * @var EnginesModel_EngineStruct
      */
-    protected $engineRecord;
+    protected EnginesModel_EngineStruct $engineRecord;
 
     protected $className;
     protected $_config = [];
@@ -29,7 +29,7 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
     /**
      * @var bool True if the engine can receive contributions through a `set/update` method.
      */
-    protected bool $_isAdaptive = false;
+    protected bool $_isAdaptiveMT = false;
 
     /**
      * @var bool
@@ -263,17 +263,12 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
         return $this->engineRecord->name;
     }
 
-    /**
-     * Read Only
-     *
-     * @return EnginesModel_EngineStruct
-     */
-    public function getEngineRow() {
-        return clone $this->engineRecord;
+    public function isTMS(): bool {
+      return false;
     }
 
-    public function isAdaptive(): bool {
-        return $this->_isAdaptive;
+    public function isAdaptiveMT(): bool {
+        return $this->_isAdaptiveMT && !$this->isTMS();
     }
 
     /**
@@ -347,6 +342,15 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
      */
     public function syncMemories( array $projectRow, ?array $segments = [] ) {
 
+    }
+
+    /**
+     * @param TmKeyManagement_MemoryKeyStruct $memoryKey The memory key structure to be checked.
+     * @throws Exception
+     * @return bool Returns true if the memory check passes, otherwise false.
+     */
+    public function memoryExists( TmKeyManagement_MemoryKeyStruct $memoryKey ): bool {
+        return false;
     }
 
 }

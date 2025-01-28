@@ -3,6 +3,7 @@
 namespace API\App;
 
 use API\Commons\KleinController;
+use CatUtils;
 use INIT;
 use Langs\Languages;
 use ReflectionException;
@@ -222,11 +223,11 @@ class GlossaryController extends KleinController {
      *
      * @param $jsonSchemaPath
      *
-     * @return mixed
+     * @return array
      * @throws ReflectionException
      * @throws InvalidValue
      */
-    private function createThePayloadForWorker( $jsonSchemaPath ) {
+    private function createThePayloadForWorker( $jsonSchemaPath ): array {
         $jsonSchema = file_get_contents( $jsonSchemaPath );
         $this->validateJson( $this->request->body(), $jsonSchema );
 
@@ -251,7 +252,7 @@ class GlossaryController extends KleinController {
             $this->validateLanguage( $json[ 'term' ][ 'source_language' ] );
         }
 
-        $job = \CatUtils::getJobFromIdAndAnyPassword( $json[ 'id_job' ], $json[ 'password' ] );
+        $job = CatUtils::getJobFromIdAndAnyPassword( $json[ 'id_job' ], $json[ 'password' ] );
 
         if ( $job === null ) {
             $this->response->code( 500 );
@@ -269,9 +270,7 @@ class GlossaryController extends KleinController {
         // Add user keys
         if ( $this->isLoggedIn() ) {
 
-            $isRevision = \CatUtils::getIsRevisionFromIdJobAndPassword( $json[ 'id_job' ], $json[ 'password' ] );
-
-            if ( $isRevision ) {
+            if ( CatUtils::isRevisionFromIdJobAndPassword( $json[ 'id_job' ], $json[ 'password' ] ) ) {
                 $userRole = TmKeyManagement_Filter::ROLE_REVISOR;
             } elseif ( $this->user->email == $job->status_owner ) {
                 $userRole = TmKeyManagement_Filter::OWNER;

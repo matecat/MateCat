@@ -26,7 +26,7 @@ class UserKeysModel {
 
     protected $userRole;
 
-    public function __construct( Users_UserStruct $user, $role ) {
+    public function __construct( Users_UserStruct $user, string $role = TmKeyManagement_Filter::ROLE_TRANSLATOR ) {
         $this->user     = $user;
         $this->userRole = $role;
     }

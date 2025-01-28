@@ -185,22 +185,20 @@ class TMSService {
                     $struct->type       = Constants_Engines::MT;
                     $engine             = Engine::createTempInstance( $struct );
 
-                    if ( $engine->isAdaptive() ) {
+                    if ( $engine->isAdaptiveMT() ) {
                         //retrieve OWNER Engine License
-                        $ownerMmtEngineMetaData = ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->get( $user->uid, $engine->getEngineRow()->class_load ); // engine_id
+                        $ownerMmtEngineMetaData = ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->get( $user->uid, $engine->getEngineRecord()->class_load ); // engine_id
                         if ( !empty( $ownerMmtEngineMetaData ) ) {
                             $engine = Engine::getInstance( $ownerMmtEngineMetaData->value );
 
-                            Log::doJsonLog( "User [$user->uid, '$user->email'] start importing memory: {$engine->getEngineRow()->class_load} -> " . $file->getFilePath() . " -> " . $file->getTmKey() );
+                            Log::doJsonLog( "User [$user->uid, '$user->email'] start importing memory: {$engine->getEngineRecord()->class_load} -> " . $file->getFilePath() . " -> " . $file->getTmKey() );
                             $engine->importMemory( $file->getFilePath(), $file->getTmKey(), $user );
 
                         }
                     }
 
                 } catch ( Exception $e ) {
-                    if ( $engineName != Constants_Engines::MY_MEMORY ) {
-                        Log::doJsonLog( $e->getMessage() );
-                    }
+                    Log::doJsonLog( $e->getMessage() );
                 }
 
             }
