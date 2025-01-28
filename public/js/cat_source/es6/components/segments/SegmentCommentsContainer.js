@@ -250,7 +250,7 @@ class SegmentCommentsContainer extends React.Component {
               <div className="bc-show-comment-top">
                 {comment.is_anonymous === 1 ? (
                   <div className="mbc-comment-label mbc-comment-username mbc-comment-username-label mbc-truncate">
-                    {comment.source_page === 1 ? 'Translator' : 'Reviewer'}
+                    {comment.full_name}
                   </div>
                 ) : (
                   <div className="mbc-comment-label mbc-comment-username mbc-comment-username-label mbc-truncate">
