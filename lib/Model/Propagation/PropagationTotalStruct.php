@@ -55,9 +55,9 @@ class Propagation_PropagationTotalStruct extends DataAccess_AbstractDaoSilentStr
     }
 
     /**
-     * @param int $id_segment
+     * @param string $id_segment
      */
-    public function addPropagatedId( int $id_segment ) {
+    public function addPropagatedId( string $id_segment ) {
         if ( false === in_array( $id_segment, $this->propagated_ids ) ) {
             $this->propagated_ids[]                               = $id_segment;
             $this->segments_for_propagation[ 'propagated_ids' ][] = $id_segment;
@@ -72,9 +72,9 @@ class Propagation_PropagationTotalStruct extends DataAccess_AbstractDaoSilentStr
     }
 
     /**
-     * @param int $id_segment
+     * @param string $id_segment
      */
-    public function addPropagatedIdToUpdateVersion( int $id_segment ) {
+    public function addPropagatedIdToUpdateVersion( string $id_segment ) {
         if ( false === in_array( $id_segment, $this->propagated_ids_to_update_version ) ) {
             $this->propagated_ids_to_update_version[ $id_segment ] = $id_segment;
         }
