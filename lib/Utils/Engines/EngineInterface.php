@@ -45,17 +45,19 @@ interface Engines_EngineInterface {
     /**
      * @return Engines_EngineInterface
      */
-    public function setAnalysis();
+    public function setAnalysis(): Engines_EngineInterface;
 
     /**
      * @return EnginesModel_EngineStruct
      */
-    public function getEngineRow();
+    public function getEngineRecord(): EnginesModel_EngineStruct;
 
     /**
      * @return bool
      */
-    public function isAdaptive(): bool;
+    public function isAdaptiveMT(): bool;
+
+    public function isTMS(): bool;
 
     /**
      * @return void
@@ -69,5 +71,12 @@ interface Engines_EngineInterface {
      * @return void
      */
     public function syncMemories( array $projectRow, ?array $segments = [] );
+
+    /**
+     * @param TmKeyManagement_MemoryKeyStruct $memoryKey
+     * @throws Exception
+     * @return bool
+     */
+    public function memoryExists( TmKeyManagement_MemoryKeyStruct $memoryKey ): bool;
 
 }

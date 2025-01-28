@@ -545,7 +545,7 @@ class MMTServiceApi {
             throw MMTServiceApiException::fromJSONResponse( $json );
         }
 
-        return isset( $json[ 'data' ] ) ? $json[ 'data' ] : null;
+        return $json[ 'data' ] ?? null;
     }
 
 }

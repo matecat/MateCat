@@ -17,10 +17,10 @@ class Engines_MMT extends Engines_AbstractEngine {
 
     /**
      * @inheritdoc
-     * @see Engines_AbstractEngine::$_isAdaptive
+     * @see Engines_AbstractEngine::$_isAdaptiveMT
      * @var bool
      */
-    protected bool $_isAdaptive = true;
+    protected bool $_isAdaptiveMT = true;
 
     protected $_config = [
             'segment'        => null,
@@ -50,11 +50,11 @@ class Engines_MMT extends Engines_AbstractEngine {
 
         parent::__construct( $engineRecord );
 
-        if ( $this->engineRecord->type != "MT" ) {
-            throw new Exception( "Engine {$this->engineRecord->id} is not a MT engine, found {$this->engineRecord->type} -> {$this->engineRecord->class_load}" );
+        if ( $this->getEngineRecord()->type != Constants_Engines::MT ) {
+            throw new Exception( "Engine {$this->getEngineRecord()->id} is not a MT engine, found {$this->getEngineRecord()->type} -> {$this->getEngineRecord()->class_load}" );
         }
 
-        if ( isset( $this->engineRecord->extra_parameters[ 'MMT-pretranslate' ] ) && $this->engineRecord->extra_parameters[ 'MMT-pretranslate' ] ) {
+        if ( isset( $this->getEngineRecord()->extra_parameters[ 'MMT-pretranslate' ] ) && $this->getEngineRecord()->extra_parameters[ 'MMT-pretranslate' ] ) {
             $this->_skipAnalysis = false;
         }
 
@@ -77,7 +77,7 @@ class Engines_MMT extends Engines_AbstractEngine {
      */
     protected function _getClient() {
 
-        $extraParams = $this->engineRecord->getExtraParamsAsArray();
+        $extraParams = $this->getEngineRecord()->getExtraParamsAsArray();
         $license     = $extraParams[ 'MMT-License' ];
 
         return Engines\MMT\MMTServiceApi::newInstance()
@@ -253,6 +253,22 @@ class Engines_MMT extends Engines_AbstractEngine {
     }
 
     /**
+     * @throws MMTServiceApiException
+     */
+    public function memoryExists( TmKeyManagement_MemoryKeyStruct $memoryKey ): bool {
+        $client = $this->_getClient();
+
+        try {
+            $response = $client->getMemory( 'x_mm-' . trim( $memoryKey->tm_key->key ) );
+        } catch ( MMTServiceApiRequestException $e ) {
+            return false;
+        }
+
+        return !empty( $response );
+    }
+
+
+    /**
      *
      * @param string           $filePath
      * @param string           $memoryKey
@@ -264,19 +280,10 @@ class Engines_MMT extends Engines_AbstractEngine {
      */
     public function importMemory( string $filePath, string $memoryKey, Users_UserStruct $user ) {
 
-        $client = $this->_getClient();
+        $client   = $this->_getClient();
+        $response = $client->getMemory( 'x_mm-' . trim( $memoryKey ) );
 
-        $associatedMemories = $client->getAllMemories();
-        $memoryFound        = false;
-
-        foreach ( $associatedMemories as $memory ) {
-            if ( 'x_mm-' . trim( $memoryKey ) === $memory[ 'externalId' ] ) {
-                $memoryFound = true;
-                break;
-            }
-        }
-
-        if ( !$memoryFound ) {
+        if ( empty( $response[ 'data' ] ) ) {
             return null;
         }
 
@@ -306,7 +313,7 @@ class Engines_MMT extends Engines_AbstractEngine {
      */
     public function syncMemories( array $projectRow, ?array $segments = [] ) {
 
-        $pid    = $projectRow[ 'id' ];
+        $pid = $projectRow[ 'id' ];
 
         if ( !empty( $this->getEngineRecord()->getExtraParamsAsArray()[ 'MMT-context-analyzer' ] ) ) {
 

@@ -41,10 +41,10 @@ class Lara extends Engines_AbstractEngine {
 
     /**
      * @inheritdoc
-     * @see Engines_AbstractEngine::$_isAdaptive
+     * @see Engines_AbstractEngine::$_isAdaptiveMT
      * @var bool
      */
-    protected bool $_isAdaptive = true;
+    protected bool $_isAdaptiveMT = true;
 
     private ?Translator $clientLoaded = null;
 
@@ -59,8 +59,8 @@ class Lara extends Engines_AbstractEngine {
     public function __construct( $engineRecord ) {
         parent::__construct( $engineRecord );
 
-        if ( $this->engineRecord->type != "MT" ) {
-            throw new Exception( "Engine {$this->engineRecord->id} is not a MT engine, found {$this->engineRecord->type} -> {$this->engineRecord->class_load}" );
+        if ( $this->getEngineRecord()->type != Constants_Engines::MT ) {
+            throw new Exception( "Engine {$this->getEngineRecord()->id} is not a MT engine, found {$this->getEngineRecord()->type} -> {$this->getEngineRecord()->class_load}" );
         }
 
         $this->_skipAnalysis = true;
@@ -79,7 +79,7 @@ class Lara extends Engines_AbstractEngine {
             return $this->clientLoaded;
         }
 
-        $extraParams = $this->engineRecord->getExtraParamsAsArray();
+        $extraParams = $this->getEngineRecord()->getExtraParamsAsArray();
         $credentials = new LaraCredentials( $extraParams[ 'Lara-AccessKeyId' ], $extraParams[ 'Lara-AccessKeySecret' ] );
 
         $mmtStruct                   = EnginesModel_MMTStruct::getStruct();
@@ -174,8 +174,8 @@ class Lara extends Engines_AbstractEngine {
             // call lara
             $translateOptions = new TranslateOptions();
             $translateOptions->setAdaptTo( $_lara_keys );
-            $translateOptions->setMultiline( true );
-            $translateOptions->setContentType( 'text/xliff' );
+            $translateOptions->setMultiline( false );
+            $translateOptions->setContentType( 'application/xliff+xml' );
 
             $request_translation = [];
 
@@ -201,7 +201,7 @@ class Lara extends Engines_AbstractEngine {
                     'adapt_to'     => $_lara_keys,
                     'source'       => $_config[ 'source' ],
                     'target'       => $_config[ 'target' ],
-                    'content_type' => 'text/xliff',
+                    'content_type' => 'application/xliff+xml',
                     'multiline'    => false,
             ] );
 
@@ -291,6 +291,18 @@ class Lara extends Engines_AbstractEngine {
     }
 
     /**
+     * @param TmKeyManagement_MemoryKeyStruct $memoryKey
+     *
+     * @return bool
+     * @throws LaraException
+     * @throws Exception
+     */
+    public function memoryExists( TmKeyManagement_MemoryKeyStruct $memoryKey ): bool {
+        $clientMemories = $this->_getClient()->memories;
+        return !empty ( $clientMemories->get( 'ext_my_' . trim( $memoryKey->tm_key->key ) ) );
+    }
+
+    /**
      * @throws LaraException
      * @throws Exception
      */
@@ -350,7 +362,7 @@ class Lara extends Engines_AbstractEngine {
                     $keyIds[] = $memKey->key;
                 }
 
-                $keyIds = $this->_reMapKeyList( array_unique( $keyIds ) );
+                $keyIds = $this->_reMapKeyList( array_values( array_unique( $keyIds ) ) );
                 $client = $this->_getClient();
                 $res    = $client->memories->connect( $keyIds );
                 Log::doJsonLog( "Keys connected: " . implode( ',', $keyIds ) . " -> " . json_encode( $res ) );

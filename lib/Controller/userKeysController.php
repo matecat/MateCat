@@ -1,6 +1,7 @@
 <?php
 
 use TMS\TMSService;
+use Users\MetadataDao;
 
 /**
  * Created by PhpStorm.
@@ -18,13 +19,13 @@ class userKeysController extends ajaxController {
 
     private $mail_list;
 
-    private static $allowed_exec = array(
+    private static $allowed_exec = [
             'delete',
             'update',
             'newKey',
             'info',
             'share'
-    );
+    ];
 
     public function __construct() {
 
@@ -35,24 +36,24 @@ class userKeysController extends ajaxController {
         //Session Disabled
 
         //define input filters
-        $filterArgs = array(
-                'exec'        => array(
+        $filterArgs = [
+                'exec'        => [
                         'filter' => FILTER_SANITIZE_STRING,
                         'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-                ),
-                'key'         => array(
+                ],
+                'key'         => [
                         'filter' => FILTER_SANITIZE_STRING,
                         'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-                ),
-                'emails'         => array(
+                ],
+                'emails'      => [
                         'filter' => FILTER_SANITIZE_STRING,
                         'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-                ),
-                'description' => array(
+                ],
+                'description' => [
                         'filter' => FILTER_SANITIZE_STRING,
                         'flags'  => FILTER_FLAG_STRIP_LOW
-                ),
-        );
+                ],
+        ];
 
         //filter input
         $_postInput = filter_var_array( $_REQUEST, $filterArgs );
@@ -64,12 +65,12 @@ class userKeysController extends ajaxController {
         $this->mail_list   = $_postInput[ 'emails' ];
 
         //check for eventual errors on the input passed
-        $this->result[ 'errors' ] = array();
+        $this->result[ 'errors' ] = [];
         if ( empty( $this->key ) ) {
-            $this->result[ 'errors' ][] = array(
+            $this->result[ 'errors' ][] = [
                     'code'    => -2,
                     'message' => "Key missing"
-            );
+            ];
             $this->result[ 'success' ]  = false;
         }
 
@@ -79,28 +80,28 @@ class userKeysController extends ajaxController {
         // <details x=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx:2 open ontoggle="prompt(document.cookie);">
         // in this case, an error MUST be thrown
 
-        if($_POST['description'] !== $this->description){
-            $this->result[ 'errors' ][] = array(
-                'code'    => -3,
-                'message' => "Invalid key description"
-            );
+        if ( $_POST[ 'description' ] !== $this->description ) {
+            $this->result[ 'errors' ][] = [
+                    'code'    => -3,
+                    'message' => "Invalid key description"
+            ];
             $this->result[ 'success' ]  = false;
         }
 
         if ( array_search( $this->exec, self::$allowed_exec ) === false ) {
-            $this->result[ 'errors' ][] = array(
+            $this->result[ 'errors' ][] = [
                     'code'    => -5,
                     'message' => "No method $this->exec allowed."
-            );
+            ];
             $this->result[ 'success' ]  = false;
         }
 
         //ONLY LOGGED USERS CAN PERFORM ACTIONS ON KEYS, BUT INFO ARE PUBLIC
         if ( !$this->userIsLogged && $this->exec != 'info' ) {
-            $this->result[ 'errors' ][] = array(
+            $this->result[ 'errors' ][] = [
                     'code'    => -1,
                     'message' => "Login is required to perform this action"
-            );
+            ];
             $this->result[ 'success' ]  = false;
         }
 
@@ -148,7 +149,7 @@ class userKeysController extends ajaxController {
             switch ( $this->exec ) {
                 case 'delete':
                     $userMemoryKeys = $mkDao->disable( $memoryKeyToUpdate );
-                    $this->featureSet->run('postUserKeyDelete', $userMemoryKeys->tm_key->key, $this->user->uid );
+                    $this->featureSet->run( 'postUserKeyDelete', $userMemoryKeys->tm_key->key, $this->user->uid );
                     break;
                 case 'update':
                     $userMemoryKeys = $mkDao->atomicUpdate( $memoryKeyToUpdate );
@@ -162,9 +163,9 @@ class userKeysController extends ajaxController {
                     $this->_getKeyUsersInfo( $userMemoryKeys );
                     break;
                 case 'share':
-                    $emailList = Utils::validateEmailList($this->mail_list);
+                    $emailList      = Utils::validateEmailList( $this->mail_list );
                     $userMemoryKeys = $mkDao->read( $memoryKeyToUpdate );
-                    (new TmKeyManagement_TmKeyManagement())->shareKey($emailList, $userMemoryKeys[0], $this->user);
+                    ( new TmKeyManagement_TmKeyManagement() )->shareKey( $emailList, $userMemoryKeys[ 0 ], $this->user );
                     break;
                 default:
                     throw new Exception( "Unexpected Exception", -4 );
@@ -177,18 +178,20 @@ class userKeysController extends ajaxController {
         } catch ( Exception $e ) {
             $this->result[ 'data' ]     = 'KO';
             $this->result[ 'success' ]  = false;
-            $this->result[ 'errors' ][] = array( "code" => $e->getCode(), "message" => $e->getMessage() );
+            $this->result[ 'errors' ][] = [ "code" => $e->getCode(), "message" => $e->getMessage() ];
         }
 
     }
 
     /**
      * @param TmKeyManagement_MemoryKeyStruct[] $userMemoryKeys
+     *
+     * @throws ReflectionException
      */
-    protected function _getKeyUsersInfo( Array $userMemoryKeys ){
+    protected function _getKeyUsersInfo( array $userMemoryKeys ) {
 
         $_userStructs = [];
-        foreach( $userMemoryKeys[0]->tm_key->getInUsers() as $userStruct ){
+        foreach ( $userMemoryKeys[ 0 ]->tm_key->getInUsers() as $userStruct ) {
             $_userStructs[] = new Users_ClientUserFacade( $userStruct );
         }
         $this->result = [
