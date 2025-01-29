@@ -60,7 +60,7 @@ export const ApplicationWrapper = ({children}) => {
             new Date(elem.expire) > new Date())
         ) {
           const notification = {
-            title: 'Notice',
+            title: elem.title ? elem.title : 'Notice',
             text: elem.msg,
             type: elem.level ? elem.level : 'warning',
             autoDismiss: false,
