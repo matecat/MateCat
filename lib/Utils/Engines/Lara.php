@@ -150,7 +150,7 @@ class Lara extends Engines_AbstractEngine {
      */
     public function get( $_config ) {
 
-        $tm_keys           = TmKeyManagement_TmKeyManagement::getOwnerKeys( [ $_config[ 'all_job_tm_keys' ] ], 'r' );
+        $tm_keys           = TmKeyManagement_TmKeyManagement::getOwnerKeys( [ $_config[ 'all_job_tm_keys' ] ?? '[]' ], 'r' );
         $_config[ 'keys' ] = array_map( function ( $tm_key ) {
             /**
              * @var $tm_key TmKeyManagement_MemoryKeyStruct
@@ -191,13 +191,13 @@ class Lara extends Engines_AbstractEngine {
 
             $request_translation = [];
 
-            foreach ( $_config[ 'context_list_before' ] as $c ) {
+            foreach ( $_config[ 'context_list_before' ] ?? [] as $c ) {
                 $request_translation[] = new TextBlock( $c, false );
             }
 
             $request_translation[] = new TextBlock( $_config[ 'segment' ] );
 
-            foreach ( $_config[ 'context_list_after' ] as $c ) {
+            foreach ( $_config[ 'context_list_after' ] ?? [] as $c ) {
                 $request_translation[] = new TextBlock( $c, false );
             }
 

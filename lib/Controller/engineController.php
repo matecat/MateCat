@@ -115,8 +115,7 @@ class engineController extends ajaxController {
      */
     private function add() {
 
-        $newEngineStruct = null;
-        $validEngine     = true;
+        $validEngine = true;
 
         switch ( strtolower( $this->provider ) ) {
 
@@ -311,7 +310,7 @@ class engineController extends ajaxController {
             $mt_result = $newTestCreatedMT->get( $config );
 
             if ( isset( $mt_result[ 'error' ][ 'code' ] ) ) {
-                $this->result[ 'errors' ][] = $mt_result[ 'error' ];
+                $this->result[ 'errors' ][] = [ 'code' => 404, 'message' => $mt_result[ 'error' ] ];
                 $engineDAO->delete( $newCreatedDbRowStruct );
                 $this->destroyUserEnginesCache();
 
@@ -325,12 +324,12 @@ class engineController extends ajaxController {
             $config[ 'segment' ] = "Hello World";
             $config[ 'source' ]  = "en-US";
             $config[ 'target' ]  = "fr-FR";
-            $config[ 'key' ]     = $this->engineData['secret'] ?? null;
+            $config[ 'key' ]     = $this->engineData[ 'secret' ] ?? null;
 
             $mt_result = $newTestCreatedMT->get( $config );
 
             if ( isset( $mt_result[ 'error' ][ 'code' ] ) ) {
-                $this->result[ 'errors' ][] = $mt_result[ 'error' ];
+                $this->result[ 'errors' ][] = [ 'code' => 404, 'message' => $mt_result[ 'error' ] ];
                 $engineDAO->delete( $newCreatedDbRowStruct );
                 $this->destroyUserEnginesCache();
 
@@ -341,12 +340,16 @@ class engineController extends ajaxController {
             /**
              * @var $newTestCreatedMT Lara
              */
-            $newTestCreatedMT = Engine::createTempInstance( $newCreatedDbRowStruct );
+            $newTestCreatedMT    = Engine::createTempInstance( $newCreatedDbRowStruct );
+            $config              = $newTestCreatedMT->getConfigStruct();
+            $config[ 'segment' ] = "Hello World";
+            $config[ 'source' ]  = "en-US";
+            $config[ 'target' ]  = "it-IT";
 
             try {
-                $newTestCreatedMT->getAvailableLanguages();
+                $newTestCreatedMT->get( $config );
             } catch ( LaraException $e ) {
-                $this->result[ 'errors' ][] = $e->getMessage();
+                $this->result[ 'errors' ][] = [ "code" => 404, "message" => $e->getMessage() ];
                 $engineDAO->delete( $newCreatedDbRowStruct );
                 $this->destroyUserEnginesCache();
 
