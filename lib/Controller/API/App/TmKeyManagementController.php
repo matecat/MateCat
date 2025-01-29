@@ -179,7 +179,9 @@ class TmKeyManagementController extends AbstractStatefulKleinController {
                 }
 
             } catch ( Exception $e ) {
-                Log::doJsonLog( $e->getMessage() );
+                if ( $engineName != Constants_Engines::MY_MEMORY ) {
+                    Log::doJsonLog( $e->getMessage() );
+                }
             }
 
         }

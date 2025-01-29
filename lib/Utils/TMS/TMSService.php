@@ -147,7 +147,7 @@ class TMSService {
      * Import TMX file in MyMemory
      * @throws Exception
      */
-    public function addTmxInMyMemory( TMSFile $file, Users_UserStruct $user ) {
+    public function addTmxInMyMemory( TMSFile $file, Users_UserStruct $user ): array {
 
         try {
 
@@ -176,6 +176,8 @@ class TMSService {
             // load tmx in engines with adaptivity
             $engineList = Constants_Engines::getAvailableEnginesList();
 
+            $warnings = [];
+
             foreach ( $engineList as $engineName ) {
 
                 try {
@@ -198,7 +200,12 @@ class TMSService {
                     }
 
                 } catch ( Exception $e ) {
-                    Log::doJsonLog( $e->getMessage() );
+                    if ( $engineName != Constants_Engines::MY_MEMORY ) {
+                        Log::doJsonLog( $e->getMessage() );
+                        $engineName = explode( "\\", $engineName );
+                        $engineName = end( $engineName );
+                        $warnings[] = [ 'engine' => $engineName, 'message' => $e->getMessage(), 'file' => $file->getName() ];
+                    }
                 }
 
             }
@@ -207,6 +214,8 @@ class TMSService {
             @unlink( $file->getFilePath() );
             @unlink( $file->getFilePath() . ".gz" );
         }
+
+        return $warnings;
 
     }
 
