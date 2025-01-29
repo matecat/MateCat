@@ -122,6 +122,16 @@ class Lara extends Engines_AbstractEngine {
 
         $client = $this->_getClient();
         $value  = $client->getLanguages();
+
+        if ( !empty( $value ) ) {
+            $value = array_map( function ( $v ) {
+                $code = explode( '-', $v );
+
+                return $code[ 0 ];
+            }, $value );
+            $value = array_unique( $value );
+        }
+
         $cache->setex( "lara_languages", 86400, serialize( $value ) );
 
         return $value;
@@ -169,8 +179,10 @@ class Lara extends Engines_AbstractEngine {
         $_lara_keys = $this->_reMapKeyList( $_config[ 'keys' ] );
 
         $languagesList = $this->getAvailableLanguages();
+        $s_c           = explode( '-', $_config[ 'source' ] )[ 0 ];
+        $t_c           = explode( '-', $_config[ 'target' ] )[ 0 ];
 
-        if ( in_array( $_config[ 'source' ], $languagesList ) && in_array( $_config[ 'target' ], $languagesList ) ) {
+        if ( in_array( $s_c, $languagesList ) && in_array( $t_c, $languagesList ) ) {
             // call lara
             $translateOptions = new TranslateOptions();
             $translateOptions->setAdaptTo( $_lara_keys );
@@ -297,10 +309,32 @@ class Lara extends Engines_AbstractEngine {
      * @throws LaraException
      * @throws Exception
      */
-    public function memoryExists( TmKeyManagement_MemoryKeyStruct $memoryKey ): bool {
+    public function memoryExists( TmKeyManagement_MemoryKeyStruct $memoryKey ): ?array {
         $clientMemories = $this->_getClient()->memories;
-        return !empty ( $clientMemories->get( 'ext_my_' . trim( $memoryKey->tm_key->key ) ) );
+        $memory         = $clientMemories->get( 'ext_my_' . trim( $memoryKey->tm_key->key ) );
+        if ( $memory ) {
+            return $memory->jsonSerialize();
+        }
+
+        return null;
     }
+
+    /**
+     * @throws LaraException
+     * @throws Exception
+     */
+    public function deleteMemory( array $memoryKey ): array {
+        $clientMemories = $this->_getClient()->memories;
+        try {
+            return $clientMemories->delete( trim( $memoryKey[ 'id' ] ) )->jsonSerialize();
+        } catch ( LaraApiException $e ) {
+            if ( $e->getCode() == 404 ) {
+                return [];
+            }
+            throw $e;
+        }
+    }
+
 
     /**
      * @throws LaraException

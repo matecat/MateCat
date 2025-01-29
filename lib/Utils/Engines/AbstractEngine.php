@@ -264,7 +264,7 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
     }
 
     public function isTMS(): bool {
-      return false;
+        return false;
     }
 
     public function isAdaptiveMT(): bool {
@@ -346,11 +346,21 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
 
     /**
      * @param TmKeyManagement_MemoryKeyStruct $memoryKey The memory key structure to be checked.
+     *
+     * @return ?array Returns the memory, otherwise null.
      * @throws Exception
-     * @return bool Returns true if the memory check passes, otherwise false.
      */
-    public function memoryExists( TmKeyManagement_MemoryKeyStruct $memoryKey ): bool {
-        return false;
+    public function memoryExists( TmKeyManagement_MemoryKeyStruct $memoryKey ): ?array {
+        return null;
+    }
+
+    /**
+     * @param array $memoryKey
+     *
+     * @return array
+     */
+    public function deleteMemory( array $memoryKey ): array {
+        return [];
     }
 
 }

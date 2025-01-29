@@ -75,8 +75,17 @@ interface Engines_EngineInterface {
     /**
      * @param TmKeyManagement_MemoryKeyStruct $memoryKey
      * @throws Exception
-     * @return bool
+     * @return ?array
      */
-    public function memoryExists( TmKeyManagement_MemoryKeyStruct $memoryKey ): bool;
+    public function memoryExists( TmKeyManagement_MemoryKeyStruct $memoryKey ): ?array;
 
+    /**
+     * Deletes a specific memory key.
+     *
+     * @param array $memoryKey
+     * @return array
+     */
+
+    public function deleteMemory( array $memoryKey ): array;
+    
 }

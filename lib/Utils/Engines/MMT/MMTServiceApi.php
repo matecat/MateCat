@@ -148,7 +148,7 @@ class MMTServiceApi {
     /**
      * @param $id
      *
-     * @return mixed
+     * @return array
      * @throws MMTServiceApiException
      */
     public function deleteMemory( $id ) {

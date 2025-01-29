@@ -255,16 +255,16 @@ class Engines_MMT extends Engines_AbstractEngine {
     /**
      * @throws MMTServiceApiException
      */
-    public function memoryExists( TmKeyManagement_MemoryKeyStruct $memoryKey ): bool {
+    public function memoryExists( TmKeyManagement_MemoryKeyStruct $memoryKey ): ?array {
         $client = $this->_getClient();
 
         try {
             $response = $client->getMemory( 'x_mm-' . trim( $memoryKey->tm_key->key ) );
         } catch ( MMTServiceApiRequestException $e ) {
-            return false;
+            return null;
         }
 
-        return !empty( $response );
+        return $response;
     }
 
 
@@ -552,15 +552,15 @@ class Engines_MMT extends Engines_AbstractEngine {
      * Delete a memory associated to an MMT account
      * (id can be an external account)
      *
-     * @param $id
+     * @param array $memoryKey
      *
-     * @return mixed
+     * @return array
      * @throws MMTServiceApiException
      */
-    public function deleteMemory( $id ) {
+    public function deleteMemory( array $memoryKey ): array {
         $client = $this->_getClient();
 
-        return $client->deleteMemory( $id );
+        return $client->deleteMemory( trim( $memoryKey[ 'id' ] ) );
     }
 
     /**

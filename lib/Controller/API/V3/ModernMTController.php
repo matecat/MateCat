@@ -105,15 +105,15 @@ class ModernMTController extends BaseChunkController {
                 throw new Exception( "Glossary is empty", 400 );
             }
 
-            $this->validateCSVContent($csv);
+            $this->validateCSVContent( $csv );
             $engineId  = filter_var( $this->request->engineId, FILTER_SANITIZE_NUMBER_INT );
             $MMTClient = $this->getModernMTClient( $engineId );
 
             $this->response->status()->setCode( 200 );
-            $this->response->json($MMTClient->importGlossary($memoryId, [
-                'csv' => new CURLFile($glossary, 'text/csv'),
-                'type' => $this->getCsvType($csv)
-            ]));
+            $this->response->json( $MMTClient->importGlossary( $memoryId, [
+                    'csv'  => new CURLFile( $glossary, 'text/csv' ),
+                    'type' => $this->getCsvType( $csv )
+            ] ) );
 
             exit();
 
@@ -230,13 +230,13 @@ class ModernMTController extends BaseChunkController {
                 throw new Exception( "Glossary is empty", 400 );
             }
 
-            $this->validateCSVContent($csv);
+            $this->validateCSVContent( $csv );
 
             $this->response->status()->setCode( 200 );
-            $this->response->json($MMTClient->importGlossary($memoryId, [
-                'csv' => new CURLFile($glossary, 'text/csv'),
-                'type' => $this->getCsvType($csv)
-            ]));
+            $this->response->json( $MMTClient->importGlossary( $memoryId, [
+                    'csv'  => new CURLFile( $glossary, 'text/csv' ),
+                    'type' => $this->getCsvType( $csv )
+            ] ) );
 
             exit();
 
@@ -288,8 +288,9 @@ class ModernMTController extends BaseChunkController {
             $engineId  = filter_var( $this->request->engineId, FILTER_SANITIZE_NUMBER_INT );
             $MMTClient = $this->getModernMTClient( $engineId );
 
+            $response = $MMTClient->deleteMemory( [ 'id' => $memoryId ] );
             $this->response->status()->setCode( 200 );
-            $this->response->json( $MMTClient->deleteMemory( $memoryId ) );
+            $this->response->json( $response );
             exit();
 
         } catch ( Exception $exception ) {
@@ -379,36 +380,36 @@ class ModernMTController extends BaseChunkController {
 
     /**
      * @param $csvContent
+     *
      * @throws Exception
      */
-    private function validateCSVContent($csvContent)
-    {
-        $type = $this->getCsvType($csvContent);
+    private function validateCSVContent( $csvContent ) {
+        $type = $this->getCsvType( $csvContent );
 
-        foreach ($csvContent as $csvRowIndex => $csvRow){
+        foreach ( $csvContent as $csvRowIndex => $csvRow ) {
 
             // missing tuid (for equivalent)
-            if($type === 'equivalent' and empty($csvRow[0])){
-                throw new Exception("Row ".($csvRowIndex+1)." invalid, please provide a tuid for the row.");
+            if ( $type === 'equivalent' and empty( $csvRow[ 0 ] ) ) {
+                throw new Exception( "Row " . ( $csvRowIndex + 1 ) . " invalid, please provide a tuid for the row." );
             }
 
             $emptyCells = 0;
 
-            for($i = 0; $i < count($csvRow); $i++){
+            for ( $i = 0; $i < count( $csvRow ); $i++ ) {
 
                 // empty cells
-                if(empty($csvRow[$i])){
+                if ( empty( $csvRow[ $i ] ) ) {
                     $emptyCells++;
-                    if($type === 'unidirectional'){
+                    if ( $type === 'unidirectional' ) {
                         // empty cell (for unidirectional)
-                        throw new Exception("Row ".($csvRowIndex+1)." invalid, please add terms for both languages.");
+                        throw new Exception( "Row " . ( $csvRowIndex + 1 ) . " invalid, please add terms for both languages." );
                     }
                 }
             }
 
             // cells has only one term (for equivalent)
-            if($type === 'equivalent' and ($emptyCells >= (count($csvRow)-2))){
-                throw new Exception("Row ".($csvRowIndex+1)." invalid, please provide terms for at least two languages.");
+            if ( $type === 'equivalent' and ( $emptyCells >= ( count( $csvRow ) - 2 ) ) ) {
+                throw new Exception( "Row " . ( $csvRowIndex + 1 ) . " invalid, please provide terms for at least two languages." );
             }
         }
     }
@@ -436,6 +437,7 @@ class ModernMTController extends BaseChunkController {
                 return false;
             }
         }
+
         return true;
     }
 
@@ -454,31 +456,31 @@ class ModernMTController extends BaseChunkController {
 
     /**
      * @param array $csv
+     *
      * @return string
      * @throws Exception
      */
-    private function getCsvType(array $csv)
-    {
-        $firstCell = $csv[0][0];
-        $numberOfRows = count($csv[0]);
+    private function getCsvType( array $csv ) {
+        $firstCell    = $csv[ 0 ][ 0 ];
+        $numberOfRows = count( $csv[ 0 ] );
 
-        if($numberOfRows === 1){
-            throw new Exception("Glossary invalid: unidirectional glossaries should have exactly two columns");
+        if ( $numberOfRows === 1 ) {
+            throw new Exception( "Glossary invalid: unidirectional glossaries should have exactly two columns" );
         }
 
         // tuid and 2 columns
-        if($firstCell == 'tuid' and $numberOfRows <= 2){
-            throw new Exception("Glossary invalid: at least two language columns are expected for glossaries of equivalent terms");
+        if ( $firstCell == 'tuid' and $numberOfRows <= 2 ) {
+            throw new Exception( "Glossary invalid: at least two language columns are expected for glossaries of equivalent terms" );
         }
 
         // tuid and more than 2 columns
-        if($firstCell == 'tuid' and $numberOfRows > 2){
+        if ( $firstCell == 'tuid' and $numberOfRows > 2 ) {
             return 'equivalent';
         }
 
         // if is not equivalent and there are more than 2 columns, is not valid
-        if($numberOfRows > 2){
-            throw new Exception("Glossary invalid: tuid column is expected for glossaries of equivalent terms");
+        if ( $numberOfRows > 2 ) {
+            throw new Exception( "Glossary invalid: tuid column is expected for glossaries of equivalent terms" );
         }
 
         return 'unidirectional';

@@ -221,6 +221,9 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
         return null;
     }
 
+    /**
+     * @throws Exception
+     */
     public function disable( TmKeyManagement_MemoryKeyStruct $obj ) {
         $obj = $this->sanitize( $obj );
 

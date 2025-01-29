@@ -26,6 +26,10 @@ class userKeysController extends ajaxController {
             'info',
             'share'
     ];
+    /**
+     * @var ?string
+     */
+    private ?string $remove_from;
 
     public function __construct() {
 
@@ -42,6 +46,10 @@ class userKeysController extends ajaxController {
                         'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ],
                 'key'         => [
+                        'filter' => FILTER_SANITIZE_STRING,
+                        'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                ],
+                'remove_from' => [
                         'filter' => FILTER_SANITIZE_STRING,
                         'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ],
@@ -63,6 +71,7 @@ class userKeysController extends ajaxController {
         $this->key         = trim( $_postInput[ 'key' ] );
         $this->description = $_postInput[ 'description' ];
         $this->mail_list   = $_postInput[ 'emails' ];
+        $this->remove_from = $_postInput[ 'remove_from' ];
 
         //check for eventual errors on the input passed
         $this->result[ 'errors' ] = [];
@@ -114,7 +123,7 @@ class userKeysController extends ajaxController {
      */
     function doAction() {
         //if some error occured, stop execution.
-        if ( count( @$this->result[ 'errors' ] ) ) {
+        if ( count( $this->result[ 'errors' ] ?? 0 ) ) {
             return;
         }
 
@@ -149,7 +158,7 @@ class userKeysController extends ajaxController {
             switch ( $this->exec ) {
                 case 'delete':
                     $userMemoryKeys = $mkDao->disable( $memoryKeyToUpdate );
-                    $this->featureSet->run( 'postUserKeyDelete', $userMemoryKeys->tm_key->key, $this->user->uid );
+                    $this->removeKeyFromEngines( $userMemoryKeys, $this->remove_from );
                     break;
                 case 'update':
                     $userMemoryKeys = $mkDao->atomicUpdate( $memoryKeyToUpdate );
@@ -199,6 +208,38 @@ class userKeysController extends ajaxController {
                 "data"    => $_userStructs,
                 "success" => true
         ];
+
+    }
+
+    private function removeKeyFromEngines( TmKeyManagement_MemoryKeyStruct $memoryKey, ?string $enginesListCsv = '' ) {
+
+        $deleteFrom = array_filter( explode( ",", $enginesListCsv ) );
+
+        foreach ( $deleteFrom as $engineName ) {
+
+            try {
+
+                $struct             = EnginesModel_EngineStruct::getStruct();
+                $struct->class_load = $engineName;
+                $struct->type       = Constants_Engines::MT;
+                $engine             = Engine::createTempInstance( $struct );
+
+                if ( $engine->isAdaptiveMT() ) {
+                    $ownerMmtEngineMetaData = ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->get( $this->getUser()->uid, $engine->getEngineRecord()->class_load ); // engine_id
+                    if ( !empty( $ownerMmtEngineMetaData ) ) {
+                        $engine    = Engine::getInstance( $ownerMmtEngineMetaData->value );
+                        $engineKey = $engine->memoryExists( $memoryKey );
+                        if ( $engineKey ) {
+                            $engine->deleteMemory( $engineKey );
+                        }
+                    }
+                }
+
+            } catch ( Exception $e ) {
+                Log::doJsonLog( $e->getMessage() );
+            }
+
+        }
 
     }
 
