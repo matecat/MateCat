@@ -218,6 +218,7 @@ class Utils {
                 $element = unserialize( $element );
 
                 $resObject = [
+                        'title'  => $element[ 'title' ],
                         'msg'    => $element[ 'message' ],
                         'level'  => $element[ 'level' ],
                         'token'  => md5( $element[ 'message' ] ),
