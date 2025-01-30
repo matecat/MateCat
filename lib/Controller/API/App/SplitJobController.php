@@ -215,7 +215,7 @@ class SplitJobController extends KleinController {
     {
         $found = false;
         $filteredJobs = array_values( array_filter( $jobList, function ( Jobs_JobStruct $jobStruct ) use ( &$found, $jid ) {
-            return $jobStruct->id == $jid and !$jobStruct->wasDeleted();
+            return $jobStruct->id == $jid and !$jobStruct->isDeleted();
         } ) );
 
         if ( empty( $filteredJobs ) ) {
