@@ -37,6 +37,7 @@ import {SCHEMA_KEYS} from '../../../../hooks/useProjectTemplates'
 import {Button, BUTTON_SIZE} from '../../../common/Button/Button'
 import {NumericStepper} from '../../../common/NumericStepper/NumericStepper'
 import IconClose from '../../../icons/IconClose'
+import {getTmKeyEnginesInfo} from '../../../../api/getTmKeyEnginesInfo/getTmKeyEnginesInfo'
 
 export const TMKeyRow = ({row, onExpandRow}) => {
   const {isImportTMXInProgress} = useContext(CreateProjectContext)
@@ -55,6 +56,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
   const [name, setName] = useState(row.name)
 
   const valueChange = useRef(false)
+  const deleteTmKeyRemoveFrom = useRef()
 
   const penalty = row.penalty ?? 0
 
@@ -174,14 +176,14 @@ export const TMKeyRow = ({row, onExpandRow}) => {
     }
   }
 
-  const handleExpandeRow = (Component) => {
+  const handleExpandeRow = (Component, props = {}) => {
     const onClose = () => onExpandRow({row, shouldExpand: false})
     const onConfirm = onConfirmDeleteTmKey
 
     onExpandRow({
       row,
       shouldExpand: true,
-      content: <Component {...{row, onClose, onConfirm}} />,
+      content: <Component {...{...props, row, onClose, onConfirm}} />,
     })
   }
 
@@ -206,7 +208,14 @@ export const TMKeyRow = ({row, onExpandRow}) => {
         }
 
   const onConfirmDeleteTmKey = () => {
-    deleteTmKey({key: row.key})
+    const removeFrom = Object.entries(deleteTmKeyRemoveFrom.current)
+      .filter(([, value]) => value)
+      .map(([key]) => key)
+      .join(',')
+
+    deleteTmKeyRemoveFrom.current = {}
+
+    deleteTmKey({key: row.key, removeFrom})
       .then(() => {
         setTmKeys((prevState) => prevState.filter(({key}) => key !== row.key))
         if (config.is_cattool) {
@@ -250,24 +259,115 @@ export const TMKeyRow = ({row, onExpandRow}) => {
   }
 
   const showConfirmDelete = () => {
-    const templatesInvolved = projectTemplates
-      .filter(({isTemporary}) => !isTemporary)
-      .filter((template) => template.tm?.some(({key}) => key === row.key))
+    deleteTmKeyRemoveFrom.current = {}
 
-    if (templatesInvolved.length) {
-      ModalsActions.showModalComponent(
-        ConfirmDeleteResourceProjectTemplates,
-        {
-          projectTemplatesInvolved: templatesInvolved,
-          successCallback: onConfirmDeleteTmKey,
-          content:
-            'The memory key you are about to delete is used in the following project creation template(s):',
-        },
-        'Confirm deletion',
-      )
-    } else {
-      handleExpandeRow(DeleteResource)
-    }
+    getTmKeyEnginesInfo(row.key)
+      .then((data) => {
+        const isMMT = data.some((value) => value === 'MMT')
+        const isLara = data.some((value) => value === 'Lara')
+
+        const footerContent =
+          isMMT && !isLara ? (
+            <div className="tm-row-delete-remove-from-content">
+              <span>
+                If you confirm, it will be removed from the template(s).
+              </span>
+              <span>
+                This resource is also linked to your ModernMT account:
+              </span>
+              <div>
+                <input
+                  checked={deleteTmKeyRemoveFrom.current.MMT}
+                  onChange={(e) => {
+                    deleteTmKeyRemoveFrom.current.MMT = e.currentTarget.checked
+                  }}
+                  type="checkbox"
+                />
+                Permanently delete it from my ModernMT account
+              </div>
+            </div>
+          ) : !isMMT && isLara ? (
+            <div className="tm-row-delete-remove-from-content">
+              <span>
+                If you confirm, it will be removed from the template(s).
+              </span>
+              <span>This resource is also linked to your Lara account:</span>
+              <div>
+                <input
+                  checked={deleteTmKeyRemoveFrom.current.Lara}
+                  onChange={(e) => {
+                    deleteTmKeyRemoveFrom.current.Lara = e.currentTarget.checked
+                  }}
+                  type="checkbox"
+                />
+                Permanently delete it from my ModernMT account
+              </div>
+            </div>
+          ) : (
+            isMMT &&
+            isLara && (
+              <div className="tm-row-delete-remove-from-content">
+                <span>
+                  If you confirm, it will be removed from the template(s).
+                </span>
+                <span>
+                  This resource is also linked to your ModernMT and Lara
+                  accounts:
+                </span>
+                <div>
+                  <input
+                    checked={deleteTmKeyRemoveFrom.current.Lara}
+                    onChange={(e) => {
+                      deleteTmKeyRemoveFrom.current.Lara =
+                        e.currentTarget.checked
+                    }}
+                    type="checkbox"
+                  />
+                  Permanently delete it from my Lara account
+                </div>
+                <div>
+                  <input
+                    checked={deleteTmKeyRemoveFrom.current.MMT}
+                    onChange={(e) => {
+                      deleteTmKeyRemoveFrom.current.MMT =
+                        e.currentTarget.checked
+                    }}
+                    type="checkbox"
+                  />
+                  Permanently delete it from my ModernMT account
+                </div>
+              </div>
+            )
+          )
+
+        const templatesInvolved = projectTemplates
+          .filter(({isTemporary}) => !isTemporary)
+          .filter((template) => template.tm?.some(({key}) => key === row.key))
+
+        if (templatesInvolved.length) {
+          ModalsActions.showModalComponent(
+            ConfirmDeleteResourceProjectTemplates,
+            {
+              projectTemplatesInvolved: templatesInvolved,
+              successCallback: onConfirmDeleteTmKey,
+              content:
+                'The memory key you are about to delete is used in the following project creation template(s):',
+              ...(footerContent && {footerContent}),
+            },
+            'Confirm deletion',
+          )
+        } else {
+          handleExpandeRow(DeleteResource, {footerContent})
+        }
+      })
+      .catch(() => {
+        const notification = {
+          title: 'Error',
+          text: `We got an error, please contact support`,
+          type: 'error',
+        }
+        CatToolActions.addNotification(notification)
+      })
   }
 
   const renderPenalty =
