@@ -117,8 +117,6 @@ class CommentController extends KleinController {
                 $commentDao->saveComment( $mentioned_comment );
             }
 
-            $commentDao->destroySegmentIdCache($request[ 'id_segment' ]);
-
             $payload = $this->enqueueComment($new_record, $request['job']->id_project, $request['id_job'], $request['id_client']);
             $users = $this->resolveUsers($comment_struct, $request['job'], $users_mentioned_id);
             $this->sendEmail($comment_struct, $request['job'], $users, $users_mentioned);
@@ -140,7 +138,7 @@ class CommentController extends KleinController {
      * @return \Klein\Response
      * @throws \ReflectionException
      */
-    public function delete()
+    public function delete(): Response
     {
         try {
             $request = $this->validateTheRequest();
@@ -196,9 +194,7 @@ class CommentController extends KleinController {
                 throw new InvalidArgumentException("Not corresponding source_page.", -207);
             }
 
-            if($commentDao->deleteComment($comment->id)){
-
-                $commentDao->destroySegmentIdCache($comment->id_segment);
+            if($commentDao->deleteComment($comment)){
 
                 $this->enqueueDeleteCommentMessage(
                     $request['id_job'],
@@ -206,7 +202,6 @@ class CommentController extends KleinController {
                     $request['job']->id_project,
                     $comment->id,
                     $comment->id_segment,
-                    $this->user->email,
                     $request['source_page']
                 );
 
@@ -240,6 +235,7 @@ class CommentController extends KleinController {
         $id_job = filter_var( $this->request->param( 'id_job' ), FILTER_SANITIZE_NUMBER_INT );
         $id_segment = filter_var( $this->request->param( 'id_segment' ), FILTER_SANITIZE_NUMBER_INT );
         $source_page = filter_var( $this->request->param( 'source_page' ), FILTER_SANITIZE_NUMBER_INT );
+        $is_anonymous = filter_var( $this->request->param( 'is_anonymous' ), FILTER_VALIDATE_BOOLEAN );
         $revision_number = filter_var( $this->request->param( 'revision_number' ), FILTER_SANITIZE_NUMBER_INT );
         $first_seg = filter_var( $this->request->param( 'first_seg' ), FILTER_SANITIZE_NUMBER_INT );
         $last_seg = filter_var( $this->request->param( 'last_seg' ), FILTER_SANITIZE_NUMBER_INT );
@@ -260,6 +256,7 @@ class CommentController extends KleinController {
             'id_job' => $id_job,
             'id_segment' => $id_segment,
             'source_page' => $source_page,
+            'is_anonymous' => $is_anonymous,
             'revision_number' => $revision_number,
             'first_seg' => $first_seg,
             'last_seg' => $last_seg,
@@ -285,6 +282,7 @@ class CommentController extends KleinController {
         $struct->source_page     = $request[ 'source_page' ];
         $struct->message         = $request[ 'message' ];
         $struct->revision_number = $request[ 'revision_number' ];
+        $struct->is_anonymous    = $request[ 'is_anonymous' ];
         $struct->email           = $this->user->getEmail();
         $struct->uid             = $this->user->getUid();
 
@@ -386,6 +384,7 @@ class CommentController extends KleinController {
      * @param Jobs_JobStruct $job
      * @param $users_mentioned_id
      * @return array
+     * @throws \ReflectionException
      */
     private function resolveUsers(Comments_CommentStruct $comment, Jobs_JobStruct $job, $users_mentioned_id): array
     {
@@ -397,7 +396,7 @@ class CommentController extends KleinController {
         $userDao->setCacheTTL( 60 * 60 * 24 );
         $owner = $userDao->getProjectOwner( $job->id );
 
-        if ( !empty( $owner->uid ) && !empty( $owner->email ) ) {
+        if ( !empty( $owner->uid ) and !empty( $owner->email ) ) {
             array_push( $users, $owner );
         }
 
@@ -418,20 +417,9 @@ class CommentController extends KleinController {
      * @param $id_client
      * @return false|string
      * @throws \Stomp\Exception\ConnectionException
+     * @throws \ReflectionException
      */
     private function enqueueComment(Comments_CommentStruct $comment, $id_project, $id_job, $id_client) {
-
-        $payload = [
-            'message_type'   => $comment->message_type,
-            'message'        => $comment->message,
-            'id'             => $comment->id,
-            'id_segment'     => $comment->id_segment,
-            'full_name'      => $comment->full_name,
-            'source_page'    => $comment->source_page,
-            'formatted_date' => $comment->getFormattedDate(),
-            'thread_id'      => $comment->thread_id,
-            'timestamp'      => (int)$comment->timestamp,
-        ];
 
         $message = json_encode( [
             '_type' => 'comment',
@@ -439,19 +427,20 @@ class CommentController extends KleinController {
                 'id_job'    => $id_job,
                 'passwords' => $this->getProjectPasswords($id_project),
                 'id_client' => $id_client,
-                'payload'   => $payload
+                'payload'   => $comment
             ]
         ] );
 
         $queueHandler = new AMQHandler();
-        $queueHandler->publishToTopic( INIT::$SSE_NOTIFICATIONS_QUEUE_NAME, new Message( $message ) );
+        $queueHandler->publishToNodeJsClients( INIT::$SOCKET_NOTIFICATIONS_QUEUE_NAME, new Message( $message ) );
 
         return $message;
     }
 
     /**
      * @param $id_project
-     * @return \DataAccess\ShapelessConcreteStruct[]
+     * @return array|\DataAccess\ShapelessConcreteStruct[]
+     * @throws \ReflectionException
      */
     private function projectData($id_project) {
         return ( new \Projects_ProjectDao() )->setCacheTTL( 60 * 60 )->getProjectData( $id_project );
@@ -460,6 +449,7 @@ class CommentController extends KleinController {
     /**
      * @param $id_project
      * @return array
+     * @throws \ReflectionException
      */
     private function getProjectPasswords($id_project) {
         $pws = [];
@@ -477,9 +467,9 @@ class CommentController extends KleinController {
      * @param $id_project
      * @param $id
      * @param $idSegment
-     * @param $email
      * @param $sourcePage
      * @throws \Stomp\Exception\ConnectionException
+     * @throws \ReflectionException
      */
     private function enqueueDeleteCommentMessage(
         $id_job,
@@ -487,7 +477,6 @@ class CommentController extends KleinController {
         $id_project,
         $id,
         $idSegment,
-        $email,
         $sourcePage
     )
     {
@@ -501,14 +490,13 @@ class CommentController extends KleinController {
                     'message_type'   => "2",
                     'id'             => (int)$id,
                     'id_segment'     => $idSegment,
-                    'email'          => $email,
                     'source_page'    => $sourcePage,
                 ]
             ]
         ] );
 
         $queueHandler = new AMQHandler();
-        $queueHandler->publishToTopic( INIT::$SSE_NOTIFICATIONS_QUEUE_NAME, new Message( $message ) );
+        $queueHandler->publishToNodeJsClients( INIT::$SOCKET_NOTIFICATIONS_QUEUE_NAME, new Message( $message ) );
 
     }
 
@@ -518,6 +506,7 @@ class CommentController extends KleinController {
      * @param array $users
      * @param array $users_mentioned
      * @return \Klein\Response
+     * @throws \ReflectionException
      */
     private function sendEmail(Comments_CommentStruct $comment, Jobs_JobStruct $job, array $users, array $users_mentioned) {
 
