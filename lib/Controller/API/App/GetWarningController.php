@@ -9,6 +9,7 @@ use API\V2\Json\QALocalWarning;
 use Chunks_ChunkDao;
 use Chunks_ChunkStruct;
 use Exception;
+use Jobs_JobStruct;
 use Klein\Response;
 use LQA\QA;
 use Matecat\SubFiltering\MateCatFilter;
@@ -198,10 +199,10 @@ class GetWarningController extends KleinController {
     /**
      * @param $id_job
      * @param $password
-     * @return \Chunks_ChunkStruct|null
+     * @return Jobs_JobStruct|null
      * @throws Exception
      */
-    private function getChunk($id_job, $password): ?Chunks_ChunkStruct
+    private function getChunk($id_job, $password): ?Jobs_JobStruct
     {
         $chunk = Chunks_ChunkDao::getByIdAndPassword($id_job, $password);
         $project = $chunk->getProject();
@@ -211,13 +212,13 @@ class GetWarningController extends KleinController {
     }
 
     /**
-     * @param Chunks_ChunkStruct $chunk
+     * @param Jobs_JobStruct $chunk
      * @param $src_content
      * @param $trg_content
      * @return array
      * @throws Exception
      */
-    private function invokeLocalWarningsOnFeatures(Chunks_ChunkStruct $chunk, $src_content, $trg_content): array
+    private function invokeLocalWarningsOnFeatures(Jobs_JobStruct $chunk, $src_content, $trg_content): array
     {
         $data = [];
         $data = $this->featureSet->filter( 'filterSegmentWarnings', $data, [
