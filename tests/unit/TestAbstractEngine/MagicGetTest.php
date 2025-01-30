@@ -24,7 +24,7 @@ class MagicGetTest extends AbstractTest {
     public function setUp(): void {
         parent::setUp();
         $this->engine_struct_param                   = new EnginesModel_EngineStruct();
-        $this->engine_struct_param->type             = "MT";
+        $this->engine_struct_param->type             = Constants_Engines::MT;
         $this->engine_struct_param->name             = "DeepLingoTestEngine";
         $this->engine_struct_param->others           = [ 'alfa' => "one", 'beta' => "two" ];
         $this->engine_struct_param->extra_parameters = [ 'gamma' => "three", 'delta' => "four" ];
@@ -42,7 +42,7 @@ class MagicGetTest extends AbstractTest {
     public function test_magic__get() {
 
         $this->assertEquals( "DeepLingoTestEngine", $this->engine->name );
-        $this->assertEquals( "MT", $this->engine->type );
+        $this->assertEquals( Constants_Engines::MT, $this->engine->type );
         $this->assertEquals( "one", $this->engine->alfa );
         $this->assertEquals( "two", $this->engine->beta );
         $this->assertEquals( "three", $this->engine->gamma );

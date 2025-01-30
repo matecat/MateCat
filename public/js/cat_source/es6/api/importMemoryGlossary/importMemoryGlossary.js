@@ -11,7 +11,7 @@ export const importMemoryGlossary = async ({engineId, glossary, memoryId}) => {
     formData.append(key, params[key])
   })
   const response = await fetch(
-    `${getMatecatApiDomain()}api/v3/mmt/${engineId}/import-glossary`,
+    `${getMatecatApiDomain()}api/v3/mmt/${engineId}/glossary/import`,
     {
       method: 'POST',
       credentials: 'include',

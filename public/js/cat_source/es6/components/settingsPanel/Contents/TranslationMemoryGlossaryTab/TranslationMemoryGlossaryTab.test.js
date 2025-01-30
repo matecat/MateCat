@@ -189,28 +189,35 @@ test('Enabled/disable key', async () => {
 
 test('Create and delete new resource', async () => {
   mswServer.use(
-    http.post(config.basepath, ({request}) => {
-      const url = new URL(request.url)
-      const action = url.searchParams.get('action')
-      const response =
-        action === 'createRandUser'
-          ? {
-              errors: [],
-              data: {
-                key: '6f03df0307c7a161afa9',
-                id: 'MyMemory_5007d86025f58b50f29c',
-                pass: 'f22815f87d',
-                mtLangSupported: true,
-                error: {
-                  code: 0,
-                  message: '',
+    ...[
+      http.post(config.basepath, ({request}) => {
+        const url = new URL(request.url)
+        const action = url.searchParams.get('action')
+        const response =
+          action === 'createRandUser'
+            ? {
+                errors: [],
+                data: {
+                  key: '6f03df0307c7a161afa9',
+                  id: 'MyMemory_5007d86025f58b50f29c',
+                  pass: 'f22815f87d',
+                  mtLangSupported: true,
+                  error: {
+                    code: 0,
+                    message: '',
+                  },
                 },
-              },
-            }
-          : {errors: [], data: []}
+              }
+            : {errors: [], data: []}
 
-      return HttpResponse.json(response)
-    }),
+        return HttpResponse.json(response)
+      }),
+      http.get(`${config.basepath}api/app/tm-keys/engines/info/:key`, () => {
+        const response = []
+
+        return HttpResponse.json(response)
+      }),
+    ],
   )
 
   const user = userEvent.setup()
@@ -475,6 +482,14 @@ test('Search resources inactive keys', async () => {
 })
 
 test('Modal delete tmkeys used in other templates', async () => {
+  mswServer.use(
+    http.get(`${config.basepath}api/app/tm-keys/engines/info/:key`, () => {
+      const response = []
+
+      return HttpResponse.json(response)
+    }),
+  )
+
   const spyShowModal = jest.spyOn(ModalsActions, 'showModalComponent')
 
   const user = userEvent.setup()

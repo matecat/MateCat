@@ -67,7 +67,7 @@ trait Oauth {
 
         }
 
-        $record = clone( $this->engineRecord );
+        $record = clone( $this->getEngineRecord() );
 
         $engineDAO = new EnginesModel_EngineDAO( Database::obtain() );
 

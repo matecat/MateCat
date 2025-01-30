@@ -74,13 +74,15 @@ route( '/api/v3/create-key',  'POST', [ 'API\V3\MyMemoryController', 'create' ] 
 // MMT
 $klein->with( '/api/v3/mmt/[i:engineId]', function () {
     route( '/keys', 'GET', [ '\API\V3\ModernMTController', 'keys' ] );
-    route( '/job-status/[:uuid]', 'GET', [ '\API\V3\ModernMTController', 'jobStatus' ] );
-    route( '/create-memory-and-import-glossary', 'POST', [ '\API\V3\ModernMTController', 'createMemoryAndImportGlossary' ] );
-    route( '/import-glossary', 'POST', [ '\API\V3\ModernMTController', 'importGlossary' ] );
-    route( '/modify-glossary', 'POST', [ '\API\V3\ModernMTController', 'modifyGlossary' ] );
-    route( '/create-memory', 'POST', [ '\API\V3\ModernMTController', 'createMemory' ] );
-    route( '/update-memory/[:memoryId]', 'POST', [ '\API\V3\ModernMTController', 'updateMemory' ] );
-    route( '/delete-memory/[:memoryId]', 'GET', [ '\API\V3\ModernMTController', 'deleteMemory' ] );
+    route( '/import-status/[:uuid]', 'GET', [ '\API\V3\ModernMTController', 'importStatus' ] );
+    route( '/memory/create', 'POST', [ '\API\V3\ModernMTController', 'createMemory' ] );
+    route( '/memory/update/[:memoryId]', 'POST', [ '\API\V3\ModernMTController', 'updateMemory' ] );
+    route( '/memory/delete/[:memoryId]', 'GET', [ '\API\V3\ModernMTController', 'deleteMemory' ] );
+
+    route( '/glossary/create-memory-and-import', 'POST', [ '\API\V3\ModernMTController', 'createMemoryAndImportGlossary' ] );
+    route( '/glossary/import-status/[:uuid]', 'GET', [ '\API\V3\ModernMTController', 'importStatus' ] );
+    route( '/glossary/import', 'POST', [ '\API\V3\ModernMTController', 'importGlossary' ] );
+    route( '/glossary/modify', 'POST', [ '\API\V3\ModernMTController', 'modifyGlossary' ] );
 } );
 
 // DEEPL

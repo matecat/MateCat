@@ -164,7 +164,7 @@ class catController extends viewController {
         //this gets all engines of the user
         if ( $this->isLoggedIn() ) {
             $engineQuery         = new EnginesModel_EngineStruct();
-            $engineQuery->type   = 'MT';
+            $engineQuery->type   = Constants_Engines::MT;
             $engineQuery->uid    = $this->user->uid;
             $engineQuery->active = 1;
             $mt_engines          = $engine->read( $engineQuery );
@@ -174,7 +174,7 @@ class catController extends viewController {
 
         // this gets MyMemory
         $engineQuery         = new EnginesModel_EngineStruct();
-        $engineQuery->type   = 'TM';
+        $engineQuery->type   = Constants_Engines::TM;
         $engineQuery->active = 1;
         $tms_engine          = $engine->setCacheTTL( 3600 * 24 * 30 )->read( $engineQuery );
 
