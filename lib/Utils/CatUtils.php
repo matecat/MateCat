@@ -272,84 +272,111 @@ class CatUtils {
      */
     public static function clean_raw_string_4_word_count( string $string, string $source_lang = 'en-US', MateCatFilter $Filter = null ): string {
 
-        if ( $Filter === null ) {
-            $Filter = MateCatFilter::getInstance( new FeatureSet(), $source_lang );
-        }
-
-        $string = $Filter->fromLayer0ToLayer1( $string );
-        $string = self::replacePlaceholders( $string );
-
         //return empty on string composed only by spaces
         //do nothing
         if ( preg_replace( '#\p{Z}+#u', '', $string ) == '' ) {
             return '';
         }
 
-        if ( strpos( $source_lang, '-' ) !== false ) {
-            $tmp_lang    = explode( '-', $source_lang );
-            $source_lang = $tmp_lang[ 0 ];
-            unset( $tmp_lang );
+        //first two letter of code lang
+        $source_lang_two_letter = explode( "-", $source_lang )[ 0 ];
+
+        if ( $Filter === null ) {
+            $Filter = MateCatFilter::getInstance( new FeatureSet(), $source_lang );
         }
 
-        if ( preg_match_all( '#</?(?![0-9]+)[a-z0-9\-._]+?(?:\s[:_a-z]+=.+?)?\s*/?>#i', $string, $matches, PREG_SET_ORDER ) ) {
+        /**
+         * Count links as one word.
+         *
+         * Heuristic
+         * This regular expression is intentionally imperfect; its purpose is not to validate URLs but to match as many forms as possible.
+         * False positives are acceptable in favor of simplifying it and reducing computational cost (for example, the part related to IPs).
+         *
+         * Disabled for now until better tests
+         *
+         * @see https://regex101.com/r/oQFKn8/5
+         *
+         */
+        $linkRegexp = '%(?:[a-z]+://|//)?(?:\S+(?::\S*)?@)?(?:\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|(?:(?:\S\S{0,62})?\S\.)+\S{2,}\.?)(?::\d{2,5})?(?:[/?#]\S*)?\b%ui';
+        $linkRegexp = '%(?:[a-z]+://|//)?(?:[\p{Latin}\d\-_]+)?[\p{Latin}\d\-_]+\.[\p{Latin}\d\-_]+\.[\p{Latin}\d#?=.\-_]+%ui';
 
-            foreach ( $matches as $tag ) {
-                if ( is_numeric( substr( $tag[ 0 ], -2, 1 ) ) && !preg_match( '#</?h[1-6][^>]*>#i', $tag[ 0 ] ) ) { //H tag are an exception
-                    //tag can not end with a number
-                    continue;
-                }
-                $string = str_replace( $tag[ 0 ], " ", $string );
-            }
+        $link_placeholder      = ' L ';
+        $word_placeholder      = ' W ';
+        $number_placeholder    = ' N ';
+        $space_placeholder     = ' ';
+        $variables_placeholder = ' P ';
 
+        /**
+         * Count as One Word fo CJK
+         */
+        if ( array_key_exists( $source_lang_two_letter, self::$cjk ) ) {
+            $link_placeholder      = 'L';
+            $word_placeholder      = 'W';
+            $number_placeholder    = 'N';
+            $variables_placeholder = 'P';
         }
 
-        //remove ampersands and entities. Converters returns entities in xml, we want raw strings.
-        //take a look at this string:
+        //Remove ampersands and entities.
+        //Converters return entities in XML, we want raw strings.
+        //
+        //Take a look at this string:
         // This is a string &amp;nbsp;
         $string = html_entity_decode(
                 html_entity_decode( $string, ENT_HTML401 | ENT_QUOTES, 'UTF-8' )
         );
 
+        $string = preg_replace( $linkRegexp, $link_placeholder, $string );
+
+        //Refine links like "php://filter/read=string.strip_tags/resource=php://input" not available in CJK because we can't use \s identifier
+        $string = preg_replace( '#[a-z]+://\S+#u', $link_placeholder, $string );
+
+        $string = $Filter->fromLayer0ToLayer1( $string );
+        $string = self::replacePlaceholders( $string, $variables_placeholder );
+
+        // replace all numbers with a placeholder, so they will be counted as 1 word
+        $string = preg_replace( '/\b[0-9]+(?:[.,][0-9]+)*\b/', $number_placeholder, $string );
+
         /**
-         * Count links as 1 word
+         * Lock Hyphenated Words and underscore composed word; count them as one word
          *
-         * heuristic, of course this regexp is not perfect, hoping it is not too greedy
+         * https://regex101.com/r/t5AG6a/3
          *
          */
-        $linkRegexp = '/(?:(?:[a-z]+:\/\/)|(?:\/\/))?(?:[\p{Latin}\d\-_]+)?(?:[\p{Latin}\d\-_]+\.[\p{Latin}\d\-_]+\.[\p{Latin}\d#\?=\.\-_]+)/u';
-
+        $string = preg_replace( '#(?![.\s])\p{L}+[_\p{Pd}]\p{L}+(?:[_\p{Pd}]\p{L}+)*\S+#u', $word_placeholder, $string ); // W count as one
 
         /**
-         * Count numbers as One Word
+         * Remove Unicode:
+         * @see http://php.net/manual/en/regexp.reference.unicode.php
+         * P -> Punctuation
+         * Z -> Separator (but not spaces)
+         * C -> Other
          */
-        if ( array_key_exists( $source_lang, self::$cjk ) ) {
+        $string = preg_replace( '#[\p{P}\p{Zl}\p{Zp}\p{C}]+#u', $space_placeholder, $string );
 
-            $string = preg_replace( $linkRegexp, 'L', $string );
-
-            // replace all numbers with a placeholder without spaces to no alter the ratio characters/words, so they will be counted as 1 word
-            $string = preg_replace( '/\b[0-9]+(?:[.,][0-9]+)*\b/', 'N', $string );
-
-        } else {
-
-            $string = preg_replace( $linkRegexp, ' L ', $string );
-
-            //Refine links like "php://filter/read=string.strip_tags/resource=php://input" not available in CJK because we can't use \s identifier
-            $string = preg_replace( '#[a-z]+://\S+#u', ' L ', $string );
-
-            // replace all numbers with a placeholder so they will be counted as 1 word
-            $string = preg_replace( '/\b[0-9]+(?:[.,][0-9]+)*\b/', ' N ', $string );
-
+        /**
+         * Remove english possessive word count
+         */
+        if ( $source_lang_two_letter == "en" ) {
+            $string = str_replace( ' s ', $space_placeholder, $string );
         }
 
-        return $string;
+        //check for a string made of spaces only, after the string was cleaned
+        $no_spaces_string = preg_replace( '#[\p{Z}\p{C}]+#u', "", $string );
+        if ( $no_spaces_string == "" ) {
+            return "";
+        }
+
+        return !array_key_exists( $source_lang_two_letter, self::$cjk ) ? $string : $no_spaces_string;
+
     }
 
     /**
-     * @param $string
+     * @param string $string
+     * @param string $variables_placeholder
      *
      * @return string
      */
-    private static function replacePlaceholders( $string ): string {
+    private static function replacePlaceholders( string $string, string $variables_placeholder ): string {
         $pattern = '|<ph id ?= ?["\'](mtc_[0-9]+)["\'] ?(ctype=["\'].+?["\'] ?) ?(equiv-text=["\'].+?["\'] ?)/>|ui';
 
         preg_match_all( $pattern, $string, $matches, PREG_SET_ORDER );
@@ -360,9 +387,16 @@ class CatUtils {
             $ctype = str_replace( 'ctype=', '', $ctype );
 
             if ( $ctype !== CTypeEnum::HTML ) {
-                $string = str_replace( $match[ 0 ], 'P', $string );
+                $string = str_replace( $match[ 0 ], $variables_placeholder, $string ); // count variables as one word
             } else {
-                $string = str_replace( $match[ 0 ], '', $string );
+                $string = str_replace( $match[ 0 ], '', $string ); // count html snippets as zero words
+            }
+        }
+
+        // remove all residual xliff tags
+        if ( preg_match_all( '#</?(?![0-9]+)[a-z0-9\-._]+?(?:\s[:_a-z]+=.+?)?\s*/?>#i', $string, $matches, PREG_SET_ORDER ) ) {
+            foreach ( $matches as $tag ) {
+                $string = str_replace( $tag[ 0 ], " ", $string );
             }
         }
 
@@ -390,44 +424,8 @@ class CatUtils {
 
         $string = self::clean_raw_string_4_word_count( $string, $source_lang, $filter );
 
-        /**
-         * Escape dash and underscore and replace them with Macro and Cedilla characters!
-         *
-         * Dash and underscore must not be treated as separated words
-         * Macro and Cedilla characters are not replaced by unicode regular expressions below
-         */
-        $string = str_replace( [ '-', '_' ], [ "¯", '¸' ], $string );
-
-        /**
-         * Remove Unicode:
-         * @see http://php.net/manual/en/regexp.reference.unicode.php
-         * P -> Punctuation
-         * Z -> Separator ( but not spaces )
-         * C -> Other
-         */
-        $string = preg_replace( '#[\p{P}\p{Zl}\p{Zp}\p{C}]+#u', " ", $string );
-
-        /**
-         * Remove english possessive word count
-         */
-        if ( $source_lang_two_letter == "en" ) {
-            $string = str_replace( ' s ', ' ', $string );
-        }
-
-        /**
-         * Now reset chars
-         */
-        $string = str_replace( [ "¯", '¸' ], [ '-', '_' ], $string );
-
-
-        //check for a string made of spaces only, after the string was cleaned
-        $string_with_no_spaces = preg_replace( '#[\p{Z}\p{C}]+#u', "", $string );
-        if ( $string_with_no_spaces == "" ) {
-            return 0;
-        }
-
         if ( array_key_exists( $source_lang_two_letter, self::$cjk ) ) {
-            $res = mb_strlen( $string_with_no_spaces, 'UTF-8' );
+            $res = mb_strlen( $string, 'UTF-8' );
         } else {
 
             $words_array = preg_split( '/\s+/u', $string );
@@ -603,14 +601,24 @@ class CatUtils {
         $values = self::getChunkReviewStructFromJobStruct( $job, $chunkReviews );
 
         if ( !isset( $values ) ) {
-            $result = null;
-        } elseif ( !empty( $values->is_pass ) ) {
-            $result = 'excellent';
-        } else {
-            $result = 'fail';
+            return null;
         }
 
-        return $result;
+        if ( !isset( $values->is_pass ) ) {
+            return null;
+        }
+
+        $is_pass = $values->is_pass;
+
+        if($is_pass == true){
+            return 'excellent';
+        }
+
+        if($is_pass == false){
+            return 'fail';
+        }
+
+        return null;
     }
 
     /**
@@ -861,6 +869,20 @@ class CatUtils {
         } );
 
         return json_encode( $json );
+    }
+
+    /**
+     * This function is used to strip malicious content from
+     * user's first_name and last_name
+     *
+     * @param $string
+     * @return string
+     */
+    public static function stripMaliciousContentFromAName($string)
+    {
+        $string = mb_substr( preg_replace( '/(?:https?|s?ftp)\P{L}+/u', '', $string ), 0, 50 );
+
+        return trim($string);
     }
 }
 

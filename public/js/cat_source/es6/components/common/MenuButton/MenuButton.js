@@ -9,6 +9,7 @@ export const MenuButton = ({
   icon = <ArrowDown />,
   onClick,
   className = '',
+  dropdownClassName = '',
   itemsTarget,
   children,
   disabled,
@@ -124,7 +125,7 @@ export const MenuButton = ({
             ref={portalRef}
             className={`menu-button-items${
               isVisibleRectArrow ? ' menu-button-items-rect-arrow' : ''
-            } ${isReversed ? 'menu-button-items-reversed' : ''}`}
+            } ${isReversed ? 'menu-button-items-reversed' : ''} ${dropdownClassName}`}
             style={{
               left: itemsCoords.left,
               top: itemsCoords.top,

@@ -97,9 +97,9 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
         $projectData = $this->getProject();
 
         return [
-                'project_id'   => $projectData->id,
-                'project_name' => $projectData->name,
-                'job_id'       => $this->id,
+            'project_id'   => $projectData->id,
+            'project_name' => $projectData->name,
+            'job_id'       => $this->id,
         ];
     }
 

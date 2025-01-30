@@ -1884,12 +1884,22 @@ class QA {
         // so, if we found a last char mismatch, and if it is in the source: add to the target else trim it
         if ( ( count( $source_tags[ 0 ] ) != count( $target_tags[ 0 ] ) ) && !empty( $source_tags[ 0 ] ) || $source_tags[ 1 ] != $target_tags[ 1 ] ) {
 
-            // Append a space to target for normalization
-            // only if target is NOT a CJ language
-            if ( false === CatUtils::isCJ( $this->target_seg_lang ) ) {
-                $this->target_seg = rtrim( $this->target_seg );
-                $this->target_seg .= ' ';
+            // check if source has a trailing space at the end
+            $sourceHasTrailingSpace = (strlen($this->source_seg) !== strlen(rtrim($this->source_seg)));
 
+            if ( $sourceHasTrailingSpace ) {
+
+                // this means that the source has a trailing space and the target haven't it
+
+                // Append a space to target for normalization
+                // only if target is NOT a CJ language
+                if ( false === CatUtils::isCJ( $this->target_seg_lang ) ) {
+                    $this->addError( self::ERR_BOUNDARY_TAIL );
+                    $this->target_seg = rtrim( $this->target_seg );
+                    $this->target_seg .= ' ';
+                }
+            } else {
+                // this means that the target has a trailing space and the source haven't it
                 $this->addError( self::ERR_BOUNDARY_TAIL );
             }
 

@@ -8,6 +8,7 @@ import commonUtils from '../utils/commonUtils'
 import {isEqual} from 'lodash'
 import {logoutUser} from '../api/logoutUser'
 import {updateUserMetadata} from '../api/updateUserMetadata'
+import {flushSync} from 'react-dom'
 
 const USER_INFO_SCHEMA = {
   user: {
@@ -82,6 +83,7 @@ function useAuth() {
             userId: data.user.uid,
           }
           CommonUtils.dispatchAnalyticsEvents(event)
+          CommonUtils.dispatchCustomEvent('user-logged-event', data.user)
           setIsUserLogged(true)
           setUserInfo(data)
           setConnectedServices(data.connected_services)
@@ -152,10 +154,12 @@ function useAuth() {
       new Promise((resolve, reject) => {
         updateUserMetadata(key, value)
           .then((data) => {
-            setUserInfo((prevState) => ({
-              ...prevState,
-              metadata: {...prevState.metadata, [key]: value},
-            }))
+            flushSync(() =>
+              setUserInfo((prevState) => ({
+                ...prevState,
+                metadata: {...prevState.metadata, [key]: value},
+              })),
+            )
 
             resolve(data)
           })
@@ -191,7 +195,6 @@ function useAuth() {
       // Trick for hubspot
       if (userInfo) CommonUtils.dispatchCustomEvent('userDataLoaded', userInfo)
     }
-    console.log('[ useAuth ] -> userInfo', userInfo)
   }, [userInfo])
 
   // Sync state userInfo with UserStore

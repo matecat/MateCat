@@ -180,6 +180,7 @@ class DownloadQRController extends BaseChunkController {
         foreach ($segments as $segment){
 
             $issues   = [];
+            $comments = [];
 
             foreach ($segment->issues as $issue){
 
@@ -190,6 +191,10 @@ class DownloadQRController extends BaseChunkController {
                 }
 
                 $issues[$label] = $issues[$label] + 1;
+
+                foreach ($issue->comments as $comment){
+                    $comments[$label][] = $comment;
+                }
             }
 
             $data[] = [
@@ -224,6 +229,7 @@ class DownloadQRController extends BaseChunkController {
                 $segment->source_page,
                 $segment->is_pre_translated,
                 $issues,
+                $comments,
             ];
         }
 
@@ -236,7 +242,7 @@ class DownloadQRController extends BaseChunkController {
      *
      * @return bool|false|string
      */
-    private function createCSVFile(array $data, array $categoryIssues){
+    private function createCSVFile(array $data, array $categoryIssues = []){
 
         $headings = [
             "sid",
@@ -271,20 +277,36 @@ class DownloadQRController extends BaseChunkController {
             "is_pre_translated",
         ];
 
-        $headings = array_merge($headings, $categoryIssues);
+        foreach ($categoryIssues as $categoryIssue){
+            $headings[] = $categoryIssue;
+            $headings[] = "comments";
+        }
 
         $csvData = [];
         $csvData[] = $headings;
 
         foreach ($data as $datum){
 
+            // comments
+            $comments = $datum[31];
+
             // issues
             $issues = $datum[30];
             unset($datum[30]);
+            unset($datum[31]);
 
             foreach ($categoryIssues as $categoryIssue){
                 $count = (isset($issues[$categoryIssue])) ? $issues[$categoryIssue] : 0;
+                $issueComments = [];
+
+                if(isset($comments[$categoryIssue])){
+                    foreach ($comments[$categoryIssue] as $issueComment){
+                        $issueComments[] = $issueComment['comment'];
+                    }
+                }
+
                 $datum[] = $count;
+                $datum[] = implode("|||", $issueComments);
             }
 
             $csvData[] = array_values($datum);
@@ -312,11 +334,14 @@ class DownloadQRController extends BaseChunkController {
      *
      * @return false|string
      */
-    private function createJsonFile(array $data, array $categoryIssues){
+    private function createJsonFile(array $data, array $categoryIssues = []){
 
         $jsonData = [];
 
         foreach ($data as $datum){
+
+            // comments
+            $comments = $datum[31];
 
             // issues
             $issues = $datum[30];
@@ -325,7 +350,10 @@ class DownloadQRController extends BaseChunkController {
 
             foreach ($categoryIssues as $categoryIssue){
                 $count = (isset($issues[$categoryIssue])) ? $issues[$categoryIssue] : 0;
-                $issueValues[$categoryIssue] = $count;
+                $issueValues[$categoryIssue] = [
+                    'count' => $count,
+                    'comments' => (isset($comments[$categoryIssue])) ? $comments[$categoryIssue] : [],
+                ];
             }
 
             $jsonData[] = [

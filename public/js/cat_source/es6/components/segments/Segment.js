@@ -1,5 +1,5 @@
 import {forEach, isUndefined} from 'lodash'
-import Immutable from 'immutable'
+import {fromJS} from 'immutable'
 import React from 'react'
 import {union} from 'lodash/array'
 
@@ -60,6 +60,8 @@ class Segment extends React.Component {
       inBulk: false,
       tagProjectionEnabled:
         this.props.guessTagActive &&
+        this.props.segment &&
+        this.props.segment.status &&
         (this.props.segment.status.toLowerCase() === 'draft' ||
           this.props.segment.status.toLowerCase() === 'new') &&
         !DraftMatecatUtils.checkXliffTagsInText(
@@ -245,7 +247,6 @@ class Segment extends React.Component {
     if (this.props.segment.opened && this.checkIfCanOpenSegment()) {
       classes.push('editor')
       classes.push('opened')
-      classes.push('shadow-1')
     }
     if (
       this.props.segment.modified ||
@@ -390,11 +391,16 @@ class Segment extends React.Component {
         (!this.props.segment.opened || !this.props.segment.openIssues)) ||
         !this.props.sideOpen) &&
       !(this.props.segment.readonly === 'true') &&
-      (!this.isSplitted() || (this.isSplitted() && this.isFirstOfSplit()))
+      (!this.isSplitted() || (this.isSplitted() && this.isFirstOfSplit())) &&
+      this.props.segment.sid
     ) {
       return (
         <TranslationIssuesSideButton
-          sid={this.props.segment.sid.split('-')[0]}
+          sid={
+            this.props.segment.splitted
+              ? this.props.segment.sid.split('-')[0]
+              : this.props.segment.sid
+          }
           segment={this.props.segment}
           open={this.props.segment.openIssues}
         />
@@ -634,8 +640,8 @@ class Segment extends React.Component {
   shouldComponentUpdate(nextProps, nextState) {
     return (
       !nextProps.segImmutable.equals(this.props.segImmutable) ||
-      !Immutable.fromJS(nextState.segment_classes).equals(
-        Immutable.fromJS(this.state.segment_classes),
+      !fromJS(nextState.segment_classes).equals(
+        fromJS(this.state.segment_classes),
       ) ||
       nextState.autopropagated !== this.state.autopropagated ||
       nextState.readonly !== this.state.readonly ||

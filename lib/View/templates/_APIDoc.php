@@ -52,7 +52,11 @@ $csp       = str_replace( '${x_nonce_unique_id}', $csp_nonce, $csp );
     $instance = $reflect->newInstanceArgs( [] );
 
     $featureSet = new FeatureSet();
-    $featureSet->loadFromUserEmail( $instance->getUser()->email );
+
+    if($instance->getUser()->email !== null){
+        $featureSet->loadFromUserEmail( $instance->getUser()->email );
+    }
+
     $appendJS = $featureSet->filter( 'overloadAPIDocs', [] );
     echo implode( "\n", $appendJS );
 

@@ -57,7 +57,8 @@ class AuthenticationHelper {
         if ( $this->validKeys( $api_key, $api_secret ) ) {
             $this->user = $this->api_record->getUser();
         } elseif ( !empty( $this->session[ 'user' ] ) && !empty( $this->session[ 'user_profile' ] ) ) {
-            $this->user = $this->session[ 'user' ]; // php deserialize from session string
+            $this->user = $this->session[ 'user' ]; // php deserialize this from session string
+            AuthCookie::setCredentials( $this->user ); //realign and revamp cookie
         } else {
             // Credentials from AuthCookie
             /**
@@ -66,7 +67,7 @@ class AuthenticationHelper {
             $user_cookie_credentials = AuthCookie::getCredentials();
             if ( !empty( $user_cookie_credentials ) && !empty( $user_cookie_credentials[ 'user' ] ) ) {
                 $userDao = new Users_UserDao();
-                $userDao->setCacheTTL( 60 * 60 );
+                $userDao->setCacheTTL( 60 * 60 * 24 );
                 $this->user = $userDao->getByUid( $user_cookie_credentials[ 'user' ][ 'uid' ] );
                 $this->setUserSession();
             }
@@ -171,7 +172,7 @@ class AuthenticationHelper {
         return $this->logged;
     }
 
-    public function getApiRecord(): ApiKeys_ApiKeyStruct {
+    public function getApiRecord(): ?ApiKeys_ApiKeyStruct {
         return $this->api_record;
     }
 

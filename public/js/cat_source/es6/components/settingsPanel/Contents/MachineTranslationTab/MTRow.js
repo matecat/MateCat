@@ -36,6 +36,11 @@ export const MTRow = ({row, deleteMT, onCheckboxClick}) => {
             <InfoIcon />
           </a>
         )}
+        {row.engine_type === 'Lara' && (
+          <a href="https://lara.translated.com/about-lara " target="_blank">
+            <InfoIcon />
+          </a>
+        )}
       </div>
       <div className="settings-panel-mt-row-description">{row.description}</div>
       {!config.is_cattool && (

@@ -96,18 +96,6 @@ let CatToolActions = {
       actionType: CatToolConstants.CLIENT_RECONNECTION,
     })
   },
-
-  showHeaderTooltip: function () {
-    var closedPopup = localStorage.getItem(this.popupInfoUserMenu())
-
-    if (config.is_cattool) {
-      UI.showProfilePopUp(!closedPopup)
-    } else if (!closedPopup) {
-      AppDispatcher.dispatch({
-        actionType: CatToolConstants.SHOW_PROFILE_MESSAGE_TOOLTIP,
-      })
-    }
-  },
   setPopupUserMenuCookie: function () {
     CommonUtils.addInStorage(this.popupInfoUserMenu(), true, 'infoUserMenu')
   },
@@ -277,9 +265,7 @@ let CatToolActions = {
     })
   },
   onTMKeysChangeStatus: () => {
-    AppDispatcher.dispatch({
-      actionType: CatToolConstants.ON_TM_KEYS_CHANGE_STATUS,
-    })
+    CatToolActions.retrieveJobKeys(true)
   },
   setHaveKeysGlossary: (value) => {
     AppDispatcher.dispatch({

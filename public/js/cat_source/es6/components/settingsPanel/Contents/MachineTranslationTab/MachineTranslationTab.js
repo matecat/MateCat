@@ -28,12 +28,12 @@ import {ConfirmDeleteResourceProjectTemplates} from '../../../modals/ConfirmDele
 import {SCHEMA_KEYS} from '../../../../hooks/useProjectTemplates'
 import IconClose from '../../../icons/IconClose'
 import {BUTTON_TYPE, Button} from '../../../common/Button/Button'
+import {Lara} from './MtEngines/Lara'
 
 export const MachineTranslationTab = () => {
   const {
     mtEngines,
     setMtEngines,
-    openLoginModal,
     modifyingCurrentTemplate,
     currentProjectTemplate,
     projectTemplates,
@@ -64,6 +64,11 @@ export const MachineTranslationTab = () => {
       name: 'ModernMT',
       id: 'mmt',
       component: ModernMt,
+    },
+    {
+      name: 'Lara',
+      id: 'Lara',
+      component: Lara,
     },
     {name: 'AltLang', id: 'altlang', component: AltLang},
     {name: 'Apertium', id: 'apertium', component: Apertium},
@@ -364,10 +369,12 @@ export const MachineTranslationTab = () => {
           }
         />
       </div>
-      <div className="inactive-mt" data-testid="inactive-mt">
-        <h2>Inactive MT</h2>
-        <SettingsPanelTable columns={COLUMNS_TABLE} rows={MTRows} />
-      </div>
+      {!config.is_cattool && (
+        <div className="inactive-mt" data-testid="inactive-mt">
+          <h2>Inactive MT</h2>
+          <SettingsPanelTable columns={COLUMNS_TABLE} rows={MTRows} />
+        </div>
+      )}
     </div>
   )
 }

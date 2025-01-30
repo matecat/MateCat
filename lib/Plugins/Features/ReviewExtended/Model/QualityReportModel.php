@@ -189,7 +189,7 @@ class QualityReportModel {
             $this->quality_report_structure[ 'chunk' ][ 'reviews' ][] = [
                     'revision_number' => $revisionNumber,
                     'feedback'        => ( $feedback and isset( $feedback[ 'feedback' ] ) ) ? $feedback[ 'feedback' ] : null,
-                    'is_pass'         => !!$chunk_review->is_pass,
+                    'is_pass'         => ($chunk_review->is_pass !== null ? !!$chunk_review->is_pass : null),
                     'score'           => $chunkReviewModel->getScore(),
                     'reviewer_name'   => $this->getReviewerName()
             ];

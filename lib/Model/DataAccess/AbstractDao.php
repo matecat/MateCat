@@ -37,7 +37,7 @@ abstract class DataAccess_AbstractDao {
     /**
      * @var array
      */
-    protected static array $auto_increment_field;
+    protected static array $auto_increment_field = [];
 
     /**
      * @var string
@@ -54,6 +54,7 @@ abstract class DataAccess_AbstractDao {
         }
 
         $this->database = $con;
+        self::$auto_increment_field = [];
     }
 
     /**
@@ -205,6 +206,7 @@ abstract class DataAccess_AbstractDao {
         $stmt->setFetchMode( PDO::FETCH_CLASS, get_class( $fetchClass ) );
         $stmt->execute( $bindParams );
         $result = $stmt->fetchAll();
+        $stmt->closeCursor();
 
         $this->_setInCache( $stmt->queryString . $this->_serializeForCacheKey( $bindParams ) . get_class( $fetchClass ), $result );
 

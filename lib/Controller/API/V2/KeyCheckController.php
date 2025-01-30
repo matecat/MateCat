@@ -24,9 +24,29 @@ class KeyCheckController extends KleinController {
 
     /**
      * @throws AuthenticationError
+     * @throws Exception
      */
     public function ping() {
-        if ( !$this->api_record ) {
+
+        $checkRateLimitEmail = $this->checkRateLimitResponse( $this->response, $this->getUser()->email ?? "BLANK_EMAIL", '/api/v2/user/ping', 3 );
+        $checkRateLimitIp    = $this->checkRateLimitResponse( $this->response, Utils::getRealIpAddr() ?? "127.0.0.1", '/api/v2/user/ping', 3 );
+
+        if ( $checkRateLimitEmail ) {
+            $this->response = $checkRateLimitEmail;
+
+            return;
+        }
+
+        if ( $checkRateLimitIp ) {
+            $this->response = $checkRateLimitIp;
+
+            return;
+        }
+
+        $this->incrementRateLimitCounter( $this->getUser()->email ?? "BLANK_EMAIL", '/api/v2/user/ping' );
+        $this->incrementRateLimitCounter( Utils::getRealIpAddr() ?? "127.0.0.1", '/api/v2/user/ping' );
+
+        if ( !$this->getApiRecord() ) {
             throw new AuthenticationError();
         }
 
@@ -43,19 +63,19 @@ class KeyCheckController extends KleinController {
         $checkRateLimitEmail = $this->checkRateLimitResponse( $this->response, $this->getUser()->email ?? "BLANK_EMAIL", '/api/v2/user/[:user_api_key]', 3 );
         $checkRateLimitIp    = $this->checkRateLimitResponse( $this->response, Utils::getRealIpAddr() ?? "127.0.0.1", '/api/v2/user/[:user_api_key]', 3 );
 
-        if ( $checkRateLimitEmail instanceof Response ) {
+        if ( $checkRateLimitEmail ) {
             $this->response = $checkRateLimitEmail;
 
             return;
         }
 
-        if ( $checkRateLimitIp instanceof Response ) {
+        if ( $checkRateLimitIp ) {
             $this->response = $checkRateLimitIp;
 
             return;
         }
 
-        if ( !$this->api_record ) {
+        if ( !$this->getApiRecord() ) {
             $this->incrementRateLimitCounter( $this->getUser()->email ?? "BLANK_EMAIL", '/api/v2/user/[:user_api_key]' );
             $this->incrementRateLimitCounter( Utils::getRealIpAddr() ?? "127.0.0.1", '/api/v2/user/[:user_api_key]' );
             throw new AuthenticationError( 'Unauthorized', 401 );

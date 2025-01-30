@@ -1,5 +1,5 @@
 import React, {createRef} from 'react'
-import Immutable from 'immutable'
+import {fromJS} from 'immutable'
 import {
   Modifier,
   Editor,
@@ -67,7 +67,7 @@ class Editarea extends React.Component {
 
   constructor(props) {
     super(props)
-    const {onEntityClick, updateTagsInEditor, getUpdatedSegmentInfo} = this
+    const {onEntityClick, getUpdatedSegmentInfo} = this
 
     this.decoratorsStructure = [
       {
@@ -138,9 +138,10 @@ class Editarea extends React.Component {
       this.updateTranslationInStore,
       100,
     )
-    this.updateTagsInEditorDebounced = debounce(updateTagsInEditor, 500)
     this.onCompositionStopDebounced = debounce(this.onCompositionStop, 1000)
-    this.focusEditorDebounced = debounce(this.focusEditor, 500)
+
+    // insertTagAtSelection debouced function avoids broken insert for languages with oncomposition event ex. Korean
+    this.insertTagAtSelectionDebounced = debounce(this.insertTagAtSelection, 1)
   }
 
   getSearchParams = () => {
@@ -382,9 +383,7 @@ class Editarea extends React.Component {
       const lexiqaChanged =
         prevLexiqaTarget &&
         currentLexiqaTarget &&
-        !Immutable.fromJS(prevLexiqa.target).equals(
-          Immutable.fromJS(lexiqa.target),
-        )
+        !fromJS(prevLexiqa.target).equals(fromJS(lexiqa.target))
 
       if (
         //Condition to understand if the job has tm keys or if the check glossary request has been made (blacklist must take precedence over lexiqa)
@@ -416,8 +415,8 @@ class Editarea extends React.Component {
         (!prevProps ||
           !prevProps.segment.inSearch || //Before was not active
           (prevProps.segment.inSearch &&
-            !Immutable.fromJS(prevProps.segment.searchParams).equals(
-              Immutable.fromJS(this.props.segment.searchParams),
+            !fromJS(prevProps.segment.searchParams).equals(
+              fromJS(this.props.segment.searchParams),
             )) || //Before was active but some params change
           (prevProps.segment.inSearch &&
             prevProps.segment.currentInSearch !==
@@ -913,7 +912,7 @@ class Editarea extends React.Component {
       moveDownTagMenuSelection,
       moveUpTagMenuSelection,
       acceptTagMenuSelection,
-      insertTagAtSelection,
+      insertTagAtSelectionDebounced,
     } = this
     const {
       segment: {sourceTagMap, missingTagsInTarget},
@@ -947,23 +946,23 @@ class Editarea extends React.Component {
       case 'right-nav':
         return 'handled'
       case 'insert-tab-tag':
-        insertTagAtSelection('tab')
+        insertTagAtSelectionDebounced('tab')
         return 'handled'
       case 'insert-space-tag':
         if (tagSignatures.space) {
-          insertTagAtSelection('space')
+          insertTagAtSelectionDebounced('space')
           return 'handled'
         } else {
           return 'not-handled'
         }
 
       case 'insert-nbsp-tag':
-        insertTagAtSelection('nbsp')
+        insertTagAtSelectionDebounced('nbsp')
         return 'handled'
       case 'add-issue':
         return 'handled'
       case 'insert-word-joiner-tag':
-        insertTagAtSelection('wordJoiner')
+        insertTagAtSelectionDebounced('wordJoiner')
         return 'handled'
       case 'delete-entity':
         return 'handled'
@@ -1050,32 +1049,6 @@ class Editarea extends React.Component {
 
   onFocus = () => {
     editorSync.editorFocused = true
-  }
-
-  updateTagsInEditor = () => {
-    const {editorState, tagRange} = this.state
-    let newEditorState = editorState
-    let newTagRange = tagRange
-    // Cerco i tag attualmente presenti nell'editor
-    // Todo: Se ci sono altre entità oltre i tag nell'editor, aggiungere l'entityName alla chiamata
-    const entities = DraftMatecatUtils.getEntities(editorState)
-    if (tagRange.length !== entities.length) {
-      const lastSelection = editorState.getSelection()
-      // Aggiorna i tag presenti
-      const {decodedSegment} = DraftMatecatUtils.decodeSegment(editorState)
-      newTagRange = DraftMatecatUtils.matchTag(decodedSegment) // range update
-      // Aggiornamento live dei collegamenti tra i tag non self-closed
-      newEditorState = updateEntityData(
-        editorState,
-        newTagRange,
-        lastSelection,
-        entities,
-      )
-    }
-    this.setState({
-      editorState: newEditorState,
-      tagRange: newTagRange,
-    })
   }
 
   onCompositionStop = () => {

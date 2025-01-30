@@ -70,19 +70,6 @@ class TranslationVersionsHandler implements VersionHandlerInterface {
     }
 
     /**
-     * @param Translations_SegmentTranslationStruct $propagation
-     * @param                                       $propagated_ids
-     */
-    public function savePropagationVersions( Translations_SegmentTranslationStruct $propagation, $propagated_ids ) {
-        $this->dao->savePropagationVersions(
-                $propagation,
-                $this->id_segment,
-                $this->chunkStruct,
-                $propagated_ids
-        );
-    }
-
-    /**
      * Save the current version and perform up-count
      *
      * If returns true it means that a new version of the parent segment was persisted
@@ -203,16 +190,16 @@ class TranslationVersionsHandler implements VersionHandlerInterface {
 
         // If propagated segments exist, start cycle here
         // There is no logic here, the version_number is simply got from $segmentTranslationBeforeChange and saved as is in translation events
-        if ( isset( $params[ 'propagation' ][ 'segments_for_propagation' ][ 'propagated' ] ) and false === empty( $params[ 'propagation' ][ 'segments_for_propagation' ][ 'propagated' ] ) ) {
+        if ( isset( $params[ 'propagation' ][ 'segments_for_propagation' ][ 'propagated' ] ) and !empty( $params[ 'propagation' ][ 'segments_for_propagation' ][ 'propagated' ] ) ) {
 
             $segments_for_propagation = $params[ 'propagation' ][ 'segments_for_propagation' ][ 'propagated' ];
             $segmentTranslations      = [];
 
-            if ( false === empty( $segments_for_propagation[ 'not_ice' ] ) ) {
+            if ( !empty( $segments_for_propagation[ 'not_ice' ] ) ) {
                 $segmentTranslations = array_merge( $segmentTranslations, $segments_for_propagation[ 'not_ice' ][ 'object' ] );
             }
 
-            if ( false === empty( $segments_for_propagation[ 'ice' ] ) ) {
+            if ( !empty( $segments_for_propagation[ 'ice' ] ) ) {
                 $segmentTranslations = array_merge( $segmentTranslations, $segments_for_propagation[ 'ice' ][ 'object' ] );
             }
 

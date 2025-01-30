@@ -29,3 +29,7 @@
 [submodule "plugins/familysearch"]
 	path = plugins/familysearch
 	url = git@github.com:matecat/familysearch_plugin.git
+[submodule "plugins/roblox"]
+        path = plugins/roblox
+        url = git@github.com:matecat/roblox_plugin.git
+

@@ -1,28 +1,23 @@
 import Cookies from 'js-cookie'
-import {saveAs} from 'file-saver'
 import CatToolActions from '../actions/CatToolActions'
 import CommonUtils from './commonUtils'
 import ModalsActions from '../actions/ModalsActions'
 import ConfirmMessageModal from '../components/modals/ConfirmMessageModal'
 import {downloadFileGDrive} from '../api/downloadFileGDrive'
+import {downloadFile} from '../api/downloadFile'
 
 const DownloadFileUtils = {
   downloadFile: function (idJob, pass, callback) {
-    let filename = ''
-    fetch(
-      `${config.basepath}api/v2/translation/${idJob}/${pass}?download_type=all`,
-    )
-      .then((response) => {
-        const header = response.headers.get('Content-Disposition')
-        const parts = header.split(';')
-        filename = parts[1].split('=')[1]
-        filename = filename.replace(/"/g, '')
-        return response.blob()
-      })
-      .then((blob) => {
-        saveAs(blob, filename)
-      })
+    downloadFile({idJob, password: pass})
       .then(() => callback())
+      .catch(() => {
+        const notification = {
+          title: 'Error',
+          text: 'Download failed. Please try again. If the error persists, contact support.',
+          type: 'error',
+        }
+        CatToolActions.addNotification(notification)
+      })
   },
 
   showDownloadErrorMessage: function () {

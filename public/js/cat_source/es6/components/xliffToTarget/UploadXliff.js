@@ -1,4 +1,4 @@
-import React, {useContext, useEffect} from 'react'
+import React, {useContext, useLayoutEffect} from 'react'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper'
 import ModalsActions from '../../actions/ModalsActions'
 
@@ -283,9 +283,10 @@ const init = () => {
 export const UploadXliff = () => {
   const {isUserLogged} = useContext(ApplicationWrapperContext)
 
-  useEffect(() => {
-    init()
-  }, [])
+  useLayoutEffect(() => {
+    console.log('############', isUserLogged)
+    isUserLogged && init()
+  }, [isUserLogged])
 
   return (
     <div id="dropzone_wrapper">

@@ -3,6 +3,7 @@
 namespace API\Commons\Authentication;
 
 use AMQHandler;
+use ApiKeys_ApiKeyStruct;
 use Bootstrap;
 use Exception;
 use INIT;
@@ -19,8 +20,9 @@ use Users_UserStruct;
  */
 trait AuthenticationTrait {
 
-    protected bool              $userIsLogged;
-    protected ?Users_UserStruct $user = null;
+    protected ?ApiKeys_ApiKeyStruct $api_record = null;
+    protected bool                  $userIsLogged;
+    protected ?Users_UserStruct     $user       = null;
 
     /**
      * @throws ReflectionException
@@ -38,6 +40,7 @@ trait AuthenticationTrait {
         $auth               = AuthenticationHelper::getInstance( $_session, $api_key, $api_secret );
         $this->user         = $auth->getUser();
         $this->userIsLogged = $auth->isLogged();
+        $this->api_record   = $auth->getApiRecord();
 
     }
 
@@ -70,15 +73,19 @@ trait AuthenticationTrait {
                 'data'  => [
                         'uid'     => $this->user->uid,
                         'payload' => [
-                                'uid'     => $this->user->uid,
+                                'uid' => $this->user->uid,
                         ]
                 ]
         ] );
-        $queueHandler->publishToTopic( INIT::$SSE_NOTIFICATIONS_QUEUE_NAME, new Message( $message ) );
+        $queueHandler->publishToNodeJsClients( INIT::$SOCKET_NOTIFICATIONS_QUEUE_NAME, new Message( $message ) );
     }
 
-    public function logout(){
+    public function logout() {
         AuthenticationHelper::destroyAuthentication( $_SESSION );
+    }
+
+    public function getApiRecord(): ?ApiKeys_ApiKeyStruct {
+        return $this->api_record;
     }
 
 }

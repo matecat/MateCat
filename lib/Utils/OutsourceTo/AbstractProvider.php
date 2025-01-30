@@ -39,7 +39,7 @@ abstract class OutsourceTo_AbstractProvider {
     protected $_outsource_login_url_ko = "";
 
     /**
-     * These are the url that the vendor system must call in order to confirm the outsource to MateCat
+     * These are the url that the vendor system must call in order to confirm the outsource to Matecat
      *
      * Set them appropriately in the constructor.
      *

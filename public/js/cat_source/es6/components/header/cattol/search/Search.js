@@ -75,14 +75,17 @@ class Search extends React.Component {
     if (this.state.funcFindButton) {
       SearchUtils.execFind(this.state.search)
     }
+
+    const {guess_tag: guessTag} = this.props.userInfo.metadata
+
     this.setState({
       funcFindButton: false,
-      ...(config.tag_projection_enabled === 1 && {
+      ...(guessTag === 1 && {
         previousIsTagProjectionEnabled: true,
       }),
     })
     // disable tag projection
-    if (config.tag_projection_enabled === 1) {
+    if (guessTag === 1) {
       SegmentActions.changeTagProjectionStatus(false)
     }
   }
@@ -262,7 +265,9 @@ class Search extends React.Component {
             ModalsActions.showModalComponent(
               AlertModal,
               {
-                text: errors[0].message,
+                text: errors?.length
+                  ? errors[0].message
+                  : 'We got an error, please contact support',
               },
               'Replace All Alert',
             )

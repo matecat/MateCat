@@ -10,34 +10,31 @@ import {lexiqaIgnoreError} from '../api/lexiqaIgnoreError'
 import SegmentStore from '../stores/SegmentStore'
 import {lexiqaTooltipwarnings} from '../api/lexiqaTooltipwarnings'
 import CatToolActions from '../actions/CatToolActions'
-import CommonUtils from './commonUtils'
+import UserStore from '../stores/UserStore'
 
 const LXQ = {
-  enabled: function () {
-    return !!config.lxq_enabled
+  enabled: function ({lexiqa} = {}) {
+    return (
+      LXQ.checkCanActivate() &&
+      (lexiqa ? lexiqa : UserStore.getUserMetadata()?.lexiqa) === 1
+    )
   },
   enable: function () {
-    if (!config.lxq_enabled) {
-      config.lxq_enabled = 1
-      toggleTagLexica({enabled: true}).then(() => {
-        if (!LXQ.initialized) {
-          LXQ.init()
-        } else {
-          SegmentActions.qaComponentsetLxqIssues(LXQ.lexiqaData.segments)
-        }
-        CatToolActions.onRender()
-        SegmentActions.getSegmentsQa(SegmentStore.getCurrentSegment())
-      })
-    }
+    toggleTagLexica({enabled: true}).then(() => {
+      if (!LXQ.initialized) {
+        LXQ.init()
+      } else {
+        SegmentActions.qaComponentsetLxqIssues(LXQ.lexiqaData.segments)
+      }
+      CatToolActions.onRender()
+      SegmentActions.getSegmentsQa(SegmentStore.getCurrentSegment())
+    })
   },
   disable: function () {
-    if (config.lxq_enabled) {
-      config.lxq_enabled = 0
-      toggleTagLexica({enabled: false}).then(() => {
-        CatToolActions.onRender()
-        SegmentActions.qaComponentsetLxqIssues([])
-      })
-    }
+    toggleTagLexica({enabled: false}).then(() => {
+      CatToolActions.onRender()
+      SegmentActions.qaComponentsetLxqIssues([])
+    })
   },
   checkCanActivate: function () {
     if (isUndefined(this.canActivate)) {
@@ -269,8 +266,6 @@ LXQ.init = function () {
       lxqServer: config.lexiqaServer,
       projectId: config.id_job + '-' + config.password,
     })
-  } else {
-    config.lxq_enabled = false
   }
   /*
    * Add lexiQA event handlers for warnings events
@@ -738,9 +733,9 @@ LXQ.init = function () {
     }
     var notCheckedSegments //store the unchecked segments at startup
     var doQAallSegments = function () {
-      var segments = SegmentStore.getAllSegments
+      var segments = SegmentStore.getAllSegments()
       var notChecked = []
-      $.each(segments, function (keys, segment) {
+      segments.forEach((segment) => {
         var segId = segment.sid
         if (LXQ.lexiqaData.segments.indexOf(segId) < 0) {
           notChecked.push(segment)
@@ -762,14 +757,13 @@ LXQ.init = function () {
       }
     }
 
-    var initPopup = function () {
-      lexiqaTooltipwarnings().then((data) => {
-        warningMessages = data
-        modulesNoHighlight = Object.entries(data)
-          .filter(([key]) => key[key.length - 1] === 'g')
-          .map(([key]) => key)
-      })
-    }
+    lexiqaTooltipwarnings().then((data) => {
+      warningMessages = data
+      modulesNoHighlight = Object.entries(data)
+        .filter(([key]) => key[key.length - 1] === 'g')
+        .map(([key]) => key)
+    })
+
     // Interfaces
     $.extend(LXQ, {
       getRanges: getRanges,
@@ -779,17 +773,10 @@ LXQ.init = function () {
       ignoreError: ignoreError,
       redoHighlighting: redoHighlighting,
       doQAallSegments: doQAallSegments,
-      initPopup: initPopup,
       partnerid: partnerid,
       projectid: config.id_job + '-' + config.password,
     })
   })(jQuery, config, window, LXQ)
 }
-
-document.addEventListener('DOMContentLoaded', () => {
-  if (LXQ.enabled()) {
-    LXQ.init()
-  }
-})
 
 export default LXQ

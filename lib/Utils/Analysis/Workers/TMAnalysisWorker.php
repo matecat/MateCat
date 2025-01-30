@@ -221,8 +221,6 @@ class TMAnalysisWorker extends AbstractWorker {
 
         $suggestion = $filter->fromLayer2ToLayer0( $suggestion );
 
-        $segment = ( new Segments_SegmentDao() )->getById( $queueElement->params->id_segment );
-
         foreach ( $this->_matches as $k => $m ) {
             $this->_matches[ $k ][ 'raw_segment' ]     = $filter->fromLayer2ToLayer0( $this->_matches[ $k ][ 'raw_segment' ] );
             $this->_matches[ $k ][ 'segment' ]         = $filter->fromLayer2ToLayer0( html_entity_decode( $this->_matches[ $k ][ 'segment' ] ) );
@@ -239,8 +237,8 @@ class TMAnalysisWorker extends AbstractWorker {
         $tm_data[ 'suggestion' ]             = $suggestion;
         $tm_data[ 'suggestions_array' ]      = $suggestion_json;
         $tm_data[ 'match_type' ]             = $new_match_type;
-        $tm_data[ 'eq_word_count' ]          = ( $eq_words > $segment->raw_word_count ) ? $segment->raw_word_count : $eq_words;
-        $tm_data[ 'standard_word_count' ]    = ( $standard_words > $segment->raw_word_count ) ? $segment->raw_word_count : $standard_words;
+        $tm_data[ 'eq_word_count' ]          = ( $eq_words > $queueElement->params->raw_word_count ) ? $queueElement->params->raw_word_count : $eq_words;
+        $tm_data[ 'standard_word_count' ]    = ( $standard_words > $queueElement->params->raw_word_count ) ? $queueElement->params->raw_word_count : $standard_words;
         $tm_data[ 'tm_analysis_status' ]     = "DONE";
         $tm_data[ 'warning' ]                = (int)$check->thereAreErrors();
         $tm_data[ 'serialized_errors_list' ] = $this->mergeJsonErrors( $err_json, $err_json2 );
@@ -274,7 +272,7 @@ class TMAnalysisWorker extends AbstractWorker {
         $this->_incrementAnalyzedCount( $queueElement->params->pid, $eq_words, $standard_words );
         $this->_decSegmentsToAnalyzeOfWaitingProjects( $queueElement->params->pid );
         $this->_tryToCloseProject( $queueElement->params );
-        
+
     }
 
     /**
@@ -518,15 +516,17 @@ class TMAnalysisWorker extends AbstractWorker {
      */
     protected function _getMatches( QueueElement $queueElement ): array {
 
-        $_config              = [];
-        $_config[ 'segment' ] = $queueElement->params->segment;
-        $_config[ 'source' ]  = $queueElement->params->source;
-        $_config[ 'target' ]  = $queueElement->params->target;
-        $_config[ 'email' ]   = INIT::$MYMEMORY_TM_API_KEY;
+        $_config                 = [];
+        $_config[ 'pid' ]        = $queueElement->params->pid;
+        $_config[ 'segment' ]    = $queueElement->params->segment;
+        $_config[ 'source' ]     = $queueElement->params->source;
+        $_config[ 'target' ]     = $queueElement->params->target;
+        $_config[ 'email' ]      = INIT::$MYMEMORY_TM_API_KEY;
 
         $_config[ 'context_before' ]    = $queueElement->params->context_before;
         $_config[ 'context_after' ]     = $queueElement->params->context_after;
         $_config[ 'additional_params' ] = @$queueElement->params->additional_params;
+        $_config[ 'priority_key' ] = $queueElement->params->tm_prioritization ?? null;
 
         $jobsMetadataDao = new MetadataDao();
         $dialect_strict  = $jobsMetadataDao->get( $queueElement->params->id_job, $queueElement->params->password, 'dialect_strict', 10 * 60 );
@@ -535,11 +535,24 @@ class TMAnalysisWorker extends AbstractWorker {
             $_config[ 'dialect_strict' ] = $dialect_strict->value == 1;
         }
 
+        // penalty_key
+        $penalty_key = [];
         $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $queueElement->params->tm_keys, 'r', 'tm' );
+
         if ( is_array( $tm_keys ) && !empty( $tm_keys ) ) {
             foreach ( $tm_keys as $tm_key ) {
                 $_config[ 'id_user' ][] = $tm_key->key;
+
+                if(isset($tm_key->penalty) and is_numeric($tm_key->penalty)){
+                    $penalty_key[] = $tm_key->penalty;
+                } else {
+                    $penalty_key[] = 0;
+                }
             }
+        }
+
+        if(!empty($penalty_key)){
+            $_config['penalty_key'] = $penalty_key;
         }
 
         $_config[ 'num_result' ] = 3;
@@ -639,6 +652,9 @@ class TMAnalysisWorker extends AbstractWorker {
 
             $config = $mtEngine->getConfigStruct();
             $config = array_merge( $config, $_config );
+
+            // set for lara engine in case, this is needed to catch all owner keys
+            $config[ 'all_job_tm_keys' ] = $queueElement->params->tm_keys;
 
             //if a callback is not set only the first argument is returned, get the config params from the callback
             $config = $this->featureSet->filter( 'analysisBeforeMTGetContribution', $config, $mtEngine, $queueElement, $mt_evaluation );

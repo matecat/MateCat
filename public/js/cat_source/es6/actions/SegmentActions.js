@@ -78,7 +78,9 @@ const SegmentActions = {
       .catch((errors) => {
         var notification = {
           title: 'Error',
-          text: errors[0].message,
+          text: errors?.length
+            ? errors[0].message
+            : 'We got an error, please contact support',
           type: 'error',
         }
         CatToolActions.addNotification(notification)
@@ -448,7 +450,6 @@ const SegmentActions = {
         } else {
           SegmentActions.setSegmentAsTagged(sid)
           SegmentActions.autoFillTagsInTarget(sid)
-          OfflineUtils.startOfflineMode()
         }
       })
       .finally(function () {
@@ -489,7 +490,6 @@ const SegmentActions = {
   },
   changeTagProjectionStatus: function (enabled) {
     //TODO: transform paremeter to bool
-    config.tag_projection_enabled = enabled ? 1 : 0
     toggleTagProjectionJob({enabled}).then(() => {
       AppDispatcher.dispatch({
         actionType: SegmentConstants.SET_GUESS_TAGS,
@@ -899,7 +899,7 @@ const SegmentActions = {
           DraftMatecatUtils.removeTagsFromText(text),
         ),
       }).catch(() => {
-        OfflineUtils.failedConnection(sid, 'getGlossaryForSegment')
+        OfflineUtils.failedConnection()
       })
       return
     }
@@ -948,7 +948,7 @@ const SegmentActions = {
             DraftMatecatUtils.removeTagsFromText(request.text),
           ),
         }).catch(() => {
-          OfflineUtils.failedConnection(request.sid, 'getGlossaryForSegment')
+          OfflineUtils.failedConnection()
         })
       }
     }
@@ -968,7 +968,7 @@ const SegmentActions = {
       sourceLanguage,
       targetLanguage,
     }).catch(() => {
-      OfflineUtils.failedConnection(0, 'glossary')
+      OfflineUtils.failedConnection()
       SegmentStore.isSearchingGlossaryInTarget = false
     })
   },
@@ -994,7 +994,7 @@ const SegmentActions = {
     deleteGlossaryItem(data)
       .then(() => {})
       .catch(() => {
-        OfflineUtils.failedConnection(0, 'deleteGlossaryItem')
+        OfflineUtils.failedConnection()
       })
   },
 
@@ -1035,7 +1035,7 @@ const SegmentActions = {
             message: errors[0].message,
           })
         } else {
-          OfflineUtils.failedConnection(0, 'addGlossaryItem')
+          OfflineUtils.failedConnection()
         }
       })
   },
@@ -1067,7 +1067,7 @@ const SegmentActions = {
     updateGlossaryItem(data)
       .then(() => {})
       .catch(() => {
-        OfflineUtils.failedConnection(0, 'updateGlossaryItem')
+        OfflineUtils.failedConnection()
       })
   },
 
@@ -1129,10 +1129,10 @@ const SegmentActions = {
     })
   },
 
-  getContributions: function (sid, multiMatchLangs) {
-    TranslationMatches.getContribution(sid, 0, multiMatchLangs)
-    TranslationMatches.getContribution(sid, 1, multiMatchLangs)
-    TranslationMatches.getContribution(sid, 2, multiMatchLangs)
+  getContributions: function (sid, multiMatchLangs, force) {
+    TranslationMatches.getContribution(sid, 0, multiMatchLangs, force)
+    TranslationMatches.getContribution(sid, 1, multiMatchLangs, force)
+    TranslationMatches.getContribution(sid, 2, multiMatchLangs, force)
   },
 
   getContribution: function (sid, multiMatchLangs, force) {
@@ -1661,7 +1661,7 @@ const SegmentActions = {
         })
       })
       .catch(() => {
-        OfflineUtils.failedConnection(0, 'getWarning')
+        OfflineUtils.failedConnection()
       })
     // get tm keys
     new Promise((resolve) => {
@@ -1783,7 +1783,7 @@ const SegmentActions = {
         }
       })
       .catch(() => {
-        OfflineUtils.failedConnection(requestData, 'setCurrentSegment')
+        OfflineUtils.failedConnection()
       })
   },
   refreshTagMap: function () {

@@ -47,6 +47,7 @@ export const TEMPLATE_PROPS_BY_TAB = {
     SCHEMA_KEYS.tm,
     SCHEMA_KEYS.getPublicMatches,
     SCHEMA_KEYS.pretranslate100,
+    SCHEMA_KEYS.tmPrioritization,
   ],
   [SETTINGS_PANEL_TABS.machineTranslation]: [SCHEMA_KEYS.mt],
   [SETTINGS_PANEL_TABS.qualityFramework]: [SCHEMA_KEYS.qaModelTemplateId],

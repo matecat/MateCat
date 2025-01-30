@@ -7,21 +7,21 @@ import {EventEmitter} from 'events'
 import ManageConstants from '../constants/ManageConstants'
 import UserConstants from '../constants/UserConstants'
 import assign from 'object-assign'
-import Immutable from 'immutable'
+import {fromJS} from 'immutable'
 
 EventEmitter.prototype.setMaxListeners(0)
 
 const UserStore = assign({}, EventEmitter.prototype, {
-  teams: Immutable.fromJS([]),
+  teams: fromJS([]),
   selectedTeam: {},
   userInfo: null,
 
   updateTeams: function (teams) {
-    this.teams = Immutable.fromJS(teams)
+    this.teams = fromJS(teams)
   },
 
   addTeam: function (team) {
-    this.teams = this.teams.concat(Immutable.fromJS([team]))
+    this.teams = this.teams.concat(fromJS([team]))
   },
   updateUser: function (user) {
     this.userInfo = user
@@ -36,7 +36,7 @@ const UserStore = assign({}, EventEmitter.prototype, {
       return org.get('id') == team.id
     })
     let index = this.teams.indexOf(teamOld)
-    this.teams = this.teams.setIn([index], Immutable.fromJS(team))
+    this.teams = this.teams.setIn([index], fromJS(team))
     return this.teams.get(index)
   },
 
@@ -54,10 +54,10 @@ const UserStore = assign({}, EventEmitter.prototype, {
       return org.get('id') == team.get('id')
     })
     let index = this.teams.indexOf(teamOld)
-    this.teams = this.teams.setIn([index, 'members'], Immutable.fromJS(members))
+    this.teams = this.teams.setIn([index, 'members'], fromJS(members))
     this.teams = this.teams.setIn(
       [index, 'pending_invitations'],
-      Immutable.fromJS(pendingInvitations),
+      fromJS(pendingInvitations),
     )
     return this.teams.get(index)
   },
@@ -174,7 +174,7 @@ AppDispatcher.register(function (action) {
     case ManageConstants.OPEN_MODIFY_TEAM_MODAL:
       UserStore.emitChange(
         action.actionType,
-        Immutable.fromJS(action.team),
+        fromJS(action.team),
         action.hideChangeName,
       )
       break

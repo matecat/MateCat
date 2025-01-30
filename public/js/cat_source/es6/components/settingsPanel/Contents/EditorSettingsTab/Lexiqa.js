@@ -4,7 +4,7 @@ import LXQ from '../../../../utils/lxq.main'
 import ApplicationStore from '../../../../stores/ApplicationStore'
 import {ApplicationWrapperContext} from '../../../common/ApplicationWrapper'
 
-export const checkLexiqaIsEnabled = ({
+const checkLexiqaIsEnabled = ({
   sourceLang,
   targetLangs,
   acceptedLanguages = config.lexiqa_languages,

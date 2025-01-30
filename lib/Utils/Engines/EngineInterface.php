@@ -52,4 +52,22 @@ interface Engines_EngineInterface {
      */
     public function getEngineRow();
 
+    /**
+     * @return bool
+     */
+    public function isAdaptive(): bool;
+
+    /**
+     * @return void
+     */
+    public function importMemory( string $filePath, string $memoryKey, Users_UserStruct $user );
+
+    /**
+     * @param array      $projectRow
+     * @param array|null $segments
+     *
+     * @return void
+     */
+    public function syncMemories( array $projectRow, ?array $segments = [] );
+
 }

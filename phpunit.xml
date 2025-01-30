@@ -1,35 +1,27 @@
-<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/5.7/phpunit.xsd"
-             bootstrap="tests/test_helper.php"
-             colors="true"
-             processIsolation="false"
-             stopOnError="false"
-             stopOnFailure="false"
-             beStrictAboutTestsThatDoNotTestAnything="true">
-    <php>
-        <includePath>tests/TestHelpers</includePath>
-    </php>
-    <testsuites>
-        <!--<testsuite name="cURL based tests">-->
-            <!--<directory>test/integration</directory>-->
-        <!--</testsuite>-->
-        <testsuite name="Unit tests">
-            <directory>tests/unit/</directory>
-        </testsuite>
-    </testsuites>
-
-    <filter>
-        <whitelist processUncoveredFilesFromWhitelist="true">
-            <directory suffix=".php">./lib</directory>
-            <exclude>
-                <file>./lib/Utils/Analysis/FastAnalysis.php</file>
-                <file>./lib/Utils/Analysis/TmAnalysis.php</file>
-                <file>./lib/Utils/TaskRunner/Executor.php</file>
-                <file>./lib/Utils/fileupload/index.php</file>
-                <file>./lib/View/APIDoc.php</file>
-                <file>./lib/View/templates/_APIDoc.php</file>
-            </exclude>
-        </whitelist>
-    </filter>
-
+<?xml version="1.0"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd" bootstrap="tests/test_helper.php" colors="true" processIsolation="false" stopOnError="false" stopOnFailure="false" beStrictAboutTestsThatDoNotTestAnything="true">
+  <coverage processUncoveredFiles="true">
+    <include>
+      <directory suffix=".php">./lib</directory>
+    </include>
+    <exclude>
+      <file>./lib/Utils/Analysis/FastAnalysis.php</file>
+      <file>./lib/Utils/Analysis/TmAnalysis.php</file>
+      <file>./lib/Utils/TaskRunner/Executor.php</file>
+      <file>./lib/Utils/fileupload/index.php</file>
+      <file>./lib/View/APIDoc.php</file>
+      <file>./lib/View/templates/_APIDoc.php</file>
+    </exclude>
+  </coverage>
+  <php>
+    <includePath>tests/TestHelpers</includePath>
+  </php>
+  <testsuites>
+    <!--<testsuite name="cURL based tests">-->
+    <!--<directory>test/integration</directory>-->
+    <!--</testsuite>-->
+    <testsuite name="Unit tests">
+      <directory>tests/unit/</directory>
+    </testsuite>
+  </testsuites>
 </phpunit>

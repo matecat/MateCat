@@ -92,7 +92,7 @@ export const Xliff12 = () => {
   return (
     <Accordion
       id="xliff12"
-      title={<span className={isModified ? 'unsaved' : ''}>Xliff 1.2</span>}
+      title={<span className={isModified ? 'unsaved' : ''}>XLIFF 1.2</span>}
       expanded={isExpanded}
       onShow={() => setIsExpanded((prevState) => !prevState)}
     >

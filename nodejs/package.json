@@ -1,23 +1,31 @@
 {
-  "name": "matecat-sse",
-  "version": "1.0.0",
-  "description": "MateCAT SSE server",
-  "main": "server.js",
+  "name": "matecat-socket-server",
+  "version": "2.0.0",
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20"
   },
+  "private": true,
+  "files": [
+    "src/"
+  ],
   "dependencies": {
     "node-ini": "^1.0.0",
-    "sse-channel": "^4.0.0",
-    "stompit": "^1.0.0",
+    "cors": "2.8.5",
+    "custom-env": "2.0.6",
+    "ip-regex": "^4.3.0",
+    "jsonwebtoken": "^9.0.2",
+    "socket.io": "^4.8.1",
+    "@socket.io/cluster-adapter": "^0.2.2",
+    "@socket.io/sticky": "^1.0.4",
+    "ioredis": "^5.4.2",
+    "@socket.io/redis-adapter": "^8.3.0",
+    "stompit": "1.0.0",
     "uuid": "^10.0.0",
-    "winston": "^3.3.3"
+    "websocket": "1.0.34",
+    "winston": "^3",
+    "winston-daily-rotate-file": "^4"
   },
-  "devDependencies": {},
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
-  },
-  "author": "Fabrizio Regini",
-  "license": "ISC"
+    "start": "node --max-semi-space-size=256 socketServer.js"
+  }
 }

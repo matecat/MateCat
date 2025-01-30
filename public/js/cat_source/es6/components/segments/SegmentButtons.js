@@ -23,18 +23,28 @@ export const SegmentButton = ({segment, disabled, isReview}) => {
     Shortcuts.cattol.events.translate_nextUntranslated.keystrokes[
       Shortcuts.shortCutsKeyType
     ],
-    (e) =>
-      config.isReview
-        ? clickOnApprovedButton(e, true)
-        : clickOnTranslatedButton(e, true),
+    (e) => {
+      if (!disabled) {
+        setTimeout(() => {
+          config.isReview
+            ? clickOnApprovedButton(e, true)
+            : clickOnTranslatedButton(e, true)
+        }, 150)
+      }
+    },
     {enableOnContentEditable: true},
   )
   useHotkeys(
     Shortcuts.cattol.events.translate.keystrokes[Shortcuts.shortCutsKeyType],
-    (e) =>
-      config.isReview
-        ? clickOnApprovedButton(e, false)
-        : clickOnTranslatedButton(e, false),
+    (e) => {
+      if (!disabled) {
+        setTimeout(() => {
+          config.isReview
+            ? clickOnApprovedButton(e, false)
+            : clickOnTranslatedButton(e, false)
+        }, 150)
+      }
+    },
     {enableOnContentEditable: true},
   )
 
@@ -53,8 +63,8 @@ export const SegmentButton = ({segment, disabled, isReview}) => {
       const userInfo = UserStore.getUser()
       const event = {
         event: 'first_segment_confirm',
-        userStatus: 'loggedUser',
-        userId: userInfo.user.uid,
+        userStatus: userInfo ? 'loggedUser' : 'notLoggedUser',
+        userId: userInfo ? userInfo.user.uid : undefined,
         idProject: parseInt(idProject),
       }
       CommonUtils.dispatchAnalyticsEvents(event)
@@ -354,7 +364,7 @@ export const SegmentButton = ({segment, disabled, isReview}) => {
           {' '}
           {config.status_labels.TRANSLATED}{' '}
         </a>
-        <p>{isMac ? 'CMD' : 'CTRL'} ENTER</p>
+        <p>{isMac ? 'CMD' : 'CTRL'}+ENTER</p>
       </li>
     )
   }
@@ -376,7 +386,7 @@ export const SegmentButton = ({segment, disabled, isReview}) => {
           {' '}
           {config.status_labels.APPROVED}{' '}
         </a>
-        <p>{isMac ? 'CMD' : 'CTRL'} ENTER</p>
+        <p>{isMac ? 'CMD' : 'CTRL'}+ENTER</p>
       </li>
     )
   }

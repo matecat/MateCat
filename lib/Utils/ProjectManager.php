@@ -113,6 +113,8 @@ class ProjectManager {
      */
     protected $metadataDao;
 
+    protected $tm_prioritization;
+
     /**
      * ProjectManager constructor.
      *
@@ -199,7 +201,8 @@ class ProjectManager {
                             'ai_assistant'                            => null,
                             'filters_extraction_parameters'           => new RecursiveArrayObject(),
                             'xliff_parameters'                        => new RecursiveArrayObject(),
-                            'mt_evaluation'                           => false
+                            'mt_evaluation'                           => false,
+                            'tm_prioritization'                       => null
                     ] );
         }
 
@@ -890,7 +893,7 @@ class ProjectManager {
 
             //Allow projects with less than 250.000 words or characters ( for cjk languages )
             if ( $this->files_word_count > INIT::$MAX_SOURCE_WORDS ) {
-                throw new Exception( "MateCat is unable to create your project. Please contact us at " . INIT::$SUPPORT_MAIL . ", we will be happy to help you!", 128 );
+                throw new Exception( "Matecat is unable to create your project. Please contact us at " . INIT::$SUPPORT_MAIL . ", we will be happy to help you!", 128 );
             }
 
             $featureSet->run( "beforeInsertSegments", $this->projectStructure,
@@ -1195,8 +1198,8 @@ class ProjectManager {
                         $this->getSingleS3QueueFile( $fileName );
                     }
 
-                    $this->tmxServiceWrapper->addTmxInMyMemory( $file );
-                    $this->features->run( 'postPushTMX', $file, $this->projectStructure[ 'id_customer' ] );
+                    $userStruct = ( new Users_UserDao() )->setCacheTTL( 60 * 60 )->getByUid( $this->projectStructure[ 'uid' ] );
+                    $this->tmxServiceWrapper->addTmxInMyMemory( $file, $userStruct );
 
                 } else {
                     //don't call the postPushTMX for normal files
@@ -1336,6 +1339,7 @@ class ProjectManager {
                     $newTmKey->tm              = true;
                     $newTmKey->glos            = true;
                     $newTmKey->owner           = true;
+                    $newTmKey->penalty         = $tmKeyObj[ 'penalty' ] ?? null;
                     $newTmKey->name            = $tmKeyObj[ 'name' ];
                     $newTmKey->key             = $tmKeyObj[ 'key' ];
                     $newTmKey->r               = $tmKeyObj[ 'r' ];
@@ -1363,6 +1367,7 @@ class ProjectManager {
             $newJob->id_tms            = $projectStructure[ 'tms_engine' ];
             $newJob->id_mt_engine      = $projectStructure[ 'target_language_mt_engine_id' ][ $target ];
             $newJob->create_date       = date( "Y-m-d H:i:s" );
+            $newJob->last_update       = date( "Y-m-d H:i:s" );
             $newJob->subject           = $projectStructure[ 'job_subject' ];
             $newJob->owner             = $projectStructure[ 'owner' ];
             $newJob->job_first_segment = $this->min_max_segments_id[ 'job_first_segment' ];
@@ -1387,6 +1392,12 @@ class ProjectManager {
             $projectStructure[ 'array_jobs' ][ 'payable_rates' ]->offsetSet( $newJob->id, $payableRates );
 
             $jobsMetadataDao = new Jobs\MetadataDao();
+
+            // tm_prioritization
+            if ( isset( $projectStructure[ 'tm_prioritization' ] ) ) {
+                $jobsMetadataDao->set( $newJob->id, $newJob->password, 'tm_prioritization', ($projectStructure[ 'tm_prioritization' ] == true ? "1" : "0") );
+            }
+
             // dialect_strict
             if ( isset( $projectStructure[ 'dialect_strict' ] ) ) {
                 $dialectStrictObj = json_decode( $projectStructure[ 'dialect_strict' ], true );
@@ -2391,8 +2402,8 @@ class ProjectManager {
              */
             $this->projectStructure[ 'segments' ][ $fid ][ $position ]->id = $id_segment;
 
-            /** @var Segments_SegmentOriginalDataStruct $segmentOriginalDataStruct */
-            $segmentOriginalDataStruct = @$this->projectStructure[ 'segments-original-data' ][ $fid ][ $position ];
+            /** @var ?Segments_SegmentOriginalDataStruct $segmentOriginalDataStruct */
+            $segmentOriginalDataStruct = $this->projectStructure[ 'segments-original-data' ][ $fid ][ $position ] ?? null;
 
             if ( isset( $segmentOriginalDataStruct->map ) ) {
 
@@ -2896,7 +2907,7 @@ class ProjectManager {
      * setSegmentIdForNotes
      *
      * Adds notes to segment, taking into account that a same note may be assigned to
-     * more than one MateCat segment, due to the <mrk> tags.
+     * more than one Matecat segment, due to the <mrk> tags.
      *
      * Example:
      * ['notes'][ $internal_id] => array( 'aaa' );

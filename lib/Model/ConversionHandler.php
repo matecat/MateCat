@@ -38,7 +38,8 @@ class ConversionHandler {
     /**
      * @var FeatureSet
      */
-    public $features;
+    public         $features;
+    protected bool $isReconversion = false;
 
     /**
      * ConversionHandler constructor.
@@ -182,7 +183,7 @@ class ConversionHandler {
 
                     if ( !$res_insert ) {
                         //custom error message passed directly to JavaScript client and displayed as is
-                        $convertResult[ 'errorMessage' ] = "Error: File upload failed because you have MateCat running in multiple tabs. Please close all other MateCat tabs in your browser.";
+                        $convertResult[ 'errorMessage' ] = "Error: File upload failed because you have Matecat running in multiple tabs. Please close all other Matecat tabs in your browser.";
 
                         $this->result->changeCode( ConversionHandlerStatus::FILESYSTEM_ERROR );
                         $this->result->addError( $convertResult[ 'errorMessage' ], AbstractFilesStorage::basename_fix( $this->file_name ) );
@@ -225,7 +226,7 @@ class ConversionHandler {
         if ( !empty( $cachedXliffPath ) ) {
 
             //FILE Found in cache, destroy the already present shasum for other languages ( if user swapped languages )
-            $uploadDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->cookieDir;
+            $uploadDir    = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->cookieDir;
             $fs->deleteHashFromUploadDir( $uploadDir, $hash_name_for_disk );
 
             if ( is_file( $file_path ) ) {
@@ -269,6 +270,7 @@ class ConversionHandler {
                         $params = $this->filters_extraction_parameters->xml;
                     }
                     break;
+                case "yml":
                 case "yaml":
                     if ( isset( $this->filters_extraction_parameters->yaml ) ) {
                         $params = $this->filters_extraction_parameters->yaml;
@@ -290,6 +292,12 @@ class ConversionHandler {
                 case "pptx":
                     if ( isset( $this->filters_extraction_parameters->ms_powerpoint ) ) {
                         $params = $this->filters_extraction_parameters->ms_powerpoint;
+                    }
+                    break;
+                case "dita":
+                case "ditamap":
+                    if ( isset( $this->filters_extraction_parameters->dita ) ) {
+                        $params = $this->filters_extraction_parameters->dita;
                     }
                     break;
             }
@@ -560,4 +568,9 @@ class ConversionHandler {
     public function setFiltersExtractionParameters( ?FiltersConfigTemplateStruct $filters_extraction_parameters = null ) {
         $this->filters_extraction_parameters = $filters_extraction_parameters;
     }
+
+    public function setReconversion( bool $isReconversion ) {
+        $this->isReconversion = $isReconversion;
+    }
+
 }

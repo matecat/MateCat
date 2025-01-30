@@ -120,13 +120,17 @@ let TranslationMatches = {
             })
 
     if (!currentSegment) return
-
+    //If segment locked or ICE
     if (SegmentUtils.isIceSegment(currentSegment) && !currentSegment.unlocked) {
       SegmentActions.addClassToSegment(currentSegment.sid, 'loaded')
       return Promise.resolve()
     }
     let callNewContributions = force
-    if (SegmentStore.lastTranslatedSegmentId) {
+    //Check similar segments
+    if (
+      SegmentStore.lastTranslatedSegmentId &&
+      SegmentStore.getSegmentByIdToJS(SegmentStore.lastTranslatedSegmentId)
+    ) {
       /* If the segment just translated is equal or similar (Levenshtein distance) to the
        * current segment force to reload the matches
        **/
@@ -144,6 +148,7 @@ let TranslationMatches = {
 
       callNewContributions = areSimilar || isEqual || force
     }
+    //If the segment already has contributions and is not similar to the last translated
     if (
       currentSegment.contributions &&
       currentSegment.contributions.matches.length > 0 &&
@@ -162,22 +167,15 @@ let TranslationMatches = {
       return Promise.resolve()
     }
     const id_segment_original = currentSegment.original_sid
-    const nextUntranslated = SegmentStore.getNextSegment(
-      id_segment_original,
-      null,
-      8,
-    )
-    const nextSegment = SegmentStore.getNextSegment(
-      id_segment_original,
-      null,
-      null,
-    )
+    const nextSegment = SegmentStore.getNextSegment({
+      current_sid: segmentSid,
+    })
     // `next` and `untranslated next` are the same
     if (
       next === 2 &&
-      nextUntranslated &&
+      currentSegment &&
       nextSegment &&
-      nextUntranslated === nextSegment
+      id_segment_original === nextSegment.sid
     ) {
       return Promise.resolve()
     }
@@ -186,16 +184,19 @@ let TranslationMatches = {
       setTimeout(function () {
         TranslationMatches.getContribution(segmentSid, next)
       }, 3000)
-      console.log('SSE: ID_CLIENT not found')
+      // console.log('SSE: ID_CLIENT not found')
       return Promise.resolve()
     }
-
+    const {contextListBefore, contextListAfter} =
+      SegmentUtils.getSegmentContext(id_segment_original)
     return getContributions({
       idSegment: id_segment_original,
       target: currentSegment.segment,
       crossLanguages: crossLanguageSettings
         ? [crossLanguageSettings.primary, crossLanguageSettings.secondary]
         : [],
+      contextListBefore,
+      contextListAfter,
     }).catch((errors) => {
       UI.processErrors(errors, 'getContribution')
       TranslationMatches.renderContributionErrors(errors, id_segment_original)
@@ -227,7 +228,7 @@ let TranslationMatches = {
       id,
       sid,
     }).catch(() => {
-      OfflineUtils.failedConnection(0, 'deleteContribution')
+      OfflineUtils.failedConnection()
     })
   },
   getPercentuageClass: function (match) {

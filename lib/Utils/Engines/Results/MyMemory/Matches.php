@@ -35,6 +35,8 @@ class Engines_Results_MyMemory_Matches {
     public $source;
     public $target;
 
+    public $penalty;
+
     public function __construct() {
 
         //NEEDED TO UNIFORM DATA as array( $matches )
@@ -136,6 +138,7 @@ class Engines_Results_MyMemory_Matches {
         $this->tm_properties    = array_key_exists( 'tm_properties', $match ) ? json_decode( $match[ 'tm_properties' ], true ) : [];
         $this->target           = array_key_exists( 'target', $match ) ? $match[ 'target' ] : $target;
         $this->source           = array_key_exists( 'source', $match ) ? $match[ 'source' ] : $source;
+        $this->penalty          = array_key_exists( 'penalty', $match ) ? $match[ 'penalty' ] : $source;
 
         $this->prop = $match[ 'prop' ];
 

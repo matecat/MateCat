@@ -3,7 +3,7 @@ import usePortal from '../hooks/usePortal'
 import Header from '../components/header/Header'
 import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper'
 import Footer from '../components/footer/Footer'
-import SseListener from '../sse/SseListener'
+import SocketListener from '../sse/SocketListener'
 import {mountPage} from './mountPage'
 import {UploadXliff} from '../components/xliffToTarget/UploadXliff'
 
@@ -25,13 +25,13 @@ export const XliffToTarget = () => {
         />
       </HeaderPortal>
       <div className="wrapper-xliff-to-target">
-        <UploadXliff />
+        {typeof isUserLogged !== 'undefined' && <UploadXliff />}
       </div>
       <Footer />
-      {/*<SseListener
+      <SocketListener
         isAuthenticated={isUserLogged}
         userId={isUserLogged ? userInfo.user.uid : null}
-      />*/}
+      />
     </>
   )
 }

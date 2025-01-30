@@ -50,6 +50,7 @@ const NotificationItem = ({
     }, 50)
 
     if (autoDismiss) {
+      clearTimeout(_notificationTimer.current)
       _notificationTimer.current = setTimeout(() => {
         hideNotification()
       }, timer)

@@ -2,11 +2,9 @@
  * Duplicated from draft-js - not part of the public API
  */
 
-import Immutable from 'immutable'
+import {OrderedMap} from 'immutable'
 import {genKey} from 'draft-js'
 import ContentBlockNode from './src/model/immutable/ContentBlockNode'
-
-const {OrderedMap} = Immutable
 
 const randomizeContentBlockNodeKeys = (blockMap) => {
   const newKeysRef = {}

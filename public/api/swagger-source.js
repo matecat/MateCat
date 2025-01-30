@@ -105,7 +105,7 @@ var spec = {
             name: 'mt_engine',
             in: 'formData',
             description:
-              'Identifier for Machine Translation Engine. 0 deactivates MT, 1 uses ModernMT Lite, other values correspond to the user\'s personal MT engines (available engines are retrieved via the /api/v2/engines/list endpoint).',
+              "Identifier for Machine Translation Engine. 0 deactivates MT, 1 uses ModernMT Lite, other values correspond to the user's personal MT engines (available engines are retrieved via the /api/v2/engines/list endpoint).",
             required: false,
             type: 'integer',
             default: 1,
@@ -214,7 +214,8 @@ var spec = {
           {
             name: 'dialect_strict',
             in: 'formData',
-            description: 'Specify if you want matches only from dialect (excluding the other language variants)',
+            description:
+              'Specify if you want matches only from dialect (excluding the other language variants)',
             required: false,
             type: 'string',
             example: '{"it-IT": true, "en-US": false, "fr-FR": false}',
@@ -225,20 +226,18 @@ var spec = {
             description: 'Load specific MMT glossaries',
             required: false,
             type: 'string',
-            example: '{"glossaries": [1, 2, 3, 4], "ignore_glossary_case": true }',
+            example:
+              '{"glossaries": [1, 2, 3, 4], "ignore_glossary_case": true }',
           },
           {
             name: 'deepl_formality',
             in: 'formData',
-            description: 'DeepL formality (choose between `default`, `prefer_less` or `prefer_more`)',
+            description:
+              'DeepL formality (choose between `default`, `prefer_less` or `prefer_more`)',
             required: false,
             type: 'string',
             default: 'default',
-            enum: [
-              'default',
-              'prefer_less',
-              'prefer_more'
-            ],
+            enum: ['default', 'prefer_less', 'prefer_more'],
           },
           {
             name: 'deepl_id_glossary',
@@ -251,10 +250,12 @@ var spec = {
           {
             name: 'filters_extraction_parameters',
             in: 'formData',
-            description: 'Set the filters extraction parameters throught a json string',
+            description:
+              'Set the filters extraction parameters throught a json string',
             required: false,
             type: 'string',
-            example: '{"name": "parameters": {"json": {"extract_arrays": true, "escape_forward_slashes": false, "translate_keys": ["key"], "do_not_translate_keys": [], "context_keys": [], "character_limit": []}}}',
+            example:
+              '{"name": "parameters": {"json": {"extract_arrays": true, "escape_forward_slashes": false, "translate_keys": ["key"], "do_not_translate_keys": [], "context_keys": [], "character_limit": []}}}',
           },
           {
             name: 'xliff_parameters',
@@ -262,12 +263,14 @@ var spec = {
             description: 'Specific parameters for the analysis of Xliff files',
             required: false,
             type: 'string',
-            example: '{"xliff12": [{"analysis": "pre-translated", "states": ["final"], "editor": "new"}], "xliff20": []}',
+            example:
+              '{"xliff12": [{"analysis": "pre-translated", "states": ["final"], "editor": "new"}], "xliff20": []}',
           },
           {
             name: 'xliff_parameters_template_id',
             in: 'formData',
-            description: 'Load a specific template for the analysis of Xliff files',
+            description:
+              'Load a specific template for the analysis of Xliff files',
             required: false,
             type: 'string',
             example: '3213',
@@ -275,7 +278,8 @@ var spec = {
           {
             name: 'filters_extraction_parameters_template_id',
             in: 'formData',
-            description: 'Load a specific template for the analysis of Xliff files and for filters extraction parameters',
+            description:
+              'Load a specific template for the analysis of Xliff files and for filters extraction parameters',
             required: false,
             type: 'string',
             example: '3213',
@@ -291,7 +295,8 @@ var spec = {
           {
             name: 'id_qa_model_template',
             in: 'formData',
-            description: 'Load a previously saved, custom QA framework template',
+            description:
+              'Load a previously saved, custom QA framework template',
             required: false,
             type: 'string',
             example: '3213',

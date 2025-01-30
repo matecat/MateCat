@@ -20,6 +20,7 @@ export const FILTERS_PARAMS_SCHEMA_KEYS = {
   msWord: 'ms_word',
   msExcel: 'ms_excel',
   msPowerpoint: 'ms_powerpoint',
+  dita: 'dita',
   createdAt: 'created_at',
   modifiedAt: 'modified_at',
 }

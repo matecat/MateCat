@@ -1,5 +1,5 @@
 import React from 'react'
-import Immutable from 'immutable'
+import {fromJS} from 'immutable'
 import {isEmpty} from 'lodash'
 import {debounce} from 'lodash/function'
 import ReactDOM, {flushSync} from 'react-dom'
@@ -22,7 +22,7 @@ import {CookieConsent} from '../components/common/CookieConsent'
 import {mountPage} from './mountPage'
 import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper'
 import DownloadFileUtils from '../utils/downloadFileUtils'
-import SseListener from '../sse/SseListener'
+import SocketListener from '../sse/SocketListener'
 
 class Dashboard extends React.Component {
   constructor() {
@@ -66,9 +66,6 @@ class Dashboard extends React.Component {
             this.getProjectsErrorHandler(err)
           })
       })
-      setTimeout(function () {
-        CatToolActions.showHeaderTooltip()
-      }, 2000)
     })
   }
 
@@ -470,8 +467,8 @@ class Dashboard extends React.Component {
         {this.state.selectedTeam && this.state.teams ? (
           <ProjectsContainer
             downloadTranslationFn={this.downloadTranslation}
-            teams={Immutable.fromJS(this.state.teams)}
-            team={Immutable.fromJS(this.state.selectedTeam)}
+            teams={fromJS(this.state.teams)}
+            team={fromJS(this.state.selectedTeam)}
             selectedUser={this.state.selectedUser}
             fetchingProjects={this.state.fetchingProjects}
           />
@@ -481,12 +478,12 @@ class Dashboard extends React.Component {
           </div>
         )}
         {ReactDOM.createPortal(<CookieConsent />, cookieBannerMountPoint)}
-        {/*<SseListener
+        <SocketListener
           isAuthenticated={this.context.isUserLogged}
           userId={
             this.context.isUserLogged ? this.context.userInfo.user.uid : null
           }
-        />*/}
+        />
       </React.Fragment>
     )
   }

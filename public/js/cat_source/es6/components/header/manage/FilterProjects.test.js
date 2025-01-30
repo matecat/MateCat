@@ -1,7 +1,7 @@
 import {render, screen, act} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import React from 'react'
-import Immutable from 'immutable'
+import {fromJS} from 'immutable'
 import {http, HttpResponse} from 'msw'
 
 import FilterProjects from './FilterProjects'
@@ -50,7 +50,7 @@ const fakeFilterData = {
 
 const getFakeProperties = (fakeProperties) => {
   const {data} = fakeProperties
-  const team = Immutable.fromJS(data)
+  const team = fromJS(data)
 
   return {
     team,

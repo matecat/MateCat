@@ -27,6 +27,11 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
     protected $_skipAnalysis = false;
 
     /**
+     * @var bool True if the engine can receive contributions through a `set/update` method.
+     */
+    protected bool $_isAdaptive = false;
+
+    /**
      * @var bool
      */
     protected $logging      = true;
@@ -59,11 +64,11 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
     }
 
     /**
-     * @param bool $bool
+     * @param ?bool $bool
      *
      * @return $this
      */
-    public function setAnalysis( $bool = true ) {
+    public function setAnalysis( ?bool $bool = true ): Engines_AbstractEngine {
         $this->_isAnalysis = filter_var( $bool, FILTER_VALIDATE_BOOLEAN );
 
         return $this;
@@ -83,24 +88,9 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
     }
 
     /**
-     *
-     *
-     * @param $_string
-     *
-     * @return string
-     */
-    public function _preserveSpecialStrings( $_string ) {
-        return $_string;
-    }
-
-    public function _resetSpecialStrings( $_string ) {
-        return $_string;
-    }
-
-    /**
      * @return EnginesModel_EngineStruct
      */
-    public function getEngineRecord() {
+    public function getEngineRecord(): EnginesModel_EngineStruct {
         return $this->engineRecord;
     }
 
@@ -204,7 +194,6 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
 
         $this->error = []; // reset last error
         if ( !$this->$function ) {
-            //Log::doJsonLog( 'Requested method ' . $function . ' not Found.' );
             $this->result = [
                     'error' => [
                             'code'    => -43,
@@ -283,6 +272,10 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
         return clone $this->engineRecord;
     }
 
+    public function isAdaptive(): bool {
+        return $this->_isAdaptive;
+    }
+
     /**
      * This function is PHP7 compatible
      *
@@ -334,4 +327,26 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
         return $gtEngine->get( $_config );
 
     }
+
+    /**
+     * @param string           $filePath
+     * @param string           $memoryKey
+     * @param Users_UserStruct $user
+     *
+     * @return void
+     */
+    public function importMemory( string $filePath, string $memoryKey, Users_UserStruct $user ) {
+
+    }
+
+    /**
+     * @param array      $projectRow
+     * @param array|null $segments
+     *
+     * @return void
+     */
+    public function syncMemories( array $projectRow, ?array $segments = [] ) {
+
+    }
+
 }

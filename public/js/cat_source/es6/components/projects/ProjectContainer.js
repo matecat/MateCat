@@ -8,11 +8,9 @@ import UserActions from '../../actions/UserActions'
 import ManageActions from '../../actions/ManageActions'
 import ProjectsStore from '../../stores/ProjectsStore'
 import {getLastProjectActivityLogAction} from '../../api/getLastProjectActivityLogAction'
-import CommonUtils from '../../utils/commonUtils'
 import CatToolActions from '../../actions/CatToolActions'
 import ModalsActions from '../../actions/ModalsActions'
 import ConfirmMessageModal from '../modals/ConfirmMessageModal'
-import Immutable from 'immutable'
 import UserStore from '../../stores/UserStore'
 import {
   DROPDOWN_MENU_ALIGN,

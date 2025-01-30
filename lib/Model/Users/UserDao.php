@@ -104,13 +104,13 @@ class Users_UserDao extends DataAccess_AbstractDao {
      *
      * @return Users_UserStruct
      * @throws ReflectionException
+     * @throws Exception
      */
     public function createUser( Users_UserStruct $obj ): ?Users_UserStruct {
         $conn = $this->database->getConnection();
         Database::obtain()->begin();
 
         $obj->create_date = date( 'Y-m-d H:i:s' );
-
         $stmt = $conn->prepare( "INSERT INTO users " .
                 " ( uid, email, salt, pass, create_date, first_name, last_name, confirmation_token ) " .
                 " VALUES " .

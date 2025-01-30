@@ -17,6 +17,7 @@ export const updateJobKeys = async ({
   currentPassword = config.currentPassword,
   getPublicMatches,
   dataTm,
+  tmPrioritization,
 }) => {
   const paramsData = {
     job_id: idJob,
@@ -24,6 +25,7 @@ export const updateJobKeys = async ({
     get_public_matches: getPublicMatches,
     data: dataTm,
     current_password: currentPassword,
+    tm_prioritization: tmPrioritization,
   }
   const formData = new FormData()
 
