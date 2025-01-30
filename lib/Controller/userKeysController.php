@@ -89,7 +89,7 @@ class userKeysController extends ajaxController {
         // <details x=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx:2 open ontoggle="prompt(document.cookie);">
         // in this case, an error MUST be thrown
 
-        if ( $_POST[ 'description' ] !== $this->description ) {
+        if ( $_POST[ 'description' ] ?? null !== $this->description ) {
             $this->result[ 'errors' ][] = [
                     'code'    => -3,
                     'message' => "Invalid key description"
@@ -228,7 +228,7 @@ class userKeysController extends ajaxController {
                     $ownerMmtEngineMetaData = ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->get( $this->getUser()->uid, $engine->getEngineRecord()->class_load ); // engine_id
                     if ( !empty( $ownerMmtEngineMetaData ) ) {
                         $engine    = Engine::getInstance( $ownerMmtEngineMetaData->value );
-                        $engineKey = $engine->memoryExists( $memoryKey );
+                        $engineKey = $engine->getMemoryIfMine( $memoryKey );
                         if ( $engineKey ) {
                             $engine->deleteMemory( $engineKey );
                         }

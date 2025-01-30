@@ -171,7 +171,7 @@ class TmKeyManagementController extends AbstractStatefulKleinController {
                     $ownerMmtEngineMetaData = ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->get( $this->getUser()->uid, $engine->getEngineRecord()->class_load ); // engine_id
                     if ( !empty( $ownerMmtEngineMetaData ) ) {
                         $engine = Engine::getInstance( $ownerMmtEngineMetaData->value );
-                        if ( $engine->memoryExists( $memoryKey ) ) {
+                        if ( $engine->getMemoryIfMine( $memoryKey ) ) {
                             $engine_type = explode( "\\", $engine->getEngineRecord()->class_load );
                             $response[]  = array_pop( $engine_type );
                         }

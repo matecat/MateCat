@@ -27,6 +27,7 @@ use SplFileObject;
 use Throwable;
 use TmKeyManagement_MemoryKeyStruct;
 use TmKeyManagement_TmKeyManagement;
+use TmKeyManagement_TmKeyStruct;
 use Users_UserDao;
 use Users_UserStruct;
 
@@ -51,7 +52,12 @@ class Lara extends Engines_AbstractEngine {
     /**
      * @var Engines_MMT
      */
-    private Engines_EngineInterface $mmtUserFallback;
+    private Engines_EngineInterface $mmt_GET_Fallback;
+
+    /**
+     * @var ?Engines_MMT
+     */
+    private ?Engines_EngineInterface $mmt_SET_PrivateLicense = null;
 
     /**
      * @throws Exception
@@ -89,8 +95,18 @@ class Lara extends Engines_AbstractEngine {
                 'MMT-pretranslate' => true,
                 'MMT-preimport'    => false,
         ];
+        $this->mmt_GET_Fallback      = Engine::createTempInstance( $mmtStruct );
 
-        $this->mmtUserFallback = Engine::createTempInstance( $mmtStruct );
+        if ( !empty( $extraParams[ 'MMT-License' ] ) ) {
+            $mmtStruct                    = EnginesModel_MMTStruct::getStruct();
+            $mmtStruct->type              = Constants_Engines::MT;
+            $mmtStruct->extra_parameters  = [
+                    'MMT-License'      => $extraParams[ 'MMT-License' ],
+                    'MMT-pretranslate' => true,
+                    'MMT-preimport'    => false,
+            ];
+            $this->mmt_SET_PrivateLicense = Engine::createTempInstance( $mmtStruct );
+        }
 
         $this->clientLoaded = new Translator( $credentials );
 
@@ -171,7 +187,7 @@ class Lara extends Engines_AbstractEngine {
 
             // analysis on Lara is disabled, fallback on MMT
 
-            return $this->mmtUserFallback->get( $_config );
+            return $this->mmt_GET_Fallback->get( $_config );
         } else {
             $_config[ 'priority' ] = 'normal';
         }
@@ -228,7 +244,7 @@ class Lara extends Engines_AbstractEngine {
 
         } else {
             // mmt fallback
-            return $this->mmtUserFallback->get( $_config );
+            return $this->mmt_GET_Fallback->get( $_config );
         }
 
         return ( new Engines_Results_MyMemory_Matches(
@@ -298,14 +314,14 @@ class Lara extends Engines_AbstractEngine {
         }
 
         // let MMT to have the last word on requeue
-        return $this->mmtUserFallback->update( $_config );
+        return !empty( $this->mmt_SET_PrivateLicense ) ? $this->mmt_SET_PrivateLicense->update( $_config ) : true;
 
     }
 
     /**
      * @param TmKeyManagement_MemoryKeyStruct $memoryKey
      *
-     * @return bool
+     * @return array|null
      * @throws LaraException
      * @throws Exception
      */
@@ -326,6 +342,17 @@ class Lara extends Engines_AbstractEngine {
     public function deleteMemory( array $memoryKey ): array {
         $clientMemories = $this->_getClient()->memories;
         try {
+
+            if ( !empty( $this->mmt_SET_PrivateLicense ) ) {
+                $memoryKeyToUpdate         = new TmKeyManagement_MemoryKeyStruct();
+                $memoryKeyToUpdate->tm_key = new TmKeyManagement_TmKeyStruct( [ 'key' => str_replace( 'ext_my_', '', $memoryKey[ 'externalId' ] ) ] );
+
+                $memoryMMT = $this->mmt_SET_PrivateLicense->getMemoryIfMine( $memoryKeyToUpdate );
+                if ( !empty( $memoryMMT ) ) {
+                    $this->mmt_SET_PrivateLicense->deleteMemory( $memoryMMT );
+                }
+            }
+
             return $clientMemories->delete( trim( $memoryKey[ 'id' ] ) )->jsonSerialize();
         } catch ( LaraApiException $e ) {
             if ( $e->getCode() == 404 ) {
@@ -333,6 +360,15 @@ class Lara extends Engines_AbstractEngine {
             }
             throw $e;
         }
+    }
+
+    /**
+     * In 'Lara', there is no need to check the ownership of the memory because if a memory exists within an account, it definitely ALSO belongs to me and can be safely deleted (unlinked from my account).
+     * Therefore, unlike ModernMT, this method is simply an alias of the memoryExists method.
+     * @throws LaraException
+     */
+    public function getMemoryIfMine( TmKeyManagement_MemoryKeyStruct $memoryKey ): ?array {
+        return $this->memoryExists( $memoryKey );
     }
 
 
@@ -368,6 +404,10 @@ class Lara extends Engines_AbstractEngine {
         Log::doJsonLog( $res );
 
         $fp_out = null;
+
+        if ( !empty( $this->mmt_SET_PrivateLicense ) ) {
+            $this->mmt_SET_PrivateLicense->importMemory( $filePath, $memoryKey, $user );
+        }
 
     }
 

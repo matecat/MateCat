@@ -300,7 +300,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
                   }}
                   type="checkbox"
                 />
-                Permanently delete it from my ModernMT account
+                Permanently delete it from my Lara account
               </div>
             </div>
           ) : (

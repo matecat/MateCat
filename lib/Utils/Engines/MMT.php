@@ -461,7 +461,7 @@ class Engines_MMT extends Engines_AbstractEngine {
             $this->result = $client->me();
 
             return $this->result;
-        } catch ( \Exception $exception ) {
+        } catch ( Exception $exception ) {
             throw new Exception( "MMT license not valid" );
         }
     }
@@ -641,4 +641,19 @@ class Engines_MMT extends Engines_AbstractEngine {
 
         return $client->importJobStatus( $uuid );
     }
+
+    /**
+     * @throws MMTServiceApiException
+     */
+    public function getMemoryIfMine( TmKeyManagement_MemoryKeyStruct $memoryKey ): ?array {
+        //Get the user account, check if the memory exists and, if so, check if the key owner's ID is mine.
+        $me     = $this->checkAccount();
+        $memory = $this->memoryExists( $memoryKey );
+        if ( !empty( $memory ) && $memory[ 'owner' ][ 'user' ] == $me[ 'id' ] ) {
+            return $memory;
+        }
+        return null;
+    }
+
+
 }

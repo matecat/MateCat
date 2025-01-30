@@ -358,9 +358,22 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
      * @param array $memoryKey
      *
      * @return array
+     * @throws Exception
      */
     public function deleteMemory( array $memoryKey ): array {
         return [];
+    }
+
+    /**
+     * Determines if the provided memory belongs to the caller.
+     *
+     *
+     * @param TmKeyManagement_MemoryKeyStruct $memoryKey *
+     *
+     * @return array|null Returns the memory key if the caller owns the memory, false otherwise.
+     */
+    public function getMemoryIfMine( TmKeyManagement_MemoryKeyStruct $memoryKey): ?array {
+        return null;
     }
 
 }
