@@ -1,7 +1,9 @@
 import React, {useContext, useEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import {QualityFrameworkTabContext} from './QualityFrameworkTab'
-import {isEqual} from 'lodash'
+import {Button, BUTTON_SIZE} from '../../../common/Button/Button'
+import IconClose from '../../../icons/IconClose'
+import Tooltip from '../../../common/Tooltip'
 
 export const SeveritiyRow = ({severity}) => {
   const {modifyingCurrentTemplate, templates, currentTemplate} = useContext(
@@ -9,6 +11,7 @@ export const SeveritiyRow = ({severity}) => {
   )
 
   const ref = useRef()
+  const removeSeverityRef = useRef()
 
   const [penalty, setPenalty] = useState(severity.penalty)
 
@@ -74,9 +77,29 @@ export const SeveritiyRow = ({severity}) => {
       .find(({id}) => id === severity.id_category)
       .severities.find(({id}) => id === severity.id)
 
-    const isModified = originalSeverity.penalty !== currentSeverity.penalty
+    const isModified = originalSeverity?.penalty !== currentSeverity.penalty
 
     return isModified
+  }
+
+  const removeSeverity = () => {
+    const {id, id_category: idCategory} = severity
+
+    modifyingCurrentTemplate((prevTemplate) => {
+      const {categories} = prevTemplate
+
+      return {
+        ...prevTemplate,
+        categories: categories.map((category) => ({
+          ...category,
+          ...(idCategory === category.id && {
+            severities: category.severities.filter(
+              (severityItem) => id !== severityItem.id,
+            ),
+          }),
+        })),
+      }
+    })
   }
 
   const isNotSaved = checkIsNotSaved()
@@ -86,15 +109,25 @@ export const SeveritiyRow = ({severity}) => {
       className={`cell${isNotSaved ? ' cell-not-saved' : ''}`}
       data-testid={`qf-severity-cell-${severity.id_category}-${severity.id}`}
     >
-      <input
-        ref={ref}
-        className="quality-framework-input"
-        type="text"
-        value={penalty}
-        onChange={onChange}
-        onFocus={selectAll}
-        onBlur={onBlur}
-      />
+      <div className="quality-framework-severity-input-container">
+        <input
+          ref={ref}
+          type="text"
+          value={penalty}
+          onChange={onChange}
+          onFocus={selectAll}
+          onBlur={onBlur}
+        />
+        <Tooltip style={{position: 'absolute'}} content="Remove severity">
+          <Button
+            ref={removeSeverityRef}
+            size={BUTTON_SIZE.ICON_SMALL}
+            onClick={removeSeverity}
+          >
+            <IconClose size={9} />
+          </Button>
+        </Tooltip>
+      </div>
     </div>
   )
 }
