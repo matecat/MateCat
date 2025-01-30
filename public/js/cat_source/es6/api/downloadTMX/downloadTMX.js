@@ -19,7 +19,6 @@ export const downloadTMX = async ({
   stripTags,
 }) => {
   const paramsData = {
-    action: 'downloadTMX',
     tm_key: key,
     tm_name: name,
     strip_tags: stripTags,
@@ -32,7 +31,7 @@ export const downloadTMX = async ({
     formData.append(key, paramsData[key])
   })
   const response = await fetch(
-    `${getMatecatApiDomain()}?action=${paramsData.action}`,
+    `${getMatecatApiDomain()}api/app/download-tmx`,
     {
       method: 'POST',
       body: formData,

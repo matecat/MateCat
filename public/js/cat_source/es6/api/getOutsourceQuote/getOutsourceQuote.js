@@ -43,7 +43,7 @@ export const getOutsourceQuote = async (
   Object.keys(data).forEach((key) => {
     formData.append(key, data[key])
   })
-  const response = await fetch(`${getMatecatApiDomain()}?action=outsourceTo`, {
+  const response = await fetch(`${getMatecatApiDomain()}api/app/outsource-to`, {
     method: 'POST',
     body: formData,
     credentials: 'include',

@@ -421,7 +421,6 @@ const NewProject = () => {
     // update store recently used target languages
     setRecentlyUsedLanguages(targetLangs)
     const getParams = () => ({
-      action: 'createProject',
       file_name: getFilenameFromUploadedFiles(),
       project_name: projectNameRef.current.value,
       source_lang: sourceLang.id,

@@ -15,7 +15,7 @@ export const createProject = async (options) => {
   Object.keys(paramsData).forEach((key) => {
     formData.append(key, paramsData[key])
   })
-  const response = await fetch(`${config.basepath}?action=createProject`, {
+  const response = await fetch(`${config.basepath}api/app/new-project`, {
     method: 'POST',
     body: formData,
     credentials: 'include',
