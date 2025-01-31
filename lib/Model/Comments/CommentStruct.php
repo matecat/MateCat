@@ -53,7 +53,7 @@ class Comments_CommentStruct extends Comments_BaseCommentStruct implements DataA
             'message' => $this->message,
             'message_type' => $this->message_type,
             'create_at' => $this->create_date,
-            'resolved_at' => $this->resolved_at,
+            'resolved_at' => $this->resolve_date,
             'timestamp' => $this->timestamp,
         ];
     }
