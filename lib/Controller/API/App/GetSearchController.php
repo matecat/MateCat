@@ -11,14 +11,15 @@ use Database;
 use Exception;
 use Features\ReviewExtended\ReviewUtils;
 use Features\TranslationVersions;
+use Klein\Response;
+use Log;
+use Matecat\Finder\WholeTextFinder;
+use Projects_ProjectDao;
+use RuntimeException;
 use INIT;
 use InvalidArgumentException;
 use Jobs_JobStruct;
-use Klein\Response;
-use Matecat\Finder\WholeTextFinder;
 use Matecat\SubFiltering\MateCatFilter;
-use Projects_ProjectDao;
-use RuntimeException;
 use Search\ReplaceEventStruct;
 use Search\SearchModel;
 use Search\SearchQueryParamsStruct;
@@ -197,10 +198,10 @@ class GetSearchController extends KleinController {
     /**
      * @param $job_id
      * @param $password
-     * @return Chunks_ChunkStruct|null
+     * @return Jobs_JobStruct|null
      * @throws Exception
      */
-    private function getJobData($job_id, $password): ?Chunks_ChunkStruct
+    private function getJobData($job_id, $password): ?Jobs_JobStruct
     {
         return Chunks_ChunkDao::getByIdAndPassword( (int)$job_id, $password );
     }

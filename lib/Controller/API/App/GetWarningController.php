@@ -7,7 +7,6 @@ use API\Commons\Validators\LoginValidator;
 use API\V2\Json\QAGlobalWarning;
 use API\V2\Json\QALocalWarning;
 use Chunks_ChunkDao;
-use Chunks_ChunkStruct;
 use Exception;
 use Jobs_JobStruct;
 use Klein\Response;
