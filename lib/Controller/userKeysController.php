@@ -89,7 +89,7 @@ class userKeysController extends ajaxController {
         // <details x=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx:2 open ontoggle="prompt(document.cookie);">
         // in this case, an error MUST be thrown
 
-        if ( $_POST[ 'description' ] ?? null !== $this->description ) {
+        if ( ( $_POST[ 'description' ] ?? null ) !== $this->description ) {
             $this->result[ 'errors' ][] = [
                     'code'    => -3,
                     'message' => "Invalid key description"

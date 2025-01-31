@@ -186,7 +186,6 @@ class Lara extends Engines_AbstractEngine {
             $_config[ 'priority' ]      = 'background';
 
             // analysis on Lara is disabled, fallback on MMT
-
             return $this->mmt_GET_Fallback->get( $_config );
         } else {
             $_config[ 'priority' ] = 'normal';

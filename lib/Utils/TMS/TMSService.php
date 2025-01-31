@@ -201,6 +201,7 @@ class TMSService {
 
                 } catch ( Exception $e ) {
                     if ( $engineName != Constants_Engines::MY_MEMORY ) {
+                        //NOTICE: ModernMT response is 404 NOT FOUND if the key on which we are importing the tmx is not synced with it
                         Log::doJsonLog( $e->getMessage() );
                         $engineName = explode( "\\", $engineName );
                         $engineName = end( $engineName );
