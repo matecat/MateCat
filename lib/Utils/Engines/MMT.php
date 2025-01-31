@@ -283,7 +283,7 @@ class Engines_MMT extends Engines_AbstractEngine {
         $client   = $this->_getClient();
         $response = $client->getMemory( 'x_mm-' . trim( $memoryKey ) );
 
-        if ( empty( $response[ 'data' ] ) ) {
+        if ( empty( $response ) ) {
             return null;
         }
 
