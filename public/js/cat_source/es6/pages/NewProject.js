@@ -457,12 +457,14 @@ const NewProject = () => {
       xliff_parameters_template_id: XliffConfigTemplateId,
       tm_prioritization: tmPrioritization ? 1 : 0,
       ...(dialectStrict && {
-        dialect_strict: targetLangs.reduce(
-          (acc, {id}) => ({
-            ...acc,
-            [id]: true,
-          }),
-          {},
+        dialect_strict: JSON.stringify(
+          targetLangs.reduce(
+            (acc, {id}) => ({
+              ...acc,
+              [id]: true,
+            }),
+            {},
+          ),
         ),
       }),
     })
