@@ -8,7 +8,7 @@ use CatUtils;
 use Chunks_ChunkDao;
 use Exception;
 use InvalidArgumentException;
-use Langs_Languages;
+use Langs\Languages;
 use Matecat\SubFiltering\MateCatFilter;
 use Segments\ContextGroupDao;
 use Segments_SegmentDao;
@@ -44,7 +44,7 @@ class GetSegmentsController extends KleinController {
             $project = $job->getProject();
             $featureSet = $this->getFeatureSet();
             $featureSet->loadForProject( $project );
-            $lang_handler = Langs_Languages::getInstance();
+            $lang_handler = Languages::getInstance();
 
             $parsedIdSegment = $this->parseIDSegment($id_segment);
 
@@ -210,12 +210,11 @@ class GetSegmentsController extends KleinController {
                 foreach ( $segment_notes as $k => $noteObj ) {
                     $segment_notes[ $k ][ 0 ][ 'json' ] = json_decode( $noteObj[ 0 ][ 'json' ], true );
                 }
-                $segment_notes = $this->featureSet->filter( 'processExtractedJsonNotes', $segment_notes );
-            } else {
-                $segment_notes = Segments_SegmentNoteDao::getAggregatedBySegmentIdInInterval( $start, $stop );
+
+                return $this->featureSet->filter( 'processExtractedJsonNotes', $segment_notes );
             }
 
-            return $segment_notes;
+            return Segments_SegmentNoteDao::getAggregatedBySegmentIdInInterval( $start, $stop );
         }
     }
 

@@ -42,11 +42,11 @@ class SetCurrentSegmentController extends KleinController {
             $job_data = Jobs_JobDao::getByIdAndPassword( $id_job, $password );
 
             if ( empty( $job_data ) ) {
-                throw new \InvalidArgumentException("wrong password", -10);
+                throw new InvalidArgumentException("wrong password", -10);
             }
 
             if ( empty( $id_segment ) ) {
-                throw new \InvalidArgumentException("missing segment id", -1);
+                throw new InvalidArgumentException("missing segment id", -1);
             }
 
             $segmentStruct             = new TranslationsSplit_SplitStruct();

@@ -20,7 +20,7 @@ use FilesStorage\FilesStorageFactory;
 use INIT;
 use InvalidArgumentException;
 use Klein\Response;
-use Langs_Languages;
+use Langs\Languages;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use Matecat\XliffParser\Utils\Files as XliffFiles;
 use PayableRates\CustomPayableRateDao;
@@ -350,8 +350,8 @@ class CreateProjectController extends KleinController {
             throw new InvalidArgumentException("Invalid pretranslate_101 value", -6);
         }
 
-        $data['source_lang']                   = $this->validateSourceLang( Langs_Languages::getInstance(), $data['source_lang'] );
-        $data['target_lang']                   = $this->validateTargetLangs( Langs_Languages::getInstance(), $data['target_lang'] );
+        $data['source_lang']                   = $this->validateSourceLang( Languages::getInstance(), $data['source_lang'] );
+        $data['target_lang']                   = $this->validateTargetLangs( Languages::getInstance(), $data['target_lang'] );
         $data['mt_engine']                     = $this->validateUserMTEngine($data['mt_engine']);
         $data['mmt_glossaries']                = $this->validateMMTGlossaries($data['mmt_glossaries']);
         $data['deepl_formality']               = $this->validateDeepLFormalityParams($data['deepl_formality']);
@@ -401,11 +401,11 @@ class CreateProjectController extends KleinController {
     }
 
     /**
-     * @param Langs_Languages $lang_handler
+     * @param Languages $lang_handler
      * @param $source_lang
      * @return string
      */
-    private function validateSourceLang( Langs_Languages $lang_handler, $source_lang ): string
+    private function validateSourceLang( Languages $lang_handler, $source_lang ): string
     {
         try {
             $lang_handler->validateLanguage( $source_lang );
@@ -417,11 +417,11 @@ class CreateProjectController extends KleinController {
     }
 
     /**
-     * @param Langs_Languages $lang_handler
+     * @param Languages $lang_handler
      * @param $target_lang
      * @return string
      */
-    private function validateTargetLangs( Langs_Languages $lang_handler, $target_lang ): string
+    private function validateTargetLangs( Languages $lang_handler, $target_lang ): string
     {
         $targets = explode( ',', $target_lang );
         $targets = array_map( 'trim', $targets );

@@ -3,6 +3,7 @@
 use Constants\ConversionHandlerStatus;
 use Conversion\ConvertedFileModel;
 use FilesStorage\AbstractFilesStorage;
+use Langs\Languages;
 
 class ConvertFile
 {
@@ -21,9 +22,9 @@ class ConvertFile
     private $resultStack = [];
 
     /**
-     * @var Langs_Languages
+     * @var Languages
      */
-    private ?Langs_Languages $lang_handler = null;
+    private ?Languages $lang_handler = null;
 
     /**
      * @var FeatureSet
@@ -67,7 +68,7 @@ class ConvertFile
         $convertZipFile = true
     )
     {
-        $this->lang_handler = Langs_Languages::getInstance();
+        $this->lang_handler = Languages::getInstance();
         $this->files = $files;
         $this->convertZipFile = $convertZipFile;
         $this->setSourceLang($source_lang);

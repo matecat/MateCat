@@ -21,8 +21,8 @@ use FilesStorage\FilesStorageFactory;
 use Filters\FiltersConfigTemplateDao;
 use INIT;
 use InvalidArgumentException;
-use Langs_LanguageDomains;
-use Langs_Languages;
+use Langs\Languages;
+use Langs\LanguageDomains;
 use Log;
 use LQA\ModelDao;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
@@ -478,7 +478,7 @@ class NewController extends KleinController
             throw new InvalidArgumentException("Missing file. Not Sent.");
         }
 
-        $lang_handler = Langs_Languages::getInstance();
+        $lang_handler = Languages::getInstance();
 
         $source_lang = $this->validateSourceLang($lang_handler, $source_lang);
         $target_lang = $this->validateTargetLangs($lang_handler, $target_lang);
@@ -655,7 +655,7 @@ class NewController extends KleinController
      */
     private function validateSubject($subject): string
     {
-        $langDomains = Langs_LanguageDomains::getInstance();
+        $langDomains = LanguageDomains::getInstance();
         $subjectMap  = $langDomains::getEnabledHashMap();
 
         $subject = ( !empty( $subject ) ) ? $subject : 'general';
@@ -668,11 +668,11 @@ class NewController extends KleinController
     }
 
     /**
-     * @param Langs_Languages $lang_handler
+     * @param Languages $lang_handler
      * @param $source_lang
      * @return string
      */
-    private function validateSourceLang( Langs_Languages $lang_handler, $source_lang ): string
+    private function validateSourceLang( Languages $lang_handler, $source_lang ): string
     {
         try {
             $lang_handler->validateLanguage( $source_lang );
@@ -684,11 +684,11 @@ class NewController extends KleinController
     }
 
     /**
-     * @param Langs_Languages $lang_handler
+     * @param Languages $lang_handler
      * @param $target_lang
      * @return string
      */
-    private function validateTargetLangs( Langs_Languages $lang_handler, $target_lang ): string
+    private function validateTargetLangs( Languages $lang_handler, $target_lang ): string
     {
         $targets = explode( ',', $target_lang );
         $targets = array_map( 'trim', $targets );

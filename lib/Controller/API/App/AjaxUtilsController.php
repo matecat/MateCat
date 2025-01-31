@@ -42,7 +42,7 @@ class AjaxUtilsController extends KleinController {
             $tmxHandler = new TMSService();
             $keyExists = $tmxHandler->checkCorrectKey( $tm_key );
 
-            if ( !isset( $keyExists ) || $keyExists === false ) {
+            if ( !isset( $keyExists ) or $keyExists === false ) {
                 throw new InvalidArgumentException("TM key is not valid.", -9);
             }
 
