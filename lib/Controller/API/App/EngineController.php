@@ -9,6 +9,7 @@ use Database;
 use DomainException;
 use Engine;
 use EnginesModel\DeepLStruct;
+use EnginesModel\LaraStruct;
 use EnginesModel_AltlangStruct;
 use EnginesModel_ApertiumStruct;
 use EnginesModel_EngineDAO;
@@ -21,7 +22,10 @@ use EnginesModel_YandexTranslateStruct;
 use Exception;
 use InvalidArgumentException;
 use Klein\Response;
+use Lara\LaraException;
 use RuntimeException;
+use Users\MetadataDao;
+use Utils\Engines\Lara;
 use Validator\DeepLValidator;
 
 class EngineController extends KleinController {
@@ -169,6 +173,20 @@ class EngineController extends KleinController {
                     $newEngineStruct->extra_parameters['providercategory'] = $engineData['providercategory'];
                     break;
 
+                case strtolower( Constants_Engines::LARA ):
+                    /**
+                     * Create a record of type Lara
+                     */
+                    $newEngineStruct = LaraStruct::getStruct();
+
+                    $newEngineStruct->uid                                        = $this->user->uid;
+                    $newEngineStruct->type                                       = Constants_Engines::MT;
+                    $newEngineStruct->extra_parameters[ 'Lara-AccessKeyId' ]     = $engineData[ 'lara-access-key-id' ];
+                    $newEngineStruct->extra_parameters[ 'Lara-AccessKeySecret' ] = $engineData[ 'secret' ];
+                    $newEngineStruct->extra_parameters[ 'MMT-License' ]          = $engineData[ 'mmt-license' ];
+
+                    break;
+
                 default:
 
                     // MMT
@@ -231,6 +249,7 @@ class EngineController extends KleinController {
                 $config[ 'segment' ] = "Hello World";
                 $config[ 'source' ]  = "en-US";
                 $config[ 'target' ]  = "fr-FR";
+                $config[ 'key' ]     = $this->engineData['secret'] ?? null;
 
                 $mt_result = $newTestCreatedMT->get( $config );
 
@@ -240,6 +259,25 @@ class EngineController extends KleinController {
 
                     throw new DomainException($mt_result[ 'error' ]);
                 }
+            } elseif ( $newEngineStruct instanceof LaraStruct ) {
+
+                /**
+                 * @var $newTestCreatedMT Lara
+                 */
+                $newTestCreatedMT = Engine::createTempInstance( $newCreatedDbRowStruct );
+
+                try {
+                    $newTestCreatedMT->getAvailableLanguages();
+                } catch ( LaraException $e ) {
+                    $engineDAO->delete( $newCreatedDbRowStruct );
+                    $this->destroyUserEnginesCache();
+
+                    throw new DomainException($e->getMessage(), $e->getCode());
+                }
+
+                $UserMetadataDao = new MetadataDao();
+                $UserMetadataDao->set( $this->user->uid, $newCreatedDbRowStruct->class_load, $newCreatedDbRowStruct->id );
+
             } else {
                 try {
                     $this->featureSet->run( 'postEngineCreation', $newCreatedDbRowStruct, $this->user );
@@ -289,7 +327,12 @@ class EngineController extends KleinController {
                 throw new RuntimeException("Deletion failed. Generic error", -9);
             }
 
-            $this->featureSet->run( 'postEngineDeletion', $result );
+            $engine = Engine::createTempInstance( $result );
+
+            if ( $engine->isAdaptive() ) {
+                //retrieve OWNER Engine License
+                ( new MetadataDao() )->delete( $this->user->uid, $result->class_load ); // engine_id
+            }
 
             return $this->response->json([
                 'data' => [
