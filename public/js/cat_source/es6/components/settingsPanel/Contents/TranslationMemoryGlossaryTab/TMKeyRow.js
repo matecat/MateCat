@@ -259,6 +259,10 @@ export const TMKeyRow = ({row, onExpandRow}) => {
   }
 
   const showConfirmDelete = () => {
+    const templatesInvolved = projectTemplates
+      .filter(({isTemporary}) => !isTemporary)
+      .filter((template) => template.tm?.some(({key}) => key === row.key))
+
     deleteTmKeyRemoveFrom.current = {}
 
     getTmKeyEnginesInfo(row.key)
@@ -269,9 +273,11 @@ export const TMKeyRow = ({row, onExpandRow}) => {
         const footerContent =
           isMMT && !isLara ? (
             <div className="tm-row-delete-remove-from-content">
-              <span>
-                If you confirm, it will be removed from the template(s).
-              </span>
+              {templatesInvolved.length >= 1 && (
+                <span>
+                  If you confirm, it will be removed from the template(s).
+                </span>
+              )}
               <span>
                 This resource is also linked to your ModernMT account:
               </span>
@@ -288,9 +294,11 @@ export const TMKeyRow = ({row, onExpandRow}) => {
             </div>
           ) : !isMMT && isLara ? (
             <div className="tm-row-delete-remove-from-content">
-              <span>
-                If you confirm, it will be removed from the template(s).
-              </span>
+              {templatesInvolved.length >= 1 && (
+                <span>
+                  If you confirm, it will be removed from the template(s).
+                </span>
+              )}
               <span>This resource is also linked to your Lara account:</span>
               <div>
                 <input
@@ -307,9 +315,11 @@ export const TMKeyRow = ({row, onExpandRow}) => {
             isMMT &&
             isLara && (
               <div className="tm-row-delete-remove-from-content">
-                <span>
-                  If you confirm, it will be removed from the template(s).
-                </span>
+                {templatesInvolved.length >= 1 && (
+                  <span>
+                    If you confirm, it will be removed from the template(s).
+                  </span>
+                )}
                 <span>
                   This resource is also linked to your ModernMT and Lara
                   accounts:
@@ -339,10 +349,6 @@ export const TMKeyRow = ({row, onExpandRow}) => {
               </div>
             )
           )
-
-        const templatesInvolved = projectTemplates
-          .filter(({isTemporary}) => !isTemporary)
-          .filter((template) => template.tm?.some(({key}) => key === row.key))
 
         if (templatesInvolved.length) {
           ModalsActions.showModalComponent(
