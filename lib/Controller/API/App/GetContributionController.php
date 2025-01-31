@@ -98,7 +98,24 @@ class GetContributionController extends KleinController {
                 'errors' => [],
                 'data' => [
                     "message" => "OK",
-                    "id_client" => $id_client
+                    "id_client" => $id_client,
+                    "request" => [
+                        'session_id' => $contributionRequest->getSessionId(),
+                        'id_file' => (int)$contributionRequest->id_file,
+                        'id_job' => (int)$contributionRequest->id_job,
+                        'password' => $contributionRequest->password,
+                        'contexts' => $contributionRequest->contexts,
+                        'id_client' => $contributionRequest->id_client,
+                        'userRole' => $contributionRequest->userRole,
+                        'tm_prioritization' => $contributionRequest->tm_prioritization,
+                        'penalty_key' => $contributionRequest->penalty_key,
+                        'crossLangTargets' => $contributionRequest->crossLangTargets,
+                        'fromTarget' => $contributionRequest->fromTarget,
+                        'dialect_strict' => $contributionRequest->dialect_strict,
+                        'segmentId' => $contributionRequest->segmentId ? (string)$contributionRequest->segmentId : null,
+                        'resultNum' => (int)$contributionRequest->resultNum,
+                        'concordanceSearch' => $contributionRequest->concordanceSearch,
+                    ]
                 ]
             ]);
 
