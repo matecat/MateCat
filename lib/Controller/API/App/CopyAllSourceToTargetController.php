@@ -15,7 +15,6 @@ use Features\TranslationEvents\Model\TranslationEvent;
 use Features\TranslationEvents\TranslationEventsHandler;
 use Jobs_JobDao;
 use Klein\Response;
-use Log;
 use RuntimeException;
 use Translations_SegmentTranslationDao;
 use WordCount\CounterModel;

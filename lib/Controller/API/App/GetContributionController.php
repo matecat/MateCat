@@ -2,36 +2,21 @@
 
 namespace API\App;
 
-use AMQHandler;
 use API\Commons\KleinController;
 use API\Commons\Validators\LoginValidator;
 use Chunks_ChunkDao;
-use Comments_CommentDao;
-use Comments_CommentStruct;
 use Contribution\ContributionRequestStruct;
 use Contribution\Request;
-use Database;
-use Email\CommentEmail;
-use Email\CommentMentionEmail;
-use Email\CommentResolveEmail;
 use Exception;
 use Files\FilesPartsDao;
 use INIT;
 use InvalidArgumentException;
-use Jobs_JobDao;
-use Jobs_JobStruct;
 use Klein\Response;
-use Log;
 use Matecat\SubFiltering\MateCatFilter;
 use Segments_SegmentDao;
 use Segments_SegmentOriginalDataDao;
-use Stomp\Transport\Message;
-use Teams\MembershipDao;
 use TmKeyManagement_Filter;
-use Url\JobUrlBuilder;
 use Users_UserDao;
-use Users_UserStruct;
-use Utils;
 
 class GetContributionController extends KleinController {
 

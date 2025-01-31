@@ -12,7 +12,6 @@ use Exception;
 use InvalidArgumentException;
 use Jobs_JobDao;
 use Klein\Response;
-use Log;
 use RuntimeException;
 use TmKeyManagement_ClientTmKeyStruct;
 use TmKeyManagement_Filter;

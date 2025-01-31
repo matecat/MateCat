@@ -34,7 +34,6 @@ use PostProcess;
 use Predis\Connection\ConnectionException;
 use Projects_ProjectDao;
 use ReflectionException;
-use Segments_SegmentDao;
 use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\AbstractWorker;
 use TaskRunner\Commons\QueueElement;

@@ -2,31 +2,15 @@
 
 namespace API\App;
 
-use AMQHandler;
 use API\Commons\KleinController;
 use API\Commons\Validators\LoginValidator;
 use Chunks_ChunkCompletionEventStruct;
-use Comments_CommentDao;
-use Comments_CommentStruct;
-use Database;
-use Email\CommentEmail;
-use Email\CommentMentionEmail;
-use Email\CommentResolveEmail;
 use Exception;
 use Features\ProjectCompletion\CompletionEventStruct;
 use Features\ProjectCompletion\Model\EventModel;
-use INIT;
 use InvalidArgumentException;
 use Jobs_JobDao;
-use Jobs_JobStruct;
 use Klein\Response;
-use Log;
-use RuntimeException;
-use Stomp\Transport\Message;
-use Teams\MembershipDao;
-use Url\JobUrlBuilder;
-use Users_UserDao;
-use Users_UserStruct;
 use Utils;
 
 class SetChunkCompletedController extends KleinController {

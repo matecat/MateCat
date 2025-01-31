@@ -10,21 +10,12 @@ use Constants_TranslationStatus;
 use Database;
 use Exception;
 use Exceptions\NotFoundException;
-use Features;
-use Features\ReviewExtended\BatchReviewProcessor;
-use Features\ReviewExtended\ReviewUtils;
-use Features\TranslationEvents\Model\TranslationEvent;
-use Features\TranslationEvents\TranslationEventsHandler;
 use InvalidArgumentException;
-use Jobs_JobDao;
 use Klein\Response;
-use Log;
 use Matecat\SubFiltering\MateCatFilter;
 use RuntimeException;
-use Translations_SegmentTranslationDao;
 use TranslationsSplit_SplitDAO;
 use TranslationsSplit_SplitStruct;
-use WordCount\CounterModel;
 
 class SplitSegmentController extends KleinController {
 

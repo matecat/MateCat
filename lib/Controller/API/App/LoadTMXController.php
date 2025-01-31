@@ -4,7 +4,6 @@ namespace API\App;
 
 use API\Commons\KleinController;
 use API\Commons\Validators\LoginValidator;
-use Constants_JobStatus;
 use Database;
 use Exception;
 use FilesStorage\AbstractFilesStorage;

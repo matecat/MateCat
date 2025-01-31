@@ -2,12 +2,6 @@
 
 use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
-use ConnectedServices\Facebook\FacebookProvider;
-use ConnectedServices\Github\GithubProvider;
-use ConnectedServices\Google\GoogleProvider;
-use ConnectedServices\LinkedIn\LinkedInProvider;
-use ConnectedServices\Microsoft\MicrosoftProvider;
-use ConnectedServices\OauthClient;
 use Engines_Intento as Intento;
 use Exceptions\AuthorizationError;
 use Exceptions\NotFoundException;

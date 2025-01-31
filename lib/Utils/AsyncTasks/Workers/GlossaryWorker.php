@@ -2,9 +2,7 @@
 
 namespace AsyncTasks\Workers;
 
-use Database;
 use Engine;
-use Engines_AbstractEngine;
 use Engines_MyMemory;
 use Engines_Results_MyMemory_CheckGlossaryResponse;
 use Engines_Results_MyMemory_DomainsResponse;
@@ -13,8 +11,6 @@ use Engines_Results_MyMemory_KeysGlossaryResponse;
 use Engines_Results_MyMemory_SearchGlossaryResponse;
 use Engines_Results_MyMemory_SetGlossaryResponse;
 use Engines_Results_MyMemory_UpdateGlossaryResponse;
-use EnginesModel_EngineDAO;
-use EnginesModel_EngineStruct;
 use Exception;
 use FeatureSet;
 use Stomp\Exception\StompException;

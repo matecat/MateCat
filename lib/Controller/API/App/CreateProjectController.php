@@ -5,7 +5,6 @@ namespace API\App;
 use API\Commons\KleinController;
 use API\Commons\Validators\LoginValidator;
 use BasicFeatureStruct;
-
 use ConnectedServices\Google\GDrive\Session;
 use Constants;
 use Constants_ProjectStatus;
@@ -21,8 +20,8 @@ use INIT;
 use InvalidArgumentException;
 use Klein\Response;
 use Langs\Languages;
-use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use Matecat\XliffParser\Utils\Files as XliffFiles;
+use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use PayableRates\CustomPayableRateDao;
 use PayableRates\CustomPayableRateStruct;
 use ProjectManager;

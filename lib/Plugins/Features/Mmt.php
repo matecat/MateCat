@@ -10,11 +10,9 @@
 namespace Features;
 
 
-use Analysis\Workers\FastAnalysis;
 use API\Commons\Exceptions\AuthenticationError;
 use BasicFeatureStruct;
 use Constants_Engines;
-use Contribution\ContributionSetStruct;
 use createProjectController;
 use Database;
 use Engine;
@@ -28,24 +26,17 @@ use Exception;
 use Exceptions\NotFoundException;
 use Exceptions\ValidationError;
 use FeatureSet;
-use FilesStorage\AbstractFilesStorage;
 use INIT;
 use Jobs_JobStruct;
 use Log;
 use NewController;
-use Projects_MetadataDao;
-use Projects_ProjectDao;
-use Projects_ProjectStruct;
-use SplFileObject;
 use TaskRunner\Commons\QueueElement;
 use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\ReQueueException;
 use TmKeyManagement_MemoryKeyDao;
 use TmKeyManagement_MemoryKeyStruct;
 use TmKeyManagement_TmKeyManagement;
-use TMS\TMSFile;
 use Users\MetadataDao;
-use Users_UserDao;
 use Users_UserStruct;
 
 class Mmt extends BaseFeature {

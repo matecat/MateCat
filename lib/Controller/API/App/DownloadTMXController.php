@@ -4,20 +4,12 @@ namespace API\App;
 
 use API\Commons\KleinController;
 use API\Commons\Validators\LoginValidator;
-use Chunks_ChunkDao;
-use Engine;
 use Exception;
-use INIT;
 use InvalidArgumentException;
 use Klein\Response;
 use Log;
-use Matecat\SubFiltering\MateCatFilter;
 use RuntimeException;
-use TmKeyManagement_Filter;
-use TmKeyManagement_TmKeyManagement;
-use TmKeyManagement_TmKeyStruct;
 use TMS\TMSService;
-use Translations_SegmentTranslationDao;
 use Utils;
 
 class DownloadTMXController extends KleinController {

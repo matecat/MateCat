@@ -21,10 +21,11 @@ use FilesStorage\FilesStorageFactory;
 use Filters\FiltersConfigTemplateDao;
 use INIT;
 use InvalidArgumentException;
-use Langs\Languages;
 use Langs\LanguageDomains;
+use Langs\Languages;
 use Log;
 use LQA\ModelDao;
+use Matecat\XliffParser\Utils\Files as XliffFiles;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use PayableRates\CustomPayableRateDao;
 use PayableRates\CustomPayableRateStruct;
@@ -50,7 +51,6 @@ use Validator\JSONValidator;
 use Validator\JSONValidatorObject;
 use Validator\MMTValidator;
 use Xliff\XliffConfigTemplateDao;
-use Matecat\XliffParser\Utils\Files as XliffFiles;
 use ZipArchiveExtended;
 
 class NewController extends KleinController

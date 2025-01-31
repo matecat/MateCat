@@ -9,23 +9,16 @@
 
 namespace AsyncTasks\Workers;
 
-use API\Commons\Exceptions\AuthenticationError;
 use Constants\Ices;
 use Constants_TranslationStatus;
 use Contribution\ContributionRequestStruct;
-use Engines_DeepL;
-use Engines_MMT;
 use Exception;
-use Exceptions\NotFoundException;
-use Exceptions\ValidationError;
 use FeatureSet;
 use INIT;
-use Jobs\MetadataDao;
 use Jobs_JobStruct;
 use Matecat\SubFiltering\AbstractFilter;
 use Matecat\SubFiltering\MateCatFilter;
 use PostProcess;
-use Projects_MetadataDao;
 use Stomp\Exception\StompException;
 use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\AbstractWorker;

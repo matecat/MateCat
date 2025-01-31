@@ -11,7 +11,6 @@ use INIT;
 use InvalidArgumentException;
 use Jobs_JobDao;
 use Klein\Response;
-use Log;
 use Projects_ProjectDao;
 use Translations_SegmentTranslationDao;
 use Utils;
