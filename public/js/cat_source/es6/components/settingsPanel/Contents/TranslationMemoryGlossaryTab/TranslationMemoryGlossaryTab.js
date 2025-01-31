@@ -121,6 +121,12 @@ export const TranslationMemoryGlossaryTab = () => {
       ...prevTemplate,
       pretranslate100: value,
     }))
+  const isDialectStrictActive = currentProjectTemplate.dialectStrict
+  const setIsDialectStrictActive = (value) =>
+    modifyingCurrentTemplate((prevTemplate) => ({
+      ...prevTemplate,
+      dialectStrict: value,
+    }))
   const tmPrioritization = currentProjectTemplate.tmPrioritization
   const [specialRows, setSpecialRows] = useState([
     {
@@ -401,16 +407,36 @@ export const TranslationMemoryGlossaryTab = () => {
         className="translation-memory-glossary-tab settings-panel-contentwrapper-tab-background"
       >
         {!config.is_cattool && (
-          <div className="translation-memory-glossary-tab-pre-translate">
-            <input
-              checked={isPretranslate100Active}
-              onChange={(e) =>
-                setIsPretranslate100Active(e.currentTarget.checked)
-              }
-              type="checkbox"
-              data-testid="pretranslate-checkbox"
-            />
-            Pre-translate 100% matches from TM
+          <div className="translation-memory-glossary-checkbox-container">
+            <div className="translation-memory-glossary-checkbox-item">
+              <input
+                checked={isPretranslate100Active}
+                onChange={(e) =>
+                  setIsPretranslate100Active(e.currentTarget.checked)
+                }
+                type="checkbox"
+                data-testid="pretranslate-checkbox"
+              />
+              Pre-translate 100% matches from TM
+            </div>
+            <div className="translation-memory-glossary-checkbox-item">
+              <input
+                checked={isDialectStrictActive}
+                onChange={(e) =>
+                  setIsDialectStrictActive(e.currentTarget.checked)
+                }
+                type="checkbox"
+                data-testid="dialect-strict-checkbox"
+              />
+              Activate variant-strict matching.{' '}
+              <a
+                href="https://guides.matecat.com/activ"
+                rel="noreferrer"
+                target="_blank"
+              >
+                More details
+              </a>
+            </div>
           </div>
         )}
         <div className="translation-memory-glossary-tab-active-resources">
