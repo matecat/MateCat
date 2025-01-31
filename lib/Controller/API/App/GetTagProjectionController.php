@@ -53,12 +53,30 @@ class GetTagProjectionController extends KleinController {
 
             $result = $engine->getTagProjection( $config );
 
+            // no errors, response ok
+            if ( empty( $result->error ) ) {
+                return $this->response->json([
+                    'code' => 0,
+                    'data' => [
+                        'translation' => $Filter->fromLayer1ToLayer2( $result->responseData )
+                    ],
+                ]);
+            }
+
+            $this->logTagProjection(
+                [
+                    'request' => $config,
+                    'error'   => $result->error
+                ]
+            );
+
+            $this->response->code($result->error->code > 400 ? $result->error->code : 500);
+
             return $this->response->json([
-                'code' => 0,
-                'data' => [
-                    'translation' => $Filter->fromLayer1ToLayer2( $result->responseData )
-                ],
+                'code' => $result->error->code,
+                'errors' => $result->error,
             ]);
+
         } catch (Exception $exception){
             return $this->returnException($exception);
         }
