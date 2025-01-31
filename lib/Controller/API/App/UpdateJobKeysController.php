@@ -10,6 +10,7 @@ use CatUtils;
 use Database;
 use Exception;
 use InvalidArgumentException;
+use Jobs\MetadataDao;
 use Jobs_JobDao;
 use Klein\Response;
 use RuntimeException;
@@ -136,6 +137,13 @@ class UpdateJobKeysController extends KleinController {
                 $jobDao->updateStruct( $request['jobData'], [ 'fields' => [ 'only_private_tm', 'tm_keys' ] ] );
                 $jobDao->destroyCache( $request['jobData'] );
 
+                // update tm_prioritization job metadata
+                if($request['tm_prioritization'] !== null){
+                    $tm_prioritization = $request['tm_prioritization'] == true ? "1" : "0";
+                    $jobsMetadataDao = new MetadataDao();
+                    $jobsMetadataDao->set($request['job_id'], $request['job_pass'], 'tm_prioritization', $tm_prioritization);
+                }
+
                 return $this->response->json([
                     'data' => 'OK'
                 ]);
@@ -156,6 +164,7 @@ class UpdateJobKeysController extends KleinController {
      */
     private function validateTheRequest(): array
     {
+        $tm_prioritization = filter_var( $this->request->param( 'tm_prioritization' ), FILTER_VALIDATE_BOOLEAN );
         $job_id = filter_var( $this->request->param( 'job_id' ), FILTER_SANITIZE_NUMBER_INT );
         $job_pass = filter_var( $this->request->param( 'job_pass' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH  ] );
         $current_password = filter_var( $this->request->param( 'current_password' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH  ] );
@@ -177,7 +186,7 @@ class UpdateJobKeysController extends KleinController {
         $pCheck = new AjaxPasswordCheck();
 
         //check for Password correctness
-        if ( empty( $jobData ) || !$pCheck->grantJobAccessByJobData( $jobData, $job_pass ) ) {
+        if ( empty( $jobData ) or !$pCheck->grantJobAccessByJobData( $jobData, $job_pass ) ) {
             throw new AuthenticationError("Wrong password", -10);
         }
 
@@ -190,6 +199,7 @@ class UpdateJobKeysController extends KleinController {
             'tm_keys' =>  CatUtils::sanitizeJSON($data), // this will be filtered inside the TmKeyManagement class
             'only_private' => !$this->request->param('get_public_matches'),
             'data' => $data,
+            'tm_prioritization' => $tm_prioritization,
         ];
     }
 
