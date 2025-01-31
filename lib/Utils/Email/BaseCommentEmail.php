@@ -8,6 +8,7 @@
 
 namespace Email;
 
+use CatUtils;
 use Comments_CommentStruct;
 use Users_UserStruct;
 
@@ -68,34 +69,9 @@ class BaseCommentEmail extends AbstractEmail {
                 'user'      => $this->user->toArray(),
                 'project'   => $this->project,
                 'job'       => $this->job,
-                'commenter' => $this->getCommentFullName(),
+                'commenter' => $this->comment->getFullName(true),
                 'url'       => $this->url . ",comment",
                 'content'   => $content
         ];
-    }
-
-    /**
-     * @return string
-     */
-    private function getCommentFullName()
-    {
-        if($this->comment->is_anonymous == true){
-
-            $revision_number = (int)$this->comment->revision_number;
-
-            switch ($revision_number){
-                default:
-                case 0:
-                    return "the translator";
-
-                case 1:
-                    return "the revisor";
-
-                case 2:
-                    return "the 2nd pass revisor";
-            }
-        }
-
-        return $this->comment->full_name;
     }
 }

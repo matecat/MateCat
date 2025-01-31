@@ -250,7 +250,7 @@ class SegmentCommentsContainer extends React.Component {
               <div className="bc-show-comment-top">
                 {comment.is_anonymous === 1 ? (
                   <div className="mbc-comment-label mbc-comment-username mbc-comment-username-label mbc-truncate">
-                    {comment.source_page === 1 ? 'Translator' : 'Reviewer'}
+                    {comment.full_name}
                   </div>
                 ) : (
                   <div className="mbc-comment-label mbc-comment-username mbc-comment-username-label mbc-truncate">
@@ -259,7 +259,7 @@ class SegmentCommentsContainer extends React.Component {
                       {' '}
                       {comment.source_page === 1
                         ? '(translator)'
-                        : '(reviewer)'}
+                        : comment.source_page === 2 ? '(revisor)' : '(2nd pass revisor)' }
                     </span>
                   </div>
                 )}
@@ -341,7 +341,7 @@ class SegmentCommentsContainer extends React.Component {
                 ' ' +
                 this.context.userInfo.user.last_name
               : config.isReview
-                ? 'Reviewer'
+                ? config.revisionNumber === 2 ? '2nd pass revisor' : 'Revisor'
                 : 'Translator'}
           </span>
           <MentionsInput
