@@ -4,7 +4,7 @@ import PropTypes from 'prop-types'
 import Checkmark from '../../../../../../../img/icons/Checkmark'
 import Close from '../../../../../../../img/icons/Close'
 
-export const DeleteResource = ({row, onClose, onConfirm}) => {
+export const DeleteResource = ({row, onClose, onConfirm, footerContent}) => {
   const onClickConfirm = () => {
     onConfirm()
   }
@@ -15,11 +15,15 @@ export const DeleteResource = ({row, onClose, onConfirm}) => {
 
   return (
     <div className="translation-memory-glossary-tab-delete">
-      <div className="action-form">
+      <div
+        className={`action-form ${footerContent ? 'action-form-remove-from' : ''}`}
+      >
         <div>
           <span>
-            Do you really want to delete this resource (<b>{row.name}</b>)
+            Do you really want to delete this resource (<b>{row.name}</b>) from
+            your Matecat account?
           </span>
+          {footerContent}
         </div>
         <div className="translation-memory-glossary-tab-buttons-group align-center">
           <button
@@ -46,4 +50,5 @@ DeleteResource.propTypes = {
   row: PropTypes.object.isRequired,
   onClose: PropTypes.func,
   onConfirm: PropTypes.func,
+  footerContent: PropTypes.node,
 }

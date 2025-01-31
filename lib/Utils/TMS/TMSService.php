@@ -147,7 +147,7 @@ class TMSService {
      * Import TMX file in MyMemory
      * @throws Exception
      */
-    public function addTmxInMyMemory( TMSFile $file, Users_UserStruct $user ) {
+    public function addTmxInMyMemory( TMSFile $file, Users_UserStruct $user ): array {
 
         try {
 
@@ -176,6 +176,8 @@ class TMSService {
             // load tmx in engines with adaptivity
             $engineList = Constants_Engines::getAvailableEnginesList();
 
+            $warnings = [];
+
             foreach ( $engineList as $engineName ) {
 
                 try {
@@ -185,13 +187,13 @@ class TMSService {
                     $struct->type       = Constants_Engines::MT;
                     $engine             = Engine::createTempInstance( $struct );
 
-                    if ( $engine->isAdaptive() ) {
+                    if ( $engine->isAdaptiveMT() ) {
                         //retrieve OWNER Engine License
-                        $ownerMmtEngineMetaData = ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->get( $user->uid, $engine->getEngineRow()->class_load ); // engine_id
+                        $ownerMmtEngineMetaData = ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->get( $user->uid, $engine->getEngineRecord()->class_load ); // engine_id
                         if ( !empty( $ownerMmtEngineMetaData ) ) {
                             $engine = Engine::getInstance( $ownerMmtEngineMetaData->value );
 
-                            Log::doJsonLog( "User [$user->uid, '$user->email'] start importing memory: {$engine->getEngineRow()->class_load} -> " . $file->getFilePath() . " -> " . $file->getTmKey() );
+                            Log::doJsonLog( "User [$user->uid, '$user->email'] start importing memory: {$engine->getEngineRecord()->class_load} -> " . $file->getFilePath() . " -> " . $file->getTmKey() );
                             $engine->importMemory( $file->getFilePath(), $file->getTmKey(), $user );
 
                         }
@@ -199,7 +201,11 @@ class TMSService {
 
                 } catch ( Exception $e ) {
                     if ( $engineName != Constants_Engines::MY_MEMORY ) {
+                        //NOTICE: ModernMT response is 404 NOT FOUND if the key on which we are importing the tmx is not synced with it
                         Log::doJsonLog( $e->getMessage() );
+                        $engineName = explode( "\\", $engineName );
+                        $engineName = end( $engineName );
+                        $warnings[] = [ 'engine' => $engineName, 'message' => $e->getMessage(), 'file' => $file->getName() ];
                     }
                 }
 
@@ -209,6 +215,8 @@ class TMSService {
             @unlink( $file->getFilePath() );
             @unlink( $file->getFilePath() . ".gz" );
         }
+
+        return $warnings;
 
     }
 

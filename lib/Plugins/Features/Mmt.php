@@ -367,35 +367,6 @@ class Mmt extends BaseFeature {
     }
 
     /**
-     * @param $key
-     * @param $uid
-     *
-     * @throws Exception
-     */
-    public function postUserKeyDelete( $key, $uid ) {
-
-        /*
-         * Comment for now, we have to decide if user can delete key imported in ModernMT directly from matecat, moreover it should have a choice.
-         * Maybe He wants to retain the key and the associated memories in its license.
-         */
-
-//        $engineToBeDeleted         = EnginesModel_EngineStruct::getStruct();
-//        $engineToBeDeleted->uid    = $uid;
-//        $engineToBeDeleted->active = true;
-//
-//        $engineDAO = new EnginesModel_EngineDAO( Database::obtain() );
-//        $result    = $engineDAO->read( $engineToBeDeleted );
-//
-//        if(empty($result)){
-//            return;
-//        }
-//
-//        $mmt = new Engines_MMT($result[0]);
-//
-//        $mmt->deleteMemory("x_mm-".$key);
-    }
-
-    /**
      * Called in @param                  $memoryKeyStructs TmKeyManagement_MemoryKeyStruct[]
      *
      * @param                  $uid              integer

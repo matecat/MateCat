@@ -273,6 +273,16 @@
     }
   }
 
+  .action-form-remove-from {
+    align-items: start;
+
+    > :first-child {
+      gap: 0;
+      align-items: start;
+      flex-direction: column;
+    }
+  }
+
   .translation-memory-glossary-tab-checkbox {
     display: flex;
     gap: 10px;
@@ -447,5 +457,15 @@
     width: 28px !important;
     height: 28px !important;
     color: $grey6 !important;
+  }
+}
+
+.tm-row-delete-remove-from-content {
+  display: flex;
+  flex-direction: column;
+
+  > div {
+    display: flex;
+    gap: 5px;
   }
 }
