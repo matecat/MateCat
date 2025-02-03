@@ -131,9 +131,9 @@ a {
   padding: 20px 0;
 }
 
-
 .forgot-password-modal {
-  background: url(/public/img/matecat_watch-left-border.png) no-repeat -34px 136px;
+  background: url(/public/img/matecat_watch-left-border.png) no-repeat -34px
+    136px;
   background-size: 23%;
   /*width: 385px;*/
   padding: 25px 96px;
@@ -431,8 +431,6 @@ a {
   &:hover {
     color: $darkBlueTransparent;
   }
-
-
 }
 
 .x-popup:before,
@@ -1226,5 +1224,12 @@ a {
     list-style: disc;
     padding: 10px 20px;
     font-weight: bold;
+  }
+
+  .tm-row-delete-remove-from-content {
+    > :nth-child(2) {
+      margin-top: 15px;
+      margin-bottom: 5px;
+    }
   }
 }

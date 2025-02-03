@@ -11,6 +11,7 @@ namespace AsyncTasks\Workers;
 
 use API\Commons\Exceptions\AuthenticationError;
 use Constants\Ices;
+use Constants_Engines;
 use Constants_TranslationStatus;
 use Contribution\ContributionRequestStruct;
 use Engines_DeepL;
@@ -233,9 +234,9 @@ class GetContributionWorker extends AbstractWorker {
 
         foreach ( $matches as &$match ) {
 
-            if ( strpos( $match[ 'created_by' ], 'MT' ) !== false ) {
+            if ( strpos( $match[ 'created_by' ], Constants_Engines::MT ) !== false ) {
 
-                $match[ 'match' ] = 'MT';
+                $match[ 'match' ] = Constants_Engines::MT;
 
                 $QA = new PostProcess( $match[ 'raw_segment' ], $match[ 'raw_translation' ] );
                 $QA->setFeatureSet( $featureSet );
@@ -255,11 +256,11 @@ class GetContributionWorker extends AbstractWorker {
 
             if ( $match[ 'created_by' ] == 'MT!' ) {
 
-                $match[ 'created_by' ] = 'MT'; //MyMemory returns MT!
+                $match[ 'created_by' ] = Constants_Engines::MT; //MyMemory returns MT!
 
             } elseif ( $match[ 'created_by' ] == 'NeuralMT' ) {
 
-                $match[ 'created_by' ] = 'MT'; //For now do not show differences
+                $match[ 'created_by' ] = Constants_Engines::MT; //For now do not show differences
 
             } else {
 
@@ -619,7 +620,7 @@ class GetContributionWorker extends AbstractWorker {
                     $matches[ $k ][ 'raw_translation' ] = $Filter->fromLayer1ToLayer0( $matches[ $k ][ 'raw_translation' ] );
 
                     if ( $matches[ $k ][ 'created_by' ] == 'MT!' ) {
-                        $matches[ $k ][ 'created_by' ] = 'MT'; //MyMemory returns MT!
+                        $matches[ $k ][ 'created_by' ] = Constants_Engines::MT; //MyMemory returns MT!
                     } else {
                         $user = new Users_UserStruct();
 

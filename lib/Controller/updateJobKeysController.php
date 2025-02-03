@@ -221,9 +221,10 @@ class updateJobKeysController extends ajaxController {
             }
 
             $this->jobData->tm_keys = json_encode( $totalTmKeys );
+            $this->jobData->last_update = date( "Y-m-d H:i:s" );
 
             $jobDao = new \Jobs_JobDao( Database::obtain() );
-            $jobDao->updateStruct( $this->jobData, [ 'fields' => [ 'only_private_tm', 'tm_keys' ] ] );
+            $jobDao->updateStruct( $this->jobData, [ 'fields' => [ 'only_private_tm', 'tm_keys', 'last_update' ] ] );
             $jobDao->destroyCache( $this->jobData );
 
             // update tm_prioritization job metadata

@@ -19,6 +19,7 @@ import LowerCaseIcon from '../../../../../img/icons/LowerCaseIcon'
 import CapitalizeIcon from '../../../../../img/icons/CapitalizeIcon'
 import QualityReportIcon from '../../../../../img/icons/QualityReportIcon'
 import ReviseLockIcon from '../../../../../img/icons/ReviseLockIcon'
+import OfflineUtils from '../../utils/offlineUtils'
 
 class SegmentTarget extends React.Component {
   static contextType = SegmentContext
@@ -367,7 +368,10 @@ class SegmentTarget extends React.Component {
     let buttonsDisabled = false
     let translation = this.props.segment.translation
 
-    if (translation.trim().length === 0) {
+    if (
+      translation.trim().length === 0 ||
+      OfflineUtils.offlineCacheRemaining <= 0
+    ) {
       buttonsDisabled = true
     }
 

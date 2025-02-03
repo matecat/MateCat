@@ -12,6 +12,7 @@ namespace Analysis\Workers;
 use Analysis\Queue\RedisKeys;
 use API\Commons\Exceptions\AuthenticationError;
 use Constants\Ices;
+use Constants_Engines;
 use Constants_ProjectStatus;
 use Constants_TranslationStatus;
 use Database;
@@ -177,7 +178,7 @@ class TMAnalysisWorker extends AbstractWorker {
          * if the first match is MT perform QA realignment because some MT engines breaks tags
          * also perform a tag ID check and mismatch validation
          */
-        if ( $new_match_type == 'MT' ) {
+        if ( $new_match_type == Constants_Engines::MT ) {
 
             //Reset the standard word count to be equals to other cat tools which do not have the MT in analysis
             $standard_words = $equivalentWordMapping[ "NO_MATCH" ] * $queueElement->params->raw_word_count / 100;
@@ -221,8 +222,6 @@ class TMAnalysisWorker extends AbstractWorker {
 
         $suggestion = $filter->fromLayer2ToLayer0( $suggestion );
 
-        $segment = ( new Segments_SegmentDao() )->getById( $queueElement->params->id_segment );
-
         foreach ( $this->_matches as $k => $m ) {
             $this->_matches[ $k ][ 'raw_segment' ]     = $filter->fromLayer2ToLayer0( $this->_matches[ $k ][ 'raw_segment' ] );
             $this->_matches[ $k ][ 'segment' ]         = $filter->fromLayer2ToLayer0( html_entity_decode( $this->_matches[ $k ][ 'segment' ] ) );
@@ -239,8 +238,8 @@ class TMAnalysisWorker extends AbstractWorker {
         $tm_data[ 'suggestion' ]             = $suggestion;
         $tm_data[ 'suggestions_array' ]      = $suggestion_json;
         $tm_data[ 'match_type' ]             = $new_match_type;
-        $tm_data[ 'eq_word_count' ]          = ( $eq_words > $segment->raw_word_count ) ? $segment->raw_word_count : $eq_words;
-        $tm_data[ 'standard_word_count' ]    = ( $standard_words > $segment->raw_word_count ) ? $segment->raw_word_count : $standard_words;
+        $tm_data[ 'eq_word_count' ]          = ( $eq_words > $queueElement->params->raw_word_count ) ? $queueElement->params->raw_word_count : $eq_words;
+        $tm_data[ 'standard_word_count' ]    = ( $standard_words > $queueElement->params->raw_word_count ) ? $queueElement->params->raw_word_count : $standard_words;
         $tm_data[ 'tm_analysis_status' ]     = "DONE";
         $tm_data[ 'warning' ]                = (int)$check->thereAreErrors();
         $tm_data[ 'serialized_errors_list' ] = $this->mergeJsonErrors( $err_json, $err_json2 );
@@ -249,10 +248,10 @@ class TMAnalysisWorker extends AbstractWorker {
 
         $tm_data[ 'suggestion_source' ] = $bestMatch[ 'created_by' ];
         if ( !empty( $tm_data[ 'suggestion_source' ] ) ) {
-            if ( strpos( $tm_data[ 'suggestion_source' ], "MT" ) === false ) {
-                $tm_data[ 'suggestion_source' ] = 'TM';
+            if ( strpos( $tm_data[ 'suggestion_source' ], Constants_Engines::MT ) === false ) {
+                $tm_data[ 'suggestion_source' ] = Constants_Engines::TM;
             } else {
-                $tm_data[ 'suggestion_source' ] = 'MT';
+                $tm_data[ 'suggestion_source' ] = Constants_Engines::MT;
             }
         }
 
@@ -285,7 +284,7 @@ class TMAnalysisWorker extends AbstractWorker {
         foreach ( $this->_matches as $match ) {
             // return $match if not MT and quality >= 75
             if (
-                    stripos( $match[ 'created_by' ], "MT" ) === false and
+                    stripos( $match[ 'created_by' ], Constants_Engines::MT ) === false and
                     (int)$match[ 'match' ] >= 75
             ) {
                 return $match;
@@ -392,7 +391,7 @@ class TMAnalysisWorker extends AbstractWorker {
             array        $equivalentWordMapping
     ): string {
 
-        $tm_match_type         = ( stripos( $bestMatch[ 'created_by' ], "MT" ) !== false ? "MT" : $bestMatch[ 'match' ] );
+        $tm_match_type         = ( stripos( $bestMatch[ 'created_by' ], Constants_Engines::MT ) !== false ? Constants_Engines::MT : $bestMatch[ 'match' ] );
         $fast_match_type       = strtoupper( $queueElement->params->match_type );
         $fast_exact_match_type = $queueElement->params->fast_exact_match_type;
 
@@ -407,14 +406,14 @@ class TMAnalysisWorker extends AbstractWorker {
         $tm_rate_paid        = 0;
         $ind                 = null;
 
-        if ( stripos( $tm_match_type, "MT" ) !== false ) {
+        if ( stripos( $tm_match_type, Constants_Engines::MT ) !== false ) {
 
             if ( !empty( $bestMatch[ 'score' ] ) && $bestMatch[ 'score' ] >= 0.9 ) {
                 $tm_match_fuzzy_band = "ICE_MT";
                 $tm_rate_paid        = $equivalentWordMapping[ "ICE_MT" ];
             } else {
-                $tm_match_fuzzy_band = "MT";
-                $tm_rate_paid        = $equivalentWordMapping[ "MT" ];
+                $tm_match_fuzzy_band = Constants_Engines::MT;
+                $tm_rate_paid        = $equivalentWordMapping[ Constants_Engines::MT ];
             }
 
         } else {

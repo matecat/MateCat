@@ -72,7 +72,7 @@ class SegmentFooterTabConcordance extends React.Component {
   getConcordance(query, type) {
     //type 0 = source, 1 = target
     getConcordance(query, type).catch(() => {
-      OfflineUtils.failedConnection(this, 'getConcordance')
+      OfflineUtils.failedConnection()
     })
     this.setState({
       loading: true,

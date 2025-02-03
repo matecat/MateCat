@@ -175,7 +175,9 @@ const NewProject = () => {
         if (
           !wasChecked &&
           typeof engineId === 'number' &&
-          projectTemplates.length
+          projectTemplates.length &&
+          projectTemplates.find(({isSelected}) => isSelected)?.mt.id ===
+            engineId
         ) {
           getMMTKeys({engineId}).then((data) => {
             const projectTemplatesInvolved = projectTemplates.filter(
@@ -247,7 +249,9 @@ const NewProject = () => {
         if (
           !wasChecked &&
           typeof engineId === 'number' &&
-          projectTemplates.length
+          projectTemplates.length &&
+          projectTemplates.find(({isSelected}) => isSelected)?.mt.id ===
+            engineId
         ) {
           getDeepLGlosssaries({engineId}).then(({glossaries}) => {
             const projectTemplatesInvolved = projectTemplates.filter(
@@ -816,6 +820,17 @@ const NewProject = () => {
                 readOnly={!isUserLogged}
               />
             </div>
+            <div className="translate-box">
+              <TemplateSelect
+                {...{
+                  label: 'Project template',
+                  maxHeightDroplist: SELECT_HEIGHT,
+                  projectTemplates,
+                  setProjectTemplates,
+                  currentProjectTemplate,
+                }}
+              />
+            </div>
             {/* Team Select*/}
             <div className="translate-box project-team">
               <Select
@@ -861,7 +876,7 @@ const NewProject = () => {
             {/*Project Subject*/}
             <div className="translate-box project-subject">
               <Select
-                label="Select subject"
+                label="Subject"
                 id="project-subject"
                 name={'project-subject'}
                 maxHeightDroplist={SELECT_HEIGHT}
@@ -877,28 +892,14 @@ const NewProject = () => {
             <div className="translate-box tmx-select">
               <TmGlossarySelect />
             </div>
-            {isUserLogged && (
-              <div className="translate-box">
-                <TemplateSelect
-                  {...{
-                    label: 'Project template',
-                    maxHeightDroplist: SELECT_HEIGHT,
-                    projectTemplates,
-                    setProjectTemplates,
-                    currentProjectTemplate,
-                  }}
-                />
-              </div>
-            )}
-            {isUserLogged && (
-              <div
-                className={`translate-box settings${isLoadingTemplates ? ' settings-disabled' : ''}`}
-                {...(!isLoadingTemplates && {onClick: openTmPanel})}
-              >
-                <More size={24} />
-                <span className="text">More settings</span>
-              </div>
-            )}
+
+            <div
+              className={`translate-box settings${isLoadingTemplates ? ' settings-disabled' : ''}`}
+              {...(!isLoadingTemplates && {onClick: openTmPanel})}
+            >
+              <More size={24} />
+              <span className="text">More settings</span>
+            </div>
           </div>
         </div>
 

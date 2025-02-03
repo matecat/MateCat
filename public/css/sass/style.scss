@@ -928,7 +928,7 @@ section .body > .text {
 body #file section:not(.editor) {
   background: $grey3;
   cursor: pointer;
-  border: 1px solid $grey2 !important;
+  border: 1px solid $grey2;
   .body {
     height: 100%;
   }
@@ -1003,6 +1003,14 @@ ul.suggestion-item.graysmall:last-child {
 
 section.loaded .submenu {
   display: block;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+  overflow: hidden;
+
+  &:has(.active) {
+    border-bottom-left-radius: unset;
+    border-bottom-right-radius: unset;
+  }
 }
 
 .loaded {
@@ -1350,10 +1358,8 @@ section.status-new.opened .editarea {
 section.editor {
   z-index: 2;
   position: relative;
-  //height: 100%;
   width: 89%;
   margin-left: 4.5%;
-  //height: 100%;
 }
 
 section.editor .sid {
@@ -1716,6 +1722,7 @@ body.rtl-target .editor .editarea span {
   right: 0;
   margin-top: 10px;
   margin-right: 15px;
+  margin-bottom: 10px;
 }
 
 .graysmall-details li {
@@ -2367,23 +2374,6 @@ section.editor .toolbar {
   }
 }
 
-.noConnectionMsg {
-  position: absolute;
-  left: 43%;
-  bottom: 50%;
-  z-index: 10001;
-  background: #434c56;
-  border: 1px solid #1a232e;
-  color: #dde4ea;
-  border-left: 0px;
-  border-bottom: 0px;
-  padding: 14px;
-  padding-bottom: 30px;
-  border-radius: 0px 3px 0px 0px;
-  -webkit-border-radius: 0px 3px 0px 0px;
-  z-index: 999999999999999;
-}
-
 /* retina display query */
 @media only screen and (-webkit-min-device-pixel-ratio: 2),
   only screen and (min--moz-device-pixel-ratio: 2),
@@ -2580,7 +2570,6 @@ section .segment-side-buttons {
   margin-right: 0;
   z-index: 0;
   position: relative;
-  margin-top: -2px;
 }
 
 .buttons li {
